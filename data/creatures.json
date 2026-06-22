@@ -1,0 +1,44 @@
+[
+  {
+    "id": "river-otter",
+    "name": "River Otter",
+    "mood": "playful",
+    "biomes": ["river", "wetland", "forest"],
+    "journalPrompt": "A slick shape rolls through the shallows, leaving rings of silver water behind."
+  },
+  {
+    "id": "painted-deer",
+    "name": "Painted Deer",
+    "mood": "gentle",
+    "biomes": ["plains", "forest"],
+    "journalPrompt": "A small deer watches from the grass, its coat patterned like fallen petals."
+  },
+  {
+    "id": "monsoon-crane",
+    "name": "Monsoon Crane",
+    "mood": "graceful",
+    "biomes": ["wetland", "river", "coast"],
+    "journalPrompt": "Tall white birds step between reeds as if reading the rain."
+  },
+  {
+    "id": "hill-macaque",
+    "name": "Hill Macaque",
+    "mood": "curious",
+    "biomes": ["hills", "forest", "settlement"],
+    "journalPrompt": "A macaque studies your satchel, then pretends it was only admiring the view."
+  },
+  {
+    "id": "shell-turtle",
+    "name": "Shell Turtle",
+    "mood": "patient",
+    "biomes": ["coast", "river"],
+    "journalPrompt": "A turtle rests where river sand meets the tide, carrying a map of scratches on its shell."
+  },
+  {
+    "id": "cloud-antelope",
+    "name": "Cloud Antelope",
+    "mood": "mythic",
+    "biomes": ["mountains", "hills"],
+    "journalPrompt": "For a breath, an antelope-shaped cloud stands on a ridge before dissolving into mist."
+  }
+]
