@@ -1,0 +1,12 @@
+[
+  { "id": "sea", "travelCost": null, "tone": "vast", "color": "#2f6f8f" },
+  { "id": "coast", "travelCost": 1, "tone": "breezy", "color": "#e8c982" },
+  { "id": "plains", "travelCost": 1, "tone": "open", "color": "#9fc96b" },
+  { "id": "forest", "travelCost": 2, "tone": "sheltered", "color": "#4f9a5a" },
+  { "id": "wetland", "travelCost": 2, "tone": "lush", "color": "#6fb7a8" },
+  { "id": "hills", "travelCost": 2, "tone": "rolling", "color": "#b89b58" },
+  { "id": "mountains", "travelCost": 3, "tone": "majestic", "color": "#8d8796" },
+  { "id": "desert", "travelCost": 2, "tone": "quiet", "color": "#d9a95f" },
+  { "id": "river", "travelCost": 1, "tone": "life-giving", "color": "#4fa3d9" },
+  { "id": "settlement", "travelCost": 1, "tone": "welcoming", "color": "#c46b4f" }
+]
