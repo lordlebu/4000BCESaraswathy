@@ -56,6 +56,16 @@ button {
   cursor: pointer;
 }
 
+#observe-creature {
+  margin: 4px 0 0;
+}
+
+#memory-text {
+  color: #6d4a39;
+  font-style: italic;
+  min-height: 1.5em;
+}
+
 .layout {
   align-items: start;
   display: grid;

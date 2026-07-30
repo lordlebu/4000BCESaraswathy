@@ -6,11 +6,37 @@ const journalText = document.querySelector('#journal-text');
 const creatureText = document.querySelector('#creature-text');
 const statusText = document.querySelector('#status-text');
 const newMapButton = document.querySelector('#new-map');
+const observeButton = document.querySelector('#observe-creature');
+const memoryText = document.querySelector('#memory-text');
 
 const tileSize = 22;
 let world = generateWorld({ seed: seedInput.value });
 let player = { ...world.start };
 let discoveries = new Set([`${player.x},${player.y}`]);
+let observedCreatures = new Set();
+
+function storageKey() {
+  return `south-of-tethys:${world.seed}`;
+}
+
+function saveJourney() {
+  localStorage.setItem(storageKey(), JSON.stringify({
+    discoveries: [...discoveries],
+    observedCreatures: [...observedCreatures]
+  }));
+}
+
+function restoreJourney() {
+  const saved = localStorage.getItem(storageKey());
+  if (!saved) return;
+  try {
+    const journey = JSON.parse(saved);
+    discoveries = new Set(journey.discoveries || []);
+    observedCreatures = new Set(journey.observedCreatures || []);
+  } catch (_) {
+    localStorage.removeItem(storageKey());
+  }
+}
 
 function currentTile() {
   return world.tiles[player.y][player.x];
@@ -20,8 +46,14 @@ function drawWorld() {
   canvas.width = world.width * tileSize;
   canvas.height = world.height * tileSize;
   world.tiles.flat().forEach((tile) => {
+    const known = discoveries.has(`${tile.x},${tile.y}`) || Math.abs(tile.x - player.x) + Math.abs(tile.y - player.y) <= 1;
     context.fillStyle = BIOME_COLORS[tile.biome];
     context.fillRect(tile.x * tileSize, tile.y * tileSize, tileSize, tileSize);
+    if (!known) {
+      context.fillStyle = 'rgba(45, 31, 47, 0.76)';
+      context.fillRect(tile.x * tileSize, tile.y * tileSize, tileSize, tileSize);
+      return;
+    }
     context.fillStyle = 'rgba(255, 255, 255, 0.52)';
     context.font = '14px serif';
     context.textAlign = 'center';
@@ -45,10 +77,14 @@ function updateJournal() {
   journalTitle.textContent = entry.title;
   journalText.textContent = entry.description;
   creatureText.textContent = entry.creature;
+  const creature = CREATURES.find((candidate) => candidate.biomes.includes(tile.biome));
+  observeButton.disabled = !creature || observedCreatures.has(creature.name);
+  observeButton.textContent = creature && observedCreatures.has(creature.name) ? 'Creature sketch recorded' : 'Observe creature';
   const reachedLandmark = world.landmark && player.x === world.landmark.x && player.y === world.landmark.y;
   statusText.textContent = reachedLandmark
     ? `Landmark recorded. ${discoveries.size} places discovered. Take a breath before generating another journey.`
     : `${discoveries.size} places discovered. Find the ✦ landmark and record it in your journal.`;
+  saveJourney();
 }
 
 function movePlayer(dx, dy) {
@@ -66,6 +102,9 @@ function resetWorld() {
   world = generateWorld({ seed: seedInput.value || 'jambhudweepa' });
   player = { ...world.start };
   discoveries = new Set([`${player.x},${player.y}`]);
+  observedCreatures = new Set();
+  memoryText.textContent = '';
+  restoreJourney();
   drawWorld();
   updateJournal();
 }
@@ -84,4 +123,11 @@ window.addEventListener('keydown', (event) => {
 });
 
 newMapButton.addEventListener('click', resetWorld);
+observeButton.addEventListener('click', () => {
+  const creature = CREATURES.find((candidate) => candidate.biomes.includes(currentTile().biome));
+  if (!creature) return;
+  observedCreatures.add(creature.name);
+  memoryText.textContent = `Sketch recorded: ${creatureAction(creature)}`;
+  updateJournal();
+});
 resetWorld();
