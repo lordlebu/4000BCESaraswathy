@@ -115,6 +115,23 @@ function placeFeature(tiles, width, height, biomeOptions, featureBiome, random) 
   return chosen;
 }
 
+function reachableTiles(tiles, width, height, start) {
+  const queue = [start];
+  const visited = new Set([`${start.x},${start.y}`]);
+  while (queue.length) {
+    const tile = queue.shift();
+    getNeighbors(tile, width, height).forEach(([x, y]) => {
+      const next = tiles[y][x];
+      const key = `${x},${y}`;
+      if (next.biome !== 'sea' && !visited.has(key)) {
+        visited.add(key);
+        queue.push(next);
+      }
+    });
+  }
+  return visited;
+}
+
 function generateWorld({ seed = 'jambhudweepa', width = 36, height = 24 } = {}) {
   const random = createRandom(seed);
   const elevationField = makeField(width, height, random, 7);
@@ -143,13 +160,20 @@ function generateWorld({ seed = 'jambhudweepa', width = 36, height = 24 } = {}) 
   highTiles.sort(() => random() - 0.5).slice(0, 5).forEach((tile) => carveRiver(tiles, width, height, tile));
 
   const settlement = placeFeature(tiles, width, height, ['coast', 'plains', 'river'], 'settlement', random);
-  const landmark = placeFeature(tiles, width, height, ['forest', 'hills', 'mountains', 'wetland'], 'landmark', random);
   const start = settlement || tiles[Math.floor(height / 2)][Math.floor(width / 2)];
+  const reachable = reachableTiles(tiles, width, height, start);
+  const landmarkCandidates = tiles.flat().filter((tile) =>
+    reachable.has(`${tile.x},${tile.y}`) && ['forest', 'hills', 'mountains', 'wetland', 'plains'].includes(tile.biome)
+  );
+  const landmark = landmarkCandidates.length
+    ? landmarkCandidates[Math.floor(random() * landmarkCandidates.length)]
+    : start;
+  landmark.biome = 'landmark';
   start.discovered = true;
 
   return { seed, width, height, tiles, start: { x: start.x, y: start.y }, landmark: landmark && { x: landmark.x, y: landmark.y } };
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { BIOME_COLORS, BIOME_SYMBOLS, generateWorld, createRandom };
+  module.exports = { BIOME_COLORS, BIOME_SYMBOLS, generateWorld, createRandom, reachableTiles };
 }

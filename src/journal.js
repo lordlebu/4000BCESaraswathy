@@ -31,6 +31,11 @@ function describeTile(tile) {
   };
 }
 
+function creatureAction(creature) {
+  if (!creature) return 'Listen quietly. The road has no creature sign to follow here.';
+  return `You make a quiet sketch of the ${creature.name.toLowerCase()} and remember its ${creature.mood} presence.`;
+}
+
 if (typeof module !== 'undefined') {
-  module.exports = { BIOME_DESCRIPTIONS, CREATURES, describeTile };
+  module.exports = { BIOME_DESCRIPTIONS, CREATURES, describeTile, creatureAction };
 }
