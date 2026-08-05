@@ -30,6 +30,22 @@ function probe() {
   });
 }
 
+// Second identity check, for instances started before the signature existed, or that are wedged
+// badly enough not to answer. A node process running this repo's serve.js is ours by definition.
+function isOurServeProcess(pid) {
+  try {
+    const details = execFileSync('powershell', [
+      '-NoProfile', '-Command',
+      `$p = Get-CimInstance Win32_Process -Filter "ProcessId=${pid}"; "$($p.Name)|$($p.CommandLine)"`
+    ], { encoding: 'utf8' }).trim();
+    const [name, ...rest] = details.split('|');
+    const commandLine = rest.join('|');
+    return /^node(\.exe)?$/i.test(name.trim()) && /serve\.js/i.test(commandLine);
+  } catch (_) {
+    return false;
+  }
+}
+
 function listeningPids() {
   const output = execFileSync('netstat', ['-ano', '-p', 'tcp'], { encoding: 'utf8' });
   const pids = new Set();
@@ -49,17 +65,23 @@ async function main() {
 
   if (state === NOTHING_LISTENING) return 0;
 
-  if (state === NOT_OURS) {
-    console.error(`Port ${port} is held by something that is not the prototype server.`);
-    console.error('Leaving it alone. Stop it yourself, or pick another port:');
-    console.error(`    set PORT=${port + 1} && run play`);
+  const listeners = listeningPids();
+  if (listeners.length === 0) {
+    console.error(`Port ${port} is in use, but no owning process was found.`);
     return 1;
   }
 
-  const pids = listeningPids();
-  if (pids.length === 0) {
-    console.error(`Port ${port} answered as the prototype server, but no owning process was found.`);
-    return 1;
+  // Ours by signature, or failing that, ours by command line.
+  let pids = listeners;
+  if (state === NOT_OURS) {
+    pids = listeners.filter(isOurServeProcess);
+    if (pids.length === 0) {
+      console.error(`Port ${port} is held by something that is not the prototype server.`);
+      console.error('Leaving it alone. Stop it yourself, or pick another port:');
+      console.error(`    set PORT=${port + 1} && run play`);
+      return 1;
+    }
+    console.log('Found an older prototype server that predates the restart support.');
   }
 
   for (const pid of pids) {
