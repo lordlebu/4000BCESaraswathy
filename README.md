@@ -26,6 +26,7 @@ Move with WASD or arrow keys. See [src/PLAYTEST.md](src/PLAYTEST.md) for what to
 - [Build plan](docs/build-plan.md): current repo audit, chosen tech track, and the phased work to reach a cozy playable slice.
 - [Game plan](docs/game-plan.md): vision, MVP, gameplay loop, milestones, and open questions.
 - [World generator design](docs/world-generator.md): map generation inputs, passes, tile fields, terrain palette, and success criteria.
+- [Bestiary and herbarium](docs/bestiary.md): the full authored flora and fauna canon, by region.
 - [Creature seed data](data/creatures.json): first creature concepts for biome-based encounters.
 - [Biome seed data](data/biomes.json): first terrain palette and travel metadata.
 - [Prototype source plan](src/README.md): planned source layout for the first browser implementation.
