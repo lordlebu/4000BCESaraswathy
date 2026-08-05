@@ -1,0 +1,827 @@
+[
+  {
+    "id": "sweet-indigo",
+    "name": "Sweet Indigo",
+    "binomial": "Indigofera dulcis",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "forest",
+      "settlement"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A domesticated decorative vine bred by Harappan settlers, boasting vibrant purple flowers that yield a sweet-scented blue dye."
+  },
+  {
+    "id": "poison-barb-indigo",
+    "name": "Poison-barb Indigo",
+    "binomial": "Indigofera spicata",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland",
+      "river"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A wild relative of sweet indigo, possessing small, sharp thorns along its stems that inject a skin-irritating toxin."
+  },
+  {
+    "id": "emerald-harbor-lotus",
+    "name": "Emerald Harbor Lotus",
+    "binomial": "Nelumbo smaragdina",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A massive aquatic lotus with bright green petals that blooms in the estuaries of Lothal, drawing mineral-rich runoff."
+  },
+  {
+    "id": "blood-red-asura-lotus",
+    "name": "Blood-red Asura Lotus",
+    "binomial": "Nelumbo asurica",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "An invasive, deep-crimson lotus that thrives in areas of past magical corruption, its pollen inducing vivid, restless dreams."
+  },
+  {
+    "id": "healing-silver-root",
+    "name": "Healing Silver-root",
+    "binomial": "Sarasvatia argentum",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland",
+      "river"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "An endemic medicinal tuber harvested along the Godavari, known for its rapid wound-healing properties when ground into salve."
+  },
+  {
+    "id": "bitter-marsh-root",
+    "name": "Bitter Marsh-root",
+    "binomial": "Sarasvatia amara",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A bitter-tasting variety of Saraswati spiceroot that grows in saltwater marshes, used as an antidote to marsh-fever."
+  },
+  {
+    "id": "bonewood-mangrove",
+    "name": "Bonewood Mangrove",
+    "binomial": "Rhizophora osteoxyla",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "coast",
+      "forest",
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "Mangrove trees that absorb calcium and basalt from the volcanic coast, yielding a naturally curved, bone-hard timber used for construction."
+  },
+  {
+    "id": "ivory-coastal-bonewood",
+    "name": "Ivory Coastal Bonewood",
+    "binomial": "Rhizophora eburnea",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "sea",
+      "coast"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A rare bonewood subspecies with smooth, cream-colored bark that resists waterrot and marine boring worms."
+  },
+  {
+    "id": "iron-root-mangrove",
+    "name": "Iron-Root Mangrove",
+    "binomial": "Rhizophora ferrea",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "coast"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A heavy, dark-wooded mangrove whose roots lock into the rocky coastline, forming impassable natural barriers."
+  },
+  {
+    "id": "saraswati-reed",
+    "name": "Saraswati Reed",
+    "binomial": "Calamus sarasvaticus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A tall, hollow, fibrous reed used by the Kia clan for weaving baskets, roofs, and lightweight outrigger hulls."
+  },
+  {
+    "id": "blue-scholar-s-moss",
+    "name": "Blue Scholar's Moss",
+    "binomial": "Dictyonema caeruleum",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A bioluminescent fungal-algal symbiont that grows on the fossilized marrow of ancient Garudasaurs, illuminating the Stone Age University's archives."
+  },
+  {
+    "id": "toxic-red-spore-moss",
+    "name": "Toxic Red Spore-Moss",
+    "binomial": "Dictyonema venenum",
+    "region": "narmada-vindhya",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "journalPrompt": "A dangerous, rust-colored variant of Garudasaur moss that releases airborne spores causing temporary respiratory paralysis in intruders."
+  },
+  {
+    "id": "black-ash-tea",
+    "name": "Black Ash-Tea",
+    "binomial": "Camellia vulcanica",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "Hardy wild tea bushes adapted to highly acidic, sulfur-rich volcanic soils, producing dark, highly caffeinated leaves."
+  },
+  {
+    "id": "golden-ember-leaf",
+    "name": "Golden Ember-Leaf",
+    "binomial": "Camellia aurata",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "An elite wild tea variety whose leaves feature glowing, amber-colored veins, highly valued by Narmada scholars for its flavor and stimulating effects."
+  },
+  {
+    "id": "silver-leaved-oracle-fig",
+    "name": "Silver-Leaved Oracle Fig",
+    "binomial": "Ficus bhutakana",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "forest",
+      "landmark"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A massive fig tree grown from a magical moon-seed, its roots acting as a biological archive tree whispering memories in the wind."
+  },
+  {
+    "id": "lesser-whisper-fig",
+    "name": "Lesser Whisper-Fig",
+    "binomial": "Ficus murmurans",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A smaller, shrub-like relative of the Bhuta-Kāna fig, growing on cliffs and whispering soft, ambient forest sounds during high winds."
+  },
+  {
+    "id": "sweet-nectar-mahua",
+    "name": "Sweet-Nectar Mahua",
+    "binomial": "Madhuca narmadensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "An indigenous tree producing sweet, fermentable cream-colored flowers that are central to the local tribal ecology and brewing traditions."
+  },
+  {
+    "id": "highland-bitter-mahua",
+    "name": "Highland Bitter Mahua",
+    "binomial": "Madhuca montana",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A rugged, slow-growing mahua variant whose seeds yield a thick, bitter oil used for lamps and traditional healing ointments."
+  },
+  {
+    "id": "shilajit-creeper",
+    "name": "Shilajit Creeper",
+    "binomial": "Lycopodium shilajit",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A trailing, primitive moss-like plant that grows near mineral fissures, absorbing pure bitumen and organic compounds from the rock."
+  },
+  {
+    "id": "vindhya-pine",
+    "name": "Vindhya Pine",
+    "binomial": "Pinus vindhyensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A towering, high-altitude conifer with resinous needles that withstands extreme temperature shifts and acidic ash rain."
+  },
+  {
+    "id": "crimson-spice-root",
+    "name": "Crimson Spice-Root",
+    "binomial": "Curcuma rubra",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A wild turmeric variant with bright red roots that has mutated under heavy mineral runoff, used as a warming spice and dye."
+  },
+  {
+    "id": "blue-healing-turmeric",
+    "name": "Blue Healing Turmeric",
+    "binomial": "Curcuma caerulea",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A rare, medicinal turmeric variety whose rhizomes yield a dark blue powder capable of soothing burns and preventing infection."
+  },
+  {
+    "id": "golden-sun-barley",
+    "name": "Golden Sun-Barley",
+    "binomial": "Hordeum aureum",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert",
+      "plains"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A drought-resistant, long-headed grain cultivated by oasis settlers, producing sweet, nutrient-dense kernels."
+  },
+  {
+    "id": "bitter-black-barley",
+    "name": "Bitter Black Barley",
+    "binomial": "Hordeum niger",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A dark, hardy barley variant that grows in highly saline, parched desert soils, used primarily for brewing heavy travel ales."
+  },
+  {
+    "id": "sand-dune-gourd",
+    "name": "Sand-Dune Gourd",
+    "binomial": "Citrullus arenarius",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A trailing vine with thick, waxy leaves and water-filled, hollow gourds that thrive in the deepest desert sands."
+  },
+  {
+    "id": "desert-saltbush",
+    "name": "Desert Saltbush",
+    "binomial": "Atriplex gedrosia",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A low, grey-green shrub whose leaves are covered in salty, moisture-retaining crystals, a key forage for camelosuchus."
+  },
+  {
+    "id": "hourglass-cactus",
+    "name": "Hourglass Cactus",
+    "binomial": "Cereus arenarius",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A ribbed, columnar cactus whose spine patterns cast shifting shadows resembling hourglasses, storing water for months."
+  },
+  {
+    "id": "spiny-acacia",
+    "name": "Spiny Acacia",
+    "binomial": "Acacia spinosa",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A hardy, deep-rooted desert tree with long, needle-sharp thorns and yellow blossoms that draw honey-goliaths."
+  },
+  {
+    "id": "tawny-sagebrush",
+    "name": "Tawny Sagebrush",
+    "binomial": "Artemisia tawny",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert",
+      "plains"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A highly fragrant, bitter herb that grows in the sandy plains, used by nomads to ward off desert insects and spirits."
+  },
+  {
+    "id": "oasis-date-palm",
+    "name": "Oasis Date Palm",
+    "binomial": "Phoenix dactylifera oasis",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A majestic palm tree that provides shelter, wood, and sweet, high-energy fruit in the hidden desert springs."
+  },
+  {
+    "id": "red-blood-coral",
+    "name": "Red Blood-Coral",
+    "binomial": "Tethysolithus rubra",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "An aggressive, fast-growing coral polyp that builds fossilized ridges and reclaims ancient stone aqueducts in the marshes."
+  },
+  {
+    "id": "lapis-lazuli-reef-builder",
+    "name": "Lapis-Lazuli Reef-Builder",
+    "binomial": "Tethysolithus lapis",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A coral species with a dense, brilliant-blue calcified structure, highly prized for jewelry and architectural inlay."
+  },
+  {
+    "id": "jungle-crested-bamboo",
+    "name": "Jungle-Crested Bamboo",
+    "binomial": "Bambusa sylvanica",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A fast-growing, heavy bamboo with thick walls and high silica content, used for constructing cages and outriggers."
+  },
+  {
+    "id": "hanging-monkey-pitcher",
+    "name": "Hanging Monkey-Pitcher",
+    "binomial": "Nepenthes vanara",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A large carnivorous vine of the Mappa Mundi canopy, secreting a sweet, narcotic liquid that traps large insects and small frogs."
+  },
+  {
+    "id": "giant-bird-nest-fern",
+    "name": "Giant Bird-Nest Fern",
+    "binomial": "Asplenium maximus",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A massive epiphyte that grows in the forks of giant ancient trees, catching rainwater and debris to create mini-ecosystems."
+  },
+  {
+    "id": "shattered-sea-kelp",
+    "name": "Shattered Sea Kelp",
+    "binomial": "Macrocystis tethyan",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "flavour",
+    "rarity": "mythic",
+    "journalPrompt": "A colossal marine alga that forms dense underwater forests, providing shelter and forage for juvenile cetaceans and rays."
+  },
+  {
+    "id": "volcanic-beach-creeper",
+    "name": "Volcanic Beach Creeper",
+    "binomial": "Ipomoea vulcanica",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A hardy, salt-tolerant vine with purple bell-shaped flowers, binding the black volcanic sands along the island's shores."
+  },
+  {
+    "id": "giant-mangrove-palm",
+    "name": "Giant Mangrove-Palm",
+    "binomial": "Nypa gigas",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "coast"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A unique, trunkless palm that grows directly in brackish delta waters, its robust fruit clusters floating on the tides."
+  },
+  {
+    "id": "shattered-seaweed-silk",
+    "name": "Shattered Seaweed-Silk",
+    "binomial": "Zostera marina",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "flavour",
+    "rarity": "common",
+    "journalPrompt": "A marine flowering plant that forms extensive meadows in the shallows, harvested to weave fine, water-resistant cordage."
+  },
+  {
+    "id": "mappa-mundi-banyan",
+    "name": "Mappa Mundi Banyan",
+    "binomial": "Ficus mappa",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest",
+      "landmark"
+    ],
+    "placement": "flavour",
+    "rarity": "mythic",
+    "journalPrompt": "A colossal, ancient tree whose aerial roots drop down to form a forest-like grove from a single trunk, housing thousands of canopy birds."
+  },
+  {
+    "id": "crimson-leaved-ash-banyan",
+    "name": "Crimson-Leaved Ash-Banyan",
+    "binomial": "Ficus ash-banyana",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A resilient tree capable of rooting directly into cooled basalt flows, feeding on mineral-rich volcanic ash."
+  },
+  {
+    "id": "weeping-charcoal-tree",
+    "name": "Weeping Charcoal Tree",
+    "binomial": "Ficus cinereus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "An ash-banyan subspecies with dark, charcoal-like bark and weeping branches that secrete a non-flammable, waxy resin."
+  },
+  {
+    "id": "golden-amber-lotus",
+    "name": "Golden Amber Lotus",
+    "binomial": "Nymphaea succinea",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A primordial, mineral-absorbing plant that grows in thermal pools, its translucent petals glowing like polished amber."
+  },
+  {
+    "id": "deep-earth-obsidian-lotus",
+    "name": "Deep-Earth Obsidian Lotus",
+    "binomial": "Nymphaea obsidiana",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A rare lotus variety with glossy, black glass-like petals that pulse softly with the earth's magmatic heat."
+  },
+  {
+    "id": "soot-grass",
+    "name": "Soot-Grass",
+    "binomial": "Agrostis cinerea",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A tough, ash-tolerant grass that grows in tufts along the cooled basalt plains, providing forage for heat-tolerant fauna."
+  },
+  {
+    "id": "lava-glass-fern",
+    "name": "Lava-Glass Fern",
+    "binomial": "Pteris vulcanica",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A primitive fern with semi-translucent, silica-rich leaves that shimmer like glass, growing in damp volcanic crevices."
+  },
+  {
+    "id": "glacial-lichen",
+    "name": "Glacial Lichen",
+    "binomial": "Lichen glacialis",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A slow-growing, pale blue lichen that covers the stone ruins near the ice wall, absorbing moisture directly from the frost."
+  },
+  {
+    "id": "snow-looming-moss",
+    "name": "Snow-Looming Moss",
+    "binomial": "Bryum glaciale",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A dense, cushioning moss that thrives on glacier-bound stones, providing insulation for snow-hare nests."
+  },
+  {
+    "id": "antarctic-kelp-grass",
+    "name": "Antarctic Kelp-Grass",
+    "binomial": "Zostera antarctica",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A tough, cold-tolerant sea-grass that forms dense beds along the glacial shores, feeding seals and small fish."
+  },
+  {
+    "id": "volcanic-sulfur-flower",
+    "name": "Volcanic Sulfur-Flower",
+    "binomial": "Sulfuraria lutea",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A low, bright-yellow wildflower that grows near active sulfur vents, utilizing chemical-heavy soil to produce pungent nectar."
+  },
+  {
+    "id": "aero-mangrove-vayu-vriksha",
+    "name": "Aero-Mangrove / Vayu-Vriksha",
+    "binomial": "Rhizophora caelia",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "journalPrompt": "Trees growing on the absolute edges of floating islands, plunging their roots downward into the open sky to harvest cloud-moisture."
+  },
+  {
+    "id": "levitation-gourd-sky-balloon",
+    "name": "Levitation Gourd / Sky-Balloon",
+    "binomial": "Cucurbita levitata",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "journalPrompt": "A trailing vine producing massive, hollow gourds that trap lighter-than-air volcanic gases, used by mariners to patch blimps."
+  },
+  {
+    "id": "static-charged-bramble",
+    "name": "Static-Charged Bramble",
+    "binomial": "Rubus electricus",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "journalPrompt": "Thorny bushes that feed on electrical discharges of high-altitude storms, glowing with residual lightning and delivering a shocking sting."
+  },
+  {
+    "id": "blue-pulse-root",
+    "name": "Blue Pulse-Root",
+    "binomial": "Nirnroot caerulea",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "journalPrompt": "A glowing plant species that absorbs bioluminescent trace minerals from the airborne soil, emitting a soft blue light."
+  },
+  {
+    "id": "toxic-crimson-root",
+    "name": "Toxic Crimson Root",
+    "binomial": "Nirnroot rubra",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "journalPrompt": "A rare, red-glowing variant of nirnroot whose roots exude a highly toxic sap used by assassins and sky-pirates."
+  },
+  {
+    "id": "sun-catcher-herb",
+    "name": "Sun-Catcher Herb",
+    "binomial": "Glassa solis",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "journalPrompt": "A silicate-absorbing plant with leaves that mirror stained glass, concentrating golden sunlight for deep-time healing."
+  },
+  {
+    "id": "moon-reflecting-mint",
+    "name": "Moon-Reflecting Mint",
+    "binomial": "Glassa luna",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "journalPrompt": "An elegant herb whose translucent, silver-rimmed leaves reflect moonlight, used by sky-elves to brew soothing, prophetic teas."
+  },
+  {
+    "id": "prana-lotus",
+    "name": "Prana-Lotus",
+    "binomial": "Nelumbo prana",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "journalPrompt": "A beautiful lotus species that grows in the inverted waterfalls, its floating petals absorbing high-altitude prana radiation."
+  },
+  {
+    "id": "cloud-weaver-vine",
+    "name": "Cloud-Weaver Vine",
+    "binomial": "Vitis nubis",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "journalPrompt": "A tough, climbing vine that spans the gap between close floating islands, forming natural rope bridges."
+  },
+  {
+    "id": "lodestone-moss",
+    "name": "Lodestone Moss",
+    "binomial": "Bryum magneticum",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "journalPrompt": "A dense, dark green moss that covers the magnetized cores of the floating islands, aligning its spores with the Earth's magnetic poles."
+  },
+  {
+    "id": "plunging-fire-siege-tree",
+    "name": "Plunging-Fire Siege Tree",
+    "binomial": "Rakshasa-Vriksha",
+    "region": "asura-conjurations",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "journalPrompt": "A living tree magically and botanically tortured over decades, its trunk bent and reinforced with bronze to serve as a biomechanical catapult."
+  },
+  {
+    "id": "root-anchored-artillery-tree",
+    "name": "Root-Anchored Artillery Tree",
+    "binomial": "Rakshasa-Vriksha ferrea",
+    "region": "asura-conjurations",
+    "biomes": [
+      "forest",
+      "settlement"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "journalPrompt": "A siege tree variant designed for defense, anchoring its stone-like roots deep into fortress walls to fling burning pitch."
+  },
+  {
+    "id": "crimson-blood-weed",
+    "name": "Crimson Blood-Weed",
+    "binomial": "Vitis asurica",
+    "region": "asura-conjurations",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "journalPrompt": "An invasive, predatory vine mutated by the bleeding energies of Asura planets, developing pulsing veins and a hunger for flesh."
+  },
+  {
+    "id": "violet-strangler-vine",
+    "name": "Violet Strangler-Vine",
+    "binomial": "Vitis violacea",
+    "region": "asura-conjurations",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "journalPrompt": "A thick, muscular vine that strangulates native trees, its violet-veined leaves exuding a sweet, sleep-inducing perfume."
+  },
+  {
+    "id": "asura-tainted-flesh-vine",
+    "name": "Asura-Tainted Flesh-Vine",
+    "binomial": "Vitis carnosa",
+    "region": "asura-conjurations",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "journalPrompt": "A highly mutated forest climber with animal-like muscle fibers, capable of grasping and constricting small animals."
+  },
+  {
+    "id": "fever-root",
+    "name": "Fever-Root",
+    "binomial": "Curcuma asurica",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "journalPrompt": "A mutated turmeric plant that grows near underworld rifts, its toxic, black rhizomes causing intense hallucinations when touched."
+  },
+  {
+    "id": "cursed-ash-fern",
+    "name": "Cursed Ash-Fern",
+    "binomial": "Pteris asurica",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "journalPrompt": "A fern with charcoal-black fronds that grows only in soil scorched by fire-brides, absorbing light and warmth from its surroundings."
+  },
+  {
+    "id": "whispering-blood-orchid",
+    "name": "Whispering Blood-Orchid",
+    "binomial": "Orchis asurica",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "journalPrompt": "A beautiful but unsettling orchid with fleshy, lip-like petals that whisper soft, mimicry-chime sounds to lure insects."
+  },
+  {
+    "id": "obsidian-rose",
+    "name": "Obsidian Rose",
+    "binomial": "Rosa obsidiana",
+    "region": "asura-conjurations",
+    "biomes": [
+      "settlement"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "journalPrompt": "A rose bush with razor-sharp black petals that secrete a deadly coagulant, growing in the ruins of desecrated temples."
+  },
+  {
+    "id": "naraka-pitcher-plant",
+    "name": "Naraka Pitcher-Plant",
+    "binomial": "Nepenthes asurica",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "journalPrompt": "A colossal carnivorous plant of the twilight zone, its wide, acid-filled pitcher capable of digesting entire small primates."
+  }
+]

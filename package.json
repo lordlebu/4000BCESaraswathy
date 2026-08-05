@@ -1,0 +1,14 @@
+{
+  "name": "south-of-tethys",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A cozy Jambhudweepa travel prototype: generate a map, wander, and keep a journal.",
+  "type": "module",
+  "scripts": {
+    "start": "node tools/serve.js",
+    "stop": "node tools/stop-server.js",
+    "test": "node src/smoke-test.js",
+    "build:data": "node tools/build-species-data.js"
+  },
+  "license": "UNLICENSED"
+}

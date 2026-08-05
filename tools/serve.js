@@ -38,7 +38,11 @@ function resolveRequest(pathname) {
   return filePath;
 }
 
+// Identifies this server to tools/stop-server.js, so a restart only ever reclaims our own port.
+const SIGNATURE = 'south-of-tethys-prototype';
+
 const server = http.createServer((request, response) => {
+  response.setHeader('X-Served-By', SIGNATURE);
   let pathname = '/';
   try {
     pathname = new URL(request.url, `http://localhost:${port}`).pathname;

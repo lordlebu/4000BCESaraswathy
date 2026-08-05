@@ -2,43 +2,3011 @@
   {
     "id": "river-otter",
     "name": "River Otter",
+    "binomial": null,
+    "region": "prototype-starters",
+    "biomes": [
+      "river",
+      "wetland",
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
     "mood": "playful",
-    "biomes": ["river", "wetland", "forest"],
     "journalPrompt": "A slick shape rolls through the shallows, leaving rings of silver water behind."
   },
   {
     "id": "painted-deer",
     "name": "Painted Deer",
+    "binomial": null,
+    "region": "prototype-starters",
+    "biomes": [
+      "plains",
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
     "mood": "gentle",
-    "biomes": ["plains", "forest"],
     "journalPrompt": "A small deer watches from the grass, its coat patterned like fallen petals."
   },
   {
     "id": "monsoon-crane",
     "name": "Monsoon Crane",
+    "binomial": null,
+    "region": "prototype-starters",
+    "biomes": [
+      "wetland",
+      "river",
+      "coast"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
     "mood": "graceful",
-    "biomes": ["wetland", "river", "coast"],
     "journalPrompt": "Tall white birds step between reeds as if reading the rain."
   },
   {
     "id": "hill-macaque",
     "name": "Hill Macaque",
+    "binomial": null,
+    "region": "prototype-starters",
+    "biomes": [
+      "hills",
+      "forest",
+      "settlement"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
     "mood": "curious",
-    "biomes": ["hills", "forest", "settlement"],
     "journalPrompt": "A macaque studies your satchel, then pretends it was only admiring the view."
   },
   {
     "id": "shell-turtle",
     "name": "Shell Turtle",
+    "binomial": null,
+    "region": "prototype-starters",
+    "biomes": [
+      "coast",
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
     "mood": "patient",
-    "biomes": ["coast", "river"],
     "journalPrompt": "A turtle rests where river sand meets the tide, carrying a map of scratches on its shell."
   },
   {
     "id": "cloud-antelope",
     "name": "Cloud Antelope",
+    "binomial": null,
+    "region": "prototype-starters",
+    "biomes": [
+      "mountains",
+      "hills",
+      "landmark"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
     "mood": "mythic",
-    "biomes": ["mountains", "hills"],
     "journalPrompt": "For a breath, an antelope-shaped cloud stands on a ridge before dissolving into mist."
+  },
+  {
+    "id": "lothal-marsh-lurker",
+    "name": "Lothal Marsh-Lurker",
+    "binomial": "Megalobatrachus lothalensis",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland",
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "An 8-foot giant river salamander that has survived since the Pleistocene. It waits in the murky delta pools of Lothal to ambush passing prey."
+  },
+  {
+    "id": "venomous-vengi-mud-salamander",
+    "name": "Venomous Vengi Mud-Salamander",
+    "binomial": "Megalobatrachus toxicus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A swamp-dwelling giant salamander variant whose skin exudes a paralyzing neurotoxin when threatened."
+  },
+  {
+    "id": "sacred-stepwell-koi",
+    "name": "Sacred Stepwell Koi",
+    "binomial": "Cyprinus devotus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "Bronze-scaled river fish bred in the sacred stepwells of Dwarka, featuring thick, armored scales to resist delta predators."
+  },
+  {
+    "id": "deep-river-bronze",
+    "name": "Deep-River Bronze",
+    "binomial": "Cyprinus chalceus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A wild relative of the stepwell koi, navigating Tethyan estuaries with heavy, protective, metallic-looking bronze scales."
+  },
+  {
+    "id": "spotted-marsh-tendua",
+    "name": "Spotted Marsh Tendua",
+    "binomial": "Panthera simiana maculata",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "clever",
+    "journalPrompt": "A highly intelligent, leopard-like feline of the wetlands that has evolved human-like eye placement and ocular mimicry to stalk its prey."
+  },
+  {
+    "id": "black-barked-canopy-tendua",
+    "name": "Black-Barked Canopy Tendua",
+    "binomial": "Panthera simiana arborea",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "coast",
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A melanistic, dark-coated subspecies of Tendua that hunts within the dense mangrove canopies of the Godavari delta."
+  },
+  {
+    "id": "nagaraptor",
+    "name": "Nagaraptor",
+    "binomial": "Proto-Jambhu Dromaeosaur",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland",
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "clever",
+    "journalPrompt": "Feathered velociraptor clans that have formed a complex diapsid scale-based civilization, using earthworks and moats to defend their nests."
+  },
+  {
+    "id": "burrowing-tortoise",
+    "name": "Burrowing Tortoise",
+    "binomial": "Geohelus domus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland",
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "patient",
+    "journalPrompt": "A large, long-lived tortoise (living 80-120 years) that digs spiral tunnels in a symbiotic relationship with the Nagaraptors, forming the underground foundations of the Taj Nest-Homes."
+  },
+  {
+    "id": "vajraptor",
+    "name": "Vajraptor",
+    "binomial": "Vajraptor territorialis",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "clever",
+    "journalPrompt": "An intelligent, social, and territorial theropod bird with colorful plumage and excellent problem-solving skills, building hidden canopy nests."
+  },
+  {
+    "id": "vanga-pearl-guide",
+    "name": "Vanga Pearl-Guide",
+    "binomial": "Cognitavi margarita",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "sea",
+      "landmark"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "clever",
+    "journalPrompt": "An elite subspecies of the hyper-intelligent Cognitavi navigator birds that aids Tuli seafarers in locating deep-sea oyster beds."
+  },
+  {
+    "id": "abyssal-storm-watcher",
+    "name": "Abyssal Storm-Watcher",
+    "binomial": "Cognitavi procellarum",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "clever",
+    "journalPrompt": "A Cognitavi navigator bird subspecies that specializes in reading weather patterns, guiding wisdom-seekers and ships safely through the Tethys monsoons."
+  },
+  {
+    "id": "iridescent-lothal-silvanus",
+    "name": "Iridescent Lothal Silvanus",
+    "binomial": "Silvanus pictus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "luminous",
+    "journalPrompt": "A winged, bird-like dinosaurid with shimmering plumage that nests in the tall reed beds outside the Sylvian Gate of Lothal."
+  },
+  {
+    "id": "baurusuchus",
+    "name": "Baurusuchus",
+    "binomial": "Baurusuchus palustris",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A heavy, quadrupedal land crocodile that prowls the delta, specializing in ambush techniques in shallow reed marshes."
+  },
+  {
+    "id": "striped-reed-stalker",
+    "name": "Striped Reed Stalker",
+    "binomial": "Baurusuchus virgatus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "patient",
+    "journalPrompt": "A camouflaged subspecies of Baurusuchus with vertical stripes, blending into the marsh grass of the Saraswati delta."
+  },
+  {
+    "id": "mud-armored-ambusher",
+    "name": "Mud-Armored Ambusher",
+    "binomial": "Baurusuchus lutosus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A baurusuchid that cakes itself in river mud, keeping its body temperature low and hiding from terrestrial prey."
+  },
+  {
+    "id": "indus-unicorn",
+    "name": "Indus Unicorn",
+    "binomial": "Monocerus indicus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "river",
+      "landmark"
+    ],
+    "placement": "encounter",
+    "rarity": "mythic",
+    "mood": "watchful",
+    "journalPrompt": "A legendary, swift-footed single-horned ungulate of the river valleys, highly revered and historically sacrificed in dark portals."
+  },
+  {
+    "id": "saraswati-delta-heron",
+    "name": "Saraswati Delta Heron",
+    "binomial": "Ardea sarasvati",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "coast"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A long-legged wading bird with pale silver feathers that filters small bronze fish from the delta's estuaries."
+  },
+  {
+    "id": "muria-river-otter",
+    "name": "Muria River-Otter",
+    "binomial": "Lutra muria",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "An agile, semi-aquatic mammal with dense, oil-slicked fur that hunts stepwell koi along the eastern coast of the island."
+  },
+  {
+    "id": "lothal-mud-skipper",
+    "name": "Lothal Mud-Skipper",
+    "binomial": "Periophthalmus gigas",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "coast"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A giant amphibious fish that climbs mangrove roots and breathes through its skin, highly prized for its tender, salty meat."
+  },
+  {
+    "id": "marsh-dwelling-terrapin",
+    "name": "Marsh-dwelling Terrapin",
+    "binomial": "Clemmys lothalensis",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "patient",
+    "journalPrompt": "A stem turtle lineage whose osteoderm shell is covered in green moss, providing perfect camouflage in swampy pools."
+  },
+  {
+    "id": "tethyan-blue-crayfish",
+    "name": "Tethyan Blue-Crayfish",
+    "binomial": "Astacus caeruleus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A large freshwater crustacean with vibrant blue claws that feeds on decaying organic matter in the Saraswati tributaries."
+  },
+  {
+    "id": "delta-kingfisher",
+    "name": "Delta Kingfisher",
+    "binomial": "Alcedo vishnu",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland",
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A tiny, brilliant-blue bird that dives with extreme speed to spear bronze fish, its sharp call mimicking wind chimes."
+  },
+  {
+    "id": "saltwater-gator-turtle",
+    "name": "Saltwater Gator-Turtle",
+    "binomial": "Macrochelys tethyan",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "coast",
+      "hills"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "An ancient, armored turtle with a ridged shell resembling a crocodile's hide, lurking in brackish delta canals."
+  },
+  {
+    "id": "saraswati-reed-warbler",
+    "name": "Saraswati Reed-Warbler",
+    "binomial": "Acrocephalus sylvanus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "clever",
+    "journalPrompt": "A small, plain bird that weaves complex hanging nests in the tall delta reeds, mimicking the clicks of local dinosaurids."
+  },
+  {
+    "id": "crested-marsh-runner",
+    "name": "Crested Marsh-Runner",
+    "binomial": "Gallinula cristata",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "graceful",
+    "journalPrompt": "A flightless bird of the delta marshes that sprints over floating lotus leaves using elongated, spread-out toes."
+  },
+  {
+    "id": "tethys-river-dolphin",
+    "name": "Tethys River Dolphin",
+    "binomial": "Platanista tethys",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A pale, blind cetacean that navigates the muddy delta waters using sophisticated acoustic clicks, hunted by Kias for meat and skin."
+  },
+  {
+    "id": "mangrove-crab-eater",
+    "name": "Mangrove Crab-Eater",
+    "binomial": "Herpestes mangrovus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "coast"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A sleek mongoose species that specializes in cracking open hard-shelled delta crustaceans with its robust jaw structure."
+  },
+  {
+    "id": "vengi-marsh-harrier",
+    "name": "Vengi Marsh Harrier",
+    "binomial": "Circus vengi",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A low-flying bird of prey that sweeps over the reed beds, hunting young dinosaurids and salamanders."
+  },
+  {
+    "id": "lothal-sand-plover",
+    "name": "Lothal Sand-Plover",
+    "binomial": "Charadrius lothalensis",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A small, pale shorebird that nests in the sandy riverbanks, distracting predators with elaborate broken-wing displays."
+  },
+  {
+    "id": "swamp-wallaby",
+    "name": "Swamp-Wallaby",
+    "binomial": "Wallabia sylvanus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A marsupial-like herbivore that grazes on the delta's edge, capable of swimming short distances between mangrove islets."
+  },
+  {
+    "id": "lothal-shell-cracker",
+    "name": "Lothal Shell-Cracker",
+    "binomial": "Carcinus lothalensis",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "coast"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A crab with one oversized, stone-hard claw used to crush estuary mollusks, highly prized by local fishers."
+  },
+  {
+    "id": "delta-reed-python",
+    "name": "Delta Reed-Python",
+    "binomial": "Python sylvanus minor",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A small, non-venomous constrictor snake that mimics the color of dried reeds, preying on nesting birds."
+  },
+  {
+    "id": "tethyan-mud-snipe",
+    "name": "Tethyan Mud-Snipe",
+    "binomial": "Gallinago tethys",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "sea",
+      "coast"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A long-billed bird that probes the estuarial mud for marine worms, its call sounding like rhythmic clicking."
+  },
+  {
+    "id": "silver-banded-sea-snake",
+    "name": "Silver-Banded Sea-Snake",
+    "binomial": "Hydrophis argentum",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A highly venomous sea snake with black and silver bands, hunting stepwell koi near coastal lagoons."
+  },
+  {
+    "id": "vanga-marsh-cat",
+    "name": "Vanga Marsh-Cat",
+    "binomial": "Felis chaus vanga",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A small, agile cat with tufted ears that hunts marsh-runners and frogs in the Godavari delta."
+  },
+  {
+    "id": "lothal-heron-raptor",
+    "name": "Lothal Heron-Raptor",
+    "binomial": "Sylvianus minor",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland",
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A small, wading theropod bird that uses its long neck and serrated beak to spear mud-lurkers."
+  },
+  {
+    "id": "mangrove-snapping-turtle",
+    "name": "Mangrove Snapping-Turtle",
+    "binomial": "Chelydra mangrovi",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "coast"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A turtle with a razor-sharp beak that lies buried in the brackish mud, ambushing small crabs and fish."
+  },
+  {
+    "id": "tethys-pelican",
+    "name": "Tethys Pelican",
+    "binomial": "Pelecanus tethys",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "coast"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A large-billed bird with a throat pouch used to scoop up schooling fish from the coastal shallows."
+  },
+  {
+    "id": "estuary-archer-fish",
+    "name": "Estuary Archer-Fish",
+    "binomial": "Toxotes tethys",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "coast"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A fish that shoots jets of water from its mouth to knock down insects resting on overhanging mangrove leaves."
+  },
+  {
+    "id": "delta-fiddler-crab",
+    "name": "Delta Fiddler-Crab",
+    "binomial": "Uca sarasvati",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland",
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A small mud-crab with a brilliant blue shell, the males waving an oversized white claw to attract mates."
+  },
+  {
+    "id": "lothal-dune-sprinter",
+    "name": "Lothal Dune-Sprinter",
+    "binomial": "Acanthodactylus lothalensis",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "wetland"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "playful",
+    "journalPrompt": "A fast-moving, sand-colored lizard of the salt marshes that feeds on delta insects and crabs."
+  },
+  {
+    "id": "saraswati-horned-frog",
+    "name": "Saraswati Horned Frog",
+    "binomial": "Ceratophrys sarasvati",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A large-mouthed, sit-and-wait predator that burrows into leaf litter, its horns mimicking fallen twigs."
+  },
+  {
+    "id": "vindhya-forest-falcon",
+    "name": "Vindhya Forest Falcon",
+    "binomial": "Falco sylvanus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A quiet, predatory bird that hunts arboreal octopuses and squirrels in the Narmada canopies."
+  },
+  {
+    "id": "narmada-mud-eel",
+    "name": "Narmada Mud-Eel",
+    "binomial": "Monopterus narmadensis",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "patient",
+    "journalPrompt": "A slender, scale-less fish that burrows into the volcanic mud of riverbeds, breathing atmospheric air during dry spells."
+  },
+  {
+    "id": "gedrosian-spiny-tailed-lizard",
+    "name": "Gedrosian Spiny-tailed Lizard",
+    "binomial": "Saara gedrosia",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "patient",
+    "journalPrompt": "A vegetarian lizard that forms large colonies in the sand, using its hard, spiked tail to block burrow entrances."
+  },
+  {
+    "id": "scythian-wild-ass",
+    "name": "Scythian Wild Ass",
+    "binomial": "Equus hemionus scythicus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "plains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A fast, resilient wild equine of the northern steppe deserts, highly valued by nomads for its stamina."
+  },
+  {
+    "id": "jungle-web-spinner",
+    "name": "Jungle Web-Spinner",
+    "binomial": "Nephila sylvanica",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A giant spider of Mappa Mundi that weaves massive, golden webs capable of catching small birds and bats."
+  },
+  {
+    "id": "tethyan-flying-squid",
+    "name": "Tethyan Flying-Squid",
+    "binomial": "Todarodes tethys",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A marine mollusk that shoots itself out of the water to escape predators, gliding over waves with lateral fins."
+  },
+  {
+    "id": "lava-pool-water-beetle",
+    "name": "Lava-Pool Water-Beetle",
+    "binomial": "Dytiscus vulcanus",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A predatory aquatic beetle that swims in hot mineral springs, feeding on larval vent-shrimps."
+  },
+  {
+    "id": "sky-faring-grasshopper",
+    "name": "Sky-Faring Grasshopper",
+    "binomial": "Melanoplus caelius",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "graceful",
+    "journalPrompt": "A lightweight, gas-buoyant grasshopper that migrates between floating islands, feeding on sky-bramble leaves."
+  },
+  {
+    "id": "grey-bark-mimic",
+    "name": "Grey Bark-Mimic",
+    "binomial": "Vrkshasmara griseus",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "An arboreal forest octopus of the Narmada Valley that has evolved keratin-rimmed suction cups and moisture-retaining gills to live in tree canopies, mimicking weathered bark."
+  },
+  {
+    "id": "bioluminescent-moss-dweller",
+    "name": "Bioluminescent Moss-Dweller",
+    "binomial": "Vrkshasmara phosphorea",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "luminous",
+    "journalPrompt": "An arboreal octopus variant that feeds on glowing moss, causing its tentacles to emit a soft, pulsing green light at night."
+  },
+  {
+    "id": "shilajit-guardian-lizard",
+    "name": "Shilajit Guardian Lizard",
+    "binomial": "Agama shilajit",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A fire-spitting cliff lizard that ingests raw sulfur and flint to strike defensive sparks, guarding natural mineral deposits."
+  },
+  {
+    "id": "lesser-ember-skink",
+    "name": "Lesser Ember-Skink",
+    "binomial": "Agama scintillans",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "luminous",
+    "journalPrompt": "A small, agile lizard of the volcanic vents, possessing fire-resistant scales and a tail that glows like a hot coal when excited."
+  },
+  {
+    "id": "golden-honey-goliath",
+    "name": "Golden Honey-Goliath",
+    "binomial": "Megapis aurea",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills"
+    ],
+    "placement": "encounter",
+    "rarity": "mythic",
+    "mood": "watchful",
+    "journalPrompt": "A colossal bee species of the Narmada cliffs, harvested for its essential-oil-rich medicinal honey. They are used as weapons in local siege engines."
+  },
+  {
+    "id": "black-striped-siege-bee",
+    "name": "Black-Striped Siege Bee",
+    "binomial": "Megapis obsidiana",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A territorial, hyper-aggressive giant bee subspecies whose sting delivers a burning, venomous heat resembling hot ash."
+  },
+  {
+    "id": "lesser-whisper-fig-bird",
+    "name": "Lesser Whisper-Fig Bird",
+    "binomial": "Ficusophila minor",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A small, dull-colored bird that feeds exclusively on the fruit of the Bhuta-Kāna fig, nesting deep within its silver canopy."
+  },
+  {
+    "id": "gondwana-spice-sifter",
+    "name": "Gondwana Spice-Sifter",
+    "binomial": "Peneus gondwanensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A freshwater mountain crustacean that lives in the mineral-rich volcanic streams, sifting through golden spice-sand for organic matter."
+  },
+  {
+    "id": "vindhya-cliff-goat",
+    "name": "Vindhya Cliff-Goat",
+    "binomial": "Capra vindhyensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A sure-footed, woolly mountain goat that grazes on steep volcanic ledges, often acting as a host or guide for anomalous entities."
+  },
+  {
+    "id": "narmada-cave-bear",
+    "name": "Narmada Cave Bear",
+    "binomial": "Ursus spelaeus narmadensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A massive, thick-furred predator of the high caves that climbs cliffs to raid honey-goliath nests, frequently clashing with human gatherers."
+  },
+  {
+    "id": "vindhya-leopard",
+    "name": "Vindhya Leopard",
+    "binomial": "Panthera pardus vindhyensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A lean, long-limbed mountain predator with a coat patterned like fractured volcanic ash, specializing in hunting cliff-goats."
+  },
+  {
+    "id": "garudasaur-eagle",
+    "name": "Garudasaur Eagle",
+    "binomial": "Aquila garudae",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "mythic",
+    "mood": "watchful",
+    "journalPrompt": "A colossal mountain eagle with obsidian-tipped feathers, carrying small goats and primates to its nest on the high volcanic ledges."
+  },
+  {
+    "id": "lava-ledge-gecko",
+    "name": "Lava-Ledge Gecko",
+    "binomial": "Gekko vulcanus",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A large gecko with sticky, heat-resistant pads that enable it to crawl directly over hot, cooled-down basalt flows."
+  },
+  {
+    "id": "vindhya-horned-owl",
+    "name": "Vindhya Horned Owl",
+    "binomial": "Bubo vindhyensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A nocturnal predator with tufted feathers resembling horns, hunting tree-octopuses and small rodents in the canopy."
+  },
+  {
+    "id": "narmada-rock-python",
+    "name": "Narmada Rock-Python",
+    "binomial": "Python narmadensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "patient",
+    "journalPrompt": "A massive constrictor snake that camouflages as a volcanic root, waiting patiently near watering holes to seize prey."
+  },
+  {
+    "id": "ash-glider-squirrel",
+    "name": "Ash-Glider Squirrel",
+    "binomial": "Petaurista cinereus",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "graceful",
+    "journalPrompt": "A nocturnal rodent with a wide skin fold that glides between tall mahua trees, its fur colored like grey ash."
+  },
+  {
+    "id": "red-crested-woodpecker",
+    "name": "Red-Crested Woodpecker",
+    "binomial": "Picus phoeniceus",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A large bird that drills into hollow bonewood trees to extract boring beetles, its tapping echoing like stone-age drums."
+  },
+  {
+    "id": "vindhya-langur",
+    "name": "Vindhya Langur",
+    "binomial": "Presbytis vindhyensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A grey-furred, black-faced monkey that climbs the highest canopy of the Narmada Valley, feeding on sweet mahua flowers."
+  },
+  {
+    "id": "volcanic-shrew",
+    "name": "Volcanic Shrew",
+    "binomial": "Sorex vulcanus",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A tiny, hyperactive mammal with a metallic coat that searches leaf litter for sulfur-beetles and insect larvae."
+  },
+  {
+    "id": "mountain-forest-boar",
+    "name": "Mountain Forest Boar",
+    "binomial": "Sus sylvanus",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A tusked, rugged omnivore that digs up volcanic tubers and rare roots, its thick hide protecting it from cliff lizards."
+  },
+  {
+    "id": "vindhya-rock-squirrel",
+    "name": "Vindhya Rock-Squirrel",
+    "binomial": "Ratufa vindhyensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A giant, colorful squirrel that nests in high cliff cavities, feeding on wild pine nuts and fig seeds."
+  },
+  {
+    "id": "narmada-honey-guide",
+    "name": "Narmada Honey-Guide",
+    "binomial": "Indicator narmadensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "clever",
+    "journalPrompt": "A small bird that has a symbiotic relationship with humans, leading them to honey-goliath nests in exchange for wax."
+  },
+  {
+    "id": "basalt-cliff-hornbill",
+    "name": "Basalt-Cliff Hornbill",
+    "binomial": "Ocyceros basalticus",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A large bird with a heavy, curved bill that nests in high rock crevices, feeding on wild figs and geckos."
+  },
+  {
+    "id": "vindhya-bark-gecko",
+    "name": "Vindhya Bark-Gecko",
+    "binomial": "Hemidactylus vindhyensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "patient",
+    "journalPrompt": "A master of camouflage, its skin texture perfectly matching the rough wood of old mahua trees."
+  },
+  {
+    "id": "narmada-cave-crab",
+    "name": "Narmada Cave-Crab",
+    "binomial": "Potamon cavea",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A blind, pale freshwater crab that lives in the dark subterranean streams beneath the plateau."
+  },
+  {
+    "id": "ash-valley-field-mouse",
+    "name": "Ash-Valley Field-Mouse",
+    "binomial": "Mus cinereus",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A small, nocturnal rodent that feeds on wild tea seeds, its burrow insulated with toxic red spore-moss."
+  },
+  {
+    "id": "vindhya-centipede-eater",
+    "name": "Vindhya Centipede-Eater",
+    "binomial": "Herpestes centipeda",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A small mongoose species with thick, leathery hide that protects it from the venomous stings of cliff centipedes."
+  },
+  {
+    "id": "narmada-tree-shrew",
+    "name": "Narmada Tree-Shrew",
+    "binomial": "Anathana narmadensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "playful",
+    "journalPrompt": "An agile, insectivorous mammal that climbs the lower branches of ash-banyan trees, active during daylight."
+  },
+  {
+    "id": "obsidian-cliff-eagle",
+    "name": "Obsidian-Cliff Eagle",
+    "binomial": "Aquila obsidiana",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A large bird of prey that nests on the highest peaks, its sharp eyes detecting movement in the valleys below."
+  },
+  {
+    "id": "vindhya-hill-parakeet",
+    "name": "Vindhya Hill-Parakeet",
+    "binomial": "Psittacula vindhyensis",
+    "region": "narmada-vindhya",
+    "biomes": [
+      "hills"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A colorful, highly vocal bird that travels in large flocks, feeding on wild fruits and nesting in hollow trees."
+  },
+  {
+    "id": "sand-camouflage-beedu",
+    "name": "Sand-Camouflage Beedu",
+    "binomial": "Sarasvatimanta gedrosii",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "graceful",
+    "journalPrompt": "A desert manta ray that has evolved gas-filled internal bladders to glide silently over hot desert thermal currents, blending into the dunes."
+  },
+  {
+    "id": "white-salt-flat-ray",
+    "name": "White Salt-Flat Ray",
+    "binomial": "Sarasvatimanta alba",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A pale, chalk-white subspecies of Beedu that hunts over the blinding salt flats, reflecting the desert glare to remain invisible."
+  },
+  {
+    "id": "woolly-bactrian-croc",
+    "name": "Woolly Bactrian-Croc",
+    "binomial": "Camelosuchus bactrianus",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A heavy, rugged crocodile-mammal hybrid with two water-retention humps, used by northern nomads to cross the highland deserts."
+  },
+  {
+    "id": "sleek-dromedary-croc",
+    "name": "Sleek Dromedary-Croc",
+    "binomial": "Camelosuchus dromedarius",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A faster, single-humped variant of Camelosuchus adapted to sandy dunes, capable of sustaining high speeds across the wastes."
+  },
+  {
+    "id": "giant-riding-ostrich",
+    "name": "Giant Riding Ostrich",
+    "binomial": "Struthio camelus maximus",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A massive, flightless bird trained by the Tushara nomads to carry heavy cargo and scouts across the arid frontiers."
+  },
+  {
+    "id": "golden-plumed-racer",
+    "name": "Golden-Plumed Racer",
+    "binomial": "Struthio camelus auratus",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A sleek, highly prized breed of desert ostrich bred specifically for speed and long-distance scout expeditions."
+  },
+  {
+    "id": "coastal-sand-sprinter",
+    "name": "Coastal Sand-Sprinter",
+    "binomial": "Postosuchus bipedalis",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A predatory, bipedal crocodyliform that re-evolved an upright, bipedal sprinting gait to chase down prey on sandy shores."
+  },
+  {
+    "id": "highland-rock-runner",
+    "name": "Highland Rock-Runner",
+    "binomial": "Postosuchus montanus",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A sturdier, darker subspecies of bipedal Postosuchus that hunts along the rocky desert ravines of Bahila Kush."
+  },
+  {
+    "id": "glass-scaled-viper",
+    "name": "Glass-Scaled Viper",
+    "binomial": "Vipera vitrea",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "luminous",
+    "journalPrompt": "An Hourglass Desert serpent whose scales mimic the shimmering, temporal-fractured sands, delivering a painful, dehydrating bite."
+  },
+  {
+    "id": "crimson-eyed-adder",
+    "name": "Crimson-Eyed Adder",
+    "binomial": "Vipera rubra",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "luminous",
+    "journalPrompt": "A nocturnal sand-viper with glowing red eyes, specialized in hunting small rodents in the cold desert nights."
+  },
+  {
+    "id": "desert-jerboa-rat",
+    "name": "Desert Jerboa-Rat",
+    "binomial": "Dipodomys deserti",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "patient",
+    "journalPrompt": "A tiny, jumping rodent with long hind legs that avoids the searing day heat by burrowing deep beneath the sand dunes."
+  },
+  {
+    "id": "taklamakan-sand-cat",
+    "name": "Taklamakan Sand-Cat",
+    "binomial": "Felis margarita taklamakan",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A small wildcat with wide, fur-covered paws that act as sand-shoes, enabling it to hunt vipers and lizards silently."
+  },
+  {
+    "id": "gedrosian-spiny-lizard",
+    "name": "Gedrosian Spiny Lizard",
+    "binomial": "Uromastyx gedrosii",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "An armored, herbivorous lizard with a thick, spiked tail used to seal its burrow entrance against predators."
+  },
+  {
+    "id": "scythian-war-camel",
+    "name": "Scythian War-Camel",
+    "binomial": "Camelus scythicus",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A massive, shaggy-haired desert ungulate bred for its high endurance and resistance to the bitter desert wind."
+  },
+  {
+    "id": "dune-lurking-scorpion",
+    "name": "Dune-Lurking Scorpion",
+    "binomial": "Buthus gedrosii",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A pale yellow scorpion that hides beneath thin layers of loose sand, striking with a swift, toxic sting when stepped on."
+  },
+  {
+    "id": "desert-falcon",
+    "name": "Desert Falcon",
+    "binomial": "Falco gedrosianus",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A swift bird of prey that sweeps over the desert ridges to hunt young ostriches and desert rodents."
+  },
+  {
+    "id": "salt-flat-beetle",
+    "name": "Salt-Flat Beetle",
+    "binomial": "Carabus salinus",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A dark, highly reflective beetle that feeds on decaying organic matter along the margins of the blinding salt plains."
+  },
+  {
+    "id": "highland-ibex",
+    "name": "Highland Ibex",
+    "binomial": "Capra ibex gedrosia",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A wild mountain goat with massive, curved horns that navigates the rocky desert crags bordering the Taklamakan."
+  },
+  {
+    "id": "sand-burrowing-toad",
+    "name": "Sand-Burrowing Toad",
+    "binomial": "Bufo arenarius",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "patient",
+    "journalPrompt": "An amphibian that remains buried in moist deep sand for months, emerging only during rare, sudden desert rains to breed."
+  },
+  {
+    "id": "hourglass-centipede",
+    "name": "Hourglass Centipede",
+    "binomial": "Scolopendra arenaria",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A multi-legged, predatory invertebrate with yellow and brown bands, hunting spiders and small lizards in sand crevices."
+  },
+  {
+    "id": "taklamakan-sand-viper",
+    "name": "Taklamakan Sand-Viper",
+    "binomial": "Vipera sand-dune",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A sand-colored viper that moves with a side-winding motion, leaving S-shaped tracks across the deep dunes."
+  },
+  {
+    "id": "gedrosian-desert-fox",
+    "name": "Gedrosian Desert Fox",
+    "binomial": "Vulpes gedrosiana",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A small fox with oversized ears that dissipate heat, hunting jerboa-rats in the cool desert nights."
+  },
+  {
+    "id": "dune-running-lizard",
+    "name": "Dune-Running Lizard",
+    "binomial": "Agama deserti",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A lizard that runs across hot sand on its hind legs, lifting its feet alternately to keep them cool."
+  },
+  {
+    "id": "camelosuchus-calf",
+    "name": "Camelosuchus Calf",
+    "binomial": "Camelosuchus minor",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "playful",
+    "journalPrompt": "A young, playful camelosuchus that stays close to its mother, learning to forage on desert saltbush."
+  },
+  {
+    "id": "desert-horned-owl",
+    "name": "Desert Horned Owl",
+    "binomial": "Bubo deserti",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A nocturnal predator that hunts sand-vipers and rats, its silent flight muffled by soft, specialized feathers."
+  },
+  {
+    "id": "gedrosian-desert-wolf",
+    "name": "Gedrosian Desert Wolf",
+    "binomial": "Canis lupus gedrosiae",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A lean, light-colored wolf that hunts in small packs, preying on wild ibex and stray cattle."
+  },
+  {
+    "id": "dune-lurking-spider",
+    "name": "Dune-Lurking Spider",
+    "binomial": "Sparassus arenarius",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A large, pale spider that burrows into the sand, constructing a silk-lined trapdoor to ambush insects."
+  },
+  {
+    "id": "salt-flat-cricket",
+    "name": "Salt-Flat Cricket",
+    "binomial": "Gryllus salinus",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "An insect with a thick, white carapace that feeds on dried saltbush leaves along the salt plains."
+  },
+  {
+    "id": "gedrosian-sand-grouse",
+    "name": "Gedrosian Sand-Grouse",
+    "binomial": "Pterocles gedrosius",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A bird that flies miles to find water, absorbing moisture in its breast feathers to carry back to its chicks."
+  },
+  {
+    "id": "highland-desert-beetle",
+    "name": "Highland Desert Beetle",
+    "binomial": "Carabus montanus",
+    "region": "gedrosian-taklamakan",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A tough-shelled beetle that feeds on cactus pulp, active during the cool, early morning hours."
+  },
+  {
+    "id": "crested-sylvian",
+    "name": "Crested Sylvian",
+    "binomial": "Sylvianus cristatus",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A terrestrial, flightless theropod dromaeosaur of Mappa Mundi that rules the jungle floor, using pack coordination to hunt."
+  },
+  {
+    "id": "stealth-patterned-theropod",
+    "name": "Stealth-Patterned Theropod",
+    "binomial": "Sylvianus occultus",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A color-changing subspecies of Sylvian that mimics the jungle foliage, allowing silent ambush in the dense canopy."
+  },
+  {
+    "id": "giant-jungle-raptor",
+    "name": "Giant Jungle Raptor",
+    "binomial": "Silvanus gigas",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A winged, predatory dinosaurid (pterosaur-avian link) with a massive beak, nesting in the highest forest canopies of the southern islands."
+  },
+  {
+    "id": "giant-horned-voay",
+    "name": "Giant Horned Voay",
+    "binomial": "Voay maximus",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea",
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "mythic",
+    "mood": "fearsome",
+    "journalPrompt": "A colossal, fully terrestrial galloping crocodile with thick hide and brow-horns, serving as the apex predator of the dry scrub."
+  },
+  {
+    "id": "banded-scavenger-voay",
+    "name": "Banded Scavenger Voay",
+    "binomial": "Voay lineatus",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea",
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A smaller, striped terrestrial crocodile that follows larger predators to feed on the remains of giant avian prey."
+  },
+  {
+    "id": "abyssal-blue-leviathan",
+    "name": "Abyssal Blue Leviathan",
+    "binomial": "Balaenoptera abyssalis",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "mythic",
+    "mood": "watchful",
+    "journalPrompt": "A colossal baleen whale of the deep Tethys Sea, whose thick hide and bone plate are harvested for engineering maritime vessels."
+  },
+  {
+    "id": "bone-plated-orca",
+    "name": "Bone-Plated Orca",
+    "binomial": "Orcinus osteoplax",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A highly aggressive, predatory Tethyan toothed whale with thick bony armor plates protecting its skull and dorsal ridge."
+  },
+  {
+    "id": "steppe-plumed-elephantbird",
+    "name": "Steppe-Plumed Elephantbird",
+    "binomial": "Aepyornis stephensis",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "coast",
+      "plains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A massive, shaggy-feathered ratite tamed by traveling merchants to serve as heavy beasts of burden on coastal routes."
+  },
+  {
+    "id": "jungle-crested-mount",
+    "name": "Jungle-Crested Mount",
+    "binomial": "Aepyornis crested",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A vibrantly colored elephantbird subspecies adapted to humid rainforest floors, capable of breaking through dense thickets."
+  },
+  {
+    "id": "sea-scorpion-queen",
+    "name": "Sea Scorpion Queen",
+    "binomial": "Shrīmā mimetica",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A predatory Eurypterid of the southern lagoons that has undergone mimetic-devolvement, resembling human women to lure prey."
+  },
+  {
+    "id": "tethyan-reef-lurker",
+    "name": "Tethyan Reef-Lurker",
+    "binomial": "Murex tethys",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A venomous, spiny mollusk that hides in coral crevices, preying on small fish with a rapid, toxic sting."
+  },
+  {
+    "id": "giant-blue-ringed-octopus",
+    "name": "Giant Blue-Ringed Octopus",
+    "binomial": "Octopus caeruleus",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "luminous",
+    "journalPrompt": "A highly intelligent, marine cephalopod of the Shattered Sea that flashes glowing blue bands to distract predators."
+  },
+  {
+    "id": "tethys-leviathan-calf",
+    "name": "Tethys Leviathan Calf",
+    "binomial": "Balaenoptera minor",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "playful",
+    "journalPrompt": "A young, playful whale that travels in the warm coastal shallows, protected by the pod's bone-plated matriarchs."
+  },
+  {
+    "id": "shattered-sea-oyster",
+    "name": "Shattered Sea Oyster",
+    "binomial": "Ostrea shattered",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "luminous",
+    "journalPrompt": "A massive bivalve that produces iridescent black pearls, highly coveted by Vanga maritime merchants."
+  },
+  {
+    "id": "coral-dwelling-moray",
+    "name": "Coral-dwelling Moray",
+    "binomial": "Muraena coralina",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A long, serpentine fish with a brightly patterned skin that mimics the red blood-coral of the Shattered Sea reefs."
+  },
+  {
+    "id": "flying-fish-of-the-tethys",
+    "name": "Flying-Fish of the Tethys",
+    "binomial": "Exocoetus tethys",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A small, schooling fish that uses enlarged pectoral fins to glide over the ocean waves, escaping predatory toothed whales."
+  },
+  {
+    "id": "hammerhead-reef-shark",
+    "name": "Hammerhead Reef-Shark",
+    "binomial": "Sphyrna reef",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A sleek, coastal shark with a broad, sensory-rich skull designed to detect prey hidden beneath the sandy reef floors."
+  },
+  {
+    "id": "mappa-mundi-tree-frog",
+    "name": "Mappa Mundi Tree-Frog",
+    "binomial": "Hyla sylvanica",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A tiny, brightly colored amphibian with sticky toes, secreting a mild toxin used by local hunters to coat arrowheads."
+  },
+  {
+    "id": "jungle-python",
+    "name": "Jungle python",
+    "binomial": "Python sylvanus",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A massive arboreal snake with emerald-green scales, blending into the hanging vines to drop onto terrestrial prey."
+  },
+  {
+    "id": "southern-sea-eagle",
+    "name": "Southern Sea-Eagle",
+    "binomial": "Haliaeetus meridionalis",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A large bird of prey with a white head and chest, nesting on high cliff edges and swooping down to seize marine fish."
+  },
+  {
+    "id": "mappa-mundi-forest-cat",
+    "name": "Mappa Mundi Forest-Cat",
+    "binomial": "Prionailurus sylvanus",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A spotted wildcat with a long, balancing tail, hunting squirrels and frogs in the deep jungle canopy."
+  },
+  {
+    "id": "southern-sea-turtle",
+    "name": "Southern Sea-Turtle",
+    "binomial": "Chelonia meridionalis",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A large turtle that migrates thousands of miles across the Tethys, nesting on isolated volcanic beaches."
+  },
+  {
+    "id": "jungle-hornbill",
+    "name": "Jungle Hornbill",
+    "binomial": "Buceros sylvanus",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A magnificent bird with a double-pointed casque, nesting in old hollow trees and feeding on wild figs."
+  },
+  {
+    "id": "mappa-mundi-flying-lizard",
+    "name": "Mappa Mundi Flying-Lizard",
+    "binomial": "Draco sylvanus",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "graceful",
+    "journalPrompt": "A small, colorful lizard with skin membranes that let it glide between tall jungle trees to escape tree-snakes."
+  },
+  {
+    "id": "tethyan-blue-fin-tuna",
+    "name": "Tethyan Blue-Fin Tuna",
+    "binomial": "Thunnus tethys",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A fast-swimming, silver-scaled predatory fish that travels in large schools in the open waters of the Shattered Sea."
+  },
+  {
+    "id": "reef-dwelling-octopus",
+    "name": "Reef-dwelling Octopus",
+    "binomial": "Octopus reef",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "An octopus with highly textured skin that mimics coral, hunting small crabs and fish in shallow waters."
+  },
+  {
+    "id": "mappa-mundi-tree-snail",
+    "name": "Mappa Mundi Tree-Snail",
+    "binomial": "Helix sylvanica",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A colorful land snail with a spiraled shell, feeding on moss and lichens growing on jungle trunks."
+  },
+  {
+    "id": "shattered-sea-barracuda",
+    "name": "Shattered Sea Barracuda",
+    "binomial": "Sphyraena shattered",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A sleek, silver predator with sharp teeth, hunting smaller schooling fish near the coral reefs."
+  },
+  {
+    "id": "jungle-horned-toad",
+    "name": "Jungle Horned Toad",
+    "binomial": "Megophrys sylvanica",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "A leaf-mimicking toad with pointed flaps over its eyes, hiding in the leaf litter of Mappa Mundi."
+  },
+  {
+    "id": "southern-reef-stingray",
+    "name": "Southern Reef-Stingray",
+    "binomial": "Dasyatis meridionalis",
+    "region": "shattered-sea-mappa-mundi",
+    "biomes": [
+      "sea"
+    ],
+    "placement": "encounter",
+    "rarity": "common",
+    "mood": "fearsome",
+    "journalPrompt": "A flat, sand-colored fish that lies buried on the reef floor, armed with a venomous tail spine."
+  },
+  {
+    "id": "magma-claw-crab",
+    "name": "Magma-Claw Crab",
+    "binomial": "Gecarcinus magma",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A deep-sea vent crustacean that has adapted to direct magma exposure, possessing a heavy, obsidian-black carapace."
+  },
+  {
+    "id": "basalt-armored-scavenger",
+    "name": "Basalt-Armored Scavenger",
+    "binomial": "Gecarcinus basalticus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A lava crab variant that feeds on mineral deposits along the cooled basalt shores, its claws strong enough to crush rock."
+  },
+  {
+    "id": "copper-veined-snail",
+    "name": "Copper-Veined Snail",
+    "binomial": "Chrysomallon chalceus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "An extremophile gastropod of the lava lake, fusing copper and volcanic ore into a heavy, metallic shell."
+  },
+  {
+    "id": "giant-steel-shelled-snail",
+    "name": "Giant Steel-Shelled Snail",
+    "binomial": "Chrysomallon ferreus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "luminous",
+    "journalPrompt": "A massive iron snail whose shell consists of layered iron-ash and basalt, reflecting the glowing fire of the lava lake."
+  },
+  {
+    "id": "serene-brown-ammonite",
+    "name": "Serene Brown Ammonite",
+    "binomial": "Ammonites pacificus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "A giant, peaceful nautiloid with an earthy, wood-patterned shell that drifts calmly through the steaming, boiling water zones."
+  },
+  {
+    "id": "asura-marked-black-ammonite",
+    "name": "Asura-Marked Black Ammonite",
+    "binomial": "Ammonites asuricus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "uncanny",
+    "journalPrompt": "A dark, basalt-grey giant ammonite with glowing, sulfur-colored veins along its ridges, native to the volcanic ocean vents."
+  },
+  {
+    "id": "frost-whisker-carp",
+    "name": "Frost-Whisker Carp",
+    "binomial": "Cyprinus glacialis",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "luminous",
+    "journalPrompt": "An ancient fish species possessing natural antifreeze glycoproteins, glowing with a pale blue light beneath glacial ice."
+  },
+  {
+    "id": "shambala-ice-pike",
+    "name": "Shambala Ice-Pike",
+    "binomial": "Esox shambala",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A predatory, crystal-scaled fish of the frozen mountain lakes, specializing in hunting frost-whisker carp near glacier edges."
+  },
+  {
+    "id": "basalt-cave-lurker",
+    "name": "Basalt Cave-Lurker",
+    "binomial": "Agama basaltica",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A dark, stone-skinned lizard that lives in the deep fissures of cooled lava plains, feeding on iron snails and magma-crabs."
+  },
+  {
+    "id": "ash-field-ground-beetle",
+    "name": "Ash-Field Ground-Beetle",
+    "binomial": "Carabus cinereus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A large, heat-resistant insect that tunnels through soft volcanic ash, feeding on organic debris carried down by streams."
+  },
+  {
+    "id": "lava-vent-tubeworm",
+    "name": "Lava-Vent Tubeworm",
+    "binomial": "Riftia vulcanica",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A giant worm species that grows in dense colonies around underwater magma vents, absorbing mineral nutrients directly from the water."
+  },
+  {
+    "id": "soot-furred-rat",
+    "name": "Soot-Furred Rat",
+    "binomial": "Rattus cinereus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A small, highly resilient rodent with heat-resistant, ash-colored fur, nesting in the stone ruins near the lava lake."
+  },
+  {
+    "id": "glacial-snow-hare",
+    "name": "Glacial Snow-Hare",
+    "binomial": "Lepus glacialis",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A pure white, thick-furred hare that lives near the Antarctic ice wall, its feet padded like snowshoes to move over glaciers."
+  },
+  {
+    "id": "glacier-edged-seal",
+    "name": "Glacier-Edged Seal",
+    "binomial": "Phoca glacialis",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A robust marine mammal with a thick layer of blubber, hunting Sarovar fish beneath the ice shelves of the deep south."
+  },
+  {
+    "id": "volcanic-salamander",
+    "name": "Volcanic Salamander",
+    "binomial": "Salamandra vulcanica",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "An amphibian with fire-resistant skin that lives in the warm mud pools near the caldera edges, feeding on small ash-beetles."
+  },
+  {
+    "id": "antarctic-petrel",
+    "name": "Antarctic Petrel",
+    "binomial": "Thalassoica antarctica",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A dark-winged bird that flies along the immense glacial cliffs of the deep south, nesting in rocky crevices."
+  },
+  {
+    "id": "soot-winged-falcon",
+    "name": "Soot-Winged Falcon",
+    "binomial": "Falco cinereus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A predatory bird of the ash valleys, its plumage colored like charcoal to remain hidden against the dark volcanic sky."
+  },
+  {
+    "id": "lava-pool-shrimp",
+    "name": "Lava-Pool Shrimp",
+    "binomial": "Palaemon vulcanus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A tiny, transparent crustacean that swims in the scalding rock pools, feeding on specialized thermophilic bacteria."
+  },
+  {
+    "id": "glacial-wolf-spider",
+    "name": "Glacial Wolf-Spider",
+    "binomial": "Lycosa glacialis",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A large, furry spider that hunts snow-hares and small rodents near the ice wall, its body containing high sugar-antifreeze."
+  },
+  {
+    "id": "antarctic-skua",
+    "name": "Antarctic Skua",
+    "binomial": "Catharacta antarctica",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A fierce, scavenging seabird that nests near the glacial bays, stealing fish from seals and other birds."
+  },
+  {
+    "id": "lava-basalt-centipede",
+    "name": "Lava-Basalt Centipede",
+    "binomial": "Scolopendra vulcanica",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A multi-legged, fire-resistant invertebrate that hunts small lizards and insects in cooled basalt cracks."
+  },
+  {
+    "id": "ash-valley-scorpion",
+    "name": "Ash-Valley Scorpion",
+    "binomial": "Buthus cinereus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A dark grey scorpion that blends into volcanic ash, active during the cooler night hours."
+  },
+  {
+    "id": "boiling-water-hermit-crab",
+    "name": "Boiling-Water Hermit-Crab",
+    "binomial": "Pagurus vulcanus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A crab that uses discarded basalt-snail shells, thriving in the scalding rock pools near the lava lake."
+  },
+  {
+    "id": "sooty-shearwater",
+    "name": "Sooty Shearwater",
+    "binomial": "Puffinus cinereus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "hills"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A seabird with charcoal-colored feathers, nesting in the high cliffs overlooking the boiling bays."
+  },
+  {
+    "id": "glacial-ice-flea",
+    "name": "Glacial Ice-Flea",
+    "binomial": "Isotoma glacialis",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A tiny, specialized insect that feeds on pollen and debris deposited on the surface of glaciers near the ice wall."
+  },
+  {
+    "id": "shambala-snow-partridge",
+    "name": "Shambala Snow-Partridge",
+    "binomial": "Lerwa shambala",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "patient",
+    "journalPrompt": "A thick-feathered bird with camouflaged plumage, nesting in the rocky scree of the frozen mountain peaks."
+  },
+  {
+    "id": "lava-vent-tubeworm-2",
+    "name": "Lava-Vent Tubeworm",
+    "binomial": "Riftia asurica",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A giant worm species that grows near active underwater vents, forming dense crimson-tipped clusters."
+  },
+  {
+    "id": "ash-plains-cricket",
+    "name": "Ash-Plains Cricket",
+    "binomial": "Gryllus cinereus",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "An insect with a soot-colored body, feeding on tough, ash-tolerant grasses along the basalt fields."
+  },
+  {
+    "id": "glacial-ribbon-seal",
+    "name": "Glacial Ribbon-Seal",
+    "binomial": "Phoca ribbon",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A marine mammal with distinctive white band markings, hunting Sarovar fish beneath the ice shelves."
+  },
+  {
+    "id": "volcanic-ash-moth",
+    "name": "Volcanic Ash-Moth",
+    "binomial": "Lymantria vulcanica",
+    "region": "ganges-lava-sea",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A moth with dusty grey wings, its larvae feeding on the tough leaves of ash-banyan trees."
+  },
+  {
+    "id": "aero-manta-high-altitude-beedu",
+    "name": "Aero-Manta / High-Altitude Beedu",
+    "binomial": "Sarasvatimanta sky",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "A massive, pale cousin of the desert Beedu that nests on the underside of floating islands, grazing on sky coral."
+  },
+  {
+    "id": "cloud-weaver-spider-gaganjala",
+    "name": "Cloud-Weaver Spider / Gaganjala",
+    "binomial": "Aranea nubis",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A massive arachnid that weaves static-charged webs between airborne mangrove roots, hunting small flying creatures."
+  },
+  {
+    "id": "cognitavi-cloud-hermit",
+    "name": "Cognitavi Cloud-Hermit",
+    "binomial": "Cognitavi solitarius",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "A highly advanced, solitary subspecies of navigator bird that establishes isolated monasteries on the highest floating peaks."
+  },
+  {
+    "id": "sky-faring-orca",
+    "name": "Sky-Faring Orca",
+    "binomial": "Orcinus volans",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "A giant marine mammal that has adapted to glide through the dense, prana-rich clouds, its fins modified into wide membranes."
+  },
+  {
+    "id": "floating-island-shrew",
+    "name": "Floating-Island Shrew",
+    "binomial": "Sorex levitatus",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "A tiny rodent with hollow bones and webbed toes, gliding between moss-covered floating rocks to forage for insects."
+  },
+  {
+    "id": "sky-gull",
+    "name": "Sky-Gull",
+    "binomial": "Larus caelius",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "A white shorebird that nests on the lodestone cliffs of the floating islands, riding high-altitude wind currents."
+  },
+  {
+    "id": "cloud-leopard",
+    "name": "Cloud-Leopard",
+    "binomial": "Neofelis nubis",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A beautifully patterned predator that climbs aero-mangrove branches, hunting sky-shrews and young birds in low gravity."
+  },
+  {
+    "id": "lodestone-beetle",
+    "name": "Lodestone Beetle",
+    "binomial": "Carabus magneticus",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "An insect with a metallic, magnetic carapace that feeds on mineral deposits along the floating island cores."
+  },
+  {
+    "id": "static-charged-wasp",
+    "name": "Static-Charged Wasp",
+    "binomial": "Vespa electrica",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A giant wasp species whose wings generate static electricity as they fly, delivering a shocking sting to defend its nest."
+  },
+  {
+    "id": "sky-turtle",
+    "name": "Sky-Turtle",
+    "binomial": "Chelonia caelia",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "A small, lightweight turtle with a hollow, gas-filled shell, drifting lazily through the clouds between floating oases."
+  },
+  {
+    "id": "aero-snail",
+    "name": "Aero-Snail",
+    "binomial": "Helix caelia",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "A land snail with a thin, lightweight shell that uses a mucus parachute to glide from island to island during high winds."
+  },
+  {
+    "id": "cloud-cricket",
+    "name": "Cloud-Cricket",
+    "binomial": "Gryllus nubis",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "An insect that produces high-frequency, melodic chirps that echo through the thin, cold air of the high altitude routes."
+  },
+  {
+    "id": "sky-snake",
+    "name": "Sky-Snake",
+    "binomial": "Chrysopelea caelia",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "A slender, green serpent that flattens its body to glide between hanging vines of neighboring floating islands."
+  },
+  {
+    "id": "mist-lurking-bat",
+    "name": "Mist-Lurking Bat",
+    "binomial": "Myotis nubis",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A small, white bat that uses echolocation to hunt cloud-crickets and moths inside the island caves."
+  },
+  {
+    "id": "gargoyle-bat",
+    "name": "Gargoyle-Bat",
+    "binomial": "Vespertilio asuricus",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A dark, stone-skinned bat of the shadowed undersides, feeding on large insects during the night."
+  },
+  {
+    "id": "aero-moth",
+    "name": "Aero-Moth",
+    "binomial": "Lymantria caelia",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "luminous",
+    "journalPrompt": "A large moth with soft, dusty wings patterned like grey clouds, drawing toward the glow of sky-brambles."
+  },
+  {
+    "id": "floating-island-chameleon",
+    "name": "Floating-Island Chameleon",
+    "binomial": "Chamaeleo levitatus",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "luminous",
+    "journalPrompt": "A lizard that changes color to match the glowing moss, using its prehensile tail to hang from sky-mangrove roots."
+  },
+  {
+    "id": "sky-dragon-fly",
+    "name": "Sky-Dragon Fly",
+    "binomial": "Anax caelius",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A giant, predatory insect with four independent wings, hunting smaller moths and flies with extreme speed."
+  },
+  {
+    "id": "prana-feeder-finch",
+    "name": "Prana-Feeder Finch",
+    "binomial": "Fringilla prana",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A small, brightly colored bird that absorbs atmospheric life-force, its song bringing a sense of calm to travelers."
+  },
+  {
+    "id": "cloud-squirrel",
+    "name": "Cloud-Squirrel",
+    "binomial": "Sciurus nubis",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "playful",
+    "journalPrompt": "A rodent with exceptionally long, bushy tail used as a rudder, leaping impossible distances in the low-gravity environment."
+  },
+  {
+    "id": "sky-faring-jellyfish",
+    "name": "Sky-Faring Jellyfish",
+    "binomial": "Aurelia caelia",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "An airborne, translucent organism that drifts on wind currents, filtering high-altitude plankton with stinging tentacles."
+  },
+  {
+    "id": "lodestone-snail",
+    "name": "Lodestone Snail",
+    "binomial": "Helix magneticus",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "A snail with an iron-rich shell that climbs the magnetized cliffs of the floating islands, sensing magnetic fields."
+  },
+  {
+    "id": "cloud-lurking-gecko",
+    "name": "Cloud-Lurking Gecko",
+    "binomial": "Gekko caelius",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A pale green gecko with large, adhesive pads, hunting moths and wasps on the underside of floating rocks."
+  },
+  {
+    "id": "sky-faring-otter",
+    "name": "Sky-Faring Otter",
+    "binomial": "Lutra caelia",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "An agile mammal that glides between floating pools using skin membranes, hunting sky-shrews and beetles."
+  },
+  {
+    "id": "mist-valley-thrush",
+    "name": "Mist-Valley Thrush",
+    "binomial": "Turdus caelius",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A bird with a sweet, echoing song that nests in the high, misty valleys, feeding on sky-bramble berries."
+  },
+  {
+    "id": "aero-weevil",
+    "name": "Aero-Weevil",
+    "binomial": "Curculio caelius",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A beetle with a long snout that drills into the tough, gas-filled gourds to lay its eggs inside."
+  },
+  {
+    "id": "sky-faring-crab",
+    "name": "Sky-Faring Crab",
+    "binomial": "Portunus caelius",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "watchful",
+    "journalPrompt": "A light-shelled crab that climbs the aerial roots of sky-mangroves, feeding on moss and small insects."
+  },
+  {
+    "id": "cloud-weaver-spiderling",
+    "name": "Cloud-Weaver Spiderling",
+    "binomial": "Aranea nubis minor",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "graceful",
+    "journalPrompt": "A young spider that uses long silk threads to balloon through the air, traveling between distant floating islands."
+  },
+  {
+    "id": "high-altitude-falcon",
+    "name": "High-Altitude Falcon",
+    "binomial": "Falco caelius",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "fearsome",
+    "journalPrompt": "A swift predator that hunts sky-gulls and finches, nesting on the sheer vertical cliffs of the highest islands."
+  },
+  {
+    "id": "prana-absorbing-butterfly",
+    "name": "Prana-absorbing Butterfly",
+    "binomial": "Danaus caelius",
+    "region": "tethys-sky-routes",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "rare",
+    "mood": "luminous",
+    "journalPrompt": "A large butterfly with glowing, translucent wings that feeds on the nectar of prana-lotuses, spreading glowing pollen."
+  },
+  {
+    "id": "colossal-void-devourer",
+    "name": "Colossal Void-Devourer",
+    "binomial": "Sauropodoligator titan",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "An extinct sauropod-crocodile hybrid resurrected from buried bones via dark Asura magic, crowned with a cursed human visage."
+  },
+  {
+    "id": "sand-resurrected-behemoth",
+    "name": "Sand-Resurrected Behemoth",
+    "binomial": "Sauropodoligator arenarius",
+    "region": "asura-conjurations",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A smaller, desert-bound variant of the Devourer, emerging from the sands of the Gedrosian wastes to hunt nomads."
+  },
+  {
+    "id": "winged-behemoth-manticore",
+    "name": "Winged Behemoth Manticore",
+    "binomial": "Manticora titan",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "An unnatural winged leopard with a human face, forged purely from brick-dust, shadow, and corrupted Asura mantras."
+  },
+  {
+    "id": "quarry-spawned-tendua",
+    "name": "Quarry-Spawned Tendua",
+    "binomial": "Manticora quarry",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "watchful",
+    "journalPrompt": "A manticore variant that haunts ancient stone quarries, its stone-hard fur blending into the weathered rock walls."
+  },
+  {
+    "id": "ash-skinned-courtesan",
+    "name": "Ash-Skinned Courtesan",
+    "binomial": "Māyā-born",
+    "region": "asura-conjurations",
+    "biomes": [
+      "river",
+      "wetland",
+      "settlement"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "An artificial, female humanoid sculpted from river mud and lotus pollen, which later mutated into a flesh-hungry night-stalker."
+  },
+  {
+    "id": "feral-harappan-night-stalker",
+    "name": "Feral Harappan Night-Stalker",
+    "binomial": "Māyā-born ferus",
+    "region": "asura-conjurations",
+    "biomes": [
+      "settlement"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A malevolent, clay-born construct that slips through the dark streets of Harappa, seeking to drain the warmth of the living."
+  },
+  {
+    "id": "lunar-reflection-wraith",
+    "name": "Lunar-Reflection Wraith",
+    "binomial": "Māyā-born spectral",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "An incorporeal, tactile illusion manifested by lunar radiation refracting on the Great Bath's water, haunting lonely travelers."
+  },
+  {
+    "id": "stepwell-shadow",
+    "name": "Stepwell Shadow",
+    "binomial": "Māyā-born umbra",
+    "region": "asura-conjurations",
+    "biomes": [
+      "river"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A shadow-lover variant that dwells in deep stepwells, wrapping around victims and pulling them into the dark waters."
+  },
+  {
+    "id": "white-ash-bride",
+    "name": "White-Ash Bride",
+    "binomial": "Māyā-born ignis",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "watchful",
+    "journalPrompt": "A short-lived, sentient female form that coalesces from ritual altar sparks, passionately violent and intensely hot to touch."
+  },
+  {
+    "id": "ember-born-dancer",
+    "name": "Ember-Born Dancer",
+    "binomial": "Māyā-born scintilla",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "graceful",
+    "journalPrompt": "A fire-bride variant that dances within sacrificial bonfires, throwing sparks that ignite neighboring structures when displeased."
+  },
+  {
+    "id": "asura-tainted-gargoyle",
+    "name": "Asura-Tainted Gargoyle",
+    "binomial": "Tuli calcified",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A devolved offshoot of humanity whose skin has calcified into a stone-like hide, animating only at night to hunt."
+  },
+  {
+    "id": "lethal-cave-spectre",
+    "name": "Lethal Cave-Spectre",
+    "binomial": "Asura spectral",
+    "region": "asura-conjurations",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A dark, floating entity born from the blood-spills of the first Asura invasion, guarding forgotten mountain tombs."
+  },
+  {
+    "id": "obsidian-winged-serpent",
+    "name": "Obsidian-Winged Serpent",
+    "binomial": "Serpens obsidianus",
+    "region": "asura-conjurations",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "fearsome",
+    "journalPrompt": "A giant shape-shifting stone serpent with razor-sharp wings of volcanic glass, serving as the progenitor of the Naga clan."
+  },
+  {
+    "id": "naga-infiltrator",
+    "name": "Naga Infiltrator",
+    "binomial": "Serpens anthropomorphic",
+    "region": "asura-conjurations",
+    "biomes": [
+      "settlement"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "watchful",
+    "journalPrompt": "A secretive, shape-shifting serpent-human hybrid that slips into royal courts, carrying out the will of Takshak."
+  },
+  {
+    "id": "gorgonopsid-war-beast",
+    "name": "Gorgonopsid War-Beast",
+    "binomial": "Gorgonops asuricus",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A shaggy-haired Permian predator selectively bred and genetically corrupted by Asuras to serve as heavy shock cavalry."
+  },
+  {
+    "id": "dimetrodon-war-mount",
+    "name": "Dimetrodon War-Mount",
+    "binomial": "Dimetrodon asuricus",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A sail-backed synapsid war predator mutated with bio-reactive colors and enhanced aggression for Asura commanders."
+  },
+  {
+    "id": "estemmenosuchus-executioner",
+    "name": "Estemmenosuchus Executioner",
+    "binomial": "Estemmenosuchus asuricus",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A massive, armored floodplain omnivore mutated with double jaw-strength, used for public execution rituals in Naraka."
+  },
+  {
+    "id": "scutosaurus-shield-beast",
+    "name": "Scutosaurus Shield-Beast",
+    "binomial": "Scutosaurus asuricus",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "watchful",
+    "journalPrompt": "A massive armored herbivore genetically engineered with iron-hard skin plates, utilized as mobile shield barriers in battles."
+  },
+  {
+    "id": "rajasaurus-ambush-drake",
+    "name": "Rajasaurus Ambush-Drake",
+    "binomial": "Rajasaurus asuricus",
+    "region": "asura-conjurations",
+    "biomes": [
+      "settlement"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A colossal, feathered theropod predator genetically altered with Asura venom, serving as the ultimate fortress guardian."
+  },
+  {
+    "id": "underworld-blood-leech",
+    "name": "Underworld Blood-Leech",
+    "binomial": "Hirudo asurica",
+    "region": "asura-conjurations",
+    "biomes": [
+      "river"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "watchful",
+    "journalPrompt": "A giant aquatic parasite of the Naraka rivers that grows up to 3 feet, draining the vitality of anything that falls into the sulfurous waters."
+  },
+  {
+    "id": "asura-tainted-bat",
+    "name": "Asura-Tainted Bat",
+    "binomial": "Vespertilio asuricus minor",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A small, red-eyed bat that has mutated under the influence of Asura planets, feeding on blood and glowing insects."
+  },
+  {
+    "id": "underworld-water-snake",
+    "name": "Underworld Water-Snake",
+    "binomial": "Serpens asuricus",
+    "region": "asura-conjurations",
+    "biomes": [
+      "river"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "fearsome",
+    "journalPrompt": "A highly venomous, dark-scaled snake that swims in the sulfuric rivers of Naraka, its bite causing immediate paralysis."
+  },
+  {
+    "id": "clay-born-watcher",
+    "name": "Clay-Born Watcher",
+    "binomial": "Māyā-born oculus",
+    "region": "asura-conjurations",
+    "biomes": [
+      "settlement"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "An artificial, clay-sculpted eye construct animated by ancient mantras, used by Harappan lords to spy on their courts."
+  },
+  {
+    "id": "ember-scattering-sprite",
+    "name": "Ember-Scattering Sprite",
+    "binomial": "Māyā-born scintilla minor",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "graceful",
+    "journalPrompt": "A small, fleeting spirit born from ritual embers that floats through the air, causing minor fires when displeased."
+  },
+  {
+    "id": "naga-kin-sentry",
+    "name": "Naga-Kin Sentry",
+    "binomial": "Serpens guard",
+    "region": "asura-conjurations",
+    "biomes": [
+      "settlement"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "watchful",
+    "journalPrompt": "A semi-anthropomorphic serpent warrior that guards the sacred temples of Takshak, wielding bronze and stone spears."
+  },
+  {
+    "id": "gorgonopsid-pack-leader",
+    "name": "Gorgonopsid Pack-Leader",
+    "binomial": "Gorgonops titan",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A larger, hyper-aggressive gorgonopsid bred by Asura generals to lead war-packs in battle."
+  },
+  {
+    "id": "dimetrodon-scout-mount",
+    "name": "Dimetrodon Scout-Mount",
+    "binomial": "Dimetrodon minor",
+    "region": "asura-conjurations",
+    "biomes": [
+      "mountains"
+    ],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A faster, sleek sail-backed synapsid used by Asura scouts to navigate the rugged, volcanic frontiers."
+  },
+  {
+    "id": "scutosaurus-battering-ram",
+    "name": "Scutosaurus Battering-Ram",
+    "binomial": "Scutosaurus titan",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A massive scutosaur mutated with an bone-hard forehead plate, used to break down defensive palisades."
+  },
+  {
+    "id": "asura-tainted-owl",
+    "name": "Asura-Tainted Owl",
+    "binomial": "Bubo asuricus",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "uncanny",
+    "journalPrompt": "A giant owl with four eyes that has mutated near portals, hunting night-stalkers and small primates."
+  },
+  {
+    "id": "void-born-leech",
+    "name": "Void-Born Leech",
+    "binomial": "Hirudo titan",
+    "region": "asura-conjurations",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "mythic",
+    "mood": "watchful",
+    "journalPrompt": "A giant, 6-foot leech of the Naraka rifts that attaches to larger monsters, draining their magical energy."
   }
 ]
