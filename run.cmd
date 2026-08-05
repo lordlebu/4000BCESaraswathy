@@ -6,6 +6,7 @@ set "TASK=%~1"
 if "%TASK%"=="" set "TASK=play"
 
 if /i "%TASK%"=="play" goto play
+if /i "%TASK%"=="stop" goto stop
 if /i "%TASK%"=="test" goto test
 if /i "%TASK%"=="dev" goto dev
 if /i "%TASK%"=="build" goto build
@@ -13,7 +14,13 @@ goto usage
 
 :play
 rem Vanilla prototype (main): dependency-free static server, opens the browser.
+rem Reclaim the port first so a leftover instance does not block the restart.
+node tools\stop-server.js || exit /b 1
 node tools\serve.js %2 %3
+goto :eof
+
+:stop
+node tools\stop-server.js
 goto :eof
 
 :test
@@ -54,6 +61,8 @@ echo Usage: run [command]
 echo.
 echo     run             Same as "run play".
 echo     run play        Serve the vanilla prototype at http://localhost:4173 and open it.
+echo                     Restarts cleanly: a previous instance is stopped first.
+echo     run stop        Stop a running prototype server without starting a new one.
 echo     run test        Run the world generator smoke test.
 echo     run dev         Start the Vite dev server (feat/react-upgrade branch).
 echo     run build       Production build, then preview it (feat/react-upgrade branch).
