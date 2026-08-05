@@ -8,8 +8,22 @@ Stories from the Edge of Time.
 
 The immediate goal is to define the build structure before moving into a playable browser prototype.
 
+## Run It Locally
+
+From the repo root, using the `run` launcher (no dependencies needed for the prototype):
+
+```
+.\run            Serve the prototype at http://localhost:4173 and open it
+.\run test       Run the world generator smoke test
+.\run dev        Vite dev server (feat/react-upgrade branch)
+.\run build      Production build, then preview it (feat/react-upgrade branch)
+```
+
+Move with WASD or arrow keys. See [src/PLAYTEST.md](src/PLAYTEST.md) for what to look for.
+
 ## Planning Documents
 
+- [Build plan](docs/build-plan.md): current repo audit, chosen tech track, and the phased work to reach a cozy playable slice.
 - [Game plan](docs/game-plan.md): vision, MVP, gameplay loop, milestones, and open questions.
 - [World generator design](docs/world-generator.md): map generation inputs, passes, tile fields, terrain palette, and success criteria.
 - [Creature seed data](data/creatures.json): first creature concepts for biome-based encounters.
@@ -18,4 +32,4 @@ The immediate goal is to define the build structure before moving into a playabl
 
 ## Near-Term Next Step
 
-Build Milestone 1: a dependency-free browser page that renders a deterministic seed-based tile map and lets the player inspect generated terrain.
+Consolidate the two prototypes onto the React/Vite shell with `src/generator.js` as the single world generator, then fix the elevation field so hills, mountains, and rivers can actually appear. See [Phase 0 and Phase 1](docs/build-plan.md#3-phases).

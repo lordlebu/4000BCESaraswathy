@@ -14,6 +14,22 @@ let world = generateWorld({ seed: seedInput.value });
 let player = { ...world.start };
 let discoveries = new Set([`${player.x},${player.y}`]);
 let observedCreatures = new Set();
+let facing = 1;
+
+// Source crop for the sprite sheet. The artwork carries faint layout guides in its margins,
+// so we draw only the region that holds the figure itself.
+const PLAYER_SPRITE = { src: '../assets/Varuna.png', x: 139, y: 0, width: 621, height: 867 };
+const playerImage = new Image();
+let playerImageReady = false;
+playerImage.addEventListener('load', () => {
+  playerImageReady = true;
+  drawWorld();
+});
+playerImage.addEventListener('error', () => {
+  playerImageReady = false;
+  console.warn(`Player sprite failed to load from ${PLAYER_SPRITE.src}; using the marker instead.`);
+});
+playerImage.src = PLAYER_SPRITE.src;
 
 function storageKey() {
   return `south-of-tethys:${world.seed}`;
@@ -60,13 +76,44 @@ function drawWorld() {
     context.fillText(BIOME_SYMBOLS[tile.biome], tile.x * tileSize + 11, tile.y * tileSize + 15);
   });
 
-  context.fillStyle = '#2d1f2f';
+  drawPlayer();
+}
+
+function drawPlayer() {
+  const centerX = player.x * tileSize + tileSize / 2;
+  const groundY = player.y * tileSize + tileSize - 1;
+
+  if (!playerImageReady) {
+    context.fillStyle = '#2d1f2f';
+    context.beginPath();
+    context.arc(centerX, player.y * tileSize + 11, 7, 0, Math.PI * 2);
+    context.fill();
+    context.fillStyle = '#fff6d5';
+    context.font = '12px serif';
+    context.textAlign = 'center';
+    context.fillText('✦', centerX, player.y * tileSize + 15);
+    return;
+  }
+
+  // Varuna stands taller than one tile, so anchor him by the feet and let the hat overhang.
+  const drawWidth = tileSize;
+  const drawHeight = drawWidth * (PLAYER_SPRITE.height / PLAYER_SPRITE.width);
+
+  context.save();
+  context.fillStyle = 'rgba(45, 31, 47, 0.28)';
   context.beginPath();
-  context.arc(player.x * tileSize + 11, player.y * tileSize + 11, 7, 0, Math.PI * 2);
+  context.ellipse(centerX, groundY - 1, drawWidth * 0.32, drawWidth * 0.12, 0, 0, Math.PI * 2);
   context.fill();
-  context.fillStyle = '#fff6d5';
-  context.font = '12px serif';
-  context.fillText('✦', player.x * tileSize + 11, player.y * tileSize + 15);
+
+  context.imageSmoothingEnabled = false;
+  context.translate(centerX, groundY);
+  context.scale(facing, 1);
+  context.drawImage(
+    playerImage,
+    PLAYER_SPRITE.x, PLAYER_SPRITE.y, PLAYER_SPRITE.width, PLAYER_SPRITE.height,
+    -drawWidth / 2, -drawHeight, drawWidth, drawHeight
+  );
+  context.restore();
 }
 
 function updateJournal() {
@@ -93,6 +140,7 @@ function movePlayer(dx, dy) {
   if (nextX < 0 || nextX >= world.width || nextY < 0 || nextY >= world.height) return;
   const nextTile = world.tiles[nextY][nextX];
   if (nextTile.biome === 'sea') return;
+  if (dx !== 0) facing = dx > 0 ? 1 : -1;
   player = { x: nextX, y: nextY };
   drawWorld();
   updateJournal();
