@@ -1,0 +1,63 @@
+@echo off
+setlocal
+cd /d "%~dp0"
+
+set "TASK=%~1"
+if "%TASK%"=="" set "TASK=play"
+
+if /i "%TASK%"=="play" goto play
+if /i "%TASK%"=="test" goto test
+if /i "%TASK%"=="dev" goto dev
+if /i "%TASK%"=="build" goto build
+goto usage
+
+:play
+rem Vanilla prototype (main): dependency-free static server, opens the browser.
+node tools\serve.js %2 %3
+goto :eof
+
+:test
+rem World generator smoke test.
+node src\smoke-test.js
+goto :eof
+
+:dev
+rem Vite dev server. Only exists on the feat/react-upgrade branch.
+if not exist package.json goto nopackage
+if not exist node_modules (
+  echo Installing dependencies...
+  call npm install || exit /b 1
+)
+call npm run dev
+goto :eof
+
+:build
+if not exist package.json goto nopackage
+if not exist node_modules (
+  echo Installing dependencies...
+  call npm install || exit /b 1
+)
+call npm run build || exit /b 1
+call npm run preview
+goto :eof
+
+:nopackage
+echo No package.json in this branch, so there is nothing for npm to run.
+echo The Vite app lives on feat/react-upgrade:
+echo     git checkout feat/react-upgrade
+echo Then re-run: run %TASK%
+echo Or play the vanilla prototype on this branch: run play
+exit /b 1
+
+:usage
+echo Usage: run [command]
+echo.
+echo     run             Same as "run play".
+echo     run play        Serve the vanilla prototype at http://localhost:4173 and open it.
+echo     run test        Run the world generator smoke test.
+echo     run dev         Start the Vite dev server (feat/react-upgrade branch).
+echo     run build       Production build, then preview it (feat/react-upgrade branch).
+echo.
+echo     Add --no-open to "run play" to skip launching the browser.
+echo     Set PORT to change the port: set PORT=4174 ^&^& run play
+exit /b 1

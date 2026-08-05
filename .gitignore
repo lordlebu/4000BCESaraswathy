@@ -1,31 +1,29 @@
-# Built things
-_Debug/
-Compiled/
+# Dependencies
+node_modules/
 
-# AudioCache can be rebuilt from sources
-AudioCache/
+# Build output
+dist/
+dist-ssr/
+.vite/
 
-# Lockfile
-_OpenInEditor.lock
+# Local environment
+.env
+.env.*
+!.env.example
+*.local
 
-# User settings
-Game.agf.user
-*.crm.user
+# Editor and tooling state
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
 
-# Backups
-Game.agf.bak
-backup_acsprset.spr
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
 
-# Memory dumps
-*.dmp
-
-# Temporary files
-# temporarily created during sprite or room background compression
-~aclzw.tmp
-# temporary, main game data, before getting packed into exe
-game28.dta
-# temporary build of the game before being moved to Compiled/ folder
-*.exe
-
-# Log files
-warnings.log
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
