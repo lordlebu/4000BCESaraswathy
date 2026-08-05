@@ -5,9 +5,9 @@ species belongs to. This document is the authored source of truth; `data/creatur
 the small, game-facing encounter table until the two are reconciled (see
 [Open Questions](#open-questions)).
 
-> **Status: incomplete.** Sections 1–7 fauna are captured in full. Section 7's flora list is cut
-> off at its first entry — see the marker at the end of this file. Anything beyond Section 7 has
-> not been received yet.
+> **Status: complete through Section 7.** All 230 fauna and 70 flora entries are captured,
+> verified line-by-line against the source at `flora_fauna.txt`. The source ends with an empty
+> "Visual & Strategic Recommendations" heading, so nothing follows Section 7 yet.
 
 ## Contents
 
@@ -390,12 +390,16 @@ the small, game-facing encounter table until the two are reconciled (see
 
 ### Flora
 
-1. **Plunging-Fire Siege Tree (*Rakshasa-Vriksha*)** — A living tree ma…
-
-> **⚠️ SOURCE TRUNCATED HERE.**
-> The Section 7 flora entry above is cut off mid-sentence, and entries 2 onward were never
-> received. If further sections exist beyond Section 7, they are also missing. Re-supply the
-> remainder and it will be appended here.
+1. **Plunging-Fire Siege Tree (*Rakshasa-Vriksha*)** — A living tree magically and botanically tortured over decades, its trunk bent and reinforced with bronze to serve as a biomechanical catapult.
+2. **Root-Anchored Artillery Tree (*Rakshasa-Vriksha ferrea*)** — A siege tree variant designed for defense, anchoring its stone-like roots deep into fortress walls to fling burning pitch.
+3. **Crimson Blood-Weed (*Vitis asurica*)** — An invasive, predatory vine mutated by the bleeding energies of Asura planets, developing pulsing veins and a hunger for flesh.
+4. **Violet Strangler-Vine (*Vitis violacea*)** — A thick, muscular vine that strangulates native trees, its violet-veined leaves exuding a sweet, sleep-inducing perfume.
+5. **Asura-Tainted Flesh-Vine (*Vitis carnosa*)** — A highly mutated forest climber with animal-like muscle fibers, capable of grasping and constricting small animals.
+6. **Fever-Root (*Curcuma asurica*)** — A mutated turmeric plant that grows near underworld rifts, its toxic, black rhizomes causing intense hallucinations when touched.
+7. **Cursed Ash-Fern (*Pteris asurica*)** — A fern with charcoal-black fronds that grows only in soil scorched by fire-brides, absorbing light and warmth from its surroundings.
+8. **Whispering Blood-Orchid (*Orchis asurica*)** — A beautiful but unsettling orchid with fleshy, lip-like petals that whisper soft, mimicry-chime sounds to lure insects.
+9. **Obsidian Rose (*Rosa obsidiana*)** — A rose bush with razor-sharp black petals that secrete a deadly coagulant, growing in the ruins of desecrated temples.
+10. **Naraka Pitcher-Plant (*Nepenthes asurica*)** — A colossal carnivorous plant of the twilight zone, its wide, acid-filled pitcher capable of digesting entire small primates.
 
 ---
 
@@ -415,5 +419,8 @@ Decisions to settle before this content reaches the game:
 4. **Tone.** The cozy pillar in [game-plan.md](game-plan.md) frames creatures as neighbours to be
    observed rather than fought. Sections 5 and 7 are predatory and horror-leaning. Decide whether
    they are encounterable, journal-only lore, or gated behind a later mode.
-5. **Scale.** ~260 species against an MVP asking for six. The encounter table needs rarity tiers
-   so a short session surfaces a handful, not a catalogue.
+5. **Scale.** 300 species (230 fauna, 70 flora) against an MVP asking for six. The encounter table
+   needs rarity tiers so a short session surfaces a handful, not a catalogue.
+6. **Flora has no game role yet.** Nothing in the code models plants — `data/biomes.json` has no
+   vegetation field and the journal only describes terrain. The 70 flora entries need a purpose
+   (foraging, journal flavour, biome dressing) before they can be data.
