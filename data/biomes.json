@@ -1,12 +1,123 @@
 [
-  { "id": "sea", "travelCost": null, "tone": "vast", "color": "#2f6f8f" },
-  { "id": "coast", "travelCost": 1, "tone": "breezy", "color": "#e8c982" },
-  { "id": "plains", "travelCost": 1, "tone": "open", "color": "#9fc96b" },
-  { "id": "forest", "travelCost": 2, "tone": "sheltered", "color": "#4f9a5a" },
-  { "id": "wetland", "travelCost": 2, "tone": "lush", "color": "#6fb7a8" },
-  { "id": "hills", "travelCost": 2, "tone": "rolling", "color": "#b89b58" },
-  { "id": "mountains", "travelCost": 3, "tone": "majestic", "color": "#8d8796" },
-  { "id": "desert", "travelCost": 2, "tone": "quiet", "color": "#d9a95f" },
-  { "id": "river", "travelCost": 1, "tone": "life-giving", "color": "#4fa3d9" },
-  { "id": "settlement", "travelCost": 1, "tone": "welcoming", "color": "#c46b4f" }
+  {
+    "id": "sea",
+    "name": "Sea",
+    "walkable": false,
+    "travelCost": null,
+    "tone": "vast",
+    "color": "#2f6f8f",
+    "symbol": "~",
+    "description": "The Tethyan water breathes in slow teal bands. A ferry would be needed to cross safely.",
+    "regions": ["shattered-sea-mappa-mundi"]
+  },
+  {
+    "id": "coast",
+    "name": "Coast",
+    "walkable": true,
+    "travelCost": 1,
+    "tone": "breezy",
+    "color": "#e8c982",
+    "symbol": ".",
+    "description": "Sand, shells, and salt grass mark the meeting place of land and old sea.",
+    "regions": ["saraswati-godavari-deltas", "shattered-sea-mappa-mundi"]
+  },
+  {
+    "id": "plains",
+    "name": "Plains",
+    "walkable": true,
+    "travelCost": 1,
+    "tone": "open",
+    "color": "#9fc96b",
+    "symbol": "·",
+    "description": "Open grassland rolls ahead, warm and easy on tired feet.",
+    "regions": ["saraswati-godavari-deltas"]
+  },
+  {
+    "id": "forest",
+    "name": "Forest",
+    "walkable": true,
+    "travelCost": 2,
+    "tone": "sheltered",
+    "color": "#4f9a5a",
+    "symbol": "♣",
+    "description": "Rounded canopies gather into green shade, full of birdsong and hidden paths.",
+    "regions": ["narmada-vindhya", "shattered-sea-mappa-mundi"]
+  },
+  {
+    "id": "wetland",
+    "name": "Wetland",
+    "walkable": true,
+    "travelCost": 2,
+    "tone": "lush",
+    "color": "#6fb7a8",
+    "symbol": "≈",
+    "description": "Reeds and shallow pools shine with patient life.",
+    "regions": ["saraswati-godavari-deltas"]
+  },
+  {
+    "id": "hills",
+    "name": "Hills",
+    "walkable": true,
+    "travelCost": 2,
+    "tone": "rolling",
+    "color": "#b89b58",
+    "symbol": "⌒",
+    "description": "Ochre hills rise and fall like sleeping cattle beneath the sun.",
+    "regions": ["narmada-vindhya"]
+  },
+  {
+    "id": "mountains",
+    "name": "Mountains",
+    "walkable": true,
+    "travelCost": 3,
+    "tone": "majestic",
+    "color": "#8d8796",
+    "symbol": "▲",
+    "description": "Lavender-gray peaks hold the horizon and turn every step into a vista.",
+    "regions": ["narmada-vindhya", "ganges-lava-sea"]
+  },
+  {
+    "id": "desert",
+    "name": "Desert",
+    "walkable": true,
+    "travelCost": 2,
+    "tone": "quiet",
+    "color": "#d9a95f",
+    "symbol": "∴",
+    "description": "Gold dust, low stones, and long quiet make this a place for careful travel.",
+    "regions": ["gedrosian-taklamakan"]
+  },
+  {
+    "id": "river",
+    "name": "River",
+    "walkable": true,
+    "travelCost": 1,
+    "tone": "life-giving",
+    "color": "#4fa3d9",
+    "symbol": "≈",
+    "description": "A bright river line braids the land together and makes the air feel cooler.",
+    "regions": ["saraswati-godavari-deltas", "narmada-vindhya"]
+  },
+  {
+    "id": "settlement",
+    "name": "Settlement",
+    "walkable": true,
+    "travelCost": 1,
+    "tone": "welcoming",
+    "color": "#c46b4f",
+    "symbol": "⌂",
+    "description": "A welcoming cluster of clay roofs, flags, and evening cook-smoke offers rest.",
+    "regions": ["saraswati-godavari-deltas"]
+  },
+  {
+    "id": "landmark",
+    "name": "Landmark",
+    "walkable": true,
+    "travelCost": 1,
+    "tone": "memorable",
+    "color": "#f2d16b",
+    "symbol": "✦",
+    "description": "A memorable place waits here, asking to be named in your travel journal.",
+    "regions": []
+  }
 ]
