@@ -1,14 +1,15 @@
-// Regenerates data/creatures.json from docs/bestiary.md.
+// Regenerates data/creatures.json and data/flora.json from docs/bestiary.md.
 //
 // The bestiary is authored prose organised by region; the generator places tiles by biome. This
-// script bridges the two, so the data file never has to be hand-maintained and cannot drift from
-// the canon. Re-run it after editing the bestiary:  node tools/build-creature-data.js
+// script bridges the two, so the data files never have to be hand-maintained and cannot drift from
+// the canon. Re-run it after editing the bestiary:  node tools/build-species-data.js
 const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const source = path.join(root, 'docs', 'bestiary.md');
-const target = path.join(root, 'data', 'creatures.json');
+const creatureTarget = path.join(root, 'data', 'creatures.json');
+const floraTarget = path.join(root, 'data', 'flora.json');
 
 const REGIONS = {
   '1': 'saraswati-godavari-deltas',
@@ -75,6 +76,14 @@ function placeFor(text, region) {
   if (region === 'tethys-sky-routes' || SKY_MARKER.test(text)) {
     return { biomes: [], placement: 'lore' };
   }
+  // Prose keywords bleed across regions: a volcanic moth mentions "ash-banyan trees" and lands in
+  // forest, a lava-lake rat mentions "ruins" and lands in a village. When the prose agrees with the
+  // species' own region, keep only that agreement. Species whose prose matches nothing in their
+  // region keep the prose — that is what re-files the Section 1 strays.
+  const home = (REGION_BIOMES[region] || []).filter((biome) => detected.includes(biome));
+  if (home.length) {
+    return { biomes: home, placement: region === 'asura-conjurations' ? 'lore' : 'encounter' };
+  }
   // Asura conjurations keep their detected habitat, but stay out of the encounter tables until
   // the tone question in docs/bestiary.md is settled.
   if (region === 'asura-conjurations') {
@@ -96,7 +105,7 @@ function rarityFor(text, region) {
   return 'common';
 }
 
-function parseBestiary() {
+function parseBestiary(kind) {
   const lines = fs.readFileSync(source, 'utf8').split(/\r?\n/);
   const entries = [];
   let region = null;
@@ -112,7 +121,7 @@ function parseBestiary() {
     if (/^### Fauna/.test(line)) { list = 'fauna'; continue; }
     if (/^### Flora/.test(line)) { list = 'flora'; continue; }
     if (/^## /.test(line)) { region = null; list = null; continue; }
-    if (list !== 'fauna' || !region) continue;
+    if (list !== kind || !region) continue;
 
     const entry = line.match(/^\d+\.\s+\*\*(.+?)\*\*\s+—\s+(.+)$/);
     if (!entry) continue;
@@ -127,17 +136,20 @@ function parseBestiary() {
 
     const text = `${heading} ${description}`;
     const { biomes, placement } = placeFor(text, region);
-    entries.push({
+    const record = {
       id: slug(heading),
       name: heading,
       binomial,
       region,
       biomes,
-      placement,
+      // Creatures are met; plants are simply there. Keeping the vocabularies apart lets the
+      // journal ask for one without accidentally drawing the other.
+      placement: placement === 'encounter' && kind === 'flora' ? 'flavour' : placement,
       rarity: rarityFor(text, region),
-      mood: moodFor(text),
+      ...(kind === 'fauna' ? { mood: moodFor(text) } : {}),
       journalPrompt: description.trim()
-    });
+    };
+    entries.push(record);
   }
   return entries;
 }
@@ -156,24 +168,76 @@ const STARTERS = [
   placement: 'encounter', rarity: 'common', mood, journalPrompt
 }));
 
-const creatures = [...STARTERS, ...parseBestiary()];
+// The bestiary was written by region, not by biome, so some biomes have no plant of their own —
+// there are no grassland or village species in it. Rather than invent flora, the closest existing
+// species is granted that biome as well, and only when the biome would otherwise be empty.
+const FLORA_BIOME_FALLBACK = {
+  plains: ['tawny-sagebrush', 'golden-sun-barley'],
+  settlement: ['sweet-indigo', 'oasis-date-palm'],
+  landmark: ['mappa-mundi-banyan', 'silver-leaved-oracle-fig']
+};
 
-const seen = new Map();
-for (const creature of creatures) {
-  const count = (seen.get(creature.id) || 0) + 1;
-  seen.set(creature.id, count);
-  if (count > 1) creature.id = `${creature.id}-${count}`;
+// Landmarks are the one place the player is guaranteed to stand, so they get something memorable
+// rather than "no creature signs yet".
+const CREATURE_BIOME_FALLBACK = {
+  landmark: ['cloud-antelope', 'indus-unicorn', 'vanga-pearl-guide']
+};
+
+function dedupeIds(entries) {
+  const seen = new Map();
+  for (const entry of entries) {
+    const count = (seen.get(entry.id) || 0) + 1;
+    seen.set(entry.id, count);
+    if (count > 1) entry.id = `${entry.id}-${count}`;
+  }
+  return entries;
 }
 
-fs.writeFileSync(target, `${JSON.stringify(creatures, null, 2)}\n`, 'utf8');
-
-const byBiome = {};
-let lore = 0;
-for (const creature of creatures) {
-  if (creature.placement === 'lore') lore += 1;
-  for (const biome of creature.biomes) byBiome[biome] = (byBiome[biome] || 0) + 1;
+function coverage(entries) {
+  const byBiome = {};
+  for (const entry of entries) {
+    if (entry.placement === 'lore') continue;
+    for (const biome of entry.biomes) byBiome[biome] = (byBiome[biome] || 0) + 1;
+  }
+  return byBiome;
 }
-console.log(`Wrote ${creatures.length} creatures to data/creatures.json`);
-console.log(`  encounterable: ${creatures.length - lore} | lore-only: ${lore}`);
-console.log('  per biome:', Object.entries(byBiome).sort((a, b) => b[1] - a[1])
-  .map(([biome, count]) => `${biome} ${count}`).join(', '));
+
+function report(label, entries) {
+  const byBiome = coverage(entries);
+  const lore = entries.filter((entry) => entry.placement === 'lore').length;
+  console.log(`Wrote ${entries.length} ${label}`);
+  console.log(`  in play: ${entries.length - lore} | lore-only: ${lore}`);
+  console.log('  per biome:', Object.entries(byBiome).sort((a, b) => b[1] - a[1])
+    .map(([biome, count]) => `${biome} ${count}`).join(', '));
+}
+
+const creatures = dedupeIds([...STARTERS, ...parseBestiary('fauna')]);
+const flora = dedupeIds(parseBestiary('flora'));
+
+const biomeIds = JSON.parse(fs.readFileSync(path.join(root, 'data', 'biomes.json'), 'utf8'))
+  .filter((biome) => biome.walkable)
+  .map((biome) => biome.id);
+
+function fillGaps(label, entries, fallbacks) {
+  for (const biome of biomeIds) {
+    if (coverage(entries)[biome]) continue;
+    const filled = (fallbacks[biome] || [])
+      .map((id) => entries.find((entry) => entry.id === id))
+      .filter(Boolean);
+    if (filled.length === 0) {
+      console.warn(`  ! no ${label} for biome "${biome}" and no fallback defined`);
+      continue;
+    }
+    filled.forEach((entry) => entry.biomes.push(biome));
+    console.log(`  filled empty ${label} biome "${biome}" with ${filled.map((e) => e.name).join(', ')}`);
+  }
+}
+
+fillGaps('flora', flora, FLORA_BIOME_FALLBACK);
+fillGaps('creature', creatures, CREATURE_BIOME_FALLBACK);
+
+fs.writeFileSync(creatureTarget, `${JSON.stringify(creatures, null, 2)}\n`, 'utf8');
+fs.writeFileSync(floraTarget, `${JSON.stringify(flora, null, 2)}\n`, 'utf8');
+
+report('creatures to data/creatures.json', creatures);
+report('flora to data/flora.json', flora);

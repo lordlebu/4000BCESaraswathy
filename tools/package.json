@@ -1,0 +1,4 @@
+{
+  "//": "The root package is type: module for the browser sources. These build and server scripts are plain CommonJS and stay that way.",
+  "type": "commonjs"
+}

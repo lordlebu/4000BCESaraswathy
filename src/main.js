@@ -1,18 +1,24 @@
+import { BIOME_COLORS, BIOME_SYMBOLS, generateWorld } from './generator.js';
+import { describeTile, creatureAction } from './journal.js';
+import { loadSpecies } from './species.js';
+
 const canvas = document.querySelector('#world');
 const context = canvas.getContext('2d');
 const seedInput = document.querySelector('#seed');
 const journalTitle = document.querySelector('#journal-title');
 const journalText = document.querySelector('#journal-text');
 const creatureText = document.querySelector('#creature-text');
+const floraText = document.querySelector('#flora-text');
 const statusText = document.querySelector('#status-text');
 const newMapButton = document.querySelector('#new-map');
 const observeButton = document.querySelector('#observe-creature');
 const memoryText = document.querySelector('#memory-text');
 
 const tileSize = 22;
-let world = generateWorld({ seed: seedInput.value });
-let player = { ...world.start };
-let discoveries = new Set([`${player.x},${player.y}`]);
+let species = null;
+let world = null;
+let player = { x: 0, y: 0 };
+let discoveries = new Set();
 let observedCreatures = new Set();
 let facing = 1;
 
@@ -23,7 +29,7 @@ const playerImage = new Image();
 let playerImageReady = false;
 playerImage.addEventListener('load', () => {
   playerImageReady = true;
-  drawWorld();
+  if (world) drawWorld();
 });
 playerImage.addEventListener('error', () => {
   playerImageReady = false;
@@ -35,8 +41,11 @@ function storageKey() {
   return `south-of-tethys:${world.seed}`;
 }
 
+const SAVE_VERSION = 1;
+
 function saveJourney() {
   localStorage.setItem(storageKey(), JSON.stringify({
+    version: SAVE_VERSION,
     discoveries: [...discoveries],
     observedCreatures: [...observedCreatures]
   }));
@@ -47,6 +56,10 @@ function restoreJourney() {
   if (!saved) return;
   try {
     const journey = JSON.parse(saved);
+    if (journey.version !== SAVE_VERSION) {
+      localStorage.removeItem(storageKey());
+      return;
+    }
     discoveries = new Set(journey.discoveries || []);
     observedCreatures = new Set(journey.observedCreatures || []);
   } catch (_) {
@@ -120,11 +133,13 @@ function updateJournal() {
   const tile = currentTile();
   tile.discovered = true;
   discoveries.add(`${tile.x},${tile.y}`);
-  const entry = describeTile(tile);
+  const entry = describeTile(tile, species, world.seed);
   journalTitle.textContent = entry.title;
   journalText.textContent = entry.description;
   creatureText.textContent = entry.creature;
-  const creature = CREATURES.find((candidate) => candidate.biomes.includes(tile.biome));
+  floraText.textContent = entry.flora;
+  // Same lookup the Observe button uses, so the sketch always matches what was just described.
+  const creature = species.creatureFor(tile, world.seed);
   observeButton.disabled = !creature || observedCreatures.has(creature.name);
   observeButton.textContent = creature && observedCreatures.has(creature.name) ? 'Creature sketch recorded' : 'Observe creature';
   const reachedLandmark = world.landmark && player.x === world.landmark.x && player.y === world.landmark.y;
@@ -146,13 +161,15 @@ function movePlayer(dx, dy) {
   updateJournal();
 }
 
-function resetWorld() {
+// resume is for returning to a journey already in progress, on page load. Asking for a new map is
+// a deliberate fresh start, so it must not restore the fog the player already lifted.
+function resetWorld({ resume = false } = {}) {
   world = generateWorld({ seed: seedInput.value || 'jambhudweepa' });
   player = { ...world.start };
   discoveries = new Set([`${player.x},${player.y}`]);
   observedCreatures = new Set();
   memoryText.textContent = '';
-  restoreJourney();
+  if (resume) restoreJourney();
   drawWorld();
   updateJournal();
 }
@@ -164,18 +181,33 @@ window.addEventListener('keydown', (event) => {
     ArrowLeft: [-1, 0], KeyA: [-1, 0],
     ArrowRight: [1, 0], KeyD: [1, 0]
   };
-  if (keys[event.code]) {
+  if (world && keys[event.code]) {
     event.preventDefault();
     movePlayer(...keys[event.code]);
   }
 });
 
-newMapButton.addEventListener('click', resetWorld);
+newMapButton.addEventListener('click', () => {
+  if (species) resetWorld({ resume: false });
+});
 observeButton.addEventListener('click', () => {
-  const creature = CREATURES.find((candidate) => candidate.biomes.includes(currentTile().biome));
+  const creature = species && species.creatureFor(currentTile(), world.seed);
   if (!creature) return;
   observedCreatures.add(creature.name);
   memoryText.textContent = `Sketch recorded: ${creatureAction(creature)}`;
   updateJournal();
 });
-resetWorld();
+
+// The bestiary lives in data/*.json, so the first journey waits on the fetch.
+(async function start() {
+  observeButton.disabled = true;
+  statusText.textContent = 'Reading the field notes…';
+  try {
+    species = await loadSpecies();
+  } catch (error) {
+    statusText.textContent = `Could not load the field notes. ${error.message}`;
+    console.error(error);
+    return;
+  }
+  resetWorld({ resume: true });
+}());

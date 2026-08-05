@@ -30,7 +30,8 @@ goto :eof
 
 :dev
 rem Vite dev server. Only exists on the feat/react-upgrade branch.
-if not exist package.json goto nopackage
+rem A package.json exists on every branch now, so check for the script itself.
+findstr /C:"\"dev\":" package.json >nul 2>&1 || goto nopackage
 if not exist node_modules (
   echo Installing dependencies...
   call npm install || exit /b 1
@@ -39,7 +40,8 @@ call npm run dev
 goto :eof
 
 :build
-if not exist package.json goto nopackage
+rem A package.json exists on every branch now, so check for the script itself.
+findstr /C:"\"dev\":" package.json >nul 2>&1 || goto nopackage
 if not exist node_modules (
   echo Installing dependencies...
   call npm install || exit /b 1
@@ -49,7 +51,7 @@ call npm run preview
 goto :eof
 
 :nopackage
-echo No package.json in this branch, so there is nothing for npm to run.
+echo This branch has no Vite scripts, so there is nothing for npm to run.
 echo The Vite app lives on feat/react-upgrade:
 echo     git checkout feat/react-upgrade
 echo Then re-run: run %TASK%

@@ -56,6 +56,12 @@ button {
   cursor: pointer;
 }
 
+#flora-text {
+  border-left: 3px solid rgba(79, 154, 90, 0.55);
+  color: #3f5c3c;
+  padding-left: 10px;
+}
+
 #observe-creature {
   margin: 4px 0 0;
 }

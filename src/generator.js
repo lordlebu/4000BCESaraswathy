@@ -132,7 +132,7 @@ function reachableTiles(tiles, width, height, start) {
   return visited;
 }
 
-function generateWorld({ seed = 'jambhudweepa', width = 36, height = 24 } = {}) {
+export function generateWorld({ seed = 'jambhudweepa', width = 36, height = 24 } = {}) {
   const random = createRandom(seed);
   const elevationField = makeField(width, height, random, 7);
   const moistureField = makeField(width, height, random, 6);
@@ -174,6 +174,4 @@ function generateWorld({ seed = 'jambhudweepa', width = 36, height = 24 } = {}) 
   return { seed, width, height, tiles, start: { x: start.x, y: start.y }, landmark: landmark && { x: landmark.x, y: landmark.y } };
 }
 
-if (typeof module !== 'undefined') {
-  module.exports = { BIOME_COLORS, BIOME_SYMBOLS, generateWorld, createRandom, reachableTiles };
-}
+export { BIOME_COLORS, BIOME_SYMBOLS, createRandom, reachableTiles };
