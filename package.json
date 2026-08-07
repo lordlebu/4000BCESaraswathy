@@ -5,10 +5,27 @@
   "description": "A cozy Jambhudweepa travel prototype: generate a map, wander, and keep a journal.",
   "type": "module",
   "scripts": {
-    "start": "node tools/serve.js",
-    "stop": "node tools/stop-server.js",
-    "test": "node src/smoke-test.js",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "build:data": "node tools/build-species-data.js"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "phaser": "^4.2.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
+  }
 }

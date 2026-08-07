@@ -1,22 +1,35 @@
-# Prototype Source
+# Source Layout
 
-The browser prototype of **South of Tethys: Jambhudweepa Adventure**. Open it with `.\run` from the
-repo root.
+**South of Tethys: Jambhudweepa Adventure** — React shell, Phaser canvas, TypeScript throughout.
+Run it with `npm run dev` from the repo root.
 
-| File | Role |
+| Folder | Role |
 | --- | --- |
-| `index.html` | Canvas, controls, and journal layout. Loads `main.js` as a module. |
-| `styles.css` | Cozy prototype styling. |
-| `main.js` | Startup, input, canvas rendering, and save/load. The only file that touches the DOM. |
-| `generator.js` | Deterministic seed-based world generation. |
-| `species.js` | Loads `data/*.json` and picks a creature and plant per tile. |
-| `journal.js` | Journal text. Presentation only — every string comes from the data. |
-| `smoke-test.js` | The whole test suite. Plain assertions that throw; run with `.\run test`. |
+| `world/` | Deterministic world generation. Seeded RNG, noise fields, biome classification, river carving, pathfinding. |
+| `content/` | The data layer over `data/*.json`: which creature and plant live on a tile, and the journal prose. |
+| `game/` | Everything that knows Phaser exists — the scene, the tile textures, and the React↔Phaser bridge. |
+| `ui/` | React chrome: journal panel, seed bar, layout, styles. |
+| `main.tsx` | React entry point. |
+| `save.ts` | Versioned `localStorage` journeys, keyed by seed. |
 
-`generator.js` and `species.js` are deliberately free of DOM and framework code, so they can be
-tested under Node and reused when the React shell lands. Keep new game logic out of `main.js`.
+## The rules that keep this from tangling
 
-These files are ES modules — the root `package.json` sets `"type": "module"`. The scripts in
-`tools/` are CommonJS instead, pinned by `tools/package.json`.
+**`world/` and `content/` import neither React nor Phaser.** They run under plain Node, so
+`test/` exercises the exact code the game ships rather than a stand-in. Keep new game logic there,
+not in a scene.
 
-See [PLAYTEST.md](PLAYTEST.md) for what to look for while playing.
+**Phaser is confined to `game/`.** Swapping engine versions — or engines — touches one folder.
+
+**Content lives in `data/*.json`.** No hardcoded creature or biome tables in TypeScript. The
+creature and flora files are generated from `docs/bestiary.md`; run `npm run build:data` rather
+than editing them.
+
+**React never renders a tile.** The map is a Phaser canvas; React owns the DOM around it. The two
+talk over `game/EventBus.ts` and nothing else.
+
+**Determinism is a promise.** The same seed must produce the same world and the same journal text,
+so nothing in `world/` or `content/` may use `Math.random()` or the clock. All randomness comes
+from `world/rng.ts`.
+
+See [PLAYTEST.md](PLAYTEST.md) for what to look for while playing, and
+[../docs/phaser-plan.md](../docs/phaser-plan.md) for where this is going.

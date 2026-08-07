@@ -1,0 +1,7 @@
+# `tools/build-species-data.js` always writes LF. With Windows' default `core.autocrlf=true` the
+# files are checked out as CRLF, so every `npm run build:data` rewrites all ~120 KB back to LF and
+# shows the whole file as changed — and the CI check that the generated data is in step with
+# docs/bestiary.md becomes unreadable. Pinning them to LF keeps the diff honest on every platform.
+data/*.json text eol=lf
+
+*.png binary
