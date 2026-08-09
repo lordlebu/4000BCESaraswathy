@@ -186,8 +186,13 @@ close the tab, reopen, and find the journey intact.
 
 ### Week 4 — Ship and polish
 
-1. GitHub Actions: install → typecheck → test → build on push and PR.
-2. Pages deploy on push to the branch; set Vite `base` to the repo subpath so `/assets/` resolves.
+1. GitHub Actions: install → typecheck → test → build on push and PR. **Done**, plus a browser job
+   running the Playwright suite against Chromium.
+2. Pages deploy. **Written and verified, but parked** — the workflow is `workflow_dispatch` only
+   until Pages is enabled for the repository under Settings → Pages → Source: "GitHub Actions",
+   because `configure-pages` 404s until then and a permanently red workflow is worse than none.
+   Vite `base` comes from `DEPLOY_BASE`, and the browser suite passes against a subpath build
+   served at `/4000BCESaraswathy/`, so only the setting is missing.
 3. Add a `LICENSE` (none currently exists) and replace the npm-publish workflow, which cannot
    succeed and targets the wrong destination anyway.
 4. Rewrite `README.md` to lead with the play link, a screenshot, and `npm install && npm run dev`.
