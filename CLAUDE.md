@@ -17,7 +17,8 @@ canvas, and the game logic belongs to neither.
 ```bash
 npm install
 npm run dev        # serve at http://localhost:4173 and open a browser
-npm test           # vitest, the whole suite
+npm test           # vitest — world, content and journal, under plain Node
+npm run test:e2e   # playwright — does the game actually boot and draw?
 npm run test:watch # vitest in watch mode
 npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
@@ -26,6 +27,34 @@ npm run build:data # regenerate data/creatures.json and data/flora.json
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
 `npx vitest run -t "some test name"`.
+
+**Two suites, two jobs.** `test/` runs under Node and covers everything in `world/` and `content/`.
+`e2e/` drives a real Chromium and is the only thing that can catch "Phaser booted but the canvas is
+blank" — worth having because Phaser 4 is new enough that most published advice describes v3.
+First run needs `npx playwright install chromium`. Vitest is scoped to `test/**/*.test.ts` in
+`vite.config.ts` so it does not try to run the Playwright specs in Node.
+
+Reading pixels back out of the Phaser canvas in-page does not work: the WebGL drawing buffer is
+undefined after compositing unless `preserveDrawingBuffer` is set, which costs the real game
+performance to serve a test. `e2e/game.spec.ts` screenshots the composited surface instead and
+checks the PNG does not compress like a flat fill.
+
+**Testing the deploy artifact.** `PLAYWRIGHT_BASE_URL` aims the browser suite at something already
+running instead of starting a dev server — a `vite preview` of the subpath build, or the live Pages
+URL. The subpath build is a genuinely different code path from dev, and a wrong `base` is the
+classic way a Pages deploy goes blank. `base` is read from `DEPLOY_BASE` at config load, so
+**`vite preview` needs the same env var as `vite build`** or it will serve at `/` while the HTML
+asks for `/<repo>/`, which looks exactly like a broken build and is not:
+
+```powershell
+$env:DEPLOY_BASE = '/4000BCESaraswathy/'
+npx vite build
+npx vite preview --port 4180            # same env var, same shell
+$env:PLAYWRIGHT_BASE_URL = 'http://localhost:4180/4000BCESaraswathy/'
+npm run test:e2e
+```
+
+Navigation in the specs is relative (`?seed=x`, never `/?seed=x`) so a baseURL subpath is honoured.
 
 `npm run build` respects `DEPLOY_BASE`, which CI sets to `/<repo>/` for GitHub Pages. Locally and
 on any plain static host it defaults to `/`.
@@ -107,6 +136,7 @@ you are negotiating with.
 ## Conventions
 
 - Dependencies must justify themselves. The runtime is React and Phaser; that is the whole list.
+  Dev dependencies are Vite, TypeScript, Vitest and Playwright.
 - Determinism matters: the same seed must produce the same world and the same journal text. Do not
   introduce `Math.random()` or time-based values into `world/` or `content/` — all randomness comes
   from `world/rng.ts`.

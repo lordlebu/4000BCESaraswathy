@@ -27,6 +27,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # First, so a Pages misconfiguration costs five seconds rather than a full install, test and
+      # build. This step 404s until Pages is switched on for the repository under
+      # Settings -> Pages -> Build and deployment -> Source: "GitHub Actions". The action's
+      # `enablement: true` input can do that automatically, but only with a personal access token —
+      # `GITHUB_TOKEN` is explicitly not accepted — so the one-time setting is the cheaper path.
+      - uses: actions/configure-pages@v5
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -38,7 +44,6 @@ jobs:
         run: npm run build
         env:
           DEPLOY_BASE: /${{ github.event.repository.name }}/
-      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
