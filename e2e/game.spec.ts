@@ -83,6 +83,28 @@ test('walking changes the journal', async ({ page }) => {
   expect(problems, problems.join('\n')).toEqual([]);
 });
 
+// The travel log is the one artifact that leaves the game, so it is worth proving it downloads —
+// the canvas and Blob work in `ui/exportJournal.ts` cannot be exercised from the Node suite.
+test('the journal can be taken away as text and as an image', async ({ page }) => {
+  await page.goto(`?seed=${SEED}`);
+  await waitForJourney(page);
+
+  const text = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Save as text' }).click();
+  const textFile = await text;
+  expect(textFile.suggestedFilename()).toBe(`south-of-tethys-${SEED}.md`);
+
+  const image = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Save as image' }).click();
+  const imageFile = await image;
+  expect(imageFile.suggestedFilename()).toBe(`south-of-tethys-${SEED}.png`);
+
+  // A PNG of a rendered page of writing; a failed render would be far smaller.
+  const path = await imageFile.path();
+  const { statSync } = await import('node:fs');
+  expect(statSync(path).size, 'exported image looks empty').toBeGreaterThan(10_000);
+});
+
 test('a seed is reproducible and travels in the URL', async ({ page }) => {
   await page.goto(`?seed=${SEED}`);
   const first = await (await waitForJourney(page)).textContent();

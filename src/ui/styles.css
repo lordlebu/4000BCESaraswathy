@@ -188,7 +188,8 @@ button:disabled {
 
 .journal,
 .legend,
-.sketches {
+.sketches,
+.export {
   padding: 18px;
   background: var(--panel);
   border: 2px solid var(--edge);
@@ -225,6 +226,30 @@ button:disabled {
 .muted {
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+/* Secondary action: present, but not competing with the one people actually want. */
+button.ghost {
+  background: transparent;
+  color: var(--accent);
+  border-color: rgba(164, 92, 64, 0.5);
+}
+
+button.ghost:hover:not(:disabled) {
+  background: rgba(164, 92, 64, 0.1);
+  filter: none;
+}
+
+.arrival-actions,
+.export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.export p {
+  margin: 0 0 14px;
+  line-height: 1.5;
 }
 
 .legend-list,

@@ -7,16 +7,18 @@
 
 const PREFIX = 'south-of-tethys';
 
-/** Bump when the payload shape changes. The Phaser shell reset it to 1. */
-export const SAVE_VERSION = 2;
+/** Bump when the payload shape changes. The Phaser shell reset it to 1; `reached` made it 3. */
+export const SAVE_VERSION = 3;
 
 export interface Journey {
   version: number;
   discovered: string[];
   observed: string[];
+  /** Whether the landmark was found. Kept so the travel log survives a reload. */
+  reached: boolean;
 }
 
-const empty = (): Journey => ({ version: SAVE_VERSION, discovered: [], observed: [] });
+const empty = (): Journey => ({ version: SAVE_VERSION, discovered: [], observed: [], reached: false });
 
 function key(seed: string): string {
   return `${PREFIX}:${seed}`;
@@ -41,7 +43,8 @@ export function loadJourney(seed: string): Journey {
     return {
       version: SAVE_VERSION,
       discovered: Array.isArray(parsed.discovered) ? parsed.discovered : [],
-      observed: Array.isArray(parsed.observed) ? parsed.observed : []
+      observed: Array.isArray(parsed.observed) ? parsed.observed : [],
+      reached: parsed.reached === true
     };
   } catch {
     localStorage.removeItem(key(seed));
