@@ -104,7 +104,7 @@ describe('rivers', () => {
   it('every carved river ends beside water', () => {
     const water = new Set<BiomeId>(['sea', 'coast', 'wetland', 'river']);
     for (const world of worlds) {
-      for (const path of world.rivers) {
+      for (const { path } of world.rivers) {
         const mouth = path[path.length - 1]!;
         const neighbours = [
           { x: mouth.x + 1, y: mouth.y },
@@ -124,7 +124,7 @@ describe('rivers', () => {
 
   it('rivers are more than a puddle', () => {
     for (const world of worlds) {
-      for (const path of world.rivers) {
+      for (const { path } of world.rivers) {
         expect(path.length, `seed ${world.seed}`).toBeGreaterThanOrEqual(2);
       }
     }

@@ -26,6 +26,7 @@ export function App() {
   const [arrival, setArrival] = useState<Arrival | null>(null);
   const [observed, setObserved] = useState<string[]>(() => loadJourney(seedFromUrl()).observed);
   const [memory, setMemory] = useState('');
+  const [arrivalPage, setArrivalPage] = useState<GameToUi['landmark-reached'] | null>(null);
 
   // The fog set changes on every step, which is far too often to keep in React state — it would
   // re-render the whole panel each tile. The scene owns it; this ref only carries it to the save.
@@ -42,13 +43,17 @@ export function App() {
       discovered.current = tiles;
     };
 
+    const onLandmarkReached = (payload: GameToUi['landmark-reached']) => setArrivalPage(payload);
+
     EventBus.onEvent('world-ready', onWorldReady);
     EventBus.onEvent('tile-entered', onTileEntered);
     EventBus.onEvent('journey-changed', onJourneyChanged);
+    EventBus.onEvent('landmark-reached', onLandmarkReached);
     return () => {
       EventBus.offEvent('world-ready', onWorldReady);
       EventBus.offEvent('tile-entered', onTileEntered);
       EventBus.offEvent('journey-changed', onJourneyChanged);
+      EventBus.offEvent('landmark-reached', onLandmarkReached);
     };
   }, []);
 
@@ -78,6 +83,7 @@ export function App() {
     discovered.current = [];
     setObserved([]);
     setMemory('');
+    setArrivalPage(null);
     setSeed(next);
     const url = new URL(window.location.href);
     url.searchParams.set('seed', next);
@@ -105,7 +111,20 @@ export function App() {
       </header>
 
       <main className="layout">
-        <PhaserGame seed={seed} discovered={initialJourney.current.discovered} />
+        <div className="map-column">
+          <PhaserGame seed={seed} discovered={initialJourney.current.discovered} />
+
+          {arrivalPage && (
+            <section className="arrival" aria-live="polite">
+              <h2>{arrivalPage.title}</h2>
+              <p>{arrivalPage.body}</p>
+              <p className="arrival-closing">{arrivalPage.closing}</p>
+              <button type="button" onClick={() => setArrivalPage(null)}>
+                Close the journal
+              </button>
+            </section>
+          )}
+        </div>
 
         <aside className="sidebar">
           <JournalPanel

@@ -9,7 +9,7 @@ import Phaser from 'phaser';
 import varunaUrl from '../../../assets/Varuna.png';
 import { EventBus } from '../EventBus';
 import { FOG_TEXTURE, TILE_SIZE, createTileTextures, tileTextureKey } from '../tileTextures';
-import { describeSurroundings, describeTile, landmarkHint } from '../../content/journal';
+import { arrivalPage, describeSurroundings, describeTile, landmarkHint } from '../../content/journal';
 import { travelCost } from '../../content/species';
 import { generateWorld, isWalkable } from '../../world/generate';
 import { findPath } from '../../world/pathfind';
@@ -42,6 +42,8 @@ export class WorldScene extends Phaser.Scene {
   private at: Point = { x: 0, y: 0 };
   private discovered = new Set<string>();
   private visible = new Set<string>();
+  /** The arrival page is written once per journey, not on every step taken at the landmark. */
+  private arrived = false;
   private moving = false;
   private queuedPath: Point[] = [];
   private facing = 1;
@@ -57,6 +59,7 @@ export class WorldScene extends Phaser.Scene {
     // a field initialiser — otherwise "generate a new map" would inherit the old fog.
     this.discovered = new Set(data.discovered ?? []);
     this.visible = new Set();
+    this.arrived = false;
     this.tileSprites = [];
     this.fogSprites = [];
     this.queuedPath = [];
@@ -283,14 +286,25 @@ export class WorldScene extends Phaser.Scene {
     this.revealAround(at);
 
     const tile: Tile = this.world.tiles[at.y]![at.x]!;
+    const atLandmark = at.x === this.world.landmark.x && at.y === this.world.landmark.y;
+
     EventBus.emitEvent('tile-entered', {
       at,
-      entry: describeTile(tile, this.world.seed),
+      entry: describeTile(tile, this.world),
       surroundings: describeSurroundings(this.world, at),
       hint: landmarkHint(this.world, at),
       discovered: this.discovered.size,
-      atLandmark: at.x === this.world.landmark.x && at.y === this.world.landmark.y
+      atLandmark
     });
     EventBus.emitEvent('journey-changed', { discovered: [...this.discovered] });
+
+    // The arrival is the end of the session, so it gets its own beat: the camera settles, and the
+    // written page goes up once rather than on every step taken while standing there.
+    if (atLandmark && !this.arrived) {
+      this.arrived = true;
+      this.cameras.main.zoomTo(1.25, 900, 'Sine.easeInOut');
+      this.cameras.main.flash(700, 255, 246, 213, false);
+      EventBus.emitEvent('landmark-reached', arrivalPage(this.world));
+    }
   }
 }

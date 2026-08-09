@@ -4,6 +4,7 @@
 // stays the single source of truth and this file holds nothing but phrasing.
 
 import { biomeFor, creatureFor, floraFor } from './species';
+import { landmarkKindFor, landmarkTitle } from './landmarks';
 import type { Creature, Point, Tile, World } from '../world/types';
 
 export interface JournalEntry {
@@ -15,14 +16,44 @@ export interface JournalEntry {
   floraName: string | null;
 }
 
-export function describeTile(tile: Tile, seed: string): JournalEntry {
+/** Is this the tile the named place sits on? */
+function isAt(place: Point | null, tile: Point): boolean {
+  return Boolean(place && place.x === tile.x && place.y === tile.y);
+}
+
+/**
+ * The heading for a tile.
+ *
+ * Named places get their name; everything else gets its terrain and coordinates. Grid references
+ * are not atmospheric, but on unnamed ground they are the only thing that tells a player they have
+ * actually moved, so they stay.
+ */
+function titleFor(world: World, tile: Tile): string {
+  if (isAt(world.landmark, tile)) return landmarkTitle(world.landmark, world.seed);
+  if (isAt(world.settlement, tile)) return `${world.settlement!.name}, a settlement`;
+
+  const river = world.rivers.find((r) => r.path.some((p) => p.x === tile.x && p.y === tile.y));
+  if (river) return `${river.name.replace(/^the /, 'The ')}, at ${tile.x}, ${tile.y}`;
+
+  const biome = biomeFor(tile.biome);
+  return biome ? `${biome.name} at ${tile.x}, ${tile.y}` : `Unmapped ground at ${tile.x}, ${tile.y}`;
+}
+
+export function describeTile(tile: Tile, world: World): JournalEntry {
+  const seed = world.seed;
   const biome = biomeFor(tile.biome);
   const creature = creatureFor(tile, seed);
   const plant = floraFor(tile, seed);
 
+  // The landmark describes itself rather than falling back to the generic "a memorable place waits
+  // here" line, which was written when every landmark was the same.
+  const description = isAt(world.landmark, tile)
+    ? landmarkKindFor(world.landmark, seed).description
+    : (biome?.description ?? 'Unmapped ground, waiting for a name.');
+
   return {
-    title: biome ? `${biome.name} at ${tile.x}, ${tile.y}` : `Unmapped ground at ${tile.x}, ${tile.y}`,
-    description: biome ? biome.description : 'Unmapped ground, waiting for a name.',
+    title: titleFor(world, tile),
+    description,
     creature: creature
       ? creature.journalPrompt
       : 'No creature signs yet, only wind, dust, and the road ahead.',
@@ -95,13 +126,36 @@ export function describeSurroundings(world: World, at: Point): string {
     : `You can make out ${last}.`;
 }
 
+/**
+ * The nudge toward the landmark.
+ *
+ * Named from the start, and named the same way the whole walk, so the goal is a place the player
+ * is going to rather than a marker on a grid. Vague at distance, specific up close.
+ */
 export function landmarkHint(world: World, at: Point): string {
   const steps = Math.abs(world.landmark.x - at.x) + Math.abs(world.landmark.y - at.y);
-  if (steps === 0) {
-    return 'This is the place. Sit a while, and write it down before the light goes.';
-  }
+  const name = world.landmark.name;
+  if (steps === 0) return `This is ${name}. Sit a while, and write it down before the light goes.`;
+
   const bearing = bearingTo(at, world.landmark);
-  if (steps <= 3) return `Something worth seeing is very close, just ${bearing} of here.`;
-  if (steps <= 10) return `The elders spoke of a place ${bearing} of here. You are close now.`;
-  return `The elders spoke of a place far to the ${bearing}. It will take most of the day.`;
+  if (steps <= 3) return `${name} is very close now, just ${bearing} of here.`;
+  if (steps <= 10) return `${name} lies ${bearing} of here. You are close.`;
+  return `The elders spoke of ${name}, far to the ${bearing}. It will take most of the day.`;
+}
+
+/**
+ * The page written on arrival — the end of the session.
+ *
+ * This is the one piece of prose the player is meant to stop and read, so it is authored per
+ * landmark kind in `data/landmarks.json` rather than assembled from fragments. Everything else in
+ * the journal describes; this one is supposed to land.
+ */
+export function arrivalPage(world: World): { title: string; body: string; closing: string } {
+  const kind = landmarkKindFor(world.landmark, world.seed);
+  const from = world.settlement ? ` You set out from ${world.settlement.name}.` : '';
+  return {
+    title: landmarkTitle(world.landmark, world.seed),
+    body: kind.arrival,
+    closing: `Recorded in the travel journal: ${world.landmark.name}, on the seed "${world.seed}".${from}`
+  };
 }

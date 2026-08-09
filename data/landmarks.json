@@ -1,0 +1,51 @@
+[
+  {
+    "id": "great-banyan",
+    "name": "Great Banyan",
+    "terrain": ["forest", "plains"],
+    "description": "One tree has become a grove. Aerial roots have come down and taken hold until the trunk cannot be told from its children, and the shade beneath is cool enough to sleep in.",
+    "arrival": "You walk in under the banyan and the light goes green. Somebody has been here before you: there are old cloth strips tied high on the roots, faded to no colour at all. You sit down against a root thicker than you are and listen to the birds arguing overhead, and for a while there is nothing you need to do."
+  },
+  {
+    "id": "hot-spring",
+    "name": "Hot Spring",
+    "terrain": ["hills", "mountains"],
+    "description": "Water comes up out of the rock steaming, gathers in a shallow bowl worn smooth, and goes off down the slope as a thread of mist.",
+    "arrival": "The water is hotter than you expected and smells faintly of iron. You put your feet in and the ache of the walk goes out of them. Steam drifts across the hillside below, and everything past twenty paces turns soft and blue and far away."
+  },
+  {
+    "id": "shell-beach",
+    "name": "Shell Beach",
+    "terrain": ["coast"],
+    "description": "The tideline here is entirely shells, banked knee-deep and rattling with each wave, white and pink and the occasional deep violet.",
+    "arrival": "You walk the shell bank until the sound of it underfoot stops being strange. One shell is the size of both hands and spiralled like a slow argument; you turn it over for a long time, then set it back where it was. It seems to belong to the beach more than it would to you."
+  },
+  {
+    "id": "hill-shrine",
+    "name": "Hill Shrine",
+    "terrain": ["hills", "forest", "plains"],
+    "description": "A low platform of fitted stone, open to the weather, with a shallow dish worn into the top step by however many hands.",
+    "arrival": "Nobody tends it and nobody has let it fall down. There is a little rainwater in the worn dish and a marigold head gone brown beside it, put there recently enough to matter. You add nothing and take nothing, and stand a while, and go on."
+  },
+  {
+    "id": "standing-stones",
+    "name": "Standing Stones",
+    "terrain": ["mountains", "desert", "hills"],
+    "description": "Seven stones set upright in a rough ring, tall as a person and leaning now, with the ground between them swept bare by wind.",
+    "arrival": "From the middle of the ring the tallest stone lines up with a notch in the far ridge. You suspect that on some particular morning of the year the sun comes up exactly in that notch, and that whoever set these stones knew which morning, and that nobody now does. The wind moves through and the stones say nothing."
+  },
+  {
+    "id": "heron-pool",
+    "name": "Heron Pool",
+    "terrain": ["wetland", "river"],
+    "description": "A still backwater screened by reeds, the surface unbroken except where insects touch it, and herons standing in it like they were planted.",
+    "arrival": "You come through the reeds and nine herons are standing in the shallows, none of them moving. You stop moving too. It goes on much longer than seems reasonable. Then one of them takes a step, and the spell is off, and you find you have been holding your breath."
+  },
+  {
+    "id": "salt-pan",
+    "name": "Salt Pan",
+    "terrain": ["desert", "coast"],
+    "description": "A dry white plain, cracked into plates the size of hands, glaring under the sun and giving back the heat of it.",
+    "arrival": "The salt crunches and gives under each step. There is no shade at all and no sound but your own feet, and the far edge of the pan wobbles and lifts off the ground in the heat. You stay until the glare gets to be too much, which is not long, and you leave a line of footprints that the next weather will take."
+  }
+]
