@@ -1,0 +1,213 @@
+/* Ported from the vanilla prototype's styles.css — same warm paper palette, rebuilt around the
+   Phaser canvas. The map is now a flexible surface rather than a fixed-size <canvas>, so the
+   layout gives it the room and lets the sidebar keep a readable column width. */
+
+:root {
+  color-scheme: light;
+  --ink: #34263a;
+  --paper: #fff6df;
+  --panel: rgba(255, 246, 223, 0.88);
+  --edge: rgba(52, 38, 58, 0.16);
+  --accent: #a45c40;
+  --muted: #6d5a68;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--ink);
+  background: linear-gradient(160deg, #ffe9b8, #d8f0d2 55%, #b8dce8);
+}
+
+.app {
+  width: min(1280px, calc(100% - 32px));
+  margin: 0 auto;
+  padding-bottom: 32px;
+}
+
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 0 16px;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem);
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+h3 {
+  margin: 16px 0 4px;
+  font-size: 0.82rem;
+  font-weight: normal;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tagline {
+  margin: 0;
+  max-width: 52ch;
+  color: var(--muted);
+}
+
+kbd {
+  font: inherit;
+  font-size: 0.9em;
+  background: rgba(52, 38, 58, 0.08);
+  border: 1px solid var(--edge);
+  border-radius: 5px;
+  padding: 1px 5px;
+}
+
+.seed-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 2px solid var(--edge);
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(52, 38, 58, 0.12);
+}
+
+input,
+button {
+  font: inherit;
+  padding: 9px 14px;
+  border: 1px solid rgba(52, 38, 58, 0.25);
+  border-radius: 999px;
+}
+
+button {
+  background: var(--accent);
+  color: #fff8ec;
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+button:disabled {
+  background: rgba(52, 38, 58, 0.22);
+  cursor: default;
+}
+
+.layout {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 24rem);
+  align-items: start;
+}
+
+/* The Phaser canvas fills this box; Phaser's RESIZE scale mode follows it. */
+.map-surface {
+  position: relative;
+  min-height: 60vh;
+  height: clamp(420px, 72vh, 820px);
+  overflow: hidden;
+  background: #1b1420;
+  border: 5px solid #5e4a50;
+  border-radius: 16px;
+  box-shadow: 0 16px 34px rgba(52, 38, 58, 0.22);
+  touch-action: none;
+}
+
+.map-surface canvas {
+  display: block;
+}
+
+.sidebar {
+  display: grid;
+  gap: 16px;
+}
+
+.journal,
+.legend,
+.sketches {
+  padding: 18px;
+  background: var(--panel);
+  border: 2px solid var(--edge);
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(52, 38, 58, 0.12);
+}
+
+.journal p {
+  margin: 0 0 10px;
+  line-height: 1.55;
+}
+
+.surroundings {
+  color: #4a5c46;
+  font-style: italic;
+}
+
+.memory {
+  color: #6d4a39;
+  font-style: italic;
+}
+
+.status {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--edge);
+  font-weight: bold;
+}
+
+.status-arrived {
+  color: #8a6410;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.legend-list,
+.sketches ul {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend-list {
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  font-size: 0.92rem;
+}
+
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  vertical-align: -2px;
+  border-radius: 5px;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .map-surface {
+    height: clamp(340px, 56vh, 560px);
+  }
+}

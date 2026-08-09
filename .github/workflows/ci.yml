@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      # The generated data files are built from docs/bestiary.md. If regenerating them changes
+      # anything, the committed copies are stale and the journal is out of step with the prose.
+      - name: Species data is up to date
+        run: |
+          npm run build:data
+          git diff --exit-code data/
