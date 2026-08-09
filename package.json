@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "build:data": "node tools/build-species-data.js"
+    "build:data": "node tools/build-species-data.js",
+    "build:sprite": "node tools/build-sprite-sheet.js \"assets/source/Varuna_front.png,assets/source/Varuna_side.png\" assets/varuna-walk.png 32 48"
   },
   "license": "UNLICENSED",
   "dependencies": {

@@ -118,3 +118,13 @@ test('a seed is reproducible and travels in the URL', async ({ page }) => {
   const other = await (await waitForJourney(page)).textContent();
   expect(other).not.toBe(first);
 });
+
+// React StrictMode mounts, unmounts and remounts every effect in development. Phaser defers its
+// canvas teardown to a game-loop tick that never arrives once the game is destroyed, so without an
+// explicit clear the remount leaves two canvases stacked in the container — two maps running, and
+// every canvas query ambiguous.
+test('mounts exactly one canvas, even under StrictMode double-mounting', async ({ page }) => {
+  await page.goto(`?seed=${SEED}`);
+  await waitForJourney(page);
+  await expect(page.locator('.map-surface canvas')).toHaveCount(1);
+});

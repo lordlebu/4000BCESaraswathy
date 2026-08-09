@@ -23,7 +23,23 @@ npm run test:watch # vitest in watch mode
 npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
 npm run build:data # regenerate data/creatures.json and data/flora.json
+npm run build:sprite # rebuild assets/varuna-walk.png from assets/source/
 ```
+
+### Sprite art is generated too
+
+`assets/varuna-walk.png` is **built, not hand-made** — run `npm run build:sprite` rather than
+editing it. The originals live in `assets/source/`.
+
+Image models do not hand back usable game sprites. The first attempt had registration guides drawn
+across the figure; the second painted the transparency checkerboard on as opaque grey and
+compressed the art until a clean 7-pixel grid became 27,000 colours. `tools/build-sprite-sheet.js`
+keys out a painted-on checkerboard when it has to, finds each figure, resamples to the game's grid
+taking the **most common** colour per block (a mean is what made an early attempt look hazy), and
+snaps everything to one 22-colour palette shared across frames. 1.3 KB for two frames, against the
+418 KB the single unprocessed figure used to cost.
+
+`docs/art-brief.md` carries the prompt and the failure post-mortem for regenerating art.
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
 `npx vitest run -t "some test name"`.
@@ -137,7 +153,8 @@ you are negotiating with.
 - Rivers usually terminate in wetland deltas rather than reaching open sea. That reads well for the
   Saraswati setting but does not literally meet the "rivers connect highlands to sea" line in
   `docs/world-generator.md`.
-- `assets/Varuna.png` is 418 KB for one sprite and dominates the asset payload.
+- There is **no back view of the player yet**. Walking away shows the front frame, which reads
+  acceptably at this scale. A third frame drops into `src/game/player.ts` when the art arrives.
 
 ## Conventions
 

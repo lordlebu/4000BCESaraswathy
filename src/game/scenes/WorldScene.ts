@@ -6,9 +6,10 @@
 // engine versions touches this folder alone.
 
 import Phaser from 'phaser';
-import varunaUrl from '../../../assets/Varuna.png';
+import varunaUrl from '../../../assets/varuna-walk.png';
 import { EventBus } from '../EventBus';
 import { FOG_TEXTURE, TILE_SIZE, createTileTextures, tileTextureKey } from '../tileTextures';
+import { PLAYER_FRAME, PLAYER_SHEET, facingFromStep, frameFor, loadPlayerSheet, type Facing } from '../player';
 import { arrivalPage, describeSurroundings, describeTile, landmarkHint } from '../../content/journal';
 import { travelCost } from '../../content/species';
 import { generateWorld, isWalkable } from '../../world/generate';
@@ -27,7 +28,7 @@ const SIGHT_RADIUS = 2;
 const STEP_MS = 170;
 
 /** The player artwork carries layout guides in its margins; this is the figure itself. */
-const VARUNA_FRAME = { x: 139, y: 0, width: 621, height: 867 };
+
 
 export interface WorldSceneData {
   seed: string;
@@ -46,7 +47,7 @@ export class WorldScene extends Phaser.Scene {
   private arrived = false;
   private moving = false;
   private queuedPath: Point[] = [];
-  private facing = 1;
+  private facing: Facing = 'down';
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
 
@@ -64,13 +65,11 @@ export class WorldScene extends Phaser.Scene {
     this.fogSprites = [];
     this.queuedPath = [];
     this.moving = false;
-    this.facing = 1;
+    this.facing = 'down';
   }
 
   preload(): void {
-    if (!this.textures.exists('varuna')) {
-      this.load.image('varuna', varunaUrl);
-    }
+    loadPlayerSheet(this, varunaUrl);
   }
 
   create(data: WorldSceneData): void {
@@ -123,19 +122,24 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createPlayer(): void {
-    const texture = this.textures.get('varuna');
-    if (!texture.has('body')) {
-      texture.add('body', 0, VARUNA_FRAME.x, VARUNA_FRAME.y, VARUNA_FRAME.width, VARUNA_FRAME.height);
-    }
     // Varuna stands taller than a tile, so he is anchored by the feet and allowed to overhang.
-    const displayHeight = TILE_SIZE * 1.6;
-    const displayWidth = displayHeight * (VARUNA_FRAME.width / VARUNA_FRAME.height);
+    // The frame is drawn at its native size — scaling pixel art by a fraction is what makes it
+    // shimmer as it moves.
     this.player = this.add
-      .image(0, 0, 'varuna', 'body')
+      .image(0, 0, PLAYER_SHEET, frameFor(this.facing).frame)
       .setOrigin(0.5, 1)
-      .setDisplaySize(displayWidth, displayHeight)
+      .setDisplaySize(PLAYER_FRAME.width, PLAYER_FRAME.height)
       .setDepth(20);
+    this.player.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.placePlayer(this.at);
+  }
+
+  /** Point the sprite the way it is walking, mirroring the side frame for leftward steps. */
+  private faceTowards(dx: number, dy: number): void {
+    this.facing = facingFromStep(dx, dy, this.facing);
+    const { frame, flipX } = frameFor(this.facing);
+    this.player.setFrame(frame);
+    this.player.setFlipX(flipX);
   }
 
   private placePlayer(at: Point): void {
@@ -211,10 +215,7 @@ export class WorldScene extends Phaser.Scene {
     const tile = this.world.tiles[target.y]![target.x]!;
     if (!isWalkable(tile)) return;
 
-    if (target.x !== this.at.x) {
-      this.facing = target.x > this.at.x ? 1 : -1;
-      this.player.setFlipX(this.facing < 0);
-    }
+    this.faceTowards(target.x - this.at.x, target.y - this.at.y);
 
     // Wetland and hills take longer to cross than open plains. `travelCost` sat unread in
     // data/biomes.json until now; this is the friction the design asks for — slower, never unsafe.
