@@ -39,6 +39,23 @@ undefined after compositing unless `preserveDrawingBuffer` is set, which costs t
 performance to serve a test. `e2e/game.spec.ts` screenshots the composited surface instead and
 checks the PNG does not compress like a flat fill.
 
+**Testing the deploy artifact.** `PLAYWRIGHT_BASE_URL` aims the browser suite at something already
+running instead of starting a dev server — a `vite preview` of the subpath build, or the live Pages
+URL. The subpath build is a genuinely different code path from dev, and a wrong `base` is the
+classic way a Pages deploy goes blank. `base` is read from `DEPLOY_BASE` at config load, so
+**`vite preview` needs the same env var as `vite build`** or it will serve at `/` while the HTML
+asks for `/<repo>/`, which looks exactly like a broken build and is not:
+
+```powershell
+$env:DEPLOY_BASE = '/4000BCESaraswathy/'
+npx vite build
+npx vite preview --port 4180            # same env var, same shell
+$env:PLAYWRIGHT_BASE_URL = 'http://localhost:4180/4000BCESaraswathy/'
+npm run test:e2e
+```
+
+Navigation in the specs is relative (`?seed=x`, never `/?seed=x`) so a baseURL subpath is honoured.
+
 `npm run build` respects `DEPLOY_BASE`, which CI sets to `/<repo>/` for GitHub Pages. Locally and
 on any plain static host it defaults to `/`.
 

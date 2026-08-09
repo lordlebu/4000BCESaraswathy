@@ -7,6 +7,9 @@ import { expect, test, type Page } from '@playwright/test';
 
 const SEED = 'play-test';
 
+// Navigation is relative on purpose. A leading slash would ignore a baseURL subpath, so the suite
+// could not be aimed at a Pages-style `/<repo>/` build or the deployed site.
+
 /** Console errors and uncaught exceptions, collected so a silent failure cannot pass. */
 function watchForErrors(page: Page): string[] {
   const problems: string[] = [];
@@ -26,7 +29,7 @@ async function waitForJourney(page: Page) {
 
 test('boots, draws a map, and reports where the player is standing', async ({ page }) => {
   const problems = watchForErrors(page);
-  await page.goto(`/?seed=${SEED}`);
+  await page.goto(`?seed=${SEED}`);
 
   // Phaser injects the canvas into .map-surface once the renderer is up.
   const canvas = page.locator('.map-surface canvas');
@@ -61,7 +64,7 @@ test('boots, draws a map, and reports where the player is standing', async ({ pa
 
 test('walking changes the journal', async ({ page }) => {
   const problems = watchForErrors(page);
-  await page.goto(`/?seed=${SEED}`);
+  await page.goto(`?seed=${SEED}`);
   const title = await waitForJourney(page);
   const before = await title.textContent();
 
@@ -77,7 +80,7 @@ test('walking changes the journal', async ({ page }) => {
 });
 
 test('a seed is reproducible and travels in the URL', async ({ page }) => {
-  await page.goto(`/?seed=${SEED}`);
+  await page.goto(`?seed=${SEED}`);
   const first = await (await waitForJourney(page)).textContent();
 
   await page.reload();
@@ -85,7 +88,7 @@ test('a seed is reproducible and travels in the URL', async ({ page }) => {
   expect(second).toBe(first);
 
   // A different seed must produce a different starting tile description.
-  await page.goto('/?seed=monsoon-evening');
+  await page.goto('?seed=monsoon-evening');
   const other = await (await waitForJourney(page)).textContent();
   expect(other).not.toBe(first);
 });
