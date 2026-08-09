@@ -56,8 +56,14 @@ npm run test:e2e
 
 Navigation in the specs is relative (`?seed=x`, never `/?seed=x`) so a baseURL subpath is honoured.
 
-`npm run build` respects `DEPLOY_BASE`, which CI sets to `/<repo>/` for GitHub Pages. Locally and
-on any plain static host it defaults to `/`.
+`npm run build` respects `DEPLOY_BASE`, which the Pages workflow sets to `/<repo>/`. Locally and on
+any plain static host it defaults to `/`.
+
+**Deployment is parked.** `.github/workflows/pages.yml` is `workflow_dispatch` only, because Pages
+has never been enabled for the repository and `configure-pages` 404s — a workflow that always fails
+just teaches people to ignore red. The build is known good: the browser suite passes against a
+subpath build served the way Pages serves it. Re-enabling is a repository setting plus restoring the
+push trigger; the steps are written at the top of that file.
 
 ## Architecture
 
