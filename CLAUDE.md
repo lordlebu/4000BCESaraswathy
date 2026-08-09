@@ -17,7 +17,8 @@ canvas, and the game logic belongs to neither.
 ```bash
 npm install
 npm run dev        # serve at http://localhost:4173 and open a browser
-npm test           # vitest, the whole suite
+npm test           # vitest — world, content and journal, under plain Node
+npm run test:e2e   # playwright — does the game actually boot and draw?
 npm run test:watch # vitest in watch mode
 npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
@@ -26,6 +27,17 @@ npm run build:data # regenerate data/creatures.json and data/flora.json
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
 `npx vitest run -t "some test name"`.
+
+**Two suites, two jobs.** `test/` runs under Node and covers everything in `world/` and `content/`.
+`e2e/` drives a real Chromium and is the only thing that can catch "Phaser booted but the canvas is
+blank" — worth having because Phaser 4 is new enough that most published advice describes v3.
+First run needs `npx playwright install chromium`. Vitest is scoped to `test/**/*.test.ts` in
+`vite.config.ts` so it does not try to run the Playwright specs in Node.
+
+Reading pixels back out of the Phaser canvas in-page does not work: the WebGL drawing buffer is
+undefined after compositing unless `preserveDrawingBuffer` is set, which costs the real game
+performance to serve a test. `e2e/game.spec.ts` screenshots the composited surface instead and
+checks the PNG does not compress like a flat fill.
 
 `npm run build` respects `DEPLOY_BASE`, which CI sets to `/<repo>/` for GitHub Pages. Locally and
 on any plain static host it defaults to `/`.
@@ -107,6 +119,7 @@ you are negotiating with.
 ## Conventions
 
 - Dependencies must justify themselves. The runtime is React and Phaser; that is the whole list.
+  Dev dependencies are Vite, TypeScript, Vitest and Playwright.
 - Determinism matters: the same seed must produce the same world and the same journal text. Do not
   introduce `Math.random()` or time-based values into `world/` or `content/` — all randomness comes
   from `world/rng.ts`.

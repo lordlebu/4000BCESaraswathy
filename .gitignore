@@ -6,6 +6,12 @@ dist/
 dist-ssr/
 .vite/
 
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
 # Local environment
 .env
 .env.*

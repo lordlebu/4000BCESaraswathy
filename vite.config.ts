@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -9,6 +10,11 @@ const base = process.env.DEPLOY_BASE ?? '/';
 export default defineConfig({
   base,
   plugins: [react()],
+  test: {
+    // Vitest owns test/ only. Without this it would also collect e2e/*.spec.ts and try to run
+    // Playwright's browser tests in Node, where they cannot work.
+    include: ['test/**/*.test.ts']
+  },
   server: {
     port: 4173,
     open: true
