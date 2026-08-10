@@ -10,13 +10,12 @@ import varunaUrl from '../../../assets/varuna-overworld.png';
 import { EventBus } from '../EventBus';
 import { FOG_TEXTURE, TILE_SIZE, createTileTextures, tileTextureKey } from '../tileTextures';
 import {
+  CHARACTERS,
   PLAYER_FRAME,
-  PLAYER_SCALE,
-  PLAYER_SHEET,
   animFor,
-  createPlayerAnimations,
+  createCharacterAnimations,
   facingFromStep,
-  loadPlayerSheet,
+  loadCharacterSheet,
   type Facing
 } from '../player';
 import { phaseAt, skyAt, startPhaseFor } from '../dayNight';
@@ -83,7 +82,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   preload(): void {
-    loadPlayerSheet(this, varunaUrl);
+    loadCharacterSheet(this, CHARACTERS.varuna.key, varunaUrl);
   }
 
   create(data: WorldSceneData): void {
@@ -144,13 +143,13 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createPlayer(): void {
-    createPlayerAnimations(this);
+    createCharacterAnimations(this, CHARACTERS.varuna.key);
     // Varuna stands taller than a tile, so he is anchored by the feet and allowed to overhang.
     // Scaled by a whole number — a fractional scale is what makes pixel art shimmer as it moves.
     this.player = this.add
-      .sprite(0, 0, PLAYER_SHEET, 0)
+      .sprite(0, 0, CHARACTERS.varuna.key, 0)
       .setOrigin(0.5, 1)
-      .setDisplaySize(PLAYER_FRAME.width * PLAYER_SCALE, PLAYER_FRAME.height * PLAYER_SCALE)
+      .setDisplaySize(PLAYER_FRAME.width, PLAYER_FRAME.height)
       .setDepth(20);
     this.player.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.updateAnimation();
@@ -162,7 +161,7 @@ export class WorldScene extends Phaser.Scene {
    * Re-playing the animation already running would restart it every frame, so it is checked first.
    */
   private updateAnimation(): void {
-    const { key, flipX } = animFor(this.facing, this.moving, this.arrived);
+    const { key, flipX } = animFor(CHARACTERS.varuna.key, this.facing, this.moving);
     if (this.player.anims.currentAnim?.key !== key) this.player.play(key);
     this.player.setFlipX(flipX);
   }

@@ -13,7 +13,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "build:data": "node tools/build-species-data.js",
-    "build:sprite": "node tools/build-sprite-sheet.js --max-height=150 --colours=30 assets/source/Varuna_final.png assets/varuna-overworld.png 20 30"
+    "build:sprite": "node tools/build-sprite-sheet.js --colours=26 assets/source/Varuna_emboss.png assets/varuna-overworld.png 26 40 && node tools/build-sprite-sheet.js --colours=26 assets/source/Mithra.png assets/mithra-overworld.png 26 40"
   },
   "license": "UNLICENSED",
   "dependencies": {

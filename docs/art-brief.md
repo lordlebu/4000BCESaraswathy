@@ -177,39 +177,41 @@ Drop the files in `assets/` and tell me the filenames. Notes for wiring them up:
 
 ---
 
-## Missing keyframes for the overworld animation
+## Where the character art stands
 
-`assets/source/Varuna_final.png` gives twelve small figures and four large ones. Twelve is plenty
-of *poses* but not a set of *animations*: no direction carries a pair of frames that differ only in
-leg position, so the traveller can stand and sit but cannot stride. What is there:
+`assets/source/Varuna_emboss.png` and `assets/source/Mithra.png` are the current sheets: two
+characters, each sixteen figures in four rows of four. Both rebuild with `npm run build:sprite`.
 
-| Have | Frames |
-| --- | --- |
-| Standing, facing the viewer | 0, 1, 5 |
-| Profile, facing right | 2 |
-| Profile, facing left | 8, 11 |
-| Seen from behind | 7, 9 |
-| Seated or crouched | 3, 4, 6, 10 |
+The layout was measured rather than assumed, and the measurements are worth keeping because they
+are how a future sheet should be checked too:
 
-**What would finish the overworld animation**, in order of how much difference it makes:
+- the back row carries almost no skin-toned pixels, which is what identifies it;
+- the two profile rows match each other at 71–78% when one is mirrored but only 52–61% as-is, so
+  they are a genuine left/right pair rather than one row used twice;
+- the face sits right of the body's centre in row 2 and left of it in row 3, which settles which is
+  which;
+- within a row, frames 0 and 1 barely differ below the waist while 2 and 3 move the legs, so 0/1
+  are the passing pose and 2/3 are the contacts.
 
-1. **A two-frame walk for the profile view.** One frame with the far leg forward, one with the legs
-   passing. This is the direction the player spends most time in and the only one with a single
-   frame today, so it is the most visible gap.
-2. **A two-frame walk seen from behind.** Same idea: 7 and 9 differ at the arm, not the legs.
-3. **A two-frame walk facing the viewer.** 0 and 1 nearly do this — the feet are together in one
-   and apart in the other — so this is the least urgent.
+Row order is therefore **down, up, right, left**, and the walk plays contact-pass-contact-pass.
+Nothing is mirrored at runtime: mirroring a hand-drawn walk moves the satchel to the other
+shoulder, which reads as a different person on alternate steps.
 
-Nice to have, not needed:
+These two sheets are also the first that needed no cleaning at all — real alpha, no guides, no
+checkerboard. The anti-aliased edges from the emboss are handled by point sampling and the palette
+snap.
 
-- **A seated figure seen from behind**, for sitting at a landmark while facing away.
-- **A "writing in the journal" pose**, seated with the book open. The arrival page is the emotional
-  beat of the whole slice and currently the figure just sits.
+### Still missing
 
-> **Prompt for the walk pair:**
-> Two pixel art frames of the same elderly travelling scholar walking, seen **[in profile facing
-> right / from behind]**, for a cozy top-down exploration game. Frame one: far leg forward, mid
-> stride. Frame two: legs passing close together. Identical character, identical size and position
-> in frame, only the legs and the swing of the coat differ between them. Wide-brimmed blue hat,
-> muted indigo robe, grey beard, brown boots, satchel, staff. Same muted palette and same scale as
-> the existing sheet. Lossless PNG, genuine alpha channel, no checkerboard, no guides, no text.
+1. **A seated pose.** The earlier sheet had several; this one has none, so the traveller stands at
+   the landmark rather than sitting down — which is exactly what the journal invites him to do
+   ("Sit a while, and write it down before the light goes"). One seated frame per character would
+   restore it; facing the viewer is enough.
+2. **A "writing in the journal" pose**, seated with the book open. The arrival is the emotional beat
+   of the whole slice, and it is currently carried entirely by the prose.
+
+> **Prompt:** One pixel art frame of the same character **seated on the ground, facing the viewer**,
+> resting after a long walk, for a cozy top-down exploration game. Same character, same palette,
+> same scale and drawing style as the existing walk sheet. Lossless PNG with a genuine alpha
+> channel — transparent background, not a grey checkerboard. No guides, no grid, no text, no
+> watermark.
