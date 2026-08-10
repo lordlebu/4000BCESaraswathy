@@ -201,17 +201,26 @@ These two sheets are also the first that needed no cleaning at all — real alph
 checkerboard. The anti-aliased edges from the emboss are handled by point sampling and the palette
 snap.
 
+
+Varuna's sheet is two source images concatenated — `Varuna_emboss.png` for walking and
+`Varuna_sitting.png` for resting — so one texture carries all 32 frames. The sitting sheet uses the
+same four-row order, confirmed the same way: 5 skin-toned pixels in its back row against ~115 in the
+others, and the face right of the body's centre in one profile row and left in the other.
+
+Seated figures come out slightly shorter than standing ones, which is right. It falls out of the
+aspect ratio rather than being tuned: fitting each figure into the same cell puts the seated pose at
+about 38 pixels against 40 for standing.
+
 ### Still missing
 
-1. **A seated pose.** The earlier sheet had several; this one has none, so the traveller stands at
-   the landmark rather than sitting down — which is exactly what the journal invites him to do
-   ("Sit a while, and write it down before the light goes"). One seated frame per character would
-   restore it; facing the viewer is enough.
+1. **Sitting for Mithra.** Varuna rests at the landmark; Mithra has a walk sheet only. Not urgent
+   while she is unwired, but the pair should match once she has a role.
 2. **A "writing in the journal" pose**, seated with the book open. The arrival is the emotional beat
-   of the whole slice, and it is currently carried entirely by the prose.
+   of the whole slice, and it is currently carried by the prose and a seated figure. One frame
+   facing the viewer would be enough.
 
-> **Prompt:** One pixel art frame of the same character **seated on the ground, facing the viewer**,
-> resting after a long walk, for a cozy top-down exploration game. Same character, same palette,
-> same scale and drawing style as the existing walk sheet. Lossless PNG with a genuine alpha
+> **Prompt:** One pixel art frame of the same character **seated on the ground facing the viewer,
+> writing in an open book on their lap**, for a cozy top-down exploration game. Same character, same
+> palette, same scale and drawing style as the existing sheets. Lossless PNG with a genuine alpha
 > channel — transparent background, not a grey checkerboard. No guides, no grid, no text, no
 > watermark.

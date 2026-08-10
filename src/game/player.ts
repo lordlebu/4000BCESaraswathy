@@ -13,18 +13,20 @@ import Phaser from 'phaser';
 export const PLAYER_FRAME = { width: 26, height: 40 };
 
 /**
- * The sheet is four rows of four, and the layout was measured rather than assumed:
+ * The sheet is two source images concatenated — a walk sheet then a sitting sheet, each four rows
+ * of four — and both layouts were measured rather than assumed:
  *
- * - the back row carries almost no skin-toned pixels, which is what identifies it;
+ * - the back row carries almost no skin-toned pixels (5 against ~115), which is what identifies it;
  * - the two profile rows match each other at 71–78% when one is mirrored but only 52–61% as-is,
  *   so they are a genuine left/right pair rather than one row used twice;
- * - the face sits right of the body's centre in row 2 and left of it in row 3, which settles which
- *   is which.
+ * - the face sits right of the body's centre in one profile row and left of it in the other, which
+ *   settles which is which.
  *
- * Within a row, frames 0 and 1 barely differ below the waist while 2 and 3 move the legs, so 0/1
- * are the passing pose and 2/3 are the contacts.
+ * Within a walking row, frames 0 and 1 barely differ below the waist while 2 and 3 move the legs,
+ * so 0/1 are the passing pose and 2/3 are the contacts.
  */
-const ROW = { down: 0, up: 4, right: 8, left: 12 } as const;
+const WALK_ROW = { down: 0, up: 4, right: 8, left: 12 } as const;
+const SIT_ROW = { down: 16, up: 20, right: 24, left: 28 } as const;
 
 export type Facing = 'up' | 'down' | 'left' | 'right';
 
@@ -86,20 +88,33 @@ export function createCharacterAnimations(scene: Phaser.Scene, key: string): voi
   };
 
   for (const facing of ['down', 'up', 'left', 'right'] as const) {
-    const row = ROW[facing];
-    define('idle', facing, idleOrder(row), 1.2);
+    const walk = WALK_ROW[facing];
+    define('idle', facing, idleOrder(walk), 1.2);
     // Roughly a frame per step at the pace the player actually walks.
-    define('walk', facing, walkOrder(row), 7);
+    define('walk', facing, walkOrder(walk), 7);
+
+    // Sitting is slower still. One of the four frames has the staff in hand, so cycling all four
+    // gives the pose something to do without the traveller appearing to fidget.
+    const sit = SIT_ROW[facing];
+    define('sit', facing, [sit, sit + 2, sit + 3, sit + 1], 0.9);
   }
 }
+
+export type Action = 'idle' | 'walk' | 'sit';
 
 /** The animation to play, and whether the sprite needs mirroring. */
 export function animFor(
   character: string,
   facing: Facing,
-  moving: boolean
+  action: Action
 ): { key: string; flipX: boolean } {
-  return { key: animKey(character, moving ? 'walk' : 'idle', facing), flipX: FLIP_X };
+  return { key: animKey(character, action, facing), flipX: FLIP_X };
+}
+
+/** What the traveller is doing. Sitting wins: arriving is the end of the walk. */
+export function actionFor(moving: boolean, sitting: boolean): Action {
+  if (sitting) return 'sit';
+  return moving ? 'walk' : 'idle';
 }
 
 /** The facing implied by a step. */

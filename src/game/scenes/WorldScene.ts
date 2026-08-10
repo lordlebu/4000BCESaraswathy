@@ -12,6 +12,7 @@ import { FOG_TEXTURE, TILE_SIZE, createTileTextures, tileTextureKey } from '../t
 import {
   CHARACTERS,
   PLAYER_FRAME,
+  actionFor,
   animFor,
   createCharacterAnimations,
   facingFromStep,
@@ -161,7 +162,8 @@ export class WorldScene extends Phaser.Scene {
    * Re-playing the animation already running would restart it every frame, so it is checked first.
    */
   private updateAnimation(): void {
-    const { key, flipX } = animFor(CHARACTERS.varuna.key, this.facing, this.moving);
+    const action = actionFor(this.moving, this.arrived);
+    const { key, flipX } = animFor(CHARACTERS.varuna.key, this.facing, action);
     if (this.player.anims.currentAnim?.key !== key) this.player.play(key);
     this.player.setFlipX(flipX);
   }
