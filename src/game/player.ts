@@ -111,10 +111,17 @@ export function animFor(
   return { key: animKey(character, action, facing), flipX: FLIP_X };
 }
 
-/** What the traveller is doing. Sitting wins: arriving is the end of the walk. */
+/**
+ * What the traveller is doing.
+ *
+ * Moving wins. Sitting used to take priority, on the reasoning that arriving is the end of the
+ * walk — but the flag stayed true for the rest of the journey, so leaving the landmark slid the
+ * traveller across the map still cross-legged. Whatever else is true, someone in motion is not
+ * sitting down.
+ */
 export function actionFor(moving: boolean, sitting: boolean): Action {
-  if (sitting) return 'sit';
-  return moving ? 'walk' : 'idle';
+  if (moving) return 'walk';
+  return sitting ? 'sit' : 'idle';
 }
 
 /** The facing implied by a step. */

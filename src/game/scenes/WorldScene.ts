@@ -176,7 +176,12 @@ export class WorldScene extends Phaser.Scene {
    * Re-playing the animation already running would restart it every frame, so it is checked first.
    */
   private updateAnimation(): void {
-    const action = actionFor(this.moving, this.arrived);
+    // Sitting is about where the traveller *is*, not whether they have ever arrived. `arrived`
+    // stays true for the rest of the journey so the arrival page is written once; using it here
+    // meant walking away from the landmark still played the seated frames.
+    const atLandmark =
+      this.at.x === this.world.landmark.x && this.at.y === this.world.landmark.y;
+    const action = actionFor(this.moving, atLandmark);
     const { key, flipX } = animFor(CHARACTERS.varuna.key, this.facing, action);
     if (this.player.anims.currentAnim?.key !== key) this.player.play(key);
     this.player.setFlipX(flipX);

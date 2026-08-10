@@ -65,6 +65,17 @@ here. You are close"*, 248 of 251 tiles explored.
 
 It now steps once the journal says the place is close, and watches for a turn that achieved nothing.
 
+### Fixed: the traveller walked around sitting down
+
+Reported from play: after reaching the landmark, leaving it slid the traveller across the map still
+cross-legged.
+
+Two mistakes, one on top of the other. `actionFor` gave sitting priority over moving, on the
+reasoning that arriving is the end of the walk — but whatever else is true, someone in motion is not
+sitting down. And the scene passed `arrived`, which stays true for the rest of the journey so the
+arrival page is only written once; sitting is about where the traveller *is*, so it now asks whether
+they are standing on the landmark tile, which stops being true the moment they leave.
+
 ### Still open
 
 - **Mountains never host the landmark** (0 of 60). They are walkable and in the candidate set, but

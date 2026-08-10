@@ -14,7 +14,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "build:data": "node tools/build-species-data.js",
-    "build:sprite": "node tools/build-sprite-sheet.js --colours=30 assets/source/Varuna_emboss.png,assets/source/Varuna_sitting.png assets/varuna-overworld.png 26 40 && node tools/build-sprite-sheet.js --colours=26 assets/source/Mithra.png assets/mithra-overworld.png 26 40"
+    "build:sprite": "node tools/build-sprite-sheet.js --colours=30 assets/source/Varuna_walking.png,assets/source/Varuna_sitting.png assets/varuna-overworld.png 26 40 && node tools/build-sprite-sheet.js --colours=26 assets/source/Mithra.png assets/mithra-overworld.png 26 40"
   },
   "dependencies": {
     "phaser": "^4.2.1",
