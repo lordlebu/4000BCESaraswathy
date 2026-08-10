@@ -133,14 +133,63 @@ button:disabled {
   display: block;
 }
 
+.map-column {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
 .sidebar {
   display: grid;
   gap: 16px;
 }
 
+/* The arrival page. Sits under the map rather than over it: the point of the moment is to read
+   something, and a modal that has to be dismissed makes reading feel like an interruption. */
+.arrival {
+  padding: 22px 24px;
+  background: linear-gradient(150deg, #fff8e6, #f6e3bd);
+  border: 2px solid rgba(138, 100, 16, 0.35);
+  border-radius: 18px;
+  box-shadow: 0 16px 34px rgba(52, 38, 58, 0.18);
+  animation: arrival-in 700ms ease-out;
+}
+
+.arrival h2 {
+  font-size: 1.35rem;
+  color: #7a5410;
+}
+
+.arrival p {
+  margin: 0 0 12px;
+  line-height: 1.65;
+  max-width: 62ch;
+}
+
+.arrival-closing {
+  padding-top: 12px;
+  border-top: 1px solid rgba(138, 100, 16, 0.28);
+  color: var(--muted);
+  font-style: italic;
+}
+
+@keyframes arrival-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrival {
+    animation: none;
+  }
+}
+
 .journal,
 .legend,
-.sketches {
+.sketches,
+.export {
   padding: 18px;
   background: var(--panel);
   border: 2px solid var(--edge);
@@ -177,6 +226,30 @@ button:disabled {
 .muted {
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+/* Secondary action: present, but not competing with the one people actually want. */
+button.ghost {
+  background: transparent;
+  color: var(--accent);
+  border-color: rgba(164, 92, 64, 0.5);
+}
+
+button.ghost:hover:not(:disabled) {
+  background: rgba(164, 92, 64, 0.1);
+  filter: none;
+}
+
+.arrival-actions,
+.export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.export p {
+  margin: 0 0 14px;
+  line-height: 1.5;
 }
 
 .legend-list,

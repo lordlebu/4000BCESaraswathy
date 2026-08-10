@@ -72,7 +72,7 @@ describe('coverage', () => {
 
 describe('the journal', () => {
   it('fills every field on the starting tile', () => {
-    const entry = describeTile(world.tiles[world.start.y]![world.start.x]!, world.seed);
+    const entry = describeTile(world.tiles[world.start.y]![world.start.x]!, world);
     expect(entry.title).toBeTruthy();
     expect(entry.description).toBeTruthy();
     expect(entry.creature).toBeTruthy();
@@ -81,7 +81,7 @@ describe('the journal', () => {
 
   it('never leaks undefined into text the player reads', () => {
     for (const tile of tiles) {
-      const entry = describeTile(tile, world.seed);
+      const entry = describeTile(tile, world);
       const text = [
         entry.title,
         entry.description,
@@ -97,8 +97,8 @@ describe('the journal', () => {
 
   it('reads the same way on every revisit', () => {
     for (const tile of tiles) {
-      const first = describeTile(tile, world.seed);
-      const second = describeTile(tile, world.seed);
+      const first = describeTile(tile, world);
+      const second = describeTile(tile, world);
       expect(first).toEqual(second);
     }
   });
@@ -116,6 +116,7 @@ describe('the journal', () => {
 
   it('points the player toward the landmark, and says so on arrival', () => {
     expect(landmarkHint(world, world.start)).toMatch(/elders spoke/);
-    expect(landmarkHint(world, world.landmark)).toMatch(/This is the place/);
+    expect(landmarkHint(world, world.landmark)).toContain(world.landmark.name);
+    expect(landmarkHint(world, world.landmark)).toMatch(/Sit a while/);
   });
 });

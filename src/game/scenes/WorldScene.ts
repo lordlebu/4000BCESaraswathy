@@ -6,10 +6,21 @@
 // engine versions touches this folder alone.
 
 import Phaser from 'phaser';
-import varunaUrl from '../../../assets/Varuna.png';
+import varunaUrl from '../../../assets/varuna-overworld.png';
 import { EventBus } from '../EventBus';
 import { FOG_TEXTURE, TILE_SIZE, createTileTextures, tileTextureKey } from '../tileTextures';
-import { describeSurroundings, describeTile, landmarkHint } from '../../content/journal';
+import {
+  CHARACTERS,
+  PLAYER_FRAME,
+  actionFor,
+  animFor,
+  createCharacterAnimations,
+  facingFromStep,
+  loadCharacterSheet,
+  type Facing
+} from '../player';
+import { phaseAt, skyAt, startPhaseFor } from '../dayNight';
+import { arrivalPage, describeSurroundings, describeTile, landmarkHint } from '../../content/journal';
 import { travelCost } from '../../content/species';
 import { generateWorld, isWalkable } from '../../world/generate';
 import { findPath } from '../../world/pathfind';
@@ -26,9 +37,6 @@ const SIGHT_RADIUS = 2;
 /** Milliseconds per step on easy ground. `travelCost` from the biome data scales this. */
 const STEP_MS = 170;
 
-/** The player artwork carries layout guides in its margins; this is the figure itself. */
-const VARUNA_FRAME = { x: 139, y: 0, width: 621, height: 867 };
-
 export interface WorldSceneData {
   seed: string;
   discovered?: string[];
@@ -38,15 +46,21 @@ export class WorldScene extends Phaser.Scene {
   private world!: World;
   private tileSprites: Phaser.GameObjects.Image[][] = [];
   private fogSprites: Phaser.GameObjects.Image[][] = [];
-  private player!: Phaser.GameObjects.Image;
+  private player!: Phaser.GameObjects.Sprite;
   private at: Point = { x: 0, y: 0 };
   private discovered = new Set<string>();
   private visible = new Set<string>();
+  /** The arrival page is written once per journey, not on every step taken at the landmark. */
+  private arrived = false;
   private moving = false;
   private queuedPath: Point[] = [];
-  private facing = 1;
+  private facing: Facing = 'down';
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
+  /** The day/night wash, drawn over the whole map. */
+  private sky!: Phaser.GameObjects.Rectangle;
+  /** Where in the day this journey opened — the player's own hour. */
+  private startPhase = 0;
 
   constructor() {
     super('WorldScene');
@@ -57,17 +71,19 @@ export class WorldScene extends Phaser.Scene {
     // a field initialiser — otherwise "generate a new map" would inherit the old fog.
     this.discovered = new Set(data.discovered ?? []);
     this.visible = new Set();
+    this.arrived = false;
     this.tileSprites = [];
     this.fogSprites = [];
     this.queuedPath = [];
     this.moving = false;
-    this.facing = 1;
+    this.facing = 'down';
+    // The map opens on the light of the hour the player is actually in, then drifts from there.
+    // `?hour=21` overrides it, so the evening can be checked without waiting for the evening.
+    this.startPhase = startPhaseFor(new URLSearchParams(window.location.search).get('hour'));
   }
 
   preload(): void {
-    if (!this.textures.exists('varuna')) {
-      this.load.image('varuna', varunaUrl);
-    }
+    loadCharacterSheet(this, CHARACTERS.varuna.key, varunaUrl);
   }
 
   create(data: WorldSceneData): void {
@@ -102,6 +118,14 @@ export class WorldScene extends Phaser.Scene {
 
     this.createPlayer();
 
+    // Above the fog and the player, so the light of the hour falls on everything. Origin at the
+    // top-left corner rather than the centre so it lines up with the world without arithmetic.
+    this.sky = this.add
+      .rectangle(0, 0, pixelWidth, pixelHeight, 0xffffff, 0)
+      .setOrigin(0, 0)
+      .setDepth(30);
+    this.updateSky();
+
     this.cameras.main.setBounds(0, 0, pixelWidth, pixelHeight);
     this.cameras.main.setBackgroundColor('#1b1420');
     this.cameras.main.setZoom(1);
@@ -120,19 +144,33 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createPlayer(): void {
-    const texture = this.textures.get('varuna');
-    if (!texture.has('body')) {
-      texture.add('body', 0, VARUNA_FRAME.x, VARUNA_FRAME.y, VARUNA_FRAME.width, VARUNA_FRAME.height);
-    }
+    createCharacterAnimations(this, CHARACTERS.varuna.key);
     // Varuna stands taller than a tile, so he is anchored by the feet and allowed to overhang.
-    const displayHeight = TILE_SIZE * 1.6;
-    const displayWidth = displayHeight * (VARUNA_FRAME.width / VARUNA_FRAME.height);
+    // Scaled by a whole number — a fractional scale is what makes pixel art shimmer as it moves.
     this.player = this.add
-      .image(0, 0, 'varuna', 'body')
+      .sprite(0, 0, CHARACTERS.varuna.key, 0)
       .setOrigin(0.5, 1)
-      .setDisplaySize(displayWidth, displayHeight)
+      .setDisplaySize(PLAYER_FRAME.width, PLAYER_FRAME.height)
       .setDepth(20);
+    this.player.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+    this.updateAnimation();
     this.placePlayer(this.at);
+  }
+
+  /**
+   * Play whatever the traveller should be doing: walking, standing, or sitting at the landmark.
+   * Re-playing the animation already running would restart it every frame, so it is checked first.
+   */
+  private updateAnimation(): void {
+    const action = actionFor(this.moving, this.arrived);
+    const { key, flipX } = animFor(CHARACTERS.varuna.key, this.facing, action);
+    if (this.player.anims.currentAnim?.key !== key) this.player.play(key);
+    this.player.setFlipX(flipX);
+  }
+
+  /** Point the sprite the way it is walking, mirroring the side view for leftward steps. */
+  private faceTowards(dx: number, dy: number): void {
+    this.facing = facingFromStep(dx, dy, this.facing);
   }
 
   private placePlayer(at: Point): void {
@@ -181,7 +219,17 @@ export class WorldScene extends Phaser.Scene {
     this.scene.restart({ seed: payload.seed, discovered: payload.discovered ?? [] });
   };
 
+  /** Repaint the wash for the current hour. Cheap enough to run every frame. */
+  private updateSky(): void {
+    const sky = skyAt(phaseAt(this.time.now, this.startPhase));
+    this.sky.setFillStyle(sky.colour, sky.alpha);
+  }
+
   update(): void {
+    // Before the movement guard: the light keeps changing while the player stands still, and it
+    // keeps changing mid-step too.
+    this.updateSky();
+
     if (this.moving) return;
 
     const held =
@@ -208,16 +256,14 @@ export class WorldScene extends Phaser.Scene {
     const tile = this.world.tiles[target.y]![target.x]!;
     if (!isWalkable(tile)) return;
 
-    if (target.x !== this.at.x) {
-      this.facing = target.x > this.at.x ? 1 : -1;
-      this.player.setFlipX(this.facing < 0);
-    }
+    this.faceTowards(target.x - this.at.x, target.y - this.at.y);
 
     // Wetland and hills take longer to cross than open plains. `travelCost` sat unread in
     // data/biomes.json until now; this is the friction the design asks for — slower, never unsafe.
     const cost = travelCost(tile.biome) ?? 1;
     this.moving = true;
     this.at = target;
+    this.updateAnimation();
 
     this.tweens.add({
       targets: this.player,
@@ -228,6 +274,7 @@ export class WorldScene extends Phaser.Scene {
       onComplete: () => {
         this.moving = false;
         this.arriveAt(target);
+        this.updateAnimation();
       }
     });
   }
@@ -283,14 +330,25 @@ export class WorldScene extends Phaser.Scene {
     this.revealAround(at);
 
     const tile: Tile = this.world.tiles[at.y]![at.x]!;
+    const atLandmark = at.x === this.world.landmark.x && at.y === this.world.landmark.y;
+
     EventBus.emitEvent('tile-entered', {
       at,
-      entry: describeTile(tile, this.world.seed),
+      entry: describeTile(tile, this.world),
       surroundings: describeSurroundings(this.world, at),
       hint: landmarkHint(this.world, at),
       discovered: this.discovered.size,
-      atLandmark: at.x === this.world.landmark.x && at.y === this.world.landmark.y
+      atLandmark
     });
     EventBus.emitEvent('journey-changed', { discovered: [...this.discovered] });
+
+    // The arrival is the end of the session, so it gets its own beat: the camera settles, and the
+    // written page goes up once rather than on every step taken while standing there.
+    if (atLandmark && !this.arrived) {
+      this.arrived = true;
+      this.cameras.main.zoomTo(1.25, 900, 'Sine.easeInOut');
+      this.cameras.main.flash(700, 255, 246, 213, false);
+      EventBus.emitEvent('landmark-reached', arrivalPage(this.world));
+    }
   }
 }

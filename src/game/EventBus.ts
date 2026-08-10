@@ -27,6 +27,8 @@ export interface GameToUi {
   };
   /** Fog state changed and should be persisted. */
   'journey-changed': { discovered: string[] };
+  /** The player reached the landmark. Fires once per journey — this is the end of the session. */
+  'landmark-reached': { title: string; body: string; closing: string };
 }
 
 /**

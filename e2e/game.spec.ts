@@ -56,8 +56,12 @@ test('boots, draws a map, and reports where the player is standing', async ({ pa
   );
 
   const title = await waitForJourney(page);
-  await expect(title).toContainText(/at \d+, \d+/);
+  // The journey starts in the settlement, which is a named place — "Hairuvati, a settlement" —
+  // rather than a grid reference. Unnamed ground still falls back to coordinates.
+  await expect(title).toContainText(/, a settlement$|at \d+, \d+/);
   await expect(page.locator('.journal')).toContainText(/discovered/);
+  // The landmark is named in the hint from the first step, so the goal is a place, not a marker.
+  await expect(page.locator('.status')).toContainText(/[A-Z][a-z]+(van|kund|shila|tala|gir|asa)\b/);
 
   expect(problems, problems.join('\n')).toEqual([]);
 });
@@ -79,6 +83,28 @@ test('walking changes the journal', async ({ page }) => {
   expect(problems, problems.join('\n')).toEqual([]);
 });
 
+// The travel log is the one artifact that leaves the game, so it is worth proving it downloads —
+// the canvas and Blob work in `ui/exportJournal.ts` cannot be exercised from the Node suite.
+test('the journal can be taken away as text and as an image', async ({ page }) => {
+  await page.goto(`?seed=${SEED}`);
+  await waitForJourney(page);
+
+  const text = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Save as text' }).click();
+  const textFile = await text;
+  expect(textFile.suggestedFilename()).toBe(`south-of-tethys-${SEED}.md`);
+
+  const image = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Save as image' }).click();
+  const imageFile = await image;
+  expect(imageFile.suggestedFilename()).toBe(`south-of-tethys-${SEED}.png`);
+
+  // A PNG of a rendered page of writing; a failed render would be far smaller.
+  const path = await imageFile.path();
+  const { statSync } = await import('node:fs');
+  expect(statSync(path).size, 'exported image looks empty').toBeGreaterThan(10_000);
+});
+
 test('a seed is reproducible and travels in the URL', async ({ page }) => {
   await page.goto(`?seed=${SEED}`);
   const first = await (await waitForJourney(page)).textContent();
@@ -91,4 +117,14 @@ test('a seed is reproducible and travels in the URL', async ({ page }) => {
   await page.goto('?seed=monsoon-evening');
   const other = await (await waitForJourney(page)).textContent();
   expect(other).not.toBe(first);
+});
+
+// React StrictMode mounts, unmounts and remounts every effect in development. Phaser defers its
+// canvas teardown to a game-loop tick that never arrives once the game is destroyed, so without an
+// explicit clear the remount leaves two canvases stacked in the container — two maps running, and
+// every canvas query ambiguous.
+test('mounts exactly one canvas, even under StrictMode double-mounting', async ({ page }) => {
+  await page.goto(`?seed=${SEED}`);
+  await waitForJourney(page);
+  await expect(page.locator('.map-surface canvas')).toHaveCount(1);
 });

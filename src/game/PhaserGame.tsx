@@ -39,8 +39,14 @@ export function PhaserGame({ seed, discovered }: PhaserGameProps) {
     game.current.scene.start('WorldScene', initial.current);
 
     return () => {
+      const node = container.current;
       game.current?.destroy(true);
       game.current = null;
+      // Phaser defers tearing the canvas down to its next game-loop tick, which never comes once
+      // the game is destroyed. Under StrictMode the effect immediately runs again and mounts a
+      // second canvas beside the abandoned one — two maps stacked, and every `.map-surface canvas`
+      // query ambiguous. The container is ours, so clear it here rather than waiting.
+      if (node) node.replaceChildren();
     };
   }, []);
 

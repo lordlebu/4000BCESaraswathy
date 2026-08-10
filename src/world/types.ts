@@ -38,6 +38,27 @@ export interface Tile extends Point {
   riverBias: number;
 }
 
+export interface NamedPlace extends Point {
+  name: string;
+}
+
+export interface Landmark extends NamedPlace {
+  /**
+   * What the tile was before it became the landmark.
+   *
+   * The content layer picks which *kind* of landmark this is from the terrain — a shell beach
+   * belongs on a coast, a heron pool in a marsh. Keeping the terrain here rather than the kind is
+   * what lets `world/` stay free of `data/*.json`: the generator says "something worth seeing
+   * stands here, on forest", and `content/landmarks.ts` decides it is a great banyan.
+   */
+  terrain: TerrainBiomeId;
+}
+
+export interface River {
+  path: Point[];
+  name: string;
+}
+
 export interface World {
   seed: string;
   width: number;
@@ -45,9 +66,11 @@ export interface World {
   /** Row-major: `tiles[y][x]`. */
   tiles: Tile[][];
   start: Point;
-  landmark: Point;
-  /** Every tile the river carver turned into `river`, in carve order. Used by the tests. */
-  rivers: Point[][];
+  /** The village the journey starts from. Null only if no suitable ground existed. */
+  settlement: NamedPlace | null;
+  landmark: Landmark;
+  /** Every river the carver cut, in carve order, named from its source. */
+  rivers: River[];
 }
 
 export interface GenerateOptions {

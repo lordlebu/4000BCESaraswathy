@@ -8,7 +8,8 @@ import { createRandom, clamp, shuffle, type Random } from './rng';
 import { fractalField, highlandSpine, normalize, type Field } from './field';
 import { classifyBiome, THRESHOLDS } from './classify';
 import { carveRivers, orthogonalNeighbours } from './rivers';
-import type { GenerateOptions, Point, Tile, World } from './types';
+import { placeName, riverName } from './names';
+import type { BiomeId, GenerateOptions, Point, River, TerrainBiomeId, Tile, World } from './types';
 
 export const DEFAULT_WIDTH = 36;
 export const DEFAULT_HEIGHT = 24;
@@ -98,13 +99,29 @@ function placeSettlement(tiles: Tile[][], random: Random): Tile | null {
  * candidates are filtered to a minimum step count and the target is relaxed only if nothing
  * qualifies.
  */
-function placeLandmark(tiles: Tile[][], reachable: Set<string>, start: Point, random: Random): Tile {
-  const interesting = new Set(['forest', 'hills', 'mountains', 'wetland', 'plains', 'desert', 'coast']);
+function placeLandmark(
+  tiles: Tile[][],
+  reachable: Set<string>,
+  start: Point,
+  random: Random
+): { tile: Tile; terrain: TerrainBiomeId } {
+  // `river` is included so a heron pool can sit on one, but sea and settlement are not.
+  const interesting = new Set<BiomeId>([
+    'forest',
+    'hills',
+    'mountains',
+    'wetland',
+    'plains',
+    'desert',
+    'coast',
+    'river'
+  ]);
   const candidates = tiles
     .flat()
     .filter((t) => reachable.has(`${t.x},${t.y}`) && interesting.has(t.biome));
 
-  if (candidates.length === 0) return tiles[start.y]![start.x]!;
+  const fallback = tiles[start.y]![start.x]!;
+  if (candidates.length === 0) return { tile: fallback, terrain: 'plains' };
 
   const furthest = candidates.reduce((best, t) =>
     stepsBetween(t, start) > stepsBetween(best, start) ? t : best
@@ -113,8 +130,11 @@ function placeLandmark(tiles: Tile[][], reachable: Set<string>, start: Point, ra
   const distant = candidates.filter((t) => stepsBetween(t, start) >= minimum);
 
   const chosen = shuffle(distant.length ? distant : candidates, random)[0]!;
+  // Remember the ground before it is overwritten — the content layer chooses which kind of
+  // landmark this is from the terrain it stands on.
+  const terrain = chosen.biome as TerrainBiomeId;
   chosen.biome = 'landmark';
-  return chosen;
+  return { tile: chosen, terrain };
 }
 
 export function generateWorld({
@@ -158,7 +178,9 @@ export function generateWorld({
     .filter((t) => t.elevation > THRESHOLDS.HILLS)
     .sort((a, b) => b.elevation - a.elevation)
     .slice(0, 24);
-  const rivers = carveRivers(tiles, width, height, sources);
+  const carved = carveRivers(tiles, width, height, sources);
+  // A river is named for where it rises, so the name holds even as the course is walked downstream.
+  const rivers: River[] = carved.map((path) => ({ path, name: riverName(seed, path[0]!) }));
 
   const settlement = placeSettlement(tiles, random);
   const start = settlement ?? tiles[Math.floor(height / 2)]![Math.floor(width / 2)]!;
@@ -173,7 +195,15 @@ export function generateWorld({
     height,
     tiles,
     start: { x: start.x, y: start.y },
-    landmark: { x: landmark.x, y: landmark.y },
+    settlement: settlement
+      ? { x: settlement.x, y: settlement.y, name: placeName(seed, 'settlement', settlement) }
+      : null,
+    landmark: {
+      x: landmark.tile.x,
+      y: landmark.tile.y,
+      terrain: landmark.terrain,
+      name: placeName(seed, 'landmark', landmark.tile)
+    },
     rivers
   };
 }

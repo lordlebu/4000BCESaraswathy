@@ -177,9 +177,11 @@ close the tab, reopen, and find the journey intact.
    observatory) with distinct text and biome affinities.
 4. **Journal shows nearby geography**, not just the current tile — this is what makes the map
    legible.
-5. **Day/night tint** via a Phaser camera/post filter, slow enough that a short session sees one
-   gentle shift.
-6. **Ambient particles** per biome group via `ParticleEmitter` — dust, pollen, spray.
+5. **Day/night tint**. **Done** — `src/game/dayNight.ts`, a colour wash over the map. An hour to the
+   day, opening on the player's own hour so the map matches the time they sat down to play.
+6. **Ambient particles** per biome group — dust, pollen, spray. **Deferred on purpose**: drifting
+   particles are continuous motion, which is the opposite of the stepped, e-ink-like movement under
+   discussion. Worth settling that first rather than building something to throw away.
 7. **Make `travelCost` real** — it already sits unread in `data/biomes.json`. Slow movement on
    wetland and hills; no hunger, no threat.
 8. **Journal export** as text or image — the shareable artifact and the natural end of a session.
