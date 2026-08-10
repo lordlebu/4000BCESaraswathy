@@ -143,9 +143,12 @@
     "name": "Toxic Red Spore-Moss",
     "binomial": "Dictyonema venenum",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
-    "rarity": "common",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
     "journalPrompt": "A dangerous, rust-colored variant of Garudasaur moss that releases airborne spores causing temporary respiratory paralysis in intruders."
   },
   {
@@ -719,7 +722,7 @@
     "biomes": [
       "forest"
     ],
-    "placement": "lore",
+    "placement": "flavour",
     "rarity": "mythic",
     "journalPrompt": "A living tree magically and botanically tortured over decades, its trunk bent and reinforced with bronze to serve as a biomechanical catapult."
   },
@@ -732,7 +735,7 @@
       "forest",
       "settlement"
     ],
-    "placement": "lore",
+    "placement": "flavour",
     "rarity": "mythic",
     "journalPrompt": "A siege tree variant designed for defense, anchoring its stone-like roots deep into fortress walls to fling burning pitch."
   },
@@ -744,7 +747,7 @@
     "biomes": [
       "forest"
     ],
-    "placement": "lore",
+    "placement": "flavour",
     "rarity": "mythic",
     "journalPrompt": "An invasive, predatory vine mutated by the bleeding energies of Asura planets, developing pulsing veins and a hunger for flesh."
   },
@@ -756,7 +759,7 @@
     "biomes": [
       "forest"
     ],
-    "placement": "lore",
+    "placement": "flavour",
     "rarity": "mythic",
     "journalPrompt": "A thick, muscular vine that strangulates native trees, its violet-veined leaves exuding a sweet, sleep-inducing perfume."
   },
@@ -768,7 +771,7 @@
     "biomes": [
       "forest"
     ],
-    "placement": "lore",
+    "placement": "flavour",
     "rarity": "mythic",
     "journalPrompt": "A highly mutated forest climber with animal-like muscle fibers, capable of grasping and constricting small animals."
   },
@@ -777,8 +780,11 @@
     "name": "Fever-Root",
     "binomial": "Curcuma asurica",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "wetland",
+      "forest"
+    ],
+    "placement": "flavour",
     "rarity": "mythic",
     "journalPrompt": "A mutated turmeric plant that grows near underworld rifts, its toxic, black rhizomes causing intense hallucinations when touched."
   },
@@ -787,8 +793,11 @@
     "name": "Cursed Ash-Fern",
     "binomial": "Pteris asurica",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "forest",
+      "hills"
+    ],
+    "placement": "flavour",
     "rarity": "mythic",
     "journalPrompt": "A fern with charcoal-black fronds that grows only in soil scorched by fire-brides, absorbing light and warmth from its surroundings."
   },
@@ -797,8 +806,10 @@
     "name": "Whispering Blood-Orchid",
     "binomial": "Orchis asurica",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "forest"
+    ],
+    "placement": "flavour",
     "rarity": "mythic",
     "journalPrompt": "A beautiful but unsettling orchid with fleshy, lip-like petals that whisper soft, mimicry-chime sounds to lure insects."
   },
@@ -810,7 +821,7 @@
     "biomes": [
       "settlement"
     ],
-    "placement": "lore",
+    "placement": "flavour",
     "rarity": "mythic",
     "journalPrompt": "A rose bush with razor-sharp black petals that secrete a deadly coagulant, growing in the ruins of desecrated temples."
   },
@@ -819,8 +830,11 @@
     "name": "Naraka Pitcher-Plant",
     "binomial": "Nepenthes asurica",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "forest",
+      "wetland"
+    ],
+    "placement": "flavour",
     "rarity": "mythic",
     "journalPrompt": "A colossal carnivorous plant of the twilight zone, its wide, acid-filled pitcher capable of digesting entire small primates."
   },
