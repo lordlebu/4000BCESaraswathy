@@ -18,6 +18,17 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:4173';
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
+  // Every spec renders WebGL, and one machine has one GPU. Playwright's default of one worker per
+  // core put eight Chromium instances on it at once, which on a developer machine already running
+  // an editor and a browser starved them all — the scene would not finish booting inside twenty
+  // seconds and every spec failed at the same assertion, looking exactly like a broken build. CI
+  // runners are quieter, so they keep the default.
+  workers: process.env.CI ? undefined : 3,
+  // Playwright's 30-second default is sized for DOM tests. Every spec here boots a WebGL renderer,
+  // generates a world, and waits on tweened fog and a camera fade; screenshotting the canvas stalls
+  // the GPU on top of that. On a machine also running an editor and a browser they overrun 30s and
+  // fail at whatever assertion they happened to reach, which reads as a broken build and is not.
+  timeout: 90_000,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',

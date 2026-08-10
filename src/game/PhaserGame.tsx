@@ -20,11 +20,24 @@ export function PhaserGame({ seed, discovered }: PhaserGameProps) {
   const initial = useRef({ seed, discovered });
 
   useEffect(() => {
-    if (game.current || !container.current) return;
+    const node = container.current;
+    if (game.current || !node) return;
 
-    game.current = new Phaser.Game({
+    // React StrictMode mounts, tears down and mounts again. Phaser appends its canvas during an
+    // asynchronous boot step and defers its own teardown to a game-loop tick that never arrives
+    // once the game is destroyed, so the two can interleave either way round:
+    //
+    //   * teardown after the canvas is appended — handled by removing that canvas below;
+    //   * teardown *before* it is appended — the abandoned game still adds its canvas afterwards,
+    //     which is why the container is also swept clean here, on the way in.
+    //
+    // Miss either and two maps end up stacked in the same box, both running, and every
+    // `.map-surface canvas` query is ambiguous.
+    node.replaceChildren();
+
+    const instance = new Phaser.Game({
       type: Phaser.AUTO,
-      parent: container.current,
+      parent: node,
       backgroundColor: '#1b1420',
       scale: {
         mode: Phaser.Scale.RESIZE,
@@ -35,18 +48,16 @@ export function PhaserGame({ seed, discovered }: PhaserGameProps) {
       // Nothing here moves under physics — the player steps between tiles on a tween.
       scene: [WorldScene]
     });
-
-    game.current.scene.start('WorldScene', initial.current);
+    game.current = instance;
+    instance.scene.start('WorldScene', initial.current);
 
     return () => {
-      const node = container.current;
-      game.current?.destroy(true);
       game.current = null;
-      // Phaser defers tearing the canvas down to its next game-loop tick, which never comes once
-      // the game is destroyed. Under StrictMode the effect immediately runs again and mounts a
-      // second canvas beside the abandoned one — two maps stacked, and every `.map-surface canvas`
-      // query ambiguous. The container is ours, so clear it here rather than waiting.
-      if (node) node.replaceChildren();
+      // Held before destroying: `destroy` clears the reference, and this is the one canvas we know
+      // belongs to this game, so removing it cannot take a newer mount's canvas with it.
+      const canvas = instance.canvas;
+      instance.destroy(true);
+      canvas?.remove();
     };
   }, []);
 

@@ -44,7 +44,7 @@
   {
     "id": "salt-pan",
     "name": "Salt Pan",
-    "terrain": ["desert", "coast"],
+    "terrain": ["desert"],
     "description": "A dry white plain, cracked into plates the size of hands, glaring under the sun and giving back the heat of it.",
     "arrival": "The salt crunches and gives under each step. There is no shade at all and no sound but your own feet, and the far edge of the pan wobbles and lifts off the ground in the heat. You stay until the glare gets to be too much, which is not long, and you leave a line of footprints that the next weather will take."
   }

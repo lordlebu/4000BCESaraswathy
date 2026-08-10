@@ -4,6 +4,7 @@
   "private": true,
   "description": "A cozy Jambhudweepa travel prototype: generate a map, wander, and keep a journal.",
   "type": "module",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -15,7 +16,6 @@
     "build:data": "node tools/build-species-data.js",
     "build:sprite": "node tools/build-sprite-sheet.js --colours=30 assets/source/Varuna_emboss.png,assets/source/Varuna_sitting.png assets/varuna-overworld.png 26 40 && node tools/build-sprite-sheet.js --colours=26 assets/source/Mithra.png assets/mithra-overworld.png 26 40"
   },
-  "license": "UNLICENSED",
   "dependencies": {
     "phaser": "^4.2.1",
     "react": "^19.2.8",

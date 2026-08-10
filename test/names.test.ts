@@ -112,9 +112,20 @@ describe('landmarks', () => {
     }
   });
 
+  // This started at "more than 2 kinds", which a playtest walked straight past: three of five
+  // showcase seeds were handing out the same salt pan, one of them on a monsoon shore with no
+  // desert anywhere on the map. The cause was in placement rather than in this data — the landmark
+  // went to the furthest reachable tile, which is nearly always map edge, so coast and plains took
+  // 39 of 60 seeds between them while standing stones never appeared at all. Levelling the terrains
+  // before picking a tile fixed it; this threshold is what stops it drifting back.
   it('varies across seeds rather than always choosing the same kind', () => {
     const chosen = new Set(worlds.map((w) => landmarkKindFor(w.landmark, w.seed).id));
-    expect(chosen.size, `only saw ${[...chosen].join(', ')}`).toBeGreaterThan(2);
+    expect(chosen.size, `only saw ${[...chosen].join(', ')}`).toBeGreaterThanOrEqual(4);
+  });
+
+  it('spreads the landmark over varied ground, not just the coastline', () => {
+    const ground = new Set(worlds.map((w) => w.landmark.terrain));
+    expect(ground.size, `only stood on ${[...ground].join(', ')}`).toBeGreaterThanOrEqual(4);
   });
 
   it('every authored kind has prose worth stopping for', () => {
