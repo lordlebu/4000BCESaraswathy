@@ -2868,11 +2868,8 @@
     "name": "Estemmenosuchus Executioner",
     "binomial": "Estemmenosuchus asuricus",
     "region": "asura-conjurations",
-    "biomes": [
-      "wetland",
-      "plains"
-    ],
-    "placement": "encounter",
+    "biomes": [],
+    "placement": "lore",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A massive, armored floodplain omnivore mutated with double jaw-strength, used for public execution rituals in Naraka."
