@@ -13,20 +13,42 @@ const place: Place = { seed: 'lothal', x: 3, y: 4, biome: 'wetland', creature: '
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
 
-describe('when no canon service is listening', () => {
+// The default build has no canon service configured, so nothing here may touch the network.
+// This is the case that broke CI: the client used to default to http://localhost:8000, and a
+// refused request still writes a console error the browser suite counts as a failure.
+describe('when no canon service is configured', () => {
+  it('never calls fetch at all', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(canonAvailable()).resolves.toBe(false);
+    await expect(loreFor({ ...place, x: 500 })).resolves.toBeNull();
+    await expect(askAbout({ ...place, x: 501 })).resolves.toBeNull();
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+const configured = () => vi.stubEnv('VITE_CANON_API', 'http://canon.test');
+
+describe('when configured but nothing is listening', () => {
   it('reports unavailable rather than throwing', async () => {
+    configured();
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('fetch failed')));
     await expect(canonAvailable()).resolves.toBe(false);
   });
 
   it('returns nothing from lore instead of failing', async () => {
+    configured();
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('fetch failed')));
     await expect(loreFor({ ...place, x: 90 })).resolves.toBeNull();
   });
 
   it('returns nothing from ask instead of failing', async () => {
+    configured();
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('fetch failed')));
     await expect(askAbout({ ...place, x: 91 })).resolves.toBeNull();
   });
@@ -34,6 +56,7 @@ describe('when no canon service is listening', () => {
 
 describe('when the service is up but has no index', () => {
   it('still reports unavailable — an empty collection has nothing to say', async () => {
+    configured();
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true, chroma: false }) })
@@ -48,6 +71,7 @@ describe('when the service answers', () => {
       query: 'Lothal Marsh-Lurker, wetland of Jambhudweepa',
       sources: [{ entity_id: 'fauna_lothal_marsh_lurker', name: 'Lothal Marsh-Lurker', type: 'fauna', source: 'database/fauna/x.json', distance: 0.29 }]
     };
+    configured();
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => body });
     vi.stubGlobal('fetch', fetchMock);
 
@@ -60,6 +84,7 @@ describe('when the service answers', () => {
 
   it('asks once per tile — a place you walk back to reads the same', async () => {
     const body = { query: 'q', sources: [] };
+    configured();
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => body });
     vi.stubGlobal('fetch', fetchMock);
 
@@ -70,6 +95,7 @@ describe('when the service answers', () => {
   });
 
   it('treats a 500 as nothing to say', async () => {
+    configured();
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500 }));
     await expect(loreFor({ ...place, x: 77 })).resolves.toBeNull();
   });
