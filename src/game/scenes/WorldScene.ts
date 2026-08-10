@@ -37,6 +37,18 @@ const SIGHT_RADIUS = 2;
 /** Milliseconds per step on easy ground. `travelCost` from the biome data scales this. */
 const STEP_MS = 170;
 
+/** Keys that move the traveller one tile, by KeyboardEvent.code. */
+const STEP_KEYS: Record<string, [number, number]> = {
+  ArrowUp: [0, -1],
+  KeyW: [0, -1],
+  ArrowDown: [0, 1],
+  KeyS: [0, 1],
+  ArrowLeft: [-1, 0],
+  KeyA: [-1, 0],
+  ArrowRight: [1, 0],
+  KeyD: [1, 0]
+};
+
 export interface WorldSceneData {
   seed: string;
   discovered?: string[];
@@ -55,6 +67,8 @@ export class WorldScene extends Phaser.Scene {
   private moving = false;
   private queuedPath: Point[] = [];
   private facing: Facing = 'down';
+  /** A key press caught between frames, waiting for the next one to act on it. */
+  private pendingStep: [number, number] | null = null;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
   /** The day/night wash, drawn over the whole map. */
@@ -206,12 +220,25 @@ export class WorldScene extends Phaser.Scene {
       );
     });
 
+    // A tap of a key must never be swallowed.
+    //
+    // `update` polls `isDown`, which only sees a key that happens to still be held when the frame
+    // runs. A press shorter than a frame — about sixteen milliseconds, well within a brisk tap —
+    // falls between two ticks and the traveller simply does not move. Listening for the event as
+    // well means every press is remembered until the next frame can act on it.
+    keyboard.on(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN, (event: KeyboardEvent) => {
+      const delta = STEP_KEYS[event.code];
+      if (!delta) return;
+      this.pendingStep = delta;
+    });
+
     EventBus.onEvent('new-journey', this.onNewJourney);
     EventBus.onEvent('resume-journey', this.onNewJourney);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       EventBus.offEvent('new-journey', this.onNewJourney);
       EventBus.offEvent('resume-journey', this.onNewJourney);
       this.input.off(Phaser.Input.Events.POINTER_UP);
+      keyboard.off(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN);
     });
   }
 
@@ -232,17 +259,20 @@ export class WorldScene extends Phaser.Scene {
 
     if (this.moving) return;
 
+    // A key still held moves continuously; a key already released is honoured once, from the press
+    // the listener caught. Held wins, so holding a direction does not queue up a backlog of steps.
     const held =
-      (this.cursors.up.isDown || this.wasd.up.isDown ? 'up' : null) ??
-      (this.cursors.down.isDown || this.wasd.down.isDown ? 'down' : null) ??
-      (this.cursors.left.isDown || this.wasd.left.isDown ? 'left' : null) ??
-      (this.cursors.right.isDown || this.wasd.right.isDown ? 'right' : null);
+      (this.cursors.up.isDown || this.wasd.up.isDown ? [0, -1] : null) ??
+      (this.cursors.down.isDown || this.wasd.down.isDown ? [0, 1] : null) ??
+      (this.cursors.left.isDown || this.wasd.left.isDown ? [-1, 0] : null) ??
+      (this.cursors.right.isDown || this.wasd.right.isDown ? [1, 0] : null);
+    const delta = held ?? this.pendingStep;
+    this.pendingStep = null;
 
-    if (held) {
-      // A key press cancels a tap-walk, so the player is never fighting their own path.
+    if (delta) {
+      // Walking on purpose cancels a tap-walk, so the player is never fighting their own path.
       this.queuedPath = [];
-      const delta = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[held] as [number, number];
-      this.step({ x: this.at.x + delta[0], y: this.at.y + delta[1] });
+      this.step({ x: this.at.x + delta[0]!, y: this.at.y + delta[1]! });
       return;
     }
 

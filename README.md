@@ -76,16 +76,21 @@ art is commissioned and what the build does to it.
 `npm run build` emits plain static files, so the game can be hosted on GitHub Pages, Hostinger, or
 anything that serves a folder. `DEPLOY_BASE` sets the subpath.
 
-The Pages workflow is currently **parked at manual-trigger only**, because Pages has never been
-enabled for this repository and `configure-pages` 404s until it is — and a workflow that always
-fails just teaches people to ignore red. To turn it on:
+`.github/workflows/pages.yml` deploys on every push to `main`. It is the **only** workflow that
+should touch Pages: turning Pages on makes GitHub offer to commit a `jekyll-gh-pages.yml` as well,
+which would publish this README rendered as a web page rather than the game, and fight the real
+workflow over the shared `pages` concurrency group. Decline it.
 
-1. Settings → Pages → Build and deployment → Source: **GitHub Actions**
-2. Run *Deploy to Pages* once from the Actions tab
-3. Restore the push trigger at the top of `.github/workflows/pages.yml`
+The build is verified against a subpath deploy — the browser suite passes against `dist/` served at
+`/4000BCESaraswathy/`, which is how Pages serves it. To check that yourself before a deploy:
 
-The build itself is known good: the browser suite passes against a subpath build served the way
-Pages serves it.
+```powershell
+$env:DEPLOY_BASE = '/4000BCESaraswathy/'
+npx vite build
+npx vite preview --port 4180                 # same env var, same shell
+$env:PLAYWRIGHT_BASE_URL = 'http://localhost:4180/4000BCESaraswathy/'
+npm run test:e2e
+```
 
 ## Documentation
 

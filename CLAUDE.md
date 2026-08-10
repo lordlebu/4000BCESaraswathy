@@ -75,11 +75,10 @@ Navigation in the specs is relative (`?seed=x`, never `/?seed=x`) so a baseURL s
 `npm run build` respects `DEPLOY_BASE`, which the Pages workflow sets to `/<repo>/`. Locally and on
 any plain static host it defaults to `/`.
 
-**Deployment is parked.** `.github/workflows/pages.yml` is `workflow_dispatch` only, because Pages
-has never been enabled for the repository and `configure-pages` 404s — a workflow that always fails
-just teaches people to ignore red. The build is known good: the browser suite passes against a
-subpath build served the way Pages serves it. Re-enabling is a repository setting plus restoring the
-push trigger; the steps are written at the top of that file.
+**`pages.yml` is the only workflow that may deploy Pages.** Enabling Pages makes GitHub offer to
+commit a `jekyll-gh-pages.yml` too — decline it. This is a Vite application, not a Jekyll site, so
+that workflow would publish the rendered README instead of the game, and the two would contend for
+the shared `pages` concurrency group.
 
 ## Architecture
 

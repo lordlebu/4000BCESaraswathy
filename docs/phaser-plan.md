@@ -190,11 +190,9 @@ close the tab, reopen, and find the journey intact.
 
 1. GitHub Actions: install → typecheck → test → build on push and PR. **Done**, plus a browser job
    running the Playwright suite against Chromium.
-2. Pages deploy. **Written and verified, but parked** — the workflow is `workflow_dispatch` only
-   until Pages is enabled for the repository under Settings → Pages → Source: "GitHub Actions",
-   because `configure-pages` 404s until then and a permanently red workflow is worse than none.
-   Vite `base` comes from `DEPLOY_BASE`, and the browser suite passes against a subpath build
-   served at `/4000BCESaraswathy/`, so only the setting is missing.
+2. Pages deploy. **Live** — `.github/workflows/pages.yml` runs on every push to `main`. Decline the
+   `jekyll-gh-pages.yml` GitHub offers when Pages is enabled: it would publish the rendered README
+   instead of the game, and contend for the shared `pages` concurrency group.
 3. Add a `LICENSE` (none currently exists) and replace the npm-publish workflow, which cannot
    succeed and targets the wrong destination anyway.
 4. Rewrite `README.md` to lead with the play link, a screenshot, and `npm install && npm run dev`.
