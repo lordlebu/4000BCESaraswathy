@@ -5,8 +5,10 @@ import { EventBus, type GameToUi } from '../game/EventBus';
 import { PhaserGame } from '../game/PhaserGame';
 import { JournalPanel } from './JournalPanel';
 import { SeedBar } from './SeedBar';
+import { CanonPanel } from './CanonPanel';
+import { canonAvailable, type Place } from './canonClient';
 import { creatureAction } from '../content/journal';
-import { biomes, creatureFor } from '../content/species';
+import { biomes, creatureFor, floraFor } from '../content/species';
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
 import { loadJourney, saveJourney } from '../save';
@@ -85,6 +87,34 @@ export function App() {
     if (!world || !arrival) return null;
     const tile = world.tiles[arrival.at.y]?.[arrival.at.x];
     return tile ? creatureFor(tile, world.seed) : null;
+  }, [world, arrival]);
+
+  // Asked once. A canon service is optional and usually absent, so the panel stays hidden
+  // rather than offering something that will fail.
+  const [canonUp, setCanonUp] = useState(false);
+  useEffect(() => {
+    let live = true;
+    canonAvailable().then((up) => {
+      if (live) setCanonUp(up);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  const place = useMemo<Place | null>(() => {
+    if (!world || !arrival) return null;
+    const tile = world.tiles[arrival.at.y]?.[arrival.at.x];
+    if (!tile) return null;
+    return {
+      seed: world.seed,
+      x: arrival.at.x,
+      y: arrival.at.y,
+      biome: tile.biome,
+      creature: creatureFor(tile, world.seed)?.name ?? null,
+      flora: floraFor(tile, world.seed)?.name ?? null,
+      landmark: arrival.atLandmark ? world.landmark.name : null
+    };
   }, [world, arrival]);
 
   const generate = useCallback((next: string) => {
@@ -172,6 +202,8 @@ export function App() {
             alreadySketched={Boolean(currentCreature && observed.includes(currentCreature.name))}
             onObserve={observe}
           />
+
+          <CanonPanel place={place} available={canonUp} />
 
           <section className="legend">
             <h2>Map Legend</h2>
