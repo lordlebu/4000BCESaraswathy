@@ -780,11 +780,8 @@
     "name": "Fever-Root",
     "binomial": "Curcuma asurica",
     "region": "asura-conjurations",
-    "biomes": [
-      "wetland",
-      "forest"
-    ],
-    "placement": "flavour",
+    "biomes": [],
+    "placement": "lore",
     "rarity": "mythic",
     "journalPrompt": "A mutated turmeric plant that grows near underworld rifts, its toxic, black rhizomes causing intense hallucinations when touched."
   },
@@ -830,11 +827,8 @@
     "name": "Naraka Pitcher-Plant",
     "binomial": "Nepenthes asurica",
     "region": "asura-conjurations",
-    "biomes": [
-      "forest",
-      "wetland"
-    ],
-    "placement": "flavour",
+    "biomes": [],
+    "placement": "lore",
     "rarity": "mythic",
     "journalPrompt": "A colossal carnivorous plant of the twilight zone, its wide, acid-filled pitcher capable of digesting entire small primates."
   },

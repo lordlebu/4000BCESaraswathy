@@ -2909,10 +2909,8 @@
     "name": "Underworld Blood-Leech",
     "binomial": "Hirudo asurica",
     "region": "asura-conjurations",
-    "biomes": [
-      "river"
-    ],
-    "placement": "encounter",
+    "biomes": [],
+    "placement": "lore",
     "rarity": "mythic",
     "mood": "watchful",
     "journalPrompt": "A giant aquatic parasite of the Naraka rivers that grows up to 3 feet, draining the vitality of anything that falls into the sulfurous waters."
@@ -2936,10 +2934,8 @@
     "name": "Underworld Water-Snake",
     "binomial": "Serpens asuricus",
     "region": "asura-conjurations",
-    "biomes": [
-      "river"
-    ],
-    "placement": "encounter",
+    "biomes": [],
+    "placement": "lore",
     "rarity": "mythic",
     "mood": "fearsome",
     "journalPrompt": "A highly venomous, dark-scaled snake that swims in the sulfuric rivers of Naraka, its bite causing immediate paralysis."
@@ -3042,11 +3038,8 @@
     "name": "Void-Born Leech",
     "binomial": "Hirudo titan",
     "region": "asura-conjurations",
-    "biomes": [
-      "wetland",
-      "river"
-    ],
-    "placement": "encounter",
+    "biomes": [],
+    "placement": "lore",
     "rarity": "mythic",
     "mood": "watchful",
     "journalPrompt": "A giant, 6-foot leech of the Naraka rifts that attaches to larger monsters, draining their magical energy."
