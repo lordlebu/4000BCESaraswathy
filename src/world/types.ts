@@ -42,6 +42,14 @@ export interface NamedPlace extends Point {
   name: string;
 }
 
+/**
+ * Ground a landmark can stand on.
+ *
+ * `TerrainBiomeId` alone is wrong here: a heron pool belongs on a river, and the generator does
+ * place landmarks there, so the type has to admit it. Settlement and sea it never uses.
+ */
+export type LandmarkTerrain = TerrainBiomeId | 'river';
+
 export interface Landmark extends NamedPlace {
   /**
    * What the tile was before it became the landmark.
@@ -51,7 +59,7 @@ export interface Landmark extends NamedPlace {
    * what lets `world/` stay free of `data/*.json`: the generator says "something worth seeing
    * stands here, on forest", and `content/landmarks.ts` decides it is a great banyan.
    */
-  terrain: TerrainBiomeId;
+  terrain: LandmarkTerrain;
 }
 
 export interface River {

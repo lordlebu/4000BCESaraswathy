@@ -51,28 +51,48 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
   const box = (await canvas.boundingBox())!;
   const arrival = page.locator('.arrival');
 
-  for (let leg = 0; leg < 60; leg += 1) {
+  // Sixty legs was enough while landmarks tended to land on coast and plains. Levelling the terrain
+  // choice sends them into the highlands too, which is slower ground — `travelCost` is 3 in the
+  // mountains against 1 on plains — and a windier route, so the same walk needs more turns.
+  let wasAt = '';
+  let stuckFor = 0;
+
+  for (let leg = 0; leg < 110; leg += 1) {
     if (await arrival.isVisible()) break;
 
     const heading = await bearing(page);
     if (!heading) break;
 
-    if (heading.nearness === 'here') {
-      // Within a few tiles, tapping overshoots and the traveller paces back and forth. Step.
+    // Taps cover ground; steps finish the job.
+    //
+    // A tap becomes a pathfinding request for whatever tile it lands on, and a tile that is sea or
+    // cut off yields no path at all — the traveller simply does not move, the journal still says
+    // the same thing, and the next turn taps the same place. That deadlocked the walk twice on the
+    // same tile: "Lamtala lies south-east of here. You are close", 248 tiles explored, going
+    // nowhere. Once the journal says the place is close, step instead, which cannot miss.
+    if (heading.nearness !== 'far' || stuckFor >= 2) {
       if (heading.dy) await page.keyboard.press(heading.dy > 0 ? 'ArrowDown' : 'ArrowUp');
       if (heading.dx) await page.keyboard.press(heading.dx > 0 ? 'ArrowRight' : 'ArrowLeft');
-      await page.waitForTimeout(450);
-      continue;
+      // A stuck walk is usually one axis blocked, so try the other on its own as well.
+      if (stuckFor >= 3) {
+        await page.keyboard.press(stuckFor % 2 ? 'ArrowUp' : 'ArrowDown');
+      }
+      await page.waitForTimeout(420);
+    } else {
+      // Tap ahead in the bearing direction and let the pathfinder route around the water. Nudging
+      // off dead centre on the unused axis keeps a blocked route from retrying the identical tap.
+      const jitter = (leg % 5) * 0.08 - 0.16;
+      const x = box.width * (0.5 + heading.dx * 0.42 + (heading.dx === 0 ? jitter : 0));
+      const y = box.height * (0.5 + heading.dy * 0.42 + (heading.dy === 0 ? jitter : 0));
+      await canvas.click({ position: { x, y } });
+      await page.waitForTimeout(1400);
     }
 
-    // Otherwise tap ahead in the bearing direction and let the pathfinder route around water.
-    // Nudging off dead centre on the unused axis keeps a blocked route from retrying the same tap.
-    const reach = heading.nearness === 'close' ? 0.18 : 0.42;
-    const jitter = (leg % 5) * 0.08 - 0.16;
-    const x = box.width * (0.5 + heading.dx * reach + (heading.dx === 0 ? jitter : 0));
-    const y = box.height * (0.5 + heading.dy * reach + (heading.dy === 0 ? jitter : 0));
-    await canvas.click({ position: { x, y } });
-    await page.waitForTimeout(1400);
+    // "Somewhere at 27, 18" changes as the traveller moves, so an unchanged heading means a turn
+    // that achieved nothing.
+    const here = (await page.locator('.journal h2').textContent()) ?? '';
+    stuckFor = here === wasAt ? stuckFor + 1 : 0;
+    wasAt = here;
   }
 
   await expect(arrival, 'never reached the landmark').toBeVisible({ timeout: 15_000 });

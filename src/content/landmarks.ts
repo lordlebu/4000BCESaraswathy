@@ -7,13 +7,13 @@
 
 import landmarkData from '../../data/landmarks.json';
 import { tileHash } from '../world/rng';
-import type { Landmark, TerrainBiomeId } from '../world/types';
+import type { Landmark, LandmarkTerrain } from '../world/types';
 
 /** One entry of `data/landmarks.json`. Hand-written, like `biomes.json`. */
 export interface LandmarkKind {
   id: string;
   name: string;
-  terrain: TerrainBiomeId[];
+  terrain: LandmarkTerrain[];
   /** What you see standing there. */
   description: string;
   /** The page written into the journal on arrival — the end of the session. */
