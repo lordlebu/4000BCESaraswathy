@@ -174,3 +174,42 @@ Drop the files in `assets/` and tell me the filenames. Notes for wiring them up:
   current asset.
 - **Please keep each file small.** The current `Varuna.png` is 418 KB for one sprite and dominates
   the whole download. A true 24×32 sprite should be well under 2 KB.
+
+---
+
+## Missing keyframes for the overworld animation
+
+`assets/source/Varuna_final.png` gives twelve small figures and four large ones. Twelve is plenty
+of *poses* but not a set of *animations*: no direction carries a pair of frames that differ only in
+leg position, so the traveller can stand and sit but cannot stride. What is there:
+
+| Have | Frames |
+| --- | --- |
+| Standing, facing the viewer | 0, 1, 5 |
+| Profile, facing right | 2 |
+| Profile, facing left | 8, 11 |
+| Seen from behind | 7, 9 |
+| Seated or crouched | 3, 4, 6, 10 |
+
+**What would finish the overworld animation**, in order of how much difference it makes:
+
+1. **A two-frame walk for the profile view.** One frame with the far leg forward, one with the legs
+   passing. This is the direction the player spends most time in and the only one with a single
+   frame today, so it is the most visible gap.
+2. **A two-frame walk seen from behind.** Same idea: 7 and 9 differ at the arm, not the legs.
+3. **A two-frame walk facing the viewer.** 0 and 1 nearly do this — the feet are together in one
+   and apart in the other — so this is the least urgent.
+
+Nice to have, not needed:
+
+- **A seated figure seen from behind**, for sitting at a landmark while facing away.
+- **A "writing in the journal" pose**, seated with the book open. The arrival page is the emotional
+  beat of the whole slice and currently the figure just sits.
+
+> **Prompt for the walk pair:**
+> Two pixel art frames of the same elderly travelling scholar walking, seen **[in profile facing
+> right / from behind]**, for a cozy top-down exploration game. Frame one: far leg forward, mid
+> stride. Frame two: legs passing close together. Identical character, identical size and position
+> in frame, only the legs and the swing of the coat differ between them. Wide-brimmed blue hat,
+> muted indigo robe, grey beard, brown boots, satchel, staff. Same muted palette and same scale as
+> the existing sheet. Lossless PNG, genuine alpha channel, no checkerboard, no guides, no text.

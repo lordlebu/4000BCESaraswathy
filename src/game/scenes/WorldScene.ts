@@ -6,11 +6,20 @@
 // engine versions touches this folder alone.
 
 import Phaser from 'phaser';
-import varunaUrl from '../../../assets/varuna-walk.png';
+import varunaUrl from '../../../assets/varuna-overworld.png';
 import { EventBus } from '../EventBus';
 import { FOG_TEXTURE, TILE_SIZE, createTileTextures, tileTextureKey } from '../tileTextures';
-import { PLAYER_FRAME, PLAYER_SHEET, facingFromStep, frameFor, loadPlayerSheet, type Facing } from '../player';
-import { phaseAt, phaseFromClock, skyAt } from '../dayNight';
+import {
+  PLAYER_FRAME,
+  PLAYER_SCALE,
+  PLAYER_SHEET,
+  animFor,
+  createPlayerAnimations,
+  facingFromStep,
+  loadPlayerSheet,
+  type Facing
+} from '../player';
+import { phaseAt, skyAt, startPhaseFor } from '../dayNight';
 import { arrivalPage, describeSurroundings, describeTile, landmarkHint } from '../../content/journal';
 import { travelCost } from '../../content/species';
 import { generateWorld, isWalkable } from '../../world/generate';
@@ -28,9 +37,6 @@ const SIGHT_RADIUS = 2;
 /** Milliseconds per step on easy ground. `travelCost` from the biome data scales this. */
 const STEP_MS = 170;
 
-/** The player artwork carries layout guides in its margins; this is the figure itself. */
-
-
 export interface WorldSceneData {
   seed: string;
   discovered?: string[];
@@ -40,7 +46,7 @@ export class WorldScene extends Phaser.Scene {
   private world!: World;
   private tileSprites: Phaser.GameObjects.Image[][] = [];
   private fogSprites: Phaser.GameObjects.Image[][] = [];
-  private player!: Phaser.GameObjects.Image;
+  private player!: Phaser.GameObjects.Sprite;
   private at: Point = { x: 0, y: 0 };
   private discovered = new Set<string>();
   private visible = new Set<string>();
@@ -72,7 +78,8 @@ export class WorldScene extends Phaser.Scene {
     this.moving = false;
     this.facing = 'down';
     // The map opens on the light of the hour the player is actually in, then drifts from there.
-    this.startPhase = phaseFromClock();
+    // `?hour=21` overrides it, so the evening can be checked without waiting for the evening.
+    this.startPhase = startPhaseFor(new URLSearchParams(window.location.search).get('hour'));
   }
 
   preload(): void {
@@ -137,24 +144,32 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createPlayer(): void {
+    createPlayerAnimations(this);
     // Varuna stands taller than a tile, so he is anchored by the feet and allowed to overhang.
-    // The frame is drawn at its native size — scaling pixel art by a fraction is what makes it
-    // shimmer as it moves.
+    // Scaled by a whole number — a fractional scale is what makes pixel art shimmer as it moves.
     this.player = this.add
-      .image(0, 0, PLAYER_SHEET, frameFor(this.facing).frame)
+      .sprite(0, 0, PLAYER_SHEET, 0)
       .setOrigin(0.5, 1)
-      .setDisplaySize(PLAYER_FRAME.width, PLAYER_FRAME.height)
+      .setDisplaySize(PLAYER_FRAME.width * PLAYER_SCALE, PLAYER_FRAME.height * PLAYER_SCALE)
       .setDepth(20);
     this.player.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+    this.updateAnimation();
     this.placePlayer(this.at);
   }
 
-  /** Point the sprite the way it is walking, mirroring the side frame for leftward steps. */
+  /**
+   * Play whatever the traveller should be doing: walking, standing, or sitting at the landmark.
+   * Re-playing the animation already running would restart it every frame, so it is checked first.
+   */
+  private updateAnimation(): void {
+    const { key, flipX } = animFor(this.facing, this.moving, this.arrived);
+    if (this.player.anims.currentAnim?.key !== key) this.player.play(key);
+    this.player.setFlipX(flipX);
+  }
+
+  /** Point the sprite the way it is walking, mirroring the side view for leftward steps. */
   private faceTowards(dx: number, dy: number): void {
     this.facing = facingFromStep(dx, dy, this.facing);
-    const { frame, flipX } = frameFor(this.facing);
-    this.player.setFrame(frame);
-    this.player.setFlipX(flipX);
   }
 
   private placePlayer(at: Point): void {
@@ -247,6 +262,7 @@ export class WorldScene extends Phaser.Scene {
     const cost = travelCost(tile.biome) ?? 1;
     this.moving = true;
     this.at = target;
+    this.updateAnimation();
 
     this.tweens.add({
       targets: this.player,
@@ -257,6 +273,7 @@ export class WorldScene extends Phaser.Scene {
       onComplete: () => {
         this.moving = false;
         this.arriveAt(target);
+        this.updateAnimation();
       }
     });
   }

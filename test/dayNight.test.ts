@@ -5,7 +5,7 @@
 // jumps, is worse than no cycle at all in a game whose whole pitch is calm.
 
 import { describe, expect, it } from 'vitest';
-import { DAY_MS, phaseAt, phaseFromClock, skyAt } from '../src/game/dayNight';
+import { DAY_MS, phaseAt, phaseFromClock, skyAt, startPhaseFor } from '../src/game/dayNight';
 
 const channels = (colour: number) => [(colour >> 16) & 0xff, (colour >> 8) & 0xff, colour & 0xff];
 
@@ -117,4 +117,26 @@ describe('skyAt', () => {
     const labels = new Set(walk.map((s) => s.label));
     expect(labels.size, `saw ${[...labels].join(', ')}`).toBeLessThanOrEqual(3);
   });
+});
+
+describe('startPhaseFor', () => {
+  const noon = new Date(2026, 7, 10, 12, 0, 0);
+
+  it('honours an ?hour= override so any time of day can be playtested', () => {
+    expect(skyAt(startPhaseFor('6', noon)).label).toBe('first light');
+    expect(skyAt(startPhaseFor('19', noon)).label).toBe('evening');
+    expect(skyAt(startPhaseFor('22', noon)).label).toBe('night');
+  });
+
+  it('accepts a fractional hour', () => {
+    expect(startPhaseFor('19.5', noon)).toBeCloseTo(startPhaseFor('19', noon) + 0.5 / 24, 6);
+  });
+
+  // A typo in the URL must never strand the map at midnight.
+  it.each([null, '', '  ', 'nine', '24', '-1', 'NaN', 'Infinity'])(
+    'falls back to the real clock for %p',
+    (bad) => {
+      expect(startPhaseFor(bad, noon)).toBe(phaseFromClock(noon));
+    }
+  );
 });

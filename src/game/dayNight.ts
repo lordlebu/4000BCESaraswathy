@@ -103,6 +103,26 @@ export function phaseFromClock(now = new Date()): number {
   return (((secondsIntoDay / 86_400 - 0.25) % 1) + 1) % 1;
 }
 
+/**
+ * Where a journey should open, honouring an `?hour=` override.
+ *
+ * Playtesting a day/night cycle is otherwise painful: whoever is testing sees only their own hour,
+ * so an evening that looks wrong at nine at night cannot be checked at ten in the morning. Anything
+ * unparseable or out of range falls back to the real clock, so a typo in the URL never leaves the
+ * map stuck at midnight.
+ */
+export function startPhaseFor(hourParam: string | null, now = new Date()): number {
+  if (hourParam === null || hourParam.trim() === '') return phaseFromClock(now);
+  const hour = Number(hourParam);
+  if (!Number.isFinite(hour) || hour < 0 || hour >= 24) return phaseFromClock(now);
+
+  const whole = Math.floor(hour);
+  const minutes = Math.round((hour - whole) * 60);
+  const at = new Date(now);
+  at.setHours(whole, minutes, 0, 0);
+  return phaseFromClock(at);
+}
+
 /** The wash to draw over the map at this point in the day. */
 export function skyAt(phase: number): Sky {
   const p = ((phase % 1) + 1) % 1;

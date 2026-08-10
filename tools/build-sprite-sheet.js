@@ -120,6 +120,24 @@ function encodePng(width, height, data) {
   ]);
 }
 
+// --- Options ---------------------------------------------------------------
+
+/**
+ * `--flag=value` before the positional arguments, so npm scripts stay cross-platform. Environment
+ * variables would need `cross-env` on Windows, and this project does not add a dependency for that.
+ */
+const flags = new Map(
+  process.argv
+    .slice(2)
+    .filter((a) => a.startsWith('--'))
+    .map((a) => {
+      const [key, value = 'true'] = a.slice(2).split('=');
+      return [key, value];
+    })
+);
+
+const option = (name, envName) => flags.get(name) ?? process.env[envName];
+
 // --- Cleaning -------------------------------------------------------------
 
 /** The checkerboard is grey; the artwork is not (except the beard, which the flood cannot reach). */
@@ -256,6 +274,50 @@ function findSprites(img, minArea = 400) {
   return boxes;
 }
 
+/**
+ * The colour at the middle of a source rectangle, or null where it is transparent.
+ *
+ * Point sampling rather than any kind of averaging. These sheets are pixel art blown up, so one art
+ * pixel covers a block several pixels across; when the output grid is close to the art's own
+ * resolution, a block covers less than one art pixel and *any* averaging — mean or mode — mixes
+ * neighbouring art pixels together. That is what turned the faces on this sheet into a smudge.
+ * Reading the centre point takes one real colour straight out of the artwork instead.
+ *
+ * Transparency is decided by the neighbourhood, not the centre, so a limb one pixel wide is not
+ * dropped because its midpoint happened to land just outside.
+ */
+function centreColour(img, x0, y0, x1, y1) {
+  const { width, data } = img;
+  let opaque = 0;
+  let total = 0;
+  for (let y = y0; y < y1; y += 1) {
+    for (let x = x0; x < x1; x += 1) {
+      total += 1;
+      if (data[(y * width + x) * 4 + 3] >= SOLID) opaque += 1;
+    }
+  }
+  if (!total || opaque * 2 < total) return null;
+
+  // Walk outward from the centre until a solid pixel turns up — the midpoint of a block straddling
+  // an outline can itself be transparent even when the block is mostly figure.
+  const cx = Math.floor((x0 + x1 - 1) / 2);
+  const cy = Math.floor((y0 + y1 - 1) / 2);
+  for (let radius = 0; radius <= Math.max(x1 - x0, y1 - y0); radius += 1) {
+    for (let dy = -radius; dy <= radius; dy += 1) {
+      for (let dx = -radius; dx <= radius; dx += 1) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== radius) continue;
+        const x = cx + dx;
+        const y = cy + dy;
+        if (x < x0 || y < y0 || x >= x1 || y >= y1) continue;
+        const p = (y * width + x) * 4;
+        if (data[p + 3] < SOLID) continue;
+        return [data[p], data[p + 1], data[p + 2]];
+      }
+    }
+  }
+  return null;
+}
+
 /** The most common colour in a source rectangle, ignoring transparency. Mode, not mean. */
 function modeColour(img, x0, y0, x1, y1) {
   const { width, data } = img;
@@ -307,7 +369,9 @@ function resample(img, box, cell) {
       const sx1 = box.x0 + Math.max(Math.floor(((x + 1) * srcW) / drawW), Math.floor((x * srcW) / drawW) + 1);
       const sy0 = box.y0 + Math.floor((y * srcH) / drawH);
       const sy1 = box.y0 + Math.max(Math.floor(((y + 1) * srcH) / drawH), Math.floor((y * srcH) / drawH) + 1);
-      const colour = modeColour(img, sx0, sy0, sx1, sy1);
+      // SPRITE_SAMPLE=mode averages instead; useful for a noisy source with a much coarser grid.
+      const sample = option('sample', 'SPRITE_SAMPLE') === 'mode' ? modeColour : centreColour;
+      const colour = sample(img, sx0, sy0, sx1, sy1);
       if (!colour) continue;
       const p = ((y + offsetY) * cell.width + x + offsetX) * 4;
       out[p] = colour[0];
@@ -383,7 +447,7 @@ function quantise(sheet, maxColours) {
 // --- Run ------------------------------------------------------------------
 
 function main() {
-  const [, , inputArg, outputArg, wArg, hArg] = process.argv;
+  const [inputArg, outputArg, wArg, hArg] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
   // Comma-separated inputs become consecutive frames in the order given, which is how the
   // directional frames are assembled from one file per facing.
   const inputs = (inputArg || 'Varuna_new.png')
@@ -405,7 +469,22 @@ function main() {
       keyOutBackground(img);
     }
 
-    const boxes = findSprites(img);
+    let boxes = findSprites(img);
+
+    // A sheet can carry more than one scale of art — the final Varuna sheet has twelve small
+    // overworld figures above four large ones meant for a zoomed-in view. Resampling both into one
+    // cell would squash the large ones to nothing, so height bounds pick out a single band.
+    const minHeight = Number(option('min-height', 'SPRITE_MIN_HEIGHT')) || 0;
+    const maxHeight = Number(option('max-height', 'SPRITE_MAX_HEIGHT')) || Infinity;
+    const before = boxes.length;
+    boxes = boxes.filter((b) => {
+      const h = b.y1 - b.y0 + 1;
+      return h >= minHeight && h <= maxHeight;
+    });
+    if (boxes.length !== before) {
+      console.log(`  ${before - boxes.length} figure(s) outside the height band, skipped`);
+    }
+
     console.log(
       `  ${boxes.length} figure(s): ${boxes
         .map((b) => `${b.x1 - b.x0 + 1}x${b.y1 - b.y0 + 1}`)
@@ -424,7 +503,7 @@ function main() {
     }
   });
 
-  const palette = quantise(sheet, Number(process.env.SPRITE_COLOURS) || 22);
+  const palette = quantise(sheet, Number(option('colours', 'SPRITE_COLOURS')) || 22);
   console.log(`Quantised to ${palette.length} colours`);
 
   fs.mkdirSync(path.dirname(output), { recursive: true });
