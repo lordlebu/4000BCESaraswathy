@@ -14,7 +14,7 @@ import biomesData from '../../data/biomes.json';
 import creaturesData from '../../data/creatures.json';
 import floraData from '../../data/flora.json';
 import { pickFor } from '../world/rng';
-import type { Biome, BiomeId, Creature, Flora, Placement, Point } from '../world/types';
+import type { Biome, BiomeId, Creature, Flora, Placement, Point, Rarity } from '../world/types';
 
 export const biomes = biomesData as Biome[];
 export const creatures = creaturesData as Creature[];
@@ -34,10 +34,48 @@ function indexByBiome<T extends { biomes: BiomeId[]; placement: Placement }>(
   return index;
 }
 
+/**
+ * How much of a biome's pool each species occupies.
+ *
+ * `rarity` sat in the data and in `types.ts` for a long time without anything reading it, so a
+ * mythic Asura conjuration was exactly as likely as a heron. That is fine while every species in a
+ * biome is ordinary wildlife and actively wrong once they are not: half the settlement pool is
+ * Asura-tainted, and uniform picking put a horror in every second village.
+ *
+ * Weights are relative, not percentages. A biome of 6 common and 6 mythic species yields a mythic
+ * about 8% of the time — seen occasionally, never routine.
+ */
+const RARITY_WEIGHT: Record<Rarity, number> = { common: 12, rare: 4, mythic: 1 };
+
+/**
+ * The same index, with each species repeated by its weight.
+ *
+ * Expanding the list rather than weighting the draw keeps `pickFor` a plain modulo over a stable
+ * array, so a tile still resolves to the same species for the same seed and the determinism
+ * contract is untouched. A few thousand array references is not worth optimising away.
+ */
+function weightByRarity<T extends { rarity: Rarity }>(
+  index: Partial<Record<BiomeId, T[]>>
+): Partial<Record<BiomeId, T[]>> {
+  const out: Partial<Record<BiomeId, T[]>> = {};
+  for (const [biome, entries] of Object.entries(index) as [BiomeId, T[]][]) {
+    const pool: T[] = [];
+    for (const entry of entries) {
+      for (let i = 0; i < RARITY_WEIGHT[entry.rarity]; i += 1) pool.push(entry);
+    }
+    out[biome] = pool;
+  }
+  return out;
+}
+
 const biomesById = new Map<BiomeId, Biome>(biomes.map((biome) => [biome.id, biome]));
-// `lore` species — sky beings and Asura conjurations — are authored but never placed in play.
+// `lore` species — sky beings held for a future sky mode — are authored but never placed in play.
 const creaturesByBiome = indexByBiome(creatures, 'encounter');
 const floraByBiome = indexByBiome(flora, 'flavour');
+// Picking reads the weighted pools; `creaturesIn`/`floraIn` stay unique, which is what callers
+// asking "what lives here?" mean.
+const creaturePool = weightByRarity(creaturesByBiome);
+const floraPool = weightByRarity(floraByBiome);
 
 export function biomeFor(biome: BiomeId): Biome | null {
   return biomesById.get(biome) ?? null;
@@ -61,11 +99,11 @@ export function floraIn(biome: BiomeId): Flora[] {
  * the journal and the observe button call this.
  */
 export function creatureFor(tile: Point & { biome: BiomeId }, seed: string): Creature | null {
-  return pickFor(creaturesIn(tile.biome), seed, tile, 'creature');
+  return pickFor(creaturePool[tile.biome] ?? [], seed, tile, 'creature');
 }
 
 export function floraFor(tile: Point & { biome: BiomeId }, seed: string): Flora | null {
-  return pickFor(floraIn(tile.biome), seed, tile, 'flora');
+  return pickFor(floraPool[tile.biome] ?? [], seed, tile, 'flora');
 }
 
 /** Travel cost in "beats". `null` means impassable. Used by the scene to pace movement. */

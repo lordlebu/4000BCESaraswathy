@@ -2656,8 +2656,11 @@
     "name": "Colossal Void-Devourer",
     "binomial": "Sauropodoligator titan",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "wetland",
+      "river"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "An extinct sauropod-crocodile hybrid resurrected from buried bones via dark Asura magic, crowned with a cursed human visage."
@@ -2670,7 +2673,7 @@
     "biomes": [
       "desert"
     ],
-    "placement": "lore",
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A smaller, desert-bound variant of the Devourer, emerging from the sands of the Gedrosian wastes to hunt nomads."
@@ -2680,8 +2683,10 @@
     "name": "Winged Behemoth Manticore",
     "binomial": "Manticora titan",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "hills"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "An unnatural winged leopard with a human face, forged purely from brick-dust, shadow, and corrupted Asura mantras."
@@ -2691,8 +2696,10 @@
     "name": "Quarry-Spawned Tendua",
     "binomial": "Manticora quarry",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "hills"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "watchful",
     "journalPrompt": "A manticore variant that haunts ancient stone quarries, its stone-hard fur blending into the weathered rock walls."
@@ -2707,7 +2714,7 @@
       "wetland",
       "settlement"
     ],
-    "placement": "lore",
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "An artificial, female humanoid sculpted from river mud and lotus pollen, which later mutated into a flesh-hungry night-stalker."
@@ -2720,7 +2727,7 @@
     "biomes": [
       "settlement"
     ],
-    "placement": "lore",
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A malevolent, clay-born construct that slips through the dark streets of Harappa, seeking to drain the warmth of the living."
@@ -2730,8 +2737,11 @@
     "name": "Lunar-Reflection Wraith",
     "binomial": "Māyā-born spectral",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "desert",
+      "coast"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "An incorporeal, tactile illusion manifested by lunar radiation refracting on the Great Bath's water, haunting lonely travelers."
@@ -2744,7 +2754,7 @@
     "biomes": [
       "river"
     ],
-    "placement": "lore",
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A shadow-lover variant that dwells in deep stepwells, wrapping around victims and pulling them into the dark waters."
@@ -2754,8 +2764,10 @@
     "name": "White-Ash Bride",
     "binomial": "Māyā-born ignis",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "settlement"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "watchful",
     "journalPrompt": "A short-lived, sentient female form that coalesces from ritual altar sparks, passionately violent and intensely hot to touch."
@@ -2765,8 +2777,10 @@
     "name": "Ember-Born Dancer",
     "binomial": "Māyā-born scintilla",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "settlement"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "graceful",
     "journalPrompt": "A fire-bride variant that dances within sacrificial bonfires, throwing sparks that ignite neighboring structures when displeased."
@@ -2790,7 +2804,7 @@
     "biomes": [
       "mountains"
     ],
-    "placement": "lore",
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A dark, floating entity born from the blood-spills of the first Asura invasion, guarding forgotten mountain tombs."
@@ -2803,7 +2817,7 @@
     "biomes": [
       "mountains"
     ],
-    "placement": "lore",
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "fearsome",
     "journalPrompt": "A giant shape-shifting stone serpent with razor-sharp wings of volcanic glass, serving as the progenitor of the Naga clan."
@@ -2816,7 +2830,7 @@
     "biomes": [
       "settlement"
     ],
-    "placement": "lore",
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "watchful",
     "journalPrompt": "A secretive, shape-shifting serpent-human hybrid that slips into royal courts, carrying out the will of Takshak."
@@ -2826,8 +2840,11 @@
     "name": "Gorgonopsid War-Beast",
     "binomial": "Gorgonops asuricus",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "plains",
+      "hills"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A shaggy-haired Permian predator selectively bred and genetically corrupted by Asuras to serve as heavy shock cavalry."
@@ -2837,8 +2854,11 @@
     "name": "Dimetrodon War-Mount",
     "binomial": "Dimetrodon asuricus",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "desert",
+      "plains"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A sail-backed synapsid war predator mutated with bio-reactive colors and enhanced aggression for Asura commanders."
@@ -2859,8 +2879,11 @@
     "name": "Scutosaurus Shield-Beast",
     "binomial": "Scutosaurus asuricus",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "plains",
+      "hills"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "watchful",
     "journalPrompt": "A massive armored herbivore genetically engineered with iron-hard skin plates, utilized as mobile shield barriers in battles."
@@ -2873,7 +2896,7 @@
     "biomes": [
       "settlement"
     ],
-    "placement": "lore",
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A colossal, feathered theropod predator genetically altered with Asura venom, serving as the ultimate fortress guardian."
@@ -2883,9 +2906,7 @@
     "name": "Underworld Blood-Leech",
     "binomial": "Hirudo asurica",
     "region": "asura-conjurations",
-    "biomes": [
-      "river"
-    ],
+    "biomes": [],
     "placement": "lore",
     "rarity": "mythic",
     "mood": "watchful",
@@ -2896,8 +2917,11 @@
     "name": "Asura-Tainted Bat",
     "binomial": "Vespertilio asuricus minor",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "forest",
+      "mountains"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A small, red-eyed bat that has mutated under the influence of Asura planets, feeding on blood and glowing insects."
@@ -2907,9 +2931,7 @@
     "name": "Underworld Water-Snake",
     "binomial": "Serpens asuricus",
     "region": "asura-conjurations",
-    "biomes": [
-      "river"
-    ],
+    "biomes": [],
     "placement": "lore",
     "rarity": "mythic",
     "mood": "fearsome",
@@ -2923,7 +2945,7 @@
     "biomes": [
       "settlement"
     ],
-    "placement": "lore",
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "An artificial, clay-sculpted eye construct animated by ancient mantras, used by Harappan lords to spy on their courts."
@@ -2933,8 +2955,10 @@
     "name": "Ember-Scattering Sprite",
     "binomial": "Māyā-born scintilla minor",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "settlement"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "graceful",
     "journalPrompt": "A small, fleeting spirit born from ritual embers that floats through the air, causing minor fires when displeased."
@@ -2947,7 +2971,7 @@
     "biomes": [
       "settlement"
     ],
-    "placement": "lore",
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "watchful",
     "journalPrompt": "A semi-anthropomorphic serpent warrior that guards the sacred temples of Takshak, wielding bronze and stone spears."
@@ -2957,8 +2981,11 @@
     "name": "Gorgonopsid Pack-Leader",
     "binomial": "Gorgonops titan",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "plains",
+      "hills"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A larger, hyper-aggressive gorgonopsid bred by Asura generals to lead war-packs in battle."
@@ -2971,7 +2998,7 @@
     "biomes": [
       "mountains"
     ],
-    "placement": "lore",
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A faster, sleek sail-backed synapsid used by Asura scouts to navigate the rugged, volcanic frontiers."
@@ -2981,8 +3008,10 @@
     "name": "Scutosaurus Battering-Ram",
     "binomial": "Scutosaurus titan",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "plains"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A massive scutosaur mutated with an bone-hard forehead plate, used to break down defensive palisades."
@@ -2992,8 +3021,11 @@
     "name": "Asura-Tainted Owl",
     "binomial": "Bubo asuricus",
     "region": "asura-conjurations",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "forest",
+      "hills"
+    ],
+    "placement": "encounter",
     "rarity": "mythic",
     "mood": "uncanny",
     "journalPrompt": "A giant owl with four eyes that has mutated near portals, hunting night-stalkers and small primates."
@@ -3014,132 +3046,173 @@
     "name": "Beedu",
     "binomial": "Sarasvatimanta gedrosii",
     "region": "gedrosian-taklamakan",
-    "biomes": [],
-    "placement": "lore",
-    "rarity": "common",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
     "mood": "watchful",
-    "journalPrompt": "Desert manta ray with gas-filled bladders for silent gliding over dunes."
+    "journalPrompt": "A pale ray glides above the dune crest, silent, its bladders full of air, casting a shadow the size of a boat."
   },
   {
     "id": "canopy-langur",
     "name": "Canopy Langur",
     "binomial": "Semnopithecus aranya",
     "region": "canon",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "forest",
+      "hills"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "Grey leaf-monkey of Aravali and canopy edges. Sometimes read as a distant echo of devolved Vanara presence in folk talk."
+    "journalPrompt": "Grey langurs move through the branches overhead, pausing to look down with long-tailed disapproval."
   },
   {
     "id": "caravan-dromedary",
     "name": "Caravan Dromedary",
     "binomial": "Camelus dromedarius itineris",
     "region": "gedrosian-taklamakan",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "desert",
+      "plains",
+      "settlement"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "Single-hump desert camel of northern trade strings. Complements Woolly Bactrian-Croc routes on drier hardpan."
+    "journalPrompt": "A single-humped camel chews sideways and regards you with the patience of an animal that has walked further than you have."
   },
   {
     "id": "cliff-swift",
     "name": "Cliff Swift",
     "binomial": "Apus narmadae",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "hills",
+      "mountains",
+      "plains"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "Fast insect-hunter of plateau cliffs. Nest density signals insect bloom years to highland herders."
+    "journalPrompt": "Swifts cut the air above the grass in long scything arcs, too fast to count."
   },
   {
     "id": "cognitavi",
     "name": "Cognitavi",
     "binomial": null,
     "region": "canon",
-    "biomes": [],
-    "placement": "lore",
-    "rarity": "common",
-    "mood": "watchful",
-    "journalPrompt": "Hyper-intelligent navigator birds. Subspecies include Vanga Pearl-Guide and Abyssal Storm-Watcher that aid seafarers."
+    "biomes": [
+      "coast",
+      "landmark"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
+    "mood": "clever",
+    "journalPrompt": "A navigator bird watches the water with its head tilted, reading something in it that you cannot, and does not much care that you are here."
   },
   {
     "id": "delta-egret",
     "name": "Delta Egret",
     "binomial": "Egretta saraswati",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "wetland",
+      "river",
+      "coast"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "White wading bird of the reed flats. Nesting colonies mark high ground during flood season."
+    "journalPrompt": "A white egret stands in the shallows, folded like a closed umbrella, then slowly straightens."
   },
   {
     "id": "delta-monitor",
     "name": "Delta Monitor",
     "binomial": "Varanus deltae",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "wetland",
+      "coast",
+      "settlement"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "Long-bodied monitor lizard of the mangrove fringe. Raids bird nests and fish-drying racks; Kia children learn to clap poles to drive it off."
+    "journalPrompt": "A long monitor lizard noses along the fish-drying racks, unhurried, entirely certain nobody will stop it."
   },
   {
     "id": "desert-fox",
     "name": "Desert Fox",
     "binomial": "Vulpes gedrosiana",
     "region": "gedrosian-taklamakan",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "desert",
+      "plains",
+      "settlement"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "Large-eared fox of the Gedrosian night. Follows caravans for scraps; omen animal in Tushara camp lore."
+    "journalPrompt": "A fox with enormous ears watches the road from a low dune, waiting to see whether anything falls off the caravan."
   },
   {
     "id": "dune-viper",
     "name": "Dune Viper",
     "binomial": "Echis gedrosianus",
     "region": "gedrosian-taklamakan",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "Sidewinding desert viper. Nomads train dogs to detect its sand signature before night camps."
+    "journalPrompt": "A sidewinding track crosses the sand ahead of you, fresh, and ends where the snake buried itself."
   },
   {
     "id": "estuary-sawfish",
     "name": "Estuary Sawfish",
     "binomial": "Pristis tethys",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
-    "rarity": "common",
+    "biomes": [
+      "coast",
+      "river"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
     "mood": "watchful",
-    "journalPrompt": "Large saw-snouted ray of the outer estuary. Kia fishers treat a stranded sawfish as both hazard and omen."
+    "journalPrompt": "Something long moves under the brown water, and for a moment the saw of its snout breaks the surface."
   },
   {
     "id": "honey-guide-bird",
     "name": "Honey-Guide Bird",
     "binomial": "Indicator narmadae",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "forest",
+      "hills",
+      "settlement"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "Leads foragers to Golden Honey-Goliath nests. Plateau people leave a share of comb as custom."
+    "journalPrompt": "A small brown bird calls, hops to the next branch, and calls again. It wants you to follow, and it knows where the comb is."
   },
   {
     "id": "mangrove-crab",
     "name": "Mangrove Crab",
     "binomial": "Scylla bonewoodi",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "coast",
+      "wetland",
+      "settlement"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "Heavy crab among Bonewood and Ghost Mangrove roots. Staple protein for marsh camps; shells used as scoops and charms."
+    "journalPrompt": "A heavy crab sidles between the mangrove roots, one claw raised like a man carrying something awkward."
   },
   {
     "id": "megalosaurus",
@@ -3157,55 +3230,70 @@
     "name": "Plateau Ibex",
     "binomial": "Capra narmadae",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "hills",
+      "mountains"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "Sure-footed highland goat preyed upon by Garudasaur Eagles. Horn and hide traded downriver to Lothal markets."
+    "journalPrompt": "An ibex stands on a ledge no wider than your hand and looks down at you without concern."
   },
   {
     "id": "plateau-wolf",
     "name": "Plateau Wolf",
     "binomial": "Canis narmadae",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "hills",
+      "mountains",
+      "plains"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "Lean highland wolf preying on Plateau Ibex and caravan strays. Howl-lines mark clan hunting ranges."
+    "journalPrompt": "A lean wolf crosses the open ground at a trot. It is not hunting you; it is following a line its clan has walked for generations."
   },
   {
     "id": "reed-python",
     "name": "Reed Python",
     "binomial": "Python phragmitis",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "wetland",
+      "river"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "Heavy python of Saltreed thickets. Takes waterfowl and small monitors; rarely threatens adults."
+    "journalPrompt": "A thick python lies banked in the reeds, digesting, in no hurry to be anywhere."
   },
   {
     "id": "sand-skink",
     "name": "Sand Skink",
     "binomial": "Scincus gedrosianus",
     "region": "gedrosian-taklamakan",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "encounter",
     "rarity": "common",
     "mood": "watchful",
-    "journalPrompt": "Desert lizard that ‘swims’ under dune surfaces. Used by northern nomads as a live weather-vane: emergence patterns track overnight wind shifts."
+    "journalPrompt": "A skink pours itself into the dune and is gone, swimming under the surface like a fish."
   },
   {
     "id": "tendua",
     "name": "Tendua",
     "binomial": "Panthera simiana",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
-    "rarity": "common",
+    "biomes": [
+      "wetland",
+      "forest"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
     "mood": "watchful",
-    "journalPrompt": "Highly intelligent leopard-like feline of the wetlands. The Tendua Manticore variant (winged, human-faced) was born from Asura desecration of Lothal tower."
+    "journalPrompt": "A spotted cat watches from the reed line with eyes set forward like a person's, and you understand that you are being considered."
   },
   {
     "id": "tendua-manticore",
@@ -3223,10 +3311,14 @@
     "name": "Vṛkṣaśmara",
     "binomial": "Vrkshasmara griseus",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
-    "rarity": "common",
+    "biomes": [
+      "forest",
+      "hills",
+      "landmark"
+    ],
+    "placement": "encounter",
+    "rarity": "rare",
     "mood": "watchful",
-    "journalPrompt": "Evolved for tree canopies of Narmada Valley. Bioluminescent moss-dweller variant exists."
+    "journalPrompt": "Something grey shifts high in the canopy, too large for a monkey, and the leaves close over it again."
   }
 ]

@@ -70,6 +70,44 @@ describe('coverage', () => {
   );
 });
 
+describe('rarity keeps the horrors rare', () => {
+  // The Asura-tainted species are placed on purpose — they are meant to be met, occasionally,
+  // and to unsettle. `rarity` is what keeps "occasionally" true. It sat in the data unread for
+  // a long time while `pickFor` drew uniformly, and at that point half the settlement pool was
+  // Asura-tainted: a horror in every second village. If these numbers ever climb back, weighting
+  // has been bypassed rather than the content having changed.
+  const sample = (biome: BiomeId) => {
+    let horrors = 0;
+    const runs = 4000;
+    for (let i = 0; i < runs; i += 1) {
+      const met = creatureFor({ x: i % 97, y: Math.floor(i / 97), biome }, `rarity-${i % 13}`);
+      if (met?.region === 'asura-conjurations') horrors += 1;
+    }
+    return horrors / runs;
+  };
+
+  it('a village is unsettling, not overrun', () => {
+    const rate = sample('settlement');
+    expect(rate, `settlement horror rate ${(rate * 100).toFixed(1)}%`).toBeLessThan(0.2);
+  });
+
+  it('the open country is mostly ordinary', () => {
+    for (const biome of ['forest', 'wetland', 'coast', 'mountains'] as BiomeId[]) {
+      const rate = sample(biome);
+      expect(rate, `${biome} horror rate ${(rate * 100).toFixed(1)}%`).toBeLessThan(0.06);
+    }
+  });
+
+  it('a common species still outranks a mythic one in the same biome', () => {
+    const counts = new Map<string, number>();
+    for (let i = 0; i < 4000; i += 1) {
+      const met = creatureFor({ x: i % 89, y: Math.floor(i / 89), biome: 'settlement' }, `mix-${i % 11}`);
+      if (met) counts.set(met.rarity, (counts.get(met.rarity) ?? 0) + 1);
+    }
+    expect(counts.get('common') ?? 0).toBeGreaterThan(counts.get('mythic') ?? 0);
+  });
+});
+
 describe('the journal', () => {
   it('fills every field on the starting tile', () => {
     const entry = describeTile(world.tiles[world.start.y]![world.start.x]!, world);
