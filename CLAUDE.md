@@ -82,24 +82,36 @@ the shared `pages` concurrency group.
 
 ## Architecture
 
-### The data pipeline is one-directional
+### The data pipeline is one-directional, and it starts in another repository
 
 ```
-docs/bestiary.md  →  tools/build-species-data.js  →  data/creatures.json
-(authored prose)                                     data/flora.json
+SouthOfTethys/database/   →  utils/export_game_data.py  →  data/creatures.json
+(canonical entity JSON)                                    data/flora.json
+                                                           data/canon.lock.json
 ```
 
-**`data/creatures.json` and `data/flora.json` are generated. Never hand-edit them** — run
-`npm run build:data` instead. CI fails if the committed copies have drifted from the bestiary.
-`data/biomes.json` is hand-written and is the one place biome colours, symbols, walkability,
-travel costs, and journal descriptions live.
+**`data/creatures.json` and `data/flora.json` are generated. Never hand-edit them.** The species
+canon lives in the sibling `SouthOfTethys` repository — 346 species with authored biome, placement,
+rarity and journal prose — and these files are a projection of it. To change species data, edit the
+canon entity there and re-run `python utils/export_game_data.py --apply`.
 
-The bestiary is authored by *region* (seven, e.g. "Saraswati & Godavari Deltas"), but the generator
-places tiles by *biome* (eleven, e.g. `wetland`). The build script bridges the two by reading biome
-keywords out of each species' prose, preferring matches that agree with the species' own region.
-Species whose prose matches nothing in their region keep the prose — that is deliberate, and is how
-entries filed under the wrong section get re-placed. Sky species and Asura conjurations become
-`placement: "lore"` and never appear in play.
+CI can no longer verify these by rebuilding them, because the canon they come from is not in this
+checkout. `npm run check:data` compares them against `data/canon.lock.json`, which carries the canon
+version and a SHA-256 of each file. That catches a hand-edit or a half-applied export. Hashes are
+taken over LF-normalised content so the check survives a CRLF checkout.
+
+`data/biomes.json` is still hand-written here, and is the one place biome colours, symbols,
+walkability, travel costs, and journal descriptions live.
+
+**`tools/build-species-data.js` is retired.** It used to build the data from `docs/bestiary.md` by
+reading biome keywords out of each species' prose. Those heuristics are the origin of every biome,
+mood and rarity tag now in canon — `utils/import_bestiary.py` in the other repo is a direct port —
+so the file is kept as the readable reference for why a species landed where it did. It refuses to
+run without `ALLOW_RETIRED_SPECIES_BUILD`, because running it would overwrite the export with a
+narrower version of the same data.
+
+Sky species and Asura conjurations remain `placement: "lore"` and never appear in play: the sky has
+no ground-biome equivalent, and the tone question for the Asura horrors is still open.
 
 ### Layers, and the rules between them
 
@@ -147,9 +159,11 @@ you are negotiating with.
 - **`feat/react-upgrade` is abandoned, not merged.** Its atmosphere components (`FogOfWar`,
   `DayNightCycle`, `AmbientParticles`) are DOM reimplementations of things Phaser does natively,
   and it carries a weaker generator. It survives only as a visual reference. Do not merge it.
-- `settlement` has very few species, so villages read repetitively. The bestiary has no village
-  flora or fauna; `tools/build-species-data.js` carries curated fallbacks for biomes that would
-  otherwise be empty. `plains` is thin for the same reason (3 creatures).
+- **Biome coverage is uneven, though no longer broken.** `settlement` and `plains` used to hold one
+  and three creatures; canon species were tagged into them, and they now hold 6 and 7 creatures with
+  8 plants each. `mountains` (51) and `desert` (35) are still far richer than `landmark` (4), because
+  the bestiary was authored by region and the mountainous and arid regions are the biggest sections.
+  85 species remain `placement: "lore"` — the sky and Asura sets, which are inert by design.
 - Rivers usually terminate in wetland deltas rather than reaching open sea. That reads well for the
   Saraswati setting but does not literally meet the "rivers connect highlands to sea" line in
   `docs/world-generator.md`.

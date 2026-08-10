@@ -829,199 +829,259 @@
     "name": "Asura Thorn",
     "binomial": "Ziziphus asurica",
     "region": "canon",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "plains",
+      "settlement"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Hooked scrub that thickens near old Dwarka-tainted ground. Planted as living fences; pollen irritates the eyes."
+    "journalPrompt": "Hooked scrub planted as a living fence. It grows thickest on the old tainted ground, which nobody mentions."
   },
   {
     "id": "bamboo-grove",
     "name": "River Bamboo",
     "binomial": "Bambusa saraswati",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "river",
+      "forest"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Fast-growing bamboo of river banks. Primary material for scaffolding, fish traps, and light rafts."
+    "journalPrompt": "Bamboo crowds the riverbank, creaking against itself, already half cut for scaffolding and fish traps."
   },
   {
     "id": "date-palm",
     "name": "Date Palm",
     "binomial": "Phoenix gedrosiana",
     "region": "gedrosian-taklamakan",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "desert",
+      "settlement"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Oasis palm of desert waystations. Fruit dried for caravan rations; fronds woven into mats."
+    "journalPrompt": "Date palms mark the waystation from a long way off, which is the point of planting them."
   },
   {
     "id": "frankincense-scrub",
     "name": "Frankincense Scrub",
     "binomial": "Boswellia gedrosiana",
     "region": "gedrosian-taklamakan",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Drought resin tree of desert margins. Tears of gum burned in Mask Family and Yaksha rites; major caravan commodity."
+    "journalPrompt": "Resin beads on the bark where the scrub has been scored, hardening into the tears burned at rites."
   },
   {
     "id": "ghost-mangrove",
     "name": "Ghost Mangrove",
     "binomial": "Avicennia phantasma",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
-    "rarity": "common",
-    "journalPrompt": "Pale-barked mangrove that appears to glow under moonlight when wet. Marks safe channels through the outer estuary; charcoal prized by mask-casters."
+    "biomes": [
+      "coast",
+      "wetland",
+      "river"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "The pale bark of these mangroves catches what light there is. Wet, they seem to glow, and the channel between them is the safe one."
   },
   {
     "id": "indigo-wild",
     "name": "Wild Indigo",
     "binomial": "Indigofera silvestris",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "plains",
+      "hills"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Undomesticated parent of Sweet Indigo. Harsher blue; still used by upland dyers who cannot afford cultivated stock."
+    "journalPrompt": "Wild indigo, harsher than the garden kind, still good enough for dyers who cannot pay Lothal prices."
   },
   {
     "id": "iron-teak",
     "name": "Iron-Teak",
     "binomial": "Tectona ferrea",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "hills",
+      "mountains",
+      "forest"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Dense highland teak preferred for river craft and the red-sandstone tower’s internal beams. Slow-grown; felling is tightly controlled by plateau clans."
+    "journalPrompt": "Teak this dense is cut for river craft and tower beams, and takes a long lifetime to replace."
   },
   {
     "id": "lotus-root-taro",
     "name": "Lotus-Root Taro",
     "binomial": "Colocasia nelumbo-affinis",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "wetland",
+      "settlement"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Starchy corm grown in flooded lotus ponds. Complements Red Delta Rice in Kia and Harappan kitchens."
+    "journalPrompt": "Broad taro leaves crowd the pond margin, hiding the starchy corms that feed the granary through the dry months."
   },
   {
     "id": "mahua",
     "name": "Mahua",
     "binomial": "Madhuca longifolia",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "plains",
+      "hills"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Flowering tree of the dry plateaus. Night-blooming flowers gathered for sweet liquor and lamp oil. Kia and Jharwa use the blossom in seasonal offerings."
+    "journalPrompt": "Mahua flowers drop through the night and are gathered before the sun gets to them."
   },
   {
     "id": "moonseed-vine",
     "name": "Moonseed Vine",
     "binomial": "Menispermum tethys",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
-    "rarity": "common",
-    "journalPrompt": "Pale climbing vine grafted onto Oracle Figs in sanctuary groves. Associated with moon-seed legends and the Silver-Leaved Oracle Fig lineage."
+    "biomes": [
+      "forest",
+      "landmark"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "A pale vine has been grafted onto the fig and left to climb, the way it is done in groves people come to on purpose."
   },
   {
     "id": "myrrh-thorn",
     "name": "Myrrh-Thorn",
     "binomial": "Commiphora spinosa",
     "region": "gedrosian-taklamakan",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "desert"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Thorny desert shrub yielding bitter resin. Mixed with Shilajit Creeper sap for field salves."
+    "journalPrompt": "A thorn shrub bleeding bitter gum, gathered for field salves and little else."
   },
   {
     "id": "neem",
     "name": "Neem",
     "binomial": "Azadirachta indica",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "settlement",
+      "plains"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Bitter medicinal tree of villages and field edges. Leaves and oil used against pests and fever."
+    "journalPrompt": "A neem tree shades the field edge, its leaves bitter enough that nothing much troubles the grain stored beneath it."
   },
   {
     "id": "pepper-vine",
     "name": "Pepper Vine",
     "binomial": "Piper tethys",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "hills",
+      "forest"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Climbing pepper of humid plateau ravines. Dried berries move downriver to Lothal spice stalls."
+    "journalPrompt": "Pepper climbs the ravine wall in the wet shade, its berries drying to the black grain that travels downriver."
   },
   {
     "id": "poison-oleander",
     "name": "Poison Oleander",
     "binomial": "Nerium oleander",
     "region": "gedrosian-taklamakan",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "plains",
+      "desert"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Toxic flowering shrub of dry margins. Sap and smoke used sparingly in arrow pastes; planted to mark forbidden ground."
+    "journalPrompt": "Oleander flowers pink and cheerful on the dry margin. Nothing grazes it, and there is a reason for that."
   },
   {
     "id": "red-delta-rice",
     "name": "Red Delta Rice",
     "binomial": "Oryza rubra-delta",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "wetland",
+      "settlement"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Iron-rich short-grain rice of the Saraswati floodplain. Forms the bulk of Lothal granary stores and river trade with upland settlements."
+    "journalPrompt": "Red rice stands in flooded squares, the water between the stalks holding the whole sky."
   },
   {
     "id": "sacred-tulsi",
     "name": "Sacred Tulsi",
     "binomial": "Ocimum sanctum",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "settlement"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Household and shrine herb. Planted in courtyards; leaves used in morning rites and mild teas."
+    "journalPrompt": "Tulsi grows in a clay pot by the door, cropped short by daily picking for the morning rites."
   },
   {
     "id": "saltreed",
     "name": "Saltreed",
     "binomial": "Phragmites salina",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "wetland",
+      "coast",
+      "river"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Tall estuary reed tolerant of brackish flood. Primary thatch for Kia marsh huts; planted in lagoon filter beds below Lothal docks."
+    "journalPrompt": "Salt-tolerant reeds stand shoulder-high along the brackish flood, the same reeds that roof every hut in the marsh camps."
   },
   {
     "id": "sandalwood",
     "name": "Sandalwood",
     "binomial": "Santalum jambhudweepa",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
-    "rarity": "common",
-    "journalPrompt": "Fragrant heartwood for masks, beads, and temple smoke. Harvest rights contested between plateau clans and river merchants."
+    "biomes": [
+      "forest",
+      "landmark"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "Sandalwood, and someone has been here before you: a strip of heartwood cut away clean, the scent still hanging in the air."
   },
   {
     "id": "tamarind",
     "name": "Tamarind",
     "binomial": "Tamarindus indica",
     "region": "narmada-vindhya",
-    "biomes": [],
-    "placement": "lore",
+    "biomes": [
+      "settlement",
+      "plains"
+    ],
+    "placement": "flavour",
     "rarity": "common",
-    "journalPrompt": "Pod-bearing shade tree of roads and courtyards. Pulp seasons stews and preserves fish on river journeys."
+    "journalPrompt": "A tamarind leans over the road, pods hanging like dark fingers, the ground beneath it swept smooth by people who sit here."
   },
   {
     "id": "whisper-fig",
     "name": "Whisper-Fig",
     "binomial": "Ficus susurrans",
     "region": "saraswati-godavari-deltas",
-    "biomes": [],
-    "placement": "lore",
-    "rarity": "common",
-    "journalPrompt": "Broad-leafed fig whose hollow trunks carry wind as a low murmur. Delta dwellers treat unusual patterns of sound as weather or spirit omens."
+    "biomes": [
+      "forest",
+      "landmark"
+    ],
+    "placement": "flavour",
+    "rarity": "rare",
+    "journalPrompt": "The fig's trunk is hollow, and the wind moving through it makes a low sound that the delta people are careful not to interrupt."
   }
 ]
