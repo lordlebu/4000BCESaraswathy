@@ -21,12 +21,12 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
-      # The generated data files are built from docs/bestiary.md. If regenerating them changes
-      # anything, the committed copies are stale and the journal is out of step with the prose.
-      - name: Species data is up to date
-        run: |
-          npm run build:data
-          git diff --exit-code data/
+      # The generated data files are a projection of the species canon in the SouthOfTethys
+      # repo, which is not in this checkout — so CI cannot rebuild them to compare. They are
+      # checked against data/canon.lock.json instead, which catches a hand-edit to a generated
+      # file or a half-applied export.
+      - name: Canon data matches the lock
+        run: npm run check:data
 
   # The unit suite runs under Node and cannot see the canvas. This job is the only thing that
   # proves Phaser still boots and draws — worth its own runner given how new Phaser 4 is.

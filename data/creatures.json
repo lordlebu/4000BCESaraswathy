@@ -2,7 +2,7 @@
   {
     "id": "river-otter",
     "name": "River Otter",
-    "binomial": null,
+    "binomial": "Lutra saraswati",
     "region": "prototype-starters",
     "biomes": [
       "river",
@@ -184,7 +184,7 @@
   {
     "id": "burrowing-tortoise",
     "name": "Burrowing Tortoise",
-    "binomial": "Geohelus domus",
+    "binomial": "Geochelone fossor",
     "region": "saraswati-godavari-deltas",
     "biomes": [
       "wetland",
@@ -211,7 +211,7 @@
   {
     "id": "vanga-pearl-guide",
     "name": "Vanga Pearl-Guide",
-    "binomial": "Cognitavi margarita",
+    "binomial": "Cognitavi vanga",
     "region": "saraswati-godavari-deltas",
     "biomes": [
       "sea",
@@ -225,7 +225,7 @@
   {
     "id": "abyssal-storm-watcher",
     "name": "Abyssal Storm-Watcher",
-    "binomial": "Cognitavi procellarum",
+    "binomial": "Cognitavi abyssalis",
     "region": "saraswati-godavari-deltas",
     "biomes": [
       "sea"
@@ -264,7 +264,7 @@
   {
     "id": "striped-reed-stalker",
     "name": "Striped Reed Stalker",
-    "binomial": "Baurusuchus virgatus",
+    "binomial": "Baurusuchus striatus",
     "region": "saraswati-godavari-deltas",
     "biomes": [
       "wetland"
@@ -277,7 +277,7 @@
   {
     "id": "mud-armored-ambusher",
     "name": "Mud-Armored Ambusher",
-    "binomial": "Baurusuchus lutosus",
+    "binomial": "Baurusuchus lutarius",
     "region": "saraswati-godavari-deltas",
     "biomes": [
       "river"
@@ -2270,7 +2270,7 @@
     "journalPrompt": "A thick-feathered bird with camouflaged plumage, nesting in the rocky scree of the frozen mountain peaks."
   },
   {
-    "id": "lava-vent-tubeworm-2",
+    "id": "lava-vent-tubeworm-asurica",
     "name": "Lava-Vent Tubeworm",
     "binomial": "Riftia asurica",
     "region": "ganges-lava-sea",
@@ -3008,5 +3008,225 @@
     "rarity": "mythic",
     "mood": "watchful",
     "journalPrompt": "A giant, 6-foot leech of the Naraka rifts that attaches to larger monsters, draining their magical energy."
+  },
+  {
+    "id": "beedu",
+    "name": "Beedu",
+    "binomial": "Sarasvatimanta gedrosii",
+    "region": "gedrosian-taklamakan",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Desert manta ray with gas-filled bladders for silent gliding over dunes."
+  },
+  {
+    "id": "canopy-langur",
+    "name": "Canopy Langur",
+    "binomial": "Semnopithecus aranya",
+    "region": "canon",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Grey leaf-monkey of Aravali and canopy edges. Sometimes read as a distant echo of devolved Vanara presence in folk talk."
+  },
+  {
+    "id": "caravan-dromedary",
+    "name": "Caravan Dromedary",
+    "binomial": "Camelus dromedarius itineris",
+    "region": "gedrosian-taklamakan",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Single-hump desert camel of northern trade strings. Complements Woolly Bactrian-Croc routes on drier hardpan."
+  },
+  {
+    "id": "cliff-swift",
+    "name": "Cliff Swift",
+    "binomial": "Apus narmadae",
+    "region": "narmada-vindhya",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Fast insect-hunter of plateau cliffs. Nest density signals insect bloom years to highland herders."
+  },
+  {
+    "id": "cognitavi",
+    "name": "Cognitavi",
+    "binomial": null,
+    "region": "canon",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Hyper-intelligent navigator birds. Subspecies include Vanga Pearl-Guide and Abyssal Storm-Watcher that aid seafarers."
+  },
+  {
+    "id": "delta-egret",
+    "name": "Delta Egret",
+    "binomial": "Egretta saraswati",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "White wading bird of the reed flats. Nesting colonies mark high ground during flood season."
+  },
+  {
+    "id": "delta-monitor",
+    "name": "Delta Monitor",
+    "binomial": "Varanus deltae",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Long-bodied monitor lizard of the mangrove fringe. Raids bird nests and fish-drying racks; Kia children learn to clap poles to drive it off."
+  },
+  {
+    "id": "desert-fox",
+    "name": "Desert Fox",
+    "binomial": "Vulpes gedrosiana",
+    "region": "gedrosian-taklamakan",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Large-eared fox of the Gedrosian night. Follows caravans for scraps; omen animal in Tushara camp lore."
+  },
+  {
+    "id": "dune-viper",
+    "name": "Dune Viper",
+    "binomial": "Echis gedrosianus",
+    "region": "gedrosian-taklamakan",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Sidewinding desert viper. Nomads train dogs to detect its sand signature before night camps."
+  },
+  {
+    "id": "estuary-sawfish",
+    "name": "Estuary Sawfish",
+    "binomial": "Pristis tethys",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Large saw-snouted ray of the outer estuary. Kia fishers treat a stranded sawfish as both hazard and omen."
+  },
+  {
+    "id": "honey-guide-bird",
+    "name": "Honey-Guide Bird",
+    "binomial": "Indicator narmadae",
+    "region": "narmada-vindhya",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Leads foragers to Golden Honey-Goliath nests. Plateau people leave a share of comb as custom."
+  },
+  {
+    "id": "mangrove-crab",
+    "name": "Mangrove Crab",
+    "binomial": "Scylla bonewoodi",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Heavy crab among Bonewood and Ghost Mangrove roots. Staple protein for marsh camps; shells used as scoops and charms."
+  },
+  {
+    "id": "megalosaurus",
+    "name": "Megalosaurus",
+    "binomial": null,
+    "region": "canon",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Appeared during the Naraka portal event; killed Nirigili’s Elephantbird mount."
+  },
+  {
+    "id": "plateau-ibex",
+    "name": "Plateau Ibex",
+    "binomial": "Capra narmadae",
+    "region": "narmada-vindhya",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Sure-footed highland goat preyed upon by Garudasaur Eagles. Horn and hide traded downriver to Lothal markets."
+  },
+  {
+    "id": "plateau-wolf",
+    "name": "Plateau Wolf",
+    "binomial": "Canis narmadae",
+    "region": "narmada-vindhya",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Lean highland wolf preying on Plateau Ibex and caravan strays. Howl-lines mark clan hunting ranges."
+  },
+  {
+    "id": "reed-python",
+    "name": "Reed Python",
+    "binomial": "Python phragmitis",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Heavy python of Saltreed thickets. Takes waterfowl and small monitors; rarely threatens adults."
+  },
+  {
+    "id": "sand-skink",
+    "name": "Sand Skink",
+    "binomial": "Scincus gedrosianus",
+    "region": "gedrosian-taklamakan",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Desert lizard that ‘swims’ under dune surfaces. Used by northern nomads as a live weather-vane: emergence patterns track overnight wind shifts."
+  },
+  {
+    "id": "tendua",
+    "name": "Tendua",
+    "binomial": "Panthera simiana",
+    "region": "saraswati-godavari-deltas",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Highly intelligent leopard-like feline of the wetlands. The Tendua Manticore variant (winged, human-faced) was born from Asura desecration of Lothal tower."
+  },
+  {
+    "id": "tendua-manticore",
+    "name": "Tendua Manticore",
+    "binomial": null,
+    "region": "saraswati-godavari-deltas",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Birthed when Nila desecrated Kavik's tower with forbidden Asura mantras. Six-foot winged leopard with human face that hunted Lothal's infants. Central to Tendua Crisis."
+  },
+  {
+    "id": "vrkshasmara",
+    "name": "Vṛkṣaśmara",
+    "binomial": "Vrkshasmara griseus",
+    "region": "narmada-vindhya",
+    "biomes": [],
+    "placement": "lore",
+    "rarity": "common",
+    "mood": "watchful",
+    "journalPrompt": "Evolved for tree canopies of Narmada Valley. Bioluminescent moss-dweller variant exists."
   }
 ]

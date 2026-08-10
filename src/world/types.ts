@@ -108,7 +108,8 @@ export type Rarity = 'common' | 'rare' | 'mythic';
 interface SpeciesBase {
   id: string;
   name: string;
-  binomial: string;
+  /** Null for the prototype starters, which predate the bestiary and have no binomial. */
+  binomial: string | null;
   region: string;
   biomes: BiomeId[];
   placement: Placement;
@@ -116,10 +117,10 @@ interface SpeciesBase {
   journalPrompt: string;
 }
 
-/** One entry of `data/creatures.json`. Generated — see `tools/build-species-data.js`. */
+/** One entry of `data/creatures.json`. Exported from canon — see `data/canon.lock.json`. */
 export interface Creature extends SpeciesBase {
   mood: string;
 }
 
-/** One entry of `data/flora.json`. Generated — see `tools/build-species-data.js`. */
+/** One entry of `data/flora.json`. Exported from canon — see `data/canon.lock.json`. */
 export type Flora = SpeciesBase;

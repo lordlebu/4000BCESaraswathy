@@ -1,0 +1,11 @@
+{
+  "canon_version": "1.1.0",
+  "counts": {
+    "creatures.json": 256,
+    "flora.json": 90
+  },
+  "sha256": {
+    "creatures.json": "40186fc647da1900d4bfdc0522a7ed955119b885e487852f4344577603bdbd4f",
+    "flora.json": "ee48b7b3bb67f6440d2ad47332650e347cfa6c8070ca8f24339c663b29f12182"
+  }
+}

@@ -1,8 +1,16 @@
-// Regenerates data/creatures.json and data/flora.json from docs/bestiary.md.
+// RETIRED. This no longer generates data/creatures.json or data/flora.json.
 //
-// The bestiary is authored prose organised by region; the generator places tiles by biome. This
-// script bridges the two, so the data files never have to be hand-maintained and cannot drift from
-// the canon. Re-run it after editing the bestiary:  node tools/build-species-data.js
+// It used to build them from docs/bestiary.md. The species canon now lives in the
+// SouthOfTethys repo under database/, and the data files are exported from there by
+// utils/export_game_data.py -- running this would overwrite that export with a narrower
+// version of the same data, dropping the 40 species authored in canon and reverting the
+// binomials that two repos disagreed on.
+//
+// The file is kept because its heuristics are the origin of every biome, mood and rarity
+// tag in canon: utils/import_bestiary.py in the other repo is a direct port of the logic
+// below, and this is the readable reference for why a species landed where it did.
+//
+// To change species data, edit the canon entity and re-export.
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -10,6 +18,17 @@ const root = path.resolve(__dirname, '..');
 const source = path.join(root, 'docs', 'bestiary.md');
 const creatureTarget = path.join(root, 'data', 'creatures.json');
 const floraTarget = path.join(root, 'data', 'flora.json');
+
+if (!process.env.ALLOW_RETIRED_SPECIES_BUILD) {
+  console.error('tools/build-species-data.js is retired and would overwrite exported canon.');
+  console.error('');
+  console.error('data/creatures.json and data/flora.json are generated from the species canon');
+  console.error('in the SouthOfTethys repo. To change them, edit the canon entity there, then:');
+  console.error('  python utils/export_game_data.py --apply');
+  console.error('');
+  console.error('Set ALLOW_RETIRED_SPECIES_BUILD=1 to run it anyway (it will clobber the export).');
+  process.exit(1);
+}
 
 const REGIONS = {
   '1': 'saraswati-godavari-deltas',
