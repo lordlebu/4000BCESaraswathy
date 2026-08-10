@@ -284,3 +284,34 @@ button.ghost:hover:not(:disabled) {
     height: clamp(340px, 56vh, 560px);
   }
 }
+
+/* Canon panel — only rendered when a canon service is listening. */
+.canon {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  padding: .75rem;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .03);
+}
+
+.canon-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+.canon-sources { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .25rem; }
+
+.canon-sources li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: .5rem;
+  align-items: baseline;
+  font-size: .82rem;
+}
+
+.canon-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.canon-type { opacity: .55; font-size: .74rem; }
+/* Distance is the retrieval score; lining the digits up makes the ranking readable. */
+.canon-distance { opacity: .55; font-variant-numeric: tabular-nums; font-size: .74rem; }
+
+.canon-passage { margin: 0; font-size: .88rem; line-height: 1.55; }
+.canon-note { margin: 0; font-size: .8rem; opacity: .65; }
