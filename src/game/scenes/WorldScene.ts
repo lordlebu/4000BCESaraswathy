@@ -10,6 +10,7 @@ import varunaUrl from '../../../assets/varuna-walk.png';
 import { EventBus } from '../EventBus';
 import { FOG_TEXTURE, TILE_SIZE, createTileTextures, tileTextureKey } from '../tileTextures';
 import { PLAYER_FRAME, PLAYER_SHEET, facingFromStep, frameFor, loadPlayerSheet, type Facing } from '../player';
+import { phaseAt, phaseFromClock, skyAt } from '../dayNight';
 import { arrivalPage, describeSurroundings, describeTile, landmarkHint } from '../../content/journal';
 import { travelCost } from '../../content/species';
 import { generateWorld, isWalkable } from '../../world/generate';
@@ -50,6 +51,10 @@ export class WorldScene extends Phaser.Scene {
   private facing: Facing = 'down';
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
+  /** The day/night wash, drawn over the whole map. */
+  private sky!: Phaser.GameObjects.Rectangle;
+  /** Where in the day this journey opened — the player's own hour. */
+  private startPhase = 0;
 
   constructor() {
     super('WorldScene');
@@ -66,6 +71,8 @@ export class WorldScene extends Phaser.Scene {
     this.queuedPath = [];
     this.moving = false;
     this.facing = 'down';
+    // The map opens on the light of the hour the player is actually in, then drifts from there.
+    this.startPhase = phaseFromClock();
   }
 
   preload(): void {
@@ -103,6 +110,14 @@ export class WorldScene extends Phaser.Scene {
     }
 
     this.createPlayer();
+
+    // Above the fog and the player, so the light of the hour falls on everything. Origin at the
+    // top-left corner rather than the centre so it lines up with the world without arithmetic.
+    this.sky = this.add
+      .rectangle(0, 0, pixelWidth, pixelHeight, 0xffffff, 0)
+      .setOrigin(0, 0)
+      .setDepth(30);
+    this.updateSky();
 
     this.cameras.main.setBounds(0, 0, pixelWidth, pixelHeight);
     this.cameras.main.setBackgroundColor('#1b1420');
@@ -188,7 +203,17 @@ export class WorldScene extends Phaser.Scene {
     this.scene.restart({ seed: payload.seed, discovered: payload.discovered ?? [] });
   };
 
+  /** Repaint the wash for the current hour. Cheap enough to run every frame. */
+  private updateSky(): void {
+    const sky = skyAt(phaseAt(this.time.now, this.startPhase));
+    this.sky.setFillStyle(sky.colour, sky.alpha);
+  }
+
   update(): void {
+    // Before the movement guard: the light keeps changing while the player stands still, and it
+    // keeps changing mid-step too.
+    this.updateSky();
+
     if (this.moving) return;
 
     const held =

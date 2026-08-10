@@ -112,6 +112,7 @@ entries filed under the wrong section get re-placed. Sky species and Asura conju
 - **`src/game/`** — the only code that knows Phaser exists. `scenes/WorldScene.ts` draws tiles,
   moves the player, and manages fog; `tileTextures.ts` generates the tile art from `biomes.json`;
   `PhaserGame.tsx` owns the `Phaser.Game` lifecycle; `EventBus.ts` is the seam to React.
+  `dayNight.ts` and `player.ts` are the exceptions that import no Phaser, so `test/` can cover them.
 - **`src/ui/`** — React chrome. Journal panel, seed bar, layout, styles.
 
 Four rules hold this together. Breaking any of them is how the codebase gets tangled:
@@ -162,7 +163,8 @@ you are negotiating with.
   Dev dependencies are Vite, TypeScript, Vitest and Playwright.
 - Determinism matters: the same seed must produce the same world and the same journal text. Do not
   introduce `Math.random()` or time-based values into `world/` or `content/` — all randomness comes
-  from `world/rng.ts`.
+  from `world/rng.ts`. `game/dayNight.ts` is the one place allowed to read the wall clock, because
+  what the sky looks like while you walk is presentation, not world state.
 - Saved journeys live in `localStorage` keyed by seed and carry a `version`; bump `SAVE_VERSION` in
   `src/save.ts` when the payload shape changes so old saves are discarded rather than misread.
 - Field order in `generateWorld` is part of the seed contract. Reordering the `fractalField` and
