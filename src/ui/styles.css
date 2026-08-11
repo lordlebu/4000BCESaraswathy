@@ -174,6 +174,31 @@ button.ghost:hover:not(:disabled) {
   font-size: 0.85rem;
 }
 
+.zoom {
+  position: absolute;
+  top: var(--safe-top);
+  right: var(--safe-right);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 3;
+}
+
+.zoom .control {
+  justify-content: center;
+  width: 38px;
+  padding: 6px 0;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+/* With the log pinned to the right there is no room beside it; tuck the buttons in on its left. */
+@media (orientation: landscape) {
+  .stage:has(.log) .zoom {
+    right: calc(var(--safe-right) + min(32vw, 26rem) + 10px);
+  }
+}
+
 /* --- The journey log ----------------------------------------------------- */
 
 .log {

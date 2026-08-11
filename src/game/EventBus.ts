@@ -51,6 +51,8 @@ export interface UiToGame {
    * part of the map you can actually see.
    */
   'viewport-insets': { right: number; bottom: number };
+  /** Step the zoom in or out, or hand it back to the automatic fit. */
+  zoom: { step: number | 'reset' };
 }
 
 type Events = GameToUi & UiToGame;

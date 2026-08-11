@@ -22,14 +22,16 @@ Walk with **WASD** or the **arrow keys**, or **tap a tile** — tapping routes a
 than into it. Press **Observe creature** to sketch what you find, and head for the named landmark;
 arriving writes a page you can keep as text or an image.
 
+Zoom with the on-screen **+** and **−**, the mouse wheel, `+`/`-`, or a pinch. `0` hands the view
+back to the automatic fit, which sizes itself to your screen.
+
 A seed travels in the URL, so a journey is a link: try
 [`?seed=play-test`](http://localhost:4173/?seed=play-test), `?seed=river-road`, or
 `?seed=monsoon-evening`. `?hour=21` overrides the time of day, which otherwise follows your own
 clock.
 
-> **Not yet hosted.** The build is verified against a subpath deploy, but GitHub Pages has never
-> been enabled for this repository, so the workflow is parked. See
-> [Deployment](#deployment) below.
+> **Play it now:** <https://lordlebu.github.io/4000BCESaraswathy/> — deployed from `main` by
+> `.github/workflows/pages.yml`. See [Deployment](#deployment) below.
 
 ## What's in it
 

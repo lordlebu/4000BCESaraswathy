@@ -134,3 +134,30 @@ test('the map sheet holds the seed, the legend and the sketches', async ({ page 
   await sheet.getByRole('button', { name: 'Close' }).click();
   await expect(sheet).toBeHidden();
 });
+
+// Zoom used to be entirely automatic, with no way for a player to change it at all.
+test('the player can zoom in and out, and get the automatic fit back', async ({ page }) => {
+  await open(page, 1280, 800);
+  const canvas = page.locator('.map-surface canvas');
+
+  const frame = async () => (await canvas.screenshot()).byteLength;
+  const start = await frame();
+
+  await page.getByRole('button', { name: 'Zoom in' }).click();
+  await page.waitForTimeout(700);
+  const zoomedIn = await frame();
+  // Bigger tiles mean fewer edges and flatter colour, which compresses smaller. The direction is
+  // what matters; the exact number is a property of the PNG encoder, not of the game.
+  expect(zoomedIn).not.toBe(start);
+
+  await page.getByRole('button', { name: 'Zoom out' }).click();
+  await page.waitForTimeout(700);
+  expect(await frame()).not.toBe(zoomedIn);
+
+  // The keyboard reaches it too, and 0 hands it back to the automatic fit.
+  await page.keyboard.press('Equal');
+  await page.waitForTimeout(500);
+  await page.keyboard.press('Digit0');
+  await page.waitForTimeout(700);
+  expect(Math.abs((await frame()) - start)).toBeLessThan(start * 0.05);
+});

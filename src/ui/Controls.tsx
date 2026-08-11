@@ -6,6 +6,7 @@
 // majority of the time.
 
 import { useState } from 'react';
+import { EventBus } from '../game/EventBus';
 import { biomes } from '../content/species';
 import { SeedBar } from './SeedBar';
 
@@ -40,6 +41,27 @@ export function Controls({ seed, onGenerate, observed, logOpen, onToggleLog }: C
         </button>
       </div>
 
+      {/* Zoom. A mouse has a wheel and a keyboard has +/-, but a phone has neither, and pinch is
+          not something anyone thinks to try on a map that fits the screen already. */}
+      <div className="zoom">
+        <button
+          type="button"
+          className="control"
+          aria-label="Zoom in"
+          onClick={() => EventBus.emitEvent('zoom', { step: 1 })}
+        >
+          +
+        </button>
+        <button
+          type="button"
+          className="control"
+          aria-label="Zoom out"
+          onClick={() => EventBus.emitEvent('zoom', { step: -1 })}
+        >
+          −
+        </button>
+      </div>
+
       {sheet && (
         <div className="sheet" role="dialog" aria-label="Map and journey">
           <button
@@ -54,6 +76,10 @@ export function Controls({ seed, onGenerate, observed, logOpen, onToggleLog }: C
           <h2>South of Tethys</h2>
           <p className="muted">
             Walk with <kbd>WASD</kbd> or the arrow keys, or tap where you want to go.
+          </p>
+          <p className="muted">
+            Zoom with the <kbd>+</kbd> and <kbd>−</kbd> buttons, the mouse wheel, or a pinch.{' '}
+            <kbd>0</kbd> fits the map to the screen again.
           </p>
 
           <h3>Journey seed</h3>

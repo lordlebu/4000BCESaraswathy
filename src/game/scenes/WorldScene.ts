@@ -51,6 +51,19 @@ const MAX_ZOOM = 4;
 /** Milliseconds per step on easy ground. `travelCost` from the biome data scales this. */
 const STEP_MS = 170;
 
+/** Keys that change the zoom. `0` gives it back to the automatic fit. */
+const ZOOM_KEYS: Record<string, number | 'reset'> = {
+  Equal: 1,
+  NumpadAdd: 1,
+  Minus: -1,
+  NumpadSubtract: -1,
+  Digit0: 'reset',
+  Numpad0: 'reset'
+};
+
+/** How far two fingers must move apart or together before it counts as a pinch, in pixels. */
+const PINCH_THRESHOLD = 60;
+
 /** Keys that move the traveller one tile, by KeyboardEvent.code. */
 const STEP_KEYS: Record<string, [number, number]> = {
   ArrowUp: [0, -1],
@@ -91,6 +104,10 @@ export class WorldScene extends Phaser.Scene {
   private startPhase = 0;
   /** How much of the canvas the DOM overlays cover. React measures it and tells us; see EventBus. */
   private insets = { right: 0, bottom: 0 };
+  /** The zoom the player asked for, or null to keep fitting the screen automatically. */
+  private zoomChoice: number | null = null;
+  /** Distance between two fingers on the previous frame, for pinch. Zero when not pinching. */
+  private pinchFrom = 0;
 
   constructor() {
     super('WorldScene');
@@ -248,14 +265,26 @@ export class WorldScene extends Phaser.Scene {
     // falls between two ticks and the traveller simply does not move. Listening for the event as
     // well means every press is remembered until the next frame can act on it.
     keyboard.on(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN, (event: KeyboardEvent) => {
+      const zoom = ZOOM_KEYS[event.code];
+      if (zoom !== undefined) {
+        this.onZoom({ step: zoom });
+        return;
+      }
       const delta = STEP_KEYS[event.code];
       if (!delta) return;
       this.pendingStep = delta;
     });
 
+    // A second pointer, so two fingers can be tracked for pinch. Phaser allocates one by default.
+    this.input.addPointer(1);
+    this.input.on(Phaser.Input.Events.POINTER_WHEEL, (_p: unknown, _o: unknown, _dx: number, dy: number) => {
+      this.onZoom({ step: dy > 0 ? -1 : 1 });
+    });
+
     EventBus.onEvent('new-journey', this.onNewJourney);
     EventBus.onEvent('resume-journey', this.onNewJourney);
     EventBus.onEvent('viewport-insets', this.onInsets);
+    EventBus.onEvent('zoom', this.onZoom);
 
     // Fires on rotation as well as on a window resize, which is exactly when the zoom and the
     // follow offset both stop being right.
@@ -265,6 +294,8 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('new-journey', this.onNewJourney);
       EventBus.offEvent('resume-journey', this.onNewJourney);
       EventBus.offEvent('viewport-insets', this.onInsets);
+      EventBus.offEvent('zoom', this.onZoom);
+      this.input.off(Phaser.Input.Events.POINTER_WHEEL);
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
       this.input.off(Phaser.Input.Events.POINTER_UP);
       keyboard.off(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN);
@@ -273,6 +304,18 @@ export class WorldScene extends Phaser.Scene {
 
   private onInsets = (insets: { right: number; bottom: number }): void => {
     this.insets = insets;
+    this.applyCamera();
+  };
+
+  /**
+   * Step the zoom, or hand it back to the automatic fit.
+   *
+   * Whole steps only. Pixel art at a fractional scale crawls as the camera moves, so a smooth
+   * pinch would look worse than a stepped one however nice the gesture felt.
+   */
+  private onZoom = ({ step }: { step: number | 'reset' }): void => {
+    this.zoomChoice =
+      step === 'reset' ? null : Phaser.Math.Clamp(Math.round(this.cameras.main.zoom + step), 1, MAX_ZOOM);
     this.applyCamera();
   };
 
@@ -319,7 +362,13 @@ export class WorldScene extends Phaser.Scene {
       Math.max(width / (this.world.width * TILE_SIZE), height / (this.world.height * TILE_SIZE))
     );
 
-    const zoom = Phaser.Math.Clamp(Math.max(wanted, toFill), 1, MAX_ZOOM);
+    // A player who has chosen a zoom keeps it, but never below `toFill` — below that the camera
+    // stops scrolling and the follow offset silently stops working.
+    const automatic = Phaser.Math.Clamp(Math.max(wanted, toFill), 1, MAX_ZOOM);
+    const zoom =
+      this.zoomChoice === null
+        ? automatic
+        : Phaser.Math.Clamp(this.zoomChoice, toFill, MAX_ZOOM);
     camera.setZoom(zoom);
 
     // Never push the traveller so far up that the notes crowd them off the top of a short screen.
@@ -333,10 +382,36 @@ export class WorldScene extends Phaser.Scene {
     this.sky.setFillStyle(sky.colour, sky.alpha);
   }
 
+  /**
+   * Two fingers moving apart or together change the zoom a step at a time.
+   *
+   * Stepped rather than continuous, and the reference distance resets after every step, so a long
+   * slow pinch keeps zooming instead of stopping once it has spent its threshold.
+   */
+  private updatePinch(): void {
+    const [first, second] = [this.input.pointer1, this.input.pointer2];
+    if (!first.isDown || !second.isDown) {
+      this.pinchFrom = 0;
+      return;
+    }
+
+    const spread = Phaser.Math.Distance.Between(first.x, first.y, second.x, second.y);
+    if (this.pinchFrom === 0) {
+      this.pinchFrom = spread;
+      return;
+    }
+
+    const change = spread - this.pinchFrom;
+    if (Math.abs(change) < PINCH_THRESHOLD) return;
+    this.onZoom({ step: change > 0 ? 1 : -1 });
+    this.pinchFrom = spread;
+  }
+
   update(): void {
     // Before the movement guard: the light keeps changing while the player stands still, and it
     // keeps changing mid-step too.
     this.updateSky();
+    this.updatePinch();
 
     if (this.moving) return;
 
@@ -457,7 +532,10 @@ export class WorldScene extends Phaser.Scene {
     // written page goes up once rather than on every step taken while standing there.
     if (atLandmark && !this.arrived) {
       this.arrived = true;
-      this.cameras.main.zoomTo(1.25, 900, 'Sine.easeInOut');
+      // Relative, not absolute. A fixed 1.25 was a zoom *out* on every desktop, where the fit is
+      // 2 or 3 — the reward for a hundred-tile walk was the map pulling away from you.
+      const settled = Math.min(this.cameras.main.zoom * 1.25, MAX_ZOOM + 0.5);
+      this.cameras.main.zoomTo(settled, 900, 'Sine.easeInOut');
       this.cameras.main.flash(700, 255, 246, 213, false);
       EventBus.emitEvent('landmark-reached', arrivalPage(this.world));
     }
