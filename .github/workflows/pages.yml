@@ -47,9 +47,20 @@ jobs:
       - run: npm test
       - name: Build
         # Pages serves the site from /<repo>/, so assets must resolve against that subpath.
+        #
+        # VITE_CANON_API is optional and safe to leave unset: the canon panel simply never
+        # appears and the game makes no network calls, which is exactly how it shipped before
+        # the service existed. Set it as a repository *variable* (Settings -> Secrets and
+        # variables -> Actions -> Variables) to the Space URL to switch retrieval on.
+        #
+        # It must be a variable, never a secret, and it must never hold the canon API key:
+        # Vite inlines every VITE_* value into the bundle, so anything here is readable by
+        # every visitor. The published game gets retrieval only; generation stays gated
+        # behind a key that lives on the service.
         run: npm run build
         env:
           DEPLOY_BASE: /${{ github.event.repository.name }}/
+          VITE_CANON_API: ${{ vars.VITE_CANON_API }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
