@@ -64,7 +64,7 @@ for (const view of VIEWPORTS) {
       // Sea is impassable, so both axes are tried rather than assuming either is open.
       for (const key of ['ArrowRight', 'ArrowRight', 'ArrowDown', 'ArrowDown']) {
         await page.keyboard.press(key);
-        await page.waitForTimeout(320);
+        await page.waitForTimeout(700);
       }
       await expect(title).not.toHaveText(before ?? '', { timeout: 10_000 });
     });
@@ -80,7 +80,7 @@ test('the traveller is never hidden behind a panel', async ({ page }) => {
   // Walk a while so this is not just true of the starting tile.
   for (let i = 0; i < 8; i += 1) {
     await page.keyboard.press(i % 2 ? 'ArrowRight' : 'ArrowDown');
-    await page.waitForTimeout(320);
+    await page.waitForTimeout(700);
   }
 
   const { canvas, log, notes } = await geometry(page);

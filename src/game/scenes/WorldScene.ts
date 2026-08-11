@@ -19,7 +19,7 @@ import {
   loadCharacterSheet,
   type Facing
 } from '../player';
-import { phaseAt, skyAt, startPhaseFor } from '../dayNight';
+import { phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
 import { arrivalPage, describeSurroundings, describeTile, landmarkHint } from '../../content/journal';
 import { travelCost } from '../../content/species';
 import { generateWorld, isWalkable } from '../../world/generate';
@@ -56,8 +56,14 @@ const MAX_ZOOM = 4;
  */
 const MIN_ZOOM = 1;
 
-/** Milliseconds per step on easy ground. `travelCost` from the biome data scales this. */
-const STEP_MS = 170;
+/**
+ * Milliseconds per step on easy ground. `travelCost` from the biome data scales this.
+ *
+ * Twice what it was. At 170 the traveller crossed a tile of grassland faster than the field notes
+ * beneath him could be read — and grassland is the common ground, so that was most of the walk. The
+ * journal is the game; outrunning it is the one pace that cannot be right.
+ */
+const STEP_MS = 340;
 
 /** Keys that change the zoom. `0` gives it back to the automatic fit. */
 const ZOOM_KEYS: Record<string, number | 'reset'> = {
@@ -110,6 +116,13 @@ export class WorldScene extends Phaser.Scene {
   private sky!: Phaser.GameObjects.Rectangle;
   /** Where in the day this journey opened — the player's own hour. */
   private startPhase = 0;
+  /**
+   * How much of the day the walking itself has spent, on top of the time that simply passes.
+   *
+   * Without this the sun answers only to the wall clock, and a traveller could cross the whole
+   * country twice between breakfast and lunch. See `travelTimeMs`: thirty kilometres to the day.
+   */
+  private travelled = 0;
   /** How much of the canvas the DOM overlays cover. React measures it and tells us; see EventBus. */
   private insets = { right: 0, bottom: 0 };
   /** The zoom the player asked for, or null to keep fitting the screen automatically. */
@@ -132,6 +145,7 @@ export class WorldScene extends Phaser.Scene {
     this.queuedPath = [];
     this.moving = false;
     this.facing = 'down';
+    this.travelled = 0;
     // The map opens on the light of the hour the player is actually in, then drifts from there.
     // `?hour=21` overrides it, so the evening can be checked without waiting for the evening.
     this.startPhase = startPhaseFor(new URLSearchParams(window.location.search).get('hour'));
@@ -400,7 +414,9 @@ export class WorldScene extends Phaser.Scene {
 
   /** Repaint the wash for the current hour. Cheap enough to run every frame. */
   private updateSky(): void {
-    const sky = skyAt(phaseAt(this.time.now, this.startPhase));
+    // Time passes while you stand still, and walking spends it faster. Sitting on a riverbank for
+    // ten real minutes is four hours of the day; so is walking twenty tiles of open grassland.
+    const sky = skyAt(phaseAt(this.time.now + this.travelled, this.startPhase));
     this.sky.setFillStyle(sky.colour, sky.alpha);
   }
 
@@ -469,6 +485,9 @@ export class WorldScene extends Phaser.Scene {
     // Wetland and hills take longer to cross than open plains. `travelCost` sat unread in
     // data/biomes.json until now; this is the friction the design asks for — slower, never unsafe.
     const cost = travelCost(tile.biome) ?? 1;
+    // The same cost buys the step twice: how long the tween takes on the screen, and how much of
+    // the day the walking spends. The second is what keeps the sun honest.
+    this.travelled += travelTimeMs(cost);
     this.moving = true;
     this.at = target;
     this.updateAnimation();

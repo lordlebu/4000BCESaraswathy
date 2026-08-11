@@ -5,12 +5,52 @@
 // jumps, is worse than no cycle at all in a game whose whole pitch is calm.
 
 import { describe, expect, it } from 'vitest';
-import { DAY_MS, phaseAt, phaseFromClock, skyAt, startPhaseFor } from '../src/game/dayNight';
+import {
+  DAY_MS,
+  KM_PER_DAY,
+  KM_PER_TILE,
+  phaseAt,
+  phaseFromClock,
+  skyAt,
+  startPhaseFor,
+  travelTimeMs
+} from '../src/game/dayNight';
+import biomes from '../data/biomes.json';
 
 const channels = (colour: number) => [(colour >> 16) & 0xff, (colour >> 8) & 0xff, colour & 0xff];
 
 /** The phase for a wall-clock hour, so the assertions below read as times of day. */
 const clock = (hour: number, minute = 0) => phaseFromClock(new Date(2026, 7, 10, hour, minute, 0));
+
+describe('travelTimeMs', () => {
+  it('spends a day on thirty kilometres of walking and no less', () => {
+    // The whole point of the number: a day of easy going is thirty tiles, not three hundred.
+    expect(travelTimeMs(1) * (KM_PER_DAY / KM_PER_TILE)).toBeCloseTo(DAY_MS, 6);
+    expect(phaseAt(travelTimeMs(1) * 30)).toBeCloseTo(0, 6);
+  });
+
+  it('charges rough ground more of the day than open ground', () => {
+    expect(travelTimeMs(2)).toBe(travelTimeMs(1) * 2);
+    expect(travelTimeMs(3)).toBe(travelTimeMs(1) * 3);
+  });
+
+  it('leaves a whole day in every walkable biome, so no tile can swallow one', () => {
+    // A cost that crept up past three would mean a single tile costing more than a day's daylight,
+    // and the sky would jump a phase on one step.
+    for (const biome of biomes) {
+      if (biome.travelCost === null) continue;
+      expect(travelTimeMs(biome.travelCost), biome.id).toBeLessThan(DAY_MS / 2);
+    }
+  });
+
+  it('crosses the map in about a day, which is what the journal already promises the player', () => {
+    // `landmarkHint` says a landmark on the far side "will take most of the day". The map is 36
+    // tiles across, so at a kilometre a tile that line is now arithmetic rather than atmosphere.
+    const acrossTheMap = travelTimeMs(1) * 36;
+    expect(acrossTheMap / DAY_MS).toBeGreaterThan(0.8);
+    expect(acrossTheMap / DAY_MS).toBeLessThan(1.5);
+  });
+});
 
 describe('phaseAt', () => {
   it('runs from 0 to 1 across a day and wraps', () => {
