@@ -37,16 +37,24 @@ const SIGHT_RADIUS = 2;
 /**
  * Roughly how many tiles should be visible across the screen, whatever its size.
  *
- * Sixteen, rather than the forty a desktop showed at zoom 1. The second reason matters more than
- * the first: at zoom 1 the whole 36-tile world is *narrower* than a 1280px viewport, so Phaser
- * centres it, refuses to scroll, and then quietly ignores the follow offset — the traveller sits
- * where the map puts him no matter what the panels are covering. Filling the screen is what gives
- * the camera room to move at all.
+ * Sixteen, rather than the forty a desktop showed at zoom 1: at that size the traveller is a
+ * postage stamp in a sea of map, and the tile art has nothing to say.
  */
 const TILES_ACROSS = 16;
 
 /** Beyond this the map reads as a few enormous squares rather than a country. */
 const MAX_ZOOM = 4;
+
+/**
+ * And below this it is not a map, it is a chart.
+ *
+ * One, not two. The whole 36-tile world is narrower than a desktop viewport at zoom 1, so this is
+ * as far back as a player can ever need to stand — it is the entire country at once. The floor used
+ * to be "large enough that the world fills the screen", which on a 1280px desktop meant 2, and made
+ * the widest view a player could reach about half the country. Standing back is most of the point
+ * of a map, so the bounds now cope with a map smaller than its frame instead of forbidding one.
+ */
+const MIN_ZOOM = 1;
 
 /** Milliseconds per step on easy ground. `travelCost` from the biome data scales this. */
 const STEP_MS = 170;
@@ -173,7 +181,8 @@ export class WorldScene extends Phaser.Scene {
       .setDepth(30);
     this.updateSky();
 
-    this.cameras.main.setBounds(0, 0, pixelWidth, pixelHeight);
+    // Bounds are not set here: they depend on the zoom and on what the panels are covering, so
+    // `applyCamera` owns them and recomputes them on every resize and every zoom step.
     this.cameras.main.setBackgroundColor('#1b1420');
     this.cameras.main.startFollow(this.player, true, 0.09, 0.09);
     this.applyCamera();
@@ -315,7 +324,9 @@ export class WorldScene extends Phaser.Scene {
    */
   private onZoom = ({ step }: { step: number | 'reset' }): void => {
     this.zoomChoice =
-      step === 'reset' ? null : Phaser.Math.Clamp(Math.round(this.cameras.main.zoom + step), 1, MAX_ZOOM);
+      step === 'reset'
+        ? null
+        : Phaser.Math.Clamp(Math.round(this.cameras.main.zoom + step), MIN_ZOOM, MAX_ZOOM);
     this.applyCamera();
   };
 
@@ -353,27 +364,38 @@ export class WorldScene extends Phaser.Scene {
     // three times to twice as large because a panel appeared, which is a lot of movement to ask of
     // someone who only wanted to read something. The panels now cover the map rather than resize it.
     const wanted = Math.round(width / (TILE_SIZE * TILES_ACROSS));
-
-    // Never small enough for the world to fit inside the screen. A camera with nothing to scroll is
-    // centred by Phaser and ignores the follow offset entirely, so the traveller would sit wherever
-    // the map happened to put him — under the notes, as often as not. It bites vertically on a tall
-    // phone, where 768px of world is shorter than an 844px viewport.
-    const toFill = Math.ceil(
-      Math.max(width / (this.world.width * TILE_SIZE), height / (this.world.height * TILE_SIZE))
-    );
-
-    // A player who has chosen a zoom keeps it, but never below `toFill` — below that the camera
-    // stops scrolling and the follow offset silently stops working.
-    const automatic = Phaser.Math.Clamp(Math.max(wanted, toFill), 1, MAX_ZOOM);
+    const automatic = Phaser.Math.Clamp(wanted, MIN_ZOOM, MAX_ZOOM);
     const zoom =
-      this.zoomChoice === null
-        ? automatic
-        : Phaser.Math.Clamp(this.zoomChoice, toFill, MAX_ZOOM);
+      this.zoomChoice === null ? automatic : Phaser.Math.Clamp(this.zoomChoice, MIN_ZOOM, MAX_ZOOM);
     camera.setZoom(zoom);
 
     // Never push the traveller so far up that the notes crowd them off the top of a short screen.
     const bottom = Math.min(this.insets.bottom, height * 0.45);
     camera.setFollowOffset(-this.insets.right / (2 * zoom), -bottom / (2 * zoom));
+
+    // Bounds, which are the part of this with any subtlety in it.
+    //
+    // The camera should come to rest with the map's edge against the *edge of what you can see* —
+    // the inside edge of the journal panel, not the edge of the screen, or the last column of the
+    // country ends up underneath the panel with no way to look at it. So the bounds are the world
+    // plus the strip the panels cover: a scroll far enough right to bring that phantom strip into
+    // view puts the true right edge exactly where the panel begins.
+    //
+    // And when the player zooms out past the map filling the visible area, there is nothing left to
+    // scroll. Phaser then pins the camera to the near edge of the bounds, which would shove the map
+    // into the top-left corner. Splitting the leftover space evenly parks it in the middle instead,
+    // which is what a map smaller than its frame should do.
+    const covered = { x: this.insets.right / zoom, y: bottom / zoom };
+    const spare = {
+      x: Math.max(0, (width - this.insets.right) / zoom - this.world.width * TILE_SIZE) / 2,
+      y: Math.max(0, (height - bottom) / zoom - this.world.height * TILE_SIZE) / 2
+    };
+    camera.setBounds(
+      -spare.x,
+      -spare.y,
+      this.world.width * TILE_SIZE + covered.x + spare.x * 2,
+      this.world.height * TILE_SIZE + covered.y + spare.y * 2
+    );
   }
 
   /** Repaint the wash for the current hour. Cheap enough to run every frame. */

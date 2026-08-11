@@ -160,4 +160,21 @@ test('the player can zoom in and out, and get the automatic fit back', async ({ 
   await page.keyboard.press('Digit0');
   await page.waitForTimeout(700);
   expect(Math.abs((await frame()) - start)).toBeLessThan(start * 0.05);
+
+  // Four steps are reachable on a desktop, not three. The floor used to be "zoomed in far enough
+  // that the world fills the screen", which on this viewport is 2 — so the widest view a player
+  // could get was half the country, and standing back to see where you are going is most of what a
+  // map is for. Sweeping the whole range and counting what actually renders differently is the
+  // guard: a floor that creeps back up shows here as one fewer distinct view.
+  const rendered = new Set<number>();
+  for (let i = 0; i < 5; i += 1) {
+    await page.keyboard.press('Minus');
+    await page.waitForTimeout(400);
+  }
+  for (let i = 0; i < 5; i += 1) {
+    rendered.add(await frame());
+    await page.keyboard.press('Equal');
+    await page.waitForTimeout(400);
+  }
+  expect(rendered.size).toBeGreaterThanOrEqual(4);
 });

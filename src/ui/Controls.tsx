@@ -27,6 +27,9 @@ export function Controls({ seed, onGenerate, observed, logOpen, onToggleLog }: C
         <button
           type="button"
           className="control"
+          // Named here rather than by the text inside, because on a short screen the CSS hides the
+          // label and leaves the button reading as "☰" to anything that cannot see it.
+          aria-label="Map"
           aria-expanded={sheet}
           onClick={() => setSheet((open) => !open)}
         >
@@ -35,7 +38,13 @@ export function Controls({ seed, onGenerate, observed, logOpen, onToggleLog }: C
           <span aria-hidden="true">☰</span>
           <span className="control-label">Map</span>
         </button>
-        <button type="button" className="control" aria-expanded={logOpen} onClick={onToggleLog}>
+        <button
+          type="button"
+          className="control"
+          aria-label="Journal"
+          aria-expanded={logOpen}
+          onClick={onToggleLog}
+        >
           <span aria-hidden="true">✦</span>
           <span className="control-label">Journal</span>
         </button>
