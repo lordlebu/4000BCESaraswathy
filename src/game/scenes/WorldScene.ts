@@ -34,8 +34,43 @@ const FOG_VISIBLE = 0;
 /** How far the traveller can see. */
 const SIGHT_RADIUS = 2;
 
+/**
+ * Roughly how many tiles should be visible across the screen, whatever its size.
+ *
+ * Sixteen, rather than the forty a desktop showed at zoom 1: at that size the traveller is a
+ * postage stamp in a sea of map, and the tile art has nothing to say.
+ */
+const TILES_ACROSS = 16;
+
+/** Beyond this the map reads as a few enormous squares rather than a country. */
+const MAX_ZOOM = 4;
+
+/**
+ * And below this it is not a map, it is a chart.
+ *
+ * One, not two. The whole 36-tile world is narrower than a desktop viewport at zoom 1, so this is
+ * as far back as a player can ever need to stand — it is the entire country at once. The floor used
+ * to be "large enough that the world fills the screen", which on a 1280px desktop meant 2, and made
+ * the widest view a player could reach about half the country. Standing back is most of the point
+ * of a map, so the bounds now cope with a map smaller than its frame instead of forbidding one.
+ */
+const MIN_ZOOM = 1;
+
 /** Milliseconds per step on easy ground. `travelCost` from the biome data scales this. */
 const STEP_MS = 170;
+
+/** Keys that change the zoom. `0` gives it back to the automatic fit. */
+const ZOOM_KEYS: Record<string, number | 'reset'> = {
+  Equal: 1,
+  NumpadAdd: 1,
+  Minus: -1,
+  NumpadSubtract: -1,
+  Digit0: 'reset',
+  Numpad0: 'reset'
+};
+
+/** How far two fingers must move apart or together before it counts as a pinch, in pixels. */
+const PINCH_THRESHOLD = 60;
 
 /** Keys that move the traveller one tile, by KeyboardEvent.code. */
 const STEP_KEYS: Record<string, [number, number]> = {
@@ -75,6 +110,12 @@ export class WorldScene extends Phaser.Scene {
   private sky!: Phaser.GameObjects.Rectangle;
   /** Where in the day this journey opened — the player's own hour. */
   private startPhase = 0;
+  /** How much of the canvas the DOM overlays cover. React measures it and tells us; see EventBus. */
+  private insets = { right: 0, bottom: 0 };
+  /** The zoom the player asked for, or null to keep fitting the screen automatically. */
+  private zoomChoice: number | null = null;
+  /** Distance between two fingers on the previous frame, for pinch. Zero when not pinching. */
+  private pinchFrom = 0;
 
   constructor() {
     super('WorldScene');
@@ -140,10 +181,11 @@ export class WorldScene extends Phaser.Scene {
       .setDepth(30);
     this.updateSky();
 
-    this.cameras.main.setBounds(0, 0, pixelWidth, pixelHeight);
+    // Bounds are not set here: they depend on the zoom and on what the panels are covering, so
+    // `applyCamera` owns them and recomputes them on every resize and every zoom step.
     this.cameras.main.setBackgroundColor('#1b1420');
-    this.cameras.main.setZoom(1);
     this.cameras.main.startFollow(this.player, true, 0.09, 0.09);
+    this.applyCamera();
     this.cameras.main.fadeIn(600, 27, 20, 32);
 
     this.bindInput();
@@ -232,24 +274,129 @@ export class WorldScene extends Phaser.Scene {
     // falls between two ticks and the traveller simply does not move. Listening for the event as
     // well means every press is remembered until the next frame can act on it.
     keyboard.on(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN, (event: KeyboardEvent) => {
+      const zoom = ZOOM_KEYS[event.code];
+      if (zoom !== undefined) {
+        this.onZoom({ step: zoom });
+        return;
+      }
       const delta = STEP_KEYS[event.code];
       if (!delta) return;
       this.pendingStep = delta;
     });
 
+    // A second pointer, so two fingers can be tracked for pinch. Phaser allocates one by default.
+    this.input.addPointer(1);
+    this.input.on(Phaser.Input.Events.POINTER_WHEEL, (_p: unknown, _o: unknown, _dx: number, dy: number) => {
+      this.onZoom({ step: dy > 0 ? -1 : 1 });
+    });
+
     EventBus.onEvent('new-journey', this.onNewJourney);
     EventBus.onEvent('resume-journey', this.onNewJourney);
+    EventBus.onEvent('viewport-insets', this.onInsets);
+    EventBus.onEvent('zoom', this.onZoom);
+
+    // Fires on rotation as well as on a window resize, which is exactly when the zoom and the
+    // follow offset both stop being right.
+    this.scale.on(Phaser.Scale.Events.RESIZE, this.onResize);
+
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       EventBus.offEvent('new-journey', this.onNewJourney);
       EventBus.offEvent('resume-journey', this.onNewJourney);
+      EventBus.offEvent('viewport-insets', this.onInsets);
+      EventBus.offEvent('zoom', this.onZoom);
+      this.input.off(Phaser.Input.Events.POINTER_WHEEL);
+      this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
       this.input.off(Phaser.Input.Events.POINTER_UP);
       keyboard.off(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN);
     });
   }
 
+  private onInsets = (insets: { right: number; bottom: number }): void => {
+    this.insets = insets;
+    this.applyCamera();
+  };
+
+  /**
+   * Step the zoom, or hand it back to the automatic fit.
+   *
+   * Whole steps only. Pixel art at a fractional scale crawls as the camera moves, so a smooth
+   * pinch would look worse than a stepped one however nice the gesture felt.
+   */
+  private onZoom = ({ step }: { step: number | 'reset' }): void => {
+    this.zoomChoice =
+      step === 'reset'
+        ? null
+        : Phaser.Math.Clamp(Math.round(this.cameras.main.zoom + step), MIN_ZOOM, MAX_ZOOM);
+    this.applyCamera();
+  };
+
+  private onResize = (): void => {
+    this.applyCamera();
+  };
+
   private onNewJourney = (payload: { seed: string; discovered?: string[] }): void => {
     this.scene.restart({ seed: payload.seed, discovered: payload.discovered ?? [] });
   };
+
+  /**
+   * Fit the camera to whatever the viewport and the overlays currently leave visible.
+   *
+   * **Zoom.** At `TILE_SIZE` 32 and zoom 1 a desktop shows about forty tiles across — a postage
+   * stamp of a traveller in a sea of map — while a narrow phone shows twelve. Zoom is therefore
+   * chosen from the width so that roughly `TILES_ACROSS` tiles are visible whatever the screen.
+   *
+   * It rounds to a **whole number**. Scaling pixel art by a fraction resamples it every frame and
+   * it crawls as the camera moves; this is the same reason the player sprite is drawn at an
+   * integer scale with `NEAREST` filtering.
+   *
+   * **Offset.** The camera centres on the player, so anything covering the right of the screen
+   * covers the traveller. Working the follow maths through: with `followOffset.x = ox`, the player
+   * lands at `width / 2 + ox * zoom` on screen. To sit them in the middle of the *visible* part
+   * instead — `(width - right) / 2` — that solves to `ox = -right / (2 * zoom)`, and the same for
+   * the bottom.
+   */
+  private applyCamera(): void {
+    const camera = this.cameras.main;
+    const { width, height } = this.scale.gameSize;
+
+    // Zoom follows the whole viewport, not the part the panels leave uncovered. Sizing it to the
+    // uncovered part meant opening the journal rescaled the entire world — the map jumped from
+    // three times to twice as large because a panel appeared, which is a lot of movement to ask of
+    // someone who only wanted to read something. The panels now cover the map rather than resize it.
+    const wanted = Math.round(width / (TILE_SIZE * TILES_ACROSS));
+    const automatic = Phaser.Math.Clamp(wanted, MIN_ZOOM, MAX_ZOOM);
+    const zoom =
+      this.zoomChoice === null ? automatic : Phaser.Math.Clamp(this.zoomChoice, MIN_ZOOM, MAX_ZOOM);
+    camera.setZoom(zoom);
+
+    // Never push the traveller so far up that the notes crowd them off the top of a short screen.
+    const bottom = Math.min(this.insets.bottom, height * 0.45);
+    camera.setFollowOffset(-this.insets.right / (2 * zoom), -bottom / (2 * zoom));
+
+    // Bounds, which are the part of this with any subtlety in it.
+    //
+    // The camera should come to rest with the map's edge against the *edge of what you can see* —
+    // the inside edge of the journal panel, not the edge of the screen, or the last column of the
+    // country ends up underneath the panel with no way to look at it. So the bounds are the world
+    // plus the strip the panels cover: a scroll far enough right to bring that phantom strip into
+    // view puts the true right edge exactly where the panel begins.
+    //
+    // And when the player zooms out past the map filling the visible area, there is nothing left to
+    // scroll. Phaser then pins the camera to the near edge of the bounds, which would shove the map
+    // into the top-left corner. Splitting the leftover space evenly parks it in the middle instead,
+    // which is what a map smaller than its frame should do.
+    const covered = { x: this.insets.right / zoom, y: bottom / zoom };
+    const spare = {
+      x: Math.max(0, (width - this.insets.right) / zoom - this.world.width * TILE_SIZE) / 2,
+      y: Math.max(0, (height - bottom) / zoom - this.world.height * TILE_SIZE) / 2
+    };
+    camera.setBounds(
+      -spare.x,
+      -spare.y,
+      this.world.width * TILE_SIZE + covered.x + spare.x * 2,
+      this.world.height * TILE_SIZE + covered.y + spare.y * 2
+    );
+  }
 
   /** Repaint the wash for the current hour. Cheap enough to run every frame. */
   private updateSky(): void {
@@ -257,10 +404,36 @@ export class WorldScene extends Phaser.Scene {
     this.sky.setFillStyle(sky.colour, sky.alpha);
   }
 
+  /**
+   * Two fingers moving apart or together change the zoom a step at a time.
+   *
+   * Stepped rather than continuous, and the reference distance resets after every step, so a long
+   * slow pinch keeps zooming instead of stopping once it has spent its threshold.
+   */
+  private updatePinch(): void {
+    const [first, second] = [this.input.pointer1, this.input.pointer2];
+    if (!first.isDown || !second.isDown) {
+      this.pinchFrom = 0;
+      return;
+    }
+
+    const spread = Phaser.Math.Distance.Between(first.x, first.y, second.x, second.y);
+    if (this.pinchFrom === 0) {
+      this.pinchFrom = spread;
+      return;
+    }
+
+    const change = spread - this.pinchFrom;
+    if (Math.abs(change) < PINCH_THRESHOLD) return;
+    this.onZoom({ step: change > 0 ? 1 : -1 });
+    this.pinchFrom = spread;
+  }
+
   update(): void {
     // Before the movement guard: the light keeps changing while the player stands still, and it
     // keeps changing mid-step too.
     this.updateSky();
+    this.updatePinch();
 
     if (this.moving) return;
 
@@ -381,7 +554,10 @@ export class WorldScene extends Phaser.Scene {
     // written page goes up once rather than on every step taken while standing there.
     if (atLandmark && !this.arrived) {
       this.arrived = true;
-      this.cameras.main.zoomTo(1.25, 900, 'Sine.easeInOut');
+      // Relative, not absolute. A fixed 1.25 was a zoom *out* on every desktop, where the fit is
+      // 2 or 3 — the reward for a hundred-tile walk was the map pulling away from you.
+      const settled = Math.min(this.cameras.main.zoom * 1.25, MAX_ZOOM + 0.5);
+      this.cameras.main.zoomTo(settled, 900, 'Sine.easeInOut');
       this.cameras.main.flash(700, 255, 246, 213, false);
       EventBus.emitEvent('landmark-reached', arrivalPage(this.world));
     }

@@ -1,67 +1,102 @@
-/* Ported from the vanilla prototype's styles.css — same warm paper palette, rebuilt around the
-   Phaser canvas. The map is now a flexible surface rather than a fixed-size <canvas>, so the
-   layout gives it the room and lets the sidebar keep a readable column width. */
+/* The map is the screen.
+ *
+ * This used to be a web page containing a game: a centred column, a page header, a bordered map box
+ * of fixed height, and a sidebar of cards beside it. It is now a game — the canvas fills the
+ * viewport and everything else floats over it on parchment.
+ *
+ * Two consequences run through the whole file. Nothing scrolls the page, because there is no page
+ * left to scroll; panels scroll inside themselves instead. And the arrangement is chosen by
+ * `orientation`, not width, so a landscape phone and a portrait tablet each get the right one. */
 
 :root {
   color-scheme: light;
   --ink: #34263a;
   --paper: #fff6df;
-  --panel: rgba(255, 246, 223, 0.88);
+  --panel: rgba(255, 246, 223, 0.93);
   --edge: rgba(52, 38, 58, 0.16);
   --accent: #a45c40;
   --muted: #6d5a68;
+
+  /* Every pinned element clears the notch and the home indicator. index.html sets
+     viewport-fit=cover, without which these all resolve to zero. */
+  --gutter: 12px;
+  --safe-top: calc(var(--gutter) + env(safe-area-inset-top));
+  --safe-bottom: calc(var(--gutter) + env(safe-area-inset-bottom));
+  --safe-left: calc(var(--gutter) + env(safe-area-inset-left));
+  --safe-right: calc(var(--gutter) + env(safe-area-inset-right));
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
-  min-height: 100dvh;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
   font-family: Georgia, 'Times New Roman', serif;
   color: var(--ink);
-  background: linear-gradient(160deg, #ffe9b8, #d8f0d2 55%, #b8dce8);
+  background: #1b1420;
 }
 
-.app {
-  width: min(1280px, calc(100% - 32px));
-  margin: 0 auto;
-  padding-bottom: 32px;
+/* dvh rather than vh: on a phone, vh is the tallest the viewport ever gets, so the bottom of the
+   layout hides behind the address bar until it collapses. */
+.stage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
 }
 
-.app-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 24px 0 16px;
+.map-surface,
+.map-surface canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
 }
 
-h1 {
-  margin: 0 0 4px;
-  font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem);
+/* --- Shared parchment ---------------------------------------------------- */
+
+.log,
+.journal,
+.sheet,
+.arrival {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(20, 14, 24, 0.35);
+  backdrop-filter: blur(2px);
 }
 
+h1,
 h2 {
-  margin: 0 0 8px;
-  font-size: 1.1rem;
+  margin: 0 0 6px;
+  font-size: 1.05rem;
 }
 
 h3 {
-  margin: 16px 0 4px;
-  font-size: 0.82rem;
+  margin: 14px 0 4px;
+  font-size: 0.74rem;
   font-weight: normal;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
-.tagline {
-  margin: 0;
-  max-width: 52ch;
+p {
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.muted {
   color: var(--muted);
+  font-size: 0.85rem;
 }
 
 kbd {
@@ -73,22 +108,10 @@ kbd {
   padding: 1px 5px;
 }
 
-.seed-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: var(--panel);
-  border: 2px solid var(--edge);
-  border-radius: 18px;
-  box-shadow: 0 12px 28px rgba(52, 38, 58, 0.12);
-}
-
 input,
 button {
   font: inherit;
-  padding: 9px 14px;
+  padding: 7px 13px;
   border: 1px solid rgba(52, 38, 58, 0.25);
   border-radius: 999px;
 }
@@ -109,151 +132,6 @@ button:disabled {
   cursor: default;
 }
 
-.layout {
-  display: grid;
-  gap: 18px;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 24rem);
-  align-items: start;
-}
-
-/* The Phaser canvas fills this box; Phaser's RESIZE scale mode follows it. */
-.map-surface {
-  position: relative;
-  min-height: 60vh;
-  height: clamp(420px, 72vh, 820px);
-  overflow: hidden;
-  background: #1b1420;
-  border: 5px solid #5e4a50;
-  border-radius: 16px;
-  box-shadow: 0 16px 34px rgba(52, 38, 58, 0.22);
-  touch-action: none;
-}
-
-.map-surface canvas {
-  display: block;
-}
-
-.map-column {
-  display: grid;
-  gap: 16px;
-  min-width: 0;
-}
-
-.sidebar {
-  display: grid;
-  gap: 16px;
-}
-
-/* The arrival page. Sits under the map rather than over it: the point of the moment is to read
-   something, and a modal that has to be dismissed makes reading feel like an interruption. */
-.arrival {
-  padding: 22px 24px;
-  background: linear-gradient(150deg, #fff8e6, #f6e3bd);
-  border: 2px solid rgba(138, 100, 16, 0.35);
-  border-radius: 18px;
-  box-shadow: 0 16px 34px rgba(52, 38, 58, 0.18);
-  animation: arrival-in 700ms ease-out;
-}
-
-.arrival h2 {
-  font-size: 1.35rem;
-  color: #7a5410;
-}
-
-.arrival p {
-  margin: 0 0 12px;
-  line-height: 1.65;
-  max-width: 62ch;
-}
-
-.arrival-closing {
-  padding-top: 12px;
-  border-top: 1px solid rgba(138, 100, 16, 0.28);
-  color: var(--muted);
-  font-style: italic;
-}
-
-@keyframes arrival-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .arrival {
-    animation: none;
-  }
-}
-
-.journal,
-.legend,
-.sketches,
-.export {
-  padding: 18px;
-  background: var(--panel);
-  border: 2px solid var(--edge);
-  border-radius: 18px;
-  box-shadow: 0 12px 28px rgba(52, 38, 58, 0.12);
-}
-
-.journal p {
-  margin: 0 0 10px;
-  line-height: 1.55;
-}
-
-.surroundings {
-  color: #4a5c46;
-  font-style: italic;
-}
-
-/* Field notes — a specimen label rather than a sentence.
-   The canon prose is written as description, not as observation ("A predatory aquatic beetle that
-   swims in hot mineral springs"), so it is presented the way a naturalist would write it down:
-   the name, then what it is, set in under a hairline the eye can follow down the column. */
-.note {
-  margin: 0 0 12px;
-}
-
-.note dt {
-  font-weight: bold;
-  letter-spacing: 0.01em;
-}
-
-.note dd {
-  margin: 3px 0 0;
-  padding-left: 11px;
-  border-left: 2px solid rgba(52, 38, 58, 0.18);
-  line-height: 1.55;
-}
-
-.note-empty {
-  color: var(--muted);
-  font-style: italic;
-}
-
-.memory {
-  color: #6d4a39;
-  font-style: italic;
-}
-
-.status {
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--edge);
-  font-weight: bold;
-}
-
-.status-arrived {
-  color: #8a6410;
-}
-
-.muted {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-/* Secondary action: present, but not competing with the one people actually want. */
 button.ghost {
   background: transparent;
   color: var(--accent);
@@ -265,48 +143,416 @@ button.ghost:hover:not(:disabled) {
   filter: none;
 }
 
-.arrival-actions,
-.export-actions {
+/* --- Controls ------------------------------------------------------------ */
+
+.controls {
+  position: absolute;
+  top: var(--safe-top);
+  left: var(--safe-left);
+  display: flex;
+  gap: 8px;
+  z-index: 3;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--edge);
+  box-shadow: 0 6px 18px rgba(20, 14, 24, 0.3);
+}
+
+.control:hover:not(:disabled) {
+  background: var(--paper);
+  filter: none;
+}
+
+.control-label {
+  font-size: 0.85rem;
+}
+
+.zoom {
+  position: absolute;
+  top: var(--safe-top);
+  right: var(--safe-right);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 3;
+}
+
+.zoom .control {
+  justify-content: center;
+  width: 38px;
+  padding: 6px 0;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+/* With the log pinned to the right there is no room beside it; tuck the buttons in on its left. */
+@media (orientation: landscape) {
+  .stage:has(.log) .zoom {
+    right: calc(var(--safe-right) + min(32vw, 26rem) + 10px);
+  }
+}
+
+/* --- The journey log ----------------------------------------------------- */
+
+.log {
+  position: absolute;
+  z-index: 2;
+  padding: 18px 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.log h2 {
+  font-size: 1.15rem;
+  padding-right: 24px;
+}
+
+.log-subtitle {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.88rem;
+}
+
+.log p {
+  font-size: 0.9rem;
+}
+
+.log-close,
+.sheet-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  padding: 0;
+  width: 26px;
+  height: 26px;
+  line-height: 1;
+  font-size: 1.1rem;
+  background: transparent;
+  color: var(--muted);
+  border-color: transparent;
+}
+
+.log-close:hover,
+.sheet-close:hover {
+  background: rgba(52, 38, 58, 0.08);
+  filter: none;
+}
+
+.log-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.log-replay {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--edge);
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.78rem;
+}
+
+.log-replay span {
+  overflow-wrap: anywhere;
+}
+
+/* --- The field notes ----------------------------------------------------- */
+
+.journal {
+  position: absolute;
+  z-index: 2;
+  padding: 14px 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.journal-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.journal h2 {
+  font-size: 1.05rem;
+}
+
+.journal-place {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.journal-head button {
+  flex: none;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+}
+
+.surroundings {
+  margin: 6px 0 0;
+  color: #4a5c46;
+  font-style: italic;
+  font-size: 0.88rem;
+}
+
+/* Two columns of notes where the strip is wide, one where it is not. */
+.journal-notes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0 24px;
+}
+
+.journal-notes h3 {
+  margin-top: 10px;
+}
+
+/* Field notes — a specimen label rather than a sentence.
+   The canon prose is written as description, not as observation ("A predatory aquatic beetle that
+   swims in hot mineral springs"), so it is presented the way a naturalist would write it down:
+   the name, then what it is, set in under a hairline the eye can follow down the column. */
+.note {
+  margin: 0 0 10px;
+}
+
+.note dt {
+  font-weight: bold;
+  letter-spacing: 0.01em;
+}
+
+.note dd {
+  margin: 3px 0 0;
+  padding-left: 11px;
+  border-left: 2px solid rgba(52, 38, 58, 0.18);
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.note-empty {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.memory {
+  margin: 4px 0 0;
+  color: #6d4a39;
+  font-style: italic;
+  font-size: 0.88rem;
+}
+
+.journal-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--edge);
+}
+
+.status {
+  margin: 0;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.status-arrived {
+  color: #8a6410;
+}
+
+.journal-foot .muted {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+/* --- The sheet behind the map button ------------------------------------- */
+
+.sheet {
+  position: absolute;
+  z-index: 4;
+  top: var(--safe-top);
+  left: var(--safe-left);
+  width: min(24rem, calc(100vw - var(--safe-left) - var(--safe-right)));
+  max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+  padding: 18px 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sheet h2 {
+  padding-right: 24px;
+}
+
+.legend-list,
+.sketch-list {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.86rem;
+}
+
+.legend-list {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.swatch {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  margin-right: 7px;
+  vertical-align: -2px;
+  border-radius: 4px;
+}
+
+.seed-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.seed-bar label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.seed-bar input {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+/* --- Arrival ------------------------------------------------------------- */
+
+.arrival-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  background: rgba(20, 14, 24, 0.45);
+  animation: veil-in 500ms ease-out;
+}
+
+.arrival {
+  width: min(46rem, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 24px 26px;
+  background: linear-gradient(150deg, #fff8e6, #f6e3bd);
+  border-color: rgba(138, 100, 16, 0.35);
+  animation: arrival-in 700ms ease-out;
+}
+
+.arrival h2 {
+  font-size: 1.35rem;
+  color: #7a5410;
+}
+
+.arrival p {
+  margin: 0 0 12px;
+  line-height: 1.65;
+}
+
+.arrival-closing {
+  padding-top: 12px;
+  border-top: 1px solid rgba(138, 100, 16, 0.28);
+  color: var(--muted);
+  font-style: italic;
+}
+
+.arrival-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.export p {
-  margin: 0 0 14px;
-  line-height: 1.5;
+@keyframes arrival-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 }
 
-.legend-list,
-.sketches ul {
-  display: grid;
-  gap: 8px;
-  margin: 12px 0 0;
-  padding: 0;
-  list-style: none;
+@keyframes veil-in {
+  from {
+    opacity: 0;
+  }
 }
 
-.legend-list {
-  grid-template-columns: repeat(2, minmax(110px, 1fr));
-  font-size: 0.92rem;
+@media (prefers-reduced-motion: reduce) {
+  .arrival,
+  .arrival-veil {
+    animation: none;
+  }
 }
 
-.swatch {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  margin-right: 8px;
-  vertical-align: -2px;
-  border-radius: 5px;
-}
+/* --- Landscape: log to the right, notes along the bottom beside it -------- */
 
-@media (max-width: 900px) {
-  .layout {
-    grid-template-columns: 1fr;
+@media (orientation: landscape) {
+  .log {
+    top: var(--safe-top);
+    right: var(--safe-right);
+    bottom: var(--safe-bottom);
+    width: min(32vw, 26rem);
   }
 
-  .map-surface {
-    height: clamp(340px, 56vh, 560px);
+  .journal {
+    left: var(--safe-left);
+    right: var(--safe-right);
+    bottom: var(--safe-bottom);
+    max-height: 40dvh;
+  }
+
+  /* With the log open the notes stop short of it rather than sliding underneath. */
+  .stage:has(.log) .journal {
+    right: calc(var(--safe-right) + min(32vw, 26rem) + 10px);
+  }
+}
+
+/* --- Portrait: notes along the bottom, log as a sheet over them ----------- */
+
+@media (orientation: portrait) {
+  .log {
+    left: var(--safe-left);
+    right: var(--safe-right);
+    bottom: var(--safe-bottom);
+    max-height: 78dvh;
+  }
+
+  .journal {
+    left: var(--safe-left);
+    right: var(--safe-right);
+    bottom: var(--safe-bottom);
+    max-height: 38dvh;
+  }
+
+  .journal-notes {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* A landscape phone is short. Give the map the height back and let the notes stay out of the way
+   until they are read. */
+@media (orientation: landscape) and (max-height: 480px) {
+  .journal {
+    max-height: 46dvh;
+  }
+
+  .control-label {
+    display: none;
   }
 }
 

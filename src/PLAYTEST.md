@@ -6,6 +6,9 @@ Run `npm run dev` from the repo root and open http://localhost:4173.
 - Type a journey seed and select **Generate map** (or press Enter) to start a new route.
 - Move with **WASD** or the **arrow keys**, or **tap/click** a tile to walk there — the route goes
   around the sea rather than into it.
+- Zoom with the on-screen **+** / **−**, the mouse wheel, the `+` and `-` keys, or a pinch; `0`
+  returns to the automatic fit. Four steps, from one tile per 32px — the whole country on a desktop
+  — to four times that. Whole steps only: pixel art at a fractional scale crawls as you walk.
 - Sea tiles are blocked. Everything else is walkable; wetland, hills and mountains just take longer
   to cross.
 - The seed lives in the URL, so a journey can be shared as a link: `?seed=river-road`.

@@ -1,4 +1,10 @@
-// The travel journal. Presentation only — every string arrives already written.
+// The field notes along the bottom of the screen: where you are, and what is here.
+//
+// This is what the traveller is looking at *right now*. The journey log — the whole route, the
+// sketches, the place at the end of it — floats separately in `JourneyLog.tsx`, because those
+// answer different questions and only one of them changes on every step.
+//
+// Presentation only — every string arrives already written.
 
 import type { FieldNote, JournalEntry } from '../content/journal';
 
@@ -45,7 +51,6 @@ export function JournalPanel({
   if (!entry) {
     return (
       <section className="journal" aria-live="polite">
-        <h2>Travel Journal</h2>
         <p className="muted">Unrolling the map…</p>
       </section>
     );
@@ -53,23 +58,36 @@ export function JournalPanel({
 
   return (
     <section className="journal" aria-live="polite">
-      <h2>{entry.title}</h2>
-      <p>{entry.description}</p>
+      <header className="journal-head">
+        <div>
+          <h2>{entry.title}</h2>
+          <p className="journal-place">{entry.description}</p>
+        </div>
+        <button type="button" onClick={onObserve} disabled={!canObserve || alreadySketched}>
+          {alreadySketched ? 'Sketch recorded' : 'Observe creature'}
+        </button>
+      </header>
+
       <p className="surroundings">{surroundings}</p>
 
-      <h3>Creatures</h3>
-      <Note note={entry.creature} />
+      {/* Side by side where there is room, stacked where there is not — see styles.css. */}
+      <div className="journal-notes">
+        <div>
+          <h3>Creatures</h3>
+          <Note note={entry.creature} />
+        </div>
+        <div>
+          <h3>Growing here</h3>
+          <Note note={entry.flora} />
+        </div>
+      </div>
 
-      <h3>Growing here</h3>
-      <Note note={entry.flora} />
-
-      <button type="button" onClick={onObserve} disabled={!canObserve || alreadySketched}>
-        {alreadySketched ? 'Creature sketch recorded' : 'Observe creature'}
-      </button>
       {memory && <p className="memory">{memory}</p>}
 
-      <p className={atLandmark ? 'status status-arrived' : 'status'}>{hint}</p>
-      <p className="muted">{discovered} places discovered.</p>
+      <footer className="journal-foot">
+        <p className={atLandmark ? 'status status-arrived' : 'status'}>{hint}</p>
+        <p className="muted">{discovered} places discovered.</p>
+      </footer>
     </section>
   );
 }
