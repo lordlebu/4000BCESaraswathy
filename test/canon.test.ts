@@ -7,7 +7,7 @@
 // exactly as it does today.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { askAbout, canonAvailable, loreFor, type Place } from '../src/ui/canonClient';
+import { askAbout, canonStatus, loreFor, type Place } from '../src/ui/canonClient';
 
 const place: Place = { seed: 'lothal', x: 3, y: 4, biome: 'wetland', creature: 'Lothal Marsh-Lurker' };
 
@@ -24,7 +24,7 @@ describe('when no canon service is configured', () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(canonAvailable()).resolves.toBe(false);
+    await expect(canonStatus()).resolves.toEqual({ lore: false, ask: false });
     await expect(loreFor({ ...place, x: 500 })).resolves.toBeNull();
     await expect(askAbout({ ...place, x: 501 })).resolves.toBeNull();
 
@@ -38,8 +38,8 @@ describe('when configured but nothing is listening', () => {
   it('reports unavailable rather than throwing', async () => {
     configured();
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('fetch failed')));
-    await expect(canonAvailable()).resolves.toBe(false);
-  });
+    await expect(canonStatus()).resolves.toEqual({ lore: false, ask: false });
+  }, 40_000);
 
   it('returns nothing from lore instead of failing', async () => {
     configured();
@@ -61,7 +61,32 @@ describe('when the service is up but has no index', () => {
       'fetch',
       vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true, chroma: false }) })
     );
-    await expect(canonAvailable()).resolves.toBe(false);
+    await expect(canonStatus()).resolves.toEqual({ lore: false, ask: false });
+  });
+});
+
+// Generation spends the service owner's quota, so a deployed service gates it behind a key
+// the public bundle cannot hold. The panel must not offer a button that is certain to 404.
+describe('what the service permits', () => {
+  const health = (ask: string) =>
+    vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true, chroma: true, ask }) });
+
+  it('offers generation when the service says it is open', async () => {
+    configured();
+    vi.stubGlobal('fetch', health('open'));
+    await expect(canonStatus()).resolves.toEqual({ lore: true, ask: true });
+  });
+
+  it('allows retrieval but not generation when a key is required', async () => {
+    configured();
+    vi.stubGlobal('fetch', health('key_required'));
+    await expect(canonStatus()).resolves.toEqual({ lore: true, ask: false });
+  });
+
+  it('allows retrieval but not generation when generation is locked', async () => {
+    configured();
+    vi.stubGlobal('fetch', health('locked'));
+    await expect(canonStatus()).resolves.toEqual({ lore: true, ask: false });
   });
 });
 

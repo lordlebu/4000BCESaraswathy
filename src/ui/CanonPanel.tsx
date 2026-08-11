@@ -9,14 +9,14 @@
 // for anyone who just cloned the repo and ran `npm run dev`.
 
 import { useCallback, useState } from 'react';
-import { askAbout, loreFor, type CanonLore, type Place } from './canonClient';
+import { askAbout, loreFor, type CanonLore, type CanonStatus, type Place } from './canonClient';
 
 export interface CanonPanelProps {
   place: Place | null;
-  available: boolean;
+  status: CanonStatus;
 }
 
-export function CanonPanel({ place, available }: CanonPanelProps) {
+export function CanonPanel({ place, status }: CanonPanelProps) {
   const [lore, setLore] = useState<CanonLore | null>(null);
   const [busy, setBusy] = useState<'lore' | 'ask' | null>(null);
   const [asked, setAsked] = useState(false);
@@ -38,7 +38,7 @@ export function CanonPanel({ place, available }: CanonPanelProps) {
     setBusy(null);
   }, [place]);
 
-  if (!available || !place) return null;
+  if (!status.lore || !place) return null;
 
   return (
     <section className="canon" aria-label="Canon">
@@ -46,7 +46,7 @@ export function CanonPanel({ place, available }: CanonPanelProps) {
         <button type="button" onClick={consult} disabled={busy !== null}>
           {busy === 'lore' ? 'Consulting…' : 'Ask the canon'}
         </button>
-        {lore && (
+        {lore && status.ask && (
           <button type="button" onClick={write} disabled={busy !== null}>
             {busy === 'ask' ? 'Writing…' : 'Write a passage'}
           </button>

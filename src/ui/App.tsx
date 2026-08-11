@@ -6,7 +6,7 @@ import { PhaserGame } from '../game/PhaserGame';
 import { JournalPanel } from './JournalPanel';
 import { SeedBar } from './SeedBar';
 import { CanonPanel } from './CanonPanel';
-import { canonAvailable, type Place } from './canonClient';
+import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { creatureAction } from '../content/journal';
 import { biomes, creatureFor, floraFor } from '../content/species';
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
@@ -91,11 +91,11 @@ export function App() {
 
   // Asked once. A canon service is optional and usually absent, so the panel stays hidden
   // rather than offering something that will fail.
-  const [canonUp, setCanonUp] = useState(false);
+  const [canon, setCanon] = useState<CanonStatus>({ lore: false, ask: false });
   useEffect(() => {
     let live = true;
-    canonAvailable().then((up) => {
-      if (live) setCanonUp(up);
+    canonStatus().then((status) => {
+      if (live) setCanon(status);
     });
     return () => {
       live = false;
@@ -203,7 +203,7 @@ export function App() {
             onObserve={observe}
           />
 
-          <CanonPanel place={place} available={canonUp} />
+          <CanonPanel place={place} status={canon} />
 
           <section className="legend">
             <h2>Map Legend</h2>

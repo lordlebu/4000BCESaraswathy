@@ -47,6 +47,9 @@ function baseUrl(): string | null {
 const HEALTH_TIMEOUT_MS = 2500;
 const LORE_TIMEOUT_MS = 10000;
 const ASK_TIMEOUT_MS = 30000;
+// A sleeping free-tier host needs tens of seconds to wake; these cover the second probe.
+const WAKE_RETRY_DELAY_MS = 4000;
+const WAKE_TIMEOUT_MS = 25000;
 
 export interface CanonSource {
   entity_id: string;
@@ -94,23 +97,56 @@ async function post<T>(path: string, body: unknown, timeout: number): Promise<T 
   }
 }
 
-/** Is a canon service listening? Asked once, so the UI can stay quiet when it is not. */
-export async function canonAvailable(): Promise<boolean> {
-  const base = baseUrl();
-  if (!base) return false;
+export interface CanonStatus {
+  /** Retrieval is available — the service is up and its index is populated. */
+  lore: boolean;
+  /**
+   * Whether this client may ask for a written passage.
+   *
+   * Generation spends the service owner's inference quota per call, so a deployed service
+   * puts it behind a key that a public browser build cannot hold — anything the game ships
+   * is readable by everyone. `false` means retrieval only, and the UI must not offer a
+   * button that is guaranteed to 404.
+   */
+  ask: boolean;
+}
+
+const OFFLINE: CanonStatus = { lore: false, ask: false };
+
+async function probe(base: string, timeout: number): Promise<CanonStatus | null> {
   const abort = new AbortController();
-  const timer = setTimeout(() => abort.abort(), HEALTH_TIMEOUT_MS);
+  const timer = setTimeout(() => abort.abort(), timeout);
   try {
     const res = await fetch(`${base}/health`, { signal: abort.signal });
-    if (!res.ok) return false;
-    const body = (await res.json()) as { ok?: boolean; chroma?: boolean };
+    if (!res.ok) return null;
+    const body = (await res.json()) as { ok?: boolean; chroma?: boolean; ask?: string };
     // `ok` without `chroma` means the service is up but has no index — nothing to say.
-    return body.ok === true && body.chroma === true;
+    if (body.ok !== true || body.chroma !== true) return OFFLINE;
+    return { lore: true, ask: body.ask === 'open' };
   } catch {
-    return false;
+    return null;
   } finally {
     clearTimeout(timer);
   }
+}
+
+/**
+ * What this client can use, if anything.
+ *
+ * Probed twice. A hosted service on a free tier sleeps when idle and takes tens of seconds
+ * to wake, so a single fast check would report "nothing here" for the first visitor of the
+ * day and never correct itself. The first probe keeps the UI responsive for the common case
+ * of no service at all; the second gives a waking one time to answer.
+ */
+export async function canonStatus(): Promise<CanonStatus> {
+  const base = baseUrl();
+  if (!base) return OFFLINE;
+
+  const quick = await probe(base, HEALTH_TIMEOUT_MS);
+  if (quick) return quick;
+
+  await new Promise((resolve) => setTimeout(resolve, WAKE_RETRY_DELAY_MS));
+  return (await probe(base, WAKE_TIMEOUT_MS)) ?? OFFLINE;
 }
 
 const cache = new Map<string, CanonLore>();
