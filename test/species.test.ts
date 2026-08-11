@@ -113,8 +113,20 @@ describe('the journal', () => {
     const entry = describeTile(world.tiles[world.start.y]![world.start.x]!, world);
     expect(entry.title).toBeTruthy();
     expect(entry.description).toBeTruthy();
-    expect(entry.creature).toBeTruthy();
-    expect(entry.flora).toBeTruthy();
+    // A field note always carries prose; the name is absent only when there is nothing to record.
+    expect(entry.creature.note).toBeTruthy();
+    expect(entry.flora.note).toBeTruthy();
+  });
+
+  it('names what it found, and says so plainly when it found nothing', () => {
+    for (const tile of tiles) {
+      const entry = describeTile(tile, world);
+      for (const note of [entry.creature, entry.flora]) {
+        expect(note.note.length, `at ${tile.x},${tile.y}`).toBeGreaterThan(10);
+        // No half-written note: either it is named and described, or neither.
+        if (note.name !== null) expect(note.name.length).toBeGreaterThan(0);
+      }
+    }
   });
 
   it('never leaks undefined into text the player reads', () => {
@@ -123,8 +135,10 @@ describe('the journal', () => {
       const text = [
         entry.title,
         entry.description,
-        entry.creature,
-        entry.flora,
+        entry.creature.name ?? '',
+        entry.creature.note,
+        entry.flora.name ?? '',
+        entry.flora.note,
         creatureAction(creatureFor(tile, world.seed)),
         describeSurroundings(world, tile),
         landmarkHint(world, tile)

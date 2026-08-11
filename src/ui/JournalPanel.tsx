@@ -1,6 +1,23 @@
 // The travel journal. Presentation only — every string arrives already written.
 
-import type { JournalEntry } from '../content/journal';
+import type { FieldNote, JournalEntry } from '../content/journal';
+
+/**
+ * A specimen label: what it is called, and what it is.
+ *
+ * A description list rather than two paragraphs, because that is precisely the shape of the
+ * content — a term and its description — and it reads that way to a screen reader too. With
+ * nothing to record there is no term, so the empty-handed line stands on its own.
+ */
+function Note({ note }: { note: FieldNote }) {
+  if (!note.name) return <p className="note-empty">{note.note}</p>;
+  return (
+    <dl className="note">
+      <dt>{note.name}</dt>
+      <dd>{note.note}</dd>
+    </dl>
+  );
+}
 
 export interface JournalPanelProps {
   entry: JournalEntry | null;
@@ -41,10 +58,10 @@ export function JournalPanel({
       <p className="surroundings">{surroundings}</p>
 
       <h3>Creatures</h3>
-      <p>{entry.creature}</p>
+      <Note note={entry.creature} />
 
       <h3>Growing here</h3>
-      <p>{entry.flora}</p>
+      <Note note={entry.flora} />
 
       <button type="button" onClick={onObserve} disabled={!canObserve || alreadySketched}>
         {alreadySketched ? 'Creature sketch recorded' : 'Observe creature'}
