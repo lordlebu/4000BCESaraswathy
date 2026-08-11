@@ -7,13 +7,28 @@ import { biomeFor, creatureFor, floraFor } from './species';
 import { landmarkKindFor, landmarkTitle } from './landmarks';
 import type { Creature, Point, Tile, World } from '../world/types';
 
+/**
+ * One line of the traveller's field notes: what a thing is called, and what it is.
+ *
+ * The two are kept apart rather than glued into a sentence. The flora line used to read
+ * "Sweet Indigo grows here. A domesticated decorative vine bred by Harappan settlers…", which says
+ * the name twice in about half the cases and reads as a sentence fighting a dictionary entry in
+ * the rest. Canon writes descriptions, not observations — so the journal presents them as a
+ * naturalist would, name above and description beneath, and the register stops being a mismatch.
+ *
+ * `name` is null where there is nothing to record; `note` then carries the empty-handed line.
+ */
+export interface FieldNote {
+  name: string | null;
+  /** Canon's own words, passed through untouched. */
+  note: string;
+}
+
 export interface JournalEntry {
   title: string;
   description: string;
-  creature: string;
-  flora: string;
-  creatureName: string | null;
-  floraName: string | null;
+  creature: FieldNote;
+  flora: FieldNote;
 }
 
 /** Is this the tile the named place sits on? */
@@ -54,14 +69,15 @@ export function describeTile(tile: Tile, world: World): JournalEntry {
   return {
     title: titleFor(world, tile),
     description,
+    // The creature's name was never shown before — the player read "A small deer watches from the
+    // grass" and only learned it was a Painted Deer after sketching it. Naming it up front is the
+    // whole point of a field note.
     creature: creature
-      ? creature.journalPrompt
-      : 'No creature signs yet, only wind, dust, and the road ahead.',
+      ? { name: creature.name, note: creature.journalPrompt }
+      : { name: null, note: 'No creature signs yet, only wind, dust, and the road ahead.' },
     flora: plant
-      ? `${plant.name} grows here. ${plant.journalPrompt}`
-      : 'Nothing is growing here worth pressing between the pages.',
-    creatureName: creature?.name ?? null,
-    floraName: plant?.name ?? null
+      ? { name: plant.name, note: plant.journalPrompt }
+      : { name: null, note: 'Nothing is growing here worth pressing between the pages.' }
   };
 }
 

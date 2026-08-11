@@ -207,6 +207,31 @@ button:disabled {
   font-style: italic;
 }
 
+/* Field notes — a specimen label rather than a sentence.
+   The canon prose is written as description, not as observation ("A predatory aquatic beetle that
+   swims in hot mineral springs"), so it is presented the way a naturalist would write it down:
+   the name, then what it is, set in under a hairline the eye can follow down the column. */
+.note {
+  margin: 0 0 12px;
+}
+
+.note dt {
+  font-weight: bold;
+  letter-spacing: 0.01em;
+}
+
+.note dd {
+  margin: 3px 0 0;
+  padding-left: 11px;
+  border-left: 2px solid rgba(52, 38, 58, 0.18);
+  line-height: 1.55;
+}
+
+.note-empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
 .memory {
   color: #6d4a39;
   font-style: italic;
