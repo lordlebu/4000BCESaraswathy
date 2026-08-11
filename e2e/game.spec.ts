@@ -76,7 +76,7 @@ test('walking changes the journal', async ({ page }) => {
   await page.locator('.map-surface canvas').click({ position: { x: 10, y: 10 } });
   for (const key of ['ArrowRight', 'ArrowRight', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowUp']) {
     await page.keyboard.press(key);
-    await page.waitForTimeout(260);
+    await page.waitForTimeout(520);
   }
 
   await expect(title).not.toHaveText(before ?? '', { timeout: 10_000 });

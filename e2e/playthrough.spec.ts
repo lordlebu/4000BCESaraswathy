@@ -98,7 +98,7 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
       if (stuckFor >= 3) {
         await page.keyboard.press(stuckFor % 2 ? 'ArrowUp' : 'ArrowDown');
       }
-      await page.waitForTimeout(420);
+      await page.waitForTimeout(780);
     } else {
       // Tap ahead in the bearing direction and let the pathfinder route around the water. Nudging
       // off dead centre on the unused axis keeps a blocked route from retrying the identical tap.
@@ -111,7 +111,7 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
       const x = usable.left + usable.width * (0.5 + heading.dx * 0.4 + (heading.dx === 0 ? jitter : 0));
       const y = usable.top + usable.height * (0.5 + heading.dy * 0.4 + (heading.dy === 0 ? jitter : 0));
       await canvas.click({ position: { x, y } });
-      await page.waitForTimeout(1400);
+      await page.waitForTimeout(1900);
     }
 
     // "Somewhere at 27, 18" changes as the traveller moves, so an unchanged heading means a turn

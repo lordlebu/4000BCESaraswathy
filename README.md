@@ -43,7 +43,9 @@ clock.
   Thenavati, Hudhukoli, the Shanesarin — so a map reads as a country rather than a grid.
 - **Seven kinds of landmark**, each suited to the ground it stands on, each with a written page for
   arriving.
-- **A day that passes**, opening on the hour you actually sat down to play.
+- **A day that passes**, opening on the hour you actually sat down to play — and that walking
+  spends. Thirty kilometres between one dawn and the next, a kilometre to the tile, so a long march
+  through the hills goes amber and then blue under you.
 - **A journal you can take with you**, as a markdown file or a rendered page of writing.
 
 ## Commands

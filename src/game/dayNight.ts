@@ -21,6 +21,33 @@
  */
 export const DAY_MS = 60 * 60 * 1000;
 
+/**
+ * How far a person covers on foot in a day, and how much ground a tile stands for.
+ *
+ * Thirty kilometres is a full day's walk with a load, rests and a night's sleep in it — the figure
+ * a marching column or a pilgrim route is planned around, not the forty-odd a fit walker can manage
+ * once. Everything else here is derived from it.
+ *
+ * A kilometre to the tile comes from the game's own prose rather than being picked. `landmarkHint`
+ * already tells the player a landmark on the far side of the map "will take most of the day", and
+ * the map is 36 tiles across — so one tile is about one kilometre, and crossing the whole country
+ * is a day of walking. Naming the scale here makes that line true instead of merely atmospheric.
+ */
+export const KM_PER_DAY = 30;
+export const KM_PER_TILE = 1;
+
+/**
+ * How much of the day one tile costs, in the same milliseconds `phaseAt` takes.
+ *
+ * `cost` is `travelCost` from `data/biomes.json`: 1 on plains and coast, 2 through forest, wetland,
+ * hills and desert, 3 in the mountains. So a day buys thirty tiles of open grassland or ten of
+ * mountain, which is roughly the right shape — rough ground does not merely feel slower, it eats
+ * the daylight.
+ */
+export function travelTimeMs(cost: number): number {
+  return (DAY_MS * KM_PER_TILE * cost) / KM_PER_DAY;
+}
+
 export interface Sky {
   /** Overlay colour, drawn with normal alpha blending over the map. */
   colour: number;
