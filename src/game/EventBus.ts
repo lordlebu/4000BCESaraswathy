@@ -42,6 +42,15 @@ export interface GameToUi {
 export interface UiToGame {
   'new-journey': { seed: string };
   'resume-journey': { seed: string; discovered: string[] };
+  /**
+   * How much of the canvas the overlays are covering, in CSS pixels.
+   *
+   * React owns the layout, so React is the only side that knows this — the scene would otherwise
+   * have to query the DOM for panel class names and re-derive the CSS breakpoints, which is two
+   * copies of the same rule waiting to disagree. The camera uses it to keep the traveller in the
+   * part of the map you can actually see.
+   */
+  'viewport-insets': { right: number; bottom: number };
 }
 
 type Events = GameToUi & UiToGame;

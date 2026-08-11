@@ -34,6 +34,20 @@ const FOG_VISIBLE = 0;
 /** How far the traveller can see. */
 const SIGHT_RADIUS = 2;
 
+/**
+ * Roughly how many tiles should be visible across the screen, whatever its size.
+ *
+ * Sixteen, rather than the forty a desktop showed at zoom 1. The second reason matters more than
+ * the first: at zoom 1 the whole 36-tile world is *narrower* than a 1280px viewport, so Phaser
+ * centres it, refuses to scroll, and then quietly ignores the follow offset — the traveller sits
+ * where the map puts him no matter what the panels are covering. Filling the screen is what gives
+ * the camera room to move at all.
+ */
+const TILES_ACROSS = 16;
+
+/** Beyond this the map reads as a few enormous squares rather than a country. */
+const MAX_ZOOM = 4;
+
 /** Milliseconds per step on easy ground. `travelCost` from the biome data scales this. */
 const STEP_MS = 170;
 
@@ -75,6 +89,8 @@ export class WorldScene extends Phaser.Scene {
   private sky!: Phaser.GameObjects.Rectangle;
   /** Where in the day this journey opened — the player's own hour. */
   private startPhase = 0;
+  /** How much of the canvas the DOM overlays cover. React measures it and tells us; see EventBus. */
+  private insets = { right: 0, bottom: 0 };
 
   constructor() {
     super('WorldScene');
@@ -142,8 +158,8 @@ export class WorldScene extends Phaser.Scene {
 
     this.cameras.main.setBounds(0, 0, pixelWidth, pixelHeight);
     this.cameras.main.setBackgroundColor('#1b1420');
-    this.cameras.main.setZoom(1);
     this.cameras.main.startFollow(this.player, true, 0.09, 0.09);
+    this.applyCamera();
     this.cameras.main.fadeIn(600, 27, 20, 32);
 
     this.bindInput();
@@ -239,17 +255,77 @@ export class WorldScene extends Phaser.Scene {
 
     EventBus.onEvent('new-journey', this.onNewJourney);
     EventBus.onEvent('resume-journey', this.onNewJourney);
+    EventBus.onEvent('viewport-insets', this.onInsets);
+
+    // Fires on rotation as well as on a window resize, which is exactly when the zoom and the
+    // follow offset both stop being right.
+    this.scale.on(Phaser.Scale.Events.RESIZE, this.onResize);
+
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       EventBus.offEvent('new-journey', this.onNewJourney);
       EventBus.offEvent('resume-journey', this.onNewJourney);
+      EventBus.offEvent('viewport-insets', this.onInsets);
+      this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
       this.input.off(Phaser.Input.Events.POINTER_UP);
       keyboard.off(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN);
     });
   }
 
+  private onInsets = (insets: { right: number; bottom: number }): void => {
+    this.insets = insets;
+    this.applyCamera();
+  };
+
+  private onResize = (): void => {
+    this.applyCamera();
+  };
+
   private onNewJourney = (payload: { seed: string; discovered?: string[] }): void => {
     this.scene.restart({ seed: payload.seed, discovered: payload.discovered ?? [] });
   };
+
+  /**
+   * Fit the camera to whatever the viewport and the overlays currently leave visible.
+   *
+   * **Zoom.** At `TILE_SIZE` 32 and zoom 1 a desktop shows about forty tiles across — a postage
+   * stamp of a traveller in a sea of map — while a narrow phone shows twelve. Zoom is therefore
+   * chosen from the width so that roughly `TILES_ACROSS` tiles are visible whatever the screen.
+   *
+   * It rounds to a **whole number**. Scaling pixel art by a fraction resamples it every frame and
+   * it crawls as the camera moves; this is the same reason the player sprite is drawn at an
+   * integer scale with `NEAREST` filtering.
+   *
+   * **Offset.** The camera centres on the player, so anything covering the right of the screen
+   * covers the traveller. Working the follow maths through: with `followOffset.x = ox`, the player
+   * lands at `width / 2 + ox * zoom` on screen. To sit them in the middle of the *visible* part
+   * instead — `(width - right) / 2` — that solves to `ox = -right / (2 * zoom)`, and the same for
+   * the bottom.
+   */
+  private applyCamera(): void {
+    const camera = this.cameras.main;
+    const { width, height } = this.scale.gameSize;
+
+    // Zoom follows the whole viewport, not the part the panels leave uncovered. Sizing it to the
+    // uncovered part meant opening the journal rescaled the entire world — the map jumped from
+    // three times to twice as large because a panel appeared, which is a lot of movement to ask of
+    // someone who only wanted to read something. The panels now cover the map rather than resize it.
+    const wanted = Math.round(width / (TILE_SIZE * TILES_ACROSS));
+
+    // Never small enough for the world to fit inside the screen. A camera with nothing to scroll is
+    // centred by Phaser and ignores the follow offset entirely, so the traveller would sit wherever
+    // the map happened to put him — under the notes, as often as not. It bites vertically on a tall
+    // phone, where 768px of world is shorter than an 844px viewport.
+    const toFill = Math.ceil(
+      Math.max(width / (this.world.width * TILE_SIZE), height / (this.world.height * TILE_SIZE))
+    );
+
+    const zoom = Phaser.Math.Clamp(Math.max(wanted, toFill), 1, MAX_ZOOM);
+    camera.setZoom(zoom);
+
+    // Never push the traveller so far up that the notes crowd them off the top of a short screen.
+    const bottom = Math.min(this.insets.bottom, height * 0.45);
+    camera.setFollowOffset(-this.insets.right / (2 * zoom), -bottom / (2 * zoom));
+  }
 
   /** Repaint the wash for the current hour. Cheap enough to run every frame. */
   private updateSky(): void {

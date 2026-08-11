@@ -11,6 +11,28 @@ import { expect, test, type Page } from '@playwright/test';
 
 const SEED = 'play-test';
 
+/**
+ * The rectangle of canvas the overlays are not covering, in canvas coordinates.
+ *
+ * The map fills the screen and the panels float on top of it, so "where can I tap" is no longer
+ * "anywhere on the canvas".
+ */
+async function visibleMap(page: Page) {
+  return page.evaluate(() => {
+    const canvas = document.querySelector('.map-surface canvas')!.getBoundingClientRect();
+    const log = document.querySelector('.log')?.getBoundingClientRect();
+    const notes = document.querySelector('.journal')?.getBoundingClientRect();
+    const margin = 12;
+
+    const left = margin;
+    const top = margin;
+    const isSidePanel = log && log.width < canvas.width * 0.8;
+    const right = (isSidePanel ? log!.left - canvas.left : canvas.width) - margin;
+    const bottom = (notes ? notes.top - canvas.top : canvas.height) - margin;
+    return { left, top, width: right - left, height: bottom - top };
+  });
+}
+
 type Heading = { dx: number; dy: number; nearness: 'far' | 'close' | 'here' };
 
 /**
@@ -48,7 +70,6 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
   const opening = (await page.locator('.status').textContent()) ?? '';
   expect(opening).toMatch(/elders spoke of [A-Z]/);
 
-  const box = (await canvas.boundingBox())!;
   const arrival = page.locator('.arrival');
 
   // Sixty legs was enough while landmarks tended to land on coast and plains. Levelling the terrain
@@ -81,9 +102,14 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
     } else {
       // Tap ahead in the bearing direction and let the pathfinder route around the water. Nudging
       // off dead centre on the unused axis keeps a blocked route from retrying the identical tap.
+      // Tap inside the part of the map that is actually showing. The journal and the field notes
+      // are DOM panels over the canvas, so a tap aimed at 92% of the height lands on the notes and
+      // never reaches the game — which is equally true for a player, and is why the camera keeps
+      // the traveller in the uncovered area in the first place.
+      const usable = await visibleMap(page);
       const jitter = (leg % 5) * 0.08 - 0.16;
-      const x = box.width * (0.5 + heading.dx * 0.42 + (heading.dx === 0 ? jitter : 0));
-      const y = box.height * (0.5 + heading.dy * 0.42 + (heading.dy === 0 ? jitter : 0));
+      const x = usable.left + usable.width * (0.5 + heading.dx * 0.4 + (heading.dx === 0 ? jitter : 0));
+      const y = usable.top + usable.height * (0.5 + heading.dy * 0.4 + (heading.dy === 0 ? jitter : 0));
       await canvas.click({ position: { x, y } });
       await page.waitForTimeout(1400);
     }

@@ -4,11 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EventBus, type GameToUi } from '../game/EventBus';
 import { PhaserGame } from '../game/PhaserGame';
 import { JournalPanel } from './JournalPanel';
-import { SeedBar } from './SeedBar';
+import { JourneyLog } from './JourneyLog';
+import { Controls } from './Controls';
 import { CanonPanel } from './CanonPanel';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { creatureAction } from '../content/journal';
-import { biomes, creatureFor, floraFor } from '../content/species';
+import { creatureFor, floraFor } from '../content/species';
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
 import { loadJourney, saveJourney } from '../save';
@@ -38,6 +39,13 @@ export function App() {
   // Separate from `arrivalPage`, which the player can dismiss. Reaching the landmark is a fact
   // about the journey and belongs in the travel log even after the page is closed.
   const [reached, setReached] = useState(initialJourney.current.reached);
+
+  // The log starts open where there is room beside the map and closed where it would cover it.
+  // Only the initial state — once the player has opened or closed it, that is their decision and
+  // rotating the device does not overrule it.
+  const [logOpen, setLogOpen] = useState(
+    () => window.matchMedia('(orientation: landscape) and (min-width: 700px)').matches
+  );
 
   // The fog set changes on every step, which is far too often to keep in React state — it would
   // re-render the whole panel each tile. The scene owns it; this ref only carries it to the save.
@@ -146,6 +154,53 @@ export function App() {
     );
   }, [world, arrival?.discovered, observed, reached]);
 
+  // Tell the scene how much of the canvas the overlays are covering, so the camera can keep the
+  // traveller somewhere they can be seen. React is the only side that knows this — it renders them.
+  //
+  // Measured rather than derived: the CSS already decides where the panels go, and re-implementing
+  // those breakpoints here would be a second copy of the rules waiting to disagree with the first.
+  const hasLog = Boolean(travelLog) && logOpen;
+  const hasNotes = Boolean(arrival);
+  useEffect(() => {
+    const stage = document.querySelector('.stage');
+    if (!stage) return;
+
+    const report = () => {
+      const bounds = stage.getBoundingClientRect();
+      const log = document.querySelector('.log')?.getBoundingClientRect();
+      const notes = document.querySelector('.journal')?.getBoundingClientRect();
+      const covered = (panel?: DOMRect) => (panel ? Math.round(bounds.bottom - panel.top) : 0);
+
+      // The log is a side panel in landscape and a bottom sheet in portrait, and it obscures a
+      // different edge in each. Which one it currently is comes from its own width rather than from
+      // re-reading the breakpoints — a sheet spans the stage, a side panel does not.
+      const isSidePanel = Boolean(log && log.width < bounds.width * 0.8);
+
+      EventBus.emitEvent('viewport-insets', {
+        right: isSidePanel ? Math.round(bounds.right - log!.left) : 0,
+        bottom: Math.max(covered(notes), isSidePanel ? 0 : covered(log))
+      });
+    };
+
+    report();
+    const observer = new ResizeObserver(report);
+    observer.observe(stage);
+    for (const panel of document.querySelectorAll('.log, .journal')) observer.observe(panel);
+    window.addEventListener('orientationchange', report);
+
+    // And again once the scene exists. Phaser boots asynchronously, so the first report can go out
+    // before `WorldScene.create` has subscribed — the message is sent, nobody is listening, and the
+    // camera spends the session behaving as though nothing were covering it.
+    EventBus.onEvent('world-ready', report);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('orientationchange', report);
+      EventBus.offEvent('world-ready', report);
+    };
+    // Re-run when a panel appears or disappears, so the observer watches the current set.
+  }, [hasLog, hasNotes]);
+
   const exportText = useCallback(() => {
     if (!travelLog || !world) return;
     downloadText(travelLogToText(travelLog), travelLogFilename(world, 'md'));
@@ -157,95 +212,60 @@ export function App() {
   }, [travelLog, world]);
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <div>
-          <h1>South of Tethys</h1>
-          <p className="tagline">
-            A cozy Jambhudweepa travel prototype. Walk with <kbd>WASD</kbd> or the arrow keys, or tap
-            where you want to go.
-          </p>
-        </div>
-        <SeedBar seed={seed} onGenerate={generate} />
-      </header>
+    // The stage is the viewport. The canvas fills it and everything else floats on top, which is
+    // why nothing here scrolls and there is no page chrome left to scroll past.
+    <div className="stage">
+      <PhaserGame seed={seed} discovered={initialJourney.current.discovered} />
 
-      <main className="layout">
-        <div className="map-column">
-          <PhaserGame seed={seed} discovered={initialJourney.current.discovered} />
+      <Controls
+        seed={seed}
+        onGenerate={generate}
+        observed={observed}
+        logOpen={logOpen}
+        onToggleLog={() => setLogOpen((open) => !open)}
+      />
 
-          {arrivalPage && (
-            <section className="arrival" aria-live="polite">
-              <h2>{arrivalPage.title}</h2>
-              <p>{arrivalPage.body}</p>
-              <p className="arrival-closing">{arrivalPage.closing}</p>
-              <div className="arrival-actions">
-                <button type="button" onClick={exportImage}>
-                  Keep this page
-                </button>
-                <button type="button" className="ghost" onClick={() => setArrivalPage(null)}>
-                  Close the journal
-                </button>
-              </div>
-            </section>
-          )}
-        </div>
+      <JourneyLog
+        log={travelLog}
+        open={logOpen}
+        onClose={() => setLogOpen(false)}
+        onExportImage={exportImage}
+        onExportText={exportText}
+      >
+        <CanonPanel place={place} status={canon} />
+      </JourneyLog>
 
-        <aside className="sidebar">
-          <JournalPanel
-            entry={arrival?.entry ?? null}
-            surroundings={arrival?.surroundings ?? ''}
-            hint={arrival?.hint ?? ''}
-            discovered={arrival?.discovered ?? 0}
-            atLandmark={arrival?.atLandmark ?? false}
-            memory={memory}
-            canObserve={Boolean(currentCreature)}
-            alreadySketched={Boolean(currentCreature && observed.includes(currentCreature.name))}
-            onObserve={observe}
-          />
+      <JournalPanel
+        entry={arrival?.entry ?? null}
+        surroundings={arrival?.surroundings ?? ''}
+        hint={arrival?.hint ?? ''}
+        discovered={arrival?.discovered ?? 0}
+        atLandmark={arrival?.atLandmark ?? false}
+        memory={memory}
+        canObserve={Boolean(currentCreature)}
+        alreadySketched={Boolean(currentCreature && observed.includes(currentCreature.name))}
+        onObserve={observe}
+      />
 
-          <CanonPanel place={place} status={canon} />
-
-          <section className="legend">
-            <h2>Map Legend</h2>
-            <ul className="legend-list">
-              {biomes.map((biome) => (
-                <li key={biome.id}>
-                  <i className="swatch" style={{ background: biome.color }} aria-hidden="true" />
-                  {biome.name}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {observed.length > 0 && (
-            <section className="sketches">
-              <h2>Field sketches ({observed.length})</h2>
-              <ul>
-                {observed.map((name) => (
-                  <li key={name}>{name}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {/* The takeaway. A game with no win condition still needs something to keep. */}
-          <section className="export">
-            <h2>Take the journal with you</h2>
-            <p className="muted">
-              A written record of where you went and what you saw. The seed goes with it, so anyone
-              can walk the same country.
-            </p>
-            <div className="export-actions">
-              <button type="button" onClick={exportImage} disabled={!travelLog}>
-                Save as image
+      {/* The arrival still stops the world for a moment, but it can no longer sit below the map —
+          there is no below. It comes to the middle, which is where you want to read it anyway. */}
+      {arrivalPage && (
+        <div className="arrival-veil">
+          <section className="arrival" aria-live="polite">
+            <h2>{arrivalPage.title}</h2>
+            <p>{arrivalPage.body}</p>
+            <p className="arrival-closing">{arrivalPage.closing}</p>
+            <div className="arrival-actions">
+              <button type="button" onClick={exportImage}>
+                Keep this page
               </button>
-              <button type="button" className="ghost" onClick={exportText} disabled={!travelLog}>
-                Save as text
+              <button type="button" className="ghost" onClick={() => setArrivalPage(null)}>
+                Close the journal
               </button>
             </div>
           </section>
-        </aside>
-      </main>
+        </div>
+      )}
     </div>
   );
 }
