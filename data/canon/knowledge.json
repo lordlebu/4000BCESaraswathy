@@ -840,7 +840,8 @@
             "discovery_poisoned_ground"
           ],
           "sound": false,
-          "revisit": "The granary walls are carrying more salt than the field and something is growing out of them."
+          "revisit": "The granary walls are carrying more salt than the field and something is growing out of them.",
+          "revisit_after": "discovery_red_rice_survival"
         },
         {
           "conclusion": "It is salt, weeping up from whatever opened underneath. The soil is not ruined for everything -- only for what they have been planting. The rice on the granary walls has been solving this problem unsupervised for four hundred years.",
@@ -874,7 +875,8 @@
             "discovery_moving_spring"
           ],
           "sound": false,
-          "revisit": "discovery_moving_spring"
+          "revisit": "There are three basins, in three places, built at three times. A careless surveyor does not build three.",
+          "revisit_after": "discovery_moving_spring"
         },
         {
           "conclusion": "The spring migrates along an opening fault, and has done so at least three times within living memory.",
@@ -922,7 +924,8 @@
             "discovery_silver_water"
           ],
           "sound": false,
-          "revisit": "It happens under heavy cloud and at every phase. Whatever the moon is doing, it is not this."
+          "revisit": "It happens under heavy cloud and at every phase. Whatever the moon is doing, it is not this.",
+          "revisit_after": "discovery_dockyard_reef"
         },
         {
           "conclusion": "A bloom rises in the closed basin when rain freshens its surface; the small fish follow the bloom and everything else follows the small fish. The Kia phrase says the same thing in four words and does not pretend to a mechanism.",
@@ -956,7 +959,8 @@
             "discovery_terrace_water"
           ],
           "sound": false,
-          "revisit": "discovery_terrace_script"
+          "revisit": "The marks are cut on the inner faces, where nothing meant to be seen would put them.",
+          "revisit_after": "discovery_terrace_script"
         },
         {
           "conclusion": "Grazing platforms cut by the herders' own ancestors.",
@@ -964,7 +968,8 @@
             "discovery_terrace_water"
           ],
           "sound": false,
-          "revisit": "discovery_terrace_water"
+          "revisit": "The fall runs along the hill rather than down it. Nobody levels two hundred courses for goats.",
+          "revisit_after": "discovery_terrace_water"
         },
         {
           "conclusion": "Contour irrigation on a scale requiring a population the archive has no record of.",
@@ -1005,7 +1010,8 @@
             "discovery_double_classified"
           ],
           "sound": false,
-          "revisit": "discovery_double_classified"
+          "revisit": "The heavy-billed ones are all old ones. The bill does not stop growing when the bird does.",
+          "revisit_after": "discovery_double_classified"
         },
         {
           "conclusion": "One species. The bill grows throughout life, and the two entries are a young bird and an old one, catalogued sixty years apart by observers who never read each other.",

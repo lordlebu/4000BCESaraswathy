@@ -55,8 +55,14 @@ const canonBiomes = (placesBundle as { biomes: CanonBiome[] }).biomes;
  */
 const RENDERABLE = new Set(canonBiomes.filter((b) => b.renderable).map((b) => b.id));
 
-/** Canon ids carry their type as a prefix; the engine's are bare slugs. */
-function engineId(canonId: string): string {
+/**
+ * Canon ids carry their type as a prefix; the engine's are bare slugs.
+ *
+ * Exported because canon's own cross-references — a discovery's `subject`, a question's
+ * evidence — are written in canon ids, and anything following those links back to a species
+ * needs the same transform rather than a second guess at it.
+ */
+export function engineId(canonId: string): string {
   const cut = canonId.indexOf('_');
   return cut === -1 ? canonId : canonId.slice(cut + 1).replace(/_/g, '-');
 }

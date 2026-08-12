@@ -17,7 +17,7 @@ import { creatureFor, floraFor } from '../content/species';
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
 import { loadJourney, saveJourney } from '../save';
-import { advance, hear, type WorldMoment } from '../journey';
+import { advance, answer, hear, type WorldMoment } from '../journey';
 import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import type { World } from '../world/types';
 
@@ -201,6 +201,12 @@ export function App() {
     []
   );
 
+  /** Settle a question. The player may be wrong, and nothing here tells them so. */
+  const settle = useCallback(
+    (questionId: string, index: number) => setProgress((p) => answer(p, questionId, index)),
+    []
+  );
+
   const travel = useCallback(
     (next: string) => {
       setFieldMapId(next);
@@ -304,6 +310,7 @@ export function App() {
         moment={moment}
         open={diaryOpen}
         onClose={() => setDiaryOpen(false)}
+        onAnswer={settle}
       />
 
       <Overworld

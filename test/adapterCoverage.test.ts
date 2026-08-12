@@ -111,7 +111,7 @@ const NESTED: Record<string, Coverage> = {
     skipped: []
   },
   'field_questions.resolutions': {
-    adapted: ['conclusion', 'requires', 'sound', 'revisit'],
+    adapted: ['conclusion', 'requires', 'sound', 'revisit', 'revisit_after'],
     skipped: []
   }
 };
