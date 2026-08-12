@@ -5,7 +5,7 @@ none of it needs to change.** What follows is what to build on top of it, what t
 what not to touch.
 
 Everything here is on branch `feature/canon-bundle` in both repos. `npm run typecheck` is
-clean and 183 tests pass across 11 files. If you break one of those tests, the fix is almost
+clean and 203 tests pass across 12 files. If you break one of those tests, the fix is almost
 certainly in your code rather than in the test.
 
 ---
@@ -145,8 +145,13 @@ names via `discovery(id)?.name` and `word(id)?.word` — never show a raw id.
 `src/game/moment.ts`** — not from `dayNight.ts`, which only owns the hour:
 
 ```ts
-const moment = momentAt(seed, elapsedMs, startPhase);
+const moment = momentAt(seed, elapsedMs, startPhase, fieldMap.climate);
 ```
+
+**Pass the field map's `climate`.** Canon owns the sky per region now — the delta and the
+plateau have different ones, and the plateau's extra mist is what opens a rung there. Omitting
+it silently falls back to the delta's weather, which will be wrong the moment a dry region is
+authored.
 
 Pass it into `canAdvance`, `blockedBy` and `advance`. Passing `null` is the safe default but
 makes every condition-gated rung permanently unreachable, so wire it up properly.

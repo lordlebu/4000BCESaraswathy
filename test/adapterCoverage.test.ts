@@ -16,6 +16,7 @@ import { describe, expect, it } from 'vitest';
 import speciesBundle from '../data/canon/species.json';
 import placesBundle from '../data/canon/places.json';
 import knowledgeBundle from '../data/canon/knowledge.json';
+import lock from '../data/canon/canon.lock.json';
 
 /** Keys the adapters read, and keys they knowingly leave behind. */
 interface Coverage {
@@ -49,7 +50,7 @@ const COVERAGE: Record<string, Coverage> = {
   },
   'places.field_maps': {
     adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'points_of_interest',
-      'neighbours', 'arrival'],
+      'neighbours', 'arrival', 'climate'],
     skipped: [...EDITORIAL]
   },
   'places.points_of_interest': {
@@ -192,10 +193,10 @@ describe('the declarations do not rot', () => {
     expect(stale, 'declared as adapted but no longer in the bundle').toEqual([]);
   });
 
-  it('notes that world.json is exported and consumed by nothing', () => {
-    // Not a failure — characters, events, settlements and factions are for later phases and
-    // for the retrieval service. Asserted so that starting to use it is a deliberate act.
-    const importers = ['canon.ts', 'places.ts', 'knowledge.ts'];
-    expect(importers).not.toContain('world.ts');
+  it('ships exactly three bundles and no more', () => {
+    // world.json was 46 KB that nothing imported, and Vite inlines every byte into the page.
+    // The lock is the list of what actually ships, so growing it back is a deliberate act.
+    const shipped = Object.keys((lock as { sha256: Record<string, string> }).sha256).sort();
+    expect(shipped).toEqual(['knowledge.json', 'places.json', 'species.json']);
   });
 });

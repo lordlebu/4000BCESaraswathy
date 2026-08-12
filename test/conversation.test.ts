@@ -126,22 +126,36 @@ const SEEDS = ['lothal', 'narmada', 'dwarka', 'saraswati', 'varuna', 'tethys'];
  */
 function liveIt(seed: string, days: number): Progress {
   let p = emptyProgress();
-  const people = fieldMaps.flatMap((m) => poisOn(m.id)).flatMap((poi) => npcsAt(poi.id).map((n) => n.id));
+
+  // Each map has its own people, its own findable discoveries and — since canon gained
+  // `climate` — its own sky. Walking both under one weather would quietly test a world that
+  // does not exist, and would hide a plateau rung that only the plateau's mist can open.
+  const places = fieldMaps.map((m) => {
+    const here = new Set(poisOn(m.id).map((x) => x.id));
+    return {
+      climate: m.climate,
+      people: poisOn(m.id).flatMap((x) => npcsAt(x.id).map((n) => n.id)),
+      findable: discoveries.filter((d) => d.foundAt.some((f) => here.has(f)))
+    };
+  });
 
   for (let ms = 0; ms <= days * DAY_MS; ms += DAY_MS / 96) {
-    const moment = momentAt(seed, ms);
     for (let settle = 0; settle < 6; settle += 1) {
       let moved = false;
 
-      for (const id of people) {
-        const before = p;
-        for (let i = 0; i < linesFor(p, id).length; i += 1) p = hear(p, id, i);
-        if (p !== before) moved = true;
-      }
-      for (const d of discoveries) {
-        if (canAdvance(p, d.id, moment)) {
-          p = advance(p, d.id, moment);
-          moved = true;
+      for (const place of places) {
+        const moment = momentAt(seed, ms, 0, place.climate);
+
+        for (const id of place.people) {
+          const before = p;
+          for (let i = 0; i < linesFor(p, id).length; i += 1) p = hear(p, id, i);
+          if (p !== before) moved = true;
+        }
+        for (const d of place.findable) {
+          if (canAdvance(p, d.id, moment)) {
+            p = advance(p, d.id, moment);
+            moved = true;
+          }
         }
       }
       if (!moved) break;

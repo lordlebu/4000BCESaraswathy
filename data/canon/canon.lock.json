@@ -9,18 +9,11 @@
     "npcs": 6,
     "discoveries": 18,
     "field_questions": 5,
-    "vocabulary": 6,
-    "characters": 41,
-    "events": 12,
-    "settlements": 2,
-    "factions": 3,
-    "artifacts": 3,
-    "mythology": 3
+    "vocabulary": 6
   },
   "sha256": {
-    "species.json": "a63e247c3d8bd51866dbc73059186737072356bfd6dfa461130fd376f4ee7bd8",
-    "places.json": "f1c90279c96f07dfda289ec998c5e33e0d98fdc6ef2fe55ac843629f0acd7f4a",
-    "knowledge.json": "9e810258b35eabeee00aa5a46363cd9c89d504033a8e4c875df243cd36ba5d5b",
-    "world.json": "dff2175b5e1f08f6e9a35dc28699654e09d7ddfd12fd3def5e346d47ec3019d6"
+    "species.json": "ed76a06ddb707db37988bd9f032aa250bcbd9e1ccef22543bd7546fd955a5969",
+    "places.json": "4dc5cc157d06c53191086e659b62884c274fe36695d628579b18d41ff84bd688",
+    "knowledge.json": "9e810258b35eabeee00aa5a46363cd9c89d504033a8e4c875df243cd36ba5d5b"
   }
 }

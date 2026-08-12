@@ -3053,6 +3053,7 @@
       "scientific": "Gecarcinus magma",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3072,6 +3073,7 @@
       "scientific": "Gecarcinus basalticus",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3091,6 +3093,7 @@
       "scientific": "Chrysomallon chalceus",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3110,6 +3113,7 @@
       "scientific": "Chrysomallon ferreus",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3129,6 +3133,7 @@
       "scientific": "Ammonites pacificus",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3148,6 +3153,7 @@
       "scientific": "Ammonites asuricus",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3167,6 +3173,7 @@
       "scientific": "Cyprinus glacialis",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3186,6 +3193,7 @@
       "scientific": "Esox shambala",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3205,6 +3213,7 @@
       "scientific": "Agama basaltica",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3224,6 +3233,7 @@
       "scientific": "Carabus cinereus",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3243,6 +3253,7 @@
       "scientific": "Riftia vulcanica",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3262,6 +3273,7 @@
       "scientific": "Rattus cinereus",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3281,6 +3293,7 @@
       "scientific": "Lepus glacialis",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3300,6 +3313,7 @@
       "scientific": "Phoca glacialis",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3319,6 +3333,7 @@
       "scientific": "Salamandra vulcanica",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3338,6 +3353,7 @@
       "scientific": "Thalassoica antarctica",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3357,6 +3373,7 @@
       "scientific": "Falco cinereus",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3376,6 +3393,7 @@
       "scientific": "Palaemon vulcanus",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3395,6 +3413,7 @@
       "scientific": "Lycosa glacialis",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3414,6 +3433,7 @@
       "scientific": "Catharacta antarctica",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3433,6 +3453,7 @@
       "scientific": "Scolopendra vulcanica",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3452,6 +3473,7 @@
       "scientific": "Buthus cinereus",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3471,6 +3493,7 @@
       "scientific": "Pagurus vulcanus",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3509,6 +3532,7 @@
       "scientific": "Isotoma glacialis",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3528,6 +3552,7 @@
       "scientific": "Lerwa shambala",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3547,6 +3572,7 @@
       "scientific": "Riftia asurica",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3566,6 +3592,7 @@
       "scientific": "Gryllus cinereus",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3585,6 +3612,7 @@
       "scientific": "Phoca ribbon",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -3604,6 +3632,7 @@
       "scientific": "Lymantria vulcanica",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "encounter",
@@ -6225,6 +6254,7 @@
       "scientific": "Ficus ash-banyana",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "flavour",
@@ -6297,6 +6327,7 @@
       "scientific": "Agrostis cinerea",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "flavour",
@@ -6315,6 +6346,7 @@
       "scientific": "Pteris vulcanica",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "flavour",
@@ -6333,6 +6365,7 @@
       "scientific": "Lichen glacialis",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "flavour",
@@ -6351,6 +6384,7 @@
       "scientific": "Bryum glaciale",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "flavour",
@@ -6369,6 +6403,7 @@
       "scientific": "Zostera antarctica",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "flavour",
@@ -6387,6 +6422,7 @@
       "scientific": "Sulfuraria lutea",
       "region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "placement": "flavour",

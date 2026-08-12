@@ -11,6 +11,7 @@
 
 import placesBundle from '../../data/canon/places.json';
 import type { BiomeId } from '../world/types';
+import { type Climate, DELTA_CLIMATE } from '../world/weather';
 
 export interface FieldMap {
   id: string;
@@ -28,6 +29,14 @@ export interface FieldMap {
    * checks that, since a one-sided edge is a dead end nobody notices until a player hits it.
    */
   neighbours: string[];
+  /**
+   * The sky this place gets, as relative weights per weather.
+   *
+   * Canon owns it because a delta and a desert should not share one. Falls back to the
+   * delta's when canon stays quiet, which is a guess rather than a reading — the day a map
+   * without one lands somewhere arid, it will be obvious and wrong.
+   */
+  climate: Climate;
   /** What the player reads on first arriving. */
   arrival: string;
 }
@@ -97,6 +106,7 @@ export interface Npc {
 interface RawFieldMap {
   id: string; name: string; region: string; seed_biomes: string[];
   scale?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
+  climate?: Climate;
 }
 interface RawPoi {
   id: string; name: string; field_map: string; kind: string; terrain?: string[];
@@ -124,6 +134,7 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   scale: (m.scale ?? 'small') as 'small' | 'large',
   pointsOfInterest: m.points_of_interest ?? [],
   neighbours: m.neighbours ?? [],
+  climate: m.climate ?? DELTA_CLIMATE,
   arrival: m.arrival ?? ''
 }));
 

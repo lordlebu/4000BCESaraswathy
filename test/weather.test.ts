@@ -25,6 +25,7 @@ import {
   restored
 } from '../src/journey';
 import { discoveries, vocabulary } from '../src/content/knowledge';
+import { fieldMap, fieldMaps } from '../src/content/places';
 
 /** The full canon weather enum, from `discovery.schema.json`. */
 const CANON_WEATHER = ['clear', 'rain', 'storm', 'mist', 'flood', 'full_moon'];
@@ -94,6 +95,40 @@ describe('weather', () => {
     const upcoming = nextSpells('lothal', 0, ['clear'], DELTA_CLIMATE, 24);
     expect(upcoming.length).toBeGreaterThan(0);
     for (const hour of upcoming) expect(weatherAt('lothal', hour)).toBe('clear');
+  });
+});
+
+describe('canon owns the sky', () => {
+  it('gives every field map a climate', () => {
+    for (const m of fieldMaps) {
+      const total = Object.values(m.climate).reduce((a, b) => a + (b ?? 0), 0);
+      expect(total, `${m.id} has an empty climate`).toBeGreaterThan(0);
+    }
+  });
+
+  it('does not give the delta and the plateau the same one', () => {
+    // If they match, `climate` is decoration and the field maps are interchangeable.
+    const lothal = fieldMap('field_map_lothal')!.climate;
+    const narmada = fieldMap('field_map_narmada')!.climate;
+    expect(narmada).not.toEqual(lothal);
+    // The scarp holds cloud, which is what discovery_escarpment_wind is about.
+    expect(narmada.mist ?? 0).toBeGreaterThan(lothal.mist ?? 0);
+  });
+
+  it('never asks for weather the world does not produce', () => {
+    for (const m of fieldMaps) {
+      for (const key of Object.keys(m.climate)) {
+        expect(['clear', 'mist', 'rain', 'storm'], `${m.id} weights ${key}`).toContain(key);
+      }
+    }
+  });
+
+  it('actually changes what the sky does', () => {
+    const a = Array.from({ length: 60 }, (_, i) =>
+      weatherAt('shared', i * SPELL_HOURS, fieldMap('field_map_lothal')!.climate));
+    const b = Array.from({ length: 60 }, (_, i) =>
+      weatherAt('shared', i * SPELL_HOURS, fieldMap('field_map_narmada')!.climate));
+    expect(a).not.toEqual(b);
   });
 });
 

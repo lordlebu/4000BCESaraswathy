@@ -20,6 +20,7 @@
       "continent": "jambhudweepa",
       "bestiary_region": "ganges-lava-sea",
       "biomes": [
+        "lava_field",
         "mountains"
       ],
       "habitats": [
@@ -30,7 +31,7 @@
       "landmarks": [
         "Ganges Lava Lake"
       ],
-      "notes": "Extreme zone where magma meets ocean. Deep-sea vent lineages were pushed to the surface here and evolved obsidian carapaces that withstand direct magma exposure; extremophile gastropods fuse basalt and metallic ore into armoured shells along the lake shores. The bestiary groups the magmatic and glacial extremes together, with underworld portals at the far end. Species here default to rare.",
+      "notes": "One of the most extreme magmatic zones in the setting: active volcanic rifts that cool and solidify into vast jagged black basalt plains and lava fields. Extreme zone where magma meets ocean. Deep-sea vent lineages were pushed to the surface here and evolved obsidian carapaces that withstand direct magma exposure; extremophile gastropods fuse basalt and metallic ore into armoured shells along the lake shores. The fauna are heavily armoured and heat-resistant, often fused with volcanic minerals. The bestiary groups the magmatic and glacial extremes together, with underworld portals at the far end. Species here default to rare.",
       "canon": "primary",
       "sources": [
         "AI_CONTEXT.md",
@@ -183,7 +184,13 @@
       ],
       "neighbours": [
         "field_map_narmada"
-      ]
+      ],
+      "climate": {
+        "clear": 58,
+        "mist": 18,
+        "rain": 18,
+        "storm": 6
+      }
     },
     {
       "id": "field_map_narmada",
@@ -217,7 +224,13 @@
       "sources": [
         "Varuna's Field Diary design",
         "AI_CONTEXT.md"
-      ]
+      ],
+      "climate": {
+        "clear": 52,
+        "mist": 30,
+        "rain": 15,
+        "storm": 3
+      }
     }
   ],
   "points_of_interest": [
