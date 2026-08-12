@@ -74,7 +74,10 @@ disciplines.
 
 ## Part 1 — Adopt `progress` in the save
 
-`SAVE_VERSION` is already at 4 and `Journey` already carries `progress: Progress`.
+`SAVE_VERSION` is at 5 and `Journey` carries `progress: Progress`. `Progress` holds four
+things: `rungs`, `words`, `answered`, and `questions` (the open questions the player is
+carrying — distinct from `answered`, because the interesting part of the game happens between
+the two).
 
 `saveJourney` currently takes `progress` **optionally** and defaults to whatever is already
 stored. That was deliberate so the data layer could land without touching `App.tsx`. Your
@@ -206,14 +209,42 @@ On arrival at a point of interest:
 - `poi.ruinOf` — the canon entity this is the wreck of, if any. Lothal's camp is a
   settlement and a ruin at once, and that is worth showing.
 
-**Sub-locations** are the gated depths. `poi.subLocations` each carry `requires: string[]` —
-discovery or word ids. Two of Kavik's Tower's three are gated. The gate should read as a
-reason, not a lock: a cave that is *too dark to enter* becomes enterable when you know what
-lives there. Resolve each requirement to a name and say what is missing. Same rule as
-`blockedBy` — never show a raw id, and never show a padlock with no explanation.
+**Sub-locations** are the gated depths. Use **`canEnter(progress, poiId, subLocationId)`** and
+**`blockedFrom(progress, poiId, subLocationId)`** — both now exist and are tested; do not
+inline the check.
 
-There is currently no helper for "can I enter this sub-location". Either add one to
-`journey.ts` with a test, or ask and it will be added. Do not inline the check.
+The gate should read as a reason, not a lock: a cave that is *too dark to enter* becomes
+enterable when you know what lives there. `blockedFrom` gives you the ids; resolve each to a
+name and say what is missing. Never show a raw id, and never show a padlock with no
+explanation.
+
+Entry asks for **understanding**, not observation — the opposite of a conversation. The stair
+is safe once you know how the tower fell; having glanced at it is not that.
+
+---
+
+## Part 4b — Talking to people
+
+This is the only route by which a word can be learned, so it is not optional flavour.
+
+- `linesFor(progress, npcId)` — what this person will say right now.
+- `hear(progress, npcId, index)` — hear one and take what it gives. **The index is into the
+  list `linesFor` returned**, not the NPC's full canon order, so you cannot trigger a locked
+  line by accident. Pass the index of the line you rendered.
+- `hasSomethingNew(progress, npcId)` — whether they still have anything to give, for a marker
+  on the map. It is false when everything reachable has been heard, which is the honest signal.
+- `openQuestions(progress)` — the field questions the player is carrying.
+
+`hear` is idempotent, so re-reading a line costs nothing and you do not need to track which
+lines have been heard.
+
+Line requirements are read as **observed**, not finished — a person will talk about something
+you have seen. That asymmetry is load-bearing: Thrali only names the silver water once you
+have watched it, and the word he gives is what the *last rung of that same discovery* requires.
+Demanding completion would deadlock the pair.
+
+NPCs also carry `language` and `knows` (discoveries and questions they can move along — a lead,
+not an answer), which are worth surfacing.
 
 ---
 

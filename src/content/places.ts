@@ -64,6 +64,21 @@ export interface PointOfInterest {
   ruinOf: string | null;
 }
 
+/** Something an NPC says, and what it takes to hear — or to understand — it. */
+export interface Line {
+  text: string;
+  /**
+   * Discovery or vocabulary ids needed first.
+   *
+   * Read as *observed* rather than finished, and it has to be: Thrali will only name the
+   * silver water once you have seen it, and the word he gives is what the last rung of that
+   * same discovery requires. Demanding completion would deadlock the pair.
+   */
+  requires: string[];
+  /** Discovery, vocabulary or field question ids this opens. */
+  gives: string[];
+}
+
 export interface Npc {
   id: string;
   name: string;
@@ -71,6 +86,12 @@ export interface Npc {
   foundAt: string[];
   /** Whether they would join the settlement at the end, having been helped. */
   wouldSettle: boolean;
+  /** What they speak. Words they teach belong to it. */
+  language: string;
+  /** Discoveries and questions they can move along. A lead, not an answer. */
+  knows: string[];
+  /** In canon order. This is the only route by which a word can be learned. */
+  lines: Line[];
 }
 
 interface RawFieldMap {
@@ -85,6 +106,8 @@ interface RawPoi {
 }
 interface RawNpc {
   id: string; name: string; role?: string; found_at?: string[]; would_settle?: boolean;
+  language?: string; knows?: string[];
+  lines?: { text: string; requires?: string[]; gives?: string[] }[];
 }
 
 const raw = placesBundle as {
@@ -128,11 +151,19 @@ export const npcs: Npc[] = raw.npcs.map((n) => ({
   name: n.name,
   role: n.role ?? '',
   foundAt: n.found_at ?? [],
-  wouldSettle: n.would_settle === true
+  wouldSettle: n.would_settle === true,
+  language: n.language ?? '',
+  knows: n.knows ?? [],
+  lines: (n.lines ?? []).map((l) => ({
+    text: l.text,
+    requires: l.requires ?? [],
+    gives: l.gives ?? []
+  }))
 }));
 
 const mapsById = new Map(fieldMaps.map((m) => [m.id, m]));
 const poisById = new Map(pointsOfInterest.map((p) => [p.id, p]));
+const npcsById = new Map(npcs.map((n) => [n.id, n]));
 
 export function fieldMap(id: string): FieldMap | null {
   return mapsById.get(id) ?? null;
@@ -152,6 +183,10 @@ export function poisOn(fieldMapId: string): PointOfInterest[] {
   const m = mapsById.get(fieldMapId);
   if (!m) return [];
   return m.pointsOfInterest.map((id) => poisById.get(id)).filter((p): p is PointOfInterest => Boolean(p));
+}
+
+export function npc(id: string): Npc | null {
+  return npcsById.get(id) ?? null;
 }
 
 export function npcsAt(poiId: string): Npc[] {

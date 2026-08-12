@@ -13,7 +13,7 @@ const PREFIX = 'south-of-tethys';
  * Bump when the payload shape changes. The Phaser shell reset it to 1; `reached` made it 3;
  * carrying what the player has come to understand made it 4.
  */
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 export interface Journey {
   version: number;
@@ -47,7 +47,8 @@ function readProgress(value: unknown): Progress {
   return {
     rungs: raw.rungs && typeof raw.rungs === 'object' ? { ...raw.rungs } : {},
     words: Array.isArray(raw.words) ? raw.words : [],
-    answered: raw.answered && typeof raw.answered === 'object' ? { ...raw.answered } : {}
+    answered: raw.answered && typeof raw.answered === 'object' ? { ...raw.answered } : {},
+    questions: Array.isArray(raw.questions) ? raw.questions : []
   };
 }
 

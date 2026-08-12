@@ -20,7 +20,7 @@ import {
   vocabulary,
   word
 } from './content/knowledge';
-import { npcs } from './content/places';
+import { type Line, npc, npcs, poi } from './content/places';
 
 /** Where the world is, when a rung asks for a particular night or weather. */
 export interface WorldMoment {
@@ -39,9 +39,21 @@ export interface Progress {
   words: string[];
   /** Question id to the resolution index the player settled on. */
   answered: Record<string, number>;
+  /**
+   * Field questions the player has been handed.
+   *
+   * Separate from `answered`, because knowing a question is open is its own state and the
+   * interesting part of the game happens between the two. Questions arrive from people.
+   */
+  questions: string[];
 }
 
-export const emptyProgress = (): Progress => ({ rungs: {}, words: [], answered: {} });
+export const emptyProgress = (): Progress => ({
+  rungs: {},
+  words: [],
+  answered: {},
+  questions: []
+});
 
 /** The rung reached on a discovery, or -1 if it has never been noticed. */
 export function rungOf(progress: Progress, id: string): number {
@@ -132,6 +144,90 @@ export function advance(progress: Progress, id: string, moment: WorldMoment | nu
 export function learn(progress: Progress, wordId: string): Progress {
   if (!word(wordId) || knowsWord(progress, wordId)) return progress;
   return { ...progress, words: [...progress.words, wordId] };
+}
+
+export function knowsQuestion(progress: Progress, id: string): boolean {
+  return progress.questions.includes(id);
+}
+
+/** The open questions the player is carrying, as entities. */
+export function openQuestions(progress: Progress): FieldQuestion[] {
+  return progress.questions
+    .map((id) => fieldQuestion(id))
+    .filter((q): q is FieldQuestion => q !== null);
+}
+
+/**
+ * Take whatever a line hands over: a word, a question, or a discovery.
+ *
+ * A discovery arrives at rung 0 — noticed, not understood — which is what rung 0 has always
+ * meant and why it is distinct from never having seen it. It bypasses that rung's conditions
+ * deliberately: somebody told you, and being told is not the same as looking, which is exactly
+ * the gap the rest of the ladder exists to close.
+ *
+ * Idempotent, so a player may re-hear a line without it meaning anything.
+ */
+function receive(progress: Progress, id: string): Progress {
+  if (id.startsWith('word_')) return learn(progress, id);
+  if (fieldQuestion(id)) {
+    if (knowsQuestion(progress, id)) return progress;
+    return { ...progress, questions: [...progress.questions, id] };
+  }
+  if (discovery(id) && rungOf(progress, id) < 0) {
+    return { ...progress, rungs: { ...progress.rungs, [id]: 0 } };
+  }
+  return progress;
+}
+
+/**
+ * What someone will say right now.
+ *
+ * Requirements are read as *observed* rather than finished. A person will talk about a thing
+ * you have seen; making them wait until you have understood it would mean the word Thrali
+ * gives could never be got, since the discovery it completes is the one he is waiting on.
+ */
+export function linesFor(progress: Progress, npcId: string): Line[] {
+  const who = npc(npcId);
+  if (!who) return [];
+  return who.lines.filter((l) => l.requires.every((r) => observed(progress, r)));
+}
+
+/**
+ * Hear one of them, and take what it gives.
+ *
+ * Indexed against the list `linesFor` returned, not against the NPC's full canon order, so a
+ * caller cannot accidentally trigger a line the player has not unlocked.
+ */
+export function hear(progress: Progress, npcId: string, lineIndex: number): Progress {
+  const line = linesFor(progress, npcId)[lineIndex];
+  if (!line) return progress;
+  return line.gives.reduce(receive, progress);
+}
+
+/** Everything a person could still teach, for a UI that wants to show a lead. */
+export function hasSomethingNew(progress: Progress, npcId: string): boolean {
+  return linesFor(progress, npcId).some((l) =>
+    l.gives.some((g) => receive(progress, g) !== progress)
+  );
+}
+
+/**
+ * Whether a gated sub-location will open.
+ *
+ * Entry asks for understanding, not merely observation — the opposite of a conversation. The
+ * stair is safe once you know how the tower fell, and having glanced at it is not that.
+ */
+export function canEnter(progress: Progress, poiId: string, subLocationId: string): boolean {
+  const sub = poi(poiId)?.subLocations.find((s) => s.id === subLocationId);
+  if (!sub) return false;
+  return sub.requires.every((r) => holds(progress, r));
+}
+
+/** What is keeping the player out, as ids, for a UI that wants to say why. */
+export function blockedFrom(progress: Progress, poiId: string, subLocationId: string): string[] {
+  const sub = poi(poiId)?.subLocations.find((s) => s.id === subLocationId);
+  if (!sub) return [];
+  return sub.requires.filter((r) => !holds(progress, r));
 }
 
 /** What the diary currently reads for a discovery, or null if it has never been noticed. */
