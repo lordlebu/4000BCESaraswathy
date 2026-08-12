@@ -20,6 +20,7 @@ import {
   type Facing
 } from '../player';
 import { phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
+import { momentAt } from '../moment';
 import { arrivalPage, describeSurroundings, describeTile, landmarkHint } from '../../content/journal';
 import { travelCost } from '../../content/species';
 import { isWalkable } from '../../world/generate';
@@ -147,6 +148,8 @@ export class WorldScene extends Phaser.Scene {
   private zoomChoice: number | null = null;
   /** Distance between two fingers on the previous frame, for pinch. Zero when not pinching. */
   private pinchFrom = 0;
+  /** The last moment announced, so the UI is told when it changes rather than every frame. */
+  private lastMoment = '';
 
   constructor() {
     super('WorldScene');
@@ -165,6 +168,7 @@ export class WorldScene extends Phaser.Scene {
     this.facing = 'down';
     this.travelled = 0;
     this.announced = new Set();
+    this.lastMoment = '';
     // The map opens on the light of the hour the player is actually in, then drifts from there.
     // `?hour=21` overrides it, so the evening can be checked without waiting for the evening.
     this.startPhase = startPhaseFor(new URLSearchParams(window.location.search).get('hour'));
@@ -470,12 +474,36 @@ export class WorldScene extends Phaser.Scene {
     );
   }
 
+  /**
+   * The hour and the sky, as one value.
+   *
+   * Built from the scene's own clock -- wall time plus whatever the walking has spent -- so
+   * the creature asleep in the journal and the light on the map are the same moment.
+   */
+  private momentNow() {
+    return momentAt(
+      this.world.seed,
+      this.time.now + this.travelled,
+      this.startPhase,
+      this.built.fieldMap.climate
+    );
+  }
+
   /** Repaint the wash for the current hour. Cheap enough to run every frame. */
   private updateSky(): void {
     // Time passes while you stand still, and walking spends it faster. Sitting on a riverbank for
     // ten real minutes is four hours of the day; so is walking twenty tiles of open grassland.
     const sky = skyAt(phaseAt(this.time.now + this.travelled, this.startPhase));
     this.sky.setFillStyle(sky.colour, sky.alpha);
+
+    // Announce the moment only when it actually turns. Every frame would be four hundred
+    // React renders a minute for a value that changes a handful of times an hour.
+    const moment = this.momentNow();
+    const key = `${moment.timeOfDay}/${moment.weather}`;
+    if (key !== this.lastMoment) {
+      this.lastMoment = key;
+      EventBus.emitEvent('moment-changed', moment);
+    }
   }
 
   /**
@@ -619,7 +647,7 @@ export class WorldScene extends Phaser.Scene {
 
     EventBus.emitEvent('tile-entered', {
       at,
-      entry: describeTile(tile, this.world),
+      entry: describeTile(tile, this.world, this.momentNow()),
       surroundings: describeSurroundings(this.world, at),
       hint: landmarkHint(this.world, at),
       discovered: this.discovered.size,

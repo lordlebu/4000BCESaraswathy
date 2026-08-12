@@ -4,6 +4,7 @@
 // stays the single source of truth and this file holds nothing but phrasing.
 
 import { biomeFor, creatureFor, floraFor } from './species';
+import { isPresent, noteFor, routineFor } from './routine';
 import { landmarkKindFor, landmarkTitle } from './landmarks';
 import type { Creature, Point, Tile, World } from '../world/types';
 
@@ -54,7 +55,11 @@ function titleFor(world: World, tile: Tile): string {
   return biome ? `${biome.name} at ${tile.x}, ${tile.y}` : `Unmapped ground at ${tile.x}, ${tile.y}`;
 }
 
-export function describeTile(tile: Tile, world: World): JournalEntry {
+export function describeTile(
+  tile: Tile,
+  world: World,
+  moment: { timeOfDay: string; weather: string } | null = null
+): JournalEntry {
   const seed = world.seed;
   const biome = biomeFor(tile.biome);
   const creature = creatureFor(tile, seed);
@@ -73,7 +78,12 @@ export function describeTile(tile: Tile, world: World): JournalEntry {
     // grass" and only learned it was a Painted Deer after sketching it. Naming it up front is the
     // whole point of a field note.
     creature: creature
-      ? { name: creature.name, note: creature.journalPrompt }
+      ? {
+          name: creature.name,
+          // What it is doing now, then what it is. The hour changes the first and never the
+          // second, which is the honest division between weather and a field guide.
+          note: `${noteFor(creature, moment)} ${creature.journalPrompt}`
+        }
       : { name: null, note: 'No creature signs yet, only wind, dust, and the road ahead.' },
     flora: plant
       ? { name: plant.name, note: plant.journalPrompt }
@@ -87,8 +97,15 @@ export function describeTile(tile: Tile, world: World): JournalEntry {
  * `mood` used to be read off a table that did not carry the field, so this printed "remember its
  * undefined presence" to the player. It is typed now, and the data is the only source.
  */
-export function creatureAction(creature: Creature | null): string {
+export function creatureAction(
+  creature: Creature | null,
+  moment: { timeOfDay: string; weather: string } | null = null
+): string {
   if (!creature) return 'Listen quietly. The road has no creature sign to follow here.';
+  if (!isPresent(routineFor(creature, moment))) {
+    // A refusal that gives a reason and an hour. Coming back is the mechanic, not a penalty.
+    return noteFor(creature, moment);
+  }
   return `You make a quiet sketch of the ${creature.name.toLowerCase()} and remember its ${creature.mood} presence.`;
 }
 
