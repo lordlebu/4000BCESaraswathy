@@ -5,7 +5,7 @@ none of it needs to change.** What follows is what to build on top of it, what t
 what not to touch.
 
 Everything here is on branch `feature/canon-bundle` in both repos. `npm run typecheck` is
-clean and 142 tests pass across 9 files. If you break one of those tests, the fix is almost
+clean and 183 tests pass across 11 files. If you break one of those tests, the fix is almost
 certainly in your code rather than in the test.
 
 ---
@@ -63,12 +63,14 @@ Three adapters under `src/content/`, all already written:
 Plus `src/journey.ts` for player state and `src/world/fieldMap.ts`, which turns a canon field
 map into walkable ground with the authored places standing on it.
 
-The authored slice is small on purpose — it is one region proving the schema, not the
-finished game: **1 field map (Lothal), 6 points of interest, 9 discoveries, 2 field
-questions, 3 Kia words, 3 NPCs**, across 5 disciplines (`zoology`, `botany`, `archaeology`,
-`geography`, `anomalies`). Build the UI so that adding a second field map is a data change
-and not a UI change. Nothing should hardcode `field_map_lothal`, six places, or five
-disciplines.
+Authored so far: **2 field maps (Lothal, the Narmada Plateau), 12 points of interest, 18
+discoveries, 5 field questions, 6 NPCs, and 6 words across two languages** (`kia` in the
+delta, `maru` on the plateau), covering all 7 disciplines.
+
+That is still a slice rather than the finished game, so **derive everything from the data**.
+Nothing should hardcode a map id, a place count, a discipline list, or two languages — read
+`fieldMaps`, the keys of `disciplineProgress()`, and `languagesKnown()`. The two maps are
+deliberately unalike in scale and palette; a third will not resemble either.
 
 ---
 
@@ -107,7 +109,8 @@ This replaces the notion of a journal that lists what you have seen. The diary i
 progression system: there are no experience points, and a discovery climbing its ladder is
 what advancement means.
 
-Each discovery has between 3 and 5 **rungs**. A rung carries `entry` — the prose the player
+Each discovery has between 3 and 7 **rungs**, and the count varies by discovery — read it
+from `lastRung()` rather than assuming a fixed ladder height. A rung carries `entry` — the prose the player
 reads — and the entries are deliberately *less certain* lower down. Rung 0 is a guess; the
 last rung is understanding.
 
