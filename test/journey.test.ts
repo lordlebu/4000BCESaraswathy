@@ -31,13 +31,12 @@ import { discoveries, discovery, fieldQuestion, lastRung, vocabulary } from '../
  * so climbing with one fixed moment stops early and says nothing useful. Coming back in
  * different weather is what the player actually does.
  */
-const MOMENTS = [
-  { timeOfDay: 'night', weather: 'rain' },
-  { timeOfDay: 'night', weather: 'clear' },
-  { timeOfDay: 'morning', weather: 'clear' },
-  { timeOfDay: 'afternoon', weather: 'rain' },
-  { timeOfDay: 'evening', weather: 'clear' }
-];
+// Every combination, rather than a hand-picked list. A hand-picked list silently stops
+// covering the content the moment canon gates a rung on something not in it -- which is
+// exactly what happened when the Narmada slice introduced a rung that wants mist.
+const MOMENTS = ['dawn', 'morning', 'afternoon', 'evening', 'night'].flatMap((timeOfDay) =>
+  ['clear', 'rain', 'mist', 'storm'].map((weather) => ({ timeOfDay, weather }))
+);
 
 /** Climb a discovery as far as the rules allow, revisiting until nothing more opens. */
 function climb(progress: Progress, id: string): Progress {

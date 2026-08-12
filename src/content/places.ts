@@ -20,6 +20,14 @@ export interface FieldMap {
   seedBiomes: BiomeId[];
   scale: 'small' | 'large';
   pointsOfInterest: string[];
+  /**
+   * Field maps reachable from this one — the overworld's edges.
+   *
+   * Canon states each edge on both maps rather than making one direction authoritative, so
+   * the overworld can be walked either way without inverting a relation. `neighboursOf`
+   * checks that, since a one-sided edge is a dead end nobody notices until a player hits it.
+   */
+  neighbours: string[];
   /** What the player reads on first arriving. */
   arrival: string;
 }
@@ -67,7 +75,7 @@ export interface Npc {
 
 interface RawFieldMap {
   id: string; name: string; region: string; seed_biomes: string[];
-  scale?: string; points_of_interest?: string[]; arrival?: string;
+  scale?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
 }
 interface RawPoi {
   id: string; name: string; field_map: string; kind: string; terrain?: string[];
@@ -92,6 +100,7 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   seedBiomes: m.seed_biomes as BiomeId[],
   scale: (m.scale ?? 'small') as 'small' | 'large',
   pointsOfInterest: m.points_of_interest ?? [],
+  neighbours: m.neighbours ?? [],
   arrival: m.arrival ?? ''
 }));
 
@@ -147,4 +156,16 @@ export function poisOn(fieldMapId: string): PointOfInterest[] {
 
 export function npcsAt(poiId: string): Npc[] {
   return npcs.filter((n) => n.foundAt.includes(poiId));
+}
+
+/**
+ * The field maps reachable from one, resolved to entities.
+ *
+ * Silently drops an id canon names but does not define, so a half-authored edge cannot crash
+ * the overworld — `neighbours` on the raw entity is still there if you need to see the gap.
+ */
+export function neighboursOf(fieldMapId: string): FieldMap[] {
+  const from = fieldMap(fieldMapId);
+  if (!from) return [];
+  return from.neighbours.map((id) => fieldMap(id)).filter((m): m is FieldMap => m !== null);
 }

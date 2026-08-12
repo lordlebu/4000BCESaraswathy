@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap, poiAt } from '../src/world/fieldMap';
-import { fieldMap, poisOn, npcsAt } from '../src/content/places';
+import { fieldMap, fieldMaps, poisOn, npcsAt, neighboursOf } from '../src/content/places';
 import { biomes } from '../src/content/species';
 
 const lothal = fieldMap('field_map_lothal');
@@ -65,6 +65,74 @@ describe('the Lothal field map', () => {
     const first = built.placed[0]!;
     expect(poiAt(built, first.at)?.poi.id).toBe(first.poi.id);
     expect(poiAt(built, { x: -1, y: -1 })).toBeNull();
+  });
+});
+
+describe('the Narmada plateau', () => {
+  const narmada = fieldMap('field_map_narmada');
+
+  it('is a different country from the delta, or the overworld is pointless', () => {
+    expect(narmada).not.toBeNull();
+    expect(narmada!.scale).toBe('large');
+    // No palette overlap beyond settlement: hills and mountains against wetland and river.
+    const shared = narmada!.seedBiomes.filter((b) => lothal!.seedBiomes.includes(b));
+    expect(shared).toEqual(['settlement']);
+  });
+
+  it('builds ground with every authored place standing on it', () => {
+    const built = buildFieldMap(narmada!);
+    expect(built.placed).toHaveLength(6);
+    expect(built.unplaced).toEqual([]);
+  });
+
+  it('puts each place on terrain canon allows', () => {
+    const built = buildFieldMap(narmada!);
+    for (const { poi, at } of built.placed) {
+      const tile = built.world.tiles[at.y]![at.x]!;
+      if (poi.terrain.length) {
+        expect(poi.terrain, `${poi.id} landed on ${tile.biome}`).toContain(tile.biome);
+      }
+    }
+  });
+
+  it('is the same plateau every time', () => {
+    const a = buildFieldMap(narmada!);
+    const b = buildFieldMap(narmada!);
+    expect(a.placed.map((p) => [p.poi.id, p.at.x, p.at.y]))
+      .toEqual(b.placed.map((p) => [p.poi.id, p.at.x, p.at.y]));
+  });
+
+  it('gates the stair and the archive on work done elsewhere', () => {
+    const stair = poisOn('field_map_narmada').find((p) => p.id === 'poi_cloud_stair')!;
+    expect(stair.kind).toBe('anomaly');
+    expect(stair.subLocations.filter((s) => s.requires.length > 0)).toHaveLength(1);
+    const archive = poisOn('field_map_narmada').find((p) => p.id === 'poi_long_archive')!;
+    expect(archive.subLocations.filter((s) => s.requires.length > 0)).toHaveLength(2);
+  });
+
+  it('has someone who would not come, like Lothal does', () => {
+    expect(npcsAt('poi_long_archive').some((n) => !n.wouldSettle)).toBe(true);
+  });
+});
+
+describe('the overworld', () => {
+  it('joins the two maps', () => {
+    expect(neighboursOf('field_map_lothal').map((m) => m.id)).toContain('field_map_narmada');
+  });
+
+  it('states every edge from both ends', () => {
+    // A one-sided edge is a dead end nobody finds until a player walks into it.
+    for (const from of fieldMaps) {
+      for (const to of neighboursOf(from.id)) {
+        expect(to.neighbours, `${to.id} does not name ${from.id} back`).toContain(from.id);
+      }
+    }
+  });
+
+  it('names no neighbour that does not exist', () => {
+    for (const m of fieldMaps) {
+      expect(neighboursOf(m.id)).toHaveLength(m.neighbours.length);
+    }
   });
 });
 

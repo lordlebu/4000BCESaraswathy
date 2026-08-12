@@ -1,5 +1,5 @@
 {
-  "canon_version": "1.3.0",
+  "canon_version": "1.4.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -180,10 +180,115 @@
       "sources": [
         "Varuna's Field Diary design",
         "AI_CONTEXT.md"
+      ],
+      "neighbours": [
+        "field_map_narmada"
+      ]
+    },
+    {
+      "id": "field_map_narmada",
+      "type": "field_map",
+      "name": "The Narmada Plateau",
+      "region": "region_narmada_plateau",
+      "seed_biomes": [
+        "hills",
+        "mountains",
+        "forest",
+        "settlement"
+      ],
+      "scale": "large",
+      "points_of_interest": [
+        "poi_narmada_university",
+        "poi_long_archive",
+        "poi_basalt_quarry",
+        "poi_walking_spring",
+        "poi_herders_terraces",
+        "poi_cloud_stair"
+      ],
+      "neighbours": [
+        "field_map_lothal"
+      ],
+      "arrival": "The road up the scarp is the only part of the plateau anyone built. Everything above it was already here: black rock in steps a hundred feet high, holding a flat green country the sea never reached. They will tell you at the top that this is why the University is here. They are right, and it is not the whole reason.",
+      "notes": "Second field map, and the counterweight to Lothal. At Lothal local knowledge was right and the academy was quoted from a distance; here the academy is a room the player stands in. The Long Archive is not foolish -- it is rigorous and its record begins at the Shattering, so it has four hundred years of excellent measurements against a baseline that is itself the wound. Large scale, hills and mountains, so the overworld reads as travel rather than as two versions of the same map.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
       ]
     }
   ],
   "points_of_interest": [
+    {
+      "id": "poi_basalt_quarry",
+      "type": "point_of_interest",
+      "name": "The Stepped Quarry",
+      "field_map": "field_map_narmada",
+      "kind": "archaeological_site",
+      "terrain": [
+        "mountains",
+        "hills"
+      ],
+      "discoveries": [
+        "discovery_quarry_sequence"
+      ],
+      "description": "Cut basalt in courses, and between two of the courses, a bed of something else.",
+      "arrival": "They quarried here for the halls and stopped when they hit a seam that would not dress. The seam is nine inches of pale ash between two floods of black rock, and it is full of small dead things lying in the order they died.",
+      "notes": "The evolution discovery. A quarry rather than a dig, so the section is exposed by accident and read by the player rather than presented by a scholar.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "poi_cloud_stair",
+      "type": "point_of_interest",
+      "name": "The Cloud Stair",
+      "field_map": "field_map_narmada",
+      "kind": "anomaly",
+      "terrain": [
+        "mountains"
+      ],
+      "related_entities": [
+        "region_tethys_sky_routes"
+      ],
+      "discoveries": [
+        "discovery_cloud_stair",
+        "discovery_escarpment_wind"
+      ],
+      "sub_locations": [
+        {
+          "id": "lower_flights",
+          "name": "The Lower Flights",
+          "description": "Cut into the scarp, wide enough for two, worn in the middle like any stair anyone ever used."
+        },
+        {
+          "id": "the_turn",
+          "name": "The Turn",
+          "description": "Where the stair stops climbing the rock and starts climbing away from it. There is no rock under the last four steps and they are still there.",
+          "requires": [
+            "discovery_escarpment_wind"
+          ]
+        }
+      ],
+      "description": "A stair up the scarp that keeps going after the scarp stops.",
+      "arrival": "You can follow it with your eye until the cloud takes it, and the cloud is not always there, and it goes up past where the cloud is. Nobody at the University will say it is not a stair. They will say it has not been surveyed.",
+      "notes": "The anomaly, and the hook toward region_tethys_sky_routes for a later map. Deliberately unresolved -- the ladder ends at a good description rather than an explanation, because some things should stay open.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
     {
       "type": "point_of_interest",
       "field_map": "field_map_lothal",
@@ -239,6 +344,34 @@
       "notes": "The solarpunk hook, and what the actionable rung acts on: restorable once the player understands both the poison and the rice."
     },
     {
+      "id": "poi_herders_terraces",
+      "type": "point_of_interest",
+      "name": "The Herders' Terraces",
+      "field_map": "field_map_narmada",
+      "kind": "wilderness",
+      "terrain": [
+        "hills",
+        "forest"
+      ],
+      "discoveries": [
+        "discovery_terrace_water"
+      ],
+      "npcs": [
+        "npc_marn"
+      ],
+      "description": "Stone steps up a hillside, grazed by goats, described in the archive as ornamental.",
+      "arrival": "Two hundred steps of dry-laid stone, each one a little lower at the outer edge than the inner. Marn's goats are on them. The University's survey calls them a devotional feature and gives them a paragraph.",
+      "notes": "The archaeology discovery and the restore target. A paragraph in the survey against two hundred courses of deliberate engineering is the whole argument of this map in one image.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "id": "poi_kavik_tower",
       "type": "point_of_interest",
       "name": "Kavik's Tower",
@@ -287,6 +420,58 @@
       "description": "Four storeys of red sandstone where the chronicles promise twenty-two.",
       "arrival": "It did not topple. It sat down. The upper courses came straight through the lower ones and the whole thing settled into the delta mud like a foot into silt, which is why four storeys are still square and true and everything above them is a slope of dressed stone.",
       "notes": "Kavik's tower, the landmark settlement_lothal records. Enterable rather than merely visited, and the undercroft gates on knowing the safe channels -- a player who has not done the mangrove work cannot reach the best of it.",
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "poi_long_archive",
+      "type": "point_of_interest",
+      "name": "The Long Archive",
+      "field_map": "field_map_narmada",
+      "kind": "archaeological_site",
+      "terrain": [
+        "settlement",
+        "hills"
+      ],
+      "discoveries": [
+        "discovery_double_classified",
+        "discovery_terrace_script"
+      ],
+      "npcs": [
+        "npc_okhi"
+      ],
+      "sub_locations": [
+        {
+          "id": "reading_floor",
+          "name": "The Reading Floor",
+          "description": "Long tables, north light, and the working copies -- which are copies of copies, and say so on the spine, which is more honest than most places manage."
+        },
+        {
+          "id": "sequence_stacks",
+          "name": "The Sequence Stacks",
+          "description": "Every measurement the University has taken, in the order it was taken. Four hundred years of rainfall, riverflow, birds arriving and birds leaving. It is beautiful and it is the whole problem.",
+          "requires": [
+            "discovery_archive_baseline"
+          ]
+        },
+        {
+          "id": "unread_shelf",
+          "name": "The Unread Shelf",
+          "description": "What came up the scarp already written and has never been transcribed, because nobody here can read it and nobody will admit that in writing.",
+          "requires": [
+            "word_maru_khet"
+          ]
+        }
+      ],
+      "description": "Four hundred and eleven years of measurements, kept perfectly.",
+      "arrival": "The stacks run back further than the lamps reach. Okhi says there are eleven thousand bound volumes and that she has personally copied four hundred of them, and then, without any change of tone, that she has no idea whether the oldest are true, only that they are old.",
+      "notes": "Where the through-line resolves. The sequence stacks gate on discovery_archive_baseline so the player cannot be handed the thesis before earning it; the unread shelf gates on a word, which is the point at which the plateau's own script stops being decoration.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
       "canon": "primary",
       "sources": [
         "Varuna's Field Diary design",
@@ -357,6 +542,37 @@
       "notes": "Kia rather than Harappan. Where the channel discovery is learned and the marsh-lurker can be watched."
     },
     {
+      "id": "poi_narmada_university",
+      "type": "point_of_interest",
+      "name": "The Narmada University",
+      "field_map": "field_map_narmada",
+      "kind": "settlement",
+      "terrain": [
+        "settlement"
+      ],
+      "related_entities": [
+        "region_narmada_plateau"
+      ],
+      "discoveries": [
+        "discovery_archive_baseline"
+      ],
+      "npcs": [
+        "npc_vessa",
+        "npc_okhi"
+      ],
+      "description": "Nine halls around a yard, and every one of them measuring something.",
+      "arrival": "It is smaller than the word suggests and busier than the quiet suggests. Nine halls, a yard with a rain gauge in it that has been read twice a day for four hundred and eleven years, and a great many people being careful. Nobody here is a fool. That turns out to matter more than the alternative would have.",
+      "notes": "The academy as a place rather than a citation. Deliberately sympathetic -- the scholars are rigorous and generous with the player, which is what makes the structural error land.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "type": "point_of_interest",
       "field_map": "field_map_lothal",
       "epochs": [
@@ -383,6 +599,35 @@
       "description": "A grid of brick chambers filled to the brim with silt, and something growing out of them.",
       "arrival": "The granary held the city's grain on raised platforms so the flood could not reach it. The flood has since reached it. What is remarkable is not that the chambers filled but that the crop came back on its own, red and thin, growing out of the tops of the walls.",
       "notes": "Where the rice discovery lives. The ruin is already doing the restoring; Varuna only has to notice."
+    },
+    {
+      "id": "poi_walking_spring",
+      "type": "point_of_interest",
+      "name": "The Walking Spring",
+      "field_map": "field_map_narmada",
+      "kind": "eco_site",
+      "terrain": [
+        "hills",
+        "forest"
+      ],
+      "discoveries": [
+        "discovery_moving_spring",
+        "discovery_bitter_millet"
+      ],
+      "npcs": [
+        "npc_marn"
+      ],
+      "description": "A spring the archive records at a fixed point, and a line of dead stonework saying otherwise.",
+      "arrival": "The water comes out of the hillside cold enough to hurt. Forty paces downslope there is a stone basin, dry, well made, and obviously built to catch exactly this. Forty paces further there is another.",
+      "notes": "Geography and botany both. The dry basins are the evidence and they are visible on arrival -- the player can see the answer before they can explain it, which is the right order.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
     }
   ],
   "npcs": [
@@ -439,6 +684,103 @@
       ],
       "descended_from": [
         "character_kavik"
+      ]
+    },
+    {
+      "id": "npc_marn",
+      "type": "npc",
+      "name": "Marn",
+      "role": "herder",
+      "found_at": [
+        "poi_herders_terraces",
+        "poi_walking_spring"
+      ],
+      "language": "maru",
+      "would_settle": true,
+      "knows": [
+        "discovery_terrace_water",
+        "discovery_bitter_millet",
+        "question_terrace_purpose"
+      ],
+      "lines": [
+        {
+          "text": "The steps? The steps have always been the steps. Good grazing, stays green late. You are the first person to walk up them looking at them.",
+          "gives": [
+            "question_terrace_purpose"
+          ]
+        },
+        {
+          "text": "Khet. Not step -- khet. It means the water is held. I do not know why we call them that, we just do.",
+          "requires": [
+            "discovery_terrace_water"
+          ],
+          "gives": [
+            "word_maru_khet"
+          ]
+        },
+        {
+          "text": "We lose one a year to the millet and we have always lost one a year to the millet. If you are telling me that is a choice and not a weather, I will need to sit down.",
+          "requires": [
+            "discovery_bitter_millet"
+          ]
+        }
+      ],
+      "notes": "Holds two of the map's answers inside ordinary vocabulary and has never had a reason to examine either. The counterpart to Thrali, and pointedly not a wise elder -- he is a working herder with a job on.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "npc_okhi",
+      "type": "npc",
+      "name": "Okhi",
+      "role": "senior copyist",
+      "found_at": [
+        "poi_long_archive"
+      ],
+      "language": "maru",
+      "would_settle": false,
+      "knows": [
+        "discovery_double_classified",
+        "discovery_terrace_script",
+        "question_two_names"
+      ],
+      "lines": [
+        {
+          "text": "Eleven thousand volumes. I have copied four hundred. I do not know if the oldest are true, only that they are old, and that is not nothing.",
+          "gives": [
+            "question_two_names"
+          ]
+        },
+        {
+          "text": "There is a shelf I dust and cannot read. Thirty years. If you learn what is on it I would like to be told, and I would like it told to me before it is told to the halls.",
+          "requires": [
+            "discovery_quarry_sequence"
+          ],
+          "gives": [
+            "word_maru_sev"
+          ]
+        },
+        {
+          "text": "No. Somebody stays. You have all found the thing that is wrong with this place and you are all leaving with it, and the eleven thousand volumes are still here and still need copying.",
+          "requires": [
+            "discovery_terrace_script"
+          ]
+        }
+      ],
+      "notes": "The one who will not come. Deliberately not a tragedy and not a rebuke -- she is right that somebody has to stay, and the ending should let her be right rather than treating her as a failed recruitment.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
       ]
     },
     {
@@ -517,6 +859,53 @@
         "epoch_post_cataclysm"
       ],
       "notes": "Keeps the camp's roofs on. The smallest possible help, and deliberately the first one available: the player learns that knowing when to cut a reed counts as helping.",
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "npc_vessa",
+      "type": "npc",
+      "name": "Vessa",
+      "role": "junior archivist",
+      "found_at": [
+        "poi_narmada_university"
+      ],
+      "language": "maru",
+      "would_settle": true,
+      "knows": [
+        "discovery_archive_baseline",
+        "question_moving_spring"
+      ],
+      "lines": [
+        {
+          "text": "You will want the rain series. Everyone wants the rain series. Read the first ten years of it and then come and tell me what you think we are measuring against.",
+          "gives": [
+            "question_moving_spring"
+          ]
+        },
+        {
+          "text": "I have written it three times and withdrawn it three times. Not because they would be angry. Because they would ask what the pre-Shattering figure was, and there isn't one, and that is the end of the conversation.",
+          "requires": [
+            "discovery_archive_baseline"
+          ]
+        },
+        {
+          "text": "My grandmother's people counted years by what happened in them. The halls would call that anecdote. It is also the only record that reaches back past the wound.",
+          "requires": [
+            "discovery_moving_spring"
+          ],
+          "gives": [
+            "word_maru_anu"
+          ]
+        }
+      ],
+      "notes": "The scholar who is already most of the way there and cannot say so in an acceptable form. Would settle -- she has been looking for somewhere the question is allowed.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
       "canon": "primary",
       "sources": [
         "Varuna's Field Diary design",

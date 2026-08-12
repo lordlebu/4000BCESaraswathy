@@ -255,10 +255,16 @@ two exist in data so far:
 
 - **Field Map** — works today. `buildFieldMap(fieldMap('field_map_lothal')!)`.
 - **Point of Interest** — data is there (Part 4); entering it is UI work.
-- **Overworld** — one field map exists, so build the screen so that a second one appearing in
-  `fieldMaps` requires no code change, and accept that it will look sparse for now. Do not
-  invent placeholder regions in the UI; if the overworld needs more places, that is a canon
-  change in SouthOfTethys.
+- **Overworld** — **two field maps now exist and they are joined.** `fieldMaps` lists them and
+  `neighboursOf(id)` gives the edges. Canon states each edge from both ends, and a test
+  enforces that, so you can render the graph without worrying about direction. Drive the
+  screen off `fieldMaps` and `neighboursOf` — never hardcode two nodes, and do not invent
+  placeholder regions in the UI; more places is a canon change in SouthOfTethys.
+
+  The two are deliberately unalike: Lothal is `small`, wetland and river; the Narmada Plateau
+  is `large`, hills and mountains. They share only `settlement`. Travel between them should
+  feel like travel, and the `scale` field is the hint that they should not be drawn at the
+  same size.
 - **Instance** — sub-locations are the closest thing that exists. Nothing more is authored.
 
 `fieldMap.arrival` is the prose for arriving on a map, mirroring `poi.arrival`.

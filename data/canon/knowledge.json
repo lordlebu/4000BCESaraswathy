@@ -1,6 +1,145 @@
 {
-  "canon_version": "1.3.0",
+  "canon_version": "1.4.0",
   "discoveries": [
+    {
+      "id": "discovery_archive_baseline",
+      "type": "discovery",
+      "name": "Where the Record Starts",
+      "discipline": "archaeology",
+      "found_at": [
+        "poi_narmada_university",
+        "poi_long_archive"
+      ],
+      "levels": [
+        {
+          "entry": "The archive is four hundred and eleven years old and complete. I have never seen anything like it."
+        },
+        {
+          "entry": "Four hundred and eleven years ago is the Shattering. The record begins the year the world broke."
+        },
+        {
+          "entry": "Which is reasonable -- that is when they started measuring. It is also the one year you would least want as your first."
+        },
+        {
+          "entry": "Every normal in these volumes is a post-Shattering normal. The rainfall they call average, the riverflow they call standard, the coastline they call the coastline."
+        },
+        {
+          "entry": "Vessa knows. She has known for some time and has not been able to say it in a form the halls would accept, because the form the halls accept is a measurement, and you cannot measure a thing you were not there for."
+        },
+        {
+          "entry": "The plateau is covered in evidence from before: the terraces, the quarry section, the marks on the stones, the herders' years. None of it is a measurement, so none of it is in the archive.",
+          "requires": [
+            "discovery_quarry_sequence",
+            "discovery_terrace_water"
+          ]
+        },
+        {
+          "entry": "The archive is not wrong. It is a perfect record of the wound, kept by careful people who mistook it for the body."
+        }
+      ],
+      "answers": [
+        "question_moving_spring"
+      ],
+      "helps": [
+        "npc_vessa"
+      ],
+      "notes": "The thesis. Seven rungs, and gated on two other discoveries so it cannot be reached by walking into the building -- the player has to bring the plateau's evidence in with them. Deliberately sympathetic to the University in the last line.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "discovery_bitter_millet",
+      "type": "discovery",
+      "name": "The Millet They Say Is Poison",
+      "discipline": "botany",
+      "found_at": [
+        "poi_walking_spring"
+      ],
+      "levels": [
+        {
+          "entry": "A hardy millet grows on the wet ground below the spring. The archive lists it as toxic to stock and to people."
+        },
+        {
+          "entry": "Marn's household eats it. Has always eaten it. Loses an animal to it about once a year and considers this normal."
+        },
+        {
+          "entry": "They soak it two days in running water and throw the first water away. Untreated, it is exactly as toxic as the archive says."
+        },
+        {
+          "entry": "The animals they lose are the ones that get into the standing crop. The archive tested the plant; the herders solved the food. Both of them stopped there."
+        },
+        {
+          "entry": "Soaking works because the thing in it is water-soluble and sits in the husk. Which means threshing first and soaking after wastes a day and half the effect."
+        }
+      ],
+      "helps": [
+        "npc_marn"
+      ],
+      "notes": "Botany, and the one where the player materially improves something rather than merely understanding it. Neither party is wrong here -- both are incompletely right, which is the map's thesis in miniature.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "discovery_cloud_stair",
+      "type": "discovery",
+      "name": "The Stair Above the Rock",
+      "discipline": "anomalies",
+      "found_at": [
+        "poi_cloud_stair"
+      ],
+      "levels": [
+        {
+          "entry": "A cut stair climbs the scarp. Above the scarp it continues. There is nothing under the upper flights."
+        },
+        {
+          "entry": "It is the same stone and the same cut. Whoever made the lower part made the upper part, or copied it exactly."
+        },
+        {
+          "entry": "The wear is on the middle of the treads, all the way up, including the steps with no rock beneath them. Something used them enough to wear them.",
+          "requires": [
+            "discovery_escarpment_wind"
+          ]
+        },
+        {
+          "entry": "On a clear night you can see how far it goes, and it does not stop where the cloud stops.",
+          "conditions": {
+            "time_of_day": [
+              "night"
+            ],
+            "weather": [
+              "clear"
+            ]
+          }
+        },
+        {
+          "entry": "The lift on the scarp is real and it is nowhere near enough to hold stone. I can describe this exactly and explain none of it, and I have decided that writing it down accurately is the work."
+        }
+      ],
+      "related_discoveries": [
+        "discovery_escarpment_wind"
+      ],
+      "notes": "Deliberately unresolved. The last rung is the diary refusing to guess, which is the discipline the whole game is about; the sky routes are a later map's problem.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
     {
       "type": "discovery",
       "epochs": [
@@ -35,6 +174,93 @@
         }
       ],
       "notes": "Archaeology that unlocks two other chains. Being a closed system is what makes it evidence for both the salt and the lurker."
+    },
+    {
+      "id": "discovery_double_classified",
+      "type": "discovery",
+      "name": "One Bird, Two Entries",
+      "discipline": "zoology",
+      "found_at": [
+        "poi_long_archive"
+      ],
+      "levels": [
+        {
+          "entry": "The archive lists a grey scarp-bird twice, under two names, catalogued sixty years apart."
+        },
+        {
+          "entry": "The descriptions differ in exactly one respect: the later one is larger and has a heavier bill."
+        },
+        {
+          "entry": "Both entries are careful. Both are signed. Neither cites the other, which means the second observer did not know the first entry existed."
+        },
+        {
+          "entry": "In the field they are one bird. The heavy-billed ones are the old ones -- the bill keeps growing, and a bird that lives thirty years ends up looking like a different species."
+        },
+        {
+          "entry": "Marn's people have one word for it and a second word for an old one, which is not two species either. They have been more accurate than the archive for as long as the archive has existed.",
+          "requires": [
+            "word_maru_sev"
+          ]
+        },
+        {
+          "entry": "Two entries, one bird, and no mechanism anywhere in the University for noticing. Nobody rereads the stacks. There is no reason to, if you believe the record is a record."
+        }
+      ],
+      "answers": [
+        "question_two_names"
+      ],
+      "helps": [
+        "npc_okhi"
+      ],
+      "notes": "The self-referential one: this is the binomial-contradiction problem the two repos actually had, put in the fiction. Resolves without villainy -- the failure is structural, not personal.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "discovery_escarpment_wind",
+      "type": "discovery",
+      "name": "How the Air Stands",
+      "discipline": "geography",
+      "found_at": [
+        "poi_cloud_stair"
+      ],
+      "levels": [
+        {
+          "entry": "The cloud on the scarp is not weather passing. It sits in one place and the weather goes through it."
+        },
+        {
+          "entry": "Warm air off the plain hits the black rock and is turned straight up. The cloud is where it cools, and the scarp holds it there."
+        },
+        {
+          "entry": "It is strongest in the afternoon and it fails at night, and when it fails the cloud falls down the scarp in one piece.",
+          "conditions": {
+            "time_of_day": [
+              "afternoon"
+            ]
+          }
+        },
+        {
+          "entry": "Standing in it, the lift is enough to take a hat and keep it. Not a metaphor -- I lost one and watched it go up."
+        }
+      ],
+      "related_discoveries": [
+        "discovery_cloud_stair"
+      ],
+      "notes": "The mundane half of the anomaly, and the prerequisite for the interesting half. Establishes real physics on the scarp so that what the stair does cannot be explained by it.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
     },
     {
       "type": "discovery",
@@ -170,6 +396,58 @@
       "notes": "Left open on purpose. Who took the mask is not answerable in this slice and should stay unanswered for a long time -- the diary needs entries the player cannot finish."
     },
     {
+      "id": "discovery_moving_spring",
+      "type": "discovery",
+      "name": "The Spring Does Not Stay",
+      "discipline": "geography",
+      "found_at": [
+        "poi_walking_spring"
+      ],
+      "levels": [
+        {
+          "entry": "The archive gives the spring a fixed position, surveyed, with a date. The spring is not in that position."
+        },
+        {
+          "entry": "There are dry basins downslope of it. Someone built them to catch this water, at three different places, at three different times."
+        },
+        {
+          "entry": "On a cold morning the whole line of them steams -- all three, faintly, not just the live one. The rock under them is still wet.",
+          "conditions": {
+            "weather": [
+              "mist"
+            ]
+          }
+        },
+        {
+          "entry": "The water is not moving because the hill is moving. It is following a crack, and the crack is opening uphill a little at a time."
+        },
+        {
+          "entry": "Marn's grandmother named a year by it. They have a word for the year the water moved, which means it has moved inside living memory and inside the archive's period, and only one of those noticed.",
+          "requires": [
+            "word_maru_anu"
+          ]
+        },
+        {
+          "entry": "Three basins, three moves, and the archive's fixed point is simply the position it happened to hold on the day a surveyor walked past."
+        }
+      ],
+      "answers": [
+        "question_moving_spring"
+      ],
+      "helps": [
+        "npc_marn"
+      ],
+      "notes": "Geography, and the first crack in the archive's authority. The measurement was not wrong -- it was a single measurement of a thing that moves, which is a different and much more forgivable error.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
@@ -214,6 +492,49 @@
         }
       ],
       "notes": "The problem half of the field chain. Stops at connected: understanding the salt is not the same as fixing it, and the fix belongs to the rice."
+    },
+    {
+      "id": "discovery_quarry_sequence",
+      "type": "discovery",
+      "name": "The Nine Inches",
+      "discipline": "evolution",
+      "found_at": [
+        "poi_basalt_quarry"
+      ],
+      "levels": [
+        {
+          "entry": "A pale band in the quarry face, between two courses of basalt. Full of small shells."
+        },
+        {
+          "entry": "The shells are not one kind. Going up through the band they change, and they change in one direction.",
+          "conditions": {
+            "weather": [
+              "clear"
+            ]
+          }
+        },
+        {
+          "entry": "At the bottom they are round and thin. At the top, over nine inches, they are ridged and heavy. In between they are both, and neither, and the intermediate ones are the commonest."
+        },
+        {
+          "entry": "Nine inches of ash is not nine inches of time. This is a long slow record laid down between two very fast events."
+        },
+        {
+          "entry": "I have looked for these in the archive. There are none in it -- not none catalogued, none collected, which is a stranger kind of absence than a gap."
+        }
+      ],
+      "answers": [
+        "question_two_names"
+      ],
+      "notes": "Evolution, and the discipline Lothal never used. The section is read bottom-up by the player rather than explained; the clear-weather gate is literal -- you cannot see the graduation in flat light.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
     },
     {
       "type": "discovery",
@@ -363,6 +684,101 @@
       "notes": "The opening hook from the design's first thirty minutes. Resolves ecologically without making the local explanation wrong -- the Kia phrase is a compressed version of the same fact."
     },
     {
+      "id": "discovery_terrace_script",
+      "type": "discovery",
+      "name": "The Cut Marks Are Writing",
+      "discipline": "linguistics",
+      "found_at": [
+        "poi_long_archive",
+        "poi_herders_terraces"
+      ],
+      "levels": [
+        {
+          "entry": "Some terrace stones carry short marks on the inner face, where they would not be seen once laid.",
+          "requires": [
+            "word_maru_khet"
+          ]
+        },
+        {
+          "entry": "The same marks are on the unread shelf in the archive, on material nobody has transcribed."
+        },
+        {
+          "entry": "They are not decoration: the same short group recurs, and it recurs at the ends of courses."
+        },
+        {
+          "entry": "Marn's word for a terrace is khet, and he says it means held water rather than step. The recurring group is two marks, and khet is two sounds."
+        },
+        {
+          "entry": "It is a builder's tally. Course numbers and volumes, cut on the hidden face because it was working notation and was never meant to be read.",
+          "requires": [
+            "discovery_terrace_water"
+          ]
+        },
+        {
+          "entry": "Which makes the unread shelf a set of construction records for something the University has classified as devotional, and Okhi has been dusting them for thirty years."
+        }
+      ],
+      "answers": [
+        "question_terrace_purpose"
+      ],
+      "helps": [
+        "npc_okhi"
+      ],
+      "notes": "Linguistics, the other unused discipline. The script is mundane on purpose -- a works ledger, not a prophecy. The plateau's past is administrative, which is a truer kind of old.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "discovery_terrace_water",
+      "type": "discovery",
+      "name": "What the Terraces Are For",
+      "discipline": "archaeology",
+      "found_at": [
+        "poi_herders_terraces"
+      ],
+      "levels": [
+        {
+          "entry": "Stone terraces above the herders' camp. The survey calls them devotional. I have no reason yet to disagree."
+        },
+        {
+          "entry": "Every course is lower at the outer edge. If they were built to be looked at, that is a strange way to do it."
+        },
+        {
+          "entry": "They are not level and they are not random: the fall is consistent, about a finger in a pace, running along the hill rather than down it."
+        },
+        {
+          "entry": "Water put on the top course would not run off. It would walk sideways across the whole hill and take a day doing it."
+        },
+        {
+          "entry": "Marn's people graze them and have never wondered about them. They know the ground stays wet up here into the dry months and have not connected the two facts, which is fair -- neither had I."
+        },
+        {
+          "entry": "This is irrigation, and it is enormous, and it is a farm rather than a shrine. It is also a farm for a great many more people than live on this plateau now."
+        }
+      ],
+      "answers": [
+        "question_terrace_purpose"
+      ],
+      "restores": [
+        "poi_herders_terraces"
+      ],
+      "notes": "The archaeology through-line. Resolves as engineering without making the herders ignorant -- they have the observation and not the question, which is the commonest way to not know something.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
@@ -446,6 +862,46 @@
       ]
     },
     {
+      "id": "question_moving_spring",
+      "type": "field_question",
+      "question": "Why does the spring not match its surveyed position?",
+      "discipline": "geography",
+      "raised_at": "poi_walking_spring",
+      "resolutions": [
+        {
+          "conclusion": "The original survey was careless.",
+          "requires": [
+            "discovery_moving_spring"
+          ],
+          "sound": false,
+          "revisit": "discovery_moving_spring"
+        },
+        {
+          "conclusion": "The spring migrates along an opening fault, and has done so at least three times within living memory.",
+          "requires": [
+            "discovery_moving_spring",
+            "discovery_archive_baseline"
+          ],
+          "sound": true
+        }
+      ],
+      "raised_by": "npc_vessa",
+      "evidence": [
+        "discovery_moving_spring"
+      ],
+      "local_knowledge": "Marn's grandmother named a year for it. The herders rebuilt the catch basin twice and did not think this remarkable enough to mention to anyone at the University, who did not ask.",
+      "academic_hypothesis": "A fixed spring, surveyed once in 371 and never resurveyed, since springs do not move. The archive is internally consistent and has simply never been checked against the hill.",
+      "notes": "The forgiving reading -- blaming the surveyor -- is the wrong one, and it is wrong in the direction the player will be tempted by after Lothal. Being anti-academy is not the same as being right either.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "id": "question_silver_water",
       "type": "field_question",
       "question": "The fisher tells me the channel runs silver and that the creatures rise when it does. He offers this as a fact about the world and not as a puzzle. I cannot decide whether the silver brings them or whether both follow from something I have not seen.",
@@ -481,6 +937,96 @@
         "epoch_post_cataclysm"
       ],
       "notes": "The opening question. The academic reading is available first and is wrong, which is the point: the player should be able to close the entry early and be mistaken.",
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "question_terrace_purpose",
+      "type": "field_question",
+      "question": "What are the terraces above the herders' camp for?",
+      "discipline": "archaeology",
+      "raised_at": "poi_herders_terraces",
+      "resolutions": [
+        {
+          "conclusion": "A devotional feature, as the University survey records.",
+          "requires": [
+            "discovery_terrace_water"
+          ],
+          "sound": false,
+          "revisit": "discovery_terrace_script"
+        },
+        {
+          "conclusion": "Grazing platforms cut by the herders' own ancestors.",
+          "requires": [
+            "discovery_terrace_water"
+          ],
+          "sound": false,
+          "revisit": "discovery_terrace_water"
+        },
+        {
+          "conclusion": "Contour irrigation on a scale requiring a population the archive has no record of.",
+          "requires": [
+            "discovery_terrace_water",
+            "discovery_terrace_script"
+          ],
+          "sound": true
+        }
+      ],
+      "raised_by": "npc_marn",
+      "evidence": [
+        "discovery_terrace_water",
+        "discovery_terrace_script"
+      ],
+      "local_knowledge": "Marn's people graze them, maintain the odd fallen course out of habit, and have no account of who built them. They will tell you the ground up there stays wet, and offer it as a fact about the ground.",
+      "academic_hypothesis": "The survey of 388 assigns them a devotional function on the grounds of scale and effort, reasoning that no agricultural return could justify the labour. The reasoning is sound and the premise -- that the population was the present population -- is assumed rather than established.",
+      "notes": "Two wrong readings rather than one, and the second is the sympathetic error: crediting the locals is not the same as being right about them.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "question_two_names",
+      "type": "field_question",
+      "question": "Is the grey scarp-bird one species or two?",
+      "discipline": "zoology",
+      "raised_at": "poi_long_archive",
+      "resolutions": [
+        {
+          "conclusion": "Two closely related species, as the archive's two entries record.",
+          "requires": [
+            "discovery_double_classified"
+          ],
+          "sound": false,
+          "revisit": "discovery_double_classified"
+        },
+        {
+          "conclusion": "One species. The bill grows throughout life, and the two entries are a young bird and an old one, catalogued sixty years apart by observers who never read each other.",
+          "requires": [
+            "discovery_double_classified",
+            "discovery_quarry_sequence"
+          ],
+          "sound": true
+        }
+      ],
+      "raised_by": "npc_okhi",
+      "evidence": [
+        "discovery_double_classified",
+        "discovery_quarry_sequence"
+      ],
+      "local_knowledge": "Marn has one word for the bird and another for an old one, in the way one has a word for a colt and a horse. He is surprised the question is a question.",
+      "academic_hypothesis": "Two species, on the authority of two independent careful descriptions. No mechanism exists in the University for a catalogue entry to be revisited, so the duplication is invisible from inside.",
+      "notes": "The binomial contradiction the two repos actually had, written into the fiction. The sound reading needs the quarry section because it takes seeing graduated forms in the rock to accept a graduated form in the air.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
       "canon": "primary",
       "sources": [
         "Varuna's Field Diary design",
@@ -559,6 +1105,75 @@
         "discovery_silver_water"
       ],
       "notes": "Completes thal-uvai. Compresses an entire trophic chain into a phrase that sounds like superstition."
+    },
+    {
+      "type": "vocabulary",
+      "language": "maru",
+      "id": "word_maru_anu",
+      "word": "anu-shivit",
+      "gloss": "the year the water moved",
+      "literal": "the year it walked",
+      "learned_from": [
+        "npc_vessa"
+      ],
+      "unlocks": [
+        "discovery_moving_spring"
+      ],
+      "notes": "A year-name rather than a date. Evidence the archive cannot accept, because its form is a story.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "type": "vocabulary",
+      "language": "maru",
+      "id": "word_maru_khet",
+      "word": "khet",
+      "gloss": "terrace",
+      "literal": "held water",
+      "learned_from": [
+        "npc_marn"
+      ],
+      "unlocks": [
+        "discovery_terrace_script"
+      ],
+      "notes": "The word that turns two hundred courses of stone from ornament into engineering. The herders kept the meaning inside the noun for long enough that nobody had to remember it.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "type": "vocabulary",
+      "language": "maru",
+      "id": "word_maru_sev",
+      "word": "sev / sev-tar",
+      "gloss": "scarp-bird / an old scarp-bird",
+      "literal": "grey / long grey",
+      "learned_from": [
+        "npc_okhi"
+      ],
+      "unlocks": [
+        "discovery_double_classified"
+      ],
+      "notes": "Two words for one animal at two ages, which is a more accurate taxonomy than the archive's two species and was never intended as one.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
     }
   ]
 }
