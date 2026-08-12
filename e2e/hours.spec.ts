@@ -41,3 +41,23 @@ test('a sleeping animal cannot be sketched, and the note says when to come back'
   // passing silently, because it would mean the routine gate never fires on this seed.
   test.fail(true, 'no hour of this seed found a creature off duty');
 });
+
+test('the panel does not resize as the day turns', async ({ page }) => {
+  // The failure this guards against is subtle and was found by CI, not by looking: the line
+  // about what a creature is doing is the only text here that changes while the player stands
+  // still. When it shared a paragraph with the field guide entry, a creature falling asleep
+  // reflowed the panel, React reported new viewport insets, and the camera refitted -- the map
+  // moving under a player who had not touched anything.
+  const heights = new Set<number>();
+  const doings = new Set<string>();
+  for (const hour of [0, 3, 6, 9, 12, 15, 18, 21]) {
+    await fieldNoteAt(page, hour);
+    const box = await page.locator('.journal').boundingBox();
+    heights.add(Math.round(box!.height));
+    doings.add((await page.locator('.doing').textContent()) ?? '');
+  }
+
+  // The hours really are saying different things -- otherwise this asserts nothing.
+  expect(doings.size).toBeGreaterThan(1);
+  expect([...heights], `panel height varied across the day: ${[...heights]}`).toHaveLength(1);
+});

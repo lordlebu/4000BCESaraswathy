@@ -841,3 +841,18 @@ button.ghost:hover:not(:disabled) {
 .sub { margin-top: 1rem; }
 .sub h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
 .sub p { margin: 0 0 0.8rem; }
+
+/* What the creature is doing. The only line in the journal that changes while the player is
+ * standing still, so it gets a reserved box: without one, a creature falling asleep reflows
+ * the panel, React reports new insets, and the camera refits — the map moving under you
+ * because the hour turned. Two lines at this width, three on a narrow phone. */
+.doing {
+  margin: 0 0 6px;
+  min-height: 2.9em;
+  font-style: italic;
+  color: var(--muted);
+}
+
+@media (max-width: 34rem) {
+  .doing { min-height: 4.4em; }
+}

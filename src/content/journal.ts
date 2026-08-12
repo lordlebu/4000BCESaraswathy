@@ -30,6 +30,15 @@ export interface JournalEntry {
   description: string;
   creature: FieldNote;
   flora: FieldNote;
+  /**
+   * What the animal is doing at this hour, kept apart from what it *is*.
+   *
+   * Separate because it is the only line here that changes while the player stands still, and
+   * mixing it into the creature's note made the panel reflow whenever a creature fell asleep.
+   * The panel then resized, React reported new insets, and the camera refitted itself — the
+   * map twitching because the day turned. Its own line can be given a reserved height.
+   */
+  doing: string;
 }
 
 /** Is this the tile the named place sits on? */
@@ -78,13 +87,9 @@ export function describeTile(
     // grass" and only learned it was a Painted Deer after sketching it. Naming it up front is the
     // whole point of a field note.
     creature: creature
-      ? {
-          name: creature.name,
-          // What it is doing now, then what it is. The hour changes the first and never the
-          // second, which is the honest division between weather and a field guide.
-          note: `${noteFor(creature, moment)} ${creature.journalPrompt}`
-        }
+      ? { name: creature.name, note: creature.journalPrompt }
       : { name: null, note: 'No creature signs yet, only wind, dust, and the road ahead.' },
+    doing: creature ? noteFor(creature, moment) : '',
     flora: plant
       ? { name: plant.name, note: plant.journalPrompt }
       : { name: null, note: 'Nothing is growing here worth pressing between the pages.' }
