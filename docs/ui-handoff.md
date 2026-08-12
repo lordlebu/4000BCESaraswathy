@@ -135,9 +135,29 @@ names via `discovery(id)?.name` and `word(id)?.word` — never show a raw id.
 
 `canAdvance(progress, id, moment)` is the boolean if you just need one.
 
-**`moment`** is `{ timeOfDay, weather }` and comes from `src/game/dayNight.ts`. Pass it
-through; `null` means "no conditional rung is reachable", which is the safe default but makes
-condition-gated rungs permanently unavailable, so wire it up properly.
+**`moment`** is `{ timeOfDay, weather }`, and you get it from **`momentAt()` in
+`src/game/moment.ts`** — not from `dayNight.ts`, which only owns the hour:
+
+```ts
+const moment = momentAt(seed, elapsedMs, startPhase);
+```
+
+Pass it into `canAdvance`, `blockedBy` and `advance`. Passing `null` is the safe default but
+makes every condition-gated rung permanently unreachable, so wire it up properly.
+
+Do **not** pass `skyAt(...).label` in directly. The engine labels the sky for the journal and
+says `first light` and `noon`; canon's vocabulary is `dawn | morning | afternoon | evening |
+night` and has never heard of either. `momentAt` does that translation, and a raw label
+matches nothing, fails silently, and looks exactly like a content bug.
+
+**When `blockedBy` returns `'conditions'`, you can say when to come back.**
+`nextSpells(seed, fromHour, wanted, climate, hours)` in `src/world/weather.ts` returns the
+upcoming hours matching a weather, and `inGameHour()` converts elapsed time for it. That turns
+"conditions not met" into "the sky clears around dawn", which is the difference between the
+mechanic reading as a world and reading as a lock.
+
+Weather is deterministic and seed-derived like the terrain — same seed, same sky at the same
+hour, for every player. Do not randomise it per session, and do not let the UI pick it.
 
 ---
 
