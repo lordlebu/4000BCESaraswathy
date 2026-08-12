@@ -8,6 +8,8 @@ import { JourneyLog } from './JourneyLog';
 import { Controls } from './Controls';
 import { CanonPanel } from './CanonPanel';
 import { Diary, diaryCount } from './Diary';
+import { PlacePanel } from './PlacePanel';
+import { Overworld } from './Overworld';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { creatureAction } from '../content/journal';
 import { creatureFor, floraFor } from '../content/species';
@@ -16,7 +18,8 @@ import { downloadImage, downloadText } from './exportJournal';
 import { loadJourney, saveJourney } from '../save';
 import { momentAt } from '../game/moment';
 import { startPhaseFor } from '../game/dayNight';
-import type { WorldMoment } from '../journey';
+import { advance, hear, type WorldMoment } from '../journey';
+import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import type { World } from '../world/types';
 
 const DEFAULT_SEED = 'jambhudweepa-evening';
@@ -48,6 +51,14 @@ export function App() {
   // it and hands it to the save.
   const [progress, setProgress] = useState(initialJourney.current.progress);
   const [diaryOpen, setDiaryOpen] = useState(false);
+
+  // The three scales. `fieldMapId` is the country under foot; `poiId` is the authored place
+  // being stood in, if any; a sub-location opens inside the place panel rather than here,
+  // because going deeper into a ruin is not leaving it.
+  const [fieldMapId, setFieldMapId] = useState(DEFAULT_FIELD_MAP);
+  const [poiId, setPoiId] = useState<string | null>(null);
+  const [overworldOpen, setOverworldOpen] = useState(false);
+  const visited = useRef(new Set<string>());
 
   // The diary explains why a rung is out of reach, which needs to know what the sky is doing.
   // Anchored to the same clock the scene uses -- `startPhaseFor` reads the same `?hour=` -- so
@@ -91,15 +102,19 @@ export function App() {
       setReached(true);
     };
 
+    const onPoiEntered = ({ poiId: id }: GameToUi['poi-entered']) => setPoiId(id);
+
     EventBus.onEvent('world-ready', onWorldReady);
     EventBus.onEvent('tile-entered', onTileEntered);
     EventBus.onEvent('journey-changed', onJourneyChanged);
     EventBus.onEvent('landmark-reached', onLandmarkReached);
+    EventBus.onEvent('poi-entered', onPoiEntered);
     return () => {
       EventBus.offEvent('world-ready', onWorldReady);
       EventBus.offEvent('tile-entered', onTileEntered);
       EventBus.offEvent('journey-changed', onJourneyChanged);
       EventBus.offEvent('landmark-reached', onLandmarkReached);
+      EventBus.offEvent('poi-entered', onPoiEntered);
     };
   }, []);
 
@@ -172,6 +187,29 @@ export function App() {
     setMemory(`Sketch recorded: ${creatureAction(currentCreature)}`);
   }, [currentCreature, observed]);
 
+  /** Look closer at something. The rule for whether that is possible is `journey.ts`'s. */
+  const look = useCallback(
+    (discoveryId: string) => setProgress((p) => advance(p, discoveryId, moment)),
+    [moment]
+  );
+
+  /** Listen to someone, and take what the line gives — a word, a question, a lead. */
+  const listen = useCallback(
+    (npcId: string, lineIndex: number) => setProgress((p) => hear(p, npcId, lineIndex)),
+    []
+  );
+
+  const travel = useCallback(
+    (next: string) => {
+      setFieldMapId(next);
+      setPoiId(null);
+      setOverworldOpen(false);
+      discovered.current = [];
+      EventBus.emitEvent('travel-to', { fieldMapId: next, seed });
+    },
+    [seed]
+  );
+
   const travelLog = useMemo(() => {
     if (!world) return null;
     return buildTravelLog(
@@ -242,7 +280,11 @@ export function App() {
     // The stage is the viewport. The canvas fills it and everything else floats on top, which is
     // why nothing here scrolls and there is no page chrome left to scroll past.
     <div className="stage">
-      <PhaserGame seed={seed} discovered={initialJourney.current.discovered} />
+      <PhaserGame
+        seed={seed}
+        discovered={initialJourney.current.discovered}
+        fieldMapId={DEFAULT_FIELD_MAP}
+      />
 
       <Controls
         seed={seed}
@@ -252,6 +294,7 @@ export function App() {
         onToggleLog={() => setLogOpen((open) => !open)}
         diaryCount={diaryCount(progress)}
         onOpenDiary={() => setDiaryOpen(true)}
+        onOpenOverworld={() => setOverworldOpen(true)}
       />
 
       <Diary
@@ -259,6 +302,27 @@ export function App() {
         moment={moment}
         open={diaryOpen}
         onClose={() => setDiaryOpen(false)}
+      />
+
+      <Overworld
+        current={fieldMapId}
+        progress={progress}
+        open={overworldOpen}
+        onTravel={travel}
+        onClose={() => setOverworldOpen(false)}
+      />
+
+      <PlacePanel
+        poiId={poiId}
+        progress={progress}
+        moment={moment}
+        firstVisit={Boolean(poiId) && !visited.current.has(poiId!)}
+        onLook={look}
+        onListen={listen}
+        onClose={() => {
+          if (poiId) visited.current.add(poiId);
+          setPoiId(null);
+        }}
       />
 
       <JourneyLog

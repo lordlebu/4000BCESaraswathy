@@ -19,6 +19,7 @@ export interface ControlsProps {
   /** How many discoveries are under way, so the button can say the diary has something in it. */
   diaryCount: number;
   onOpenDiary: () => void;
+  onOpenOverworld: () => void;
 }
 
 export function Controls({
@@ -28,13 +29,19 @@ export function Controls({
   logOpen,
   onToggleLog,
   diaryCount,
-  onOpenDiary
+  onOpenDiary,
+  onOpenOverworld
 }: ControlsProps) {
   const [sheet, setSheet] = useState(false);
 
   return (
     <>
       <div className="controls">
+        <button type="button" className="control" aria-label="Where to go" onClick={onOpenOverworld}>
+          <span aria-hidden="true">◇</span>
+          <span className="control-label">Travel</span>
+        </button>
+
         <button
           type="button"
           className="control"

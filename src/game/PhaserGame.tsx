@@ -10,14 +10,15 @@ import { WorldScene } from './scenes/WorldScene';
 export interface PhaserGameProps {
   seed: string;
   discovered: string[];
+  fieldMapId: string;
 }
 
-export function PhaserGame({ seed, discovered }: PhaserGameProps) {
+export function PhaserGame({ seed, discovered, fieldMapId }: PhaserGameProps) {
   const container = useRef<HTMLDivElement>(null);
   // Held in a ref, not state: changing it must never trigger a render.
   const game = useRef<Phaser.Game | null>(null);
   // The first journey's data has to reach `create()`, but must not restart the scene afterwards.
-  const initial = useRef({ seed, discovered });
+  const initial = useRef({ seed, discovered, fieldMapId });
 
   useEffect(() => {
     const node = container.current;
