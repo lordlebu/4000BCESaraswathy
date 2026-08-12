@@ -112,6 +112,15 @@ describe('gated sub-locations', () => {
 });
 
 /**
+ * A handful of seeds, because one is not evidence.
+ *
+ * Weather is seed-derived, so a rung gated on something uncommon can pass under one seed and
+ * be unreachable under another — and the authored slice would look fine either way. Anything
+ * asserting content is finishable runs across all of these.
+ */
+const SEEDS = ['lothal', 'narmada', 'dwarka', 'saraswati', 'varuna', 'tethys'];
+
+/**
  * Walk both field maps for a few days, talking to whoever is standing there and looking at
  * whatever the sky allows. Never calls `learn` — every word has to be earned in conversation.
  */
@@ -143,16 +152,20 @@ function liveIt(seed: string, days: number): Progress {
 
 describe('the whole thing, without cheating', () => {
   it('teaches every word through someone who says it', () => {
-    const p = liveIt('lothal', 3);
-    for (const w of vocabulary) {
-      expect(knowsWord(p, w.id), `${w.id} cannot be learned from anyone`).toBe(true);
+    for (const seed of SEEDS) {
+      const p = liveIt(seed, 3);
+      for (const w of vocabulary) {
+        expect(knowsWord(p, w.id), `${w.id} unlearnable under seed ${seed}`).toBe(true);
+      }
     }
   });
 
   it('finishes every ladder in both slices', () => {
-    const p = liveIt('lothal', 3);
-    for (const d of discoveries) {
-      expect(isComplete(p, d.id), `${d.id} unreachable when words must be earned`).toBe(true);
+    for (const seed of SEEDS) {
+      const p = liveIt(seed, 3);
+      for (const d of discoveries) {
+        expect(isComplete(p, d.id), `${d.id} unreachable under seed ${seed}`).toBe(true);
+      }
     }
   });
 
@@ -162,7 +175,7 @@ describe('the whole thing, without cheating', () => {
   });
 
   it('opens the gated depths, having done the work', () => {
-    const p = liveIt('lothal', 3);
+    const p = liveIt(SEEDS[0]!, 3);
     expect(canEnter(p, 'poi_kavik_tower', 'flooded_undercroft')).toBe(true);
     expect(canEnter(p, 'poi_long_archive', 'sequence_stacks')).toBe(true);
     expect(canEnter(p, 'poi_long_archive', 'unread_shelf')).toBe(true);

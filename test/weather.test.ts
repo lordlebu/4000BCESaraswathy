@@ -130,6 +130,15 @@ describe('the moment handed to the ladder', () => {
   });
 });
 
+/**
+ * A handful of seeds, because one is not evidence.
+ *
+ * Weather is seed-derived, so a rung gated on something uncommon can pass under one seed and
+ * be unreachable under another — and the authored slice would look fine either way. Anything
+ * asserting content is finishable runs across all of these.
+ */
+const SEEDS = ['lothal', 'narmada', 'dwarka', 'saraswati', 'varuna', 'tethys'];
+
 /** Play a seed for a while, climbing whatever the sky allows as the hours pass. */
 function playThrough(seed: string, days: number, climate: Climate = DELTA_CLIMATE): Progress {
   let p = emptyProgress();
@@ -154,14 +163,18 @@ function playThrough(seed: string, days: number, climate: Climate = DELTA_CLIMAT
 
 describe('the ending weather was blocking', () => {
   it('lets the poisoned ground be read, given a clear day', () => {
-    const p = playThrough('lothal', 2);
-    expect(isComplete(p, 'discovery_poisoned_ground')).toBe(true);
+    for (const seed of SEEDS) {
+      const p = playThrough(seed, 2);
+      expect(isComplete(p, 'discovery_poisoned_ground'), `stalled under seed ${seed}`).toBe(true);
+    }
   });
 
   it('carries that through to the field being put back', () => {
-    const p = playThrough('lothal', 2);
-    expect(isComplete(p, 'discovery_red_rice_survival')).toBe(true);
-    expect(restored(p)).toContain('poi_eastern_field');
+    for (const seed of SEEDS) {
+      const p = playThrough(seed, 2);
+      expect(isComplete(p, 'discovery_red_rice_survival'), `seed ${seed}`).toBe(true);
+      expect(restored(p), `seed ${seed}`).toContain('poi_eastern_field');
+    }
   });
 
   it('and the gate is real — under a sky that never clears, the field stays dead', () => {
@@ -173,10 +186,12 @@ describe('the ending weather was blocking', () => {
     expect(restored(p)).not.toContain('poi_eastern_field');
   });
 
-  it('finishes every ladder in the slice within a couple of days', () => {
-    const p = playThrough('lothal', 2);
-    for (const d of discoveries) {
-      expect(isComplete(p, d.id), `${d.id} never finished under real weather`).toBe(true);
+  it('finishes every ladder in the slice within a couple of days, on any seed', () => {
+    for (const seed of SEEDS) {
+      const p = playThrough(seed, 2);
+      for (const d of discoveries) {
+        expect(isComplete(p, d.id), `${d.id} never finished under seed ${seed}`).toBe(true);
+      }
     }
   });
 });
