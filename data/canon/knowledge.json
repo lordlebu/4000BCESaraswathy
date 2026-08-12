@@ -1053,11 +1053,6 @@
       "learned_from": [
         "npc_thrali"
       ],
-      "unlocks": [
-        "discovery_ghost_mangrove_channel",
-        "discovery_mask_niche",
-        "word_kia_thal_set"
-      ],
       "notes": "The key that opens the Kia readings. Thrali has half of it; Bekh supplies the rest by using it without explaining."
     },
     {
@@ -1079,9 +1074,6 @@
         "npc_bekh",
         "poi_marsh_shrine"
       ],
-      "unlocks": [
-        "discovery_ghost_mangrove_channel"
-      ],
       "notes": "Names the channel before the player can see it, which is the point -- the language encodes the ecology."
     },
     {
@@ -1101,9 +1093,6 @@
       "learned_from": [
         "npc_thrali"
       ],
-      "unlocks": [
-        "discovery_silver_water"
-      ],
       "notes": "Completes thal-uvai. Compresses an entire trophic chain into a phrase that sounds like superstition."
     },
     {
@@ -1115,9 +1104,6 @@
       "literal": "the year it walked",
       "learned_from": [
         "npc_vessa"
-      ],
-      "unlocks": [
-        "discovery_moving_spring"
       ],
       "notes": "A year-name rather than a date. Evidence the archive cannot accept, because its form is a story.",
       "epochs": [
@@ -1139,9 +1125,6 @@
       "learned_from": [
         "npc_marn"
       ],
-      "unlocks": [
-        "discovery_terrace_script"
-      ],
       "notes": "The word that turns two hundred courses of stone from ornament into engineering. The herders kept the meaning inside the noun for long enough that nobody had to remember it.",
       "epochs": [
         "epoch_post_cataclysm"
@@ -1161,9 +1144,6 @@
       "literal": "grey / long grey",
       "learned_from": [
         "npc_okhi"
-      ],
-      "unlocks": [
-        "discovery_double_classified"
       ],
       "notes": "Two words for one animal at two ages, which is a more accurate taxonomy than the archive's two species and was never intended as one.",
       "epochs": [

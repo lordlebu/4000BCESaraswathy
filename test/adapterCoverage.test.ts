@@ -91,7 +91,7 @@ const COVERAGE: Record<string, Coverage> = {
     skipped: [...EDITORIAL]
   },
   'knowledge.vocabulary': {
-    adapted: ['id', 'word', 'language', 'gloss', 'literal', 'learned_from', 'unlocks'],
+    adapted: ['id', 'word', 'language', 'gloss', 'literal', 'learned_from'],
     skipped: [...EDITORIAL]
   }
 };

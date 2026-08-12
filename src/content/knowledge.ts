@@ -82,7 +82,6 @@ export interface Word {
   gloss: string;
   literal: string | null;
   learnedFrom: string[];
-  unlocks: string[];
 }
 
 interface RawRung {
@@ -103,7 +102,7 @@ interface RawQuestion {
 }
 interface RawWord {
   id: string; word: string; language: string; gloss: string;
-  literal?: string; learned_from?: string[]; unlocks?: string[];
+  literal?: string; learned_from?: string[];
 }
 
 const raw = knowledgeBundle as {
@@ -153,8 +152,7 @@ export const vocabulary: Word[] = raw.vocabulary.map((w) => ({
   language: w.language,
   gloss: w.gloss,
   literal: w.literal ?? null,
-  learnedFrom: w.learned_from ?? [],
-  unlocks: w.unlocks ?? []
+  learnedFrom: w.learned_from ?? []
 }));
 
 const discoveryById = new Map(discoveries.map((d) => [d.id, d]));

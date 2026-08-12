@@ -315,6 +315,20 @@ per playthrough.
 
 ---
 
+## One piece of art the data is waiting on
+
+Everything else here is code. This one is not, and it is worth knowing because content is
+already stacked behind it.
+
+**`lava_field` needs a 32×32 tile.** It is the only biome canon names that the engine cannot
+draw, and forty species in the Ganges Lava Sea are currently filed under `mountains` because of
+it. Full brief, prompt and the two-line wiring change are in
+[docs/art-brief.md](art-brief.md) under *Asset 2b*. Nothing breaks until it exists — canon is
+already correct and the engine filters the biome out — but the basalt plains are not walkable
+ground until someone draws them.
+
+---
+
 ## What is deliberately not specified here
 
 Art direction, layout, palette, typography, animation, and how the three-scale navigation
