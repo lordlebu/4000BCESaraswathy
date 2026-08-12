@@ -33,15 +33,15 @@ the small, game-facing encounter table until the two are reconciled (see
 4. **Deep-River Bronze (*Cyprinus chalceus*)** — A wild relative of the stepwell koi, navigating Tethyan estuaries with heavy, protective, metallic-looking bronze scales.
 5. **Spotted Marsh Tendua (*Panthera simiana maculata*)** — A highly intelligent, leopard-like feline of the wetlands that has evolved human-like eye placement and ocular mimicry to stalk its prey.
 6. **Black-Barked Canopy Tendua (*Panthera simiana arborea*)** — A melanistic, dark-coated subspecies of Tendua that hunts within the dense mangrove canopies of the Godavari delta.
-7. **Nagaraptor (*Proto-Jambhu Dromaeosaur*)** — Feathered velociraptor clans that have formed a complex diapsid scale-based civilization, using earthworks and moats to defend their nests.
-8. **Burrowing Tortoise (*Geohelus domus*)** — A large, long-lived tortoise (living 80-120 years) that digs spiral tunnels in a symbiotic relationship with the Nagaraptors, forming the underground foundations of the Taj Nest-Homes.
+7. **Nagaraptor (*Nagaraptor vallatus*)** — Feathered velociraptor clans that have formed a complex diapsid scale-based civilization, using earthworks and moats to defend their nests.
+8. **Burrowing Tortoise (*Geochelone fossor*)** — A large, long-lived tortoise (living 80-120 years) that digs spiral tunnels in a symbiotic relationship with the Nagaraptors, forming the underground foundations of the Taj Nest-Homes.
 9. **Vajraptor (*Vajraptor territorialis*)** — An intelligent, social, and territorial theropod bird with colorful plumage and excellent problem-solving skills, building hidden canopy nests.
-10. **Vanga Pearl-Guide (*Cognitavi margarita*)** — An elite subspecies of the hyper-intelligent Cognitavi navigator birds that aids Tuli seafarers in locating deep-sea oyster beds.
-11. **Abyssal Storm-Watcher (*Cognitavi procellarum*)** — A Cognitavi navigator bird subspecies that specializes in reading weather patterns, guiding wisdom-seekers and ships safely through the Tethys monsoons.
+10. **Vanga Pearl-Guide (*Cognitavi vanga*)** — An elite subspecies of the hyper-intelligent Cognitavi navigator birds that aids Tuli seafarers in locating deep-sea oyster beds.
+11. **Abyssal Storm-Watcher (*Cognitavi abyssalis*)** — A Cognitavi navigator bird subspecies that specializes in reading weather patterns, guiding wisdom-seekers and ships safely through the Tethys monsoons.
 12. **Iridescent Lothal Silvanus (*Silvanus pictus*)** — A winged, bird-like dinosaurid with shimmering plumage that nests in the tall reed beds outside the Sylvian Gate of Lothal.
 13. **Baurusuchus (*Baurusuchus palustris*)** — A heavy, quadrupedal land crocodile that prowls the delta, specializing in ambush techniques in shallow reed marshes.
-14. **Striped Reed Stalker (*Baurusuchus virgatus*)** — A camouflaged subspecies of Baurusuchus with vertical stripes, blending into the marsh grass of the Saraswati delta.
-15. **Mud-Armored Ambusher (*Baurusuchus lutosus*)** — A baurusuchid that cakes itself in river mud, keeping its body temperature low and hiding from terrestrial prey.
+14. **Striped Reed Stalker (*Baurusuchus striatus*)** — A camouflaged subspecies of Baurusuchus with vertical stripes, blending into the marsh grass of the Saraswati delta.
+15. **Mud-Armored Ambusher (*Baurusuchus lutarius*)** — A baurusuchid that cakes itself in river mud, keeping its body temperature low and hiding from terrestrial prey.
 16. **Indus Unicorn (*Monocerus indicus*)** — A legendary, swift-footed single-horned ungulate of the river valleys, highly revered and historically sacrificed in dark portals.
 17. **Saraswati Delta Heron (*Ardea sarasvati*)** — A long-legged wading bird with pale silver feathers that filters small bronze fish from the delta's estuaries.
 18. **Muria River-Otter (*Lutra muria*)** — An agile, semi-aquatic mammal with dense, oil-slicked fur that hunts stepwell koi along the eastern coast of the island.
@@ -140,7 +140,7 @@ the small, game-facing encounter table until the two are reconciled (see
 6. **Lesser Whisper-Fig (*Ficus murmurans*)** — A smaller, shrub-like relative of the Bhuta-Kāna fig, growing on cliffs and whispering soft, ambient forest sounds during high winds.
 7. **Sweet-Nectar Mahua (*Madhuca narmadensis*)** — An indigenous tree producing sweet, fermentable cream-colored flowers that are central to the local tribal ecology and brewing traditions.
 8. **Highland Bitter Mahua (*Madhuca montana*)** — A rugged, slow-growing mahua variant whose seeds yield a thick, bitter oil used for lamps and traditional healing ointments.
-9. **Shilajit Creeper (*Lycopodium shilajit*)** — A trailing, primitive moss-like plant that grows near mineral fissures, absorbing pure bitumen and organic compounds from the rock.
+9. **Shilajit Creeper (*Cissus shilajita*)** — A trailing, primitive moss-like plant that grows near mineral fissures, absorbing pure bitumen and organic compounds from the rock.
 10. **Vindhya Pine (*Pinus vindhyensis*)** — A towering, high-altitude conifer with resinous needles that withstands extreme temperature shifts and acidic ash rain.
 
 ---
@@ -370,7 +370,7 @@ the small, game-facing encounter table until the two are reconciled (see
 11. **Asura-Tainted Gargoyle (*Tuli calcified*)** — A devolved offshoot of humanity whose skin has calcified into a stone-like hide, animating only at night to hunt.
 12. **Lethal Cave-Spectre (*Asura spectral*)** — A dark, floating entity born from the blood-spills of the first Asura invasion, guarding forgotten mountain tombs.
 13. **Obsidian-Winged Serpent (*Serpens obsidianus*)** — A giant shape-shifting stone serpent with razor-sharp wings of volcanic glass, serving as the progenitor of the Naga clan.
-14. **Naga Infiltrator (*Serpens anthropomorphic*)** — A secretive, shape-shifting serpent-human hybrid that slips into royal courts, carrying out the will of Takshak.
+14. **Naga Infiltrator (*Serpens simulans*)** — A secretive, shape-shifting serpent-human hybrid that slips into royal courts, carrying out the will of Takshak.
 15. **Gorgonopsid War-Beast (*Gorgonops asuricus*)** — A shaggy-haired Permian predator selectively bred and genetically corrupted by Asuras to serve as heavy shock cavalry.
 16. **Dimetrodon War-Mount (*Dimetrodon asuricus*)** — A sail-backed synapsid war predator mutated with bio-reactive colors and enhanced aggression for Asura commanders.
 17. **Estemmenosuchus Executioner (*Estemmenosuchus asuricus*)** — A massive, armored floodplain omnivore mutated with double jaw-strength, used for public execution rituals in Naraka.
@@ -381,7 +381,7 @@ the small, game-facing encounter table until the two are reconciled (see
 22. **Underworld Water-Snake (*Serpens asuricus*)** — A highly venomous, dark-scaled snake that swims in the sulfuric rivers of Naraka, its bite causing immediate paralysis.
 23. **Clay-Born Watcher (*Māyā-born oculus*)** — An artificial, clay-sculpted eye construct animated by ancient mantras, used by Harappan lords to spy on their courts.
 24. **Ember-Scattering Sprite (*Māyā-born scintilla minor*)** — A small, fleeting spirit born from ritual embers that floats through the air, causing minor fires when displeased.
-25. **Naga-Kin Sentry (*Serpens guard*)** — A semi-anthropomorphic serpent warrior that guards the sacred temples of Takshak, wielding bronze and stone spears.
+25. **Naga-Kin Sentry (*Serpens custos*)** — A semi-anthropomorphic serpent warrior that guards the sacred temples of Takshak, wielding bronze and stone spears.
 26. **Gorgonopsid Pack-Leader (*Gorgonops titan*)** — A larger, hyper-aggressive gorgonopsid bred by Asura generals to lead war-packs in battle.
 27. **Dimetrodon Scout-Mount (*Dimetrodon minor*)** — A faster, sleek sail-backed synapsid used by Asura scouts to navigate the rugged, volcanic frontiers.
 28. **Scutosaurus Battering-Ram (*Scutosaurus titan*)** — A massive scutosaur mutated with an bone-hard forehead plate, used to break down defensive palisades.
