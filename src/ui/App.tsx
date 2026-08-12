@@ -7,12 +7,16 @@ import { JournalPanel } from './JournalPanel';
 import { JourneyLog } from './JourneyLog';
 import { Controls } from './Controls';
 import { CanonPanel } from './CanonPanel';
+import { Diary, diaryCount } from './Diary';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { creatureAction } from '../content/journal';
 import { creatureFor, floraFor } from '../content/species';
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
 import { loadJourney, saveJourney } from '../save';
+import { momentAt } from '../game/moment';
+import { startPhaseFor } from '../game/dayNight';
+import type { WorldMoment } from '../journey';
 import type { World } from '../world/types';
 
 const DEFAULT_SEED = 'jambhudweepa-evening';
@@ -39,6 +43,27 @@ export function App() {
   // Separate from `arrivalPage`, which the player can dismiss. Reaching the landmark is a fact
   // about the journey and belongs in the travel log even after the page is closed.
   const [reached, setReached] = useState(initialJourney.current.reached);
+
+  // What the player knows. Every rule about changing it lives in `journey.ts`; this only holds
+  // it and hands it to the save.
+  const [progress, setProgress] = useState(initialJourney.current.progress);
+  const [diaryOpen, setDiaryOpen] = useState(false);
+
+  // The diary explains why a rung is out of reach, which needs to know what the sky is doing.
+  // Anchored to the same clock the scene uses -- `startPhaseFor` reads the same `?hour=` -- so
+  // the book and the map never disagree about whether it is night.
+  const openedAt = useRef(Date.now());
+  const startPhase = useRef(startPhaseFor(new URLSearchParams(window.location.search).get('hour')));
+  const [moment, setMoment] = useState<WorldMoment | null>(null);
+  useEffect(() => {
+    const tick = () =>
+      setMoment(momentAt(seed, Date.now() - openedAt.current, startPhase.current));
+    tick();
+    // A weather spell is three in-game hours, about seven real minutes. Half a minute is far
+    // finer than the thing being watched and costs nothing.
+    const timer = window.setInterval(tick, 30_000);
+    return () => window.clearInterval(timer);
+  }, [seed]);
 
   // The log starts open where there is room beside the map and closed where it would cover it.
   // Only the initial state — once the player has opened or closed it, that is their decision and
@@ -81,7 +106,8 @@ export function App() {
   // Persist on a timer rather than on every step: walking writes to localStorage 4-5 times a
   // second otherwise, and the journey is not worth a synchronous write that often.
   useEffect(() => {
-    const flush = () => saveJourney(seed, { discovered: discovered.current, observed, reached });
+    const flush = () =>
+      saveJourney(seed, { discovered: discovered.current, observed, reached, progress });
     const timer = window.setInterval(flush, 3000);
     window.addEventListener('pagehide', flush);
     return () => {
@@ -89,7 +115,7 @@ export function App() {
       window.removeEventListener('pagehide', flush);
       flush();
     };
-  }, [seed, observed, reached]);
+  }, [seed, observed, reached, progress]);
 
   const currentCreature = useMemo(() => {
     if (!world || !arrival) return null;
@@ -129,6 +155,7 @@ export function App() {
     // A new map is a deliberate fresh start, so it must not inherit fog the player already lifted.
     discovered.current = [];
     setObserved([]);
+    setProgress(loadJourney(next).progress);
     setMemory('');
     setArrivalPage(null);
     setReached(false);
@@ -223,6 +250,15 @@ export function App() {
         observed={observed}
         logOpen={logOpen}
         onToggleLog={() => setLogOpen((open) => !open)}
+        diaryCount={diaryCount(progress)}
+        onOpenDiary={() => setDiaryOpen(true)}
+      />
+
+      <Diary
+        progress={progress}
+        moment={moment}
+        open={diaryOpen}
+        onClose={() => setDiaryOpen(false)}
       />
 
       <JourneyLog
