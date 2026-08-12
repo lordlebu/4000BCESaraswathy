@@ -1,0 +1,1717 @@
+{
+  "canon_version": "1.3.0",
+  "characters": [
+    {
+      "id": "character_arin",
+      "type": "character",
+      "name": "Arin",
+      "epithets": [
+        "Thornfoot",
+        "Kia-Vanar"
+      ],
+      "culture": "kia",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "warrior",
+        "daughter"
+      ],
+      "relations": {
+        "parents": [
+          "character_khadi"
+        ],
+        "siblings": [
+          "character_mira"
+        ],
+        "spouse": "character_mehme"
+      },
+      "notes": "Fierce Vanara-trained daughter of Khadi. Marries Mehme.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_asha",
+      "type": "character",
+      "name": "Aasha",
+      "aliases": [
+        "Asha"
+      ],
+      "epithets": [
+        "Dreamseer",
+        "Vaidyahridaya"
+      ],
+      "culture": "harappan",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "lorekeeper",
+        "co-ruler",
+        "younger_daughter"
+      ],
+      "relations": {
+        "parents": [
+          "character_kavik"
+        ],
+        "siblings": [
+          "character_shaashak",
+          "character_mehme"
+        ]
+      },
+      "physical": {
+        "height": "5'6\"",
+        "eyes": "brown",
+        "hair": "dark brown",
+        "skin": "warm tan",
+        "mark": "spiral scar on right palm (Blessing of Narmada Man)"
+      },
+      "notes": "Oral historian and mystical younger daughter. Co-ruler of Lothal after exile of Shaashak.",
+      "canon": "primary",
+      "sources": [
+        "SouthOfTethys_Lothal_profiles.pdf",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_asura_tainted_princess",
+      "type": "character",
+      "name": "Asura-Tainted Princess",
+      "epithets": [],
+      "culture": "asura_hybrid",
+      "species": "asura_tainted",
+      "status": "alive",
+      "epoch": "epoch_deep_antiquity",
+      "roles": [
+        "isolated_royal",
+        "dream_prophet"
+      ],
+      "notes": "Immortal offspring of Prince Varunesh and Asura princess Manjalaya/Vishaili. Heavy curled ram horns, violet gemstones. Marked by Aryaman with golden constellations in dreams. Lives in eternal isolation on a rocky plateau.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_aurum_theophanes",
+      "type": "character",
+      "name": "Aurum Theophanes",
+      "culture": "outlier",
+      "species": "human",
+      "status": "unknown",
+      "epoch": "epoch_current",
+      "roles": [
+        "chronicler",
+        "outsider"
+      ],
+      "notes": "Outlier chronicler name preserved in fringe notes of the Current Era. Association with Narmada academic circles is conjectural.",
+      "canon": "draft",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_bela",
+      "type": "character",
+      "name": "Bela",
+      "culture": "vedda",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_migrations",
+      "roles": [
+        "brother",
+        "manipulated"
+      ],
+      "relations": {
+        "siblings": [
+          "character_ranu"
+        ],
+        "spouse": "character_meera"
+      },
+      "notes": "Vedda brother manipulated by Sira into the Aravali Jharwa massacre alongside Ranu.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_daedrasura",
+      "type": "character",
+      "name": "Daedrasura",
+      "epithets": [
+        "The Devourer"
+      ],
+      "culture": "asura",
+      "species": "asura",
+      "status": "mythic",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "antagonist",
+        "devourer"
+      ],
+      "notes": "Asura-class threat associated with the Devourer crisis at the maritime periphery. Motives and full form remain poorly attested; treated as a high-stakes cosmic pressure rather than a courtly rival.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_digha_jani",
+      "type": "character",
+      "name": "Digha Jani",
+      "culture": "narmada_scholar",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_current",
+      "roles": [
+        "field_historian",
+        "researcher"
+      ],
+      "notes": "Rugged, sharp-featured historian and field researcher exploring anomalous zones, space-time anomalies, Asura planets, and fossilized magic.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_guyuk",
+      "type": "character",
+      "name": "Guyuk",
+      "epithets": [
+        "Mongke",
+        "Storm-Bone Khan"
+      ],
+      "culture": "tushara",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_migrations",
+      "roles": [
+        "nomad",
+        "threshold_bearer"
+      ],
+      "notes": "Teenage Tushara nomad girl. Lost royal status after Botai raid. Taken in by Nirigili. Opens crimson portal to Naraka Lok via forbidden tome, permanently altering her bloodline and the steppe.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_honan",
+      "type": "character",
+      "name": "Honan",
+      "culture": "bloodfang",
+      "species": "human",
+      "status": "deceased",
+      "epoch": "epoch_deep_antiquity",
+      "roles": [
+        "barbarian_king",
+        "dragon_slayer"
+      ],
+      "notes": "Stone-age king of the Bloodfang Tribe. Battled and petrified the deep-time dragon Gorvaxx, forming the Dragon’s Spine mountain pass. Mythic foundation for later Keepers of Faces.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_iknaya",
+      "type": "character",
+      "name": "iKnaya",
+      "epithets": [
+        "Scrollbearer",
+        "Subayai"
+      ],
+      "culture": "harappan",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "ritualist",
+        "aunt",
+        "co-ruler"
+      ],
+      "relations": {
+        "siblings": [
+          "character_kavik",
+          "character_sira",
+          "character_thren"
+        ]
+      },
+      "notes": "Wise pragmatic aunt. Hair streaked white from cursed texts. Guards family secrets. Co-ruler with Asha and Varna.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_jambanson",
+      "type": "character",
+      "name": "Jambanson",
+      "epithets": [
+        "Seedbearer of the South"
+      ],
+      "culture": "vanara",
+      "species": "vanara",
+      "status": "mythic",
+      "epoch": "epoch_prehistoric",
+      "roles": [
+        "mystic",
+        "seedbearer"
+      ],
+      "notes": "Half-man/half-simian Vanara mystic. Seedbearer of the South during the Vanara Zenith before the Great Devolvement.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_jarek",
+      "type": "character",
+      "name": "Jarek",
+      "epithets": [
+        "Shwetavahana"
+      ],
+      "culture": "silvershore",
+      "species": "human",
+      "status": "deceased",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "warrior"
+      ],
+      "relations": {
+        "parents": [
+          "character_torin",
+          "character_lira"
+        ],
+        "siblings": [
+          "character_varna"
+        ]
+      },
+      "notes": "Fierce brother of Varna. Killed alongside Torin by Kavik.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_kavik",
+      "type": "character",
+      "name": "Kavik",
+      "aliases": [
+        "Kavek"
+      ],
+      "epithets": [
+        "Stoneheart",
+        "Pashaanahridaya"
+      ],
+      "culture": "harappan",
+      "species": "human",
+      "status": "deceased",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "patriarch",
+        "architect",
+        "merchant-lord",
+        "bearer_in_waiting"
+      ],
+      "relations": {
+        "parents": [
+          "character_orek",
+          "character_vara_ma"
+        ],
+        "siblings": [
+          "character_sira",
+          "character_thren",
+          "character_iknaya"
+        ],
+        "spouse": null,
+        "children": [
+          "character_shaashak",
+          "character_asha",
+          "character_mehme"
+        ]
+      },
+      "physical": {
+        "age_approx": 45,
+        "build": "broad-shouldered",
+        "skin": "weathered bronze",
+        "beard": "salt-and-pepper"
+      },
+      "notes": "Architect of Lothal's 22-story red sandstone tower. Bearer-in-Waiting of ancestral masks. Assassinated by Asura-possessed Nila during Tendua crisis.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md",
+        "SouthOfTethys.txt"
+      ]
+    },
+    {
+      "id": "character_khadi",
+      "type": "character",
+      "name": "Khadi",
+      "epithets": [
+        "Serpent's Tongue",
+        "Naga-Ambanee"
+      ],
+      "culture": "kia",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "chieftain",
+        "kia_clan_leader"
+      ],
+      "relations": {
+        "spouse": [
+          "character_nila",
+          "character_shaashak"
+        ],
+        "children": [
+          "character_arin",
+          "character_mira",
+          "character_sarita"
+        ]
+      },
+      "notes": "Charismatic Kia chieftain. Married Shaashak in Stone Pact. Fled with her after Kavik's death.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_kubera",
+      "type": "character",
+      "name": "Kubera",
+      "epithets": [
+        "Yaksharaj",
+        "Lord of Hidden Wealth"
+      ],
+      "culture": "yaksha",
+      "species": "yaksha",
+      "status": "mythic",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "patron",
+        "wealth_lord"
+      ],
+      "relations": {
+        "linked": [
+          "character_vijaya"
+        ]
+      },
+      "notes": "Yaksharaj of the southern maritime periphery. Tradition linked to Prince Vijaya and the Mask of Tethys. Guardian of hoarded wealth and island trade oaths.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_lira",
+      "type": "character",
+      "name": "Lira",
+      "epithets": [
+        "Shwetavahana"
+      ],
+      "culture": "silvershore",
+      "species": "human",
+      "status": "unknown",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "matriarch"
+      ],
+      "relations": {
+        "spouse": "character_torin",
+        "children": [
+          "character_varna",
+          "character_jarek"
+        ]
+      },
+      "notes": "Silvershore matriarch. Wife of Torin, mother of Varna and Jarek.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_manjalaya",
+      "type": "character",
+      "name": "Manjalaya",
+      "aliases": [
+        "Vishaili"
+      ],
+      "epithets": [
+        "Asura Princess of Shadows"
+      ],
+      "culture": "asura",
+      "species": "asura",
+      "status": "mythic",
+      "epoch": "epoch_deep_antiquity",
+      "roles": [
+        "summoned_princess",
+        "shadow_entity"
+      ],
+      "relations": {
+        "spouse": "character_varunesh",
+        "children": [
+          "character_asura_tainted_princess"
+        ]
+      },
+      "notes": "Asura princess of shadows summoned by Varunesh through dark tantra and unicorn sacrifice via Dwarka Gate. Skin shifts to radiant violet upon arousal. Mother of the Asura-Tainted Princess.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_meera",
+      "type": "character",
+      "name": "Meera",
+      "culture": "jharwa",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_migrations",
+      "roles": [
+        "survivor",
+        "protector"
+      ],
+      "relations": {
+        "spouse": [
+          "character_ranu",
+          "character_bela"
+        ]
+      },
+      "notes": "Jharwa chief’s daughter. Sole survivor of village massacre orchestrated by Sira via Vedda brothers Ranu and Bela. Forced into tragic marriage; later aided by Vara-Ma and Orek. Becomes fierce adoptive protector of the Aravali sanctuary.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_mehme",
+      "type": "character",
+      "name": "Mehme",
+      "epithets": [
+        "Ironstorm",
+        "Steelaklad"
+      ],
+      "culture": "harappan",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "scout",
+        "military_captain",
+        "son"
+      ],
+      "relations": {
+        "parents": [
+          "character_kavik"
+        ],
+        "siblings": [
+          "character_shaashak",
+          "character_asha"
+        ],
+        "spouse": [
+          "character_varna",
+          "character_arin",
+          "character_mira"
+        ]
+      },
+      "notes": "Hotheaded son. Wields double-headed axe. Marries Varna, Arin and Mira. Takes military command after Kavik's death.",
+      "canon": "primary",
+      "sources": [
+        "SouthOfTethys_Lothal_profiles.pdf",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_mira",
+      "type": "character",
+      "name": "Mira",
+      "epithets": [
+        "Starchild",
+        "Kia-Yaksha"
+      ],
+      "culture": "kia",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "prophetic",
+        "daughter"
+      ],
+      "relations": {
+        "parents": [
+          "character_khadi"
+        ],
+        "siblings": [
+          "character_arin"
+        ],
+        "spouse": "character_mehme"
+      },
+      "notes": "Ethereal prophetic daughter of Khadi. Marries Mehme.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_naga_raja",
+      "type": "character",
+      "name": "Naga-Raja",
+      "culture": "polynesian_khmer",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "pirate_king",
+        "black_lotus_leader"
+      ],
+      "notes": "Brutal Polynesian-Khmer pirate king of Black Lotus Camp. Captured Varna and Rathak.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_narmada_man",
+      "type": "character",
+      "name": "Narmada Man",
+      "epithets": [
+        "First of the Riverbone People",
+        "Primeval King"
+      ],
+      "culture": "primordial",
+      "species": "riverbone",
+      "status": "mythic",
+      "epoch": "epoch_deep_antiquity",
+      "roles": [
+        "king",
+        "ancestor",
+        "blessing_giver"
+      ],
+      "notes": "Primeval King of Jambhudweepa and first of the riverbone people. Source of the spiral scar blessing on Aasha’s palm. Linked to Apsara union legend and Asura-tainted egg.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_nila",
+      "type": "character",
+      "name": "Nila",
+      "epithets": [
+        "Veil of Shadows",
+        "Ambanee"
+      ],
+      "culture": "kia",
+      "species": "human",
+      "status": "unknown",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "first_wife",
+        "asura_vessel"
+      ],
+      "relations": {
+        "spouse": "character_khadi"
+      },
+      "notes": "Jealous first wife of Khadi. Desecrated Kavik's tower with Asura mantras, birthing Tendua Manticore. Fully possessed, assassinated Kavik.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_nirigili",
+      "type": "character",
+      "name": "Nirigili",
+      "epithets": [
+        "Mahashay",
+        "Niladri Mahashay"
+      ],
+      "culture": "wanderer",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_migrations",
+      "roles": [
+        "circus_master",
+        "elder",
+        "guardian"
+      ],
+      "notes": "Learned traveling circus master who rides an Elephantbird. Protects Guyuk and hides dangerous artifacts. Loses his mount to a Megalosaurus during the Naraka portal chaos.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_onko",
+      "type": "character",
+      "name": "Onko",
+      "epithets": [
+        "Professor"
+      ],
+      "culture": "narmada_scholar",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_current",
+      "roles": [
+        "academic",
+        "skeptic"
+      ],
+      "notes": "Eccentric, skeptical Bengali academic at Narmada University. Studies anomalous phenomena alongside Digha Jani.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_orek",
+      "type": "character",
+      "name": "Orek",
+      "epithets": [
+        "Face Without a Mask"
+      ],
+      "culture": "harappan",
+      "species": "human",
+      "status": "deceased",
+      "epoch": "epoch_migrations",
+      "roles": [
+        "ancestor"
+      ],
+      "relations": {
+        "spouse": "character_vara_ma",
+        "children": [
+          "character_kavik",
+          "character_sira",
+          "character_thren",
+          "character_iknaya"
+        ]
+      },
+      "notes": "Father of Kavik. Took immune son Thren into wilderness to protect masks.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_owlman",
+      "type": "character",
+      "name": "Owlman",
+      "epithets": [
+        "Forest Watcher"
+      ],
+      "culture": "primordial",
+      "species": "biological_spiritual_hybrid",
+      "status": "mythic",
+      "epoch": "epoch_deep_antiquity",
+      "roles": [
+        "forest_domain",
+        "watcher"
+      ],
+      "notes": "Biological-spiritual hybrid of the forest domain. Counterpart to sea-bound Ammonite Man. Appears in highland and canopy lore as a silent adjudicator of boundary crossings.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_ranu",
+      "type": "character",
+      "name": "Ranu",
+      "culture": "vedda",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_migrations",
+      "roles": [
+        "brother",
+        "manipulated"
+      ],
+      "relations": {
+        "siblings": [
+          "character_bela"
+        ],
+        "spouse": "character_meera"
+      },
+      "notes": "Vedda brother manipulated by Sira (The Wandered Face) into massacring a Jharwa village in the Aravalis. Forced marriage to survivor Meera.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_rathak",
+      "type": "character",
+      "name": "Rathak",
+      "culture": "trader",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "trader",
+        "whale_blimp_commander"
+      ],
+      "notes": "Sturdy trader commanding whale blimps with lapis lazuli. Captured with Varna by Naga-Raja; rescued by Kavik.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_ruvan",
+      "type": "character",
+      "name": "Ruvan",
+      "culture": "wanderer",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "observer",
+        "bridge",
+        "mentor"
+      ],
+      "notes": "Culturally fluent wanderer. Bridges Harappan and Kia. Mentors young Sarita in exile. Fights Tendua.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_sarita",
+      "type": "character",
+      "name": "Sarita",
+      "epithets": [
+        "Silversong",
+        "Mask-Ambanee"
+      ],
+      "culture": "harappan_kia",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "heir",
+        "cancer_child"
+      ],
+      "relations": {
+        "parents": [
+          "character_shaashak",
+          "character_khadi"
+        ]
+      },
+      "notes": "Daughter of Shaashak and Khadi, born in exile. Represents healing of Harappan-Kia divide. Mentored later by Ruvan.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_shaashak",
+      "type": "character",
+      "name": "Shaashak",
+      "epithets": [
+        "Silversong",
+        "Mask-Ambanee"
+      ],
+      "culture": "harappan",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "prophetess",
+        "elder_daughter",
+        "bride_of_the_stone_pact"
+      ],
+      "relations": {
+        "parents": [
+          "character_kavik"
+        ],
+        "siblings": [
+          "character_asha",
+          "character_mehme"
+        ],
+        "spouse": "character_khadi",
+        "children": [
+          "character_sarita"
+        ]
+      },
+      "notes": "Diplomatic elder daughter. Married Khadi under Stone Pact. Fled Lothal after Kavik's death. Mother of Sarita Silversong.",
+      "canon": "primary",
+      "sources": [
+        "SouthOfTethys_Lothal_profiles.pdf",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_shakariman",
+      "type": "character",
+      "name": "Shakariman",
+      "epithets": [
+        "The Shikari"
+      ],
+      "culture": "narmada_scholar",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_current",
+      "roles": [
+        "forest_ranger",
+        "field_surveyor"
+      ],
+      "notes": "Seasoned forest ranger and practical field surveyor. Discovers the arboreal octopus (Vṛkṣaśmara).",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_sira",
+      "type": "character",
+      "name": "Sira",
+      "epithets": [
+        "The Wandered Face"
+      ],
+      "culture": "harappan",
+      "species": "human",
+      "status": "unknown",
+      "epoch": "epoch_migrations",
+      "roles": [
+        "mask_thief",
+        "ancestor"
+      ],
+      "relations": {
+        "parents": [
+          "character_orek",
+          "character_vara_ma"
+        ],
+        "siblings": [
+          "character_kavik",
+          "character_thren",
+          "character_iknaya"
+        ]
+      },
+      "notes": "Stole corrupting mask. Manipulated Vedda brothers into Aravali massacre. Ancestor of Mask Family schism.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_thren",
+      "type": "character",
+      "name": "Thren",
+      "epithets": [
+        "The Unmarked"
+      ],
+      "culture": "harappan",
+      "species": "human",
+      "status": "unknown",
+      "epoch": "epoch_migrations",
+      "roles": [
+        "immune",
+        "ancestor"
+      ],
+      "relations": {
+        "parents": [
+          "character_orek",
+          "character_vara_ma"
+        ],
+        "siblings": [
+          "character_kavik",
+          "character_sira",
+          "character_iknaya"
+        ]
+      },
+      "notes": "Immune son hidden in Aravali sanctuary with most dangerous masks.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_torin",
+      "type": "character",
+      "name": "Torin",
+      "epithets": [
+        "Shwetavahana"
+      ],
+      "culture": "silvershore",
+      "species": "human",
+      "status": "deceased",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "river_lord",
+        "patriarch"
+      ],
+      "relations": {
+        "spouse": "character_lira",
+        "children": [
+          "character_varna",
+          "character_jarek"
+        ]
+      },
+      "notes": "Ruthless Silvershore patriarch. Slew by Kavik on Lothal docks during debt war.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_vara_ma",
+      "type": "character",
+      "name": "Vara-Ma",
+      "epithets": [
+        "Mask-Binder"
+      ],
+      "culture": "harappan",
+      "species": "human",
+      "status": "deceased",
+      "epoch": "epoch_migrations",
+      "roles": [
+        "mask_binder",
+        "ancestor"
+      ],
+      "relations": {
+        "spouse": "character_orek",
+        "children": [
+          "character_kavik",
+          "character_sira",
+          "character_thren",
+          "character_iknaya"
+        ]
+      },
+      "notes": "Mother of Kavik. Hid dangerous masks with Orek and Thren in Aravali sanctuary.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_varna",
+      "type": "character",
+      "name": "Varna",
+      "epithets": [
+        "Emberheart",
+        "Shwetavahana",
+        "Steelaklad"
+      ],
+      "culture": "silvershore",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "cartographer",
+        "survivor",
+        "co-ruler"
+      ],
+      "relations": {
+        "parents": [
+          "character_torin",
+          "character_lira"
+        ],
+        "siblings": [
+          "character_jarek"
+        ],
+        "spouse": "character_mehme"
+      },
+      "notes": "Silvershore princess and cartographer. Captured by Naga-Raja, rescued by Kavik. Married Mehme. Co-ruler of Lothal after crisis.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_varunesh",
+      "type": "character",
+      "name": "Varunesh",
+      "aliases": [
+        "Tukulti-Vishra"
+      ],
+      "culture": "ancient_court",
+      "species": "human",
+      "status": "deceased",
+      "epoch": "epoch_deep_antiquity",
+      "roles": [
+        "prince",
+        "dark_tantrist"
+      ],
+      "notes": "Debauched son of Pashupati Chakravarthy. Used unicorn sacrifice and dark tantra to open Dwarka Gate and summon Asura princess Manjalaya. Father of the Asura-Tainted Princess.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_vijaya",
+      "type": "character",
+      "name": "Vijaya",
+      "epithets": [
+        "Prince"
+      ],
+      "culture": "tamralinga",
+      "species": "human",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "prince",
+        "diplomat",
+        "mask_bearer"
+      ],
+      "notes": "Prince from Tamralinga. Arrives during Tendua/Devourer crisis offering the Mask of Tethys to Khadi in exchange for allegiance, seeking to make Lothal a vassal state. Linked to Yaksharaj Kubera.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "character_yaksha_envoy",
+      "type": "character",
+      "name": "Yaksha Envoy",
+      "culture": "yaksha",
+      "species": "yaksha",
+      "status": "alive",
+      "epoch": "epoch_civilization_dawn",
+      "roles": [
+        "envoy",
+        "diplomat"
+      ],
+      "relations": {
+        "patron": "character_kubera"
+      },
+      "notes": "Generic office for Kubera’s maritime messengers who accompany Mask of Tethys negotiations. Individual names rarely recorded.",
+      "canon": "draft",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "event_aravali_massacre",
+      "type": "event",
+      "title": "Aravali Massacre & Sanctuary",
+      "epoch": "epoch_migrations",
+      "participants": [
+        "character_sira",
+        "character_ranu",
+        "character_bela",
+        "character_meera",
+        "character_vara_ma",
+        "character_orek",
+        "character_thren"
+      ],
+      "location": "region_aravali",
+      "predecessors": [],
+      "successors": [],
+      "causes": [
+        "sira_stolen_mask",
+        "dark_manipulation"
+      ],
+      "outcomes": [
+        "jharwa_village_destroyed",
+        "meera_forced_marriage",
+        "aravali_sanctuary_established"
+      ],
+      "summary": "Sira uses a corrupting mask to manipulate Vedda brothers Ranu and Bela into massacring a Jharwa village. Meera survives and is forced into marriage. Vara-Ma and Orek later help her and hide dangerous masks with Thren in the Aravali sanctuary.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "event_birth_of_sarita",
+      "type": "event",
+      "title": "Birth of Sarita Silversong",
+      "epoch": "epoch_civilization_dawn",
+      "participants": [
+        "character_shaashak",
+        "character_khadi",
+        "character_sarita"
+      ],
+      "location": "upriver_exile_settlement",
+      "predecessors": [
+        "event_exile_of_shaashak"
+      ],
+      "successors": [],
+      "outcomes": [
+        "cancer_child_born",
+        "symbol_of_harappan_kia_healing"
+      ],
+      "summary": "In exile, Shaashak gives birth to Sarita. The child’s first cry echoes her mother’s lullaby. Represents future reconciliation of the two bloodlines.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "event_black_lotus_siege",
+      "type": "event",
+      "title": "Black Lotus Siege",
+      "epoch": "epoch_civilization_dawn",
+      "participants": [
+        "character_kavik",
+        "character_varna",
+        "character_rathak",
+        "character_naga_raja"
+      ],
+      "location": "black_lotus_camp",
+      "predecessors": [
+        "event_silvershore_war"
+      ],
+      "successors": [
+        "event_stone_pact"
+      ],
+      "causes": [
+        "piracy",
+        "capture_of_varna"
+      ],
+      "outcomes": [
+        "rescue_of_varna_and_rathak",
+        "kavik_victory"
+      ],
+      "summary": "Kavik leads nighttime maritime siege on Black Lotus Fort during thunderstorm. Scales basalt cliffs, battles Naga-Raja, liberates Varna and Rathak.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "event_dragon_spine",
+      "type": "event",
+      "title": "Forging of the Dragon’s Spine",
+      "epoch": "epoch_deep_antiquity",
+      "participants": [
+        "character_honan"
+      ],
+      "location": "ironfang_mountains",
+      "predecessors": [],
+      "successors": [],
+      "outcomes": [
+        "petrification_of_gorvaxx",
+        "formation_of_mountain_pass"
+      ],
+      "summary": "Honan battles the deep-time dragon Gorvaxx. The beast is petrified rather than slain, forming the treacherous mountain pass known as the Dragon’s Spine.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "event_exile_of_shaashak",
+      "type": "event",
+      "title": "Exile of Shaashak and Khadi",
+      "epoch": "epoch_civilization_dawn",
+      "participants": [
+        "character_shaashak",
+        "character_khadi"
+      ],
+      "location": "settlement_lothal",
+      "predecessors": [
+        "event_tendua_crisis",
+        "event_mask_retrieval"
+      ],
+      "successors": [
+        "event_birth_of_sarita"
+      ],
+      "outcomes": [
+        "birth_of_sarita",
+        "matriarchal_council_asha_iknaya_varna"
+      ],
+      "summary": "Grief-stricken Shaashak and Khadi depart upriver on a river skiff to raise their child far from Lothal's tainted legacy. Asha, iKnaya and Varna form ruling council.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "event_founding_lothal",
+      "type": "event",
+      "title": "Founding of Lothal",
+      "epoch": "epoch_civilization_dawn",
+      "date_approx": "c. 3000 BCE",
+      "participants": [
+        "character_kavik"
+      ],
+      "location": "settlement_lothal",
+      "artifacts": [],
+      "predecessors": [
+        "event_silvershore_war"
+      ],
+      "successors": [
+        "event_stone_pact",
+        "event_black_lotus_siege"
+      ],
+      "causes": [
+        "migration_from_mohenjo_daro",
+        "grief_over_wife_death"
+      ],
+      "outcomes": [
+        "construction_of_22_story_tower",
+        "harappan_dominance_in_delta"
+      ],
+      "summary": "Kavik leads Mask Family across Tethys Sea, performs Chandra Grahan ritual, declares himself Raij, and begins construction of the red sandstone tower.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "event_mask_retrieval",
+      "type": "event",
+      "title": "Retrieval of the Mask of Harappa",
+      "epoch": "epoch_civilization_dawn",
+      "participants": [
+        "character_asha",
+        "character_iknaya",
+        "character_varna"
+      ],
+      "location": "settlement_lothal",
+      "artifacts": [
+        "artifact_mask_of_harappa"
+      ],
+      "predecessors": [
+        "event_tendua_crisis"
+      ],
+      "successors": [
+        "event_exile_of_shaashak"
+      ],
+      "causes": [
+        "tainted_mask_stolen_by_nila",
+        "need_to_repel_tenduas"
+      ],
+      "outcomes": [
+        "mask_recovered_from_tower_foundation",
+        "tenduas_scattered"
+      ],
+      "summary": "Asha, iKnaya and Varna recover the bronze raven-and-waves Mask of Harappa from a hidden chamber beneath the tower. Used with other stone masks to drive remaining Tenduas back into the marsh.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "event_naraka_portal",
+      "type": "event",
+      "title": "Opening of the Naraka Lok Portal",
+      "epoch": "epoch_migrations",
+      "participants": [
+        "character_guyuk",
+        "character_nirigili"
+      ],
+      "location": "hyrkanian_steppe",
+      "predecessors": [],
+      "successors": [],
+      "causes": [
+        "forbidden_tome",
+        "possessed_mountain_goat_guidance"
+      ],
+      "outcomes": [
+        "crimson_portal_to_naraka",
+        "beast_spill",
+        "loss_of_nirigili_mount",
+        "guyuk_bloodline_alteration"
+      ],
+      "summary": "Guyuk, guided by a possessed mountain goat, recites incantations from an ancient tome and tears open a colossal glowing red portal to Naraka Lok. Horrific beasts spill forth; Nirigili loses his Elephantbird to a Megalosaurus.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "event_shadow_pact",
+      "type": "event",
+      "title": "Shadow Pact of Saraswati",
+      "epoch": "epoch_deep_antiquity",
+      "participants": [
+        "character_varunesh",
+        "character_asura_tainted_princess"
+      ],
+      "location": "ancient_courts",
+      "predecessors": [],
+      "successors": [],
+      "causes": [
+        "dark_tantra",
+        "unicorn_sacrifice",
+        "dwarka_gate"
+      ],
+      "outcomes": [
+        "summoning_of_manjalaya",
+        "birth_of_asura_tainted_princess",
+        "curse_on_ancient_courts"
+      ],
+      "summary": "Prince Varunesh slits an Indus unicorn and uses dark tantra through a Dwarka Gate to summon the Asura princess Manjalaya. Their union produces the immortal Asura-Tainted Princess.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "event_silvershore_war",
+      "type": "event",
+      "title": "Silvershore War",
+      "epoch": "epoch_civilization_dawn",
+      "participants": [
+        "character_kavik",
+        "character_torin",
+        "character_jarek"
+      ],
+      "location": "settlement_lothal",
+      "predecessors": [],
+      "successors": [
+        "event_black_lotus_siege",
+        "event_founding_lothal"
+      ],
+      "causes": [
+        "debt_refusal",
+        "silvershore_raid"
+      ],
+      "outcomes": [
+        "death_of_torin",
+        "death_of_jarek",
+        "kavik_dominance"
+      ],
+      "summary": "Kavik refuses to honor his father’s debt to the Silvershore Dynasty. When they raid Lothal docks, Kavik personally slays Torin and Jarek.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "event_stone_pact",
+      "type": "event",
+      "title": "The Stone Pact",
+      "epoch": "epoch_civilization_dawn",
+      "participants": [
+        "character_shaashak",
+        "character_khadi",
+        "character_kavik"
+      ],
+      "location": "settlement_lothal",
+      "artifacts": [
+        "artifact_mask_of_harappa"
+      ],
+      "predecessors": [
+        "event_founding_lothal",
+        "event_black_lotus_siege"
+      ],
+      "successors": [
+        "event_tendua_crisis"
+      ],
+      "causes": [
+        "need_for_peace_with_kia"
+      ],
+      "outcomes": [
+        "political_marriage",
+        "mask_as_dowry",
+        "resentment_of_nila"
+      ],
+      "summary": "Political marriage of Shaashak to Khadi sealed under crimson sunset at the base of Kavik's tower. Ancestral Mask of Harappa pledged as dowry.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "event_tendua_crisis",
+      "type": "event",
+      "title": "Tendua Crisis and Assassination of Kavik",
+      "epoch": "epoch_civilization_dawn",
+      "participants": [
+        "character_nila",
+        "character_kavik",
+        "character_shaashak",
+        "character_khadi",
+        "character_mehme",
+        "character_asha"
+      ],
+      "location": "settlement_lothal",
+      "artifacts": [],
+      "predecessors": [
+        "event_stone_pact"
+      ],
+      "successors": [
+        "event_mask_retrieval",
+        "event_exile_of_shaashak"
+      ],
+      "causes": [
+        "nila_resentment",
+        "asura_mantras_on_tower"
+      ],
+      "outcomes": [
+        "birth_of_tendua_manticore",
+        "death_of_kavik",
+        "matriarchal_council"
+      ],
+      "summary": "Nila desecrates tower with Asura mantras, birthing Tendua Manticore. During the attack, Asura-possessed Nila assassinates Kavik.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    }
+  ],
+  "settlements": [
+    {
+      "id": "settlement_dwarka",
+      "type": "settlement",
+      "name": "Dwarka",
+      "region": "region_saraswati_delta",
+      "notes": "Coastal city. Site of Dwarka Gate anomaly and celestial festivals.",
+      "canon": "primary",
+      "sources": [
+        "map",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "settlement_lothal",
+      "type": "settlement",
+      "name": "Lothal",
+      "region": "region_saraswati_delta",
+      "epoch_founded": "epoch_civilization_dawn",
+      "founders": [
+        "character_kavik"
+      ],
+      "factions": [
+        "faction_mask_family",
+        "faction_kia_clan"
+      ],
+      "landmarks": [
+        "22-story red sandstone tower"
+      ],
+      "notes": "Harappan city-state on the Saraswati delta. Site of Stone Pact and Tendua Crisis.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md",
+        "map"
+      ]
+    }
+  ],
+  "factions": [
+    {
+      "id": "faction_kia_clan",
+      "type": "faction",
+      "name": "Kia Clan",
+      "aliases": [
+        "Naga-Ambanee"
+      ],
+      "culture": "kia",
+      "origin": "vedda_naga_hybrid",
+      "members": [
+        "character_khadi",
+        "character_nila",
+        "character_arin",
+        "character_mira"
+      ],
+      "notes": "Indigenous marsh-dwelling population of the delta. Fluid, oral-tradition bound. Formed fragile co-rulership with Harappans after Stone Pact.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "faction_mask_family",
+      "type": "faction",
+      "name": "Mask Family",
+      "culture": "harappan",
+      "origin": "mohenjo_daro",
+      "epithet": "Keepers of Faces",
+      "members": [
+        "character_kavik",
+        "character_shaashak",
+        "character_asha",
+        "character_mehme",
+        "character_iknaya"
+      ],
+      "artifacts": [
+        "artifact_mask_of_harappa"
+      ],
+      "notes": "Semi-mythic lineage protecting ancestral masks of bone, resin, coral, volcanic glass. Settled Lothal under Kavik.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "faction_silvershore",
+      "type": "faction",
+      "name": "Silvershore Dynasty",
+      "aliases": [
+        "Shwetavahana"
+      ],
+      "culture": "silvershore",
+      "members": [
+        "character_torin",
+        "character_lira",
+        "character_varna",
+        "character_jarek"
+      ],
+      "notes": "Ruthless river lords ruling via silver, debt, and floating palaces. Clashed with Mask Family.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "artifact_mask_of_harappa",
+      "type": "artifact",
+      "name": "Mask of Harappa",
+      "material": [
+        "bronze",
+        "raven-and-waves motif"
+      ],
+      "power": "preserves memories and primal instincts of previous bearers",
+      "risk": "identity overwrite on prolonged wear",
+      "related_characters": [
+        "character_kavik",
+        "character_khadi",
+        "character_asha"
+      ],
+      "events": [
+        "event_stone_pact",
+        "event_tendua_crisis"
+      ],
+      "notes": "Ancestral mask of the Mask Family. Pledged as dowry in Stone Pact. Later retrieved from hidden chamber beneath tower.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "artifact_mask_of_sunlit_stone",
+      "type": "artifact",
+      "name": "Mask of Sunlit Stone",
+      "material": [
+        "sandstone",
+        "solar inlay"
+      ],
+      "power": "steadies will under Asura pressure; amplifies stone-pact oaths",
+      "risk": "rigidity of purpose; refusal to yield even when wise",
+      "related_characters": [
+        "character_kavik",
+        "character_asha",
+        "character_iknaya"
+      ],
+      "events": [
+        "event_mask_retrieval"
+      ],
+      "notes": "Remaining Mask Family relic used alongside the Mask of Harappa during the Tendua repulsion. Associated with red-sandstone tower rites.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "artifact_mask_of_tethys",
+      "type": "artifact",
+      "name": "Mask of Tethys",
+      "material": [
+        "sea-bronze",
+        "wave motif"
+      ],
+      "power": "maritime dominion and allegiance binding",
+      "risk": "vassalage of the bearer’s polity",
+      "related_characters": [
+        "character_vijaya",
+        "character_khadi"
+      ],
+      "events": [],
+      "notes": "Offered by Prince Vijaya of Tamralinga during the Tendua/Devourer crisis in exchange for Lothal’s allegiance as a vassal state. Linked to Yaksharaj Kubera traditions.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    }
+  ],
+  "mythology": [
+    {
+      "id": "mythology_ammonite_man",
+      "type": "mythology",
+      "name": "Ammonite Man",
+      "domain": [
+        "tethys_sea",
+        "oracle"
+      ],
+      "aspect": "Colossal sentient nautiloid oracle of the deep Tethys",
+      "notes": "First spiritual entity of the Invertebrate Dominion. GM analogue for deep-time memory.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "mythology_gorvaxx",
+      "type": "mythology",
+      "name": "Gorvaxx",
+      "domain": [
+        "mountains",
+        "geothermal"
+      ],
+      "aspect": "Deep-time dragon of the Ironfang Mountains",
+      "notes": "Black granite scales; breathed geothermal fire and thunder. Petrified by Honan into the Dragon’s Spine pass.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "mythology_varuna",
+      "type": "mythology",
+      "name": "Varuna",
+      "domain": [
+        "abyssal",
+        "deep_tethys",
+        "rta"
+      ],
+      "aspect": "Asura of the Deep Tethys, keeper of Ṛta (cosmic order)",
+      "relations": {
+        "bound_by_storm_oath": "character_mehme"
+      },
+      "notes": "Plays cosmic chess against Indra. In possible post-cataclysm future, appears as older man leading Survival Train.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md"
+      ]
+    }
+  ],
+  "epochs": [
+    {
+      "id": "epoch_prehistoric",
+      "name": "Prehistoric Foundations & Age of Vanaras",
+      "range": "500 MYA – 5 MYA",
+      "notes": "Invertebrate Dominion, Avian-Synapsid Epoch, Vanara Zenith and Devolvement"
+    },
+    {
+      "id": "epoch_deep_antiquity",
+      "name": "Deep Antiquity",
+      "range": "before the migrations",
+      "notes": "Mythic age of Varunesh and Manjalaya, the Shadow Pact and the forging of the Dragon's Spine. Was in use on entities long before it was declared here."
+    },
+    {
+      "id": "epoch_migrations",
+      "name": "Era of Human Migrations",
+      "range": "50K – 5K years ago",
+      "notes": "Jharwa, Vedda, Naga, Outliers waves"
+    },
+    {
+      "id": "epoch_civilization_dawn",
+      "name": "Civilization Dawn (Lothal Era)",
+      "range": "c. 3000 – 500 BCE",
+      "notes": "Harappan city-states, Mask Family, Kia alliance, Tendua Crisis"
+    },
+    {
+      "id": "epoch_current",
+      "name": "Current Era (Age of Machinery)",
+      "range": "~1920s equivalent",
+      "notes": "Narmada University, dieselpunk exploration"
+    },
+    {
+      "id": "epoch_post_cataclysm",
+      "name": "Post-Cataclysmic Era (The Great Shattering)",
+      "range": "after the Collapse",
+      "notes": "The Great Shattering. Reckless Narmada excavations in the Age of Machinery met space-time rifts and the pull of sentient Asura planets, and the world fractured under the weight of its own eras -- tectonic and dimensional boundaries collapsing together. Lothal is a half-buried relic with survivors camped in it; Dwarka is drowned and its Gate dormant; Narmada University stands hollow, lit only by Garudasaur moss over ruined scrolls. Varuna and Mitra keep no power worth the name and have turned to preservation: a travelling apothecary and workshop gathering the displaced. The tone is solarpunk, not ruin -- the story ends when the Survival Train stops for good and becomes the centre of a village.",
+      "status": "authoring",
+      "setting_of": "Varuna's Field Diary"
+    }
+  ]
+}

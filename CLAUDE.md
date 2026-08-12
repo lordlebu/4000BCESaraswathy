@@ -22,7 +22,7 @@ npm run test:e2e   # playwright — does the game actually boot and draw?
 npm run test:watch # vitest in watch mode
 npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
-npm run build:data # regenerate data/creatures.json and data/flora.json
+npm run check:data # verify data/canon/ matches the canon release it came from
 npm run build:sprite # rebuild assets/varuna-walk.png from assets/source/
 ```
 
@@ -85,19 +85,31 @@ the shared `pages` concurrency group.
 ### The data pipeline is one-directional, and it starts in another repository
 
 ```
-SouthOfTethys/database/   →  utils/export_game_data.py  →  data/creatures.json
-(canonical entity JSON)                                    data/flora.json
-                                                           data/canon.lock.json
+SouthOfTethys/database/  →  utils/export_canon_bundle.py  →  data/canon/species.json
+(canonical entity JSON)                                      data/canon/places.json
+                                                             data/canon/knowledge.json
+                                                             data/canon/world.json
+                                                             ↓
+                                                     src/content/canon.ts
+                                                        (the adapter)
+                                                             ↓
+                                                     src/content/species.ts
 ```
 
-**`data/creatures.json` and `data/flora.json` are generated. Never hand-edit them.** The species
-canon lives in the sibling `SouthOfTethys` repository — 346 species with authored biome, placement,
-rarity and journal prose — and these files are a projection of it. To change species data, edit the
-canon entity there and re-run `python utils/export_game_data.py --apply`.
+**Everything in `data/canon/` is generated. Never hand-edit it.** Canon lives in the sibling
+`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 441 entities
+across species, places, discoveries and world. To change any of it, edit the canon entity there and
+re-run `python utils/export_canon_bundle.py --apply`.
+
+**`src/content/canon.ts` is the adapter, and the only place that knows both shapes.** Canon used to
+be exported in this game's exact field list by a Python script in the other repo, which meant the
+lore repo had to track the engine's data model and threw away everything that was not a species.
+Now the mapping lives here. If a field is renamed on the way in, that file is the single place to
+look. Canon changes when the fiction changes; the engine changes when the design does.
 
 CI can no longer verify these by rebuilding them, because the canon they come from is not in this
-checkout. `npm run check:data` compares them against `data/canon.lock.json`, which carries the canon
-version and a SHA-256 of each file. That catches a hand-edit or a half-applied export. Hashes are
+checkout. `npm run check:data` compares them against `data/canon/canon.lock.json`, which carries the canon
+version and a SHA-256 of each bundle file. That catches a hand-edit or a half-applied export. Hashes are
 taken over LF-normalised content so the check survives a CRLF checkout.
 
 `data/biomes.json` is still hand-written here, and is the one place biome colours, symbols,
@@ -118,8 +130,9 @@ no ground-biome equivalent, and the tone question for the Asura horrors is still
 - **`src/world/`** — deterministic generation. Seeded RNG (`rng.ts`), octave value-noise fields
   (`field.ts`), biome thresholds (`classify.ts`), river carving (`rivers.ts`), BFS routing
   (`pathfind.ts`), and the assembly in `generate.ts`.
-- **`src/content/`** — the data layer over `data/*.json`. `species.ts` answers which creature and
-  plant live on a tile; `journal.ts` turns that into prose. Both import the JSON at build time.
+- **`src/content/`** — the data layer. `canon.ts` adapts the canon bundle into engine shapes and is
+  the only file that knows both; `species.ts` answers which creature and plant live on a tile;
+  `journal.ts` turns that into prose. All import their JSON at build time.
 - **`src/game/`** — the only code that knows Phaser exists. `scenes/WorldScene.ts` draws tiles,
   moves the player, and manages fog; `tileTextures.ts` generates the tile art from `biomes.json`;
   `PhaserGame.tsx` owns the `Phaser.Game` lifecycle; `EventBus.ts` is the seam to React.

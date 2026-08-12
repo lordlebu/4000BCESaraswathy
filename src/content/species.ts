@@ -11,14 +11,18 @@
 // Free of React and Phaser, so the tests exercise exactly what ships.
 
 import biomesData from '../../data/biomes.json';
-import creaturesData from '../../data/creatures.json';
-import floraData from '../../data/flora.json';
+import { creatures as canonCreatures, flora as canonFlora } from './canon';
 import { pickFor } from '../world/rng';
 import type { Biome, BiomeId, Creature, Flora, Placement, Point, Rarity } from '../world/types';
 
+// Biome presentation -- colour, symbol, walkability, travel cost, journal description --
+// is authored here. Canon says which biomes exist; it has no opinion on what they look like.
 export const biomes = biomesData as Biome[];
-export const creatures = creaturesData as Creature[];
-export const flora = floraData as Flora[];
+
+// Species come from canon through the adapter, which is the only place that knows how to
+// turn canon's shape into this one.
+export const creatures: Creature[] = canonCreatures;
+export const flora: Flora[] = canonFlora;
 
 function indexByBiome<T extends { biomes: BiomeId[]; placement: Placement }>(
   entries: T[],

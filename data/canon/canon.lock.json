@@ -1,0 +1,26 @@
+{
+  "canon_version": "1.3.0",
+  "counts": {
+    "fauna": 256,
+    "flora": 90,
+    "regions": 7,
+    "field_maps": 1,
+    "points_of_interest": 6,
+    "npcs": 3,
+    "discoveries": 9,
+    "field_questions": 2,
+    "vocabulary": 3,
+    "characters": 41,
+    "events": 12,
+    "settlements": 2,
+    "factions": 3,
+    "artifacts": 3,
+    "mythology": 3
+  },
+  "sha256": {
+    "species.json": "a20299b849aaccb5965412c79f8b028b4aa9db0bfd7b14d72d3704aca481604e",
+    "places.json": "f2ccecd941d9295eac114d31844ec968b927df7e7258d29b0441d108a3d23cf5",
+    "knowledge.json": "38688db512c4b940c05df08fdcd0442c178dc70bfc5f89e705f40baada233fbf",
+    "world.json": "2f28caae16df7361d1da13ebd1112ff2da86d387dec961ce8cf0703b538ac7f2"
+  }
+}

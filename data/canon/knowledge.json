@@ -1,0 +1,564 @@
+{
+  "canon_version": "1.3.0",
+  "discoveries": [
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "discovery_dockyard_reef",
+      "name": "A Reef in a Square Basin",
+      "discipline": "archaeology",
+      "found_at": [
+        "poi_drowned_dockyard"
+      ],
+      "related_discoveries": [
+        "discovery_tower_collapse"
+      ],
+      "levels": [
+        {
+          "entry": "The water here has corners."
+        },
+        {
+          "entry": "A basin, brick-lined, perhaps two hundred feet on a side. Far too regular to be anything but built."
+        },
+        {
+          "entry": "Lothal's dockyard, which the chronicles describe and which nobody has seen dry in living memory."
+        },
+        {
+          "entry": "The sluice is silted shut. It has been a closed pool since the Shattering, and everything in it has been in it that whole time."
+        }
+      ],
+      "notes": "Archaeology that unlocks two other chains. Being a closed system is what makes it evidence for both the salt and the lurker."
+    },
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "discovery_ghost_mangrove_channel",
+      "name": "The Pale Mangroves Mark the Channel",
+      "discipline": "botany",
+      "subject": "flora_ghost_mangrove",
+      "found_at": [
+        "poi_marsh_shrine"
+      ],
+      "helps": [
+        "npc_thrali"
+      ],
+      "answers": [
+        "question_silver_water"
+      ],
+      "levels": [
+        {
+          "entry": "Mangroves with bark far paler than the others. They seem to be arranged, though that is surely my eye imposing order."
+        },
+        {
+          "entry": "Ghost mangrove, and they are arranged -- in a rough line, with a second line some thirty feet off."
+        },
+        {
+          "entry": "Not planted. They have grown where the water is deep enough to stand and shallow enough to root, which happens to be either side of the old channel."
+        },
+        {
+          "entry": "The Kia have not marked the safe water. The tree has, and the Kia have been reading the tree. Bekh says her grandmother could walk to the shrine at night.",
+          "requires": [
+            "word_kia_thal"
+          ]
+        },
+        {
+          "entry": "Every pale line in this marsh is a channel that held when the rest silted. They are a map of the delta as it was before the Shattering, drawn by something that did not know it was drawing.",
+          "requires": [
+            "discovery_dockyard_reef"
+          ]
+        },
+        {
+          "entry": "Which means the undercroft of the tower can be reached, if one goes the way the trees go."
+        },
+        {
+          "entry": "Thrali can work the far banks again. It is a morning's walk to show him and it will double the ground his family can fish."
+        }
+      ],
+      "notes": "Canon already said the ghost mangrove marks safe channels; this is that fact turned into gameplay. Gates the tower undercroft, so botany opens archaeology."
+    },
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "discovery_marsh_lurker_habits",
+      "name": "The Lurker Waits Where the Water Warms",
+      "discipline": "zoology",
+      "subject": "fauna_lothal_marsh_lurker",
+      "found_at": [
+        "poi_marsh_shrine",
+        "poi_drowned_dockyard"
+      ],
+      "levels": [
+        {
+          "entry": "Something large moved in the pool and I did not see it move."
+        },
+        {
+          "entry": "An enormous salamander, perhaps eight feet, entirely still in the shallow water.",
+          "conditions": {
+            "time_of_day": [
+              "morning",
+              "evening"
+            ]
+          }
+        },
+        {
+          "entry": "The Lothal Marsh-Lurker, which the old bestiaries have surviving here since the Pleistocene and which I had assumed was a flourish."
+        },
+        {
+          "entry": "It chooses the pools that warm first -- shallow, dark-bottomed, out of the current. It is not hunting so much as banking heat, and the hunting follows."
+        },
+        {
+          "entry": "The warm pools are the old brick chambers. The city built its own predator a habitat and then left.",
+          "requires": [
+            "discovery_dockyard_reef"
+          ]
+        }
+      ],
+      "notes": "Pure natural history, no help attached. Not every discovery should mend something -- most should just be worth knowing."
+    },
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "discovery_mask_niche",
+      "name": "The Empty Niche",
+      "discipline": "archaeology",
+      "found_at": [
+        "poi_kavik_tower"
+      ],
+      "subject": "faction_mask_family",
+      "levels": [
+        {
+          "entry": "A recess cut into the stair core at shoulder height, lined and finished, and empty."
+        },
+        {
+          "entry": "Cut for something specific: the back is shaped, and the shaping is a face."
+        },
+        {
+          "entry": "A mask niche, of the kind the Mask Family kept. Whatever stood here was taken rather than lost -- the dust line is clean.",
+          "requires": [
+            "word_kia_thal"
+          ]
+        }
+      ],
+      "notes": "Left open on purpose. Who took the mask is not answerable in this slice and should stay unanswered for a long time -- the diary needs entries the player cannot finish."
+    },
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "discovery_poisoned_ground",
+      "name": "What Came Up in the Eastern Field",
+      "discipline": "geography",
+      "found_at": [
+        "poi_eastern_field"
+      ],
+      "answers": [
+        "question_eastern_field"
+      ],
+      "levels": [
+        {
+          "entry": "Eight acres that will not grow anything. The camp calls it poisoned."
+        },
+        {
+          "entry": "The soil is good, the water is fresh, and the surface crusts white after a dry week."
+        },
+        {
+          "entry": "Salt, and not sea salt -- there is too much of it and it is coming up rather than blowing in."
+        },
+        {
+          "entry": "Something opened below this field during the Shattering and has been weeping brine into it since. Not a wound one can close.",
+          "conditions": {
+            "weather": [
+              "clear"
+            ]
+          }
+        },
+        {
+          "entry": "The same white crust is on the stones at the drowned dockyard, at the same height above the waterline. Whatever opened runs under both.",
+          "requires": [
+            "discovery_dockyard_reef"
+          ]
+        }
+      ],
+      "notes": "The problem half of the field chain. Stops at connected: understanding the salt is not the same as fixing it, and the fix belongs to the rice."
+    },
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "discovery_red_rice_survival",
+      "name": "Red Delta Rice, Wild",
+      "discipline": "botany",
+      "subject": "flora_red_delta_rice",
+      "found_at": [
+        "poi_silted_granary"
+      ],
+      "helps": [
+        "npc_bekh"
+      ],
+      "restores": [
+        "poi_eastern_field"
+      ],
+      "answers": [
+        "question_eastern_field"
+      ],
+      "related_discoveries": [
+        "discovery_poisoned_ground"
+      ],
+      "levels": [
+        {
+          "entry": "Something red is growing out of the granary walls. Not planted, I think."
+        },
+        {
+          "entry": "A cereal, thin-stemmed, the grain red rather than pale. It is rooted in the silt that filled the chambers, several feet above the water table."
+        },
+        {
+          "entry": "Red Delta Rice, which the chronicles say filled these very chambers. It did not need to be reintroduced. It simply never entirely left."
+        },
+        {
+          "entry": "It is growing where the silt is deepest, which is to say where the flood put it. The plant tolerates a salinity that would kill the pale varieties, and the granary walls have been wicking salt out of the delta for four hundred years."
+        },
+        {
+          "entry": "If it will grow in salt, it will grow in the eastern field, which the camp has been failing to plant with the wrong crop every spring since the Shattering.",
+          "requires": [
+            "discovery_poisoned_ground"
+          ]
+        },
+        {
+          "entry": "The field was never poisoned in the sense the camp means. It is salt, brought up by whatever opened underneath it, and salt is a thing some plants have already solved."
+        },
+        {
+          "entry": "Eight acres, sown from the granary walls. It will not be a good crop for three years and it will be a crop.",
+          "requires": [
+            "discovery_poisoned_ground"
+          ]
+        }
+      ],
+      "notes": "The slice's central chain, and the clearest case of knowledge being help: five rungs of ordinary botany, then the field. Deliberately requires the poison discovery, so the player cannot act before they understand."
+    },
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "discovery_saltreed_thatch",
+      "name": "Saltreed, and What It Is For",
+      "discipline": "botany",
+      "subject": "flora_saltreed",
+      "found_at": [
+        "poi_lothal_camp",
+        "poi_marsh_shrine"
+      ],
+      "helps": [
+        "npc_uma"
+      ],
+      "restores": [
+        "poi_lothal_camp"
+      ],
+      "levels": [
+        {
+          "entry": "Reeds, shoulder-high, growing where the water is brackish enough to kill everything else."
+        },
+        {
+          "entry": "Saltreed. The camp roofs with it, badly -- they cut it in spring because that is when they have time."
+        },
+        {
+          "entry": "Cut after the flood rather than before it, the stems are hollow and dry hard. Cut in spring they are full of sap and rot by winter."
+        },
+        {
+          "entry": "Uma has been re-roofing the same three kilns every year of her life for want of somebody telling her when to cut."
+        }
+      ],
+      "notes": "Small, quick, and the first time the player helps anyone. Four rungs, ending in help -- proof that the actionable rung does not require a grand chain."
+    },
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "discovery_silver_water",
+      "name": "When the Channel Runs Silver",
+      "discipline": "anomalies",
+      "found_at": [
+        "poi_drowned_dockyard"
+      ],
+      "answers": [
+        "question_silver_water"
+      ],
+      "levels": [
+        {
+          "entry": "Thrali says the water turns silver and that things come up when it does. I have written it down without knowing what I have written."
+        },
+        {
+          "entry": "It does turn silver, on a still night after rain, and it is not the moon -- it happens under cloud.",
+          "conditions": {
+            "time_of_day": [
+              "night"
+            ],
+            "weather": [
+              "rain",
+              "clear"
+            ]
+          }
+        },
+        {
+          "entry": "The silver is a bloom, not a light. Something microscopic rising in the closed basin when the rain freshens the top of it."
+        },
+        {
+          "entry": "The bloom brings the small fish up, and the small fish bring everything else. Thrali's grandfather knew the whole chain and expressed it in four words.",
+          "requires": [
+            "word_kia_thal"
+          ]
+        }
+      ],
+      "notes": "The opening hook from the design's first thirty minutes. Resolves ecologically without making the local explanation wrong -- the Kia phrase is a compressed version of the same fact."
+    },
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "discovery_tower_collapse",
+      "name": "How the Tower Sat Down",
+      "discipline": "archaeology",
+      "subject": "settlement_lothal",
+      "found_at": [
+        "poi_kavik_tower"
+      ],
+      "related_discoveries": [
+        "discovery_dockyard_reef"
+      ],
+      "levels": [
+        {
+          "entry": "Twenty-two storeys in the chronicles. Four here, and a great deal of rubble that is not shaped like rubble."
+        },
+        {
+          "entry": "The fallen stone lies in courses. It did not scatter -- it descended."
+        },
+        {
+          "entry": "The delta took the foundation before anything took the walls. The tower sank into its own footing and the upper structure came through the lower.",
+          "requires": [
+            "discovery_dockyard_reef"
+          ]
+        },
+        {
+          "entry": "Kavik built for a delta that drained. After the Shattering it stopped draining. The tower did not fail; the ground under it changed its mind."
+        }
+      ],
+      "notes": "Opens the stair shaft. The reading is deliberately sympathetic to Kavik -- the building was sound and the world moved."
+    }
+  ],
+  "field_questions": [
+    {
+      "id": "question_eastern_field",
+      "type": "field_question",
+      "question": "Eight acres of good silt beside permanent water, and the camp has taken nothing off it in a generation. They call it poisoned. I do not think they mean anything precise by the word, and I do not yet have a better one.",
+      "discipline": "botany",
+      "raised_at": "poi_eastern_field",
+      "raised_by": "npc_bekh",
+      "evidence": [
+        "discovery_poisoned_ground",
+        "discovery_red_rice_survival",
+        "discovery_dockyard_reef"
+      ],
+      "local_knowledge": "The ground was spoiled in the Shattering and will come back when it chooses to.",
+      "academic_hypothesis": "Contamination from below, of the kind the Narmada rift literature describes. Untreatable without instruments nobody has.",
+      "resolutions": [
+        {
+          "conclusion": "The field is spoiled and will not be planted again in our lifetimes.",
+          "requires": [
+            "discovery_poisoned_ground"
+          ],
+          "sound": false,
+          "revisit": "The granary walls are carrying more salt than the field and something is growing out of them."
+        },
+        {
+          "conclusion": "It is salt, weeping up from whatever opened underneath. The soil is not ruined for everything -- only for what they have been planting. The rice on the granary walls has been solving this problem unsupervised for four hundred years.",
+          "requires": [
+            "discovery_poisoned_ground",
+            "discovery_red_rice_survival"
+          ],
+          "sound": true
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "The slice's proof that knowledge is help. Both readings are reasonable; only one leads to eight acres of crop, and reaching it needs botany and archaeology together.",
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "question_silver_water",
+      "type": "field_question",
+      "question": "The fisher tells me the channel runs silver and that the creatures rise when it does. He offers this as a fact about the world and not as a puzzle. I cannot decide whether the silver brings them or whether both follow from something I have not seen.",
+      "discipline": "anomalies",
+      "raised_at": "poi_drowned_dockyard",
+      "raised_by": "npc_thrali",
+      "evidence": [
+        "discovery_silver_water",
+        "discovery_dockyard_reef",
+        "discovery_ghost_mangrove_channel"
+      ],
+      "local_knowledge": "Thal-uvai: the water remembers. Said of the basin on still nights after rain, and of two or three other things.",
+      "academic_hypothesis": "Lunar tidal influence on a closed basin, per the Narmada literature on coastal anomalies.",
+      "resolutions": [
+        {
+          "conclusion": "The moon draws the water and the water draws the creatures, as the University would have it.",
+          "requires": [
+            "discovery_silver_water"
+          ],
+          "sound": false,
+          "revisit": "It happens under heavy cloud and at every phase. Whatever the moon is doing, it is not this."
+        },
+        {
+          "conclusion": "A bloom rises in the closed basin when rain freshens its surface; the small fish follow the bloom and everything else follows the small fish. The Kia phrase says the same thing in four words and does not pretend to a mechanism.",
+          "requires": [
+            "discovery_silver_water",
+            "discovery_dockyard_reef"
+          ],
+          "sound": true
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "The opening question. The academic reading is available first and is wrong, which is the point: the player should be able to close the entry early and be mistaken.",
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    }
+  ],
+  "vocabulary": [
+    {
+      "type": "vocabulary",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "word_kia_thal",
+      "word": "thal-",
+      "language": "kia",
+      "gloss": "water that holds something",
+      "literal": "A prefix rather than a word. Attaches to what the water is holding: thal-uvai, water holding memory; thal-set, water holding a path.",
+      "learned_from": [
+        "npc_thrali"
+      ],
+      "unlocks": [
+        "discovery_ghost_mangrove_channel",
+        "discovery_mask_niche",
+        "word_kia_thal_set"
+      ],
+      "notes": "The key that opens the Kia readings. Thrali has half of it; Bekh supplies the rest by using it without explaining."
+    },
+    {
+      "type": "vocabulary",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "word_kia_thal_set",
+      "word": "thal-set",
+      "language": "kia",
+      "gloss": "water holding a path",
+      "literal": "Water that holds a way through it. Said of the marsh between the pale mangroves.",
+      "learned_from": [
+        "npc_bekh",
+        "poi_marsh_shrine"
+      ],
+      "unlocks": [
+        "discovery_ghost_mangrove_channel"
+      ],
+      "notes": "Names the channel before the player can see it, which is the point -- the language encodes the ecology."
+    },
+    {
+      "type": "vocabulary",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "word_kia_uvai",
+      "word": "uvai",
+      "language": "kia",
+      "gloss": "memory, or a thing remembered",
+      "learned_from": [
+        "npc_thrali"
+      ],
+      "unlocks": [
+        "discovery_silver_water"
+      ],
+      "notes": "Completes thal-uvai. Compresses an entire trophic chain into a phrase that sounds like superstition."
+    }
+  ]
+}
