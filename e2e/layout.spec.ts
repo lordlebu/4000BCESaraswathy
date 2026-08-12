@@ -137,44 +137,78 @@ test('the map sheet holds the seed, the legend and the sketches', async ({ page 
 
 // Zoom used to be entirely automatic, with no way for a player to change it at all.
 test('the player can zoom in and out, and get the automatic fit back', async ({ page }) => {
+  // Genuinely slow: it boots the scene, waits for the fit to settle, and then sweeps the whole
+  // zoom range twice. The default budget is fine on an idle machine and not when this shares a
+  // runner with twenty-five other specs, which is where it kept timing out.
+  test.slow();
   await open(page, 1280, 800);
-  const canvas = page.locator('.map-surface canvas');
+  const surface = page.locator('.map-surface');
+  const zoom = async () => Number(await surface.getAttribute('data-zoom'));
 
-  const frame = async () => (await canvas.screenshot()).byteLength;
-  const start = await frame();
+  /**
+   * The zoom, once it has stopped moving.
+   *
+   * The automatic fit is computed from the viewport minus whatever the panels cover, and React
+   * measures those and reports them after mount. Under load that report can land after the
+   * first read, so the fit settles a step later -- which made the baseline racy rather than
+   * the assertions wrong. Polling an attribute costs nothing, unlike polling a screenshot.
+   */
+  const settledZoom = async () => {
+    let last = -1;
+    for (let i = 0; i < 40; i += 1) {
+      const now = await zoom();
+      if (now === last) return now;
+      last = now;
+      await page.waitForTimeout(80);
+    }
+    return last;
+  };
+
+  // Asked of the camera rather than inferred from a picture of it. This test used to compare
+  // the byte length of a canvas screenshot against a 5% tolerance, which cannot work: a whole
+  // zoom step moves that number by about 6%, so the signal and the rendering noise between two
+  // screenshots are the same size. It passed at home and failed on CI's software rasteriser,
+  // and no tolerance exists that both detects a wrong zoom and survives the variance.
+  const fitted = await settledZoom();
+  expect(fitted).toBeGreaterThan(0);
 
   await page.getByRole('button', { name: 'Zoom in' }).click();
-  await page.waitForTimeout(700);
-  const zoomedIn = await frame();
-  // Bigger tiles mean fewer edges and flatter colour, which compresses smaller. The direction is
-  // what matters; the exact number is a property of the PNG encoder, not of the game.
-  expect(zoomedIn).not.toBe(start);
+  await expect(surface).not.toHaveAttribute('data-zoom', String(fitted));
+  const zoomedIn = await zoom();
+  expect(zoomedIn).toBeGreaterThan(fitted);
 
+  // A step down from a step up. Stepping rounds to whole numbers, so this lands where it
+  // started only because the fit is whole here -- assert the direction, which always holds.
   await page.getByRole('button', { name: 'Zoom out' }).click();
-  await page.waitForTimeout(700);
-  expect(await frame()).not.toBe(zoomedIn);
+  await expect(surface).not.toHaveAttribute('data-zoom', String(zoomedIn));
+  expect(await zoom()).toBeLessThan(zoomedIn);
 
-  // The keyboard reaches it too, and 0 hands it back to the automatic fit.
+  // The keyboard reaches it too, and 0 hands it back to the automatic fit exactly.
   await page.keyboard.press('Equal');
-  await page.waitForTimeout(500);
+  await expect(surface).not.toHaveAttribute('data-zoom', String(fitted));
   await page.keyboard.press('Digit0');
-  await page.waitForTimeout(700);
-  expect(Math.abs((await frame()) - start)).toBeLessThan(start * 0.05);
+  await expect(surface).toHaveAttribute('data-zoom', String(fitted));
 
   // Four steps are reachable on a desktop, not three. The floor used to be "zoomed in far enough
   // that the world fills the screen", which on this viewport is 2 — so the widest view a player
-  // could get was half the country, and standing back to see where you are going is most of what a
-  // map is for. Sweeping the whole range and counting what actually renders differently is the
-  // guard: a floor that creeps back up shows here as one fewer distinct view.
-  const rendered = new Set<number>();
+  // could get was half the country, and standing back to see where you are going is most of what
+  // a map is for. Sweeping the range and counting the distinct levels is the guard: a floor that
+  // creeps back up shows here as one fewer.
+  const levels = new Set<number>();
   for (let i = 0; i < 5; i += 1) {
     await page.keyboard.press('Minus');
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(80);
   }
   for (let i = 0; i < 5; i += 1) {
-    rendered.add(await frame());
+    levels.add(await zoom());
     await page.keyboard.press('Equal');
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(80);
   }
-  expect(rendered.size).toBeGreaterThanOrEqual(4);
+  expect(levels.size).toBeGreaterThanOrEqual(4);
+
+  // And the map really is being redrawn, not just reporting a number.
+  const wide = (await page.locator('.map-surface canvas').screenshot()).byteLength;
+  await page.keyboard.press('Equal');
+  await page.waitForTimeout(400);
+  expect((await page.locator('.map-surface canvas').screenshot()).byteLength).not.toBe(wide);
 });

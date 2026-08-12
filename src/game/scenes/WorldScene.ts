@@ -150,6 +150,8 @@ export class WorldScene extends Phaser.Scene {
   private pinchFrom = 0;
   /** The last moment announced, so the UI is told when it changes rather than every frame. */
   private lastMoment = '';
+  /** The zoom last announced, so the DOM mirror is written only when it moves. */
+  private lastZoom = 0;
   /** When the moment was last worked out. It turns a few times an hour; sixty times a second
    * is sixty times too often, and `momentAt` redoes the sky calculation `updateSky` just did. */
   private momentCheckedAt = -Infinity;
@@ -173,6 +175,7 @@ export class WorldScene extends Phaser.Scene {
     this.announced = new Set();
     this.lastMoment = '';
     this.momentCheckedAt = -Infinity;
+    this.lastZoom = 0;
     // The map opens on the light of the hour the player is actually in, then drifts from there.
     // `?hour=21` overrides it, so the evening can be checked without waiting for the evening.
     this.startPhase = startPhaseFor(new URLSearchParams(window.location.search).get('hour'));
@@ -448,6 +451,10 @@ export class WorldScene extends Phaser.Scene {
     const zoom =
       this.zoomChoice === null ? automatic : Phaser.Math.Clamp(this.zoomChoice, MIN_ZOOM, MAX_ZOOM);
     camera.setZoom(zoom);
+    if (zoom !== this.lastZoom) {
+      this.lastZoom = zoom;
+      EventBus.emitEvent('zoom-changed', { zoom });
+    }
 
     // Never push the traveller so far up that the notes crowd them off the top of a short screen.
     const bottom = Math.min(this.insets.bottom, height * 0.45);

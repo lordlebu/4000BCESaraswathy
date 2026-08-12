@@ -6,6 +6,7 @@
 import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { WorldScene } from './scenes/WorldScene';
+import { EventBus } from './EventBus';
 
 export interface PhaserGameProps {
   seed: string;
@@ -52,7 +53,14 @@ export function PhaserGame({ seed, discovered, fieldMapId }: PhaserGameProps) {
     game.current = instance;
     instance.scene.start('WorldScene', initial.current);
 
+    // Mirror the camera's zoom onto the container. One attribute, written only when it moves:
+    // it makes the zoom observable to a test without that test having to read pixels, and it
+    // is the first thing worth looking at when the camera misbehaves.
+    const onZoom = ({ zoom }: { zoom: number }) => node.setAttribute('data-zoom', String(zoom));
+    EventBus.onEvent('zoom-changed', onZoom);
+
     return () => {
+      EventBus.offEvent('zoom-changed', onZoom);
       game.current = null;
       // Held before destroying: `destroy` clears the reference, and this is the one canvas we know
       // belongs to this game, so removing it cannot take a newer mount's canvas with it.
