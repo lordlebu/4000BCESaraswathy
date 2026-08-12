@@ -856,3 +856,56 @@ button.ghost:hover:not(:disabled) {
 @media (max-width: 34rem) {
   .doing { min-height: 4.4em; }
 }
+
+/* Settling a question. Every reading is on the page, including the ones you cannot support —
+ * the shape of the disagreement is the content. Nothing here marks an answer right or wrong. */
+.question h5 {
+  margin: 0.8rem 0 0.3rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.evidence, .readings { list-style: none; margin: 0; padding: 0; }
+.evidence li { display: flex; gap: 0.5rem; margin-bottom: 0.25rem; font-size: 0.88rem; }
+.evidence li b { flex: none; min-width: 11rem; font-weight: 600; }
+.evidence li span { color: var(--muted); }
+.evidence li.lacks b { color: var(--muted); font-weight: 400; }
+
+.readings li {
+  border-left: 2px solid var(--edge);
+  padding: 0.1rem 0 0.1rem 0.7rem;
+  margin-bottom: 0.6rem;
+}
+.readings li p { margin: 0 0 0.25rem; font-size: 0.92rem; }
+.readings li.reading-chosen { border-left-color: var(--accent); }
+.readings button {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  background: rgba(164, 92, 64, 0.12);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* The doubt. An observation the reading has to answer for, not a correction. */
+.doubt {
+  margin: 0.7rem 0 0;
+  padding: 0.5rem 0.7rem;
+  border-left: 2px solid var(--accent);
+  background: rgba(164, 92, 64, 0.08);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+.doubt span {
+  display: block;
+  font-style: normal;
+  font-size: 0.7rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.15rem;
+}

@@ -14,7 +14,6 @@ import { useEffect, useRef } from 'react';
 import {
   type Progress,
   type WorldMoment,
-  availableResolutions,
   blockedBy,
   disciplineProgress,
   entriesSoFar,
@@ -24,6 +23,7 @@ import {
   rungOf
 } from '../journey';
 import { discoveries, discovery, vocabulary, word } from '../content/knowledge';
+import { QuestionCard } from './Questions';
 
 /** Canon's discipline ids, in the order a naturalist would keep them. */
 const DISCIPLINE_ORDER = [
@@ -126,9 +126,10 @@ export interface DiaryProps {
   moment: WorldMoment | null;
   open: boolean;
   onClose: () => void;
+  onAnswer: (questionId: string, index: number) => void;
 }
 
-export function Diary({ progress, moment, open, onClose }: DiaryProps) {
+export function Diary({ progress, moment, open, onClose, onAnswer }: DiaryProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   // Escape closes it, and focus starts somewhere sensible. The map keeps running underneath;
@@ -155,6 +156,12 @@ export function Diary({ progress, moment, open, onClose }: DiaryProps) {
   // mostly paper; a full one is crowded with your own handwriting.
   const density = noticed.length === 0 ? 'sparse' : noticed.length < 6 ? 'filling' : 'dense';
 
+  // A diary is not empty because no discovery has been climbed. A question somebody asked you
+  // is written down too, and so is a word. Checking only discoveries hid the whole page --
+  // including the questions — from a player whose first act was to talk to someone.
+  const written =
+    noticed.length > 0 || questions.length > 0 || Object.keys(languages).length > 0;
+
   return (
     <div className="diary-veil" role="dialog" aria-modal="true" aria-label="Field diary">
       <section className={`diary diary-${density}`}>
@@ -172,7 +179,7 @@ export function Diary({ progress, moment, open, onClose }: DiaryProps) {
           </button>
         </header>
 
-        {noticed.length === 0 ? (
+        {!written ? (
           <p className="diary-empty">
             You have not written anything down. Go and look at something.
           </p>
@@ -180,7 +187,7 @@ export function Diary({ progress, moment, open, onClose }: DiaryProps) {
           <>
             {/* The knowledge tree: disciplines, not stats. Counts rungs, because a
                 half-understood thing is real progress and should look like it. */}
-            <ul className="disciplines">
+            <ul className="disciplines" hidden={noticed.length === 0}>
               {DISCIPLINE_ORDER.filter((k) => byDiscipline[k]?.climbed).map((k) => {
                 const { climbed, total } = byDiscipline[k]!;
                 return (
@@ -214,29 +221,14 @@ export function Diary({ progress, moment, open, onClose }: DiaryProps) {
             {questions.length > 0 && (
               <section className="diary-section">
                 <h3>Open questions</h3>
-                {questions.map((q) => {
-                  const open_ = availableResolutions(progress, q.id);
-                  return (
-                    <article key={q.id} className="question">
-                      <h4>{q.question}</h4>
-                      {q.localKnowledge && (
-                        <p className="account">
-                          <span>Locally</span> {q.localKnowledge}
-                        </p>
-                      )}
-                      {q.academicHypothesis && (
-                        <p className="account">
-                          <span>The University</span> {q.academicHypothesis}
-                        </p>
-                      )}
-                      <p className="muted">
-                        {open_.length === 0
-                          ? 'No reading yet fits what you have seen.'
-                          : `${open_.length} reading${open_.length > 1 ? 's' : ''} the evidence supports.`}
-                      </p>
-                    </article>
-                  );
-                })}
+                {questions.map((q) => (
+                  <QuestionCard
+                    key={q.id}
+                    questionId={q.id}
+                    progress={progress}
+                    onAnswer={onAnswer}
+                  />
+                ))}
               </section>
             )}
 

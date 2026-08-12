@@ -57,8 +57,16 @@ export interface Resolution {
   requires: string[];
   /** Whether this reading survives later evidence. At most one per question. */
   sound: boolean;
-  /** What eventually shows an unsound reading was wrong, if anything does. */
+  /**
+   * The observation that eventually troubles this reading, in a field diary's words.
+   *
+   * Prose, not an id — it had drifted into meaning both, because nothing read it. `revisitAfter`
+   * carries the id, and the pair is deliberate: the prose says what the doubt is, the id says
+   * when the player is in a position to have it.
+   */
   revisit: string | null;
+  /** The discovery that raises that doubt. Until it is seen, a wrong answer is not questioned. */
+  revisitAfter: string | null;
 }
 
 export interface FieldQuestion {
@@ -97,7 +105,10 @@ interface RawDiscovery {
 interface RawQuestion {
   id: string; question: string; discipline: string;
   raised_at?: string; raised_by?: string; evidence?: string[];
-  resolutions: { conclusion: string; requires?: string[]; sound?: boolean; revisit?: string }[];
+  resolutions: {
+    conclusion: string; requires?: string[]; sound?: boolean;
+    revisit?: string; revisit_after?: string;
+  }[];
   local_knowledge?: string; academic_hypothesis?: string;
 }
 interface RawWord {
@@ -140,7 +151,8 @@ export const fieldQuestions: FieldQuestion[] = raw.field_questions.map((q) => ({
     conclusion: r.conclusion,
     requires: r.requires ?? [],
     sound: r.sound === true,
-    revisit: r.revisit ?? null
+    revisit: r.revisit ?? null,
+    revisitAfter: r.revisit_after ?? null
   })),
   localKnowledge: q.local_knowledge ?? null,
   academicHypothesis: q.academic_hypothesis ?? null
