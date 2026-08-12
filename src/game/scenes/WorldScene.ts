@@ -150,6 +150,9 @@ export class WorldScene extends Phaser.Scene {
   private pinchFrom = 0;
   /** The last moment announced, so the UI is told when it changes rather than every frame. */
   private lastMoment = '';
+  /** When the moment was last worked out. It turns a few times an hour; sixty times a second
+   * is sixty times too often, and `momentAt` redoes the sky calculation `updateSky` just did. */
+  private momentCheckedAt = -Infinity;
 
   constructor() {
     super('WorldScene');
@@ -169,6 +172,7 @@ export class WorldScene extends Phaser.Scene {
     this.travelled = 0;
     this.announced = new Set();
     this.lastMoment = '';
+    this.momentCheckedAt = -Infinity;
     // The map opens on the light of the hour the player is actually in, then drifts from there.
     // `?hour=21` overrides it, so the evening can be checked without waiting for the evening.
     this.startPhase = startPhaseFor(new URLSearchParams(window.location.search).get('hour'));
@@ -496,13 +500,17 @@ export class WorldScene extends Phaser.Scene {
     const sky = skyAt(phaseAt(this.time.now + this.travelled, this.startPhase));
     this.sky.setFillStyle(sky.colour, sky.alpha);
 
-    // Announce the moment only when it actually turns. Every frame would be four hundred
-    // React renders a minute for a value that changes a handful of times an hour.
-    const moment = this.momentNow();
-    const key = `${moment.timeOfDay}/${moment.weather}`;
-    if (key !== this.lastMoment) {
-      this.lastMoment = key;
-      EventBus.emitEvent('moment-changed', moment);
+    // Announce the moment only when it actually turns, and only bother asking twice a second.
+    // A weather spell is three in-game hours; checking every frame is work for nothing and
+    // showed up as slower frames under load rather than as anything visible.
+    if (this.time.now - this.momentCheckedAt >= 500) {
+      this.momentCheckedAt = this.time.now;
+      const moment = this.momentNow();
+      const key = `${moment.timeOfDay}/${moment.weather}`;
+      if (key !== this.lastMoment) {
+        this.lastMoment = key;
+        EventBus.emitEvent('moment-changed', moment);
+      }
     }
   }
 
