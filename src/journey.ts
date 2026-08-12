@@ -238,6 +238,23 @@ export function entryFor(progress: Progress, id: string): string | null {
   return d.rungs[Math.min(rung, lastRung(d))]?.entry ?? null;
 }
 
+/**
+ * Every entry the player has written for a discovery, oldest first.
+ *
+ * The diary keeps its crossings-out. A rung does not replace the one below it on the page —
+ * it is written under it, and the earlier reading stays there struck through. That is the
+ * whole progression system made visible: the player can see they thought the silver water was
+ * the moon, and that they were wrong, without anyone telling them how the game works.
+ *
+ * The last element is the current reading; everything before it is superseded.
+ */
+export function entriesSoFar(progress: Progress, id: string): string[] {
+  const d = discovery(id);
+  const rung = rungOf(progress, id);
+  if (!d || rung < 0) return [];
+  return d.rungs.slice(0, Math.min(rung, lastRung(d)) + 1).map((r) => r.entry);
+}
+
 /** A discovery is finished when its ladder is climbed. */
 export function isComplete(progress: Progress, id: string): boolean {
   const d = discovery(id);

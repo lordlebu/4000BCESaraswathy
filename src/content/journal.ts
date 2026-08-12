@@ -4,6 +4,7 @@
 // stays the single source of truth and this file holds nothing but phrasing.
 
 import { biomeFor, creatureFor, floraFor } from './species';
+import { isPresent, noteFor, routineFor } from './routine';
 import { landmarkKindFor, landmarkTitle } from './landmarks';
 import type { Creature, Point, Tile, World } from '../world/types';
 
@@ -29,6 +30,15 @@ export interface JournalEntry {
   description: string;
   creature: FieldNote;
   flora: FieldNote;
+  /**
+   * What the animal is doing at this hour, kept apart from what it *is*.
+   *
+   * Separate because it is the only line here that changes while the player stands still, and
+   * mixing it into the creature's note made the panel reflow whenever a creature fell asleep.
+   * The panel then resized, React reported new insets, and the camera refitted itself — the
+   * map twitching because the day turned. Its own line can be given a reserved height.
+   */
+  doing: string;
 }
 
 /** Is this the tile the named place sits on? */
@@ -54,7 +64,11 @@ function titleFor(world: World, tile: Tile): string {
   return biome ? `${biome.name} at ${tile.x}, ${tile.y}` : `Unmapped ground at ${tile.x}, ${tile.y}`;
 }
 
-export function describeTile(tile: Tile, world: World): JournalEntry {
+export function describeTile(
+  tile: Tile,
+  world: World,
+  moment: { timeOfDay: string; weather: string } | null = null
+): JournalEntry {
   const seed = world.seed;
   const biome = biomeFor(tile.biome);
   const creature = creatureFor(tile, seed);
@@ -75,6 +89,7 @@ export function describeTile(tile: Tile, world: World): JournalEntry {
     creature: creature
       ? { name: creature.name, note: creature.journalPrompt }
       : { name: null, note: 'No creature signs yet, only wind, dust, and the road ahead.' },
+    doing: creature ? noteFor(creature, moment) : '',
     flora: plant
       ? { name: plant.name, note: plant.journalPrompt }
       : { name: null, note: 'Nothing is growing here worth pressing between the pages.' }
@@ -87,8 +102,15 @@ export function describeTile(tile: Tile, world: World): JournalEntry {
  * `mood` used to be read off a table that did not carry the field, so this printed "remember its
  * undefined presence" to the player. It is typed now, and the data is the only source.
  */
-export function creatureAction(creature: Creature | null): string {
+export function creatureAction(
+  creature: Creature | null,
+  moment: { timeOfDay: string; weather: string } | null = null
+): string {
   if (!creature) return 'Listen quietly. The road has no creature sign to follow here.';
+  if (!isPresent(routineFor(creature, moment))) {
+    // A refusal that gives a reason and an hour. Coming back is the mechanic, not a penalty.
+    return noteFor(creature, moment);
+  }
   return `You make a quiet sketch of the ${creature.name.toLowerCase()} and remember its ${creature.mood} presence.`;
 }
 

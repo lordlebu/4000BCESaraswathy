@@ -29,6 +29,17 @@ export interface GameToUi {
   'journey-changed': { discovered: string[] };
   /** The player reached the landmark. Fires once per journey — this is the end of the session. */
   'landmark-reached': { title: string; body: string; closing: string };
+
+  /**
+   * The hour and the sky, from the only thing that owns them.
+   *
+   * React used to run its own timer off the same formulas, which is two clocks agreeing by
+   * luck. The scene spends time when the traveller walks, so it is the authority.
+   */
+  'moment-changed': { timeOfDay: string; weather: string };
+
+  /** The traveller is standing on an authored place. Carries ids; the UI resolves them. */
+  'poi-entered': { poiId: string; fieldMapId: string };
 }
 
 /**
@@ -41,6 +52,8 @@ export interface GameToUi {
  */
 export interface UiToGame {
   'new-journey': { seed: string };
+  /** Lay down a different field map. The overworld sends this. */
+  'travel-to': { fieldMapId: string; seed: string };
   'resume-journey': { seed: string; discovered: string[] };
   /**
    * How much of the canvas the overlays are covering, in CSS pixels.

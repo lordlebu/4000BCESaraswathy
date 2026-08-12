@@ -13,6 +13,7 @@ import {
   canAdvance,
   disciplineProgress,
   emptyProgress,
+  entriesSoFar,
   entryFor,
   gatherable,
   isComplete,
@@ -60,6 +61,28 @@ describe('the ladder', () => {
     const first = entryFor(p, 'discovery_saltreed_thatch')!;
     p = advance(p, 'discovery_saltreed_thatch');
     expect(entryFor(p, 'discovery_saltreed_thatch')).not.toBe(first);
+  });
+
+  it('keeps the crossings-out, so the player can see they were wrong', () => {
+    let p = emptyProgress();
+    expect(entriesSoFar(p, 'discovery_saltreed_thatch')).toEqual([]);
+
+    p = advance(p, 'discovery_saltreed_thatch');
+    const first = entriesSoFar(p, 'discovery_saltreed_thatch');
+    expect(first).toHaveLength(1);
+
+    p = advance(p, 'discovery_saltreed_thatch');
+    const second = entriesSoFar(p, 'discovery_saltreed_thatch');
+    expect(second).toHaveLength(2);
+    // The earlier reading is kept, not overwritten, and the newest is last.
+    expect(second[0]).toBe(first[0]);
+    expect(second.at(-1)).toBe(entryFor(p, 'discovery_saltreed_thatch'));
+  });
+
+  it('never writes more entries than the ladder has rungs', () => {
+    const p = climb(emptyProgress(), 'discovery_saltreed_thatch');
+    const d = discovery('discovery_saltreed_thatch')!;
+    expect(entriesSoFar(p, 'discovery_saltreed_thatch')).toHaveLength(d.rungs.length);
   });
 
   it('will not climb past what a rung requires', () => {

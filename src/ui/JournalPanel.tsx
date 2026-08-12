@@ -74,6 +74,9 @@ export function JournalPanel({
       <div className="journal-notes">
         <div>
           <h3>Creatures</h3>
+          {/* Reserved height: this is the one line that changes on its own, and a panel that
+              resizes as the day turns drags the camera with it. */}
+          {entry.doing && <p className="doing">{entry.doing}</p>}
           <Note note={entry.creature} />
         </div>
         <div>

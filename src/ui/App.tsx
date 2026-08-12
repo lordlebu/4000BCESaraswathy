@@ -7,12 +7,18 @@ import { JournalPanel } from './JournalPanel';
 import { JourneyLog } from './JourneyLog';
 import { Controls } from './Controls';
 import { CanonPanel } from './CanonPanel';
+import { Diary, diaryCount } from './Diary';
+import { PlacePanel } from './PlacePanel';
+import { Overworld } from './Overworld';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { creatureAction } from '../content/journal';
+import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
 import { loadJourney, saveJourney } from '../save';
+import { advance, hear, type WorldMoment } from '../journey';
+import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import type { World } from '../world/types';
 
 const DEFAULT_SEED = 'jambhudweepa-evening';
@@ -40,6 +46,24 @@ export function App() {
   // about the journey and belongs in the travel log even after the page is closed.
   const [reached, setReached] = useState(initialJourney.current.reached);
 
+  // What the player knows. Every rule about changing it lives in `journey.ts`; this only holds
+  // it and hands it to the save.
+  const [progress, setProgress] = useState(initialJourney.current.progress);
+  const [diaryOpen, setDiaryOpen] = useState(false);
+
+  // The three scales. `fieldMapId` is the country under foot; `poiId` is the authored place
+  // being stood in, if any; a sub-location opens inside the place panel rather than here,
+  // because going deeper into a ruin is not leaving it.
+  const [fieldMapId, setFieldMapId] = useState(DEFAULT_FIELD_MAP);
+  const [poiId, setPoiId] = useState<string | null>(null);
+  const [overworldOpen, setOverworldOpen] = useState(false);
+  const visited = useRef(new Set<string>());
+
+  // The scene owns the clock and says when it turns. React used to run its own timer off the
+  // same formulas, which is two clocks agreeing by luck -- and they would have drifted the
+  // moment walking started spending time, which it does.
+  const [moment, setMoment] = useState<WorldMoment | null>(null);
+
   // The log starts open where there is room beside the map and closed where it would cover it.
   // Only the initial state — once the player has opened or closed it, that is their decision and
   // rotating the device does not overrule it.
@@ -66,22 +90,30 @@ export function App() {
       setReached(true);
     };
 
+    const onPoiEntered = ({ poiId: id }: GameToUi['poi-entered']) => setPoiId(id);
+    const onMoment = (next: GameToUi['moment-changed']) => setMoment(next);
+
     EventBus.onEvent('world-ready', onWorldReady);
     EventBus.onEvent('tile-entered', onTileEntered);
     EventBus.onEvent('journey-changed', onJourneyChanged);
     EventBus.onEvent('landmark-reached', onLandmarkReached);
+    EventBus.onEvent('poi-entered', onPoiEntered);
+    EventBus.onEvent('moment-changed', onMoment);
     return () => {
       EventBus.offEvent('world-ready', onWorldReady);
       EventBus.offEvent('tile-entered', onTileEntered);
       EventBus.offEvent('journey-changed', onJourneyChanged);
       EventBus.offEvent('landmark-reached', onLandmarkReached);
+      EventBus.offEvent('poi-entered', onPoiEntered);
+      EventBus.offEvent('moment-changed', onMoment);
     };
   }, []);
 
   // Persist on a timer rather than on every step: walking writes to localStorage 4-5 times a
   // second otherwise, and the journey is not worth a synchronous write that often.
   useEffect(() => {
-    const flush = () => saveJourney(seed, { discovered: discovered.current, observed, reached });
+    const flush = () =>
+      saveJourney(seed, { discovered: discovered.current, observed, reached, progress });
     const timer = window.setInterval(flush, 3000);
     window.addEventListener('pagehide', flush);
     return () => {
@@ -89,7 +121,7 @@ export function App() {
       window.removeEventListener('pagehide', flush);
       flush();
     };
-  }, [seed, observed, reached]);
+  }, [seed, observed, reached, progress]);
 
   const currentCreature = useMemo(() => {
     if (!world || !arrival) return null;
@@ -129,6 +161,7 @@ export function App() {
     // A new map is a deliberate fresh start, so it must not inherit fog the player already lifted.
     discovered.current = [];
     setObserved([]);
+    setProgress(loadJourney(next).progress);
     setMemory('');
     setArrivalPage(null);
     setReached(false);
@@ -139,11 +172,45 @@ export function App() {
     EventBus.emitEvent('new-journey', { seed: next });
   }, []);
 
+  /**
+   * Whether the animal is actually here, rather than asleep or sheltering somewhere out of it.
+   *
+   * A sketch needs a subject. Refusing when the creature is not out is the point of the
+   * routine system, and the journal says which hour to come back for.
+   */
+  const creatureIsOut = useMemo(
+    () => Boolean(currentCreature) && isPresent(routineFor(currentCreature!, moment)),
+    [currentCreature, moment]
+  );
+
   const observe = useCallback(() => {
-    if (!currentCreature || observed.includes(currentCreature.name)) return;
+    if (!currentCreature || !creatureIsOut || observed.includes(currentCreature.name)) return;
     setObserved((previous) => [...previous, currentCreature.name]);
-    setMemory(`Sketch recorded: ${creatureAction(currentCreature)}`);
-  }, [currentCreature, observed]);
+    setMemory(`Sketch recorded: ${creatureAction(currentCreature, moment)}`);
+  }, [currentCreature, creatureIsOut, observed, moment]);
+
+  /** Look closer at something. The rule for whether that is possible is `journey.ts`'s. */
+  const look = useCallback(
+    (discoveryId: string) => setProgress((p) => advance(p, discoveryId, moment)),
+    [moment]
+  );
+
+  /** Listen to someone, and take what the line gives — a word, a question, a lead. */
+  const listen = useCallback(
+    (npcId: string, lineIndex: number) => setProgress((p) => hear(p, npcId, lineIndex)),
+    []
+  );
+
+  const travel = useCallback(
+    (next: string) => {
+      setFieldMapId(next);
+      setPoiId(null);
+      setOverworldOpen(false);
+      discovered.current = [];
+      EventBus.emitEvent('travel-to', { fieldMapId: next, seed });
+    },
+    [seed]
+  );
 
   const travelLog = useMemo(() => {
     if (!world) return null;
@@ -215,7 +282,11 @@ export function App() {
     // The stage is the viewport. The canvas fills it and everything else floats on top, which is
     // why nothing here scrolls and there is no page chrome left to scroll past.
     <div className="stage">
-      <PhaserGame seed={seed} discovered={initialJourney.current.discovered} />
+      <PhaserGame
+        seed={seed}
+        discovered={initialJourney.current.discovered}
+        fieldMapId={DEFAULT_FIELD_MAP}
+      />
 
       <Controls
         seed={seed}
@@ -223,6 +294,37 @@ export function App() {
         observed={observed}
         logOpen={logOpen}
         onToggleLog={() => setLogOpen((open) => !open)}
+        diaryCount={diaryCount(progress)}
+        onOpenDiary={() => setDiaryOpen(true)}
+        onOpenOverworld={() => setOverworldOpen(true)}
+      />
+
+      <Diary
+        progress={progress}
+        moment={moment}
+        open={diaryOpen}
+        onClose={() => setDiaryOpen(false)}
+      />
+
+      <Overworld
+        current={fieldMapId}
+        progress={progress}
+        open={overworldOpen}
+        onTravel={travel}
+        onClose={() => setOverworldOpen(false)}
+      />
+
+      <PlacePanel
+        poiId={poiId}
+        progress={progress}
+        moment={moment}
+        firstVisit={Boolean(poiId) && !visited.current.has(poiId!)}
+        onLook={look}
+        onListen={listen}
+        onClose={() => {
+          if (poiId) visited.current.add(poiId);
+          setPoiId(null);
+        }}
       />
 
       <JourneyLog
@@ -242,7 +344,7 @@ export function App() {
         discovered={arrival?.discovered ?? 0}
         atLandmark={arrival?.atLandmark ?? false}
         memory={memory}
-        canObserve={Boolean(currentCreature)}
+        canObserve={creatureIsOut}
         alreadySketched={Boolean(currentCreature && observed.includes(currentCreature.name))}
         onObserve={observe}
       />

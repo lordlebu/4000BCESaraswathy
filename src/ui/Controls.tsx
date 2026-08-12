@@ -16,14 +16,44 @@ export interface ControlsProps {
   observed: string[];
   logOpen: boolean;
   onToggleLog: () => void;
+  /** How many discoveries are under way, so the button can say the diary has something in it. */
+  diaryCount: number;
+  onOpenDiary: () => void;
+  onOpenOverworld: () => void;
 }
 
-export function Controls({ seed, onGenerate, observed, logOpen, onToggleLog }: ControlsProps) {
+export function Controls({
+  seed,
+  onGenerate,
+  observed,
+  logOpen,
+  onToggleLog,
+  diaryCount,
+  onOpenDiary,
+  onOpenOverworld
+}: ControlsProps) {
   const [sheet, setSheet] = useState(false);
 
   return (
     <>
       <div className="controls">
+        <button type="button" className="control" aria-label="Where to go" onClick={onOpenOverworld}>
+          <span aria-hidden="true">◇</span>
+          <span className="control-label">Travel</span>
+        </button>
+
+        <button
+          type="button"
+          className="control"
+          aria-label={diaryCount ? `Diary, ${diaryCount} under way` : 'Diary'}
+          onClick={onOpenDiary}
+        >
+          <span aria-hidden="true">✎</span>
+          <span className="control-label">
+            Diary{diaryCount > 0 && <i className="control-count">{diaryCount}</i>}
+          </span>
+        </button>
+
         <button
           type="button"
           className="control"

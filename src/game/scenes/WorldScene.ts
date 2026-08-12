@@ -20,9 +20,12 @@ import {
   type Facing
 } from '../player';
 import { phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
+import { momentAt } from '../moment';
 import { arrivalPage, describeSurroundings, describeTile, landmarkHint } from '../../content/journal';
 import { travelCost } from '../../content/species';
-import { generateWorld, isWalkable } from '../../world/generate';
+import { isWalkable } from '../../world/generate';
+import { buildFieldMap, poiAt, type FieldMapWorld } from '../../world/fieldMap';
+import { fieldMap } from '../../content/places';
 import { findPath } from '../../world/pathfind';
 import type { Point, Tile, World } from '../../world/types';
 
@@ -93,10 +96,26 @@ const STEP_KEYS: Record<string, [number, number]> = {
 export interface WorldSceneData {
   seed: string;
   discovered?: string[];
+  /**
+   * Which canon field map to lay down.
+   *
+   * The scene used to call `generateWorld` and get an anonymous continent. It now builds a
+   * named place: canon gives the biome palette and the points of interest, the generator lays
+   * the terrain, and `buildFieldMap` puts the authored places on it. Layout stays the
+   * engine's business and the places stay canon's, which is the whole reason for the split.
+   */
+  fieldMapId?: string;
 }
+
+/** Where a journey starts when nothing says otherwise. */
+export const DEFAULT_FIELD_MAP = 'field_map_lothal';
 
 export class WorldScene extends Phaser.Scene {
   private world!: World;
+  /** The field map and its placed points of interest. `world` is this one's ground. */
+  private built!: FieldMapWorld;
+  /** Points of interest already announced, so standing on one does not re-announce it. */
+  private announced = new Set<string>();
   private tileSprites: Phaser.GameObjects.Image[][] = [];
   private fogSprites: Phaser.GameObjects.Image[][] = [];
   private player!: Phaser.GameObjects.Sprite;
@@ -129,6 +148,11 @@ export class WorldScene extends Phaser.Scene {
   private zoomChoice: number | null = null;
   /** Distance between two fingers on the previous frame, for pinch. Zero when not pinching. */
   private pinchFrom = 0;
+  /** The last moment announced, so the UI is told when it changes rather than every frame. */
+  private lastMoment = '';
+  /** When the moment was last worked out. It turns a few times an hour; sixty times a second
+   * is sixty times too often, and `momentAt` redoes the sky calculation `updateSky` just did. */
+  private momentCheckedAt = -Infinity;
 
   constructor() {
     super('WorldScene');
@@ -146,6 +170,9 @@ export class WorldScene extends Phaser.Scene {
     this.moving = false;
     this.facing = 'down';
     this.travelled = 0;
+    this.announced = new Set();
+    this.lastMoment = '';
+    this.momentCheckedAt = -Infinity;
     // The map opens on the light of the hour the player is actually in, then drifts from there.
     // `?hour=21` overrides it, so the evening can be checked without waiting for the evening.
     this.startPhase = startPhaseFor(new URLSearchParams(window.location.search).get('hour'));
@@ -157,7 +184,13 @@ export class WorldScene extends Phaser.Scene {
 
   create(data: WorldSceneData): void {
     createTileTextures(this);
-    this.world = generateWorld({ seed: data.seed });
+
+    // Canon names the ground. A seed still varies it, so a journey stays shareable in a link;
+    // leave the seed alone and every player walks the same documented Lothal.
+    const map = fieldMap(data.fieldMapId ?? DEFAULT_FIELD_MAP);
+    if (!map) throw new Error(`no such field map: ${data.fieldMapId}`);
+    this.built = buildFieldMap(map, { seed: data.seed });
+    this.world = this.built.world;
     this.at = { ...this.world.start };
 
     const { width, height } = this.world;
@@ -183,6 +216,21 @@ export class WorldScene extends Phaser.Scene {
       }
       this.tileSprites.push(tileRow);
       this.fogSprites.push(fogRow);
+    }
+
+    // The authored places, marked. Under the fog on purpose: a point of interest is a thing
+    // you find by walking there, not a waypoint handed to you at the start.
+    for (const { poi, at } of this.built.placed) {
+      this.add
+        .text(at.x * TILE_SIZE + TILE_SIZE / 2, at.y * TILE_SIZE + TILE_SIZE / 2, '◇', {
+          fontFamily: 'Georgia, serif',
+          fontSize: `${Math.round(TILE_SIZE * 0.7)}px`,
+          color: '#fff6df'
+        })
+        .setOrigin(0.5)
+        .setDepth(5)
+        .setAlpha(0.9)
+        .setName(`poi:${poi.id}`);
     }
 
     this.createPlayer();
@@ -306,6 +354,7 @@ export class WorldScene extends Phaser.Scene {
 
     EventBus.onEvent('new-journey', this.onNewJourney);
     EventBus.onEvent('resume-journey', this.onNewJourney);
+    EventBus.onEvent('travel-to', this.onTravelTo);
     EventBus.onEvent('viewport-insets', this.onInsets);
     EventBus.onEvent('zoom', this.onZoom);
 
@@ -316,6 +365,7 @@ export class WorldScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       EventBus.offEvent('new-journey', this.onNewJourney);
       EventBus.offEvent('resume-journey', this.onNewJourney);
+      EventBus.offEvent('travel-to', this.onTravelTo);
       EventBus.offEvent('viewport-insets', this.onInsets);
       EventBus.offEvent('zoom', this.onZoom);
       this.input.off(Phaser.Input.Events.POINTER_WHEEL);
@@ -349,7 +399,23 @@ export class WorldScene extends Phaser.Scene {
   };
 
   private onNewJourney = (payload: { seed: string; discovered?: string[] }): void => {
-    this.scene.restart({ seed: payload.seed, discovered: payload.discovered ?? [] });
+    this.scene.restart({
+      seed: payload.seed,
+      discovered: payload.discovered ?? [],
+      // A new seed re-rolls the ground under the same place, rather than moving you.
+      fieldMapId: this.built?.fieldMap.id
+    });
+  };
+
+  /**
+   * Travel to another field map.
+   *
+   * The fog does not carry over: it is knowledge of *this* ground, and arriving on the plateau
+   * knowing where the Lothal mangroves are would be a lie. What does carry over is the diary,
+   * which lives in React and never passes through here.
+   */
+  private onTravelTo = (payload: { fieldMapId: string; seed: string }): void => {
+    this.scene.restart({ seed: payload.seed, discovered: [], fieldMapId: payload.fieldMapId });
   };
 
   /**
@@ -412,12 +478,40 @@ export class WorldScene extends Phaser.Scene {
     );
   }
 
+  /**
+   * The hour and the sky, as one value.
+   *
+   * Built from the scene's own clock -- wall time plus whatever the walking has spent -- so
+   * the creature asleep in the journal and the light on the map are the same moment.
+   */
+  private momentNow() {
+    return momentAt(
+      this.world.seed,
+      this.time.now + this.travelled,
+      this.startPhase,
+      this.built.fieldMap.climate
+    );
+  }
+
   /** Repaint the wash for the current hour. Cheap enough to run every frame. */
   private updateSky(): void {
     // Time passes while you stand still, and walking spends it faster. Sitting on a riverbank for
     // ten real minutes is four hours of the day; so is walking twenty tiles of open grassland.
     const sky = skyAt(phaseAt(this.time.now + this.travelled, this.startPhase));
     this.sky.setFillStyle(sky.colour, sky.alpha);
+
+    // Announce the moment only when it actually turns, and only bother asking twice a second.
+    // A weather spell is three in-game hours; checking every frame is work for nothing and
+    // showed up as slower frames under load rather than as anything visible.
+    if (this.time.now - this.momentCheckedAt >= 500) {
+      this.momentCheckedAt = this.time.now;
+      const moment = this.momentNow();
+      const key = `${moment.timeOfDay}/${moment.weather}`;
+      if (key !== this.lastMoment) {
+        this.lastMoment = key;
+        EventBus.emitEvent('moment-changed', moment);
+      }
+    }
   }
 
   /**
@@ -561,13 +655,24 @@ export class WorldScene extends Phaser.Scene {
 
     EventBus.emitEvent('tile-entered', {
       at,
-      entry: describeTile(tile, this.world),
+      entry: describeTile(tile, this.world, this.momentNow()),
       surroundings: describeSurroundings(this.world, at),
       hint: landmarkHint(this.world, at),
       discovered: this.discovered.size,
       atLandmark
     });
     EventBus.emitEvent('journey-changed', { discovered: [...this.discovered] });
+
+    // Standing on an authored place. Announced once per visit rather than on every step, so
+    // walking on the spot does not reopen the page you are already reading.
+    const here = poiAt(this.built, at);
+    if (here && !this.announced.has(here.poi.id)) {
+      this.announced.add(here.poi.id);
+      EventBus.emitEvent('poi-entered', { poiId: here.poi.id, fieldMapId: this.built.fieldMap.id });
+    } else if (!here) {
+      // Leaving clears the latch, so coming back later is a fresh arrival.
+      this.announced.clear();
+    }
 
     // The arrival is the end of the session, so it gets its own beat: the camera settles, and the
     // written page goes up once rather than on every step taken while standing there.
