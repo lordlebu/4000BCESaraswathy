@@ -38,6 +38,17 @@ export interface GameToUi {
    */
   'moment-changed': { timeOfDay: string; weather: string };
 
+  /**
+   * The camera's zoom, whenever it changes.
+   *
+   * Reflected onto the map container as `data-zoom`. The e2e suite used to infer zoom from the
+   * size of a PNG of the canvas, which turns out to be a hopeless instrument: a whole zoom step
+   * moves that number by about 6%, and rendering variance between two screenshots on a
+   * software rasteriser is the same size. Reporting the number directly makes the question
+   * exact instead of statistical, and is worth knowing when debugging besides.
+   */
+  'zoom-changed': { zoom: number };
+
   /** The traveller is standing on an authored place. Carries ids; the UI resolves them. */
   'poi-entered': { poiId: string; fieldMapId: string };
 }
