@@ -15,12 +15,14 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 
-const dataDir = path.join(path.resolve(__dirname, '..'), 'data');
+// The bundle lives in data/canon/ now: canon exports its own shape and src/content/canon.ts
+// adapts it. The flat creatures.json and flora.json were the old engine-shaped export.
+const dataDir = path.join(path.resolve(__dirname, '..'), 'data', 'canon');
 const lockPath = path.join(dataDir, 'canon.lock.json');
 
 if (!fs.existsSync(lockPath)) {
   console.error('data/canon.lock.json is missing. Regenerate it from the canon repo:');
-  console.error('  python utils/export_game_data.py --apply');
+  console.error('  python utils/export_canon_bundle.py --apply');
   process.exit(1);
 }
 
@@ -52,7 +54,7 @@ if (failures.length) {
   console.error('');
   console.error('These files are generated. Do not edit them by hand -- change the species');
   console.error('canon in the SouthOfTethys repo, then re-export:');
-  console.error('  python utils/export_game_data.py --apply');
+  console.error('  python utils/export_canon_bundle.py --apply');
   process.exit(1);
 }
 

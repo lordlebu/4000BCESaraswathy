@@ -1,0 +1,1040 @@
+{
+  "canon_version": "1.4.0",
+  "regions": [
+    {
+      "id": "region_aravali",
+      "type": "region",
+      "name": "Aravali Ranges",
+      "continent": "jambhudweepa",
+      "notes": "Stony ranges. Site of Mask Family schism, Jharwa massacre, and hidden sanctuary of Vara-Ma/Orek/Thren.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md",
+        "map"
+      ]
+    },
+    {
+      "id": "region_ganges_lava_sea",
+      "type": "region",
+      "name": "Ganges Lava Sea",
+      "continent": "jambhudweepa",
+      "bestiary_region": "ganges-lava-sea",
+      "biomes": [
+        "lava_field",
+        "mountains"
+      ],
+      "habitats": [
+        "magmatic",
+        "glacial",
+        "underworld portals"
+      ],
+      "landmarks": [
+        "Ganges Lava Lake"
+      ],
+      "notes": "One of the most extreme magmatic zones in the setting: active volcanic rifts that cool and solidify into vast jagged black basalt plains and lava fields. Extreme zone where magma meets ocean. Deep-sea vent lineages were pushed to the surface here and evolved obsidian carapaces that withstand direct magma exposure; extremophile gastropods fuse basalt and metallic ore into armoured shells along the lake shores. The fauna are heavily armoured and heat-resistant, often fused with volcanic minerals. The bestiary groups the magmatic and glacial extremes together, with underworld portals at the far end. Species here default to rare.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md",
+        "docs/bestiary.md"
+      ]
+    },
+    {
+      "id": "region_gedrosian_desert",
+      "type": "region",
+      "name": "Gedrosian Desert",
+      "continent": "jambhudweepa",
+      "bestiary_region": "gedrosian-taklamakan",
+      "biomes": [
+        "desert"
+      ],
+      "notes": "Arid frontier. Home to Beedu desert rays and northern steppe approaches.",
+      "canon": "primary",
+      "sources": [
+        "map"
+      ]
+    },
+    {
+      "id": "region_narmada_plateau",
+      "type": "region",
+      "name": "Narmada Plateau",
+      "continent": "jambhudweepa",
+      "bestiary_region": "narmada-vindhya",
+      "biomes": [
+        "hills",
+        "mountains"
+      ],
+      "landmarks": [
+        "Narmada University"
+      ],
+      "notes": "Volcanic highlands. Site of academic culture in later eras and source of Narmada Man blessing.",
+      "canon": "primary",
+      "sources": [
+        "map",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "region_saraswati_delta",
+      "type": "region",
+      "name": "Saraswati Delta",
+      "continent": "jambhudweepa",
+      "bestiary_region": "saraswati-godavari-deltas",
+      "biomes": [
+        "wetland",
+        "river"
+      ],
+      "settlements": [
+        "settlement_lothal",
+        "settlement_dwarka"
+      ],
+      "habitats": [
+        "wetlands",
+        "marshes",
+        "mangroves"
+      ],
+      "notes": "Primary setting of Civilization Dawn / Lothal Era. Home to Harappan settlers and Kia clan.",
+      "canon": "primary",
+      "sources": [
+        "map",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "region_shattered_sea",
+      "type": "region",
+      "name": "Shattered Sea & Mappa Mundi",
+      "continent": "jambhudweepa",
+      "bestiary_region": "shattered-sea-mappa-mundi",
+      "biomes": [
+        "sea",
+        "forest"
+      ],
+      "habitats": [
+        "reefs",
+        "islands",
+        "deep rainforest"
+      ],
+      "landmarks": [
+        "Tamralinga Port",
+        "Cognitavi bird-fortresses",
+        "Mappa Mundi rainforests"
+      ],
+      "notes": "Marine and island belt east of the delta, grouped in the bestiary with the deep rainforests of Mappa Mundi. The Cognitavi claim the volatile sea and build their own bird-fortresses here, holding integrated nests on the coral docks of Tamralinga Port; Tuli seafarers of the Vanga Maritime League work the pearl routes under Cognitavi guidance. The Mappa Mundi rainforests are the refuge of the displaced Silvanus and Sylvian lineages after the Vanara cataclysm.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md",
+        "docs/bestiary.md"
+      ]
+    },
+    {
+      "id": "region_tethys_sky_routes",
+      "type": "region",
+      "name": "Tethys Sky Routes & Floating Islands",
+      "continent": "tethys",
+      "bestiary_region": "tethys-sky-routes",
+      "biomes": [],
+      "habitats": [
+        "floating islands",
+        "sky-oases",
+        "low gravity"
+      ],
+      "landmarks": [
+        "Cognitavi cloud-monasteries",
+        "inverted waterfalls"
+      ],
+      "notes": "Sky-oases above the Tethys Sea. The islands are held up by lodestone cores of hyper-magnetised, Permian-irradiated ore that repels the Earth's field into localised anti-gravity bubbles, a legacy of the shattering of Gondwana; warped gravity on the undersides sends rainwater overflowing upward as inverted waterfalls. Home to the bark-skinned Vyom-Yakshis, the Cognitavi Cloud-Hermits and their monasteries, and traded by orca-blimp mariners.",
+      "biomes_note": "Deliberately empty. Sky species have no equivalent among the ten ground biomes, so everything filed here is held as lore and never placed on a tile.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md",
+        "docs/bestiary.md"
+      ]
+    }
+  ],
+  "field_maps": [
+    {
+      "id": "field_map_lothal",
+      "type": "field_map",
+      "name": "Lothal",
+      "region": "region_saraswati_delta",
+      "seed_biomes": [
+        "wetland",
+        "river",
+        "settlement",
+        "coast"
+      ],
+      "scale": "small",
+      "points_of_interest": [
+        "poi_lothal_camp",
+        "poi_kavik_tower",
+        "poi_silted_granary",
+        "poi_drowned_dockyard",
+        "poi_marsh_shrine",
+        "poi_eastern_field"
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "arrival": "The delta takes a long time to become a city. Reeds, then reed-and-mud, then mud with brick in it, and then brick cut by someone who expected it to last. The tower is visible from a good way out, or the half of it still standing. Somebody has hung washing across the third storey.",
+      "notes": "Opening field map. Lothal after the Great Shattering: the Harappan city is a half-buried relic and survivors are camped inside it rather than beside it, so the same ground is a settlement and a ruin at once. Kept small and legible -- this is where the player learns how to look.",
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "neighbours": [
+        "field_map_narmada"
+      ],
+      "climate": {
+        "clear": 58,
+        "mist": 18,
+        "rain": 18,
+        "storm": 6
+      }
+    },
+    {
+      "id": "field_map_narmada",
+      "type": "field_map",
+      "name": "The Narmada Plateau",
+      "region": "region_narmada_plateau",
+      "seed_biomes": [
+        "hills",
+        "mountains",
+        "forest",
+        "settlement"
+      ],
+      "scale": "large",
+      "points_of_interest": [
+        "poi_narmada_university",
+        "poi_long_archive",
+        "poi_basalt_quarry",
+        "poi_walking_spring",
+        "poi_herders_terraces",
+        "poi_cloud_stair"
+      ],
+      "neighbours": [
+        "field_map_lothal"
+      ],
+      "arrival": "The road up the scarp is the only part of the plateau anyone built. Everything above it was already here: black rock in steps a hundred feet high, holding a flat green country the sea never reached. They will tell you at the top that this is why the University is here. They are right, and it is not the whole reason.",
+      "notes": "Second field map, and the counterweight to Lothal. At Lothal local knowledge was right and the academy was quoted from a distance; here the academy is a room the player stands in. The Long Archive is not foolish -- it is rigorous and its record begins at the Shattering, so it has four hundred years of excellent measurements against a baseline that is itself the wound. Large scale, hills and mountains, so the overworld reads as travel rather than as two versions of the same map.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "climate": {
+        "clear": 52,
+        "mist": 30,
+        "rain": 15,
+        "storm": 3
+      }
+    }
+  ],
+  "points_of_interest": [
+    {
+      "id": "poi_basalt_quarry",
+      "type": "point_of_interest",
+      "name": "The Stepped Quarry",
+      "field_map": "field_map_narmada",
+      "kind": "archaeological_site",
+      "terrain": [
+        "mountains",
+        "hills"
+      ],
+      "discoveries": [
+        "discovery_quarry_sequence"
+      ],
+      "description": "Cut basalt in courses, and between two of the courses, a bed of something else.",
+      "arrival": "They quarried here for the halls and stopped when they hit a seam that would not dress. The seam is nine inches of pale ash between two floods of black rock, and it is full of small dead things lying in the order they died.",
+      "notes": "The evolution discovery. A quarry rather than a dig, so the section is exposed by accident and read by the player rather than presented by a scholar.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "poi_cloud_stair",
+      "type": "point_of_interest",
+      "name": "The Cloud Stair",
+      "field_map": "field_map_narmada",
+      "kind": "anomaly",
+      "terrain": [
+        "mountains"
+      ],
+      "related_entities": [
+        "region_tethys_sky_routes"
+      ],
+      "discoveries": [
+        "discovery_cloud_stair",
+        "discovery_escarpment_wind"
+      ],
+      "sub_locations": [
+        {
+          "id": "lower_flights",
+          "name": "The Lower Flights",
+          "description": "Cut into the scarp, wide enough for two, worn in the middle like any stair anyone ever used."
+        },
+        {
+          "id": "the_turn",
+          "name": "The Turn",
+          "description": "Where the stair stops climbing the rock and starts climbing away from it. There is no rock under the last four steps and they are still there.",
+          "requires": [
+            "discovery_escarpment_wind"
+          ]
+        }
+      ],
+      "description": "A stair up the scarp that keeps going after the scarp stops.",
+      "arrival": "You can follow it with your eye until the cloud takes it, and the cloud is not always there, and it goes up past where the cloud is. Nobody at the University will say it is not a stair. They will say it has not been surveyed.",
+      "notes": "The anomaly, and the hook toward region_tethys_sky_routes for a later map. Deliberately unresolved -- the ladder ends at a good description rather than an explanation, because some things should stay open.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "type": "point_of_interest",
+      "field_map": "field_map_lothal",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "poi_drowned_dockyard",
+      "name": "The Drowned Dockyard",
+      "kind": "eco_site",
+      "terrain": [
+        "coast",
+        "river"
+      ],
+      "discoveries": [
+        "discovery_dockyard_reef",
+        "discovery_silver_water"
+      ],
+      "related_entities": [
+        "settlement_lothal"
+      ],
+      "description": "Straight lines under the water, at what used to be a quayside.",
+      "arrival": "The basin was cut square and lined with fired brick, and salt water has been in it long enough that a reef has taken the corners. Fish that have never seen the open sea live in a harbour that no longer reaches it.",
+      "notes": "Lothal's dock. An archaeological site being eaten by an ecological one, which is the tone of the whole era."
+    },
+    {
+      "type": "point_of_interest",
+      "field_map": "field_map_lothal",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "poi_eastern_field",
+      "name": "The Eastern Field",
+      "kind": "eco_site",
+      "terrain": [
+        "wetland",
+        "settlement"
+      ],
+      "discoveries": [
+        "discovery_poisoned_ground"
+      ],
+      "description": "Good flat ground, well watered, and nothing on it.",
+      "arrival": "Eight acres of level silt beside a channel that never runs dry, and not a stem on any of it. The camp plants here every spring out of stubbornness and takes nothing off it. Something came up out of the ground during the Shattering and has not gone back down.",
+      "notes": "The solarpunk hook, and what the actionable rung acts on: restorable once the player understands both the poison and the rice."
+    },
+    {
+      "id": "poi_herders_terraces",
+      "type": "point_of_interest",
+      "name": "The Herders' Terraces",
+      "field_map": "field_map_narmada",
+      "kind": "wilderness",
+      "terrain": [
+        "hills",
+        "forest"
+      ],
+      "discoveries": [
+        "discovery_terrace_water"
+      ],
+      "npcs": [
+        "npc_marn"
+      ],
+      "description": "Stone steps up a hillside, grazed by goats, described in the archive as ornamental.",
+      "arrival": "Two hundred steps of dry-laid stone, each one a little lower at the outer edge than the inner. Marn's goats are on them. The University's survey calls them a devotional feature and gives them a paragraph.",
+      "notes": "The archaeology discovery and the restore target. A paragraph in the survey against two hundred courses of deliberate engineering is the whole argument of this map in one image.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "poi_kavik_tower",
+      "type": "point_of_interest",
+      "name": "Kavik's Tower",
+      "field_map": "field_map_lothal",
+      "kind": "archaeological_site",
+      "ruin_of": "settlement_lothal",
+      "terrain": [
+        "settlement",
+        "landmark"
+      ],
+      "related_entities": [
+        "character_kavik",
+        "settlement_lothal",
+        "event_stone_pact"
+      ],
+      "discoveries": [
+        "discovery_tower_collapse",
+        "discovery_mask_niche"
+      ],
+      "sub_locations": [
+        {
+          "id": "lower_courses",
+          "name": "The Lower Courses",
+          "description": "Twenty-two storeys of red sandstone, of which four remain standing and the rest lie in roughly the order they fell."
+        },
+        {
+          "id": "stair_shaft",
+          "name": "The Stair Shaft",
+          "description": "The stair survives because it was cut into the core rather than built against it. It goes up into daylight and down into water.",
+          "requires": [
+            "discovery_tower_collapse"
+          ]
+        },
+        {
+          "id": "flooded_undercroft",
+          "name": "The Flooded Undercroft",
+          "description": "Below the waterline the sandstone is cold and the carving is sharper, having been spared four hundred years of weather.",
+          "requires": [
+            "discovery_ghost_mangrove_channel"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "description": "Four storeys of red sandstone where the chronicles promise twenty-two.",
+      "arrival": "It did not topple. It sat down. The upper courses came straight through the lower ones and the whole thing settled into the delta mud like a foot into silt, which is why four storeys are still square and true and everything above them is a slope of dressed stone.",
+      "notes": "Kavik's tower, the landmark settlement_lothal records. Enterable rather than merely visited, and the undercroft gates on knowing the safe channels -- a player who has not done the mangrove work cannot reach the best of it.",
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "poi_long_archive",
+      "type": "point_of_interest",
+      "name": "The Long Archive",
+      "field_map": "field_map_narmada",
+      "kind": "archaeological_site",
+      "terrain": [
+        "settlement",
+        "hills"
+      ],
+      "discoveries": [
+        "discovery_double_classified",
+        "discovery_terrace_script"
+      ],
+      "npcs": [
+        "npc_okhi"
+      ],
+      "sub_locations": [
+        {
+          "id": "reading_floor",
+          "name": "The Reading Floor",
+          "description": "Long tables, north light, and the working copies -- which are copies of copies, and say so on the spine, which is more honest than most places manage."
+        },
+        {
+          "id": "sequence_stacks",
+          "name": "The Sequence Stacks",
+          "description": "Every measurement the University has taken, in the order it was taken. Four hundred years of rainfall, riverflow, birds arriving and birds leaving. It is beautiful and it is the whole problem.",
+          "requires": [
+            "discovery_archive_baseline"
+          ]
+        },
+        {
+          "id": "unread_shelf",
+          "name": "The Unread Shelf",
+          "description": "What came up the scarp already written and has never been transcribed, because nobody here can read it and nobody will admit that in writing.",
+          "requires": [
+            "word_maru_khet"
+          ]
+        }
+      ],
+      "description": "Four hundred and eleven years of measurements, kept perfectly.",
+      "arrival": "The stacks run back further than the lamps reach. Okhi says there are eleven thousand bound volumes and that she has personally copied four hundred of them, and then, without any change of tone, that she has no idea whether the oldest are true, only that they are old.",
+      "notes": "Where the through-line resolves. The sequence stacks gate on discovery_archive_baseline so the player cannot be handed the thesis before earning it; the unread shelf gates on a word, which is the point at which the plateau's own script stops being decoration.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "poi_lothal_camp",
+      "type": "point_of_interest",
+      "name": "The Camp in the Kilns",
+      "field_map": "field_map_lothal",
+      "kind": "settlement",
+      "ruin_of": "settlement_lothal",
+      "terrain": [
+        "settlement"
+      ],
+      "npcs": [
+        "npc_thrali",
+        "npc_uma",
+        "npc_bekh"
+      ],
+      "related_entities": [
+        "settlement_lothal",
+        "faction_mask_family",
+        "faction_silvershore"
+      ],
+      "discoveries": [
+        "discovery_saltreed_thatch"
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "description": "Smoke, and washing strung between two courses of Harappan brick.",
+      "arrival": "Forty-odd people live in the kiln quarter, because the kilns were built to hold heat and still do. Nobody has repaired anything so much as leaned things against other things until they stopped falling. A child watches you from a doorway that used to be a flue.",
+      "notes": "The living settlement, inside the ruin. Deliberately not a quest hub: people here trade leads, tea and old maps. Mixed survivors -- a Mask Family remnant, a Silvershore straggler, delta fishers -- thrown together by the Collapse rather than by kinship.",
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "type": "point_of_interest",
+      "field_map": "field_map_lothal",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "poi_marsh_shrine",
+      "name": "The Marsh Shrine",
+      "kind": "anomaly",
+      "terrain": [
+        "wetland"
+      ],
+      "discoveries": [
+        "discovery_ghost_mangrove_channel",
+        "discovery_marsh_lurker_habits"
+      ],
+      "related_entities": [
+        "faction_kia_clan"
+      ],
+      "description": "Pale mangroves standing in a ring, and something at the centre that is not a tree.",
+      "arrival": "The Kia did not build the shrine so much as agree about it. A ring of ghost mangrove, a stone with a hollow worn into the top, and a great deal of water that is shallower than it looks if you know where to put your feet.",
+      "notes": "Kia rather than Harappan. Where the channel discovery is learned and the marsh-lurker can be watched."
+    },
+    {
+      "id": "poi_narmada_university",
+      "type": "point_of_interest",
+      "name": "The Narmada University",
+      "field_map": "field_map_narmada",
+      "kind": "settlement",
+      "terrain": [
+        "settlement"
+      ],
+      "related_entities": [
+        "region_narmada_plateau"
+      ],
+      "discoveries": [
+        "discovery_archive_baseline"
+      ],
+      "npcs": [
+        "npc_vessa"
+      ],
+      "description": "Nine halls around a yard, and every one of them measuring something.",
+      "arrival": "It is smaller than the word suggests and busier than the quiet suggests. Nine halls, a yard with a rain gauge in it that has been read twice a day for four hundred and eleven years, and a great many people being careful. Nobody here is a fool. That turns out to matter more than the alternative would have.",
+      "notes": "The academy as a place rather than a citation. Deliberately sympathetic -- the scholars are rigorous and generous with the player, which is what makes the structural error land.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "type": "point_of_interest",
+      "field_map": "field_map_lothal",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "id": "poi_silted_granary",
+      "name": "The Silted Granary",
+      "kind": "archaeological_site",
+      "terrain": [
+        "settlement",
+        "wetland"
+      ],
+      "discoveries": [
+        "discovery_red_rice_survival"
+      ],
+      "related_entities": [
+        "settlement_lothal"
+      ],
+      "description": "A grid of brick chambers filled to the brim with silt, and something growing out of them.",
+      "arrival": "The granary held the city's grain on raised platforms so the flood could not reach it. The flood has since reached it. What is remarkable is not that the chambers filled but that the crop came back on its own, red and thin, growing out of the tops of the walls.",
+      "notes": "Where the rice discovery lives. The ruin is already doing the restoring; Varuna only has to notice."
+    },
+    {
+      "id": "poi_walking_spring",
+      "type": "point_of_interest",
+      "name": "The Walking Spring",
+      "field_map": "field_map_narmada",
+      "kind": "eco_site",
+      "terrain": [
+        "hills",
+        "forest"
+      ],
+      "discoveries": [
+        "discovery_moving_spring",
+        "discovery_bitter_millet"
+      ],
+      "npcs": [
+        "npc_marn"
+      ],
+      "description": "A spring the archive records at a fixed point, and a line of dead stonework saying otherwise.",
+      "arrival": "The water comes out of the hillside cold enough to hurt. Forty paces downslope there is a stone basin, dry, well made, and obviously built to catch exactly this. Forty paces further there is another.",
+      "notes": "Geography and botany both. The dry basins are the evidence and they are visible on arrival -- the player can see the answer before they can explain it, which is the right order.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "id": "npc_bekh",
+      "type": "npc",
+      "name": "Bekh",
+      "role": "keeper of what is left",
+      "found_at": [
+        "poi_lothal_camp",
+        "poi_kavik_tower"
+      ],
+      "language": "kia",
+      "would_settle": false,
+      "knows": [
+        "discovery_mask_niche",
+        "discovery_red_rice_survival",
+        "question_eastern_field"
+      ],
+      "lines": [
+        {
+          "text": "Mask Family, yes. There is no family and there are no masks, so it is mostly a way of saying which brick I sleep under."
+        },
+        {
+          "text": "We plant the eastern field every spring. My mother did. Her mother did. It is not stubbornness, it is that the ground is good and we cannot see what is wrong with it.",
+          "gives": [
+            "question_eastern_field"
+          ]
+        },
+        {
+          "text": "My grandmother walked to the shrine at night and came back dry. I have never known how and I have stopped asking whether it was true.",
+          "requires": [
+            "word_kia_thal"
+          ],
+          "gives": [
+            "discovery_ghost_mangrove_channel",
+            "word_kia_thal_set"
+          ]
+        },
+        {
+          "text": "The niche in the stair. Something stood in it when my grandmother was small. She would not say what.",
+          "requires": [
+            "discovery_mask_niche"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "Mask Family remnant with no masks and no family, related to character_kavik far enough back that the line means little to her. Would NOT settle -- she is the one who stays, because somebody has to be here when the rest go. The ending is better for her refusing.",
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ],
+      "descended_from": [
+        "character_kavik"
+      ]
+    },
+    {
+      "id": "npc_marn",
+      "type": "npc",
+      "name": "Marn",
+      "role": "herder",
+      "found_at": [
+        "poi_herders_terraces",
+        "poi_walking_spring"
+      ],
+      "language": "maru",
+      "would_settle": true,
+      "knows": [
+        "discovery_terrace_water",
+        "discovery_bitter_millet",
+        "question_terrace_purpose"
+      ],
+      "lines": [
+        {
+          "text": "The steps? The steps have always been the steps. Good grazing, stays green late. You are the first person to walk up them looking at them.",
+          "gives": [
+            "question_terrace_purpose"
+          ]
+        },
+        {
+          "text": "Khet. Not step -- khet. It means the water is held. I do not know why we call them that, we just do.",
+          "requires": [
+            "discovery_terrace_water"
+          ],
+          "gives": [
+            "word_maru_khet"
+          ]
+        },
+        {
+          "text": "We lose one a year to the millet and we have always lost one a year to the millet. If you are telling me that is a choice and not a weather, I will need to sit down.",
+          "requires": [
+            "discovery_bitter_millet"
+          ]
+        }
+      ],
+      "notes": "Holds two of the map's answers inside ordinary vocabulary and has never had a reason to examine either. The counterpart to Thrali, and pointedly not a wise elder -- he is a working herder with a job on.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "npc_okhi",
+      "type": "npc",
+      "name": "Okhi",
+      "role": "senior copyist",
+      "found_at": [
+        "poi_long_archive"
+      ],
+      "language": "maru",
+      "would_settle": false,
+      "knows": [
+        "discovery_double_classified",
+        "discovery_terrace_script",
+        "question_two_names"
+      ],
+      "lines": [
+        {
+          "text": "Eleven thousand volumes. I have copied four hundred. I do not know if the oldest are true, only that they are old, and that is not nothing.",
+          "gives": [
+            "question_two_names"
+          ]
+        },
+        {
+          "text": "There is a shelf I dust and cannot read. Thirty years. If you learn what is on it I would like to be told, and I would like it told to me before it is told to the halls.",
+          "requires": [
+            "discovery_quarry_sequence"
+          ],
+          "gives": [
+            "word_maru_sev"
+          ]
+        },
+        {
+          "text": "No. Somebody stays. You have all found the thing that is wrong with this place and you are all leaving with it, and the eleven thousand volumes are still here and still need copying.",
+          "requires": [
+            "discovery_terrace_script"
+          ]
+        }
+      ],
+      "notes": "The one who will not come. Deliberately not a tragedy and not a rebuke -- she is right that somebody has to stay, and the ending should let her be right rather than treating her as a failed recruitment.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "npc_thrali",
+      "type": "npc",
+      "name": "Thrali",
+      "role": "fisher",
+      "found_at": [
+        "poi_lothal_camp",
+        "poi_drowned_dockyard"
+      ],
+      "language": "kia",
+      "would_settle": true,
+      "knows": [
+        "discovery_silver_water",
+        "discovery_ghost_mangrove_channel",
+        "question_silver_water"
+      ],
+      "lines": [
+        {
+          "text": "You will want the basin at night, after rain. The water goes silver and they come up. Ask me why and I will tell you I do not know.",
+          "gives": [
+            "question_silver_water"
+          ]
+        },
+        {
+          "text": "My grandfather had a word for it. Thal-something. He is dead and I have half of it.",
+          "requires": [
+            "discovery_silver_water"
+          ],
+          "gives": [
+            "word_kia_thal"
+          ]
+        },
+        {
+          "text": "The far banks I cannot work. Water looks the same everywhere out there and it is not the same, and I have a family.",
+          "requires": [
+            "discovery_ghost_mangrove_channel"
+          ],
+          "gives": [
+            "word_kia_uvai"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "Delta fisher, Kia by descent, half his grandfather's vocabulary lost. Gives the opening hook and is the first person the player can materially help. Would settle -- he has nothing holding him here but the fishing.",
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "npc_uma",
+      "type": "npc",
+      "name": "Uma",
+      "role": "roofer",
+      "found_at": [
+        "poi_lothal_camp"
+      ],
+      "would_settle": true,
+      "knows": [
+        "discovery_saltreed_thatch"
+      ],
+      "lines": [
+        {
+          "text": "Three kilns, every year, and every year the same three. I have stopped minding. It is something to do in spring."
+        },
+        {
+          "text": "After the flood? Nobody cuts reed after the flood. -- No, I am listening. Say it again.",
+          "requires": [
+            "discovery_saltreed_thatch"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "Keeps the camp's roofs on. The smallest possible help, and deliberately the first one available: the player learns that knowing when to cut a reed counts as helping.",
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "npc_vessa",
+      "type": "npc",
+      "name": "Vessa",
+      "role": "junior archivist",
+      "found_at": [
+        "poi_narmada_university"
+      ],
+      "language": "maru",
+      "would_settle": true,
+      "knows": [
+        "discovery_archive_baseline",
+        "question_moving_spring"
+      ],
+      "lines": [
+        {
+          "text": "You will want the rain series. Everyone wants the rain series. Read the first ten years of it and then come and tell me what you think we are measuring against.",
+          "gives": [
+            "question_moving_spring"
+          ]
+        },
+        {
+          "text": "I have written it three times and withdrawn it three times. Not because they would be angry. Because they would ask what the pre-Shattering figure was, and there isn't one, and that is the end of the conversation.",
+          "requires": [
+            "discovery_archive_baseline"
+          ]
+        },
+        {
+          "text": "My grandmother's people counted years by what happened in them. The halls would call that anecdote. It is also the only record that reaches back past the wound.",
+          "requires": [
+            "discovery_moving_spring"
+          ],
+          "gives": [
+            "word_maru_anu"
+          ]
+        }
+      ],
+      "notes": "The scholar who is already most of the way there and cannot say so in an acceptable form. Would settle -- she has been looking for somewhere the question is allowed.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    }
+  ],
+  "biomes": [
+    {
+      "id": "sea",
+      "name": "Sea",
+      "realm": "ground",
+      "renderable": true,
+      "notes": "Tethyan water. Not walkable in the game."
+    },
+    {
+      "id": "coast",
+      "name": "Coast",
+      "realm": "ground",
+      "renderable": true
+    },
+    {
+      "id": "plains",
+      "name": "Plains",
+      "realm": "ground",
+      "renderable": true
+    },
+    {
+      "id": "forest",
+      "name": "Forest",
+      "realm": "ground",
+      "renderable": true
+    },
+    {
+      "id": "wetland",
+      "name": "Wetland",
+      "realm": "ground",
+      "renderable": true
+    },
+    {
+      "id": "hills",
+      "name": "Hills",
+      "realm": "ground",
+      "renderable": true
+    },
+    {
+      "id": "mountains",
+      "name": "Mountains",
+      "realm": "ground",
+      "renderable": true
+    },
+    {
+      "id": "desert",
+      "name": "Desert",
+      "realm": "ground",
+      "renderable": true
+    },
+    {
+      "id": "river",
+      "name": "River",
+      "realm": "ground",
+      "renderable": true
+    },
+    {
+      "id": "settlement",
+      "name": "Settlement",
+      "realm": "ground",
+      "renderable": true
+    },
+    {
+      "id": "landmark",
+      "name": "Landmark",
+      "realm": "ground",
+      "renderable": true
+    },
+    {
+      "id": "sky_island",
+      "name": "Floating Island",
+      "realm": "sky",
+      "renderable": false,
+      "region": "region_tethys_sky_routes",
+      "notes": "The island surface itself — glowing moss, prismatic glass herbs, aero-mangrove groves at the edges. Held up by lodestone cores of Permian-irradiated ore."
+    },
+    {
+      "id": "sky_underside",
+      "name": "Island Underside",
+      "realm": "sky",
+      "renderable": false,
+      "region": "region_tethys_sky_routes",
+      "notes": "The inverted world beneath an island, where gravity is warped and rainwater falls upward. Sky coral calcifies here and holds the crumbling rock together; the Asura-tainted gargoyles shelter in it."
+    },
+    {
+      "id": "open_sky",
+      "name": "Open Sky",
+      "realm": "sky",
+      "renderable": false,
+      "region": "region_tethys_sky_routes",
+      "notes": "The air between islands, worked by gliders and migrants — aero-mantas, sky-faring orcas, ballooning spiderlings. The orca-blimp routes run through it."
+    },
+    {
+      "id": "underworld",
+      "name": "Naraka Rifts",
+      "realm": "subterranean",
+      "renderable": false,
+      "notes": "The rift country beyond the portals: sulphurous rivers, blood-warm pools, the twilight zone. Naraka water is not the Saraswati's, so its creatures do not simply swim into a delta — they cross into this realm at a gate. See `crosses_at` on the species themselves; the Dwarka Gate is the established one (settlement_dwarka, event_shadow_pact, event_naraka_portal). A Naraka creature met in this realm should therefore be met near a gate, not spread through ordinary water."
+    },
+    {
+      "id": "lava_field",
+      "name": "Lava Sea",
+      "realm": "extreme",
+      "renderable": false,
+      "region": "region_ganges_lava_sea",
+      "notes": "The molten surface and scalding shallows of the Ganges Lava Lake, where magma meets ocean. Distinct from the volcanic highlands around it, which are ordinary mountains and remain renderable."
+    }
+  ]
+}

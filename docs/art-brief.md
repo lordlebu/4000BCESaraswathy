@@ -156,6 +156,37 @@ country* · *lavender-grey rocky peaks* · *gold dust desert with low stones* ·
 running over stones* · *cluster of clay-roofed huts seen from above* · *a memorable place, a small
 shrine platform*.
 
+### Asset 2b — `lava_field`, the twelfth tile (blocked, and blocking content)
+
+`lava_field` is the one biome canon names that the engine cannot draw, and it is not a nicety:
+**forty species live in the Ganges Lava Sea, and thirty-six of them are currently filed under
+`mountains`** because there was nowhere better to put them. Canon now names the right ground;
+the engine filters it straight back out, because a biome with no tile is not renderable.
+
+Until this tile exists those species keep `mountains` alongside `lava_field` — deliberately, since
+a species left with no drawable ground stops being placed in the world at all. **Once the tile
+lands, tell the canon side and the pairing gets undone**, and the basalt plains become real
+places you can stand on.
+
+The region, in canon's own words: active volcanic rifts that cool and solidify into vast jagged
+black basalt plains and lava fields, where magma meets ocean. Its fauna are armoured and
+heat-resistant, often fused with volcanic minerals — obsidian carapaces, gastropods that build
+shells out of basalt and metallic ore.
+
+> **Prompt:**
+> Seamless top-down 32×32 pixel art terrain tile of **cooled black basalt plain, cracked and
+> jagged, with a dull ember glow deep in the fissures** for a cozy exploration game set in
+> ancient South Asia. Cozy colour e-ink palette: muted desaturated colour, warm paper undertone,
+> gentle contrast, matte and flat, faint paper grain. The glow is warm but restrained — this is
+> a quiet dangerous place, not a fire effect. Tiles seamlessly on all four edges. Crisp pixel
+> art, flat colour per pixel, no anti-aliasing. No grid lines, no guide marks, no border, no
+> text, no watermark, no drop shadow.
+
+Making it renderable is two steps once the PNG exists: add the tile in
+`src/game/tileTextures.ts`, and set `renderable: true` on `lava_field` in the canon repo's
+`database/biomes.json`, then re-export. Both are needed — the flag is what `src/content/canon.ts`
+filters on.
+
 ## Asset 3 — landmarks (nice to have)
 
 Seven kinds, each 32×32, same rules: *great banyan* · *hot spring* · *shell beach* · *hill shrine*
