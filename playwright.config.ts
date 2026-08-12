@@ -23,7 +23,11 @@ export default defineConfig({
   // an editor and a browser starved them all — the scene would not finish booting inside twenty
   // seconds and every spec failed at the same assertion, looking exactly like a broken build. CI
   // runners are quieter, so they keep the default.
-  workers: process.env.CI ? undefined : 3,
+  // Two locally, not three. CI lets Playwright choose and gets one or two on a runner of
+  // half the cores; three was picked when this suite was eighteen specs and became the reason
+  // the zoom test failed at home while passing on CI -- three parallel Phaser games do not
+  // settle inside its waits. Matching CI is more useful than being fast and differently wrong.
+  workers: process.env.CI ? undefined : 2,
   // Playwright's 30-second default is sized for DOM tests. Every spec here boots a WebGL renderer,
   // generates a world, and waits on tweened fog and a camera fade; screenshotting the canvas stalls
   // the GPU on top of that. On a machine also running an editor and a browser they overrun 30s and

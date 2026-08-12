@@ -140,41 +140,25 @@ test('the player can zoom in and out, and get the automatic fit back', async ({ 
   await open(page, 1280, 800);
   const canvas = page.locator('.map-surface canvas');
 
-  /**
-   * A frame, once the picture has stopped moving.
-   *
-   * Fixed waits were fine when this spec ran three Phaser games in parallel and became
-   * unreliable when there were more: a 400ms window is plenty on an idle machine and not
-   * always enough on a loaded one, and the failure looked like "zoom stopped working" rather
-   * than "the screenshot was early". Waiting for two consecutive frames to agree waits for
-   * the actual event. The tolerance is for the sky, which drifts continuously and would
-   * otherwise never settle to the byte.
-   */
-  const frame = async (): Promise<number> => {
-    let last = -1;
-    for (let i = 0; i < 25; i += 1) {
-      const size = (await canvas.screenshot()).byteLength;
-      if (last > 0 && Math.abs(size - last) < size * 0.005) return size;
-      last = size;
-      await page.waitForTimeout(150);
-    }
-    return last;
-  };
+  const frame = async () => (await canvas.screenshot()).byteLength;
   const start = await frame();
 
   await page.getByRole('button', { name: 'Zoom in' }).click();
+  await page.waitForTimeout(700);
   const zoomedIn = await frame();
   // Bigger tiles mean fewer edges and flatter colour, which compresses smaller. The direction is
   // what matters; the exact number is a property of the PNG encoder, not of the game.
   expect(zoomedIn).not.toBe(start);
 
   await page.getByRole('button', { name: 'Zoom out' }).click();
+  await page.waitForTimeout(700);
   expect(await frame()).not.toBe(zoomedIn);
 
   // The keyboard reaches it too, and 0 hands it back to the automatic fit.
   await page.keyboard.press('Equal');
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(500);
   await page.keyboard.press('Digit0');
+  await page.waitForTimeout(700);
   expect(Math.abs((await frame()) - start)).toBeLessThan(start * 0.05);
 
   // Four steps are reachable on a desktop, not three. The floor used to be "zoomed in far enough
@@ -185,11 +169,12 @@ test('the player can zoom in and out, and get the automatic fit back', async ({ 
   const rendered = new Set<number>();
   for (let i = 0; i < 5; i += 1) {
     await page.keyboard.press('Minus');
-    await page.waitForTimeout(250);
+    await page.waitForTimeout(400);
   }
   for (let i = 0; i < 5; i += 1) {
     rendered.add(await frame());
     await page.keyboard.press('Equal');
+    await page.waitForTimeout(400);
   }
   expect(rendered.size).toBeGreaterThanOrEqual(4);
 });
