@@ -8,6 +8,7 @@ import { JourneyLog } from './JourneyLog';
 import { Controls } from './Controls';
 import { CanonPanel } from './CanonPanel';
 import { Diary, diaryCount } from './Diary';
+import { Ending } from './Ending';
 import { PlacePanel } from './PlacePanel';
 import { Overworld } from './Overworld';
 import { poi } from '../content/places';
@@ -51,6 +52,7 @@ export function App() {
   // it and hands it to the save.
   const [progress, setProgress] = useState(initialJourney.current.progress);
   const [diaryOpen, setDiaryOpen] = useState(false);
+  const [endingOpen, setEndingOpen] = useState(false);
 
   // The three scales. `fieldMapId` is the country under foot; `poiId` is the authored place
   // being stood in, if any; a sub-location opens inside the place panel rather than here,
@@ -335,7 +337,10 @@ export function App() {
         open={diaryOpen}
         onClose={() => setDiaryOpen(false)}
         onAnswer={settle}
+        onOpenEnding={() => setEndingOpen(true)}
       />
+
+      <Ending progress={progress} open={endingOpen} onClose={() => setEndingOpen(false)} />
 
       <Overworld
         current={fieldMapId}

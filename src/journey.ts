@@ -310,6 +310,27 @@ export function gatherable(progress: Progress): string[] {
   return npcs.filter((n) => n.wouldSettle && helped.has(n.id)).map((n) => n.id);
 }
 
+/**
+ * The people you helped who will not come with you.
+ *
+ * The counterpart to `gatherable`, and not an afterthought: four of the ten people in the game
+ * refuse, each for a different reason, and the ending is better for every one of them. Bekh
+ * stays because somebody has to be there when the rest go. Pell because the wall is never
+ * finished and that is not an argument for stopping. Teshk because the rope needs two people
+ * and there are not two to spare. Okhi because eleven thousand volumes still need copying.
+ *
+ * A refusal is only reachable once you have actually helped them — you cannot be turned down
+ * by someone you never did anything for.
+ */
+export function staying(progress: Progress): string[] {
+  const helped = new Set<string>();
+  for (const d of discoveries) {
+    if (!isComplete(progress, d.id)) continue;
+    for (const who of d.helps) helped.add(who);
+  }
+  return npcs.filter((n) => !n.wouldSettle && helped.has(n.id)).map((n) => n.id);
+}
+
 /** What the player has put back. The endgame settlement is built out of these. */
 export function restored(progress: Progress): string[] {
   const out = new Set<string>();
