@@ -20,6 +20,13 @@ export interface ControlsProps {
   diaryCount: number;
   onOpenDiary: () => void;
   onOpenOverworld: () => void;
+  /** The field notes along the bottom. Closable like everything else now. */
+  notesOpen: boolean;
+  onToggleNotes: () => void;
+  /** The authored place under foot, if any — the button is only useful when standing on one. */
+  placeName: string | null;
+  placeOpen: boolean;
+  onTogglePlace: () => void;
 }
 
 export function Controls({
@@ -30,13 +37,44 @@ export function Controls({
   onToggleLog,
   diaryCount,
   onOpenDiary,
-  onOpenOverworld
+  onOpenOverworld,
+  notesOpen,
+  onToggleNotes,
+  placeName,
+  placeOpen,
+  onTogglePlace
 }: ControlsProps) {
   const [sheet, setSheet] = useState(false);
 
   return (
     <>
       <div className="controls">
+        {/* Only offered where there is something to stand in. A button that is present but
+            dead everywhere teaches the player to ignore it. */}
+        {placeName && (
+          <button
+            type="button"
+            className={placeOpen ? 'control control-on' : 'control'}
+            aria-pressed={placeOpen}
+            aria-label={`${placeName}, ${placeOpen ? 'showing' : 'hidden'}`}
+            onClick={onTogglePlace}
+          >
+            <span aria-hidden="true">◈</span>
+            <span className="control-label">Here</span>
+          </button>
+        )}
+
+        <button
+          type="button"
+          className={notesOpen ? 'control control-on' : 'control'}
+          aria-pressed={notesOpen}
+          aria-label={`Field notes, ${notesOpen ? 'showing' : 'hidden'}`}
+          onClick={onToggleNotes}
+        >
+          <span aria-hidden="true">✒</span>
+          <span className="control-label">Notes</span>
+        </button>
+
         <button type="button" className="control" aria-label="Where to go" onClick={onOpenOverworld}>
           <span aria-hidden="true">◇</span>
           <span className="control-label">Travel</span>

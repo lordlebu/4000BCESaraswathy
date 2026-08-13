@@ -909,3 +909,44 @@ button.ghost:hover:not(:disabled) {
   color: var(--accent);
   margin-bottom: 0.15rem;
 }
+
+/* A control that is currently showing something. */
+.control-on {
+  background: rgba(164, 92, 64, 0.22);
+  border-color: var(--accent);
+}
+
+/* The place panel shares the bottom of the screen with the field notes rather than covering
+ * them. It used to sit on a dark veil over everything, which meant arriving somewhere hid the
+ * flora and fauna you had walked there to read. Now only one of the two holds the slot, both
+ * can be closed, and the map stays visible behind. */
+.place-veil {
+  background: none;
+  pointer-events: none;
+}
+.place { pointer-events: auto; }
+
+@media (orientation: landscape) {
+  /* Stop short of the log, exactly as the field notes do. */
+  .stage:has(.log) .place-veil {
+    right: calc(var(--safe-right) + min(32vw, 26rem) + 10px);
+  }
+}
+
+/* And stop short of the field notes, which sit below it. Suppressing the notes while a place
+ * was open was the first attempt and it was wrong: a journey that *starts* on a place then
+ * never showed them at all, while the Notes button still claimed to be on. Nothing hides
+ * anything now — the bottom of the screen is divided instead. */
+.stage:has(.journal) .place-veil {
+  bottom: calc(var(--safe-bottom) + 42dvh);
+}
+@media (orientation: landscape) and (max-height: 480px) {
+  .stage:has(.journal) .place-veil {
+    bottom: calc(var(--safe-bottom) + 48dvh);
+  }
+}
+@media (orientation: portrait) {
+  .stage:has(.journal) .place-veil {
+    bottom: calc(var(--safe-bottom) + 46dvh);
+  }
+}

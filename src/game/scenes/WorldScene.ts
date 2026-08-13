@@ -114,8 +114,8 @@ export class WorldScene extends Phaser.Scene {
   private world!: World;
   /** The field map and its placed points of interest. `world` is this one's ground. */
   private built!: FieldMapWorld;
-  /** Points of interest already announced, so standing on one does not re-announce it. */
-  private announced = new Set<string>();
+  /** The place under foot, so the UI is told when it changes rather than on every step. */
+  private standingOn: string | null = null;
   private tileSprites: Phaser.GameObjects.Image[][] = [];
   private fogSprites: Phaser.GameObjects.Image[][] = [];
   private player!: Phaser.GameObjects.Sprite;
@@ -172,7 +172,7 @@ export class WorldScene extends Phaser.Scene {
     this.moving = false;
     this.facing = 'down';
     this.travelled = 0;
-    this.announced = new Set();
+    this.standingOn = null;
     this.lastMoment = '';
     this.momentCheckedAt = -Infinity;
     this.lastZoom = 0;
@@ -670,15 +670,12 @@ export class WorldScene extends Phaser.Scene {
     });
     EventBus.emitEvent('journey-changed', { discovered: [...this.discovered] });
 
-    // Standing on an authored place. Announced once per visit rather than on every step, so
-    // walking on the spot does not reopen the page you are already reading.
-    const here = poiAt(this.built, at);
-    if (here && !this.announced.has(here.poi.id)) {
-      this.announced.add(here.poi.id);
-      EventBus.emitEvent('poi-entered', { poiId: here.poi.id, fieldMapId: this.built.fieldMap.id });
-    } else if (!here) {
-      // Leaving clears the latch, so coming back later is a fresh arrival.
-      this.announced.clear();
+    // What is under foot, every time it changes. The UI decides whether that opens anything;
+    // the scene only reports the ground, which is the division everywhere else in this file.
+    const here = poiAt(this.built, at)?.poi.id ?? null;
+    if (here !== this.standingOn) {
+      this.standingOn = here;
+      EventBus.emitEvent('standing-on', { poiId: here, fieldMapId: this.built.fieldMap.id });
     }
 
     // The arrival is the end of the session, so it gets its own beat: the camera settles, and the

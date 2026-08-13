@@ -49,8 +49,14 @@ export interface GameToUi {
    */
   'zoom-changed': { zoom: number };
 
-  /** The traveller is standing on an authored place. Carries ids; the UI resolves them. */
-  'poi-entered': { poiId: string; fieldMapId: string };
+  /**
+   * The authored place under the traveller's feet, or null when there is none.
+   *
+   * A state rather than an arrival event. The UI needs to know not just that you arrived
+   * somewhere but that you are *still there*, so a panel you closed can be opened again
+   * without walking off the tile and back on to re-trigger it.
+   */
+  'standing-on': { poiId: string | null; fieldMapId: string };
 }
 
 /**
