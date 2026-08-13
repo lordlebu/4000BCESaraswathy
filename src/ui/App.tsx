@@ -241,10 +241,10 @@ export function App() {
     if (!world) return null;
     return buildTravelLog(
       world,
-      { discovered: arrival?.discovered ?? 0, observed, reachedLandmark: reached },
+      { discovered: arrival?.discovered ?? 0, observed, reachedLandmark: reached, progress },
       `${window.location.origin}${window.location.pathname}`
     );
-  }, [world, arrival?.discovered, observed, reached]);
+  }, [world, arrival?.discovered, observed, reached, progress]);
 
   // Tell the scene how much of the canvas the overlays are covering, so the camera can keep the
   // traveller somewhere they can be seen. React is the only side that knows this — it renders them.

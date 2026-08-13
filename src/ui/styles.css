@@ -189,17 +189,20 @@ button.ghost:hover:not(:disabled) {
   font-size: 0.85rem;
 }
 
-/* Narrow screens get the glyphs alone. Six labelled buttons cannot share a phone's width, and
- * wrapping them onto three rows buries the map the player is trying to look at. Every button
- * carries an `aria-label`, so nothing is lost to anyone reading the page rather than seeing it,
- * and the tap target grows to stay comfortable without the text. */
+/* Narrow screens keep their words and take a second row instead.
+ *
+ * The first attempt dropped the labels below 34rem, which fits six buttons on one line and
+ * leaves a sighted phone user reading `◈ ✒ ◇ ✎ ☰ ✦`. An `aria-label` rescues a screen reader
+ * and nobody else. Two rows of named buttons cost about ninety pixels of a tall phone and are
+ * worth every one; the labels only go where vertical space is genuinely scarce, which is a
+ * short landscape phone and is handled further down. */
 @media (max-width: 34rem) {
-  .control-label {
-    display: none;
+  .control {
+    padding: 8px 10px;
   }
 
-  .control {
-    padding: 9px;
+  .control-label {
+    font-size: 0.8rem;
   }
 }
 

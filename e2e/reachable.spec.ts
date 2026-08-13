@@ -79,3 +79,12 @@ test('a keyboard user can see where they are', async ({ page }) => {
   expect(ring.style).not.toBe('none');
   expect(parseFloat(ring.width)).toBeGreaterThanOrEqual(2);
 });
+
+test('a phone still gets words on its buttons', async ({ page }) => {
+  // Glyphs alone rescue a screen reader via aria-label and nobody else. If the labels ever go
+  // again, this is what says so.
+  await boot(page, 360, 800);
+  const labels = page.locator('.controls .control-label');
+  expect(await labels.count()).toBeGreaterThan(3);
+  await expect(labels.first()).toBeVisible();
+});

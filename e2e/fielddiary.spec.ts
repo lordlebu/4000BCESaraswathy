@@ -10,6 +10,7 @@
 // across a delta hoping to find something" into a test that finishes in seconds.
 
 import { expect, test, type Page } from '@playwright/test';
+import { step } from './walk';
 
 /** A seed where poi_eastern_field sits at (24,47) and the traveller starts at (25,46). */
 const SEED = 'poi-53';
@@ -21,11 +22,6 @@ async function boot(page: Page) {
   await expect(page.locator('.journal h2')).toBeVisible();
 }
 
-/** One step. Tweened, so the walk needs a beat between presses. */
-async function step(page: Page, key: string) {
-  await page.locator('.map-surface canvas').press(key);
-  await page.waitForTimeout(450);
-}
 
 test('stand on an authored place, and it opens', async ({ page }) => {
   await boot(page);

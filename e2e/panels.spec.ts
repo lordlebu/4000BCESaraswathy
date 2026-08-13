@@ -5,6 +5,7 @@
 // reopened without stepping off the tile and back on.
 
 import { expect, test, type Page } from '@playwright/test';
+import { step, walkTo } from './walk';
 
 const SEED = 'poi-53';
 
@@ -16,11 +17,7 @@ async function boot(page: Page, w = 1280, h = 800) {
 }
 
 async function walkToPlace(page: Page) {
-  for (const key of ['ArrowLeft', 'ArrowDown']) {
-    await page.locator('.map-surface canvas').press(key);
-    await page.waitForTimeout(450);
-  }
-  await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
+  await walkTo(page, ['ArrowLeft', 'ArrowDown']);
 }
 
 /** Overlapping area of two elements, in square pixels. */
