@@ -298,21 +298,21 @@ describe('the diary offers the last page', () => {
 
 describe('the field kit', () => {
   it('has nothing to work on until something has been noticed', () => {
-    render(<FieldKit progress={emptyProgress()} open onClose={noop} />);
+    render(<FieldKit progress={emptyProgress()} open onClose={noop} canResearch={false} />);
     expect(screen.getByText(/go and notice something first/i)).toBeDefined();
   });
 
   it('offers only the specimens the player has actually met', () => {
     // A tool that answered about the rest of canon would be a spoiler engine in a lab coat.
     const p = advance(emptyProgress(), 'discovery_saltreed_thatch');
-    const { container } = render(<FieldKit progress={p} open onClose={noop} />);
+    const { container } = render(<FieldKit progress={p} open onClose={noop} canResearch={false} />);
     const chips = [...container.querySelectorAll('.specimen')].map((e) => e.textContent);
     expect(chips).toEqual(['Saltreed']);
   });
 
   it('classifies one, and says how much enquiry is still open', () => {
     const p = advance(emptyProgress(), 'discovery_marsh_lurker_habits');
-    render(<FieldKit progress={p} open onClose={noop} />);
+    render(<FieldKit progress={p} open onClose={noop} canResearch={false} />);
     fireEvent.click(screen.getByRole('button', { name: 'Lothal Marsh-Lurker' }));
     expect(screen.getByRole('heading', { name: /what it is/i })).toBeDefined();
     expect(screen.getByText(/lines of enquiry begun/i)).toBeDefined();
@@ -321,7 +321,7 @@ describe('the field kit', () => {
   it('sets two side by side, and marks the row that differs', () => {
     let p = advance(emptyProgress(), 'discovery_saltreed_thatch');
     p = advance(p, 'discovery_red_rice_survival');
-    const { container } = render(<FieldKit progress={p} open onClose={noop} />);
+    const { container } = render(<FieldKit progress={p} open onClose={noop} canResearch={false} />);
     fireEvent.click(screen.getByRole('button', { name: 'Saltreed' }));
     fireEvent.click(screen.getByRole('button', { name: /red delta rice/i }));
 
@@ -336,7 +336,7 @@ describe('the field kit', () => {
     let p = advance(emptyProgress(), 'discovery_saltreed_thatch');
     p = advance(p, 'discovery_red_rice_survival');
     p = advance(p, 'discovery_ghost_mangrove_channel');
-    const { container } = render(<FieldKit progress={p} open onClose={noop} />);
+    const { container } = render(<FieldKit progress={p} open onClose={noop} canResearch={false} />);
     for (const chip of container.querySelectorAll('.specimen')) fireEvent.click(chip);
     expect(container.querySelectorAll('.specimen.picked').length).toBe(2);
   });
@@ -344,9 +344,34 @@ describe('the field kit', () => {
   it('says so plainly when two things cannot be compared', () => {
     let p = advance(emptyProgress(), 'discovery_saltreed_thatch');
     p = advance(p, 'discovery_tower_collapse');
-    render(<FieldKit progress={p} open onClose={noop} />);
+    render(<FieldKit progress={p} open onClose={noop} canResearch={false} />);
     fireEvent.click(screen.getByRole('button', { name: 'Saltreed' }));
     fireEvent.click(screen.getByRole('button', { name: /lothal/i }));
     expect(screen.getByText(/cannot be set side by side/i)).toBeDefined();
+  });
+});
+
+describe('research is the one tool that can be absent', () => {
+  it('is not rendered at all when no canon service is listening', () => {
+    // An input that always fails teaches a player to distrust the panel it sits in.
+    const p = advance(emptyProgress(), 'discovery_saltreed_thatch');
+    render(<FieldKit progress={p} open onClose={noop} canResearch={false} />);
+    expect(screen.queryByRole('heading', { name: /^research$/i })).toBeNull();
+    expect(screen.queryByRole('searchbox')).toBeNull();
+  });
+
+  it('appears when there is one, and says it searches beyond the diary', () => {
+    const p = advance(emptyProgress(), 'discovery_saltreed_thatch');
+    render(<FieldKit progress={p} open onClose={noop} canResearch />);
+    expect(screen.getByRole('heading', { name: /^research$/i })).toBeDefined();
+    // The other three tools only ever discuss what the player has met; this one does not, and
+    // says so rather than quietly breaking that rule.
+    expect(screen.getByText(/asks the whole corpus, not your diary/i)).toBeDefined();
+  });
+
+  it('will not send an empty question', () => {
+    const p = advance(emptyProgress(), 'discovery_saltreed_thatch');
+    render(<FieldKit progress={p} open onClose={noop} canResearch />);
+    expect(screen.getByRole('button', { name: /look it up/i })).toHaveProperty('disabled', true);
   });
 });

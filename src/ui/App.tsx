@@ -343,7 +343,12 @@ export function App() {
         onOpenKit={() => setKitOpen(true)}
       />
 
-      <FieldKit progress={progress} open={kitOpen} onClose={() => setKitOpen(false)} />
+      <FieldKit
+        progress={progress}
+        open={kitOpen}
+        onClose={() => setKitOpen(false)}
+        canResearch={canon.lore}
+      />
 
       <Ending progress={progress} open={endingOpen} onClose={() => setEndingOpen(false)} />
 

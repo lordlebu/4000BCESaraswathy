@@ -154,6 +154,22 @@ const cache = new Map<string, CanonLore>();
 const key = (p: Place, kind: string) => `${kind}:${p.seed}:${p.x},${p.y}`;
 
 /** What canon knows about this tile. Retrieval only — fast, and the reliable half. */
+/**
+ * Ask canon a question in the player's own words.
+ *
+ * `loreFor` answers "what does canon say about where I am standing", which cannot express
+ * "has anything like this been seen before". This is the same retrieval with words instead of
+ * coordinates — public, no model, nothing spent.
+ *
+ * Uncached, unlike `loreFor`: a tile is asked about repeatedly and a typed question is not,
+ * so a cache here would only hold strings nobody asks twice.
+ */
+export async function searchCanon(query: string): Promise<CanonLore | null> {
+  const trimmed = query.trim();
+  if (!trimmed) return null;
+  return post<CanonLore>('/search', { query: trimmed, k: 6 }, LORE_TIMEOUT_MS);
+}
+
 export async function loreFor(place: Place): Promise<CanonLore | null> {
   const k = key(place, 'lore');
   const hit = cache.get(k);
