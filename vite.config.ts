@@ -13,7 +13,11 @@ export default defineConfig({
   test: {
     // Vitest owns test/ only. Without this it would also collect e2e/*.spec.ts and try to run
     // Playwright's browser tests in Node, where they cannot work.
-    include: ['test/**/*.test.ts']
+    include: ['test/**/*.test.ts', 'test/**/*.test.tsx'],
+    // Node by default, because everything under world/ and content/ is meant to run there and
+    // a DOM would hide a stray browser dependency rather than catch it. The panel tests opt in
+    // per file with `// @vitest-environment jsdom`, which keeps that boundary visible.
+    environment: 'node'
   },
   server: {
     port: 4173,

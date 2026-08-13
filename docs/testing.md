@@ -88,12 +88,28 @@ specs pushed three parallel Phaser instances past what a spec's waits allowed, a
 failure looked like a code regression. **Being fast locally and differently wrong is worse
 than being slow and the same.** Local is now 2.
 
-## What is worth adding next
+## Component tests, and the trap in them
 
-- **Component tests.** There is no DOM test environment, so `Diary.tsx` and `PlacePanel.tsx`
-  are covered only through e2e, which is slow and indirect. `jsdom` plus
-  `@testing-library/react` would let the diary's rules-to-render wiring be tested in
-  milliseconds. Two dev dependencies, and the first thing I would add.
+Added after three bugs reached a browser before anything noticed: the diary counted itself
+empty in discoveries alone, the place panel buried the field notes, and settling a question was
+unreachable because nothing called `answer`. All three are rendering questions with
+rules-shaped causes — the seam neither a unit test nor a five-minute browser suite covers well.
+`test/panels.test.tsx` runs in about a second and each test names the bug it would have caught.
+
+**Node stays the default environment**, and the panel tests opt in per file with
+`// @vitest-environment jsdom`. Everything under `world/` and `content/` is meant to run
+without a DOM, and a global jsdom would hide a stray browser dependency rather than catch it.
+
+**Register `afterEach(cleanup)` yourself.** Testing Library only does it for you when vitest
+runs with globals, which this project does not — so without it the DOM accumulates and every
+query searches the previous test's markup too. It fails in the most misleading way available:
+the first three assertions written here "failed" by finding an empty diary that belonged to an
+earlier render, which reads exactly like the bug they were written to catch.
+
+And the same rule as everywhere else: **the guard was verified by reintroducing the bug.**
+Putting the old `noticed.length === 0` check back fails precisely the two tests written for it.
+
+## What is worth adding next
 - **A Python test runner for the canon repo.** `lint_story.py` and `check_playability.py` are
   untested scripts, and one of them shipped a wrong ordering check for months.
 - **Visual regression, properly.** If screenshots are ever compared again, compare *images*
