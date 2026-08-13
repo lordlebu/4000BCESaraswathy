@@ -81,6 +81,17 @@ to be the journal panel reflowing as the day turned, dragging the camera with it
 
 A real product bug, found only because the flake was investigated rather than retried.
 
+## Never run two browser suites at once
+
+Twice now a suite has "failed" — once six specs, once thirty-six — because a second Playwright
+run was started while one was still going in the background. They contend for the dev server on
+one port and for the machine, and the failures scatter across unrelated specs in a way that
+looks exactly like a real regression. The 36-failure run was diagnosed in a minute only because
+the previous clean run was still on screen.
+
+The tell is the duration: this suite takes about three minutes. A thirteen-minute run has been
+starved, and nothing it reports should be believed until it is repeated on an idle machine.
+
 ## Match CI's parallelism locally
 
 Local `workers` was pinned at 3 while CI leaves it to Playwright and gets 1–2. Adding seven

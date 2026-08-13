@@ -9,6 +9,7 @@ import { Controls } from './Controls';
 import { CanonPanel } from './CanonPanel';
 import { Diary, diaryCount } from './Diary';
 import { Ending } from './Ending';
+import { FieldKit } from './FieldKit';
 import { PlacePanel } from './PlacePanel';
 import { Overworld } from './Overworld';
 import { poi } from '../content/places';
@@ -53,6 +54,7 @@ export function App() {
   const [progress, setProgress] = useState(initialJourney.current.progress);
   const [diaryOpen, setDiaryOpen] = useState(false);
   const [endingOpen, setEndingOpen] = useState(false);
+  const [kitOpen, setKitOpen] = useState(false);
 
   // The three scales. `fieldMapId` is the country under foot; `poiId` is the authored place
   // being stood in, if any; a sub-location opens inside the place panel rather than here,
@@ -338,7 +340,10 @@ export function App() {
         onClose={() => setDiaryOpen(false)}
         onAnswer={settle}
         onOpenEnding={() => setEndingOpen(true)}
+        onOpenKit={() => setKitOpen(true)}
       />
+
+      <FieldKit progress={progress} open={kitOpen} onClose={() => setKitOpen(false)} />
 
       <Ending progress={progress} open={endingOpen} onClose={() => setEndingOpen(false)} />
 

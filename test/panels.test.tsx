@@ -15,10 +15,11 @@
 // Each test below states which bug it would have caught.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { Diary } from '../src/ui/Diary';
 import { QuestionCard } from '../src/ui/Questions';
 import { Ending } from '../src/ui/Ending';
+import { FieldKit } from '../src/ui/FieldKit';
 import {
   type Progress,
   advance,
@@ -65,7 +66,7 @@ afterEach(cleanup);
 
 describe('the diary decides whether it is empty', () => {
   it('says so when nothing at all has happened', () => {
-    render(<Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} />);
+    render(<Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
     expect(screen.getByText(/have not written anything down/i)).toBeDefined();
   });
 
@@ -75,20 +76,20 @@ describe('the diary decides whether it is empty', () => {
     const p = talkedToBekh();
     expect(p.questions.length).toBeGreaterThan(0);
 
-    render(<Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} />);
+    render(<Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
     expect(screen.queryByText(/have not written anything down/i)).toBeNull();
     expect(screen.getByRole('heading', { name: /open questions/i })).toBeDefined();
   });
 
   it('does not call itself empty when only a word has been learned', () => {
     const p = learn(emptyProgress(), 'word_kia_thal');
-    render(<Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} />);
+    render(<Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
     expect(screen.queryByText(/have not written anything down/i)).toBeNull();
   });
 
   it('renders nothing at all when closed', () => {
     const { container } = render(
-      <Diary progress={emptyProgress()} moment={null} open={false} onClose={noop} onAnswer={noop} onOpenEnding={noop} />
+      <Diary progress={emptyProgress()} moment={null} open={false} onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     expect(container.firstChild).toBeNull();
   });
@@ -100,7 +101,7 @@ describe('the diary keeps the crossings-out', () => {
     p = advance(p, 'discovery_saltreed_thatch');
 
     const { container } = render(
-      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} />
+      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     const readings = container.querySelectorAll('.revisions .reading');
     expect(readings.length).toBe(2);
@@ -111,7 +112,7 @@ describe('the diary keeps the crossings-out', () => {
 
   it('shows no row at all for a discovery never noticed', () => {
     const { container } = render(
-      <Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} />
+      <Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     expect(container.querySelectorAll('.entry').length).toBe(0);
   });
@@ -126,6 +127,7 @@ describe('the diary keeps the crossings-out', () => {
         onClose={noop}
         onAnswer={noop}
         onOpenEnding={noop}
+        onOpenKit={noop}
       />
     );
     expect(screen.getByText(/come back at night/i)).toBeDefined();
@@ -156,8 +158,7 @@ describe('settling a question', () => {
     const onAnswer = vi.fn();
     render(<QuestionCard questionId="question_silver_water" progress={p} onAnswer={onAnswer} />);
 
-    const button = screen.getAllByRole('button', { name: /write this down/i })[0]!;
-    button.click();
+    fireEvent.click(screen.getAllByRole('button', { name: /write this down/i })[0]!);
     expect(onAnswer).toHaveBeenCalledWith('question_silver_water', expect.any(Number));
   });
 
@@ -189,7 +190,7 @@ describe('the knowledge tree', () => {
   it('never claims a discipline the player has not touched', () => {
     const p = climb(emptyProgress(), 'discovery_saltreed_thatch');
     const { container } = render(
-      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} />
+      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     const shown = [...container.querySelectorAll('.disc-name')].map((e) => e.textContent);
     expect(shown.length).toBeGreaterThan(0);
@@ -199,7 +200,7 @@ describe('the knowledge tree', () => {
   it('counts rungs rather than discoveries, so half-understanding shows', () => {
     const one = advance(emptyProgress(), 'discovery_saltreed_thatch');
     const { container } = render(
-      <Diary progress={one} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} />
+      <Diary progress={one} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     const bar = container.querySelector('.disc-bar i') as HTMLElement | null;
     expect(bar).not.toBeNull();
@@ -215,7 +216,7 @@ describe('the panels stay in step with canon', () => {
     let p = emptyProgress();
     for (const d of discoveries) p = advance(p, d.id);
     const { container } = render(
-      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} />
+      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     const shown = new Set([...container.querySelectorAll('.diary-section > h3')].map((e) => e.textContent));
     const used = new Set(discoveries.map((d) => d.discipline));
@@ -280,7 +281,7 @@ describe('the last page', () => {
 describe('the diary offers the last page', () => {
   it('only once something has been finished', () => {
     const nothing = render(
-      <Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} />
+      <Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     expect(nothing.queryByRole('button', { name: /see who would come/i })).toBeNull();
     cleanup();
@@ -288,10 +289,64 @@ describe('the diary offers the last page', () => {
     const p = climb(emptyProgress(), 'discovery_saltreed_thatch');
     const onOpenEnding = vi.fn();
     render(
-      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={onOpenEnding} />
+      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={onOpenEnding} onOpenKit={noop} />
     );
-    const button = screen.getByRole('button', { name: /see who would come/i });
-    button.click();
+    fireEvent.click(screen.getByRole('button', { name: /see who would come/i }));
     expect(onOpenEnding).toHaveBeenCalled();
+  });
+});
+
+describe('the field kit', () => {
+  it('has nothing to work on until something has been noticed', () => {
+    render(<FieldKit progress={emptyProgress()} open onClose={noop} />);
+    expect(screen.getByText(/go and notice something first/i)).toBeDefined();
+  });
+
+  it('offers only the specimens the player has actually met', () => {
+    // A tool that answered about the rest of canon would be a spoiler engine in a lab coat.
+    const p = advance(emptyProgress(), 'discovery_saltreed_thatch');
+    const { container } = render(<FieldKit progress={p} open onClose={noop} />);
+    const chips = [...container.querySelectorAll('.specimen')].map((e) => e.textContent);
+    expect(chips).toEqual(['Saltreed']);
+  });
+
+  it('classifies one, and says how much enquiry is still open', () => {
+    const p = advance(emptyProgress(), 'discovery_marsh_lurker_habits');
+    render(<FieldKit progress={p} open onClose={noop} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Lothal Marsh-Lurker' }));
+    expect(screen.getByRole('heading', { name: /what it is/i })).toBeDefined();
+    expect(screen.getByText(/lines of enquiry begun/i)).toBeDefined();
+  });
+
+  it('sets two side by side, and marks the row that differs', () => {
+    let p = advance(emptyProgress(), 'discovery_saltreed_thatch');
+    p = advance(p, 'discovery_red_rice_survival');
+    const { container } = render(<FieldKit progress={p} open onClose={noop} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Saltreed' }));
+    fireEvent.click(screen.getByRole('button', { name: /red delta rice/i }));
+
+    expect(screen.getByRole('heading', { name: /side by side/i })).toBeDefined();
+    // Two plants that differ by name and binomial and agree on region: the point of the tool
+    // is that only some rows differ, so both classes must be present.
+    expect(container.querySelectorAll('table.compare tr.differs').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('table.compare tr.same').length).toBeGreaterThan(0);
+  });
+
+  it('never holds more than two at once', () => {
+    let p = advance(emptyProgress(), 'discovery_saltreed_thatch');
+    p = advance(p, 'discovery_red_rice_survival');
+    p = advance(p, 'discovery_ghost_mangrove_channel');
+    const { container } = render(<FieldKit progress={p} open onClose={noop} />);
+    for (const chip of container.querySelectorAll('.specimen')) fireEvent.click(chip);
+    expect(container.querySelectorAll('.specimen.picked').length).toBe(2);
+  });
+
+  it('says so plainly when two things cannot be compared', () => {
+    let p = advance(emptyProgress(), 'discovery_saltreed_thatch');
+    p = advance(p, 'discovery_tower_collapse');
+    render(<FieldKit progress={p} open onClose={noop} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Saltreed' }));
+    fireEvent.click(screen.getByRole('button', { name: /lothal/i }));
+    expect(screen.getByText(/cannot be set side by side/i)).toBeDefined();
   });
 });
