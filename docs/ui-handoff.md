@@ -1,12 +1,17 @@
-# UI handoff — Varuna's Field Diary
+# UI notes — Varuna's Field Diary
 
-This is a brief for the instance doing UI and art. **The data layer is finished and tested;
-none of it needs to change.** What follows is what to build on top of it, what to call, and
-what not to touch.
+**This began as a brief for a separate instance building the UI. That split ended on 2026-08-12
+and everything described here has since been built**, so read it as a design record rather than
+as a contract: it explains why the panels behave as they do, which is knowledge that outlived
+the arrangement it was written for.
 
-Everything here is on branch `feature/canon-bundle` in both repos. `npm run typecheck` is
-clean and 203 tests pass across 12 files. If you break one of those tests, the fix is almost
-certainly in your code rather than in the test.
+Two things in it are still live rules rather than history — *ask `journey.ts`, do not
+reimplement it*, and the layering constraints under "Standing constraints". Both are enforced by
+tests. The rest describes work that is done.
+
+Counts and branch names have been removed rather than maintained: this is history, and a
+historical document that keeps a running total is just a document that is wrong. For current
+figures read `database/index.json` in the canon repo, or run the suite.
 
 ---
 
@@ -63,14 +68,13 @@ Three adapters under `src/content/`, all already written:
 Plus `src/journey.ts` for player state and `src/world/fieldMap.ts`, which turns a canon field
 map into walkable ground with the authored places standing on it.
 
-Authored so far: **2 field maps (Lothal, the Narmada Plateau), 12 points of interest, 18
-discoveries, 5 field questions, 6 NPCs, and 6 words across two languages** (`kia` in the
-delta, `maru` on the plateau), covering all 7 disciplines.
+**Derive everything from the data.** Nothing should hardcode a map id, a place count, a
+discipline list, or a number of languages — read `fieldMaps`, the keys of
+`disciplineProgress()`, and `languagesKnown()`. The maps are deliberately unalike in scale,
+palette and climate, and the next one will not resemble any of them.
 
-That is still a slice rather than the finished game, so **derive everything from the data**.
-Nothing should hardcode a map id, a place count, a discipline list, or two languages — read
-`fieldMaps`, the keys of `disciplineProgress()`, and `languagesKnown()`. The two maps are
-deliberately unalike in scale and palette; a third will not resemble either.
+This instruction is the reason the panels survived going from one field map to four without
+edits, and it is the part of this document most worth keeping.
 
 ---
 

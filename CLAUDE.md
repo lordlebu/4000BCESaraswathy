@@ -4,10 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**South of Tethys: Jambhudweepa Adventure** — a cozy 2D browser exploration game with a seed-based
-world generator. The player wanders a tile map, reads a travel journal describing the terrain,
-creatures, and plants of each tile, and records a landmark. Combat is absent by design; creatures
+**Varuna's Field Diary** — a cozy 2D browser naturalist RPG. Combat is absent by design; creatures
 are observed, not fought.
+
+The player travels between authored **field maps** (four so far, joined by roads), walks each one,
+stands in **points of interest**, talks to the people there, and looks closely at things. Looking
+closely climbs a **discovery** one rung, and each rung rewrites its diary entry — *the diary is the
+progression system*, and there are no experience points anywhere. Understanding things well enough
+lets you settle **field questions**, possibly wrongly, and reach an **ending** where the people your
+work helped either come with you or explain why they are staying.
+
+The older loop — a procedural world with a landmark to find and a travel journal to export — still
+runs underneath, deliberately kept. See "Known issues".
+
+Stack: **React 19 + Phaser 4 + TypeScript + Vite**. React owns the DOM chrome, Phaser owns the map
+canvas, and the game logic belongs to neither.
 
 Stack: **React 19 + Phaser 4 + TypeScript + Vite**. React owns the DOM chrome, Phaser owns the map
 canvas, and the game logic belongs to neither.
@@ -17,7 +28,7 @@ canvas, and the game logic belongs to neither.
 ```bash
 npm install
 npm run dev        # serve at http://localhost:4173 and open a browser
-npm test           # vitest — world, content and journal, under plain Node
+npm test           # vitest — rules and content under Node, panels under jsdom
 npm run test:e2e   # playwright — does the game actually boot and draw?
 npm run test:watch # vitest in watch mode
 npm run typecheck  # tsc --noEmit
@@ -167,8 +178,50 @@ Terrain is now built from octaves of value noise over a seeded highland spine, a
 cannot come back quietly. If you retune `THRESHOLDS` in `classify.ts`, those tests are the contract
 you are negotiating with.
 
+## The rules layer, and the one rule about it
+
+`src/journey.ts` holds every rule about what a player knows and what that lets them do:
+`canAdvance`, `blockedBy`, `entriesSoFar`, `linesFor`, `hear`, `canEnter`, `availableResolutions`,
+`answer`, `gatherable`, `staying`, `disciplineProgress`, `languagesKnown`. All pure, all tested
+under Node.
+
+**The UI asks; it never reimplements.** A panel that reads `progress.rungs` to compute a percentage
+is a second implementation of the ladder and will drift. If something a component needs is not
+exposed, add a tested function here rather than computing it in the component.
+
+This has bitten three times, each the same shape — a rule written, tested, and with no caller, so
+the mechanic simply did not exist in the shipped game while every test passed:
+
+- NPC dialogue never reached the adapter, so **no word could ever be learned**
+- `answer` had no caller, so **a field question could not be settled**
+- `gatherable` had no caller, so **the game had no ending**
+
+The guard against the first of those is `test/adapterCoverage.test.ts`, which fails when canon
+grows a field nothing adapts. The guard against the others is that at least one test per mechanic
+must use only the paths a player has — `test/conversation.test.ts` walks both maps talking to
+people and never calls `learn`.
+
+## A requirement means two different things
+
+Climbing a rung requires what it stands on to be **fully understood**. Forming a reading of a
+question, or hearing a line, requires only that it has been **observed** (rung ≥ 1). A hypothesis
+is built from what you have seen, not from what you have finished.
+
+This is not a subtlety to tidy away. Under one uniform rule the wrong-but-early reading of a
+question becomes unreachable, and Thrali can never hand over the word that completes the very
+discovery he is waiting on. `utils/check_playability.py` in the canon repo duplicates both
+readings; change them here and change them there.
+
 ## Known issues to be aware of
 
+- **The landmark loop is kept deliberately.** The compass bearing to a great banyan and the arrival
+  page it ends in predate points of interest, so there are two notions of arriving somewhere.
+  Retiring the older one was proposed three times and declined: it works, its tests pass, and it is
+  the shape the original game had. It goes only for a design reason, never as tidying.
+- **`lava_field` cannot be drawn.** Canon names it and 36 species live there, but there is no tile,
+  so `src/content/canon.ts` filters it out and those species keep `mountains` alongside it. The
+  Ganges Lava Sea is unbuildable-looking until someone makes a 32×32 tile — see `docs/art-brief.md`,
+  Asset 2b.
 - **`feat/react-upgrade` is abandoned, not merged.** Its atmosphere components (`FogOfWar`,
   `DayNightCycle`, `AmbientParticles`) are DOM reimplementations of things Phaser does natively,
   and it carries a weaker generator. It survives only as a visual reference. Do not merge it.
@@ -192,6 +245,16 @@ you are negotiating with.
   from `world/rng.ts`. `game/dayNight.ts` is the one place allowed to read the wall clock, because
   what the sky looks like while you walk is presentation, not world state.
 - Saved journeys live in `localStorage` keyed by seed and carry a `version`; bump `SAVE_VERSION` in
-  `src/save.ts` when the payload shape changes so old saves are discarded rather than misread.
+  `src/save.ts` when the payload shape changes so old saves are discarded rather than misread. It is
+  at 5, and `Progress` — rungs, words, answered, questions — is the part that matters.
+- **Dev dependencies grew by three, for a reason.** `jsdom`, `@testing-library/react` and
+  `@testing-library/dom` exist because three panel bugs reached a browser before anything noticed.
+  Node stays the default test environment; panel files opt in with `// @vitest-environment jsdom`,
+  so a stray browser dependency under `world/` or `content/` still fails rather than being hidden.
+  Register `afterEach(cleanup)` yourself — Testing Library only does it under vitest globals, which
+  this project does not use.
+- **`docs/testing.md` is worth reading before writing a test here.** It records what the failures
+  in this repository have actually cost, including the one that matters most: measure the signal
+  before tuning a threshold.
 - Field order in `generateWorld` is part of the seed contract. Reordering the `fractalField` and
   `highlandSpine` calls changes every existing map.
