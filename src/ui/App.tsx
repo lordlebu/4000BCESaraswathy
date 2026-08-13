@@ -10,6 +10,7 @@ import { CanonPanel } from './CanonPanel';
 import { Diary, diaryCount } from './Diary';
 import { PlacePanel } from './PlacePanel';
 import { Overworld } from './Overworld';
+import { poi } from '../content/places';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { creatureAction } from '../content/journal';
 import { isPresent, routineFor } from '../content/routine';
@@ -55,9 +56,21 @@ export function App() {
   // being stood in, if any; a sub-location opens inside the place panel rather than here,
   // because going deeper into a ruin is not leaving it.
   const [fieldMapId, setFieldMapId] = useState(DEFAULT_FIELD_MAP);
-  const [poiId, setPoiId] = useState<string | null>(null);
   const [overworldOpen, setOverworldOpen] = useState(false);
   const visited = useRef(new Set<string>());
+
+  /**
+   * Every panel opens and closes, and the two that share the bottom of the screen never both
+   * hold it.
+   *
+   * `standingOn` is where the traveller is; `placeOpen` is whether they are reading about it.
+   * Keeping those apart is what lets a closed panel be opened again without walking off the
+   * tile and back — and it is why the place panel can be dismissed to read the field notes it
+   * would otherwise cover.
+   */
+  const [standingOn, setStandingOn] = useState<string | null>(null);
+  const [placeOpen, setPlaceOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(true);
 
   // The scene owns the clock and says when it turns. React used to run its own timer off the
   // same formulas, which is two clocks agreeing by luck -- and they would have drifted the
@@ -90,21 +103,26 @@ export function App() {
       setReached(true);
     };
 
-    const onPoiEntered = ({ poiId: id }: GameToUi['poi-entered']) => setPoiId(id);
+    const onStandingOn = ({ poiId: id }: GameToUi['standing-on']) => {
+      setStandingOn(id);
+      // Arriving somewhere opens it once. Leaving closes it, because a panel about a place you
+      // are no longer standing in is a lie about where you are.
+      setPlaceOpen(Boolean(id));
+    };
     const onMoment = (next: GameToUi['moment-changed']) => setMoment(next);
 
     EventBus.onEvent('world-ready', onWorldReady);
     EventBus.onEvent('tile-entered', onTileEntered);
     EventBus.onEvent('journey-changed', onJourneyChanged);
     EventBus.onEvent('landmark-reached', onLandmarkReached);
-    EventBus.onEvent('poi-entered', onPoiEntered);
+    EventBus.onEvent('standing-on', onStandingOn);
     EventBus.onEvent('moment-changed', onMoment);
     return () => {
       EventBus.offEvent('world-ready', onWorldReady);
       EventBus.offEvent('tile-entered', onTileEntered);
       EventBus.offEvent('journey-changed', onJourneyChanged);
       EventBus.offEvent('landmark-reached', onLandmarkReached);
-      EventBus.offEvent('poi-entered', onPoiEntered);
+      EventBus.offEvent('standing-on', onStandingOn);
       EventBus.offEvent('moment-changed', onMoment);
     };
   }, []);
@@ -210,7 +228,8 @@ export function App() {
   const travel = useCallback(
     (next: string) => {
       setFieldMapId(next);
-      setPoiId(null);
+      setStandingOn(null);
+      setPlaceOpen(false);
       setOverworldOpen(false);
       discovered.current = [];
       EventBus.emitEvent('travel-to', { fieldMapId: next, seed });
@@ -233,7 +252,7 @@ export function App() {
   // Measured rather than derived: the CSS already decides where the panels go, and re-implementing
   // those breakpoints here would be a second copy of the rules waiting to disagree with the first.
   const hasLog = Boolean(travelLog) && logOpen;
-  const hasNotes = Boolean(arrival);
+  const hasNotes = Boolean(arrival) && notesOpen;
   useEffect(() => {
     const stage = document.querySelector('.stage');
     if (!stage) return;
@@ -301,8 +320,13 @@ export function App() {
         logOpen={logOpen}
         onToggleLog={() => setLogOpen((open) => !open)}
         diaryCount={diaryCount(progress)}
-        onOpenDiary={() => setDiaryOpen(true)}
-        onOpenOverworld={() => setOverworldOpen(true)}
+        onOpenDiary={() => setDiaryOpen((open) => !open)}
+        onOpenOverworld={() => setOverworldOpen((open) => !open)}
+        notesOpen={notesOpen}
+        onToggleNotes={() => setNotesOpen((open) => !open)}
+        placeName={standingOn ? poi(standingOn)?.name ?? null : null}
+        placeOpen={placeOpen}
+        onTogglePlace={() => setPlaceOpen((open) => !open)}
       />
 
       <Diary
@@ -322,15 +346,15 @@ export function App() {
       />
 
       <PlacePanel
-        poiId={poiId}
+        poiId={placeOpen ? standingOn : null}
         progress={progress}
         moment={moment}
-        firstVisit={Boolean(poiId) && !visited.current.has(poiId!)}
+        firstVisit={Boolean(standingOn) && !visited.current.has(standingOn!)}
         onLook={look}
         onListen={listen}
         onClose={() => {
-          if (poiId) visited.current.add(poiId);
-          setPoiId(null);
+          if (standingOn) visited.current.add(standingOn);
+          setPlaceOpen(false);
         }}
       />
 
@@ -344,6 +368,7 @@ export function App() {
         <CanonPanel place={place} status={canon} />
       </JourneyLog>
 
+      {notesOpen && (
       <JournalPanel
         entry={arrival?.entry ?? null}
         surroundings={arrival?.surroundings ?? ''}
@@ -355,6 +380,7 @@ export function App() {
         alreadySketched={Boolean(currentCreature && observed.includes(currentCreature.name))}
         onObserve={observe}
       />
+      )}
 
       {/* The arrival still stops the world for a moment, but it can no longer sit below the map —
           there is no below. It comes to the middle, which is where you want to read it anyway. */}
