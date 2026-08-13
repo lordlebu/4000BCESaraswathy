@@ -5,7 +5,7 @@
 // reopened without stepping off the tile and back on.
 
 import { expect, test, type Page } from '@playwright/test';
-import { step, walkTo } from './walk';
+import { walkTo } from './walk';
 
 const SEED = 'poi-53';
 

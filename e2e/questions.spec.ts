@@ -5,7 +5,7 @@
 // This walks it: hear a question from someone, look at the thing it is about, and commit.
 
 import { expect, test, type Page } from '@playwright/test';
-import { step, walkTo } from './walk';
+import { step } from './walk';
 
 /**
  * A seed where the drowned dockyard sits one step west and one north of the start.
