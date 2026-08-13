@@ -24,6 +24,7 @@ import {
 } from '../journey';
 import { discoveries, discovery, vocabulary, word } from '../content/knowledge';
 import { QuestionCard } from './Questions';
+import { specimensIn } from './FieldKit';
 
 /** Canon's discipline ids, in the order a naturalist would keep them. */
 const DISCIPLINE_ORDER = [
@@ -128,9 +129,18 @@ export interface DiaryProps {
   onClose: () => void;
   onAnswer: (questionId: string, index: number) => void;
   onOpenEnding: () => void;
+  onOpenKit: () => void;
 }
 
-export function Diary({ progress, moment, open, onClose, onAnswer, onOpenEnding }: DiaryProps) {
+export function Diary({
+  progress,
+  moment,
+  open,
+  onClose,
+  onAnswer,
+  onOpenEnding,
+  onOpenKit
+}: DiaryProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   // Escape closes it, and focus starts somewhere sensible. The map keeps running underneath;
@@ -230,6 +240,17 @@ export function Diary({ progress, moment, open, onClose, onAnswer, onOpenEnding 
                     onAnswer={onAnswer}
                   />
                 ))}
+              </section>
+            )}
+
+            {/* The kit works on the subjects of discoveries you have noticed, so it appears
+                as soon as there is one thing in it to examine. */}
+            {specimensIn(progress).length > 0 && (
+              <section className="diary-section">
+                <h3>Field kit</h3>
+                <button type="button" className="ending-open" onClick={onOpenKit}>
+                  Examine what you have found
+                </button>
               </section>
             )}
 

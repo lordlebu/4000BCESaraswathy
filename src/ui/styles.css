@@ -1042,3 +1042,35 @@ button.ghost:hover:not(:disabled) {
   color: var(--muted);
   font-size: 0.9rem;
 }
+
+/* The field kit. Specimens are chips because picking one and then a second is the whole
+ * interaction — a list with checkboxes would hide that the second pick means "compare". */
+.specimens { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.specimen {
+  font: inherit;
+  font-size: 0.84rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.specimen.picked { background: rgba(164, 92, 64, 0.2); border-color: var(--accent); }
+
+.facts { margin: 0.3rem 0 0.5rem; }
+.facts > div { display: flex; gap: 0.6rem; margin-bottom: 0.15rem; font-size: 0.9rem; }
+.facts dt { font-weight: 600; min-width: 6rem; flex: none; }
+.facts dd { margin: 0; color: var(--muted); }
+
+table.compare { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+table.compare th, table.compare td {
+  text-align: left;
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--edge);
+}
+table.compare thead th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+/* The row that differs is the answer, so it is the row that looks like something. */
+table.compare tr.same td { color: var(--muted); }
+table.compare tr.differs td { font-weight: 600; }
+table.compare tr.differs th[scope='row'] { color: var(--accent); }
