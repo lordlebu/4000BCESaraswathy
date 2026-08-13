@@ -21,6 +21,7 @@ import {
   learn,
   restored,
   rungOf,
+  staying,
   type Progress
 } from '../src/journey';
 import { discoveries, discovery, fieldQuestion, lastRung, vocabulary } from '../src/content/knowledge';
@@ -208,6 +209,48 @@ describe('the knowledge tree', () => {
     // climbed, which is the failure this whole file exists to catch.
     for (const d of discoveries) {
       expect(isComplete(p, d.id), `${d.id} cannot be finished`).toBe(true);
+    }
+  });
+});
+
+describe('the ending', () => {
+  /** Everything knowable, known — the state a player reaches by finishing. */
+  function everything(): Progress {
+    let p = emptyProgress();
+    for (const w of vocabulary) p = learn(p, w.id);
+    for (let pass = 0; pass < discoveries.length; pass += 1) {
+      for (const d of discoveries) p = climb(p, d.id);
+    }
+    return p;
+  }
+
+  it('gathers nobody before anything has been finished', () => {
+    expect(gatherable(emptyProgress())).toEqual([]);
+    expect(staying(emptyProgress())).toEqual([]);
+  });
+
+  it('separates who comes from who stays', () => {
+    const p = everything();
+    const come = gatherable(p);
+    const stay = staying(p);
+    expect(come.length).toBeGreaterThan(0);
+    expect(stay.length).toBeGreaterThan(0);
+    // Nobody is in both, and everyone helped is in one.
+    expect(come.filter((id) => stay.includes(id))).toEqual([]);
+  });
+
+  it('cannot be refused by somebody you never helped', () => {
+    // A refusal has to be earned too, or it is just a locked door.
+    const p = climb(emptyProgress(), 'discovery_saltreed_thatch');
+    expect(gatherable(p)).toContain('npc_uma');
+    expect(staying(p)).not.toContain('npc_bekh');
+  });
+
+  it('counts everyone canon says would not settle, once they are helped', () => {
+    const p = everything();
+    const stay = staying(p);
+    for (const id of ['npc_bekh', 'npc_pell', 'npc_teshk', 'npc_okhi']) {
+      expect(stay, `${id} should be staying`).toContain(id);
     }
   });
 });

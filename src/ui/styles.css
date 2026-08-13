@@ -1016,3 +1016,29 @@ button.ghost:hover:not(:disabled) {
     scroll-behavior: auto !important;
   }
 }
+
+/* The last page. Same parchment as the diary — it is a page of it, not a different thing. */
+.ending-open {
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--edge);
+  border-radius: 5px;
+  background: rgba(164, 92, 64, 0.14);
+  color: var(--ink);
+  cursor: pointer;
+}
+.leaving { margin-bottom: 0.9rem; }
+.leaving h4 { margin: 0 0 0.25rem; font-size: 0.98rem; font-weight: 600; }
+.plainlist { margin: 0; padding-left: 1.1rem; }
+.plainlist li { margin-bottom: 0.2rem; }
+
+/* Says the page costs nothing. A player should be able to look at the ending and walk away. */
+.ending-note {
+  margin-top: 1.6rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--edge);
+  font-style: italic;
+  color: var(--muted);
+  font-size: 0.9rem;
+}

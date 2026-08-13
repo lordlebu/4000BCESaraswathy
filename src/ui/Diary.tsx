@@ -127,9 +127,10 @@ export interface DiaryProps {
   open: boolean;
   onClose: () => void;
   onAnswer: (questionId: string, index: number) => void;
+  onOpenEnding: () => void;
 }
 
-export function Diary({ progress, moment, open, onClose, onAnswer }: DiaryProps) {
+export function Diary({ progress, moment, open, onClose, onAnswer, onOpenEnding }: DiaryProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   // Escape closes it, and focus starts somewhere sensible. The map keeps running underneath;
@@ -229,6 +230,17 @@ export function Diary({ progress, moment, open, onClose, onAnswer }: DiaryProps)
                     onAnswer={onAnswer}
                   />
                 ))}
+              </section>
+            )}
+
+            {/* The way to the last page. Offered only once something has been finished, since
+                before that it would say nothing a player could act on. */}
+            {discoveries.some((d) => isComplete(progress, d.id)) && (
+              <section className="diary-section">
+                <h3>If you stopped here</h3>
+                <button type="button" className="ending-open" onClick={onOpenEnding}>
+                  See who would come
+                </button>
               </section>
             )}
 
