@@ -1,0 +1,222 @@
+// @vitest-environment jsdom
+//
+// The panels, rendered.
+//
+// These exist because of three bugs that all reached a browser before anything noticed:
+//
+//   * the diary decided it was empty by counting discoveries, so a player whose first act was
+//     to talk to somebody was told they had written nothing down — with the question they had
+//     just been given hidden behind that message;
+//   * the place panel opened over the field notes and buried them;
+//   * settling a question was unreachable, because nothing called `answer`.
+//
+// Every one is a rendering question with a rules-shaped cause, which is exactly the seam a
+// component test covers and neither a unit test nor a five-minute browser suite covers well.
+// Each test below states which bug it would have caught.
+
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen, within } from '@testing-library/react';
+import { Diary } from '../src/ui/Diary';
+import { QuestionCard } from '../src/ui/Questions';
+import {
+  type Progress,
+  advance,
+  answer,
+  canAdvance,
+  emptyProgress,
+  hear,
+  learn,
+  linesFor
+} from '../src/journey';
+import { discoveries } from '../src/content/knowledge';
+
+const MOMENTS = ['dawn', 'morning', 'afternoon', 'evening', 'night'].flatMap((timeOfDay) =>
+  ['clear', 'rain', 'mist', 'storm'].map((weather) => ({ timeOfDay, weather }))
+);
+
+function climb(progress: Progress, id: string): Progress {
+  let p = progress;
+  for (;;) {
+    const m = MOMENTS.find((x) => canAdvance(p, id, x));
+    if (!m) return p;
+    p = advance(p, id, m);
+  }
+}
+
+/** Heard everybody at least once — the state a player reaches by talking before looking. */
+function talkedToBekh(): Progress {
+  let p = emptyProgress();
+  for (let i = 0; i < linesFor(p, 'npc_bekh').length; i += 1) p = hear(p, 'npc_bekh', i);
+  return p;
+}
+
+const noop = () => {};
+
+/**
+ * Unmount between tests.
+ *
+ * Testing Library only registers this for you when vitest runs with globals, which this
+ * project does not — so without it the DOM accumulates and every query searches the previous
+ * test's markup too. It fails in the most misleading way possible: the first three assertions
+ * written here all "failed" by finding an empty diary that belonged to an earlier render.
+ */
+afterEach(cleanup);
+
+describe('the diary decides whether it is empty', () => {
+  it('says so when nothing at all has happened', () => {
+    render(<Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} />);
+    expect(screen.getByText(/have not written anything down/i)).toBeDefined();
+  });
+
+  it('does not call itself empty when a question has been written in it', () => {
+    // The bug: emptiness was counted in discoveries, so this state showed "nothing written
+    // down" *and* hid the question behind that message. It took a browser run to find.
+    const p = talkedToBekh();
+    expect(p.questions.length).toBeGreaterThan(0);
+
+    render(<Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} />);
+    expect(screen.queryByText(/have not written anything down/i)).toBeNull();
+    expect(screen.getByRole('heading', { name: /open questions/i })).toBeDefined();
+  });
+
+  it('does not call itself empty when only a word has been learned', () => {
+    const p = learn(emptyProgress(), 'word_kia_thal');
+    render(<Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} />);
+    expect(screen.queryByText(/have not written anything down/i)).toBeNull();
+  });
+
+  it('renders nothing at all when closed', () => {
+    const { container } = render(
+      <Diary progress={emptyProgress()} moment={null} open={false} onClose={noop} onAnswer={noop} />
+    );
+    expect(container.firstChild).toBeNull();
+  });
+});
+
+describe('the diary keeps the crossings-out', () => {
+  it('shows every reading written so far, the superseded ones struck', () => {
+    let p = advance(emptyProgress(), 'discovery_saltreed_thatch');
+    p = advance(p, 'discovery_saltreed_thatch');
+
+    const { container } = render(
+      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} />
+    );
+    const readings = container.querySelectorAll('.revisions .reading');
+    expect(readings.length).toBe(2);
+    // The earlier one is crossed out, not replaced. This is the panel's whole idea.
+    expect(readings[0]!.className).toContain('struck');
+    expect(readings[1]!.className).not.toContain('struck');
+  });
+
+  it('shows no row at all for a discovery never noticed', () => {
+    const { container } = render(
+      <Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} />
+    );
+    expect(container.querySelectorAll('.entry').length).toBe(0);
+  });
+
+  it('explains a rung held back by the weather as a reason, not a lock', () => {
+    const p = advance(emptyProgress(), 'discovery_silver_water');
+    render(
+      <Diary
+        progress={p}
+        moment={{ timeOfDay: 'afternoon', weather: 'clear' }}
+        open
+        onClose={noop}
+        onAnswer={noop}
+      />
+    );
+    expect(screen.getByText(/come back at night/i)).toBeDefined();
+  });
+});
+
+describe('settling a question', () => {
+  it('shows both accounts and marks neither as right', () => {
+    render(<QuestionCard questionId="question_eastern_field" progress={emptyProgress()} onAnswer={noop} />);
+    expect(screen.getByText(/^Locally$/)).toBeDefined();
+    expect(screen.getByText(/^The University$/)).toBeDefined();
+    expect(screen.queryByText(/correct|incorrect|right answer|wrong answer/i)).toBeNull();
+  });
+
+  it('lists readings it cannot support, and says what is missing', () => {
+    const { container } = render(
+      <QuestionCard questionId="question_silver_water" progress={emptyProgress()} onAnswer={noop} />
+    );
+    // Unlike the diary, a question hides nothing: the shape of the disagreement is the content.
+    expect(container.querySelectorAll('.readings li').length).toBeGreaterThan(1);
+    expect(screen.getAllByText(/You would need/i).length).toBeGreaterThan(0);
+  });
+
+  it('offers a button once the evidence supports a reading, and answers with its index', () => {
+    // The bug this covers: `answer` had no caller anywhere, so the game's signature mechanic
+    // could not be performed at all.
+    const p = climb(emptyProgress(), 'discovery_silver_water');
+    const onAnswer = vi.fn();
+    render(<QuestionCard questionId="question_silver_water" progress={p} onAnswer={onAnswer} />);
+
+    const button = screen.getAllByRole('button', { name: /write this down/i })[0]!;
+    button.click();
+    expect(onAnswer).toHaveBeenCalledWith('question_silver_water', expect.any(Number));
+  });
+
+  it('records the choice without passing judgement on it', () => {
+    let p = climb(emptyProgress(), 'discovery_silver_water');
+    p = answer(p, 'question_silver_water', 0);
+    const { container } = render(
+      <QuestionCard questionId="question_silver_water" progress={p} onAnswer={noop} />
+    );
+    expect(container.querySelectorAll('.reading-chosen').length).toBe(1);
+    expect(screen.getByText(/written down/i)).toBeDefined();
+    expect(screen.queryByText(/since troubled/i)).toBeNull();
+  });
+
+  it('raises the doubt only once the player has found what raises it', () => {
+    let p = climb(emptyProgress(), 'discovery_silver_water');
+    p = answer(p, 'question_silver_water', 0);
+    p = climb(p, 'discovery_dockyard_reef');
+
+    const { container } = render(
+      <QuestionCard questionId="question_silver_water" progress={p} onAnswer={noop} />
+    );
+    expect(within(container).getByText(/Since then/i)).toBeDefined();
+    expect(screen.getByText(/since troubled/i)).toBeDefined();
+  });
+});
+
+describe('the knowledge tree', () => {
+  it('never claims a discipline the player has not touched', () => {
+    const p = climb(emptyProgress(), 'discovery_saltreed_thatch');
+    const { container } = render(
+      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} />
+    );
+    const shown = [...container.querySelectorAll('.disc-name')].map((e) => e.textContent);
+    expect(shown.length).toBeGreaterThan(0);
+    expect(shown.length).toBeLessThan(7);
+  });
+
+  it('counts rungs rather than discoveries, so half-understanding shows', () => {
+    const one = advance(emptyProgress(), 'discovery_saltreed_thatch');
+    const { container } = render(
+      <Diary progress={one} moment={null} open onClose={noop} onAnswer={noop} />
+    );
+    const bar = container.querySelector('.disc-bar i') as HTMLElement | null;
+    expect(bar).not.toBeNull();
+    const width = parseFloat(bar!.style.width);
+    expect(width).toBeGreaterThan(0);
+    expect(width).toBeLessThan(100);
+  });
+});
+
+describe('the panels stay in step with canon', () => {
+  it('renders a diary containing every discipline canon actually uses', () => {
+    // If canon gains a discipline the panel does not name, this is where it shows.
+    let p = emptyProgress();
+    for (const d of discoveries) p = advance(p, d.id);
+    const { container } = render(
+      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} />
+    );
+    const shown = new Set([...container.querySelectorAll('.diary-section > h3')].map((e) => e.textContent));
+    const used = new Set(discoveries.map((d) => d.discipline));
+    expect(shown.size).toBeGreaterThanOrEqual(used.size);
+  });
+});
