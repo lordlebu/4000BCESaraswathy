@@ -56,7 +56,7 @@ npm test             # vitest — world, content, journal, day/night
 npm run test:e2e     # playwright — does the game boot, draw and play?
 npm run typecheck    # tsc --noEmit
 npm run build        # static bundle into dist/
-npm run build:data   # regenerate data/creatures.json and data/flora.json
+npm run check:data   # verify data/canon/ matches the canon release it came from
 npm run build:sprite # rebuild the character sheets from assets/source/
 ```
 
@@ -64,10 +64,15 @@ The browser suite needs `npx playwright install chromium` once.
 
 ## World content
 
-The flora and fauna canon lives in [docs/bestiary.md](docs/bestiary.md): 300 species across seven
+The flora and fauna canon lives in the **SouthOfTethys** repository, not here — 256 fauna and 90
+flora among 504 entities, alongside the field maps, discoveries, questions, people and vocabulary
+the game is made of. [docs/bestiary.md](docs/bestiary.md) is the prose document those species were
+originally extracted from, kept for provenance; it is no longer upstream of anything. 300 species across seven
 regions, from the Saraswati deltas to the Asura-tainted horrors.
 
-`data/creatures.json` and `data/flora.json` are **generated** from that document — run
+`data/canon/` is **generated** by `utils/export_canon_bundle.py` in the canon repository and must
+never be hand-edited; `npm run check:data` fails if it drifts. The old line about regenerating from
+the bestiary described a pipeline that no longer exists — run
 `npm run build:data` rather than editing them. CI fails if the committed copies have drifted.
 `data/biomes.json` and `data/landmarks.json` are hand-written.
 
@@ -103,7 +108,8 @@ npm run test:e2e
 - [Phaser plan](docs/phaser-plan.md) — the current plan and the four weeks to a hosted demo
 - [Game plan](docs/game-plan.md) — vision, MVP, gameplay loop, milestones
 - [World generator design](docs/world-generator.md) — generation inputs, passes, success criteria
-- [Bestiary and herbarium](docs/bestiary.md) — the authored canon, by region
+- [Bestiary and herbarium](docs/bestiary.md) — where the species came from, kept for provenance
+- [Testing notes](docs/testing.md) — what the failures here have cost, and the rules that came out of them
 - [Art brief](docs/art-brief.md) — how the character art is specified, and what went wrong twice
 - [Source layout](src/README.md) — the four layers and the rules between them
 - [Playtest guide](src/PLAYTEST.md) — showcase seeds and what to look for
