@@ -4,6 +4,8 @@
 // shown to other people: no placeholders, no `undefined`, and a seed that actually reproduces the
 // journey it describes.
 
+import { advance, answer, canAdvance, emptyProgress, learn, type Progress } from '../src/journey';
+import { discoveries, vocabulary } from '../src/content/knowledge';
 import { describe, expect, it } from 'vitest';
 import {
   buildTravelLog,
@@ -105,5 +107,56 @@ describe('markdown shape', () => {
     expect(text.startsWith('# ')).toBe(true);
     for (const section of log.sections) expect(text).toContain(`## ${section.heading}`);
     expect(text.trimEnd().endsWith(log.replayUrl)).toBe(true);
+  });
+});
+
+describe('the keepsake records the diary, not just the walk', () => {
+  const world = generateWorld({ seed: 'keepsake' });
+  const bare = { discovered: 40, observed: [], reachedLandmark: false };
+
+  /** Climb everything, learn every word, settle a question. */
+  function full(): Progress {
+    let p = emptyProgress();
+    for (const w of vocabulary) p = learn(p, w.id);
+    const moments = ['dawn', 'morning', 'afternoon', 'evening', 'night'].flatMap((timeOfDay) =>
+      ['clear', 'rain', 'mist', 'storm'].map((weather) => ({ timeOfDay, weather }))
+    );
+    for (let pass = 0; pass < discoveries.length; pass += 1) {
+      for (const d of discoveries) {
+        for (;;) {
+          const m = moments.find((x) => canAdvance(p, d.id, x));
+          if (!m) break;
+          p = advance(p, d.id, m);
+        }
+      }
+    }
+    return answer(p, 'question_silver_water', 0);
+  }
+
+  it('says nothing about the diary when there is nothing to say', () => {
+    const log = buildTravelLog(world, bare);
+    const headings = log.sections.map((s) => s.heading);
+    expect(headings.some((h) => /Understood|Questions settled|Words|Put back/.test(h))).toBe(false);
+  });
+
+  it('records what was understood, learned, settled and put back', () => {
+    const log = buildTravelLog(world, { ...bare, progress: full() });
+    const headings = log.sections.map((s) => s.heading).join(' | ');
+    expect(headings).toMatch(/Understood/);
+    expect(headings).toMatch(/Questions settled/);
+    expect(headings).toMatch(/Words/);
+    expect(headings).toMatch(/Put back/);
+  });
+
+  it('never says whether a reading was right', () => {
+    // The game does not grade an answer on screen; it must not grade one in the thing the
+    // player hands to somebody else.
+    const text = travelLogToText(buildTravelLog(world, { ...bare, progress: full() }));
+    expect(text).not.toMatch(/correct|incorrect|wrong|mistaken|sound/i);
+  });
+
+  it('names words and places in words, not ids', () => {
+    const text = travelLogToText(buildTravelLog(world, { ...bare, progress: full() }));
+    expect(text).not.toMatch(/word_|poi_|discovery_|question_/);
   });
 });

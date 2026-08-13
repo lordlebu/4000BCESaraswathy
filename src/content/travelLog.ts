@@ -7,6 +7,9 @@
 // Pure: builds a structure and renders it to text. No DOM, no canvas, no download — `ui/export.ts`
 // owns all of that, so this stays testable under plain Node.
 
+import { isComplete, languagesKnown, restored, type Progress } from '../journey';
+import { discoveries, fieldQuestion, vocabulary } from './knowledge';
+import { poi } from './places';
 import { landmarkTitle, landmarkKindFor } from './landmarks';
 import type { World } from '../world/types';
 
@@ -27,6 +30,65 @@ export interface JourneyState {
   discovered: number;
   observed: string[];
   reachedLandmark: boolean;
+  /**
+   * What the player came to understand.
+   *
+   * The log used to record tiles walked, creatures sketched and whether the landmark was
+   * found — the whole of the old game. A player could climb eighteen ladders, learn two
+   * languages, settle a question and put a field back, and the keepsake would still read
+   * "the satchel came home empty". Optional so a caller with nothing to say can omit it.
+   */
+  progress?: Progress;
+}
+
+/**
+ * The sections the diary earns, in the order a naturalist would keep them.
+ *
+ * Every one is omitted when empty rather than printed hollow. A record someone shows other
+ * people should not list the headings of things that did not happen — the same rule the diary
+ * itself follows on screen.
+ */
+function diarySections(progress: Progress | undefined): LogSection[] {
+  if (!progress) return [];
+  const out: LogSection[] = [];
+
+  const understood = discoveries.filter((d) => isComplete(progress, d.id));
+  if (understood.length) {
+    out.push({
+      heading: `Understood (${count(understood.length)} ${plural(understood.length, 'thing', 'things')})`,
+      lines: understood.map((d) => `— ${d.name}`)
+    });
+  }
+
+  // What the player concluded, never whether it was right. The game does not grade a reading
+  // on screen and must not do it in the thing they hand to someone else.
+  const settled = Object.entries(progress.answered)
+    .map(([id, index]) => {
+      const q = fieldQuestion(id);
+      return q ? `— ${q.question.split(/(?<=[.?])\s/)[0]} ${q.resolutions[index]?.conclusion ?? ''}` : null;
+    })
+    .filter((line): line is string => line !== null);
+  if (settled.length) out.push({ heading: 'Questions settled', lines: settled });
+
+  const languages = languagesKnown(progress);
+  if (Object.keys(languages).length) {
+    out.push({
+      heading: 'Words',
+      lines: vocabulary
+        .filter((w) => progress.words.includes(w.id))
+        .map((w) => `— ${w.word} (${w.language}): ${w.gloss}`)
+    });
+  }
+
+  const put = restored(progress);
+  if (put.length) {
+    out.push({
+      heading: 'Put back',
+      lines: put.map((id) => `— ${poi(id)?.name ?? id}`)
+    });
+  }
+
+  return out;
 }
 
 /** "three" reads better than "3" in a sentence, up to the point where it stops being worth it. */
@@ -87,6 +149,7 @@ export function buildTravelLog(world: World, journey: JourneyState, origin = '')
         )})`,
         lines: sketches
       },
+      ...diarySections(journey.progress),
       { heading: journey.reachedLandmark ? 'The place itself' : 'Unfinished', lines: ending }
     ],
     replayUrl: `${origin}?seed=${encodeURIComponent(world.seed)}`

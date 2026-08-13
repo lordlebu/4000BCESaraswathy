@@ -1,5 +1,5 @@
 {
-  "canon_version": "1.4.0",
+  "canon_version": "1.5.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -263,6 +263,100 @@
       ]
     },
     {
+      "id": "discovery_fever_root_spread",
+      "type": "discovery",
+      "name": "Something Is Doing Well Here",
+      "discipline": "botany",
+      "found_at": [
+        "poi_salt_orchard"
+      ],
+      "levels": [
+        {
+          "entry": "The seaward orchard rows are dead of salt. In among them something is thriving that I do not recognise."
+        },
+        {
+          "entry": "Thick leaf, no wax, and it is fruiting in the shade of dead trees in the wrong season."
+        },
+        {
+          "entry": "It is not salt-tolerant, it is salt-indifferent -- the soil chemistry does not appear to be a variable for it at all."
+        },
+        {
+          "entry": "Nothing eats it. Not the goats, not the insects, not the rot. In a delta, that is a stranger fact than the leaf shape."
+        },
+        {
+          "entry": "It is spreading at about a pace a year, along the dead rows, and no farmer here is worried because it grows where nothing grows."
+        },
+        {
+          "entry": "Which is the mistake. It is not filling ground nothing wanted. It is making ground that nothing else can use, and it is doing it slowly enough that nobody has thought to measure.",
+          "requires": [
+            "discovery_midden_layers"
+          ]
+        }
+      ],
+      "helps": [
+        "npc_sura"
+      ],
+      "restores": [
+        "poi_salt_orchard"
+      ],
+      "notes": "An establishment event in progress, which is slower and worse than a monster. The last rung is the only place on this map where the player knows something the locals do not.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "discovery_gate_rhythm",
+      "type": "discovery",
+      "name": "What the Gate Keeps Time With",
+      "discipline": "anomalies",
+      "found_at": [
+        "poi_gate_court",
+        "poi_watch_stair"
+      ],
+      "levels": [
+        {
+          "entry": "There is a doorway in the court that people walk around rather than through. Nobody has told me not to. I have not."
+        },
+        {
+          "entry": "It is not always doing anything. Most of the day it is a doorway in a wall."
+        },
+        {
+          "entry": "In mist it is doing something. The air on the far side is a different air -- warmer, and it smells of stone rather than salt.",
+          "conditions": {
+            "weather": [
+              "mist"
+            ]
+          }
+        },
+        {
+          "entry": "Not the tide, then, and not the hour. I sat the stair for three days with a slate and the only thing that matches is the mist."
+        },
+        {
+          "entry": "Which is backwards. Mist is water in air; it does not open anything. Unless the mist and the opening are both downstream of a third thing, and I have been watching the wrong one."
+        },
+        {
+          "entry": "Pell says the sweeping is done at mist and always has been. Nobody decided that. It is simply when there is something to sweep."
+        }
+      ],
+      "answers": [
+        "question_what_comes_through"
+      ],
+      "notes": "The anomaly, approached as a naturalist would: rule out the tide, rule out the hour, notice the correlation, then notice the correlation is not a cause. Ends honestly short of an explanation.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
@@ -315,6 +409,44 @@
         }
       ],
       "notes": "Canon already said the ghost mangrove marks safe channels; this is that fact turned into gameplay. Gates the tower undercroft, so botany opens archaeology."
+    },
+    {
+      "id": "discovery_market_ledger",
+      "type": "discovery",
+      "name": "Two Mornings a Day",
+      "discipline": "geography",
+      "found_at": [
+        "poi_tide_market"
+      ],
+      "levels": [
+        {
+          "entry": "The market opens twice and closes twice, and everyone knows when without being told."
+        },
+        {
+          "entry": "It is the tide, obviously. What is less obvious is that the tide here is not the tide at Lothal."
+        },
+        {
+          "entry": "A ledger goes back sixty years of opening times. Nobody kept it for the tide; they kept it for the tolls."
+        },
+        {
+          "entry": "Read as a tide record it is better than anything the University has, and it says the high water is arriving later each decade.",
+          "requires": [
+            "discovery_seawall_courses"
+          ]
+        }
+      ],
+      "answers": [
+        "question_what_ends_dwarka"
+      ],
+      "notes": "Local record-keeping outperforming the academy again, and this time entirely by accident -- the ledger was for taxes.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
     },
     {
       "type": "discovery",
@@ -394,6 +526,47 @@
         }
       ],
       "notes": "Left open on purpose. Who took the mask is not answerable in this slice and should stay unanswered for a long time -- the diary needs entries the player cannot finish."
+    },
+    {
+      "id": "discovery_midden_layers",
+      "type": "discovery",
+      "name": "How Often This Has Happened",
+      "discipline": "archaeology",
+      "found_at": [
+        "poi_bone_midden"
+      ],
+      "levels": [
+        {
+          "entry": "The midden is layered like any midden: fish, shell, pot, ash, fish, shell, pot."
+        },
+        {
+          "entry": "There are other layers. Thin ones, of bone I cannot place, and they are not at the top."
+        },
+        {
+          "entry": "I counted nine. The deepest is under a pottery style Sura says her grandmother's grandmother used."
+        },
+        {
+          "entry": "Nine, in four hundred years, and not evenly spaced -- they cluster. Two of them are close enough to be one bad decade."
+        },
+        {
+          "entry": "This is not an event. It is a climate. Dwarka has been dealing with this the whole time it has existed, and has a word for it, and a place to put the remains."
+        }
+      ],
+      "answers": [
+        "question_what_comes_through"
+      ],
+      "helps": [
+        "npc_sura"
+      ],
+      "notes": "Turns the anomaly from an incident into a condition, which is the map's whole argument. The clustering is left unexplained on purpose.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
     },
     {
       "id": "discovery_moving_spring",
@@ -637,6 +810,52 @@
       "notes": "Small, quick, and the first time the player helps anyone. Four rungs, ending in help -- proof that the actionable rung does not require a grand chain."
     },
     {
+      "id": "discovery_seawall_courses",
+      "type": "discovery",
+      "name": "Three Walls Against One Sea",
+      "discipline": "geography",
+      "found_at": [
+        "poi_drowned_seawall"
+      ],
+      "levels": [
+        {
+          "entry": "There are three seawalls here, not one. I assumed rebuilding. It is not rebuilding -- all three still stand."
+        },
+        {
+          "entry": "Each is founded a little higher than the one seaward of it, and each is built of what was cheap that century."
+        },
+        {
+          "entry": "The outermost is under water at every tide now. It was not built to be.",
+          "conditions": {
+            "time_of_day": [
+              "dawn"
+            ]
+          }
+        },
+        {
+          "entry": "Roughly a hand of sea in a hundred years, if the walls were built dry-footed. Slow enough that no single person ever saw it happen."
+        },
+        {
+          "entry": "The gate gets swept and the sea gets a new wall. Only one of those is going to finish the city, and it is not the interesting one."
+        }
+      ],
+      "answers": [
+        "question_what_ends_dwarka"
+      ],
+      "helps": [
+        "npc_pell"
+      ],
+      "notes": "The sober counterweight. A map about a supernatural door should be clear that the thing actually destroying the place is ordinary sea-level rise.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
@@ -816,6 +1035,48 @@
         }
       ],
       "notes": "Opens the stair shaft. The reading is deliberately sympathetic to Kavik -- the building was sound and the world moved."
+    },
+    {
+      "id": "discovery_wrong_anatomy",
+      "type": "discovery",
+      "name": "A Skeleton That Does Not Fit",
+      "discipline": "evolution",
+      "found_at": [
+        "poi_bone_midden",
+        "poi_gate_court"
+      ],
+      "levels": [
+        {
+          "entry": "A partial skeleton in the midden, picked over. Not fish, not bird, not anything I can put a name to."
+        },
+        {
+          "entry": "The limb bones are paired the wrong way. Whatever this was did not share an ancestor with anything I have drawn on this continent."
+        },
+        {
+          "entry": "Not deformity, and not two animals mixed: the joints articulate. It worked. Something walked around inside this."
+        },
+        {
+          "entry": "The teeth are the argument. Replacement runs from the back forward, which nothing here does, and the wear says it lived long enough to be old."
+        },
+        {
+          "entry": "So it did not arrive as a curiosity in somebody's cargo. It arrived, and then it lived, and then it died here and was thrown out with the fish spine.",
+          "requires": [
+            "discovery_midden_layers"
+          ]
+        }
+      ],
+      "answers": [
+        "question_what_comes_through"
+      ],
+      "notes": "The evolution discovery, and the one that makes the academy's answers untenable. Deliberately unglamorous -- the remarkable thing is in a rubbish heap, because that is where the city put it.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
     }
   ],
   "field_questions": [
@@ -1038,9 +1299,125 @@
         "Varuna's Field Diary design",
         "AI_CONTEXT.md"
       ]
+    },
+    {
+      "id": "question_what_comes_through",
+      "type": "field_question",
+      "question": "There are animals in this midden that belong to no lineage on this continent, at a city whose people say a door opens in the mist. I have three respectable explanations and I am losing confidence in all of them.",
+      "discipline": "anomalies",
+      "raised_at": "poi_bone_midden",
+      "raised_by": "npc_sura",
+      "evidence": [
+        "discovery_wrong_anatomy",
+        "discovery_midden_layers",
+        "discovery_gate_rhythm"
+      ],
+      "resolutions": [
+        {
+          "conclusion": "Vagrants and escaped stock from a trading city, misremembered into a story about a door.",
+          "requires": [
+            "discovery_wrong_anatomy"
+          ],
+          "sound": false,
+          "revisit": "Nine layers, over four hundred years, of animals that share no ancestor with anything on this coast. Trade does not do that, and it does not do it in clusters.",
+          "revisit_after": "discovery_midden_layers"
+        },
+        {
+          "conclusion": "A relict population from before the Shattering, surviving in the drowned quarter and coming ashore.",
+          "requires": [
+            "discovery_wrong_anatomy",
+            "discovery_midden_layers"
+          ],
+          "sound": false,
+          "revisit": "A relict lineage would still be a lineage. These share no ancestor with anything here, and no two layers share one with each other.",
+          "revisit_after": "discovery_gate_rhythm"
+        },
+        {
+          "conclusion": "They cross. The gate is real, it is not rare, and the people who live beside it have been correct about it for four hundred years while being unable to say why.",
+          "requires": [
+            "discovery_wrong_anatomy",
+            "discovery_midden_layers",
+            "discovery_gate_rhythm"
+          ],
+          "sound": true
+        }
+      ],
+      "local_knowledge": "Sura will tell you the gate opens in mist, that you sweep after, and that the bones go in the midden with everything else. She is not being mystical. She is telling you the procedure, the way you would explain bins.",
+      "academic_hypothesis": "The Narmada position is that Dwarka is a trading port with an old story and poor record-keeping, and that every specimen produced so far has been either a misidentified juvenile or a hoax. No scholar has been to the midden.",
+      "notes": "The map's thesis, and the one question in the game where the local account is simply correct and the academy simply wrong. Both wrong readings are respectable and one of them is what a good naturalist would reach for second.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "question_what_ends_dwarka",
+      "type": "field_question",
+      "question": "The city is being lost. I would like to be able to say to somebody in authority what is losing it, and I notice I want the answer to be the interesting one.",
+      "discipline": "geography",
+      "raised_at": "poi_drowned_seawall",
+      "raised_by": "npc_pell",
+      "evidence": [
+        "discovery_seawall_courses",
+        "discovery_market_ledger"
+      ],
+      "resolutions": [
+        {
+          "conclusion": "The gate. Whatever comes through is taking the place apart by degrees.",
+          "requires": [
+            "discovery_seawall_courses"
+          ],
+          "sound": false,
+          "revisit": "Three walls, sixty years of toll ledgers, and a hand of sea a century. Nothing that came through the court has moved a single course of stone.",
+          "revisit_after": "discovery_market_ledger"
+        },
+        {
+          "conclusion": "The sea, rising slowly enough that no one person has ever watched it happen, and no more mysterious than that.",
+          "requires": [
+            "discovery_seawall_courses",
+            "discovery_market_ledger"
+          ],
+          "sound": true
+        }
+      ],
+      "local_knowledge": "Pell has rebuilt the inner wall once in his life and expects his son to do it again. He does not connect that to anything; it is simply what the wall is for.",
+      "academic_hypothesis": "The survey of 402 records the Dwarka coastline as stable, on the basis of a single visit and the outermost wall being described as a breakwater.",
+      "notes": "The counterweight question, and the one where the player's own appetite for a good story is the thing being tested. The unsound reading is the one this map has spent the whole time making attractive.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
     }
   ],
   "vocabulary": [
+    {
+      "type": "vocabulary",
+      "language": "kia",
+      "id": "word_kia_ossu",
+      "word": "ossu",
+      "gloss": "the thin layer",
+      "literal": "not-ours bone",
+      "learned_from": [
+        "npc_sura"
+      ],
+      "notes": "A stratigraphic term in a language with no word for stratigraphy. The bone-pickers needed to tell each other which layer they meant.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
     {
       "type": "vocabulary",
       "epochs": [
@@ -1100,6 +1477,26 @@
         "npc_thrali"
       ],
       "notes": "Completes thal-uvai. Compresses an entire trophic chain into a phrase that sounds like superstition."
+    },
+    {
+      "type": "vocabulary",
+      "language": "kia",
+      "id": "word_kia_vaath",
+      "word": "vaath",
+      "gloss": "a mist that opens",
+      "literal": "the other side's weather",
+      "learned_from": [
+        "npc_pell"
+      ],
+      "notes": "Distinguishes the mist that does something from the mist that does not, which is a distinction the University has no vocabulary for and no reason to want.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
     },
     {
       "type": "vocabulary",

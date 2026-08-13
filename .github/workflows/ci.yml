@@ -39,8 +39,24 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+
+      # Chromium was downloaded on every run, which is about a minute of a job that is already
+      # the slowest thing in CI. The key carries the Playwright version, so a bump misses the
+      # cache and fetches the matching browser rather than reusing a stale one.
+      - name: Playwright version
+        id: pw
+        run: echo "v=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.v }}
+
+      # The browser comes from the cache when it hits; the OS packages it needs do not, and are
+      # cheap enough to install either way.
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
+
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v7
         if: failure()

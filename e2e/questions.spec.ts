@@ -5,6 +5,7 @@
 // This walks it: hear a question from someone, look at the thing it is about, and commit.
 
 import { expect, test, type Page } from '@playwright/test';
+import { step } from './walk';
 
 /**
  * A seed where the drowned dockyard sits one step west and one north of the start.
@@ -20,11 +21,6 @@ async function boot(page: Page) {
   await page.goto(AT_NIGHT);
   await expect(page.locator('.map-surface canvas')).toBeVisible();
   await expect(page.locator('.journal h2')).toBeVisible();
-}
-
-async function step(page: Page, key: string) {
-  await page.locator('.map-surface canvas').press(key);
-  await page.waitForTimeout(450);
 }
 
 async function openDiary(page: Page) {

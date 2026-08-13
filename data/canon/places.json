@@ -1,5 +1,5 @@
 {
-  "canon_version": "1.4.0",
+  "canon_version": "1.5.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -153,6 +153,46 @@
   ],
   "field_maps": [
     {
+      "id": "field_map_dwarka",
+      "type": "field_map",
+      "name": "Dwarka",
+      "region": "region_saraswati_delta",
+      "seed_biomes": [
+        "coast",
+        "settlement",
+        "wetland",
+        "river"
+      ],
+      "scale": "small",
+      "points_of_interest": [
+        "poi_tide_market",
+        "poi_gate_court",
+        "poi_drowned_seawall",
+        "poi_bone_midden",
+        "poi_salt_orchard",
+        "poi_watch_stair"
+      ],
+      "neighbours": [
+        "field_map_lothal"
+      ],
+      "climate": {
+        "clear": 44,
+        "mist": 30,
+        "rain": 18,
+        "storm": 8
+      },
+      "arrival": "Half of Dwarka is under water and the half that is not has been rebuilt twice on top of itself. Nobody here treats the sea as an enemy or the gate as a wonder. Both are simply conditions, like weather, and the whole city is arranged around living beside them.",
+      "notes": "Third field map. The one where the method is tested: local knowledge is not merely useful here, it is right, and the academy's three tidy explanations are all wrong. Gives `crosses_at` a consumer without making the crossing species placeable -- you find what they left, never the animal.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "id": "field_map_lothal",
       "type": "field_map",
       "name": "Lothal",
@@ -183,6 +223,7 @@
         "AI_CONTEXT.md"
       ],
       "neighbours": [
+        "field_map_dwarka",
         "field_map_narmada"
       ],
       "climate": {
@@ -250,6 +291,35 @@
       "description": "Cut basalt in courses, and between two of the courses, a bed of something else.",
       "arrival": "They quarried here for the halls and stopped when they hit a seam that would not dress. The seam is nine inches of pale ash between two floods of black rock, and it is full of small dead things lying in the order they died.",
       "notes": "The evolution discovery. A quarry rather than a dig, so the section is exposed by accident and read by the player rather than presented by a scholar.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "type": "point_of_interest",
+      "field_map": "field_map_dwarka",
+      "id": "poi_bone_midden",
+      "name": "The Bone Midden",
+      "kind": "archaeological_site",
+      "terrain": [
+        "coast",
+        "wetland"
+      ],
+      "discoveries": [
+        "discovery_midden_layers",
+        "discovery_wrong_anatomy"
+      ],
+      "npcs": [
+        "npc_sura"
+      ],
+      "description": "Where the city puts what it cannot eat, cannot burn, and does not want.",
+      "arrival": "Every settlement has a midden and this one has the usual fish spine and oyster shell and broken pot. It also has, at intervals, layers of something else — and the intervals are the interesting part.",
+      "notes": "Evidence rather than encounter. The crossing species stay `lore` and unplaceable; what the player finds is what they left.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -333,6 +403,31 @@
     },
     {
       "type": "point_of_interest",
+      "field_map": "field_map_dwarka",
+      "id": "poi_drowned_seawall",
+      "name": "The Drowned Seawall",
+      "kind": "archaeological_site",
+      "terrain": [
+        "coast",
+        "wetland"
+      ],
+      "discoveries": [
+        "discovery_seawall_courses"
+      ],
+      "description": "Three seawalls, one behind the other, each built when the last stopped working.",
+      "arrival": "You can wade the outermost at low water and stand on the innermost without getting your feet wet, and between them is four hundred years of a city agreeing, twice, that the sea had won that round.",
+      "notes": "The geography discovery and the sober counterweight to the gate: the thing actually destroying Dwarka is the sea, which nobody finds remarkable either.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "type": "point_of_interest",
       "field_map": "field_map_lothal",
       "epochs": [
         "epoch_post_cataclysm"
@@ -355,6 +450,54 @@
       "description": "Good flat ground, well watered, and nothing on it.",
       "arrival": "Eight acres of level silt beside a channel that never runs dry, and not a stem on any of it. The camp plants here every spring out of stubbornness and takes nothing off it. Something came up out of the ground during the Shattering and has not gone back down.",
       "notes": "The solarpunk hook, and what the actionable rung acts on: restorable once the player understands both the poison and the rice."
+    },
+    {
+      "type": "point_of_interest",
+      "field_map": "field_map_dwarka",
+      "id": "poi_gate_court",
+      "name": "The Gate Court",
+      "kind": "anomaly",
+      "terrain": [
+        "settlement",
+        "coast"
+      ],
+      "related_entities": [
+        "settlement_dwarka",
+        "event_shadow_pact"
+      ],
+      "discoveries": [
+        "discovery_gate_rhythm",
+        "discovery_wrong_anatomy"
+      ],
+      "npcs": [
+        "npc_pell"
+      ],
+      "sub_locations": [
+        {
+          "id": "outer_court",
+          "name": "The Outer Court",
+          "description": "Paving, a drain, and a low wall someone maintains. It looks like a yard because it is one."
+        },
+        {
+          "id": "the_threshold",
+          "name": "The Threshold",
+          "description": "Where the air stops being the same on both sides. You can stand with one hand in each and feel the difference at the wrist.",
+          "requires": [
+            "discovery_gate_rhythm"
+          ]
+        }
+      ],
+      "description": "A swept courtyard with a doorway in it that does not lead anywhere in this city.",
+      "arrival": "It is swept. That is the first thing, and it undoes most of what you were prepared for: somebody sweeps the gate court, the way somebody sweeps a threshing floor, because things come through and the mess has to go somewhere.",
+      "notes": "The anomaly, presented as municipal infrastructure. The horror of it, if there is any, is entirely in how unremarkable the locals find it.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
     },
     {
       "id": "poi_herders_terraces",
@@ -586,6 +729,34 @@
     },
     {
       "type": "point_of_interest",
+      "field_map": "field_map_dwarka",
+      "id": "poi_salt_orchard",
+      "name": "The Salt Orchard",
+      "kind": "eco_site",
+      "terrain": [
+        "wetland",
+        "coast"
+      ],
+      "discoveries": [
+        "discovery_fever_root_spread"
+      ],
+      "npcs": [
+        "npc_sura"
+      ],
+      "description": "Fruit trees dying at one end and something else doing well at the other.",
+      "arrival": "The orchard is half orchard. The seaward rows are salt-killed and standing, and through them, in the shade the dead trees still cast, something with the wrong leaf shape is doing extremely well.",
+      "notes": "The botany discovery. An establishment event in progress, which is a slower and more frightening thing than a monster.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "type": "point_of_interest",
       "field_map": "field_map_lothal",
       "epochs": [
         "epoch_post_cataclysm"
@@ -613,6 +784,37 @@
       "notes": "Where the rice discovery lives. The ruin is already doing the restoring; Varuna only has to notice."
     },
     {
+      "type": "point_of_interest",
+      "field_map": "field_map_dwarka",
+      "id": "poi_tide_market",
+      "name": "The Tide Market",
+      "kind": "settlement",
+      "terrain": [
+        "settlement"
+      ],
+      "related_entities": [
+        "settlement_dwarka"
+      ],
+      "discoveries": [
+        "discovery_market_ledger"
+      ],
+      "npcs": [
+        "npc_sura",
+        "npc_pell"
+      ],
+      "description": "Trading twice a day, around a tide that decides when the floor is a floor.",
+      "arrival": "The market runs on the low water and stops on the high, so the day has two mornings and two evenings and everybody's sense of time is bent around it. Prices are quoted in what the tide will allow rather than in what a thing is worth.",
+      "notes": "Where the people are. Deliberately ordinary: the point of Dwarka is that the extraordinary thing is treated as weather.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "id": "poi_walking_spring",
       "type": "point_of_interest",
       "name": "The Walking Spring",
@@ -632,6 +834,31 @@
       "description": "A spring the archive records at a fixed point, and a line of dead stonework saying otherwise.",
       "arrival": "The water comes out of the hillside cold enough to hurt. Forty paces downslope there is a stone basin, dry, well made, and obviously built to catch exactly this. Forty paces further there is another.",
       "notes": "Geography and botany both. The dry basins are the evidence and they are visible on arrival -- the player can see the answer before they can explain it, which is the right order.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "type": "point_of_interest",
+      "field_map": "field_map_dwarka",
+      "id": "poi_watch_stair",
+      "name": "The Watch Stair",
+      "kind": "wilderness",
+      "terrain": [
+        "coast",
+        "settlement"
+      ],
+      "discoveries": [
+        "discovery_gate_rhythm"
+      ],
+      "description": "Steps up the old wall, kept clear, with a good view of the court.",
+      "arrival": "Somebody keeps these steps clear of weed, and there is a worn patch at the top where people stand. They are not watching the sea from here.",
+      "notes": "The observation post. Exists so the gate can be watched over time rather than visited once, which is what its discovery needs.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -787,6 +1014,105 @@
         }
       ],
       "notes": "The one who will not come. Deliberately not a tragedy and not a rebuke -- she is right that somebody has to stay, and the ending should let her be right rather than treating her as a failed recruitment.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "npc_pell",
+      "type": "npc",
+      "name": "Pell",
+      "role": "wall-keeper and sweeper",
+      "found_at": [
+        "poi_gate_court",
+        "poi_tide_market"
+      ],
+      "language": "kia",
+      "would_settle": false,
+      "knows": [
+        "discovery_gate_rhythm",
+        "discovery_seawall_courses",
+        "question_what_ends_dwarka"
+      ],
+      "lines": [
+        {
+          "text": "I keep the inner wall and I sweep the court. They are the same job to me: something arrives, and it has to go somewhere.",
+          "gives": [
+            "question_what_ends_dwarka"
+          ]
+        },
+        {
+          "text": "In mist, yes. Not every mist. You will want the stair and three days, and you will be the first person to sit them who was not being paid.",
+          "requires": [
+            "discovery_gate_rhythm"
+          ],
+          "gives": [
+            "word_kia_vaath"
+          ]
+        },
+        {
+          "text": "No. My father rebuilt this wall and I have rebuilt it and my son will. You are asking me to leave a job that is not finished, and it is never going to be finished, and that is not a reason.",
+          "requires": [
+            "discovery_seawall_courses"
+          ]
+        }
+      ],
+      "notes": "The one who will not come, and for the opposite reason to Bekh: not somebody has to stay, but the work does not end and that is not an argument for stopping. Sweeps an interdimensional gate as municipal maintenance.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "npc_sura",
+      "type": "npc",
+      "name": "Sura",
+      "role": "bone-picker",
+      "found_at": [
+        "poi_bone_midden",
+        "poi_salt_orchard",
+        "poi_tide_market"
+      ],
+      "language": "kia",
+      "would_settle": true,
+      "knows": [
+        "discovery_midden_layers",
+        "discovery_wrong_anatomy",
+        "question_what_comes_through"
+      ],
+      "lines": [
+        {
+          "text": "Everything the city cannot use comes to me eventually. Most of it is fish. Some years it is not.",
+          "gives": [
+            "question_what_comes_through"
+          ]
+        },
+        {
+          "text": "You want the thin layers. My mother showed me where they are, and hers showed her, and none of us has ever been asked about them before today.",
+          "requires": [
+            "discovery_wrong_anatomy"
+          ],
+          "gives": [
+            "word_kia_ossu"
+          ]
+        },
+        {
+          "text": "The orchard? The orchard is finished. I would rather you told me something about it that I can do than something about it that is true.",
+          "requires": [
+            "discovery_fever_root_spread"
+          ]
+        }
+      ],
+      "notes": "Holds four hundred years of stratigraphy as a family trade and has never been asked. Would settle -- the midden is a living, not a home.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
