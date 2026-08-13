@@ -1,19 +1,19 @@
 {
-  "canon_version": "1.5.0",
+  "canon_version": "1.6.0",
   "counts": {
     "fauna": 256,
     "flora": 90,
     "regions": 7,
-    "field_maps": 3,
-    "points_of_interest": 18,
-    "npcs": 8,
-    "discoveries": 24,
-    "field_questions": 7,
-    "vocabulary": 8
+    "field_maps": 4,
+    "points_of_interest": 24,
+    "npcs": 10,
+    "discoveries": 31,
+    "field_questions": 8,
+    "vocabulary": 10
   },
   "sha256": {
-    "species.json": "13c71aef745d15f68d35d8f7f3db5a64341915105317d5a870792b8685199743",
-    "places.json": "2568e8fc474a9320e34e2dea20895f86502b6a343d24e0148f892f103eef181a",
-    "knowledge.json": "7f9ab173ed3f92a37f4be5c2cf748fecc9de7193bf33212b6e6420d5a2d1b9f2"
+    "species.json": "241315e6b611f7dbb174f44b9a1428cf078f356f8f5c8d337724949552f42199",
+    "places.json": "aaeb863c80faa4ee51dd9fb3dc9a6d2f87043d1189f2d35f2dd3f0e8d8419958",
+    "knowledge.json": "457f4d44d2c77f98e0130c94d8ef255a1036a17fd933f5ff582091cee86d7719"
   }
 }

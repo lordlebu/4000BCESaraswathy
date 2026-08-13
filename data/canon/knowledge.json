@@ -1,5 +1,5 @@
 {
-  "canon_version": "1.5.0",
+  "canon_version": "1.6.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -82,6 +82,50 @@
         "npc_marn"
       ],
       "notes": "Botany, and the one where the player materially improves something rather than merely understanding it. Neither party is wrong here -- both are incompletely right, which is the map's thesis in miniature.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "discovery_channel_gravel",
+      "type": "discovery",
+      "name": "How the Stones Are Lying",
+      "discipline": "geography",
+      "found_at": [
+        "poi_fossil_channel"
+      ],
+      "levels": [
+        {
+          "entry": "A valley shaped like a river. That shape can be made by other things and I should not assume."
+        },
+        {
+          "entry": "The gravel is rounded — carried, not fallen — and it grades from fine at the edges to coarse in the middle."
+        },
+        {
+          "entry": "That grading is a current, and a strong one. Nothing seasonal sorts stones like this."
+        },
+        {
+          "entry": "In low sun the terraces show along both walls: three of them, cut at three levels, so it ran high for a long time and then lower for a long time.",
+          "conditions": {
+            "time_of_day": [
+              "dawn",
+              "evening"
+            ]
+          }
+        },
+        {
+          "entry": "But no fourth terrace, and no delta of silt at the mouth. A river that dries slowly leaves both. This one was running one year and gone the next."
+        }
+      ],
+      "answers": [
+        "question_where_the_water_went"
+      ],
+      "notes": "The geography discovery and the strongest evidence for suddenness -- expressed as an absence, which is the discipline's real skill.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -411,6 +455,49 @@
       "notes": "Canon already said the ghost mangrove marks safe channels; this is that fact turned into gameplay. Gates the tower undercroft, so botany opens archaeology."
     },
     {
+      "id": "discovery_glass_scar",
+      "type": "discovery",
+      "name": "A Line of Glass",
+      "discipline": "anomalies",
+      "found_at": [
+        "poi_glass_scar"
+      ],
+      "levels": [
+        {
+          "entry": "A seam of green-black glass running straight across open sand. Nothing near it is scorched."
+        },
+        {
+          "entry": "Fused sand, and only at the surface — a hand down it is ordinary. Whatever did this was fast enough that the heat never travelled."
+        },
+        {
+          "entry": "It runs true for as far as I walked it, which was most of a morning, and it does not deviate for a dune or a ridge.",
+          "conditions": {
+            "weather": [
+              "clear"
+            ]
+          }
+        },
+        {
+          "entry": "It crosses the fossil channel without a break, and the channel gravel underneath it is unfused. So it happened after the water went, and not long after.",
+          "requires": [
+            "discovery_channel_gravel"
+          ]
+        },
+        {
+          "entry": "I can date it and describe it and I cannot say what it is. I have written down the bearing, which is the only useful thing I have."
+        }
+      ],
+      "notes": "Deliberately unresolved, like the Cloud Stair. Its job is to date the ending, not to explain it, and the diary says so.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "id": "discovery_market_ledger",
       "type": "discovery",
       "name": "Two Mornings a Day",
@@ -559,6 +646,48 @@
         "npc_sura"
       ],
       "notes": "Turns the anomaly from an incident into a condition, which is the map's whole argument. The clustering is left unexplained on purpose.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "id": "discovery_mooring_rings",
+      "type": "discovery",
+      "name": "The Rings Are the Right Height",
+      "discipline": "archaeology",
+      "found_at": [
+        "poi_mooring_stones",
+        "poi_customs_house"
+      ],
+      "levels": [
+        {
+          "entry": "Iron rings set into a stone wall in the desert. Somebody's idea of a joke, or a ruin from a wetter age I have no date for."
+        },
+        {
+          "entry": "They are mooring rings. The wear is on the inner face, one side only, the way a rope pulls when a hull rides at anchor."
+        },
+        {
+          "entry": "Set at three heights along the wall, which is a tide, and the spacing between them is about a forearm."
+        },
+        {
+          "entry": "A forearm of tide means this was open water with a sea connection, not a lake. And the rings are sized for a hull I have seen at Dwarka."
+        },
+        {
+          "entry": "The iron has pitted but not parted. Four hundred years in dry air would do about this. Not four thousand.",
+          "requires": [
+            "discovery_tariff_boards"
+          ]
+        }
+      ],
+      "answers": [
+        "question_where_the_water_went"
+      ],
+      "notes": "The map's opening image, argued rather than asserted. The last rung is the first hint that this is recent, which is the whole thesis.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -770,6 +899,44 @@
       "notes": "The slice's central chain, and the clearest case of knowledge being help: five rungs of ordinary botany, then the field. Deliberately requires the poison discovery, so the player cannot act before they understand."
     },
     {
+      "id": "discovery_road_follows_water",
+      "type": "discovery",
+      "name": "The Road Still Goes the Long Way",
+      "discipline": "archaeology",
+      "found_at": [
+        "poi_caravan_camp"
+      ],
+      "levels": [
+        {
+          "entry": "The caravan road bends north here for no reason I can see, and adds half a day."
+        },
+        {
+          "entry": "Everyone stops at the same ground, which is exposed, far from the well, and inconvenient."
+        },
+        {
+          "entry": "Laid over the fossil channel, the bend is not a bend. The road is following a bank."
+        },
+        {
+          "entry": "The camp is at a crossing. There is nothing to cross, and the caravans still stop where the ford was, because that is where you stop."
+        },
+        {
+          "entry": "Nobody chose to keep doing this. The road is older than any of them and it remembers something none of them do.",
+          "requires": [
+            "discovery_channel_gravel"
+          ]
+        }
+      ],
+      "notes": "The map's quietest discovery and possibly its best: habit outliving the reason for it, with nobody at fault.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
@@ -903,6 +1070,50 @@
       "notes": "The opening hook from the design's first thirty minutes. Resolves ecologically without making the local explanation wrong -- the Kia phrase is a compressed version of the same fact."
     },
     {
+      "id": "discovery_tariff_boards",
+      "type": "discovery",
+      "name": "What the Customs House Was Counting",
+      "discipline": "linguistics",
+      "found_at": [
+        "poi_customs_house"
+      ],
+      "levels": [
+        {
+          "entry": "Boards fixed to the wall of the weighing floor, cut with rows of marks. A tally of something."
+        },
+        {
+          "entry": "Two columns. The left is quantities and the right is a rate — this is a tariff, posted where the payer could see it."
+        },
+        {
+          "entry": "The goods are named in a trade shorthand. Grain, oil, salt, and one I cannot read at all, which is charged at nine times the rate of salt.",
+          "requires": [
+            "word_sarv_tolu"
+          ]
+        },
+        {
+          "entry": "Tolu. Teshk uses the word for the shallow water at the head of a channel — so the ninefold rate was on something that only came in on a shallow draught."
+        },
+        {
+          "entry": "The last board is unfinished. Ruled, and the first two rows cut, and then nothing — which is not what abandonment looks like. Somebody stopped in the middle of a morning."
+        }
+      ],
+      "answers": [
+        "question_where_the_water_went"
+      ],
+      "helps": [
+        "npc_ravi"
+      ],
+      "notes": "The map's clock. An unfinished tariff board dates the ending to a day rather than a century, which is what makes the sudden reading arguable.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "id": "discovery_terrace_script",
       "type": "discovery",
       "name": "The Cut Marks Are Writing",
@@ -998,6 +1209,44 @@
       ]
     },
     {
+      "id": "discovery_thorn_roots",
+      "type": "discovery",
+      "name": "A Tree Drinking From a River That Left",
+      "discipline": "botany",
+      "found_at": [
+        "poi_last_well"
+      ],
+      "levels": [
+        {
+          "entry": "Thorn trees along the old channel, alive, in ground that has had no rain worth the name this year."
+        },
+        {
+          "entry": "They are not doing it on rain. Something is reaching water and it is not the surface."
+        },
+        {
+          "entry": "A washout has opened one root system. It goes down past where I can follow, straight, with no side branching at all."
+        },
+        {
+          "entry": "No side roots means no water to find on the way. This tree is drinking from the depth the wells reach, and it is a slower version of the same argument."
+        },
+        {
+          "entry": "The young ones are dying and the old ones are not. Whatever the root has to reach, it became too far to reach for a seedling somewhere inside a human lifetime."
+        }
+      ],
+      "helps": [
+        "npc_teshk"
+      ],
+      "notes": "Botany doing the same dating work as the wells, from the other side. The detail that only the young die is the whole point.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
@@ -1035,6 +1284,50 @@
         }
       ],
       "notes": "Opens the stair shaft. The reading is deliberately sympathetic to Kavik -- the building was sound and the world moved."
+    },
+    {
+      "id": "discovery_well_depth",
+      "type": "discovery",
+      "name": "Why There Is Only One Well",
+      "discipline": "geography",
+      "found_at": [
+        "poi_last_well"
+      ],
+      "levels": [
+        {
+          "entry": "Forty families and one well. I assumed poverty. Teshk says three others were dug and all three are dry."
+        },
+        {
+          "entry": "The dry ones are shallower. Not much — a few armspans — but all three of them, and this one is not."
+        },
+        {
+          "entry": "So the water is not gone, it is lower, and it is lowering. The rope has been lengthened twice in Teshk's lifetime."
+        },
+        {
+          "entry": "Which gives a rate, and the rate gives a date. Two more lengthenings and this well joins the other three.",
+          "requires": [
+            "discovery_channel_gravel"
+          ]
+        }
+      ],
+      "answers": [
+        "question_where_the_water_went"
+      ],
+      "helps": [
+        "npc_teshk"
+      ],
+      "restores": [
+        "poi_last_well"
+      ],
+      "notes": "Turns the map's history into the inhabitants' future. The only discovery here with a deadline attached.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
     },
     {
       "id": "discovery_wrong_anatomy",
@@ -1395,6 +1688,60 @@
         "Varuna's Field Diary design",
         "AI_CONTEXT.md"
       ]
+    },
+    {
+      "id": "question_where_the_water_went",
+      "type": "field_question",
+      "question": "There is a harbour here and no sea, a road that follows a bank that is not there, and forty families lengthening a rope. I would like to know whether this place is dying or whether it already died and this is the noise afterwards.",
+      "discipline": "geography",
+      "raised_at": "poi_mooring_stones",
+      "raised_by": "npc_ravi",
+      "evidence": [
+        "discovery_mooring_rings",
+        "discovery_channel_gravel",
+        "discovery_tariff_boards"
+      ],
+      "resolutions": [
+        {
+          "conclusion": "Aridification, over the age it takes a climate to turn. The harbour is simply very old.",
+          "requires": [
+            "discovery_mooring_rings"
+          ],
+          "sound": false,
+          "revisit": "The iron has pitted and not parted, and the last tariff board was ruled and abandoned in the middle of a morning. Neither of those is an age.",
+          "revisit_after": "discovery_tariff_boards"
+        },
+        {
+          "conclusion": "The sea withdrew and the river followed it out, the way a coast retreats.",
+          "requires": [
+            "discovery_mooring_rings",
+            "discovery_channel_gravel"
+          ],
+          "sound": false,
+          "revisit": "A river leaving slowly cuts a fourth terrace and drops a silt fan at its mouth. There is no fourth terrace and there is no fan.",
+          "revisit_after": "discovery_channel_gravel"
+        },
+        {
+          "conclusion": "It was taken, in about a year, and everything here is what a place does afterwards: the road keeps the old bend, the trees keep the old depth, and the rope gets longer.",
+          "requires": [
+            "discovery_mooring_rings",
+            "discovery_channel_gravel",
+            "discovery_tariff_boards"
+          ],
+          "sound": true
+        }
+      ],
+      "local_knowledge": "Ravi's family kept the customs house through four generations of no customs. He will tell you the water was taken, and he means it plainly and without blame — the way you would say a roof came off.",
+      "academic_hypothesis": "The Narmada position is that the Gedrosian has been arid throughout the archive's period and that the harbour is pre-Shattering, on the grounds that no post-Shattering settlement could have been that wealthy. The reasoning rests entirely on the second clause.",
+      "notes": "The map's question, and the one where the academy's error is snobbery rather than method -- it cannot picture a rich town out here, so it dates the town instead of checking the iron.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
     }
   ],
   "vocabulary": [
@@ -1549,6 +1896,46 @@
         "npc_okhi"
       ],
       "notes": "Two words for one animal at two ages, which is a more accurate taxonomy than the archive's two species and was never intended as one.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "type": "vocabulary",
+      "language": "sarv",
+      "id": "word_sarv_khenu",
+      "word": "khenu",
+      "gloss": "unlucky in when rather than where",
+      "literal": "wrong-year",
+      "learned_from": [
+        "npc_teshk"
+      ],
+      "notes": "A whole grammar of hindsight in one word, in a language spoken by people who have needed it. The Kia have no equivalent and the University would need a sentence.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design",
+        "AI_CONTEXT.md"
+      ]
+    },
+    {
+      "type": "vocabulary",
+      "language": "sarv",
+      "id": "word_sarv_tolu",
+      "word": "tolu",
+      "gloss": "the shallow head of a channel",
+      "literal": "where the keel touches",
+      "learned_from": [
+        "npc_ravi"
+      ],
+      "notes": "A draught rather than a place, which is why it reads as a good on a tariff board until somebody who still uses the word explains it.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
