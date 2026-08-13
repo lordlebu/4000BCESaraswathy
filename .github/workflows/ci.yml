@@ -33,21 +33,59 @@ jobs:
   browser:
     runs-on: ubuntu-latest
     steps:
+      # Deliberately not `paths-ignore` on the workflow, and not `if:` on the job.
+      #
+      # Both of those stop the check *reporting*, and a required status check that never
+      # reports leaves a pull request pending forever rather than mergeable. `main` is
+      # protected here, so a docs PR that could not merge would be a worse problem than a
+      # five-minute suite. The job therefore always runs and always goes green; it just does
+      # almost nothing when there is no code in the change.
       - uses: actions/checkout@v7
+        with:
+          # The comparison below needs history, which the default shallow clone does not have.
+          fetch-depth: 0
+
+      - name: Is there any code in this change?
+        id: scope
+        run: |
+          # A push to main re-verifies everything: it is the branch that gets deployed, and
+          # being wrong there is expensive in a way that saving four minutes is not.
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "on main — running the full suite"
+            exit 0
+          fi
+          base=$(git merge-base origin/main HEAD)
+          changed=$(git diff --name-only "$base" HEAD)
+          echo "$changed"
+          # Anything that is not markdown counts as code, including workflow files — a change
+          # to how CI runs should be checked by CI. An empty diff also lands here and runs the
+          # suite, which is deliberate: every ambiguous case should err towards checking.
+          if echo "$changed" | grep -qvE '\.md$'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+            echo "documentation only — skipping the browser suite"
+          fi
+
       - uses: actions/setup-node@v7
+        if: steps.scope.outputs.code == 'true'
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+        if: steps.scope.outputs.code == 'true'
 
       # Chromium was downloaded on every run, which is about a minute of a job that is already
       # the slowest thing in CI. The key carries the Playwright version, so a bump misses the
       # cache and fetches the matching browser rather than reusing a stale one.
       - name: Playwright version
         id: pw
+        if: steps.scope.outputs.code == 'true'
         run: echo "v=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v4
         id: pw-cache
+        if: steps.scope.outputs.code == 'true'
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pw.outputs.v }}
@@ -55,11 +93,13 @@ jobs:
       # The browser comes from the cache when it hits; the OS packages it needs do not, and are
       # cheap enough to install either way.
       - name: Install Chromium
+        if: steps.scope.outputs.code == 'true'
         run: npx playwright install --with-deps chromium
 
       - run: npm run test:e2e
+        if: steps.scope.outputs.code == 'true'
       - uses: actions/upload-artifact@v7
-        if: failure()
+        if: failure() && steps.scope.outputs.code == 'true'
         with:
           name: playwright-report
           path: playwright-report/
