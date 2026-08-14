@@ -1,6 +1,6 @@
 // Layout and shared state. The map is a sibling, not a child — React never renders a tile.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { EventBus, type GameToUi } from '../game/EventBus';
 import { PhaserGame } from '../game/PhaserGame';
 import { JournalPanel } from './JournalPanel';
@@ -12,6 +12,7 @@ import { Ending } from './Ending';
 import { FieldKit } from './FieldKit';
 import { PlacePanel } from './PlacePanel';
 import { Overworld } from './Overworld';
+import { initialSurface, surfaceReducer } from './surface';
 import { poi } from '../content/places';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { creatureAction } from '../content/journal';
@@ -52,29 +53,28 @@ export function App() {
   // What the player knows. Every rule about changing it lives in `journey.ts`; this only holds
   // it and hands it to the save.
   const [progress, setProgress] = useState(initialJourney.current.progress);
-  const [diaryOpen, setDiaryOpen] = useState(false);
-  const [endingOpen, setEndingOpen] = useState(false);
-  const [kitOpen, setKitOpen] = useState(false);
 
   // The three scales. `fieldMapId` is the country under foot; `poiId` is the authored place
   // being stood in, if any; a sub-location opens inside the place panel rather than here,
   // because going deeper into a ruin is not leaving it.
   const [fieldMapId, setFieldMapId] = useState(DEFAULT_FIELD_MAP);
-  const [overworldOpen, setOverworldOpen] = useState(false);
   const visited = useRef(new Set<string>());
 
   /**
-   * Every panel opens and closes, and the two that share the bottom of the screen never both
-   * hold it.
+   * One value decides what is on screen; the rules are in `surface.ts` and tested under Node.
    *
-   * `standingOn` is where the traveller is; `placeOpen` is whether they are reading about it.
-   * Keeping those apart is what lets a closed panel be opened again without walking off the
-   * tile and back — and it is why the place panel can be dismissed to read the field notes it
-   * would otherwise cover.
+   * This replaced five independent booleans. They did not merely allow two panels to overlap —
+   * they made overlap the *default*, since nothing consulted anything else before opening, and
+   * the camera then measured whatever rectangles resulted. Two surfaces cannot collide here
+   * because there is one slot to be in.
+   *
+   * `standingOn` stays a separate fact from whether `here` is open, exactly as it was: knowing
+   * where the traveller is and knowing whether they are reading about it are different
+   * questions, and conflating them would mean walking off a tile and back to reopen a panel
+   * you had dismissed.
    */
-  const [standingOn, setStandingOn] = useState<string | null>(null);
-  const [placeOpen, setPlaceOpen] = useState(false);
-  const [notesOpen, setNotesOpen] = useState(true);
+  const [ui, dispatch] = useReducer(surfaceReducer, initialSurface);
+  const { surface, interrupts, standingOn, placeOpen } = ui;
 
   // The scene owns the clock and says when it turns. React used to run its own timer off the
   // same formulas, which is two clocks agreeing by luck -- and they would have drifted the
@@ -107,12 +107,11 @@ export function App() {
       setReached(true);
     };
 
-    const onStandingOn = ({ poiId: id }: GameToUi['standing-on']) => {
-      setStandingOn(id);
-      // Arriving somewhere opens it once. Leaving closes it, because a panel about a place you
-      // are no longer standing in is a lie about where you are.
-      setPlaceOpen(Boolean(id));
-    };
+    // Arriving opens the place once; leaving closes it. Both rules now live in the reducer,
+    // where they are tested — including the one this handler could not express before: leaving
+    // must not close the album or the diary, which are not about the tile being left.
+    const onStandingOn = ({ poiId: id }: GameToUi['standing-on']) =>
+      dispatch({ type: 'standing-on', poiId: id });
     const onMoment = (next: GameToUi['moment-changed']) => setMoment(next);
 
     EventBus.onEvent('world-ready', onWorldReady);
@@ -232,9 +231,10 @@ export function App() {
   const travel = useCallback(
     (next: string) => {
       setFieldMapId(next);
-      setStandingOn(null);
-      setPlaceOpen(false);
-      setOverworldOpen(false);
+      // Arriving in another country is leaving wherever you were standing, and the map that
+      // sent you there has done its job.
+      dispatch({ type: 'standing-on', poiId: null });
+      dispatch({ type: 'close-interrupt', which: 'overworld' });
       discovered.current = [];
       EventBus.emitEvent('travel-to', { fieldMapId: next, seed });
     },
@@ -256,7 +256,7 @@ export function App() {
   // Measured rather than derived: the CSS already decides where the panels go, and re-implementing
   // those breakpoints here would be a second copy of the rules waiting to disagree with the first.
   const hasLog = Boolean(travelLog) && logOpen;
-  const hasNotes = Boolean(arrival) && notesOpen;
+  const hasNotes = Boolean(arrival) && surface === 'here';
   useEffect(() => {
     const stage = document.querySelector('.stage');
     if (!stage) return;
@@ -324,44 +324,53 @@ export function App() {
         logOpen={logOpen}
         onToggleLog={() => setLogOpen((open) => !open)}
         diaryCount={diaryCount(progress)}
-        onOpenDiary={() => setDiaryOpen((open) => !open)}
-        onOpenOverworld={() => setOverworldOpen((open) => !open)}
-        notesOpen={notesOpen}
-        onToggleNotes={() => setNotesOpen((open) => !open)}
+        onOpenDiary={() => dispatch({ type: 'toggle', surface: 'progress' })}
+        onOpenOverworld={() =>
+          dispatch({
+            type: interrupts.overworld ? 'close-interrupt' : 'open-interrupt',
+            which: 'overworld'
+          })
+        }
+        notesOpen={surface === 'here'}
+        onToggleNotes={() => dispatch({ type: 'toggle', surface: 'here' })}
         placeName={standingOn ? poi(standingOn)?.name ?? null : null}
         placeOpen={placeOpen}
-        onTogglePlace={() => setPlaceOpen((open) => !open)}
+        onTogglePlace={() => dispatch({ type: 'toggle-place' })}
       />
 
       <Diary
         progress={progress}
         moment={moment}
-        open={diaryOpen}
-        onClose={() => setDiaryOpen(false)}
+        open={surface === 'progress'}
+        onClose={() => dispatch({ type: 'close' })}
         onAnswer={settle}
-        onOpenEnding={() => setEndingOpen(true)}
-        onOpenKit={() => setKitOpen(true)}
+        onOpenEnding={() => dispatch({ type: 'open-interrupt', which: 'ending' })}
+        onOpenKit={() => dispatch({ type: 'open-interrupt', which: 'kit' })}
       />
 
       <FieldKit
         progress={progress}
-        open={kitOpen}
-        onClose={() => setKitOpen(false)}
+        open={interrupts.kit}
+        onClose={() => dispatch({ type: 'close-interrupt', which: 'kit' })}
         canResearch={canon.lore}
       />
 
-      <Ending progress={progress} open={endingOpen} onClose={() => setEndingOpen(false)} />
+      <Ending
+        progress={progress}
+        open={interrupts.ending}
+        onClose={() => dispatch({ type: 'close-interrupt', which: 'ending' })}
+      />
 
       <Overworld
         current={fieldMapId}
         progress={progress}
-        open={overworldOpen}
+        open={interrupts.overworld}
         onTravel={travel}
-        onClose={() => setOverworldOpen(false)}
+        onClose={() => dispatch({ type: 'close-interrupt', which: 'overworld' })}
       />
 
       <PlacePanel
-        poiId={placeOpen ? standingOn : null}
+        poiId={surface === 'here' && placeOpen ? standingOn : null}
         progress={progress}
         moment={moment}
         firstVisit={Boolean(standingOn) && !visited.current.has(standingOn!)}
@@ -369,7 +378,7 @@ export function App() {
         onListen={listen}
         onClose={() => {
           if (standingOn) visited.current.add(standingOn);
-          setPlaceOpen(false);
+          dispatch({ type: 'close-place' });
         }}
       />
 
@@ -383,7 +392,7 @@ export function App() {
         <CanonPanel place={place} status={canon} />
       </JourneyLog>
 
-      {notesOpen && (
+      {surface === 'here' && (
       <JournalPanel
         entry={arrival?.entry ?? null}
         surroundings={arrival?.surroundings ?? ''}
