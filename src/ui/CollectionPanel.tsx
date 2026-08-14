@@ -14,7 +14,7 @@
 // Presentation, plus one optional network call. The species records come from the bundle, so
 // every entry is fully readable offline; asking canon only ever adds.
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   type Collection,
   type Meeting,
@@ -130,6 +130,21 @@ export interface CollectionPanelProps {
 }
 
 export function CollectionPanel({ collection, open, onClose, canAsk }: CollectionPanelProps) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  // Escape closes it and focus starts on the way out, matching the diary. This was the one
+  // modal without either, which is the sort of inconsistency a keyboard finds immediately and
+  // a mouse never does. The map keeps running underneath: a book you opened, not a stopped world.
+  useEffect(() => {
+    if (!open) return;
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const met = everythingMet(collection);
@@ -152,7 +167,7 @@ export function CollectionPanel({ collection, open, onClose, canAsk }: Collectio
                   )} growing things.`}
             </p>
           </div>
-          <button type="button" className="diary-close" onClick={onClose}>
+          <button type="button" className="diary-close" ref={closeRef} onClick={onClose}>
             Close
           </button>
         </header>
