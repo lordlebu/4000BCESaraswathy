@@ -61,3 +61,24 @@ test('the panel does not resize as the day turns', async ({ page }) => {
   expect(doings.size).toBeGreaterThan(1);
   expect([...heights], `panel height varied across the day: ${[...heights]}`).toHaveLength(1);
 });
+
+/**
+ * The same, on a narrow phone.
+ *
+ * Added while checking whether the reservation above was still needed after the panels were
+ * consolidated. It is -- removing it swings the wide panel 288/278/288 across a day -- but the
+ * phone override that used to sit beside it was not: at this width the two-column notes absorb
+ * the extra wrapped line by themselves. This holds that, so the removal cannot silently regress.
+ */
+test('the panel does not resize as the day turns, on a narrow phone', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+
+  const heights = new Set<number>();
+  for (const hour of [0, 6, 12, 18]) {
+    await fieldNoteAt(page, hour);
+    const box = await page.locator('.journal').boundingBox();
+    heights.add(Math.round(box!.height));
+  }
+
+  expect([...heights], `panel height varied on a phone: ${[...heights]}`).toHaveLength(1);
+});

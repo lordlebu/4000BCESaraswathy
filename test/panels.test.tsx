@@ -518,4 +518,20 @@ describe('collection', () => {
     );
     expect(container.textContent).toBe('');
   });
+
+  /**
+   * Every other modal closes on Escape and puts focus on the way out. This one did not, which
+   * is the sort of gap a keyboard finds at once and a mouse never does.
+   */
+  it('closes on Escape, like the rest of them', () => {
+    const onClose = vi.fn();
+    render(<CollectionPanel collection={met} open onClose={onClose} canAsk={false} />);
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('starts focus somewhere a keyboard can leave from', () => {
+    render(<CollectionPanel collection={met} open onClose={noop} canAsk={false} />);
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close' }));
+  });
 });

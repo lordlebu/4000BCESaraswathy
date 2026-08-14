@@ -83,14 +83,25 @@ A real product bug, found only because the flake was investigated rather than re
 
 ## Never run two browser suites at once
 
-Twice now a suite has "failed" — once six specs, once thirty-six — because a second Playwright
-run was started while one was still going in the background. They contend for the dev server on
-one port and for the machine, and the failures scatter across unrelated specs in a way that
-looks exactly like a real regression. The 36-failure run was diagnosed in a minute only because
-the previous clean run was still on screen.
+Five times now a suite has "failed" — six specs, then thirty-six, then two, then three, then one
+— because a second Playwright run was started while one was still going in the background. They
+contend for the dev server on one port and for the machine, and the failures scatter across
+unrelated specs in a way that looks exactly like a real regression. The 36-failure run was
+diagnosed in a minute only because the previous clean run was still on screen.
 
-The tell is the duration: this suite takes about three minutes. A thirteen-minute run has been
-starved, and nothing it reports should be believed until it is repeated on an idle machine.
+**The tell is the duration.** This suite takes about three minutes. Runs of 8.3, 10.1 and 11.8
+minutes have all reported failures that vanished on an idle machine. Nothing a starved run
+reports should be believed until it is repeated.
+
+But do not stop at the duration either. One 11.8-minute run held three failures: two were real
+regressions from the change under test, and only the third was contention. **Re-run each failed
+spec alone before dismissing any of them** — a slow run is evidence the failures are suspect,
+not evidence they are false.
+
+The same contention appears within a single file, not just across runs. A viewport-resizing test
+added beside existing ones failed in the two-worker file run and passed alone, because the specs
+share a page. If a new test resizes or navigates differently from its neighbours, check it in
+isolation before believing either result.
 
 ## Match CI's parallelism locally
 

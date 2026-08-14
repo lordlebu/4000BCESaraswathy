@@ -19,8 +19,9 @@ npm run dev        # http://localhost:4173
 ```
 
 Walk with **WASD** or the **arrow keys**, or **tap a tile** — tapping routes around the sea rather
-than into it. Press **Observe creature** to sketch what you find, and head for the named landmark;
-arriving writes a page you can keep as text or an image.
+than into it. Whatever is out as you pass records itself in your **collection**; there is nothing
+to press. Head for the named landmark, and arriving writes a page you can keep as text or an
+image from the **Diary**.
 
 Zoom with the on-screen **+** and **−**, the mouse wheel, `+`/`-`, or a pinch. `0` hands the view
 back to the automatic fit, which sizes itself to your screen.

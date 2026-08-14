@@ -832,7 +832,13 @@ button.ghost:hover:not(:disabled) {
 /* What the creature is doing. The only line in the journal that changes while the player is
  * standing still, so it gets a reserved box: without one, a creature falling asleep reflows
  * the panel, React reports new insets, and the camera refits — the map moving under you
- * because the hour turned. Two lines at this width, three on a narrow phone. */
+ * because the hour turned. Two lines at this width, three on a narrow phone.
+ *
+ * Consolidating the panels did *not* make this unnecessary, which was the assumption going in.
+ * One owner of the screen stops two panels fighting over an edge; it does nothing about a panel
+ * changing its own height as the hour turns, and this sentence is the only text in the game
+ * that does. Removing it here swings the panel 288 -> 278 -> 288px across a day, which is the
+ * camera refit this was written to stop. Measured, not assumed. */
 .doing {
   margin: 0 0 6px;
   min-height: 2.9em;
@@ -840,9 +846,10 @@ button.ghost:hover:not(:disabled) {
   color: var(--muted);
 }
 
-@media (max-width: 34rem) {
-  .doing { min-height: 4.4em; }
-}
+/* There was a `@media (max-width: 34rem) { .doing { min-height: 4.4em } }` here, for the third
+ * line the sentence wraps to on a phone. It was doing nothing: at 360px the `.journal-notes`
+ * columns absorb the extra line themselves, and the panel measures 281px at every hour of the
+ * day with the rule gone. Removed rather than kept for symmetry with the base case above. */
 
 /* Settling a question. Every reading is on the page, including the ones you cannot support —
  * the shape of the disagreement is the content. Nothing here marks an answer right or wrong. */
