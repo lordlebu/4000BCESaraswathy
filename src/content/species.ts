@@ -85,6 +85,22 @@ export function biomeFor(biome: BiomeId): Biome | null {
   return biomesById.get(biome) ?? null;
 }
 
+/**
+ * Every species by its game id, flora and fauna together.
+ *
+ * Named `metSpecies` rather than `speciesFor` because `content/investigate.ts` already has a
+ * `speciesFor`, and it looks things up in the *other* namespace -- canon ids like
+ * `fauna_saltreed` rather than the bundle's `saltreed`. Two functions with one name differing
+ * only in which id space they accept is exactly the confusion this phase exists to remove.
+ */
+const speciesById = new Map<string, Creature | Flora>(
+  [...creatures, ...flora].map((s) => [s.id, s])
+);
+
+export function metSpecies(id: string): Creature | Flora | null {
+  return speciesById.get(id) ?? null;
+}
+
 export function creaturesIn(biome: BiomeId): Creature[] {
   return creaturesByBiome[biome] ?? [];
 }

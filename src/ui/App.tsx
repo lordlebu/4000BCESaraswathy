@@ -14,9 +14,9 @@ import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { poi } from '../content/places';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
-import { creatureAction } from '../content/journal';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
+import { type Collection, emptyCollection, metOnTile, size } from '../content/collection';
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
 import { loadJourney, saveJourney } from '../save';
@@ -42,7 +42,7 @@ export function App() {
   const [seed, setSeed] = useState(seedFromUrl);
   const [world, setWorld] = useState<World | null>(null);
   const [arrival, setArrival] = useState<Arrival | null>(null);
-  const [observed, setObserved] = useState<string[]>(initialJourney.current.observed);
+  const [collection, setCollection] = useState<Collection>(initialJourney.current.collection);
   const [memory, setMemory] = useState('');
   const [arrivalPage, setArrivalPage] = useState<GameToUi['landmark-reached'] | null>(null);
   // Separate from `arrivalPage`, which the player can dismiss. Reaching the landmark is a fact
@@ -133,7 +133,7 @@ export function App() {
   // second otherwise, and the journey is not worth a synchronous write that often.
   useEffect(() => {
     const flush = () =>
-      saveJourney(seed, { discovered: discovered.current, observed, reached, progress });
+      saveJourney(seed, { discovered: discovered.current, collection, reached, progress });
     const timer = window.setInterval(flush, 3000);
     window.addEventListener('pagehide', flush);
     return () => {
@@ -141,7 +141,7 @@ export function App() {
       window.removeEventListener('pagehide', flush);
       flush();
     };
-  }, [seed, observed, reached, progress]);
+  }, [seed, collection, reached, progress]);
 
   const currentCreature = useMemo(() => {
     if (!world || !arrival) return null;
@@ -180,7 +180,8 @@ export function App() {
   const generate = useCallback((next: string) => {
     // A new map is a deliberate fresh start, so it must not inherit fog the player already lifted.
     discovered.current = [];
-    setObserved([]);
+    // The collection is trip-scoped: a new world is a new walk, not a continuing album.
+    setCollection(emptyCollection());
     setProgress(loadJourney(next).progress);
     setMemory('');
     setArrivalPage(null);
@@ -203,11 +204,28 @@ export function App() {
     [currentCreature, moment]
   );
 
-  const observe = useCallback(() => {
-    if (!currentCreature || !creatureIsOut || observed.includes(currentCreature.name)) return;
-    setObserved((previous) => [...previous, currentCreature.name]);
-    setMemory(`Sketch recorded: ${creatureAction(currentCreature, moment)}`);
-  }, [currentCreature, creatureIsOut, observed, moment]);
+  /**
+   * Meeting things is a consequence of being somewhere, not of pressing a button.
+   *
+   * The old "Observe creature" button appended a name to a list that nothing read -- the whole
+   * mechanic was that the button then said something else. Standing on a tile with a creature
+   * out is the encounter, so that is what gets recorded, and the starting tile seeds the album
+   * so it is never empty on arrival.
+   *
+   * A creature only counts while it is actually out: `routineFor` decides that from the hour,
+   * so a nocturnal animal met at noon was not met. The flora is always there to be seen.
+   */
+  useEffect(() => {
+    if (!world || !arrival) return;
+    const tile = world.tiles[arrival.at.y]?.[arrival.at.x];
+    if (!tile) return;
+    setCollection((previous) =>
+      metOnTile(previous, {
+        creature: creatureIsOut ? currentCreature : null,
+        flora: floraFor(tile, world.seed)
+      })
+    );
+  }, [world, arrival, currentCreature, creatureIsOut]);
 
   /** Look closer at something. The rule for whether that is possible is `journey.ts`'s. */
   const look = useCallback(
@@ -244,10 +262,10 @@ export function App() {
     if (!world) return null;
     return buildTravelLog(
       world,
-      { discovered: arrival?.discovered ?? 0, observed, reachedLandmark: reached, progress },
+      { discovered: arrival?.discovered ?? 0, collection, reachedLandmark: reached, progress },
       `${window.location.origin}${window.location.pathname}`
     );
-  }, [world, arrival?.discovered, observed, reached, progress]);
+  }, [world, arrival?.discovered, collection, reached, progress]);
 
   // Tell the scene how much of the canvas the overlays are covering, so the camera can keep the
   // traveller somewhere they can be seen. React is the only side that knows this — it renders them.
@@ -319,7 +337,7 @@ export function App() {
       <Controls
         seed={seed}
         onGenerate={generate}
-        observed={observed}
+        metCount={size(collection)}
         logOpen={logOpen}
         onToggleLog={() => setLogOpen((open) => !open)}
         diaryCount={diaryCount(progress)}
@@ -387,9 +405,6 @@ export function App() {
           discovered: arrival?.discovered ?? 0,
           atLandmark: arrival?.atLandmark ?? false,
           memory,
-          canObserve: creatureIsOut,
-          alreadySketched: Boolean(currentCreature && observed.includes(currentCreature.name)),
-          onObserve: observe
         }}
         place={{
           poiId: placeOpen ? standingOn : null,
