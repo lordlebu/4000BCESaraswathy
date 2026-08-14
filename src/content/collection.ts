@@ -39,8 +39,6 @@ export interface Meeting {
   /** Canon's stable handle. The key of the record too, but repeated so an entry stands alone. */
   id: string;
   kind: SpeciesKind;
-  /** How many times it has been met. Shown, but nothing is gated on reaching a number. */
-  times: number;
 }
 
 /** Species id to what is known about meeting it. */
@@ -51,11 +49,19 @@ export function emptyCollection(): Collection {
 }
 
 /**
- * Record having met something.
+ * Record having met something. Meeting it again changes nothing.
  *
- * Idempotent in the sense that matters: meeting the same species again is a real event and
- * increments the count, but it never creates a second entry or changes what the album shows
- * about which species are in it.
+ * There was a `times` count here, and it measured the wrong thing: `metOnTile` runs on every
+ * arrival, so pacing back and forth across one tile read as "met 14 times" while telling the
+ * reader nothing, and a species met once in four different places was indistinguishable from
+ * one met four times in the same spot. It counted footsteps, not encounters.
+ *
+ * Dropping it rather than fixing it, because the album is explicitly not for completion: a
+ * number on an entry invites treating it as something to grow. Each entry is now a plain fact
+ * -- you have met this -- which is what "discovered once" should mean.
+ *
+ * Returning the same object when nothing changed also means React re-renders only on a genuine
+ * first meeting rather than on every step.
  */
 export function met(
   collection: Collection,
@@ -63,14 +69,10 @@ export function met(
   kind: SpeciesKind
 ): Collection {
   if (!species?.id) return collection;
-  const existing = collection[species.id];
+  if (collection[species.id]) return collection;
   return {
     ...collection,
-    [species.id]: {
-      id: species.id,
-      kind,
-      times: (existing?.times ?? 0) + 1
-    }
+    [species.id]: { id: species.id, kind }
   };
 }
 
@@ -126,11 +128,7 @@ export function readCollection(value: unknown): Collection {
     if (!raw || typeof raw !== 'object') continue;
     const entry = raw as Partial<Meeting>;
     if (entry.kind !== 'creature' && entry.kind !== 'flora') continue;
-    out[id] = {
-      id,
-      kind: entry.kind,
-      times: typeof entry.times === 'number' && entry.times > 0 ? Math.floor(entry.times) : 1
-    };
+    out[id] = { id, kind: entry.kind };
   }
   return out;
 }

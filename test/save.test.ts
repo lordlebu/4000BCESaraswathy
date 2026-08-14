@@ -86,13 +86,13 @@ describe('an older save is discarded rather than misread', () => {
     writeRaw({
       version: SAVE_VERSION,
       discovered: [],
-      collection: { 'river-otter': { kind: 'not-a-kind' }, saltreed: { kind: 'flora', times: 2 } },
+      collection: { 'river-otter': { kind: 'not-a-kind' }, saltreed: { kind: 'flora' } },
       reached: false,
       progress: emptyProgress()
     });
 
     const back = loadJourney(SEED);
     expect(back.collection['river-otter']).toBeUndefined();
-    expect(back.collection.saltreed.times).toBe(2);
+    expect(back.collection.saltreed).toEqual({ id: 'saltreed', kind: 'flora' });
   });
 });

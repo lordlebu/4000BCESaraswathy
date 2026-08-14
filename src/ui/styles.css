@@ -1099,3 +1099,60 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   cursor: pointer;
 }
 .research button:disabled { opacity: 0.5; cursor: default; }
+
+/* --- The collection ------------------------------------------------------ */
+/* Entries are cards rather than rows: each carries a paragraph of authored prose, and a list
+   of paragraphs with no edges between them reads as one long column of text. */
+
+.met-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
+}
+
+.met-entry {
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  padding: 0.8rem 0.9rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.met-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.met-head h4 { margin: 0; font-size: 1rem; }
+
+.met-binomial {
+  margin: 0.1rem 0 0;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.met-prose { margin: 0.55rem 0 0; font-size: 0.88rem; line-height: 1.55; }
+
+.met-facts {
+  margin: 0.55rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.met-facts span {
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  text-transform: lowercase;
+}
+
+.met-ask { margin-top: 0.6rem; }
+.met-ask .canon-sources { margin-top: 0.3rem; }

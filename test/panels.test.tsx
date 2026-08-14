@@ -21,6 +21,9 @@ import { QuestionCard } from '../src/ui/Questions';
 import { Ending } from '../src/ui/Ending';
 import { FieldKit } from '../src/ui/FieldKit';
 import { Here } from '../src/ui/Here';
+import { CollectionPanel } from '../src/ui/CollectionPanel';
+import { emptyCollection, metOnTile } from '../src/content/collection';
+import { metSpecies } from '../src/content/species';
 import {
   type Progress,
   advance,
@@ -442,5 +445,77 @@ describe('here', () => {
       <Here open notes={{ ...notes }} place={{ ...place }} canon={<p>Canon says something.</p>} />
     );
     expect(screen.getByText('Canon says something.')).toBeTruthy();
+  });
+});
+
+/**
+ * The collection.
+ *
+ * A read surface with nothing gated on it, so these check what a reader sees rather than what a
+ * rule permits. The one property worth defending is that it fills rather than unlocks: species
+ * never met are absent, not shown as blanks to be completed.
+ */
+describe('collection', () => {
+  const met = metOnTile(emptyCollection(), {
+    creature: { id: 'river-otter' },
+    flora: { id: 'sweet-indigo' }
+  });
+
+  it('says plainly when nothing has been met', () => {
+    render(
+      <CollectionPanel collection={emptyCollection()} open onClose={noop} canAsk={false} />
+    );
+    expect(screen.getByText(/Walk a while/)).toBeTruthy();
+  });
+
+  it('shows an entry with the prose canon authored for it', () => {
+    render(<CollectionPanel collection={met} open onClose={noop} canAsk={false} />);
+    const otter = metSpecies('river-otter')!;
+    expect(screen.getByText(otter.name)).toBeTruthy();
+    expect(screen.getByText(otter.journalPrompt)).toBeTruthy();
+  });
+
+  it('keeps creatures and growing things apart', () => {
+    render(<CollectionPanel collection={met} open onClose={noop} canAsk={false} />);
+    expect(screen.getByText('Creatures')).toBeTruthy();
+    expect(screen.getByText('Growing things')).toBeTruthy();
+  });
+
+  /**
+   * It fills; it does not unlock. Showing every unmet species as a blank would turn a record of
+   * one walk into a completion target, which is the opposite of what this is for.
+   */
+  it('holds only what was met, not the whole field guide', () => {
+    render(<CollectionPanel collection={met} open onClose={noop} canAsk={false} />);
+    expect(screen.getAllByRole('listitem').length).toBe(2);
+  });
+
+  it('lists a species once however often it is met', () => {
+    const twice = metOnTile(met, { creature: { id: 'river-otter' } });
+    render(<CollectionPanel collection={twice} open onClose={noop} canAsk={false} />);
+    expect(screen.getAllByRole('listitem').length).toBe(2);
+  });
+
+  /**
+   * The network is optional everywhere else in this game, and it is optional here. With no
+   * service listening, nothing about asking is rendered — an affordance that always fails
+   * teaches a player to distrust the panel it sits in.
+   */
+  it('offers canon only when a service is listening', () => {
+    const { unmount } = render(
+      <CollectionPanel collection={met} open onClose={noop} canAsk={false} />
+    );
+    expect(screen.queryByRole('button', { name: /Ask canon/ })).toBeNull();
+    unmount();
+
+    render(<CollectionPanel collection={met} open onClose={noop} canAsk />);
+    expect(screen.getAllByRole('button', { name: /Ask canon/ }).length).toBe(2);
+  });
+
+  it('renders nothing at all when closed', () => {
+    const { container } = render(
+      <CollectionPanel collection={met} open={false} onClose={noop} canAsk={false} />
+    );
+    expect(container.textContent).toBe('');
   });
 });
