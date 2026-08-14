@@ -89,6 +89,11 @@ test('the journal can be taken away as text and as an image', async ({ page }) =
   await page.goto(`?seed=${SEED}`);
   await waitForJourney(page);
 
+  // Taking a copy now lives at the end of the Progress surface rather than in a panel of its
+  // own, so it has to be opened first -- which is the point: you copy a record you have read.
+  await page.getByRole('button', { name: /Diary/ }).click();
+  await expect(page.locator('.diary')).toBeVisible();
+
   const text = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Save as text' }).click();
   const textFile = await text;

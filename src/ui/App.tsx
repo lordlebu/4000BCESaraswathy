@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { EventBus, type GameToUi } from '../game/EventBus';
 import { PhaserGame } from '../game/PhaserGame';
-import { JourneyLog } from './JourneyLog';
 import { Controls } from './Controls';
 import { CanonPanel } from './CanonPanel';
 import { Here } from './Here';
 import { CollectionPanel } from './CollectionPanel';
-import { Diary, diaryCount } from './Diary';
+import { Progress } from './Progress';
+import { diaryCount } from './Diary';
 import { Ending } from './Ending';
 import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
@@ -80,13 +80,6 @@ export function App() {
   // same formulas, which is two clocks agreeing by luck -- and they would have drifted the
   // moment walking started spending time, which it does.
   const [moment, setMoment] = useState<WorldMoment | null>(null);
-
-  // The log starts open where there is room beside the map and closed where it would cover it.
-  // Only the initial state — once the player has opened or closed it, that is their decision and
-  // rotating the device does not overrule it.
-  const [logOpen, setLogOpen] = useState(
-    () => window.matchMedia('(orientation: landscape) and (min-width: 700px)').matches
-  );
 
   // The fog set changes on every step, which is far too often to keep in React state — it would
   // re-render the whole panel each tile. The scene owns it; this ref only carries it to the save.
@@ -273,7 +266,10 @@ export function App() {
   //
   // Measured rather than derived: the CSS already decides where the panels go, and re-implementing
   // those breakpoints here would be a second copy of the rules waiting to disagree with the first.
-  const hasLog = Boolean(travelLog) && logOpen;
+  // Only the field notes float over the map now. The travel log used to as well, in two
+  // different shapes -- a side panel in landscape, a bottom sheet in portrait -- and telling
+  // those apart by measuring its width, then deciding which edge it covered, was most of what
+  // this effect did. Retiring the panel retires the arithmetic with it.
   const hasNotes = Boolean(arrival) && surface === 'here';
   useEffect(() => {
     const stage = document.querySelector('.stage');
@@ -281,25 +277,18 @@ export function App() {
 
     const report = () => {
       const bounds = stage.getBoundingClientRect();
-      const log = document.querySelector('.log')?.getBoundingClientRect();
       const notes = document.querySelector('.journal')?.getBoundingClientRect();
-      const covered = (panel?: DOMRect) => (panel ? Math.round(bounds.bottom - panel.top) : 0);
-
-      // The log is a side panel in landscape and a bottom sheet in portrait, and it obscures a
-      // different edge in each. Which one it currently is comes from its own width rather than from
-      // re-reading the breakpoints — a sheet spans the stage, a side panel does not.
-      const isSidePanel = Boolean(log && log.width < bounds.width * 0.8);
 
       EventBus.emitEvent('viewport-insets', {
-        right: isSidePanel ? Math.round(bounds.right - log!.left) : 0,
-        bottom: Math.max(covered(notes), isSidePanel ? 0 : covered(log))
+        right: 0,
+        bottom: notes ? Math.round(bounds.bottom - notes.top) : 0
       });
     };
 
     report();
     const observer = new ResizeObserver(report);
     observer.observe(stage);
-    for (const panel of document.querySelectorAll('.log, .journal')) observer.observe(panel);
+    for (const panel of document.querySelectorAll('.journal')) observer.observe(panel);
     window.addEventListener('orientationchange', report);
 
     // And again once the scene exists. Phaser boots asynchronously, so the first report can go out
@@ -312,8 +301,8 @@ export function App() {
       window.removeEventListener('orientationchange', report);
       EventBus.offEvent('world-ready', report);
     };
-    // Re-run when a panel appears or disappears, so the observer watches the current set.
-  }, [hasLog, hasNotes]);
+    // Re-run when the notes appear or disappear, so the observer watches the current set.
+  }, [hasNotes]);
 
   const exportText = useCallback(() => {
     if (!travelLog || !world) return;
@@ -340,8 +329,6 @@ export function App() {
         onGenerate={generate}
         metCount={size(collection)}
         onOpenCollection={() => dispatch({ type: 'toggle', surface: 'collection' })}
-        logOpen={logOpen}
-        onToggleLog={() => setLogOpen((open) => !open)}
         diaryCount={diaryCount(progress)}
         onOpenDiary={() => dispatch({ type: 'toggle', surface: 'progress' })}
         onOpenOverworld={() =>
@@ -357,7 +344,7 @@ export function App() {
         onTogglePlace={() => dispatch({ type: 'toggle-place' })}
       />
 
-      <Diary
+      <Progress
         progress={progress}
         moment={moment}
         open={surface === 'progress'}
@@ -365,6 +352,9 @@ export function App() {
         onAnswer={settle}
         onOpenEnding={() => dispatch({ type: 'open-interrupt', which: 'ending' })}
         onOpenKit={() => dispatch({ type: 'open-interrupt', which: 'kit' })}
+        replayUrl={travelLog?.replayUrl ?? null}
+        onExportImage={exportImage}
+        onExportText={exportText}
       />
 
       <CollectionPanel
@@ -393,14 +383,6 @@ export function App() {
         open={interrupts.overworld}
         onTravel={travel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'overworld' })}
-      />
-
-      <JourneyLog
-        log={travelLog}
-        open={logOpen}
-        onClose={() => setLogOpen(false)}
-        onExportImage={exportImage}
-        onExportText={exportText}
       />
 
       {/* One surface, two layers: the notes are the floor, a place sits over them, and canon

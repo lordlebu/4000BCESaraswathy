@@ -10,7 +10,7 @@
 // Presentation only. Every rule — whether a rung can advance, why it cannot, which readings
 // of a question are open — is asked of `journey.ts`. Nothing here recomputes a ladder.
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import {
   type Progress,
   type WorldMoment,
@@ -130,6 +130,13 @@ export interface DiaryProps {
   onAnswer: (questionId: string, index: number) => void;
   onOpenEnding: () => void;
   onOpenKit: () => void;
+  /**
+   * Anything that belongs after the record, when this is being shown as the Progress surface.
+   *
+   * The travel log's export buttons and replay link live here rather than in a panel of their
+   * own: taking a copy is something you do to a record you have just read.
+   */
+  footer?: ReactNode;
 }
 
 export function Diary({
@@ -139,7 +146,8 @@ export function Diary({
   onClose,
   onAnswer,
   onOpenEnding,
-  onOpenKit
+  onOpenKit,
+  footer
 }: DiaryProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -292,6 +300,8 @@ export function Diary({
             )}
           </>
         )}
+
+        {footer}
       </section>
     </div>
   );

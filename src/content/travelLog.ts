@@ -56,8 +56,14 @@ export interface JourneyState {
  * Every one is omitted when empty rather than printed hollow. A record someone shows other
  * people should not list the headings of things that did not happen — the same rule the diary
  * itself follows on screen.
+ *
+ * Exported, because the Progress surface renders exactly this and the export writes exactly
+ * this. They were two compositions over one `Progress`: this function built the keepsake while
+ * `Diary.tsx` built the screen, and the pair had already drifted -- the same four things,
+ * grouped and headed differently, with nothing keeping them honest. One builder means the page
+ * a player reads and the page they keep cannot disagree.
  */
-function diarySections(progress: Progress | undefined): LogSection[] {
+export function diarySections(progress: Progress | undefined): LogSection[] {
   if (!progress) return [];
   const out: LogSection[] = [];
 

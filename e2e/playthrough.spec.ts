@@ -20,14 +20,14 @@ const SEED = 'play-test';
 async function visibleMap(page: Page) {
   return page.evaluate(() => {
     const canvas = document.querySelector('.map-surface canvas')!.getBoundingClientRect();
-    const log = document.querySelector('.log')?.getBoundingClientRect();
     const notes = document.querySelector('.journal')?.getBoundingClientRect();
     const margin = 12;
 
     const left = margin;
     const top = margin;
-    const isSidePanel = log && log.width < canvas.width * 0.8;
-    const right = (isSidePanel ? log!.left - canvas.left : canvas.width) - margin;
+    // The travel log was the only panel that could take a side of the map. It is not a panel
+    // any more, so the uncovered rectangle runs the full width.
+    const right = canvas.width - margin;
     const bottom = (notes ? notes.top - canvas.top : canvas.height) - margin;
     return { left, top, width: right - left, height: bottom - top };
   });

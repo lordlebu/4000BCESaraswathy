@@ -16,6 +16,7 @@ import {
 import { landmarkKindFor, landmarkTitle } from '../src/content/landmarks';
 import { generateWorld } from '../src/world/generate';
 import { emptyCollection, metOnTile } from '../src/content/collection';
+import { diarySections } from '../src/content/travelLog';
 
 const world = generateWorld({ seed: 'play-test' });
 
@@ -170,5 +171,45 @@ describe('the keepsake records the diary, not just the walk', () => {
   it('names words and places in words, not ids', () => {
     const text = travelLogToText(buildTravelLog(world, { ...bare, progress: full() }));
     expect(text).not.toMatch(/word_|poi_|discovery_|question_/);
+  });
+});
+
+/**
+ * One builder, two readers.
+ *
+ * `diarySections()` was written for the export and then rendered on screen as well, so the same
+ * four things — understood, questions settled, words, put back — were composed twice from one
+ * `Progress` with nothing keeping the two in step. That is the duplication this phase removed:
+ * both the Progress surface and the keepsake now read these sections, so the page a player
+ * reads and the page they keep cannot disagree.
+ */
+describe('the screen and the keepsake are built from one thing', () => {
+  const world = generateWorld({ seed: 'one-builder' });
+
+  it('puts everything understood into both', () => {
+    let p = emptyProgress();
+    for (const w of vocabulary) p = learn(p, w.id);
+    for (const d of discoveries) {
+      for (let i = 0; i < d.rungs.length; i += 1) p = advance(p, d.id, null);
+    }
+
+    const sections = diarySections(p);
+    const exported = travelLogToText(
+      buildTravelLog(world, {
+        discovered: 10,
+        collection: emptyCollection(),
+        reachedLandmark: false,
+        progress: p
+      })
+    );
+
+    expect(sections.length).toBeGreaterThan(0);
+    // Every heading the builder earns reaches the exported page; the surface renders the same
+    // array, so agreeing with the export is agreeing with the screen.
+    for (const section of sections) expect(exported).toContain(section.heading);
+  });
+
+  it('earns no headings at all from an empty progress', () => {
+    expect(diarySections(emptyProgress())).toEqual([]);
   });
 });

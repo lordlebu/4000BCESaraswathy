@@ -45,7 +45,6 @@ test('standing on a place never buries the field notes', async ({ page }) => {
   await walkToPlace(page);
   // The two share the bottom of the screen, so only one of them holds it.
   expect(await overlap(page, '.place', '.journal')).toBe(0);
-  expect(await overlap(page, '.place', '.log')).toBe(0);
 });
 
 test('a place can be closed, read around, and opened again without moving', async ({ page }) => {
@@ -72,11 +71,10 @@ test('the Here button only exists where there is a here', async ({ page }) => {
 test('nothing overlaps in landscape, with every panel open at once', async ({ page }) => {
   await boot(page, 1280, 800);
   await walkToPlace(page);
-  // Log open as well as the place: the three panels divide the screen rather than stack.
-  const log = page.locator('.log');
-  if (!(await log.isVisible())) await page.getByRole('button', { name: 'Journal' }).click();
-  await expect(log).toBeVisible();
-  expect(await overlap(page, '.place', '.log')).toBe(0);
+  // The travel log used to be a third panel here. What remains on the glass at once is the
+  // place and the notes underneath it, and they divide the bottom edge rather than stack.
+  await expect(page.locator('.place')).toBeVisible();
+  expect(await overlap(page, '.place', '.journal')).toBe(0);
 });
 
 /**
