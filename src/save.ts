@@ -5,20 +5,29 @@
 // than a fresh start — it shows the player fog and sketches that do not match the world they are
 // standing in.
 
+import { type Collection, readCollection } from './content/collection';
 import { type Progress, emptyProgress } from './journey';
 
 const PREFIX = 'south-of-tethys';
 
 /**
  * Bump when the payload shape changes. The Phaser shell reset it to 1; `reached` made it 3;
- * carrying what the player has come to understand made it 4.
+ * carrying what the player has come to understand made it 4; the collection replacing the
+ * sketch list made it 6, because `observed` changed from an array of names to a record keyed
+ * by species id and a save written under the old shape cannot be read into the new one.
  */
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 
 export interface Journey {
   version: number;
   discovered: string[];
-  observed: string[];
+  /**
+   * The flora and fauna met, keyed by species id.
+   *
+   * Was `observed: string[]` -- creature names, appended by a button, read only to print a
+   * list. See `content/collection.ts` for why both the key and the filling changed.
+   */
+  collection: Collection;
   /** Whether the landmark was found. Kept so the travel log survives a reload. */
   reached: boolean;
   /**
@@ -35,7 +44,7 @@ export interface Journey {
 const empty = (): Journey => ({
   version: SAVE_VERSION,
   discovered: [],
-  observed: [],
+  collection: {},
   reached: false,
   progress: emptyProgress()
 });
@@ -75,7 +84,7 @@ export function loadJourney(seed: string): Journey {
     return {
       version: SAVE_VERSION,
       discovered: Array.isArray(parsed.discovered) ? parsed.discovered : [],
-      observed: Array.isArray(parsed.observed) ? parsed.observed : [],
+      collection: readCollection(parsed.collection),
       reached: parsed.reached === true,
       progress: readProgress(parsed.progress)
     };

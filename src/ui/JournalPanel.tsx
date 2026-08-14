@@ -33,9 +33,6 @@ export interface JournalPanelProps {
   discovered: number;
   atLandmark: boolean;
   memory: string;
-  canObserve: boolean;
-  alreadySketched: boolean;
-  onObserve: () => void;
   /**
    * Canon, when a service is listening.
    *
@@ -54,9 +51,6 @@ export function JournalPanel({
   discovered,
   atLandmark,
   memory,
-  canObserve,
-  alreadySketched,
-  onObserve,
   children
 }: JournalPanelProps) {
   if (!entry) {
@@ -74,9 +68,6 @@ export function JournalPanel({
           <h2>{entry.title}</h2>
           <p className="journal-place">{entry.description}</p>
         </div>
-        <button type="button" onClick={onObserve} disabled={!canObserve || alreadySketched}>
-          {alreadySketched ? 'Sketch recorded' : 'Observe creature'}
-        </button>
       </header>
 
       <p className="surroundings">{surroundings}</p>

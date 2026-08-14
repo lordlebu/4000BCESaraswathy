@@ -24,15 +24,15 @@ test('the creatures are doing different things at noon and at midnight', async (
   expect(midnight.length).toBeGreaterThan(20);
 });
 
-test('a sleeping animal cannot be sketched, and the note says when to come back', async ({ page }) => {
-  // Walk the clock until the traveller is standing over something that is not out.
+test('a sleeping animal is not met, and the note says when to come back', async ({ page }) => {
+  // The button this used to check is gone: meeting something is now a consequence of standing
+  // where it is, not of pressing anything. The rule it was guarding survives -- an animal that
+  // is not out has not been met -- so that is what is checked instead.
   for (const hour of [0, 3, 6, 9, 12, 15, 18, 21]) {
     await fieldNoteAt(page, hour);
-    const button = page.getByRole('button', { name: /Observe creature|Sketch recorded/ });
     const notes = (await page.locator('.journal-notes').textContent()) ?? '';
 
     if (/asleep somewhere close|Nothing is out in this/.test(notes)) {
-      await expect(button).toBeDisabled();
       expect(notes).toMatch(/Try (dawn|morning|afternoon|evening|night)/);
       return;
     }

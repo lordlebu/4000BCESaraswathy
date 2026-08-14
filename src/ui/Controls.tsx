@@ -13,7 +13,8 @@ import { SeedBar } from './SeedBar';
 export interface ControlsProps {
   seed: string;
   onGenerate: (seed: string) => void;
-  observed: string[];
+  /** How many species have been met. The album itself is its own surface in phase four. */
+  metCount: number;
   logOpen: boolean;
   onToggleLog: () => void;
   /** How many discoveries are under way, so the button can say the diary has something in it. */
@@ -32,7 +33,7 @@ export interface ControlsProps {
 export function Controls({
   seed,
   onGenerate,
-  observed,
+  metCount,
   logOpen,
   onToggleLog,
   diaryCount,
@@ -178,15 +179,10 @@ export function Controls({
             ))}
           </ul>
 
-          {observed.length > 0 && (
-            <>
-              <h3>Field sketches ({observed.length})</h3>
-              <ul className="sketch-list">
-                {observed.map((name) => (
-                  <li key={name}>{name}</li>
-                ))}
-              </ul>
-            </>
+          {metCount > 0 && (
+            // A count, not the list. The album is a surface of its own, and duplicating it in
+            // the map sheet is how the diary and the travel log came to disagree.
+            <h3>Met so far ({metCount})</h3>
           )}
         </div>
       )}

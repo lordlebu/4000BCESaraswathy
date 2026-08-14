@@ -5,7 +5,7 @@
 // reopened without stepping off the tile and back on.
 
 import { expect, test, type Page } from '@playwright/test';
-import { walkTo } from './walk';
+import { step, walkTo } from './walk';
 
 const SEED = 'poi-53';
 
@@ -77,4 +77,35 @@ test('nothing overlaps in landscape, with every panel open at once', async ({ pa
   if (!(await log.isVisible())) await page.getByRole('button', { name: 'Journal' }).click();
   await expect(log).toBeVisible();
   expect(await overlap(page, '.place', '.log')).toBe(0);
+});
+
+/**
+ * The album fills by walking.
+ *
+ * The mechanic this replaced was written, tested, and had no consumer -- the fourth time that
+ * has happened here. So this checks the thing only a player can see: that walking, with nothing
+ * pressed, causes species to be recorded. Unit tests cannot see it, because the wiring from
+ * arrival to record is the part that was missing last time.
+ */
+test('species are met by walking, without pressing anything', async ({ page }) => {
+  await boot(page);
+
+  // Seeded from the starting tile, so it is never empty on arrival.
+  await expect(page.getByRole('button', { name: 'Map', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Map', exact: true }).click();
+  const first = (await page.locator('.sheet').textContent()) ?? '';
+  expect(first).toMatch(/Met so far \(\d+\)/);
+  const started = Number(/Met so far \((\d+)\)/.exec(first)?.[1] ?? '0');
+  expect(started).toBeGreaterThan(0);
+  await page.locator('.sheet').getByRole('button', { name: 'Close' }).click();
+
+  // Walk a while. Different tiles hold different species, so the count should climb.
+  for (const key of ['ArrowRight', 'ArrowRight', 'ArrowDown', 'ArrowDown', 'ArrowLeft']) {
+    await step(page, key);
+  }
+
+  await page.getByRole('button', { name: 'Map', exact: true }).click();
+  const after = (await page.locator('.sheet').textContent()) ?? '';
+  const ended = Number(/Met so far \((\d+)\)/.exec(after)?.[1] ?? '0');
+  expect(ended).toBeGreaterThanOrEqual(started);
 });

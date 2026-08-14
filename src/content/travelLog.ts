@@ -10,6 +10,8 @@
 import { isComplete, languagesKnown, restored, type Progress } from '../journey';
 import { discoveries, fieldQuestion, vocabulary } from './knowledge';
 import { poi } from './places';
+import { type Collection, everythingMet } from './collection';
+import { metSpecies } from './species';
 import { landmarkTitle, landmarkKindFor } from './landmarks';
 import type { World } from '../world/types';
 
@@ -28,7 +30,14 @@ export interface TravelLog {
 
 export interface JourneyState {
   discovered: number;
-  observed: string[];
+  /**
+   * The flora and fauna met, keyed by species id.
+   *
+   * Was an array of creature names appended by a button. The log renders names because it is
+   * prose, so it resolves each id through `metSpecies` -- which is exactly why the record is
+   * keyed by id and not by the name it happens to print today.
+   */
+  collection: Collection;
   reachedLandmark: boolean;
   /**
    * What the player came to understand.
@@ -125,9 +134,10 @@ export function buildTravelLog(world: World, journey: JourneyState, origin = '')
     );
   }
 
-  const sketches: string[] = journey.observed.length
-    ? journey.observed.map((name) => `— ${name}`)
-    : ['Nothing sketched. The satchel came home empty, which happens.'];
+  const found = everythingMet(journey.collection);
+  const seen: string[] = found.length
+    ? found.map((m) => `— ${metSpecies(m.id)?.name ?? m.id}`)
+    : ['Nothing met. The satchel came home empty, which happens.'];
 
   const ending: string[] = journey.reachedLandmark
     ? [`${landmarkTitle(world.landmark, world.seed)}.`, '', kind.arrival]
@@ -142,12 +152,12 @@ export function buildTravelLog(world: World, journey: JourneyState, origin = '')
     sections: [
       { heading: 'The route', lines: route },
       {
-        heading: `Field sketches (${count(journey.observed.length)} ${plural(
-          journey.observed.length,
-          'creature',
-          'creatures'
+        heading: `Met along the way (${count(found.length)} ${plural(
+          found.length,
+          'species',
+          'species'
         )})`,
-        lines: sketches
+        lines: seen
       },
       ...diarySections(journey.progress),
       { heading: journey.reachedLandmark ? 'The place itself' : 'Unfinished', lines: ending }

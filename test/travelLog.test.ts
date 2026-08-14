@@ -15,15 +15,25 @@ import {
 } from '../src/content/travelLog';
 import { landmarkKindFor, landmarkTitle } from '../src/content/landmarks';
 import { generateWorld } from '../src/world/generate';
+import { emptyCollection, metOnTile } from '../src/content/collection';
 
 const world = generateWorld({ seed: 'play-test' });
 
+// Keyed by species id, because that is what the collection stores. The log resolves them to
+// names for its prose -- which is the point of storing the id rather than the name.
 const finished: JourneyState = {
   discovered: 210,
-  observed: ['River Otter', 'Monsoon Crane'],
+  collection: metOnTile(emptyCollection(), {
+    creature: { id: 'river-otter' },
+    flora: { id: 'sweet-indigo' }
+  }),
   reachedLandmark: true
 };
-const abandoned: JourneyState = { discovered: 12, observed: [], reachedLandmark: false };
+const abandoned: JourneyState = {
+  discovered: 12,
+  collection: emptyCollection(),
+  reachedLandmark: false
+};
 
 describe('building the log', () => {
   it('names where the journey started and where it was going', () => {
@@ -52,13 +62,15 @@ describe('building the log', () => {
     );
   });
 
-  it('lists every sketch, and says so plainly when there are none', () => {
+  it('names everything met, and says so plainly when there is nothing', () => {
     const listed = travelLogToText(buildTravelLog(world, finished));
-    for (const name of finished.observed) expect(listed).toContain(name);
-    expect(listed).toContain('(two creatures)');
+    // Stored as ids, printed as names.
+    expect(listed).toContain('River Otter');
+    expect(listed).toContain('Sweet Indigo');
+    expect(listed).toContain('(two species)');
 
     const empty = travelLogToText(buildTravelLog(world, abandoned));
-    expect(empty).toContain('(no creatures)');
+    expect(empty).toContain('(no species)');
     expect(empty).toContain('came home empty');
   });
 
@@ -112,7 +124,7 @@ describe('markdown shape', () => {
 
 describe('the keepsake records the diary, not just the walk', () => {
   const world = generateWorld({ seed: 'keepsake' });
-  const bare = { discovered: 40, observed: [], reachedLandmark: false };
+  const bare = { discovered: 40, collection: emptyCollection(), reachedLandmark: false };
 
   /** Climb everything, learn every word, settle a question. */
   function full(): Progress {
