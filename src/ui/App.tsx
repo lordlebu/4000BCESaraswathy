@@ -3,14 +3,13 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { EventBus, type GameToUi } from '../game/EventBus';
 import { PhaserGame } from '../game/PhaserGame';
-import { JournalPanel } from './JournalPanel';
 import { JourneyLog } from './JourneyLog';
 import { Controls } from './Controls';
 import { CanonPanel } from './CanonPanel';
+import { Here } from './Here';
 import { Diary, diaryCount } from './Diary';
 import { Ending } from './Ending';
 import { FieldKit } from './FieldKit';
-import { PlacePanel } from './PlacePanel';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { poi } from '../content/places';
@@ -369,42 +368,43 @@ export function App() {
         onClose={() => dispatch({ type: 'close-interrupt', which: 'overworld' })}
       />
 
-      <PlacePanel
-        poiId={surface === 'here' && placeOpen ? standingOn : null}
-        progress={progress}
-        moment={moment}
-        firstVisit={Boolean(standingOn) && !visited.current.has(standingOn!)}
-        onLook={look}
-        onListen={listen}
-        onClose={() => {
-          if (standingOn) visited.current.add(standingOn);
-          dispatch({ type: 'close-place' });
-        }}
-      />
-
       <JourneyLog
         log={travelLog}
         open={logOpen}
         onClose={() => setLogOpen(false)}
         onExportImage={exportImage}
         onExportText={exportText}
-      >
-        <CanonPanel place={place} status={canon} />
-      </JourneyLog>
-
-      {surface === 'here' && (
-      <JournalPanel
-        entry={arrival?.entry ?? null}
-        surroundings={arrival?.surroundings ?? ''}
-        hint={arrival?.hint ?? ''}
-        discovered={arrival?.discovered ?? 0}
-        atLandmark={arrival?.atLandmark ?? false}
-        memory={memory}
-        canObserve={creatureIsOut}
-        alreadySketched={Boolean(currentCreature && observed.includes(currentCreature.name))}
-        onObserve={observe}
       />
-      )}
+
+      {/* One surface, two layers: the notes are the floor, a place sits over them, and canon
+          is a section inside the notes rather than a panel of its own. */}
+      <Here
+        open={surface === 'here'}
+        notes={{
+          entry: arrival?.entry ?? null,
+          surroundings: arrival?.surroundings ?? '',
+          hint: arrival?.hint ?? '',
+          discovered: arrival?.discovered ?? 0,
+          atLandmark: arrival?.atLandmark ?? false,
+          memory,
+          canObserve: creatureIsOut,
+          alreadySketched: Boolean(currentCreature && observed.includes(currentCreature.name)),
+          onObserve: observe
+        }}
+        place={{
+          poiId: placeOpen ? standingOn : null,
+          progress,
+          moment,
+          firstVisit: Boolean(standingOn) && !visited.current.has(standingOn!),
+          onLook: look,
+          onListen: listen,
+          onClose: () => {
+            if (standingOn) visited.current.add(standingOn);
+            dispatch({ type: 'close-place' });
+          }
+        }}
+        canon={<CanonPanel place={place} status={canon} />}
+      />
 
       {/* The arrival still stops the world for a moment, but it can no longer sit below the map —
           there is no below. It comes to the middle, which is where you want to read it anyway. */}

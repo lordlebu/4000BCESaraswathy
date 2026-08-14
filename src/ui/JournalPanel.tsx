@@ -1,11 +1,12 @@
 // The field notes along the bottom of the screen: where you are, and what is here.
 //
-// This is what the traveller is looking at *right now*. The journey log — the whole route, the
-// sketches, the place at the end of it — floats separately in `JourneyLog.tsx`, because those
-// answer different questions and only one of them changes on every step.
+// The floor of the `Here` surface — what the traveller is looking at *right now*, on every
+// step, authored place or bare tile. A place panel layers over these; the travel log, which is
+// about the whole trip rather than this moment, is a separate thing entirely.
 //
 // Presentation only — every string arrives already written.
 
+import type { ReactNode } from 'react';
 import type { FieldNote, JournalEntry } from '../content/journal';
 
 /**
@@ -35,6 +36,15 @@ export interface JournalPanelProps {
   canObserve: boolean;
   alreadySketched: boolean;
   onObserve: () => void;
+  /**
+   * Canon, when a service is listening.
+   *
+   * It sits here rather than in a panel of its own because it answers the same question these
+   * notes do — what is here — only from the corpus instead of the bundle. It used to float
+   * inside the travel log, which is about the whole trip and so was never where a reader would
+   * look for it.
+   */
+  children?: ReactNode;
 }
 
 export function JournalPanel({
@@ -46,7 +56,8 @@ export function JournalPanel({
   memory,
   canObserve,
   alreadySketched,
-  onObserve
+  onObserve,
+  children
 }: JournalPanelProps) {
   if (!entry) {
     return (
@@ -86,6 +97,8 @@ export function JournalPanel({
       </div>
 
       {memory && <p className="memory">{memory}</p>}
+
+      {children}
 
       <footer className="journal-foot">
         <p className={atLandmark ? 'status status-arrived' : 'status'}>{hint}</p>

@@ -20,6 +20,7 @@ import { Diary } from '../src/ui/Diary';
 import { QuestionCard } from '../src/ui/Questions';
 import { Ending } from '../src/ui/Ending';
 import { FieldKit } from '../src/ui/FieldKit';
+import { Here } from '../src/ui/Here';
 import {
   type Progress,
   advance,
@@ -373,5 +374,73 @@ describe('research is the one tool that can be absent', () => {
     const p = advance(emptyProgress(), 'discovery_saltreed_thatch');
     render(<FieldKit progress={p} open onClose={noop} canResearch />);
     expect(screen.getByRole('button', { name: /look it up/i })).toHaveProperty('disabled', true);
+  });
+});
+
+/**
+ * The `Here` surface: two layers, not two rival panels.
+ *
+ * Phase one collapsed the place and the field notes into a single flag twice, and both times
+ * the result was the bug the place panel's close button exists to fix — "Leave" clearing the
+ * screen instead of revealing what was underneath. The reducer holds the rule; these check the
+ * rendering actually obeys it, which the reducer test cannot see.
+ */
+describe('here', () => {
+  const notes = {
+    entry: {
+      title: 'Salt flats',
+      description: 'Cracked white ground.',
+      doing: '',
+      creature: { name: 'Reed heron', note: 'Standing very still.' },
+      flora: { name: 'Saltreed', note: 'Low and grey.' }
+    },
+    surroundings: 'The wind comes off the water.',
+    hint: 'Keep going east.',
+    discovered: 3,
+    atLandmark: false,
+    memory: '',
+    canObserve: false,
+    alreadySketched: false,
+    onObserve: noop
+  } as const;
+
+  const place = {
+    poiId: null as string | null,
+    progress: emptyProgress(),
+    moment: null,
+    firstVisit: false,
+    onLook: noop,
+    onListen: noop,
+    onClose: noop
+  };
+
+  it('shows the field notes with no place to stand in', () => {
+    render(<Here open notes={{ ...notes }} place={{ ...place }} />);
+    expect(screen.getByText('Salt flats')).toBeTruthy();
+  });
+
+  /** The layering. A place on top must not take the notes away with it. */
+  it('keeps the notes underneath while a place is open', () => {
+    render(<Here open notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} />);
+    expect(screen.getByText('Salt flats')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Leave' })).toBeTruthy();
+  });
+
+  it('renders nothing at all when the surface is closed', () => {
+    const { container } = render(
+      <Here open={false} notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} />
+    );
+    expect(container.textContent).toBe('');
+  });
+
+  /**
+   * Canon moved out of the travel log, which is about the whole trip, and into the notes, which
+   * are about this tile — the question it actually answers.
+   */
+  it('carries canon inside the notes when a service is listening', () => {
+    render(
+      <Here open notes={{ ...notes }} place={{ ...place }} canon={<p>Canon says something.</p>} />
+    );
+    expect(screen.getByText('Canon says something.')).toBeTruthy();
   });
 });

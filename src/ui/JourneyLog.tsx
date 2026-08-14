@@ -1,5 +1,9 @@
 // The journey log, floating over the map.
 //
+// Canon used to hang off this panel as a child. It answers "what is here", which is a question
+// about the tile rather than about the whole trip, so it now sits in the field notes where a
+// reader would actually look for it.
+//
 // This is the same `TravelLog` that `content/travelLog.ts` builds for the export, rendered on the
 // glass instead of into a file. That is deliberate: the page the player can keep and the page they
 // read while walking should not be two different documents that drift apart. Export is a snapshot
@@ -7,7 +11,6 @@
 //
 // Presentation only — every string arrives already written.
 
-import type { ReactNode } from 'react';
 import type { TravelLog } from '../content/travelLog';
 
 export interface JourneyLogProps {
@@ -17,8 +20,6 @@ export interface JourneyLogProps {
   onClose: () => void;
   onExportImage: () => void;
   onExportText: () => void;
-  /** The canon panel, when a canon service is listening. Usually nothing. */
-  children?: ReactNode;
 }
 
 export function JourneyLog({
@@ -26,8 +27,7 @@ export function JourneyLog({
   open,
   onClose,
   onExportImage,
-  onExportText,
-  children
+  onExportText
 }: JourneyLogProps) {
   if (!log || !open) return null;
 
@@ -53,7 +53,6 @@ export function JourneyLog({
         </section>
       ))}
 
-      {children}
 
       <div className="log-actions">
         <button type="button" onClick={onExportImage}>
