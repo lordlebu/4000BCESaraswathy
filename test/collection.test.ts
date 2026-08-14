@@ -30,14 +30,21 @@ describe('meeting things', () => {
   it('records what was met', () => {
     const c = met(emptyCollection(), otter, 'creature');
     expect(hasMet(c, 'river-otter')).toBe(true);
-    expect(c['river-otter'].times).toBe(1);
   });
 
-  it('counts a second meeting without making a second entry', () => {
-    let c = met(emptyCollection(), otter, 'creature');
-    c = met(c, otter, 'creature');
-    expect(size(c)).toBe(1);
-    expect(c['river-otter'].times).toBe(2);
+  /**
+   * Discovered once, and that is the whole of it.
+   *
+   * There was a `times` count, and it measured footsteps rather than encounters: `metOnTile`
+   * runs on every arrival, so standing still and walking back and forth read the same as
+   * genuinely finding a species again somewhere else.
+   */
+  it('is unchanged by meeting the same thing again', () => {
+    const first = met(emptyCollection(), otter, 'creature');
+    const again = met(first, otter, 'creature');
+    expect(size(again)).toBe(1);
+    // The same object, so a step onto a tile you have already read costs no re-render.
+    expect(again).toBe(first);
   });
 
   it('ignores an empty tile rather than recording a blank', () => {
@@ -103,7 +110,8 @@ describe('standing on a tile', () => {
       c = metOnTile(c, tile);
     }
     expect(size(c)).toBe(3);
-    expect(c.saltreed.times).toBe(2);
+    // The second tile's flora was already known, so it added nothing.
+    expect(hasMet(c, 'saltreed')).toBe(true);
   });
 });
 
@@ -124,14 +132,14 @@ describe('reading a stored collection', () => {
     }
   });
 
-  /** `localStorage` is editable by anyone with a console, so a nonsense count is repaired. */
-  it('repairs a count that could not be true', () => {
-    const c = readCollection({ 'river-otter': { kind: 'creature', times: -5 } });
-    expect(c['river-otter'].times).toBe(1);
+  /** Fields the shape no longer carries are dropped rather than preserved. */
+  it('ignores a leftover count from an older entry', () => {
+    const c = readCollection({ 'river-otter': { kind: 'creature', times: 5 } });
+    expect(c['river-otter']).toEqual({ id: 'river-otter', kind: 'creature' });
   });
 
   it('fills in an id that was only a key', () => {
-    const c: Collection = readCollection({ saltreed: { kind: 'flora', times: 2 } });
+    const c: Collection = readCollection({ saltreed: { kind: 'flora' } });
     expect(c.saltreed.id).toBe('saltreed');
   });
 });

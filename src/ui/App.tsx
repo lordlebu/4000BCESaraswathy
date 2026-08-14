@@ -7,6 +7,7 @@ import { JourneyLog } from './JourneyLog';
 import { Controls } from './Controls';
 import { CanonPanel } from './CanonPanel';
 import { Here } from './Here';
+import { CollectionPanel } from './CollectionPanel';
 import { Diary, diaryCount } from './Diary';
 import { Ending } from './Ending';
 import { FieldKit } from './FieldKit';
@@ -338,6 +339,7 @@ export function App() {
         seed={seed}
         onGenerate={generate}
         metCount={size(collection)}
+        onOpenCollection={() => dispatch({ type: 'toggle', surface: 'collection' })}
         logOpen={logOpen}
         onToggleLog={() => setLogOpen((open) => !open)}
         diaryCount={diaryCount(progress)}
@@ -363,6 +365,13 @@ export function App() {
         onAnswer={settle}
         onOpenEnding={() => dispatch({ type: 'open-interrupt', which: 'ending' })}
         onOpenKit={() => dispatch({ type: 'open-interrupt', which: 'kit' })}
+      />
+
+      <CollectionPanel
+        collection={collection}
+        open={surface === 'collection'}
+        onClose={() => dispatch({ type: 'close' })}
+        canAsk={canon.lore}
       />
 
       <FieldKit

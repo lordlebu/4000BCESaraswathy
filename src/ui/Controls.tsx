@@ -13,8 +13,9 @@ import { SeedBar } from './SeedBar';
 export interface ControlsProps {
   seed: string;
   onGenerate: (seed: string) => void;
-  /** How many species have been met. The album itself is its own surface in phase four. */
+  /** How many species have been met. Shown on the button; the album is its own surface. */
   metCount: number;
+  onOpenCollection: () => void;
   logOpen: boolean;
   onToggleLog: () => void;
   /** How many discoveries are under way, so the button can say the diary has something in it. */
@@ -34,6 +35,7 @@ export function Controls({
   seed,
   onGenerate,
   metCount,
+  onOpenCollection,
   logOpen,
   onToggleLog,
   diaryCount,
@@ -92,6 +94,22 @@ export function Controls({
             Diary{diaryCount > 0 && <i className="control-count">{diaryCount}</i>}
           </span>
         </button>
+
+        {/* Only once something has been met. Before that it is a button onto an empty room, and
+            the starting tile seeds the collection, so it appears almost immediately anyway. */}
+        {metCount > 0 && (
+          <button
+            type="button"
+            className="control"
+            aria-label={`Collection, ${metCount} met`}
+            onClick={onOpenCollection}
+          >
+            <span aria-hidden="true">❧</span>
+            <span className="control-label">
+              Met<i className="control-count">{metCount}</i>
+            </span>
+          </button>
+        )}
 
         <button
           type="button"
@@ -179,11 +197,7 @@ export function Controls({
             ))}
           </ul>
 
-          {metCount > 0 && (
-            // A count, not the list. The album is a surface of its own, and duplicating it in
-            // the map sheet is how the diary and the travel log came to disagree.
-            <h3>Met so far ({metCount})</h3>
-          )}
+          {metCount > 0 && <h3>Met so far ({metCount})</h3>}
         </div>
       )}
     </>
