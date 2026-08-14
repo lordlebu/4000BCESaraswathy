@@ -16,8 +16,6 @@ export interface ControlsProps {
   /** How many species have been met. Shown on the button; the album is its own surface. */
   metCount: number;
   onOpenCollection: () => void;
-  logOpen: boolean;
-  onToggleLog: () => void;
   /** How many discoveries are under way, so the button can say the diary has something in it. */
   diaryCount: number;
   onOpenDiary: () => void;
@@ -36,8 +34,6 @@ export function Controls({
   onGenerate,
   metCount,
   onOpenCollection,
-  logOpen,
-  onToggleLog,
   diaryCount,
   onOpenDiary,
   onOpenOverworld,
@@ -124,16 +120,6 @@ export function Controls({
               reads to a screen reader without extra markup. */}
           <span aria-hidden="true">☰</span>
           <span className="control-label">Map</span>
-        </button>
-        <button
-          type="button"
-          className="control"
-          aria-label="Journal"
-          aria-expanded={logOpen}
-          onClick={onToggleLog}
-        >
-          <span aria-hidden="true">✦</span>
-          <span className="control-label">Journal</span>
         </button>
       </div>
 

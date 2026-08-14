@@ -27,7 +27,6 @@ async function geometry(page: Page) {
     const rect = (selector: string) => document.querySelector(selector)?.getBoundingClientRect() ?? null;
     return {
       canvas: rect('.map-surface canvas'),
-      log: rect('.log'),
       notes: rect('.journal'),
       scrollHeight: document.documentElement.scrollHeight,
       clientHeight: document.documentElement.clientHeight,
@@ -83,43 +82,50 @@ test('the traveller is never hidden behind a panel', async ({ page }) => {
     await page.waitForTimeout(700);
   }
 
-  const { canvas, log, notes } = await geometry(page);
+  const { canvas, notes } = await geometry(page);
   const camera = await page.evaluate(() => {
     // The scene centres the traveller in whatever the panels leave uncovered, so that rectangle's
     // centre is where he is. Asserting on the rectangle rather than hunting for him in pixels keeps
     // this about the layout contract instead of about sprite colours.
     const c = document.querySelector('.map-surface canvas')!.getBoundingClientRect();
-    const l = document.querySelector('.log')?.getBoundingClientRect();
     const n = document.querySelector('.journal')?.getBoundingClientRect();
-    const right = l && l.width < c.width * 0.8 ? l.left : c.right;
+    // Only the notes cover the map now, and only along the bottom -- the travel log was the
+    // one panel that could take a side, which is why this used to need a width test.
     const bottom = n ? n.top : c.bottom;
-    return { x: (c.left + right) / 2, y: (c.top + bottom) / 2 };
+    return { x: (c.left + c.right) / 2, y: (c.top + bottom) / 2 };
   });
 
-  expect(log, 'the log should be open on a desktop').not.toBeNull();
-  expect(notes).not.toBeNull();
-  expect(camera.x).toBeLessThan(log!.left);
+  expect(notes, 'the field notes are the resting state').not.toBeNull();
+  // Nothing takes a side of the map any more, so the only panel to stay clear of is the notes
+  // along the bottom. The horizontal check is now that the traveller is simply on the canvas.
   expect(camera.y).toBeLessThan(notes!.top);
-  // And that centre is genuinely inside the canvas, not off the edge of it.
   expect(camera.x).toBeGreaterThan(canvas!.left);
+  expect(camera.x).toBeLessThan(canvas!.right);
   expect(camera.y).toBeGreaterThan(canvas!.top);
 });
 
-test('the journal opens and closes, and reading it does not walk the traveller', async ({ page }) => {
+test('progress opens and closes, and reading it does not walk the traveller', async ({ page }) => {
+  // Was the travel log, which is no longer a panel. The rules it carried are the Progress
+  // surface's now: it opens, it closes, and a tap on it is not a move order to the map.
   await open(page, 1280, 800);
-  const log = page.locator('.log');
-  await expect(log).toBeVisible();
+  const diary = page.locator('.diary');
+  await expect(diary).toBeHidden();
 
+  // Read where the traveller is *before* opening: Progress takes the screen from the notes, so
+  // `.journal` is not in the DOM while it is up. That is the surface rule, not a timing quirk.
   const where = await page.locator('.journal h2').textContent();
-  // A tap on the panel is a tap on the panel, not a move order to the map underneath it.
-  await log.click({ position: { x: 60, y: 200 } });
-  await page.waitForTimeout(900);
-  await expect(page.locator('.journal h2')).toHaveText(where ?? '');
 
-  await page.getByRole('button', { name: 'Journal', exact: true }).click();
-  await expect(log).toBeHidden();
-  await page.getByRole('button', { name: 'Journal', exact: true }).click();
-  await expect(log).toBeVisible();
+  await page.getByRole('button', { name: /Diary/ }).click();
+  await expect(diary).toBeVisible();
+
+  // A tap on the panel is a tap on the panel, not a move order to the map underneath it.
+  await diary.click({ position: { x: 60, y: 200 } });
+  await page.waitForTimeout(900);
+
+  await page.getByRole('button', { name: 'Close', exact: true }).click();
+  await expect(diary).toBeHidden();
+  // Closing returns to the notes, and the traveller is where they were left.
+  await expect(page.locator('.journal h2')).toHaveText(where ?? '');
 });
 
 test('the map sheet holds the seed, the legend and the sketches', async ({ page }) => {

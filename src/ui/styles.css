@@ -63,7 +63,6 @@ body {
 
 /* --- Shared parchment ---------------------------------------------------- */
 
-.log,
 .journal,
 .sheet,
 .arrival {
@@ -226,39 +225,10 @@ button.ghost:hover:not(:disabled) {
   line-height: 1;
 }
 
-/* With the log pinned to the right there is no room beside it; tuck the buttons in on its left. */
-@media (orientation: landscape) {
-  .stage:has(.log) .zoom {
-    right: calc(var(--safe-right) + min(32vw, 26rem) + 10px);
-  }
-}
+/* --- Taking a copy ------------------------------------------------------- */
+/* What is left of the journey log's styling. The panel is gone -- these dress the export
+   buttons and the replay link at the end of the Progress surface. */
 
-/* --- The journey log ----------------------------------------------------- */
-
-.log {
-  position: absolute;
-  z-index: 2;
-  padding: 18px 20px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-.log h2 {
-  font-size: 1.15rem;
-  padding-right: 24px;
-}
-
-.log-subtitle {
-  color: var(--muted);
-  font-style: italic;
-  font-size: 0.88rem;
-}
-
-.log p {
-  font-size: 0.9rem;
-}
-
-.log-close,
 .sheet-close {
   position: absolute;
   top: 10px;
@@ -273,7 +243,6 @@ button.ghost:hover:not(:disabled) {
   border-color: transparent;
 }
 
-.log-close:hover,
 .sheet-close:hover {
   background: rgba(52, 38, 58, 0.08);
   filter: none;
@@ -536,12 +505,6 @@ button.ghost:hover:not(:disabled) {
 /* --- Landscape: log to the right, notes along the bottom beside it -------- */
 
 @media (orientation: landscape) {
-  .log {
-    top: var(--safe-top);
-    right: var(--safe-right);
-    bottom: var(--safe-bottom);
-    width: min(32vw, 26rem);
-  }
 
   .journal {
     left: var(--safe-left);
@@ -550,21 +513,11 @@ button.ghost:hover:not(:disabled) {
     max-height: 40dvh;
   }
 
-  /* With the log open the notes stop short of it rather than sliding underneath. */
-  .stage:has(.log) .journal {
-    right: calc(var(--safe-right) + min(32vw, 26rem) + 10px);
-  }
 }
 
-/* --- Portrait: notes along the bottom, log as a sheet over them ----------- */
+/* --- Portrait: notes along the bottom ------------------------------------ */
 
 @media (orientation: portrait) {
-  .log {
-    left: var(--safe-left);
-    right: var(--safe-right);
-    bottom: var(--safe-bottom);
-    max-height: 78dvh;
-  }
 
   .journal {
     left: var(--safe-left);
@@ -959,13 +912,6 @@ button.ghost:hover:not(:disabled) {
   pointer-events: none;
 }
 .place { pointer-events: auto; }
-
-@media (orientation: landscape) {
-  /* Stop short of the log, exactly as the field notes do. */
-  .stage:has(.log) .place-veil {
-    right: calc(var(--safe-right) + min(32vw, 26rem) + 10px);
-  }
-}
 
 /* And stop short of the field notes, which sit below it. Suppressing the notes while a place
  * was open was the first attempt and it was wrong: a journey that *starts* on a place then
