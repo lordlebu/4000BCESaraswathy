@@ -104,7 +104,7 @@ three-quarter.
 > **facing [the viewer / away from the viewer / to the right]**. Wide-brimmed soft blue hat, deep
 > muted indigo robe, grey beard, brown boots, satchel strap, wooden staff. Cozy colour e-ink
 > palette: muted desaturated colour, warm off-cream highlights, warm near-black outlines instead of
-> pure black, matte and flat. Exactly 24 pixels wide by 32 pixels tall, true pixel art, every pixel
+> pure black, matte and flat. Exactly 26 pixels wide by 40 pixels tall, true pixel art, every pixel
 > a flat solid colour, hard edges, no anti-aliasing, no gradients, no dithering inside the figure.
 > Save as lossless PNG with a genuine alpha channel: the background must be fully transparent, not
 > a grey checkerboard. No grid, no guide lines, no centre cross, no alignment marks, no drop shadow,
@@ -112,7 +112,8 @@ three-quarter.
 
 If the model insists on producing something large, that is still fine **as long as it is lossless
 and the blocks are clean** — `tools/build-sprite-sheet.js` resamples any size down to the game's
-grid by taking the most common colour per block, which keeps edges hard.
+grid by taking the most common colour per block, which keeps edges hard. Keep the 26:40
+proportions though: a squarer source is drawn as a stockier figure than the cell wants.
 
 ## Asset 1 — the player (superseded by Asset 0 above)
 
@@ -143,18 +144,49 @@ transparent PNG**, and they must tile seamlessly against themselves and each oth
 `sea` · `coast` · `plains` · `forest` · `wetland` · `hills` · `mountains` · `desert` · `river` ·
 `settlement` · `landmark`
 
-> **Prompt (adapt the terrain word each time):**
-> Seamless top-down 32×32 pixel art terrain tile of **[monsoon forest canopy]** for a cozy
-> exploration game set in ancient South Asia. Cozy colour e-ink palette: muted desaturated colour,
-> warm paper undertone, gentle contrast, matte and flat, faint paper grain. Tiles seamlessly on all
-> four edges. Crisp pixel art, flat colour per pixel, no anti-aliasing. No grid lines, no guide
-> marks, no border, no text, no watermark, no drop shadow.
+**Two rules specific to tiles**, both learned the hard way from a generated set that had to be
+thrown away:
 
-Terrain descriptions to swap in: *calm warm shallow sea* · *pale shell and sand shore* · *open
-warm grassland* · *monsoon forest canopy* · *reed marsh with shallow pools* · *rolling ochre hill
-country* · *lavender-grey rocky peaks* · *gold dust desert with low stones* · *bright river water
-running over stones* · *cluster of clay-roofed huts seen from above* · *a memorable place, a small
-shrine platform*.
+1. **No border, frame, or outline around the tile.** A model asked for a "tile" very often draws a
+   framed square. A dark edge on every cell turns the map into graph paper and is the least cozy
+   thing the screen can do. The tile must read as a continuous surface with nothing marking where
+   it stops.
+2. **Keep the interior quiet.** Low internal contrast, no strong highlights, no single feature
+   demanding attention. These sit under the player and repeat hundreds of times — texture, not
+   illustration. Detailed painterly tiles measurably hurt figure legibility.
+
+**Give the model the hex directly.** The values below are the existing biome colours pulled toward
+the e-ink direction — chroma cut to about 55%, values compressed into a narrow band. Asking in
+prose for "desaturated" gets ignored; a hex does not.
+
+| tile | base colour | subject |
+| --- | --- | --- |
+| `sea` | `#2f6f8f` *(kept dark — see below)* | calm warm shallow sea |
+| `coast` | `#c9b587` | pale shell and sand shore |
+| `plains` | `#9eb582` | open warm grassland |
+| `forest` | `#769f7c` | monsoon forest canopy |
+| `wetland` | `#86aba4` | reed marsh with shallow pools |
+| `hills` | `#ab9d7c` | rolling ochre hill country |
+| `mountains` | `#96919c` | lavender-grey rocky peaks |
+| `desert` | `#bea47b` | gold dust desert with low stones |
+| `river` | `#7ba3c0` | river water running over stones |
+| `settlement` | `#b18577` | cluster of clay-roofed huts seen from above |
+| `landmark` | `#d8c48c` | a memorable place, a small shrine platform |
+
+**`sea` is deliberately the exception.** It is the only non-walkable biome, so the player has to be
+able to tell it from land at a glance. Everything else sits in a tight value band; sea stays darker
+and a little more saturated than the rest. Do not soften it into the others.
+
+> **Prompt (swap the subject and the hex each time):**
+> Seamless top-down 32×32 pixel art terrain tile of **[monsoon forest canopy]** for a cozy
+> exploration game set in ancient South Asia. Base colour approximately **[#769f7c]**, with only
+> gentle variation around it. Cozy colour e-ink palette: muted desaturated colour, warm paper
+> undertone, gentle contrast, matte and flat, faint paper grain. Quiet all-over texture, low
+> internal contrast, no single focal point — this tile repeats hundreds of times under the player.
+> Tiles seamlessly on all four edges. **No border, no frame, no outline around the edge of the
+> tile** — the surface must continue past the edges with nothing marking where it stops. Crisp
+> pixel art, flat colour per pixel, no anti-aliasing. No grid lines, no guide marks, no text, no
+> watermark, no drop shadow.
 
 ### Asset 2b — `lava_field`, the twelfth tile (blocked, and blocking content)
 
@@ -187,10 +219,95 @@ Making it renderable is two steps once the PNG exists: add the tile in
 `database/biomes.json`, then re-export. Both are needed — the flag is what `src/content/canon.ts`
 filters on.
 
-## Asset 3 — landmarks (nice to have)
+## Asset 3 — landmarks
 
-Seven kinds, each 32×32, same rules: *great banyan* · *hot spring* · *shell beach* · *hill shrine*
-· *standing stones* · *heron pool* · *salt pan*.
+Seven kinds, each **32×32**, one transparent PNG each. These are the destination — arriving at one
+is the end of a session and the emotional beat the whole slice is built around — so they earn more
+detail than terrain does.
+
+**How these differ from terrain:** a landmark is an *object standing on ground*, not ground. It
+must have a transparent background so it can be drawn over whatever tile it happens to occupy, it
+does **not** need to tile seamlessly, and it should have a clear silhouette that reads at a glance.
+The one thing it shares with terrain is the no-border rule.
+
+The descriptions below are the game's own words from `data/landmarks.json` — the journal tells the
+player exactly this, so the art needs to match it rather than reinterpret it.
+
+| file | stands on | what the player is told they see |
+| --- | --- | --- |
+| `landmark-great-banyan.png` | forest, plains | One tree has become a grove. Aerial roots have come down and taken hold until the trunk cannot be told from its children, and the shade beneath is cool enough to sleep in. |
+| `landmark-hot-spring.png` | hills, mountains | Water comes up out of the rock steaming, gathers in a shallow bowl worn smooth, and goes off down the slope as a thread of mist. |
+| `landmark-shell-beach.png` | coast | The tideline here is entirely shells, banked knee-deep and rattling with each wave, white and pink and the occasional deep violet. |
+| `landmark-hill-shrine.png` | hills, forest, plains | A low platform of fitted stone, open to the weather, with a shallow dish worn into the top step by however many hands. |
+| `landmark-standing-stones.png` | mountains, desert, hills | Seven stones set upright in a rough ring, tall as a person and leaning now, with the ground between them swept bare by wind. |
+| `landmark-heron-pool.png` | wetland, river | A still backwater screened by reeds, the surface unbroken except where insects touch it, and herons standing in it like they were planted. |
+| `landmark-salt-pan.png` | desert | A dry white plain, cracked into plates the size of hands, glaring under the sun and giving back the heat of it. |
+
+> **Prompt (swap in one description):**
+> Top-down 32×32 pixel art of a single landmark object for a cozy exploration game set in ancient
+> South Asia: **[one tree that has become a grove, aerial roots come down and taken hold until the
+> trunk cannot be told from its children, cool shade beneath]**. Seen from directly above, sitting
+> on open ground. Cozy colour e-ink palette: muted desaturated colour, warm paper undertone, gentle
+> contrast, matte and flat, faint paper grain. A clear readable silhouette — this is the
+> destination and the player should recognise it immediately. **Fully transparent background**, so
+> it can be drawn over any terrain; no ground plate, no base tile, no circle or square of ground
+> under it. No border, no frame, no drop shadow. Crisp pixel art, flat colour per pixel, no
+> anti-aliasing. Lossless PNG with a genuine alpha channel. No grid lines, no guide marks, no text,
+> no watermark.
+
+Two of these are ground-like and worth a note. **Shell beach** and **salt pan** describe a *stretch
+of ground* rather than an object; draw them as an irregular patch with soft edges that fades to
+transparent, not a hard-edged square, so they sit on the coast or desert tile without cutting a
+rectangle out of it.
+
+## Asset 4 — NPC portraits
+
+Ten people, each a small portrait. **This is new capability, not a replacement**: NPCs currently
+have no art at all and appear only as text in `PlacePanel.tsx`. That makes portraits the right ask
+and overworld NPC sprites the wrong one — a portrait drops into the panel that already exists,
+whereas walking NPCs need renderer work that has not been written.
+
+**Size: 32×32**, transparent PNG, head and shoulders, facing the viewer. Same palette and drawing
+style as the character sheets.
+
+These people are the heart of the writing, so the brief matters more here than anywhere else. Two
+things to hold on to:
+
+- **Nobody here is a wise elder or a quest-giver.** They are working people with jobs on, caught
+  mid-task. Canon is pointed about this — Marn is "pointedly not a wise elder — he is a working
+  herder with a job on."
+- **No fantasy costuming.** Ordinary ancient South Asian working clothes: undyed linen and cotton,
+  simple wraps, sun-worn skin, practical. The player character's blue robe is distinctive precisely
+  because everyone else is plain.
+
+| file | who | drawing note |
+| --- | --- | --- |
+| `npc-thrali.png` | Thrali, fisher | Delta fisher. The first person the player can help. Weathered, middle-aged, salt-bleached wrap. |
+| `npc-uma.png` | Uma, roofer | Keeps the camp's roofs on. Caught mid-job, reed bundle or cut reeds to hand. |
+| `npc-bekh.png` | Bekh, keeper of what is left | The one who stays because somebody has to. Older woman, plain, unsentimental. |
+| `npc-sura.png` | Sura, bone-picker | Four hundred years of stratigraphy as a family trade. Practical, dusty, unbothered. |
+| `npc-marn.png` | Marn, herder | A working herder, *not* a sage. Sun-squint, staff, animals somewhere off-frame. |
+| `npc-teshk.png` | Teshk, well-keeper | Stays because the rope needs two people and there are not two to spare. Rope, worn hands. |
+| `npc-ravi.png` | Ravi, keeper of the customs house | Four generations of custody with nothing left to be custodian of. Tidy, formal, slightly absurd dignity. |
+| `npc-pell.png` | Pell, wall-keeper and sweeper | Sweeps an interdimensional gate as municipal maintenance. Broom. Entirely matter-of-fact. |
+| `npc-okhi.png` | Okhi, senior copyist | The one who will not come, and is right not to. Older scholar, ink-stained, certain. |
+| `npc-vessa.png` | Vessa, junior archivist | Already most of the way to the answer and cannot say so acceptably. Younger, alert, holding back. |
+
+> **Prompt (swap in one person):**
+> Small pixel art portrait, head and shoulders, facing the viewer, of **[a weathered middle-aged
+> delta fisher in a salt-bleached linen wrap]** for a cozy top-down exploration game set in ancient
+> South Asia. An ordinary working person caught mid-task, not a hero and not a wise elder — plain
+> undyed linen and cotton, sun-worn, practical, no jewellery or ornament, no fantasy costume.
+> Calm and unhurried; there is no threat in this world. Cozy colour e-ink palette: muted
+> desaturated colour, warm off-cream highlights, warm near-black outlines rather than pure black,
+> matte and flat. 32 pixels by 32 pixels, crisp pixel art, flat colour per pixel, hard edges, no
+> anti-aliasing, no gradients. Lossless PNG with a genuine alpha channel — fully transparent
+> background, not a grey checkerboard. No border, no frame, no vignette, no drop shadow. No grid,
+> no guide lines, no centre cross, no alignment marks, no text, no watermark.
+
+At 32×32 a portrait is roughly eight pixels of face, so **silhouette and colour do the work** —
+headwear, hair shape, and what they are holding are what distinguish one person from another, not
+facial detail. If a person needs to be recognisable, give them one strong identifying shape.
 
 ---
 
@@ -210,7 +327,7 @@ Drop the files in `assets/` and tell me the filenames. Notes for wiring them up:
 
 ## Where the character art stands
 
-`assets/source/Varuna_emboss.png` and `assets/source/Mithra.png` are the current sheets: two
+`assets/source/Varuna_walking.png` and `assets/source/Mithra.png` are the current sheets: two
 characters, each sixteen figures in four rows of four. Both rebuild with `npm run build:sprite`.
 
 The layout was measured rather than assumed, and the measurements are worth keeping because they
@@ -233,7 +350,7 @@ checkerboard. The anti-aliased edges from the emboss are handled by point sampli
 snap.
 
 
-Varuna's sheet is two source images concatenated — `Varuna_emboss.png` for walking and
+Varuna's sheet is two source images concatenated — `Varuna_walking.png` for walking and
 `Varuna_sitting.png` for resting — so one texture carries all 32 frames. The sitting sheet uses the
 same four-row order, confirmed the same way: 5 skin-toned pixels in its back row against ~115 in the
 others, and the face right of the body's centre in one profile row and left in the other.

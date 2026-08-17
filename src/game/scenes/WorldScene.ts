@@ -7,8 +7,27 @@
 
 import Phaser from 'phaser';
 import varunaUrl from '../../../assets/varuna-overworld.png';
+import terrainUrl from '../../../assets/terrain.png';
+import landmarksUrl from '../../../assets/landmarks.png';
+import placesUrl from '../../../assets/places.png';
+import hutsUrl from '../../../assets/huts.png';
 import { EventBus } from '../EventBus';
-import { FOG_TEXTURE, TILE_SIZE, createTileTextures, tileTextureKey } from '../tileTextures';
+import {
+  FOG_TEXTURE,
+  HUT_SHEET,
+  HUT_VARIANTS,
+  LANDMARK_SHEET,
+  PLACE_SHEET,
+  TERRAIN_SHEET,
+  TILE_SIZE,
+  createTileTextures,
+  landmarkFrame,
+  loadTileSheets,
+  placeFrame,
+  tileFrame
+} from '../tileTextures';
+import { landmarkKindFor } from '../../content/landmarks';
+import { tileHash } from '../../world/rng';
 import {
   CHARACTERS,
   PLAYER_FRAME,
@@ -183,6 +202,12 @@ export class WorldScene extends Phaser.Scene {
 
   preload(): void {
     loadCharacterSheet(this, CHARACTERS.varuna.key, varunaUrl);
+    loadTileSheets(this, {
+      terrain: terrainUrl,
+      landmarks: landmarksUrl,
+      places: placesUrl,
+      huts: hutsUrl
+    });
   }
 
   create(data: WorldSceneData): void {
@@ -207,7 +232,7 @@ export class WorldScene extends Phaser.Scene {
         const tile = this.world.tiles[y]![x]!;
         const cx = x * TILE_SIZE + TILE_SIZE / 2;
         const cy = y * TILE_SIZE + TILE_SIZE / 2;
-        tileRow.push(this.add.image(cx, cy, tileTextureKey(tile.biome)).setDepth(0));
+        tileRow.push(this.add.image(cx, cy, TERRAIN_SHEET, tileFrame(tile.biome)).setDepth(0));
         fogRow.push(
           this.add
             .image(cx, cy, FOG_TEXTURE)
@@ -221,11 +246,31 @@ export class WorldScene extends Phaser.Scene {
       this.fogSprites.push(fogRow);
     }
 
+    this.createSettlements();
+    this.createLandmark();
+
     // The authored places, marked. Under the fog on purpose: a point of interest is a thing
     // you find by walking there, not a waypoint handed to you at the start.
+    //
+    // Canon's archaeological sites have their own art; everything else keeps the diamond, which
+    // is why `placeFrame` returns null rather than a fallback frame. A generic marker reads
+    // better than the wrong building.
     for (const { poi, at } of this.built.placed) {
+      const cx = at.x * TILE_SIZE + TILE_SIZE / 2;
+      const frame = placeFrame(poi.id);
+      if (frame !== null) {
+        this.add
+          .image(cx, at.y * TILE_SIZE + TILE_SIZE, PLACE_SHEET, frame)
+          // Bottom-centre, so a tower stands on its tile and rises into the one above.
+          .setOrigin(0.5, 1)
+          // Above the huts at depth 4: Kavik's Tower stands inside the Lothal settlement, and a
+          // hut drawn afterwards at the same depth would cover the thing the player came to see.
+          .setDepth(6)
+          .setName(`poi:${poi.id}`);
+        continue;
+      }
       this.add
-        .text(at.x * TILE_SIZE + TILE_SIZE / 2, at.y * TILE_SIZE + TILE_SIZE / 2, '◇', {
+        .text(cx, at.y * TILE_SIZE + TILE_SIZE / 2, '◇', {
           fontFamily: 'Georgia, serif',
           fontSize: `${Math.round(TILE_SIZE * 0.7)}px`,
           color: '#fff6df'
@@ -262,6 +307,42 @@ export class WorldScene extends Phaser.Scene {
     }
     EventBus.emitEvent('world-ready', { world: this.world });
     this.arriveAt(this.at);
+  }
+
+  /**
+   * Huts on the settlement tiles.
+   *
+   * Drawn as objects rather than into the ground tile, because a building baked into a repeating
+   * texture appears once per tile forever, in a perfect grid — an endless orchard of identical
+   * huts rather than a village. Four variants, picked per tile by the same `tileHash` the species
+   * placement uses, so a seed still produces the same village twice.
+   *
+   * Not every settlement tile gets one: two in three keeps courtyards and paths open between them.
+   */
+  private createSettlements(): void {
+    for (let y = 0; y < this.world.height; y += 1) {
+      for (let x = 0; x < this.world.width; x += 1) {
+        if (this.world.tiles[y]![x]!.biome !== 'settlement') continue;
+        if (tileHash(this.world.seed, x, y, 'hut-present') % 3 === 0) continue;
+        const variant = tileHash(this.world.seed, x, y, 'hut-variant') % HUT_VARIANTS;
+        this.add
+          .image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE - 2, HUT_SHEET, variant)
+          .setOrigin(0.5, 1)
+          .setDepth(4);
+      }
+    }
+  }
+
+  /** The destination, drawn as whatever kind of place the terrain called for. */
+  private createLandmark(): void {
+    const { landmark } = this.world;
+    const frame = landmarkFrame(landmarkKindFor(landmark, this.world.seed).id);
+    if (frame === null) return;
+    this.add
+      .image(landmark.x * TILE_SIZE + TILE_SIZE / 2, landmark.y * TILE_SIZE + TILE_SIZE, LANDMARK_SHEET, frame)
+      .setOrigin(0.5, 1)
+      .setDepth(5)
+      .setName('landmark');
   }
 
   private createPlayer(): void {
