@@ -15,12 +15,24 @@
 import Phaser from 'phaser';
 
 export {
+  depthFor,
+  ROW_SLOT,
+  FEATURE_RARITY,
+  FEATURES,
+  FENCE_FRAME,
   HUT_VARIANTS,
+  OVERDRAW_REST,
+  PRINTS_FRAME,
+  SPLASH_FRAME,
   LANDMARK_ORDER,
   PLACE_ORDER,
   TERRAIN_ORDER,
+  featureFrame,
   landmarkFrame,
+  overdrawFrame,
   placeFrame,
+  swayFrame,
+  traceFrameFor,
   tileFrame
 } from './frames';
 
@@ -30,6 +42,8 @@ export const TERRAIN_SHEET = 'terrain';
 export const LANDMARK_SHEET = 'landmarks';
 export const PLACE_SHEET = 'places';
 export const HUT_SHEET = 'huts';
+export const OVERDRAW_SHEET = 'overdraw';
+export const FEATURE_SHEET = 'features';
 
 /** The 1x1 white pixel the fog layer stretches over each tile. */
 export const FOG_TEXTURE = 'fog:pixel';
@@ -37,7 +51,7 @@ export const FOG_TEXTURE = 'fog:pixel';
 /** Load every sheet. Call from `preload`. */
 export function loadTileSheets(
   scene: Phaser.Scene,
-  urls: { terrain: string; landmarks: string; places: string; huts: string }
+  urls: { terrain: string; landmarks: string; places: string; huts: string; overdraw: string; features: string }
 ): void {
   const sheet = (key: string, url: string, frameWidth: number, frameHeight: number) => {
     if (scene.textures.exists(key)) return;
@@ -47,6 +61,8 @@ export function loadTileSheets(
   sheet(LANDMARK_SHEET, urls.landmarks, TILE_SIZE, TILE_SIZE);
   sheet(PLACE_SHEET, urls.places, TILE_SIZE, 40);
   sheet(HUT_SHEET, urls.huts, 20, 22);
+  sheet(OVERDRAW_SHEET, urls.overdraw, TILE_SIZE, TILE_SIZE);
+  sheet(FEATURE_SHEET, urls.features, TILE_SIZE, TILE_SIZE);
 }
 
 /**
