@@ -253,19 +253,33 @@ describe('the world stacks by row, not by layer', () => {
     expect(depthFor(row, ROW_SLOT.walker)).toBeLessThan(depthFor(row, ROW_SLOT.canopy));
   });
 
-  it('never lets undergrowth hide the place you are walking towards', () => {
-    // Landmarks and authored places sit above the canopy of their own row. That is not physically
-    // true -- grass in front of a shrine really would obscure it -- but a marker the player is
-    // navigating to is the one thing that must not be hidden by a tuft of salt grass.
+  it('shows a marker over the undergrowth but never over the traveller', () => {
+    // Two regressions, in opposite directions, and the slot has to satisfy both.
     //
-    // The regression this catches: markers were left on fixed depths of 3 and 4 when the row band
-    // was introduced at 100, so vegetation drew over four of the six markers on the Lothal map,
-    // including the Drowned Dockyard.
+    // Markers were once on fixed depths of 3 and 4 while the row band started at 100, so grass
+    // drew over four of the six markers on the Lothal map -- the Drowned Dockyard looked absent.
+    // Fixing that by putting the slot above the canopy overcorrected: it went above the walker
+    // too, so arriving at the banyan made the traveller disappear behind it.
     const row = 9;
-    expect(depthFor(row, ROW_SLOT.marker)).toBeGreaterThan(depthFor(row, ROW_SLOT.canopy));
-    expect(depthFor(row, ROW_SLOT.marker)).toBeGreaterThan(depthFor(row, ROW_SLOT.walker));
+    expect(depthFor(row, ROW_SLOT.marker)).toBeGreaterThan(depthFor(row, ROW_SLOT.undergrowth));
+    expect(depthFor(row, ROW_SLOT.marker)).toBeLessThan(depthFor(row, ROW_SLOT.walker));
     // And still below the next row, so a marker never floats over ground nearer the camera.
-    expect(depthFor(row, ROW_SLOT.marker)).toBeLessThan(depthFor(row + 1, ROW_SLOT.undergrowth));
+    expect(depthFor(row, ROW_SLOT.marker)).toBeLessThan(depthFor(row + 1, ROW_SLOT.underfoot));
+  });
+
+  it('lets nothing but the canopy of his own tile cover the traveller', () => {
+    // The rule the whole band exists to keep. Grass and trees on the tile he is standing on pass
+    // in front of him -- that is the depth effect. Everything else on that tile is below him, and
+    // nothing on the row above him is ever in front.
+    const row = 12;
+    const player = depthFor(row, ROW_SLOT.walker);
+    for (const [name, slot] of Object.entries(ROW_SLOT)) {
+      if (name === 'walker') continue;
+      const own = depthFor(row, slot);
+      if (name === 'canopy') expect(own, 'canopy should cover him').toBeGreaterThan(player);
+      else expect(own, `${name} should not cover him`).toBeLessThan(player);
+      expect(depthFor(row - 1, slot), `${name} a row behind`).toBeLessThan(player);
+    }
   });
 
   it('leaves room inside a row for more kinds of thing', () => {
