@@ -16,29 +16,30 @@ import featuresUrl from '../../../assets/features.png';
 import { EventBus } from '../EventBus';
 import {
   FEATURE_SHEET,
-  FENCE_FRAME,
   FOG_TEXTURE,
   HUT_SHEET,
-  HUT_VARIANTS,
   OVERDRAW_SHEET,
   LANDMARK_SHEET,
   PLACE_SHEET,
   TERRAIN_SHEET,
   TILE_SIZE,
   createTileTextures,
-  depthFor,
-  featureFrame,
-  landmarkFrame,
   loadTileSheets,
-  overdrawFrame,
-  placeFrame,
-  swayFrame,
-  ROW_SLOT,
   tileFrame,
   traceFrameFor
 } from '../tileTextures';
-import { landmarkKindFor } from '../../content/landmarks';
-import { tileHash } from '../../world/rng';
+import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
+import { ROW_SLOT, depthFor } from '../frames';
+
+/** Which loaded texture each kind of placement draws from. `marker` is a glyph and has none. */
+const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker'>, string> = {
+  terrain: TERRAIN_SHEET,
+  huts: HUT_SHEET,
+  overdraw: OVERDRAW_SHEET,
+  features: FEATURE_SHEET,
+  places: PLACE_SHEET,
+  landmarks: LANDMARK_SHEET
+};
 import {
   CHARACTERS,
   PLAYER_FRAME,
@@ -68,15 +69,6 @@ const FOG_VISIBLE = 0;
 const SIGHT_RADIUS = 2;
 
 /**
- * How long one sway takes, in milliseconds.
- *
- * Slow on purpose, and for the same reason the idle animation is: this is a game about a quiet
- * afternoon walk. Grass that flickers reads as wind damage. Two seconds is about the pace of a
- * breeze you would not comment on.
- */
-const SWAY_PERIOD = 2000;
-
-/**
  * The fixed layers, below and above the row-sorted band in `frames.ts`.
  *
  * Named rather than written inline because that band is unbounded -- a 48-row map reaches depth
@@ -86,7 +78,6 @@ const SWAY_PERIOD = 2000;
  */
 const DEPTH_TILE = 0;
 const DEPTH_TRACE = 1;
-const DEPTH_HUT = 2;
 /** Above every row: a field map is 48 rows, so the band tops out far below this. */
 const DEPTH_FOG = 2000;
 const DEPTH_SKY = 3000;
@@ -181,9 +172,7 @@ export class WorldScene extends Phaser.Scene {
   private standingOn: string | null = null;
   private tileSprites: Phaser.GameObjects.Image[][] = [];
   /** Everything swaying at depth 21, with the two frames it alternates and its own phase. */
-  /** Tiles a hut already occupies, so the overdraw layer leaves them alone. */
-  private builtOn = new Set<string>();
-  private overdraw: { sprite: Phaser.GameObjects.Image; rest: number; sway: number; phase: number }[] = [];
+  private overdraw: { sprite: Phaser.GameObjects.Image; rest: number; lean: number; phase: number }[] = [];
   private fogSprites: Phaser.GameObjects.Image[][] = [];
   private player!: Phaser.GameObjects.Sprite;
   private at: Point = { x: 0, y: 0 };
@@ -236,7 +225,6 @@ export class WorldScene extends Phaser.Scene {
     this.tileSprites = [];
     this.fogSprites = [];
     this.overdraw = [];
-    this.builtOn = new Set();
     this.queuedPath = [];
     this.moving = false;
     this.facing = 'down';
@@ -298,41 +286,7 @@ export class WorldScene extends Phaser.Scene {
       this.fogSprites.push(fogRow);
     }
 
-    this.createSettlements();
-    this.createOverdraw();
-    this.createLandmark();
-
-    // The authored places, marked. Under the fog on purpose: a point of interest is a thing
-    // you find by walking there, not a waypoint handed to you at the start.
-    //
-    // Canon's archaeological sites have their own art; everything else keeps the diamond, which
-    // is why `placeFrame` returns null rather than a fallback frame. A generic marker reads
-    // better than the wrong building.
-    for (const { poi, at } of this.built.placed) {
-      const cx = at.x * TILE_SIZE + TILE_SIZE / 2;
-      const frame = placeFrame(poi.id);
-      if (frame !== null) {
-        this.add
-          .image(cx, at.y * TILE_SIZE + TILE_SIZE, PLACE_SHEET, frame)
-          // Bottom-centre, so a tower stands on its tile and rises into the one above.
-          .setOrigin(0.5, 1)
-          // Above the huts at depth 4: Kavik's Tower stands inside the Lothal settlement, and a
-          // hut drawn afterwards at the same depth would cover the thing the player came to see.
-          .setDepth(depthFor(at.y, ROW_SLOT.marker))
-          .setName(`poi:${poi.id}`);
-        continue;
-      }
-      this.add
-        .text(cx, at.y * TILE_SIZE + TILE_SIZE / 2, '◇', {
-          fontFamily: 'Georgia, serif',
-          fontSize: `${Math.round(TILE_SIZE * 0.7)}px`,
-          color: '#fff6df'
-        })
-        .setOrigin(0.5)
-        .setDepth(depthFor(at.y, ROW_SLOT.marker))
-        .setAlpha(0.9)
-        .setName(`poi:${poi.id}`);
-    }
+    this.createGround();
 
     this.createPlayer();
 
@@ -363,121 +317,56 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /**
-   * Huts on the settlement tiles.
+   * Everything that stands on the ground: huts, undergrowth, features, markers.
    *
-   * Drawn as objects rather than into the ground tile, because a building baked into a repeating
-   * texture appears once per tile forever, in a perfect grid — an endless orchard of identical
-   * huts rather than a village. Four variants, picked per tile by the same `tileHash` the species
-   * placement uses, so a seed still produces the same village twice.
-   *
-   * Not every settlement tile gets one: two in three keeps courtyards and paths open between them.
+   * The decisions live in `scenePlan.ts`, which is free of Phaser so they can be asserted under
+   * Node. This is the half that needs an engine, and it is deliberately dull -- if placing a sprite
+   * ever needs a decision, that decision belongs in the plan rather than here.
    */
-  private createSettlements(): void {
-    for (let y = 0; y < this.world.height; y += 1) {
-      for (let x = 0; x < this.world.width; x += 1) {
-        if (this.world.tiles[y]![x]!.biome !== 'settlement') continue;
-        if (tileHash(this.world.seed, x, y, 'hut-present') % 3 === 0) continue;
-        this.builtOn.add(`${x},${y}`);
-        const variant = tileHash(this.world.seed, x, y, 'hut-variant') % HUT_VARIANTS;
+  private createGround(): void {
+    for (const item of planScene(this.built)) {
+      const cx = item.x * TILE_SIZE + TILE_SIZE / 2;
+      const cy = item.y * TILE_SIZE + TILE_SIZE / 2;
+
+      if (item.sheet === 'marker') {
         this.add
-          .image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE - 2, HUT_SHEET, variant)
-          .setOrigin(0.5, 1)
-          .setDepth(DEPTH_HUT);
+          .text(cx, cy, '◇', {
+            fontFamily: 'Georgia, serif',
+            fontSize: `${Math.round(TILE_SIZE * 0.7)}px`,
+            color: '#fff6df'
+          })
+          .setOrigin(0.5)
+          .setDepth(item.depth)
+          .setAlpha(0.9)
+          .setName(item.name ?? '');
+        continue;
       }
-    }
-  }
 
-  /**
-   * The layer the traveller walks into: grass, reeds, paddy, and the settlement fence.
-   *
-   * Depth 21 is the whole trick. Everything else on the map sits below the player at depth 20, so
-   * he slides over a flat picture; one sprite above him and his legs go behind the blades. It is
-   * the cheapest depth this world can buy.
-   *
-   * Two rules keep it from swallowing him. The art is short by construction -- nothing in the
-   * sheet reaches higher than fifteen of the cell's thirty-two pixels, so it clears his head with
-   * room to spare. And it is sparse: a third of eligible tiles stay bare, which leaves paths
-   * through a field rather than a wall of green.
-   *
-   * The fence is different in kind. It is a boundary, not undergrowth, so it goes where settlement
-   * meets open ground rather than being scattered -- and only on the *southern* edge, where a
-   * traveller approaching from open country walks up behind it.
-   */
-  private createOverdraw(): void {
-    const { width, height, seed } = this.world;
-    for (let y = 0; y < height; y += 1) {
-      for (let x = 0; x < width; x += 1) {
-        const biome = this.world.tiles[y]![x]!.biome;
-        const cx = x * TILE_SIZE + TILE_SIZE / 2;
-        const cy = y * TILE_SIZE + TILE_SIZE / 2;
-
-        // A settlement tile with open ground to the south gets a fence along that edge.
-        const southern = y + 1 < height ? this.world.tiles[y + 1]![x]!.biome : null;
-        if (biome === 'settlement' && southern !== null && southern !== 'settlement') {
-          this.add.image(cx, cy, OVERDRAW_SHEET, FENCE_FRAME).setDepth(depthFor(y, ROW_SLOT.canopy));
-          continue;
-        }
-
-        // Nothing grows through a roof. The hut layer runs first and records where it built, so
-        // paddy does not sprout across the thatch of the house it is planted beside.
-        if (this.builtOn.has(`${x},${y}`)) continue;
-
-        // A feature -- a tree, an anthill, a bee colony -- takes the tile instead of undergrowth,
-        // and is rare enough that meeting one is an event. It may stand far taller than the common
-        // overdraw because it is drawn offset to one side, so the traveller passes beside it rather
-        // than behind it.
-        const feature = featureFrame(
-          biome,
-          tileHash(seed, x, y, 'feature-present'),
-          tileHash(seed, x, y, 'feature-pick')
-        );
-        if (feature !== null) {
-          this.add.image(cx, cy, FEATURE_SHEET, feature).setDepth(depthFor(y, ROW_SLOT.canopy));
-          continue;
-        }
-
-        if (tileHash(seed, x, y, 'overdraw-present') % 3 === 0) continue;
-        const rest = overdrawFrame(biome, tileHash(seed, x, y, 'overdraw-scatter'));
-        if (rest === null) continue;
-        const sprite = this.add.image(cx, cy, OVERDRAW_SHEET, rest).setDepth(depthFor(y, ROW_SLOT.canopy));
-        // Phase offset per tile, so a field ripples across rather than blinking in unison. The
-        // sprite carries its own two frames so `update` needs no lookup.
-        this.overdraw.push({
-          sprite,
-          rest,
-          sway: swayFrame(rest),
-          phase: tileHash(seed, x, y, 'overdraw-phase') % SWAY_PERIOD
-        });
-      }
+      // Huts, places and landmarks are bottom-anchored so a tower stands on its tile and rises
+      // into the one above; ground cover fills its cell.
+      const anchored = item.sheet === 'huts' || item.sheet === 'places' || item.sheet === 'landmarks';
+      const sprite = this.add
+        .image(cx, anchored ? item.y * TILE_SIZE + TILE_SIZE : cy, SHEET_KEY[item.sheet], item.frame)
+        .setDepth(item.depth);
+      if (anchored) sprite.setOrigin(0.5, 1);
+      if (item.name) sprite.setName(item.name);
+      if (item.sway) this.overdraw.push({ sprite, ...item.sway });
     }
   }
 
   /**
    * Alternate every swaying sprite between its two frames.
    *
-   * One pass over a flat array each frame, setting a frame index that is usually the one already
-   * set -- Phaser skips the work when it has not changed, so this costs a comparison per tile
-   * rather than a redraw. The phase offset is what stops a field looking like a single blinking
-   * object; neighbouring tiles cross the halfway point at different moments.
+   * One pass over a flat array each frame, setting an index that is usually the one already set --
+   * Phaser skips the work when it has not changed, so this costs a comparison per tile rather than
+   * a redraw. The phase offset is what stops a field looking like one blinking object.
    */
   private updateSway(): void {
     const now = this.time.now;
     for (const item of this.overdraw) {
       const leaning = ((now + item.phase) % SWAY_PERIOD) * 2 > SWAY_PERIOD;
-      item.sprite.setFrame(leaning ? item.sway : item.rest);
+      item.sprite.setFrame(leaning ? item.lean : item.rest);
     }
-  }
-
-  /** The destination, drawn as whatever kind of place the terrain called for. */
-  private createLandmark(): void {
-    const { landmark } = this.world;
-    const frame = landmarkFrame(landmarkKindFor(landmark, this.world.seed).id);
-    if (frame === null) return;
-    this.add
-      .image(landmark.x * TILE_SIZE + TILE_SIZE / 2, landmark.y * TILE_SIZE + TILE_SIZE, LANDMARK_SHEET, frame)
-      .setOrigin(0.5, 1)
-      .setDepth(depthFor(landmark.y, ROW_SLOT.marker))
-      .setName('landmark');
   }
 
   private createPlayer(): void {
