@@ -17,6 +17,9 @@ import speciesBundle from '../data/canon/species.json';
 import placesBundle from '../data/canon/places.json';
 import knowledgeBundle from '../data/canon/knowledge.json';
 import lock from '../data/canon/canon.lock.json';
+import { LANDMARK_ORDER, PLACE_ORDER, TERRAIN_ORDER } from '../src/game/frames';
+import biomesData from '../data/biomes.json';
+import landmarkData from '../data/landmarks.json';
 
 /** Keys the adapters read, and keys they knowingly leave behind. */
 interface Coverage {
@@ -198,5 +201,35 @@ describe('the declarations do not rot', () => {
     // The lock is the list of what actually ships, so growing it back is a deliberate act.
     const shipped = Object.keys((lock as { sha256: Record<string, string> }).sha256).sort();
     expect(shipped).toEqual(['knowledge.json', 'places.json', 'species.json']);
+  });
+});
+
+describe('the artwork points at places that exist', () => {
+  // `placeFrame` looks a point of interest up by canon id. A typo there does not throw and does
+  // not fail a build -- it silently returns null, the place keeps the generic diamond, and the
+  // sprite that was drawn for it never appears. That is exactly what happened to the Stepped
+  // Quarry, whose art was wired to `poi_stepped_quarry` while canon calls it `poi_basalt_quarry`.
+  it('draws no place canon does not name', () => {
+    const known = new Set(
+      collection('places.points_of_interest').map((poi) => (poi as { id: string }).id)
+    );
+    const unknown = PLACE_ORDER.filter((id) => !known.has(id));
+    expect(unknown, 'art wired to point-of-interest ids that are not in canon').toEqual([]);
+  });
+
+  it('draws every biome the game can put on the ground', () => {
+    // The reverse risk to the one above: a biome present in the data but missing from the sheet
+    // silently falls back to plains, so a whole terrain type would render as grassland.
+    const biomes = (biomesData as { id: string }[]).map((biome) => biome.id);
+    const missing = biomes.filter((id) => !TERRAIN_ORDER.includes(id as (typeof TERRAIN_ORDER)[number]));
+    expect(missing, 'biomes in data/biomes.json with no frame in the terrain sheet').toEqual([]);
+  });
+
+  it('draws every kind of landmark a journey can end at', () => {
+    // A landmark kind with no frame draws nothing at all, so the destination -- the emotional
+    // beat the whole session builds to -- would be an empty tile.
+    const kinds = (landmarkData as { id: string }[]).map((kind) => kind.id);
+    const missing = kinds.filter((id) => !LANDMARK_ORDER.includes(id));
+    expect(missing, 'landmark kinds in data/landmarks.json with no frame').toEqual([]);
   });
 });

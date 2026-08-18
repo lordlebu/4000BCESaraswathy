@@ -343,7 +343,7 @@ const PLACES = {
   'drowned-seawall': 'poi-drowned-seawall.png',
   'customs-house': 'poi-customs-house.png',
   'bone-midden': 'poi-bone-midden.png',
-  'stepped-quarry': 'poi-stepped-quarry.png'
+  'basalt-quarry': 'poi-stepped-quarry.png'
 };
 
 const TILE = { width: 32, height: 32 };
