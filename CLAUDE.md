@@ -256,6 +256,21 @@ worse than a five-minute suite.
 **One branch, one PR for this repo.** The browser suite is slow, so batch game changes rather
 than opening several PRs that each pay for it.
 
+**Consolidate commits onto one branch rather than opening a branch per fix.** This is easy to
+forget when the work arrives as a series of small corrections, and forgetting it is expensive: one
+session produced `feat/npc-portraits`, `feat/poi-kind-markers`, `fix/landmark-tile` and
+`fix/depth-corrections` as four separate branches, each paying for its own browser run, when three
+of them touched no common file and could have been one.
+
+The habit that avoids it: **before starting a new branch, ask whether the last one is still
+unmerged.** If it is, and the new work does not depend on it having landed, commit onto it. Several
+commits on one branch is the normal shape here, not an exception — each keeps its own message, and
+the PR reads as a sequence rather than a pile.
+
+Split into a second branch only when the work genuinely cannot travel with the first: it touches
+another repository, it reverses something in the first, or it is urgent and the first is still
+under review.
+
 ## Conventions
 
 - Dependencies must justify themselves. The runtime is React and Phaser; that is the whole list.
