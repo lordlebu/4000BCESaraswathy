@@ -188,7 +188,7 @@ export function planMarkers(built: FieldMapWorld): Placement[] {
   // marker reads better than the wrong building, which is why `placeFrame` returns null rather
   // than falling back to a frame.
   for (const { poi, at } of built.placed) {
-    const frame = placeFrame(poi.id);
+    const frame = placeFrame(poi.id, poi.kind);
     out.push({
       sheet: frame === null ? 'marker' : 'places',
       frame: frame ?? -1,

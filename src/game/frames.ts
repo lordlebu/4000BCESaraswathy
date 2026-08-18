@@ -56,6 +56,24 @@ export const PLACE_ORDER = [
   'poi_basalt_quarry'
 ];
 
+/**
+ * Frames for a *kind* of place, used when the place itself has no art.
+ *
+ * Sixteen of canon's twenty-four points of interest have no drawing of their own, and were all
+ * showing the same diamond. A kind marker says more than that without claiming more than it knows:
+ * reeds and standing water for an eco-site, a doorway leading nowhere for an anomaly, a roof and a
+ * well for a place people live.
+ *
+ * Two kinds are deliberately absent. `wilderness` and `travel_node` are three places and one, and
+ * both are defined by what is *not* built there -- a fossil channel, a hillside of steps, a cleared
+ * circle of ground. A marker for those would be inventing scenery canon has kept empty.
+ */
+const KIND_FRAMES: Record<string, number> = {
+  eco_site: PLACE_ORDER.length,
+  anomaly: PLACE_ORDER.length + 1,
+  settlement: PLACE_ORDER.length + 2
+};
+
 /** How many hut variants the sheet carries, for the seeded per-tile pick. */
 export const HUT_VARIANTS = 4;
 
@@ -75,9 +93,12 @@ export function landmarkFrame(kindId: string): number | null {
 }
 
 /** The frame for an authored place, or null — most points of interest keep the diamond marker. */
-export function placeFrame(poiId: string): number | null {
+export function placeFrame(poiId: string, kind?: string): number | null {
   const index = PLACE_ORDER.indexOf(poiId);
-  return index >= 0 ? index : null;
+  if (index >= 0) return index;
+  // A place canon has authored art for wins; otherwise its kind speaks for it. Falling back on
+  // kind rather than on nothing is what closed the gap that made the Drowned Dockyard look absent.
+  return kind !== undefined ? KIND_FRAMES[kind] ?? null : null;
 }
 
 // --- the layer above the player ------------------------------------------

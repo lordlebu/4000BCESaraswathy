@@ -17,7 +17,7 @@ import speciesBundle from '../data/canon/species.json';
 import placesBundle from '../data/canon/places.json';
 import knowledgeBundle from '../data/canon/knowledge.json';
 import lock from '../data/canon/canon.lock.json';
-import { LANDMARK_ORDER, PLACE_ORDER, TERRAIN_ORDER } from '../src/game/frames';
+import { LANDMARK_ORDER, PLACE_ORDER, TERRAIN_ORDER, placeFrame } from '../src/game/frames';
 import biomesData from '../data/biomes.json';
 import landmarkData from '../data/landmarks.json';
 
@@ -223,6 +223,23 @@ describe('the artwork points at places that exist', () => {
     const biomes = (biomesData as { id: string }[]).map((biome) => biome.id);
     const missing = biomes.filter((id) => !TERRAIN_ORDER.includes(id as (typeof TERRAIN_ORDER)[number]));
     expect(missing, 'biomes in data/biomes.json with no frame in the terrain sheet').toEqual([]);
+  });
+
+  it('draws most places by kind, and the rest honestly', () => {
+    // Sixteen of the twenty-four points of interest have no art of their own and were all showing
+    // the same diamond. A kind marker says more without claiming more -- reeds for an eco-site, a
+    // doorway leading nowhere for an anomaly, a roof and a well for a place people live.
+    const places = collection('places.points_of_interest') as { id: string; kind: string }[];
+    const drawn = places.filter((p) => placeFrame(p.id, p.kind) !== null);
+    expect(drawn.length / places.length, 'share of places with a picture').toBeGreaterThan(0.75);
+
+    // Wilderness and travel nodes keep the diamond on purpose: a fossil channel, a hillside of
+    // steps and a cleared camping circle are defined by what is *not* built there, and a marker
+    // would be inventing scenery canon has kept empty.
+    for (const place of places) {
+      if (place.kind !== 'wilderness' && place.kind !== 'travel_node') continue;
+      expect(placeFrame(place.id, place.kind), `${place.id} should keep the diamond`).toBeNull();
+    }
   });
 
   it('draws every kind of landmark a journey can end at', () => {
