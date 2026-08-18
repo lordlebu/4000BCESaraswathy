@@ -236,6 +236,26 @@ readings; change them here and change them there.
 - There is **no back view of the player yet**. Walking away shows the front frame, which reads
   acceptably at this scale. A third frame drops into `src/game/player.ts` when the art arrives.
 
+## Branches
+
+**Feature branches always. Never commit to `main`**, and this is enforced rather than trusted: a
+ruleset on the default branch blocks direct pushes, force pushes and deletions, and requires a
+pull request whose `check` and `browser` jobs have both passed. There is **no bypass, for
+anyone**, including the repository owner.
+
+If a required check ever hangs or its workflow breaks, `main` cannot be merged to or repaired
+until the rule is relaxed — Settings → Rules → Rulesets → *Protect main* → Enforcement:
+**Disabled**, merge the fix, then back to Active.
+
+This is why `browser` in `ci.yml` is written the way it is. It has no `paths-ignore` and no
+job-level `if:`; the six expensive steps are skipped individually instead, so the job always
+runs and always reports. A required check that does not report leaves a pull request pending
+forever rather than failing it, and a documentation-only change that could never merge would be
+worse than a five-minute suite.
+
+**One branch, one PR for this repo.** The browser suite is slow, so batch game changes rather
+than opening several PRs that each pay for it.
+
 ## Conventions
 
 - Dependencies must justify themselves. The runtime is React and Phaser; that is the whole list.
@@ -246,7 +266,8 @@ readings; change them here and change them there.
   what the sky looks like while you walk is presentation, not world state.
 - Saved journeys live in `localStorage` keyed by seed and carry a `version`; bump `SAVE_VERSION` in
   `src/save.ts` when the payload shape changes so old saves are discarded rather than misread. It is
-  at 5, and `Progress` — rungs, words, answered, questions — is the part that matters.
+  at 6 — the collection replacing the old sketch list moved it — and `Progress` (rungs, words,
+  answered, questions) plus `collection` are the parts that matter.
 - **Dev dependencies grew by three, for a reason.** `jsdom`, `@testing-library/react` and
   `@testing-library/dom` exist because three panel bugs reached a browser before anything noticed.
   Node stays the default test environment; panel files opt in with `// @vitest-environment jsdom`,
