@@ -343,7 +343,15 @@ const PLACES = {
   'drowned-seawall': 'poi-drowned-seawall.png',
   'customs-house': 'poi-customs-house.png',
   'bone-midden': 'poi-bone-midden.png',
-  'basalt-quarry': 'poi-stepped-quarry.png'
+  'basalt-quarry': 'poi-stepped-quarry.png',
+  // Kind markers, for the places that have no art of their own. Sixteen of canon's twenty-four
+  // points of interest share five kinds, and a marker that says "an anomaly is here" carries more
+  // than a diamond while claiming less than a wrong building would.
+  'kind-eco-site': 'poi-eco-site.png',
+  'kind-anomaly': 'poi-anomaly.png',
+  'kind-settlement': 'poi-settlement.png',
+  'kind-wilderness': 'poi-wilderness.png',
+  'kind-travel-node': 'poi-travel-node.png'
 };
 
 const TILE = { width: 32, height: 32 };
