@@ -96,16 +96,6 @@ function applyPalette(world: World, palette: Set<BiomeId>): void {
     }
   }
 
-  // Put the landmark back. No field map lists `landmark` in its palette -- and none should, since
-  // it is a place rather than a climate and canon's `seed_biomes` describe the country -- so the
-  // loop above reclassifies it along with everything else. The destination of the whole journey
-  // was being drawn as ordinary marsh on every one of the four maps.
-  //
-  // Restamped here for the same reason the settlement patch below is stamped rather than seeded:
-  // both are things put *on* the land after the land exists.
-  const landmark = world.tiles[world.landmark.y]?.[world.landmark.x];
-  if (landmark) landmark.biome = 'landmark';
-
   if (!palette.has('settlement')) return;
 
   // A ruined city, in tiles. Small enough to walk out of, large enough to hold its own
@@ -220,6 +210,20 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
       unplaced.push(poi);
     }
   }
+
+  // Put the landmark back, *after* placement has read the ground.
+  //
+  // No field map lists `landmark` in its palette -- and none should, since it is a place rather
+  // than a climate and canon's `seed_biomes` describe the country -- so `applyPalette` reclassifies
+  // it along with everything else and the destination of the journey was drawn as ordinary marsh.
+  //
+  // The stamp has to come last. `walkable` and every candidate list above are gathered by biome,
+  // and `pick` indexes them with `tileHash(...) % candidates.length` -- so taking one tile out of
+  // the pool shifts the modulo for every point of interest, not just the one that lost its tile.
+  // Stamping inside `applyPalette` moved five of Lothal's six places and put The Eastern Field
+  // thirteen rows off the walk the browser suite makes to reach it.
+  const landmark = world.tiles[world.landmark.y]?.[world.landmark.x];
+  if (landmark) landmark.biome = 'landmark';
 
   return { fieldMap, world, placed, unplaced };
 }
