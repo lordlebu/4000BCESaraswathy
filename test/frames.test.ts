@@ -8,12 +8,14 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
 import {
-  FENCE_FRAME,
   OVERDRAW_PLANTS,
+  PRINTS_FRAME,
+  SPLASH_FRAME,
   OVERDRAW_REST,
   OVERDRAW_SCATTERS,
   overdrawFrame,
-  swayFrame
+  swayFrame,
+  traceFrameFor
 } from '../src/game/frames';
 
 /** Width and height of a PNG, read straight from its IHDR. */
@@ -24,11 +26,11 @@ function pngSize(file: string): { width: number; height: number } {
 
 describe('the overdraw sheet and the code agree', () => {
   it('has exactly the frames the layout claims', () => {
-    // rest scatters + leaning scatters + one fence. If build-overdraw.js grows a plant and this
-    // is not updated, the fence index silently points at a blade of grass.
+    // rest scatters + leaning scatters + fence + the two underfoot marks. If build-overdraw.js
+    // grows a plant and this is not updated, the fence index silently points at a blade of grass.
     const { width, height } = pngSize('assets/overdraw.png');
     expect(height).toBe(32);
-    expect(width / 32).toBe(FENCE_FRAME + 1);
+    expect(width / 32).toBe(SPLASH_FRAME + 1);
     expect(OVERDRAW_REST).toBe(OVERDRAW_PLANTS.length * OVERDRAW_SCATTERS);
   });
 
@@ -47,6 +49,18 @@ describe('the overdraw sheet and the code agree', () => {
     // Forest is the busiest tile in the set; sea and mountains are not places you wade through.
     for (const biome of ['forest', 'sea', 'mountains', 'desert', 'coast'] as const) {
       expect(overdrawFrame(biome, 0)).toBeNull();
+    }
+  });
+
+  it('leaves a mark on soft ground and none on hard', () => {
+    // Restricting the trail is what keeps it meaningful: everywhere is decoration, sand and marsh
+    // is evidence of where you went.
+    expect(traceFrameFor('wetland')).toBe(SPLASH_FRAME);
+    expect(traceFrameFor('river')).toBe(SPLASH_FRAME);
+    expect(traceFrameFor('coast')).toBe(PRINTS_FRAME);
+    expect(traceFrameFor('desert')).toBe(PRINTS_FRAME);
+    for (const hard of ['mountains', 'hills', 'forest', 'settlement', 'plains'] as const) {
+      expect(traceFrameFor(hard)).toBeNull();
     }
   });
 

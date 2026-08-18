@@ -29,7 +29,8 @@ import {
   overdrawFrame,
   placeFrame,
   swayFrame,
-  tileFrame
+  tileFrame,
+  traceFrameFor
 } from '../tileTextures';
 import { landmarkKindFor } from '../../content/landmarks';
 import { tileHash } from '../../world/rng';
@@ -69,6 +70,14 @@ const SIGHT_RADIUS = 2;
  * breeze you would not comment on.
  */
 const SWAY_PERIOD = 2000;
+
+/**
+ * How long a footprint stays before it is gone.
+ *
+ * Long enough to look back and see three or four steps of your own trail, short enough that a
+ * long walk does not leave the whole map scribbled on.
+ */
+const TRACE_FADE_MS = 6000;
 
 /**
  * Roughly how many tiles should be visible across the screen, whatever its size.
@@ -151,6 +160,8 @@ export class WorldScene extends Phaser.Scene {
   private standingOn: string | null = null;
   private tileSprites: Phaser.GameObjects.Image[][] = [];
   /** Everything swaying at depth 21, with the two frames it alternates and its own phase. */
+  /** Tiles a hut already occupies, so the overdraw layer leaves them alone. */
+  private builtOn = new Set<string>();
   private overdraw: { sprite: Phaser.GameObjects.Image; rest: number; sway: number; phase: number }[] = [];
   private fogSprites: Phaser.GameObjects.Image[][] = [];
   private player!: Phaser.GameObjects.Sprite;
@@ -204,6 +215,7 @@ export class WorldScene extends Phaser.Scene {
     this.tileSprites = [];
     this.fogSprites = [];
     this.overdraw = [];
+    this.builtOn = new Set();
     this.queuedPath = [];
     this.moving = false;
     this.facing = 'down';
@@ -343,6 +355,7 @@ export class WorldScene extends Phaser.Scene {
       for (let x = 0; x < this.world.width; x += 1) {
         if (this.world.tiles[y]![x]!.biome !== 'settlement') continue;
         if (tileHash(this.world.seed, x, y, 'hut-present') % 3 === 0) continue;
+        this.builtOn.add(`${x},${y}`);
         const variant = tileHash(this.world.seed, x, y, 'hut-variant') % HUT_VARIANTS;
         this.add
           .image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE - 2, HUT_SHEET, variant)
@@ -383,6 +396,9 @@ export class WorldScene extends Phaser.Scene {
           continue;
         }
 
+        // Nothing grows through a roof. The hut layer runs first and records where it built, so
+        // paddy does not sprout across the thatch of the house it is planted beside.
+        if (this.builtOn.has(`${x},${y}`)) continue;
         if (tileHash(seed, x, y, 'overdraw-present') % 3 === 0) continue;
         const rest = overdrawFrame(biome, tileHash(seed, x, y, 'overdraw-scatter'));
         if (rest === null) continue;
@@ -753,6 +769,7 @@ export class WorldScene extends Phaser.Scene {
     // The same cost buys the step twice: how long the tween takes on the screen, and how much of
     // the day the walking spends. The second is what keeps the sun honest.
     this.travelled += travelTimeMs(cost);
+    this.leaveTrace(this.at, tile.biome);
     this.moving = true;
     this.at = target;
     this.updateAnimation();
@@ -768,6 +785,32 @@ export class WorldScene extends Phaser.Scene {
         this.arriveAt(target);
         this.updateAnimation();
       }
+    });
+  }
+
+  /**
+   * The mark a step leaves behind: prints on sand, a splash on water.
+   *
+   * Left on the tile being *departed* rather than the one being entered, so the trail reads as
+   * where the traveller has been rather than where he is standing. Below him at depth 3, because
+   * a footprint is on the ground, not over it -- unlike the grass, which is the point of depth 21.
+   *
+   * It fades and destroys itself. Keeping a handle on every mark a long walk leaves would be a
+   * slow leak of sprites nothing ever reads again.
+   */
+  private leaveTrace(from: Point, biome: Tile['biome']): void {
+    const frame = traceFrameFor(biome);
+    if (frame === null) return;
+    const mark = this.add
+      .image(from.x * TILE_SIZE + TILE_SIZE / 2, from.y * TILE_SIZE + TILE_SIZE / 2, OVERDRAW_SHEET, frame)
+      .setDepth(3)
+      .setAlpha(0.7);
+    this.tweens.add({
+      targets: mark,
+      alpha: 0,
+      duration: TRACE_FADE_MS,
+      ease: 'Quad.easeIn',
+      onComplete: () => mark.destroy()
     });
   }
 

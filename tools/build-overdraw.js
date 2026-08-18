@@ -214,6 +214,43 @@ function fenceFrame() {
   return pixels;
 }
 
+/**
+ * A mark left underfoot: a pair of prints on dry ground, or a ring of displaced water on wet.
+ *
+ * Small and centred rather than rooted, because this is not a plant -- it belongs where the foot
+ * landed, not where the tile begins. Drawn once per step and faded out by the scene, so it needs
+ * no second frame.
+ */
+function traceFrame(kind) {
+  const pixels = Buffer.alloc(CELL * CELL * 4);
+  const colour = hex(kind === 'splash' ? '#cfe4ea' : '#6b5847');
+  const set = (x, y) => {
+    if (x < 0 || x >= CELL || y < 0 || y >= CELL) return;
+    const p = (y * CELL + x) * 4;
+    pixels[p] = colour[0];
+    pixels[p + 1] = colour[1];
+    pixels[p + 2] = colour[2];
+    pixels[p + 3] = 255;
+  };
+  const cx = CELL / 2;
+  const cy = CELL - 6;
+  if (kind === 'splash') {
+    // A broken ring, so it reads as water thrown outward rather than a drawn circle.
+    const ring = [[-4, 0], [-3, -2], [0, -3], [3, -2], [4, 0], [3, 2], [0, 3], [-3, 2]];
+    for (const [dx, dy] of ring) set(cx + dx, cy + dy);
+    for (const [dx, dy] of [[-2, -1], [2, -1], [-2, 1], [2, 1]]) set(cx + dx, cy + dy);
+  } else {
+    // Two small prints, offset left and right of centre the way a stride lands.
+    for (const [ox, oy] of [[-3, 0], [2, 2]]) {
+      for (let dy = 0; dy < 3; dy += 1) {
+        set(cx + ox, cy + oy + dy);
+        set(cx + ox + 1, cy + oy + dy);
+      }
+    }
+  }
+  return pixels;
+}
+
 // --- build ----------------------------------------------------------------
 
 function main() {
@@ -228,7 +265,7 @@ function main() {
       lean.push(plantFrame(plant, 1, s));
     }
   }
-  const frames = [...rest, ...lean, fenceFrame()];
+  const frames = [...rest, ...lean, fenceFrame(), traceFrame('prints'), traceFrame('splash')];
 
   const sheetWidth = CELL * frames.length;
   const sheet = Buffer.alloc(sheetWidth * CELL * 4);
@@ -246,6 +283,7 @@ function main() {
   console.log(`overdraw: ${frames.length} frames of ${CELL}x${CELL}, ${kb} KB`);
   console.log(`  ${PLANTS.length} plants x ${SCATTERS} scatters at rest, the same leaning, then fence`);
   console.log(`  order: ${PLANTS.map((p) => p.id).join(', ')}`);
+  console.log(`  then fence, footprints, splash`);
 }
 
 main();

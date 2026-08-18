@@ -18,6 +18,8 @@ export {
   FENCE_FRAME,
   HUT_VARIANTS,
   OVERDRAW_REST,
+  PRINTS_FRAME,
+  SPLASH_FRAME,
   LANDMARK_ORDER,
   PLACE_ORDER,
   TERRAIN_ORDER,
@@ -25,6 +27,7 @@ export {
   overdrawFrame,
   placeFrame,
   swayFrame,
+  traceFrameFor,
   tileFrame
 } from './frames';
 

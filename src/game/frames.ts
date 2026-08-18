@@ -94,6 +94,23 @@ export const OVERDRAW_PLANTS = ['grass-plains', 'reeds-wetland', 'paddy-settleme
 export const OVERDRAW_REST = OVERDRAW_PLANTS.length * OVERDRAW_SCATTERS;
 export const FENCE_FRAME = OVERDRAW_REST * 2;
 
+/** Marks left underfoot, drawn once per step and faded out. */
+export const PRINTS_FRAME = FENCE_FRAME + 1;
+export const SPLASH_FRAME = FENCE_FRAME + 2;
+
+/**
+ * Which mark a step onto this ground leaves, or null where a step leaves nothing.
+ *
+ * Water and soft ground record a footfall; rock and grass do not. Restricting it that way is what
+ * keeps the mark meaningful -- a trail across every surface is decoration, a trail across sand and
+ * marsh is evidence of where you went.
+ */
+export function traceFrameFor(biome: BiomeId): number | null {
+  if (biome === 'wetland' || biome === 'river') return SPLASH_FRAME;
+  if (biome === 'coast' || biome === 'desert') return PRINTS_FRAME;
+  return null;
+}
+
 /**
  * Which plant grows on which ground, or null where nothing does.
  *
