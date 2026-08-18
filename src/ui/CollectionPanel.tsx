@@ -25,6 +25,7 @@ import {
 import { metSpecies } from '../content/species';
 import { searchCanon, type CanonSource } from './canonClient';
 import type { Creature, Flora } from '../world/types';
+import { SpeciesIcon } from './SpeciesIcon';
 
 /** Fauna carry a mood; flora do not. Narrower than a cast, and it is the only difference shown. */
 function moodOf(species: Creature | Flora): string | null {
@@ -71,6 +72,10 @@ function Entry({ meeting, canAsk }: EntryProps) {
   return (
     <li className="met-entry">
       <div className="met-head">
+        {/* Plants only. The shape is derived from the name, and the vocabulary it reads --
+            banyan, lotus, reed -- is botanical; run an animal through it and a Desert Fox comes
+            out drawn as a sprig. Fauna keep no icon until they have shapes of their own. */}
+        {meeting.kind === 'flora' && <SpeciesIcon species={species} />}
         <div>
           <h4>{species.name}</h4>
           {species.binomial && <p className="met-binomial">{species.binomial}</p>}

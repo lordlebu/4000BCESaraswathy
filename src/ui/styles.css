@@ -1075,9 +1075,20 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 
 .met-head {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: baseline;
   gap: 0.6rem;
+}
+
+/*
+ * The drawn mark beside a plant's name. Nudged down a little because the icon's optical centre
+ * sits above its box -- everything in it grows upward from a baseline -- so aligning the boxes
+ * leaves it looking like it is floating.
+ */
+.species-icon {
+  flex: none;
+  position: relative;
+  top: 3px;
 }
 
 .met-head h4 { margin: 0; font-size: 1rem; }
