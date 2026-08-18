@@ -135,7 +135,21 @@ const PLANTS = [
   // Paddy: shorter, denser, planted in rough rows rather than scattered.
   { id: 'paddy-settlement', blades: 9, height: 9, width: 1, dark: '#6d7a44', light: '#93a05c', lean: 1, rows: true },
   // Rushes at a river edge, sparser than marsh reeds.
-  { id: 'rushes-river', blades: 4, height: 13, width: 1, dark: '#4a7d70', light: '#6b9a86', lean: 2 }
+  { id: 'rushes-river', blades: 4, height: 13, width: 1, dark: '#4a7d70', light: '#6b9a86', lean: 2 },
+  // Sun-barley: canon's crop of the open plains, taller than grass and topped with seed.
+  { id: 'barley-plains', blades: 6, height: 13, width: 1, dark: '#8a8548', light: '#c2b26a', lean: 1, seed: true },
+  // Sagebrush: low, grey-green, rounded rather than bladed.
+  { id: 'sagebrush-plains', blades: 8, height: 6, width: 1, dark: '#6f7a62', light: '#8d9a7e', lean: 0 },
+  // Ferns on the forest floor, arching rather than upright.
+  { id: 'ferns-forest', blades: 6, height: 9, width: 1, dark: '#3d6b47', light: '#57895d', lean: 2 },
+  // Pepper vine, thin and climbing. Canon puts it in both forest and hills.
+  { id: 'vine-forest', blades: 4, height: 12, width: 1, dark: '#40704a', light: '#5f8f5a', lean: 2 },
+  // Salt grass on the shore: sparse and bent by wind, so every blade leans the same way.
+  { id: 'saltgrass-coast', blades: 5, height: 8, width: 1, dark: '#9a9370', light: '#b6ae87', lean: 2 },
+  // Scholar's moss, flat against hill stone.
+  { id: 'moss-hills', blades: 9, height: 3, width: 1, dark: '#6d7f79', light: '#87968c', lean: 0 },
+  // Saltbush, the one thing that grows on the dunes.
+  { id: 'saltbush-desert', blades: 5, height: 5, width: 1, dark: '#9c8f72', light: '#b5a888', lean: 0 }
 ];
 
 /**
@@ -181,6 +195,18 @@ function plantFrame(plant, frame, scatter) {
     // A minority of blades catch the light. Two tones is all a 32px cell can carry.
     const colour = hash(plant.id, 'c', scatter, n) % 3 === 0 ? light : dark;
     blade(pixels, x, root, height, plant.lean, colour, frame);
+    // Barley carries a seed-head: one lighter pixel beside the tip, which is what separates a
+    // crop from grass at this size.
+    if (plant.seed) {
+      const tipY = CELL - 1 - root - height;
+      const p = (tipY * CELL + Math.min(CELL - 1, x + 1)) * 4;
+      if (tipY >= 0) {
+        pixels[p] = light[0];
+        pixels[p + 1] = light[1];
+        pixels[p + 2] = light[2];
+        pixels[p + 3] = 255;
+      }
+    }
   }
   return pixels;
 }

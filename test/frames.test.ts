@@ -8,12 +8,15 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
 import {
+  FEATURES,
+  FEATURE_RARITY,
   OVERDRAW_PLANTS,
   PRINTS_FRAME,
   SPLASH_FRAME,
   OVERDRAW_REST,
   OVERDRAW_SCATTERS,
   overdrawFrame,
+  featureFrame,
   swayFrame,
   traceFrameFor
 } from '../src/game/frames';
@@ -42,12 +45,13 @@ describe('the overdraw sheet and the code agree', () => {
     }
   });
 
-  it('grows something on the four biomes that have art, and nothing elsewhere', () => {
-    for (const biome of ['plains', 'wetland', 'settlement', 'river'] as const) {
+  it('grows something on every walkable ground but the bare three', () => {
+    for (const biome of ['plains', 'wetland', 'settlement', 'river', 'forest', 'coast', 'hills', 'desert'] as const) {
       expect(overdrawFrame(biome, 0)).not.toBeNull();
     }
-    // Forest is the busiest tile in the set; sea and mountains are not places you wade through.
-    for (const biome of ['forest', 'sea', 'mountains', 'desert', 'coast'] as const) {
+    // Sea is not walked on. Mountains is already the busiest tile in the set, and the landmark
+    // tile stays bare so the destination standing on it is what the eye finds.
+    for (const biome of ['sea', 'mountains', 'landmark'] as const) {
       expect(overdrawFrame(biome, 0)).toBeNull();
     }
   });
@@ -64,20 +68,31 @@ describe('the overdraw sheet and the code agree', () => {
     }
   });
 
-  it('keeps every scatter inside its own plant', () => {
-    // A scatter index that leaked into the next plant would put reeds on the plains.
-    for (let plant = 0; plant < OVERDRAW_PLANTS.length; plant += 1) {
-      const biome = (['plains', 'wetland', 'settlement', 'river'] as const)[plant]!;
-      for (let scatter = 0; scatter < 12; scatter += 1) {
-        const frame = overdrawFrame(biome, scatter)!;
-        expect(Math.floor(frame / OVERDRAW_SCATTERS)).toBe(plant);
+  it('only ever grows a plant that belongs on that ground', () => {
+    // A frame index that leaked past its plant's three scatters would put reeds on the plains.
+    // Checked by name rather than by number so the assertion says what it means.
+    const expected: Record<string, string[]> = {
+      plains: ['grass-plains', 'barley-plains', 'sagebrush-plains'],
+      wetland: ['reeds-wetland'],
+      settlement: ['paddy-settlement'],
+      river: ['rushes-river'],
+      forest: ['ferns-forest', 'vine-forest'],
+      coast: ['saltgrass-coast'],
+      hills: ['moss-hills'],
+      desert: ['saltbush-desert']
+    };
+    for (const [biome, allowed] of Object.entries(expected)) {
+      for (let scatter = 0; scatter < 40; scatter += 1) {
+        const frame = overdrawFrame(biome as never, scatter)!;
+        const plant = OVERDRAW_PLANTS[Math.floor(frame / OVERDRAW_SCATTERS)]!;
+        expect(allowed, `${biome} scatter ${scatter} grew ${plant}`).toContain(plant);
       }
     }
   });
 });
 
-/** The topmost opaque row of each frame, decoded from the sheet itself. */
-function frameTops(file: string): number[] {
+/** Decode a PNG to raw RGBA rows. Enough of a decoder for sheets this builder writes. */
+function decode(file: string): { rows: Buffer; width: number; height: number; stride: number } {
   const buf = readFileSync(file);
   const width = buf.readUInt32BE(16);
   const height = buf.readUInt32BE(20);
@@ -96,9 +111,9 @@ function frameTops(file: string): number[] {
     const filter = raw[pos];
     pos += 1;
     for (let x = 0; x < stride; x += 1) {
-      const left = x >= 4 ? rows[y * stride + x - 4] : 0;
-      const up = y > 0 ? rows[(y - 1) * stride + x] : 0;
-      const upLeft = x >= 4 && y > 0 ? rows[(y - 1) * stride + x - 4] : 0;
+      const left = x >= 4 ? rows[y * stride + x - 4]! : 0;
+      const up = y > 0 ? rows[(y - 1) * stride + x]! : 0;
+      const upLeft = x >= 4 && y > 0 ? rows[(y - 1) * stride + x - 4]! : 0;
       let v = raw[pos + x]!;
       if (filter === 1) v += left;
       else if (filter === 2) v += up;
@@ -114,6 +129,12 @@ function frameTops(file: string): number[] {
     }
     pos += stride;
   }
+  return { rows, width, height, stride };
+}
+
+/** The topmost opaque row of each frame. */
+function frameTops(file: string): number[] {
+  const { rows, width, height, stride } = decode(file);
   const tops: number[] = [];
   for (let frame = 0; frame < width / 32; frame += 1) {
     let top = 32;
@@ -127,9 +148,29 @@ function frameTops(file: string): number[] {
   return tops;
 }
 
+/** The horizontal centre of mass of each frame's opaque pixels. */
+function frameCentroids(file: string): (number | null)[] {
+  const { rows, width, height, stride } = decode(file);
+  const out: (number | null)[] = [];
+  for (let frame = 0; frame < width / 32; frame += 1) {
+    let sum = 0;
+    let n = 0;
+    for (let y = 0; y < height; y += 1) {
+      for (let x = frame * 32; x < (frame + 1) * 32; x += 1) {
+        if (rows[y * stride + x * 4 + 3]! >= 128) {
+          sum += x - frame * 32;
+          n += 1;
+        }
+      }
+    }
+    out.push(n === 0 ? null : sum / n);
+  }
+  return out;
+}
+
 describe('the overdraw cannot swallow the traveller', () => {
   it('draws nothing in the top half of a tile', () => {
-    // The rule the whole layer rests on. It is drawn *over* the player, so art that reaches his
+    // The rule the common layer rests on. It is drawn *over* the player, so art that reaches his
     // head makes him vanish behind grass. Nothing may start above row 16 of 32 -- grass to the
     // knee reads as depth, grass to the chest reads as losing the character.
     //
@@ -137,5 +178,56 @@ describe('the overdraw cannot swallow the traveller', () => {
     // is to catch a future edit to build-overdraw.js that raises a height past what is safe.
     const tallest = Math.min(...frameTops('assets/overdraw.png'));
     expect(tallest, 'topmost opaque row across every overdraw frame').toBeGreaterThanOrEqual(16);
+  });
+});
+
+describe('features may be tall because they stand aside', () => {
+  // The trade this layer makes. Common overdraw stops at row 16 so it can never hide the player.
+  // A tree cannot obey that and still be a tree, so it gets a different bargain: it may reach
+  // row 4, but it must be offset toward one side of the tile and it must be rare. The player then
+  // walks *past* it rather than behind it.
+  //
+  // These assert the two halves of that bargain, because breaking either one silently turns the
+  // world into a set of obstructions the traveller keeps vanishing into.
+
+  it('has a frame for every feature the code indexes', () => {
+    const frames = pngSize('assets/features.png').width / 32;
+    const claimed = Object.values(FEATURES).flatMap((f) => f.frames);
+    expect(Math.max(...claimed)).toBe(frames - 1);
+    // No frame claimed twice, and none left unclaimed.
+    expect(new Set(claimed).size).toBe(claimed.length);
+    expect(claimed.length).toBe(frames);
+  });
+
+  it('keeps anything tall away from the centre of its tile', () => {
+    // Only tall frames need the offset. A boulder or a lotus pad sits centred and is harmless,
+    // because it is below the player's waist wherever he stands.
+    const tops = frameTops('assets/features.png');
+    const centroids = frameCentroids('assets/features.png');
+    const offenders: string[] = [];
+    tops.forEach((top, i) => {
+      if (top >= 16) return; // short enough not to matter
+      const centre = centroids[i];
+      if (centre === null) return;
+      if (Math.abs(centre - 16) < 4) offenders.push(`frame ${i}: top ${top}, centre ${centre.toFixed(1)}`);
+    });
+    expect(offenders, 'tall features drawn across the middle of their tile').toEqual([]);
+  });
+
+  it('places a feature on roughly one eligible tile in twelve', () => {
+    // Rarity is the other half of the bargain. Counted over a large sample rather than asserted
+    // from the constant, so a change to the selection logic shows up here too.
+    let hits = 0;
+    const sample = 6000;
+    for (let i = 0; i < sample; i += 1) {
+      if (featureFrame('plains', i, 0) !== null) hits += 1;
+    }
+    expect(hits / sample).toBeCloseTo(1 / FEATURE_RARITY, 2);
+  });
+
+  it('offers nothing on ground with no features', () => {
+    for (const bare of ['sea', 'mountains', 'landmark'] as const) {
+      expect(featureFrame(bare, 0, 0)).toBeNull();
+    }
   });
 });

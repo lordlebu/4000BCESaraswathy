@@ -90,7 +90,19 @@ export function placeFrame(poiId: string): number | null {
  * arithmetic `swayFrame` below depends on.
  */
 export const OVERDRAW_SCATTERS = 3;
-export const OVERDRAW_PLANTS = ['grass-plains', 'reeds-wetland', 'paddy-settlement', 'rushes-river'];
+export const OVERDRAW_PLANTS = [
+  'grass-plains',
+  'reeds-wetland',
+  'paddy-settlement',
+  'rushes-river',
+  'barley-plains',
+  'sagebrush-plains',
+  'ferns-forest',
+  'vine-forest',
+  'saltgrass-coast',
+  'moss-hills',
+  'saltbush-desert'
+];
 export const OVERDRAW_REST = OVERDRAW_PLANTS.length * OVERDRAW_SCATTERS;
 export const FENCE_FRAME = OVERDRAW_REST * 2;
 
@@ -119,18 +131,25 @@ export function traceFrameFor(biome: BiomeId): number | null {
  * grassland, marsh, the planted margin of a settlement, and a river's edge. Forest is left alone
  * because its canopy is already the busiest tile in the set.
  */
-const OVERDRAW_BY_BIOME: Partial<Record<BiomeId, number>> = {
-  plains: 0,
-  wetland: 1,
-  settlement: 2,
-  river: 3
+const OVERDRAW_BY_BIOME: Partial<Record<BiomeId, number[]>> = {
+  plains: [0, 4, 5],
+  wetland: [1],
+  settlement: [2],
+  river: [3],
+  forest: [6, 7],
+  coast: [8],
+  hills: [9],
+  desert: [10]
 };
 
 /** The rest-frame for this biome and scatter, or null if nothing grows here. */
 export function overdrawFrame(biome: BiomeId, scatter: number): number | null {
-  const plant = OVERDRAW_BY_BIOME[biome];
-  if (plant === undefined) return null;
-  return plant * OVERDRAW_SCATTERS + (scatter % OVERDRAW_SCATTERS);
+  const plants = OVERDRAW_BY_BIOME[biome];
+  if (plants === undefined || plants.length === 0) return null;
+  // Two rolls out of one hash: which plant grows here, and which of its three scatters this tile
+  // gets. Plains carries grass, barley and sagebrush, so open country is not one repeated texture.
+  const plant = plants[scatter % plants.length]!;
+  return plant * OVERDRAW_SCATTERS + (Math.floor(scatter / plants.length) % OVERDRAW_SCATTERS);
 }
 
 /**
@@ -141,4 +160,59 @@ export function overdrawFrame(biome: BiomeId, scatter: number): number | null {
  */
 export function swayFrame(rest: number): number {
   return rest + OVERDRAW_REST;
+}
+
+// --- features: the tall things -------------------------------------------
+
+/**
+ * Frame layout of `assets/features.png`, written by tools/build-features.js.
+ *
+ * Each entry lists the frames that feature occupies. Anything with a trunk carries two mirrored
+ * variants so a run of tiles does not build a hedge down one side of the map; low things that sit
+ * centred carry one.
+ */
+export const FEATURES: Record<string, { biome: BiomeId; frames: number[] }> = {
+  neem: { biome: 'plains', frames: [0, 1] },
+  anthill: { biome: 'plains', frames: [2, 3] },
+  bamboo: { biome: 'forest', frames: [4, 5] },
+  bees: { biome: 'forest', frames: [6, 7] },
+  log: { biome: 'forest', frames: [8] },
+  mangroveWetland: { biome: 'wetland', frames: [9, 10] },
+  lotus: { biome: 'wetland', frames: [11] },
+  tussock: { biome: 'wetland', frames: [12] },
+  steppingStones: { biome: 'river', frames: [13] },
+  datePalm: { biome: 'settlement', frames: [14, 15] },
+  tulsi: { biome: 'settlement', frames: [16] },
+  woodpile: { biome: 'settlement', frames: [17] },
+  mangroveCoast: { biome: 'coast', frames: [18, 19] },
+  driftwood: { biome: 'coast', frames: [20] },
+  pine: { biome: 'hills', frames: [21, 22] },
+  boulder: { biome: 'hills', frames: [23] },
+  cactus: { biome: 'desert', frames: [24, 25] }
+};
+
+/**
+ * How rare a feature is: one tile in this many, before the per-biome choice.
+ *
+ * Twelve is what makes the trade safe. Features may reach row 4 of the cell where common overdraw
+ * stops at 16, which is only acceptable because you meet one occasionally rather than walking
+ * through a wood of them. Lowering this number is the thing that would make the map obstructive.
+ */
+export const FEATURE_RARITY = 12;
+
+/** Every frame available on a given ground, flattened. */
+const FEATURES_BY_BIOME = (() => {
+  const index: Partial<Record<BiomeId, number[]>> = {};
+  for (const entry of Object.values(FEATURES)) {
+    (index[entry.biome] ??= []).push(...entry.frames);
+  }
+  return index;
+})();
+
+/** The feature frame for this tile, or null — which is the usual answer. */
+export function featureFrame(biome: BiomeId, roll: number, pick: number): number | null {
+  if (roll % FEATURE_RARITY !== 0) return null;
+  const frames = FEATURES_BY_BIOME[biome];
+  if (!frames || frames.length === 0) return null;
+  return frames[pick % frames.length]!;
 }

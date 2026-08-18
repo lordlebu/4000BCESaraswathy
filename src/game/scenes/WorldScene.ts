@@ -12,8 +12,10 @@ import landmarksUrl from '../../../assets/landmarks.png';
 import placesUrl from '../../../assets/places.png';
 import hutsUrl from '../../../assets/huts.png';
 import overdrawUrl from '../../../assets/overdraw.png';
+import featuresUrl from '../../../assets/features.png';
 import { EventBus } from '../EventBus';
 import {
+  FEATURE_SHEET,
   FENCE_FRAME,
   FOG_TEXTURE,
   HUT_SHEET,
@@ -24,6 +26,7 @@ import {
   TERRAIN_SHEET,
   TILE_SIZE,
   createTileTextures,
+  featureFrame,
   landmarkFrame,
   loadTileSheets,
   overdrawFrame,
@@ -236,7 +239,8 @@ export class WorldScene extends Phaser.Scene {
       landmarks: landmarksUrl,
       places: placesUrl,
       huts: hutsUrl,
-      overdraw: overdrawUrl
+      overdraw: overdrawUrl,
+      features: featuresUrl
     });
   }
 
@@ -399,6 +403,21 @@ export class WorldScene extends Phaser.Scene {
         // Nothing grows through a roof. The hut layer runs first and records where it built, so
         // paddy does not sprout across the thatch of the house it is planted beside.
         if (this.builtOn.has(`${x},${y}`)) continue;
+
+        // A feature -- a tree, an anthill, a bee colony -- takes the tile instead of undergrowth,
+        // and is rare enough that meeting one is an event. It may stand far taller than the common
+        // overdraw because it is drawn offset to one side, so the traveller passes beside it rather
+        // than behind it.
+        const feature = featureFrame(
+          biome,
+          tileHash(seed, x, y, 'feature-present'),
+          tileHash(seed, x, y, 'feature-pick')
+        );
+        if (feature !== null) {
+          this.add.image(cx, cy, FEATURE_SHEET, feature).setDepth(21);
+          continue;
+        }
+
         if (tileHash(seed, x, y, 'overdraw-present') % 3 === 0) continue;
         const rest = overdrawFrame(biome, tileHash(seed, x, y, 'overdraw-scatter'));
         if (rest === null) continue;
