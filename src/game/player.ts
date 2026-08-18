@@ -2,7 +2,11 @@
 //
 // `assets/varuna-overworld.png` is built by `tools/build-sprite-sheet.js` from the artist's
 // full-size sheet: sixteen figures cropped, point-sampled down to the game's grid, and snapped to a
-// shared 26-colour palette. 8.3 KB for the lot.
+// small palette. 14 KB for the lot.
+//
+// The palette is per-character, not shared: Varuna's 30 colours and Mithra's 26 have none in
+// common. That is the design rather than an oversight — each figure is a tight tonal ramp around
+// one hue, so at 26x40 it is hue that tells one person from another.
 //
 // `assets/mithra-overworld.png` is a second character on exactly the same layout, so anything here
 // works for either — see `CHARACTERS`.
