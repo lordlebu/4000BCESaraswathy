@@ -811,7 +811,20 @@ button.ghost:hover:not(:disabled) {
 }
 
 .person { margin-bottom: 1rem; }
-.person h4 { margin: 0 0 0.3rem; font-size: 0.95rem; font-weight: 600; }
+.person h4 {
+  margin: 0 0 0.3rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/*
+ * The drawn mark beside a person's name. Fixed rather than flexible: a portrait that shrank when
+ * a role ran long would make a row of people look like a row of different-sized people.
+ */
+.person-portrait { flex: none; }
 .said { margin: 0 0 0.4rem; font-size: 0.92rem; font-style: italic; }
 .ghost.small {
   font-size: 0.76rem;
