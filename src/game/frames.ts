@@ -79,3 +79,49 @@ export function placeFrame(poiId: string): number | null {
   const index = PLACE_ORDER.indexOf(poiId);
   return index >= 0 ? index : null;
 }
+
+// --- the layer above the player ------------------------------------------
+
+/**
+ * Frame layout of `assets/overdraw.png`, written by tools/build-overdraw.js.
+ *
+ * Four plants, three scatters each, at rest; then the same twelve leaning; then the fence. Frame
+ * `n` and frame `n + OVERDRAW_REST` are therefore the two halves of one animation, which is the
+ * arithmetic `swayFrame` below depends on.
+ */
+export const OVERDRAW_SCATTERS = 3;
+export const OVERDRAW_PLANTS = ['grass-plains', 'reeds-wetland', 'paddy-settlement', 'rushes-river'];
+export const OVERDRAW_REST = OVERDRAW_PLANTS.length * OVERDRAW_SCATTERS;
+export const FENCE_FRAME = OVERDRAW_REST * 2;
+
+/**
+ * Which plant grows on which ground, or null where nothing does.
+ *
+ * Deliberately not every biome. Overdraw costs a sprite per tile and hides the player's legs, so
+ * it earns its place only where a traveller would actually be wading through something: open
+ * grassland, marsh, the planted margin of a settlement, and a river's edge. Forest is left alone
+ * because its canopy is already the busiest tile in the set.
+ */
+const OVERDRAW_BY_BIOME: Partial<Record<BiomeId, number>> = {
+  plains: 0,
+  wetland: 1,
+  settlement: 2,
+  river: 3
+};
+
+/** The rest-frame for this biome and scatter, or null if nothing grows here. */
+export function overdrawFrame(biome: BiomeId, scatter: number): number | null {
+  const plant = OVERDRAW_BY_BIOME[biome];
+  if (plant === undefined) return null;
+  return plant * OVERDRAW_SCATTERS + (scatter % OVERDRAW_SCATTERS);
+}
+
+/**
+ * The leaning counterpart of a rest frame.
+ *
+ * Kept as arithmetic rather than a second lookup so the two halves cannot drift apart: if the
+ * sheet grows a plant, both halves move together by construction.
+ */
+export function swayFrame(rest: number): number {
+  return rest + OVERDRAW_REST;
+}

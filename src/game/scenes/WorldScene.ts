@@ -11,11 +11,14 @@ import terrainUrl from '../../../assets/terrain.png';
 import landmarksUrl from '../../../assets/landmarks.png';
 import placesUrl from '../../../assets/places.png';
 import hutsUrl from '../../../assets/huts.png';
+import overdrawUrl from '../../../assets/overdraw.png';
 import { EventBus } from '../EventBus';
 import {
+  FENCE_FRAME,
   FOG_TEXTURE,
   HUT_SHEET,
   HUT_VARIANTS,
+  OVERDRAW_SHEET,
   LANDMARK_SHEET,
   PLACE_SHEET,
   TERRAIN_SHEET,
@@ -23,7 +26,9 @@ import {
   createTileTextures,
   landmarkFrame,
   loadTileSheets,
+  overdrawFrame,
   placeFrame,
+  swayFrame,
   tileFrame
 } from '../tileTextures';
 import { landmarkKindFor } from '../../content/landmarks';
@@ -55,6 +60,15 @@ const FOG_VISIBLE = 0;
 
 /** How far the traveller can see. */
 const SIGHT_RADIUS = 2;
+
+/**
+ * How long one sway takes, in milliseconds.
+ *
+ * Slow on purpose, and for the same reason the idle animation is: this is a game about a quiet
+ * afternoon walk. Grass that flickers reads as wind damage. Two seconds is about the pace of a
+ * breeze you would not comment on.
+ */
+const SWAY_PERIOD = 2000;
 
 /**
  * Roughly how many tiles should be visible across the screen, whatever its size.
@@ -136,6 +150,8 @@ export class WorldScene extends Phaser.Scene {
   /** The place under foot, so the UI is told when it changes rather than on every step. */
   private standingOn: string | null = null;
   private tileSprites: Phaser.GameObjects.Image[][] = [];
+  /** Everything swaying at depth 21, with the two frames it alternates and its own phase. */
+  private overdraw: { sprite: Phaser.GameObjects.Image; rest: number; sway: number; phase: number }[] = [];
   private fogSprites: Phaser.GameObjects.Image[][] = [];
   private player!: Phaser.GameObjects.Sprite;
   private at: Point = { x: 0, y: 0 };
@@ -187,6 +203,7 @@ export class WorldScene extends Phaser.Scene {
     this.arrived = false;
     this.tileSprites = [];
     this.fogSprites = [];
+    this.overdraw = [];
     this.queuedPath = [];
     this.moving = false;
     this.facing = 'down';
@@ -206,7 +223,8 @@ export class WorldScene extends Phaser.Scene {
       terrain: terrainUrl,
       landmarks: landmarksUrl,
       places: placesUrl,
-      huts: hutsUrl
+      huts: hutsUrl,
+      overdraw: overdrawUrl
     });
   }
 
@@ -247,6 +265,7 @@ export class WorldScene extends Phaser.Scene {
     }
 
     this.createSettlements();
+    this.createOverdraw();
     this.createLandmark();
 
     // The authored places, marked. Under the fog on purpose: a point of interest is a thing
@@ -330,6 +349,69 @@ export class WorldScene extends Phaser.Scene {
           .setOrigin(0.5, 1)
           .setDepth(4);
       }
+    }
+  }
+
+  /**
+   * The layer the traveller walks into: grass, reeds, paddy, and the settlement fence.
+   *
+   * Depth 21 is the whole trick. Everything else on the map sits below the player at depth 20, so
+   * he slides over a flat picture; one sprite above him and his legs go behind the blades. It is
+   * the cheapest depth this world can buy.
+   *
+   * Two rules keep it from swallowing him. The art is short by construction -- nothing in the
+   * sheet reaches higher than fifteen of the cell's thirty-two pixels, so it clears his head with
+   * room to spare. And it is sparse: a third of eligible tiles stay bare, which leaves paths
+   * through a field rather than a wall of green.
+   *
+   * The fence is different in kind. It is a boundary, not undergrowth, so it goes where settlement
+   * meets open ground rather than being scattered -- and only on the *southern* edge, where a
+   * traveller approaching from open country walks up behind it.
+   */
+  private createOverdraw(): void {
+    const { width, height, seed } = this.world;
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const biome = this.world.tiles[y]![x]!.biome;
+        const cx = x * TILE_SIZE + TILE_SIZE / 2;
+        const cy = y * TILE_SIZE + TILE_SIZE / 2;
+
+        // A settlement tile with open ground to the south gets a fence along that edge.
+        const southern = y + 1 < height ? this.world.tiles[y + 1]![x]!.biome : null;
+        if (biome === 'settlement' && southern !== null && southern !== 'settlement') {
+          this.add.image(cx, cy, OVERDRAW_SHEET, FENCE_FRAME).setDepth(21);
+          continue;
+        }
+
+        if (tileHash(seed, x, y, 'overdraw-present') % 3 === 0) continue;
+        const rest = overdrawFrame(biome, tileHash(seed, x, y, 'overdraw-scatter'));
+        if (rest === null) continue;
+        const sprite = this.add.image(cx, cy, OVERDRAW_SHEET, rest).setDepth(21);
+        // Phase offset per tile, so a field ripples across rather than blinking in unison. The
+        // sprite carries its own two frames so `update` needs no lookup.
+        this.overdraw.push({
+          sprite,
+          rest,
+          sway: swayFrame(rest),
+          phase: tileHash(seed, x, y, 'overdraw-phase') % SWAY_PERIOD
+        });
+      }
+    }
+  }
+
+  /**
+   * Alternate every swaying sprite between its two frames.
+   *
+   * One pass over a flat array each frame, setting a frame index that is usually the one already
+   * set -- Phaser skips the work when it has not changed, so this costs a comparison per tile
+   * rather than a redraw. The phase offset is what stops a field looking like a single blinking
+   * object; neighbouring tiles cross the halfway point at different moments.
+   */
+  private updateSway(): void {
+    const now = this.time.now;
+    for (const item of this.overdraw) {
+      const leaning = ((now + item.phase) % SWAY_PERIOD) * 2 > SWAY_PERIOD;
+      item.sprite.setFrame(leaning ? item.sway : item.rest);
     }
   }
 
@@ -632,6 +714,7 @@ export class WorldScene extends Phaser.Scene {
     // keeps changing mid-step too.
     this.updateSky();
     this.updatePinch();
+    this.updateSway();
 
     if (this.moving) return;
 
