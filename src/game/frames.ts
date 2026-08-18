@@ -240,13 +240,46 @@ export const ROW_DEPTH = 10;
 /**
  * Where in a row's ten slots each kind of thing sits.
  *
+ * `underfoot` is for things that are a *surface* rather than something growing out of one: moss
+ * crusting a hill stone, lily pads lying flat on water, stepping stones you cross by standing on
+ * them. Drawing those above the traveller puts them over his boots, which reads as him sinking
+ * into the ground.
+ *
  * `marker` is above the canopy on purpose, and it is the one slot that is not about physical
  * height. A landmark or an authored place is the thing the player is walking *towards*; letting a
  * tuft of grass on the same tile hide it would be correct as depth and wrong as a game. Everything
  * else in the band sorts by where it stands.
  */
-export const ROW_SLOT = { undergrowth: 1, walker: 5, canopy: 8, marker: 9 } as const;
+export const ROW_SLOT = { underfoot: 0, undergrowth: 1, walker: 5, canopy: 8, marker: 9 } as const;
 
 export function depthFor(row: number, slot: number): number {
   return GROUND_DEPTH_BASE + row * ROW_DEPTH + slot;
+}
+
+// --- what lies flat -------------------------------------------------------
+
+/**
+ * Overdraw plants that are a surface rather than something standing in one.
+ *
+ * Moss crusts a hill stone; a traveller walks on it, not through it. Everything else in the
+ * overdraw sheet is grass, reeds or scrub, which he wades into -- and that difference is the whole
+ * reason the layer exists, so getting it wrong on one entry is worth a lookup rather than a guess.
+ */
+const UNDERFOOT_PLANTS = new Set(['moss-hills']);
+
+/** Features that lie flat: lily pads on water, and stones you cross by standing on them. */
+const UNDERFOOT_FEATURES = new Set(['lotus', 'steppingStones']);
+
+/** Does this overdraw frame lie on the ground rather than stand in it? */
+export function overdrawIsUnderfoot(frame: number): boolean {
+  const plant = OVERDRAW_PLANTS[Math.floor(frame / OVERDRAW_SCATTERS)];
+  return plant !== undefined && UNDERFOOT_PLANTS.has(plant);
+}
+
+/** Does this feature frame lie on the ground rather than stand on it? */
+export function featureIsUnderfoot(frame: number): boolean {
+  for (const [name, entry] of Object.entries(FEATURES)) {
+    if (entry.frames.includes(frame)) return UNDERFOOT_FEATURES.has(name);
+  }
+  return false;
 }
