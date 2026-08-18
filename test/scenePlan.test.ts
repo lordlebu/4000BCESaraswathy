@@ -17,13 +17,17 @@ const worlds = fieldMaps.map((map) => ({ id: map.id, built: buildFieldMap(map, {
 const key = (p: { x: number; y: number }) => `${p.x},${p.y}`;
 
 describe('nothing hides the traveller or what he is walking towards', () => {
-  it('never puts vegetation above a marker on the same tile', () => {
+  it('never puts undergrowth above a marker on the same tile', () => {
     // The Drowned Dockyard bug. Its marker was drawn under the salt grass growing on its own tile,
     // so a place that was correctly placed simply could not be seen.
     for (const { id, built } of worlds) {
       const plan = planScene(built);
+      // Only the low layer. A tree may legitimately stand in front of a marker on its own tile --
+      // it is taller than the marker and taller than the traveller -- but grass must not.
       const cover = new Map(
-        plan.filter((p) => p.sheet === 'overdraw' || p.sheet === 'features').map((p) => [key(p), p.depth])
+        plan
+          .filter((p) => (p.sheet === 'overdraw' || p.sheet === 'features') && p.depth < depthFor(p.y, ROW_SLOT.walker))
+          .map((p) => [key(p), p.depth])
       );
       for (const marker of plan.filter((p) => p.sheet === 'marker' || p.sheet === 'places' || p.sheet === 'landmarks')) {
         const over = cover.get(key(marker));

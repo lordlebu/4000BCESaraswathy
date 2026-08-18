@@ -269,12 +269,16 @@ export const ROW_DEPTH = 10;
  * them. Drawing those above the traveller puts them over his boots, which reads as him sinking
  * into the ground.
  *
- * `marker` is above the canopy on purpose, and it is the one slot that is not about physical
- * height. A landmark or an authored place is the thing the player is walking *towards*; letting a
- * tuft of grass on the same tile hide it would be correct as depth and wrong as a game. Everything
- * else in the band sorts by where it stands.
+ * `marker` sits above the undergrowth and below the walker, and the ordering matters in both
+ * directions. A landmark is the thing the player is walking *towards*, so a tuft of grass on its
+ * tile must not hide it -- but arriving is the end of the journey, and a traveller who disappears
+ * behind the banyan the moment he reaches it is worse than one standing in front of it. He is the
+ * only thing on the map that is never occluded by something on his own tile.
+ *
+ * An earlier version put `marker` above `canopy`, which put it above the walker too. That was not
+ * the intent and it took reaching a landmark in play to notice.
  */
-export const ROW_SLOT = { underfoot: 0, undergrowth: 1, walker: 5, canopy: 8, marker: 9 } as const;
+export const ROW_SLOT = { underfoot: 0, undergrowth: 1, marker: 3, walker: 5, canopy: 8 } as const;
 
 export function depthFor(row: number, slot: number): number {
   return GROUND_DEPTH_BASE + row * ROW_DEPTH + slot;
@@ -291,8 +295,28 @@ export function depthFor(row: number, slot: number): number {
  */
 const UNDERFOOT_PLANTS = new Set(['moss-hills']);
 
-/** Features that lie flat: lily pads on water, and stones you cross by standing on them. */
-const UNDERFOOT_FEATURES = new Set(['lotus', 'steppingStones']);
+/**
+ * Features low enough that the traveller passes them rather than through them.
+ *
+ * Lily pads and stepping stones are surfaces he stands on. The rest are objects that reach his
+ * knee at most -- an anthill, a fallen log, a boulder, a woodpile, driftwood, a marsh tussock --
+ * and an object that low drawn over him puts a boulder across his chest.
+ *
+ * Kept as a list rather than a height test, for the reason the moss case proved: height alone is
+ * the wrong rule. A sagebrush is short *and* something you wade through, and lotus pads are the
+ * tallest thing here at sixteen pixels while lying flat on the water. What decides it is what the
+ * thing is.
+ */
+const UNDERFOOT_FEATURES = new Set([
+  'lotus',
+  'steppingStones',
+  'anthill',
+  'log',
+  'driftwood',
+  'boulder',
+  'woodpile',
+  'tussock'
+]);
 
 /** Does this overdraw frame lie on the ground rather than stand in it? */
 export function overdrawIsUnderfoot(frame: number): boolean {

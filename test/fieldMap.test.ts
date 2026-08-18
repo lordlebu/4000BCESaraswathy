@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap, poiAt } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps, poisOn, npcsAt, neighboursOf } from '../src/content/places';
 import { biomes } from '../src/content/species';
+import { landmarkKindFor } from '../src/content/landmarks';
 
 const lothal = fieldMap('field_map_lothal');
 
@@ -163,6 +164,36 @@ describe('what the places carry', () => {
     for (const b of lothal!.seedBiomes) expect(known.has(b)).toBe(true);
     for (const p of poisOn('field_map_lothal')) {
       for (const b of p.terrain) expect(known.has(b)).toBe(true);
+    }
+  });
+});
+
+describe('the destination stands on its own ground', () => {
+  // The landmark tile was being reclassified away on every map. No field map lists `landmark` in
+  // its palette -- and none should, since canon's `seed_biomes` describe the country and a
+  // landmark is a place put on it -- so `applyPalette` swept it up with everything else. The end
+  // of the whole journey was drawn as ordinary marsh, and the tile built for it never appeared.
+  //
+  // It hid because nothing asserted the one tile the journey is *about*: the terrain tests count
+  // biomes across the map, where a single wrong tile is invisible.
+  it('keeps the landmark tile on every field map', () => {
+    for (const map of fieldMaps) {
+      const { world } = buildFieldMap(map, {});
+      const tile = world.tiles[world.landmark.y]![world.landmark.x]!;
+      expect(tile.biome, `${map.id}: the landmark stands on ${tile.biome}`).toBe('landmark');
+    }
+  });
+
+  it('still remembers what the ground was before the landmark took it', () => {
+    // `terrain` is deliberately *not* the tile's biome -- it is what the tile was beforehand, and
+    // it is how the content layer knows a shell beach belongs on a coast. Reading the two as if
+    // they should agree is a mistake worth pinning down: they must differ.
+    for (const map of fieldMaps) {
+      const { world } = buildFieldMap(map, {});
+      expect(world.landmark.terrain).not.toBe('landmark');
+      const kind = landmarkKindFor(world.landmark, world.seed);
+      expect(kind.terrain, `${map.id}: ${kind.name} does not belong on ${world.landmark.terrain}`)
+        .toContain(world.landmark.terrain);
     }
   });
 });

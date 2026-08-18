@@ -131,6 +131,49 @@ earlier render, which reads exactly like the bug they were written to catch.
 And the same rule as everywhere else: **the guard was verified by reintroducing the bug.**
 Putting the old `noticed.length === 0` check back fails precisely the two tests written for it.
 
+## The engine file was the one nothing could test
+
+Six bugs surfaced while building the map art. Sorting them by how each was found says the whole
+thing:
+
+| Bug | Where it lived | Found by |
+|---|---|---|
+| Grass drawn across the traveller's face | `WorldScene` | playing it |
+| Paddy sprouting through hut roofs | `WorldScene` | a contact sheet |
+| A marker hidden under salt grass | `WorldScene` | a bug report |
+| Footprints drawn beneath the terrain | `WorldScene` | a bug report |
+| Blades reaching the player's chest | `frames.ts` | a test, in milliseconds |
+| `ant` matching inside *Panthera* | `bodyPlan.ts` | a test |
+
+The split is exact and it is not luck. `WorldScene.ts` was the only file importing Phaser, so it
+was the only file no test could load — and it was nine hundred lines of both *deciding* what to
+draw and *calling* the engine to draw it. Everything testable was caught early; everything
+untestable cost a dev server, a scripted walk and a screenshot.
+
+Only the drawing needs a browser. Placement is now a pure function in `scenePlan.ts` — world in,
+a list of sprites, tiles and depths out — which `WorldScene` walks. The three depth bugs became
+one assertion each, run against all four field maps rather than a fixture.
+
+**Writing those assertions immediately found a fourth**: five huts on the Dry Harbour map had a
+fence rail across the thatch, because the fence branch ran before the check for what the hut layer
+had already built. It had been shipping since the fence landed. Nobody had walked that map's
+southern boundary, and no screenshot of Lothal would ever have shown it.
+
+What this does not fix is judgement. *"The neem tree looks like a green disc on a stick"* is not a
+test. So the division is: **spatial and ordering facts get tests**, exhaustive and on every commit;
+**aesthetic questions get contact sheets**, slow but only when the art changes.
+
+## Write measurements down, or measure them again
+
+The sprite heights were measured by hand three times in one session — each time in a throwaway
+command whose output scrolled away, and once the number was assumed instead of checked and was
+wrong. `tools/measure-sprites.js` now generates `docs/sprite-heights.md` from the built sheets and
+fails if a sheet grows frames the name list does not know about.
+
+The general form: **if a number decides behaviour and you had to compute it, commit the
+computation, not the number.** A figure in a comment is stale the day the art changes; a generated
+table is not.
+
 ## What is worth adding next
 - **A Python test runner for the canon repo.** `lint_story.py` and `check_playability.py` are
   untested scripts, and one of them shipped a wrong ordering check for months.

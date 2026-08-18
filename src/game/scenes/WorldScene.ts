@@ -77,7 +77,6 @@ const SIGHT_RADIUS = 2;
  * over the fog and escaped the light of the hour.
  */
 const DEPTH_TILE = 0;
-const DEPTH_TRACE = 1;
 /** Above every row: a field map is 48 rows, so the band tops out far below this. */
 const DEPTH_FOG = 2000;
 const DEPTH_SKY = 3000;
@@ -732,8 +731,12 @@ export class WorldScene extends Phaser.Scene {
    * The mark a step leaves behind: prints on sand, a splash on water.
    *
    * Left on the tile being *departed* rather than the one being entered, so the trail reads as
-   * where the traveller has been rather than where he is standing. Below him at depth 3, because
-   * a footprint is on the ground, not over it -- unlike the grass, which is the point of depth 21.
+   * where the traveller has been rather than where he is standing.
+   *
+   * Sorted into the `underfoot` slot of the row it is left on, like moss and lily pads: a print is
+   * the ground, not something on it. It was a fixed depth of 1 until now, which put every print
+   * *below the terrain* of any row past the first -- a whole feature drawing under the map,
+   * invisible except on the top row.
    *
    * It fades and destroys itself. Keeping a handle on every mark a long walk leaves would be a
    * slow leak of sprites nothing ever reads again.
@@ -743,7 +746,7 @@ export class WorldScene extends Phaser.Scene {
     if (frame === null) return;
     const mark = this.add
       .image(from.x * TILE_SIZE + TILE_SIZE / 2, from.y * TILE_SIZE + TILE_SIZE / 2, OVERDRAW_SHEET, frame)
-      .setDepth(DEPTH_TRACE)
+      .setDepth(depthFor(from.y, ROW_SLOT.underfoot))
       .setAlpha(0.7);
     this.tweens.add({
       targets: mark,
