@@ -24,6 +24,7 @@ import {
 } from '../journey';
 import { discovery } from '../content/knowledge';
 import { npc, npcsAt, poi } from '../content/places';
+import { PersonPortrait } from './PersonPortrait';
 
 /** Why a rung will not move, in words. Mirrors the diary's phrasing on purpose. */
 function why(progress: Progress, id: string, moment: WorldMoment | null): string {
@@ -133,8 +134,11 @@ export function PlacePanel({
                   return (
                     <div key={n.id} className="person">
                       <h4>
-                        {n.name} <span className="muted">· {n.role}</span>
-                        {more && <i className="control-count">new</i>}
+                        <PersonPortrait person={n} />
+                        <span>
+                          {n.name} <span className="muted">· {n.role}</span>
+                          {more && <i className="control-count">new</i>}
+                        </span>
                       </h4>
                       {lines.map((line, i) => (
                         <p key={i} className="said">

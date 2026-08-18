@@ -22,7 +22,9 @@ import {
   ROW_SLOT,
   depthFor,
   featureFrame,
+  featureIsUnderfoot,
   landmarkFrame,
+  overdrawIsUnderfoot,
   overdrawFrame,
   placeFrame,
   swayFrame
@@ -99,7 +101,11 @@ export function planOverdraw(world: FieldMapWorld['world'], builtOn: ReadonlySet
   for (let y = 0; y < world.height; y += 1) {
     for (let x = 0; x < world.width; x += 1) {
       const biome = world.tiles[y]![x]!.biome;
-      const depth = depthFor(y, ROW_SLOT.canopy);
+      // Most of this layer stands in the ground and belongs above the traveller. A few entries are
+      // the ground -- moss on stone, pads on water, stones you step across -- and drawing those
+      // over his boots reads as him sinking into the tile.
+      const canopy = depthFor(y, ROW_SLOT.canopy);
+      const underfoot = depthFor(y, ROW_SLOT.underfoot);
 
       // Nothing is drawn over a roof -- checked before the fence, not after. A settlement's
       // southern edge is exactly where huts are, so putting the fence branch first meant five of
@@ -111,7 +117,7 @@ export function planOverdraw(world: FieldMapWorld['world'], builtOn: ReadonlySet
       // whole reason the fence reads as a boundary rather than as decoration.
       const southern = y + 1 < world.height ? world.tiles[y + 1]![x]!.biome : null;
       if (biome === 'settlement' && southern !== null && southern !== 'settlement') {
-        out.push({ sheet: 'overdraw', frame: FENCE_FRAME, x, y, depth });
+        out.push({ sheet: 'overdraw', frame: FENCE_FRAME, x, y, depth: canopy });
         continue;
       }
 
@@ -124,7 +130,13 @@ export function planOverdraw(world: FieldMapWorld['world'], builtOn: ReadonlySet
         tileHash(world.seed, x, y, 'feature-pick')
       );
       if (feature !== null) {
-        out.push({ sheet: 'features', frame: feature, x, y, depth });
+        out.push({
+          sheet: 'features',
+          frame: feature,
+          x,
+          y,
+          depth: featureIsUnderfoot(feature) ? underfoot : canopy
+        });
         continue;
       }
 
@@ -136,7 +148,7 @@ export function planOverdraw(world: FieldMapWorld['world'], builtOn: ReadonlySet
         frame: rest,
         x,
         y,
-        depth,
+        depth: overdrawIsUnderfoot(rest) ? underfoot : canopy,
         // Phase offset per tile, so a field ripples across rather than blinking in unison.
         sway: {
           rest,

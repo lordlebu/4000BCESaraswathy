@@ -147,7 +147,10 @@ const PLANTS = [
   // Salt grass on the shore: sparse and bent by wind, so every blade leans the same way.
   { id: 'saltgrass-coast', blades: 5, height: 8, width: 1, dark: '#9a9370', light: '#b6ae87', lean: 2 },
   // Scholar's moss, flat against hill stone.
-  { id: 'moss-hills', blades: 9, height: 3, width: 1, dark: '#6d7f79', light: '#87968c', lean: 0 },
+  // Moss crusts the stone rather than growing out of it, so it is drawn flat and rooted low. The
+  // `flat` flag keeps its blades on the bottom rows instead of scattering them up the cell, which
+  // is what made a three-pixel plant ten pixels tall.
+  { id: 'moss-hills', blades: 11, height: 3, width: 1, dark: '#6d7f79', light: '#87968c', lean: 0, flat: true },
   // Saltbush, the one thing that grows on the dunes.
   { id: 'saltbush-desert', blades: 5, height: 5, width: 1, dark: '#9c8f72', light: '#b5a888', lean: 0 }
 ];
@@ -186,7 +189,9 @@ function plantFrame(plant, frame, scatter) {
     // Vary the height so the field has a top edge rather than a hairline.
     // How far up the cell this blade is planted. Spreading the roots is what stops a column of
     // tiles reading as stacked bands with a seam between each one.
-    const root = hash(plant.id, 'r', scatter, n) % 9;
+    // A flat plant keeps its roots on the ground; everything else spreads them up the cell so a
+    // column of tiles does not read as stacked bands.
+    const root = plant.flat ? hash(plant.id, 'r', scatter, n) % 2 : hash(plant.id, 'r', scatter, n) % 9;
     // `height` is measured from the ground, not from the root, so raising a blade's root does not
     // also raise its tip. Getting that wrong put tips at row 9 of 32 -- half way up the tile and
     // straight across the player's chest -- while every constant here still read as safe.

@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMaps } from '../src/content/places';
 import { planScene, planHuts, planOverdraw, SWAY_PERIOD } from '../src/game/scenePlan';
-import { ROW_SLOT, depthFor } from '../src/game/frames';
+import { ROW_SLOT, depthFor, featureIsUnderfoot, overdrawIsUnderfoot } from '../src/game/frames';
 
 const worlds = fieldMaps.map((map) => ({ id: map.id, built: buildFieldMap(map, {}) }));
 const key = (p: { x: number; y: number }) => `${p.x},${p.y}`;
@@ -42,6 +42,34 @@ describe('nothing hides the traveller or what he is walking towards', () => {
       const huts = new Set(planHuts(built.world).map(key));
       const growing = planOverdraw(built.world, huts).filter((p) => huts.has(key(p)));
       expect(growing.map((p) => key(p)), `${id}: vegetation on a hut tile`).toEqual([]);
+    }
+  });
+
+  it('draws what lies flat below the traveller, not over his boots', () => {
+    // Reported from play: some of this layer is a surface rather than something standing in one.
+    // Moss crusts a hill stone, lily pads lie on water, stepping stones are crossed by standing on
+    // them -- and all three were drawn above the player, which reads as him sinking into the tile.
+    for (const { id, built } of worlds) {
+      for (const item of planScene(built)) {
+        const flat =
+          (item.sheet === 'overdraw' && overdrawIsUnderfoot(item.frame)) ||
+          (item.sheet === 'features' && featureIsUnderfoot(item.frame));
+        if (!flat) continue;
+        expect(item.depth, `${id}: flat ${item.sheet} at ${key(item)} drawn above the walker`)
+          .toBeLessThan(depthFor(item.y, ROW_SLOT.walker));
+      }
+    }
+  });
+
+  it('still draws everything that grows above him', () => {
+    // The other half, and the one that would break if the flat list ever swallowed a plant: grass
+    // and reeds must stay above the walker, because that overlap is the entire point of the layer.
+    for (const { id, built } of worlds) {
+      for (const item of planScene(built)) {
+        if (item.sheet !== 'overdraw' || overdrawIsUnderfoot(item.frame)) continue;
+        expect(item.depth, `${id}: growing ${key(item)} fell below the walker`)
+          .toBeGreaterThan(depthFor(item.y, ROW_SLOT.walker));
+      }
     }
   });
 
