@@ -15,6 +15,8 @@
 import Phaser from 'phaser';
 
 export {
+  depthFor,
+  ROW_SLOT,
   FEATURE_RARITY,
   FEATURES,
   FENCE_FRAME,

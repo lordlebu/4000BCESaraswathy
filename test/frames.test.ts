@@ -16,6 +16,8 @@ import {
   OVERDRAW_REST,
   OVERDRAW_SCATTERS,
   overdrawFrame,
+  ROW_SLOT,
+  depthFor,
   featureFrame,
   swayFrame,
   traceFrameFor
@@ -229,5 +231,41 @@ describe('features may be tall because they stand aside', () => {
     for (const bare of ['sea', 'mountains', 'landmark'] as const) {
       expect(featureFrame(bare, 0, 0)).toBeNull();
     }
+  });
+});
+
+describe('the world stacks by row, not by layer', () => {
+  // The bug this replaced: everything above the player had one depth and everything below had
+  // another, so a plant a dozen rows south of him -- nearer the camera, and therefore behind him
+  // -- still drew across his face. Depth is a global ordering and knows nothing about position.
+
+  it('draws a lower row nearer the viewer than a higher one', () => {
+    // The whole rule in one assertion. Anything on row 20 sits in front of anything on row 19,
+    // whatever kind of thing each is.
+    expect(depthFor(20, ROW_SLOT.undergrowth)).toBeGreaterThan(depthFor(19, ROW_SLOT.canopy));
+  });
+
+  it('puts the traveller between the undergrowth of his row and its canopy', () => {
+    // Which is what lets grass on his own tile pass in front of his legs while the ground cover
+    // he is standing on stays behind him.
+    const row = 12;
+    expect(depthFor(row, ROW_SLOT.walker)).toBeGreaterThan(depthFor(row, ROW_SLOT.undergrowth));
+    expect(depthFor(row, ROW_SLOT.walker)).toBeLessThan(depthFor(row, ROW_SLOT.canopy));
+  });
+
+  it('leaves room inside a row for more kinds of thing', () => {
+    // Every slot of a row must stay below the next row's first slot, or a third kind of sprite
+    // added later would leak into the row in front.
+    const slots = Object.values(ROW_SLOT);
+    for (const slot of slots) {
+      expect(depthFor(5, slot)).toBeLessThan(depthFor(6, Math.min(...slots)));
+    }
+  });
+
+  it('keeps the whole band clear of the fog and the sky', () => {
+    // A field map is 48 rows. The fog sits at 2000 and the sky at 3000, so the tallest row depth
+    // must stay well under that -- otherwise grass draws over the fog and escapes the day's light,
+    // which is exactly what happened when the band was introduced at 100 and fog was still at 10.
+    expect(depthFor(48, ROW_SLOT.canopy)).toBeLessThan(2000);
   });
 });

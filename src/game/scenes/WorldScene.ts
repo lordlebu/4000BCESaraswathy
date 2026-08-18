@@ -26,12 +26,14 @@ import {
   TERRAIN_SHEET,
   TILE_SIZE,
   createTileTextures,
+  depthFor,
   featureFrame,
   landmarkFrame,
   loadTileSheets,
   overdrawFrame,
   placeFrame,
   swayFrame,
+  ROW_SLOT,
   tileFrame,
   traceFrameFor
 } from '../tileTextures';
@@ -73,6 +75,24 @@ const SIGHT_RADIUS = 2;
  * breeze you would not comment on.
  */
 const SWAY_PERIOD = 2000;
+
+/**
+ * The fixed layers, below and above the row-sorted band in `frames.ts`.
+ *
+ * Named rather than written inline because that band is unbounded -- a 48-row map reaches depth
+ * 580 -- so anything meant to sit over the whole world needs a number that clears it. Fog and the
+ * sky tint were 10 and 30, which the row band silently overtook the moment it existed: grass drew
+ * over the fog and escaped the light of the hour.
+ */
+const DEPTH_TILE = 0;
+const DEPTH_TRACE = 1;
+const DEPTH_HUT = 2;
+const DEPTH_LANDMARK = 3;
+const DEPTH_PLACE = 4;
+/** Above every row: a field map is 48 rows, so the band tops out far below this. */
+const DEPTH_FOG = 2000;
+const DEPTH_SKY = 3000;
+
 
 /**
  * How long a footprint stays before it is gone.
@@ -266,14 +286,14 @@ export class WorldScene extends Phaser.Scene {
         const tile = this.world.tiles[y]![x]!;
         const cx = x * TILE_SIZE + TILE_SIZE / 2;
         const cy = y * TILE_SIZE + TILE_SIZE / 2;
-        tileRow.push(this.add.image(cx, cy, TERRAIN_SHEET, tileFrame(tile.biome)).setDepth(0));
+        tileRow.push(this.add.image(cx, cy, TERRAIN_SHEET, tileFrame(tile.biome)).setDepth(DEPTH_TILE));
         fogRow.push(
           this.add
             .image(cx, cy, FOG_TEXTURE)
             .setDisplaySize(TILE_SIZE, TILE_SIZE)
             .setTint(0x241a26)
             .setAlpha(FOG_UNKNOWN)
-            .setDepth(10)
+            .setDepth(DEPTH_FOG)
         );
       }
       this.tileSprites.push(tileRow);
@@ -300,7 +320,7 @@ export class WorldScene extends Phaser.Scene {
           .setOrigin(0.5, 1)
           // Above the huts at depth 4: Kavik's Tower stands inside the Lothal settlement, and a
           // hut drawn afterwards at the same depth would cover the thing the player came to see.
-          .setDepth(6)
+          .setDepth(DEPTH_PLACE)
           .setName(`poi:${poi.id}`);
         continue;
       }
@@ -311,7 +331,7 @@ export class WorldScene extends Phaser.Scene {
           color: '#fff6df'
         })
         .setOrigin(0.5)
-        .setDepth(5)
+        .setDepth(DEPTH_PLACE)
         .setAlpha(0.9)
         .setName(`poi:${poi.id}`);
     }
@@ -323,7 +343,7 @@ export class WorldScene extends Phaser.Scene {
     this.sky = this.add
       .rectangle(0, 0, pixelWidth, pixelHeight, 0xffffff, 0)
       .setOrigin(0, 0)
-      .setDepth(30);
+      .setDepth(DEPTH_SKY);
     this.updateSky();
 
     // Bounds are not set here: they depend on the zoom and on what the panels are covering, so
@@ -364,7 +384,7 @@ export class WorldScene extends Phaser.Scene {
         this.add
           .image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE - 2, HUT_SHEET, variant)
           .setOrigin(0.5, 1)
-          .setDepth(4);
+          .setDepth(DEPTH_HUT);
       }
     }
   }
@@ -396,7 +416,7 @@ export class WorldScene extends Phaser.Scene {
         // A settlement tile with open ground to the south gets a fence along that edge.
         const southern = y + 1 < height ? this.world.tiles[y + 1]![x]!.biome : null;
         if (biome === 'settlement' && southern !== null && southern !== 'settlement') {
-          this.add.image(cx, cy, OVERDRAW_SHEET, FENCE_FRAME).setDepth(21);
+          this.add.image(cx, cy, OVERDRAW_SHEET, FENCE_FRAME).setDepth(depthFor(y, ROW_SLOT.canopy));
           continue;
         }
 
@@ -414,14 +434,14 @@ export class WorldScene extends Phaser.Scene {
           tileHash(seed, x, y, 'feature-pick')
         );
         if (feature !== null) {
-          this.add.image(cx, cy, FEATURE_SHEET, feature).setDepth(21);
+          this.add.image(cx, cy, FEATURE_SHEET, feature).setDepth(depthFor(y, ROW_SLOT.canopy));
           continue;
         }
 
         if (tileHash(seed, x, y, 'overdraw-present') % 3 === 0) continue;
         const rest = overdrawFrame(biome, tileHash(seed, x, y, 'overdraw-scatter'));
         if (rest === null) continue;
-        const sprite = this.add.image(cx, cy, OVERDRAW_SHEET, rest).setDepth(21);
+        const sprite = this.add.image(cx, cy, OVERDRAW_SHEET, rest).setDepth(depthFor(y, ROW_SLOT.canopy));
         // Phase offset per tile, so a field ripples across rather than blinking in unison. The
         // sprite carries its own two frames so `update` needs no lookup.
         this.overdraw.push({
@@ -458,7 +478,7 @@ export class WorldScene extends Phaser.Scene {
     this.add
       .image(landmark.x * TILE_SIZE + TILE_SIZE / 2, landmark.y * TILE_SIZE + TILE_SIZE, LANDMARK_SHEET, frame)
       .setOrigin(0.5, 1)
-      .setDepth(5)
+      .setDepth(DEPTH_LANDMARK)
       .setName('landmark');
   }
 
@@ -469,8 +489,7 @@ export class WorldScene extends Phaser.Scene {
     this.player = this.add
       .sprite(0, 0, CHARACTERS.varuna.key, 0)
       .setOrigin(0.5, 1)
-      .setDisplaySize(PLAYER_FRAME.width, PLAYER_FRAME.height)
-      .setDepth(20);
+      .setDisplaySize(PLAYER_FRAME.width, PLAYER_FRAME.height);
     this.player.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.updateAnimation();
     this.placePlayer(this.at);
@@ -499,6 +518,18 @@ export class WorldScene extends Phaser.Scene {
 
   private placePlayer(at: Point): void {
     this.player.setPosition(at.x * TILE_SIZE + TILE_SIZE / 2, at.y * TILE_SIZE + TILE_SIZE - 2);
+    this.sortPlayer(at.y);
+  }
+
+  /**
+   * Put the traveller in his row's depth slot.
+   *
+   * Called on every step rather than set once, because his depth is a function of where he is
+   * standing. Without this he keeps one depth for the whole journey and grass a dozen tiles south
+   * of him -- which should be nearer the camera than he is -- draws across his face.
+   */
+  private sortPlayer(row: number): void {
+    this.player.setDepth(depthFor(row, ROW_SLOT.walker));
   }
 
   private bindInput(): void {
@@ -799,6 +830,9 @@ export class WorldScene extends Phaser.Scene {
       y: target.y * TILE_SIZE + TILE_SIZE - 2,
       duration: STEP_MS * cost,
       ease: 'Sine.easeInOut',
+      // Re-sorted at the start of the step rather than the end: he should be behind the grass of
+      // the tile he is entering from the moment he begins to enter it.
+      onStart: () => this.sortPlayer(target.y),
       onComplete: () => {
         this.moving = false;
         this.arriveAt(target);
@@ -822,7 +856,7 @@ export class WorldScene extends Phaser.Scene {
     if (frame === null) return;
     const mark = this.add
       .image(from.x * TILE_SIZE + TILE_SIZE / 2, from.y * TILE_SIZE + TILE_SIZE / 2, OVERDRAW_SHEET, frame)
-      .setDepth(3)
+      .setDepth(DEPTH_TRACE)
       .setAlpha(0.7);
     this.tweens.add({
       targets: mark,

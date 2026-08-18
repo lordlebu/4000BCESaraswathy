@@ -216,3 +216,30 @@ export function featureFrame(biome: BiomeId, roll: number, pick: number): number
   if (!frames || frames.length === 0) return null;
   return frames[pick % frames.length]!;
 }
+
+// --- how the world is stacked --------------------------------------------
+
+/**
+ * Depth for something standing on the ground, sorted by the row it stands on.
+ *
+ * A flat depth per layer does not work on a top-down map. Give every plant one number and the
+ * player another, and a tuft of grass a dozen rows *south* of him -- nearer the camera, so it
+ * belongs behind him -- still draws across his face. Depth is a global ordering and knows nothing
+ * about position.
+ *
+ * So depth follows the row: further down the screen means nearer the viewer means drawn later. The
+ * player is sorted by the same rule, which is what lets him pass behind the grass on his own tile
+ * and in front of everything below it.
+ *
+ * Lives here rather than in the scene so it can be tested under Node, and because getting it wrong
+ * is invisible until someone stands in the wrong place.
+ */
+export const GROUND_DEPTH_BASE = 100;
+export const ROW_DEPTH = 10;
+
+/** Where in a row's ten slots each kind of thing sits. */
+export const ROW_SLOT = { undergrowth: 1, walker: 5, canopy: 8 } as const;
+
+export function depthFor(row: number, slot: number): number {
+  return GROUND_DEPTH_BASE + row * ROW_DEPTH + slot;
+}
