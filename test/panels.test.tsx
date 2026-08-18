@@ -22,6 +22,8 @@ import { Ending } from '../src/ui/Ending';
 import { FieldKit } from '../src/ui/FieldKit';
 import { Here } from '../src/ui/Here';
 import { CollectionPanel } from '../src/ui/CollectionPanel';
+import { LANGUAGE_INK, PersonPortrait } from '../src/ui/PersonPortrait';
+import { npcs } from '../src/content/places';
 import { emptyCollection, metOnTile } from '../src/content/collection';
 import { metSpecies } from '../src/content/species';
 import {
@@ -533,5 +535,61 @@ describe('collection', () => {
   it('starts focus somewhere a keyboard can leave from', () => {
     render(<CollectionPanel collection={met} open onClose={noop} canAsk={false} />);
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close' }));
+  });
+});
+
+describe('the people in a place', () => {
+  // Getting a portrait on screen by walking to it cost several attempts and never succeeded: the
+  // camp is forty tiles from the start, across water, and a scripted walk lands beside it rather
+  // than on it. Rendering the component directly answers the same question in milliseconds, which
+  // is the trade the whole `scenePlan` split was about.
+
+  it('draws a portrait beside every person, coloured by their language', () => {
+    const people = npcs.filter((n) => ['npc_thrali', 'npc_uma', 'npc_marn'].includes(n.id));
+    expect(people).toHaveLength(3);
+
+    render(
+      <ul>
+        {people.map((person) => (
+          <li key={person.id}>
+            <PersonPortrait person={person} />
+            <span>{person.name}</span>
+          </li>
+        ))}
+      </ul>
+    );
+
+    // One portrait each, and hidden from the reading order: the name beside it already says who
+    // this is, so announcing "portrait, Thrali" would be worse than announcing "Thrali".
+    const portraits = document.querySelectorAll('svg.person-portrait');
+    expect(portraits).toHaveLength(3);
+    for (const svg of portraits) expect(svg.getAttribute('aria-hidden')).toBe('true');
+
+    // Thrali speaks Kia and Marn speaks Maru, so they must not be drawn in the same ink. Uma has
+    // no language in canon and takes the neutral one rather than being assigned a tongue.
+    const inkOf = (i: number) => portraits[i]!.querySelector('path')!.getAttribute('fill');
+    const thrali = inkOf(people.findIndex((p) => p.id === 'npc_thrali'));
+    const marn = inkOf(people.findIndex((p) => p.id === 'npc_marn'));
+    const uma = inkOf(people.findIndex((p) => p.id === 'npc_uma'));
+    expect(thrali).toBe(LANGUAGE_INK.kia);
+    expect(marn).toBe(LANGUAGE_INK.maru);
+    expect(uma).not.toBe(thrali);
+    expect(Object.values(LANGUAGE_INK)).not.toContain(uma);
+  });
+
+  it('gives a fisher and a herder different things to hold', () => {
+    // The portrait says what someone does, which is the only thing canon records about how they
+    // look. Two trades sharing a drawing would make it say nothing.
+    const thrali = npcs.find((n) => n.id === 'npc_thrali')!;
+    const marn = npcs.find((n) => n.id === 'npc_marn')!;
+    render(
+      <div>
+        <PersonPortrait person={thrali} />
+        <PersonPortrait person={marn} />
+      </div>
+    );
+    const [first, second] = [...document.querySelectorAll('svg.person-portrait')];
+    const toolOf = (svg: Element) => [...svg.querySelectorAll('path')].at(-1)!.getAttribute('d');
+    expect(toolOf(first!)).not.toBe(toolOf(second!));
   });
 });
