@@ -253,6 +253,21 @@ describe('the world stacks by row, not by layer', () => {
     expect(depthFor(row, ROW_SLOT.walker)).toBeLessThan(depthFor(row, ROW_SLOT.canopy));
   });
 
+  it('never lets undergrowth hide the place you are walking towards', () => {
+    // Landmarks and authored places sit above the canopy of their own row. That is not physically
+    // true -- grass in front of a shrine really would obscure it -- but a marker the player is
+    // navigating to is the one thing that must not be hidden by a tuft of salt grass.
+    //
+    // The regression this catches: markers were left on fixed depths of 3 and 4 when the row band
+    // was introduced at 100, so vegetation drew over four of the six markers on the Lothal map,
+    // including the Drowned Dockyard.
+    const row = 9;
+    expect(depthFor(row, ROW_SLOT.marker)).toBeGreaterThan(depthFor(row, ROW_SLOT.canopy));
+    expect(depthFor(row, ROW_SLOT.marker)).toBeGreaterThan(depthFor(row, ROW_SLOT.walker));
+    // And still below the next row, so a marker never floats over ground nearer the camera.
+    expect(depthFor(row, ROW_SLOT.marker)).toBeLessThan(depthFor(row + 1, ROW_SLOT.undergrowth));
+  });
+
   it('leaves room inside a row for more kinds of thing', () => {
     // Every slot of a row must stay below the next row's first slot, or a third kind of sprite
     // added later would leak into the row in front.

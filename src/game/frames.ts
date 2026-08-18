@@ -237,8 +237,15 @@ export function featureFrame(biome: BiomeId, roll: number, pick: number): number
 export const GROUND_DEPTH_BASE = 100;
 export const ROW_DEPTH = 10;
 
-/** Where in a row's ten slots each kind of thing sits. */
-export const ROW_SLOT = { undergrowth: 1, walker: 5, canopy: 8 } as const;
+/**
+ * Where in a row's ten slots each kind of thing sits.
+ *
+ * `marker` is above the canopy on purpose, and it is the one slot that is not about physical
+ * height. A landmark or an authored place is the thing the player is walking *towards*; letting a
+ * tuft of grass on the same tile hide it would be correct as depth and wrong as a game. Everything
+ * else in the band sorts by where it stands.
+ */
+export const ROW_SLOT = { undergrowth: 1, walker: 5, canopy: 8, marker: 9 } as const;
 
 export function depthFor(row: number, slot: number): number {
   return GROUND_DEPTH_BASE + row * ROW_DEPTH + slot;
