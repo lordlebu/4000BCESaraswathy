@@ -349,7 +349,9 @@ const PLACES = {
   // than a diamond while claiming less than a wrong building would.
   'kind-eco-site': 'poi-eco-site.png',
   'kind-anomaly': 'poi-anomaly.png',
-  'kind-settlement': 'poi-settlement.png'
+  'kind-settlement': 'poi-settlement.png',
+  'kind-wilderness': 'poi-wilderness.png',
+  'kind-travel-node': 'poi-travel-node.png'
 };
 
 const TILE = { width: 32, height: 32 };

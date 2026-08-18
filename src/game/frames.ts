@@ -62,16 +62,19 @@ export const PLACE_ORDER = [
  * Sixteen of canon's twenty-four points of interest have no drawing of their own, and were all
  * showing the same diamond. A kind marker says more than that without claiming more than it knows:
  * reeds and standing water for an eco-site, a doorway leading nowhere for an anomaly, a roof and a
- * well for a place people live.
+ * well for a place people live, worn steps for a wilderness, a cold fire-ring for a travel node.
  *
- * Two kinds are deliberately absent. `wilderness` and `travel_node` are three places and one, and
- * both are defined by what is *not* built there -- a fossil channel, a hillside of steps, a cleared
- * circle of ground. A marker for those would be inventing scenery canon has kept empty.
+ * The last two were nearly left out on the argument that both are defined by what is *not* built
+ * there. Seeing them drawn changed that: canon says "stone steps up a hillside", "steps up the old
+ * wall, kept clear", and "where the road stops for the night" -- worn steps and a cold fire-ring
+ * are made things, and the reading was too strict.
  */
 const KIND_FRAMES: Record<string, number> = {
   eco_site: PLACE_ORDER.length,
   anomaly: PLACE_ORDER.length + 1,
-  settlement: PLACE_ORDER.length + 2
+  settlement: PLACE_ORDER.length + 2,
+  wilderness: PLACE_ORDER.length + 3,
+  travel_node: PLACE_ORDER.length + 4
 };
 
 /** How many hut variants the sheet carries, for the seeded per-tile pick. */

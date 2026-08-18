@@ -225,21 +225,23 @@ describe('the artwork points at places that exist', () => {
     expect(missing, 'biomes in data/biomes.json with no frame in the terrain sheet').toEqual([]);
   });
 
-  it('draws most places by kind, and the rest honestly', () => {
-    // Sixteen of the twenty-four points of interest have no art of their own and were all showing
-    // the same diamond. A kind marker says more without claiming more -- reeds for an eco-site, a
-    // doorway leading nowhere for an anomaly, a roof and a well for a place people live.
+  it('draws every place, by its own art or by its kind', () => {
+    // All twenty-four points of interest were showing the same diamond until eight got their own
+    // drawing; the other sixteen now fall back to their kind. A kind marker says more without
+    // claiming more -- reeds for an eco-site, a doorway leading nowhere for an anomaly, a roof and
+    // a well for a place people live, worn steps for a wilderness, a cold fire-ring for a camp.
     const places = collection('places.points_of_interest') as { id: string; kind: string }[];
-    const drawn = places.filter((p) => placeFrame(p.id, p.kind) !== null);
-    expect(drawn.length / places.length, 'share of places with a picture').toBeGreaterThan(0.75);
+    const bare = places.filter((p) => placeFrame(p.id, p.kind) === null);
+    expect(bare.map((p) => `${p.id} (${p.kind})`), 'places with no picture at all').toEqual([]);
+  });
 
-    // Wilderness and travel nodes keep the diamond on purpose: a fossil channel, a hillside of
-    // steps and a cleared camping circle are defined by what is *not* built there, and a marker
-    // would be inventing scenery canon has kept empty.
-    for (const place of places) {
-      if (place.kind !== 'wilderness' && place.kind !== 'travel_node') continue;
-      expect(placeFrame(place.id, place.kind), `${place.id} should keep the diamond`).toBeNull();
-    }
+  it('prefers its own art over its kind', () => {
+    // Kavik's Tower is an archaeological site and so is the Silted Granary; if the kind ever won,
+    // canon's eight authored places would silently collapse into one generic ruin.
+    const own = placeFrame('poi_kavik_tower', 'archaeological_site');
+    const kind = placeFrame('poi_bone_midden', 'archaeological_site');
+    expect(own).not.toBe(kind);
+    expect(own).toBeLessThan(PLACE_ORDER.length);
   });
 
   it('draws every kind of landmark a journey can end at', () => {
