@@ -72,10 +72,10 @@ function Entry({ meeting, canAsk }: EntryProps) {
   return (
     <li className="met-entry">
       <div className="met-head">
-        {/* Plants only. The shape is derived from the name, and the vocabulary it reads --
-            banyan, lotus, reed -- is botanical; run an animal through it and a Desert Fox comes
-            out drawn as a sprig. Fauna keep no icon until they have shapes of their own. */}
-        {meeting.kind === 'flora' && <SpeciesIcon species={species} />}
+        {/* Plants are read by one vocabulary and animals by another -- a Desert Fox run through
+            the botanical matcher came out drawn as a sprig -- so the kind is passed rather than
+            guessed. */}
+        <SpeciesIcon species={species} kind={meeting.kind} />
         <div>
           <h4>{species.name}</h4>
           {species.binomial && <p className="met-binomial">{species.binomial}</p>}
