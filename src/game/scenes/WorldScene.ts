@@ -87,8 +87,6 @@ const SWAY_PERIOD = 2000;
 const DEPTH_TILE = 0;
 const DEPTH_TRACE = 1;
 const DEPTH_HUT = 2;
-const DEPTH_LANDMARK = 3;
-const DEPTH_PLACE = 4;
 /** Above every row: a field map is 48 rows, so the band tops out far below this. */
 const DEPTH_FOG = 2000;
 const DEPTH_SKY = 3000;
@@ -320,7 +318,7 @@ export class WorldScene extends Phaser.Scene {
           .setOrigin(0.5, 1)
           // Above the huts at depth 4: Kavik's Tower stands inside the Lothal settlement, and a
           // hut drawn afterwards at the same depth would cover the thing the player came to see.
-          .setDepth(DEPTH_PLACE)
+          .setDepth(depthFor(at.y, ROW_SLOT.marker))
           .setName(`poi:${poi.id}`);
         continue;
       }
@@ -331,7 +329,7 @@ export class WorldScene extends Phaser.Scene {
           color: '#fff6df'
         })
         .setOrigin(0.5)
-        .setDepth(DEPTH_PLACE)
+        .setDepth(depthFor(at.y, ROW_SLOT.marker))
         .setAlpha(0.9)
         .setName(`poi:${poi.id}`);
     }
@@ -478,7 +476,7 @@ export class WorldScene extends Phaser.Scene {
     this.add
       .image(landmark.x * TILE_SIZE + TILE_SIZE / 2, landmark.y * TILE_SIZE + TILE_SIZE, LANDMARK_SHEET, frame)
       .setOrigin(0.5, 1)
-      .setDepth(DEPTH_LANDMARK)
+      .setDepth(depthFor(landmark.y, ROW_SLOT.marker))
       .setName('landmark');
   }
 
