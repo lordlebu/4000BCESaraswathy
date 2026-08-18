@@ -4871,6 +4871,45 @@
       "placement_note": "Native to the Naraka rifts, not to this realm's water or ground. Naraka creatures cross through gates: the standing Dwarka Gate (settlement_dwarka, event_shadow_pact) and the portal Guyuk tore open over the Hyrkanian steppe, whose outcomes record a beast spill (event_naraka_portal). So one met here should be met at a gate and nowhere else. `underworld` is not renderable yet, so the export holds this as lore; when a gate exists as a landmark, add that biome."
     },
     {
+      "id": "fauna_shrima",
+      "type": "fauna",
+      "name": "Shrīmā",
+      "aliases": [
+        "Srima",
+        "Lagoon Queens"
+      ],
+      "scientific": "Eurypterus mimeticus",
+      "taxonomy": {
+        "notes": "Giant eurypterid, Merostomata; a deep-time survivor of the Invertebrate Dominion"
+      },
+      "diet": "Carnivore",
+      "habitats": [
+        "region_shattered_sea"
+      ],
+      "behaviour": [
+        "ambush",
+        "camouflage",
+        "aquatic",
+        "ocular_mimicry"
+      ],
+      "notes": "The islanders read them as fallen sky-mystics who chose the shallows; the Narmada reading is that a eurypterid lineage has evolved toward the human silhouette as a lure. Both accounts describe the same animal, and the folklore is the older of the two. Dr. Digha Jani's lecture notes are the source for the second, and she is careful to say the mimicry is of *shape*, not of mind.",
+      "canon": "primary",
+      "sources": [
+        "docs/bestiary.md",
+        "Palm-Leaf Manuscript of iKnaya Subayai"
+      ],
+      "region": "shattered-sea-mappa-mundi",
+      "biomes": [
+        "coast",
+        "sea"
+      ],
+      "placement": "encounter",
+      "rarity": "mythic",
+      "journal_prompt": "Something stands in the shallow lagoon at dusk, draped in seaweed-silk and cowrie shells, swaying as though dancing. The proportions are almost right. The antennae are not.",
+      "mood": "uncanny",
+      "source_index": 236
+    },
+    {
       "id": "fauna_beedu",
       "type": "fauna",
       "name": "Beedu",

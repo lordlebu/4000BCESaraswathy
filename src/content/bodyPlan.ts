@@ -75,7 +75,10 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
     'terrapin', 'croc', 'suchus', 'dinosaur', 'chameleon', 'megalosaur', 'postosuchus', 'acanthodactylus', 'scutosaurus', 'sauropodoligator'
   ]],
   ['amphibian', ['rana', 'bufo', 'megalobatrachus', 'frog', 'toad', 'salamander', 'newt', 'caecilian']],
-  ['arachnid', ['spider', 'arachn', 'scorpion', 'tarantula', 'mite', 'tick', 'nephila', 'spinner']],
+    // Eurypterids are sea scorpions, and the chelicerate silhouette is the closest honest shape for
+  // one. Canon's Shrīmā mimics a human outline as a lure, but the icon should say what the animal
+  // is rather than what it is pretending to be.
+  ['arachnid', ['spider', 'arachn', 'scorpion', 'tarantula', 'mite', 'tick', 'nephila', 'spinner', 'eurypterus', 'eurypterid']],
   ['insect', [
     'coleopt', 'apis', 'formic', 'lepidopt', 'odonat', 'mantis', 'scarab', 'vespa', 'cicada',
     'bombyx', 'anax', 'isotoma', 'silvanus', 'beetle', 'moth', 'butterfly', 'bee', 'wasp', 'ant', 'dragonfly',

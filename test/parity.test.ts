@@ -6,6 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import { creatures, flora } from '../src/content/species';
 import placesBundle from '../data/canon/places.json';
+import speciesBundle from '../data/canon/species.json';
 
 const renderable = new Set(
   (placesBundle as { biomes: { id: string; renderable?: boolean }[] }).biomes
@@ -15,8 +16,13 @@ const renderable = new Set(
 
 describe('the adapter', () => {
   it('brings across every species canon holds', () => {
-    expect(creatures.length).toBe(256);
-    expect(flora.length).toBe(90);
+    // Counted from the bundle rather than written down. A literal here has to be edited every
+    // time canon grows a species, which turns an invariant into a chore and teaches whoever hits
+    // it that the number is the thing to change -- when the point is that the adapter must not
+    // silently drop anything.
+    const bundle = speciesBundle as { fauna: unknown[]; flora: unknown[] };
+    expect(creatures.length).toBe(bundle.fauna.length);
+    expect(flora.length).toBe(bundle.flora.length);
   });
 
   it('never lets a biome the engine cannot draw reach a placed species', () => {
