@@ -403,6 +403,8 @@ describe('here', () => {
     hint: 'Keep going east.',
     whereNext: '',
     fatigue: null as string | null,
+    dusk: null as string | null,
+    shelter: 'bedroll' as 'roof' | 'camp' | 'bedroll' | 'none',
     canCamp: false,
     onCamp: noop,
     discovered: 3,
@@ -423,12 +425,20 @@ describe('here', () => {
     onClose: noop
   };
 
-  it('offers a camp only where one can be made', () => {
+  it('offers a night only when one can be spent, and names what kind', () => {
+    // The label is the whole explanation of shelter -- no tooltip, no legend. A roof, a camp and
+    // the bedroll each say what sort of night this will be before the player commits to it.
     const { unmount } = render(
-      <Here open notes={{ ...notes, canCamp: true }} place={{ ...place }} />
+      <Here open notes={{ ...notes, canCamp: true, shelter: 'roof' }} place={{ ...place }} />
     );
-    expect(screen.getByRole('button', { name: /Make camp/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /roof/i })).toBeTruthy();
     unmount();
+
+    const bed = render(
+      <Here open notes={{ ...notes, canCamp: true, shelter: 'bedroll' }} place={{ ...place }} />
+    );
+    expect(screen.getByRole('button', { name: /bedding/i })).toBeTruthy();
+    bed.unmount();
 
     const { container } = render(
       <Here open notes={{ ...notes, canCamp: false }} place={{ ...place }} />

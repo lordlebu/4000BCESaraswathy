@@ -23,14 +23,25 @@ async function boot(page: Page, query: string) {
   await expect(page.locator('.journal-foot')).toBeVisible();
 }
 
-test('nothing changes when the flag is off', async ({ page }) => {
-  await boot(page, '/?seed=poi-252');
+test('tiredness stays inert when the flag is off', async ({ page }) => {
+  // Narrowed deliberately. This used to assert no camp button either, which was right while
+  // stopping for the night was part of the fatigue experiment. Shelter is unconditional now --
+  // it is how a night is spent, not an optional system -- so the button appears after dark for
+  // everyone. What the flag still gates is the *tiredness*: the mood line and the slower pace.
+  await boot(page, '/?seed=poi-252&hour=12');
 
   for (let i = 0; i < 6; i += 1) await step(page, 'ArrowRight');
 
-  // No mood line, no camp button. The default game is exactly the game that shipped.
   await expect(page.locator('.status-tired')).toHaveCount(0);
+  // Midday, so nothing to stop for either way.
   await expect(page.locator('.camp-button')).toHaveCount(0);
+});
+
+test('shelter is offered after dark whether or not the flag is on', async ({ page }) => {
+  await boot(page, '/?seed=poi-252&hour=22');
+  await expect(page.locator('.camp-button')).toBeVisible({ timeout: 10_000 });
+  // And the label says what kind of night it will be, which is the whole explanation of shelter.
+  await expect(page.locator('.camp-button')).toHaveText(/roof|camp|bedding|sit out/i);
 });
 
 test('walking far enough with the flag on says something about it', async ({ page }) => {

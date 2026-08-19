@@ -37,7 +37,11 @@ export interface GameToUi {
      * session. Never a warning: nothing bad happens, so a line implying otherwise would lie.
      */
     fatigue: string | null;
-    /** Whether bedding down would work here and now. Drives the button. */
+    /** A word about the fading light, or null while there is plenty. */
+    dusk: string | null;
+    /** The best shelter where the traveller stands: a roof, a camp, or his own bedroll. */
+    shelter: 'roof' | 'camp' | 'bedroll' | 'none';
+    /** Whether stopping for the night would do anything. Only after dark. */
     canCamp: boolean;
     discovered: number;
     atLandmark: boolean;
@@ -75,8 +79,19 @@ export interface GameToUi {
    */
   'poi-reached': { poiId: string; fieldMapId: string };
 
-  /** The traveller slept. The clock has moved to first light and the legs are fresh. */
-  'camped': { at: Point; place: string };
+  /**
+   * A night passed. The clock has moved to first light.
+   *
+   * `at` is where he already was: he wakes where he stopped, and this event reports the position
+   * rather than setting it. `rested` is false for a night on the bedroll -- it buys the hours, not
+   * the sleep, which is what keeps a roof worth walking to.
+   */
+  'night-passed': {
+    at: Point;
+    shelter: 'roof' | 'camp' | 'bedroll' | 'none';
+    rested: boolean;
+    entry: string;
+  };
 
   /**
    * The authored place under the traveller's feet, or null when there is none.

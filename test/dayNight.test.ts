@@ -24,9 +24,11 @@ const clock = (hour: number, minute = 0) => phaseFromClock(new Date(2026, 7, 10,
 
 describe('travelTimeMs', () => {
   it('spends a day on thirty kilometres of walking and no less', () => {
-    // The whole point of the number: a day of easy going is thirty tiles, not three hundred.
+    // The kilometres are the fixed part; how many tiles that is depends on the tile. A day is
+    // eighty steps of easy going now rather than thirty, because a tile shrank when the maps grew
+    // from 36 across to 48 and 64 -- see `KM_PER_TILE` for why that had to change.
     expect(travelTimeMs(1) * (KM_PER_DAY / KM_PER_TILE)).toBeCloseTo(DAY_MS, 6);
-    expect(phaseAt(travelTimeMs(1) * 30)).toBeCloseTo(0, 6);
+    expect(DAY_MS / travelTimeMs(1)).toBeCloseTo(80, 0);
   });
 
   it('charges rough ground more of the day than open ground', () => {
@@ -43,12 +45,15 @@ describe('travelTimeMs', () => {
     }
   });
 
-  it('crosses the map in about a day, which is what the journal already promises the player', () => {
-    // `landmarkHint` says a landmark on the far side "will take most of the day". The map is 36
-    // tiles across, so at a kilometre a tile that line is now arithmetic rather than atmosphere.
-    const acrossTheMap = travelTimeMs(1) * 36;
-    expect(acrossTheMap / DAY_MS).toBeGreaterThan(0.8);
-    expect(acrossTheMap / DAY_MS).toBeLessThan(1.5);
+  it('crosses a field map in about a day, which is what the journal promises the player', () => {
+    // `landmarkHint` says a landmark on the far side "will take most of the day". Field maps are
+    // 48 and 64 tiles across; at a kilometre a tile that line had quietly become false, and the
+    // tile was rescaled rather than the promise abandoned.
+    for (const across of [48, 64]) {
+      const day = (travelTimeMs(1) * across) / DAY_MS;
+      expect(day, `${across} tiles`).toBeGreaterThan(0.5);
+      expect(day, `${across} tiles`).toBeLessThan(1.2);
+    }
   });
 });
 

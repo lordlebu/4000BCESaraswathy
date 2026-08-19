@@ -100,15 +100,18 @@ describe('the curve is tuned against a real session, not a round number', () => 
     expect(after(22, 1.5)).toBeLessThan(0.35); // a quarter of Lothal: no note, no slowdown
   });
 
-  it('has the traveller tiring by the end of a small map', () => {
-    const end = after(88, 1.5);
+  it('has the traveller tiring by the end of a full tour', () => {
+    // Re-measured after the tile was rescaled for the larger maps. A tour of every place on Lothal
+    // is about 240 steps now rather than 88, because a step covers less ground -- so the number
+    // that matters moved with it and the shape did not.
+    const end = after(240, 1.5);
     expect(end).toBeGreaterThan(0.9);
     expect(end).toBeLessThanOrEqual(1);
   });
 
-  it('does not saturate before a small map is half walked', () => {
-    // The failure the first setting had. Half of Lothal must still leave somewhere to go.
-    expect(after(44, 1.5)).toBeLessThan(1);
+  it('does not saturate before a tour is half walked', () => {
+    // The failure the first setting had, kept: half a journey must still leave somewhere to go.
+    expect(after(120, 1.5)).toBeLessThan(1);
   });
 });
 
