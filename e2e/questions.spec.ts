@@ -8,13 +8,17 @@ import { expect, test, type Page } from '@playwright/test';
 import { step } from './walk';
 
 /**
- * A seed where the drowned dockyard sits one step west and one north of the start.
+ * A seed where the drowned dockyard sits one step east and one south of the start.
+ *
+ * Re-searched when Lothal's palette gained forest and hills, which moved every placement --
+ * `dock-1127` put the dockyard thirty-three steps away. A searched seed is a fixture and goes
+ * stale like one.
  *
  * Thrali stands there and offers the silver-water question, and the water itself is found
  * there — so one place holds the whole loop: hear the question, look at the thing, settle.
  * Opened at midnight because the bloom only shows at night, which is the point of that rung.
  */
-const SEED = 'dock-1127';
+const SEED = 'dock-808';
 const AT_NIGHT = `/?seed=${SEED}&hour=0`;
 
 async function boot(page: Page) {
@@ -35,8 +39,8 @@ test('a question arrives from a person, not from the air', async ({ page }) => {
   await expect(page.locator('.question')).toHaveCount(0);
   await page.getByRole('button', { name: 'Close', exact: true }).click();
 
-  await step(page, 'ArrowLeft');
-  await step(page, 'ArrowUp');
+  await step(page, 'ArrowRight');
+  await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
 
   const listen = page.getByRole('button', { name: 'Write it down' });
@@ -50,8 +54,8 @@ test('a question arrives from a person, not from the air', async ({ page }) => {
 
 test('every reading is shown, including the ones you cannot argue', async ({ page }) => {
   await boot(page);
-  await step(page, 'ArrowLeft');
-  await step(page, 'ArrowUp');
+  await step(page, 'ArrowRight');
+  await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
   const listen = page.getByRole('button', { name: 'Write it down' });
   if ((await listen.count()) === 0) test.skip(true, 'no question available on this seed');
@@ -69,8 +73,8 @@ test('every reading is shown, including the ones you cannot argue', async ({ pag
 
 test('the player can settle a question, and is never told they were wrong', async ({ page }) => {
   await boot(page);
-  await step(page, 'ArrowLeft');
-  await step(page, 'ArrowUp');
+  await step(page, 'ArrowRight');
+  await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
 
   // Take everything this place will give. Rounds rather than a single pass: a rung opens the
