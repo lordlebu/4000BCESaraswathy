@@ -204,11 +204,22 @@ export function hear(progress: Progress, npcId: string, lineIndex: number): Prog
   return line.gives.reduce(receive, progress);
 }
 
+/**
+ * Whether a line still has anything to hand over.
+ *
+ * The honest way to ask "has this been heard already?" without remembering that it was: a line
+ * that gave you a word is spent once you hold the word. Deriving it keeps a list of prose out of
+ * `Progress`, which is saved -- and a saved list of line texts would break the moment somebody
+ * reworded a line.
+ */
+export function lineIsSpent(progress: Progress, line: Line): boolean {
+  if (line.gives.length === 0) return false;
+  return line.gives.every((g) => receive(progress, g) === progress);
+}
+
 /** Everything a person could still teach, for a UI that wants to show a lead. */
 export function hasSomethingNew(progress: Progress, npcId: string): boolean {
-  return linesFor(progress, npcId).some((l) =>
-    l.gives.some((g) => receive(progress, g) !== progress)
-  );
+  return linesFor(progress, npcId).some((l) => !lineIsSpent(progress, l));
 }
 
 /**
