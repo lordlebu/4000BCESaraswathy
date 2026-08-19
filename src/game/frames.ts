@@ -45,13 +45,17 @@ export const LANDMARK_ORDER = [
  * release like that, wired to `poi_stepped_quarry` while canon calls it `poi_basalt_quarry`.
  * `adapterCoverage.test.ts` now checks every id against the bundle.
  */
-export const PLACE_ORDER = [
+export const PLACE_ORDER: (string | null)[] = [
   'poi_kavik_tower',
   'poi_silted_granary',
   'poi_long_archive',
-  'poi_mooring_stones',
+  // Retired with the Dry Harbour, and deliberately still here. `KIND_FRAMES` below is computed
+  // from this array's length and the sprite sheet is laid out in this order, so removing an entry
+  // would shift every frame after it and silently redraw half the places on the map. A null holds
+  // the slot; `adapterCoverage.test.ts` knows to skip them rather than demanding canon name them.
+  null,
   'poi_drowned_seawall',
-  'poi_customs_house',
+  null,
   'poi_bone_midden',
   'poi_basalt_quarry'
 ];

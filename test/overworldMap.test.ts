@@ -110,21 +110,25 @@ describe('neighbours are closer than strangers', () => {
     ).toBeLessThan(nearestStranger);
   });
 
-  it('would have caught the arrangement that was tried first', () => {
-    // Not hypothetical. The Dry Harbour was first placed at (86, 74), which made the Narmada
-    // crossing 68 units -- the longest line on the map -- while Dwarka and Narmada, which have no
-    // road between them, sat 60 apart. Kept as a fixture so the guard is known to be able to fail.
+  it('would catch a layout that misleads', () => {
+    // Not hypothetical. During authoring the Dry Harbour was first placed at (86, 74), which made
+    // its road to Narmada the longest line on the map at 68 units while Dwarka and Narmada, which
+    // have no road between them, sat 60 apart. That map has since been retired, so the fixture is
+    // rebuilt from the three that remain.
+    //
+    // The maps form a chain -- Dwarka to Lothal to Narmada -- so the way to mislead with three is
+    // to put the middle of the chain far from both its ends. Then the two roads are long while the
+    // pair with no road between them sits close, and the drawing says the opposite of the truth.
     const at = (id: string, x: number, y: number) =>
       ({ ...fieldMaps.find((m) => m.id === id)!, coordinates: { x, y } });
-    const first = spread(
+    const bad = spread(
       overworldShape([
-        at('field_map_lothal', 30, 44),
-        at('field_map_dwarka', 20, 58),
-        at('field_map_narmada', 58, 12),
-        at('field_map_dry_harbour', 86, 74)
+        at('field_map_dwarka', 50, 50),
+        at('field_map_narmada', 55, 55),
+        at('field_map_lothal', 5, 95)
       ])
     );
-    expect(first.furthestRoad).toBeGreaterThan(first.nearestStranger);
+    expect(bad.furthestRoad).toBeGreaterThan(bad.nearestStranger);
   });
 });
 
@@ -145,8 +149,12 @@ describe('the drawing fits what is drawn', () => {
     // maps span 44 units of y, so the box is 68 rather than 100. Width comes out at exactly 100
     // here because Dwarka and the Dry Harbour sit near the edges -- fitting is not the same as
     // shrinking, and asserting a strict inequality on both axes fails on honest data.
-    expect(w).toBeLessThanOrEqual(100);
-    expect(h).toBeLessThan(w);
+    // Fitted on both axes, without assuming which way round the continent happens to be. It was
+    // landscape while the Dry Harbour sat far east; with three maps it is 66 x 68 and slightly
+    // portrait, and an assertion that quietly required landscape failed on a change that was
+    // nothing to do with drawing.
+    expect(w).toBeLessThan(100);
+    expect(h).toBeLessThan(100);
 
     // And every node has to be inside it, padding included, or a dot is drawn off the canvas.
     for (const n of shape.nodes) {

@@ -213,7 +213,10 @@ describe('the artwork points at places that exist', () => {
     const known = new Set(
       collection('places.points_of_interest').map((poi) => (poi as { id: string }).id)
     );
-    const unknown = PLACE_ORDER.filter((id) => !known.has(id));
+    // `null` entries are retired places whose sprite-sheet slot has to stay, because the sheet is
+    // laid out in this order and `KIND_FRAMES` counts the array. They are holes on purpose; a
+    // wrongly-*named* id is the bug this guards.
+    const unknown = PLACE_ORDER.filter((id): id is string => id !== null && !known.has(id));
     expect(unknown, 'art wired to point-of-interest ids that are not in canon').toEqual([]);
   });
 

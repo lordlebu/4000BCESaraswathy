@@ -249,7 +249,9 @@ describe('the ending', () => {
   it('counts everyone canon says would not settle, once they are helped', () => {
     const p = everything();
     const stay = staying(p);
-    for (const id of ['npc_bekh', 'npc_pell', 'npc_teshk', 'npc_okhi']) {
+    // Teshk retired with the Dry Harbour; the other three are the whole of the
+    // would-not-settle set now.
+    for (const id of ['npc_bekh', 'npc_pell', 'npc_okhi']) {
       expect(stay, `${id} should be staying`).toContain(id);
     }
   });
