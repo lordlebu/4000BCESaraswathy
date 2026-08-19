@@ -6,6 +6,8 @@
 import { biomeFor, creatureFor, floraFor } from './species';
 import { isPresent, noteFor, routineFor } from './routine';
 import { landmarkKindFor, landmarkTitle } from './landmarks';
+import { nearestCamp, nearestUnvisited, stepsBetween } from './camps';
+import type { PlacedPoi } from '../world/fieldMap';
 import type { Creature, Point, Tile, World } from '../world/types';
 
 /**
@@ -179,6 +181,54 @@ export function landmarkHint(world: World, at: Point): string {
   if (steps <= 3) return `${name} is very close now, just ${bearing} of here.`;
   if (steps <= 10) return `${name} lies ${bearing} of here. You are close.`;
   return `The elders spoke of ${name}, far to the ${bearing}. It will take most of the day.`;
+}
+
+/**
+ * Where there is still something to go and see, and where the nearest shelter is.
+ *
+ * **Legibility, not direction.** Nothing here locks, gates or requires anything: the player asked
+ * to be less lost, not to be led, and three separate records say this design is deliberately open.
+ * So this names a place and gives a bearing, in the same voice `landmarkHint` uses -- and says
+ * nothing at all when there is nothing useful to say, rather than filling the line.
+ *
+ * The camp is only mentioned when it is somewhere else. Standing in one and being told where it
+ * is reads as broken.
+ */
+export function whereNextHint(
+  placed: PlacedPoi[],
+  at: Point,
+  discovered: ReadonlySet<string>
+): string {
+  const lines: string[] = [];
+
+  const next = nearestUnvisited(placed, at, discovered);
+  const steps = next ? stepsBetween(next.at, at) : 0;
+
+  // Nothing to say about the place being stood on. `bearingTo` answers 'here' at distance zero,
+  // which the templates below turn into "The Tide Market is just here of here." -- found by
+  // printing the line for all four real maps rather than by a unit test, because the fixtures
+  // never happened to start the traveller on top of a place. The engine's own fog marks the
+  // starting tile, but a save loaded onto a place would land exactly here.
+  if (next && steps > 0) {
+    const bearing = bearingTo(at, next.at);
+    // No distance banding beyond near and far: "just east of here" is the useful thing to say,
+    // and a step count would be the map talking rather than the traveller.
+    lines.push(
+      steps <= 3
+        ? `${next.poi.name} is just ${bearing} of here.`
+        : `You have not been to ${next.poi.name}, ${bearing} of here.`
+    );
+  }
+
+  // Not when standing in it, and not when it is the place just named. A camp is also somewhere
+  // you have not been, so the nearest unvisited place is often the nearest camp -- and saying
+  // "The Camp is just east of here. The Camp would do for the night." names it twice.
+  const camp = nearestCamp(placed, at);
+  if (camp && stepsBetween(camp.at, at) > 0 && !(next && steps > 0 && camp.poi.id === next.poi.id)) {
+    lines.push(`${camp.poi.name} would do for the night.`);
+  }
+
+  return lines.join(' ');
 }
 
 /**

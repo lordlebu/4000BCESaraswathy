@@ -53,7 +53,13 @@ import {
 } from '../player';
 import { phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
 import { momentAt } from '../moment';
-import { arrivalPage, describeSurroundings, describeTile, landmarkHint } from '../../content/journal';
+import {
+  arrivalPage,
+  describeSurroundings,
+  describeTile,
+  landmarkHint,
+  whereNextHint
+} from '../../content/journal';
 import { travelCost } from '../../content/species';
 import { isWalkable } from '../../world/generate';
 import { buildFieldMap, poiAt, type FieldMapWorld } from '../../world/fieldMap';
@@ -835,6 +841,7 @@ export class WorldScene extends Phaser.Scene {
       entry: describeTile(tile, this.world, this.momentNow()),
       surroundings: describeSurroundings(this.world, at),
       hint: landmarkHint(this.world, at),
+      whereNext: whereNextHint(this.built.placed, at, this.discovered),
       discovered: this.discovered.size,
       atLandmark
     });
