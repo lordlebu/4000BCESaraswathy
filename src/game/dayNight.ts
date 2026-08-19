@@ -26,15 +26,22 @@ export const DAY_MS = 60 * 60 * 1000;
  *
  * Thirty kilometres is a full day's walk with a load, rests and a night's sleep in it — the figure
  * a marching column or a pilgrim route is planned around, not the forty-odd a fit walker can manage
- * once. Everything else here is derived from it.
+ * once.
  *
- * A kilometre to the tile comes from the game's own prose rather than being picked. `landmarkHint`
- * already tells the player a landmark on the far side of the map "will take most of the day", and
- * the map is 36 tiles across — so one tile is about one kilometre, and crossing the whole country
- * is a day of walking. Naming the scale here makes that line true instead of merely atmospheric.
+ * **The tile got smaller when the maps got bigger.** A kilometre to the tile was read off the
+ * game's own prose: `landmarkHint` tells the player a landmark on the far side "will take most of
+ * the day", and the map was 36 tiles across. Field maps are now 48 and 64, and the promise had
+ * quietly become false — a full in-game day bought 23 steps of ordinary walking while the furthest
+ * tile from any shelter measured 72. A traveller could be three days from a roof through no fault
+ * of their own, which is not a hard choice, it is a trap.
+ *
+ * So a tile is now a little over a third of a kilometre and a day buys about eighty steps: more
+ * than the 72 that measurement found, so **setting out at dawn always leaves you able to reach
+ * shelter**. That is the promise the night system rests on, and it is why this number is derived
+ * from the maps rather than picked.
  */
 export const KM_PER_DAY = 30;
-export const KM_PER_TILE = 1;
+export const KM_PER_TILE = 0.375;
 
 /**
  * How much of the day one tile costs, in the same milliseconds `phaseAt` takes.
