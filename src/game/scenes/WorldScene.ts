@@ -116,11 +116,17 @@ const MIN_ZOOM = 1;
 /**
  * Milliseconds per step on easy ground. `travelCost` from the biome data scales this.
  *
- * Twice what it was. At 170 the traveller crossed a tile of grassland faster than the field notes
- * beneath him could be read — and grassland is the common ground, so that was most of the walk. The
- * journal is the game; outrunning it is the one pace that cannot be right.
+ * Raised twice, for the same reason both times. At 170 the traveller crossed a tile of grassland
+ * faster than the field notes beneath him could be read — and grassland is the common ground, so
+ * that was most of the walk. The journal is the game; outrunning it is the one pace that cannot be
+ * right. 340 was still brisk enough that a map went by as scenery rather than as country, so this
+ * is a further quarter on top.
+ *
+ * A number to settle by playing rather than by reasoning. It interacts with the map sizes (48x48
+ * and 64x64) and, later, with fatigue — which is why fatigue is a separate phase behind a flag
+ * rather than something tuned at the same time as this.
  */
-const STEP_MS = 340;
+const STEP_MS = 425;
 
 /** Keys that change the zoom. `0` gives it back to the automatic fit. */
 const ZOOM_KEYS: Record<string, number | 'reset'> = {
@@ -447,13 +453,17 @@ export class WorldScene extends Phaser.Scene {
         x: Math.floor(world.x / TILE_SIZE),
         y: Math.floor(world.y / TILE_SIZE)
       };
+      // Weighted, so a tap across a range walks round it rather than over it. The scene has
+      // always paid `travelCost` per step; until now only the *duration* knew about it and the
+      // route did not, so tap-to-walk reliably chose the slowest line available to it.
       this.queuedPath = findPath(
         this.world.tiles,
         this.world.width,
         this.world.height,
         this.at,
         target,
-        isWalkable
+        isWalkable,
+        (tile) => travelCost(tile.biome) ?? 1
       );
     });
 
