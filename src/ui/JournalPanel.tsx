@@ -98,7 +98,7 @@ export function JournalPanel({
         <p className={atLandmark ? 'status status-arrived' : 'status'}>{hint}</p>
         {/* Rendered only when it has something to say. An empty paragraph still takes vertical
             space in a panel that is deliberately tight on a phone. */}
-        {whereNext && <p className="status status-next">{whereNext}</p>}
+        {whereNext && <p className="status-next">{whereNext}</p>}
         <p className="muted">{discovered} places discovered.</p>
       </footer>
     </section>

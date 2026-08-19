@@ -379,11 +379,16 @@ button.ghost:hover:not(:disabled) {
  * `.status` is bold because the landmark hint is the arc of the whole journey. This is a note
  * about the next hour, and the player asked to be less lost rather than to be led -- so it is
  * regular weight and a step down in colour. Legibility, not instruction.
+ *
+ * **Not also a `.status`.** It carried both classes at first, which made `.status` resolve to two
+ * elements and broke a spec that asks the status line whether the landmark is named in it. A
+ * selector that used to mean one thing should keep meaning one thing.
  */
 .status-next {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
   font-weight: normal;
   color: var(--muted);
-  margin-top: 2px;
 }
 
 .journal-foot .muted {
