@@ -1,5 +1,5 @@
 {
-  "canon_version": "1.6.0",
+  "canon_version": "1.7.0",
   "counts": {
     "fauna": 257,
     "flora": 90,
@@ -7,13 +7,13 @@
     "field_maps": 4,
     "points_of_interest": 24,
     "npcs": 10,
-    "discoveries": 31,
+    "discoveries": 35,
     "field_questions": 8,
     "vocabulary": 10
   },
   "sha256": {
-    "species.json": "c1ab0109ba7f14996615ae73fbfcb10932896d6634f52ff96e51c1da2c75a0a9",
-    "places.json": "e2af6adb557e786649c48eab4e958a29d1073d6bb80a7a315735d02532e25952",
-    "knowledge.json": "457f4d44d2c77f98e0130c94d8ef255a1036a17fd933f5ff582091cee86d7719"
+    "species.json": "e3fd5fddb770551e2d5bc7db0ffb39e9d5be34d33f36db688684845a65d6b8be",
+    "places.json": "f514cd8e5770b1fc12ed9b40305f8972a5d2e098717946d4f8c53fb127567faa",
+    "knowledge.json": "e6c580a2216aa65228964778f16d65b65ab068f84d4c682c17e5c60a979c6e7e"
   }
 }

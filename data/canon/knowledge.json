@@ -1,5 +1,5 @@
 {
-  "canon_version": "1.6.0",
+  "canon_version": "1.7.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -498,6 +498,107 @@
       ]
     },
     {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design"
+      ],
+      "id": "discovery_granary_fall",
+      "name": "The Channel Still Falls",
+      "discipline": "archaeology",
+      "subject": "settlement_lothal",
+      "found_at": [
+        "poi_silted_granary"
+      ],
+      "helps": [
+        "npc_bekh"
+      ],
+      "restores": [
+        "poi_silted_granary"
+      ],
+      "levels": [
+        {
+          "entry": "A stone channel runs into the granary's north wall and stops at a chamber full of silt. It has been dry so long the camp treats it as a wall."
+        },
+        {
+          "entry": "Not dry. There is water in it, moving, under about a foot of silt. It is audible if the marsh is quiet."
+        },
+        {
+          "entry": "The channel drops nearly six feet across the granary's length. That is not drainage -- drainage is laid flat. Something was meant to be turned by it."
+        },
+        {
+          "entry": "The chamber below the drop has a stone floor worn in a circle, and a socket cut in the middle of the circle. Whatever stood in it was taken or rotted."
+        },
+        {
+          "entry": "A mill, and the grain it ground was the red rice from these same chambers. The building is one machine: store, drop, mill, store.",
+          "requires": [
+            "discovery_red_rice_survival"
+          ]
+        },
+        {
+          "entry": "The silt is the whole failure. Six feet of fall is still six feet of fall, and the water never stopped -- it only stopped being able to reach the wheel."
+        },
+        {
+          "entry": "Clear the north chamber and the fall works again. Bekh's people thresh eight acres by hand and the building that would do it for them is standing over their heads.",
+          "requires": [
+            "discovery_red_rice_survival"
+          ]
+        }
+      ],
+      "notes": "The water half. Nothing is invented: the mill was there, the fall never stopped, and the discovery is that a wall is actually a blocked machine. Requires `discovery_red_rice_survival` twice over -- once to know what was ground here, once because threshing eight acres only matters if the eight acres are sown, which is that chain's own last rung."
+    },
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design"
+      ],
+      "id": "discovery_kiln_draught",
+      "name": "The Wind That Took the Tower Will Fire a Kiln",
+      "discipline": "archaeology",
+      "subject": "settlement_lothal",
+      "found_at": [
+        "poi_lothal_camp",
+        "poi_kavik_tower"
+      ],
+      "helps": [
+        "npc_uma"
+      ],
+      "levels": [
+        {
+          "entry": "The kilns are lit three times a year and never in spring. Uma says spring firings go wrong and nobody knows why."
+        },
+        {
+          "entry": "They do not go wrong. They go cold. A spring firing takes twice the reed and comes out grey."
+        },
+        {
+          "entry": "The wind turns in spring. From the sea eight months of the year, and off the plateau for four -- and the kiln mouths all face the sea."
+        },
+        {
+          "entry": "Kavik knew. The tower's lower courses are pierced on the seaward face and blind on the landward, which is a building arranged around a wind that blows one way."
+        },
+        {
+          "entry": "The same arrangement, and the same mistake. He built for eight months and lost the tower in the fourth. The kilns are losing a firing a year to it.",
+          "requires": [
+            "discovery_tower_collapse"
+          ]
+        },
+        {
+          "entry": "A kiln mouth is a hole in a wall. It can be moved in a morning, and it only has to be moved once."
+        },
+        {
+          "entry": "Turn the spring kiln to face the plateau and it will fire in a day on half the reed. Uma has cut that reed every spring of her life and burnt it for grey brick."
+        }
+      ],
+      "notes": "The wind half of the winter chain, and deliberately the smallest. Nothing is built and nothing is invented -- a kiln mouth is moved, because the tower already recorded which way the wind blows and nobody had read it as advice. Requires `discovery_tower_collapse`, which is the archaeology on the same map: the tower is the evidence, not a separate errand."
+    },
+    {
       "id": "discovery_market_ledger",
       "type": "discovery",
       "name": "Two Mornings a Day",
@@ -943,6 +1044,58 @@
       ],
       "canon": "primary",
       "sources": [
+        "Varuna's Field Diary design"
+      ],
+      "id": "discovery_salt_glass",
+      "name": "What the Field Gives Instead of Grain",
+      "discipline": "geography",
+      "found_at": [
+        "poi_eastern_field"
+      ],
+      "helps": [
+        "npc_thrali"
+      ],
+      "restores": [
+        "poi_eastern_field"
+      ],
+      "levels": [
+        {
+          "entry": "The white crust on the eastern field is not all the same white. Some of it has a shine on it."
+        },
+        {
+          "entry": "The shine gathers where the kiln ash was tipped, years ago, at the field's low corner. Nowhere else."
+        },
+        {
+          "entry": "Ash and brine and a hot summer, and the crust there has run together into something between salt and glass. It will hold an edge for a day before it goes cloudy."
+        },
+        {
+          "entry": "The brine is the reason nothing grows and also the reason this happens at all. The field has one thing to give and it is not a crop.",
+          "requires": [
+            "discovery_poisoned_ground"
+          ]
+        },
+        {
+          "entry": "Fired properly rather than left to a hot week, it would not go cloudy. That is a kiln's work, not a summer's."
+        },
+        {
+          "entry": "Thrali sets his nets by feel because he cannot see the channel bed through four feet of silt-water. A pane he could hold under would show him it."
+        },
+        {
+          "entry": "The corner of the field the camp gave up on will glaze the whole delta's worth of them, and it renews every dry week for as long as the brine keeps weeping.",
+          "requires": [
+            "discovery_poisoned_ground"
+          ]
+        }
+      ],
+      "notes": "The glass, sourced on Lothal rather than at the Glass Scar. The plan for this chain wanted the Scar, which is on Narmada -- but all 24 existing prerequisites are within a single map, so requiring it would have been the first cross-map dependency in the game and a design decision rather than an authoring one. The eastern field already weeps brine and already has ash tipped in it, so the material was on the map the whole time. The Scar remains the grander version of the same fact, for whoever wants it later."
+    },
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
         "Varuna's Field Diary design",
         "AI_CONTEXT.md"
       ],
@@ -1328,6 +1481,72 @@
         "Varuna's Field Diary design",
         "AI_CONTEXT.md"
       ]
+    },
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design"
+      ],
+      "id": "discovery_winter_line",
+      "name": "The Camp Can Winter Here",
+      "discipline": "archaeology",
+      "subject": "settlement_lothal",
+      "found_at": [
+        "poi_lothal_camp"
+      ],
+      "helps": [
+        "npc_bekh",
+        "npc_thrali",
+        "npc_uma"
+      ],
+      "restores": [
+        "settlement_lothal"
+      ],
+      "related_discoveries": [
+        "discovery_kiln_draught",
+        "discovery_granary_fall",
+        "discovery_salt_glass"
+      ],
+      "levels": [
+        {
+          "entry": "Bekh keeps a count of what the camp has and what it will need, and the two columns have never met. They move every third winter because of the gap."
+        },
+        {
+          "entry": "The gap is not food. It is the four months when nothing can be done -- no firing, no threshing, no fishing worth the walk -- and stores go while nobody is adding to them."
+        },
+        {
+          "entry": "Each of those four months is stopped by a different thing, and I have written down the answer to all three without noticing they were one question.",
+          "requires": [
+            "discovery_kiln_draught",
+            "discovery_granary_fall",
+            "discovery_salt_glass"
+          ]
+        },
+        {
+          "entry": "A spring kiln that fires means the glass gets made. The glass means Thrali fishes the silt-water months. The fall means the rice is threshed while the weather is against them rather than after it."
+        },
+        {
+          "entry": "Nothing here is new. The mill is Harappan, the kiln is the camp's own, the brine has been weeping since the Shattering. All that has changed is that somebody wrote down which end of each thing the work comes out of.",
+          "requires": [
+            "discovery_granary_fall"
+          ]
+        },
+        {
+          "entry": "Bekh went through it twice and then went quiet, and then asked whether I was sure about the kiln. She has moved this camp nine times."
+        },
+        {
+          "entry": "They are not moving in the spring. That is the whole of it, and it is more than I came here to do.",
+          "requires": [
+            "discovery_kiln_draught",
+            "discovery_salt_glass"
+          ]
+        }
+      ],
+      "notes": "The capstone, and deliberately not a machine. The three chains under it were each already useful alone; this is the rung where the player notices they are one system, which is the only thing being 'built'. Requires all three and is required by nothing -- the graph runs one way. Written to stay in the diary's register: the last rung is a camp not moving, not a train arriving."
     },
     {
       "id": "discovery_wrong_anatomy",
