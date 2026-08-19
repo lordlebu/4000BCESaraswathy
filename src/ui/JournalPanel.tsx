@@ -32,6 +32,11 @@ export interface JournalPanelProps {
   hint: string;
   /** Where there is still something to see, and where to sleep. Empty when there is nothing. */
   whereNext: string;
+  /** How tired the traveller is, or null when there is nothing to say. */
+  fatigue: string | null;
+  /** Whether bedding down would work here and now. */
+  canCamp: boolean;
+  onCamp: () => void;
   discovered: number;
   atLandmark: boolean;
   memory: string;
@@ -51,6 +56,9 @@ export function JournalPanel({
   surroundings,
   hint,
   whereNext,
+  fatigue,
+  canCamp,
+  onCamp,
   discovered,
   atLandmark,
   memory,
@@ -99,6 +107,12 @@ export function JournalPanel({
         {/* Rendered only when it has something to say. An empty paragraph still takes vertical
             space in a panel that is deliberately tight on a phone. */}
         {whereNext && <p className="status-next">{whereNext}</p>}
+        {fatigue && <p className="status-tired">{fatigue}</p>}
+        {canCamp && (
+          <button type="button" className="camp-button" onClick={onCamp}>
+            Make camp for the night
+          </button>
+        )}
         <p className="muted">{discovered} places discovered.</p>
       </footer>
     </section>

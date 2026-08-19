@@ -30,6 +30,15 @@ export interface GameToUi {
      * quieter aside about the next hour. Empty string when there is nothing worth saying.
      */
     whereNext: string;
+    /**
+     * A mood line about how tired the traveller is, or null.
+     *
+     * Null both when the flag is off and when there is nothing worth saying, which is most of a
+     * session. Never a warning: nothing bad happens, so a line implying otherwise would lie.
+     */
+    fatigue: string | null;
+    /** Whether bedding down would work here and now. Drives the button. */
+    canCamp: boolean;
     discovered: number;
     atLandmark: boolean;
   };
@@ -66,6 +75,9 @@ export interface GameToUi {
    */
   'poi-reached': { poiId: string; fieldMapId: string };
 
+  /** The traveller slept. The clock has moved to first light and the legs are fresh. */
+  'camped': { at: Point; place: string };
+
   /**
    * The authored place under the traveller's feet, or null when there is none.
    *
@@ -86,6 +98,8 @@ export interface GameToUi {
  */
 export interface UiToGame {
   'new-journey': { seed: string };
+  /** Bed down for the night. Ignored unless standing at a camp after dark. */
+  'camp': Record<string, never>;
   /** Lay down a different field map. The overworld sends this. */
   'travel-to': { fieldMapId: string; seed: string };
   'resume-journey': { seed: string; discovered: string[] };

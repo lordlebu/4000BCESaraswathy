@@ -52,6 +52,15 @@ import {
   type Facing
 } from '../player';
 import { phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
+import {
+  canCamp,
+  fatigueAt,
+  fatigueEnabled,
+  fatigueNote,
+  isNight,
+  paceFor,
+  restUntilMorning
+} from '../fatigue';
 import { momentAt } from '../moment';
 import {
   arrivalPage,
@@ -64,6 +73,7 @@ import { travelCost } from '../../content/species';
 import { isWalkable } from '../../world/generate';
 import { buildFieldMap, poiAt, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
+import { isCamp } from '../../content/camps';
 import { findPath } from '../../world/pathfind';
 import type { Point, Tile, World } from '../../world/types';
 
@@ -215,6 +225,16 @@ export class WorldScene extends Phaser.Scene {
    * country twice between breakfast and lunch. See `travelTimeMs`: thirty kilometres to the day.
    */
   private travelled = 0;
+  /**
+   * Where `travelled` stood at the last night's sleep. Fatigue is the gap between the two.
+   *
+   * **Deliberately not saved.** Loading into an exhausted state with no memory of the walk that
+   * caused it is worse than starting rested, so a reload is a fresh morning. Do not "fix" this
+   * by persisting it.
+   */
+  private restedAt = 0;
+  /** Off unless `?fatigue=1`. One release behind a flag -- see `fatigue.ts`. */
+  private fatigueOn = false;
   /** How much of the canvas the DOM overlays cover. React measures it and tells us; see EventBus. */
   private insets = { right: 0, bottom: 0 };
   /** The zoom the player asked for, or null to keep fitting the screen automatically. */
@@ -246,6 +266,7 @@ export class WorldScene extends Phaser.Scene {
     this.moving = false;
     this.facing = 'down';
     this.travelled = 0;
+    this.restedAt = 0;
     this.standingOn = null;
     this.lastMoment = '';
     this.momentCheckedAt = -Infinity;
@@ -253,6 +274,7 @@ export class WorldScene extends Phaser.Scene {
     // The map opens on the light of the hour the player is actually in, then drifts from there.
     // `?hour=21` overrides it, so the evening can be checked without waiting for the evening.
     this.startPhase = startPhaseFor(new URLSearchParams(window.location.search).get('hour'));
+    this.fatigueOn = fatigueEnabled(window.location.search);
   }
 
   preload(): void {
@@ -501,6 +523,7 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('travel-to', this.onTravelTo);
     EventBus.onEvent('viewport-insets', this.onInsets);
     EventBus.onEvent('zoom', this.onZoom);
+    EventBus.onEvent('camp', this.onCamp);
 
     // Fires on rotation as well as on a window resize, which is exactly when the zoom and the
     // follow offset both stop being right.
@@ -512,6 +535,7 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('travel-to', this.onTravelTo);
       EventBus.offEvent('viewport-insets', this.onInsets);
       EventBus.offEvent('zoom', this.onZoom);
+      EventBus.offEvent('camp', this.onCamp);
       this.input.off(Phaser.Input.Events.POINTER_WHEEL);
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
       this.input.off(Phaser.Input.Events.POINTER_UP);
@@ -632,6 +656,46 @@ export class WorldScene extends Phaser.Scene {
    * Built from the scene's own clock -- wall time plus whatever the walking has spent -- so
    * the creature asleep in the journal and the light on the map are the same moment.
    */
+  private onCamp = (): void => {
+    this.tryCamp();
+  };
+
+  /** Whether bedding down would work right now. Drives the button; `tryCamp` does the work. */
+  private canCampHere(): boolean {
+    const here = poiAt(this.built, this.at);
+    return canCamp(
+      here !== null && isCamp(here.poi),
+      isNight(this.travelled, this.startPhase, this.time.now)
+    );
+  }
+
+  /** How tired the traveller is, or 0 when the flag is off. */
+  private fatigue(): number {
+    return this.fatigueOn ? fatigueAt(this.travelled, this.restedAt) : 0;
+  }
+
+  /**
+   * Bed down, if this is a camp and it is dark.
+   *
+   * Sleeping advances the clock to first light and clears the fatigue, so waking is a fresh
+   * morning in a place that is still where you left it. Nothing is spent and nothing is locked;
+   * the only thing that changes is the sky and how heavy the next step feels.
+   */
+  private tryCamp(): boolean {
+    if (!this.fatigueOn) return false;
+    const here = poiAt(this.built, this.at);
+    const atCamp = here !== null && isCamp(here.poi);
+    if (!canCamp(atCamp, isNight(this.travelled, this.startPhase, this.time.now))) return false;
+
+    const rested = restUntilMorning(this.travelled, this.startPhase, this.time.now);
+    this.travelled = rested.travelledMs;
+    this.restedAt = rested.restedAtMs;
+    this.updateSky();
+    EventBus.emitEvent('camped', { at: this.at, place: here!.poi.name });
+    this.arriveAt(this.at);
+    return true;
+  }
+
   private momentNow() {
     return momentAt(
       this.world.seed,
@@ -731,6 +795,9 @@ export class WorldScene extends Phaser.Scene {
     // The same cost buys the step twice: how long the tween takes on the screen, and how much of
     // the day the walking spends. The second is what keeps the sun honest.
     this.travelled += travelTimeMs(cost);
+    // Tiredness slows the walk and nothing else. It never blocks a step, never makes ground
+    // unwalkable and never reaches `canAdvance` -- see the invariants at the top of fatigue.ts.
+    const pace = this.fatigueOn ? paceFor(this.fatigue()) : 1;
     this.leaveTrace(this.at, tile.biome);
     this.moving = true;
     this.at = target;
@@ -740,7 +807,7 @@ export class WorldScene extends Phaser.Scene {
       targets: this.player,
       x: target.x * TILE_SIZE + TILE_SIZE / 2,
       y: target.y * TILE_SIZE + TILE_SIZE - 2,
-      duration: STEP_MS * cost,
+      duration: STEP_MS * cost * pace,
       ease: 'Sine.easeInOut',
       // Re-sorted at the start of the step rather than the end: he should be behind the grass of
       // the tile he is entering from the moment he begins to enter it.
@@ -842,6 +909,8 @@ export class WorldScene extends Phaser.Scene {
       surroundings: describeSurroundings(this.world, at),
       hint: landmarkHint(this.world, at),
       whereNext: whereNextHint(this.built.placed, at, this.discovered),
+      fatigue: this.fatigueOn ? fatigueNote(this.fatigue()) : null,
+      canCamp: this.fatigueOn && this.canCampHere(),
       discovered: this.discovered.size,
       atLandmark
     });

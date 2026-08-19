@@ -402,6 +402,9 @@ describe('here', () => {
     surroundings: 'The wind comes off the water.',
     hint: 'Keep going east.',
     whereNext: '',
+    fatigue: null as string | null,
+    canCamp: false,
+    onCamp: noop,
     discovered: 3,
     atLandmark: false,
     memory: '',
@@ -419,6 +422,34 @@ describe('here', () => {
     onListen: noop,
     onClose: noop
   };
+
+  it('offers a camp only where one can be made', () => {
+    const { unmount } = render(
+      <Here open notes={{ ...notes, canCamp: true }} place={{ ...place }} />
+    );
+    expect(screen.getByRole('button', { name: /Make camp/ })).toBeTruthy();
+    unmount();
+
+    const { container } = render(
+      <Here open notes={{ ...notes, canCamp: false }} place={{ ...place }} />
+    );
+    expect(container.querySelector('.camp-button')).toBeNull();
+  });
+
+  it('shows a tiredness line only when there is one', () => {
+    // Null covers both "the flag is off" and "nothing worth saying", which is most of a session.
+    const { unmount } = render(
+      <Here open notes={{ ...notes, fatigue: 'You have been walking a while.' }}
+            place={{ ...place }} />
+    );
+    expect(screen.getByText('You have been walking a while.')).toBeTruthy();
+    unmount();
+
+    const { container } = render(
+      <Here open notes={{ ...notes, fatigue: null }} place={{ ...place }} />
+    );
+    expect(container.querySelector('.status-tired')).toBeNull();
+  });
 
   it('shows where to go next, and nothing when there is nowhere', () => {
     // The empty case is the one worth pinning: an always-rendered paragraph still takes vertical
