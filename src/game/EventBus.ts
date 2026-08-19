@@ -22,6 +22,14 @@ export interface GameToUi {
     entry: JournalEntry;
     surroundings: string;
     hint: string;
+    /**
+     * Where there is still something to see, and where the nearest shelter is.
+     *
+     * Kept apart from `hint` rather than folded into it. `hint` is the arc of the whole journey
+     * -- the landmark, named the same way from the first step to the last -- and this is a
+     * quieter aside about the next hour. Empty string when there is nothing worth saying.
+     */
+    whereNext: string;
     discovered: number;
     atLandmark: boolean;
   };

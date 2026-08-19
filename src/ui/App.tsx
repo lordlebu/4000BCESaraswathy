@@ -393,6 +393,7 @@ export function App() {
           entry: arrival?.entry ?? null,
           surroundings: arrival?.surroundings ?? '',
           hint: arrival?.hint ?? '',
+          whereNext: arrival?.whereNext ?? '',
           discovered: arrival?.discovered ?? 0,
           atLandmark: arrival?.atLandmark ?? false,
           memory,

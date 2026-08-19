@@ -401,6 +401,7 @@ describe('here', () => {
     },
     surroundings: 'The wind comes off the water.',
     hint: 'Keep going east.',
+    whereNext: '',
     discovered: 3,
     atLandmark: false,
     memory: '',
@@ -418,6 +419,22 @@ describe('here', () => {
     onListen: noop,
     onClose: noop
   };
+
+  it('shows where to go next, and nothing when there is nowhere', () => {
+    // The empty case is the one worth pinning: an always-rendered paragraph still takes vertical
+    // space in a panel that is deliberately tight on a phone.
+    const { unmount } = render(
+      <Here open notes={{ ...notes, whereNext: 'The Camp would do for the night.' }}
+            place={{ ...place }} />
+    );
+    expect(screen.getByText('The Camp would do for the night.')).toBeTruthy();
+    unmount();
+
+    const { container } = render(
+      <Here open notes={{ ...notes, whereNext: '' }} place={{ ...place }} />
+    );
+    expect(container.querySelector('.status-next')).toBeNull();
+  });
 
   it('shows the field notes with no place to stand in', () => {
     render(<Here open notes={{ ...notes }} place={{ ...place }} />);
