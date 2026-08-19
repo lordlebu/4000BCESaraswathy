@@ -85,6 +85,13 @@ export interface GenerateOptions {
   seed?: string;
   width?: number;
   height?: number;
+  /**
+   * The landform canon declares for this map, if any.
+   *
+   * Optional so `generateWorld` still works standalone — the procedural walk that predates field
+   * maps has no canon behind it and gets `basin`, which is the neutral bowl.
+   */
+  relief?: string | null;
 }
 
 /** One entry of `data/biomes.json`. */
