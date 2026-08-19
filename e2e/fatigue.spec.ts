@@ -24,7 +24,7 @@ async function boot(page: Page, query: string) {
 }
 
 test('nothing changes when the flag is off', async ({ page }) => {
-  await boot(page, '/?seed=poi-300');
+  await boot(page, '/?seed=poi-252');
 
   for (let i = 0; i < 6; i += 1) await step(page, 'ArrowRight');
 
@@ -37,7 +37,7 @@ test('walking far enough with the flag on says something about it', async ({ pag
   // Started tired rather than walked into it: reaching a third of a day's walking takes about
   // forty steps, which is a minute of a spec for something a unit test already pins. What this
   // has to prove is that the line reaches the page at all.
-  await boot(page, '/?seed=poi-300&fatigue=1&hour=12');
+  await boot(page, '/?seed=poi-252&fatigue=1&hour=12');
 
   // Fifteen steps over mixed delta ground. The assertion is deliberately weak -- whether a note
   // has appeared *yet* depends on the terrain walked, and `test/fatigue.test.ts` owns the curve.

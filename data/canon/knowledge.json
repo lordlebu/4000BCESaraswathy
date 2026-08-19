@@ -378,7 +378,7 @@
           }
         },
         {
-          "entry": "Not the tide, then, and not the hour. I sat the stair for three days with a slate and the only thing that matches is the mist."
+          "entry": "Not the tide — there has not been a tide here in sixty years — and not the hour. I sat the stair for three days with a slate and the only thing that matches is the mist."
         },
         {
           "entry": "Which is backwards. Mist is water in air; it does not open anything. Unless the mist and the opening are both downstream of a third thing, and I have been watching the wrong one."
@@ -390,7 +390,7 @@
       "answers": [
         "question_what_comes_through"
       ],
-      "notes": "The anomaly, approached as a naturalist would: rule out the tide, rule out the hour, notice the correlation, then notice the correlation is not a cause. Ends honestly short of an explanation.",
+      "notes": "The anomaly, approached as a naturalist would: rule out the tide, rule out the hour, notice the correlation, then notice the correlation is not a cause. Ends honestly short of an explanation. Rewritten when Dwarka was dried out: the sea left rather than the land sinking, so a rung that assumed a live tide now reads against its absence. The chain is stronger for it — a city keeping a tide schedule for water that stopped arriving is a better observation than one keeping it for water that is still there.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -611,10 +611,10 @@
           "entry": "The market opens twice and closes twice, and everyone knows when without being told."
         },
         {
-          "entry": "It is the tide, obviously. What is less obvious is that the tide here is not the tide at Lothal."
+          "entry": "It is the tide, they say, and they are half right: the market still opens on a tide that stopped arriving before most of them were born."
         },
         {
-          "entry": "A ledger goes back sixty years of opening times. Nobody kept it for the tide; they kept it for the tolls."
+          "entry": "A ledger goes back sixty years of opening times. Nobody kept it for the tide; they kept it for the tolls — which is why the times outlived the water."
         },
         {
           "entry": "Read as a tide record it is better than anything the University has, and it says the high water is arriving later each decade.",
@@ -626,7 +626,7 @@
       "answers": [
         "question_what_ends_dwarka"
       ],
-      "notes": "Local record-keeping outperforming the academy again, and this time entirely by accident -- the ledger was for taxes.",
+      "notes": "Local record-keeping outperforming the academy again, and this time entirely by accident -- the ledger was for taxes. Rewritten when Dwarka was dried out: the sea left rather than the land sinking, so a rung that assumed a live tide now reads against its absence. The chain is stronger for it — a city keeping a tide schedule for water that stopped arriving is a better observation than one keeping it for water that is still there.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -1145,7 +1145,7 @@
           "entry": "Each is founded a little higher than the one seaward of it, and each is built of what was cheap that century."
         },
         {
-          "entry": "The outermost is under water at every tide now. It was not built to be.",
+          "entry": "The outermost stands in dry dust, and it was built to stand in surf. Nothing about it has moved; the sea did.",
           "conditions": {
             "time_of_day": [
               "dawn"
@@ -1156,7 +1156,7 @@
           "entry": "Roughly a hand of sea in a hundred years, if the walls were built dry-footed. Slow enough that no single person ever saw it happen."
         },
         {
-          "entry": "The gate gets swept and the sea gets a new wall. Only one of those is going to finish the city, and it is not the interesting one."
+          "entry": "The gate still gets swept and the seawalls still get repaired. Neither has anything left to keep out, and only one of those facts is the interesting one."
         }
       ],
       "answers": [
@@ -1165,7 +1165,7 @@
       "helps": [
         "npc_pell"
       ],
-      "notes": "The sober counterweight. A map about a supernatural door should be clear that the thing actually destroying the place is ordinary sea-level rise.",
+      "notes": "The sober counterweight. A map about a supernatural door should be clear that the thing actually destroying the place is ordinary sea-level rise. Rewritten when Dwarka was dried out: the sea left rather than the land sinking, so a rung that assumed a live tide now reads against its absence. The chain is stronger for it — a city keeping a tide schedule for water that stopped arriving is a better observation than one keeping it for water that is still there.",
       "epochs": [
         "epoch_post_cataclysm"
       ],

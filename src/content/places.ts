@@ -45,6 +45,13 @@ export interface FieldMap {
    * invent them, which is the noun/verb line this project runs on.
    */
   coordinates: { x: number; y: number } | null;
+  /**
+   * The landform, which decides how the generator shapes this map's ground.
+   *
+   * Canon still does not describe tiles — it says what kind of place this is. Null when canon
+   * has not declared one, which the generator reads as a plain bowl.
+   */
+  relief: string | null;
   /** What the player reads on first arriving. */
   arrival: string;
 }
@@ -114,7 +121,7 @@ export interface Npc {
 interface RawFieldMap {
   id: string; name: string; region: string; seed_biomes: string[];
   scale?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
-  climate?: Climate; coordinates?: { x: number; y: number };
+  climate?: Climate; coordinates?: { x: number; y: number }; relief?: string;
 }
 interface RawPoi {
   id: string; name: string; field_map: string; kind: string; terrain?: string[];
@@ -144,6 +151,7 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   neighbours: m.neighbours ?? [],
   climate: m.climate ?? DELTA_CLIMATE,
   coordinates: m.coordinates ?? null,
+  relief: m.relief ?? null,
   arrival: m.arrival ?? ''
 }));
 

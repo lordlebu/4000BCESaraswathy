@@ -5,11 +5,16 @@
 // field map. Every other spec proves the old procedural walk still works; this one proves the
 // game is now about somewhere.
 //
-// The seed is chosen, not arbitrary. `buildFieldMap` is deterministic, so `poi-300` is a world
+// The seed is chosen, not arbitrary. `buildFieldMap` is deterministic, so `poi-252` is a world
 // where the Eastern Field lands three steps from where the traveller starts — which turns "walk
 // across a delta hoping to find something" into a test that finishes in seconds.
 //
-// **Re-searched when Lothal's palette gained forest and hills.** A searched seed is a fixture
+// **Re-searched twice now**: once when Lothal's palette gained forest and hills, again when
+// landforms changed the shaping. Both times for the same reason — what terrain a tile is
+// decides which candidate list a place is drawn from, so any change to the ground moves
+// every placement. Predicting that seeds would survive the landform change was wrong.
+//
+// **Originally:** A searched seed is a fixture
 // like any other: the palette decides what every tile becomes, so new ground means new
 // placements, and `poi-53` went from two steps away to thirty-nine. Ten specs failed at once,
 // all of them ones that walk somewhere. Re-run the search rather than widening the timeouts.
@@ -18,7 +23,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { step } from './walk';
 
 /** A seed where poi_eastern_field sits at (39,41) and the traveller starts at (38,43). */
-const SEED = 'poi-300';
+const SEED = 'poi-252';
 
 async function boot(page: Page) {
   await page.goto(`/?seed=${SEED}`);
@@ -30,7 +35,6 @@ async function boot(page: Page) {
 
 test('stand on an authored place, and it opens', async ({ page }) => {
   await boot(page);
-  await step(page, 'ArrowRight');
   await step(page, 'ArrowUp');
   await step(page, 'ArrowUp');
 
@@ -43,7 +47,6 @@ test('stand on an authored place, and it opens', async ({ page }) => {
 
 test('looking closer writes the diary, and the diary keeps the crossings-out', async ({ page }) => {
   await boot(page);
-  await step(page, 'ArrowRight');
   await step(page, 'ArrowUp');
   await step(page, 'ArrowUp');
   await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
@@ -71,7 +74,6 @@ test('looking closer writes the diary, and the diary keeps the crossings-out', a
 
 test('the diary survives a reload', async ({ page }) => {
   await boot(page);
-  await step(page, 'ArrowRight');
   await step(page, 'ArrowUp');
   await step(page, 'ArrowUp');
   await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
@@ -88,12 +90,13 @@ test('the diary survives a reload', async ({ page }) => {
 });
 
 test('an instance is a place you go into, and it says why when you cannot', async ({ page }) => {
-  // A seed where Kavik's Tower stands two steps north of the start.
-  await page.goto('/?seed=tower-139');
+  // A seed where Kavik's Tower stands three steps south of the start.
+  await page.goto('/?seed=tower-57');
   await expect(page.locator('.map-surface canvas')).toBeVisible();
   await expect(page.locator('.journal h2')).toBeVisible();
-  await step(page, 'ArrowUp');
-  await step(page, 'ArrowUp');
+  await step(page, 'ArrowDown');
+  await step(page, 'ArrowDown');
+  await step(page, 'ArrowDown');
 
   const place = page.locator('.place');
   await expect(place).toBeVisible({ timeout: 10_000 });

@@ -10,6 +10,7 @@
 //
 // Free of React and Phaser, like everything in `world/`, so the tests exercise what ships.
 
+import { easeRoutes, tourOrder } from './routes';
 import { generateWorld } from './generate';
 import { tileHash } from './rng';
 import type { BiomeId, Point, Tile, World } from './types';
@@ -186,7 +187,7 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
     spacing = 6
   } = options;
 
-  const world = generateWorld({ seed, width, height });
+  const world = generateWorld({ seed, width, height, relief: fieldMap.relief });
 
   // Canon's palette is what the place is *made of*; the generator produces what it
   // produces. Points of interest are held to the intersection, so a marsh shrine cannot
@@ -210,6 +211,31 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
       unplaced.push(poi);
     }
   }
+
+  // Ease the ground between the places, now that we know where they ended up.
+  //
+  // The third rule of a field map: the rim is hard, the middle is easier, and **the places are
+  // reachable however far out they sit**. The first two are functions of position and the shapers
+  // in `landform.ts` handle them. This one is not -- it depends on where the content landed -- so
+  // it cannot happen while generating terrain and has to happen here, after placement.
+  //
+  // The effect is that a valley is literally the path between two places rather than a landform a
+  // place happens to sit in. Narmada can keep cliffs in the middle of the plateau, because the
+  // route between the University and the quarry is a walkable line through them.
+  //
+  // Before the landmark stamp, so the landmark's own tile is never softened, and before the fog
+  // and species passes so nothing has read the ground yet.
+  const route = tourOrder(placed.map((p) => p.at), world.start);
+  // Wet landforms get a wider corridor -- see `radius` in routes.ts for why.
+  const wet = fieldMap.relief === 'delta' || fieldMap.relief === 'island';
+  easeRoutes(world.tiles, world.width, world.height, [world.start, ...route], {
+    radius: wet ? 2 : 1,
+    // Never soften the ground a place is standing on, or the landmark's tile.
+    keep: new Set([
+      ...placed.map((p) => `${p.at.x},${p.at.y}`),
+      `${world.landmark.x},${world.landmark.y}`
+    ])
+  });
 
   // Put the landmark back, *after* placement has read the ground.
   //

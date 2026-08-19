@@ -53,7 +53,7 @@ const COVERAGE: Record<string, Coverage> = {
   },
   'places.field_maps': {
     adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'points_of_interest',
-      'neighbours', 'arrival', 'climate', 'coordinates'],
+      'neighbours', 'arrival', 'climate', 'coordinates', 'relief'],
     skipped: [...EDITORIAL]
   },
   'places.points_of_interest': {

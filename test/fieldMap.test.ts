@@ -91,11 +91,16 @@ describe('the Narmada plateau', () => {
       return n / (world.width * world.height);
     };
     const water = (map: typeof narmada) =>
-      share(map, 'wetland') + share(map, 'coast') + share(map, 'river');
+      share(map, 'wetland') + share(map, 'coast') + share(map, 'river') + share(map, 'sea');
 
     expect(water(narmada), 'the plateau has water on it').toBeLessThan(0.05);
     expect(water(lothal), 'the delta is not mostly water').toBeGreaterThan(0.5);
-    expect(share(narmada, 'hills'), 'the plateau is not mostly high ground').toBeGreaterThan(0.5);
+    // High ground rather than *mostly* hills. Canon's arrival text calls the plateau "a flat
+    // green country the sea never reached" -- so a map that is 50% hills is the wrong place, and
+    // this assertion was quietly demanding it. What matters is that the plateau is elevated and
+    // dry, which the water check above already covers, and that it is not flat at the rim.
+    const high = share(narmada, 'hills') + share(narmada, 'mountains') + share(narmada, 'plains');
+    expect(high, 'the plateau has lost its tableland').toBeGreaterThan(0.7);
   });
 
   it('builds ground with every authored place standing on it', () => {
@@ -255,8 +260,14 @@ describe('every map has ground that is not all one thing', () => {
     // The other half, and the reason plains was left out of Lothal's palette. Adding it takes
     // back every reclassified plains tile at once and drops wetland from 45% to 2% -- richer
     // ground, but no longer a delta. Variety must not cost a map its thesis.
+    //
+    // `sea` and `river` count as water, which they obviously are. They were omitted when this was
+    // written because neither existed on a delta map then: Lothal had no open sea at all and 0.5%
+    // river. Leaving them out started failing the moment the landforms gave the harbour its water,
+    // which is the test's definition going stale rather than the map getting worse.
     for (const id of ['field_map_lothal', 'field_map_dwarka']) {
-      const wet = (mix(id).get('wetland') ?? 0) + (mix(id).get('coast') ?? 0);
+      const m = mix(id);
+      const wet = ['wetland', 'coast', 'sea', 'river'].reduce((n, b) => n + (m.get(b) ?? 0), 0);
       expect(wet, `${id} is no longer mostly water`).toBeGreaterThan(0.5);
     }
   });
