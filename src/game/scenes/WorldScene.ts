@@ -30,6 +30,7 @@ import {
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
 import { ROW_SLOT, depthFor } from '../frames';
+import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 
 /** Which loaded texture each kind of placement draws from. `marker` is a glyph and has none. */
 const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker'>, string> = {
@@ -177,8 +178,13 @@ export class WorldScene extends Phaser.Scene {
   private at: Point = { x: 0, y: 0 };
   private discovered = new Set<string>();
   private visible = new Set<string>();
-  /** The arrival page is written once per journey, not on every step taken at the landmark. */
-  private arrived = false;
+  /**
+   * Places whose arrival beat has already played, keyed by `beatKey`.
+   *
+   * Was a single `arrived` boolean when only the landmark had a beat. Now that every place gets
+   * one, "has this fired" is a question per place rather than per journey.
+   */
+  private beaten = new Set<string>();
   private moving = false;
   private queuedPath: Point[] = [];
   private facing: Facing = 'down';
@@ -220,7 +226,7 @@ export class WorldScene extends Phaser.Scene {
     // a field initialiser — otherwise "generate a new map" would inherit the old fog.
     this.discovered = new Set(data.discovered ?? []);
     this.visible = new Set();
-    this.arrived = false;
+    this.beaten = new Set();
     this.tileSprites = [];
     this.fogSprites = [];
     this.overdraw = [];
@@ -386,12 +392,16 @@ export class WorldScene extends Phaser.Scene {
    * Re-playing the animation already running would restart it every frame, so it is checked first.
    */
   private updateAnimation(): void {
-    // Sitting is about where the traveller *is*, not whether they have ever arrived. `arrived`
-    // stays true for the rest of the journey so the arrival page is written once; using it here
-    // meant walking away from the landmark still played the seated frames.
-    const atLandmark =
-      this.at.x === this.world.landmark.x && this.at.y === this.world.landmark.y;
-    const action = actionFor(this.moving, atLandmark);
+    // Sitting is about where the traveller *is*, not whether they have ever arrived. `beaten`
+    // keeps its entries for the rest of the journey so each page is written once; using it here
+    // meant walking away from a place still played the seated frames.
+    //
+    // A place counts as well as the landmark: sitting down is what reads as "this is a stop", and
+    // it is the whole of the beat a place gets.
+    const atRest =
+      (this.at.x === this.world.landmark.x && this.at.y === this.world.landmark.y) ||
+      poiAt(this.built, this.at) !== null;
+    const action = actionFor(this.moving, atRest);
     const { key, flipX } = animFor(CHARACTERS.varuna.key, this.facing, action);
     if (this.player.anims.currentAnim?.key !== key) this.player.play(key);
     this.player.setFlipX(flipX);
@@ -822,22 +832,56 @@ export class WorldScene extends Phaser.Scene {
 
     // What is under foot, every time it changes. The UI decides whether that opens anything;
     // the scene only reports the ground, which is the division everywhere else in this file.
-    const here = poiAt(this.built, at)?.poi.id ?? null;
+    const placed = poiAt(this.built, at);
+    const here = placed?.poi.id ?? null;
     if (here !== this.standingOn) {
       this.standingOn = here;
       EventBus.emitEvent('standing-on', { poiId: here, fieldMapId: this.built.fieldMap.id });
     }
 
-    // The arrival is the end of the session, so it gets its own beat: the camera settles, and the
-    // written page goes up once rather than on every step taken while standing there.
-    if (atLandmark && !this.arrived) {
-      this.arrived = true;
-      // Relative, not absolute. A fixed 1.25 was a zoom *out* on every desktop, where the fit is
-      // 2 or 3 — the reward for a hundred-tile walk was the map pulling away from you.
-      const settled = Math.min(this.cameras.main.zoom * 1.25, MAX_ZOOM + 0.5);
-      this.cameras.main.zoomTo(settled, 900, 'Sine.easeInOut');
-      this.cameras.main.flash(700, 255, 246, 213, false);
+    // Arriving somewhere gets a beat: the camera settles and the traveller sits down. The landmark
+    // is the end of the session and keeps the louder one; a place along the way gets the same
+    // gesture, quieter. `arrival.ts` decides which; this only plays it.
+    //
+    // One code path for both, deliberately. The landmark had this inline and a place had nothing,
+    // which is how the two drifted — and only one of them was reachable by a test.
+    const place: ArrivalPlace | null = atLandmark
+      ? { kind: 'landmark' }
+      : placed
+        ? { kind: 'poi', poiKind: placed.poi.kind }
+        : null;
+
+    if (place) this.playArrival(place, here);
+  }
+
+  /** Settle the camera and mark the place beaten. Nothing here decides — see `arrival.ts`. */
+  private playArrival(place: ArrivalPlace, poiId: string | null): void {
+    const key = beatKey(place, poiId);
+    const beat = beatFor(place, !this.beaten.has(key));
+    if (!beat) return;
+    this.beaten.add(key);
+
+    // Through `zoomChoice`, not `zoomTo` behind the camera's back.
+    //
+    // `applyCamera` recomputes the zoom from `zoomChoice ?? automatic` and calls `setZoom` on every
+    // resize and every change of panel insets — so opening the journal mid-settle snapped the zoom
+    // straight back. That was true of the landmark already; six places a map would have made it six
+    // times as visible. Recording the choice means a resize during the beat re-applies the settled
+    // zoom rather than undoing it.
+    this.zoomChoice = settleZoom(this.cameras.main.zoom, beat, MAX_ZOOM);
+    this.cameras.main.zoomTo(this.zoomChoice, beat.settleMs, 'Sine.easeInOut');
+    this.lastZoom = this.zoomChoice;
+    EventBus.emitEvent('zoom-changed', { zoom: this.zoomChoice });
+
+    if (beat.flash) {
+      const [r, g, b] = beat.flash.rgb;
+      this.cameras.main.flash(beat.flash.durationMs, r, g, b, false);
+    }
+
+    if (place.kind === 'landmark') {
       EventBus.emitEvent('landmark-reached', arrivalPage(this.world));
+    } else if (poiId) {
+      EventBus.emitEvent('poi-reached', { poiId, fieldMapId: this.built.fieldMap.id });
     }
   }
 }

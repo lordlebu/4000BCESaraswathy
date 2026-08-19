@@ -50,6 +50,15 @@ export interface GameToUi {
   'zoom-changed': { zoom: number };
 
   /**
+   * The traveller reached an authored place for the first time this journey.
+   *
+   * Separate from `standing-on` on purpose. That one is a *state* the UI depends on — it fires
+   * on leaving as well as arriving, and re-fires when you walk back — so overloading it with
+   * "and this is the first time" would make one message mean two things.
+   */
+  'poi-reached': { poiId: string; fieldMapId: string };
+
+  /**
    * The authored place under the traveller's feet, or null when there is none.
    *
    * A state rather than an arrival event. The UI needs to know not just that you arrived
