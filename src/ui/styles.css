@@ -391,6 +391,24 @@ button.ghost:hover:not(:disabled) {
   color: var(--muted);
 }
 
+/* The tiredness line: quieter again than "where next", and italic because it is the traveller
+   noticing something about himself rather than the map reporting a fact. */
+.status-tired {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* Offered rather than urged. Full width so it is reachable one-handed on a phone, where the
+   e2e suite requires a 40px target at six viewport sizes. */
+.camp-button {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  min-height: 40px;
+}
+
 .journal-foot .muted {
   margin: 0;
   font-size: 0.8rem;

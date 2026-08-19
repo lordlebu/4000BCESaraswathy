@@ -58,7 +58,15 @@ export interface Sky {
 }
 
 /** Phase 0 is six in the morning, so the cycle can be written in hours a person recognises. */
-const hoursToPhase = (hour: number): number => (((hour - 6) / 24 + 1) % 1 || 0);
+/**
+ * A clock hour as a phase.
+ *
+ * **Phase 0 is 6 a.m., not midnight** -- the cycle is anchored to first light. Exported because
+ * `fatigue.ts` needs to ask whether it is dark, and a second copy of this offset in another file
+ * is two things that will disagree. The first version of `isNight` did exactly that, compared
+ * against a bare `hour / 24`, and was false at every hour of the day.
+ */
+export const hoursToPhase = (hour: number): number => (((hour - 6) / 24 + 1) % 1 || 0);
 
 /**
  * Keyframes around the day, written as clock times.
