@@ -33,7 +33,13 @@ jobs:
   # proves Phaser still boots and draws — worth its own runner given how new Phaser 4 is.
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Has to clear the two install steps retrying *and* the suite still running afterwards.
+    # Worked through: deps can spend 12 and the download 15, but a run where both burn their
+    # full budget is already broken. The case to leave room for is the realistic one -- deps
+    # stalls twice and succeeds on the third attempt, about 14 minutes, then the suite takes
+    # its usual 4 or 5. At 20 that lands on the cap and the job is killed mid-suite with no
+    # report, which is the least useful failure available.
+    timeout-minutes: 30
     steps:
       # Deliberately not `paths-ignore` on the workflow, and not `if:` on the job.
       #
@@ -102,14 +108,40 @@ jobs:
           restore-keys: |
             playwright-${{ runner.os }}-
 
-      # The OS packages the browser needs. These are not cached -- they go into system
-      # directories rather than `~/.cache/ms-playwright` -- and are cheap, so they run every
-      # time. Split from the browser download below because only the download hangs, and
-      # retrying an apt install that already succeeded is wasted minutes.
+      # The OS packages the browser needs. Not cached -- they go into system directories rather
+      # than `~/.cache/ms-playwright` -- so this runs every time.
+      #
+      # **This step was described as "cheap enough to install either way" and that was wrong.**
+      # It is `apt-get update` plus about forty packages from Azure's Ubuntu mirrors, which is
+      # two to four minutes on a cold runner and occasionally much worse when a mirror is slow.
+      # A 5-minute bound cut into normal variance rather than catching a hang, and run
+      # 32227114349 died at exactly 5:00 with the install still in progress.
+      #
+      # So it gets the same treatment as the download below, for the same reason: it is a
+      # network operation that can stall. 12 minutes outside, 5 per attempt inside, three
+      # attempts. The inner bound is what makes retrying worth anything -- without it one stalled
+      # attempt eats the whole budget.
+      #
+      # `apt-get update` is retried on its own first. A stale package index is the usual cause of
+      # the install failing outright, and refreshing it is far cheaper than re-fetching forty
+      # packages.
       - name: Install Chromium's system dependencies
         if: steps.scope.outputs.code == 'true'
-        timeout-minutes: 5
-        run: npx playwright install-deps chromium
+        timeout-minutes: 12
+        run: |
+          for attempt in 1 2 3; do
+            echo "::group::System dependencies, attempt $attempt of 3"
+            sudo apt-get update -qq || echo "apt-get update failed; trying the install anyway"
+            if timeout 300 npx playwright install-deps chromium; then
+              echo "::endgroup::"
+              exit 0
+            fi
+            echo "::endgroup::"
+            echo "attempt $attempt failed or timed out"
+            sleep $((attempt * 15))
+          done
+          echo "::error::Chromium's system dependencies would not install after three attempts"
+          exit 1
 
       # The browser itself, and the step that hangs.
       #
