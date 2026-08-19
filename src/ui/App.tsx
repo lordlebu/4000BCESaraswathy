@@ -395,6 +395,8 @@ export function App() {
           hint: arrival?.hint ?? '',
           whereNext: arrival?.whereNext ?? '',
           fatigue: arrival?.fatigue ?? null,
+          dusk: arrival?.dusk ?? null,
+          shelter: arrival?.shelter ?? 'bedroll',
           canCamp: arrival?.canCamp ?? false,
           onCamp: () => EventBus.emitEvent('camp', {}),
           discovered: arrival?.discovered ?? 0,

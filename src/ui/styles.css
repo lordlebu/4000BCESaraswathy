@@ -393,6 +393,20 @@ button.ghost:hover:not(:disabled) {
 
 /* The tiredness line: quieter again than "where next", and italic because it is the traveller
    noticing something about himself rather than the map reporting a fact. */
+/* The light going. Louder than the tiredness note beneath it, because it is the one line here
+   worth acting on before it stops being actionable.
+   
+   `flex-basis: 100%` because `.journal-foot` is a wrapping flex row: without it this line sits
+   beside the where-next hint at the right margin, reading as an afterthought rather than as the
+   thing to do something about. */
+.status-dusk {
+  flex-basis: 100%;
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--accent);
+}
+
 .status-tired {
   margin: 2px 0 0;
   font-size: 0.9rem;

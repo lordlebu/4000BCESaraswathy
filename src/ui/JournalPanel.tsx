@@ -26,6 +26,19 @@ function Note({ note }: { note: FieldNote }) {
   );
 }
 
+/**
+ * What the button says, which is the whole of how shelter is explained.
+ *
+ * No tooltip, no legend, no icon: the label tells the player what kind of night this will be
+ * before they commit to it, in the same voice everything else here uses.
+ */
+const SHELTER_LABEL: Record<string, string> = {
+  roof: 'Sleep under the roof',
+  camp: 'Make camp for the night',
+  bedroll: 'Unroll the bedding here',
+  none: 'Sit out the night'
+};
+
 export interface JournalPanelProps {
   entry: JournalEntry | null;
   surroundings: string;
@@ -34,7 +47,11 @@ export interface JournalPanelProps {
   whereNext: string;
   /** How tired the traveller is, or null when there is nothing to say. */
   fatigue: string | null;
-  /** Whether bedding down would work here and now. */
+  /** A word about the fading light, or null while there is plenty. */
+  dusk: string | null;
+  /** The best shelter here: a roof, a camp, or his own bedroll. */
+  shelter: 'roof' | 'camp' | 'bedroll' | 'none';
+  /** Whether stopping for the night would do anything. */
   canCamp: boolean;
   onCamp: () => void;
   discovered: number;
@@ -57,6 +74,8 @@ export function JournalPanel({
   hint,
   whereNext,
   fatigue,
+  dusk,
+  shelter,
   canCamp,
   onCamp,
   discovered,
@@ -107,10 +126,11 @@ export function JournalPanel({
         {/* Rendered only when it has something to say. An empty paragraph still takes vertical
             space in a panel that is deliberately tight on a phone. */}
         {whereNext && <p className="status-next">{whereNext}</p>}
+        {dusk && <p className="status-dusk">{dusk}</p>}
         {fatigue && <p className="status-tired">{fatigue}</p>}
         {canCamp && (
           <button type="button" className="camp-button" onClick={onCamp}>
-            Make camp for the night
+            {SHELTER_LABEL[shelter]}
           </button>
         )}
         <p className="muted">{discovered} places discovered.</p>

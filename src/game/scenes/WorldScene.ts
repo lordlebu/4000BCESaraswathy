@@ -52,15 +52,8 @@ import {
   type Facing
 } from '../player';
 import { phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
-import {
-  canCamp,
-  fatigueAt,
-  fatigueEnabled,
-  fatigueNote,
-  isNight,
-  paceFor,
-  restUntilMorning
-} from '../fatigue';
+import { fatigueAt, fatigueEnabled, fatigueNote, paceFor, restUntilMorning } from '../fatigue';
+import { duskNote, isDark, lightLeft, shelterAt, spendNight, type Shelter } from '../night';
 import { momentAt } from '../moment';
 import {
   arrivalPage,
@@ -657,16 +650,28 @@ export class WorldScene extends Phaser.Scene {
    * the creature asleep in the journal and the light on the map are the same moment.
    */
   private onCamp = (): void => {
-    this.tryCamp();
+    this.tryStop();
   };
 
-  /** Whether bedding down would work right now. Drives the button; `tryCamp` does the work. */
-  private canCampHere(): boolean {
+  /**
+   * The best shelter where the traveller is standing.
+   *
+   * A roof beats a camp beats the bedroll, and the bedroll is always there — which is the whole
+   * reason he carries one. A roofed place is one canon gave sub-locations to: the tower's stair
+   * shaft, the gate court's threshold, the archive's stacks. That is not a new content type, it is
+   * reading what "you can go inside this" already meant.
+   */
+  private shelterHere(): Shelter {
     const here = poiAt(this.built, this.at);
-    return canCamp(
-      here !== null && isCamp(here.poi),
-      isNight(this.travelled, this.startPhase, this.time.now)
+    return shelterAt(
+      (here?.poi.subLocations ?? []).length > 0,
+      here !== null && isCamp(here.poi)
     );
+  }
+
+  /** Whether stopping for the night would do anything. Only after dark; before it, keep walking. */
+  private canStopHere(): boolean {
+    return isDark(this.travelled, this.startPhase, this.time.now);
   }
 
   /** How tired the traveller is, or 0 when the flag is off. */
@@ -675,23 +680,33 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /**
-   * Bed down, if this is a camp and it is dark.
+   * Stop for the night, wherever that is.
    *
-   * Sleeping advances the clock to first light and clears the fatigue, so waking is a fresh
-   * morning in a place that is still where you left it. Nothing is spent and nothing is locked;
-   * the only thing that changes is the sky and how heavy the next step feels.
+   * Advances the clock to first light and, under a roof or at a camp, clears the tiredness. On the
+   * bedroll it does not: an open-ground night counts as a night and no more, which is what keeps
+   * shelter worth walking to.
+   *
+   * **He wakes where he stopped.** `this.at` is not touched here and `spendNight` returns no
+   * position, so there is nowhere for a new location to come from. An earlier design had him
+   * waking somewhere he had not walked to, which is the game moving the player's character while
+   * they were not looking.
    */
-  private tryCamp(): boolean {
-    if (!this.fatigueOn) return false;
-    const here = poiAt(this.built, this.at);
-    const atCamp = here !== null && isCamp(here.poi);
-    if (!canCamp(atCamp, isNight(this.travelled, this.startPhase, this.time.now))) return false;
+  private tryStop(): boolean {
+    if (!this.canStopHere()) return false;
 
-    const rested = restUntilMorning(this.travelled, this.startPhase, this.time.now);
-    this.travelled = rested.travelledMs;
-    this.restedAt = rested.restedAtMs;
+    const outcome = spendNight(this.shelterHere());
+    const morning = restUntilMorning(this.travelled, this.startPhase, this.time.now);
+    this.travelled = morning.travelledMs;
+    // Only a real night's sleep resets the tiredness. The bedroll buys the hours, not the rest.
+    if (outcome.rested) this.restedAt = morning.restedAtMs;
+
     this.updateSky();
-    EventBus.emitEvent('camped', { at: this.at, place: here!.poi.name });
+    EventBus.emitEvent('night-passed', {
+      at: this.at,
+      shelter: outcome.shelter,
+      rested: outcome.rested,
+      entry: outcome.entry
+    });
     this.arriveAt(this.at);
     return true;
   }
@@ -910,7 +925,9 @@ export class WorldScene extends Phaser.Scene {
       hint: landmarkHint(this.world, at),
       whereNext: whereNextHint(this.built.placed, at, this.discovered),
       fatigue: this.fatigueOn ? fatigueNote(this.fatigue()) : null,
-      canCamp: this.fatigueOn && this.canCampHere(),
+      dusk: duskNote(lightLeft(this.travelled, this.startPhase, this.time.now)),
+      shelter: this.shelterHere(),
+      canCamp: this.canStopHere(),
       discovered: this.discovered.size,
       atLandmark
     });
