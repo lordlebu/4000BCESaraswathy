@@ -8,7 +8,7 @@
 // here to talk to, and what is further in. That is the order a person arriving somewhere
 // actually works through it.
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   type Progress,
   type WorldMoment,
@@ -17,13 +17,14 @@ import {
   canAdvance,
   canEnter,
   entryFor,
-  hasSomethingNew,
   isComplete,
+  lineIsSpent,
   linesFor,
   rungOf
 } from '../journey';
 import { discovery } from '../content/knowledge';
-import { npc, npcsAt, poi } from '../content/places';
+import { npcsAt, poi, type Npc } from '../content/places';
+import { quietNote, saysNow } from '../content/conversation';
 import { PersonPortrait } from './PersonPortrait';
 
 /** Why a rung will not move, in words. Mirrors the diary's phrasing on purpose. */
@@ -55,6 +56,59 @@ export interface PlacePanelProps {
   onLook: (discoveryId: string) => void;
   onListen: (npcId: string, lineIndex: number) => void;
   onClose: () => void;
+}
+
+/**
+ * One person, saying one thing.
+ *
+ * **Being told something is how you hear it.** The old panel made the player click "Write it
+ * down" beside each line, which is the paperwork this phase exists to remove -- the diary is
+ * Varuna's and he does not need permission to use it. So the effect below records the line as
+ * heard the moment it is shown, and the button that remains asks for the *next* thing rather than
+ * for consent to remember this one.
+ *
+ * The effect keys on the line's text rather than the person, so walking away and coming back does
+ * not re-give what was already given: `lineIsSpent` will have started returning true and
+ * `saysNow` will have moved on.
+ */
+function Person({
+  person,
+  progress,
+  onListen
+}: {
+  person: Npc;
+  progress: Progress;
+  onListen: (npcId: string, lineIndex: number) => void;
+}) {
+  const said = saysNow(linesFor(progress, person.id), (l) => lineIsSpent(progress, l));
+  const text = said.line?.text ?? null;
+  const index = said.index;
+  const gives = said.gives;
+
+  useEffect(() => {
+    if (text !== null && gives) onListen(person.id, index);
+  }, [person.id, text, index, gives, onListen]);
+
+  return (
+    <div className="person">
+      <h4>
+        <PersonPortrait person={person} />
+        <span>
+          {person.name} <span className="muted">· {person.role}</span>
+        </span>
+      </h4>
+      {said.line ? (
+        <p className="said">
+          <span aria-hidden="true">“</span>
+          {said.line.text}
+          <span aria-hidden="true">”</span>
+        </p>
+      ) : (
+        <p className="muted">{quietNote(person.name)}</p>
+      )}
+      {said.more && <p className="muted said-more">There is more they could tell you.</p>}
+    </div>
+  );
 }
 
 export function PlacePanel({
@@ -128,40 +182,14 @@ export function PlacePanel({
             {people.length > 0 && (
               <section className="place-section">
                 <h3>Who is here</h3>
-                {people.map((n) => {
-                  const lines = linesFor(progress, n.id);
-                  const more = hasSomethingNew(progress, n.id);
-                  return (
-                    <div key={n.id} className="person">
-                      <h4>
-                        <PersonPortrait person={n} />
-                        <span>
-                          {n.name} <span className="muted">· {n.role}</span>
-                          {more && <i className="control-count">new</i>}
-                        </span>
-                      </h4>
-                      {lines.map((line, i) => (
-                        <p key={i} className="said">
-                          <span aria-hidden="true">“</span>
-                          {line.text}
-                          <span aria-hidden="true">”</span>
-                          {line.gives.length > 0 && (
-                            <button
-                              type="button"
-                              className="ghost small"
-                              onClick={() => onListen(n.id, i)}
-                            >
-                              Write it down
-                            </button>
-                          )}
-                        </p>
-                      ))}
-                      {lines.length === 0 && (
-                        <p className="muted">{npc(n.id)?.name} has nothing to say to you yet.</p>
-                      )}
-                    </div>
-                  );
-                })}
+                {people.map((n) => (
+                  <Person
+                    key={n.id}
+                    person={n}
+                    progress={progress}
+                    onListen={onListen}
+                  />
+                ))}
               </section>
             )}
 

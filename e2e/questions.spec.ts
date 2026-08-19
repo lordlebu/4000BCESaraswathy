@@ -43,9 +43,11 @@ test('a question arrives from a person, not from the air', async ({ page }) => {
   await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
 
-  const listen = page.getByRole('button', { name: 'Write it down' });
-  if ((await listen.count()) === 0) test.skip(true, 'nobody at this place has a question to give');
-  await listen.first().click();
+  // No button. Being told something is how you hear it now -- the diary is Varuna's and he does
+  // not need permission to use it -- so simply standing here and being spoken to is enough. This
+  // used to click "Write it down" and skip when there was none, which meant it silently stopped
+  // running rather than failing when the button was removed.
+  await expect(page.locator('.person .said')).not.toHaveCount(0);
   await page.getByRole('button', { name: 'Leave' }).click();
 
   await openDiary(page);
@@ -57,9 +59,7 @@ test('every reading is shown, including the ones you cannot argue', async ({ pag
   await step(page, 'ArrowDown');
   await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
-  const listen = page.getByRole('button', { name: 'Write it down' });
-  if ((await listen.count()) === 0) test.skip(true, 'no question available on this seed');
-  await listen.first().click();
+  await expect(page.locator('.person .said')).not.toHaveCount(0);
   await page.getByRole('button', { name: 'Leave' }).click();
   await openDiary(page);
 
@@ -77,14 +77,16 @@ test('the player can settle a question, and is never told they were wrong', asyn
   await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
 
-  // Take everything this place will give. Rounds rather than a single pass: a rung opens the
-  // next rung, and hearing a line can unlock another, so one sweep leaves the place unfinished.
+  // Take everything this place will give. Rounds rather than a single pass: a rung opens the next
+  // rung, and hearing a line can unlock another, so one sweep leaves the place unfinished.
+  //
+  // Only looking needs clicking. Hearing happens by being here -- the "Write it down" button this
+  // loop used to press no longer exists, and pressing a button that is gone is a silent no-op that
+  // would leave this walking through the motions of a mechanic it had stopped exercising.
   for (let round = 0; round < 4; round += 1) {
-    for (const label of ['Look closer', 'Write it down']) {
-      const buttons = page.getByRole('button', { name: label });
-      for (let i = 0; i < (await buttons.count()); i += 1) {
-        if (await buttons.nth(i).isEnabled()) await buttons.nth(i).click();
-      }
+    const buttons = page.getByRole('button', { name: 'Look closer' });
+    for (let i = 0; i < (await buttons.count()); i += 1) {
+      if (await buttons.nth(i).isEnabled()) await buttons.nth(i).click();
     }
   }
   await page.getByRole('button', { name: 'Leave' }).click();
