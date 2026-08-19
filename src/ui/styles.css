@@ -1169,3 +1169,64 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 
 .met-ask { margin-top: 0.6rem; }
 .met-ask .canon-sources { margin-top: 0.3rem; }
+
+/*
+ * The overworld sketch: a drawing of the continent, above the list that does the travelling.
+ *
+ * Orientation, not navigation. Nothing here is clickable -- the buttons below are how you go
+ * somewhere, and the drawing exists so that "the plateau" and "the harbour" become places with a
+ * position rather than names in a list.
+ */
+.overworld-sketch {
+  display: block;
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto 6px;
+  height: auto;
+  overflow: visible;
+}
+
+.overworld-road {
+  stroke: var(--edge);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+}
+
+.overworld-dot {
+  fill: var(--muted);
+  stroke: var(--paper);
+  stroke-width: 1;
+}
+
+.overworld-name {
+  font-size: 5px;
+  fill: var(--muted);
+  font-family: inherit;
+}
+
+/* Where you are, and where a road actually goes. Distinguished by weight rather than by hue
+   alone, so the map still reads without colour. */
+.overworld-here .overworld-dot {
+  fill: var(--accent);
+}
+
+.overworld-here .overworld-name {
+  fill: var(--ink);
+  font-weight: bold;
+}
+
+.overworld-near .overworld-dot {
+  fill: var(--ink);
+}
+
+.overworld-near .overworld-name {
+  fill: var(--ink);
+}
+
+/* Somewhere with no road from here. Present, because a naturalist knows the plateau exists
+   before they can walk to it, but plainly not connected. */
+.overworld-far .overworld-dot {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1;
+}

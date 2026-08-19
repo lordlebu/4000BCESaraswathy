@@ -37,6 +37,14 @@ export interface FieldMap {
    * without one lands somewhere arid, it will be obvious and wrong.
    */
   climate: Climate;
+  /**
+   * Where this map sits on the overworld, in abstract 0-100 units, or null if canon is quiet.
+   *
+   * Not latitude and longitude, and canon says why: a real basemap would make a claim about a
+   * post-cataclysm continent that canon does not make. The drawing reads these; it does not
+   * invent them, which is the noun/verb line this project runs on.
+   */
+  coordinates: { x: number; y: number } | null;
   /** What the player reads on first arriving. */
   arrival: string;
 }
@@ -106,7 +114,7 @@ export interface Npc {
 interface RawFieldMap {
   id: string; name: string; region: string; seed_biomes: string[];
   scale?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
-  climate?: Climate;
+  climate?: Climate; coordinates?: { x: number; y: number };
 }
 interface RawPoi {
   id: string; name: string; field_map: string; kind: string; terrain?: string[];
@@ -135,6 +143,7 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   pointsOfInterest: m.points_of_interest ?? [],
   neighbours: m.neighbours ?? [],
   climate: m.climate ?? DELTA_CLIMATE,
+  coordinates: m.coordinates ?? null,
   arrival: m.arrival ?? ''
 }));
 

@@ -185,7 +185,7 @@
         "rain": 4
       },
       "arrival": "The harbour wall runs for four hundred paces and the mooring rings are still in it, at the height a loaded hull would sit. There is no water. There has been no water for long enough that the nearest is two days' walk, and short enough that the rings have not rusted through.",
-      "notes": "Fourth field map, and the one about time rather than about knowing. Everything here was built or evolved for a wetter world that ended inside cultural memory, and nothing about it is mysterious -- it is all simply out of date. First map where canon's own species populate the ground: forty Gedrosian species, all placeable. Mountains added to the palette: without them the built map is desert, plains and hills and nothing else, which reads as one flat expanse. They come out at about 2% -- a ridge on the skyline rather than a range, which is the right amount for a map whose subject is a shoreline that is no longer there. Coast and forest were both measured and rejected: coast would put 41% water back on a map about there being none, and forest 19% woodland on a desert.",
+      "notes": "Fourth field map, and the one about time rather than about knowing. Everything here was built or evolved for a wetter world that ended inside cultural memory, and nothing about it is mysterious -- it is all simply out of date. First map where canon's own species populate the ground: forty Gedrosian species, all placeable. Mountains added to the palette: without them the built map is desert, plains and hills and nothing else, which reads as one flat expanse. They come out at about 2% -- a ridge on the skyline rather than a range, which is the right amount for a map whose subject is a shoreline that is no longer there. Coast and forest were both measured and rejected: coast would put 41% water back on a map about there being none, and forest 19% woodland on a desert. Far east into the dead interior. Placed by measurement as well as by meaning: the first arrangement tried put it at (86, 74), which made the Narmada crossing the longest line on the map while two places that are *not* neighbours sat closer together -- so the drawing would have contradicted the connections it was supposed to show.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -193,7 +193,11 @@
       "sources": [
         "Varuna's Field Diary design",
         "AI_CONTEXT.md"
-      ]
+      ],
+      "coordinates": {
+        "x": 92,
+        "y": 36
+      }
     },
     {
       "id": "field_map_dwarka",
@@ -226,7 +230,7 @@
         "storm": 8
       },
       "arrival": "Half of Dwarka is under water and the half that is not has been rebuilt twice on top of itself. Nobody here treats the sea as an enemy or the gate as a wonder. Both are simply conditions, like weather, and the whole city is arranged around living beside them.",
-      "notes": "Third field map. The one where the method is tested: local knowledge is not merely useful here, it is right, and the academy's three tidy explanations are all wrong. Gives `crosses_at` a consumer without making the crossing species placeable -- you find what they left, never the animal. Hills added for the headland the surviving half stands on. Forest was considered and left out: it halves the wetland, and a drowned city arranged around living beside the sea should not read as woodland.",
+      "notes": "Third field map. The one where the method is tested: local knowledge is not merely useful here, it is right, and the academy's three tidy explanations are all wrong. Gives `crosses_at` a consumer without making the crossing species placeable -- you find what they left, never the animal. Hills added for the headland the surviving half stands on. Forest was considered and left out: it halves the wetland, and a drowned city arranged around living beside the sea should not read as woodland. Below and west of Lothal, on the coast the sea took half of. The two delta maps are close together because the delta is the part of the world that survived; Dwarka to the Dry Harbour is the widest gulf on the overworld.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -234,7 +238,11 @@
       "sources": [
         "Varuna's Field Diary design",
         "AI_CONTEXT.md"
-      ]
+      ],
+      "coordinates": {
+        "x": 16,
+        "y": 64
+      }
     },
     {
       "id": "field_map_lothal",
@@ -262,7 +270,7 @@
         "epoch_post_cataclysm"
       ],
       "arrival": "The delta takes a long time to become a city. Reeds, then reed-and-mud, then mud with brick in it, and then brick cut by someone who expected it to last. The tower is visible from a good way out, or the half of it still standing. Somebody has hung washing across the third storey.",
-      "notes": "Opening field map. Lothal after the Great Shattering: the Harappan city is a half-buried relic and survivors are camped inside it rather than beside it, so the same ground is a settlement and a ruin at once. Kept small and legible -- this is where the player learns how to look. Forest and hills were added to the palette late: with only wetland, river, settlement and coast, the engine reclassified everything it could not match and the whole map came out 55% coast and 45% wetland -- two biomes, and a delta that read as flat. They are appended, not inserted, because the engine takes the first palette entry as its fallback. Plains was deliberately left out: adding it takes back every reclassified plains tile at once and drops wetland from 45% to 2%, which would stop this being a delta at all.",
+      "notes": "Opening field map. Lothal after the Great Shattering: the Harappan city is a half-buried relic and survivors are camped inside it rather than beside it, so the same ground is a settlement and a ruin at once. Kept small and legible -- this is where the player learns how to look. Forest and hills were added to the palette late: with only wetland, river, settlement and coast, the engine reclassified everything it could not match and the whole map came out 55% coast and 45% wetland -- two biomes, and a delta that read as flat. They are appended, not inserted, because the engine takes the first palette entry as its fallback. Plains was deliberately left out: adding it takes back every reclassified plains tile at once and drops wetland from 45% to 2%, which would stop this being a delta at all. Sits at the centre of what is left, and every other map is reached from here -- which is why it is the opening one.",
       "canon": "primary",
       "sources": [
         "Varuna's Field Diary design",
@@ -277,6 +285,10 @@
         "mist": 18,
         "rain": 18,
         "storm": 6
+      },
+      "coordinates": {
+        "x": 28,
+        "y": 50
       }
     },
     {
@@ -304,7 +316,7 @@
         "field_map_lothal"
       ],
       "arrival": "The road up the scarp is the only part of the plateau anyone built. Everything above it was already here: black rock in steps a hundred feet high, holding a flat green country the sea never reached. They will tell you at the top that this is why the University is here. They are right, and it is not the whole reason.",
-      "notes": "Second field map, and the counterweight to Lothal. At Lothal local knowledge was right and the academy was quoted from a distance; here the academy is a room the player stands in. The Long Archive is not foolish -- it is rigorous and its record begins at the Shattering, so it has four hundred years of excellent measurements against a baseline that is itself the wound. Large scale, hills and mountains, so the overworld reads as travel rather than as two versions of the same map.",
+      "notes": "Second field map, and the counterweight to Lothal. At Lothal local knowledge was right and the academy was quoted from a distance; here the academy is a room the player stands in. The Long Archive is not foolish -- it is rigorous and its record begins at the Shattering, so it has four hundred years of excellent measurements against a baseline that is itself the wound. Large scale, hills and mountains, so the overworld reads as travel rather than as two versions of the same map. High and apart. The plateau is the only place on the overworld that is neither delta nor desert, and the distance from Lothal is the point -- reaching the university is a journey out of the country you started in.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -318,6 +330,10 @@
         "mist": 30,
         "rain": 15,
         "storm": 3
+      },
+      "coordinates": {
+        "x": 58,
+        "y": 20
       }
     }
   ],
