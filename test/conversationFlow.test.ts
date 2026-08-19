@@ -10,7 +10,9 @@
 
 import { describe, expect, it } from 'vitest';
 import { quietNote, saysNow } from '../src/content/conversation';
-import { linesFor, emptyProgress } from '../src/journey';
+import { linesFor, lineIsSpent, emptyProgress, hear } from '../src/journey';
+import type { Progress } from '../src/journey';
+import { discovery, discoveries } from '../src/content/knowledge';
 import { npc, npcsAt, poisOn, fieldMaps } from '../src/content/places';
 import type { Line } from '../src/content/places';
 
@@ -114,6 +116,50 @@ describe('everybody in canon says something', () => {
       const first = npc(person)?.lines[0];
       expect(first, person).toBeDefined();
       expect(first!.requires, `${person} opens behind a requirement`).toEqual([]);
+    }
+  });
+});
+
+describe('help somebody and they say so', () => {
+  /** Complete a discovery outright, as a player who climbed every rung would have it. */
+  function finish(progress: Progress, id: string): Progress {
+    const d = discovery(id);
+    return d ? { ...progress, rungs: { ...progress.rungs, [id]: d.rungs.length - 1 } } : progress;
+  }
+
+  /** Talk to somebody until they have nothing left to hand over, as the panel does. */
+  function talkedOut(progress: Progress, npcId: string): Progress {
+    let p = progress;
+    for (let round = 0; round < 6; round += 1) {
+      const said = saysNow(linesFor(p, npcId), (l) => lineIsSpent(p, l));
+      if (!said.line || !said.gives) break;
+      p = hear(p, npcId, said.index);
+    }
+    return p;
+  }
+
+  it('is what the person says next, for every discovery that helps somebody', () => {
+    // The failure this exists for shipped once: four discoveries named three people in `helps` and
+    // not one of them had a line acknowledging it. The camp's spring was turned around and nobody
+    // mentioned it, which is why none of it landed when the game was played.
+    //
+    // Walked the way a player walks it -- talk to them on arrival, go and do the work, come back --
+    // because the reaction only surfaces once the opening offer has been taken. A first version of
+    // this check started from an empty journey and reported every reaction missing, which was the
+    // check being unrealistic rather than the content being absent.
+    for (const d of discoveries) {
+      for (const who of d.helps ?? []) {
+        const before = talkedOut(emptyProgress(), who);
+        const after = finish(before, d.id);
+        const said = saysNow(linesFor(after, who), (l) => lineIsSpent(after, l));
+
+        expect(said.line, `${who} says nothing after ${d.id}`).not.toBeNull();
+        const heardBefore = saysNow(linesFor(before, who), (l) => lineIsSpent(before, l));
+        expect(
+          said.line!.text,
+          `${who} says the same thing after ${d.id} as before it -- the help is a field in a file`
+        ).not.toBe(heardBefore.line?.text);
+      }
     }
   });
 });

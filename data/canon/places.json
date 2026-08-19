@@ -996,6 +996,24 @@
           "requires": [
             "discovery_mask_niche"
           ]
+        },
+        {
+          "text": "The north chamber is clear. The water was still falling under all that silt -- it never stopped, it only stopped being able to reach anything. We threshed in a morning what takes us four days. My mother would have called that a miracle and been wrong twice.",
+          "requires": [
+            "discovery_granary_fall"
+          ]
+        },
+        {
+          "text": "We are not moving in the spring. I have counted it four times and it keeps coming out the same, which is not something I am used to. Nine times I have moved this camp. My daughter will be the first of us to know what a place looks like in its second year.",
+          "requires": [
+            "discovery_winter_line"
+          ]
+        },
+        {
+          "text": "Eight acres, sown from the granary wall. It will be a poor crop for three years and it will be a crop, which is three years better than a field we plant every spring out of habit. My mother planted it. Her mother planted it. Neither of them ever got anything back.",
+          "requires": [
+            "discovery_red_rice_survival"
+          ]
         }
       ],
       "epochs": [
@@ -1048,6 +1066,12 @@
           "requires": [
             "discovery_bitter_millet"
           ]
+        },
+        {
+          "text": "So the spring moved and the archive did not. I have been grazing off the old mark my whole life and telling myself the water was unreliable. The water is fine. It is the mark that is wrong, and a mark is a thing a person put there.",
+          "requires": [
+            "discovery_moving_spring"
+          ]
         }
       ],
       "notes": "Holds two of the map's answers inside ordinary vocabulary and has never had a reason to examine either. The counterpart to Thrali, and pointedly not a wise elder -- he is a working herder with a job on.",
@@ -1095,6 +1119,12 @@
           "text": "No. Somebody stays. You have all found the thing that is wrong with this place and you are all leaving with it, and the eleven thousand volumes are still here and still need copying.",
           "requires": [
             "discovery_terrace_script"
+          ]
+        },
+        {
+          "text": "One bird, two entries, thirty years apart, and I have dusted both shelves. Nobody rereads. I am going to start at the oldest and work forward, and I expect it will take the rest of my life, and I would rather know.",
+          "requires": [
+            "discovery_double_classified"
           ]
         }
       ],
@@ -1195,6 +1225,12 @@
           "requires": [
             "discovery_fever_root_spread"
           ]
+        },
+        {
+          "text": "Layers, yes. My mother knew where the thin ones were and I know, and neither of us knew why. It is not a thing that happened to Dwarka. It is what Dwarka is, and we already had a word for it and a place to put the bones.",
+          "requires": [
+            "discovery_midden_layers"
+          ]
         }
       ],
       "notes": "Holds four hundred years of stratigraphy as a family trade and has never been asked. Would settle -- the midden is a living, not a home.",
@@ -1247,6 +1283,18 @@
           "gives": [
             "word_kia_uvai"
           ]
+        },
+        {
+          "text": "I can see the bottom. Do you understand what I am telling you -- I have set nets by feel for nineteen years and this morning I looked through a piece of the eastern field and saw the channel bed. The field nobody could plant. It was giving us this the whole time.",
+          "requires": [
+            "discovery_salt_glass"
+          ]
+        },
+        {
+          "text": "Bekh has it written down. Four months a year I could not fish and now I can, and the reason is a kiln and a mill and a piece of glass, none of which is mine. I do not entirely follow it. I am not going to argue with a full net.",
+          "requires": [
+            "discovery_winter_line"
+          ]
         }
       ],
       "epochs": [
@@ -1279,6 +1327,18 @@
           "text": "After the flood? Nobody cuts reed after the flood. -- No, I am listening. Say it again.",
           "requires": [
             "discovery_saltreed_thatch"
+          ]
+        },
+        {
+          "text": "You were right about the wind. We turned the spring kiln to face the plateau and it fired in a day, on half the reed. Half. I have been cutting twice what I needed since I was fourteen and nobody ever stood in the doorway and looked at which way the smoke went.",
+          "requires": [
+            "discovery_kiln_draught"
+          ]
+        },
+        {
+          "text": "Bekh says we are staying. So I am going to put a proper roof on the kiln shed, the kind you build when you expect to be under it. It will take three weeks and there is no reason to hurry, which is the strangest part.",
+          "requires": [
+            "discovery_winter_line"
           ]
         }
       ],
