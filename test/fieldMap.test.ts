@@ -75,9 +75,27 @@ describe('the Narmada plateau', () => {
   it('is a different country from the delta, or the overworld is pointless', () => {
     expect(narmada).not.toBeNull();
     expect(narmada!.scale).toBe('large');
-    // No palette overlap beyond settlement: hills and mountains against wetland and river.
-    const shared = narmada!.seedBiomes.filter((b) => lothal!.seedBiomes.includes(b));
-    expect(shared).toEqual(['settlement']);
+
+    // Measured on the built ground, not on the palettes.
+    //
+    // This used to assert the two palettes shared nothing but `settlement`, which worked while
+    // every palette was four entries deep. It stopped being a fair instrument once Lothal gained
+    // forest and hills: the lists now overlap on three names while the maps remain completely
+    // different places. Narmada comes out 64% hills and 33% forest with no water at all; Lothal
+    // is 48% coast and 32% wetland with the woodland on the dry ground behind it.
+    //
+    // So ask the question directly. A plateau has no water; a delta is mostly water.
+    const share = (map: typeof narmada, biome: string) => {
+      const { world } = buildFieldMap(map!, {});
+      const n = world.tiles.flat().filter((t) => t.biome === biome).length;
+      return n / (world.width * world.height);
+    };
+    const water = (map: typeof narmada) =>
+      share(map, 'wetland') + share(map, 'coast') + share(map, 'river');
+
+    expect(water(narmada), 'the plateau has water on it').toBeLessThan(0.05);
+    expect(water(lothal), 'the delta is not mostly water').toBeGreaterThan(0.5);
+    expect(share(narmada, 'hills'), 'the plateau is not mostly high ground').toBeGreaterThan(0.5);
   });
 
   it('builds ground with every authored place standing on it', () => {
@@ -194,6 +212,52 @@ describe('the destination stands on its own ground', () => {
       const kind = landmarkKindFor(world.landmark, world.seed);
       expect(kind.terrain, `${map.id}: ${kind.name} does not belong on ${world.landmark.terrain}`)
         .toContain(world.landmark.terrain);
+    }
+  });
+});
+
+describe('every map has ground that is not all one thing', () => {
+  /** How much of a built map each biome covers, as a fraction. */
+  function mix(mapId: string): Map<string, number> {
+    const map = fieldMaps.find((m) => m.id === mapId)!;
+    const { world } = buildFieldMap(map, {});
+    const tally = new Map<string, number>();
+    for (const tile of world.tiles.flat()) {
+      tally.set(tile.biome, (tally.get(tile.biome) ?? 0) + 1);
+    }
+    const total = world.width * world.height;
+    return new Map([...tally].map(([biome, n]) => [biome, n / total]));
+  }
+
+  it('draws at least four biomes on every map', () => {
+    // The bug this exists for: Lothal's palette was wetland, river, settlement and coast, and
+    // because everything outside a palette is reclassified into the nearest thing inside it, the
+    // finished map was 55% coast and 45% wetland. Two biomes, and it read as flat.
+    //
+    // Counting only what covers a real share of the map -- a palette entry that lands on nine
+    // tiles out of two thousand is in the data but not on the screen.
+    for (const map of fieldMaps) {
+      const real = [...mix(map.id)].filter(([, share]) => share >= 0.01);
+      expect(real.length, `${map.id} is only ${real.map(([b]) => b).join(' and ')}`)
+        .toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it('gives the delta maps somewhere that is not water', () => {
+    // Named rather than derived from the palette, because the palette is the thing under test:
+    // reading the expectation out of it would pass however the palette changed.
+    expect(mix('field_map_lothal').get('forest') ?? 0).toBeGreaterThan(0.05);
+    expect(mix('field_map_lothal').get('hills') ?? 0).toBeGreaterThan(0.01);
+    expect(mix('field_map_dwarka').get('hills') ?? 0).toBeGreaterThan(0.01);
+  });
+
+  it('keeps the deltas deltas', () => {
+    // The other half, and the reason plains was left out of Lothal's palette. Adding it takes
+    // back every reclassified plains tile at once and drops wetland from 45% to 2% -- richer
+    // ground, but no longer a delta. Variety must not cost a map its thesis.
+    for (const id of ['field_map_lothal', 'field_map_dwarka']) {
+      const wet = (mix(id).get('wetland') ?? 0) + (mix(id).get('coast') ?? 0);
+      expect(wet, `${id} is no longer mostly water`).toBeGreaterThan(0.5);
     }
   });
 });

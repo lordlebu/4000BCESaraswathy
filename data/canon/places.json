@@ -163,7 +163,8 @@
         "desert",
         "plains",
         "settlement",
-        "hills"
+        "hills",
+        "mountains"
       ],
       "scale": "large",
       "points_of_interest": [
@@ -184,7 +185,7 @@
         "rain": 4
       },
       "arrival": "The harbour wall runs for four hundred paces and the mooring rings are still in it, at the height a loaded hull would sit. There is no water. There has been no water for long enough that the nearest is two days' walk, and short enough that the rings have not rusted through.",
-      "notes": "Fourth field map, and the one about time rather than about knowing. Everything here was built or evolved for a wetter world that ended inside cultural memory, and nothing about it is mysterious -- it is all simply out of date. First map where canon's own species populate the ground: forty Gedrosian species, all placeable.",
+      "notes": "Fourth field map, and the one about time rather than about knowing. Everything here was built or evolved for a wetter world that ended inside cultural memory, and nothing about it is mysterious -- it is all simply out of date. First map where canon's own species populate the ground: forty Gedrosian species, all placeable. Mountains added to the palette: without them the built map is desert, plains and hills and nothing else, which reads as one flat expanse. They come out at about 2% -- a ridge on the skyline rather than a range, which is the right amount for a map whose subject is a shoreline that is no longer there. Coast and forest were both measured and rejected: coast would put 41% water back on a map about there being none, and forest 19% woodland on a desert.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -203,7 +204,8 @@
         "coast",
         "settlement",
         "wetland",
-        "river"
+        "river",
+        "hills"
       ],
       "scale": "small",
       "points_of_interest": [
@@ -224,7 +226,7 @@
         "storm": 8
       },
       "arrival": "Half of Dwarka is under water and the half that is not has been rebuilt twice on top of itself. Nobody here treats the sea as an enemy or the gate as a wonder. Both are simply conditions, like weather, and the whole city is arranged around living beside them.",
-      "notes": "Third field map. The one where the method is tested: local knowledge is not merely useful here, it is right, and the academy's three tidy explanations are all wrong. Gives `crosses_at` a consumer without making the crossing species placeable -- you find what they left, never the animal.",
+      "notes": "Third field map. The one where the method is tested: local knowledge is not merely useful here, it is right, and the academy's three tidy explanations are all wrong. Gives `crosses_at` a consumer without making the crossing species placeable -- you find what they left, never the animal. Hills added for the headland the surviving half stands on. Forest was considered and left out: it halves the wetland, and a drowned city arranged around living beside the sea should not read as woodland.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -243,7 +245,9 @@
         "wetland",
         "river",
         "settlement",
-        "coast"
+        "coast",
+        "forest",
+        "hills"
       ],
       "scale": "small",
       "points_of_interest": [
@@ -258,7 +262,7 @@
         "epoch_post_cataclysm"
       ],
       "arrival": "The delta takes a long time to become a city. Reeds, then reed-and-mud, then mud with brick in it, and then brick cut by someone who expected it to last. The tower is visible from a good way out, or the half of it still standing. Somebody has hung washing across the third storey.",
-      "notes": "Opening field map. Lothal after the Great Shattering: the Harappan city is a half-buried relic and survivors are camped inside it rather than beside it, so the same ground is a settlement and a ruin at once. Kept small and legible -- this is where the player learns how to look.",
+      "notes": "Opening field map. Lothal after the Great Shattering: the Harappan city is a half-buried relic and survivors are camped inside it rather than beside it, so the same ground is a settlement and a ruin at once. Kept small and legible -- this is where the player learns how to look. Forest and hills were added to the palette late: with only wetland, river, settlement and coast, the engine reclassified everything it could not match and the whole map came out 55% coast and 45% wetland -- two biomes, and a delta that read as flat. They are appended, not inserted, because the engine takes the first palette entry as its fallback. Plains was deliberately left out: adding it takes back every reclassified plains tile at once and drops wetland from 45% to 2%, which would stop this being a delta at all.",
       "canon": "primary",
       "sources": [
         "Varuna's Field Diary design",
