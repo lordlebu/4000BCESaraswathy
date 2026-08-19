@@ -7,6 +7,7 @@ on:
 
 jobs:
   check:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -32,6 +33,7 @@ jobs:
   # proves Phaser still boots and draws — worth its own runner given how new Phaser 4 is.
   browser:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       # Deliberately not `paths-ignore` on the workflow, and not `if:` on the job.
       #
@@ -79,22 +81,70 @@ jobs:
       # Chromium was downloaded on every run, which is about a minute of a job that is already
       # the slowest thing in CI. The key carries the Playwright version, so a bump misses the
       # cache and fetches the matching browser rather than reusing a stale one.
+      #
+      # Read from the lockfile via the installed package, which is the version that will
+      # actually run. `package.json` says `^1.62.1`, so reading the range there would keep one
+      # key across several real browser versions and serve a stale binary.
       - name: Playwright version
         id: pw
         if: steps.scope.outputs.code == 'true'
         run: echo "v=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         id: pw-cache
         if: steps.scope.outputs.code == 'true'
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pw.outputs.v }}
+          # A miss on the exact version still restores the previous one. The installer then
+          # fetches only what is genuinely missing rather than starting from an empty
+          # directory, which is the difference between a short download and the long one
+          # that hangs.
+          restore-keys: |
+            playwright-${{ runner.os }}-
 
-      # The browser comes from the cache when it hits; the OS packages it needs do not, and are
-      # cheap enough to install either way.
+      # The OS packages the browser needs. These are not cached -- they go into system
+      # directories rather than `~/.cache/ms-playwright` -- and are cheap, so they run every
+      # time. Split from the browser download below because only the download hangs, and
+      # retrying an apt install that already succeeded is wasted minutes.
+      - name: Install Chromium's system dependencies
+        if: steps.scope.outputs.code == 'true'
+        timeout-minutes: 5
+        run: npx playwright install-deps chromium
+
+      # The browser itself, and the step that hangs.
+      #
+      # Observed: a run sat on this for twenty minutes and had to be cancelled by hand. It is a
+      # ~170 MB download from Playwright's CDN, and when that connection stalls the installer
+      # waits rather than failing -- so with no timeout the job ran towards the six-hour default
+      # instead of failing in a minute and being retryable.
+      #
+      # Three things together, because no one of them is sufficient:
+      #
+      #   * `timeout-minutes` turns an indefinite hang into a failure in bounded time. This is
+      #     the part that matters -- a hang you can retry costs a minute, a hang you cannot
+      #     costs the afternoon.
+      #   * the retry loop covers a stall that is genuinely transient, which is most of them,
+      #     without a human having to notice and press the button.
+      #   * `timeout 240` inside the loop bounds each *attempt*. Without it the first attempt
+      #     could consume the whole step budget and the retries would never run.
+      #
+      # A cache hit skips the download entirely, so on most runs this does nothing at all.
       - name: Install Chromium
         if: steps.scope.outputs.code == 'true'
-        run: npx playwright install --with-deps chromium
+        timeout-minutes: 15
+        run: |
+          for attempt in 1 2 3; do
+            echo "::group::Chromium download, attempt $attempt of 3"
+            if timeout 240 npx playwright install chromium; then
+              echo "::endgroup::"
+              exit 0
+            fi
+            echo "::endgroup::"
+            echo "attempt $attempt failed or timed out"
+            sleep $((attempt * 10))
+          done
+          echo "::error::Chromium would not install after three attempts"
+          exit 1
 
       - run: npm run test:e2e
         if: steps.scope.outputs.code == 'true'
