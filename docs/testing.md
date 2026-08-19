@@ -73,6 +73,16 @@ became a 5-second assertion.
 
 **If the world is seeded, search it for the world that makes the test easy.**
 
+The corollary, learned the hard way: **a searched seed is a fixture, and fixtures go stale.**
+Adding forest and hills to Lothal's palette changed what every tile becomes, so every authored
+place moved — `poi-53` went from putting the Eastern Field two steps from the start to putting it
+thirty-nine. Ten specs failed at once, and every one of them was a spec that walks somewhere.
+
+The tell is the *shape* of the failure: ten failures that all share one behaviour is a changed
+fixture, where ten scattered across unrelated specs is contention. The fix is to re-run the search,
+never to widen the timeouts — that hides the cause and leaves the specs walking half a map. Check
+walkability along the route while searching, too, or the key sequence stalls on a tile of sea.
+
 ## Intermittent means time-dependent
 
 The same commit passed one CI run and failed another. That single fact ruled out a

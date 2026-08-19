@@ -15,8 +15,15 @@ const PREFIX = 'south-of-tethys';
  * carrying what the player has come to understand made it 4; the collection replacing the
  * sketch list made it 6, because `observed` changed from an array of names to a record keyed
  * by species id and a save written under the old shape cannot be read into the new one.
+ *
+ * **7 is the first bump where the shape did not change at all.** Lothal and Dwarka gained
+ * biomes in their canon palettes, and the palette decides what every tile becomes -- so the
+ * same seed now generates different ground, the authored places sit on different tiles, and
+ * the fog and the sketches in an old save describe a world that is no longer there. The
+ * payload would still parse, which is exactly the danger: it would be read, and be wrong.
+ * Discarding it is the whole point of this constant.
  */
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 
 export interface Journey {
   version: number;

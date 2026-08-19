@@ -24,7 +24,7 @@ const MIN_TAP = 40;
 
 async function boot(page: Page, w: number, h: number) {
   await page.setViewportSize({ width: w, height: h });
-  await page.goto('/?seed=poi-53&hour=12');
+  await page.goto('/?seed=poi-300&hour=12');
   await expect(page.locator('.map-surface canvas')).toBeVisible();
   await expect(page.locator('.journal h2')).toBeVisible();
   await page.waitForTimeout(400);
