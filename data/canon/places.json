@@ -1,5 +1,5 @@
 {
-  "canon_version": "1.6.0",
+  "canon_version": "1.7.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -580,7 +580,8 @@
         "settlement"
       ],
       "discoveries": [
-        "discovery_poisoned_ground"
+        "discovery_poisoned_ground",
+        "discovery_salt_glass"
       ],
       "description": "Good flat ground, well watered, and nothing on it.",
       "arrival": "Eight acres of level silt beside a channel that never runs dry, and not a stem on any of it. The camp plants here every spring out of stubbornness and takes nothing off it. Something came up out of the ground during the Shattering and has not gone back down.",
@@ -729,7 +730,8 @@
       ],
       "discoveries": [
         "discovery_tower_collapse",
-        "discovery_mask_niche"
+        "discovery_mask_niche",
+        "discovery_kiln_draught"
       ],
       "sub_locations": [
         {
@@ -869,7 +871,9 @@
         "faction_silvershore"
       ],
       "discoveries": [
-        "discovery_saltreed_thatch"
+        "discovery_saltreed_thatch",
+        "discovery_kiln_draught",
+        "discovery_winter_line"
       ],
       "epochs": [
         "epoch_post_cataclysm"
@@ -1013,7 +1017,8 @@
         "wetland"
       ],
       "discoveries": [
-        "discovery_red_rice_survival"
+        "discovery_red_rice_survival",
+        "discovery_granary_fall"
       ],
       "related_entities": [
         "settlement_lothal"
