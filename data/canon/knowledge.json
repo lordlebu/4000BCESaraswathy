@@ -1,5 +1,5 @@
 {
-  "canon_version": "1.8.0",
+  "canon_version": "1.9.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -90,6 +90,61 @@
         "Varuna's Field Diary design",
         "AI_CONTEXT.md"
       ]
+    },
+    {
+      "type": "discovery",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "canon": "primary",
+      "sources": [
+        "Varuna's Field Diary design"
+      ],
+      "id": "discovery_chamber_below",
+      "name": "Somebody Came Back For It",
+      "discipline": "archaeology",
+      "subject": "faction_mask_family",
+      "found_at": [
+        "poi_kavik_tower"
+      ],
+      "related_discoveries": [
+        "discovery_mask_niche",
+        "discovery_tower_collapse"
+      ],
+      "levels": [
+        {
+          "entry": "The undercroft is not one room. There is a second, behind the west wall, and the wall is a wall on one side only."
+        },
+        {
+          "entry": "It was closed from the outside and it was closed in a hurry -- the facing stones are the right stones, put back in the wrong order.",
+          "requires": [
+            "discovery_mask_niche"
+          ]
+        },
+        {
+          "entry": "Inside there is a shelf at shoulder height, cut for something specific, and empty. It is the same height as the niche in the stair, and it is the same shape."
+        },
+        {
+          "entry": "So the thing that stood in the stair was brought down here and put behind a wall. Not hidden from thieves -- a thief does not rebuild the wall behind him -- hidden from something that was already inside the building."
+        },
+        {
+          "entry": "There is soot on the shelf and none anywhere else. Something burned in a room with no chimney, which is a thing you do once and quickly."
+        },
+        {
+          "entry": "The mortar is post-collapse. Whatever happened here happened after the tower sat down, which is to say the city was already broken and somebody came back into it for this.",
+          "requires": [
+            "discovery_tower_collapse"
+          ]
+        },
+        {
+          "entry": "The shelf is empty too. Whoever sealed the room came back and took it, and I cannot say who, or when, or whether it was the same hands. Uvai. A thing remembered, which is what the Kia call the part of a story that outlasts the people in it -- and this is the shape of one with the middle gone.",
+          "requires": [
+            "word_kia_uvai",
+            "discovery_ghost_mangrove_channel"
+          ]
+        }
+      ],
+      "notes": "The mask thread, extending `discovery_mask_niche` without resolving it. Canon knows the answer -- `event_tendua_crisis` and `event_mask_retrieval` name Nila, Asha, iKnaya and Varna -- and none of those names appears here, on purpose: who took it should stay unanswered, and `lint_story.py` now enforces that against the cast list rather than trusting it. The niche's own note says who took the mask 'should stay unanswered for a long time; the diary needs entries the player cannot finish', and this is written to that constraint rather than around it.\n\nWhat Varuna can reach is the *event*: a chamber, opened and closed in a hurry, something burned, a shelf cut for the thing the stair niche also held, and mortar that dates it after the collapse. What he cannot reach is a person. The last rung says so out loud, which is the honest end of an archaeological reading and a better entry than a solved case.\n\nEvery prerequisite is on Lothal. `word_kia_uvai` comes from Thrali after `discovery_ghost_mangrove_channel`, which this also requires and which opens the flooded undercroft in the first place -- so the word is always gettable before this chain needs it. That ordering is deliberate: the two-bar trap is requiring a word an NPC only gives once the requiring chain is already finished."
     },
     {
       "id": "discovery_cloud_stair",
