@@ -457,6 +457,35 @@ These two sheets are also the first that needed no cleaning at all — real alph
 checkerboard. The anti-aliased edges from the emboss are handled by point sampling and the palette
 snap.
 
+### `Guyuk_walking.png` — held for later, and not yet verified
+
+A third sheet is in `assets/source/`: sixteen figures of a steppe archer in a fur-lined cap, with a
+bow, a quiver and silver braids. It is **not built and not wired into anything** — `CHARACTERS` in
+`src/game/player.ts` still holds only Varuna and Mithra.
+
+It is kept because canon has the character. `character_guyuk` in the SouthOfTethys repository is a
+**teenage Tushara nomad girl**, epithet *Mongke* — which is where the original filename came from —
+of `epoch_migrations`, who opens the crimson portal to Naraka Lok and alters her own bloodline
+doing it. That places her in the deep-lore layer the game keeps `placement: "lore"` and inert, so
+there is nowhere to put her yet; when there is, the art already exists.
+
+**Two things to settle before building it**, because it does *not* pass the checks above that
+Varuna's sheet passes:
+
+| Check | Varuna | Guyuk |
+| --- | --- | --- |
+| Back row identified by skin-toned pixels | 1,389 against 5–6k — unmistakable | 16.9k against 25–28k — no clear minimum |
+| Profile rows are a mirrored pair | 78% mirrored against 74% as-is | 52% mirrored against 56% as-is |
+
+Neither result is evidence the sheet is *wrong*. The first is explained by the character: her
+braids and fur brim are pale enough to swamp a skin-tone test that works on a dark-robed scholar.
+The second is not explained, and means the row order and the left/right pairing **cannot be assumed
+to be down-up-right-left** — settle both by eye before running the builder.
+
+What it does have: a real alpha channel, 66.9% transparent, no checkerboard and no guides, at
+1312×1199. So it is clean art of unverified layout, which is a much better position than the first
+two attempts this document exists to describe.
+
 
 Varuna's sheet is two source images concatenated — `Varuna_walking.png` for walking and
 `Varuna_sitting.png` for resting — so one texture carries all 32 frames. The sitting sheet uses the
