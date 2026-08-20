@@ -21,13 +21,20 @@ with a sketchbook.
 *cozy colour e-ink* — crisp pixel art, flat colour per pixel, no gradients, no drop shadows. That
 was a real direction, honestly pursued, and everything in `assets/` today is the result of it.
 
-It was abandoned for one reason that is not taste. `assets/source/` already holds eleven
-2048×2048 **painted** terrains, painted points of interest and painted characters, and the
-pipeline was throwing essentially all of it away: `wetland.png` is 2.9 MB of painting resampled
-into a 32×32 cell and snapped to 48 colours. The art for the game we want has already been paid
-for. The build step was what stood between it and the screen.
+It was abandoned because `endgame.png`, in the repository root, is the frame this game is trying
+to be, and it is watercolour. Everything below describes that frame.
 
-`endgame.png` in the repository root is the target frame. Everything below describes it.
+**What is in `assets/source/` today is not painted, and it is worth being exact about this**, because
+the mistake was nearly written into this document as a justification. The eleven terrain sources are
+2048×2048 and 1–3 MB each, which reads like painting and is not: `wetland.png` is a flat `#8fada8`
+field with hard-edged eight-pixel reed glyphs and blue blobs on it — pixel art drawn large. Sampling
+a 400×400 region of each finds 439–1,400 distinct colours in most, and those come from PNG noise
+rather than from gradients; only `river` and `desert` have real internal variation.
+
+So the eleven terrains **have to be generated again**. `tools/build-terrain.js` was not destroying
+painting; it was faithfully reproducing what it was given. The resolution raise to 128 was still
+worth doing on its own — the tiles now carry their real detail instead of a 2.5× upscale — but it
+buys sharpness, not paint.
 
 Think a **watercolour field study in a naturalist's notebook**, not a screen at all:
 
@@ -189,15 +196,18 @@ landmark.
 
 ## Asset 2 — terrain tiles
 
-**These already exist**, painted, at 2048×2048, in `assets/source/`. Eleven tiles:
+**All eleven need generating**, against the painted direction. The versions in `assets/source/` are
+pixel art drawn at 2048² — see the direction section above — so they are the right subjects at the
+wrong medium, and are worth opening for reference before prompting.
 
 `sea` · `coast` · `plains` · `forest` · `wetland` · `hills` · `mountains` · `desert` · `river` ·
 `settlement` · `landmark`
 
-The job now is mostly *rebuilding* them at a usable size rather than regenerating them — see
-`tools/build-terrain.js`. **Tiles are 128×128, not 32×32.** They were 32 because the old direction
-wanted pixel art; at 32 they were being drawn at roughly 80 pixels on a 1280-wide viewport and
-upscaled 2.5×, which is why the shipped game looks soft.
+**Tiles are 128×128, not 32×32.** They were 32 because the old direction wanted pixel art; at 32
+they were drawn at roughly 80 pixels on a 1280-wide viewport and upscaled 2.5×, which is why the
+game looked soft whatever the source. `tools/build-terrain.js` already emits 128 and already takes
+the painted path — averaging rather than picking one colour per block, and no palette snap — so a
+new source drops in with `node tools/build-terrain.js` and nothing else.
 
 **Three rules specific to tiles.** The first two are unchanged and were learned the hard way from a
 generated set that had to be thrown away. The third is new and is the whole reason this direction
