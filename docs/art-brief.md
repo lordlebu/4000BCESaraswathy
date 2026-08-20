@@ -287,8 +287,6 @@ things to hold on to:
 | `npc-bekh.png` | Bekh, keeper of what is left | The one who stays because somebody has to. Older woman, plain, unsentimental. |
 | `npc-sura.png` | Sura, bone-picker | Four hundred years of stratigraphy as a family trade. Practical, dusty, unbothered. |
 | `npc-marn.png` | Marn, herder | A working herder, *not* a sage. Sun-squint, staff, animals somewhere off-frame. |
-| `npc-teshk.png` | Teshk, well-keeper | Stays because the rope needs two people and there are not two to spare. Rope, worn hands. |
-| `npc-ravi.png` | Ravi, keeper of the customs house | Four generations of custody with nothing left to be custodian of. Tidy, formal, slightly absurd dignity. |
 | `npc-pell.png` | Pell, wall-keeper and sweeper | Sweeps an interdimensional gate as municipal maintenance. Broom. Entirely matter-of-fact. |
 | `npc-okhi.png` | Okhi, senior copyist | The one who will not come, and is right not to. Older scholar, ink-stained, certain. |
 | `npc-vessa.png` | Vessa, junior archivist | Already most of the way to the answer and cannot say so acceptably. Younger, alert, holding back. |
