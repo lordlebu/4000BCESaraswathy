@@ -319,6 +319,31 @@ function traceFrame(kind) {
 
 // --- build ----------------------------------------------------------------
 
+/**
+ * Sheets are laid out in rows, not one long strip.
+ *
+ * A strip of 69 frames at 128 pixels is 8,832 across, and WebGL's MAX_TEXTURE_SIZE is **8,192** on
+ * ordinary hardware. Over that limit the upload fails with `INVALID_VALUE: texImage2D: width or
+ * height out of range` and the texture is never created -- so every sprite drawn from it renders as
+ * a black quad. Overdraw sits above the traveller, so the visible symptom was black patches across
+ * the map and a player who disappeared under the grass on his own tile.
+ *
+ * It shipped that way: the strip was 2,208 wide while a cell was 32, and quadrupling the grid
+ * quadrupled the width straight through the limit. Nothing warned, because a spritesheet's
+ * dimensions are only a problem on the GPU.
+ *
+ * 4,096 is half the limit, which leaves room for the frame count to grow again. Phaser indexes a
+ * spritesheet left-to-right then top-to-bottom, so wrapping changes no frame number and every
+ * `*_ORDER` list in `frames.ts` still holds.
+ */
+const MAX_SHEET_WIDTH = 4096;
+
+/** Rows and columns for `count` frames of `cellWidth`, wrapped to stay inside the limit. */
+function sheetLayout(count, cellWidth) {
+  const columns = Math.max(1, Math.min(count, Math.floor(MAX_SHEET_WIDTH / cellWidth)));
+  return { columns, rows: Math.ceil(count / columns) };
+}
+
 function main() {
   // Frame order: every plant's rest frame, then every plant's lean frame, then the fence. Laying
   // it out that way means frame N and frame N + count are the two halves of one animation, which
@@ -333,21 +358,27 @@ function main() {
   }
   const frames = [...rest, ...lean, fenceFrame(), traceFrame('prints'), traceFrame('splash')];
 
-  const sheetWidth = CELL * frames.length;
-  const sheet = Buffer.alloc(sheetWidth * CELL * 4);
+  // Against the *final* cell size: this art is authored at CELL and upscaled by SCALE on the way
+  // out, so wrapping against CELL alone would still emit a strip four times over the limit.
+  const { columns, rows } = sheetLayout(frames.length, CELL * SCALE);
+  const sheetWidth = CELL * columns;
+  const sheetHeight = CELL * rows;
+  const sheet = Buffer.alloc(sheetWidth * sheetHeight * 4);
   frames.forEach((frame, index) => {
+    const ox = (index % columns) * CELL;
+    const oy = Math.floor(index / columns) * CELL;
     for (let y = 0; y < CELL; y += 1) {
       const from = y * CELL * 4;
-      const to = (y * sheetWidth + index * CELL) * 4;
+      const to = ((oy + y) * sheetWidth + ox) * 4;
       frame.copy(sheet, to, from, from + CELL * 4);
     }
   });
 
   const file = path.join(OUT, 'overdraw.png');
-  const big = upscale(sheet, sheetWidth, CELL, SCALE);
-  fs.writeFileSync(file, encodePng(sheetWidth * SCALE, CELL * SCALE, big));
+  const big = upscale(sheet, sheetWidth, sheetHeight, SCALE);
+  fs.writeFileSync(file, encodePng(sheetWidth * SCALE, sheetHeight * SCALE, big));
   const kb = (fs.statSync(file).size / 1024).toFixed(1);
-  console.log(`overdraw: ${frames.length} frames of ${CELL * SCALE}x${CELL * SCALE}, ${kb} KB`);
+  console.log(`overdraw: ${frames.length} frames of ${CELL * SCALE}x${CELL * SCALE} in ${columns}x${rows}, ${kb} KB`);
   console.log(`  ${PLANTS.length} plants x ${SCATTERS} scatters at rest, the same leaning, then fence`);
   console.log(`  order: ${PLANTS.map((p) => p.id).join(', ')}`);
   console.log(`  then fence, footprints, splash`);

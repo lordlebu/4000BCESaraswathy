@@ -372,28 +372,50 @@ function shell(dark, light) {
 
 // --- build ----------------------------------------------------------------
 
+/**
+ * Sheets wrap into rows rather than running as one long strip.
+ *
+ * WebGL's MAX_TEXTURE_SIZE is 8,192 on ordinary hardware. Past it the upload fails with
+ * `INVALID_VALUE: texImage2D` and the texture is simply never created, so every sprite drawn from
+ * it renders black -- see the note in `tools/build-overdraw.js`, where this actually bit.
+ *
+ * Phaser indexes a spritesheet left-to-right then top-to-bottom, so wrapping changes no frame
+ * number and the `*_ORDER` lists in `frames.ts` are unaffected.
+ */
+const MAX_SHEET_WIDTH = 4096;
+
+/** Rows and columns for `count` frames of `cellWidth`, wrapped to stay inside the limit. */
+function sheetLayout(count, cellWidth) {
+  const columns = Math.max(1, Math.min(count, Math.floor(MAX_SHEET_WIDTH / cellWidth)));
+  return { columns, rows: Math.ceil(count / columns) };
+}
+
 function main() {
   const frames = [];
   for (const prop of PROPS) {
     for (let v = 0; v < VARIANTS; v += 1) frames.push({ prop, variant: v });
   }
 
-  const sheetWidth = CELL * frames.length;
-  const sheet = Buffer.alloc(sheetWidth * CELL * 4);
+  const { columns, rows } = sheetLayout(frames.length, CELL);
+  const sheetWidth = CELL * columns;
+  const sheetHeight = CELL * rows;
+  const sheet = Buffer.alloc(sheetWidth * sheetHeight * 4);
   frames.forEach(({ prop, variant }, index) => {
     const px = canvas();
     prop.draw(px, `${prop.id}:${variant}`);
+    const ox = (index % columns) * CELL;
+    const oy = Math.floor(index / columns) * CELL;
     for (let y = 0; y < CELL; y += 1) {
       const from = y * CELL * 4;
-      const to = (y * sheetWidth + index * CELL) * 4;
+      const to = ((oy + y) * sheetWidth + ox) * 4;
       px.copy(sheet, to, from, from + CELL * 4);
     }
   });
 
   const file = path.join(OUT, 'decor.png');
-  fs.writeFileSync(file, encodePng(sheetWidth, CELL, sheet));
+  fs.writeFileSync(file, encodePng(sheetWidth, sheetHeight, sheet));
   const kb = (fs.statSync(file).size / 1024).toFixed(1);
-  console.log(`decor: ${frames.length} frames of ${CELL}x${CELL}, ${kb} KB`);
+  console.log(`decor: ${frames.length} frames of ${CELL}x${CELL} in ${columns}x${rows}, ${kb} KB`);
   console.log(`  ${PROPS.length} props x ${VARIANTS} variants`);
   console.log(`  order: ${PROPS.map((p) => p.id).join(', ')}`);
 }

@@ -453,12 +453,29 @@ function variantBox(img, v, variants) {
   return { x0: ox, y0: oy, x1: ox + size - 1, y1: oy + size - 1 };
 }
 
+/**
+ * Sheets wrap into rows rather than running as one long strip.
+ *
+ * WebGL's MAX_TEXTURE_SIZE is 8,192 on ordinary hardware, and past it the upload fails silently --
+ * see the note in `tools/build-overdraw.js`, where this actually bit. Phaser indexes a spritesheet
+ * left-to-right then top-to-bottom, so wrapping changes no frame number.
+ */
+const MAX_SHEET_WIDTH = 4096;
+
+/** Rows and columns for `count` frames of `cellWidth`, wrapped to stay inside the limit. */
+function sheetLayout(count, cellWidth) {
+  const columns = Math.max(1, Math.min(count, Math.floor(MAX_SHEET_WIDTH / cellWidth)));
+  return { columns, rows: Math.ceil(count / columns) };
+}
+
 function buildStrip(entries, cell, anchorBottom, threshold, colours, outFile, label, painted, variants = 1) {
   const names = Object.keys(entries);
   // Frame order is name-major: every variant of the first name, then of the second. `tileFrame`
   // in frames.ts mirrors this, and a test asserts the sheet is the width that implies.
-  const sheetWidth = cell.width * names.length * variants;
-  const sheet = Buffer.alloc(sheetWidth * cell.height * 4);
+  const { columns, rows } = sheetLayout(names.length * variants, cell.width);
+  const sheetWidth = cell.width * columns;
+  const sheetHeight = cell.height * rows;
+  const sheet = Buffer.alloc(sheetWidth * sheetHeight * 4);
   names.forEach((name, nameIndex) => {
     const file = path.join(SRC, entries[name]);
     const img = decodePng(file);
@@ -467,19 +484,21 @@ function buildStrip(entries, cell, anchorBottom, threshold, colours, outFile, la
       if (!box) throw new Error(`${entries[name]}: nothing opaque to place`);
       const frame = resample(img, box, cell, threshold, anchorBottom, painted);
       const index = nameIndex * variants + v;
+      const ox = (index % columns) * cell.width;
+      const oy = Math.floor(index / columns) * cell.height;
       for (let y = 0; y < cell.height; y += 1) {
         const from = y * cell.width * 4;
-        const to = (y * sheetWidth + index * cell.width) * 4;
+        const to = ((oy + y) * sheetWidth + ox) * 4;
         frame.copy(sheet, to, from, from + cell.width * 4);
       }
     }
   });
   const palette = painted ? null : quantise(sheet, colours);
-  fs.writeFileSync(outFile, encodePng(sheetWidth, cell.height, sheet));
+  fs.writeFileSync(outFile, encodePng(sheetWidth, sheetHeight, sheet));
   const kb = (fs.statSync(outFile).size / 1024).toFixed(1);
   const how = painted ? 'painted' : `${palette.length} colours`;
   const count = variants > 1 ? `${names.length}x${variants} frames` : `${names.length} frames`;
-  console.log(`${label}: ${count} of ${cell.width}x${cell.height}, ${how}, ${kb} KB`);
+  console.log(`${label}: ${count} of ${cell.width}x${cell.height} in ${columns}x${rows}, ${how}, ${kb} KB`);
   console.log(`  order: ${names.join(', ')}`);
 }
 

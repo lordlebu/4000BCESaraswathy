@@ -80,7 +80,7 @@ export const FEATURE_SHEET = 'features';
 export const EDGE_SHEET = 'edges';
 export const DECOR_SHEET = 'decor';
 
-/** The soft disc the fog layer draws over each tile. See `createTileTextures`. */
+/** The 1x1 white pixel the fog layer stretches over each tile. See `createTileTextures`. */
 export const FOG_TEXTURE = 'fog:pixel';
 
 /** Load every sheet. Call from `preload`. */
@@ -159,51 +159,41 @@ export function blendTextureKey(scene: Phaser.Scene, terrainFrame: number, maskF
 }
 
 /**
- * Build the fog disc. Safe to call more than once — Phaser keeps textures across scene restarts,
+ * Build the fog pixel. Safe to call more than once — Phaser keeps textures across scene restarts,
  * so a second call would otherwise warn about a duplicate key.
  */
 export function createTileTextures(scene: Phaser.Scene): void {
   if (scene.textures.exists(FOG_TEXTURE)) return;
 
-  // A soft disc, not a square.
+  // One white pixel, stretched over a tile.
   //
-  // This was a 1x1 white pixel stretched over each tile, which made the unexplored map a grid of
-  // hard-edged dark squares -- the least finished thing on the screen, and a grid in its own right
-  // after the tile seams and the repeating texture had both been dealt with. `endgame.png` has no
-  // fog at all.
+  // This was briefly a soft disc scaled past its cell, so neighbouring quads overlapped into cloud
+  // with no straight edge. It looked better and was wrong: alpha from a fogged tile's disc lands on
+  // its *neighbours*, so a cleared tile surrounded by unexplored ground collects the bleed from all
+  // eight of them and goes dark. Measured at the settings that shipped, a cleared tile received a
+  // mean 0.26 and a peak 0.49 -- enough to hide the traveller standing on it, which is exactly what
+  // it did.
   //
-  // The mechanic is kept and only the rendering changes: still one quad per tile carrying that
-  // tile's own memory state, but drawn as a disc that is solid in the middle and gone at the rim,
-  // and scaled past its cell so neighbours overlap. A field of them sums into continuous cloud with
-  // no straight edge anywhere, and the boundary against explored ground becomes a fade instead of a
-  // staircase.
+  // The tension is structural rather than a bad constant. Additive per-tile quads cannot be soft at
+  // the boundary *and* leave cleared ground clear: every setting that drops the bleed to nothing
+  // also stops neighbouring fog from meeting, which puts the grid back as a lattice of seams. The
+  // simulation is in the commit; no point on that curve is good.
   //
-  // 64 across rather than 16: at 16 the gradient banded visibly once stretched over a 128-pixel
-  // tile, which is the same lesson as quantising a wash.
-  const size = 64;
-  const fog = scene.textures.createCanvas(FOG_TEXTURE, size, size);
+  // So the shape goes back to a plain quad, which has neither problem -- adjacent tiles at equal
+  // alpha are seamless, and nothing reaches past its own cell. What is kept from the attempt is the
+  // part that was independently right: the alphas are far lower than the 0.92 this started at, so
+  // unexplored ground now shades the map instead of hiding it.
+  //
+  // The real fix is a single fog `RenderTexture` filled once and *erased* through a soft brush at
+  // every known tile. Erasing subtracts rather than accumulates, so it is soft at the edge and
+  // exact in the middle, which is both requirements at once. It needs a full redraw per step rather
+  // than per frame and is a bigger change than a texture swap, so it is written down here rather
+  // than rushed.
+  const fog = scene.textures.createCanvas(FOG_TEXTURE, 1, 1);
   const context = fog?.getContext();
   if (fog && context) {
-    const half = size / 2;
-    const gradient = context.createRadialGradient(half, half, 0, half, half, half);
-    // Solid to 40% of the radius, then a long fade. Chosen by measuring rather than by eye: a
-    // grid of overlapping discs was simulated at a range of solid fractions and scales, and the
-    // alpha sampled across a cell. What matters is the *spread* between the lightest and darkest
-    // point, because that is what reads as mottling on remembered ground -- and it is worst there,
-    // since a low base alpha makes the variation a large fraction of the whole.
-    //
-    //   solid 0.55, scale 1.6  ->  spread 0.129   (the first guess)
-    //   solid 0.40, scale 1.8  ->  spread 0.081   (this)
-    //
-    // The same simulation also corrected an assumption in the other direction: overlap was expected
-    // to stack toward opaque, and in fact lifts a 0.62 base to only 0.672. Fewer, wider, softer
-    // discs beat tighter ones, because a tight disc leaves the cell's corners to be filled by a
-    // neighbour's steep falloff, which is exactly where the blotches came from.
-    gradient.addColorStop(0, 'rgba(255,255,255,1)');
-    gradient.addColorStop(0.4, 'rgba(255,255,255,1)');
-    gradient.addColorStop(1, 'rgba(255,255,255,0)');
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, size, size);
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, 1, 1);
     fog.refresh();
   }
 }

@@ -79,11 +79,9 @@ import type { Point, Tile, World } from '../../world/types';
 /**
  * How the fog reads: clear underfoot, dimmed where you have been, dark where you have not.
  *
- * Lowered from 0.92 and 0.4 when the quads became overlapping soft discs. Two reasons, and the
- * first is arithmetic rather than taste: discs at 1.6x overlap, so alpha accumulates where they
- * meet and 0.92 composited two or three deep is effectively solid black. The second is that the
- * target frame has no fog at all -- so where this used to hide the map, it now shades it, and
- * unexplored ground reads as being beyond the lamp rather than behind a wall.
+ * Lowered from 0.92 and 0.4, and that part survived an attempt at soft-edged fog that did not --
+ * see `createTileTextures`. The target frame has no fog at all, so where this used to hide the map
+ * it now shades it, and unexplored ground reads as being beyond the lamp rather than behind a wall.
  */
 const FOG_UNKNOWN = 0.6;
 const FOG_REMEMBERED = 0.2;
@@ -337,11 +335,9 @@ export class WorldScene extends Phaser.Scene {
         fogRow.push(
           this.add
             .image(cx, cy, FOG_TEXTURE)
-            // Wider than its cell, so neighbouring discs overlap into continuous cloud. 1.8 was
-            // measured against the gradient in `createTileTextures`, not guessed -- see the note
-            // there. Wider still would push the fade at the edge of an explored region too far
-            // into ground the traveller has actually seen.
-            .setDisplaySize(TILE_SIZE * 1.8, TILE_SIZE * 1.8)
+            // Exactly its own cell. Anything wider bleeds onto neighbours and buries the tile the
+            // traveller is standing on -- see `createTileTextures`.
+            .setDisplaySize(TILE_SIZE, TILE_SIZE)
             .setTint(0x241a26)
             .setAlpha(FOG_UNKNOWN)
             .setDepth(DEPTH_FOG)
