@@ -97,12 +97,30 @@ const KIND_FRAMES: Record<string, number> = {
 export const HUT_VARIANTS = 4;
 
 /** Which frame of `assets/terrain.png` this biome is drawn with. */
-export function tileFrame(biome: BiomeId): number {
+/**
+ * Crops per biome on `assets/terrain.png`. Matches TILE_VARIANTS in tools/build-terrain.js.
+ *
+ * A tile repeats every 128 screen pixels, and a repeat that regular is a grid by another name.
+ * The edge blend removes the line *between* two biomes and does nothing about a field of one
+ * stamping the same texture forty times, which is the other half of the same problem.
+ */
+export const TILE_VARIANTS = 4;
+
+/**
+ * The frame for a biome, optionally varied by position.
+ *
+ * Called with coordinates the tile picks one of its crops; called without, it gets the first --
+ * which is what the edge blend wants, because the bleed is a thin sliver where a second crop would
+ * read as noise rather than variety, and because keeping it fixed holds the baked-texture count
+ * down (see `blendTextureKey`).
+ */
+export function tileFrame(biome: BiomeId, variant = 0): number {
   const index = TERRAIN_ORDER.indexOf(biome);
   // A biome with no tile falls back to plains rather than crashing: canon can name ground the art
   // has not caught up with, and an unexpected tile reads better than a blank map. `lava_field` is
   // the live case — canon marks it `renderable: false` precisely because this frame is missing.
-  return index >= 0 ? index : TERRAIN_ORDER.indexOf('plains');
+  const slot = index >= 0 ? index : TERRAIN_ORDER.indexOf('plains');
+  return slot * TILE_VARIANTS + (variant % TILE_VARIANTS);
 }
 
 // --- the edge blend ------------------------------------------------------

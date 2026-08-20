@@ -13,6 +13,9 @@ import {
   EDGE_VARIANTS,
   blends,
   edgeMaskFrame,
+  TILE_VARIANTS,
+  TERRAIN_ORDER,
+  tileFrame,
   FEATURES,
   FEATURE_RARITY,
   OVERDRAW_PLANTS,
@@ -59,6 +62,35 @@ describe('every sheet is built to the same grid', () => {
     expect(pngSize('assets/places.png').height).toBe((GRID / 32) * 40);
     expect(pngSize('assets/huts.png').height).toBe((GRID / 32) * 22);
     expect(cellOf('assets/edges.png')).toBe(GRID);
+  });
+
+  it('carries every biome at every variant', () => {
+    // Frame order is biome-major: all four crops of sea, then of coast. A sheet built without
+    // --variants, or code expecting a different order, silently paints the wrong ground.
+    const frames = pngSize('assets/terrain.png').width / cellOf('assets/terrain.png');
+    expect(frames).toBe(TERRAIN_ORDER.length * TILE_VARIANTS);
+
+    const seen = new Set<number>();
+    for (const biome of TERRAIN_ORDER) {
+      for (let v = 0; v < TILE_VARIANTS; v += 1) {
+        const f = tileFrame(biome, v);
+        expect(f).toBeGreaterThanOrEqual(0);
+        expect(f).toBeLessThan(frames);
+        seen.add(f);
+      }
+    }
+    expect(seen.size, 'every biome/variant pair should be its own frame').toBe(frames);
+  });
+
+  it('wraps the variant, and defaults to the first crop', () => {
+    // The scene hands in a raw tile hash. And the edge blend calls it with no variant at all,
+    // which must land on the biome's first frame rather than drifting.
+    const frames = pngSize('assets/terrain.png').width / cellOf('assets/terrain.png');
+    for (const n of [0, 4, 5, 4294967295]) {
+      expect(tileFrame('plains', n)).toBeLessThan(frames);
+    }
+    expect(tileFrame('plains')).toBe(tileFrame('plains', 0));
+    expect(tileFrame('plains', TILE_VARIANTS)).toBe(tileFrame('plains', 0));
   });
 });
 

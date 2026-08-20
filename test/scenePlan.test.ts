@@ -184,7 +184,7 @@ describe('the plan is a function of the world and nothing else', () => {
           [-1, 0]
         ]
           .map(([dx, dy]) => built.world.tiles[item.y + dy!]?.[item.x + dx!]?.biome)
-          .filter((b): b is string => b !== undefined);
+          .filter((b) => b !== undefined);
         const crossesWater = neighbours.some((n) => water.has(n) !== water.has(here));
         const differs = neighbours.some((n) => n !== here);
         expect(differs, `${id}: blend at ${key(item)} with no differing neighbour`).toBe(true);
