@@ -184,8 +184,42 @@ function sampleBlock(img, x0, y0, x1, y1, base, threshold) {
   return [Math.round(pick.r / pick.n), Math.round(pick.g / pick.n), Math.round(pick.b / pick.n)];
 }
 
-/** Resample a source region into a cell. Objects sit on the bottom edge; tiles fill the cell. */
-function resample(img, box, cell, threshold, anchorBottom) {
+/**
+ * One output pixel, averaged. The painted path.
+ *
+ * `sampleBlock` above exists because a 32-pixel cell makes each output pixel a ~64x64 block of
+ * source, and a mean over that much painting is mud -- so it picks one colour and keeps minority
+ * detail alive. At 128 a block is ~16x16 and that reasoning inverts: picking one colour per block
+ * posterises a gradient into flat steps, which is exactly the thing the painted direction is
+ * trying not to look like. A mean is right when the block is small.
+ *
+ * Alpha is averaged rather than thresholded, so a painted edge stays soft instead of stair-stepping
+ * -- which matters for the objects, not the ground.
+ */
+function averageBlock(img, x0, y0, x1, y1) {
+  let r = 0, g = 0, b = 0, a = 0, n = 0;
+  for (let y = y0; y < y1; y += 1) {
+    for (let x = x0; x < x1; x += 1) {
+      const p = (y * img.width + x) * 4;
+      const alpha = img.data[p + 3];
+      // Weight colour by alpha so transparent pixels do not drag the edge toward black.
+      r += img.data[p] * alpha;
+      g += img.data[p + 1] * alpha;
+      b += img.data[p + 2] * alpha;
+      a += alpha;
+      n += 1;
+    }
+  }
+  if (!n || a === 0) return null;
+  return [Math.round(r / a), Math.round(g / a), Math.round(b / a), Math.round(a / n)];
+}
+
+/**
+ * Resample a source region into a cell. Objects sit on the bottom edge; tiles fill the cell.
+ *
+ * `painted` switches the sampler and keeps real alpha. See `averageBlock`.
+ */
+function resample(img, box, cell, threshold, anchorBottom, painted) {
   const base = baseColour(img);
   const srcW = box.x1 - box.x0 + 1;
   const srcH = box.y1 - box.y0 + 1;
@@ -202,13 +236,15 @@ function resample(img, box, cell, threshold, anchorBottom) {
       const sx1 = box.x0 + Math.max(Math.floor(((x + 1) * srcW) / drawW), Math.floor((x * srcW) / drawW) + 1);
       const sy0 = box.y0 + Math.floor((y * srcH) / drawH);
       const sy1 = box.y0 + Math.max(Math.floor(((y + 1) * srcH) / drawH), Math.floor((y * srcH) / drawH) + 1);
-      const colour = sampleBlock(img, sx0, sy0, sx1, sy1, base, threshold);
+      const colour = painted
+        ? averageBlock(img, sx0, sy0, sx1, sy1)
+        : sampleBlock(img, sx0, sy0, sx1, sy1, base, threshold);
       if (!colour) continue;
       const p = ((y + offsetY) * cell.width + x + offsetX) * 4;
       out[p] = colour[0];
       out[p + 1] = colour[1];
       out[p + 2] = colour[2];
-      out[p + 3] = 255;
+      out[p + 3] = painted ? colour[3] : 255;
     }
   }
   return out;
@@ -354,12 +390,33 @@ const PLACES = {
   'kind-travel-node': 'poi-travel-node.png'
 };
 
-const TILE = { width: 32, height: 32 };
-const OBJECT = { width: 32, height: 32 };
-const PLACE = { width: 32, height: 40 };
-const HUT = { width: 20, height: 22 };
+/**
+ * The grid, at 128.
+ *
+ * It was 32, because the previous art direction was pixel art. The consequence was that a tile
+ * drawn at roughly 80 screen pixels on a 1280-wide viewport was a 2.5x upscale of its own art, and
+ * the game shipped looking soft. 128 is four times the linear resolution and sixteen times the
+ * pixels; from a 2048 source that is still a 16x reduction, so the detail exists to be taken.
+ *
+ * PLACE keeps its 32:40 ratio -- a tower stands taller than the tile it occupies -- and HUT keeps
+ * 20:22, sitting inside a cell with ground showing around it. Both scale by the same factor as
+ * TILE so every existing placement rule in `frames.ts` holds without arithmetic.
+ */
+const SCALE = 4;
+const TILE = { width: 32 * SCALE, height: 32 * SCALE };
+const OBJECT = { width: 32 * SCALE, height: 32 * SCALE };
+const PLACE = { width: 32 * SCALE, height: 40 * SCALE };
+const HUT = { width: 20 * SCALE, height: 22 * SCALE };
 
-function buildStrip(entries, cell, anchorBottom, threshold, colours, outFile, label) {
+/**
+ * `painted` picks the averaging sampler and skips the palette snap.
+ *
+ * Quantising is what made the old sheets genuinely flat pixel art, and it is precisely wrong now:
+ * snapping a watercolour wash to 48 colours reintroduces the banding the higher resolution was
+ * bought to remove. `colours` is ignored when painted, rather than removed, because the figure
+ * sheets built by `build-sprite-sheet.js` still want it.
+ */
+function buildStrip(entries, cell, anchorBottom, threshold, colours, outFile, label, painted) {
   const names = Object.keys(entries);
   const sheetWidth = cell.width * names.length;
   const sheet = Buffer.alloc(sheetWidth * cell.height * 4);
@@ -368,17 +425,18 @@ function buildStrip(entries, cell, anchorBottom, threshold, colours, outFile, la
     const img = decodePng(file);
     const box = anchorBottom ? contentBox(img) : { x0: 0, y0: 0, x1: img.width - 1, y1: img.height - 1 };
     if (!box) throw new Error(`${entries[name]}: nothing opaque to place`);
-    const frame = resample(img, box, cell, threshold, anchorBottom);
+    const frame = resample(img, box, cell, threshold, anchorBottom, painted);
     for (let y = 0; y < cell.height; y += 1) {
       const from = y * cell.width * 4;
       const to = (y * sheetWidth + index * cell.width) * 4;
       frame.copy(sheet, to, from, from + cell.width * 4);
     }
   });
-  const palette = quantise(sheet, colours);
+  const palette = painted ? null : quantise(sheet, colours);
   fs.writeFileSync(outFile, encodePng(sheetWidth, cell.height, sheet));
   const kb = (fs.statSync(outFile).size / 1024).toFixed(1);
-  console.log(`${label}: ${names.length} frames of ${cell.width}x${cell.height}, ${palette.length} colours, ${kb} KB`);
+  const how = painted ? 'painted' : `${palette.length} colours`;
+  console.log(`${label}: ${names.length} frames of ${cell.width}x${cell.height}, ${how}, ${kb} KB`);
   console.log(`  order: ${names.join(', ')}`);
 }
 
@@ -389,9 +447,9 @@ function main() {
   };
   const threshold = arg('threshold', 0.22);
 
-  buildStrip(TILES, TILE, false, threshold, 48, path.join(OUT, 'terrain.png'), 'terrain');
-  buildStrip(LANDMARKS, OBJECT, true, threshold, 40, path.join(OUT, 'landmarks.png'), 'landmarks');
-  buildStrip(PLACES, PLACE, true, threshold, 40, path.join(OUT, 'places.png'), 'places');
+  buildStrip(TILES, TILE, false, threshold, 48, path.join(OUT, 'terrain.png'), 'terrain', true);
+  buildStrip(LANDMARKS, OBJECT, true, threshold, 40, path.join(OUT, 'landmarks.png'), 'landmarks', true);
+  buildStrip(PLACES, PLACE, true, threshold, 40, path.join(OUT, 'places.png'), 'places', true);
 
   // The huts arrive as one sheet of four separated figures, so they are sliced rather than listed.
   const hutsFile = path.join(SRC, 'huts.png');
@@ -400,17 +458,16 @@ function main() {
   const sheetWidth = HUT.width * boxes.length;
   const sheet = Buffer.alloc(sheetWidth * HUT.height * 4);
   boxes.forEach((box, index) => {
-    const frame = resample(huts, box, HUT, threshold, true);
+    const frame = resample(huts, box, HUT, threshold, true, true);
     for (let y = 0; y < HUT.height; y += 1) {
       const from = y * HUT.width * 4;
       const to = (y * sheetWidth + index * HUT.width) * 4;
       frame.copy(sheet, to, from, from + HUT.width * 4);
     }
   });
-  const palette = quantise(sheet, 32);
   fs.writeFileSync(path.join(OUT, 'huts.png'), encodePng(sheetWidth, HUT.height, sheet));
   const kb = (fs.statSync(path.join(OUT, 'huts.png')).size / 1024).toFixed(1);
-  console.log(`huts: ${boxes.length} frames of ${HUT.width}x${HUT.height}, ${palette.length} colours, ${kb} KB`);
+  console.log(`huts: ${boxes.length} frames of ${HUT.width}x${HUT.height}, painted, ${kb} KB`);
 }
 
 main();

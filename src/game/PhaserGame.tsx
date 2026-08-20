@@ -47,6 +47,24 @@ export function PhaserGame({ seed, discovered, fieldMapId }: PhaserGameProps) {
         width: '100%',
         height: '100%'
       },
+      render: {
+        // Linear filtering, stated rather than inherited.
+        //
+        // This is the default, so setting it changes nothing today — which is the point of writing
+        // it down. The ground is painted now (`docs/art-brief.md`), and smooth is what painted art
+        // wants when it is scaled. Under the previous pixel-art direction the correct value was the
+        // opposite, and the fact that neither was ever declared is how the game shipped a 32-pixel
+        // tile drawn at ~80 pixels through a filter nobody had chosen.
+        //
+        // If tiles ever look soft again, the bug is the source resolution (TILE_SIZE, and what
+        // `tools/build-terrain.js` emitted), not this line.
+        pixelArt: false,
+        antialias: true,
+        // Sprites land on whole pixels. Painted art is forgiving about this, but the figure is
+        // still 26x40 pixel art walking over it, and a half-pixel offset is what makes a drawn
+        // figure shimmer as it moves.
+        roundPixels: true
+      },
       // Nothing here moves under physics — the player steps between tiles on a tween.
       scene: [WorldScene]
     });

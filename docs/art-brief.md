@@ -15,19 +15,40 @@ terrain and the creatures and plants of each tile, and records a landmark. **The
 no threat.** Creatures are observed, not fought. The feeling to aim for is a quiet afternoon walk
 with a sketchbook.
 
-## Art direction: cozy colour e-ink
+## Art direction: painted field study
 
-Think a **Kindle Colorsoft or Kaleido display**, not a backlit screen:
+**This section was rewritten, and the previous direction is gone.** The brief used to ask for
+*cozy colour e-ink* — crisp pixel art, flat colour per pixel, no gradients, no drop shadows. That
+was a real direction, honestly pursued, and everything in `assets/` today is the result of it.
 
-- **Muted, low-saturation colour.** Every hue reads as though slightly washed. No neon, no pure
-  saturated primaries, nothing that glows.
+It was abandoned for one reason that is not taste. `assets/source/` already holds eleven
+2048×2048 **painted** terrains, painted points of interest and painted characters, and the
+pipeline was throwing essentially all of it away: `wetland.png` is 2.9 MB of painting resampled
+into a 32×32 cell and snapped to 48 colours. The art for the game we want has already been paid
+for. The build step was what stood between it and the screen.
+
+`endgame.png` in the repository root is the target frame. Everything below describes it.
+
+Think a **watercolour field study in a naturalist's notebook**, not a screen at all:
+
+- **Muted, low-saturation colour.** Unchanged, and the one thing carried over whole. Every hue
+  reads as though slightly washed. No neon, no pure saturated primaries, nothing that glows.
 - **Warm paper base**, never pure white. Off-cream, the colour of good sketchbook paper.
 - **Gentle contrast.** Darks are a warm near-black (a deep plum-brown), not `#000000`.
-- **Matte and flat.** No gloss, no bloom, no lens effects, no drop shadows, no gradients that look
-  like plastic.
-- A **faint paper grain** is welcome. Dithering and visible stipple in the style of an e-ink
-  display is welcome.
-- **Hand-drawn warmth** over technical polish. Slightly irregular lines are good.
+- **Soft gradients within a shape are correct**, and are the point. A reed bed is lighter where
+  the light falls on it. This is the direct reversal of the old rule.
+- **Ambient shading under every mass.** Where a bush meets the ground there is a soft darkening.
+  Where the figure stands there is a contact shadow. Both were previously forbidden; both are now
+  required, because without them everything reads as pasted on.
+- **No visible grid, at any zoom.** Nothing in the frame may reveal where one tile ends and the
+  next begins. This is the hardest requirement in the document and the one most likely to be
+  broken accidentally — see Asset 2.
+- **Visible brush and pigment.** Edges that vary, pigment pooling slightly darker where a stroke
+  ends, the granulation real watercolour leaves on paper. Irregularity is the texture.
+- **Hand-drawn warmth** over technical polish. Unchanged, and now easier rather than harder.
+
+What is *not* welcome, and would have been fine before: dithering, visible stipple, hard pixel
+edges, anything that reads as a display rather than as paper.
 
 Reference palette already in the game — new art should sit comfortably beside these:
 
@@ -47,7 +68,34 @@ Reference palette already in the game — new art should sit comfortably beside 
 | settlement | `#c46b4f` |
 | landmark | `#f2d16b` |
 
-If anything, pull these **slightly further toward desaturated** for the e-ink feel.
+If anything, pull these **slightly further toward desaturated**. The palette survived the direction
+change unchanged, because it was never the part that was wrong.
+
+---
+
+## Which assets this direction applies to
+
+The change is **ground and objects, not figures**. That is a deliberate split, not an oversight.
+
+| Asset | Direction | Why |
+| --- | --- | --- |
+| 2 · terrain tiles | **Painted**, 128×128 | Rebuilt from the 2048² source, see below |
+| 2b · `lava_field` | **Painted**, 128×128 | Still blocked, still blocking content |
+| 3 · landmarks | **Painted**, 128×128 | Objects standing on painted ground |
+| *new* · decor props | **Painted** | Lily pads, rocks, reeds — see Asset 5 |
+| 0 · walk cycle | **Pixel, unchanged** | `build-sprite-sheet.js` and its 22-colour palette stay exactly as they are |
+| 1 · player (superseded) | **Pixel, unchanged** | Historical; kept for the post-mortem |
+| 4 · NPC portraits | **Pixel, unchanged** | 32×32 in a DOM panel, never composited onto ground |
+
+**The figures stay pixel art on purpose.** The sprite pipeline works, it cost three attempts to get
+working, and the frames are 1.3 KB. A painted figure would also have to survive being drawn at
+26×40 over painted ground, which is the hardest legibility problem in the project and buys the
+least. Varuna reads as a drawn figure in a painted world — which is what `endgame.png` shows.
+
+**Prompt blocks below Asset 2 that still say "cozy colour e-ink" and "crisp pixel art" have not
+been converted.** For Assets 0, 1 and 4 that is correct and they should be used as written. For
+Asset 2b and Asset 3 it is not — those need the painted prompt from Asset 2, adapted. They are
+left unconverted rather than half-converted so it is obvious which is which.
 
 ---
 
@@ -60,12 +108,16 @@ If anything, pull these **slightly further toward desaturated** for the e-ink fe
    caption or label text. The previous sprite had a vertical and horizontal centre line drawn
    straight through the character and it could not be cropped out.
 3. **One subject, centred, filling the frame**, with only a couple of pixels of transparent
-   padding. No mockup, no "presentation" framing, no shadow plate under the figure.
-4. **Crisp pixel art at a stated small resolution** — see each asset below. If the model can only
-   produce large images, that is fine as long as the art is genuinely blocky and each art pixel is
-   a clean uniform square of colour with no anti-aliasing, no gradients inside a pixel, and no
-   stray marks.
-5. **Flat colours per pixel.** No soft airbrushed shading within a single art pixel.
+   padding. No mockup, no "presentation" framing. *A soft contact shadow directly beneath the
+   subject is now wanted* — what is still forbidden is a rendered "plate", pedestal or reflection
+   the subject is standing on.
+4. **Large, and painted.** Ask for the biggest square the model will give you — 1024×1024 or
+   2048×2048. The build step downsamples; it cannot invent detail that was never there. This is
+   the direct reversal of the old requirement, which asked for crisp blocky pixels at a small
+   stated size.
+5. **Soft shading within a shape is correct.** Gradients, blended edges and pigment variation are
+   what makes this read as paint. What is still forbidden is *photographic* rendering: no lens
+   blur, no specular highlights, no 3D render, no plastic sheen.
 
 ---
 
@@ -137,15 +189,19 @@ landmark.
 
 ## Asset 2 — terrain tiles
 
-The game currently draws tiles as a flat colour plus a glyph, generated in code. Real tile art is
-the single biggest visual upgrade available. **Eleven tiles, each 32×32, each a separate
-transparent PNG**, and they must tile seamlessly against themselves and each other:
+**These already exist**, painted, at 2048×2048, in `assets/source/`. Eleven tiles:
 
 `sea` · `coast` · `plains` · `forest` · `wetland` · `hills` · `mountains` · `desert` · `river` ·
 `settlement` · `landmark`
 
-**Two rules specific to tiles**, both learned the hard way from a generated set that had to be
-thrown away:
+The job now is mostly *rebuilding* them at a usable size rather than regenerating them — see
+`tools/build-terrain.js`. **Tiles are 128×128, not 32×32.** They were 32 because the old direction
+wanted pixel art; at 32 they were being drawn at roughly 80 pixels on a 1280-wide viewport and
+upscaled 2.5×, which is why the shipped game looks soft.
+
+**Three rules specific to tiles.** The first two are unchanged and were learned the hard way from a
+generated set that had to be thrown away. The third is new and is the whole reason this direction
+is harder than the last one:
 
 1. **No border, frame, or outline around the tile.** A model asked for a "tile" very often draws a
    framed square. A dark edge on every cell turns the map into graph paper and is the least cozy
@@ -153,7 +209,14 @@ thrown away:
    it stops.
 2. **Keep the interior quiet.** Low internal contrast, no strong highlights, no single feature
    demanding attention. These sit under the player and repeat hundreds of times — texture, not
-   illustration. Detailed painterly tiles measurably hurt figure legibility.
+   illustration.
+3. **Quiet is now doing two jobs, and it is the harder one.** Under the old brief, flat tiles kept
+   the figure legible for free. Painted tiles do not: detail under the player measurably hurt
+   figure legibility, which is what the old brief recorded and it was right. The resolution is that
+   **detail belongs in the decor layer, not in the ground** — props are placed objects with known
+   positions that can be kept away from the figure, whereas a busy tile is everywhere at once.
+   Keep the ground close to a wash. A tile that looks slightly boring on its own is correct; it is
+   never seen on its own.
 
 **Give the model the hex directly.** The values below are the existing biome colours pulled toward
 the e-ink direction — chroma cut to about 55%, values compressed into a narrow band. Asking in
@@ -178,15 +241,20 @@ able to tell it from land at a glance. Everything else sits in a tight value ban
 and a little more saturated than the rest. Do not soften it into the others.
 
 > **Prompt (swap the subject and the hex each time):**
-> Seamless top-down 32×32 pixel art terrain tile of **[monsoon forest canopy]** for a cozy
-> exploration game set in ancient South Asia. Base colour approximately **[#769f7c]**, with only
-> gentle variation around it. Cozy colour e-ink palette: muted desaturated colour, warm paper
-> undertone, gentle contrast, matte and flat, faint paper grain. Quiet all-over texture, low
-> internal contrast, no single focal point — this tile repeats hundreds of times under the player.
-> Tiles seamlessly on all four edges. **No border, no frame, no outline around the edge of the
-> tile** — the surface must continue past the edges with nothing marking where it stops. Crisp
-> pixel art, flat colour per pixel, no anti-aliasing. No grid lines, no guide marks, no text, no
-> watermark, no drop shadow.
+> Seamless top-down watercolour terrain texture of **[monsoon forest canopy]** for a cozy
+> exploration game set in ancient South Asia, painted in a naturalist's field notebook. Base colour
+> approximately **[#769f7c]**, with only gentle variation around it. Muted desaturated palette,
+> warm paper undertone, gentle contrast, visible paper grain and pigment granulation. Soft blended
+> edges and gentle gradients within shapes. Quiet all-over texture, low internal contrast, no single
+> focal point — this repeats hundreds of times under the player and must not compete with him.
+> Tiles seamlessly on all four edges. **No border, no frame, no outline around the edge** — the
+> surface must continue past the edges with nothing marking where it stops. No grid lines, no guide
+> marks, no text, no watermark. Not photographic: no lens blur, no specular highlight, no 3D render.
+> 2048×2048.
+
+**Regenerate only what is missing or wrong.** The eleven in `assets/source/` were painted for the
+old brief but were painted, not pixelled — most should survive the direction change with a rebuild
+rather than a reprompt. Look before you regenerate.
 
 ### Asset 2b — `lava_field`, the twelfth tile (blocked, and blocking content)
 

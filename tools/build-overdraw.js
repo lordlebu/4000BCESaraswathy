@@ -35,6 +35,41 @@ const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'assets');
 
 const CELL = 32;
+
+/**
+ * The grid moved to 128 (`src/game/tileTextures.ts`), and this art is generated rather than drawn.
+ *
+ * The blades are still *authored* at 32 and upscaled by whole pixels afterwards, rather than being
+ * generated at 128 directly. Every constant in the drawing code below is a literal count of pixels
+ * -- `CELL - 13` for a fence rail, `x += 6` for its posts, a blade root three pixels up -- so
+ * raising CELL alone would keep the arithmetic and shrink the result to a quarter of its intended
+ * height against the new tile. Rewriting all of it in proportional terms is a change with no
+ * visible payoff: this art is a handful of vertical runs, and a whole-pixel upscale of a hard-edged
+ * shape is lossless.
+ *
+ * When the painted decor layer replaces this (Asset 5), it arrives at 128 natively and this goes.
+ */
+const SCALE = 4;
+
+/** Nearest-neighbour, whole pixels only. Lossless for hard-edged art; wrong for anything painted. */
+function upscale(src, width, height, factor) {
+  const outW = width * factor;
+  const out = Buffer.alloc(outW * height * factor * 4);
+  for (let y = 0; y < height * factor; y += 1) {
+    const sy = Math.floor(y / factor);
+    for (let x = 0; x < outW; x += 1) {
+      const sx = Math.floor(x / factor);
+      const s = (sy * width + sx) * 4;
+      const d = (y * outW + x) * 4;
+      out[d] = src[s];
+      out[d + 1] = src[s + 1];
+      out[d + 2] = src[s + 2];
+      out[d + 3] = src[s + 3];
+    }
+  }
+  return out;
+}
+
 /** Two frames per variant: at rest, and leaning. */
 const FRAMES = 2;
 
@@ -309,9 +344,10 @@ function main() {
   });
 
   const file = path.join(OUT, 'overdraw.png');
-  fs.writeFileSync(file, encodePng(sheetWidth, CELL, sheet));
+  const big = upscale(sheet, sheetWidth, CELL, SCALE);
+  fs.writeFileSync(file, encodePng(sheetWidth * SCALE, CELL * SCALE, big));
   const kb = (fs.statSync(file).size / 1024).toFixed(1);
-  console.log(`overdraw: ${frames.length} frames of ${CELL}x${CELL}, ${kb} KB`);
+  console.log(`overdraw: ${frames.length} frames of ${CELL * SCALE}x${CELL * SCALE}, ${kb} KB`);
   console.log(`  ${PLANTS.length} plants x ${SCATTERS} scatters at rest, the same leaning, then fence`);
   console.log(`  order: ${PLANTS.map((p) => p.id).join(', ')}`);
   console.log(`  then fence, footprints, splash`);

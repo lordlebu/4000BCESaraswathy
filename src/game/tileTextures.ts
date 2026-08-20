@@ -5,16 +5,18 @@
 // `WorldScene` kept placing tiles exactly as it did before.
 //
 // The art is four sheets rather than one atlas because the frames are three different sizes:
-// ground is 32x32 and opaque, landmark objects are 32x32 with alpha, the authored places are
-// 32x40 so a tower can stand taller than the tile it occupies, and huts are 20x22 so they sit
-// inside a tile with ground showing around them.
+// ground and landmark objects are square, the authored places are 4:5 so a tower can stand taller
+// than the tile it occupies, and huts are smaller than a cell so ground shows around them. Every
+// one of those is a ratio to `GRID` rather than a fixed pixel count -- see `frames.ts`.
 //
 // Which frame is which lives in `frames.ts`, which is free of Phaser so the tests can read it
 // under Node. This file is only the engine half: loading the sheets and the fog pixel.
 
 import Phaser from 'phaser';
+import { GRID } from './frames';
 
 export {
+  GRID,
   depthFor,
   ROW_SLOT,
   FEATURE_RARITY,
@@ -36,7 +38,27 @@ export {
   tileFrame
 } from './frames';
 
-export const TILE_SIZE = 32;
+/**
+ * The world grid, in pixels of art.
+ *
+ * 32 until the art direction changed. At 32 a tile was drawn at roughly 80 screen pixels on a
+ * 1280-wide viewport -- a 2.5x upscale of its own texture -- which is why the shipped game looked
+ * soft whatever the source art was.
+ *
+ * This is the *art* size, not a world measurement. Nothing about distance, travel cost or the
+ * 0.375 km a tile represents changes with it; `WorldScene` multiplies tile coordinates by this to
+ * get pixel positions, and the camera fits `TILES_ACROSS` of them to the screen either way.
+ *
+ * `tools/build-terrain.js` has the matching SCALE. Change one, change both.
+ */
+export const TILE_SIZE = GRID;
+
+/** Places stand taller than their tile: a 32:40 ratio, scaled with everything else. */
+const PLACE_HEIGHT = (TILE_SIZE / 32) * 40;
+
+/** Huts sit inside a cell with ground showing around them: 20:22 at the same scale. */
+const HUT_WIDTH = (TILE_SIZE / 32) * 20;
+const HUT_HEIGHT = (TILE_SIZE / 32) * 22;
 
 export const TERRAIN_SHEET = 'terrain';
 export const LANDMARK_SHEET = 'landmarks';
@@ -59,8 +81,8 @@ export function loadTileSheets(
   };
   sheet(TERRAIN_SHEET, urls.terrain, TILE_SIZE, TILE_SIZE);
   sheet(LANDMARK_SHEET, urls.landmarks, TILE_SIZE, TILE_SIZE);
-  sheet(PLACE_SHEET, urls.places, TILE_SIZE, 40);
-  sheet(HUT_SHEET, urls.huts, 20, 22);
+  sheet(PLACE_SHEET, urls.places, TILE_SIZE, PLACE_HEIGHT);
+  sheet(HUT_SHEET, urls.huts, HUT_WIDTH, HUT_HEIGHT);
   sheet(OVERDRAW_SHEET, urls.overdraw, TILE_SIZE, TILE_SIZE);
   sheet(FEATURE_SHEET, urls.features, TILE_SIZE, TILE_SIZE);
 }
