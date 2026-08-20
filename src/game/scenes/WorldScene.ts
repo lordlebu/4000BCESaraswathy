@@ -13,6 +13,7 @@ import placesUrl from '../../../assets/places.png';
 import hutsUrl from '../../../assets/huts.png';
 import overdrawUrl from '../../../assets/overdraw.png';
 import featuresUrl from '../../../assets/features.png';
+import edgesUrl from '../../../assets/edges.png';
 import { EventBus } from '../EventBus';
 import {
   FEATURE_SHEET,
@@ -23,6 +24,7 @@ import {
   PLACE_SHEET,
   TERRAIN_SHEET,
   TILE_SIZE,
+  blendTextureKey,
   createTileTextures,
   loadTileSheets,
   tileFrame,
@@ -286,7 +288,8 @@ export class WorldScene extends Phaser.Scene {
       places: placesUrl,
       huts: hutsUrl,
       overdraw: overdrawUrl,
-      features: featuresUrl
+      features: featuresUrl,
+      edges: edgesUrl
     });
   }
 
@@ -379,6 +382,16 @@ export class WorldScene extends Phaser.Scene {
           .setDepth(item.depth)
           .setAlpha(0.9)
           .setName(item.name ?? '');
+        continue;
+      }
+
+      // The edge blend is the one placement carrying two frames: a terrain frame and the torn mask
+      // it shows through. The pair is baked into a texture once and drawn as an ordinary image --
+      // see `blendTextureKey` for why a per-sprite Phaser mask is not an option at this count.
+      if (item.maskFrame !== undefined) {
+        this.add
+          .image(cx, cy, blendTextureKey(this, item.frame, item.maskFrame))
+          .setDepth(item.depth);
         continue;
       }
 

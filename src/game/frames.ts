@@ -105,6 +105,52 @@ export function tileFrame(biome: BiomeId): number {
   return index >= 0 ? index : TERRAIN_ORDER.indexOf('plains');
 }
 
+// --- the edge blend ------------------------------------------------------
+
+/**
+ * The four edges of a cell, in the order `tools/build-edges.js` writes them.
+ *
+ * Index into `assets/edges.png` is `EDGE_ORDER.indexOf(edge) * EDGE_VARIANTS + variant`.
+ */
+export const EDGE_ORDER = ['n', 'e', 's', 'w'] as const;
+export type Edge = (typeof EDGE_ORDER)[number];
+
+/** Torn variants per edge. Matches VARIANTS in tools/build-edges.js. */
+export const EDGE_VARIANTS = 4;
+
+/** Neighbour offset for each edge. */
+export const EDGE_STEP: Record<Edge, { dx: number; dy: number }> = {
+  n: { dx: 0, dy: -1 },
+  e: { dx: 1, dy: 0 },
+  s: { dx: 0, dy: 1 },
+  w: { dx: -1, dy: 0 }
+};
+
+/** Frame index of one torn mask. */
+export function edgeMaskFrame(edge: Edge, variant: number): number {
+  return EDGE_ORDER.indexOf(edge) * EDGE_VARIANTS + (variant % EDGE_VARIANTS);
+}
+
+/**
+ * Whether a boundary between two biomes should be blended at all.
+ *
+ * Not every pair should. The blend says *these two grounds meet gradually*, and some of them do
+ * not: a coastline is where the land stops, and bleeding plains out over the sea turns a definite
+ * edge into a vague one. Water keeps its outline. Everything else on land bleeds into everything
+ * else on land.
+ *
+ * `sea` and `river` are the water set rather than a `walkable` test, because `mountains` is also
+ * unwalkable and a mountain absolutely should merge into the hills below it.
+ */
+const WATER: ReadonlySet<BiomeId> = new Set<BiomeId>(['sea', 'river']);
+
+export function blends(here: BiomeId, there: BiomeId): boolean {
+  if (here === there) return false;
+  // A shore is a line, and should stay one.
+  if (WATER.has(here) !== WATER.has(there)) return false;
+  return true;
+}
+
 /** The frame for a landmark kind, or null if that kind has no art yet. */
 export function landmarkFrame(kindId: string): number | null {
   const index = LANDMARK_ORDER.indexOf(kindId);
