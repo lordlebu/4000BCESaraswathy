@@ -31,10 +31,15 @@ field with hard-edged eight-pixel reed glyphs and blue blobs on it — pixel art
 a 400×400 region of each finds 439–1,400 distinct colours in most, and those come from PNG noise
 rather than from gradients; only `river` and `desert` have real internal variation.
 
-So the eleven terrains **have to be generated again**. `tools/build-terrain.js` was not destroying
-painting; it was faithfully reproducing what it was given. The resolution raise to 128 was still
-worth doing on its own — the tiles now carry their real detail instead of a 2.5× upscale — but it
-buys sharpness, not paint.
+So the terrains **still have to be generated** as paint. `tools/build-terrain.js` was not destroying
+painting; it was faithfully reproducing what it was given. The resolution raise to 128 was worth
+doing on its own — tiles carry their real detail instead of a 2.5× upscale — but it buys sharpness,
+not paint.
+
+**Two of the eleven improved without generating anything**, by taking a better candidate that was
+already sitting in `assets/source/dump/` — see the provenance section below. `wetland` and `forest`
+are now the denser ChatGPT versions rather than the sparse Gemini ones. They are still pixel art;
+they are simply much better pixel art, and worth having while the painted set is prompted.
 
 Think a **watercolour field study in a naturalist's notebook**, not a screen at all:
 
@@ -125,6 +130,33 @@ left unconverted rather than half-converted so it is obvious which is which.
 5. **Soft shading within a shape is correct.** Gradients, blended edges and pigment variation are
    what makes this read as paint. What is still forbidden is *photographic* rendering: no lens
    blur, no specular highlights, no 3D render, no plastic sheen.
+
+---
+
+## Where the art came from, and what was rejected
+
+`assets/source/dump/` holds every candidate three image models produced — ChatGPT, Gemini and Grok
+attempting the same subjects. It is **git-ignored**: 211 MB, and nothing builds from it. Only
+`assets/source/` is read by `tools/build-terrain.js`. Keep the dump locally; it is the provenance
+record and the place to look before generating anything new.
+
+What the comparison settled, measured rather than eyeballed — colour count and the share of
+horizontally adjacent pixel pairs that are identical, sampled from the middle of each image:
+
+- **The Gemini terrains are the sparse ones.** `Gemini_Wetlands.png` is 82% flat pairs and 2,144
+  colours: a bare field with a few reed glyphs. It hash-matches what shipped as `wetland.png`.
+- **The ChatGPT terrains are denser and shaded.** `ChatGPT Wetlands.png` has five times the colour
+  count and real pools; `monsoon forest canopy.png` has 28,579 colours against Gemini's 2,106 and
+  only 3% flat pairs.
+- **The Grok points of interest are the weakest**, and nine of them had shipped. They are small
+  (roughly 700×900 against ChatGPT's 1122×1402), several carry a **visible "Grok" watermark**, and
+  the transparency checkerboard is *painted into the opaque pixels* — the exact failure this
+  document was written to prevent, which had come back unnoticed. An alpha check reports 55%
+  transparent while the checker is still visibly drawn on.
+
+So the current set is: **ChatGPT for the points of interest and for wetland and forest**, and
+whatever was already there elsewhere. When a subject needs regenerating, check the dump first — the
+alternative may already exist and be better than what is in play.
 
 ---
 

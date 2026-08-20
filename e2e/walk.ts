@@ -15,7 +15,19 @@ export async function step(page: Page, key: string): Promise<void> {
   const journal = page.locator('.journal');
   const before = (await journal.textContent()) ?? '';
 
-  await page.locator('.map-surface canvas').press(key);
+  // `page.keyboard`, not `locator('.map-surface canvas').press`.
+  //
+  // Phaser listens on the window, so the key arrives either way -- but a locator press first waits
+  // for that element to be *actionable*, and part of actionability is being **stable**: the same
+  // bounding box for two consecutive animation frames. The canvas is in a RESIZE-mode scale
+  // manager sitting next to a journal panel that reflows as the day turns, so there are moments
+  // when its box is never still for two frames together. The wait then runs to the test timeout.
+  //
+  // That is what failed CI on the fatigue walk: ninety seconds spent "waiting for
+  // locator('.map-surface canvas')" before a key was ever sent, on both the run and its retry,
+  // while the spec passes in 24 seconds locally. Every other spec in this suite already presses
+  // through `page.keyboard`; this helper was the one place that did not.
+  await page.keyboard.press(key);
 
   // A step onto identical ground reads the same, so this cannot demand a change forever —
   // but it can wait far longer than a tween before giving up, which is the useful part.

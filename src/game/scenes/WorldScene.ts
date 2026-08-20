@@ -13,6 +13,7 @@ import placesUrl from '../../../assets/places.png';
 import hutsUrl from '../../../assets/huts.png';
 import overdrawUrl from '../../../assets/overdraw.png';
 import featuresUrl from '../../../assets/features.png';
+import edgesUrl from '../../../assets/edges.png';
 import { EventBus } from '../EventBus';
 import {
   FEATURE_SHEET,
@@ -23,6 +24,7 @@ import {
   PLACE_SHEET,
   TERRAIN_SHEET,
   TILE_SIZE,
+  blendTextureKey,
   createTileTextures,
   loadTileSheets,
   tileFrame,
@@ -68,6 +70,7 @@ import { buildFieldMap, poiAt, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
 import { isCamp } from '../../content/camps';
 import { findPath } from '../../world/pathfind';
+import { tileHash } from '../../world/rng';
 import type { Point, Tile, World } from '../../world/types';
 
 /** How the fog reads: clear underfoot, dimmed where you have been, dark where you have not. */
@@ -286,7 +289,8 @@ export class WorldScene extends Phaser.Scene {
       places: placesUrl,
       huts: hutsUrl,
       overdraw: overdrawUrl,
-      features: featuresUrl
+      features: featuresUrl,
+      edges: edgesUrl
     });
   }
 
@@ -312,7 +316,12 @@ export class WorldScene extends Phaser.Scene {
         const tile = this.world.tiles[y]![x]!;
         const cx = x * TILE_SIZE + TILE_SIZE / 2;
         const cy = y * TILE_SIZE + TILE_SIZE / 2;
-        tileRow.push(this.add.image(cx, cy, TERRAIN_SHEET, tileFrame(tile.biome)).setDepth(DEPTH_TILE));
+        // Which crop of this biome's art. Deterministic from the seed, so the same journey draws
+        // the same ground -- `tileHash` is the generator's, not a fresh random.
+        const variant = tileHash(this.world.seed, x, y, 'tile-variant');
+        tileRow.push(
+          this.add.image(cx, cy, TERRAIN_SHEET, tileFrame(tile.biome, variant)).setDepth(DEPTH_TILE)
+        );
         fogRow.push(
           this.add
             .image(cx, cy, FOG_TEXTURE)
@@ -379,6 +388,16 @@ export class WorldScene extends Phaser.Scene {
           .setDepth(item.depth)
           .setAlpha(0.9)
           .setName(item.name ?? '');
+        continue;
+      }
+
+      // The edge blend is the one placement carrying two frames: a terrain frame and the torn mask
+      // it shows through. The pair is baked into a texture once and drawn as an ordinary image --
+      // see `blendTextureKey` for why a per-sprite Phaser mask is not an option at this count.
+      if (item.maskFrame !== undefined) {
+        this.add
+          .image(cx, cy, blendTextureKey(this, item.frame, item.maskFrame))
+          .setDepth(item.depth);
         continue;
       }
 

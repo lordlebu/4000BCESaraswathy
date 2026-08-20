@@ -97,12 +97,76 @@ const KIND_FRAMES: Record<string, number> = {
 export const HUT_VARIANTS = 4;
 
 /** Which frame of `assets/terrain.png` this biome is drawn with. */
-export function tileFrame(biome: BiomeId): number {
+/**
+ * Crops per biome on `assets/terrain.png`. Matches TILE_VARIANTS in tools/build-terrain.js.
+ *
+ * A tile repeats every 128 screen pixels, and a repeat that regular is a grid by another name.
+ * The edge blend removes the line *between* two biomes and does nothing about a field of one
+ * stamping the same texture forty times, which is the other half of the same problem.
+ */
+export const TILE_VARIANTS = 4;
+
+/**
+ * The frame for a biome, optionally varied by position.
+ *
+ * Called with coordinates the tile picks one of its crops; called without, it gets the first --
+ * which is what the edge blend wants, because the bleed is a thin sliver where a second crop would
+ * read as noise rather than variety, and because keeping it fixed holds the baked-texture count
+ * down (see `blendTextureKey`).
+ */
+export function tileFrame(biome: BiomeId, variant = 0): number {
   const index = TERRAIN_ORDER.indexOf(biome);
   // A biome with no tile falls back to plains rather than crashing: canon can name ground the art
   // has not caught up with, and an unexpected tile reads better than a blank map. `lava_field` is
   // the live case — canon marks it `renderable: false` precisely because this frame is missing.
-  return index >= 0 ? index : TERRAIN_ORDER.indexOf('plains');
+  const slot = index >= 0 ? index : TERRAIN_ORDER.indexOf('plains');
+  return slot * TILE_VARIANTS + (variant % TILE_VARIANTS);
+}
+
+// --- the edge blend ------------------------------------------------------
+
+/**
+ * The four edges of a cell, in the order `tools/build-edges.js` writes them.
+ *
+ * Index into `assets/edges.png` is `EDGE_ORDER.indexOf(edge) * EDGE_VARIANTS + variant`.
+ */
+export const EDGE_ORDER = ['n', 'e', 's', 'w'] as const;
+export type Edge = (typeof EDGE_ORDER)[number];
+
+/** Torn variants per edge. Matches VARIANTS in tools/build-edges.js. */
+export const EDGE_VARIANTS = 4;
+
+/** Neighbour offset for each edge. */
+export const EDGE_STEP: Record<Edge, { dx: number; dy: number }> = {
+  n: { dx: 0, dy: -1 },
+  e: { dx: 1, dy: 0 },
+  s: { dx: 0, dy: 1 },
+  w: { dx: -1, dy: 0 }
+};
+
+/** Frame index of one torn mask. */
+export function edgeMaskFrame(edge: Edge, variant: number): number {
+  return EDGE_ORDER.indexOf(edge) * EDGE_VARIANTS + (variant % EDGE_VARIANTS);
+}
+
+/**
+ * Whether a boundary between two biomes should be blended at all.
+ *
+ * Not every pair should. The blend says *these two grounds meet gradually*, and some of them do
+ * not: a coastline is where the land stops, and bleeding plains out over the sea turns a definite
+ * edge into a vague one. Water keeps its outline. Everything else on land bleeds into everything
+ * else on land.
+ *
+ * `sea` and `river` are the water set rather than a `walkable` test, because `mountains` is also
+ * unwalkable and a mountain absolutely should merge into the hills below it.
+ */
+const WATER: ReadonlySet<BiomeId> = new Set<BiomeId>(['sea', 'river']);
+
+export function blends(here: BiomeId, there: BiomeId): boolean {
+  if (here === there) return false;
+  // A shore is a line, and should stay one.
+  if (WATER.has(here) !== WATER.has(there)) return false;
+  return true;
 }
 
 /** The frame for a landmark kind, or null if that kind has no art yet. */

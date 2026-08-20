@@ -403,6 +403,14 @@ const PLACES = {
  * TILE so every existing placement rule in `frames.ts` holds without arithmetic.
  */
 const SCALE = 4;
+
+/**
+ * Crops per biome. Matches TILE_VARIANTS in src/game/frames.ts -- change one, change both.
+ *
+ * Four. Three still showed a beat on a large plain; eight is more sheet for a difference nobody
+ * reported seeing.
+ */
+const TILE_VARIANTS = 4;
 const TILE = { width: 32 * SCALE, height: 32 * SCALE };
 const OBJECT = { width: 32 * SCALE, height: 32 * SCALE };
 const PLACE = { width: 32 * SCALE, height: 40 * SCALE };
@@ -416,27 +424,62 @@ const HUT = { width: 20 * SCALE, height: 22 * SCALE };
  * bought to remove. `colours` is ignored when painted, rather than removed, because the figure
  * sheets built by `build-sprite-sheet.js` still want it.
  */
-function buildStrip(entries, cell, anchorBottom, threshold, colours, outFile, label, painted) {
+/**
+ * The sub-rectangle of a source that becomes variant `v` of `variants`.
+ *
+ * A tile repeats every 128 screen pixels, and a repeat that regular is a grid by another name --
+ * the edge blend removes the line between two biomes but does nothing about a field of one biome
+ * stamping the same texture forty times. Four crops from different parts of the source break that
+ * for nothing: the art is 1254-2048 across and a tile only needs one square of it.
+ *
+ * The crops overlap deliberately. Four disjoint quadrants would each be a quarter of the source,
+ * losing any feature bigger than that and making each variant visibly less varied than the whole.
+ * These are 70% squares stepped around the image, so each keeps most of the source's character
+ * while starting somewhere else.
+ */
+function variantBox(img, v, variants) {
+  if (variants === 1) return { x0: 0, y0: 0, x1: img.width - 1, y1: img.height - 1 };
+  const size = Math.floor(Math.min(img.width, img.height) * 0.7);
+  // Step around the image rather than tiling it: four corners of the remaining margin.
+  const spanX = img.width - size;
+  const spanY = img.height - size;
+  const corners = [
+    [0, 0],
+    [spanX, 0],
+    [spanX, spanY],
+    [0, spanY]
+  ];
+  const [ox, oy] = corners[v % corners.length];
+  return { x0: ox, y0: oy, x1: ox + size - 1, y1: oy + size - 1 };
+}
+
+function buildStrip(entries, cell, anchorBottom, threshold, colours, outFile, label, painted, variants = 1) {
   const names = Object.keys(entries);
-  const sheetWidth = cell.width * names.length;
+  // Frame order is name-major: every variant of the first name, then of the second. `tileFrame`
+  // in frames.ts mirrors this, and a test asserts the sheet is the width that implies.
+  const sheetWidth = cell.width * names.length * variants;
   const sheet = Buffer.alloc(sheetWidth * cell.height * 4);
-  names.forEach((name, index) => {
+  names.forEach((name, nameIndex) => {
     const file = path.join(SRC, entries[name]);
     const img = decodePng(file);
-    const box = anchorBottom ? contentBox(img) : { x0: 0, y0: 0, x1: img.width - 1, y1: img.height - 1 };
-    if (!box) throw new Error(`${entries[name]}: nothing opaque to place`);
-    const frame = resample(img, box, cell, threshold, anchorBottom, painted);
-    for (let y = 0; y < cell.height; y += 1) {
-      const from = y * cell.width * 4;
-      const to = (y * sheetWidth + index * cell.width) * 4;
-      frame.copy(sheet, to, from, from + cell.width * 4);
+    for (let v = 0; v < variants; v += 1) {
+      const box = anchorBottom ? contentBox(img) : variantBox(img, v, variants);
+      if (!box) throw new Error(`${entries[name]}: nothing opaque to place`);
+      const frame = resample(img, box, cell, threshold, anchorBottom, painted);
+      const index = nameIndex * variants + v;
+      for (let y = 0; y < cell.height; y += 1) {
+        const from = y * cell.width * 4;
+        const to = (y * sheetWidth + index * cell.width) * 4;
+        frame.copy(sheet, to, from, from + cell.width * 4);
+      }
     }
   });
   const palette = painted ? null : quantise(sheet, colours);
   fs.writeFileSync(outFile, encodePng(sheetWidth, cell.height, sheet));
   const kb = (fs.statSync(outFile).size / 1024).toFixed(1);
   const how = painted ? 'painted' : `${palette.length} colours`;
-  console.log(`${label}: ${names.length} frames of ${cell.width}x${cell.height}, ${how}, ${kb} KB`);
+  const count = variants > 1 ? `${names.length}x${variants} frames` : `${names.length} frames`;
+  console.log(`${label}: ${count} of ${cell.width}x${cell.height}, ${how}, ${kb} KB`);
   console.log(`  order: ${names.join(', ')}`);
 }
 
@@ -447,7 +490,7 @@ function main() {
   };
   const threshold = arg('threshold', 0.22);
 
-  buildStrip(TILES, TILE, false, threshold, 48, path.join(OUT, 'terrain.png'), 'terrain', true);
+  buildStrip(TILES, TILE, false, threshold, 48, path.join(OUT, 'terrain.png'), 'terrain', true, TILE_VARIANTS);
   buildStrip(LANDMARKS, OBJECT, true, threshold, 40, path.join(OUT, 'landmarks.png'), 'landmarks', true);
   buildStrip(PLACES, PLACE, true, threshold, 40, path.join(OUT, 'places.png'), 'places', true);
 

@@ -17,6 +17,11 @@ import { GRID } from './frames';
 
 export {
   GRID,
+  EDGE_ORDER,
+  EDGE_STEP,
+  EDGE_VARIANTS,
+  blends,
+  edgeMaskFrame,
   depthFor,
   ROW_SLOT,
   FEATURE_RARITY,
@@ -66,6 +71,7 @@ export const PLACE_SHEET = 'places';
 export const HUT_SHEET = 'huts';
 export const OVERDRAW_SHEET = 'overdraw';
 export const FEATURE_SHEET = 'features';
+export const EDGE_SHEET = 'edges';
 
 /** The 1x1 white pixel the fog layer stretches over each tile. */
 export const FOG_TEXTURE = 'fog:pixel';
@@ -73,7 +79,15 @@ export const FOG_TEXTURE = 'fog:pixel';
 /** Load every sheet. Call from `preload`. */
 export function loadTileSheets(
   scene: Phaser.Scene,
-  urls: { terrain: string; landmarks: string; places: string; huts: string; overdraw: string; features: string }
+  urls: {
+    terrain: string;
+    landmarks: string;
+    places: string;
+    huts: string;
+    overdraw: string;
+    features: string;
+    edges: string;
+  }
 ): void {
   const sheet = (key: string, url: string, frameWidth: number, frameHeight: number) => {
     if (scene.textures.exists(key)) return;
@@ -85,6 +99,54 @@ export function loadTileSheets(
   sheet(HUT_SHEET, urls.huts, HUT_WIDTH, HUT_HEIGHT);
   sheet(OVERDRAW_SHEET, urls.overdraw, TILE_SIZE, TILE_SIZE);
   sheet(FEATURE_SHEET, urls.features, TILE_SIZE, TILE_SIZE);
+  sheet(EDGE_SHEET, urls.edges, TILE_SIZE, TILE_SIZE);
+}
+
+/**
+ * Pre-multiply every terrain frame by every torn mask, once, at scene start.
+ *
+ * The blend layer wants "this biome, seen through that tear", and there are around twelve thousand
+ * placements of it on a 64x64 map. Giving each sprite a Phaser mask is out of the question: a
+ * `BitmapMask` costs a framebuffer and a second render pass *per object*, and a `GeometryMask`
+ * cannot express an alpha gradient at all.
+ *
+ * But the *combinations* are few. Eleven biomes by sixteen masks is 176 textures, built once with
+ * a canvas `destination-in` composite and then drawn as ordinary images -- so the scene pays for
+ * 176 small canvas operations at startup and nothing at all per frame. Twelve thousand blend
+ * sprites then batch exactly like twelve thousand tiles do.
+ *
+ * Keyed `blend:<terrainFrame>:<maskFrame>`, and built lazily: a map only uses the pairs its own
+ * biomes produce, which is usually a third of the grid.
+ */
+export function blendTextureKey(scene: Phaser.Scene, terrainFrame: number, maskFrame: number): string {
+  const key = `blend:${terrainFrame}:${maskFrame}`;
+  if (scene.textures.exists(key)) return key;
+
+  const canvas = scene.textures.createCanvas(key, TILE_SIZE, TILE_SIZE);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  const terrain = scene.textures.getFrame(TERRAIN_SHEET, terrainFrame);
+  const mask = scene.textures.getFrame(EDGE_SHEET, maskFrame);
+  if (!terrain || !mask) return key;
+
+  // The ground bleeding in...
+  context.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
+  context.drawImage(
+    terrain.source.image as CanvasImageSource,
+    terrain.cutX, terrain.cutY, terrain.cutWidth, terrain.cutHeight,
+    0, 0, TILE_SIZE, TILE_SIZE
+  );
+  // ...keeping only where the tear says it may show.
+  context.globalCompositeOperation = 'destination-in';
+  context.drawImage(
+    mask.source.image as CanvasImageSource,
+    mask.cutX, mask.cutY, mask.cutWidth, mask.cutHeight,
+    0, 0, TILE_SIZE, TILE_SIZE
+  );
+  context.globalCompositeOperation = 'source-over';
+  canvas.refresh();
+  return key;
 }
 
 /**

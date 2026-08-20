@@ -77,11 +77,16 @@ describe('nothing hides the traveller or what he is walking towards', () => {
     }
   });
 
-  it('sorts everything on the ground by the row it stands on', () => {
+  it('sorts everything that stands on the ground by the row it stands on', () => {
     // The bug that made grass a dozen rows south of the traveller draw across his face: one flat
     // depth for the whole layer, which knows nothing about position.
+    //
+    // The edge blend is exempt, and is the only thing that is: it *is* ground rather than something
+    // standing on it, so it sits in one flat band below every row. See `planEdges`, and the two
+    // assertions below that pin it there.
     for (const { id, built } of worlds) {
       for (const item of planScene(built)) {
+        if (item.maskFrame !== undefined) continue;
         const lowest = depthFor(item.y, Math.min(...Object.values(ROW_SLOT)));
         const highest = depthFor(item.y, Math.max(...Object.values(ROW_SLOT)));
         expect(item.depth, `${id}: ${item.sheet} at ${key(item)} is outside its row's band`)
@@ -97,6 +102,7 @@ describe('nothing hides the traveller or what he is walking towards', () => {
       const deepestByRow = new Map<number, number>();
       const shallowestByRow = new Map<number, number>();
       for (const p of plan) {
+        if (p.maskFrame !== undefined) continue;
         deepestByRow.set(p.y, Math.max(deepestByRow.get(p.y) ?? -Infinity, p.depth));
         shallowestByRow.set(p.y, Math.min(shallowestByRow.get(p.y) ?? Infinity, p.depth));
       }
@@ -140,6 +146,52 @@ describe('the plan is a function of the world and nothing else', () => {
         expect(item.sway.phase).toBeGreaterThanOrEqual(0);
         expect(item.sway.phase).toBeLessThan(SWAY_PERIOD);
         expect(item.sway.lean).not.toBe(item.sway.rest);
+      }
+    }
+  });
+
+  it('keeps the edge blend under everything that stands on the ground', () => {
+    // The exemption above is only safe if this holds. The blend draws a *neighbouring* biome over
+    // part of this tile, so anything of it that escaped above the row band would paint over a hut
+    // roof or a traveller's boots with a patch of the ground next door.
+    for (const { id, built } of worlds) {
+      for (const item of planScene(built)) {
+        if (item.maskFrame === undefined) continue;
+        const lowestStanding = depthFor(0, Math.min(...Object.values(ROW_SLOT)));
+        expect(item.depth, `${id}: edge blend at ${key(item)} rose into the row band`)
+          .toBeLessThan(lowestStanding);
+        // And above the flat terrain it is bleeding into, or it would be invisible.
+        expect(item.depth).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('blends both sides of a boundary, and never a shoreline', () => {
+    // Two rules that are easy to get half-right. Blending one side only moves the straight line
+    // rather than removing it; blending water to land turns a definite coast into a vague one.
+    for (const { id, built } of worlds) {
+      const blends = planScene(built).filter((p) => p.maskFrame !== undefined);
+      expect(blends.length, `${id}: no edge blending at all`).toBeGreaterThan(0);
+
+      const water = new Set(['sea', 'river']);
+      for (const item of blends) {
+        const here = built.world.tiles[item.y]![item.x]!.biome;
+        // The frame drawn is the neighbour's terrain, so recover which neighbour it was.
+        const neighbours = [
+          [0, -1],
+          [1, 0],
+          [0, 1],
+          [-1, 0]
+        ]
+          .map(([dx, dy]) => built.world.tiles[item.y + dy!]?.[item.x + dx!]?.biome)
+          .filter((b) => b !== undefined);
+        const crossesWater = neighbours.some((n) => water.has(n) !== water.has(here));
+        const differs = neighbours.some((n) => n !== here);
+        expect(differs, `${id}: blend at ${key(item)} with no differing neighbour`).toBe(true);
+        // If every differing neighbour were across water, this tile should have had no blend.
+        if (!neighbours.some((n) => n !== here && water.has(n) === water.has(here))) {
+          expect(crossesWater, `${id}: blended a shoreline at ${key(item)}`).toBe(false);
+        }
       }
     }
   });

@@ -17,10 +17,15 @@
 // built, and a plan is returned in the order things should be created.
 
 import {
+  EDGE_ORDER,
+  EDGE_STEP,
   FENCE_FRAME,
   HUT_VARIANTS,
   ROW_SLOT,
+  blends,
   depthFor,
+  edgeMaskFrame,
+  tileFrame,
   featureFrame,
   featureIsUnderfoot,
   landmarkFrame,
@@ -51,7 +56,23 @@ export interface Placement {
    * no lookups: it reads the number it was given.
    */
   sway?: { rest: number; lean: number; phase: number };
+  /**
+   * Present only on the edge-blend layer, which is the one placement that needs two frames.
+   *
+   * `frame` is the *neighbour's terrain* frame -- the ground bleeding in -- and `maskFrame` indexes
+   * `assets/edges.png` for the torn shape it bleeds through. The scene draws the terrain sprite and
+   * applies the mask; the plan decides which two, and stays free of Phaser.
+   */
+  maskFrame?: number;
 }
+
+/**
+ * Where the edge blend sits: above the flat terrain, below everything that stands on it.
+ *
+ * Terrain is depth 0 and the row-sorted band starts at GROUND_DEPTH_BASE (100), so anything in
+ * between works. One flat number rather than a row slot -- see `planEdges`.
+ */
+const EDGE_DEPTH = 50;
 
 /** How long one sway takes. Slow: this is a game about a quiet walk, not a windy one. */
 export const SWAY_PERIOD = 2000;
@@ -61,6 +82,50 @@ const HUT_DENSITY = 3;
 
 /** Two eligible tiles in three grow something, so a field has ways through it. */
 const OVERDRAW_DENSITY = 3;
+
+/**
+ * The layer that hides the grid.
+ *
+ * Every tile is an opaque square, so two biomes meeting produce a straight line and a staircase.
+ * For each tile this emits one placement per neighbour that differs: the *neighbour's* terrain
+ * frame, to be drawn over this tile through a torn alpha mask, so their ground bleeds a third of a
+ * cell inward along an irregular boundary instead of stopping at it.
+ *
+ * Both halves of the pair get one, and that is deliberate rather than wasteful. Blending only one
+ * direction moves the straight line rather than removing it -- the seam ends up wherever the
+ * one-sided bleed stops. Two overlapping tears leave no line anywhere.
+ *
+ * `blends` decides which boundaries qualify; a shoreline deliberately does not.
+ *
+ * Depth sits just above the terrain and below everything that stands on it. It is a flat band
+ * rather than row-sorted because this *is* ground: sorting it by row would let a bleed from the
+ * row below draw over a hut standing in the row above.
+ */
+export function planEdges(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      const here = world.tiles[y]![x]!.biome;
+      for (const edge of EDGE_ORDER) {
+        const { dx, dy } = EDGE_STEP[edge];
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= world.width || ny >= world.height) continue;
+        const there = world.tiles[ny]![nx]!.biome;
+        if (!blends(here, there)) continue;
+        out.push({
+          sheet: 'terrain',
+          frame: tileFrame(there),
+          maskFrame: edgeMaskFrame(edge, tileHash(world.seed, x, y, `edge-${edge}`)),
+          x,
+          y,
+          depth: EDGE_DEPTH
+        });
+      }
+    }
+  }
+  return out;
+}
 
 /**
  * Every hut in a settlement.
@@ -211,5 +276,6 @@ export function planMarkers(built: FieldMapWorld): Placement[] {
 export function planScene(built: FieldMapWorld): Placement[] {
   const huts = planHuts(built.world);
   const builtOn = new Set(huts.map((h) => `${h.x},${h.y}`));
-  return [...huts, ...planOverdraw(built.world, builtOn), ...planMarkers(built)];
+  // Edges first: they are ground, and everything after them stands on it.
+  return [...planEdges(built.world), ...huts, ...planOverdraw(built.world, builtOn), ...planMarkers(built)];
 }

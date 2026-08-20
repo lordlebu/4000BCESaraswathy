@@ -9,6 +9,13 @@ import { readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
 import {
   GRID,
+  EDGE_ORDER,
+  EDGE_VARIANTS,
+  blends,
+  edgeMaskFrame,
+  TILE_VARIANTS,
+  TERRAIN_ORDER,
+  tileFrame,
   FEATURES,
   FEATURE_RARITY,
   OVERDRAW_PLANTS,
@@ -54,6 +61,77 @@ describe('every sheet is built to the same grid', () => {
     // Places stand taller than their tile, huts sit inside one; both keep their ratio to it.
     expect(pngSize('assets/places.png').height).toBe((GRID / 32) * 40);
     expect(pngSize('assets/huts.png').height).toBe((GRID / 32) * 22);
+    expect(cellOf('assets/edges.png')).toBe(GRID);
+  });
+
+  it('carries every biome at every variant', () => {
+    // Frame order is biome-major: all four crops of sea, then of coast. A sheet built without
+    // --variants, or code expecting a different order, silently paints the wrong ground.
+    const frames = pngSize('assets/terrain.png').width / cellOf('assets/terrain.png');
+    expect(frames).toBe(TERRAIN_ORDER.length * TILE_VARIANTS);
+
+    const seen = new Set<number>();
+    for (const biome of TERRAIN_ORDER) {
+      for (let v = 0; v < TILE_VARIANTS; v += 1) {
+        const f = tileFrame(biome, v);
+        expect(f).toBeGreaterThanOrEqual(0);
+        expect(f).toBeLessThan(frames);
+        seen.add(f);
+      }
+    }
+    expect(seen.size, 'every biome/variant pair should be its own frame').toBe(frames);
+  });
+
+  it('wraps the variant, and defaults to the first crop', () => {
+    // The scene hands in a raw tile hash. And the edge blend calls it with no variant at all,
+    // which must land on the biome's first frame rather than drifting.
+    const frames = pngSize('assets/terrain.png').width / cellOf('assets/terrain.png');
+    for (const n of [0, 4, 5, 4294967295]) {
+      expect(tileFrame('plains', n)).toBeLessThan(frames);
+    }
+    expect(tileFrame('plains')).toBe(tileFrame('plains', 0));
+    expect(tileFrame('plains', TILE_VARIANTS)).toBe(tileFrame('plains', 0));
+  });
+});
+
+describe('the edge masks and the code agree', () => {
+  it('has one frame per edge per variant, in the order the code indexes', () => {
+    const cell = cellOf('assets/edges.png');
+    const frames = pngSize('assets/edges.png').width / cell;
+    expect(frames).toBe(EDGE_ORDER.length * EDGE_VARIANTS);
+    // Every (edge, variant) lands on a distinct frame inside the sheet.
+    const seen = new Set<number>();
+    for (const edge of EDGE_ORDER) {
+      for (let v = 0; v < EDGE_VARIANTS; v += 1) {
+        const f = edgeMaskFrame(edge, v);
+        expect(f).toBeGreaterThanOrEqual(0);
+        expect(f).toBeLessThan(frames);
+        seen.add(f);
+      }
+    }
+    expect(seen.size).toBe(frames);
+  });
+
+  it('wraps the variant rather than running off the sheet', () => {
+    // The caller hands in a raw tile hash, not a number already reduced.
+    const frames = pngSize('assets/edges.png').width / cellOf('assets/edges.png');
+    for (const n of [0, 3, 4, 17, 4294967295]) {
+      expect(edgeMaskFrame('n', n)).toBeLessThan(frames);
+      expect(edgeMaskFrame('w', n)).toBeLessThan(frames);
+    }
+  });
+
+  it('blends land to land, and never land to water', () => {
+    // A shore is a line and should stay one; a mountain should melt into the hills below it.
+    expect(blends('plains', 'hills')).toBe(true);
+    expect(blends('mountains', 'hills')).toBe(true);
+    expect(blends('forest', 'wetland')).toBe(true);
+    expect(blends('plains', 'sea')).toBe(false);
+    expect(blends('sea', 'coast')).toBe(false);
+    expect(blends('river', 'plains')).toBe(false);
+    // Water to water is still water, and a tile never blends with its own kind.
+    expect(blends('sea', 'river')).toBe(true);
+    expect(blends('plains', 'plains')).toBe(false);
   });
 });
 
