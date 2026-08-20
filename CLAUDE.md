@@ -303,6 +303,26 @@ Split into a second branch only when the work genuinely cannot travel with the f
 another repository, it reverses something in the first, or it is urgent and the first is still
 under review.
 
+**Always end with the pull request link.** Whenever work is pushed, the reply must carry the URL —
+the PR itself if one exists, otherwise the `pull/new/<branch>` compare link the push prints. Not
+the branch name, not "ready to open a PR", not a description of where to click: the link, so it can
+be opened directly.
+
+`gh` is **not installed on this machine**, so the PR usually cannot be opened for you. That does not
+change the obligation, it just means the link is the compare URL and the title and body come with
+it, ready to paste:
+
+```
+https://github.com/lordlebu/4000BCESaraswathy/pull/new/<branch>
+```
+
+Two habits that go with it, both learned by getting them wrong:
+
+- **Push before reporting.** A link to an unpushed branch 404s. If the work is not ready to push,
+  say that instead of offering a link.
+- **One link, not several.** If a second branch was opened when it should have been a commit on the
+  first, fix the branching before reporting rather than handing over two links and an explanation.
+
 ## Conventions
 
 - Dependencies must justify themselves. The runtime is React and Phaser; that is the whole list.
