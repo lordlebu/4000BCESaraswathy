@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Varuna's Field Diary** — a cozy 2D browser naturalist RPG. Combat is absent by design; creatures
 are observed, not fought.
 
-The player travels between authored **field maps** (four so far, joined by roads), walks each one,
+The player travels between authored **field maps** (three, joined by roads), walks each one,
 stands in **points of interest**, talks to the people there, and looks closely at things. Looking
 closely climbs a **discovery** one rung, and each rung rewrites its diary entry — *the diary is the
 progression system*, and there are no experience points anywhere. Understanding things well enough
@@ -16,9 +16,6 @@ work helped either come with you or explain why they are staying.
 
 The older loop — a procedural world with a landmark to find and a travel journal to export — still
 runs underneath, deliberately kept. See "Known issues".
-
-Stack: **React 19 + Phaser 4 + TypeScript + Vite**. React owns the DOM chrome, Phaser owns the map
-canvas, and the game logic belongs to neither.
 
 Stack: **React 19 + Phaser 4 + TypeScript + Vite**. React owns the DOM chrome, Phaser owns the map
 canvas, and the game logic belongs to neither.
@@ -108,7 +105,7 @@ SouthOfTethys/database/  →  utils/export_canon_bundle.py  →  data/canon/spec
 ```
 
 **Everything in `data/canon/` is generated. Never hand-edit it.** Canon lives in the sibling
-`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 441 entities
+`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 424 entities
 across species, places, discoveries and world. To change any of it, edit the canon entity there and
 re-run `python utils/export_canon_bundle.py --apply`.
 
@@ -139,15 +136,20 @@ no ground-biome equivalent, and the tone question for the Asura horrors is still
 ### Layers, and the rules between them
 
 - **`src/world/`** — deterministic generation. Seeded RNG (`rng.ts`), octave value-noise fields
-  (`field.ts`), biome thresholds (`classify.ts`), river carving (`rivers.ts`), BFS routing
-  (`pathfind.ts`), and the assembly in `generate.ts`.
+  (`field.ts`), biome thresholds (`classify.ts`), river carving (`rivers.ts`), cost-aware routing
+  (`pathfind.ts`), per-map landform shaping (`landform.ts`), the pass that eases the ground between
+  placed points of interest (`routes.ts`), and the assembly in `generate.ts`.
 - **`src/content/`** — the data layer. `canon.ts` adapts the canon bundle into engine shapes and is
   the only file that knows both; `species.ts` answers which creature and plant live on a tile;
-  `journal.ts` turns that into prose. All import their JSON at build time.
+  `journal.ts` turns that into prose; `conversation.ts` decides what a person says now;
+  `camps.ts` and `kit.ts` answer where you can sleep and what you carry. All import their JSON at
+  build time.
 - **`src/game/`** — the only code that knows Phaser exists. `scenes/WorldScene.ts` draws tiles,
   moves the player, and manages fog; `tileTextures.ts` generates the tile art from `biomes.json`;
   `PhaserGame.tsx` owns the `Phaser.Game` lifecycle; `EventBus.ts` is the seam to React.
-  `dayNight.ts` and `player.ts` are the exceptions that import no Phaser, so `test/` can cover them.
+  `dayNight.ts`, `player.ts`, `night.ts`, `arrival.ts`, `fatigue.ts`, `frames.ts` and `scenePlan.ts`
+  are the exceptions that import no Phaser, so `test/` can cover them — which is the whole reason
+  the placement and night rules live outside the scene.
 - **`src/ui/`** — React chrome. Journal panel, seed bar, layout, styles.
 
 Four rules hold this together. Breaking any of them is how the codebase gets tangled:
@@ -177,6 +179,35 @@ Terrain is now built from octaves of value noise over a seeded highland spine, a
 `test/generator.test.ts` asserts every seed produces hills, mountains and a river, so the bug
 cannot come back quietly. If you retune `THRESHOLDS` in `classify.ts`, those tests are the contract
 you are negotiating with.
+
+**What decides a map's shape now.** Canon gives each field map a `relief` — `delta`, `island`,
+`plateau` or `basin` — and `world/landform.ts` holds one shaper per landform, because one rule
+cannot produce a harbour, an island and a plateau. It was producing a dome on all of them:
+elevation rose toward the centre, high ground classifies as hills and forest at travel cost 2, and
+the average tile went 1.15 at the rim to 1.98 in the middle. Every map was hardest exactly where
+the walking happens.
+
+Two rules in there are easy to get backwards and both were:
+
+- **Raise the interior, never lower the rim.** The difference looks like a constant, and
+  normalisation runs afterwards — but the sea threshold is a fixed fraction of the normalised
+  range, so subtracting drags the world under water. Land fell from 63–86% across twenty seeds
+  to 27–75%.
+- **An easy middle means mid elevation and *low* moisture.** The only window yielding `plains` —
+  the sole cheap non-coastal biome — is elevation 0.36–0.66 with moisture below 0.50. Raising
+  moisture toward the middle, which is the intuitive way to make a delta feel like a delta, makes
+  it more expensive.
+
+`world/routes.ts` runs **after** placement and eases the ground along the routes between the
+places, turning mountains to hills and wetland to river. That cannot be done while shaping,
+because where the places landed is not known yet — and it is what makes a valley the path between
+two places rather than a landform one happens to sit in.
+
+**A tile is 0.375 km, not one.** `landmarkHint` promises a landmark on the far side "will take most
+of the day", which was arithmetic when maps were 36 tiles across. They are 48 and 64 now, and the
+promise had quietly become false: a day bought 23 steps of walking while the furthest tile from any
+shelter measured 72. A day buys about eighty steps now, which is what makes "set out at dawn and
+you can reach shelter" true rather than hopeful.
 
 ## The rules layer, and the one rule about it
 
@@ -230,7 +261,8 @@ readings; change them here and change them there.
   8 plants each. `mountains` (51) and `desert` (35) are still far richer than `landmark` (4), because
   the bestiary was authored by region and the mountainous and arid regions are the biggest sections.
   85 species remain `placement: "lore"` — the sky and Asura sets, which are inert by design.
-- Rivers usually terminate in wetland deltas rather than reaching open sea. That reads well for the
+- Rivers usually terminate in wetland deltas rather than reaching open sea, and on Dwarka
+  they cannot reach it at all: that map has no sea in its palette since it was dried out. That reads well for the
   Saraswati setting but does not literally meet the "rivers connect highlands to sea" line in
   `docs/world-generator.md`.
 - There is **no back view of the player yet**. Walking away shows the front frame, which reads
@@ -281,7 +313,8 @@ under review.
   what the sky looks like while you walk is presentation, not world state.
 - Saved journeys live in `localStorage` keyed by seed and carry a `version`; bump `SAVE_VERSION` in
   `src/save.ts` when the payload shape changes so old saves are discarded rather than misread. It is
-  at 6 — the collection replacing the old sketch list moved it — and `Progress` (rungs, words,
+  at 7 — the collection replacing the old sketch list moved it to 6, and the landform work
+  moved it again, because the same seed now generates different ground — and `Progress` (rungs, words,
   answered, questions) plus `collection` are the parts that matter.
 - **Dev dependencies grew by three, for a reason.** `jsdom`, `@testing-library/react` and
   `@testing-library/dom` exist because three panel bugs reached a browser before anything noticed.

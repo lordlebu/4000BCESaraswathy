@@ -41,7 +41,7 @@ NPC dialogue never reached the adapter — while the suite was green. Every test
 word called `learn()` directly.
 
 **At least one test per mechanic must use only the paths a player has.**
-`test/conversation.test.ts` walks both maps talking to people and never calls `learn`. It
+`test/conversation.test.ts` walks every map talking to people and never calls `learn`. It
 found two more content bugs on its first run.
 
 ## Allowlists rot silently
@@ -67,16 +67,22 @@ Whenever a test asserts a gate opens, assert it stays shut.
 ## Determinism is a testing feature
 
 `buildFieldMap` is deterministic, so rather than walking a delta hoping to trip over
-something, the e2e searches seeds for a convenient world: `poi-53` puts the Eastern Field two
-steps from the start, `tower-139` does the same for Kavik's Tower. A 50-second fragile walk
+something, the e2e searches seeds for a convenient world: `poi-252` puts the Eastern Field two
+steps from the start, `tower-57` does the same for Kavik's Tower. A 50-second fragile walk
 became a 5-second assertion.
 
 **If the world is seeded, search it for the world that makes the test easy.**
 
-The corollary, learned the hard way: **a searched seed is a fixture, and fixtures go stale.**
+The corollary, learned the hard way twice: **a searched seed is a fixture, and fixtures go stale.**
 Adding forest and hills to Lothal's palette changed what every tile becomes, so every authored
-place moved — `poi-53` went from putting the Eastern Field two steps from the start to putting it
+place moved — the seed that had put the Eastern Field two steps from the start now put it
 thirty-nine. Ten specs failed at once, and every one of them was a spec that walks somewhere.
+
+Then it happened again with landforms, **after I had reasoned that it would not**. The argument was
+that the route-easing pass runs after placement, so the places stay where they are. True, and
+beside the point: the *shaping* decides what terrain each tile is, placement gathers candidates by
+terrain, and `pick` indexes those lists with a modulo. So the rule is wider than it first looked —
+it is not palettes, it is **anything that changes what a tile is**.
 
 The tell is the *shape* of the failure: ten failures that all share one behaviour is a changed
 fixture, where ten scattered across unrelated specs is contention. The fix is to re-run the search,
@@ -162,16 +168,43 @@ untestable cost a dev server, a scripted walk and a screenshot.
 
 Only the drawing needs a browser. Placement is now a pure function in `scenePlan.ts` — world in,
 a list of sprites, tiles and depths out — which `WorldScene` walks. The three depth bugs became
-one assertion each, run against all four field maps rather than a fixture.
+one assertion each, run against every field map rather than a fixture.
 
-**Writing those assertions immediately found a fourth**: five huts on the Dry Harbour map had a
-fence rail across the thatch, because the fence branch ran before the check for what the hut layer
-had already built. It had been shipping since the fence landed. Nobody had walked that map's
-southern boundary, and no screenshot of Lothal would ever have shown it.
+**Writing those assertions immediately found a fourth**: five huts on what was then the Dry Harbour
+map had a fence rail across the thatch, because the fence branch ran before the check for what the
+hut layer had already built. It had been shipping since the fence landed. Nobody had walked that
+map's southern boundary, and no screenshot of Lothal would ever have shown it. (That map has since
+been retired, which does not weaken the lesson — the bug was found because the assertion ran
+against every map rather than the one being looked at.)
 
 What this does not fix is judgement. *"The neem tree looks like a green disc on a stick"* is not a
 test. So the division is: **spatial and ordering facts get tests**, exhaustive and on every commit;
 **aesthetic questions get contact sheets**, slow but only when the art changes.
+
+## A test that shares an assumption with the code cannot catch it
+
+Two of the most expensive bugs here were invisible because the test and the code were wrong in the
+same way.
+
+`isNight` compared a phase against `hour / 24` and was false at every hour of the day. Its unit
+test built fixtures with the same conversion and passed — the function and the check agreed, and
+both were wrong. A browser spec caught it, because the camp button never appeared.
+
+Later, a check that every `helps` is spoken reported **every reaction missing**. For several
+minutes that looked like a content bug. It was not: the check started from an empty journey, and a
+person's reaction only surfaces once their opening offer has been taken. The content was there and
+the test was unrealistic.
+
+The two shapes are worth naming separately:
+
+- **A fixture built with the implementation's own formula proves nothing.** Where a conversion
+  exists in the source, import it or go through the real entry point — `startPhaseFor`, not a
+  hand-written `hour / 24`.
+- **A check that skips the path a player takes will report absence that is not there.** Walk it the
+  way it is walked: arrive, talk, go and do the work, come back.
+
+The tell for the second one is a check that fails *everywhere at once* on its first run. Genuine
+absence is usually patchy; universal failure is more often the harness.
 
 ## Write measurements down, or measure them again
 

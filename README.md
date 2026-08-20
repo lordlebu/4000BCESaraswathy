@@ -39,14 +39,18 @@ clock.
 - **A generator that produces real geography.** Terrain is built from octaves of value noise over a
   seeded highland spine, so every seed has hills, mountains and rivers running off them to the
   water. `test/generator.test.ts` asserts this on twenty seeds.
-- **236 creatures and 70 plants**, placed by biome, each with authored journal prose.
+- **257 creatures and 90 plants**, placed by biome, each with authored journal prose.
 - **Invented place names.** Settlements, rivers and landmarks are named from seeded syllables —
   Thenavati, Hudhukoli, the Shanesarin — so a map reads as a country rather than a grid.
 - **Seven kinds of landmark**, each suited to the ground it stands on, each with a written page for
   arriving.
+- **A night you have to answer.** The light goes, the journal says so, and you sleep under a roof,
+  at a camp, or on the bedroll you carry. Being caught out costs the night and nothing else: no
+  discoveries, no observations, and you wake exactly where you stopped.
 - **A day that passes**, opening on the hour you actually sat down to play — and that walking
-  spends. Thirty kilometres between one dawn and the next, a kilometre to the tile, so a long march
-  through the hills goes amber and then blue under you.
+  spends. Thirty kilometres between one dawn and the next and a little over a third of a kilometre
+  to the tile, so a day of easy going is about eighty steps and a long march through the hills goes
+  amber and then blue under you.
 - **A journal you can take with you**, as a markdown file or a rendered page of writing.
 
 ## Commands
@@ -65,8 +69,8 @@ The browser suite needs `npx playwright install chromium` once.
 
 ## World content
 
-The flora and fauna canon lives in the **SouthOfTethys** repository, not here — 256 fauna and 90
-flora among 504 entities, alongside the field maps, discoveries, questions, people and vocabulary
+The flora and fauna canon lives in the **SouthOfTethys** repository, not here — 257 fauna and 90
+flora among 424 entities, alongside the field maps, discoveries, questions, people and vocabulary
 the game is made of. [docs/bestiary.md](docs/bestiary.md) is the prose document those species were
 originally extracted from, kept for provenance; it is no longer upstream of anything. 300 species across seven
 regions, from the Saraswati deltas to the Asura-tainted horrors.

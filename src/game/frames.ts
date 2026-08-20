@@ -11,6 +11,18 @@
 
 import type { BiomeId } from '../world/types';
 
+/**
+ * The world grid, in pixels of art. `tileTextures.ts` re-exports this as the engine's TILE_SIZE.
+ *
+ * It lives here rather than there for the same reason everything else in this file does: a test
+ * under Node cannot import `tileTextures.ts`, and "every sheet was built to the grid the engine
+ * draws on" is precisely the kind of agreement that fails silently. When it moved from 32 to 128
+ * the sheets and the scene disagreed for three separate reasons and none of them threw.
+ *
+ * `tools/build-terrain.js` has the matching SCALE, as do build-overdraw.js and build-features.js.
+ */
+export const GRID = 128;
+
 /** Frame order of `assets/terrain.png`, matching TILES in tools/build-terrain.js. */
 export const TERRAIN_ORDER: BiomeId[] = [
   'sea',

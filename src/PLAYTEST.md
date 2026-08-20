@@ -9,9 +9,12 @@ Run `npm run dev` from the repo root and open http://localhost:4173.
 - Zoom with the on-screen **+** / **−**, the mouse wheel, the `+` and `-` keys, or a pinch; `0`
   returns to the automatic fit. Four steps, from one tile per 32px — the whole country on a desktop
   — to four times that. Whole steps only: pixel art at a fractional scale crawls as you walk.
-- Walking spends the day. A person on foot covers about 30 km between one dawn and the next, a tile
-  is about a kilometre, so thirty tiles of grassland — or ten of mountain — is a day's light. Watch
-  for it on a long march: the wash goes amber and then blue while you walk. Time also passes on its
+- Walking spends the day. A person on foot covers about 30 km between one dawn and the next and a
+  tile is a little over a third of a kilometre, so about eighty tiles of grassland — or twenty-six
+  of mountain — is a day's light. That number is not arbitrary: the furthest tile from shelter on
+  any map measured 72, so a day has to buy more than that or somebody can be stranded through no
+  fault of their own. Watch for it on a long march: the wash goes amber and then blue while you
+  walk. Time also passes on its
   own, an hour of sitting still to a day, so a rest by the river is not free either.
 - Sea tiles are blocked. Everything else is walkable; wetland, hills and mountains just take longer
   to cross.

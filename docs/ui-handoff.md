@@ -73,14 +73,14 @@ discipline list, or a number of languages — read `fieldMaps`, the keys of
 `disciplineProgress()`, and `languagesKnown()`. The maps are deliberately unalike in scale,
 palette and climate, and the next one will not resemble any of them.
 
-This instruction is the reason the panels survived going from one field map to four without
+This instruction is the reason the panels survived going from one field map to four, and back to three, without
 edits, and it is the part of this document most worth keeping.
 
 ---
 
 ## Part 1 — Adopt `progress` in the save
 
-`SAVE_VERSION` is at 5 and `Journey` carries `progress: Progress`. `Progress` holds four
+`SAVE_VERSION` is at 7 and `Journey` carries `progress: Progress`. `Progress` holds four
 things: `rungs`, `words`, `answered`, and `questions` (the open questions the player is
 carrying — distinct from `answered`, because the interesting part of the game happens between
 the two).
@@ -350,7 +350,7 @@ Nothing in the UI should create urgency.
 
 ```bash
 npm run typecheck     # world/, content/ and journey.ts must stay React- and Phaser-free
-npm test              # 142 tests, 9 files — journey.test.ts walks the Lothal slice
+npm test              # 499 tests, 31 files — journey.test.ts walks the Lothal slice
 npm run test:e2e      # Phaser actually boots and draws
 npm run build         # with VITE_CANON_API unset — the game must work with no service
 ```

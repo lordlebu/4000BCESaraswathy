@@ -108,19 +108,27 @@ const TRACE_FADE_MS = 6000;
  */
 const TILES_ACROSS = 16;
 
-/** Beyond this the map reads as a few enormous squares rather than a country. */
-const MAX_ZOOM = 4;
-
 /**
- * And below this it is not a map, it is a chart.
+ * Zoom limits, as multiples of the automatic fit rather than absolute numbers.
  *
- * One, not two. The whole 36-tile world is narrower than a desktop viewport at zoom 1, so this is
- * as far back as a player can ever need to stand — it is the entire country at once. The floor used
- * to be "large enough that the world fills the screen", which on a 1280px desktop meant 2, and made
- * the widest view a player could reach about half the country. Standing back is most of the point
- * of a map, so the bounds now cope with a map smaller than its frame instead of forbidding one.
+ * These used to be absolute — `MAX_ZOOM = 4`, `MIN_ZOOM = 1` — and that was correct while a tile
+ * was 32 pixels of art, because the fit landed on 3 and the useful range around it happened to be
+ * the integers 1 to 4. Integers also mattered then for their own sake: a fractional zoom on pixel
+ * art puts texels between screen pixels and the whole map shimmers.
+ *
+ * At 128 both reasons are gone. The fit is now 0.625 on a 1280 viewport, so an absolute floor of 1
+ * clamps *every* desktop to a zoom that shows a quarter of the tiles it should — which is exactly
+ * what happened: the map drew at a quarter scale into the corner. And painted art at a fractional
+ * zoom is fine, which is the whole reason the direction changed.
+ *
+ * So the limits are relative. The player may stand twice as close as the fit, or four times as far
+ * back, whatever the fit happens to be — and the fit follows `TILES_ACROSS` at any tile size.
  */
-const MIN_ZOOM = 1;
+const MAX_ZOOM_FACTOR = 2;
+const MIN_ZOOM_FACTOR = 0.25;
+
+/** How much one press of `+` or `-` changes the zoom. A ratio, so it reads the same at any fit. */
+const ZOOM_STEP_RATIO = 1.35;
 
 /**
  * Milliseconds per step on easy ground. `travelCost` from the biome data scales this.
@@ -404,11 +412,20 @@ export class WorldScene extends Phaser.Scene {
   private createPlayer(): void {
     createCharacterAnimations(this, CHARACTERS.varuna.key);
     // Varuna stands taller than a tile, so he is anchored by the feet and allowed to overhang.
-    // Scaled by a whole number — a fractional scale is what makes pixel art shimmer as it moves.
+    //
+    // The frame is 26x40 pixels of art and stays that way — the figures are deliberately still
+    // pixel art (`docs/art-brief.md`). What changed is the ground beneath him: at TILE_SIZE 32 the
+    // frame was drawn at its native size and that was right, but on a 128 grid it made him a fifth
+    // of his intended height and he disappeared into the tile he was standing on.
+    //
+    // So he is scaled by the same whole number the grid grew by. Whole, not fitted: a fractional
+    // scale is what makes pixel art shimmer as it moves, and that reason survives the direction
+    // change even though the ground's version of it did not.
+    const figureScale = TILE_SIZE / 32;
     this.player = this.add
       .sprite(0, 0, CHARACTERS.varuna.key, 0)
       .setOrigin(0.5, 1)
-      .setDisplaySize(PLAYER_FRAME.width, PLAYER_FRAME.height);
+      .setDisplaySize(PLAYER_FRAME.width * figureScale, PLAYER_FRAME.height * figureScale);
     this.player.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.updateAnimation();
     this.placePlayer(this.at);
@@ -544,14 +561,22 @@ export class WorldScene extends Phaser.Scene {
   /**
    * Step the zoom, or hand it back to the automatic fit.
    *
-   * Whole steps only. Pixel art at a fractional scale crawls as the camera moves, so a smooth
-   * pinch would look worse than a stepped one however nice the gesture felt.
+   * Steps *multiply* rather than add. Adding one worked while the fit was the integer 3 and the
+   * range was 1 to 4; at 128px art the fit is around 0.6, where adding one is a doubling and
+   * `Math.round` collapses every step onto the same value — the control stops responding.
+   *
+   * A ratio behaves the same at any tile size, and each press is a fixed proportion of what you
+   * are already looking at, which is what a zoom control should feel like. Still stepped rather
+   * than continuous: the discrete jump is easier to undo than a drifting pinch.
    */
   private onZoom = ({ step }: { step: number | 'reset' }): void => {
-    this.zoomChoice =
-      step === 'reset'
-        ? null
-        : Phaser.Math.Clamp(Math.round(this.cameras.main.zoom + step), MIN_ZOOM, MAX_ZOOM);
+    if (step === 'reset') {
+      this.zoomChoice = null;
+      this.applyCamera();
+      return;
+    }
+    const ratio = step > 0 ? ZOOM_STEP_RATIO : 1 / ZOOM_STEP_RATIO;
+    this.zoomChoice = this.cameras.main.zoom * ratio;
     this.applyCamera();
   };
 
@@ -604,10 +629,13 @@ export class WorldScene extends Phaser.Scene {
     // uncovered part meant opening the journal rescaled the entire world — the map jumped from
     // three times to twice as large because a panel appeared, which is a lot of movement to ask of
     // someone who only wanted to read something. The panels now cover the map rather than resize it.
-    const wanted = Math.round(width / (TILE_SIZE * TILES_ACROSS));
-    const automatic = Phaser.Math.Clamp(wanted, MIN_ZOOM, MAX_ZOOM);
+    // The fit, unrounded: at 128px art this is fractional on almost every viewport, and rounding it
+    // to an integer is what clamped the whole map to a quarter scale when the tiles grew.
+    const fit = width / (TILE_SIZE * TILES_ACROSS);
+    const minZoom = fit * MIN_ZOOM_FACTOR;
+    const maxZoom = fit * MAX_ZOOM_FACTOR;
     const zoom =
-      this.zoomChoice === null ? automatic : Phaser.Math.Clamp(this.zoomChoice, MIN_ZOOM, MAX_ZOOM);
+      this.zoomChoice === null ? fit : Phaser.Math.Clamp(this.zoomChoice, minZoom, maxZoom);
     camera.setZoom(zoom);
     if (zoom !== this.lastZoom) {
       this.lastZoom = zoom;
@@ -971,7 +999,10 @@ export class WorldScene extends Phaser.Scene {
     // straight back. That was true of the landmark already; six places a map would have made it six
     // times as visible. Recording the choice means a resize during the beat re-applies the settled
     // zoom rather than undoing it.
-    this.zoomChoice = settleZoom(this.cameras.main.zoom, beat, MAX_ZOOM);
+    // The ceiling is relative to the fit now, so it has to be computed rather than read from a
+    // constant — see MAX_ZOOM_FACTOR. `settleZoom` still clamps against it exactly as before.
+    const fit = this.scale.gameSize.width / (TILE_SIZE * TILES_ACROSS);
+    this.zoomChoice = settleZoom(this.cameras.main.zoom, beat, fit * MAX_ZOOM_FACTOR);
     this.cameras.main.zoomTo(this.zoomChoice, beat.settleMs, 'Sine.easeInOut');
     this.lastZoom = this.zoomChoice;
     EventBus.emitEvent('zoom-changed', { zoom: this.zoomChoice });

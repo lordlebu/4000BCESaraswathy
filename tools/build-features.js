@@ -40,6 +40,32 @@ const OUT = path.join(ROOT, 'assets');
 const CELL = 32;
 
 /**
+ * Authored at 32, upscaled to the 128 grid. Same bargain and same reasoning as
+ * `build-overdraw.js` -- the drawing constants here are literal pixel counts (`OFFSET` below is
+ * seven of them), so the art is generated at its authored size and scaled by whole pixels after.
+ */
+const SCALE = 4;
+
+/** Nearest-neighbour, whole pixels only. See build-overdraw.js. */
+function upscale(src, width, height, factor) {
+  const outW = width * factor;
+  const out = Buffer.alloc(outW * height * factor * 4);
+  for (let y = 0; y < height * factor; y += 1) {
+    const sy = Math.floor(y / factor);
+    for (let x = 0; x < outW; x += 1) {
+      const sx = Math.floor(x / factor);
+      const s = (sy * width + sx) * 4;
+      const d = (y * outW + x) * 4;
+      out[d] = src[s];
+      out[d + 1] = src[s + 1];
+      out[d + 2] = src[s + 2];
+      out[d + 3] = src[s + 3];
+    }
+  }
+  return out;
+}
+
+/**
  * How far from the cell's centre a feature's mass sits, in pixels.
  *
  * The whole safety argument rests on this. Alternating sides per variant means a run of tiles does
@@ -385,9 +411,10 @@ function main() {
   });
 
   const file = path.join(OUT, 'features.png');
-  fs.writeFileSync(file, encodePng(sheetWidth, CELL, sheet));
+  const big = upscale(sheet, sheetWidth, CELL, SCALE);
+  fs.writeFileSync(file, encodePng(sheetWidth * SCALE, CELL * SCALE, big));
   const kb = (fs.statSync(file).size / 1024).toFixed(1);
-  console.log(`features: ${frames.length} frames of ${CELL}x${CELL}, ${kb} KB`);
+  console.log(`features: ${frames.length} frames of ${CELL * SCALE}x${CELL * SCALE}, ${kb} KB`);
   console.log(`  ${order.join(', ')}`);
 }
 

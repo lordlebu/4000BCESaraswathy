@@ -8,6 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
 import {
+  GRID,
   FEATURES,
   FEATURE_RARITY,
   OVERDRAW_PLANTS,
@@ -29,18 +30,45 @@ function pngSize(file: string): { width: number; height: number } {
   return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
 }
 
+/**
+ * The cell size of a square-framed sheet: its height.
+ *
+ * Read rather than asserted. These tests used to hard-code 32, which made them a second, silent
+ * declaration of the grid — when it moved to 128 they failed for a reason that had nothing to do
+ * with what they exist to check. The frame *count* is the contract here; the cell size is
+ * `TILE_SIZE`'s business and is checked once, below.
+ */
+function cellOf(file: string): number {
+  return pngSize(file).height;
+}
+
+describe('every sheet is built to the same grid', () => {
+  it('agrees with GRID, and with itself', () => {
+    // The one place the grid size is asserted rather than derived. Six sheets are written by three
+    // different builders; a scale changed in one and forgotten in another draws a quarter-size
+    // tile with no error anywhere, which is exactly what happened when the grid moved to 128.
+    expect(cellOf('assets/terrain.png')).toBe(GRID);
+    expect(cellOf('assets/landmarks.png')).toBe(GRID);
+    expect(cellOf('assets/overdraw.png')).toBe(GRID);
+    expect(cellOf('assets/features.png')).toBe(GRID);
+    // Places stand taller than their tile, huts sit inside one; both keep their ratio to it.
+    expect(pngSize('assets/places.png').height).toBe((GRID / 32) * 40);
+    expect(pngSize('assets/huts.png').height).toBe((GRID / 32) * 22);
+  });
+});
+
 describe('the overdraw sheet and the code agree', () => {
   it('has exactly the frames the layout claims', () => {
     // rest scatters + leaning scatters + fence + the two underfoot marks. If build-overdraw.js
     // grows a plant and this is not updated, the fence index silently points at a blade of grass.
-    const { width, height } = pngSize('assets/overdraw.png');
-    expect(height).toBe(32);
-    expect(width / 32).toBe(SPLASH_FRAME + 1);
+    const { width } = pngSize('assets/overdraw.png');
+    const cell = cellOf('assets/overdraw.png');
+    expect(width / cell).toBe(SPLASH_FRAME + 1);
     expect(OVERDRAW_REST).toBe(OVERDRAW_PLANTS.length * OVERDRAW_SCATTERS);
   });
 
   it('pairs every rest frame with a leaning one inside the sheet', () => {
-    const frames = pngSize('assets/overdraw.png').width / 32;
+    const frames = pngSize('assets/overdraw.png').width / cellOf('assets/overdraw.png');
     for (let rest = 0; rest < OVERDRAW_REST; rest += 1) {
       expect(swayFrame(rest)).toBeLessThan(frames);
       expect(swayFrame(rest)).not.toBe(rest);
@@ -134,18 +162,25 @@ function decode(file: string): { rows: Buffer; width: number; height: number; st
   return { rows, width, height, stride };
 }
 
-/** The topmost opaque row of each frame. */
+/**
+ * The topmost opaque row of each frame, as a fraction of the cell.
+ *
+ * A fraction rather than a row index, because the rules these feed are fractions: "nothing above
+ * row 16 of 32" is *the top half*, and it means the same thing when a cell is 128. Returning raw
+ * rows made the grid size leak into every assertion below.
+ */
 function frameTops(file: string): number[] {
   const { rows, width, height, stride } = decode(file);
+  const cell = height;
   const tops: number[] = [];
-  for (let frame = 0; frame < width / 32; frame += 1) {
-    let top = 32;
+  for (let frame = 0; frame < width / cell; frame += 1) {
+    let top = cell;
     for (let y = 0; y < height; y += 1) {
-      for (let x = frame * 32; x < (frame + 1) * 32; x += 1) {
+      for (let x = frame * cell; x < (frame + 1) * cell; x += 1) {
         if (rows[y * stride + x * 4 + 3]! >= 128 && y < top) top = y;
       }
     }
-    tops.push(top);
+    tops.push(top / cell);
   }
   return tops;
 }
@@ -153,14 +188,15 @@ function frameTops(file: string): number[] {
 /** The horizontal centre of mass of each frame's opaque pixels. */
 function frameCentroids(file: string): (number | null)[] {
   const { rows, width, height, stride } = decode(file);
+  const cell = height;
   const out: (number | null)[] = [];
-  for (let frame = 0; frame < width / 32; frame += 1) {
+  for (let frame = 0; frame < width / cell; frame += 1) {
     let sum = 0;
     let n = 0;
     for (let y = 0; y < height; y += 1) {
-      for (let x = frame * 32; x < (frame + 1) * 32; x += 1) {
+      for (let x = frame * cell; x < (frame + 1) * cell; x += 1) {
         if (rows[y * stride + x * 4 + 3]! >= 128) {
-          sum += x - frame * 32;
+          sum += x - frame * cell;
           n += 1;
         }
       }
@@ -179,7 +215,7 @@ describe('the overdraw cannot swallow the traveller', () => {
     // Measured off the built sheet, not trusted from the builder's constants, because the point
     // is to catch a future edit to build-overdraw.js that raises a height past what is safe.
     const tallest = Math.min(...frameTops('assets/overdraw.png'));
-    expect(tallest, 'topmost opaque row across every overdraw frame').toBeGreaterThanOrEqual(16);
+    expect(tallest, 'topmost opaque row as a fraction of the cell').toBeGreaterThanOrEqual(0.5);
   });
 });
 
@@ -193,7 +229,7 @@ describe('features may be tall because they stand aside', () => {
   // world into a set of obstructions the traveller keeps vanishing into.
 
   it('has a frame for every feature the code indexes', () => {
-    const frames = pngSize('assets/features.png').width / 32;
+    const frames = pngSize('assets/features.png').width / cellOf('assets/features.png');
     const claimed = Object.values(FEATURES).flatMap((f) => f.frames);
     expect(Math.max(...claimed)).toBe(frames - 1);
     // No frame claimed twice, and none left unclaimed.
@@ -204,14 +240,20 @@ describe('features may be tall because they stand aside', () => {
   it('keeps anything tall away from the centre of its tile', () => {
     // Only tall frames need the offset. A boulder or a lotus pad sits centred and is harmless,
     // because it is below the player's waist wherever he stands.
+    // Both measures are fractions of the cell, so the bargain reads the same at any grid size:
+    // "reaches into the top half" and "sits within an eighth of the centre line".
+    const cell = cellOf('assets/features.png');
     const tops = frameTops('assets/features.png');
     const centroids = frameCentroids('assets/features.png');
     const offenders: string[] = [];
     tops.forEach((top, i) => {
-      if (top >= 16) return; // short enough not to matter
+      if (top >= 0.5) return; // short enough not to matter
       const centre = centroids[i];
       if (centre === null) return;
-      if (Math.abs(centre - 16) < 4) offenders.push(`frame ${i}: top ${top}, centre ${centre.toFixed(1)}`);
+      const fromCentre = Math.abs(centre / cell - 0.5);
+      if (fromCentre < 0.125) {
+        offenders.push(`frame ${i}: top ${top.toFixed(2)}, centre ${(centre / cell).toFixed(2)}`);
+      }
     });
     expect(offenders, 'tall features drawn across the middle of their tile').toEqual([]);
   });
