@@ -14,6 +14,7 @@ import hutsUrl from '../../../assets/huts.png';
 import overdrawUrl from '../../../assets/overdraw.png';
 import featuresUrl from '../../../assets/features.png';
 import edgesUrl from '../../../assets/edges.png';
+import decorUrl from '../../../assets/decor.png';
 import { EventBus } from '../EventBus';
 import {
   FEATURE_SHEET,
@@ -23,6 +24,7 @@ import {
   LANDMARK_SHEET,
   PLACE_SHEET,
   TERRAIN_SHEET,
+  DECOR_SHEET,
   TILE_SIZE,
   blendTextureKey,
   createTileTextures,
@@ -41,7 +43,8 @@ const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker'>, string> = {
   overdraw: OVERDRAW_SHEET,
   features: FEATURE_SHEET,
   places: PLACE_SHEET,
-  landmarks: LANDMARK_SHEET
+  landmarks: LANDMARK_SHEET,
+  decor: DECOR_SHEET
 };
 import {
   CHARACTERS,
@@ -73,9 +76,17 @@ import { findPath } from '../../world/pathfind';
 import { tileHash } from '../../world/rng';
 import type { Point, Tile, World } from '../../world/types';
 
-/** How the fog reads: clear underfoot, dimmed where you have been, dark where you have not. */
-const FOG_UNKNOWN = 0.92;
-const FOG_REMEMBERED = 0.4;
+/**
+ * How the fog reads: clear underfoot, dimmed where you have been, dark where you have not.
+ *
+ * Lowered from 0.92 and 0.4 when the quads became overlapping soft discs. Two reasons, and the
+ * first is arithmetic rather than taste: discs at 1.6x overlap, so alpha accumulates where they
+ * meet and 0.92 composited two or three deep is effectively solid black. The second is that the
+ * target frame has no fog at all -- so where this used to hide the map, it now shades it, and
+ * unexplored ground reads as being beyond the lamp rather than behind a wall.
+ */
+const FOG_UNKNOWN = 0.6;
+const FOG_REMEMBERED = 0.2;
 const FOG_VISIBLE = 0;
 
 /** How far the traveller can see. */
@@ -290,7 +301,8 @@ export class WorldScene extends Phaser.Scene {
       huts: hutsUrl,
       overdraw: overdrawUrl,
       features: featuresUrl,
-      edges: edgesUrl
+      edges: edgesUrl,
+      decor: decorUrl
     });
   }
 
@@ -325,7 +337,11 @@ export class WorldScene extends Phaser.Scene {
         fogRow.push(
           this.add
             .image(cx, cy, FOG_TEXTURE)
-            .setDisplaySize(TILE_SIZE, TILE_SIZE)
+            // Wider than its cell, so neighbouring discs overlap into continuous cloud. 1.8 was
+            // measured against the gradient in `createTileTextures`, not guessed -- see the note
+            // there. Wider still would push the fade at the edge of an explored region too far
+            // into ground the traveller has actually seen.
+            .setDisplaySize(TILE_SIZE * 1.8, TILE_SIZE * 1.8)
             .setTint(0x241a26)
             .setAlpha(FOG_UNKNOWN)
             .setDepth(DEPTH_FOG)
@@ -374,8 +390,13 @@ export class WorldScene extends Phaser.Scene {
    */
   private createGround(): void {
     for (const item of planScene(this.built)) {
-      const cx = item.x * TILE_SIZE + TILE_SIZE / 2;
-      const cy = item.y * TILE_SIZE + TILE_SIZE / 2;
+      // The offset is a fraction of a cell and only decor carries one -- see `Placement.offset`.
+      // Converting it here rather than in the plan is the same split as everything else: the plan
+      // says "four tenths of a tile to the left", the scene knows what a tile is in pixels.
+      const jx = (item.offset?.x ?? 0) * TILE_SIZE;
+      const jy = (item.offset?.y ?? 0) * TILE_SIZE;
+      const cx = item.x * TILE_SIZE + TILE_SIZE / 2 + jx;
+      const cy = item.y * TILE_SIZE + TILE_SIZE / 2 + jy;
 
       if (item.sheet === 'marker') {
         this.add

@@ -13,6 +13,11 @@ import {
   EDGE_VARIANTS,
   blends,
   edgeMaskFrame,
+  DECOR_ORDER,
+  DECOR_VARIANTS,
+  DECOR_BY_BIOME,
+  decorFrame,
+  decorCount,
   TILE_VARIANTS,
   TERRAIN_ORDER,
   tileFrame,
@@ -62,6 +67,7 @@ describe('every sheet is built to the same grid', () => {
     expect(pngSize('assets/places.png').height).toBe((GRID / 32) * 40);
     expect(pngSize('assets/huts.png').height).toBe((GRID / 32) * 22);
     expect(cellOf('assets/edges.png')).toBe(GRID);
+    expect(cellOf('assets/decor.png')).toBe(GRID);
   });
 
   it('carries every biome at every variant', () => {
@@ -416,5 +422,61 @@ describe('the world stacks by row, not by layer', () => {
     // must stay well under that -- otherwise grass draws over the fog and escapes the day's light,
     // which is exactly what happened when the band was introduced at 100 and fog was still at 10.
     expect(depthFor(48, ROW_SLOT.canopy)).toBeLessThan(2000);
+  });
+});
+
+describe('the decor sheet and the code agree', () => {
+  it('has one frame per prop per variant', () => {
+    const cell = cellOf('assets/decor.png');
+    const frames = pngSize('assets/decor.png').width / cell;
+    expect(frames).toBe(DECOR_ORDER.length * DECOR_VARIANTS);
+
+    const seen = new Set<number>();
+    for (const prop of DECOR_ORDER) {
+      for (let v = 0; v < DECOR_VARIANTS; v += 1) {
+        const f = decorFrame(prop, v);
+        expect(f, `${prop} variant ${v} has no frame`).not.toBeNull();
+        expect(f!).toBeGreaterThanOrEqual(0);
+        expect(f!).toBeLessThan(frames);
+        seen.add(f!);
+      }
+    }
+    expect(seen.size).toBe(frames);
+  });
+
+  it('only ever names a prop that is on the sheet', () => {
+    // A typo in the per-biome table would silently draw nothing on that ground rather than throw.
+    for (const [biome, props] of Object.entries(DECOR_BY_BIOME)) {
+      for (const prop of props ?? []) {
+        expect(DECOR_ORDER, `${biome} asks for ${prop}, which is not on the sheet`).toContain(prop);
+      }
+    }
+  });
+
+  it('leaves the water and the landmark bare', () => {
+    // The same two exclusions the overdraw layer makes: sea is not walked on, and a landmark tile
+    // stays clear so the thing standing on it is what the eye finds.
+    expect(DECOR_BY_BIOME.sea).toBeUndefined();
+    expect(DECOR_BY_BIOME.landmark).toBeUndefined();
+  });
+
+  it('wraps the variant rather than running off the sheet', () => {
+    const frames = pngSize('assets/decor.png').width / cellOf('assets/decor.png');
+    for (const n of [0, 3, 4, 4294967295]) {
+      expect(decorFrame('pebbles', n)!).toBeLessThan(frames);
+    }
+  });
+
+  it('scatters one to three, and leaves a third of tiles empty', () => {
+    // Counted over the range rather than asserted from the constant, so a change to the rolling
+    // shows up here. Empty tiles matter: a prop on every tile is a texture, not a scatter.
+    const tally = [0, 0, 0, 0];
+    for (let i = 0; i < 6000; i += 1) tally[decorCount(i)] += 1;
+    expect(tally[0] / 6000).toBeCloseTo(1 / 3, 1);
+    expect(tally[1] / 6000).toBeCloseTo(1 / 3, 1);
+    expect(tally[2]).toBeGreaterThan(0);
+    expect(tally[3]).toBeGreaterThan(0);
+    // Nothing above three, ever.
+    expect(decorCount(5)).toBeLessThanOrEqual(3);
   });
 });

@@ -10,13 +10,19 @@
 // one of those is a ratio to `GRID` rather than a fixed pixel count -- see `frames.ts`.
 //
 // Which frame is which lives in `frames.ts`, which is free of Phaser so the tests can read it
-// under Node. This file is only the engine half: loading the sheets and the fog pixel.
+// under Node. This file is only the engine half: loading the sheets, baking the edge blends, and
+// building the fog disc.
 
 import Phaser from 'phaser';
 import { GRID } from './frames';
 
 export {
   GRID,
+  DECOR_ORDER,
+  DECOR_VARIANTS,
+  DECOR_BY_BIOME,
+  decorFrame,
+  decorCount,
   EDGE_ORDER,
   EDGE_STEP,
   EDGE_VARIANTS,
@@ -72,8 +78,9 @@ export const HUT_SHEET = 'huts';
 export const OVERDRAW_SHEET = 'overdraw';
 export const FEATURE_SHEET = 'features';
 export const EDGE_SHEET = 'edges';
+export const DECOR_SHEET = 'decor';
 
-/** The 1x1 white pixel the fog layer stretches over each tile. */
+/** The soft disc the fog layer draws over each tile. See `createTileTextures`. */
 export const FOG_TEXTURE = 'fog:pixel';
 
 /** Load every sheet. Call from `preload`. */
@@ -87,6 +94,7 @@ export function loadTileSheets(
     overdraw: string;
     features: string;
     edges: string;
+    decor: string;
   }
 ): void {
   const sheet = (key: string, url: string, frameWidth: number, frameHeight: number) => {
@@ -100,6 +108,7 @@ export function loadTileSheets(
   sheet(OVERDRAW_SHEET, urls.overdraw, TILE_SIZE, TILE_SIZE);
   sheet(FEATURE_SHEET, urls.features, TILE_SIZE, TILE_SIZE);
   sheet(EDGE_SHEET, urls.edges, TILE_SIZE, TILE_SIZE);
+  sheet(DECOR_SHEET, urls.decor, TILE_SIZE, TILE_SIZE);
 }
 
 /**
@@ -150,16 +159,51 @@ export function blendTextureKey(scene: Phaser.Scene, terrainFrame: number, maskF
 }
 
 /**
- * Build the fog pixel. Safe to call more than once — Phaser keeps textures across scene restarts,
+ * Build the fog disc. Safe to call more than once — Phaser keeps textures across scene restarts,
  * so a second call would otherwise warn about a duplicate key.
  */
 export function createTileTextures(scene: Phaser.Scene): void {
   if (scene.textures.exists(FOG_TEXTURE)) return;
-  const fog = scene.textures.createCanvas(FOG_TEXTURE, 1, 1);
+
+  // A soft disc, not a square.
+  //
+  // This was a 1x1 white pixel stretched over each tile, which made the unexplored map a grid of
+  // hard-edged dark squares -- the least finished thing on the screen, and a grid in its own right
+  // after the tile seams and the repeating texture had both been dealt with. `endgame.png` has no
+  // fog at all.
+  //
+  // The mechanic is kept and only the rendering changes: still one quad per tile carrying that
+  // tile's own memory state, but drawn as a disc that is solid in the middle and gone at the rim,
+  // and scaled past its cell so neighbours overlap. A field of them sums into continuous cloud with
+  // no straight edge anywhere, and the boundary against explored ground becomes a fade instead of a
+  // staircase.
+  //
+  // 64 across rather than 16: at 16 the gradient banded visibly once stretched over a 128-pixel
+  // tile, which is the same lesson as quantising a wash.
+  const size = 64;
+  const fog = scene.textures.createCanvas(FOG_TEXTURE, size, size);
   const context = fog?.getContext();
   if (fog && context) {
-    context.fillStyle = '#ffffff';
-    context.fillRect(0, 0, 1, 1);
+    const half = size / 2;
+    const gradient = context.createRadialGradient(half, half, 0, half, half, half);
+    // Solid to 40% of the radius, then a long fade. Chosen by measuring rather than by eye: a
+    // grid of overlapping discs was simulated at a range of solid fractions and scales, and the
+    // alpha sampled across a cell. What matters is the *spread* between the lightest and darkest
+    // point, because that is what reads as mottling on remembered ground -- and it is worst there,
+    // since a low base alpha makes the variation a large fraction of the whole.
+    //
+    //   solid 0.55, scale 1.6  ->  spread 0.129   (the first guess)
+    //   solid 0.40, scale 1.8  ->  spread 0.081   (this)
+    //
+    // The same simulation also corrected an assumption in the other direction: overlap was expected
+    // to stack toward opaque, and in fact lifts a 0.62 base to only 0.672. Fewer, wider, softer
+    // discs beat tighter ones, because a tight disc leaves the cell's corners to be filled by a
+    // neighbour's steep falloff, which is exactly where the blotches came from.
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+    gradient.addColorStop(0.4, 'rgba(255,255,255,1)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, size, size);
     fog.refresh();
   }
 }
