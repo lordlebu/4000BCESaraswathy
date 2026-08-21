@@ -26,7 +26,6 @@ import {
   TERRAIN_SHEET,
   DECOR_SHEET,
   SHADOW_TEXTURE,
-  VIGNETTE_TEXTURE,
   TILE_SIZE,
   blendTextureKey,
   createTileTextures,
@@ -245,8 +244,6 @@ export class WorldScene extends Phaser.Scene {
   private wasd!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
   /** The day/night wash, drawn over the whole map. */
   private sky!: Phaser.GameObjects.Rectangle;
-  /** The frame's falloff, pinned to the camera rather than the world. */
-  private vignette!: Phaser.GameObjects.Image;
   /** Where in the day this journey opened — the player's own hour. */
   private startPhase = 0;
   /**
@@ -382,23 +379,6 @@ export class WorldScene extends Phaser.Scene {
       .setDepth(DEPTH_SKY);
     this.updateSky();
 
-    // Stretched over whatever the camera can see, and re-stretched whenever that changes.
-    //
-    // The first version used `setScrollFactor(0)` on the reasoning that the vignette belongs to the
-    // frame rather than the world. That is the right idea and the wrong mechanism: a scroll factor
-    // of zero pins an object to the camera but does **not** exempt it from the camera's zoom, so an
-    // image sized to the viewport in world units shrinks as the player zooms out. At the widest
-    // zoom it became a small dark rectangle sitting in the middle of the map and moving with the
-    // traveller -- with a visibly lighter ellipse in it, because that is the gradient's clear centre
-    // and the hard edges are where it clamps to its final stop.
-    //
-    // `camera.worldView` is the visible world rectangle, so tracking it is correct at any zoom by
-    // construction and needs no arithmetic about scroll factors.
-    this.vignette = this.add
-      .image(0, 0, VIGNETTE_TEXTURE)
-      .setOrigin(0, 0)
-      .setDepth(DEPTH_SKY + 1);
-    this.updateVignette();
 
     // Bounds are not set here: they depend on the zoom and on what the panels are covering, so
     // `applyCamera` owns them and recomputes them on every resize and every zoom step.
@@ -689,38 +669,7 @@ export class WorldScene extends Phaser.Scene {
 
   private onResize = (): void => {
     this.applyCamera();
-    this.updateVignette();
   };
-
-  /**
-   * Stretch the vignette over exactly what the camera can see.
-   *
-   * Called every frame, because the view moves with the traveller and changes size with the zoom --
-   * but it does nothing unless the rectangle has actually moved, which is four comparisons.
-   *
-   * A pixel of overscan on each side. The view's edges land on fractional world coordinates as the
-   * camera tweens between tiles, and a vignette that stops exactly on the boundary leaves a
-   * one-pixel seam of untinted map along the edge of the screen on some frames.
-   */
-  private updateVignette(): void {
-    if (!this.vignette) return;
-    const view = this.cameras.main.worldView;
-    if (view.width === 0) return;
-    const x = view.x - 1;
-    const y = view.y - 1;
-    const w = view.width + 2;
-    const h = view.height + 2;
-    if (
-      this.vignette.x === x &&
-      this.vignette.y === y &&
-      this.vignette.displayWidth === w &&
-      this.vignette.displayHeight === h
-    ) {
-      return;
-    }
-    this.vignette.setPosition(x, y);
-    this.vignette.setDisplaySize(w, h);
-  }
 
   private onNewJourney = (payload: { seed: string; discovered?: string[] }): void => {
     this.scene.restart({
@@ -964,7 +913,6 @@ export class WorldScene extends Phaser.Scene {
   update(): void {
     this.cullToCamera();
     this.moveShadow();
-    this.updateVignette();
     // Before the movement guard: the light keeps changing while the player stands still, and it
     // keeps changing mid-step too.
     this.updateSky();

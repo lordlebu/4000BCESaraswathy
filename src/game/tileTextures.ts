@@ -87,8 +87,6 @@ export const FOG_TEXTURE = 'fog:pixel';
 /** The soft ellipse the traveller stands on. See `createTileTextures`. */
 export const SHADOW_TEXTURE = 'shadow:contact';
 
-/** The screen-space vignette drawn over everything. See `createTileTextures`. */
-export const VIGNETTE_TEXTURE = 'light:vignette';
 
 /** Load every sheet. Call from `preload`. */
 export function loadTileSheets(
@@ -205,7 +203,6 @@ export function createTileTextures(scene: Phaser.Scene): void {
   }
 
   createShadowTexture(scene);
-  createVignetteTexture(scene);
 }
 
 /**
@@ -240,28 +237,24 @@ function createShadowTexture(scene: Phaser.Scene): void {
   canvas.refresh();
 }
 
-/**
- * A vignette, drawn in screen space rather than world space.
+/*
+ * There is no vignette, and that is a measurement rather than an oversight.
  *
- * The `sky` rectangle covers the world and tints it by the hour, which is a property of the *place*
- * and moves with the camera. This is a property of the *frame* -- the corners of what you are
- * looking at sit slightly deeper than the middle -- so it is pinned to the camera with a scroll
- * factor of zero and never moves at all.
+ * One was built and shipped: a soft radial darkening over the frame's edges, so the picture did not
+ * end flat at the screen border. It looked mildly better and it cost too much in the one place that
+ * matters for the build.
  *
- * Deliberately weak. A vignette that announces itself reads as a photographic filter, which the art
- * brief rules out; at this strength it does nothing but stop the frame ending flat at the edges.
+ * A vignette is a full-screen alpha-blended quad every frame. On the GPU a player actually has,
+ * that is free -- 7.0 ms a frame either way. On the software rasteriser headless Chromium uses,
+ * and therefore on CI, it measured **83 ms a frame against 67 ms without**: a 24% increase for the
+ * whole scene. That pushed four walk-heavy browser specs past their ninety-second budget and turned
+ * the browser job red.
+ *
+ * The trade was not worth it. It is the weakest of the things added in that change -- the contact
+ * shadow beside it is in the target frame and this was not -- so it went and the shadow stayed.
+ *
+ * If it comes back, it should be drawn as **four bands around the edge** rather than one quad over
+ * the whole screen. The middle of a vignette is fully transparent and still costs a blend per
+ * pixel; rasterising only the parts that are actually dark would cut most of the cost. That is real
+ * work for a subtle effect, which is why it was not done now.
  */
-function createVignetteTexture(scene: Phaser.Scene): void {
-  if (scene.textures.exists(VIGNETTE_TEXTURE)) return;
-  const size = 256;
-  const canvas = scene.textures.createCanvas(VIGNETTE_TEXTURE, size, size);
-  const context = canvas?.getContext();
-  if (!canvas || !context) return;
-  const half = size / 2;
-  const gradient = context.createRadialGradient(half, half, half * 0.55, half, half, half * 1.02);
-  gradient.addColorStop(0, 'rgba(26,18,26,0)');
-  gradient.addColorStop(1, 'rgba(26,18,26,0.42)');
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, size, size);
-  canvas.refresh();
-}
