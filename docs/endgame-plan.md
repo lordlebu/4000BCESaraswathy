@@ -15,12 +15,50 @@ this was read against was captured from a dev server on `feat/solarpunk-spoken`,
 | 00 · the direction call | Settled — painterly, and worth reopening (above) |
 | 01 · resolution and the grid | **Shipped** — PR 66, 67 |
 | 02 · density, water, fog | **Shipped** — PR 68 |
-| 03 · the notebook page | **Shipped** — PR 69 |
+| 03 · the notebook page | **Shipped** — PR 69, 71 |
 | 04a · the plate work queue | **Shipped** — PR 70 |
 | 04b–05 · painting the plates | Open, and now purely art |
+| 06 · a guard against slow frames | **Proposed** — see below |
 
-What remains that is *not* art: the contact shadow and ambient light (item 7), and the shoreline
-pass (item 4). Both are code and neither waits on anything.
+What remains that is *not* art: the shoreline pass (item 4), and the guard in Phase 06.
+
+---
+
+## Phase 06 — a guard, so this class of mistake fails in seconds
+
+Not in the original plan. It is here because the same failure has now happened three times, and
+each time it cost a twenty-minute round trip to find out.
+
+**The pattern.** A change is free on the GPU it was built on and expensive on CI's software
+rasteriser, so it passes typecheck, 520 unit tests and a local browser run — then four walk-heavy
+specs time out at ninety seconds each and the browser job goes red. It happened with the decor
+layer, with the vignette, and with the vignette's own fix. The failure never names its cause: it
+says `Test timeout of 90000ms exceeded`, which reads as a flaky test rather than as a frame that
+got 24% more expensive.
+
+**What it should be.** `npm run perf` serves the build, launches headless Chromium — the same
+SwiftShader rasteriser CI uses — measures the median frame on the largest map, and fails above a
+threshold. Thirty seconds instead of twenty minutes, and the message names the number.
+
+- **6a. Measure the median frame headless**, largest map, fixed viewport. Discard the first twenty
+  frames and take the median of the rest. **Print the renderer string**, so a run that happens to
+  get hardware acceleration is obvious rather than silently reassuring.
+- **6b. Fail above a threshold.** The floor is 67 ms and the failures began at 83, so something
+  near **75 ms** catches a regression while leaving room for an ordinary loaded machine. Set it
+  from a measured quiet run rather than choosing it.
+- **6c. Say what to do about it.** On failure, print the four levers from `docs/rendering.md` in
+  order: shrink the cell, cull, avoid full-screen passes, bake combinations. A threshold with no
+  advice just moves the guessing earlier.
+- **6d. Leave it out of CI, at least at first.** A runner's speed varies far more than a developer
+  machine's, and a flaky performance gate is worse than none. This is something to run before
+  pushing, like `npm run typecheck`.
+
+**The threshold is the whole risk.** Too tight and it cries wolf on a loaded laptop; too loose and
+it passes the next vignette. It wants revisiting whenever the floor moves — which it will, every
+time a layer is added.
+
+**Gate:** reintroducing the vignette makes `npm run perf` fail locally in under a minute. That is
+the exact regression that reached CI twice.
 
 Two companion documents came out of building it, and both hold things this plan got wrong:
 `docs/rendering.md` for how the map is drawn and how to measure it, and `docs/art-direction.md` for
