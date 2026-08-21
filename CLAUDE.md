@@ -31,6 +31,7 @@ npm run test:watch # vitest in watch mode
 npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
 npm run check:data # verify data/canon/ matches the canon release it came from
+npm run perf       # frame cost on the renderer CI has -- see docs/rendering.md
 npm run build:sprite # rebuild assets/varuna-walk.png from assets/source/
 ```
 

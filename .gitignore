@@ -38,3 +38,6 @@ yarn-debug.log*
 # provenance record for what is in assets/source/. 211 MB, and nothing builds from
 # it -- tools/build-terrain.js reads assets/source/ only. See docs/art-brief.md.
 assets/source/dump/
+
+# Local performance baseline: describes a machine, not the code.
+.perf-baseline.json
