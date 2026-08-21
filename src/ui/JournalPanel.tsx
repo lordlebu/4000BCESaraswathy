@@ -8,6 +8,7 @@
 
 import type { ReactNode } from 'react';
 import type { FieldNote, JournalEntry } from '../content/journal';
+import { SpeciesIcon } from './SpeciesIcon';
 
 /**
  * A specimen label: what it is called, and what it is.
@@ -16,11 +17,19 @@ import type { FieldNote, JournalEntry } from '../content/journal';
  * content — a term and its description — and it reads that way to a screen reader too. With
  * nothing to record there is no term, so the empty-handed line stands on its own.
  */
-function Note({ note }: { note: FieldNote }) {
+function Note({ note, kind }: { note: FieldNote; kind: 'creature' | 'flora' }) {
   if (!note.name) return <p className="note-empty">{note.note}</p>;
   return (
     <dl className="note">
-      <dt>{note.name}</dt>
+      <dt>
+        {/* The derived mark, not a painted plate.
+            `SpeciesIcon` builds a silhouette from the name and colours it by the ground the
+            species lives on, so every one of the 297 species in canon has something to show
+            without a single illustration existing. Painted plates, when they arrive, replace this
+            one species at a time -- which is the only way a tail that long is survivable. */}
+        {note.species && <SpeciesIcon species={note.species} kind={kind} size={18} />}
+        <span>{note.name}</span>
+      </dt>
       <dd>{note.note}</dd>
     </dl>
   );
@@ -95,7 +104,14 @@ export function JournalPanel({
     <section className="journal" aria-live="polite">
       <header className="journal-head">
         <div>
-          <h2>{entry.title}</h2>
+          {/* The dingbat is decorative and says so: the heading beside it already names the
+              place, and a screen reader announcing "flower, Wetland at 28, 29" is worse. */}
+          <h2>
+            <span className="journal-mark" aria-hidden="true">
+              &#10047;
+            </span>
+            {entry.title}
+          </h2>
           <p className="journal-place">{entry.description}</p>
         </div>
       </header>
@@ -109,11 +125,11 @@ export function JournalPanel({
           {/* Reserved height: this is the one line that changes on its own, and a panel that
               resizes as the day turns drags the camera with it. */}
           {entry.doing && <p className="doing">{entry.doing}</p>}
-          <Note note={entry.creature} />
+          <Note note={entry.creature} kind="creature" />
         </div>
         <div>
           <h3>Growing here</h3>
-          <Note note={entry.flora} />
+          <Note note={entry.flora} kind="flora" />
         </div>
       </div>
 

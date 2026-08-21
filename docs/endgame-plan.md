@@ -8,6 +8,20 @@ This is what it would take to get there from where the game actually is today. T
 this was read against was captured from a dev server on `feat/solarpunk-spoken`, not from
 `docs/images/screenshot.png`, which is two art generations out of date.
 
+## Where this stands
+
+| Phase | State |
+|---|---|
+| 00 · the direction call | Settled — painterly, and worth reopening (above) |
+| 01 · resolution and the grid | **Shipped** — PR 66, 67 |
+| 02 · density, water, fog | **Shipped** — PR 68 |
+| 03 · the notebook page | Open, and the recommended next step |
+| 04–05 · species plates | Open |
+
+Two companion documents came out of building it, and both hold things this plan got wrong:
+`docs/rendering.md` for how the map is drawn and how to measure it, and `docs/art-direction.md` for
+which art rules have actually been tested.
+
 ## The good news first
 
 **The information architecture is already right.** Every element in the target exists in the
@@ -50,6 +64,14 @@ The consequence is a real cost, and it lands on the largest item in Phase 01: **
 textures have to be generated**, which moves that work out of the code column and into the
 art-bound one this plan calls unschedulable. The resolution raise was still worth doing on its own
 — tiles now carry their real detail instead of a 2.5× upscale — but it buys sharpness, not paint.
+
+**And with Phases 01 and 02 shipped, the recommendation above is worth reopening.** What has
+actually closed the gap to the target frame is sharper tiles, blended edges, a scatter layer and
+better points of interest — none of which required painted terrain. The eleven generations remain
+the most expensive item on the board for the least certain gain, and the thing that fixed the
+forest was a better canopy rather than a different medium. The direction is defensible on the
+target frame alone; it is not defensible on cost, and it should be chosen deliberately rather than
+drifted into. See `docs/art-direction.md`.
 
 The one thing to keep from the old brief is the **palette**. The target frame sits comfortably
 inside the existing paper/ink/biome swatches: muted, warm, low-saturation. That part was right.
@@ -227,13 +249,25 @@ breaks nothing.
 
 ## Two things that will bite
 
-**Performance — and measure it before assuming.** `WorldScene` instantiates every tile and every fog
-quad up front; on a 64×64 map that is already 8,192 sprites. An edge-blend layer plus two decor props
-per tile roughly triples it, at 16× the texture memory per tile. That may well be fine — Phaser
-batches aggressively and the maps are small. **Measure before tuning it**; that lesson is already
-written down in `docs/testing.md` and it has cost this project once. If it does bite, the answer is
-to bake the static ground and blend layers into a single `RenderTexture` per map at scene start,
-which the plan/scene split makes contained: `scenePlan` does not care who draws it.
+**Performance — settled, and not where this expected.** Written as a warning that the sprite count
+would bite. It did not. The largest map carries 17,650 objects and runs at **7.0 ms a frame — about
+143 fps — on real hardware**. There is no performance problem and no `RenderTexture` rewrite is
+needed.
+
+Getting to that answer cost a strategic detour worth recording. Frame time was measured in headless
+Chromium, which renders WebGL through SwiftShader in software: it reported 67 ms, a crisis was
+declared on that number, and a renderer rewrite onto Phaser tilemaps was recommended. The game had
+been running at 143 fps throughout. **Launch headed to measure rendering, and print the renderer
+string to prove which one you got** — see `docs/rendering.md`.
+
+The useful half is the inverse: **CI is software-rendered**, so it does experience the 67 ms frame.
+That is why walk-heavy specs began missing their 90-second budget when the decor layer landed. Read
+a CI browser failure as *the scene got heavier*, not as *the game is slow*. Culling and the
+half-tile decor cell earn their place on that basis alone.
+
+And the lever, when one is needed, is **fill rate rather than object count**: frame cost tracks
+canvas area almost linearly and is nearly flat against zoom. Ask what fraction of a new layer's cell
+is actually opaque.
 
 **The e2e suite is on your side here, once.** `e2e/game.spec.ts` asserts the composited PNG does not
 compress like a flat fill — more detail can only help it. But `layout.spec.ts` and the zoom specs
