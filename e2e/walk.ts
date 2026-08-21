@@ -12,8 +12,7 @@ import { expect, type Page } from '@playwright/test';
 
 /** Take one step, and return when the traveller has actually arrived somewhere new. */
 export async function step(page: Page, key: string): Promise<void> {
-  const journal = page.locator('.journal');
-  const before = (await journal.textContent()) ?? '';
+  const before = await readJournal(page, 'before the step');
 
   // `page.keyboard`, not `locator('.map-surface canvas').press`.
   //
@@ -33,8 +32,42 @@ export async function step(page: Page, key: string): Promise<void> {
   // but it can wait far longer than a tween before giving up, which is the useful part.
   for (let i = 0; i < 40; i += 1) {
     await page.waitForTimeout(100);
-    if (((await journal.textContent()) ?? '') !== before) return;
+    if ((await readJournal(page, `after pressing ${key}`)) !== before) return;
   }
+}
+
+/**
+ * The field notes' text, or a failure that says what went wrong.
+ *
+ * `locator.textContent()` waits for the element to exist and then, if it never does, runs to the
+ * *test's* timeout — ninety seconds, reported as `waiting for locator('.journal')` with no hint of
+ * why. That has now cost several CI investigations, and the message is the reason: it reads as
+ * slowness, when what it actually means is that the panel is **gone from the DOM**.
+ *
+ * `.journal` only renders while the surface is `here` (see `src/ui/surface.ts`), so it vanishing
+ * mid-walk means something closed or replaced that surface — an interrupt, a travel, a scene
+ * restart. Waiting longer can never fix that.
+ *
+ * So the wait is bounded to a few seconds and the failure names the state it found. A spec that
+ * dies in five seconds pointing at the surface is worth many that die in ninety pointing at
+ * nothing.
+ */
+async function readJournal(page: Page, when: string): Promise<string> {
+  const journal = page.locator('.journal');
+  try {
+    await journal.first().waitFor({ state: 'attached', timeout: 5_000 });
+  } catch {
+    const surfaces = await page.evaluate(() =>
+      ['.journal', '.sheet', '.arrival', '.overworld', '.ending', '.field-kit']
+        .filter((sel) => document.querySelector(sel))
+        .join(', ')
+    );
+    throw new Error(
+      `The field notes are not on the page ${when}. \`.journal\` renders only while the surface ` +
+        `is \`here\`, so something closed or replaced it. Visible instead: ${surfaces || 'nothing'}.`
+    );
+  }
+  return (await journal.first().textContent()) ?? '';
 }
 
 /** Walk a fixed route and wait for the place panel it should end on. */
