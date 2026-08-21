@@ -123,6 +123,85 @@ the frame cost on its own.
 **When adding a layer, ask what fraction of its cell is actually opaque.** If the answer is "a
 little", shrink the cell.
 
+## Optimising: the method, and every change made so far
+
+The rule this section exists to enforce: **measure headed to know what a player gets, measure
+headless to know what CI gets, and never quote one as the other.** They differ by roughly ten
+times, and every wrong turn in this project's performance work came from confusing them.
+
+### The two budgets
+
+| | Median frame | What it constrains |
+|---|---|---|
+| Headed, real GPU | **7.0 ms** (~143 fps) | what the game feels like |
+| Headless, SwiftShader | **67 ms** (~15 fps) | whether the browser suite finishes |
+
+A change that costs nothing on the first can still turn the browser job red on the second. A
+walk-heavy spec has ninety seconds; at 67 ms a frame it is already spending most of that on
+rendering, so there is very little headroom for a new full-screen effect.
+
+### How to A/B a change honestly
+
+Both wrong turns here came from a single sample on a loaded machine, so:
+
+1. Serve a build, then measure `requestAnimationFrame` intervals in-page and take the **median**,
+   discarding the first twenty frames.
+2. Do the same with the change disabled — a constant flipped, a layer hidden — rather than on a
+   different commit, so nothing else moves.
+3. **Repeat each side at least twice.** A single pair once read 9.3 s against 40.9 s for the same
+   configuration; the machine, not the code, was the variable.
+4. Print the renderer string. If it says SwiftShader, you are measuring the rasteriser.
+
+Do **not** read pixels back from the canvas in-page to check what was drawn — the WebGL drawing
+buffer is undefined after compositing without `preserveDrawingBuffer`, and it returns all zeros.
+Screenshot the composited surface and analyse the PNG instead. Two measurements were silently
+wrong before this was remembered.
+
+### What has actually been changed, and what each bought
+
+**Culling — `cullToCamera`.** Phaser submits the whole display list every frame, and a 64×64 map
+carries ~17,650 objects. The tell was that frame cost tracked *map size* rather than window: 83 ms
+on a 48×48 map against 133 ms on a 64×64 one. Now anything outside the view plus a two-tile margin
+is hidden, and the sweep only runs when the tile window changes — once a step, not once a frame.
+**133 ms → 83 ms.**
+
+**A half-tile cell for decor.** A prop is a few dozen pixels; in a 128 cell it is a quad over 95%
+transparent, and the GPU blends every one of those pixels. With ~370 props on screen that was six
+million blended pixels a frame. The sheet moved to a 64 cell — a quarter of the fill, and the props
+are proportionally larger, which they wanted anyway. **83 ms → 67 ms, matching `main`.**
+
+**A vignette, added and then removed.** A soft darkening of the frame's edges. Free on a GPU and
+**83 ms against 67 ms** in software — a 24% increase for the whole scene, which pushed four
+walk-heavy specs past ninety seconds and turned the browser job red. It was the weakest of the
+things it shipped with, so it went and the contact shadow stayed. If it returns it should be drawn
+as four bands around the edge rather than one quad over the whole screen, since the transparent
+middle still costs a blend per pixel.
+
+**Sheets wrapped to 4,096 wide.** Not a speed change but a correctness one, and it belongs in the
+same list because it was invisible to every test — see below.
+
+### What was measured and found *not* to be a problem
+
+Recording these matters as much as the wins, because a register that only ever grows teaches
+nothing about its own accuracy.
+
+- **Object count.** Predicted to triple toward ~25,000 and need `RenderTexture` baking. The largest
+  map carries 17,650 objects and runs at 7.0 ms headed. No rescue was needed and none was built.
+- **The edge-blend layer.** Predicted ~12,000 sprites; measured 1,952 on the largest map, over
+  78–94 baked textures, because most tiles have no differing neighbour.
+- **Fog quads and the sky rectangle.** Skipping them when fully transparent changed nothing
+  measurable.
+- **Zoom.** Frame cost is nearly flat against it — 0.21 to 1.25 moved it 83 → 67 ms — which is what
+  first showed the cost is fill rate rather than visible tile count.
+
+### The levers, in the order worth reaching for
+
+1. **Shrink the cell** of any layer whose art does not fill it. Fill rate is what scales.
+2. **Cull** anything static that the camera cannot see.
+3. **Avoid full-screen passes.** Each one costs a whole canvas of blending every frame; the sky
+   tint is already one, and a second was one too many.
+4. **Bake combinations** rather than compositing per sprite — see the blend textures below.
+
 ## Sheets must fit in a texture
 
 **Every sheet wraps into rows at 4,096 pixels.** `MAX_TEXTURE_SIZE` is 8,192 on ordinary hardware,
