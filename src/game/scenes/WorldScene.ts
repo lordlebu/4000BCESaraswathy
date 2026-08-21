@@ -25,6 +25,8 @@ import {
   PLACE_SHEET,
   TERRAIN_SHEET,
   DECOR_SHEET,
+  SHADOW_TEXTURE,
+  VIGNETTE_TEXTURE,
   TILE_SIZE,
   blendTextureKey,
   createTileTextures,
@@ -222,6 +224,8 @@ export class WorldScene extends Phaser.Scene {
   /** The tile window last culled to, so the sweep only runs when it actually changes. */
   private culled: { x0: number; y0: number; x1: number; y1: number } | null = null;
   private player!: Phaser.GameObjects.Sprite;
+  /** The soft ellipse under the traveller, moved with him so he never floats. */
+  private shadow!: Phaser.GameObjects.Image;
   private at: Point = { x: 0, y: 0 };
   private discovered = new Set<string>();
   private visible = new Set<string>();
@@ -241,6 +245,8 @@ export class WorldScene extends Phaser.Scene {
   private wasd!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
   /** The day/night wash, drawn over the whole map. */
   private sky!: Phaser.GameObjects.Rectangle;
+  /** The frame's falloff, pinned to the camera rather than the world. */
+  private vignette!: Phaser.GameObjects.Image;
   /** Where in the day this journey opened — the player's own hour. */
   private startPhase = 0;
   /**
@@ -376,6 +382,16 @@ export class WorldScene extends Phaser.Scene {
       .setDepth(DEPTH_SKY);
     this.updateSky();
 
+    // Screen space, not world space: `scrollFactor` 0 pins it to the camera, so it darkens the
+    // corners of the *frame* rather than a fixed patch of country. Above the sky tint, because the
+    // hour changes the colour of the light and this is about where the light falls off.
+    this.vignette = this.add
+      .image(0, 0, VIGNETTE_TEXTURE)
+      .setOrigin(0, 0)
+      .setScrollFactor(0)
+      .setDepth(DEPTH_SKY + 1);
+    this.updateVignette();
+
     // Bounds are not set here: they depend on the zoom and on what the panels are covering, so
     // `applyCamera` owns them and recomputes them on every resize and every zoom step.
     this.cameras.main.setBackgroundColor('#1b1420');
@@ -479,6 +495,18 @@ export class WorldScene extends Phaser.Scene {
     // scale is what makes pixel art shimmer as it moves, and that reason survives the direction
     // change even though the ground's version of it did not.
     const figureScale = TILE_SIZE / 32;
+
+    // Created before the player so it is beneath him in the display list as well as in depth --
+    // equal depths resolve by insertion order, and his own shadow drawn over his boots is worse
+    // than no shadow at all.
+    //
+    // Wider than it is tall, and wider than the figure: a shadow the width of the sprite reads as
+    // a dark stripe under a plank. Two thirds of a tile across and a fifth of one deep is what
+    // makes it read as ground rather than as an object.
+    this.shadow = this.add
+      .image(0, 0, SHADOW_TEXTURE)
+      .setDisplaySize(TILE_SIZE * 0.62, TILE_SIZE * 0.2);
+
     this.player = this.add
       .sprite(0, 0, CHARACTERS.varuna.key, 0)
       .setOrigin(0.5, 1)
@@ -515,7 +543,18 @@ export class WorldScene extends Phaser.Scene {
 
   private placePlayer(at: Point): void {
     this.player.setPosition(at.x * TILE_SIZE + TILE_SIZE / 2, at.y * TILE_SIZE + TILE_SIZE - 2);
+    this.moveShadow();
     this.sortPlayer(at.y);
+  }
+
+  /**
+   * Keep the shadow under the feet.
+   *
+   * Read off the player rather than off the tile, because during a step he is between two tiles on
+   * a tween and a shadow placed by tile coordinates would jump ahead of him and then wait.
+   */
+  private moveShadow(): void {
+    this.shadow.setPosition(this.player.x, this.player.y - 1);
   }
 
   /**
@@ -527,6 +566,9 @@ export class WorldScene extends Phaser.Scene {
    */
   private sortPlayer(row: number): void {
     this.player.setDepth(depthFor(row, ROW_SLOT.walker));
+    // One slot below him, in the same row band. `underfoot` is where decor lives, which is right:
+    // a shadow is a mark on the ground, and it should pass under a stone the way the ground does.
+    this.shadow.setDepth(depthFor(row, ROW_SLOT.underfoot));
   }
 
   private bindInput(): void {
@@ -639,7 +681,21 @@ export class WorldScene extends Phaser.Scene {
 
   private onResize = (): void => {
     this.applyCamera();
+    this.updateVignette();
   };
+
+  /**
+   * Stretch the vignette over the viewport.
+   *
+   * Recomputed rather than set once because the canvas resizes with the window, and a vignette
+   * sized to the old viewport leaves a hard edge partway across the new one.
+   */
+  private updateVignette(): void {
+    if (!this.vignette) return;
+    const { width, height } = this.scale.gameSize;
+    if (this.vignette.displayWidth === width && this.vignette.displayHeight === height) return;
+    this.vignette.setDisplaySize(width, height);
+  }
 
   private onNewJourney = (payload: { seed: string; discovered?: string[] }): void => {
     this.scene.restart({
@@ -882,6 +938,8 @@ export class WorldScene extends Phaser.Scene {
 
   update(): void {
     this.cullToCamera();
+    this.moveShadow();
+    this.updateVignette();
     // Before the movement guard: the light keeps changing while the player stands still, and it
     // keeps changing mid-step too.
     this.updateSky();

@@ -84,6 +84,12 @@ export const DECOR_SHEET = 'decor';
 /** The 1x1 white pixel the fog layer stretches over each tile. See `createTileTextures`. */
 export const FOG_TEXTURE = 'fog:pixel';
 
+/** The soft ellipse the traveller stands on. See `createTileTextures`. */
+export const SHADOW_TEXTURE = 'shadow:contact';
+
+/** The screen-space vignette drawn over everything. See `createTileTextures`. */
+export const VIGNETTE_TEXTURE = 'light:vignette';
+
 /** Load every sheet. Call from `preload`. */
 export function loadTileSheets(
   scene: Phaser.Scene,
@@ -197,4 +203,65 @@ export function createTileTextures(scene: Phaser.Scene): void {
     context.fillRect(0, 0, 1, 1);
     fog.refresh();
   }
+
+  createShadowTexture(scene);
+  createVignetteTexture(scene);
+}
+
+/**
+ * The contact shadow the traveller stands on.
+ *
+ * Without one he floats: a figure drawn over ground with no darkening beneath reads as pasted on
+ * rather than standing, which is the single clearest difference between the shipped frame and
+ * `endgame.png` once the ground itself stopped being a grid.
+ *
+ * The old art brief forbade shadows outright -- it wanted flat, matte, e-ink -- and the rewritten
+ * one requires ambient shading under every mass. This is that rule applied to the one mass that
+ * moves.
+ *
+ * A radial gradient rather than a flat ellipse, and squashed by the drawing rather than the
+ * texture, so one 64-pixel square serves any figure at any scale.
+ */
+function createShadowTexture(scene: Phaser.Scene): void {
+  if (scene.textures.exists(SHADOW_TEXTURE)) return;
+  const size = 64;
+  const canvas = scene.textures.createCanvas(SHADOW_TEXTURE, size, size);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return;
+  const half = size / 2;
+  const gradient = context.createRadialGradient(half, half, 0, half, half, half);
+  // Held near-solid in the middle so the contact point reads, then away quickly. A linear falloff
+  // gives a grey disc with a visible rim, which looks like a plate rather than a shadow.
+  gradient.addColorStop(0, 'rgba(28,22,18,0.5)');
+  gradient.addColorStop(0.45, 'rgba(28,22,18,0.3)');
+  gradient.addColorStop(1, 'rgba(28,22,18,0)');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, size, size);
+  canvas.refresh();
+}
+
+/**
+ * A vignette, drawn in screen space rather than world space.
+ *
+ * The `sky` rectangle covers the world and tints it by the hour, which is a property of the *place*
+ * and moves with the camera. This is a property of the *frame* -- the corners of what you are
+ * looking at sit slightly deeper than the middle -- so it is pinned to the camera with a scroll
+ * factor of zero and never moves at all.
+ *
+ * Deliberately weak. A vignette that announces itself reads as a photographic filter, which the art
+ * brief rules out; at this strength it does nothing but stop the frame ending flat at the edges.
+ */
+function createVignetteTexture(scene: Phaser.Scene): void {
+  if (scene.textures.exists(VIGNETTE_TEXTURE)) return;
+  const size = 256;
+  const canvas = scene.textures.createCanvas(VIGNETTE_TEXTURE, size, size);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return;
+  const half = size / 2;
+  const gradient = context.createRadialGradient(half, half, half * 0.55, half, half, half * 1.02);
+  gradient.addColorStop(0, 'rgba(26,18,26,0)');
+  gradient.addColorStop(1, 'rgba(26,18,26,0.42)');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, size, size);
+  canvas.refresh();
 }
