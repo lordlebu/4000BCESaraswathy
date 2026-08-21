@@ -382,13 +382,21 @@ export class WorldScene extends Phaser.Scene {
       .setDepth(DEPTH_SKY);
     this.updateSky();
 
-    // Screen space, not world space: `scrollFactor` 0 pins it to the camera, so it darkens the
-    // corners of the *frame* rather than a fixed patch of country. Above the sky tint, because the
-    // hour changes the colour of the light and this is about where the light falls off.
+    // Stretched over whatever the camera can see, and re-stretched whenever that changes.
+    //
+    // The first version used `setScrollFactor(0)` on the reasoning that the vignette belongs to the
+    // frame rather than the world. That is the right idea and the wrong mechanism: a scroll factor
+    // of zero pins an object to the camera but does **not** exempt it from the camera's zoom, so an
+    // image sized to the viewport in world units shrinks as the player zooms out. At the widest
+    // zoom it became a small dark rectangle sitting in the middle of the map and moving with the
+    // traveller -- with a visibly lighter ellipse in it, because that is the gradient's clear centre
+    // and the hard edges are where it clamps to its final stop.
+    //
+    // `camera.worldView` is the visible world rectangle, so tracking it is correct at any zoom by
+    // construction and needs no arithmetic about scroll factors.
     this.vignette = this.add
       .image(0, 0, VIGNETTE_TEXTURE)
       .setOrigin(0, 0)
-      .setScrollFactor(0)
       .setDepth(DEPTH_SKY + 1);
     this.updateVignette();
 
@@ -685,16 +693,33 @@ export class WorldScene extends Phaser.Scene {
   };
 
   /**
-   * Stretch the vignette over the viewport.
+   * Stretch the vignette over exactly what the camera can see.
    *
-   * Recomputed rather than set once because the canvas resizes with the window, and a vignette
-   * sized to the old viewport leaves a hard edge partway across the new one.
+   * Called every frame, because the view moves with the traveller and changes size with the zoom --
+   * but it does nothing unless the rectangle has actually moved, which is four comparisons.
+   *
+   * A pixel of overscan on each side. The view's edges land on fractional world coordinates as the
+   * camera tweens between tiles, and a vignette that stops exactly on the boundary leaves a
+   * one-pixel seam of untinted map along the edge of the screen on some frames.
    */
   private updateVignette(): void {
     if (!this.vignette) return;
-    const { width, height } = this.scale.gameSize;
-    if (this.vignette.displayWidth === width && this.vignette.displayHeight === height) return;
-    this.vignette.setDisplaySize(width, height);
+    const view = this.cameras.main.worldView;
+    if (view.width === 0) return;
+    const x = view.x - 1;
+    const y = view.y - 1;
+    const w = view.width + 2;
+    const h = view.height + 2;
+    if (
+      this.vignette.x === x &&
+      this.vignette.y === y &&
+      this.vignette.displayWidth === w &&
+      this.vignette.displayHeight === h
+    ) {
+      return;
+    }
+    this.vignette.setPosition(x, y);
+    this.vignette.setDisplaySize(w, h);
   }
 
   private onNewJourney = (payload: { seed: string; discovered?: string[] }): void => {
