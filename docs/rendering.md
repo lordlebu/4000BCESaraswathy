@@ -140,6 +140,40 @@ A change that costs nothing on the first can still turn the browser job red on t
 walk-heavy spec has ninety seconds; at 67 ms a frame it is already spending most of that on
 rendering, so there is very little headroom for a new full-screen effect.
 
+### The tool: `npm run perf`
+
+```
+npm run perf -- --save     record where you are, immediately before the change
+npm run perf               measure again after it, and read the delta
+```
+
+It starts its own dev server, launches headless Chromium — the same SwiftShader rasteriser CI uses
+— measures frame times, and compares against the baseline you recorded. It prints the renderer
+string, so a machine that happens to give headless Chromium a real GPU is obvious rather than
+silently reassuring.
+
+**It compares the fastest frame, not the median.** A throttle spike or a background process can
+only ever make a frame slower, so the minimum is the closest thing to *what this machine can do
+with this scene*, and it drifts least. That is not a guess: validated by adding a full-screen pass
+and taking it out again, the median read 283 → 483 → 550 ms while the minimum read 250 → 333 → 250.
+The median called the restored code 33% slower than the baseline; the minimum correctly called it
+unchanged.
+
+**There is no threshold, and two attempts at one both failed.**
+
+*A fixed millisecond budget* does not survive the machine. The same commit measured 67 ms in the
+morning and 283 ms in the evening — fourfold, no code change, almost certainly heat from hours of
+browser suites. Any budget tight enough to catch a real regression would have failed all evening.
+
+*A ratio against a reference workload measured in the same run*, on the theory that when the machine
+slows both slow together, is worse. Over four runs on identical code the raw frame time held within
+300–383 ms while the ratio swung 0.89 to 2.16. Dividing by a second noisy measurement amplifies
+noise rather than cancelling it.
+
+So it is an **aid, not an oracle**: it reports a delta against something you recorded, and the noise
+floor is 20%. Record the baseline immediately before the change — a baseline several heavy runs old
+will report a regression that is really just the laptop warming up.
+
 ### How to A/B a change honestly
 
 Both wrong turns here came from a single sample on a loaded machine, so:
