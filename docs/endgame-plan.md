@@ -15,8 +15,12 @@ this was read against was captured from a dev server on `feat/solarpunk-spoken`,
 | 00 · the direction call | Settled — painterly, and worth reopening (above) |
 | 01 · resolution and the grid | **Shipped** — PR 66, 67 |
 | 02 · density, water, fog | **Shipped** — PR 68 |
-| 03 · the notebook page | Open, and the recommended next step |
-| 04–05 · species plates | Open |
+| 03 · the notebook page | **Shipped** — PR 69 |
+| 04a · the plate work queue | **Shipped** — PR 70 |
+| 04b–05 · painting the plates | Open, and now purely art |
+
+What remains that is *not* art: the contact shadow and ambient light (item 7), and the shoreline
+pass (item 4). Both are code and neither waits on anything.
 
 Two companion documents came out of building it, and both hold things this plan got wrong:
 `docs/rendering.md` for how the map is drawn and how to measure it, and `docs/art-direction.md` for
