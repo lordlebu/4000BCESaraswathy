@@ -396,8 +396,8 @@ describe('here', () => {
       title: 'Salt flats',
       description: 'Cracked white ground.',
       doing: '',
-      creature: { name: 'Reed heron', note: 'Standing very still.' },
-      flora: { name: 'Saltreed', note: 'Low and grey.' }
+      creature: { name: 'Reed heron', note: 'Standing very still.', species: null },
+      flora: { name: 'Saltreed', note: 'Low and grey.', species: null }
     },
     surroundings: 'The wind comes off the water.',
     hint: 'Keep going east.',
@@ -649,5 +649,79 @@ describe('the people in a place', () => {
     const [first, second] = [...document.querySelectorAll('svg.person-portrait')];
     const toolOf = (svg: Element) => [...svg.querySelectorAll('path')].at(-1)!.getAttribute('d');
     expect(toolOf(first!)).not.toBe(toolOf(second!));
+  });
+});
+
+describe('the field notes draw a mark for every species', () => {
+  // The reason the 297-species tail is survivable. Canon holds 219 encounter fauna and 78 flora,
+  // one painted plate is a session's work, and 297 of them is a year -- so the panel derives a
+  // silhouette from the name and colours it by the ground the species lives on. Every species has
+  // something to show before a single illustration exists, and a real plate replaces one at a time.
+  const note = (over: Record<string, unknown> = {}) => ({
+    entry: {
+      title: 'Wetland at 28, 29',
+      description: 'Reeds and shallow pools.',
+      doing: '',
+      creature: {
+        name: 'Swamp-Wallaby',
+        note: 'A marsupial-like herbivore.',
+        species: {
+          id: 'fauna_swamp_wallaby',
+          name: 'Swamp-Wallaby',
+          binomial: null,
+          biomes: ['wetland' as const]
+        }
+      },
+      flora: {
+        name: 'Saraswati Reed',
+        note: 'A tall, hollow, fibrous reed.',
+        species: {
+          id: 'flora_saraswati_reed',
+          name: 'Saraswati Reed',
+          binomial: null,
+          biomes: ['wetland' as const]
+        }
+      },
+      ...over
+    },
+    surroundings: 'You can make out hills to the north.',
+    hint: 'The elders spoke of Chatasa.',
+    whereNext: '',
+    fatigue: null,
+    dusk: null,
+    shelter: 'roof' as const,
+    canCamp: false,
+    onCamp: () => {},
+    discovered: 5,
+    atLandmark: false,
+    memory: ''
+  });
+
+  it('draws one beside the creature and one beside the plant', () => {
+    const { container } = render(
+      <Here open notes={note()} place={{ poiId: null } as never} />
+    );
+    // Two marks, one per named species -- and they are inside the term, beside the name, rather
+    // than floating in the section heading.
+    expect(container.querySelectorAll('.note dt .species-icon')).toHaveLength(2);
+  });
+
+  it('draws nothing where there is nothing to draw', () => {
+    const empty = { name: null, note: 'No creature signs yet.', species: null };
+    const { container } = render(
+      <Here open notes={note({ creature: empty, flora: empty })} place={{ poiId: null } as never} />
+    );
+    expect(container.querySelectorAll('.species-icon')).toHaveLength(0);
+  });
+
+  it('marks the heading dingbat as decorative', () => {
+    // The heading already names the place; a screen reader announcing "flower, Wetland at 28, 29"
+    // is worse than one announcing the place alone.
+    const { container } = render(
+      <Here open notes={note()} place={{ poiId: null } as never} />
+    );
+    const mark = container.querySelector('.journal-mark');
+    expect(mark).not.toBeNull();
+    expect(mark!.getAttribute('aria-hidden')).toBe('true');
   });
 });

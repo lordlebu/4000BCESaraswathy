@@ -73,6 +73,73 @@ body {
   backdrop-filter: blur(2px);
 }
 
+/* --- The notebook page ---------------------------------------------------
+ *
+ * The field notes are a torn leaf of paper, not a rounded rectangle. Three parts, and each is
+ * cheap on its own -- the deckle is a mask, the grain is a repeating gradient, the tab is one
+ * pseudo-element -- which is why this is the best result-per-hour left in the programme.
+ *
+ * All of it is drawn rather than fetched: an SVG mask and two gradients cost no request and no
+ * asset to keep in step with the rest of the art.
+ */
+
+.journal {
+  /* A torn top edge. The path is a shallow, irregular run of arcs across the full width; the
+     `fill` beneath it keeps the rest of the panel solid. `mask-size: 100% 100%` stretches it to
+     whatever height the panel settles at, so the tear stays a few pixels tall at any size. */
+  /* A torn top edge: many short segments with a few pixels of jitter, not a run of arcs.
+     Arcs at this width read as scallops -- a decorative wave rather than paper that tore.
+     `preserveAspectRatio='none'` lets one path stretch to any panel width, and the tall
+     viewBox below the tear keeps the rest of the page solid. */
+  --deckle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='300' preserveAspectRatio='none'%3E%3Cpath fill='%23fff' d='M0 5 L14 7.2 L29 5.4 L39 6.4 L49 3.7 L58 7.0 L70 1.7 L85 4.0 L97 2.0 L112 1.9 L130 2.2 L142 5.3 L160 7.2 L178 5.0 L187 7.4 L196 4.8 L207 3.2 L218 4.7 L236 3.4 L258 5.6 L268 5.0 L287 2.6 L297 4.8 L307 4.9 L325 2.7 L344 4.7 L365 3.4 L383 7.0 L397 3.3 L418 2.6 L439 3.0 L457 3.3 L473 6.8 L493 4.2 L511 7.4 L521 4.6 L532 6.0 L543 7.1 L558 1.7 L577 2.0 L594 4.9 L616 3.4 L636 3.6 L652 5.0 L668 1.9 L678 7.2 L694 5.7 L704 1.9 L724 3.4 L742 7.5 L764 4.2 L784 3.8 L803 3.6 L819 3.6 L837 2.2 L846 2.8 L859 2.3 L871 3.9 L893 4.5 L904 4.2 L921 3.2 L932 6.4 L954 4.8 L974 4.0 L988 5.6 L1003 7.2 L1014 2.0 L1025 2.9 L1037 1.6 L1059 5.0 L1072 3.2 L1083 4.0 L1097 5.2 L1111 7.2 L1131 6.7 L1149 5.4 L1169 1.8 L1191 6.2 L1200 5.6 L1200 300 L0 300 Z'/%3E%3C/svg%3E");
+  -webkit-mask-image: var(--deckle);
+  mask-image: var(--deckle);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  /* The mask eats the top border and the top corners with it, so the radius is dropped there
+     rather than left to show through as two stubs either side of the tear. */
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Paper grain: two very faint gradients at odd angles, so the texture does not read as stripes.
+   Drawn on a pseudo-element rather than the panel's own background, which is already carrying
+   the parchment colour and would have to become a stack to hold both. */
+.journal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.5;
+  background-image:
+    repeating-linear-gradient(
+      101deg,
+      rgba(120, 96, 62, 0.05) 0 1px,
+      transparent 1px 4px
+    ),
+    repeating-linear-gradient(
+      7deg,
+      rgba(120, 96, 62, 0.035) 0 1px,
+      transparent 1px 7px
+    );
+}
+
+/* No tab, and that is a decision rather than an omission.
+ *
+ * `endgame.png` has one on the right edge of its notes card, and it reads well there because that
+ * card is inset from the screen with a margin for the tab to protrude into. This panel is
+ * full-bleed -- it spans the viewport with a 12px gutter -- so a tab has nowhere to go, and the
+ * deckle mask clips pseudo-elements, so it gets cut off as well as crowded.
+ *
+ * The page reads as a torn leaf without it. Worth revisiting only if the notes ever become an
+ * inset card, which is a layout change rather than a styling one.
+ */
+
+
 h1,
 h2 {
   margin: 0 0 6px;
@@ -286,7 +353,22 @@ button.ghost:hover:not(:disabled) {
 }
 
 .journal h2 {
-  font-size: 1.05rem;
+  font-size: 1.22rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+/* The flower before the title. Sized down and pushed off the baseline a little, so it reads as a
+   printer's mark rather than as a character in the heading. */
+.journal-mark {
+  color: var(--accent, #a8552f);
+  font-size: 0.78em;
+  line-height: 1;
+  transform: translateY(-1px);
+  flex: none;
 }
 
 .journal-place {
@@ -329,6 +411,16 @@ button.ghost:hover:not(:disabled) {
 .note dt {
   font-weight: bold;
   letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The derived silhouette. `flex: none` so a long name never squeezes it, and a slight optical
+   lift because the shapes are drawn to sit on a baseline that is not the text's. */
+.note dt .species-icon {
+  flex: none;
+  transform: translateY(-1px);
 }
 
 .note dd {

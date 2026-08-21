@@ -8,7 +8,7 @@ import { isPresent, noteFor, routineFor } from './routine';
 import { landmarkKindFor, landmarkTitle } from './landmarks';
 import { nearestCamp, nearestUnvisited, stepsBetween } from './camps';
 import type { PlacedPoi } from '../world/fieldMap';
-import type { Creature, Point, Tile, World } from '../world/types';
+import type { BiomeId, Creature, Point, Tile, World } from '../world/types';
 
 /**
  * One line of the traveller's field notes: what a thing is called, and what it is.
@@ -25,6 +25,16 @@ export interface FieldNote {
   name: string | null;
   /** Canon's own words, passed through untouched. */
   note: string;
+  /**
+   * Enough of the species for the panel to draw a mark beside the name, or null when there is
+   * nothing here to draw.
+   *
+   * Deliberately a `Pick` rather than the whole record. The panel needs an id to seed the shape,
+   * a name and binomial to choose it, and the biome to colour it -- and nothing else. Passing the
+   * full creature would let a component start reading `rarity` or `routine`, which is the kind of
+   * drift `journey.ts` exists to prevent.
+   */
+  species: { id: string; name: string; binomial: string | null; biomes: BiomeId[] } | null;
 }
 
 export interface JournalEntry {
@@ -41,6 +51,11 @@ export interface JournalEntry {
    * map twitching because the day turned. Its own line can be given a reserved height.
    */
   doing: string;
+}
+
+/** The four fields the panel's mark is drawn from, and no more. See `FieldNote.species`. */
+function markOf(s: { id: string; name: string; binomial: string | null; biomes: BiomeId[] }) {
+  return { id: s.id, name: s.name, binomial: s.binomial, biomes: s.biomes };
 }
 
 /** Is this the tile the named place sits on? */
@@ -89,12 +104,20 @@ export function describeTile(
     // grass" and only learned it was a Painted Deer after sketching it. Naming it up front is the
     // whole point of a field note.
     creature: creature
-      ? { name: creature.name, note: creature.journalPrompt }
-      : { name: null, note: 'No creature signs yet, only wind, dust, and the road ahead.' },
+      ? { name: creature.name, note: creature.journalPrompt, species: markOf(creature) }
+      : {
+          name: null,
+          note: 'No creature signs yet, only wind, dust, and the road ahead.',
+          species: null
+        },
     doing: creature ? noteFor(creature, moment) : '',
     flora: plant
-      ? { name: plant.name, note: plant.journalPrompt }
-      : { name: null, note: 'Nothing is growing here worth pressing between the pages.' }
+      ? { name: plant.name, note: plant.journalPrompt, species: markOf(plant) }
+      : {
+          name: null,
+          note: 'Nothing is growing here worth pressing between the pages.',
+          species: null
+        }
   };
 }
 
