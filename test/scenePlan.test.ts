@@ -196,3 +196,58 @@ describe('the plan is a function of the world and nothing else', () => {
     }
   });
 });
+
+describe('the decor lies on the ground, never over the traveller', () => {
+  it('draws every prop below the walker', () => {
+    // The contract that lets this layer be dense. Overdraw and features both have to be careful --
+    // one is drawn above him and one stands up -- and decor is neither, so it may go anywhere in
+    // the cell at any count *provided* it stays underneath. A prop that climbed above the walker
+    // would put a boulder across his chest.
+    for (const { id, built } of worlds) {
+      for (const item of planScene(built)) {
+        if (item.sheet !== 'decor') continue;
+        expect(item.depth, `${id}: decor at ${key(item)} rose above the walker`)
+          .toBeLessThan(depthFor(item.y, ROW_SLOT.walker));
+      }
+    }
+  });
+
+  it('keeps every prop inside its own cell', () => {
+    // The jitter is what breaks the grid beat, and it is also the thing that could put a stone on
+    // the tile next door -- which on a shoreline means a pebble floating in open water.
+    for (const { id, built } of worlds) {
+      for (const item of planScene(built)) {
+        if (item.sheet !== 'decor') continue;
+        expect(item.offset, `${id}: decor at ${key(item)} has no offset`).toBeDefined();
+        expect(Math.abs(item.offset!.x), `${id}: decor at ${key(item)} drifted off its tile`)
+          .toBeLessThanOrEqual(0.45);
+        expect(Math.abs(item.offset!.y)).toBeLessThanOrEqual(0.45);
+      }
+    }
+  });
+
+  it('never scatters onto a roof', () => {
+    // The same coupling that once grew paddy through thatch, arriving by a third route.
+    for (const { id, built } of worlds) {
+      const plan = planScene(built);
+      const roofs = new Set(plan.filter((p) => p.sheet === 'huts').map((p) => `${p.x},${p.y}`));
+      for (const item of plan) {
+        if (item.sheet !== 'decor') continue;
+        expect(roofs.has(`${item.x},${item.y}`), `${id}: decor at ${key(item)} sits on a hut`)
+          .toBe(false);
+      }
+    }
+  });
+
+  it('puts something on the ground without carpeting it', () => {
+    // Both halves matter. Too little and the map is as empty as it was; too much and the scatter
+    // becomes a texture, which is the thing the tile art is already doing.
+    for (const { id, built } of worlds) {
+      const decor = planScene(built).filter((p) => p.sheet === 'decor');
+      const tiles = built.world.width * built.world.height;
+      const perTile = decor.length / tiles;
+      expect(perTile, `${id}: barely any decor`).toBeGreaterThan(0.3);
+      expect(perTile, `${id}: decor has become a carpet`).toBeLessThan(2);
+    }
+  });
+});

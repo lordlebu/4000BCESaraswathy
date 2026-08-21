@@ -123,6 +123,88 @@ export function tileFrame(biome: BiomeId, variant = 0): number {
   return slot * TILE_VARIANTS + (variant % TILE_VARIANTS);
 }
 
+// --- decor ---------------------------------------------------------------
+
+/**
+ * Prop order of `assets/decor.png`, matching PROPS in tools/build-decor.js.
+ *
+ * Kept here beside `FEATURES` rather than in `data/biomes.json`, and that is a deliberate reading of
+ * rule four. The rule forbids creature and biome *content* in TypeScript, which is why species and
+ * journal prose live in JSON. A frame index is not content: it is one half of a contract with a
+ * builder, and the other half is a list in a file in `tools/`. Splitting those two across a data
+ * file would put the sheet's order somewhere a test cannot see it next to the code that indexes it,
+ * which is exactly the drift `frames.ts` exists to prevent.
+ */
+export const DECOR_ORDER = [
+  'lily-pad',
+  'lotus',
+  'reed-tuft',
+  'marsh-stone',
+  'pebbles',
+  'wildflower',
+  'clover',
+  'twig',
+  'leaf-litter',
+  'mushroom',
+  'forest-stone',
+  'scree',
+  'boulder-small',
+  'desert-stone',
+  'dry-brush',
+  'shell',
+  'driftwood-small'
+] as const;
+
+/**
+ * The decor sheet's cell, which is *half* a tile. Matches CELL in tools/build-decor.js.
+ *
+ * Not GRID, and deliberately: a prop is a few dozen pixels of stone in a mostly-empty cell, and at
+ * full tile size the transparent remainder still costs the GPU a blend per pixel. See the note in
+ * the builder for what that measured.
+ */
+export const DECOR_CELL = GRID / 2;
+
+/** Variants per prop. Matches VARIANTS in tools/build-decor.js. */
+export const DECOR_VARIANTS = 3;
+
+/** Which props lie on which ground. Mirrors the `biomes` list on each entry in the builder. */
+export const DECOR_BY_BIOME: Partial<Record<BiomeId, readonly string[]>> = {
+  river: ['lily-pad', 'reed-tuft', 'marsh-stone'],
+  wetland: ['lily-pad', 'lotus', 'reed-tuft', 'marsh-stone'],
+  plains: ['pebbles', 'wildflower', 'clover', 'twig'],
+  settlement: ['pebbles', 'clover'],
+  forest: ['twig', 'leaf-litter', 'mushroom', 'forest-stone'],
+  hills: ['pebbles', 'twig', 'scree', 'boulder-small'],
+  mountains: ['scree', 'boulder-small'],
+  desert: ['desert-stone', 'dry-brush'],
+  coast: ['pebbles', 'shell', 'driftwood-small']
+  // `sea` is not walked on and `landmark` stays bare, so the destination is what the eye finds --
+  // the same two exclusions the overdraw layer makes, for the same reasons.
+};
+
+/** Frame index of one prop variant, or null if the name is not on the sheet. */
+export function decorFrame(prop: string, variant: number): number | null {
+  const index = DECOR_ORDER.indexOf(prop as (typeof DECOR_ORDER)[number]);
+  if (index < 0) return null;
+  return index * DECOR_VARIANTS + (variant % DECOR_VARIANTS);
+}
+
+/**
+ * How many props a tile carries, from a hash.
+ *
+ * One to three, with two thirds of tiles getting at least one. Denser than the features layer by a
+ * long way -- that is one tile in twelve -- because these lie flat and below the traveller, so they
+ * cannot obstruct anything. The target frame holds around forty objects in a screen of roughly
+ * sixteen by nine tiles, which is where this range comes from rather than from taste.
+ */
+export function decorCount(hash: number): number {
+  const roll = hash % 6;
+  if (roll < 2) return 0;
+  if (roll < 4) return 1;
+  if (roll === 4) return 2;
+  return 3;
+}
+
 // --- the edge blend ------------------------------------------------------
 
 /**

@@ -17,6 +17,9 @@
 // built, and a plan is returned in the order things should be created.
 
 import {
+  DECOR_BY_BIOME,
+  decorCount,
+  decorFrame,
   EDGE_ORDER,
   EDGE_STEP,
   FENCE_FRAME,
@@ -39,7 +42,15 @@ import { tileHash } from '../world/rng';
 import type { FieldMapWorld } from '../world/fieldMap';
 
 /** Which sheet a placement draws from. `marker` is the fallback glyph, which has no sheet. */
-export type PlacementSheet = 'terrain' | 'huts' | 'overdraw' | 'features' | 'places' | 'landmarks' | 'marker';
+export type PlacementSheet =
+  | 'terrain'
+  | 'huts'
+  | 'overdraw'
+  | 'features'
+  | 'places'
+  | 'landmarks'
+  | 'decor'
+  | 'marker';
 
 export interface Placement {
   sheet: PlacementSheet;
@@ -56,6 +67,18 @@ export interface Placement {
    * no lookups: it reads the number it was given.
    */
   sway?: { rest: number; lean: number; phase: number };
+  /**
+   * Sub-tile offset, in fractions of a cell, present only on decor.
+   *
+   * The jitter is the entire point of that layer. A prop drawn at the centre of its cell puts every
+   * stone on the same 128-pixel beat, which is the grid arriving by a third route after the tile
+   * seams and the repeating texture were both dealt with.
+   *
+   * Fractions rather than pixels, because pixel positions are the scene's business -- the same
+   * reason `x` and `y` are tile coordinates. Range is roughly -0.4 to 0.4, so a prop stays inside
+   * the cell it belongs to and a tile's props do not drift onto a neighbour that may be water.
+   */
+  offset?: { x: number; y: number };
   /**
    * Present only on the edge-blend layer, which is the one placement that needs two frames.
    *
@@ -120,6 +143,52 @@ export function planEdges(world: FieldMapWorld['world']): Placement[] {
           x,
           y,
           depth: EDGE_DEPTH
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * The scatter that lies on the ground: stones, pads, flowers, litter.
+ *
+ * One to three per tile on most ground, each placed at a jittered offset inside its cell. Drawn
+ * *below* the traveller, which is what separates this from the other two scatter layers and what
+ * lets it be dense: overdraw goes above him and must stay short, features stand up and must stay
+ * rare and off-centre, and decor lies flat so it can go anywhere in the cell at any density.
+ *
+ * `builtOn` keeps props off hut tiles, for the reason paddy once grew through a roof: a stone drawn
+ * under a building is either invisible or, worse, visible through a doorway it has no business in.
+ */
+export function planDecor(world: FieldMapWorld['world'], builtOn: ReadonlySet<string>): Placement[] {
+  const out: Placement[] = [];
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      if (builtOn.has(`${x},${y}`)) continue;
+      const biome = world.tiles[y]![x]!.biome;
+      const props = DECOR_BY_BIOME[biome];
+      if (!props || props.length === 0) continue;
+
+      const count = decorCount(tileHash(world.seed, x, y, 'decor-count'));
+      for (let i = 0; i < count; i += 1) {
+        const prop = props[tileHash(world.seed, x, y, `decor-pick-${i}`) % props.length]!;
+        const frame = decorFrame(prop, tileHash(world.seed, x, y, `decor-var-${i}`));
+        if (frame === null) continue;
+        out.push({
+          sheet: 'decor',
+          frame,
+          x,
+          y,
+          // -0.4..0.4 of a cell, on both axes, from two independent hashes.
+          offset: {
+            x: (tileHash(world.seed, x, y, `decor-ox-${i}`) % 1000) / 1250 - 0.4,
+            y: (tileHash(world.seed, x, y, `decor-oy-${i}`) % 1000) / 1250 - 0.4
+          },
+          // Underfoot, so the traveller walks over a stone rather than behind it. Row-sorted like
+          // everything else that sits on the ground, so a prop on a southern row still draws after
+          // one to the north.
+          depth: depthFor(y, ROW_SLOT.underfoot)
         });
       }
     }
@@ -276,6 +345,13 @@ export function planMarkers(built: FieldMapWorld): Placement[] {
 export function planScene(built: FieldMapWorld): Placement[] {
   const huts = planHuts(built.world);
   const builtOn = new Set(huts.map((h) => `${h.x},${h.y}`));
-  // Edges first: they are ground, and everything after them stands on it.
-  return [...planEdges(built.world), ...huts, ...planOverdraw(built.world, builtOn), ...planMarkers(built)];
+  // Edges first: they are ground. Then decor, which lies on that ground. Then the huts and the
+  // overdraw that stand in it, and the markers above everything.
+  return [
+    ...planEdges(built.world),
+    ...planDecor(built.world, builtOn),
+    ...huts,
+    ...planOverdraw(built.world, builtOn),
+    ...planMarkers(built)
+  ];
 }

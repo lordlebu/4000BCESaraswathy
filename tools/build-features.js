@@ -388,6 +388,21 @@ const FEATURES = [
   { id: 'cactus-desert', sides: 2, draw: cactus }
 ];
 
+/**
+ * Sheets wrap into rows rather than running as one long strip.
+ *
+ * WebGL's MAX_TEXTURE_SIZE is 8,192 on ordinary hardware, and past it the upload fails silently --
+ * see the note in `tools/build-overdraw.js`, where this actually bit. Phaser indexes a spritesheet
+ * left-to-right then top-to-bottom, so wrapping changes no frame number.
+ */
+const MAX_SHEET_WIDTH = 4096;
+
+/** Rows and columns for `count` frames of `cellWidth`, wrapped to stay inside the limit. */
+function sheetLayout(count, cellWidth) {
+  const columns = Math.max(1, Math.min(count, Math.floor(MAX_SHEET_WIDTH / cellWidth)));
+  return { columns, rows: Math.ceil(count / columns) };
+}
+
 function main() {
   const frames = [];
   const order = [];
@@ -400,21 +415,26 @@ function main() {
     }
   }
 
-  const sheetWidth = CELL * frames.length;
-  const sheet = Buffer.alloc(sheetWidth * CELL * 4);
+  // Against the *final* cell size: authored at CELL, upscaled by SCALE on the way out.
+  const { columns, rows } = sheetLayout(frames.length, CELL * SCALE);
+  const sheetWidth = CELL * columns;
+  const sheetHeight = CELL * rows;
+  const sheet = Buffer.alloc(sheetWidth * sheetHeight * 4);
   frames.forEach((frame, index) => {
+    const ox = (index % columns) * CELL;
+    const oy = Math.floor(index / columns) * CELL;
     for (let y = 0; y < CELL; y += 1) {
       const from = y * CELL * 4;
-      const to = (y * sheetWidth + index * CELL) * 4;
+      const to = ((oy + y) * sheetWidth + ox) * 4;
       frame.copy(sheet, to, from, from + CELL * 4);
     }
   });
 
   const file = path.join(OUT, 'features.png');
-  const big = upscale(sheet, sheetWidth, CELL, SCALE);
-  fs.writeFileSync(file, encodePng(sheetWidth * SCALE, CELL * SCALE, big));
+  const big = upscale(sheet, sheetWidth, sheetHeight, SCALE);
+  fs.writeFileSync(file, encodePng(sheetWidth * SCALE, sheetHeight * SCALE, big));
   const kb = (fs.statSync(file).size / 1024).toFixed(1);
-  console.log(`features: ${frames.length} frames of ${CELL * SCALE}x${CELL * SCALE}, ${kb} KB`);
+  console.log(`features: ${frames.length} frames of ${CELL * SCALE}x${CELL * SCALE} in ${columns}x${rows}, ${kb} KB`);
   console.log(`  ${order.join(', ')}`);
 }
 

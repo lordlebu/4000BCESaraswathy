@@ -148,15 +148,43 @@ horizontally adjacent pixel pairs that are identical, sampled from the middle of
 - **The ChatGPT terrains are denser and shaded.** `ChatGPT Wetlands.png` has five times the colour
   count and real pools; `monsoon forest canopy.png` has 28,579 colours against Gemini's 2,106 and
   only 3% flat pairs.
-- **The Grok points of interest are the weakest**, and nine of them had shipped. They are small
-  (roughly 700×900 against ChatGPT's 1122×1402), several carry a **visible "Grok" watermark**, and
-  the transparency checkerboard is *painted into the opaque pixels* — the exact failure this
-  document was written to prevent, which had come back unnoticed. An alpha check reports 55%
-  transparent while the checker is still visibly drawn on.
+- **The Grok points of interest are smaller and carry a watermark.** Roughly 700×900 against
+  ChatGPT's 1122×1402, and each has around 800 opaque light-grey pixels spelling "Grok" in the
+  bottom-right corner. That is a real defect and this document's second hard requirement forbids it.
 
-So the current set is: **ChatGPT for the points of interest and for wetland and forest**, and
-whatever was already there elsewhere. When a subject needs regenerating, check the dump first — the
-alternative may already exist and be better than what is in play.
+  **Their alpha is fine, though**, and an earlier version of this section said otherwise. It claimed
+  the transparency checkerboard was painted into the opaque pixels — the failure that ruined
+  `Varuna_new.png`. It is not: sampling the corners returns alpha 0, and the 61% transparent figure
+  is genuine. The checkerboard is what an image *viewer* draws behind transparency, and reading a
+  screenshot of a viewer as if it were the file is exactly the mistake that made the terrain sources
+  look painted when they were pixel art. **Measure the alpha channel; do not look at the picture.**
+
+So the current set is: **ChatGPT for most points of interest and for wetland and forest**, with
+Kavik Tower deliberately kept as the Grok version — a tower half-buried in its own sand drift says
+"silted" better than a clean building does, which is the whole point of that place. Its watermark
+was stripped: 799 pixels, selected by being near-neutral and bright inside the bottom-right corner,
+where the artwork is tan sand and nothing legitimate is grey.
+
+When a subject needs regenerating, check the dump first — the alternative may already exist and be
+better than what is in play.
+
+### The forest floor, tried and rejected
+
+Worth recording so it is not proposed a third time. The forest tile read as swampy — a mid-green
+mottle too close to the wetland's, so two very different grounds looked alike. One diagnosis was
+that a canopy is not ground at all: it is a thing at head height, and painting it into the floor
+means the trees are everywhere and nowhere, with no trunks and no clearings. So the ground was
+rebuilt as a *forest floor* — humus, leaf litter, roots, dappled light, generated in a tool — with
+the tree density raised fourfold so the features layer supplied the wood.
+
+It worked as designed and looked worse. Held up against the alternatives it is a brown tile, and a
+brown forest beside a brown hill costs more separation than the green-on-green it fixed. The tool
+and its output were deleted rather than left dead; `git log` has them.
+
+**What actually fixed it was a better canopy**, not a different subject:
+`ChatGPTmonsoon forest canopy.png` has distinct crowns and enough tonal range to read as woodland at
+tile size, where the previous source was flat mottle. The lesson is the one this document keeps
+relearning — when a tile is not working, suspect the art before the architecture.
 
 ---
 
@@ -456,6 +484,35 @@ shoulder, which reads as a different person on alternate steps.
 These two sheets are also the first that needed no cleaning at all — real alpha, no guides, no
 checkerboard. The anti-aliased edges from the emboss are handled by point sampling and the palette
 snap.
+
+### `Guyuk_walking.png` — held for later, and not yet verified
+
+A third sheet is in `assets/source/`: sixteen figures of a steppe archer in a fur-lined cap, with a
+bow, a quiver and silver braids. It is **not built and not wired into anything** — `CHARACTERS` in
+`src/game/player.ts` still holds only Varuna and Mithra.
+
+It is kept because canon has the character. `character_guyuk` in the SouthOfTethys repository is a
+**teenage Tushara nomad girl**, epithet *Mongke* — which is where the original filename came from —
+of `epoch_migrations`, who opens the crimson portal to Naraka Lok and alters her own bloodline
+doing it. That places her in the deep-lore layer the game keeps `placement: "lore"` and inert, so
+there is nowhere to put her yet; when there is, the art already exists.
+
+**Two things to settle before building it**, because it does *not* pass the checks above that
+Varuna's sheet passes:
+
+| Check | Varuna | Guyuk |
+| --- | --- | --- |
+| Back row identified by skin-toned pixels | 1,389 against 5–6k — unmistakable | 16.9k against 25–28k — no clear minimum |
+| Profile rows are a mirrored pair | 78% mirrored against 74% as-is | 52% mirrored against 56% as-is |
+
+Neither result is evidence the sheet is *wrong*. The first is explained by the character: her
+braids and fur brim are pale enough to swamp a skin-tone test that works on a dark-robed scholar.
+The second is not explained, and means the row order and the left/right pairing **cannot be assumed
+to be down-up-right-left** — settle both by eye before running the builder.
+
+What it does have: a real alpha channel, 66.9% transparent, no checkerboard and no guides, at
+1312×1199. So it is clean art of unverified layout, which is a much better position than the first
+two attempts this document exists to describe.
 
 
 Varuna's sheet is two source images concatenated — `Varuna_walking.png` for walking and

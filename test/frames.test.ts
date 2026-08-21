@@ -13,6 +13,12 @@ import {
   EDGE_VARIANTS,
   blends,
   edgeMaskFrame,
+  DECOR_ORDER,
+  DECOR_CELL,
+  DECOR_VARIANTS,
+  DECOR_BY_BIOME,
+  decorFrame,
+  decorCount,
   TILE_VARIANTS,
   TERRAIN_ORDER,
   tileFrame,
@@ -37,16 +43,36 @@ function pngSize(file: string): { width: number; height: number } {
   return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
 }
 
+
 /**
- * The cell size of a square-framed sheet: its height.
+ * How many frames a sheet holds.
  *
- * Read rather than asserted. These tests used to hard-code 32, which made them a second, silent
- * declaration of the grid — when it moved to 128 they failed for a reason that had nothing to do
- * with what they exist to check. The frame *count* is the contract here; the cell size is
- * `TILE_SIZE`'s business and is checked once, below.
+ * Width alone is not the answer any more. Sheets wrap into rows once a strip would pass WebGL's
+ * 8,192-pixel texture limit -- `overdraw.png` shipped at 8,832 and every sprite drawn from it
+ * rendered black, because the upload had failed and nothing said so. Counting both axes is what
+ * makes these assertions independent of that layout.
  */
-function cellOf(file: string): number {
-  return pngSize(file).height;
+function frameCount(file: string, cellWidth = GRID, cellHeight = GRID): number {
+  const { rows, width, height, stride } = decode(file);
+  const columns = width / cellWidth;
+  const capacity = columns * (height / cellHeight);
+
+  // Count cells that hold anything, rather than dividing the width. Wrapping pads the sheet out to
+  // a full rectangle, so capacity is an upper bound and the tail of the last row is empty -- and a
+  // test that trusted capacity would pass whatever the builder emitted.
+  let used = 0;
+  for (let i = 0; i < capacity; i += 1) {
+    const ox = (i % columns) * cellWidth;
+    const oy = Math.floor(i / columns) * cellHeight;
+    let any = false;
+    for (let y = 0; y < cellHeight && !any; y += 1) {
+      for (let x = 0; x < cellWidth; x += 1) {
+        if (rows[(oy + y) * stride + (ox + x) * 4 + 3]! > 0) { any = true; break; }
+      }
+    }
+    if (any) used += 1;
+  }
+  return used;
 }
 
 describe('every sheet is built to the same grid', () => {
@@ -54,20 +80,25 @@ describe('every sheet is built to the same grid', () => {
     // The one place the grid size is asserted rather than derived. Six sheets are written by three
     // different builders; a scale changed in one and forgotten in another draws a quarter-size
     // tile with no error anywhere, which is exactly what happened when the grid moved to 128.
-    expect(cellOf('assets/terrain.png')).toBe(GRID);
-    expect(cellOf('assets/landmarks.png')).toBe(GRID);
-    expect(cellOf('assets/overdraw.png')).toBe(GRID);
-    expect(cellOf('assets/features.png')).toBe(GRID);
+    for (const sheet of ['terrain', 'landmarks', 'overdraw', 'features', 'edges', 'decor']) {
+      const { width, height } = pngSize(`assets/${sheet}.png`);
+      // Decor is the one sheet on a half-tile cell -- see DECOR_CELL.
+      const cell = sheet === 'decor' ? DECOR_CELL : GRID;
+      expect(width % cell, `${sheet}.png is not a whole number of cells wide`).toBe(0);
+      expect(height % cell, `${sheet}.png is not a whole number of cells tall`).toBe(0);
+      // And inside what a GPU will actually upload -- see `frameCount`.
+      expect(width, `${sheet}.png is too wide for WebGL`).toBeLessThanOrEqual(8192);
+      expect(height, `${sheet}.png is too tall for WebGL`).toBeLessThanOrEqual(8192);
+    }
     // Places stand taller than their tile, huts sit inside one; both keep their ratio to it.
     expect(pngSize('assets/places.png').height).toBe((GRID / 32) * 40);
     expect(pngSize('assets/huts.png').height).toBe((GRID / 32) * 22);
-    expect(cellOf('assets/edges.png')).toBe(GRID);
   });
 
   it('carries every biome at every variant', () => {
     // Frame order is biome-major: all four crops of sea, then of coast. A sheet built without
     // --variants, or code expecting a different order, silently paints the wrong ground.
-    const frames = pngSize('assets/terrain.png').width / cellOf('assets/terrain.png');
+    const frames = frameCount('assets/terrain.png');
     expect(frames).toBe(TERRAIN_ORDER.length * TILE_VARIANTS);
 
     const seen = new Set<number>();
@@ -85,7 +116,7 @@ describe('every sheet is built to the same grid', () => {
   it('wraps the variant, and defaults to the first crop', () => {
     // The scene hands in a raw tile hash. And the edge blend calls it with no variant at all,
     // which must land on the biome's first frame rather than drifting.
-    const frames = pngSize('assets/terrain.png').width / cellOf('assets/terrain.png');
+    const frames = frameCount('assets/terrain.png');
     for (const n of [0, 4, 5, 4294967295]) {
       expect(tileFrame('plains', n)).toBeLessThan(frames);
     }
@@ -96,8 +127,7 @@ describe('every sheet is built to the same grid', () => {
 
 describe('the edge masks and the code agree', () => {
   it('has one frame per edge per variant, in the order the code indexes', () => {
-    const cell = cellOf('assets/edges.png');
-    const frames = pngSize('assets/edges.png').width / cell;
+    const frames = frameCount('assets/edges.png');
     expect(frames).toBe(EDGE_ORDER.length * EDGE_VARIANTS);
     // Every (edge, variant) lands on a distinct frame inside the sheet.
     const seen = new Set<number>();
@@ -114,7 +144,7 @@ describe('the edge masks and the code agree', () => {
 
   it('wraps the variant rather than running off the sheet', () => {
     // The caller hands in a raw tile hash, not a number already reduced.
-    const frames = pngSize('assets/edges.png').width / cellOf('assets/edges.png');
+    const frames = frameCount('assets/edges.png');
     for (const n of [0, 3, 4, 17, 4294967295]) {
       expect(edgeMaskFrame('n', n)).toBeLessThan(frames);
       expect(edgeMaskFrame('w', n)).toBeLessThan(frames);
@@ -139,14 +169,12 @@ describe('the overdraw sheet and the code agree', () => {
   it('has exactly the frames the layout claims', () => {
     // rest scatters + leaning scatters + fence + the two underfoot marks. If build-overdraw.js
     // grows a plant and this is not updated, the fence index silently points at a blade of grass.
-    const { width } = pngSize('assets/overdraw.png');
-    const cell = cellOf('assets/overdraw.png');
-    expect(width / cell).toBe(SPLASH_FRAME + 1);
+    expect(frameCount('assets/overdraw.png')).toBe(SPLASH_FRAME + 1);
     expect(OVERDRAW_REST).toBe(OVERDRAW_PLANTS.length * OVERDRAW_SCATTERS);
   });
 
   it('pairs every rest frame with a leaning one inside the sheet', () => {
-    const frames = pngSize('assets/overdraw.png').width / cellOf('assets/overdraw.png');
+    const frames = frameCount('assets/overdraw.png');
     for (let rest = 0; rest < OVERDRAW_REST; rest += 1) {
       expect(swayFrame(rest)).toBeLessThan(frames);
       expect(swayFrame(rest)).not.toBe(rest);
@@ -249,16 +277,20 @@ function decode(file: string): { rows: Buffer; width: number; height: number; st
  */
 function frameTops(file: string): number[] {
   const { rows, width, height, stride } = decode(file);
-  const cell = height;
+  const cell = GRID;
+  const columns = width / cell;
   const tops: number[] = [];
-  for (let frame = 0; frame < width / cell; frame += 1) {
+  for (let i = 0; i < columns * (height / cell); i += 1) {
+    const ox = (i % columns) * cell;
+    const oy = Math.floor(i / columns) * cell;
     let top = cell;
-    for (let y = 0; y < height; y += 1) {
-      for (let x = frame * cell; x < (frame + 1) * cell; x += 1) {
-        if (rows[y * stride + x * 4 + 3]! >= 128 && y < top) top = y;
+    for (let y = 0; y < cell; y += 1) {
+      for (let x = 0; x < cell; x += 1) {
+        if (rows[(oy + y) * stride + (ox + x) * 4 + 3]! >= 128 && y < top) top = y;
       }
     }
-    tops.push(top / cell);
+    // An empty padding cell has no top at all and must not drag the minimum down.
+    if (top < cell) tops.push(top / cell);
   }
   return tops;
 }
@@ -266,15 +298,18 @@ function frameTops(file: string): number[] {
 /** The horizontal centre of mass of each frame's opaque pixels. */
 function frameCentroids(file: string): (number | null)[] {
   const { rows, width, height, stride } = decode(file);
-  const cell = height;
+  const cell = GRID;
+  const columns = width / cell;
   const out: (number | null)[] = [];
-  for (let frame = 0; frame < width / cell; frame += 1) {
+  for (let i = 0; i < columns * (height / cell); i += 1) {
+    const ox = (i % columns) * cell;
+    const oy = Math.floor(i / columns) * cell;
     let sum = 0;
     let n = 0;
-    for (let y = 0; y < height; y += 1) {
-      for (let x = frame * cell; x < (frame + 1) * cell; x += 1) {
-        if (rows[y * stride + x * 4 + 3]! >= 128) {
-          sum += x - frame * cell;
+    for (let y = 0; y < cell; y += 1) {
+      for (let x = 0; x < cell; x += 1) {
+        if (rows[(oy + y) * stride + (ox + x) * 4 + 3]! >= 128) {
+          sum += x;
           n += 1;
         }
       }
@@ -307,7 +342,7 @@ describe('features may be tall because they stand aside', () => {
   // world into a set of obstructions the traveller keeps vanishing into.
 
   it('has a frame for every feature the code indexes', () => {
-    const frames = pngSize('assets/features.png').width / cellOf('assets/features.png');
+    const frames = frameCount('assets/features.png');
     const claimed = Object.values(FEATURES).flatMap((f) => f.frames);
     expect(Math.max(...claimed)).toBe(frames - 1);
     // No frame claimed twice, and none left unclaimed.
@@ -320,7 +355,6 @@ describe('features may be tall because they stand aside', () => {
     // because it is below the player's waist wherever he stands.
     // Both measures are fractions of the cell, so the bargain reads the same at any grid size:
     // "reaches into the top half" and "sits within an eighth of the centre line".
-    const cell = cellOf('assets/features.png');
     const tops = frameTops('assets/features.png');
     const centroids = frameCentroids('assets/features.png');
     const offenders: string[] = [];
@@ -328,9 +362,9 @@ describe('features may be tall because they stand aside', () => {
       if (top >= 0.5) return; // short enough not to matter
       const centre = centroids[i];
       if (centre === null) return;
-      const fromCentre = Math.abs(centre / cell - 0.5);
+      const fromCentre = Math.abs(centre / GRID - 0.5);
       if (fromCentre < 0.125) {
-        offenders.push(`frame ${i}: top ${top.toFixed(2)}, centre ${(centre / cell).toFixed(2)}`);
+        offenders.push(`frame ${i}: top ${top.toFixed(2)}, centre ${(centre / GRID).toFixed(2)}`);
       }
     });
     expect(offenders, 'tall features drawn across the middle of their tile').toEqual([]);
@@ -416,5 +450,60 @@ describe('the world stacks by row, not by layer', () => {
     // must stay well under that -- otherwise grass draws over the fog and escapes the day's light,
     // which is exactly what happened when the band was introduced at 100 and fog was still at 10.
     expect(depthFor(48, ROW_SLOT.canopy)).toBeLessThan(2000);
+  });
+});
+
+describe('the decor sheet and the code agree', () => {
+  it('has one frame per prop per variant', () => {
+    const frames = frameCount('assets/decor.png', DECOR_CELL, DECOR_CELL);
+    expect(frames).toBe(DECOR_ORDER.length * DECOR_VARIANTS);
+
+    const seen = new Set<number>();
+    for (const prop of DECOR_ORDER) {
+      for (let v = 0; v < DECOR_VARIANTS; v += 1) {
+        const f = decorFrame(prop, v);
+        expect(f, `${prop} variant ${v} has no frame`).not.toBeNull();
+        expect(f!).toBeGreaterThanOrEqual(0);
+        expect(f!).toBeLessThan(frames);
+        seen.add(f!);
+      }
+    }
+    expect(seen.size).toBe(frames);
+  });
+
+  it('only ever names a prop that is on the sheet', () => {
+    // A typo in the per-biome table would silently draw nothing on that ground rather than throw.
+    for (const [biome, props] of Object.entries(DECOR_BY_BIOME)) {
+      for (const prop of props ?? []) {
+        expect(DECOR_ORDER, `${biome} asks for ${prop}, which is not on the sheet`).toContain(prop);
+      }
+    }
+  });
+
+  it('leaves the water and the landmark bare', () => {
+    // The same two exclusions the overdraw layer makes: sea is not walked on, and a landmark tile
+    // stays clear so the thing standing on it is what the eye finds.
+    expect(DECOR_BY_BIOME.sea).toBeUndefined();
+    expect(DECOR_BY_BIOME.landmark).toBeUndefined();
+  });
+
+  it('wraps the variant rather than running off the sheet', () => {
+    const frames = frameCount('assets/decor.png', DECOR_CELL, DECOR_CELL);
+    for (const n of [0, 3, 4, 4294967295]) {
+      expect(decorFrame('pebbles', n)!).toBeLessThan(frames);
+    }
+  });
+
+  it('scatters one to three, and leaves a third of tiles empty', () => {
+    // Counted over the range rather than asserted from the constant, so a change to the rolling
+    // shows up here. Empty tiles matter: a prop on every tile is a texture, not a scatter.
+    const tally = [0, 0, 0, 0];
+    for (let i = 0; i < 6000; i += 1) tally[decorCount(i)] += 1;
+    expect(tally[0] / 6000).toBeCloseTo(1 / 3, 1);
+    expect(tally[1] / 6000).toBeCloseTo(1 / 3, 1);
+    expect(tally[2]).toBeGreaterThan(0);
+    expect(tally[3]).toBeGreaterThan(0);
+    // Nothing above three, ever.
+    expect(decorCount(5)).toBeLessThanOrEqual(3);
   });
 });

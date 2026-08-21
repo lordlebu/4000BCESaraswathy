@@ -10,13 +10,20 @@
 // one of those is a ratio to `GRID` rather than a fixed pixel count -- see `frames.ts`.
 //
 // Which frame is which lives in `frames.ts`, which is free of Phaser so the tests can read it
-// under Node. This file is only the engine half: loading the sheets and the fog pixel.
+// under Node. This file is only the engine half: loading the sheets, baking the edge blends, and
+// building the fog disc.
 
 import Phaser from 'phaser';
-import { GRID } from './frames';
+import { GRID, DECOR_CELL } from './frames';
 
 export {
   GRID,
+  DECOR_CELL,
+  DECOR_ORDER,
+  DECOR_VARIANTS,
+  DECOR_BY_BIOME,
+  decorFrame,
+  decorCount,
   EDGE_ORDER,
   EDGE_STEP,
   EDGE_VARIANTS,
@@ -72,8 +79,9 @@ export const HUT_SHEET = 'huts';
 export const OVERDRAW_SHEET = 'overdraw';
 export const FEATURE_SHEET = 'features';
 export const EDGE_SHEET = 'edges';
+export const DECOR_SHEET = 'decor';
 
-/** The 1x1 white pixel the fog layer stretches over each tile. */
+/** The 1x1 white pixel the fog layer stretches over each tile. See `createTileTextures`. */
 export const FOG_TEXTURE = 'fog:pixel';
 
 /** Load every sheet. Call from `preload`. */
@@ -87,6 +95,7 @@ export function loadTileSheets(
     overdraw: string;
     features: string;
     edges: string;
+    decor: string;
   }
 ): void {
   const sheet = (key: string, url: string, frameWidth: number, frameHeight: number) => {
@@ -100,6 +109,7 @@ export function loadTileSheets(
   sheet(OVERDRAW_SHEET, urls.overdraw, TILE_SIZE, TILE_SIZE);
   sheet(FEATURE_SHEET, urls.features, TILE_SIZE, TILE_SIZE);
   sheet(EDGE_SHEET, urls.edges, TILE_SIZE, TILE_SIZE);
+  sheet(DECOR_SHEET, urls.decor, DECOR_CELL, DECOR_CELL);
 }
 
 /**
@@ -155,6 +165,31 @@ export function blendTextureKey(scene: Phaser.Scene, terrainFrame: number, maskF
  */
 export function createTileTextures(scene: Phaser.Scene): void {
   if (scene.textures.exists(FOG_TEXTURE)) return;
+
+  // One white pixel, stretched over a tile.
+  //
+  // This was briefly a soft disc scaled past its cell, so neighbouring quads overlapped into cloud
+  // with no straight edge. It looked better and was wrong: alpha from a fogged tile's disc lands on
+  // its *neighbours*, so a cleared tile surrounded by unexplored ground collects the bleed from all
+  // eight of them and goes dark. Measured at the settings that shipped, a cleared tile received a
+  // mean 0.26 and a peak 0.49 -- enough to hide the traveller standing on it, which is exactly what
+  // it did.
+  //
+  // The tension is structural rather than a bad constant. Additive per-tile quads cannot be soft at
+  // the boundary *and* leave cleared ground clear: every setting that drops the bleed to nothing
+  // also stops neighbouring fog from meeting, which puts the grid back as a lattice of seams. The
+  // simulation is in the commit; no point on that curve is good.
+  //
+  // So the shape goes back to a plain quad, which has neither problem -- adjacent tiles at equal
+  // alpha are seamless, and nothing reaches past its own cell. What is kept from the attempt is the
+  // part that was independently right: the alphas are far lower than the 0.92 this started at, so
+  // unexplored ground now shades the map instead of hiding it.
+  //
+  // The real fix is a single fog `RenderTexture` filled once and *erased* through a soft brush at
+  // every known tile. Erasing subtracts rather than accumulates, so it is soft at the edge and
+  // exact in the middle, which is both requirements at once. It needs a full redraw per step rather
+  // than per frame and is a bigger change than a texture swap, so it is written down here rather
+  // than rushed.
   const fog = scene.textures.createCanvas(FOG_TEXTURE, 1, 1);
   const context = fog?.getContext();
   if (fog && context) {

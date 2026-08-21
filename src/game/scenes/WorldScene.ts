@@ -14,6 +14,7 @@ import hutsUrl from '../../../assets/huts.png';
 import overdrawUrl from '../../../assets/overdraw.png';
 import featuresUrl from '../../../assets/features.png';
 import edgesUrl from '../../../assets/edges.png';
+import decorUrl from '../../../assets/decor.png';
 import { EventBus } from '../EventBus';
 import {
   FEATURE_SHEET,
@@ -23,6 +24,7 @@ import {
   LANDMARK_SHEET,
   PLACE_SHEET,
   TERRAIN_SHEET,
+  DECOR_SHEET,
   TILE_SIZE,
   blendTextureKey,
   createTileTextures,
@@ -41,7 +43,8 @@ const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker'>, string> = {
   overdraw: OVERDRAW_SHEET,
   features: FEATURE_SHEET,
   places: PLACE_SHEET,
-  landmarks: LANDMARK_SHEET
+  landmarks: LANDMARK_SHEET,
+  decor: DECOR_SHEET
 };
 import {
   CHARACTERS,
@@ -73,9 +76,15 @@ import { findPath } from '../../world/pathfind';
 import { tileHash } from '../../world/rng';
 import type { Point, Tile, World } from '../../world/types';
 
-/** How the fog reads: clear underfoot, dimmed where you have been, dark where you have not. */
-const FOG_UNKNOWN = 0.92;
-const FOG_REMEMBERED = 0.4;
+/**
+ * How the fog reads: clear underfoot, dimmed where you have been, dark where you have not.
+ *
+ * Lowered from 0.92 and 0.4, and that part survived an attempt at soft-edged fog that did not --
+ * see `createTileTextures`. The target frame has no fog at all, so where this used to hide the map
+ * it now shades it, and unexplored ground reads as being beyond the lamp rather than behind a wall.
+ */
+const FOG_UNKNOWN = 0.6;
+const FOG_REMEMBERED = 0.2;
 const FOG_VISIBLE = 0;
 
 /** How far the traveller can see. */
@@ -200,6 +209,18 @@ export class WorldScene extends Phaser.Scene {
   /** Everything swaying at depth 21, with the two frames it alternates and its own phase. */
   private overdraw: { sprite: Phaser.GameObjects.Image; rest: number; lean: number; phase: number }[] = [];
   private fogSprites: Phaser.GameObjects.Image[][] = [];
+  /**
+   * Every static thing that belongs to a tile, so it can be hidden when the camera cannot see it.
+   *
+   * Phaser submits the whole display list every frame whether or not the camera is looking at it,
+   * and a 64x64 map carries around nineteen thousand objects: a tile, a fog quad, up to four edge
+   * blends and up to three props per cell. Measured before this existed, the frame cost tracked the
+   * *map size* rather than the window -- 83ms on a 48x48 map against 133ms on a 64x64 one, which is
+   * the signature of nothing being culled.
+   */
+  private tileOwned: { sprite: Phaser.GameObjects.GameObject & { visible: boolean }; x: number; y: number }[] = [];
+  /** The tile window last culled to, so the sweep only runs when it actually changes. */
+  private culled: { x0: number; y0: number; x1: number; y1: number } | null = null;
   private player!: Phaser.GameObjects.Sprite;
   private at: Point = { x: 0, y: 0 };
   private discovered = new Set<string>();
@@ -265,6 +286,8 @@ export class WorldScene extends Phaser.Scene {
     this.beaten = new Set();
     this.tileSprites = [];
     this.fogSprites = [];
+    this.tileOwned = [];
+    this.culled = null;
     this.overdraw = [];
     this.queuedPath = [];
     this.moving = false;
@@ -290,7 +313,8 @@ export class WorldScene extends Phaser.Scene {
       huts: hutsUrl,
       overdraw: overdrawUrl,
       features: featuresUrl,
-      edges: edgesUrl
+      edges: edgesUrl,
+      decor: decorUrl
     });
   }
 
@@ -319,18 +343,23 @@ export class WorldScene extends Phaser.Scene {
         // Which crop of this biome's art. Deterministic from the seed, so the same journey draws
         // the same ground -- `tileHash` is the generator's, not a fresh random.
         const variant = tileHash(this.world.seed, x, y, 'tile-variant');
-        tileRow.push(
-          this.add.image(cx, cy, TERRAIN_SHEET, tileFrame(tile.biome, variant)).setDepth(DEPTH_TILE)
-        );
+        const tileSprite = this.add
+          .image(cx, cy, TERRAIN_SHEET, tileFrame(tile.biome, variant))
+          .setDepth(DEPTH_TILE);
+        tileRow.push(tileSprite);
+        this.tileOwned.push({ sprite: tileSprite, x, y });
         fogRow.push(
           this.add
             .image(cx, cy, FOG_TEXTURE)
+            // Exactly its own cell. Anything wider bleeds onto neighbours and buries the tile the
+            // traveller is standing on -- see `createTileTextures`.
             .setDisplaySize(TILE_SIZE, TILE_SIZE)
             .setTint(0x241a26)
             .setAlpha(FOG_UNKNOWN)
             .setDepth(DEPTH_FOG)
         );
       }
+      for (let x = 0; x < width; x += 1) this.tileOwned.push({ sprite: fogRow[x]!, x, y });
       this.tileSprites.push(tileRow);
       this.fogSprites.push(fogRow);
     }
@@ -374,8 +403,13 @@ export class WorldScene extends Phaser.Scene {
    */
   private createGround(): void {
     for (const item of planScene(this.built)) {
-      const cx = item.x * TILE_SIZE + TILE_SIZE / 2;
-      const cy = item.y * TILE_SIZE + TILE_SIZE / 2;
+      // The offset is a fraction of a cell and only decor carries one -- see `Placement.offset`.
+      // Converting it here rather than in the plan is the same split as everything else: the plan
+      // says "four tenths of a tile to the left", the scene knows what a tile is in pixels.
+      const jx = (item.offset?.x ?? 0) * TILE_SIZE;
+      const jy = (item.offset?.y ?? 0) * TILE_SIZE;
+      const cx = item.x * TILE_SIZE + TILE_SIZE / 2 + jx;
+      const cy = item.y * TILE_SIZE + TILE_SIZE / 2 + jy;
 
       if (item.sheet === 'marker') {
         this.add
@@ -395,9 +429,10 @@ export class WorldScene extends Phaser.Scene {
       // it shows through. The pair is baked into a texture once and drawn as an ordinary image --
       // see `blendTextureKey` for why a per-sprite Phaser mask is not an option at this count.
       if (item.maskFrame !== undefined) {
-        this.add
+        const blend = this.add
           .image(cx, cy, blendTextureKey(this, item.frame, item.maskFrame))
           .setDepth(item.depth);
+        this.tileOwned.push({ sprite: blend, x: item.x, y: item.y });
         continue;
       }
 
@@ -410,6 +445,9 @@ export class WorldScene extends Phaser.Scene {
       if (anchored) sprite.setOrigin(0.5, 1);
       if (item.name) sprite.setName(item.name);
       if (item.sway) this.overdraw.push({ sprite, ...item.sway });
+      // Markers are found by name for the fog reveal and must stay in the list; everything else
+      // that belongs to one tile can be hidden with it.
+      if (!item.name) this.tileOwned.push({ sprite, x: item.x, y: item.y });
     }
   }
 
@@ -813,7 +851,37 @@ export class WorldScene extends Phaser.Scene {
     this.pinchFrom = spread;
   }
 
+  /**
+   * Hide everything the camera cannot see.
+   *
+   * Run from `update`, but the sweep itself only happens when the window of visible tiles actually
+   * changes -- which is once a step, not once a frame. Comparing four integers is what keeps this
+   * from costing more than it saves.
+   *
+   * A generous margin: the camera pans smoothly between tiles and a tile revealed a frame late
+   * would pop at the edge of the screen. Two tiles is more than a step can uncover.
+   */
+  private cullToCamera(): void {
+    const view = this.cameras.main.worldView;
+    if (view.width === 0) return;
+    const margin = 2;
+    const x0 = Math.floor(view.x / TILE_SIZE) - margin;
+    const y0 = Math.floor(view.y / TILE_SIZE) - margin;
+    const x1 = Math.ceil(view.right / TILE_SIZE) + margin;
+    const y1 = Math.ceil(view.bottom / TILE_SIZE) + margin;
+
+    const last = this.culled;
+    if (last && last.x0 === x0 && last.y0 === y0 && last.x1 === x1 && last.y1 === y1) return;
+    this.culled = { x0, y0, x1, y1 };
+
+    for (const owned of this.tileOwned) {
+      owned.sprite.visible =
+        owned.x >= x0 && owned.x <= x1 && owned.y >= y0 && owned.y <= y1;
+    }
+  }
+
   update(): void {
+    this.cullToCamera();
     // Before the movement guard: the light keeps changing while the player stands still, and it
     // keeps changing mid-step too.
     this.updateSky();
