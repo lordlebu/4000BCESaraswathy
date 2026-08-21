@@ -155,6 +155,15 @@ export const DECOR_ORDER = [
   'driftwood-small'
 ] as const;
 
+/**
+ * The decor sheet's cell, which is *half* a tile. Matches CELL in tools/build-decor.js.
+ *
+ * Not GRID, and deliberately: a prop is a few dozen pixels of stone in a mostly-empty cell, and at
+ * full tile size the transparent remainder still costs the GPU a blend per pixel. See the note in
+ * the builder for what that measured.
+ */
+export const DECOR_CELL = GRID / 2;
+
 /** Variants per prop. Matches VARIANTS in tools/build-decor.js. */
 export const DECOR_VARIANTS = 3;
 

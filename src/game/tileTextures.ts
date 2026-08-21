@@ -14,10 +14,11 @@
 // building the fog disc.
 
 import Phaser from 'phaser';
-import { GRID } from './frames';
+import { GRID, DECOR_CELL } from './frames';
 
 export {
   GRID,
+  DECOR_CELL,
   DECOR_ORDER,
   DECOR_VARIANTS,
   DECOR_BY_BIOME,
@@ -108,7 +109,7 @@ export function loadTileSheets(
   sheet(OVERDRAW_SHEET, urls.overdraw, TILE_SIZE, TILE_SIZE);
   sheet(FEATURE_SHEET, urls.features, TILE_SIZE, TILE_SIZE);
   sheet(EDGE_SHEET, urls.edges, TILE_SIZE, TILE_SIZE);
-  sheet(DECOR_SHEET, urls.decor, TILE_SIZE, TILE_SIZE);
+  sheet(DECOR_SHEET, urls.decor, DECOR_CELL, DECOR_CELL);
 }
 
 /**

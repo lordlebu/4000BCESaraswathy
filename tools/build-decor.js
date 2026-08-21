@@ -38,8 +38,19 @@ const zlib = require('zlib');
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'assets');
 
-/** Matches GRID in src/game/frames.ts. Drawn at full size, unlike overdraw and features. */
-const CELL = 128;
+/**
+ * Half a tile, not a whole one -- and this is a performance decision, not an art one.
+ *
+ * A pebble occupies a few dozen pixels. Drawn in a 128-cell it is a quad that is over 95%
+ * transparent, and the GPU still blends every one of those pixels: around 370 props are on screen
+ * at once, so a full-size cell costs six million blended pixels a frame for a handful of stones.
+ * Measured, that took the frame from 67ms to 133ms on the largest map -- decor alone doubling the
+ * cost of the whole scene.
+ *
+ * At 64 the fill is a quarter and the props are proportionally larger, which they wanted anyway.
+ * `DECOR_CELL` in `frames.ts` must match; the loader slices the sheet with it.
+ */
+const CELL = 64;
 
 /**
  * Nothing may rise above this row.

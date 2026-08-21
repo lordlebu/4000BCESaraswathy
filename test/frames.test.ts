@@ -14,6 +14,7 @@ import {
   blends,
   edgeMaskFrame,
   DECOR_ORDER,
+  DECOR_CELL,
   DECOR_VARIANTS,
   DECOR_BY_BIOME,
   decorFrame,
@@ -81,8 +82,10 @@ describe('every sheet is built to the same grid', () => {
     // tile with no error anywhere, which is exactly what happened when the grid moved to 128.
     for (const sheet of ['terrain', 'landmarks', 'overdraw', 'features', 'edges', 'decor']) {
       const { width, height } = pngSize(`assets/${sheet}.png`);
-      expect(width % GRID, `${sheet}.png is not a whole number of cells wide`).toBe(0);
-      expect(height % GRID, `${sheet}.png is not a whole number of cells tall`).toBe(0);
+      // Decor is the one sheet on a half-tile cell -- see DECOR_CELL.
+      const cell = sheet === 'decor' ? DECOR_CELL : GRID;
+      expect(width % cell, `${sheet}.png is not a whole number of cells wide`).toBe(0);
+      expect(height % cell, `${sheet}.png is not a whole number of cells tall`).toBe(0);
       // And inside what a GPU will actually upload -- see `frameCount`.
       expect(width, `${sheet}.png is too wide for WebGL`).toBeLessThanOrEqual(8192);
       expect(height, `${sheet}.png is too tall for WebGL`).toBeLessThanOrEqual(8192);
@@ -452,7 +455,7 @@ describe('the world stacks by row, not by layer', () => {
 
 describe('the decor sheet and the code agree', () => {
   it('has one frame per prop per variant', () => {
-    const frames = frameCount('assets/decor.png');
+    const frames = frameCount('assets/decor.png', DECOR_CELL, DECOR_CELL);
     expect(frames).toBe(DECOR_ORDER.length * DECOR_VARIANTS);
 
     const seen = new Set<number>();
@@ -485,7 +488,7 @@ describe('the decor sheet and the code agree', () => {
   });
 
   it('wraps the variant rather than running off the sheet', () => {
-    const frames = frameCount('assets/decor.png');
+    const frames = frameCount('assets/decor.png', DECOR_CELL, DECOR_CELL);
     for (const n of [0, 3, 4, 4294967295]) {
       expect(decorFrame('pebbles', n)!).toBeLessThan(frames);
     }
