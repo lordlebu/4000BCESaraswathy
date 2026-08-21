@@ -13,6 +13,7 @@
 // nobody adds one by accident.
 
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import speciesBundle from '../data/canon/species.json';
 import placesBundle from '../data/canon/places.json';
 import knowledgeBundle from '../data/canon/knowledge.json';
@@ -253,5 +254,33 @@ describe('the artwork points at places that exist', () => {
     const kinds = (landmarkData as { id: string }[]).map((kind) => kind.id);
     const missing = kinds.filter((id) => !LANDMARK_ORDER.includes(id));
     expect(missing, 'landmark kinds in data/landmarks.json with no frame').toEqual([]);
+  });
+});
+
+describe('the plate queue reads the same rarity weights the engine picks with', () => {
+  // `tools/reachable-species.js` ranks species by how often a player will meet one, so a painter
+  // works down the list in the order they appear in play. It reads the shipped JSON bundle and
+  // cannot import TypeScript, so it copies RARITY_WEIGHT from `src/content/species.ts`.
+  //
+  // A copied rule needs a test or it drifts, which is the cost CLAUDE.md records for
+  // `check_playability.py` duplicating `journey.ts`. This is that test.
+  //
+  // Leaving the weights out entirely was the first version of the tool and it was wrong by a
+  // factor of twelve: a mythic species holds one pool slot where a common one holds twelve, so an
+  // unweighted ranking put nine Asura conjurations in the top twenty-five fauna -- precisely the
+  // creatures a player meets least often.
+  const weights = (source: string) => {
+    const line = source.match(/RARITY_WEIGHT[^=]*=\s*\{([^}]*)\}/);
+    expect(line, 'no RARITY_WEIGHT found').not.toBeNull();
+    const out: Record<string, number> = {};
+    for (const [, k, v] of line![1].matchAll(/(\w+)\s*:\s*(\d+)/g)) out[k] = Number(v);
+    return out;
+  };
+
+  it('matches, weight for weight', () => {
+    const engine = weights(readFileSync('src/content/species.ts', 'utf8'));
+    const tool = weights(readFileSync('tools/reachable-species.js', 'utf8'));
+    expect(Object.keys(engine).length).toBeGreaterThan(0);
+    expect(tool).toEqual(engine);
   });
 });

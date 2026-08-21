@@ -203,9 +203,29 @@ Do not attempt 297 illustrations.
   coloured by the ground it grows on. Extend that to fauna via `bodyPlanOf`, and the plate slot is
   never empty. Every real plate that arrives afterwards improves something that already reads as
   finished — which is the only way a long tail is survivable.
-- **Tier the real plates by reachability.** The three authored field maps do not use all eleven
-  biomes. Write the script that lists which species can actually be met on them, and illustrate that
-  set first; it is a fraction of 297.
+- **Tiering by reachability does not work, and the script now says so.** This was the plan's idea
+  and it is wrong: between them Dwarka, Lothal and the Narmada Plateau cover **ten of the eleven**
+  biomes — everything but `landmark` — so all 297 placeable species are reachable and the filter
+  removes nobody.
+
+  `tools/reachable-species.js` therefore ranks by **how often** a player meets one instead: each
+  biome's share of a map, divided by the competition for that ground, weighted by rarity. The
+  weighting is not optional — the engine expands each species by `RARITY_WEIGHT`, so a mythic holds
+  one pool slot where a common holds twelve, and the first unweighted version put nine Asura
+  conjurations in the top twenty-five fauna. `test/adapterCoverage.test.ts` pins the copied
+  constant.
+
+  What that buys, as a share of all encounters:
+
+  | Plates painted | Fauna covered | Flora covered |
+  |---|---|---|
+  | top 20 of each half | 47% | 33% |
+  | top 40 | 63% | 55% |
+  | top 60 | 73% | 74% |
+  | top 100 | 85% | 90% |
+
+  **Forty fauna and sixteen flora covers roughly half of everything a player will ever meet.** That
+  is the tier-one list, and it is a work queue rather than a guess.
 - **Plates are game assets, keyed by canon id.** They live in `assets/`, not in the canon bundle,
   and canon gains no `illustration` field. A picture is a view, and views belong here. That is the
   noun/verb test from the canon repo, applied.
