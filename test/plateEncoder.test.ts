@@ -287,6 +287,13 @@ describe('the species id is read off the file name, whatever the tool called it'
     ['Grokplate-caravan-dromedary.jpg', 'caravan-dromedary'],
     ['plate-desert-fox.png', 'desert-fox'],
     ['desert-fox.png', 'desert-fox'],
+    // A species whose own name starts with "plate". The prefix strip used to allow zero
+    // separators, so this came back as `au-wolf` -- and because a *built* plate is named exactly
+    // its id, the sweep then decided a finished plateau-wolf.png was a stray raw and moved it out
+    // of the output folder. Canon has two of these, both on the Narmada Plateau.
+    ['plateau-wolf.png', 'plateau-wolf'],
+    ['plateau-ibex.png', 'plateau-ibex'],
+    ['ChatGPTplate-plateau-wolf.png', 'plateau-wolf'],
     ['Grok saltwater gator turtle.png', 'saltwater-gator-turtle']
   ])('%s -> %s', (file, id) => {
     expect(idFor(file)).toBe(id);

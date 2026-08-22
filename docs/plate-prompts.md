@@ -110,7 +110,7 @@ the fix is upstream and free. Re-export and drop it in again.
 
 ## Fauna — the first twenty
 
-✅ = painted and in the game. **4 of 20.** Next up is `cliff-swift`.
+✅ = painted and in the game. **9 of 20.** Next up is `scythian-wild-ass` (#10).
 
 | # | File name | Subject line |
 |---|---|---|
@@ -118,11 +118,11 @@ the fix is upstream and free. Re-export and drop it in again.
 | 2 ✅ | `plate-desert-fox.png` | A small fox with enormous ears, sitting alert on a low dune at dusk, watching a road out of frame. Sandy ochres, long shadows. |
 | 3 ✅ | `plate-hill-macaque.png` | A macaque sitting on a stone wall at a village edge, caught mid-glance, looking studiedly innocent. Hill scrub and a hint of thatch behind. |
 | 4 ✅ | `plate-honey-guide-bird.png` | A small brown bird perched on a thin branch, beak open mid-call, head turned back as if waiting to be followed. Dappled forest edge. |
-| 5 | `plate-cliff-swift.png` | A swift in flight, wings swept into a long scythe shape, banking above plateau grass. Pale sky, a suggestion of cliff below. |
-| 6 | `plate-plateau-wolf.png` | A lean highland wolf at a steady trot across open ground, seen side-on, not hunting — following a line. Dry upland grass, distant hills. |
-| 7 | `plate-delta-monitor.png` | A long-bodied monitor lizard nosing along the ground beside wooden fish-drying racks, unhurried and entirely unbothered. Mangrove fringe. |
-| 8 | `plate-mangrove-crab.png` | A heavy crab picking between arching mangrove roots, one claw raised high like a man carrying something awkward. Brackish mud and water. |
-| 9 | `plate-painted-deer.png` | A small deer standing in tall grass, watching the viewer, its coat patterned with pale markings like fallen petals. Warm meadow light. |
+| 5 ✅ | `plate-cliff-swift.png` | A swift in flight, wings swept into a long scythe shape, banking above plateau grass. Pale sky, a suggestion of cliff below. |
+| 6 ✅ | `plate-plateau-wolf.png` | A lean highland wolf at a steady trot across open ground, seen side-on, not hunting — following a line. Dry upland grass, distant hills. |
+| 7 ✅ | `plate-delta-monitor.png` | A long-bodied monitor lizard nosing along the ground beside wooden fish-drying racks, unhurried and entirely unbothered. Mangrove fringe. |
+| 8 ✅ | `plate-mangrove-crab.png` | A heavy crab picking between arching mangrove roots, one claw raised high like a man carrying something awkward. Brackish mud and water. |
+| 9 ✅ | `plate-painted-deer.png` | A small deer standing in tall grass, watching the viewer, its coat patterned with pale markings like fallen petals. Warm meadow light. |
 | 10 | `plate-scythian-wild-ass.png` | A wiry wild ass of the northern steppe, standing side-on, built for stamina rather than speed. Dry open plain, big sky. |
 | 11 | `plate-saltwater-gator-turtle.png` | An ancient armoured turtle with a heavily ridged shell like crocodile hide, half-submerged in a brackish delta canal. |
 | 12 | `plate-monsoon-crane.png` | A tall white crane stepping carefully between reeds, head lowered as if reading the water. Grey rain-light. |

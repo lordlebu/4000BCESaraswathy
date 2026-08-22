@@ -532,19 +532,74 @@ function resample(src, box) {
   return out;
 }
 
-/** `Gemini_plate-caravan-dromedary.png` -> `caravan-dromedary`. */
+/**
+ * `Gemini_plate-caravan-dromedary.png` -> `caravan-dromedary`.
+ *
+ * The separator after `plate` is required, and that is not fussiness. It was `[ _-]*`, which
+ * matches zero separators, so it happily ate the first five letters of any species whose own name
+ * begins with those letters -- `plateau-wolf.png` came back as `au-wolf`. That went unnoticed on
+ * the way in, because the raw was `ChatGPTplate-plateau-wolf.png` and the `plate-` there does have
+ * its separator; it surfaced the moment the sweep asked whether an already-built `plateau-wolf.png`
+ * was named after itself, decided it was not, and moved a finished plate back into the intake.
+ *
+ * Canon has three species this would hit, all of them on the Narmada Plateau.
+ */
 function idFor(file) {
   return path
     .basename(file, path.extname(file))
     .replace(TOOL_NOISE, '')
-    .replace(/^plate[ _-]*/i, '')
+    .replace(/^plate[ _-]+/i, '')
     .trim()
     .toLowerCase()
     .replace(/[_\s]+/g, '-')
     .replace(/[^a-z0-9-]/g, '');
 }
 
+/**
+ * Move raws that were dropped in the output folder into the intake, and say so.
+ *
+ * `src/ui/plates/` is the obvious place to put a plate -- it is where plates live, it is what
+ * `plates.ts` reads, and its README used to say to put them there. Three batches in a row have
+ * landed in it. At that point it stops being a mistake anyone is making and starts being a design
+ * problem: the tool should accept art wherever it is sensibly put, not require a folder to be
+ * memorised.
+ *
+ * The test is exact rather than heuristic. A built plate is named precisely its engine id, so
+ * `idFor(name) === name` for everything this script writes, and anything else in there came from
+ * an image model. `ChatGPT plate-cliff-swift.png` fails that; `cliff-swift.png` passes it.
+ *
+ * test/platesFolder.test.ts still fails on a raw left in the output folder. This does not replace
+ * that -- it is the fix, and the test is the net for when someone copies a file in without
+ * running the build at all.
+ */
+function sweepMisplaced() {
+  if (!fs.existsSync(OUT)) return [];
+  const moved = [];
+  for (const file of fs.readdirSync(OUT)) {
+    if (!/\.(png|jpe?g|webp)$/i.test(file)) continue;
+    const base = path.basename(file, path.extname(file));
+    if (idFor(file) === base) continue; // already a built plate
+
+    fs.mkdirSync(RAW, { recursive: true });
+    const to = path.join(RAW, file);
+    if (fs.existsSync(to)) {
+      console.log(`  !  ${file} is in the output folder and already in the intake. Delete one.`);
+      continue;
+    }
+    fs.renameSync(path.join(OUT, file), to);
+    moved.push(file);
+  }
+  if (moved.length) {
+    console.log(`  ~  moved ${moved.length} raw${moved.length > 1 ? 's' : ''} out of ${path.relative(ROOT, OUT)} into ${path.relative(ROOT, RAW)}:`);
+    for (const f of moved) console.log(`       ${f}`);
+    console.log('');
+  }
+  return moved;
+}
+
 function main() {
+  sweepMisplaced();
+
   if (!fs.existsSync(RAW)) {
     console.log(`Nothing to do: ${path.relative(ROOT, RAW)} does not exist.`);
     console.log('Drop generated plates there under any name and run this again.');
