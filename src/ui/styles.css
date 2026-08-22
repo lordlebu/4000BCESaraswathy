@@ -9,6 +9,20 @@
  * `orientation`, not width, so a landscape phone and a portrait tablet each get the right one. */
 
 :root {
+  /* Opting out of the browser's dark mode, deliberately.
+   *
+   * There is no dark theme and there does not need to be one: the game is already dark-grounded --
+   * `body` is #1b1420 and the canvas covers it -- with parchment panels floating over the top. Every
+   * colour below is an explicit token, and nothing in this file reads `prefers-color-scheme`.
+   *
+   * Verified rather than assumed: rendering the same seed under light, dark and no-preference gives
+   * pixels that differ by 0.00% -- the same as the animation noise between two runs of the *same*
+   * scheme. What `color-scheme` still buys is the UA's own furniture, scrollbars especially, which
+   * would otherwise turn dark against the parchment.
+   *
+   * If a dark theme is ever wanted, the painted species plates are the thing to think about first.
+   * They are opaque cream watercolour -- see src/ui/plates/ -- so they would sit as bright rectangles
+   * in a dark panel, and no CSS can fix that from the outside. */
   color-scheme: light;
   --ink: #34263a;
   --paper: #fff6df;

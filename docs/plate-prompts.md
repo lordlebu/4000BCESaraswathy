@@ -54,12 +54,23 @@ were given the identical block for `caravan-dromedary`. They disagreed about alm
 
 | | ChatGPT | Gemini | Grok |
 |---|---|---|---|
-| Size | 1254 × 1254 | 2048 × 2048 | 788 × 1176 |
-| Format | PNG | PNG, 8.4 MB | **JPEG** |
-| Aspect | square ✓ | square ✓ | **3:2 portrait ✗** |
-| Watermark | none ✓ | small sparkle | **"Grok" in words** |
+| Size | 1254 × 1254 | 2048 × 2048 | 788 × 1176 → **1024 × 1024** |
+| Format | PNG ✓ | PNG, 8.4 MB | **JPEG** → **PNG** ✓ |
+| Aspect | square ✓ | square ✓ | **3:2 portrait** → square ✓ |
+| Watermark | none ✓ | small sparkle | **"Grok" in words** → none ✓ |
 | Style | watercolour ✓ | **ink-outlined** | watercolour ✓ |
-| Habitat | dune ridge, hardpan, scrub ✓ | **floats on bare paper** | present ✓ |
+| Habitat | full ✓ | thin → **full ✓** | full ✓ |
+| Border | none ✓ | **painted frame** | none ✓ |
+
+The arrows are the second round, after the notes below were added to the block. **Grok fixed
+everything it was asked to** — square, PNG, 1024, no signature — which is the useful result here:
+these are prompt problems, not tool problems.
+
+Gemini half-fixed. The habitat clause worked and the fox is standing in real desert. The
+anti-outline clause did not fully take, and it found a new way to disobey requirement 2: it painted
+the fox inside a **cream frame**, a flat margin about 5% of the picture on all four sides. The
+build now detects and strips that — a frame is flat on all four edges and one colour, which no
+plate has by accident — so it is no longer worth a re-roll. Ask anyway.
 
 ChatGPT's went in unaltered. The other two each need one sentence added, and neither needs the block
 rewritten.
@@ -75,11 +86,17 @@ behind it. Both are now covered in the shared block, but say it twice for this o
 > one wash of pigment meets another. The animal is standing in a real place — put the ground under
 > its feet and a few strokes of its habitat behind it, not blank paper.
 
+Add the frame clause too, since it did this even though the shared block already forbids it:
+
+> No border, no frame, no painted edge, no margin of blank paper around the picture. The painting
+> runs right to all four edges of the image.
+
 Also expect a small sparkle mark in a bottom corner and roughly 8 MB of RGBA. Neither matters — the
 build step flattens the alpha, and the mark is a handful of pixels at the size this is displayed.
 
-**Grok — pin the format down before anything else.** It is the only one that ignored *square* and
-*PNG*, and the only one that signs its work in readable letters:
+**Grok — pin the format down before anything else, and then it is fine.** It was the only one that
+ignored *square* and *PNG* and the only one that signed its work in readable letters. Told plainly,
+it complied on every count, so this is worth pasting rather than working around:
 
 > The image must be square, 1:1 aspect ratio, at least 1024 × 1024. Save as PNG, not JPEG. Leave the
 > bottom edge clear — no signature, no watermark, no tool name in the corner.
@@ -93,17 +110,19 @@ the fix is upstream and free. Re-export and drop it in again.
 
 ## Fauna — the first twenty
 
+✅ = painted and in the game. **9 of 20.** Next up is `scythian-wild-ass` (#10).
+
 | # | File name | Subject line |
 |---|---|---|
-| 1 | `plate-caravan-dromedary.png` | A single-humped desert camel of the northern trade routes, chewing sideways, regarding the viewer with the patience of an animal that has walked further than you have. Dry hardpan and a low dune behind. |
-| 2 | `plate-desert-fox.png` | A small fox with enormous ears, sitting alert on a low dune at dusk, watching a road out of frame. Sandy ochres, long shadows. |
-| 3 | `plate-hill-macaque.png` | A macaque sitting on a stone wall at a village edge, caught mid-glance, looking studiedly innocent. Hill scrub and a hint of thatch behind. |
-| 4 | `plate-honey-guide-bird.png` | A small brown bird perched on a thin branch, beak open mid-call, head turned back as if waiting to be followed. Dappled forest edge. |
-| 5 | `plate-cliff-swift.png` | A swift in flight, wings swept into a long scythe shape, banking above plateau grass. Pale sky, a suggestion of cliff below. |
-| 6 | `plate-plateau-wolf.png` | A lean highland wolf at a steady trot across open ground, seen side-on, not hunting — following a line. Dry upland grass, distant hills. |
-| 7 | `plate-delta-monitor.png` | A long-bodied monitor lizard nosing along the ground beside wooden fish-drying racks, unhurried and entirely unbothered. Mangrove fringe. |
-| 8 | `plate-mangrove-crab.png` | A heavy crab picking between arching mangrove roots, one claw raised high like a man carrying something awkward. Brackish mud and water. |
-| 9 | `plate-painted-deer.png` | A small deer standing in tall grass, watching the viewer, its coat patterned with pale markings like fallen petals. Warm meadow light. |
+| 1 ✅ | `plate-caravan-dromedary.png` | A single-humped desert camel of the northern trade routes, chewing sideways, regarding the viewer with the patience of an animal that has walked further than you have. Dry hardpan and a low dune behind. |
+| 2 ✅ | `plate-desert-fox.png` | A small fox with enormous ears, sitting alert on a low dune at dusk, watching a road out of frame. Sandy ochres, long shadows. |
+| 3 ✅ | `plate-hill-macaque.png` | A macaque sitting on a stone wall at a village edge, caught mid-glance, looking studiedly innocent. Hill scrub and a hint of thatch behind. |
+| 4 ✅ | `plate-honey-guide-bird.png` | A small brown bird perched on a thin branch, beak open mid-call, head turned back as if waiting to be followed. Dappled forest edge. |
+| 5 ✅ | `plate-cliff-swift.png` | A swift in flight, wings swept into a long scythe shape, banking above plateau grass. Pale sky, a suggestion of cliff below. |
+| 6 ✅ | `plate-plateau-wolf.png` | A lean highland wolf at a steady trot across open ground, seen side-on, not hunting — following a line. Dry upland grass, distant hills. |
+| 7 ✅ | `plate-delta-monitor.png` | A long-bodied monitor lizard nosing along the ground beside wooden fish-drying racks, unhurried and entirely unbothered. Mangrove fringe. |
+| 8 ✅ | `plate-mangrove-crab.png` | A heavy crab picking between arching mangrove roots, one claw raised high like a man carrying something awkward. Brackish mud and water. |
+| 9 ✅ | `plate-painted-deer.png` | A small deer standing in tall grass, watching the viewer, its coat patterned with pale markings like fallen petals. Warm meadow light. |
 | 10 | `plate-scythian-wild-ass.png` | A wiry wild ass of the northern steppe, standing side-on, built for stamina rather than speed. Dry open plain, big sky. |
 | 11 | `plate-saltwater-gator-turtle.png` | An ancient armoured turtle with a heavily ridged shell like crocodile hide, half-submerged in a brackish delta canal. |
 | 12 | `plate-monsoon-crane.png` | A tall white crane stepping carefully between reeds, head lowered as if reading the water. Grey rain-light. |
