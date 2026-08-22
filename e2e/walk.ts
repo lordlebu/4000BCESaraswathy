@@ -10,6 +10,9 @@
 
 import { expect, type Page } from '@playwright/test';
 
+/** How long to wait for a step to land before assuming it went nowhere. */
+const ARRIVAL_TIMEOUT = 4_000;
+
 /** Take one step, and return when the traveller has actually arrived somewhere new. */
 export async function step(page: Page, key: string): Promise<void> {
   const before = await readJournal(page, 'before the step');
@@ -28,12 +31,26 @@ export async function step(page: Page, key: string): Promise<void> {
   // through `page.keyboard`; this helper was the one place that did not.
   await page.keyboard.press(key);
 
-  // A step onto identical ground reads the same, so this cannot demand a change forever —
-  // but it can wait far longer than a tween before giving up, which is the useful part.
-  for (let i = 0; i < 40; i += 1) {
-    await page.waitForTimeout(100);
-    if ((await readJournal(page, `after pressing ${key}`)) !== before) return;
-  }
+  // Poll **inside the browser**, not across the wire.
+  //
+  // This was a loop of `waitForTimeout(100)` then `textContent()`, and the round-trip was not
+  // free: a step that finished in 1100ms was detected after 7 polls, so each iteration cost about
+  // 157ms rather than the 100 intended. A third of the wait was Playwright talking to Chromium,
+  // paid fifteen times a spec, on the slowest job in CI.
+  //
+  // `waitForFunction` ships the comparison to the page and polls there, so arrival is noticed
+  // within the polling interval instead of an interval plus a round-trip.
+  //
+  // The timeout is not a failure. A step onto identical ground genuinely reads the same, so this
+  // can never demand a change -- it can only wait longer than any tween before giving up, which is
+  // the useful part.
+  await page
+    .waitForFunction(
+      (previous) => (document.querySelector('.journal')?.textContent ?? '') !== previous,
+      before,
+      { timeout: ARRIVAL_TIMEOUT, polling: 50 }
+    )
+    .catch(() => undefined);
 }
 
 /**
@@ -57,17 +74,35 @@ async function readJournal(page: Page, when: string): Promise<string> {
   try {
     await journal.first().waitFor({ state: 'attached', timeout: 5_000 });
   } catch {
-    const surfaces = await page.evaluate(() =>
+    throw new Error(
+      `The field notes are not on the page ${when}. \`.journal\` renders only while the surface ` +
+        `is \`here\`, so something closed or replaced it. Visible instead: ${await surfaces(page)}.`
+    );
+  }
+  return (await journal.first().textContent()) ?? '';
+}
+
+/**
+ * Which surface is on the page, for the message above — and never a thrown error.
+ *
+ * This is a diagnostic, so it must not be able to fail louder than the thing it is diagnosing, and
+ * on its first outing it did exactly that. When the *test* runs out of time, Playwright tears the
+ * context down and then unwinds; a bare `page.evaluate` in that window throws "Target page,
+ * context or browser has been closed", which replaced the real failure in the CI log with a
+ * pointer to this file. The genuine problem — the fatigue walk overrunning ninety seconds — was
+ * invisible underneath it.
+ */
+async function surfaces(page: Page): Promise<string> {
+  try {
+    const found = await page.evaluate(() =>
       ['.journal', '.sheet', '.arrival', '.overworld', '.ending', '.field-kit']
         .filter((sel) => document.querySelector(sel))
         .join(', ')
     );
-    throw new Error(
-      `The field notes are not on the page ${when}. \`.journal\` renders only while the surface ` +
-        `is \`here\`, so something closed or replaced it. Visible instead: ${surfaces || 'nothing'}.`
-    );
+    return found || 'nothing';
+  } catch {
+    return 'could not look — the page was already closed, which usually means the test itself ran out of time';
   }
-  return (await journal.first().textContent()) ?? '';
 }
 
 /** Walk a fixed route and wait for the place panel it should end on. */
