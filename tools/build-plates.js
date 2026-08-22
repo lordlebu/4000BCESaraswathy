@@ -50,6 +50,35 @@ const SIZE = 384;
  */
 const CROP_BOTTOM = 0.1;
 
+/**
+ * How flat a line of pixels has to be, as a standard deviation in 0-255, to read as paper rather
+ * than picture. Measured: a painted margin sits at 2-3, the flattest real sky in these four plates
+ * at 3, and anything pictorial at 12 or above. 6 is the gap.
+ */
+const FLAT_SD = 6;
+
+/**
+ * How closely the four edge colours must agree before a flat margin is called a border.
+ *
+ * This is the whole safeguard, and it is why the check looks at all four edges rather than each on
+ * its own. Flatness alone does not mean margin: the dromedary has 43px of flat pale sky along its
+ * top and the macaque 36px, and cropping either would take the picture. What no plate has by
+ * accident is *four* flat edges that are all the same colour -- that is a frame, and the fox came
+ * back with one despite the brief forbidding it in as many words.
+ *
+ * Measured: the fox's four edges read 248, 247, 246, 247. A spread of 6 accepts that comfortably
+ * and rejects any plate whose sky merely happens to be pale.
+ */
+const BORDER_TOLERANCE = 6;
+
+/**
+ * The most of a side a border may claim, as a fraction.
+ *
+ * A backstop, not a tuning knob. A real frame is a few percent; if this rule ever wants a fifth of
+ * the picture it has misread something, and losing the trim is far cheaper than losing the plate.
+ */
+const MAX_BORDER = 0.15;
+
 /** Files a tool prefixes or suffixes its name onto, stripped when working out the id. */
 const TOOL_NOISE = /^(chatgpt|gemini|grok|dalle|midjourney|firefly)[ _-]*/i;
 
@@ -386,6 +415,62 @@ function encodePng(width, height, rgb) {
 
 // --- shaping --------------------------------------------------------------
 
+/** Mean and standard deviation of one row or column, in greyscale. */
+function lineStats(img, kind, i) {
+  const n = kind === 'row' ? img.width : img.height;
+  let sum = 0;
+  const vals = new Float64Array(n);
+  for (let k = 0; k < n; k += 1) {
+    const p = (kind === 'row' ? i * img.width + k : k * img.width + i) * 3;
+    const v = (img.data[p] + img.data[p + 1] + img.data[p + 2]) / 3;
+    vals[k] = v;
+    sum += v;
+  }
+  const mean = sum / n;
+  let variance = 0;
+  for (let k = 0; k < n; k += 1) variance += (vals[k] - mean) ** 2;
+  return { mean, sd: Math.sqrt(variance / n) };
+}
+
+/** How many pixels inward from one edge stay flat. */
+function flatDepth(img, kind, fromEnd) {
+  const span = kind === 'row' ? img.height : img.width;
+  const limit = Math.floor(span * MAX_BORDER);
+  let depth = 0;
+  for (let k = 0; k < limit; k += 1) {
+    const i = fromEnd ? span - 1 - k : k;
+    if (lineStats(img, kind, i).sd >= FLAT_SD) break;
+    depth = k + 1;
+  }
+  return depth;
+}
+
+/**
+ * How much painted border to strip, or zero -- which is the usual and expected answer.
+ *
+ * Hard requirement 2 in docs/plate-prompts.md is "no border or frame", because the panel draws its
+ * own and a painted one inside it reads as a picture of a picture. Gemini ignored it and returned
+ * the desert fox floating in a cream frame, so the rule needs enforcing here as well as asking.
+ *
+ * The test is deliberately conjunctive: all four edges flat, *and* all four the same colour. Either
+ * half alone would eat a sky. See BORDER_TOLERANCE.
+ */
+function borderInset(img) {
+  const edges = [
+    { ...lineStats(img, 'row', 0), depth: flatDepth(img, 'row', false) },
+    { ...lineStats(img, 'row', img.height - 1), depth: flatDepth(img, 'row', true) },
+    { ...lineStats(img, 'col', 0), depth: flatDepth(img, 'col', false) },
+    { ...lineStats(img, 'col', img.width - 1), depth: flatDepth(img, 'col', true) }
+  ];
+  if (edges.some((e) => e.depth === 0)) return 0;
+
+  const means = edges.map((e) => e.mean);
+  if (Math.max(...means) - Math.min(...means) > BORDER_TOLERANCE) return 0;
+
+  // The shallowest edge, so the crop never cuts into the picture on the tightest side.
+  return Math.min(...edges.map((e) => e.depth));
+}
+
 /**
  * The square to take, biased upward, dropping the bottom edge only when that costs nothing.
  *
@@ -396,18 +481,23 @@ function encodePng(width, height, rgb) {
  *
  * See CROP_BOTTOM for why a square source is returned whole.
  */
-function squareBox(width, height) {
-  const side = Math.min(width, height);
-  const x = Math.round((width - side) / 2);
+function squareBox(width, height, inset = 0) {
+  // Everything below works on the picture inside any painted frame, then shifts back out by the
+  // inset at the end. Doing it this way keeps the squaring rule identical whether a border was
+  // found or not.
+  const innerWidth = width - inset * 2;
+  const innerHeight = height - inset * 2;
+  const side = Math.min(innerWidth, innerHeight);
+  const x = inset + Math.round((innerWidth - side) / 2);
 
   // Vertical slack is whatever squaring already has to discard, and it is the entire budget: spend
   // up to CROP_BOTTOM of it on the bottom edge, then place the square a third of the way down what
   // is left. `Math.min` is the rule, not a guard against a silly number — a square or landscape
   // source has zero slack, so it is returned whole with nothing trimmed, which is the point.
-  const slack = height - side;
-  const trimmed = Math.min(slack, Math.round(height * CROP_BOTTOM));
-  const y = Math.round((slack - trimmed) / 3);
-  return { x, y, side, trimmed };
+  const slack = innerHeight - side;
+  const trimmed = Math.min(slack, Math.round(innerHeight * CROP_BOTTOM));
+  const y = inset + Math.round((slack - trimmed) / 3);
+  return { x, y, side, trimmed, inset };
 }
 
 /** Box-average down to SIZE. A mean is right here: this is a painting, not pixel art. */
@@ -524,10 +614,13 @@ function main() {
       continue;
     }
 
-    const box = squareBox(img.width, img.height);
+    const box = squareBox(img.width, img.height, borderInset(img));
     fs.writeFileSync(dest, encodePng(SIZE, SIZE, resample(img, box)));
     const kb = (fs.statSync(dest).size / 1024).toFixed(0);
-    const trim = box.trimmed ? `, bottom ${box.trimmed}px dropped` : '';
+    const notes = [];
+    if (box.inset) notes.push(`${box.inset}px border stripped`);
+    if (box.trimmed) notes.push(`bottom ${box.trimmed}px dropped`);
+    const trim = notes.length ? `, ${notes.join(', ')}` : '';
     console.log(`  ok ${file}  ${img.width}x${img.height} -> ${SIZE}x${SIZE}${trim}  ${kb} KB  ${rel}`);
     built += 1;
   }
@@ -544,6 +637,6 @@ function main() {
 
 // Exported so test/plateEncoder.test.ts can round-trip the encoder without running the build.
 // Everything else here is I/O; these three are the arithmetic worth guarding.
-module.exports = { encodePng, filterRows, quantise, squareBox, idFor, SIZE, CROP_BOTTOM };
+module.exports = { encodePng, filterRows, quantise, squareBox, borderInset, idFor, SIZE, CROP_BOTTOM };
 
 if (require.main === module) main();

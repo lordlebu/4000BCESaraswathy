@@ -16,7 +16,7 @@ import { createRequire } from 'node:module';
 import zlib from 'node:zlib';
 
 const require = createRequire(import.meta.url);
-const { encodePng, filterRows, squareBox, idFor } = require('../tools/build-plates.js');
+const { encodePng, filterRows, squareBox, borderInset, idFor } = require('../tools/build-plates.js');
 
 /** Decode a PNG using nothing from the encoder. Handles colour type 2 (RGB) and 3 (indexed). */
 function decode(buf: Buffer): { width: number; height: number; colour: number; rgb: Buffer } {
@@ -239,12 +239,12 @@ describe('the crop takes the bottom edge only when that is free', () => {
   // A watermark is a few hundred pixels in a corner. Feet are the picture.
 
   it('leaves a square source completely alone', () => {
-    expect(squareBox(1254, 1254)).toEqual({ x: 0, y: 0, side: 1254, trimmed: 0 });
+    expect(squareBox(1254, 1254)).toEqual({ x: 0, y: 0, side: 1254, trimmed: 0, inset: 0 });
   });
 
   it('leaves a landscape source at full height, cropping only the sides', () => {
     const box = squareBox(1600, 900);
-    expect(box).toEqual({ x: 350, y: 0, side: 900, trimmed: 0 });
+    expect(box).toEqual({ x: 350, y: 0, side: 900, trimmed: 0, inset: 0 });
   });
 
   it('drops the bottom of a portrait, where the signature is and the height is spare', () => {
@@ -290,5 +290,96 @@ describe('the species id is read off the file name, whatever the tool called it'
     ['Grok saltwater gator turtle.png', 'saltwater-gator-turtle']
   ])('%s -> %s', (file, id) => {
     expect(idFor(file)).toBe(id);
+  });
+});
+
+/** A flat field, optionally with a pictorial region painted into it. */
+function field(size: number, tone: number[]): { width: number; height: number; data: Buffer } {
+  const data = Buffer.alloc(size * size * 3);
+  for (let i = 0; i < size * size; i += 1) {
+    for (let c = 0; c < 3; c += 1) data[i * 3 + c] = tone[c];
+  }
+  return { width: size, height: size, data };
+}
+
+/** Scribble noise into a rectangle, so it reads as picture rather than paper. */
+function paint(
+  img: { width: number; height: number; data: Buffer },
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number
+): void {
+  let seed = 7;
+  for (let y = y0; y < y1; y += 1) {
+    for (let x = x0; x < x1; x += 1) {
+      const p = (y * img.width + x) * 3;
+      for (let c = 0; c < 3; c += 1) {
+        seed = (seed * 1664525 + 1013904223) >>> 0;
+        img.data[p + c] = 60 + (seed % 160);
+      }
+    }
+  }
+}
+
+describe('a painted border is stripped, and a pale sky is not', () => {
+  // Hard requirement 2 of docs/plate-prompts.md is "no border or frame" — the panel draws its own,
+  // and a painted one inside it reads as a picture of a picture. Gemini ignored it and returned
+  // the desert fox in a cream frame, so the build enforces what the prompt only asks for.
+  //
+  // The danger in enforcing it is obvious the moment you look at the other three plates: the
+  // dromedary has 43px of flat pale sky along its top edge and the macaque 36px. A rule that
+  // trimmed flat edges would cut the sky off both. What separates them is that a frame is flat on
+  // *all four* edges and the same colour on each, which no plate here has by accident.
+
+  it('strips a frame that surrounds the picture', () => {
+    const img = field(200, [247, 244, 236]);
+    paint(img, 30, 30, 170, 170);
+    // Detected depth is the shallowest edge, and never more than the margin actually present.
+    expect(borderInset(img)).toBeGreaterThan(0);
+    expect(borderInset(img)).toBeLessThanOrEqual(30);
+  });
+
+  it('leaves a flat sky alone, which is the whole reason for the four-edge rule', () => {
+    // The dromedary and macaque shape: flat across the top, picture everywhere else.
+    const img = field(200, [223, 221, 210]);
+    paint(img, 0, 60, 200, 200);
+    expect(borderInset(img)).toBe(0);
+  });
+
+  it('ignores four flat edges that are not the same colour', () => {
+    // Flatness alone is not a frame. Four different flat edges is some other kind of picture, and
+    // guessing at it would be how this rule eventually eats something it should not.
+    const img = field(200, [240, 240, 240]);
+    paint(img, 40, 40, 160, 160);
+    for (let y = 0; y < 20; y += 1) {
+      for (let x = 0; x < 200; x += 1) {
+        const p = (y * 200 + x) * 3;
+        img.data[p] = 120;
+        img.data[p + 1] = 120;
+        img.data[p + 2] = 120;
+      }
+    }
+    expect(borderInset(img)).toBe(0);
+  });
+
+  it('finds nothing in a picture that reaches every edge', () => {
+    const img = field(200, [200, 190, 170]);
+    paint(img, 0, 0, 200, 200);
+    expect(borderInset(img)).toBe(0);
+  });
+
+  it('never claims more than MAX_BORDER of the picture', () => {
+    // A blank image is flat all the way through, and without the cap the rule would happily crop
+    // it to nothing. Losing the trim is always cheaper than losing the plate.
+    const img = field(200, [245, 242, 235]);
+    expect(borderInset(img)).toBeLessThanOrEqual(Math.floor(200 * 0.15));
+  });
+
+  it('shifts the square out by the inset it was given', () => {
+    // A 1000px source with a 100px frame leaves an 800px picture, taken whole and offset by 100.
+    expect(squareBox(1000, 1000, 100)).toEqual({ x: 100, y: 100, side: 800, trimmed: 0, inset: 100 });
+    // And with no inset, nothing changes from the unframed case.
+    expect(squareBox(1000, 1000, 0)).toEqual({ x: 0, y: 0, side: 1000, trimmed: 0, inset: 0 });
   });
 });
