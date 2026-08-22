@@ -39,5 +39,12 @@ yarn-debug.log*
 # it -- tools/build-terrain.js reads assets/source/ only. See docs/art-brief.md.
 assets/source/dump/
 
+# Raw plates as the image models returned them: 1254-2048px and 2.6-8.4 MB each. The tracked art in
+# assets/source/ runs to 3 MB a file, so one of these would be in keeping -- but the queue in
+# docs/plate-prompts.md is fifty-six long, and 145 MB of inputs nothing ships is too much weight for
+# a browser game. tools/build-plates.js writes the ~100 KB version that does ship, and that is
+# committed. Keep the raws; re-running the build at a different size needs them.
+assets/source/plates/
+
 # Local performance baseline: describes a machine, not the code.
 .perf-baseline.json

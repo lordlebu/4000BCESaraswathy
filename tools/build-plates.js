@@ -1,0 +1,549 @@
+// Turn whatever an image model hands back into a plate the game can use.
+//
+// Three tools are generating these in parallel and they disagree about almost everything: ChatGPT
+// returns a 1254px square PNG, Gemini a 2048px square PNG weighing 8 MB, Grok a 788x1176 **portrait
+// JPEG** with its own name painted in the corner. Asking a person to reconcile that by hand, forty
+// times, is how a queue stops being worked.
+//
+// So the rule is: **drop the file in `assets/source/plates/` under any name and run this.** It
+// derives the id, squares the image, crops the corner a watermark sits in, resizes, and writes
+// `src/ui/plates/<engine-id>.png`.
+//
+//   node tools/build-plates.js            # build everything not already built
+//   node tools/build-plates.js --force    # rebuild all of them
+//   node tools/build-plates.js --list     # what it would do, without doing it
+//
+// CommonJS, like everything in tools/ -- see tools/package.json.
+
+const fs = require('fs');
+const path = require('path');
+const zlib = require('zlib');
+
+const ROOT = path.resolve(__dirname, '..');
+const RAW = path.join(ROOT, 'assets', 'source', 'plates');
+const OUT = path.join(ROOT, 'src', 'ui', 'plates');
+
+/**
+ * What a plate is displayed at, doubled for a high-density screen, rounded up.
+ *
+ * The panel floats it at 7.5em against roughly 16px text, so about 120 CSS pixels, and 384 covers
+ * a 2x display with room over. The sources are 1254-2048px and 2.6-8.4 MB; the whole point of this
+ * step is that fifty-six plates should be a sensible download rather than a third of a gigabyte.
+ */
+const SIZE = 384;
+
+/**
+ * The most of the bottom edge the squaring step is allowed to throw away, as a fraction.
+ *
+ * Two of the three tools sign their work in a bottom corner -- Grok in words, Gemini with a small
+ * sparkle -- so discarding that strip is worth doing **when it is free**, which is exactly when the
+ * source is taller than it is wide. Squaring a portrait has to drop that height regardless, so
+ * dropping it off the bottom removes the signature at no cost.
+ *
+ * It is emphatically not worth doing otherwise, and the first version of this file learned that the
+ * expensive way. Cropping a tenth off an already-square image forces a twentieth off each side to
+ * stay square, and on the first real plate that took the camel's feet clean off. A watermark is a
+ * few hundred pixels in a corner; feet are the picture.
+ *
+ * So a square or landscape source is left alone, and a tool that signs a square image gets fixed by
+ * asking it not to -- see the per-tool notes in docs/plate-prompts.md.
+ */
+const CROP_BOTTOM = 0.1;
+
+/** Files a tool prefixes or suffixes its name onto, stripped when working out the id. */
+const TOOL_NOISE = /^(chatgpt|gemini|grok|dalle|midjourney|firefly)[ _-]*/i;
+
+// --- PNG ------------------------------------------------------------------
+
+function decodePng(buf) {
+  if (buf.readUInt32BE(1) !== 0x504e470d) return null;
+  const width = buf.readUInt32BE(16);
+  const height = buf.readUInt32BE(20);
+  const depth = buf[24];
+  const colour = buf[25];
+  if (depth !== 8 || (colour !== 6 && colour !== 2)) return { unsupported: `depth ${depth}, colour type ${colour}` };
+  const channels = colour === 6 ? 4 : 3;
+
+  const chunks = [];
+  let off = 8;
+  while (off < buf.length) {
+    const len = buf.readUInt32BE(off);
+    if (buf.toString('ascii', off + 4, off + 8) === 'IDAT') chunks.push(buf.subarray(off + 8, off + 8 + len));
+    off += 12 + len;
+  }
+  const raw = zlib.inflateSync(Buffer.concat(chunks));
+  const stride = width * channels;
+  const rows = Buffer.alloc(height * stride);
+  let pos = 0;
+  for (let y = 0; y < height; y += 1) {
+    const filter = raw[pos];
+    pos += 1;
+    for (let x = 0; x < stride; x += 1) {
+      const left = x >= channels ? rows[y * stride + x - channels] : 0;
+      const up = y > 0 ? rows[(y - 1) * stride + x] : 0;
+      const upLeft = x >= channels && y > 0 ? rows[(y - 1) * stride + x - channels] : 0;
+      let v = raw[pos + x];
+      if (filter === 1) v += left;
+      else if (filter === 2) v += up;
+      else if (filter === 3) v += (left + up) >> 1;
+      else if (filter === 4) {
+        const p = left + up - upLeft;
+        const pa = Math.abs(p - left);
+        const pb = Math.abs(p - up);
+        const pc = Math.abs(p - upLeft);
+        v += pa <= pb && pa <= pc ? left : pb <= pc ? up : upLeft;
+      }
+      rows[y * stride + x] = v & 0xff;
+    }
+    pos += stride;
+  }
+
+  // Flatten to opaque RGB. A plate is a small scene, not a cut-out, so alpha is meaningless here --
+  // and Gemini returns RGBA with a fully opaque cream field anyway.
+  const data = Buffer.alloc(width * height * 3);
+  for (let i = 0; i < width * height; i += 1) {
+    data[i * 3] = rows[i * channels];
+    data[i * 3 + 1] = rows[i * channels + 1];
+    data[i * 3 + 2] = rows[i * channels + 2];
+  }
+  return { width, height, data };
+}
+
+let CRC_TABLE = null;
+function crc(buf) {
+  if (!CRC_TABLE) {
+    CRC_TABLE = new Int32Array(256);
+    for (let n = 0; n < 256; n += 1) {
+      let c = n;
+      for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      CRC_TABLE[n] = c;
+    }
+  }
+  let c = -1;
+  for (let i = 0; i < buf.length; i += 1) c = CRC_TABLE[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
+  return c ^ -1;
+}
+
+/**
+ * Encode with a filter chosen per row, which on a painting is the difference between a usable file
+ * and an unusable one.
+ *
+ * The other writers in `tools/` emit filter 0 -- None -- on every row, and that is fine for them:
+ * they write flat pixel art where whole runs of a row are one colour and deflate eats it. A
+ * watercolour has no runs, so unfiltered it compressed to 595 KB for a single 512px plate. Fifty-six
+ * of those is thirty-three megabytes of download for the decorative half of a side panel.
+ *
+ * The standard heuristic picks, for each row, whichever of the five filters gives the smallest sum
+ * of absolute byte values -- the one most likely to leave deflate a low-entropy row.
+ */
+function filterRows(width, height, rgb, bpp) {
+  const stride = width * bpp;
+  const out = Buffer.alloc((stride + 1) * height);
+  const candidate = Buffer.alloc(stride);
+  let prev = Buffer.alloc(stride);
+
+  for (let y = 0; y < height; y += 1) {
+    const row = rgb.subarray(y * stride, (y + 1) * stride);
+    let bestType = 0;
+    let bestScore = Infinity;
+    let best = null;
+
+    for (let type = 0; type < 5; type += 1) {
+      let score = 0;
+      for (let x = 0; x < stride; x += 1) {
+        const a = x >= bpp ? row[x - bpp] : 0;
+        const b = prev[x];
+        const c = x >= bpp ? prev[x - bpp] : 0;
+        let v;
+        if (type === 0) v = row[x];
+        else if (type === 1) v = row[x] - a;
+        else if (type === 2) v = row[x] - b;
+        else if (type === 3) v = row[x] - ((a + b) >> 1);
+        else {
+          const p = a + b - c;
+          const pa = Math.abs(p - a);
+          const pb = Math.abs(p - b);
+          const pc = Math.abs(p - c);
+          v = row[x] - (pa <= pb && pa <= pc ? a : pb <= pc ? b : c);
+        }
+        candidate[x] = v & 0xff;
+        // Signed magnitude: a byte near 0 or near 255 is a small delta either way.
+        score += candidate[x] < 128 ? candidate[x] : 256 - candidate[x];
+      }
+      if (score < bestScore) {
+        bestScore = score;
+        bestType = type;
+        best = Buffer.from(candidate);
+      }
+    }
+
+    out[y * (stride + 1)] = bestType;
+    best.copy(out, y * (stride + 1) + 1);
+    prev = row;
+  }
+  return out;
+}
+
+// --- colour ---------------------------------------------------------------
+
+/** How many colours an indexed plate gets. 256 is the most an 8-bit PNG can index. */
+const PALETTE = 256;
+
+/**
+ * Reduce to a 256-colour palette by median cut, then dither.
+ *
+ * Truecolour was costing 250 KB a plate, which is fifty-six plates at fourteen megabytes for the
+ * decorative half of a side panel. The saving is structural rather than clever: an indexed pixel is
+ * one byte instead of three before deflate even starts.
+ *
+ * It is also the right *kind* of loss for this art. The style block asks for muted, low-saturation
+ * pigment, so a plate genuinely occupies a small corner of the colour cube, and 256 wells chosen
+ * from where its pixels actually are will land close to all of them. What indexing ruins is a wide
+ * smooth gradient, and Floyd-Steinberg is here for that case -- it trades a visible band for noise,
+ * which at 120 displayed pixels is invisible.
+ *
+ * The caller keeps whichever encoding came out smaller, so a plate this suits badly stays
+ * truecolour and costs nothing but the attempt.
+ */
+function quantise(rgb, width, height) {
+  // Bucket to 5 bits a channel first. Median cut over 147k individual pixels is slow and pointless;
+  // over the few thousand distinct colours that survive a 32-level bucket it is instant, and the
+  // dither still maps against the full-precision original.
+  const counts = new Map();
+  for (let i = 0; i < width * height; i += 1) {
+    const key = ((rgb[i * 3] >> 3) << 10) | ((rgb[i * 3 + 1] >> 3) << 5) | (rgb[i * 3 + 2] >> 3);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  const colours = [];
+  for (const [key, n] of counts) {
+    colours.push([((key >> 10) & 31) * 8 + 4, ((key >> 5) & 31) * 8 + 4, (key & 31) * 8 + 4, n]);
+  }
+
+  const boxes = [colours];
+  while (boxes.length < PALETTE) {
+    // Split whichever box is worst -- widest spread, weighted by how many pixels sit in it. Going
+    // on width alone spends the palette on a handful of outlying speckles.
+    let pick = -1;
+    let worst = 0;
+    for (let i = 0; i < boxes.length; i += 1) {
+      if (boxes[i].length < 2) continue;
+      const score = spread(boxes[i]).range * Math.log2(1 + weight(boxes[i]));
+      if (score > worst) {
+        worst = score;
+        pick = i;
+      }
+    }
+    if (pick < 0) break;
+
+    const axis = spread(boxes[pick]).axis;
+    const sorted = boxes[pick].slice().sort((a, b) => a[axis] - b[axis]);
+    const half = weight(sorted) / 2;
+    let acc = 0;
+    let cut = 1;
+    for (let i = 0; i < sorted.length - 1; i += 1) {
+      acc += sorted[i][3];
+      if (acc >= half) {
+        cut = i + 1;
+        break;
+      }
+    }
+    boxes.splice(pick, 1, sorted.slice(0, cut), sorted.slice(cut));
+  }
+
+  const palette = boxes.map((box) => {
+    let r = 0;
+    let g = 0;
+    let b = 0;
+    let n = 0;
+    for (const c of box) {
+      r += c[0] * c[3];
+      g += c[1] * c[3];
+      b += c[2] * c[3];
+      n += c[3];
+    }
+    return [Math.round(r / n), Math.round(g / n), Math.round(b / n)];
+  });
+
+  // Floyd-Steinberg, serpentine. Alternating the direction stops the error dragging one way and
+  // leaving a diagonal grain across the paper.
+  const work = Float32Array.from(rgb);
+  const indices = Buffer.alloc(width * height);
+  for (let y = 0; y < height; y += 1) {
+    const leftToRight = y % 2 === 0;
+    for (let k = 0; k < width; k += 1) {
+      const x = leftToRight ? k : width - 1 - k;
+      const p = (y * width + x) * 3;
+      const best = nearest(palette, work[p], work[p + 1], work[p + 2]);
+      indices[y * width + x] = best;
+      const err = [
+        work[p] - palette[best][0],
+        work[p + 1] - palette[best][1],
+        work[p + 2] - palette[best][2]
+      ];
+      const ahead = leftToRight ? 1 : -1;
+      spill(work, width, height, x + ahead, y, err, 7 / 16);
+      spill(work, width, height, x - ahead, y + 1, err, 3 / 16);
+      spill(work, width, height, x, y + 1, err, 5 / 16);
+      spill(work, width, height, x + ahead, y + 1, err, 1 / 16);
+    }
+  }
+  return { palette, indices };
+}
+
+function weight(box) {
+  let n = 0;
+  for (const c of box) n += c[3];
+  return n;
+}
+
+function spread(box) {
+  let axis = 0;
+  let range = 0;
+  for (let a = 0; a < 3; a += 1) {
+    let lo = 255;
+    let hi = 0;
+    for (const c of box) {
+      if (c[a] < lo) lo = c[a];
+      if (c[a] > hi) hi = c[a];
+    }
+    // Weight green the way the eye does, so a green box splits before an equally wide blue one.
+    const r = (hi - lo) * (a === 0 ? 1.0 : a === 1 ? 1.4 : 0.6);
+    if (r > range) {
+      range = r;
+      axis = a;
+    }
+  }
+  return { axis, range };
+}
+
+function nearest(palette, r, g, b) {
+  let best = 0;
+  let bestD = Infinity;
+  for (let i = 0; i < palette.length; i += 1) {
+    const dr = r - palette[i][0];
+    const dg = g - palette[i][1];
+    const db = b - palette[i][2];
+    const d = dr * dr * 2 + dg * dg * 4 + db * db;
+    if (d < bestD) {
+      bestD = d;
+      best = i;
+    }
+  }
+  return best;
+}
+
+function spill(work, width, height, x, y, err, f) {
+  if (x < 0 || x >= width || y < 0 || y >= height) return;
+  const p = (y * width + x) * 3;
+  work[p] += err[0] * f;
+  work[p + 1] += err[1] * f;
+  work[p + 2] += err[2] * f;
+}
+
+function png(width, height, bitDepth, colourType, raw, plte) {
+  const chunk = (type, body) => {
+    const out = Buffer.alloc(body.length + 12);
+    out.writeUInt32BE(body.length, 0);
+    out.write(type, 4, 'ascii');
+    body.copy(out, 8);
+    out.writeInt32BE(crc(Buffer.concat([Buffer.from(type, 'ascii'), body])), body.length + 8);
+    return out;
+  };
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = bitDepth;
+  ihdr[9] = colourType;
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk('IHDR', ihdr),
+    ...(plte ? [chunk('PLTE', plte)] : []),
+    chunk('IDAT', zlib.deflateSync(raw, { level: 9 })),
+    chunk('IEND', Buffer.alloc(0))
+  ]);
+}
+
+/**
+ * Encode both ways and keep the smaller file.
+ *
+ * Which one wins is a property of the picture rather than of the pipeline, so there is nothing to
+ * decide here and no flag to get wrong. Indexed usually wins by a wide margin on this art.
+ */
+function encodePng(width, height, rgb) {
+  const direct = png(width, height, 8, 2, filterRows(width, height, rgb, 3));
+
+  const { palette, indices } = quantise(rgb, width, height);
+  const plte = Buffer.alloc(palette.length * 3);
+  palette.forEach((c, i) => {
+    plte[i * 3] = c[0];
+    plte[i * 3 + 1] = c[1];
+    plte[i * 3 + 2] = c[2];
+  });
+  const paletted = png(width, height, 8, 3, filterRows(width, height, indices, 1), plte);
+
+  return paletted.length < direct.length ? paletted : direct;
+}
+
+// --- shaping --------------------------------------------------------------
+
+/**
+ * The square to take, biased upward, dropping the bottom edge only when that costs nothing.
+ *
+ * The bias is not centring. The brief asks for the animal filling the frame with habitat below it,
+ * so in a portrait the subject sits above the middle and a centred crop takes its head off. Coming
+ * a third of the way down keeps the head and drops ground, which is the right trade at 120
+ * displayed pixels.
+ *
+ * See CROP_BOTTOM for why a square source is returned whole.
+ */
+function squareBox(width, height) {
+  const side = Math.min(width, height);
+  const x = Math.round((width - side) / 2);
+
+  // Vertical slack is whatever squaring already has to discard, and it is the entire budget: spend
+  // up to CROP_BOTTOM of it on the bottom edge, then place the square a third of the way down what
+  // is left. `Math.min` is the rule, not a guard against a silly number — a square or landscape
+  // source has zero slack, so it is returned whole with nothing trimmed, which is the point.
+  const slack = height - side;
+  const trimmed = Math.min(slack, Math.round(height * CROP_BOTTOM));
+  const y = Math.round((slack - trimmed) / 3);
+  return { x, y, side, trimmed };
+}
+
+/** Box-average down to SIZE. A mean is right here: this is a painting, not pixel art. */
+function resample(src, box) {
+  const out = Buffer.alloc(SIZE * SIZE * 3);
+  const step = box.side / SIZE;
+  for (let y = 0; y < SIZE; y += 1) {
+    for (let x = 0; x < SIZE; x += 1) {
+      const sx0 = box.x + Math.floor(x * step);
+      const sy0 = box.y + Math.floor(y * step);
+      const sx1 = box.x + Math.max(Math.floor((x + 1) * step), Math.floor(x * step) + 1);
+      const sy1 = box.y + Math.max(Math.floor((y + 1) * step), Math.floor(y * step) + 1);
+      let r = 0;
+      let g = 0;
+      let b = 0;
+      let n = 0;
+      for (let sy = sy0; sy < sy1; sy += 1) {
+        for (let sx = sx0; sx < sx1; sx += 1) {
+          const p = (sy * src.width + sx) * 3;
+          r += src.data[p];
+          g += src.data[p + 1];
+          b += src.data[p + 2];
+          n += 1;
+        }
+      }
+      const d = (y * SIZE + x) * 3;
+      out[d] = Math.round(r / n);
+      out[d + 1] = Math.round(g / n);
+      out[d + 2] = Math.round(b / n);
+    }
+  }
+  return out;
+}
+
+/** `Gemini_plate-caravan-dromedary.png` -> `caravan-dromedary`. */
+function idFor(file) {
+  return path
+    .basename(file, path.extname(file))
+    .replace(TOOL_NOISE, '')
+    .replace(/^plate[ _-]*/i, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[_\s]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
+}
+
+function main() {
+  if (!fs.existsSync(RAW)) {
+    console.log(`Nothing to do: ${path.relative(ROOT, RAW)} does not exist.`);
+    console.log('Drop generated plates there under any name and run this again.');
+    return;
+  }
+  fs.mkdirSync(OUT, { recursive: true });
+
+  const force = process.argv.includes('--force');
+  const listOnly = process.argv.includes('--list');
+  const files = fs.readdirSync(RAW).filter((f) => /\.(png|jpe?g|webp)$/i.test(f));
+  if (files.length === 0) {
+    console.log(`No images in ${path.relative(ROOT, RAW)}.`);
+    return;
+  }
+
+  // Work out every id first, so a clash is reported before anything is written rather than being
+  // resolved by whichever file happened to sort last. Three tools are generating the same subject
+  // in parallel, so this is the normal case and not an edge one: without the check, running the
+  // build silently replaced the plate that had been chosen with whichever name sorted lower.
+  const claims = new Map();
+  for (const file of files.sort()) {
+    const id = idFor(file);
+    if (!id) continue;
+    if (!claims.has(id)) claims.set(id, []);
+    claims.get(id).push(file);
+  }
+  const contested = new Set();
+  for (const [id, sources] of claims) {
+    if (sources.length < 2) continue;
+    contested.add(id);
+    console.log(`  !  ${id}: ${sources.length} sources claim this plate --`);
+    for (const f of sources) console.log(`       ${f}`);
+    console.log('       Keep the one you want and move the rest to assets/source/dump/.');
+  }
+
+  let built = 0;
+  let skipped = 0;
+  for (const file of files.sort()) {
+    const id = idFor(file);
+    if (contested.has(id)) continue;
+    const dest = path.join(OUT, `${id}.png`);
+    const rel = path.relative(ROOT, dest);
+
+    if (!id) {
+      console.log(`  ?  ${file} -> could not work out an id from that name`);
+      continue;
+    }
+    if (listOnly) {
+      console.log(`  .  ${file} -> ${rel}`);
+      continue;
+    }
+    if (fs.existsSync(dest) && !force) {
+      skipped += 1;
+      continue;
+    }
+
+    const buf = fs.readFileSync(path.join(RAW, file));
+    const img = decodePng(buf);
+    if (!img) {
+      // JPEG and WebP need a decoder this project does not have, and will not be adding one:
+      // dependencies here must justify themselves, and the fix is upstream and free.
+      console.log(`  !  ${file} -> not a PNG. Re-export it as PNG; see docs/plate-prompts.md.`);
+      continue;
+    }
+    if (img.unsupported) {
+      console.log(`  !  ${file} -> unsupported PNG (${img.unsupported}). Re-save as 8-bit RGB or RGBA.`);
+      continue;
+    }
+
+    const box = squareBox(img.width, img.height);
+    fs.writeFileSync(dest, encodePng(SIZE, SIZE, resample(img, box)));
+    const kb = (fs.statSync(dest).size / 1024).toFixed(0);
+    const trim = box.trimmed ? `, bottom ${box.trimmed}px dropped` : '';
+    console.log(`  ok ${file}  ${img.width}x${img.height} -> ${SIZE}x${SIZE}${trim}  ${kb} KB  ${rel}`);
+    built += 1;
+  }
+
+  if (!listOnly) {
+    console.log('');
+    const parts = [`${built} built`];
+    if (skipped) parts.push(`${skipped} already there (--force to redo them)`);
+    if (contested.size) parts.push(`${contested.size} skipped over a name clash`);
+    console.log(`${parts.join(', ')}.`);
+    if (contested.size) process.exitCode = 1;
+  }
+}
+
+// Exported so test/plateEncoder.test.ts can round-trip the encoder without running the build.
+// Everything else here is I/O; these three are the arithmetic worth guarding.
+module.exports = { encodePng, filterRows, quantise, squareBox, idFor, SIZE, CROP_BOTTOM };
+
+if (require.main === module) main();

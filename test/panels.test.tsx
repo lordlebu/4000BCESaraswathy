@@ -38,6 +38,19 @@ import {
 } from '../src/journey';
 import { discoveries, vocabulary } from '../src/content/knowledge';
 
+// The plate loader, mocked -- and mocked at the top of the file because that is where vitest runs
+// it. Written inside the `describe` it belongs to, it still hoisted above every import and merely
+// read as though it were scoped, which vitest now warns about and will later reject.
+//
+// Mocked rather than fed a fixture because what needs testing is that the panel prefers a plate to
+// a silhouette, not that Vite can glob a directory. Naming a species that has no committed plate
+// keeps it that way: the real folder now holds one, and a test that mocked nothing would start
+// passing or failing on which art happens to have been painted.
+vi.mock('../src/ui/plates', () => ({
+  plateFor: (id: string) => (id === 'scythian-wild-ass' ? '/plates/scythian-wild-ass.png' : null),
+  plateCount: () => 1
+}));
+
 const MOMENTS = ['dawn', 'morning', 'afternoon', 'evening', 'night'].flatMap((timeOfDay) =>
   ['clear', 'rain', 'mist', 'storm'].map((weather) => ({ timeOfDay, weather }))
 );
@@ -734,15 +747,6 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
   // the trap and it is why this test exists: canon calls it `fauna_scythian_wild_ass`, the adapter
   // rewrites it to `scythian-wild-ass`, and a plate filed under the canon id matches nothing and
   // fails silently. It did, first time.
-  // The plate folder is empty in a clean checkout -- real art arrives one file at a time and there
-  // is no fixture worth committing, since anything dropped in there renders in the actual game.
-  // So the loader is mocked rather than fed a fake PNG: what needs testing is that the panel picks
-  // the plate over the silhouette when one exists, not that Vite can glob a directory.
-  vi.mock('../src/ui/plates', () => ({
-    plateFor: (id: string) => (id === 'scythian-wild-ass' ? '/plates/scythian-wild-ass.png' : null),
-    plateCount: () => 1
-  }));
-
   const notes = (species: { id: string; name: string }) => ({
     entry: {
       title: 'Plains at 35, 19',

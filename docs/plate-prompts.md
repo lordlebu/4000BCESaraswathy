@@ -46,6 +46,51 @@ opaque and needs no alpha channel.
 
 ---
 
+## Curating the block per tool
+
+Three tools generating in parallel — one takes the second subject, the next takes the third — is the
+right way to work this queue, and it is worth thirty seconds to know how each one fails. All three
+were given the identical block for `caravan-dromedary`. They disagreed about almost everything:
+
+| | ChatGPT | Gemini | Grok |
+|---|---|---|---|
+| Size | 1254 × 1254 | 2048 × 2048 | 788 × 1176 |
+| Format | PNG | PNG, 8.4 MB | **JPEG** |
+| Aspect | square ✓ | square ✓ | **3:2 portrait ✗** |
+| Watermark | none ✓ | small sparkle | **"Grok" in words** |
+| Style | watercolour ✓ | **ink-outlined** | watercolour ✓ |
+| Habitat | dune ridge, hardpan, scrub ✓ | **floats on bare paper** | present ✓ |
+
+ChatGPT's went in unaltered. The other two each need one sentence added, and neither needs the block
+rewritten.
+
+**ChatGPT — use the block as written.** It is the reference: no outlines, granulated pigment, the
+animal filling the frame with its habitat established in a few strokes, no signature. Nothing to add.
+
+**Gemini — add the anti-outline and habitat sentences.** It returns a clean, confident drawing that
+is *inked and then coloured*, and it leaves the subject floating on bare paper with barely a mark
+behind it. Both are now covered in the shared block, but say it twice for this one:
+
+> Painting, not illustration: no ink outlines and no line art anywhere, every edge formed by where
+> one wash of pigment meets another. The animal is standing in a real place — put the ground under
+> its feet and a few strokes of its habitat behind it, not blank paper.
+
+Also expect a small sparkle mark in a bottom corner and roughly 8 MB of RGBA. Neither matters — the
+build step flattens the alpha, and the mark is a handful of pixels at the size this is displayed.
+
+**Grok — pin the format down before anything else.** It is the only one that ignored *square* and
+*PNG*, and the only one that signs its work in readable letters:
+
+> The image must be square, 1:1 aspect ratio, at least 1024 × 1024. Save as PNG, not JPEG. Leave the
+> bottom edge clear — no signature, no watermark, no tool name in the corner.
+
+If it still comes back portrait, that is fine and nothing is lost: squaring a portrait has to discard
+that height anyway, so the build takes it off the bottom and the watermark goes with it. **JPEG is the
+one that actually blocks** — there is no JPEG decoder in `tools/`, and there will not be one, because
+the fix is upstream and free. Re-export and drop it in again.
+
+---
+
 ## Fauna — the first twenty
 
 | # | File name | Subject line |
@@ -113,14 +158,32 @@ in the parchment buttons along the top of the screen, currently showing Unicode 
 
 ## Sending them back
 
-Drop the files anywhere in the repo and say where. Then:
+**Drop the file in `assets/source/plates/` under whatever name the tool gave it, and run:**
 
-- **Plates** go to `assets/plates/`, keyed by the file names above. There is no build step for them
-  yet — that gets written when the first batch arrives, and it is small.
-- **Chip icons** go to `assets/source/` and are folded into a sheet the way the others are.
-- Anything rejected goes in `assets/source/dump/` rather than being deleted. That directory is the
-  provenance record, and auditing it once already improved twelve assets for the cost of choosing a
-  different file.
+```bash
+node tools/build-plates.js          # build anything not already built
+node tools/build-plates.js --list   # what it would do, without doing it
+node tools/build-plates.js --force  # redo them all
+```
+
+That is the whole procedure. The build works out the species id from the file name — `ChatGPTplate-caravan-dromedary.png`
+and `Gemini_plate-caravan-dromedary.png` both mean `caravan-dromedary` — squares the image, takes the
+bottom edge off a portrait, resizes to 384px, and writes `src/ui/plates/<id>.png`. Nothing else needs
+touching: `src/ui/plates.ts` finds the file by name and the panel starts drawing it. There is no list
+to update.
+
+Three things it will tell you rather than guess at:
+
+- **Two files claiming one subject.** The normal case when three tools are running the same queue.
+  It names them and builds neither, because the alternative is that whichever name sorts lower
+  silently replaces the plate you chose. Keep the one you want, move the rest to
+  `assets/source/dump/`.
+- **A JPEG.** Re-export as PNG.
+- **A name it cannot read.** Rename it after the species.
+
+The raws stay on this machine — `assets/source/plates/` is git-ignored the way `dump/` is, because
+fifty-six sources at 2.6 MB is 145 MB of input that nothing ships. The built 100 KB plate is what
+gets committed.
 
 **Do not worry about consistency between batches.** These are seen one at a time in a small panel,
 never side by side, so a plate that is slightly off-key is worth far more than a plate that does not
