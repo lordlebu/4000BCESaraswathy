@@ -725,3 +725,84 @@ describe('the field notes draw a mark for every species', () => {
     expect(mark!.getAttribute('aria-hidden')).toBe('true');
   });
 });
+
+describe('a painted plate replaces the derived mark, one species at a time', () => {
+  // The whole tail strategy in one behaviour. 297 species, one plate a session, so the silhouette
+  // is the normal case forever and a plate is the exception -- and adding one must take no code.
+  //
+  // `src/ui/plates.ts` globs `src/ui/plates/*.png` keyed by the **engine** id. That distinction is
+  // the trap and it is why this test exists: canon calls it `fauna_scythian_wild_ass`, the adapter
+  // rewrites it to `scythian-wild-ass`, and a plate filed under the canon id matches nothing and
+  // fails silently. It did, first time.
+  // The plate folder is empty in a clean checkout -- real art arrives one file at a time and there
+  // is no fixture worth committing, since anything dropped in there renders in the actual game.
+  // So the loader is mocked rather than fed a fake PNG: what needs testing is that the panel picks
+  // the plate over the silhouette when one exists, not that Vite can glob a directory.
+  vi.mock('../src/ui/plates', () => ({
+    plateFor: (id: string) => (id === 'scythian-wild-ass' ? '/plates/scythian-wild-ass.png' : null),
+    plateCount: () => 1
+  }));
+
+  const notes = (species: { id: string; name: string }) => ({
+    entry: {
+      title: 'Plains at 35, 19',
+      description: 'Open grassland.',
+      doing: '',
+      creature: {
+        name: species.name,
+        note: 'A fast, resilient wild equine.',
+        species: { ...species, binomial: null, biomes: ['plains' as const] }
+      },
+      flora: { name: null, note: 'Nothing growing here.', species: null }
+    },
+    surroundings: '',
+    hint: '',
+    whereNext: '',
+    fatigue: null,
+    dusk: null,
+    shelter: 'roof' as const,
+    canCamp: false,
+    onCamp: () => {},
+    discovered: 1,
+    atLandmark: false,
+    memory: ''
+  });
+
+  it('draws the plate, and drops the silhouette, when one exists', () => {
+    const { container } = render(
+      <Here
+        open
+        notes={notes({ id: 'scythian-wild-ass', name: 'Scythian Wild Ass' })}
+        place={{ poiId: null } as never}
+      />
+    );
+    expect(container.querySelectorAll('.note-plate')).toHaveLength(1);
+    // Not both: the plate *is* the picture, and a small silhouette beside it is noise.
+    expect(container.querySelectorAll('.note dt .species-icon')).toHaveLength(0);
+  });
+
+  it('falls back to the silhouette for a species with no plate', () => {
+    const { container } = render(
+      <Here
+        open
+        notes={notes({ id: 'a-species-nobody-has-painted', name: 'Unpainted Thing' })}
+        place={{ poiId: null } as never}
+      />
+    );
+    expect(container.querySelectorAll('.note-plate')).toHaveLength(0);
+    expect(container.querySelectorAll('.note dt .species-icon')).toHaveLength(1);
+  });
+
+  it('marks the plate decorative, since the name already says what it is', () => {
+    const { container } = render(
+      <Here
+        open
+        notes={notes({ id: 'scythian-wild-ass', name: 'Scythian Wild Ass' })}
+        place={{ poiId: null } as never}
+      />
+    );
+    const img = container.querySelector('.note-plate')!;
+    expect(img.getAttribute('alt')).toBe('');
+    expect(img.getAttribute('aria-hidden')).toBe('true');
+  });
+});

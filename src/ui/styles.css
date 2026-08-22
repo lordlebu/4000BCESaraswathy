@@ -423,6 +423,37 @@ button.ghost:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
+/* A painted plate, when one exists for this species.
+ *
+ * Floated rather than laid out in a grid, so the note's prose wraps around it and short notes do
+ * not leave a column of empty paper beside the picture. `endgame.png` sets it beside the text and
+ * that only reads well because its note happens to be long; ours vary from one line to four.
+ *
+ * Sized in `em` so it tracks the panel's type rather than the viewport: on a phone the notes column
+ * is narrow and a fixed pixel plate would crowd the words off it entirely.
+ */
+.note-plate {
+  float: right;
+  width: 7.5em;
+  max-width: 40%;
+  margin: 0 0 6px 12px;
+  border: 1px solid rgba(52, 38, 58, 0.35);
+  border-radius: 2px;
+  /* The paper behind it shows at the edge, so the plate reads as pasted into the notebook rather
+     than printed on the page. */
+  padding: 3px;
+  background: rgba(255, 246, 223, 0.55);
+  box-shadow: 0 1px 4px rgba(20, 14, 24, 0.18);
+}
+
+/* The float has to be cleared or a long plate beside a one-line note overhangs the section below
+   it -- which on a two-column layout means a creature's picture landing in the plant's column. */
+.note-plated dd::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
 .note dd {
   margin: 3px 0 0;
   padding-left: 11px;
