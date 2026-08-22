@@ -110,7 +110,17 @@ the fix is upstream and free. Re-export and drop it in again.
 
 ## Fauna — the first twenty
 
-✅ = painted and in the game. **9 of 20.** Next up is `scythian-wild-ass` (#10).
+✅ = painted and in the game. **All twenty.** By the encounter ranking that is roughly **47% of every
+creature a player meets**; the next twenty would take it to 63%.
+
+Two notes carried forward from painting them:
+
+- **The Vindhya Leopard has a human face, on purpose.** Tendua is a leopard, and the plate is a
+  deliberate hint at something later. It is not a bad generation and should not be re-rolled.
+- **The Monsoon Crane kept its frame.** Gemini painted one 149px thick on one edge and 2px on
+  another, and the stripper crops uniformly by the shallowest edge so it declines rather than cut
+  into the picture. Cosmetic, and a re-roll with the frame clause is the cheap fix if it bothers
+  you.
 
 | # | File name | Subject line |
 |---|---|---|
@@ -123,17 +133,17 @@ the fix is upstream and free. Re-export and drop it in again.
 | 7 ✅ | `plate-delta-monitor.png` | A long-bodied monitor lizard nosing along the ground beside wooden fish-drying racks, unhurried and entirely unbothered. Mangrove fringe. |
 | 8 ✅ | `plate-mangrove-crab.png` | A heavy crab picking between arching mangrove roots, one claw raised high like a man carrying something awkward. Brackish mud and water. |
 | 9 ✅ | `plate-painted-deer.png` | A small deer standing in tall grass, watching the viewer, its coat patterned with pale markings like fallen petals. Warm meadow light. |
-| 10 | `plate-scythian-wild-ass.png` | A wiry wild ass of the northern steppe, standing side-on, built for stamina rather than speed. Dry open plain, big sky. |
-| 11 | `plate-saltwater-gator-turtle.png` | An ancient armoured turtle with a heavily ridged shell like crocodile hide, half-submerged in a brackish delta canal. |
-| 12 | `plate-monsoon-crane.png` | A tall white crane stepping carefully between reeds, head lowered as if reading the water. Grey rain-light. |
-| 13 | `plate-delta-egret.png` | A white egret standing in shallow water, body folded tight like a closed umbrella, beginning to straighten. Reed flats. |
-| 14 | `plate-canopy-langur.png` | A grey long-tailed leaf-monkey sitting on a high branch, looking down with an expression of mild disapproval. Forest canopy. |
-| 15 | `plate-shell-turtle.png` | A turtle resting where river sand meets the tide, its shell covered in a map of old scratches. Wet sand, shallow water. |
-| 16 | `plate-river-otter.png` | A freshwater otter rolling through shallow water, leaving rings of silver on the surface. Reeds and river stones. |
-| 17 | `plate-steppe-plumed-elephantbird.png` | A very large flightless bird with long decorative plumes, standing tall on coastal grassland. Imposing but entirely calm. |
-| 18 | `plate-cloud-antelope.png` | A slender pale antelope on a high ridge, standing in drifting mountain mist. Cool greys and thin light. |
-| 19 | `plate-vindhya-leopard.png` | A leopard lying along a warm basalt ledge, relaxed, tail hanging. Dry hill scrub. Not snarling, not stalking. |
-| 20 | `plate-basalt-cliff-hornbill.png` | A large hornbill with a heavy casqued bill, perched on a dark basalt outcrop. Highland cliff behind. |
+| 10 ✅ | `plate-scythian-wild-ass.png` | A wiry wild ass of the northern steppe, standing side-on, built for stamina rather than speed. Dry open plain, big sky. |
+| 11 ✅ | `plate-saltwater-gator-turtle.png` | An ancient armoured turtle with a heavily ridged shell like crocodile hide, half-submerged in a brackish delta canal. |
+| 12 ✅ | `plate-monsoon-crane.png` | A tall white crane stepping carefully between reeds, head lowered as if reading the water. Grey rain-light. |
+| 13 ✅ | `plate-delta-egret.png` | A white egret standing in shallow water, body folded tight like a closed umbrella, beginning to straighten. Reed flats. |
+| 14 ✅ | `plate-canopy-langur.png` | A grey long-tailed leaf-monkey sitting on a high branch, looking down with an expression of mild disapproval. Forest canopy. |
+| 15 ✅ | `plate-shell-turtle.png` | A turtle resting where river sand meets the tide, its shell covered in a map of old scratches. Wet sand, shallow water. |
+| 16 ✅ | `plate-river-otter.png` | A freshwater otter rolling through shallow water, leaving rings of silver on the surface. Reeds and river stones. |
+| 17 ✅ | `plate-steppe-plumed-elephantbird.png` | A very large flightless bird with long decorative plumes, standing tall on coastal grassland. Imposing but entirely calm. |
+| 18 ✅ | `plate-cloud-antelope.png` | A slender pale antelope on a high ridge, standing in drifting mountain mist. Cool greys and thin light. |
+| 19 ✅ | `plate-vindhya-leopard.png` | A leopard lying along a warm basalt ledge, relaxed, tail hanging. Dry hill scrub. Not snarling, not stalking. |
+| 20 ✅ | `plate-basalt-cliff-hornbill.png` | A large hornbill with a heavy casqued bill, perched on a dark basalt outcrop. Highland cliff behind. |
 
 ## Flora — the first eight
 

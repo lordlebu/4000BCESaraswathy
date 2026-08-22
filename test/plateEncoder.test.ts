@@ -376,6 +376,16 @@ describe('a painted border is stripped, and a pale sky is not', () => {
     expect(borderInset(img)).toBe(0);
   });
 
+  it('does not bother with a frame too thin to matter', () => {
+    // The crop is uniform and takes the shallowest of the four edges, so an asymmetric frame
+    // collapses to its thinnest corner. The cloud antelope measured 50/22/35/3 and had three
+    // pixels of a 1024px image removed -- a rebuild that changed nothing while reporting that a
+    // border had been dealt with, which is worse than saying nothing.
+    const img = field(400, [244, 241, 233]);
+    paint(img, 3, 3, 400, 400); // picture reaches within 3px on two sides
+    expect(borderInset(img)).toBe(0);
+  });
+
   it('never claims more than MAX_BORDER of the picture', () => {
     // A blank image is flat all the way through, and without the cap the rule would happily crop
     // it to nothing. Losing the trim is always cheaper than losing the plate.

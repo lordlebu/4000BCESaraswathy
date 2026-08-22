@@ -80,8 +80,34 @@ test('the diary survives a reload', async ({ page }) => {
   await page.getByRole('button', { name: 'Look closer' }).first().click();
   await page.getByRole('button', { name: 'Leave' }).click();
 
-  // The save flushes on a timer and on pagehide; give the timer a turn rather than racing it.
-  await page.waitForTimeout(3500);
+  // Wait for the save to actually land, rather than sleeping longer than it should take.
+  //
+  // This was `waitForTimeout(3500)` against a flush that runs on a 3000ms interval -- 500ms of
+  // margin, and only if the interval happens to tick soon after the click. It failed once in three
+  // full-suite runs and passed alone every time, which is the classic shape of a fixed sleep racing
+  // a timer on a loaded machine. `pagehide` flushes too, so the reload should cover it; evidently
+  // not always, and either way the fix is to stop guessing.
+  //
+  // Comparing the whole `south-of-tethys:*` snapshot rather than one key means the seed does not
+  // have to be threaded in here, and any write counts -- which is what "the save happened" means.
+  const saved = () =>
+    page.evaluate(() => {
+      const out: Record<string, string> = {};
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const k = localStorage.key(i);
+        if (k?.startsWith('south-of-tethys:')) out[k] = localStorage.getItem(k) ?? '';
+      }
+      return JSON.stringify(out);
+    });
+
+  const before = await saved();
+  await expect
+    .poll(saved, {
+      timeout: 15_000,
+      message: 'the journey was never written to localStorage, so the reload had nothing to restore'
+    })
+    .not.toBe(before);
+
   await page.reload();
   await expect(page.locator('.journal h2')).toBeVisible();
 
