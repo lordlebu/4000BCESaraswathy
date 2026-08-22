@@ -89,6 +89,13 @@ fixture, where ten scattered across unrelated specs is contention. The fix is to
 never to widen the timeouts — that hides the cause and leaves the specs walking half a map. Check
 walkability along the route while searching, too, or the key sequence stalls on a tile of sea.
 
+"Never widen the timeouts" is the right rule *for this failure*, and it is worth saying what makes
+it right, because it has one real exception and they are easy to confuse. Here the route was
+supposed to be two tiles and had silently become thirty-nine: the budget was fine and the work had
+grown behind it. Widening would have bought the spec enough room to keep doing the wrong thing.
+See the section below for the case where the work is the intended size and the budget genuinely
+does not fit it.
+
 ## Intermittent means time-dependent
 
 The same commit passed one CI run and failed another. That single fact ruled out a
@@ -105,9 +112,11 @@ contend for the dev server on one port and for the machine, and the failures sca
 unrelated specs in a way that looks exactly like a real regression. The 36-failure run was
 diagnosed in a minute only because the previous clean run was still on screen.
 
-**The tell is the duration.** This suite takes about three minutes. Runs of 8.3, 10.1 and 11.8
-minutes have all reported failures that vanished on an idle machine. Nothing a starved run
-reports should be believed until it is repeated.
+**The tell is the duration.** This suite takes about **4.7 minutes** at fifty specs, on two
+workers. It was three when that figure was first written and the suite was smaller — worth
+re-measuring whenever specs are added, because a stale number here makes every normal run look
+like contention. Runs of 8.3, 10.1 and 11.8 minutes have all reported failures that vanished on an
+idle machine. Nothing a starved run reports should be believed until it is repeated.
 
 But do not stop at the duration either. One 11.8-minute run held three failures: two were real
 regressions from the change under test, and only the third was contention. **Re-run each failed
@@ -118,6 +127,41 @@ The same contention appears within a single file, not just across runs. A viewpo
 added beside existing ones failed in the two-worker file run and passed alone, because the specs
 share a page. If a new test resizes or navigates differently from its neighbours, check it in
 isolation before believing either result.
+
+## When the budget really is too small
+
+The exception to "never widen the timeouts", and the way to tell it from the rule.
+
+Run 32553811087 failed the fatigue walk at ninety seconds. Two things were true at once, and only
+one of them was the spec's fault.
+
+The spec's fault: it walked fifteen steps to reach a tiredness note that needs about forty, so the
+distance was never doing anything the assertion could use — `expect(tired).toBeLessThanOrEqual(1)`
+would have passed without walking at all. Eight steps proves the same thing and still crosses the
+terrain change, which was the only part of the route with any content in it. **That half is the
+ordinary rule: the work was wasted, so the work went, and the budget was not the problem.**
+
+Not the spec's fault: **headless Chromium on a CI runner has no GPU.** It falls back to SwiftShader
+and renders in software, measured at roughly 3.7× slower than the same suite locally. Against that
+multiplier the second-slowest spec — settling a question, 25s local — lands at about 92 seconds,
+and there is nothing wasteful in it to remove. It is a legitimately long spec on a legitimately
+slow renderer, and it was one noisy runner from failing for a reason no amount of tuning addresses.
+
+So the budget went to 180 seconds, which costs nothing on a green run: **a timeout bounds failure,
+it does not pace success.**
+
+The distinction to hold on to:
+
+| | Stale fixture | Too-small budget |
+|---|---|---|
+| What changed | the work grew behind the budget | nothing; the renderer is just slow |
+| Evidence | route length, seed search | measured per-step time, local vs CI ratio |
+| Fix | re-run the seed search | raise the budget, and say by what factor and why |
+| Widening the timeout | hides it | is the fix |
+
+The test is whether you can say *where the time goes* before you touch the number. Measure the
+steps, compare local against CI, and only then decide. Widening because a spec failed and you do
+not know why is the thing the rule forbids, and it stays forbidden.
 
 ## Match CI's parallelism locally
 

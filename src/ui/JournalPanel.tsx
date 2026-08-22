@@ -9,6 +9,7 @@
 import type { ReactNode } from 'react';
 import type { FieldNote, JournalEntry } from '../content/journal';
 import { SpeciesIcon } from './SpeciesIcon';
+import { plateFor } from './plates';
 
 /**
  * A specimen label: what it is called, and what it is.
@@ -19,18 +20,31 @@ import { SpeciesIcon } from './SpeciesIcon';
  */
 function Note({ note, kind }: { note: FieldNote; kind: 'creature' | 'flora' }) {
   if (!note.name) return <p className="note-empty">{note.note}</p>;
+
+  // A painted plate if one exists for this species, and a derived silhouette if not.
+  //
+  // Two shapes rather than one, because they are not the same thing at different sizes. The
+  // silhouette is a mark beside a name -- it belongs on the line, at text height. A plate is a
+  // picture and wants a block of its own, the way `endgame.png` frames it.
+  //
+  // Canon holds 297 species and a plate is a session's work each, so the silhouette is the normal
+  // case forever and the plate is the exception. Adding one takes no code: see `plates.ts`.
+  const plate = note.species ? plateFor(note.species.id) : null;
+
   return (
-    <dl className="note">
+    <dl className={plate ? 'note note-plated' : 'note'}>
       <dt>
-        {/* The derived mark, not a painted plate.
-            `SpeciesIcon` builds a silhouette from the name and colours it by the ground the
-            species lives on, so every one of the 297 species in canon has something to show
-            without a single illustration existing. Painted plates, when they arrive, replace this
-            one species at a time -- which is the only way a tail that long is survivable. */}
-        {note.species && <SpeciesIcon species={note.species} kind={kind} size={18} />}
+        {!plate && note.species && <SpeciesIcon species={note.species} kind={kind} size={18} />}
         <span>{note.name}</span>
       </dt>
-      <dd>{note.note}</dd>
+      <dd>
+        {plate && (
+          // Decorative: the name and the note beside it already say what this is, and a screen
+          // reader announcing the species a third time is worse than one announcing it twice.
+          <img className="note-plate" src={plate} alt="" aria-hidden="true" loading="lazy" />
+        )}
+        {note.note}
+      </dd>
     </dl>
   );
 }

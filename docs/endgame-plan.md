@@ -17,10 +17,12 @@ this was read against was captured from a dev server on `feat/solarpunk-spoken`,
 | 02 · density, water, fog | **Shipped** — PR 68 |
 | 03 · the notebook page | **Shipped** — PR 69, 71 |
 | 04a · the plate work queue | **Shipped** — PR 70 |
-| 04b–05 · painting the plates | Open, and now purely art |
+| 04b · plate intake | **Shipped** — `tools/build-plates.js`, first plate in |
+| 05 · painting the plates | Open, 1 of 56, and now purely art |
 | 06 · a guard against slow frames | **Proposed** — see below |
 
-What remains that is *not* art: the shoreline pass (item 4), and the guard in Phase 06.
+What remains that is *not* art: the shoreline pass (item 4), the five chip icons, and the guard
+in Phase 06. Everything else on the plate side is now a painting queue with a working intake.
 
 ---
 
@@ -268,9 +270,30 @@ Do not attempt 297 illustrations.
 
   **Forty fauna and sixteen flora covers roughly half of everything a player will ever meet.** That
   is the tier-one list, and it is a work queue rather than a guess.
-- **Plates are game assets, keyed by canon id.** They live in `assets/`, not in the canon bundle,
-  and canon gains no `illustration` field. A picture is a view, and views belong here. That is the
-  noun/verb test from the canon repo, applied.
+- **Plates are game assets, keyed by the *engine* id.** Canon gains no `illustration` field: a
+  picture is a view, and views belong here. That is the noun/verb test from the canon repo, applied.
+
+  The id is the part worth writing down, because getting it wrong fails silently and did. Canon
+  calls the animal `fauna_scythian_wild_ass`; `canon.ts` rewrites that to `scythian-wild-ass` on the
+  way in, and that is the name a plate must carry. A file under the canon id matches nothing, throws
+  nothing, and simply keeps drawing the silhouette.
+
+  Built plates live in **`src/ui/plates/`**, not `assets/`, because `src/ui/plates.ts` finds them
+  with `import.meta.glob` and Vite only globs under `src/`. That is what makes adding one take no
+  code — no list to register, nothing to drift out of date.
+
+- **Intake is a build step, not a chore.** Three image models are generating in parallel and they
+  agree on nothing: 1254px square PNG, 2048px 8 MB RGBA, 788×1176 JPEG with a watermark.
+  `tools/build-plates.js` takes any of it — drop the file in `assets/source/plates/` under whatever
+  name the tool gave it — and writes the ~100 KB, 384px plate that ships. It reads the species from
+  the file name, squares the image, takes the bottom edge off a portrait where the signatures sit,
+  and refuses rather than guessing when two files claim one subject.
+
+  Getting a plate down to 100 KB mattered more than it looks: the first attempt wrote 595 KB, which
+  is 33 MB across the queue for the decorative half of a side panel. Per-row filter selection took
+  it to 251 KB and a 256-colour median-cut palette with Floyd–Steinberg took it to 101 KB, at a
+  measured cost of 2.3/255 mean error — invisible at the 120 pixels it is displayed at. The raws
+  stay out of git, like `dump/`.
 
 ### 7. Chips, figure, and light
 

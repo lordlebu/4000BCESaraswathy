@@ -32,7 +32,22 @@ export default defineConfig({
   // generates a world, and waits on tweened fog and a camera fade; screenshotting the canvas stalls
   // the GPU on top of that. On a machine also running an editor and a browser they overrun 30s and
   // fail at whatever assertion they happened to reach, which reads as a broken build and is not.
-  timeout: 90_000,
+  //
+  // **90 seconds was not enough, and the margin was thinner than it looked.** Headless Chromium on
+  // a CI runner has no GPU: it falls back to SwiftShader and renders in software, which measured
+  // roughly 3.7x slower here. Against that, the two slowest specs -- a walk at 27s and settling a
+  // question at 25s -- land at about 100s and 92s. The first one duly failed run 32553811087, and
+  // the second was one bad runner away from following it.
+  //
+  // Shortening the walk fixed the spec that was wasting time (see e2e/fatigue.spec.ts). It does
+  // nothing for the one that is legitimately slow, and no amount of tuning will: settling a
+  // question genuinely takes that long in software. So the budget has to fit the slowest honest
+  // spec on the slowest renderer, with room for a noisy runner on top.
+  //
+  // This costs nothing on a green run -- a timeout bounds failure, it does not pace success. What
+  // it does cost is a slower report when something really does hang, which is why it is 180 and
+  // not larger: two attempts at 180s is still six minutes inside the job's 30-minute cap.
+  timeout: 180_000,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',

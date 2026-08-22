@@ -1,9 +1,14 @@
 // Fatigue, which ships behind `?fatigue=1` for one release.
 //
 // Two things worth a browser. First that the flag is genuinely inert when off -- that is the
-// promise this ships on, and a unit test cannot see the rendered page. Second that walking with
-// it on eventually says something, since the whole chain from the accumulator through the scene
-// to the journal only exists at runtime.
+// promise this ships on, and a unit test cannot see the rendered page. Second that walking with it
+// on does not break anything, since the chain from the accumulator through the scene to the
+// journal only exists at runtime.
+//
+// Note the second one carefully: it is *not* that walking eventually produces a tiredness note.
+// That is what this file used to say it did, and it never did -- the threshold is about forty
+// tiles away and no spec here walks that far. `test/fatigue.test.ts` owns the curve, under Node,
+// where forty steps is free.
 
 import { expect, test, type Page } from '@playwright/test';
 import { step } from './walk';
@@ -44,22 +49,39 @@ test('shelter is offered after dark whether or not the flag is on', async ({ pag
   await expect(page.locator('.camp-button')).toHaveText(/roof|camp|bedding|sit out/i);
 });
 
-test('walking far enough with the flag on says something about it', async ({ page }) => {
-  // Started tired rather than walked into it: reaching a third of a day's walking takes about
-  // forty steps, which is a minute of a spec for something a unit test already pins. What this
-  // has to prove is that the line reaches the page at all.
+test('walking with the flag on leaves the page and the journal working', async ({ page }) => {
+  // **This used to claim it walked far enough to get tired, and it did not.** The name said so,
+  // a comment said the traveller "started tired", and neither was true: there is no query
+  // parameter that starts anyone tired -- the app reads `seed`, `hour` and `fatigue` and nothing
+  // else -- and the walk was nowhere near long enough to earn it. `FRESH_BELOW` is 0.35 of
+  // `DAY_OF_WALKING_MS`, which is four days, so a note needs about a day and a half of travel:
+  // roughly forty tiles of easy ground. The spec walked fifteen.
+  //
+  // So `expect(tired).toBeLessThanOrEqual(1)` was passing vacuously. It would have passed with no
+  // walk at all, and it passes just as well now, because it never depended on the distance.
+  //
+  // That mattered, because the walk was not free. Fifteen steps is the most expensive thing in
+  // this suite -- the traveller crosses into wetland at step four and wetland steps are
+  // deliberately slow, about 1.05s each measured. At 27s locally against a 90s budget it was the
+  // first spec to run out of time on CI, where the software renderer costs roughly 3.7x.
+  //
+  // Eight steps still crosses the plains-to-wetland boundary, which is the only part of the route
+  // that was ever doing anything: it proves a step lands, the terrain changes under it, and the
+  // journal keeps writing through the change. `test/fatigue.test.ts` owns the curve, as it always
+  // did.
   await boot(page, '/?seed=poi-252&fatigue=1&hour=12');
 
-  // Fifteen steps over mixed delta ground. The assertion is deliberately weak -- whether a note
-  // has appeared *yet* depends on the terrain walked, and `test/fatigue.test.ts` owns the curve.
-  for (let i = 0; i < 15; i += 1) await step(page, i % 2 ? 'ArrowDown' : 'ArrowRight');
+  for (let i = 0; i < 8; i += 1) await step(page, i % 2 ? 'ArrowDown' : 'ArrowRight');
 
-  // Whatever else is true, the page must not have broken and the journal must still be writing.
+  // The page must not have broken and the journal must still be writing.
   await expect(page.locator('.journal h2')).toBeVisible();
-  const tired = await page.locator('.status-tired').count();
-  const camp = await page.locator('.camp-button').count();
-  expect(tired).toBeLessThanOrEqual(1);
-  expect(camp).toBeLessThanOrEqual(1);
+
+  // Not tired, and stated as the real assertion it always could have been rather than the
+  // `<= 1` that could not fail. Eight steps is far short of the threshold, so a note appearing
+  // here would mean the curve had moved by more than an order of magnitude.
+  await expect(page.locator('.status-tired')).toHaveCount(0);
+  // Midday, so no bed on offer either.
+  await expect(page.locator('.camp-button')).toHaveCount(0);
 });
 
 test('the camp button appears at a camp after dark, and sleeping brings the morning', async ({

@@ -38,6 +38,19 @@ import {
 } from '../src/journey';
 import { discoveries, vocabulary } from '../src/content/knowledge';
 
+// The plate loader, mocked -- and mocked at the top of the file because that is where vitest runs
+// it. Written inside the `describe` it belongs to, it still hoisted above every import and merely
+// read as though it were scoped, which vitest now warns about and will later reject.
+//
+// Mocked rather than fed a fixture because what needs testing is that the panel prefers a plate to
+// a silhouette, not that Vite can glob a directory. Naming a species that has no committed plate
+// keeps it that way: the real folder now holds one, and a test that mocked nothing would start
+// passing or failing on which art happens to have been painted.
+vi.mock('../src/ui/plates', () => ({
+  plateFor: (id: string) => (id === 'scythian-wild-ass' ? '/plates/scythian-wild-ass.png' : null),
+  plateCount: () => 1
+}));
+
 const MOMENTS = ['dawn', 'morning', 'afternoon', 'evening', 'night'].flatMap((timeOfDay) =>
   ['clear', 'rain', 'mist', 'storm'].map((weather) => ({ timeOfDay, weather }))
 );
@@ -723,5 +736,77 @@ describe('the field notes draw a mark for every species', () => {
     const mark = container.querySelector('.journal-mark');
     expect(mark).not.toBeNull();
     expect(mark!.getAttribute('aria-hidden')).toBe('true');
+  });
+});
+
+describe('a painted plate replaces the derived mark, one species at a time', () => {
+  // The whole tail strategy in one behaviour. 297 species, one plate a session, so the silhouette
+  // is the normal case forever and a plate is the exception -- and adding one must take no code.
+  //
+  // `src/ui/plates.ts` globs `src/ui/plates/*.png` keyed by the **engine** id. That distinction is
+  // the trap and it is why this test exists: canon calls it `fauna_scythian_wild_ass`, the adapter
+  // rewrites it to `scythian-wild-ass`, and a plate filed under the canon id matches nothing and
+  // fails silently. It did, first time.
+  const notes = (species: { id: string; name: string }) => ({
+    entry: {
+      title: 'Plains at 35, 19',
+      description: 'Open grassland.',
+      doing: '',
+      creature: {
+        name: species.name,
+        note: 'A fast, resilient wild equine.',
+        species: { ...species, binomial: null, biomes: ['plains' as const] }
+      },
+      flora: { name: null, note: 'Nothing growing here.', species: null }
+    },
+    surroundings: '',
+    hint: '',
+    whereNext: '',
+    fatigue: null,
+    dusk: null,
+    shelter: 'roof' as const,
+    canCamp: false,
+    onCamp: () => {},
+    discovered: 1,
+    atLandmark: false,
+    memory: ''
+  });
+
+  it('draws the plate, and drops the silhouette, when one exists', () => {
+    const { container } = render(
+      <Here
+        open
+        notes={notes({ id: 'scythian-wild-ass', name: 'Scythian Wild Ass' })}
+        place={{ poiId: null } as never}
+      />
+    );
+    expect(container.querySelectorAll('.note-plate')).toHaveLength(1);
+    // Not both: the plate *is* the picture, and a small silhouette beside it is noise.
+    expect(container.querySelectorAll('.note dt .species-icon')).toHaveLength(0);
+  });
+
+  it('falls back to the silhouette for a species with no plate', () => {
+    const { container } = render(
+      <Here
+        open
+        notes={notes({ id: 'a-species-nobody-has-painted', name: 'Unpainted Thing' })}
+        place={{ poiId: null } as never}
+      />
+    );
+    expect(container.querySelectorAll('.note-plate')).toHaveLength(0);
+    expect(container.querySelectorAll('.note dt .species-icon')).toHaveLength(1);
+  });
+
+  it('marks the plate decorative, since the name already says what it is', () => {
+    const { container } = render(
+      <Here
+        open
+        notes={notes({ id: 'scythian-wild-ass', name: 'Scythian Wild Ass' })}
+        place={{ poiId: null } as never}
+      />
+    );
+    const img = container.querySelector('.note-plate')!;
+    expect(img.getAttribute('alt')).toBe('');
+    expect(img.getAttribute('aria-hidden')).toBe('true');
   });
 });
