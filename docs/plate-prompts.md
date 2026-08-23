@@ -1,13 +1,19 @@
 # Species plate prompts — ready to paste
 
+> Why plates exist and what they are for:
+> **[Repainting South of Tethys](https://claude.ai/code/artifact/2ee2b8c5-e1e5-429a-ba41-334576ce8ba0)**. Private artifact; ask the repo owner if the link 404s.
+
 Copy the **style block** once, then append one **subject line** per plate. Every subject line below
 is built from canon's own words for that species, so the picture and the field note agree.
 
 Order matters and is not alphabetical: it is the order a player meets them, from
 `node tools/reachable-species.js --top=40`. Painting the first twenty fauna covers roughly **47%
 of every creature encounter in the game**; forty covers 63%. Nothing is blocked while they are
-missing — the panel draws a derived silhouette for all 297 species — so these can arrive one at a
-time, in any quantity, and each one immediately replaces a silhouette.
+missing — the panel draws a derived silhouette for every unpainted animal — so these can arrive one
+at a time, in any quantity, and each one immediately replaces a silhouette.
+
+**Animals only.** Plants are drawn as an emoji and are not painted at all; see below for why. So
+are the animals that have no plate yet.
 
 ---
 
@@ -145,21 +151,65 @@ Two notes carried forward from painting them:
 | 19 ✅ | `plate-vindhya-leopard.png` | A leopard lying along a warm basalt ledge, relaxed, tail hanging. Dry hill scrub. Not snarling, not stalking. |
 | 20 ✅ | `plate-basalt-cliff-hornbill.png` | A large hornbill with a heavy casqued bill, perched on a dark basalt outcrop. Highland cliff behind. |
 
-## Flora — the first eight
+## Marks — what everything else is drawn as
 
-Plants are drawn the same way, but **whole plant or a characteristic branch**, not a specimen
-pressed flat, and rooted in the ground it grows on.
+**Every species that has no painted plate gets an emoji**, and for plants that is the finished
+answer rather than a queue nobody reached.
 
-| # | File name | Subject line |
+A plate earns its block: it is the thing you walked out to see, and `endgame.png` frames it that
+way. Everything else wants punctuation beside a name — 🐊 next to *Baurusuchus*, 🌳 next to *Mappa
+Mundi Banyan* — which says what the thing is and gets out of the way. Twenty animals have plates;
+these cover the other 199 and all 90 plants.
+
+Keyed on **what the species is**, never on a per-species list: an animal's body plan, a plant's
+growth form. Twenty-nine entries cover all 297, a new species needs no work, and
+`Record<BodyPlan, string>` / `Record<GrowthForm, string>` refuse to build if a category is added
+without a mark.
+
+### Animals, by body plan
+
+| | | | | | |
+|---|---|---|---|---|---|
+| mammal 🐾 | bird 🐦 | reptile 🦎 | dinosaur 🦖 | synapsid 🦣 | crocodilian 🐊 |
+| amphibian 🐸 | fish 🐟 | insect 🦗 | arachnid 🕷️ | crustacean 🦀 | mollusc 🐚 |
+| worm 🪱 | construct 🗿 | spectre 👻 | unknown 👣 | | |
+
+### Plants, by growth form
+
+| | | | | | |
+|---|---|---|---|---|---|
+| tree 🌳 | palm 🌴 | vine 🍃 | flower 🌸 | grass 🌾 | fern 🌿 |
+| moss 🍀 | shrub 🪴 | root 🫚 | cactus 🌵 | seaweed 🪸 | pitcher 🪤 |
+| unknown 🌱 | | | | | |
+
+### Named exceptions
+
+A handful of plants whose own name says more than their shape does. Checked before the form table,
+and matched on **whole words** — `tea` as a substring hits *Iron-Teak*, which is a timber tree.
+
+| Term | Mark | Why |
 |---|---|---|
-| 1 | `plate-saltreed.png` | Tall shoulder-high estuary reeds standing in brackish flood water, the kind cut for marsh-hut thatch. Grey-green, wind-leaned. |
-| 2 | `plate-neem.png` | A neem tree shading a field edge, dense with small bitter leaves, grain sacks stored in its shade. |
-| 3 | `plate-tamarind.png` | A tamarind tree leaning over a road, dark pods hanging like fingers, the earth beneath swept smooth by people who sit there. |
-| 4 | `plate-asura-thorn.png` | Dense hooked scrub grown as a living fence, thorns prominent, on pale disturbed ground. Slightly unwelcoming. |
-| 5 | `plate-bonewood-mangrove.png` | A mangrove with naturally curved, bone-pale hard timber and arching stilt roots, on a dark volcanic coast. |
-| 6 | `plate-wild-indigo.png` | A scrubby wild indigo bush on dry upland ground, small leaves, a few deep blue-purple flower spikes. |
-| 7 | `plate-mahua.png` | A flowering mahua tree of the dry plateau at night, pale blossoms falling and scattered on the ground beneath it. |
-| 8 | `plate-iron-teak.png` | A tall dense highland teak, broad leaves, straight heavy trunk — timber cut for river craft and tower beams. |
+| taro, yam, tuber | 🫜 | *Lotus-Root Taro* names two plants; the taro is the one you dig up |
+| ginger, turmeric | 🫚 | a rhizome rather than a root proper |
+| bamboo | 🎋 | a grass, and 🌾 is not wrong — but 🎋 is *bamboo* |
+| tea | 🍵 | *Black Ash-Tea* |
+| pine, cedar, fir | 🎍 | *Vindhya Pine* |
+| lotus | 🪷 | six of them in canon, and there is an exact glyph |
+
+### If a mark shows as an empty box
+
+These are the newest glyphs and so the likeliest to be missing on an older system, worst first:
+
+| Mark | Unicode | Used for |
+|---|---|---|
+| 🫜 | 16 · 2024 | taro — deliberately on the narrowest case, one species |
+| 🫚 | 15 · 2022 | roots, ginger, turmeric |
+| 🪸 🪷 | 14 · 2021 | seaweed, lotus |
+| 🦣 🪱 | 13 · 2020 | synapsid, worm |
+| 🪴 🪤 | 12 · 2019 | shrub, pitcher plant |
+
+Everything else is Unicode 11 or earlier and safe anywhere. A custom glyph would replace any of
+them without touching anything but the table.
 
 ---
 

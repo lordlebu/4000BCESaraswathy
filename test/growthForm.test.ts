@@ -10,7 +10,7 @@
 
 import { describe, expect, it } from 'vitest';
 import speciesBundle from '../data/canon/species.json';
-import { growthFormOf, speciesHash } from '../src/content/growthForm';
+import { FORM_EMOJI, emojiFor, growthFormOf, speciesHash } from '../src/content/growthForm';
 
 interface RawFlora {
   id: string;
@@ -80,5 +80,53 @@ describe('the same plant always looks the same', () => {
     // still be the same tree.
     const buckets = new Set(flora.map((raw) => speciesHash(raw.id) % 3));
     expect(buckets.size).toBe(3);
+  });
+});
+
+describe('every plant gets an emoji', () => {
+  // Plants are named with an emoji where animals get a painted plate. Keyed on the growth form,
+  // so thirteen entries cover all ninety flora and a new plant needs no work -- but that only
+  // holds while the table stays complete, which is what these check.
+
+  it('covers the whole bundle, with no blanks', () => {
+    for (const plant of speciesBundle.flora) {
+      const mark = emojiFor({ name: plant.name, binomial: plant.scientific ?? null });
+      expect(mark, `${plant.name} has no mark`).toBeTruthy();
+      // A single emoji, not a sequence and not a word. Length in code units is 2 for the
+      // astral-plane plants (🌳 and friends) and 2 for the clover with no variation selector.
+      expect([...mark], `${plant.name} -> ${JSON.stringify(mark)}`).toHaveLength(1);
+    }
+  });
+
+  it('reads the obvious plants the way a reader would', () => {
+    const mark = (name: string, binomial: string | null = null) => emojiFor({ name, binomial });
+    expect(mark('Mappa Mundi Banyan')).toBe('🌳');
+    expect(mark('Saltreed')).toBe('🌾');
+    expect(mark('Sacred Lotus')).toBe('🪷');       // a named exception, above its form
+    expect(mark('Date Palm')).toBe('🌴');
+    expect(mark('Asura Thorn')).toBe('🪴');
+    expect(mark('Lotus-Root Taro')).toBe('🫜');    // taro before lotus: you dig the root up
+  });
+
+  it('lets a name beat its form where the name is more telling', () => {
+    const mark = (name: string, binomial: string | null = null) => emojiFor({ name, binomial });
+    expect(mark('River Bamboo', 'Bambusa saraswati')).toBe('🎋');
+    expect(mark('Black Ash-Tea')).toBe('🍵');
+    expect(mark('Vindhya Pine')).toBe('🎍');
+    expect(mark('Blue Healing Turmeric')).toBe('🫚');
+  });
+
+  it('matches those exceptions on whole words, because `tea` is inside `teak`', () => {
+    // Iron-Teak is a timber tree. Substring matching would pour it a cup of tea, which is the
+    // same trap that made Saltreed a tree for the life of the classifier.
+    expect(emojiFor({ name: 'Iron-Teak', binomial: null })).toBe('🌳');
+  });
+
+  it('gives every form in the union a distinct mark', () => {
+    // `Record<GrowthForm, string>` already makes the build fail if a form has no entry. What it
+    // cannot catch is two forms sharing one, which would quietly make a palm and a tree the same
+    // thing in the notes.
+    const marks = Object.values(FORM_EMOJI);
+    expect(new Set(marks).size).toBe(marks.length);
   });
 });

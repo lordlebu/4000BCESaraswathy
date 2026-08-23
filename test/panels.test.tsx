@@ -716,7 +716,40 @@ describe('the field notes draw a mark for every species', () => {
     );
     // Two marks, one per named species -- and they are inside the term, beside the name, rather
     // than floating in the section heading.
-    expect(container.querySelectorAll('.note dt .species-icon')).toHaveLength(2);
+    //
+    // Both halves are an emoji now: the mark is punctuation beside a name, and the painted plate
+    // is what gets a block of its own. The two use different classifiers -- body plan for an
+    // animal, growth form for a plant -- so this also checks they are not the same glyph.
+    const marks = [...container.querySelectorAll('.note dt .species-emoji')];
+    expect(marks).toHaveLength(2);
+    expect(marks[0].textContent).not.toBe(marks[1].textContent);
+  });
+
+  it('never opens a plate block for a plant, even if one is dropped in', () => {
+    // `plateFor` is mocked to answer for `scythian-wild-ass` only, so this cannot be proven by the
+    // fixture alone. What it does prove is the gate: the flora note asks for a plate under a
+    // *creature* id and still gets none, because the panel decides on `kind` rather than on
+    // whether a file happens to exist. Plants being emoji is a decision, not an unpainted queue.
+    const { container } = render(
+      <Here
+        open
+        notes={note({
+          flora: {
+            name: 'Scythian Wild Ass',
+            note: 'Standing in for a plant that shares a plated id.',
+            species: {
+              id: 'scythian-wild-ass',
+              name: 'Scythian Wild Ass',
+              binomial: null,
+              biomes: ['plains']
+            }
+          }
+        })}
+        place={{ poiId: null } as never}
+      />
+    );
+    expect(container.querySelectorAll('.note-plate')).toHaveLength(0);
+    expect(container.querySelectorAll('.note-plated')).toHaveLength(0);
   });
 
   it('draws nothing where there is nothing to draw', () => {
@@ -724,7 +757,7 @@ describe('the field notes draw a mark for every species', () => {
     const { container } = render(
       <Here open notes={note({ creature: empty, flora: empty })} place={{ poiId: null } as never} />
     );
-    expect(container.querySelectorAll('.species-icon')).toHaveLength(0);
+    expect(container.querySelectorAll('.species-emoji')).toHaveLength(0);
   });
 
   it('marks the heading dingbat as decorative', () => {
@@ -785,7 +818,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
     expect(container.querySelectorAll('.note dt .species-icon')).toHaveLength(0);
   });
 
-  it('falls back to the silhouette for a species with no plate', () => {
+  it('falls back to the mark for a species with no plate', () => {
     const { container } = render(
       <Here
         open
@@ -794,7 +827,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
       />
     );
     expect(container.querySelectorAll('.note-plate')).toHaveLength(0);
-    expect(container.querySelectorAll('.note dt .species-icon')).toHaveLength(1);
+    expect(container.querySelectorAll('.note dt .species-emoji')).toHaveLength(1);
   });
 
   it('marks the plate decorative, since the name already says what it is', () => {

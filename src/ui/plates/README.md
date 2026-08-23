@@ -25,5 +25,11 @@ called. The build works this out from the source file name, so it is only worth 
 something goes wrong.
 
 Anything without a plate keeps its derived silhouette, which is the point of having one — see
-`src/ui/SpeciesIcon.tsx`. The queue worth painting first, the prompts for it, and what to change
-per image model are in `docs/plate-prompts.md`.
+`src/ui/SpeciesIcon.tsx`.
+
+**Animals only.** A plant is drawn as an emoji on the line beside its name, keyed on its growth
+form, and `JournalPanel` refuses a plate for one on `kind` rather than on whether a file exists —
+so dropping `neem.png` in here does nothing at all.
+
+The queue worth painting first, the prompts for it, and what to change per image model are in
+`docs/plate-prompts.md`.

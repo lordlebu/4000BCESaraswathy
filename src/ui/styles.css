@@ -446,6 +446,25 @@ button.ghost:hover:not(:disabled) {
  * Sized in `em` so it tracks the panel's type rather than the viewport: on a phone the notes column
  * is narrow and a fixed pixel plate would crowd the words off it entirely.
  */
+/* A plant's mark is an emoji, so it is type, not a graphic.
+ *
+ * No width, no height and no flex sizing on purpose: the whole reason plants moved off the drawn
+ * silhouettes is that a sized box beside the text always reads as an icon in a slot. Left as a
+ * character it inherits the line and sits where any other glyph would.
+ *
+ * The only nudges are optical. Emoji glyphs are drawn a little large for their em, so 0.95 brings
+ * one back to the weight of the words beside it, and they sit slightly high, so the baseline shift
+ * puts it back on the line. */
+.species-emoji {
+  font-size: 0.95em;
+  line-height: 1;
+  vertical-align: -0.06em;
+  margin-right: 0.3em;
+  /* A colour font ignores `color`, but the fallback box if the glyph is missing should not be
+     louder than the ink around it. */
+  color: var(--muted);
+}
+
 .note-plate {
   float: right;
   width: 7.5em;

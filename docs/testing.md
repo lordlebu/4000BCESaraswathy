@@ -128,6 +128,44 @@ added beside existing ones failed in the two-worker file run and passed alone, b
 share a page. If a new test resizes or navigates differently from its neighbours, check it in
 isolation before believing either result.
 
+## Should the strategy change? Recorded, not acted on
+
+Asked after the third browser-suite flake in a fortnight, and worth writing down because the answer
+is "not yet" and that will stop being true at some point.
+
+**What is actually wrong.** Every flake this suite has produced has had the same shape: a test
+waiting on *elapsed time* instead of on *state*. The fatigue walk waited a fixed number of steps
+against a tween whose length depends on terrain. The diary reload slept 3500ms against a save that
+flushes on a 3000ms interval. The fix for that one waited for localStorage to **change**, which
+races the same interval from the other side — the write can land before the snapshot, and then
+nothing ever changes again. Three failures, one root cause, and none of them a bug in the game.
+
+**What people do about it in projects like this.** The standard answers, roughly in order of how
+much they would help here:
+
+| Practice | Fit |
+|---|---|
+| Assert on state, never on elapsed time | **Already the rule**, newly written down. Every flake so far violated it. |
+| Expose a test seam for async work — a `data-*` attribute, a promise on `window` | Would have prevented all three outright. The cheapest real change available. |
+| Control the clock (fake timers) rather than out-waiting it | Awkward here: Phaser drives tweens off its own loop, so faking `setTimeout` alone does not stop the world. |
+| Push logic down: thin browser suite over a thick unit suite | **Largely done and worth protecting.** 593 unit tests to 50 browser specs, and `scenePlan.ts` is deliberately Phaser-free so the hard part runs under Node. |
+| Trace/video on first retry | Already on. It is what makes a CI failure legible at all. |
+| Shard CI across runners | Premature. The suite is 4.4 minutes locally; the problem is flakiness, not duration. |
+
+**Why not now.** The one change that would pay — a state seam the specs can await instead of
+guessing — is a change to production code to suit the tests, and it should be made once, on
+evidence, rather than three times in a hurry while chasing a red build. There are now three worked
+examples of exactly what such a seam would need to expose. That is a good position to design from
+and a bad one to design during.
+
+**The trigger to revisit.** A fourth time-dependent flake, or any flake in a spec that does *not*
+wait on a timer. Either means the pattern is wider than "we kept writing sleeps", and the seam
+should be built.
+
+Until then the rule is the cheap half of the same idea, and it is not optional: **a spec may wait
+for a condition to be true, never for a duration to pass.** If the condition cannot be observed
+from the page, that is the argument for the seam — make it then.
+
 ## When the budget really is too small
 
 The exception to "never widen the timeouts", and the way to tell it from the rule.

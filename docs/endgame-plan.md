@@ -1,5 +1,15 @@
 # Endgame plan — getting the game to look like `endgame.png`
 
+> **Published, illustrated version:** [Repainting South of Tethys](https://claude.ai/code/artifact/2ee2b8c5-e1e5-429a-ba41-334576ce8ba0)
+>
+> Same content, laid out to be read rather than diffed — the phase table, the effort ledger against
+> the original estimate, and the two corrections the programme had to make to its own premises. It
+> is the better thing to hand someone who is picking up the art. Start there, come here for detail.
+>
+> It is a **private** artifact: it opens for the repository owner and for anyone they have shared it
+> with, and 404s for everyone else. If you are reading this and the link is dead, ask — or just read
+> on, because nothing below depends on it.
+
 `endgame.png` (repo root, untracked) is the target frame: a painted wetland seen from above, a
 figure standing in it, five parchment chips along the top, and a torn field-notebook page across
 the bottom carrying a species plate.
@@ -7,6 +17,16 @@ the bottom carrying a species plate.
 This is what it would take to get there from where the game actually is today. The current frame
 this was read against was captured from a dev server on `feat/solarpunk-spoken`, not from
 `docs/images/screenshot.png`, which is two art generations out of date.
+
+## Closed — 2026-08-24
+
+**This programme is finished and parked.** All six phases shipped; the frame does not look like
+`endgame.png` in every particular and never will, because two of its particulars were measured and
+declined. What follows is the record, not a plan: read the *Parked* section for what was left
+undone deliberately, and do not treat it as a backlog.
+
+The successor work is a different problem — canon's data quality, and the linter that failed to
+catch three duplicate species — and gets its own plan rather than an extension of this one.
 
 ## Where this stands
 
@@ -21,17 +41,20 @@ this was read against was captured from a dev server on `feat/solarpunk-spoken`,
 | 05 · painting the plates | **Tier one complete** — PR 78, 79 and one open branch: 20 of 20 |
 | 06 · a guard against slow frames | **Shipped** — PR 76, 77, `npm run perf` |
 
-**Every phase in the original programme has now landed.** What is left was never in it as a phase,
-and is listed below rather than dressed up as one.
+**Every phase in the original programme has landed.** 11.4 sessions against an estimate of 11–16,
+and that range did not include two of the things in it — the plate intake and the performance
+guard, both of which were added after the plan was written because the work asked for them.
 
-### Genuinely still open
+### Parked, not pending
 
-| Item | Where it came from | Size |
+Three items are genuinely undone. They are parked rather than queued: none blocks anything, and
+each is a fresh decision whenever somebody wants it, not a debt this programme owes.
+
+| Item | Where it came from | What it needs |
 |---|---|---|
-| **Five chip icons** | item 7 | small; `src/ui/Controls.tsx` still renders `✒ ◇ ✎ ❧ ☰` |
-| **The shoreline pass** | item 4 | code; reeds and foam on the land side of water |
-| **Flora plates** | the plate queue | art; 8 queued, 0 painted — all 20 done so far are fauna |
-| **Fauna beyond tier one** | the plate queue | art, optional; 20 of the 40 listed, ~16% more encounters |
+| **Five chip icons** | item 7 | `src/ui/Controls.tsx` still renders `✒ ◇ ✎ ❧ ☰`. Five drawn marks and some CSS. |
+| **The shoreline pass** | item 4 | Reeds and foam on the *land* side of every water edge. Code, no art. |
+| **Fauna 21–40** | the plate queue | 20 painted of the 40 listed. Worth about 16% more encounters. Pure art, and the intake takes them whenever they arrive. |
 
 ### Closed by a decision rather than by work
 
@@ -42,10 +65,41 @@ outstanding:
   built, measured at **24% of the frame** on CI's software rasteriser, and removed. See
   `docs/rendering.md`. The warm paper grain it was paired with never landed either and has no
   advocate; the grain that *did* ship is on the notebook page, which is item 5.
+- **Nothing unpainted is drawn any more; it is marked.** The queue listed eight flora. A plant is
+  scenery being named as you pass, not the thing you walked out to see, so it gets an emoji on the
+  line — and so does every animal without a plate. Keyed on growth form and body plan, twenty-nine
+  entries covering all 297 species.
+
+  This deleted all twenty-six hand-built SVG marks. They were good, and the argument for them —
+  that a drawn mark can be tinted with the biome's ink where an emoji cannot — was true and beside
+  the point. The mark is punctuation beside a name; the plate is the picture. `git log` has the
+  paths.
 - **Water edges stay hard.** Item 4 wanted land dissolving into water. `blends()` in
   `src/game/frames.ts` deliberately excludes every land/water boundary — *"a shore is a line, and
   should stay one"* — so the dissolve is off the table. The shoreline **pass** above is the half of
   that item still live: props on the land side, not a blended edge.
+
+### What this programme found in canon
+
+Not part of the plan, and the reason there is a next one. Painting twenty species and then choosing
+a mark for the other 277 meant reading canon's fauna closely for the first time, which turned up
+four things `utils/lint_story.py` does not check:
+
+- **Three species are entered twice**, each pair sharing a binomial: *Vulpes gedrosiana*,
+  *Sarasvatimanta gedrosii*, *Vrkshasmara griseus*. One of each pair is hand-authored, the other
+  bestiary-imported. All six are reachable, so a player meets the same animal under two names — and
+  it is now visible, because Desert Fox is the most-encountered species in the game and has a
+  painted plate while its twin shows 🐾.
+- **One genus is spelled two ways**: `Silvanus gigas` and `Sylvianus cristatus` are the same kind of
+  animal, and `Silvanus` is also a real-world beetle genus, which is why the Iridescent Lothal
+  Silvanus was being drawn as a cricket.
+- **Eight fauna have no `scientific` at all**, including four that now have painted plates.
+- **`taxonomy` exists in the schema and is unused** — `{"type": "object"}` with no shape, populated
+  on 8 of 257, spelled `note` in some and `notes` in others. So the game derives clades from name
+  strings, which is why an `asuricus` epithet could turn an owl into a ghost and `camel` could turn
+  a crocodile into a mammal.
+
+The lint passes green on all of it.
 
 ---
 

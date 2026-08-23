@@ -20,12 +20,29 @@
 //
 // Both were originally classifier failures. They are better understood as the classifier telling
 // the truth: these things are not animals, and the honest answer was to give them their own shape.
+//
+// Three more groups exist for the opposite reason -- the classifier was lying by lumping them.
+// `reptile` was collecting a theropod, a sail-backed synapsid and a land crocodile alongside geckos
+// and snakes, and drawing all four as a lizard. They are not the same animal in any sense a player
+// would recognise:
+//
+//   * `dinosaur` -- the non-avian ones. Nagaraptor, Vajraptor, Rajasaurus, Megalosaurus,
+//     Sauropodoligator and canon's Sylvianus theropods.
+//   * `synapsid` -- Dimetrodon, Gorgonops, Estemmenosuchus. Stem-mammals, on our branch rather than
+//     the reptile one, and it is simply wrong to draw them as lizards.
+//   * `crocodilian` -- Baurusuchus, Postosuchus, Camelosuchus, Voay. Croc-line archosaurs.
+//
+// `Scutosaurus` deliberately stays a reptile: a pareiasaur really is one, and the `-saurus` in the
+// name is not evidence of anything.
 
 /** The shapes an animal can take. Order here is display order, not match order. */
 export type BodyPlan =
   | 'mammal'
   | 'bird'
   | 'reptile'
+  | 'dinosaur'
+  | 'synapsid'
+  | 'crocodilian'
   | 'amphibian'
   | 'fish'
   | 'insect'
@@ -48,11 +65,49 @@ export type BodyPlan =
 const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
   // Bodies made rather than born. Canon's own term, so it matches the binomial directly.
   ['construct', ['māyā', 'maya', 'clay', 'calcified', 'construct', 'golem']],
-  // Incorporeal, or descended from the Asura invasion. Matched before zoology on purpose.
-  ['spectre', ['asura', 'spectral', 'wraith', 'spectre', 'umbra', 'asuricus', 'manticore', 'manticora']],
+  // Incorporeal only.
+  //
+  // `asura` and `asuricus` used to be here, and they made the classifier contradict itself. The
+  // epithet is an adjective -- *Asura-tainted* -- so it was overriding zoology wherever canon
+  // happened to use it: `Bubo asuricus` is the **Asura-Tainted Owl** and was drawn as a ghost
+  // rather than an owl, and so were a bat, an ammonite and a water-snake.
+  //
+  // Worse, it split genera down the middle. `Gorgonops asuricus` was a spectre while `Gorgonops
+  // titan` was a reptile; the same for Dimetrodon and Scutosaurus. One animal, two body plans,
+  // decided by a species epithet. A taint changes what a creature has *done to it*, never what
+  // shape it is.
+  //
+  // The manticores stay. They are not tainted animals but their own thing, and canon's Tendua is
+  // deliberately one of them.
+  ['spectre', ['spectral', 'wraith', 'spectre', 'umbra', 'manticore', 'manticora']],
   // Canon's invented genera, whose common names say nothing useful about the body.
   ['bird', ['cognitavi']],
   ['mollusc', ['vrkshasmara', 'vṛkṣaśmara']],
+
+  // Above `reptile`, which has `saur` and `croc` and would otherwise swallow all three, and above
+  // `mammal`, which was turning **Camelosuchus Calf** into a mammal on the strength of `camel`.
+  //
+  // Genera are listed in full rather than by stem. `suchus` cannot be a prefix rule -- the matcher
+  // asks whether a *word* starts with the keyword, and `baurusuchus` does not start with `suchus`
+  // -- so every croc genus canon uses has to be named.
+  ['synapsid', [
+    'dimetrodon', 'gorgonops', 'gorgonopsid', 'estemmenosuchus', 'therapsid', 'synapsid',
+    'cynodon', 'dicynodon', 'edaphosaur', 'lystrosaur'
+  ]],
+  ['crocodilian', [
+    'baurusuchus', 'postosuchus', 'camelosuchus', 'voay', 'crocod', 'crocodile', 'croc',
+    'gharial', 'alligator', 'caiman', 'suchus'
+  ]],
+  ['dinosaur', [
+    'raptor', 'nagaraptor', 'vajraptor', 'rajasaurus', 'megalosaur', 'sauropod',
+    'sauropodoligator', 'theropod', 'dinosaur', 'allosaur', 'ceratops', 'tyrannosaur',
+    // Canon spells one genus two ways -- `Sylvianus cristatus` and `Silvanus gigas` are the same
+    // kind of animal -- so both are listed. `silvanus` also had to be taken *out* of the insect
+    // keywords, where it had been put because Silvanus is a real-world beetle genus. Canon's is
+    // not: `Silvanus pictus` is "a winged, bird-like dinosaurid with shimmering plumage", and the
+    // Iridescent Lothal Silvanus was being drawn as a cricket.
+    'sylvianus', 'silvanus'
+  ]],
 
   ['bird', [
     'ornis', 'avis', 'ptera', 'corvus', 'ardea', 'anser', 'falco', 'aquila', 'grus', 'cygnus',
@@ -81,7 +136,7 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
   ['arachnid', ['spider', 'arachn', 'scorpion', 'tarantula', 'mite', 'tick', 'nephila', 'spinner', 'eurypterus', 'eurypterid']],
   ['insect', [
     'coleopt', 'apis', 'formic', 'lepidopt', 'odonat', 'mantis', 'scarab', 'vespa', 'cicada',
-    'bombyx', 'anax', 'isotoma', 'silvanus', 'beetle', 'moth', 'butterfly', 'bee', 'wasp', 'ant', 'dragonfly',
+    'bombyx', 'anax', 'isotoma', 'beetle', 'moth', 'butterfly', 'bee', 'wasp', 'ant', 'dragonfly',
     'locust', 'cricket', 'termite', 'weevil', 'grasshopper', 'firefly', 'hornet', 'flea', 'megapis',
     'centipede', 'millipede'
   ]],
@@ -98,6 +153,45 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
     'bear', 'lion', 'panther', 'vulpes', 'fox', 'indicator'
   ]]
 ];
+
+/**
+ * One emoji per body plan — what an animal is drawn as until it has a painted plate.
+ *
+ * The plate is the real answer and twenty of them exist; this covers the other 199 and any species
+ * canon adds tomorrow. Keyed on the plan rather than the species for the same reason the plants
+ * are: sixteen entries instead of a list that goes stale, and `Record<BodyPlan, string>` refuses
+ * to build if a plan is added without a mark.
+ *
+ * Three are worth defending:
+ *
+ *   * `synapsid` takes the mammoth. There is no Dimetrodon emoji and there never will be; what a
+ *     player needs from the mark is "large archaic beast, on the mammal side of things", and the
+ *     mammoth is the only glyph that says it.
+ *   * `construct` takes the moai — a body made rather than born, out of stone or river mud.
+ *   * `unknown` takes footprints, which in a field diary is exactly right: something passed here
+ *     and was not identified.
+ *
+ * Newest glyphs, so likeliest to box on an old system: 🦣 and 🪱 (Unicode 13, 2020) and 🦖
+ * (Unicode 11, 2018). Everything else is 2015 or earlier.
+ */
+export const PLAN_EMOJI: Record<BodyPlan, string> = {
+  mammal: '🐾',
+  bird: '🐦',
+  reptile: '🦎',
+  dinosaur: '🦖',
+  synapsid: '🦣',
+  crocodilian: '🐊',
+  amphibian: '🐸',
+  fish: '🐟',
+  insect: '🦗',
+  arachnid: '🕷️',
+  crustacean: '🦀',
+  mollusc: '🐚',
+  worm: '🪱',
+  construct: '🗿',
+  spectre: '👻',
+  unknown: '👣'
+};
 
 /**
  * The body plan of an animal, from its name and binomial.
@@ -132,4 +226,9 @@ export function bodyPlanOf(animal: { name: string; binomial: string | null }): B
     }
   }
   return 'unknown';
+}
+
+/** The emoji for an animal, from its name and binomial. */
+export function animalEmojiFor(animal: { name: string; binomial: string | null }): string {
+  return PLAN_EMOJI[bodyPlanOf(animal)];
 }

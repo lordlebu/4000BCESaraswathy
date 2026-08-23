@@ -1,5 +1,9 @@
 # Art Brief — South of Tethys
 
+> Context for why any of this is shaped the way it is:
+> **[Repainting South of Tethys](https://claude.ai/code/artifact/2ee2b8c5-e1e5-429a-ba41-334576ce8ba0)** — the rendering programme, closed August 2026, with the
+> measurements behind each decision. Private artifact; ask the repo owner if the link 404s.
+
 Copy the prompt blocks below into an image model. The **Hard requirements** section is the part
 that matters most: the current sprite had registration guides baked into the artwork, which no
 amount of cropping could remove.

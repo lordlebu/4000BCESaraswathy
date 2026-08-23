@@ -50,6 +50,24 @@ snaps everything to one 22-colour palette shared across frames. 1.3 KB for two f
 
 `docs/art-brief.md` carries the prompt and the failure post-mortem for regenerating art.
 
+**Before touching the art, read the programme that produced it:**
+[Repainting South of Tethys](https://claude.ai/code/artifact/2ee2b8c5-e1e5-429a-ba41-334576ce8ba0) — the illustrated version of `docs/endgame-plan.md`, closed in
+August 2026. It records what was measured and declined as well as what shipped, which is the part
+that saves time: the vignette and the dissolved shoreline both look like obvious wins and both were
+built and reverted. The artifact is **private** — it opens for the repository owner and whoever
+they share it with — so treat `docs/endgame-plan.md` as the authoritative copy and the link as the
+readable one.
+
+The art docs, in the order they are useful:
+
+| File | What it holds |
+|---|---|
+| `docs/endgame-plan.md` | the programme, closed; what shipped, what is parked, what was declined |
+| `docs/art-direction.md` | the five rules the art follows, and what each one cost to learn |
+| `docs/art-brief.md` | prompt blocks for terrain, objects and figures |
+| `docs/plate-prompts.md` | the species plate queue, per-tool prompt notes, and the emoji tables |
+| `docs/rendering.md` | why the frame costs what it costs, and the four levers when it costs more |
+
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
 `npx vitest run -t "some test name"`.
 
