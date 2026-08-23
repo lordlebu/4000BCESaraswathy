@@ -80,33 +80,46 @@ test('the diary survives a reload', async ({ page }) => {
   await page.getByRole('button', { name: 'Look closer' }).first().click();
   await page.getByRole('button', { name: 'Leave' }).click();
 
-  // Wait for the save to actually land, rather than sleeping longer than it should take.
+  // Wait for the save to actually hold the rung, rather than sleeping longer than it should take.
   //
-  // This was `waitForTimeout(3500)` against a flush that runs on a 3000ms interval -- 500ms of
-  // margin, and only if the interval happens to tick soon after the click. It failed once in three
-  // full-suite runs and passed alone every time, which is the classic shape of a fixed sleep racing
-  // a timer on a loaded machine. `pagehide` flushes too, so the reload should cover it; evidently
-  // not always, and either way the fix is to stop guessing.
+  // Two wrong versions of this, and the second is the instructive one.
   //
-  // Comparing the whole `south-of-tethys:*` snapshot rather than one key means the seed does not
-  // have to be threaded in here, and any write counts -- which is what "the save happened" means.
-  const saved = () =>
-    page.evaluate(() => {
-      const out: Record<string, string> = {};
-      for (let i = 0; i < localStorage.length; i += 1) {
-        const k = localStorage.key(i);
-        if (k?.startsWith('south-of-tethys:')) out[k] = localStorage.getItem(k) ?? '';
-      }
-      return JSON.stringify(out);
-    });
-
-  const before = await saved();
+  // It began as `waitForTimeout(3500)` against a flush on a 3000ms interval -- 500ms of margin, and
+  // only if the tick fell kindly. That failed roughly one full-suite run in three.
+  //
+  // The fix for that was worse: snapshot localStorage, then wait for it to **change**. It passed
+  // fifteen local runs and failed on CI immediately, because a change is the wrong thing to wait
+  // for. The flush runs on its own interval throughout, so on a slower machine it can land the
+  // write *before* the snapshot is taken -- and then the value is already correct and will never
+  // change again, because the walk is over and nothing else is dirty. The test sat for its full
+  // fifteen seconds waiting for a second write that had no reason to exist.
+  //
+  // A state assertion has no such race: the save either holds the rung or it does not, and when it
+  // was written does not matter. `progress.rungs` is what "Look closer" advances, so a non-empty
+  // one is exactly the thing the reload has to restore.
   await expect
-    .poll(saved, {
-      timeout: 15_000,
-      message: 'the journey was never written to localStorage, so the reload had nothing to restore'
-    })
-    .not.toBe(before);
+    .poll(
+      () =>
+        page.evaluate(() => {
+          for (let i = 0; i < localStorage.length; i += 1) {
+            const k = localStorage.key(i);
+            if (!k?.startsWith('south-of-tethys:')) continue;
+            try {
+              const rungs = JSON.parse(localStorage.getItem(k) ?? '{}')?.progress?.rungs;
+              if (rungs && Object.keys(rungs).length > 0) return true;
+            } catch {
+              // A half-written or older-shaped save is not the one we are waiting for.
+            }
+          }
+          return false;
+        }),
+      {
+        timeout: 15_000,
+        message:
+          'the rung from "Look closer" was never saved, so the reload had nothing to restore'
+      }
+    )
+    .toBe(true);
 
   await page.reload();
   await expect(page.locator('.journal h2')).toBeVisible();
