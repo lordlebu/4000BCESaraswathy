@@ -12,7 +12,7 @@
 
 import { describe, expect, it } from 'vitest';
 import speciesBundle from '../data/canon/species.json';
-import { bodyPlanOf } from '../src/content/bodyPlan';
+import { PLAN_EMOJI, animalEmojiFor, bodyPlanOf } from '../src/content/bodyPlan';
 
 interface RawFauna {
   id: string;
@@ -63,12 +63,71 @@ describe('every animal gets a shape', () => {
     expect(bodyPlanOf({ name: 'Delta Kingfisher', binomial: 'Alcedo vishnu' })).toBe('bird');
     expect(bodyPlanOf({ name: 'River Otter', binomial: 'Lutra saraswati' })).toBe('mammal');
     expect(bodyPlanOf({ name: 'Mangrove Crab', binomial: 'Scylla bonewoodi' })).toBe('crustacean');
-    expect(bodyPlanOf({ name: 'Baurusuchus', binomial: 'Baurusuchus palustris' })).toBe('reptile');
+    // A land crocodile, and no longer filed as a generic reptile beside the geckos and snakes.
+    expect(bodyPlanOf({ name: 'Baurusuchus', binomial: 'Baurusuchus palustris' })).toBe('crocodilian');
+  });
+
+  it('tells the archosaurs and stem-mammals apart from the lizards', () => {
+    // `reptile` was collecting all of these and drawing them as one shape. They are not one shape.
+    expect(bodyPlanOf({ name: 'Megalosaurus', binomial: null })).toBe('dinosaur');
+    expect(bodyPlanOf({ name: 'Giant Jungle Raptor', binomial: 'Silvanus gigas' })).toBe('dinosaur');
+    expect(bodyPlanOf({ name: 'Dimetrodon Scout-Mount', binomial: 'Dimetrodon minor' })).toBe('synapsid');
+    expect(bodyPlanOf({ name: 'Giant Horned Voay', binomial: 'Voay maximus' })).toBe('crocodilian');
+    // A pareiasaur really is a reptile. The `-saurus` in a name is not evidence of anything.
+    expect(bodyPlanOf({ name: 'Scutosaurus Battering-Ram', binomial: 'Scutosaurus titan' })).toBe('reptile');
+    // `camel` used to win here and made a baby crocodile a mammal.
+    expect(bodyPlanOf({ name: 'Camelosuchus Calf', binomial: 'Camelosuchus minor' })).toBe('crocodilian');
+  });
+
+  it('treats an Asura taint as an adjective, not a body', () => {
+    // `asuricus` used to be a spectre keyword, which drew an owl as a ghost -- and split genera
+    // down the middle, so `Gorgonops asuricus` was a spectre while `Gorgonops titan` was a
+    // reptile. One animal cannot have two body plans because of a species epithet.
+    expect(bodyPlanOf({ name: 'Asura-Tainted Owl', binomial: 'Bubo asuricus' })).toBe('bird');
+    expect(bodyPlanOf({ name: 'Gargoyle-Bat', binomial: 'Vespertilio asuricus' })).toBe('mammal');
+    expect(bodyPlanOf({ name: 'Asura-Marked Black Ammonite', binomial: 'Ammonites asuricus' })).toBe('mollusc');
+    expect(bodyPlanOf({ name: 'Gorgonopsid War-Beast', binomial: 'Gorgonops asuricus' })).toBe(
+      bodyPlanOf({ name: 'Gorgonopsid Pack-Leader', binomial: 'Gorgonops titan' })
+    );
+    // What stays a spectre is what has no body to begin with.
+    expect(bodyPlanOf({ name: 'Lethal Cave-Spectre', binomial: 'Asura spectral' })).toBe('spectre');
+    expect(bodyPlanOf({ name: 'Tendua Manticore', binomial: null })).toBe('spectre');
   });
 
   it('spreads the bundle across the shapes rather than collapsing to one', () => {
     // A matcher that answered `reptile` for everything would pass every test above and be useless.
     const plans = new Set(fauna.map((raw) => bodyPlanOf(asAnimal(raw))));
     expect(plans.size).toBeGreaterThanOrEqual(10);
+  });
+});
+
+describe('every animal gets an emoji until it gets a plate', () => {
+  // Twenty animals have painted plates. These cover the other 199, and anything canon adds.
+
+  it('covers the whole bundle, one glyph each, with no blanks', () => {
+    for (const raw of fauna) {
+      const mark = animalEmojiFor(asAnimal(raw));
+      expect(mark, `${raw.name} has no mark`).toBeTruthy();
+      // One glyph. `🕷️` is a base character plus a variation selector, so count graphemes by
+      // stripping U+FE0F rather than by code point.
+      expect([...mark.replace(/️/g, '')], `${raw.name} -> ${JSON.stringify(mark)}`).toHaveLength(1);
+    }
+  });
+
+  it('gives every plan in the union a distinct mark', () => {
+    // `Record<BodyPlan, string>` already fails the build if a plan has no entry. What it cannot
+    // catch is two plans sharing one, which would undo the point of splitting them: a crocodile
+    // and a gecko becoming the same glyph is exactly the lumping this change removed.
+    const marks = Object.values(PLAN_EMOJI);
+    expect(new Set(marks).size).toBe(marks.length);
+  });
+
+  it('draws the groups that used to be lumped as different things', () => {
+    const mark = (name: string, binomial: string | null) => animalEmojiFor({ name, binomial });
+    const gecko = mark('Lava-Ledge Gecko', 'Gekko vulcanus');
+    const croc = mark('Baurusuchus', 'Baurusuchus palustris');
+    const dino = mark('Megalosaurus', null);
+    const synapsid = mark('Dimetrodon Scout-Mount', 'Dimetrodon minor');
+    expect(new Set([gecko, croc, dino, synapsid]).size).toBe(4);
   });
 });

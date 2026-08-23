@@ -9,7 +9,8 @@ of every creature encounter in the game**; forty covers 63%. Nothing is blocked 
 missing — the panel draws a derived silhouette for every unpainted animal — so these can arrive one
 at a time, in any quantity, and each one immediately replaces a silhouette.
 
-**Animals only.** Plants are drawn as an emoji and are not painted at all; see below for why.
+**Animals only.** Plants are drawn as an emoji and are not painted at all; see below for why. So
+are the animals that have no plate yet.
 
 ---
 
@@ -147,31 +148,65 @@ Two notes carried forward from painting them:
 | 19 ✅ | `plate-vindhya-leopard.png` | A leopard lying along a warm basalt ledge, relaxed, tail hanging. Dry hill scrub. Not snarling, not stalking. |
 | 20 ✅ | `plate-basalt-cliff-hornbill.png` | A large hornbill with a heavy casqued bill, perched on a dark basalt outcrop. Highland cliff behind. |
 
-## Flora — not painted at all
+## Marks — what everything else is drawn as
 
-**Plants are an emoji, and that is the finished answer rather than a queue nobody has reached.**
+**Every species that has no painted plate gets an emoji**, and for plants that is the finished
+answer rather than a queue nobody reached.
 
-The eight flora that used to be listed here are gone. A creature plate earns its block: it is the
-thing you walked out to see, and `endgame.png` frames it that way. A plant is scenery you are
-naming as you pass, and the right weight for that is a character on the line — 🌳 beside *Mappa
-Mundi Banyan*, 🌾 beside *Saltreed* — the size of an emoji in a sentence, because that is exactly
-what it is.
+A plate earns its block: it is the thing you walked out to see, and `endgame.png` frames it that
+way. Everything else wants punctuation beside a name — 🐊 next to *Baurusuchus*, 🌳 next to *Mappa
+Mundi Banyan* — which says what the thing is and gets out of the way. Twenty animals have plates;
+these cover the other 199 and all 90 plants.
 
-It is keyed on the **growth form**, not the species, so all ninety plants in canon are covered by
-thirteen entries in `FORM_EMOJI` and a new plant needs no work. `Record<GrowthForm, string>` makes
-the build fail if a form is ever added without a mark.
+Keyed on **what the species is**, never on a per-species list: an animal's body plan, a plant's
+growth form. Twenty-nine entries cover all 297, a new species needs no work, and
+`Record<BodyPlan, string>` / `Record<GrowthForm, string>` refuse to build if a category is added
+without a mark.
 
-| Form | | Form | | Form | |
+### Animals, by body plan
+
+| | | | | | |
 |---|---|---|---|---|---|
-| tree | 🌳 | palm | 🌴 | vine | 🍃 |
-| flower | 🌸 | grass | 🌾 | fern | 🌿 |
-| moss | 🍀 | shrub | 🪴 | root | 🥕 |
-| cactus | 🌵 | seaweed | 🪸 | pitcher | 🪤 |
-| unknown | 🌱 | | | | |
+| mammal 🐾 | bird 🐦 | reptile 🦎 | dinosaur 🦖 | synapsid 🦣 | crocodilian 🐊 |
+| amphibian 🐸 | fish 🐟 | insect 🦗 | arachnid 🕷️ | crustacean 🦀 | mollusc 🐚 |
+| worm 🪱 | construct 🗿 | spectre 👻 | unknown 👣 | | |
 
-Two are worth knowing about if a mark ever shows as an empty box: **🪸 seaweed** (Unicode 14, 2021)
-and **🪴 shrub** (Unicode 12, 2019) are the newest. Everything else is Unicode 6.0 or 9.0 and safe
-anywhere. A custom glyph could replace either without touching anything but the table.
+### Plants, by growth form
+
+| | | | | | |
+|---|---|---|---|---|---|
+| tree 🌳 | palm 🌴 | vine 🍃 | flower 🌸 | grass 🌾 | fern 🌿 |
+| moss 🍀 | shrub 🪴 | root 🫚 | cactus 🌵 | seaweed 🪸 | pitcher 🪤 |
+| unknown 🌱 | | | | | |
+
+### Named exceptions
+
+A handful of plants whose own name says more than their shape does. Checked before the form table,
+and matched on **whole words** — `tea` as a substring hits *Iron-Teak*, which is a timber tree.
+
+| Term | Mark | Why |
+|---|---|---|
+| taro, yam, tuber | 🫜 | *Lotus-Root Taro* names two plants; the taro is the one you dig up |
+| ginger, turmeric | 🫚 | a rhizome rather than a root proper |
+| bamboo | 🎋 | a grass, and 🌾 is not wrong — but 🎋 is *bamboo* |
+| tea | 🍵 | *Black Ash-Tea* |
+| pine, cedar, fir | 🎍 | *Vindhya Pine* |
+| lotus | 🪷 | six of them in canon, and there is an exact glyph |
+
+### If a mark shows as an empty box
+
+These are the newest glyphs and so the likeliest to be missing on an older system, worst first:
+
+| Mark | Unicode | Used for |
+|---|---|---|
+| 🫜 | 16 · 2024 | taro — deliberately on the narrowest case, one species |
+| 🫚 | 15 · 2022 | roots, ginger, turmeric |
+| 🪸 🪷 | 14 · 2021 | seaweed, lotus |
+| 🦣 🪱 | 13 · 2020 | synapsid, worm |
+| 🪴 🪤 | 12 · 2019 | shrub, pitcher plant |
+
+Everything else is Unicode 11 or earlier and safe anywhere. A custom glyph would replace any of
+them without touching anything but the table.
 
 ---
 

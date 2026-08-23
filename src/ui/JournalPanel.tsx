@@ -21,14 +21,15 @@ import { plateFor } from './plates';
 function Note({ note, kind }: { note: FieldNote; kind: 'creature' | 'flora' }) {
   if (!note.name) return <p className="note-empty">{note.note}</p>;
 
-  // A painted plate if one exists for this species, and a derived silhouette if not.
+  // A painted plate if one exists for this animal, and a mark on the line if not.
   //
-  // Two shapes rather than one, because they are not the same thing at different sizes. The
-  // silhouette is a mark beside a name -- it belongs on the line, at text height. A plate is a
-  // picture and wants a block of its own, the way `endgame.png` frames it.
+  // Two shapes rather than one, because they are not the same thing at different sizes. The mark
+  // is punctuation beside a name -- it belongs on the line, at text height, and says no more than
+  // "crocodile" or "grass". A plate is a picture and wants a block of its own, the way
+  // `endgame.png` frames it.
   //
-  // Canon holds 297 species and a plate is a session's work each, so the silhouette is the normal
-  // case forever and the plate is the exception. Adding one takes no code: see `plates.ts`.
+  // Canon holds 297 species and a plate is a session's work each, so the mark is the normal case
+  // and the plate is the exception. Adding one takes no code: see `plates.ts`.
   // Creatures only. Plants are named with an emoji on the line -- see `SpeciesIcon` -- and that is
   // a decision about what a plant *is* in the notes, not a queue that has not reached them yet.
   // Reading `kind` here rather than relying on there being no flora plates keeps it that way: drop
@@ -38,7 +39,7 @@ function Note({ note, kind }: { note: FieldNote; kind: 'creature' | 'flora' }) {
   return (
     <dl className={plate ? 'note note-plated' : 'note'}>
       <dt>
-        {!plate && note.species && <SpeciesIcon species={note.species} kind={kind} size={18} />}
+        {!plate && note.species && <SpeciesIcon species={note.species} kind={kind} />}
         <span>{note.name}</span>
       </dt>
       <dd>

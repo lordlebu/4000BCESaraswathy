@@ -102,10 +102,24 @@ describe('every plant gets an emoji', () => {
     const mark = (name: string, binomial: string | null = null) => emojiFor({ name, binomial });
     expect(mark('Mappa Mundi Banyan')).toBe('🌳');
     expect(mark('Saltreed')).toBe('🌾');
-    expect(mark('Sacred Lotus')).toBe('🌸');
+    expect(mark('Sacred Lotus')).toBe('🪷');       // a named exception, above its form
     expect(mark('Date Palm')).toBe('🌴');
     expect(mark('Asura Thorn')).toBe('🪴');
-    expect(mark('Lotus-Root Taro')).toBe('🥕');
+    expect(mark('Lotus-Root Taro')).toBe('🫜');    // taro before lotus: you dig the root up
+  });
+
+  it('lets a name beat its form where the name is more telling', () => {
+    const mark = (name: string, binomial: string | null = null) => emojiFor({ name, binomial });
+    expect(mark('River Bamboo', 'Bambusa saraswati')).toBe('🎋');
+    expect(mark('Black Ash-Tea')).toBe('🍵');
+    expect(mark('Vindhya Pine')).toBe('🎍');
+    expect(mark('Blue Healing Turmeric')).toBe('🫚');
+  });
+
+  it('matches those exceptions on whole words, because `tea` is inside `teak`', () => {
+    // Iron-Teak is a timber tree. Substring matching would pour it a cup of tea, which is the
+    // same trap that made Saltreed a tree for the life of the classifier.
+    expect(emojiFor({ name: 'Iron-Teak', binomial: null })).toBe('🌳');
   });
 
   it('gives every form in the union a distinct mark', () => {

@@ -717,11 +717,12 @@ describe('the field notes draw a mark for every species', () => {
     // Two marks, one per named species -- and they are inside the term, beside the name, rather
     // than floating in the section heading.
     //
-    // They are deliberately different elements. An animal gets a drawn silhouette carrying its
-    // biome ink; a plant gets an emoji, because a plant in the notes is scenery being named and
-    // wants the weight of a character in the line rather than a graphic in a slot.
-    expect(container.querySelectorAll('.note dt .species-icon')).toHaveLength(1);
-    expect(container.querySelectorAll('.note dt .species-emoji')).toHaveLength(1);
+    // Both halves are an emoji now: the mark is punctuation beside a name, and the painted plate
+    // is what gets a block of its own. The two use different classifiers -- body plan for an
+    // animal, growth form for a plant -- so this also checks they are not the same glyph.
+    const marks = [...container.querySelectorAll('.note dt .species-emoji')];
+    expect(marks).toHaveLength(2);
+    expect(marks[0].textContent).not.toBe(marks[1].textContent);
   });
 
   it('never opens a plate block for a plant, even if one is dropped in', () => {
@@ -756,7 +757,6 @@ describe('the field notes draw a mark for every species', () => {
     const { container } = render(
       <Here open notes={note({ creature: empty, flora: empty })} place={{ poiId: null } as never} />
     );
-    expect(container.querySelectorAll('.species-icon')).toHaveLength(0);
     expect(container.querySelectorAll('.species-emoji')).toHaveLength(0);
   });
 
@@ -818,7 +818,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
     expect(container.querySelectorAll('.note dt .species-icon')).toHaveLength(0);
   });
 
-  it('falls back to the silhouette for a species with no plate', () => {
+  it('falls back to the mark for a species with no plate', () => {
     const { container } = render(
       <Here
         open
@@ -827,7 +827,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
       />
     );
     expect(container.querySelectorAll('.note-plate')).toHaveLength(0);
-    expect(container.querySelectorAll('.note dt .species-icon')).toHaveLength(1);
+    expect(container.querySelectorAll('.note dt .species-emoji')).toHaveLength(1);
   });
 
   it('marks the plate decorative, since the name already says what it is', () => {

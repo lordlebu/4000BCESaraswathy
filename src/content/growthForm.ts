@@ -122,13 +122,13 @@ export function growthFormOf(plant: { name: string; binomial: string | null }): 
  *
  *   * `moss` takes the clover. There is no lichen or moss emoji; a low green thing close to the
  *     ground is the nearest honest reading.
- *   * `root` takes the carrot rather than the potato: it reads as a root at sixteen pixels, which
- *     a brown lump does not.
+ *   * `root` takes the ginger root. These are wild roots dug out of the ground — taro, turmeric,
+ *     shilajit — not a market vegetable, and ginger is the glyph that says so.
  *   * `pitcher` takes the trap. A carnivorous plant's one interesting fact is that it catches
  *     things, and a jug emoji would say the opposite of what the name means.
- *   * `seaweed` takes the coral (Unicode 14, 2021) and `shrub` the potted plant (Unicode 12,
- *     2019). These are the two newest and so the likeliest to land as a blank box on an old
- *     system; everything else here is Unicode 6.0 or 9.0 and safe everywhere.
+ *   * Support: `🫚` is Unicode 15 (2022), `🪸` 14 (2021), `🪴` 12 (2019). Those three are the
+ *     likeliest to land as a blank box on an old system; the rest are Unicode 6.0 and safe
+ *     anywhere. See `SPECIFIC_EMOJI` for the one that is newer still.
  */
 export const FORM_EMOJI: Record<GrowthForm, string> = {
   tree: '🌳',
@@ -139,15 +139,54 @@ export const FORM_EMOJI: Record<GrowthForm, string> = {
   fern: '🌿',
   moss: '🍀',
   shrub: '🪴',
-  root: '🥕',
+  root: '🫚',
   cactus: '🌵',
   seaweed: '🪸',
   pitcher: '🪤',
   unknown: '🌱'
 };
 
+/**
+ * Plants whose own name beats their growth form, checked before it.
+ *
+ * A form is a shape, and mostly a shape is all a mark needs to say. Sometimes the name says
+ * something better: bamboo is a grass, and 🌾 is not wrong, but 🎋 is *bamboo*. What earns a place
+ * here is a plant the player would name differently from its silhouette — not every plant with a
+ * cute glyph available.
+ *
+ * **Matched on whole words**, unlike the form keywords below, and that is not a stylistic choice.
+ * `tea` as a substring hits **Iron-Teak**, which is a timber tree. It is the same trap that made
+ * `Saltreed` a tree for the life of this file, arriving by a shorter route, and word boundaries
+ * close it here because none of these terms is ever buried inside a longer word the way `reed` is
+ * inside `saltreed`.
+ *
+ * `taro` before `lotus`, because canon's **Lotus-Root Taro** names two plants and the taro is the
+ * one you dig up. `growthFormOf` already makes the same call for the same reason.
+ *
+ * 🫜 is Unicode 16 (2024) and by some distance the newest glyph in this file. It sits on the
+ * narrowest case on purpose — one species — so that if it boxes on an older system it costs one
+ * plant, not every root in canon.
+ */
+const SPECIFIC_EMOJI: [string[], string][] = [
+  [['taro', 'yam', 'tuber'], '🫜'],
+  [['ginger', 'turmeric', 'curcuma', 'zingiber'], '🫚'],
+  [['bamboo', 'bambusa'], '🎋'],
+  [['tea'], '🍵'],
+  [['pine', 'cedar', 'conifer', 'fir'], '🎍'],
+  [['lotus', 'nelumbo'], '🪷']
+];
+
 /** The emoji for a plant, from its name and binomial. */
 export function emojiFor(plant: { name: string; binomial: string | null }): string {
+  const words = new Set(
+    `${plant.binomial ?? ''} ${plant.name}`
+      .toLowerCase()
+      .split(/[^\p{L}]+/u)
+      .filter(Boolean)
+  );
+  for (const [terms, mark] of SPECIFIC_EMOJI) {
+    if (terms.some((term) => words.has(term))) return mark;
+  }
   return FORM_EMOJI[growthFormOf(plant)];
 }
 

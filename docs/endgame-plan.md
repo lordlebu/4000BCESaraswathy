@@ -41,10 +41,15 @@ outstanding:
   built, measured at **24% of the frame** on CI's software rasteriser, and removed. See
   `docs/rendering.md`. The warm paper grain it was paired with never landed either and has no
   advocate; the grain that *did* ship is on the notebook page, which is item 5.
-- **Flora are not painted.** The queue listed eight plants. A plant in the notes is scenery being
-  named as you pass, not the thing you walked out to see, so it gets an emoji on the line — keyed
-  on growth form, thirteen entries covering all ninety. The drawn plant silhouettes were deleted
-  with it: they were good and they were solving the wrong problem, and `git log` has the paths.
+- **Nothing unpainted is drawn any more; it is marked.** The queue listed eight flora. A plant is
+  scenery being named as you pass, not the thing you walked out to see, so it gets an emoji on the
+  line — and so does every animal without a plate. Keyed on growth form and body plan, twenty-nine
+  entries covering all 297 species.
+
+  This deleted all twenty-six hand-built SVG marks. They were good, and the argument for them —
+  that a drawn mark can be tinted with the biome's ink where an emoji cannot — was true and beside
+  the point. The mark is punctuation beside a name; the plate is the picture. `git log` has the
+  paths.
 - **Water edges stay hard.** Item 4 wanted land dissolving into water. `blends()` in
   `src/game/frames.ts` deliberately excludes every land/water boundary — *"a shore is a line, and
   should stay one"* — so the dissolve is off the table. The shoreline **pass** above is the half of
