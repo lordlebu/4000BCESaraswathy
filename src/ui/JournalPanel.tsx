@@ -29,7 +29,11 @@ function Note({ note, kind }: { note: FieldNote; kind: 'creature' | 'flora' }) {
   //
   // Canon holds 297 species and a plate is a session's work each, so the silhouette is the normal
   // case forever and the plate is the exception. Adding one takes no code: see `plates.ts`.
-  const plate = note.species ? plateFor(note.species.id) : null;
+  // Creatures only. Plants are named with an emoji on the line -- see `SpeciesIcon` -- and that is
+  // a decision about what a plant *is* in the notes, not a queue that has not reached them yet.
+  // Reading `kind` here rather than relying on there being no flora plates keeps it that way: drop
+  // `neem.png` into src/ui/plates/ and it still will not open a block in the field notes.
+  const plate = kind === 'creature' && note.species ? plateFor(note.species.id) : null;
 
   return (
     <dl className={plate ? 'note note-plated' : 'note'}>

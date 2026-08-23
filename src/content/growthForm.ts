@@ -47,12 +47,28 @@ export type GrowthForm =
  * Order matters. `palm` is tried before `tree` because a date palm is both and the palm silhouette
  * is the more useful one; `pitcher` before `flower` for the same reason. Within a form the terms
  * are ordinary words first, Linnaean roots second.
+ *
+ * `grass` and `seaweed` are above `tree` for a blunter reason: the match is a plain substring, and
+ * **`Saltreed` contains the letters of `tree`**. It classified as a tree for as long as this file
+ * has existed, which cost nothing while the mark was an abstract silhouette and is obvious the
+ * moment a plant is drawn as 🌳 or 🌾. Word boundaries are not the fix — `reed` is mid-word there
+ * too, so requiring them would classify it as nothing at all.
+ *
+ * `seaweed` goes above `grass` rather than merely above `tree`, so that `Antarctic Kelp-Grass`
+ * stays marine. It is *Zostera*, a true seagrass rather than an alga, so either answer is
+ * defensible botanically — but it grows in the sea, and moving it was a side effect of fixing
+ * Saltreed rather than a decision anybody made.
  */
 const FORM_KEYWORDS: [GrowthForm, string[]][] = [
   // Carnivorous plants first: they are flowers and vines by name, and neither icon would say so.
   ['pitcher', ['pitcher', 'nepenthes', 'carnivor', 'flytrap']],
   // Palms read as a distinct silhouette from a broad canopy, so they are pulled out of `tree`.
   ['palm', ['palm', 'arecac', 'phoenix dactyl', 'coco']],
+  ['seaweed', ['seaweed', 'coral', 'reef', 'algae', 'kelp', 'sargass', 'laminar']],
+  ['grass', [
+    'grass', 'reed', 'barley', 'rice', 'bamboo', 'sedge', 'cane', 'oryza', 'hordeum',
+    'bambus', 'phragmit', 'saccharum', 'cyper'
+  ]],
   ['tree', [
     'tree', 'banyan', 'fig', 'teak', 'pine', 'mangrove', 'acacia', 'sandalwood', 'neem',
     'tamarind', 'mahua', 'bonewood', 'oak', 'cedar', 'timber', 'ficus', 'terminalia',
@@ -60,14 +76,9 @@ const FORM_KEYWORDS: [GrowthForm, string[]][] = [
   ]],
   ['vine', ['vine', 'creeper', 'liana', 'strangler', 'moonseed', 'pepper', 'piper', 'convolvul', 'bramble']],
   ['cactus', ['cactus', 'succulent', 'gourd', 'euphorb', 'cactac', 'aloe']],
-  ['seaweed', ['seaweed', 'coral', 'reef', 'algae', 'kelp', 'sargass', 'laminar']],
   ['fern', ['fern', 'frond', 'bracken', 'pteris', 'adiant', 'polypod']],
   ['moss', ['moss', 'lichen', 'liverwort', 'bryo', 'sphagn', 'cladon']],
 
-  ['grass', [
-    'grass', 'reed', 'barley', 'rice', 'bamboo', 'sedge', 'cane', 'oryza', 'hordeum',
-    'bambus', 'phragmit', 'saccharum', 'cyper'
-  ]],
   // Before `flower`, because `Lotus-Root Taro` carries both words and it is the root that is the
   // plant -- the part dug up, eaten and traded. A name naming two parts means the specific one.
   ['root', ['root', 'tuber', 'taro', 'ginger', 'rhizome', 'shilajit', 'curcuma', 'zingiber', 'colocasia']],
@@ -92,6 +103,52 @@ export function growthFormOf(plant: { name: string; binomial: string | null }): 
     if (keywords.some((word) => haystack.includes(word))) return form;
   }
   return 'unknown';
+}
+
+/**
+ * One emoji per growth form — what a plant is drawn as in the notes.
+ *
+ * Plants get an emoji where animals get a painted plate, and that asymmetry is deliberate rather
+ * than a gap in the art. A creature plate earns its block: it is the thing you walked out to see,
+ * and `endgame.png` frames it that way. A plant is scenery you are naming, so it wants a mark on
+ * the line beside the name and nothing more — the size of an emoji in a sentence, because that is
+ * exactly what it is.
+ *
+ * Keyed on the form rather than the species, so all ninety flora in canon are covered by thirteen
+ * entries and a new plant needs no work at all. `Record<GrowthForm, string>` is the point of the
+ * type: adding a form to the union fails the build here until it has a mark.
+ *
+ * On the choices — every one is a compromise, because Unicode has no moss:
+ *
+ *   * `moss` takes the clover. There is no lichen or moss emoji; a low green thing close to the
+ *     ground is the nearest honest reading.
+ *   * `root` takes the carrot rather than the potato: it reads as a root at sixteen pixels, which
+ *     a brown lump does not.
+ *   * `pitcher` takes the trap. A carnivorous plant's one interesting fact is that it catches
+ *     things, and a jug emoji would say the opposite of what the name means.
+ *   * `seaweed` takes the coral (Unicode 14, 2021) and `shrub` the potted plant (Unicode 12,
+ *     2019). These are the two newest and so the likeliest to land as a blank box on an old
+ *     system; everything else here is Unicode 6.0 or 9.0 and safe everywhere.
+ */
+export const FORM_EMOJI: Record<GrowthForm, string> = {
+  tree: '🌳',
+  palm: '🌴',
+  vine: '🍃',
+  flower: '🌸',
+  grass: '🌾',
+  fern: '🌿',
+  moss: '🍀',
+  shrub: '🪴',
+  root: '🥕',
+  cactus: '🌵',
+  seaweed: '🪸',
+  pitcher: '🪤',
+  unknown: '🌱'
+};
+
+/** The emoji for a plant, from its name and binomial. */
+export function emojiFor(plant: { name: string; binomial: string | null }): string {
+  return FORM_EMOJI[growthFormOf(plant)];
 }
 
 /**

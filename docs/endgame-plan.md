@@ -30,7 +30,6 @@ and is listed below rather than dressed up as one.
 |---|---|---|
 | **Five chip icons** | item 7 | small; `src/ui/Controls.tsx` still renders `✒ ◇ ✎ ❧ ☰` |
 | **The shoreline pass** | item 4 | code; reeds and foam on the land side of water |
-| **Flora plates** | the plate queue | art; 8 queued, 0 painted — all 20 done so far are fauna |
 | **Fauna beyond tier one** | the plate queue | art, optional; 20 of the 40 listed, ~16% more encounters |
 
 ### Closed by a decision rather than by work
@@ -42,6 +41,10 @@ outstanding:
   built, measured at **24% of the frame** on CI's software rasteriser, and removed. See
   `docs/rendering.md`. The warm paper grain it was paired with never landed either and has no
   advocate; the grain that *did* ship is on the notebook page, which is item 5.
+- **Flora are not painted.** The queue listed eight plants. A plant in the notes is scenery being
+  named as you pass, not the thing you walked out to see, so it gets an emoji on the line — keyed
+  on growth form, thirteen entries covering all ninety. The drawn plant silhouettes were deleted
+  with it: they were good and they were solving the wrong problem, and `git log` has the paths.
 - **Water edges stay hard.** Item 4 wanted land dissolving into water. `blends()` in
   `src/game/frames.ts` deliberately excludes every land/water boundary — *"a shore is a line, and
   should stay one"* — so the dissolve is off the table. The shoreline **pass** above is the half of

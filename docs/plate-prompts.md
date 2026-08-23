@@ -6,8 +6,10 @@ is built from canon's own words for that species, so the picture and the field n
 Order matters and is not alphabetical: it is the order a player meets them, from
 `node tools/reachable-species.js --top=40`. Painting the first twenty fauna covers roughly **47%
 of every creature encounter in the game**; forty covers 63%. Nothing is blocked while they are
-missing — the panel draws a derived silhouette for all 297 species — so these can arrive one at a
-time, in any quantity, and each one immediately replaces a silhouette.
+missing — the panel draws a derived silhouette for every unpainted animal — so these can arrive one
+at a time, in any quantity, and each one immediately replaces a silhouette.
+
+**Animals only.** Plants are drawn as an emoji and are not painted at all; see below for why.
 
 ---
 
@@ -145,21 +147,31 @@ Two notes carried forward from painting them:
 | 19 ✅ | `plate-vindhya-leopard.png` | A leopard lying along a warm basalt ledge, relaxed, tail hanging. Dry hill scrub. Not snarling, not stalking. |
 | 20 ✅ | `plate-basalt-cliff-hornbill.png` | A large hornbill with a heavy casqued bill, perched on a dark basalt outcrop. Highland cliff behind. |
 
-## Flora — the first eight
+## Flora — not painted at all
 
-Plants are drawn the same way, but **whole plant or a characteristic branch**, not a specimen
-pressed flat, and rooted in the ground it grows on.
+**Plants are an emoji, and that is the finished answer rather than a queue nobody has reached.**
 
-| # | File name | Subject line |
-|---|---|---|
-| 1 | `plate-saltreed.png` | Tall shoulder-high estuary reeds standing in brackish flood water, the kind cut for marsh-hut thatch. Grey-green, wind-leaned. |
-| 2 | `plate-neem.png` | A neem tree shading a field edge, dense with small bitter leaves, grain sacks stored in its shade. |
-| 3 | `plate-tamarind.png` | A tamarind tree leaning over a road, dark pods hanging like fingers, the earth beneath swept smooth by people who sit there. |
-| 4 | `plate-asura-thorn.png` | Dense hooked scrub grown as a living fence, thorns prominent, on pale disturbed ground. Slightly unwelcoming. |
-| 5 | `plate-bonewood-mangrove.png` | A mangrove with naturally curved, bone-pale hard timber and arching stilt roots, on a dark volcanic coast. |
-| 6 | `plate-wild-indigo.png` | A scrubby wild indigo bush on dry upland ground, small leaves, a few deep blue-purple flower spikes. |
-| 7 | `plate-mahua.png` | A flowering mahua tree of the dry plateau at night, pale blossoms falling and scattered on the ground beneath it. |
-| 8 | `plate-iron-teak.png` | A tall dense highland teak, broad leaves, straight heavy trunk — timber cut for river craft and tower beams. |
+The eight flora that used to be listed here are gone. A creature plate earns its block: it is the
+thing you walked out to see, and `endgame.png` frames it that way. A plant is scenery you are
+naming as you pass, and the right weight for that is a character on the line — 🌳 beside *Mappa
+Mundi Banyan*, 🌾 beside *Saltreed* — the size of an emoji in a sentence, because that is exactly
+what it is.
+
+It is keyed on the **growth form**, not the species, so all ninety plants in canon are covered by
+thirteen entries in `FORM_EMOJI` and a new plant needs no work. `Record<GrowthForm, string>` makes
+the build fail if a form is ever added without a mark.
+
+| Form | | Form | | Form | |
+|---|---|---|---|---|---|
+| tree | 🌳 | palm | 🌴 | vine | 🍃 |
+| flower | 🌸 | grass | 🌾 | fern | 🌿 |
+| moss | 🍀 | shrub | 🪴 | root | 🥕 |
+| cactus | 🌵 | seaweed | 🪸 | pitcher | 🪤 |
+| unknown | 🌱 | | | | |
+
+Two are worth knowing about if a mark ever shows as an empty box: **🪸 seaweed** (Unicode 14, 2021)
+and **🪴 shrub** (Unicode 12, 2019) are the newest. Everything else is Unicode 6.0 or 9.0 and safe
+anywhere. A custom glyph could replace either without touching anything but the table.
 
 ---
 
