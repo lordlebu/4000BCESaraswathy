@@ -73,6 +73,11 @@ describe('every animal gets a shape', () => {
     expect(bodyPlanOf({ name: 'Giant Jungle Raptor', binomial: 'Silvanus gigas' })).toBe('dinosaur');
     expect(bodyPlanOf({ name: 'Dimetrodon Scout-Mount', binomial: 'Dimetrodon minor' })).toBe('synapsid');
     expect(bodyPlanOf({ name: 'Giant Horned Voay', binomial: 'Voay maximus' })).toBe('crocodilian');
+    // Canon spells one theropod genus two ways, and `Silvanus` is also a real-world beetle genus
+    // -- which is why the Iridescent Lothal Silvanus used to be drawn as a cricket. Canon's own
+    // prompt calls it "a winged, bird-like dinosaurid with shimmering plumage".
+    expect(bodyPlanOf({ name: 'Iridescent Lothal Silvanus', binomial: 'Silvanus pictus' })).toBe('dinosaur');
+    expect(bodyPlanOf({ name: 'Crested Sylvian', binomial: 'Sylvianus cristatus' })).toBe('dinosaur');
     // A pareiasaur really is a reptile. The `-saurus` in a name is not evidence of anything.
     expect(bodyPlanOf({ name: 'Scutosaurus Battering-Ram', binomial: 'Scutosaurus titan' })).toBe('reptile');
     // `camel` used to win here and made a baby crocodile a mammal.

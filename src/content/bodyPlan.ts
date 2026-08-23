@@ -101,7 +101,12 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
   ['dinosaur', [
     'raptor', 'nagaraptor', 'vajraptor', 'rajasaurus', 'megalosaur', 'sauropod',
     'sauropodoligator', 'theropod', 'dinosaur', 'allosaur', 'ceratops', 'tyrannosaur',
-    'sylvianus'
+    // Canon spells one genus two ways -- `Sylvianus cristatus` and `Silvanus gigas` are the same
+    // kind of animal -- so both are listed. `silvanus` also had to be taken *out* of the insect
+    // keywords, where it had been put because Silvanus is a real-world beetle genus. Canon's is
+    // not: `Silvanus pictus` is "a winged, bird-like dinosaurid with shimmering plumage", and the
+    // Iridescent Lothal Silvanus was being drawn as a cricket.
+    'sylvianus', 'silvanus'
   ]],
 
   ['bird', [
@@ -131,7 +136,7 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
   ['arachnid', ['spider', 'arachn', 'scorpion', 'tarantula', 'mite', 'tick', 'nephila', 'spinner', 'eurypterus', 'eurypterid']],
   ['insect', [
     'coleopt', 'apis', 'formic', 'lepidopt', 'odonat', 'mantis', 'scarab', 'vespa', 'cicada',
-    'bombyx', 'anax', 'isotoma', 'silvanus', 'beetle', 'moth', 'butterfly', 'bee', 'wasp', 'ant', 'dragonfly',
+    'bombyx', 'anax', 'isotoma', 'beetle', 'moth', 'butterfly', 'bee', 'wasp', 'ant', 'dragonfly',
     'locust', 'cricket', 'termite', 'weevil', 'grasshopper', 'firefly', 'hornet', 'flea', 'megapis',
     'centipede', 'millipede'
   ]],
