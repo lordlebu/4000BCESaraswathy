@@ -177,3 +177,32 @@ describe('birds are not non-avian dinosaurs, and the genus decides which', () =>
     expect(plan('Vajraptor', 'Vajraptor territorialis')).toBe('dinosaur');
   });
 });
+
+describe('an animal named for its prey is not its prey', () => {
+  // This world names animals for what they do, which the header of bodyPlan.ts says and this
+  // block is the bill for. Three mongooses are called Crab-Eater and Centipede-Eater, and the
+  // prey word was matched long before `mongoose` ever was.
+  //
+  // Found by hand-authoring canon's clades and diffing them against this classifier -- the first
+  // time the two had been compared. Thirty-two species in, it had five wrong.
+
+  const plan = (name: string, binomial: string | null) => bodyPlanOf({ name, binomial });
+
+  it('reads Herpestes as a mongoose whatever it is named after', () => {
+    expect(plan('Mangrove Crab-Eater', 'Herpestes mangrovus')).toBe('mammal');
+    expect(plan('Vindhya Centipede-Eater', 'Herpestes centipeda')).toBe('mammal');
+  });
+
+  it('still reads a real centipede as one', () => {
+    // The fix has to be the genus and not a blanket veto on the word, or Scolopendra goes with it.
+    expect(plan('Hourglass Centipede', 'Scolopendra arenaria')).toBe('insect');
+    expect(plan('Lava-Basalt Centipede', 'Scolopendra vulcanica')).toBe('insect');
+  });
+
+  it('reads Indicator as the honeyguide genus, which is a bird', () => {
+    // `indicator` sat in the *mammal* keyword list. Both of canon's honeyguides are birds, and
+    // one of them already has a painted plate.
+    expect(plan('Honey-Guide Bird', 'Indicator narmadae')).toBe('bird');
+    expect(plan('Narmada Honey-Guide', 'Indicator narmadensis')).toBe('bird');
+  });
+});

@@ -82,7 +82,18 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
   // The manticores stay. They are not tainted animals but their own thing, and canon's Tendua is
   // deliberately one of them.
   ['spectre', ['spectral', 'wraith', 'spectre', 'umbra', 'manticore', 'manticora']],
-  // Canon's invented genera, whose common names say nothing useful about the body.
+  // Genera whose common name actively misleads, checked before anything reads the common name.
+  //
+  // This block began as canon's *invented* genera and has had to widen, because the problem is not
+  // that a genus is invented -- it is that this world names animals for what they do. Three
+  // mongooses are called Crab-Eater and Centipede-Eater, and `crab` and `centipede` are matched
+  // before `mongoose` ever is, so all three came out as the thing they eat. Naming `herpestes`
+  // here settles it once for the genus instead of once per prey animal.
+  //
+  // `indicator` is here for the opposite reason: it was in the **mammal** list. *Indicator* is the
+  // honeyguide genus and both of canon's honeyguides are birds -- including the one that already
+  // has a painted plate. Found by hand-authoring canon's clades and comparing them against this
+  // file, which is the first time the two have ever been checked against each other.
   //
   // `sylvianus` sits here, above `dinosaur`, and the order is the whole point. Canon's Sylvianus
   // are **avian dinosaurids -- birds** -- but two of the five are called raptors and a third a
@@ -93,8 +104,9 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
   // a real-world genus of flat bark beetle, which is why the Iridescent Lothal Silvanus was once
   // drawn as a cricket -- it is neither a beetle nor, as the fix for that briefly made it, a
   // non-avian dinosaur.
-  ['bird', ['cognitavi', 'sylvianus', 'silvanus', 'aepyornis']],
+  ['bird', ['cognitavi', 'sylvianus', 'silvanus', 'aepyornis', 'indicator']],
   ['mollusc', ['vrkshasmara', 'vṛkṣaśmara']],
+  ['mammal', ['herpestes']],
 
   // Above `reptile`, which has `saur` and `croc` and would otherwise swallow all three, and above
   // `mammal`, which was turning **Camelosuchus Calf** into a mammal on the strength of `camel`.
@@ -165,7 +177,7 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
     'jackal', 'wolf', 'elephant', 'rhino', 'whale', 'dolphin', 'orca', 'seal', 'shrew', 'mouse',
     'rat', 'civet', 'mongoose', 'unicorn', 'horse', 'goat', 'sheep', 'cattle', 'ox', 'langur',
     'squirrel', 'wallaby', 'camel', 'ass', 'ibex', 'pangolin', 'porcupine', 'hare', 'sloth',
-    'bear', 'lion', 'panther', 'vulpes', 'fox', 'indicator'
+    'bear', 'lion', 'panther', 'vulpes', 'fox'
   ]]
 ];
 
