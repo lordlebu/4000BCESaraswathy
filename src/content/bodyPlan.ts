@@ -133,7 +133,16 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
     'saur', 'crocod', 'python', 'naja', 'varan', 'gecko', 'testud', 'chelon', 'ophi', 'serpen',
     'draco', 'raptor', 'vajraptor', 'nagaraptor', 'agama', 'voay', 'gorgonops', 'dimetrodon', 'baurusuchus', 'snake', 'lizard', 'turtle',
     'tortoise', 'monitor', 'viper', 'cobra', 'krait', 'gharial', 'crocodile', 'skink', 'iguana',
-    'terrapin', 'croc', 'suchus', 'dinosaur', 'chameleon', 'megalosaur', 'postosuchus', 'acanthodactylus', 'scutosaurus', 'sauropodoligator'
+    'terrapin', 'croc', 'suchus', 'dinosaur', 'chameleon', 'megalosaur', 'postosuchus', 'acanthodactylus', 'scutosaurus', 'sauropodoligator',
+    // An archosauromorph: a diapsid off an older branch than either the dinosaurs or the
+    // crocodilians, so it belongs with the reptiles rather than with `dinosaur` despite the name.
+    //
+    // Listed explicitly, and there is no general `-saurus` fallback, deliberately. A blanket rule
+    // would have to guess, and it would guess wrong on Rajasaurus, which is a dinosaur. The cost
+    // of that discipline is visible right here: adding these two species to canon drew them as
+    // `unknown` -- footprints -- until this line was written in a different repository. That is
+    // the argument for canon carrying a clade of its own, and it is now a measured one.
+    'shringasaur'
   ]],
   ['amphibian', ['rana', 'bufo', 'megalobatrachus', 'frog', 'toad', 'salamander', 'newt', 'caecilian']],
     // Eurypterids are sea scorpions, and the chelicerate silhouette is the closest honest shape for

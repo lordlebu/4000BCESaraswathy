@@ -73,6 +73,11 @@ describe('every animal gets a shape', () => {
     expect(bodyPlanOf({ name: 'Nagaraptor', binomial: 'Nagaraptor vallatus' })).toBe('dinosaur');
     expect(bodyPlanOf({ name: 'Dimetrodon Scout-Mount', binomial: 'Dimetrodon minor' })).toBe('synapsid');
     expect(bodyPlanOf({ name: 'Giant Horned Voay', binomial: 'Voay maximus' })).toBe('crocodilian');
+    // Shringasaurus is an archosauromorph -- a diapsid off an older branch than the dinosaurs or
+    // the crocodilians -- so it lands with the reptiles despite the name. Both forms, because a
+    // lineage that splits across two entities must not split across two body plans.
+    expect(bodyPlanOf({ name: 'Shringasaurus', binomial: 'Shringasaurus indicus' })).toBe('reptile');
+    expect(bodyPlanOf({ name: 'Frilled Shringasaurus', binomial: 'Shringasaurus torquatus' })).toBe('reptile');
     // A pareiasaur really is a reptile. The `-saurus` in a name is not evidence of anything.
     expect(bodyPlanOf({ name: 'Scutosaurus Battering-Ram', binomial: 'Scutosaurus titan' })).toBe('reptile');
     // `camel` used to win here and made a baby crocodile a mammal.
