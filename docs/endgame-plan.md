@@ -17,12 +17,35 @@ this was read against was captured from a dev server on `feat/solarpunk-spoken`,
 | 02 · density, water, fog | **Shipped** — PR 68 |
 | 03 · the notebook page | **Shipped** — PR 69, 71 |
 | 04a · the plate work queue | **Shipped** — PR 70 |
-| 04b · plate intake | **Shipped** — `tools/build-plates.js`, first plate in |
-| 05 · painting the plates | Open, 1 of 56, and now purely art |
-| 06 · a guard against slow frames | **Proposed** — see below |
+| 04b · plate intake | **Shipped** — PR 78, `tools/build-plates.js` |
+| 05 · painting the plates | **Tier one complete** — PR 78, 79 and one open branch: 20 of 20 |
+| 06 · a guard against slow frames | **Shipped** — PR 76, 77, `npm run perf` |
 
-What remains that is *not* art: the shoreline pass (item 4), the five chip icons, and the guard
-in Phase 06. Everything else on the plate side is now a painting queue with a working intake.
+**Every phase in the original programme has now landed.** What is left was never in it as a phase,
+and is listed below rather than dressed up as one.
+
+### Genuinely still open
+
+| Item | Where it came from | Size |
+|---|---|---|
+| **Five chip icons** | item 7 | small; `src/ui/Controls.tsx` still renders `✒ ◇ ✎ ❧ ☰` |
+| **The shoreline pass** | item 4 | code; reeds and foam on the land side of water |
+| **Flora plates** | the plate queue | art; 8 queued, 0 painted — all 20 done so far are fauna |
+| **Fauna beyond tier one** | the plate queue | art, optional; 20 of the 40 listed, ~16% more encounters |
+
+### Closed by a decision rather than by work
+
+Both of these were in the plan and are now settled the other way, which is not the same as being
+outstanding:
+
+- **The vignette is withdrawn.** Item 7 asked for a slight vignette over the sky layer. It was
+  built, measured at **24% of the frame** on CI's software rasteriser, and removed. See
+  `docs/rendering.md`. The warm paper grain it was paired with never landed either and has no
+  advocate; the grain that *did* ship is on the notebook page, which is item 5.
+- **Water edges stay hard.** Item 4 wanted land dissolving into water. `blends()` in
+  `src/game/frames.ts` deliberately excludes every land/water boundary — *"a shore is a line, and
+  should stay one"* — so the dissolve is off the table. The shoreline **pass** above is the half of
+  that item still live: props on the land side, not a blended edge.
 
 ---
 

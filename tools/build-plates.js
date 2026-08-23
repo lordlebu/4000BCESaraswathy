@@ -72,6 +72,20 @@ const FLAT_SD = 6;
 const BORDER_TOLERANCE = 6;
 
 /**
+ * The least of a side a border must claim to be worth stripping, as a fraction.
+ *
+ * The rule crops uniformly, by the *shallowest* of the four edges, so that it can never cut into
+ * the picture on the tightest side. The cost of that choice is that an asymmetric frame reduces to
+ * its thinnest corner: the cloud antelope measured 50/22/35/3 and duly had 3 pixels of a 1024px
+ * image removed, which is a rebuild for nothing.
+ *
+ * Below one percent there is no frame worth the name, so say so and leave the plate alone. This is
+ * about honest reporting as much as pixels -- a build line reading "3px border stripped" invites
+ * the belief that a frame was dealt with when it was not.
+ */
+const MIN_BORDER = 0.01;
+
+/**
  * The most of a side a border may claim, as a fraction.
  *
  * A backstop, not a tuning knob. A real frame is a few percent; if this rule ever wants a fifth of
@@ -468,7 +482,16 @@ function borderInset(img) {
   if (Math.max(...means) - Math.min(...means) > BORDER_TOLERANCE) return 0;
 
   // The shallowest edge, so the crop never cuts into the picture on the tightest side.
-  return Math.min(...edges.map((e) => e.depth));
+  //
+  // The known limit, and it is a real one: a frame that is much thicker on some edges than others
+  // collapses to its thinnest. The monsoon crane came back framed 149/167/40/2 and gets nothing --
+  // it also fails the colour test at a spread of 8.3, so both halves reject it, but even passing
+  // them would have bought two pixels. Fixing that properly means flood-filling the paper colour
+  // inward from the corners rather than measuring whole rows, and the plate that makes that
+  // dangerous is already in the set: a white egret on cream paper is exactly what such a fill
+  // leaks into. Left alone deliberately; a re-roll with the frame clause is cheaper and safer.
+  const inset = Math.min(...edges.map((e) => e.depth));
+  return inset >= Math.min(img.width, img.height) * MIN_BORDER ? inset : 0;
 }
 
 /**
