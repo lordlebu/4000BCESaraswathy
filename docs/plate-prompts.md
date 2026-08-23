@@ -1,5 +1,8 @@
 # Species plate prompts — ready to paste
 
+> Why plates exist and what they are for:
+> **[Repainting South of Tethys](https://claude.ai/code/artifact/2ee2b8c5-e1e5-429a-ba41-334576ce8ba0)**. Private artifact; ask the repo owner if the link 404s.
+
 Copy the **style block** once, then append one **subject line** per plate. Every subject line below
 is built from canon's own words for that species, so the picture and the field note agree.
 

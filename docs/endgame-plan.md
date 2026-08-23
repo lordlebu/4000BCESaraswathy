@@ -1,5 +1,15 @@
 # Endgame plan — getting the game to look like `endgame.png`
 
+> **Published, illustrated version:** [Repainting South of Tethys](https://claude.ai/code/artifact/2ee2b8c5-e1e5-429a-ba41-334576ce8ba0)
+>
+> Same content, laid out to be read rather than diffed — the phase table, the effort ledger against
+> the original estimate, and the two corrections the programme had to make to its own premises. It
+> is the better thing to hand someone who is picking up the art. Start there, come here for detail.
+>
+> It is a **private** artifact: it opens for the repository owner and for anyone they have shared it
+> with, and 404s for everyone else. If you are reading this and the link is dead, ask — or just read
+> on, because nothing below depends on it.
+
 `endgame.png` (repo root, untracked) is the target frame: a painted wetland seen from above, a
 figure standing in it, five parchment chips along the top, and a torn field-notebook page across
 the bottom carrying a species plate.

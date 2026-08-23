@@ -1,5 +1,10 @@
 # Art direction — the rules, and what they cost
 
+> Picking up the art? Read **[Repainting South of Tethys](https://claude.ai/code/artifact/2ee2b8c5-e1e5-429a-ba41-334576ce8ba0)** first — the whole programme in
+> one illustrated page, including what was tried and declined. Then this file for the rules, and
+> `docs/plate-prompts.md` for what to actually generate. (Private artifact; ask the repo owner if
+> the link 404s.)
+
 `docs/art-brief.md` is the prompting document: what to ask an image model for, and the failures that
 shaped each request. This is the layer above it — **why the art is the way it is**, which decisions
 are settled, and which are still open.
