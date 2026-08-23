@@ -70,14 +70,9 @@ describe('every animal gets a shape', () => {
   it('tells the archosaurs and stem-mammals apart from the lizards', () => {
     // `reptile` was collecting all of these and drawing them as one shape. They are not one shape.
     expect(bodyPlanOf({ name: 'Megalosaurus', binomial: null })).toBe('dinosaur');
-    expect(bodyPlanOf({ name: 'Giant Jungle Raptor', binomial: 'Silvanus gigas' })).toBe('dinosaur');
+    expect(bodyPlanOf({ name: 'Nagaraptor', binomial: 'Nagaraptor vallatus' })).toBe('dinosaur');
     expect(bodyPlanOf({ name: 'Dimetrodon Scout-Mount', binomial: 'Dimetrodon minor' })).toBe('synapsid');
     expect(bodyPlanOf({ name: 'Giant Horned Voay', binomial: 'Voay maximus' })).toBe('crocodilian');
-    // Canon spells one theropod genus two ways, and `Silvanus` is also a real-world beetle genus
-    // -- which is why the Iridescent Lothal Silvanus used to be drawn as a cricket. Canon's own
-    // prompt calls it "a winged, bird-like dinosaurid with shimmering plumage".
-    expect(bodyPlanOf({ name: 'Iridescent Lothal Silvanus', binomial: 'Silvanus pictus' })).toBe('dinosaur');
-    expect(bodyPlanOf({ name: 'Crested Sylvian', binomial: 'Sylvianus cristatus' })).toBe('dinosaur');
     // A pareiasaur really is a reptile. The `-saurus` in a name is not evidence of anything.
     expect(bodyPlanOf({ name: 'Scutosaurus Battering-Ram', binomial: 'Scutosaurus titan' })).toBe('reptile');
     // `camel` used to win here and made a baby crocodile a mammal.
@@ -134,5 +129,46 @@ describe('every animal gets an emoji until it gets a plate', () => {
     const dino = mark('Megalosaurus', null);
     const synapsid = mark('Dimetrodon Scout-Mount', 'Dimetrodon minor');
     expect(new Set([gecko, croc, dino, synapsid]).size).toBe(4);
+  });
+});
+
+describe('birds are not non-avian dinosaurs, and the genus decides which', () => {
+  // Canon keeps three groups apart that cladistics does not: reptiles, non-avian dinosaurs, and
+  // birds. Birds *are* avian dinosaurs, so `bird` is not a sub-case of `dinosaur` here -- they are
+  // siblings, and which one a creature lands in is canon's call rather than a taxonomy textbook's.
+  //
+  // The hard part is that canon's avian dinosaurids are called raptors and theropods. Reading the
+  // common name gets three of the five wrong, so the genus is matched first and the name gets no
+  // vote at all.
+
+  const plan = (name: string, binomial: string | null) => bodyPlanOf({ name, binomial });
+
+  it.each([
+    ['Iridescent Lothal Silvanus', 'Silvanus pictus'],
+    ['Giant Jungle Raptor', 'Silvanus gigas'],
+    ['Crested Sylvian', 'Sylvianus cristatus'],
+    ['Lothal Heron-Raptor', 'Sylvianus minor'],
+    ['Stealth-Patterned Theropod', 'Sylvianus occultus'],
+    ['Cognitavi Cloud-Hermit', 'Cognitavi solitarius'],
+    ['Steppe-Plumed Elephantbird', 'Aepyornis stephensis']
+  ])('%s is a bird', (name, binomial) => {
+    expect(plan(name, binomial)).toBe('bird');
+  });
+
+  it.each([
+    ['Vajraptor', 'Vajraptor territorialis'],
+    ['Nagaraptor', 'Nagaraptor vallatus'],
+    ['Rajasaurus Ambush-Drake', 'Rajasaurus asuricus'],
+    ['Colossal Void-Devourer', 'Sauropodoligator titan'],
+    ['Megalosaurus', null]
+  ])('%s is a non-avian dinosaur', (name, binomial) => {
+    expect(plan(name, binomial)).toBe('dinosaur');
+  });
+
+  it('lets the genus beat the common name, which is where this goes wrong', () => {
+    // Two creatures, both called a raptor, one of each. Nothing in the common names separates
+    // them; only Sylvianus versus Vajraptor does.
+    expect(plan('Giant Jungle Raptor', 'Silvanus gigas')).toBe('bird');
+    expect(plan('Vajraptor', 'Vajraptor territorialis')).toBe('dinosaur');
   });
 });

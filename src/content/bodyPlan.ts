@@ -26,8 +26,10 @@
 // and snakes, and drawing all four as a lizard. They are not the same animal in any sense a player
 // would recognise:
 //
-//   * `dinosaur` -- the non-avian ones. Nagaraptor, Vajraptor, Rajasaurus, Megalosaurus,
-//     Sauropodoligator and canon's Sylvianus theropods.
+//   * `dinosaur` -- the **non-avian** ones, and only those. Nagaraptor, Vajraptor, Rajasaurus,
+//     Megalosaurus, Sauropodoligator. Birds are avian dinosaurs and canon keeps the two apart, so
+//     `bird` is not a sub-case of this: Sylvianus, Cognitavi and the elephant birds are birds even
+//     where their common names say raptor or theropod.
 //   * `synapsid` -- Dimetrodon, Gorgonops, Estemmenosuchus. Stem-mammals, on our branch rather than
 //     the reptile one, and it is simply wrong to draw them as lizards.
 //   * `crocodilian` -- Baurusuchus, Postosuchus, Camelosuchus, Voay. Croc-line archosaurs.
@@ -81,7 +83,17 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
   // deliberately one of them.
   ['spectre', ['spectral', 'wraith', 'spectre', 'umbra', 'manticore', 'manticora']],
   // Canon's invented genera, whose common names say nothing useful about the body.
-  ['bird', ['cognitavi']],
+  //
+  // `sylvianus` sits here, above `dinosaur`, and the order is the whole point. Canon's Sylvianus
+  // are **avian dinosaurids -- birds** -- but two of the five are called raptors and a third a
+  // theropod, so reading the common name gets all three wrong. The genus decides; the name does
+  // not get a vote.
+  //
+  // Canon spells it both `Sylvianus` and `Silvanus`, so both are listed. `Silvanus` is separately
+  // a real-world genus of flat bark beetle, which is why the Iridescent Lothal Silvanus was once
+  // drawn as a cricket -- it is neither a beetle nor, as the fix for that briefly made it, a
+  // non-avian dinosaur.
+  ['bird', ['cognitavi', 'sylvianus', 'silvanus', 'aepyornis']],
   ['mollusc', ['vrkshasmara', 'vṛkṣaśmara']],
 
   // Above `reptile`, which has `saur` and `croc` and would otherwise swallow all three, and above
@@ -100,13 +112,7 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
   ]],
   ['dinosaur', [
     'raptor', 'nagaraptor', 'vajraptor', 'rajasaurus', 'megalosaur', 'sauropod',
-    'sauropodoligator', 'theropod', 'dinosaur', 'allosaur', 'ceratops', 'tyrannosaur',
-    // Canon spells one genus two ways -- `Sylvianus cristatus` and `Silvanus gigas` are the same
-    // kind of animal -- so both are listed. `silvanus` also had to be taken *out* of the insect
-    // keywords, where it had been put because Silvanus is a real-world beetle genus. Canon's is
-    // not: `Silvanus pictus` is "a winged, bird-like dinosaurid with shimmering plumage", and the
-    // Iridescent Lothal Silvanus was being drawn as a cricket.
-    'sylvianus', 'silvanus'
+    'sauropodoligator', 'theropod', 'dinosaur', 'allosaur', 'ceratops', 'tyrannosaur'
   ]],
 
   ['bird', [
