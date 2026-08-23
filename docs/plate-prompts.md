@@ -168,6 +168,10 @@ without a mark.
 
 ### Animals, by body plan
 
+Reptiles, **non-avian** dinosaurs and birds are three separate groups, deliberately. Birds are
+avian dinosaurs and canon keeps them apart, so 🦖 is only ever the non-avian ones — Sylvianus and
+Cognitavi are 🐦 even where their common names say raptor or theropod.
+
 | | | | | | |
 |---|---|---|---|---|---|
 | mammal 🐾 | bird 🐦 | reptile 🦎 | dinosaur 🦖 | synapsid 🦣 | crocodilian 🐊 |

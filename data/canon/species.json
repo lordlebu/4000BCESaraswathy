@@ -1,5 +1,5 @@
 {
-  "canon_version": "1.9.0",
+  "canon_version": "1.10.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -5189,6 +5189,39 @@
       "mood": "watchful"
     },
     {
+      "id": "fauna_frilled_shringasaurus",
+      "type": "fauna",
+      "name": "Frilled Shringasaurus",
+      "scientific": "Shringasaurus torquatus",
+      "diet": "Herbivore",
+      "habitats": [
+        "region_narmada_plateau",
+        "region_aravali"
+      ],
+      "behaviour": [
+        "browsing",
+        "solitary",
+        "territorial"
+      ],
+      "related_species": [
+        "fauna_shringasaurus"
+      ],
+      "notes": "The larger, later form of the same lineage: half again the length, with a bony frill spreading back from behind the horns over the neck. The frill is display and shade rather than armour -- it is thin enough to glow at the edges with the sun behind it, and old bulls carry it scarred. Where the common Shringasaurus moves in herds, these hold ground alone and do not give way to caravans.",
+      "canon": "primary",
+      "sources": [
+        "SouthOfTethys.txt"
+      ],
+      "biomes": [
+        "plains",
+        "hills",
+        "mountains"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "journal_prompt": "It does not move aside. The frill turns first, edge-on and then full, thin enough that the low sun comes through it in red, and the horns beneath it are the same shape as the smaller kind's and twice the size.",
+      "mood": "fearsome"
+    },
+    {
       "id": "fauna_honey_guide_bird",
       "type": "fauna",
       "name": "Honey-Guide Bird",
@@ -5380,6 +5413,38 @@
       "rarity": "common",
       "journal_prompt": "A skink pours itself into the dune and is gone, swimming under the surface like a fish.",
       "mood": "watchful"
+    },
+    {
+      "id": "fauna_shringasaurus",
+      "type": "fauna",
+      "name": "Shringasaurus",
+      "scientific": "Shringasaurus indicus",
+      "diet": "Herbivore",
+      "habitats": [
+        "region_narmada_plateau"
+      ],
+      "behaviour": [
+        "browsing",
+        "herd",
+        "diurnal"
+      ],
+      "related_species": [
+        "fauna_frilled_shringasaurus"
+      ],
+      "notes": "Horned archosauromorph of the Denwa ground, not a dinosaur and not a crocodile -- an older diapsid branch that outlasted both here. A pair of forward-curving horns sits above the eyes, on adults only; yearlings are hornless and are often taken for something else entirely. Browses the high branches by rearing onto its hind legs, which is what the neck is for.",
+      "canon": "primary",
+      "sources": [
+        "SouthOfTethys.txt"
+      ],
+      "biomes": [
+        "plains",
+        "forest",
+        "hills"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "Two horns come up out of the scrub before the head does, curved forward like a bull's and set above the eyes rather than on the nose. The animal rears slowly against a tree, takes what it came for, and drops back down.",
+      "mood": "patient"
     },
     {
       "id": "fauna_tendua",

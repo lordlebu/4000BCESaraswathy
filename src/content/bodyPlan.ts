@@ -26,8 +26,10 @@
 // and snakes, and drawing all four as a lizard. They are not the same animal in any sense a player
 // would recognise:
 //
-//   * `dinosaur` -- the non-avian ones. Nagaraptor, Vajraptor, Rajasaurus, Megalosaurus,
-//     Sauropodoligator and canon's Sylvianus theropods.
+//   * `dinosaur` -- the **non-avian** ones, and only those. Nagaraptor, Vajraptor, Rajasaurus,
+//     Megalosaurus, Sauropodoligator. Birds are avian dinosaurs and canon keeps the two apart, so
+//     `bird` is not a sub-case of this: Sylvianus, Cognitavi and the elephant birds are birds even
+//     where their common names say raptor or theropod.
 //   * `synapsid` -- Dimetrodon, Gorgonops, Estemmenosuchus. Stem-mammals, on our branch rather than
 //     the reptile one, and it is simply wrong to draw them as lizards.
 //   * `crocodilian` -- Baurusuchus, Postosuchus, Camelosuchus, Voay. Croc-line archosaurs.
@@ -81,7 +83,17 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
   // deliberately one of them.
   ['spectre', ['spectral', 'wraith', 'spectre', 'umbra', 'manticore', 'manticora']],
   // Canon's invented genera, whose common names say nothing useful about the body.
-  ['bird', ['cognitavi']],
+  //
+  // `sylvianus` sits here, above `dinosaur`, and the order is the whole point. Canon's Sylvianus
+  // are **avian dinosaurids -- birds** -- but two of the five are called raptors and a third a
+  // theropod, so reading the common name gets all three wrong. The genus decides; the name does
+  // not get a vote.
+  //
+  // Canon spells it both `Sylvianus` and `Silvanus`, so both are listed. `Silvanus` is separately
+  // a real-world genus of flat bark beetle, which is why the Iridescent Lothal Silvanus was once
+  // drawn as a cricket -- it is neither a beetle nor, as the fix for that briefly made it, a
+  // non-avian dinosaur.
+  ['bird', ['cognitavi', 'sylvianus', 'silvanus', 'aepyornis']],
   ['mollusc', ['vrkshasmara', 'vṛkṣaśmara']],
 
   // Above `reptile`, which has `saur` and `croc` and would otherwise swallow all three, and above
@@ -100,13 +112,7 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
   ]],
   ['dinosaur', [
     'raptor', 'nagaraptor', 'vajraptor', 'rajasaurus', 'megalosaur', 'sauropod',
-    'sauropodoligator', 'theropod', 'dinosaur', 'allosaur', 'ceratops', 'tyrannosaur',
-    // Canon spells one genus two ways -- `Sylvianus cristatus` and `Silvanus gigas` are the same
-    // kind of animal -- so both are listed. `silvanus` also had to be taken *out* of the insect
-    // keywords, where it had been put because Silvanus is a real-world beetle genus. Canon's is
-    // not: `Silvanus pictus` is "a winged, bird-like dinosaurid with shimmering plumage", and the
-    // Iridescent Lothal Silvanus was being drawn as a cricket.
-    'sylvianus', 'silvanus'
+    'sauropodoligator', 'theropod', 'dinosaur', 'allosaur', 'ceratops', 'tyrannosaur'
   ]],
 
   ['bird', [
@@ -127,7 +133,16 @@ const PLAN_KEYWORDS: [BodyPlan, string[]][] = [
     'saur', 'crocod', 'python', 'naja', 'varan', 'gecko', 'testud', 'chelon', 'ophi', 'serpen',
     'draco', 'raptor', 'vajraptor', 'nagaraptor', 'agama', 'voay', 'gorgonops', 'dimetrodon', 'baurusuchus', 'snake', 'lizard', 'turtle',
     'tortoise', 'monitor', 'viper', 'cobra', 'krait', 'gharial', 'crocodile', 'skink', 'iguana',
-    'terrapin', 'croc', 'suchus', 'dinosaur', 'chameleon', 'megalosaur', 'postosuchus', 'acanthodactylus', 'scutosaurus', 'sauropodoligator'
+    'terrapin', 'croc', 'suchus', 'dinosaur', 'chameleon', 'megalosaur', 'postosuchus', 'acanthodactylus', 'scutosaurus', 'sauropodoligator',
+    // An archosauromorph: a diapsid off an older branch than either the dinosaurs or the
+    // crocodilians, so it belongs with the reptiles rather than with `dinosaur` despite the name.
+    //
+    // Listed explicitly, and there is no general `-saurus` fallback, deliberately. A blanket rule
+    // would have to guess, and it would guess wrong on Rajasaurus, which is a dinosaur. The cost
+    // of that discipline is visible right here: adding these two species to canon drew them as
+    // `unknown` -- footprints -- until this line was written in a different repository. That is
+    // the argument for canon carrying a clade of its own, and it is now a measured one.
+    'shringasaur'
   ]],
   ['amphibian', ['rana', 'bufo', 'megalobatrachus', 'frog', 'toad', 'salamander', 'newt', 'caecilian']],
     // Eurypterids are sea scorpions, and the chelicerate silhouette is the closest honest shape for
