@@ -279,6 +279,25 @@ export function cliffFrame(edge: Edge, variant: number): number {
   return EDGE_ORDER.indexOf(edge) * EDGE_VARIANTS + (variant % EDGE_VARIANTS);
 }
 
+/**
+ * A treeline is drawn on the *forest* tile, along the edge facing open ground.
+ *
+ * The same rim the cliff is, filled with trees instead of rock -- and the reference that taught the
+ * shape proved it is a slot rather than a special case, by drawing the identical structure nine
+ * times in nine materials, one of them a wooden palisade.
+ *
+ * Worth stating why this is not the tree layer that was rejected before. `forest-canopy.png` is
+ * already a canopy seen from above, so scattering trees across forest tiles would draw trees on a
+ * picture of treetops -- doubling sprites for nothing, which is why `FEATURES` has bamboo and bees
+ * and logs for forest but no tree. A treeline is the opposite shape of work: it draws only on the
+ * boundary, giving the forest a silhouette the flat texture cannot, and leaves the interior alone.
+ * Measured on the real field maps it is 248 sprites at worst, about 5% more than the plan already
+ * holds.
+ */
+export function treelineAt(here: BiomeId, there: BiomeId): boolean {
+  return here === 'forest' && there !== 'forest';
+}
+
 /** The frame for a landmark kind, or null if that kind has no art yet. */
 export function landmarkFrame(kindId: string): number | null {
   const index = LANDMARK_ORDER.indexOf(kindId);

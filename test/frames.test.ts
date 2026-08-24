@@ -592,3 +592,84 @@ describe('ground tiles meet without showing the grid', () => {
     }
   });
 });
+
+describe('the rim sheets are built the way the engine indexes them', () => {
+  // `assets/cliffs.png` and `assets/treeline.png` come from `tools/build-rims.js`, which keys a
+  // magenta 4x4 painting into a transparent strip. Every failure that pass can have is invisible
+  // in the source file and obvious in the game, so it is checked here rather than by looking.
+
+  for (const sheet of ['cliffs', 'treeline'] as const) {
+    it(`${sheet}: is one row of EDGE_ORDER x EDGE_VARIANTS frames`, () => {
+      const { width, height } = pngSize(`assets/${sheet}.png`);
+      expect(height).toBe(GRID);
+      expect(width).toBe(GRID * EDGE_ORDER.length * EDGE_VARIANTS);
+    });
+
+    it(`${sheet}: keeps no trace of the chroma key`, () => {
+      // The bug: keying on brightness left the shadow under every south face, which is magenta
+      // blended toward black, not bright magenta. 4,341 lilac pixels that looked fine over the
+      // magenta source and read as a purple fringe over grass.
+      const { rows, width, height, stride } = decode(`assets/${sheet}.png`);
+      let tinted = 0;
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          const p = y * stride + x * 4;
+          if (rows[p + 3]! < 24) continue;
+          // Magenta's signature: red and blue both well above green.
+          if (Math.min(rows[p]!, rows[p + 2]!) - rows[p + 1]! > 25) tinted += 1;
+        }
+      }
+      expect(tinted, `${sheet} has magenta fringing`).toBeLessThan(100);
+    });
+
+    it(`${sheet}: puts each frame's art against the edge it is named for`, () => {
+      // A frame indexed as 'n' whose art sits at the bottom draws a ledge on the wrong side of the
+      // tile. Nothing throws; the map just looks wrong in a way that is hard to attribute.
+      const { rows, width, stride } = decode(`assets/${sheet}.png`);
+      const solid = (x: number, y: number) => rows[y * stride + x * 4 + 3]! > 24;
+      const frames = width / GRID;
+      for (let f = 0; f < frames; f += 1) {
+        const edge = EDGE_ORDER[Math.floor(f / EDGE_VARIANTS)]!;
+        const ox = f * GRID;
+        // Count opaque pixels in the half nearest each edge, and check the named one wins.
+        let near = 0;
+        let far = 0;
+        for (let y = 0; y < GRID; y += 1) {
+          for (let x = 0; x < GRID; x += 1) {
+            if (!solid(ox + x, y)) continue;
+            const toward =
+              edge === 'n' ? y < GRID / 2 : edge === 's' ? y >= GRID / 2 : edge === 'w' ? x < GRID / 2 : x >= GRID / 2;
+            if (toward) near += 1;
+            else far += 1;
+          }
+        }
+        expect(near, `${sheet} frame ${f} (${edge}) is empty`).toBeGreaterThan(0);
+        expect(near, `${sheet} frame ${f} is not against its ${edge} edge`).toBeGreaterThan(far);
+      }
+    });
+
+    it(`${sheet}: gives the south face more depth than the lips`, () => {
+      // The asymmetry is the whole look: a thin lip where you look down at the break, a tall face
+      // where you see the wall. Built symmetrically it reads as an outline rather than a ledge.
+      const { rows, stride } = decode(`assets/${sheet}.png`);
+      // How many rows of this frame hold any art at all.
+      //
+      // Counted, not scanned from the edge: the resample leaves the outermost row or two clear on
+      // some frames, so "walk in until a row is empty" stops at once and reports zero. What the
+      // assertion actually cares about is how tall the band is, and that is a count.
+      const depth = (f: number) => {
+        const ox = f * GRID;
+        let n = 0;
+        for (let y = 0; y < GRID; y += 1) {
+          for (let x = 0; x < GRID; x += 1) {
+            if (rows[y * stride + (ox + x) * 4 + 3]! > 24) { n += 1; break; }
+          }
+        }
+        return n;
+      };
+      const north = depth(0);
+      const south = depth(EDGE_ORDER.indexOf('s') * EDGE_VARIANTS);
+      expect(south, `${sheet}: south face is not deeper than the north lip`).toBeGreaterThan(north * 1.5);
+    });
+  }
+});

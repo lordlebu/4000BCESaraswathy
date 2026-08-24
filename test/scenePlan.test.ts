@@ -326,3 +326,53 @@ describe('a cliff is drawn where the ground drops away', () => {
     }
   });
 });
+
+describe('a treeline stands where the forest stops', () => {
+  it('draws only on forest tiles, only toward open ground', () => {
+    for (const { id, built } of worlds) {
+      const { tiles, width, height } = built.world;
+      for (const t of planScene(built).filter((p) => p.sheet === 'treeline')) {
+        expect(tiles[t.y]![t.x]!.biome, `${id}: treeline at ${key(t)} is not on forest`).toBe('forest');
+        const open = [
+          [0, -1],
+          [1, 0],
+          [0, 1],
+          [-1, 0]
+        ].some(([dx, dy]) => {
+          const nx = t.x + dx!;
+          const ny = t.y + dy!;
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) return false;
+          return tiles[ny]![nx]!.biome !== 'forest';
+        });
+        expect(open, `${id}: treeline at ${key(t)} faces only forest`).toBe(true);
+      }
+    }
+  });
+
+  it('leaves the forest interior alone', () => {
+    // The whole reason this is affordable, and the reason the earlier tree layer was not. The
+    // canopy texture already draws treetops; a rim adds a silhouette at the boundary and nothing
+    // in the middle. If this ever starts covering interior tiles it has become the layer that was
+    // rejected, at several times the sprite count.
+    for (const { id, built } of worlds) {
+      const { tiles, width, height } = built.world;
+      let forest = 0;
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) if (tiles[y]![x]!.biome === 'forest') forest += 1;
+      }
+      if (forest === 0) continue;
+      const drawn = new Set(planScene(built).filter((p) => p.sheet === 'treeline').map(key));
+      expect(drawn.size, `${id}: treeline covers most of the forest, not its edge`).toBeLessThan(forest);
+    }
+  });
+
+  it('sits below the traveller, like the cliff it shares a layer with', () => {
+    for (const { id, built } of worlds) {
+      for (const t of planScene(built).filter((p) => p.sheet === 'treeline')) {
+        expect(t.depth, `${id}: treeline at ${key(t)} draws over the walker`).toBeLessThan(
+          depthFor(t.y, ROW_SLOT.walker)
+        );
+      }
+    }
+  });
+});

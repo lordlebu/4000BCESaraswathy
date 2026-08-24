@@ -14,6 +14,8 @@ import hutsUrl from '../../../assets/huts.png';
 import overdrawUrl from '../../../assets/overdraw.png';
 import featuresUrl from '../../../assets/features.png';
 import edgesUrl from '../../../assets/edges.png';
+import cliffsUrl from '../../../assets/cliffs.png';
+import treelineUrl from '../../../assets/treeline.png';
 import decorUrl from '../../../assets/decor.png';
 import { EventBus } from '../EventBus';
 import {
@@ -28,7 +30,8 @@ import {
   SHADOW_TEXTURE,
   TILE_SIZE,
   blendTextureKey,
-  EDGE_SHEET,
+  CLIFF_SHEET,
+  TREELINE_SHEET,
   createTileTextures,
   loadTileSheets,
   tileFrame,
@@ -47,11 +50,8 @@ const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker'>, string> = {
   places: PLACE_SHEET,
   landmarks: LANDMARK_SHEET,
   decor: DECOR_SHEET,
-  // Cliffs borrow the torn-edge sheet until their own rock faces are painted. The layout is
-  // identical -- four directions by four variants -- so the swap is one line here and no change
-  // anywhere else. Until then a ledge shows as a torn band, which is wrong-looking but is the
-  // placement being visibly correct, and that is the half worth checking first.
-  cliffs: EDGE_SHEET
+  cliffs: CLIFF_SHEET,
+  treeline: TREELINE_SHEET
 };
 import {
   CHARACTERS,
@@ -323,6 +323,8 @@ export class WorldScene extends Phaser.Scene {
       overdraw: overdrawUrl,
       features: featuresUrl,
       edges: edgesUrl,
+      cliffs: cliffsUrl,
+      treeline: treelineUrl,
       decor: decorUrl
     });
   }
