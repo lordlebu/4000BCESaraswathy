@@ -5791,6 +5791,7 @@
       "type": "flora",
       "name": "Sweet Indigo",
       "scientific": "Indigofera dulcis",
+      "growth_form": "vine",
       "habitats": [
         "region_saraswati_delta"
       ],
@@ -5819,6 +5820,7 @@
       "type": "flora",
       "name": "Poison-barb Indigo",
       "scientific": "Indigofera spicata",
+      "growth_form": "shrub",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland",
@@ -5838,6 +5840,7 @@
       "type": "flora",
       "name": "Emerald Harbor Lotus",
       "scientific": "Nelumbo smaragdina",
+      "growth_form": "flower",
       "habitats": [
         "region_saraswati_delta",
         "settlement_lothal"
@@ -5866,6 +5869,7 @@
       "type": "flora",
       "name": "Blood-red Asura Lotus",
       "scientific": "Nelumbo asurica",
+      "growth_form": "flower",
       "habitats": [
         "corrupted_zones"
       ],
@@ -5892,6 +5896,7 @@
       "type": "flora",
       "name": "Healing Silver-root",
       "scientific": "Sarasvatia argentum",
+      "growth_form": "root",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland",
@@ -5911,6 +5916,7 @@
       "type": "flora",
       "name": "Bitter Marsh-root",
       "scientific": "Sarasvatia amara",
+      "growth_form": "root",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -5929,6 +5935,7 @@
       "type": "flora",
       "name": "Bonewood Mangrove",
       "scientific": "Rhizophora osteoxyla",
+      "growth_form": "tree",
       "habitats": [
         "coastal",
         "region_saraswati_delta"
@@ -5959,6 +5966,7 @@
       "type": "flora",
       "name": "Ivory Coastal Bonewood",
       "scientific": "Rhizophora eburnea",
+      "growth_form": "tree",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "sea",
@@ -5978,6 +5986,7 @@
       "type": "flora",
       "name": "Iron-Root Mangrove",
       "scientific": "Rhizophora ferrea",
+      "growth_form": "tree",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "coast"
@@ -5996,6 +6005,7 @@
       "type": "flora",
       "name": "Saraswati Reed",
       "scientific": "Calamus sarasvaticus",
+      "growth_form": "grass",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -6014,6 +6024,7 @@
       "type": "flora",
       "name": "Blue Scholar's Moss",
       "scientific": "Dictyonema caeruleum",
+      "growth_form": "lichen",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -6033,6 +6044,7 @@
       "type": "flora",
       "name": "Toxic Red Spore-Moss",
       "scientific": "Dictyonema venenum",
+      "growth_form": "lichen",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -6052,6 +6064,7 @@
       "type": "flora",
       "name": "Black Ash-Tea",
       "scientific": "Camellia vulcanica",
+      "growth_form": "shrub",
       "habitats": [
         "region_narmada_plateau"
       ],
@@ -6079,6 +6092,7 @@
       "type": "flora",
       "name": "Golden Ember-Leaf",
       "scientific": "Camellia aurata",
+      "growth_form": "shrub",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -6098,6 +6112,7 @@
       "type": "flora",
       "name": "Silver-Leaved Oracle Fig",
       "scientific": "Ficus bhutakana",
+      "growth_form": "tree",
       "habitats": [
         "region_narmada_plateau"
       ],
@@ -6126,6 +6141,7 @@
       "type": "flora",
       "name": "Lesser Whisper-Fig",
       "scientific": "Ficus murmurans",
+      "growth_form": "shrub",
       "region": "narmada-vindhya",
       "biomes": [
         "hills"
@@ -6144,6 +6160,7 @@
       "type": "flora",
       "name": "Sweet-Nectar Mahua",
       "scientific": "Madhuca narmadensis",
+      "growth_form": "tree",
       "region": "narmada-vindhya",
       "biomes": [
         "forest"
@@ -6162,6 +6179,7 @@
       "type": "flora",
       "name": "Highland Bitter Mahua",
       "scientific": "Madhuca montana",
+      "growth_form": "tree",
       "region": "narmada-vindhya",
       "biomes": [
         "mountains"
@@ -6180,6 +6198,7 @@
       "type": "flora",
       "name": "Shilajit Creeper",
       "scientific": "Cissus shilajita",
+      "growth_form": "vine",
       "habitats": [
         "region_narmada_plateau"
       ],
@@ -6208,6 +6227,7 @@
       "type": "flora",
       "name": "Vindhya Pine",
       "scientific": "Pinus vindhyensis",
+      "growth_form": "tree",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -6227,6 +6247,7 @@
       "type": "flora",
       "name": "Crimson Spice-Root",
       "scientific": "Curcuma rubra",
+      "growth_form": "root",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -6245,6 +6266,7 @@
       "type": "flora",
       "name": "Blue Healing Turmeric",
       "scientific": "Curcuma caerulea",
+      "growth_form": "root",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -6263,6 +6285,7 @@
       "type": "flora",
       "name": "Golden Sun-Barley",
       "scientific": "Hordeum aureum",
+      "growth_form": "grass",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert",
@@ -6282,6 +6305,7 @@
       "type": "flora",
       "name": "Bitter Black Barley",
       "scientific": "Hordeum niger",
+      "growth_form": "grass",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -6300,6 +6324,7 @@
       "type": "flora",
       "name": "Sand-Dune Gourd",
       "scientific": "Citrullus arenarius",
+      "growth_form": "vine",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -6318,6 +6343,7 @@
       "type": "flora",
       "name": "Desert Saltbush",
       "scientific": "Atriplex gedrosia",
+      "growth_form": "shrub",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -6336,6 +6362,7 @@
       "type": "flora",
       "name": "Hourglass Cactus",
       "scientific": "Cereus arenarius",
+      "growth_form": "cactus",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -6354,6 +6381,7 @@
       "type": "flora",
       "name": "Spiny Acacia",
       "scientific": "Acacia spinosa",
+      "growth_form": "tree",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -6372,6 +6400,7 @@
       "type": "flora",
       "name": "Tawny Sagebrush",
       "scientific": "Artemisia tawny",
+      "growth_form": "shrub",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert",
@@ -6391,6 +6420,7 @@
       "type": "flora",
       "name": "Oasis Date Palm",
       "scientific": "Phoenix dactylifera oasis",
+      "growth_form": "palm",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -6409,6 +6439,7 @@
       "type": "flora",
       "name": "Red Blood-Coral",
       "scientific": "Tethysolithus rubra",
+      "growth_form": "coral",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -6427,6 +6458,7 @@
       "type": "flora",
       "name": "Lapis-Lazuli Reef-Builder",
       "scientific": "Tethysolithus lapis",
+      "growth_form": "coral",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -6445,6 +6477,7 @@
       "type": "flora",
       "name": "Jungle-Crested Bamboo",
       "scientific": "Bambusa sylvanica",
+      "growth_form": "grass",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -6463,6 +6496,7 @@
       "type": "flora",
       "name": "Hanging Monkey-Pitcher",
       "scientific": "Nepenthes vanara",
+      "growth_form": "pitcher",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -6481,6 +6515,7 @@
       "type": "flora",
       "name": "Giant Bird-Nest Fern",
       "scientific": "Asplenium maximus",
+      "growth_form": "fern",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -6499,6 +6534,7 @@
       "type": "flora",
       "name": "Shattered Sea Kelp",
       "scientific": "Macrocystis tethyan",
+      "growth_form": "seaweed",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -6517,6 +6553,7 @@
       "type": "flora",
       "name": "Volcanic Beach Creeper",
       "scientific": "Ipomoea vulcanica",
+      "growth_form": "vine",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -6535,6 +6572,7 @@
       "type": "flora",
       "name": "Giant Mangrove-Palm",
       "scientific": "Nypa gigas",
+      "growth_form": "palm",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "coast"
@@ -6553,6 +6591,7 @@
       "type": "flora",
       "name": "Shattered Seaweed-Silk",
       "scientific": "Zostera marina",
+      "growth_form": "grass",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -6571,6 +6610,7 @@
       "type": "flora",
       "name": "Mappa Mundi Banyan",
       "scientific": "Ficus mappa",
+      "growth_form": "tree",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest",
@@ -6590,6 +6630,7 @@
       "type": "flora",
       "name": "Crimson-Leaved Ash-Banyan",
       "scientific": "Ficus ash-banyana",
+      "growth_form": "tree",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -6609,6 +6650,7 @@
       "type": "flora",
       "name": "Weeping Charcoal Tree",
       "scientific": "Ficus cinereus",
+      "growth_form": "tree",
       "region": "ganges-lava-sea",
       "biomes": [
         "forest"
@@ -6627,6 +6669,7 @@
       "type": "flora",
       "name": "Golden Amber Lotus",
       "scientific": "Nymphaea succinea",
+      "growth_form": "flower",
       "region": "ganges-lava-sea",
       "biomes": [
         "wetland"
@@ -6645,6 +6688,7 @@
       "type": "flora",
       "name": "Deep-Earth Obsidian Lotus",
       "scientific": "Nymphaea obsidiana",
+      "growth_form": "flower",
       "region": "ganges-lava-sea",
       "biomes": [
         "wetland"
@@ -6663,6 +6707,7 @@
       "type": "flora",
       "name": "Soot-Grass",
       "scientific": "Agrostis cinerea",
+      "growth_form": "grass",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -6682,6 +6727,7 @@
       "type": "flora",
       "name": "Lava-Glass Fern",
       "scientific": "Pteris vulcanica",
+      "growth_form": "fern",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -6701,6 +6747,7 @@
       "type": "flora",
       "name": "Glacial Lichen",
       "scientific": "Lichen glacialis",
+      "growth_form": "lichen",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -6720,6 +6767,7 @@
       "type": "flora",
       "name": "Snow-Looming Moss",
       "scientific": "Bryum glaciale",
+      "growth_form": "moss",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -6739,6 +6787,7 @@
       "type": "flora",
       "name": "Antarctic Kelp-Grass",
       "scientific": "Zostera antarctica",
+      "growth_form": "grass",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -6758,6 +6807,7 @@
       "type": "flora",
       "name": "Volcanic Sulfur-Flower",
       "scientific": "Sulfuraria lutea",
+      "growth_form": "flower",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -6777,6 +6827,7 @@
       "type": "flora",
       "name": "Aero-Mangrove / Vayu-Vriksha",
       "scientific": "Rhizophora caelia",
+      "growth_form": "tree",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -6796,6 +6847,7 @@
       "type": "flora",
       "name": "Levitation Gourd / Sky-Balloon",
       "scientific": "Cucurbita levitata",
+      "growth_form": "vine",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -6816,6 +6868,7 @@
       "type": "flora",
       "name": "Static-Charged Bramble",
       "scientific": "Rubus electricus",
+      "growth_form": "shrub",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -6835,6 +6888,7 @@
       "type": "flora",
       "name": "Blue Pulse-Root",
       "scientific": "Nirnroot caerulea",
+      "growth_form": "root",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -6855,6 +6909,7 @@
       "type": "flora",
       "name": "Toxic Crimson Root",
       "scientific": "Nirnroot rubra",
+      "growth_form": "root",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -6874,6 +6929,7 @@
       "type": "flora",
       "name": "Sun-Catcher Herb",
       "scientific": "Glassa solis",
+      "growth_form": "shrub",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -6893,6 +6949,7 @@
       "type": "flora",
       "name": "Moon-Reflecting Mint",
       "scientific": "Glassa luna",
+      "growth_form": "shrub",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -6912,6 +6969,7 @@
       "type": "flora",
       "name": "Prana-Lotus",
       "scientific": "Nelumbo prana",
+      "growth_form": "flower",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -6931,6 +6989,7 @@
       "type": "flora",
       "name": "Cloud-Weaver Vine",
       "scientific": "Vitis nubis",
+      "growth_form": "vine",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -6950,6 +7009,7 @@
       "type": "flora",
       "name": "Lodestone Moss",
       "scientific": "Bryum magneticum",
+      "growth_form": "moss",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -6969,6 +7029,7 @@
       "type": "flora",
       "name": "Plunging-Fire Siege Tree",
       "scientific": "Rakshasa-Vriksha",
+      "growth_form": "tree",
       "region": "asura-conjurations",
       "biomes": [
         "forest"
@@ -6987,6 +7048,7 @@
       "type": "flora",
       "name": "Root-Anchored Artillery Tree",
       "scientific": "Rakshasa-Vriksha ferrea",
+      "growth_form": "tree",
       "region": "asura-conjurations",
       "biomes": [
         "forest",
@@ -7006,6 +7068,7 @@
       "type": "flora",
       "name": "Crimson Blood-Weed",
       "scientific": "Vitis asurica",
+      "growth_form": "vine",
       "region": "asura-conjurations",
       "biomes": [
         "forest"
@@ -7024,6 +7087,7 @@
       "type": "flora",
       "name": "Violet Strangler-Vine",
       "scientific": "Vitis violacea",
+      "growth_form": "vine",
       "region": "asura-conjurations",
       "biomes": [
         "forest"
@@ -7042,6 +7106,7 @@
       "type": "flora",
       "name": "Asura-Tainted Flesh-Vine",
       "scientific": "Vitis carnosa",
+      "growth_form": "vine",
       "region": "asura-conjurations",
       "biomes": [
         "forest"
@@ -7060,6 +7125,7 @@
       "type": "flora",
       "name": "Fever-Root",
       "scientific": "Curcuma asurica",
+      "growth_form": "root",
       "region": "asura-conjurations",
       "biomes": [
         "underworld"
@@ -7083,6 +7149,7 @@
       "type": "flora",
       "name": "Cursed Ash-Fern",
       "scientific": "Pteris asurica",
+      "growth_form": "fern",
       "region": "asura-conjurations",
       "biomes": [
         "forest",
@@ -7102,6 +7169,7 @@
       "type": "flora",
       "name": "Whispering Blood-Orchid",
       "scientific": "Orchis asurica",
+      "growth_form": "flower",
       "region": "asura-conjurations",
       "biomes": [
         "forest"
@@ -7120,6 +7188,7 @@
       "type": "flora",
       "name": "Obsidian Rose",
       "scientific": "Rosa obsidiana",
+      "growth_form": "flower",
       "region": "asura-conjurations",
       "biomes": [
         "settlement"
@@ -7138,6 +7207,7 @@
       "type": "flora",
       "name": "Naraka Pitcher-Plant",
       "scientific": "Nepenthes asurica",
+      "growth_form": "pitcher",
       "region": "asura-conjurations",
       "biomes": [
         "underworld"
@@ -7161,6 +7231,7 @@
       "type": "flora",
       "name": "Asura Thorn",
       "scientific": "Ziziphus asurica",
+      "growth_form": "shrub",
       "habitats": [
         "corrupted_zones",
         "region_aravali"
@@ -7187,6 +7258,7 @@
       "type": "flora",
       "name": "River Bamboo",
       "scientific": "Bambusa saraswati",
+      "growth_form": "grass",
       "habitats": [
         "region_saraswati_delta",
         "region_narmada_plateau"
@@ -7214,6 +7286,7 @@
       "type": "flora",
       "name": "Date Palm",
       "scientific": "Phoenix gedrosiana",
+      "growth_form": "palm",
       "habitats": [
         "region_gedrosian_desert"
       ],
@@ -7240,6 +7313,7 @@
       "type": "flora",
       "name": "Frankincense Scrub",
       "scientific": "Boswellia gedrosiana",
+      "growth_form": "shrub",
       "habitats": [
         "region_gedrosian_desert",
         "region_aravali"
@@ -7265,6 +7339,7 @@
       "type": "flora",
       "name": "Ghost Mangrove",
       "scientific": "Avicennia phantasma",
+      "growth_form": "tree",
       "habitats": [
         "coastal",
         "region_saraswati_delta"
@@ -7292,6 +7367,7 @@
       "type": "flora",
       "name": "Wild Indigo",
       "scientific": "Indigofera silvestris",
+      "growth_form": "shrub",
       "habitats": [
         "region_saraswati_delta",
         "region_aravali"
@@ -7317,6 +7393,7 @@
       "type": "flora",
       "name": "Iron-Teak",
       "scientific": "Tectona ferrea",
+      "growth_form": "tree",
       "habitats": [
         "region_narmada_plateau",
         "region_aravali"
@@ -7344,6 +7421,7 @@
       "type": "flora",
       "name": "Lotus-Root Taro",
       "scientific": "Colocasia nelumbo-affinis",
+      "growth_form": "root",
       "habitats": [
         "region_saraswati_delta"
       ],
@@ -7369,6 +7447,7 @@
       "type": "flora",
       "name": "Mahua",
       "scientific": "Madhuca longifolia",
+      "growth_form": "tree",
       "habitats": [
         "region_narmada_plateau",
         "region_aravali"
@@ -7396,6 +7475,7 @@
       "type": "flora",
       "name": "Moonseed Vine",
       "scientific": "Menispermum tethys",
+      "growth_form": "vine",
       "habitats": [
         "region_aravali",
         "region_narmada_plateau"
@@ -7422,6 +7502,7 @@
       "type": "flora",
       "name": "Myrrh-Thorn",
       "scientific": "Commiphora spinosa",
+      "growth_form": "shrub",
       "habitats": [
         "region_gedrosian_desert"
       ],
@@ -7446,6 +7527,7 @@
       "type": "flora",
       "name": "Neem",
       "scientific": "Azadirachta indica",
+      "growth_form": "tree",
       "habitats": [
         "region_saraswati_delta",
         "region_narmada_plateau"
@@ -7473,6 +7555,7 @@
       "type": "flora",
       "name": "Pepper Vine",
       "scientific": "Piper tethys",
+      "growth_form": "vine",
       "habitats": [
         "region_narmada_plateau",
         "canopy"
@@ -7499,6 +7582,7 @@
       "type": "flora",
       "name": "Poison Oleander",
       "scientific": "Nerium oleander",
+      "growth_form": "flower",
       "habitats": [
         "region_aravali",
         "region_gedrosian_desert"
@@ -7525,6 +7609,7 @@
       "type": "flora",
       "name": "Red Delta Rice",
       "scientific": "Oryza rubra-delta",
+      "growth_form": "grass",
       "habitats": [
         "region_saraswati_delta"
       ],
@@ -7550,6 +7635,7 @@
       "type": "flora",
       "name": "Sacred Tulsi",
       "scientific": "Ocimum sanctum",
+      "growth_form": "shrub",
       "habitats": [
         "settlement_lothal",
         "region_narmada_plateau"
@@ -7575,6 +7661,7 @@
       "type": "flora",
       "name": "Saltreed",
       "scientific": "Phragmites salina",
+      "growth_form": "grass",
       "habitats": [
         "region_saraswati_delta",
         "coastal"
@@ -7603,6 +7690,7 @@
       "type": "flora",
       "name": "Sandalwood",
       "scientific": "Santalum jambhudweepa",
+      "growth_form": "tree",
       "habitats": [
         "region_narmada_plateau",
         "region_aravali"
@@ -7630,6 +7718,7 @@
       "type": "flora",
       "name": "Tamarind",
       "scientific": "Tamarindus indica",
+      "growth_form": "tree",
       "habitats": [
         "region_narmada_plateau",
         "region_aravali"
@@ -7657,6 +7746,7 @@
       "type": "flora",
       "name": "Whisper-Fig",
       "scientific": "Ficus susurrans",
+      "growth_form": "tree",
       "habitats": [
         "region_saraswati_delta",
         "canopy"

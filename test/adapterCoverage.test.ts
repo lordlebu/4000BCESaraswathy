@@ -62,7 +62,17 @@ const COVERAGE: Record<string, Coverage> = {
   'species.flora': {
     adapted: ['id', 'name', 'scientific', 'region', 'biomes', 'placement', 'rarity',
       'journal_prompt', 'habitats', 'source_index'],
-    skipped: [...EDITORIAL, 'uses', 'placement_note', 'crosses_at']
+    skipped: [...EDITORIAL, 'uses', 'placement_note', 'crosses_at',
+      // The plant half of the same debt as `clade` on fauna. Canon now states every plant's
+      // growth form; `growthFormOf` still derives it from the name, and diffing the two put the
+      // derived answer wrong on **13 of 90** -- `gourd` sits in its cactus keywords so two
+      // trailing vines are cacti, `lichen` sits in moss, and `coral` and `kelp` sit in seaweed,
+      // which catches the actual corals and both Zostera seagrasses.
+      //
+      // Skipped rather than adapted for the same reason as `clade`: reading it deletes the
+      // derivation, and that is a game-side change with its own plan. Delete both lines the day
+      // the adapter reads them.
+      'growth_form']
   },
   'places.field_maps': {
     adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'points_of_interest',
