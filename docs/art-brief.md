@@ -1,5 +1,10 @@
 # Art Brief — South of Tethys
 
+> **Where to put what comes back:** raw generations go in `assets/source/` if a tool reads them, or
+> the git-ignored `assets/source/dump/` if they were rejected. Anything nobody's code opens — a
+> reference frame, a mood board — goes in the git-ignored `dump/`. See *Where an art file lives* in
+> `docs/art-direction.md`.
+>
 > Context for why any of this is shaped the way it is:
 > **[Repainting South of Tethys](https://claude.ai/code/artifact/2ee2b8c5-e1e5-429a-ba41-334576ce8ba0)** — the rendering programme, closed August 2026, with the
 > measurements behind each decision. Private artifact; ask the repo owner if the link 404s.

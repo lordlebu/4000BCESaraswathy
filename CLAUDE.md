@@ -50,6 +50,40 @@ snaps everything to one 22-colour palette shared across frames. 1.3 KB for two f
 
 `docs/art-brief.md` carries the prompt and the failure post-mortem for regenerating art.
 
+### Where a large media file goes
+
+**Ask what reads it.** That question sorts every picture in the repository, and it is the only test
+that matters:
+
+| What reads it | Where it lives | Tracked |
+|---|---|---|
+| `src/` imports it and it ships | `assets/`, `src/ui/plates/` | **yes** |
+| a script in `tools/` reads it to build something | `assets/source/` | **yes** |
+| a doc embeds it with `![alt](…)` | `docs/images/` | **yes** |
+| **nothing** — a person looks at it | **`dump/`** | **no**, git-ignored |
+
+A reference image is still worth keeping. `dump/endgame.png` is the frame this game's whole
+rendering programme was measured against, and it is named in three docs and three source comments
+— but no code path opens it, so 2.5 MB of it does not belong in everybody's clone. **Move, do not
+delete:** `dump/` is git-ignored and the file stays on disk, the same arrangement
+`assets/source/dump/` already uses for rejected art and `assets/source/plates/` for 80 MB of raw
+plates.
+
+Two things that make this go wrong:
+
+- **`git add -A` will sweep up a stray PNG.** A 6.4 MB lore map reached a canon commit that way,
+  as a side effect of staging a linter change. Check `git status` before staging when a large file
+  is loose in the tree.
+- **A doc that names a moved file goes stale silently.** `docs/art-brief.md` said `endgame.png` was
+  "in the repository root" and was wrong the moment it moved. Grep for the filename after moving
+  one.
+
+And the limit of all this: `.git` is far larger than the tracked total, because history keeps every
+old version of a binary. Ignoring a file stops new weight accruing; it does not shrink an existing
+clone. Only a history rewrite does that, and it breaks every clone and every open pull request —
+so this rule is about not making it worse, not about undoing it.
+
+
 **Before touching the art, read the programme that produced it:**
 [Repainting South of Tethys](https://claude.ai/code/artifact/2ee2b8c5-e1e5-429a-ba41-334576ce8ba0) — the illustrated version of `docs/endgame-plan.md`, closed in
 August 2026. It records what was measured and declined as well as what shipped, which is the part
