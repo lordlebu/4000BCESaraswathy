@@ -121,7 +121,9 @@ well is a session's work. **Do not attempt 297.**
 The proven shape for a catalogue this size is a **derived visual grammar** with hand art reserved for
 the few things a player stops and looks at:
 
-1. **Ship the fallback first.** `SpeciesIcon.tsx` already draws a derived silhouette for every plant
+1. **Ship the fallback first.** *(Written before the marks came from canon; `SpeciesIcon.tsx` now
+   reads `clade` and `growth_form` off the record rather than deriving anything.)* It already drew
+   a mark for every plant
    — shape from the name, colour from the ground it grows on. Extending it to fauna via `bodyPlanOf`
    means the plate slot is never empty, and every real plate that arrives afterwards improves
    something that already reads as finished. This is *code*, not illustration, and it is the highest

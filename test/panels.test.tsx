@@ -682,7 +682,8 @@ describe('the field notes draw a mark for every species', () => {
           id: 'fauna_swamp_wallaby',
           name: 'Swamp-Wallaby',
           binomial: null,
-          biomes: ['wetland' as const]
+          biomes: ['wetland' as const],
+          clade: 'mammal' as const
         }
       },
       flora: {
@@ -692,7 +693,8 @@ describe('the field notes draw a mark for every species', () => {
           id: 'flora_saraswati_reed',
           name: 'Saraswati Reed',
           binomial: null,
-          biomes: ['wetland' as const]
+          biomes: ['wetland' as const],
+          growthForm: 'grass' as const
         }
       },
       ...over
@@ -788,7 +790,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
       creature: {
         name: species.name,
         note: 'A fast, resilient wild equine.',
-        species: { ...species, binomial: null, biomes: ['plains' as const] }
+        species: { ...species, binomial: null, biomes: ['plains' as const], clade: 'mammal' as const }
       },
       flora: { name: null, note: 'Nothing growing here.', species: null }
     },

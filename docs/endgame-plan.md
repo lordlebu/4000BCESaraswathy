@@ -67,8 +67,8 @@ outstanding:
   advocate; the grain that *did* ship is on the notebook page, which is item 5.
 - **Nothing unpainted is drawn any more; it is marked.** The queue listed eight flora. A plant is
   scenery being named as you pass, not the thing you walked out to see, so it gets an emoji on the
-  line — and so does every animal without a plate. Keyed on growth form and body plan, twenty-nine
-  entries covering all 297 species.
+  line — and so does every animal without a plate. Keyed on canon's own `growth_form` and `clade`,
+  thirty entries covering all 346 species. (Originally derived from names here; canon states it now.)
 
   This deleted all twenty-six hand-built SVG marks. They were good, and the argument for them —
   that a drawn mark can be tinted with the biome's ink where an emoji cannot — was true and beside
@@ -320,7 +320,9 @@ tail behind it: the canon bundle holds **219 encounter fauna and 78 flora** that
 
 Do not attempt 297 illustrations.
 
-- **Ship the fallback first.** `SpeciesIcon.tsx` already draws a derived silhouette for every plant,
+- **Ship the fallback first.** *(As planned at the time. `bodyPlanOf` and `growthFormOf` no longer
+  exist — canon states the clade and the growth form, and `SpeciesIcon` reads them.)*
+  `SpeciesIcon.tsx` already draws a derived silhouette for every plant,
   coloured by the ground it grows on. Extend that to fauna via `bodyPlanOf`, and the plate slot is
   never empty. Every real plate that arrives afterwards improves something that already reads as
   finished — which is the only way a long tail is survivable.

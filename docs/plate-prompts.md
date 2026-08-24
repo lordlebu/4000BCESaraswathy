@@ -9,7 +9,7 @@ is built from canon's own words for that species, so the picture and the field n
 Order matters and is not alphabetical: it is the order a player meets them, from
 `node tools/reachable-species.js --top=40`. Painting the first twenty fauna covers roughly **47%
 of every creature encounter in the game**; forty covers 63%. Nothing is blocked while they are
-missing — the panel draws a derived silhouette for every unpainted animal — so these can arrive one
+missing — the panel draws an emoji mark for every unpainted animal — so these can arrive one
 at a time, in any quantity, and each one immediately replaces a silhouette.
 
 **Animals only.** Plants are drawn as an emoji and are not painted at all; see below for why. So
@@ -161,12 +161,17 @@ way. Everything else wants punctuation beside a name — 🐊 next to *Baurusuch
 Mundi Banyan* — which says what the thing is and gets out of the way. Twenty animals have plates;
 these cover the other 199 and all 90 plants.
 
-Keyed on **what the species is**, never on a per-species list: an animal's body plan, a plant's
-growth form. Twenty-nine entries cover all 297, a new species needs no work, and
-`Record<BodyPlan, string>` / `Record<GrowthForm, string>` refuse to build if a category is added
-without a mark.
+Keyed on **what canon says the species is** — an animal's `clade`, a plant's `growth_form` — and
+read from the bundle rather than worked out here. Thirty entries cover all 346, a new species needs
+no work, and `Record<Clade, string>` / `Record<GrowthForm, string>` refuse to build if canon adds a
+category the game has no mark for.
 
-### Animals, by body plan
+This used to be derived from names, and between the two halves it was wrong nineteen times: an
+Asura-tainted owl as a ghost, a baby crocodile as a mammal, a feathered dinosaurid as a cricket,
+three mongooses as their prey, two gourds as cacti, three lichens as moss, two corals and two
+seagrasses as seaweed.
+
+### Animals, by clade
 
 Reptiles, **non-avian** dinosaurs and birds are three separate groups, deliberately. Birds are
 avian dinosaurs and canon keeps them apart, so 🦖 is only ever the non-avian ones — Sylvianus and

@@ -8,7 +8,9 @@ import { isPresent, noteFor, routineFor } from './routine';
 import { landmarkKindFor, landmarkTitle } from './landmarks';
 import { nearestCamp, nearestUnvisited, stepsBetween } from './camps';
 import type { PlacedPoi } from '../world/fieldMap';
-import type { BiomeId, Creature, Point, Tile, World } from '../world/types';
+import type {
+  BiomeId, Clade, Creature, Flora, GrowthForm, Point, Tile, World
+} from '../world/types';
 
 /**
  * One line of the traveller's field notes: what a thing is called, and what it is.
@@ -34,7 +36,7 @@ export interface FieldNote {
    * full creature would let a component start reading `rarity` or `routine`, which is the kind of
    * drift `journey.ts` exists to prevent.
    */
-  species: { id: string; name: string; binomial: string | null; biomes: BiomeId[] } | null;
+  species: SpeciesMark | null;
 }
 
 export interface JournalEntry {
@@ -53,9 +55,23 @@ export interface JournalEntry {
   doing: string;
 }
 
-/** The four fields the panel's mark is drawn from, and no more. See `FieldNote.species`. */
-function markOf(s: { id: string; name: string; binomial: string | null; biomes: BiomeId[] }) {
-  return { id: s.id, name: s.name, binomial: s.binomial, biomes: s.biomes };
+/**
+ * The fields the panel's mark is drawn from, and no more. See `FieldNote.species`.
+ *
+ * A union rather than one shape, because the two halves are now drawn from different canon facts:
+ * an animal's mark comes from its `clade` and a plant's from its `growthForm`. Widening this to
+ * one type carrying both optionally would let a plant be handed a clade, which is exactly the kind
+ * of thing the old name-matching classifier used to do to itself.
+ */
+export type SpeciesMark =
+  | { id: string; name: string; binomial: string | null; biomes: BiomeId[]; clade: Clade }
+  | { id: string; name: string; binomial: string | null; biomes: BiomeId[]; growthForm: GrowthForm };
+
+function markOf(s: Creature): SpeciesMark;
+function markOf(s: Flora): SpeciesMark;
+function markOf(s: Creature | Flora): SpeciesMark {
+  const base = { id: s.id, name: s.name, binomial: s.binomial, biomes: s.biomes };
+  return 'clade' in s ? { ...base, clade: s.clade } : { ...base, growthForm: s.growthForm };
 }
 
 /** Is this the tile the named place sits on? */

@@ -1,49 +1,139 @@
 // The mark beside a species name, until it has a painted plate.
 //
-// Every species in the collection and the field notes gets one. Twenty animals have real
-// watercolour plates; the other 199 animals and all 90 plants get an emoji, chosen from what the
-// creature *is* — its body plan or its growth form — rather than from a per-species list that
-// would go stale the moment canon grew.
+// Twenty animals have real watercolour plates. The other 236 animals and all 90 plants get an
+// emoji, chosen from **what canon says the species is** — its clade or its growth form — rather
+// than from anything worked out here.
 //
-// **This used to be drawn, and the reasoning for that is worth keeping because it was good and it
-// was still wrong.** There were twenty-six hand-built SVG marks: thirteen growth forms and
-// thirteen body plans, each on a 24×24 grid, tinted with the ink of the biome the species lives in
-// and varied per species so that two trees were not the same picture. The argument against emoji
-// was exactly that — a bitmap glyph is always the same colour, so colouring by habitat is lost,
-// and the repertoire has no mangrove and no pitcher plant.
+// **This file used to guess, and the guessing is what it cost.** Two classifiers matched keywords
+// against names and binomials, roughly four hundred lines of them, and between them they were
+// wrong nineteen times that anybody checked:
 //
-// What that argument missed is what the mark is *for*. It is not a picture of the species; the
-// plate is, and the plate is what the panel gives a block of its own to. The mark is punctuation
-// beside a name — it says "plant" or "crocodile" and then gets out of the way. An SVG next to text
-// can be made small but never stops reading as a graphic in a slot; an emoji is incidental by
-// nature, which is the whole requirement. Losing colour-by-biome costs a grouping cue on one
-// panel. `git log` has the paths if a drawn mark is ever wanted again.
+//   * an Asura-tainted owl drawn as a ghost, because `asuricus` outranked `Bubo`;
+//   * a baby crocodile as a mammal, because `Camelosuchus` starts with `camel`;
+//   * a feathered dinosaurid as a cricket, because `Silvanus` is also a beetle genus;
+//   * three mongooses as the crabs and centipedes they are named for;
+//   * two trailing gourds as cacti, three lichens as moss, two corals and two seagrasses as
+//     seaweed.
+//
+// Every one was a name being read as though it were a fact. None of them can happen now, because
+// the fact is in the data: canon requires `clade` on all 256 fauna and `growth_form` on all 90
+// flora, its linter refuses a species without one, and `canon.ts` carries them onto the runtime
+// record. Adding a species to canon no longer requires editing a keyword list in this repository —
+// which it did, and which drew two Shringasaurus as unidentified footprints until somebody noticed.
+//
+// What is left here is the one thing that is genuinely the game's: **which glyph**. Canon says a
+// creature is a synapsid; it does not say a synapsid looks like 🦣. That is a view decision and it
+// belongs on this side of the line.
 
-import { animalEmojiFor } from '../content/bodyPlan';
-import { emojiFor } from '../content/growthForm';
-import type { Flora } from '../world/types';
+import type { Clade, GrowthForm } from '../world/types';
+import type { SpeciesMark } from '../content/journal';
+
+/**
+ * A clade as a mark.
+ *
+ * `Record<Clade, string>` is doing real work: canon's vocabulary is fixed in
+ * `database/clades.json` and mirrored in the `Clade` type, so adding a sixteenth clade there and
+ * forgetting it here fails the build rather than rendering nothing.
+ *
+ * Three worth defending. `synapsid` takes the mammoth because there is no Dimetrodon emoji and
+ * never will be, and what a player needs is "large archaic beast, mammal side". `construct` takes
+ * the moai — a body made rather than born. `spectre` is the only one canon would call obvious.
+ */
+export const CLADE_MARK: Record<Clade, string> = {
+  mammal: '🐾',
+  synapsid: '🦣',
+  bird: '🐦',
+  dinosaur: '🦖',
+  crocodilian: '🐊',
+  reptile: '🦎',
+  amphibian: '🐸',
+  fish: '🐟',
+  insect: '🦗',
+  arachnid: '🕷️',
+  crustacean: '🦀',
+  mollusc: '🐚',
+  cnidarian: '🪼',
+  worm: '🪱',
+  construct: '🗿',
+  spectre: '👻'
+};
+
+/**
+ * A growth form as a mark.
+ *
+ * The named exceptions below sit above this table, not in it: bamboo is a grass and 🌾 is not
+ * wrong, but 🎋 is *bamboo*.
+ */
+export const FORM_MARK: Record<GrowthForm, string> = {
+  tree: '🌳',
+  palm: '🌴',
+  shrub: '🪴',
+  vine: '🍃',
+  flower: '🌸',
+  grass: '🌾',
+  root: '🫚',
+  fern: '🌿',
+  moss: '🍀',
+  lichen: '🪨',
+  cactus: '🌵',
+  seaweed: '🪸',
+  coral: '🐚',
+  pitcher: '🪤'
+};
+
+/**
+ * Plants whose own name beats their form, checked first.
+ *
+ * The only place a name is still read — and it is read for the *mark*, never for what the plant
+ * is. Canon has already said that. Getting one of these wrong makes a bamboo look like ordinary
+ * grass; getting the old classifier wrong made a mongoose into a crab.
+ *
+ * Matched on whole words, because `tea` is inside `teak` and *Iron-Teak* is a timber tree.
+ */
+const NAMED: [string[], string][] = [
+  [['taro', 'yam', 'tuber'], '🫜'],
+  [['ginger', 'turmeric', 'curcuma', 'zingiber'], '🫚'],
+  [['bamboo', 'bambusa'], '🎋'],
+  [['tea'], '🍵'],
+  [['pine', 'cedar', 'conifer', 'fir'], '🎍'],
+  [['lotus', 'nelumbo'], '🪷']
+];
+
+function plantMark(plant: Extract<SpeciesMark, { growthForm: GrowthForm }>): string {
+  const words = new Set(
+    `${plant.binomial ?? ''} ${plant.name}`
+      .toLowerCase()
+      .split(/[^\p{L}]+/u)
+      .filter(Boolean)
+  );
+  for (const [terms, mark] of NAMED) {
+    if (terms.some((term) => words.has(term))) return mark;
+  }
+  return FORM_MARK[plant.growthForm];
+}
 
 export interface SpeciesIconProps {
-  species: Pick<Flora, 'id' | 'name' | 'binomial' | 'biomes'>;
-  /** Which half of the collection this is. The two halves use different classifiers. */
-  kind: 'creature' | 'flora';
+  /** Just enough of the species to draw a mark — see `SpeciesMark` in `content/journal.ts`. */
+  species: SpeciesMark;
 }
+
+// There is no `kind` prop any more. Callers used to pass 'creature' or 'flora' so this could pick
+// a classifier; the mark now comes from whichever canon field the record carries, so the record
+// already says which half it is and a second opinion could only disagree with it.
 
 /**
  * The mark for one species.
  *
- * Presentational only: it carries no label of its own, because the name it sits beside already
- * says what the species is, and a screen reader announcing "tree icon, Mappa Mundi Banyan" is
- * worse than one announcing the name alone.
- *
- * There is deliberately no `size`. The old drawn mark took one because it had to line up with a
- * 22px row; a glyph should sit on the text baseline like any other character, and the CSS keeps it
- * there. A caller that wants it bigger should change the text size around it.
+ * Presentational only: it carries no label, because the name it sits beside already says what the
+ * species is, and a screen reader announcing "tree icon, Mappa Mundi Banyan" is worse than one
+ * announcing the name alone.
  */
-export function SpeciesIcon({ species, kind }: SpeciesIconProps) {
+export function SpeciesIcon({ species }: SpeciesIconProps) {
+  const mark = 'clade' in species ? CLADE_MARK[species.clade] : plantMark(species);
+
   return (
     <span className="species-emoji" aria-hidden="true">
-      {kind === 'flora' ? emojiFor(species) : animalEmojiFor(species)}
+      {mark}
     </span>
   );
 }
