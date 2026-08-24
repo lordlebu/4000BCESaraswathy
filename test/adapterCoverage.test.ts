@@ -45,7 +45,19 @@ const COVERAGE: Record<string, Coverage> = {
       'aliases', 'behaviour', 'diet', 'taxonomy', 'related_species', 'sentient',
       // Placement commentary for editors, and the Dwarka-gate crossing rule, which the
       // engine has no concept of yet.
-      'placement_note', 'crosses_at']
+      'placement_note', 'crosses_at',
+      // Canon states what every animal is; the game still guesses it from the name.
+      //
+      // `clade` and `subclade` are the fields that would end that -- `bodyPlanOf` matches
+      // keywords against names and binomials, and has been wrong six separate times: an owl drawn
+      // as a ghost, a baby crocodile as a mammal, a feathered dinosaurid as a cricket, three
+      // mongooses as the prey they are named after. Reading the clade instead deletes the
+      // classifier and the whole class of bug.
+      //
+      // Skipped rather than adapted because that is a game-side change with its own plan, and
+      // doing it here would smuggle a rewrite of `SpeciesIcon` into a data sync. This line is the
+      // reminder, and it should be deleted the day the adapter reads them.
+      'clade', 'subclade']
   },
   'species.flora': {
     adapted: ['id', 'name', 'scientific', 'region', 'biomes', 'placement', 'rarity',

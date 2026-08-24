@@ -128,9 +128,19 @@ describe('two records side by side', () => {
   it('lays out where two specimens agree and where they do not', () => {
     const rows = compare('fauna_lava_vent_tubeworm', 'fauna_lava_vent_tubeworm_asurica');
     expect(rows.length).toBeGreaterThan(3);
-    // These two share a name and differ by binomial — precisely the archive's problem.
-    expect(rows.find((r) => r.field === 'Name')?.same).toBe(true);
+
+    // Two Riftia from the same vents: same region, same ground, same rarity, different animal.
+    // Showing agreement *and* disagreement in one view is the whole job of this component.
     expect(rows.find((r) => r.field === 'Binomial')?.same).toBe(false);
+    expect(rows.find((r) => r.field === 'Region')?.same).toBe(true);
+    expect(rows.find((r) => r.field === 'How often')?.same).toBe(true);
+
+    // These two used to share the name "Lava-Vent Tubeworm", and this test asserted it as
+    // "precisely the archive's problem". It was a real problem rather than a feature: two
+    // entities answering to one name meant the tool that assigned canon's clades classified only
+    // one of them. Canon renamed the second and `lint_story.py` now forbids the pattern outright,
+    // so the fixture had to change with it.
+    expect(rows.find((r) => r.field === 'Name')?.same).toBe(false);
   });
 
   it('says nothing rather than guessing when a record is missing', () => {
