@@ -48,3 +48,13 @@ assets/source/plates/
 
 # Local performance baseline: describes a machine, not the code.
 .perf-baseline.json
+
+# Reference media: pictures we look at, that nothing in the repo reads.
+#
+# `endgame.png` is the target frame the whole rendering programme was measured against. It is named
+# in three docs and three source comments and opened by nothing -- it is a thing a person looks at,
+# and 2.5 MB of a person looking at something does not need to be in everybody's clone.
+#
+# Kept on disk rather than deleted, the same arrangement as assets/source/dump/: that directory is
+# the provenance record for the art, and this is the provenance record for the brief.
+dump/

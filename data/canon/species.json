@@ -1,11 +1,12 @@
 {
-  "canon_version": "1.10.0",
+  "canon_version": "1.11.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
       "type": "fauna",
       "name": "River Otter",
       "scientific": "Lutra saraswati",
+      "clade": "mammal",
       "diet": "Carnivore",
       "habitats": [
         "region_saraswati_delta"
@@ -36,7 +37,8 @@
       "id": "fauna_painted_deer",
       "type": "fauna",
       "name": "Painted Deer",
-      "scientific": null,
+      "scientific": "Axis pictus",
+      "clade": "mammal",
       "region": "prototype-starters",
       "biomes": [
         "plains",
@@ -56,7 +58,8 @@
       "id": "fauna_monsoon_crane",
       "type": "fauna",
       "name": "Monsoon Crane",
-      "scientific": null,
+      "scientific": "Grus pluvialis",
+      "clade": "bird",
       "region": "prototype-starters",
       "biomes": [
         "wetland",
@@ -77,7 +80,8 @@
       "id": "fauna_hill_macaque",
       "type": "fauna",
       "name": "Hill Macaque",
-      "scientific": null,
+      "scientific": "Macaca vindhyensis",
+      "clade": "mammal",
       "region": "prototype-starters",
       "biomes": [
         "hills",
@@ -98,7 +102,8 @@
       "id": "fauna_shell_turtle",
       "type": "fauna",
       "name": "Shell Turtle",
-      "scientific": null,
+      "scientific": "Conchochelys lothalensis",
+      "clade": "reptile",
       "region": "prototype-starters",
       "biomes": [
         "coast",
@@ -118,7 +123,8 @@
       "id": "fauna_cloud_antelope",
       "type": "fauna",
       "name": "Cloud Antelope",
-      "scientific": null,
+      "scientific": "Naemorhedus nubilus",
+      "clade": "mammal",
       "region": "prototype-starters",
       "biomes": [
         "mountains",
@@ -140,8 +146,9 @@
       "type": "fauna",
       "name": "Lothal Marsh-Lurker",
       "scientific": "Megalobatrachus lothalensis",
+      "clade": "amphibian",
       "taxonomy": {
-        "notes": "Giant river salamander, Pleistocene survivor"
+        "notes": "Authoring note, not player-facing: this is a temnospondyl rather than a lissamphibian, and the journal prompt is written so a reader who knows the difference can see it -- flat broad skull, sprawling limbs, a size no living amphibian reaches. Canon does not say so anywhere a player can read, and the clade is plain `amphibian` on purpose. An easter egg, in the same spirit as the Tendua's face."
       },
       "diet": "Carnivore",
       "habitats": [
@@ -164,7 +171,7 @@
       ],
       "placement": "encounter",
       "rarity": "rare",
-      "journal_prompt": "An 8-foot giant river salamander that has survived since the Pleistocene. It waits in the murky delta pools of Lothal to ambush passing prey.",
+      "journal_prompt": "An 8-foot giant river salamander that has survived since the Pleistocene. It waits in the murky delta pools of Lothal to ambush passing prey. The skull is flatter and broader than a salamander's has any right to be, and the legs sprawl where they should tuck.",
       "mood": "fearsome",
       "source_index": 6
     },
@@ -173,6 +180,7 @@
       "type": "fauna",
       "name": "Venomous Vengi Mud-Salamander",
       "scientific": "Megalobatrachus toxicus",
+      "clade": "amphibian",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -192,6 +200,7 @@
       "type": "fauna",
       "name": "Sacred Stepwell Koi",
       "scientific": "Cyprinus devotus",
+      "clade": "fish",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "river"
@@ -211,6 +220,7 @@
       "type": "fauna",
       "name": "Deep-River Bronze",
       "scientific": "Cyprinus chalceus",
+      "clade": "fish",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "river"
@@ -230,6 +240,7 @@
       "type": "fauna",
       "name": "Spotted Marsh Tendua",
       "scientific": "Panthera simiana maculata",
+      "clade": "mammal",
       "diet": "Carnivore",
       "habitats": [
         "region_saraswati_delta"
@@ -263,6 +274,7 @@
       "type": "fauna",
       "name": "Black-Barked Canopy Tendua",
       "scientific": "Panthera simiana arborea",
+      "clade": "mammal",
       "diet": "Carnivore",
       "habitats": [
         "region_saraswati_delta"
@@ -296,6 +308,8 @@
       "type": "fauna",
       "name": "Nagaraptor",
       "scientific": "Nagaraptor vallatus",
+      "clade": "dinosaur",
+      "subclade": "dromaeosaurid",
       "diet": "Carnivore",
       "habitats": [
         "region_saraswati_delta"
@@ -331,6 +345,7 @@
       "type": "fauna",
       "name": "Burrowing Tortoise",
       "scientific": "Geochelone fossor",
+      "clade": "reptile",
       "diet": "Herbivore",
       "habitats": [
         "region_saraswati_delta"
@@ -364,6 +379,8 @@
       "type": "fauna",
       "name": "Vajraptor",
       "scientific": "Vajraptor territorialis",
+      "clade": "dinosaur",
+      "subclade": "dromaeosaurid",
       "diet": "Carnivore",
       "habitats": [
         "canopy",
@@ -374,7 +391,7 @@
         "territorial",
         "problem_solving"
       ],
-      "notes": "Intelligent theropod bird with colorful plumage. Builds hidden canopy nests.",
+      "notes": "Intelligent feathered dromaeosaur with colorful plumage. Builds hidden canopy nests.",
       "canon": "primary",
       "sources": [
         "SouthOfTethys.txt",
@@ -386,7 +403,7 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "An intelligent, social, and territorial theropod bird with colorful plumage and excellent problem-solving skills, building hidden canopy nests.",
+      "journal_prompt": "An intelligent, social and territorial feathered dromaeosaur with colorful plumage and excellent problem-solving skills, building hidden canopy nests. Flightless: the plumage is for display and for warmth.",
       "mood": "clever",
       "sentient": true,
       "source_index": 14
@@ -396,6 +413,7 @@
       "type": "fauna",
       "name": "Vanga Pearl-Guide",
       "scientific": "Cognitavi vanga",
+      "clade": "bird",
       "diet": "Omnivore",
       "habitats": [
         "coastal",
@@ -431,6 +449,7 @@
       "type": "fauna",
       "name": "Abyssal Storm-Watcher",
       "scientific": "Cognitavi abyssalis",
+      "clade": "bird",
       "diet": "Omnivore",
       "habitats": [
         "coastal",
@@ -464,7 +483,9 @@
       "id": "fauna_iridescent_lothal_silvanus",
       "type": "fauna",
       "name": "Iridescent Lothal Silvanus",
-      "scientific": "Silvanus pictus",
+      "scientific": "Sylvianus pictus",
+      "clade": "bird",
+      "subclade": "avian_dinosaurid",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -485,6 +506,7 @@
       "type": "fauna",
       "name": "Baurusuchus",
       "scientific": "Baurusuchus palustris",
+      "clade": "crocodilian",
       "diet": "Carnivore",
       "habitats": [
         "region_saraswati_delta"
@@ -514,6 +536,7 @@
       "type": "fauna",
       "name": "Striped Reed Stalker",
       "scientific": "Baurusuchus striatus",
+      "clade": "crocodilian",
       "diet": "Carnivore",
       "habitats": [
         "region_saraswati_delta"
@@ -546,6 +569,7 @@
       "type": "fauna",
       "name": "Mud-Armored Ambusher",
       "scientific": "Baurusuchus lutarius",
+      "clade": "crocodilian",
       "diet": "Carnivore",
       "habitats": [
         "region_saraswati_delta"
@@ -578,6 +602,7 @@
       "type": "fauna",
       "name": "Indus Unicorn",
       "scientific": "Monocerus indicus",
+      "clade": "mammal",
       "diet": "Herbivore",
       "habitats": [
         "region_saraswati_delta"
@@ -608,6 +633,7 @@
       "type": "fauna",
       "name": "Saraswati Delta Heron",
       "scientific": "Ardea sarasvati",
+      "clade": "bird",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "coast"
@@ -627,6 +653,7 @@
       "type": "fauna",
       "name": "Muria River-Otter",
       "scientific": "Lutra muria",
+      "clade": "mammal",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "river"
@@ -646,6 +673,7 @@
       "type": "fauna",
       "name": "Lothal Mud-Skipper",
       "scientific": "Periophthalmus gigas",
+      "clade": "fish",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "coast"
@@ -665,6 +693,7 @@
       "type": "fauna",
       "name": "Marsh-dwelling Terrapin",
       "scientific": "Clemmys lothalensis",
+      "clade": "reptile",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -684,6 +713,7 @@
       "type": "fauna",
       "name": "Tethyan Blue-Crayfish",
       "scientific": "Astacus caeruleus",
+      "clade": "crustacean",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "river"
@@ -703,6 +733,7 @@
       "type": "fauna",
       "name": "Delta Kingfisher",
       "scientific": "Alcedo vishnu",
+      "clade": "bird",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland",
@@ -723,6 +754,7 @@
       "type": "fauna",
       "name": "Saltwater Gator-Turtle",
       "scientific": "Macrochelys tethyan",
+      "clade": "reptile",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "coast",
@@ -743,6 +775,7 @@
       "type": "fauna",
       "name": "Saraswati Reed-Warbler",
       "scientific": "Acrocephalus sylvanus",
+      "clade": "bird",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -762,6 +795,7 @@
       "type": "fauna",
       "name": "Crested Marsh-Runner",
       "scientific": "Gallinula cristata",
+      "clade": "bird",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -781,6 +815,7 @@
       "type": "fauna",
       "name": "Tethys River Dolphin",
       "scientific": "Platanista tethys",
+      "clade": "mammal",
       "diet": "Carnivore",
       "habitats": [
         "region_saraswati_delta"
@@ -810,6 +845,7 @@
       "type": "fauna",
       "name": "Mangrove Crab-Eater",
       "scientific": "Herpestes mangrovus",
+      "clade": "mammal",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "coast"
@@ -829,6 +865,7 @@
       "type": "fauna",
       "name": "Vengi Marsh Harrier",
       "scientific": "Circus vengi",
+      "clade": "bird",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -848,6 +885,7 @@
       "type": "fauna",
       "name": "Lothal Sand-Plover",
       "scientific": "Charadrius lothalensis",
+      "clade": "bird",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "river"
@@ -867,6 +905,7 @@
       "type": "fauna",
       "name": "Swamp-Wallaby",
       "scientific": "Wallabia sylvanus",
+      "clade": "mammal",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -886,6 +925,7 @@
       "type": "fauna",
       "name": "Lothal Shell-Cracker",
       "scientific": "Carcinus lothalensis",
+      "clade": "crustacean",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "coast"
@@ -905,6 +945,7 @@
       "type": "fauna",
       "name": "Delta Reed-Python",
       "scientific": "Python sylvanus minor",
+      "clade": "reptile",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -924,6 +965,7 @@
       "type": "fauna",
       "name": "Tethyan Mud-Snipe",
       "scientific": "Gallinago tethys",
+      "clade": "bird",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "sea",
@@ -944,6 +986,7 @@
       "type": "fauna",
       "name": "Silver-Banded Sea-Snake",
       "scientific": "Hydrophis argentum",
+      "clade": "reptile",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "river"
@@ -963,6 +1006,7 @@
       "type": "fauna",
       "name": "Vanga Marsh-Cat",
       "scientific": "Felis chaus vanga",
+      "clade": "mammal",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -982,6 +1026,8 @@
       "type": "fauna",
       "name": "Lothal Heron-Raptor",
       "scientific": "Sylvianus minor",
+      "clade": "bird",
+      "subclade": "avian_dinosaurid",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland",
@@ -1003,6 +1049,7 @@
       "type": "fauna",
       "name": "Mangrove Snapping-Turtle",
       "scientific": "Chelydra mangrovi",
+      "clade": "reptile",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "coast"
@@ -1022,6 +1069,7 @@
       "type": "fauna",
       "name": "Tethys Pelican",
       "scientific": "Pelecanus tethys",
+      "clade": "bird",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "coast"
@@ -1041,6 +1089,7 @@
       "type": "fauna",
       "name": "Estuary Archer-Fish",
       "scientific": "Toxotes tethys",
+      "clade": "fish",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "coast"
@@ -1060,6 +1109,7 @@
       "type": "fauna",
       "name": "Delta Fiddler-Crab",
       "scientific": "Uca sarasvati",
+      "clade": "crustacean",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland",
@@ -1080,6 +1130,7 @@
       "type": "fauna",
       "name": "Lothal Dune-Sprinter",
       "scientific": "Acanthodactylus lothalensis",
+      "clade": "reptile",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -1099,6 +1150,7 @@
       "type": "fauna",
       "name": "Saraswati Horned Frog",
       "scientific": "Ceratophrys sarasvati",
+      "clade": "amphibian",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "forest"
@@ -1118,6 +1170,7 @@
       "type": "fauna",
       "name": "Vindhya Forest Falcon",
       "scientific": "Falco sylvanus",
+      "clade": "bird",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "forest"
@@ -1137,6 +1190,7 @@
       "type": "fauna",
       "name": "Narmada Mud-Eel",
       "scientific": "Monopterus narmadensis",
+      "clade": "fish",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "river"
@@ -1156,6 +1210,7 @@
       "type": "fauna",
       "name": "Gedrosian Spiny-tailed Lizard",
       "scientific": "Saara gedrosia",
+      "clade": "reptile",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "desert"
@@ -1175,6 +1230,7 @@
       "type": "fauna",
       "name": "Scythian Wild Ass",
       "scientific": "Equus hemionus scythicus",
+      "clade": "mammal",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "plains"
@@ -1194,6 +1250,7 @@
       "type": "fauna",
       "name": "Jungle Web-Spinner",
       "scientific": "Nephila sylvanica",
+      "clade": "arachnid",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "forest"
@@ -1213,6 +1270,7 @@
       "type": "fauna",
       "name": "Tethyan Flying-Squid",
       "scientific": "Todarodes tethys",
+      "clade": "mollusc",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "sea"
@@ -1232,6 +1290,7 @@
       "type": "fauna",
       "name": "Lava-Pool Water-Beetle",
       "scientific": "Dytiscus vulcanus",
+      "clade": "insect",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "mountains"
@@ -1251,6 +1310,7 @@
       "type": "fauna",
       "name": "Sky-Faring Grasshopper",
       "scientific": "Melanoplus caelius",
+      "clade": "insect",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "sky_island",
@@ -1268,22 +1328,41 @@
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
     },
     {
-      "id": "fauna_grey_bark_mimic",
+      "id": "fauna_vrkshasmara",
       "type": "fauna",
-      "name": "Grey Bark-Mimic",
-      "scientific": "Vrkshasmara griseus",
-      "region": "narmada-vindhya",
-      "biomes": [
-        "forest"
+      "name": "Vṛkṣaśmara",
+      "aliases": [
+        "Grey Bark-Mimic",
+        "Arboreal Forest Octopus"
       ],
-      "placement": "encounter",
-      "rarity": "common",
-      "journal_prompt": "An arboreal forest octopus of the Narmada Valley that has evolved keratin-rimmed suction cups and moisture-retaining gills to live in tree canopies, mimicking weathered bark.",
+      "scientific": "Vrkshasmara griseus",
+      "clade": "mollusc",
+      "taxonomy": {
+        "notes": "Arboreal octopus with keratin-rimmed suction cups"
+      },
+      "diet": "Omnivore",
+      "habitats": [
+        "region_narmada_plateau"
+      ],
+      "behaviour": [
+        "camouflage",
+        "arboreal"
+      ],
+      "notes": "Evolved for tree canopies of Narmada Valley. Bioluminescent moss-dweller variant exists.",
       "canon": "primary",
       "sources": [
-        "docs/bestiary.md"
+        "SouthOfTethys.txt"
       ],
+      "biomes": [
+        "forest",
+        "hills",
+        "landmark"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "journal_prompt": "Something grey shifts high in the canopy, too large for a monkey, and the leaves close over it again.",
       "mood": "watchful",
+      "region": "narmada-vindhya",
       "source_index": 56
     },
     {
@@ -1291,6 +1370,7 @@
       "type": "fauna",
       "name": "Bioluminescent Moss-Dweller",
       "scientific": "Vrkshasmara phosphorea",
+      "clade": "mollusc",
       "region": "narmada-vindhya",
       "biomes": [
         "forest"
@@ -1310,6 +1390,7 @@
       "type": "fauna",
       "name": "Shilajit Guardian Lizard",
       "scientific": "Agama shilajit",
+      "clade": "reptile",
       "diet": "Omnivore",
       "habitats": [
         "region_narmada_plateau"
@@ -1339,6 +1420,7 @@
       "type": "fauna",
       "name": "Lesser Ember-Skink",
       "scientific": "Agama scintillans",
+      "clade": "reptile",
       "region": "narmada-vindhya",
       "biomes": [
         "mountains"
@@ -1358,6 +1440,7 @@
       "type": "fauna",
       "name": "Golden Honey-Goliath",
       "scientific": "Megapis aurea",
+      "clade": "insect",
       "diet": "Herbivore",
       "habitats": [
         "region_narmada_plateau"
@@ -1387,6 +1470,7 @@
       "type": "fauna",
       "name": "Black-Striped Siege Bee",
       "scientific": "Megapis obsidiana",
+      "clade": "insect",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -1407,6 +1491,7 @@
       "type": "fauna",
       "name": "Lesser Whisper-Fig Bird",
       "scientific": "Ficusophila minor",
+      "clade": "bird",
       "region": "narmada-vindhya",
       "biomes": [
         "forest"
@@ -1426,6 +1511,7 @@
       "type": "fauna",
       "name": "Gondwana Spice-Sifter",
       "scientific": "Peneus gondwanensis",
+      "clade": "crustacean",
       "region": "narmada-vindhya",
       "biomes": [
         "mountains"
@@ -1445,6 +1531,7 @@
       "type": "fauna",
       "name": "Vindhya Cliff-Goat",
       "scientific": "Capra vindhyensis",
+      "clade": "mammal",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -1465,6 +1552,7 @@
       "type": "fauna",
       "name": "Narmada Cave Bear",
       "scientific": "Ursus spelaeus narmadensis",
+      "clade": "mammal",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -1485,6 +1573,7 @@
       "type": "fauna",
       "name": "Vindhya Leopard",
       "scientific": "Panthera pardus vindhyensis",
+      "clade": "mammal",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -1505,6 +1594,7 @@
       "type": "fauna",
       "name": "Garudasaur Eagle",
       "scientific": "Aquila garudae",
+      "clade": "bird",
       "diet": "Carnivore",
       "habitats": [
         "region_narmada_plateau"
@@ -1535,6 +1625,7 @@
       "type": "fauna",
       "name": "Lava-Ledge Gecko",
       "scientific": "Gekko vulcanus",
+      "clade": "reptile",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -1555,6 +1646,7 @@
       "type": "fauna",
       "name": "Vindhya Horned Owl",
       "scientific": "Bubo vindhyensis",
+      "clade": "bird",
       "region": "narmada-vindhya",
       "biomes": [
         "forest"
@@ -1574,6 +1666,7 @@
       "type": "fauna",
       "name": "Narmada Rock-Python",
       "scientific": "Python narmadensis",
+      "clade": "reptile",
       "region": "narmada-vindhya",
       "biomes": [
         "mountains"
@@ -1593,6 +1686,7 @@
       "type": "fauna",
       "name": "Ash-Glider Squirrel",
       "scientific": "Petaurista cinereus",
+      "clade": "mammal",
       "region": "narmada-vindhya",
       "biomes": [
         "forest"
@@ -1612,6 +1706,7 @@
       "type": "fauna",
       "name": "Red-Crested Woodpecker",
       "scientific": "Picus phoeniceus",
+      "clade": "bird",
       "region": "narmada-vindhya",
       "biomes": [
         "forest"
@@ -1631,6 +1726,7 @@
       "type": "fauna",
       "name": "Vindhya Langur",
       "scientific": "Presbytis vindhyensis",
+      "clade": "mammal",
       "region": "narmada-vindhya",
       "biomes": [
         "forest"
@@ -1650,6 +1746,7 @@
       "type": "fauna",
       "name": "Volcanic Shrew",
       "scientific": "Sorex vulcanus",
+      "clade": "mammal",
       "region": "narmada-vindhya",
       "biomes": [
         "mountains"
@@ -1669,6 +1766,7 @@
       "type": "fauna",
       "name": "Mountain Forest Boar",
       "scientific": "Sus sylvanus",
+      "clade": "mammal",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -1689,6 +1787,7 @@
       "type": "fauna",
       "name": "Vindhya Rock-Squirrel",
       "scientific": "Ratufa vindhyensis",
+      "clade": "mammal",
       "region": "narmada-vindhya",
       "biomes": [
         "hills"
@@ -1708,6 +1807,7 @@
       "type": "fauna",
       "name": "Narmada Honey-Guide",
       "scientific": "Indicator narmadensis",
+      "clade": "bird",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -1728,6 +1828,7 @@
       "type": "fauna",
       "name": "Basalt-Cliff Hornbill",
       "scientific": "Ocyceros basalticus",
+      "clade": "bird",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -1748,6 +1849,7 @@
       "type": "fauna",
       "name": "Vindhya Bark-Gecko",
       "scientific": "Hemidactylus vindhyensis",
+      "clade": "reptile",
       "region": "narmada-vindhya",
       "biomes": [
         "forest"
@@ -1767,6 +1869,7 @@
       "type": "fauna",
       "name": "Narmada Cave-Crab",
       "scientific": "Potamon cavea",
+      "clade": "crustacean",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -1787,6 +1890,7 @@
       "type": "fauna",
       "name": "Ash-Valley Field-Mouse",
       "scientific": "Mus cinereus",
+      "clade": "mammal",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -1807,6 +1911,7 @@
       "type": "fauna",
       "name": "Vindhya Centipede-Eater",
       "scientific": "Herpestes centipeda",
+      "clade": "mammal",
       "region": "narmada-vindhya",
       "biomes": [
         "hills"
@@ -1826,6 +1931,7 @@
       "type": "fauna",
       "name": "Narmada Tree-Shrew",
       "scientific": "Anathana narmadensis",
+      "clade": "mammal",
       "region": "narmada-vindhya",
       "biomes": [
         "forest"
@@ -1845,6 +1951,7 @@
       "type": "fauna",
       "name": "Obsidian-Cliff Eagle",
       "scientific": "Aquila obsidiana",
+      "clade": "bird",
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -1865,6 +1972,7 @@
       "type": "fauna",
       "name": "Vindhya Hill-Parakeet",
       "scientific": "Psittacula vindhyensis",
+      "clade": "bird",
       "region": "narmada-vindhya",
       "biomes": [
         "hills"
@@ -1880,22 +1988,36 @@
       "source_index": 85
     },
     {
-      "id": "fauna_sand_camouflage_beedu",
+      "id": "fauna_beedu",
       "type": "fauna",
-      "name": "Sand-Camouflage Beedu",
+      "name": "Beedu",
+      "aliases": [
+        "Sand-Camouflage Beedu"
+      ],
       "scientific": "Sarasvatimanta gedrosii",
-      "region": "gedrosian-taklamakan",
+      "clade": "fish",
+      "diet": "Carnivore",
+      "habitats": [
+        "region_gedrosian_desert"
+      ],
+      "behaviour": [
+        "gliding",
+        "thermal_currents",
+        "camouflage"
+      ],
+      "notes": "Desert manta ray with gas-filled bladders for silent gliding over dunes.",
+      "canon": "primary",
+      "sources": [
+        "SouthOfTethys.txt"
+      ],
       "biomes": [
         "desert"
       ],
       "placement": "encounter",
-      "rarity": "common",
-      "journal_prompt": "A desert manta ray that has evolved gas-filled internal bladders to glide silently over hot desert thermal currents, blending into the dunes.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
-      "mood": "graceful",
+      "rarity": "rare",
+      "journal_prompt": "A pale ray glides above the dune crest, silent, its bladders full of air, casting a shadow the size of a boat.",
+      "mood": "watchful",
+      "region": "gedrosian-taklamakan",
       "source_index": 86
     },
     {
@@ -1903,6 +2025,7 @@
       "type": "fauna",
       "name": "White Salt-Flat Ray",
       "scientific": "Sarasvatimanta alba",
+      "clade": "fish",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -1922,6 +2045,7 @@
       "type": "fauna",
       "name": "Woolly Bactrian-Croc",
       "scientific": "Camelosuchus bactrianus",
+      "clade": "crocodilian",
       "diet": "Omnivore",
       "habitats": [
         "region_gedrosian_desert"
@@ -1951,6 +2075,7 @@
       "type": "fauna",
       "name": "Sleek Dromedary-Croc",
       "scientific": "Camelosuchus dromedarius",
+      "clade": "crocodilian",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -1970,6 +2095,8 @@
       "type": "fauna",
       "name": "Giant Riding Ostrich",
       "scientific": "Struthio camelus maximus",
+      "clade": "bird",
+      "subclade": "ratite",
       "diet": "Herbivore",
       "habitats": [
         "hyrkanian_steppe",
@@ -2000,6 +2127,8 @@
       "type": "fauna",
       "name": "Golden-Plumed Racer",
       "scientific": "Struthio camelus auratus",
+      "clade": "bird",
+      "subclade": "ratite",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2019,6 +2148,7 @@
       "type": "fauna",
       "name": "Coastal Sand-Sprinter",
       "scientific": "Postosuchus bipedalis",
+      "clade": "crocodilian",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2038,6 +2168,7 @@
       "type": "fauna",
       "name": "Highland Rock-Runner",
       "scientific": "Postosuchus montanus",
+      "clade": "crocodilian",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2057,6 +2188,7 @@
       "type": "fauna",
       "name": "Glass-Scaled Viper",
       "scientific": "Vipera vitrea",
+      "clade": "reptile",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2076,6 +2208,7 @@
       "type": "fauna",
       "name": "Crimson-Eyed Adder",
       "scientific": "Vipera rubra",
+      "clade": "reptile",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2095,6 +2228,7 @@
       "type": "fauna",
       "name": "Desert Jerboa-Rat",
       "scientific": "Dipodomys deserti",
+      "clade": "mammal",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2114,6 +2248,7 @@
       "type": "fauna",
       "name": "Taklamakan Sand-Cat",
       "scientific": "Felis margarita taklamakan",
+      "clade": "mammal",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2133,6 +2268,7 @@
       "type": "fauna",
       "name": "Gedrosian Spiny Lizard",
       "scientific": "Uromastyx gedrosii",
+      "clade": "reptile",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2152,6 +2288,7 @@
       "type": "fauna",
       "name": "Scythian War-Camel",
       "scientific": "Camelus scythicus",
+      "clade": "mammal",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2171,6 +2308,7 @@
       "type": "fauna",
       "name": "Dune-Lurking Scorpion",
       "scientific": "Buthus gedrosii",
+      "clade": "arachnid",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2190,6 +2328,7 @@
       "type": "fauna",
       "name": "Desert Falcon",
       "scientific": "Falco gedrosianus",
+      "clade": "bird",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2209,6 +2348,7 @@
       "type": "fauna",
       "name": "Salt-Flat Beetle",
       "scientific": "Carabus salinus",
+      "clade": "insect",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2228,6 +2368,7 @@
       "type": "fauna",
       "name": "Highland Ibex",
       "scientific": "Capra ibex gedrosia",
+      "clade": "mammal",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2247,6 +2388,7 @@
       "type": "fauna",
       "name": "Sand-Burrowing Toad",
       "scientific": "Bufo arenarius",
+      "clade": "amphibian",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2266,6 +2408,7 @@
       "type": "fauna",
       "name": "Hourglass Centipede",
       "scientific": "Scolopendra arenaria",
+      "clade": "insect",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2285,6 +2428,7 @@
       "type": "fauna",
       "name": "Taklamakan Sand-Viper",
       "scientific": "Vipera sand-dune",
+      "clade": "reptile",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2300,22 +2444,37 @@
       "source_index": 106
     },
     {
-      "id": "fauna_gedrosian_desert_fox",
+      "id": "fauna_desert_fox",
       "type": "fauna",
-      "name": "Gedrosian Desert Fox",
+      "name": "Desert Fox",
+      "aliases": [
+        "Gedrosian Desert Fox"
+      ],
       "scientific": "Vulpes gedrosiana",
-      "region": "gedrosian-taklamakan",
+      "clade": "mammal",
+      "diet": "Omnivore",
+      "habitats": [
+        "region_gedrosian_desert"
+      ],
+      "behaviour": [
+        "nocturnal",
+        "scavenger"
+      ],
+      "notes": "Large-eared fox of the Gedrosian night. Follows caravans for scraps; omen animal in Tushara camp lore.",
+      "canon": "primary",
+      "sources": [
+        "SouthOfTethys.txt"
+      ],
       "biomes": [
-        "desert"
+        "desert",
+        "plains",
+        "settlement"
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "A small fox with oversized ears that dissipate heat, hunting jerboa-rats in the cool desert nights.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
-      "mood": "fearsome",
+      "journal_prompt": "A fox with enormous ears watches the road from a low dune, waiting to see whether anything falls off the caravan.",
+      "mood": "watchful",
+      "region": "gedrosian-taklamakan",
       "source_index": 107
     },
     {
@@ -2323,6 +2482,7 @@
       "type": "fauna",
       "name": "Dune-Running Lizard",
       "scientific": "Agama deserti",
+      "clade": "reptile",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2342,6 +2502,7 @@
       "type": "fauna",
       "name": "Camelosuchus Calf",
       "scientific": "Camelosuchus minor",
+      "clade": "crocodilian",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2361,6 +2522,7 @@
       "type": "fauna",
       "name": "Desert Horned Owl",
       "scientific": "Bubo deserti",
+      "clade": "bird",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2380,6 +2542,7 @@
       "type": "fauna",
       "name": "Gedrosian Desert Wolf",
       "scientific": "Canis lupus gedrosiae",
+      "clade": "mammal",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2399,6 +2562,7 @@
       "type": "fauna",
       "name": "Dune-Lurking Spider",
       "scientific": "Sparassus arenarius",
+      "clade": "arachnid",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2418,6 +2582,7 @@
       "type": "fauna",
       "name": "Salt-Flat Cricket",
       "scientific": "Gryllus salinus",
+      "clade": "insect",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2437,6 +2602,7 @@
       "type": "fauna",
       "name": "Gedrosian Sand-Grouse",
       "scientific": "Pterocles gedrosius",
+      "clade": "bird",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2456,6 +2622,7 @@
       "type": "fauna",
       "name": "Highland Desert Beetle",
       "scientific": "Carabus montanus",
+      "clade": "insect",
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2475,6 +2642,8 @@
       "type": "fauna",
       "name": "Crested Sylvian",
       "scientific": "Sylvianus cristatus",
+      "clade": "bird",
+      "subclade": "avian_dinosaurid",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -2495,6 +2664,8 @@
       "type": "fauna",
       "name": "Stealth-Patterned Theropod",
       "scientific": "Sylvianus occultus",
+      "clade": "bird",
+      "subclade": "avian_dinosaurid",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -2514,7 +2685,9 @@
       "id": "fauna_giant_jungle_raptor",
       "type": "fauna",
       "name": "Giant Jungle Raptor",
-      "scientific": "Silvanus gigas",
+      "scientific": "Sylvianus gigas",
+      "clade": "bird",
+      "subclade": "avian_dinosaurid",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -2535,6 +2708,7 @@
       "type": "fauna",
       "name": "Giant Horned Voay",
       "scientific": "Voay maximus",
+      "clade": "crocodilian",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea",
@@ -2555,6 +2729,7 @@
       "type": "fauna",
       "name": "Banded Scavenger Voay",
       "scientific": "Voay lineatus",
+      "clade": "crocodilian",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea",
@@ -2575,6 +2750,7 @@
       "type": "fauna",
       "name": "Abyssal Blue Leviathan",
       "scientific": "Balaenoptera abyssalis",
+      "clade": "mammal",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2594,6 +2770,7 @@
       "type": "fauna",
       "name": "Bone-Plated Orca",
       "scientific": "Orcinus osteoplax",
+      "clade": "mammal",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2613,6 +2790,8 @@
       "type": "fauna",
       "name": "Steppe-Plumed Elephantbird",
       "scientific": "Aepyornis stephensis",
+      "clade": "bird",
+      "subclade": "ratite",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "coast",
@@ -2633,6 +2812,8 @@
       "type": "fauna",
       "name": "Jungle-Crested Mount",
       "scientific": "Aepyornis crested",
+      "clade": "bird",
+      "subclade": "ratite",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -2652,6 +2833,7 @@
       "type": "fauna",
       "name": "Sea Scorpion Queen",
       "scientific": "Shrīmā mimetica",
+      "clade": "arachnid",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2671,6 +2853,7 @@
       "type": "fauna",
       "name": "Tethyan Reef-Lurker",
       "scientific": "Murex tethys",
+      "clade": "mollusc",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2690,6 +2873,7 @@
       "type": "fauna",
       "name": "Giant Blue-Ringed Octopus",
       "scientific": "Octopus caeruleus",
+      "clade": "mollusc",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2709,6 +2893,7 @@
       "type": "fauna",
       "name": "Tethys Leviathan Calf",
       "scientific": "Balaenoptera minor",
+      "clade": "mammal",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2728,6 +2913,7 @@
       "type": "fauna",
       "name": "Shattered Sea Oyster",
       "scientific": "Ostrea shattered",
+      "clade": "mollusc",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2747,6 +2933,7 @@
       "type": "fauna",
       "name": "Coral-dwelling Moray",
       "scientific": "Muraena coralina",
+      "clade": "fish",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2766,6 +2953,7 @@
       "type": "fauna",
       "name": "Flying-Fish of the Tethys",
       "scientific": "Exocoetus tethys",
+      "clade": "fish",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2785,6 +2973,7 @@
       "type": "fauna",
       "name": "Hammerhead Reef-Shark",
       "scientific": "Sphyrna reef",
+      "clade": "fish",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2804,6 +2993,7 @@
       "type": "fauna",
       "name": "Mappa Mundi Tree-Frog",
       "scientific": "Hyla sylvanica",
+      "clade": "amphibian",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -2823,6 +3013,7 @@
       "type": "fauna",
       "name": "Jungle python",
       "scientific": "Python sylvanus",
+      "clade": "reptile",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -2842,6 +3033,7 @@
       "type": "fauna",
       "name": "Southern Sea-Eagle",
       "scientific": "Haliaeetus meridionalis",
+      "clade": "bird",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2861,6 +3053,7 @@
       "type": "fauna",
       "name": "Mappa Mundi Forest-Cat",
       "scientific": "Prionailurus sylvanus",
+      "clade": "mammal",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -2880,6 +3073,7 @@
       "type": "fauna",
       "name": "Southern Sea-Turtle",
       "scientific": "Chelonia meridionalis",
+      "clade": "reptile",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2899,6 +3093,7 @@
       "type": "fauna",
       "name": "Jungle Hornbill",
       "scientific": "Buceros sylvanus",
+      "clade": "bird",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -2918,6 +3113,7 @@
       "type": "fauna",
       "name": "Mappa Mundi Flying-Lizard",
       "scientific": "Draco sylvanus",
+      "clade": "reptile",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -2937,6 +3133,7 @@
       "type": "fauna",
       "name": "Tethyan Blue-Fin Tuna",
       "scientific": "Thunnus tethys",
+      "clade": "fish",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2956,6 +3153,7 @@
       "type": "fauna",
       "name": "Reef-dwelling Octopus",
       "scientific": "Octopus reef",
+      "clade": "mollusc",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -2975,6 +3173,7 @@
       "type": "fauna",
       "name": "Mappa Mundi Tree-Snail",
       "scientific": "Helix sylvanica",
+      "clade": "mollusc",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -2994,6 +3193,7 @@
       "type": "fauna",
       "name": "Shattered Sea Barracuda",
       "scientific": "Sphyraena shattered",
+      "clade": "fish",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -3013,6 +3213,7 @@
       "type": "fauna",
       "name": "Jungle Horned Toad",
       "scientific": "Megophrys sylvanica",
+      "clade": "amphibian",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "forest"
@@ -3032,6 +3233,7 @@
       "type": "fauna",
       "name": "Southern Reef-Stingray",
       "scientific": "Dasyatis meridionalis",
+      "clade": "fish",
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "sea"
@@ -3051,6 +3253,7 @@
       "type": "fauna",
       "name": "Magma-Claw Crab",
       "scientific": "Gecarcinus magma",
+      "clade": "crustacean",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3071,6 +3274,7 @@
       "type": "fauna",
       "name": "Basalt-Armored Scavenger",
       "scientific": "Gecarcinus basalticus",
+      "clade": "crustacean",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3091,6 +3295,7 @@
       "type": "fauna",
       "name": "Copper-Veined Snail",
       "scientific": "Chrysomallon chalceus",
+      "clade": "mollusc",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3111,6 +3316,7 @@
       "type": "fauna",
       "name": "Giant Steel-Shelled Snail",
       "scientific": "Chrysomallon ferreus",
+      "clade": "mollusc",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3131,6 +3337,7 @@
       "type": "fauna",
       "name": "Serene Brown Ammonite",
       "scientific": "Ammonites pacificus",
+      "clade": "mollusc",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3151,6 +3358,7 @@
       "type": "fauna",
       "name": "Asura-Marked Black Ammonite",
       "scientific": "Ammonites asuricus",
+      "clade": "mollusc",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3171,6 +3379,7 @@
       "type": "fauna",
       "name": "Frost-Whisker Carp",
       "scientific": "Cyprinus glacialis",
+      "clade": "fish",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3191,6 +3400,7 @@
       "type": "fauna",
       "name": "Shambala Ice-Pike",
       "scientific": "Esox shambala",
+      "clade": "fish",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3211,6 +3421,7 @@
       "type": "fauna",
       "name": "Basalt Cave-Lurker",
       "scientific": "Agama basaltica",
+      "clade": "reptile",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3231,6 +3442,7 @@
       "type": "fauna",
       "name": "Ash-Field Ground-Beetle",
       "scientific": "Carabus cinereus",
+      "clade": "insect",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3251,6 +3463,7 @@
       "type": "fauna",
       "name": "Lava-Vent Tubeworm",
       "scientific": "Riftia vulcanica",
+      "clade": "worm",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3271,6 +3484,7 @@
       "type": "fauna",
       "name": "Soot-Furred Rat",
       "scientific": "Rattus cinereus",
+      "clade": "mammal",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3291,6 +3505,7 @@
       "type": "fauna",
       "name": "Glacial Snow-Hare",
       "scientific": "Lepus glacialis",
+      "clade": "mammal",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3311,6 +3526,7 @@
       "type": "fauna",
       "name": "Glacier-Edged Seal",
       "scientific": "Phoca glacialis",
+      "clade": "mammal",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3331,6 +3547,7 @@
       "type": "fauna",
       "name": "Volcanic Salamander",
       "scientific": "Salamandra vulcanica",
+      "clade": "amphibian",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3351,6 +3568,7 @@
       "type": "fauna",
       "name": "Antarctic Petrel",
       "scientific": "Thalassoica antarctica",
+      "clade": "bird",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3371,6 +3589,7 @@
       "type": "fauna",
       "name": "Soot-Winged Falcon",
       "scientific": "Falco cinereus",
+      "clade": "bird",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3391,6 +3610,7 @@
       "type": "fauna",
       "name": "Lava-Pool Shrimp",
       "scientific": "Palaemon vulcanus",
+      "clade": "crustacean",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3411,6 +3631,7 @@
       "type": "fauna",
       "name": "Glacial Wolf-Spider",
       "scientific": "Lycosa glacialis",
+      "clade": "arachnid",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3431,6 +3652,7 @@
       "type": "fauna",
       "name": "Antarctic Skua",
       "scientific": "Catharacta antarctica",
+      "clade": "bird",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3451,6 +3673,7 @@
       "type": "fauna",
       "name": "Lava-Basalt Centipede",
       "scientific": "Scolopendra vulcanica",
+      "clade": "insect",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3471,6 +3694,7 @@
       "type": "fauna",
       "name": "Ash-Valley Scorpion",
       "scientific": "Buthus cinereus",
+      "clade": "arachnid",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3491,6 +3715,7 @@
       "type": "fauna",
       "name": "Boiling-Water Hermit-Crab",
       "scientific": "Pagurus vulcanus",
+      "clade": "crustacean",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3511,6 +3736,7 @@
       "type": "fauna",
       "name": "Sooty Shearwater",
       "scientific": "Puffinus cinereus",
+      "clade": "bird",
       "region": "ganges-lava-sea",
       "biomes": [
         "hills"
@@ -3530,6 +3756,7 @@
       "type": "fauna",
       "name": "Glacial Ice-Flea",
       "scientific": "Isotoma glacialis",
+      "clade": "insect",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3550,6 +3777,7 @@
       "type": "fauna",
       "name": "Shambala Snow-Partridge",
       "scientific": "Lerwa shambala",
+      "clade": "bird",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3568,8 +3796,9 @@
     {
       "id": "fauna_lava_vent_tubeworm_asurica",
       "type": "fauna",
-      "name": "Lava-Vent Tubeworm",
+      "name": "Crimson-Tipped Tubeworm",
       "scientific": "Riftia asurica",
+      "clade": "worm",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3583,13 +3812,17 @@
         "docs/bestiary.md"
       ],
       "mood": "watchful",
-      "source_index": 172
+      "source_index": 172,
+      "aliases": [
+        "Asura-Vent Tubeworm"
+      ]
     },
     {
       "id": "fauna_ash_plains_cricket",
       "type": "fauna",
       "name": "Ash-Plains Cricket",
       "scientific": "Gryllus cinereus",
+      "clade": "insect",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3610,6 +3843,7 @@
       "type": "fauna",
       "name": "Glacial Ribbon-Seal",
       "scientific": "Phoca ribbon",
+      "clade": "mammal",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3630,6 +3864,7 @@
       "type": "fauna",
       "name": "Volcanic Ash-Moth",
       "scientific": "Lymantria vulcanica",
+      "clade": "insect",
       "region": "ganges-lava-sea",
       "biomes": [
         "lava_field",
@@ -3650,6 +3885,7 @@
       "type": "fauna",
       "name": "Aero-Manta / High-Altitude Beedu",
       "scientific": "Sarasvatimanta sky",
+      "clade": "fish",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -3671,6 +3907,7 @@
       "type": "fauna",
       "name": "Cloud-Weaver Spider / Gaganjala",
       "scientific": "Aranea nubis",
+      "clade": "arachnid",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -3692,6 +3929,7 @@
       "type": "fauna",
       "name": "Cognitavi Cloud-Hermit",
       "scientific": "Cognitavi solitarius",
+      "clade": "bird",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -3713,6 +3951,7 @@
       "type": "fauna",
       "name": "Sky-Faring Orca",
       "scientific": "Orcinus volans",
+      "clade": "mammal",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -3734,6 +3973,7 @@
       "type": "fauna",
       "name": "Floating-Island Shrew",
       "scientific": "Sorex levitatus",
+      "clade": "mammal",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -3755,6 +3995,7 @@
       "type": "fauna",
       "name": "Sky-Gull",
       "scientific": "Larus caelius",
+      "clade": "bird",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -3775,6 +4016,7 @@
       "type": "fauna",
       "name": "Cloud-Leopard",
       "scientific": "Neofelis nubis",
+      "clade": "mammal",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -3795,6 +4037,7 @@
       "type": "fauna",
       "name": "Lodestone Beetle",
       "scientific": "Carabus magneticus",
+      "clade": "insect",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -3815,6 +4058,7 @@
       "type": "fauna",
       "name": "Static-Charged Wasp",
       "scientific": "Vespa electrica",
+      "clade": "insect",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -3836,6 +4080,7 @@
       "type": "fauna",
       "name": "Sky-Turtle",
       "scientific": "Chelonia caelia",
+      "clade": "reptile",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -3857,6 +4102,7 @@
       "type": "fauna",
       "name": "Aero-Snail",
       "scientific": "Helix caelia",
+      "clade": "mollusc",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -3878,6 +4124,7 @@
       "type": "fauna",
       "name": "Cloud-Cricket",
       "scientific": "Gryllus nubis",
+      "clade": "insect",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -3898,6 +4145,7 @@
       "type": "fauna",
       "name": "Sky-Snake",
       "scientific": "Chrysopelea caelia",
+      "clade": "reptile",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -3919,6 +4167,7 @@
       "type": "fauna",
       "name": "Mist-Lurking Bat",
       "scientific": "Myotis nubis",
+      "clade": "mammal",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -3939,6 +4188,7 @@
       "type": "fauna",
       "name": "Gargoyle-Bat",
       "scientific": "Vespertilio asuricus",
+      "clade": "mammal",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -3960,6 +4210,7 @@
       "type": "fauna",
       "name": "Aero-Moth",
       "scientific": "Lymantria caelia",
+      "clade": "insect",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -3980,6 +4231,7 @@
       "type": "fauna",
       "name": "Floating-Island Chameleon",
       "scientific": "Chamaeleo levitatus",
+      "clade": "reptile",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -4000,6 +4252,7 @@
       "type": "fauna",
       "name": "Sky-Dragon Fly",
       "scientific": "Anax caelius",
+      "clade": "insect",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -4021,6 +4274,7 @@
       "type": "fauna",
       "name": "Prana-Feeder Finch",
       "scientific": "Fringilla prana",
+      "clade": "bird",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -4041,6 +4295,7 @@
       "type": "fauna",
       "name": "Cloud-Squirrel",
       "scientific": "Sciurus nubis",
+      "clade": "mammal",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -4062,6 +4317,7 @@
       "type": "fauna",
       "name": "Sky-Faring Jellyfish",
       "scientific": "Aurelia caelia",
+      "clade": "cnidarian",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -4083,6 +4339,7 @@
       "type": "fauna",
       "name": "Lodestone Snail",
       "scientific": "Helix magneticus",
+      "clade": "mollusc",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -4103,6 +4360,7 @@
       "type": "fauna",
       "name": "Cloud-Lurking Gecko",
       "scientific": "Gekko caelius",
+      "clade": "reptile",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -4124,6 +4382,7 @@
       "type": "fauna",
       "name": "Sky-Faring Otter",
       "scientific": "Lutra caelia",
+      "clade": "mammal",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -4145,6 +4404,7 @@
       "type": "fauna",
       "name": "Mist-Valley Thrush",
       "scientific": "Turdus caelius",
+      "clade": "bird",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -4165,6 +4425,7 @@
       "type": "fauna",
       "name": "Aero-Weevil",
       "scientific": "Curculio caelius",
+      "clade": "insect",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -4185,6 +4446,7 @@
       "type": "fauna",
       "name": "Sky-Faring Crab",
       "scientific": "Portunus caelius",
+      "clade": "crustacean",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -4205,6 +4467,7 @@
       "type": "fauna",
       "name": "Cloud-Weaver Spiderling",
       "scientific": "Aranea nubis minor",
+      "clade": "arachnid",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -4226,6 +4489,7 @@
       "type": "fauna",
       "name": "High-Altitude Falcon",
       "scientific": "Falco caelius",
+      "clade": "bird",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island"
@@ -4246,6 +4510,7 @@
       "type": "fauna",
       "name": "Prana-absorbing Butterfly",
       "scientific": "Danaus caelius",
+      "clade": "insect",
       "region": "tethys-sky-routes",
       "biomes": [
         "sky_island",
@@ -4267,6 +4532,8 @@
       "type": "fauna",
       "name": "Colossal Void-Devourer",
       "scientific": "Sauropodoligator titan",
+      "clade": "dinosaur",
+      "subclade": "sauropodomorph",
       "region": "asura-conjurations",
       "biomes": [
         "wetland",
@@ -4287,6 +4554,8 @@
       "type": "fauna",
       "name": "Sand-Resurrected Behemoth",
       "scientific": "Sauropodoligator arenarius",
+      "clade": "dinosaur",
+      "subclade": "sauropodomorph",
       "region": "asura-conjurations",
       "biomes": [
         "desert"
@@ -4306,6 +4575,7 @@
       "type": "fauna",
       "name": "Winged Behemoth Manticore",
       "scientific": "Manticora titan",
+      "clade": "spectre",
       "region": "asura-conjurations",
       "biomes": [
         "hills"
@@ -4325,6 +4595,7 @@
       "type": "fauna",
       "name": "Quarry-Spawned Tendua",
       "scientific": "Manticora quarry",
+      "clade": "spectre",
       "region": "asura-conjurations",
       "biomes": [
         "hills"
@@ -4344,6 +4615,7 @@
       "type": "fauna",
       "name": "Ash-Skinned Courtesan",
       "scientific": "Māyā-born",
+      "clade": "construct",
       "region": "asura-conjurations",
       "biomes": [
         "river",
@@ -4365,6 +4637,7 @@
       "type": "fauna",
       "name": "Feral Harappan Night-Stalker",
       "scientific": "Māyā-born ferus",
+      "clade": "construct",
       "region": "asura-conjurations",
       "biomes": [
         "settlement"
@@ -4384,6 +4657,7 @@
       "type": "fauna",
       "name": "Lunar-Reflection Wraith",
       "scientific": "Māyā-born spectral",
+      "clade": "construct",
       "region": "asura-conjurations",
       "biomes": [
         "desert",
@@ -4404,6 +4678,7 @@
       "type": "fauna",
       "name": "Stepwell Shadow",
       "scientific": "Māyā-born umbra",
+      "clade": "construct",
       "region": "asura-conjurations",
       "biomes": [
         "river"
@@ -4423,6 +4698,7 @@
       "type": "fauna",
       "name": "White-Ash Bride",
       "scientific": "Māyā-born ignis",
+      "clade": "construct",
       "region": "asura-conjurations",
       "biomes": [
         "settlement"
@@ -4442,6 +4718,7 @@
       "type": "fauna",
       "name": "Ember-Born Dancer",
       "scientific": "Māyā-born scintilla",
+      "clade": "construct",
       "region": "asura-conjurations",
       "biomes": [
         "settlement"
@@ -4460,7 +4737,8 @@
       "id": "fauna_asura_tainted_gargoyle",
       "type": "fauna",
       "name": "Asura-Tainted Gargoyle",
-      "scientific": "Tuli calcified",
+      "scientific": "Māyā-born tuli",
+      "clade": "construct",
       "region": "asura-conjurations",
       "biomes": [
         "sky_island",
@@ -4468,20 +4746,25 @@
       ],
       "placement": "lore",
       "rarity": "mythic",
-      "journal_prompt": "A devolved offshoot of humanity whose skin has calcified into a stone-like hide, animating only at night to hunt.",
+      "journal_prompt": "A Māyā-born thing in the shape of a Tuli, its skin calcified into a stone-like hide. It animates only at night, and hunts.",
       "canon": "primary",
       "sources": [
         "docs/bestiary.md"
       ],
       "mood": "uncanny",
       "source_index": 216,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity.",
+      "taxonomy": {
+        "notes": "Māyā-born, in the shape of a Tuli. The old binomial `Tuli calcified` carried the right subject and the wrong grammar -- Tuli is a people, not a genus, and `calcified` is an English epithet of the kind canon has already replaced twice. Filed as a construct because it is made rather than born, which also settles what had been read as a devolved hominid."
+      },
+      "notes": "Māyā-born construct in Tuli shape, hide calcified to stone. Nocturnal."
     },
     {
       "id": "fauna_lethal_cave_spectre",
       "type": "fauna",
       "name": "Lethal Cave-Spectre",
       "scientific": "Asura spectral",
+      "clade": "spectre",
       "region": "asura-conjurations",
       "biomes": [
         "mountains"
@@ -4501,6 +4784,7 @@
       "type": "fauna",
       "name": "Obsidian-Winged Serpent",
       "scientific": "Serpens obsidianus",
+      "clade": "reptile",
       "region": "asura-conjurations",
       "biomes": [
         "mountains"
@@ -4520,6 +4804,7 @@
       "type": "fauna",
       "name": "Naga Infiltrator",
       "scientific": "Serpens simulans",
+      "clade": "reptile",
       "region": "asura-conjurations",
       "biomes": [
         "settlement"
@@ -4542,6 +4827,7 @@
       "type": "fauna",
       "name": "Gorgonopsid War-Beast",
       "scientific": "Gorgonops asuricus",
+      "clade": "synapsid",
       "region": "asura-conjurations",
       "biomes": [
         "plains",
@@ -4562,6 +4848,7 @@
       "type": "fauna",
       "name": "Dimetrodon War-Mount",
       "scientific": "Dimetrodon asuricus",
+      "clade": "synapsid",
       "region": "asura-conjurations",
       "biomes": [
         "desert",
@@ -4582,6 +4869,7 @@
       "type": "fauna",
       "name": "Estemmenosuchus Executioner",
       "scientific": "Estemmenosuchus asuricus",
+      "clade": "synapsid",
       "region": "asura-conjurations",
       "biomes": [
         "underworld"
@@ -4606,6 +4894,7 @@
       "type": "fauna",
       "name": "Scutosaurus Shield-Beast",
       "scientific": "Scutosaurus asuricus",
+      "clade": "reptile",
       "region": "asura-conjurations",
       "biomes": [
         "plains",
@@ -4626,6 +4915,7 @@
       "type": "fauna",
       "name": "Rajasaurus Ambush-Drake",
       "scientific": "Rajasaurus asuricus",
+      "clade": "dinosaur",
       "region": "asura-conjurations",
       "biomes": [
         "settlement"
@@ -4645,6 +4935,7 @@
       "type": "fauna",
       "name": "Underworld Blood-Leech",
       "scientific": "Hirudo asurica",
+      "clade": "worm",
       "region": "asura-conjurations",
       "biomes": [
         "underworld"
@@ -4669,6 +4960,7 @@
       "type": "fauna",
       "name": "Asura-Tainted Bat",
       "scientific": "Vespertilio asuricus minor",
+      "clade": "mammal",
       "region": "asura-conjurations",
       "biomes": [
         "forest",
@@ -4689,6 +4981,7 @@
       "type": "fauna",
       "name": "Underworld Water-Snake",
       "scientific": "Serpens asuricus",
+      "clade": "reptile",
       "region": "asura-conjurations",
       "biomes": [
         "underworld"
@@ -4713,6 +5006,7 @@
       "type": "fauna",
       "name": "Clay-Born Watcher",
       "scientific": "Māyā-born oculus",
+      "clade": "construct",
       "region": "asura-conjurations",
       "biomes": [
         "settlement"
@@ -4732,6 +5026,7 @@
       "type": "fauna",
       "name": "Ember-Scattering Sprite",
       "scientific": "Māyā-born scintilla minor",
+      "clade": "construct",
       "region": "asura-conjurations",
       "biomes": [
         "settlement"
@@ -4751,6 +5046,7 @@
       "type": "fauna",
       "name": "Naga-Kin Sentry",
       "scientific": "Serpens custos",
+      "clade": "reptile",
       "region": "asura-conjurations",
       "biomes": [
         "settlement"
@@ -4773,6 +5069,7 @@
       "type": "fauna",
       "name": "Gorgonopsid Pack-Leader",
       "scientific": "Gorgonops titan",
+      "clade": "synapsid",
       "region": "asura-conjurations",
       "biomes": [
         "plains",
@@ -4793,6 +5090,7 @@
       "type": "fauna",
       "name": "Dimetrodon Scout-Mount",
       "scientific": "Dimetrodon minor",
+      "clade": "synapsid",
       "region": "asura-conjurations",
       "biomes": [
         "mountains"
@@ -4812,6 +5110,7 @@
       "type": "fauna",
       "name": "Scutosaurus Battering-Ram",
       "scientific": "Scutosaurus titan",
+      "clade": "reptile",
       "region": "asura-conjurations",
       "biomes": [
         "plains"
@@ -4831,6 +5130,7 @@
       "type": "fauna",
       "name": "Asura-Tainted Owl",
       "scientific": "Bubo asuricus",
+      "clade": "bird",
       "region": "asura-conjurations",
       "biomes": [
         "forest",
@@ -4851,6 +5151,7 @@
       "type": "fauna",
       "name": "Void-Born Leech",
       "scientific": "Hirudo titan",
+      "clade": "worm",
       "region": "asura-conjurations",
       "biomes": [
         "underworld"
@@ -4879,6 +5180,7 @@
         "Lagoon Queens"
       ],
       "scientific": "Eurypterus mimeticus",
+      "clade": "arachnid",
       "taxonomy": {
         "notes": "Giant eurypterid, Merostomata; a deep-time survivor of the Invertebrate Dominion"
       },
@@ -4910,37 +5212,11 @@
       "source_index": 236
     },
     {
-      "id": "fauna_beedu",
-      "type": "fauna",
-      "name": "Beedu",
-      "scientific": "Sarasvatimanta gedrosii",
-      "diet": "Carnivore",
-      "habitats": [
-        "region_gedrosian_desert"
-      ],
-      "behaviour": [
-        "gliding",
-        "thermal_currents",
-        "camouflage"
-      ],
-      "notes": "Desert manta ray with gas-filled bladders for silent gliding over dunes.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
-      "biomes": [
-        "desert"
-      ],
-      "placement": "encounter",
-      "rarity": "rare",
-      "journal_prompt": "A pale ray glides above the dune crest, silent, its bladders full of air, casting a shadow the size of a boat.",
-      "mood": "watchful"
-    },
-    {
       "id": "fauna_canopy_langur",
       "type": "fauna",
       "name": "Canopy Langur",
       "scientific": "Semnopithecus aranya",
+      "clade": "mammal",
       "diet": "Herbivore",
       "habitats": [
         "region_aravali",
@@ -4969,6 +5245,7 @@
       "type": "fauna",
       "name": "Caravan Dromedary",
       "scientific": "Camelus dromedarius itineris",
+      "clade": "mammal",
       "diet": "Herbivore",
       "habitats": [
         "region_gedrosian_desert"
@@ -4997,6 +5274,7 @@
       "type": "fauna",
       "name": "Cliff Swift",
       "scientific": "Apus narmadae",
+      "clade": "bird",
       "diet": "Insectivore",
       "habitats": [
         "region_narmada_plateau"
@@ -5024,7 +5302,8 @@
       "id": "fauna_cognitavi",
       "type": "fauna",
       "name": "Cognitavi",
-      "scientific": null,
+      "scientific": "Cognitavi viator",
+      "clade": "bird",
       "diet": "Omnivore",
       "habitats": [
         "coastal",
@@ -5055,6 +5334,7 @@
       "type": "fauna",
       "name": "Delta Egret",
       "scientific": "Egretta saraswati",
+      "clade": "bird",
       "diet": "Carnivore",
       "habitats": [
         "region_saraswati_delta"
@@ -5083,6 +5363,7 @@
       "type": "fauna",
       "name": "Delta Monitor",
       "scientific": "Varanus deltae",
+      "clade": "reptile",
       "diet": "Carnivore",
       "habitats": [
         "region_saraswati_delta"
@@ -5107,38 +5388,11 @@
       "mood": "watchful"
     },
     {
-      "id": "fauna_desert_fox",
-      "type": "fauna",
-      "name": "Desert Fox",
-      "scientific": "Vulpes gedrosiana",
-      "diet": "Omnivore",
-      "habitats": [
-        "region_gedrosian_desert"
-      ],
-      "behaviour": [
-        "nocturnal",
-        "scavenger"
-      ],
-      "notes": "Large-eared fox of the Gedrosian night. Follows caravans for scraps; omen animal in Tushara camp lore.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
-      "biomes": [
-        "desert",
-        "plains",
-        "settlement"
-      ],
-      "placement": "encounter",
-      "rarity": "common",
-      "journal_prompt": "A fox with enormous ears watches the road from a low dune, waiting to see whether anything falls off the caravan.",
-      "mood": "watchful"
-    },
-    {
       "id": "fauna_dune_viper",
       "type": "fauna",
       "name": "Dune Viper",
       "scientific": "Echis gedrosianus",
+      "clade": "reptile",
       "diet": "Carnivore",
       "habitats": [
         "region_gedrosian_desert"
@@ -5165,6 +5419,7 @@
       "type": "fauna",
       "name": "Estuary Sawfish",
       "scientific": "Pristis tethys",
+      "clade": "fish",
       "diet": "Carnivore",
       "habitats": [
         "region_saraswati_delta",
@@ -5193,6 +5448,7 @@
       "type": "fauna",
       "name": "Frilled Shringasaurus",
       "scientific": "Shringasaurus torquatus",
+      "clade": "reptile",
       "diet": "Herbivore",
       "habitats": [
         "region_narmada_plateau",
@@ -5219,13 +5475,15 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "It does not move aside. The frill turns first, edge-on and then full, thin enough that the low sun comes through it in red, and the horns beneath it are the same shape as the smaller kind's and twice the size.",
-      "mood": "fearsome"
+      "mood": "fearsome",
+      "region": "narmada-vindhya"
     },
     {
       "id": "fauna_honey_guide_bird",
       "type": "fauna",
       "name": "Honey-Guide Bird",
       "scientific": "Indicator narmadae",
+      "clade": "bird",
       "diet": "Omnivore",
       "habitats": [
         "region_narmada_plateau"
@@ -5254,6 +5512,7 @@
       "type": "fauna",
       "name": "Mangrove Crab",
       "scientific": "Scylla bonewoodi",
+      "clade": "crustacean",
       "diet": "Omnivore",
       "habitats": [
         "region_saraswati_delta",
@@ -5282,6 +5541,7 @@
       "id": "fauna_megalosaurus",
       "type": "fauna",
       "name": "Megalosaurus",
+      "scientific": "Megalosaurus jambhudweepensis",
       "diet": "Carnivore",
       "habitats": [
         "hyrkanian_steppe"
@@ -5302,13 +5562,15 @@
       "placement_note": "Native to Naraka. It entered this realm through the portal Guyuk tore open over the Hyrkanian steppe and killed Nirigili's Elephantbird mount -- the event records both the beast spill and that loss (event_naraka_portal). Not ambient fauna: it is met at that crossing, not across the map.",
       "crosses_at": [
         "event_naraka_portal"
-      ]
+      ],
+      "clade": "dinosaur"
     },
     {
       "id": "fauna_plateau_ibex",
       "type": "fauna",
       "name": "Plateau Ibex",
       "scientific": "Capra narmadae",
+      "clade": "mammal",
       "diet": "Herbivore",
       "habitats": [
         "region_narmada_plateau",
@@ -5337,6 +5599,7 @@
       "type": "fauna",
       "name": "Plateau Wolf",
       "scientific": "Canis narmadae",
+      "clade": "mammal",
       "diet": "Carnivore",
       "habitats": [
         "region_narmada_plateau",
@@ -5366,6 +5629,7 @@
       "type": "fauna",
       "name": "Reed Python",
       "scientific": "Python phragmitis",
+      "clade": "reptile",
       "diet": "Carnivore",
       "habitats": [
         "region_saraswati_delta"
@@ -5393,6 +5657,7 @@
       "type": "fauna",
       "name": "Sand Skink",
       "scientific": "Scincus gedrosianus",
+      "clade": "reptile",
       "diet": "Insectivore",
       "habitats": [
         "region_gedrosian_desert"
@@ -5419,6 +5684,7 @@
       "type": "fauna",
       "name": "Shringasaurus",
       "scientific": "Shringasaurus indicus",
+      "clade": "reptile",
       "diet": "Herbivore",
       "habitats": [
         "region_narmada_plateau"
@@ -5444,13 +5710,15 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "Two horns come up out of the scrub before the head does, curved forward like a bull's and set above the eyes rather than on the nose. The animal rears slowly against a tree, takes what it came for, and drops back down.",
-      "mood": "patient"
+      "mood": "patient",
+      "region": "narmada-vindhya"
     },
     {
       "id": "fauna_tendua",
       "type": "fauna",
       "name": "Tendua",
       "scientific": "Panthera simiana",
+      "clade": "mammal",
       "taxonomy": {
         "kingdom": "Animalia",
         "clade": "Felidae",
@@ -5488,7 +5756,8 @@
       "id": "fauna_tendua_manticore",
       "type": "fauna",
       "name": "Tendua Manticore",
-      "scientific": null,
+      "scientific": "Manticora tendua",
+      "clade": "spectre",
       "taxonomy": {
         "notes": "Asura-tainted aberration; winged leopard with human face"
       },
@@ -5514,41 +5783,6 @@
       "biomes": [],
       "placement": "lore",
       "placement_note": "Held out of play deliberately. Asura-born horror, birthed when Nila desecrated Kavik's tower. The cozy-tone question -- whether the Asura-tainted set is encounterable, journal-only, or gated behind a later mode -- is still open (docs/bestiary.md, Open Questions #4). Empty `biomes` here is a decision, not an untagged entity."
-    },
-    {
-      "id": "fauna_vrkshasmara",
-      "type": "fauna",
-      "name": "Vṛkṣaśmara",
-      "aliases": [
-        "Grey Bark-Mimic",
-        "Arboreal Forest Octopus"
-      ],
-      "scientific": "Vrkshasmara griseus",
-      "taxonomy": {
-        "notes": "Arboreal octopus with keratin-rimmed suction cups"
-      },
-      "diet": "Omnivore",
-      "habitats": [
-        "region_narmada_plateau"
-      ],
-      "behaviour": [
-        "camouflage",
-        "arboreal"
-      ],
-      "notes": "Evolved for tree canopies of Narmada Valley. Bioluminescent moss-dweller variant exists.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
-      "biomes": [
-        "forest",
-        "hills",
-        "landmark"
-      ],
-      "placement": "encounter",
-      "rarity": "rare",
-      "journal_prompt": "Something grey shifts high in the canopy, too large for a monkey, and the leaves close over it again.",
-      "mood": "watchful"
     }
   ],
   "flora": [

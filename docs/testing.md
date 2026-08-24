@@ -166,6 +166,29 @@ Until then the rule is the cheap half of the same idea, and it is not optional: 
 for a condition to be true, never for a duration to pass.** If the condition cannot be observed
 from the page, that is the argument for the seam — make it then.
 
+## What skips the browser suite
+
+The suite is the slowest thing in CI, so it does not run on changes that cannot reach a browser.
+The rule is a safe list rather than a denylist, and the list is short because an ambiguous case
+should err towards checking.
+
+| Change | Browser suite |
+|---|---|
+| `*.md` anywhere | skipped |
+| anything under `docs/` — prose and the images embedded in it | skipped |
+| anything under `assets/source/` — the raw art the builders read | skipped |
+| `assets/*.png`, `src/ui/plates/*.png` | **runs** |
+| workflows, code, `data/canon/`, an empty diff | **runs** |
+
+The distinction that matters is **shipping versus not**. `assets/source/` holds inputs: changing
+one does not change a pixel the game draws, because the sheet under `assets/` only moves when
+somebody runs the tool and commits the output — and that output *is* a change to `assets/`, which
+is not on the list. The built sheets and the painted plates are imported by `src/` and ship, and
+two specs compare rendered frames, so an art change there can genuinely fail a test.
+
+Workflow files are deliberately absent from the safe list: a change to how CI runs should be
+checked by CI. So is an empty diff.
+
 ## When the budget really is too small
 
 The exception to "never widen the timeouts", and the way to tell it from the rule.

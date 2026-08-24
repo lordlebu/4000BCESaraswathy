@@ -156,3 +156,33 @@ From `art-brief.md`, restated because each was learned by losing an asset:
 - **Whether 128 is the right grid.** It quadrupled texture memory and broke three latent
   assumptions. It also looks considerably better. Worth revisiting only with a measurement, and only
   a *headed* one.
+
+---
+
+## Where an art file lives
+
+One question sorts every picture in the repository: **what reads it?**
+
+| What reads it | Where | Tracked |
+|---|---|---|
+| `src/` imports it and it ships | `assets/`, `src/ui/plates/` | yes |
+| `tools/` reads it to build a sheet | `assets/source/` | yes |
+| a doc embeds it with `![alt](…)` | `docs/images/` | yes |
+| nothing — somebody looks at it | `dump/` | **no** |
+
+The last row is the one that needs saying. `dump/endgame.png` is the target frame this entire
+programme was measured against; it is named in three docs and three source comments and **opened by
+no code path**. That is a real job and not one that needs 2.5 MB in every clone. `dump/` is
+git-ignored and the file stays on disk — the same arrangement `assets/source/dump/` has always used
+for rejected art, and `assets/source/plates/` for 80 MB of raw plates.
+
+Two ways it goes wrong, both observed:
+
+- **`git add -A` sweeps up a stray PNG.** A 6.4 MB map reached a canon commit that way, as a side
+  effect of staging something unrelated.
+- **Docs that name a moved file go stale silently.** `art-brief.md` said `endgame.png` was "in the
+  repository root". Grep the filename after moving one.
+
+None of this shrinks an existing clone: `.git` holds every old version of every binary, so ignoring
+a file only stops new weight accruing. A history rewrite is the only thing that reclaims the rest,
+and it breaks every clone and open pull request, so it is not on the table.
