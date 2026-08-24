@@ -507,3 +507,88 @@ describe('the decor sheet and the code agree', () => {
     expect(decorCount(5)).toBeLessThanOrEqual(3);
   });
 });
+describe('ground tiles meet without showing the grid', () => {
+  // The bug this locks out: a field of one biome showed a hard line at every 128px boundary,
+  // because the four variants were unrelated crops and nothing made a tile's left edge continue
+  // its right. Hills measured 8.4x and forest 9.5x on the ratio below; only plains and coast were
+  // clean, and only because their features are too small for a cut edge to sever anything.
+  //
+  // Measured the way the eye works: the jump across a boundary, over the jump between ordinary
+  // neighbouring columns inside a tile. 1.0x is indistinguishable from anywhere else in the
+  // texture. This asserts 2.5x, the point where it starts to read as a line.
+  const SEAM_LIMIT = 2.5;
+
+  const luma = (rows: Buffer, stride: number, x: number, y: number): number =>
+    (rows[y * stride + x * 4]! + rows[y * stride + x * 4 + 1]! + rows[y * stride + x * 4 + 2]!) / 3;
+
+  /** Variant `v` of biome `slot`, as a GRID x GRID window into the sheet. */
+  function tileAt(
+    sheet: { rows: Buffer; width: number; stride: number },
+    slot: number,
+    v: number
+  ): (x: number, y: number) => number {
+    const columns = sheet.width / GRID;
+    const frame = slot * TILE_VARIANTS + v;
+    const ox = (frame % columns) * GRID;
+    const oy = Math.floor(frame / columns) * GRID;
+    return (x, y) => luma(sheet.rows, sheet.stride, ox + x, oy + y);
+  }
+
+  it('has every variant pairing meet as smoothly as the texture itself', () => {
+    // Every ORDERED pair, not just the ones a particular seed happens to place together. A field
+    // draws all sixteen eventually, and the old art failed all sixteen -- including a tile against
+    // itself, which is why adding more variants could never have helped.
+    const sheet = decode('assets/terrain.png');
+    for (const biome of ['hills', 'forest', 'plains', 'sea', 'wetland', 'river', 'desert'] as const) {
+      const slot = TERRAIN_ORDER.indexOf(biome);
+      expect(slot, `${biome} is not in TERRAIN_ORDER`).toBeGreaterThanOrEqual(0);
+      const tiles = Array.from({ length: TILE_VARIANTS }, (_, v) => tileAt(sheet, slot, v));
+
+      // The texture's own roughness, as the yardstick the seam is judged against.
+      let inside = 0;
+      let n = 0;
+      for (const at of tiles) {
+        for (let y = 0; y < GRID; y += 1) {
+          for (let x = 1; x < GRID; x += 1) {
+            inside += Math.abs(at(x, y) - at(x - 1, y));
+            n += 1;
+          }
+        }
+      }
+      inside /= n;
+
+      for (let a = 0; a < TILE_VARIANTS; a += 1) {
+        for (let b = 0; b < TILE_VARIANTS; b += 1) {
+          let seam = 0;
+          for (let y = 0; y < GRID; y += 1) seam += Math.abs(tiles[a]!(GRID - 1, y) - tiles[b]!(0, y));
+          seam /= GRID;
+          expect(seam / inside, `${biome}: variant ${a} against ${b}`).toBeLessThan(SEAM_LIMIT);
+        }
+      }
+    }
+  });
+
+  it('keeps the variants different from each other', () => {
+    // The other half of the trade. A shared border makes tiling seamless; sharing *everything*
+    // would too, and would be one repeating image. The interiors have to stay apart.
+    const sheet = decode('assets/terrain.png');
+    const quarter = GRID >> 2;
+    for (const biome of ['hills', 'forest', 'plains'] as const) {
+      const slot = TERRAIN_ORDER.indexOf(biome);
+      const tiles = Array.from({ length: TILE_VARIANTS }, (_, v) => tileAt(sheet, slot, v));
+      let spread = 0;
+      let n = 0;
+      for (let a = 0; a < TILE_VARIANTS; a += 1) {
+        for (let b = a + 1; b < TILE_VARIANTS; b += 1) {
+          for (let y = quarter; y < GRID - quarter; y += 1) {
+            for (let x = quarter; x < GRID - quarter; x += 1) {
+              spread += Math.abs(tiles[a]!(x, y) - tiles[b]!(x, y));
+              n += 1;
+            }
+          }
+        }
+      }
+      expect(spread / n, `${biome}: variants are too alike to be worth four frames`).toBeGreaterThan(1);
+    }
+  });
+});

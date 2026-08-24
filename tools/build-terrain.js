@@ -436,21 +436,99 @@ const HUT = { width: 20 * SCALE, height: 22 * SCALE };
  * losing any feature bigger than that and making each variant visibly less varied than the whole.
  * These are 70% squares stepped around the image, so each keeps most of the source's character
  * while starting somewhere else.
+ *
+ * The centre crop is variant 0 and is also the source of the shared border -- see `tileable`.
  */
 function variantBox(img, v, variants) {
   if (variants === 1) return { x0: 0, y0: 0, x1: img.width - 1, y1: img.height - 1 };
   const size = Math.floor(Math.min(img.width, img.height) * 0.7);
-  // Step around the image rather than tiling it: four corners of the remaining margin.
   const spanX = img.width - size;
   const spanY = img.height - size;
-  const corners = [
+  // Variant 0 is the centre, because it is also the master every other variant borrows its edges
+  // from, and a centre crop is the most representative square the source has.
+  const origins = [
+    [spanX >> 1, spanY >> 1],
     [0, 0],
     [spanX, 0],
-    [spanX, spanY],
     [0, spanY]
   ];
-  const [ox, oy] = corners[v % corners.length];
+  const [ox, oy] = origins[v % origins.length];
   return { x0: ox, y0: oy, x1: ox + size - 1, y1: oy + size - 1 };
+}
+
+/**
+ * How far in from the edge a tile stops using the shared border. In cell pixels.
+ *
+ * 16 of 128. Measured against both things that matter -- 16, 32 and 48 all removed the seam, and
+ * 16 kept the most interior variety, so the smallest band that works is the one to take.
+ */
+const BORDER_MARGIN = 16;
+
+/**
+ * Make one cell wrap: its left edge continues its right, and its top continues its bottom.
+ *
+ * Blend the cell with a copy of itself offset by half a cell, weighted to zero at the edges. What
+ * was the edge is now the middle of a cross-fade, and the new edge comes from what was the middle
+ * -- which is continuous with itself by construction.
+ */
+function wrapCell(buf, cell) {
+  const { width: w, height: h } = cell;
+  const hx = w >> 1;
+  const hy = h >> 1;
+  const out = Buffer.from(buf);
+  const ramp = (i, n) => Math.min(1, (Math.min(i, n - 1 - i) / (n >> 1)) * 2);
+  for (let y = 0; y < h; y += 1) {
+    for (let x = 0; x < w; x += 1) {
+      const k = Math.min(ramp(x, w), ramp(y, h));
+      if (k >= 1) continue;
+      const a = (y * w + x) * 4;
+      const b = (((y + hy) % h) * w + ((x + hx) % w)) * 4;
+      for (let c = 0; c < 4; c += 1) {
+        out[a + c] = Math.round(buf[a + c] * k + buf[b + c] * (1 - k));
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Give `inner` the border of `base`, so the two tile against each other seamlessly.
+ *
+ * **This is the whole fix, and it took three wrong answers to find.** The variants used to be four
+ * unrelated crops, and nothing in the pipeline ever made a tile's left edge continue its right --
+ * so a field of one biome showed a hard grid at every 128px boundary. Measured as the jump across
+ * a boundary over the jump between ordinary neighbouring columns, hills was 8.4x and forest 9.5x,
+ * where 1.0x is invisible and past about 2.5x reads as a line. Only plains and coast were clean,
+ * and only by luck: their features are 2-5px, too small for a cut edge to sever anything visible.
+ *
+ * What did not work, recorded because each looked right:
+ *
+ *   * **Wrapping each variant on its own.** Every tile then tiles with *itself*, which is not what
+ *     a field does -- neighbours are usually a different variant. Hills went 8.4x to 7.9x.
+ *   * **Cutting the four variants as rolls of one wrapped master.** A roll by half a cell puts the
+ *     master's interior at the tile edge, and interiors do not match edges. 8.4x to 3.6x.
+ *   * **Normalising per-variant tone.** Real for `mountains` (6.3 levels) and nothing anywhere
+ *     else -- hills' spread is 2.7 levels, below the threshold of notice.
+ *
+ * A single wrapped master tiles perfectly (hills, alone, measures 0.98x). The seam only exists
+ * because the four variants *differ at their edges*. So they must not: every variant is wrapped,
+ * then cross-faded onto variant 0's border over `BORDER_MARGIN` pixels. All sixteen ordered pairs
+ * meet the same edge, and the interiors stay as different as they ever were.
+ */
+function shareBorder(base, inner, cell) {
+  const { width: w, height: h } = cell;
+  const out = Buffer.alloc(base.length);
+  for (let y = 0; y < h; y += 1) {
+    for (let x = 0; x < w; x += 1) {
+      const d = Math.min(x, w - 1 - x, y, h - 1 - y);
+      const k = Math.min(1, d / BORDER_MARGIN);
+      const p = (y * w + x) * 4;
+      for (let c = 0; c < 4; c += 1) {
+        out[p + c] = Math.round(inner[p + c] * k + base[p + c] * (1 - k));
+      }
+    }
+  }
+  return out;
 }
 
 /**
@@ -479,10 +557,18 @@ function buildStrip(entries, cell, anchorBottom, threshold, colours, outFile, la
   names.forEach((name, nameIndex) => {
     const file = path.join(SRC, entries[name]);
     const img = decodePng(file);
+    // Tiles share a border so they meet seamlessly; objects sit on the ground and have no edge to
+    // continue, so `anchorBottom` skips all of it. `base` is variant 0 -- see `shareBorder`.
+    let base = null;
     for (let v = 0; v < variants; v += 1) {
       const box = anchorBottom ? contentBox(img) : variantBox(img, v, variants);
       if (!box) throw new Error(`${entries[name]}: nothing opaque to place`);
-      const frame = resample(img, box, cell, threshold, anchorBottom, painted);
+      let frame = resample(img, box, cell, threshold, anchorBottom, painted);
+      if (!anchorBottom && variants > 1) {
+        frame = wrapCell(frame, cell);
+        if (v === 0) base = frame;
+        else frame = shareBorder(base, frame, cell);
+      }
       const index = nameIndex * variants + v;
       const ox = (index % columns) * cell.width;
       const oy = Math.floor(index / columns) * cell.height;
