@@ -38,7 +38,10 @@ const EDITORIAL = ['canon', 'sources', 'notes', 'type', 'epochs'];
 const COVERAGE: Record<string, Coverage> = {
   'species.fauna': {
     adapted: ['id', 'name', 'scientific', 'region', 'biomes', 'placement', 'rarity', 'mood',
-      'journal_prompt', 'habitats', 'source_index'],
+      'journal_prompt', 'habitats', 'source_index',
+      // Read by `SpeciesIcon` to choose a mark. This replaced ~400 lines of keyword matching that
+      // guessed it from the name and was wrong nineteen times.
+      'clade'],
     skipped: [...EDITORIAL,
       // Reference facts for the canon book and the retrieval service. The game shows
       // `journal_prompt`, which is the player-facing prose written separately from `notes`.
@@ -46,33 +49,17 @@ const COVERAGE: Record<string, Coverage> = {
       // Placement commentary for editors, and the Dwarka-gate crossing rule, which the
       // engine has no concept of yet.
       'placement_note', 'crosses_at',
-      // Canon states what every animal is; the game still guesses it from the name.
-      //
-      // `clade` and `subclade` are the fields that would end that -- `bodyPlanOf` matches
-      // keywords against names and binomials, and has been wrong six separate times: an owl drawn
-      // as a ghost, a baby crocodile as a mammal, a feathered dinosaurid as a cricket, three
-      // mongooses as the prey they are named after. Reading the clade instead deletes the
-      // classifier and the whole class of bug.
-      //
-      // Skipped rather than adapted because that is a game-side change with its own plan, and
-      // doing it here would smuggle a rewrite of `SpeciesIcon` into a data sync. This line is the
-      // reminder, and it should be deleted the day the adapter reads them.
-      'clade', 'subclade']
+      // `subclade` stays skipped, and that one is genuine: canon distinguishes a dromaeosaurid
+      // from a sauropodomorph, and the game draws every non-avian dinosaur as 🦖 regardless. It is
+      // a finer fact than any view here needs.
+      'subclade']
   },
   'species.flora': {
     adapted: ['id', 'name', 'scientific', 'region', 'biomes', 'placement', 'rarity',
-      'journal_prompt', 'habitats', 'source_index'],
-    skipped: [...EDITORIAL, 'uses', 'placement_note', 'crosses_at',
-      // The plant half of the same debt as `clade` on fauna. Canon now states every plant's
-      // growth form; `growthFormOf` still derives it from the name, and diffing the two put the
-      // derived answer wrong on **13 of 90** -- `gourd` sits in its cactus keywords so two
-      // trailing vines are cacti, `lichen` sits in moss, and `coral` and `kelp` sit in seaweed,
-      // which catches the actual corals and both Zostera seagrasses.
-      //
-      // Skipped rather than adapted for the same reason as `clade`: reading it deletes the
-      // derivation, and that is a game-side change with its own plan. Delete both lines the day
-      // the adapter reads them.
-      'growth_form']
+      'journal_prompt', 'habitats', 'source_index',
+      // As `clade` on fauna. The derived version was wrong on 13 of 90.
+      'growth_form'],
+    skipped: [...EDITORIAL, 'uses', 'placement_note', 'crosses_at']
   },
   'places.field_maps': {
     adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'points_of_interest',

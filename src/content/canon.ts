@@ -18,7 +18,9 @@
 
 import placesBundle from '../../data/canon/places.json';
 import speciesBundle from '../../data/canon/species.json';
-import type { Biome, BiomeId, Creature, Flora, Placement, Rarity } from '../world/types';
+import type {
+  Biome, BiomeId, Clade, Creature, Flora, GrowthForm, Placement, Rarity
+} from '../world/types';
 
 /** A species as canon holds it: more fields than the engine uses, and different names. */
 interface CanonSpecies {
@@ -30,6 +32,8 @@ interface CanonSpecies {
   placement?: string;
   rarity?: string;
   mood?: string;
+  clade?: string;
+  growth_form?: string;
   journal_prompt?: string;
   notes?: string;
   habitats?: string[];
@@ -112,7 +116,12 @@ function toSpecies(entity: CanonSpecies, kind: 'fauna' | 'flora'): Creature | Fl
     // imported from the bestiary have only the former, and are all `lore` anyway.
     journalPrompt: entity.journal_prompt ?? entity.notes ?? ''
   };
-  return kind === 'fauna' ? { ...base, mood: entity.mood ?? 'watchful' } : base;
+  // Canon requires both of these on every species, so a missing one means the bundle is older
+  // than this adapter rather than that a default is wanted. Falling back would hide that: the
+  // whole point of reading canon is that the game stops deciding what a species is.
+  return kind === 'fauna'
+    ? { ...base, mood: entity.mood ?? 'watchful', clade: entity.clade as Clade }
+    : { ...base, growthForm: entity.growth_form as GrowthForm };
 }
 
 const bundle = speciesBundle as { fauna: CanonSpecies[]; flora: CanonSpecies[] };

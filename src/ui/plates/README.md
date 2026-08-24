@@ -24,8 +24,9 @@ that into `desert-fox` — prefix dropped, underscores to hyphens — and that i
 called. The build works this out from the source file name, so it is only worth knowing when
 something goes wrong.
 
-Anything without a plate keeps its derived silhouette, which is the point of having one — see
-`src/ui/SpeciesIcon.tsx`.
+Anything without a plate keeps its emoji mark, which is the point of having one — see
+`src/ui/SpeciesIcon.tsx`. The mark comes from canon: an animal's `clade`, a plant's `growth_form`.
+The game chooses the glyph and nothing else.
 
 **Animals only.** A plant is drawn as an emoji on the line beside its name, keyed on its growth
 form, and `JournalPanel` refuses a plate for one on `kind` rather than on whether a file exists —

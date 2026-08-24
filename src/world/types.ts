@@ -124,10 +124,65 @@ interface SpeciesBase {
   journalPrompt: string;
 }
 
+/**
+ * What kind of animal this is, straight from canon.
+ *
+ * Not derived here. The game used to work this out by matching keywords against names and
+ * binomials, and got it wrong six times in a way anybody could see: an Asura-tainted owl drawn as
+ * a ghost, a baby crocodile as a mammal, a feathered dinosaurid as a cricket, and three mongooses
+ * as the crabs and centipedes they are named after. Canon states it now, for all 256.
+ */
+export type Clade =
+  | 'mammal'
+  | 'synapsid'
+  | 'bird'
+  | 'dinosaur'
+  | 'crocodilian'
+  | 'reptile'
+  | 'amphibian'
+  | 'fish'
+  | 'insect'
+  | 'arachnid'
+  | 'crustacean'
+  | 'mollusc'
+  | 'cnidarian'
+  | 'worm'
+  | 'construct'
+  | 'spectre';
+
+/**
+ * What shape a plant takes, straight from canon.
+ *
+ * Same story, worse numbers: derived from names, this was wrong on **13 of 90**. `gourd` sat in
+ * the cactus keywords, `lichen` in moss, and `coral` and `kelp` in seaweed — which caught the two
+ * corals and both *Zostera* seagrasses, marine flowering plants that are not algae at all.
+ *
+ * `coral` and `lichen` have no counterpart in the old vocabulary, because the old vocabulary could
+ * not say them.
+ */
+export type GrowthForm =
+  | 'tree'
+  | 'palm'
+  | 'shrub'
+  | 'vine'
+  | 'flower'
+  | 'grass'
+  | 'root'
+  | 'fern'
+  | 'moss'
+  | 'lichen'
+  | 'cactus'
+  | 'seaweed'
+  | 'coral'
+  | 'pitcher';
+
 /** One entry of `data/creatures.json`. Exported from canon — see `data/canon.lock.json`. */
 export interface Creature extends SpeciesBase {
   mood: string;
+  clade: Clade;
 }
 
 /** One entry of `data/flora.json`. Exported from canon — see `data/canon.lock.json`. */
-export type Flora = SpeciesBase;
+export interface Flora extends SpeciesBase {
+  growthForm: GrowthForm;
+}

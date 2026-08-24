@@ -39,7 +39,7 @@ function Note({ note, kind }: { note: FieldNote; kind: 'creature' | 'flora' }) {
   return (
     <dl className={plate ? 'note note-plated' : 'note'}>
       <dt>
-        {!plate && note.species && <SpeciesIcon species={note.species} kind={kind} />}
+        {!plate && note.species && <SpeciesIcon species={note.species} />}
         <span>{note.name}</span>
       </dt>
       <dd>

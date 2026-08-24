@@ -75,7 +75,7 @@ function Entry({ meeting, canAsk }: EntryProps) {
         {/* Plants are read by one vocabulary and animals by another -- a Desert Fox run through
             the botanical matcher came out drawn as a sprig -- so the kind is passed rather than
             guessed. */}
-        <SpeciesIcon species={species} kind={meeting.kind} />
+        <SpeciesIcon species={species} />
         <div>
           <h4>{species.name}</h4>
           {species.binomial && <p className="met-binomial">{species.binomial}</p>}
