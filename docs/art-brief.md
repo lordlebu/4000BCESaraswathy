@@ -25,7 +25,7 @@ with a sketchbook.
 *cozy colour e-ink* — crisp pixel art, flat colour per pixel, no gradients, no drop shadows. That
 was a real direction, honestly pursued, and everything in `assets/` today is the result of it.
 
-It was abandoned because `endgame.png`, in the repository root, is the frame this game is trying
+It was abandoned because `endgame.png`, kept in the git-ignored `dump/`, is the frame this game is trying
 to be, and it is watercolour. Everything below describes that frame.
 
 **What is in `assets/source/` today is not painted, and it is worth being exact about this**, because

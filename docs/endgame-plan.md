@@ -10,7 +10,7 @@
 > with, and 404s for everyone else. If you are reading this and the link is dead, ask — or just read
 > on, because nothing below depends on it.
 
-`endgame.png` (repo root, untracked) is the target frame: a painted wetland seen from above, a
+`endgame.png` (in `dump/`, git-ignored) is the target frame: a painted wetland seen from above, a
 figure standing in it, five parchment chips along the top, and a torn field-notebook page across
 the bottom carrying a species plate.
 
