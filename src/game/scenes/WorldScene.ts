@@ -28,6 +28,7 @@ import {
   SHADOW_TEXTURE,
   TILE_SIZE,
   blendTextureKey,
+  EDGE_SHEET,
   createTileTextures,
   loadTileSheets,
   tileFrame,
@@ -45,7 +46,12 @@ const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker'>, string> = {
   features: FEATURE_SHEET,
   places: PLACE_SHEET,
   landmarks: LANDMARK_SHEET,
-  decor: DECOR_SHEET
+  decor: DECOR_SHEET,
+  // Cliffs borrow the torn-edge sheet until their own rock faces are painted. The layout is
+  // identical -- four directions by four variants -- so the swap is one line here and no change
+  // anywhere else. Until then a ledge shows as a torn band, which is wrong-looking but is the
+  // placement being visibly correct, and that is the half worth checking first.
+  cliffs: EDGE_SHEET
 };
 import {
   CHARACTERS,

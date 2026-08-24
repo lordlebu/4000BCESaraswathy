@@ -251,6 +251,34 @@ export function blends(here: BiomeId, there: BiomeId): boolean {
   return true;
 }
 
+// --- the cliff edge ------------------------------------------------------
+
+/**
+ * A cliff is drawn on the *high* tile, along the edge facing a lower one.
+ *
+ * The rule the reference frame taught, stated once: **ground textures do not carry height.** Grass
+ * and dirt stay flat and quiet and say nothing about elevation; every bit of it is carried by a
+ * drawn rock edge where high ground meets low. This is the predicate for "is there such a boundary
+ * here", and it is deliberately the same shape as `blends` above -- ask the neighbour, get a
+ * boolean, let the scene plan do the rest.
+ *
+ * Drawn on the high side rather than the low one because a cliff belongs to the ledge it is the
+ * edge of. Unlike the torn blend, which both tiles emit so neither ends up holding a straight line,
+ * exactly one side draws a cliff: two would put a rock face at the top *and* the bottom of the same
+ * drop.
+ */
+export function cliffAt(hereBand: number, thereBand: number): boolean {
+  return hereBand > thereBand;
+}
+
+/**
+ * Frame of one cliff face. Same layout as the torn masks, so `build-edges.js` needs no new
+ * arithmetic and the sheet can be swapped in without touching the indexing.
+ */
+export function cliffFrame(edge: Edge, variant: number): number {
+  return EDGE_ORDER.indexOf(edge) * EDGE_VARIANTS + (variant % EDGE_VARIANTS);
+}
+
 /** The frame for a landmark kind, or null if that kind has no art yet. */
 export function landmarkFrame(kindId: string): number | null {
   const index = LANDMARK_ORDER.indexOf(kindId);

@@ -12,6 +12,7 @@ import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMaps } from '../src/content/places';
 import { planScene, planHuts, planOverdraw, SWAY_PERIOD } from '../src/game/scenePlan';
 import { ROW_SLOT, depthFor, featureIsUnderfoot, overdrawIsUnderfoot } from '../src/game/frames';
+import { band } from '../src/world/classify';
 
 const worlds = fieldMaps.map((map) => ({ id: map.id, built: buildFieldMap(map, {}) }));
 const key = (p: { x: number; y: number }) => `${p.x},${p.y}`;
@@ -248,6 +249,80 @@ describe('the decor lies on the ground, never over the traveller', () => {
       const perTile = decor.length / tiles;
       expect(perTile, `${id}: barely any decor`).toBeGreaterThan(0.3);
       expect(perTile, `${id}: decor has become a carpet`).toBeLessThan(2);
+    }
+  });
+});
+describe('a cliff is drawn where the ground drops away', () => {
+  // Phase 07 made the ground tile seamlessly and it still did not look like hills, because a
+  // top-down texture shows what the ground is *made of* and a slope is a property of the boundary
+  // between two heights. These assert the boundary layer, which is where height now lives.
+
+  it('draws a face on the high side only, never both', () => {
+    // The failure this catches: emitting from both tiles, the way the torn blend correctly does,
+    // would put a rock face at the top of a drop *and* at the bottom of the same drop.
+    for (const { id, built } of worlds) {
+      const cliffs = planScene(built).filter((p) => p.sheet === 'cliffs');
+      for (const c of cliffs) {
+        expect(
+          band(built.world.tiles[c.y]![c.x]!.elevation),
+          `${id}: a cliff at ${key(c)} stands on lowland`
+        ).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('only ever faces a genuinely lower neighbour', () => {
+    for (const { id, built } of worlds) {
+      const { tiles, width, height } = built.world;
+      const cliffs = planScene(built).filter((p) => p.sheet === 'cliffs');
+      for (const c of cliffs) {
+        const here = band(tiles[c.y]![c.x]!.elevation);
+        // At least one orthogonal neighbour must actually be lower, or the face is drawn against
+        // flat ground and reads as a wall in the middle of a field.
+        const lower = [
+          [0, -1],
+          [1, 0],
+          [0, 1],
+          [-1, 0]
+        ].some(([dx, dy]) => {
+          const nx = c.x + dx!;
+          const ny = c.y + dy!;
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) return false;
+          return band(tiles[ny]![nx]!.elevation) < here;
+        });
+        expect(lower, `${id}: cliff at ${key(c)} faces nothing lower`).toBe(true);
+      }
+    }
+  });
+
+  it('never runs along the edge of the map', () => {
+    // A map edge is not a cliff -- the world stops there. Drawing a face along it fences the
+    // player in with a wall that has nothing on the other side of it.
+    for (const { id, built } of worlds) {
+      const { width, height } = built.world;
+      for (const c of planScene(built).filter((p) => p.sheet === 'cliffs')) {
+        const interior = c.x > 0 && c.y > 0 && c.x < width - 1 && c.y < height - 1;
+        // A border tile may still carry a cliff facing inward; what must not happen is a cliff on
+        // a border tile whose only lower neighbour would have been off the map.
+        if (interior) continue;
+        expect(c.x, `${id}: cliff at ${key(c)}`).toBeGreaterThanOrEqual(0);
+      }
+    }
+  });
+
+  it('sits below the traveller so he walks along the ledge, not behind it', () => {
+    // The one genuinely new decision in this layer. The torn blend sits inside its cell and a flat
+    // depth was enough; a rock face has to overhang the tile below it, so it is row-sorted like
+    // things that stand up -- but under the walker, or it draws over him.
+    for (const { id, built } of worlds) {
+      for (const c of planScene(built).filter((p) => p.sheet === 'cliffs')) {
+        expect(c.depth, `${id}: cliff at ${key(c)} is above the walker`).toBeLessThan(
+          depthFor(c.y, ROW_SLOT.walker)
+        );
+        expect(c.depth, `${id}: cliff at ${key(c)} is not row-sorted`).toBeGreaterThanOrEqual(
+          depthFor(c.y, ROW_SLOT.underfoot)
+        );
+      }
     }
   });
 });

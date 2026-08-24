@@ -26,6 +26,8 @@ import {
   HUT_VARIANTS,
   ROW_SLOT,
   blends,
+  cliffAt,
+  cliffFrame,
   depthFor,
   edgeMaskFrame,
   tileFrame,
@@ -38,6 +40,7 @@ import {
   swayFrame
 } from './frames';
 import { landmarkKindFor } from '../content/landmarks';
+import { band } from '../world/classify';
 import { tileHash } from '../world/rng';
 import type { FieldMapWorld } from '../world/fieldMap';
 
@@ -50,6 +53,7 @@ export type PlacementSheet =
   | 'places'
   | 'landmarks'
   | 'decor'
+  | 'cliffs'
   | 'marker';
 
 export interface Placement {
@@ -143,6 +147,51 @@ export function planEdges(world: FieldMapWorld['world']): Placement[] {
           x,
           y,
           depth: EDGE_DEPTH
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * The rock face where a height terrace drops away.
+ *
+ * **Why this layer exists at all.** Phase 07 made the ground tile seamlessly and it still did not
+ * look like hills, because a top-down ground texture cannot show a slope -- it shows what the
+ * ground is *made of*, and a slope is a property of the boundary between two heights. Every
+ * top-down game that reads as hilly does the same thing: keep the ground flat and quiet, and draw
+ * a rock edge where high meets low. That edge is this.
+ *
+ * `band` comes from the elevation every tile has always carried, so nothing was added to the world
+ * to make this possible -- see `classify.ts`.
+ *
+ * **Draw order is the one new problem here.** The torn blend sits inside its cell, so a flat depth
+ * band was enough for it. A cliff cannot: a rock face has to hang over the tile *below* it or it
+ * reads as a line painted on the ground rather than a wall standing on it. So a cliff is depth
+ * sorted by row like the things that stand up, one slot under the traveller -- he walks along the
+ * top of a ledge and in front of the face below him, which is what both of those should look like.
+ */
+export function planCliffs(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      const here = band(world.tiles[y]![x]!.elevation);
+      if (here === 0) continue; // nothing to fall away from
+      for (const edge of EDGE_ORDER) {
+        const { dx, dy } = EDGE_STEP[edge];
+        const nx = x + dx;
+        const ny = y + dy;
+        // A map edge is not a cliff. The world simply stops there, and drawing a face along it
+        // would fence the player in with a wall that has nothing on the other side.
+        if (nx < 0 || ny < 0 || nx >= world.width || ny >= world.height) continue;
+        if (!cliffAt(here, band(world.tiles[ny]![nx]!.elevation))) continue;
+        out.push({
+          sheet: 'cliffs',
+          frame: cliffFrame(edge, tileHash(world.seed, x, y, `cliff-${edge}`)),
+          x,
+          y,
+          depth: depthFor(y, ROW_SLOT.undergrowth)
         });
       }
     }
@@ -345,10 +394,11 @@ export function planMarkers(built: FieldMapWorld): Placement[] {
 export function planScene(built: FieldMapWorld): Placement[] {
   const huts = planHuts(built.world);
   const builtOn = new Set(huts.map((h) => `${h.x},${h.y}`));
-  // Edges first: they are ground. Then decor, which lies on that ground. Then the huts and the
-  // overdraw that stand in it, and the markers above everything.
+  // Edges first: they are ground. Then cliffs, which are where that ground ends. Then decor, which
+  // lies on it, then the huts and the overdraw that stand in it, and the markers above everything.
   return [
     ...planEdges(built.world),
+    ...planCliffs(built.world),
     ...planDecor(built.world, builtOn),
     ...huts,
     ...planOverdraw(built.world, builtOn),
