@@ -85,16 +85,22 @@ describe('nothing hides the traveller or what he is walking towards', () => {
     // The edge blend is exempt, and is the only thing that is: it *is* ground rather than something
     // standing on it, so it sits in one flat band below every row. See `planEdges`, and the two
     // assertions below that pin it there.
+    // Collect, then assert once. Two `expect` calls per placement is around forty thousand of
+    // them across the three maps, and each one builds a matcher and formats a message whether or
+    // not it fails -- the test took 27 seconds and timed out at five once the cliff and treeline
+    // layers added their placements. Gathering the offenders and asserting on the list is the same
+    // check and reports better: every bad placement at once, instead of the first.
+    const bottom = Math.min(...Object.values(ROW_SLOT));
+    const top = Math.max(...Object.values(ROW_SLOT));
+    const strays: string[] = [];
     for (const { id, built } of worlds) {
       for (const item of planScene(built)) {
         if (item.maskFrame !== undefined) continue;
-        const lowest = depthFor(item.y, Math.min(...Object.values(ROW_SLOT)));
-        const highest = depthFor(item.y, Math.max(...Object.values(ROW_SLOT)));
-        expect(item.depth, `${id}: ${item.sheet} at ${key(item)} is outside its row's band`)
-          .toBeGreaterThanOrEqual(lowest);
-        expect(item.depth).toBeLessThanOrEqual(highest);
+        if (item.depth >= depthFor(item.y, bottom) && item.depth <= depthFor(item.y, top)) continue;
+        strays.push(`${id}: ${item.sheet} at ${key(item)} is outside its row's band`);
       }
     }
+    expect(strays, strays.join('\n')).toEqual([]);
   });
 
   it('keeps each row band clear of the row in front', () => {

@@ -23,8 +23,8 @@ import { step } from './walk';
  */
 async function boot(page: Page, query: string) {
   await page.goto(query);
-  await expect(page.locator('.map-surface canvas')).toBeVisible();
-  await expect(page.locator('.journal h2')).toBeVisible();
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.journal-foot')).toBeVisible();
 }
 
@@ -74,7 +74,7 @@ test('walking with the flag on leaves the page and the journal working', async (
   for (let i = 0; i < 8; i += 1) await step(page, i % 2 ? 'ArrowDown' : 'ArrowRight');
 
   // The page must not have broken and the journal must still be writing.
-  await expect(page.locator('.journal h2')).toBeVisible();
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 
   // Not tired, and stated as the real assertion it always could have been rather than the
   // `<= 1` that could not fail. Eight steps is far short of the threshold, so a note appearing
@@ -97,7 +97,7 @@ test('the camp button appears at a camp after dark, and sleeping brings the morn
   await expect(camp).toBeVisible({ timeout: 10_000 });
   await camp.click();
   // Sleeping moves the sky. Whatever the journal says afterwards, it must still be saying it.
-  await expect(page.locator('.journal h2')).toBeVisible();
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
   // Slept: it is morning now, so the same tile no longer offers a bed.
   await expect(page.locator('.camp-button')).toHaveCount(0);
 });

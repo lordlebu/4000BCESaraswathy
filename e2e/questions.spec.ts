@@ -23,8 +23,8 @@ const AT_NIGHT = `/?seed=${SEED}&hour=0`;
 
 async function boot(page: Page) {
   await page.goto(AT_NIGHT);
-  await expect(page.locator('.map-surface canvas')).toBeVisible();
-  await expect(page.locator('.journal h2')).toBeVisible();
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 }
 
 async function openDiary(page: Page) {

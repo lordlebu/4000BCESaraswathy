@@ -54,6 +54,32 @@ async function bearing(page: Page): Promise<Heading | null> {
   };
 }
 
+/**
+ * Wait for a turn to land, rather than for a fixed span of time.
+ *
+ * **This is what made the walk fail, and it was a budget problem rather than a bug.** The loop
+ * spent 1,900 ms after every tap and 780 ms after every step, so 110 legs of tapping is 209 seconds
+ * of deliberate waiting against a 240-second timeout -- about thirty seconds of margin for the page
+ * load, 110 journal reads and the arrival page. Nothing had to break for that to run out; the walk
+ * only had to spend a few more legs tapping than usual, or the machine had to be a little busier.
+ * Adding two overlay layers to the scene was enough to tip it, and no assertion in the test was
+ * about either of them.
+ *
+ * The turn is observable, so waiting for the clock was never necessary: the journal heading names
+ * where the traveller is and changes when they arrive somewhere new. Waiting for *that* costs what
+ * the move costs. A turn that genuinely changes nothing -- a tap into water, a blocked axis -- still
+ * has to fall back on the timeout, which is why it is passed in rather than dropped, and the loop
+ * already counts those as `stuckFor`.
+ */
+async function settle(page: Page, before: string, cap: number): Promise<void> {
+  const heading = page.locator('.journal h2');
+  try {
+    await expect(heading).not.toHaveText(before, { timeout: cap });
+  } catch {
+    // Unchanged after the full budget: the turn achieved nothing, which the caller handles.
+  }
+}
+
 test('walk from the settlement to the landmark and get a page for it', async ({ page }) => {
   // Crossing a 36x24 map on foot takes a while: steps are tweened, and wetland and hills are
   // deliberately slower than plains. This is a real playthrough, so it gets a real budget.
@@ -98,7 +124,7 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
       if (stuckFor >= 3) {
         await page.keyboard.press(stuckFor % 2 ? 'ArrowUp' : 'ArrowDown');
       }
-      await page.waitForTimeout(780);
+      await settle(page, wasAt, 780);
     } else {
       // Tap ahead in the bearing direction and let the pathfinder route around the water. Nudging
       // off dead centre on the unused axis keeps a blocked route from retrying the identical tap.
@@ -111,7 +137,7 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
       const x = usable.left + usable.width * (0.5 + heading.dx * 0.4 + (heading.dx === 0 ? jitter : 0));
       const y = usable.top + usable.height * (0.5 + heading.dy * 0.4 + (heading.dy === 0 ? jitter : 0));
       await canvas.click({ position: { x, y } });
-      await page.waitForTimeout(1900);
+      await settle(page, wasAt, 1900);
     }
 
     // "Somewhere at 27, 18" changes as the traveller moves, so an unchanged heading means a turn

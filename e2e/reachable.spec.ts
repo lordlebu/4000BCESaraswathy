@@ -25,8 +25,10 @@ const MIN_TAP = 40;
 async function boot(page: Page, w: number, h: number) {
   await page.setViewportSize({ width: w, height: h });
   await page.goto('/?seed=poi-252&hour=12');
-  await expect(page.locator('.map-surface canvas')).toBeVisible();
-  await expect(page.locator('.journal h2')).toBeVisible();
+  // Explicit, not the 5s default: booting the game is the slowest thing this spec does and is not
+  // what it is testing. See the same note in fielddiary's `boot`.
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
   await page.waitForTimeout(400);
 }
 
