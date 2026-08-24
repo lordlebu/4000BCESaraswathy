@@ -66,10 +66,27 @@ jobs:
           base=$(git merge-base origin/main HEAD)
           changed=$(git diff --name-only "$base" HEAD)
           echo "$changed"
-          # Anything that is not markdown counts as code, including workflow files — a change
-          # to how CI runs should be checked by CI. An empty diff also lands here and runs the
-          # suite, which is deliberate: every ambiguous case should err towards checking.
-          if echo "$changed" | grep -qvE '\.md$'; then
+          # Everything counts as code except an explicit safe list, and the list is short on
+          # purpose: an ambiguous case should err towards checking, and an empty diff lands here
+          # and runs the suite for the same reason. Workflow files are deliberately *not* safe --
+          # a change to how CI runs should be checked by CI.
+          #
+          # What is safe, and why each one cannot reach the browser:
+          #
+          #   *.md            prose.
+          #   docs/**         prose and the images embedded in it. Nothing under src/ or tools/
+          #                   reads anything in docs/ -- checked, not assumed.
+          #   assets/source/  the raw art the sheet builders read. Changing one of these does not
+          #                   change a pixel the game draws: it changes an *input*, and the built
+          #                   sheet under assets/ only moves when somebody runs the tool and
+          #                   commits the output -- which is itself a change to assets/, and that
+          #                   is not on this list.
+          #
+          # `assets/*.png` and `src/ui/plates/*.png` are pointedly absent. Those are imported by
+          # `src/` and ship in the bundle, so a change to one changes what renders, and two specs
+          # compare rendered frames. An art change that cannot break a test is still an art change
+          # that can break a screenshot.
+          if echo "$changed" | grep -qvE '(^docs/|^assets/source/|\.md$)'; then
             echo "code=true" >> "$GITHUB_OUTPUT"
           else
             echo "code=false" >> "$GITHUB_OUTPUT"
