@@ -335,6 +335,159 @@ and a little more saturated than the rest. Do not soften it into the others.
 old brief but were painted, not pixelled — most should survive the direction change with a rebuild
 rather than a reprompt. Look before you regenerate.
 
+### Asset 2c — the three that need repainting, and the rule that changed
+
+**Stop asking for a seamless tile. The pipeline guarantees it now.**
+
+The prompt above asks for "Tiles seamlessly on all four edges", it has asked for that from the
+start, and **every tile came back not tiling**. Measured as the brightness jump across a tile
+boundary over the jump between ordinary neighbouring columns — 1.0× is invisible, past about 2.5×
+reads as a line — seven of the nine ground biomes seamed, hills at 8.4× and forest at 9.5×. Only
+`plains` and `coast` were clean, and only because their marks are 2–5 px, too small for a cut edge
+to sever anything visible.
+
+That is now fixed in `tools/build-terrain.js`: the four variants are wrapped and cross-faded onto a
+shared 16 px border, so all sixteen pairings meet the same edge by construction. Hills is 0.8×.
+`test/frames.test.ts` asserts it and fails on the old sheet.
+
+**So seamlessness is no longer the artist's problem, and asking for it wastes a sentence the model
+was ignoring anyway.** What the pipeline cannot do is invent a subject. That is what these three
+prompts are for.
+
+#### Why these three, specifically
+
+| tile | seam after the fix | what is still wrong |
+| --- | --- | --- |
+| `hills` | 0.8× — perfect | **It is not hills.** A flat field of soft diagonal ripples: no slope, no ground plane, no consistent sun. Seamless, and reads as sand. |
+| `forest` | 1.8× | Canopy blobs about half a tile across, so it reads as lumps rather than foliage. Also the lowest contrast range in the set (39 of 255). |
+| `mountains` | 2.8× — the only one still visible | The one swatch with a genuine painted lighting gradient, **17 levels top to bottom**, plus a 6.3-level tone spread between crops. Lit from above like a picture, which no tiling ground can be. |
+
+The other six are fine on the swatches already in the repository. **Do not regenerate them.**
+
+#### The rule the old prompt was missing
+
+The old prompt said "keep the interior quiet" and meant contrast. The real constraint is *scale*,
+and it is the one thing that separated the two clean tiles from the seven broken ones:
+
+> **No feature in the image may be larger than about a twelfth of its width.**
+
+Measured on the built tiles, seven biomes sit at 2–7 px and the two worst offenders do not:
+**`hills` is 18 px and `forest` 12 px**, against a threshold of about 11. (`mountains` measures
+5 px — scale is not its problem, the lighting gradient is.)
+
+This survives the border fix as a quality rule rather than a correctness one: a big feature still
+repeats visibly across a field even when the edges match, because the *same shape* appears in
+every tile.
+
+A landform cannot be drawn into a ground texture. **Hills gets its shape from objects on the decor
+layer** — scree, boulders, twigs, already wired for `hills` in `tools/build-decor.js` and currently
+unused. The ground's job is to be believable dirt, and nothing more.
+
+#### Three rules for all three prompts
+
+1. **Flat, even lighting. No sun direction, no cast shadows, no vignette, no darkening at any
+   edge.** This is what `mountains` gets wrong. A repeating texture lit from one side becomes a
+   field of identically-lit patches, which is worse than a seam because it cannot be fixed in code.
+2. **No feature larger than a twelfth of the width.** At 2048 that is about 170 px. Measure the
+   biggest single shape, not the average.
+3. **Fill the frame edge to edge.** No border, no frame, no vignette, no paper edge, no margin.
+   The pipeline crops a 70% centre square, so anything decorative at the rim is wasted anyway.
+
+---
+
+> **Prompt — `hills` (`assets/source/hills.png`)**
+>
+> Top-down aerial view of **dry ochre hill-country ground: fine gritty soil, scattered small
+> pebbles and grit, sparse patches of dry tussock grass, faint bare-earth scuffs** — a cozy
+> exploration game set in ancient South Asia, painted in a naturalist's watercolour field notebook.
+> Base colour approximately **#ab9d7c**, with only gentle variation around it. Muted desaturated
+> palette, warm paper undertone, visible paper grain and pigment granulation, soft blended edges.
+>
+> **Flat even lighting from directly above. No sun direction, no cast shadows, no highlights, no
+> vignette, no darkening toward any edge.** This is ground seen from straight overhead, not a
+> landscape.
+>
+> **Every mark must be small: no feature larger than about 1/12 of the image width.** Many small
+> scattered marks of varying size, evenly distributed, with no clustering and no empty regions. No
+> hills, no ridges, no dunes, no slopes, no horizon, no large waves or ripples — this is the
+> *surface* of the ground, not its shape.
+>
+> Quiet all-over texture, low contrast, no focal point. Fills the frame edge to edge. No border, no
+> frame, no outline, no grid, no text, no watermark. Not photographic: no lens blur, no specular
+> highlight, no 3D render. 2048×2048.
+
+*Note the subject change.* The old swatch tried to draw hills — the landform — into a ground tile.
+This asks for **what the ground of a hill is made of**, which is what a top-down tile can actually
+show. The hills themselves come from the decor layer.
+
+---
+
+> **Prompt — `forest` (`assets/source/forest-canopy.png`)**
+>
+> Top-down aerial view of **dense monsoon forest canopy: many small overlapping leaf clusters,
+> fine-grained foliage texture, occasional narrow dark gaps between crowns** — a cozy exploration
+> game set in ancient South Asia, painted in a naturalist's watercolour field notebook. Base colour
+> approximately **#769f7c**, with gentle variation around it and slightly more tonal range than a
+> flat wash — a mix of deeper green shadow between clusters and lighter green on the leaves.
+>
+> **Flat even lighting from directly above. No sun direction, no cast shadows, no vignette, no
+> darkening toward any edge.**
+>
+> **Leaf clusters must be small: no single crown or clump larger than about 1/12 of the image
+> width.** Many small crowns rather than a few large ones, evenly distributed, no clustering and no
+> empty regions. No individual trees, no trunks, no branches, no clearings, no paths.
+>
+> Quiet all-over texture, no focal point. Fills the frame edge to edge. No border, no frame, no
+> outline, no grid, no text, no watermark. Not photographic: no lens blur, no specular highlight,
+> no 3D render. 2048×2048.
+
+*The one place to push contrast slightly.* Forest is the flattest tile in the set — a 39-level
+range where others have 90–110 — which is why it reads as lumps rather than leaves. More tonal
+range *within small marks* is wanted; more contrast between large shapes is not.
+
+---
+
+> **Prompt — `mountains` (`assets/source/mountains.png`)**
+>
+> Top-down aerial view of **high rocky mountain ground: broken grey stone, angular scree and rock
+> fragments, patches of coarse grit, thin cracks in bare rock** — a cozy exploration game set in
+> ancient South Asia, painted in a naturalist's watercolour field notebook. Base colour
+> approximately **#96919c**, a cool lavender-grey, with only gentle variation around it. Muted
+> desaturated palette, warm paper undertone, visible paper grain.
+>
+> **Flat even lighting from directly above. Absolutely no sun direction, no cast shadows, no
+> highlights on one side of anything, no vignette, and no gradient from top to bottom or side to
+> side.** The previous version was painted 17 levels brighter at the top than the bottom, which is
+> the single worst thing a repeating ground texture can have.
+>
+> **Every rock and fragment must be small: no feature larger than about 1/12 of the image width.**
+> The previous version already got this right — keep it. No peaks, no ridges, no cliffs, no
+> summits, no horizon, no snow caps: this is the *rubble underfoot* at altitude, not a mountain
+> seen from a distance.
+>
+> Quiet all-over texture, low contrast, no focal point. Fills the frame edge to edge. No border, no
+> frame, no outline, no grid, no text, no watermark. Not photographic. 2048×2048.
+
+*Same subject inversion as hills.* A mountain cannot be drawn top-down in a tile the player stands
+on; the ground at altitude can.
+
+---
+
+#### Checking what comes back, before committing it
+
+Drop the file into `assets/source/` and run the pipeline — then read the two numbers, because both
+failures are invisible to the eye until the map is walked:
+
+```bash
+node tools/build-terrain.js      # rebuilds assets/terrain.png from the swatches
+npx vitest run test/frames.test.ts   # asserts every variant pairing tiles, and that they differ
+```
+
+If the seam test fails, the art has something the border fix cannot absorb — almost always a
+lighting gradient. If the *variety* test fails, the swatch is too uniform to be worth four
+variants. Neither is a judgement of the painting; both are cheap to re-prompt with one rule
+tightened.
+
 ### Asset 2b — `lava_field`, the twelfth tile (blocked, and blocking content)
 
 `lava_field` is the one biome canon names that the engine cannot draw, and it is not a nicety:
