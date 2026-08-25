@@ -178,7 +178,8 @@ export function planCliffs(world: FieldMapWorld['world']): Placement[] {
   const out: Placement[] = [];
   for (let y = 0; y < world.height; y += 1) {
     for (let x = 0; x < world.width; x += 1) {
-      const here = band(world.tiles[y]![x]!.elevation);
+      const tile = world.tiles[y]![x]!;
+      const here = band(tile.elevation);
       if (here === 0) continue; // nothing to fall away from
       for (const edge of EDGE_ORDER) {
         const { dx, dy } = EDGE_STEP[edge];
@@ -187,7 +188,8 @@ export function planCliffs(world: FieldMapWorld['world']): Placement[] {
         // A map edge is not a cliff. The world simply stops there, and drawing a face along it
         // would fence the player in with a wall that has nothing on the other side.
         if (nx < 0 || ny < 0 || nx >= world.width || ny >= world.height) continue;
-        if (!cliffAt(here, band(world.tiles[ny]![nx]!.elevation))) continue;
+        const neighbour = world.tiles[ny]![nx]!;
+        if (!cliffAt(here, band(neighbour.elevation), tile.biome, neighbour.biome)) continue;
         out.push({
           sheet: 'cliffs',
           frame: cliffFrame(edge, tileHash(world.seed, x, y, `cliff-${edge}`)),
