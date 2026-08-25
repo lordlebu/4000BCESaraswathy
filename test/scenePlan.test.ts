@@ -11,7 +11,15 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMaps } from '../src/content/places';
 import { planScene, planHuts, planOverdraw, SWAY_PERIOD } from '../src/game/scenePlan';
-import { ROW_SLOT, depthFor, featureIsUnderfoot, overdrawIsUnderfoot } from '../src/game/frames';
+import {
+  ROW_SLOT,
+  depthFor,
+  featureIsUnderfoot,
+  overdrawIsUnderfoot,
+  EDGE_ORDER,
+  EDGE_STEP,
+  EDGE_VARIANTS
+} from '../src/game/frames';
 import { band } from '../src/world/classify';
 
 const worlds = fieldMaps.map((map) => ({ id: map.id, built: buildFieldMap(map, {}) }));
@@ -378,6 +386,34 @@ describe('a treeline stands where the forest stops', () => {
         expect(t.depth, `${id}: treeline at ${key(t)} draws over the walker`).toBeLessThan(
           depthFor(t.y, ROW_SLOT.walker)
         );
+      }
+    }
+  });
+});
+
+describe('a cliff never fences in the water', () => {
+  it('draws no rock face where either side is water', () => {
+    // Rivers are carved after the elevation field is laid down, so a river keeps the height of the
+    // ground it cut through and its neighbours do not. Height alone therefore asked for a rock face
+    // along every bank -- and, between two river tiles at different heights, inside the water. On a
+    // real map that was 83 of 234 faces, and it turned a valley into a stone-lined canal.
+    const WATER = new Set(['sea', 'river']);
+    for (const { id, built } of worlds) {
+      const { tiles, width, height } = built.world;
+      for (const c of planScene(built).filter((p) => p.sheet === 'cliffs')) {
+        expect(WATER.has(tiles[c.y]![c.x]!.biome), `${id}: cliff standing in water at ${key(c)}`).toBe(false);
+        // The edge this particular frame is for, not every neighbour the tile has. A first version
+        // checked all four and failed on a hills tile that has a river to one side and correctly
+        // draws its face on another -- the placement was right and the assertion was not.
+        const edge = EDGE_ORDER[Math.floor(c.frame / EDGE_VARIANTS)]!;
+        const { dx, dy } = EDGE_STEP[edge];
+        const nx = c.x + dx;
+        const ny = c.y + dy;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+        expect(
+          WATER.has(tiles[ny]![nx]!.biome),
+          `${id}: cliff at ${key(c)} drops onto water to the ${edge}`
+        ).toBe(false);
       }
     }
   });

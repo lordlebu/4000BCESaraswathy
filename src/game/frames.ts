@@ -266,8 +266,26 @@ export function blends(here: BiomeId, there: BiomeId): boolean {
  * edge of. Unlike the torn blend, which both tiles emit so neither ends up holding a straight line,
  * exactly one side draws a cliff: two would put a rock face at the top *and* the bottom of the same
  * drop.
+ *
+ * **Water is excluded, and leaving it in was a real bug.** Rivers are carved after the elevation
+ * field is laid down, so a river running through upland keeps the height of the ground it cut and
+ * its neighbours do not. Height alone therefore said "draw a rock face here" along every bank --
+ * and, where a river ran between two of its own tiles at different heights, *inside the water*.
+ * Rendered on a real map, **83 of 234 cliff faces touched water**, which turned a river valley into
+ * something that read as a stone-lined canal.
+ *
+ * `blends` above already refuses the mirror image of this for the mirror reason: a shoreline is
+ * where the land stops, and bleeding two grounds across it turns a definite edge into a vague one.
+ * A cliff makes the opposite mistake, putting a hard built-looking edge where the water already
+ * draws its own.
  */
-export function cliffAt(hereBand: number, thereBand: number): boolean {
+export function cliffAt(
+  hereBand: number,
+  thereBand: number,
+  here: BiomeId,
+  there: BiomeId
+): boolean {
+  if (WATER.has(here) || WATER.has(there)) return false;
   return hereBand > thereBand;
 }
 
