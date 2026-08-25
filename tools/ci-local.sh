@@ -40,17 +40,22 @@ VOLUME="sot-node-modules-${VERSION}"
 
 # The runner's *size*, which is most of why CI fails where a laptop does not.
 #
-# The image alone is not enough. A first attempt at this ran the suite in the right container
-# on a machine offering it sixteen cores, and everything passed comfortably -- proving only
-# that a sixteen-core Linux box is not a GitHub runner. A hosted `ubuntu-latest` is two vCPUs
-# and 7 GB on a private repository, four and 16 on a public one, and the browser suite is the
-# part of this project that notices. Constrain the container to the same and a test that is
-# quietly close to its budget stops passing here too.
+# The image alone is not enough. A first attempt at this ran the suite in the right container on a
+# machine offering it sixteen cores, and everything passed comfortably -- proving only that a
+# sixteen-core Linux box is not a GitHub runner.
 #
-# Override for a public repo, or to see how much headroom a change actually bought:
-#   CI_CPUS=4 CI_MEMORY=16g tools/ci-local.sh
-CPUS="${CI_CPUS:-2}"
-MEMORY="${CI_MEMORY:-7g}"
+# Four and 16 GB is `ubuntu-latest` for a public repository, which this one is. **Two and 7 was
+# tried first and is wrong**: at two cores, three of the four tests in `hours.spec.ts` fail, and
+# those tests pass on real CI every time. A reproduction that is harsher than the thing it
+# reproduces invents failures nobody has, which is its own kind of useless -- the point is to see
+# what CI sees, not to see something worse. Calibrated by running a spec that CI passes and
+# tightening until it stops passing: four is the number where local behaviour matches observed CI
+# behaviour.
+#
+# Override to squeeze harder, or for a private repo's smaller runner:
+#   CI_CPUS=2 CI_MEMORY=7g tools/ci-local.sh
+CPUS="${CI_CPUS:-4}"
+MEMORY="${CI_MEMORY:-16g}"
 
 # Docker on Windows needs a native path, and Git Bash rewrites anything that looks like one unless
 # told not to. `pwd -W` gives the Windows form; MSYS_NO_PATHCONV stops the rewrite.

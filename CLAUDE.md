@@ -39,8 +39,8 @@ npm run build:sprite # rebuild assets/varuna-walk.png from assets/source/
 ### When CI fails and the suite passes here, run `npm run test:ci`
 
 It runs the browser suite in `mcr.microsoft.com/playwright` at the version this repo pins,
-constrained to **2 CPUs and 7 GB** — a hosted `ubuntu-latest`. Both halves matter, and the second
-one is the half that is easy to skip.
+constrained to **4 CPUs and 16 GB** — a hosted `ubuntu-latest` on a public repository. Both halves
+matter, and the second one is the half that is easy to skip.
 
 **Why it exists.** Four CI failures in a row were diagnosed by reading logs, because the suite
 passed locally every time. Three commits went out against a failure nobody could reproduce and one
@@ -50,13 +50,20 @@ version that had just failed CI passed under the throttle, faster than the fix d
 **The renderer is only half of it.** A developer machine draws through a real GPU and the runner
 falls back to SwiftShader, so the image matters — but the first run of this script gave the
 container sixteen cores and everything passed comfortably, which proves only that a sixteen-core
-Linux box is not a GitHub runner. Constrained to two, the playthrough walk failed exactly as CI
-fails it. **A test that is quietly close to its budget only shows it at the runner's size.**
+Linux box is not a GitHub runner. **A test that is quietly close to its budget only shows it at the
+runner's size.**
+
+**Getting the size right cuts both ways.** Two CPUs was tried first and fails three of the four
+tests in `hours.spec.ts` — tests CI passes every time. A reproduction harsher than the thing it
+reproduces invents failures nobody has. Calibrate by running a spec CI passes and tightening until
+it stops: four is where local behaviour matches CI's. At four, the playthrough walk takes
+**4.3 minutes**, which is exactly why it was failing against a four-minute budget and why that
+budget is now eight.
 
 ```bash
 npm run test:ci                              # whole suite
 npm run test:ci e2e/playthrough.spec.ts      # one spec
-CI_CPUS=4 CI_MEMORY=16g npm run test:ci      # a public repo's runner
+CI_CPUS=2 CI_MEMORY=7g npm run test:ci       # a private repo's smaller runner
 ```
 
 Linux dependencies live in a named Docker volume rather than the checkout, because `rolldown` and
