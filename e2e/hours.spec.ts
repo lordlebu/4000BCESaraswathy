@@ -9,8 +9,8 @@ const SEED = 'hours-test';
 
 async function fieldNoteAt(page: Page, hour: number): Promise<string> {
   await page.goto(`/?seed=${SEED}&hour=${hour}`);
-  await expect(page.locator('.map-surface canvas')).toBeVisible();
-  await expect(page.locator('.journal h2')).toBeVisible();
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
   return (await page.locator('.journal-notes').textContent()) ?? '';
 }
 

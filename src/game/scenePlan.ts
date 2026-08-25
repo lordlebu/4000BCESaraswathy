@@ -28,6 +28,7 @@ import {
   blends,
   cliffAt,
   cliffFrame,
+  treelineAt,
   depthFor,
   edgeMaskFrame,
   tileFrame,
@@ -54,6 +55,7 @@ export type PlacementSheet =
   | 'landmarks'
   | 'decor'
   | 'cliffs'
+  | 'treeline'
   | 'marker';
 
 export interface Placement {
@@ -189,6 +191,45 @@ export function planCliffs(world: FieldMapWorld['world']): Placement[] {
         out.push({
           sheet: 'cliffs',
           frame: cliffFrame(edge, tileHash(world.seed, x, y, `cliff-${edge}`)),
+          x,
+          y,
+          depth: depthFor(y, ROW_SLOT.undergrowth)
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * The wall of trees where a forest meets open ground.
+ *
+ * The same layer as `planCliffs` with a different predicate and a different sheet -- which is the
+ * point rather than a coincidence. The reference that established this shape drew nine materials
+ * into one rim slot, including a wooden palisade, so a rim is a slot and what fills it is
+ * interchangeable. Cliffs fill it with rock where the height band drops; this fills it with crowns
+ * where the forest stops.
+ *
+ * Same depth reasoning too: the south frames overhang the tile below, so this is row-sorted under
+ * the walker rather than sitting in a flat band.
+ */
+export function planTreeline(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      const here = world.tiles[y]![x]!.biome;
+      if (here !== 'forest') continue;
+      for (const edge of EDGE_ORDER) {
+        const { dx, dy } = EDGE_STEP[edge];
+        const nx = x + dx;
+        const ny = y + dy;
+        // The map edge is not a treeline, for the same reason it is not a cliff: the world stops
+        // there rather than the forest.
+        if (nx < 0 || ny < 0 || nx >= world.width || ny >= world.height) continue;
+        if (!treelineAt(here, world.tiles[ny]![nx]!.biome)) continue;
+        out.push({
+          sheet: 'treeline',
+          frame: cliffFrame(edge, tileHash(world.seed, x, y, `treeline-${edge}`)),
           x,
           y,
           depth: depthFor(y, ROW_SLOT.undergrowth)
@@ -399,6 +440,7 @@ export function planScene(built: FieldMapWorld): Placement[] {
   return [
     ...planEdges(built.world),
     ...planCliffs(built.world),
+    ...planTreeline(built.world),
     ...planDecor(built.world, builtOn),
     ...huts,
     ...planOverdraw(built.world, builtOn),

@@ -29,7 +29,16 @@ async function visibleMap(page: Page) {
     // any more, so the uncovered rectangle runs the full width.
     const right = canvas.width - margin;
     const bottom = (notes ? notes.top - canvas.top : canvas.height) - margin;
-    return { left, top, width: right - left, height: bottom - top };
+    // `originX/Y` turn these canvas-relative numbers into viewport ones, which is what
+    // `page.mouse` wants -- see the note on the tap below for why it is not `locator.click`.
+    return {
+      left,
+      top,
+      width: right - left,
+      height: bottom - top,
+      originX: canvas.left,
+      originY: canvas.top
+    };
   });
 }
 
@@ -52,6 +61,32 @@ async function bearing(page: Page): Promise<Heading | null> {
     dy: /south/.test(direction) ? 1 : /north/.test(direction) ? -1 : 0,
     nearness: /very close/.test(status) ? 'here' : /You are close/.test(status) ? 'close' : 'far'
   };
+}
+
+/**
+ * Wait for a turn to land, rather than for a fixed span of time.
+ *
+ * **This is what made the walk fail, and it was a budget problem rather than a bug.** The loop
+ * spent 1,900 ms after every tap and 780 ms after every step, so 110 legs of tapping is 209 seconds
+ * of deliberate waiting against a 240-second timeout -- about thirty seconds of margin for the page
+ * load, 110 journal reads and the arrival page. Nothing had to break for that to run out; the walk
+ * only had to spend a few more legs tapping than usual, or the machine had to be a little busier.
+ * Adding two overlay layers to the scene was enough to tip it, and no assertion in the test was
+ * about either of them.
+ *
+ * The turn is observable, so waiting for the clock was never necessary: the journal heading names
+ * where the traveller is and changes when they arrive somewhere new. Waiting for *that* costs what
+ * the move costs. A turn that genuinely changes nothing -- a tap into water, a blocked axis -- still
+ * has to fall back on the timeout, which is why it is passed in rather than dropped, and the loop
+ * already counts those as `stuckFor`.
+ */
+async function settle(page: Page, before: string, cap: number): Promise<void> {
+  const heading = page.locator('.journal h2');
+  try {
+    await expect(heading).not.toHaveText(before, { timeout: cap });
+  } catch {
+    // Unchanged after the full budget: the turn achieved nothing, which the caller handles.
+  }
 }
 
 test('walk from the settlement to the landmark and get a page for it', async ({ page }) => {
@@ -98,7 +133,7 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
       if (stuckFor >= 3) {
         await page.keyboard.press(stuckFor % 2 ? 'ArrowUp' : 'ArrowDown');
       }
-      await page.waitForTimeout(780);
+      await settle(page, wasAt, 780);
     } else {
       // Tap ahead in the bearing direction and let the pathfinder route around the water. Nudging
       // off dead centre on the unused axis keeps a blocked route from retrying the identical tap.
@@ -110,8 +145,23 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
       const jitter = (leg % 5) * 0.08 - 0.16;
       const x = usable.left + usable.width * (0.5 + heading.dx * 0.4 + (heading.dx === 0 ? jitter : 0));
       const y = usable.top + usable.height * (0.5 + heading.dy * 0.4 + (heading.dy === 0 ? jitter : 0));
-      await canvas.click({ position: { x, y } });
-      await page.waitForTimeout(1900);
+      // `page.mouse`, not `canvas.click`, and for exactly the reason `walk.ts` uses
+      // `page.keyboard` rather than a locator press.
+      //
+      // `locator.click` first waits for the element to be **actionable**, and part of that is
+      // being *stable*: the same bounding box for two consecutive animation frames. The canvas is
+      // in a RESIZE-mode scale manager next to a journal panel that reflows as the day turns, so
+      // there are moments when its box is never still for two frames together, and the click then
+      // waits until the test times out. CI reported it precisely -- "element was visible and
+      // stable but the operation never completed", then the page closing underneath the next read.
+      //
+      // That comment already exists in `walk.ts`, ending "every other spec in this suite already
+      // presses through `page.keyboard`; this helper was the one place that did not." This tap was
+      // the other place. A mouse click at a computed point sends the event without asking the
+      // canvas to hold still, which is the same trade: the coordinates are ours to get right, and
+      // nothing waits on a box that never settles.
+      await page.mouse.click(usable.originX + x, usable.originY + y);
+      await settle(page, wasAt, 1900);
     }
 
     // "Somewhere at 27, 18" changes as the traveller moves, so an unchanged heading means a turn

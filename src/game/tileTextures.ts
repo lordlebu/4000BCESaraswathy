@@ -79,6 +79,10 @@ export const HUT_SHEET = 'huts';
 export const OVERDRAW_SHEET = 'overdraw';
 export const FEATURE_SHEET = 'features';
 export const EDGE_SHEET = 'edges';
+/** The rock face where a height terrace drops away. Same 4x4 layout as the torn masks. */
+export const CLIFF_SHEET = 'cliffs';
+/** The wall of trees where a forest stops. Same layout again -- see `tools/build-rims.js`. */
+export const TREELINE_SHEET = 'treeline';
 export const DECOR_SHEET = 'decor';
 
 /** The 1x1 white pixel the fog layer stretches over each tile. See `createTileTextures`. */
@@ -99,6 +103,8 @@ export function loadTileSheets(
     overdraw: string;
     features: string;
     edges: string;
+    cliffs: string;
+    treeline: string;
     decor: string;
   }
 ): void {
@@ -113,6 +119,8 @@ export function loadTileSheets(
   sheet(OVERDRAW_SHEET, urls.overdraw, TILE_SIZE, TILE_SIZE);
   sheet(FEATURE_SHEET, urls.features, TILE_SIZE, TILE_SIZE);
   sheet(EDGE_SHEET, urls.edges, TILE_SIZE, TILE_SIZE);
+  sheet(CLIFF_SHEET, urls.cliffs, TILE_SIZE, TILE_SIZE);
+  sheet(TREELINE_SHEET, urls.treeline, TILE_SIZE, TILE_SIZE);
   sheet(DECOR_SHEET, urls.decor, DECOR_CELL, DECOR_CELL);
 }
 

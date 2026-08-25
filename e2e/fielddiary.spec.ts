@@ -27,9 +27,16 @@ const SEED = 'poi-252';
 
 async function boot(page: Page) {
   await page.goto(`/?seed=${SEED}`);
-  await expect(page.locator('.map-surface canvas')).toBeVisible();
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   // The journal only writes once the scene has placed the traveller.
-  await expect(page.locator('.journal h2')).toBeVisible();
+  //
+  // Both waits are explicit rather than the 5s default, because starting the game is the slowest
+  // thing any of these specs do and it is not the thing any of them are testing. Phaser boots, the
+  // world generates, and every sprite in the scene plan is created before this heading appears --
+  // five thousand of them on the smaller maps. Whichever spec happens to run while the machine is
+  // busiest pays for that, which is why the failure moved between specs from run to run and never
+  // pointed at a cause. A generous boot wait costs nothing on a green run.
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 }
 
 
@@ -39,7 +46,7 @@ test('stand on an authored place, and it opens', async ({ page }) => {
   await step(page, 'ArrowUp');
 
   const place = page.locator('.place');
-  await expect(place).toBeVisible({ timeout: 10_000 });
+  await expect(place).toBeVisible({ timeout: 20_000 });
   await expect(place.locator('h2')).toHaveText(/Eastern Field/i);
   // The arrival prose is the writing the place exists for; it should not be a toast.
   expect((await place.locator('.place-arrival').textContent())!.length).toBeGreaterThan(60);
@@ -49,7 +56,7 @@ test('looking closer writes the diary, and the diary keeps the crossings-out', a
   await boot(page);
   await step(page, 'ArrowUp');
   await step(page, 'ArrowUp');
-  await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 
   // Climb whatever this place will give us without any other knowledge.
   const look = page.getByRole('button', { name: 'Look closer' });
@@ -76,7 +83,13 @@ test('the diary survives a reload', async ({ page }) => {
   await boot(page);
   await step(page, 'ArrowUp');
   await step(page, 'ArrowUp');
-  await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
+  // Twenty seconds rather than ten, and the reason is worth keeping: nothing here is slow, the
+  // margin was simply thin. `step` already waits on the journal changing rather than on a clock,
+  // so this is only covering the panel's own mount -- but the whole suite shares one machine, and
+  // adding two overlay layers to the scene was enough to push this past ten on a loaded run while
+  // the identical two-step walk in the test above passed. A wait that is generous costs nothing on
+  // a green run; it only bounds the failure.
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
   await page.getByRole('button', { name: 'Look closer' }).first().click();
   await page.getByRole('button', { name: 'Leave' }).click();
 
@@ -122,7 +135,7 @@ test('the diary survives a reload', async ({ page }) => {
     .toBe(true);
 
   await page.reload();
-  await expect(page.locator('.journal h2')).toBeVisible();
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 
   await page.getByRole('button', { name: /^Diary/ }).click();
   await expect(page.locator('.diary .entry')).toHaveCount(1);
@@ -131,14 +144,14 @@ test('the diary survives a reload', async ({ page }) => {
 test('an instance is a place you go into, and it says why when you cannot', async ({ page }) => {
   // A seed where Kavik's Tower stands three steps south of the start.
   await page.goto('/?seed=tower-57');
-  await expect(page.locator('.map-surface canvas')).toBeVisible();
-  await expect(page.locator('.journal h2')).toBeVisible();
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
   await step(page, 'ArrowDown');
   await step(page, 'ArrowDown');
   await step(page, 'ArrowDown');
 
   const place = page.locator('.place');
-  await expect(place).toBeVisible({ timeout: 10_000 });
+  await expect(place).toBeVisible({ timeout: 20_000 });
   await expect(place.locator('h2')).toHaveText(/Kavik/i);
 
   // Three ways further in, two of them shut until the work is done. A closed one explains
@@ -170,6 +183,6 @@ test('the overworld joins the two field maps', async ({ page }) => {
   await expect(sheet).toBeHidden();
 
   // A different country: the plateau is large where Lothal is small, so the map is rebuilt.
-  await expect(page.locator('.map-surface canvas')).toBeVisible();
-  await expect(page.locator('.journal h2')).toBeVisible();
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 });

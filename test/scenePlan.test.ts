@@ -85,16 +85,22 @@ describe('nothing hides the traveller or what he is walking towards', () => {
     // The edge blend is exempt, and is the only thing that is: it *is* ground rather than something
     // standing on it, so it sits in one flat band below every row. See `planEdges`, and the two
     // assertions below that pin it there.
+    // Collect, then assert once. Two `expect` calls per placement is around forty thousand of
+    // them across the three maps, and each one builds a matcher and formats a message whether or
+    // not it fails -- the test took 27 seconds and timed out at five once the cliff and treeline
+    // layers added their placements. Gathering the offenders and asserting on the list is the same
+    // check and reports better: every bad placement at once, instead of the first.
+    const bottom = Math.min(...Object.values(ROW_SLOT));
+    const top = Math.max(...Object.values(ROW_SLOT));
+    const strays: string[] = [];
     for (const { id, built } of worlds) {
       for (const item of planScene(built)) {
         if (item.maskFrame !== undefined) continue;
-        const lowest = depthFor(item.y, Math.min(...Object.values(ROW_SLOT)));
-        const highest = depthFor(item.y, Math.max(...Object.values(ROW_SLOT)));
-        expect(item.depth, `${id}: ${item.sheet} at ${key(item)} is outside its row's band`)
-          .toBeGreaterThanOrEqual(lowest);
-        expect(item.depth).toBeLessThanOrEqual(highest);
+        if (item.depth >= depthFor(item.y, bottom) && item.depth <= depthFor(item.y, top)) continue;
+        strays.push(`${id}: ${item.sheet} at ${key(item)} is outside its row's band`);
       }
     }
+    expect(strays, strays.join('\n')).toEqual([]);
   });
 
   it('keeps each row band clear of the row in front', () => {
@@ -321,6 +327,56 @@ describe('a cliff is drawn where the ground drops away', () => {
         );
         expect(c.depth, `${id}: cliff at ${key(c)} is not row-sorted`).toBeGreaterThanOrEqual(
           depthFor(c.y, ROW_SLOT.underfoot)
+        );
+      }
+    }
+  });
+});
+
+describe('a treeline stands where the forest stops', () => {
+  it('draws only on forest tiles, only toward open ground', () => {
+    for (const { id, built } of worlds) {
+      const { tiles, width, height } = built.world;
+      for (const t of planScene(built).filter((p) => p.sheet === 'treeline')) {
+        expect(tiles[t.y]![t.x]!.biome, `${id}: treeline at ${key(t)} is not on forest`).toBe('forest');
+        const open = [
+          [0, -1],
+          [1, 0],
+          [0, 1],
+          [-1, 0]
+        ].some(([dx, dy]) => {
+          const nx = t.x + dx!;
+          const ny = t.y + dy!;
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) return false;
+          return tiles[ny]![nx]!.biome !== 'forest';
+        });
+        expect(open, `${id}: treeline at ${key(t)} faces only forest`).toBe(true);
+      }
+    }
+  });
+
+  it('leaves the forest interior alone', () => {
+    // The whole reason this is affordable, and the reason the earlier tree layer was not. The
+    // canopy texture already draws treetops; a rim adds a silhouette at the boundary and nothing
+    // in the middle. If this ever starts covering interior tiles it has become the layer that was
+    // rejected, at several times the sprite count.
+    for (const { id, built } of worlds) {
+      const { tiles, width, height } = built.world;
+      let forest = 0;
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) if (tiles[y]![x]!.biome === 'forest') forest += 1;
+      }
+      if (forest === 0) continue;
+      const drawn = new Set(planScene(built).filter((p) => p.sheet === 'treeline').map(key));
+      expect(drawn.size, `${id}: treeline covers most of the forest, not its edge`).toBeLessThan(forest);
+    }
+  });
+
+  it('sits below the traveller, like the cliff it shares a layer with', () => {
+    for (const { id, built } of worlds) {
+      for (const t of planScene(built).filter((p) => p.sheet === 'treeline')) {
+        expect(t.depth, `${id}: treeline at ${key(t)} draws over the walker`).toBeLessThan(
+          depthFor(t.y, ROW_SLOT.walker)
         );
       }
     }
