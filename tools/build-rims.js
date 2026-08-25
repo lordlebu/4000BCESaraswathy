@@ -76,7 +76,7 @@ const DEPTH = { n: 0.20, e: 0.22, s: 0.48, w: 0.22 };
 
 /** Sheets to build: source file in assets/source, output name in assets. */
 const SHEETS = [
-  { id: 'cliffs', from: 'Gemini_cliff-rim3.png', to: 'cliffs.png' },
+  { id: 'cliffs', from: 'Gemini_Stones.png', to: 'cliffs.png' },
   { id: 'treeline', from: 'Gemini_tree-rim2.png', to: 'treeline.png' }
 ];
 
@@ -203,8 +203,16 @@ function isKey(data, i) {
   // What all of it shares is the structure of magenta rather than its value: red and blue close to
   // each other, green far below both. No stone, moss or foliage in these sheets does that -- their
   // green sits between red and blue, or above them.
+  // Magenta's signature is structural: red and blue close to each other, green well below both.
+  // No stone, moss or foliage in these sheets does that -- their green sits between red and blue,
+  // or above them, which makes this difference negative rather than large.
   const chroma = Math.min(r, b) - g;
-  if (chroma > 45 && Math.abs(r - b) < 60) return true;
+  // **Relative, not a fixed number, and that is the whole trick.** A flat threshold of 45 caught
+  // the bright background and missed the shadow under every south face, because magenta blended
+  // toward black keeps its *proportions* and loses its magnitude: rgb(75,29,62) is unmistakably
+  // magenta and has a chroma of 33. Scaling the bar with the pixel's own brightness catches the
+  // shadow at any depth while still ignoring anything whose green is not genuinely suppressed.
+  if (chroma > 14 && chroma > 0.22 * Math.max(r, b) && Math.abs(r - b) < 60) return true;
   // The other background. Both sheets are painted with the brief's "warm paper undertone", and the
   // model puts a band of that bare paper under the south row where the ground would be -- correct
   // in a painting, wrong in an overlay, where it lands as a bright cream halo under every treeline
