@@ -63,30 +63,56 @@ async function bearing(page: Page): Promise<Heading | null> {
   };
 }
 
+/** How long the heading must hold still before a turn counts as finished. */
+const QUIET_MS = 300;
+
 /**
- * Wait for a turn to land, rather than for a fixed span of time.
+ * How long a turn may take. A tap hands the pathfinder a whole route; a step is one tile.
  *
- * **This is what made the walk fail, and it was a budget problem rather than a bug.** The loop
- * spent 1,900 ms after every tap and 780 ms after every step, so 110 legs of tapping is 209 seconds
- * of deliberate waiting against a 240-second timeout -- about thirty seconds of margin for the page
- * load, 110 journal reads and the arrival page. Nothing had to break for that to run out; the walk
- * only had to spend a few more legs tapping than usual, or the machine had to be a little busier.
- * Adding two overlay layers to the scene was enough to tip it, and no assertion in the test was
- * about either of them.
+ * The tap budget is generous because it is a *ceiling*, not a wait -- `settle` returns the moment
+ * the traveller stops, so a short path costs what a short path costs.
+ */
+const TAP_CAP = 5_000;
+const STEP_CAP = 1_500;
+
+/**
+ * Wait for a turn to *finish*, rather than for a fixed span of time.
  *
- * The turn is observable, so waiting for the clock was never necessary: the journal heading names
- * where the traveller is and changes when they arrive somewhere new. Waiting for *that* costs what
- * the move costs. A turn that genuinely changes nothing -- a tap into water, a blocked axis -- still
- * has to fall back on the timeout, which is why it is passed in rather than dropped, and the loop
- * already counts those as `stuckFor`.
+ * The loop used to spend 1,900 ms after every tap and 780 ms after every step, which is 209 seconds
+ * of deliberate waiting across 110 legs inside a 240-second budget. Waiting on the clock was never
+ * necessary, because the turn is observable: the journal heading names where the traveller is.
+ *
+ * **But "changed" is the wrong signal, and getting that wrong is what broke this test.** A tap is
+ * not one move -- it hands the pathfinder a whole route, and the traveller walks it tile by tile.
+ * Returning the moment the heading first changes cuts that route off after its *first* tile and
+ * taps again, so every leg advanced one tile instead of five. Measured: the walk went from needing
+ * 110 legs to needing **214**, well past the loop's cap, and only still passed because the fifteen
+ * seconds of grace after the loop let one last uninterrupted path run to the landmark. On CI there
+ * was no such slack and it timed out.
+ *
+ * So the signal is *stillness*, not change: the heading must differ from where the turn started and
+ * then hold the same value for `QUIET_MS`, which is what "the traveller stopped walking" looks like
+ * from outside. Back to **38 legs and 41 seconds**, from 214 and 124.
+ *
+ * Polled in the page rather than across the wire, for the reason `walk.ts` gives: a round trip per
+ * check costs more than the interval being polled for. A turn that genuinely achieves nothing -- a
+ * tap into water, a blocked axis -- never satisfies the condition and falls back on `cap`, which
+ * the loop already counts as `stuckFor`.
  */
 async function settle(page: Page, before: string, cap: number): Promise<void> {
-  const heading = page.locator('.journal h2');
-  try {
-    await expect(heading).not.toHaveText(before, { timeout: cap });
-  } catch {
-    // Unchanged after the full budget: the turn achieved nothing, which the caller handles.
-  }
+  await page
+    .waitForFunction(
+      ({ before: was, quiet }) => {
+        const w = window as unknown as { __settle?: { text: string; since: number } };
+        const text = document.querySelector('.journal h2')?.textContent ?? '';
+        const now = Date.now();
+        if (!w.__settle || w.__settle.text !== text) w.__settle = { text, since: now };
+        return text !== was && now - w.__settle.since >= quiet;
+      },
+      { before, quiet: QUIET_MS },
+      { timeout: cap, polling: 60 }
+    )
+    .catch(() => undefined);
 }
 
 test('walk from the settlement to the landmark and get a page for it', async ({ page }) => {
@@ -133,7 +159,7 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
       if (stuckFor >= 3) {
         await page.keyboard.press(stuckFor % 2 ? 'ArrowUp' : 'ArrowDown');
       }
-      await settle(page, wasAt, 780);
+      await settle(page, wasAt, STEP_CAP);
     } else {
       // Tap ahead in the bearing direction and let the pathfinder route around the water. Nudging
       // off dead centre on the unused axis keeps a blocked route from retrying the identical tap.
@@ -161,7 +187,7 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
       // canvas to hold still, which is the same trade: the coordinates are ours to get right, and
       // nothing waits on a box that never settles.
       await page.mouse.click(usable.originX + x, usable.originY + y);
-      await settle(page, wasAt, 1900);
+      await settle(page, wasAt, TAP_CAP);
     }
 
     // "Somewhere at 27, 18" changes as the traveller moves, so an unchanged heading means a turn
