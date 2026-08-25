@@ -12,32 +12,44 @@ import { expect, test, type Page } from '@playwright/test';
 const SEED = 'play-test';
 
 /**
- * The rectangle of canvas the overlays are not covering, in canvas coordinates.
+ * Everything one leg of the walk needs to read, in a single round trip.
  *
- * The map fills the screen and the panels float on top of it, so "where can I tap" is no longer
- * "anywhere on the canvas".
+ * It used to be four: `arrival.isVisible()`, the status text, the journal heading, and a
+ * `page.evaluate` for the tappable rectangle. Each is a message to the browser and back, which is
+ * nearly free locally and is not free at all on CI, where the renderer is SwiftShader and every
+ * round trip queues behind whatever the page is struggling to draw. Four of them times 110 legs is
+ * a lot of waiting for information the page could have handed over once.
+ *
+ * Raw strings come back and the parsing happens in Node, so the regexes stay testable and out of
+ * the page.
  */
-async function visibleMap(page: Page) {
+async function survey(page: Page) {
   return page.evaluate(() => {
     const canvas = document.querySelector('.map-surface canvas')!.getBoundingClientRect();
     const notes = document.querySelector('.journal')?.getBoundingClientRect();
+    const arrival = document.querySelector('.arrival') as HTMLElement | null;
     const margin = 12;
 
-    const left = margin;
-    const top = margin;
     // The travel log was the only panel that could take a side of the map. It is not a panel
     // any more, so the uncovered rectangle runs the full width.
     const right = canvas.width - margin;
     const bottom = (notes ? notes.top - canvas.top : canvas.height) - margin;
-    // `originX/Y` turn these canvas-relative numbers into viewport ones, which is what
-    // `page.mouse` wants -- see the note on the tap below for why it is not `locator.click`.
+
     return {
-      left,
-      top,
-      width: right - left,
-      height: bottom - top,
-      originX: canvas.left,
-      originY: canvas.top
+      // Present *and* laid out. A hidden panel still answers `querySelector`.
+      arrived: !!arrival && arrival.getClientRects().length > 0,
+      status: document.querySelector('.status')?.textContent ?? '',
+      here: document.querySelector('.journal h2')?.textContent ?? '',
+      map: {
+        left: margin,
+        top: margin,
+        width: right - margin,
+        height: bottom - margin,
+        // Canvas-relative numbers become viewport ones, which is what `page.mouse` wants -- see
+        // the note on the tap below for why it is not `locator.click`.
+        originX: canvas.left,
+        originY: canvas.top
+      }
     };
   });
 }
@@ -51,8 +63,7 @@ type Heading = { dx: number; dy: number; nearness: 'far' | 'close' | 'here' };
  * edge of the view is right when the landmark is a day away and wrong when it is two tiles off,
  * where it simply overshoots and paces back and forth.
  */
-async function bearing(page: Page): Promise<Heading | null> {
-  const status = (await page.locator('.status').textContent()) ?? '';
+function bearing(status: string): Heading | null {
   if (/Sit a while/.test(status)) return null;
 
   const direction = status.match(/\b(?:north|south)?-?(?:east|west)?\b(?=[\s.]*(?:of here|$|\.))/)?.[0] ?? status;
@@ -69,11 +80,21 @@ const QUIET_MS = 300;
 /**
  * How long a turn may take. A tap hands the pathfinder a whole route; a step is one tile.
  *
- * The tap budget is generous because it is a *ceiling*, not a wait -- `settle` returns the moment
- * the traveller stops, so a short path costs what a short path costs.
+ * **Both are ceilings, not waits.** `settle` returns the moment the traveller stops, so a short
+ * path costs what a short path costs and these only bound the pathological case.
+ *
+ * The first version of these was five seconds and one and a half, picked from what a path costs on
+ * this machine -- and that is the mistake worth naming, because a cap tuned to local speed is a
+ * fixed wait wearing a disguise. A tile is `STEP_MS` = 425 ms of tween, so a twelve-tile route is
+ * already 5.1 seconds and gets guillotined at five; the walk then taps again mid-route and is back
+ * to advancing one tile a leg, which is exactly the failure this was meant to fix. CI, being
+ * slower everywhere else, hit it far more often than a local run ever would.
+ *
+ * Sized from the map instead: 36x24, so a long route is comfortably past twenty tiles, and twenty
+ * tiles is 8.5 seconds of walking before any slowness at all.
  */
-const TAP_CAP = 5_000;
-const STEP_CAP = 1_500;
+const TAP_CAP = 20_000;
+const STEP_CAP = 4_000;
 
 /**
  * Wait for a turn to *finish*, rather than for a fixed span of time.
@@ -118,7 +139,14 @@ async function settle(page: Page, before: string, cap: number): Promise<void> {
 test('walk from the settlement to the landmark and get a page for it', async ({ page }) => {
   // Crossing a 36x24 map on foot takes a while: steps are tweened, and wetland and hills are
   // deliberately slower than plains. This is a real playthrough, so it gets a real budget.
-  test.setTimeout(240_000);
+  //
+  // Four minutes was that budget for a long time and it is not enough any more. The walk is real
+  // time -- `STEP_MS` is 425 ms a tile and no amount of test cleverness makes a tween finish
+  // sooner -- and CI walks the same route through a software renderer. Locally the walk is around
+  // forty seconds; the margin at four minutes was small enough that ordinary variance decided the
+  // run, which is not a threshold doing any work. Eight costs nothing on a green run: a timeout
+  // bounds a failure, it does not pace a success. The job it sits in allows thirty.
+  test.setTimeout(480_000);
   const problems: string[] = [];
   page.on('pageerror', (error) => problems.push(`uncaught: ${error.message}`));
 
@@ -140,10 +168,16 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
   let stuckFor = 0;
 
   for (let leg = 0; leg < 110; leg += 1) {
-    if (await arrival.isVisible()) break;
+    // One read for the whole leg. `wasAt` compares against the previous leg's heading, so noticing
+    // a turn that achieved nothing costs nothing extra either.
+    const view = await survey(page);
+    if (view.arrived) break;
 
-    const heading = await bearing(page);
+    const heading = bearing(view.status);
     if (!heading) break;
+
+    stuckFor = view.here === wasAt ? stuckFor + 1 : 0;
+    wasAt = view.here;
 
     // Taps cover ground; steps finish the job.
     //
@@ -167,7 +201,7 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
       // are DOM panels over the canvas, so a tap aimed at 92% of the height lands on the notes and
       // never reaches the game — which is equally true for a player, and is why the camera keeps
       // the traveller in the uncovered area in the first place.
-      const usable = await visibleMap(page);
+      const usable = view.map;
       const jitter = (leg % 5) * 0.08 - 0.16;
       const x = usable.left + usable.width * (0.5 + heading.dx * 0.4 + (heading.dx === 0 ? jitter : 0));
       const y = usable.top + usable.height * (0.5 + heading.dy * 0.4 + (heading.dy === 0 ? jitter : 0));
@@ -190,11 +224,6 @@ test('walk from the settlement to the landmark and get a page for it', async ({ 
       await settle(page, wasAt, TAP_CAP);
     }
 
-    // "Somewhere at 27, 18" changes as the traveller moves, so an unchanged heading means a turn
-    // that achieved nothing.
-    const here = (await page.locator('.journal h2').textContent()) ?? '';
-    stuckFor = here === wasAt ? stuckFor + 1 : 0;
-    wasAt = here;
   }
 
   await expect(arrival, 'never reached the landmark').toBeVisible({ timeout: 15_000 });
