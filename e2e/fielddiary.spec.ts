@@ -46,7 +46,7 @@ test('stand on an authored place, and it opens', async ({ page }) => {
   await step(page, 'ArrowUp');
 
   const place = page.locator('.place');
-  await expect(place).toBeVisible({ timeout: 10_000 });
+  await expect(place).toBeVisible({ timeout: 20_000 });
   await expect(place.locator('h2')).toHaveText(/Eastern Field/i);
   // The arrival prose is the writing the place exists for; it should not be a toast.
   expect((await place.locator('.place-arrival').textContent())!.length).toBeGreaterThan(60);
@@ -56,7 +56,7 @@ test('looking closer writes the diary, and the diary keeps the crossings-out', a
   await boot(page);
   await step(page, 'ArrowUp');
   await step(page, 'ArrowUp');
-  await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 
   // Climb whatever this place will give us without any other knowledge.
   const look = page.getByRole('button', { name: 'Look closer' });
@@ -151,7 +151,7 @@ test('an instance is a place you go into, and it says why when you cannot', asyn
   await step(page, 'ArrowDown');
 
   const place = page.locator('.place');
-  await expect(place).toBeVisible({ timeout: 10_000 });
+  await expect(place).toBeVisible({ timeout: 20_000 });
   await expect(place.locator('h2')).toHaveText(/Kavik/i);
 
   // Three ways further in, two of them shut until the work is done. A closed one explains

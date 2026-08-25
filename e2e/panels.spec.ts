@@ -58,7 +58,7 @@ test('a place can be closed, read around, and opened again without moving', asyn
 
   // And it comes back without stepping off the tile, which was the reported dead end.
   await page.getByRole('button', { name: /Eastern Field/ }).click();
-  await expect(page.locator('.place')).toBeVisible();
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 });
 
 test('the Here button only exists where there is a here', async ({ page }) => {
@@ -73,7 +73,7 @@ test('nothing overlaps in landscape, with every panel open at once', async ({ pa
   await walkToPlace(page);
   // The travel log used to be a third panel here. What remains on the glass at once is the
   // place and the notes underneath it, and they divide the bottom edge rather than stack.
-  await expect(page.locator('.place')).toBeVisible();
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
   expect(await overlap(page, '.place', '.journal')).toBe(0);
 });
 

@@ -73,7 +73,13 @@ test('walking changes the journal', async ({ page }) => {
   const before = await title.textContent();
 
   // Walk a short way. Sea is impassable, so try both axes rather than assuming a free direction.
-  await page.locator('.map-surface canvas').click({ position: { x: 10, y: 10 } });
+  //
+  // `page.mouse` rather than a locator click, for the reason `walk.ts` gives for using
+  // `page.keyboard`: a locator waits for the canvas to hold the same bounding box for two frames,
+  // and a RESIZE-mode canvas beside a reflowing journal panel does not always manage it. This tap
+  // only needs to put focus on the game before the keys below.
+  const box = await page.locator('.map-surface canvas').boundingBox();
+  await page.mouse.click((box?.x ?? 0) + 10, (box?.y ?? 0) + 10);
   for (const key of ['ArrowRight', 'ArrowRight', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowUp']) {
     await page.keyboard.press(key);
     await page.waitForTimeout(520);

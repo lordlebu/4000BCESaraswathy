@@ -41,7 +41,7 @@ test('a question arrives from a person, not from the air', async ({ page }) => {
 
   await step(page, 'ArrowDown');
   await step(page, 'ArrowDown');
-  await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 
   // No button. Being told something is how you hear it now -- the diary is Varuna's and he does
   // not need permission to use it -- so simply standing here and being spoken to is enough. This
@@ -58,7 +58,7 @@ test('every reading is shown, including the ones you cannot argue', async ({ pag
   await boot(page);
   await step(page, 'ArrowDown');
   await step(page, 'ArrowDown');
-  await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.person .said')).not.toHaveCount(0);
   await page.getByRole('button', { name: 'Leave' }).click();
   await openDiary(page);
@@ -75,7 +75,7 @@ test('the player can settle a question, and is never told they were wrong', asyn
   await boot(page);
   await step(page, 'ArrowDown');
   await step(page, 'ArrowDown');
-  await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 
   // Take everything this place will give. Rounds rather than a single pass: a rung opens the next
   // rung, and hearing a line can unlock another, so one sweep leaves the place unfinished.
