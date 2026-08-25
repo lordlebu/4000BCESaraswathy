@@ -27,6 +27,7 @@ npm install
 npm run dev        # serve at http://localhost:4173 and open a browser
 npm test           # vitest — rules and content under Node, panels under jsdom
 npm run test:e2e   # playwright — does the game actually boot and draw?
+npm run test:ci    # the same suite in CI's container, at CI's size — see below
 npm run test:watch # vitest in watch mode
 npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
@@ -34,6 +35,40 @@ npm run check:data # verify data/canon/ matches the canon release it came from
 npm run perf       # frame cost on the renderer CI has -- see docs/rendering.md
 npm run build:sprite # rebuild assets/varuna-walk.png from assets/source/
 ```
+
+### When CI fails and the suite passes here, run `npm run test:ci`
+
+It runs the browser suite in `mcr.microsoft.com/playwright` at the version this repo pins,
+constrained to **4 CPUs and 16 GB** — a hosted `ubuntu-latest` on a public repository. Both halves
+matter, and the second one is the half that is easy to skip.
+
+**Why it exists.** Four CI failures in a row were diagnosed by reading logs, because the suite
+passed locally every time. Three commits went out against a failure nobody could reproduce and one
+of them broke `main`. An attempt to stand in for CI with 4× CPU throttling *disproved itself*: the
+version that had just failed CI passed under the throttle, faster than the fix did.
+
+**The renderer is only half of it.** A developer machine draws through a real GPU and the runner
+falls back to SwiftShader, so the image matters — but the first run of this script gave the
+container sixteen cores and everything passed comfortably, which proves only that a sixteen-core
+Linux box is not a GitHub runner. **A test that is quietly close to its budget only shows it at the
+runner's size.**
+
+**Getting the size right cuts both ways.** Two CPUs was tried first and fails three of the four
+tests in `hours.spec.ts` — tests CI passes every time. A reproduction harsher than the thing it
+reproduces invents failures nobody has. Calibrate by running a spec CI passes and tightening until
+it stops: four is where local behaviour matches CI's. At four, the playthrough walk takes
+**4.3 minutes**, which is exactly why it was failing against a four-minute budget and why that
+budget is now eight.
+
+```bash
+npm run test:ci                              # whole suite
+npm run test:ci e2e/playthrough.spec.ts      # one spec
+CI_CPUS=2 CI_MEMORY=7g npm run test:ci       # a private repo's smaller runner
+```
+
+Linux dependencies live in a named Docker volume rather than the checkout, because `rolldown` and
+`esbuild` ship per-platform binaries and this machine's `node_modules` cannot be used inside Linux.
+First run installs them; later runs start immediately.
 
 ### Sprite art is generated too
 
