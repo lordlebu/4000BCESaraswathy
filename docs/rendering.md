@@ -6,7 +6,7 @@ the cost of adding another.
 
 ## The layers, bottom to top
 
-Six of them, and the rules between them are what stop this tangling. Three are scatter layers that
+Eight of them, and the rules between them are what stop this tangling. Three are scatter layers that
 look similar and are not interchangeable — the difference is **where they sit relative to the
 traveller**, and that decides everything else about them.
 
@@ -14,6 +14,8 @@ traveller**, and that decides everything else about them.
 |---|---|---|---|---|
 | **terrain** | 0 | one per tile | below | 128 |
 | **edge blend** | 50 | 0–4 per tile | below | 128 |
+| **cliff rim** | row band, `undergrowth` | ~8% of tiles | row-sorted | 128 |
+| **treeline** | row band, `undergrowth` | forest edges only | row-sorted | 128 |
 | **decor** | row band, `underfoot` | 0–3 per tile | **below** | **64** |
 | **huts / places / landmarks** | row band, `undergrowth` | sparse | row-sorted | 128 / 128×160 / 80×88 |
 | **features** | row band, `undergrowth` | 1 tile in 12 | row-sorted, offset aside | 128 |
@@ -33,6 +35,29 @@ is only survivable because you meet one occasionally and pass beside it rather t
 
 Getting these confused is how the map becomes obstructive. `test/scenePlan.test.ts` asserts each
 one separately.
+
+**The rims are edges, not fills, and that is why they are affordable.** A cliff is drawn where a
+height band drops away and a treeline where the forest stops — on the boundary tiles only, never in
+the interior. Measured on the real field maps that is about 8% of tiles for cliffs and at worst 446
+placements for the treeline on Lothal, against roughly 5,000 already in the plan.
+
+Both are row-sorted rather than sitting in the flat band the edge blend uses, and that is the one
+genuinely new decision in them. A torn blend sits inside its own cell, so a flat depth is enough. A
+rock face has to **overhang the tile below it** or it reads as a line painted on the ground rather
+than a thing standing on it — so it sorts by row like the things that stand up, one slot under the
+walker. He walks along the top of a ledge and in front of the face below him.
+
+**Why a rim exists at all.** A top-down ground texture shows what the ground is *made of*; a slope
+and a forest edge are properties of the *boundary between* two tiles, which no texture can carry.
+Every top-down game that reads as hilly does the same thing: keep the ground flat and quiet, and
+draw an edge where high meets low.
+
+**Water is excluded from cliffs, and leaving it in was a real bug.** Rivers are carved after the
+elevation field is laid down, so a river keeps the height of the ground it cut and its neighbours do
+not. Height alone therefore asked for a rock face along every bank — and, between two river tiles at
+different heights, *inside the water*. On Lothal that was **83 of 234 faces touching water**, which
+turned a valley into a stone-lined canal. `blends` already refuses the mirror image of this for the
+mirror reason: a shoreline is where the land stops.
 
 ## The plan/scene split
 
@@ -235,6 +260,36 @@ nothing about its own accuracy.
 3. **Avoid full-screen passes.** Each one costs a whole canvas of blending every frame; the sky
    tint is already one, and a second was one too many.
 4. **Bake combinations** rather than compositing per sprite — see the blend textures below.
+
+## Ground tiles have to wrap, and asking the artist does not achieve it
+
+`docs/art-brief.md` asked for "Tiles seamlessly on all four edges" from the start, and **every tile
+came back not tiling**. Measured as the brightness jump across a tile boundary over the jump between
+ordinary neighbouring columns — 1.0× is invisible, past about 2.5× reads as a line — **seven of the
+nine ground biomes seamed**, hills at 8.4× and forest at 9.5×. Only `plains` and `coast` were clean,
+and only because their marks are 2–5 px: too small for a cut edge to sever anything visible.
+
+`variantBox` cut each of the four variants as an arbitrary 70% square and nothing anywhere made a
+tile's left edge continue its right. Tested pairwise, **all sixteen hills pairings seamed**,
+including a tile against itself — so no arrangement and no number of extra variants could have
+helped.
+
+Two fixes that looked right and were not, both worth knowing because each measured as an
+improvement:
+
+- **Wrapping each variant on its own.** Every tile then tiles with *itself*, which is not what a
+  field does — neighbours are usually a different variant. Hills went 8.4× to 7.9×.
+- **Cutting the variants as rolls of one wrapped master.** A roll by half a cell puts the master's
+  interior at the tile edge, and interiors do not match edges. 8.4× to 3.6×.
+
+What works: every variant is wrapped, then cross-faded onto variant 0's border over 16 px. All
+sixteen pairs meet the same edge and the interiors stay as different as they were. Every biome
+improved — hills 8.4× → 0.8×, river 3.9× → 0.3×, forest 9.5× → 1.8×. `test/frames.test.ts` asserts
+every ordered pairing and fails on the old sheet at 7.6×.
+
+**The rule for new ground art**, which the brief did not have: no feature larger than about a
+twelfth of the image width. The seven clean biomes measure 2–7 px at tile size; the two that failed
+were 18 px and 12 px.
 
 ## Sheets must fit in a texture
 

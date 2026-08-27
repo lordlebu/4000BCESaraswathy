@@ -335,7 +335,35 @@ and a little more saturated than the rest. Do not soften it into the others.
 old brief but were painted, not pixelled — most should survive the direction change with a rebuild
 rather than a reprompt. Look before you regenerate.
 
-### Asset 2c — the three that need repainting, and the rule that changed
+### Asset 2c — the ground, and how it was settled
+
+> **Status: closed.** All nine ground biomes tile. `hills` was repainted and is the one that
+> needed it; `mountains` and `forest` were judged good enough as they stand once the forest gained
+> a treeline. **Nothing in this section is outstanding** — it is kept because the rules in it apply
+> to any ground art added later, and because two of them were learned the expensive way.
+>
+> | tile | outcome |
+> | --- | --- |
+> | `hills` | **repainted twice.** Ochre read as sand; olive reads as hill country. See *the palette was the problem* below. |
+> | `mountains` | kept. The 17-level gradient is still there and still measurable; on the map it does not read. |
+> | `forest` | kept. The treeline rim gave the forest the silhouette its flat texture could not. |
+
+#### The palette was the problem, not the paintings
+
+Two good `hills` swatches came back and both read as sand. The better of them sat **19 from
+`desert`** in RGB, and under about 25 two grounds stop being tellable apart at a glance.
+
+The obvious fix was to make `build-terrain.js` pull every ground toward the base colour this
+document already declares for it. **It was built, measured and thrown away** — it made the problem
+worse. The declared targets put `hills` at `#ab9d7c` and `desert` at `#bea47b`, which are **20
+apart**, already inside the range where two grounds converge. Pulling both toward that palette
+converges them faster.
+
+So the ask went back as one word — **olive rather than ochre** — and the swatch that came back is
+50 from desert. **When two biomes are hard to tell apart, check the declared colours against each
+other before blaming the art.**
+
+#### The rules any new ground art still has to obey
 
 **Stop asking for a seamless tile. The pipeline guarantees it now.**
 
@@ -518,6 +546,79 @@ Making it renderable is two steps once the PNG exists: add the tile in
 `src/game/tileTextures.ts`, and set `renderable: true` on `lava_field` in the canon repo's
 `database/biomes.json`, then re-export. Both are needed — the flag is what `src/content/canon.ts`
 filters on.
+
+### Asset 2d — rim sheets (cliff and treeline), and the format that works
+
+A **rim** is the edge of something: the rock face where a height terrace drops away, the wall of
+trees where a forest stops. Ground textures cannot carry either — a slope and a forest edge are
+properties of the *boundary between* two tiles. Both ship; this is the format to reuse for a third
+(a settlement palisade is the obvious one).
+
+**Ask for a 4 × 4 grid on solid magenta, not a transparent strip.** Every model tried gave good art
+or a good container, never both: Grok returned the right strip and filled 64% of it with the one hex
+the prompt named; ChatGPT returned real alpha floating in an empty canvas; Gemini returned by far the
+best painting on a magenta grid. So the prompt asks for what Gemini reliably does, and
+`tools/build-rims.js` keys the magenta out, crops each row and packs the 2048×128 strip the engine
+indexes. Keying a known background is arithmetic; getting a model to paint stone is not.
+
+**The asymmetry is the whole look.** North is a thin lip — you are looking down at where the ground
+breaks. South is a tall face — you are seeing the wall. Drawing all four the same makes a flat
+outline rather than a ledge.
+
+**Do not give a hex for an object that needs internal form.** "Rock colour around #8f8a76" produced
+a flat slab that was 64% that one colour. A hex works for a ground wash and fails for anything that
+needs light and shade inside it.
+
+**And say what not to draw.** The first cliff prompt asked for "a face of stacked, broken, irregular
+stone blocks" — and stacked blocks is a description of masonry, so masonry is what came back. It
+read as a dry-stone wall on the map. The prompt now bans courses, rectangular blocks and anything
+that looks laid by hand, and asks for rounded weathered boulders with soil in the gaps and grass in
+the cracks.
+
+> **Prompt — a rim sheet.** Swap the material; everything else stays.
+>
+> A **sprite sheet for a top-down 2D game**, drawn on a **solid pure magenta background, hex
+> #FF00FF**, edge to edge, with **no transparency anywhere in the file** — the magenta is a
+> chroma-key backdrop that will be removed later, so every pixel that is not artwork must be exactly
+> that magenta.
+>
+> Layout: a **4 × 4 grid of 16 square frames**. Each frame shows **[the broken rocky edge of a low
+> natural ledge]** entering the frame from **one side only**; the rest of that frame is plain
+> magenta.
+>
+> - **Row 1 — TOP edge.** Material enters from the top and comes down about **one eighth** of the
+>   frame's height: a thin crumbling lip seen from directly above.
+> - **Row 2 — RIGHT edge.** A **narrow vertical strip about one eighth of the frame's width**. The
+>   left seven eighths is plain magenta. **This row must NOT be a full tile.**
+> - **Row 3 — BOTTOM edge.** Rises about **two fifths** of the frame's height. **This is the only
+>   row showing a face rather than a lip** — a soft dark shadow pools at its base.
+> - **Row 4 — LEFT edge.** A mirror of row 2.
+>
+> Four interchangeable variations across each row — different placement and outline, same depth.
+>
+> **Style:** muted desaturated watercolour, a naturalist's field-notebook painting, warm paper
+> undertone, fine dark ink outlines. **Individually visible forms, each modelled with its own light
+> top and shaded underside. Do not fill the area with a single flat colour.** **Nothing in this
+> image is man-made** — no walls, ruins, masonry, fences or structures of any kind.
+>
+> The silhouette against the magenta must be **irregular and lumpy**, never a straight line. **Flat
+> even lighting from directly above** apart from the one shadow under the bottom row. No grid lines
+> between frames, no text, no watermark, no border.
+
+Two artefacts the intake absorbs, so they are not worth re-prompting for: Gemini draws thin magenta
+gridlines between frames (they key out with the background) and a small white sparkle in the last
+frame (cropped).
+
+**Check what comes back by building it**, not by looking:
+
+```bash
+node tools/build-rims.js --apply
+npx vitest run test/frames.test.ts
+```
+
+The tests assert the sheet is one row of `EDGE_ORDER × EDGE_VARIANTS`, carries no trace of the key,
+puts each frame's art against the edge it is named for, and keeps the south face deeper than the
+north lip.
 
 ## Asset 3 — landmarks
 

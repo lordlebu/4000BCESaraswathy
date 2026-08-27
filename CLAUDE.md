@@ -89,6 +89,19 @@ Linux dependencies live in a named Docker volume rather than the checkout, becau
 `esbuild` ship per-platform binaries and this machine's `node_modules` cannot be used inside Linux.
 First run installs them; later runs start immediately.
 
+### The ground is finished; the maps are what is left
+
+All nine ground biomes tile — `test/frames.test.ts` asserts every ordered variant pairing. `hills`
+is olive rather than ochre (ochre sat 19 from `desert` in RGB, and under ~25 two grounds stop being
+tellable apart). Cliffs and treelines are **rim** layers drawn on boundary tiles only; see
+`docs/rendering.md` for why a ground texture cannot carry a slope, and `docs/art-brief.md` Asset 2d
+for the sheet format and the prompt.
+
+**The remaining complaints are terrain generation, not art**, and they are recorded in
+`docs/world-generator.md`: Lothal's hills and rivers tangle at a scale neither reads at, two of
+Narmada's hill clusters never cross `MOUNTAINS` so they get no cliff rim, and Dwarka is too easy to
+cross. None needs new art.
+
 ### Sprite art is generated too
 
 `assets/varuna-walk.png` is **built, not hand-made** — run `npm run build:sprite` rather than

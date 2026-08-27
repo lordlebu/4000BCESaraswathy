@@ -189,6 +189,97 @@ two specs compare rendered frames, so an art change there can genuinely fail a t
 Workflow files are deliberately absent from the safe list: a change to how CI runs should be
 checked by CI. So is an empty diff.
 
+## Reproduce CI before diagnosing CI
+
+**Four failures in a row were diagnosed by reading a log**, because the suite passed locally every
+time. Three commits went out against a failure nobody could reproduce and one of them broke `main`.
+An attempt to stand in for CI with 4× CPU throttling *disproved itself*: the version that had just
+failed CI passed under the throttle in 84 seconds, faster than the fix did at 99. Throttling a CPU
+does not emulate a software renderer.
+
+```bash
+npm run test:ci                            # the whole suite, the way CI runs it
+npm run test:ci e2e/playthrough.spec.ts    # one spec
+CI_CPUS=2 CI_MEMORY=7g npm run test:ci     # a private repo's smaller runner
+```
+
+`tools/ci-local.sh` runs the browser suite in `mcr.microsoft.com/playwright` at the version the
+repo pins, constrained to **4 CPUs and 16 GB**. Two things make it work, and the second is the one
+that gets skipped:
+
+**The image**, because a developer machine draws through a real GPU and the runner falls back to
+SwiftShader. **The size**, because the first run of this handed the container sixteen cores and
+everything passed comfortably — which proves only that a sixteen-core Linux box is not a GitHub
+runner.
+
+**Getting the size right cuts both ways.** Two CPUs was tried first and fails three of the four
+tests in `hours.spec.ts` — tests CI passes every time. A reproduction harsher than the thing it
+reproduces invents failures nobody has. Calibrate by running a spec CI passes and tightening until
+it stops: four is where local behaviour matches CI's.
+
+The number that came out of it settled a fortnight of guessing: **at a correctly sized runner the
+map crossing takes 4.3 minutes, and its budget was four.** Not a flake, not the renderer, not new
+sprites — a test that needed more time than it had.
+
+Two things to know before reading a duration off it. Linux dependencies live in a named Docker
+volume rather than the checkout, because `rolldown` and `esbuild` ship per-platform binaries and a
+Windows `node_modules` dies on the first import inside Linux; the first run installs, later ones
+start immediately. And Docker Desktop on Windows adds real filesystem overhead — a full suite that
+CI does in 17 minutes has taken 31 here. **It reproduces behaviour, not timings.**
+
+## The long walk runs on `main`, not on every push
+
+`playthrough.spec.ts` is tagged **`@slow`**. A pull request runs the other 49 tests; `main` and a
+nightly schedule run all 50.
+
+```bash
+npm run test:e2e:fast   # what a pull request runs
+npm run test:e2e:slow   # only the map crossing
+```
+
+Not a judgement on the test — it is the only one that walks a whole map and proves a real
+playthrough finishes, and it has caught three separate bugs. It is also 4.5 minutes at a runner's
+size, because `STEP_MS` is 425 ms a tile and no test cleverness makes a tween finish sooner.
+
+That is fine once and wrong on every push. It was most of a seventeen-minute job and it failed four
+times running on causes unrelated to the change under review. **A check that is usually red for
+reasons you did not cause is a check people learn to ignore**, which is worse than not having one.
+
+Nothing is skipped, only moved. The walk still guards every merge to `main`, and the nightly catches
+what neither push nor pull request can: two changes that are green alone and break something once
+they are both in.
+
+## The signal has to be the one the thing actually gives
+
+Three of the four CI failures above came from waiting on the wrong thing, and each wrong thing
+looked obviously right.
+
+**A fixed wait is a guess about someone else's machine.** The walk spent 1,900 ms after every tap
+and 780 ms after every step — 209 seconds of deliberate waiting inside a 240-second budget, with
+about thirty seconds left for everything else. Nothing had to break for that to run out.
+
+**"Changed" is not "finished".** Replacing those waits with "wait until the journal heading
+changes" was worse. A tap is not one move: it hands the pathfinder a whole route, so returning on
+the first change cuts the route off after its *first* tile and taps again. Measured with the loop
+cap lifted, the walk went from needing 110 legs to **214** — and still passed locally, because
+fifteen seconds of grace after the loop let one last uninterrupted path reach the landmark. The
+signal had to be *stillness*: differ from where the turn started, then hold the same value for
+300 ms. Back to 38 legs.
+
+**A cap tuned to your own machine is a fixed wait wearing a disguise.** The replacement capped a
+tap at five seconds, picked from what a path costs locally. A tile is 425 ms, so a twelve-tile route
+is already 5.1 seconds and gets guillotined — putting the walk straight back to one tile a leg on
+any machine slower than the one that chose the number. Size caps from the *map*, not the clock.
+
+**And `locator.click` waits for the element to hold still.** Part of actionability is stability: the
+same bounding box for two consecutive animation frames. The canvas is in a RESIZE-mode scale manager
+beside a journal panel that reflows as the day turns, so there are moments when its box is never
+still for two frames together, and the click then runs to the test timeout — reported as *"element
+was visible and stable but the operation never completed"*. `walk.ts` already documented this for
+`keyboard.press`, ending "every other spec in this suite already presses through `page.keyboard`;
+this helper was the one place that did not." The tap in the walk was the other place. Both go
+through `page.mouse` at a computed point now. The full suite went 8.9 minutes to 4.8.
+
 ## When the budget really is too small
 
 The exception to "never widen the timeouts", and the way to tell it from the rule.
