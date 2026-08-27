@@ -27,6 +27,7 @@
 
 import type { Clade, GrowthForm } from '../world/types';
 import type { SpeciesMark } from '../content/journal';
+import { plateFor } from './plates';
 
 /**
  * A clade as a mark.
@@ -129,6 +130,22 @@ export interface SpeciesIconProps {
  * announcing the name alone.
  */
 export function SpeciesIcon({ species }: SpeciesIconProps) {
+  // A painted plate beats a glyph wherever one exists.
+  //
+  // Twenty animals have watercolour plates and the collection was showing every one of them as
+  // 🐾, because this component only ever knew about marks -- the plate lookup lived in
+  // `JournalPanel` alone. So the plates appeared once, in the field notes, at the moment of
+  // meeting, and never again in the place built for looking back over what you have met. That is
+  // exactly backwards for the screen whose whole job is the collection.
+  //
+  // `JournalPanel` guards its own call with `!plate`, so it does not draw one twice.
+  const plate = plateFor(species.id);
+  if (plate) {
+    // Decorative: the name sits immediately beside it, and a screen reader announcing the species
+    // twice is worse than announcing it once.
+    return <img className="species-plate" src={plate} alt="" aria-hidden="true" />;
+  }
+
   const mark = 'clade' in species ? CLADE_MARK[species.clade] : plantMark(species);
 
   return (

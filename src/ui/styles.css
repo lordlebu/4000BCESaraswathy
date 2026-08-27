@@ -455,6 +455,18 @@ button.ghost:hover:not(:disabled) {
  * The only nudges are optical. Emoji glyphs are drawn a little large for their em, so 0.95 brings
  * one back to the weight of the words beside it, and they sit slightly high, so the baseline shift
  * puts it back on the line. */
+/* A plate stands in for the mark at the same size, so a row with one does not jump.
+   `object-fit: cover` because the plates are square and any future one might not be. */
+.species-plate {
+  width: 2.4em;
+  height: 2.4em;
+  object-fit: cover;
+  border-radius: 3px;
+  margin-right: 0.3em;
+  align-self: center;
+  flex: 0 0 auto;
+}
+
 .species-emoji {
   font-size: 0.95em;
   line-height: 1;

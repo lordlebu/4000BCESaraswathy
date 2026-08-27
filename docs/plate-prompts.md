@@ -257,8 +257,18 @@ node tools/build-plates.js --force  # redo them all
 That is the whole procedure. The build works out the species id from the file name — `ChatGPTplate-caravan-dromedary.png`
 and `Gemini_plate-caravan-dromedary.png` both mean `caravan-dromedary` — squares the image, takes the
 bottom edge off a portrait, resizes to 384px, and writes `src/ui/plates/<id>.png`. Nothing else needs
-touching: `src/ui/plates.ts` finds the file by name and the panel starts drawing it. There is no list
-to update.
+touching: `src/ui/plates.ts` finds the file by name and both panels start drawing it. There is no
+list to update.
+
+**Both** is load-bearing and was not always true. `plateFor` was called only in `JournalPanel` for a
+long time, so a plate appeared once at the moment of meeting and never again — the collection, whose
+whole job is looking back over what you have met, showed all twenty painted animals as an emoji.
+`SpeciesIcon` prefers a plate now and falls back to the mark, so every caller gets it.
+
+The join is the fragile part, and it is what `test/speciesMark.test.ts` guards: plates are keyed by
+**engine id** (`desert-fox`) and canon's ids are `fauna_desert_fox`. A change to `engineId` that
+stopped matching would not throw — every plate would quietly stop resolving and every animal would
+go back to being an emoji.
 
 Three things it will tell you rather than guess at:
 
