@@ -4,6 +4,11 @@ on:
   push:
     branches: ['**']
   pull_request:
+  # Catches what neither of the above can: two pull requests that are each green alone and break
+  # something once they are both on `main`. Also the safety net for the full map crossing, which a
+  # pull request no longer runs -- see the browser job.
+  schedule:
+    - cron: '0 3 * * *'
 
 jobs:
   check:
@@ -195,8 +200,27 @@ jobs:
           echo "::error::Chromium would not install after three attempts"
           exit 1
 
-      - run: npm run test:e2e
+      # The full map crossing runs on `main` and on the nightly schedule; a pull request gets
+      # everything else.
+      #
+      # `main` is what gets deployed and is worth the whole suite. A pull request is worth a fast
+      # answer, and the walk is four and a half minutes of a job that was seventeen -- for a test
+      # that failed four times running on causes unrelated to the change under review. A check that
+      # is usually red for reasons you did not cause is a check people learn to ignore, which is
+      # worse than not having it.
+      #
+      # Nothing is skipped, only moved: the walk still guards every merge, and a nightly run catches
+      # the case where two green pull requests break it only once they are together.
+      - name: Browser suite
         if: steps.scope.outputs.code == 'true'
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ] || [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "on ${{ github.ref_name }} -- running the whole suite, walk included"
+            npm run test:e2e
+          else
+            echo "pull request -- running everything but the full map crossing (@slow)"
+            npm run test:e2e:fast
+          fi
       - uses: actions/upload-artifact@v7
         if: failure() && steps.scope.outputs.code == 'true'
         with:
