@@ -13,6 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:fast": "playwright test --grep-invert @slow",
+    "test:e2e:slow": "playwright test --grep @slow",
     "test:ci": "bash tools/ci-local.sh",
     "check:data": "node tools/check-canon-lock.js",
     "perf": "node tools/perf.js",

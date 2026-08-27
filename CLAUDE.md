@@ -27,6 +27,8 @@ npm install
 npm run dev        # serve at http://localhost:4173 and open a browser
 npm test           # vitest — rules and content under Node, panels under jsdom
 npm run test:e2e   # playwright — does the game actually boot and draw?
+npm run test:e2e:fast # the same, minus the @slow map crossing — what a PR runs
+npm run test:e2e:slow # only the map crossing — what main and the nightly add
 npm run test:ci    # the same suite in CI's container, at CI's size — see below
 npm run test:watch # vitest in watch mode
 npm run typecheck  # tsc --noEmit
@@ -35,6 +37,23 @@ npm run check:data # verify data/canon/ matches the canon release it came from
 npm run perf       # frame cost on the renderer CI has -- see docs/rendering.md
 npm run build:sprite # rebuild assets/varuna-walk.png from assets/source/
 ```
+
+### The browser suite is split, and the split is deliberate
+
+The full map crossing in `playthrough.spec.ts` is tagged **`@slow`**. A pull request runs
+everything else; `main` and a nightly schedule run the lot.
+
+It is not a judgement on the test — it is the only one that walks a whole map and proves a real
+playthrough finishes, and it has caught three separate bugs. It is also **four and a half minutes**
+at a runner's size, because `STEP_MS` is 425 ms a tile and no test cleverness makes a tween finish
+sooner. That is fine once and wrong on every push: it was most of a seventeen-minute job, and it
+failed four times running for reasons unrelated to the change under review. **A check that is
+usually red for reasons you did not cause is a check people learn to ignore**, which is worse than
+not having it.
+
+Nothing is skipped, only moved. The walk still guards every merge to `main`, and the nightly run
+catches the case neither can — two pull requests that are green alone and break something once
+they are both in.
 
 ### When CI fails and the suite passes here, run `npm run test:ci`
 

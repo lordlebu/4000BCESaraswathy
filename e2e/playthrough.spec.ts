@@ -136,7 +136,18 @@ async function settle(page: Page, before: string, cap: number): Promise<void> {
     .catch(() => undefined);
 }
 
-test('walk from the settlement to the landmark and get a page for it', async ({ page }) => {
+// `@slow` is what keeps this off the pull-request path -- see `npm run test:e2e:fast` and the
+// browser job in `.github/workflows/ci.yml`.
+//
+// **Not a judgement on the test, which is the most valuable one here.** It is the only thing that
+// crosses a whole map on foot and proves a real playthrough finishes, and it is the reason three
+// separate bugs were caught. It is also, unavoidably, four and a half minutes: `STEP_MS` is 425 ms
+// a tile and no amount of test cleverness makes a tween finish sooner.
+//
+// That cost is fine once. It is not fine on every push, where it was most of a seventeen-minute
+// job and where it failed four times running for reasons that had nothing to do with the change
+// under review -- which is how a suite teaches people to ignore it.
+test('walk from the settlement to the landmark and get a page for it', { tag: '@slow' }, async ({ page }) => {
   // Crossing a 36x24 map on foot takes a while: steps are tweened, and wetland and hills are
   // deliberately slower than plains. This is a real playthrough, so it gets a real budget.
   //
