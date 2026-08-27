@@ -13,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 import speciesBundle from '../data/canon/species.json';
 import { creatures, flora } from '../src/content/species';
 import { CLADE_MARK, FORM_MARK } from '../src/ui/SpeciesIcon';
+import { plateFor } from '../src/ui/plates';
 
 const bundle = speciesBundle as {
   fauna: { name: string; clade?: string }[];
@@ -81,6 +82,28 @@ describe('canon says what a species is, and the game only chooses a glyph', () =
       const c = byName.get(name);
       expect(c, `${name} is not in the bundle`).toBeTruthy();
       expect(c!.clade, name).toBe(clade);
+    }
+  });
+});
+
+describe('a painted plate beats a glyph', () => {
+  // The bug: twenty animals have watercolour plates and the collection showed every one of them
+  // as a paw print, because the plate lookup lived only in `JournalPanel`. The plates appeared
+  // once, at the moment of meeting, and never again on the screen built for looking back.
+
+  it('has a plate file for a species the game actually carries', () => {
+    // Guards the join, which is where this would fail silently: plates are keyed by *engine* id
+    // (`desert-fox`), and canon's ids are `fauna_desert_fox`. A change to `engineId` that stopped
+    // matching would not throw -- every plate would simply stop resolving and every animal would
+    // quietly go back to being an emoji.
+    const withPlates = creatures.filter((c) => plateFor(c.id) !== null);
+    expect(withPlates.length, 'no runtime species resolves a plate — the ids have drifted').toBeGreaterThan(10);
+  });
+
+  it('never leaves a species with neither plate nor mark', () => {
+    for (const c of creatures) {
+      const has = plateFor(c.id) !== null || Boolean(CLADE_MARK[c.clade]);
+      expect(has, `${c.name} would render as nothing`).toBe(true);
     }
   });
 });
