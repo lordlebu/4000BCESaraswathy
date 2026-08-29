@@ -64,7 +64,12 @@ const COVERAGE: Record<string, Coverage> = {
   'places.field_maps': {
     adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'points_of_interest',
       'neighbours', 'arrival', 'climate', 'coordinates', 'relief'],
-    skipped: [...EDITORIAL]
+    skipped: [...EDITORIAL,
+      // The name canon used before. There are around four Dwarkas in Jambhudweepa, so the one
+      // this game walks became North Dwarka and the bare name was kept as an alias so canon's
+      // own older references still resolve. The game shows the current `name` and reaches maps
+      // by id, so the previous one has nothing to do here.
+      'aliases']
   },
   'places.points_of_interest': {
     adapted: ['id', 'name', 'field_map', 'kind', 'terrain', 'description', 'arrival',
@@ -84,7 +89,12 @@ const COVERAGE: Record<string, Coverage> = {
     // Only `bestiary_region` is read, to recover a species' region from its habitats.
     adapted: ['id', 'bestiary_region'],
     skipped: [...EDITORIAL, 'name', 'biomes', 'biomes_note', 'continent', 'habitats',
-      'landmarks', 'settlements']
+      'landmarks', 'settlements',
+      // The region's outline on canon's abstract 0-100 world grid, traced for the atlas it
+      // draws per era. That grid describes where things sit relative to each other across the
+      // whole world; this game generates its ground from a field map's own seed and never
+      // places anything on a world grid.
+      'extent']
   },
   'places.biomes': {
     adapted: ['id', 'name', 'renderable'],
