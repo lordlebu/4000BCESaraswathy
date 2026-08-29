@@ -1,5 +1,5 @@
 {
-  "canon_version": "1.11.0",
+  "canon_version": "1.24.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -11,6 +11,36 @@
       "sources": [
         "AI_CONTEXT.md",
         "map"
+      ],
+      "extent": [
+        [
+          33,
+          34
+        ],
+        [
+          38,
+          29
+        ],
+        [
+          46,
+          27
+        ],
+        [
+          53,
+          30
+        ],
+        [
+          51,
+          37
+        ],
+        [
+          44,
+          39
+        ],
+        [
+          37,
+          39
+        ]
       ]
     },
     {
@@ -22,6 +52,36 @@
       "biomes": [
         "lava_field",
         "mountains"
+      ],
+      "extent": [
+        [
+          77,
+          12
+        ],
+        [
+          90,
+          9
+        ],
+        [
+          100,
+          11
+        ],
+        [
+          100,
+          24
+        ],
+        [
+          90,
+          27
+        ],
+        [
+          80,
+          22
+        ],
+        [
+          76,
+          17
+        ]
       ],
       "habitats": [
         "magmatic",
@@ -49,6 +109,32 @@
         "plains",
         "hills"
       ],
+      "extent": [
+        [
+          0,
+          13
+        ],
+        [
+          11,
+          14
+        ],
+        [
+          13,
+          19
+        ],
+        [
+          10,
+          23
+        ],
+        [
+          2,
+          22
+        ],
+        [
+          0,
+          19
+        ]
+      ],
       "notes": "Arid interior, and young: the harbour, the fossil channel and the caravan road all date the water's departure to within cultural memory rather than to geological time. Forty authored species, all desert-placeable.",
       "canon": "primary",
       "sources": [
@@ -64,6 +150,36 @@
       "biomes": [
         "hills",
         "mountains"
+      ],
+      "extent": [
+        [
+          44,
+          39
+        ],
+        [
+          53,
+          36
+        ],
+        [
+          62,
+          38
+        ],
+        [
+          64,
+          45
+        ],
+        [
+          58,
+          49
+        ],
+        [
+          49,
+          49
+        ],
+        [
+          45,
+          45
+        ]
       ],
       "landmarks": [
         "Narmada University"
@@ -84,6 +200,36 @@
       "biomes": [
         "wetland",
         "river"
+      ],
+      "extent": [
+        [
+          16,
+          41
+        ],
+        [
+          22,
+          38
+        ],
+        [
+          30,
+          42
+        ],
+        [
+          32,
+          48
+        ],
+        [
+          30,
+          52
+        ],
+        [
+          24,
+          51
+        ],
+        [
+          18,
+          46
+        ]
       ],
       "settlements": [
         "settlement_lothal",
@@ -110,6 +256,36 @@
       "biomes": [
         "sea",
         "forest"
+      ],
+      "extent": [
+        [
+          15,
+          78
+        ],
+        [
+          40,
+          74
+        ],
+        [
+          60,
+          76
+        ],
+        [
+          85,
+          74
+        ],
+        [
+          100,
+          78
+        ],
+        [
+          100,
+          100
+        ],
+        [
+          15,
+          100
+        ]
       ],
       "habitats": [
         "reefs",
@@ -157,7 +333,10 @@
     {
       "id": "field_map_dwarka",
       "type": "field_map",
-      "name": "Dwarka",
+      "name": "North Dwarka",
+      "aliases": [
+        "Dwarka"
+      ],
       "region": "region_saraswati_delta",
       "seed_biomes": [
         "desert",
@@ -188,7 +367,7 @@
         "storm": 4
       },
       "arrival": "Half of Dwarka is under the dust and the half that is not has been rebuilt twice on top of itself. The sea left inside living memory and nobody here treats that as a disaster or the gate as a wonder. Both are simply conditions, like weather, and the whole city is still arranged around a shoreline that stopped arriving.",
-      "notes": "Third field map, and the one where the method is tested: local knowledge is not merely useful here, it is right, and the academy's three tidy explanations are all wrong. Gives `crosses_at` a consumer without making the crossing species placeable -- you find what they left, never the animal.\n\n**Dried out deliberately.** Dwarka was an island city; the Shattering took the sea away rather than the land, so it is now a cold high desert built around a dead harbour. Almost nothing authored here had to change, because every discovery on this map is about reading what water *did* -- three seawalls each founded higher than the last read better standing in dust than standing in surf, and a salt orchard with no sea to explain the salt is a better question than one with an obvious answer.\n\nThe terrain reason is as real as the lore one: a wetland-dominant palette cannot produce cheap ground, because wetland, forest and hills are all travel cost 2 and the classifier's only cheap non-coastal window is dry. The map read as uniformly slow whatever shaping was applied to it. `coast` and `river` stay in the palette for the old waterline and the one channel that still runs; `sea` is gone, which is the whole point.\n\nGained the Glass Scar and the Caravan Ground when the Dry Harbour was retired. Both are desert-native and this is now the only desert map, so they had nowhere else to go -- and both read better here. Eight points of interest rather than six, which is the first map to exceed the six every field map has carried since the beginning.",
+      "notes": "Third field map, and the one where the method is tested: local knowledge is not merely useful here, it is right, and the academy's three tidy explanations are all wrong. Gives `crosses_at` a consumer without making the crossing species placeable -- you find what they left, never the animal.\n\n**Dried out deliberately.** Dwarka was an island city; the Shattering took the sea away rather than the land, so it is now a cold high desert built around a dead harbour. Almost nothing authored here had to change, because every discovery on this map is about reading what water *did* -- three seawalls each founded higher than the last read better standing in dust than standing in surf, and a salt orchard with no sea to explain the salt is a better question than one with an obvious answer.\n\nThe terrain reason is as real as the lore one: a wetland-dominant palette cannot produce cheap ground, because wetland, forest and hills are all travel cost 2 and the classifier's only cheap non-coastal window is dry. The map read as uniformly slow whatever shaping was applied to it. `coast` and `river` stay in the palette for the old waterline and the one channel that still runs; `sea` is gone, which is the whole point.\n\nGained the Glass Scar and the Caravan Ground when the Dry Harbour was retired. Both are desert-native and this is now the only desert map, so they had nowhere else to go -- and both read better here. Eight points of interest rather than six, which is the first map to exceed the six every field map has carried since the beginning.\n\nOne of several Dwarkas on Jambhudweep. This is the northern one -- the harbour with the Gate, and the one the game walks. The name was bare `Dwarka` while canon held only one, which stopped being true; `Dwarka` is kept as an alias so older references still read.",
       "epochs": [
         "epoch_post_cataclysm"
       ],

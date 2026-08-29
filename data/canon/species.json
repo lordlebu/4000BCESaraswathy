@@ -1,5 +1,5 @@
 {
-  "canon_version": "1.11.0",
+  "canon_version": "1.24.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -4630,7 +4630,9 @@
         "docs/bestiary.md"
       ],
       "mood": "uncanny",
-      "source_index": 210
+      "source_index": 210,
+      "sentient": true,
+      "subclade": "clay_born"
     },
     {
       "id": "fauna_feral_harappan_night_stalker",
@@ -4650,7 +4652,9 @@
         "docs/bestiary.md"
       ],
       "mood": "uncanny",
-      "source_index": 211
+      "source_index": 211,
+      "sentient": true,
+      "subclade": "clay_born"
     },
     {
       "id": "fauna_lunar_reflection_wraith",
@@ -4671,7 +4675,8 @@
         "docs/bestiary.md"
       ],
       "mood": "uncanny",
-      "source_index": 212
+      "source_index": 212,
+      "sentient": true
     },
     {
       "id": "fauna_stepwell_shadow",
@@ -4691,7 +4696,8 @@
         "docs/bestiary.md"
       ],
       "mood": "uncanny",
-      "source_index": 213
+      "source_index": 213,
+      "sentient": true
     },
     {
       "id": "fauna_white_ash_bride",
@@ -4711,7 +4717,9 @@
         "docs/bestiary.md"
       ],
       "mood": "watchful",
-      "source_index": 214
+      "source_index": 214,
+      "sentient": true,
+      "subclade": "ember_born"
     },
     {
       "id": "fauna_ember_born_dancer",
@@ -4731,7 +4739,9 @@
         "docs/bestiary.md"
       ],
       "mood": "graceful",
-      "source_index": 215
+      "source_index": 215,
+      "sentient": true,
+      "subclade": "ember_born"
     },
     {
       "id": "fauna_asura_tainted_gargoyle",
@@ -4757,7 +4767,8 @@
       "taxonomy": {
         "notes": "Māyā-born, in the shape of a Tuli. The old binomial `Tuli calcified` carried the right subject and the wrong grammar -- Tuli is a people, not a genus, and `calcified` is an English epithet of the kind canon has already replaced twice. Filed as a construct because it is made rather than born, which also settles what had been read as a devolved hominid."
       },
-      "notes": "Māyā-born construct in Tuli shape, hide calcified to stone. Nocturnal."
+      "notes": "Māyā-born construct in Tuli shape, hide calcified to stone. Nocturnal.",
+      "sentient": true
     },
     {
       "id": "fauna_lethal_cave_spectre",
@@ -5019,7 +5030,9 @@
         "docs/bestiary.md"
       ],
       "mood": "uncanny",
-      "source_index": 228
+      "source_index": 228,
+      "sentient": true,
+      "subclade": "clay_born"
     },
     {
       "id": "fauna_ember_scattering_sprite",
@@ -5039,7 +5052,9 @@
         "docs/bestiary.md"
       ],
       "mood": "graceful",
-      "source_index": 229
+      "source_index": 229,
+      "sentient": true,
+      "subclade": "ember_born"
     },
     {
       "id": "fauna_naga_kin_sentry",
@@ -5477,6 +5492,30 @@
       "journal_prompt": "It does not move aside. The frill turns first, edge-on and then full, thin enough that the low sun comes through it in red, and the horns beneath it are the same shape as the smaller kind's and twice the size.",
       "mood": "fearsome",
       "region": "narmada-vindhya"
+    },
+    {
+      "id": "fauna_heartwood_warden",
+      "type": "fauna",
+      "name": "Heartwood Warden",
+      "scientific": "Homunculus silvaticus",
+      "clade": "construct",
+      "subclade": "forest_born",
+      "sentient": true,
+      "region": "asura-conjurations",
+      "biomes": [
+        "forest",
+        "wetland"
+      ],
+      "placement": "lore",
+      "rarity": "rare",
+      "mood": "patient",
+      "journal_prompt": "It has not moved since you sat down. You are no longer certain it is a tree.",
+      "notes": "A maya-born shaped from heartwood, leaf-mould, spore and sap rather than from mud or fire. Slower than either, and the only one of the three that keeps growing after it is made -- an old warden is indistinguishable from the wood it stands in until it turns its head. Sentient, like the rest of the maya-born: a person made of forest, not an animal shaped like one.",
+      "canon": "primary",
+      "sources": [
+        "Asura and maya-born rulings, 2026-08-27"
+      ],
+      "placement_note": "Exists in canon and does not spawn. Making it an encounter would add it to the forest and wetland pools, which changes what a player meets on tiles they have already walked -- a game decision rather than a lore one. The Asura-Tainted Gargoyle is filed the same way. Promote it deliberately when the spawn change is wanted."
     },
     {
       "id": "fauna_honey_guide_bird",
