@@ -33,6 +33,14 @@ export interface Interrupts {
   overworld: boolean;
   /** The field kit, opened from within progress. */
   kit: boolean;
+  /**
+   * The satchel: what is carried and what could be made of it.
+   *
+   * An interrupt rather than a surface, on the same reasoning as the kit. A player opens it
+   * deliberately, does a thing, and closes it — it must not silently discard the field notes
+   * they were reading, which is exactly what putting it in `Surface` would do.
+   */
+  satchel: boolean;
 }
 
 export interface SurfaceState {
@@ -79,7 +87,7 @@ export type SurfaceAction =
  */
 export const initialSurface: SurfaceState = {
   surface: 'here',
-  interrupts: { ending: false, overworld: false, kit: false },
+  interrupts: { ending: false, overworld: false, kit: false, satchel: false },
   standingOn: null,
   placeOpen: false
 };

@@ -19,6 +19,11 @@ export interface ControlsProps {
   /** How many discoveries are under way, so the button can say the diary has something in it. */
   diaryCount: number;
   onOpenDiary: () => void;
+  /** How many kinds of thing are carried. Zero is a real state and the button still shows. */
+  carryCount: number;
+  /** True when the tile under foot has something on it, so the button can lead the player to it. */
+  somethingUnderfoot: boolean;
+  onOpenSatchel: () => void;
   onOpenOverworld: () => void;
   /** The field notes along the bottom. Closable like everything else now. */
   notesOpen: boolean;
@@ -36,6 +41,9 @@ export function Controls({
   onOpenCollection,
   diaryCount,
   onOpenDiary,
+  carryCount,
+  somethingUnderfoot,
+  onOpenSatchel,
   onOpenOverworld,
   notesOpen,
   onToggleNotes,
@@ -88,6 +96,25 @@ export function Controls({
           <span aria-hidden="true">✎</span>
           <span className="control-label">
             Diary{diaryCount > 0 && <i className="control-count">{diaryCount}</i>}
+          </span>
+        </button>
+
+        {/* Always present, unlike the collection button. An empty satchel is not an empty room:
+            the panel's first section is what is under foot, so it has something to say from the
+            first step — which is also how a player finds out that gathering exists at all. */}
+        <button
+          type="button"
+          className={somethingUnderfoot ? 'control control-on' : 'control'}
+          aria-label={
+            somethingUnderfoot
+              ? `Satchel, ${carryCount} carried, something under foot`
+              : `Satchel, ${carryCount} carried`
+          }
+          onClick={onOpenSatchel}
+        >
+          <span aria-hidden="true">◑</span>
+          <span className="control-label">
+            Satchel{carryCount > 0 && <i className="control-count">{carryCount}</i>}
           </span>
         </button>
 

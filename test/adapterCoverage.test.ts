@@ -17,6 +17,7 @@ import { readFileSync } from 'node:fs';
 import speciesBundle from '../data/canon/species.json';
 import placesBundle from '../data/canon/places.json';
 import knowledgeBundle from '../data/canon/knowledge.json';
+import craftingBundle from '../data/canon/crafting.json';
 import lock from '../data/canon/canon.lock.json';
 import { LANDMARK_ORDER, PLACE_ORDER, TERRAIN_ORDER, placeFrame } from '../src/game/frames';
 import biomesData from '../data/biomes.json';
@@ -116,6 +117,44 @@ const COVERAGE: Record<string, Coverage> = {
   'knowledge.vocabulary': {
     adapted: ['id', 'word', 'language', 'gloss', 'literal', 'learned_from'],
     skipped: [...EDITORIAL]
+  },
+  // The making layer. Canon withholds `canon` and `sources` from this bundle alone — they are
+  // provenance for the canon book and the retrieval service, both of which read `database/`
+  // directly, and dropping them paid for 18 KB of the export budget. So EDITORIAL is not
+  // spread here: two of its five keys are not in this bundle at all, and a `skipped` entry for
+  // a key that cannot appear is a claim that rots quietly.
+  'crafting.materials': {
+    // `notes` is adapted here rather than skipped, unlike everywhere else. A species carries
+    // `journal_prompt` written for the player and `notes` written for whoever edits canon
+    // next; a material has only the one field, and it is the prose the player reads.
+    adapted: ['id', 'name', 'classes', 'found_in', 'rarity', 'won_from', 'notes'],
+    skipped: ['type', 'epochs', 'source_index',
+      // Which processes can transform this. Canon calls it a convenience for the atlas and
+      // says the recipe is the source of truth, so the game reads the recipes.
+      'worked_by']
+  },
+  'crafting.items': {
+    adapted: ['id', 'name', 'kind', 'affords', 'base_item', 'materials', 'notes'],
+    skipped: ['type', 'epochs', 'source_index',
+      // Canon cross-references: who made one, who carried one. Book material.
+      'made_by', 'wielded_by']
+  },
+  'crafting.processes': {
+    adapted: ['id', 'name', 'performed_at', 'needs', 'notes'],
+    skipped: ['type', 'source_index']
+  },
+  'crafting.recipes': {
+    adapted: ['id', 'name', 'process', 'ingredients', 'outputs', 'known_by', 'notes'],
+    skipped: ['type', 'epochs', 'source_index']
+  },
+  'crafting.vehicles': {
+    adapted: ['id', 'name', 'kind', 'crosses', 'capacity', 'materials', 'notes'],
+    skipped: ['type', 'epochs', 'source_index',
+      // The named vessels of this kind — the Kelpfang, the Ekranoplan. They are `place`
+      // entities canon does not export, so the ids would not resolve to anything here.
+      'exemplars',
+      // Which process builds one. The game has no boatyard yet.
+      'built_by']
   }
 };
 
@@ -142,7 +181,8 @@ const NESTED: Record<string, Coverage> = {
 const BUNDLES: Record<string, Record<string, unknown>> = {
   species: speciesBundle as Record<string, unknown>,
   places: placesBundle as Record<string, unknown>,
-  knowledge: knowledgeBundle as Record<string, unknown>
+  knowledge: knowledgeBundle as Record<string, unknown>,
+  crafting: craftingBundle as Record<string, unknown>
 };
 
 function keysOf(items: unknown[]): Set<string> {
@@ -216,11 +256,17 @@ describe('the declarations do not rot', () => {
     expect(stale, 'declared as adapted but no longer in the bundle').toEqual([]);
   });
 
-  it('ships exactly three bundles and no more', () => {
+  it('ships exactly four bundles and no more', () => {
     // world.json was 46 KB that nothing imported, and Vite inlines every byte into the page.
     // The lock is the list of what actually ships, so growing it back is a deliberate act.
+    //
+    // It grew once, deliberately: `crafting.json` carries the making layer — materials,
+    // items, processes, recipes and vehicles. Unlike world.json it is read, by
+    // `src/content/making.ts` and everything downstream of it. Canon withholds `canon` and
+    // `sources` from this one bundle to pay for the weight, and enforces a total budget of
+    // its own in `check_export_boundary.py`.
     const shipped = Object.keys((lock as { sha256: Record<string, string> }).sha256).sort();
-    expect(shipped).toEqual(['knowledge.json', 'places.json', 'species.json']);
+    expect(shipped).toEqual(['crafting.json', 'knowledge.json', 'places.json', 'species.json']);
   });
 });
 

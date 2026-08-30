@@ -1,0 +1,3958 @@
+{
+  "canon_version": "2.0.0",
+  "materials": [
+    {
+      "id": "material_reed_fibre",
+      "type": "material",
+      "name": "Reed fibre",
+      "classes": [
+        "fibre"
+      ],
+      "won_from": [
+        "flora_saraswati_reed",
+        "flora_saltreed"
+      ],
+      "found_in": [
+        "wetland",
+        "river",
+        "coast"
+      ],
+      "rarity": "common",
+      "notes": "Retted in standing water until the pith rots away, then combed out and dried. The whole delta runs on it -- matting, basketry, and every rope that does not need to hold a boat.",
+      "source_index": 0
+    },
+    {
+      "id": "material_palm_husk",
+      "type": "material",
+      "name": "Palm husk",
+      "classes": [
+        "fibre"
+      ],
+      "won_from": [
+        "flora_date_palm",
+        "flora_oasis_date_palm"
+      ],
+      "found_in": [
+        "desert",
+        "coast",
+        "settlement"
+      ],
+      "rarity": "common",
+      "notes": "The coarse mat of fibre at the base of a frond. Harsher than reed and far more patient of salt water, which is why the harbour rope is husk and the house rope is reed.",
+      "source_index": 1
+    },
+    {
+      "id": "material_goat_hair",
+      "type": "material",
+      "name": "Cliff-goat hair",
+      "classes": [
+        "fibre"
+      ],
+      "won_from": [
+        "fauna_vindhya_cliff_goat"
+      ],
+      "found_in": [
+        "hills",
+        "mountains"
+      ],
+      "rarity": "common",
+      "notes": "Combed from the winter coat rather than shorn. Spins into a yarn that stays warm wet, which matters more on the Vindhya than anything else about it.",
+      "source_index": 2
+    },
+    {
+      "id": "material_bark_bast",
+      "type": "material",
+      "name": "Bast",
+      "classes": [
+        "fibre"
+      ],
+      "won_from": [
+        "flora_neem",
+        "flora_tamarind"
+      ],
+      "found_in": [
+        "forest",
+        "plains"
+      ],
+      "rarity": "common",
+      "notes": "The inner bark, stripped in long ribbons and beaten soft. Taken from a tree the taker intends to keep, so it is cut in bands and never a ring.",
+      "source_index": 3
+    },
+    {
+      "id": "material_teak_timber",
+      "type": "material",
+      "name": "Iron-teak timber",
+      "classes": [
+        "timber"
+      ],
+      "won_from": [
+        "flora_iron_teak"
+      ],
+      "found_in": [
+        "forest",
+        "hills"
+      ],
+      "rarity": "rare",
+      "notes": "Canon already records this tree for ship timber and tower beams, which is a strong claim about a wood: it means the grain holds under a load that would split anything else growing near it.",
+      "source_index": 4
+    },
+    {
+      "id": "material_mangrove_pole",
+      "type": "material",
+      "name": "Mangrove pole",
+      "classes": [
+        "timber"
+      ],
+      "won_from": [
+        "flora_bonewood_mangrove",
+        "flora_iron_root_mangrove"
+      ],
+      "found_in": [
+        "wetland",
+        "coast"
+      ],
+      "rarity": "common",
+      "notes": "Cut from the stilt roots rather than the trunk. Already the right shape, already used to standing in salt water, and no use at all for anything that must be straight.",
+      "source_index": 5
+    },
+    {
+      "id": "material_bamboo_cane",
+      "type": "material",
+      "name": "Bamboo cane",
+      "classes": [
+        "timber",
+        "fibre"
+      ],
+      "won_from": [
+        "flora_bamboo_grove",
+        "flora_jungle_crested_bamboo"
+      ],
+      "found_in": [
+        "river",
+        "forest",
+        "wetland"
+      ],
+      "rarity": "common",
+      "notes": "Two classes, honestly. A whole cane is a scaffold pole; a split one is a strap. Canon records the grove for scaffolding, rafts and tools, which is all three uses of one plant.",
+      "source_index": 6
+    },
+    {
+      "id": "material_sandalwood_billet",
+      "type": "material",
+      "name": "Sandalwood billet",
+      "classes": [
+        "timber",
+        "physic"
+      ],
+      "won_from": [
+        "flora_sandalwood"
+      ],
+      "found_in": [
+        "forest",
+        "hills"
+      ],
+      "rarity": "rare",
+      "notes": "Heartwood only; the sapwood is scentless and worth nothing. Carved, burnt or ground, and canon has it doing all three.",
+      "source_index": 7
+    },
+    {
+      "id": "material_leviathan_bone",
+      "type": "material",
+      "name": "Leviathan bone",
+      "classes": [
+        "bone"
+      ],
+      "won_from": [
+        "fauna_abyssal_blue_leviathan",
+        "fauna_tethys_leviathan_calf"
+      ],
+      "found_in": [
+        "sea",
+        "coast"
+      ],
+      "rarity": "mythic",
+      "notes": "Canon states outright that the hide and bone plate of the Abyssal Blue are harvested for building maritime vessels. A single rib is a keel. Nobody takes one alone, and nobody takes one often.",
+      "source_index": 8
+    },
+    {
+      "id": "material_deer_antler",
+      "type": "material",
+      "name": "Antler",
+      "classes": [
+        "bone"
+      ],
+      "won_from": [
+        "fauna_painted_deer"
+      ],
+      "found_in": [
+        "forest",
+        "plains",
+        "hills"
+      ],
+      "rarity": "common",
+      "notes": "Shed each year and gathered off the ground, which makes it the one bone in this list that costs nothing but the walking.",
+      "source_index": 9
+    },
+    {
+      "id": "material_boar_tusk",
+      "type": "material",
+      "name": "Boar tusk",
+      "classes": [
+        "bone"
+      ],
+      "won_from": [
+        "fauna_mountain_forest_boar"
+      ],
+      "found_in": [
+        "forest",
+        "hills"
+      ],
+      "rarity": "rare",
+      "notes": "Curved, hollow at the root, and hard enough to take an edge. Worn as often as it is worked.",
+      "source_index": 10
+    },
+    {
+      "id": "material_fish_bone",
+      "type": "material",
+      "name": "Sawfish bone",
+      "classes": [
+        "bone"
+      ],
+      "won_from": [
+        "fauna_estuary_sawfish"
+      ],
+      "found_in": [
+        "river",
+        "coast"
+      ],
+      "rarity": "common",
+      "notes": "The rostral teeth of the sawfish come out of the estuary already barbed, and a harpoon made from one is a harpoon somebody did very little to.",
+      "source_index": 11
+    },
+    {
+      "id": "material_goat_hide",
+      "type": "material",
+      "name": "Goat hide",
+      "classes": [
+        "hide"
+      ],
+      "won_from": [
+        "fauna_vindhya_cliff_goat"
+      ],
+      "found_in": [
+        "hills",
+        "mountains"
+      ],
+      "rarity": "common",
+      "notes": "Tanned with bark liquor. Becomes a water-skin, a drum head, or the seat of a saddle, in roughly that order of frequency.",
+      "source_index": 12
+    },
+    {
+      "id": "material_croc_hide",
+      "type": "material",
+      "name": "Croc hide",
+      "classes": [
+        "hide"
+      ],
+      "won_from": [
+        "fauna_sleek_dromedary_croc",
+        "fauna_woolly_bactrian_croc"
+      ],
+      "found_in": [
+        "river",
+        "wetland",
+        "desert"
+      ],
+      "rarity": "rare",
+      "notes": "Scuted, awkward to cut and nearly impossible to wear out. The dromedary-croc's is the lighter of the two and the one the delta actually uses.",
+      "source_index": 13
+    },
+    {
+      "id": "material_sinew",
+      "type": "material",
+      "name": "Sinew",
+      "classes": [
+        "hide",
+        "fibre"
+      ],
+      "won_from": [
+        "fauna_painted_deer",
+        "fauna_mountain_forest_boar"
+      ],
+      "found_in": [
+        "forest",
+        "hills",
+        "plains"
+      ],
+      "rarity": "common",
+      "notes": "Filed under hide as well as fibre because of how it is got: skinning, not retting. Dries to a lashing that tightens as it goes, which no plant fibre does.",
+      "source_index": 14
+    },
+    {
+      "id": "material_oyster_shell",
+      "type": "material",
+      "name": "Oyster shell",
+      "classes": [
+        "shell"
+      ],
+      "won_from": [
+        "fauna_shattered_sea_oyster"
+      ],
+      "found_in": [
+        "coast",
+        "sea"
+      ],
+      "rarity": "common",
+      "notes": "Burnt for lime, ground for temper, or cut for inlay. The middens outside Dwarka are made of the ones nobody bothered with.",
+      "source_index": 15
+    },
+    {
+      "id": "material_ammonite_shell",
+      "type": "material",
+      "name": "Ammonite shell",
+      "classes": [
+        "shell"
+      ],
+      "won_from": [
+        "fauna_serene_brown_ammonite",
+        "fauna_asura_marked_black_ammonite"
+      ],
+      "found_in": [
+        "sea",
+        "coast"
+      ],
+      "rarity": "rare",
+      "notes": "Canon inlays the Board of the Chess of Fate with fossilised ammonites, so this is a material with a reputation before it is a material with a use. The black ones are not worked by anybody sensible.",
+      "source_index": 16
+    },
+    {
+      "id": "material_crayfish_carapace",
+      "type": "material",
+      "name": "Crayfish carapace",
+      "classes": [
+        "shell"
+      ],
+      "won_from": [
+        "fauna_tethyan_blue_crayfish"
+      ],
+      "found_in": [
+        "river",
+        "coast"
+      ],
+      "rarity": "common",
+      "notes": "Thin, blue, and worth keeping only for the colour. Ground into a pigment more often than it is worked whole.",
+      "source_index": 17
+    },
+    {
+      "id": "material_frankincense",
+      "type": "material",
+      "name": "Frankincense",
+      "classes": [
+        "resin"
+      ],
+      "won_from": [
+        "flora_frankincense_scrub"
+      ],
+      "found_in": [
+        "desert",
+        "hills"
+      ],
+      "rarity": "rare",
+      "notes": "Canon already records the scrub for incense and trade resin. Tapped by scoring the bark and coming back a fortnight later, which makes it a crop as much as a gathering.",
+      "source_index": 18
+    },
+    {
+      "id": "material_myrrh_gum",
+      "type": "material",
+      "name": "Myrrh gum",
+      "classes": [
+        "resin",
+        "physic"
+      ],
+      "won_from": [
+        "flora_myrrh_thorn"
+      ],
+      "found_in": [
+        "desert",
+        "hills"
+      ],
+      "rarity": "rare",
+      "notes": "The wound salve canon names on the myrrh-thorn is this, softened in oil. It is also the best glue in the desert, which is the same property read two ways.",
+      "source_index": 19
+    },
+    {
+      "id": "material_tree_pitch",
+      "type": "material",
+      "name": "Pitch",
+      "classes": [
+        "resin",
+        "fuel"
+      ],
+      "rarity": "common",
+      "notes": "Boiled down from resinous heartwood in a covered pit. Nothing floats without it -- every hull in canon is a hull somebody paid this attention. Boiled out of resinous heartwood in a covered pit.",
+      "source_index": 20
+    },
+    {
+      "id": "material_river_clay",
+      "type": "material",
+      "name": "River clay",
+      "classes": [
+        "clay"
+      ],
+      "found_in": [
+        "river",
+        "wetland",
+        "coast"
+      ],
+      "rarity": "common",
+      "notes": "Dug from the cut bank where the water has already done the sorting. The Saraswati's is grey wet and buff fired.",
+      "source_index": 21
+    },
+    {
+      "id": "material_potters_grog",
+      "type": "material",
+      "name": "Grog",
+      "classes": [
+        "clay"
+      ],
+      "rarity": "common",
+      "notes": "Old fired pots, crushed and put back into new clay so the new one survives the kiln. The only material in this file that can only be made from itself. Crushed out of old fired pots. There is no grog in the ground.",
+      "source_index": 22
+    },
+    {
+      "id": "material_flint",
+      "type": "material",
+      "name": "Flint",
+      "classes": [
+        "stone"
+      ],
+      "found_in": [
+        "hills",
+        "plains",
+        "coast"
+      ],
+      "rarity": "common",
+      "notes": "Nodules out of limestone, or cobbles out of a riverbed. Knaps predictably, which is the entire reason it outlasted better-looking stone.",
+      "source_index": 23
+    },
+    {
+      "id": "material_basalt",
+      "type": "material",
+      "name": "Basalt",
+      "classes": [
+        "stone"
+      ],
+      "found_in": [
+        "mountains",
+        "lava_field",
+        "hills"
+      ],
+      "rarity": "common",
+      "notes": "The Deccan is made of it. Too tough to knap and perfect for anything that must grind -- querns, mortars, and the Board of the Chess of Fate.",
+      "source_index": 24
+    },
+    {
+      "id": "material_sandstone",
+      "type": "material",
+      "name": "Sandstone",
+      "classes": [
+        "stone"
+      ],
+      "found_in": [
+        "desert",
+        "hills",
+        "plains"
+      ],
+      "rarity": "common",
+      "notes": "Dressed rather than knapped. Soft enough to cut with bronze and hard enough to still be standing when the person who cut it is not.",
+      "source_index": 25
+    },
+    {
+      "id": "material_magma_glass",
+      "type": "material",
+      "name": "Magma-glass",
+      "classes": [
+        "glass"
+      ],
+      "found_in": [
+        "lava_field",
+        "mountains"
+      ],
+      "rarity": "rare",
+      "notes": "Volcanic glass, and canon's Chess of Fate has its squares inlaid with it. Takes an edge sharper than bronze and loses it to a hard look.",
+      "source_index": 26
+    },
+    {
+      "id": "material_scar_glass",
+      "type": "material",
+      "name": "Scar glass",
+      "classes": [
+        "glass"
+      ],
+      "found_in": [
+        "desert",
+        "coast"
+      ],
+      "rarity": "rare",
+      "notes": "Fused sand from the Glass Scar at Dwarka. Whatever made it is one of the things the player is there to work out, so canon says what it is and pointedly not how it happened.",
+      "source_index": 27
+    },
+    {
+      "id": "material_native_copper",
+      "type": "material",
+      "name": "Native copper",
+      "classes": [
+        "metal"
+      ],
+      "found_in": [
+        "hills",
+        "mountains",
+        "desert"
+      ],
+      "rarity": "rare",
+      "notes": "Found as metal rather than smelted from ore -- green-crusted lumps in a dry watercourse. Cold-worked, annealed, worked again.",
+      "source_index": 28
+    },
+    {
+      "id": "material_tin_ore",
+      "type": "material",
+      "name": "Tin ore",
+      "classes": [
+        "metal"
+      ],
+      "found_in": [
+        "mountains",
+        "hills"
+      ],
+      "rarity": "rare",
+      "notes": "Cassiterite, heavy and black, panned out of highland gravel. Scarce enough that its trade route is more important than its deposit.",
+      "source_index": 29
+    },
+    {
+      "id": "material_bronze",
+      "type": "material",
+      "name": "Bronze",
+      "classes": [
+        "metal"
+      ],
+      "rarity": "rare",
+      "notes": "Copper and tin, and the era's outer edge. Canon is a bronze world with iron as a rumour; nothing here should let a recipe quietly invent a smelted iron industry. Cast, never found. Copper and tin and a furnace -- see recipe_cast_bronze.",
+      "source_index": 30
+    },
+    {
+      "id": "material_salt_crust",
+      "type": "material",
+      "name": "Salt crust",
+      "classes": [
+        "salt"
+      ],
+      "won_from": [
+        "flora_desert_saltbush"
+      ],
+      "found_in": [
+        "desert",
+        "coast"
+      ],
+      "rarity": "common",
+      "notes": "Scraped off a pan in sheets. It is preservative, currency and the ground Dwarka stands on, which is why it is its own class and not a footnote under stone.",
+      "source_index": 31
+    },
+    {
+      "id": "material_natron",
+      "type": "material",
+      "name": "Natron",
+      "classes": [
+        "salt"
+      ],
+      "found_in": [
+        "desert"
+      ],
+      "rarity": "rare",
+      "notes": "The bitter salt from a dry lake bed. Cleans, cures hide, and makes glass possible.",
+      "source_index": 32
+    },
+    {
+      "id": "material_indigo_dye",
+      "type": "material",
+      "name": "Indigo",
+      "classes": [
+        "pigment"
+      ],
+      "won_from": [
+        "flora_indigo_wild",
+        "flora_sweet_indigo"
+      ],
+      "found_in": [
+        "plains",
+        "wetland",
+        "settlement"
+      ],
+      "rarity": "rare",
+      "notes": "Fermented in a vat until it stinks, then oxidised in the air. The cloth comes out green and turns blue while you watch, which is why it is worth what it is worth.",
+      "source_index": 33
+    },
+    {
+      "id": "material_red_ochre",
+      "type": "material",
+      "name": "Red ochre",
+      "classes": [
+        "pigment"
+      ],
+      "found_in": [
+        "hills",
+        "desert",
+        "plains"
+      ],
+      "rarity": "common",
+      "notes": "Iron-stained earth, ground and washed. The oldest pigment anybody has, and the one every mark in this world is made in until somebody wants blue.",
+      "source_index": 34
+    },
+    {
+      "id": "material_lamp_black",
+      "type": "material",
+      "name": "Lamp black",
+      "classes": [
+        "pigment"
+      ],
+      "rarity": "common",
+      "notes": "Soot caught on a cold plate held over a flame. Bound with gum it is ink, which makes it the material Varuna's diary is actually written in. Soot caught on a plate. Nobody gathers it; somebody makes it.",
+      "source_index": 35
+    },
+    {
+      "id": "material_delta_rice",
+      "type": "material",
+      "name": "Red delta rice",
+      "classes": [
+        "grain",
+        "produce"
+      ],
+      "won_from": [
+        "flora_red_delta_rice"
+      ],
+      "found_in": [
+        "wetland",
+        "river",
+        "plains"
+      ],
+      "rarity": "common",
+      "notes": "Canon records it as a staple grain and a trade good. Stores through a season, which is the whole difference between a camp and a settlement.",
+      "source_index": 36
+    },
+    {
+      "id": "material_taro_root",
+      "type": "material",
+      "name": "Lotus-root taro",
+      "classes": [
+        "produce"
+      ],
+      "won_from": [
+        "flora_lotus_root_taro"
+      ],
+      "found_in": [
+        "wetland",
+        "river"
+      ],
+      "rarity": "common",
+      "notes": "A flood crop in canon's own words -- it wants the water the rice cannot take, so the two together mean a bad year is survivable.",
+      "source_index": 37
+    },
+    {
+      "id": "material_date_fruit",
+      "type": "material",
+      "name": "Dates",
+      "classes": [
+        "produce"
+      ],
+      "won_from": [
+        "flora_date_palm",
+        "flora_oasis_date_palm"
+      ],
+      "found_in": [
+        "desert",
+        "coast",
+        "settlement"
+      ],
+      "rarity": "common",
+      "notes": "Dried on the frond and carried in a pressed block. Sweet, heavy, and the reason a desert crossing is arithmetic rather than a gamble.",
+      "source_index": 38
+    },
+    {
+      "id": "material_tamarind_pulp",
+      "type": "material",
+      "name": "Tamarind pulp",
+      "classes": [
+        "produce"
+      ],
+      "won_from": [
+        "flora_tamarind"
+      ],
+      "found_in": [
+        "forest",
+        "plains",
+        "settlement"
+      ],
+      "rarity": "common",
+      "notes": "Canon files the tree under food, souring agent and shade. This is the first two; the third is not a thing you can carry.",
+      "source_index": 39
+    },
+    {
+      "id": "material_river_fish",
+      "type": "material",
+      "name": "River fish",
+      "classes": [
+        "flesh"
+      ],
+      "won_from": [
+        "fauna_estuary_archer_fish",
+        "fauna_beedu"
+      ],
+      "found_in": [
+        "river",
+        "coast",
+        "wetland"
+      ],
+      "rarity": "common",
+      "notes": "Split, salted and dried on a rack. Named for what it is rather than for a species, because a weir does not sort its catch.",
+      "source_index": 40
+    },
+    {
+      "id": "material_mahua_oil",
+      "type": "material",
+      "name": "Mahua oil",
+      "classes": [
+        "oil",
+        "produce"
+      ],
+      "won_from": [
+        "flora_mahua",
+        "flora_sweet_nectar_mahua"
+      ],
+      "found_in": [
+        "forest",
+        "plains",
+        "hills"
+      ],
+      "rarity": "common",
+      "notes": "Pressed from the seed. Canon already has the tree down for oil, a fermented drink and a ritual offering, and this is only the first of the three.",
+      "source_index": 41
+    },
+    {
+      "id": "material_charcoal",
+      "type": "material",
+      "name": "Charcoal",
+      "classes": [
+        "fuel"
+      ],
+      "won_from": [
+        "flora_ghost_mangrove"
+      ],
+      "rarity": "common",
+      "notes": "Canon names the ghost mangrove for charcoal specifically. Burnt slow under turf, and the only fuel in this list hot enough to melt anything. Burnt slow under turf from timber. Not a thing lying about.",
+      "source_index": 42
+    },
+    {
+      "id": "material_dung_cake",
+      "type": "material",
+      "name": "Dung cake",
+      "classes": [
+        "fuel"
+      ],
+      "found_in": [
+        "plains",
+        "settlement",
+        "desert"
+      ],
+      "rarity": "common",
+      "notes": "Patted flat and dried on a wall. Unglamorous, universal, and what almost every meal in this world is actually cooked over.",
+      "source_index": 43
+    },
+    {
+      "id": "material_neem_bark",
+      "type": "material",
+      "name": "Neem bark",
+      "classes": [
+        "physic"
+      ],
+      "won_from": [
+        "flora_neem"
+      ],
+      "found_in": [
+        "forest",
+        "plains",
+        "settlement"
+      ],
+      "rarity": "common",
+      "notes": "Canon has the tree for medicine and insect repellent. Bitter enough that nobody takes it for pleasure and reliable enough that everybody has some.",
+      "source_index": 44
+    },
+    {
+      "id": "material_shilajit",
+      "type": "material",
+      "name": "Shilajit",
+      "classes": [
+        "physic"
+      ],
+      "won_from": [
+        "flora_shilajit_creeper"
+      ],
+      "found_in": [
+        "mountains",
+        "hills"
+      ],
+      "rarity": "rare",
+      "notes": "The tonic canon names on the creeper -- a mineral exudate scraped from high rock. Filed as physic rather than salt because of what it is for, not what it is made of.",
+      "source_index": 45
+    }
+  ],
+  "items": [
+    {
+      "id": "item_cordage",
+      "type": "item",
+      "name": "Cordage",
+      "kind": "tool",
+      "affords": [
+        "bind"
+      ],
+      "notes": "The prototype every rope inherits from. Twisted fibre that holds two things together, and the single most useful object in this world by a distance nobody would guess.",
+      "source_index": 0
+    },
+    {
+      "id": "item_woven_ware",
+      "type": "item",
+      "name": "Woven ware",
+      "kind": "textile",
+      "affords": [
+        "carry"
+      ],
+      "notes": "The prototype for mat, basket, sail and cloth -- one process at four scales, so one base with four overrides rather than four unrelated entities.",
+      "source_index": 1
+    },
+    {
+      "id": "item_blade",
+      "type": "item",
+      "name": "Blade",
+      "kind": "tool",
+      "affords": [
+        "cut"
+      ],
+      "notes": "The prototype for anything with a worked edge, before it is told what it is made of.",
+      "source_index": 2
+    },
+    {
+      "id": "item_hafted_tool",
+      "type": "item",
+      "name": "Hafted tool",
+      "kind": "tool",
+      "affords": [
+        "cut"
+      ],
+      "notes": "A head bound to a handle. The base for adze, pick and chisel: what they share is the binding, which is why cordage is a prerequisite of half the toolkit.",
+      "source_index": 3
+    },
+    {
+      "id": "item_vessel_ware",
+      "type": "item",
+      "name": "Vessel",
+      "kind": "container",
+      "affords": [
+        "contain"
+      ],
+      "notes": "The prototype for anything that keeps something in. Distinct from `woven_ware`, whose job is to move a load rather than to hold one.",
+      "source_index": 4
+    },
+    {
+      "id": "item_prepared_food",
+      "type": "item",
+      "name": "Prepared food",
+      "kind": "food",
+      "affords": [
+        "eat"
+      ],
+      "notes": "The prototype for anything cooked, dried or pressed into a form somebody meant to eat later. A raw tuber and a baked one are different objects and only one is dinner.",
+      "source_index": 5
+    },
+    {
+      "id": "item_reed_rope",
+      "type": "item",
+      "name": "Reed rope",
+      "base_item": "item_cordage",
+      "kind": "tool",
+      "affords": [
+        "bind"
+      ],
+      "materials": [
+        "material_reed_fibre"
+      ],
+      "notes": "Light, cheap and rots. The house rope: everything that does not have to hold a boat.",
+      "source_index": 6
+    },
+    {
+      "id": "item_husk_hawser",
+      "type": "item",
+      "name": "Husk hawser",
+      "base_item": "item_cordage",
+      "kind": "tool",
+      "affords": [
+        "bind"
+      ],
+      "materials": [
+        "material_palm_husk"
+      ],
+      "notes": "Coarse palm-husk line that does not mind salt water. The harbour rope, and the reason a date palm is worth more standing than felled.",
+      "source_index": 7
+    },
+    {
+      "id": "item_sinew_lashing",
+      "type": "item",
+      "name": "Sinew lashing",
+      "base_item": "item_cordage",
+      "kind": "tool",
+      "affords": [
+        "bind"
+      ],
+      "materials": [
+        "material_sinew"
+      ],
+      "notes": "Dries tight rather than merely holding, which is why every hafted tool wants it and no plant fibre will substitute.",
+      "source_index": 8
+    },
+    {
+      "id": "item_reed_mat",
+      "type": "item",
+      "name": "Reed mat",
+      "base_item": "item_woven_ware",
+      "kind": "textile",
+      "affords": [
+        "shelter",
+        "carry"
+      ],
+      "materials": [
+        "material_reed_fibre"
+      ],
+      "notes": "A floor, a wall, a roof or a bed depending on which way it is put down.",
+      "source_index": 9
+    },
+    {
+      "id": "item_carry_basket",
+      "type": "item",
+      "name": "Carry basket",
+      "base_item": "item_woven_ware",
+      "kind": "textile",
+      "affords": [
+        "carry",
+        "contain"
+      ],
+      "materials": [
+        "material_reed_fibre",
+        "material_bamboo_cane"
+      ],
+      "notes": "Split cane ribs with reed weft. Carries as much as a person can and weighs almost nothing empty.",
+      "source_index": 10
+    },
+    {
+      "id": "item_fish_weir",
+      "type": "item",
+      "name": "Fish weir",
+      "base_item": "item_woven_ware",
+      "kind": "textile",
+      "affords": [
+        "carry"
+      ],
+      "materials": [
+        "material_bamboo_cane",
+        "material_reed_fibre"
+      ],
+      "notes": "A fence in the water that lets the river do the catching. Does not sort what it takes, which is why canon's fish material is named for the river and not for a species.",
+      "source_index": 11
+    },
+    {
+      "id": "item_goat_hair_blanket",
+      "type": "item",
+      "name": "Goat-hair blanket",
+      "base_item": "item_woven_ware",
+      "kind": "textile",
+      "affords": [
+        "shelter"
+      ],
+      "materials": [
+        "material_goat_hair"
+      ],
+      "notes": "Stays warm wet. On the Vindhya that is the only property anybody asks about.",
+      "source_index": 12
+    },
+    {
+      "id": "item_indigo_cloth",
+      "type": "item",
+      "name": "Indigo cloth",
+      "base_item": "item_woven_ware",
+      "kind": "textile",
+      "affords": [
+        "trade",
+        "shelter"
+      ],
+      "materials": [
+        "material_indigo_dye",
+        "material_bark_bast"
+      ],
+      "notes": "Comes out of the vat green and turns blue in the air while you watch. Half its worth is the colour and half is that everyone has seen it happen.",
+      "source_index": 13
+    },
+    {
+      "id": "item_sail_cloth",
+      "type": "item",
+      "name": "Sail cloth",
+      "base_item": "item_woven_ware",
+      "kind": "textile",
+      "affords": [
+        "cross"
+      ],
+      "materials": [
+        "material_palm_husk",
+        "material_bark_bast"
+      ],
+      "notes": "Coarse, heavy, and the difference between a boat that drifts and a boat that goes.",
+      "source_index": 14
+    },
+    {
+      "id": "item_flint_knife",
+      "type": "item",
+      "name": "Flint knife",
+      "base_item": "item_blade",
+      "kind": "tool",
+      "affords": [
+        "cut"
+      ],
+      "materials": [
+        "material_flint"
+      ],
+      "notes": "Knapped in an afternoon, sharp for a week, replaced without ceremony.",
+      "source_index": 15
+    },
+    {
+      "id": "item_glass_lancet",
+      "type": "item",
+      "name": "Glass lancet",
+      "base_item": "item_blade",
+      "kind": "tool",
+      "affords": [
+        "cut"
+      ],
+      "materials": [
+        "material_magma_glass"
+      ],
+      "notes": "Sharper than bronze and loses the edge to a hard look. Used where the cut matters more than the tool lasting -- surgery, and the finest carving.",
+      "source_index": 16
+    },
+    {
+      "id": "item_bronze_knife",
+      "type": "item",
+      "name": "Bronze knife",
+      "base_item": "item_blade",
+      "kind": "tool",
+      "affords": [
+        "cut",
+        "trade"
+      ],
+      "materials": [
+        "material_bronze"
+      ],
+      "epochs": [
+        "epoch_civilization_dawn",
+        "epoch_current"
+      ],
+      "notes": "Holds an edge, takes a new one, and is worth more than the person carrying it usually is.",
+      "source_index": 17
+    },
+    {
+      "id": "item_stone_adze",
+      "type": "item",
+      "name": "Stone adze",
+      "base_item": "item_hafted_tool",
+      "kind": "tool",
+      "affords": [
+        "cut",
+        "work"
+      ],
+      "materials": [
+        "material_basalt",
+        "material_sinew"
+      ],
+      "notes": "For dressing timber. The blade is set across the haft rather than along it, which is the whole difference between an adze and an axe and matters enormously to a boat.",
+      "source_index": 18
+    },
+    {
+      "id": "item_antler_pick",
+      "type": "item",
+      "name": "Antler pick",
+      "base_item": "item_hafted_tool",
+      "kind": "tool",
+      "affords": [
+        "cut",
+        "work"
+      ],
+      "materials": [
+        "material_deer_antler"
+      ],
+      "notes": "For clay, chalk and soft rock. Free, in the sense that the deer left it lying there.",
+      "source_index": 19
+    },
+    {
+      "id": "item_bronze_chisel",
+      "type": "item",
+      "name": "Bronze chisel",
+      "base_item": "item_hafted_tool",
+      "kind": "tool",
+      "affords": [
+        "cut",
+        "work"
+      ],
+      "materials": [
+        "material_bronze"
+      ],
+      "epochs": [
+        "epoch_civilization_dawn",
+        "epoch_current"
+      ],
+      "notes": "What dressed sandstone is dressed with. A settlement that has these has a mason.",
+      "source_index": 20
+    },
+    {
+      "id": "item_bone_awl",
+      "type": "item",
+      "name": "Bone awl",
+      "kind": "tool",
+      "affords": [
+        "cut",
+        "mark"
+      ],
+      "materials": [
+        "material_deer_antler"
+      ],
+      "notes": "Bores a hole and scores a line. Filed under both cutting and marking because a tally is scratched with the same point that makes a stitch-hole.",
+      "source_index": 21
+    },
+    {
+      "id": "item_grinding_quern",
+      "type": "item",
+      "name": "Quern",
+      "kind": "tool",
+      "affords": [
+        "work"
+      ],
+      "materials": [
+        "material_basalt"
+      ],
+      "notes": "Grain to flour, ochre to pigment, bark to powder. The first object written here that had nothing honest to say for itself under the old vocabulary -- which is how `work` came to exist.",
+      "source_index": 22
+    },
+    {
+      "id": "item_bow_drill",
+      "type": "item",
+      "name": "Bow drill",
+      "kind": "tool",
+      "affords": [
+        "work",
+        "burn"
+      ],
+      "materials": [
+        "material_bamboo_cane",
+        "material_sinew"
+      ],
+      "notes": "Makes holes and makes fire, which is the same motion done with different patience.",
+      "source_index": 23
+    },
+    {
+      "id": "item_loom_frame",
+      "type": "item",
+      "name": "Loom frame",
+      "kind": "tool",
+      "affords": [
+        "work"
+      ],
+      "materials": [
+        "material_bamboo_cane",
+        "material_reed_fibre"
+      ],
+      "notes": "Upright, weighted, and taken apart to travel. Weaving needs a thing that works rather than a place that does, and this is that thing.",
+      "source_index": 24
+    },
+    {
+      "id": "item_bone_harpoon",
+      "type": "item",
+      "name": "Bone harpoon",
+      "base_item": "item_hafted_tool",
+      "kind": "weapon",
+      "affords": [
+        "cut",
+        "deter"
+      ],
+      "materials": [
+        "material_fish_bone",
+        "material_bamboo_cane",
+        "material_sinew"
+      ],
+      "notes": "The sawfish rostral tooth arrives already barbed, so this is a harpoon somebody did very little to. Canon says what it is for and pointedly not what it does to anything.",
+      "source_index": 25
+    },
+    {
+      "id": "item_reed_spear",
+      "type": "item",
+      "name": "Reed spear",
+      "base_item": "item_hafted_tool",
+      "kind": "weapon",
+      "affords": [
+        "cut",
+        "deter"
+      ],
+      "materials": [
+        "material_bamboo_cane",
+        "material_flint"
+      ],
+      "notes": "Held level, it moves a herd. That is the whole of its recorded use.",
+      "source_index": 26
+    },
+    {
+      "id": "item_boar_spear",
+      "type": "item",
+      "name": "Boar spear",
+      "base_item": "item_hafted_tool",
+      "kind": "weapon",
+      "affords": [
+        "cut",
+        "deter"
+      ],
+      "materials": [
+        "material_teak_timber",
+        "material_boar_tusk"
+      ],
+      "notes": "Cross-barred below the head so that what it stops does not walk up it. A defensive object described defensively, which is what canon has.",
+      "source_index": 27
+    },
+    {
+      "id": "item_bronze_spearhead",
+      "type": "item",
+      "name": "Bronze spearhead",
+      "kind": "weapon",
+      "affords": [
+        "cut",
+        "deter",
+        "trade"
+      ],
+      "materials": [
+        "material_bronze"
+      ],
+      "epochs": [
+        "epoch_civilization_dawn",
+        "epoch_current"
+      ],
+      "notes": "Socketed, so it outlives its shaft. Traded far past where anybody can make one.",
+      "source_index": 28
+    },
+    {
+      "id": "item_hunting_sling",
+      "type": "item",
+      "name": "Sling",
+      "kind": "weapon",
+      "affords": [
+        "deter"
+      ],
+      "materials": [
+        "material_goat_hair",
+        "material_goat_hide"
+      ],
+      "notes": "Two cords and a pouch. Affords only `deter`: canon records slings keeping birds off a crop far more often than it records them doing anything else.",
+      "source_index": 29
+    },
+    {
+      "id": "item_fire_rattle",
+      "type": "item",
+      "name": "Fire rattle",
+      "kind": "weapon",
+      "affords": [
+        "deter"
+      ],
+      "materials": [
+        "material_bamboo_cane",
+        "material_oyster_shell"
+      ],
+      "notes": "Shells on a line, shaken. Filed as a weapon because that is honestly its category and it is the clearest case in the file that the category is not about harm.",
+      "source_index": 30
+    },
+    {
+      "id": "item_storage_jar",
+      "type": "item",
+      "name": "Storage jar",
+      "base_item": "item_vessel_ware",
+      "kind": "container",
+      "affords": [
+        "contain"
+      ],
+      "materials": [
+        "material_river_clay",
+        "material_potters_grog"
+      ],
+      "notes": "Fired, lidded, and half-buried to stay cool. A grain surplus is not a harvest, it is one of these.",
+      "source_index": 31
+    },
+    {
+      "id": "item_cooking_pot",
+      "type": "item",
+      "name": "Cooking pot",
+      "base_item": "item_vessel_ware",
+      "kind": "container",
+      "affords": [
+        "contain"
+      ],
+      "materials": [
+        "material_river_clay",
+        "material_potters_grog"
+      ],
+      "notes": "Coarse-tempered so it survives the fire. Every cooked thing in canon passes through one.",
+      "source_index": 32
+    },
+    {
+      "id": "item_water_skin",
+      "type": "item",
+      "name": "Water skin",
+      "base_item": "item_vessel_ware",
+      "kind": "container",
+      "affords": [
+        "contain",
+        "carry"
+      ],
+      "materials": [
+        "material_goat_hide",
+        "material_tree_pitch"
+      ],
+      "notes": "Pitched inside. Tastes of it, and everyone stopped noticing generations ago.",
+      "source_index": 33
+    },
+    {
+      "id": "item_salt_box",
+      "type": "item",
+      "name": "Salt box",
+      "base_item": "item_vessel_ware",
+      "kind": "container",
+      "affords": [
+        "contain"
+      ],
+      "materials": [
+        "material_sandalwood_billet"
+      ],
+      "notes": "Wood rather than clay, because salt draws water and a fired jar sweats.",
+      "source_index": 34
+    },
+    {
+      "id": "item_resin_flask",
+      "type": "item",
+      "name": "Resin flask",
+      "base_item": "item_vessel_ware",
+      "kind": "container",
+      "affords": [
+        "contain"
+      ],
+      "materials": [
+        "material_river_clay",
+        "material_myrrh_gum"
+      ],
+      "notes": "Small, stoppered, and worth more full than the room it sits in.",
+      "source_index": 35
+    },
+    {
+      "id": "item_grain_bin",
+      "type": "item",
+      "name": "Grain bin",
+      "base_item": "item_vessel_ware",
+      "kind": "container",
+      "affords": [
+        "contain"
+      ],
+      "materials": [
+        "material_river_clay",
+        "material_reed_fibre"
+      ],
+      "notes": "Mud-plastered basketwork, taller than a person. Does not move once filled, which makes it the first object here that only a settlement can own.",
+      "source_index": 36
+    },
+    {
+      "id": "item_oil_lamp",
+      "type": "item",
+      "name": "Oil lamp",
+      "kind": "light",
+      "affords": [
+        "burn"
+      ],
+      "materials": [
+        "material_river_clay",
+        "material_mahua_oil"
+      ],
+      "notes": "A closed clay lamp with a shielded wick, the kind that survives being carried. Throws about an arm of light. **Varuna has carried one since the game's first step** -- canon is recording the kit rather than inventing it.",
+      "source_index": 37
+    },
+    {
+      "id": "item_reed_torch",
+      "type": "item",
+      "name": "Reed torch",
+      "kind": "light",
+      "affords": [
+        "burn"
+      ],
+      "materials": [
+        "material_reed_fibre",
+        "material_tree_pitch"
+      ],
+      "notes": "Pitched reed bundle. Bright, brief, and gone in the rain.",
+      "source_index": 38
+    },
+    {
+      "id": "item_tinder_bundle",
+      "type": "item",
+      "name": "Tinder bundle",
+      "kind": "light",
+      "affords": [
+        "burn"
+      ],
+      "materials": [
+        "material_bark_bast",
+        "material_charcoal"
+      ],
+      "notes": "Kept dry against the body. The difference between a cold night and a warm one is usually whether somebody remembered this.",
+      "source_index": 39
+    },
+    {
+      "id": "item_charcoal_brazier",
+      "type": "item",
+      "name": "Brazier",
+      "kind": "light",
+      "affords": [
+        "burn",
+        "contain"
+      ],
+      "materials": [
+        "material_river_clay",
+        "material_charcoal"
+      ],
+      "notes": "Portable fire. Lets a process that needs heat happen somewhere that has none.",
+      "source_index": 40
+    },
+    {
+      "id": "item_reed_stylus",
+      "type": "item",
+      "name": "Reed stylus",
+      "kind": "record",
+      "affords": [
+        "mark"
+      ],
+      "materials": [
+        "material_reed_fibre"
+      ],
+      "notes": "Cut to a point and recut every few lines. Costs nothing and is lost constantly.",
+      "source_index": 41
+    },
+    {
+      "id": "item_ink_cake",
+      "type": "item",
+      "name": "Ink cake",
+      "kind": "record",
+      "affords": [
+        "mark"
+      ],
+      "materials": [
+        "material_lamp_black",
+        "material_frankincense"
+      ],
+      "notes": "Soot bound with gum, dried into a block, wetted on a stone. The substance Varuna's diary is actually written in.",
+      "source_index": 42
+    },
+    {
+      "id": "item_palm_leaf_sheet",
+      "type": "item",
+      "name": "Palm-leaf sheet",
+      "kind": "record",
+      "affords": [
+        "mark"
+      ],
+      "materials": [
+        "material_palm_husk"
+      ],
+      "notes": "Cut, boiled, dried and smoothed. Takes a scored line better than it takes ink.",
+      "source_index": 43
+    },
+    {
+      "id": "item_field_diary",
+      "type": "item",
+      "name": "Field diary",
+      "kind": "record",
+      "affords": [
+        "mark",
+        "carry"
+      ],
+      "materials": [
+        "material_palm_husk",
+        "material_bark_bast",
+        "material_lamp_black"
+      ],
+      "notes": "Bound, and about a third full. **The game's whole progression system**: the crossings-out are the useful part, because a first guess is worth keeping once it is wrong.",
+      "source_index": 44
+    },
+    {
+      "id": "item_tally_stick",
+      "type": "item",
+      "name": "Tally stick",
+      "kind": "record",
+      "affords": [
+        "mark"
+      ],
+      "materials": [
+        "material_bamboo_cane"
+      ],
+      "notes": "Notched and split, so both parties hold half and neither can add a notch alone. A contract that cannot be argued with.",
+      "source_index": 45
+    },
+    {
+      "id": "item_clay_seal",
+      "type": "item",
+      "name": "Clay seal",
+      "kind": "record",
+      "affords": [
+        "mark",
+        "trade"
+      ],
+      "materials": [
+        "material_river_clay",
+        "material_oyster_shell"
+      ],
+      "notes": "Pressed into the clay closing a jar or a bale. Says who packed it and that nobody has opened it since.",
+      "source_index": 46
+    },
+    {
+      "id": "item_flood_bread",
+      "type": "item",
+      "name": "Flood bread",
+      "base_item": "item_prepared_food",
+      "kind": "food",
+      "affords": [
+        "eat"
+      ],
+      "materials": [
+        "material_delta_rice",
+        "material_taro_root"
+      ],
+      "notes": "Rice flour stretched with taro, which is what you eat in a year the rice did badly and the flood did well.",
+      "source_index": 47
+    },
+    {
+      "id": "item_dried_fish",
+      "type": "item",
+      "name": "Dried fish",
+      "base_item": "item_prepared_food",
+      "kind": "food",
+      "affords": [
+        "eat",
+        "trade"
+      ],
+      "materials": [
+        "material_river_fish",
+        "material_salt_crust"
+      ],
+      "notes": "Split, salted, racked. Keeps a season and travels anywhere.",
+      "source_index": 48
+    },
+    {
+      "id": "item_date_block",
+      "type": "item",
+      "name": "Date block",
+      "base_item": "item_prepared_food",
+      "kind": "food",
+      "affords": [
+        "eat",
+        "carry"
+      ],
+      "materials": [
+        "material_date_fruit"
+      ],
+      "notes": "Pressed into a brick and wrapped in leaf. Sweet, heavy, and the reason a desert crossing is arithmetic rather than a gamble.",
+      "source_index": 49
+    },
+    {
+      "id": "item_tamarind_paste",
+      "type": "item",
+      "name": "Tamarind paste",
+      "base_item": "item_prepared_food",
+      "kind": "food",
+      "affords": [
+        "eat"
+      ],
+      "materials": [
+        "material_tamarind_pulp",
+        "material_salt_crust"
+      ],
+      "notes": "Sour enough to make bad water drinkable and worse food interesting.",
+      "source_index": 50
+    },
+    {
+      "id": "item_salt_fish_stew",
+      "type": "item",
+      "name": "Salt-fish stew",
+      "base_item": "item_prepared_food",
+      "kind": "food",
+      "affords": [
+        "eat"
+      ],
+      "materials": [
+        "material_river_fish",
+        "material_taro_root",
+        "material_tamarind_pulp"
+      ],
+      "notes": "The pot everything ends up in. Nobody writes a recipe for it and everybody makes it.",
+      "source_index": 51
+    },
+    {
+      "id": "item_spiced_rice",
+      "type": "item",
+      "name": "Spiced rice",
+      "base_item": "item_prepared_food",
+      "kind": "food",
+      "affords": [
+        "eat"
+      ],
+      "materials": [
+        "material_delta_rice",
+        "material_salt_crust"
+      ],
+      "notes": "The meal a settlement eats when there is nothing to mark.",
+      "source_index": 52
+    },
+    {
+      "id": "item_travel_cake",
+      "type": "item",
+      "name": "Travel cake",
+      "base_item": "item_prepared_food",
+      "kind": "food",
+      "affords": [
+        "eat",
+        "carry"
+      ],
+      "materials": [
+        "material_delta_rice",
+        "material_mahua_oil",
+        "material_date_fruit"
+      ],
+      "notes": "Rice flour, oil and fruit, baked hard. Made to be carried rather than to be enjoyed, and it tastes like it.",
+      "source_index": 53
+    },
+    {
+      "id": "item_mahua_liquor",
+      "type": "item",
+      "name": "Mahua liquor",
+      "base_item": "item_prepared_food",
+      "kind": "food",
+      "affords": [
+        "eat",
+        "trade"
+      ],
+      "materials": [
+        "material_mahua_oil"
+      ],
+      "notes": "Canon already records the tree for a fermented drink. Distilled nowhere -- this is the fermented thing itself, and strong enough.",
+      "source_index": 54
+    },
+    {
+      "id": "item_neem_salve",
+      "type": "item",
+      "name": "Neem salve",
+      "kind": "physic",
+      "affords": [
+        "heal"
+      ],
+      "materials": [
+        "material_neem_bark",
+        "material_mahua_oil"
+      ],
+      "notes": "Bitter, oily, and keeps a wound clean. Canon has the tree for medicine already.",
+      "source_index": 55
+    },
+    {
+      "id": "item_myrrh_poultice",
+      "type": "item",
+      "name": "Myrrh poultice",
+      "kind": "physic",
+      "affords": [
+        "heal"
+      ],
+      "materials": [
+        "material_myrrh_gum",
+        "material_bark_bast"
+      ],
+      "notes": "The wound salve canon names on the myrrh-thorn, softened in oil and spread on bast.",
+      "source_index": 56
+    },
+    {
+      "id": "item_shilajit_tonic",
+      "type": "item",
+      "name": "Shilajit tonic",
+      "kind": "physic",
+      "affords": [
+        "heal",
+        "trade"
+      ],
+      "materials": [
+        "material_shilajit"
+      ],
+      "notes": "Scraped from high rock and taken in water. Worth carrying down the mountain, which is the only claim canon makes for it.",
+      "source_index": 57
+    },
+    {
+      "id": "item_bedroll",
+      "type": "item",
+      "name": "Bedroll",
+      "kind": "shelter",
+      "affords": [
+        "shelter",
+        "carry"
+      ],
+      "materials": [
+        "material_reed_fibre",
+        "material_goat_hide",
+        "material_tree_pitch"
+      ],
+      "notes": "Oiled cloth over a reed mat, rolled and strapped under the satchel. It has been rained on. **The game has carried this from its first step.**",
+      "source_index": 58
+    },
+    {
+      "id": "item_hide_tent",
+      "type": "item",
+      "name": "Hide tent",
+      "kind": "shelter",
+      "affords": [
+        "shelter"
+      ],
+      "materials": [
+        "material_goat_hide",
+        "material_bamboo_cane",
+        "material_palm_husk"
+      ],
+      "notes": "Two people to raise and one to strike. What a caravan sleeps under when there is no travel node within a day.",
+      "source_index": 59
+    },
+    {
+      "id": "item_walking_staff",
+      "type": "item",
+      "name": "Walking staff",
+      "kind": "tool",
+      "affords": [
+        "cross"
+      ],
+      "materials": [
+        "material_teak_timber"
+      ],
+      "notes": "Shoulder height, worn smooth at the grip. Good for testing what will hold your weight before you stand on it. **Also from the game's kit.**",
+      "source_index": 60
+    },
+    {
+      "id": "item_mud_shoes",
+      "type": "item",
+      "name": "Mud shoes",
+      "kind": "tool",
+      "affords": [
+        "cross"
+      ],
+      "materials": [
+        "material_bamboo_cane",
+        "material_reed_fibre"
+      ],
+      "notes": "Splayed frames lashed under the foot. Cross a salt flat or a tidal mud that would otherwise take you to the knee.",
+      "source_index": 61
+    },
+    {
+      "id": "item_rope_span",
+      "type": "item",
+      "name": "Rope span",
+      "kind": "tool",
+      "affords": [
+        "cross",
+        "bind"
+      ],
+      "materials": [
+        "material_palm_husk",
+        "material_teak_timber"
+      ],
+      "notes": "A line fixed both banks, and a loop to hang from. Wants two people, which is why Teshk will not leave -- the rope needs two and there are not two to spare.",
+      "source_index": 62
+    },
+    {
+      "id": "item_shell_bead",
+      "type": "item",
+      "name": "Shell bead",
+      "kind": "ornament",
+      "affords": [
+        "trade"
+      ],
+      "materials": [
+        "material_oyster_shell"
+      ],
+      "notes": "Drilled, strung, and the smallest unit of worth anybody agrees on.",
+      "source_index": 63
+    },
+    {
+      "id": "item_ammonite_pendant",
+      "type": "item",
+      "name": "Ammonite pendant",
+      "kind": "ornament",
+      "affords": [
+        "trade"
+      ],
+      "materials": [
+        "material_ammonite_shell"
+      ],
+      "notes": "A spiral somebody found already made. The brown ones are worn; the Asura-marked black ones are not worn by anybody sensible.",
+      "source_index": 64
+    },
+    {
+      "id": "item_sandalwood_comb",
+      "type": "item",
+      "name": "Sandalwood comb",
+      "kind": "ornament",
+      "affords": [
+        "trade"
+      ],
+      "materials": [
+        "material_sandalwood_billet"
+      ],
+      "notes": "Keeps its scent for a lifetime, which is most of why it is worth carrying anywhere.",
+      "source_index": 65
+    }
+  ],
+  "processes": [
+    {
+      "id": "process_gathering",
+      "type": "process",
+      "name": "Gathering",
+      "notes": "Picking a thing up. Named as a process rather than left implicit because every recipe chain has to start somewhere, and a layer whose raw materials arrive by magic cannot be checked for reachability.",
+      "source_index": 0
+    },
+    {
+      "id": "process_knapping",
+      "type": "process",
+      "name": "Knapping",
+      "notes": "Striking flakes off stone or glass to leave an edge. Wants nothing but a hammerstone and somewhere to sit, which is why it has no site and no needs.",
+      "source_index": 1
+    },
+    {
+      "id": "process_retting",
+      "type": "process",
+      "name": "Retting",
+      "notes": "Rotting the soft parts off a stem in standing water until only fibre is left. Takes days and smells; done at the water's edge and never indoors.",
+      "source_index": 2
+    },
+    {
+      "id": "process_spinning",
+      "type": "process",
+      "name": "Spinning and twisting",
+      "needs": [
+        "work"
+      ],
+      "notes": "Drawing fibre into thread, and thread into rope. The whorl is the tool and the tool is almost always somebody's spare moment.",
+      "source_index": 3
+    },
+    {
+      "id": "process_weaving",
+      "type": "process",
+      "name": "Weaving",
+      "needs": [
+        "work"
+      ],
+      "notes": "Mat, basket, sail and cloth are one process at four scales. Needs a loom or a frame, which is a thing that works rather than a place that does.",
+      "source_index": 4
+    },
+    {
+      "id": "process_carving",
+      "type": "process",
+      "name": "Carving",
+      "needs": [
+        "cut"
+      ],
+      "notes": "Shaping bone, wood, shell or antler with a blade. The most portable of the making processes -- it is what a person does at a camp fire with what they picked up that day.",
+      "source_index": 5
+    },
+    {
+      "id": "process_tanning",
+      "type": "process",
+      "name": "Tanning",
+      "performed_at": [
+        "settlement"
+      ],
+      "needs": [
+        "contain"
+      ],
+      "notes": "Turning hide into leather with bark liquor and time. Sited at a settlement because it needs vats and because nobody will let you do it upwind of them.",
+      "source_index": 6
+    },
+    {
+      "id": "process_firing",
+      "type": "process",
+      "name": "Firing",
+      "performed_at": [
+        "settlement"
+      ],
+      "needs": [
+        "burn"
+      ],
+      "notes": "Clay to pottery in a kiln. The first process in this list that a person cannot do alone in a field, and the reason a settlement is worth walking back to.",
+      "source_index": 7
+    },
+    {
+      "id": "process_smelting",
+      "type": "process",
+      "name": "Smelting",
+      "performed_at": [
+        "settlement"
+      ],
+      "needs": [
+        "burn",
+        "contain"
+      ],
+      "notes": "Ore to metal. Needs a furnace, charcoal and somebody who has done it before. Canon is a bronze world, so this is near the edge of what anybody can do at all.",
+      "source_index": 8
+    },
+    {
+      "id": "process_casting",
+      "type": "process",
+      "name": "Casting",
+      "performed_at": [
+        "settlement"
+      ],
+      "needs": [
+        "burn",
+        "contain"
+      ],
+      "notes": "Molten metal into a mould. Held apart from smelting because the skills are different and the failures are different.",
+      "source_index": 9
+    },
+    {
+      "id": "process_pressing",
+      "type": "process",
+      "name": "Pressing",
+      "needs": [
+        "work",
+        "contain"
+      ],
+      "notes": "Oil out of seed, under a beam or a stone. Wants a vessel to catch what comes out, which is the whole reason `contain` is a needed affordance and not a nicety.",
+      "source_index": 10
+    },
+    {
+      "id": "process_grinding",
+      "type": "process",
+      "name": "Grinding",
+      "needs": [
+        "work"
+      ],
+      "notes": "Grain to flour, ochre to pigment, bark to powder. One quern does all three and the household that owns it does not lend it.",
+      "source_index": 11
+    },
+    {
+      "id": "process_cooking",
+      "type": "process",
+      "name": "Cooking",
+      "needs": [
+        "burn",
+        "contain"
+      ],
+      "notes": "Heat and a pot. Deliberately siteless -- a hearth is a fire somebody built, and a traveller builds one wherever they stop.",
+      "source_index": 12
+    },
+    {
+      "id": "process_drying",
+      "type": "process",
+      "name": "Drying and salting",
+      "notes": "Preserving by taking the water out. Needs sun, air and patience, none of which canon models, so it needs nothing.",
+      "source_index": 13
+    },
+    {
+      "id": "process_brewing",
+      "type": "process",
+      "name": "Brewing",
+      "performed_at": [
+        "settlement"
+      ],
+      "needs": [
+        "contain"
+      ],
+      "notes": "Fermenting. Canon already records the mahua for a fermented drink, so this process is describing something in the record rather than proposing an industry.",
+      "source_index": 14
+    },
+    {
+      "id": "process_boatbuilding",
+      "type": "process",
+      "name": "Boatbuilding",
+      "performed_at": [
+        "settlement",
+        "travel_node"
+      ],
+      "needs": [
+        "cut",
+        "bind"
+      ],
+      "notes": "Hull, frame, lashing and pitch. Sited at settlements and travel nodes because those are the two kinds of place in canon that sit on water and have people.",
+      "source_index": 15
+    }
+  ],
+  "recipes": [
+    {
+      "id": "recipe_ret_reed_fibre",
+      "type": "recipe",
+      "name": "Retting reed",
+      "process": "process_retting",
+      "ingredients": [
+        {
+          "material": "material_reed_fibre"
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_reed_fibre",
+          "count": 2
+        }
+      ],
+      "notes": "Nine days in standing water, then combed. The one recipe here that turns a thing into more of itself, because retting is what makes gathered reed into usable fibre at all.",
+      "source_index": 0
+    },
+    {
+      "id": "recipe_reed_rope",
+      "type": "recipe",
+      "name": "Twisting reed rope",
+      "process": "process_spinning",
+      "ingredients": [
+        {
+          "material": "material_reed_fibre",
+          "count": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_reed_rope"
+        }
+      ],
+      "notes": "Four handfuls to a working length. Wants a whorl, which is any item that works.",
+      "source_index": 1
+    },
+    {
+      "id": "recipe_husk_hawser",
+      "type": "recipe",
+      "name": "Laying a husk hawser",
+      "process": "process_spinning",
+      "ingredients": [
+        {
+          "material": "material_palm_husk",
+          "count": 6
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_husk_hawser"
+        }
+      ],
+      "notes": "Heavier and slower than reed, and it will still be there next season.",
+      "source_index": 2
+    },
+    {
+      "id": "recipe_sinew_lashing",
+      "type": "recipe",
+      "name": "Drying sinew lashing",
+      "process": "process_drying",
+      "ingredients": [
+        {
+          "material": "material_sinew",
+          "count": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_sinew_lashing"
+        }
+      ],
+      "notes": "Split, wetted and wound on while damp. Tightens as it dries, which is the whole point.",
+      "source_index": 3
+    },
+    {
+      "id": "recipe_reed_mat",
+      "type": "recipe",
+      "name": "Weaving a reed mat",
+      "process": "process_weaving",
+      "ingredients": [
+        {
+          "tag": "#fibre",
+          "count": 6
+        },
+        {
+          "item": "item_loom_frame",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_reed_mat"
+        }
+      ],
+      "notes": "Any fibre will do, which is what a tag ingredient is for -- reed in the delta, husk on the coast, and the recipe does not have to know which.",
+      "source_index": 4
+    },
+    {
+      "id": "recipe_carry_basket",
+      "type": "recipe",
+      "name": "Weaving a carry basket",
+      "process": "process_weaving",
+      "ingredients": [
+        {
+          "material": "material_bamboo_cane",
+          "count": 2
+        },
+        {
+          "tag": "#fibre",
+          "count": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_carry_basket"
+        }
+      ],
+      "notes": "Split cane ribs, then any fibre for the weft.",
+      "source_index": 5
+    },
+    {
+      "id": "recipe_fish_weir",
+      "type": "recipe",
+      "name": "Setting a fish weir",
+      "process": "process_weaving",
+      "ingredients": [
+        {
+          "material": "material_bamboo_cane",
+          "count": 6
+        },
+        {
+          "item": "item_reed_rope"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_fish_weir"
+        }
+      ],
+      "notes": "Built in the water and left. What it catches is not sorted, which is why the fish it gives is named for the river.",
+      "source_index": 6
+    },
+    {
+      "id": "recipe_goat_hair_blanket",
+      "type": "recipe",
+      "name": "Weaving a blanket",
+      "process": "process_weaving",
+      "ingredients": [
+        {
+          "material": "material_goat_hair",
+          "count": 5
+        },
+        {
+          "item": "item_loom_frame",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_goat_hair_blanket"
+        }
+      ],
+      "known_by": [
+        "tushara"
+      ],
+      "notes": "Known on the steppe and in the hills, where staying warm wet is the only question.",
+      "source_index": 7
+    },
+    {
+      "id": "recipe_indigo_cloth",
+      "type": "recipe",
+      "name": "Dyeing indigo cloth",
+      "process": "process_weaving",
+      "ingredients": [
+        {
+          "material": "material_bark_bast",
+          "count": 4
+        },
+        {
+          "material": "material_indigo_dye",
+          "count": 2
+        },
+        {
+          "item": "item_loom_frame",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_indigo_cloth"
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "notes": "Green out of the vat, blue in the air. Half its worth is that everyone has watched it happen.",
+      "source_index": 8
+    },
+    {
+      "id": "recipe_sail_cloth",
+      "type": "recipe",
+      "name": "Weaving sail cloth",
+      "process": "process_weaving",
+      "ingredients": [
+        {
+          "material": "material_palm_husk",
+          "count": 6
+        },
+        {
+          "material": "material_bark_bast",
+          "count": 4
+        },
+        {
+          "item": "item_loom_frame",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_sail_cloth"
+        }
+      ],
+      "notes": "Coarse and heavy. The difference between a boat that drifts and a boat that goes.",
+      "source_index": 9
+    },
+    {
+      "id": "recipe_flint_knife",
+      "type": "recipe",
+      "name": "Knapping a flint knife",
+      "process": "process_knapping",
+      "ingredients": [
+        {
+          "material": "material_flint",
+          "count": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_flint_knife"
+        }
+      ],
+      "notes": "An afternoon's work, sharp for a week, replaced without ceremony.",
+      "source_index": 10
+    },
+    {
+      "id": "recipe_glass_lancet",
+      "type": "recipe",
+      "name": "Knapping a glass lancet",
+      "process": "process_knapping",
+      "ingredients": [
+        {
+          "tag": "#glass"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_glass_lancet"
+        }
+      ],
+      "notes": "Magma-glass or scar-glass, whichever the ground offers -- they knap the same, which is why they share a class.",
+      "source_index": 11
+    },
+    {
+      "id": "recipe_stone_adze",
+      "type": "recipe",
+      "name": "Hafting a stone adze",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_basalt"
+        },
+        {
+          "item": "item_sinew_lashing"
+        },
+        {
+          "tag": "#timber"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_stone_adze"
+        }
+      ],
+      "notes": "The blade set across the haft, not along it. That difference matters enormously to a boat.",
+      "source_index": 12
+    },
+    {
+      "id": "recipe_antler_pick",
+      "type": "recipe",
+      "name": "Hafting an antler pick",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_deer_antler"
+        },
+        {
+          "item": "item_reed_rope"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_antler_pick"
+        }
+      ],
+      "notes": "Free, in the sense that the deer left it lying there.",
+      "source_index": 13
+    },
+    {
+      "id": "recipe_bone_awl",
+      "type": "recipe",
+      "name": "Carving a bone awl",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "tag": "#bone"
+        },
+        {
+          "item": "item_flint_knife",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_bone_awl"
+        }
+      ],
+      "notes": "Bores a hole and scores a line, with the same point.",
+      "source_index": 14
+    },
+    {
+      "id": "recipe_bow_drill",
+      "type": "recipe",
+      "name": "Making a bow drill",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_bamboo_cane"
+        },
+        {
+          "material": "material_sinew"
+        },
+        {
+          "item": "item_flint_knife",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_bow_drill"
+        }
+      ],
+      "notes": "Holes and fire, the same motion at different patience.",
+      "source_index": 15
+    },
+    {
+      "id": "recipe_loom_frame",
+      "type": "recipe",
+      "name": "Building a loom frame",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_bamboo_cane",
+          "count": 4
+        },
+        {
+          "item": "item_reed_rope"
+        },
+        {
+          "item": "item_flint_knife",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_loom_frame"
+        }
+      ],
+      "notes": "Upright, weighted, taken apart to travel. Every woven thing waits on this one.",
+      "source_index": 16
+    },
+    {
+      "id": "recipe_grinding_quern",
+      "type": "recipe",
+      "name": "Dressing a quern",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_basalt",
+          "count": 2
+        },
+        {
+          "item": "item_stone_adze",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_grinding_quern"
+        }
+      ],
+      "notes": "Two stones, dressed to sit true. The household that owns one does not lend it.",
+      "source_index": 17
+    },
+    {
+      "id": "recipe_walking_staff",
+      "type": "recipe",
+      "name": "Cutting a walking staff",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "tag": "#timber"
+        },
+        {
+          "item": "item_flint_knife",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_walking_staff"
+        }
+      ],
+      "notes": "Shoulder height, worn smooth at the grip in its own time.",
+      "source_index": 18
+    },
+    {
+      "id": "recipe_mud_shoes",
+      "type": "recipe",
+      "name": "Lashing mud shoes",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_bamboo_cane",
+          "count": 2
+        },
+        {
+          "item": "item_reed_rope"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_mud_shoes"
+        }
+      ],
+      "notes": "Splayed frames under the foot. A salt flat becomes ground you can cross.",
+      "source_index": 19
+    },
+    {
+      "id": "recipe_tally_stick",
+      "type": "recipe",
+      "name": "Notching a tally",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_bamboo_cane"
+        },
+        {
+          "item": "item_bone_awl",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_tally_stick"
+        }
+      ],
+      "notes": "Notched and split so both halves must agree. A contract nobody can argue with.",
+      "source_index": 20
+    },
+    {
+      "id": "recipe_sandalwood_comb",
+      "type": "recipe",
+      "name": "Carving a comb",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_sandalwood_billet"
+        },
+        {
+          "item": "item_flint_knife",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_sandalwood_comb"
+        }
+      ],
+      "notes": "Keeps its scent for a lifetime, which is most of why anyone carries one.",
+      "source_index": 21
+    },
+    {
+      "id": "recipe_shell_bead",
+      "type": "recipe",
+      "name": "Drilling shell beads",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "tag": "#shell",
+          "count": 2
+        },
+        {
+          "item": "item_bow_drill",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_shell_bead",
+          "count": 4
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "notes": "The smallest unit of worth anybody agrees on, and Harappa is where they are made.",
+      "source_index": 22
+    },
+    {
+      "id": "recipe_ammonite_pendant",
+      "type": "recipe",
+      "name": "Drilling an ammonite",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_ammonite_shell"
+        },
+        {
+          "item": "item_bow_drill",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_ammonite_pendant"
+        }
+      ],
+      "notes": "A spiral somebody found already made.",
+      "source_index": 23
+    },
+    {
+      "id": "recipe_bone_harpoon",
+      "type": "recipe",
+      "name": "Binding a bone harpoon",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_fish_bone"
+        },
+        {
+          "material": "material_bamboo_cane"
+        },
+        {
+          "item": "item_sinew_lashing"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_bone_harpoon"
+        }
+      ],
+      "notes": "The rostral tooth arrives barbed. Very little is done to it.",
+      "source_index": 24
+    },
+    {
+      "id": "recipe_reed_spear",
+      "type": "recipe",
+      "name": "Binding a reed spear",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_bamboo_cane"
+        },
+        {
+          "material": "material_flint"
+        },
+        {
+          "item": "item_reed_rope"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_reed_spear"
+        }
+      ],
+      "notes": "Held level, it moves a herd. That is its recorded use.",
+      "source_index": 25
+    },
+    {
+      "id": "recipe_boar_spear",
+      "type": "recipe",
+      "name": "Binding a boar spear",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_teak_timber"
+        },
+        {
+          "material": "material_boar_tusk"
+        },
+        {
+          "item": "item_sinew_lashing"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_boar_spear"
+        }
+      ],
+      "notes": "Cross-barred below the head, so that what it stops does not walk up it.",
+      "source_index": 26
+    },
+    {
+      "id": "recipe_hunting_sling",
+      "type": "recipe",
+      "name": "Braiding a sling",
+      "process": "process_spinning",
+      "ingredients": [
+        {
+          "material": "material_goat_hair",
+          "count": 2
+        },
+        {
+          "material": "material_goat_hide"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_hunting_sling"
+        }
+      ],
+      "notes": "Two cords and a pouch. Keeps birds off a crop far more often than anything else.",
+      "source_index": 27
+    },
+    {
+      "id": "recipe_fire_rattle",
+      "type": "recipe",
+      "name": "Stringing a fire rattle",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "tag": "#shell",
+          "count": 4
+        },
+        {
+          "item": "item_reed_rope"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_fire_rattle"
+        }
+      ],
+      "notes": "Shells on a line. The clearest case in canon that a weapon is not about harm.",
+      "source_index": 28
+    },
+    {
+      "id": "recipe_potters_grog",
+      "type": "recipe",
+      "name": "Crushing grog",
+      "process": "process_grinding",
+      "ingredients": [
+        {
+          "item": "item_storage_jar"
+        },
+        {
+          "item": "item_grinding_quern",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_potters_grog",
+          "count": 3
+        }
+      ],
+      "notes": "Old fired pots, crushed back into new clay so the new one survives the kiln. The only material in canon that can only be made out of itself.",
+      "source_index": 29
+    },
+    {
+      "id": "recipe_storage_jar",
+      "type": "recipe",
+      "name": "Firing a storage jar",
+      "process": "process_firing",
+      "ingredients": [
+        {
+          "material": "material_river_clay",
+          "count": 3
+        },
+        {
+          "tag": "#fuel",
+          "count": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_storage_jar"
+        }
+      ],
+      "notes": "A grain surplus is not a harvest. It is one of these.",
+      "source_index": 30
+    },
+    {
+      "id": "recipe_cooking_pot",
+      "type": "recipe",
+      "name": "Firing a cooking pot",
+      "process": "process_firing",
+      "ingredients": [
+        {
+          "material": "material_river_clay",
+          "count": 2
+        },
+        {
+          "material": "material_potters_grog"
+        },
+        {
+          "tag": "#fuel",
+          "count": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_cooking_pot"
+        }
+      ],
+      "notes": "Coarse-tempered so it survives the fire it is made for.",
+      "source_index": 31
+    },
+    {
+      "id": "recipe_oil_lamp",
+      "type": "recipe",
+      "name": "Firing an oil lamp",
+      "process": "process_firing",
+      "ingredients": [
+        {
+          "material": "material_river_clay"
+        },
+        {
+          "tag": "#fuel"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_oil_lamp"
+        }
+      ],
+      "notes": "A closed lamp with a shielded wick, the kind that survives being carried.",
+      "source_index": 32
+    },
+    {
+      "id": "recipe_charcoal_brazier",
+      "type": "recipe",
+      "name": "Firing a brazier",
+      "process": "process_firing",
+      "ingredients": [
+        {
+          "material": "material_river_clay",
+          "count": 2
+        },
+        {
+          "tag": "#fuel",
+          "count": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_charcoal_brazier"
+        }
+      ],
+      "notes": "Portable fire. Lets heat happen where there is none.",
+      "source_index": 33
+    },
+    {
+      "id": "recipe_clay_seal",
+      "type": "recipe",
+      "name": "Cutting a seal",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_river_clay"
+        },
+        {
+          "item": "item_bone_awl",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_clay_seal"
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "notes": "Says who packed it and that nobody has opened it since.",
+      "source_index": 34
+    },
+    {
+      "id": "recipe_resin_flask",
+      "type": "recipe",
+      "name": "Firing a resin flask",
+      "process": "process_firing",
+      "ingredients": [
+        {
+          "material": "material_river_clay"
+        },
+        {
+          "tag": "#resin"
+        },
+        {
+          "tag": "#fuel"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_resin_flask"
+        }
+      ],
+      "notes": "Small, stoppered, worth more full than the room it sits in.",
+      "source_index": 35
+    },
+    {
+      "id": "recipe_grain_bin",
+      "type": "recipe",
+      "name": "Raising a grain bin",
+      "process": "process_weaving",
+      "ingredients": [
+        {
+          "material": "material_bamboo_cane",
+          "count": 6
+        },
+        {
+          "material": "material_river_clay",
+          "count": 4
+        },
+        {
+          "tag": "#fibre",
+          "count": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_grain_bin"
+        }
+      ],
+      "notes": "Mud-plastered basketwork, taller than a person. Does not move once filled -- the first object here only a settlement can own.",
+      "source_index": 36
+    },
+    {
+      "id": "recipe_charcoal",
+      "type": "recipe",
+      "name": "Burning charcoal",
+      "process": "process_firing",
+      "ingredients": [
+        {
+          "tag": "#timber",
+          "count": 3
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_charcoal",
+          "count": 2
+        }
+      ],
+      "notes": "Burnt slow under turf. The only fuel hot enough to melt anything.",
+      "source_index": 37
+    },
+    {
+      "id": "recipe_tree_pitch",
+      "type": "recipe",
+      "name": "Boiling pitch",
+      "process": "process_firing",
+      "ingredients": [
+        {
+          "tag": "#timber",
+          "count": 2
+        },
+        {
+          "tag": "#fuel"
+        },
+        {
+          "item": "item_cooking_pot",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_tree_pitch",
+          "count": 2
+        }
+      ],
+      "notes": "In a covered pit. Nothing floats without it.",
+      "source_index": 38
+    },
+    {
+      "id": "recipe_reed_torch",
+      "type": "recipe",
+      "name": "Making a torch",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_reed_fibre",
+          "count": 2
+        },
+        {
+          "material": "material_tree_pitch"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_reed_torch",
+          "count": 2
+        }
+      ],
+      "notes": "Bright, brief, and gone in the rain.",
+      "source_index": 39
+    },
+    {
+      "id": "recipe_tinder_bundle",
+      "type": "recipe",
+      "name": "Making tinder",
+      "process": "process_drying",
+      "ingredients": [
+        {
+          "material": "material_bark_bast"
+        },
+        {
+          "material": "material_charcoal"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_tinder_bundle",
+          "count": 2
+        }
+      ],
+      "notes": "Kept dry against the body. Usually the difference between a cold night and a warm one.",
+      "source_index": 40
+    },
+    {
+      "id": "recipe_tan_goat_hide",
+      "type": "recipe",
+      "name": "Tanning hide",
+      "process": "process_tanning",
+      "ingredients": [
+        {
+          "tag": "#hide",
+          "count": 2
+        },
+        {
+          "material": "material_bark_bast",
+          "count": 2
+        },
+        {
+          "item": "item_storage_jar",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_goat_hide",
+          "count": 2
+        }
+      ],
+      "notes": "Bark liquor and time. Nobody will let you do it upwind of them.",
+      "source_index": 41
+    },
+    {
+      "id": "recipe_water_skin",
+      "type": "recipe",
+      "name": "Pitching a water skin",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_goat_hide"
+        },
+        {
+          "material": "material_tree_pitch"
+        },
+        {
+          "item": "item_bone_awl",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_water_skin"
+        }
+      ],
+      "notes": "Tastes of the pitch. Everyone stopped noticing generations ago.",
+      "source_index": 42
+    },
+    {
+      "id": "recipe_bedroll",
+      "type": "recipe",
+      "name": "Making a bedroll",
+      "process": "process_weaving",
+      "ingredients": [
+        {
+          "item": "item_reed_mat"
+        },
+        {
+          "material": "material_goat_hide"
+        },
+        {
+          "material": "material_tree_pitch"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_bedroll"
+        }
+      ],
+      "notes": "Oiled cloth over a reed mat. It has been rained on.",
+      "source_index": 43
+    },
+    {
+      "id": "recipe_hide_tent",
+      "type": "recipe",
+      "name": "Raising a hide tent",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_goat_hide",
+          "count": 4
+        },
+        {
+          "material": "material_bamboo_cane",
+          "count": 3
+        },
+        {
+          "item": "item_husk_hawser"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_hide_tent"
+        }
+      ],
+      "known_by": [
+        "tushara"
+      ],
+      "notes": "Two people to raise and one to strike.",
+      "source_index": 44
+    },
+    {
+      "id": "recipe_rope_span",
+      "type": "recipe",
+      "name": "Fixing a rope span",
+      "process": "process_boatbuilding",
+      "ingredients": [
+        {
+          "item": "item_husk_hawser",
+          "count": 2
+        },
+        {
+          "tag": "#timber",
+          "count": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_rope_span"
+        }
+      ],
+      "notes": "A line fixed both banks and a loop to hang from. Wants two people, which is why Teshk will not leave.",
+      "source_index": 45
+    },
+    {
+      "id": "recipe_salt_box",
+      "type": "recipe",
+      "name": "Carving a salt box",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_sandalwood_billet"
+        },
+        {
+          "item": "item_flint_knife",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_salt_box"
+        }
+      ],
+      "notes": "Wood rather than clay, because salt draws water and a fired jar sweats.",
+      "source_index": 46
+    },
+    {
+      "id": "recipe_smelt_copper",
+      "type": "recipe",
+      "name": "Smelting copper",
+      "process": "process_smelting",
+      "ingredients": [
+        {
+          "material": "material_native_copper",
+          "count": 2
+        },
+        {
+          "material": "material_charcoal",
+          "count": 3
+        },
+        {
+          "item": "item_charcoal_brazier",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_native_copper",
+          "count": 3
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "epochs": [
+        "epoch_civilization_dawn",
+        "epoch_current"
+      ],
+      "notes": "Canon is a bronze world with iron as a rumour. Nothing above this line goes further.",
+      "source_index": 47
+    },
+    {
+      "id": "recipe_cast_bronze",
+      "type": "recipe",
+      "name": "Casting bronze",
+      "process": "process_casting",
+      "ingredients": [
+        {
+          "material": "material_native_copper",
+          "count": 3
+        },
+        {
+          "material": "material_tin_ore"
+        },
+        {
+          "material": "material_charcoal",
+          "count": 3
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_bronze",
+          "count": 2
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "epochs": [
+        "epoch_civilization_dawn",
+        "epoch_current"
+      ],
+      "notes": "Copper and tin. Worth more than the person carrying it usually is.",
+      "source_index": 48
+    },
+    {
+      "id": "recipe_bronze_knife",
+      "type": "recipe",
+      "name": "Casting a bronze knife",
+      "process": "process_casting",
+      "ingredients": [
+        {
+          "material": "material_bronze"
+        },
+        {
+          "material": "material_charcoal",
+          "count": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_bronze_knife"
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "epochs": [
+        "epoch_civilization_dawn",
+        "epoch_current"
+      ],
+      "notes": "Holds an edge and takes a new one.",
+      "source_index": 49
+    },
+    {
+      "id": "recipe_bronze_chisel",
+      "type": "recipe",
+      "name": "Casting a chisel",
+      "process": "process_casting",
+      "ingredients": [
+        {
+          "material": "material_bronze"
+        },
+        {
+          "material": "material_charcoal",
+          "count": 2
+        },
+        {
+          "tag": "#timber"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_bronze_chisel"
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "epochs": [
+        "epoch_civilization_dawn",
+        "epoch_current"
+      ],
+      "notes": "What dressed sandstone is dressed with. A settlement with these has a mason.",
+      "source_index": 50
+    },
+    {
+      "id": "recipe_bronze_spearhead",
+      "type": "recipe",
+      "name": "Casting a spearhead",
+      "process": "process_casting",
+      "ingredients": [
+        {
+          "material": "material_bronze"
+        },
+        {
+          "material": "material_charcoal",
+          "count": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_bronze_spearhead"
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "epochs": [
+        "epoch_civilization_dawn",
+        "epoch_current"
+      ],
+      "notes": "Socketed, so it outlives its shaft. Traded far past where anyone can make one.",
+      "source_index": 51
+    },
+    {
+      "id": "recipe_grind_ochre",
+      "type": "recipe",
+      "name": "Grinding ochre",
+      "process": "process_grinding",
+      "ingredients": [
+        {
+          "material": "material_red_ochre",
+          "count": 2
+        },
+        {
+          "item": "item_grinding_quern",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_red_ochre",
+          "count": 3
+        }
+      ],
+      "notes": "Ground and washed. The oldest pigment anybody has.",
+      "source_index": 52
+    },
+    {
+      "id": "recipe_lamp_black",
+      "type": "recipe",
+      "name": "Catching lamp black",
+      "process": "process_firing",
+      "ingredients": [
+        {
+          "tag": "#oil"
+        },
+        {
+          "item": "item_oil_lamp",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_lamp_black",
+          "count": 2
+        }
+      ],
+      "notes": "Soot on a cold plate held over a flame.",
+      "source_index": 53
+    },
+    {
+      "id": "recipe_indigo_dye",
+      "type": "recipe",
+      "name": "Fermenting indigo",
+      "process": "process_brewing",
+      "ingredients": [
+        {
+          "material": "material_indigo_dye",
+          "count": 2
+        },
+        {
+          "item": "item_storage_jar",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_indigo_dye",
+          "count": 4
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "notes": "Stinks for a fortnight. Then it is worth what it is worth.",
+      "source_index": 54
+    },
+    {
+      "id": "recipe_ink_cake",
+      "type": "recipe",
+      "name": "Pressing an ink cake",
+      "process": "process_pressing",
+      "ingredients": [
+        {
+          "material": "material_lamp_black",
+          "count": 2
+        },
+        {
+          "tag": "#resin"
+        },
+        {
+          "item": "item_cooking_pot",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_ink_cake"
+        }
+      ],
+      "notes": "Soot bound with gum and dried into a block. What Varuna's diary is written in.",
+      "source_index": 55
+    },
+    {
+      "id": "recipe_reed_stylus",
+      "type": "recipe",
+      "name": "Cutting a stylus",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_reed_fibre"
+        },
+        {
+          "item": "item_flint_knife",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_reed_stylus",
+          "count": 2
+        }
+      ],
+      "notes": "Recut every few lines, and lost constantly.",
+      "source_index": 56
+    },
+    {
+      "id": "recipe_palm_leaf_sheet",
+      "type": "recipe",
+      "name": "Preparing palm leaf",
+      "process": "process_drying",
+      "ingredients": [
+        {
+          "material": "material_palm_husk",
+          "count": 2
+        },
+        {
+          "item": "item_cooking_pot",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_palm_leaf_sheet",
+          "count": 3
+        }
+      ],
+      "notes": "Cut, boiled, dried, smoothed. Takes a scored line better than it takes ink.",
+      "source_index": 57
+    },
+    {
+      "id": "recipe_field_diary",
+      "type": "recipe",
+      "name": "Binding a field diary",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "item": "item_palm_leaf_sheet",
+          "count": 4
+        },
+        {
+          "item": "item_reed_rope"
+        },
+        {
+          "item": "item_bone_awl",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_field_diary"
+        }
+      ],
+      "notes": "The crossings-out are the useful part. A first guess is worth keeping once it is wrong.",
+      "source_index": 58
+    },
+    {
+      "id": "recipe_press_mahua_oil",
+      "type": "recipe",
+      "name": "Pressing mahua oil",
+      "process": "process_pressing",
+      "ingredients": [
+        {
+          "material": "material_mahua_oil",
+          "count": 2
+        },
+        {
+          "item": "item_cooking_pot",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_mahua_oil",
+          "count": 3
+        }
+      ],
+      "notes": "Under a beam or a stone, with something underneath to catch it.",
+      "source_index": 59
+    },
+    {
+      "id": "recipe_grind_flour",
+      "type": "recipe",
+      "name": "Grinding flour",
+      "process": "process_grinding",
+      "ingredients": [
+        {
+          "tag": "#grain",
+          "count": 2
+        },
+        {
+          "item": "item_grinding_quern",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_delta_rice",
+          "count": 3
+        }
+      ],
+      "notes": "Any grain. The quern does not care and neither does the recipe.",
+      "source_index": 60
+    },
+    {
+      "id": "recipe_flood_bread",
+      "type": "recipe",
+      "name": "Baking flood bread",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "material": "material_delta_rice",
+          "count": 2
+        },
+        {
+          "material": "material_taro_root"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_flood_bread",
+          "count": 2
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "notes": "What you eat in a year the rice did badly and the flood did well.",
+      "source_index": 61
+    },
+    {
+      "id": "recipe_dried_fish",
+      "type": "recipe",
+      "name": "Drying fish",
+      "process": "process_drying",
+      "ingredients": [
+        {
+          "tag": "#flesh",
+          "count": 2
+        },
+        {
+          "tag": "#salt"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_dried_fish",
+          "count": 2
+        }
+      ],
+      "notes": "Split, salted, racked. Keeps a season and travels anywhere.",
+      "source_index": 62
+    },
+    {
+      "id": "recipe_date_block",
+      "type": "recipe",
+      "name": "Pressing a date block",
+      "process": "process_pressing",
+      "ingredients": [
+        {
+          "material": "material_date_fruit",
+          "count": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_date_block"
+        }
+      ],
+      "notes": "Wrapped in leaf. Why a desert crossing is arithmetic rather than a gamble.",
+      "source_index": 63
+    },
+    {
+      "id": "recipe_tamarind_paste",
+      "type": "recipe",
+      "name": "Making tamarind paste",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "material": "material_tamarind_pulp",
+          "count": 2
+        },
+        {
+          "tag": "#salt"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_tamarind_paste"
+        }
+      ],
+      "notes": "Sour enough to make bad water drinkable and worse food interesting.",
+      "source_index": 64
+    },
+    {
+      "id": "recipe_salt_fish_stew",
+      "type": "recipe",
+      "name": "Cooking salt-fish stew",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "item": "item_dried_fish"
+        },
+        {
+          "material": "material_taro_root",
+          "count": 2
+        },
+        {
+          "material": "material_tamarind_pulp"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_salt_fish_stew"
+        }
+      ],
+      "notes": "The pot everything ends up in. Nobody writes it down and everybody makes it.",
+      "source_index": 65
+    },
+    {
+      "id": "recipe_spiced_rice",
+      "type": "recipe",
+      "name": "Cooking spiced rice",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "material": "material_delta_rice",
+          "count": 2
+        },
+        {
+          "tag": "#salt"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_spiced_rice"
+        }
+      ],
+      "notes": "What a settlement eats when there is nothing to mark.",
+      "source_index": 66
+    },
+    {
+      "id": "recipe_travel_cake",
+      "type": "recipe",
+      "name": "Baking travel cake",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "material": "material_delta_rice",
+          "count": 2
+        },
+        {
+          "tag": "#oil"
+        },
+        {
+          "material": "material_date_fruit"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_travel_cake",
+          "count": 2
+        }
+      ],
+      "notes": "Baked hard. Made to be carried rather than enjoyed, and it tastes like it.",
+      "source_index": 67
+    },
+    {
+      "id": "recipe_mahua_liquor",
+      "type": "recipe",
+      "name": "Brewing mahua",
+      "process": "process_brewing",
+      "ingredients": [
+        {
+          "material": "material_mahua_oil",
+          "count": 3
+        },
+        {
+          "item": "item_storage_jar",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_mahua_liquor"
+        }
+      ],
+      "known_by": [
+        "jharwa"
+      ],
+      "notes": "Fermented, not distilled. Strong enough.",
+      "source_index": 68
+    },
+    {
+      "id": "recipe_neem_salve",
+      "type": "recipe",
+      "name": "Making neem salve",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "material": "material_neem_bark",
+          "count": 2
+        },
+        {
+          "tag": "#oil"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_neem_salve"
+        }
+      ],
+      "notes": "Bitter, oily, keeps a wound clean.",
+      "source_index": 69
+    },
+    {
+      "id": "recipe_myrrh_poultice",
+      "type": "recipe",
+      "name": "Making a myrrh poultice",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "material": "material_myrrh_gum"
+        },
+        {
+          "material": "material_bark_bast"
+        },
+        {
+          "tag": "#oil"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_myrrh_poultice"
+        }
+      ],
+      "notes": "The salve canon already names on the thorn, spread on bast.",
+      "source_index": 70
+    },
+    {
+      "id": "recipe_shilajit_tonic",
+      "type": "recipe",
+      "name": "Preparing shilajit",
+      "process": "process_grinding",
+      "ingredients": [
+        {
+          "material": "material_shilajit"
+        },
+        {
+          "item": "item_grinding_quern",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_shilajit_tonic"
+        }
+      ],
+      "notes": "Scraped from high rock and taken in water.",
+      "source_index": 71
+    }
+  ],
+  "vehicles": [
+    {
+      "id": "vehicle_reed_raft",
+      "type": "vehicle",
+      "name": "Reed raft",
+      "kind": "raft",
+      "crosses": [
+        "river",
+        "wetland"
+      ],
+      "capacity": 2,
+      "materials": [
+        "material_reed_fibre",
+        "material_bamboo_cane"
+      ],
+      "built_by": "process_boatbuilding",
+      "notes": "Bundled reed lashed to a cane frame. Rots in a season and is rebuilt in a morning, which is the correct trade for something that only has to cross a channel.",
+      "source_index": 0
+    },
+    {
+      "id": "vehicle_log_dugout",
+      "type": "vehicle",
+      "name": "Dugout",
+      "kind": "boat",
+      "crosses": [
+        "river",
+        "wetland",
+        "coast"
+      ],
+      "capacity": 3,
+      "materials": [
+        "material_teak_timber",
+        "material_tree_pitch"
+      ],
+      "built_by": "process_boatbuilding",
+      "notes": "One trunk, burnt and adzed hollow. The adze blade set across the haft rather than along it is the whole reason this is possible.",
+      "source_index": 1
+    },
+    {
+      "id": "vehicle_hide_coracle",
+      "type": "vehicle",
+      "name": "Coracle",
+      "kind": "boat",
+      "crosses": [
+        "river"
+      ],
+      "capacity": 2,
+      "materials": [
+        "material_croc_hide",
+        "material_bamboo_cane",
+        "material_tree_pitch"
+      ],
+      "built_by": "process_boatbuilding",
+      "notes": "A basket with a skin over it. Spins constantly, carries far more than it should, and one person can walk home with it on their back.",
+      "source_index": 2
+    },
+    {
+      "id": "vehicle_delta_barge",
+      "type": "vehicle",
+      "name": "Delta barge",
+      "kind": "boat",
+      "crosses": [
+        "river",
+        "wetland",
+        "coast"
+      ],
+      "capacity": 8,
+      "materials": [
+        "material_teak_timber",
+        "material_palm_husk",
+        "material_tree_pitch"
+      ],
+      "built_by": "process_boatbuilding",
+      "notes": "Flat-bottomed and poled. What actually moves a grain surplus, and therefore what a settlement is downstream of in every sense.",
+      "source_index": 3
+    },
+    {
+      "id": "vehicle_coastal_dhow",
+      "type": "vehicle",
+      "name": "Coastal dhow",
+      "kind": "ship",
+      "crosses": [
+        "coast",
+        "sea"
+      ],
+      "capacity": 12,
+      "materials": [
+        "material_teak_timber",
+        "material_palm_husk",
+        "material_tree_pitch"
+      ],
+      "built_by": "process_boatbuilding",
+      "notes": "Sewn rather than nailed -- husk cordage through drilled planks, and the whole hull flexes. Canon records iron-teak for ship timber, and this is what it is for.",
+      "source_index": 4
+    },
+    {
+      "id": "vehicle_outrigger",
+      "type": "vehicle",
+      "name": "Outrigger",
+      "kind": "ship",
+      "crosses": [
+        "sea",
+        "coast"
+      ],
+      "capacity": 6,
+      "materials": [
+        "material_teak_timber",
+        "material_palm_husk"
+      ],
+      "built_by": "process_boatbuilding",
+      "exemplars": [
+        "place_kelpfang"
+      ],
+      "notes": "A hull too narrow to stand up on its own, and a float that makes it the steadiest thing on open water. The Kelpfang is one of these, grown rather than built.",
+      "source_index": 5
+    },
+    {
+      "id": "vehicle_ox_cart",
+      "type": "vehicle",
+      "name": "Ox cart",
+      "kind": "cart",
+      "crosses": [
+        "plains",
+        "settlement",
+        "desert",
+        "hills"
+      ],
+      "capacity": 4,
+      "materials": [
+        "material_teak_timber",
+        "material_sinew"
+      ],
+      "notes": "Solid wheels, no springs, and a pace nobody hurries. Carries what a barge cannot reach.",
+      "source_index": 6
+    },
+    {
+      "id": "vehicle_salt_sled",
+      "type": "vehicle",
+      "name": "Salt sled",
+      "kind": "sled",
+      "crosses": [
+        "desert",
+        "coast"
+      ],
+      "capacity": 2,
+      "materials": [
+        "material_bamboo_cane",
+        "material_palm_husk"
+      ],
+      "notes": "Dragged over a salt pan where a wheel would cut through the crust and stop. Dwarka's answer to ground that is neither water nor road.",
+      "source_index": 7
+    },
+    {
+      "id": "vehicle_bone_framed_trawler",
+      "type": "vehicle",
+      "name": "Bone-framed trawler",
+      "kind": "ship",
+      "crosses": [
+        "sea",
+        "coast"
+      ],
+      "capacity": 20,
+      "materials": [
+        "material_leviathan_bone",
+        "material_teak_timber",
+        "material_bronze"
+      ],
+      "built_by": "process_boatbuilding",
+      "exemplars": [
+        "place_leviathans_rib"
+      ],
+      "epochs": [
+        "epoch_current"
+      ],
+      "notes": "Canon states the Abyssal Blue's bone plate is harvested for building maritime vessels. This is that claim made into a ship: a single rib is a keel, and the Leviathan's Rib is the one canon names.",
+      "source_index": 8
+    },
+    {
+      "id": "vehicle_ground_effect_craft",
+      "type": "vehicle",
+      "name": "Ground-effect craft",
+      "kind": "machine",
+      "crosses": [
+        "sea",
+        "coast",
+        "desert"
+      ],
+      "capacity": 30,
+      "materials": [
+        "material_bronze"
+      ],
+      "exemplars": [
+        "place_ekranoplan"
+      ],
+      "epochs": [
+        "epoch_current"
+      ],
+      "notes": "Flies a few metres above the water and cannot go higher, which makes it neither a boat nor an aircraft and useless anywhere but the open Tethys. The Battered Ekranoplan is the one canon has, bought cheap off delta salvagers.",
+      "source_index": 9
+    },
+    {
+      "id": "vehicle_workshop_train",
+      "type": "vehicle",
+      "name": "Workshop train",
+      "kind": "machine",
+      "crosses": [
+        "plains",
+        "hills",
+        "desert",
+        "settlement"
+      ],
+      "capacity": 60,
+      "materials": [
+        "material_bronze",
+        "material_teak_timber"
+      ],
+      "exemplars": [
+        "place_survival_train"
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "A travelling apothecary and workshop rather than transport. The Survival Train gathers the displaced across the broken country, which is a use for a vehicle that has nothing to do with getting anywhere.",
+      "source_index": 10
+    }
+  ]
+}
