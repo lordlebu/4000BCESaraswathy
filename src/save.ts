@@ -6,6 +6,7 @@
 // standing in.
 
 import { type Collection, readCollection } from './content/collection';
+import { type Satchel, emptySatchel } from './content/satchel';
 import { type Progress, emptyProgress } from './journey';
 
 const PREFIX = 'south-of-tethys';
@@ -22,8 +23,15 @@ const PREFIX = 'south-of-tethys';
  * the fog and the sketches in an old save describe a world that is no longer there. The
  * payload would still parse, which is exactly the danger: it would be read, and be wrong.
  * Discarding it is the whole point of this constant.
+ *
+ * **8 adds the satchel.** A save written under 7 has no `satchel` key, and reading one as an
+ * empty satchel would be defensible -- the player simply has nothing yet. It is discarded
+ * anyway, on the rule this constant exists for: the payload shape changed, and a save that
+ * parses under a shape it was not written for is the danger rather than the inconvenience.
+ * The cost is real and small; the alternative is a special case that has to be remembered
+ * every time the shape moves again.
  */
-export const SAVE_VERSION = 7;
+export const SAVE_VERSION = 8;
 
 export interface Journey {
   version: number;
@@ -46,6 +54,13 @@ export interface Journey {
    * only stores it.
    */
   progress: Progress;
+  /**
+   * What the traveller is carrying, keyed by canon id.
+   *
+   * A flat record of counts, which is the whole of it: there is no weight, no slots and
+   * nothing that spoils. See `content/satchel.ts` for why that is narrower than it sounds.
+   */
+  satchel: Satchel;
 }
 
 const empty = (): Journey => ({
@@ -53,7 +68,8 @@ const empty = (): Journey => ({
   discovered: [],
   collection: {},
   reached: false,
-  progress: emptyProgress()
+  progress: emptyProgress(),
+  satchel: emptySatchel()
 });
 
 /** Anything unrecognisable becomes an empty progress rather than a half-read one. */
@@ -66,6 +82,18 @@ function readProgress(value: unknown): Progress {
     answered: raw.answered && typeof raw.answered === 'object' ? { ...raw.answered } : {},
     questions: Array.isArray(raw.questions) ? raw.questions : []
   };
+}
+
+/** Anything unrecognisable becomes an empty satchel, on the same terms as progress. */
+function readSatchel(value: unknown): Satchel {
+  if (!value || typeof value !== 'object') return emptySatchel();
+  const out: Satchel = {};
+  for (const [id, n] of Object.entries(value as Record<string, unknown>)) {
+    // A count that is not a positive whole number is a corrupted stack, not a hint. Dropping
+    // it keeps `carried()` honest -- every key in a satchel is something actually held.
+    if (typeof n === 'number' && Number.isInteger(n) && n > 0) out[id] = n;
+  }
+  return out;
 }
 
 function key(seed: string): string {
@@ -93,7 +121,8 @@ export function loadJourney(seed: string): Journey {
       discovered: Array.isArray(parsed.discovered) ? parsed.discovered : [],
       collection: readCollection(parsed.collection),
       reached: parsed.reached === true,
-      progress: readProgress(parsed.progress)
+      progress: readProgress(parsed.progress),
+      satchel: readSatchel(parsed.satchel)
     };
   } catch {
     localStorage.removeItem(key(seed));
@@ -110,13 +139,22 @@ export function loadJourney(seed: string): Journey {
  */
 export function saveJourney(
   seed: string,
-  journey: Omit<Journey, 'version' | 'progress'> & { progress?: Progress }
+  journey: Omit<Journey, 'version' | 'progress' | 'satchel'> & {
+    progress?: Progress;
+    satchel?: Satchel;
+  }
 ): void {
   try {
+    // One read, not one per optional field. Both `progress` and `satchel` fall back to what
+    // is already stored, and calling `loadJourney` twice would parse the same payload twice
+    // on every save -- which happens on every step the player takes.
+    const stored =
+      journey.progress === undefined || journey.satchel === undefined ? loadJourney(seed) : null;
     const payload: Journey = {
       version: SAVE_VERSION,
       ...journey,
-      progress: journey.progress ?? loadJourney(seed).progress
+      progress: journey.progress ?? stored!.progress,
+      satchel: journey.satchel ?? stored!.satchel
     };
     localStorage.setItem(key(seed), JSON.stringify(payload));
   } catch {
