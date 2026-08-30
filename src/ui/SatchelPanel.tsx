@@ -10,9 +10,17 @@
 // nothing is running out — see `content/satchel.ts` for why that is a narrower reversal of
 // `kit.ts` than it looks.
 
-import { type Recipe, item, material, nameOf } from '../content/making';
+import {
+  type Recipe,
+  recipes as allRecipes,
+  item,
+  material,
+  nameOf
+} from '../content/making';
+import { npc } from '../content/places';
 import {
   type Bench,
+  type Knows,
   blockedBy,
   canMake,
   makeableNow,
@@ -30,6 +38,14 @@ export interface SatchelPanelProps {
   gatherHint: string | null;
   onGather: () => void;
   onMake: (recipeId: string) => void;
+  /**
+   * Whether the player has been shown how.
+   *
+   * Passed in rather than derived here, because knowing is a fact about the journey and this
+   * panel is about the satchel. `App` composes the two, which is the same division `bench`
+   * already has.
+   */
+  knows: Knows;
   open: boolean;
   onClose: () => void;
 }
@@ -83,6 +99,11 @@ function Makeable({
   );
 }
 
+/** Recipes that exist, need a teacher, and have not been taught yet. */
+function stillToLearn(knows: Knows): Recipe[] {
+  return allRecipes.filter((r) => r.taughtBy.length > 0 && !knows(r.id));
+}
+
 export function SatchelPanel({
   satchel,
   bench,
@@ -90,6 +111,7 @@ export function SatchelPanel({
   gatherHint,
   onGather,
   onMake,
+  knows,
   open,
   onClose
 }: SatchelPanelProps) {
@@ -97,10 +119,14 @@ export function SatchelPanel({
 
   const stuff = materialsHeld(satchel);
   const made = itemsHeld(satchel);
-  const ready = makeableNow(satchel, bench);
+  const ready = makeableNow(satchel, bench, knows);
   // Capped, and the cap is a judgement rather than a limit: a list of everything within reach
   // is 40 rows of things the player cannot do, which reads as a wall rather than as a lead.
-  const near = withinReach(satchel, bench).slice(0, 8);
+  const near = withinReach(satchel, bench, knows).slice(0, 8);
+
+  // Craft somebody would have to show you. Named rather than hidden: a player who has met
+  // nobody should be able to see that the craft exists and that a person is the way in, which
+  // is the whole point of gating it on people rather than on a level.
 
   return (
     <div className="diary-veil" role="dialog" aria-modal="true" aria-label="Satchel">
@@ -178,6 +204,21 @@ export function SatchelPanel({
             </ul>
           )}
         </section>
+
+        {stillToLearn(knows).length > 0 && (
+          <section className="diary-section">
+            <h3>Somebody would have to show you</h3>
+            <ul className="recipe-why">
+              {stillToLearn(knows)
+                .slice(0, 6)
+                .map((r) => (
+                  <li key={r.id}>
+                    {r.name} — {r.taughtBy.map((w) => npc(w)?.name ?? w).join(' or ')}
+                  </li>
+                ))}
+            </ul>
+          </section>
+        )}
       </section>
     </div>
   );

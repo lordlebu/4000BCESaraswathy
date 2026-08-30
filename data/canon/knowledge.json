@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.0.0",
+  "canon_version": "2.1.1",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -69,7 +69,10 @@
           "entry": "Marn's household eats it. Has always eaten it. Loses an animal to it about once a year and considers this normal."
         },
         {
-          "entry": "They soak it two days in running water and throw the first water away. Untreated, it is exactly as toxic as the archive says."
+          "entry": "They soak it two days in running water and throw the first water away. Untreated, it is exactly as toxic as the archive says.",
+          "needs_tool": [
+            "contain"
+          ]
         },
         {
           "entry": "The animals they lose are the ones that get into the standing crop. The archive tested the plant; the herders solved the food. Both of them stopped there."
@@ -492,6 +495,9 @@
           "entry": "It crosses the old harbour floor without a break, and the silt underneath it is unfused. So it happened after the water left, and fast.",
           "requires": [
             "discovery_seawall_courses"
+          ],
+          "needs_tool": [
+            "cut"
           ]
         },
         {
@@ -742,7 +748,10 @@
           "entry": "There are other layers. Thin ones, of bone I cannot place, and they are not at the top."
         },
         {
-          "entry": "I counted nine. The deepest is under a pottery style Sura says her grandmother's grandmother used."
+          "entry": "I counted nine. The deepest is under a pottery style Sura says her grandmother's grandmother used.",
+          "needs_tool": [
+            "cut"
+          ]
         },
         {
           "entry": "Nine, in four hundred years, and not evenly spaced -- they cluster. Two of them are close enough to be one bad decade."
@@ -886,7 +895,10 @@
           }
         },
         {
-          "entry": "At the bottom they are round and thin. At the top, over nine inches, they are ridged and heavy. In between they are both, and neither, and the intermediate ones are the commonest."
+          "entry": "At the bottom they are round and thin. At the top, over nine inches, they are ridged and heavy. In between they are both, and neither, and the intermediate ones are the commonest.",
+          "needs_tool": [
+            "cut"
+          ]
         },
         {
           "entry": "Nine inches of ash is not nine inches of time. This is a long slow record laid down between two very fast events."
@@ -1044,7 +1056,10 @@
           ]
         },
         {
-          "entry": "Fired properly rather than left to a hot week, it would not go cloudy. That is a kiln's work, not a summer's."
+          "entry": "Fired properly rather than left to a hot week, it would not go cloudy. That is a kiln's work, not a summer's.",
+          "needs_tool": [
+            "contain"
+          ]
         },
         {
           "entry": "Thrali sets his nets by feel because he cannot see the channel bed through four feet of silt-water. A pane he could hold under would show him it."
@@ -1408,7 +1423,10 @@
           "entry": "The limb bones are paired the wrong way. Whatever this was did not share an ancestor with anything I have drawn on this continent."
         },
         {
-          "entry": "Not deformity, and not two animals mixed: the joints articulate. It worked. Something walked around inside this."
+          "entry": "Not deformity, and not two animals mixed: the joints articulate. It worked. Something walked around inside this.",
+          "needs_tool": [
+            "carry"
+          ]
         },
         {
           "entry": "The teeth are the argument. Replacement runs from the back forward, which nothing here does, and the wear says it lived long enough to be old."

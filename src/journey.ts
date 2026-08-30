@@ -21,6 +21,8 @@ import {
   word
 } from './content/knowledge';
 import { type Line, npc, npcs, poi } from './content/places';
+import { recipe } from './content/making';
+import { type Satchel, canDo, count, emptySatchel, remove } from './content/satchel';
 
 /** Where the world is, when a rung asks for a particular night or weather. */
 export interface WorldMoment {
@@ -37,6 +39,14 @@ export interface WorldMoment {
 export interface Progress {
   rungs: Record<string, number>;
   words: string[];
+  /**
+   * Recipes somebody showed the player how to make.
+   *
+   * Only the ones that had to be learned: a recipe canon gives no `taughtBy` is common
+   * knowledge and is never listed here. So this is a short list, and an empty one is the
+   * correct state for a player who has not talked to anybody — not an empty repertoire.
+   */
+  recipes: string[];
   /** Question id to the resolution index the player settled on. */
   answered: Record<string, number>;
   /**
@@ -51,6 +61,7 @@ export interface Progress {
 export const emptyProgress = (): Progress => ({
   rungs: {},
   words: [],
+  recipes: [],
   answered: {},
   questions: []
 });
@@ -62,6 +73,27 @@ export function rungOf(progress: Progress, id: string): number {
 
 export function knowsWord(progress: Progress, id: string): boolean {
   return progress.words.includes(id);
+}
+
+/**
+ * Whether the player can make this.
+ *
+ * True for anything common — canon says a recipe with no teacher is known from the first
+ * step — and for anything somebody has since shown them. Note which way round the default
+ * runs: silence in canon means *known* here, which is the opposite of how `requires` reads
+ * and is deliberate. A making panel that starts empty teaches nobody that making exists.
+ */
+export function knowsRecipe(progress: Progress, id: string): boolean {
+  const r = recipe(id);
+  if (!r) return false;
+  return r.taughtBy.length === 0 || progress.recipes.includes(id);
+}
+
+/** Learn a recipe. Idempotent, and refuses one canon says nobody needs to teach. */
+export function learnRecipe(progress: Progress, id: string): Progress {
+  const r = recipe(id);
+  if (!r || r.taughtBy.length === 0 || progress.recipes.includes(id)) return progress;
+  return { ...progress, recipes: [...progress.recipes, id] };
 }
 
 /**
@@ -112,18 +144,43 @@ function momentAllows(rungConditions: Discovery['rungs'][number]['conditions'], 
 export function canAdvance(
   progress: Progress,
   id: string,
-  moment: WorldMoment | null = null
+  moment: WorldMoment | null = null,
+  carrying: Satchel = emptySatchel()
 ): boolean {
   const d = discovery(id);
   if (!d) return false;
   const next = rungOf(progress, id) + 1;
   if (next > lastRung(d)) return false;
   const rung = d.rungs[next]!;
-  return rung.requires.every((r) => holds(progress, r)) && momentAllows(rung.conditions, moment);
+  return (
+    rung.requires.every((r) => holds(progress, r)) &&
+    momentAllows(rung.conditions, moment) &&
+    hasTools(carrying, rung.needsTool)
+  );
+}
+
+/**
+ * Whether the traveller has what a rung asks them to be holding.
+ *
+ * `carrying` defaults to an empty satchel rather than being required, which keeps every
+ * existing caller working and is honest for the twenty-five rungs that ask for nothing. The
+ * six that do ask are all `cut`, `contain` or `carry` — never one of the four the kit already
+ * affords, because a gate the player passes on their first step is not a gate.
+ */
+function hasTools(carrying: Satchel, needed: readonly string[]): boolean {
+  // The early return is not decoration: this runs for every discovery on every tick, and all
+  // but six rungs in the game ask for nothing.
+  if (needed.length === 0) return true;
+  return needed.every((n) => canDo(carrying, n));
 }
 
 /** Why the next rung is out of reach, for a UI that wants to say something useful. */
-export function blockedBy(progress: Progress, id: string, moment: WorldMoment | null = null): string[] {
+export function blockedBy(
+  progress: Progress,
+  id: string,
+  moment: WorldMoment | null = null,
+  carrying: Satchel = emptySatchel()
+): string[] {
   const d = discovery(id);
   if (!d) return [];
   const next = rungOf(progress, id) + 1;
@@ -131,12 +188,22 @@ export function blockedBy(progress: Progress, id: string, moment: WorldMoment | 
   const rung = d.rungs[next]!;
   const missing = rung.requires.filter((r) => !holds(progress, r));
   if (!momentAllows(rung.conditions, moment)) missing.push('conditions');
+  // Reported as `tool:cut` rather than as an id, because unlike everything else in this list
+  // it is not a thing the player can go and look at — it is a thing they have to make.
+  for (const need of rung.needsTool) {
+    if (!canDo(carrying, need)) missing.push(`tool:${need}`);
+  }
   return missing;
 }
 
 /** Advance a discovery by one rung if it can be. Returns a new Progress; never mutates. */
-export function advance(progress: Progress, id: string, moment: WorldMoment | null = null): Progress {
-  if (!canAdvance(progress, id, moment)) return progress;
+export function advance(
+  progress: Progress,
+  id: string,
+  moment: WorldMoment | null = null,
+  carrying: Satchel = emptySatchel()
+): Progress {
+  if (!canAdvance(progress, id, moment, carrying)) return progress;
   return { ...progress, rungs: { ...progress.rungs, [id]: rungOf(progress, id) + 1 } };
 }
 
@@ -169,6 +236,7 @@ export function openQuestions(progress: Progress): FieldQuestion[] {
  */
 function receive(progress: Progress, id: string): Progress {
   if (id.startsWith('word_')) return learn(progress, id);
+  if (id.startsWith('recipe_')) return learnRecipe(progress, id);
   if (fieldQuestion(id)) {
     if (knowsQuestion(progress, id)) return progress;
     return { ...progress, questions: [...progress.questions, id] };
@@ -186,10 +254,20 @@ function receive(progress: Progress, id: string): Progress {
  * you have seen; making them wait until you have understood it would mean the word Thrali
  * gives could never be got, since the discovery it completes is the one he is waiting on.
  */
-export function linesFor(progress: Progress, npcId: string): Line[] {
+export function linesFor(
+  progress: Progress,
+  npcId: string,
+  carrying: Satchel = emptySatchel()
+): Line[] {
   const who = npc(npcId);
   if (!who) return [];
-  return who.lines.filter((l) => l.requires.every((r) => observed(progress, r)));
+  return who.lines.filter(
+    (l) =>
+      l.requires.every((r) => observed(progress, r)) &&
+      // A line with a price is not offered until it can be paid. Showing it greyed out would
+      // be a shop; a person who has not been given anything simply has nothing to say yet.
+      (l.costs === null || count(carrying, l.costs) > 0)
+  );
 }
 
 /**
@@ -198,10 +276,30 @@ export function linesFor(progress: Progress, npcId: string): Line[] {
  * Indexed against the list `linesFor` returned, not against the NPC's full canon order, so a
  * caller cannot accidentally trigger a line the player has not unlocked.
  */
-export function hear(progress: Progress, npcId: string, lineIndex: number): Progress {
-  const line = linesFor(progress, npcId)[lineIndex];
-  if (!line) return progress;
-  return line.gives.reduce(receive, progress);
+export interface Heard {
+  progress: Progress;
+  /** The satchel after any price was paid. The same object when nothing was owed. */
+  satchel: Satchel;
+  /** What was handed over, for a UI that wants to say so. Null when the line was free. */
+  paid: string | null;
+}
+
+export function hear(
+  progress: Progress,
+  npcId: string,
+  lineIndex: number,
+  carrying: Satchel = emptySatchel()
+): Heard {
+  const line = linesFor(progress, npcId, carrying)[lineIndex];
+  if (!line) return { progress, satchel: carrying, paid: null };
+  // Both halves in one call, deliberately. A `pay` the caller has to remember beside `hear` is
+  // the shape of the three mechanics this codebase has shipped with no caller — and a gift the
+  // player keeps is worse than one they never gave, because it looks like it worked.
+  return {
+    progress: line.gives.reduce(receive, progress),
+    satchel: line.costs ? remove(carrying, line.costs, 1) : carrying,
+    paid: line.costs
+  };
 }
 
 /**

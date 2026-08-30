@@ -110,6 +110,14 @@ export interface Recipe {
   outputs: Output[];
   /** Culture ids that hold the knowledge. Empty means everybody. */
   knownBy: string[];
+  /**
+   * NPC ids who can show a traveller how.
+   *
+   * **Empty means common knowledge, known from the first step.** Stated that way round in canon
+   * and read that way round here: 72 recipes offered at once is a wall, and the fix was never
+   * to re-author 72 files to opt out of it.
+   */
+  taughtBy: string[];
   description: string;
 }
 
@@ -138,7 +146,7 @@ interface RawRecipe {
   id: string; name: string; process: string;
   ingredients: { tag?: string; material?: string; item?: string; count?: number; kept?: boolean }[];
   outputs: { item?: string; material?: string; count?: number }[];
-  known_by?: string[]; notes?: string;
+  known_by?: string[]; taught_by?: string[]; notes?: string;
 }
 interface RawVehicle {
   id: string; name: string; kind: string; crosses: string[]; capacity?: number;
@@ -235,6 +243,7 @@ export const recipes: Recipe[] = raw.recipes.map((r) => ({
     count: o.count ?? 1
   })),
   knownBy: r.known_by ?? [],
+  taughtBy: r.taught_by ?? [],
   description: r.notes ?? ''
 }));
 
@@ -284,6 +293,20 @@ export function materialsWithClass(cls: MaterialClass): Material[] {
 /** What can be gathered on a biome, in canon's order. */
 export function materialsIn(biome: BiomeId): Material[] {
   return materials.filter((m) => m.foundIn.includes(biome));
+}
+
+/**
+ * Recipes nobody has to teach.
+ *
+ * The starting repertoire, and most of them: knapping a flint, twisting a rope, putting a pot
+ * on a fire. What people teach is the craft that takes a craftsman — Sura's beads, Okhi's ink,
+ * the span Pell has needed for eleven years.
+ */
+export const commonRecipes: Recipe[] = recipes.filter((r) => r.taughtBy.length === 0);
+
+/** Who could teach this, for a panel that would rather point at a person than at a wall. */
+export function teachersOf(recipeId: string): string[] {
+  return recipe(recipeId)?.taughtBy ?? [];
 }
 
 /** The recipes that produce an item or material, for a panel showing how to get one. */

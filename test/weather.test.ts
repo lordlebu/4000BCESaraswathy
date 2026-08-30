@@ -25,6 +25,17 @@ import {
   restored
 } from '../src/journey';
 import { discoveries, vocabulary } from '../src/content/knowledge';
+import { items } from '../src/content/making';
+import { type Satchel, add, emptySatchel } from '../src/content/satchel';
+
+/**
+ * One of everything, handed over.
+ *
+ * This file asks whether the *sky* ever stops a ladder, so it is given both the words and the
+ * tools — the same deliberate cheat, for the same reason. Whether the making layer can supply
+ * a knife is `conversation.test.ts`'s question, and it answers it by gathering.
+ */
+const TOOLED: Satchel = items.reduce((bag, i) => add(bag, i.id, 1), emptySatchel());
 import { fieldMap, fieldMaps } from '../src/content/places';
 
 /** The full canon weather enum, from `discovery.schema.json`. */
@@ -185,8 +196,8 @@ function playThrough(seed: string, days: number, climate: Climate = DELTA_CLIMAT
     for (let settle = 0; settle < discoveries.length; settle += 1) {
       let moved = false;
       for (const d of discoveries) {
-        if (canAdvance(p, d.id, moment)) {
-          p = advance(p, d.id, moment);
+        if (canAdvance(p, d.id, moment, TOOLED)) {
+          p = advance(p, d.id, moment, TOOLED);
           moved = true;
         }
       }

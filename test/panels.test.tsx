@@ -67,7 +67,7 @@ function climb(progress: Progress, id: string): Progress {
 /** Heard everybody at least once — the state a player reaches by talking before looking. */
 function talkedToBekh(): Progress {
   let p = emptyProgress();
-  for (let i = 0; i < linesFor(p, 'npc_bekh').length; i += 1) p = hear(p, 'npc_bekh', i);
+  for (let i = 0; i < linesFor(p, 'npc_bekh').length; i += 1) p = hear(p, 'npc_bekh', i).progress;
   return p;
 }
 

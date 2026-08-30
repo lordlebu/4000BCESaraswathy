@@ -79,6 +79,7 @@ function readProgress(value: unknown): Progress {
   return {
     rungs: raw.rungs && typeof raw.rungs === 'object' ? { ...raw.rungs } : {},
     words: Array.isArray(raw.words) ? raw.words : [],
+    recipes: Array.isArray(raw.recipes) ? raw.recipes : [],
     answered: raw.answered && typeof raw.answered === 'object' ? { ...raw.answered } : {},
     questions: Array.isArray(raw.questions) ? raw.questions : []
   };

@@ -99,8 +99,17 @@ export interface Line {
    * same discovery requires. Demanding completion would deadlock the pair.
    */
   requires: string[];
-  /** Discovery, vocabulary or field question ids this opens. */
+  /** Discovery, vocabulary, field question or recipe ids this opens. */
   gives: string[];
+  /**
+   * An item handed over to hear this, or null.
+   *
+   * The gift loop, and it is one item one person wants rather than a price. Canon has no
+   * currency and inventing one would be a design decision made in a data file. Uma wants a
+   * reed mat for the kiln shed and shows you a bedroll for it; Pell wants a hawser and shows
+   * you the span he has needed for eleven years.
+   */
+  costs: string | null;
 }
 
 export interface Npc {
@@ -132,7 +141,7 @@ interface RawPoi {
 interface RawNpc {
   id: string; name: string; role?: string; found_at?: string[]; would_settle?: boolean;
   language?: string; knows?: string[];
-  lines?: { text: string; requires?: string[]; gives?: string[] }[];
+  lines?: { text: string; requires?: string[]; gives?: string[]; costs?: string }[];
 }
 
 const raw = placesBundle as {
@@ -185,7 +194,8 @@ export const npcs: Npc[] = raw.npcs.map((n) => ({
   lines: (n.lines ?? []).map((l) => ({
     text: l.text,
     requires: l.requires ?? [],
-    gives: l.gives ?? []
+    gives: l.gives ?? [],
+    costs: l.costs ?? null
   }))
 }));
 

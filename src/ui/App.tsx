@@ -25,7 +25,7 @@ import { type Collection, emptyCollection, metOnTile, size } from '../content/co
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
 import { loadJourney, saveJourney } from '../save';
-import { advance, answer, hear, type WorldMoment } from '../journey';
+import { advance, answer, hear, knowsRecipe, type WorldMoment } from '../journey';
 import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import type { World } from '../world/types';
 
@@ -238,10 +238,21 @@ export function App() {
     [moment]
   );
 
-  /** Listen to someone, and take what the line gives — a word, a question, a lead. */
+  /**
+   * Listen to someone, and take what the line gives — a word, a question, a lead, a recipe.
+   *
+   * Both halves of `hear` are applied, and that is why it returns both: a line can cost an
+   * item, and a gift the player keeps is worse than one they never gave, because it looks
+   * like it worked. `satchel` is in the dependency list rather than read through a ref
+   * because paying with a stale one would spend something already spent.
+   */
   const listen = useCallback(
-    (npcId: string, lineIndex: number) => setProgress((p) => hear(p, npcId, lineIndex)),
-    []
+    (npcId: string, lineIndex: number) => {
+      const heard = hear(progress, npcId, lineIndex, satchel);
+      setProgress(heard.progress);
+      if (heard.paid) setSatchel(heard.satchel);
+    },
+    [progress, satchel]
   );
 
   /**
@@ -275,6 +286,20 @@ export function App() {
     if (!underfoot) return;
     setSatchel((s) => gather(s, underfoot.seed, underfoot.at, underfoot.biome));
   }, [underfoot]);
+
+  /**
+   * Whether the player has been shown how to make something.
+   *
+   * Composed here rather than inside the panel or inside `crafting.ts`: knowing is a fact
+   * about the journey, making is a fact about the satchel, and this is the one place that
+   * holds both. Memoised on `progress.recipes` rather than on `progress`, because the panel
+   * re-filters 72 recipes with it and every step of the walk changes `progress`.
+   */
+  const knowsRecipeHere = useCallback(
+    (recipeId: string) => knowsRecipe(progress, recipeId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [progress.recipes]
+  );
 
   /** Make a thing. Whether that is possible is `crafting.ts`'s question, not this one's. */
   const craft = useCallback(
@@ -428,6 +453,7 @@ export function App() {
       <SatchelPanel
         satchel={satchel}
         bench={bench}
+        knows={knowsRecipeHere}
         canGather={
           underfoot !== null && anythingAt(underfoot.seed, underfoot.at, underfoot.biome)
         }
