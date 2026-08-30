@@ -17,6 +17,7 @@ import {
   hear,
   isComplete,
   knowsQuestion,
+  knowsRecipe,
   knowsWord,
   linesFor,
   openQuestions,
@@ -24,6 +25,10 @@ import {
 } from '../src/journey';
 import { fieldMaps, npc, npcsAt, poisOn } from '../src/content/places';
 import { discoveries, vocabulary } from '../src/content/knowledge';
+import { emptySatchel } from '../src/content/satchel';
+import { make, makeableNow, openGround } from '../src/content/crafting';
+import { gather } from '../src/content/gathering';
+import { buildFieldMap } from '../src/world/fieldMap';
 import { momentAt } from '../src/game/moment';
 import { DAY_MS } from '../src/game/dayNight';
 
@@ -42,7 +47,7 @@ describe('people say things', () => {
   });
 
   it('hand over the question when heard', () => {
-    const p = hear(emptyProgress(), 'npc_thrali', 0);
+    const p = hear(emptyProgress(), 'npc_thrali', 0).progress;
     expect(knowsQuestion(p, 'question_silver_water')).toBe(true);
     expect(openQuestions(p).map((q) => q.id)).toContain('question_silver_water');
   });
@@ -60,26 +65,36 @@ describe('people say things', () => {
 
   it('are indexed against what is available, not against canon order', () => {
     // Hearing line 0 of the *available* list can never trigger a locked line by accident.
-    const p = hear(emptyProgress(), 'npc_thrali', 0);
+    const p = hear(emptyProgress(), 'npc_thrali', 0).progress;
     expect(knowsWord(p, 'word_kia_thal')).toBe(false);
   });
 
   it('do nothing the second time', () => {
-    const once = hear(emptyProgress(), 'npc_thrali', 0);
-    expect(hear(once, 'npc_thrali', 0)).toEqual(once);
+    const once = hear(emptyProgress(), 'npc_thrali', 0).progress;
+    expect(hear(once, 'npc_thrali', 0).progress).toEqual(once);
   });
 
   it('can be asked whether they still have something', () => {
     expect(hasSomethingNew(emptyProgress(), 'npc_thrali')).toBe(true);
-    const p = hear(emptyProgress(), 'npc_thrali', 0);
-    // Only the opening line is reachable yet, and it has been heard.
+
+    // Two lines are reachable from the first step now, not one: the opening, and the one
+    // where he shows you how a weir is set. Both have to be heard before he is out of
+    // things to say — which is the assertion this test was always making, stated as a walk
+    // rather than as a number so that a ninth line does not break it again.
+    let p = emptyProgress();
+    for (let i = 0; i < 8 && hasSomethingNew(p, 'npc_thrali'); i += 1) {
+      const said = linesFor(p, 'npc_thrali');
+      const next = said.findIndex((l) => l.gives.length > 0 && hear(p, 'npc_thrali', said.indexOf(l)).progress !== p);
+      if (next === -1) break;
+      p = hear(p, 'npc_thrali', next).progress;
+    }
     expect(hasSomethingNew(p, 'npc_thrali')).toBe(false);
   });
 
   it('ignore an index that is not there', () => {
     const p = emptyProgress();
-    expect(hear(p, 'npc_thrali', 99)).toBe(p);
-    expect(hear(p, 'npc_nobody', 0)).toBe(p);
+    expect(hear(p, 'npc_thrali', 99).progress).toBe(p);
+    expect(hear(p, 'npc_nobody', 0).progress).toBe(p);
   });
 });
 
@@ -124,20 +139,91 @@ const SEEDS = ['lothal', 'narmada', 'dwarka', 'saraswati', 'varuna', 'tethys'];
  * Walk both field maps for a few days, talking to whoever is standing there and looking at
  * whatever the sky allows. Never calls `learn` — every word has to be earned in conversation.
  */
+/**
+ * Every map, built once, with what a full walk of it yields.
+ *
+ * Built at module scope because a field map is generated from its own canon seed rather than
+ * from the journey's, so all six journeys below would generate identical ground and gather
+ * identical things. Doing that per journey took this file from four seconds to over two
+ * minutes, which is a long time to spend proving the same thing six times.
+ */
+const MAPS = fieldMaps.map((m) => {
+  const here = new Set(poisOn(m.id).map((x) => x.id));
+  const built = buildFieldMap(m);
+  return {
+    climate: m.climate,
+    kinds: new Set(built.placed.map((x) => x.poi.kind as string)),
+    people: poisOn(m.id).flatMap((x) => npcsAt(x.id).map((n) => n.id)),
+    findable: discoveries.filter((d) => d.foundAt.some((f) => here.has(f))),
+    built
+  };
+});
+
+/**
+ * Everything a full walk of every map picks up.
+ *
+ * A player crossing a map does not cover all of it in a day, but they cover it over a journey,
+ * and the question here is whether the ladders can be finished at all rather than how far
+ * anybody walked.
+ */
+const GATHERED = MAPS.reduce((acc, place) => {
+  const { world } = place.built;
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      acc = gather(acc, world.seed, { x, y }, world.tiles[y]![x]!.biome);
+    }
+  }
+  return acc;
+}, emptySatchel());
+
 function liveIt(seed: string, days: number): Progress {
   let p = emptyProgress();
+  // **It gathers and crafts too, and that is not decoration.** Six rungs need a tool, and a
+  // tool has to be picked up off the ground and made. Handing this function a satchel of tools
+  // would be exactly the cheating this describe block is named for, so it does what a player
+  // does: walks the tiles, picks up what is there, and makes what it can. If the making layer
+  // ever stops being able to produce a cutting edge, the ladders stop finishing and this says
+  // so — which is the only reason it is worth the extra work in here.
+  let bag = emptySatchel();
 
   // Each map has its own people, its own findable discoveries and — since canon gained
   // `climate` — its own sky. Walking both under one weather would quietly test a world that
   // does not exist, and would hide a plateau rung that only the plateau's mist can open.
-  const places = fieldMaps.map((m) => {
-    const here = new Set(poisOn(m.id).map((x) => x.id));
-    return {
-      climate: m.climate,
-      people: poisOn(m.id).flatMap((x) => npcsAt(x.id).map((n) => n.id)),
-      findable: discoveries.filter((d) => d.foundAt.some((f) => here.has(f)))
-    };
-  });
+  const places = MAPS;
+  // What a full walk of every map yields. Hoisted to module scope and shared: a field map is
+  // built from its own canon seed, not from the journey's, so all six journeys gather exactly
+  // the same things and generating the ground six times over cost more than the rest of this
+  // file put together.
+  bag = { ...GATHERED };
+
+  /**
+   * Make whatever is possible, standing where this map allows, until nothing more opens.
+   *
+   * Called only when the repertoire has actually grown, and that guard is load-bearing rather
+   * than tidy: without it this runs inside the innermost loop — six seeds by three days by
+   * ninety-six ticks by six settling passes by three maps — and the suite goes from four
+   * seconds to over two minutes. The only thing that can make a new recipe possible is
+   * learning one, so learning one is the trigger.
+   */
+  let repertoire = -1;
+  function makeWhatYouCan(kinds: Set<string>): void {
+    if (p.recipes.length === repertoire) return;
+    repertoire = p.recipes.length;
+    for (let pass = 0; pass < 8; pass += 1) {
+      let made = false;
+      for (const bench of [openGround(), ...[...kinds].map((k) => ({ kind: k }))]) {
+        for (const r of makeableNow(bag, bench)) {
+          if (!knowsRecipe(p, r.id)) continue;
+          const next = make(bag, r.id, bench);
+          if (next !== bag) {
+            bag = next;
+            made = true;
+          }
+        }
+      }
+      if (!made) break;
+    }
+  }
 
   for (let ms = 0; ms <= days * DAY_MS; ms += DAY_MS / 96) {
     for (let settle = 0; settle < 6; settle += 1) {
@@ -148,12 +234,23 @@ function liveIt(seed: string, days: number): Progress {
 
         for (const id of place.people) {
           const before = p;
-          for (let i = 0; i < linesFor(p, id).length; i += 1) p = hear(p, id, i);
-          if (p !== before) moved = true;
+          const beforeBag = bag;
+          for (let i = 0; i < linesFor(p, id, bag).length; i += 1) {
+            const heard = hear(p, id, i, bag);
+            p = heard.progress;
+            bag = heard.satchel;
+          }
+          if (p !== before || bag !== beforeBag) moved = true;
         }
+
+        // Talking can teach a recipe, so making sits between the conversation and the climb.
+        const bagBefore = bag;
+        makeWhatYouCan(place.kinds);
+        if (bag !== bagBefore) moved = true;
+
         for (const d of place.findable) {
-          if (canAdvance(p, d.id, moment)) {
-            p = advance(p, d.id, moment);
+          if (canAdvance(p, d.id, moment, bag)) {
+            p = advance(p, d.id, moment, bag);
             moved = true;
           }
         }

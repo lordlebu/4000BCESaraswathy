@@ -25,6 +25,8 @@ import {
   type Progress
 } from '../src/journey';
 import { discoveries, discovery, fieldQuestion, lastRung, vocabulary } from '../src/content/knowledge';
+import { items } from '../src/content/making';
+import { type Satchel, add, emptySatchel } from '../src/content/satchel';
 
 /**
  * Every moment a patient player could return in.
@@ -40,13 +42,24 @@ const MOMENTS = ['dawn', 'morning', 'afternoon', 'evening', 'night'].flatMap((ti
   ['clear', 'rain', 'mist', 'storm'].map((weather) => ({ timeOfDay, weather }))
 );
 
+/**
+ * A satchel holding one of everything canon can make.
+ *
+ * The same deliberate cheat as `learn`ing every word below, and for the same reason: this file
+ * tests the *shape* of the ladders — that none is authored so it can never be climbed — and
+ * not whether the making layer can supply a knife. That second question is real and is
+ * answered in `conversation.test.ts`, which gathers and crafts its way to the same place
+ * without being handed anything.
+ */
+const TOOLED: Satchel = items.reduce((bag, i) => add(bag, i.id, 1), emptySatchel());
+
 /** Climb a discovery as far as the rules allow, revisiting until nothing more opens. */
 function climb(progress: Progress, id: string): Progress {
   let p = progress;
   for (;;) {
-    const moment = MOMENTS.find((m) => canAdvance(p, id, m));
+    const moment = MOMENTS.find((m) => canAdvance(p, id, m, TOOLED));
     if (!moment) return p;
-    p = advance(p, id, moment);
+    p = advance(p, id, moment, TOOLED);
   }
 }
 

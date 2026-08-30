@@ -16,7 +16,12 @@ import { discovery, discoveries } from '../src/content/knowledge';
 import { npc, npcsAt, poisOn, fieldMaps } from '../src/content/places';
 import type { Line } from '../src/content/places';
 
-const line = (text: string, gives: string[] = []): Line => ({ text, requires: [], gives });
+const line = (text: string, gives: string[] = []): Line => ({
+  text,
+  requires: [],
+  gives,
+  costs: null
+});
 
 /** "Already given" as a predicate, which is how the real caller derives it from `Progress`. */
 const spentIf = (...texts: string[]) => (l: Line) => texts.includes(l.text);
@@ -133,7 +138,7 @@ describe('help somebody and they say so', () => {
     for (let round = 0; round < 6; round += 1) {
       const said = saysNow(linesFor(p, npcId), (l) => lineIsSpent(p, l));
       if (!said.line || !said.gives) break;
-      p = hear(p, npcId, said.index);
+      p = hear(p, npcId, said.index).progress;
     }
     return p;
   }

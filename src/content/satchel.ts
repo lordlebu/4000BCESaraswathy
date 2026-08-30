@@ -86,9 +86,20 @@ export function affording(satchel: Satchel, affordance: string): string[] {
   return itemsHeld(satchel).filter((id) => item(id)?.affords.includes(affordance as never));
 }
 
-/** Whether anything carried affords this. */
+/**
+ * Whether anything carried affords this.
+ *
+ * Deliberately **not** `affording(...).length > 0`, which is how it was written first and is
+ * the obvious way. `affording` goes through `itemsHeld`, which sorts the whole satchel to
+ * return a stable list for a panel — and this is called from `canAdvance`, which runs for
+ * every discovery on every tick. Sorting a satchel to answer a yes/no question took the
+ * conversation suite from four seconds to thirteen.
+ */
 export function canDo(satchel: Satchel, affordance: string): boolean {
-  return affording(satchel, affordance).length > 0;
+  for (const id in satchel) {
+    if (item(id)?.affords.includes(affordance as never)) return true;
+  }
+  return false;
 }
 
 /** A line a panel or the diary can print, e.g. "Reed fibre x4". */

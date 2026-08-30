@@ -167,9 +167,24 @@ export function make(satchel: Satchel, recipeId: string, bench: Bench = openGrou
   return next;
 }
 
+/**
+ * Whether the player knows how.
+ *
+ * A predicate rather than a `Progress`, so this module stays about the satchel and the ground
+ * under foot and never learns what a journey is. The caller composes the two — `App` passes
+ * `(id) => knowsRecipe(progress, id)` — and the default is "everything", which is the right
+ * answer for a test asking a question about ingredients rather than about teaching.
+ */
+export type Knows = (recipeId: string) => boolean;
+const ALL: Knows = () => true;
+
 /** Every recipe that can be made right now. What a Making panel lists. */
-export function makeableNow(satchel: Satchel, bench: Bench = openGround()): Recipe[] {
-  return recipes.filter((r) => canMake(satchel, r.id, bench));
+export function makeableNow(
+  satchel: Satchel,
+  bench: Bench = openGround(),
+  known: Knows = ALL
+): Recipe[] {
+  return recipes.filter((r) => known(r.id) && canMake(satchel, r.id, bench));
 }
 
 /**
@@ -179,9 +194,14 @@ export function makeableNow(satchel: Satchel, bench: Bench = openGround()): Reci
  * hand. A panel listing all 72 from the first step is a wall; one listing nothing until a
  * recipe is complete never teaches anybody that making exists.
  */
-export function withinReach(satchel: Satchel, bench: Bench = openGround()): Recipe[] {
+export function withinReach(
+  satchel: Satchel,
+  bench: Bench = openGround(),
+  known: Knows = ALL
+): Recipe[] {
   return recipes.filter(
     (r) =>
+      known(r.id) &&
       !canMake(satchel, r.id, bench) &&
       r.ingredients.some((need) => {
         if (need.tag) return tagCount(satchel, need.tag) > 0;

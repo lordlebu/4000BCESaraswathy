@@ -189,7 +189,7 @@ describe('cross-reference', () => {
     expect(crossReference(p, 'flora_saltreed').questions).toEqual([]);
 
     // Bekh raises the eastern field question; the link appears once it has been heard.
-    for (let i = 0; i < linesFor(p, 'npc_bekh').length; i += 1) p = hear(p, 'npc_bekh', i);
+    for (let i = 0; i < linesFor(p, 'npc_bekh').length; i += 1) p = hear(p, 'npc_bekh', i).progress;
     expect(p.questions.length).toBeGreaterThan(0);
   });
 });

@@ -144,7 +144,7 @@ const COVERAGE: Record<string, Coverage> = {
     skipped: ['type', 'source_index']
   },
   'crafting.recipes': {
-    adapted: ['id', 'name', 'process', 'ingredients', 'outputs', 'known_by', 'notes'],
+    adapted: ['id', 'name', 'process', 'ingredients', 'outputs', 'known_by', 'taught_by', 'notes'],
     skipped: ['type', 'epochs', 'source_index']
   },
   'crafting.vehicles': {
@@ -165,11 +165,11 @@ const NESTED: Record<string, Coverage> = {
     skipped: []
   },
   'npcs.lines': {
-    adapted: ['text', 'requires', 'gives'],
+    adapted: ['text', 'requires', 'gives', 'costs'],
     skipped: []
   },
   'discoveries.levels': {
-    adapted: ['entry', 'requires', 'conditions'],
+    adapted: ['entry', 'requires', 'conditions', 'needs_tool'],
     skipped: []
   },
   'field_questions.resolutions': {

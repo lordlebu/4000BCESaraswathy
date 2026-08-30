@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.0.0",
+  "canon_version": "2.1.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -1155,6 +1155,14 @@
           "text": "Mask Family, yes. There is no family and there are no masks, so it is mostly a way of saying which brick I sleep under."
         },
         {
+          "text": "Everything I keep, I keep in something. That is the whole of the job. Clay for grain, because clay breathes a little and grain wants that. Wood for salt, because a fired jar sweats and salt draws the water straight out of the air to spite you.",
+          "requires": [],
+          "gives": [
+            "recipe_storage_jar",
+            "recipe_salt_box"
+          ]
+        },
+        {
           "text": "We plant the eastern field every spring. My mother did. Her mother did. It is not stubbornness, it is that the ground is good and we cannot see what is wrong with it.",
           "gives": [
             "question_eastern_field"
@@ -1232,6 +1240,15 @@
           ]
         },
         {
+          "text": "Comb it, do not cut it. The winter coat comes away in your hand in spring and the animal is happier for it. It spins rough and it stays warm wet, which up here is the only question anybody is actually asking about cloth.",
+          "requires": [],
+          "gives": [
+            "recipe_goat_hair_blanket",
+            "recipe_hunting_sling",
+            "recipe_tan_goat_hide"
+          ]
+        },
+        {
           "text": "Khet. Not step -- khet. It means the water is held. I do not know why we call them that, we just do.",
           "requires": [
             "discovery_terrace_water"
@@ -1283,6 +1300,15 @@
           "text": "Eleven thousand volumes. I have copied four hundred. I do not know if the oldest are true, only that they are old, and that is not nothing.",
           "gives": [
             "question_two_names"
+          ]
+        },
+        {
+          "text": "Soot, gum, and the patience to let it dry properly. Everyone wants to write with it wet. -- The leaf takes a scored line better than it takes ink, which is why the old books are cut and not painted. Eleven thousand volumes and I know how every one of them was made.",
+          "requires": [],
+          "gives": [
+            "recipe_ink_cake",
+            "recipe_palm_leaf_sheet",
+            "recipe_field_diary"
           ]
         },
         {
@@ -1341,6 +1367,13 @@
           ]
         },
         {
+          "text": "Husk, not reed. Reed rope on a wall by the sea is a rope you replace twice a year and eventually you are not mending the wall, you are mending the rope. Lay it in three strands against the twist and it will still be there when I am not.",
+          "requires": [],
+          "gives": [
+            "recipe_husk_hawser"
+          ]
+        },
+        {
           "text": "In mist, yes. Not every mist. You will want the stair and three days, and you will be the first person to sit them who was not being paid.",
           "requires": [
             "discovery_gate_rhythm"
@@ -1353,6 +1386,14 @@
           "text": "No. My father rebuilt this wall and I have rebuilt it and my son will. You are asking me to leave a job that is not finished, and it is never going to be finished, and that is not a reason.",
           "requires": [
             "discovery_seawall_courses"
+          ]
+        },
+        {
+          "text": "Three strands, and you laid them against the twist. -- Then I can get to the outer course alone, and I have wanted to get to the outer course alone for eleven years. Sit down. A span is two anchors and a line you are willing to hang from, and the third part is the only one that takes any nerve.",
+          "requires": [],
+          "costs": "item_husk_hawser",
+          "gives": [
+            "recipe_rope_span"
           ]
         }
       ],
@@ -1388,6 +1429,15 @@
           "text": "Everything the city cannot use comes to me eventually. Most of it is fish. Some years it is not.",
           "gives": [
             "question_what_comes_through"
+          ]
+        },
+        {
+          "text": "Everyone thinks I am looking for something. I am looking at *how things break*. Bone breaks along the grain and shell does not, so bone makes a point and shell makes a bead. Here -- drill it wet, and go slower than you want to.",
+          "requires": [],
+          "gives": [
+            "recipe_bone_awl",
+            "recipe_shell_bead",
+            "recipe_ammonite_pendant"
           ]
         },
         {
@@ -1443,6 +1493,15 @@
           "text": "You will want the basin at night, after rain. The water goes silver and they come up. Ask me why and I will tell you I do not know.",
           "gives": [
             "question_silver_water"
+          ]
+        },
+        {
+          "text": "A weir is a fence that does the fishing while you are asleep. Cane, set slant to the current, and a rope through the tops so the whole run comes up together. What it catches it catches -- you do not get to choose, and that is why I never say I caught anything in particular.",
+          "requires": [],
+          "gives": [
+            "recipe_fish_weir",
+            "recipe_dried_fish",
+            "recipe_bone_harpoon"
           ]
         },
         {
@@ -1503,6 +1562,14 @@
           "text": "Three kilns, every year, and every year the same three. I have stopped minding. It is something to do in spring."
         },
         {
+          "text": "You are sleeping on the ground, I can see it from here. Sit. -- No, like that, butt the reeds against the frame, do not weave the ends in. The ends are where a mat goes first. Three of those and you have a floor. Six and you have a wall.",
+          "requires": [],
+          "gives": [
+            "recipe_reed_mat",
+            "recipe_grain_bin"
+          ]
+        },
+        {
           "text": "After the flood? Nobody cuts reed after the flood. -- No, I am listening. Say it again.",
           "requires": [
             "discovery_saltreed_thatch"
@@ -1518,6 +1585,14 @@
           "text": "Bekh says we are staying. So I am going to put a proper roof on the kiln shed, the kind you build when you expect to be under it. It will take three weeks and there is no reason to hurry, which is the strangest part.",
           "requires": [
             "discovery_winter_line"
+          ]
+        },
+        {
+          "text": "Is that one of mine? -- It is one of yours. Good. Then stop sleeping on the bare ground: oiled cloth over the mat, rolled and strapped, and it does not matter what the night does. I made my first one at eleven and I have been dry ever since.",
+          "requires": [],
+          "costs": "item_reed_mat",
+          "gives": [
+            "recipe_bedroll"
           ]
         }
       ],
@@ -1550,6 +1625,14 @@
           "text": "You will want the rain series. Everyone wants the rain series. Read the first ten years of it and then come and tell me what you think we are measuring against.",
           "gives": [
             "question_moving_spring"
+          ]
+        },
+        {
+          "text": "Nobody teaches this because everybody assumes you know. Cut the reed at a slant, recut it every few lines, and do not mourn it -- a stylus is a thing you lose. The tally is different. Notch it, split it, and neither of you can lie afterwards.",
+          "requires": [],
+          "gives": [
+            "recipe_reed_stylus",
+            "recipe_tally_stick"
           ]
         },
         {

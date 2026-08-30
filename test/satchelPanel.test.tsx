@@ -22,6 +22,10 @@ afterEach(cleanup);
 
 const base = {
   bench: openGround(),
+  // Everything known, so these tests ask about ingredients and ground rather than about
+  // teaching. Whether a recipe has to be taught is `journey.test.ts`'s question and the
+  // player-path one below it.
+  knows: () => true,
   canGather: false,
   gatherHint: null,
   onGather: () => {},

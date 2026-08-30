@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.0.0",
+  "canon_version": "2.1.0",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -1484,15 +1484,14 @@
       "name": "Field diary",
       "kind": "record",
       "affords": [
-        "mark",
-        "carry"
+        "mark"
       ],
       "materials": [
         "material_palm_husk",
         "material_bark_bast",
         "material_lamp_black"
       ],
-      "notes": "Bound, and about a third full. **The game's whole progression system**: the crossings-out are the useful part, because a first guess is worth keeping once it is wrong.",
+      "notes": "Bound, and about a third full. **The game's whole progression system**: the crossings-out are the useful part, because a first guess is worth keeping once it is wrong. Affords marking alone. It holds writing, which is not what `contain` or `carry` mean.",
       "source_index": 44
     },
     {
@@ -1708,15 +1707,14 @@
       "name": "Bedroll",
       "kind": "shelter",
       "affords": [
-        "shelter",
-        "carry"
+        "shelter"
       ],
       "materials": [
         "material_reed_fibre",
         "material_goat_hide",
         "material_tree_pitch"
       ],
-      "notes": "Oiled cloth over a reed mat, rolled and strapped under the satchel. It has been rained on. **The game has carried this from its first step.**",
+      "notes": "Oiled cloth over a reed mat, rolled and strapped under the satchel. It has been rained on. **The game has carried this from its first step.** Affords shelter and nothing else: a bedroll strapped under a satchel is a thing being carried, not a thing that carries.",
       "source_index": 58
     },
     {
@@ -2053,7 +2051,10 @@
         }
       ],
       "notes": "Heavier and slower than reed, and it will still be there next season.",
-      "source_index": 2
+      "source_index": 2,
+      "taught_by": [
+        "npc_pell"
+      ]
     },
     {
       "id": "recipe_sinew_lashing",
@@ -2095,7 +2096,10 @@
         }
       ],
       "notes": "Any fibre will do, which is what a tag ingredient is for -- reed in the delta, husk on the coast, and the recipe does not have to know which.",
-      "source_index": 4
+      "source_index": 4,
+      "taught_by": [
+        "npc_uma"
+      ]
     },
     {
       "id": "recipe_carry_basket",
@@ -2140,7 +2144,10 @@
         }
       ],
       "notes": "Built in the water and left. What it catches is not sorted, which is why the fish it gives is named for the river.",
-      "source_index": 6
+      "source_index": 6,
+      "taught_by": [
+        "npc_thrali"
+      ]
     },
     {
       "id": "recipe_goat_hair_blanket",
@@ -2166,7 +2173,10 @@
         "tushara"
       ],
       "notes": "Known on the steppe and in the hills, where staying warm wet is the only question.",
-      "source_index": 7
+      "source_index": 7,
+      "taught_by": [
+        "npc_marn"
+      ]
     },
     {
       "id": "recipe_indigo_cloth",
@@ -2327,7 +2337,10 @@
         }
       ],
       "notes": "Bores a hole and scores a line, with the same point.",
-      "source_index": 14
+      "source_index": 14,
+      "taught_by": [
+        "npc_sura"
+      ]
     },
     {
       "id": "recipe_bow_drill",
@@ -2467,7 +2480,10 @@
         }
       ],
       "notes": "Notched and split so both halves must agree. A contract nobody can argue with.",
-      "source_index": 20
+      "source_index": 20,
+      "taught_by": [
+        "npc_vessa"
+      ]
     },
     {
       "id": "recipe_sandalwood_comb",
@@ -2516,7 +2532,10 @@
         "harappan"
       ],
       "notes": "The smallest unit of worth anybody agrees on, and Harappa is where they are made.",
-      "source_index": 22
+      "source_index": 22,
+      "taught_by": [
+        "npc_sura"
+      ]
     },
     {
       "id": "recipe_ammonite_pendant",
@@ -2538,7 +2557,10 @@
         }
       ],
       "notes": "A spiral somebody found already made.",
-      "source_index": 23
+      "source_index": 23,
+      "taught_by": [
+        "npc_sura"
+      ]
     },
     {
       "id": "recipe_bone_harpoon",
@@ -2562,7 +2584,10 @@
         }
       ],
       "notes": "The rostral tooth arrives barbed. Very little is done to it.",
-      "source_index": 24
+      "source_index": 24,
+      "taught_by": [
+        "npc_thrali"
+      ]
     },
     {
       "id": "recipe_reed_spear",
@@ -2632,7 +2657,10 @@
         }
       ],
       "notes": "Two cords and a pouch. Keeps birds off a crop far more often than anything else.",
-      "source_index": 27
+      "source_index": 27,
+      "taught_by": [
+        "npc_marn"
+      ]
     },
     {
       "id": "recipe_fire_rattle",
@@ -2700,7 +2728,10 @@
         }
       ],
       "notes": "A grain surplus is not a harvest. It is one of these.",
-      "source_index": 30
+      "source_index": 30,
+      "taught_by": [
+        "npc_bekh"
+      ]
     },
     {
       "id": "recipe_cooking_pot",
@@ -2846,7 +2877,10 @@
         }
       ],
       "notes": "Mud-plastered basketwork, taller than a person. Does not move once filled -- the first object here only a settlement can own.",
-      "source_index": 36
+      "source_index": 36,
+      "taught_by": [
+        "npc_uma"
+      ]
     },
     {
       "id": "recipe_charcoal",
@@ -2966,7 +3000,10 @@
         }
       ],
       "notes": "Bark liquor and time. Nobody will let you do it upwind of them.",
-      "source_index": 41
+      "source_index": 41,
+      "taught_by": [
+        "npc_marn"
+      ]
     },
     {
       "id": "recipe_water_skin",
@@ -3015,7 +3052,10 @@
         }
       ],
       "notes": "Oiled cloth over a reed mat. It has been rained on.",
-      "source_index": 43
+      "source_index": 43,
+      "taught_by": [
+        "npc_uma"
+      ]
     },
     {
       "id": "recipe_hide_tent",
@@ -3067,7 +3107,10 @@
         }
       ],
       "notes": "A line fixed both banks and a loop to hang from. Wants two people, which is why Teshk will not leave.",
-      "source_index": 45
+      "source_index": 45,
+      "taught_by": [
+        "npc_pell"
+      ]
     },
     {
       "id": "recipe_salt_box",
@@ -3089,7 +3132,10 @@
         }
       ],
       "notes": "Wood rather than clay, because salt draws water and a fired jar sweats.",
-      "source_index": 46
+      "source_index": 46,
+      "taught_by": [
+        "npc_bekh"
+      ]
     },
     {
       "id": "recipe_smelt_copper",
@@ -3348,7 +3394,10 @@
         }
       ],
       "notes": "Soot bound with gum and dried into a block. What Varuna's diary is written in.",
-      "source_index": 55
+      "source_index": 55,
+      "taught_by": [
+        "npc_okhi"
+      ]
     },
     {
       "id": "recipe_reed_stylus",
@@ -3371,7 +3420,10 @@
         }
       ],
       "notes": "Recut every few lines, and lost constantly.",
-      "source_index": 56
+      "source_index": 56,
+      "taught_by": [
+        "npc_vessa"
+      ]
     },
     {
       "id": "recipe_palm_leaf_sheet",
@@ -3395,7 +3447,10 @@
         }
       ],
       "notes": "Cut, boiled, dried, smoothed. Takes a scored line better than it takes ink.",
-      "source_index": 57
+      "source_index": 57,
+      "taught_by": [
+        "npc_okhi"
+      ]
     },
     {
       "id": "recipe_field_diary",
@@ -3421,7 +3476,10 @@
         }
       ],
       "notes": "The crossings-out are the useful part. A first guess is worth keeping once it is wrong.",
-      "source_index": 58
+      "source_index": 58,
+      "taught_by": [
+        "npc_okhi"
+      ]
     },
     {
       "id": "recipe_press_mahua_oil",
@@ -3518,7 +3576,10 @@
         }
       ],
       "notes": "Split, salted, racked. Keeps a season and travels anywhere.",
-      "source_index": 62
+      "source_index": 62,
+      "taught_by": [
+        "npc_thrali"
+      ]
     },
     {
       "id": "recipe_date_block",
