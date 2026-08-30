@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.2.0",
+  "canon_version": "2.2.1",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -4015,5 +4015,230 @@
       "notes": "A travelling apothecary and workshop rather than transport. The Survival Train gathers the displaced across the broken country, which is a use for a vehicle that has nothing to do with getting anywhere.",
       "source_index": 10
     }
-  ]
+  ],
+  "conformance": {
+    "affords": {
+      "item_cordage": [
+        "bind"
+      ],
+      "item_woven_ware": [
+        "carry"
+      ],
+      "item_blade": [
+        "cut"
+      ],
+      "item_hafted_tool": [
+        "cut"
+      ],
+      "item_vessel_ware": [
+        "contain"
+      ],
+      "item_prepared_food": [
+        "eat"
+      ],
+      "item_reed_rope": [
+        "bind"
+      ],
+      "item_husk_hawser": [
+        "bind"
+      ],
+      "item_sinew_lashing": [
+        "bind"
+      ],
+      "item_reed_mat": [
+        "shelter",
+        "carry"
+      ],
+      "item_carry_basket": [
+        "carry",
+        "contain"
+      ],
+      "item_fish_weir": [
+        "carry"
+      ],
+      "item_goat_hair_blanket": [
+        "shelter"
+      ],
+      "item_indigo_cloth": [
+        "trade",
+        "shelter"
+      ],
+      "item_sail_cloth": [
+        "cross"
+      ],
+      "item_flint_knife": [
+        "cut"
+      ],
+      "item_glass_lancet": [
+        "cut"
+      ],
+      "item_bronze_knife": [
+        "cut",
+        "trade"
+      ],
+      "item_stone_adze": [
+        "cut",
+        "work"
+      ],
+      "item_antler_pick": [
+        "cut",
+        "work"
+      ],
+      "item_bronze_chisel": [
+        "cut",
+        "work"
+      ],
+      "item_bone_awl": [
+        "cut",
+        "mark"
+      ],
+      "item_grinding_quern": [
+        "work"
+      ],
+      "item_bow_drill": [
+        "work",
+        "burn"
+      ],
+      "item_loom_frame": [
+        "work"
+      ],
+      "item_bone_harpoon": [
+        "cut",
+        "deter"
+      ],
+      "item_reed_spear": [
+        "cut",
+        "deter"
+      ],
+      "item_boar_spear": [
+        "cut",
+        "deter"
+      ],
+      "item_bronze_spearhead": [
+        "cut",
+        "deter",
+        "trade"
+      ],
+      "item_hunting_sling": [
+        "deter"
+      ],
+      "item_fire_rattle": [
+        "deter"
+      ],
+      "item_storage_jar": [
+        "contain"
+      ],
+      "item_cooking_pot": [
+        "contain"
+      ],
+      "item_water_skin": [
+        "contain",
+        "carry"
+      ],
+      "item_salt_box": [
+        "contain"
+      ],
+      "item_resin_flask": [
+        "contain"
+      ],
+      "item_grain_bin": [
+        "contain"
+      ],
+      "item_oil_lamp": [
+        "burn"
+      ],
+      "item_reed_torch": [
+        "burn"
+      ],
+      "item_tinder_bundle": [
+        "burn"
+      ],
+      "item_charcoal_brazier": [
+        "burn",
+        "contain"
+      ],
+      "item_reed_stylus": [
+        "mark"
+      ],
+      "item_ink_cake": [
+        "mark"
+      ],
+      "item_palm_leaf_sheet": [
+        "mark"
+      ],
+      "item_field_diary": [
+        "mark"
+      ],
+      "item_tally_stick": [
+        "mark"
+      ],
+      "item_clay_seal": [
+        "mark",
+        "trade"
+      ],
+      "item_flood_bread": [
+        "eat"
+      ],
+      "item_dried_fish": [
+        "eat",
+        "trade"
+      ],
+      "item_date_block": [
+        "eat",
+        "carry"
+      ],
+      "item_tamarind_paste": [
+        "eat"
+      ],
+      "item_salt_fish_stew": [
+        "eat"
+      ],
+      "item_spiced_rice": [
+        "eat"
+      ],
+      "item_travel_cake": [
+        "eat",
+        "carry"
+      ],
+      "item_mahua_liquor": [
+        "eat",
+        "trade"
+      ],
+      "item_neem_salve": [
+        "heal"
+      ],
+      "item_myrrh_poultice": [
+        "heal"
+      ],
+      "item_shilajit_tonic": [
+        "heal",
+        "trade"
+      ],
+      "item_bedroll": [
+        "shelter"
+      ],
+      "item_hide_tent": [
+        "shelter"
+      ],
+      "item_walking_staff": [
+        "cross"
+      ],
+      "item_mud_shoes": [
+        "cross"
+      ],
+      "item_rope_span": [
+        "cross",
+        "bind"
+      ],
+      "item_shell_bead": [
+        "trade"
+      ],
+      "item_ammonite_pendant": [
+        "trade"
+      ],
+      "item_sandalwood_comb": [
+        "trade"
+      ]
+    }
+  }
 }

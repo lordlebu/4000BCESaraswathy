@@ -61,6 +61,16 @@ export function anythingAt(seed: string, at: Point, biome: BiomeId): boolean {
  * One at a time is the obvious alternative and is worse: a tile with three things on it
  * would need three prompts, and the cozy reading of gathering is stooping once rather than
  * running an interface. Returns a new Satchel; never mutates.
+ *
+ * **A tile is never used up, and that is load-bearing beyond this file.** Walking back gives
+ * the same reeds again, which is right for a game with no scarcity — but it is also the reason
+ * canon's `check_playability.py` may ask "is this class obtainable at all" and ignore every
+ * `count` in every recipe. Its closure is count-blind, and that is sound only because there is
+ * no quantity a patient walker cannot reach.
+ *
+ * So if gathering ever depletes, canon's gate silently starts lying: it would keep passing
+ * recipes no player could afford. `test/makingMatters.test.ts` pins the no-depletion half of
+ * that bargain so the assumption cannot quietly stop being true.
  */
 export function gather(
   satchel: Satchel,
