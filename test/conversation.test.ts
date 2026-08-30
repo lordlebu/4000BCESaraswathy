@@ -23,7 +23,7 @@ import {
   openQuestions,
   rungOf
 } from '../src/journey';
-import { fieldMaps, npc, npcsAt, poisOn } from '../src/content/places';
+import { fieldMap, fieldMaps, npc, npcsAt, poisOn } from '../src/content/places';
 import { discoveries, vocabulary } from '../src/content/knowledge';
 import { emptySatchel } from '../src/content/satchel';
 import { make, makeableNow, openGround } from '../src/content/crafting';
@@ -149,13 +149,14 @@ const SEEDS = ['lothal', 'narmada', 'dwarka', 'saraswati', 'varuna', 'tethys'];
  */
 const MAPS = fieldMaps.map((m) => {
   const here = new Set(poisOn(m.id).map((x) => x.id));
-  const built = buildFieldMap(m);
   return {
     climate: m.climate,
-    kinds: new Set(built.placed.map((x) => x.poi.kind as string)),
+    // Straight from canon rather than from a generated map. `fieldMap.test.ts` already asserts
+    // every authored place gets placed, so the kinds standing on the ground are the kinds canon
+    // lists — and reading them here costs nothing where generating three worlds costs seconds.
+    kinds: new Set(poisOn(m.id).map((x) => x.kind as string)),
     people: poisOn(m.id).flatMap((x) => npcsAt(x.id).map((n) => n.id)),
-    findable: discoveries.filter((d) => d.foundAt.some((f) => here.has(f))),
-    built
+    findable: discoveries.filter((d) => d.foundAt.some((f) => here.has(f)))
   };
 });
 
@@ -166,17 +167,41 @@ const MAPS = fieldMaps.map((m) => {
  * and the question here is whether the ladders can be finished at all rather than how far
  * anybody walked.
  */
-const GATHERED = MAPS.reduce((acc, place) => {
-  const { world } = place.built;
+const GATHERED = (() => {
+  // **One map, not three.** The question here is whether the ladders can be finished at all,
+  // and the toolchain it needs — flint to a knife, a knife to a bow drill, a drill to cordage —
+  // is provable off Lothal alone, which carries eight of the ten biomes between them. Building
+  // all three cost about a second of world generation for materials the other two duplicate,
+  // and it landed on whichever test in this file ran first, taking it over vitest's limit under
+  // a parallel run. `test/makingMatters.test.ts` is where the per-map gathering is checked.
+  const { world } = buildFieldMap(fieldMap('field_map_lothal')!);
+  let acc = emptySatchel();
   for (let y = 0; y < world.height; y += 1) {
     for (let x = 0; x < world.width; x += 1) {
       acc = gather(acc, world.seed, { x, y }, world.tiles[y]![x]!.biome);
     }
   }
   return acc;
-}, emptySatchel());
+})();
 
+/**
+ * Three tests ask for the same six journeys, and a journey is deterministic in its seed.
+ *
+ * Without this the file walks eighteen identical lives instead of six. That was affordable
+ * while the walk only talked and looked; it stopped being affordable once it also gathers and
+ * crafts, and the whole file went over vitest's five-second limit under a parallel run — which
+ * is a flake rather than a failure, and the worst kind of red.
+ */
+const LIVED = new Map<string, Progress>();
 function liveIt(seed: string, days: number): Progress {
+  const cached = LIVED.get(`${seed}:${days}`);
+  if (cached) return cached;
+  const lived = walkIt(seed, days);
+  LIVED.set(`${seed}:${days}`, lived);
+  return lived;
+}
+
+function walkIt(seed: string, days: number): Progress {
   let p = emptyProgress();
   // **It gathers and crafts too, and that is not decoration.** Six rungs need a tool, and a
   // tool has to be picked up off the ground and made. Handing this function a satchel of tools
@@ -235,7 +260,12 @@ function liveIt(seed: string, days: number): Progress {
         for (const id of place.people) {
           const before = p;
           const beforeBag = bag;
-          for (let i = 0; i < linesFor(p, id, bag).length; i += 1) {
+          // Length read once. The loop used to call `linesFor` on every iteration, which
+          // rebuilds and re-filters the list per line — cheap when everybody had four lines
+          // and no longer cheap now they teach a craft as well. The list can only grow while
+          // this loop runs, and a line that appears mid-loop is heard on the next settle pass.
+          const count = linesFor(p, id, bag).length;
+          for (let i = 0; i < count; i += 1) {
             const heard = hear(p, id, i, bag);
             p = heard.progress;
             bag = heard.satchel;

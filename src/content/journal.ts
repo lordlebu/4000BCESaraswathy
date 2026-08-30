@@ -6,6 +6,7 @@
 import { biomeFor, creatureFor, floraFor } from './species';
 import { isPresent, noteFor, routineFor } from './routine';
 import { landmarkKindFor, landmarkTitle } from './landmarks';
+import { underfootLine } from './gathering';
 import { nearestCamp, nearestUnvisited, stepsBetween } from './camps';
 import type { PlacedPoi } from '../world/fieldMap';
 import type {
@@ -53,6 +54,15 @@ export interface JournalEntry {
    * map twitching because the day turned. Its own line can be given a reserved height.
    */
   doing: string;
+  /**
+   * What the ground here will give up, or empty when it will give nothing.
+   *
+   * Beside the creature and the plant because it is the same kind of fact — what is on this
+   * tile — and it belongs in the notes rather than only in the satchel panel: a player should
+   * notice the reeds while walking and then decide to cut them, not discover them by opening
+   * an inventory.
+   */
+  underfoot: string;
 }
 
 /**
@@ -127,6 +137,7 @@ export function describeTile(
           species: null
         },
     doing: creature ? noteFor(creature, moment) : '',
+    underfoot: underfootLine(seed, tile, tile.biome) ?? '',
     flora: plant
       ? { name: plant.name, note: plant.journalPrompt, species: markOf(plant) }
       : {

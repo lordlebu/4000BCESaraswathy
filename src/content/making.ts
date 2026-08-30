@@ -290,10 +290,32 @@ export function materialsWithClass(cls: MaterialClass): Material[] {
   return materials.filter((m) => m.classes.includes(cls));
 }
 
-/** What can be gathered on a biome, in canon's order. */
-export function materialsIn(biome: BiomeId): Material[] {
-  return materials.filter((m) => m.foundIn.includes(biome));
+/**
+ * What can be gathered on a biome, in canon's order.
+ *
+ * Indexed rather than filtered, because this is on the walk's hot path twice over: `yieldsAt`
+ * asks it for every tile it considers, and `describeTile` asks `yieldsAt` on every step the
+ * player takes. Filtering 46 materials per call is invisible in a unit test and measurable
+ * across a 64x64 map — the conversation suite, which gathers every tile of three maps, lost
+ * seconds to it.
+ *
+ * The arrays are frozen: they are shared, and a caller that sorted one in place would silently
+ * reorder what everybody else gathers.
+ */
+const BY_BIOME = new Map<string, readonly Material[]>();
+for (const m of materials) {
+  for (const b of m.foundIn) {
+    const list = (BY_BIOME.get(b) as Material[] | undefined) ?? [];
+    list.push(m);
+    BY_BIOME.set(b, list);
+  }
 }
+for (const [b, list] of BY_BIOME) BY_BIOME.set(b, Object.freeze(list.slice()));
+
+export function materialsIn(biome: BiomeId): readonly Material[] {
+  return BY_BIOME.get(biome) ?? EMPTY;
+}
+const EMPTY: readonly Material[] = Object.freeze([]);
 
 /**
  * Recipes nobody has to teach.

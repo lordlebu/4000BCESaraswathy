@@ -14,13 +14,18 @@ import {
   advance,
   blockedBy,
   canAdvance,
+  craft,
   emptyProgress,
+  hasMade,
   hear,
   knowsRecipe,
   learnRecipe,
   linesFor,
   rungOf
 } from '../src/journey';
+import { describeTile } from '../src/content/journal';
+import { underfootLine } from '../src/content/gathering';
+import { diarySections } from '../src/content/travelLog';
 import { discoveries } from '../src/content/knowledge';
 import { npc, npcs } from '../src/content/places';
 import { recipes } from '../src/content/making';
@@ -168,20 +173,20 @@ describe('a line can cost something', () => {
 // Only the calls a player has.
 // ---------------------------------------------------------------------------------------
 
-describe('a player can earn a craft and pay for one', () => {
-  const lothal = fieldMap('field_map_lothal')!;
-  const built = buildFieldMap(lothal);
-
-  /** Walk the whole map picking things up. No hand-seeded satchel anywhere below. */
-  function walked() {
-    let bag = emptySatchel();
-    for (let y = 0; y < built.world.height; y += 1) {
-      for (let x = 0; x < built.world.width; x += 1) {
-        bag = gather(bag, built.world.seed, { x, y }, built.world.tiles[y]![x]!.biome);
-      }
+/** Walk the whole of Lothal picking things up. No hand-seeded satchel anywhere below. */
+function walkedLothal() {
+  const { world } = buildFieldMap(fieldMap('field_map_lothal')!);
+  let bag = emptySatchel();
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      bag = gather(bag, world.seed, { x, y }, world.tiles[y]![x]!.biome);
     }
-    return bag;
   }
+  return bag;
+}
+
+describe('a player can earn a craft and pay for one', () => {
+  const walked = walkedLothal;
 
   it('learns a craft by talking to somebody, and then can do it', () => {
     let p = emptyProgress();
@@ -235,5 +240,95 @@ describe('a player can earn a craft and pay for one', () => {
     expect(heard.paid).toBe('item_reed_mat');
     expect(count(heard.satchel, 'item_reed_mat')).toBe(0);
     expect(knowsRecipe(heard.progress, 'recipe_bedroll')).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------------------
+// The diary, and the keepsake.
+// ---------------------------------------------------------------------------------------
+
+describe('the ground says what it has', () => {
+  const built = buildFieldMap(fieldMap('field_map_lothal')!);
+  const seed = built.world.seed;
+
+  it('writes a lead into the field notes, not a record', () => {
+    // Present tense and offered, so a player notices the reeds while walking rather than by
+    // opening a panel. `gatheredLine` is the past-tense counterpart and says something else.
+    let found: string | null = null;
+    for (let y = 0; y < built.world.height && !found; y += 1) {
+      for (let x = 0; x < built.world.width && !found; x += 1) {
+        found = underfootLine(seed, { x, y }, built.world.tiles[y]![x]!.biome);
+      }
+    }
+    expect(found, 'nothing on the whole map is offered').not.toBeNull();
+    expect(found).toMatch(/^There is .+ here, for the taking\.$/);
+  });
+
+  it('reaches the journal entry the panel renders', () => {
+    // The entry is what `JournalPanel` draws. A line that exists and never reaches this is the
+    // shape of every mechanic this repo has shipped with no caller.
+    let withSomething = 0;
+    for (let y = 0; y < built.world.height; y += 1) {
+      for (let x = 0; x < built.world.width; x += 1) {
+        const entry = describeTile(built.world.tiles[y]![x]!, built.world);
+        if (entry.underfoot) withSomething += 1;
+      }
+    }
+    expect(withSomething).toBeGreaterThan(100);
+  });
+
+  it('says nothing where there is nothing, rather than an empty phrase', () => {
+    const entry = describeTile(built.world.tiles[0]![0]!, built.world);
+    expect(typeof entry.underfoot).toBe('string');
+  });
+});
+
+describe('what was made outlives what is carried', () => {
+  it('records the making, and refuses a craft nobody taught', () => {
+    const bag = add(emptySatchel(), 'material_flint', 2);
+    const done = craft(emptyProgress(), bag, 'recipe_flint_knife');
+    expect(done.made).toBe('recipe_flint_knife');
+    expect(hasMade(done.progress, 'recipe_flint_knife')).toBe(true);
+    expect(count(done.satchel, 'item_flint_knife')).toBe(1);
+
+    // Taught recipes are refused even with every ingredient in hand.
+    let s = add(emptySatchel(), 'material_deer_antler', 2);
+    s = add(s, 'item_flint_knife', 1);
+    const before = emptyProgress();
+    const refused = craft(before, s, 'recipe_bone_awl');
+    expect(refused.made).toBeNull();
+    // Both halves returned unchanged by identity, so nothing was spent and nothing recorded.
+    expect(refused.progress).toBe(before);
+    expect(refused.satchel).toBe(s);
+  });
+
+  it('remembers a thing that was given away', () => {
+    // The whole reason `made` is not derived from the satchel. Uma's mat leaves the bag.
+    let p = emptyProgress();
+    let bag = walkedLothal();
+
+    const said = linesFor(p, 'npc_uma', bag);
+    p = hear(p, 'npc_uma', said.findIndex((l) => l.gives.includes('recipe_reed_mat')), bag).progress;
+
+    for (const r of ['recipe_flint_knife', 'recipe_bow_drill', 'recipe_reed_rope', 'recipe_loom_frame', 'recipe_reed_mat']) {
+      const step = craft(p, bag, r);
+      p = step.progress;
+      bag = step.satchel;
+    }
+    expect(count(bag, 'item_reed_mat')).toBe(1);
+
+    const gift = linesFor(p, 'npc_uma', bag).findIndex((l) => l.costs === 'item_reed_mat');
+    const heard = hear(p, 'npc_uma', gift, bag);
+    expect(count(heard.satchel, 'item_reed_mat')).toBe(0);
+
+    // Gone from the bag, still in the record — and so in the keepsake.
+    expect(hasMade(heard.progress, 'recipe_reed_mat')).toBe(true);
+    const made = diarySections(heard.progress).find((s) => s.heading.startsWith('Made'));
+    expect(made, 'the keepsake has no Made section').toBeTruthy();
+    expect(made!.lines.join(' ')).toMatch(/Reed mat/i);
+  });
+
+  it('keeps the keepsake quiet when nothing was made', () => {
+    expect(diarySections(emptyProgress()).find((s) => s.heading.startsWith('Made'))).toBeUndefined();
   });
 });

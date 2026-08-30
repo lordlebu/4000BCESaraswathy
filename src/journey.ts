@@ -23,6 +23,7 @@ import {
 import { type Line, npc, npcs, poi } from './content/places';
 import { recipe } from './content/making';
 import { type Satchel, canDo, count, emptySatchel, remove } from './content/satchel';
+import { type Bench, canMake, make, openGround } from './content/crafting';
 
 /** Where the world is, when a rung asks for a particular night or weather. */
 export interface WorldMoment {
@@ -47,6 +48,15 @@ export interface Progress {
    * correct state for a player who has not talked to anybody — not an empty repertoire.
    */
   recipes: string[];
+  /**
+   * Recipes performed at least once, ever.
+   *
+   * Not derived from the satchel, and that is the whole reason it exists: the two things a
+   * player makes *for other people* — Uma's mat, Pell's hawser — are handed over and gone, so
+   * a keepsake that read the satchel would omit exactly the objects that mattered most. What
+   * you did is not what you are still holding.
+   */
+  made: string[];
   /** Question id to the resolution index the player settled on. */
   answered: Record<string, number>;
   /**
@@ -62,6 +72,7 @@ export const emptyProgress = (): Progress => ({
   rungs: {},
   words: [],
   recipes: [],
+  made: [],
   answered: {},
   questions: []
 });
@@ -87,6 +98,47 @@ export function knowsRecipe(progress: Progress, id: string): boolean {
   const r = recipe(id);
   if (!r) return false;
   return r.taughtBy.length === 0 || progress.recipes.includes(id);
+}
+
+/** Whether the player has ever made this, whether or not they still hold it. */
+export function hasMade(progress: Progress, recipeId: string): boolean {
+  return progress.made.includes(recipeId);
+}
+
+export interface Crafted {
+  progress: Progress;
+  satchel: Satchel;
+  /** The recipe performed, or null when nothing was. */
+  made: string | null;
+}
+
+/**
+ * Make something, and remember having made it.
+ *
+ * Both halves in one call, on the same reasoning as `hear`: `content/crafting.ts` owns whether
+ * a recipe is possible and what it costs, and it must not learn what a `Progress` is — but a
+ * caller left to record the making separately is a caller that will one day forget, and the
+ * keepsake would quietly lose the object. So the composition lives here, where knowing and
+ * carrying already meet.
+ *
+ * Refuses a recipe the player has not been shown, which `make` alone cannot check.
+ */
+export function craft(
+  progress: Progress,
+  satchel: Satchel,
+  recipeId: string,
+  bench: Bench = openGround()
+): Crafted {
+  if (!knowsRecipe(progress, recipeId) || !canMake(satchel, recipeId, bench)) {
+    return { progress, satchel, made: null };
+  }
+  return {
+    progress: progress.made.includes(recipeId)
+      ? progress
+      : { ...progress, made: [...progress.made, recipeId] },
+    satchel: make(satchel, recipeId, bench),
+    made: recipeId
+  };
 }
 
 /** Learn a recipe. Idempotent, and refuses one canon says nobody needs to teach. */

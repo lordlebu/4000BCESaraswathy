@@ -409,6 +409,7 @@ describe('here', () => {
       title: 'Salt flats',
       description: 'Cracked white ground.',
       doing: '',
+      underfoot: '',
       creature: { name: 'Reed heron', note: 'Standing very still.', species: null },
       flora: { name: 'Saltreed', note: 'Low and grey.', species: null }
     },
@@ -675,6 +676,7 @@ describe('the field notes draw a mark for every species', () => {
       title: 'Wetland at 28, 29',
       description: 'Reeds and shallow pools.',
       doing: '',
+      underfoot: '',
       creature: {
         name: 'Swamp-Wallaby',
         note: 'A marsupial-like herbivore.',
@@ -787,6 +789,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
       title: 'Plains at 35, 19',
       description: 'Open grassland.',
       doing: '',
+      underfoot: '',
       creature: {
         name: species.name,
         note: 'A fast, resilient wild equine.',
