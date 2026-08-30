@@ -64,9 +64,30 @@ function suitable(tile: Tile, poi: PointOfInterest, walkable: Set<BiomeId>): boo
  * Reclassifying rather than re-generating keeps `generateWorld` and its seed contract
  * untouched: elevation, moisture and the rivers are all still the generator's, and only the
  * biome label moves.
+ *
+ * **This table is the weakest thing in the generator and it should be replaced.** It is not a
+ * standard technique -- classification by elevation, moisture and temperature is Whittaker's and
+ * the drainage model in `rivers.ts` is the usual one, but generating a whole continent and then
+ * remapping it into a palette is bespoke to this codebase. Every one of these entries is a
+ * guess about a substitution nobody asked for, and three separate faults in one afternoon came
+ * out of it: marsh reclassified to watercourse, a plateau's rim reclassified to watercourse, and
+ * before that the same rim reclassified to hill. The map that suffers most is the one whose
+ * palette is least like a whole world.
+ *
+ * The standard answer is to constrain the classifier instead -- hand `classifyBiome` the biomes
+ * the map is allowed to use, so the thresholds divide the range among *those* and nothing is ever
+ * generated that has to be substituted afterwards. That is a real piece of work and is written
+ * down in `database/TODO.md`; until it happens, treat every ordering here as load-bearing and
+ * measure all three maps after touching one.
  */
 const BECOMES: Record<string, BiomeId[]> = {
-  sea: ['coast', 'river', 'wetland'],
+  // **Dry land before a channel.** `normalize` guarantees the generator makes low ground on
+  // every map, so even a plateau comes out with sea around its rim -- and with `river` ahead of
+  // the dry options, a map whose palette had no shoreline turned its entire rim into
+  // watercourse. That is what put the Narmada at 55.8% river the moment canon gave it the
+  // `river` it should always have had. A map with no coast and no marsh in its palette has no
+  // water at its edge; it has ground.
+  sea: ['coast', 'wetland'],
   coast: ['wetland', 'river', 'plains'],
   plains: ['wetland', 'coast', 'forest'],
   forest: ['wetland', 'river', 'plains'],
@@ -74,7 +95,12 @@ const BECOMES: Record<string, BiomeId[]> = {
   mountains: ['hills', 'plains', 'coast'],
   desert: ['plains', 'coast', 'wetland'],
   river: ['wetland', 'coast'],
-  wetland: ['river', 'coast'],
+  // **Standing water is not a channel**, and putting `river` first here said it was. On a map
+  // whose palette has no `wetland`, every marsh the generator made became a watercourse: giving
+  // the Narmada plateau its river back turned 57.7% of it into river and left 2% hills, which is
+  // not a plateau with a river through it, it is a flood. Wet ground becomes wet *ground* where
+  // the palette has any, and only falls to a channel when it has none.
+  wetland: ['coast', 'forest', 'river', 'plains'],
   settlement: ['plains', 'coast'],
   landmark: ['plains', 'forest']
 };
@@ -96,6 +122,17 @@ function applyPalette(world: World, palette: Set<BiomeId>): void {
       tile.biome = preferred ?? fallback;
     }
   }
+
+  // A river the palette just erased is not a river any more, and `world.rivers` must not go on
+  // naming it. The Narmada carried ten of these: channels carved by the generator, reclassified
+  // to hill and plain because that map's palette had no `river` in it, and still listed as
+  // watercourses with names. Nothing read them, which is exactly why it survived so long.
+  //
+  // Canon has since given that map its river back -- it is named for one -- but the guard stays,
+  // because the next palette to omit a biome the generator produces will do this again silently.
+  world.rivers = world.rivers
+    .map((r) => ({ ...r, path: r.path.filter((p) => world.tiles[p.y]?.[p.x]?.biome === 'river') }))
+    .filter((r) => r.path.length >= 2);
 
   if (!palette.has('settlement')) return;
 
