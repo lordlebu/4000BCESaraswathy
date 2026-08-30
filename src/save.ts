@@ -30,8 +30,17 @@ const PREFIX = 'south-of-tethys';
  * parses under a shape it was not written for is the danger rather than the inconvenience.
  * The cost is real and small; the alternative is a special case that has to be remembered
  * every time the shape moves again.
+ *
+ * **9 adds what `Progress` learned about making**: `recipes`, the crafts somebody taught you,
+ * and `made`, the crafts you have performed. Both would read as empty from a version 8 save
+ * and both would be wrong in the same quiet way — the people would look as though they had
+ * never taught you anything, and the keepsake at the end would list none of what you built.
+ *
+ * `recipes` landed one commit before this bump did, which is the mistake this constant exists
+ * to catch and did not, because the edit that was supposed to raise it failed silently. Both
+ * fields are covered by this one bump: the branch has not merged, so no save carries either.
  */
-export const SAVE_VERSION = 8;
+export const SAVE_VERSION = 9;
 
 export interface Journey {
   version: number;
@@ -80,6 +89,7 @@ function readProgress(value: unknown): Progress {
     rungs: raw.rungs && typeof raw.rungs === 'object' ? { ...raw.rungs } : {},
     words: Array.isArray(raw.words) ? raw.words : [],
     recipes: Array.isArray(raw.recipes) ? raw.recipes : [],
+    made: Array.isArray(raw.made) ? raw.made : [],
     answered: raw.answered && typeof raw.answered === 'object' ? { ...raw.answered } : {},
     questions: Array.isArray(raw.questions) ? raw.questions : []
   };

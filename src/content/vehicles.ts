@@ -4,14 +4,17 @@
 // are holding. A vehicle's whole content is `crosses`: a list of biomes it can travel over,
 // which is `affords: ["cross"]` said at the scale of a journey rather than a step.
 //
-// **This does not move anybody yet, and says so.** Canon's field maps have declared
-// `neighbours` since the second map shipped — Lothal names Narmada, Narmada names Lothal —
-// and nothing in the game has ever used the edge. A vehicle is the reason that edge would be
-// used, so this file answers the questions a travel screen would ask, and the travel screen
-// is not built. That is a deliberate stopping point rather than an omission: the rules layer
-// is where this repo puts a mechanic first, and the three times a rule shipped with no caller
-// are recorded at the top of `journey.ts` as the thing to avoid. So the test for this file
-// covers what it claims and nothing pretends the crossing happens.
+// **Nothing here gates travel yet, and says so.** An earlier version of this comment claimed
+// that nothing in the game used canon's `neighbours` edges, and that was simply wrong:
+// `content/overworldMap.ts` draws the overworld's roads out of them, and the Travel screen has
+// walked them since the second map shipped. What is missing is narrower and more interesting —
+// travel is free, so a boat changes nothing about where a player can go.
+//
+// That is a deliberate stopping point rather than an omission. Making a vehicle *required*
+// would put a gate in front of a cozy game's only journey, which is a design decision and not
+// a wiring one; making it *open* new ground needs ground that walking cannot reach, and the
+// only unwalkable biome is `sea`. So this file answers the questions such a screen would ask,
+// the answers are tested, and nothing pretends the crossing happens.
 //
 // Pure and free of React and Phaser.
 

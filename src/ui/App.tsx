@@ -16,7 +16,6 @@ import { initialSurface, surfaceReducer } from './surface';
 import { poi } from '../content/places';
 import { SatchelPanel } from './SatchelPanel';
 import { distinct, emptySatchel } from '../content/satchel';
-import { make } from '../content/crafting';
 import { anythingAt, gather, gatheredLine } from '../content/gathering';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
@@ -25,7 +24,7 @@ import { type Collection, emptyCollection, metOnTile, size } from '../content/co
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
 import { loadJourney, saveJourney } from '../save';
-import { advance, answer, hear, knowsRecipe, type WorldMoment } from '../journey';
+import { advance, answer, craft, hear, knowsRecipe, type WorldMoment } from '../journey';
 import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import type { World } from '../world/types';
 
@@ -301,10 +300,21 @@ export function App() {
     [progress.recipes]
   );
 
-  /** Make a thing. Whether that is possible is `crafting.ts`'s question, not this one's. */
-  const craft = useCallback(
-    (recipeId: string) => setSatchel((s) => make(s, recipeId, bench)),
-    [bench]
+  /**
+   * Make a thing, and remember having made it.
+   *
+   * `journey.craft` returns both halves for the same reason `hear` does: the satchel loses the
+   * object the moment it is given away, and the keepsake at the end is built from what was
+   * made rather than from what is still carried.
+   */
+  const makeHere = useCallback(
+    (recipeId: string) => {
+      const done = craft(progress, satchel, recipeId, bench);
+      if (!done.made) return;
+      setProgress(done.progress);
+      setSatchel(done.satchel);
+    },
+    [progress, satchel, bench]
   );
 
   /** Settle a question. The player may be wrong, and nothing here tells them so. */
@@ -461,7 +471,7 @@ export function App() {
           underfoot ? gatheredLine(underfoot.seed, underfoot.at, underfoot.biome) : null
         }
         onGather={pickUp}
-        onMake={craft}
+        onMake={makeHere}
         open={interrupts.satchel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'satchel' })}
       />

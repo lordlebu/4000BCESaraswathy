@@ -74,6 +74,25 @@ export function gather(
 }
 
 /**
+ * What is here to take, in the present tense, or null when there is nothing.
+ *
+ * The counterpart to `gatheredLine`, and the one the field notes use. The difference matters:
+ * that one is a record of something done and this is a lead. Without it the only way to find
+ * out the ground has anything on it is to open a panel, which is the wrong way round — a
+ * naturalist notices the reeds and *then* decides to cut them.
+ */
+export function underfootLine(seed: string, at: Point, biome: BiomeId): string | null {
+  const here = yieldsAt(seed, at, biome);
+  if (here.length === 0) return null;
+  const names = here.map((m) => m.name.toLowerCase());
+  const list =
+    names.length === 1
+      ? names[0]
+      : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+  return `There is ${list} here, for the taking.`;
+}
+
+/**
  * A sentence for the diary, or null if there was nothing.
  *
  * In the diary's register rather than a pickup notification — the game's whole progression

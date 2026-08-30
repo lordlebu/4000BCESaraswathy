@@ -12,6 +12,7 @@ import { discoveries, fieldQuestion, vocabulary } from './knowledge';
 import { poi } from './places';
 import { type Collection, everythingMet } from './collection';
 import { metSpecies } from './species';
+import { nameOf, recipe } from './making';
 import { landmarkTitle, landmarkKindFor } from './landmarks';
 import type { World } from '../world/types';
 
@@ -92,6 +93,18 @@ export function diarySections(progress: Progress | undefined): LogSection[] {
       lines: vocabulary
         .filter((w) => progress.words.includes(w.id))
         .map((w) => `— ${w.word} (${w.language}): ${w.gloss}`)
+    });
+  }
+
+  // What the traveller made, which is deliberately not what they are still carrying: the mat
+  // went to Uma and the hawser to Pell, and those are the two the record should be proudest of.
+  const built = progress.made
+    .map((id) => recipe(id))
+    .filter((r): r is NonNullable<typeof r> => r !== null);
+  if (built.length) {
+    out.push({
+      heading: `Made (${count(built.length)} ${plural(built.length, 'thing', 'things')})`,
+      lines: built.map((r) => `— ${r.outputs.map((o) => nameOf(o.item ?? o.material ?? '')).join(', ')}`)
     });
   }
 

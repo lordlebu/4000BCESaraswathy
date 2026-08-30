@@ -144,6 +144,8 @@ export function JournalPanel({
           {/* Reserved height: this is the one line that changes on its own, and a panel that
               resizes as the day turns drags the camera with it. */}
           {entry.doing && <p className="doing">{entry.doing}</p>}
+          {/* A lead rather than a record: it says what is here, and the satchel does the taking. */}
+          {entry.underfoot && <p className="underfoot">{entry.underfoot}</p>}
           <Note note={entry.creature} kind="creature" />
         </div>
         <div>
