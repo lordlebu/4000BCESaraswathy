@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.1.1",
+  "canon_version": "2.2.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -5836,7 +5836,7 @@
       ],
       "uses": [
         "dye",
-        "decorative"
+        "ornament"
       ],
       "notes": "Domesticated decorative vine bred by Harappan settlers. Vibrant purple flowers yield sweet-scented blue dye.",
       "canon": "primary",
@@ -5885,8 +5885,8 @@
         "settlement_lothal"
       ],
       "uses": [
-        "ornamental",
-        "mineral_filter"
+        "ornament",
+        "filtration"
       ],
       "notes": "Massive aquatic lotus with bright green petals. Blooms in Lothal estuaries, drawing mineral-rich runoff.",
       "canon": "primary",
@@ -5913,7 +5913,7 @@
         "corrupted_zones"
       ],
       "uses": [
-        "dream_inducer"
+        "psychoactive"
       ],
       "notes": "Invasive deep-crimson lotus thriving in areas of past magical corruption. Pollen induces vivid, restless dreams.",
       "canon": "primary",
@@ -5980,8 +5980,7 @@
         "region_saraswati_delta"
       ],
       "uses": [
-        "timber",
-        "construction"
+        "timber"
       ],
       "notes": "Mangrove absorbing calcium and basalt. Yields naturally curved, bone-hard timber used for construction.",
       "canon": "primary",
@@ -6108,8 +6107,8 @@
         "region_narmada_plateau"
       ],
       "uses": [
-        "stimulant",
-        "beverage"
+        "psychoactive",
+        "drink"
       ],
       "notes": "Hardy wild tea adapted to acidic, sulfur-rich volcanic soils. Produces dark, highly caffeinated leaves.",
       "canon": "primary",
@@ -6156,7 +6155,7 @@
         "region_narmada_plateau"
       ],
       "uses": [
-        "memory_archive",
+        "memory",
         "ritual"
       ],
       "notes": "Massive fig grown from a magical moon-seed. Roots act as biological archive tree whispering memories in the wind.",
@@ -6242,10 +6241,10 @@
         "region_narmada_plateau"
       ],
       "uses": [
-        "tonic",
-        "mineral_binder"
+        "physic",
+        "filtration"
       ],
-      "notes": "Rock-clinging vine that concentrates bituminous minerals from cliff seeps. Pressed sap mixed into fortifying tonics; also used to seal pottery.",
+      "notes": "Rock-clinging vine that concentrates bituminous minerals from cliff seeps. Pressed sap mixed into fortifying tonics; also used to seal pottery. Binds minerals out of what runs past it.",
       "canon": "primary",
       "sources": [
         "SouthOfTethys.txt",
@@ -7276,8 +7275,7 @@
         "region_aravali"
       ],
       "uses": [
-        "barrier_hedge",
-        "warning_marker"
+        "boundary"
       ],
       "notes": "Hooked scrub that thickens near old Dwarka-tainted ground. Planted as living fences; pollen irritates the eyes.",
       "canon": "primary",
@@ -7303,11 +7301,10 @@
         "region_narmada_plateau"
       ],
       "uses": [
-        "scaffolding",
-        "rafts",
-        "tools"
+        "timber",
+        "craftwork"
       ],
-      "notes": "Fast-growing bamboo of river banks. Primary material for scaffolding, fish traps, and light rafts.",
+      "notes": "Fast-growing bamboo of river banks. Primary material for scaffolding, fish traps, and light rafts. Used for scaffolding. Used for rafts.",
       "canon": "primary",
       "sources": [
         "SouthOfTethys.txt"
@@ -7330,7 +7327,7 @@
         "region_gedrosian_desert"
       ],
       "uses": [
-        "fruit",
+        "food",
         "shade",
         "fibre"
       ],
@@ -7358,10 +7355,10 @@
         "region_aravali"
       ],
       "uses": [
-        "incense",
-        "trade_resin"
+        "fragrance",
+        "trade"
       ],
-      "notes": "Drought resin tree of desert margins. Tears of gum burned in Mask Family and Yaksha rites; major caravan commodity.",
+      "notes": "Drought resin tree of desert margins. Tears of gum burned in Mask Family and Yaksha rites; major caravan commodity. The resin is the traded part.",
       "canon": "primary",
       "sources": [
         "SouthOfTethys.txt"
@@ -7384,8 +7381,8 @@
         "region_saraswati_delta"
       ],
       "uses": [
-        "navigational_landmark",
-        "charcoal"
+        "landmark",
+        "fuel"
       ],
       "notes": "Pale-barked mangrove that appears to glow under moonlight when wet. Marks safe channels through the outer estuary; charcoal prized by mask-casters.",
       "canon": "primary",
@@ -7438,10 +7435,9 @@
         "region_aravali"
       ],
       "uses": [
-        "ship_timber",
-        "tower_beams"
+        "timber"
       ],
-      "notes": "Dense highland teak preferred for river craft and the red-sandstone tower’s internal beams. Slow-grown; felling is tightly controlled by plateau clans.",
+      "notes": "Dense highland teak preferred for river craft and the red-sandstone tower’s internal beams. Slow-grown; felling is tightly controlled by plateau clans. Canon records it specifically for ship timber. Canon records it specifically for tower beams.",
       "canon": "primary",
       "sources": [
         "SouthOfTethys.txt"
@@ -7465,10 +7461,9 @@
         "region_saraswati_delta"
       ],
       "uses": [
-        "staple_food",
-        "flood_crop"
+        "food"
       ],
-      "notes": "Starchy corm grown in flooded lotus ponds. Complements Red Delta Rice in Kia and Harappan kitchens.",
+      "notes": "Starchy corm grown in flooded lotus ponds. Complements Red Delta Rice in Kia and Harappan kitchens. A staple food. Grown as a flood crop: it wants the water the rice cannot take.",
       "canon": "primary",
       "sources": [
         "SouthOfTethys.txt"
@@ -7492,9 +7487,9 @@
         "region_aravali"
       ],
       "uses": [
-        "fermented_drink",
+        "drink",
         "oil",
-        "ritual_offering"
+        "ritual"
       ],
       "notes": "Flowering tree of the dry plateaus. Night-blooming flowers gathered for sweet liquor and lamp oil. Kia and Jharwa use the blossom in seasonal offerings.",
       "canon": "primary",
@@ -7521,7 +7516,7 @@
       ],
       "uses": [
         "ritual",
-        "memory_archive_graft"
+        "memory"
       ],
       "notes": "Pale climbing vine grafted onto Oracle Figs in sanctuary groves. Associated with moon-seed legends and the Silver-Leaved Oracle Fig lineage.",
       "canon": "primary",
@@ -7546,10 +7541,10 @@
         "region_gedrosian_desert"
       ],
       "uses": [
-        "incense",
-        "wound_salve"
+        "fragrance",
+        "physic"
       ],
-      "notes": "Thorny desert shrub yielding bitter resin. Mixed with Shilajit Creeper sap for field salves.",
+      "notes": "Thorny desert shrub yielding bitter resin. Mixed with Shilajit Creeper sap for field salves. Prepared as a wound salve.",
       "canon": "primary",
       "sources": [
         "SouthOfTethys.txt"
@@ -7572,11 +7567,10 @@
         "region_narmada_plateau"
       ],
       "uses": [
-        "medicine",
-        "insect_repellent",
+        "physic",
         "shade"
       ],
-      "notes": "Bitter medicinal tree of villages and field edges. Leaves and oil used against pests and fever.",
+      "notes": "Bitter medicinal tree of villages and field edges. Leaves and oil used against pests and fever. Also burnt or hung as an insect repellent.",
       "canon": "primary",
       "sources": [
         "SouthOfTethys.txt"
@@ -7600,7 +7594,7 @@
         "canopy"
       ],
       "uses": [
-        "spice",
+        "seasoning",
         "trade"
       ],
       "notes": "Climbing pepper of humid plateau ravines. Dried berries move downriver to Lothal spice stalls.",
@@ -7628,7 +7622,7 @@
       ],
       "uses": [
         "poison",
-        "boundary_marker"
+        "boundary"
       ],
       "notes": "Toxic flowering shrub of dry margins. Sap and smoke used sparingly in arrow pastes; planted to mark forbidden ground.",
       "canon": "primary",
@@ -7653,10 +7647,10 @@
         "region_saraswati_delta"
       ],
       "uses": [
-        "staple_grain",
+        "food",
         "trade"
       ],
-      "notes": "Iron-rich short-grain rice of the Saraswati floodplain. Forms the bulk of Lothal granary stores and river trade with upland settlements.",
+      "notes": "Iron-rich short-grain rice of the Saraswati floodplain. Forms the bulk of Lothal granary stores and river trade with upland settlements. A staple grain.",
       "canon": "primary",
       "sources": [
         "SouthOfTethys.txt"
@@ -7681,9 +7675,9 @@
       ],
       "uses": [
         "ritual",
-        "household_herb"
+        "physic"
       ],
-      "notes": "Household and shrine herb. Planted in courtyards; leaves used in morning rites and mild teas.",
+      "notes": "Household and shrine herb. Planted in courtyards; leaves used in morning rites and mild teas. Kept as a household herb, by the door.",
       "canon": "primary",
       "sources": [
         "SouthOfTethys.txt"
@@ -7706,11 +7700,10 @@
         "coastal"
       ],
       "uses": [
-        "thatching",
-        "mat_weaving",
-        "filter_beds"
+        "fibre",
+        "filtration"
       ],
-      "notes": "Tall estuary reed tolerant of brackish flood. Primary thatch for Kia marsh huts; planted in lagoon filter beds below Lothal docks.",
+      "notes": "Tall estuary reed tolerant of brackish flood. Primary thatch for Kia marsh huts; planted in lagoon filter beds below Lothal docks. Cut for thatching. Woven into mats. Planted in filter beds.",
       "canon": "primary",
       "sources": [
         "SouthOfTethys.txt"
@@ -7735,9 +7728,9 @@
         "region_aravali"
       ],
       "uses": [
-        "ritual_wood",
-        "perfume",
-        "carving"
+        "ritual",
+        "fragrance",
+        "craftwork"
       ],
       "notes": "Fragrant heartwood for masks, beads, and temple smoke. Harvest rights contested between plateau clans and river merchants.",
       "canon": "primary",
@@ -7764,7 +7757,7 @@
       ],
       "uses": [
         "food",
-        "souring_agent",
+        "seasoning",
         "shade"
       ],
       "notes": "Pod-bearing shade tree of roads and courtyards. Pulp seasons stews and preserves fish on river journeys.",
@@ -7792,9 +7785,9 @@
       ],
       "uses": [
         "shade",
-        "omen_reading"
+        "ritual"
       ],
-      "notes": "Broad-leafed fig whose hollow trunks carry wind as a low murmur. Delta dwellers treat unusual patterns of sound as weather or spirit omens.",
+      "notes": "Broad-leafed fig whose hollow trunks carry wind as a low murmur. Delta dwellers treat unusual patterns of sound as weather or spirit omens. Read for omens.",
       "canon": "primary",
       "sources": [
         "SouthOfTethys.txt"

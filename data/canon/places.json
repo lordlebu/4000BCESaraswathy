@@ -1,17 +1,18 @@
 {
-  "canon_version": "2.1.1",
+  "canon_version": "2.2.0",
   "regions": [
     {
       "id": "region_aravali",
       "type": "region",
       "name": "Aravali Ranges",
       "continent": "jambhudweepa",
-      "notes": "Stony ranges. Site of Mask Family schism, Jharwa massacre, and hidden sanctuary of Vara-Ma/Orek/Thren.",
-      "canon": "primary",
-      "sources": [
-        "AI_CONTEXT.md",
-        "map"
+      "biomes": [
+        "hills",
+        "mountains",
+        "plains",
+        "forest"
       ],
+      "biomes_note": "Recorded from the species canon already places here -- hills and plains carry seven each, forest and mountains four. It was the last region with an `extent` drawn on the atlas and no biomes at all, which meant nothing could be laid out in it: `region_gedrosian_desert` had the same gap and was closed the same way. Advisory, as the schema says -- a field map's `seed_biomes` is still what the generator draws from, and a map here would want a cheap biome in the palette because hills, forest and mountains are all travel cost 2 or worse.",
       "extent": [
         [
           33,
@@ -41,6 +42,12 @@
           37,
           39
         ]
+      ],
+      "notes": "Stony ranges. Site of Mask Family schism, Jharwa massacre, and hidden sanctuary of Vara-Ma/Orek/Thren.",
+      "canon": "primary",
+      "sources": [
+        "AI_CONTEXT.md",
+        "map"
       ]
     },
     {
