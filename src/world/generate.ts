@@ -6,7 +6,7 @@
 
 import { createRandom, clamp, shuffle, type Random } from './rng';
 import { fractalField, highlandSpine, normalize, type Field } from './field';
-import { classifyBiome, THRESHOLDS } from './classify';
+import { classifyBiome } from './classify';
 import { placeOf, shapeFor, type Relief } from './landform';
 import { carveRivers, orthogonalNeighbours } from './rivers';
 import { placeName, riverName } from './names';
@@ -215,27 +215,25 @@ export function generateWorld({
     tiles.push(row);
   }
 
-  // Rivers rise on the highest ground and are spaced apart so they read as separate valleys.
+  // Rivers are found, not placed. `rivers.ts` fills the depressions, accumulates the drainage
+  // and calls a channel anywhere enough land drains through -- so the network converges,
+  // tributaries join, and every course reaches water because the filled surface has no minima
+  // to trap one.
   //
-  // **A delta is the exception, and it is the whole point of one.** Sourcing only above
-  // `HILLS` means a map with no highlands gets almost no river -- Lothal ran at 0.5% river,
-  // which is absurd for a delta. And it matters beyond looks: `river` is one of only two wet
-  // biomes that cost 1 to cross, so with no channels there is no cheap way through a marsh and
-  // the map is uniformly expensive whatever shape the land is.
+  // **One number instead of three.** This used to pick the highest N tiles as sources and walk
+  // each downhill with a random tie-breaker, spaced apart so they read as separate valleys: on a
+  // delta, ninety greedy walks out of the raised centre, which is precisely the braided tangle
+  // it produced. The threshold is the honest knob because it is the actual question -- how much
+  // land has to drain through a cell before it is a channel.
   //
-  // So a delta sources from the highest ground it actually has, and carves many more of them.
-  // The result is what a delta is: a braid of channels you follow, through reeds you would
-  // rather not wade. The Phase 6 route line then draws itself -- the fast way is the water.
-  const isDelta = relief === 'delta';
-  const bar = isDelta ? THRESHOLDS.COAST : THRESHOLDS.HILLS;
-  const sources = tiles
-    .flat()
-    .filter((t) => t.elevation > bar)
-    .sort((a, b) => b.elevation - a.elevation)
-    .slice(0, isDelta ? 90 : 24);
-  // Delta channels sit closer together than mountain valleys do -- that is what braiding means --
-  // so the spacing that keeps highland rivers reading as separate valleys is wrong here.
-  const carved = carveRivers(tiles, width, height, sources, isDelta ? 2 : 5);
+  // A delta still runs wetter than a plateau, and for the reason it always did rather than by
+  // sourcing differently: `river` is one of only two wet biomes costing 1 to cross, so a marsh
+  // with no channels is uniformly expensive whatever shape the land is. Here that is a larger
+  // share of channel, not a different way of finding one.
+  // A ribbon, not a marsh: a channel two tiles wide crossing a 48-tile map is about 4% of it,
+  // and tributaries take it to five or six. The delta is the one that should read as water.
+  const wetness = relief === 'delta' ? 0.16 : 0.035;
+  const carved = carveRivers(tiles, width, height, wetness);
   // A river is named for where it rises, so the name holds even as the course is walked downstream.
   const rivers: River[] = carved.map((path) => ({ path, name: riverName(seed, path[0]!) }));
 

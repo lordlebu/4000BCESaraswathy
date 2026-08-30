@@ -24,11 +24,12 @@ import {
   rungOf
 } from '../src/journey';
 import { describeTile } from '../src/content/journal';
-import { underfootLine } from '../src/content/gathering';
+import { underfootLine, yieldsAt } from '../src/content/gathering';
 import { diarySections } from '../src/content/travelLog';
 import { discoveries } from '../src/content/knowledge';
 import { npc, npcs } from '../src/content/places';
-import { recipes } from '../src/content/making';
+import { items, recipes } from '../src/content/making';
+import craftingBundle from '../data/canon/crafting.json';
 import { add, count, emptySatchel } from '../src/content/satchel';
 import { canMake, make, makeableNow, openGround, withinReach } from '../src/content/crafting';
 import { gather } from '../src/content/gathering';
@@ -330,5 +331,94 @@ describe('what was made outlives what is carried', () => {
 
   it('keeps the keepsake quiet when nothing was made', () => {
     expect(diarySections(emptyProgress()).find((s) => s.heading.startsWith('Made'))).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------------------
+// The assumption canon's gate rests on.
+// ---------------------------------------------------------------------------------------
+
+describe('gathering does not use a tile up', () => {
+  const built = buildFieldMap(fieldMap('field_map_lothal')!);
+  const seed = built.world.seed;
+
+  /**
+   * This is not a test about gathering. It is the game's half of a bargain with canon.
+   *
+   * `check_playability.py` decides a recipe is reachable by asking whether its ingredient
+   * *classes* can be obtained at all, and ignores every `count` in every recipe. That is
+   * sound only because a tile can be revisited: there is no quantity a patient walker cannot
+   * reach, so "obtainable" and "obtainable four times" are the same question.
+   *
+   * The day gathering starts depleting, that stops being true and canon's gate starts passing
+   * recipes nobody can afford — silently, because canon has no notion of how much of anything
+   * the world holds. This fails first, and says so.
+   */
+  it('gives the same tile up again, which is what makes canon allowed to ignore counts', () => {
+    const at = { x: 12, y: 12 };
+    const biome = built.world.tiles[12]![12]!.biome;
+
+    let bag = emptySatchel();
+    const first = yieldsAt(seed, at, biome);
+    expect(first.length, 'pick a tile with something on it').toBeGreaterThan(0);
+
+    for (let visit = 1; visit <= 5; visit += 1) {
+      bag = gather(bag, seed, at, biome);
+      for (const m of first) {
+        expect(count(bag, m.id), `${m.id} after ${visit} visits`).toBe(visit);
+      }
+    }
+  });
+
+  it('lets a patient walker reach any count a recipe asks for', () => {
+    // The strongest form: the largest count any recipe wants, gathered off one map.
+    const biggest = Math.max(...recipes.flatMap((r) => r.ingredients.map((n) => n.count)));
+    let bag = emptySatchel();
+    for (let lap = 0; lap < biggest; lap += 1) {
+      for (let y = 0; y < built.world.height; y += 1) {
+        for (let x = 0; x < built.world.width; x += 1) {
+          bag = gather(bag, seed, { x, y }, built.world.tiles[y]![x]!.biome);
+        }
+      }
+    }
+    const reed = count(bag, 'material_reed_fibre');
+    expect(reed, 'walking the map repeatedly must accumulate').toBeGreaterThanOrEqual(biggest);
+  });
+});
+
+// ---------------------------------------------------------------------------------------
+// The one rule written down twice.
+// ---------------------------------------------------------------------------------------
+
+describe('the two implementations agree', () => {
+  /**
+   * `affordsOf` resolves `base_item` here; `World.affords` resolves it in canon's Python. Both
+   * exist because canon must prove a recipe performable *before* it exports, and both have
+   * carried a comment saying "change one, change both" — which is a convention, not a guard.
+   *
+   * Canon now emits its own answer with the bundle, so this is the guard. If either walk
+   * changes, the two stop agreeing here rather than in somebody's playthrough.
+   */
+  it('resolves every affordance chain the same way canon does', () => {
+    const canonSays = (craftingBundle as { conformance?: { affords: Record<string, string[]> } })
+      .conformance?.affords;
+    expect(canonSays, 'canon exported no conformance block').toBeTruthy();
+
+    expect(Object.keys(canonSays!).sort()).toEqual(items.map((i) => i.id).sort());
+    for (const i of items) {
+      expect([...i.affords].sort(), `${i.id} resolves differently on the two sides`).toEqual(
+        [...canonSays![i.id]!].sort()
+      );
+    }
+  });
+
+  it('covers the inherited case, so agreement is not agreement about nothing', () => {
+    // `item_reed_rope` states nothing of its own and takes `bind` from `item_cordage`. If the
+    // chain walk broke on both sides identically this would still pass — but if it broke on
+    // either, it would not, which is what a conformance check is for.
+    const canonSays = (craftingBundle as { conformance: { affords: Record<string, string[]> } })
+      .conformance.affords;
+    expect(canonSays['item_reed_rope']).toEqual(['bind']);
+    expect(items.some((i) => i.materials.length === 0 && i.affords.length > 0)).toBe(true);
   });
 });

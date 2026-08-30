@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.2.0",
+  "canon_version": "2.2.2",
   "regions": [
     {
       "id": "region_aravali",
@@ -449,7 +449,8 @@
         "mountains",
         "forest",
         "settlement",
-        "plains"
+        "plains",
+        "river"
       ],
       "scale": "large",
       "points_of_interest": [
@@ -464,7 +465,7 @@
         "field_map_lothal"
       ],
       "arrival": "The road up the scarp is the only part of the plateau anyone built. Everything above it was already here: black rock in steps a hundred feet high, holding a flat green country the sea never reached. They will tell you at the top that this is why the University is here. They are right, and it is not the whole reason.",
-      "notes": "Second field map, and the counterweight to Lothal. At Lothal local knowledge was right and the academy was quoted from a distance; here the academy is a room the player stands in. The Long Archive is not foolish -- it is rigorous and its record begins at the Shattering, so it has four hundred years of excellent measurements against a baseline that is itself the wound. Large scale, hills and mountains, so the overworld reads as travel rather than as two versions of the same map. High and apart. The plateau is the only place on the overworld that is neither delta nor desert, and the distance from Lothal is the point -- reaching the university is a journey out of the country you started in. Relief is `plateau`: canon's own arrival text says black rock in steps a hundred feet high holding a flat green country, so the surface is walkable and the drama is at the scarp. The map was previously 62% forest and 35% hills at a uniform travel cost of 2 -- high country with no flat anything in it, which is not the place canon describes. Plains added with it: a plateau needs flat ground to be flat, and the palette had none -- hills, mountains and forest are all travel cost 2 or 3, so the only cost-1 tile on the whole map was `settlement`. Appended rather than inserted, since the first entry is the engine's fallback and hills must stay dominant; the shaping is what keeps plains on the surface and hills at the scarp, rather than letting plains flood the map as it did when tried on Lothal. The Dry Harbour was retired and is no longer a neighbour, so the plateau is reached from Lothal alone.",
+      "notes": "Second field map, and the counterweight to Lothal. At Lothal local knowledge was right and the academy was quoted from a distance; here the academy is a room the player stands in. The Long Archive is not foolish -- it is rigorous and its record begins at the Shattering, so it has four hundred years of excellent measurements against a baseline that is itself the wound. Large scale, hills and mountains, so the overworld reads as travel rather than as two versions of the same map. High and apart. The plateau is the only place on the overworld that is neither delta nor desert, and the distance from Lothal is the point -- reaching the university is a journey out of the country you started in. Relief is `plateau`: canon's own arrival text says black rock in steps a hundred feet high holding a flat green country, so the surface is walkable and the drama is at the scarp. The map was previously 62% forest and 35% hills at a uniform travel cost of 2 -- high country with no flat anything in it, which is not the place canon describes. Plains added with it: a plateau needs flat ground to be flat, and the palette had none -- hills, mountains and forest are all travel cost 2 or 3, so the only cost-1 tile on the whole map was `settlement`. Appended rather than inserted, since the first entry is the engine's fallback and hills must stay dominant; the shaping is what keeps plains on the surface and hills at the scarp, rather than letting plains flood the map as it did when tried on Lothal. The Dry Harbour was retired and is no longer a neighbour, so the plateau is reached from Lothal alone.\n\n**The palette gained `river`, which it should never have lacked.** This map is named for a river and had none: the generator carved channels, `applyPalette` found no `river` in the palette and no `wetland` or `coast` to turn them into, and dropped every one to the fallback biome. Ten named watercourses survived as paths pointing at tiles of hill and plain. Nothing read them, which is why it went unnoticed for as long as the map has existed.",
       "epochs": [
         "epoch_post_cataclysm"
       ],

@@ -93,7 +93,18 @@ describe('the Narmada plateau', () => {
     const water = (map: typeof narmada) =>
       share(map, 'wetland') + share(map, 'coast') + share(map, 'river') + share(map, 'sea');
 
-    expect(water(narmada), 'the plateau has water on it').toBeLessThan(0.05);
+    // **A river through it, not a marsh.** This used to assert the plateau was bone dry, and
+    // that passed for the wrong reason: canon's palette had no `river`, so every channel the
+    // generator cut was reclassified away and the map named ten watercourses that were hills.
+    // Canon has given the Narmada the river it is named after, so the question is now whether
+    // the water reads as a ribbon rather than as a wetland.
+    expect(water(narmada), 'the plateau has no river on it').toBeGreaterThan(0.01);
+    // 0.16 rather than a tighter figure, and the slack is honest: `carveRivers` cuts about 3%
+    // of this map, and `routes.ts` then eases the ground between the six places, turning wetland
+    // to river along every path it draws. Two sources, one number. Tightening this belongs with
+    // the constrained-classifier rewrite noted in `fieldMap.ts`, not with another pass of
+    // tuning the substitution table.
+    expect(water(narmada), 'the plateau is a marsh, not a plateau').toBeLessThan(0.16);
     expect(water(lothal), 'the delta is not mostly water').toBeGreaterThan(0.5);
     // High ground rather than *mostly* hills. Canon's arrival text calls the plateau "a flat
     // green country the sea never reached" -- so a map that is 50% hills is the wrong place, and
