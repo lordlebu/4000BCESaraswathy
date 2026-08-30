@@ -14,6 +14,10 @@ import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { poi } from '../content/places';
+import { SatchelPanel } from './SatchelPanel';
+import { distinct, emptySatchel } from '../content/satchel';
+import { make } from '../content/crafting';
+import { anythingAt, gather, gatheredLine } from '../content/gathering';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
@@ -53,6 +57,11 @@ export function App() {
   // What the player knows. Every rule about changing it lives in `journey.ts`; this only holds
   // it and hands it to the save.
   const [progress, setProgress] = useState(initialJourney.current.progress);
+
+  // What the traveller is carrying. Every rule about changing it lives in `content/satchel.ts`
+  // and `content/crafting.ts`; this only holds it and hands it to the save, exactly as
+  // `progress` does.
+  const [satchel, setSatchel] = useState(initialJourney.current.satchel ?? emptySatchel());
 
   // The three scales. `fieldMapId` is the country under foot; `poiId` is the authored place
   // being stood in, if any; a sub-location opens inside the place panel rather than here,
@@ -127,7 +136,7 @@ export function App() {
   // second otherwise, and the journey is not worth a synchronous write that often.
   useEffect(() => {
     const flush = () =>
-      saveJourney(seed, { discovered: discovered.current, collection, reached, progress });
+      saveJourney(seed, { discovered: discovered.current, collection, reached, progress, satchel });
     const timer = window.setInterval(flush, 3000);
     window.addEventListener('pagehide', flush);
     return () => {
@@ -135,7 +144,7 @@ export function App() {
       window.removeEventListener('pagehide', flush);
       flush();
     };
-  }, [seed, collection, reached, progress]);
+  }, [seed, collection, reached, progress, satchel]);
 
   const currentCreature = useMemo(() => {
     if (!world || !arrival) return null;
@@ -177,6 +186,8 @@ export function App() {
     // The collection is trip-scoped: a new world is a new walk, not a continuing album.
     setCollection(emptyCollection());
     setProgress(loadJourney(next).progress);
+    // A new world is a new walk. What was in the satchel belonged to the old one.
+    setSatchel(loadJourney(next).satchel);
     setMemory('');
     setArrivalPage(null);
     setReached(false);
@@ -231,6 +242,44 @@ export function App() {
   const listen = useCallback(
     (npcId: string, lineIndex: number) => setProgress((p) => hear(p, npcId, lineIndex)),
     []
+  );
+
+  /**
+   * Where the traveller stands, as far as making is concerned.
+   *
+   * A sited process -- firing, tanning, brewing -- wants a kind of place, and canon states the
+   * kind on the point of interest. Off an authored place this is null, which `crafting.ts`
+   * reads as open ground.
+   */
+  const bench = useMemo(
+    () => ({ kind: standingOn ? poi(standingOn)?.kind ?? null : null }),
+    [standingOn]
+  );
+
+  /** The tile under foot, for gathering. Null before the world has been built. */
+  const underfoot = useMemo(() => {
+    if (!world || !arrival) return null;
+    const tile = world.tiles[arrival.at.y]?.[arrival.at.x];
+    return tile ? { at: arrival.at, biome: tile.biome, seed: world.seed } : null;
+  }, [world, arrival]);
+
+  /**
+   * Stoop and pick up whatever this tile offers.
+   *
+   * Done in React straight from the content layer rather than routed through the scene, on
+   * the precedent `EventBus.ts` sets for observing a creature: the content layer is
+   * framework-free and importable here, and going through the scene is what once made the
+   * journal describe a crane while the sketch recorded an otter.
+   */
+  const pickUp = useCallback(() => {
+    if (!underfoot) return;
+    setSatchel((s) => gather(s, underfoot.seed, underfoot.at, underfoot.biome));
+  }, [underfoot]);
+
+  /** Make a thing. Whether that is possible is `crafting.ts`'s question, not this one's. */
+  const craft = useCallback(
+    (recipeId: string) => setSatchel((s) => make(s, recipeId, bench)),
+    [bench]
   );
 
   /** Settle a question. The player may be wrong, and nothing here tells them so. */
@@ -331,6 +380,11 @@ export function App() {
         onOpenCollection={() => dispatch({ type: 'toggle', surface: 'collection' })}
         diaryCount={diaryCount(progress)}
         onOpenDiary={() => dispatch({ type: 'toggle', surface: 'progress' })}
+        carryCount={distinct(satchel)}
+        somethingUnderfoot={
+          underfoot !== null && anythingAt(underfoot.seed, underfoot.at, underfoot.biome)
+        }
+        onOpenSatchel={() => dispatch({ type: 'open-interrupt', which: 'satchel' })}
         onOpenOverworld={() =>
           dispatch({
             type: interrupts.overworld ? 'close-interrupt' : 'open-interrupt',
@@ -369,6 +423,21 @@ export function App() {
         open={interrupts.kit}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'kit' })}
         canResearch={canon.lore}
+      />
+
+      <SatchelPanel
+        satchel={satchel}
+        bench={bench}
+        canGather={
+          underfoot !== null && anythingAt(underfoot.seed, underfoot.at, underfoot.biome)
+        }
+        gatherHint={
+          underfoot ? gatheredLine(underfoot.seed, underfoot.at, underfoot.biome) : null
+        }
+        onGather={pickUp}
+        onMake={craft}
+        open={interrupts.satchel}
+        onClose={() => dispatch({ type: 'close-interrupt', which: 'satchel' })}
       />
 
       <Ending

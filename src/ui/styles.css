@@ -1412,3 +1412,43 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   stroke: var(--muted);
   stroke-width: 1;
 }
+
+/* The satchel. Stacks are a list rather than a grid of slots, deliberately: there is no
+ * capacity, so a grid would draw empty boxes that promise a limit the game does not have. */
+.stacks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.stack { display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 0.6rem; }
+.stack-name { font-weight: 600; font-size: 0.92rem; }
+.stack-count { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+.stack-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.recipes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+.recipe { border-top: 1px solid var(--edge); padding-top: 0.5rem; }
+.recipe-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; }
+.recipe-name { font-weight: 600; font-size: 0.92rem; }
+/* Ready reads as available rather than as a reward: the accent, not a colour change on the
+ * whole row. A crafting list that lights up is a list that nags. */
+.recipe-ready .recipe-name { color: var(--accent); }
+.recipe-head button {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.22rem 0.7rem;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  flex: none;
+}
+.recipe-ready .recipe-head button { border-color: var(--accent); }
+.recipe-head button:disabled { color: var(--muted); cursor: default; }
+.recipe-out { margin: 0.1rem 0 0; font-size: 0.84rem; color: var(--muted); }
+/* The reasons come from `blockedBy` verbatim. They are the useful part of a recipe you
+ * cannot make yet, so they are set as text rather than hidden behind a tooltip. */
+.recipe-why { list-style: none; margin: 0.3rem 0 0; padding: 0; }
+.recipe-why li { font-size: 0.8rem; color: var(--muted); font-style: italic; }

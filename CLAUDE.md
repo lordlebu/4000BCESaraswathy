@@ -216,7 +216,7 @@ the shared `pages` concurrency group.
 SouthOfTethys/database/  →  utils/export_canon_bundle.py  →  data/canon/species.json
 (canonical entity JSON)                                      data/canon/places.json
                                                              data/canon/knowledge.json
-                                                             data/canon/world.json
+                                                             data/canon/crafting.json
                                                              ↓
                                                      src/content/canon.ts
                                                         (the adapter)
@@ -262,8 +262,16 @@ no ground-biome equivalent, and the tone question for the Asura horrors is still
 - **`src/content/`** — the data layer. `canon.ts` adapts the canon bundle into engine shapes and is
   the only file that knows both; `species.ts` answers which creature and plant live on a tile;
   `journal.ts` turns that into prose; `conversation.ts` decides what a person says now;
-  `camps.ts` and `kit.ts` answer where you can sleep and what you carry. All import their JSON at
+  `camps.ts` and `kit.ts` answer where you can sleep and what the traveller always carries;
+  `making.ts` adapts the crafting bundle and `satchel.ts`, `crafting.ts`, `gathering.ts`,
+  `cooking.ts` and `vehicles.ts` are the rules over it. All import their JSON at
   build time.
+
+  **A satchel is not the kit, and neither replaced the other.** `kit.ts` is the bedroll, lamp,
+  diary and staff: fixed, unmanaged, there from the first step. `satchel.ts` is what gets
+  picked up along the way. The kit's argument against consumables still stands — there is no
+  weight, no spoilage and no hunger, and a player who never opens the satchel finishes the
+  game.
 - **`src/game/`** — the only code that knows Phaser exists. `scenes/WorldScene.ts` draws tiles,
   moves the player, and manages fog; `tileTextures.ts` generates the tile art from `biomes.json`;
   `PhaserGame.tsx` owns the `Phaser.Game` lifecycle; `EventBus.ts` is the seam to React.
