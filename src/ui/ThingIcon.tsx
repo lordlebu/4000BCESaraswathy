@@ -16,6 +16,7 @@
 // class there and forget it here, and the build fails rather than the panel rendering a gap.
 
 import type { ItemKind, MaterialClass } from '../content/making';
+import { markFor, type MarkKind } from './marks';
 
 /**
  * What a material is, as a mark.
@@ -83,6 +84,48 @@ export const KIND_MARK: Record<ItemKind, string> = {
 };
 
 /**
+ * What a process is, as a mark.
+ *
+ * The seventeen ways canon says a thing gets made. These were the last uncovered vocabulary in
+ * the making layer -- a recipe wore the mark of its output and the *verb* had none, so the
+ * workshop could not say what a bench was for.
+ *
+ * **Thirteen of the seventeen have an emoji that genuinely fits. Four do not**, and they are
+ * exactly the crafts Unicode never had reason to encode: casting bronze, grinding at a quern,
+ * pressing oil, and retting flax in standing water. Those four take a drawn mark from
+ * `src/ui/marks/` -- `process-casting.svg` and so on -- and fall back to the nearest honest
+ * emoji until one arrives. Nothing is blocked while they are missing.
+ *
+ * Chosen for the *action* rather than its product, which is the same division the material and
+ * item tables already make: `firing` is the kiln, not the pot that comes out of it, because a
+ * player reading the workshop is looking for what a place lets them do.
+ */
+export const PROCESS_MARK: Record<string, string> = {
+  boatbuilding: '🛶',
+  brewing: '🍶',
+  carving: '🪚',
+  cooking: '🍲',
+  drying: '☀️',
+  firing: '🏺',
+  gathering: '🧺',
+  knapping: '🪨',
+  purifying: '💧',
+  smelting: '🔥',
+  spinning: '🧵',
+  tanning: '🐄',
+  weaving: '🧶',
+  // The four with no true emoji. A quern is not a gear and a press is not an olive, so these are
+  // stand-ins that say roughly the right thing and are the first four files worth drawing.
+  casting: '🫗',
+  grinding: '⚙️',
+  pressing: '🫒',
+  retting: '🌾'
+};
+
+/** The four processes whose emoji is a stand-in rather than a fit. Drawn art replaces these first. */
+export const PROCESSES_WANTING_ART: readonly string[] = ['casting', 'grinding', 'pressing', 'retting'];
+
+/**
  * A vehicle's kind, as a mark.
  *
  * Canon's `kind` is coarse on purpose — a raft from a ship, not a dhow from a ketch — so these
@@ -106,6 +149,14 @@ export function materialMark(classes: readonly MaterialClass[]): string {
 export interface ThingIconProps {
   mark: string;
   /**
+   * The vocabulary word this stands for, so a drawn mark can replace the emoji.
+   *
+   * Optional: a caller that has no word still gets its emoji, which is what every caller did
+   * before `marks.ts` existed. Given one, a file in `src/ui/marks/` named `class-fibre.svg` is
+   * drawn instead -- see that file for why the namespace is part of the name.
+   */
+  word?: { namespace: MarkKind; value: string };
+  /**
    * What it is, for a screen reader.
    *
    * The glyph is decoration — the name is always beside it in every panel that uses this — so the
@@ -115,7 +166,17 @@ export interface ThingIconProps {
   label: string;
 }
 
-export function ThingIcon({ mark, label }: ThingIconProps) {
+export function ThingIcon({ mark, label, word }: ThingIconProps) {
+  const drawn = word ? markFor(word.namespace, word.value) : null;
+  if (drawn) {
+    // `alt` is empty and the label goes on the wrapper, so a screen reader hears the category
+    // once rather than twice -- the same call the emoji branch makes below.
+    return (
+      <span className="thing-mark" role="img" aria-label={label}>
+        <img className="thing-mark-drawn" src={drawn} alt="" />
+      </span>
+    );
+  }
   return (
     <span className="thing-mark" role="img" aria-label={label}>
       {mark}

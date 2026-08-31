@@ -6,8 +6,15 @@
 // These check the data rather than the types, which is the half the compiler cannot reach.
 
 import { describe, expect, it } from 'vitest';
-import { CLASS_MARK, KIND_MARK, VEHICLE_MARK, materialMark } from '../src/ui/ThingIcon';
-import { items, materials, vehicles } from '../src/content/making';
+import {
+  CLASS_MARK,
+  KIND_MARK,
+  PROCESS_MARK,
+  PROCESSES_WANTING_ART,
+  VEHICLE_MARK,
+  materialMark
+} from '../src/ui/ThingIcon';
+import { items, materials, processes, vehicles } from '../src/content/making';
 
 describe('every made thing has a mark', () => {
   it('covers every class canon actually uses', () => {
@@ -22,6 +29,28 @@ describe('every made thing has a mark', () => {
     const used = new Set(items.map((i) => i.kind));
     for (const k of used) expect(KIND_MARK[k], `no mark for item kind '${k}'`).toBeTruthy();
     expect(used.size).toBeGreaterThan(5);
+  });
+
+  it('covers every process canon actually uses', () => {
+    // Keyed by string like `VEHICLE_MARK`, because canon's process ids are not mirrored into a
+    // union here -- so this test is the only guard, which is why it is written rather than
+    // trusted. Processes were the last uncovered vocabulary in the making layer: a recipe wore
+    // the mark of its output and the verb that produced it had none at all.
+    const used = processes.map((p) => p.id.replace('process_', ''));
+    for (const p of used) expect(PROCESS_MARK[p], `no mark for process '${p}'`).toBeTruthy();
+    expect(used.length).toBe(17);
+  });
+
+  it('is honest about which process marks are stand-ins', () => {
+    // Four crafts have no emoji that fits -- casting bronze, grinding at a quern, pressing oil,
+    // retting flax -- because Unicode never had reason to encode them. They carry the nearest
+    // honest thing until a drawing lands in `src/ui/marks/`. This asserts the list stays true:
+    // every name on it is a real process, so it cannot rot into naming something that is gone.
+    const known = new Set(processes.map((p) => p.id.replace('process_', '')));
+    for (const p of PROCESSES_WANTING_ART) {
+      expect(known.has(p), `'${p}' is not a process canon has`).toBe(true);
+      expect(PROCESS_MARK[p], `'${p}' must still have a stand-in`).toBeTruthy();
+    }
   });
 
   it('covers every vehicle kind canon actually uses', () => {

@@ -32,7 +32,9 @@ import {
   openGround,
   satisfying,
   tagCount,
-  withinReach
+  withinReach,
+  offeredHere,
+  sitedHere
 } from '../src/content/crafting';
 import { anythingAt, gather, gatheredLine, yieldsAt } from '../src/content/gathering';
 import { canCook, cookableNow, dishes, foods, isFood, whereCooked } from '../src/content/cooking';
@@ -182,6 +184,34 @@ describe('crafting', () => {
     const nearly = add(emptySatchel(), 'material_reed_fibre', 1);
     expect(withinReach(nearly).map((r) => r.id)).toContain('recipe_reed_rope');
     expect(makeableNow(nearly).map((r) => r.id)).not.toContain('recipe_reed_rope');
+  });
+
+  it('shows what a place allows, even carrying nothing for it', () => {
+    // **The discoverability hole the workshop screen exists to close.** Six of seventeen
+    // processes can only be performed somewhere. Before this, a recipe surfaced only once the
+    // traveller already held an ingredient -- so a player could stand in the middle of the only
+    // kind of place in the world that can smelt and never be told that smelting was a thing.
+    const empty = emptySatchel();
+    const settlement = { kind: 'settlement' };
+
+    const inTown = withinReach(empty, settlement).map((r) => r.id);
+    const inField = withinReach(empty, openGround()).map((r) => r.id);
+
+    expect(inTown.length, 'a settlement should offer something').toBeGreaterThan(0);
+    // And nothing is offered for standing in a field, because field work is not news: a player
+    // does not need telling that knapping works where they are standing.
+    expect(inField.length).toBe(0);
+  });
+
+  it('names what a bench is for, whatever is carried', () => {
+    const offered = offeredHere({ kind: 'settlement' }).map((r) => r.id);
+    expect(offered.length).toBeGreaterThan(0);
+    // Every one of them must genuinely be sited -- a recipe doable anywhere is not what a
+    // settlement is *for*, and listing it would make the place look more special than it is.
+    for (const id of offered) {
+      expect(sitedHere(id, { kind: 'settlement' }), `${id} is not sited`).toBe(true);
+      expect(sitedHere(id, openGround()), `${id} should not be open-ground work`).toBe(false);
+    }
   });
 });
 

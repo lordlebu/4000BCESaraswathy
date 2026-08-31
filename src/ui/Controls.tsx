@@ -24,6 +24,9 @@ export interface ControlsProps {
   /** True when the tile under foot has something on it, so the button can lead the player to it. */
   somethingUnderfoot: boolean;
   onOpenSatchel: () => void;
+  /** How many things this place can make that open ground cannot. Zero out in the field. */
+  offeredHere: number;
+  onOpenWorkshop: () => void;
   onOpenOverworld: () => void;
   /** The field notes along the bottom. Closable like everything else now. */
   notesOpen: boolean;
@@ -44,6 +47,8 @@ export function Controls({
   carryCount,
   somethingUnderfoot,
   onOpenSatchel,
+  offeredHere,
+  onOpenWorkshop,
   onOpenOverworld,
   notesOpen,
   onToggleNotes,
@@ -117,6 +122,30 @@ export function Controls({
             Satchel{carryCount > 0 && <i className="control-count">{carryCount}</i>}
           </span>
         </button>
+
+        {/* Making has its own button because it is a different verb from carrying, and it lights
+            up where the ground can work a material -- six of canon's seventeen processes need a
+            settlement, and this badge is the first place a player is ever told so.
+            **Only where there is something to carry or somewhere that can work it.** A seventh
+            permanent control wrapped the bar onto a third row at 360px, which
+            `reachable.spec.ts` refuses on the grounds that a bar that tall is a wall rather than
+            a bar. Nothing is lost by hiding it: with an empty satchel out in the open there is
+            genuinely nothing behind it, and the moment either becomes true it appears. */}
+        {(offeredHere > 0 || carryCount > 0) && (
+          <button
+            type="button"
+            className={offeredHere > 0 ? 'control control-on' : 'control'}
+            aria-label={
+              offeredHere > 0 ? `Workshop, ${offeredHere} can be made here` : 'Workshop'
+            }
+            onClick={onOpenWorkshop}
+          >
+            <span aria-hidden="true">⚒</span>
+            <span className="control-label">
+              Workshop{offeredHere > 0 && <i className="control-count">{offeredHere}</i>}
+            </span>
+          </button>
+        )}
 
         {/* Only once something has been met. Before that it is a button onto an empty room, and
             the starting tile seeds the collection, so it appears almost immediately anyway. */}
