@@ -76,7 +76,7 @@ import {
 } from '../../content/journal';
 import { travelCost } from '../../content/species';
 import { isWalkable } from '../../world/generate';
-import { buildFieldMap, poiAt, type FieldMapWorld } from '../../world/fieldMap';
+import { buildFieldMap, poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
 import { isCamp } from '../../content/camps';
 import { findPath } from '../../world/pathfind';
@@ -338,7 +338,7 @@ export class WorldScene extends Phaser.Scene {
     if (!map) throw new Error(`no such field map: ${data.fieldMapId}`);
     this.built = buildFieldMap(map, { seed: data.seed });
     this.world = this.built.world;
-    this.at = { ...this.world.start };
+    this.at = startTileFor(this.built, window.location.search);
 
     const { width, height } = this.world;
     const pixelWidth = width * TILE_SIZE;

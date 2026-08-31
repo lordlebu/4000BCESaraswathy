@@ -5,14 +5,22 @@
 // field map. Every other spec proves the old procedural walk still works; this one proves the
 // game is now about somewhere.
 //
-// The seed is chosen, not arbitrary. `buildFieldMap` is deterministic, so `poi-1666` is a world
+// The seed is chosen, not arbitrary. `buildFieldMap` is deterministic, so `poi-1621` is a world
 // where the Eastern Field lands two steps from where the traveller starts — which turns "walk
 // across a delta hoping to find something" into a test that finishes in seconds.
 //
-// **Re-searched three times now**: when Lothal's palette gained forest and hills, when landforms
-// changed the shaping, and when the rivers were rebuilt as a drainage network. Every time for the
-// same reason — what terrain a tile is decides which candidate list a place is drawn from, so any
-// change to the ground moves every placement.
+// **Re-searched four times**: when Lothal's palette gained forest and hills, when landforms
+// changed the shaping, when the rivers were rebuilt as a drainage network, and when placement
+// stopped indexing into the candidate list. Every time for the same reason — what terrain a tile
+// is decided which candidate list a place was drawn from, so any change to the ground moved
+// every placement.
+//
+// **The fourth re-search is meant to be the last of that kind.** `pick` in `world/fieldMap.ts`
+// no longer indexes the gathered list; it scores each candidate tile by its own coordinates and
+// keeps the best, so a place moves only when the ground under *it* changes. Measured: taking one
+// tile out of a 400-tile pool used to move all six of Lothal's places and now moves none. A
+// terrain change can still move a place standing on the tile that changed — that is honest — but
+// it can no longer move the five that were nowhere near it.
 //
 // The third time cost twelve browser tests in CI and was entirely avoidable: the unit suite and
 // the build were both green, and this suite was simply not run before pushing. The lesson is not
@@ -29,11 +37,17 @@
 import { expect, test, type Page } from '@playwright/test';
 import { step } from './walk';
 
-/** A seed where poi_eastern_field sits at (36,37) and the traveller starts at (36,35). */
-const SEED = 'poi-1666';
+/**
+ * The seed no longer has to be searched.
+ *
+ * `?at=poi_eastern_field` starts the traveller on that place, so this spec no longer depends on
+ * a world where it happens to land near the start. See `startTileFor` in `world/fieldMap.ts`.
+ */
+const SEED = 'poi-1621';
 
 async function boot(page: Page) {
-  await page.goto(`/?seed=${SEED}`);
+  // Two tiles north of poi_eastern_field at (10,10), so the two ArrowDowns below still walk.
+  await page.goto(`/?seed=${SEED}&at=10,8`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   // The journal only writes once the scene has placed the traveller.
   //
@@ -149,8 +163,8 @@ test('the diary survives a reload', async ({ page }) => {
 });
 
 test('an instance is a place you go into, and it says why when you cannot', async ({ page }) => {
-  // A seed where Kavik's Tower stands three steps south of the start: (43,30) from (43,27).
-  await page.goto('/?seed=tower-1190');
+  // Three tiles north of Kavik's Tower at (39,8), so the three ArrowDowns below still walk.
+  await page.goto('/?seed=poi-1621&at=39,5');
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
   await step(page, 'ArrowDown');

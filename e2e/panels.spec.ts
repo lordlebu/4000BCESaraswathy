@@ -7,11 +7,14 @@
 import { expect, test, type Page } from '@playwright/test';
 import { step, walkTo } from './walk';
 
-const SEED = 'poi-1666';
+// Shares `fielddiary.spec.ts`'s fixture: two steps south of the start is an authored place.
+// See the note there for why searched seeds go stale and what stopped most of it.
+const SEED = 'poi-1621';
 
 async function boot(page: Page, w = 1280, h = 800) {
   await page.setViewportSize({ width: w, height: h });
-  await page.goto(`/?seed=${SEED}&hour=12`);
+  // Two tiles north of poi_eastern_field at (10,10); `walkToPlace` walks the rest.
+  await page.goto(`/?seed=${SEED}&hour=12&at=10,8`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 }

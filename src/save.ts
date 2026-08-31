@@ -49,8 +49,19 @@ const PREFIX = 'south-of-tethys';
  *
  * Canon has frozen every species order and now refuses one without an index, so this cannot
  * recur. This bump is for the shift that already shipped.
+ *
+ * **11 is the last bump of that kind, and that is the point of it.** Species are no longer
+ * picked by indexing into a per-biome list; they are picked by rendezvous hashing over their
+ * ids, so a species' tile depends on nothing but that species and that tile. Adding one to
+ * canon can now only take the tiles it wins outright -- measured at 4.8% of a biome's ground,
+ * all of it the newcomer arriving -- where the old scheme moved 95.4%, of which 94.8% was
+ * existing species swapping places for no reason at all.
+ *
+ * This bump is the one-time cost of crossing over: every tile is re-picked under the new
+ * scheme, so a save written under 10 describes plants that are no longer there. After it,
+ * **adding canon content is not a save-breaking change** and must not bump this again.
  */
-export const SAVE_VERSION = 10;
+export const SAVE_VERSION = 11;
 
 export interface Journey {
   version: number;

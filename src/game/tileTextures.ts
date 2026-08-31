@@ -92,7 +92,32 @@ export const FOG_TEXTURE = 'fog:pixel';
 export const SHADOW_TEXTURE = 'shadow:contact';
 
 
-/** Load every sheet. Call from `preload`. */
+/**
+ * Sheets that failed to load, by key, in the order they failed.
+ *
+ * Exported so a test or a diagnostic can ask. Phaser's own answer to a failed load is to hand
+ * out a 32x32 magenta-and-black `__MISSING` checkerboard and carry on, which is why this went
+ * unnoticed on GitHub Pages for as long as it did: the game looked like it was working and drew
+ * black squares. A texture that silently substitutes itself is the worst possible failure mode
+ * for art, because nothing anywhere reports it.
+ */
+const failedSheets: string[] = [];
+
+/** Which sheets failed to load, if any. Empty when everything arrived. */
+export function missingSheets(): readonly string[] {
+  return failedSheets;
+}
+
+/**
+ * Load every sheet. Call from `preload`.
+ *
+ * **A failed sheet says so.** Every load is watched, and a failure is logged with the key and
+ * the URL that did not arrive, then recorded in `missingSheets()`. This is deliberately louder
+ * than the rest of the engine: the tileset is about to grow a great deal, `tools/build-*.js`
+ * generates ten sheets from art that lives outside this repository, and a sheet that is missing,
+ * misnamed or half-built is the single most likely thing to go wrong. The checkerboard is not a
+ * diagnosis; the key and the URL are.
+ */
 export function loadTileSheets(
   scene: Phaser.Scene,
   urls: {
@@ -108,6 +133,18 @@ export function loadTileSheets(
     decor: string;
   }
 ): void {
+  // One handler for the whole batch rather than one per sheet: `loaderror` fires with the file
+  // that failed, so a single listener names any of them. Registered before the queueing below,
+  // because a cached-but-corrupt file can fail during the very first `load.spritesheet` call.
+  scene.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => {
+    if (!failedSheets.includes(file.key)) failedSheets.push(file.key);
+    console.error(
+      `[tiles] sheet "${file.key}" failed to load from ${file.url}. ` +
+        'Phaser will draw a magenta checkerboard in its place. ' +
+        'Check that tools/build-*.js produced it and that it shipped in the bundle.'
+    );
+  });
+
   const sheet = (key: string, url: string, frameWidth: number, frameHeight: number) => {
     if (scene.textures.exists(key)) return;
     scene.load.spritesheet(key, url, { frameWidth, frameHeight });

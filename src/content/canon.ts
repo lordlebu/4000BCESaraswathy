@@ -127,12 +127,15 @@ function toSpecies(entity: CanonSpecies, kind: 'fauna' | 'flora'): Creature | Fl
 const bundle = speciesBundle as { fauna: CanonSpecies[]; flora: CanonSpecies[] };
 
 /**
- * Array order is part of the seed contract.
+ * Array order is the authored bestiary sequence, and it is **no longer part of the seed
+ * contract**.
  *
- * `pickFor` indexes into the per-biome list, so the order these arrive in decides which
- * creature a given tile shows. Canon sorts by `source_index` — the authored bestiary
- * sequence — and anything without one sorts after by id, so adding to canon can never
- * reshuffle what came before. That ordering is preserved here rather than re-sorted.
+ * It used to be: picking indexed into the per-biome list, so this order decided what a tile
+ * showed, and adding a species to canon re-rolled 95% of the ground. Species are now chosen by
+ * rendezvous hashing over their ids (`weightedPickFor`), which reads no position at all.
+ *
+ * The order is still preserved rather than re-sorted, because it is how the books read and how
+ * `creaturesIn`/`floraIn` present a biome. It is presentation now, not a contract.
  */
 export const creatures: Creature[] = bundle.fauna.map((e) => toSpecies(e, 'fauna') as Creature);
 export const flora: Flora[] = bundle.flora.map((e) => toSpecies(e, 'flora') as Flora);
