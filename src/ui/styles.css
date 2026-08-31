@@ -1546,3 +1546,13 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   opacity: 0.85;
 }
 .recipe-head .thing-mark { margin-right: 0.1rem; }
+
+/* A drawn mark, where one has been dropped into `src/ui/marks/`. Sized to the emoji it replaces
+   so a row does not shift when one arrives, and it inherits the wrapper's `opacity` for the same
+   reason the emoji needs it. An SVG stroked in `currentColor` themes itself; a PNG will not, which
+   is most of why `docs/mark-prompts.md` asks for SVG. */
+.thing-mark-drawn {
+  display: block;
+  width: 1.05rem;
+  height: 1.05rem;
+}
