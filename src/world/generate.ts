@@ -6,7 +6,7 @@
 
 import { createRandom, clamp, shuffle, type Random } from './rng';
 import { fractalField, highlandSpine, normalize, type Field } from './field';
-import { classifyBiome } from './classify';
+import { classifyBiome, liftElevation, terrainPaletteFor } from './classify';
 import { placeOf, shapeFor, type Relief } from './landform';
 import { carveRivers, orthogonalNeighbours } from './rivers';
 import { placeName, riverName } from './names';
@@ -183,9 +183,13 @@ export function generateWorld({
   seed = 'jambhudweepa',
   width = DEFAULT_WIDTH,
   height = DEFAULT_HEIGHT,
-  relief = null
+  relief = null,
+  palette = null
 }: GenerateOptions = {}): World {
   const random = createRandom(seed);
+  // Built once. Undefined means every biome is permitted, which is what a standalone caller and
+  // every test predating field maps expect.
+  const terrainPalette = palette ? terrainPaletteFor(palette) : undefined;
 
   // Field order is part of the seed contract: reordering these calls changes every existing map.
   const elevationBase = fractalField(width, height, random, { octaves: 4, baseCell: 11 });
@@ -211,14 +215,18 @@ export function generateWorld({
       const damp = clamp(
         moisture[y]![x]! * 0.86 + (x / width) * 0.16 - temperature * 0.14 + reliefDamp[y]![x]!
       );
-      const height01 = elevation[y]![x]!;
+      // Lifted into the span this map's palette uses, so a map with no shoreline spends its
+       // whole elevation budget on the ground it does have. See `liftElevation`.
+      const height01 = terrainPalette
+        ? liftElevation(elevation[y]![x]!, terrainPalette)
+        : elevation[y]![x]!;
       row.push({
         x,
         y,
         elevation: height01,
         moisture: damp,
         temperature,
-        biome: classifyBiome(height01, damp, temperature),
+        biome: classifyBiome(height01, damp, temperature, terrainPalette),
         riverBias: random() * 0.05
       });
     }

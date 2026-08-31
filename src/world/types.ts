@@ -101,6 +101,15 @@ export interface GenerateOptions {
    * maps has no canon behind it and gets `basin`, which is the neutral bowl.
    */
   relief?: string | null;
+  /**
+   * The ground this map is allowed to be made of.
+   *
+   * Optional, and absent means "anything" — the procedural walk that predates field maps has no
+   * canon palette behind it. When present the generator classifies against these biomes only, so
+   * nothing is produced that would have to be substituted afterwards. Non-terrain entries
+   * (`river`, `settlement`, `landmark`) are ignored: those are stamped onto finished ground.
+   */
+  palette?: readonly BiomeId[] | null;
 }
 
 /** One entry of `data/biomes.json`. */

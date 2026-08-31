@@ -13,7 +13,7 @@ import { Ending } from './Ending';
 import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
-import { poi } from '../content/places';
+import { fieldMap, poi } from '../content/places';
 import { SatchelPanel } from './SatchelPanel';
 import { distinct, emptySatchel } from '../content/satchel';
 import { anythingAt, gather, gatheredLine } from '../content/gathering';
@@ -34,6 +34,19 @@ const DEFAULT_SEED = 'jambhudweepa-evening';
 function seedFromUrl(): string {
   const fromQuery = new URLSearchParams(window.location.search).get('seed');
   return fromQuery?.trim() || DEFAULT_SEED;
+}
+
+/**
+ * Which country to open on, for a link that wants to start somewhere other than Lothal.
+ *
+ * The same kind of hook as `?hour=` and `?at=`, and here for the same reason: looking at the
+ * Narmada should not require travelling there first. An unknown id falls back to the default
+ * rather than throwing — this is a convenience, and must never break the game for someone who
+ * mistypes one.
+ */
+function fieldMapFromUrl(): string {
+  const asked = new URLSearchParams(window.location.search).get('map')?.trim();
+  return asked && fieldMap(asked) ? asked : DEFAULT_FIELD_MAP;
 }
 
 type Arrival = GameToUi['tile-entered'];
@@ -65,7 +78,7 @@ export function App() {
   // The three scales. `fieldMapId` is the country under foot; `poiId` is the authored place
   // being stood in, if any; a sub-location opens inside the place panel rather than here,
   // because going deeper into a ruin is not leaving it.
-  const [fieldMapId, setFieldMapId] = useState(DEFAULT_FIELD_MAP);
+  const [fieldMapId, setFieldMapId] = useState(fieldMapFromUrl);
   const visited = useRef(new Set<string>());
 
   /**
@@ -405,7 +418,7 @@ export function App() {
       <PhaserGame
         seed={seed}
         discovered={initialJourney.current.discovered}
-        fieldMapId={DEFAULT_FIELD_MAP}
+        fieldMapId={fieldMapFromUrl()}
       />
 
       <Controls
