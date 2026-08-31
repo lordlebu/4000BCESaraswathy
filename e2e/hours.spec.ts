@@ -5,7 +5,10 @@
 
 import { expect, test, type Page } from '@playwright/test';
 
-const SEED = 'hours-test';
+// Re-searched when the rivers were rebuilt: the start tile moved, and the one it moved to had
+// an animal that reads the same at noon and at midnight, which is exactly what this asserts is
+// impossible. A seed whose starting tile holds a night-stalker.
+const SEED = 'hours-1';
 
 async function fieldNoteAt(page: Page, hour: number): Promise<string> {
   await page.goto(`/?seed=${SEED}&hour=${hour}`);

@@ -17,7 +17,23 @@ export default defineConfig({
     // Node by default, because everything under world/ and content/ is meant to run there and
     // a DOM would hide a stray browser dependency rather than catch it. The panel tests opt in
     // per file with `// @vitest-environment jsdom`, which keeps that boundary visible.
-    environment: 'node'
+    environment: 'node',
+    /**
+     * Vitest's default is five seconds, which was never a budget anybody chose for this suite.
+     *
+     * Several tests here generate whole worlds -- `conversation.test.ts` lives six journeys
+     * across six seeds, `night.test.ts` checks shelter is reachable from every tile of every
+     * map -- and a field map costs about 30ms to build. In isolation each file finishes in
+     * two or three seconds; run thirty-five files in parallel on a saturated machine and the
+     * same tests intermittently cross five, and the suite goes red for no reason anybody can
+     * act on. That happened three times in one afternoon, each time on a different file.
+     *
+     * Measured before raising: the cost per build is 30ms and was 30ms before the river
+     * rewrite, so this is contention rather than a regression to fix. Twenty seconds is far
+     * enough above the worst observed run (6.7s) to stop the noise, and far below anything
+     * that would let a genuinely hung test pass unnoticed.
+     */
+    testTimeout: 20_000
   },
   server: {
     port: 4173,

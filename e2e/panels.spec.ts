@@ -7,7 +7,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { step, walkTo } from './walk';
 
-const SEED = 'poi-252';
+const SEED = 'poi-1666';
 
 async function boot(page: Page, w = 1280, h = 800) {
   await page.setViewportSize({ width: w, height: h });
@@ -17,7 +17,7 @@ async function boot(page: Page, w = 1280, h = 800) {
 }
 
 async function walkToPlace(page: Page) {
-  await walkTo(page, ['ArrowUp', 'ArrowUp']);
+  await walkTo(page, ['ArrowDown', 'ArrowDown']);
 }
 
 /** Overlapping area of two elements, in square pixels. */
