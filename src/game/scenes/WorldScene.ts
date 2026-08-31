@@ -35,6 +35,8 @@ import {
   createTileTextures,
   loadTileSheets,
   tileFrame,
+  hasTileArt,
+  placeholderTileKey,
   traceFrameFor
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
@@ -74,7 +76,7 @@ import {
   landmarkHint,
   whereNextHint
 } from '../../content/journal';
-import { travelCost } from '../../content/species';
+import { biomeFor, travelCost } from '../../content/species';
 import { isWalkable } from '../../world/generate';
 import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
@@ -82,7 +84,7 @@ import { fieldMap } from '../../content/places';
 import { isCamp } from '../../content/camps';
 import { findPath } from '../../world/pathfind';
 import { tileHash } from '../../world/rng';
-import type { Point, Tile, World } from '../../world/types';
+import type { BiomeId, Point, Tile, World } from '../../world/types';
 
 /**
  * How the fog reads: clear underfoot, dimmed where you have been, dark where you have not.
@@ -330,6 +332,28 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * The texture and frame for a patch of ground.
+   *
+   * Returned as arguments for `this.add.image` because the two cases differ in arity: real art is
+   * a sheet plus a frame index, a placeholder is a whole texture of its own. Anything the terrain
+   * sheet has no drawing for gets one built from the biome's colour and symbol, rather than being
+   * drawn as plains -- see `placeholderTileKey`.
+   */
+  private groundArt(biome: BiomeId, variant: number): { key: string; frame?: number } {
+    if (hasTileArt(biome)) return { key: TERRAIN_SHEET, frame: tileFrame(biome, variant) };
+    const known = biomeFor(biome);
+    return {
+      key: placeholderTileKey(
+        this,
+        biome,
+        known?.color ?? '#8d8796',
+        known?.symbol ?? '?',
+        variant % 4
+      )
+    };
+  }
+
   create(data: WorldSceneData): void {
     createTileTextures(this);
 
@@ -358,8 +382,12 @@ export class WorldScene extends Phaser.Scene {
         // Which crop of this biome's art. Deterministic from the seed, so the same journey draws
         // the same ground -- `tileHash` is the generator's, not a fresh random.
         const variant = tileHash(this.world.seed, x, y, 'tile-variant');
+        // Ground the sheet has art for is drawn from the sheet; ground it does not is drawn from
+        // the biome's own colour and symbol. Falling back to the plains frame would draw a lie
+        // about what the traveller is standing on -- see `placeholderTileKey`.
+        const art = this.groundArt(tile.biome, variant);
         const tileSprite = this.add
-          .image(cx, cy, TERRAIN_SHEET, tileFrame(tile.biome, variant))
+          .image(cx, cy, art.key, art.frame)
           .setDepth(DEPTH_TILE);
         tileRow.push(tileSprite);
         this.tileOwned.push({ sprite: tileSprite, x, y });

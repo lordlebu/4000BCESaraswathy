@@ -116,11 +116,23 @@ export const TILE_VARIANTS = 4;
  */
 export function tileFrame(biome: BiomeId, variant = 0): number {
   const index = TERRAIN_ORDER.indexOf(biome);
-  // A biome with no tile falls back to plains rather than crashing: canon can name ground the art
-  // has not caught up with, and an unexpected tile reads better than a blank map. `lava_field` is
-  // the live case — canon marks it `renderable: false` precisely because this frame is missing.
+  // A biome with no tile falls back to plains rather than crashing. Callers that can draw a
+  // placeholder instead should ask `hasTileArt` first -- drawing unknown ground as plains is a
+  // lie about what the player is standing on, and was only ever acceptable because the
+  // alternative was a blank map.
   const slot = index >= 0 ? index : TERRAIN_ORDER.indexOf('plains');
   return slot * TILE_VARIANTS + (variant % TILE_VARIANTS);
+}
+
+/**
+ * Whether `assets/terrain.png` actually holds this biome.
+ *
+ * False means the art has not caught up, not that the biome is unreal -- canon names ground the
+ * sheet has no drawing for, and `placeholderTileKey` draws it from the biome's own colour and
+ * symbol rather than leaving it to be mistaken for plains.
+ */
+export function hasTileArt(biome: BiomeId): boolean {
+  return TERRAIN_ORDER.includes(biome);
 }
 
 // --- decor ---------------------------------------------------------------

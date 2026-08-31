@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { fieldMaps } from '../src/content/places';
 import { creatureFor, floraFor, travelCost } from '../src/content/species';
-import { bakeWorld, rebake, restoreWorld, type BakedWorld } from '../src/world/bake';
+import { BIOME_CODES, bakeWorld, rebake, restoreWorld, type BakedWorld } from '../src/world/bake';
+import biomesData from '../data/biomes.json';
+import type { BiomeId } from '../src/world/types';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { band } from '../src/world/classify';
 
@@ -69,6 +71,18 @@ describe('a world survives being baked and restored', () => {
       expect(back.unplaced.map((p) => p.id)).toEqual(built.unplaced.map((p) => p.id));
     });
   }
+});
+
+describe('every biome the engine knows can be stored', () => {
+  it('has a code in BIOME_CODES', () => {
+    // The gap that bit: five biomes were added to `BiomeId` and to `data/biomes.json` but not
+    // here, so a world containing one failed to restore and was silently regenerated instead --
+    // which looks exactly like the bake not working at all, and gives no clue why.
+    const uncodeable = (biomesData as { id: string }[])
+      .map((b) => b.id)
+      .filter((id) => !BIOME_CODES.includes(id as BiomeId));
+    expect(uncodeable, 'biomes with no character in the bake encoding').toEqual([]);
+  });
 });
 
 describe('the stored band reads back as itself', () => {

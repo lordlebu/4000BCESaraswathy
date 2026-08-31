@@ -8,7 +8,9 @@
     "color": "#2f6f8f",
     "symbol": "~",
     "description": "The Tethyan water breathes in slow teal bands. A ferry would be needed to cross safely.",
-    "regions": ["shattered-sea-mappa-mundi"]
+    "regions": [
+      "shattered-sea-mappa-mundi"
+    ]
   },
   {
     "id": "coast",
@@ -19,7 +21,10 @@
     "color": "#e8c982",
     "symbol": ".",
     "description": "Sand, shells, and salt grass mark the meeting place of land and old sea.",
-    "regions": ["saraswati-godavari-deltas", "shattered-sea-mappa-mundi"]
+    "regions": [
+      "saraswati-godavari-deltas",
+      "shattered-sea-mappa-mundi"
+    ]
   },
   {
     "id": "plains",
@@ -30,7 +35,9 @@
     "color": "#9fc96b",
     "symbol": "·",
     "description": "Open grassland rolls ahead, warm and easy on tired feet.",
-    "regions": ["saraswati-godavari-deltas"]
+    "regions": [
+      "saraswati-godavari-deltas"
+    ]
   },
   {
     "id": "forest",
@@ -41,7 +48,10 @@
     "color": "#4f9a5a",
     "symbol": "♣",
     "description": "Rounded canopies gather into green shade, full of birdsong and hidden paths.",
-    "regions": ["narmada-vindhya", "shattered-sea-mappa-mundi"]
+    "regions": [
+      "narmada-vindhya",
+      "shattered-sea-mappa-mundi"
+    ]
   },
   {
     "id": "wetland",
@@ -52,7 +62,9 @@
     "color": "#6fb7a8",
     "symbol": "≈",
     "description": "Reeds and shallow pools shine with patient life.",
-    "regions": ["saraswati-godavari-deltas"]
+    "regions": [
+      "saraswati-godavari-deltas"
+    ]
   },
   {
     "id": "hills",
@@ -63,7 +75,9 @@
     "color": "#b89b58",
     "symbol": "⌒",
     "description": "Ochre hills rise and fall like sleeping cattle beneath the sun.",
-    "regions": ["narmada-vindhya"]
+    "regions": [
+      "narmada-vindhya"
+    ]
   },
   {
     "id": "mountains",
@@ -74,7 +88,10 @@
     "color": "#8d8796",
     "symbol": "▲",
     "description": "Lavender-gray peaks hold the horizon and turn every step into a vista.",
-    "regions": ["narmada-vindhya", "ganges-lava-sea"]
+    "regions": [
+      "narmada-vindhya",
+      "ganges-lava-sea"
+    ]
   },
   {
     "id": "desert",
@@ -85,7 +102,9 @@
     "color": "#d9a95f",
     "symbol": "∴",
     "description": "Gold dust, low stones, and long quiet make this a place for careful travel.",
-    "regions": ["gedrosian-taklamakan"]
+    "regions": [
+      "gedrosian-taklamakan"
+    ]
   },
   {
     "id": "river",
@@ -96,7 +115,10 @@
     "color": "#4fa3d9",
     "symbol": "≈",
     "description": "A bright river line braids the land together and makes the air feel cooler.",
-    "regions": ["saraswati-godavari-deltas", "narmada-vindhya"]
+    "regions": [
+      "saraswati-godavari-deltas",
+      "narmada-vindhya"
+    ]
   },
   {
     "id": "settlement",
@@ -107,7 +129,9 @@
     "color": "#c46b4f",
     "symbol": "⌂",
     "description": "A welcoming cluster of clay roofs, flags, and evening cook-smoke offers rest.",
-    "regions": ["saraswati-godavari-deltas"]
+    "regions": [
+      "saraswati-godavari-deltas"
+    ]
   },
   {
     "id": "landmark",
@@ -119,5 +143,70 @@
     "symbol": "✦",
     "description": "A memorable place waits here, asking to be named in your travel journal.",
     "regions": []
+  },
+  {
+    "id": "lava_field",
+    "name": "Lava Field",
+    "walkable": true,
+    "travelCost": 4,
+    "tone": "scorched",
+    "color": "#6e4a45",
+    "symbol": "▧",
+    "description": "Cooled basalt in broken plates, warm underfoot, with a dull glow deep in the cracks.",
+    "regions": [
+      "ganges-lava-sea"
+    ]
+  },
+  {
+    "id": "sky_island",
+    "name": "Sky Island",
+    "walkable": true,
+    "travelCost": 2,
+    "tone": "suspended",
+    "color": "#a8b6c6",
+    "symbol": "◍",
+    "description": "A shelf of pale rock adrift in open air, grass clinging to its rim.",
+    "regions": [
+      "tethys-sky-routes"
+    ]
+  },
+  {
+    "id": "sky_underside",
+    "name": "Sky Underside",
+    "walkable": false,
+    "travelCost": null,
+    "tone": "inverted",
+    "color": "#6b7688",
+    "symbol": "◌",
+    "description": "The raw underside of a floating shelf, root-hung and hollow, with nothing below it.",
+    "regions": [
+      "tethys-sky-routes"
+    ]
+  },
+  {
+    "id": "open_sky",
+    "name": "Open Sky",
+    "walkable": false,
+    "travelCost": null,
+    "tone": "boundless",
+    "color": "#bcd0e0",
+    "symbol": "·",
+    "description": "Nothing but air and the long light between islands.",
+    "regions": [
+      "tethys-sky-routes"
+    ]
+  },
+  {
+    "id": "underworld",
+    "name": "Underworld",
+    "walkable": true,
+    "travelCost": 5,
+    "tone": "buried",
+    "color": "#4a4550",
+    "symbol": "◇",
+    "description": "Worked stone under a low roof, cold, and older than anything above it.",
+    "regions": [
+      "underworld-vaults"
+    ]
   }
 ]

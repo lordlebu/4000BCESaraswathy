@@ -16,7 +16,16 @@ export type BiomeId =
   | 'desert'
   | 'river'
   | 'settlement'
-  | 'landmark';
+  | 'landmark'
+  // Ground canon has always named and the terrain sheet has no drawing for. They are here rather
+  // than absent because `placeholderTileKey` can now draw any biome from its own colour and
+  // symbol, so "the art has not been made yet" no longer has to mean "the engine cannot say the
+  // word". Whether a map may *use* one is canon's `renderable` flag, not this union.
+  | 'lava_field'
+  | 'sky_island'
+  | 'sky_underside'
+  | 'open_sky'
+  | 'underworld';
 
 /** Biomes the generator classifies terrain into, before features are stamped on top. */
 export type TerrainBiomeId = Exclude<BiomeId, 'river' | 'settlement' | 'landmark'>;

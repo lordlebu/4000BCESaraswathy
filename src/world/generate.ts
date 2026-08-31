@@ -20,8 +20,18 @@ export const DEFAULT_HEIGHT = 24;
  * is deliberate so that `world/` stays independent of the content layer, and
  * `test/species.test.ts` asserts the two agree.
  */
+/**
+ * Ground you cannot stand on.
+ *
+ * `sea` was the only one for a long time and the rule was written as `!== 'sea'`. The sky biomes
+ * broke that: open air and the underside of a floating shelf are exactly as unwalkable as water,
+ * and a rule naming one biome could not say so. `test/species.test.ts` holds this set and
+ * `data/biomes.json` to the same answer, which is what caught it.
+ */
+const UNWALKABLE: ReadonlySet<string> = new Set(['sea', 'open_sky', 'sky_underside']);
+
 export function isWalkable(tile: Pick<Tile, 'biome'>): boolean {
-  return tile.biome !== 'sea';
+  return !UNWALKABLE.has(tile.biome);
 }
 
 /**
