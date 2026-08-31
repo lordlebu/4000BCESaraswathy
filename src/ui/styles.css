@@ -1511,8 +1511,14 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 
 .recipes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
 .recipe { border-top: 1px solid var(--edge); padding-top: 0.5rem; }
-.recipe-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; }
-.recipe-name { font-weight: 600; font-size: 0.92rem; }
+.recipe-head { display: flex; align-items: baseline; gap: 0.6rem; }
+/* Takes the slack so the name sits beside its mark and the button stays at the right edge.
+   `justify-content: space-between` put the name in the middle of the row once the mark, the name
+   and the button were three children rather than two. */
+.recipe-name { font-weight: 600; font-size: 0.92rem; flex: 1; }
+/* The verb, and where it can be done. Quieter than the output it follows: it answers "where
+   would I have to be", which is a second question rather than the first one. */
+.recipe-verb { color: var(--muted); }
 /* Ready reads as available rather than as a reward: the accent, not a colour change on the
  * whole row. A crafting list that lights up is a list that nags. */
 .recipe-ready .recipe-name { color: var(--accent); }

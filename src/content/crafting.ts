@@ -193,6 +193,13 @@ export function makeableNow(
  * Anything the traveller has begun to have the makings of -- at least one ingredient in
  * hand. A panel listing all 72 from the first step is a wall; one listing nothing until a
  * recipe is complete never teaches anybody that making exists.
+ *
+ * **Or anything this place allows that nowhere else does.** Standing at a settlement is itself a
+ * reason to show a recipe, whether or not the traveller is carrying a scrap of it: six of the
+ * seventeen processes can only be performed somewhere, and until this clause existed a player
+ * could stand in the middle of the only place in the world that can smelt and never be told so.
+ * That is the discoverability hole the whole workshop screen is for -- a capability you are
+ * standing inside and cannot see is worse than one you have not reached.
  */
 export function withinReach(
   satchel: Satchel,
@@ -203,10 +210,33 @@ export function withinReach(
     (r) =>
       known(r.id) &&
       !canMake(satchel, r.id, bench) &&
-      r.ingredients.some((need) => {
-        if (need.tag) return tagCount(satchel, need.tag) > 0;
-        const id = need.material ?? need.item ?? '';
-        return count(satchel, id) > 0;
-      })
+      (sitedHere(r.id, bench) ||
+        r.ingredients.some((need) => {
+          if (need.tag) return tagCount(satchel, need.tag) > 0;
+          const id = need.material ?? need.item ?? '';
+          return count(satchel, id) > 0;
+        }))
   );
+}
+
+/**
+ * Whether this recipe's process is one that had to be done somewhere, and this is somewhere.
+ *
+ * Deliberately narrower than `placeAllows`, which is also true for the eleven processes that can
+ * be done anywhere. Those are not news: a player standing in a field does not need telling that
+ * knapping works there. What is worth surfacing is the recipe that is *only* possible because of
+ * where they are standing.
+ */
+export function sitedHere(recipeId: string, bench: Bench): boolean {
+  const p = process(recipe(recipeId)?.process ?? '');
+  if (!p || p.performedAt.length === 0) return false;
+  return bench.kind !== null && p.performedAt.includes(bench.kind);
+}
+
+/**
+ * Every recipe this place allows that could not be made out in the open, whether or not the
+ * traveller can make it yet. What a bench is *for*.
+ */
+export function offeredHere(bench: Bench, known: Knows = ALL): Recipe[] {
+  return recipes.filter((r) => known(r.id) && sitedHere(r.id, bench));
 }

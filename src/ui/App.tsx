@@ -18,7 +18,9 @@ import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { fieldMap, poi } from '../content/places';
 import { SatchelPanel } from './SatchelPanel';
+import { WorkshopPanel } from './WorkshopPanel';
 import { distinct, emptySatchel } from '../content/satchel';
+import { offeredHere } from '../content/crafting';
 import { anythingAt, gather, gatheredLine } from '../content/gathering';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
@@ -476,6 +478,8 @@ export function App() {
           underfoot !== null && anythingAt(underfoot.seed, underfoot.at, underfoot.biome)
         }
         onOpenSatchel={() => dispatch({ type: 'open-interrupt', which: 'satchel' })}
+        offeredHere={offeredHere(bench, knowsRecipeHere).length}
+        onOpenWorkshop={() => dispatch({ type: 'open-interrupt', which: 'workshop' })}
         onOpenOverworld={() =>
           dispatch({
             type: interrupts.overworld ? 'close-interrupt' : 'open-interrupt',
@@ -518,11 +522,17 @@ export function App() {
 
       <SatchelPanel
         satchel={satchel}
+        open={interrupts.satchel}
+        onClose={() => dispatch({ type: 'close-interrupt', which: 'satchel' })}
+      />
+
+      <WorkshopPanel
+        satchel={satchel}
         bench={bench}
         knows={knowsRecipeHere}
         onMake={makeHere}
-        open={interrupts.satchel}
-        onClose={() => dispatch({ type: 'close-interrupt', which: 'satchel' })}
+        open={interrupts.workshop}
+        onClose={() => dispatch({ type: 'close-interrupt', which: 'workshop' })}
       />
 
       <Ending

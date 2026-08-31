@@ -34,13 +34,18 @@ export interface Interrupts {
   /** The field kit, opened from within progress. */
   kit: boolean;
   /**
-   * The satchel: what is carried and what could be made of it.
+   * The satchel: what is carried.
    *
    * An interrupt rather than a surface, on the same reasoning as the kit. A player opens it
    * deliberately, does a thing, and closes it — it must not silently discard the field notes
    * they were reading, which is exactly what putting it in `Surface` would do.
+   *
+   * It used to be "and what could be made of it". Making has its own surface now: a bag is a
+   * thing you have and a workshop is a thing you do.
    */
   satchel: boolean;
+  /** The workshop: what can be made, and what this place allows that open ground does not. */
+  workshop: boolean;
 }
 
 export interface SurfaceState {
@@ -87,7 +92,7 @@ export type SurfaceAction =
  */
 export const initialSurface: SurfaceState = {
   surface: 'here',
-  interrupts: { ending: false, overworld: false, kit: false, satchel: false },
+  interrupts: { ending: false, overworld: false, kit: false, satchel: false, workshop: false },
   standingOn: null,
   placeOpen: false
 };
