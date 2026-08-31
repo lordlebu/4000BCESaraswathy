@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.3.1",
+  "canon_version": "2.4.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -4281,7 +4281,8 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "Grey langurs move through the branches overhead, pausing to look down with long-tailed disapproval.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 237
     },
     {
       "id": "fauna_caravan_dromedary",
@@ -4306,7 +4307,8 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A single-humped camel chews sideways and regards you with the patience of an animal that has walked further than you have.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 238
     },
     {
       "id": "fauna_cliff_swift",
@@ -4331,7 +4333,8 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "Swifts cut the air above the grass in long scything arcs, too fast to count.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 239
     },
     {
       "id": "fauna_cognitavi",
@@ -4358,7 +4361,8 @@
       "sentient": true,
       "rarity": "rare",
       "mood": "clever",
-      "journal_prompt": "A navigator bird watches the water with its head tilted, reading something in it that you cannot, and does not much care that you are here."
+      "journal_prompt": "A navigator bird watches the water with its head tilted, reading something in it that you cannot, and does not much care that you are here.",
+      "source_index": 240
     },
     {
       "id": "fauna_delta_egret",
@@ -4383,7 +4387,8 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A white egret stands in the shallows, folded like a closed umbrella, then slowly straightens.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 241
     },
     {
       "id": "fauna_delta_monitor",
@@ -4408,7 +4413,8 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A long monitor lizard noses along the fish-drying racks, unhurried, entirely certain nobody will stop it.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 242
     },
     {
       "id": "fauna_dune_viper",
@@ -4431,7 +4437,8 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A sidewinding track crosses the sand ahead of you, fresh, and ends where the snake buried itself.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 243
     },
     {
       "id": "fauna_estuary_sawfish",
@@ -4456,7 +4463,8 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "Something long moves under the brown water, and for a moment the saw of its snout breaks the surface.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 244
     },
     {
       "id": "fauna_frilled_shringasaurus",
@@ -4487,7 +4495,8 @@
       "rarity": "rare",
       "journal_prompt": "It does not move aside. The frill turns first, edge-on and then full, thin enough that the low sun comes through it in red, and the horns beneath it are the same shape as the smaller kind's and twice the size.",
       "mood": "fearsome",
-      "region": "narmada-vindhya"
+      "region": "narmada-vindhya",
+      "source_index": 245
     },
     {
       "id": "fauna_heartwood_warden",
@@ -4507,7 +4516,8 @@
       "mood": "patient",
       "journal_prompt": "It has not moved since you sat down. You are no longer certain it is a tree.",
       "notes": "A maya-born shaped from heartwood, leaf-mould, spore and sap rather than from mud or fire. Slower than either, and the only one of the three that keeps growing after it is made -- an old warden is indistinguishable from the wood it stands in until it turns its head. Sentient, like the rest of the maya-born: a person made of forest, not an animal shaped like one.",
-      "placement_note": "Exists in canon and does not spawn. Making it an encounter would add it to the forest and wetland pools, which changes what a player meets on tiles they have already walked -- a game decision rather than a lore one. The Asura-Tainted Gargoyle is filed the same way. Promote it deliberately when the spawn change is wanted."
+      "placement_note": "Exists in canon and does not spawn. Making it an encounter would add it to the forest and wetland pools, which changes what a player meets on tiles they have already walked -- a game decision rather than a lore one. The Asura-Tainted Gargoyle is filed the same way. Promote it deliberately when the spawn change is wanted.",
+      "source_index": 246
     },
     {
       "id": "fauna_honey_guide_bird",
@@ -4532,7 +4542,8 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small brown bird calls, hops to the next branch, and calls again. It wants you to follow, and it knows where the comb is.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 247
     },
     {
       "id": "fauna_mangrove_crab",
@@ -4558,7 +4569,8 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A heavy crab sidles between the mangrove roots, one claw raised like a man carrying something awkward.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 248
     },
     {
       "id": "fauna_megalosaurus",
@@ -4582,7 +4594,8 @@
       "crosses_at": [
         "event_naraka_portal"
       ],
-      "clade": "dinosaur"
+      "clade": "dinosaur",
+      "source_index": 249
     },
     {
       "id": "fauna_plateau_ibex",
@@ -4607,7 +4620,8 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "An ibex stands on a ledge no wider than your hand and looks down at you without concern.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 250
     },
     {
       "id": "fauna_plateau_wolf",
@@ -4633,7 +4647,8 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A lean wolf crosses the open ground at a trot. It is not hunting you; it is following a line its clan has walked for generations.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 251
     },
     {
       "id": "fauna_reed_python",
@@ -4657,7 +4672,8 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A thick python lies banked in the reeds, digesting, in no hurry to be anywhere.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 252
     },
     {
       "id": "fauna_sand_skink",
@@ -4680,7 +4696,8 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A skink pours itself into the dune and is gone, swimming under the surface like a fish.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 253
     },
     {
       "id": "fauna_shringasaurus",
@@ -4710,7 +4727,8 @@
       "rarity": "common",
       "journal_prompt": "Two horns come up out of the scrub before the head does, curved forward like a bull's and set above the eyes rather than on the nose. The animal rears slowly against a tree, takes what it came for, and drops back down.",
       "mood": "patient",
-      "region": "narmada-vindhya"
+      "region": "narmada-vindhya",
+      "source_index": 254
     },
     {
       "id": "fauna_tendua",
@@ -4745,7 +4763,8 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A spotted cat watches from the reed line with eyes set forward like a person's, and you understand that you are being considered.",
-      "mood": "watchful"
+      "mood": "watchful",
+      "source_index": 255
     },
     {
       "id": "fauna_tendua_manticore",
@@ -4773,7 +4792,8 @@
       "notes": "Birthed when Nila desecrated Kavik's tower with forbidden Asura mantras. Six-foot winged leopard with human face that hunted Lothal's infants. Central to Tendua Crisis.",
       "biomes": [],
       "placement": "lore",
-      "placement_note": "Held out of play deliberately. Asura-born horror, birthed when Nila desecrated Kavik's tower. The cozy-tone question -- whether the Asura-tainted set is encounterable, journal-only, or gated behind a later mode -- is still open (docs/bestiary.md, Open Questions #4). Empty `biomes` here is a decision, not an untagged entity."
+      "placement_note": "Held out of play deliberately. Asura-born horror, birthed when Nila desecrated Kavik's tower. The cozy-tone question -- whether the Asura-tainted set is encounterable, journal-only, or gated behind a later mode -- is still open (docs/bestiary.md, Open Questions #4). Empty `biomes` here is a decision, not an untagged entity.",
+      "source_index": 256
     }
   ],
   "flora": [
@@ -5949,7 +5969,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Hooked scrub planted as a living fence. It grows thickest on the old tainted ground, which nobody mentions."
+      "journal_prompt": "Hooked scrub planted as a living fence. It grows thickest on the old tainted ground, which nobody mentions.",
+      "source_index": 70
     },
     {
       "id": "flora_bamboo_grove",
@@ -5972,7 +5993,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Bamboo crowds the riverbank, creaking against itself, already half cut for scaffolding and fish traps."
+      "journal_prompt": "Bamboo crowds the riverbank, creaking against itself, already half cut for scaffolding and fish traps.",
+      "source_index": 71
     },
     {
       "id": "flora_bethua",
@@ -5994,7 +6016,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "Mealy grey-green leaves crowding the edge of a worked field, dusted as though with flour."
+      "journal_prompt": "Mealy grey-green leaves crowding the edge of a worked field, dusted as though with flour.",
+      "source_index": 72
     },
     {
       "id": "flora_cardamom",
@@ -6017,7 +6040,8 @@
       ],
       "placement": "encounter",
       "rarity": "rare",
-      "journal_prompt": "Pale pods low on a stem at the foot of tall leaves, in shade deep enough to feel cold."
+      "journal_prompt": "Pale pods low on a stem at the foot of tall leaves, in shade deep enough to feel cold.",
+      "source_index": 73
     },
     {
       "id": "flora_date_palm",
@@ -6040,7 +6064,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Date palms mark the waystation from a long way off, which is the point of planting them."
+      "journal_prompt": "Date palms mark the waystation from a long way off, which is the point of planting them.",
+      "source_index": 74
     },
     {
       "id": "flora_frankincense_scrub",
@@ -6062,7 +6087,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Resin beads on the bark where the scrub has been scored, hardening into the tears burned at rites."
+      "journal_prompt": "Resin beads on the bark where the scrub has been scored, hardening into the tears burned at rites.",
+      "source_index": 75
     },
     {
       "id": "flora_ghentu",
@@ -6086,7 +6112,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "A coarse shrub with sticky leaves and white flowers, growing where nobody chose to put it."
+      "journal_prompt": "A coarse shrub with sticky leaves and white flowers, growing where nobody chose to put it.",
+      "source_index": 76
     },
     {
       "id": "flora_ghost_mangrove",
@@ -6110,7 +6137,8 @@
       ],
       "placement": "flavour",
       "rarity": "rare",
-      "journal_prompt": "The pale bark of these mangroves catches what light there is. Wet, they seem to glow, and the channel between them is the safe one."
+      "journal_prompt": "The pale bark of these mangroves catches what light there is. Wet, they seem to glow, and the channel between them is the safe one.",
+      "source_index": 77
     },
     {
       "id": "flora_ginger",
@@ -6134,7 +6162,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "A knuckled rhizome under a stand of narrow reed-like leaves, hot enough to smell when broken."
+      "journal_prompt": "A knuckled rhizome under a stand of narrow reed-like leaves, hot enough to smell when broken.",
+      "source_index": 78
     },
     {
       "id": "flora_guloncho",
@@ -6157,7 +6186,8 @@
       ],
       "placement": "encounter",
       "rarity": "rare",
-      "journal_prompt": "Heart-shaped leaves on a vine hung with aerial roots that reach down without touching."
+      "journal_prompt": "Heart-shaped leaves on a vine hung with aerial roots that reach down without touching.",
+      "source_index": 79
     },
     {
       "id": "flora_hinche",
@@ -6179,7 +6209,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "A mat of fleshy stems lying flat on still water, rooting wherever a node touches mud."
+      "journal_prompt": "A mat of fleshy stems lying flat on still water, rooting wherever a node touches mud.",
+      "source_index": 80
     },
     {
       "id": "flora_indigo_wild",
@@ -6201,7 +6232,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Wild indigo, harsher than the garden kind, still good enough for dyers who cannot pay Lothal prices."
+      "journal_prompt": "Wild indigo, harsher than the garden kind, still good enough for dyers who cannot pay Lothal prices.",
+      "source_index": 81
     },
     {
       "id": "flora_iron_teak",
@@ -6224,7 +6256,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Teak this dense is cut for river craft and tower beams, and takes a long lifetime to replace."
+      "journal_prompt": "Teak this dense is cut for river craft and tower beams, and takes a long lifetime to replace.",
+      "source_index": 82
     },
     {
       "id": "flora_jackfruit",
@@ -6248,7 +6281,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "Fruit the size of a child growing straight out of the trunk, too heavy for any branch."
+      "journal_prompt": "Fruit the size of a child growing straight out of the trunk, too heavy for any branch.",
+      "source_index": 83
     },
     {
       "id": "flora_jayanti",
@@ -6273,7 +6307,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "A quick soft-wooded shrub on a field bund, yellow pea-flowers and a mist of small leaflets."
+      "journal_prompt": "A quick soft-wooded shrub on a field bund, yellow pea-flowers and a mist of small leaflets.",
+      "source_index": 84
     },
     {
       "id": "flora_kalkasunde",
@@ -6295,7 +6330,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "A leggy shrub with paired leaflets, yellow flowers, and a smell like cut grass gone sharp."
+      "journal_prompt": "A leggy shrub with paired leaflets, yellow flowers, and a smell like cut grass gone sharp.",
+      "source_index": 85
     },
     {
       "id": "flora_kemuk",
@@ -6318,7 +6354,8 @@
       ],
       "placement": "encounter",
       "rarity": "rare",
-      "journal_prompt": "Leaves set in a slow spiral up a cane, a white crepe flower out of a red cone at the top."
+      "journal_prompt": "Leaves set in a slow spiral up a cane, a white crepe flower out of a red cone at the top.",
+      "source_index": 86
     },
     {
       "id": "flora_keot_taro",
@@ -6340,7 +6377,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "Wide leaves shedding water in beads, pale runners spreading through the mud between them."
+      "journal_prompt": "Wide leaves shedding water in beads, pale runners spreading through the mud between them.",
+      "source_index": 87
     },
     {
       "id": "flora_lotus_root_taro",
@@ -6361,7 +6399,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Broad taro leaves crowd the pond margin, hiding the starchy corms that feed the granary through the dry months."
+      "journal_prompt": "Broad taro leaves crowd the pond margin, hiding the starchy corms that feed the granary through the dry months.",
+      "source_index": 88
     },
     {
       "id": "flora_mahua",
@@ -6385,7 +6424,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Mahua flowers drop through the night and are gathered before the sun gets to them."
+      "journal_prompt": "Mahua flowers drop through the night and are gathered before the sun gets to them.",
+      "source_index": 89
     },
     {
       "id": "flora_mango",
@@ -6410,7 +6450,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "A dense dark crown throwing shade a household sits in, fruit hanging green among the leaves."
+      "journal_prompt": "A dense dark crown throwing shade a household sits in, fruit hanging green among the leaves.",
+      "source_index": 90
     },
     {
       "id": "flora_moonseed_vine",
@@ -6433,7 +6474,8 @@
       ],
       "placement": "flavour",
       "rarity": "rare",
-      "journal_prompt": "A pale vine has been grafted onto the fig and left to climb, the way it is done in groves people come to on purpose."
+      "journal_prompt": "A pale vine has been grafted onto the fig and left to climb, the way it is done in groves people come to on purpose.",
+      "source_index": 91
     },
     {
       "id": "flora_mustard",
@@ -6457,7 +6499,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "A field turned yellow head to foot, loud with bees, the pods filling below the flowers."
+      "journal_prompt": "A field turned yellow head to foot, loud with bees, the pods filling below the flowers.",
+      "source_index": 92
     },
     {
       "id": "flora_myrrh_thorn",
@@ -6478,7 +6521,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "A thorn shrub bleeding bitter gum, gathered for field salves and little else."
+      "journal_prompt": "A thorn shrub bleeding bitter gum, gathered for field salves and little else.",
+      "source_index": 93
     },
     {
       "id": "flora_neem",
@@ -6501,7 +6545,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "A neem tree shades the field edge, its leaves bitter enough that nothing much troubles the grain stored beneath it."
+      "journal_prompt": "A neem tree shades the field edge, its leaves bitter enough that nothing much troubles the grain stored beneath it.",
+      "source_index": 94
     },
     {
       "id": "flora_ol_yam",
@@ -6523,7 +6568,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "Broad umbrella leaves on a speckled stalk, the corm below big enough to feed a household."
+      "journal_prompt": "Broad umbrella leaves on a speckled stalk, the corm below big enough to feed a household.",
+      "source_index": 95
     },
     {
       "id": "flora_palta_gourd",
@@ -6544,7 +6590,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "A trained vine over a low frame, striped young gourds hanging under rough leaves."
+      "journal_prompt": "A trained vine over a low frame, striped young gourds hanging under rough leaves.",
+      "source_index": 96
     },
     {
       "id": "flora_pepper_vine",
@@ -6567,7 +6614,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Pepper climbs the ravine wall in the wet shade, its berries drying to the black grain that travels downriver."
+      "journal_prompt": "Pepper climbs the ravine wall in the wet shade, its berries drying to the black grain that travels downriver.",
+      "source_index": 97
     },
     {
       "id": "flora_poison_oleander",
@@ -6590,7 +6638,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Oleander flowers pink and cheerful on the dry margin. Nothing grazes it, and there is a reason for that."
+      "journal_prompt": "Oleander flowers pink and cheerful on the dry margin. Nothing grazes it, and there is a reason for that.",
+      "source_index": 98
     },
     {
       "id": "flora_red_delta_rice",
@@ -6612,7 +6661,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Red rice stands in flooded squares, the water between the stalks holding the whole sky."
+      "journal_prompt": "Red rice stands in flooded squares, the water between the stalks holding the whole sky.",
+      "source_index": 99
     },
     {
       "id": "flora_sacred_tulsi",
@@ -6634,7 +6684,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Tulsi grows in a clay pot by the door, cropped short by daily picking for the morning rites."
+      "journal_prompt": "Tulsi grows in a clay pot by the door, cropped short by daily picking for the morning rites.",
+      "source_index": 100
     },
     {
       "id": "flora_saltreed",
@@ -6658,7 +6709,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "Salt-tolerant reeds stand shoulder-high along the brackish flood, the same reeds that roof every hut in the marsh camps."
+      "journal_prompt": "Salt-tolerant reeds stand shoulder-high along the brackish flood, the same reeds that roof every hut in the marsh camps.",
+      "source_index": 101
     },
     {
       "id": "flora_sandalwood",
@@ -6682,7 +6734,8 @@
       ],
       "placement": "flavour",
       "rarity": "rare",
-      "journal_prompt": "Sandalwood, and someone has been here before you: a strip of heartwood cut away clean, the scent still hanging in the air."
+      "journal_prompt": "Sandalwood, and someone has been here before you: a strip of heartwood cut away clean, the scent still hanging in the air.",
+      "source_index": 102
     },
     {
       "id": "flora_shaluk_lily",
@@ -6704,7 +6757,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "Pink night-blooming lilies closing as the sun climbs, their long stalks pulled up in coils."
+      "journal_prompt": "Pink night-blooming lilies closing as the sun climbs, their long stalks pulled up in coils.",
+      "source_index": 103
     },
     {
       "id": "flora_shulfa",
@@ -6727,7 +6781,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "Fine thread-leaves and flat yellow umbels, sharp-sweet when brushed against."
+      "journal_prompt": "Fine thread-leaves and flat yellow umbels, sharp-sweet when brushed against.",
+      "source_index": 104
     },
     {
       "id": "flora_shushni",
@@ -6749,7 +6804,8 @@
       ],
       "placement": "encounter",
       "rarity": "common",
-      "journal_prompt": "Four small leaflets on a thread of stalk, standing just clear of the shallows like clover that has learned to swim."
+      "journal_prompt": "Four small leaflets on a thread of stalk, standing just clear of the shallows like clover that has learned to swim.",
+      "source_index": 105
     },
     {
       "id": "flora_tamarind",
@@ -6773,7 +6829,8 @@
       ],
       "placement": "flavour",
       "rarity": "common",
-      "journal_prompt": "A tamarind leans over the road, pods hanging like dark fingers, the ground beneath it swept smooth by people who sit here."
+      "journal_prompt": "A tamarind leans over the road, pods hanging like dark fingers, the ground beneath it swept smooth by people who sit here.",
+      "source_index": 106
     },
     {
       "id": "flora_whisper_fig",
@@ -6796,7 +6853,201 @@
       ],
       "placement": "flavour",
       "rarity": "rare",
-      "journal_prompt": "The fig's trunk is hollow, and the wind moving through it makes a low sound that the delta people are careful not to interrupt."
+      "journal_prompt": "The fig's trunk is hollow, and the wind moving through it makes a low sound that the delta people are careful not to interrupt.",
+      "source_index": 107
+    },
+    {
+      "id": "flora_ashwagandha",
+      "type": "flora",
+      "name": "Ashwagandha",
+      "scientific": "Withania somnifera",
+      "growth_form": "shrub",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "physic"
+      ],
+      "notes": "A dry-ground shrub whose root smells faintly of a horse, which is where the name comes from and what everybody says about it first. Taken for exhaustion rather than for illness.",
+      "biomes": [
+        "plains",
+        "desert",
+        "settlement"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "A grey-leaved shrub on stony ground, small berries in papery lanterns.",
+      "source_index": 108
+    },
+    {
+      "id": "flora_brahmi",
+      "type": "flora",
+      "name": "Brahmi",
+      "scientific": "Bacopa monnieri",
+      "growth_form": "flower",
+      "habitats": [
+        "region_saraswati_delta"
+      ],
+      "uses": [
+        "physic"
+      ],
+      "notes": "A creeping marsh herb taken for a failing memory. Filed as `physic` and **not** as `memory`: canon's `memory` use means a plant that *is* a record, like the oracle fig, and reading it as `helps you remember` would collapse a literal claim into a figurative one on the first plant that invited it.",
+      "biomes": [
+        "wetland",
+        "river"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "Small fleshy leaves creeping over wet mud, white flowers barely clear of the water.",
+      "source_index": 109
+    },
+    {
+      "id": "flora_datura",
+      "type": "flora",
+      "name": "Dhatura",
+      "scientific": "Datura metel",
+      "growth_form": "flower",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "poison",
+        "psychoactive",
+        "ritual"
+      ],
+      "notes": "Grows on waste ground at the edge of every settlement, trumpet-flowered and entirely poisonous. Offered rather than taken -- the flower goes on a shrine and the seed goes nowhere near a pot.",
+      "biomes": [
+        "plains",
+        "settlement"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "White trumpets opening at dusk on a coarse weed nobody planted, and a spiked green fruit.",
+      "source_index": 110
+    },
+    {
+      "id": "flora_guggul",
+      "type": "flora",
+      "name": "Guggul",
+      "scientific": "Commiphora wightii",
+      "growth_form": "shrub",
+      "habitats": [
+        "region_gedrosian_desert"
+      ],
+      "uses": [
+        "physic",
+        "fragrance",
+        "trade"
+      ],
+      "notes": "A thorny desert shrub tapped for a resin that smells like a temple and is swallowed like a pill. Slow to yield and slower to recover, so a stand that is worked too hard is a stand that is gone.",
+      "biomes": [
+        "desert",
+        "hills"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "journal_prompt": "A crooked thorn shrub with peeling papery bark, beaded with resin where it has been cut.",
+      "source_index": 111
+    },
+    {
+      "id": "flora_haritaki",
+      "type": "flora",
+      "name": "Haritaki",
+      "scientific": "Terminalia chebula",
+      "growth_form": "tree",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "physic",
+        "dye",
+        "trade"
+      ],
+      "notes": "The fruit is dried and powdered and taken for almost everything, which is usually a sign a remedy does nothing in particular. This one is also the tannin that blacks a hide and fixes a dye, and nobody doubts that part.",
+      "biomes": [
+        "forest",
+        "plains"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "A tall tree with ribbed yellow-green fruit, the ground beneath it swept for windfalls.",
+      "source_index": 112
+    },
+    {
+      "id": "flora_long_pepper",
+      "type": "flora",
+      "name": "Pippali",
+      "scientific": "Piper longum",
+      "growth_form": "vine",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "seasoning",
+        "physic",
+        "trade"
+      ],
+      "notes": "Hotter than the round pepper and picked unripe, the whole spike dried. Cooked with as often as it is prescribed, which makes it the one plant on this page a household would call food.",
+      "biomes": [
+        "forest",
+        "settlement"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "A climbing vine on a shade tree, catkin-like spikes greening toward grey.",
+      "source_index": 113
+    },
+    {
+      "id": "flora_nux_vomica",
+      "type": "flora",
+      "name": "Kuchla",
+      "scientific": "Strychnos nux-vomica",
+      "growth_form": "tree",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "poison",
+        "physic",
+        "trade"
+      ],
+      "notes": "The seed is a flat grey disc and it will kill a grown person. It is also, soaked and thrown and soaked again for a fortnight, one of the few things that will settle a palsy -- and the same household keeps it in a sealed jar for both reasons. Canon records the two uses on one plant because that is what the plant is, and the difference between them is entirely a matter of preparation.",
+      "biomes": [
+        "forest",
+        "plains"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "journal_prompt": "A modest tree with glossy paired leaves and a fruit like a small orange, which children are told about early and pointedly.",
+      "source_index": 114
+    },
+    {
+      "id": "flora_vatsanabha",
+      "type": "flora",
+      "name": "Vatsanabha",
+      "scientific": "Aconitum ferox",
+      "growth_form": "flower",
+      "habitats": [
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "poison",
+        "physic"
+      ],
+      "notes": "Highland aconite, and the most dangerous root canon holds. Purified it is a medicine of last resort; unpurified it is what the hill people once tipped arrows with, which is the only recorded use canon has for a poison that was not eventually a cure.",
+      "biomes": [
+        "hills",
+        "mountains"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "journal_prompt": "Hooded blue flowers on a stem in wet upland shade, the root pale and forked like a small hand.",
+      "source_index": 115
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.3.1",
+  "canon_version": "2.4.0",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -931,6 +931,168 @@
       "rarity": "common",
       "notes": "Unripe it is cooked like meat and ripe it is eaten like sweets. Canon files it as produce both times, because it is a fruit whichever way it is used.",
       "source_index": 51
+    },
+    {
+      "id": "material_kuchla_seed",
+      "type": "material",
+      "name": "Kuchla seed",
+      "classes": [
+        "poison"
+      ],
+      "won_from": [
+        "flora_nux_vomica"
+      ],
+      "found_in": [
+        "forest",
+        "plains"
+      ],
+      "rarity": "rare",
+      "notes": "Flat grey discs, kept in a sealed jar and counted. Nothing is made of them but medicine, and that only after a fortnight of soaking.",
+      "source_index": 52
+    },
+    {
+      "id": "material_purified_kuchla",
+      "type": "material",
+      "name": "Purified kuchla",
+      "classes": [
+        "physic"
+      ],
+      "won_from": [
+        "flora_nux_vomica"
+      ],
+      "rarity": "rare",
+      "notes": "What a fortnight of soaking leaves. Still measured in single seeds and still counted out, because the process removes the danger rather than the need for care.",
+      "source_index": 53
+    },
+    {
+      "id": "material_datura_seed",
+      "type": "material",
+      "name": "Dhatura seed",
+      "classes": [
+        "poison"
+      ],
+      "won_from": [
+        "flora_datura"
+      ],
+      "found_in": [
+        "plains",
+        "settlement"
+      ],
+      "rarity": "common",
+      "notes": "Kept for the shrine and never for the pot. Canon records no preparation that makes these safe, and the households that grow it do not look for one.",
+      "source_index": 54
+    },
+    {
+      "id": "material_aconite_root",
+      "type": "material",
+      "name": "Aconite root",
+      "classes": [
+        "poison"
+      ],
+      "won_from": [
+        "flora_vatsanabha"
+      ],
+      "found_in": [
+        "hills",
+        "mountains"
+      ],
+      "rarity": "rare",
+      "notes": "The most dangerous thing in canon's ground, and the only poison it records being used as a weapon -- on arrows, by hill people, once.",
+      "source_index": 55
+    },
+    {
+      "id": "material_ashwagandha_root",
+      "type": "material",
+      "name": "Ashwagandha root",
+      "classes": [
+        "physic"
+      ],
+      "won_from": [
+        "flora_ashwagandha"
+      ],
+      "found_in": [
+        "plains",
+        "desert",
+        "settlement"
+      ],
+      "rarity": "common",
+      "notes": "Dug in the dry months and dried further. Smells faintly of a horse, which everybody mentions.",
+      "source_index": 56
+    },
+    {
+      "id": "material_brahmi_leaf",
+      "type": "material",
+      "name": "Brahmi",
+      "classes": [
+        "physic"
+      ],
+      "won_from": [
+        "flora_brahmi"
+      ],
+      "found_in": [
+        "wetland",
+        "river"
+      ],
+      "rarity": "common",
+      "notes": "Pulled by the handful from wet mud and used fresh, which limits it to where it grows.",
+      "source_index": 57
+    },
+    {
+      "id": "material_haritaki_fruit",
+      "type": "material",
+      "name": "Haritaki",
+      "classes": [
+        "physic",
+        "pigment"
+      ],
+      "won_from": [
+        "flora_haritaki"
+      ],
+      "found_in": [
+        "forest",
+        "plains"
+      ],
+      "rarity": "common",
+      "notes": "Dried until it rattles. Powdered it is a remedy and steeped it is the tannin that blacks a hide, and only the second of those is beyond dispute.",
+      "source_index": 58
+    },
+    {
+      "id": "material_guggul_resin",
+      "type": "material",
+      "name": "Guggul",
+      "classes": [
+        "resin",
+        "physic"
+      ],
+      "won_from": [
+        "flora_guggul"
+      ],
+      "found_in": [
+        "desert",
+        "hills"
+      ],
+      "rarity": "rare",
+      "notes": "Tapped in beads from a cut in the bark. Smells like a temple and is swallowed like a pill.",
+      "source_index": 59
+    },
+    {
+      "id": "material_pippali",
+      "type": "material",
+      "name": "Pippali",
+      "classes": [
+        "spice",
+        "physic"
+      ],
+      "won_from": [
+        "flora_long_pepper"
+      ],
+      "found_in": [
+        "forest",
+        "settlement"
+      ],
+      "rarity": "common",
+      "notes": "Whole spikes picked unripe and dried grey. Hotter than round pepper and traded further.",
+      "source_index": 60
     }
   ],
   "items": [
@@ -2015,6 +2177,68 @@
       ],
       "notes": "Unripe jackfruit cooked long enough to pull apart in threads. It is not meat and the delta does not claim it is; it is what the tree gives a month before it gives sweets.",
       "source_index": 69
+    },
+    {
+      "id": "item_kuchla_grain",
+      "type": "item",
+      "name": "A grain of kuchla",
+      "kind": "physic",
+      "affords": [
+        "heal"
+      ],
+      "materials": [
+        "material_purified_kuchla",
+        "material_mahua_oil"
+      ],
+      "notes": "One purified seed ground into oil and divided into doses the size of a grain of rice. For a palsy, and for nothing else -- a preparation this specific is a preparation nobody improvises.",
+      "source_index": 70
+    },
+    {
+      "id": "item_ashwagandha_tonic",
+      "type": "item",
+      "name": "Ashwagandha tonic",
+      "kind": "physic",
+      "affords": [
+        "heal",
+        "eat"
+      ],
+      "materials": [
+        "material_ashwagandha_root",
+        "material_mahua_oil"
+      ],
+      "notes": "Root powder in warm oil, taken at night. For exhaustion, which canon distinguishes from illness.",
+      "source_index": 71
+    },
+    {
+      "id": "item_haritaki_powder",
+      "type": "item",
+      "name": "Haritaki powder",
+      "kind": "physic",
+      "affords": [
+        "heal",
+        "trade"
+      ],
+      "materials": [
+        "material_haritaki_fruit"
+      ],
+      "notes": "Dried fruit ground fine. Taken for almost anything, which is usually a sign a remedy does nothing in particular -- canon records the claim without endorsing it.",
+      "source_index": 72
+    },
+    {
+      "id": "item_guggul_pill",
+      "type": "item",
+      "name": "Guggul pill",
+      "kind": "physic",
+      "affords": [
+        "heal",
+        "trade"
+      ],
+      "materials": [
+        "material_guggul_resin",
+        "material_pippali"
+      ],
+      "notes": "Resin softened and rolled with pepper. Worth carrying a long way, which is most of why the stands are overworked.",
+      "source_index": 73
     }
   ],
   "processes": [
@@ -2189,6 +2413,16 @@
       ],
       "notes": "Hull, frame, lashing and pitch. Sited at settlements and travel nodes because those are the two kinds of place in canon that sit on water and have people.",
       "source_index": 15
+    },
+    {
+      "id": "process_purifying",
+      "type": "process",
+      "name": "Purifying",
+      "needs": [
+        "contain"
+      ],
+      "notes": "Days of soaking, the liquor thrown away and replaced, and then drying. It is the one process here that adds nothing and removes something -- every other way of making turns a thing into more of a thing, and this turns a poison into a medicine by taking part of it away.\n\nSlow on purpose and impossible to hurry, which is the whole safeguard: a preparation that could be rushed would be rushed.",
+      "source_index": 16
     }
   ],
   "recipes": [
@@ -4122,6 +4356,130 @@
       ],
       "notes": "A second oil for the delta, and a hotter one. Canon keeps one oil material -- what changes is which seed the press was fed.",
       "source_index": 76
+    },
+    {
+      "id": "recipe_purify_kuchla",
+      "type": "recipe",
+      "name": "Purifying kuchla",
+      "process": "process_purifying",
+      "ingredients": [
+        {
+          "material": "material_kuchla_seed",
+          "count": 4
+        },
+        {
+          "item": "item_cooking_pot",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_purified_kuchla",
+          "count": 2
+        }
+      ],
+      "notes": "A fortnight of soaking, the liquor thrown away and replaced daily. **The only kind of recipe that consumes a poison in canon**, and that is deliberate rather than an omission: there is no word in `affordances.json` for what a thing made to harm somebody would be for.",
+      "source_index": 77
+    },
+    {
+      "id": "recipe_kuchla_grain",
+      "type": "recipe",
+      "name": "Dividing a dose",
+      "process": "process_grinding",
+      "ingredients": [
+        {
+          "material": "material_purified_kuchla",
+          "count": 1
+        },
+        {
+          "tag": "#oil",
+          "count": 1
+        },
+        {
+          "item": "item_grinding_quern",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_kuchla_grain",
+          "count": 4
+        }
+      ],
+      "notes": "Ground into oil and divided small. The dividing is the safeguard and is done in company.",
+      "source_index": 78
+    },
+    {
+      "id": "recipe_ashwagandha_tonic",
+      "type": "recipe",
+      "name": "Making a tonic",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "material": "material_ashwagandha_root",
+          "count": 2
+        },
+        {
+          "tag": "#oil",
+          "count": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_ashwagandha_tonic",
+          "count": 2
+        }
+      ],
+      "notes": "Warmed, not boiled. Taken at night.",
+      "source_index": 79
+    },
+    {
+      "id": "recipe_haritaki_powder",
+      "type": "recipe",
+      "name": "Grinding haritaki",
+      "process": "process_grinding",
+      "ingredients": [
+        {
+          "material": "material_haritaki_fruit",
+          "count": 3
+        },
+        {
+          "item": "item_grinding_quern",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_haritaki_powder",
+          "count": 2
+        }
+      ],
+      "notes": "Dried until it rattles, then ground fine enough to float.",
+      "source_index": 80
+    },
+    {
+      "id": "recipe_guggul_pill",
+      "type": "recipe",
+      "name": "Rolling guggul",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "material": "material_guggul_resin",
+          "count": 2
+        },
+        {
+          "material": "material_pippali",
+          "count": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_guggul_pill",
+          "count": 3
+        }
+      ],
+      "notes": "Softened over heat and rolled between the palms with pepper.",
+      "source_index": 81
     }
   ],
   "vehicles": [
@@ -4634,6 +4992,21 @@
       ],
       "item_jackfruit_curry": [
         "eat"
+      ],
+      "item_kuchla_grain": [
+        "heal"
+      ],
+      "item_ashwagandha_tonic": [
+        "heal",
+        "eat"
+      ],
+      "item_haritaki_powder": [
+        "heal",
+        "trade"
+      ],
+      "item_guggul_pill": [
+        "heal",
+        "trade"
       ]
     }
   }

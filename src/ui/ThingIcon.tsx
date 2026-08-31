@@ -51,7 +51,11 @@ export const CLASS_MARK: Record<MaterialClass, string> = {
   // Added when canon did. `spice` is its own class rather than a `produce` for the reason
   // `salt` is: three cardamom pods scent a whole pot, which makes it a thing you trade across
   // a continent where produce is a thing you eat where it grew.
-  spice: '🌶️'
+  spice: '🌶️',
+  // A sealed jar, not a skull. Canon records poisons as substances and has no vocabulary for
+  // harm at all -- nothing can be made of one except medicine -- so a mark that read as a
+  // threat would say more than canon does.
+  poison: '🫙'
 };
 
 /**
