@@ -418,9 +418,6 @@ describe('here', () => {
     whereNext: '',
     fatigue: null as string | null,
     dusk: null as string | null,
-    shelter: 'bedroll' as 'roof' | 'camp' | 'bedroll' | 'none',
-    canCamp: false,
-    onCamp: noop,
     discovered: 3,
     atLandmark: false,
     memory: '',
@@ -428,6 +425,17 @@ describe('here', () => {
     alreadySketched: false,
     onObserve: noop
   } as const;
+
+  /**
+   * Tile actions, which `Here` now renders above the notes.
+   *
+   * Resting moved here from the foot of the field notes and taking moved here from inside the
+   * satchel -- see `TileActions.tsx`. The shelter labels are unchanged and still come from
+   * `SHELTER_LABEL`, so the assertions below are the same ones, asked of the new surface.
+   */
+  const restAction = (label: string, blocked: string | null) => [
+    { id: 'rest', label, mark: '☽', blocked, onDo: noop }
+  ];
 
   const place = {
     poiId: null as string | null,
@@ -443,34 +451,41 @@ describe('here', () => {
     // The label is the whole explanation of shelter -- no tooltip, no legend. A roof, a camp and
     // the bedroll each say what sort of night this will be before the player commits to it.
     const { unmount } = render(
-      <Here open notes={{ ...notes, canCamp: true, shelter: 'roof' }} place={{ ...place }} />
+      <Here open notes={{ ...notes }} place={{ ...place }}
+            actions={restAction('Sleep under the roof', null)} />
     );
     expect(screen.getByRole('button', { name: /roof/i })).toBeTruthy();
     unmount();
 
     const bed = render(
-      <Here open notes={{ ...notes, canCamp: true, shelter: 'bedroll' }} place={{ ...place }} />
+      <Here open notes={{ ...notes }} place={{ ...place }}
+            actions={restAction('Unroll the bedding here', null)} />
     );
     expect(screen.getByRole('button', { name: /bedding/i })).toBeTruthy();
     bed.unmount();
 
+    // **Blocked, not gone.** The row stays and says why, which is the convention the whole
+    // surface is built on: a vanished button teaches a player nothing about the mechanic.
     const { container } = render(
-      <Here open notes={{ ...notes, canCamp: false }} place={{ ...place }} />
+      <Here open notes={{ ...notes }} place={{ ...place }}
+            actions={restAction('Unroll the bedding here', 'Not yet -- there is daylight left.')} />
     );
-    expect(container.querySelector('.camp-button')).toBeNull();
+    const button = screen.getByRole('button', { name: /bedding/i }) as HTMLButtonElement;
+    expect(button.disabled).toBe(true);
+    expect(container.textContent).toContain('there is daylight left');
   });
 
   it('shows a tiredness line only when there is one', () => {
     // Null covers both "the flag is off" and "nothing worth saying", which is most of a session.
     const { unmount } = render(
       <Here open notes={{ ...notes, fatigue: 'You have been walking a while.' }}
-            place={{ ...place }} />
+            place={{ ...place }} actions={[]} />
     );
     expect(screen.getByText('You have been walking a while.')).toBeTruthy();
     unmount();
 
     const { container } = render(
-      <Here open notes={{ ...notes, fatigue: null }} place={{ ...place }} />
+      <Here open notes={{ ...notes, fatigue: null }} place={{ ...place }} actions={[]} />
     );
     expect(container.querySelector('.status-tired')).toBeNull();
   });
@@ -480,32 +495,32 @@ describe('here', () => {
     // space in a panel that is deliberately tight on a phone.
     const { unmount } = render(
       <Here open notes={{ ...notes, whereNext: 'The Camp would do for the night.' }}
-            place={{ ...place }} />
+            place={{ ...place }} actions={[]} />
     );
     expect(screen.getByText('The Camp would do for the night.')).toBeTruthy();
     unmount();
 
     const { container } = render(
-      <Here open notes={{ ...notes, whereNext: '' }} place={{ ...place }} />
+      <Here open notes={{ ...notes, whereNext: '' }} place={{ ...place }} actions={[]} />
     );
     expect(container.querySelector('.status-next')).toBeNull();
   });
 
   it('shows the field notes with no place to stand in', () => {
-    render(<Here open notes={{ ...notes }} place={{ ...place }} />);
+    render(<Here open notes={{ ...notes }} place={{ ...place }} actions={[]} />);
     expect(screen.getByText('Salt flats')).toBeTruthy();
   });
 
   /** The layering. A place on top must not take the notes away with it. */
   it('keeps the notes underneath while a place is open', () => {
-    render(<Here open notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} />);
+    render(<Here open notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />);
     expect(screen.getByText('Salt flats')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Leave' })).toBeTruthy();
   });
 
   it('renders nothing at all when the surface is closed', () => {
     const { container } = render(
-      <Here open={false} notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} />
+      <Here open={false} notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />
     );
     expect(container.textContent).toBe('');
   });
@@ -516,7 +531,7 @@ describe('here', () => {
    */
   it('carries canon inside the notes when a service is listening', () => {
     render(
-      <Here open notes={{ ...notes }} place={{ ...place }} canon={<p>Canon says something.</p>} />
+      <Here open notes={{ ...notes }} place={{ ...place }} canon={<p>Canon says something.</p>} actions={[]} />
     );
     expect(screen.getByText('Canon says something.')).toBeTruthy();
   });
@@ -716,7 +731,7 @@ describe('the field notes draw a mark for every species', () => {
 
   it('draws one beside the creature and one beside the plant', () => {
     const { container } = render(
-      <Here open notes={note()} place={{ poiId: null } as never} />
+      <Here open notes={note()} place={{ poiId: null } as never} actions={[]} />
     );
     // Two marks, one per named species -- and they are inside the term, beside the name, rather
     // than floating in the section heading.
@@ -750,7 +765,7 @@ describe('the field notes draw a mark for every species', () => {
           }
         })}
         place={{ poiId: null } as never}
-      />
+      actions={[]} />
     );
     expect(container.querySelectorAll('.note-plate')).toHaveLength(0);
     expect(container.querySelectorAll('.note-plated')).toHaveLength(0);
@@ -759,7 +774,7 @@ describe('the field notes draw a mark for every species', () => {
   it('draws nothing where there is nothing to draw', () => {
     const empty = { name: null, note: 'No creature signs yet.', species: null };
     const { container } = render(
-      <Here open notes={note({ creature: empty, flora: empty })} place={{ poiId: null } as never} />
+      <Here open notes={note({ creature: empty, flora: empty })} place={{ poiId: null } as never} actions={[]} />
     );
     expect(container.querySelectorAll('.species-emoji')).toHaveLength(0);
   });
@@ -768,7 +783,7 @@ describe('the field notes draw a mark for every species', () => {
     // The heading already names the place; a screen reader announcing "flower, Wetland at 28, 29"
     // is worse than one announcing the place alone.
     const { container } = render(
-      <Here open notes={note()} place={{ poiId: null } as never} />
+      <Here open notes={note()} place={{ poiId: null } as never} actions={[]} />
     );
     const mark = container.querySelector('.journal-mark');
     expect(mark).not.toBeNull();
@@ -816,7 +831,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
         open
         notes={notes({ id: 'scythian-wild-ass', name: 'Scythian Wild Ass' })}
         place={{ poiId: null } as never}
-      />
+      actions={[]} />
     );
     expect(container.querySelectorAll('.note-plate')).toHaveLength(1);
     // Not both: the plate *is* the picture, and a small silhouette beside it is noise.
@@ -829,7 +844,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
         open
         notes={notes({ id: 'a-species-nobody-has-painted', name: 'Unpainted Thing' })}
         place={{ poiId: null } as never}
-      />
+      actions={[]} />
     );
     expect(container.querySelectorAll('.note-plate')).toHaveLength(0);
     expect(container.querySelectorAll('.note dt .species-emoji')).toHaveLength(1);
@@ -841,7 +856,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
         open
         notes={notes({ id: 'scythian-wild-ass', name: 'Scythian Wild Ass' })}
         place={{ poiId: null } as never}
-      />
+      actions={[]} />
     );
     const img = container.querySelector('.note-plate')!;
     expect(img.getAttribute('alt')).toBe('');

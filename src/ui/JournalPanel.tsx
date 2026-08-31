@@ -60,7 +60,7 @@ function Note({ note, kind }: { note: FieldNote; kind: 'creature' | 'flora' }) {
  * No tooltip, no legend, no icon: the label tells the player what kind of night this will be
  * before they commit to it, in the same voice everything else here uses.
  */
-const SHELTER_LABEL: Record<string, string> = {
+export const SHELTER_LABEL: Record<string, string> = {
   roof: 'Sleep under the roof',
   camp: 'Make camp for the night',
   bedroll: 'Unroll the bedding here',
@@ -77,11 +77,6 @@ export interface JournalPanelProps {
   fatigue: string | null;
   /** A word about the fading light, or null while there is plenty. */
   dusk: string | null;
-  /** The best shelter here: a roof, a camp, or his own bedroll. */
-  shelter: 'roof' | 'camp' | 'bedroll' | 'none';
-  /** Whether stopping for the night would do anything. */
-  canCamp: boolean;
-  onCamp: () => void;
   discovered: number;
   atLandmark: boolean;
   memory: string;
@@ -103,9 +98,6 @@ export function JournalPanel({
   whereNext,
   fatigue,
   dusk,
-  shelter,
-  canCamp,
-  onCamp,
   discovered,
   atLandmark,
   memory,
@@ -165,11 +157,10 @@ export function JournalPanel({
         {whereNext && <p className="status-next">{whereNext}</p>}
         {dusk && <p className="status-dusk">{dusk}</p>}
         {fatigue && <p className="status-tired">{fatigue}</p>}
-        {canCamp && (
-          <button type="button" className="camp-button" onClick={onCamp}>
-            {SHELTER_LABEL[shelter]}
-          </button>
-        )}
+        {/* The camp button moved to `TileActions`, and `shelter`, `canCamp` and `onCamp` went
+            with it -- nothing here read them but the button. Resting is something you do to the
+            tile you are standing on, so it belongs with taking and looking rather than at the
+            foot of a page of prose. See the note at the top of that file. */}
         <p className="muted">{discovered} places discovered.</p>
       </footer>
     </section>

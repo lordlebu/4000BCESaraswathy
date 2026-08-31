@@ -14,6 +14,23 @@ import { expect, test, type Page } from '@playwright/test';
 import { step } from './walk';
 
 /**
+ * The rest action, wherever the night can be spent.
+ *
+ * Was `.camp-button` at the foot of the field notes. Resting is something you do to the tile you
+ * are standing on, so it moved into the one list of tile actions with taking and looking closer
+ * -- see `src/ui/TileActions.tsx`.
+ *
+ * **The assertions changed shape with it, and the change is the point.** A row that cannot be
+ * used is no longer absent; it stays listed, disabled, with the reason under it. So these tests
+ * ask `toBeDisabled` where they used to ask `toHaveCount(0)` -- because a vanished button teaches
+ * a player nothing, and in a game you read before you click that is the only way to learn a
+ * mechanic exists.
+ */
+function rest(page: Page) {
+  return page.locator('.tile-action', { hasText: /roof|camp|bedding|sit out/i }).getByRole('button');
+}
+
+/**
  * Open the map and wait for the notes to be written.
  *
  * The journal is open at boot, so nothing needs clicking -- worth stating because the first
@@ -38,15 +55,16 @@ test('tiredness stays inert when the flag is off', async ({ page }) => {
   for (let i = 0; i < 6; i += 1) await step(page, 'ArrowRight');
 
   await expect(page.locator('.status-tired')).toHaveCount(0);
-  // Midday, so nothing to stop for either way.
-  await expect(page.locator('.camp-button')).toHaveCount(0);
+  // Midday, so nothing to stop for either way. The row is still listed -- that is the point of
+  // the surface -- but it is disabled and says why.
+  await expect(rest(page)).toBeDisabled();
 });
 
 test('shelter is offered after dark whether or not the flag is on', async ({ page }) => {
   await boot(page, '/?seed=poi-252&hour=22');
-  await expect(page.locator('.camp-button')).toBeVisible({ timeout: 10_000 });
+  await expect(rest(page)).toBeEnabled({ timeout: 10_000 });
   // And the label says what kind of night it will be, which is the whole explanation of shelter.
-  await expect(page.locator('.camp-button')).toHaveText(/roof|camp|bedding|sit out/i);
+  await expect(rest(page)).toHaveText(/roof|camp|bedding|sit out/i);
 });
 
 test('walking with the flag on leaves the page and the journal working', async ({ page }) => {
@@ -81,7 +99,7 @@ test('walking with the flag on leaves the page and the journal working', async (
   // here would mean the curve had moved by more than an order of magnitude.
   await expect(page.locator('.status-tired')).toHaveCount(0);
   // Midday, so no bed on offer either.
-  await expect(page.locator('.camp-button')).toHaveCount(0);
+  await expect(rest(page)).toBeDisabled();
 });
 
 test('the camp button appears at a camp after dark, and sleeping brings the morning', async ({
@@ -93,18 +111,18 @@ test('the camp button appears at a camp after dark, and sleeping brings the morn
   // nothing at all.
   await boot(page, '/?seed=camp-23&fatigue=1&hour=23');
 
-  const camp = page.locator('.camp-button');
-  await expect(camp).toBeVisible({ timeout: 10_000 });
+  const camp = rest(page);
+  await expect(camp).toBeEnabled({ timeout: 10_000 });
   await camp.click();
   // Sleeping moves the sky. Whatever the journal says afterwards, it must still be saying it.
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
-  // Slept: it is morning now, so the same tile no longer offers a bed.
-  await expect(page.locator('.camp-button')).toHaveCount(0);
+  // Slept: it is morning now, so the same tile will not offer a bed again.
+  await expect(rest(page)).toBeDisabled();
 });
 
 test('a camp in daylight is just a place', async ({ page }) => {
   // The negative half. Standing in the same camp at noon must offer nothing -- otherwise the
   // button is a fast-forward rather than somewhere to sleep.
   await boot(page, '/?seed=camp-23&fatigue=1&hour=12');
-  await expect(page.locator('.camp-button')).toHaveCount(0);
+  await expect(rest(page)).toBeDisabled();
 });

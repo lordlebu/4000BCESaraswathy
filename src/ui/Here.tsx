@@ -18,6 +18,7 @@
 import type { ReactNode } from 'react';
 import { JournalPanel, type JournalPanelProps } from './JournalPanel';
 import { PlacePanel, type PlacePanelProps } from './PlacePanel';
+import { TileActions, type TileAction } from './TileActions';
 
 export interface HereProps {
   /** Whether the surface holds the screen at all. */
@@ -28,9 +29,17 @@ export interface HereProps {
   place: PlacePanelProps;
   /** Canon, when a service is listening. Usually nothing at all. */
   canon?: ReactNode;
+  /**
+   * Everything that can be done on this tile.
+   *
+   * Above the notes rather than inside them: the notes are prose about where you are, and these
+   * are the things you can do about it. Mixing them is how taking a reed ended up inside the
+   * satchel and unrolling the bedding inside the field notes.
+   */
+  actions: readonly TileAction[];
 }
 
-export function Here({ open, notes, place, canon }: HereProps) {
+export function Here({ open, notes, place, canon, actions }: HereProps) {
   if (!open) return null;
 
   return (
@@ -38,7 +47,10 @@ export function Here({ open, notes, place, canon }: HereProps) {
       {/* The place renders itself as null when there is nowhere to be, so this is not a
           conditional -- `poiId` already carries "am I being read" from the reducer. */}
       <PlacePanel {...place} />
-      <JournalPanel {...notes}>{canon}</JournalPanel>
+      <JournalPanel {...notes}>
+        <TileActions actions={actions} />
+        {canon}
+      </JournalPanel>
     </>
   );
 }
