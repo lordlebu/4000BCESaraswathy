@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.4.0",
+  "canon_version": "2.4.1",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -6000,6 +6000,11 @@
       "id": "flora_bethua",
       "type": "flora",
       "name": "Bethua",
+      "aliases": [
+        "Bathua",
+        "Lamb's quarters",
+        "Fat hen"
+      ],
       "scientific": "Chenopodium album",
       "growth_form": "flower",
       "habitats": [
@@ -6023,6 +6028,10 @@
       "id": "flora_cardamom",
       "type": "flora",
       "name": "Hill Cardamom",
+      "aliases": [
+        "Green cardamom",
+        "Elaichi"
+      ],
       "scientific": "Elettaria cardamomum",
       "growth_form": "shrub",
       "habitats": [
@@ -6094,6 +6103,10 @@
       "id": "flora_ghentu",
       "type": "flora",
       "name": "Ghentu",
+      "aliases": [
+        "Bhant",
+        "Glory bower"
+      ],
       "scientific": "Clerodendrum viscosum",
       "growth_form": "shrub",
       "habitats": [
@@ -6169,6 +6182,10 @@
       "id": "flora_guloncho",
       "type": "flora",
       "name": "Guloncho",
+      "aliases": [
+        "Giloy",
+        "Heart-leaved moonseed"
+      ],
       "scientific": "Tinospora cordifolia",
       "growth_form": "vine",
       "habitats": [
@@ -6193,6 +6210,10 @@
       "id": "flora_hinche",
       "type": "flora",
       "name": "Hinche",
+      "aliases": [
+        "Helencha",
+        "Marsh herb"
+      ],
       "scientific": "Enhydra fluctuans",
       "growth_form": "flower",
       "habitats": [
@@ -6288,6 +6309,10 @@
       "id": "flora_jayanti",
       "type": "flora",
       "name": "Jayanti",
+      "aliases": [
+        "Sesban",
+        "Egyptian riverhemp"
+      ],
       "scientific": "Sesbania sesban",
       "growth_form": "shrub",
       "habitats": [
@@ -6314,6 +6339,9 @@
       "id": "flora_kalkasunde",
       "type": "flora",
       "name": "Kalkasunde",
+      "aliases": [
+        "Kasondi"
+      ],
       "scientific": "Cassia sophera",
       "growth_form": "shrub",
       "habitats": [
@@ -6337,6 +6365,10 @@
       "id": "flora_kemuk",
       "type": "flora",
       "name": "Kemuk",
+      "aliases": [
+        "Crepe ginger",
+        "Spiral ginger"
+      ],
       "scientific": "Costus speciosus",
       "growth_form": "root",
       "habitats": [
@@ -6361,6 +6393,10 @@
       "id": "flora_keot_taro",
       "type": "flora",
       "name": "Keot",
+      "aliases": [
+        "Taro",
+        "Kachu"
+      ],
       "scientific": "Colocasia esculenta",
       "growth_form": "root",
       "habitats": [
@@ -6481,6 +6517,10 @@
       "id": "flora_mustard",
       "type": "flora",
       "name": "Field Mustard",
+      "aliases": [
+        "Field mustard",
+        "Sarson"
+      ],
       "scientific": "Brassica rapa",
       "growth_form": "flower",
       "habitats": [
@@ -6552,6 +6592,10 @@
       "id": "flora_ol_yam",
       "type": "flora",
       "name": "Ol Yam",
+      "aliases": [
+        "Elephant foot yam",
+        "Suran"
+      ],
       "scientific": "Amorphophallus paeoniifolius",
       "growth_form": "root",
       "habitats": [
@@ -6575,6 +6619,10 @@
       "id": "flora_palta_gourd",
       "type": "flora",
       "name": "Palta",
+      "aliases": [
+        "Pointed gourd",
+        "Parwal"
+      ],
       "scientific": "Trichosanthes dioica",
       "growth_form": "vine",
       "habitats": [
@@ -6741,6 +6789,10 @@
       "id": "flora_shaluk_lily",
       "type": "flora",
       "name": "Shaluk",
+      "aliases": [
+        "Water lily",
+        "Red water lily"
+      ],
       "scientific": "Nymphaea pubescens",
       "growth_form": "flower",
       "habitats": [
@@ -6764,6 +6816,9 @@
       "id": "flora_shulfa",
       "type": "flora",
       "name": "Shulfa",
+      "aliases": [
+        "Dill"
+      ],
       "scientific": "Anethum graveolens",
       "growth_form": "flower",
       "habitats": [
@@ -6788,6 +6843,10 @@
       "id": "flora_shushni",
       "type": "flora",
       "name": "Shushni",
+      "aliases": [
+        "Water clover",
+        "Four-leaf clover fern"
+      ],
       "scientific": "Marsilea minuta",
       "growth_form": "fern",
       "habitats": [
@@ -6860,6 +6919,10 @@
       "id": "flora_ashwagandha",
       "type": "flora",
       "name": "Ashwagandha",
+      "aliases": [
+        "Indian winter cherry",
+        "Withania"
+      ],
       "scientific": "Withania somnifera",
       "growth_form": "shrub",
       "habitats": [
@@ -6884,6 +6947,9 @@
       "id": "flora_brahmi",
       "type": "flora",
       "name": "Brahmi",
+      "aliases": [
+        "Water hyssop"
+      ],
       "scientific": "Bacopa monnieri",
       "growth_form": "flower",
       "habitats": [
@@ -6906,6 +6972,11 @@
       "id": "flora_datura",
       "type": "flora",
       "name": "Dhatura",
+      "aliases": [
+        "Datura",
+        "Thorn-apple",
+        "Devil's trumpet"
+      ],
       "scientific": "Datura metel",
       "growth_form": "flower",
       "habitats": [
@@ -6931,6 +7002,10 @@
       "id": "flora_guggul",
       "type": "flora",
       "name": "Guggul",
+      "aliases": [
+        "Indian bdellium",
+        "Mukul myrrh"
+      ],
       "scientific": "Commiphora wightii",
       "growth_form": "shrub",
       "habitats": [
@@ -6955,6 +7030,10 @@
       "id": "flora_haritaki",
       "type": "flora",
       "name": "Haritaki",
+      "aliases": [
+        "Chebulic myrobalan",
+        "Black myrobalan"
+      ],
       "scientific": "Terminalia chebula",
       "growth_form": "tree",
       "habitats": [
@@ -6980,6 +7059,10 @@
       "id": "flora_long_pepper",
       "type": "flora",
       "name": "Pippali",
+      "aliases": [
+        "Long pepper",
+        "Indian long pepper"
+      ],
       "scientific": "Piper longum",
       "growth_form": "vine",
       "habitats": [
@@ -7005,6 +7088,11 @@
       "id": "flora_nux_vomica",
       "type": "flora",
       "name": "Kuchla",
+      "aliases": [
+        "Nux-vomica",
+        "Strychnine tree",
+        "Poison nut"
+      ],
       "scientific": "Strychnos nux-vomica",
       "growth_form": "tree",
       "habitats": [
@@ -7030,6 +7118,11 @@
       "id": "flora_vatsanabha",
       "type": "flora",
       "name": "Vatsanabha",
+      "aliases": [
+        "Indian aconite",
+        "Monkshood",
+        "Wolfsbane"
+      ],
       "scientific": "Aconitum ferox",
       "growth_form": "flower",
       "habitats": [
