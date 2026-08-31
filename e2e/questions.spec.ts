@@ -11,15 +11,17 @@ import { step } from './walk';
  * A seed where the drowned dockyard sits two steps south of the start.
  *
  * Re-searched when Lothal's palette gained forest and hills, which moved every placement --
- * `dock-1127` put the dockyard thirty-three steps away. A searched seed is a fixture and goes
- * stale like one.
+ * `dock-1127` put the dockyard thirty-three steps away -- and again when placement stopped
+ * indexing into the candidate list. A searched seed is a fixture and goes stale like one, though
+ * far less often now: see the note in `fielddiary.spec.ts` for what changed.
  *
  * Thrali stands there and offers the silver-water question, and the water itself is found
  * there — so one place holds the whole loop: hear the question, look at the thing, settle.
  * Opened at midnight because the bloom only shows at night, which is the point of that rung.
  */
-const SEED = 'dock-3574';
-const AT_NIGHT = `/?seed=${SEED}&hour=0`;
+const SEED = 'dock-5226';
+// Two tiles north of poi_drowned_dockyard at (35,41), so the two ArrowDowns still walk.
+const AT_NIGHT = `/?seed=${SEED}&hour=0&at=35,39`;
 
 async function boot(page: Page) {
   await page.goto(AT_NIGHT);

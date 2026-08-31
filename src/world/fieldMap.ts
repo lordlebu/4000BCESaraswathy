@@ -160,14 +160,40 @@ function gather(world: World, accept: (tile: Tile) => boolean): Point[] {
   return out;
 }
 
+/**
+ * Choose a tile for a place, by scoring the tiles rather than indexing the list.
+ *
+ * This used to be `tileHash(...) % candidates.length` with a linear probe from there, and the
+ * position of a tile in the gathered list decided everything. `gather` walks the grid in row
+ * order, so **any** change to the terrain -- a river moving one tile, a biome reclassified,
+ * a single tile taken out of the pool -- shifted the list and moved every place on the map.
+ *
+ * The file already carries one post-mortem of that: stamping the landmark before placement
+ * moved five of Lothal's six places and put The Eastern Field thirteen rows off the route the
+ * browser suite walks. It has since gone stale twice more, taking four e2e seed fixtures with
+ * it each time. It is the same defect that made adding a plant re-roll the world, in a second
+ * place, and it deserves the same answer.
+ *
+ * Each candidate is now scored by hashing the *place* together with that tile's own
+ * coordinates, and the best-scoring acceptable tile wins. A tile's score depends on nothing but
+ * itself and the place being sited, so terrain changing elsewhere on the map cannot move a
+ * place whose own ground is untouched. Rejected candidates are skipped rather than shifting
+ * anything, and ties break on coordinate so the gather order is never read at all.
+ */
 function pick(seed: string, poi: PointOfInterest, candidates: Point[], reject: (at: Point) => boolean): Point | null {
-  if (candidates.length === 0) return null;
-  const start = tileHash(seed, 0, 0, poi.id) % candidates.length;
-  for (let step = 0; step < candidates.length; step += 1) {
-    const at = candidates[(start + step) % candidates.length]!;
-    if (!reject(at)) return at;
+  let best: Point | null = null;
+  let bestScore = -Infinity;
+
+  for (const at of candidates) {
+    if (reject(at)) continue;
+    const score = tileHash(seed, at.x, at.y, `poi:${poi.id}`);
+    if (score > bestScore || (score === bestScore && best !== null && (at.y < best.y || (at.y === best.y && at.x < best.x)))) {
+      best = at;
+      bestScore = score;
+    }
   }
-  return null;
+
+  return best;
 }
 
 function placeOne(
@@ -237,7 +263,17 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
 
   const placed: PlacedPoi[] = [];
   const unplaced: PointOfInterest[] = [];
-  const taken: Point[] = [];
+  // The tile the traveller wakes on is spoken for.
+  //
+  // Nothing ever said so, and nothing needed to while `pick` indexed the candidate list: the
+  // modulo simply never landed there. That was luck rather than a rule, and scoring the tiles
+  // spent it -- `play-test` put Kavik's Tower exactly on the start tile, so the journey opened
+  // *inside* the place it was meant to walk to. The arrival beat fired before the player had
+  // moved, which also set the camera's settled zoom at boot and left `0` no fit to return to.
+  //
+  // Seeding `taken` is the whole fix: `occupied` and `crowded` already read it, so the start
+  // tile is excluded on the same terms as a tile another place is standing on.
+  const taken: Point[] = [world.start];
 
   for (const poi of poisOn(fieldMap.id)) {
     const at = placeOne(world, poi, walkable, palette, taken, spacing);
@@ -294,4 +330,35 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
 /** The point of interest standing on a tile, if any. */
 export function poiAt(built: FieldMapWorld, at: Point): PlacedPoi | null {
   return built.placed.find((p) => p.at.x === at.x && p.at.y === at.y) ?? null;
+}
+
+/**
+ * Where the traveller begins: the map's own start tile, or a tile named in the query string.
+ *
+ * `?at=poi_drowned_dockyard` starts on that place; `?at=12,30` starts on those coordinates. This
+ * is the same kind of hook as `?hour=21`, and it exists for the same reason: to check something
+ * without first arranging the world so that it happens.
+ *
+ * **It is here to stop the browser suite depending on generated layout.** Four e2e fixtures were
+ * *searched* seeds -- worlds found by brute force because a place happened to land two steps from
+ * the start -- and every change to `src/world/` invalidated all four at once. They went stale
+ * four times, cost twelve CI failures on one occasion, and the last re-search found no seed at
+ * all with the walk the spec wanted. A test that needs to stand somewhere should say where it
+ * wants to stand, which is what shipped debug commands are for in every game that has them.
+ *
+ * An unparseable or unplaced value falls back to the real start rather than throwing: this is a
+ * convenience for testing and must never be able to break the game for a player who types one in.
+ */
+export function startTileFor(built: FieldMapWorld, search: string): Point {
+  const asked = new URLSearchParams(search).get('at');
+  if (!asked) return { ...built.world.start };
+
+  const named = built.placed.find((p) => p.poi.id === asked);
+  if (named) return { ...named.at };
+
+  const [x, y] = asked.split(',').map((n) => Number.parseInt(n, 10));
+  const inside =
+    Number.isInteger(x) && Number.isInteger(y) &&
+    x >= 0 && y >= 0 && x < built.world.width && y < built.world.height;
+  return inside ? { x: x!, y: y! } : { ...built.world.start };
 }
