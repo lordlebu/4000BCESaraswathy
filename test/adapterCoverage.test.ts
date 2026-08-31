@@ -60,7 +60,12 @@ const COVERAGE: Record<string, Coverage> = {
       'journal_prompt', 'habitats', 'source_index',
       // As `clade` on fauna. The derived version was wrong on 13 of 90.
       'growth_form'],
-    skipped: [...EDITORIAL, 'uses', 'placement_note', 'crosses_at']
+    skipped: [...EDITORIAL, 'uses', 'placement_note', 'crosses_at',
+      // The other names a plant is known by, which canon gained so a reader who came looking
+      // for nux-vomica could find the page filed under Kuchla. That is a problem the book has
+      // and the game does not: a species reaches the player through the tile they are standing
+      // on, never through a search box. Skipped on the same terms as `aliases` on fauna.
+      'aliases']
   },
   'places.field_maps': {
     adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'points_of_interest',
