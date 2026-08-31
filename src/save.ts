@@ -60,6 +60,18 @@ const PREFIX = 'south-of-tethys';
  * This bump is the one-time cost of crossing over: every tile is re-picked under the new
  * scheme, so a save written under 10 describes plants that are no longer there. After it,
  * **adding canon content is not a save-breaking change** and must not bump this again.
+ *
+ * ---
+ *
+ * **The world is now baked, which changes what this constant is for.** `world/bake.ts` resolves
+ * a map once and stores it, so a journey keeps the ground it started on and a generator change
+ * reaches only new journeys. Versions 7, 10 and 11 all existed *because the ground had moved
+ * under an unchanged payload* -- and that reason is gone. There should not be another of that
+ * kind.
+ *
+ * What still bumps this: the payload shape below changing, and a bump of `BAKE_VERSION`, since
+ * a bake format change forces every world to be generated afresh and the fog and sketches are
+ * tied to their ground. Both should be rare, and neither is the price of touching the generator.
  */
 export const SAVE_VERSION = 11;
 
