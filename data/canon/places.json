@@ -445,6 +445,7 @@
       "name": "The Stepped Quarry",
       "field_map": "field_map_narmada",
       "kind": "archaeological_site",
+      "stands": "high",
       "terrain": [
         "mountains",
         "hills"
@@ -511,6 +512,7 @@
       "name": "The Cloud Stair",
       "field_map": "field_map_narmada",
       "kind": "anomaly",
+      "stands": "high",
       "terrain": [
         "mountains"
       ],
@@ -552,6 +554,7 @@
       "id": "poi_drowned_dockyard",
       "name": "The Drowned Dockyard",
       "kind": "eco_site",
+      "stands": "low",
       "terrain": [
         "coast",
         "river"
@@ -573,6 +576,7 @@
       "id": "poi_drowned_seawall",
       "name": "The Drowned Seawall",
       "kind": "archaeological_site",
+      "stands": "low",
       "terrain": [
         "coast",
         "desert",
@@ -597,6 +601,7 @@
       "id": "poi_eastern_field",
       "name": "The Eastern Field",
       "kind": "eco_site",
+      "stands": "low",
       "terrain": [
         "wetland",
         "settlement"
@@ -677,6 +682,7 @@
       "name": "The Herders' Terraces",
       "field_map": "field_map_narmada",
       "kind": "wilderness",
+      "stands": "high",
       "terrain": [
         "hills",
         "forest"
@@ -701,6 +707,7 @@
       "field_map": "field_map_lothal",
       "kind": "archaeological_site",
       "ruin_of": "settlement_lothal",
+      "stands": "low",
       "terrain": [
         "settlement",
         "landmark"
@@ -752,6 +759,7 @@
       "name": "The Long Archive",
       "field_map": "field_map_narmada",
       "kind": "archaeological_site",
+      "stands": "high",
       "terrain": [
         "settlement",
         "hills"
@@ -834,6 +842,7 @@
       "id": "poi_marsh_shrine",
       "name": "The Marsh Shrine",
       "kind": "anomaly",
+      "stands": "low",
       "terrain": [
         "wetland"
       ],
@@ -906,6 +915,7 @@
       "id": "poi_silted_granary",
       "name": "The Silted Granary",
       "kind": "archaeological_site",
+      "stands": "low",
       "terrain": [
         "settlement",
         "wetland"
@@ -927,6 +937,7 @@
       "id": "poi_tide_market",
       "name": "The Tide Market",
       "kind": "settlement",
+      "stands": "low",
       "terrain": [
         "settlement"
       ],
@@ -953,6 +964,7 @@
       "name": "The Walking Spring",
       "field_map": "field_map_narmada",
       "kind": "eco_site",
+      "stands": "high",
       "terrain": [
         "hills",
         "forest"
@@ -977,16 +989,18 @@
       "id": "poi_watch_stair",
       "name": "The Watch Stair",
       "kind": "wilderness",
+      "stands": "high",
       "terrain": [
         "coast",
-        "settlement"
+        "settlement",
+        "hills"
       ],
       "discoveries": [
         "discovery_gate_rhythm"
       ],
       "description": "Steps up the old wall, kept clear, with a good view of the court.",
       "arrival": "Somebody keeps these steps clear of weed, and there is a worn patch at the top where people stand. They are not watching the sea from here.",
-      "notes": "The observation post. Exists so the gate can be watched over time rather than visited once, which is what its discovery needs.",
+      "notes": "The observation post. Exists so the gate can be watched over time rather than visited once, which is what its discovery needs.`hills` was added to the terrain when `stands` did: a lookout confined to coast and settlement could never actually be sited on the high ground it is for.",
       "epochs": [
         "epoch_post_cataclysm"
       ]

@@ -18,8 +18,8 @@
   },
   "sha256": {
     "species.json": "49210e1d671bfa631c46b57b8616cda43fd5b7f056de76a8bffcc38b3799c38d",
-    "places.json": "0d41ed9fd8a1f317d38913febba7d6a53f5d27acf7a7e092f452485d0ed4c7ea",
+    "places.json": "e1311d44264fc9c875199966c013b6f6a055eb03e262a7a81eed0e528e378c70",
     "knowledge.json": "2ed07d2555fb629d975572a16c73f54bf0c8ba4353b0dc3822d062f5284e399d",
-    "crafting.json": "da8409ad48032d341638e4ba631ba5e83b0091b64316725717ea602232b225cd"
+    "crafting.json": "bb5a18364f491c7ac0714afd456b26c3a1afff35eb758a916e978680954302f7"
   }
 }
