@@ -39,8 +39,18 @@ const PREFIX = 'south-of-tethys';
  * `recipes` landed one commit before this bump did, which is the mistake this constant exists
  * to catch and did not, because the edit that was supposed to raise it failed silently. Both
  * fields are covered by this one bump: the branch has not merged, so no save carries either.
+ *
+ * **10 is a bump where the shape did not change at all, like 7 before it.** Twenty-five plants
+ * were added to canon without a `source_index`. Unindexed species sort last *by id*, so each
+ * new one landed in the middle of that group and moved every species after it -- and the game
+ * picks a tile's flora by indexing into a per-biome list. The same seed therefore grows
+ * different plants than it did, and a save written before that describes a world that is no
+ * longer there. It would parse perfectly, which is exactly the danger.
+ *
+ * Canon has frozen every species order and now refuses one without an index, so this cannot
+ * recur. This bump is for the shift that already shipped.
  */
-export const SAVE_VERSION = 9;
+export const SAVE_VERSION = 10;
 
 export interface Journey {
   version: number;
