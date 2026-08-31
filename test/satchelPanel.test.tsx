@@ -13,7 +13,7 @@
 // calling neither is precisely the failure that shipped three times here.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { SatchelPanel } from '../src/ui/SatchelPanel';
 import { openGround } from '../src/content/crafting';
 import { add, emptySatchel } from '../src/content/satchel';
@@ -76,6 +76,16 @@ describe('the satchel panel', () => {
     expect(screen.getByRole('heading', { name: 'Stuff' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Made' })).toBeTruthy();
     expect(screen.getByText('×3')).toBeTruthy();
+
+    // Each row wears a mark, and the two kinds of row wear different ones — flint is `stone`,
+    // a knife is a `tool`. See `ThingIcon.tsx` for why that distinction is the whole point.
+    //
+    // Scoped to the two stacks rather than the whole panel: the Making list draws marks as
+    // well, and several recipes there produce tools. Asserting across the document found five
+    // of them, which is the panel working rather than a fault.
+    const [stuff, made] = screen.getAllByRole('list').filter((l) => l.className === 'stacks');
+    expect(within(stuff!).getByRole('img', { name: 'stone' })).toBeTruthy();
+    expect(within(made!).getByRole('img', { name: 'tool' })).toBeTruthy();
   });
 
   it('makes a thing, and hands the recipe id back', () => {

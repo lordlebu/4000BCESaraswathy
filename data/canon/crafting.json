@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.2.2",
+  "canon_version": "2.3.0",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -802,6 +802,135 @@
       "rarity": "rare",
       "notes": "The tonic canon names on the creeper -- a mineral exudate scraped from high rock. Filed as physic rather than salt because of what it is for, not what it is made of.",
       "source_index": 45
+    },
+    {
+      "id": "material_bitter_greens",
+      "type": "material",
+      "name": "Bitter greens",
+      "classes": [
+        "physic",
+        "produce"
+      ],
+      "won_from": [
+        "flora_ol_yam",
+        "flora_bethua",
+        "flora_kalkasunde",
+        "flora_neem",
+        "flora_hinche",
+        "flora_shushni",
+        "flora_jayanti",
+        "flora_guloncho",
+        "flora_palta_gourd",
+        "flora_shulfa",
+        "flora_shaluk_lily",
+        "flora_ghentu",
+        "flora_kemuk",
+        "flora_keot_taro"
+      ],
+      "found_in": [
+        "wetland",
+        "river",
+        "plains",
+        "settlement"
+      ],
+      "rarity": "common",
+      "notes": "Fourteen leaves, and the number is the point rather than the plants -- see `foodway_choddo_shak`. Gathered on one morning from ditch, bund, pond and field edge, most of them things nobody planted. Bitter to the last, on purpose.",
+      "source_index": 46
+    },
+    {
+      "id": "material_ginger_root",
+      "type": "material",
+      "name": "Ginger",
+      "classes": [
+        "spice",
+        "physic"
+      ],
+      "won_from": [
+        "flora_ginger"
+      ],
+      "found_in": [
+        "forest",
+        "settlement"
+      ],
+      "rarity": "common",
+      "notes": "Dug rather than picked. Keeps a season in dry sand and travels as well as anything that is not a stone, which is most of why it is worth as much away from where it grows.",
+      "source_index": 47
+    },
+    {
+      "id": "material_mustard_seed",
+      "type": "material",
+      "name": "Mustard seed",
+      "classes": [
+        "oil",
+        "spice",
+        "grain"
+      ],
+      "won_from": [
+        "flora_mustard"
+      ],
+      "found_in": [
+        "plains",
+        "settlement"
+      ],
+      "rarity": "common",
+      "notes": "Pressed for a hot yellow oil, or cracked whole into it. A field of mustard is two crops standing in one place.",
+      "source_index": 48
+    },
+    {
+      "id": "material_cardamom_pod",
+      "type": "material",
+      "name": "Cardamom",
+      "classes": [
+        "spice",
+        "physic"
+      ],
+      "won_from": [
+        "flora_cardamom"
+      ],
+      "found_in": [
+        "forest",
+        "hills"
+      ],
+      "rarity": "rare",
+      "notes": "Three pods will scent a whole pot, which is the only reason something growing in wet shade on one plateau is eaten a thousand miles away.",
+      "source_index": 49
+    },
+    {
+      "id": "material_mango_fruit",
+      "type": "material",
+      "name": "Mango",
+      "classes": [
+        "produce"
+      ],
+      "won_from": [
+        "flora_mango"
+      ],
+      "found_in": [
+        "settlement",
+        "plains",
+        "forest"
+      ],
+      "rarity": "common",
+      "notes": "Two crops from one tree a month apart: the green fruit is the sour one cooks with, and the ripe one is not cooked at all.",
+      "source_index": 50
+    },
+    {
+      "id": "material_jackfruit_flesh",
+      "type": "material",
+      "name": "Jackfruit",
+      "classes": [
+        "produce"
+      ],
+      "won_from": [
+        "flora_jackfruit"
+      ],
+      "found_in": [
+        "settlement",
+        "forest"
+      ],
+      "rarity": "common",
+      "notes": "Unripe it is cooked like meat and ripe it is eaten like sweets. Canon files it as produce both times, because it is a fruit whichever way it is used.",
+      "source_index": 51
     }
   ],
   "items": [
@@ -1819,6 +1948,73 @@
       ],
       "notes": "Keeps its scent for a lifetime, which is most of why it is worth carrying anywhere.",
       "source_index": 65
+    },
+    {
+      "id": "item_choddo_shak",
+      "type": "item",
+      "name": "The Fourteen",
+      "base_item": "item_prepared_food",
+      "kind": "food",
+      "affords": [
+        "eat"
+      ],
+      "materials": [
+        "material_bitter_greens",
+        "material_mustard_seed"
+      ],
+      "notes": "Fourteen greens in one pot, bitter to the last, eaten on one night of the year. Nobody pretends it is pleasant -- see `foodway_choddo_shak` for what it is instead.",
+      "source_index": 66
+    },
+    {
+      "id": "item_green_mango_sour",
+      "type": "item",
+      "name": "Green mango sour",
+      "base_item": "item_prepared_food",
+      "kind": "food",
+      "affords": [
+        "eat",
+        "carry"
+      ],
+      "materials": [
+        "material_mango_fruit",
+        "material_salt_crust"
+      ],
+      "notes": "Unripe mango, salted and dried on a mat. Sour enough to make bad water drinkable, which is what it is carried for.",
+      "source_index": 67
+    },
+    {
+      "id": "item_spiced_oil",
+      "type": "item",
+      "name": "Tempered oil",
+      "base_item": "item_prepared_food",
+      "kind": "food",
+      "affords": [
+        "eat",
+        "carry"
+      ],
+      "materials": [
+        "material_mustard_seed",
+        "material_ginger_root",
+        "material_cardamom_pod"
+      ],
+      "notes": "Mustard oil taken to smoking and dropped over with seed, ginger and pod. Poured on at the end rather than cooked in, so what it carries is the smell. Affords carrying rather than containing: it is poured out of a flask, it is not the flask.",
+      "source_index": 68
+    },
+    {
+      "id": "item_jackfruit_curry",
+      "type": "item",
+      "name": "Green jackfruit pot",
+      "base_item": "item_prepared_food",
+      "kind": "food",
+      "affords": [
+        "eat"
+      ],
+      "materials": [
+        "material_jackfruit_flesh",
+        "material_ginger_root"
+      ],
+      "notes": "Unripe jackfruit cooked long enough to pull apart in threads. It is not meat and the delta does not claim it is; it is what the tree gives a month before it gives sweets.",
+      "source_index": 69
     }
   ],
   "processes": [
@@ -3788,6 +3984,144 @@
       ],
       "notes": "Scraped from high rock and taken in water.",
       "source_index": 71
+    },
+    {
+      "id": "recipe_choddo_shak",
+      "type": "recipe",
+      "name": "Cooking the fourteen",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "material": "material_bitter_greens",
+          "count": 14
+        },
+        {
+          "tag": "#oil",
+          "count": 1
+        },
+        {
+          "tag": "#salt",
+          "count": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_choddo_shak",
+          "count": 2
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "notes": "Fourteen, counted. A cook who is one short does not make it with thirteen -- they go back out.",
+      "source_index": 72
+    },
+    {
+      "id": "recipe_green_mango_sour",
+      "type": "recipe",
+      "name": "Salting green mango",
+      "process": "process_drying",
+      "ingredients": [
+        {
+          "material": "material_mango_fruit",
+          "count": 3
+        },
+        {
+          "tag": "#salt",
+          "count": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_green_mango_sour",
+          "count": 2
+        }
+      ],
+      "notes": "Sliced, salted and left on a mat in the sun for four days.",
+      "source_index": 73
+    },
+    {
+      "id": "recipe_spiced_oil",
+      "type": "recipe",
+      "name": "Tempering oil",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "material": "material_mustard_seed",
+          "count": 2
+        },
+        {
+          "tag": "#spice",
+          "count": 1
+        },
+        {
+          "item": "item_cooking_pot",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_spiced_oil",
+          "count": 1
+        }
+      ],
+      "notes": "Oil taken to smoking, then seed and pod dropped in off the heat. Poured over at the end.",
+      "source_index": 74
+    },
+    {
+      "id": "recipe_jackfruit_curry",
+      "type": "recipe",
+      "name": "Cooking green jackfruit",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "material": "material_jackfruit_flesh",
+          "count": 2
+        },
+        {
+          "material": "material_ginger_root",
+          "count": 1
+        },
+        {
+          "tag": "#salt",
+          "count": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_jackfruit_curry",
+          "count": 2
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "notes": "Cooked until it pulls apart in threads. Hands are oiled first or the sap will not come off.",
+      "source_index": 75
+    },
+    {
+      "id": "recipe_press_mustard_oil",
+      "type": "recipe",
+      "name": "Pressing mustard oil",
+      "process": "process_pressing",
+      "ingredients": [
+        {
+          "material": "material_mustard_seed",
+          "count": 4
+        },
+        {
+          "item": "item_cooking_pot",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "material": "material_mahua_oil",
+          "count": 2
+        }
+      ],
+      "notes": "A second oil for the delta, and a hotter one. Canon keeps one oil material -- what changes is which seed the press was fed.",
+      "source_index": 76
     }
   ],
   "vehicles": [
@@ -4238,6 +4572,20 @@
       ],
       "item_sandalwood_comb": [
         "trade"
+      ],
+      "item_choddo_shak": [
+        "eat"
+      ],
+      "item_green_mango_sour": [
+        "eat",
+        "carry"
+      ],
+      "item_spiced_oil": [
+        "eat",
+        "carry"
+      ],
+      "item_jackfruit_curry": [
+        "eat"
       ]
     }
   }

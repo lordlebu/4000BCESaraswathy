@@ -18,6 +18,7 @@ import {
   nameOf
 } from '../content/making';
 import { npc } from '../content/places';
+import { KIND_MARK, ThingIcon, materialMark } from './ThingIcon';
 import {
   type Bench,
   type Knows,
@@ -52,9 +53,17 @@ export interface SatchelPanelProps {
 
 function Stack({ satchel, id }: { satchel: Satchel; id: string }) {
   const n = count(satchel, id);
-  const what = material(id) ?? item(id);
+  const stuff = material(id);
+  const made = item(id);
+  const what = stuff ?? made;
+  // Stuff is marked by what it is; a made thing by what it is for. Drawing both from the same
+  // table would give reed fibre and reed rope one glyph, at exactly the moment a player is
+  // learning they are not the same thing.
+  const mark = stuff ? materialMark(stuff.classes) : made ? KIND_MARK[made.kind] : '•';
+  const label = stuff ? stuff.classes[0]! : (made?.kind ?? 'thing');
   return (
     <li className="stack">
+      <ThingIcon mark={mark} label={label} />
       <span className="stack-name">{what?.name ?? id}</span>
       {n > 1 && <span className="stack-count">×{n}</span>}
       {what?.description && <p className="stack-note">{what.description}</p>}
@@ -76,6 +85,10 @@ function Makeable({
   return (
     <li className={ready ? 'recipe recipe-ready' : 'recipe'}>
       <div className="recipe-head">
+        <ThingIcon
+          mark={markFor(recipe)}
+          label={item(recipe.outputs[0]?.item ?? '')?.kind ?? 'craft'}
+        />
         <span className="recipe-name">{recipe.name}</span>
         <button type="button" disabled={!ready} onClick={() => onMake(recipe.id)}>
           {ready ? 'Make' : 'Not yet'}
@@ -97,6 +110,21 @@ function Makeable({
       )}
     </li>
   );
+}
+
+/**
+ * A recipe wears the mark of what it makes.
+ *
+ * The output rather than the process, because a player scanning the Making list is looking for
+ * the thing they want, not for the verb that produces it -- and three different processes all
+ * produce a container.
+ */
+function markFor(r: Recipe): string {
+  const out = r.outputs[0];
+  const made = out?.item ? item(out.item) : null;
+  if (made) return KIND_MARK[made.kind];
+  const stuff = out?.material ? material(out.material) : null;
+  return stuff ? materialMark(stuff.classes) : '•';
 }
 
 /** Recipes that exist, need a teacher, and have not been taught yet. */

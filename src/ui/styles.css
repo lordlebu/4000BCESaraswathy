@@ -1416,7 +1416,7 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 /* The satchel. Stacks are a list rather than a grid of slots, deliberately: there is no
  * capacity, so a grid would draw empty boxes that promise a limit the game does not have. */
 .stacks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-.stack { display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 0.6rem; }
+.stack { display: grid; grid-template-columns: auto 1fr auto; gap: 0.2rem 0.6rem; align-items: baseline; }
 .stack-name { font-weight: 600; font-size: 0.92rem; }
 .stack-count { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 0.92rem; }
 .stack-note {
@@ -1452,3 +1452,15 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
  * cannot make yet, so they are set as text rather than hidden behind a tooltip. */
 .recipe-why { list-style: none; margin: 0.3rem 0 0; padding: 0; }
 .recipe-why li { font-size: 0.8rem; color: var(--muted); font-style: italic; }
+
+/* The mark beside a material, an item or a craft. Decoration: every panel that draws one has
+ * the name beside it, which is why the glyph is labelled with its category and not its name. */
+.thing-mark {
+  font-size: 1.05rem;
+  line-height: 1;
+  flex: none;
+  /* Emoji ignore `color`, so a mark cannot be dimmed with the text around it. Fading the whole
+   * glyph is the only lever, and a light touch keeps it from competing with the name. */
+  opacity: 0.85;
+}
+.recipe-head .thing-mark { margin-right: 0.1rem; }

@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.2.2",
+  "canon_version": "2.3.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -16,11 +16,6 @@
         "family_group"
       ],
       "notes": "Freshwater otter of inner channels. Fishers tolerate them as net-cleaners; children forbidden from approaching dens.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "prototype-starters",
       "biomes": [
         "river",
@@ -47,10 +42,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small deer watches from the grass, its coat patterned like fallen petals.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "gentle",
       "source_index": 1
     },
@@ -69,10 +60,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "Tall white birds step between reeds as if reading the rain.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 2
     },
@@ -91,10 +78,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A macaque studies your satchel, then pretends it was only admiring the view.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "curious",
       "source_index": 3
     },
@@ -112,10 +95,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A turtle rests where river sand meets the tide, carrying a map of scratches on its shell.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "patient",
       "source_index": 4
     },
@@ -134,10 +113,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "For a breath, an antelope-shaped cloud stands on a ridge before dissolving into mist.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "mythic",
       "source_index": 5
     },
@@ -159,11 +134,6 @@
         "aquatic"
       ],
       "notes": "8-foot giant river salamander waiting in murky delta pools of Lothal.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland",
@@ -188,10 +158,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A swamp-dwelling giant salamander variant whose skin exudes a paralyzing neurotoxin when threatened.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 7
     },
@@ -208,10 +174,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "Bronze-scaled river fish bred in the sacred stepwells of Dwarka, featuring thick, armored scales to resist delta predators.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 8
     },
@@ -228,10 +190,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A wild relative of the stepwell koi, navigating Tethyan estuaries with heavy, protective, metallic-looking bronze scales.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 9
     },
@@ -254,11 +212,6 @@
         "fauna_tendua"
       ],
       "notes": "Wetland leopard-like feline with human-like eye placement.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -287,11 +240,6 @@
         "fauna_tendua"
       ],
       "notes": "Melanistic subspecies hunting in mangrove canopies.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "coast",
@@ -320,11 +268,6 @@
         "earthworks"
       ],
       "notes": "Feathered velociraptor clans forming complex diapsid scale-based civilization. Use earthworks and moats to defend nests. Symbiotic with Burrowing Tortoise.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland",
@@ -358,11 +301,6 @@
         "fauna_nagaraptor"
       ],
       "notes": "Heavy delta tortoise that digs deep tunnels. Nagaraptor clans use the burrows as nest foundations; the tortoise gains predator warning in return.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland",
@@ -392,11 +330,6 @@
         "problem_solving"
       ],
       "notes": "Intelligent feathered dromaeosaur with colorful plumage. Builds hidden canopy nests.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "forest"
@@ -427,11 +360,6 @@
         "fauna_cognitavi"
       ],
       "notes": "Cognitavi subspecies that leads fishing fleets toward pearl banks by patterned flight. Harappan pilots treat a circling flock as a chart mark.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "sea",
@@ -463,11 +391,6 @@
         "fauna_cognitavi"
       ],
       "notes": "Dark-winged Cognitavi that rides pressure fronts ahead of monsoon squalls. Sailors read its high circling as a storm warning.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "sea"
@@ -493,10 +416,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A winged, bird-like dinosaurid with shimmering plumage that nests in the tall reed beds outside the Sylvian Gate of Lothal.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "luminous",
       "sentient": true,
       "source_index": 17
@@ -516,11 +435,6 @@
         "quadrupedal"
       ],
       "notes": "Heavy land crocodile specializing in ambush in shallow reed marshes. Subspecies include Striped Reed Stalker and Mud-Armored Ambusher.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -549,11 +463,6 @@
         "fauna_baurusuchus"
       ],
       "notes": "Baurusuchus subspecies banded for reed-marsh camouflage. Lies motionless among Saltreed stands until prey crosses the mudline.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -582,11 +491,6 @@
         "fauna_baurusuchus"
       ],
       "notes": "Baurusuchus subspecies that cakes itself in dried silt for armor and scent-masking. Favours silted oxbows near Lothal’s outer channels.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "river"
@@ -612,11 +516,6 @@
         "revered"
       ],
       "notes": "Legendary single-horned ungulate. Historically sacrificed in dark portal rites (Varunesh myth).",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "river",
@@ -641,10 +540,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A long-legged wading bird with pale silver feathers that filters small bronze fish from the delta's estuaries.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 22
     },
@@ -661,10 +556,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "An agile, semi-aquatic mammal with dense, oil-slicked fur that hunts stepwell koi along the eastern coast of the island.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 23
     },
@@ -681,10 +572,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A giant amphibious fish that climbs mangrove roots and breathes through its skin, highly prized for its tender, salty meat.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 24
     },
@@ -701,10 +588,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A stem turtle lineage whose osteoderm shell is covered in green moss, providing perfect camouflage in swampy pools.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "patient",
       "source_index": 25
     },
@@ -721,10 +604,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A large freshwater crustacean with vibrant blue claws that feeds on decaying organic matter in the Saraswati tributaries.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 26
     },
@@ -742,10 +621,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A tiny, brilliant-blue bird that dives with extreme speed to spear bronze fish, its sharp call mimicking wind chimes.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 27
     },
@@ -763,10 +638,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "An ancient, armored turtle with a ridged shell resembling a crocodile's hide, lurking in brackish delta canals.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 28
     },
@@ -783,10 +654,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small, plain bird that weaves complex hanging nests in the tall delta reeds, mimicking the clicks of local dinosaurids.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "clever",
       "source_index": 29
     },
@@ -803,10 +670,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A flightless bird of the delta marshes that sprints over floating lotus leaves using elongated, spread-out toes.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 30
     },
@@ -825,11 +688,6 @@
         "blind"
       ],
       "notes": "Pale blind cetacean navigating muddy delta waters via sophisticated acoustic clicks. Hunted by Kia for meat and skin.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "river"
@@ -853,10 +711,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A sleek mongoose species that specializes in cracking open hard-shelled delta crustaceans with its robust jaw structure.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 32
     },
@@ -873,10 +727,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A low-flying bird of prey that sweeps over the reed beds, hunting young dinosaurids and salamanders.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 33
     },
@@ -893,10 +743,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small, pale shorebird that nests in the sandy riverbanks, distracting predators with elaborate broken-wing displays.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 34
     },
@@ -913,10 +759,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A marsupial-like herbivore that grazes on the delta's edge, capable of swimming short distances between mangrove islets.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 35
     },
@@ -933,10 +775,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A crab with one oversized, stone-hard claw used to crush estuary mollusks, highly prized by local fishers.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 36
     },
@@ -953,10 +791,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small, non-venomous constrictor snake that mimics the color of dried reeds, preying on nesting birds.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 37
     },
@@ -974,10 +808,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A long-billed bird that probes the estuarial mud for marine worms, its call sounding like rhythmic clicking.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 38
     },
@@ -994,10 +824,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A highly venomous sea snake with black and silver bands, hunting stepwell koi near coastal lagoons.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 39
     },
@@ -1014,10 +840,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small, agile cat with tufted ears that hunts marsh-runners and frogs in the Godavari delta.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 40
     },
@@ -1036,10 +858,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small, wading theropod bird that uses its long neck and serrated beak to spear mud-lurkers.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "sentient": true,
       "source_index": 41
@@ -1057,10 +875,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A turtle with a razor-sharp beak that lies buried in the brackish mud, ambushing small crabs and fish.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 42
     },
@@ -1077,10 +891,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A large-billed bird with a throat pouch used to scoop up schooling fish from the coastal shallows.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 43
     },
@@ -1097,10 +907,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A fish that shoots jets of water from its mouth to knock down insects resting on overhanging mangrove leaves.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 44
     },
@@ -1118,10 +924,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small mud-crab with a brilliant blue shell, the males waving an oversized white claw to attract mates.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 45
     },
@@ -1138,10 +940,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A fast-moving, sand-colored lizard of the salt marshes that feeds on delta insects and crabs.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "playful",
       "source_index": 46
     },
@@ -1158,10 +956,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A large-mouthed, sit-and-wait predator that burrows into leaf litter, its horns mimicking fallen twigs.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 47
     },
@@ -1178,10 +972,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A quiet, predatory bird that hunts arboreal octopuses and squirrels in the Narmada canopies.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 48
     },
@@ -1198,10 +988,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A slender, scale-less fish that burrows into the volcanic mud of riverbeds, breathing atmospheric air during dry spells.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "patient",
       "source_index": 49
     },
@@ -1218,10 +1004,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A vegetarian lizard that forms large colonies in the sand, using its hard, spiked tail to block burrow entrances.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "patient",
       "source_index": 50
     },
@@ -1238,10 +1020,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A fast, resilient wild equine of the northern steppe deserts, highly valued by nomads for its stamina.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 51
     },
@@ -1258,10 +1036,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A giant spider of Mappa Mundi that weaves massive, golden webs capable of catching small birds and bats.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 52
     },
@@ -1278,10 +1052,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A marine mollusk that shoots itself out of the water to escape predators, gliding over waves with lateral fins.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 53
     },
@@ -1298,10 +1068,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A predatory aquatic beetle that swims in hot mineral springs, feeding on larval vent-shrimps.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 54
     },
@@ -1319,10 +1085,6 @@
       "placement": "lore",
       "rarity": "common",
       "journal_prompt": "A lightweight, gas-buoyant grasshopper that migrates between floating islands, feeding on sky-bramble leaves.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 55,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -1349,10 +1111,6 @@
         "arboreal"
       ],
       "notes": "Evolved for tree canopies of Narmada Valley. Bioluminescent moss-dweller variant exists.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "forest",
         "hills",
@@ -1378,10 +1136,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "An arboreal octopus variant that feeds on glowing moss, causing its tentacles to emit a soft, pulsing green light at night.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "luminous",
       "source_index": 57
     },
@@ -1400,11 +1154,6 @@
         "territorial"
       ],
       "notes": "Fire-spitting cliff lizard that ingests raw sulfur and flint to strike defensive sparks. Guards natural mineral deposits.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "narmada-vindhya",
       "biomes": [
         "hills"
@@ -1428,10 +1177,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small, agile lizard of the volcanic vents, possessing fire-resistant scales and a tail that glows like a hot coal when excited.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "luminous",
       "source_index": 59
     },
@@ -1450,11 +1195,6 @@
         "defensive"
       ],
       "notes": "Colossal bee of the Narmada cliffs. Harvested for medicinal honey; also used as weapons in local siege engines.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "narmada-vindhya",
       "biomes": [
         "hills"
@@ -1479,10 +1219,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A territorial, hyper-aggressive giant bee subspecies whose sting delivers a burning, venomous heat resembling hot ash.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 61
     },
@@ -1499,10 +1235,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small, dull-colored bird that feeds exclusively on the fruit of the Bhuta-Kāna fig, nesting deep within its silver canopy.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 62
     },
@@ -1519,10 +1251,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A freshwater mountain crustacean that lives in the mineral-rich volcanic streams, sifting through golden spice-sand for organic matter.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 63
     },
@@ -1540,10 +1268,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A sure-footed, woolly mountain goat that grazes on steep volcanic ledges, often acting as a host or guide for anomalous entities.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 64
     },
@@ -1561,10 +1285,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A massive, thick-furred predator of the high caves that climbs cliffs to raid honey-goliath nests, frequently clashing with human gatherers.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 65
     },
@@ -1582,10 +1302,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A lean, long-limbed mountain predator with a coat patterned like fractured volcanic ash, specializing in hunting cliff-goats.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 66
     },
@@ -1604,11 +1320,6 @@
         "cliff_nester"
       ],
       "notes": "Colossal mountain eagle with obsidian-tipped feathers. Carries small goats and primates to high volcanic ledges.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -1634,10 +1345,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A large gecko with sticky, heat-resistant pads that enable it to crawl directly over hot, cooled-down basalt flows.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 68
     },
@@ -1654,10 +1361,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A nocturnal predator with tufted feathers resembling horns, hunting tree-octopuses and small rodents in the canopy.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 69
     },
@@ -1674,10 +1377,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A massive constrictor snake that camouflages as a volcanic root, waiting patiently near watering holes to seize prey.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "patient",
       "source_index": 70
     },
@@ -1694,10 +1393,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A nocturnal rodent with a wide skin fold that glides between tall mahua trees, its fur colored like grey ash.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 71
     },
@@ -1714,10 +1409,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A large bird that drills into hollow bonewood trees to extract boring beetles, its tapping echoing like stone-age drums.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 72
     },
@@ -1734,10 +1425,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A grey-furred, black-faced monkey that climbs the highest canopy of the Narmada Valley, feeding on sweet mahua flowers.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 73
     },
@@ -1754,10 +1441,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A tiny, hyperactive mammal with a metallic coat that searches leaf litter for sulfur-beetles and insect larvae.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 74
     },
@@ -1775,10 +1458,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A tusked, rugged omnivore that digs up volcanic tubers and rare roots, its thick hide protecting it from cliff lizards.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 75
     },
@@ -1795,10 +1474,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A giant, colorful squirrel that nests in high cliff cavities, feeding on wild pine nuts and fig seeds.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 76
     },
@@ -1816,10 +1491,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small bird that has a symbiotic relationship with humans, leading them to honey-goliath nests in exchange for wax.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "clever",
       "source_index": 77
     },
@@ -1837,10 +1508,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A large bird with a heavy, curved bill that nests in high rock crevices, feeding on wild figs and geckos.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 78
     },
@@ -1857,10 +1524,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A master of camouflage, its skin texture perfectly matching the rough wood of old mahua trees.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "patient",
       "source_index": 79
     },
@@ -1878,10 +1541,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A blind, pale freshwater crab that lives in the dark subterranean streams beneath the plateau.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 80
     },
@@ -1899,10 +1558,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small, nocturnal rodent that feeds on wild tea seeds, its burrow insulated with toxic red spore-moss.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 81
     },
@@ -1919,10 +1574,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small mongoose species with thick, leathery hide that protects it from the venomous stings of cliff centipedes.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 82
     },
@@ -1939,10 +1590,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "An agile, insectivorous mammal that climbs the lower branches of ash-banyan trees, active during daylight.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "playful",
       "source_index": 83
     },
@@ -1960,10 +1607,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A large bird of prey that nests on the highest peaks, its sharp eyes detecting movement in the valleys below.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 84
     },
@@ -1980,10 +1623,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A colorful, highly vocal bird that travels in large flocks, feeding on wild fruits and nesting in hollow trees.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 85
     },
@@ -2006,10 +1645,6 @@
         "camouflage"
       ],
       "notes": "Desert manta ray with gas-filled bladders for silent gliding over dunes.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "desert"
       ],
@@ -2033,10 +1668,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A pale, chalk-white subspecies of Beedu that hunts over the blinding salt flats, reflecting the desert glare to remain invisible.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 87
     },
@@ -2055,11 +1686,6 @@
         "water_retention"
       ],
       "notes": "Heavy crocodile-mammal hybrid with two water-retention humps. Used by northern nomads to cross highland deserts.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "gedrosian-taklamakan",
       "biomes": [
         "mountains"
@@ -2083,10 +1709,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A faster, single-humped variant of Camelosuchus adapted to sandy dunes, capable of sustaining high speeds across the wastes.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 89
     },
@@ -2107,11 +1729,6 @@
         "cargo"
       ],
       "notes": "Massive flightless bird trained by Tushara nomads for cargo and scouts.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "gedrosian-taklamakan",
       "biomes": [
         "desert"
@@ -2136,10 +1753,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A sleek, highly prized breed of desert ostrich bred specifically for speed and long-distance scout expeditions.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 91
     },
@@ -2156,10 +1769,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A predatory, bipedal crocodyliform that re-evolved an upright, bipedal sprinting gait to chase down prey on sandy shores.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 92
     },
@@ -2176,10 +1785,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A sturdier, darker subspecies of bipedal Postosuchus that hunts along the rocky desert ravines of Bahila Kush.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 93
     },
@@ -2196,10 +1801,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "An Hourglass Desert serpent whose scales mimic the shimmering, temporal-fractured sands, delivering a painful, dehydrating bite.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "luminous",
       "source_index": 94
     },
@@ -2216,10 +1817,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A nocturnal sand-viper with glowing red eyes, specialized in hunting small rodents in the cold desert nights.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "luminous",
       "source_index": 95
     },
@@ -2236,10 +1833,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A tiny, jumping rodent with long hind legs that avoids the searing day heat by burrowing deep beneath the sand dunes.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "patient",
       "source_index": 96
     },
@@ -2256,10 +1849,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small wildcat with wide, fur-covered paws that act as sand-shoes, enabling it to hunt vipers and lizards silently.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 97
     },
@@ -2276,10 +1865,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "An armored, herbivorous lizard with a thick, spiked tail used to seal its burrow entrance against predators.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 98
     },
@@ -2296,10 +1881,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A massive, shaggy-haired desert ungulate bred for its high endurance and resistance to the bitter desert wind.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 99
     },
@@ -2316,10 +1897,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A pale yellow scorpion that hides beneath thin layers of loose sand, striking with a swift, toxic sting when stepped on.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 100
     },
@@ -2336,10 +1913,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A swift bird of prey that sweeps over the desert ridges to hunt young ostriches and desert rodents.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 101
     },
@@ -2356,10 +1929,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A dark, highly reflective beetle that feeds on decaying organic matter along the margins of the blinding salt plains.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 102
     },
@@ -2376,10 +1945,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A wild mountain goat with massive, curved horns that navigates the rocky desert crags bordering the Taklamakan.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 103
     },
@@ -2396,10 +1961,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "An amphibian that remains buried in moist deep sand for months, emerging only during rare, sudden desert rains to breed.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "patient",
       "source_index": 104
     },
@@ -2416,10 +1977,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A multi-legged, predatory invertebrate with yellow and brown bands, hunting spiders and small lizards in sand crevices.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 105
     },
@@ -2436,10 +1993,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A sand-colored viper that moves with a side-winding motion, leaving S-shaped tracks across the deep dunes.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 106
     },
@@ -2461,10 +2014,6 @@
         "scavenger"
       ],
       "notes": "Large-eared fox of the Gedrosian night. Follows caravans for scraps; omen animal in Tushara camp lore.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "desert",
         "plains",
@@ -2490,10 +2039,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A lizard that runs across hot sand on its hind legs, lifting its feet alternately to keep them cool.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 108
     },
@@ -2510,10 +2055,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A young, playful camelosuchus that stays close to its mother, learning to forage on desert saltbush.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "playful",
       "source_index": 109
     },
@@ -2530,10 +2071,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A nocturnal predator that hunts sand-vipers and rats, its silent flight muffled by soft, specialized feathers.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 110
     },
@@ -2550,10 +2087,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A lean, light-colored wolf that hunts in small packs, preying on wild ibex and stray cattle.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 111
     },
@@ -2570,10 +2103,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A large, pale spider that burrows into the sand, constructing a silk-lined trapdoor to ambush insects.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 112
     },
@@ -2590,10 +2119,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "An insect with a thick, white carapace that feeds on dried saltbush leaves along the salt plains.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 113
     },
@@ -2610,10 +2135,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A bird that flies miles to find water, absorbing moisture in its breast feathers to carry back to its chicks.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 114
     },
@@ -2630,10 +2151,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A tough-shelled beetle that feeds on cactus pulp, active during the cool, early morning hours.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 115
     },
@@ -2651,10 +2168,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A terrestrial, flightless theropod dromaeosaur of Mappa Mundi that rules the jungle floor, using pack coordination to hunt.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "sentient": true,
       "source_index": 116
@@ -2673,10 +2186,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A color-changing subspecies of Sylvian that mimics the jungle foliage, allowing silent ambush in the dense canopy.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "sentient": true,
       "source_index": 117
@@ -2695,10 +2204,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A winged, predatory dinosaurid (pterosaur-avian link) with a massive beak, nesting in the highest forest canopies of the southern islands.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "sentient": true,
       "source_index": 118
@@ -2717,10 +2222,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A colossal, fully terrestrial galloping crocodile with thick hide and brow-horns, serving as the apex predator of the dry scrub.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 119
     },
@@ -2738,10 +2239,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A smaller, striped terrestrial crocodile that follows larger predators to feed on the remains of giant avian prey.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 120
     },
@@ -2758,10 +2255,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A colossal baleen whale of the deep Tethys Sea, whose thick hide and bone plate are harvested for engineering maritime vessels.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 121
     },
@@ -2778,10 +2271,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A highly aggressive, predatory Tethyan toothed whale with thick bony armor plates protecting its skull and dorsal ridge.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 122
     },
@@ -2800,10 +2289,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A massive, shaggy-feathered ratite tamed by traveling merchants to serve as heavy beasts of burden on coastal routes.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 123
     },
@@ -2821,10 +2306,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A vibrantly colored elephantbird subspecies adapted to humid rainforest floors, capable of breaking through dense thickets.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 124
     },
@@ -2841,10 +2322,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A predatory Eurypterid of the southern lagoons that has undergone mimetic-devolvement, resembling human women to lure prey.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 125
     },
@@ -2861,10 +2338,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A venomous, spiny mollusk that hides in coral crevices, preying on small fish with a rapid, toxic sting.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 126
     },
@@ -2881,10 +2354,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A highly intelligent, marine cephalopod of the Shattered Sea that flashes glowing blue bands to distract predators.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "luminous",
       "source_index": 127
     },
@@ -2901,10 +2370,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A young, playful whale that travels in the warm coastal shallows, protected by the pod's bone-plated matriarchs.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "playful",
       "source_index": 128
     },
@@ -2921,10 +2386,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A massive bivalve that produces iridescent black pearls, highly coveted by Vanga maritime merchants.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "luminous",
       "source_index": 129
     },
@@ -2941,10 +2402,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A long, serpentine fish with a brightly patterned skin that mimics the red blood-coral of the Shattered Sea reefs.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 130
     },
@@ -2961,10 +2418,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small, schooling fish that uses enlarged pectoral fins to glide over the ocean waves, escaping predatory toothed whales.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 131
     },
@@ -2981,10 +2434,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A sleek, coastal shark with a broad, sensory-rich skull designed to detect prey hidden beneath the sandy reef floors.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 132
     },
@@ -3001,10 +2450,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A tiny, brightly colored amphibian with sticky toes, secreting a mild toxin used by local hunters to coat arrowheads.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 133
     },
@@ -3021,10 +2466,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A massive arboreal snake with emerald-green scales, blending into the hanging vines to drop onto terrestrial prey.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 134
     },
@@ -3041,10 +2482,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A large bird of prey with a white head and chest, nesting on high cliff edges and swooping down to seize marine fish.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 135
     },
@@ -3061,10 +2498,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A spotted wildcat with a long, balancing tail, hunting squirrels and frogs in the deep jungle canopy.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 136
     },
@@ -3081,10 +2514,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A large turtle that migrates thousands of miles across the Tethys, nesting on isolated volcanic beaches.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 137
     },
@@ -3101,10 +2530,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A magnificent bird with a double-pointed casque, nesting in old hollow trees and feeding on wild figs.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 138
     },
@@ -3121,10 +2546,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A small, colorful lizard with skin membranes that let it glide between tall jungle trees to escape tree-snakes.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 139
     },
@@ -3141,10 +2562,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A fast-swimming, silver-scaled predatory fish that travels in large schools in the open waters of the Shattered Sea.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 140
     },
@@ -3161,10 +2578,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "An octopus with highly textured skin that mimics coral, hunting small crabs and fish in shallow waters.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 141
     },
@@ -3181,10 +2594,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A colorful land snail with a spiraled shell, feeding on moss and lichens growing on jungle trunks.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 142
     },
@@ -3201,10 +2610,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A sleek, silver predator with sharp teeth, hunting smaller schooling fish near the coral reefs.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 143
     },
@@ -3221,10 +2626,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A leaf-mimicking toad with pointed flaps over its eyes, hiding in the leaf litter of Mappa Mundi.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 144
     },
@@ -3241,10 +2642,6 @@
       "placement": "encounter",
       "rarity": "common",
       "journal_prompt": "A flat, sand-colored fish that lies buried on the reef floor, armed with a venomous tail spine.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 145
     },
@@ -3262,10 +2659,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A deep-sea vent crustacean that has adapted to direct magma exposure, possessing a heavy, obsidian-black carapace.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 146
     },
@@ -3283,10 +2676,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A lava crab variant that feeds on mineral deposits along the cooled basalt shores, its claws strong enough to crush rock.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 147
     },
@@ -3304,10 +2693,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "An extremophile gastropod of the lava lake, fusing copper and volcanic ore into a heavy, metallic shell.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 148
     },
@@ -3325,10 +2710,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A massive iron snail whose shell consists of layered iron-ash and basalt, reflecting the glowing fire of the lava lake.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "luminous",
       "source_index": 149
     },
@@ -3346,10 +2727,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A giant, peaceful nautiloid with an earthy, wood-patterned shell that drifts calmly through the steaming, boiling water zones.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 150
     },
@@ -3367,10 +2744,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A dark, basalt-grey giant ammonite with glowing, sulfur-colored veins along its ridges, native to the volcanic ocean vents.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 151
     },
@@ -3388,10 +2761,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "An ancient fish species possessing natural antifreeze glycoproteins, glowing with a pale blue light beneath glacial ice.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "luminous",
       "source_index": 152
     },
@@ -3409,10 +2778,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A predatory, crystal-scaled fish of the frozen mountain lakes, specializing in hunting frost-whisker carp near glacier edges.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 153
     },
@@ -3430,10 +2795,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A dark, stone-skinned lizard that lives in the deep fissures of cooled lava plains, feeding on iron snails and magma-crabs.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 154
     },
@@ -3451,10 +2812,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A large, heat-resistant insect that tunnels through soft volcanic ash, feeding on organic debris carried down by streams.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 155
     },
@@ -3472,10 +2829,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A giant worm species that grows in dense colonies around underwater magma vents, absorbing mineral nutrients directly from the water.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 156
     },
@@ -3493,10 +2846,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A small, highly resilient rodent with heat-resistant, ash-colored fur, nesting in the stone ruins near the lava lake.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 157
     },
@@ -3514,10 +2863,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A pure white, thick-furred hare that lives near the Antarctic ice wall, its feet padded like snowshoes to move over glaciers.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 158
     },
@@ -3535,10 +2880,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A robust marine mammal with a thick layer of blubber, hunting Sarovar fish beneath the ice shelves of the deep south.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 159
     },
@@ -3556,10 +2897,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "An amphibian with fire-resistant skin that lives in the warm mud pools near the caldera edges, feeding on small ash-beetles.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 160
     },
@@ -3577,10 +2914,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A dark-winged bird that flies along the immense glacial cliffs of the deep south, nesting in rocky crevices.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 161
     },
@@ -3598,10 +2931,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A predatory bird of the ash valleys, its plumage colored like charcoal to remain hidden against the dark volcanic sky.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 162
     },
@@ -3619,10 +2948,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A tiny, transparent crustacean that swims in the scalding rock pools, feeding on specialized thermophilic bacteria.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 163
     },
@@ -3640,10 +2965,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A large, furry spider that hunts snow-hares and small rodents near the ice wall, its body containing high sugar-antifreeze.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 164
     },
@@ -3661,10 +2982,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A fierce, scavenging seabird that nests near the glacial bays, stealing fish from seals and other birds.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 165
     },
@@ -3682,10 +2999,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A multi-legged, fire-resistant invertebrate that hunts small lizards and insects in cooled basalt cracks.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 166
     },
@@ -3703,10 +3016,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A dark grey scorpion that blends into volcanic ash, active during the cooler night hours.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 167
     },
@@ -3724,10 +3033,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A crab that uses discarded basalt-snail shells, thriving in the scalding rock pools near the lava lake.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 168
     },
@@ -3744,10 +3049,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A seabird with charcoal-colored feathers, nesting in the high cliffs overlooking the boiling bays.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 169
     },
@@ -3765,10 +3066,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A tiny, specialized insect that feeds on pollen and debris deposited on the surface of glaciers near the ice wall.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 170
     },
@@ -3786,10 +3083,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A thick-feathered bird with camouflaged plumage, nesting in the rocky scree of the frozen mountain peaks.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "patient",
       "source_index": 171
     },
@@ -3807,10 +3100,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A giant worm species that grows near active underwater vents, forming dense crimson-tipped clusters.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 172,
       "aliases": [
@@ -3831,10 +3120,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "An insect with a soot-colored body, feeding on tough, ash-tolerant grasses along the basalt fields.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 173
     },
@@ -3852,10 +3137,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A marine mammal with distinctive white band markings, hunting Sarovar fish beneath the ice shelves.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 174
     },
@@ -3873,10 +3154,6 @@
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A moth with dusty grey wings, its larvae feeding on the tough leaves of ash-banyan trees.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 175
     },
@@ -3894,10 +3171,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A massive, pale cousin of the desert Beedu that nests on the underside of floating islands, grazing on sky coral.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 176,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -3916,10 +3189,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A massive arachnid that weaves static-charged webs between airborne mangrove roots, hunting small flying creatures.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 177,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -3937,10 +3206,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A highly advanced, solitary subspecies of navigator bird that establishes isolated monasteries on the highest floating peaks.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "sentient": true,
       "source_index": 178,
@@ -3960,10 +3225,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A giant marine mammal that has adapted to glide through the dense, prana-rich clouds, its fins modified into wide membranes.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 179,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -3982,10 +3243,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A tiny rodent with hollow bones and webbed toes, gliding between moss-covered floating rocks to forage for insects.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 180,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4003,10 +3260,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A white shorebird that nests on the lodestone cliffs of the floating islands, riding high-altitude wind currents.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 181,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4024,10 +3277,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A beautifully patterned predator that climbs aero-mangrove branches, hunting sky-shrews and young birds in low gravity.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 182,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4045,10 +3294,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "An insect with a metallic, magnetic carapace that feeds on mineral deposits along the floating island cores.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 183,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4067,10 +3312,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A giant wasp species whose wings generate static electricity as they fly, delivering a shocking sting to defend its nest.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 184,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4089,10 +3330,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A small, lightweight turtle with a hollow, gas-filled shell, drifting lazily through the clouds between floating oases.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 185,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4111,10 +3348,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A land snail with a thin, lightweight shell that uses a mucus parachute to glide from island to island during high winds.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 186,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4132,10 +3365,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "An insect that produces high-frequency, melodic chirps that echo through the thin, cold air of the high altitude routes.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 187,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4154,10 +3383,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A slender, green serpent that flattens its body to glide between hanging vines of neighboring floating islands.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 188,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4175,10 +3400,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A small, white bat that uses echolocation to hunt cloud-crickets and moths inside the island caves.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 189,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4197,10 +3418,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A dark, stone-skinned bat of the shadowed undersides, feeding on large insects during the night.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 190,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4218,10 +3435,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A large moth with soft, dusty wings patterned like grey clouds, drawing toward the glow of sky-brambles.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "luminous",
       "source_index": 191,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4239,10 +3452,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A lizard that changes color to match the glowing moss, using its prehensile tail to hang from sky-mangrove roots.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "luminous",
       "source_index": 192,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4261,10 +3470,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A giant, predatory insect with four independent wings, hunting smaller moths and flies with extreme speed.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 193,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4282,10 +3487,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A small, brightly colored bird that absorbs atmospheric life-force, its song bringing a sense of calm to travelers.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 194,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4304,10 +3505,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A rodent with exceptionally long, bushy tail used as a rudder, leaping impossible distances in the low-gravity environment.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "playful",
       "source_index": 195,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4326,10 +3523,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "An airborne, translucent organism that drifts on wind currents, filtering high-altitude plankton with stinging tentacles.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 196,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4347,10 +3540,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A snail with an iron-rich shell that climbs the magnetized cliffs of the floating islands, sensing magnetic fields.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 197,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4369,10 +3558,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A pale green gecko with large, adhesive pads, hunting moths and wasps on the underside of floating rocks.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 198,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4391,10 +3576,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "An agile mammal that glides between floating pools using skin membranes, hunting sky-shrews and beetles.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 199,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4412,10 +3593,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A bird with a sweet, echoing song that nests in the high, misty valleys, feeding on sky-bramble berries.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 200,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4433,10 +3610,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A beetle with a long snout that drills into the tough, gas-filled gourds to lay its eggs inside.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 201,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4454,10 +3627,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A light-shelled crab that climbs the aerial roots of sky-mangroves, feeding on moss and small insects.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 202,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4476,10 +3645,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A young spider that uses long silk threads to balloon through the air, traveling between distant floating islands.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 203,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4497,10 +3662,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A swift predator that hunts sky-gulls and finches, nesting on the sheer vertical cliffs of the highest islands.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 204,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4519,10 +3680,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A large butterfly with glowing, translucent wings that feeds on the nectar of prana-lotuses, spreading glowing pollen.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "luminous",
       "source_index": 205,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
@@ -4542,10 +3699,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "An extinct sauropod-crocodile hybrid resurrected from buried bones via dark Asura magic, crowned with a cursed human visage.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 206
     },
@@ -4563,10 +3716,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A smaller, desert-bound variant of the Devourer, emerging from the sands of the Gedrosian wastes to hunt nomads.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 207
     },
@@ -4583,10 +3732,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "An unnatural winged leopard with a human face, forged purely from brick-dust, shadow, and corrupted Asura mantras.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 208
     },
@@ -4603,10 +3748,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A manticore variant that haunts ancient stone quarries, its stone-hard fur blending into the weathered rock walls.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 209
     },
@@ -4625,10 +3766,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "An artificial, female humanoid sculpted from river mud and lotus pollen, which later mutated into a flesh-hungry night-stalker.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 210,
       "sentient": true,
@@ -4647,10 +3784,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A malevolent, clay-born construct that slips through the dark streets of Harappa, seeking to drain the warmth of the living.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 211,
       "sentient": true,
@@ -4670,10 +3803,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "An incorporeal, tactile illusion manifested by lunar radiation refracting on the Great Bath's water, haunting lonely travelers.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 212,
       "sentient": true
@@ -4691,10 +3820,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A shadow-lover variant that dwells in deep stepwells, wrapping around victims and pulling them into the dark waters.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 213,
       "sentient": true
@@ -4712,10 +3837,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A short-lived, sentient female form that coalesces from ritual altar sparks, passionately violent and intensely hot to touch.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 214,
       "sentient": true,
@@ -4734,10 +3855,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A fire-bride variant that dances within sacrificial bonfires, throwing sparks that ignite neighboring structures when displeased.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 215,
       "sentient": true,
@@ -4757,10 +3874,6 @@
       "placement": "lore",
       "rarity": "mythic",
       "journal_prompt": "A Māyā-born thing in the shape of a Tuli, its skin calcified into a stone-like hide. It animates only at night, and hunts.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 216,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity.",
@@ -4783,10 +3896,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A dark, floating entity born from the blood-spills of the first Asura invasion, guarding forgotten mountain tombs.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 217
     },
@@ -4803,10 +3912,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A giant shape-shifting stone serpent with razor-sharp wings of volcanic glass, serving as the progenitor of the Naga clan.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 218
     },
@@ -4823,10 +3928,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A secretive, shape-shifting serpent-human hybrid that slips into royal courts, carrying out the will of Takshak.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 219,
       "taxonomy": {
@@ -4847,10 +3948,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A shaggy-haired Permian predator selectively bred and genetically corrupted by Asuras to serve as heavy shock cavalry.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 220
     },
@@ -4868,10 +3965,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A sail-backed synapsid war predator mutated with bio-reactive colors and enhanced aggression for Asura commanders.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 221
     },
@@ -4888,10 +3981,6 @@
       "placement": "lore",
       "rarity": "mythic",
       "journal_prompt": "A massive, armored floodplain omnivore mutated with double jaw-strength, used for public execution rituals in Naraka.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 222,
       "crosses_at": [
@@ -4914,10 +4003,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A massive armored herbivore genetically engineered with iron-hard skin plates, utilized as mobile shield barriers in battles.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 223
     },
@@ -4934,10 +4019,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A colossal, feathered theropod predator genetically altered with Asura venom, serving as the ultimate fortress guardian.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 224
     },
@@ -4954,10 +4035,6 @@
       "placement": "lore",
       "rarity": "mythic",
       "journal_prompt": "A giant aquatic parasite of the Naraka rivers that grows up to 3 feet, draining the vitality of anything that falls into the sulfurous waters.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 225,
       "crosses_at": [
@@ -4980,10 +4057,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A small, red-eyed bat that has mutated under the influence of Asura planets, feeding on blood and glowing insects.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 226
     },
@@ -5000,10 +4073,6 @@
       "placement": "lore",
       "rarity": "mythic",
       "journal_prompt": "A highly venomous, dark-scaled snake that swims in the sulfuric rivers of Naraka, its bite causing immediate paralysis.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "fearsome",
       "source_index": 227,
       "crosses_at": [
@@ -5025,10 +4094,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "An artificial, clay-sculpted eye construct animated by ancient mantras, used by Harappan lords to spy on their courts.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 228,
       "sentient": true,
@@ -5047,10 +4112,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A small, fleeting spirit born from ritual embers that floats through the air, causing minor fires when displeased.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "graceful",
       "source_index": 229,
       "sentient": true,
@@ -5069,10 +4130,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A semi-anthropomorphic serpent warrior that guards the sacred temples of Takshak, wielding bronze and stone spears.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 230,
       "taxonomy": {
@@ -5093,10 +4150,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A larger, hyper-aggressive gorgonopsid bred by Asura generals to lead war-packs in battle.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 231
     },
@@ -5113,10 +4166,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A faster, sleek sail-backed synapsid used by Asura scouts to navigate the rugged, volcanic frontiers.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 232
     },
@@ -5133,10 +4182,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A massive scutosaur mutated with an bone-hard forehead plate, used to break down defensive palisades.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 233
     },
@@ -5154,10 +4199,6 @@
       "placement": "encounter",
       "rarity": "mythic",
       "journal_prompt": "A giant owl with four eyes that has mutated near portals, hunting night-stalkers and small primates.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "uncanny",
       "source_index": 234
     },
@@ -5174,10 +4215,6 @@
       "placement": "lore",
       "rarity": "mythic",
       "journal_prompt": "A giant, 6-foot leech of the Naraka rifts that attaches to larger monsters, draining their magical energy.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "mood": "watchful",
       "source_index": 235,
       "crosses_at": [
@@ -5210,11 +4247,6 @@
         "ocular_mimicry"
       ],
       "notes": "The islanders read them as fallen sky-mystics who chose the shallows; the Narmada reading is that a eurypterid lineage has evolved toward the human silhouette as a lure. Both accounts describe the same animal, and the folklore is the older of the two. Dr. Digha Jani's lecture notes are the source for the second, and she is careful to say the mimicry is of *shape*, not of mind.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md",
-        "Palm-Leaf Manuscript of iKnaya Subayai"
-      ],
       "region": "shattered-sea-mappa-mundi",
       "biomes": [
         "coast",
@@ -5242,10 +4274,6 @@
         "troop"
       ],
       "notes": "Grey leaf-monkey of Aravali and canopy edges. Sometimes read as a distant echo of devolved Vanara presence in folk talk.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "forest",
         "hills"
@@ -5270,10 +4298,6 @@
         "endurance"
       ],
       "notes": "Single-hump desert camel of northern trade strings. Complements Woolly Bactrian-Croc routes on drier hardpan.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "desert",
         "plains",
@@ -5299,10 +4323,6 @@
         "colony"
       ],
       "notes": "Fast insect-hunter of plateau cliffs. Nest density signals insect bloom years to highland herders.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "hills",
         "mountains",
@@ -5330,10 +4350,6 @@
         "intelligent"
       ],
       "notes": "Hyper-intelligent navigator birds. Subspecies include Vanga Pearl-Guide and Abyssal Storm-Watcher that aid seafarers.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "coast",
         "landmark"
@@ -5359,10 +4375,6 @@
         "colony_nester"
       ],
       "notes": "White wading bird of the reed flats. Nesting colonies mark high ground during flood season.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "wetland",
         "river",
@@ -5388,10 +4400,6 @@
         "tree_climber"
       ],
       "notes": "Long-bodied monitor lizard of the mangrove fringe. Raids bird nests and fish-drying racks; Kia children learn to clap poles to drive it off.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "wetland",
         "coast",
@@ -5417,10 +4425,6 @@
         "sidewinder"
       ],
       "notes": "Sidewinding desert viper. Nomads train dogs to detect its sand signature before night camps.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "desert"
       ],
@@ -5445,10 +4449,6 @@
         "migratory"
       ],
       "notes": "Large saw-snouted ray of the outer estuary. Kia fishers treat a stranded sawfish as both hazard and omen.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "coast",
         "river"
@@ -5478,10 +4478,6 @@
         "fauna_shringasaurus"
       ],
       "notes": "The larger, later form of the same lineage: half again the length, with a bony frill spreading back from behind the horns over the neck. The frill is display and shade rather than armour -- it is thin enough to glow at the edges with the sun behind it, and old bulls carry it scarred. Where the common Shringasaurus moves in herds, these hold ground alone and do not give way to caravans.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "plains",
         "hills",
@@ -5511,10 +4507,6 @@
       "mood": "patient",
       "journal_prompt": "It has not moved since you sat down. You are no longer certain it is a tree.",
       "notes": "A maya-born shaped from heartwood, leaf-mould, spore and sap rather than from mud or fire. Slower than either, and the only one of the three that keeps growing after it is made -- an old warden is indistinguishable from the wood it stands in until it turns its head. Sentient, like the rest of the maya-born: a person made of forest, not an animal shaped like one.",
-      "canon": "primary",
-      "sources": [
-        "Asura and maya-born rulings, 2026-08-27"
-      ],
       "placement_note": "Exists in canon and does not spawn. Making it an encounter would add it to the forest and wetland pools, which changes what a player meets on tiles they have already walked -- a game decision rather than a lore one. The Asura-Tainted Gargoyle is filed the same way. Promote it deliberately when the spawn change is wanted."
     },
     {
@@ -5532,10 +4524,6 @@
         "commensal"
       ],
       "notes": "Leads foragers to Golden Honey-Goliath nests. Plateau people leave a share of comb as custom.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "forest",
         "hills",
@@ -5562,10 +4550,6 @@
         "nocturnal"
       ],
       "notes": "Heavy crab among Bonewood and Ghost Mangrove roots. Staple protein for marsh camps; shells used as scoops and charms.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "coast",
         "wetland",
@@ -5590,10 +4574,6 @@
         "large_theropod"
       ],
       "notes": "Appeared during the Naraka portal event; killed Nirigili’s Elephantbird mount.",
-      "canon": "primary",
-      "sources": [
-        "AI_CONTEXT.md"
-      ],
       "biomes": [
         "underworld"
       ],
@@ -5620,10 +4600,6 @@
         "herd"
       ],
       "notes": "Sure-footed highland goat preyed upon by Garudasaur Eagles. Horn and hide traded downriver to Lothal markets.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "hills",
         "mountains"
@@ -5649,10 +4625,6 @@
         "crepuscular"
       ],
       "notes": "Lean highland wolf preying on Plateau Ibex and caravan strays. Howl-lines mark clan hunting ranges.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "hills",
         "mountains",
@@ -5678,10 +4650,6 @@
         "ambush"
       ],
       "notes": "Heavy python of Saltreed thickets. Takes waterfowl and small monitors; rarely threatens adults.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "wetland",
         "river"
@@ -5706,10 +4674,6 @@
         "nocturnal"
       ],
       "notes": "Desert lizard that ‘swims’ under dune surfaces. Used by northern nomads as a live weather-vane: emergence patterns track overnight wind shifts.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "desert"
       ],
@@ -5737,10 +4701,6 @@
         "fauna_frilled_shringasaurus"
       ],
       "notes": "Horned archosauromorph of the Denwa ground, not a dinosaur and not a crocodile -- an older diapsid branch that outlasted both here. A pair of forward-curving horns sits above the eyes, on adults only; yearlings are hornless and are often taken for something else entirely. Browses the high branches by rearing onto its hind legs, which is what the neck is for.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "plains",
         "forest",
@@ -5778,10 +4738,6 @@
         "fauna_spotted_marsh_tendua"
       ],
       "notes": "Highly intelligent leopard-like feline of the wetlands. The Tendua Manticore variant (winged, human-faced) was born from Asura desecration of Lothal tower.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "wetland",
         "forest"
@@ -5815,10 +4771,6 @@
         "fauna_spotted_marsh_tendua"
       ],
       "notes": "Birthed when Nila desecrated Kavik's tower with forbidden Asura mantras. Six-foot winged leopard with human face that hunted Lothal's infants. Central to Tendua Crisis.",
-      "canon": "primary",
-      "sources": [
-        "AI_CONTEXT.md"
-      ],
       "biomes": [],
       "placement": "lore",
       "placement_note": "Held out of play deliberately. Asura-born horror, birthed when Nila desecrated Kavik's tower. The cozy-tone question -- whether the Asura-tainted set is encounterable, journal-only, or gated behind a later mode -- is still open (docs/bestiary.md, Open Questions #4). Empty `biomes` here is a decision, not an untagged entity."
@@ -5839,11 +4791,6 @@
         "ornament"
       ],
       "notes": "Domesticated decorative vine bred by Harappan settlers. Vibrant purple flowers yield sweet-scented blue dye.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "forest",
@@ -5868,10 +4815,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A wild relative of sweet indigo, possessing small, sharp thorns along its stems that inject a skin-irritating toxin.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 1
     },
     {
@@ -5889,11 +4832,6 @@
         "filtration"
       ],
       "notes": "Massive aquatic lotus with bright green petals. Blooms in Lothal estuaries, drawing mineral-rich runoff.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -5916,11 +4854,6 @@
         "psychoactive"
       ],
       "notes": "Invasive deep-crimson lotus thriving in areas of past magical corruption. Pollen induces vivid, restless dreams.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland"
@@ -5944,10 +4877,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "An endemic medicinal tuber harvested along the Godavari, known for its rapid wound-healing properties when ground into salve.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 4
     },
     {
@@ -5963,10 +4892,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A bitter-tasting variety of Saraswati spiceroot that grows in saltwater marshes, used as an antidote to marsh-fever.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 5
     },
     {
@@ -5983,11 +4908,6 @@
         "timber"
       ],
       "notes": "Mangrove absorbing calcium and basalt. Yields naturally curved, bone-hard timber used for construction.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "coast",
@@ -6013,10 +4933,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A rare bonewood subspecies with smooth, cream-colored bark that resists waterrot and marine boring worms.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 7
     },
     {
@@ -6032,10 +4948,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A heavy, dark-wooded mangrove whose roots lock into the rocky coastline, forming impassable natural barriers.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 8
     },
     {
@@ -6051,10 +4963,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A tall, hollow, fibrous reed used by the Kia clan for weaving baskets, roofs, and lightweight outrigger hulls.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 9
     },
     {
@@ -6071,10 +4979,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A bioluminescent fungal-algal symbiont that grows on the fossilized marrow of ancient Garudasaurs, illuminating the Stone Age University's archives.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 10
     },
     {
@@ -6091,10 +4995,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A dangerous, rust-colored variant of Garudasaur moss that releases airborne spores causing temporary respiratory paralysis in intruders.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 11
     },
     {
@@ -6111,11 +5011,6 @@
         "drink"
       ],
       "notes": "Hardy wild tea adapted to acidic, sulfur-rich volcanic soils. Produces dark, highly caffeinated leaves.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "narmada-vindhya",
       "biomes": [
         "mountains"
@@ -6139,10 +5034,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "An elite wild tea variety whose leaves feature glowing, amber-colored veins, highly valued by Narmada scholars for its flavor and stimulating effects.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 13
     },
     {
@@ -6159,11 +5050,6 @@
         "ritual"
       ],
       "notes": "Massive fig grown from a magical moon-seed. Roots act as biological archive tree whispering memories in the wind.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "narmada-vindhya",
       "biomes": [
         "forest",
@@ -6187,10 +5073,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A smaller, shrub-like relative of the Bhuta-Kāna fig, growing on cliffs and whispering soft, ambient forest sounds during high winds.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 15
     },
     {
@@ -6206,10 +5088,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "An indigenous tree producing sweet, fermentable cream-colored flowers that are central to the local tribal ecology and brewing traditions.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 16
     },
     {
@@ -6225,10 +5103,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A rugged, slow-growing mahua variant whose seeds yield a thick, bitter oil used for lamps and traditional healing ointments.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 17
     },
     {
@@ -6245,11 +5119,6 @@
         "filtration"
       ],
       "notes": "Rock-clinging vine that concentrates bituminous minerals from cliff seeps. Pressed sap mixed into fortifying tonics; also used to seal pottery. Binds minerals out of what runs past it.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt",
-        "docs/bestiary.md"
-      ],
       "region": "narmada-vindhya",
       "biomes": [
         "hills",
@@ -6274,10 +5143,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A towering, high-altitude conifer with resinous needles that withstands extreme temperature shifts and acidic ash rain.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 19
     },
     {
@@ -6293,10 +5158,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A wild turmeric variant with bright red roots that has mutated under heavy mineral runoff, used as a warming spice and dye.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 20
     },
     {
@@ -6312,10 +5173,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A rare, medicinal turmeric variety whose rhizomes yield a dark blue powder capable of soothing burns and preventing infection.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 21
     },
     {
@@ -6332,10 +5189,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A drought-resistant, long-headed grain cultivated by oasis settlers, producing sweet, nutrient-dense kernels.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 22
     },
     {
@@ -6351,10 +5204,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A dark, hardy barley variant that grows in highly saline, parched desert soils, used primarily for brewing heavy travel ales.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 23
     },
     {
@@ -6370,10 +5219,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A trailing vine with thick, waxy leaves and water-filled, hollow gourds that thrive in the deepest desert sands.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 24
     },
     {
@@ -6389,10 +5234,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A low, grey-green shrub whose leaves are covered in salty, moisture-retaining crystals, a key forage for camelosuchus.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 25
     },
     {
@@ -6408,10 +5249,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A ribbed, columnar cactus whose spine patterns cast shifting shadows resembling hourglasses, storing water for months.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 26
     },
     {
@@ -6427,10 +5264,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A hardy, deep-rooted desert tree with long, needle-sharp thorns and yellow blossoms that draw honey-goliaths.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 27
     },
     {
@@ -6447,10 +5280,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A highly fragrant, bitter herb that grows in the sandy plains, used by nomads to ward off desert insects and spirits.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 28
     },
     {
@@ -6466,10 +5295,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A majestic palm tree that provides shelter, wood, and sweet, high-energy fruit in the hidden desert springs.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 29
     },
     {
@@ -6485,10 +5310,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "An aggressive, fast-growing coral polyp that builds fossilized ridges and reclaims ancient stone aqueducts in the marshes.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 30
     },
     {
@@ -6504,10 +5325,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A coral species with a dense, brilliant-blue calcified structure, highly prized for jewelry and architectural inlay.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 31
     },
     {
@@ -6523,10 +5340,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A fast-growing, heavy bamboo with thick walls and high silica content, used for constructing cages and outriggers.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 32
     },
     {
@@ -6542,10 +5355,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A large carnivorous vine of the Mappa Mundi canopy, secreting a sweet, narcotic liquid that traps large insects and small frogs.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 33
     },
     {
@@ -6561,10 +5370,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A massive epiphyte that grows in the forks of giant ancient trees, catching rainwater and debris to create mini-ecosystems.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 34
     },
     {
@@ -6580,10 +5385,6 @@
       "placement": "flavour",
       "rarity": "mythic",
       "journal_prompt": "A colossal marine alga that forms dense underwater forests, providing shelter and forage for juvenile cetaceans and rays.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 35
     },
     {
@@ -6599,10 +5400,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A hardy, salt-tolerant vine with purple bell-shaped flowers, binding the black volcanic sands along the island's shores.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 36
     },
     {
@@ -6618,10 +5415,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A unique, trunkless palm that grows directly in brackish delta waters, its robust fruit clusters floating on the tides.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 37
     },
     {
@@ -6637,10 +5430,6 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A marine flowering plant that forms extensive meadows in the shallows, harvested to weave fine, water-resistant cordage.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 38
     },
     {
@@ -6657,10 +5446,6 @@
       "placement": "flavour",
       "rarity": "mythic",
       "journal_prompt": "A colossal, ancient tree whose aerial roots drop down to form a forest-like grove from a single trunk, housing thousands of canopy birds.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 39
     },
     {
@@ -6677,10 +5462,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A resilient tree capable of rooting directly into cooled basalt flows, feeding on mineral-rich volcanic ash.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 40
     },
     {
@@ -6696,10 +5477,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "An ash-banyan subspecies with dark, charcoal-like bark and weeping branches that secrete a non-flammable, waxy resin.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 41
     },
     {
@@ -6715,10 +5492,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A primordial, mineral-absorbing plant that grows in thermal pools, its translucent petals glowing like polished amber.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 42
     },
     {
@@ -6734,10 +5507,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A rare lotus variety with glossy, black glass-like petals that pulse softly with the earth's magmatic heat.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 43
     },
     {
@@ -6754,10 +5523,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A tough, ash-tolerant grass that grows in tufts along the cooled basalt plains, providing forage for heat-tolerant fauna.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 44
     },
     {
@@ -6774,10 +5539,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A primitive fern with semi-translucent, silica-rich leaves that shimmer like glass, growing in damp volcanic crevices.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 45
     },
     {
@@ -6794,10 +5555,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A slow-growing, pale blue lichen that covers the stone ruins near the ice wall, absorbing moisture directly from the frost.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 46
     },
     {
@@ -6814,10 +5571,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A dense, cushioning moss that thrives on glacier-bound stones, providing insulation for snow-hare nests.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 47
     },
     {
@@ -6834,10 +5587,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A tough, cold-tolerant sea-grass that forms dense beds along the glacial shores, feeding seals and small fish.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 48
     },
     {
@@ -6854,10 +5603,6 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A low, bright-yellow wildflower that grows near active sulfur vents, utilizing chemical-heavy soil to produce pungent nectar.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 49
     },
     {
@@ -6873,10 +5618,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "Trees growing on the absolute edges of floating islands, plunging their roots downward into the open sky to harvest cloud-moisture.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 50,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
     },
@@ -6894,10 +5635,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A trailing vine producing massive, hollow gourds that trap lighter-than-air volcanic gases, used by mariners to patch blimps.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 51,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
     },
@@ -6914,10 +5651,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "Thorny bushes that feed on electrical discharges of high-altitude storms, glowing with residual lightning and delivering a shocking sting.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 52,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
     },
@@ -6935,10 +5668,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A glowing plant species that absorbs bioluminescent trace minerals from the airborne soil, emitting a soft blue light.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 53,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
     },
@@ -6955,10 +5684,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A rare, red-glowing variant of nirnroot whose roots exude a highly toxic sap used by assassins and sky-pirates.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 54,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
     },
@@ -6975,10 +5700,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A silicate-absorbing plant with leaves that mirror stained glass, concentrating golden sunlight for deep-time healing.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 55,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
     },
@@ -6995,10 +5716,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "An elegant herb whose translucent, silver-rimmed leaves reflect moonlight, used by sky-elves to brew soothing, prophetic teas.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 56,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
     },
@@ -7015,10 +5732,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A beautiful lotus species that grows in the inverted waterfalls, its floating petals absorbing high-altitude prana radiation.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 57,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
     },
@@ -7035,10 +5748,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A tough, climbing vine that spans the gap between close floating islands, forming natural rope bridges.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 58,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
     },
@@ -7055,10 +5764,6 @@
       "placement": "lore",
       "rarity": "rare",
       "journal_prompt": "A dense, dark green moss that covers the magnetized cores of the floating islands, aligning its spores with the Earth's magnetic poles.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 59,
       "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
     },
@@ -7075,10 +5780,6 @@
       "placement": "flavour",
       "rarity": "mythic",
       "journal_prompt": "A living tree magically and botanically tortured over decades, its trunk bent and reinforced with bronze to serve as a biomechanical catapult.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 60
     },
     {
@@ -7095,10 +5796,6 @@
       "placement": "flavour",
       "rarity": "mythic",
       "journal_prompt": "A siege tree variant designed for defense, anchoring its stone-like roots deep into fortress walls to fling burning pitch.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 61
     },
     {
@@ -7114,10 +5811,6 @@
       "placement": "flavour",
       "rarity": "mythic",
       "journal_prompt": "An invasive, predatory vine mutated by the bleeding energies of Asura planets, developing pulsing veins and a hunger for flesh.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 62
     },
     {
@@ -7133,10 +5826,6 @@
       "placement": "flavour",
       "rarity": "mythic",
       "journal_prompt": "A thick, muscular vine that strangulates native trees, its violet-veined leaves exuding a sweet, sleep-inducing perfume.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 63
     },
     {
@@ -7152,10 +5841,6 @@
       "placement": "flavour",
       "rarity": "mythic",
       "journal_prompt": "A highly mutated forest climber with animal-like muscle fibers, capable of grasping and constricting small animals.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 64
     },
     {
@@ -7171,10 +5856,6 @@
       "placement": "lore",
       "rarity": "mythic",
       "journal_prompt": "A mutated turmeric plant that grows near underworld rifts, its toxic, black rhizomes causing intense hallucinations when touched.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 65,
       "crosses_at": [
         "event_naraka_portal",
@@ -7196,10 +5877,6 @@
       "placement": "flavour",
       "rarity": "mythic",
       "journal_prompt": "A fern with charcoal-black fronds that grows only in soil scorched by fire-brides, absorbing light and warmth from its surroundings.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 66
     },
     {
@@ -7215,10 +5892,6 @@
       "placement": "flavour",
       "rarity": "mythic",
       "journal_prompt": "A beautiful but unsettling orchid with fleshy, lip-like petals that whisper soft, mimicry-chime sounds to lure insects.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 67
     },
     {
@@ -7234,10 +5907,6 @@
       "placement": "flavour",
       "rarity": "mythic",
       "journal_prompt": "A rose bush with razor-sharp black petals that secrete a deadly coagulant, growing in the ruins of desecrated temples.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 68
     },
     {
@@ -7253,10 +5922,6 @@
       "placement": "lore",
       "rarity": "mythic",
       "journal_prompt": "A colossal carnivorous plant of the twilight zone, its wide, acid-filled pitcher capable of digesting entire small primates.",
-      "canon": "primary",
-      "sources": [
-        "docs/bestiary.md"
-      ],
       "source_index": 69,
       "crosses_at": [
         "event_naraka_portal",
@@ -7278,10 +5943,6 @@
         "boundary"
       ],
       "notes": "Hooked scrub that thickens near old Dwarka-tainted ground. Planted as living fences; pollen irritates the eyes.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "plains",
         "settlement"
@@ -7305,10 +5966,6 @@
         "craftwork"
       ],
       "notes": "Fast-growing bamboo of river banks. Primary material for scaffolding, fish traps, and light rafts. Used for scaffolding. Used for rafts.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "river",
         "forest"
@@ -7316,6 +5973,51 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "Bamboo crowds the riverbank, creaking against itself, already half cut for scaffolding and fish traps."
+    },
+    {
+      "id": "flora_bethua",
+      "type": "flora",
+      "name": "Bethua",
+      "scientific": "Chenopodium album",
+      "growth_form": "flower",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "food"
+      ],
+      "notes": "A weed of turned ground that nobody plants and everybody eats. It arrives with the plough and is gone by the hot months.",
+      "biomes": [
+        "plains",
+        "settlement"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "Mealy grey-green leaves crowding the edge of a worked field, dusted as though with flour."
+    },
+    {
+      "id": "flora_cardamom",
+      "type": "flora",
+      "name": "Hill Cardamom",
+      "scientific": "Elettaria cardamomum",
+      "growth_form": "shrub",
+      "habitats": [
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "seasoning",
+        "fragrance",
+        "trade"
+      ],
+      "notes": "Grows only in wet shade on the plateau's flanks and is worth carrying down. Three pods will scent a whole pot.",
+      "biomes": [
+        "forest",
+        "hills"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "journal_prompt": "Pale pods low on a stem at the foot of tall leaves, in shade deep enough to feel cold."
     },
     {
       "id": "flora_date_palm",
@@ -7332,10 +6034,6 @@
         "fibre"
       ],
       "notes": "Oasis palm of desert waystations. Fruit dried for caravan rations; fronds woven into mats.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "desert",
         "settlement"
@@ -7359,16 +6057,36 @@
         "trade"
       ],
       "notes": "Drought resin tree of desert margins. Tears of gum burned in Mask Family and Yaksha rites; major caravan commodity. The resin is the traded part.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "desert"
       ],
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "Resin beads on the bark where the scrub has been scored, hardening into the tears burned at rites."
+    },
+    {
+      "id": "flora_ghentu",
+      "type": "flora",
+      "name": "Ghentu",
+      "scientific": "Clerodendrum viscosum",
+      "growth_form": "shrub",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "food",
+        "physic",
+        "boundary"
+      ],
+      "notes": "Sticky, rank-smelling, and planted at a boundary as often as eaten. Bitter past the point most people would go without a reason.",
+      "biomes": [
+        "plains",
+        "forest"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "A coarse shrub with sticky leaves and white flowers, growing where nobody chose to put it."
     },
     {
       "id": "flora_ghost_mangrove",
@@ -7385,10 +6103,6 @@
         "fuel"
       ],
       "notes": "Pale-barked mangrove that appears to glow under moonlight when wet. Marks safe channels through the outer estuary; charcoal prized by mask-casters.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "coast",
         "wetland",
@@ -7397,6 +6111,75 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "The pale bark of these mangroves catches what light there is. Wet, they seem to glow, and the channel between them is the safe one."
+    },
+    {
+      "id": "flora_ginger",
+      "type": "flora",
+      "name": "Ginger",
+      "scientific": "Zingiber officinale",
+      "growth_form": "root",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "seasoning",
+        "physic",
+        "trade"
+      ],
+      "notes": "Dug, not picked. Keeps for a season in dry sand and travels as well as anything that is not a stone.",
+      "biomes": [
+        "forest",
+        "settlement"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "A knuckled rhizome under a stand of narrow reed-like leaves, hot enough to smell when broken."
+    },
+    {
+      "id": "flora_guloncho",
+      "type": "flora",
+      "name": "Guloncho",
+      "scientific": "Tinospora cordifolia",
+      "growth_form": "vine",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "food",
+        "physic"
+      ],
+      "notes": "A climbing stem that will root from the air, which is most of its reputation. Taken against fever.",
+      "biomes": [
+        "forest",
+        "settlement"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "journal_prompt": "Heart-shaped leaves on a vine hung with aerial roots that reach down without touching."
+    },
+    {
+      "id": "flora_hinche",
+      "type": "flora",
+      "name": "Hinche",
+      "scientific": "Enhydra fluctuans",
+      "growth_form": "flower",
+      "habitats": [
+        "region_saraswati_delta"
+      ],
+      "uses": [
+        "food",
+        "physic"
+      ],
+      "notes": "Floats in still water at the pond's edge. Cooling, bitter, and one of the few greens that can be gathered from a boat.",
+      "biomes": [
+        "wetland",
+        "river"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "A mat of fleshy stems lying flat on still water, rooting wherever a node touches mud."
     },
     {
       "id": "flora_indigo_wild",
@@ -7412,10 +6195,6 @@
         "dye"
       ],
       "notes": "Undomesticated parent of Sweet Indigo. Harsher blue; still used by upland dyers who cannot afford cultivated stock.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "plains",
         "hills"
@@ -7438,10 +6217,6 @@
         "timber"
       ],
       "notes": "Dense highland teak preferred for river craft and the red-sandstone tower’s internal beams. Slow-grown; felling is tightly controlled by plateau clans. Canon records it specifically for ship timber. Canon records it specifically for tower beams.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "hills",
         "mountains",
@@ -7450,6 +6225,122 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "Teak this dense is cut for river craft and tower beams, and takes a long lifetime to replace."
+    },
+    {
+      "id": "flora_jackfruit",
+      "type": "flora",
+      "name": "Jackfruit",
+      "scientific": "Artocarpus heterophyllus",
+      "growth_form": "tree",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "food",
+        "timber",
+        "shade"
+      ],
+      "notes": "The unripe fruit is cooked like meat and the ripe one is eaten like sweets, from the same tree a month apart.",
+      "biomes": [
+        "settlement",
+        "forest"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "Fruit the size of a child growing straight out of the trunk, too heavy for any branch."
+    },
+    {
+      "id": "flora_jayanti",
+      "type": "flora",
+      "name": "Jayanti",
+      "scientific": "Sesbania sesban",
+      "growth_form": "shrub",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "food",
+        "physic",
+        "boundary"
+      ],
+      "notes": "Grown along field bunds as much as for the pot: it holds a bank together and feeds the soil, and the young leaves go into the fourteen.",
+      "biomes": [
+        "plains",
+        "wetland",
+        "settlement"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "A quick soft-wooded shrub on a field bund, yellow pea-flowers and a mist of small leaflets."
+    },
+    {
+      "id": "flora_kalkasunde",
+      "type": "flora",
+      "name": "Kalkasunde",
+      "scientific": "Cassia sophera",
+      "growth_form": "shrub",
+      "habitats": [
+        "region_saraswati_delta"
+      ],
+      "uses": [
+        "food",
+        "physic"
+      ],
+      "notes": "Bitter enough that it is eaten in small amounts and mostly for what it is thought to do rather than for the taste.",
+      "biomes": [
+        "plains",
+        "settlement"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "A leggy shrub with paired leaflets, yellow flowers, and a smell like cut grass gone sharp."
+    },
+    {
+      "id": "flora_kemuk",
+      "type": "flora",
+      "name": "Kemuk",
+      "scientific": "Costus speciosus",
+      "growth_form": "root",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "food",
+        "physic"
+      ],
+      "notes": "A spiral ginger of damp shade. The stem is peeled and the sour core eaten.",
+      "biomes": [
+        "forest",
+        "wetland"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "journal_prompt": "Leaves set in a slow spiral up a cane, a white crepe flower out of a red cone at the top."
+    },
+    {
+      "id": "flora_keot_taro",
+      "type": "flora",
+      "name": "Keot",
+      "scientific": "Colocasia esculenta",
+      "growth_form": "root",
+      "habitats": [
+        "region_saraswati_delta"
+      ],
+      "uses": [
+        "food"
+      ],
+      "notes": "The runner rather than the corm -- taro grown for its stolons, which are the part the fourteen wants.",
+      "biomes": [
+        "wetland",
+        "river",
+        "settlement"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "Wide leaves shedding water in beads, pale runners spreading through the mud between them."
     },
     {
       "id": "flora_lotus_root_taro",
@@ -7464,10 +6355,6 @@
         "food"
       ],
       "notes": "Starchy corm grown in flooded lotus ponds. Complements Red Delta Rice in Kia and Harappan kitchens. A staple food. Grown as a flood crop: it wants the water the rice cannot take.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "wetland",
         "settlement"
@@ -7492,10 +6379,6 @@
         "ritual"
       ],
       "notes": "Flowering tree of the dry plateaus. Night-blooming flowers gathered for sweet liquor and lamp oil. Kia and Jharwa use the blossom in seasonal offerings.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "plains",
         "hills"
@@ -7503,6 +6386,31 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "Mahua flowers drop through the night and are gathered before the sun gets to them."
+    },
+    {
+      "id": "flora_mango",
+      "type": "flora",
+      "name": "Mango",
+      "scientific": "Mangifera indica",
+      "growth_form": "tree",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "food",
+        "shade",
+        "ritual"
+      ],
+      "notes": "Shade, fruit and firewood from one tree, which is why a village is often planted around one rather than the other way about. The unripe fruit is the sour one cooks with.",
+      "biomes": [
+        "settlement",
+        "plains",
+        "forest"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "A dense dark crown throwing shade a household sits in, fruit hanging green among the leaves."
     },
     {
       "id": "flora_moonseed_vine",
@@ -7519,10 +6427,6 @@
         "memory"
       ],
       "notes": "Pale climbing vine grafted onto Oracle Figs in sanctuary groves. Associated with moon-seed legends and the Silver-Leaved Oracle Fig lineage.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "forest",
         "landmark"
@@ -7530,6 +6434,30 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A pale vine has been grafted onto the fig and left to climb, the way it is done in groves people come to on purpose."
+    },
+    {
+      "id": "flora_mustard",
+      "type": "flora",
+      "name": "Field Mustard",
+      "scientific": "Brassica rapa",
+      "growth_form": "flower",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "food",
+        "oil",
+        "seasoning"
+      ],
+      "notes": "The seed is pressed for oil and the young leaf goes in the pot, so a field of it is two crops standing in one place.",
+      "biomes": [
+        "plains",
+        "settlement"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "A field turned yellow head to foot, loud with bees, the pods filling below the flowers."
     },
     {
       "id": "flora_myrrh_thorn",
@@ -7545,10 +6473,6 @@
         "physic"
       ],
       "notes": "Thorny desert shrub yielding bitter resin. Mixed with Shilajit Creeper sap for field salves. Prepared as a wound salve.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "desert"
       ],
@@ -7571,10 +6495,6 @@
         "shade"
       ],
       "notes": "Bitter medicinal tree of villages and field edges. Leaves and oil used against pests and fever. Also burnt or hung as an insect repellent.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "settlement",
         "plains"
@@ -7582,6 +6502,49 @@
       "placement": "flavour",
       "rarity": "common",
       "journal_prompt": "A neem tree shades the field edge, its leaves bitter enough that nothing much troubles the grain stored beneath it."
+    },
+    {
+      "id": "flora_ol_yam",
+      "type": "flora",
+      "name": "Ol Yam",
+      "scientific": "Amorphophallus paeoniifolius",
+      "growth_form": "root",
+      "habitats": [
+        "region_saraswati_delta"
+      ],
+      "uses": [
+        "food",
+        "physic"
+      ],
+      "notes": "A corm the size of a head, and an acrid one -- it has to be cut, soaked and cooked long or it burns the throat. The leaf is the part counted among the fourteen.",
+      "biomes": [
+        "wetland",
+        "settlement"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "Broad umbrella leaves on a speckled stalk, the corm below big enough to feed a household."
+    },
+    {
+      "id": "flora_palta_gourd",
+      "type": "flora",
+      "name": "Palta",
+      "scientific": "Trichosanthes dioica",
+      "growth_form": "vine",
+      "habitats": [
+        "region_saraswati_delta"
+      ],
+      "uses": [
+        "food"
+      ],
+      "notes": "The gourd is the crop and the leaf is the green, so a household growing one has both.",
+      "biomes": [
+        "settlement",
+        "plains"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "A trained vine over a low frame, striped young gourds hanging under rough leaves."
     },
     {
       "id": "flora_pepper_vine",
@@ -7598,10 +6561,6 @@
         "trade"
       ],
       "notes": "Climbing pepper of humid plateau ravines. Dried berries move downriver to Lothal spice stalls.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "hills",
         "forest"
@@ -7625,10 +6584,6 @@
         "boundary"
       ],
       "notes": "Toxic flowering shrub of dry margins. Sap and smoke used sparingly in arrow pastes; planted to mark forbidden ground.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "plains",
         "desert"
@@ -7651,10 +6606,6 @@
         "trade"
       ],
       "notes": "Iron-rich short-grain rice of the Saraswati floodplain. Forms the bulk of Lothal granary stores and river trade with upland settlements. A staple grain.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "wetland",
         "settlement"
@@ -7678,10 +6629,6 @@
         "physic"
       ],
       "notes": "Household and shrine herb. Planted in courtyards; leaves used in morning rites and mild teas. Kept as a household herb, by the door.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "settlement"
       ],
@@ -7704,10 +6651,6 @@
         "filtration"
       ],
       "notes": "Tall estuary reed tolerant of brackish flood. Primary thatch for Kia marsh huts; planted in lagoon filter beds below Lothal docks. Cut for thatching. Woven into mats. Planted in filter beds.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "wetland",
         "coast",
@@ -7733,10 +6676,6 @@
         "craftwork"
       ],
       "notes": "Fragrant heartwood for masks, beads, and temple smoke. Harvest rights contested between plateau clans and river merchants.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "forest",
         "landmark"
@@ -7744,6 +6683,73 @@
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "Sandalwood, and someone has been here before you: a strip of heartwood cut away clean, the scent still hanging in the air."
+    },
+    {
+      "id": "flora_shaluk_lily",
+      "type": "flora",
+      "name": "Shaluk",
+      "scientific": "Nymphaea pubescens",
+      "growth_form": "flower",
+      "habitats": [
+        "region_saraswati_delta"
+      ],
+      "uses": [
+        "food",
+        "ritual"
+      ],
+      "notes": "The stalk is the food and the flower is the offering, from one plant on one morning -- which is the whole reason it sits in both lists.",
+      "biomes": [
+        "wetland",
+        "river"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "Pink night-blooming lilies closing as the sun climbs, their long stalks pulled up in coils."
+    },
+    {
+      "id": "flora_shulfa",
+      "type": "flora",
+      "name": "Shulfa",
+      "scientific": "Anethum graveolens",
+      "growth_form": "flower",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau"
+      ],
+      "uses": [
+        "food",
+        "seasoning"
+      ],
+      "notes": "Feathery and anise-sweet. The only one of the fourteen anybody would call pleasant on its own, which is why it is added last.",
+      "biomes": [
+        "settlement",
+        "plains"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "Fine thread-leaves and flat yellow umbels, sharp-sweet when brushed against."
+    },
+    {
+      "id": "flora_shushni",
+      "type": "flora",
+      "name": "Shushni",
+      "scientific": "Marsilea minuta",
+      "growth_form": "fern",
+      "habitats": [
+        "region_saraswati_delta"
+      ],
+      "uses": [
+        "food",
+        "physic"
+      ],
+      "notes": "A four-leaved water fern, taken for sleep as much as for food. The leaflets fold shut at dusk, which is how a gatherer knows the hour has got away from them.",
+      "biomes": [
+        "wetland",
+        "river"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "Four small leaflets on a thread of stalk, standing just clear of the shallows like clover that has learned to swim."
     },
     {
       "id": "flora_tamarind",
@@ -7761,10 +6767,6 @@
         "shade"
       ],
       "notes": "Pod-bearing shade tree of roads and courtyards. Pulp seasons stews and preserves fish on river journeys.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "settlement",
         "plains"
@@ -7788,10 +6790,6 @@
         "ritual"
       ],
       "notes": "Broad-leafed fig whose hollow trunks carry wind as a low murmur. Delta dwellers treat unusual patterns of sound as weather or spirit omens. Read for omens.",
-      "canon": "primary",
-      "sources": [
-        "SouthOfTethys.txt"
-      ],
       "biomes": [
         "forest",
         "landmark"
