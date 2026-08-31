@@ -79,6 +79,14 @@ export interface PointOfInterest {
   kind: PoiKind;
   /** Which of the map's biomes this can sit on. The placer needs somewhere plausible. */
   terrain: BiomeId[];
+  /**
+   * Whether the place wants height, which `terrain` cannot say.
+   *
+   * A biome is what the ground is made of; this is where on the slope it sits. Read against the
+   * generator's three terraces -- the same ones cliffs are drawn between. A preference, never a
+   * rule: a map with no high ground still has to put the place somewhere.
+   */
+  stands: 'high' | 'low' | 'either';
   description: string;
   arrival: string;
   discoveries: string[];
@@ -133,7 +141,7 @@ interface RawFieldMap {
   climate?: Climate; coordinates?: { x: number; y: number }; relief?: string;
 }
 interface RawPoi {
-  id: string; name: string; field_map: string; kind: string; terrain?: string[];
+  id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string;
   description?: string; arrival?: string; discoveries?: string[]; npcs?: string[];
   sub_locations?: { id: string; name: string; description?: string; requires?: string[] }[];
   ruin_of?: string;
@@ -170,6 +178,7 @@ export const pointsOfInterest: PointOfInterest[] = raw.points_of_interest.map((p
   fieldMap: p.field_map,
   kind: p.kind as PoiKind,
   terrain: (p.terrain ?? []) as BiomeId[],
+  stands: (p.stands ?? 'either') as 'high' | 'low' | 'either',
   description: p.description ?? '',
   arrival: p.arrival ?? '',
   discoveries: p.discoveries ?? [],

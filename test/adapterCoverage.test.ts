@@ -78,7 +78,7 @@ const COVERAGE: Record<string, Coverage> = {
       'aliases']
   },
   'places.points_of_interest': {
-    adapted: ['id', 'name', 'field_map', 'kind', 'terrain', 'description', 'arrival',
+    adapted: ['id', 'name', 'field_map', 'kind', 'terrain', 'stands', 'description', 'arrival',
       'discoveries', 'npcs', 'sub_locations', 'ruin_of'],
     skipped: [...EDITORIAL,
       // Canon cross-references — the character or event a place belongs to. Useful to the

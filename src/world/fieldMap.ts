@@ -10,6 +10,7 @@
 //
 // Free of React and Phaser, like everything in `world/`, so the tests exercise what ships.
 
+import { band } from './classify';
 import { easeRoutes, tourOrder } from './routes';
 import { generateWorld } from './generate';
 import { tileHash } from './rng';
@@ -160,13 +161,18 @@ function gather(world: World, accept: (tile: Tile) => boolean): Point[] {
  * place whose own ground is untouched. Rejected candidates are skipped rather than shifting
  * anything, and ties break on coordinate so the gather order is never read at all.
  */
-function pick(seed: string, poi: PointOfInterest, candidates: Point[], reject: (at: Point) => boolean): Point | null {
+function pick(
+  world: World,
+  poi: PointOfInterest,
+  candidates: Point[],
+  reject: (at: Point) => boolean
+): Point | null {
   let best: Point | null = null;
   let bestScore = -Infinity;
 
   for (const at of candidates) {
     if (reject(at)) continue;
-    const score = tileHash(seed, at.x, at.y, `poi:${poi.id}`);
+    const score = tileHash(world.seed, at.x, at.y, `poi:${poi.id}`) * heightBias(world, poi, at);
     if (score > bestScore || (score === bestScore && best !== null && (at.y < best.y || (at.y === best.y && at.x < best.x)))) {
       best = at;
       bestScore = score;
@@ -174,6 +180,32 @@ function pick(seed: string, poi: PointOfInterest, candidates: Point[], reject: (
   }
 
   return best;
+}
+
+/**
+ * How much a place wants the height of the tile it is being offered.
+ *
+ * **A weight on the score, not a filter, and that distinction is the whole design.** A filter
+ * would refuse every low tile to a place that wants height, and on a map whose palette has no
+ * high ground at all -- or whose high ground is already taken -- that loses the place entirely.
+ * A place that cannot have what it wants must still be somewhere.
+ *
+ * So a matching terrace multiplies the candidate's score and a mismatched one divides it. Since
+ * `tileHash` is uniform, this makes the wanted band overwhelmingly likely to win wherever it
+ * exists, and costs nothing where it does not: with no high ground on the map, every candidate
+ * is scaled the same way and the ordering is exactly what it was.
+ *
+ * Deliberately not a large factor. Placement is still spread across the map by the hash rather
+ * than clustering every high-standing place onto the single highest tile, which is what a
+ * strict "highest wins" rule would do.
+ */
+function heightBias(world: World, poi: PointOfInterest, at: Point): number {
+  if (poi.stands === 'either') return 1;
+  const tile = world.tiles[at.y]?.[at.x];
+  if (!tile) return 1;
+  const high = band(tile.elevation) >= 1;
+  const wanted = poi.stands === 'high' ? high : !high;
+  return wanted ? 4 : 0.25;
 }
 
 function placeOne(
@@ -191,12 +223,12 @@ function placeOne(
   const exact = gather(world, (t) => suitable(t, poi, walkable));
 
   // Best case: the terrain canon asked for, with room around it.
-  const spaced = pick(world.seed, poi, exact, crowded);
+  const spaced = pick(world, poi, exact, crowded);
   if (spaced) return spaced;
 
   // The map is tight but the terrain is right. Crowding is a cosmetic loss; two places on
   // one tile is a correctness one, so give up spacing before giving up the ground.
-  const tight = pick(world.seed, poi, exact, occupied);
+  const tight = pick(world, poi, exact, occupied);
   if (tight) return tight;
 
   // The terrain canon asked for is used up. This happens when the generator makes a biome
@@ -205,7 +237,7 @@ function placeOne(
   // map is made of rather than dropping it, and `unplaced` stays meaningful for the case
   // where even that fails.
   const anywhereOnTheMap = gather(world, (t) => palette.has(t.biome));
-  return pick(world.seed, poi, anywhereOnTheMap, occupied);
+  return pick(world, poi, anywhereOnTheMap, occupied);
 }
 
 export interface BuildOptions {

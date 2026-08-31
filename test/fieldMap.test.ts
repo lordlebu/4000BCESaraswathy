@@ -7,7 +7,8 @@
 
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap, poiAt } from '../src/world/fieldMap';
-import { fieldMap, fieldMaps, poisOn, npcsAt, neighboursOf } from '../src/content/places';
+import { fieldMap, fieldMaps, poi, poisOn, npcsAt, neighboursOf } from '../src/content/places';
+import { band } from '../src/world/classify';
 import { biomes } from '../src/content/species';
 import { landmarkKindFor } from '../src/content/landmarks';
 
@@ -279,6 +280,44 @@ describe('every map has ground that is not all one thing', () => {
     const m = mix('field_map_lothal');
     const wet = ['wetland', 'coast', 'sea', 'river'].reduce((n, b) => n + (m.get(b) ?? 0), 0);
     expect(wet, 'Lothal is no longer mostly water').toBeGreaterThan(0.5);
+  });
+
+  it('puts a place on the ground it stands on', () => {
+    // Every point of interest on Lothal and Dwarka used to sit on the lowest terrace while both
+    // maps carried over a hundred and twenty hill tiles. Nothing was choosing badly -- `suitable`
+    // matches on biome and no place on either map listed `hills`, so high ground was never a
+    // candidate. `stands` is the word for what `terrain` could not say.
+    for (const map of fieldMaps) {
+      const built = buildFieldMap(map, { seed: map.id });
+      for (const placed of built.placed) {
+        const want = poi(placed.poi.id)?.stands ?? 'either';
+        if (want === 'either') continue;
+        const tile = built.world.tiles[placed.at.y]![placed.at.x]!;
+        const high = band(tile.elevation) >= 1;
+        expect(
+          want === 'high' ? high : !high,
+          `${placed.poi.id} stands '${want}' but sits on band ${band(tile.elevation)}`
+        ).toBe(true);
+      }
+    }
+  });
+
+  it('treats height as a preference, never a filter', () => {
+    // **The reason `heightBias` weights the score instead of rejecting candidates.** A filter
+    // would refuse every low tile to a place that wants height, and on a map with no high ground
+    // -- or whose high ground is already taken -- that loses the place entirely. A place that
+    // cannot have what it wants must still be somewhere.
+    let lost = 0;
+    let total = 0;
+    for (const map of fieldMaps) {
+      for (let i = 1; i <= 6; i += 1) {
+        const built = buildFieldMap(map, { seed: `stands-${i}` });
+        total += built.placed.length + built.unplaced.length;
+        lost += built.unplaced.length;
+      }
+    }
+    expect(total).toBeGreaterThan(100);
+    expect(lost, 'a height preference must never cost a place its spot').toBe(0);
   });
 
   it('never generates ground a map is not made of', () => {
