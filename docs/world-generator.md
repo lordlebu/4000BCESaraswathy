@@ -54,6 +54,87 @@ Two consequences worth knowing before retuning either threshold:
 - **Moving a threshold moves the cliffs too.** That is correct, and it is the lever for the
   complaint below.
 
+## Resilience: what breaks when content is added, and what has been fixed
+
+Written when the tileset was about to grow substantially, on the question *"why does changing one
+map affect the others?"* The short answer is that there were **three separate coupling mechanisms**
+and they were easy to confuse with each other. Two are now fixed; the rest is recorded here so the
+next person does not have to rediscover it.
+
+### The general rule
+
+**Never let array position be part of the seed contract.** Every failure below is the same
+mistake wearing a different hat: something chose an item with `hash % list.length`, so the
+*length and order* of the list decided the answer, and any edit anywhere in the list moved
+everything. The market answer is to hash the *identity* of each candidate and keep the best
+scorer — rendezvous hashing, the same reason CDNs use consistent hashing instead of `% nodes`.
+Adding a candidate can then only take what it wins outright.
+
+### Fixed
+
+| Was | Symptom | Now |
+|---|---|---|
+| Species picked by `hash % pool.length` | Adding one plant re-rolled **95.4% of tiles**, of which only 5.2% was the newcomer arriving — the rest was existing species swapping places on ground players had walked. Forced a `SAVE_VERSION` bump for a pure content addition. | `weightedPickFor` scores each species by `(tile, species id)`. A newcomer takes **4.8%**, all of it its own share. `source_index` is no longer load-bearing. |
+| Places sited by `hash % candidates.length` over a row-order tile list | Removing **one tile** from a 400-tile pool moved **all six** of Lothal's places. Invalidated every searched e2e seed on any change to `src/world/`. | `pick` scores each candidate tile by its own coordinates. A place moves only when the ground under *it* changes. |
+| Nothing excluded the start tile from placement | Never a rule — the modulo simply never landed there. When scoring replaced it, `play-test` put Kavik's Tower exactly on the tile the traveller wakes on, so the journey opened *inside* its destination and the arrival beat fired at boot. | `taken` is seeded with `world.start`. |
+| Four e2e fixtures were **searched seeds** | Went stale four times; cost twelve CI failures once; the last re-search found *no* seed with the walk the spec wanted. | `startTileFor` adds `?at=poi_id` or `?at=x,y`, like the existing `?hour=`. A test says where it stands. |
+| A failed tile sheet drew Phaser's `__MISSING` checkerboard silently | Black squares shipped to GitHub Pages and needed a bug report to notice. | `loadTileSheets` logs the key and URL, and records it in `missingSheets()`. Covered by `e2e/tiles.spec.ts`. |
+
+One measurement worth keeping: `tileHash` is FNV-1a and **does not avalanche on a change to its
+last character**, so ids differing only in a trailing digit hash to near-consecutive values. A
+modulo never noticed, because it reads the low bits of one hash; rendezvous compares whole hashes,
+and without a finalizer the last of 21 equal candidates took 25.8% of tiles while another took
+1.0%. Murmur3's `fmix32` brings it to 4.5–5.0% against an even 4.76%. Any future use of `tileHash`
+for comparison rather than indexing needs the same treatment.
+
+### Still open
+
+**1. Bake the resolved map instead of regenerating it from the seed.** *This is the big one, and
+it is what the rest of the resilience work is waiting on.*
+
+The game regenerates the world from its seed on every load, so determinism is doing the job
+persistence normally does — which is why **every** generator change is a save-breaking change and
+why `SAVE_VERSION` has been bumped for things that altered no data shape at all (7, 10 and 11 were
+all of this kind). Chunk-based games resolve a tile once, store it, and thereafter read it;
+generator changes then affect only unvisited ground. Minecraft additionally stores a `DataVersion`
+and the generator settings *in the world*, so old worlds keep generating under the generator they
+were born under, accepting a visible seam at the chunk boundary as the price.
+
+Measured, so the objection is closed: a field map is **48×48 or 64×64**, at most 4,096 tiles.
+Only `biome` and the elevation *band* (`band()` returns 0–2) survive generation — nothing else is
+read after the fact. Packed one character per tile that is **8.4 KB**, against a naive
+`Tile[][]` dump of 635 KB and a localStorage budget of ~5 MB. There is no size argument against
+doing this.
+
+**2. `BECOMES` should be replaced by a constrained classifier.** The generator produces a whole
+continent with global thresholds and *then* substitutes whatever a map's palette does not allow.
+The substitution table is global but which rows fire depends on each map's palette — Lothal has
+`sea`, Dwarka and Narmada do not — so tuning a fallback for one map silently re-terrains the
+others. This is the direct answer to "why does changing one map affect the others", and it is the
+thing that scales worst as biomes are added: 11 rows today is already three post-mortems deep, and
+at 25 biomes it is a 25×25 adjacency judgement nobody can hold.
+
+The standard form is Minecraft's multi-noise biome source: each region declares points in noise
+space and the nearest declared point wins, so an undeclared biome is never produced and nothing
+needs substituting. Hand `classifyBiome` the palette and let the thresholds divide the range among
+the permitted biomes only.
+
+Note also that `normalize` rescales elevation to 0–1 *after* the terms are summed, with fixed
+thresholds against that normalised range — so a local change to any additive term redistributes
+everything. Damping the delta's spine drove hills from 6.7% to 25.9% this way. Measure all three
+maps after touching any shaping term.
+
+**3. `relief` cannot express visual relief.** Canyons, cliff faces and a two-tile-wide Narmada
+were all asked for and none is expressible today. They belong with the classifier rewrite rather
+than before it.
+
+**4. Tiles for `lava_field`, the sky biomes and the train track** are blocked on source art —
+`tools/build-terrain.js` converts art, it does not invent it. Canon's half of lava is largely
+done.
+
+**5. Hardening deferred.** The above is the resilience pass, not a hardening pass. Load limits,
+malformed-canon handling and error recovery in the scene are deliberately not addressed yet.
+
 ## Known: the maps are the weakest part, and it is not the art
 
 Recorded at the close of the art programme, when every ground biome had been made to tile and the
