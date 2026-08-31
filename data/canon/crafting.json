@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.3.0",
+  "canon_version": "2.3.1",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -1962,7 +1962,7 @@
         "material_bitter_greens",
         "material_mustard_seed"
       ],
-      "notes": "Fourteen greens in one pot, bitter to the last, eaten on one night of the year. Nobody pretends it is pleasant -- see `foodway_choddo_shak` for what it is instead.",
+      "notes": "Fourteen greens in one pot, bitter to the last, eaten on one night of the year. Nobody pretends it is pleasant, which is not what it is for.",
       "source_index": 66
     },
     {
@@ -4348,6 +4348,54 @@
       ],
       "notes": "A travelling apothecary and workshop rather than transport. The Survival Train gathers the displaced across the broken country, which is a use for a vehicle that has nothing to do with getting anywhere.",
       "source_index": 10
+    },
+    {
+      "id": "vehicle_harappan_cart",
+      "type": "vehicle",
+      "name": "Harappan cart",
+      "kind": "cart",
+      "crosses": [
+        "settlement",
+        "plains",
+        "river",
+        "coast",
+        "hills"
+      ],
+      "capacity": 3,
+      "materials": [
+        "material_teak_timber",
+        "material_sinew",
+        "material_palm_husk"
+      ],
+      "epochs": [
+        "epoch_civilization_dawn",
+        "epoch_current"
+      ],
+      "notes": "Two solid wheels of three planks dowelled together, and an axle that turns with them rather than under them -- so the whole undercarriage groans and a driver is heard coming from a field away. Nobody has improved on it because nothing about it is difficult: a household can cut one, and a broken wheel is three new planks.\n\nThe commonest vehicle in canon and the least remarked on, which is the usual fate of the thing everybody has. It is drawn in miniature more often than it is written about -- small clay carts turn up in every settlement, in numbers that make more sense as toys than as votives, though canon does not insist on either.",
+      "source_index": 11
+    },
+    {
+      "id": "vehicle_sinauli_wagon",
+      "type": "vehicle",
+      "name": "The Sinauli wagon",
+      "kind": "cart",
+      "crosses": [
+        "settlement",
+        "plains",
+        "hills"
+      ],
+      "capacity": 2,
+      "materials": [
+        "material_teak_timber",
+        "material_native_copper",
+        "material_croc_hide"
+      ],
+      "epochs": [
+        "epoch_civilization_dawn",
+        "epoch_current"
+      ],
+      "notes": "Copper-sheathed along every edge a hand would touch, with triangular figures worked into the wheel faces. Found only in graves, and only ever with a body in it.\n\n**Canon files it as a cart, and the argument is the point.** Its wheels are solid -- three planks and a copper rim, the same construction as the household cart above -- and a spoked wheel is what would make it a chariot. So the people who bury one are burying something that looks like a war machine and is built like a farm vehicle, and canon does not know which of those they meant. Recording the dispute rather than settling it is the same call made about the Shattering: the question is better than any answer available.",
+      "source_index": 12
     }
   ],
   "conformance": {
