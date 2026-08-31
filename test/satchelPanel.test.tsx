@@ -8,9 +8,14 @@
 // holding a question, a place panel that buried the notes, and a settle button that called
 // nothing.
 //
-// The last is the one this file is most about. `onMake` and `onGather` are the two ways the
-// making layer can be reached by a player at all, and a panel that renders beautifully while
-// calling neither is precisely the failure that shipped three times here.
+// The last is the one this file is most about. `onMake` is how the making layer is reached by a
+// player at all, and a panel that renders beautifully while calling nothing is precisely the
+// failure that shipped three times here.
+//
+// `onGather` used to be tested here too. Taking what is under foot has moved out of the satchel
+// entirely -- picking up a reed should not mean opening your bag -- and its tests moved with it,
+// to `tileActions.test.tsx`. The rule that a control must actually call something did not move;
+// it applies there now.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
@@ -26,9 +31,6 @@ const base = {
   // teaching. Whether a recipe has to be taught is `journey.test.ts`'s question and the
   // player-path one below it.
   knows: () => true,
-  canGather: false,
-  gatherHint: null,
-  onGather: () => {},
   onMake: () => {},
   open: true,
   onClose: () => {}
@@ -48,24 +50,9 @@ describe('the satchel panel', () => {
     expect(screen.queryByText(/\d+\s*\/\s*\d+/)).toBeNull();
   });
 
-  it('offers what is under foot, and calls back when it is taken', () => {
-    const onGather = vi.fn();
-    render(
-      <SatchelPanel
-        {...base}
-        satchel={emptySatchel()}
-        canGather
-        gatherHint="Picked up reed fibre."
-        onGather={onGather}
-      />
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Pick it up' }));
-    expect(onGather).toHaveBeenCalledTimes(1);
-  });
-
-  it('says plainly when there is nothing to pick up', () => {
+  it('says plainly when it is empty', () => {
     render(<SatchelPanel {...base} satchel={emptySatchel()} />);
-    expect(screen.getByText(/Nothing here worth stooping for\./)).toBeTruthy();
+    expect(screen.queryByText(/Nothing here worth stooping for\./)).toBeNull();
     expect(screen.queryByRole('button', { name: 'Pick it up' })).toBeNull();
   });
 

@@ -582,13 +582,95 @@ button.ghost:hover:not(:disabled) {
   color: var(--muted);
 }
 
-/* Offered rather than urged. Full width so it is reachable one-handed on a phone, where the
-   e2e suite requires a 40px target at six viewport sizes. */
-.camp-button {
-  display: block;
+/* --- What can be done on this tile --------------------------------------- */
+
+/* One list of everything actionable here: taking what the ground offers, stopping for the
+   night, and whatever later joins them. The three used to live in three different panels --
+   taking inside the satchel, resting at the foot of the field notes -- which meant a player
+   had to learn three homes for one idea. See `TileActions.tsx`.
+
+   Offered rather than urged, and full width so each is reachable one-handed on a phone, where
+   `reachable.spec.ts` requires a 40px target at six viewport sizes. */
+.tile-actions {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule, rgba(0, 0, 0, 0.12));
+}
+
+.tile-actions-head {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.tile-action-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tile-action > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
-  margin-top: 8px;
   min-height: 40px;
+  text-align: left;
+}
+
+/* Wide enough that a drawn mark and a character mark occupy the same column, so the labels
+   line up down the list whichever kind a row happens to carry. */
+.tile-action-mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.shelter-mark {
+  display: block;
+  /* Thin enough to read as a drawing rather than a blob at 20px on a coloured button. */
+  stroke-width: 1.25;
+  opacity: 0.9;
+}
+
+.tile-action-words {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+/* Inherits the button's own text colour at reduced opacity rather than taking `--muted`.
+   The buttons are solid `--accent` with near-white text on them, so a muted grey -- which is
+   correct everywhere else on this panel -- came out unreadable on the one surface it was
+   actually used on. */
+.tile-action-detail {
+  font-size: 0.82rem;
+  opacity: 0.82;
+}
+
+/* A blocked action keeps its row and states why, rather than vanishing. The reason is the
+   teaching -- a row reading "nothing here to take" tells a player that ground can hold
+   things, where a disappeared row tells them nothing at all. */
+.tile-action.is-blocked > button {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.tile-action-why {
+  margin: 2px 0 0 28px;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--muted);
 }
 
 .journal-foot .muted {

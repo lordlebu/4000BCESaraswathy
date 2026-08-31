@@ -6,6 +6,9 @@ import { PhaserGame } from '../game/PhaserGame';
 import { Controls } from './Controls';
 import { CanonPanel } from './CanonPanel';
 import { Here } from './Here';
+import { SHELTER_LABEL } from './JournalPanel';
+import { ShelterMark } from './ShelterMark';
+import type { TileAction } from './TileActions';
 import { CollectionPanel } from './CollectionPanel';
 import { Progress } from './Progress';
 import { diaryCount } from './Diary';
@@ -300,6 +303,46 @@ export function App() {
   }, [underfoot]);
 
   /**
+   * Everything that can be done on the tile under foot, in one list.
+   *
+   * Assembled here because this is the only place that already holds all three answers -- what
+   * the ground offers, how tired the traveller is, and what the hour is doing. The panel renders
+   * the list and decides nothing.
+   *
+   * **A blocked action keeps its row and states its reason.** That is the genre convention and
+   * it is load-bearing rather than polite: a row reading "nothing here to take" teaches that
+   * ground can hold things, where a vanished row teaches nothing at all. It is also the shape
+   * the workshop will need in phase two, where the reason is "needs a settlement".
+   */
+  const tileActions = useMemo<TileAction[]>(() => {
+    const takeable = underfoot
+      ? gatheredLine(underfoot.seed, underfoot.at, underfoot.biome)
+      : null;
+    const shelter = arrival?.shelter ?? 'bedroll';
+
+    return [
+      {
+        id: 'take',
+        label: 'Take what is here',
+        detail: takeable ?? undefined,
+        mark: '❀',
+        blocked: takeable ? null : 'Nothing on this ground to take.',
+        onDo: pickUp
+      },
+      {
+        id: 'rest',
+        label: SHELTER_LABEL[shelter] ?? 'Stop for the night',
+        detail: arrival?.fatigue ?? undefined,
+        mark: <ShelterMark shelter={shelter} />,
+        // `canCamp` is the rules layer's answer, not this panel's guess -- resting is refused
+        // in daylight because a night passed at noon is not a night.
+        blocked: arrival?.canCamp ? null : 'Not yet -- there is daylight left.',
+        onDo: () => EventBus.emitEvent('camp', {})
+      }
+    ];
+  }, [underfoot, arrival, pickUp]);
+
+  /**
    * Whether the player has been shown how to make something.
    *
    * Composed here rather than inside the panel or inside `crafting.ts`: knowing is a fact
@@ -477,13 +520,6 @@ export function App() {
         satchel={satchel}
         bench={bench}
         knows={knowsRecipeHere}
-        canGather={
-          underfoot !== null && anythingAt(underfoot.seed, underfoot.at, underfoot.biome)
-        }
-        gatherHint={
-          underfoot ? gatheredLine(underfoot.seed, underfoot.at, underfoot.biome) : null
-        }
-        onGather={pickUp}
         onMake={makeHere}
         open={interrupts.satchel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'satchel' })}
@@ -514,9 +550,6 @@ export function App() {
           whereNext: arrival?.whereNext ?? '',
           fatigue: arrival?.fatigue ?? null,
           dusk: arrival?.dusk ?? null,
-          shelter: arrival?.shelter ?? 'bedroll',
-          canCamp: arrival?.canCamp ?? false,
-          onCamp: () => EventBus.emitEvent('camp', {}),
           discovered: arrival?.discovered ?? 0,
           atLandmark: arrival?.atLandmark ?? false,
           memory,
@@ -534,6 +567,7 @@ export function App() {
           }
         }}
         canon={<CanonPanel place={place} status={canon} />}
+        actions={tileActions}
       />
 
       {/* The arrival still stops the world for a moment, but it can no longer sit below the map —

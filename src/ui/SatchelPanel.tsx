@@ -34,10 +34,6 @@ export interface SatchelPanelProps {
   /** Where the traveller stands, which decides whether a sited process is available. */
   bench: Bench;
   /** True when the tile under foot has something on it. */
-  canGather: boolean;
-  /** What is under foot, in the diary's words, or null when there is nothing. */
-  gatherHint: string | null;
-  onGather: () => void;
   onMake: (recipeId: string) => void;
   /**
    * Whether the player has been shown how.
@@ -135,9 +131,6 @@ function stillToLearn(knows: Knows): Recipe[] {
 export function SatchelPanel({
   satchel,
   bench,
-  canGather,
-  gatherHint,
-  onGather,
   onMake,
   knows,
   open,
@@ -172,20 +165,6 @@ export function SatchelPanel({
             Close
           </button>
         </header>
-
-        <section className="diary-section">
-          <h3>Under foot</h3>
-          {canGather ? (
-            <>
-              <p>{gatherHint}</p>
-              <button type="button" onClick={onGather}>
-                Pick it up
-              </button>
-            </>
-          ) : (
-            <p className="muted">Nothing here worth stooping for.</p>
-          )}
-        </section>
 
         {stuff.length > 0 && (
           <section className="diary-section">
