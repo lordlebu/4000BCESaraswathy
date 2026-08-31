@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.2.2",
+  "canon_version": "2.3.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -43,12 +43,7 @@
           39
         ]
       ],
-      "notes": "Stony ranges. Site of Mask Family schism, Jharwa massacre, and hidden sanctuary of Vara-Ma/Orek/Thren.",
-      "canon": "primary",
-      "sources": [
-        "AI_CONTEXT.md",
-        "map"
-      ]
+      "notes": "Stony ranges. Site of Mask Family schism, Jharwa massacre, and hidden sanctuary of Vara-Ma/Orek/Thren."
     },
     {
       "id": "region_ganges_lava_sea",
@@ -98,12 +93,7 @@
       "landmarks": [
         "Ganges Lava Lake"
       ],
-      "notes": "One of the most extreme magmatic zones in the setting: active volcanic rifts that cool and solidify into vast jagged black basalt plains and lava fields. Extreme zone where magma meets ocean. Deep-sea vent lineages were pushed to the surface here and evolved obsidian carapaces that withstand direct magma exposure; extremophile gastropods fuse basalt and metallic ore into armoured shells along the lake shores. The fauna are heavily armoured and heat-resistant, often fused with volcanic minerals. The bestiary groups the magmatic and glacial extremes together, with underworld portals at the far end. Species here default to rare.",
-      "canon": "primary",
-      "sources": [
-        "AI_CONTEXT.md",
-        "docs/bestiary.md"
-      ]
+      "notes": "One of the most extreme magmatic zones in the setting: active volcanic rifts that cool and solidify into vast jagged black basalt plains and lava fields. Extreme zone where magma meets ocean. Deep-sea vent lineages were pushed to the surface here and evolved obsidian carapaces that withstand direct magma exposure; extremophile gastropods fuse basalt and metallic ore into armoured shells along the lake shores. The fauna are heavily armoured and heat-resistant, often fused with volcanic minerals. The bestiary groups the magmatic and glacial extremes together, with underworld portals at the far end. Species here default to rare."
     },
     {
       "id": "region_gedrosian_desert",
@@ -142,11 +132,7 @@
           19
         ]
       ],
-      "notes": "Arid interior, and young: the harbour, the fossil channel and the caravan road all date the water's departure to within cultural memory rather than to geological time. Forty authored species, all desert-placeable.",
-      "canon": "primary",
-      "sources": [
-        "map"
-      ]
+      "notes": "Arid interior, and young: the harbour, the fossil channel and the caravan road all date the water's departure to within cultural memory rather than to geological time. Forty authored species, all desert-placeable."
     },
     {
       "id": "region_narmada_plateau",
@@ -191,12 +177,7 @@
       "landmarks": [
         "Narmada University"
       ],
-      "notes": "Volcanic highlands. Site of academic culture in later eras and source of Narmada Man blessing.",
-      "canon": "primary",
-      "sources": [
-        "map",
-        "AI_CONTEXT.md"
-      ]
+      "notes": "Volcanic highlands. Site of academic culture in later eras and source of Narmada Man blessing."
     },
     {
       "id": "region_saraswati_delta",
@@ -247,12 +228,7 @@
         "marshes",
         "mangroves"
       ],
-      "notes": "Primary setting of Civilization Dawn / Lothal Era. Home to Harappan settlers and Kia clan.",
-      "canon": "primary",
-      "sources": [
-        "map",
-        "AI_CONTEXT.md"
-      ]
+      "notes": "Primary setting of Civilization Dawn / Lothal Era. Home to Harappan settlers and Kia clan."
     },
     {
       "id": "region_shattered_sea",
@@ -304,12 +280,7 @@
         "Cognitavi bird-fortresses",
         "Mappa Mundi rainforests"
       ],
-      "notes": "Marine and island belt east of the delta, grouped in the bestiary with the deep rainforests of Mappa Mundi. The Cognitavi claim the volatile sea and build their own bird-fortresses here, holding integrated nests on the coral docks of Tamralinga Port; Tuli seafarers of the Vanga Maritime League work the pearl routes under Cognitavi guidance. The Mappa Mundi rainforests are the refuge of the displaced Silvanus and Sylvian lineages after the Vanara cataclysm.",
-      "canon": "primary",
-      "sources": [
-        "AI_CONTEXT.md",
-        "docs/bestiary.md"
-      ]
+      "notes": "Marine and island belt east of the delta, grouped in the bestiary with the deep rainforests of Mappa Mundi. The Cognitavi claim the volatile sea and build their own bird-fortresses here, holding integrated nests on the coral docks of Tamralinga Port; Tuli seafarers of the Vanga Maritime League work the pearl routes under Cognitavi guidance. The Mappa Mundi rainforests are the refuge of the displaced Silvanus and Sylvian lineages after the Vanara cataclysm."
     },
     {
       "id": "region_tethys_sky_routes",
@@ -328,12 +299,7 @@
         "inverted waterfalls"
       ],
       "notes": "Sky-oases above the Tethys Sea. The islands are held up by lodestone cores of hyper-magnetised, Permian-irradiated ore that repels the Earth's field into localised anti-gravity bubbles, a legacy of the shattering of Gondwana; warped gravity on the undersides sends rainwater overflowing upward as inverted waterfalls. Home to the bark-skinned Vyom-Yakshis, the Cognitavi Cloud-Hermits and their monasteries, and traded by orca-blimp mariners.",
-      "biomes_note": "Deliberately empty. Sky species have no equivalent among the ten ground biomes, so everything filed here is held as lore and never placed on a tile.",
-      "canon": "primary",
-      "sources": [
-        "AI_CONTEXT.md",
-        "docs/bestiary.md"
-      ]
+      "biomes_note": "Deliberately empty. Sky species have no equivalent among the ten ground biomes, so everything filed here is held as lore and never placed on a tile."
     }
   ],
   "field_maps": [
@@ -378,11 +344,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
-      ],
       "coordinates": {
         "x": 16,
         "y": 64
@@ -418,11 +379,6 @@
       ],
       "arrival": "The delta takes a long time to become a city. Reeds, then reed-and-mud, then mud with brick in it, and then brick cut by someone who expected it to last. The tower is visible from a good way out, or the half of it still standing. Somebody has hung washing across the third storey.",
       "notes": "Opening field map. Lothal after the Great Shattering: the Harappan city is a half-buried relic and survivors are camped inside it rather than beside it, so the same ground is a settlement and a ruin at once. Kept small and legible -- this is where the player learns how to look. Forest and hills were added to the palette late: with only wetland, river, settlement and coast, the engine reclassified everything it could not match and the whole map came out 55% coast and 45% wetland -- two biomes, and a delta that read as flat. They are appended, not inserted, because the engine takes the first palette entry as its fallback. Plains was deliberately left out: adding it takes back every reclassified plains tile at once and drops wetland from 45% to 2%, which would stop this being a delta at all. Sits at the centre of what is left, and every other map is reached from here -- which is why it is the opening one. Sea added to the palette. Lothal is a harbour -- it needs water to be a harbour of -- and the generator had always been able to make open water here while `applyPalette` reclassified all of it to coast, so the opening map of a game about a delta port contained no sea at all. It sits last because the first entry is the engine's fallback and wetland must stay dominant.\n\nPlains was tried and reverted: with cheap ground available the low middle became plains across 53% of the map, which fixes the travel-cost curve by destroying the delta. The same trap as the first palette change -- variety must not cost a map its thesis. Relief is `delta`: Lothal is a harbour on a delta, so its easy ground is the channels and the water's edge rather than any high ground. Plains added once the landform shaping was in: the shapers dry the interior into the classifier's plains window on purpose, because that window is the only cheap non-coastal ground there is, and without `plains` in the palette every one of those tiles was reclassified straight back to wetland. This is not the earlier attempt that flooded the map -- that one added plains while the shaping still made the middle *wetter*, so the fallback swallowed everything. Appended, so wetland stays the first entry and therefore dominant.",
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
-      ],
       "neighbours": [
         "field_map_dwarka",
         "field_map_narmada"
@@ -469,11 +425,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
-      ],
       "climate": {
         "clear": 52,
         "mist": 30,
@@ -506,11 +457,6 @@
       "notes": "The evolution discovery. A quarry rather than a dig, so the section is exposed by accident and read by the player rather than presented by a scholar.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -536,11 +482,6 @@
       "notes": "Evidence rather than encounter. The crossing species stay `lore` and unplaceable; what the player finds is what they left.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -562,11 +503,6 @@
       "notes": "The road is the map's other clock: it still follows a river that is not there. Moved from the Dry Harbour when that map was retired. Teshk did not come with it -- he was a Dry Harbour person -- so this is a camp with nobody in it, which suits a road that outlived its reason.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -605,11 +541,6 @@
       "notes": "The anomaly, and the hook toward region_tethys_sky_routes for a later map. Deliberately unresolved -- the ladder ends at a good description rather than an explanation, because some things should stay open.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -617,11 +548,6 @@
       "field_map": "field_map_lothal",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "poi_drowned_dockyard",
       "name": "The Drowned Dockyard",
@@ -660,11 +586,6 @@
       "notes": "The geography discovery and the sober counterweight to the gate: the thing actually destroying Dwarka is the sea, which nobody finds remarkable either.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -672,11 +593,6 @@
       "field_map": "field_map_lothal",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "poi_eastern_field",
       "name": "The Eastern Field",
@@ -734,11 +650,6 @@
       "notes": "The anomaly, presented as municipal infrastructure. The horror of it, if there is any, is entirely in how unremarkable the locals find it.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -758,11 +669,6 @@
       "notes": "The anomaly, and the map's only unexplained thing. Kept small and undramatic: it is a date stamp more than a mystery. Moved from the Dry Harbour when that map was retired. It belongs here better than it did there: a seam of fused sand pointing at a doorway things come through is a question, where the same seam in an empty desert was only a curiosity. Still unresolved, and still meant to stay that way.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -786,11 +692,6 @@
       "notes": "The archaeology discovery and the restore target. A paragraph in the survey against two hundred courses of deliberate engineering is the whole argument of this map in one image.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -843,12 +744,7 @@
       ],
       "description": "Four storeys of red sandstone where the chronicles promise twenty-two.",
       "arrival": "It did not topple. It sat down. The upper courses came straight through the lower ones and the whole thing settled into the delta mud like a foot into silt, which is why four storeys are still square and true and everything above them is a slope of dressed stone.",
-      "notes": "Kavik's tower, the landmark settlement_lothal records. Enterable rather than merely visited, and the undercroft gates on knowing the safe channels -- a player who has not done the mangrove work cannot reach the best of it.",
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
-      ]
+      "notes": "Kavik's tower, the landmark settlement_lothal records. Enterable rather than merely visited, and the undercroft gates on knowing the safe channels -- a player who has not done the mangrove work cannot reach the best of it."
     },
     {
       "id": "poi_long_archive",
@@ -895,11 +791,6 @@
       "notes": "Where the through-line resolves. The sequence stacks gate on discovery_archive_baseline so the player cannot be handed the thesis before earning it; the unread shelf gates on a word, which is the point at which the plateau's own script stops being decoration.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -932,23 +823,13 @@
       ],
       "description": "Smoke, and washing strung between two courses of Harappan brick.",
       "arrival": "Forty-odd people live in the kiln quarter, because the kilns were built to hold heat and still do. Nobody has repaired anything so much as leaned things against other things until they stopped falling. A child watches you from a doorway that used to be a flue.",
-      "notes": "The living settlement, inside the ruin. Deliberately not a quest hub: people here trade leads, tea and old maps. Mixed survivors -- a Mask Family remnant, a Silvershore straggler, delta fishers -- thrown together by the Collapse rather than by kinship.",
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
-      ]
+      "notes": "The living settlement, inside the ruin. Deliberately not a quest hub: people here trade leads, tea and old maps. Mixed survivors -- a Mask Family remnant, a Silvershore straggler, delta fishers -- thrown together by the Collapse rather than by kinship."
     },
     {
       "type": "point_of_interest",
       "field_map": "field_map_lothal",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "poi_marsh_shrine",
       "name": "The Marsh Shrine",
@@ -990,11 +871,6 @@
       "notes": "The academy as a place rather than a citation. Deliberately sympathetic -- the scholars are rigorous and generous with the player, which is what makes the structural error land.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1019,11 +895,6 @@
       "notes": "The botany discovery. An establishment event in progress, which is a slower and more frightening thing than a monster.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1031,11 +902,6 @@
       "field_map": "field_map_lothal",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "poi_silted_granary",
       "name": "The Silted Granary",
@@ -1079,11 +945,6 @@
       "notes": "Where the people are. Deliberately ordinary: the point of Dwarka is that the extraordinary thing is treated as weather.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1108,11 +969,6 @@
       "notes": "Geography and botany both. The dry basins are the evidence and they are visible on arrival -- the player can see the answer before they can explain it, which is the right order.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1133,11 +989,6 @@
       "notes": "The observation post. Exists so the gate can be watched over time rather than visited once, which is what its discovery needs.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     }
   ],
@@ -1215,11 +1066,6 @@
         "epoch_post_cataclysm"
       ],
       "notes": "Mask Family remnant with no masks and no family, related to character_kavik far enough back that the line means little to her. Would NOT settle -- she is the one who stays, because somebody has to be here when the rest go. The ending is better for her refusing.",
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
-      ],
       "descended_from": [
         "character_kavik"
       ]
@@ -1281,11 +1127,6 @@
       "notes": "Holds two of the map's answers inside ordinary vocabulary and has never had a reason to examine either. The counterpart to Thrali, and pointedly not a wise elder -- he is a working herder with a job on.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1344,11 +1185,6 @@
       "notes": "The one who will not come. Deliberately not a tragedy and not a rebuke -- she is right that somebody has to stay, and the ending should let her be right rather than treating her as a failed recruitment.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1408,11 +1244,6 @@
       "notes": "The one who will not come, and for the opposite reason to Bekh: not somebody has to stay, but the work does not end and that is not an argument for stopping. Sweeps an interdimensional gate as municipal maintenance.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1473,11 +1304,6 @@
       "notes": "Holds four hundred years of stratigraphy as a family trade and has never been asked. Would settle -- the midden is a living, not a home.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1546,12 +1372,7 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "Delta fisher, Kia by descent, half his grandfather's vocabulary lost. Gives the opening hook and is the first person the player can materially help. Would settle -- he has nothing holding him here but the fishing.",
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
-      ]
+      "notes": "Delta fisher, Kia by descent, half his grandfather's vocabulary lost. Gives the opening hook and is the first person the player can materially help. Would settle -- he has nothing holding him here but the fishing."
     },
     {
       "id": "npc_uma",
@@ -1607,12 +1428,7 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "Keeps the camp's roofs on. The smallest possible help, and deliberately the first one available: the player learns that knowing when to cut a reed counts as helping.",
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
-      ]
+      "notes": "Keeps the camp's roofs on. The smallest possible help, and deliberately the first one available: the player learns that knowing when to cut a reed counts as helping."
     },
     {
       "id": "npc_vessa",
@@ -1662,11 +1478,6 @@
       "notes": "The scholar who is already most of the way there and cannot say so in an acceptable form. Would settle -- she has been looking for somewhere the question is allowed.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     }
   ],

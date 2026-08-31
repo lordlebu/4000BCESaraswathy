@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.2.2",
+  "canon_version": "2.3.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -46,11 +46,6 @@
       "notes": "The thesis. Seven rungs, and gated on two other discoveries so it cannot be reached by walking into the building -- the player has to bring the plateau's evidence in with them. Deliberately sympathetic to the University in the last line.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -87,21 +82,12 @@
       "notes": "Botany, and the one where the player materially improves something rather than merely understanding it. Neither party is wrong here -- both are incompletely right, which is the map's thesis in miniature.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design"
       ],
       "id": "discovery_chamber_below",
       "name": "Somebody Came Back For It",
@@ -191,22 +177,12 @@
       "notes": "Deliberately unresolved. The last rung is the diary refusing to guess, which is the discipline the whole game is about; the sky routes are a later map's problem.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "discovery_dockyard_reef",
       "name": "A Reef in a Square Basin",
@@ -273,11 +249,6 @@
       "notes": "The self-referential one: this is the binomial-contradiction problem the two repos actually had, put in the fiction. Resolves without villainy -- the failure is structural, not personal.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -313,11 +284,6 @@
       "notes": "The mundane half of the anomaly, and the prerequisite for the interesting half. Establishes real physics on the scarp so that what the stair does cannot be explained by it.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -360,11 +326,6 @@
       "notes": "An establishment event in progress, which is slower and worse than a monster. The last rung is the only place on this map where the player knows something the locals do not.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -407,22 +368,12 @@
       "notes": "The anomaly, approached as a naturalist would: rule out the tide, rule out the hour, notice the correlation, then notice the correlation is not a cause. Ends honestly short of an explanation. Rewritten when Dwarka was dried out: the sea left rather than the land sinking, so a rung that assumed a live tide now reads against its absence. The chain is stronger for it — a city keeping a tide schedule for water that stopped arriving is a better observation than one keeping it for water that is still there.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "discovery_ghost_mangrove_channel",
       "name": "The Pale Mangroves Mark the Channel",
@@ -507,21 +458,12 @@
       "notes": "Deliberately unresolved, like the Cloud Stair. Its job is to date the ending, not to explain it, and the diary says so. Moved to Dwarka. Rung 3 used to be dated against the fossil channel and is now dated against the harbour floor and the seawalls, which is the same argument with the evidence that survived. The bearing pointing at the gate is new and deliberately unresolved -- its job is still to date the ending, not to explain it.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design"
       ],
       "id": "discovery_granary_fall",
       "name": "The Channel Still Falls",
@@ -571,10 +513,6 @@
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design"
       ],
       "id": "discovery_kiln_draught",
       "name": "The Wind That Took the Tower Will Fire a Kiln",
@@ -646,22 +584,12 @@
       "notes": "Local record-keeping outperforming the academy again, and this time entirely by accident -- the ledger was for taxes. Rewritten when Dwarka was dried out: the sea left rather than the land sinking, so a rung that assumed a live tide now reads against its absence. The chain is stronger for it — a city keeping a tide schedule for water that stopped arriving is a better observation than one keeping it for water that is still there.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "discovery_marsh_lurker_habits",
       "name": "The Lurker Waits Where the Water Warms",
@@ -703,11 +631,6 @@
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "discovery_mask_niche",
       "name": "The Empty Niche",
@@ -769,11 +692,6 @@
       "notes": "Turns the anomaly from an incident into a condition, which is the map's whole argument. The clustering is left unexplained on purpose.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -821,22 +739,12 @@
       "notes": "Geography, and the first crack in the archive's authority. The measurement was not wrong -- it was a single measurement of a thing that moves, which is a different and much more forgivable error.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "discovery_poisoned_ground",
       "name": "What Came Up in the Eastern Field",
@@ -913,22 +821,12 @@
       "notes": "Evolution, and the discipline Lothal never used. The section is read bottom-up by the player rather than explained; the clear-weather gate is literal -- you cannot see the graduation in flat light.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "discovery_red_rice_survival",
       "name": "Red Delta Rice, Wild",
@@ -1011,21 +909,12 @@
       "notes": "The map's quietest discovery and possibly its best: habit outliving the reason for it, with nobody at fault. Moved to Dwarka with the Caravan Ground. Its last rung used to require `discovery_channel_gravel`, which retired with the Dry Harbour; it now rests on the seawall chain, which dates the sea's departure from the other direction. The transplant is close to free because the chain was always about a road outliving the water it was laid beside, and that is Dwarka's whole premise now.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design"
       ],
       "id": "discovery_salt_glass",
       "name": "What the Field Gives Instead of Grain",
@@ -1077,11 +966,6 @@
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "discovery_saltreed_thatch",
       "name": "Saltreed, and What It Is For",
@@ -1152,22 +1036,12 @@
       "notes": "The sober counterweight. A map about a supernatural door should be clear that the thing actually destroying the place is ordinary sea-level rise. Rewritten when Dwarka was dried out: the sea left rather than the land sinking, so a rung that assumed a live tide now reads against its absence. The chain is stronger for it — a city keeping a tide schedule for water that stopped arriving is a better observation than one keeping it for water that is still there.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "discovery_silver_water",
       "name": "When the Channel Runs Silver",
@@ -1250,11 +1124,6 @@
       "notes": "Linguistics, the other unused discipline. The script is mundane on purpose -- a works ledger, not a prophecy. The plateau's past is administrative, which is a truer kind of old.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1294,22 +1163,12 @@
       "notes": "The archaeology through-line. Resolves as engineering without making the herders ignorant -- they have the observation and not the question, which is the commonest way to not know something.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "discovery_tower_collapse",
       "name": "How the Tower Sat Down",
@@ -1344,10 +1203,6 @@
       "type": "discovery",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design"
       ],
       "id": "discovery_winter_line",
       "name": "The Camp Can Winter Here",
@@ -1444,11 +1299,6 @@
       "notes": "The evolution discovery, and the one that makes the academy's answers untenable. Deliberately unglamorous -- the remarkable thing is in a rubbish heap, because that is where the city put it.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     }
   ],
@@ -1489,12 +1339,7 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "The slice's proof that knowledge is help. Both readings are reasonable; only one leads to eight acres of crop, and reaching it needs botany and archaeology together.",
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
-      ]
+      "notes": "The slice's proof that knowledge is help. Both readings are reasonable; only one leads to eight acres of crop, and reaching it needs botany and archaeology together."
     },
     {
       "id": "question_moving_spring",
@@ -1530,11 +1375,6 @@
       "notes": "The forgiving reading -- blaming the surveyor -- is the wrong one, and it is wrong in the direction the player will be tempted by after Lothal. Being anti-academy is not the same as being right either.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1573,12 +1413,7 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "The opening question. The academic reading is available first and is wrong, which is the point: the player should be able to close the entry early and be mistaken.",
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
-      ]
+      "notes": "The opening question. The academic reading is available first and is wrong, which is the point: the player should be able to close the entry early and be mistaken."
     },
     {
       "id": "question_terrace_purpose",
@@ -1624,11 +1459,6 @@
       "notes": "Two wrong readings rather than one, and the second is the sympathetic error: crediting the locals is not the same as being right about them.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1666,11 +1496,6 @@
       "notes": "The binomial contradiction the two repos actually had, written into the fiction. The sound reading needs the quarry section because it takes seeing graduated forms in the rock to accept a graduated form in the air.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1720,11 +1545,6 @@
       "notes": "The map's thesis, and the one question in the game where the local account is simply correct and the academy simply wrong. Both wrong readings are respectable and one of them is what a good naturalist would reach for second.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1762,11 +1582,6 @@
       "notes": "The counterweight question, and the one where the player's own appetite for a good story is the thing being tested. The unsound reading is the one this map has spent the whole time making attractive.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     }
   ],
@@ -1784,22 +1599,12 @@
       "notes": "A stratigraphic term in a language with no word for stratigraphy. The bone-pickers needed to tell each other which layer they meant.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
       "type": "vocabulary",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "word_kia_thal",
       "word": "thal-",
@@ -1816,11 +1621,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
-      ],
       "id": "word_kia_thal_set",
       "word": "thal-set",
       "language": "kia",
@@ -1836,11 +1636,6 @@
       "type": "vocabulary",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ],
       "id": "word_kia_uvai",
       "word": "uvai",
@@ -1864,11 +1659,6 @@
       "notes": "Distinguishes the mist that does something from the mist that does not, which is a distinction the University has no vocabulary for and no reason to want.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1884,11 +1674,6 @@
       "notes": "A year-name rather than a date. Evidence the archive cannot accept, because its form is a story.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1904,11 +1689,6 @@
       "notes": "The word that turns two hundred courses of stone from ornament into engineering. The herders kept the meaning inside the noun for long enough that nobody had to remember it.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     },
     {
@@ -1924,11 +1704,6 @@
       "notes": "Two words for one animal at two ages, which is a more accurate taxonomy than the archive's two species and was never intended as one.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "canon": "primary",
-      "sources": [
-        "Varuna's Field Diary design",
-        "AI_CONTEXT.md"
       ]
     }
   ]

@@ -47,7 +47,11 @@ export const CLASS_MARK: Record<MaterialClass, string> = {
   flesh: '🐟',
   oil: '🫗',
   fuel: '🔥',
-  physic: '⚱️'
+  physic: '⚱️',
+  // Added when canon did. `spice` is its own class rather than a `produce` for the reason
+  // `salt` is: three cardamom pods scent a whole pot, which makes it a thing you trade across
+  // a continent where produce is a thing you eat where it grew.
+  spice: '🌶️'
 };
 
 /**

@@ -29,7 +29,7 @@ import type { BiomeId, Rarity } from '../world/types';
 export type MaterialClass =
   | 'fibre' | 'timber' | 'bone' | 'hide' | 'shell' | 'resin' | 'clay' | 'stone'
   | 'glass' | 'metal' | 'salt' | 'pigment' | 'grain' | 'produce' | 'flesh'
-  | 'oil' | 'fuel' | 'physic';
+  | 'oil' | 'fuel' | 'physic' | 'spice';
 
 /**
  * What an object lets a person do, from `database/affordances.json`.
