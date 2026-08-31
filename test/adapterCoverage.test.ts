@@ -291,12 +291,31 @@ describe('the artwork points at places that exist', () => {
     expect(unknown, 'art wired to point-of-interest ids that are not in canon').toEqual([]);
   });
 
-  it('draws every biome the game can put on the ground', () => {
+  it('draws every biome the game can put on the ground, by art or by placeholder', () => {
     // The reverse risk to the one above: a biome present in the data but missing from the sheet
-    // silently falls back to plains, so a whole terrain type would render as grassland.
-    const biomes = (biomesData as { id: string }[]).map((biome) => biome.id);
-    const missing = biomes.filter((id) => !TERRAIN_ORDER.includes(id as (typeof TERRAIN_ORDER)[number]));
-    expect(missing, 'biomes in data/biomes.json with no frame in the terrain sheet').toEqual([]);
+    // used to fall back silently to plains, so a whole terrain type rendered as grassland.
+    //
+    // It no longer has to. `placeholderTileKey` draws any biome from its own `color` and `symbol`,
+    // so ground the art has not caught up with is drawn as itself rather than mistaken for a
+    // meadow. What this test now guards is that every biome has *one* of the two -- a frame in
+    // the sheet, or the two fields a placeholder needs. A biome with neither is undrawable, which
+    // is the failure that actually matters.
+    const biomes = biomesData as { id: string; color?: string; symbol?: string }[];
+    const undrawable = biomes
+      .filter((b) => !TERRAIN_ORDER.includes(b.id as (typeof TERRAIN_ORDER)[number]))
+      .filter((b) => !b.color || !b.symbol)
+      .map((b) => b.id);
+    expect(undrawable, 'biomes with neither terrain art nor a colour and symbol to stand in').toEqual([]);
+  });
+
+  it('says which biomes are standing in for missing art', () => {
+    // Not a failure -- a ledger. These are drawn from colour and symbol until someone draws them,
+    // and the list should be short and deliberate rather than quietly growing.
+    const biomes = (biomesData as { id: string }[]).map((b) => b.id);
+    const standIns = biomes.filter((id) => !TERRAIN_ORDER.includes(id as (typeof TERRAIN_ORDER)[number]));
+    expect(standIns.sort()).toEqual(
+      ['lava_field', 'open_sky', 'sky_island', 'sky_underside', 'underworld'].sort()
+    );
   });
 
   it('draws every place, by its own art or by its kind', () => {

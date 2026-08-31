@@ -7,6 +7,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { biomes, creatures, creatureFor, creaturesIn, flora, floraFor, floraIn } from '../src/content/species';
+import { renderableBiomeIds } from '../src/content/canon';
 import { creatureAction, describeSurroundings, describeTile, landmarkHint } from '../src/content/journal';
 import { generateWorld, isWalkable } from '../src/world/generate';
 import type { BiomeId } from '../src/world/types';
@@ -61,7 +62,12 @@ describe('data shape', () => {
 });
 
 describe('coverage', () => {
-  it.each(biomes.filter((b) => b.walkable).map((b) => b.id))(
+  // Only ground canon will actually put under a player. The engine can now *name* and *draw*
+  // biomes canon marks unrenderable -- the sky and the underworld -- and demanding species for
+  // those would be demanding content for places nothing can walk to. Every species authored in
+  // them is `lore` on purpose. `lava_field` is renderable and therefore is covered here, which is
+  // the point: the moment canon opens ground, this test asks what lives on it.
+  it.each(biomes.filter((b) => b.walkable && renderableBiomeIds.includes(b.id)).map((b) => b.id))(
     '%s has something to see and something growing',
     (biome: BiomeId) => {
       expect(creaturesIn(biome).length, `${biome} has no encounterable creature`).toBeGreaterThan(0);

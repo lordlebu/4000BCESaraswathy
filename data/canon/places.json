@@ -1584,9 +1584,9 @@
       "id": "lava_field",
       "name": "Lava Sea",
       "realm": "extreme",
-      "renderable": false,
+      "renderable": true,
       "region": "region_ganges_lava_sea",
-      "notes": "The molten surface and scalding shallows of the Ganges Lava Lake, where magma meets ocean. Distinct from the volcanic highlands around it, which are ordinary mountains and remain renderable."
+      "notes": "The molten surface and scalding shallows of the Ganges Lava Lake, where magma meets ocean. Distinct from the volcanic highlands around it, which are ordinary mountains and remain renderable. Renderable since the engine gained placeholder tiles: a biome with no drawn art is now drawn from its own colour and symbol rather than being undrawable, so the 29 encounterable fauna and 7 flora that live here can finally be met. The sky biomes and the underworld stay unrenderable because every species in them is authored `lore` -- that is an authorial decision, not a missing drawing."
     }
   ]
 }

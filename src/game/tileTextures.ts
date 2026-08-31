@@ -47,7 +47,8 @@ export {
   placeFrame,
   swayFrame,
   traceFrameFor,
-  tileFrame
+  tileFrame,
+  hasTileArt
 } from './frames';
 
 /**
@@ -206,6 +207,119 @@ export function blendTextureKey(scene: Phaser.Scene, terrainFrame: number, maskF
   context.globalCompositeOperation = 'source-over';
   canvas.refresh();
   return key;
+}
+
+/**
+ * A stand-in tile for ground the art has not caught up with.
+ *
+ * **This is what stops new terrain waiting on a drawing.** `assets/terrain.png` is built by
+ * `tools/build-terrain.js` from art in `assets/source/`, and that script converts art rather than
+ * inventing it -- so a biome with no source PNG could not be drawn at all. Canon carries five such
+ * biomes (`lava_field`, three sky biomes and `underworld`) and marks them `renderable: false` for
+ * exactly that reason, which strands every species that lives only there.
+ *
+ * Nothing has to be invented to fill the gap, because `data/biomes.json` already gives every biome
+ * a `color` and a `symbol` -- `~` for sea, `♣` for forest, `▲` for mountains. Those two fields were
+ * written for the text map and between them describe a tile completely.
+ *
+ * **It has to look like ground, not like a debug swatch.** A flat fill with a white glyph on it
+ * would read as a missing asset, which is worse than the checkerboard it replaces -- the point is
+ * that a map using these should still be worth walking. So the tile is mottled in its own hue the
+ * way the drawn tiles are, with the mark carried in a darker shade of the same colour rather than
+ * in white. It reads as unfinished ground rather than as an error, which is exactly what it is.
+ *
+ * Built once per biome and variant, cached by Phaser under `placeholder:<biome>:<variant>`.
+ */
+export function placeholderTileKey(
+  scene: Phaser.Scene,
+  biome: string,
+  colour: string,
+  symbol: string,
+  variant = 0
+): string {
+  const key = `placeholder:${biome}:${variant}`;
+  if (scene.textures.exists(key)) return key;
+
+  const canvas = scene.textures.createCanvas(key, TILE_SIZE, TILE_SIZE);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  const base = parseHex(colour);
+
+  context.fillStyle = shade(base, 0);
+  context.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+
+  // Mottling, seeded from the biome name and the variant so a field of these is varied but the
+  // same tile is the same every load. Coarse blotches first, then finer grain over them -- which
+  // is roughly what the drawn tiles do and is why they read as material rather than as fill.
+  let seed = 0;
+  for (const char of `${biome}:${variant}`) seed = Math.imul(seed ^ char.charCodeAt(0), 16777619);
+  const next = () => {
+    seed = Math.imul(seed ^ (seed >>> 15), 2246822507);
+    seed ^= seed >>> 13;
+    return (seed >>> 0) / 4294967296;
+  };
+
+  for (let i = 0; i < 16; i += 1) {
+    const r = TILE_SIZE * (0.12 + next() * 0.20);
+    context.globalAlpha = 0.09 + next() * 0.10;
+    context.fillStyle = shade(base, next() < 0.5 ? -0.26 : 0.20);
+    context.beginPath();
+    context.arc(next() * TILE_SIZE, next() * TILE_SIZE, r, 0, Math.PI * 2);
+    context.fill();
+  }
+  for (let i = 0; i < 130; i += 1) {
+    context.globalAlpha = 0.06 + next() * 0.10;
+    context.fillStyle = shade(base, next() < 0.5 ? -0.34 : 0.26);
+    const size = 2 + Math.floor(next() * 4);
+    context.fillRect(next() * TILE_SIZE, next() * TILE_SIZE, size, size);
+  }
+  context.globalAlpha = 1;
+
+  // **The mark goes on some tiles, not all of them.**
+  //
+  // Drawn on every tile it tiles -- a glyph dead centre of every cell is a regular grid, and a
+  // screen of them reads as a debug overlay however well the ground underneath is coloured. Real
+  // terrain art varies. So only one variant in four carries the mark and it sits off-centre,
+  // which turns a stamp into an occasional feature on the ground: enough to tell you what you are
+  // standing on when you look, invisible as a pattern when you do not.
+  if (variant % 4 === 0) {
+    context.font = `${Math.round(TILE_SIZE * 0.38)}px system-ui, "Segoe UI Symbol", sans-serif`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.globalAlpha = 0.30;
+    context.fillStyle = shade(base, -0.5);
+    context.fillText(
+      symbol,
+      TILE_SIZE * (0.34 + next() * 0.32),
+      TILE_SIZE * (0.34 + next() * 0.32)
+    );
+    context.globalAlpha = 1;
+  }
+
+  canvas.refresh();
+  return key;
+}
+
+interface Rgb {
+  r: number;
+  g: number;
+  b: number;
+}
+
+function parseHex(colour: string): Rgb {
+  const hex = colour.replace('#', '');
+  const full = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex;
+  const n = Number.parseInt(full, 16);
+  if (!Number.isFinite(n)) return { r: 140, g: 140, b: 140 };
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+/** Lighten (positive) or darken (negative) toward white or black, by a fraction. */
+function shade({ r, g, b }: Rgb, amount: number): string {
+  const mix = (channel: number) =>
+    Math.max(0, Math.min(255, Math.round(amount >= 0 ? channel + (255 - channel) * amount : channel * (1 + amount))));
+  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
 }
 
 /**

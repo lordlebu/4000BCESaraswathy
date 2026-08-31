@@ -48,7 +48,7 @@ export const BAKE_VERSION = 1;
  * that caused so much trouble, it is closed: it changes when the engine gains a biome, not when
  * canon gains a plant. Reordering it silently reinterprets every stored world.
  */
-const BIOME_CODES: readonly BiomeId[] = [
+export const BIOME_CODES: readonly BiomeId[] = [
   'sea',
   'coast',
   'plains',
@@ -59,7 +59,13 @@ const BIOME_CODES: readonly BiomeId[] = [
   'desert',
   'river',
   'settlement',
-  'landmark'
+  'landmark',
+  // Appended when the engine learned to draw ground it has no art for. Order above is frozen.
+  'lava_field',
+  'sky_island',
+  'sky_underside',
+  'open_sky',
+  'underworld'
 ];
 
 const codeOf = new Map<BiomeId, string>(BIOME_CODES.map((b, i) => [b, i.toString(36)]));
