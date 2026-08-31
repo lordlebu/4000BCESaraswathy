@@ -80,30 +80,6 @@ function suitable(tile: Tile, poi: PointOfInterest, walkable: Set<BiomeId>): boo
  * down in `database/TODO.md`; until it happens, treat every ordering here as load-bearing and
  * measure all three maps after touching one.
  */
-const BECOMES: Record<string, BiomeId[]> = {
-  // **Dry land before a channel.** `normalize` guarantees the generator makes low ground on
-  // every map, so even a plateau comes out with sea around its rim -- and with `river` ahead of
-  // the dry options, a map whose palette had no shoreline turned its entire rim into
-  // watercourse. That is what put the Narmada at 55.8% river the moment canon gave it the
-  // `river` it should always have had. A map with no coast and no marsh in its palette has no
-  // water at its edge; it has ground.
-  sea: ['coast', 'wetland'],
-  coast: ['wetland', 'river', 'plains'],
-  plains: ['wetland', 'coast', 'forest'],
-  forest: ['wetland', 'river', 'plains'],
-  hills: ['plains', 'coast', 'forest'],
-  mountains: ['hills', 'plains', 'coast'],
-  desert: ['plains', 'coast', 'wetland'],
-  river: ['wetland', 'coast'],
-  // **Standing water is not a channel**, and putting `river` first here said it was. On a map
-  // whose palette has no `wetland`, every marsh the generator made became a watercourse: giving
-  // the Narmada plateau its river back turned 57.7% of it into river and left 2% hills, which is
-  // not a plateau with a river through it, it is a flood. Wet ground becomes wet *ground* where
-  // the palette has any, and only falls to a channel when it has none.
-  wetland: ['coast', 'forest', 'river', 'plains'],
-  settlement: ['plains', 'coast'],
-  landmark: ['plains', 'forest']
-};
 
 /**
  * Redraw the generated world in the field map's own materials.
@@ -114,14 +90,18 @@ const BECOMES: Record<string, BiomeId[]> = {
  * place every time.
  */
 function applyPalette(world: World, palette: Set<BiomeId>): void {
-  const fallback = [...palette][0]!;
-  for (const row of world.tiles) {
-    for (const tile of row) {
-      if (palette.has(tile.biome)) continue;
-      const preferred = (BECOMES[tile.biome] ?? []).find((b) => palette.has(b));
-      tile.biome = preferred ?? fallback;
-    }
-  }
+  // **Nothing is substituted here any more, and that is the point of this rewrite.**
+  //
+  // This function used to redraw the whole map: the generator produced a continent against fixed
+  // thresholds and then every tile whose biome the palette did not contain was swapped for a
+  // fallback from a hand-written `BECOMES` table. That table was global but its effect was
+  // per-map, so tuning a fallback for one map silently re-terrained the others -- the direct
+  // answer to "why does changing one map affect the others" -- and it is what turned the Narmada
+  // into 55.8% river the moment canon gave that map the river it is named after.
+  //
+  // `classifyBiome` now takes the palette and never produces anything outside it, so there is
+  // nothing left to swap. What remains here is the work that genuinely happens *after* the ground
+  // exists: pruning rivers the palette never allowed, and growing the settlement patch.
 
   // A river the palette just erased is not a river any more, and `world.rivers` must not go on
   // naming it. The Narmada carried ten of these: channels carved by the generator, reclassified
@@ -250,7 +230,15 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
     spacing = 6
   } = options;
 
-  const world = generateWorld({ seed, width, height, relief: fieldMap.relief });
+  // The palette goes *into* generation rather than being applied to its output. See
+  // `terrainPaletteFor` -- this is the whole of the constrained-classifier change.
+  const world = generateWorld({
+    seed,
+    width,
+    height,
+    relief: fieldMap.relief,
+    palette: fieldMap.seedBiomes
+  });
 
   // Canon's palette is what the place is *made of*; the generator produces what it
   // produces. Points of interest are held to the intersection, so a marsh shrine cannot

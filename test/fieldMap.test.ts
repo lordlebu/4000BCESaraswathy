@@ -267,7 +267,7 @@ describe('every map has ground that is not all one thing', () => {
     expect(mix('field_map_dwarka').get('hills') ?? 0).toBeGreaterThan(0.01);
   });
 
-  it('keeps the deltas deltas', () => {
+  it('keeps the delta a delta', () => {
     // The other half, and the reason plains was left out of Lothal's palette. Adding it takes
     // back every reclassified plains tile at once and drops wetland from 45% to 2% -- richer
     // ground, but no longer a delta. Variety must not cost a map its thesis.
@@ -276,10 +276,42 @@ describe('every map has ground that is not all one thing', () => {
     // written because neither existed on a delta map then: Lothal had no open sea at all and 0.5%
     // river. Leaving them out started failing the moment the landforms gave the harbour its water,
     // which is the test's definition going stale rather than the map getting worse.
-    for (const id of ['field_map_lothal', 'field_map_dwarka']) {
-      const m = mix(id);
-      const wet = ['wetland', 'coast', 'sea', 'river'].reduce((n, b) => n + (m.get(b) ?? 0), 0);
-      expect(wet, `${id} is no longer mostly water`).toBeGreaterThan(0.5);
+    const m = mix('field_map_lothal');
+    const wet = ['wetland', 'coast', 'sea', 'river'].reduce((n, b) => n + (m.get(b) ?? 0), 0);
+    expect(wet, 'Lothal is no longer mostly water').toBeGreaterThan(0.5);
+  });
+
+  it('never generates ground a map is not made of', () => {
+    // **The guarantee the constrained classifier exists to give.** Before it, the generator made a
+    // whole continent against fixed thresholds and a hand-written `BECOMES` table swapped out
+    // whatever the palette did not contain -- so this property held only because a substitution
+    // pass repaired it afterwards, and every fault in that table showed up as a map quietly
+    // becoming something else. `classifyBiome` now takes the palette, so there is nothing to
+    // repair.
+    //
+    // `landmark` is the one exception and is stamped deliberately: it is the destination of the
+    // journey, it is authored rather than classified, and no palette lists it.
+    for (const map of fieldMaps) {
+      const allowed = new Set<string>([...map.seedBiomes, 'landmark']);
+      const stray = [...mix(map.id).keys()].filter((biome) => !allowed.has(biome));
+      expect(stray, `${map.id} generated ${stray.join(', ')}, which is not in its palette`).toEqual([]);
     }
+  });
+
+  it('leaves Dwarka a waterline rather than water', () => {
+    // **Dwarka used to be asserted "mostly water" alongside Lothal, and it should never have
+    // been.** Canon is specific that the Shattering took the water and not the land, and
+    // `landform.test.ts` asserts `sea === 0` on the grounds that open sea would contradict the
+    // whole map. The two expectations were in direct tension and both held only because the old
+    // substitution table turned 24% generated sea into coast -- so the number was measuring the
+    // artefact rather than the place.
+    //
+    // What the map actually owes canon is the old waterline: the seawalls have to stand on
+    // something. That is coast, and it is asserted as a floor rather than a majority.
+    const m = mix('field_map_dwarka');
+    expect(m.get('sea') ?? 0, 'the sea left; it must not come back').toBe(0);
+    expect(m.get('coast') ?? 0, 'the old waterline is gone').toBeGreaterThan(0.05);
+    const dry = (m.get('plains') ?? 0) + (m.get('desert') ?? 0) + (m.get('hills') ?? 0);
+    expect(dry, 'a dead harbour in a cold desert should be mostly dry').toBeGreaterThan(0.4);
   });
 });

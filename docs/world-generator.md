@@ -80,6 +80,7 @@ Adding a candidate can then only take what it wins outright.
 | Four e2e fixtures were **searched seeds** | Went stale four times; cost twelve CI failures once; the last re-search found *no* seed with the walk the spec wanted. | `startTileFor` adds `?at=poi_id` or `?at=x,y`, like the existing `?hour=`. A test says where it stands. |
 | A failed tile sheet drew Phaser's `__MISSING` checkerboard silently | Black squares shipped to GitHub Pages and needed a bug report to notice. | `loadTileSheets` logs the key and URL, and records it in `missingSheets()`. Covered by `e2e/tiles.spec.ts`. |
 | The world was regenerated from its seed on every load | Determinism was doing persistence's job, so **every** generator change moved the ground under saved journeys. `SAVE_VERSION` 7, 10 and 11 were all this, with no payload change. | `world/bake.ts` resolves a map once and stores it (5.6–9.5 KB). A journey keeps its ground; generator changes reach only new journeys. |
+| A whole continent was generated and then remapped into each map's palette | `BECOMES` was global but fired per-map, so tuning one map re-terrained the others. It is why the Narmada hit 55.8% river the moment canon gave it a river. | `classifyBiome` takes the palette. Nothing outside it is ever generated, so nothing needs substituting; `BECOMES` is deleted. |
 
 One measurement worth keeping: `tileHash` is FNV-1a and **does not avalanche on a change to its
 last character**, so ids differing only in a trailing digit hash to near-consecutive values. A
@@ -90,38 +91,39 @@ for comparison rather than indexing needs the same treatment.
 
 ### Still open
 
-Baking landed first, deliberately: it is what makes everything below it cheap. A generator change
-no longer moves the ground under a saved journey, so the classifier rewrite — which changes the
-shape of every map — is now an ordinary change rather than one that costs every player their
-progress.
+Baking paid for itself immediately. The classifier rewrite below changes the shape of two of the
+three maps and needed **no `SAVE_VERSION` bump at all** — an existing journey restores its baked
+world and keeps the ground it started on, and only new journeys see the new generator. Before
+baking that same change would have cost every player their progress.
 
-**1. `BECOMES` should be replaced by a constrained classifier.** The generator produces a whole
-continent with global thresholds and *then* substitutes whatever a map's palette does not allow.
-The substitution table is global but which rows fire depends on each map's palette — Lothal has
-`sea`, Dwarka and Narmada do not — so tuning a fallback for one map silently re-terrains the
-others. This is the direct answer to "why does changing one map affect the others", and it is the
-thing that scales worst as biomes are added: 11 rows today is already three post-mortems deep, and
-at 25 biomes it is a 25×25 adjacency judgement nobody can hold.
+Two things worth keeping from the classifier work:
 
-The standard form is Minecraft's multi-noise biome source: each region declares points in noise
-space and the nearest declared point wins, so an undeclared biome is never produced and nothing
-needs substituting. Hand `classifyBiome` the palette and let the thresholds divide the range among
-the permitted biomes only.
+**An absent biome's span is absorbed by its neighbour on the same axis, not redistributed.** The
+axes are lists of upper bounds, so dropping an entry hands its span to whatever now sits above it —
+no code, just the representation. That is also the behaviour you want, because a biome's span is
+positional: `sea` is the low end of elevation, `wetland` the wet end of moisture.
+
+**But absorption alone is not enough when nothing survives at the bottom.** Dropping `sea` and
+`coast` from the Narmada handed everything below 0.36 — 54% of that map's tiles — to lowland
+ground, giving a plateau with 69.5% plains and 2.5% hills. So a map that keeps *neither* sea nor
+shore has its elevation lifted into the span it actually uses. A map that keeps a shore does not,
+because the shore is the natural owner of the water below it: lifting Dwarka instead squeezed its
+coast to 1.6% and left the seawalls standing on nothing. Measured both ways before choosing.
 
 Note also that `normalize` rescales elevation to 0–1 *after* the terms are summed, with fixed
 thresholds against that normalised range — so a local change to any additive term redistributes
 everything. Damping the delta's spine drove hills from 6.7% to 25.9% this way. Measure all three
 maps after touching any shaping term.
 
-**2. `relief` cannot express visual relief.** Canyons, cliff faces and a two-tile-wide Narmada
+**1. `relief` cannot express visual relief.** Canyons, cliff faces and a two-tile-wide Narmada
 were all asked for and none is expressible today. They belong with the classifier rewrite rather
 than before it.
 
-**3. Tiles for `lava_field`, the sky biomes and the train track** are blocked on source art —
+**2. Tiles for `lava_field`, the sky biomes and the train track** are blocked on source art —
 `tools/build-terrain.js` converts art, it does not invent it. Canon's half of lava is largely
 done.
 
-**4. Hardening deferred.** The above is the resilience pass, not a hardening pass. Load limits,
+**3. Hardening deferred.** The above is the resilience pass, not a hardening pass. Load limits,
 malformed-canon handling and error recovery in the scene are deliberately not addressed yet.
 
 ## Known: the maps are the weakest part, and it is not the art
