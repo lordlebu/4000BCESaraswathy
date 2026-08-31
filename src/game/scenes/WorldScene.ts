@@ -76,7 +76,8 @@ import {
 } from '../../content/journal';
 import { travelCost } from '../../content/species';
 import { isWalkable } from '../../world/generate';
-import { buildFieldMap, poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
+import { worldFor } from '../../world/bake';
+import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
 import { isCamp } from '../../content/camps';
 import { findPath } from '../../world/pathfind';
@@ -336,7 +337,10 @@ export class WorldScene extends Phaser.Scene {
     // leave the seed alone and every player walks the same documented Lothal.
     const map = fieldMap(data.fieldMapId ?? DEFAULT_FIELD_MAP);
     if (!map) throw new Error(`no such field map: ${data.fieldMapId}`);
-    this.built = buildFieldMap(map, { seed: data.seed });
+    // Resolved once and kept, rather than generated afresh on every load. A journey therefore
+    // keeps the ground it started on even when the generator changes underneath it -- which is
+    // what stops a terrain change from being a save-breaking change. See `world/bake.ts`.
+    this.built = worldFor(map, data.seed);
     this.world = this.built.world;
     this.at = startTileFor(this.built, window.location.search);
 
