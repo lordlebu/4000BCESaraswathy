@@ -5,14 +5,21 @@
 // field map. Every other spec proves the old procedural walk still works; this one proves the
 // game is now about somewhere.
 //
-// The seed is chosen, not arbitrary. `buildFieldMap` is deterministic, so `poi-252` is a world
-// where the Eastern Field lands three steps from where the traveller starts — which turns "walk
+// The seed is chosen, not arbitrary. `buildFieldMap` is deterministic, so `poi-1666` is a world
+// where the Eastern Field lands two steps from where the traveller starts — which turns "walk
 // across a delta hoping to find something" into a test that finishes in seconds.
 //
-// **Re-searched twice now**: once when Lothal's palette gained forest and hills, again when
-// landforms changed the shaping. Both times for the same reason — what terrain a tile is
-// decides which candidate list a place is drawn from, so any change to the ground moves
-// every placement. Predicting that seeds would survive the landform change was wrong.
+// **Re-searched three times now**: when Lothal's palette gained forest and hills, when landforms
+// changed the shaping, and when the rivers were rebuilt as a drainage network. Every time for the
+// same reason — what terrain a tile is decides which candidate list a place is drawn from, so any
+// change to the ground moves every placement.
+//
+// The third time cost twelve browser tests in CI and was entirely avoidable: the unit suite and
+// the build were both green, and this suite was simply not run before pushing. The lesson is not
+// about seeds. **Anything that touches `src/world/` invalidates every searched fixture in `e2e/`,
+// and there are four of them** — this one, `tower-*` below, `dock-*` in `questions.spec.ts` and
+// `hours-*` in `hours.spec.ts`. The field notes' own hour test counts, because the start tile
+// moves too and the animal standing on it changes with it.
 //
 // **Originally:** A searched seed is a fixture
 // like any other: the palette decides what every tile becomes, so new ground means new
@@ -22,8 +29,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { step } from './walk';
 
-/** A seed where poi_eastern_field sits at (39,41) and the traveller starts at (38,43). */
-const SEED = 'poi-252';
+/** A seed where poi_eastern_field sits at (36,37) and the traveller starts at (36,35). */
+const SEED = 'poi-1666';
 
 async function boot(page: Page) {
   await page.goto(`/?seed=${SEED}`);
@@ -42,8 +49,8 @@ async function boot(page: Page) {
 
 test('stand on an authored place, and it opens', async ({ page }) => {
   await boot(page);
-  await step(page, 'ArrowUp');
-  await step(page, 'ArrowUp');
+  await step(page, 'ArrowDown');
+  await step(page, 'ArrowDown');
 
   const place = page.locator('.place');
   await expect(place).toBeVisible({ timeout: 20_000 });
@@ -54,8 +61,8 @@ test('stand on an authored place, and it opens', async ({ page }) => {
 
 test('looking closer writes the diary, and the diary keeps the crossings-out', async ({ page }) => {
   await boot(page);
-  await step(page, 'ArrowUp');
-  await step(page, 'ArrowUp');
+  await step(page, 'ArrowDown');
+  await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 
   // Climb whatever this place will give us without any other knowledge.
@@ -81,8 +88,8 @@ test('looking closer writes the diary, and the diary keeps the crossings-out', a
 
 test('the diary survives a reload', async ({ page }) => {
   await boot(page);
-  await step(page, 'ArrowUp');
-  await step(page, 'ArrowUp');
+  await step(page, 'ArrowDown');
+  await step(page, 'ArrowDown');
   // Twenty seconds rather than ten, and the reason is worth keeping: nothing here is slow, the
   // margin was simply thin. `step` already waits on the journal changing rather than on a clock,
   // so this is only covering the panel's own mount -- but the whole suite shares one machine, and
@@ -142,8 +149,8 @@ test('the diary survives a reload', async ({ page }) => {
 });
 
 test('an instance is a place you go into, and it says why when you cannot', async ({ page }) => {
-  // A seed where Kavik's Tower stands three steps south of the start.
-  await page.goto('/?seed=tower-57');
+  // A seed where Kavik's Tower stands three steps south of the start: (43,30) from (43,27).
+  await page.goto('/?seed=tower-1190');
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
   await step(page, 'ArrowDown');

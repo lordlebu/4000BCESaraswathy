@@ -18,7 +18,7 @@ import { step } from './walk';
  * there — so one place holds the whole loop: hear the question, look at the thing, settle.
  * Opened at midnight because the bloom only shows at night, which is the point of that rung.
  */
-const SEED = 'dock-118';
+const SEED = 'dock-3574';
 const AT_NIGHT = `/?seed=${SEED}&hour=0`;
 
 async function boot(page: Page) {
