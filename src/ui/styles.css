@@ -815,6 +815,46 @@ button.ghost:hover:not(:disabled) {
   }
 }
 
+/* --- The album's search and its headings ---------------------------------
+ *
+ * A single map holds 145 to 193 distinct species, so the two flat lists this had were fine at
+ * twenty and a wall at two hundred. The box appears past twenty entries; below that it is
+ * clutter rather than help. */
+
+.album-search {
+  margin-bottom: 10px;
+}
+
+.album-search input {
+  font: inherit;
+  font-size: 0.9rem;
+  width: 100%;
+  padding: 7px 11px;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  color: inherit;
+  /* A search field is one of the few places on this page where a full-width control is right:
+     the thing being typed is a name, and names are long. */
+  min-height: 36px;
+}
+
+.album-search input::placeholder {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* The count sits on the heading rather than in the list, because a species appears under every
+   ground it lives on -- so the totals across headings sum to more than the collection holds, and
+   showing them is what stops that arithmetic looking like a bug. */
+.album-count {
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 /* --- What you are carrying, always on screen ------------------------------
  *
  * Pinned to the top, under the control bar, rather than the bottom: the field notes own the

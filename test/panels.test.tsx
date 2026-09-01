@@ -22,9 +22,10 @@ import { Ending } from '../src/ui/Ending';
 import { FieldKit } from '../src/ui/FieldKit';
 import { Here } from '../src/ui/Here';
 import { CollectionPanel } from '../src/ui/CollectionPanel';
+import { creatures as allCreatures, flora as allFlora } from '../src/content/canon';
 import { LANGUAGE_INK, PersonPortrait } from '../src/ui/PersonPortrait';
 import { npcs } from '../src/content/places';
-import { emptyCollection, metOnTile } from '../src/content/collection';
+import { type Collection, emptyCollection, metOnTile } from '../src/content/collection';
 import { metSpecies } from '../src/content/species';
 import {
   type Progress,
@@ -545,6 +546,22 @@ describe('here', () => {
  * never met are absent, not shown as blanks to be completed.
  */
 describe('collection', () => {
+  /**
+   * A collection past the search threshold, which real play reaches in about twenty steps.
+   * Built from canon rather than invented, so it exercises the same names and aliases a player
+   * would actually be searching.
+   */
+  const crowded = (): Collection => {
+    const out: Collection = {};
+    for (const c of allCreatures.filter((s) => s.placement !== 'lore').slice(0, 30)) {
+      out[c.id] = { id: c.id, kind: 'creature' };
+    }
+    for (const f of allFlora.filter((s) => s.placement !== 'lore').slice(0, 10)) {
+      out[f.id] = { id: f.id, kind: 'flora' };
+    }
+    return out;
+  };
+
   const met = metOnTile(emptyCollection(), {
     creature: { id: 'river-otter' },
     flora: { id: 'sweet-indigo' }
@@ -560,14 +577,25 @@ describe('collection', () => {
   it('shows an entry with the prose canon authored for it', () => {
     render(<CollectionPanel collection={met} open onClose={noop} canAsk={false} />);
     const otter = metSpecies('river-otter')!;
-    expect(screen.getByText(otter.name)).toBeTruthy();
-    expect(screen.getByText(otter.journalPrompt)).toBeTruthy();
+    // `getAll`, because the album groups by ground and an otter lives on three of them. See
+    // the note on the next test.
+    expect(screen.getAllByText(otter.name).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(otter.journalPrompt).length).toBeGreaterThan(0);
   });
 
-  it('keeps creatures and growing things apart', () => {
+  it('groups by the ground a thing lives on', () => {
+    // **Replaces "keeps creatures and growing things apart".** That split was the whole of the
+    // album's structure and it is fine at twenty entries; a single map holds 145 to 193, so the
+    // question worth answering became *what lives in the wetland* rather than *is this an
+    // animal*. `content/album.ts` owns the grouping and `album.test.ts` checks it properly.
     render(<CollectionPanel collection={met} open onClose={noop} canAsk={false} />);
-    expect(screen.getByText('Creatures')).toBeTruthy();
-    expect(screen.getByText('Growing things')).toBeTruthy();
+    // Headings only -- `/River/` alone also matches "River Otter", which is the entry rather
+    // than the ground it was found on.
+    const headings = [...document.querySelectorAll('.diary-section h3')].map((h) =>
+      h.textContent?.replace(/\d+/g, '').trim()
+    );
+    expect(headings).toContain('River');
+    expect(headings).toContain('Wetland');
   });
 
   /**
@@ -576,13 +604,27 @@ describe('collection', () => {
    */
   it('holds only what was met, not the whole field guide', () => {
     render(<CollectionPanel collection={met} open onClose={noop} canAsk={false} />);
-    expect(screen.getAllByRole('listitem').length).toBe(2);
+    // Counted by *distinct name* rather than by list item, because a species is listed under
+    // every ground it lives on -- an otter is a fact about the river, the wetland and the
+    // forest, and picking one would make the other two headings wrong. The rule being guarded
+    // is "only what was met", and that is about which species appear, not how many rows.
+    // And nothing else: two species met, two distinct names on screen.
+    const names = new Set(
+      [...document.querySelectorAll('.met-head h4')].map((n) => n.textContent)
+    );
+    expect(names.size).toBe(2);
   });
 
-  it('lists a species once however often it is met', () => {
+  it('lists a species once per ground, however often it is met', () => {
+    // Meeting the same otter twice must not double its entries. It appears three times because
+    // it lives on three grounds, not because it was met twice -- so the count is unchanged.
+    const once = render(<CollectionPanel collection={met} open onClose={noop} canAsk={false} />);
+    const before = screen.getAllByRole('listitem').length;
+    once.unmount();
+
     const twice = metOnTile(met, { creature: { id: 'river-otter' } });
     render(<CollectionPanel collection={twice} open onClose={noop} canAsk={false} />);
-    expect(screen.getAllByRole('listitem').length).toBe(2);
+    expect(screen.getAllByRole('listitem').length).toBe(before);
   });
 
   /**
@@ -598,7 +640,10 @@ describe('collection', () => {
     unmount();
 
     render(<CollectionPanel collection={met} open onClose={noop} canAsk />);
-    expect(screen.getAllByRole('button', { name: /Ask canon/ }).length).toBe(2);
+    // One per entry rather than per species, since the album lists a thing under every ground
+    // it lives on. The rule being guarded is that the affordance appears at all when a service
+    // is listening and not at all when none is -- the exact number is layout.
+    expect(screen.getAllByRole('button', { name: /Ask canon/ }).length).toBeGreaterThan(0);
   });
 
   it('renders nothing at all when closed', () => {
@@ -606,6 +651,34 @@ describe('collection', () => {
       <CollectionPanel collection={met} open={false} onClose={noop} canAsk={false} />
     );
     expect(container.textContent).toBe('');
+  });
+
+  it('offers a search once there is enough to search', () => {
+    // Below the threshold the box is clutter: two entries do not need finding. A player crosses
+    // it fast -- 40 steps of walking meets 47 distinct species -- so this is not a wall anybody
+    // sits behind, it is the first twenty steps.
+    render(<CollectionPanel collection={met} open onClose={noop} canAsk={false} />);
+    expect(screen.queryByRole('searchbox')).toBeNull();
+    cleanup();
+
+    render(<CollectionPanel collection={crowded()} open onClose={noop} canAsk={false} />);
+    expect(screen.getByRole('searchbox')).toBeTruthy();
+  });
+
+  it('filters to what was typed, and says so when nothing matches', () => {
+    render(<CollectionPanel collection={crowded()} open onClose={noop} canAsk={false} />);
+    const box = screen.getByRole('searchbox');
+    const one = allCreatures.filter((c) => c.placement !== 'lore')[0]!;
+
+    fireEvent.change(box, { target: { value: one.name } });
+    const shown = new Set(
+      [...document.querySelectorAll('.met-head h4')].map((n) => n.textContent)
+    );
+    expect(shown).toEqual(new Set([one.name]));
+
+    // An empty result must say why rather than looking like a broken panel.
+    fireEvent.change(box, { target: { value: 'zzzzzz' } });
+    expect(screen.getByText(/answers to that name/)).toBeTruthy();
   });
 
   /**
