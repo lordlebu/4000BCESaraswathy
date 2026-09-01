@@ -599,6 +599,31 @@ export class WorldScene extends Phaser.Scene {
     this.shadow.setDepth(depthFor(row, ROW_SLOT.underfoot));
   }
 
+  /**
+   * Whether the player is typing, in which case the world must not read the keyboard at all.
+   *
+   * **Reported from play: searching the album for a plant with an "a" or a "w" in it walked the
+   * traveller across the map instead of typing.** The scene binds WASD on the document, so every
+   * keystroke reached both the input and the world -- and `addCapture` calls `preventDefault` on
+   * those keys, so the letters never even arrived in the box.
+   *
+   * There are three text fields, not one: the album's search, the field kit and the seed bar. So
+   * this is checked here, once, rather than each panel remembering to stop events -- a rule that
+   * has to be re-remembered in every new panel is a rule that will be forgotten in one.
+   *
+   * `isContentEditable` is included because a future panel may use one, and the cost of asking is
+   * a property read.
+   */
+  /** Removed on shutdown; see `bindInput`. */
+  private swallowWhileTyping: ((event: KeyboardEvent) => void) | null = null;
+
+  private typing(): boolean {
+    const el = document.activeElement as HTMLElement | null;
+    if (!el) return false;
+    const tag = el.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+  }
+
   private bindInput(): void {
     const keyboard = this.input.keyboard!;
     this.cursors = keyboard.createCursorKeys();
@@ -609,7 +634,30 @@ export class WorldScene extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D
     }) as typeof this.wasd;
     // Without this the arrow keys scroll the page behind the canvas.
-    keyboard.addCapture('UP,DOWN,LEFT,RIGHT,W,A,S,D');
+    //
+    // **The letters are deliberately not captured.** `addCapture` calls `preventDefault`, so
+    // capturing W, A, S and D stopped them reaching a focused text field at all -- typing
+    // "saltweed" into the seed box produced "ltee". The arrows are captured because their default
+    // *is* scrolling the page, which is never wanted here; a letter's default is typing it.
+    keyboard.addCapture('UP,DOWN,LEFT,RIGHT');
+
+    // **Stopped before Phaser sees them, not after.**
+    //
+    // Dropping the letters from `addCapture` was necessary and not sufficient: a `Key` created by
+    // `addKeys` registers its own capture, so W, A, S and D were still having `preventDefault`
+    // called on them and still never reached a focused field. Rather than reach into Phaser's
+    // internals to undo that, this listens on the *capture* phase of the document -- ahead of
+    // Phaser's own handler, which is bound on the bubble phase of the window -- and stops the
+    // event there whenever a text field has focus.
+    //
+    // `stopImmediatePropagation` rather than `stopPropagation`, because Phaser's listener is on
+    // an ancestor *and* other handlers may sit on the same node.
+    this.swallowWhileTyping = (event: KeyboardEvent) => {
+      if (!this.typing()) return;
+      if (!STEP_KEYS[event.code] && ZOOM_KEYS[event.code] === undefined) return;
+      event.stopImmediatePropagation();
+    };
+    document.addEventListener('keydown', this.swallowWhileTyping, true);
 
     // Tap or click to walk: the only way to play on a phone.
     this.input.on(Phaser.Input.Events.POINTER_UP, (pointer: Phaser.Input.Pointer) => {
@@ -639,6 +687,9 @@ export class WorldScene extends Phaser.Scene {
     // falls between two ticks and the traveller simply does not move. Listening for the event as
     // well means every press is remembered until the next frame can act on it.
     keyboard.on(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN, (event: KeyboardEvent) => {
+      // Typing is not walking. See `typing()` -- this is the half a player notices, and the poll
+      // in `update` is the half that would still have moved them a frame later.
+      if (this.typing()) return;
       const zoom = ZOOM_KEYS[event.code];
       if (zoom !== undefined) {
         this.onZoom({ step: zoom });
@@ -667,6 +718,10 @@ export class WorldScene extends Phaser.Scene {
     this.scale.on(Phaser.Scale.Events.RESIZE, this.onResize);
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      if (this.swallowWhileTyping) {
+        document.removeEventListener('keydown', this.swallowWhileTyping, true);
+        this.swallowWhileTyping = null;
+      }
       EventBus.offEvent('new-journey', this.onNewJourney);
       EventBus.offEvent('resume-journey', this.onNewJourney);
       EventBus.offEvent('travel-to', this.onTravelTo);
@@ -963,6 +1018,11 @@ export class WorldScene extends Phaser.Scene {
 
     // A key still held moves continuously; a key already released is honoured once, from the press
     // the listener caught. Held wins, so holding a direction does not queue up a backlog of steps.
+    // A held key must be ignored while typing too, or holding "a" to repeat a letter walks west
+    // for as long as the key is down. Checked separately from the listener above because the two
+    // paths are independent: one catches a tap too short for a frame, the other a key still held.
+    if (this.typing()) return;
+
     const held =
       (this.cursors.up.isDown || this.wasd.up.isDown ? [0, -1] : null) ??
       (this.cursors.down.isDown || this.wasd.down.isDown ? [0, 1] : null) ??
