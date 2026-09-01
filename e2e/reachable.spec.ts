@@ -66,6 +66,22 @@ test('the control bar never buries the map under rows of buttons', async ({ page
   expect(bar.height, `control bar is ${bar.height}px tall — it has wrapped too far`).toBeLessThan(120);
 });
 
+test('the satchel strip never sits under the control bar', async ({ page }) => {
+  // **Measured, because guessing got it wrong.** The strip was first pinned 44px below the top
+  // on the assumption the bar was one row tall. It is two rows on a 360px phone, and the strip
+  // landed underneath it -- invisible, on the narrowest screen, where a permanent readout matters
+  // most. They stack in normal flow now; this is what says so if that regresses.
+  for (const [w, h] of [[360, 800], [412, 915], [1280, 800]] as const) {
+    await boot(page, w, h);
+    const bar = (await page.locator('.controls').boundingBox())!;
+    const strip = (await page.locator('.satchel-strip').boundingBox())!;
+    expect(
+      strip.y,
+      `at ${w}x${h} the strip starts at ${strip.y} and the bar ends at ${bar.y + bar.height}`
+    ).toBeGreaterThanOrEqual(bar.y + bar.height);
+  }
+});
+
 test('a keyboard user can see where they are', async ({ page }) => {
   // There was no focus state in the whole stylesheet: every control could be tabbed to and
   // none of them showed it. This checks the ring is actually painted, not merely declared.

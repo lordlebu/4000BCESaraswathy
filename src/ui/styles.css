@@ -231,16 +231,29 @@ button.ghost:hover:not(:disabled) {
  * phone the last one ran off the screen behind the zoom cluster and could not be pressed at
  * all. A row that can overflow silently is the bug; bounding it and letting it wrap is the fix,
  * and the label rules below keep it to one line wherever there is room for one. */
-.controls {
+/* The bar and the satchel strip, stacked. Absolute so the map keeps the whole viewport, but the
+   two flow inside it -- the bar wraps to two rows on a narrow phone and the strip has to follow
+   it down rather than sit at a height guessed from the one-row case. */
+.controls-stack {
   position: absolute;
   top: var(--safe-top);
   left: var(--safe-left);
   /* Stop short of the zoom cluster, which owns the opposite corner. */
   right: calc(var(--safe-right) + 52px);
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
   z-index: 3;
+  /* The stack is a positioning shell; only its children take pointer events, or the empty space
+     beside the bar would swallow clicks meant for the map. */
+  pointer-events: none;
+}
+.controls-stack > * { pointer-events: auto; }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .control {
@@ -801,6 +814,66 @@ button.ghost:hover:not(:disabled) {
     animation: none;
   }
 }
+
+/* --- What you are carrying, always on screen ------------------------------
+ *
+ * Pinned to the top, under the control bar, rather than the bottom: the field notes own the
+ * bottom edge in both orientations and the strip must not move when they open and close. A
+ * readout that shifts is a readout you have to look for.
+ *
+ * Deliberately quiet. It is glanced at constantly and read rarely, so it is a thin band of marks
+ * and numbers with no prose -- the full satchel is one click away and holds everything else. */
+
+.satchel-strip {
+  /* **Ordinary flow inside `.controls-stack`, not an absolute offset.** The first version pinned
+     it 44px below the top on the assumption the bar was one row tall. It is two on a 360px
+     phone, and the strip landed underneath it -- measured, not guessed. Letting the two stack
+     means the strip follows the bar to whatever height it wraps to. */
+  z-index: 3;
+
+  /* A button, but not a control: no pill, no accent fill. Pressing it opens the full satchel and
+     that is a secondary action -- the primary use of this element is reading it. */
+  display: block;
+  width: auto;
+  text-align: left;
+  padding: 5px 10px;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  background: var(--panel);
+  color: inherit;
+  box-shadow: 0 6px 18px rgba(20, 14, 24, 0.25);
+  backdrop-filter: blur(2px);
+  min-height: 32px;
+}
+
+.satchel-strip-empty {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.satchel-strip-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  /* Column gap wider than row gap: the pairs read as pairs when they wrap. */
+  gap: 2px 12px;
+}
+
+.satchel-held {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.satchel-held .thing-mark { font-size: 0.95rem; }
+
+.satchel-held-n { color: var(--ink-soft, inherit); }
 
 /* --- Landscape: log to the right, notes along the bottom beside it -------- */
 
