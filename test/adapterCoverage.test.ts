@@ -42,11 +42,17 @@ const COVERAGE: Record<string, Coverage> = {
       'journal_prompt', 'habitats', 'source_index',
       // Read by `SpeciesIcon` to choose a mark. This replaced ~400 lines of keyword matching that
       // guessed it from the name and was wrong nineteen times.
-      'clade'],
+      'clade',
+      // The other names a thing goes by. **This moved out of `skipped`, and the old reason is
+      // worth keeping because it was true when it was written:** "a species reaches the player
+      // through the tile they are standing on, never through a search box". The album now has a
+      // search box, so it does not. 28 species carry aliases and the runtime type dropped every
+      // one of them.
+      'aliases'],
     skipped: [...EDITORIAL,
       // Reference facts for the canon book and the retrieval service. The game shows
       // `journal_prompt`, which is the player-facing prose written separately from `notes`.
-      'aliases', 'behaviour', 'diet', 'taxonomy', 'related_species', 'sentient',
+      'behaviour', 'diet', 'taxonomy', 'related_species', 'sentient',
       // Placement commentary for editors, and the Dwarka-gate crossing rule, which the
       // engine has no concept of yet.
       'placement_note', 'crosses_at',
@@ -59,13 +65,13 @@ const COVERAGE: Record<string, Coverage> = {
     adapted: ['id', 'name', 'scientific', 'region', 'biomes', 'placement', 'rarity',
       'journal_prompt', 'habitats', 'source_index',
       // As `clade` on fauna. The derived version was wrong on 13 of 90.
-      'growth_form'],
-    skipped: [...EDITORIAL, 'uses', 'placement_note', 'crosses_at',
-      // The other names a plant is known by, which canon gained so a reader who came looking
-      // for nux-vomica could find the page filed under Kuchla. That is a problem the book has
-      // and the game does not: a species reaches the player through the tile they are standing
-      // on, never through a search box. Skipped on the same terms as `aliases` on fauna.
-      'aliases']
+      'growth_form',
+      // The other names a plant is known by, which canon gained so a reader looking for
+      // nux-vomica could find the page filed under Kuchla. It was skipped because that was a
+      // problem the book had and the game did not -- see the note on fauna above. The album's
+      // search box is what changed that.
+      'aliases'],
+    skipped: [...EDITORIAL, 'uses', 'placement_note', 'crosses_at']
   },
   'places.field_maps': {
     adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'points_of_interest',

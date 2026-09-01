@@ -27,6 +27,7 @@ interface CanonSpecies {
   id: string;
   name: string;
   scientific?: string | null;
+  aliases?: string[];
   region?: string;
   biomes?: string[];
   placement?: string;
@@ -106,6 +107,7 @@ function toSpecies(entity: CanonSpecies, kind: 'fauna' | 'flora'): Creature | Fl
     id: engineId(entity.id),
     name: entity.name,
     binomial: entity.scientific ?? null,
+    aliases: entity.aliases ?? [],
     region: regionOf(entity),
     biomes,
     // Nothing renderable to stand on means nothing to place, whatever canon says.

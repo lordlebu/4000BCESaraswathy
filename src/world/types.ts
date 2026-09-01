@@ -135,6 +135,15 @@ interface SpeciesBase {
   name: string;
   /** Null for the prototype starters, which predate the bestiary and have no binomial. */
   binomial: string | null;
+  /**
+   * Other names the same thing goes by. Empty for most.
+   *
+   * On the base rather than on flora alone, because canon carries them on both -- 23 plants and
+   * 5 animals today. The game had no field for them at all and dropped every one, which is the
+   * failure they were authored to fix: canon calls the strychnine tree `Kuchla`, and a player
+   * who knows it as nux-vomica could find nothing.
+   */
+  aliases: string[];
   region: string;
   biomes: BiomeId[];
   placement: Placement;

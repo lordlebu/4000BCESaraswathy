@@ -23,6 +23,8 @@ import {
   size
 } from '../content/collection';
 import { metSpecies } from '../content/species';
+import { byBiome, matches } from '../content/album';
+import { TERRAIN_ORDER } from '../game/frames';
 import { searchCanon, type CanonSource } from './canonClient';
 import type { Creature, Flora } from '../world/types';
 import { SpeciesIcon } from './SpeciesIcon';
@@ -136,6 +138,7 @@ export interface CollectionPanelProps {
 
 export function CollectionPanel({ collection, open, onClose, canAsk }: CollectionPanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const [query, setQuery] = useState('');
 
   // Escape closes it and focus starts on the way out, matching the diary. This was the one
   // modal without either, which is the sort of inconsistency a keyboard finds immediately and
@@ -153,9 +156,12 @@ export function CollectionPanel({ collection, open, onClose, canAsk }: Collectio
   if (!open) return null;
 
   const met = everythingMet(collection);
-  const creatures = met.filter((m) => m.kind === 'creature');
-  const flora = met.filter((m) => m.kind === 'flora');
   const total = size(collection);
+
+  // Grouped by the ground a thing lives on, and filtered by what has been typed. Both are pure
+  // functions in `content/album.ts` -- this panel renders their answers and decides neither.
+  const found = met.filter((m) => matches(m, query));
+  const groups = byBiome(found, TERRAIN_ORDER);
 
   return (
     <div className="diary-veil" role="dialog" aria-modal="true" aria-label="Collection">
@@ -183,26 +189,39 @@ export function CollectionPanel({ collection, open, onClose, canAsk }: Collectio
           </p>
         ) : (
           <>
-            {creatures.length > 0 && (
-              <section className="diary-section">
-                <h3>Creatures</h3>
-                <ul className="met-list">
-                  {creatures.map((m) => (
-                    <Entry key={m.id} meeting={m} canAsk={canAsk} />
-                  ))}
-                </ul>
-              </section>
+            {/* Search earns its line past about a hundred entries, and a single map holds far
+                more than that. Below that it is clutter, so it appears when it is useful. */}
+            {total > 20 && (
+              <div className="album-search">
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Find a creature or a plant"
+                  aria-label="Search the collection"
+                />
+              </div>
             )}
 
-            {flora.length > 0 && (
-              <section className="diary-section">
-                <h3>Growing things</h3>
-                <ul className="met-list">
-                  {flora.map((m) => (
-                    <Entry key={m.id} meeting={m} canAsk={canAsk} />
-                  ))}
-                </ul>
-              </section>
+            {groups.length === 0 ? (
+              <p className="diary-empty">Nothing here answers to that name.</p>
+            ) : (
+              groups.map((group) => (
+                <section className="diary-section" key={group.id || 'elsewhere'}>
+                  {/* The count is on the heading rather than in the list, because a species
+                      appears under every ground it lives on -- so the totals across headings add
+                      up to more than the collection holds, and saying so avoids the arithmetic
+                      looking wrong. */}
+                  <h3>
+                    {group.name} <span className="album-count">{group.members.length}</span>
+                  </h3>
+                  <ul className="met-list">
+                    {group.members.map((m) => (
+                      <Entry key={`${group.id}:${m.id}`} meeting={m} canAsk={canAsk} />
+                    ))}
+                  </ul>
+                </section>
+              ))
             )}
           </>
         )}
