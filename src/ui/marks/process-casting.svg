@@ -1,0 +1,18 @@
+<!-- Casting: a crucible held in tongs, tipped, a line of metal running into a two-piece stone
+     mould below. Redrawn as SVG from `assets/source/dump/ChatGPTprocess-casting.png`, which had
+     the right subject and the wrong form for this size: an auto-trace of a thick-outline raster
+     gives doubled contours that read as mush at 20px. Same subject, drawn once.
+
+     Strokes are currentColor so the mark themes itself, as `ShelterMark` does. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+  <!-- The crucible, tipped to pour. -->
+  <path d="M18 14 C18 24 22 29 28 29 C34 29 38 24 38 14 Z"/>
+  <!-- Tongs gripping it, running off to the top right. -->
+  <path d="M36 17 L54 8"/>
+  <path d="M37 22 L55 14"/>
+  <!-- The pour: one line, because two reads as steam. -->
+  <path d="M22 29 C21 36 22 41 24 45"/>
+  <!-- A two-piece mould, the seam showing. -->
+  <path d="M10 45 L46 45 L44 56 L12 56 Z"/>
+  <path d="M28 45 L28 56"/>
+</svg>

@@ -1,0 +1,14 @@
+<!-- Flax stems tied at both ends, weighted with a stone, lying under a waterline. Drawn from docs/mark-prompts.md. Strokes are currentColor so the mark themes itself. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Bundle of flax stems -->
+  <path d="M10 30 L54 30"/>
+  <path d="M11 34 L53 34"/>
+  <path d="M12 38 L52 38"/>
+  <!-- Ties at both ends -->
+  <path d="M10 27 C7 32 7 36 10 41"/>
+  <path d="M54 27 C57 32 57 36 54 41"/>
+  <!-- Stone weighting the bundle -->
+  <path d="M26 22 C26 18 30 16 34 16 C38 16 42 18 42 22 L40 27 L28 27 Z"/>
+  <!-- Waterline across the bundle -->
+  <path d="M6 36 C16 33 24 39 32 36 C40 33 48 39 58 36"/>
+</svg>
