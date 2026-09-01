@@ -396,6 +396,27 @@ export function hasSomethingNew(progress: Progress, npcId: string): boolean {
 }
 
 /**
+ * Whether the player has never spoken to this person.
+ *
+ * Drives the longer opening exchange: on a first meeting somebody introduces themselves in the
+ * two or three lines their author gave them, and afterwards says the newest useful thing instead.
+ *
+ * **Derived, like everything else about a conversation.** A person has been met when something
+ * they hand over has been taken, which is the same evidence `lineIsSpent` reads. The alternative
+ * — a list of met people in `Progress` — is state that has to be saved, migrated and kept in step
+ * with a bundle that can be re-exported underneath it.
+ *
+ * The one thing it cannot see is a person whose every line is free: nothing they say leaves a
+ * trace, so every visit is a first meeting. That is Uma before a mat changes hands, and replaying
+ * her introduction is the right behaviour anyway — she has nothing else to say yet.
+ */
+export function isFirstMeeting(progress: Progress, npcId: string): boolean {
+  const who = npc(npcId);
+  if (!who) return false;
+  return !who.lines.some((l) => l.gives.length > 0 && lineIsSpent(progress, l));
+}
+
+/**
  * Whether a gated sub-location will open.
  *
  * Entry asks for understanding, not merely observation — the opposite of a conversation. The

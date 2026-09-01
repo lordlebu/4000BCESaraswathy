@@ -76,6 +76,30 @@ export function App() {
   // `progress` does.
   const [satchel, setSatchel] = useState(initialJourney.current.satchel ?? emptySatchel());
 
+  /**
+   * The current progress and satchel, readable synchronously.
+   *
+   * **Only for handlers that fire more than once in a tick.** A conversation now does: leaving a
+   * place mid-exchange reports every line still to be said, one call each, and a handler reading
+   * `progress` from its closure would hand all of them the same starting state — so only the last
+   * would survive and the question somebody was giving you would vanish. React state is not
+   * readable between two calls in the same tick; a ref is.
+   *
+   * Everything else should read the state directly. This is a workaround for a batching rule, not
+   * a second copy of the truth, and it is kept in step immediately below.
+   */
+  const latest = useRef({
+    progress: initialJourney.current.progress,
+    satchel: initialJourney.current.satchel ?? emptySatchel()
+  });
+
+  // Kept in step after every commit, so anything that changes progress or the satchel by another
+  // route -- looking at something, crafting, gathering -- is visible to the next conversation.
+  useEffect(() => {
+    latest.current.progress = progress;
+    latest.current.satchel = satchel;
+  }, [progress, satchel]);
+
   // The three scales. `fieldMapId` is the country under foot; `poiId` is the authored place
   // being stood in, if any; a sub-location opens inside the place panel rather than here,
   // because going deeper into a ruin is not leaving it.
@@ -259,14 +283,31 @@ export function App() {
    * like it worked. `satchel` is in the dependency list rather than read through a ref
    * because paying with a stale one would spend something already spent.
    */
-  const listen = useCallback(
-    (npcId: string, lineIndex: number) => {
-      const heard = hear(progress, npcId, lineIndex, satchel);
-      setProgress(heard.progress);
-      if (heard.paid) setSatchel(heard.satchel);
-    },
-    [progress, satchel]
-  );
+  /**
+   * Hear one line, and take what it gives.
+   *
+   * **Updated from the previous state rather than from the captured one.** A conversation can now
+   * report several lines in a single tick — leaving a place mid-exchange records everything that
+   * was still to be said — and a handler that read `progress` from its closure gave each of those
+   * calls the *same* starting state, so only the last one survived. Thrali would hand over his
+   * question and the panel would drop it on the way out.
+   *
+   * The satchel is updated the same way and for the same reason, though only a line with a price
+   * touches it.
+   */
+  const listen = useCallback((npcId: string, lineIndex: number) => {
+    // Both halves come from one `hear`, so the price and what it bought cannot come apart. The
+    // refs are what make a run of calls in a single tick each see the one before it: a state
+    // setter's argument is not readable until React re-renders, and by then the rest of the
+    // exchange has already been reported.
+    const heard = hear(latest.current.progress, npcId, lineIndex, latest.current.satchel);
+    latest.current.progress = heard.progress;
+    setProgress(heard.progress);
+    if (heard.paid) {
+      latest.current.satchel = heard.satchel;
+      setSatchel(heard.satchel);
+    }
+  }, []);
 
   /**
    * Where the traveller stands, as far as making is concerned.

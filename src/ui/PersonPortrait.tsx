@@ -32,6 +32,12 @@ import type { Npc } from '../content/places';
  *
  * Uma has no language in canon -- she is the roofer at the Lothal camp and teaches no words -- so
  * she takes the neutral ink rather than being assigned one.
+ *
+ * **`sarv` currently draws nothing.** Canon has no speaker of it and no word in it -- the string
+ * appears nowhere in the database -- so this entry has never rendered. It is kept rather than
+ * deleted because the cost of a spare colour is nothing and the cost of a person arriving in a
+ * language with no ink is a portrait that silently reads as "no language". If canon still has no
+ * `sarv` by the time anybody is tidying this file, delete it; it is not load-bearing.
  */
 export const LANGUAGE_INK: Record<string, string> = {
   kia: '#3d7a8c',
@@ -91,6 +97,15 @@ export function toolFor(role: string): string | null {
 export interface PersonPortraitProps {
   person: Pick<Npc, 'name' | 'role' | 'language'>;
   size?: number;
+  /**
+   * Whether this person is mid-sentence.
+   *
+   * Drives a small idle shift while they talk and stillness when they stop. It is two frames and
+   * a few pixels on purpose: enough that the eye reads somebody as present rather than as a label,
+   * and far short of animation, which at this size turns into fidgeting. Motion is dropped
+   * entirely under `prefers-reduced-motion` -- see `styles.css`.
+   */
+  speaking?: boolean;
 }
 
 /**
@@ -99,13 +114,13 @@ export interface PersonPortraitProps {
  * Presentational: the name sits beside it and already says who this is, so a screen reader
  * announcing "portrait, Thrali" would be worse than one announcing "Thrali".
  */
-export function PersonPortrait({ person, size = 26 }: PersonPortraitProps) {
+export function PersonPortrait({ person, size = 26, speaking = false }: PersonPortraitProps) {
   const ink = LANGUAGE_INK[person.language] ?? NEUTRAL_INK;
   const tool = toolFor(person.role);
 
   return (
     <svg
-      className="person-portrait"
+      className={`person-portrait${speaking ? ' is-speaking' : ''}`}
       width={size}
       height={size}
       viewBox="0 0 24 24"
