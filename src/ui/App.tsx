@@ -21,6 +21,7 @@ import { fieldMap, poi } from '../content/places';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
 import { RecordTabs, type RecordTab } from './Records';
+import { seedFromUrl } from './seed';
 import { WorkshopPanel } from './WorkshopPanel';
 import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
@@ -35,14 +36,6 @@ import { loadJourney, saveJourney } from '../save';
 import { advance, answer, craft, hear, knowsRecipe, type WorldMoment } from '../journey';
 import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import type { World } from '../world/types';
-
-const DEFAULT_SEED = 'jambhudweepa-evening';
-
-/** A seed in the URL makes a journey shareable — the whole world travels in the link. */
-function seedFromUrl(): string {
-  const fromQuery = new URLSearchParams(window.location.search).get('seed');
-  return fromQuery?.trim() || DEFAULT_SEED;
-}
 
 /**
  * Which country to open on, for a link that wants to start somewhere other than Lothal.

@@ -840,6 +840,51 @@ button.ghost:hover:not(:disabled) {
 .made-out::before { content: ' — '; color: var(--muted); }
 .made-out { color: var(--muted); }
 
+/* --- When something throws ------------------------------------------------
+ *
+ * Until the boundary existed, an uncaught error blanked the page: React unmounts the whole tree
+ * and nothing was catching it. This is what stands in its place -- the same paper as every other
+ * panel, because a player who has hit a fault should not also be dropped out of the world's
+ * register into a browser error page. */
+
+.fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(27, 20, 32, 0.72);
+}
+
+.fallback-sheet {
+  max-width: 30rem;
+  padding: 22px 24px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(20, 14, 24, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fallback-sheet h2 { margin: 0; }
+.fallback-sheet p { margin: 0; }
+
+/* The seed is the whole world in a word. Monospaced and selectable, because the useful thing to
+   do with it is copy it. */
+.fallback-seed span {
+  font-family: var(--mono, ui-monospace, monospace);
+  user-select: all;
+}
+
+.fallback-sheet button {
+  align-self: flex-start;
+  min-height: 40px;
+}
+
 /* --- Records: two tabs, one sheet -----------------------------------------
  *
  * The diary and the album are the two things a player *has*, and they were two controls in a bar

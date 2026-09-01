@@ -123,8 +123,26 @@ than before it.
 `tools/build-terrain.js` converts art, it does not invent it. Canon's half of lava is largely
 done.
 
-**3. Hardening deferred.** The above is the resilience pass, not a hardening pass. Load limits,
-malformed-canon handling and error recovery in the scene are deliberately not addressed yet.
+**3. Hardening — done, and two of its three items were not real.**
+
+The deferred list named load limits, malformed-canon handling and error recovery. Checking each
+before writing code found that only the last one existed.
+
+**Load limits are already gated.** Canon's `check_export_boundary.py` refuses a bundle over
+560 KB, and it sits at 494 KB. That gate was added during the making-layer work and the note here
+had not caught up.
+
+**Malformed canon cannot happen at runtime.** The bundle is `import`ed, not fetched — Vite inlines
+it at build time, so a broken `species.json` fails the build rather than reaching a player. Adding
+runtime validation would be guarding against a state the architecture makes unreachable, and would
+cost every load a parse it does not need.
+
+**Error recovery was the real gap, and it was worse than "recovery".** There was no boundary
+anywhere: React unmounts the whole tree when a render throws, so a single fault took the map, the
+notes and the diary with it and left a white screen with no way back. `ui/Fallback.tsx` catches it
+and offers the one thing that matters — a reload, which re-reads the save, and the seed, which is
+the whole world in a word. It sits outside `StrictMode` so it also catches a fault during the
+double render StrictMode performs in development, which is where a new bug shows up first.
 
 ## Known: the maps are the weakest part, and it is not the art
 
