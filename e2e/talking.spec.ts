@@ -44,14 +44,22 @@ test('the second thing arrives only when asked for', async ({ page }) => {
   // One beat on screen: the current one. Everything else is still held back.
   await expect(beats).toHaveCount(1);
 
-  // A click completes the sentence being typed; only a click on a finished one advances. So the
-  // first click may do either depending on how fast the typing got here, and the test must not
-  // assume which -- it clicks until a second beat exists, and fails if that never happens.
+  // A click completes the sentence being typed; only a click on a finished one advances. Which of
+  // those the first click does depends on how fast the typing got here, so the test clicks until a
+  // second beat exists rather than assuming a count.
+  //
+  // **This is the test that caught the reveal bug on CI.** Clicking used to complete the sentence
+  // and then have the still-running interval overwrite it a frame later, so no number of clicks
+  // ever advanced the exchange. It passed locally, where the typing finishes in about a second,
+  // and failed on a runner with no GPU, where it does not.
   const goOn = person.getByRole('button', { name: /Go on/ });
   await expect(async () => {
-    if (await goOn.isVisible()) await goOn.click();
-    await expect(beats).toHaveCount(2, { timeout: 1_000 });
-  }).toPass({ timeout: 15_000 });
+    // If the control has gone, the exchange has run out of beats and clicking will never help --
+    // surface that rather than spinning to the outer timeout.
+    await expect(goOn, 'expected another beat to be offered').toBeVisible({ timeout: 2_000 });
+    await goOn.click();
+    await expect(beats).toHaveCount(2, { timeout: 2_000 });
+  }).toPass({ timeout: 30_000 });
 
   // And the first is still there -- half these lines are the only place a word is explained.
   await expect(beats.first()).toBeVisible();

@@ -44,7 +44,7 @@ below for why that matters.
 
 ## Four things found by measuring
 
-Each of these was believed to be settled before it was checked.
+Each of these was believed to be settled before it was checked. Two more, found later by CI, are below.
 
 **1. The comment claiming everybody has one opening line was wrong.** `conversation.ts` carried
 "almost everybody has exactly *one* line available on arrival", which is why `saysNow` returns one
@@ -76,6 +76,34 @@ doing something in the gap** — Uma says *"Sit."*, the player tries, and she sa
 butt the reeds against the frame"*. Six lines use the first form and five the second. Splitting on
 both breaks Marn; splitting on neither loses all five of those silences. `beats()` splits only where
 a dash follows `.`/`?`/`!`, and drops the dash, which is stage direction.
+
+## Two more, found by CI
+
+Both were invisible locally and both were caught by the browser suite on a runner with no GPU,
+where software rendering stretches the typing out by roughly 3.7x. Neither could have been found by
+reading the code.
+
+**5. A click completed the sentence and the reveal put it back.** `advance()` set the text to the
+whole beat, and the `setInterval` still running for that beat overwrote it on its very next tick
+with the handful of characters it had reached. So the documented behaviour — *a click completes the
+beat* — did nothing a player could see, and no number of clicks advanced the exchange until the
+typing finished on its own. Locally a beat types out in about a second and the window is too narrow
+to notice. On CI it is wide enough that `e2e/talking.spec.ts` clicked, got nothing, and timed out.
+The interval is now held in a ref and stopped before the text is completed.
+
+**The unit test that should have caught it passed, and guarded nothing.** It clicked mid-typing and
+asserted the text was whole — but never let the clock run afterwards, so it never saw the overwrite.
+The fix to the test is a 100ms advance, and the size matters in both directions: the first attempt
+advanced 2000ms, by which time the beat has typed itself out anyway, and the sabotage check passed
+against deliberately broken code. **A generous wait hid the bug exactly as the missing wait did.**
+
+**6. Under StrictMode, mounting reported every line as heard.** React runs each effect's cleanup
+once on mount in development to prove it is safe to run twice, and the leave path is an unmount
+cleanup — so walking up to somebody marked all of their lines heard before a character of the first
+was drawn. That is the original bug, reintroduced through the fix for fault 2, and it lived in
+development only, which is exactly where the browser suite runs. Nothing has been typed at that
+moment and something always has been by the time a player can leave, so the reveal being empty is
+the discriminator.
 
 ## Beats
 

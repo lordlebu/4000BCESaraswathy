@@ -10,6 +10,7 @@
 // flaky, and neither would be testing the component.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { StrictMode } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Dialogue } from '../src/ui/Dialogue';
 
@@ -75,6 +76,19 @@ describe('Dialogue', () => {
     });
     fireEvent.click(screen.getByRole('button'));
     // The first beat is now whole, and the second has not started.
+    expect(screen.getByText(/still being typed out right now/)).toBeTruthy();
+    expect(screen.queryByText(/^Next\./)).toBeNull();
+
+    // **And it stays whole on the very next tick.** This assertion is the whole test. Without it
+    // the version above passed against a component whose reveal was still running and overwrote
+    // the completed text a frame later, so the click did nothing a player could see.
+    //
+    // The window has to be short. That sentence types itself out in about 880ms unaided, so
+    // advancing past that finds it complete either way and proves nothing -- the overwrite is
+    // transient, and a generous wait hides it exactly as the missing wait did.
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
     expect(screen.getByText(/still being typed out right now/)).toBeTruthy();
     expect(screen.queryByText(/^Next\./)).toBeNull();
   });
@@ -181,5 +195,34 @@ describe('Dialogue', () => {
     // every time a letter lands.
     expect(live).toHaveLength(1);
     expect(live[0]?.getAttribute('aria-atomic')).toBe('true');
+  });
+});
+
+// React runs every effect's cleanup once on mount under StrictMode, to prove it is safe to run
+// twice. The leave path is an unmount cleanup, so that simulated unmount fired it -- and merely
+// walking up to somebody reported all of their lines as heard before a character was drawn. It is
+// the bug this component exists to remove, reintroduced through its own leave path, and it lived
+// in development only, which is exactly where the browser suite runs.
+describe('under StrictMode', () => {
+  it('does not report a single beat merely by mounting', () => {
+    const heard = vi.fn();
+    render(
+      <StrictMode>
+        <Dialogue beats={['One.', 'Two.', 'Three.']} onBeatDone={heard} />
+      </StrictMode>
+    );
+    expect(heard).not.toHaveBeenCalled();
+  });
+
+  it('still reports on a real unmount', () => {
+    const heard = vi.fn();
+    const { unmount } = render(
+      <StrictMode>
+        <Dialogue beats={['One.', 'Two.', 'Three.']} onBeatDone={heard} />
+      </StrictMode>
+    );
+    typeItOut();
+    unmount();
+    expect(heard).toHaveBeenCalledTimes(3);
   });
 });

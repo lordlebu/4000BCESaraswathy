@@ -105,6 +105,29 @@ export function Dialogue({
     setTyped('');
   }, [key]);
 
+  /**
+   * The reveal in progress.
+   *
+   * **Held in a ref because completing a beat has to be able to stop it.** Without this the click
+   * that finishes a sentence set the text to the whole thing and the interval, still running,
+   * overwrote it on its very next tick with the few characters it had reached — so the line
+   * visibly snapped back to partial and the documented "a click completes the beat" did nothing
+   * until the typing caught up on its own.
+   *
+   * It survived a unit test that clicked mid-typing and asserted the text was whole, because that
+   * test never let the clock run afterwards. What caught it was the browser suite on CI, where
+   * software rendering stretches the typing out far enough that a click almost always lands
+   * inside the window: `e2e/talking.spec.ts` clicked, got nothing, and timed out.
+   */
+  const ticking = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopTyping = useCallback(() => {
+    if (ticking.current !== null) {
+      clearInterval(ticking.current);
+      ticking.current = null;
+    }
+  }, []);
+
   // Type the current beat.
   useEffect(() => {
     if (!current) return;
@@ -115,13 +138,13 @@ export function Dialogue({
     setTyped('');
     const step = Math.max(1, Math.round((CHARS_PER_SECOND * TICK_MS) / 1000));
     let at = 0;
-    const timer = setInterval(() => {
+    ticking.current = setInterval(() => {
       at = Math.min(current.length, at + step);
       setTyped(current.slice(0, at));
-      if (at >= current.length) clearInterval(timer);
+      if (at >= current.length) stopTyping();
     }, TICK_MS);
-    return () => clearInterval(timer);
-  }, [current, shown, key]);
+    return stopTyping;
+  }, [current, shown, key, stopTyping]);
 
   // Report a finished beat exactly once. `shown` is in the dependency list because the same text
   // can legitimately appear twice in one exchange.
@@ -137,14 +160,16 @@ export function Dialogue({
   }, [complete, current, shown, onBeatDone]);
 
   const advance = useCallback(() => {
-    // Impatience finishes the sentence rather than losing it.
+    // Impatience finishes the sentence rather than losing it. Stop the reveal first, or its next
+    // tick undoes what this just did.
     if (!complete) {
+      stopTyping();
       setTyped(current);
       return;
     }
     if (last) onDone?.();
     else setShown((n) => n + 1);
-  }, [complete, current, last, onDone]);
+  }, [complete, current, last, onDone, stopTyping]);
 
   // On the way out, report whatever was never reached. Held in a ref and read from the cleanup
   // because an unmount cleanup closes over the render it was created in, and the count of beats
@@ -152,6 +177,17 @@ export function Dialogue({
   const onLeave = useRef<() => void>(() => {});
   onLeave.current = () => {
     if (!keepOnLeave) return;
+    // **Only once the exchange has actually begun.** React runs every effect's cleanup on mount
+    // under StrictMode, to prove it is safe to run twice -- and that simulated unmount fired this,
+    // so merely walking up to somebody reported every one of their lines as heard before a
+    // character of the first had been drawn. That is precisely the bug this component was written
+    // to remove, reintroduced through its own leave path, and it hid in development only, which is
+    // where the browser suite runs.
+    //
+    // Nothing has been typed at that moment and something always has been by the time a player can
+    // leave, so the emptiness of the reveal is the discriminator. It needs no timer and no second
+    // mount flag, both of which were tried and are harder to reason about than this.
+    if (typed.length === 0) return;
     for (let i = reported.current + 1; i < beats.length; i += 1) onBeatDone?.(i);
   };
   useEffect(() => () => onLeave.current(), []);
