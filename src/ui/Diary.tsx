@@ -137,6 +137,8 @@ export interface DiaryProps {
    * own: taking a copy is something you do to a record you have just read.
    */
   footer?: ReactNode;
+  /** Tabs, when this panel is one of two records behind one door. See `Records.tsx`. */
+  tabs?: ReactNode;
 }
 
 export function Diary({
@@ -147,7 +149,8 @@ export function Diary({
   onAnswer,
   onOpenEnding,
   onOpenKit,
-  footer
+  footer,
+  tabs
 }: DiaryProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -184,6 +187,7 @@ export function Diary({
   return (
     <div className="diary-veil" role="dialog" aria-modal="true" aria-label="Field diary">
       <section className={`diary diary-${density}`}>
+        {tabs}
         <header className="diary-head">
           <div>
             <h2>Field Diary</h2>

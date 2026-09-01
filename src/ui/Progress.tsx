@@ -13,6 +13,7 @@
 // The route stays export-only. It is trip history rather than something the player made, and
 // on screen it competed with the understanding this surface is for.
 
+import type { ReactNode } from 'react';
 import { Diary } from './Diary';
 import type { Progress as Knowledge, WorldMoment } from '../journey';
 
@@ -28,6 +29,8 @@ export interface ProgressProps {
   replayUrl: string | null;
   onExportImage: () => void;
   onExportText: () => void;
+  /** Tabs, when this panel is one of two records behind one door. See `Records.tsx`. */
+  tabs?: ReactNode;
 }
 
 export function Progress({
@@ -40,12 +43,14 @@ export function Progress({
   onOpenKit,
   replayUrl,
   onExportImage,
-  onExportText
+  onExportText,
+  tabs
 }: ProgressProps) {
   if (!open) return null;
 
   return (
     <Diary
+      tabs={tabs}
       progress={progress}
       moment={moment}
       open

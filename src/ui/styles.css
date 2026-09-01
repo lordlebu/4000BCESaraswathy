@@ -815,6 +815,50 @@ button.ghost:hover:not(:disabled) {
   }
 }
 
+/* --- Records: two tabs, one sheet -----------------------------------------
+ *
+ * The diary and the album are the two things a player *has*, and they were two controls in a bar
+ * that otherwise holds only things a player can *do*. One door, tabbed inside.
+ *
+ * The strip renders into each panel's own `tabs` slot rather than floating over it. Floating was
+ * the first attempt: both panels draw a full-screen veil at `z-index: 40`, so tabs positioned
+ * against the page sat underneath and the second one could not be clicked at all. */
+
+.records-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.records-tab {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 5px 14px;
+  min-height: 34px;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* The showing tab takes the accent, the other stays an outline. Same treatment the control bar
+   gives a pressed toggle, so a tab reads as the same kind of thing. */
+.records-tab.is-on {
+  background: var(--accent);
+  color: #fff8ec;
+  border-color: transparent;
+}
+
+.records-count {
+  font-style: normal;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
 /* --- The album's search and its headings ---------------------------------
  *
  * A single map holds 145 to 193 distinct species, so the two flat lists this had were fine at

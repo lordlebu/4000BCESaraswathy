@@ -19,6 +19,7 @@ import { initialSurface, surfaceReducer } from './surface';
 import { fieldMap, poi } from '../content/places';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
+import { RecordTabs, type RecordTab } from './Records';
 import { WorkshopPanel } from './WorkshopPanel';
 import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
@@ -476,9 +477,16 @@ export function App() {
         seed={seed}
         onGenerate={generate}
         metCount={size(collection)}
-        onOpenCollection={() => dispatch({ type: 'toggle', surface: 'collection' })}
         diaryCount={diaryCount(progress)}
-        onOpenDiary={() => dispatch({ type: 'toggle', surface: 'progress' })}
+        recordsOpen={surface === 'progress' || surface === 'collection'}
+        // Opens on the journey, which is the one a player is more often coming back to -- the
+        // album is browsed and the diary is worked. Toggling closes whichever is showing.
+        onOpenRecords={() =>
+          dispatch({
+            type: 'toggle',
+            surface: surface === 'collection' ? 'collection' : 'progress'
+          })
+        }
         carryCount={distinct(satchel)}
         offeredHere={offeredHere(bench, knowsRecipeHere).length}
         onOpenWorkshop={() => dispatch({ type: 'open-interrupt', which: 'workshop' })}
@@ -504,7 +512,25 @@ export function App() {
         )}
       </div>
 
+      {/* One door, two tabs. The panels are unchanged -- each keeps its own escape handling and
+          focus behaviour, because they were right before this and consolidating surfaces is not a
+          licence to rewrite them. The strip renders into each panel's own `tabs` slot rather than
+          floating over it: both draw a full-screen veil, so anything positioned above the page
+          sits underneath them. */}
       <Progress
+        tabs={
+          <RecordTabs
+            tab="journey"
+            onTab={(tab: RecordTab) =>
+              dispatch({
+                type: 'show',
+                surface: tab === 'collection' ? 'collection' : 'progress'
+              })
+            }
+            journeyCount={diaryCount(progress)}
+            metCount={size(collection)}
+          />
+        }
         progress={progress}
         moment={moment}
         open={surface === 'progress'}
@@ -518,6 +544,19 @@ export function App() {
       />
 
       <CollectionPanel
+        tabs={
+          <RecordTabs
+            tab="collection"
+            onTab={(tab: RecordTab) =>
+              dispatch({
+                type: 'show',
+                surface: tab === 'collection' ? 'collection' : 'progress'
+              })
+            }
+            journeyCount={diaryCount(progress)}
+            metCount={size(collection)}
+          />
+        }
         collection={collection}
         open={surface === 'collection'}
         onClose={() => dispatch({ type: 'close' })}

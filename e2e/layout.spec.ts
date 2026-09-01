@@ -115,7 +115,7 @@ test('progress opens and closes, and reading it does not walk the traveller', as
   // `.journal` is not in the DOM while it is up. That is the surface rule, not a timing quirk.
   const where = await page.locator('.journal h2').textContent();
 
-  await page.getByRole('button', { name: /Diary/ }).click();
+  await page.getByRole('button', { name: /Records/ }).click();
   await expect(diary).toBeVisible();
 
   // A tap on the panel is a tap on the panel, not a move order to the map underneath it.

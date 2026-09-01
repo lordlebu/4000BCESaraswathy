@@ -30,7 +30,7 @@ async function boot(page: Page) {
 }
 
 async function openDiary(page: Page) {
-  await page.getByRole('button', { name: /^Diary/ }).click();
+  await page.getByRole('button', { name: /Records/ }).click();
   await expect(page.locator('.diary')).toBeVisible();
 }
 
