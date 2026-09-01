@@ -29,6 +29,9 @@ export interface ControlsProps {
   /** The field notes along the bottom. Closable like everything else now. */
   notesOpen: boolean;
   onToggleNotes: () => void;
+  /** Whether the satchel ribbon is showing. */
+  satchelRibbon: boolean;
+  onToggleSatchelRibbon: () => void;
   /** The authored place under foot, if any — the button is only useful when standing on one. */
   placeName: string | null;
   placeOpen: boolean;
@@ -48,6 +51,8 @@ export function Controls({
   onOpenOverworld,
   notesOpen,
   onToggleNotes,
+  satchelRibbon,
+  onToggleSatchelRibbon,
   placeName,
   placeOpen,
   onTogglePlace
@@ -81,6 +86,20 @@ export function Controls({
         >
           <span aria-hidden="true">✒</span>
           <span className="control-label">Notes</span>
+        </button>
+
+        {/* The ribbon has an off switch for the same reason the notes do: the map is the thing
+            somebody came to look at, and a permanent band that cannot be dismissed is an
+            obstruction rather than a convenience. Reported from play. */}
+        <button
+          type="button"
+          className={satchelRibbon ? 'control control-on' : 'control'}
+          aria-pressed={satchelRibbon}
+          aria-label={`Satchel ribbon, ${satchelRibbon ? 'showing' : 'hidden'}`}
+          onClick={onToggleSatchelRibbon}
+        >
+          <span aria-hidden="true">◑</span>
+          <span className="control-label">Carrying</span>
         </button>
 
         <button type="button" className="control" aria-label="Where to go" onClick={onOpenOverworld}>

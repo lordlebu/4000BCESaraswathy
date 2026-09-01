@@ -101,7 +101,7 @@ export function App() {
    * you had dismissed.
    */
   const [ui, dispatch] = useReducer(surfaceReducer, initialSurface);
-  const { surface, interrupts, standingOn, placeOpen } = ui;
+  const { surface, interrupts, standingOn, placeOpen, satchelRibbon } = ui;
 
   // The scene owns the clock and says when it turns. React used to run its own timer off the
   // same formulas, which is two clocks agreeing by luck -- and they would have drifted the
@@ -490,14 +490,18 @@ export function App() {
         }
         notesOpen={surface === 'here'}
         onToggleNotes={() => dispatch({ type: 'toggle', surface: 'here' })}
+        satchelRibbon={satchelRibbon}
+        onToggleSatchelRibbon={() => dispatch({ type: 'toggle-satchel-ribbon' })}
         placeName={standingOn ? poi(standingOn)?.name ?? null : null}
         placeOpen={placeOpen}
         onTogglePlace={() => dispatch({ type: 'toggle-place' })}
       />
-        <SatchelStrip
-          satchel={satchel}
-          onOpen={() => dispatch({ type: 'open-interrupt', which: 'satchel' })}
-        />
+        {satchelRibbon && (
+          <SatchelStrip
+            satchel={satchel}
+            onOpen={() => dispatch({ type: 'open-interrupt', which: 'satchel' })}
+          />
+        )}
       </div>
 
       <Progress
