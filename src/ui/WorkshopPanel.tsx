@@ -200,7 +200,16 @@ function Makeable({
         {verb && (
           <span className="recipe-verb">
             {' · '}
-            <span aria-hidden="true">{PROCESS_MARK[verb] ?? ''}</span> {verb}
+            {/* Through `ThingIcon` rather than printing the emoji directly, so a drawn mark in
+                `src/ui/marks/` replaces it. Four of the seventeen processes have one -- the
+                Bronze-Age crafts Unicode never encoded -- and rendering the emoji here meant
+                they could never appear. */}
+            <ThingIcon
+              mark={PROCESS_MARK[verb] ?? ''}
+              label={verb}
+              word={{ namespace: 'process', value: verb }}
+            />{' '}
+            {verb}
           </span>
         )}
       </p>

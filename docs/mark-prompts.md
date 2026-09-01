@@ -14,8 +14,10 @@ and `PROCESS_MARK` in `src/ui/ThingIcon.tsx`. Emoji are preferred wherever one i
 theme themselves, cost nothing, need no attribution, and an exhaustive `Record` makes a missing
 one a *build failure*, which a folder of files can never do.
 
-**Four have no emoji that fits**, and they are exactly the Bronze-Age crafts Unicode never had
-reason to encode:
+**Four had no emoji that fits** — the Bronze-Age crafts Unicode never had reason to encode — and
+**all four are now drawn.** They live in `src/ui/marks/` as `process-casting.svg`,
+`process-grinding.svg`, `process-pressing.svg` and `process-retting.svg`. The queue below is kept
+because it records what was asked for and why, not because anything is outstanding.
 
 | word | file to drop | stand-in today | why the stand-in is wrong |
 |---|---|---|---|
@@ -24,7 +26,21 @@ reason to encode:
 | `pressing` | `process-pressing.svg` | 🫒 olive | the fruit, not the press — and canon presses sesame and mahua, not olives |
 | `retting` | `process-retting.svg` | 🌾 sheaf | standing flax, where retting is flax *submerged and rotting* |
 
-That is the whole queue. Four files.
+That was the whole queue, and it is done.
+
+Two arrived as SVG and needed only two changes: `stroke="#000000"` became `currentColor` so they
+theme themselves, and the grain scatter on the quern was five zero-length paths, which render
+nothing — they are circles now.
+
+Two arrived as PNG, and were **redrawn rather than traced**. An auto-trace of a thick-outline
+raster produces doubled contours either side of every stroke, which reads as mush at the twenty
+pixels these actually appear at. The subjects were right and the form was wrong for the size, so
+they were drawn once from the same description. The pressing PNG also arrived on a magenta ground
+with a stray sparkle in the corner, which is its own argument for not tracing it.
+
+**Check a mark at 20px before accepting it.** All four were rendered at 56, 28 and 20 together, as
+a set, because the thing that matters is not whether one is good but whether four read as one
+hand.
 
 ## Where they go
 

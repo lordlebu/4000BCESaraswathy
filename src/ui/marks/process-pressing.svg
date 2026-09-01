@@ -1,0 +1,20 @@
+<!-- Pressing: a lever beam weighted with a stone, bearing down on a stacked basket of seed, oil
+     running into a shallow bowl. Redrawn as SVG from `assets/source/dump/Gemini_process-pressing.png`
+     -- right subject, wrong form for this size, and it arrived on a magenta ground with a stray
+     sparkle in the corner. Simplified to what survives at 20px: the beam, the weight, one basket
+     rather than three, and the drip.
+
+     Strokes are currentColor so the mark themes itself, as `ShelterMark` does. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+  <!-- The upright the beam pivots against. -->
+  <path d="M18 16 L18 56"/>
+  <!-- The lever beam. -->
+  <path d="M7 22 L57 26"/>
+  <!-- The stone weighting its short end. -->
+  <path d="M6 14 C10 12 15 14 15 18 C15 22 10 24 6 22 Z"/>
+  <!-- The basket of seed under the long end. -->
+  <path d="M32 30 L54 30 L50 42 L36 42 Z"/>
+  <!-- Oil running out, into a shallow bowl. -->
+  <path d="M43 42 L43 48"/>
+  <path d="M34 50 C36 56 50 56 52 50 Z"/>
+</svg>

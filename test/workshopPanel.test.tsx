@@ -93,6 +93,22 @@ describe('the workshop', () => {
     expect(screen.getAllByRole('button', { name: 'Not yet' }).length).toBeGreaterThan(0);
   });
 
+  it('draws a process that has a drawing, and keeps the emoji for one that does not', () => {
+    // Four of seventeen processes have a drawn mark -- the Bronze-Age crafts Unicode never
+    // encoded. The panel printed `PROCESS_MARK` directly for a while, which meant those four
+    // could never appear however many files landed in `src/ui/marks/`.
+    let s = add(emptySatchel(), 'material_reed_fibre', 12);
+    s = add(s, 'material_grain', 12);
+    const { container } = render(<WorkshopPanel {...base} satchel={s} />);
+
+    const verbs = [...container.querySelectorAll('.recipe-verb')].map((n) => n.textContent ?? '');
+    expect(verbs.length, 'no recipes listed, so this proves nothing').toBeGreaterThan(0);
+
+    // At least one drawing on screen, and at least one emoji still doing its job.
+    expect(container.querySelectorAll('.thing-mark-drawn').length).toBeGreaterThan(0);
+    expect(verbs.some((v) => /\p{Extended_Pictographic}/u.test(v))).toBe(true);
+  });
+
   it('closes when asked', () => {
     const onClose = vi.fn();
     render(<WorkshopPanel {...base} satchel={emptySatchel()} onClose={onClose} />);
