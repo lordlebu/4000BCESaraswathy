@@ -815,6 +815,31 @@ button.ghost:hover:not(:disabled) {
   }
 }
 
+/* --- What one click actually did -----------------------------------------
+ *
+ * One press of Make can run four recipes. A panel that consumed four materials in silence is
+ * indistinguishable from a cheat, so it prints the run: smelted the ore, poured the ingot, cast
+ * the blade. Numbered, because the order is the point -- it is a short account of how the thing
+ * came to exist, and it teaches the process the click just spared. */
+
+.made-steps {
+  margin: 0;
+  padding-left: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.86rem;
+}
+
+.made-steps li { line-height: 1.45; }
+
+.made-what { font-weight: 600; }
+
+/* The output sits after the step rather than under it: at four rungs a stacked pair per line is
+   eight lines for one click, which is longer than the thing it is apologising for. */
+.made-out::before { content: ' — '; color: var(--muted); }
+.made-out { color: var(--muted); }
+
 /* --- Records: two tabs, one sheet -----------------------------------------
  *
  * The diary and the album are the two things a player *has*, and they were two controls in a bar

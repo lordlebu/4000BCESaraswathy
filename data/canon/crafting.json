@@ -2365,7 +2365,10 @@
       "needs": [
         "work"
       ],
-      "notes": "Grain to flour, ochre to pigment, bark to powder. One quern does all three and the household that owns it does not lend it.",
+      "performed_at": [
+        "settlement"
+      ],
+      "notes": "Grain to flour, ochre to pigment, bark to powder. One quern does all three and the household that owns it does not lend it -- which is why this is sited: a saddle quern is two heavy stones that live somewhere, and nobody carries one.",
       "source_index": 11
     },
     {

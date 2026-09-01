@@ -9,6 +9,7 @@ import { Here } from './Here';
 import { SHELTER_LABEL } from './JournalPanel';
 import { ShelterMark } from './ShelterMark';
 import type { TileAction } from './TileActions';
+import type { Step } from '../content/making-chain';
 import { CollectionPanel } from './CollectionPanel';
 import { Progress } from './Progress';
 import { diaryCount } from './Diary';
@@ -367,12 +368,22 @@ export function App() {
    * object the moment it is given away, and the keepsake at the end is built from what was
    * made rather than from what is still carried.
    */
+  /**
+   * The rungs of the last thing made, for the workshop to print.
+   *
+   * Held here rather than in the panel because the panel is not the thing that made it -- and a
+   * log that lived in the panel would vanish the moment it closed, which is exactly when a player
+   * wants to reread what just happened.
+   */
+  const [lastMade, setLastMade] = useState<Step[]>([]);
+
   const makeHere = useCallback(
     (recipeId: string) => {
       const done = craft(progress, satchel, recipeId, bench);
       if (!done.made) return;
       setProgress(done.progress);
       setSatchel(done.satchel);
+      setLastMade(done.steps);
     },
     [progress, satchel, bench]
   );
@@ -581,6 +592,7 @@ export function App() {
         bench={bench}
         knows={knowsRecipeHere}
         onMake={makeHere}
+        lastMade={lastMade}
         open={interrupts.workshop}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'workshop' })}
       />

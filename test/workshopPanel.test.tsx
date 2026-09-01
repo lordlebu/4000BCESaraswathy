@@ -21,6 +21,7 @@ afterEach(cleanup);
 
 const base = {
   bench: openGround(),
+  lastMade: [],
   // Everything known, so these ask about ingredients and ground rather than about teaching.
   knows: () => true,
   onMake: () => {},
