@@ -18,10 +18,11 @@ import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { fieldMap, poi } from '../content/places';
 import { SatchelPanel } from './SatchelPanel';
+import { SatchelStrip } from './SatchelStrip';
 import { WorkshopPanel } from './WorkshopPanel';
 import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
-import { anythingAt, gather, gatheredLine } from '../content/gathering';
+import { gather, gatheredLine } from '../content/gathering';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
@@ -466,6 +467,11 @@ export function App() {
         fieldMapId={fieldMapFromUrl()}
       />
 
+      {/* The bar and the satchel strip stack together in the top-left. The strip is always on
+          screen because every other decision is read against it -- see the note at the top of
+          `SatchelStrip` -- and it flows under the bar rather than sitting at a fixed offset,
+          because the bar wraps to two rows on a narrow phone. */}
+      <div className="controls-stack">
       <Controls
         seed={seed}
         onGenerate={generate}
@@ -474,10 +480,6 @@ export function App() {
         diaryCount={diaryCount(progress)}
         onOpenDiary={() => dispatch({ type: 'toggle', surface: 'progress' })}
         carryCount={distinct(satchel)}
-        somethingUnderfoot={
-          underfoot !== null && anythingAt(underfoot.seed, underfoot.at, underfoot.biome)
-        }
-        onOpenSatchel={() => dispatch({ type: 'open-interrupt', which: 'satchel' })}
         offeredHere={offeredHere(bench, knowsRecipeHere).length}
         onOpenWorkshop={() => dispatch({ type: 'open-interrupt', which: 'workshop' })}
         onOpenOverworld={() =>
@@ -492,6 +494,11 @@ export function App() {
         placeOpen={placeOpen}
         onTogglePlace={() => dispatch({ type: 'toggle-place' })}
       />
+        <SatchelStrip
+          satchel={satchel}
+          onOpen={() => dispatch({ type: 'open-interrupt', which: 'satchel' })}
+        />
+      </div>
 
       <Progress
         progress={progress}

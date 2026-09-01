@@ -22,8 +22,6 @@ export interface ControlsProps {
   /** How many kinds of thing are carried. Zero is a real state and the button still shows. */
   carryCount: number;
   /** True when the tile under foot has something on it, so the button can lead the player to it. */
-  somethingUnderfoot: boolean;
-  onOpenSatchel: () => void;
   /** How many things this place can make that open ground cannot. Zero out in the field. */
   offeredHere: number;
   onOpenWorkshop: () => void;
@@ -45,8 +43,6 @@ export function Controls({
   diaryCount,
   onOpenDiary,
   carryCount,
-  somethingUnderfoot,
-  onOpenSatchel,
   offeredHere,
   onOpenWorkshop,
   onOpenOverworld,
@@ -104,24 +100,12 @@ export function Controls({
           </span>
         </button>
 
-        {/* Always present, unlike the collection button. An empty satchel is not an empty room:
-            the panel's first section is what is under foot, so it has something to say from the
-            first step — which is also how a player finds out that gathering exists at all. */}
-        <button
-          type="button"
-          className={somethingUnderfoot ? 'control control-on' : 'control'}
-          aria-label={
-            somethingUnderfoot
-              ? `Satchel, ${carryCount} carried, something under foot`
-              : `Satchel, ${carryCount} carried`
-          }
-          onClick={onOpenSatchel}
-        >
-          <span aria-hidden="true">◑</span>
-          <span className="control-label">
-            Satchel{carryCount > 0 && <i className="control-count">{carryCount}</i>}
-          </span>
-        </button>
+        {/* **The satchel button is gone and `SatchelStrip` replaced it.** What you carry is now
+            permanently on screen rather than behind a control, which is what an idle game does
+            with its resource readout -- clicking the strip still opens the full panel for the
+            detail. The badge here also described a panel section that no longer exists: "something
+            under foot" pointed at the satchel's gathering row, which moved to the Here screen in
+            the phase before this one. */}
 
         {/* Making has its own button because it is a different verb from carrying, and it lights
             up where the ground can work a material -- six of canon's seventeen processes need a
