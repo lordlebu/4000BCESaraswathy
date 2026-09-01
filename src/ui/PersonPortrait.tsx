@@ -22,6 +22,7 @@
 // far more detailed that resamples into mush.
 
 import type { Npc } from '../content/places';
+import { portraitFor } from './portraits';
 
 /**
  * Ink by language.
@@ -95,7 +96,7 @@ export function toolFor(role: string): string | null {
 }
 
 export interface PersonPortraitProps {
-  person: Pick<Npc, 'name' | 'role' | 'language'>;
+  person: Pick<Npc, 'id' | 'name' | 'role' | 'language'>;
   size?: number;
   /**
    * Whether this person is mid-sentence.
@@ -117,6 +118,24 @@ export interface PersonPortraitProps {
 export function PersonPortrait({ person, size = 26, speaking = false }: PersonPortraitProps) {
   const ink = LANGUAGE_INK[person.language] ?? NEUTRAL_INK;
   const tool = toolFor(person.role);
+  const painted = portraitFor(person.id);
+
+  // A painting replaces the silhouette individually, the moment one is added -- see `portraits.ts`.
+  // Nobody is blocked on the set being complete, and the drawing below stays the fallback rather
+  // than a placeholder anybody has to clear.
+  if (painted) {
+    return (
+      <img
+        className={`person-portrait is-painted${speaking ? ' is-speaking' : ''}`}
+        src={painted}
+        width={size}
+        height={size}
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+      />
+    );
+  }
 
   return (
     <svg

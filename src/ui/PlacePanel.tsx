@@ -29,6 +29,16 @@ import { beats, meeting, moreAfter, quietNote } from '../content/conversation';
 import { Dialogue } from './Dialogue';
 import { PersonPortrait } from './PersonPortrait';
 
+/**
+ * How large a person is drawn while they are talking.
+ *
+ * 96 rather than the 26 the mark was: at 26 a portrait is punctuation beside a name, and the point
+ * of this one is that somebody is on the other side of the words. It is also what the built
+ * portraits are sized against -- `tools/build-plates.js --portraits` writes 256, which covers this
+ * on a 2x screen with the same margin a plate gets.
+ */
+const PORTRAIT_SIZE = 96;
+
 /** Why a rung will not move, in words. Mirrors the diary's phrasing on purpose. */
 function why(progress: Progress, id: string, moment: WorldMoment | null): string {
   const missing = blockedBy(progress, id, moment);
@@ -115,25 +125,33 @@ function Person({
 
   const more = moreAfter(available, spent, turns);
 
+  const talking = flat.length > 0 && !over;
+
   return (
     <div className="person">
-      <h4>
-        <PersonPortrait person={person} speaking={flat.length > 0 && !over} />
-        <span>
-          {person.name} <span className="muted">· {person.role}</span>
-        </span>
-      </h4>
-      {flat.length > 0 && !over ? (
-        <Dialogue
-          beats={flat}
-          onBeatDone={heardBeat}
-          onDone={() => setOver(true)}
-          doneLabel={null}
-        />
-      ) : (
-        <p className="muted">{quietNote(person.name)}</p>
-      )}
-      {over && more && <p className="muted said-more">There is more they could tell you.</p>}
+      {/* The portrait sits beside what is being said rather than above it, and at a size worth
+          looking at. A speaking portrait is the third of the four things the genre does -- it does
+          not need expressions, it needs to be large, next to the words, and to move a little while
+          its owner talks. */}
+      <div className="person-speaking">
+        <PersonPortrait person={person} size={PORTRAIT_SIZE} speaking={talking} />
+        <div className="person-words">
+          <h4>
+            {person.name} <span className="muted">· {person.role}</span>
+          </h4>
+          {talking ? (
+            <Dialogue
+              beats={flat}
+              onBeatDone={heardBeat}
+              onDone={() => setOver(true)}
+              doneLabel={null}
+            />
+          ) : (
+            <p className="muted">{quietNote(person.name)}</p>
+          )}
+          {over && more && <p className="muted said-more">There is more they could tell you.</p>}
+        </div>
+      </div>
     </div>
   );
 }

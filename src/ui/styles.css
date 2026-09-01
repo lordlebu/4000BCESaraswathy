@@ -1337,14 +1337,34 @@ button.ghost:hover:not(:disabled) {
   background: transparent;
 }
 
-.person { margin-bottom: 1rem; }
+.person { margin-bottom: 1.25rem; }
 .person h4 {
   margin: 0 0 0.3rem;
   font-size: 0.95rem;
   font-weight: 600;
+}
+
+/*
+ * Somebody talking: the portrait beside the words, not above them.
+ *
+ * `align-items: flex-start` so a long exchange grows downward past a fixed-height portrait rather
+ * than dragging it to the middle -- these people say two or three things and the picture should
+ * stay where the name is.
+ */
+.person-speaking {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.person-words { flex: 1; min-width: 0; }
+
+/*
+ * On a narrow screen the portrait and a 96px column of text is not a layout. Stack, and let the
+ * portrait shrink -- it is the thing that can lose size without losing meaning.
+ */
+@media (max-width: 520px) {
+  .person-speaking { gap: 0.6rem; }
+  .person-portrait { width: 56px; height: 56px; }
 }
 
 /*
@@ -1352,6 +1372,17 @@ button.ghost:hover:not(:disabled) {
  * a role ran long would make a row of people look like a row of different-sized people.
  */
 .person-portrait { flex: none; }
+
+/*
+ * A painted portrait, when one exists. Rounded a little and given the panel's own edge so it reads
+ * as a picture set into the page rather than an image dropped on it; `object-fit: cover` because
+ * the build writes squares and a future non-square source should crop rather than stretch a face.
+ */
+.person-portrait.is-painted {
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid var(--edge);
+}
 
 /*
  * A person who is mid-sentence.

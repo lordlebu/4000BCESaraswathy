@@ -78,3 +78,22 @@ test('walking out does not lose what you were told', async ({ page }) => {
   await expect(page.locator('.diary')).toBeVisible();
   await expect(page.locator('.question')).not.toHaveCount(0);
 });
+
+test('the person you are talking to has a face beside the words', async ({ page }) => {
+  await walkToThrali(page);
+
+  const person = page.locator('.person').first();
+  const portrait = person.locator('.person-portrait').first();
+  await expect(portrait).toBeVisible();
+
+  // Large enough to read as somebody rather than as punctuation beside a name -- the mark this
+  // replaced was 26px. Painted or drawn, it is the same box.
+  const face = await portrait.boundingBox();
+  expect(face, 'the portrait should have a box').not.toBeNull();
+  expect(face!.width).toBeGreaterThanOrEqual(56);
+
+  // And it sits beside what is being said, not above it.
+  const said = await person.locator('.dialogue-beat').first().boundingBox();
+  expect(said, 'a beat should have a box').not.toBeNull();
+  expect(said!.x).toBeGreaterThan(face!.x + face!.width - 1);
+});

@@ -129,12 +129,16 @@ canon question, answered in canon.
 
 ## Still open
 
-**Portraits are still the 26px silhouette.** They are drawn from what canon records — ink by
-language, tool by trade, and nobody made a wise elder — and canon records no appearance for anybody:
-no age, no build, no colouring. The agreed direction is **the plate treatment**: generated art
-built through `tools/build-plates.js` into a folder the loader globs, so adding one takes no code
-and anybody without one keeps the silhouette. See `docs/plate-prompts.md` for how that pipeline
-works and what it has already been burned by.
+**Portraits are wired and unpainted.** A person is now drawn at 96px beside what they are saying
+rather than as a 26px mark beside their name, and `src/ui/portraits.ts` swaps in a painting the
+moment one exists. `tools/build-plates.js --portraits` builds them — the same tool as the species
+plates, because a portrait *is* a plate of a person and that code has already been beaten into
+shape by three image tools disagreeing about all of it.
+
+The eight prompts are written and grounded: `docs/portrait-prompts.md`. Canon records no appearance
+for anybody, so the trade, the tool, the pronoun and the age band in each one are derived from what
+canon *does* say — and the pronouns for Pell, Sura and Uma had to be looked up in the discoveries
+that mention them (`his son`, `hers`, `her life`) rather than their own entities.
 
 **Varuna never speaks.** He is silent in a game whose whole subject is asking. Phase 4 of the plan
 gives him one line per exchange, phrased from the fiction, drawn from what is actually available —
