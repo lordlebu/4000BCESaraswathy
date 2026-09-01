@@ -241,6 +241,16 @@ export function npcsAt(poiId: string): Npc[] {
 }
 
 /**
+ * Everybody, for a caller that wants the whole cast rather than whoever is standing here.
+ *
+ * A copy, not the backing array — a Records tab or a test iterating this must not be able to
+ * reorder the list the placer and `npcsAt` both read.
+ */
+export function allNpcs(): Npc[] {
+  return [...npcs];
+}
+
+/**
  * The field maps reachable from one, resolved to entities.
  *
  * Silently drops an id canon names but does not define, so a half-authored edge cannot crash

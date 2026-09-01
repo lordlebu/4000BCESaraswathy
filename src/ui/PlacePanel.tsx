@@ -8,7 +8,7 @@
 // here to talk to, and what is further in. That is the order a person arriving somewhere
 // actually works through it.
 
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   type Progress,
   type WorldMoment,
@@ -18,13 +18,15 @@ import {
   canEnter,
   entryFor,
   isComplete,
+  isFirstMeeting,
   lineIsSpent,
   linesFor,
   rungOf
 } from '../journey';
 import { discovery } from '../content/knowledge';
-import { npcsAt, poi, type Npc } from '../content/places';
-import { quietNote, saysNow } from '../content/conversation';
+import { npcsAt, poi, type Line, type Npc } from '../content/places';
+import { beats, meeting, moreAfter, quietNote } from '../content/conversation';
+import { Dialogue } from './Dialogue';
 import { PersonPortrait } from './PersonPortrait';
 
 /** Why a rung will not move, in words. Mirrors the diary's phrasing on purpose. */
@@ -59,17 +61,19 @@ export interface PlacePanelProps {
 }
 
 /**
- * One person, saying one thing.
+ * One person, talking.
  *
  * **Being told something is how you hear it.** The old panel made the player click "Write it
- * down" beside each line, which is the paperwork this phase exists to remove -- the diary is
- * Varuna's and he does not need permission to use it. So the effect below records the line as
- * heard the moment it is shown, and the button that remains asks for the *next* thing rather than
- * for consent to remember this one.
+ * down" beside each line, which was paperwork -- the diary is Varuna's and he does not need
+ * permission to use it. What replaced it recorded the line on mount instead, which fixed the
+ * clicking and introduced a subtler version of the same fault: a line counted as heard before it
+ * was legible, so a player who left mid-sentence had still "heard" it. `Dialogue` now reports each
+ * beat as it *finishes*, and the last beat of a line is what writes it down.
  *
- * The effect keys on the line's text rather than the person, so walking away and coming back does
- * not re-give what was already given: `lineIsSpent` will have started returning true and
- * `saysNow` will have moved on.
+ * **A first meeting is longer than a visit.** Measured against the shipped bundle: everybody opens
+ * with two or three ungated lines -- nineteen across the eight of them -- and `saysNow` returns
+ * exactly one, so about two fifths of the introductions were authored and never shown. `meeting`
+ * plays all of them the first time and hands back to `saysNow` afterwards.
  */
 function Person({
   person,
@@ -80,33 +84,56 @@ function Person({
   progress: Progress;
   onListen: (npcId: string, lineIndex: number) => void;
 }) {
-  const said = saysNow(linesFor(progress, person.id), (l) => lineIsSpent(progress, l));
-  const text = said.line?.text ?? null;
-  const index = said.index;
-  const gives = said.gives;
+  const available = linesFor(progress, person.id);
+  const spent = (l: Line) => lineIsSpent(progress, l);
+  const first = isFirstMeeting(progress, person.id);
 
-  useEffect(() => {
-    if (text !== null && gives) onListen(person.id, index);
-  }, [person.id, text, index, gives, onListen]);
+  // Held for the length of the exchange. Recomputing on every render would rebuild the turns from
+  // a `Progress` that the exchange itself is changing -- so hearing the first line of a meeting
+  // would end the meeting.
+  const [turns] = useState(() => meeting(available, spent, first));
+  const [over, setOver] = useState(false);
+
+  const beatsOf = turns.map((t) => beats(t.line.text));
+  const flat = beatsOf.flat();
+
+  // Which turn a flattened beat index belongs to, so a finished beat can record the right line.
+  const owner: number[] = [];
+  beatsOf.forEach((bs, turnIndex) => bs.forEach(() => owner.push(turnIndex)));
+
+  const heardBeat = useCallback(
+    (beatIndex: number) => {
+      const turnIndex = owner[beatIndex];
+      if (turnIndex === undefined) return;
+      // The line is written down when its *last* beat lands, not its first.
+      const isLastOfTurn = owner[beatIndex + 1] !== turnIndex;
+      const turn = turns[turnIndex];
+      if (isLastOfTurn && turn && turn.gives) onListen(person.id, turn.index);
+    },
+    [owner, turns, person.id, onListen]
+  );
+
+  const more = moreAfter(available, spent, turns);
 
   return (
     <div className="person">
       <h4>
-        <PersonPortrait person={person} />
+        <PersonPortrait person={person} speaking={flat.length > 0 && !over} />
         <span>
           {person.name} <span className="muted">· {person.role}</span>
         </span>
       </h4>
-      {said.line ? (
-        <p className="said">
-          <span aria-hidden="true">“</span>
-          {said.line.text}
-          <span aria-hidden="true">”</span>
-        </p>
+      {flat.length > 0 && !over ? (
+        <Dialogue
+          beats={flat}
+          onBeatDone={heardBeat}
+          onDone={() => setOver(true)}
+          doneLabel={null}
+        />
       ) : (
         <p className="muted">{quietNote(person.name)}</p>
       )}
-      {said.more && <p className="muted said-more">There is more they could tell you.</p>}
+      {over && more && <p className="muted said-more">There is more they could tell you.</p>}
     </div>
   );
 }

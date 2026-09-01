@@ -1352,7 +1352,81 @@ button.ghost:hover:not(:disabled) {
  * a role ran long would make a row of people look like a row of different-sized people.
  */
 .person-portrait { flex: none; }
+
+/*
+ * A person who is mid-sentence.
+ *
+ * Two frames and about a pixel and a half of shoulder shift -- enough that the eye reads somebody
+ * as present rather than as a label, and short of anything that reads as fidgeting at 26px. It
+ * stops the moment they stop talking, which is what makes the movement mean something.
+ */
+@keyframes person-speaking {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(0.9px); }
+}
+.person-portrait.is-speaking { animation: person-speaking 620ms ease-in-out infinite; }
+
 .said { margin: 0 0 0.4rem; font-size: 0.92rem; font-style: italic; }
+
+/*
+ * One person's turn, played out a beat at a time.
+ *
+ * Beats already said stay on screen and fade back a little, so the exchange reads as a short
+ * transcript with the newest line brightest. Replacing the text instead would make the player
+ * choose between reading and continuing, and half of these lines are the only place a word or a
+ * discovery is ever explained.
+ */
+.dialogue { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; }
+.dialogue-beat { margin: 0 0 0.35rem; }
+.dialogue-beat:not(.dialogue-current) { opacity: 0.66; }
+.dialogue-current { min-height: 1.2em; }
+
+/*
+ * The typing cursor. A block rather than a caret -- it sits at the end of a proportional italic
+ * line where a thin bar disappears against the descenders.
+ */
+.dialogue-cursor {
+  display: inline-block;
+  width: 0.42em;
+  height: 0.95em;
+  margin-left: 0.12em;
+  vertical-align: -0.1em;
+  background: currentColor;
+  opacity: 0.55;
+  animation: dialogue-blink 1s step-end infinite;
+}
+@keyframes dialogue-blink {
+  0%, 55% { opacity: 0.55; }
+  56%, 100% { opacity: 0; }
+}
+
+/*
+ * "Go on". Quiet on purpose: it is the only control in the exchange and it should read as the
+ * player leaning in, not as a form submission.
+ */
+.dialogue-on {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  padding: 0.15rem 0.6rem;
+  background: transparent;
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  color: var(--ink);
+  cursor: pointer;
+  opacity: 0.8;
+}
+.dialogue-on:hover { opacity: 1; }
+
+/*
+ * Typing is motion, and for some people it is motion that makes text unreadable. Under this
+ * setting `Dialogue` renders every beat complete on arrival, so there is nothing left to animate
+ * -- these rules stop the cursor and the portrait from moving too.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .person-portrait.is-speaking,
+  .dialogue-cursor { animation: none; }
+  .dialogue-cursor { display: none; }
+}
 .ghost.small {
   font-size: 0.76rem;
   padding: 0.1rem 0.5rem;
