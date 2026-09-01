@@ -82,6 +82,27 @@ test('the satchel strip never sits under the control bar', async ({ page }) => {
   }
 });
 
+test('the satchel ribbon can be put away for a clean map', async ({ page }) => {
+  // Reported from play: the ribbon is useful and permanent, and permanent is the problem -- the
+  // map is what somebody came to look at. It closes like the notes do, from the same bar, and
+  // stays closed until asked for.
+  await boot(page, 1280, 800);
+  await expect(page.locator('.satchel-strip')).toBeVisible();
+
+  const toggle = page.getByRole('button', { name: /Satchel ribbon/ });
+  await toggle.click();
+  await expect(page.locator('.satchel-strip')).toHaveCount(0);
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+
+  // A footstep is not a request for it back.
+  await page.keyboard.press('ArrowRight');
+  await page.waitForTimeout(400);
+  await expect(page.locator('.satchel-strip')).toHaveCount(0);
+
+  await toggle.click();
+  await expect(page.locator('.satchel-strip')).toBeVisible();
+});
+
 test('a keyboard user can see where they are', async ({ page }) => {
   // There was no focus state in the whole stylesheet: every control could be tabbed to and
   // none of them showed it. This checks the ring is actually painted, not merely declared.

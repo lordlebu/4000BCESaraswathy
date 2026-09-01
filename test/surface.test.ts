@@ -148,6 +148,53 @@ describe('standing somewhere', () => {
   });
 });
 
+describe('the satchel ribbon', () => {
+  it('starts showing, because a readout nobody finds does not exist', () => {
+    expect(initialSurface.satchelRibbon).toBe(true);
+  });
+
+  it('closes and opens again', () => {
+    // Reported from play: a permanent band that cannot be dismissed is an obstruction rather
+    // than a convenience. The map is the thing somebody came to look at.
+    expect(run({ type: 'toggle-satchel-ribbon' }).satchelRibbon).toBe(false);
+    expect(
+      run({ type: 'toggle-satchel-ribbon' }, { type: 'toggle-satchel-ribbon' }).satchelRibbon
+    ).toBe(true);
+  });
+
+  it('disturbs nothing else when it closes', () => {
+    // Hiding what you carry says nothing about the notes, the place under foot, or anything
+    // open. Its own flag rather than a surface, precisely so it cannot be read as more.
+    const before = run(
+      { type: 'standing-on', poiId: 'poi_lothal_camp' },
+      { type: 'open-interrupt', which: 'workshop' }
+    );
+    const after = { ...before };
+    const closed = run(
+      { type: 'standing-on', poiId: 'poi_lothal_camp' },
+      { type: 'open-interrupt', which: 'workshop' },
+      { type: 'toggle-satchel-ribbon' }
+    );
+    expect(closed.surface).toBe(after.surface);
+    expect(closed.standingOn).toBe(after.standingOn);
+    expect(closed.placeOpen).toBe(after.placeOpen);
+    expect(closed.interrupts.workshop).toBe(true);
+    expect(closed.satchelRibbon).toBe(false);
+  });
+
+  it('survives walking, and reading a place', () => {
+    // The three are unrelated facts. A ribbon a player put away must stay away until they ask
+    // for it back -- a footstep is not asking.
+    const state = run(
+      { type: 'toggle-satchel-ribbon' },
+      { type: 'standing-on', poiId: 'poi_lothal_camp' },
+      { type: 'standing-on', poiId: null },
+      { type: 'toggle', surface: 'progress' }
+    );
+    expect(state.satchelRibbon).toBe(false);
+  });
+});
+
 describe('interrupts', () => {
   it('do not evict the surface underneath', () => {
     const state = run(

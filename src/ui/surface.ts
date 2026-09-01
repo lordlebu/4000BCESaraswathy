@@ -68,6 +68,18 @@ export interface SurfaceState {
    * ended the player exactly as the original bug report described.
    */
   placeOpen: boolean;
+  /**
+   * Whether the satchel ribbon is showing.
+   *
+   * Its own flag rather than a `Surface`, because a surface is one-of-many and this is
+   * independent of every other: reading the notes, standing in a place and carrying things are
+   * three unrelated facts, and the ribbon has to survive all of them.
+   *
+   * Not an `Interrupt` either. An interrupt is something a player opens, does and closes; the
+   * ribbon is the resting state with an off switch, which is the notes' relationship rather than
+   * the satchel panel's.
+   */
+  satchelRibbon: boolean;
 }
 
 export type SurfaceAction =
@@ -81,7 +93,9 @@ export type SurfaceAction =
   | { type: 'open-interrupt'; which: keyof Interrupts }
   | { type: 'close-interrupt'; which: keyof Interrupts }
   /** The world says the traveller moved. `poiId` is null off an authored place. */
-  | { type: 'standing-on'; poiId: string | null };
+  | { type: 'standing-on'; poiId: string | null }
+  /** Show or hide the satchel ribbon. */
+  | { type: 'toggle-satchel-ribbon' };
 
 /**
  * The field notes are the game's resting state, not an extra.
@@ -94,7 +108,12 @@ export const initialSurface: SurfaceState = {
   surface: 'here',
   interrupts: { ending: false, overworld: false, kit: false, satchel: false, workshop: false },
   standingOn: null,
-  placeOpen: false
+  placeOpen: false,
+  // Shown by default, on the same reasoning as the notes: a readout nobody has found is a
+  // readout that does not exist. It closes because a permanent band that cannot be dismissed is
+  // an obstruction rather than a convenience -- reported from play, and the map is the thing
+  // somebody came to look at.
+  satchelRibbon: true
 };
 
 export function surfaceReducer(state: SurfaceState, action: SurfaceAction): SurfaceState {
@@ -138,6 +157,12 @@ export function surfaceReducer(state: SurfaceState, action: SurfaceAction): Surf
       }
       return { ...state, standingOn: null, placeOpen: false };
     }
+
+    case 'toggle-satchel-ribbon':
+      // Nothing else moves. Hiding what you carry says nothing about the notes, the place under
+      // foot, or anything open -- it is a request for a clean view of the map and must not be
+      // read as anything more.
+      return { ...state, satchelRibbon: !state.satchelRibbon };
 
     default:
       return state;
