@@ -23,7 +23,8 @@ import {
 import { type Line, npc, npcs, poi } from './content/places';
 import { recipe } from './content/making';
 import { type Satchel, canDo, count, emptySatchel, remove } from './content/satchel';
-import { type Bench, canMake, make, openGround } from './content/crafting';
+import { type Bench, openGround } from './content/crafting';
+import { type Step, plan, runPlan } from './content/making-chain';
 
 /** Where the world is, when a rung asks for a particular night or weather. */
 export interface WorldMoment {
@@ -110,6 +111,15 @@ export interface Crafted {
   satchel: Satchel;
   /** The recipe performed, or null when nothing was. */
   made: string | null;
+  /**
+   * Every rung the chain ran, in order, ending with the one asked for.
+   *
+   * Empty when nothing was made. This is what the workshop prints -- *smelted the ore, poured
+   * the ingot, cast the blade* -- and it is what keeps one click honest rather than magic: a
+   * chain that silently consumes four materials is indistinguishable from a cheat, and one that
+   * says what it did teaches the process it just spared you.
+   */
+  steps: Step[];
 }
 
 /**
@@ -129,15 +139,28 @@ export function craft(
   recipeId: string,
   bench: Bench = openGround()
 ): Crafted {
-  if (!knowsRecipe(progress, recipeId) || !canMake(satchel, recipeId, bench)) {
-    return { progress, satchel, made: null };
+  // **The chain, not just the recipe.** Thirty-eight of eighty-two recipes need something else
+  // made first, and asking a player to click each rung is the tedium that makes crafting a chore.
+  // `plan` refuses a run it cannot finish whole, so this either does everything or nothing --
+  // a half-made chain would spend materials and produce nothing, which is the worst outcome
+  // available and has no undo.
+  const run = plan(satchel, recipeId, bench, (id) => knowsRecipe(progress, id));
+  if (run.blocked !== null || run.steps.length === 0) {
+    return { progress, satchel, made: null, steps: [] };
   }
+
+  // Every rung counts as made. The keepsake at the end lists what the player built, and a
+  // chain that recorded only its last step would forget the four things it made on the way.
+  let made = progress.made;
+  for (const step of run.steps) {
+    if (!made.includes(step.recipeId)) made = [...made, step.recipeId];
+  }
+
   return {
-    progress: progress.made.includes(recipeId)
-      ? progress
-      : { ...progress, made: [...progress.made, recipeId] },
-    satchel: make(satchel, recipeId, bench),
-    made: recipeId
+    progress: made === progress.made ? progress : { ...progress, made },
+    satchel: runPlan(satchel, run.steps, bench),
+    made: recipeId,
+    steps: run.steps
   };
 }
 

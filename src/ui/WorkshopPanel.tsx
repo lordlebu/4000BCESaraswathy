@@ -22,6 +22,7 @@
 // places have capabilities at all.
 
 import { type Recipe, item, nameOf, process } from '../content/making';
+import type { Step } from '../content/making-chain';
 import {
   type Bench,
   type Knows,
@@ -40,6 +41,14 @@ export interface WorkshopPanelProps {
   /** Whether the player has been shown how. A fact about the journey, composed by `App`. */
   knows: Knows;
   onMake: (recipeId: string) => void;
+  /**
+   * The rungs of the last thing made, newest run only.
+   *
+   * One click can run four recipes, and a panel that consumed four materials in silence is
+   * indistinguishable from a cheat. Printing what it did teaches the process it just spared the
+   * player -- which is the whole bargain of doing the chain for them.
+   */
+  lastMade: readonly Step[];
   open: boolean;
   onClose: () => void;
 }
@@ -49,6 +58,7 @@ export function WorkshopPanel({
   bench,
   knows,
   onMake,
+  lastMade,
   open,
   onClose
 }: WorkshopPanelProps) {
@@ -73,6 +83,20 @@ export function WorkshopPanel({
             Close
           </button>
         </header>
+
+        {lastMade.length > 0 && (
+          <section className="diary-section made-log">
+            <h3>{lastMade.length > 1 ? 'You worked through' : 'You made'}</h3>
+            <ol className="made-steps">
+              {lastMade.map((step, i) => (
+                <li key={`${step.recipeId}-${i}`}>
+                  <span className="made-what">{step.name}</span>
+                  <span className="made-out">{step.made}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
         {ready.length > 0 && (
           <section className="diary-section">
