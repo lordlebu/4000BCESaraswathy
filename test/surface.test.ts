@@ -148,6 +148,28 @@ describe('standing somewhere', () => {
   });
 });
 
+describe('showing a surface outright', () => {
+  it('does not close the one already showing', () => {
+    // What a tab needs and `toggle` cannot give it. Pressing the tab you are already on must
+    // leave it open; toggling would close the sheet, which reads as the panel breaking.
+    const state = run({ type: 'show', surface: 'progress' }, { type: 'show', surface: 'progress' });
+    expect(state.surface).toBe('progress');
+  });
+
+  it('swaps between the two records without closing', () => {
+    const state = run(
+      { type: 'show', surface: 'progress' },
+      { type: 'show', surface: 'collection' }
+    );
+    expect(state.surface).toBe('collection');
+  });
+
+  it('leaves the toggle alone, which still closes what it opens', () => {
+    const state = run({ type: 'toggle', surface: 'progress' }, { type: 'toggle', surface: 'progress' });
+    expect(state.surface).toBeNull();
+  });
+});
+
 describe('the satchel ribbon', () => {
   it('starts showing, because a readout nobody finds does not exist', () => {
     expect(initialSurface.satchelRibbon).toBe(true);

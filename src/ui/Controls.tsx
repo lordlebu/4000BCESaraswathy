@@ -15,10 +15,12 @@ export interface ControlsProps {
   onGenerate: (seed: string) => void;
   /** How many species have been met. Shown on the button; the album is its own surface. */
   metCount: number;
-  onOpenCollection: () => void;
+  /** Whether either record is showing, so the button can read as a toggle. */
+  recordsOpen: boolean;
+  onOpenRecords: () => void;
   /** How many discoveries are under way, so the button can say the diary has something in it. */
   diaryCount: number;
-  onOpenDiary: () => void;
+
   /** How many kinds of thing are carried. Zero is a real state and the button still shows. */
   carryCount: number;
   /** True when the tile under foot has something on it, so the button can lead the player to it. */
@@ -42,9 +44,10 @@ export function Controls({
   seed,
   onGenerate,
   metCount,
-  onOpenCollection,
+  recordsOpen,
+  onOpenRecords,
   diaryCount,
-  onOpenDiary,
+
   carryCount,
   offeredHere,
   onOpenWorkshop,
@@ -107,15 +110,30 @@ export function Controls({
           <span className="control-label">Travel</span>
         </button>
 
+        {/* **One button for both records, tabbed inside.** The diary and the album were two
+            controls in a bar that already holds everything a player can *do*, and they are the
+            two things a player *has* -- so they compete for a row they do not belong in. The
+            badge counts both, because the reason to press it is that either has something new.
+
+            The overworld is not here and should not be: it is a place you travel from rather
+            than a record you read, which is why it sits beside Travel. */}
         <button
           type="button"
-          className="control"
-          aria-label={diaryCount ? `Diary, ${diaryCount} under way` : 'Diary'}
-          onClick={onOpenDiary}
+          className={recordsOpen ? 'control control-on' : 'control'}
+          aria-pressed={recordsOpen}
+          aria-label={
+            diaryCount || metCount
+              ? `Records, ${diaryCount} under way, ${metCount} met`
+              : 'Records'
+          }
+          onClick={onOpenRecords}
         >
           <span aria-hidden="true">✎</span>
           <span className="control-label">
-            Diary{diaryCount > 0 && <i className="control-count">{diaryCount}</i>}
+            Records
+            {diaryCount + metCount > 0 && (
+              <i className="control-count">{diaryCount + metCount}</i>
+            )}
           </span>
         </button>
 
@@ -146,22 +164,6 @@ export function Controls({
             <span aria-hidden="true">⚒</span>
             <span className="control-label">
               Workshop{offeredHere > 0 && <i className="control-count">{offeredHere}</i>}
-            </span>
-          </button>
-        )}
-
-        {/* Only once something has been met. Before that it is a button onto an empty room, and
-            the starting tile seeds the collection, so it appears almost immediately anyway. */}
-        {metCount > 0 && (
-          <button
-            type="button"
-            className="control"
-            aria-label={`Collection, ${metCount} met`}
-            onClick={onOpenCollection}
-          >
-            <span aria-hidden="true">❧</span>
-            <span className="control-label">
-              Met<i className="control-count">{metCount}</i>
             </span>
           </button>
         )}

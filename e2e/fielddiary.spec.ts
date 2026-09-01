@@ -86,7 +86,7 @@ test('looking closer writes the diary, and the diary keeps the crossings-out', a
   await look.first().click().catch(() => {}); // the second rung, if this one has no gate on it
 
   await page.getByRole('button', { name: 'Leave' }).click();
-  await page.getByRole('button', { name: /^Diary/ }).click();
+  await page.getByRole('button', { name: /Records/ }).click();
 
   const diary = page.locator('.diary');
   await expect(diary).toBeVisible();
@@ -158,7 +158,7 @@ test('the diary survives a reload', async ({ page }) => {
   await page.reload();
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 
-  await page.getByRole('button', { name: /^Diary/ }).click();
+  await page.getByRole('button', { name: /Records/ }).click();
   await expect(page.locator('.diary .entry')).toHaveCount(1);
 });
 

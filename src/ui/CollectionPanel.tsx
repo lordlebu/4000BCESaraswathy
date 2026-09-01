@@ -15,6 +15,7 @@
 // every entry is fully readable offline; asking canon only ever adds.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   type Collection,
   type Meeting,
@@ -134,9 +135,17 @@ export interface CollectionPanelProps {
   onClose: () => void;
   /** Whether a canon service is listening. When absent, nothing about asking is rendered. */
   canAsk: boolean;
+  /** Tabs, when this panel is one of two records behind one door. See `Records.tsx`. */
+  tabs?: ReactNode;
 }
 
-export function CollectionPanel({ collection, open, onClose, canAsk }: CollectionPanelProps) {
+export function CollectionPanel({
+  collection,
+  open,
+  onClose,
+  canAsk,
+  tabs
+}: CollectionPanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [query, setQuery] = useState('');
 
@@ -166,6 +175,7 @@ export function CollectionPanel({ collection, open, onClose, canAsk }: Collectio
   return (
     <div className="diary-veil" role="dialog" aria-modal="true" aria-label="Collection">
       <section className="diary diary-filling">
+        {tabs}
         <header className="diary-head">
           <div>
             <h2>Collection</h2>

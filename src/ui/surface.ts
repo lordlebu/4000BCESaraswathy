@@ -85,6 +85,13 @@ export interface SurfaceState {
 export type SurfaceAction =
   /** The player asked for a surface. Asking for the open one closes it. */
   | { type: 'toggle'; surface: Exclude<Surface, null> }
+  /**
+   * Show a surface outright, without the toggle's close-if-open behaviour.
+   *
+   * What a tab does. Pressing the tab you are already on must keep it open -- `toggle` would
+   * close the sheet, which is the opposite of what a tab means and reads as the panel breaking.
+   */
+  | { type: 'show'; surface: Exclude<Surface, null> }
   /** Close whatever is open. */
   | { type: 'close' }
   /** Open or put away the place, without disturbing the notes beneath it. */
@@ -123,6 +130,9 @@ export function surfaceReducer(state: SurfaceState, action: SurfaceAction): Surf
         ...state,
         surface: state.surface === action.surface ? null : action.surface
       };
+
+    case 'show':
+      return { ...state, surface: action.surface };
 
     case 'close':
       // Closing the diary or the album returns to the field notes, not to a bare map. They are
