@@ -1,6 +1,7 @@
 # Portrait prompts — ready to paste
 
-Eight people, eight prompts. Copy the **style block** once, then append one **subject line**.
+Eight people, eight prompts. **Each one is a single block you copy whole** — jump to
+[The eight prompts](#the-eight-prompts); everything before it is why they say what they say.
 
 The pipeline is the plates' pipeline. Drop what a tool gives you into `assets/source/portraits/`
 under any name and run:
@@ -25,7 +26,7 @@ portrait is the *game* deciding what these people look like, which is a step out
 discipline that canon owns what is true. That is a deliberate call and it is recorded here rather
 than hidden.
 
-What canon *does* give, and what every line below is built from:
+What canon *does* give, and what every prompt below is built from:
 
 | | trade | canon pronoun | age, and the canon that implies it |
 |---|---|---|---|
@@ -53,97 +54,187 @@ important person is important.
 
 ---
 
-## The style block
+## The eight prompts
 
-> Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted
-> with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour —
-> nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading.
-> Warm near-black for the darks, never pure black.
->
-> One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with
-> only a suggestion of where they are behind them — a few strokes, not a landscape. A working
-> person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and
-> unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
->
-> Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric,
-> no staff, no robe. Not an elder or a sage.
->
-> Square image, 1024×1024. Not photographic: no lens blur, no specular highlights, no 3D render.
-> No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
->
-> **Subject:** *(one line from below)*
+**Each block below is the whole prompt.** Copy one, paste it into an image tool, done — there is
+nothing to assemble and nothing to strip. The first four paragraphs are identical in all eight;
+only the subject and the colour bias change.
+
+An earlier version of this page kept the shared part in one place and the subjects in another,
+which is tidier to maintain and worse to use: it made the reader splice two halves together and
+delete a column of `>` markers first. Eight near-copies is the right trade when the reader is a
+person with an image tool open.
+
+### Thrali, fisher
+
+Save what comes back as anything you like, then build it. The file becomes `thrali.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A delta fisher, a man of about forty, holding a hanging net gathered in one fist. Salt marsh and the brick edge of a drowned harbour basin behind him. He has fished by feel for nineteen years and has just been shown something he cannot unsee.
+
+Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
+```
+
+### Uma, roofer
+
+Save what comes back as anything you like, then build it. The file becomes `uma.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A roofer, a woman of working age, a bundle of cut reeds stood on end against her shoulder. Low kiln sheds and grey brick behind her. Practical and quick, mid-instruction - she is showing somebody how and is not waiting for them to catch up.
+
+Bias the surrounding wash neutral grey-mauve (#6b5c6f) - a tint in the paper and the shadows, not a costume.
+```
+
+### Bekh, keeper of what is left
+
+Save what comes back as anything you like, then build it. The file becomes `bekh.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: An older woman, keeper of a camp's stores, one hand resting on a stacked clay jar. Brick niches and the shadow of a kiln behind her. Steady and unsentimental; she has counted something four times and it keeps coming out the same.
+
+Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
+```
+
+### Marn, herder
+
+Save what comes back as anything you like, then build it. The file becomes `marn.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A herder of working age, a man, a hooked crook held in the crook of his arm rather than leant on. Terraced hillside and low cloud behind him. Emphatically not a wise elder - a working man with a job on and somewhere to be.
+
+Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
+```
+
+### Pell, wall-keeper and sweeper
+
+Save what comes back as anything you like, then build it. The file becomes `pell.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A wall-keeper and sweeper, a man in middle age, a long-handled broom with a splayed head held upright. A courtyard of fitted stone behind him. He has swept the same court for eleven years and finds nothing funny about it.
+
+Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
+```
+
+### Sura, bone-picker
+
+Save what comes back as anything you like, then build it. The file becomes `sura.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A bone-picker, a woman of working age, a flat sieve held level in both hands. A cut bank of shell and ash layers behind her. Sharp-eyed and matter-of-fact; she is looking at how things break, not for treasure.
+
+Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
+```
+
+### Okhi, senior copyist
+
+Save what comes back as anything you like, then build it. The file becomes `okhi.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A senior copyist, an older woman, a reed stylus held over the edge of a clay tablet. Deep shelving and stacked tablets behind her. Exacting, a little impatient, entirely certain about the one thing she is certain about.
+
+Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
+```
+
+### Vessa, junior archivist
+
+Save what comes back as anything you like, then build it. The file becomes `vessa.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A junior archivist, a young woman, a reed stylus and a half-scored tablet held close. Shelved records and a high window behind her. Alert and slightly guarded - she has worked something out and has not found an acceptable way to say it.
+
+Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
+```
 
 ---
 
-## Hard requirements
+## Why the prompts say what they say
 
-Every one of these is here because a plate was lost to it. They apply unchanged.
+Nothing here is a step to follow — all of it is already inside every block above. It is written
+down so that a ninth person, or a reworded prompt, keeps the parts that were paid for.
 
-1. **No text of any kind.** Not a name, not a caption. A notebook page *looks* like it should be
-   labelled, so models add labels unprompted — this is the most likely failure.
+**Six rules, each one earned by a lost plate.** From `docs/art-brief.md`, unchanged for portraits:
+
+1. **No text of any kind.** A notebook page *looks* like it should be labelled, so models add
+   labels unprompted. This is the most likely failure.
 2. **No border or frame.** The panel draws its own; a painted one reads as a picture of a picture.
 3. **No watermark or signature.** A mark across the subject cannot be cropped out.
-4. **One subject, filling the frame.** No sheet of studies, no multiple poses, no before-and-after.
+4. **One subject, filling the frame.** No sheet of studies, no multiple poses.
 5. **Square**, and as large as the tool will give. The build downsamples and cannot invent detail.
 6. **Lossless PNG.** Not JPEG.
 
 Background is wanted, as with the plates — a portrait here is a small scene, so it is opaque and
 needs no alpha channel.
 
----
-
-## The eight subjects
-
-Each line names the trade, the tool, and the place, because those three are what canon actually
-records. The tool is the same one the drawn silhouette gives them, so a painted portrait and an
-unpainted one agree with each other.
-
-**thrali** — A delta fisher, a man of about forty, holding a hanging net gathered in one fist. Salt
-marsh and the brick edge of a drowned harbour basin behind him. He has fished by feel for nineteen
-years and has just been shown something he cannot unsee.
-
-**uma** — A roofer, a woman of working age, a bundle of cut reeds stood on end against her shoulder.
-Low kiln sheds and grey brick behind her. Practical, quick, mid-instruction — she is showing
-somebody how and is not waiting for them to catch up.
-
-**bekh** — An older woman, keeper of a camp's stores, one hand resting on a stacked clay jar. Brick
-niches and the shadow of a kiln behind her. Steady and unsentimental; she has counted something four
-times and it keeps coming out the same.
-
-**marn** — A herder of working age, a man, a hooked crook held in the crook of his arm rather than
-leant on. Terraced hillside and low cloud behind him. Emphatically not a wise elder — a working man
-with a job on and somewhere to be.
-
-**pell** — A wall-keeper and sweeper, a man in middle age, a long-handled broom with a splayed head
-held upright. A courtyard of fitted stone behind him. He has swept the same court for eleven years
-and finds nothing funny about it.
-
-**sura** — A bone-picker, a woman of working age, a flat sieve held level in both hands. A cut bank
-of shell and ash layers behind her. Sharp-eyed and matter-of-fact; she is looking at *how things
-break*, not for treasure.
-
-**okhi** — A senior copyist, an older woman, a reed stylus held over the edge of a clay tablet. Deep
-shelving and stacked tablets behind her. Exacting, a little impatient, entirely certain about the
-one thing she is certain about.
-
-**vessa** — A junior archivist, a young woman, a reed stylus and a half-scored tablet held close.
-Shelved records and a high window behind her. Alert and slightly guarded — she has worked something
-out and has not found an acceptable way to say it.
-
----
-
-## A colour cue worth keeping
-
-The silhouettes ink each person by the language they speak, because that is the axis the game turns
-on — words are learned from people, and which language a word belongs to decides who else can hear
-it. If a tool will take the hint, bias the palette the same way and the two treatments stay
-consistent:
-
-- **Kia** — Bekh, Pell, Sura, Thrali — cool blue-green ground, `#3d7a8c`
-- **Maru** — Marn, Okhi, Vessa — warm ochre-brown ground, `#8a6a3a`
-- **Uma** speaks nothing canon has named, and takes the neutral `#6b5c6f`
-
-Do not let it become a costume. It is a bias in the surrounding wash, not a uniform.
+**The colour bias carries the language.** The drawn silhouettes ink each person by what they speak,
+because that is the axis the game turns on: words are learned from people, and which language a
+word belongs to decides who else can hear it. The prompts bias the wash the same way so the two
+treatments agree — Kia `#3d7a8c` for Bekh, Pell, Sura and Thrali; Maru `#8a6a3a` for Marn, Okhi and
+Vessa; the neutral `#6b5c6f` for Uma, who speaks nothing canon has named. It is a tint in the paper,
+never a uniform.
 
 ---
 
