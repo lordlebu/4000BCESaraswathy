@@ -46,6 +46,13 @@ assets/source/dump/
 # committed. Keep the raws; re-running the build at a different size needs them.
 assets/source/plates/
 
+# Raw portraits, on exactly the same footing and for the same reason: 784-2048px and 1.8-8.7 MB
+# each, against the ~50 KB the build writes into src/ui/portraits/ and ships. Eight people rather
+# than fifty-six species, so the total is smaller -- but a raw is still an input nothing ships, and
+# the rule that keeps plates out should not have an exception for people. Keep them on disk;
+# rebuilding at another size needs them.
+assets/source/portraits/
+
 # Local performance baseline: describes a machine, not the code.
 .perf-baseline.json
 
