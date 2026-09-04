@@ -72,9 +72,9 @@ Save what comes back as anything you like, then build it. The file becomes `thra
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
@@ -90,9 +90,9 @@ Save what comes back as anything you like, then build it. The file becomes `uma.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
@@ -108,9 +108,9 @@ Save what comes back as anything you like, then build it. The file becomes `bekh
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
@@ -126,9 +126,9 @@ Save what comes back as anything you like, then build it. The file becomes `marn
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
@@ -144,9 +144,9 @@ Save what comes back as anything you like, then build it. The file becomes `pell
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
@@ -162,9 +162,9 @@ Save what comes back as anything you like, then build it. The file becomes `sura
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
@@ -180,9 +180,9 @@ Save what comes back as anything you like, then build it. The file becomes `okhi
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
@@ -198,9 +198,9 @@ Save what comes back as anything you like, then build it. The file becomes `vess
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders, seen three-quarter or side-on, filling most of the frame, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, in plain undyed cloth. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage.
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
@@ -297,15 +297,28 @@ Measured at 96px, which is the size that decides it:
 
 - **Grok** has returned a tight head-and-shoulders every time. Thrali and Uma both ship.
 - **Gemini** frames correctly and adds a soft white vignette the border rule cannot see.
-- **ChatGPT** frames wide, twice. Thrali came back with the harbour and boats behind him and a face
-  about 25 pixels across. Bekh came back as a half-length torso study, undressed, with the head in
-  the top corner — off-brief on the framing and on the *plain undyed cloth* the block asks for, and
-  not a portrait this game can use. Neither was shipped.
+- **ChatGPT** frames wide, three times. Thrali came back with the harbour and boats behind him and
+  a face about 25 pixels across. Bekh came back twice as a half-length figure with the chest bare —
+  off-brief on the framing and on the *plain undyed cloth* the block asks for, and not a portrait
+  this game can use. None of the three was shipped.
 
-The block already says *head and shoulders* and *filling most of the frame*. When a tool ignores
-that, adding adjectives does not help; the fix is to say the crop as a measurement — **"head and
-shoulders only, the head filling the upper third of the frame, nothing below the collarbone"** —
-and to generate again.
+**The second Bekh is why the block changed rather than the prompt being re-rolled again.** The
+first attempt could be a bad draw; the same fault twice on the same subject is the brief being
+under-specified, and re-rolling a weak brief just buys another sample from the same distribution.
+
+Two things were too polite to be instructions. *Head and shoulders* and *filling most of the frame*
+pull against each other — a torso fills the frame — so the crop is now stated as a measurement:
+**the head fills the upper third and the picture ends at the top of the chest, with at most a hint
+of the tool at the lower edge.** That last clause is measured against the two portraits that
+work rather than invented — Uma's reeds and Thrali's net both sit in the bottom corner, and a rule
+that excluded them would have been a rule against the best evidence available. And *in plain undyed
+cloth* described the fabric without requiring it to cover anything, so it is now **fully clothed in
+plain undyed cloth that covers the shoulders and chest**, with the figure study named among the
+exclusions.
+
+Both are positive instructions with a number or a body part in them. That is the general lesson
+here, and it is the same one the framing paragraph reaches: **a tool that ignored an adjective will
+ignore a stronger adjective.** Give it something it can measure.
 
 ---
 
