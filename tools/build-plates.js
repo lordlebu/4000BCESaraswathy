@@ -659,6 +659,40 @@ function main() {
 
   const force = process.argv.includes('--force');
   const listOnly = process.argv.includes('--list');
+
+  // Build one id rather than the folder, so a re-crop does not touch anything already settled.
+  const onlyArg = process.argv.find((a) => a.startsWith('--only='));
+  const only = onlyArg ? onlyArg.slice('--only='.length) : null;
+
+  /**
+   * An explicit crop in source pixels: `--crop=x,y,size`.
+   *
+   * **Framing is the one fault the build could not repair, and this is why it now can.** Cropping
+   * in on a face means guessing where the face is -- but that is only true when nobody says. A
+   * person looking at the picture can say, and then it is arithmetic. Two portraits have been lost
+   * to framing that were otherwise wanted, which is a poor trade against one flag.
+   *
+   * Replaces the automatic squaring entirely, border detection included: an explicit box is a
+   * statement about this image, and having a rule second-guess it would defeat the point. Use it
+   * with `--only` and `--force`, and record the numbers in docs/portrait-prompts.md -- the raws are
+   * gitignored, so an unrecorded crop cannot be reproduced.
+   */
+  const cropArg = process.argv.find((a) => a.startsWith('--crop='));
+  let crop = null;
+  if (cropArg) {
+    const [x, y, side] = cropArg.slice('--crop='.length).split(',').map(Number);
+    if (![x, y, side].every((n) => Number.isFinite(n) && n >= 0) || side <= 0) {
+      console.log('  !  --crop wants three numbers: --crop=x,y,size (source pixels)');
+      process.exitCode = 1;
+      return;
+    }
+    crop = { x, y, side, trimmed: 0, inset: 0 };
+    if (!only) {
+      console.log('  !  --crop applies to one image; pass --only=<id> as well');
+      process.exitCode = 1;
+      return;
+    }
+  }
   const files = fs.readdirSync(kind.raw).filter((f) => /\.(png|jpe?g|webp)$/i.test(f));
   if (files.length === 0) {
     console.log(`No images in ${path.relative(ROOT, kind.raw)}.`);
@@ -690,6 +724,7 @@ function main() {
   for (const file of files.sort()) {
     const id = idFor(file, kind.word);
     if (contested.has(id)) continue;
+    if (only && id !== only) continue;
     const dest = path.join(kind.out, `${id}.png`);
     const rel = path.relative(ROOT, dest);
 
@@ -719,10 +754,15 @@ function main() {
       continue;
     }
 
-    const box = squareBox(img.width, img.height, borderInset(img));
+    if (crop && (crop.x + crop.side > img.width || crop.y + crop.side > img.height)) {
+      console.log(`  !  ${file} -> crop runs past the edge of a ${img.width}x${img.height} image`);
+      continue;
+    }
+    const box = crop ?? squareBox(img.width, img.height, borderInset(img));
     fs.writeFileSync(dest, encodePng(kind.size, kind.size, resample(img, box, kind.size)));
     const kb = (fs.statSync(dest).size / 1024).toFixed(0);
     const notes = [];
+    if (crop) notes.push(`cropped to ${crop.x},${crop.y} +${crop.side}`);
     if (box.inset) notes.push(`${box.inset}px border stripped`);
     if (box.trimmed) notes.push(`bottom ${box.trimmed}px dropped`);
     const trim = notes.length ? `, ${notes.join(', ')}` : '';

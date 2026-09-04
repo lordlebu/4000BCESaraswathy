@@ -309,14 +309,30 @@ broom is the entire joke. The tool is the one thing canon actually records about
 looks, so a portrait without it is a portrait of the wrong person. ChatGPT's face is perfectly
 legible; it just is not the best one on the table.
 
-**Okhi is the clearest failure so far and the most instructive.** Gemini returned a seated scene at
-a desk: heavy gold jewellery, an ornately patterned garment, and *writing on the tablet* — three of
-the six hard requirements, including the first one. At 96px none of that is legible anyway, which
-is the actual reason it was held: her face lands at about twelve pixels inside a brown smudge.
-**A portrait that reads worse than the silhouette it replaces is not an improvement**, and the
-drawn stylus-and-tablet mark says more about her at that size than the painting does.
+**Okhi is where the crop flag came from.** Gemini returned a seated scene at a desk, her face
+about twelve pixels across at display size inside a brown smudge — held, on the grounds that a
+portrait reading worse than the silhouette it replaces is not an improvement.
 
----
+The colourful clothes and the gold were not the problem. They are deliberate: the repo owner wanted
+Okhi dressed that way, and the block's *no jewellery, no fine fabric* line is about not inventing
+status for a working person, not a ban on anybody being colourful. **Only the crop was wrong.**
+
+So the picture was cropped rather than regenerated:
+
+```bash
+node tools/build-plates.js --portraits --only=okhi --crop=440,165,1020 --force
+```
+
+Numbers are source pixels and they are recorded here because the raws are gitignored — an
+unrecorded crop cannot be reproduced. It replaces the automatic squaring outright, border detection
+included, since an explicit box is a statement about this image and a rule second-guessing it would
+defeat the point.
+
+This contradicts something written two sections up: that framing is the one fault the build cannot
+repair, because cropping in on a face means guessing where it is. **That is only true when nobody
+says.** A person looking at the picture can say, and then it stops being a guess and becomes
+arithmetic. Two portraits had been lost to framing before the flag existed, which is a poor trade
+against one argument.
 
 ---
 
