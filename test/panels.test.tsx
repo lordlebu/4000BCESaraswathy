@@ -25,6 +25,8 @@ import { CollectionPanel } from '../src/ui/CollectionPanel';
 import { creatures as allCreatures, flora as allFlora } from '../src/content/canon';
 import { LANGUAGE_INK, PersonPortrait, toolFor } from '../src/ui/PersonPortrait';
 import { portraitFor } from '../src/ui/portraits';
+import { add, emptySatchel } from '../src/content/satchel';
+import { PlacePanel, handOver } from '../src/ui/PlacePanel';
 import { npcs } from '../src/content/places';
 import { type Collection, emptyCollection, metOnTile } from '../src/content/collection';
 import { metSpecies } from '../src/content/species';
@@ -443,7 +445,7 @@ describe('here', () => {
     poiId: null as string | null,
     progress: emptyProgress(),
     moment: null,
-    firstVisit: false,
+    firstVisit: false, satchel: emptySatchel(),
     onLook: noop,
     onListen: noop,
     onClose: noop
@@ -961,5 +963,50 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
     const img = container.querySelector('.note-plate')!;
     expect(img.getAttribute('alt')).toBe('');
     expect(img.getAttribute('aria-hidden')).toBe('true');
+  });
+});
+// The gift, which was unreachable until the panel was given a satchel.
+//
+// Canon prices two lines and both teach a recipe it marks `taught_by` that person and nobody else.
+// `linesFor` refuses a priced line unless the item is in hand, and the panel called it without a
+// satchel -- so it asked what Uma says to somebody carrying nothing, every time, and a bedroll and
+// a rope span could not be got. The suite was green throughout.
+describe('handing something over', () => {
+  const noop = () => {};
+  const base = {
+    poiId: 'poi_lothal_camp',
+    progress: emptyProgress(),
+    moment: null,
+    firstVisit: false,
+    onLook: noop,
+    onListen: noop,
+    onClose: noop
+  };
+
+  it('says nothing about a gift while the traveller carries nothing', () => {
+    render(<PlacePanel {...base} satchel={emptySatchel()} />);
+    expect(screen.queryByRole('button', { name: /Give .* the reed mat/i })).toBeNull();
+  });
+
+  it('offers the mat to Uma once it is in the satchel', () => {
+    render(<PlacePanel {...base} satchel={add(emptySatchel(), 'item_reed_mat')} />);
+    expect(screen.getByRole('button', { name: /Give Uma the reed mat/i })).toBeTruthy();
+  });
+
+  it('does not spend the mat until the player says so', () => {
+    // The point of the offer. Playing the line automatically would take the item out of the
+    // satchel for something the player never chose to do.
+    const heard = vi.fn();
+    render(
+      <PlacePanel {...base} satchel={add(emptySatchel(), 'item_reed_mat')} onListen={heard} />
+    );
+    expect(heard).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: /Give Uma the reed mat/i }));
+    // The line now plays; `Dialogue` reports it as its beats land.
+    expect(screen.queryByRole('button', { name: /Give Uma the reed mat/i })).toBeNull();
+  });
+
+  it('names the act rather than the transaction', () => {
+    expect(handOver('Uma', 'item_reed_mat')).toBe('Give Uma the reed mat');
   });
 });

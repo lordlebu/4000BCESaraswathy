@@ -25,7 +25,9 @@ import {
 } from '../journey';
 import { discovery } from '../content/knowledge';
 import { npcsAt, poi, type Line, type Npc } from '../content/places';
-import { beats, meeting, moreAfter, quietNote } from '../content/conversation';
+import { type Turn, beats, meeting, moreAfter, offerIn, quietNote } from '../content/conversation';
+import type { Satchel } from '../content/satchel';
+import { nameOf } from '../content/making';
 import { Dialogue } from './Dialogue';
 import { PersonPortrait } from './PersonPortrait';
 
@@ -38,6 +40,22 @@ import { PersonPortrait } from './PersonPortrait';
  * on a 2x screen with the same margin a plate gets.
  */
 const PORTRAIT_SIZE = 96;
+
+/**
+ * What Varuna says when he hands something over.
+ *
+ * **The only line he gets, and it is deliberately not a transaction.** "Trade reed mat" or "Give
+ * (1) Reed mat" would make this a shop, and canon has no currency — the note on the `costs` field
+ * says as much: it is one item one person wants, not a price. So the control reads as the thing he
+ * does, in the register the rest of the panel uses, and names the person because handing a mat to
+ * Uma is not the same act as handing one to anybody else.
+ *
+ * Lower-cased mid-sentence: canon capitalises an item's name as a title ("Reed mat"), which reads
+ * as a proper noun in the middle of a sentence somebody is saying.
+ */
+export function handOver(name: string, itemId: string): string {
+  return `Give ${name} the ${nameOf(itemId).toLowerCase()}`;
+}
 
 /** Why a rung will not move, in words. Mirrors the diary's phrasing on purpose. */
 function why(progress: Progress, id: string, moment: WorldMoment | null): string {
@@ -65,6 +83,16 @@ export interface PlacePanelProps {
   moment: WorldMoment | null;
   /** True the first time this place is entered in a session — the long prose goes up once. */
   firstVisit: boolean;
+  /**
+   * What the traveller is carrying.
+   *
+   * **Needed to see a whole mechanic.** Canon prices two lines, and `linesFor` refuses to offer a
+   * priced line unless the item is in hand — so a panel that did not pass this asked for the
+   * lines a person will say *to somebody carrying nothing*, and the two gift lines were invisible
+   * for as long as this prop did not exist. Both teach a recipe that canon marks `taught_by` them
+   * and nothing else, so a bedroll and a rope span were unobtainable.
+   */
+  satchel: Satchel;
   onLook: (discoveryId: string) => void;
   onListen: (npcId: string, lineIndex: number) => void;
   onClose: () => void;
@@ -88,13 +116,15 @@ export interface PlacePanelProps {
 function Person({
   person,
   progress,
+  satchel,
   onListen
 }: {
   person: Npc;
   progress: Progress;
+  satchel: Satchel;
   onListen: (npcId: string, lineIndex: number) => void;
 }) {
-  const available = linesFor(progress, person.id);
+  const available = linesFor(progress, person.id, satchel);
   const spent = (l: Line) => lineIsSpent(progress, l);
   const first = isFirstMeeting(progress, person.id);
 
@@ -103,6 +133,11 @@ function Person({
   // would end the meeting.
   const [turns] = useState(() => meeting(available, spent, first));
   const [over, setOver] = useState(false);
+
+  // A priced line waits for the player to hand the thing over. Recomputed each render rather than
+  // frozen with the turns: accepting one changes the satchel, and the offer has to go away.
+  const offer = offerIn(available, spent);
+  const [given, setGiven] = useState<Turn | null>(null);
 
   const beatsOf = turns.map((t) => beats(t.line.text));
   const flat = beatsOf.flat();
@@ -125,7 +160,19 @@ function Person({
 
   const more = moreAfter(available, spent, turns);
 
-  const talking = flat.length > 0 && !over;
+  // What plays now: the introduction, or the priced line once it has been accepted.
+  const playing = given ? beats(given.line.text) : flat;
+  const talking = playing.length > 0 && !(over && !given);
+
+  const heardGiven = useCallback(
+    (beatIndex: number) => {
+      // One line, so its last beat is the last beat there is.
+      if (given && beatIndex === beats(given.line.text).length - 1) {
+        onListen(person.id, given.index);
+      }
+    },
+    [given, person.id, onListen]
+  );
 
   return (
     <div className="person">
@@ -141,15 +188,29 @@ function Person({
           </h4>
           {talking ? (
             <Dialogue
-              beats={flat}
-              onBeatDone={heardBeat}
+              key={given ? given.line.text : 'opening'}
+              beats={playing}
+              onBeatDone={given ? heardGiven : heardBeat}
               onDone={() => setOver(true)}
               doneLabel={null}
             />
           ) : (
             <p className="muted">{quietNote(person.name)}</p>
           )}
-          {over && more && <p className="muted said-more">There is more they could tell you.</p>}
+
+          {/* Varuna's turn, and the only one he gets. Canon prices exactly two lines and writes
+              both around the handover -- Uma asks "Is that one of mine?" and answers herself after
+              the pause -- so the offer belongs here, between the question and the reply, rather
+              than as a transaction the panel completes on his behalf. */}
+          {offer && !given && (
+            <button type="button" className="offer" onClick={() => setGiven(offer)}>
+              {handOver(person.name, offer.line.costs!)}
+            </button>
+          )}
+
+          {over && !offer && more && (
+            <p className="muted said-more">There is more they could tell you.</p>
+          )}
         </div>
       </div>
     </div>
@@ -161,6 +222,7 @@ export function PlacePanel({
   progress,
   moment,
   firstVisit,
+  satchel,
   onLook,
   onListen,
   onClose
@@ -232,6 +294,7 @@ export function PlacePanel({
                     key={n.id}
                     person={n}
                     progress={progress}
+                    satchel={satchel}
                     onListen={onListen}
                   />
                 ))}
