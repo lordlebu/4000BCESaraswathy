@@ -33,6 +33,32 @@ const OUT = path.join(ROOT, 'src', 'ui', 'plates');
 const SIZE = 384;
 
 /**
+ * The two things this builds.
+ *
+ * **A portrait is a plate of a person.** Everything hard here -- decoding whatever PNG a tool
+ * emitted, finding and stripping a painted frame, squaring, quantising, resampling -- is identical
+ * for a watercolour of a fox and a watercolour of a fisher, and the plate pipeline has already been
+ * burned into shape by three tools disagreeing about all of it. Writing a second copy for people
+ * would mean fixing the next border-detection bug twice, and the two copies would drift.
+ *
+ * So the differences are named here and nothing else changes: where the raws are, where the built
+ * files go, how big, and the word a filename may carry.
+ *
+ * Portraits are smaller because they are shown smaller -- about 96 CSS pixels beside the words a
+ * person is saying, so 256 covers a 2x screen with the same margin 384 gives a plate at 120.
+ */
+const KINDS = {
+  plate: { raw: RAW, out: OUT, size: SIZE, word: 'plate', label: 'plate' },
+  portrait: {
+    raw: path.join(ROOT, 'assets', 'source', 'portraits'),
+    out: path.join(ROOT, 'src', 'ui', 'portraits'),
+    size: 256,
+    word: 'portrait',
+    label: 'portrait'
+  }
+};
+
+/**
  * The most of the bottom edge the squaring step is allowed to throw away, as a fraction.
  *
  * Two of the three tools sign their work in a bottom corner -- Grok in words, Gemini with a small
@@ -524,11 +550,11 @@ function squareBox(width, height, inset = 0) {
 }
 
 /** Box-average down to SIZE. A mean is right here: this is a painting, not pixel art. */
-function resample(src, box) {
-  const out = Buffer.alloc(SIZE * SIZE * 3);
-  const step = box.side / SIZE;
-  for (let y = 0; y < SIZE; y += 1) {
-    for (let x = 0; x < SIZE; x += 1) {
+function resample(src, box, size = SIZE) {
+  const out = Buffer.alloc(size * size * 3);
+  const step = box.side / size;
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
       const sx0 = box.x + Math.floor(x * step);
       const sy0 = box.y + Math.floor(y * step);
       const sx1 = box.x + Math.max(Math.floor((x + 1) * step), Math.floor(x * step) + 1);
@@ -546,7 +572,7 @@ function resample(src, box) {
           n += 1;
         }
       }
-      const d = (y * SIZE + x) * 3;
+      const d = (y * size + x) * 3;
       out[d] = Math.round(r / n);
       out[d + 1] = Math.round(g / n);
       out[d + 2] = Math.round(b / n);
@@ -567,11 +593,11 @@ function resample(src, box) {
  *
  * Canon has three species this would hit, all of them on the Narmada Plateau.
  */
-function idFor(file) {
+function idFor(file, word = 'plate') {
   return path
     .basename(file, path.extname(file))
     .replace(TOOL_NOISE, '')
-    .replace(/^plate[ _-]+/i, '')
+    .replace(new RegExp(`^${word}[ _-]+`, 'i'), '')
     .trim()
     .toLowerCase()
     .replace(/[_\s]+/g, '-')
@@ -595,25 +621,25 @@ function idFor(file) {
  * that -- it is the fix, and the test is the net for when someone copies a file in without
  * running the build at all.
  */
-function sweepMisplaced() {
-  if (!fs.existsSync(OUT)) return [];
+function sweepMisplaced(kind = KINDS.plate) {
+  if (!fs.existsSync(kind.out)) return [];
   const moved = [];
-  for (const file of fs.readdirSync(OUT)) {
+  for (const file of fs.readdirSync(kind.out)) {
     if (!/\.(png|jpe?g|webp)$/i.test(file)) continue;
     const base = path.basename(file, path.extname(file));
-    if (idFor(file) === base) continue; // already a built plate
+    if (idFor(file, kind.word) === base) continue; // already built
 
-    fs.mkdirSync(RAW, { recursive: true });
-    const to = path.join(RAW, file);
+    fs.mkdirSync(kind.raw, { recursive: true });
+    const to = path.join(kind.raw, file);
     if (fs.existsSync(to)) {
       console.log(`  !  ${file} is in the output folder and already in the intake. Delete one.`);
       continue;
     }
-    fs.renameSync(path.join(OUT, file), to);
+    fs.renameSync(path.join(kind.out, file), to);
     moved.push(file);
   }
   if (moved.length) {
-    console.log(`  ~  moved ${moved.length} raw${moved.length > 1 ? 's' : ''} out of ${path.relative(ROOT, OUT)} into ${path.relative(ROOT, RAW)}:`);
+    console.log(`  ~  moved ${moved.length} raw${moved.length > 1 ? 's' : ''} out of ${path.relative(ROOT, kind.out)} into ${path.relative(ROOT, kind.raw)}:`);
     for (const f of moved) console.log(`       ${f}`);
     console.log('');
   }
@@ -621,20 +647,55 @@ function sweepMisplaced() {
 }
 
 function main() {
-  sweepMisplaced();
+  const kind = process.argv.includes('--portraits') ? KINDS.portrait : KINDS.plate;
+  sweepMisplaced(kind);
 
-  if (!fs.existsSync(RAW)) {
-    console.log(`Nothing to do: ${path.relative(ROOT, RAW)} does not exist.`);
-    console.log('Drop generated plates there under any name and run this again.');
+  if (!fs.existsSync(kind.raw)) {
+    console.log(`Nothing to do: ${path.relative(ROOT, kind.raw)} does not exist.`);
+    console.log(`Drop generated ${kind.label}s there under any name and run this again.`);
     return;
   }
-  fs.mkdirSync(OUT, { recursive: true });
+  fs.mkdirSync(kind.out, { recursive: true });
 
   const force = process.argv.includes('--force');
   const listOnly = process.argv.includes('--list');
-  const files = fs.readdirSync(RAW).filter((f) => /\.(png|jpe?g|webp)$/i.test(f));
+
+  // Build one id rather than the folder, so a re-crop does not touch anything already settled.
+  const onlyArg = process.argv.find((a) => a.startsWith('--only='));
+  const only = onlyArg ? onlyArg.slice('--only='.length) : null;
+
+  /**
+   * An explicit crop in source pixels: `--crop=x,y,size`.
+   *
+   * **Framing is the one fault the build could not repair, and this is why it now can.** Cropping
+   * in on a face means guessing where the face is -- but that is only true when nobody says. A
+   * person looking at the picture can say, and then it is arithmetic. Two portraits have been lost
+   * to framing that were otherwise wanted, which is a poor trade against one flag.
+   *
+   * Replaces the automatic squaring entirely, border detection included: an explicit box is a
+   * statement about this image, and having a rule second-guess it would defeat the point. Use it
+   * with `--only` and `--force`, and record the numbers in docs/portrait-prompts.md -- the raws are
+   * gitignored, so an unrecorded crop cannot be reproduced.
+   */
+  const cropArg = process.argv.find((a) => a.startsWith('--crop='));
+  let crop = null;
+  if (cropArg) {
+    const [x, y, side] = cropArg.slice('--crop='.length).split(',').map(Number);
+    if (![x, y, side].every((n) => Number.isFinite(n) && n >= 0) || side <= 0) {
+      console.log('  !  --crop wants three numbers: --crop=x,y,size (source pixels)');
+      process.exitCode = 1;
+      return;
+    }
+    crop = { x, y, side, trimmed: 0, inset: 0 };
+    if (!only) {
+      console.log('  !  --crop applies to one image; pass --only=<id> as well');
+      process.exitCode = 1;
+      return;
+    }
+  }
+  const files = fs.readdirSync(kind.raw).filter((f) => /\.(png|jpe?g|webp)$/i.test(f));
   if (files.length === 0) {
-    console.log(`No images in ${path.relative(ROOT, RAW)}.`);
+    console.log(`No images in ${path.relative(ROOT, kind.raw)}.`);
     return;
   }
 
@@ -644,7 +705,7 @@ function main() {
   // build silently replaced the plate that had been chosen with whichever name sorted lower.
   const claims = new Map();
   for (const file of files.sort()) {
-    const id = idFor(file);
+    const id = idFor(file, kind.word);
     if (!id) continue;
     if (!claims.has(id)) claims.set(id, []);
     claims.get(id).push(file);
@@ -653,7 +714,7 @@ function main() {
   for (const [id, sources] of claims) {
     if (sources.length < 2) continue;
     contested.add(id);
-    console.log(`  !  ${id}: ${sources.length} sources claim this plate --`);
+    console.log(`  !  ${id}: ${sources.length} sources claim this ${kind.label} --`);
     for (const f of sources) console.log(`       ${f}`);
     console.log('       Keep the one you want and move the rest to assets/source/dump/.');
   }
@@ -661,9 +722,10 @@ function main() {
   let built = 0;
   let skipped = 0;
   for (const file of files.sort()) {
-    const id = idFor(file);
+    const id = idFor(file, kind.word);
     if (contested.has(id)) continue;
-    const dest = path.join(OUT, `${id}.png`);
+    if (only && id !== only) continue;
+    const dest = path.join(kind.out, `${id}.png`);
     const rel = path.relative(ROOT, dest);
 
     if (!id) {
@@ -679,7 +741,7 @@ function main() {
       continue;
     }
 
-    const buf = fs.readFileSync(path.join(RAW, file));
+    const buf = fs.readFileSync(path.join(kind.raw, file));
     const img = decodePng(buf);
     if (!img) {
       // JPEG and WebP need a decoder this project does not have, and will not be adding one:
@@ -692,14 +754,19 @@ function main() {
       continue;
     }
 
-    const box = squareBox(img.width, img.height, borderInset(img));
-    fs.writeFileSync(dest, encodePng(SIZE, SIZE, resample(img, box)));
+    if (crop && (crop.x + crop.side > img.width || crop.y + crop.side > img.height)) {
+      console.log(`  !  ${file} -> crop runs past the edge of a ${img.width}x${img.height} image`);
+      continue;
+    }
+    const box = crop ?? squareBox(img.width, img.height, borderInset(img));
+    fs.writeFileSync(dest, encodePng(kind.size, kind.size, resample(img, box, kind.size)));
     const kb = (fs.statSync(dest).size / 1024).toFixed(0);
     const notes = [];
+    if (crop) notes.push(`cropped to ${crop.x},${crop.y} +${crop.side}`);
     if (box.inset) notes.push(`${box.inset}px border stripped`);
     if (box.trimmed) notes.push(`bottom ${box.trimmed}px dropped`);
     const trim = notes.length ? `, ${notes.join(', ')}` : '';
-    console.log(`  ok ${file}  ${img.width}x${img.height} -> ${SIZE}x${SIZE}${trim}  ${kb} KB  ${rel}`);
+    console.log(`  ok ${file}  ${img.width}x${img.height} -> ${kind.size}x${kind.size}${trim}  ${kb} KB  ${rel}`);
     built += 1;
   }
 
@@ -715,6 +782,6 @@ function main() {
 
 // Exported so test/plateEncoder.test.ts can round-trip the encoder without running the build.
 // Everything else here is I/O; these three are the arithmetic worth guarding.
-module.exports = { encodePng, filterRows, quantise, squareBox, borderInset, idFor, SIZE, CROP_BOTTOM };
+module.exports = { encodePng, filterRows, quantise, squareBox, borderInset, idFor, SIZE, CROP_BOTTOM, KINDS };
 
 if (require.main === module) main();

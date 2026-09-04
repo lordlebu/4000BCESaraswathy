@@ -177,20 +177,39 @@ export function Dialogue({
   const onLeave = useRef<() => void>(() => {});
   onLeave.current = () => {
     if (!keepOnLeave) return;
-    // **Only once the exchange has actually begun.** React runs every effect's cleanup on mount
-    // under StrictMode, to prove it is safe to run twice -- and that simulated unmount fired this,
-    // so merely walking up to somebody reported every one of their lines as heard before a
-    // character of the first had been drawn. That is precisely the bug this component was written
-    // to remove, reintroduced through its own leave path, and it hid in development only, which is
-    // where the browser suite runs.
-    //
-    // Nothing has been typed at that moment and something always has been by the time a player can
-    // leave, so the emptiness of the reveal is the discriminator. It needs no timer and no second
-    // mount flag, both of which were tried and are harder to reason about than this.
-    if (typed.length === 0) return;
     for (let i = reported.current + 1; i < beats.length; i += 1) onBeatDone?.(i);
   };
-  useEffect(() => () => onLeave.current(), []);
+
+  /**
+   * Leaving reports the rest — but only from a mount that was real.
+   *
+   * **React runs every effect's cleanup once on mount under StrictMode**, to prove it is safe to
+   * run twice, and that simulated unmount fires this. Left ungated it meant walking up to somebody
+   * reported all of their lines as heard before a character of the first was drawn: the bug this
+   * component exists to remove, coming back through its own leave path, in development only —
+   * which is where the browser suite runs.
+   *
+   * The discriminator is *when*, not *what*. StrictMode's cleanup runs synchronously inside the
+   * mount commit, so a task queued by the effect has not run yet; a real unmount is always at
+   * least one task later. So the flag is set from a zero-delay timeout that the simulated unmount
+   * cancels before it can fire, and the second mount re-arms.
+   *
+   * The first attempt keyed on the reveal being empty instead — nothing is typed at StrictMode's
+   * cleanup, and something normally is by the time a player can leave. **"Normally" was the flaw.**
+   * It held alone and failed under a loaded machine running four browser tests at once, where the
+   * panel can be closed before the first character lands, and it silently took the exchange with
+   * it. Timing is what distinguishes the two mounts, so timing is what the test should be.
+   */
+  const settled = useRef(false);
+  useEffect(() => {
+    const armed = setTimeout(() => {
+      settled.current = true;
+    }, 0);
+    return () => {
+      clearTimeout(armed);
+      if (settled.current) onLeave.current();
+    };
+  }, []);
 
   if (beats.length === 0) return null;
 

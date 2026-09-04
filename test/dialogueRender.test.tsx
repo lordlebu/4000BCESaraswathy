@@ -158,6 +158,20 @@ describe('Dialogue', () => {
       expect(heard).toHaveBeenCalledTimes(1);
     });
 
+    it('counts them even when the player leaves before a character is drawn', () => {
+      // The window that broke the browser suite. An earlier guard keyed on the reveal being empty,
+      // which is also true at StrictMode's simulated unmount -- so leaving this fast was
+      // indistinguishable from mounting, and the whole exchange was silently dropped. On a loaded
+      // machine that is reachable, and it takes progress away, which is the worse direction.
+      const heard = vi.fn();
+      const { unmount } = render(<Dialogue beats={['One.', 'Two.']} onBeatDone={heard} />);
+      act(() => {
+        vi.advanceTimersByTime(0); // the mount settles; nothing has typed yet
+      });
+      unmount();
+      expect(heard).toHaveBeenCalledTimes(2);
+    });
+
     it('lets a caller opt out', () => {
       const heard = vi.fn();
       const { unmount } = render(

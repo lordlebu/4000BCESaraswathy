@@ -23,7 +23,8 @@ import { FieldKit } from '../src/ui/FieldKit';
 import { Here } from '../src/ui/Here';
 import { CollectionPanel } from '../src/ui/CollectionPanel';
 import { creatures as allCreatures, flora as allFlora } from '../src/content/canon';
-import { LANGUAGE_INK, PersonPortrait } from '../src/ui/PersonPortrait';
+import { LANGUAGE_INK, PersonPortrait, toolFor } from '../src/ui/PersonPortrait';
+import { portraitFor } from '../src/ui/portraits';
 import { npcs } from '../src/content/places';
 import { type Collection, emptyCollection, metOnTile } from '../src/content/collection';
 import { metSpecies } from '../src/content/species';
@@ -704,9 +705,31 @@ describe('the people in a place', () => {
   // than on it. Rendering the component directly answers the same question in milliseconds, which
   // is the trade the whole `scenePlan` split was about.
 
+  /**
+   * Somebody with no painting, so the silhouette branch is what renders.
+   *
+   * **Synthetic, and it has to be.** These tests named Thrali until he was painted, at which point
+   * they broke; picking whoever was still unpainted fixed that and then quietly ran out — seven of
+   * eight are painted now, so the language check had one subject left and the kia and neutral inks
+   * were going untested while the suite stayed green. Art arriving should not erode coverage.
+   *
+   * The trade and language are canon's; only the id is invented, and inventing it is the point —
+   * nothing will ever paint `npc_nobody_*`, so the fallback stays exercised forever.
+   */
+  const nobody = (language: string, role: string) => ({
+    id: `npc_nobody_${language || 'none'}`,
+    name: 'Somebody',
+    role,
+    language
+  });
+
   it('draws a portrait beside every person, coloured by their language', () => {
-    const people = npcs.filter((n) => ['npc_thrali', 'npc_uma', 'npc_marn'].includes(n.id));
-    expect(people).toHaveLength(3);
+    const people = [
+      nobody('kia', 'fisher'),
+      nobody('maru', 'herder'),
+      nobody('', 'roofer')
+    ];
+    for (const p of people) expect(portraitFor(p.id)).toBeNull();
 
     render(
       <ul>
@@ -725,32 +748,36 @@ describe('the people in a place', () => {
     expect(portraits).toHaveLength(3);
     for (const svg of portraits) expect(svg.getAttribute('aria-hidden')).toBe('true');
 
-    // Thrali speaks Kia and Marn speaks Maru, so they must not be drawn in the same ink. Uma has
-    // no language in canon and takes the neutral one rather than being assigned a tongue.
+    // Kia and Maru must not be drawn in the same ink. Somebody canon gives no language takes the
+    // neutral one rather than being assigned a tongue.
     const inkOf = (i: number) => portraits[i]!.querySelector('path')!.getAttribute('fill');
-    const thrali = inkOf(people.findIndex((p) => p.id === 'npc_thrali'));
-    const marn = inkOf(people.findIndex((p) => p.id === 'npc_marn'));
-    const uma = inkOf(people.findIndex((p) => p.id === 'npc_uma'));
-    expect(thrali).toBe(LANGUAGE_INK.kia);
-    expect(marn).toBe(LANGUAGE_INK.maru);
-    expect(uma).not.toBe(thrali);
-    expect(Object.values(LANGUAGE_INK)).not.toContain(uma);
+    expect(inkOf(0)).toBe(LANGUAGE_INK.kia);
+    expect(inkOf(1)).toBe(LANGUAGE_INK.maru);
+    expect(Object.values(LANGUAGE_INK)).not.toContain(inkOf(2));
   });
 
   it('gives a fisher and a herder different things to hold', () => {
     // The portrait says what someone does, which is the only thing canon records about how they
     // look. Two trades sharing a drawing would make it say nothing.
-    const thrali = npcs.find((n) => n.id === 'npc_thrali')!;
-    const marn = npcs.find((n) => n.id === 'npc_marn')!;
+    expect(toolFor('fisher')).not.toBe(toolFor('herder'));
+
     render(
       <div>
-        <PersonPortrait person={thrali} />
-        <PersonPortrait person={marn} />
+        <PersonPortrait person={nobody('kia', 'fisher')} />
+        <PersonPortrait person={nobody('maru', 'herder')} />
       </div>
     );
     const [first, second] = [...document.querySelectorAll('svg.person-portrait')];
     const toolOf = (svg: Element) => [...svg.querySelectorAll('path')].at(-1)!.getAttribute('d');
     expect(toolOf(first!)).not.toBe(toolOf(second!));
+  });
+
+  it('shows a painting instead, for anybody who has one', () => {
+    const painted = npcs.find((n) => portraitFor(n.id) !== null);
+    if (!painted) return; // nobody painted yet; the silhouette tests above cover everyone
+    render(<PersonPortrait person={painted} />);
+    expect(document.querySelector('img.person-portrait.is-painted')).not.toBeNull();
+    expect(document.querySelector('svg.person-portrait')).toBeNull();
   });
 });
 
