@@ -297,14 +297,15 @@ Measured at 96px, which is the size that decides it:
 
 - **Grok** has returned a tight head-and-shoulders every time. Thrali and Uma both ship.
 - **Gemini** frames correctly and adds a soft white vignette the border rule cannot see.
-- **ChatGPT** frames wide, three times. Thrali came back with the harbour and boats behind him and
-  a face about 25 pixels across. Bekh came back twice as a half-length figure with the chest bare —
-  off-brief on the framing and on the *plain undyed cloth* the block asks for, and not a portrait
-  this game can use. None of the three was shipped.
+- **ChatGPT** frames wide. Thrali came back with the harbour and boats behind him and a face about
+  25 pixels across, and was not shipped. Bekh came back twice as a half-length figure rather than
+  the head-and-shoulders the block asks for; **the second is the one in the game**, on the repo
+  owner's call, after the framing improved.
 
-**The second Bekh is why the block changed rather than the prompt being re-rolled again.** The
-first attempt could be a bad draw; the same fault twice on the same subject is the brief being
-under-specified, and re-rolling a weak brief just buys another sample from the same distribution.
+**Bekh is also why the block changed.** A first attempt off-brief could be a bad draw; the same
+fault twice on the same subject is the brief being under-specified, and re-rolling a weak brief
+just buys another sample from the same distribution. The change stands for the five still to come
+whichever way any individual picture is judged.
 
 Two things were too polite to be instructions. *Head and shoulders* and *filling most of the frame*
 pull against each other — a torso fills the frame — so the crop is now stated as a measurement:
