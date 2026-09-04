@@ -8,7 +8,7 @@
 // against the shipped text and a paraphrase would stop testing the thing that broke.
 
 import { describe, expect, it } from 'vitest';
-import { beats, meeting, moreAfter, saysNow } from '../src/content/conversation';
+import { beats, meeting, moreAfter, offerIn, saysNow } from '../src/content/conversation';
 import type { Line } from '../src/content/places';
 import { allNpcs } from '../src/content/places';
 
@@ -190,5 +190,65 @@ describe('against the writing as shipped', () => {
       const said = saysNow(person.lines, nothingSpent);
       expect(said.line).not.toBeNull();
     }
+  });
+});
+
+// A gift is Varuna's act, not the panel's.
+//
+// Canon prices two lines -- Uma wants a reed mat back before she shows you a bedroll, Pell wants a
+// hawser before he shows you the span -- and both teach a recipe canon marks `taught_by` them and
+// nobody else. Neither was reachable: the panel asked `linesFor` what somebody says to a traveller
+// carrying nothing, so a priced line was filtered out every time and two recipes could not be got.
+describe('a line with a price', () => {
+  const priced = (text: string, costs: string, gives: string[] = []): Line => ({
+    text,
+    requires: [],
+    gives,
+    costs
+  });
+
+  it('never plays itself as part of a meeting', () => {
+    const lines = [line('Free.'), priced('Is that one of mine?', 'item_reed_mat', ['recipe_x'])];
+    const turns = meeting(lines, nothingSpent, true);
+    expect(turns.map((t) => t.line.text)).toEqual(['Free.']);
+  });
+
+  it('is not what somebody says on a later visit either', () => {
+    const lines = [line('Free.'), priced('Is that one of mine?', 'item_reed_mat', ['recipe_x'])];
+    expect(meeting(lines, nothingSpent, false)).toEqual([]);
+  });
+
+  it('is offered separately, so the player can accept it', () => {
+    const lines = [line('Free.'), priced('Is that one of mine?', 'item_reed_mat', ['recipe_x'])];
+    const offer = offerIn(lines, nothingSpent);
+    expect(offer?.line.costs).toBe('item_reed_mat');
+    expect(offer?.index).toBe(1);
+  });
+
+  it('stops being offered once it has been given', () => {
+    const lines = [priced('Is that one of mine?', 'item_reed_mat', ['recipe_x'])];
+    expect(offerIn(lines, spentIf('Is that one of mine?'))).toBeNull();
+  });
+
+  it('is not offered when there is nothing to pay for', () => {
+    expect(offerIn([line('Free.')], nothingSpent)).toBeNull();
+  });
+});
+
+describe('the two gifts canon actually authors', () => {
+  it('are reachable only by carrying the thing', () => {
+    for (const person of allNpcs()) {
+      for (const l of person.lines) {
+        if (!l.costs) continue;
+        // The line exists, it wants an item, and it teaches something.
+        expect(l.costs).toMatch(/^item_/);
+        expect(l.gives.length, `${person.name}'s priced line gives nothing`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('are exactly two, so one offer slot per person is enough', () => {
+    const n = allNpcs().reduce((c, p) => c + p.lines.filter((l) => l.costs).length, 0);
+    expect(n).toBe(2);
   });
 });

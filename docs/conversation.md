@@ -140,9 +140,29 @@ for anybody, so the trade, the tool, the pronoun and the age band in each one ar
 canon *does* say — and the pronouns for Pell, Sura and Uma had to be looked up in the discoveries
 that mention them (`his son`, `hers`, `her life`) rather than their own entities.
 
-**Varuna never speaks.** He is silent in a game whose whole subject is asking. Phase 4 of the plan
-gives him one line per exchange, phrased from the fiction, drawn from what is actually available —
-never a free-text box and never a wheel of four.
+**Varuna speaks once, and it is the gift.** Canon prices two lines — Uma will show you a bedroll
+once she has one of her own mats back, Pell will show you the span once he has a hawser — and both
+teach a recipe canon marks `taught_by` that person and nobody else.
+
+**Neither was reachable.** `linesFor` refuses to offer a priced line unless the item is in hand, and
+the panel called it without a satchel, so it asked what Uma says to somebody carrying nothing —
+every time. A bedroll and a rope span could not be got, and the whole suite was green throughout,
+because nothing had ever rendered the panel with something in the satchel.
+
+The fix is the prop; the *design* is that the gift is now something Varuna does. `meeting()` refuses
+to auto-play a priced line and `offerIn()` hands it to the panel as an offer, so the item leaves the
+satchel only when the player accepts. Playing it automatically would spend a mat on a line nobody
+chose to buy.
+
+It sits exactly where the writing already put it. Both priced lines are scene-break lines: Uma says
+*"Is that one of mine?"*, and after the pause, *"It is one of yours. Good."* The dash is the moment
+the mat changes hands.
+
+One thing checked and found harmless: `hear()` recomputes `linesFor` **with** the satchel and
+indexes into that, while the panel indexed a list computed without it. Two different lists, one
+index. It never misfired only because both priced lines sort last in canon order, so including one
+appends rather than shifts — luck, not design, and now moot since both lists are built the same
+way.
 
 **There is nowhere to look somebody up.** Eight people met across twenty places and no record of who
 said what. Phase 5 adds a People tab to `Records`, where `would_settle` — authored on every person

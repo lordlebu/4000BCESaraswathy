@@ -1449,6 +1449,24 @@ button.ghost:hover:not(:disabled) {
 .dialogue-on:hover { opacity: 1; }
 
 /*
+ * Varuna handing something over. The one control in the game that is *his* turn rather than a
+ * request to the world, so it reads warmer than the ghost buttons around it -- but quietly: a
+ * gift here is one item one person wants, not a purchase, and canon has no currency to dress it
+ * up as.
+ */
+.offer {
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  padding: 0.25rem 0.7rem;
+  background: var(--warm, rgba(160, 120, 60, 0.14));
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.offer:hover { background: rgba(160, 120, 60, 0.22); }
+
+/*
  * Typing is motion, and for some people it is motion that makes text unreadable. Under this
  * setting `Dialogue` renders every beat complete on arrival, so there is nothing left to animate
  * -- these rules stop the cursor and the portrait from moving too.

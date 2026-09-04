@@ -127,12 +127,39 @@ export function meeting(
     // first meeting is the introduction and nothing else.
     const opening = available
       .map((line, index) => ({ line, index, gives: line.gives.length > 0 }))
-      .filter((turn) => !spent(turn.line));
+      .filter((turn) => !spent(turn.line) && turn.line.costs === null);
     if (opening.length > 0) return opening;
   }
 
   const said = saysNow(available, spent);
-  return said.line ? [{ line: said.line, index: said.index, gives: said.gives }] : [];
+  if (!said.line || said.line.costs !== null) return [];
+  return [{ line: said.line, index: said.index, gives: said.gives }];
+}
+
+/**
+ * A line that has to be paid for, waiting on the player to pay it.
+ *
+ * **A gift is something Varuna does, not something a panel does on his behalf.** Canon prices two
+ * lines: Uma will show you a bedroll once she has a reed mat of her own back, Pell will show you
+ * the span once he has a hawser. `linesFor` already refuses to offer either until the item is in
+ * the satchel, so by the time one reaches here it *can* be paid — and playing it automatically
+ * would take the item out of the satchel for a line the player never chose to buy.
+ *
+ * Held apart from `meeting` for exactly that reason: those turns play themselves, and this one
+ * must not. The panel renders it as an offer and calls it only when the player accepts.
+ *
+ * Both are also the two lines canon writes *around* the handover: Uma says "Is that one of mine?",
+ * and after the break, "It is one of yours. Good." The pause the dash makes is the moment the mat
+ * changes hands, so the offer sits exactly where the writing already put it.
+ */
+export function offerIn(available: readonly Line[], spent: (line: Line) => boolean): Turn | null {
+  for (let i = available.length - 1; i >= 0; i -= 1) {
+    const line = available[i]!;
+    if (line.costs !== null && !spent(line)) {
+      return { line, index: i, gives: line.gives.length > 0 };
+    }
+  }
+  return null;
 }
 
 /**

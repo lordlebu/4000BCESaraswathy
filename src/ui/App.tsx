@@ -666,6 +666,7 @@ export function App() {
           moment,
           firstVisit: Boolean(standingOn) && !visited.current.has(standingOn!),
           onLook: look,
+          satchel,
           onListen: listen,
           onClose: () => {
             if (standingOn) visited.current.add(standingOn);
