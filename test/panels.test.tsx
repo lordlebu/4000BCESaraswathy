@@ -706,26 +706,30 @@ describe('the people in a place', () => {
   // is the trade the whole `scenePlan` split was about.
 
   /**
-   * Somebody with no painting, so the silhouette is what renders.
+   * Somebody with no painting, so the silhouette branch is what renders.
    *
-   * **Picked rather than named.** These two tests used Thrali until he was the first person
-   * painted, at which point they failed -- correctly, because he now renders an `img` and not an
-   * `svg`. Naming the next unpainted person would just move the breakage to whoever is painted
-   * next, so the subject is chosen by the thing that actually decides which branch runs.
+   * **Synthetic, and it has to be.** These tests named Thrali until he was painted, at which point
+   * they broke; picking whoever was still unpainted fixed that and then quietly ran out — seven of
+   * eight are painted now, so the language check had one subject left and the kia and neutral inks
+   * were going untested while the suite stayed green. Art arriving should not erode coverage.
+   *
+   * The trade and language are canon's; only the id is invented, and inventing it is the point —
+   * nothing will ever paint `npc_nobody_*`, so the fallback stays exercised forever.
    */
-  const unpainted = (want: (n: (typeof npcs)[number]) => boolean) => {
-    const found = npcs.find((n) => want(n) && portraitFor(n.id) === null);
-    // A synthetic stand-in keeps the silhouette covered once every real person is painted, which
-    // is the point the folder is working towards.
-    return found ?? null;
-  };
+  const nobody = (language: string, role: string) => ({
+    id: `npc_nobody_${language || 'none'}`,
+    name: 'Somebody',
+    role,
+    language
+  });
 
   it('draws a portrait beside every person, coloured by their language', () => {
-    const kia = unpainted((n) => n.language === 'kia');
-    const maru = unpainted((n) => n.language === 'maru');
-    const none = unpainted((n) => n.language === '');
-    const people = [kia, maru, none].filter((p): p is NonNullable<typeof p> => p !== null);
-    expect(people.length, 'no unpainted person left to draw a silhouette for').toBeGreaterThan(0);
+    const people = [
+      nobody('kia', 'fisher'),
+      nobody('maru', 'herder'),
+      nobody('', 'roofer')
+    ];
+    for (const p of people) expect(portraitFor(p.id)).toBeNull();
 
     render(
       <ul>
@@ -741,34 +745,26 @@ describe('the people in a place', () => {
     // One portrait each, and hidden from the reading order: the name beside it already says who
     // this is, so announcing "portrait, Thrali" would be worse than announcing "Thrali".
     const portraits = document.querySelectorAll('svg.person-portrait');
-    expect(portraits).toHaveLength(people.length);
+    expect(portraits).toHaveLength(3);
     for (const svg of portraits) expect(svg.getAttribute('aria-hidden')).toBe('true');
 
     // Kia and Maru must not be drawn in the same ink. Somebody canon gives no language takes the
     // neutral one rather than being assigned a tongue.
-    const inkOf = (id: string) =>
-      portraits[people.findIndex((p) => p.id === id)]!.querySelector('path')!.getAttribute('fill');
-    if (kia) expect(inkOf(kia.id)).toBe(LANGUAGE_INK.kia);
-    if (maru) expect(inkOf(maru.id)).toBe(LANGUAGE_INK.maru);
-    if (none) expect(Object.values(LANGUAGE_INK)).not.toContain(inkOf(none.id));
+    const inkOf = (i: number) => portraits[i]!.querySelector('path')!.getAttribute('fill');
+    expect(inkOf(0)).toBe(LANGUAGE_INK.kia);
+    expect(inkOf(1)).toBe(LANGUAGE_INK.maru);
+    expect(Object.values(LANGUAGE_INK)).not.toContain(inkOf(2));
   });
 
-  it('gives two trades different things to hold', () => {
+  it('gives a fisher and a herder different things to hold', () => {
     // The portrait says what someone does, which is the only thing canon records about how they
     // look. Two trades sharing a drawing would make it say nothing.
-    //
-    // Checked at the source as well as in the DOM, because the render half can only compare
-    // trades nobody has painted yet -- and the fisher, which is the case this was written for, is
-    // now a painting.
     expect(toolFor('fisher')).not.toBe(toolFor('herder'));
 
-    const a = unpainted((n) => /herder/i.test(n.role));
-    const b = unpainted((n) => /bone-picker|roofer|copyist/i.test(n.role));
-    if (!a || !b) return;
     render(
       <div>
-        <PersonPortrait person={a} />
-        <PersonPortrait person={b} />
+        <PersonPortrait person={nobody('kia', 'fisher')} />
+        <PersonPortrait person={nobody('maru', 'herder')} />
       </div>
     );
     const [first, second] = [...document.querySelectorAll('svg.person-portrait')];

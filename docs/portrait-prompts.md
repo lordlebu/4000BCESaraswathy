@@ -285,8 +285,8 @@ rather than to add adjectives — "a herder checking a terrace wall" holds where
 
 ## Framing is the failure that costs a portrait
 
-Two of the three shipped so far are Grok's, and both times the deciding fault was the same one:
-**how much of the person is in the frame.**
+Seven of eight are painted, four of them Grok's, and the fault that decided nearly every one was
+the same: **how much of the person is in the frame.**
 
 Everything else the build can fix. A frame is stripped, a watermark is cropped, an 8 MB source is
 resampled, a portrait aspect is squared. Framing is the one thing it cannot touch, because cropping
@@ -295,31 +295,28 @@ already spent the pixels the portrait needed.
 
 Measured at 96px, which is the size that decides it:
 
-- **Grok** has returned a tight head-and-shoulders every time. Thrali and Uma both ship.
-- **Gemini** frames correctly and adds a soft white vignette the border rule cannot see.
-- **ChatGPT** frames wide. Thrali came back with the harbour and boats behind him and a face about
-  25 pixels across, and was not shipped. Bekh came back twice as a half-length figure rather than
-  the head-and-shoulders the block asks for; **the second is the one in the game**, on the repo
-  owner's call, after the framing improved.
+- **Grok** has returned a tight head-and-shoulders nearly every time. Thrali, Uma, Sura and Vessa
+  all ship on it.
+- **Gemini** frames correctly and adds a soft white vignette the border rule cannot see, or leaves
+  a wide unpainted paper margin. Marn ships with the margin costing him some face; Okhi did not.
+- **ChatGPT** frames wide, and then stopped. Given the revised block it returned the best Pell of
+  the two, and the one that ships.
 
-**Bekh is also why the block changed.** A first attempt off-brief could be a bad draw; the same
-fault twice on the same subject is the brief being under-specified, and re-rolling a weak brief
-just buys another sample from the same distribution. The change stands for the five still to come
-whichever way any individual picture is judged.
+**Pell is the case where the better face lost.** Grok's is a stronger portrait — bigger head, more
+legible at 96px — and it has no broom in it. Canon gives Pell a broom, the silhouette gives him a
+broom, and canon's note is that he sweeps an interdimensional gate as municipal maintenance and the
+broom is the entire joke. The tool is the one thing canon actually records about how somebody
+looks, so a portrait without it is a portrait of the wrong person. ChatGPT's face is perfectly
+legible; it just is not the best one on the table.
 
-Two things were too polite to be instructions. *Head and shoulders* and *filling most of the frame*
-pull against each other — a torso fills the frame — so the crop is now stated as a measurement:
-**the head fills the upper third and the picture ends at the top of the chest, with at most a hint
-of the tool at the lower edge.** That last clause is measured against the two portraits that
-work rather than invented — Uma's reeds and Thrali's net both sit in the bottom corner, and a rule
-that excluded them would have been a rule against the best evidence available. And *in plain undyed
-cloth* described the fabric without requiring it to cover anything, so it is now **fully clothed in
-plain undyed cloth that covers the shoulders and chest**, with the figure study named among the
-exclusions.
+**Okhi is the clearest failure so far and the most instructive.** Gemini returned a seated scene at
+a desk: heavy gold jewellery, an ornately patterned garment, and *writing on the tablet* — three of
+the six hard requirements, including the first one. At 96px none of that is legible anyway, which
+is the actual reason it was held: her face lands at about twelve pixels inside a brown smudge.
+**A portrait that reads worse than the silhouette it replaces is not an improvement**, and the
+drawn stylus-and-tablet mark says more about her at that size than the painting does.
 
-Both are positive instructions with a number or a body part in them. That is the general lesson
-here, and it is the same one the framing paragraph reaches: **a tool that ignored an adjective will
-ignore a stronger adjective.** Give it something it can measure.
+---
 
 ---
 
