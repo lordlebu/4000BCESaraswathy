@@ -1540,6 +1540,13 @@
       "renderable": true
     },
     {
+      "id": "snow",
+      "name": "High Snow",
+      "realm": "ground",
+      "renderable": true,
+      "notes": "Wind-packed snow above the treeline. Ordinary ground, not an extreme: a person walks on it, and what grows and hunts there is scarce rather than impossible. It is a sub-biome by design -- the game stamps it as a cap on high ground rather than listing it in a map's `seed_biomes`, because a climate palette would hand it an elevation band and turn a third of a map to snow. Nothing is authored to live here yet; the biome exists so the mountains can have a top."
+    },
+    {
       "id": "desert",
       "name": "Desert",
       "realm": "ground",

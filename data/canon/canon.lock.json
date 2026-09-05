@@ -17,8 +17,8 @@
     "vehicles": 13
   },
   "sha256": {
-    "species.json": "66a25611580f3c0faabac1c25d88973094abe0869bfb1b086afa8282a6b7f93b",
-    "places.json": "b7787337338f0dc69271de5048e148fd6ca568e4c65f969298e957b0fd20cac4",
+    "species.json": "763c14a593ccb5a63e94d9b39c3b5d157fe1f9b84a04ece86c79c41dd4d2c3c4",
+    "places.json": "25af5ab30a9e64501dedea99cc3c0d817f6a20b0a0d067cb1c79fb879d9f3d8f",
     "knowledge.json": "f3e918a7f678b3463cd48d3988aacd9e1e76023afa709dd39cfe6a96562f6fb5",
     "crafting.json": "c00e28d8ae0c9ec807dd8371c1001b556e6cd64323eee9b65cac0095f644ee88"
   }

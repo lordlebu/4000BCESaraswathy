@@ -355,7 +355,14 @@ const TILES = {
   desert: 'desert.png',
   river: 'river.png',
   settlement: 'settlement-ground.png',
-  landmark: 'landmark-ground.png'
+  landmark: 'landmark-ground.png',
+  // The sub-biomes. Stamped as patches after classification rather than listed in a map's
+  // `seed_biomes` -- see docs/art-brief.md, Asset 2d. Order must match TERRAIN_ORDER in
+  // src/game/frames.ts, which is what turns a slot in this strip into a biome id.
+  lava_field: 'lava_field.png',
+  snow: 'snow.png',
+  sky_island: 'sky_island.png',
+  sky_underside: 'sky_underside.png'
 };
 
 // The seven landmark kinds of data/landmarks.json, drawn as objects so the ground stays plain.

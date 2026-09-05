@@ -94,6 +94,19 @@
     ]
   },
   {
+    "id": "snow",
+    "name": "High Snow",
+    "walkable": true,
+    "travelCost": 3,
+    "tone": "still",
+    "color": "#dfe3e8",
+    "symbol": "*",
+    "description": "Wind-packed snow above the treeline, quiet enough to hear your own steps break it.",
+    "regions": [
+      "narmada-vindhya"
+    ]
+  },
+  {
     "id": "desert",
     "name": "Desert",
     "walkable": true,
