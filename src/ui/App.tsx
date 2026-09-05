@@ -27,7 +27,8 @@ import { seedFromUrl } from './seed';
 import { WorkshopPanel } from './WorkshopPanel';
 import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
-import { gather, gatheredLine } from '../content/gathering';
+import { carry, gatheredLine } from '../content/gathering';
+import { draw, noNodes, takeableAt } from '../content/nodes';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
@@ -112,6 +113,12 @@ export function App() {
   // and `content/crafting.ts`; this only holds it and hands it to the save, exactly as
   // `progress` does.
   const [satchel, setSatchel] = useState(initialJourney.current.satchel ?? emptySatchel());
+  // What the traveller has drawn down. The one piece of world state a save has to hold, because
+  // it is the only thing about a tile that cannot be recomputed from the seed.
+  const [nodes, setNodes] = useState(initialJourney.current.nodes ?? noNodes());
+  // The scene owns the clock; this is only where the last reading is kept so the save can hand
+  // it back on the next boot. A ref rather than state because nothing renders from it.
+  const travelledRef = useRef(initialJourney.current.travelled ?? 0);
 
   /**
    * The current progress and satchel, readable synchronously.
@@ -173,6 +180,7 @@ export function App() {
     const onTileEntered = (payload: Arrival) => {
       setArrival(payload);
       setMemory('');
+      travelledRef.current = payload.travelled;
     };
     const onJourneyChanged = ({ discovered: tiles }: GameToUi['journey-changed']) => {
       discovered.current = tiles;
@@ -221,7 +229,11 @@ export function App() {
         collection,
         reached,
         progress,
-        satchel
+        satchel,
+        nodes,
+        // The scene owns the clock and reports it with each step; this is only where it is kept
+        // so the next boot can hand it back. Nought until the first tile is entered.
+        travelled: travelledRef.current
       });
     const timer = window.setInterval(flush, 3000);
     window.addEventListener('pagehide', flush);
@@ -406,8 +418,15 @@ export function App() {
    */
   const pickUp = useCallback(() => {
     if (!underfoot) return;
-    setSatchel((s) => gather(s, underfoot.seed, underfoot.at, underfoot.biome));
-  }, [underfoot]);
+    const today = arrival?.day ?? 0;
+    // What is *left* here, not what grows here. `gather` still does the carrying; this decides
+    // what there is to carry, which is the whole of what a resource node changes.
+    const taking = takeableAt(nodes, underfoot.seed, underfoot.at, underfoot.biome, today);
+    if (taking.length === 0) return;
+
+    setSatchel((s) => carry(s, taking));
+    setNodes((n) => draw(n, underfoot.seed, underfoot.at, taking, today));
+  }, [underfoot, nodes, arrival?.day]);
 
   /**
    * Everything that can be done on the tile under foot, in one list.
@@ -422,8 +441,12 @@ export function App() {
    * the workshop will need in phase two, where the reason is "needs a settlement".
    */
   const tileActions = useMemo<TileAction[]>(() => {
+    // What is left here, so a picked-over stand reads as picked over rather than as bare ground.
+    const left = underfoot
+      ? takeableAt(nodes, underfoot.seed, underfoot.at, underfoot.biome, arrival?.day ?? 0)
+      : [];
     const takeable = underfoot
-      ? gatheredLine(underfoot.seed, underfoot.at, underfoot.biome)
+      ? gatheredLine(underfoot.seed, underfoot.at, underfoot.biome, left)
       : null;
     const shelter = arrival?.shelter ?? 'bedroll';
 
@@ -447,7 +470,7 @@ export function App() {
         onDo: () => EventBus.emitEvent('camp', {})
       }
     ];
-  }, [underfoot, arrival, pickUp]);
+  }, [underfoot, arrival, nodes, pickUp]);
 
   /**
    * Whether the player has been shown how to make something.

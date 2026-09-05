@@ -67,7 +67,7 @@ import {
   loadCharacterSheet,
   type Facing
 } from '../player';
-import { phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
+import { DAY_MS, phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
 import { fatigueAt, fatigueEnabled, fatigueNote, paceFor, restUntilMorning } from '../fatigue';
 import { duskNote, isDark, lightLeft, shelterAt, spendNight, type Shelter } from '../night';
 import { momentAt } from '../moment';
@@ -198,6 +198,15 @@ export interface WorldSceneData {
   seed: string;
   discovered?: string[];
   /**
+   * How much of the journey's time has already been spent, in milliseconds.
+   *
+   * Restored like `discovered` and for the same reason: a reload used to set the clock back to
+   * dawn of day one, which was invisible while nothing depended on elapsed time and is a
+   * correctness problem the moment a resource node regrows on a schedule. Absent means a fresh
+   * journey, which is what every save written before nodes existed is.
+   */
+  travelled?: number;
+  /**
    * Which canon field map to lay down.
    *
    * The scene used to call `generateWorld` and get an anonymous continent. It now builds a
@@ -321,8 +330,8 @@ export class WorldScene extends Phaser.Scene {
     this.queuedPath = [];
     this.moving = false;
     this.facing = 'down';
-    this.travelled = 0;
-    this.restedAt = 0;
+    this.travelled = data.travelled ?? 0;
+    this.restedAt = this.travelled;
     this.standingOn = null;
     this.lastMoment = '';
     this.momentCheckedAt = -Infinity;
@@ -932,6 +941,17 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /** How tired the traveller is, or 0 when the flag is off. */
+  /**
+   * Which day of the journey this is, counting from nought.
+   *
+   * Whole days only: a node regrows on the day boundary, not by fractions of one, and rounding
+   * here keeps every caller from having to agree about that separately. `travelled` is the only
+   * clock -- the scene spends it when the traveller walks -- so this is derived rather than kept.
+   */
+  private dayOfJourney(): number {
+    return Math.floor(this.travelled / DAY_MS);
+  }
+
   private fatigue(): number {
     return this.fatigueOn ? fatigueAt(this.travelled, this.restedAt) : 0;
   }
@@ -1222,6 +1242,8 @@ export class WorldScene extends Phaser.Scene {
       shelter: this.shelterHere(),
       canCamp: this.canStopHere(),
       discovered: this.discovered.size,
+      day: this.dayOfJourney(),
+      travelled: this.travelled,
       atLandmark
     });
     EventBus.emitEvent('journey-changed', { discovered: [...this.discovered] });
