@@ -57,3 +57,42 @@ test('an unknown traveller falls back rather than breaking', async ({ page }) =>
   await expect(page.locator('.map-surface canvas')).toBeVisible();
   expect(problems, problems.join('\n')).toEqual([]);
 });
+
+test('the picker changes who is walking, without restarting the journey', async ({ page }) => {
+  const problems = await bootAs(page, 'varuna');
+
+  // Walk first, so there is a journey to lose if switching restarts one.
+  await step(page, 'KeyD');
+  const walked = (await page.locator('.journal h2').textContent()) ?? '';
+
+  await page.getByRole('button', { name: /Map/ }).click();
+  const picker = page.getByRole('radiogroup', { name: /walking as/i });
+  await expect(picker).toBeVisible();
+
+  // **What the scene says it is drawing**, which is the assertion that matters.
+  //
+  // Two earlier versions of this check guarded nothing. Asserting on the button's own state and
+  // the URL passed with the texture swap deliberately removed -- the picker looked right and drew
+  // the same person. Comparing canvas pixels passed too, because the map animates on its own and
+  // any two screenshots of it differ.
+  //
+  // `data-traveller` is reported by `WorldScene` after it swaps the sprite, so it cannot be true
+  // unless the swap happened. `docs/testing.md` calls this seam "the cheapest real change
+  // available" and it is: one attribute, and the test stops being decorative.
+  const stage = page.locator('.stage');
+  await expect(stage).toHaveAttribute('data-traveller', 'varuna');
+
+  await picker.getByRole('radio', { name: /Guyuk/ }).click();
+  await expect(picker.getByRole('radio', { name: /Guyuk/ })).toHaveAttribute('aria-checked', 'true');
+  await expect(stage, 'the scene is still drawing somebody else').toHaveAttribute(
+    'data-traveller',
+    'guyuk'
+  );
+
+  // The URL says who, so the link keeps describing what is on screen.
+  await expect(page).toHaveURL(/as=guyuk/);
+
+  // And the journey is still where it was -- a swap, not a restart.
+  expect(await page.locator('.journal h2').textContent()).toBe(walked);
+  expect(problems, problems.join('\n')).toEqual([]);
+});

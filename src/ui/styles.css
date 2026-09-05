@@ -1945,3 +1945,40 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
  */
 .people-helped { margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--accent, #6b8f5e); }
 .people-none { padding: 1rem 0; }
+
+/*
+ * Choosing who to walk as.
+ *
+ * Five buttons, each showing that character's own first frame. The face is a window onto the
+ * sheet rather than a separate image: `background-size` scales the whole 20-frame strip so one
+ * 26x40 cell fills the box, and `background-position: 0 0` lands on frame 0, which is the
+ * traveller facing the player. There is no second set of portraits, and a picker that needed one
+ * would have waited on art it did not need.
+ */
+.travellers { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 0.75rem; }
+.traveller {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.5rem 0.3rem;
+  background: transparent;
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+}
+.traveller:hover { background: rgba(160, 140, 90, 0.12); }
+.traveller.is-on { border-color: var(--ink); background: rgba(160, 140, 90, 0.18); }
+
+.traveller-face {
+  width: 26px;
+  height: 40px;
+  /* Twenty frames wide, so the strip is scaled to 2000% and frame 0 sits at the origin. */
+  background-size: 2000% 100%;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.traveller-name { font-size: 0.76rem; }

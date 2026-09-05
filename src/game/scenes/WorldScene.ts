@@ -430,6 +430,8 @@ export class WorldScene extends Phaser.Scene {
     this.createGround();
 
     this.createPlayer();
+    // The initial answer, so the UI never has to assume one.
+    this.reportCharacter();
 
     // Above the fog and the player, so the light of the hour falls on everything. Origin at the
     // top-left corner rather than the centre so it lines up with the world without arithmetic.
@@ -732,6 +734,7 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('viewport-insets', this.onInsets);
     EventBus.onEvent('zoom', this.onZoom);
     EventBus.onEvent('camp', this.onCamp);
+    EventBus.onEvent('set-character', this.onSetCharacter);
 
     // Fires on rotation as well as on a window resize, which is exactly when the zoom and the
     // follow offset both stop being right.
@@ -745,6 +748,7 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('new-journey', this.onNewJourney);
       EventBus.offEvent('resume-journey', this.onNewJourney);
       EventBus.offEvent('travel-to', this.onTravelTo);
+      EventBus.offEvent('set-character', this.onSetCharacter);
       EventBus.offEvent('viewport-insets', this.onInsets);
       EventBus.offEvent('zoom', this.onZoom);
       EventBus.offEvent('camp', this.onCamp);
@@ -785,6 +789,29 @@ export class WorldScene extends Phaser.Scene {
   private onResize = (): void => {
     this.applyCamera();
   };
+
+  /**
+   * Swap who is walking, in place.
+   *
+   * No scene restart: the sheets are all loaded and the animations all exist, so this is a texture
+   * change and a replay. The sprite keeps its position, the fog keeps what it has uncovered, and
+   * the journey carries on -- changing your mind about who is carrying the satchel should not cost
+   * you the walk.
+   */
+  private onSetCharacter = ({ characterId }: { characterId: string }): void => {
+    this.character = characterFor(characterId);
+    if (!this.player) return;
+    this.player.setTexture(this.character.key, 0);
+    // `updateAnimation` works out the right animation from where the traveller is and what they
+    // are doing, so the new sheet picks up mid-walk or mid-sit rather than snapping to a stand.
+    this.updateAnimation();
+    this.reportCharacter();
+  };
+
+  /** Say who is being drawn, from the scene that is drawing them. */
+  private reportCharacter(): void {
+    EventBus.emitEvent('character-changed', { characterId: this.character.key });
+  }
 
   private onNewJourney = (payload: { seed: string; discovered?: string[] }): void => {
     this.scene.restart({
