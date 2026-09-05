@@ -287,6 +287,26 @@ export function saveJourney(
   }
 }
 
+/**
+ * Whether this seed has a journey in progress, as opposed to one waiting to start.
+ *
+ * What the front door asks before deciding whether to offer *continue*. Read from the save
+ * rather than kept as a flag, on the same discipline as everything else here: a flag would be a
+ * second source of truth about a question the payload already answers.
+ *
+ * **Fog is the test, and it is the earliest thing to move.** `discovered` fills as the traveller
+ * walks, before a single rung is climbed or anything is picked up -- so a journey that has gone
+ * ten steps and found nothing still counts as begun, which is what a player who walked ten steps
+ * would expect. Progress, the satchel and the collection all lag it, and using any of them would
+ * offer to start over on a walk somebody was in the middle of.
+ *
+ * The clock is checked too, because a traveller can stand still and let the hours pass -- resting
+ * at a camp moves `travelled` without moving anybody.
+ */
+export function hasBegun(journey: Journey): boolean {
+  return journey.discovered.length > 0 || journey.travelled > 0;
+}
+
 export function clearJourney(seed: string): void {
   try {
     localStorage.removeItem(key(seed));

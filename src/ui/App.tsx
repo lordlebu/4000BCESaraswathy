@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import { EventBus, type GameToUi } from '../game/EventBus';
 import { PhaserGame } from '../game/PhaserGame';
 import { Controls } from './Controls';
+import { FrontDoor } from './FrontDoor';
 import { CanonPanel } from './CanonPanel';
 import { Here } from './Here';
 import { SHELTER_LABEL } from './JournalPanel';
@@ -35,7 +36,7 @@ import { creatureFor, floraFor } from '../content/species';
 import { type Collection, emptyCollection, metOnTile, size } from '../content/collection';
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
-import { loadJourney, saveJourney } from '../save';
+import { hasBegun, loadJourney, saveJourney } from '../save';
 import { advance, answer, craft, hear, knowsRecipe, type WorldMoment } from '../journey';
 import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import { characterFor } from '../game/player';
@@ -116,6 +117,36 @@ export function App() {
   // What the traveller has drawn down. The one piece of world state a save has to hold, because
   // it is the only thing about a tile that cannot be recomputed from the seed.
   const [nodes, setNodes] = useState(initialJourney.current.nodes ?? noNodes());
+  /**
+   * Whether the front door is still closed.
+   *
+   * Opens once and never comes back -- there is no way to walk back out to it, because a door
+   * you can reopen mid-walk is a menu, and this is the moment before the walk rather than a thing
+   * you consult during it.
+   *
+   * **Two ways past it, and the second is the interesting one.**
+   *
+   * `?door=open` skips it, on the same principle as `?seed=`, `?at=` and `?hour=`: seeing
+   * something should not require playing to it.
+   *
+   * And it is skipped under browser automation, which `navigator.webdriver` reports and no
+   * ordinary browser sets. That is a real seam rather than a hack: **fifty-odd browser tests are
+   * about the map and none of them is about this screen**, and making each click through a door
+   * first would be ceremony that tests nothing. The specs that *are* about the door ask for it
+   * back with `?door=shut`.
+   *
+   * The first attempt keyed the bypass to `?at=`, on the reasoning that a test with a starting
+   * position wants to get on with it. **Ten spec files do not pass `?at=` and every one of them
+   * broke** -- which is what a bypass inferred from an unrelated flag earns. A door should be
+   * conditional on something that is actually about the door.
+   */
+  const [atTheDoor, setAtTheDoor] = useState(() => {
+    const asked = new URLSearchParams(window.location.search).get('door');
+    if (asked === 'open') return false;
+    if (asked === 'shut') return true;
+    return !navigator.webdriver;
+  });
+
   // The scene owns the clock; this is only where the last reading is kept so the save can hand
   // it back on the next boot. A ref rather than state because nothing renders from it.
   const travelledRef = useRef(initialJourney.current.travelled ?? 0);
@@ -609,11 +640,31 @@ export function App() {
     // readout rather than a control, and it exists because a browser test otherwise cannot tell a
     // working picker from a highlighted button -- see `e2e/travellers.spec.ts`.
     <div className="stage" data-traveller={drawn}>
-      <PhaserGame
+      {/* The scene mounts only once the door is open. Booting it behind the door and hiding it
+          would spend a second of loading nobody asked for, and would make "start a new walk" a
+          restart of something already running rather than a beginning. */}
+      {!atTheDoor && (
+        <PhaserGame
+          seed={seed}
+          discovered={initialJourney.current.discovered}
+          fieldMapId={fieldMapFromUrl()}
+          characterId={characterId}
+        />
+      )}
+
+      <FrontDoor
+        open={atTheDoor}
+        canContinue={hasBegun(initialJourney.current)}
         seed={seed}
-        discovered={initialJourney.current.discovered}
-        fieldMapId={fieldMapFromUrl()}
         characterId={characterId}
+        onChoose={chooseCharacter}
+        onContinue={() => setAtTheDoor(false)}
+        onBegin={() => {
+          // `generate` with the same seed is exactly "this world again, from nothing" -- it
+          // clears fog, collection, satchel and progress, which is what starting over means.
+          generate(seed);
+          setAtTheDoor(false);
+        }}
       />
 
       {/* The bar and the satchel strip stack together in the top-left. The strip is always on

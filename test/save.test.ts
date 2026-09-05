@@ -9,7 +9,7 @@
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { SAVE_VERSION, clearJourney, loadJourney, saveJourney } from '../src/save';
+import { SAVE_VERSION, clearJourney, hasBegun, loadJourney, saveJourney } from '../src/save';
 import { emptyCollection, metOnTile } from '../src/content/collection';
 import { emptyProgress } from '../src/journey';
 
@@ -94,5 +94,36 @@ describe('an older save is discarded rather than misread', () => {
     const back = loadJourney(SEED);
     expect(back.collection['river-otter']).toBeUndefined();
     expect(back.collection.saltreed).toEqual({ id: 'saltreed', kind: 'flora' });
+  });
+});
+
+describe('whether a journey has begun', () => {
+  /**
+   * What the front door asks before offering *continue*.
+   *
+   * **Fog is the test, because it is the earliest thing to move.** `discovered` fills as the
+   * traveller walks, before a rung is climbed or anything is picked up — so ten steps and
+   * nothing found still counts as begun, which is what somebody who walked ten steps expects.
+   * Progress, the satchel and the collection all lag it, and any of them would offer to start
+   * over on a walk somebody was in the middle of.
+   */
+  it('is false for a save nobody has walked', () => {
+    expect(hasBegun(loadJourney('nobody-walked-this-one'))).toBe(false);
+  });
+
+  it('is true as soon as a single tile is uncovered', () => {
+    const seed = 'begun-by-walking';
+    saveJourney(seed, { discovered: ['3,4'], collection: {}, reached: false });
+    expect(hasBegun(loadJourney(seed))).toBe(true);
+  });
+
+  /**
+   * The clock counts too: a traveller can stand still and let the hours pass, because resting
+   * at a camp moves `travelled` without moving anybody.
+   */
+  it('is true for a journey that only rested', () => {
+    const seed = 'begun-by-resting';
+    saveJourney(seed, { discovered: [], collection: {}, reached: false, travelled: 90_000 });
+    expect(hasBegun(loadJourney(seed))).toBe(true);
   });
 });

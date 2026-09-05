@@ -1982,3 +1982,143 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   image-rendering: pixelated;
 }
 .traveller-name { font-size: 0.76rem; }
+
+/* --- the front door ---------------------------------------------------------------
+ *
+ * The moment before the walk. It covers everything because there is nothing behind it yet --
+ * the scene does not mount until this closes, which is what makes "start a new walk" a
+ * beginning rather than a restart of something already running.
+ *
+ * Deliberately quiet. A cozy game's title screen that shouts is writing a cheque the first
+ * ten minutes cannot cash, and the whole of this one is: here is the country, here is who you
+ * are, in you go.
+ */
+.front-door {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  background: var(--paper);
+  /* The same wash the map wears at dusk, so the door belongs to the same world as the walk. */
+  background-image: radial-gradient(circle at 50% 38%, rgba(164, 92, 64, 0.10), transparent 62%);
+  overflow-y: auto;
+}
+
+.front-door-panel {
+  width: min(30rem, 100%);
+  text-align: center;
+}
+
+.front-door-title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.7rem, 6vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.front-door-line {
+  margin: 0 0 1.8rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* The picker's proper home. Wider gaps than the map-sheet version: this is the question the
+   screen exists to ask rather than a setting tucked beside a seed field. */
+.front-door-who {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0 0 1.9rem;
+}
+
+.front-door-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.6rem 0.4rem;
+  background: transparent;
+  border: 1px solid var(--edge);
+  border-radius: 5px;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+}
+
+.front-door-face:hover { background: rgba(160, 140, 90, 0.12); }
+.front-door-face.is-on { border-color: var(--ink); background: rgba(160, 140, 90, 0.18); }
+
+.front-door-portrait {
+  width: 39px;
+  height: 60px;
+  /* Twenty frames wide, so the strip is scaled to 2000% and frame 0 sits at the origin --
+     the same windowing `.traveller-face` does, at half again the size. */
+  background-size: 2000% 100%;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+.front-door-name { letter-spacing: 0.02em; }
+
+.front-door-ways {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.front-door-go,
+.front-door-fresh {
+  padding: 0.6rem 1.4rem;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.front-door-go {
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  color: var(--paper);
+}
+
+.front-door-fresh {
+  background: transparent;
+  border: 1px solid var(--edge);
+  color: var(--muted);
+}
+
+.front-door-fresh:hover { border-color: var(--ink); color: var(--ink); }
+
+/* Stated rather than shouted. It is a warning about a diary, not an alarm. */
+.front-door-warning {
+  margin: 1rem auto 0;
+  max-width: 24rem;
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+.front-door-seed {
+  margin: 2.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.front-door-seed-value { color: var(--ink); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .front-door-panel { animation: front-door-in 320ms ease-out both; }
+}
+
+@keyframes front-door-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
