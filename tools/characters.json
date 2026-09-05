@@ -1,0 +1,60 @@
+{
+  "$comment": [
+    "Every playable traveller, and where their frames come from.",
+    "",
+    "This replaced two hand-written invocations in package.json with a colour count typed into",
+    "each. Two characters was tolerable; five characters across seven sheets is not, and the",
+    "sitting art is packed two and three to a file, which no command line should have to remember.",
+    "",
+    "A sixth traveller is a row here and nothing else.",
+    "",
+    "walk:  a 4x4 sheet, one character, sixteen frames -- four per facing, in the order",
+    "       findSprites returns them (down, up, right, left).",
+    "sit:   one frame per facing. The new sitting art gives one pose per direction rather than",
+    "       four, and that is enough: a seated figure has nowhere to walk to. `frames` names which",
+    "       figures to take from a packed sheet, in reading order, because position-in-row is not",
+    "       reliable -- see the note on --frames in build-sprite-sheet.js.",
+    "colours: per character, never shared. At 26x40 it is hue that tells one person from another,",
+    "       and quantising three characters together starves all three."
+  ],
+
+  "cell": { "width": 26, "height": 40 },
+
+  "characters": [
+    {
+      "id": "varuna",
+      "name": "Varuna",
+      "colours": 30,
+      "walk": { "source": "assets/source/dump/varuna_walkingNew.png" },
+      "sit": { "source": "assets/source/dump/Varuna Guyuk Sitting.png", "frames": [4, 5, 6, 7] }
+    },
+    {
+      "id": "guyuk",
+      "name": "Guyuk",
+      "colours": 30,
+      "walk": { "source": "assets/source/dump/Guyuk MOngke walking.png" },
+      "sit": { "source": "assets/source/dump/Varuna Guyuk Sitting.png", "frames": [0, 1, 2, 3] }
+    },
+    {
+      "id": "mithra",
+      "name": "Mithra",
+      "colours": 26,
+      "walk": { "source": "assets/source/dump/Mithra_walking.png" },
+      "sit": { "source": "assets/source/dump/3 M characters sitting.png", "frames": [0, 3, 6] }
+    },
+    {
+      "id": "malacite",
+      "name": "Malacite",
+      "colours": 34,
+      "walk": { "source": "assets/source/dump/Malacite_walking.png" },
+      "sit": { "source": "assets/source/dump/3 M characters sitting.png", "frames": [1, 4, 7] }
+    },
+    {
+      "id": "mehtar",
+      "name": "Mehtar",
+      "colours": 34,
+      "walk": { "source": "assets/source/dump/Mehtar_walking.png" },
+      "sit": { "source": "assets/source/dump/3 M characters sitting.png", "frames": [2, 5, 8] }
+    }
+  ]
+}
