@@ -27,7 +27,7 @@ import { describeTile } from '../src/content/journal';
 import { underfootLine, yieldsAt } from '../src/content/gathering';
 import { diarySections } from '../src/content/travelLog';
 import { discoveries } from '../src/content/knowledge';
-import { creatures, flora } from '../src/content/species';
+import { creatures, creatureFor, flora, floraFor } from '../src/content/species';
 import { npc, npcs } from '../src/content/places';
 import { items, materials, recipes } from '../src/content/making';
 import craftingBundle from '../data/canon/crafting.json';
@@ -487,5 +487,78 @@ describe('what canon says a material is', () => {
       }
     }
     expect(offences, offences.join('; ')).toEqual([]);
+  });
+});
+
+describe('the ground gives what is standing on it', () => {
+  const built = buildFieldMap(fieldMap('field_map_lothal')!);
+  const seed = built.world.seed;
+
+  /**
+   * **The whole of the gathering overhaul, in one assertion.**
+   *
+   * A tile used to answer two questions that never consulted each other: `species.ts` picked the
+   * plant and the creature standing here, and `gathering.ts` picked materials from everything the
+   * *biome* could hold. So a tile could offer boar tusk with no boar in sight -- canon's
+   * `won_from` said where it came from, the exporter shipped it, `making.ts` parsed it into
+   * `wonFrom`, and **nothing read it**.
+   *
+   * Now every yield is either won from the species on this tile, or is one of the fifteen
+   * materials canon wins from nothing alive -- flint, clay, the ores, the glasses -- which come
+   * from the ground and need no plant to be standing on them.
+   *
+   * Sabotaging `yieldsAt` back to `materialsIn(biome)` fails this on the first tile that offers
+   * something its own flora and fauna do not.
+   */
+  it('offers nothing a tile has no source for', () => {
+    const wrong: string[] = [];
+    let checked = 0;
+
+    for (const row of built.world.tiles) {
+      for (const tile of row) {
+        const here = { x: tile.x, y: tile.y, biome: tile.biome };
+        const standing = new Set(
+          [floraFor(here, seed), creatureFor(here, seed)]
+            .filter((s): s is NonNullable<typeof s> => Boolean(s))
+            .map((s) => s.id)
+        );
+
+        for (const m of yieldsAt(seed, here, tile.biome)) {
+          checked += 1;
+          if (m.wonFrom.length === 0) continue;          // the ground itself
+          if (m.wonFrom.some((id) => standing.has(id))) continue;
+          wrong.push(`${tile.x},${tile.y} offers ${m.id}, won from ${m.wonFrom.join('/')}, but ${
+            [...standing].join('/') || 'nothing'
+          } is standing there`);
+        }
+      }
+    }
+
+    expect(checked, 'no tile on this map offered anything -- the test proves nothing').toBeGreaterThan(0);
+    expect(wrong.slice(0, 5), `${wrong.length} tiles offer what is not there`).toEqual([]);
+  });
+
+  /**
+   * The other half, and the fault the first version of this rewrite actually shipped.
+   *
+   * Keying every yield to the species standing on the tile made **stone ungatherable
+   * everywhere**: fifteen materials have no `won_from` at all, because canon knows salt-crust is
+   * salt without owing anyone an account of which pan it was scraped from. That is the entire
+   * mineral half of the crafting tree, and two of Uma's commission tests failed on the spot.
+   *
+   * Measurement found it, not reading. This keeps it found.
+   */
+  it('still gives up what the ground itself is made of', () => {
+    const fromTheGround = new Set<string>();
+    for (const row of built.world.tiles) {
+      for (const tile of row) {
+        for (const m of yieldsAt(seed, { x: tile.x, y: tile.y }, tile.biome)) {
+          if (m.wonFrom.length === 0) fromTheGround.add(m.id);
+        }
+      }
+    }
+    // Flint is the one Uma's commission needs, so it is named rather than counted.
+    expect([...fromTheGround], 'no mineral is gatherable on this map').toContain('material_flint');
+    expect(fromTheGround.size).toBeGreaterThan(1);
   });
 });
