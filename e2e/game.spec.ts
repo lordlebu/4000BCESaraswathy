@@ -10,11 +10,27 @@ const SEED = 'play-test';
 // Navigation is relative on purpose. A leading slash would ignore a baseURL subpath, so the suite
 // could not be aimed at a Pages-style `/<repo>/` build or the deployed site.
 
+/**
+ * Warnings that mean the game is broken even though nothing threw.
+ *
+ * **Phaser reports a missing sprite frame as a `console.warn` and carries on.** When the sitting
+ * layout outlived the art, every boot logged `Texture "varuna" has no frame 25` twelve times over
+ * and the whole browser suite still passed -- the traveller simply had no sitting pose, which no
+ * assertion was looking at. A warning that names a texture is not noise.
+ *
+ * Deliberately a list rather than "fail on any warning". Vite and Phaser both warn about things
+ * that are true and harmless, and a check that cries wolf is one people learn to switch off.
+ */
+const FATAL_WARNINGS = [/has no frame/i, /Texture .* not found/i];
+
 /** Console errors and uncaught exceptions, collected so a silent failure cannot pass. */
 function watchForErrors(page: Page): string[] {
   const problems: string[] = [];
   page.on('console', (message) => {
     if (message.type() === 'error') problems.push(`console.error: ${message.text()}`);
+    if (message.type() === 'warning' && FATAL_WARNINGS.some((r) => r.test(message.text()))) {
+      problems.push(`console.warn: ${message.text()}`);
+    }
   });
   page.on('pageerror', (error) => problems.push(`uncaught: ${error.message}`));
   return problems;
