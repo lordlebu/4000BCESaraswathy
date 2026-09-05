@@ -13,6 +13,8 @@
 
 import Phaser from 'phaser';
 
+
+
 /** One cell. Frames are bottom-aligned in the cell, so the feet sit on the anchor point. */
 export const PLAYER_FRAME = { width: 26, height: 40 };
 
@@ -61,19 +63,15 @@ const walkOrder = (row: number): number[] => [row + 2, row + 0, row + 3, row + 1
 /** Two near-identical standing poses, so idling breathes rather than freezes. */
 const idleOrder = (row: number): number[] => [row + 0, row + 1];
 
-export interface CharacterArt {
-  /** Texture key, also the prefix for its animation keys. */
-  key: string;
-  /** Human name, for the journal and for debugging. */
-  name: string;
-}
-
-export const CHARACTERS = {
-  varuna: { key: 'varuna', name: 'Varuna' },
-  mithra: { key: 'mithra', name: 'Mithra' }
-} as const satisfies Record<string, CharacterArt>;
-
-export type CharacterId = keyof typeof CHARACTERS;
+// The cast lives in `characters.ts`, which imports no Phaser so it can be tested under Node.
+// Re-exported here because everything that draws a character already imports this file.
+export {
+  CHARACTERS,
+  characterFor,
+  everyCharacter,
+  type CharacterArt,
+  type CharacterId
+} from './characters';
 
 const animKey = (character: string, action: string, facing: Facing): string =>
   `${character}-${action}-${facing}`;

@@ -9,10 +9,14 @@ import { useState } from 'react';
 import { EventBus } from '../game/EventBus';
 import { biomes } from '../content/species';
 import { SeedBar } from './SeedBar';
+import { TravellerPicker } from './TravellerPicker';
 
 export interface ControlsProps {
   seed: string;
   onGenerate: (seed: string) => void;
+  /** Who is walking, and how to change it. Appearance only -- see `TravellerPicker`. */
+  characterId: string;
+  onCharacter: (characterId: string) => void;
   /** How many species have been met. Shown on the button; the album is its own surface. */
   metCount: number;
   /** Whether either record is showing, so the button can read as a toggle. */
@@ -43,6 +47,8 @@ export interface ControlsProps {
 export function Controls({
   seed,
   onGenerate,
+  characterId,
+  onCharacter,
   metCount,
   recordsOpen,
   onOpenRecords,
@@ -224,6 +230,9 @@ export function Controls({
             Zoom with the <kbd>+</kbd> and <kbd>−</kbd> buttons, the mouse wheel, or a pinch.{' '}
             <kbd>0</kbd> fits the map to the screen again.
           </p>
+
+          <h3>Who you are walking as</h3>
+          <TravellerPicker characterId={characterId} onChoose={onCharacter} />
 
           <h3>Journey seed</h3>
           <SeedBar

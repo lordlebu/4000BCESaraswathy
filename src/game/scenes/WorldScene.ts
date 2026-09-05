@@ -6,7 +6,6 @@
 // engine versions touches this folder alone.
 
 import Phaser from 'phaser';
-import varunaUrl from '../../../assets/varuna-overworld.png';
 import terrainUrl from '../../../assets/terrain.png';
 import landmarksUrl from '../../../assets/landmarks.png';
 import placesUrl from '../../../assets/places.png';
@@ -56,11 +55,14 @@ const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker'>, string> = {
   treeline: TREELINE_SHEET
 };
 import {
-  CHARACTERS,
   PLAYER_FRAME,
   actionFor,
+  CHARACTERS,
   animFor,
+  characterFor,
   createCharacterAnimations,
+  everyCharacter,
+  type CharacterArt,
   facingFromStep,
   loadCharacterSheet,
   type Facing
@@ -204,6 +206,13 @@ export interface WorldSceneData {
    * engine's business and the places stay canon's, which is the whole reason for the split.
    */
   fieldMapId?: string;
+  /**
+   * Who is walking.
+   *
+   * Unknown or absent falls back to Varuna rather than throwing -- this arrives from a URL or a
+   * save, and both can be stale. Same rule `fieldMapFromUrl` follows for `?map=`.
+   */
+  characterId?: string;
 }
 
 /** Where a journey starts when nothing says otherwise. */
@@ -247,6 +256,13 @@ export class WorldScene extends Phaser.Scene {
   private moving = false;
   private queuedPath: Point[] = [];
   private facing: Facing = 'down';
+  /**
+   * Whose sheet the sprite draws from.
+   *
+   * Set in `init` so it is decided before `create` builds the sprite, and defaulted rather than
+   * required: the scene has always been able to run without being told who is walking.
+   */
+  private character: CharacterArt = CHARACTERS.varuna;
   /** A key press caught between frames, waiting for the next one to act on it. */
   private pendingStep: [number, number] | null = null;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -291,6 +307,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   init(data: WorldSceneData): void {
+    this.character = characterFor(data.characterId);
     // A restart re-enters init, so every piece of per-journey state is reset here rather than in
     // a field initialiser — otherwise "generate a new map" would inherit the old fog.
     this.discovered = new Set(data.discovered ?? []);
@@ -317,7 +334,10 @@ export class WorldScene extends Phaser.Scene {
   }
 
   preload(): void {
-    loadCharacterSheet(this, CHARACTERS.varuna.key, varunaUrl);
+    // Every sheet, not just the one being walked. They are 9-12 KB each and 55 KB for the set, so
+    // loading them all costs less than the machinery to load one lazily and swap textures later --
+    // and it means a character can be changed without a scene restart.
+    for (const art of everyCharacter()) loadCharacterSheet(this, art.key, art.url);
     loadTileSheets(this, {
       terrain: terrainUrl,
       landmarks: landmarksUrl,
@@ -410,6 +430,8 @@ export class WorldScene extends Phaser.Scene {
     this.createGround();
 
     this.createPlayer();
+    // The initial answer, so the UI never has to assume one.
+    this.reportCharacter();
 
     // Above the fog and the player, so the light of the hour falls on everything. Origin at the
     // top-left corner rather than the centre so it lines up with the world without arithmetic.
@@ -511,7 +533,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createPlayer(): void {
-    createCharacterAnimations(this, CHARACTERS.varuna.key);
+    for (const art of everyCharacter()) createCharacterAnimations(this, art.key);
     // Varuna stands taller than a tile, so he is anchored by the feet and allowed to overhang.
     //
     // The frame is 26x40 pixels of art and stays that way — the figures are deliberately still
@@ -536,7 +558,7 @@ export class WorldScene extends Phaser.Scene {
       .setDisplaySize(TILE_SIZE * 0.62, TILE_SIZE * 0.2);
 
     this.player = this.add
-      .sprite(0, 0, CHARACTERS.varuna.key, 0)
+      .sprite(0, 0, this.character.key, 0)
       .setOrigin(0.5, 1)
       .setDisplaySize(PLAYER_FRAME.width * figureScale, PLAYER_FRAME.height * figureScale);
     this.player.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
@@ -559,7 +581,7 @@ export class WorldScene extends Phaser.Scene {
       (this.at.x === this.world.landmark.x && this.at.y === this.world.landmark.y) ||
       poiAt(this.built, this.at) !== null;
     const action = actionFor(this.moving, atRest);
-    const { key, flipX } = animFor(CHARACTERS.varuna.key, this.facing, action);
+    const { key, flipX } = animFor(this.character.key, this.facing, action);
     if (this.player.anims.currentAnim?.key !== key) this.player.play(key);
     this.player.setFlipX(flipX);
   }
@@ -712,6 +734,7 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('viewport-insets', this.onInsets);
     EventBus.onEvent('zoom', this.onZoom);
     EventBus.onEvent('camp', this.onCamp);
+    EventBus.onEvent('set-character', this.onSetCharacter);
 
     // Fires on rotation as well as on a window resize, which is exactly when the zoom and the
     // follow offset both stop being right.
@@ -725,6 +748,7 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('new-journey', this.onNewJourney);
       EventBus.offEvent('resume-journey', this.onNewJourney);
       EventBus.offEvent('travel-to', this.onTravelTo);
+      EventBus.offEvent('set-character', this.onSetCharacter);
       EventBus.offEvent('viewport-insets', this.onInsets);
       EventBus.offEvent('zoom', this.onZoom);
       EventBus.offEvent('camp', this.onCamp);
@@ -765,6 +789,29 @@ export class WorldScene extends Phaser.Scene {
   private onResize = (): void => {
     this.applyCamera();
   };
+
+  /**
+   * Swap who is walking, in place.
+   *
+   * No scene restart: the sheets are all loaded and the animations all exist, so this is a texture
+   * change and a replay. The sprite keeps its position, the fog keeps what it has uncovered, and
+   * the journey carries on -- changing your mind about who is carrying the satchel should not cost
+   * you the walk.
+   */
+  private onSetCharacter = ({ characterId }: { characterId: string }): void => {
+    this.character = characterFor(characterId);
+    if (!this.player) return;
+    this.player.setTexture(this.character.key, 0);
+    // `updateAnimation` works out the right animation from where the traveller is and what they
+    // are doing, so the new sheet picks up mid-walk or mid-sit rather than snapping to a stand.
+    this.updateAnimation();
+    this.reportCharacter();
+  };
+
+  /** Say who is being drawn, from the scene that is drawing them. */
+  private reportCharacter(): void {
+    EventBus.emitEvent('character-changed', { characterId: this.character.key });
+  }
 
   private onNewJourney = (payload: { seed: string; discovered?: string[] }): void => {
     this.scene.restart({

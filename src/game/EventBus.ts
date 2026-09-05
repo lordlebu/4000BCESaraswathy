@@ -16,6 +16,15 @@ import type { Point, World } from '../world/types';
 export interface GameToUi {
   /** A world was generated and the scene is drawing it. */
   'world-ready': { world: World };
+  /**
+   * Who the scene is actually drawing.
+   *
+   * Reported by the scene rather than assumed by the UI, so the two cannot disagree. It exists
+   * because a browser test could not otherwise tell "the picker changed the sprite" from "the
+   * picker highlighted a button": comparing canvas pixels passed with the swap deliberately
+   * removed, because the map animates on its own and any two screenshots differ.
+   */
+  'character-changed': { characterId: string };
   /** The player finished a step onto this tile. */
   'tile-entered': {
     at: Point;
@@ -113,6 +122,14 @@ export interface GameToUi {
  */
 export interface UiToGame {
   'new-journey': { seed: string };
+  /**
+   * Walk as somebody else, without restarting the journey.
+   *
+   * Every sheet is loaded and every character's animations are created at boot, so this is a
+   * texture swap and a replayed animation rather than a scene restart -- which means the walk, the
+   * fog and the satchel all survive changing your mind about who is carrying them.
+   */
+  'set-character': { characterId: string };
   /** Bed down for the night. Ignored unless standing at a camp after dark. */
   'camp': Record<string, never>;
   /** Lay down a different field map. The overworld sends this. */

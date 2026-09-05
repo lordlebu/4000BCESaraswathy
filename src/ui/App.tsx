@@ -37,6 +37,7 @@ import { downloadImage, downloadText } from './exportJournal';
 import { loadJourney, saveJourney } from '../save';
 import { advance, answer, craft, hear, knowsRecipe, type WorldMoment } from '../journey';
 import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
+import { characterFor } from '../game/player';
 import type { World } from '../world/types';
 
 /**
@@ -63,6 +64,21 @@ function recordSurface(tab: RecordTab): 'progress' | 'collection' | 'people' {
   return tab === 'collection' ? 'collection' : tab === 'people' ? 'people' : 'progress';
 }
 
+/**
+ * Who to walk as, for a link that wants somebody other than Varuna.
+ *
+ * The same hook as `?seed=`, `?map=`, `?at=` and `?hour=`, and here for the same reason: seeing
+ * Guyuk should not require playing to her. An unknown id falls back rather than throwing --
+ * `characterFor` handles that -- because this is a convenience and must never break the game for
+ * somebody who mistypes one.
+ */
+function characterFromUrl(): string | null {
+  const asked = new URLSearchParams(window.location.search).get('as')?.trim();
+  // Null when nothing was asked for, so the save can win. Returning a default here instead made
+  // the `??` below dead code and quietly pinned every journey to Varuna.
+  return asked ? characterFor(asked).key : null;
+}
+
 type Arrival = GameToUi['tile-entered'];
 
 export function App() {
@@ -71,6 +87,14 @@ export function App() {
   const initialJourney = useRef(loadJourney(seedFromUrl()));
 
   const [seed, setSeed] = useState(seedFromUrl);
+  // Who is walking. Part of the journey rather than a setting: a save belongs to a traveller, so
+  // the URL only decides it when the save has nothing to say.
+  const [characterId, setCharacterId] = useState(
+    () => characterFromUrl() ?? characterFor(initialJourney.current.characterId).key
+  );
+  // Who the *scene* reports drawing, as distinct from who was asked for. They agree in practice;
+  // keeping them separate is what lets a test tell a working picker from a highlighted button.
+  const [drawn, setDrawn] = useState('');
   const [world, setWorld] = useState<World | null>(null);
   const [arrival, setArrival] = useState<Arrival | null>(null);
   const [collection, setCollection] = useState<Collection>(initialJourney.current.collection);
@@ -165,6 +189,9 @@ export function App() {
     const onStandingOn = ({ poiId: id }: GameToUi['standing-on']) =>
       dispatch({ type: 'standing-on', poiId: id });
     const onMoment = (next: GameToUi['moment-changed']) => setMoment(next);
+    // Who the scene says it is drawing, which is the only authority on it. The picker sets its
+    // own state optimistically; this is what corrects it if the scene ever disagreed.
+    const onCharacter = ({ characterId: drawn }: GameToUi['character-changed']) => setDrawn(drawn);
 
     EventBus.onEvent('world-ready', onWorldReady);
     EventBus.onEvent('tile-entered', onTileEntered);
@@ -172,6 +199,7 @@ export function App() {
     EventBus.onEvent('landmark-reached', onLandmarkReached);
     EventBus.onEvent('standing-on', onStandingOn);
     EventBus.onEvent('moment-changed', onMoment);
+    EventBus.onEvent('character-changed', onCharacter);
     return () => {
       EventBus.offEvent('world-ready', onWorldReady);
       EventBus.offEvent('tile-entered', onTileEntered);
@@ -179,6 +207,7 @@ export function App() {
       EventBus.offEvent('landmark-reached', onLandmarkReached);
       EventBus.offEvent('standing-on', onStandingOn);
       EventBus.offEvent('moment-changed', onMoment);
+      EventBus.offEvent('character-changed', onCharacter);
     };
   }, []);
 
@@ -186,7 +215,14 @@ export function App() {
   // second otherwise, and the journey is not worth a synchronous write that often.
   useEffect(() => {
     const flush = () =>
-      saveJourney(seed, { discovered: discovered.current, collection, reached, progress, satchel });
+      saveJourney(seed, {
+        characterId,
+        discovered: discovered.current,
+        collection,
+        reached,
+        progress,
+        satchel
+      });
     const timer = window.setInterval(flush, 3000);
     window.addEventListener('pagehide', flush);
     return () => {
@@ -246,6 +282,25 @@ export function App() {
     url.searchParams.set('seed', next);
     window.history.replaceState(null, '', url);
     EventBus.emitEvent('new-journey', { seed: next });
+  }, []);
+
+  /**
+   * Walk as somebody else.
+   *
+   * **No restart.** Every sheet is loaded and every character's animations exist, so the scene
+   * swaps a texture and the journey carries on -- the walk, the fog and the satchel all survive
+   * changing your mind about who is carrying them. Nothing about the game differs; only the
+   * drawing does.
+   *
+   * The URL is updated too, so the link in the address bar keeps describing what is on screen,
+   * exactly as changing the seed does.
+   */
+  const chooseCharacter = useCallback((next: string) => {
+    setCharacterId(next);
+    const url = new URL(window.location.href);
+    url.searchParams.set('as', next);
+    window.history.replaceState(null, '', url);
+    EventBus.emitEvent('set-character', { characterId: next });
   }, []);
 
   /**
@@ -519,11 +574,15 @@ export function App() {
   return (
     // The stage is the viewport. The canvas fills it and everything else floats on top, which is
     // why nothing here scrolls and there is no page chrome left to scroll past.
-    <div className="stage">
+    // `data-traveller` is who the *scene* says it is drawing, not who was asked for. It is a
+    // readout rather than a control, and it exists because a browser test otherwise cannot tell a
+    // working picker from a highlighted button -- see `e2e/travellers.spec.ts`.
+    <div className="stage" data-traveller={drawn}>
       <PhaserGame
         seed={seed}
         discovered={initialJourney.current.discovered}
         fieldMapId={fieldMapFromUrl()}
+        characterId={characterId}
       />
 
       {/* The bar and the satchel strip stack together in the top-left. The strip is always on
@@ -534,6 +593,8 @@ export function App() {
       <Controls
         seed={seed}
         onGenerate={generate}
+        characterId={characterId}
+        onCharacter={chooseCharacter}
         metCount={size(collection)}
         diaryCount={diaryCount(progress)}
         recordsOpen={surface === 'progress' || surface === 'collection'}
