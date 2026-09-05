@@ -30,7 +30,22 @@ export const PLAYER_FRAME = { width: 26, height: 40 };
  * so 0/1 are the passing pose and 2/3 are the contacts.
  */
 const WALK_ROW = { down: 0, up: 4, right: 8, left: 12 } as const;
-const SIT_ROW = { down: 16, up: 20, right: 24, left: 28 } as const;
+
+/**
+ * Sitting is **one frame a facing**, not four.
+ *
+ * It was four -- `{ down: 16, up: 20, right: 24, left: 28 }` -- back when Varuna's sitting art was
+ * drawn as a full 4x4 and he was the only character. The sheets built from the new art give one
+ * pose per direction instead, which is enough: a seated figure has nowhere to walk to, and the
+ * second frame of an idle exists to breathe rather than to move.
+ *
+ * **This is the constant that has to agree with `tools/characters.json`.** A sheet is 20 frames --
+ * sixteen walking, four sitting -- and `build-characters.js --check` refuses one that is short.
+ * When the old four-frame layout outlived the art, Phaser warned twelve times a boot that
+ * "Texture varuna has no frame 25" and every test still passed, because a missing frame is a
+ * console warning rather than a thrown error.
+ */
+const SIT_ROW = { down: 16, up: 17, right: 18, left: 19 } as const;
 
 export type Facing = 'up' | 'down' | 'left' | 'right';
 
@@ -97,10 +112,9 @@ export function createCharacterAnimations(scene: Phaser.Scene, key: string): voi
     // Roughly a frame per step at the pace the player actually walks.
     define('walk', facing, walkOrder(walk), 7);
 
-    // Sitting is slower still. One of the four frames has the staff in hand, so cycling all four
-    // gives the pose something to do without the traveller appearing to fidget.
-    const sit = SIT_ROW[facing];
-    define('sit', facing, [sit, sit + 2, sit + 3, sit + 1], 0.9);
+    // One frame, so there is nothing to cycle. Kept as an animation rather than a static frame so
+    // `animFor` returns the same shape for all three actions and the scene needs no special case.
+    define('sit', facing, [SIT_ROW[facing]], 0.9);
   }
 }
 

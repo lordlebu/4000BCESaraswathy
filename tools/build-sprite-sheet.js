@@ -22,110 +22,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const zlib = require('zlib');
+const { decodePng, encodePng } = require('./sprite-png.js');
 
-// --- PNG in ---------------------------------------------------------------
-
-function decodePng(file) {
-  const buf = fs.readFileSync(file);
-  const width = buf.readUInt32BE(16);
-  const height = buf.readUInt32BE(20);
-  if (buf[24] !== 8 || buf[25] !== 6) {
-    throw new Error(`${file}: expected 8-bit RGBA, got depth ${buf[24]} type ${buf[25]}`);
-  }
-
-  const chunks = [];
-  let off = 8;
-  while (off < buf.length) {
-    const len = buf.readUInt32BE(off);
-    if (buf.toString('ascii', off + 4, off + 8) === 'IDAT') {
-      chunks.push(buf.subarray(off + 8, off + 8 + len));
-    }
-    off += 12 + len;
-  }
-
-  const raw = zlib.inflateSync(Buffer.concat(chunks));
-  const stride = width * 4;
-  const data = Buffer.alloc(height * stride);
-  let pos = 0;
-  for (let y = 0; y < height; y += 1) {
-    const filter = raw[pos];
-    pos += 1;
-    for (let x = 0; x < stride; x += 1) {
-      const left = x >= 4 ? data[y * stride + x - 4] : 0;
-      const up = y > 0 ? data[(y - 1) * stride + x] : 0;
-      const upLeft = x >= 4 && y > 0 ? data[(y - 1) * stride + x - 4] : 0;
-      let v = raw[pos + x];
-      if (filter === 1) v += left;
-      else if (filter === 2) v += up;
-      else if (filter === 3) v += (left + up) >> 1;
-      else if (filter === 4) {
-        const p = left + up - upLeft;
-        const pa = Math.abs(p - left);
-        const pb = Math.abs(p - up);
-        const pc = Math.abs(p - upLeft);
-        v += pa <= pb && pa <= pc ? left : pb <= pc ? up : upLeft;
-      }
-      data[y * stride + x] = v & 0xff;
-    }
-    pos += stride;
-  }
-  return { width, height, data };
-}
-
-// --- PNG out --------------------------------------------------------------
-
-const CRC_TABLE = (() => {
-  const table = new Int32Array(256);
-  for (let n = 0; n < 256; n += 1) {
-    let c = n;
-    for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-    table[n] = c;
-  }
-  return table;
-})();
-
-function crc32(buf) {
-  let c = -1;
-  for (let i = 0; i < buf.length; i += 1) c = CRC_TABLE[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
-  return (c ^ -1) >>> 0;
-}
-
-function chunk(type, body) {
-  const len = Buffer.alloc(4);
-  len.writeUInt32BE(body.length);
-  const typed = Buffer.concat([Buffer.from(type, 'ascii'), body]);
-  const crc = Buffer.alloc(4);
-  crc.writeUInt32BE(crc32(typed));
-  return Buffer.concat([len, typed, crc]);
-}
-
-function encodePng(width, height, data) {
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(width, 0);
-  ihdr.writeUInt32BE(height, 4);
-  ihdr[8] = 8; // bit depth
-  ihdr[9] = 6; // RGBA
-  const stride = width * 4;
-  const raw = Buffer.alloc(height * (stride + 1));
-  for (let y = 0; y < height; y += 1) {
-    raw[y * (stride + 1)] = 0; // filter: none. The images are tiny; this compresses fine.
-    data.copy(raw, y * (stride + 1) + 1, y * stride, (y + 1) * stride);
-  }
-  return Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    chunk('IHDR', ihdr),
-    chunk('IDAT', zlib.deflateSync(raw, { level: 9 })),
-    chunk('IEND', Buffer.alloc(0))
-  ]);
-}
-
-// --- Options ---------------------------------------------------------------
-
-/**
- * `--flag=value` before the positional arguments, so npm scripts stay cross-platform. Environment
- * variables would need `cross-env` on Windows, and this project does not add a dependency for that.
- */
 const flags = new Map(
   process.argv
     .slice(2)
@@ -470,6 +368,42 @@ function main() {
     }
 
     let boxes = findSprites(img);
+
+    /**
+     * Which of a packed sheet's figures this pass wants, as an explicit list.
+     *
+     * **A sheet holding three people is sorted for the wrong thing.** `findSprites` orders figures
+     * top-to-bottom then left-to-right, which is right for one character in four poses and wrong
+     * the moment a sheet is three characters wide: the frames come out interleaved -- Mithra,
+     * Malacite, Mehtar, Mithra, Malacite, Mehtar -- and all of them land in one output sharing one
+     * palette.
+     *
+     * **This was first written as `--columns=3 --column=1`, and that is wrong here.** The three
+     * sitting characters do not sit on a grid: rows 0 and 1 hold three figures at x = 189/663/1136,
+     * and row 2 holds *four*, at 70/514/850/1252, because Mehtar has two side poses where the
+     * others have one. Position-within-row therefore picks a different person in the last row than
+     * it does in the first two, and does it silently.
+     *
+     * So the caller names the frames: `--frames=0,3,6` takes the first figure of each row in
+     * reading order. It is more typing and it cannot be quietly wrong, which is the trade the
+     * portrait `--crop` flag already made -- when a person can look at the sheet and say, guessing
+     * is not worth defending.
+     */
+    const framesArg = option('frames', 'SPRITE_FRAMES');
+    if (framesArg) {
+      const wanted = framesArg
+        .split(',')
+        .map((n) => Number(n.trim()))
+        .filter((n) => Number.isInteger(n));
+      const outOfRange = wanted.filter((i) => i < 0 || i >= boxes.length);
+      if (outOfRange.length) {
+        throw new Error(
+          `--frames names ${outOfRange.join(', ')} but ${input} has ${boxes.length} figures (0-${boxes.length - 1})`
+        );
+      }
+      console.log(`  taking frames ${wanted.join(', ')} of ${boxes.length}`);
+      boxes = wanted.map((i) => boxes[i]);
+    }
 
     // A sheet can carry more than one scale of art — the final Varuna sheet has twelve small
     // overworld figures above four large ones meant for a zoomed-in view. Resampling both into one
