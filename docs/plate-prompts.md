@@ -252,6 +252,27 @@ in the parchment buttons along the top of the screen, currently showing Unicode 
 node tools/build-plates.js          # build anything not already built
 node tools/build-plates.js --list   # what it would do, without doing it
 node tools/build-plates.js --force  # redo them all
+
+Two flags were added for the people portraits and apply to plates unchanged:
+
+```bash
+node tools/build-plates.js --portraits                    # the other kind: assets/source/portraits/ -> src/ui/portraits/, at 256px
+node tools/build-plates.js --only=desert-fox --force      # rebuild one id rather than the folder
+node tools/build-plates.js --only=okhi --crop=440,165,1020 --force   # an explicit crop, in source pixels
+```
+
+**`--crop` exists because framing was the one fault this tool could not repair.** It was written
+down here that cropping in on a subject means guessing where the subject is — true only while
+nobody says. A person looking at the picture can say, and then it is arithmetic. Two portraits had
+been thrown away for bad framing before the flag existed.
+
+It replaces the automatic squaring outright, border detection included: an explicit box is a
+statement about that image, and a rule second-guessing it would defeat the point. It refuses a box
+running off the edge, and requires `--only`, since a crop means nothing applied to a folder.
+
+**Record the numbers wherever the subject is listed.** The raws are gitignored, so an unrecorded
+crop cannot be reproduced. What no crop can recover is detail that was never painted — enlarging a
+half-length figure is a blurrier version of the same picture.
 ```
 
 That is the whole procedure. The build works out the species id from the file name — `ChatGPTplate-caravan-dromedary.png`

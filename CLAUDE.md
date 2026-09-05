@@ -175,8 +175,14 @@ Run a single test file with `npx vitest run test/generator.test.ts`, or a single
 **Two suites, two jobs.** `test/` runs under Node and covers everything in `world/` and `content/`.
 `e2e/` drives a real Chromium and is the only thing that can catch "Phaser booted but the canvas is
 blank" — worth having because Phaser 4 is new enough that most published advice describes v3.
-First run needs `npx playwright install chromium`. Vitest is scoped to `test/**/*.test.ts` in
-`vite.config.ts` so it does not try to run the Playwright specs in Node.
+First run needs `npx playwright install chromium`. Vitest is scoped to `test/**/*.test.ts` and
+`test/**/*.test.tsx` in `vite.config.ts` so it does not try to run the Playwright specs in Node.
+
+**A `.tsx` suite renders React and needs a DOM**, declared per file with
+`// @vitest-environment jsdom` rather than globally — a global jsdom would hide a stray browser
+import in `world/` or `content/` instead of catching it. Nine suites do this, and they earn their
+keep: **every fault found in the interface work was found by rendering a component, and none by the
+arithmetic underneath it.**
 
 Reading pixels back out of the Phaser canvas in-page does not work: the WebGL drawing buffer is
 undefined after compositing unless `preserveDrawingBuffer` is set, which costs the real game
