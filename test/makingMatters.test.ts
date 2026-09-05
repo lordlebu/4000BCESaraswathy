@@ -27,8 +27,9 @@ import { describeTile } from '../src/content/journal';
 import { underfootLine, yieldsAt } from '../src/content/gathering';
 import { diarySections } from '../src/content/travelLog';
 import { discoveries } from '../src/content/knowledge';
+import { creatures, flora } from '../src/content/species';
 import { npc, npcs } from '../src/content/places';
-import { items, recipes } from '../src/content/making';
+import { items, materials, recipes } from '../src/content/making';
 import craftingBundle from '../data/canon/crafting.json';
 import { add, count, emptySatchel } from '../src/content/satchel';
 import { canMake, make, makeableNow, openGround, withinReach } from '../src/content/crafting';
@@ -420,5 +421,71 @@ describe('the two implementations agree', () => {
       .conformance.affords;
     expect(canonSays['item_reed_rope']).toEqual(['bind']);
     expect(items.some((i) => i.materials.length === 0 && i.affords.length > 0)).toBe(true);
+  });
+});
+
+describe('what canon says a material is', () => {
+  /**
+   * Canon gained `renews` so the game can decide whether a depleted resource node ever refills.
+   * The adapter-coverage test proves the field is *declared*; this proves the values actually
+   * arrive, which is a different claim and the one a node will rely on.
+   *
+   * A default of `seasonal` would hide a bundle that shipped none of them, so this asserts the
+   * spread rather than mere presence: canon has never-renewing stone and fast-growing greens,
+   * and if everything came back as one value the field would be carrying no information.
+   */
+  it('gives every material a renewal rate, and more than one of them', () => {
+    for (const m of materials) {
+      expect(['fast', 'seasonal', 'slow', 'never'], `${m.id} renews as ${m.renews}`).toContain(
+        m.renews
+      );
+    }
+    const spread = new Set(materials.map((m) => m.renews));
+    expect(spread.size, `every material renews the same way: ${[...spread]}`).toBeGreaterThan(1);
+
+    // The two ends, named, because they are the cases a node behaves differently for.
+    // A material keeps canon's id; only `wonFrom` is converted to the engine's namespace.
+    expect(materials.find((m) => m.id === 'material_basalt')?.renews).toBe('never');
+    expect(materials.find((m) => m.id === 'material_reed_fibre')?.renews).toBe('fast');
+  });
+
+  /**
+   * **The canon guarantee the whole gathering overhaul rests on.**
+   *
+   * `lint_story.py` refuses a material whose `found_in` names a biome none of its `won_from`
+   * species can reach. Twenty-five materials broke that rule before it existed -- the ammonite
+   * shell was gathered on the coast while both its ammonites live in lava field and mountains,
+   * no biome in common at all.
+   *
+   * It matters here rather than only over there because the game is moving from gathering a
+   * biome-wide list to gathering what is standing on the tile: a material whose source is not
+   * in the biome stops being merely odd and becomes unobtainable. This is the game's half --
+   * it fails if a bundle is exported from a canon whose lint was skipped.
+   *
+   * The three exemptions are canon's, and are named there: leviathan bone and oyster shell wash
+   * ashore, and salt crusts a pan no saltbush grew in.
+   */
+  it('never offers a material where nothing it comes from lives', () => {
+    const travels = new Set([
+      'material_leviathan_bone',
+      'material_oyster_shell',
+      'material_salt_crust'
+    ]);
+    const whereSpeciesLive = new Map<string, Set<string>>();
+    for (const s of [...creatures, ...flora]) whereSpeciesLive.set(s.id, new Set(s.biomes));
+
+    const offences: string[] = [];
+    for (const m of materials) {
+      if (travels.has(m.id)) continue;
+      const sources = m.wonFrom.filter((id) => whereSpeciesLive.has(id));
+      if (sources.length === 0) continue;
+      const reachable = new Set(sources.flatMap((id) => [...whereSpeciesLive.get(id)!]));
+      for (const biome of m.foundIn) {
+        if (!reachable.has(biome)) {
+          offences.push(`${m.id} is gathered in ${biome}; its sources reach ${[...reachable]}`);
+        }
+      }
+    }
+    expect(offences, offences.join('; ')).toEqual([]);
   });
 });
