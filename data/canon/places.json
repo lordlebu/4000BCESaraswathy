@@ -406,7 +406,8 @@
         "forest",
         "settlement",
         "plains",
-        "river"
+        "river",
+        "snow"
       ],
       "scale": "large",
       "points_of_interest": [

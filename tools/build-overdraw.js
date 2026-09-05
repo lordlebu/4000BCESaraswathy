@@ -359,7 +359,12 @@ function fenceFrame(sides) {
  */
 function traceFrame(kind) {
   const pixels = Buffer.alloc(CELL * CELL * 4);
-  const colour = hex(kind === 'splash' ? '#cfe4ea' : '#6b5847');
+  // A print in snow is a *hole*, not a stain: the mark is the shadowed depression where the
+  // boot went in, so it is drawn cooler and darker than the ground rather than as spilled colour
+  // the way a sandy print is.
+  const colour = hex(
+    kind === 'splash' ? '#cfe4ea' : kind === 'snow' ? '#93a3b2' : '#6b5847'
+  );
   const set = (x, y) => {
     if (x < 0 || x >= CELL || y < 0 || y >= CELL) return;
     const p = (y * CELL + x) * 4;
@@ -375,6 +380,16 @@ function traceFrame(kind) {
     const ring = [[-4, 0], [-3, -2], [0, -3], [3, -2], [4, 0], [3, 2], [0, 3], [-3, 2]];
     for (const [dx, dy] of ring) set(cx + dx, cy + dy);
     for (const [dx, dy] of [[-2, -1], [2, -1], [-2, 1], [2, 1]]) set(cx + dx, cy + dy);
+  } else if (kind === 'snow') {
+    // Deeper than a sandy print, and wider: a boot sinks into snow rather than pressing it. Two
+    // strides rather than one, because a mark in snow lasts and the second is still there.
+    for (const [ox, oy] of [[-4, -1], [1, 2], [4, -3]]) {
+      for (let dy = 0; dy < 4; dy += 1) {
+        set(cx + ox, cy + oy + dy);
+        set(cx + ox + 1, cy + oy + dy);
+        set(cx + ox + 2, cy + oy + dy);
+      }
+    }
   } else {
     // Two small prints, offset left and right of centre the way a stride lands.
     for (const [ox, oy] of [[-3, 0], [2, 2]]) {
@@ -429,7 +444,14 @@ function main() {
   // Sixteen fence pieces, indexed by the side mask, then the two underfoot traces.
   const fences = [];
   for (let sides = 0; sides < 16; sides += 1) fences.push(fenceFrame(sides));
-  const frames = [...rest, ...lean, ...fences, traceFrame('prints'), traceFrame('splash')];
+  const frames = [
+    ...rest,
+    ...lean,
+    ...fences,
+    traceFrame('prints'),
+    traceFrame('splash'),
+    traceFrame('snow')
+  ];
 
   // Against the *final* cell size: this art is authored at CELL and upscaled by SCALE on the way
   // out, so wrapping against CELL alone would still emit a strip four times over the limit.
@@ -454,7 +476,7 @@ function main() {
   console.log(`overdraw: ${frames.length} frames of ${CELL * SCALE}x${CELL * SCALE} in ${columns}x${rows}, ${kb} KB`);
   console.log(`  ${PLANTS.length} plants x ${SCATTERS} scatters at rest, the same leaning, then fence`);
   console.log(`  order: ${PLANTS.map((p) => p.id).join(', ')}`);
-  console.log(`  then ${fences.length} fence pieces by side mask, footprints, splash`);
+  console.log(`  then ${fences.length} fence pieces by side mask, footprints, splash, snow prints`);
 }
 
 main();
