@@ -966,3 +966,60 @@ standing on it.
 Then add each id to `TERRAIN_ORDER` in `src/game/frames.ts` — **the same order as the sheet**, and
 `hasTileArt` starts returning true for it. That is the whole wiring; the pipeline is drop-a-PNG,
 exactly as it is for plates and portraits.
+
+---
+
+## Asset 6 — yurts, on the hut sheet
+
+**Status: prompt written, art not yet generated.** Two felt tents to sit alongside the four
+mud-brick huts, so a settlement stops being four repeating shapes.
+
+**Nothing in the tools changes.** `build-terrain.js` reads `assets/source/huts.png`, finds the
+separated figures with `findSprites`, and slices each into its own frame — so adding buildings is
+a drop-a-PNG change exactly like the species plates. The one code edit is `HUT_VARIANTS` in
+`src/game/frames.ts`, from 4 to 6, and `test/frames.test.ts` now fails if that is forgotten:
+without it the placement modulo keeps choosing from the first four and the yurts ship, take space
+in the sheet, and are never drawn.
+
+| Spec | Value | Why |
+| --- | --- | --- |
+| Cell | **80×88** | What each figure is resampled to — `HUT` at `SCALE` 4. Smaller than a 128px tile, so ground shows around it. |
+| Source scale | roughly **500×550** each | The existing sheet is 2079×756 for four figures. Bigger is fine; the ratio is what matters. |
+| Anchor | **bottom-centre** | Objects are bottom-anchored, so a building stands on its tile rather than floating over it. |
+| Alpha | real transparency | Not a checkerboard, not white. The slicer finds figures by opacity. |
+| How many | **2** | Taking the pool to six. Two is enough that a settlement does not repeat one felt shape. |
+
+> **Prompt — yurts (add to `assets/source/huts.png`)**
+>
+> Two round nomad yurts seen from a high three-quarter angle, for a cozy exploration game set in
+> ancient South Asia, painted in a naturalist's watercolour field notebook. Felt and hide stretched
+> over a low wooden frame, a domed roof with a smoke opening at the crown, a doorway facing the
+> viewer, guy ropes and weighting stones at the base. One plain and undyed, one with a band of
+> simple woven pattern around the wall.
+>
+> Muted desaturated palette, warm paper undertone, visible paper grain and pigment granulation,
+> soft blended edges — the same painted style and about the same size as a mud-brick hut in the
+> same set.
+>
+> **Each yurt whole and separate**, side by side with clear empty space between them, on a fully
+> transparent background. Nothing touching or overlapping. No ground, no cast shadow, no base
+> plate, no grass, no people, no animals, no border, no frame, no text, no watermark.
+>
+> Flat even lighting with no strong sun direction. Not photographic: no lens blur, no specular
+> highlight, no 3D render. Lossless PNG with a genuine alpha channel.
+
+*"Whole and separate, with clear empty space" is the load-bearing clause.* The slicer separates
+opaque islands: two yurts whose guy ropes touch become one figure at half scale, and a shadow
+under the row makes the whole thing a single blob. That is the same failure the species plates hit
+and the reason `findSprites` exists in the shape it does.
+
+*And the doorway matters more than it sounds.* Every hut on the sheet faces the viewer, because
+the map has one camera angle and a building turned away reads as a wall. A yurt with its door to
+the side would be the only structure in the world that had turned its back.
+
+### After the art arrives
+
+    node tools/build-terrain.js
+
+Then `HUT_VARIANTS` from 4 to 6. The tool prints the frame count it sliced, so a sheet that came
+back with three figures rather than two says so before anything is wired.
