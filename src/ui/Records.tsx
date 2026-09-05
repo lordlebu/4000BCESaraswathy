@@ -5,7 +5,7 @@
 // discover a verb by bumping into it, so verbs must be listed and always reachable, and the
 // records they produce must not compete with them for the same row of buttons.
 //
-// **Two tabs, not four.** The original plan said diary, species met, map and progress, which
+// **Three tabs now, and it was two.** The original plan said diary, species met, map and progress, which
 // turned out to be wrong about its own subject: `Progress` already *wraps* `Diary` and always
 // has, and the overworld is a place you travel from rather than a record you read -- it belongs
 // with Travel, where it already is. So the real consolidation is two surfaces, and saying "four"
@@ -19,7 +19,7 @@
 // state, their own escape handling and their own focus behaviour, because they were correct
 // before this existed and consolidating surfaces is not a licence to rewrite them.
 
-export type RecordTab = 'journey' | 'collection';
+export type RecordTab = 'journey' | 'collection' | 'people';
 
 export interface RecordTabsProps {
   tab: RecordTab;
@@ -28,6 +28,8 @@ export interface RecordTabsProps {
   journeyCount: number;
   /** How many species have been met. */
   metCount: number;
+  /** How many people have been talked to. */
+  peopleCount: number;
 }
 
 /**
@@ -38,11 +40,15 @@ export interface RecordTabsProps {
  * screenshot showed a diary with no tabs at all and the second one unclickable. Each panel takes
  * a `tabs` slot instead, on the same footing as the `footer` slot `Diary` already had.
  */
-export function RecordTabs({ tab, onTab, journeyCount, metCount }: RecordTabsProps) {
+export function RecordTabs({ tab, onTab, journeyCount, metCount, peopleCount }: RecordTabsProps) {
   return (
     <div className="records-tabs" role="tablist" aria-label="Records">
       <Tab id="journey" label="Journey" count={journeyCount} current={tab} onTab={onTab} />
       <Tab id="collection" label="Met" count={metCount} current={tab} onTab={onTab} />
+      {/* Third, and last. "Two tabs, not four" was right about the *records* -- Progress already
+          wrapped Diary and the overworld belongs with Travel -- and this is not a fourth record
+          rediscovered, it is the one surface the people never had. */}
+      <Tab id="people" label="People" count={peopleCount} current={tab} onTab={onTab} />
     </div>
   );
 }

@@ -101,9 +101,14 @@ against deliberately broken code. **A generous wait hid the bug exactly as the m
 once on mount in development to prove it is safe to run twice, and the leave path is an unmount
 cleanup — so walking up to somebody marked all of their lines heard before a character of the first
 was drawn. That is the original bug, reintroduced through the fix for fault 2, and it lived in
-development only, which is exactly where the browser suite runs. Nothing has been typed at that
-moment and something always has been by the time a player can leave, so the reveal being empty is
-the discriminator.
+development only, which is exactly where the browser suite runs.
+
+The first discriminator was the reveal being empty — nothing is typed at StrictMode'''s cleanup, and
+something *normally* is by the time a player can leave. **"Normally" was the flaw.** It held alone
+and failed with four browser specs running at once, where the panel can be closed before the first
+character lands, and it silently took the exchange with it. Timing is what separates the two
+mounts, so timing is the test: a zero-delay timeout that the simulated unmount cancels and the
+second mount re-arms.
 
 ## Beats
 
@@ -164,9 +169,26 @@ index. It never misfired only because both priced lines sort last in canon order
 appends rather than shifts — luck, not design, and now moot since both lists are built the same
 way.
 
-**There is nowhere to look somebody up.** Eight people met across twenty places and no record of who
-said what. Phase 5 adds a People tab to `Records`, where `would_settle` — authored on every person
-and already driving the ending — would become legible before the ending arrives.
+**A People tab now records who you have met**, what they handed over, and whether you have been any
+use to them. Eight people is small enough that it needs no search and no grouping — the album beside
+it needs both because it holds 145–193 species per map, and sizing furniture to the larger of two
+lists is how a panel of eight rows ends up with a filter bar.
+
+Three things it deliberately does not do:
+
+- **Unmet people are absent, not greyed.** A full roster would be a checklist of content, and it
+  would quietly say where to go next in a game whose subject is finding out.
+- **No progress count.** "2 of 6 heard" turns a person into a completion bar, and it is a promise
+  the writing cannot keep — a line can be gated on a discovery three maps away.
+- **`would_settle` stays the ending's to reveal.** The tab says *you have been some use to them*,
+  which is the same test `gatherable` and `staying` split on, so the two can never disagree about
+  who was helped. Whether they would *come* is a different question and it is not answered here.
+
+**"Met" is derived, like everything else** — somebody has been met once they have handed something
+over. That works only because every introduction in canon contains at least one line that gives
+something freely, which is a property of the *writing* rather than of the code. `test/people.test.ts`
+asserts it, so a future person with an empty opening fails there rather than being invisible in a
+tab having been talked to.
 
 **`sarv` draws nothing.** `PersonPortrait` defines an ink for it; the string appears nowhere in
 canon — no speaker, no word. Kept as a spare rather than deleted, and noted at the constant.
