@@ -471,6 +471,42 @@ function main() {
 
     let boxes = findSprites(img);
 
+    /**
+     * Which of a packed sheet's figures this pass wants, as an explicit list.
+     *
+     * **A sheet holding three people is sorted for the wrong thing.** `findSprites` orders figures
+     * top-to-bottom then left-to-right, which is right for one character in four poses and wrong
+     * the moment a sheet is three characters wide: the frames come out interleaved -- Mithra,
+     * Malacite, Mehtar, Mithra, Malacite, Mehtar -- and all of them land in one output sharing one
+     * palette.
+     *
+     * **This was first written as `--columns=3 --column=1`, and that is wrong here.** The three
+     * sitting characters do not sit on a grid: rows 0 and 1 hold three figures at x = 189/663/1136,
+     * and row 2 holds *four*, at 70/514/850/1252, because Mehtar has two side poses where the
+     * others have one. Position-within-row therefore picks a different person in the last row than
+     * it does in the first two, and does it silently.
+     *
+     * So the caller names the frames: `--frames=0,3,6` takes the first figure of each row in
+     * reading order. It is more typing and it cannot be quietly wrong, which is the trade the
+     * portrait `--crop` flag already made -- when a person can look at the sheet and say, guessing
+     * is not worth defending.
+     */
+    const framesArg = option('frames', 'SPRITE_FRAMES');
+    if (framesArg) {
+      const wanted = framesArg
+        .split(',')
+        .map((n) => Number(n.trim()))
+        .filter((n) => Number.isInteger(n));
+      const outOfRange = wanted.filter((i) => i < 0 || i >= boxes.length);
+      if (outOfRange.length) {
+        throw new Error(
+          `--frames names ${outOfRange.join(', ')} but ${input} has ${boxes.length} figures (0-${boxes.length - 1})`
+        );
+      }
+      console.log(`  taking frames ${wanted.join(', ')} of ${boxes.length}`);
+      boxes = wanted.map((i) => boxes[i]);
+    }
+
     // A sheet can carry more than one scale of art — the final Varuna sheet has twelve small
     // overworld figures above four large ones meant for a zoomed-in view. Resampling both into one
     // cell would squash the large ones to nothing, so height bounds pick out a single band.
