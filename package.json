@@ -19,7 +19,10 @@
     "check:data": "node tools/check-canon-lock.js",
     "perf": "node tools/perf.js",
     "build:sprite": "node tools/build-characters.js",
-    "check:sprite": "node tools/build-characters.js --check",
+    "check:sprite": "node tools/build-characters.js --check"
+  },
+  "dependencies": {
+    "phaser": "^4.2.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
