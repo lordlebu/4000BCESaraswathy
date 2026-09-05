@@ -326,6 +326,71 @@ function crystalShard(side) {
   return pixels;
 }
 
+/**
+ * A basalt column standing off a lava field: the one tall thing on cooled rock.
+ *
+ * Hexagonal jointing is what basalt actually does when it cools slowly, and it is the only
+ * silhouette on this sheet that is straight-sided all the way up -- a column rather than a
+ * tapering mass, which is what tells it apart from the boulder lying at its foot.
+ */
+function basaltColumn(side) {
+  const pixels = canvas();
+  const cx = Math.round(CELL / 2 + side * OFFSET);
+  const face = hex('#5a524e');
+  const lit = hex('#786e68');
+  const dark = hex('#403a37');
+
+  const base = CELL - 2;
+  const height = 19;
+  for (let d = 0; d < height; d += 1) {
+    const y = base - d;
+    // Straight-sided, narrowing only at the very top where the column has broken.
+    const half = d > height - 4 ? 2 : 4;
+    fill(pixels, cx - half, y, cx + half, y, face);
+    fill(pixels, cx - half, y, cx - half + 1, y, lit);
+    plot(pixels, cx + half, y, dark);
+    // The horizontal joints that make a column read as jointed rock rather than a post.
+    if (d % 5 === 0) fill(pixels, cx - half, y, cx + half, y, dark);
+  }
+  // A fallen block at the foot, touching the column so the two read as one broken thing rather
+  // than a post with a stone beside it.
+  fill(pixels, cx - 6, base - 3, cx - 3, base, face);
+  fill(pixels, cx - 6, base - 3, cx - 5, base - 3, lit);
+  return pixels;
+}
+
+/**
+ * A bare wind-stripped snag on the snowfield: a dead conifer with no needles left.
+ *
+ * The counterweight to the snow pine. A field with one kind of tree on it reads as planted; a
+ * living pine and a dead snag read as a treeline that is losing. It is also the darkest thing on
+ * that ground, which is what a white tile needs most.
+ */
+function snowSnag(side) {
+  const pixels = canvas();
+  const cx = Math.round(CELL / 2 + side * OFFSET);
+  const wood = hex('#6b5f52');
+  const pale = hex('#8a7d6d');
+
+  const base = CELL - 2;
+  fill(pixels, cx - 1, base - 20, cx, base, wood);
+  fill(pixels, cx - 1, base - 20, cx - 1, base, pale);
+  // Broken branches, shorter as they go up, all leaning the same way the wind blew.
+  const branches = [
+    { y: base - 6, len: 6 },
+    { y: base - 11, len: 5 },
+    { y: base - 15, len: 4 },
+    { y: base - 18, len: 3 }
+  ];
+  for (const b of branches) {
+    const dir = side >= 0 ? 1 : -1;
+    for (let i = 0; i < b.len; i += 1) {
+      plot(pixels, cx + dir * i, b.y - Math.floor(i / 2), wood);
+    }
+  }
+  return pixels;
+}
+
 /** An anthill: a cone of red earth with a dark mouth. */
 function anthill(side) {
   const pixels = canvas();
@@ -517,7 +582,9 @@ const FEATURES = [
   // The sub-biomes. A snowfield and a sky island each get one tall thing, which is the most
   // this layer ever gives a ground -- and on those two it is the only vertical there is.
   { id: 'pine-snow', sides: 2, draw: snowPine },
-  { id: 'crystal-sky_island', sides: 2, draw: crystalShard }
+  { id: 'crystal-sky_island', sides: 2, draw: crystalShard },
+  { id: 'column-lava_field', sides: 2, draw: basaltColumn },
+  { id: 'snag-snow', sides: 2, draw: snowSnag }
 ];
 
 /**

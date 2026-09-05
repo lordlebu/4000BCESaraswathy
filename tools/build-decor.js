@@ -261,25 +261,40 @@ const PROPS = [
   // Colours are pulled toward each tile's declared base so a prop reads as part of its ground:
   // lava #6b5f5c, snow #dfe3e8, sky island #a8c69b.
 
-  // Cooled basalt: shards off the flows, and the ash that collects between them.
+  // Cooled basalt: shards off the flows, the ash between them, and the things that grow on old
+  // rock once it has weathered enough to hold anything.
   { id: 'basalt-shard', biomes: ['lava_field'], draw: stones('#867b74', '#a2968e', 4) },
   { id: 'ash-patch', biomes: ['lava_field'], draw: patch('#948a83', 5) },
   { id: 'lava-boulder', biomes: ['lava_field'], draw: boulder('#7d726b', '#988c84') },
+  // Sulphur crust: the one warm colour on a grey ground, and the reason a lava field does not
+  // read as a car park.
+  { id: 'sulphur-crust', biomes: ['lava_field'], draw: patch('#b8a35c', 4) },
+  // Fumarole vent: a dark mouth ringed with pale mineral.
+  { id: 'vent-mouth', biomes: ['lava_field'], draw: stones('#3b3532', '#8c8078', 2) },
+  // Ash-tolerant scrub, low and bleached.
+  { id: 'cinder-brush', biomes: ['lava_field'], draw: tuft('#8a7f6c', 3, 3) },
 
-  // Snow: what shows *through* it, which is the only way a white ground gets any depth. A buried
-  // stone and a wind crust read as snow precisely because they are the things it has not covered.
+  // On snow the props are what shows *through* it: a white ground gets its depth from the things
+  // it has not covered, so a dark mark does more here than on any other tile.
   { id: 'snow-stone', biomes: ['snow'], draw: stones('#aab3bd', '#c8d0d8', 3) },
   { id: 'wind-crust', biomes: ['snow'], draw: patch('#c6ced8', 6) },
-  // Bare twigs pushing through the crust: the only dark marks up there, and what stops a snowfield
-  // reading as a hole in the map.
   { id: 'snow-twig', biomes: ['snow'], draw: twig('#6f665c') },
+  // A drift shaped by wind: paler than the crust, and the only thing up here with a highlight.
+  { id: 'snow-drift', biomes: ['snow'], draw: boulder('#d2dae2', '#eef3f7') },
+  // Hardy alpine tuft, the one green thing on the field.
+  { id: 'frost-tuft', biomes: ['snow'], draw: tuft('#6b7a6a', 2, 4) },
+  // Animal tracks: two small dark marks, and the clearest sign anything lives up here.
+  { id: 'snow-tracks', biomes: ['snow'], draw: stones('#9aa5b0', '#aeb8c2', 2) },
 
-  // Sky island: high thin-aired turf, so cushion plants and weathered stone rather than grass.
+  // Sky island: high thin-aired turf, weathered stone, and the crystal it is known for.
   { id: 'cushion-plant', biomes: ['sky_island'], draw: patch('#7f9e74', 5) },
   { id: 'sky-stone', biomes: ['sky_island'], draw: stones('#9aa294', '#b3baa8', 3) },
-  // The flowers that grow among the crystal. **The crystal itself moved to `features`**: decor is
-  // what lies on the ground and is capped at a third of a cell, which makes a formation gravel.
-  // A thing you walk *past* belongs on the sheet built for tall things.
+  // Seed heads gone to wind, bleached almost white.
+  { id: 'wind-seed', biomes: ['sky_island'], draw: tuft('#c2c8ae', 2, 4) },
+  // Crystal grit: the small stuff that broke off the shards, aqua and unmistakable.
+  { id: 'crystal-grit', biomes: ['sky_island'], draw: stones('#3fa8a8', '#79d6cf', 4) },
+  // Moss on the weathered stone, which is what says this ground is old rather than new.
+  { id: 'sky-moss', biomes: ['sky_island'], draw: patch('#6f8f72', 6) },
   { id: 'crystal-flower', biomes: ['sky_island'], draw: flower('#7f9e74', '#b8cdd2', '#e8f0f0') }
 ];
 
