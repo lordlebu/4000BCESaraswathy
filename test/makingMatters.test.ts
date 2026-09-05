@@ -340,6 +340,22 @@ describe('what was made outlives what is carried', () => {
 // ---------------------------------------------------------------------------------------
 
 describe('gathering does not use a tile up', () => {
+  /*
+   * **The bargain changed when resource nodes arrived, and this is what it says now.**
+   *
+   * It used to be simply "a tile is never used up". That is still true of `gather` -- the
+   * function below carries what it is given and has no notion of stock -- but it is no longer
+   * true of the game: `nodes.ts` draws a place down and regrows it on a schedule.
+   *
+   * So the bargain with canon is now in two halves, and both are tested:
+   *
+   *   here    `gather` itself never depletes, so what a tile *grows* is stable;
+   *   below   a node that renews comes back, so a patient walker still reaches any count.
+   *
+   * The second is what keeps `check_playability.py` allowed to ignore counts. Waiting is not
+   * running out. What canon can no longer wave through is `renews: never`, which is exactly
+   * why that script gained `nothing_runs_out` before this file gained nodes.
+   */
   const built = buildFieldMap(fieldMap('field_map_lothal')!);
   const seed = built.world.seed;
 

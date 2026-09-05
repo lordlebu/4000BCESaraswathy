@@ -54,6 +54,26 @@ export interface GameToUi {
     canCamp: boolean;
     discovered: number;
     atLandmark: boolean;
+    /**
+     * Which day of the journey this is, counting from nought.
+     *
+     * Sent for the same reason `moment-changed` exists: **the scene spends time when the
+     * traveller walks, so it is the authority on how much has passed**, and React running its
+     * own clock off the same formulas would be two clocks agreeing by luck.
+     *
+     * Resource nodes need it and nothing else did, which is why it was never carried before.
+     * Regrowth is worked out from the day a node was drawn from rather than ticked, so this is
+     * the whole of what the content layer needs to know about time.
+     */
+    day: number;
+    /**
+     * The same clock unrounded, in milliseconds, which is what the save has to keep.
+     *
+     * `day` is what the content layer reasons in and `travelled` is what survives a reload;
+     * rounding the second to the first would lose most of a day on every boot, and a traveller
+     * who reloaded often would find nodes regrowing far faster than they should.
+     */
+    travelled: number;
   };
   /** Fog state changed and should be persisted. */
   'journey-changed': { discovered: string[] };

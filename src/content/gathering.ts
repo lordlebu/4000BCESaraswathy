@@ -163,8 +163,19 @@ export function gather(
   at: Point,
   biome: BiomeId
 ): Satchel {
+  return carry(satchel, yieldsAt(seed, at, biome));
+}
+
+/**
+ * Put a decided list of materials into the satchel.
+ *
+ * Split out from `gather` when resource nodes arrived, because "what does this tile grow" and
+ * "what is left of it" became two questions with two answers -- and the second is `nodes.ts`'s
+ * to answer. This is the part that was always only carrying.
+ */
+export function carry(satchel: Satchel, taken: readonly Material[]): Satchel {
   let next = satchel;
-  for (const m of yieldsAt(seed, at, biome)) next = add(next, m.id, 1);
+  for (const m of taken) next = add(next, m.id, 1);
   return next;
 }
 
@@ -175,9 +186,19 @@ export function gather(
  * that one is a record of something done and this is a lead. Without it the only way to find
  * out the ground has anything on it is to open a panel, which is the wrong way round — a
  * naturalist notices the reeds and *then* decides to cut them.
+ *
+ * **This says what grows here, not what is left of it**, and the default argument is why: the
+ * field notes are written by the scene, which has no business knowing what one player has
+ * already taken. A note reading "there is rice here" stays true of a stand somebody has been
+ * cutting — the place is still a rice stand. What is *left* is a question the action panel
+ * asks, by passing the list `nodes.ts` gives it.
  */
-export function underfootLine(seed: string, at: Point, biome: BiomeId): string | null {
-  const here = yieldsAt(seed, at, biome);
+export function underfootLine(
+  seed: string,
+  at: Point,
+  biome: BiomeId,
+  here: readonly Material[] = yieldsAt(seed, at, biome)
+): string | null {
   if (here.length === 0) return null;
   const names = here.map((m) => m.name.toLowerCase());
   const list =
@@ -193,8 +214,12 @@ export function underfootLine(seed: string, at: Point, biome: BiomeId): string |
  * In the diary's register rather than a pickup notification — the game's whole progression
  * system is a written journal, so a thing picked up is a thing noted.
  */
-export function gatheredLine(seed: string, at: Point, biome: BiomeId): string | null {
-  const got = yieldsAt(seed, at, biome);
+export function gatheredLine(
+  seed: string,
+  at: Point,
+  biome: BiomeId,
+  got: readonly Material[] = yieldsAt(seed, at, biome)
+): string | null {
   if (got.length === 0) return null;
   const names = got.map((m) => m.name.toLowerCase());
   if (names.length === 1) return `Picked up ${names[0]}.`;

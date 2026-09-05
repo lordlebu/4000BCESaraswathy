@@ -7,6 +7,7 @@
 
 import { type Collection, readCollection } from './content/collection';
 import { type Satchel, emptySatchel } from './content/satchel';
+import { type Drawn, type Nodes, noNodes } from './content/nodes';
 import { type Progress, emptyProgress } from './journey';
 
 const PREFIX = 'south-of-tethys';
@@ -72,8 +73,19 @@ const PREFIX = 'south-of-tethys';
  * What still bumps this: the payload shape below changing, and a bump of `BAKE_VERSION`, since
  * a bake format change forces every world to be generated afresh and the fog and sketches are
  * tied to their ground. Both should be rare, and neither is the price of touching the generator.
+ *
+ * ---
+ *
+ * **12 is the payload changing, which is the first kind.** Resource nodes need two things no
+ * save held: what the traveller has drawn down, and how much of the journey's time has passed.
+ * Neither can be inferred from an older save -- an absent `nodes` genuinely means "nothing taken"
+ * and would read correctly, but an absent `travelled` would claim every journey is on its first
+ * morning, and every node a returning player had emptied would look freshly cut.
+ *
+ * Read strictly rather than migrated: a version mismatch drops the save. That is the existing
+ * behaviour and it stays, because a half-understood journey is worse than a fresh one.
  */
-export const SAVE_VERSION = 11;
+export const SAVE_VERSION = 12;
 
 export interface Journey {
   version: number;
@@ -111,6 +123,26 @@ export interface Journey {
    * nothing that spoils. See `content/satchel.ts` for why that is narrower than it sounds.
    */
   satchel: Satchel;
+  /**
+   * What the traveller has drawn down, and when.
+   *
+   * The first thing in this save that records an *absence*. Everything else is what a player
+   * has gained -- rungs, words, things carried -- and this is what a place no longer has,
+   * which is why it could not be derived from the seed like the rest of the world.
+   *
+   * Only the tiles somebody actually drew from are stored, and a node that has grown back to
+   * full is deleted rather than kept, so an untouched world costs nothing here.
+   */
+  nodes: Nodes;
+  /**
+   * How much of the journey's time has been spent, in milliseconds.
+   *
+   * The scene owns the clock and resets it to nought on every boot, which was invisible while
+   * nothing depended on elapsed time. It stops being invisible the moment a reed bed regrows on
+   * a schedule: without this, closing the tab would put the traveller back at dawn of day one
+   * and every node would be as freshly cut as the hour it was cut.
+   */
+  travelled: number;
 }
 
 const empty = (): Journey => ({
@@ -119,7 +151,9 @@ const empty = (): Journey => ({
   collection: {},
   reached: false,
   progress: emptyProgress(),
-  satchel: emptySatchel()
+  satchel: emptySatchel(),
+  nodes: noNodes(),
+  travelled: 0
 });
 
 /** Anything unrecognisable becomes an empty progress rather than a half-read one. */
@@ -144,6 +178,26 @@ function readSatchel(value: unknown): Satchel {
     // A count that is not a positive whole number is a corrupted stack, not a hint. Dropping
     // it keeps `carried()` honest -- every key in a satchel is something actually held.
     if (typeof n === 'number' && Number.isInteger(n) && n > 0) out[id] = n;
+  }
+  return out;
+}
+
+/**
+ * Anything unrecognisable becomes an untouched world, on the same terms as the satchel.
+ *
+ * A malformed node is dropped rather than repaired, and dropping one means that place is full
+ * again -- which is the safe direction to be wrong in. The other way round would take something
+ * from a player on the strength of a corrupted number.
+ */
+function readNodes(value: unknown): Nodes {
+  if (!value || typeof value !== 'object') return noNodes();
+  const out: Nodes = {};
+  for (const [at, drawn] of Object.entries(value as Record<string, unknown>)) {
+    if (!drawn || typeof drawn !== 'object') continue;
+    const { left, day } = drawn as Partial<Drawn>;
+    if (typeof left !== 'number' || !Number.isInteger(left) || left < 0) continue;
+    if (typeof day !== 'number' || !Number.isFinite(day) || day < 0) continue;
+    out[at] = { left, day };
   }
   return out;
 }
@@ -177,7 +231,14 @@ export function loadJourney(seed: string): Journey {
       collection: readCollection(parsed.collection),
       reached: parsed.reached === true,
       progress: readProgress(parsed.progress),
-      satchel: readSatchel(parsed.satchel)
+      satchel: readSatchel(parsed.satchel),
+      nodes: readNodes(parsed.nodes),
+      // A clock that is not a finite number is no clock. Nought is a fresh journey, which is
+      // exactly what every save written before nodes existed is.
+      travelled:
+        typeof parsed.travelled === 'number' && Number.isFinite(parsed.travelled) && parsed.travelled >= 0
+          ? parsed.travelled
+          : 0
     };
   } catch {
     localStorage.removeItem(key(seed));
@@ -194,22 +255,31 @@ export function loadJourney(seed: string): Journey {
  */
 export function saveJourney(
   seed: string,
-  journey: Omit<Journey, 'version' | 'progress' | 'satchel'> & {
+  journey: Omit<Journey, 'version' | 'progress' | 'satchel' | 'nodes' | 'travelled'> & {
     progress?: Progress;
     satchel?: Satchel;
+    nodes?: Nodes;
+    travelled?: number;
   }
 ): void {
   try {
-    // One read, not one per optional field. Both `progress` and `satchel` fall back to what
-    // is already stored, and calling `loadJourney` twice would parse the same payload twice
+    // One read, not one per optional field. Every optional field falls back to what is already
+    // stored, and calling `loadJourney` once per field would parse the same payload four times
     // on every save -- which happens on every step the player takes.
     const stored =
-      journey.progress === undefined || journey.satchel === undefined ? loadJourney(seed) : null;
+      journey.progress === undefined ||
+      journey.satchel === undefined ||
+      journey.nodes === undefined ||
+      journey.travelled === undefined
+        ? loadJourney(seed)
+        : null;
     const payload: Journey = {
       version: SAVE_VERSION,
       ...journey,
       progress: journey.progress ?? stored!.progress,
-      satchel: journey.satchel ?? stored!.satchel
+      satchel: journey.satchel ?? stored!.satchel,
+      nodes: journey.nodes ?? stored!.nodes,
+      travelled: journey.travelled ?? stored!.travelled
     };
     localStorage.setItem(key(seed), JSON.stringify(payload));
   } catch {
