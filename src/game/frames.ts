@@ -99,8 +99,14 @@ const KIND_FRAMES: Record<string, number> = {
   travel_node: PLACE_ORDER.length + 4
 };
 
-/** How many hut variants the sheet carries, for the seeded per-tile pick. */
-export const HUT_VARIANTS = 4;
+/**
+ * How many buildings the hut sheet carries, for the seeded per-tile pick.
+ *
+ * Six: four mud-brick huts and two felt yurts.  holds this to the sheet,
+ * because the slicer finds figures automatically -- so adding a building and forgetting this
+ * number would ship art the modulo never chooses.
+ */
+export const HUT_VARIANTS = 6;
 
 /** Which frame of `assets/terrain.png` this biome is drawn with. */
 /**
