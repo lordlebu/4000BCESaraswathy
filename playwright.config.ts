@@ -50,7 +50,19 @@ export default defineConfig({
   timeout: 180_000,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? 'github' : 'list',
+  /**
+   * On CI, annotate *and* write a report.
+   *
+   * `github` alone puts the failure in the job's annotations, which is genuinely useful -- but it
+   * writes no files, so the `upload-artifact` step that exists to preserve a failing run uploaded
+   * nothing and warned "No files were found with the provided path: playwright-report/". Every
+   * failed run since that step was added has produced an empty artifact.
+   *
+   * That cost real time: diagnosing a CI-only failure meant reading it out of the annotations API
+   * rather than opening the report with its trace and screenshot, which is what the artifact was
+   * for.
+   */
+  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL,
     trace: 'on-first-retry',

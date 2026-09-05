@@ -9,6 +9,7 @@
 // so this is a rule about focus rather than about one panel.
 
 import { expect, test, type Page } from '@playwright/test';
+import { step } from './walk';
 
 async function boot(page: Page) {
   await page.setViewportSize({ width: 1000, height: 820 });
@@ -49,9 +50,14 @@ test('typing a word with WASD in it does not walk the traveller', async ({ page 
 
 test('the keys still walk once the field is left', async ({ page }) => {
   // The other half: refusing keys while typing must not leave them refused afterwards.
+  //
+  // **Waits for the arrival rather than for 700ms.** A step is a tween of `STEP_MS` times the
+  // terrain's cost, and 700ms covers that on a machine with a GPU and does not on a CI runner
+  // rendering in software -- where it failed on both the run and its retry while walking was
+  // working perfectly well. `step()` exists for this and says so in its own header: every spec
+  // that pressed a key and slept was making the same mistake. This one had not adopted it.
   await boot(page);
   const before = await where(page);
-  await page.keyboard.press('KeyD');
-  await page.waitForTimeout(700);
+  await step(page, 'KeyD');
   expect(await where(page), 'walking stopped working').not.toBe(before);
 });
