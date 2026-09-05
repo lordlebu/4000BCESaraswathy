@@ -10,7 +10,8 @@
 //
 // Pure and free of React and Phaser.
 
-import { type Material, materialsIn } from './making';
+import { type Material, materials } from './making';
+import { creatureFor, floraFor } from './species';
 import { type Satchel, add } from './satchel';
 import type { BiomeId, Point } from '../world/types';
 import { tileHash } from '../world/rng';
@@ -30,21 +31,105 @@ const CHANCE: Record<string, number> = {
 };
 
 /**
+ * What each species gives up, keyed by the species' engine id.
+ *
+ * **Canon states this once, on the material, and never on the species.** `material.won_from`
+ * names the flora and fauna a thing is taken from — `material_delta_rice` is won from
+ * `flora_red_delta_rice` — and nothing on the species names the material back. That is canon's
+ * ruling and it is the right way round: a material is a fact about stuff, and making the
+ * species carry a list too would be the same fact authored twice, free to disagree with itself.
+ *
+ * So the index is built by inverting, here, at load. The cost is one pass over 62 materials
+ * and the benefit is that the game never holds an opinion canon did not give it.
+ *
+ * This field was parsed into `Material.wonFrom` for months and read by **nothing** — canon
+ * knew rice came from the rice plant, shipped that across the boundary, and the game threw it
+ * away and picked materials by biome instead. This map is where that stops.
+ */
+const YIELDS = new Map<string, Material[]>();
+for (const material of materials) {
+  for (const species of material.wonFrom) {
+    const list = YIELDS.get(species);
+    if (list) list.push(material);
+    else YIELDS.set(species, [material]);
+  }
+}
+
+/** What this species gives up, or nothing. Most species give nothing, and that is fine. */
+export function yieldsOf(speciesId: string): readonly Material[] {
+  return YIELDS.get(speciesId) ?? EMPTY;
+}
+const EMPTY: readonly Material[] = Object.freeze([]);
+
+/**
+ * What the ground itself gives up, by biome.
+ *
+ * **Not everything is won from something alive, and canon says so in as many words:** the
+ * material schema records that `won_from` may be absent because "canon knows salt-crust is salt
+ * without owing anyone an account of which pan it was scraped from". Fifteen materials are like
+ * that — flint, river clay, basalt, sandstone, copper, tin, ochre, the glasses — and they are
+ * the entire mineral half of the crafting tree.
+ *
+ * This was found by measurement rather than by reading, and it is the fault this rewrite would
+ * otherwise have shipped: keying every yield to the plant or the animal standing on the tile
+ * made stone ungatherable *everywhere*, and two crafting tests failed on the spot because Uma's
+ * commission needs a flint. A tile is a place as well as a habitat.
+ *
+ * So the rule is: **a material with a living source comes from that source; a material without
+ * one comes from the ground.** Both still answer to `found_in`, and neither is picked from a
+ * biome-wide list of everything.
+ */
+const FROM_THE_GROUND = new Map<string, Material[]>();
+for (const material of materials) {
+  if (material.wonFrom.length > 0) continue;
+  for (const biome of material.foundIn) {
+    const list = FROM_THE_GROUND.get(biome);
+    if (list) list.push(material);
+    else FROM_THE_GROUND.set(biome, [material]);
+  }
+}
+
+/**
  * What is standing on this tile, if anything.
  *
- * Built on `tileHash` rather than `createRandom`, and the difference is the whole point:
- * `tileHash` has no stream position, so a tile answers the same way however the player
- * reaches it — walk away, come back, reload the page, the reeds are still the reeds. A
- * stream would depend on how many tiles had been asked about first, which is exactly the
- * bug the comment on `tileHash` was written to prevent.
+ * **Asks the tile, not the biome, and that is the whole of this rewrite.**
  *
- * Each material is salted by its own id, so adding a material to canon cannot change what a
- * tile already offered. That matters more here than it looks: array order is load-bearing
- * across this boundary, and this is the one place a new entity could have silently rewritten
- * an existing save's world.
+ * Every tile has always answered two questions that never consulted each other: `species.ts`
+ * picked the one creature and the one plant standing here, and this picked materials from a
+ * list of everything the *biome* can hold. So the reeds a player read about in the field notes
+ * and the reeds they cut were decided separately, and a tile could offer boar tusk with no
+ * boar in sight — canon's own `won_from` said where it came from and nothing read it.
+ *
+ * Now the plant and the creature on the tile are asked what they give up, and that is the
+ * yield. **The reeds you cut are the reeds you were looking at.**
+ *
+ * What survives unchanged is the determinism. `creatureFor` and `floraFor` are keyed by tile
+ * and seed exactly as this was, so a tile still answers the same way however the player
+ * reaches it — walk away, come back, reload, and it is the same stand of rice. And each
+ * material is still salted by its own id, so a canon addition cannot rewrite what a tile
+ * already offered.
+ *
+ * The rarity roll stays too, and now means something narrower and truer: not "is this material
+ * in this biome" but "is this plant, which is standing right here, worth taking from today".
  */
 export function yieldsAt(seed: string, at: Point, biome: BiomeId): Material[] {
-  return materialsIn(biome).filter((m) => {
+  const here = { x: at.x, y: at.y, biome };
+  const standing = [floraFor(here, seed), creatureFor(here, seed)];
+
+  const offered: Material[] = [];
+  for (const species of standing) {
+    if (!species) continue;
+    for (const m of yieldsOf(species.id)) {
+      // Canon's lint guarantees a material is only found where its sources live, so this
+      // filter should never fire. It stays because the guarantee is canon's and this file is
+      // the one that would silently offer desert rice if a bundle ever arrived unlinted.
+      if (m.foundIn.includes(biome)) offered.push(m);
+    }
+  }
+  // And what the ground is made of, which no plant has to be standing on for you to find.
+  for (const m of FROM_THE_GROUND.get(biome) ?? EMPTY) offered.push(m);
+
+  return offered.filter((m) => {
     const roll = tileHash(seed, at.x, at.y, `gather:${m.id}`) / 4294967296;
     return roll < (CHANCE[m.rarity] ?? CHANCE.common);
   });
