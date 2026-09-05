@@ -163,7 +163,10 @@ export function gather(
   at: Point,
   biome: BiomeId
 ): Satchel {
-  return carry(satchel, yieldsAt(seed, at, biome));
+  return carry(
+    satchel,
+    yieldsAt(seed, at, biome).map((material) => ({ material, count: 1 }))
+  );
 }
 
 /**
@@ -173,10 +176,22 @@ export function gather(
  * "what is left of it" became two questions with two answers -- and the second is `nodes.ts`'s
  * to answer. This is the part that was always only carrying.
  */
-export function carry(satchel: Satchel, taken: readonly Material[]): Satchel {
+export function carry(satchel: Satchel, taken: readonly Haul[]): Satchel {
   let next = satchel;
-  for (const m of taken) next = add(next, m.id, 1);
+  for (const { material, count } of taken) next = add(next, material.id, count);
   return next;
+}
+
+/**
+ * One material and how many of it.
+ *
+ * Structurally the same as `nodes.Taking` and deliberately declared here rather than imported:
+ * `nodes.ts` already imports this module, and pointing the arrow back would make a cycle. The
+ * shape is two fields; the coupling would be for ever.
+ */
+export interface Haul {
+  material: Material;
+  count: number;
 }
 
 /**
@@ -200,12 +215,7 @@ export function underfootLine(
   here: readonly Material[] = yieldsAt(seed, at, biome)
 ): string | null {
   if (here.length === 0) return null;
-  const names = here.map((m) => m.name.toLowerCase());
-  const list =
-    names.length === 1
-      ? names[0]
-      : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
-  return `There is ${list} here, for the taking.`;
+  return `There is ${listOf(here.map((m) => m.name.toLowerCase()))} here, for the taking.`;
 }
 
 /**
@@ -213,16 +223,64 @@ export function underfootLine(
  *
  * In the diary's register rather than a pickup notification — the game's whole progression
  * system is a written journal, so a thing picked up is a thing noted.
+ *
+ * **A good cut says so.** Two reeds reads "two bundles of reed fibre" rather than a number in a
+ * badge, because this is prose and the bonus should land as something noticed rather than as a
+ * score. That is the whole of the reward: no failure, no die, just occasionally more.
  */
 export function gatheredLine(
   seed: string,
   at: Point,
   biome: BiomeId,
-  got: readonly Material[] = yieldsAt(seed, at, biome)
+  got: readonly Haul[] = yieldsAt(seed, at, biome).map((material) => ({ material, count: 1 }))
 ): string | null {
   if (got.length === 0) return null;
-  const names = got.map((m) => m.name.toLowerCase());
-  if (names.length === 1) return `Picked up ${names[0]}.`;
-  const last = names[names.length - 1];
-  return `Picked up ${names.slice(0, -1).join(', ')} and ${last}.`;
+  return `Picked up ${listOf(got.map(amountOf))}.`;
+}
+
+/**
+ * What is here and what shape it is in, or null when the ground holds nothing.
+ *
+ * **The predictability the design rests on.** A player decides whether to stoop by looking, so a
+ * stand that has been cut has to read as cut *before* the decision rather than after it. This is
+ * the line the action row shows, and it is why there is no hidden roll anywhere in gathering:
+ * everything the player is deciding about is on the screen in front of them.
+ *
+ * Only worn ground is described. Saying "untouched" of every fresh tile would put the word on
+ * screen constantly and make the interesting case invisible by drowning it.
+ */
+export function standingLine(
+  here: readonly Haul[],
+  worn: (m: Material) => boolean
+): string | null {
+  if (here.length === 0) return null;
+  const cut = here.filter((h) => worn(h.material));
+  const full = here.filter((h) => !worn(h.material));
+
+  const parts: string[] = [];
+  if (full.length > 0) parts.push(listOf(full.map(amountOf)));
+  if (cut.length > 0) {
+    parts.push(`${listOf(cut.map(amountOf))} on ground already worked`);
+  }
+  // It opens a sentence, so it is capitalised here rather than leaving every caller to do it.
+  // Material names are lower-cased for use mid-sentence, which is where they are usually needed.
+  const line = parts.join(', and ');
+  return `${line.charAt(0).toUpperCase()}${line.slice(1)}.`;
+}
+
+/** "two bundles of reed fibre", or just the name when one comes up. */
+function amountOf({ material, count }: Haul): string {
+  const name = material.name.toLowerCase();
+  return count > 1 ? `${WORDS[count] ?? count} of ${name}` : name;
+}
+
+// Small numbers as words, because the journal is prose and "2 flint" is a spreadsheet. Nothing
+// here ever gives more than a couple at once, so the list is deliberately short rather than a
+// general number-speller nobody asked for.
+const WORDS: Record<number, string> = { 2: 'two', 3: 'three' };
+
+/** "a, b and c", the way the journal has always written a list. */
+function listOf(names: readonly string[]): string {
+  if (names.length === 1) return names[0]!;
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 }

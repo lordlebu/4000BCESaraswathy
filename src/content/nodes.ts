@@ -122,6 +122,18 @@ export function leftAt(
 }
 
 /**
+ * One material and how many of it come up in a single stoop.
+ *
+ * A pair rather than a bare list, because "what is here" and "how much of it you get" became two
+ * answers the moment a haul could vary -- and asking the second question twice, once to show the
+ * player and once to take it, is how a UI ends up promising two reeds and handing over one.
+ */
+export interface Taking {
+  material: Material;
+  count: number;
+}
+
+/**
  * What is actually takeable here, after what has already been taken.
  *
  * The filter `gather` and every prompt should ask, rather than `yieldsAt` directly. The
@@ -134,8 +146,14 @@ export function takeableAt(
   at: Point,
   biome: BiomeId,
   today: number
-): Material[] {
-  return yieldsAt(seed, at, biome).filter((m) => leftAt(nodes, seed, at, m, today) > 0);
+): Taking[] {
+  const out: Taking[] = [];
+  for (const material of yieldsAt(seed, at, biome)) {
+    const left = leftAt(nodes, seed, at, material, today);
+    if (left <= 0) continue;
+    out.push({ material, count: handful(seed, at, material, today, left) });
+  }
+  return out;
 }
 
 /**
@@ -149,13 +167,13 @@ export function draw(
   nodes: Nodes,
   seed: string,
   at: Point,
-  taken: readonly Material[],
+  taken: readonly Taking[],
   today: number
 ): Nodes {
   let next = nodes;
-  for (const m of taken) {
+  for (const { material: m, count } of taken) {
     const key = nodeKey(at, m.id);
-    const left = leftAt(nodes, seed, at, m, today) - 1;
+    const left = leftAt(nodes, seed, at, m, today) - count;
     const full = capacityOf(seed, at, m);
     if (left >= full) {
       if (next[key] === undefined) continue;
@@ -178,6 +196,37 @@ export function draw(
  * Returned as a word rather than a number because the journal is prose and always has been —
  * this is a thing the field notes say, not a bar that fills.
  */
+/**
+ * How many come up in one stoop.
+ *
+ * **Always at least one, and sometimes more.** This is the whole of the "clicker" reading, and
+ * it is deliberately the bonus half without the failure half: cozy games vary *how much* rather
+ * than *whether*, and a hidden roll that returns nothing teaches the player nothing they can
+ * practise. Stardew's fishing does fail, but it fails on your input -- a skill surface this game
+ * does not have and would have to build on purpose.
+ *
+ * It also matters that gathering is the *only* thing that puts a material in a satchel. A chance
+ * of nothing would put a die in front of every recipe in the game, and stack multiplicatively
+ * with depletion, which is already a scarcity mechanic.
+ *
+ * Seeded on the tile, the material and the day, so it is predictable in the way that matters:
+ * the same stand on the same day always gives the same, and coming back tomorrow is a different
+ * question rather than a re-roll of the same one. No two visits in one afternoon can farm it.
+ */
+export function handful(
+  seed: string,
+  at: Point,
+  m: Material,
+  today: number,
+  left: number
+): number {
+  if (left <= 0) return 0;
+  // A quarter of stoops are good ones. Frequent enough to be a texture rather than an event,
+  // rare enough that it still reads as luck when it happens.
+  const roll = tileHash(seed, at.x, at.y, `handful:${m.id}:${today}`) % 4;
+  return Math.min(left, roll === 0 ? 2 : 1);
+}
+
 export type Condition = 'untouched' | 'picked-over' | 'bare';
 
 export function conditionOf(
