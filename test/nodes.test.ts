@@ -14,15 +14,17 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  DAYS_TO_RETURN,
   capacityOf,
   conditionOf,
   draw,
   leftAt,
   noNodes,
+  revealedNear,
   takeableAt
 } from '../src/content/nodes';
-import { yieldsAt } from '../src/content/gathering';
+import { DAYS_TO_RETURN } from '../src/content/tiers';
+import { gatheredLine, standingLine, yieldsAt } from '../src/content/gathering';
+import { REVEAL_CAP } from '../src/content/tiers';
 import { materials } from '../src/content/making';
 import { buildFieldMap } from '../src/world/fieldMap';
 import type { BiomeId } from '../src/world/types';
@@ -53,11 +55,11 @@ describe('a place that has been drawn from', () => {
 
     let nodes = noNodes();
     for (let taken = 1; taken <= full; taken += 1) {
-      nodes = draw(nodes, seed, at, [m], 0);
+      nodes = draw(nodes, seed, at, [{ material: m, count: 1 }], 0);
       expect(leftAt(nodes, seed, at, m, 0), `after ${taken} taken`).toBe(full - taken);
     }
     expect(leftAt(nodes, seed, at, m, 0), 'worked out').toBe(0);
-    expect(takeableAt(nodes, seed, at, biome, 0).map((x) => x.id)).not.toContain(m.id);
+    expect(takeableAt(nodes, seed, at, biome, 0).map((x) => x.material.id)).not.toContain(m.id);
   });
 
   /**
@@ -76,7 +78,7 @@ describe('a place that has been drawn from', () => {
     const days = DAYS_TO_RETURN[m.renews]!;
 
     let nodes = noNodes();
-    for (let i = 0; i < full; i += 1) nodes = draw(nodes, seed, at, [m], 0);
+    for (let i = 0; i < full; i += 1) nodes = draw(nodes, seed, at, [{ material: m, count: 1 }], 0);
     expect(leftAt(nodes, seed, at, m, 0)).toBe(0);
 
     // The day before it is due, still nothing. Not merely "it grows back eventually".
@@ -101,7 +103,7 @@ describe('a place that has been drawn from', () => {
     const full = capacityOf(seed, at, m);
 
     let nodes = noNodes();
-    for (let i = 0; i < full; i += 1) nodes = draw(nodes, seed, at, [m], 0);
+    for (let i = 0; i < full; i += 1) nodes = draw(nodes, seed, at, [{ material: m, count: 1 }], 0);
 
     expect(leftAt(nodes, seed, at, m, 0)).toBe(0);
     // A century of in-game days. Nothing.
@@ -126,11 +128,11 @@ describe('what the save has to hold', () => {
     const days = DAYS_TO_RETURN[m.renews]!;
     const full = capacityOf(seed, at, m);
 
-    let nodes = draw(noNodes(), seed, at, [m], 0);
+    let nodes = draw(noNodes(), seed, at, [{ material: m, count: 1 }], 0);
     expect(Object.keys(nodes).length, 'a drawn node is remembered').toBe(1);
 
     // Take the last one on a day by which it has fully regrown: back to full, so nothing to say.
-    nodes = draw(nodes, seed, at, [m], days * full);
+    nodes = draw(nodes, seed, at, [{ material: m, count: 1 }], days * full);
     expect(leftAt(nodes, seed, at, m, days * full)).toBe(full - 1);
   });
 
@@ -163,7 +165,7 @@ describe('what the save has to hold', () => {
 
     const { at, both } = found!;
     const [first, second] = both as [(typeof both)[0], (typeof both)[0]];
-    const nodes = draw(noNodes(), seed, at, [first], 0);
+    const nodes = draw(noNodes(), seed, at, [{ material: first, count: 1 }], 0);
 
     expect(leftAt(nodes, seed, at, first, 0), 'the thing taken was not drawn down').toBe(
       capacityOf(seed, at, first) - 1
@@ -190,10 +192,230 @@ describe('what a place looks like before you stoop', () => {
     let nodes = noNodes();
     expect(conditionOf(nodes, seed, at, m, 0)).toBe('untouched');
 
-    nodes = draw(nodes, seed, at, [m], 0);
+    nodes = draw(nodes, seed, at, [{ material: m, count: 1 }], 0);
     expect(conditionOf(nodes, seed, at, m, 0)).toBe(full > 1 ? 'picked-over' : 'bare');
 
-    for (let i = 1; i < full; i += 1) nodes = draw(nodes, seed, at, [m], 0);
+    for (let i = 1; i < full; i += 1) nodes = draw(nodes, seed, at, [{ material: m, count: 1 }], 0);
     expect(conditionOf(nodes, seed, at, m, 0)).toBe('bare');
+  });
+});
+
+describe('a good cut', () => {
+  /**
+   * **The clicker reading, and deliberately only its bonus half.**
+   *
+   * The brief asked for "a chance of actually collecting, like a clicker game". This is the
+   * chance of collecting *more*, and never the chance of collecting nothing -- cozy games vary
+   * how much rather than whether, and a hidden roll returning nothing teaches a player nothing
+   * they can practise. Stardew's fishing does fail, but it fails on your input, which is a skill
+   * surface this game does not have.
+   *
+   * Measured across Lothal: 1,942 stoops, 2,421 items, 479 of them good -- a quarter, which is
+   * frequent enough to be a texture and rare enough to still read as luck.
+   */
+  it('sometimes gives more, and never gives nothing', () => {
+    let stoops = 0;
+    let good = 0;
+    for (const row of built.world.tiles) {
+      for (const tile of row) {
+        for (const h of takeableAt(noNodes(), seed, { x: tile.x, y: tile.y }, tile.biome, 0)) {
+          stoops += 1;
+          expect(h.count, `${h.material.id} gave nothing on an untouched node`).toBeGreaterThan(0);
+          if (h.count > 1) good += 1;
+        }
+      }
+    }
+    expect(stoops, 'nothing on the map is takeable -- the fixture is wrong').toBeGreaterThan(0);
+    // Neither always nor never, which is the whole claim. Bounds rather than an exact rate, so
+    // retuning the odds does not break a test that is not about the odds.
+    expect(good, 'no cut was ever a good one').toBeGreaterThan(0);
+    expect(good, 'every cut was a good one -- the roll is not rolling').toBeLessThan(stoops);
+  });
+
+  /**
+   * Predictable in the way that matters: the same stand on the same day always answers the same,
+   * so a player cannot stand still and re-roll it. Coming back *tomorrow* is a different
+   * question, which is what makes returning worth anything.
+   */
+  it('answers the same all day, and differently tomorrow', () => {
+    const { at, biome } = tileWithSomething();
+    const today = takeableAt(noNodes(), seed, at, biome, 5);
+    const again = takeableAt(noNodes(), seed, at, biome, 5);
+    expect(again.map((h) => h.count), 're-rolled within the day').toEqual(today.map((h) => h.count));
+
+    // Over a fortnight the same tile must not give the identical answer every single day, or
+    // the day is not in the roll at all.
+    const spread = new Set<string>();
+    for (let day = 0; day < 14; day += 1) {
+      spread.add(takeableAt(noNodes(), seed, at, biome, day).map((h) => h.count).join(','));
+    }
+    expect(spread.size, 'every day gives exactly the same haul').toBeGreaterThan(1);
+  });
+
+  it('never gives more than the place has left', () => {
+    const { at, biome } = tileWithSomething();
+    const m = yieldsAt(seed, at, biome)[0]!;
+    const full = capacityOf(seed, at, m);
+
+    // Draw it down to exactly one and check no bonus can overdraw it.
+    let nodes = noNodes();
+    for (let i = 0; i < full - 1; i += 1) {
+      nodes = draw(nodes, seed, at, [{ material: m, count: 1 }], 0);
+    }
+    expect(leftAt(nodes, seed, at, m, 0)).toBe(1);
+
+    for (let day = 0; day < 3; day += 1) {
+      const here = takeableAt(nodes, seed, at, biome, day).find((h) => h.material.id === m.id);
+      if (here) expect(here.count, 'took more than was there').toBeLessThanOrEqual(1);
+    }
+  });
+});
+
+describe('what the row says before you stoop', () => {
+  const reed = materials.find((m) => m.id === 'material_reed_fibre')!;
+  const clay = materials.find((m) => m.id === 'material_river_clay')!;
+
+  it('names what is here', () => {
+    expect(standingLine([{ material: reed, count: 1 }], () => false)).toBe('Reed fibre.');
+  });
+
+  it('says when a cut would be a good one', () => {
+    expect(standingLine([{ material: reed, count: 2 }], () => false)).toBe('Two of reed fibre.');
+  });
+
+  /**
+   * **The predictability the whole design rests on.** Worked ground has to read as worked
+   * *before* the player decides, which is what makes a visible variance honest where a hidden
+   * roll would not be.
+   */
+  it('says when the ground has already been worked', () => {
+    const line = standingLine([{ material: reed, count: 1 }], (m) => m.id === reed.id);
+    expect(line).toBe('Reed fibre on ground already worked.');
+  });
+
+  it('keeps the two apart when a tile holds both', () => {
+    const line = standingLine(
+      [{ material: reed, count: 1 }, { material: clay, count: 1 }],
+      (m) => m.id === clay.id
+    );
+    expect(line).toBe('Reed fibre, and river clay on ground already worked.');
+  });
+
+  it('has nothing to say about bare ground', () => {
+    expect(standingLine([], () => false)).toBeNull();
+  });
+
+  it('writes a good cut into the diary as prose, not a number', () => {
+    const line = gatheredLine('seed', { x: 0, y: 0 }, 'wetland', [{ material: reed, count: 2 }]);
+    expect(line).toBe('Picked up two of reed fibre.');
+    expect(line, 'a bare digit belongs in a spreadsheet').not.toMatch(/\d/);
+  });
+});
+
+describe('stone is found, not regrown', () => {
+  /**
+   * **The model, in one sentence: a cut nodule never comes back, and the world never runs out.**
+   *
+   * Canon says flint, ochre and sandstone renew `never`, and that stays literally true -- no
+   * emptied node ever refills. What working the ground does instead is *reveal* more of it: a
+   * quarry face exposes fresh rock behind the block you took, a flood rolls new cobbles into a
+   * bed already picked over.
+   *
+   * The alternative was making stone `slow`, and it is worse twice: untrue of a nodule, and
+   * measured against a player working a district hard, a thirty-day node is emptied thirty times
+   * before it returns one -- so `slow` is `never` wearing a hat.
+   */
+  it('leaves a worked district still giving, without refilling anything', () => {
+    const X0 = 10, Y0 = 10, N = 14;
+    const stoneHere = (nodes: ReturnType<typeof noNodes>, day: number) => {
+      let n = 0;
+      for (let y = Y0; y < Y0 + N; y += 1) {
+        for (let x = X0; x < X0 + N; x += 1) {
+          for (const h of takeableAt(nodes, seed, { x, y }, built.world.tiles[y]![x]!.biome, day)) {
+            if (h.material.renews === 'never') n += 1;
+          }
+        }
+      }
+      return n;
+    };
+
+    let nodes = noNodes();
+    const before = stoneHere(nodes, 0);
+    expect(before, 'no stone in the district -- the fixture is wrong').toBeGreaterThan(0);
+
+    let taken = 0;
+    for (let day = 0; day < 5; day += 1) {
+      for (let y = Y0; y < Y0 + N; y += 1) {
+        for (let x = X0; x < X0 + N; x += 1) {
+          const at = { x, y };
+          const take = takeableAt(nodes, seed, at, built.world.tiles[y]![x]!.biome, day);
+          taken += take.filter((h) => h.material.renews === 'never').reduce((a, c) => a + c.count, 0);
+          nodes = draw(nodes, seed, at, take, day);
+        }
+      }
+    }
+
+    // Far more stone came out than the district originally held, and it is still worth working.
+    expect(taken, 'nothing was taken').toBeGreaterThan(before);
+
+    // **A third of what it started with, not "more than nothing".** Removing discovery leaves
+    // exactly 1 node standing out of 91 -- a straggler on a tile the sweep happened to reach
+    // late -- and `toBeGreaterThan(0)` passed on it. A guard that a broken build satisfies by
+    // one is not a guard, which is the third time this sprint an assertion needed watching fail
+    // before it meant anything.
+    expect(
+      stoneHere(nodes, 5),
+      'the district is worked out -- discovery is not revealing new seams'
+    ).toBeGreaterThan(before / 3);
+  });
+
+  /**
+   * Discovery must not become regrowth by the back door. **No individual node ever refills**,
+   * which is what keeps `check_playability.py`'s lock-out report honest.
+   */
+  it('never refills a node that has been emptied', () => {
+    const m = materials.find((x) => x.renews === 'never' && x.foundIn.length > 0)!;
+    const at = { x: 3, y: 4 };
+    const full = capacityOf(seed, at, m);
+
+    let nodes = noNodes();
+    for (let i = 0; i < full; i += 1) nodes = draw(nodes, seed, at, [{ material: m, count: 1 }], 0);
+    expect(leftAt(nodes, seed, at, m, 0)).toBe(0);
+
+    // Work out a whole district around it, so the reveal bonus is at its cap.
+    for (let y = 0; y <= 8; y += 1) {
+      for (let x = 0; x <= 8; x += 1) {
+        const near = { x, y };
+        for (let i = 0; i < capacityOf(seed, near, m); i += 1) {
+          nodes = draw(nodes, seed, near, [{ material: m, count: 1 }], 0);
+        }
+      }
+    }
+    expect(revealedNear(nodes, at, m.id), 'the bonus did not build').toBeGreaterThan(0);
+    expect(leftAt(nodes, seed, at, m, 36_500), `${m.id} refilled`).toBe(0);
+  });
+
+  /**
+   * Only stone is discovered. A stripped reed bed says nothing about where the next one is; a
+   * worked-out outcrop says a great deal about where the rock continues.
+   */
+  it('does not reveal anything that renews', () => {
+    // A renewing material must gain nothing from worked ground: it comes back on a clock, and
+    // giving it a discovery bonus too would be paying it twice.
+    const reed = materials.find((m) => m.id === 'material_reed_fibre')!;
+    expect(reed.renews, 'reed should renew, or this test proves nothing').not.toBe('never');
+
+    const at = { x: 4, y: 4 };
+    const fresh = yieldsAt(seed, at, 'wetland').map((m) => m.id).sort();
+    // The strongest bonus the system can produce, offered to *everything*.
+    const bribed = yieldsAt(seed, at, 'wetland', (m) => (m.renews === 'never' ? REVEAL_CAP : 0))
+      .map((m) => m.id)
+      .sort();
+
+    const gained = bribed.filter((id) => !fresh.includes(id));
+    for (const id of gained) {
+      const m = materials.find((x) => x.id === id)!;
+      expect(m.renews, `${id} was revealed and it renews on a clock`).toBe('never');
+    }
   });
 });

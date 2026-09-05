@@ -27,8 +27,8 @@ import { seedFromUrl } from './seed';
 import { WorkshopPanel } from './WorkshopPanel';
 import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
-import { carry, gatheredLine } from '../content/gathering';
-import { draw, noNodes, takeableAt } from '../content/nodes';
+import { carry, gatheredLine, standingLine } from '../content/gathering';
+import { conditionOf, draw, noNodes, takeableAt } from '../content/nodes';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
@@ -426,6 +426,9 @@ export function App() {
 
     setSatchel((s) => carry(s, taking));
     setNodes((n) => draw(n, underfoot.seed, underfoot.at, taking, today));
+    // Noted rather than announced. The whole progression of this game is a written journal, so
+    // a good cut is a sentence in the field notes and not a number in a badge.
+    setMemory(gatheredLine(underfoot.seed, underfoot.at, underfoot.biome, taking) ?? '');
   }, [underfoot, nodes, arrival?.day]);
 
   /**
@@ -441,12 +444,17 @@ export function App() {
    * the workshop will need in phase two, where the reason is "needs a settlement".
    */
   const tileActions = useMemo<TileAction[]>(() => {
-    // What is left here, so a picked-over stand reads as picked over rather than as bare ground.
+    // What is left here and how much of it comes up, so the row can say both *before* the
+    // player commits. The whole design rests on this being visible rather than rolled: a stand
+    // somebody has been cutting reads as worked ground, and a good cut reads as two.
+    const today = arrival?.day ?? 0;
     const left = underfoot
-      ? takeableAt(nodes, underfoot.seed, underfoot.at, underfoot.biome, arrival?.day ?? 0)
+      ? takeableAt(nodes, underfoot.seed, underfoot.at, underfoot.biome, today)
       : [];
     const takeable = underfoot
-      ? gatheredLine(underfoot.seed, underfoot.at, underfoot.biome, left)
+      ? standingLine(left, (m) =>
+          conditionOf(nodes, underfoot.seed, underfoot.at, m, today) === 'picked-over'
+        )
       : null;
     const shelter = arrival?.shelter ?? 'bedroll';
 

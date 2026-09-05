@@ -317,11 +317,14 @@ describe('the artwork points at places that exist', () => {
   it('says which biomes are standing in for missing art', () => {
     // Not a failure -- a ledger. These are drawn from colour and symbol until someone draws them,
     // and the list should be short and deliberate rather than quietly growing.
+    //
+    // It got **shorter**: lava_field, sky_island and sky_underside gained painted ground, and snow
+    // arrived with art rather than as a stand-in. The two left are the two whose species are all
+    // authored `lore` -- an authorial decision rather than a missing drawing, which is what
+    // canon's own note on biomes.json says.
     const biomes = (biomesData as { id: string }[]).map((b) => b.id);
     const standIns = biomes.filter((id) => !TERRAIN_ORDER.includes(id as (typeof TERRAIN_ORDER)[number]));
-    expect(standIns.sort()).toEqual(
-      ['lava_field', 'open_sky', 'sky_island', 'sky_underside', 'underworld'].sort()
-    );
+    expect(standIns.sort()).toEqual(['open_sky', 'underworld'].sort());
   });
 
   it('draws every place, by its own art or by its kind', () => {

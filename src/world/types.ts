@@ -13,6 +13,9 @@ export type BiomeId =
   | 'wetland'
   | 'hills'
   | 'mountains'
+  // Caps high ground rather than being a climate of its own -- the generator stamps it as a
+  // patch, the way the settlement already is. See docs/art-brief.md, Asset 2d.
+  | 'snow'
   | 'desert'
   | 'river'
   | 'settlement'

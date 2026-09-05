@@ -2857,7 +2857,7 @@
       "clade": "mammal",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "encounter",
@@ -2959,7 +2959,7 @@
       "clade": "arachnid",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "encounter",
@@ -3060,7 +3060,7 @@
       "clade": "insect",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "encounter",
@@ -3077,7 +3077,7 @@
       "clade": "bird",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "encounter",
@@ -5569,7 +5569,7 @@
       "growth_form": "lichen",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "flavour",

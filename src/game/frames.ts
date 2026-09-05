@@ -35,7 +35,13 @@ export const TERRAIN_ORDER: BiomeId[] = [
   'desert',
   'river',
   'settlement',
-  'landmark'
+  'landmark',
+  // The sub-biomes, in the same order as TILES in tools/build-terrain.js -- a slot in the strip
+  // is a biome only because these two lists agree.
+  'lava_field',
+  'snow',
+  'sky_island',
+  'sky_underside'
 ];
 
 /** Frame order of `assets/landmarks.png`, matching the ids in data/landmarks.json. */
