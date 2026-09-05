@@ -18,7 +18,7 @@
  * - `collection` — the album of species met. Reference; gates nothing.
  * - `progress` — discoveries, rungs, open questions, words.
  */
-export type Surface = 'here' | 'collection' | 'progress' | null;
+export type Surface = 'here' | 'collection' | 'progress' | 'people' | null;
 
 /**
  * Panels that are *not* surfaces, because they interrupt rather than inform.

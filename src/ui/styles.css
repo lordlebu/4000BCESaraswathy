@@ -1912,3 +1912,36 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   width: 1.05rem;
   height: 1.05rem;
 }
+
+/*
+ * The People record.
+ *
+ * A list of eight at most, so it takes no search, no grouping and no virtualisation -- the album
+ * beside it needs all three because it holds 145-193 species per map. Sizing furniture to the
+ * larger of two lists is how a panel of eight rows ends up with a filter bar above it.
+ */
+.people { list-style: none; margin: 0; padding: 0; }
+.people-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--edge);
+}
+.people-row:last-child { border-bottom: 0; }
+.people-text { flex: 1; min-width: 0; }
+.people-text h4 { margin: 0 0 0.15rem; font-size: 0.95rem; font-weight: 600; }
+.people-where { margin: 0 0 0.35rem; font-size: 0.78rem; }
+
+/* What they handed over. Indented as a list because it is a list of things, not a sentence. */
+.people-gave { margin: 0.2rem 0 0.35rem; padding-left: 1rem; font-size: 0.85rem; }
+.people-gave li { margin: 0.1rem 0; }
+.people-gave li::marker { color: var(--edge); }
+
+/*
+ * "You have been some use to them." Warm, and the only line here that is not a fact about the
+ * record -- so it gets the accent the offer button uses, and nothing louder. Whether they would
+ * come with you at the end is the ending's to say, not this panel's.
+ */
+.people-helped { margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--accent, #6b8f5e); }
+.people-none { padding: 1rem 0; }

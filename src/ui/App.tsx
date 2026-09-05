@@ -21,6 +21,8 @@ import { fieldMap, poi } from '../content/places';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
 import { RecordTabs, type RecordTab } from './Records';
+import { PeoplePanel } from './PeoplePanel';
+import { met } from '../content/people';
 import { seedFromUrl } from './seed';
 import { WorkshopPanel } from './WorkshopPanel';
 import { distinct, emptySatchel } from '../content/satchel';
@@ -48,6 +50,17 @@ import type { World } from '../world/types';
 function fieldMapFromUrl(): string {
   const asked = new URLSearchParams(window.location.search).get('map')?.trim();
   return asked && fieldMap(asked) ? asked : DEFAULT_FIELD_MAP;
+}
+
+/**
+ * Which surface a records tab opens.
+ *
+ * One mapping rather than the ternary each strip carried. Three tabs make a chain of conditionals
+ * that has to be edited in three places, which is the shape a fourth tab would get wrong -- and
+ * the strips had already drifted into two copies of the same expression.
+ */
+function recordSurface(tab: RecordTab): 'progress' | 'collection' | 'people' {
+  return tab === 'collection' ? 'collection' : tab === 'people' ? 'people' : 'progress';
 }
 
 type Arrival = GameToUi['tile-entered'];
@@ -557,7 +570,7 @@ export function App() {
         )}
       </div>
 
-      {/* One door, two tabs. The panels are unchanged -- each keeps its own escape handling and
+      {/* One door, three tabs. The panels are unchanged -- each keeps its own escape handling and
           focus behaviour, because they were right before this and consolidating surfaces is not a
           licence to rewrite them. The strip renders into each panel's own `tabs` slot rather than
           floating over it: both draw a full-screen veil, so anything positioned above the page
@@ -566,14 +579,10 @@ export function App() {
         tabs={
           <RecordTabs
             tab="journey"
-            onTab={(tab: RecordTab) =>
-              dispatch({
-                type: 'show',
-                surface: tab === 'collection' ? 'collection' : 'progress'
-              })
-            }
+            onTab={(tab: RecordTab) => dispatch({ type: 'show', surface: recordSurface(tab) })}
             journeyCount={diaryCount(progress)}
             metCount={size(collection)}
+            peopleCount={met(progress).length}
           />
         }
         progress={progress}
@@ -592,20 +601,31 @@ export function App() {
         tabs={
           <RecordTabs
             tab="collection"
-            onTab={(tab: RecordTab) =>
-              dispatch({
-                type: 'show',
-                surface: tab === 'collection' ? 'collection' : 'progress'
-              })
-            }
+            onTab={(tab: RecordTab) => dispatch({ type: 'show', surface: recordSurface(tab) })}
             journeyCount={diaryCount(progress)}
             metCount={size(collection)}
+            peopleCount={met(progress).length}
           />
         }
         collection={collection}
         open={surface === 'collection'}
         onClose={() => dispatch({ type: 'close' })}
         canAsk={canon.lore}
+      />
+
+      <PeoplePanel
+        tabs={
+          <RecordTabs
+            tab="people"
+            onTab={(tab: RecordTab) => dispatch({ type: 'show', surface: recordSurface(tab) })}
+            journeyCount={diaryCount(progress)}
+            metCount={size(collection)}
+            peopleCount={met(progress).length}
+          />
+        }
+        progress={progress}
+        open={surface === 'people'}
+        onClose={() => dispatch({ type: 'close' })}
       />
 
       <FieldKit

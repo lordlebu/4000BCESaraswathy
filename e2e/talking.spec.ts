@@ -97,3 +97,28 @@ test('the person you are talking to has a face beside the words', async ({ page 
   expect(said, 'a beat should have a box').not.toBeNull();
   expect(said!.x).toBeGreaterThan(face!.x + face!.width - 1);
 });
+
+test('the People tab keeps a record of who you have met', async ({ page }) => {
+  await walkToThrali(page);
+  await expect(page.locator('.person .dialogue-beat')).not.toHaveCount(0);
+  await page.getByRole('button', { name: 'Leave' }).click();
+
+  await page.getByRole('button', { name: /Records/ }).click();
+  await page.getByRole('tab', { name: /People/ }).click();
+
+  // He is in it, with his trade and what he handed over -- and none of it as a canon id.
+  const row = page.locator('.people-row').first();
+  await expect(row).toContainText('Thrali');
+  await expect(row).toContainText('fisher');
+  await expect(page.locator('.people')).not.toContainText('question_');
+});
+
+test('the People tab is empty before anybody has been spoken to', async ({ page }) => {
+  await page.goto(AT_NIGHT);
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
+
+  await page.getByRole('button', { name: /Records/ }).click();
+  await page.getByRole('tab', { name: /People/ }).click();
+  await expect(page.getByText(/have not talked to anybody/i)).toBeVisible();
+});

@@ -15,16 +15,18 @@ afterEach(cleanup);
 
 describe('the record tabs', () => {
   it('marks the one showing, and only that one', () => {
-    render(<RecordTabs tab="collection" onTab={() => {}} journeyCount={2} metCount={9} />);
+    render(<RecordTabs tab="collection" onTab={() => {}} journeyCount={2} metCount={9} peopleCount={0} />);
     const tabs = screen.getAllByRole('tab');
-    expect(tabs).toHaveLength(2);
+    // Three now: Journey, Met, People. Counted rather than named so a fourth fails here loudly
+    // instead of passing quietly with a tab nobody checks.
+    expect(tabs).toHaveLength(3);
     expect(tabs.filter((t) => t.getAttribute('aria-selected') === 'true')).toHaveLength(1);
     expect(screen.getByRole('tab', { name: /Met/ }).getAttribute('aria-selected')).toBe('true');
   });
 
   it('asks for the other one when pressed', () => {
     const onTab = vi.fn();
-    render(<RecordTabs tab="journey" onTab={onTab} journeyCount={0} metCount={4} />);
+    render(<RecordTabs tab="journey" onTab={onTab} journeyCount={0} metCount={4} peopleCount={0} />);
     fireEvent.click(screen.getByRole('tab', { name: /Met/ }));
     expect(onTab).toHaveBeenCalledWith('collection');
   });
@@ -33,7 +35,7 @@ describe('the record tabs', () => {
     // `App` turns this into a `show` rather than a `toggle`, which is what keeps pressing the
     // current tab from closing the sheet underneath it.
     const onTab = vi.fn();
-    render(<RecordTabs tab="journey" onTab={onTab} journeyCount={0} metCount={4} />);
+    render(<RecordTabs tab="journey" onTab={onTab} journeyCount={0} metCount={4} peopleCount={0} />);
     fireEvent.click(screen.getByRole('tab', { name: /Journey/ }));
     expect(onTab).toHaveBeenCalledWith('journey');
   });
@@ -41,9 +43,31 @@ describe('the record tabs', () => {
   it('shows a count only when there is one', () => {
     // A badge reading "0" looks broken. An empty diary is a reason not to press it.
     const { container } = render(
-      <RecordTabs tab="journey" onTab={() => {}} journeyCount={0} metCount={7} />
+      <RecordTabs tab="journey" onTab={() => {}} journeyCount={0} metCount={7} peopleCount={0} />
     );
     const counts = [...container.querySelectorAll('.records-count')].map((n) => n.textContent);
     expect(counts).toEqual(['7']);
+  });
+});
+
+describe('the People tab', () => {
+  it('asks for the people surface when pressed', () => {
+    const onTab = vi.fn();
+    render(<RecordTabs tab="journey" onTab={onTab} journeyCount={0} metCount={4} peopleCount={3} />);
+    fireEvent.click(screen.getByRole('tab', { name: /People/ }));
+    expect(onTab).toHaveBeenCalledWith('people');
+  });
+
+  it('counts the people met, and hides the badge at nobody', () => {
+    const { container, unmount } = render(
+      <RecordTabs tab="journey" onTab={() => {}} journeyCount={0} metCount={0} peopleCount={3} />
+    );
+    expect([...container.querySelectorAll('.records-count')].map((n) => n.textContent)).toEqual(['3']);
+    unmount();
+
+    const none = render(
+      <RecordTabs tab="journey" onTab={() => {}} journeyCount={0} metCount={0} peopleCount={0} />
+    );
+    expect(none.container.querySelectorAll('.records-count')).toHaveLength(0);
   });
 });
