@@ -138,7 +138,7 @@ const COVERAGE: Record<string, Coverage> = {
     // `notes` is adapted here rather than skipped, unlike everywhere else. A species carries
     // `journal_prompt` written for the player and `notes` written for whoever edits canon
     // next; a material has only the one field, and it is the prose the player reads.
-    adapted: ['id', 'name', 'classes', 'found_in', 'rarity', 'won_from', 'notes'],
+    adapted: ['id', 'name', 'classes', 'found_in', 'rarity', 'renews', 'won_from', 'notes'],
     skipped: ['type', 'epochs', 'source_index',
       // Which processes can transform this. Canon calls it a convenience for the atlas and
       // says the recipe is the source of truth, so the game reads the recipes.

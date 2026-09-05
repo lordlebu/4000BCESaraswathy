@@ -46,6 +46,9 @@ export type ItemKind =
   | 'tool' | 'weapon' | 'container' | 'textile' | 'food' | 'physic'
   | 'light' | 'record' | 'ornament' | 'shelter';
 
+/** Canon's `renewal_rates.json`, in canon's own order: fastest back first. */
+export type Renewal = 'fast' | 'seasonal' | 'slow' | 'never';
+
 export interface Material {
   id: string;
   name: string;
@@ -53,6 +56,18 @@ export interface Material {
   /** Renderable biomes only — canon's vocabulary is wider than the walk can draw. */
   foundIn: BiomeId[];
   rarity: Rarity;
+  /**
+   * Whether a place you have taken this from gives it again.
+   *
+   * Canon's ordering, not a duration — it says salt-crust returns faster than sandalwood and
+   * never says in how many days, because the length of a day is a question about play. Turning
+   * this into a number of days is the game's job and belongs with the resource nodes.
+   *
+   * Deliberately not derived from `rarity`, which answers a different question: a leviathan is
+   * rare because few of them exist, and a quarried block of basalt is not rare at all and is
+   * still gone once it is cut.
+   */
+  renews: Renewal;
   /** Engine species ids this is taken from. Empty is legal and common. */
   wonFrom: string[];
   /** Canon's `notes`. On a material this is the player-facing prose; there is no other. */
@@ -133,7 +148,7 @@ export interface Vehicle {
 
 interface RawMaterial {
   id: string; name: string; classes: string[]; found_in?: string[];
-  rarity?: string; won_from?: string[]; notes?: string;
+  rarity?: string; renews?: string; won_from?: string[]; notes?: string;
 }
 interface RawItem {
   id: string; name: string; kind: string; affords: string[]; base_item?: string;
@@ -204,6 +219,9 @@ export const materials: Material[] = raw.materials.map((m) => ({
   classes: m.classes as MaterialClass[],
   foundIn: (m.found_in ?? []).filter((b) => RENDERABLE.has(b)) as BiomeId[],
   rarity: (m.rarity ?? 'common') as Rarity,
+  // `seasonal` rather than `fast` when canon is silent: the safer wrong answer is the one that
+  // makes a place worth returning to, not one that makes it inexhaustible.
+  renews: (m.renews ?? 'seasonal') as Renewal,
   wonFrom: (m.won_from ?? []).map(engineId),
   description: m.notes ?? ''
 }));
