@@ -11,6 +11,7 @@ import {
   GRID,
   EDGE_ORDER,
   EDGE_VARIANTS,
+  HUT_VARIANTS,
   blends,
   edgeMaskFrame,
   DECOR_ORDER,
@@ -93,6 +94,25 @@ describe('every sheet is built to the same grid', () => {
     // Places stand taller than their tile, huts sit inside one; both keep their ratio to it.
     expect(pngSize('assets/places.png').height).toBe((GRID / 32) * 40);
     expect(pngSize('assets/huts.png').height).toBe((GRID / 32) * 22);
+  });
+
+  it('draws every building on the hut sheet', () => {
+    // **`HUT_VARIANTS` is a count the code picks with, and nothing held it to the sheet.**
+    //
+    // `build-terrain.js` slices `assets/source/huts.png` by finding separated figures, so adding
+    // a building is a drop-a-PNG change -- and that is exactly why this can go wrong quietly. Add
+    // two yurts to the source, forget the constant, and the modulo keeps picking from the first
+    // four: the yurts ship, take space in the sheet, and are never drawn.
+    //
+    // The same shape of fault as the sitting frames that were built, shipped and never loaded
+    // for a month, which the browser suite eventually caught. This catches it in seconds.
+    const hut = (GRID / 32) * 20;
+    expect(pngSize('assets/huts.png').width / hut, 'huts.png is not a whole number of huts wide')
+      .toBe(Math.round(pngSize('assets/huts.png').width / hut));
+    expect(
+      pngSize('assets/huts.png').width / hut,
+      'HUT_VARIANTS does not match the sheet -- a building is on it and never drawn'
+    ).toBe(HUT_VARIANTS);
   });
 
   it('carries every biome at every variant', () => {

@@ -18,12 +18,18 @@ import {
   overdrawIsUnderfoot,
   EDGE_ORDER,
   EDGE_STEP,
-  EDGE_VARIANTS
+  EDGE_VARIANTS,
+  FENCE_FIRST,
+  FENCE_PIECES
 } from '../src/game/frames';
 import { band } from '../src/world/classify';
 
 const worlds = fieldMaps.map((map) => ({ id: map.id, built: buildFieldMap(map, {}) }));
 const key = (p: { x: number; y: number }) => `${p.x},${p.y}`;
+
+/** Whether an overdraw frame is one of the sixteen fence pieces rather than something growing. */
+const isFence = (frame: number): boolean =>
+  frame >= FENCE_FIRST && frame < FENCE_FIRST + FENCE_PIECES;
 
 describe('nothing hides the traveller or what he is walking towards', () => {
   it('never puts undergrowth above a marker on the same tile', () => {
@@ -51,10 +57,79 @@ describe('nothing hides the traveller or what he is walking towards', () => {
   it('never grows anything through a roof', () => {
     // Paddy sprouted across the thatch of every hut it was planted beside, because the hut layer
     // and the overdraw layer were written a week apart and never told about each other.
+    //
+    // **Vegetation, not everything on the tile.** The check used to be "nothing at all on a hut
+    // tile", which was the same thing while a fence could only be drawn on the settlement's
+    // southern edge and hut tiles were skipped outright. Once the fence went round the whole
+    // perimeter that stopped being true and stopped being wanted: two settlement tiles in three
+    // hold a hut, so refusing them disqualified most of the boundary -- seventeen edge tiles
+    // produced two fences on Lothal.
+    //
+    // A fence and a hut on one tile is right. The fence runs inside the tile's edge and the hut
+    // stands in the middle of it; a boundary that stopped wherever somebody had built is not a
+    // boundary. What must never share the tile is anything that *grows*.
     for (const { id, built } of worlds) {
       const huts = new Set(planHuts(built.world).map(key));
-      const growing = planOverdraw(built.world, huts).filter((p) => huts.has(key(p)));
+      const growing = planOverdraw(built.world, huts)
+        .filter((p) => huts.has(key(p)))
+        .filter((p) => !isFence(p.frame));
       expect(growing.map((p) => key(p)), `${id}: vegetation on a hut tile`).toEqual([]);
+    }
+  });
+
+  it('fences every tile on the boundary, not one edge of it', () => {
+    // **The bug this change exists to fix, and the assertion that catches it coming back.**
+    //
+    // The fence used to be drawn only where a settlement tile had open ground *to the south*,
+    // because the single fence frame was a bottom rail and could not honestly be anything else.
+    // Measured on the built maps that produced two fences against seventeen boundary tiles on
+    // Lothal, and four on Dwarka -- about 88% of every settlement's perimeter open.
+    //
+    // Restoring the south-only rule passes every other test in this file, which is why this one
+    // is here.
+    for (const { id, built } of worlds) {
+      const world = built.world;
+      const wanted: string[] = [];
+      for (let y = 0; y < world.height; y += 1) {
+        for (let x = 0; x < world.width; x += 1) {
+          if (world.tiles[y]![x]!.biome !== 'settlement') continue;
+          const onEdge = [
+            [0, 1],
+            [0, -1],
+            [1, 0],
+            [-1, 0]
+          ].some(([dx, dy]) => {
+            const tile = world.tiles[y + dy!]?.[x + dx!];
+            return !tile || tile.biome !== 'settlement';
+          });
+          if (onEdge) wanted.push(`${x},${y}`);
+        }
+      }
+
+      const huts = new Set(planHuts(world).map(key));
+      const fenced = new Set(
+        planOverdraw(world, huts)
+          .filter((p) => isFence(p.frame))
+          .map(key)
+      );
+
+      expect(wanted.length, `${id}: no settlement perimeter to fence`).toBeGreaterThan(0);
+      const missed = wanted.filter((at) => !fenced.has(at));
+      expect(missed, `${id}: ${missed.length} of ${wanted.length} boundary tiles unfenced`).toEqual(
+        []
+      );
+    }
+  });
+
+  it('does fence the tiles the huts stand on, which is the point of the change', () => {
+    // The other half, and the one that would have caught the old behaviour: without it, a future
+    // edit could restore "skip every hut tile" and only the coverage would suffer, silently.
+    for (const { id, built } of worlds) {
+      const huts = new Set(planHuts(built.world).map(key));
+      const fenced = planOverdraw(built.world, huts).filter((p) => isFence(p.frame));
+      const onHuts = fenced.filter((p) => huts.has(key(p)));
+      expect(fenced.length, `${id}: no fence anywhere`).toBeGreaterThan(0);
+      expect(onHuts.length, `${id}: the boundary stops wherever somebody built`).toBeGreaterThan(0);
     }
   });
 

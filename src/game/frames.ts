@@ -373,11 +373,36 @@ export const OVERDRAW_PLANTS = [
   'saltbush-desert'
 ];
 export const OVERDRAW_REST = OVERDRAW_PLANTS.length * OVERDRAW_SCATTERS;
-export const FENCE_FRAME = OVERDRAW_REST * 2;
+/**
+ * The first of sixteen fence pieces, one per side mask.
+ *
+ * There used to be one frame here, and it was a bottom rail -- so a fence could only honestly be
+ * drawn along a settlement's southern edge, which is what the placement code did. That left about
+ * 88% of a settlement's perimeter unfenced: seventeen boundary tiles against two fences drawn on
+ * Lothal, four on Dwarka.
+ */
+export const FENCE_FIRST = OVERDRAW_REST * 2;
+
+/** How many fence pieces the sheet carries: every combination of four sides. */
+export const FENCE_PIECES = 16;
+
+/** North, east, south, west, as the bits `fenceFrame` reads. */
+export const FENCE_SIDE = { north: 1, east: 2, south: 4, west: 8 } as const;
+
+/**
+ * The fence piece for a tile whose given sides face open ground.
+ *
+ * A mask rather than four separate frames stacked, because two runs meeting at a corner have to
+ * *join*: drawn as separate sprites they cross, and the corner reads as two fences passing each
+ * other rather than one turning.
+ */
+export function fenceFrame(sides: number): number {
+  return FENCE_FIRST + (sides & (FENCE_PIECES - 1));
+}
 
 /** Marks left underfoot, drawn once per step and faded out. */
-export const PRINTS_FRAME = FENCE_FRAME + 1;
-export const SPLASH_FRAME = FENCE_FRAME + 2;
+export const PRINTS_FRAME = FENCE_FIRST + FENCE_PIECES;
+export const SPLASH_FRAME = PRINTS_FRAME + 1;
 
 /**
  * Which mark a step onto this ground leaves, or null where a step leaves nothing.
