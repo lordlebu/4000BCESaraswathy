@@ -37,6 +37,7 @@ import { downloadImage, downloadText } from './exportJournal';
 import { loadJourney, saveJourney } from '../save';
 import { advance, answer, craft, hear, knowsRecipe, type WorldMoment } from '../journey';
 import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
+import { characterFor } from '../game/player';
 import type { World } from '../world/types';
 
 /**
@@ -63,6 +64,21 @@ function recordSurface(tab: RecordTab): 'progress' | 'collection' | 'people' {
   return tab === 'collection' ? 'collection' : tab === 'people' ? 'people' : 'progress';
 }
 
+/**
+ * Who to walk as, for a link that wants somebody other than Varuna.
+ *
+ * The same hook as `?seed=`, `?map=`, `?at=` and `?hour=`, and here for the same reason: seeing
+ * Guyuk should not require playing to her. An unknown id falls back rather than throwing --
+ * `characterFor` handles that -- because this is a convenience and must never break the game for
+ * somebody who mistypes one.
+ */
+function characterFromUrl(): string | null {
+  const asked = new URLSearchParams(window.location.search).get('as')?.trim();
+  // Null when nothing was asked for, so the save can win. Returning a default here instead made
+  // the `??` below dead code and quietly pinned every journey to Varuna.
+  return asked ? characterFor(asked).key : null;
+}
+
 type Arrival = GameToUi['tile-entered'];
 
 export function App() {
@@ -71,6 +87,11 @@ export function App() {
   const initialJourney = useRef(loadJourney(seedFromUrl()));
 
   const [seed, setSeed] = useState(seedFromUrl);
+  // Who is walking. Part of the journey rather than a setting: a save belongs to a traveller, so
+  // the URL only decides it when the save has nothing to say.
+  const [characterId] = useState(
+    () => characterFromUrl() ?? characterFor(initialJourney.current.characterId).key
+  );
   const [world, setWorld] = useState<World | null>(null);
   const [arrival, setArrival] = useState<Arrival | null>(null);
   const [collection, setCollection] = useState<Collection>(initialJourney.current.collection);
@@ -186,7 +207,14 @@ export function App() {
   // second otherwise, and the journey is not worth a synchronous write that often.
   useEffect(() => {
     const flush = () =>
-      saveJourney(seed, { discovered: discovered.current, collection, reached, progress, satchel });
+      saveJourney(seed, {
+        characterId,
+        discovered: discovered.current,
+        collection,
+        reached,
+        progress,
+        satchel
+      });
     const timer = window.setInterval(flush, 3000);
     window.addEventListener('pagehide', flush);
     return () => {
@@ -524,6 +552,7 @@ export function App() {
         seed={seed}
         discovered={initialJourney.current.discovered}
         fieldMapId={fieldMapFromUrl()}
+        characterId={characterId}
       />
 
       {/* The bar and the satchel strip stack together in the top-left. The strip is always on

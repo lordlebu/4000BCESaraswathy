@@ -77,6 +77,14 @@ export const SAVE_VERSION = 11;
 
 export interface Journey {
   version: number;
+  /**
+   * Who was walking.
+   *
+   * Optional rather than versioned: every save written before there was a choice has no field, and
+   * absent means Varuna, which is who those journeys were. A bump would have invalidated them to
+   * record something that was already true of all of them.
+   */
+  characterId?: string;
   discovered: string[];
   /**
    * The flora and fauna met, keyed by species id.
@@ -162,6 +170,9 @@ export function loadJourney(seed: string): Journey {
     }
     return {
       version: SAVE_VERSION,
+      // A string or nothing. An id the build no longer knows resolves to Varuna at the point of
+      // use rather than here, so an old save naming a retired character still loads.
+      characterId: typeof parsed.characterId === 'string' ? parsed.characterId : undefined,
       discovered: Array.isArray(parsed.discovered) ? parsed.discovered : [],
       collection: readCollection(parsed.collection),
       reached: parsed.reached === true,
