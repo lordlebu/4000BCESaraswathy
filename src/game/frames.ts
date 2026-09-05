@@ -438,6 +438,16 @@ export const PRINTS_FRAME = FENCE_FIRST + FENCE_PIECES;
 export const SPLASH_FRAME = PRINTS_FRAME + 1;
 
 /**
+ * A print in snow: deeper, wider, and cooler than one in sand.
+ *
+ * A mark in snow is a *hole* rather than a stain -- the shadowed depression where the boot went
+ * in -- so it is drawn darker than the ground it sits on, which is the opposite of every other
+ * trace here. It is also the longest-lasting: three strides show rather than two, because snow
+ * keeps a track and dry sand does not.
+ */
+export const SNOW_PRINTS_FRAME = SPLASH_FRAME + 1;
+
+/**
  * Which mark a step onto this ground leaves, or null where a step leaves nothing.
  *
  * Water and soft ground record a footfall; rock and grass do not. Restricting it that way is what
@@ -447,6 +457,9 @@ export const SPLASH_FRAME = PRINTS_FRAME + 1;
 export function traceFrameFor(biome: BiomeId): number | null {
   if (biome === 'wetland' || biome === 'river') return SPLASH_FRAME;
   if (biome === 'coast' || biome === 'desert') return PRINTS_FRAME;
+  // Snow is the softest ground in the game and the one that most obviously keeps a mark. It gets
+  // its own frame rather than the sandy print: a track in snow is a shadow, not a smear.
+  if (biome === 'snow') return SNOW_PRINTS_FRAME;
   return null;
 }
 

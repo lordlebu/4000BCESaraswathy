@@ -28,6 +28,7 @@ import {
   OVERDRAW_PLANTS,
   PRINTS_FRAME,
   SPLASH_FRAME,
+  SNOW_PRINTS_FRAME,
   OVERDRAW_REST,
   OVERDRAW_SCATTERS,
   overdrawFrame,
@@ -188,9 +189,10 @@ describe('the edge masks and the code agree', () => {
 
 describe('the overdraw sheet and the code agree', () => {
   it('has exactly the frames the layout claims', () => {
-    // rest scatters + leaning scatters + fence + the two underfoot marks. If build-overdraw.js
-    // grows a plant and this is not updated, the fence index silently points at a blade of grass.
-    expect(frameCount('assets/overdraw.png')).toBe(SPLASH_FRAME + 1);
+    // rest scatters + leaning scatters + the sixteen fence pieces + the three underfoot marks.
+    // If build-overdraw.js grows a plant and this is not updated, the fence index silently points
+    // at a blade of grass.
+    expect(frameCount('assets/overdraw.png')).toBe(SNOW_PRINTS_FRAME + 1);
     expect(OVERDRAW_REST).toBe(OVERDRAW_PLANTS.length * OVERDRAW_SCATTERS);
   });
 
@@ -220,6 +222,9 @@ describe('the overdraw sheet and the code agree', () => {
     expect(traceFrameFor('river')).toBe(SPLASH_FRAME);
     expect(traceFrameFor('coast')).toBe(PRINTS_FRAME);
     expect(traceFrameFor('desert')).toBe(PRINTS_FRAME);
+    // Snow is the softest ground in the game and gets a mark of its own -- a shadowed hole rather
+    // than the smear a sandy print leaves.
+    expect(traceFrameFor('snow')).toBe(SNOW_PRINTS_FRAME);
     for (const hard of ['mountains', 'hills', 'forest', 'settlement', 'plains'] as const) {
       expect(traceFrameFor(hard)).toBeNull();
     }

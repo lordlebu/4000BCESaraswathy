@@ -11,6 +11,7 @@
 // Free of React and Phaser, like everything in `world/`, so the tests exercise what ships.
 
 import { band } from './classify';
+import { stampCamp, stampTableland } from './tableland';
 import { easeRoutes, tourOrder } from './routes';
 import { generateWorld } from './generate';
 import { tileHash } from './rng';
@@ -277,6 +278,11 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // end up on a mountain that the generator happened to raise.
   const palette = new Set(fieldMap.seedBiomes);
   applyPalette(world, palette);
+  // Drifts on the country the scarp encloses, if this map has one and canon allows snow on it.
+  // After the palette, like the settlement patch: a drift is something that happened to the
+  // ground rather than a climate the ground has, and the classifier deals only in climates.
+  const drifts = stampTableland(world, palette);
+  stampCamp(world, palette, drifts);
   const walkable = new Set<BiomeId>(
     world.tiles.flat().map((t) => t.biome).filter((b) => palette.has(b))
   );
