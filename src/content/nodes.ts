@@ -13,46 +13,20 @@
 //
 // Pure and free of React and Phaser.
 
-import { type Material, type Renewal } from './making';
+import { type Material } from './making';
+import {
+  DAYS_TO_RETURN,
+  GOOD_CUT_GIVES,
+  GOOD_CUT_IN,
+  REVEAL_CAP,
+  REVEAL_PER_NODE,
+  REVEAL_WITHIN,
+  STOCK,
+  STOCK_VARIANCE
+} from './tiers';
 import { yieldsAt } from './gathering';
 import type { BiomeId, Point } from '../world/types';
 import { tileHash } from '../world/rng';
-
-/**
- * How long each renewal rate takes, in days.
- *
- * **Canon orders these and the game times them**, which is the split `renewal_rates.json`
- * states in its own note: canon says salt-crust returns faster than sandalwood and never says
- * in how many days, because the length of a day is a question about play. So these four numbers
- * are the game's, they are pacing rather than fact, and changing them needs no canon edit.
- *
- * Sized against the day the game actually has. `dayNight.ts` spends `DAY_MS` over about eighty
- * steps of ordinary walking, so three days is roughly a there-and-back across a field map: long
- * enough that a stripped reed bed is a thing you notice, short enough that noticing it is not a
- * punishment. Seven is a season's errand. Thirty is "not on this journey", which is what `slow`
- * means in canon's own gloss — a player will not see one of these return, and that is the point.
- */
-export const DAYS_TO_RETURN: Record<Renewal, number | null> = {
-  fast: 3,
-  seasonal: 7,
-  slow: 30,
-  never: null
-};
-
-/**
- * How much a place holds before it is drawn down.
- *
- * Not a canon number: canon does not model a world's stock, and says so. Rarity is the honest
- * game-side proxy — a common reed bed is worth several visits and a mythic thing is one and done.
- *
- * The floor is 1 rather than 0, so a node that exists always gives at least once. A tile that
- * offers something and then refuses it is a bug wearing a mechanic's clothes.
- */
-const STOCK: Record<string, number> = {
-  common: 4,
-  rare: 2,
-  mythic: 1
-};
 
 /** A node the player has drawn from. Absent means untouched, which is the common case. */
 export interface Drawn {
@@ -87,8 +61,8 @@ export function nodeKey(at: Point, materialId: string): string {
  * base+2, so the shape of the number is legible — a good patch is visibly a good patch.
  */
 export function capacityOf(seed: string, at: Point, m: Material): number {
-  const base = STOCK[m.rarity] ?? STOCK.common!;
-  return base + (tileHash(seed, at.x, at.y, `stock:${m.id}`) % 3);
+  const base = STOCK[m.rarity] ?? STOCK.common;
+  return base + (tileHash(seed, at.x, at.y, `stock:${m.id}`) % STOCK_VARIANCE);
 }
 
 /**
@@ -134,6 +108,78 @@ export interface Taking {
 }
 
 /**
+ * How much likelier a new seam is here, because the ground nearby has been worked.
+ *
+ * **Stone does not grow back; it is found.** Canon says flint, ochre and sandstone renew
+ * `never`, and that is literally true of a cut nodule — it does not come back, and this never
+ * makes one come back. What it says instead is that the *world* does not run out of stone,
+ * because working the ground turns up more of it: a quarry face exposes fresh rock behind the
+ * block you took, and a flood rolls new cobbles into a bed you have already picked over.
+ *
+ * That distinction is the whole design. Making stone `slow` was the obvious alternative and is
+ * a worse answer twice over — it is untrue of a nodule, and measured against a player who works
+ * a district hard, a thirty-day node is emptied thirty times before it returns one, so `slow`
+ * is `never` wearing a hat.
+ *
+ * **Derived, never stored.** This reads the same `nodes` record depletion already keeps and
+ * counts what is empty nearby, so no second list of "revealed" tiles enters the save. That is
+ * the same discipline `lineIsSpent` follows: state you can recompute is state that cannot drift.
+ *
+ * Only `never` materials are counted, because only they are the thing being discovered. A
+ * stripped reed bed says nothing about where the next reed bed is; a worked-out outcrop says a
+ * great deal about where the rock continues.
+ */
+export function revealedNear(
+  nodes: Nodes,
+  at: Point,
+  materialId: string
+): number {
+  const empty = emptyIndex(nodes).get(materialId);
+  if (!empty) return 0;
+
+  let workedOut = 0;
+  // Chebyshev rather than Euclidean: a district worked in a square reads the same in every
+  // direction, and a walker does not experience diagonals as further.
+  for (let dy = -REVEAL_WITHIN; dy <= REVEAL_WITHIN; dy += 1) {
+    for (let dx = -REVEAL_WITHIN; dx <= REVEAL_WITHIN; dx += 1) {
+      if (empty.has(`${at.x + dx},${at.y + dy}`)) workedOut += 1;
+    }
+  }
+  return Math.min(REVEAL_CAP, workedOut * REVEAL_PER_NODE);
+}
+
+/**
+ * Where each material has been worked out, indexed by material and then by tile.
+ *
+ * **Cached against the `Nodes` object it was built from**, because `revealedNear` is on the
+ * walk's hot path: `takeableAt` asks it for every material on every tile, and scanning the whole
+ * record each time is quadratic in the number of nodes a journey has touched. A map-wide sweep
+ * took long enough to time a test out, which is how this was found rather than reasoned about.
+ *
+ * Keyed by identity rather than contents, which is sound because `draw` never mutates -- it
+ * returns a new object -- so a changed record is always a different object. One entry is kept:
+ * callers walk one journey's nodes, and holding more would be a leak dressed as a cache.
+ */
+let indexedFrom: Nodes | null = null;
+let indexed: Map<string, Set<string>> = new Map();
+
+function emptyIndex(nodes: Nodes): Map<string, Set<string>> {
+  if (indexedFrom === nodes) return indexed;
+  const built = new Map<string, Set<string>>();
+  for (const [key, drawn] of Object.entries(nodes)) {
+    if (drawn.left > 0) continue;
+    const cut = key.lastIndexOf(',');
+    const id = key.slice(cut + 1);
+    const where = built.get(id) ?? new Set<string>();
+    where.add(key.slice(0, cut));
+    built.set(id, where);
+  }
+  indexedFrom = nodes;
+  indexed = built;
+  return built;
+}
+
+/**
  * What is actually takeable here, after what has already been taken.
  *
  * The filter `gather` and every prompt should ask, rather than `yieldsAt` directly. The
@@ -148,7 +194,10 @@ export function takeableAt(
   today: number
 ): Taking[] {
   const out: Taking[] = [];
-  for (const material of yieldsAt(seed, at, biome)) {
+  // Worked ground is likelier to turn up more of the same stone. See `revealedNear`.
+  for (const material of yieldsAt(seed, at, biome, (m) =>
+    m.renews === 'never' ? revealedNear(nodes, at, m.id) : 0
+  )) {
     const left = leftAt(nodes, seed, at, material, today);
     if (left <= 0) continue;
     out.push({ material, count: handful(seed, at, material, today, left) });
@@ -223,8 +272,8 @@ export function handful(
   if (left <= 0) return 0;
   // A quarter of stoops are good ones. Frequent enough to be a texture rather than an event,
   // rare enough that it still reads as luck when it happens.
-  const roll = tileHash(seed, at.x, at.y, `handful:${m.id}:${today}`) % 4;
-  return Math.min(left, roll === 0 ? 2 : 1);
+  const roll = tileHash(seed, at.x, at.y, `handful:${m.id}:${today}`) % GOOD_CUT_IN;
+  return Math.min(left, roll === 0 ? GOOD_CUT_GIVES : 1);
 }
 
 export type Condition = 'untouched' | 'picked-over' | 'bare';
