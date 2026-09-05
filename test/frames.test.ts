@@ -37,6 +37,7 @@ import {
   swayFrame,
   traceFrameFor
 } from '../src/game/frames';
+import biomesData from '../data/biomes.json';
 
 /** Width and height of a PNG, read straight from its IHDR. */
 function pngSize(file: string): { width: number; height: number } {
@@ -498,6 +499,25 @@ describe('the decor sheet and the code agree', () => {
         expect(DECOR_ORDER, `${biome} asks for ${prop}, which is not on the sheet`).toContain(prop);
       }
     }
+  });
+
+  it('gives every walkable ground something lying on it', () => {
+    // **The gap the four new tiles fell into.** `lava_field`, `snow`, `sky_island` and
+    // `sky_underside` shipped with painted ground and nothing on it, and every decor test passed:
+    // the table only checked that the props a biome *names* exist, so a biome naming none was
+    // silently fine. Bare ground is what made the old `hills` read as flat sand, and the brief's
+    // own conclusion is that detail belongs in this layer rather than in the tile.
+    //
+    // The exclusions are deliberate and named, so adding a biome cannot quietly join them:
+    // `sea` is not walked on, `landmark` stays clear so the thing standing on it is what the eye
+    // finds, and `sky_underside` is the far side of a boundary rather than ground.
+    const bare = new Set(['sea', 'landmark', 'sky_underside', 'open_sky', 'underworld']);
+    const walkable = (biomesData as { id: string; walkable: boolean }[])
+      .filter((b) => b.walkable && !bare.has(b.id))
+      .map((b) => b.id);
+
+    const without = walkable.filter((id) => !(DECOR_BY_BIOME as Record<string, unknown>)[id]);
+    expect(without, 'walkable ground with nothing lying on it').toEqual([]);
   });
 
   it('leaves the water and the landmark bare', () => {

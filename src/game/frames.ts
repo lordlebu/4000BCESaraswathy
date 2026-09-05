@@ -176,7 +176,17 @@ export const DECOR_ORDER = [
   'desert-stone',
   'dry-brush',
   'shell',
-  'driftwood-small'
+  'driftwood-small',
+  // The sub-biomes, in the order tools/build-decor.js emits them.
+  'basalt-shard',
+  'ash-patch',
+  'lava-boulder',
+  'snow-stone',
+  'wind-crust',
+  'snow-twig',
+  'cushion-plant',
+  'sky-stone',
+  'crystal-flower'
 ] as const;
 
 /**
@@ -201,9 +211,17 @@ export const DECOR_BY_BIOME: Partial<Record<BiomeId, readonly string[]>> = {
   hills: ['pebbles', 'twig', 'scree', 'boulder-small'],
   mountains: ['scree', 'boulder-small'],
   desert: ['desert-stone', 'dry-brush'],
-  coast: ['pebbles', 'shell', 'driftwood-small']
+  coast: ['pebbles', 'shell', 'driftwood-small'],
+  // Cooled basalt. The ash is what keeps it from reading as one flat dark tile.
+  lava_field: ['basalt-shard', 'ash-patch', 'lava-boulder'],
+  // On snow the props are what shows *through* it: a white ground gets its depth from the things
+  // it has not covered, so a buried stone and a bare twig do more here than they do anywhere else.
+  snow: ['snow-stone', 'wind-crust', 'snow-twig'],
+  // High turf, weathered stone, and the crystal the islands are known for.
+  sky_island: ['cushion-plant', 'sky-stone', 'crystal-flower']
   // `sea` is not walked on and `landmark` stays bare, so the destination is what the eye finds --
-  // the same two exclusions the overdraw layer makes, for the same reasons.
+  // the same two exclusions the overdraw layer makes, for the same reasons. `sky_underside` joins
+  // them: it is the far side of a boundary rather than ground, and nothing stands on it.
 };
 
 /** Frame index of one prop variant, or null if the name is not on the sheet. */
@@ -488,7 +506,11 @@ export const FEATURES: Record<string, { biome: BiomeId; frames: number[] }> = {
   driftwood: { biome: 'coast', frames: [20] },
   pine: { biome: 'hills', frames: [21, 22] },
   boulder: { biome: 'hills', frames: [23] },
-  cactus: { biome: 'desert', frames: [24, 25] }
+  cactus: { biome: 'desert', frames: [24, 25] },
+  // A snowfield and a sky island each get one tall thing, and on those two grounds it is
+  // the only vertical there is.
+  snowPine: { biome: 'snow', frames: [26, 27] },
+  crystalCluster: { biome: 'sky_island', frames: [28, 29] }
 };
 
 /**

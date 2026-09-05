@@ -198,6 +198,134 @@ function pine(side) {
   return pixels;
 }
 
+/**
+ * A snow-laden pine: taller than the hill pine, and white on every upward face.
+ *
+ * **Bigger on purpose.** The hill pine tops out at row 6; this reaches row 4, the ceiling this
+ * layer allows, because a snowfield has nothing else standing on it -- no hedgerow, no scrub, no
+ * second storey of vegetation. A tree that reads as ordinary among hills is the only vertical
+ * thing for a hundred tiles up here, and it should look it.
+ *
+ * The snow is drawn as the *lit* rows rather than as a separate pass: on a conifer the load sits
+ * on the upper surface of each tier, which is exactly the row the hill pine already lightens. So
+ * this is the same loop with white where the highlight was, which is both simpler and more
+ * correct than dusting a green tree afterwards.
+ */
+function snowPine(side) {
+  const pixels = canvas();
+  const cx = Math.round(CELL / 2 + side * OFFSET);
+  const needle = hex('#31473e');
+  const load = hex('#e8eef2');
+  const shade = hex('#c3ced6');
+
+  // Trunk first, so the tiers sit over it.
+  fill(pixels, cx, CELL - 5, cx, CELL - 1, hex('#403326'));
+
+  // **Widening downward, which the hill pine does not.** That one starts at width 1 at its base
+  // and grows as it climbs, so it draws a cone standing on its point -- an upside-down tree that
+  // has been on the sheet since it was written and reads as odd the moment anything else stands
+  // beside it. Here the width is a function of depth from the tip, which is the shape a conifer
+  // actually has.
+  const top = 4;                 // the ceiling this layer allows
+  const bottom = CELL - 6;
+  const height = bottom - top;
+  for (let y = top; y <= bottom; y += 1) {
+    const t = (y - top) / height;          // 0 at the tip, 1 at the skirt
+    const half = Math.round(1 + t * 6);
+    // Snow rides the top of each tier; the rows under it are needles in shadow. Drawing the load
+    // as the lit row rather than as a separate dusting pass is both simpler and truer -- on a
+    // conifer that is exactly where it sits.
+    const tier = (y - top) % 4;
+    if (tier === 0) {
+      fill(pixels, cx - half, y, cx + half, y, load);
+    } else if (tier === 1) {
+      fill(pixels, cx - half + 1, y, cx + half - 1, y, shade);
+    } else {
+      fill(pixels, cx - half, y, cx + half, y, needle);
+    }
+  }
+  return pixels;
+}
+
+/**
+ * A big shard of crystal jutting out of the ground, with sparkles.
+ *
+ * **Moved here from the decor sheet, and the move is the point.** Decor is what lies *on* the
+ * ground -- pebbles, litter, a shell -- drawn below the traveller and capped at a third of a cell.
+ * Crystal that low is gravel. A shard is a thing you walk *past*, which is this layer's whole
+ * definition: tall, offset to one side so it never sits behind the figure, and rare enough that
+ * meeting one is an event.
+ *
+ * One shard rather than a cluster. Three of a height read as a rock garden; one big one leaning
+ * out of the turf reads as something the ground did.
+ *
+ * **Every coordinate here is an integer**, which is not fussiness: `fill` steps by whole pixels
+ * from wherever it is given, so a fractional start lands between pixels and `plot` drops most of
+ * them. The first version of this passed fractions in and came out as scattered dots.
+ */
+function crystalShard(side) {
+  const pixels = canvas();
+  const cx = Math.round(CELL / 2 + side * OFFSET);
+  // **Two seams, one per side.** This layer already draws each feature twice -- once leaning
+  // left, once right -- so the pair costs nothing and a sky island turns up both aqua and ruby
+  // crystal rather than one repeated colour.
+  //
+  // Saturated on purpose. An earlier pass had these as pale quartz, on the reasoning that a
+  // bright crystal reads as loot in a naturalist's notebook -- which was reading the craft tree
+  // as if it were the whole setting. It is a solarpunk world; the crystal is meant to be seen.
+  const aqua = { body: '#3fa8a8', lit: '#79d6cf', deep: '#27706f', tip: '#d8f7f2' };
+  const ruby = { body: '#b03a52', lit: '#e0708a', deep: '#7a2438', tip: '#f8d9e0' };
+  const seam = side >= 0 ? aqua : ruby;
+  const body = hex(seam.body);
+  const lit = hex(seam.lit);
+  const deep = hex(seam.deep);
+  const tip = hex(seam.tip);
+
+  const base = CELL - 2;
+  const height = 24;          // to row 6: tall, and inside what this layer allows
+  const lean = side >= 0 ? 1 : -1;
+
+  for (let d = 0; d < height; d += 1) {
+    const t = d / height;
+    const y = base - d;
+    // Wide at the ground, tapering to a point: the profile of a shard rather than a column.
+    const half = Math.max(0, Math.round(5 * (1 - t * 0.86)));
+    const shift = Math.round(lean * t * 3);
+    fill(pixels, cx + shift - half, y, cx + shift + half, y, body);
+    // One lit facet down the leaning side, and a dark one opposite, so the shard reads as flat
+    // planes rather than a round spike. A highlight that wrapped would say "cylinder".
+    if (half > 0) {
+      fill(pixels, cx + shift - half, y, cx + shift - Math.max(0, half - 1), y, lit);
+      if (t < 0.7) plot(pixels, cx + shift + half, y, deep);
+    }
+  }
+  // The point.
+  const top = base - height;
+  fill(pixels, cx + Math.round(lean * 3), top, cx + Math.round(lean * 3), top + 2, tip);
+
+  // Sparkles: single bright pixels off the shard, in a plus so each reads as a glint rather than
+  // as dust. Placed by hand rather than randomly -- three is a constellation, and a scatter of
+  // ten is snow on the lens.
+  const glints = [
+    { x: cx + lean * 6, y: base - 20 },
+    { x: cx - lean * 5, y: base - 13 },
+    { x: cx + lean * 7, y: base - 7 }
+  ];
+  for (const g of glints) {
+    plot(pixels, g.x, g.y, tip);
+    plot(pixels, g.x - 1, g.y, lit);
+    plot(pixels, g.x + 1, g.y, lit);
+    plot(pixels, g.x, g.y - 1, lit);
+    plot(pixels, g.x, g.y + 1, lit);
+  }
+
+  // A couple of small offcuts at the foot, so the shard looks like it broke out of the ground
+  // rather than being placed on it.
+  fill(pixels, cx - lean * 4, base - 2, cx - lean * 3, base, deep);
+  fill(pixels, cx + lean * 5, base - 1, cx + lean * 6, base, deep);
+  return pixels;
+}
+
 /** An anthill: a cone of red earth with a dark mouth. */
 function anthill(side) {
   const pixels = canvas();
@@ -385,7 +513,11 @@ const FEATURES = [
   { id: 'driftwood-coast', sides: 1, draw: () => log({ body: '#a89880', shade: '#8b7c66' }) },
   { id: 'pine-hills', sides: 2, draw: pine },
   { id: 'boulder-hills', sides: 1, draw: boulder },
-  { id: 'cactus-desert', sides: 2, draw: cactus }
+  { id: 'cactus-desert', sides: 2, draw: cactus },
+  // The sub-biomes. A snowfield and a sky island each get one tall thing, which is the most
+  // this layer ever gives a ground -- and on those two it is the only vertical there is.
+  { id: 'pine-snow', sides: 2, draw: snowPine },
+  { id: 'crystal-sky_island', sides: 2, draw: crystalShard }
 ];
 
 /**

@@ -249,7 +249,38 @@ const PROPS = [
 
   // --- shore ---
   { id: 'shell', biomes: ['coast'], draw: shell('#d9c6a4', '#efe2c6') },
-  { id: 'driftwood-small', biomes: ['coast'], draw: twig('#9a8c74') }
+  { id: 'driftwood-small', biomes: ['coast'], draw: twig('#9a8c74') },
+
+  // --- the sub-biomes -------------------------------------------------------------------
+  //
+  // Four grounds arrived with tiles and nothing on them. Bare ground is what made the old
+  // `hills` read as flat sand: the brief's own conclusion is that detail belongs in this layer
+  // rather than in the tile, because props sit at known positions that can be kept clear of the
+  // figure while a busy texture is everywhere at once.
+  //
+  // Colours are pulled toward each tile's declared base so a prop reads as part of its ground:
+  // lava #6b5f5c, snow #dfe3e8, sky island #a8c69b.
+
+  // Cooled basalt: shards off the flows, and the ash that collects between them.
+  { id: 'basalt-shard', biomes: ['lava_field'], draw: stones('#867b74', '#a2968e', 4) },
+  { id: 'ash-patch', biomes: ['lava_field'], draw: patch('#948a83', 5) },
+  { id: 'lava-boulder', biomes: ['lava_field'], draw: boulder('#7d726b', '#988c84') },
+
+  // Snow: what shows *through* it, which is the only way a white ground gets any depth. A buried
+  // stone and a wind crust read as snow precisely because they are the things it has not covered.
+  { id: 'snow-stone', biomes: ['snow'], draw: stones('#aab3bd', '#c8d0d8', 3) },
+  { id: 'wind-crust', biomes: ['snow'], draw: patch('#c6ced8', 6) },
+  // Bare twigs pushing through the crust: the only dark marks up there, and what stops a snowfield
+  // reading as a hole in the map.
+  { id: 'snow-twig', biomes: ['snow'], draw: twig('#6f665c') },
+
+  // Sky island: high thin-aired turf, so cushion plants and weathered stone rather than grass.
+  { id: 'cushion-plant', biomes: ['sky_island'], draw: patch('#7f9e74', 5) },
+  { id: 'sky-stone', biomes: ['sky_island'], draw: stones('#9aa294', '#b3baa8', 3) },
+  // The flowers that grow among the crystal. **The crystal itself moved to `features`**: decor is
+  // what lies on the ground and is capped at a third of a cell, which makes a formation gravel.
+  // A thing you walk *past* belongs on the sheet built for tall things.
+  { id: 'crystal-flower', biomes: ['sky_island'], draw: flower('#7f9e74', '#b8cdd2', '#e8f0f0') }
 ];
 
 /** A lily pad: a flat disc with a wedge cut out of it. */
