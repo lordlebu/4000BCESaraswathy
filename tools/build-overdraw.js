@@ -252,12 +252,23 @@ function plantFrame(plant, frame, scatter) {
 }
 
 /**
- * A low fence, for the settlement edge.
+ * A fence, in the piece that fits the tile.
  *
- * Not scattered: it is a boundary, so it spans the cell and joins to its neighbours. Posts every
- * six pixels with two rails, which is enough to read as built rather than grown.
+ * **There used to be exactly one frame: two horizontal rails spanning the cell.** That is a
+ * bottom rail and nothing else -- no vertical, no corner -- so the placement code could only
+ * honestly draw it along a settlement's southern edge, and did. Measured on the built maps, that
+ * left about 88% of a settlement's perimeter unfenced: seventeen boundary tiles against two
+ * fences on Lothal, and four on Dwarka.
+ *
+ * So a fence is now a small set of pieces chosen by which neighbours are outside, the same way
+ * `build-edges.js` picks a biome blend. `sides` is a bitmask -- north 1, east 2, south 4, west 8 --
+ * and sixteen frames covers every combination including the lone post at 0.
+ *
+ * The rails run *inside* the tile edge rather than on it, so two fenced tiles meeting at a corner
+ * join instead of crossing. Posts sit at the corners of each run and every six pixels along it,
+ * which is what made the original read as built rather than grown.
  */
-function fenceFrame() {
+function fenceFrame(sides) {
   const pixels = Buffer.alloc(CELL * CELL * 4);
   const post = hex('#5c4634');
   const rail = hex('#7a5c44');
@@ -269,13 +280,72 @@ function fenceFrame() {
     pixels[p + 2] = colour[2];
     pixels[p + 3] = 255;
   };
-  const top = CELL - 13;
-  for (let x = 0; x < CELL; x += 1) {
-    set(x, top + 3, rail);
-    set(x, top + 8, rail);
-  }
-  for (let x = 1; x < CELL; x += 6) {
-    for (let y = top; y < CELL - 1; y += 1) set(x, y, post);
+
+  // How far in from the left and right edges a run stops. Far enough that two tiles' rails do not
+  // touch and read as one thick line; near enough that the fence still bounds this tile.
+  const IN = 3;
+
+  /**
+   * **Every run lives in the bottom half of the cell, and that is not a style choice.**
+   *
+   * This sheet is drawn *over* the traveller, and `test/frames.test.ts` holds it to starting no
+   * higher than row 16 of 32: grass to the knee reads as depth, grass to the chest reads as
+   * losing the character. A fence is taller than grass and would swallow him outright.
+   *
+   * The first attempt put the north run near the top edge, where a north fence belongs in plan
+   * view. It looked right in a sheet viewer and failed that test on the first build. So the four
+   * runs are **stacked inside the lower band** rather than placed at the tile's four edges: north
+   * at the top of the band, south at the bottom, verticals spanning it. On the map that reads as
+   * a fence seen from slightly above, which is the projection everything else here already uses.
+   */
+  const BAND = CELL >> 1;
+  const HIGH = 7;                 // a run's full height, band-sized rather than tile-sized
+  const northTop = BAND + 1;
+  const southTop = CELL - HIGH - 1;
+
+  /** A run of two rails with posts standing along it. `y` is the top of the run. */
+  const horizontal = (y) => {
+    for (let x = IN; x < CELL - IN; x += 1) {
+      set(x, y + 2, rail);
+      set(x, y + 5, rail);
+    }
+    for (let x = IN; x < CELL - IN; x += 6) {
+      for (let d = 0; d < HIGH; d += 1) set(x, y + d, post);
+    }
+    // A post at the far end, so a run does not stop in mid-air.
+    for (let d = 0; d < HIGH; d += 1) set(CELL - IN - 1, y + d, post);
+  };
+
+  /**
+   * A run seen edge-on.
+   *
+   * **Not a rotation of the horizontal piece**, and that is the whole difficulty of drawing a
+   * fence in a top-down game: a rail running away from the viewer foreshortens to almost nothing,
+   * so it is posts with short rail segments between them. Rotating the side view would lay a rail
+   * flat across the ground.
+   */
+  const vertical = (x) => {
+    for (let y = northTop; y < CELL - 1; y += 1) {
+      set(x, y, rail);
+      set(x + 1, y, rail);
+    }
+    for (let y = northTop; y < CELL - 1; y += 5) {
+      for (let d = 0; d < 4; d += 1) {
+        set(x, y + d, post);
+        set(x + 1, y + d, post);
+      }
+    }
+  };
+
+  if (sides & 4) horizontal(southTop);       // south, where the single frame always was
+  if (sides & 1) horizontal(northTop);       // north
+  if (sides & 8) vertical(IN);               // west
+  if (sides & 2) vertical(CELL - IN - 2);    // east
+
+  // A settlement tile enclosed on no side still gets a marker post -- a gate, or the end of a
+  // run. Without it an isolated fenced tile would draw nothing at all.
+  if (sides === 0) {
+    for (let d = 0; d < HIGH + 4; d += 1) set(CELL >> 1, CELL - 2 - d, post);
   }
   return pixels;
 }
@@ -356,7 +426,10 @@ function main() {
       lean.push(plantFrame(plant, 1, s));
     }
   }
-  const frames = [...rest, ...lean, fenceFrame(), traceFrame('prints'), traceFrame('splash')];
+  // Sixteen fence pieces, indexed by the side mask, then the two underfoot traces.
+  const fences = [];
+  for (let sides = 0; sides < 16; sides += 1) fences.push(fenceFrame(sides));
+  const frames = [...rest, ...lean, ...fences, traceFrame('prints'), traceFrame('splash')];
 
   // Against the *final* cell size: this art is authored at CELL and upscaled by SCALE on the way
   // out, so wrapping against CELL alone would still emit a strip four times over the limit.
@@ -381,7 +454,7 @@ function main() {
   console.log(`overdraw: ${frames.length} frames of ${CELL * SCALE}x${CELL * SCALE} in ${columns}x${rows}, ${kb} KB`);
   console.log(`  ${PLANTS.length} plants x ${SCATTERS} scatters at rest, the same leaning, then fence`);
   console.log(`  order: ${PLANTS.map((p) => p.id).join(', ')}`);
-  console.log(`  then fence, footprints, splash`);
+  console.log(`  then ${fences.length} fence pieces by side mask, footprints, splash`);
 }
 
 main();

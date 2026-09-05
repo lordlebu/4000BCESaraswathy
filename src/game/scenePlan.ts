@@ -22,7 +22,8 @@ import {
   decorFrame,
   EDGE_ORDER,
   EDGE_STEP,
-  FENCE_FRAME,
+  FENCE_SIDE,
+  fenceFrame,
   HUT_VARIANTS,
   ROW_SLOT,
   blends,
@@ -316,6 +317,32 @@ export function planHuts(world: FieldMapWorld['world']): Placement[] {
 }
 
 /**
+ * Which sides of this tile face out of the enclosure, or null if it is not on a boundary.
+ *
+ * The enclosure is a settlement: a place people built, as opposed to a climate they live in. A
+ * tile is on the boundary when at least one of its four neighbours is something else -- including
+ * the edge of the map, which is the honest reading of a settlement that runs off the map rather
+ * than a village with an open side.
+ *
+ * Returns a bitmask for `fenceFrame`, so a corner tile gets one piece with two runs that join
+ * rather than two sprites that cross.
+ */
+function fencedSides(world: FieldMapWorld['world'], x: number, y: number): number | null {
+  if (world.tiles[y]![x]!.biome !== 'settlement') return null;
+
+  let sides = 0;
+  const outside = (dx: number, dy: number): boolean => {
+    const tile = world.tiles[y + dy]?.[x + dx];
+    return !tile || tile.biome !== 'settlement';
+  };
+  if (outside(0, -1)) sides |= FENCE_SIDE.north;
+  if (outside(1, 0)) sides |= FENCE_SIDE.east;
+  if (outside(0, 1)) sides |= FENCE_SIDE.south;
+  if (outside(-1, 0)) sides |= FENCE_SIDE.west;
+  return sides === 0 ? null : sides;
+}
+
+/**
  * The layer above the player: grass, reeds, fences, and the occasional tree.
  *
  * `builtOn` is the set of tiles the hut layer claimed. Passing it in rather than recomputing it is
@@ -333,19 +360,28 @@ export function planOverdraw(world: FieldMapWorld['world'], builtOn: ReadonlySet
       const canopy = depthFor(y, ROW_SLOT.canopy);
       const underfoot = depthFor(y, ROW_SLOT.underfoot);
 
-      // Nothing is drawn over a roof -- checked before the fence, not after. A settlement's
-      // southern edge is exactly where huts are, so putting the fence branch first meant five of
-      // them on the Dry Harbour map had a fence rail across the thatch.
-      if (builtOn.has(`${x},${y}`)) continue;
-
-      // A settlement tile with open ground to the south gets a fence along that edge. Only the
-      // southern edge: a traveller approaching from open country walks up behind it, which is the
-      // whole reason the fence reads as a boundary rather than as decoration.
-      const southern = y + 1 < world.height ? world.tiles[y + 1]![x]!.biome : null;
-      if (biome === 'settlement' && southern !== null && southern !== 'settlement') {
-        out.push({ sheet: 'overdraw', frame: FENCE_FRAME, x, y, depth: canopy });
+      // **The fence goes round, and it is drawn before the roof check rather than after.**
+      //
+      // It used to be southern-edge only, because the single fence frame *was* a bottom rail and
+      // could not honestly be anything else. Now there is a piece per side mask, so a settlement
+      // gets a boundary rather than a rail along its bottom.
+      //
+      // And it is no longer skipped on a hut tile. Two settlement tiles in three hold a hut, so
+      // skipping them disqualified most of the perimeter before the fence rule was reached --
+      // seventeen boundary tiles produced two fences on Lothal. A fence and a hut on one tile is
+      // fine: the fence runs inside the tile edge and the hut stands in the middle of it.
+      const outward = fencedSides(world, x, y);
+      if (outward !== null) {
+        out.push({ sheet: 'overdraw', frame: fenceFrame(outward), x, y, depth: canopy });
+        // A fenced tile still gets its hut, but nothing else grows on it: paddy through a rail
+        // reads as the fence being behind the field rather than round it.
         continue;
       }
+
+      // Nothing else is drawn over a roof -- checked after the fence, not before. A settlement's
+      // southern edge is exactly where huts are, so this order is what stops paddy growing
+      // through thatch while still letting the boundary reach the tiles the huts stand on.
+      if (builtOn.has(`${x},${y}`)) continue;
 
       // A feature takes the tile instead of undergrowth, and is rare enough that meeting one is an
       // event. It may stand far taller than common overdraw because it is drawn offset to one
