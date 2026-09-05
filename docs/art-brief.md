@@ -800,3 +800,169 @@ about 38 pixels against 40 for standing.
 > palette, same scale and drawing style as the existing sheets. Lossless PNG with a genuine alpha
 > channel — transparent background, not a grey checkerboard. No guides, no grid, no text, no
 > watermark.
+
+---
+
+## Asset 2d — four new grounds, for the sub-biomes
+
+**Status: prompts written, art not yet generated.** These are the four the resource sprint needs
+and the game cannot draw. Everything above about ground still applies; nothing here is a new
+technique, only four new subjects.
+
+**Why these four and not a list of ideas.** The brief that arrived with them settled the shape:
+the lava and granite *juts out from time to time*, snow is a *sub-biome*, and the flying islands
+are *mostly normal green land with some specific portion of it sky island*. So none of these is a
+climate. They are **patches stamped onto a map after classification**, the way the settlement
+already is — `applyPalette` grows that as a place rather than a climate, because "a city is a
+place, not a climate", and these are places in exactly that sense. Listing one in `seed_biomes`
+would hand it an elevation band and produce a map that is a third lava, which is the thing the
+brief was ruling out.
+
+| tile | file | base colour | nearest existing ground |
+| --- | --- | --- | --- |
+| `lava_field` | `assets/source/lava_field.png` | `#6b5f5c` | 53 from `sky_underside`, 59 from `forest` |
+| `snow` | `assets/source/snow.png` | `#dfe3e8` | 97 from `landmark` |
+| `sky_island` | `assets/source/sky_island.png` | `#a8c69b` | **32 from `plains`** |
+| `sky_underside` | `assets/source/sky_underside.png` | `#847a82` | 39 from `mountains` |
+
+**The colours were checked against the existing eleven before a single prompt was written**, which
+is the rule this document earned the hard way with `hills` and `desert`. It caught a real
+collision: every green tried for `sky_island` first landed **10 to 20 from `plains`** — inside the
+range where two grounds stop being tellable apart, and the same failure as the ochre `hills` that
+read as sand. `#a8c69b` is cooler and lighter and sits 32 away.
+
+Worth recording while the numbers are out: `hills`/`desert` are still **20 apart**,
+`coast`/`landmark` **22**, and `coast`/`desert` **24**. All three predate this and none is made
+worse by the four new grounds, every one of which clears the threshold.
+
+### What is *not* needed
+
+**Hills, mountains and snow on a sky island come free.** A sky island is a patch of ground with its
+own elevation, so the classifier draws its high ground from tiles that already exist. Only the
+island's own turf and its underside are new subjects.
+
+**Waterfalls too.** `frames.ts` already draws cliff faces between the generator's elevation
+terraces and already special-cases the 83 of 234 faces that touched water. A waterfall is that case
+drawn deliberately rather than avoided — a frame decision using art that already exists.
+
+---
+
+> **Prompt — `lava_field` (`assets/source/lava_field.png`)**
+>
+> Top-down aerial view of **cooled basalt ground: dark grey-brown volcanic rock, fine crazed
+> cracking, scattered small angular fragments and grit, patches of coarse ash and a little dull
+> rust-coloured mineral staining** — a cozy exploration game set in ancient South Asia, painted in
+> a naturalist's watercolour field notebook. Base colour approximately **#6b5f5c**, with only
+> gentle variation around it. Muted desaturated palette, warm paper undertone, visible paper grain
+> and pigment granulation, soft blended edges.
+>
+> **Flat even lighting from directly above. No sun direction, no cast shadows, no highlights, no
+> vignette, no darkening toward any edge.** This is ground seen from straight overhead, not a
+> landscape.
+>
+> **Every mark must be small: no feature larger than about 1/12 of the image width.** Many small
+> scattered marks of varying size, evenly distributed, with no clustering and no empty regions. No
+> volcano, no crater, no lava flow, no ridges, no horizon — and **no glowing molten rock, no
+> orange, no fire, no embers**. This is old cold stone, not an eruption.
+>
+> Quiet all-over texture, low contrast, no focal point. Fills the frame edge to edge. No border, no
+> frame, no outline, no grid, no text, no watermark. Not photographic: no lens blur, no specular
+> highlight, no 3D render. 2048x2048.
+
+*The "no glowing lava" clause is the whole difficulty of this one.* A model asked for a lava field
+draws molten orange, which would be the single loudest thing on the map and would break rule 2 —
+these sit under the player and repeat. Canon has this as **cooled basalt the ammonites are
+fossilised in**, which is what makes the ammonite a `renews: never` fossil rather than a beach
+shell. Cold rock is both the truthful subject and the quiet one.
+
+---
+
+> **Prompt — `snow` (`assets/source/snow.png`)**
+>
+> Top-down aerial view of **wind-packed snow ground: fine granular snow surface, faint wind-drift
+> ripples, a scatter of small dark grit and pebbles pushed up through the crust, occasional thin
+> patches where darker ground shows faintly through** — a cozy exploration game set in ancient
+> South Asia, painted in a naturalist's watercolour field notebook. Base colour approximately
+> **#dfe3e8**, with only gentle variation around it. Muted desaturated palette, warm paper
+> undertone, visible paper grain and pigment granulation, soft blended edges.
+>
+> **Flat even lighting from directly above. No sun direction, no cast shadows, no highlights, no
+> sparkle, no vignette, no darkening toward any edge.** This is ground seen from straight overhead,
+> not a landscape.
+>
+> **Every mark must be small: no feature larger than about 1/12 of the image width.** Many small
+> scattered marks, evenly distributed, with no clustering and no empty regions. No drifts, no
+> dunes, no slopes, no footprints, no horizon, no trees.
+>
+> Quiet all-over texture, low contrast, no focal point. Fills the frame edge to edge. No border, no
+> frame, no outline, no grid, no text, no watermark. Not photographic: no lens blur, no specular
+> highlight, no 3D render. 2048x2048.
+
+*The grit is not decoration.* It is the only thing keeping this from being a blank white square:
+the tile has to carry paper grain and small dark marks or the four crops are indistinguishable and
+the map looks like a hole. Snow is also the lightest ground in the set by a distance — 97 from its
+nearest neighbour — so it can afford to be quiet.
+
+---
+
+> **Prompt — `sky_island` (`assets/source/sky_island.png`)**
+>
+> Top-down aerial view of **high thin-aired meadow turf: short cool-green alpine grass, small
+> cushion plants and moss patches, occasional pale weathered stone showing through the sward, a
+> scatter of tiny wind-bleached seed heads** — a cozy exploration game set in ancient South Asia,
+> painted in a naturalist's watercolour field notebook. Base colour approximately **#a8c69b**,
+> cooler and paler than lowland grass, with only gentle variation around it. Muted desaturated
+> palette, warm paper undertone, visible paper grain and pigment granulation, soft blended edges.
+>
+> **Flat even lighting from directly above. No sun direction, no cast shadows, no highlights, no
+> vignette, no darkening toward any edge.**
+>
+> **Every mark must be small: no feature larger than about 1/12 of the image width.** Many small
+> scattered marks, evenly distributed, no clustering and no empty regions. No island edge, no
+> cliff, no sky, no clouds, no void, no horizon — this is the *turf on top*, and the edge is drawn
+> by the engine.
+>
+> Quiet all-over texture, low contrast, no focal point. Fills the frame edge to edge. No border, no
+> frame, no outline, no grid, no text, no watermark. Not photographic: no lens blur, no specular
+> highlight, no 3D render. 2048x2048.
+
+*"No island edge, no sky" is the clause that matters.* A model asked for a sky island paints a
+floating rock against clouds, which is an illustration of the concept and useless as ground. What
+is wanted is what the grass **on** one looks like from directly above. It must also stay clear of
+`plains`: every first attempt at this green landed 10–20 from it, which is the `hills`-reads-as-sand
+failure again, so the ask is explicitly *cooler and paler than lowland grass*.
+
+---
+
+> **Prompt — `sky_underside` (`assets/source/sky_underside.png`)**
+>
+> Top-down aerial view of **the underside of a floating rock shelf: pale grey-violet weathered
+> stone, fine root-like mineral veining, small pitted hollows, a scatter of tiny hanging crystal
+> grains** — a cozy exploration game set in ancient South Asia, painted in a naturalist's
+> watercolour field notebook. Base colour approximately **#847a82**, with only gentle variation
+> around it. Muted desaturated palette, warm paper undertone, visible paper grain and pigment
+> granulation, soft blended edges.
+>
+> **Flat even lighting from directly above. No sun direction, no cast shadows, no highlights, no
+> vignette, no darkening toward any edge.**
+>
+> **Every mark must be small: no feature larger than about 1/12 of the image width.** Many small
+> scattered marks, evenly distributed, no clustering and no empty regions. No stalactites, no large
+> hanging spurs, no sky, no clouds, no horizon.
+>
+> Quiet all-over texture, low contrast, no focal point. Fills the frame edge to edge. No border, no
+> frame, no outline, no grid, no text, no watermark. Not photographic: no lens blur, no specular
+> highlight, no 3D render. 2048x2048.
+
+*This one is drawn but never walked on.* `sky_underside` is in `UNWALKABLE` alongside `sea` and
+`open_sky`, so it is the far side of a boundary rather than ground — which means it can be a
+little stranger than the rest without costing figure legibility, because the figure is never
+standing on it.
+
+### After the art arrives
+
+    node tools/build-terrain.js
+
+Then add each id to `TERRAIN_ORDER` in `src/game/frames.ts` — **the same order as the sheet**, and
+`hasTileArt` starts returning true for it. That is the whole wiring; the pipeline is drop-a-PNG,
+exactly as it is for plates and portraits.
