@@ -579,6 +579,27 @@ export class WorldScene extends Phaser.Scene {
    * Play whatever the traveller should be doing: walking, standing, or sitting at the landmark.
    * Re-playing the animation already running would restart it every frame, so it is checked first.
    */
+  /**
+   * How fast the legs should cycle, relative to the animation's authored 7fps.
+   *
+   * **This is the moonwalk.** A step's *duration* has always known about the ground -- wetland and
+   * hills cost more than plains, and `STEP_MS * cost * pace` is how long the tween takes -- but
+   * the walk animation was a flat 7fps whatever the terrain. So on slow ground the feet cycled
+   * faster than the world went past, which is precisely what moonwalking is: a walk cycle running
+   * out of step with the travel under it.
+   *
+   * Reported as "Mithra keeps moonwalking", and it was never Mithra: every traveller did it, on
+   * every slow tile, and the sharpest case is the one where the art reads clearest.
+   *
+   * 1 on open plains, and proportionally slower as a tile costs more.
+   */
+  private walkRate(): number {
+    const tile = this.world.tiles[this.at.y]?.[this.at.x];
+    const cost = (tile ? travelCost(tile.biome) : 1) ?? 1;
+    const pace = this.fatigueOn ? paceFor(this.fatigue()) : 1;
+    return 1 / (cost * pace);
+  }
+
   private updateAnimation(): void {
     // Sitting is about where the traveller *is*, not whether they have ever arrived. `beaten`
     // keeps its entries for the rest of the journey so each page is written once; using it here
@@ -592,6 +613,9 @@ export class WorldScene extends Phaser.Scene {
     const action = actionFor(this.moving, atRest);
     const { key, flipX } = animFor(this.character.key, this.facing, action);
     if (this.player.anims.currentAnim?.key !== key) this.player.play(key);
+    // Only the walk is tied to the ground. An idle and a sit are about the person rather than
+    // about the tile, and slowing a seated figure down on a hill would be nonsense.
+    this.player.anims.timeScale = action === 'walk' ? this.walkRate() : 1;
     this.player.setFlipX(flipX);
   }
 
@@ -827,7 +851,9 @@ export class WorldScene extends Phaser.Scene {
       seed: payload.seed,
       discovered: payload.discovered ?? [],
       // A new seed re-rolls the ground under the same place, rather than moving you.
-      fieldMapId: this.built?.fieldMap.id
+      fieldMapId: this.built?.fieldMap.id,
+      // **Who is walking survives the restart.** See `onTravelTo`.
+      characterId: this.character.key
     });
   };
 
@@ -839,7 +865,21 @@ export class WorldScene extends Phaser.Scene {
    * which lives in React and never passes through here.
    */
   private onTravelTo = (payload: { fieldMapId: string; seed: string }): void => {
-    this.scene.restart({ seed: payload.seed, discovered: [], fieldMapId: payload.fieldMapId });
+    this.scene.restart({
+      seed: payload.seed,
+      discovered: [],
+      fieldMapId: payload.fieldMapId,
+      /**
+       * **Who is walking has to be handed back in, or the next map is Varuna's.**
+       *
+       * `create` reads the character from the scene's data and `characterFor` falls back to
+       * Varuna for anything it does not recognise -- including `undefined`. A restart that omits
+       * this is therefore not a missing prop but a silent recast: pick Mithra, travel to Dwarka,
+       * and Varuna arrives. The scene is the only thing that knows who is being drawn at the
+       * moment of travel, which is why it comes from `this.character` rather than from the event.
+       */
+      characterId: this.character.key
+    });
   };
 
   /**

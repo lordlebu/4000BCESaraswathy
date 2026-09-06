@@ -96,3 +96,41 @@ test('the picker changes who is walking, without restarting the journey', async 
   expect(await page.locator('.journal h2').textContent()).toBe(walked);
   expect(problems, problems.join('\n')).toEqual([]);
 });
+
+test('who is walking survives travelling to another map', async ({ page }) => {
+  /**
+   * **Reported from play: pick somebody, change map, and Varuna arrives.**
+   *
+   * `create` reads the character out of the scene's data and `characterFor` falls back to Varuna
+   * for anything it does not recognise, `undefined` included -- so a `scene.restart` that omits
+   * it is not a missing prop but a silent recast. Both restarts omitted it.
+   *
+   * This asserts on `data-traveller`, which `WorldScene` reports *after* it has swapped the
+   * sprite, for the reason the picker test gives: the two earlier versions of that check guarded
+   * nothing because they asked the button and the URL rather than the scene.
+   */
+  const problems = await bootAs(page, 'mithra');
+  const stage = page.locator('.stage');
+  await expect(stage).toHaveAttribute('data-traveller', 'mithra');
+
+  // The control's accessible name is "Where to go", the same as the dialog it opens -- so this
+  // has to ask for the button by role rather than by a /Travel/ name match.
+  await page.getByRole('button', { name: 'Where to go' }).click();
+  const where = page.getByRole('dialog', { name: /Where to go/ });
+  await expect(where).toBeVisible();
+
+  const travel = where.locator('.look button', { hasText: 'Travel' }).first();
+  test.skip((await travel.count()) === 0, 'nowhere else is reachable from this map yet');
+  await travel.click();
+
+  // The map changed -- otherwise this proves nothing about travel.
+  await expect(where).toBeHidden();
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+
+  await expect(stage, 'travelling recast the traveller as Varuna').toHaveAttribute(
+    'data-traveller',
+    'mithra',
+    { timeout: 20_000 }
+  );
+  expect(problems, problems.join('\n')).toEqual([]);
+});

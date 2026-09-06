@@ -25,35 +25,35 @@
       "id": "varuna",
       "name": "Varuna",
       "colours": 30,
-      "walk": { "source": "assets/source/dump/varuna_walkingNew.png" },
+      "walk": { "source": "assets/source/dump/Varuna_walking3_eyedot.png" },
       "sit": { "source": "assets/source/dump/Varuna Guyuk Sitting.png", "frames": [4, 5, 6, 7] }
     },
     {
       "id": "guyuk",
       "name": "Guyuk",
       "colours": 30,
-      "walk": { "source": "assets/source/dump/Guyuk MOngke walking.png" },
+      "walk": { "source": "assets/source/dump/Guyuk_walking2.png" },
       "sit": { "source": "assets/source/dump/Varuna Guyuk Sitting.png", "frames": [0, 1, 2, 3] }
     },
     {
       "id": "mithra",
       "name": "Mithra",
       "colours": 26,
-      "walk": { "source": "assets/source/dump/Mithra_walking.png" },
+      "walk": { "source": "assets/source/dump/Mithra_walking_roundeye.png" },
       "sit": { "source": "assets/source/dump/3 M characters sitting.png", "frames": [0, 3, 6] }
     },
     {
       "id": "malacite",
       "name": "Malacite",
       "colours": 34,
-      "walk": { "source": "assets/source/dump/Malacite_walking.png" },
+      "walk": { "source": "assets/source/dump/Malacite_walking2.png" },
       "sit": { "source": "assets/source/dump/3 M characters sitting.png", "frames": [1, 4, 7] }
     },
     {
       "id": "mehtar",
       "name": "Mehtar",
       "colours": 34,
-      "walk": { "source": "assets/source/dump/Mehtar_walking.png" },
+      "walk": { "source": "assets/source/dump/Mehtar_walking2.png" },
       "sit": { "source": "assets/source/dump/3 M characters sitting.png", "frames": [2, 5, 8] }
     }
   ]
