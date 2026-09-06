@@ -252,8 +252,18 @@ export interface BuildOptions {
 /**
  * Build the playable ground for a canon field map.
  *
- * The seed defaults to the field map's own id, so Lothal is the same Lothal for every
- * player — this is a documented island, not a roguelike. Pass a seed to vary it.
+ * The seed defaults to the field map's own id, so a caller that asks for a map and nothing else
+ * gets a stable one — the same Lothal every time, which is what a test wants.
+ *
+ * **The game never takes that default.** `worldFor` always passes the journey's seed, and the
+ * journey's seed is `jambhudweepa-evening` unless a link says otherwise. So the world a player
+ * walks and the world `buildFieldMap(map)` returns are *different worlds*, and both are correct.
+ *
+ * That is worth stating because it looks exactly like a bug when you meet it. A tile measured
+ * under the default seed came out `snow` while the running game said `hills` at the same
+ * coordinates, and the hunt went through the bake, the URL parameters and the scene wiring before
+ * the answer turned out to be that they were two seeds. **A measurement of the world a player
+ * sees has to pass the seed a player has.**
  */
 export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): FieldMapWorld {
   const {
