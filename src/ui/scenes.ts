@@ -32,7 +32,21 @@ for (const [path, url] of Object.entries(files)) {
   byGesture.set(id, url);
 }
 
-/** The painted scene for this gesture, or null — which is legal and simply means no picture yet. */
-export function sceneFor(gesture: string): string | null {
+/**
+ * The painted scene for this gesture, or null — which is legal and simply means no picture yet.
+ *
+ * `variant` narrows it where one gesture happens in more than one kind of place. Resting is the
+ * case that has one: a night under a mat on open ground and a night at a camp with a fire and
+ * animals are different nights, and the game already models four shelter kinds -- so a single
+ * painting was flattening a distinction canon and the rules layer both make.
+ *
+ * It falls back to the plain gesture, so adding `rest-roof.png` later is a file and no code, and
+ * a variant with no painting is not an error.
+ */
+export function sceneFor(gesture: string, variant?: string | null): string | null {
+  if (variant) {
+    const narrowed = byGesture.get(`${gesture}-${variant}`);
+    if (narrowed) return narrowed;
+  }
   return byGesture.get(gesture) ?? null;
 }

@@ -12,6 +12,8 @@
 //   node tools/build-plates.js            # build everything not already built
 //   node tools/build-plates.js --force    # rebuild all of them
 //   node tools/build-plates.js --list     # what it would do, without doing it
+//   node tools/build-plates.js --portraits
+//   node tools/build-plates.js --scenes   # the activity scenes, which are 4:3 rather than square
 //
 // CommonJS, like everything in tools/ -- see tools/package.json.
 
@@ -673,7 +675,14 @@ function sweepMisplaced(kind = KINDS.plate) {
 }
 
 function main() {
-  const kind = process.argv.includes('--portraits') ? KINDS.portrait : KINDS.plate;
+  // One flag per kind rather than a loop, matching how `--portraits` already works: each kind has
+  // its own intake folder and the sweep is destructive, so building "everything" would move files
+  // between folders on somebody who only meant to build one.
+  const kind = process.argv.includes('--portraits')
+    ? KINDS.portrait
+    : process.argv.includes('--scenes')
+      ? KINDS.scene
+      : KINDS.plate;
   sweepMisplaced(kind);
 
   if (!fs.existsSync(kind.raw)) {
@@ -794,7 +803,7 @@ function main() {
     if (box.inset) notes.push(`${box.inset}px border stripped`);
     if (box.trimmed) notes.push(`bottom ${box.trimmed}px dropped`);
     const trim = notes.length ? `, ${notes.join(', ')}` : '';
-    console.log(`  ok ${file}  ${img.width}x${img.height} -> ${kind.size}x${kind.size}${trim}  ${kb} KB  ${rel}`);
+    console.log(`  ok ${file}  ${img.width}x${img.height} -> ${kind.size}x${tall}${trim}  ${kb} KB  ${rel}`);
     built += 1;
   }
 

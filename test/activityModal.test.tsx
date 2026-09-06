@@ -77,18 +77,34 @@ describe('the activity modal', () => {
   });
 
   /**
-   * **The state the repository is actually in.**
+   * **A gesture with no painting still opens and plays.**
    *
-   * There is no art in `src/ui/scenes/` yet and there may never be for a gesture added later, so
-   * "no painting" is a normal path rather than an error. If this ever throws or renders nothing,
-   * the whole layer is blocked on an image that was always optional.
+   * This was written when `src/ui/scenes/` was empty and asserted that *no* image rendered, which
+   * was a fact about the repository rather than about the component -- so it failed the moment the
+   * art arrived, which is the wrong way round. What actually matters is the fallback: art is
+   * optional, a gesture added later starts with none, and the card must keep its shape either way
+   * so it does not jump when a painting lands.
+   *
+   * So it now asks for a gesture nobody has painted, which is the condition rather than the
+   * calendar.
    */
   it('opens and plays with no painting at all', () => {
-    open();
+    // @ts-expect-error -- deliberately a gesture that does not exist, which is the whole point:
+    // the component must not require art it was never given.
+    open({ gesture: 'dance' });
     expect(screen.getByRole('dialog')).toBeTruthy();
     // The picture box is still there, so the card does not change shape when art lands.
     expect(document.querySelector('.activity-scene')).toBeTruthy();
     expect(document.querySelector('img.activity-scene'), 'an image appeared with no art').toBeNull();
+  });
+
+  it('shows the painting when there is one', () => {
+    open({ gesture: 'stoop' });
+    const img = document.querySelector('img.activity-scene');
+    expect(img, 'the stoop painting is in the folder and did not render').toBeTruthy();
+    // Decorative: the prose beside it says what is happening, and a screen reader announcing a
+    // painting of hands cutting reeds adds nothing to that.
+    expect(img?.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('hands over the haul once, and only once, when the run ends', () => {

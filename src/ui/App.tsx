@@ -137,7 +137,12 @@ export function App() {
    * another, which is exactly the "promising two reeds and handing over one" fault `Taking`
    * exists to prevent.
    */
-  const [activity, setActivity] = useState<{ taking: Taking[]; day: number } | null>(null);
+  const [activity, setActivity] = useState<{
+    taking: Taking[];
+    day: number;
+    /** Set when this is a night rather than a gathering. Carries the shelter kind for the picture. */
+    resting?: string;
+  } | null>(null);
   /**
    * Whether the front door is still closed.
    *
@@ -512,7 +517,12 @@ export function App() {
    * that disagree eventually.
    */
   const activityGesture = useMemo<Gesture | null>(
-    () => (activity ? gestureFor(activity.taking[0]!.material, isAnimal) : null),
+    () =>
+      activity
+        ? activity.resting
+          ? 'rest'
+          : gestureFor(activity.taking[0]!.material, isAnimal)
+        : null,
     [activity]
   );
 
@@ -594,7 +604,10 @@ export function App() {
         // in daylight because a night passed at noon is not a night.
         blocked: arrival?.canCamp ? null : 'Not yet -- there is daylight left.',
         key: 'R',
-        onDo: () => EventBus.emitEvent('camp', {})
+        // Through the same modal as everything else. Nothing is won and nothing can go wrong, so
+        // it settles on its own -- but it is the same shape of act, and the night should look like
+        // one rather than happening between two frames.
+        onDo: () => setActivity({ taking: [], day: arrival?.day ?? 0, resting: shelter })
       }
     ];
   }, [underfoot, arrival, nodes, pickUp, currentCreature, moment]);
@@ -932,16 +945,31 @@ export function App() {
           open
           gesture={activityGesture}
           promised={activity.taking}
-          difficulty={difficultyOf(
-            activity.taking[0]!.material,
-            activityGesture,
-            currentCreature ? routineFor(currentCreature, moment) : null
-          )}
+          difficulty={
+            // A night is not a test of anybody's hands. There is nothing to aim at, so the band is
+            // at its widest and the beats pass on their own -- which is the whole of what makes
+            // this the gentlest place to learn what the modal is.
+            activity.resting
+              ? 0
+              : difficultyOf(
+                  activity.taking[0]!.material,
+                  activityGesture,
+                  currentCreature ? routineFor(currentCreature, moment) : null
+                )
+          }
           roll={activityRoll}
           creatureId={activityGesture === 'stalk' ? currentCreature?.id ?? null : null}
           creatureName={activityGesture === 'stalk' ? currentCreature?.name ?? null : null}
-          onClose={() => setActivity(null)}
-          onFinish={finishTaking}
+          variant={activity.resting ?? null}
+          subject={activity.resting ? SHELTER_LABEL[activity.resting] ?? 'Stop for the night' : null}
+          onClose={() => {
+            setActivity(null);
+            // The night is spent on the way out rather than when the run settles, so a player who
+            // changes their mind has not already slept. `camp` is the rules layer's own event and
+            // it still decides whether a night is legal.
+            if (activity.resting) EventBus.emitEvent('camp', {});
+          }}
+          onFinish={activity.resting ? () => {} : finishTaking}
         />
       )}
 
