@@ -2122,3 +2122,135 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
 }
+
+/* The activity modal --- a painted scene, a passage, and the choices under it.
+ *
+ * Composed after Six Ages: one centred card, the picture filling its top edge to edge, prose
+ * beneath in the game's own voice, and full-width choice rows at the bottom. Nothing is a HUD and
+ * nothing sits in a corner --- the player is reading a page and then acting on it.
+ *
+ * `.diary-veil` supplies the backdrop; this only styles what floats on it. */
+.activity-veil {
+  align-items: center;
+  justify-content: center;
+}
+
+.activity-card {
+  width: min(30rem, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--paper);
+  border-radius: 6px;
+  box-shadow: 0 18px 44px rgba(27, 20, 32, 0.5);
+}
+
+/* 4:3 rather than square: a plate is a portrait of an animal, but a scene is a pair of hands at
+   work and wants the width. An unpainted gesture keeps the same box so the card does not jump
+   when art lands. */
+.activity-scene {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+
+.activity-scene-blank {
+  background: linear-gradient(160deg, #e8dcc0, #d6c6a4);
+}
+
+.activity-body {
+  padding: 1rem 1.15rem 1.15rem;
+  overflow-y: auto;
+}
+
+.activity-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.activity-prose {
+  margin: 0 0 0.9rem;
+  color: var(--muted);
+  line-height: 1.5;
+  /* Two lines of prose either way, so the card does not resize between the instruction and the
+     outcome --- a modal that jumps as it resolves reads as a glitch. */
+  min-height: 3em;
+}
+
+/* The band is drawn rather than described: a player should be able to *see* that a mythic
+   material is harder, instead of being told a difficulty number. */
+.activity-track {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: rgba(52, 38, 58, 0.12);
+  overflow: hidden;
+  margin-bottom: 0.6rem;
+}
+
+.activity-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(164, 92, 64, 0.42);
+}
+
+.activity-marker {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 3px;
+  background: var(--ink);
+  border-radius: 2px;
+}
+
+.activity-beats {
+  display: flex;
+  gap: 0.3rem;
+  list-style: none;
+  margin: 0 0 0.9rem;
+  padding: 0;
+}
+
+.activity-beat {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  border: 1px solid var(--edge);
+}
+
+.activity-beat.hit { background: var(--accent); border-color: var(--accent); }
+.activity-beat.miss { background: rgba(52, 38, 58, 0.2); }
+.activity-beat.waiting { background: transparent; }
+
+.activity-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Full-width rows, the same shape as `TileActions` --- an action is a labelled line you read and
+   press, everywhere in this game. */
+.activity-choice {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  background: rgba(255, 246, 223, 0.6);
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.activity-choice:hover { background: rgba(164, 92, 64, 0.12); }
+.activity-choice.primary { border-color: var(--accent); font-weight: 600; }
+.activity-choice:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .activity-marker { transition: none; }
+}
