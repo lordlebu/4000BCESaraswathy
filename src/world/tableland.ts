@@ -144,51 +144,44 @@ export function stampTableland(world: World, palette: ReadonlySet<BiomeId>): Poi
 const CAMP_RADIUS = 2;
 
 /**
- * How far from a drift the camp is pitched.
+ * The camp on the tableland, where canon already put the people.
  *
- * **Beside the snow, never on it.** A camp is pitched where there is shelter and grazing, and the
- * drift a few tiles off is the *reason* somebody is up here rather than in the valley -- meltwater
- * through the summer. Pitching on the snow would be pitching on the water supply.
- */
-const CAMP_FROM_DRIFT = 4;
-
-/**
- * A herders' camp on the tableland, beside the old snow.
+ * **The first version pitched this beside a drift, and it was anonymous.** A settlement patch four
+ * tiles across on high ground, near some snow, belonging to nobody -- and eleven tiles away sat
+ * `poi_herders_terraces`, which canon describes as *"stone steps up a hillside, grazed by goats"*
+ * and gives to Marn. The plateau already had herders on it; the generator had simply put their
+ * houses somewhere else.
  *
- * Uses the settlement biome rather than inventing a camp one, which means it inherits everything
- * a settlement already gets for free: the huts and yurts, and now the fence that goes round a
- * whole perimeter. **That inheritance is the reason this is small work** -- a camp is a settlement
- * that happens to be four tiles across and a thousand feet up.
+ * So the camp is anchored to that place instead. Canon owns places, the generator owns layout,
+ * and this is the seam: canon says *there are herders here*, the generator says *and their tents
+ * stand on these tiles*.
+ *
+ * Which means it runs **after** the points of interest are placed rather than before, because it
+ * needs to know where one of them landed. That is the whole of the change; the stamping itself is
+ * what it was.
+ *
+ * It uses the settlement biome rather than inventing a camp one, so it inherits everything a
+ * settlement already gets: the huts and yurts, and the fence that goes round a whole perimeter.
  */
-export function stampCamp(world: World, palette: ReadonlySet<BiomeId>, drifts: Point[]): void {
-  if (!palette.has('settlement') || drifts.length === 0) return;
+export function stampCamp(world: World, palette: ReadonlySet<BiomeId>, at: Point | null): void {
+  if (!palette.has('settlement') || !at) return;
 
   const country = tablelands(world)[0];
   if (!country) return;
   const onTop = new Set(country.map((p) => `${p.x},${p.y}`));
 
-  // Beside the first drift, in a direction the seed picks -- so the camp is on the same side of
-  // the same drift every time this world is built.
-  const drift = drifts[0]!;
-  const spin = tileHash(world.seed, drift.x, drift.y, 'camp-side') % 4;
-  const [ox, oy] = [
-    [CAMP_FROM_DRIFT, 0],
-    [-CAMP_FROM_DRIFT, 0],
-    [0, CAMP_FROM_DRIFT],
-    [0, -CAMP_FROM_DRIFT]
-  ][spin]!;
-
-  const cx = drift.x + ox;
-  const cy = drift.y + oy;
-
   for (let dy = -CAMP_RADIUS; dy <= CAMP_RADIUS; dy += 1) {
     for (let dx = -CAMP_RADIUS; dx <= CAMP_RADIUS; dx += 1) {
       if (Math.abs(dx) + Math.abs(dy) > CAMP_RADIUS) continue;
-      const x = cx + dx;
-      const y = cy + dy;
+      const x = at.x + dx;
+      const y = at.y + dy;
       const tile = world.tiles[y]?.[x];
-      // Only on the tableland, and never over the snow it is pitched beside.
+      // Only on the tableland, and never over the snow: a camp is pitched beside a drift because
+      // the drift is its water, and pitching on it would be pitching on the water supply.
       if (!tile || !onTop.has(`${x},${y}`) || tile.biome === 'snow') continue;
+      // The terraces themselves keep their tile, so the place canon named is still the place the
+      // traveller arrives at rather than a hut standing on it.
+      if (dx === 0 && dy === 0) continue;
       tile.biome = 'settlement';
     }
   }

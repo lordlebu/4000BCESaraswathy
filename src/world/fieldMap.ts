@@ -291,8 +291,7 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // Drifts on the country the scarp encloses, if this map has one and canon allows snow on it.
   // After the palette, like the settlement patch: a drift is something that happened to the
   // ground rather than a climate the ground has, and the classifier deals only in climates.
-  const drifts = stampTableland(world, palette);
-  stampCamp(world, palette, drifts);
+  stampTableland(world, palette);
   const walkable = new Set<BiomeId>(
     world.tiles.flat().map((t) => t.biome).filter((b) => palette.has(b))
   );
@@ -320,6 +319,16 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
       unplaced.push(poi);
     }
   }
+
+  // The herders' camp, where canon already put the herders.
+  //
+  // Here rather than with the drifts above, for the same reason the easing is here: it depends on
+  // where the content landed. Canon says there are herders on this plateau -- `poi_herders_terraces`
+  // is stone steps grazed by goats, and Marn stands on them -- and the generator says where their
+  // tents are. An earlier version pitched a camp beside a drift and belonged to nobody, eleven
+  // tiles from the place canon had named.
+  const herders = placed.find((p) => p.poi.id === 'poi_herders_terraces');
+  stampCamp(world, palette, herders?.at ?? null);
 
   // Ease the ground between the places, now that we know where they ended up.
   //
