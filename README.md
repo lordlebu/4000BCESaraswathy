@@ -39,7 +39,7 @@ clock.
 - **A generator that produces real geography.** Terrain is built from octaves of value noise over a
   seeded highland spine, so every seed has hills, mountains and rivers running off them to the
   water. `test/generator.test.ts` asserts this on twenty seeds.
-- **257 creatures and 90 plants**, placed by biome, each with authored journal prose.
+- **257 creatures and 116 plants**, placed by biome, each with authored journal prose.
 - **Invented place names.** Settlements, rivers and landmarks are named from seeded syllables —
   Thenavati, Hudhukoli, the Shanesarin — so a map reads as a country rather than a grid.
 - **Seven kinds of landmark**, each suited to the ground it stands on, each with a written page for
@@ -51,6 +51,15 @@ clock.
   spends. Thirty kilometres between one dawn and the next and a little over a third of a kilometre
   to the tile, so a day of easy going is about eighty steps and a long march through the hills goes
   amber and then blue under you.
+- **Ground that gives what is standing on it.** The rice you cut is the rice you were reading
+  about: canon says which species a material comes from, and a tile offers what actually grows
+  there rather than anything the biome could hold.
+- **Places that run down and come back.** A worked reed bed is visibly worked before you stoop,
+  and it regrows on canon's own schedule — days, a season, years, or never. Stone never regrows;
+  working the ground *reveals* more of it, which is why a district that gave up six hundred
+  stone still has some.
+- **Fifteen kinds of ground**, including snow above the treeline, cooled lava, and the turf of a
+  sky island. Each carries its own scatter and its own tall things.
 - **A journal you can take with you**, as a markdown file or a rendered page of writing.
 
 ## Commands
@@ -114,6 +123,7 @@ npm run test:e2e
 - [Game plan](docs/game-plan.md) — vision, MVP, gameplay loop, milestones
 - [World generator design](docs/world-generator.md) — generation inputs, passes, success criteria
 - [Bestiary and herbarium](docs/bestiary.md) — where the species came from, kept for provenance
+- [The ground that gives](docs/the-ground-that-gives.md) — gathering, resource nodes, and the two design rulings behind them
 - [Testing notes](docs/testing.md) — what the failures here have cost, and the rules that came out of them
 - [Art brief](docs/art-brief.md) — how the character art is specified, and what went wrong twice
 - [Source layout](src/README.md) — the four layers and the rules between them
