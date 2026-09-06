@@ -91,7 +91,18 @@ First run installs them; later runs start immediately.
 
 ### The ground is finished; the maps are what is left
 
-All nine ground biomes tile — `test/frames.test.ts` asserts every ordered variant pairing. `hills`
+Fifteen biomes now, and the last four arrived as **patches rather than palettes** — a distinction
+worth keeping, because getting it wrong is how a map becomes a third lava. `seed_biomes` is a
+*climate* palette: the classifier divides elevation and moisture among whatever is listed, so
+anything in it becomes a large region. `lava_field`, `snow`, `sky_island` and `sky_underside` are
+places instead, stamped after classification the way the settlement already is — its comment says
+why, and it is the whole rule: *a city is a place, not a climate*.
+
+`snow` is not in `ELEVATION_ORDER` or `GROUND_PREFERENCE` at all, so the classifier **cannot**
+produce it. It exists only where `world/tableland.ts` stamps it, which is what keeps it off a
+delta.
+
+All nine original ground biomes tile — `test/frames.test.ts` asserts every ordered variant pairing. `hills`
 is olive rather than ochre (ochre sat 19 from `desert` in RGB, and under ~25 two grounds stop being
 tellable apart). Cliffs and treelines are **rim** layers drawn on boundary tiles only; see
 `docs/rendering.md` for why a ground texture cannot carry a slope, and `docs/art-brief.md` Asset 2d
@@ -168,6 +179,7 @@ The art docs, in the order they are useful:
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |
 | `docs/plate-prompts.md` | the species plate queue, per-tool prompt notes, and the emoji tables |
 | `docs/rendering.md` | why the frame costs what it costs, and the four levers when it costs more |
+| `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
 `npx vitest run -t "some test name"`.
@@ -294,6 +306,36 @@ Four rules hold this together. Breaking any of them is how the codebase gets tan
 3. **React never renders a tile.** The two sides talk over `EventBus` and nothing else. A scene
    never calls `setState`; React never holds a scene reference and pokes at sprites.
 4. **Content lives in `data/*.json`.** No hardcoded creature or biome tables in TypeScript.
+
+### The resource layer, and where its numbers live
+
+Four modules, and the split between them is the same canon/game split as everywhere else:
+
+| Where | What it answers |
+|---|---|
+| canon's `material.won_from` | which species a material comes from |
+| canon's `material.renews` | whether a place gives it again — an *ordering*, never a duration |
+| `content/gathering.ts` | what a tile offers, from the species standing on it |
+| `content/nodes.ts` | what is *left* of it, and what a worked node looks like |
+| `content/tiers.ts` | every number the layer is tuned by |
+
+**`tiers.ts` is the file to edit when the walk feels wrong.** Regrowth in days, stock by rarity,
+the odds of a good cut, the stone-discovery constants — all of it, in one place, because they were
+spread across two modules and tuning meant finding three tables and hoping there was not a fourth.
+None of it is a fact about the world and none needs a canon edit.
+
+Two rules in there are design rulings rather than numbers to tune past:
+
+**Gathering never gives nothing.** Cozy games vary *how much*, not *whether*, and gathering is the
+only thing that puts a material in a satchel — a failure roll would put a die in front of every
+recipe and stack with depletion. `test/nodes.test.ts` fails by name if a material ever gives
+nothing on an untouched node.
+
+**Stone does not regrow; it is found.** `renews: never` is literally true — no emptied node ever
+refills — but working the ground reveals more of it nearby, so the world does not run out. Making
+common stone `slow` was the obvious alternative and is worse twice: untrue of a cut nodule, and
+against a player working a district hard a thirty-day node is emptied thirty times before it
+returns one.
 
 ### Module systems differ by directory
 

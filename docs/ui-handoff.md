@@ -350,8 +350,9 @@ Nothing in the UI should create urgency.
 
 ```bash
 npm run typecheck     # world/, content/ and journey.ts must stay React- and Phaser-free
-npm test              # 843 tests, 49 files — journey.test.ts walks the Lothal slice
+npm test              # journey.test.ts walks the Lothal slice
 npm run test:e2e      # Phaser actually boots and draws
+npm run check:data    # the bundle matches canon.lock.json
 npm run build         # with VITE_CANON_API unset — the game must work with no service
 ```
 
