@@ -177,6 +177,23 @@ test('walk from the settlement to the landmark and get a page for it', { tag: '@
   // mountains against 1 on plains — and a windier route, so the same walk needs more turns.
   let wasAt = '';
   let stuckFor = 0;
+  /**
+   * Where the walk has been lately, so a **loop** counts as being stuck.
+   *
+   * `stuckFor` only ever caught a traveller frozen on one tile, and that is not the shape this
+   * walk actually fails in. Traced over a failing run it paced 17,8 → 18,8 → 19,8 → 18,8 → 17,8
+   * for seventy legs: moving every single leg, so `stuckFor` stayed 0 the whole time and the
+   * step-fallback that exists to break a deadlock was never reached. The run then exhausted its
+   * 110 legs having covered no ground, while a passing run arrived at leg 47.
+   *
+   * That is why this test failed on `main` and not on any pull request: the walk is `@slow` and
+   * pull requests skip it, so it only ever ran after the merge.
+   *
+   * Six is two full there-and-back cycles of the three-tile pace above -- long enough not to fire
+   * on an honest detour round water, short enough to break the loop with legs to spare.
+   */
+  const lately: string[] = [];
+  const RECENT = 6;
 
   for (let leg = 0; leg < 110; leg += 1) {
     // One read for the whole leg. `wasAt` compares against the previous leg's heading, so noticing
@@ -189,6 +206,12 @@ test('walk from the settlement to the landmark and get a page for it', { tag: '@
 
     stuckFor = view.here === wasAt ? stuckFor + 1 : 0;
     wasAt = view.here;
+
+    // Revisiting somewhere from the last few legs is the loop, and it counts the same as standing
+    // still -- both mean the taps are not getting anywhere and it is time to step instead.
+    if (lately.includes(view.here)) stuckFor = Math.max(stuckFor, 2);
+    lately.push(view.here);
+    if (lately.length > RECENT) lately.shift();
 
     // Taps cover ground; steps finish the job.
     //
