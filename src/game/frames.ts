@@ -394,6 +394,18 @@ export function landmarkFrame(kindId: string): number | null {
 
 /** The frame for an authored place, or null — most points of interest keep the diamond marker. */
 export function placeFrame(poiId: string, kind?: string): number | null {
+  // **The High Camp is a settlement of tents, and the settlement marker is a house.**
+  //
+  // A roof and a well standing among two felt yurts on a plateau nobody builds on is exactly what
+  // the rule below is written against: a generic marker reads better than the wrong building. The
+  // travel-node ring -- a cold fire circle -- is what a camp actually leaves behind, so it borrows
+  // that rather than the roof.
+  //
+  // Drawing nothing was the first answer and `adapterCoverage` refused it, correctly: every place
+  // has to be findable on the map, and "the yurts are its drawing" is true of the tiles and not of
+  // the tile the traveller is walking towards.
+  if (poiId === 'poi_high_camp') return KIND_FRAMES.travel_node ?? null;
+
   const index = PLACE_ORDER.indexOf(poiId);
   if (index >= 0) return index;
   // A place canon has authored art for wins; otherwise its kind speaks for it. Falling back on
