@@ -2254,3 +2254,33 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   .activity-marker { transition: none; }
 }
+
+/* The key that does this action.
+ *
+ * Shown because an unlabelled hotkey is a secret --- the same reasoning `TileActions.tsx` gives for
+ * never hiding a blocked row. It sits at the end of the row, quiet enough to ignore. */
+.tile-action-key {
+  margin-left: auto;
+  align-self: center;
+  flex-shrink: 0;
+  font-family: inherit;
+  font-size: 0.72em;
+  line-height: 1;
+  padding: 0.25em 0.45em;
+  color: var(--muted);
+  border: 1px solid var(--edge);
+  border-radius: 3px;
+  background: rgba(255, 246, 223, 0.5);
+}
+
+/* **No keyboard, no key hints.**
+ *
+ * `hover: none` and `pointer: coarse` together mean a touch screen rather than a narrow window ---
+ * a small desktop browser still has a keyboard and still wants the hint, and keying this off width
+ * would take it away from them. A phone gets the row itself, which is already the whole control:
+ * the buttons are full-width and thumb-sized, so there is nothing a shortcut would add. */
+@media (hover: none) and (pointer: coarse) {
+  .tile-action-key {
+    display: none;
+  }
+}

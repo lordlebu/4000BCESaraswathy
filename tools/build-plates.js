@@ -55,6 +55,25 @@ const KINDS = {
     size: 256,
     word: 'portrait',
     label: 'portrait'
+  },
+  /**
+   * An activity scene: the painting at the top of the activity modal.
+   *
+   * **The one that is not square.** A plate is one animal standing still and a portrait is a face,
+   * both of which want a square; a scene is a pair of hands at work with the ground around them,
+   * and cropping that to a square throws away the work. `aspect` is width over height, and the
+   * modal crops to 4:3 in CSS, so building to 4:3 means nothing is lost twice.
+   *
+   * There are exactly three -- stoop, stalk, work -- so unlike the plate queue this set can be
+   * finished. A gesture with no painting still opens and plays.
+   */
+  scene: {
+    raw: path.join(ROOT, 'assets', 'source', 'scenes'),
+    out: path.join(ROOT, 'src', 'ui', 'scenes'),
+    size: 512,
+    aspect: 4 / 3,
+    word: 'scene',
+    label: 'activity scene'
   }
 };
 
@@ -530,35 +549,42 @@ function borderInset(img) {
  *
  * See CROP_BOTTOM for why a square source is returned whole.
  */
-function squareBox(width, height, inset = 0) {
+function squareBox(width, height, inset = 0, aspect = 1) {
   // Everything below works on the picture inside any painted frame, then shifts back out by the
   // inset at the end. Doing it this way keeps the squaring rule identical whether a border was
   // found or not.
   const innerWidth = width - inset * 2;
   const innerHeight = height - inset * 2;
-  const side = Math.min(innerWidth, innerHeight);
+  // `aspect` is width/height of the wanted crop. 1 is a plate and keeps the original behaviour
+  // exactly; 4/3 is an activity scene, which is landscape because it holds a pair of hands at work
+  // rather than one animal standing still.
+  const side = Math.min(innerWidth, Math.round(innerHeight * aspect));
+  const tall = Math.round(side / aspect);
   const x = inset + Math.round((innerWidth - side) / 2);
 
   // Vertical slack is whatever squaring already has to discard, and it is the entire budget: spend
   // up to CROP_BOTTOM of it on the bottom edge, then place the square a third of the way down what
   // is left. `Math.min` is the rule, not a guard against a silly number — a square or landscape
   // source has zero slack, so it is returned whole with nothing trimmed, which is the point.
-  const slack = innerHeight - side;
+  const slack = innerHeight - tall;
   const trimmed = Math.min(slack, Math.round(innerHeight * CROP_BOTTOM));
   const y = inset + Math.round((slack - trimmed) / 3);
-  return { x, y, side, trimmed, inset };
+  return { x, y, side, tall, trimmed, inset };
 }
 
 /** Box-average down to SIZE. A mean is right here: this is a painting, not pixel art. */
-function resample(src, box, size = SIZE) {
-  const out = Buffer.alloc(size * size * 3);
+function resample(src, box, size = SIZE, height = size) {
+  const out = Buffer.alloc(size * height * 3);
   const step = box.side / size;
-  for (let y = 0; y < size; y += 1) {
+  // A square crop steps identically on both axes; a 4:3 one does not, so the vertical step comes
+  // from the box's own height rather than being assumed equal.
+  const stepY = (box.tall ?? box.side) / height;
+  for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < size; x += 1) {
       const sx0 = box.x + Math.floor(x * step);
-      const sy0 = box.y + Math.floor(y * step);
+      const sy0 = box.y + Math.floor(y * stepY);
       const sx1 = box.x + Math.max(Math.floor((x + 1) * step), Math.floor(x * step) + 1);
-      const sy1 = box.y + Math.max(Math.floor((y + 1) * step), Math.floor(y * step) + 1);
+      const sy1 = box.y + Math.max(Math.floor((y + 1) * stepY), Math.floor(y * stepY) + 1);
       let r = 0;
       let g = 0;
       let b = 0;
@@ -758,8 +784,10 @@ function main() {
       console.log(`  !  ${file} -> crop runs past the edge of a ${img.width}x${img.height} image`);
       continue;
     }
-    const box = crop ?? squareBox(img.width, img.height, borderInset(img));
-    fs.writeFileSync(dest, encodePng(kind.size, kind.size, resample(img, box, kind.size)));
+    const aspect = kind.aspect ?? 1;
+    const box = crop ?? squareBox(img.width, img.height, borderInset(img), aspect);
+    const tall = Math.round(kind.size / aspect);
+    fs.writeFileSync(dest, encodePng(kind.size, tall, resample(img, box, kind.size, tall)));
     const kb = (fs.statSync(dest).size / 1024).toFixed(0);
     const notes = [];
     if (crop) notes.push(`cropped to ${crop.x},${crop.y} +${crop.side}`);

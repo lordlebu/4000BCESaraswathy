@@ -94,3 +94,32 @@ describe('what can be done here', () => {
     expect(container.querySelector('.tile-actions')).toBeNull();
   });
 });
+
+/**
+ * The key hint on a row.
+ *
+ * **A hotkey nobody can see is a secret**, and this file's own header states the rule it breaks:
+ * an action you cannot take keeps its row and says why, because a player learns the mechanic from
+ * what is written. A shortcut is the same bargain -- it exists when it is on screen.
+ *
+ * The key *handler* lives in `App.tsx`, driven off this same action list so a key and a tap cannot
+ * diverge. What is asserted here is only that the row shows what it is.
+ */
+describe('the key that does it', () => {
+  it('shows the key when there is one, and nothing when there is not', () => {
+    render(<TileActions actions={[take({ key: 'E' })]} />);
+    expect(screen.getByText('E').tagName, 'the hint is not a <kbd>').toBe('KBD');
+
+    cleanup();
+    render(<TileActions actions={[take()]} />);
+    expect(screen.queryByText('E'), 'a key appeared on an action with none').toBeNull();
+  });
+
+  it('keeps the hint out of the accessible name, so the label still reads cleanly', () => {
+    render(<TileActions actions={[take({ key: 'E', label: 'Cut and gather' })]} />);
+    // `aria-hidden` on the hint: a screen reader announcing "Cut and gather E" is worse than one
+    // announcing the action, and the key is no use to somebody who is not looking at it.
+    const button = screen.getByRole('button', { name: 'Cut and gather' });
+    expect(button, 'the key leaked into the accessible name').toBeTruthy();
+  });
+});

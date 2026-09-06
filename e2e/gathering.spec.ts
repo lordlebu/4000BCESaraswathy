@@ -117,3 +117,40 @@ test('leaving an activity takes nothing', async ({ page }) => {
   // honestly, and this tile holds more than one thing -- so either way there is something here.
   await expect(takeRow(page)).toBeEnabled();
 });
+
+test('E opens the activity, and typing an E does not', async ({ page }) => {
+  /**
+   * **The hazard this guards is already recorded in `WorldScene.typing()`**: searching the album
+   * for a plant with an "a" or a "w" in it walked the traveller across the map, because the scene
+   * binds WASD on the document. A hotkey on the document has exactly that shape, so the second
+   * half of this test matters as much as the first.
+   */
+  await boot(page);
+
+  await page.keyboard.press('KeyE');
+  const modal = page.locator('[role="dialog"] .activity-card');
+  await expect(modal, 'E did not open the activity').toBeVisible();
+
+  // Out again, so the next press starts from the same place.
+  await page.locator('.activity-choices .activity-choice').last().click();
+  await expect(modal).toBeHidden();
+
+  // **A focused text field swallows the hotkey.**
+  //
+  // This is the hazard `WorldScene.typing()` already records: the album search, the field kit and
+  // the seed bar all take letters, and a hotkey bound on the document would fire while somebody is
+  // typing into one. Rather than navigate to a real panel -- which needs species met first, and is
+  // the sort of incidental setup that makes a test fail for reasons unrelated to its subject -- an
+  // input is put on the page and focused, which is precisely the condition the guard checks.
+  await page.evaluate(() => {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'typing-probe';
+    document.body.appendChild(input);
+    input.focus();
+  });
+
+  await page.keyboard.press('KeyE');
+  await expect(modal, 'the hotkey fired while a text field had focus').toBeHidden();
+  await expect(page.locator('#typing-probe')).toHaveValue('e');
+});

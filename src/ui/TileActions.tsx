@@ -45,6 +45,18 @@ export interface TileAction {
    * amounts of shelter and should look like it.
    */
   mark: ReactNode;
+  /**
+   * The key that does this, when there is one.
+   *
+   * **Shown, because this game's rule is that a thing not written on screen does not exist.** That
+   * is stated at the top of this file for actions and it holds just as well for the keys that
+   * trigger them: an unlabelled hotkey is a secret, and a secret is worth nothing to the player
+   * who would most benefit from a shortcut.
+   *
+   * Hidden on a touch screen by CSS -- see `.tile-action-key` -- where there is no keyboard to
+   * press and the hint would be noise.
+   */
+  key?: string;
   onDo: () => void;
 }
 
@@ -87,6 +99,11 @@ function Row({ action }: { action: TileAction }): ReactNode {
           <span className="tile-action-label">{action.label}</span>
           {action.detail && <span className="tile-action-detail">{action.detail}</span>}
         </span>
+        {action.key && (
+          <kbd className="tile-action-key" aria-hidden="true">
+            {action.key}
+          </kbd>
+        )}
       </button>
       {blocked && (
         <p className="tile-action-why" id={`${action.id}-why`}>

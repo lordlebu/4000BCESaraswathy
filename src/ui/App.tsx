@@ -582,6 +582,7 @@ export function App() {
         detail: takeable ?? undefined,
         mark: gesture === 'stalk' ? '🐾' : gesture === 'work' ? '⛏' : '❀',
         blocked: takeable ? cannotStalk : 'Nothing on this ground to take.',
+        key: 'E',
         onDo: pickUp
       },
       {
@@ -592,10 +593,48 @@ export function App() {
         // `canCamp` is the rules layer's answer, not this panel's guess -- resting is refused
         // in daylight because a night passed at noon is not a night.
         blocked: arrival?.canCamp ? null : 'Not yet -- there is daylight left.',
+        key: 'R',
         onDo: () => EventBus.emitEvent('camp', {})
       }
     ];
   }, [underfoot, arrival, nodes, pickUp, currentCreature, moment]);
+
+  /**
+   * A key for each thing you can do here.
+   *
+   * **Driven off `tileActions` rather than beside it**, so a key and a tap can never come to mean
+   * different things -- including the blocked case: a hotkey for an action whose row says "there is
+   * daylight left" does nothing, exactly as pressing the greyed row does. A second list of what the
+   * keys do would be a second copy of the rules, and this codebase has paid for that kind of copy
+   * before.
+   *
+   * E and R, because W A S D are the walk and the arrows are captured for it. They are also the
+   * genre's own keys -- E interacts nearly everywhere -- and this game has no other letter bound.
+   *
+   * `typing()` in `WorldScene` guards the walk the same way and states the reason: searching the
+   * album for a plant with an "a" in it used to walk the traveller across the map. A hotkey on the
+   * document has exactly that hazard, so the check is repeated here rather than assumed.
+   */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = document.activeElement as HTMLElement | null;
+      const tag = el?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el?.isContentEditable) return;
+      // A modal is open: it owns the keyboard, and Space is its own. Acting on the map underneath
+      // something the player is reading is how a stray press loses a run.
+      if (activity) return;
+
+      const wanted = e.code === 'KeyE' ? 'take' : e.code === 'KeyR' ? 'rest' : null;
+      if (!wanted) return;
+      const action = tileActions.find((a) => a.id === wanted);
+      if (!action || action.blocked) return;
+      e.preventDefault();
+      action.onDo();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [tileActions, activity]);
 
   /**
    * Whether the player has been shown how to make something.

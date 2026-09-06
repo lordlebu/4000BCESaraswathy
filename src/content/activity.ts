@@ -153,6 +153,8 @@ export function attemptLine(gesture: Gesture, grade: Grade, material: Material):
   const what = material.name.toLowerCase();
   if (grade === 'clean') {
     switch (gesture) {
+      case 'rest':
+        return `You slept well, and woke before the light with the day already in order.`;
       case 'stoop':
         return `Clean work. The ${what} came away whole, and there was more of it than the stand looked to hold.`;
       case 'stalk':
@@ -163,6 +165,8 @@ export function attemptLine(gesture: Gesture, grade: Grade, material: Material):
   }
   if (grade === 'fair') {
     switch (gesture) {
+      case 'rest':
+        return `You slept, near enough. The morning is here either way.`;
       case 'stoop':
         return `Passable. Some of the ${what} tore, and what is in the satchel is honest enough.`;
       case 'stalk':
@@ -172,6 +176,10 @@ export function attemptLine(gesture: Gesture, grade: Grade, material: Material):
     }
   }
   switch (gesture) {
+    case 'rest':
+      // Never a failure, exactly like the others: a bad night is still a night, and the morning
+      // arrives regardless. See the ruling at the top of this file.
+      return `A poor night, and you are up before you meant to be. The day starts anyway.`;
     case 'stoop':
       return `Clumsy, and the ${what} shows it. Still enough to carry.`;
     case 'stalk':
