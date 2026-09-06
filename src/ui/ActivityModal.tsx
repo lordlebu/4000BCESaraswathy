@@ -231,21 +231,29 @@ export function ActivityModal({
             </>
           )}
 
+          {/**
+            * **The way out is one button that never goes away.**
+            *
+            * It used to be two: "Leave it" while the run was going and "Put it in the satchel"
+            * once it settled. A beat can time out at any instant, so the button a player is
+            * reaching for could be replaced mid-reach -- and it was. In the CI container, on the
+            * software renderer, Playwright resolved "Leave it", went to click it, and got
+            * "element was detached from the DOM": the run settled in between. A slow machine hits
+            * that race constantly and a fast one hits it rarely, which is the worst kind of bug --
+            * it looks like flakiness and is a real one a player can hit too.
+            *
+            * So the element is stable and only its label changes. React keeps the same DOM node,
+            * nothing is detached, and the escape hatch is always there to be pressed.
+            */}
           <div className="activity-choices">
-            {done ? (
-              <button type="button" ref={closeRef} className="activity-choice" onClick={onClose}>
-                Put it in the satchel
+            {!done && (
+              <button type="button" className="activity-choice primary" onClick={strike}>
+                {gesture === 'stalk' ? 'Move now' : 'Strike'}
               </button>
-            ) : (
-              <>
-                <button type="button" className="activity-choice primary" onClick={strike}>
-                  {gesture === 'stalk' ? 'Move now' : 'Strike'}
-                </button>
-                <button type="button" ref={closeRef} className="activity-choice" onClick={onClose}>
-                  Leave it
-                </button>
-              </>
             )}
+            <button type="button" ref={closeRef} className="activity-choice" onClick={onClose}>
+              {done ? 'Put it in the satchel' : 'Leave it'}
+            </button>
           </div>
         </div>
       </section>

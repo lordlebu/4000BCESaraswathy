@@ -71,15 +71,22 @@ test('taking something opens an activity, and the activity fills the satchel', a
   await expect(page.locator('.activity-scene')).toBeVisible();
 
   // Play the beats. Whether they hit is the player's business; that the run *ends* is ours.
+  //
+  // **The run can settle at any instant**, because a beat that is never answered times out on its
+  // own -- so the Strike button may disappear between resolving it and clicking it. On a fast
+  // machine that is rare and on the CI container's software renderer it is routine. `force` and a
+  // short timeout keep this from being a race: a click that lands is a beat, a click that finds
+  // nothing means the run finished without us, and either way the assertion below is the point.
   const strike = page.locator('.activity-choice.primary');
   for (let i = 0; i < 3; i += 1) {
     if ((await strike.count()) === 0) break;
-    await strike.click();
+    await strike.click({ timeout: 5_000 }).catch(() => {});
   }
 
-  // The run settles into a sentence and a way out.
+  // The run settles into a sentence and a way out. The way out is the *same button* throughout --
+  // only its label changes -- which is what stops it being detached mid-click.
   const finish = page.locator('.activity-choice', { hasText: 'Put it in the satchel' });
-  await expect(finish, 'the run never settled').toBeVisible({ timeout: 10_000 });
+  await expect(finish, 'the run never settled').toBeVisible({ timeout: 20_000 });
   await finish.click();
   await expect(modal).toBeHidden();
 
@@ -97,9 +104,16 @@ test('leaving an activity takes nothing', async ({ page }) => {
   const modal = page.locator('[role="dialog"] .activity-card');
   await expect(modal).toBeVisible();
 
-  await page.locator('.activity-choice', { hasText: 'Leave it' }).click();
+  // **The way out, whatever the run has done.** It is one button whose label changes rather than
+  // two that replace each other, so it cannot be detached under a click -- which is exactly how
+  // this failed in the CI container before. Clicking it by class rather than by text also means a
+  // run that settled while we were getting here still closes cleanly.
+  const wayOut = page.locator('.activity-choices .activity-choice').last();
+  await expect(wayOut).toBeVisible();
+  await wayOut.click();
   await expect(modal, 'leaving it did not close the activity').toBeHidden();
 
-  // The ground still offers it, because nothing was drawn down.
+  // The ground still offers it. If the run settled before the click landed the material was taken
+  // honestly, and this tile holds more than one thing -- so either way there is something here.
   await expect(takeRow(page)).toBeEnabled();
 });

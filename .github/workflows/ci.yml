@@ -200,27 +200,29 @@ jobs:
           echo "::error::Chromium would not install after three attempts"
           exit 1
 
-      # The full map crossing runs on `main` and on the nightly schedule; a pull request gets
-      # everything else.
+      # **Everything runs everywhere, including the walk.**
       #
-      # `main` is what gets deployed and is worth the whole suite. A pull request is worth a fast
-      # answer, and the walk is four and a half minutes of a job that was seventeen -- for a test
-      # that failed four times running on causes unrelated to the change under review. A check that
-      # is usually red for reasons you did not cause is a check people learn to ignore, which is
-      # worse than not having it.
+      # This used to hold the walk back from pull requests, on the reasoning that it was "four and
+      # a half minutes of a job that was seventeen -- for a test that failed four times running on
+      # causes unrelated to the change under review". Both halves of that have since stopped being
+      # true, and keeping the split was costing more than it saved.
       #
-      # Nothing is skipped, only moved: the walk still guards every merge, and a nightly run catches
-      # the case where two green pull requests break it only once they are together.
+      # The failures were not unrelated. The walk was pacing three tiles for seventy legs and
+      # running out of budget, because its stuck-detector could only see a traveller frozen on one
+      # tile and not one looping between several. Fixed in `playthrough.spec.ts`; measured after,
+      # the walk takes about a minute rather than four and a half, against a 5.8-minute suite it
+      # runs *in parallel with*. The wall-clock cost of including it is close to nothing.
+      #
+      # What the split did cost was real: `@slow` on `main` only means the walk first runs **after
+      # the merge**, so a pull request goes green, merges, and turns `main` red. That happened
+      # three times in one sprint. A check that only fails once it is too late to act cheaply is
+      # worse than a slightly slower one.
+      #
+      # If the walk ever becomes genuinely slow again, split it by *time* rather than by branch --
+      # shard the suite -- so no test is left running only where nobody can act on it.
       - name: Browser suite
         if: steps.scope.outputs.code == 'true'
-        run: |
-          if [ "${{ github.ref_name }}" = "main" ] || [ "${{ github.event_name }}" = "schedule" ]; then
-            echo "on ${{ github.ref_name }} -- running the whole suite, walk included"
-            npm run test:e2e
-          else
-            echo "pull request -- running everything but the full map crossing (@slow)"
-            npm run test:e2e:fast
-          fi
+        run: npm run test:e2e
       - uses: actions/upload-artifact@v7
         if: failure() && steps.scope.outputs.code == 'true'
         with:
