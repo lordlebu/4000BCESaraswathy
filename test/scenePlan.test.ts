@@ -20,6 +20,7 @@ import {
   EDGE_STEP,
   EDGE_VARIANTS,
   FENCE_FIRST,
+  FIRST_YURT,
   FENCE_PIECES
 } from '../src/game/frames';
 import { band } from '../src/world/classify';
@@ -30,6 +31,47 @@ const key = (p: { x: number; y: number }) => `${p.x},${p.y}`;
 /** Whether an overdraw frame is one of the sixteen fence pieces rather than something growing. */
 const isFence = (frame: number): boolean =>
   frame >= FENCE_FIRST && frame < FENCE_FIRST + FENCE_PIECES;
+
+describe('a nomad camp is felt, not brick', () => {
+  /**
+   * **The camp's tiles are `settlement` like any other**, which is what earns them buildings, a
+   * fence and a name in the journal. The only thing separating a camp from a village is which
+   * frames it may draw -- people who are not from here do not build in mud brick.
+   *
+   * That makes it exactly the kind of rule that can be quietly removed: the ground stays right,
+   * the fence stays right, and the wrong buildings appear. Asserting that `World.camp` is
+   * *recorded* was not enough -- it passed with the frame picker ignoring it entirely.
+   */
+  it('draws only yurts on the tiles a camp claimed', () => {
+    const narmada = worlds.find((w) => w.id === 'field_map_narmada');
+    expect(narmada, 'no Narmada to test').toBeTruthy();
+    const world = narmada!.built.world;
+    expect(world.camp, 'the Narmada pitched no camp').toBeTruthy();
+
+    const huts = planHuts(world);
+    const inCamp = huts.filter(
+      (h) =>
+        Math.abs(h.x - world.camp!.at.x) <= world.camp!.radius &&
+        Math.abs(h.y - world.camp!.at.y) <= world.camp!.radius
+    );
+    expect(inCamp.length, 'nothing was drawn in the camp at all').toBeGreaterThan(0);
+    for (const hut of inCamp) {
+      expect(
+        hut.frame,
+        `a mud-brick hut (frame ${hut.frame}) stands in the nomad camp`
+      ).toBeGreaterThanOrEqual(FIRST_YURT);
+    }
+
+    // And the settled village still draws from the whole pool, or the rule has been applied
+    // everywhere rather than where it belongs.
+    const elsewhere = huts.filter((h) => !inCamp.includes(h));
+    expect(elsewhere.length, 'no village to compare against').toBeGreaterThan(0);
+    expect(
+      elsewhere.some((h) => h.frame < FIRST_YURT),
+      'the whole map is yurts -- the camp rule leaked'
+    ).toBe(true);
+  });
+});
 
 describe('nothing hides the traveller or what he is walking towards', () => {
   it('never puts undergrowth above a marker on the same tile', () => {

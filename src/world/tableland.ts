@@ -136,32 +136,27 @@ export function stampTableland(world: World, palette: ReadonlySet<BiomeId>): Poi
 }
 
 /**
- * How wide the herders' camp is. Small: a handful of tents, not a town.
+ * How wide the High Camp is.
  *
- * The settlement patch on the plain is a twelfth of the map across, because canon's Lothal is a
- * ruined city. This is four tiles of ground on a high tableland, which is what a summer camp is.
+ * **Two tents, so a radius of one.** Canon says two felt tents, and the number is the point rather
+ * than a detail: it is what makes the Narmada University's nine halls read as an institution
+ * instead of as a bigger version of the same thing. A five-tile diamond is a household.
  */
-const CAMP_RADIUS = 2;
+const CAMP_RADIUS = 1;
 
 /**
- * The camp on the tableland, where canon already put the people.
+ * The High Camp, where canon puts it.
  *
- * **The first version pitched this beside a drift, and it was anonymous.** A settlement patch four
- * tiles across on high ground, near some snow, belonging to nobody -- and eleven tiles away sat
- * `poi_herders_terraces`, which canon describes as *"stone steps up a hillside, grazed by goats"*
- * and gives to Marn. The plateau already had herders on it; the generator had simply put their
- * houses somewhere else.
+ * Two felt tents on the plateau and the **second settlement** on this map. The University has
+ * stood where it stands for four hundred years measuring things; this moves with the grass, and
+ * the archive has a word for the terraces and no word for this. Marn stands at both.
  *
- * So the camp is anchored to that place instead. Canon owns places, the generator owns layout,
- * and this is the seam: canon says *there are herders here*, the generator says *and their tents
- * stand on these tiles*.
+ * It uses the settlement biome, which is what earns it huts, a fence and a name in the journal --
+ * and then `World.camp` tells the renderer these particular settlement tiles are felt rather than
+ * brick. People who are not from here do not build in mud.
  *
- * Which means it runs **after** the points of interest are placed rather than before, because it
- * needs to know where one of them landed. That is the whole of the change; the stamping itself is
- * what it was.
- *
- * It uses the settlement biome rather than inventing a camp one, so it inherits everything a
- * settlement already gets: the huts and yurts, and the fence that goes round a whole perimeter.
+ * The tile canon placed keeps its own ground, so the arrival is the place rather than a tent
+ * standing on it.
  */
 export function stampCamp(world: World, palette: ReadonlySet<BiomeId>, at: Point | null): void {
   if (!palette.has('settlement') || !at) return;
@@ -170,19 +165,19 @@ export function stampCamp(world: World, palette: ReadonlySet<BiomeId>, at: Point
   if (!country) return;
   const onTop = new Set(country.map((p) => `${p.x},${p.y}`));
 
+  let pitched = 0;
   for (let dy = -CAMP_RADIUS; dy <= CAMP_RADIUS; dy += 1) {
     for (let dx = -CAMP_RADIUS; dx <= CAMP_RADIUS; dx += 1) {
       if (Math.abs(dx) + Math.abs(dy) > CAMP_RADIUS) continue;
+      if (dx === 0 && dy === 0) continue;
       const x = at.x + dx;
       const y = at.y + dy;
       const tile = world.tiles[y]?.[x];
-      // Only on the tableland, and never over the snow: a camp is pitched beside a drift because
-      // the drift is its water, and pitching on it would be pitching on the water supply.
+      // On the tableland, and never over a drift: the snow is the camp's water.
       if (!tile || !onTop.has(`${x},${y}`) || tile.biome === 'snow') continue;
-      // The terraces themselves keep their tile, so the place canon named is still the place the
-      // traveller arrives at rather than a hut standing on it.
-      if (dx === 0 && dy === 0) continue;
       tile.biome = 'settlement';
+      pitched += 1;
     }
   }
+  if (pitched > 0) world.camp = { at, radius: CAMP_RADIUS };
 }

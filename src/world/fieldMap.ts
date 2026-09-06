@@ -320,15 +320,18 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
     }
   }
 
-  // The herders' camp, where canon already put the herders.
+  // The High Camp, which canon now names.
+  //
+  // Two felt tents on the plateau, and the second settlement on this map: the University is nine
+  // halls that have measured things for four hundred years, and this is a household that moves
+  // with the grass. Marn stands at both, because the terraces are where his goats are in the day
+  // and this is where he sleeps.
   //
   // Here rather than with the drifts above, for the same reason the easing is here: it depends on
-  // where the content landed. Canon says there are herders on this plateau -- `poi_herders_terraces`
-  // is stone steps grazed by goats, and Marn stands on them -- and the generator says where their
-  // tents are. An earlier version pitched a camp beside a drift and belonged to nobody, eleven
-  // tiles from the place canon had named.
-  const herders = placed.find((p) => p.poi.id === 'poi_herders_terraces');
-  stampCamp(world, palette, herders?.at ?? null);
+  // where the content landed. An earlier version guessed a spot beside a drift, and then anchored
+  // to the terraces; canon naming the place settles it properly.
+  const highCamp = placed.find((p) => p.poi.id === 'poi_high_camp');
+  stampCamp(world, palette, highCamp?.at ?? null);
 
   // Ease the ground between the places, now that we know where they ended up.
   //

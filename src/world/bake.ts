@@ -38,7 +38,7 @@ import type { BiomeId, LandmarkTerrain, Point, River, Tile, World } from './type
  * sketches are tied to its ground, bumping this means bumping `SAVE_VERSION` too. That should be
  * rare; it is no longer the ordinary cost of changing the generator.
  */
-export const BAKE_VERSION = 1;
+export const BAKE_VERSION = 2;
 
 /**
  * Biomes in a fixed order, so a tile is one character.
@@ -113,6 +113,15 @@ export interface BakedWorld {
   rivers: (string | number)[][];
   /** `[poiId, x, y]` per placed point of interest. */
   placed: [string, number, number][];
+  /**
+   * The nomad camp, as `[x, y, radius]`, or null.
+   *
+   * **This is what bumped the format to 2.** Its tiles bake as `settlement` like any other, so a
+   * world restored under version 1 would draw a camp of mud-brick huts -- correct ground, wrong
+   * buildings, and no way to tell from the stored bytes. A version bump regenerates rather than
+   * mis-reads.
+   */
+  camp: [number, number, number] | null;
   unplaced: string[];
 }
 
@@ -136,6 +145,7 @@ export function bakeWorld(built: FieldMapWorld): BakedWorld {
 
   return {
     bakeVersion: BAKE_VERSION,
+    camp: world.camp ? [world.camp.at.x, world.camp.at.y, world.camp.radius] : null,
     seed: world.seed,
     fieldMapId: built.fieldMap.id,
     width: world.width,
@@ -199,6 +209,9 @@ export function restoreWorld(baked: BakedWorld, fieldMap: FieldMap): FieldMapWor
 
   const world: World = {
     seed: baked.seed,
+    camp: baked.camp
+      ? { at: { x: baked.camp[0], y: baked.camp[1] }, radius: baked.camp[2] }
+      : null,
     width: baked.width,
     height: baked.height,
     tiles,

@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.6.0",
+  "canon_version": "2.7.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -416,7 +416,8 @@
         "poi_basalt_quarry",
         "poi_walking_spring",
         "poi_herders_terraces",
-        "poi_cloud_stair"
+        "poi_cloud_stair",
+        "poi_high_camp"
       ],
       "neighbours": [
         "field_map_lothal"
@@ -697,6 +698,27 @@
       "description": "Stone steps up a hillside, grazed by goats, described in the archive as ornamental.",
       "arrival": "Two hundred steps of dry-laid stone, each one a little lower at the outer edge than the inner. Marn's goats are on them. The University's survey calls them a devotional feature and gives them a paragraph.",
       "notes": "The archaeology discovery and the restore target. A paragraph in the survey against two hundred courses of deliberate engineering is the whole argument of this map in one image.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "poi_high_camp",
+      "type": "point_of_interest",
+      "name": "The High Camp",
+      "field_map": "field_map_narmada",
+      "kind": "settlement",
+      "stands": "high",
+      "terrain": [
+        "hills",
+        "forest"
+      ],
+      "npcs": [
+        "npc_marn"
+      ],
+      "description": "Two felt tents on the plateau, pitched where the grazing is and moved when it is not.",
+      "arrival": "Two round tents of stretched felt, guyed against a wind that does not stop, with stones on the ropes and a ring of hurdles round the whole of it. Marn's people winter lower down and are up here from the thaw. The University has a word for the terraces and no word for this.",
+      "notes": "The second settlement on this map, and the counterweight to the first. The Narmada University is nine halls that measure things and has stood where it stands for four hundred years; this is two tents that move with the grass. Both are settlements, and the map says something by holding both -- the archive's whole difficulty is that it records what stays and has no method for what moves.\n\nDeliberately small. Two tents is a household, not a village: it is the number that makes the University's nine halls read as an institution rather than as a bigger version of the same thing.\n\nMarn stands here as well as on the terraces because they are one life. The steps are where the goats are in the day and this is where he sleeps, which is also why the game pitches this beside them rather than anywhere else on the plateau.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1092,7 +1114,8 @@
       "role": "herder",
       "found_at": [
         "poi_herders_terraces",
-        "poi_walking_spring"
+        "poi_walking_spring",
+        "poi_high_camp"
       ],
       "language": "maru",
       "would_settle": true,
