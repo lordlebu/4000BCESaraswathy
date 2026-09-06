@@ -264,6 +264,8 @@ export function generateWorld({
 
   return {
     seed,
+    // The generator makes ground; a camp is stamped onto it afterwards by `camps.ts`.
+    camp: null,
     width,
     height,
     tiles,

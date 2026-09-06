@@ -112,52 +112,62 @@ describe('snow on the tableland', () => {
   });
 });
 
-describe('the camp at the terraces', () => {
+describe('the High Camp', () => {
   /**
-   * **The camp belongs to somebody.** An earlier version pitched it beside a drift, which put a
-   * settlement of nobody's on high ground near some snow -- eleven tiles from
-   * `poi_herders_terraces`, which canon describes as "stone steps up a hillside, grazed by
-   * goats" and gives to Marn. The plateau already had herders; the generator had put their houses
-   * somewhere else.
+   * **The camp is canon's place now, and that is the third and last answer.**
    *
-   * So this asserts the seam rather than a distance: canon says *there are herders here*, the
-   * generator says *and their tents stand on these tiles*.
+   * It began as a settlement patch pitched beside a drift, belonging to nobody. Then it was
+   * anchored to `poi_herders_terraces`, which at least gave it Marn -- but the terraces are a
+   * `wilderness`, stone steps grazed by goats, not somewhere anyone sleeps. Canon now names the
+   * place itself: `poi_high_camp`, two felt tents, the **second settlement** on a map whose first
+   * is nine halls that have measured things for four hundred years.
+   *
+   * So this asserts the seam. Canon says where the camp is; the generator says which tiles its
+   * tents stand on.
    */
-  it('stands at the place canon named, without standing on it', () => {
+  it('pitches its tents at the place canon named, without standing on it', () => {
+    const camp = narmada.placed.find((p) => p.poi.id === 'poi_high_camp');
+    expect(camp, 'poi_high_camp was not placed at all').toBeTruthy();
+
     const country = new Set(tablelands(narmada.world)[0]!.map((p) => `${p.x},${p.y}`));
-    const camp = narmada.world.tiles
+    expect(country.has(`${camp!.at.x},${camp!.at.y}`), 'the camp is off the tableland').toBe(true);
+
+    const tents = narmada.world.tiles
       .flat()
-      .filter((t) => t.biome === 'settlement' && country.has(`${t.x},${t.y}`));
+      .filter(
+        (t) =>
+          t.biome === 'settlement' &&
+          Math.abs(t.x - camp!.at.x) + Math.abs(t.y - camp!.at.y) <= 1
+      );
+    expect(tents.length, 'no tents were pitched').toBeGreaterThan(0);
+    // **Two tents, not a village.** The number is canon's and it is the point: it is what makes
+    // the University's nine halls read as an institution rather than a bigger version of this.
+    expect(tents.length, 'the camp has grown into a village').toBeLessThanOrEqual(4);
 
-    expect(camp.length, 'no camp was pitched on the tableland').toBeGreaterThan(0);
-    // Small: a handful of tents rather than the university down on the plain.
-    expect(camp.length, 'the camp is a town').toBeLessThan(30);
-
-    const terraces = narmada.placed.find((p) => p.poi.id === 'poi_herders_terraces');
-    expect(terraces, 'the terraces were not placed at all').toBeTruthy();
-
-    // Wrapped around the place, not scattered near it.
-    const away = Math.min(
-      ...camp.map((c) => Math.abs(c.x - terraces!.at.x) + Math.abs(c.y - terraces!.at.y))
-    );
-    expect(away, 'the camp is not at the terraces').toBeLessThanOrEqual(2);
-
-    // **The terrace tile keeps its own ground.** A hut standing on the place canon named would
-    // make the arrival a building rather than the steps the prose describes.
+    // The place canon named keeps its own ground, so the arrival is the camp rather than a tent
+    // standing on it.
     expect(
-      narmada.world.tiles[terraces!.at.y]![terraces!.at.x]!.biome,
-      'a tent was pitched on the terraces themselves'
+      narmada.world.tiles[camp!.at.y]![camp!.at.x]!.biome,
+      'a tent was pitched on the place itself'
     ).not.toBe('settlement');
   });
 
   /**
-   * **Never on the snow**, which survives the move: a drift is the camp's water, and pitching on
-   * it would be pitching on the water supply.
-   *
-   * What did *not* survive is "beside the snow". Measured at the terraces, the nearest drift is
-   * fourteen tiles -- 5.3km, a morning's walk with goats rather than a step outside. That was my
-   * reasoning for where the camp went before canon's own place overruled it, and asserting it
-   * here would be keeping a justification the layout no longer has.
+   * **Felt, not brick.** The tents are `settlement` tiles like any other -- that is what earns
+   * them buildings, a fence and a name in the journal -- so the only thing separating a nomad
+   * camp from a village is which frames it may draw. `World.camp` is what carries that, and
+   * without it the renderer would put mud-brick huts on a plateau nobody builds on.
+   */
+  it('is marked as a camp, so it draws tents rather than houses', () => {
+    const camp = narmada.placed.find((p) => p.poi.id === 'poi_high_camp')!;
+    expect(narmada.world.camp, 'the camp was not recorded on the world').toBeTruthy();
+    expect(narmada.world.camp!.at).toEqual(camp.at);
+  });
+
+  /**
+   * Never on the snow: a drift is the camp's water, and pitching on it would be pitching on the
+   * water supply. Canon's own placement puts this beside one, which is the reasoning the earlier
+   * guessed position had and lost.
    */
   it('is never pitched on a drift', () => {
     const snow = new Set(

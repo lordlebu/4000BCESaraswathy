@@ -108,6 +108,25 @@ const KIND_FRAMES: Record<string, number> = {
  */
 export const HUT_VARIANTS = 6;
 
+/**
+ * The frames on the hut sheet that are yurts rather than mud-brick huts.
+ *
+ * The sheet is four huts then two yurts, and until now nothing needed to tell them apart -- a
+ * settlement drew from the whole pool and the mix was the point. A **nomad camp** is different:
+ * it is felt tents and nothing else, because people who are not from here do not build in brick.
+ *
+ * Stated as a range rather than a list, so adding a third yurt to the sheet is `HUT_VARIANTS` and
+ * this number, which are the two things a new building already touches.
+ */
+export const FIRST_YURT = 4;
+
+/** Which hut frame a tile draws, felt-only where a camp has no business having brick. */
+export function hutFrame(pick: number, feltOnly: boolean): number {
+  if (!feltOnly) return pick % HUT_VARIANTS;
+  const yurts = HUT_VARIANTS - FIRST_YURT;
+  return FIRST_YURT + (pick % yurts);
+}
+
 /** Which frame of `assets/terrain.png` this biome is drawn with. */
 /**
  * Crops per biome on `assets/terrain.png`. Matches TILE_VARIANTS in tools/build-terrain.js.

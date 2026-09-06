@@ -24,7 +24,7 @@ import {
   EDGE_STEP,
   FENCE_SIDE,
   fenceFrame,
-  HUT_VARIANTS,
+  hutFrame,
   ROW_SLOT,
   blends,
   cliffAt,
@@ -302,9 +302,17 @@ export function planHuts(world: FieldMapWorld['world']): Placement[] {
     for (let x = 0; x < world.width; x += 1) {
       if (world.tiles[y]![x]!.biome !== 'settlement') continue;
       if (tileHash(world.seed, x, y, 'hut-present') % HUT_DENSITY === 0) continue;
+      // **A nomad camp is felt and nothing else.** Its tiles are `settlement` like any other --
+      // that is what earns them huts, fences and a name in the journal -- so the only thing
+      // separating the two is which frames they may draw. People who are not from here do not
+      // build in mud brick.
+      const inCamp =
+        world.camp !== null &&
+        Math.abs(x - world.camp.at.x) <= world.camp.radius &&
+        Math.abs(y - world.camp.at.y) <= world.camp.radius;
       out.push({
         sheet: 'huts',
-        frame: tileHash(world.seed, x, y, 'hut-variant') % HUT_VARIANTS,
+        frame: hutFrame(tileHash(world.seed, x, y, 'hut-variant'), inCamp),
         x,
         y,
         // Huts sort by row like everything else that stands on the ground, in the undergrowth slot

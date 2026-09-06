@@ -91,6 +91,17 @@ export interface World {
   landmark: Landmark;
   /** Every river the carver cut, in carve order, named from its source. */
   rivers: River[];
+  /**
+   * The nomad camp, if this world has one.
+   *
+   * Its tiles are `settlement` like any other, because that is what gets them huts, fences and a
+   * name in the journal for free. What the renderer needs on top is *which* settlement tiles are
+   * felt rather than brick -- people who are not from here do not build in mud.
+   *
+   * A centre and a radius rather than a list of tiles: the patch is a diamond and stating it that
+   * way keeps the baked world small.
+   */
+  camp: { at: Point; radius: number } | null;
 }
 
 export interface GenerateOptions {

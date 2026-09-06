@@ -117,8 +117,11 @@ describe('the Narmada plateau', () => {
 
   it('builds ground with every authored place standing on it', () => {
     const built = buildFieldMap(narmada!);
-    expect(built.placed).toHaveLength(6);
-    expect(built.unplaced).toEqual([]);
+    // Counted from canon rather than pinned to a number. The pin was 6 and canon gained a
+    // seventh place -- the High Camp -- which made a passing test fail for the one reason it
+    // should not: content arriving. What this is actually for is the line below.
+    expect(built.placed).toHaveLength(narmada!.pointsOfInterest.length);
+    expect(built.unplaced, 'a place canon authored has nowhere to stand').toEqual([]);
   });
 
   it('puts each place on terrain canon allows', () => {
