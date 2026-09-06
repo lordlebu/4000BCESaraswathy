@@ -46,6 +46,11 @@ assets/source/dump/
 # committed. Keep the raws; re-running the build at a different size needs them.
 assets/source/plates/
 
+# Raw activity scenes, on the same footing: 3-9 MB each against the ~150 KB build that ships into
+# src/ui/scenes/. There are only five, so the weight is smaller than the plates -- but the rule is
+# what the file is, not how many there are, and a 28 MB folder nothing reads is a 28 MB folder.
+assets/source/scenes/
+
 # Raw portraits, on exactly the same footing and for the same reason: 784-2048px and 1.8-8.7 MB
 # each, against the ~50 KB the build writes into src/ui/portraits/ and ships. Eight people rather
 # than fifty-six species, so the total is smaller -- but a raw is still an input nothing ships, and

@@ -30,7 +30,7 @@ import { isPresent, type Routine } from './routine';
  * living thing at all. That is not a tidy invention -- it is the shape of `won_from`, and it is
  * why three gestures cover the set without a fourth for awkward cases.
  */
-export type Gesture = 'stoop' | 'stalk' | 'work';
+export type Gesture = 'stoop' | 'stalk' | 'work' | 'rest';
 
 /**
  * Which gesture this material asks for.
@@ -120,11 +120,20 @@ export function blockedReason(
   return null;
 }
 
-/** What the button says, and what the modal is titled. */
+/**
+ * What the button says, and what the modal is titled.
+ *
+ * `rest` is the quiet member of the family. It is not a gesture a material asks for -- `gestureFor`
+ * never returns it -- but it is the same *shape* of thing: you commit, something happens, and the
+ * journal says how it went. Putting it through the same modal is what makes the modal read as
+ * "this is what doing something looks like" rather than as a gathering minigame that happens to
+ * exist. It is also the gentlest way to teach that language, because nothing is at stake.
+ */
 export const GESTURE_VERB: Record<Gesture, string> = {
   stoop: 'Cut and gather',
   stalk: 'Follow it',
-  work: 'Work the ground'
+  work: 'Work the ground',
+  rest: 'Stop for the night'
 };
 
 /**
@@ -137,6 +146,10 @@ export const GESTURE_VERB: Record<Gesture, string> = {
 export function gestureLine(gesture: Gesture, materialName: string): string {
   const what = materialName.toLowerCase();
   switch (gesture) {
+    case 'rest':
+      // Named for the shelter rather than for a material: `SHELTER_LABEL` already says what kind
+      // of night this is, and the caller passes that word through.
+      return `${materialName}. The light is going and there is nothing more to be done with it today.`;
     case 'stoop':
       return `Taking ${what} asks for a steady hand and a moment's patience. Cut with the rhythm, not against it.`;
     case 'stalk':

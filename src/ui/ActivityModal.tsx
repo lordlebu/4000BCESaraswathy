@@ -57,6 +57,21 @@ export interface ActivityModalProps {
   /** The animal being followed, when there is one — its plate is the picture for a stalk. */
   creatureId: string | null;
   creatureName: string | null;
+  /**
+   * Which kind of this gesture it is, when that changes the picture.
+   *
+   * Only resting uses it today -- the shelter kind, so a night at a camp is not painted as a night
+   * on bare ground. `sceneFor` falls back to the plain gesture, so this is always optional.
+   */
+  variant?: string | null;
+  /**
+   * What this activity is *about*, when there is no material to name it.
+   *
+   * A rest has an empty `promised` — nothing is won — so without this the prose reads "It. The
+   * light is going", and the shelter label ("Make camp for the night") is the phrase the rest of
+   * the game already uses for exactly this.
+   */
+  subject?: string | null;
   onClose: () => void;
   /** Called once, with what the player actually leaves with. */
   onFinish: (taken: Taking[], line: string) => void;
@@ -70,6 +85,8 @@ export function ActivityModal({
   roll,
   creatureId,
   creatureName,
+  variant,
+  subject,
   onClose,
   onFinish
 }: ActivityModalProps) {
@@ -173,8 +190,9 @@ export function ActivityModal({
 
   // A stalk shows the animal itself where a plate exists, because the animal *is* the subject --
   // the gesture scene is the fallback rather than the other way round.
-  const picture = (gesture === 'stalk' && creatureId ? plateFor(creatureId) : null) ?? sceneFor(gesture);
-  const what = promised[0]?.material.name ?? 'it';
+  const picture =
+    (gesture === 'stalk' && creatureId ? plateFor(creatureId) : null) ?? sceneFor(gesture, variant);
+  const what = subject ?? promised[0]?.material.name ?? 'it';
   const band = attempt.bands[Math.min(attempt.beats.length, BEATS - 1)] ?? 0;
 
   return (

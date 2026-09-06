@@ -239,12 +239,12 @@ describe('the crop takes the bottom edge only when that is free', () => {
   // A watermark is a few hundred pixels in a corner. Feet are the picture.
 
   it('leaves a square source completely alone', () => {
-    expect(squareBox(1254, 1254)).toEqual({ x: 0, y: 0, side: 1254, trimmed: 0, inset: 0 });
+    expect(squareBox(1254, 1254)).toEqual({ x: 0, y: 0, side: 1254, tall: 1254, trimmed: 0, inset: 0 });
   });
 
   it('leaves a landscape source at full height, cropping only the sides', () => {
     const box = squareBox(1600, 900);
-    expect(box).toEqual({ x: 350, y: 0, side: 900, trimmed: 0, inset: 0 });
+    expect(box).toEqual({ x: 350, y: 0, side: 900, tall: 900, trimmed: 0, inset: 0 });
   });
 
   it('drops the bottom of a portrait, where the signature is and the height is spare', () => {
@@ -395,8 +395,38 @@ describe('a painted border is stripped, and a pale sky is not', () => {
 
   it('shifts the square out by the inset it was given', () => {
     // A 1000px source with a 100px frame leaves an 800px picture, taken whole and offset by 100.
-    expect(squareBox(1000, 1000, 100)).toEqual({ x: 100, y: 100, side: 800, trimmed: 0, inset: 100 });
+    expect(squareBox(1000, 1000, 100)).toEqual({ x: 100, y: 100, side: 800, tall: 800, trimmed: 0, inset: 100 });
     // And with no inset, nothing changes from the unframed case.
-    expect(squareBox(1000, 1000, 0)).toEqual({ x: 0, y: 0, side: 1000, trimmed: 0, inset: 0 });
+    expect(squareBox(1000, 1000, 0)).toEqual({ x: 0, y: 0, side: 1000, tall: 1000, trimmed: 0, inset: 0 });
+  });
+});
+
+/**
+ * The 4:3 crop the activity scenes use.
+ *
+ * **The only kind that is not square.** A plate is one animal standing still and a portrait is a
+ * face; a scene is a pair of hands at work with ground around them, and squaring that throws the
+ * work away. `aspect` defaults to 1, so every existing caller is untouched -- which is what the
+ * assertions above are now pinning as well.
+ */
+describe('a landscape crop for an activity scene', () => {
+  it('takes a 4:3 slice of a square source, biased upward', () => {
+    const box = squareBox(1024, 1024, 0, 4 / 3);
+    expect(box.side, 'the full width should be kept').toBe(1024);
+    expect(box.tall, '4:3 of 1024 is 768').toBe(768);
+    // Biased upward for the same reason a plate is: the subject sits above the middle, so a
+    // centred crop takes the top off it.
+    expect(box.y).toBeLessThan((1024 - 768) / 2);
+  });
+
+  it('leaves a source already at 4:3 completely alone', () => {
+    expect(squareBox(1024, 768, 0, 4 / 3)).toEqual({
+      x: 0,
+      y: 0,
+      side: 1024,
+      tall: 768,
+      trimmed: 0,
+      inset: 0
+    });
   });
 });

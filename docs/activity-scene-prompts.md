@@ -1,12 +1,17 @@
 # Activity scene prompts — ready to paste
 
-Three paintings, one per gesture. They fill the top of the activity modal, above the prose.
+Four paintings, one per gesture. They fill the top of the activity modal, above the prose.
+
+Resting is one of them. It is not a *gathering* gesture -- nothing is won and nothing can go wrong
+-- but it is the same shape of thing: you commit, something happens, and the journal says how the
+night went. Giving it the same treatment is what makes the modal read as "this is what doing
+something looks like" rather than as a minigame bolted onto gathering.
 
 Built the same way as species plates: put the raw generation in `assets/source/scenes/`, then the
-file goes to `src/ui/scenes/<gesture>.png`. Named exactly `stoop`, `stalk`, `work` — the glob keys
+file goes to `src/ui/scenes/<gesture>.png`. Named exactly `stoop`, `stalk`, `work`, `rest` — the glob keys
 on the filename and nothing else.
 
-**These are the only three.** Unlike the plate queue there is no priority order and no backlog: the
+**These are the only four.** Unlike the plate queue there is no priority order and no backlog: the
 set is finishable in one sitting. Nothing is blocked while they are missing — a gesture with no
 painting opens and plays with a blank parchment panel where the picture goes.
 
@@ -42,6 +47,10 @@ Copy this once, then append one **subject line**.
 **`work.png`**
 > Two hands striking a river cobble with a hammerstone on a stone anvil, pale chips and dust in
 > the air, a scatter of struck flakes and a half-worked nodule on the bare ground beside it.
+
+**`rest.png`**
+> Hands unrolling a woven reed sleeping mat on flat ground at dusk, a satchel and an unlit oil lamp
+> set down beside it, long blue evening shadows and the last warm light low across the grass.
 
 ---
 

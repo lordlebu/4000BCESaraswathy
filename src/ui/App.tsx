@@ -137,7 +137,12 @@ export function App() {
    * another, which is exactly the "promising two reeds and handing over one" fault `Taking`
    * exists to prevent.
    */
-  const [activity, setActivity] = useState<{ taking: Taking[]; day: number } | null>(null);
+  const [activity, setActivity] = useState<{
+    taking: Taking[];
+    day: number;
+    /** Set when this is a night rather than a gathering. Carries the shelter kind for the picture. */
+    resting?: string;
+  } | null>(null);
   /**
    * Whether the front door is still closed.
    *
@@ -512,7 +517,12 @@ export function App() {
    * that disagree eventually.
    */
   const activityGesture = useMemo<Gesture | null>(
-    () => (activity ? gestureFor(activity.taking[0]!.material, isAnimal) : null),
+    () =>
+      activity
+        ? activity.resting
+          ? 'rest'
+          : gestureFor(activity.taking[0]!.material, isAnimal)
+        : null,
     [activity]
   );
 
@@ -582,6 +592,7 @@ export function App() {
         detail: takeable ?? undefined,
         mark: gesture === 'stalk' ? '🐾' : gesture === 'work' ? '⛏' : '❀',
         blocked: takeable ? cannotStalk : 'Nothing on this ground to take.',
+        key: 'E',
         onDo: pickUp
       },
       {
@@ -592,10 +603,51 @@ export function App() {
         // `canCamp` is the rules layer's answer, not this panel's guess -- resting is refused
         // in daylight because a night passed at noon is not a night.
         blocked: arrival?.canCamp ? null : 'Not yet -- there is daylight left.',
-        onDo: () => EventBus.emitEvent('camp', {})
+        key: 'R',
+        // Through the same modal as everything else. Nothing is won and nothing can go wrong, so
+        // it settles on its own -- but it is the same shape of act, and the night should look like
+        // one rather than happening between two frames.
+        onDo: () => setActivity({ taking: [], day: arrival?.day ?? 0, resting: shelter })
       }
     ];
   }, [underfoot, arrival, nodes, pickUp, currentCreature, moment]);
+
+  /**
+   * A key for each thing you can do here.
+   *
+   * **Driven off `tileActions` rather than beside it**, so a key and a tap can never come to mean
+   * different things -- including the blocked case: a hotkey for an action whose row says "there is
+   * daylight left" does nothing, exactly as pressing the greyed row does. A second list of what the
+   * keys do would be a second copy of the rules, and this codebase has paid for that kind of copy
+   * before.
+   *
+   * E and R, because W A S D are the walk and the arrows are captured for it. They are also the
+   * genre's own keys -- E interacts nearly everywhere -- and this game has no other letter bound.
+   *
+   * `typing()` in `WorldScene` guards the walk the same way and states the reason: searching the
+   * album for a plant with an "a" in it used to walk the traveller across the map. A hotkey on the
+   * document has exactly that hazard, so the check is repeated here rather than assumed.
+   */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = document.activeElement as HTMLElement | null;
+      const tag = el?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el?.isContentEditable) return;
+      // A modal is open: it owns the keyboard, and Space is its own. Acting on the map underneath
+      // something the player is reading is how a stray press loses a run.
+      if (activity) return;
+
+      const wanted = e.code === 'KeyE' ? 'take' : e.code === 'KeyR' ? 'rest' : null;
+      if (!wanted) return;
+      const action = tileActions.find((a) => a.id === wanted);
+      if (!action || action.blocked) return;
+      e.preventDefault();
+      action.onDo();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [tileActions, activity]);
 
   /**
    * Whether the player has been shown how to make something.
@@ -893,16 +945,31 @@ export function App() {
           open
           gesture={activityGesture}
           promised={activity.taking}
-          difficulty={difficultyOf(
-            activity.taking[0]!.material,
-            activityGesture,
-            currentCreature ? routineFor(currentCreature, moment) : null
-          )}
+          difficulty={
+            // A night is not a test of anybody's hands. There is nothing to aim at, so the band is
+            // at its widest and the beats pass on their own -- which is the whole of what makes
+            // this the gentlest place to learn what the modal is.
+            activity.resting
+              ? 0
+              : difficultyOf(
+                  activity.taking[0]!.material,
+                  activityGesture,
+                  currentCreature ? routineFor(currentCreature, moment) : null
+                )
+          }
           roll={activityRoll}
           creatureId={activityGesture === 'stalk' ? currentCreature?.id ?? null : null}
           creatureName={activityGesture === 'stalk' ? currentCreature?.name ?? null : null}
-          onClose={() => setActivity(null)}
-          onFinish={finishTaking}
+          variant={activity.resting ?? null}
+          subject={activity.resting ? SHELTER_LABEL[activity.resting] ?? 'Stop for the night' : null}
+          onClose={() => {
+            setActivity(null);
+            // The night is spent on the way out rather than when the run settles, so a player who
+            // changes their mind has not already slept. `camp` is the rules layer's own event and
+            // it still decides whether a night is legal.
+            if (activity.resting) EventBus.emitEvent('camp', {});
+          }}
+          onFinish={activity.resting ? () => {} : finishTaking}
         />
       )}
 
