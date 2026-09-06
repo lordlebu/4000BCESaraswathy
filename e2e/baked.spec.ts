@@ -10,6 +10,23 @@
 // show the rewritten ground: proof that it is reading the store rather than regenerating.
 
 import { expect, test } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+
+/**
+ * The bake format version, **read out of the source rather than written here as a literal**.
+ *
+ * Both assertions below said `1`. Bumping the format to 2 -- a normal thing to do, and done for a
+ * good reason -- turned two correct tests red for stating a number instead of a rule. What they
+ * are actually for is that the stored payload carries *the version the code writes*.
+ *
+ * Read with a regex rather than imported, which looks worse and is not. `import { BAKE_VERSION }
+ * from '../src/world/bake'` pulls in `content/places.ts` and with it `data/canon/places.json`,
+ * and Playwright's Node loader refuses a JSON import without an import attribute: the whole spec
+ * file stops being discovered, which is a far quieter failure than a wrong number.
+ */
+const BAKE_VERSION = Number(
+  /export const BAKE_VERSION = (\d+)/.exec(readFileSync('src/world/bake.ts', 'utf8'))?.[1]
+);
 
 const SEED = 'bake-e2e';
 const MAP = 'field_map_lothal';
@@ -28,7 +45,7 @@ test('a world is stored on the first visit and read back on the next', async ({ 
   expect(stored, 'nothing was baked on the first load').toBeTruthy();
 
   const baked = JSON.parse(stored!) as { biomes: string[]; bands: string[]; bakeVersion: number };
-  expect(baked.bakeVersion).toBe(1);
+  expect(baked.bakeVersion).toBe(BAKE_VERSION);
   expect(baked.biomes.length).toBeGreaterThan(0);
   // One character per tile is the whole size argument for doing this at all.
   expect(baked.biomes[0]!.length).toBe(baked.biomes.length);
@@ -86,5 +103,5 @@ test('an unreadable bake is discarded and the world is generated again', async (
   await expect(page.locator('.map-surface canvas')).toBeVisible();
   const rewritten = await page.evaluate((k) => localStorage.getItem(k), KEY);
   expect(rewritten).not.toBe('{ not json');
-  expect(JSON.parse(rewritten!).bakeVersion).toBe(1);
+  expect(JSON.parse(rewritten!).bakeVersion).toBe(BAKE_VERSION);
 });
