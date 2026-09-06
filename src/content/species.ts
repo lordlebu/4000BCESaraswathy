@@ -88,6 +88,19 @@ export function metSpecies(id: string): Creature | Flora | null {
   return speciesById.get(id) ?? null;
 }
 
+/**
+ * Whether this species id is an animal rather than a plant.
+ *
+ * Here rather than in `gestures.ts` because this is a fact about the species tables, and that
+ * module must be able to answer a question about a *material* without importing them. A set
+ * lookup on the ids canon already exported -- no new data, no new field.
+ */
+const animalIds = new Set(creatures.map((c) => c.id));
+
+export function isAnimal(speciesId: string): boolean {
+  return animalIds.has(speciesId);
+}
+
 export function creaturesIn(biome: BiomeId): Creature[] {
   return creaturesByBiome[biome] ?? [];
 }

@@ -79,17 +79,34 @@ export function ActivityModal({
   const closeRef = useRef<HTMLButtonElement>(null);
   const startedAt = useRef(0);
 
-  // A fresh attempt every time the modal opens. Keyed on `open` rather than built in the parent,
-  // so closing and reopening on the same tile deals new bands rather than resuming a half-played
-  // run the player has forgotten the state of.
+  /**
+   * A fresh attempt every time the modal opens -- and **only** when it opens.
+   *
+   * Keyed on `open` rather than built in the parent, so closing and reopening on the same tile
+   * deals new bands rather than resuming a half-played run the player has forgotten the state of.
+   *
+   * `roll`, `gesture` and `difficulty` are deliberately **not** dependencies, and that is a fix
+   * rather than an oversight. They were, and a caller passing an inline `roll` -- a new function
+   * identity on every render -- re-dealt the bands on every tick of this component's own timer.
+   * Beats never accumulated and the run never settled. Nine unit tests passed throughout, because
+   * none of them re-rendered mid-run; the browser found it in one click.
+   *
+   * Reading them from a ref keeps the fix local. A caller should still memoise, but forgetting to
+   * can no longer break the run -- which is the right place for the guarantee, because the
+   * component is the thing that knows a run is in flight.
+   */
+  const latest = useRef({ gesture, difficulty, roll });
+  latest.current = { gesture, difficulty, roll };
+
   useEffect(() => {
     if (!open) return;
-    setAttempt(begin(gesture, difficulty, roll));
+    const { gesture: g, difficulty: d, roll: r } = latest.current;
+    setAttempt(begin(g, d, r));
     setMarker(0);
     setDone(null);
     startedAt.current = performance.now();
     closeRef.current?.focus();
-  }, [open, gesture, difficulty, roll]);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -177,7 +194,10 @@ export function ActivityModal({
         <div className="activity-body">
           <h2 className="activity-title">{GESTURE_VERB[gesture]}</h2>
           <p className="activity-prose">
-            {done ?? gestureLine(gesture, creatureName ?? what)}
+            {/* Only a stalk is about the animal; everything else is about the material. Passing
+                the creature regardless put "Painted Deer comes out of the ground" on a flint
+                quarry, which the browser caught and no unit test could. */}
+            {done ?? gestureLine(gesture, gesture === 'stalk' ? creatureName ?? what : what)}
           </p>
 
           {!done && (

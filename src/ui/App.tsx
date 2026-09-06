@@ -29,7 +29,7 @@ import { WorkshopPanel } from './WorkshopPanel';
 import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
 import { carry, gatheredLine, standingLine } from '../content/gathering';
-import { conditionOf, draw, noNodes, takeableAt } from '../content/nodes';
+import { conditionOf, draw, noNodes, takeableAt, type Taking } from '../content/nodes';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
@@ -41,6 +41,16 @@ import { advance, answer, craft, hear, knowsRecipe, type WorldMoment } from '../
 import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import { characterFor } from '../game/player';
 import type { World } from '../world/types';
+import { tileHash } from '../world/rng';
+import { isAnimal } from '../content/species';
+import {
+  GESTURE_VERB,
+  blockedReason,
+  difficultyOf,
+  gestureFor,
+  type Gesture
+} from '../content/gestures';
+import { ActivityModal } from './ActivityModal';
 
 /**
  * Which country to open on, for a link that wants to start somewhere other than Lothal.
@@ -117,6 +127,17 @@ export function App() {
   // What the traveller has drawn down. The one piece of world state a save has to hold, because
   // it is the only thing about a tile that cannot be recomputed from the seed.
   const [nodes, setNodes] = useState(initialJourney.current.nodes ?? noNodes());
+
+  /**
+   * The activity being played, or null when none is.
+   *
+   * Holds what the tile promised at the moment the player committed, rather than recomputing it
+   * when the run settles. `takeableAt` is a function of the day and the nodes, and both can move
+   * under a modal that is open -- so re-asking would let a player see one offer and receive
+   * another, which is exactly the "promising two reeds and handing over one" fault `Taking`
+   * exists to prevent.
+   */
+  const [activity, setActivity] = useState<{ taking: Taking[]; day: number } | null>(null);
   /**
    * Whether the front door is still closed.
    *
@@ -455,12 +476,63 @@ export function App() {
     const taking = takeableAt(nodes, underfoot.seed, underfoot.at, underfoot.biome, today);
     if (taking.length === 0) return;
 
-    setSatchel((s) => carry(s, taking));
-    setNodes((n) => draw(n, underfoot.seed, underfoot.at, taking, today));
-    // Noted rather than announced. The whole progression of this game is a written journal, so
-    // a good cut is a sentence in the field notes and not a number in a badge.
-    setMemory(gatheredLine(underfoot.seed, underfoot.at, underfoot.biome, taking) ?? '');
+    // **Opening a modal rather than taking.** Everything below this line used to run here, and
+    // that was the whole of the finding: a reed and a beedu manta came off the same click, so a
+    // player looking for the hunting could not find it because there was no gesture to see.
+    // `finishTaking` now holds what this did, and runs when the activity settles.
+    setActivity({ taking, day: today });
   }, [underfoot, nodes, arrival?.day]);
+
+  /**
+   * What the old single click did, run once the activity is over.
+   *
+   * `taken` comes from `settle` rather than from `takeableAt`, so a clean run's extra is carried
+   * *and* drawn down -- the two must agree or the satchel and the ground disagree about what left
+   * the tile. The floor is `settle`'s: this can never be less than the click gave.
+   */
+  const finishTaking = useCallback(
+    (taken: Taking[], line: string) => {
+      if (!underfoot || taken.length === 0) return;
+      const today = arrival?.day ?? 0;
+      setSatchel((s) => carry(s, taken));
+      setNodes((n) => draw(n, underfoot.seed, underfoot.at, taken, today));
+      // Noted rather than announced. The whole progression of this game is a written journal, so
+      // a good cut is a sentence in the field notes and not a number in a badge. The activity's
+      // own line wins when it has one, because it says how the hands went as well as what was cut.
+      setMemory(line || gatheredLine(underfoot.seed, underfoot.at, underfoot.biome, taken) || '');
+    },
+    [underfoot, arrival?.day]
+  );
+
+  /**
+   * Which gesture the running activity is, from the material it is about.
+   *
+   * Derived rather than stored on the activity, so it cannot drift from the material the modal is
+   * actually settling -- the two would be a pair of facts about the same thing, and pairs like
+   * that disagree eventually.
+   */
+  const activityGesture = useMemo<Gesture | null>(
+    () => (activity ? gestureFor(activity.taking[0]!.material, isAnimal) : null),
+    [activity]
+  );
+
+  /**
+   * The seeded roll the activity deals its bands from.
+   *
+   * **Memoised because its identity is load-bearing.** The modal deals a fresh attempt in an
+   * effect keyed on this function, so an inline arrow -- a new identity every render -- re-deals
+   * the bands on every tick of its own timer. The run then never accumulates a beat and never
+   * settles, which is precisely what the browser showed while all 900 unit tests passed: the
+   * component is correct and the caller was re-mounting it under itself.
+   */
+  const activityRoll = useMemo(
+    () =>
+      underfoot && activity
+        ? (salt: string) =>
+            tileHash(underfoot.seed, underfoot.at.x, underfoot.at.y, `${salt}:${activity.day}`)
+        : () => 0,
+    [underfoot, activity]
+  );
 
   /**
    * Everything that can be done on the tile under foot, in one list.
@@ -489,13 +561,27 @@ export function App() {
       : null;
     const shelter = arrival?.shelter ?? 'bedroll';
 
+    // **The row says which gesture it is before you press it.** "Follow it" and "Cut and gather"
+    // are different promises, and a player who cannot tell which one a tile is offering is back
+    // in the position this whole layer exists to fix. The gesture comes from the first material
+    // on offer, which is the one the modal will be about.
+    const first = left[0]?.material ?? null;
+    const gesture = first ? gestureFor(first, isAnimal) : null;
+    const routine = currentCreature ? routineFor(currentCreature, moment) : null;
+    // A stalk is refused when the animal is only sign. `blockedReason` writes the sentence,
+    // because the reason is the teaching -- it sends the player back at a better hour.
+    const cannotStalk =
+      gesture && first
+        ? blockedReason(gesture, routine, currentCreature?.name ?? null)
+        : null;
+
     return [
       {
         id: 'take',
-        label: 'Take what is here',
+        label: gesture ? GESTURE_VERB[gesture] : 'Take what is here',
         detail: takeable ?? undefined,
-        mark: '❀',
-        blocked: takeable ? null : 'Nothing on this ground to take.',
+        mark: gesture === 'stalk' ? '🐾' : gesture === 'work' ? '⛏' : '❀',
+        blocked: takeable ? cannotStalk : 'Nothing on this ground to take.',
         onDo: pickUp
       },
       {
@@ -509,7 +595,7 @@ export function App() {
         onDo: () => EventBus.emitEvent('camp', {})
       }
     ];
-  }, [underfoot, arrival, nodes, pickUp]);
+  }, [underfoot, arrival, nodes, pickUp, currentCreature, moment]);
 
   /**
    * Whether the player has been shown how to make something.
@@ -799,6 +885,26 @@ export function App() {
         open={interrupts.ending}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'ending' })}
       />
+
+      {/* The activity. Mounted only while one is running, so every open deals fresh bands rather
+          than resuming a run the player has forgotten the state of. */}
+      {activity && underfoot && activityGesture && (
+        <ActivityModal
+          open
+          gesture={activityGesture}
+          promised={activity.taking}
+          difficulty={difficultyOf(
+            activity.taking[0]!.material,
+            activityGesture,
+            currentCreature ? routineFor(currentCreature, moment) : null
+          )}
+          roll={activityRoll}
+          creatureId={activityGesture === 'stalk' ? currentCreature?.id ?? null : null}
+          creatureName={activityGesture === 'stalk' ? currentCreature?.name ?? null : null}
+          onClose={() => setActivity(null)}
+          onFinish={finishTaking}
+        />
+      )}
 
       <Overworld
         current={fieldMapId}
