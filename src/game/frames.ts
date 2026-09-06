@@ -111,20 +111,30 @@ export const HUT_VARIANTS = 6;
 /**
  * The frames on the hut sheet that are yurts rather than mud-brick huts.
  *
- * The sheet is four huts then two yurts, and until now nothing needed to tell them apart -- a
- * settlement drew from the whole pool and the mix was the point. A **nomad camp** is different:
- * it is felt tents and nothing else, because people who are not from here do not build in brick.
+ * The sheet is four huts then two yurts, and the split is **exclusive in both directions**: a
+ * nomad camp is felt and nothing else, and a village is brick and nothing else. People who are
+ * not from here do not build in mud, and people who are do not live under felt.
+ *
+ * The first version only enforced the camp half, on the reasoning that a settlement drawing from
+ * the whole pool made a pleasing mix. It does not: it put yurts in Lothal, a Harappan port with
+ * a granary and a dock, where a felt tent reads as a different culture pitched in the middle of
+ * town. Culture is not decoration, and a mixed pool says something canon does not.
  *
  * Stated as a range rather than a list, so adding a third yurt to the sheet is `HUT_VARIANTS` and
  * this number, which are the two things a new building already touches.
  */
 export const FIRST_YURT = 4;
 
-/** Which hut frame a tile draws, felt-only where a camp has no business having brick. */
+/**
+ * Which hut frame a tile draws: felt in a camp, brick in a village, never the other way.
+ *
+ * `feltOnly` is really "is this a nomad camp", and it selects between two disjoint ranges rather
+ * than between a subset and the whole -- which is what makes the brick side a guarantee instead
+ * of a probability.
+ */
 export function hutFrame(pick: number, feltOnly: boolean): number {
-  if (!feltOnly) return pick % HUT_VARIANTS;
-  const yurts = HUT_VARIANTS - FIRST_YURT;
-  return FIRST_YURT + (pick % yurts);
+  if (feltOnly) return FIRST_YURT + (pick % (HUT_VARIANTS - FIRST_YURT));
+  return pick % FIRST_YURT;
 }
 
 /** Which frame of `assets/terrain.png` this biome is drawn with. */

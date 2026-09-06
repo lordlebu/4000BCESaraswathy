@@ -12,6 +12,8 @@ import {
   EDGE_ORDER,
   EDGE_VARIANTS,
   HUT_VARIANTS,
+  FIRST_YURT,
+  hutFrame,
   blends,
   edgeMaskFrame,
   DECOR_ORDER,
@@ -115,6 +117,38 @@ describe('every sheet is built to the same grid', () => {
       pngSize('assets/huts.png').width / hut,
       'HUT_VARIANTS does not match the sheet -- a building is on it and never drawn'
     ).toBe(HUT_VARIANTS);
+  });
+
+  it('never puts a yurt in a village, or a brick hut in a camp', () => {
+    // **The half of this rule that was missing shipped yurts to Lothal.**
+    //
+    // The first version made a camp felt-only and left a settlement drawing from the whole pool,
+    // which sounded like a pleasing mix and was actually a third of every village drawing tents.
+    // Lothal is a Harappan port with a granary and a dock; a felt tent in it reads as somebody
+    // else's culture pitched in the middle of town.
+    //
+    // So the assertion runs both ways over the whole hash space, because the fault was never
+    // that some particular tile drew wrong -- it was that a range overlapped.
+    for (let pick = 0; pick < HUT_VARIANTS * 8; pick += 1) {
+      const village = hutFrame(pick, false);
+      expect(village, `a village drew a yurt at pick ${pick}`).toBeLessThan(FIRST_YURT);
+      expect(village, `a village drew off the sheet at pick ${pick}`).toBeGreaterThanOrEqual(0);
+
+      const camp = hutFrame(pick, true);
+      expect(camp, `a camp drew brick at pick ${pick}`).toBeGreaterThanOrEqual(FIRST_YURT);
+      expect(camp, `a camp drew off the sheet at pick ${pick}`).toBeLessThan(HUT_VARIANTS);
+    }
+
+    // Both kinds still reach every frame they are entitled to, so this cannot be satisfied by
+    // pinning either side to a single building.
+    const villages = new Set<number>();
+    const camps = new Set<number>();
+    for (let pick = 0; pick < HUT_VARIANTS * 8; pick += 1) {
+      villages.add(hutFrame(pick, false));
+      camps.add(hutFrame(pick, true));
+    }
+    expect(villages.size, 'a village no longer varies its huts').toBe(FIRST_YURT);
+    expect(camps.size, 'a camp no longer varies its tents').toBe(HUT_VARIANTS - FIRST_YURT);
   });
 
   it('carries every biome at every variant', () => {
