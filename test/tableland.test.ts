@@ -12,9 +12,23 @@ import { tablelands } from '../src/world/tableland';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { THRESHOLDS } from '../src/world/classify';
+import { DEFAULT_SEED } from '../src/ui/seed';
 
-const worlds = fieldMaps.map((map) => ({ id: map.id, built: buildFieldMap(map) }));
-const narmada = buildFieldMap(fieldMap('field_map_narmada')!);
+/**
+ * **Built with the seed a player actually has**, not `buildFieldMap`'s default.
+ *
+ * That default is the map's own id, which makes a stable world for a test that only cares about
+ * shape -- and a *different* world from the one on screen. Measuring the tableland under it gave
+ * numbers that disagreed with the running game at the same coordinates, and the hunt went through
+ * the bake, the URL parameters and the scene wiring before the answer turned out to be two seeds.
+ *
+ * Anything asserting what a player sees has to use this.
+ */
+const worlds = fieldMaps.map((map) => ({
+  id: map.id,
+  built: buildFieldMap(map, { seed: DEFAULT_SEED })
+}));
+const narmada = buildFieldMap(fieldMap('field_map_narmada')!, { seed: DEFAULT_SEED });
 
 describe('the country inside the scarp', () => {
   /**
@@ -128,7 +142,7 @@ describe('the camp beside the snow', () => {
   it('is the same camp every time this world is built', () => {
     // The world is baked once and kept, so a camp that moved between builds would move under a
     // journey already walking on it.
-    const again = buildFieldMap(fieldMap('field_map_narmada')!);
+    const again = buildFieldMap(fieldMap('field_map_narmada')!, { seed: DEFAULT_SEED });
     const one = narmada.world.tiles.flat().filter((t) => t.biome === 'settlement').map((t) => `${t.x},${t.y}`);
     const two = again.world.tiles.flat().filter((t) => t.biome === 'settlement').map((t) => `${t.x},${t.y}`);
     expect(two).toEqual(one);
