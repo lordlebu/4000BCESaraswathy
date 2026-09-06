@@ -358,6 +358,64 @@ describe('the overdraw cannot swallow the traveller', () => {
   });
 });
 
+describe('a conifer is widest at its skirt', () => {
+  /**
+   * **The hill pine was drawn upside down for as long as it existed**, and shipped that way.
+   *
+   * Its loop started at the base with a width of 1 and grew as it climbed, so it drew a cone
+   * balanced on its point: skirt at the crown, tip in the earth. Nothing caught it because
+   * nothing stood beside it -- on ochre ground and scree a dark green wedge reads as *a tree*
+   * whichever way up it is. It became obvious the moment the snow pine was drawn next to it.
+   *
+   * Measured off the built sheet rather than trusted from the drawing code, which is the same
+   * reason `frameTops` measures the overdraw ceiling: the point is to catch the next edit.
+   *
+   * Only the conifers. A palm *is* wider at the crown -- fronds on a bare trunk -- and so are the
+   * mangroves and the lily pads, which is why this names its subjects rather than sweeping the
+   * sheet.
+   */
+  const widths = (frame: number): number[] => {
+    const { rows, width, stride } = decode('assets/features.png');
+    const cell = GRID;
+    const cols = width / cell;
+    const ox = (frame % cols) * cell;
+    const oy = Math.floor(frame / cols) * cell;
+    const out: number[] = [];
+    for (let y = 0; y < cell; y += 1) {
+      let lo = Infinity;
+      let hi = -1;
+      for (let x = 0; x < cell; x += 1) {
+        if (rows[(oy + y) * stride + (ox + x) * 4 + 3]! >= 128) {
+          if (x < lo) lo = x;
+          if (x > hi) hi = x;
+        }
+      }
+      out.push(hi < 0 ? 0 : hi - lo + 1);
+    }
+    return out;
+  };
+
+  it.each([
+    ['the hill pine', FEATURES.pine!.frames[0]!],
+    ['the snow pine', FEATURES.snowPine!.frames[0]!]
+  ])('%s is wider at the foot than at the crown', (what, frame) => {
+    const drawn = widths(frame)
+      .map((w, y) => [y, w] as const)
+      .filter(([, w]) => w > 0);
+    expect(drawn.length, `${what} drew nothing`).toBeGreaterThan(8);
+
+    // Drop the bottom fifth, which is the trunk rather than the canopy.
+    const last = drawn[drawn.length - 1]![0];
+    const span = last - drawn[0]![0];
+    const body = drawn.filter(([y]) => y <= last - span * 0.18);
+    const third = Math.floor(body.length / 3);
+    const crown = Math.max(...body.slice(0, third).map(([, w]) => w));
+    const skirt = Math.max(...body.slice(third * 2).map(([, w]) => w));
+
+    expect(skirt, `${what} is wider at the crown -- it is upside down`).toBeGreaterThan(crown);
+  });
+});
+
 describe('features may be tall because they stand aside', () => {
   // The trade this layer makes. Common overdraw stops at row 16 so it can never hide the player.
   // A tree cannot obey that and still be a tree, so it gets a different bargain: it may reach

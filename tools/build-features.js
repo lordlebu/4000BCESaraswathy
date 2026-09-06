@@ -185,18 +185,33 @@ function tree(spec, side) {
 /** A narrow conifer: a stack of shrinking bands. */
 function pine(side) {
   const pixels = canvas();
-  const cx = CELL / 2 + side * OFFSET;
+  const cx = Math.round(CELL / 2 + side * OFFSET);
   const dark = hex('#3c5a4a');
   const light = hex('#55765f');
+
   fill(pixels, cx, CELL - 4, cx, CELL - 1, hex('#4a3b2c'));
-  let width = 1;
-  for (let y = CELL - 5; y >= 6; y -= 1) {
-    fill(pixels, cx - width, y, cx + width, y, (y % 4 === 0) ? light : dark);
-    if (y % 3 === 0) width += 1;
-    if (width > 5) width = 5;
+
+  // **This used to widen as it climbed**, drawing a cone balanced on its point -- a tree upside
+  // down. The old loop started at the base with `width = 1` and grew it as `y` decreased, so the
+  // skirt was at the crown and the tip was in the earth.
+  //
+  // It shipped and stayed because nothing stood beside it: on a hill of ochre ground and scree a
+  // dark green wedge reads as *a tree* whichever way up it is. It became obvious the moment the
+  // snow pine was drawn next to it, which is the same lesson the palette check keeps teaching --
+  // a thing looks fine alone and wrong in company.
+  //
+  // Width is now a function of depth from the tip, which is the shape a conifer has.
+  const top = 6;
+  const bottom = CELL - 5;
+  const height = bottom - top;
+  for (let y = top; y <= bottom; y += 1) {
+    const t = (y - top) / height;
+    const width = Math.round(1 + t * 4);
+    fill(pixels, cx - width, y, cx + width, y, (y - top) % 4 === 0 ? light : dark);
   }
   return pixels;
 }
+
 
 /**
  * A snow-laden pine: taller than the hill pine, and white on every upward face.
