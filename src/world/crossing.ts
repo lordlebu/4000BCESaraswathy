@@ -145,8 +145,14 @@ const LINE_HALF_WIDTH = 1;
  * that makes a crossing a crossing rather than two maps that happen to share a file.
  *
  * Marked with `Tile.track` rather than by changing the biome. The water below stays water and
- * stays navigable; only the walking changes. The rails and trestles themselves belong to the
- * overdraw layer, where the fences already live.
+ * stays navigable; only the walking changes. The rails themselves belong to the overdraw layer,
+ * where the fences already live.
+ *
+ * **The line floats.** It is laid on the same Permian-irradiated lodestone that holds the islands
+ * up, and it hangs at the height the ore wants -- which is why it runs level over open water and
+ * why nothing has ever been built beneath it. An earlier version of this module called them
+ * trestles and that was a guess; canon's own physics gives the better answer, and it is the reason
+ * a boat passes under without lowering a mast.
  *
  * It runs through both islands rather than past them: the islands are the piers. That is what the
  * reference image shows and it is why they are where they are.
@@ -163,10 +169,10 @@ export function stampLine(world: World, _palette: ReadonlySet<BiomeId>, islands:
       const tile = world.tiles[y]?.[x + dx];
       if (!tile) continue;
       // **The track is laid over the ground, never instead of it.** The sea below stays sea and
-      // stays navigable -- a boat passes under the trestles, which is what the reference image
-      // shows and what a railway across water actually is. An earlier version turned these tiles
-      // into `coast`, which is a causeway of piled stone: a different thing, and one that would
-      // have closed the strait to shipping in a sea canon keeps working.
+      // stays navigable -- the line floats on lodestone and a boat passes under it. An earlier
+      // version turned these tiles into `coast`, which is a causeway of piled stone: a different
+      // thing, and one that would have closed the strait to shipping in a sea canon keeps
+      // working.
       //
       // It runs the full height so it meets land on both shores, and it crosses the underside rim
       // the same way. The rim is deliberately unwalkable -- `generate.ts` groups `sky_underside`
@@ -210,4 +216,58 @@ export function startOnTheNearShore(world: World): void {
     }
   }
   if (best) world.start = best;
+}
+
+/**
+ * Every tile the line runs along, in order from one shore to the other.
+ *
+ * **What a vehicle needs that `Tile.track` alone does not give.** The flag answers "is there rail
+ * here"; a train needs the *route* -- an ordered run it can be moved along, with both ends on
+ * solid ground so a player can board at one and get off at the other.
+ *
+ * Returned north to south, which is the direction the line is laid. A caller wanting the other
+ * way round reverses it; baking a direction in here would be a fact about one journey rather than
+ * about the line.
+ *
+ * Measured on the Aravali: 192 tiles across three columns, contiguous from row 0 to row 63 with
+ * no gaps. The route this returns is the middle column, which is the one a train would sit on.
+ */
+export function trackRoute(world: World): Point[] {
+  const tracked = world.tiles.flat().filter((t) => t.track);
+  if (tracked.length === 0) return [];
+
+  // The middle of however many columns the line occupies: the rails are three tiles wide so a
+  // walker is not threading a needle, but a train runs down the centre of them.
+  const columns = [...new Set(tracked.map((t) => t.x))].sort((a, b) => a - b);
+  const centre = columns[Math.floor(columns.length / 2)]!;
+
+  const down = tracked.filter((t) => t.x === centre).sort((a, b) => a.y - b.y);
+
+  // **Trimmed to the shores.** The stamp runs the full height so the line meets land wherever the
+  // coast falls, which leaves rail hanging off both map edges over open sea. A route that starts
+  // over water starts nowhere: a train would appear out of the ocean. So the route is the run
+  // between the outermost tiles that have ground under them.
+  const solid = (t: { x: number; y: number }): boolean => {
+    const biome = world.tiles[t.y]?.[t.x]?.biome;
+    return biome !== undefined && biome !== 'sea' && biome !== 'sky_underside';
+  };
+  const first = down.findIndex(solid);
+  if (first === -1) return [];
+  let last = down.length - 1;
+  while (last > first && !solid(down[last]!)) last -= 1;
+
+  return down.slice(first, last + 1).map((t) => ({ x: t.x, y: t.y }));
+}
+
+/**
+ * Whether a traveller standing here could board.
+ *
+ * On the rail *and* on ground that holds you up -- the shore ends of the line and the islands it
+ * calls at. Standing on the stretch over open water is not boarding; it is already being aboard,
+ * and there is nothing there to step onto.
+ */
+export function canBoardAt(world: World, at: Point): boolean {
+  const tile = world.tiles[at.y]?.[at.x];
+  if (!tile?.track) return false;
+  return tile.biome !== 'sea' && tile.biome !== 'sky_underside';
 }

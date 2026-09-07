@@ -11,6 +11,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
+import { canBoardAt, trackRoute } from '../src/world/crossing';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
@@ -121,5 +122,55 @@ describe('the Aravali crossing', () => {
     const here = world.tiles[world.start.y]![world.start.x]!;
     expect(here.biome, 'the traveller starts in the water').not.toBe('sea');
     expect(here.biome, 'the traveller starts under an island').not.toBe('sky_underside');
+  });
+
+  /**
+   * **The line has to be ridable, not just walkable** — a train is coming, and this is what it
+   * runs on.
+   *
+   * `Tile.track` answers "is there rail here". A vehicle needs the *route*: an ordered run from
+   * one shore to the other with no gap in it, because a train that has to jump a tile is not on
+   * rails.
+   */
+  it('carries a continuous route from one shore to the other', () => {
+    const world = aravali();
+    const route = trackRoute(world);
+    expect(route.length, 'the line has no route').toBeGreaterThan(world.height / 2);
+
+    // No gaps: consecutive tiles, all the way down.
+    for (let i = 1; i < route.length; i += 1) {
+      expect(route[i]!.y - route[i - 1]!.y, `the line jumps at row ${route[i]!.y}`).toBe(1);
+    }
+
+    // One column, so a train has somewhere definite to sit rather than three abreast.
+    expect(new Set(route.map((p) => p.x)).size, 'the route wanders between columns').toBe(1);
+
+    // Both ends on land: a line that begins over water begins nowhere.
+    const first = world.tiles[route[0]!.y]![route[0]!.x]!;
+    const last = world.tiles[route[route.length - 1]!.y]![route[route.length - 1]!.x]!;
+    expect(first.biome, 'the line starts over open water').not.toBe('sea');
+    expect(last.biome, 'the line ends over open water').not.toBe('sea');
+  });
+
+  it('can only be boarded where there is something to stand on', () => {
+    const world = aravali();
+    const route = trackRoute(world);
+
+    // Over the strait there is nothing to step onto -- you are already aboard or you are not.
+    //
+    // Measured, only three tiles of the centre column are over *open* sea: the two islands fill
+    // most of the strait, which is the point of them. A bigger number here would be asserting a
+    // longer gap between the piers than the map has.
+    const overWater = route.filter((p) => world.tiles[p.y]![p.x]!.biome === 'sea');
+    expect(overWater.length, 'the route never crosses water').toBeGreaterThan(1);
+    for (const at of overWater) {
+      expect(canBoardAt(world, at), `boarding allowed over open water at ${at.x},${at.y}`).toBe(
+        false
+      );
+    }
+
+    // And somewhere along it a traveller can actually get on: the shores and the islands.
+    const boardable = route.filter((p) => canBoardAt(world, p));
+    expect(boardable.length, 'there is nowhere to board the line at all').toBeGreaterThan(4);
   });
 });
