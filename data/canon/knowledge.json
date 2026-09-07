@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.11.0",
+  "canon_version": "2.12.1",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -80,6 +80,37 @@
         "npc_marn"
       ],
       "notes": "Botany, and the one where the player materially improves something rather than merely understanding it. Neither party is wrong here -- both are incompletely right, which is the map's thesis in miniature.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "discovery_bones_in_one_stone",
+      "type": "discovery",
+      "name": "Bones in One Stone",
+      "discipline": "evolution",
+      "found_at": [
+        "poi_fang_bed",
+        "poi_scale_shore"
+      ],
+      "levels": [
+        {
+          "entry": "A seam of bone in the black pavement: heavy skulls, a pair of long teeth in the upper jaw, nothing like them alive."
+        },
+        {
+          "entry": "A short walk away, three-toed trackways in the same stone, walking toward water that was not there yet."
+        },
+        {
+          "entry": "They are the same rock. Same layer, same hexagons, same weathering."
+        },
+        {
+          "entry": "The teeth replace from the back forward, like the skeleton in the midden and unlike anything in the delta."
+        },
+        {
+          "entry": "Two kinds of animal that share nothing, lying in one stone that formed after both. I can describe the rock and I cannot describe how they came to be in it together."
+        }
+      ],
+      "notes": "Ends unresolved: described exactly, explained not at all.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1161,6 +1192,127 @@
         "poi_herders_terraces"
       ],
       "notes": "The archaeology through-line. Resolves as engineering without making the herders ignorant -- they have the observation and not the question, which is the commonest way to not know something.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "discovery_the_forest_took_it",
+      "type": "discovery",
+      "name": "What the Forest Took",
+      "discipline": "archaeology",
+      "found_at": [
+        "poi_sunk_cutting",
+        "poi_second_line"
+      ],
+      "levels": [
+        {
+          "entry": "Iron rails in the floor of a green cutting, with roots up between the sleepers."
+        },
+        {
+          "entry": "A signal post with a tree through the frame. The tree is younger than the post by a long way and the post has not been moved."
+        },
+        {
+          "entry": "The cutting is dug, not natural -- both banks are spoil and the spoil is graded."
+        },
+        {
+          "entry": "There is a second embankment beside it, same height, same age, carrying nothing. They doubled it."
+        },
+        {
+          "entry": "You do not double a line for a few people and a market. This carried enough traffic to need two, and then it carried none, and the difference is not written anywhere I can find."
+        }
+      ],
+      "notes": "Ends unresolved: described exactly, explained not at all.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "discovery_the_kept_bench",
+      "type": "discovery",
+      "name": "The Kept Bench",
+      "discipline": "botany",
+      "found_at": [
+        "poi_quiet_atelier"
+      ],
+      "levels": [
+        {
+          "entry": "A glasshouse in a clearing, panes mostly whole, benches and seed trays inside."
+        },
+        {
+          "entry": "The trays are sorted and labelled, and the labels face out so they can be read from the aisle. Somebody works here."
+        },
+        {
+          "entry": "Grass seed, mostly, and steppe varieties -- and a shelf of soil samples from ground that is not local, each one worse than the last."
+        },
+        {
+          "entry": "The dust is weeks deep, not years. Whoever keeps this is coming back to it."
+        },
+        {
+          "entry": "They are not growing food here. They are working out what will grow in dirt that has stopped growing anything, which is a much stranger thing to be doing in a forest this healthy."
+        }
+      ],
+      "notes": "Ends unresolved: described exactly, explained not at all.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "discovery_the_other_doors",
+      "type": "discovery",
+      "name": "The Other Doors",
+      "discipline": "anomalies",
+      "found_at": [
+        "poi_second_gate"
+      ],
+      "levels": [
+        {
+          "entry": "A second doorway, out past the salt, framed in the same dressed basalt as the swept one."
+        },
+        {
+          "entry": "No path to it. Nobody sweeps it and nobody warns you off it either."
+        },
+        {
+          "entry": "Same courses, same joints, same stone. Built by whoever built the other, and not later."
+        },
+        {
+          "entry": "Pell says there are more. Says it the way you would say there are more wells."
+        },
+        {
+          "entry": "So the Gate Court is not the gate. It is the one they kept, and keeping one and abandoning the rest is a decision somebody made and nobody remembers making."
+        }
+      ],
+      "notes": "Ends unresolved: described exactly, explained not at all.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "discovery_three_crossings",
+      "type": "discovery",
+      "name": "Three Crossings, One Ford",
+      "discipline": "archaeology",
+      "found_at": [
+        "poi_vedda_ford"
+      ],
+      "levels": [
+        {
+          "entry": "A bar of shingle you can wade. The nomads use it and so does everything with four legs."
+        },
+        {
+          "entry": "There are stones set in the bed, worn round, laid about a pace apart. River stones do not line up."
+        },
+        {
+          "entry": "They are under the modern silt, which means they were laid before it, which means before the line."
+        },
+        {
+          "entry": "The rail crosses two miles upstream at the narrowest water. This crosses at the shallowest, which is a different question and an older one."
+        },
+        {
+          "entry": "So: forded, then bridged, then forded again, and the ford has not moved. Whoever laid these stones and whoever pitched those tents made the same decision about the same river a very long way apart."
+        }
+      ],
+      "notes": "Ends unresolved: described exactly, explained not at all.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
