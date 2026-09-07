@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.7.0",
+  "canon_version": "2.10.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -3291,12 +3291,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "An insect with a metallic, magnetic carapace that feeds on mineral deposits along the floating island cores.",
       "mood": "graceful",
       "source_index": 183,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_static_charged_wasp",
@@ -3362,12 +3362,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "An insect that produces high-frequency, melodic chirps that echo through the thin, cold air of the high altitude routes.",
       "mood": "watchful",
       "source_index": 187,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_sky_snake",
@@ -3415,12 +3415,12 @@
         "sky_island",
         "sky_underside"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A dark, stone-skinned bat of the shadowed undersides, feeding on large insects during the night.",
       "mood": "watchful",
       "source_index": 190,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_aero_moth",
@@ -3432,12 +3432,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A large moth with soft, dusty wings patterned like grey clouds, drawing toward the glow of sky-brambles.",
       "mood": "luminous",
       "source_index": 191,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_floating_island_chameleon",
@@ -3449,12 +3449,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A lizard that changes color to match the glowing moss, using its prehensile tail to hang from sky-mangrove roots.",
       "mood": "luminous",
       "source_index": 192,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_sky_dragon_fly",
@@ -3502,12 +3502,12 @@
         "sky_island",
         "open_sky"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A rodent with exceptionally long, bushy tail used as a rudder, leaping impossible distances in the low-gravity environment.",
       "mood": "playful",
       "source_index": 195,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_sky_faring_jellyfish",
@@ -3555,12 +3555,12 @@
         "sky_island",
         "sky_underside"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A pale green gecko with large, adhesive pads, hunting moths and wasps on the underside of floating rocks.",
       "mood": "fearsome",
       "source_index": 198,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_sky_faring_otter",
@@ -3590,12 +3590,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A bird with a sweet, echoing song that nests in the high, misty valleys, feeding on sky-bramble berries.",
       "mood": "watchful",
       "source_index": 200,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_aero_weevil",
@@ -3624,12 +3624,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A light-shelled crab that climbs the aerial roots of sky-mangroves, feeding on moss and small insects.",
       "mood": "watchful",
       "source_index": 202,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_cloud_weaver_spiderling",
@@ -3659,12 +3659,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A swift predator that hunts sky-gulls and finches, nesting on the sheer vertical cliffs of the highest islands.",
       "mood": "fearsome",
       "source_index": 204,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_prana_absorbing_butterfly",
@@ -5635,11 +5635,11 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "Trees growing on the absolute edges of floating islands, plunging their roots downward into the open sky to harvest cloud-moisture.",
       "source_index": 50,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. **`flavour` rather than `encounter`, because that is what the game reads for a plant** -- `species.ts` indexes flora by `flavour` and fauna by `encounter`, since a plant is something you find growing rather than somebody you meet. Promoting these to `encounter` first put them in the bundle and left `floraIn` empty, which the game's own coverage test caught."
     },
     {
       "id": "flora_levitation_gourd_sky_balloon",
@@ -5652,11 +5652,11 @@
         "sky_island",
         "open_sky"
       ],
-      "placement": "lore",
+      "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A trailing vine producing massive, hollow gourds that trap lighter-than-air volcanic gases, used by mariners to patch blimps.",
       "source_index": 51,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. **`flavour` rather than `encounter`, because that is what the game reads for a plant** -- `species.ts` indexes flora by `flavour` and fauna by `encounter`, since a plant is something you find growing rather than somebody you meet. Promoting these to `encounter` first put them in the bundle and left `floraIn` empty, which the game's own coverage test caught."
     },
     {
       "id": "flora_static_charged_bramble",
@@ -5668,11 +5668,11 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "Thorny bushes that feed on electrical discharges of high-altitude storms, glowing with residual lightning and delivering a shocking sting.",
       "source_index": 52,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. **`flavour` rather than `encounter`, because that is what the game reads for a plant** -- `species.ts` indexes flora by `flavour` and fauna by `encounter`, since a plant is something you find growing rather than somebody you meet. Promoting these to `encounter` first put them in the bundle and left `floraIn` empty, which the game's own coverage test caught."
     },
     {
       "id": "flora_blue_pulse_root",
@@ -5717,11 +5717,11 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A silicate-absorbing plant with leaves that mirror stained glass, concentrating golden sunlight for deep-time healing.",
       "source_index": 55,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. **`flavour` rather than `encounter`, because that is what the game reads for a plant** -- `species.ts` indexes flora by `flavour` and fauna by `encounter`, since a plant is something you find growing rather than somebody you meet. Promoting these to `encounter` first put them in the bundle and left `floraIn` empty, which the game's own coverage test caught."
     },
     {
       "id": "flora_moon_reflecting_mint",
@@ -5749,11 +5749,11 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A beautiful lotus species that grows in the inverted waterfalls, its floating petals absorbing high-altitude prana radiation.",
       "source_index": 57,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. **`flavour` rather than `encounter`, because that is what the game reads for a plant** -- `species.ts` indexes flora by `flavour` and fauna by `encounter`, since a plant is something you find growing rather than somebody you meet. Promoting these to `encounter` first put them in the bundle and left `floraIn` empty, which the game's own coverage test caught."
     },
     {
       "id": "flora_cloud_weaver_vine",
@@ -5779,13 +5779,14 @@
       "growth_form": "moss",
       "region": "tethys-sky-routes",
       "biomes": [
-        "sky_island"
+        "sky_island",
+        "sky_underside"
       ],
-      "placement": "lore",
+      "placement": "flavour",
       "rarity": "rare",
-      "journal_prompt": "A dense, dark green moss that covers the magnetized cores of the floating islands, aligning its spores with the Earth's magnetic poles.",
+      "journal_prompt": "A dense, dark green moss that covers the magnetized cores of the floating islands, aligning its spores with the Earth's magnetic poles, and it grows down over the rim onto the underside where the ore is bare.",
       "source_index": 59,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. **`flavour` rather than `encounter`, because that is what the game reads for a plant** -- `species.ts` indexes flora by `flavour` and fauna by `encounter`, since a plant is something you find growing rather than somebody you meet. Promoting these to `encounter` first put them in the bundle and left `floraIn` empty, which the game's own coverage test caught."
     },
     {
       "id": "flora_plunging_fire_siege_tree",
