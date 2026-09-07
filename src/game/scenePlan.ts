@@ -20,6 +20,7 @@ import {
   DECOR_BY_BIOME,
   decorCount,
   decorFrame,
+  trackFrame,
   EDGE_ORDER,
   EDGE_STEP,
   FENCE_SIDE,
@@ -55,6 +56,7 @@ export type PlacementSheet =
   | 'places'
   | 'landmarks'
   | 'decor'
+  | 'track'
   | 'cliffs'
   | 'treeline'
   | 'marker';
@@ -488,8 +490,55 @@ export function planScene(built: FieldMapWorld): Placement[] {
     ...planCliffs(built.world),
     ...planTreeline(built.world),
     ...planDecor(built.world, builtOn),
+    // After decor, before the huts: the line is laid *on* the ground and things stand beside it,
+    // so a rail draws over a scattered stone and under a building.
+    ...planTrack(built.world),
     ...huts,
     ...planOverdraw(built.world, builtOn),
     ...planMarkers(built)
   ];
+}
+
+/**
+ * The railway, laid along whatever `Tile.track` marks.
+ *
+ * **Placed from the world rather than from the ground.** Every other scatter layer asks what a
+ * tile is made of; this asks whether a line runs over it, which is a fact the generator stamped
+ * and no biome can express. That is the same distinction `Tile.track` exists for: the sea under
+ * the Aravali crossing is still sea, and the forest floor under the sunk cutting is still forest.
+ *
+ * The run's direction comes from the neighbours, because a single tile cannot know which way a
+ * route goes -- a rail with track above and below it runs north-south whatever it is standing on.
+ *
+ * Drawn at `underfoot`, like decor: the traveller walks over the rails rather than behind them.
+ */
+export function planTrack(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  const tracked = (x: number, y: number): boolean => world.tiles[y]?.[x]?.track === true;
+
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      const tile = world.tiles[y]![x]!;
+      if (!tile.track) continue;
+
+      // East-west when the line's neighbours are to the sides rather than above and below. A
+      // lone tile with neither falls to north-south, which is the direction the Aravali line runs.
+      const alongX = tracked(x - 1, y) || tracked(x + 1, y);
+      const alongY = tracked(x, y - 1) || tracked(x, y + 1);
+      const eastWest = alongX && !alongY;
+
+      // Overgrown where nothing runs: the strait crossing is kept and the land approaches are not.
+      // Read off the ground rather than stored, so a line laid across new country needs no edit.
+      const overgrown = tile.biome === 'forest' || tile.biome === 'hills';
+
+      out.push({
+        sheet: 'track',
+        frame: trackFrame(eastWest, overgrown),
+        x,
+        y,
+        depth: depthFor(y, ROW_SLOT.underfoot)
+      });
+    }
+  }
+  return out;
 }

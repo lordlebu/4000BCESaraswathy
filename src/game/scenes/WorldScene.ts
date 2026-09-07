@@ -16,6 +16,7 @@ import edgesUrl from '../../../assets/edges.png';
 import cliffsUrl from '../../../assets/cliffs.png';
 import treelineUrl from '../../../assets/treeline.png';
 import decorUrl from '../../../assets/decor.png';
+import trackUrl from '../../../assets/track.png';
 import { EventBus } from '../EventBus';
 import {
   FEATURE_SHEET,
@@ -26,6 +27,7 @@ import {
   PLACE_SHEET,
   TERRAIN_SHEET,
   DECOR_SHEET,
+  TRACK_SHEET,
   SHADOW_TEXTURE,
   TILE_SIZE,
   blendTextureKey,
@@ -51,6 +53,7 @@ const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker'>, string> = {
   places: PLACE_SHEET,
   landmarks: LANDMARK_SHEET,
   decor: DECOR_SHEET,
+  track: TRACK_SHEET,
   cliffs: CLIFF_SHEET,
   treeline: TREELINE_SHEET
 };
@@ -367,7 +370,8 @@ export class WorldScene extends Phaser.Scene {
       edges: edgesUrl,
       cliffs: cliffsUrl,
       treeline: treelineUrl,
-      decor: decorUrl
+      decor: decorUrl,
+      track: trackUrl
     });
   }
 

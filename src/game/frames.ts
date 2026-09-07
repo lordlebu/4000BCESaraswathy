@@ -712,3 +712,26 @@ export function featureIsUnderfoot(frame: number): boolean {
   }
   return false;
 }
+
+/**
+ * How many pieces the track sheet carries: two runs, each sound or overgrown.
+ *
+ * The order is a contract with `tools/build-track.js`, not a preference -- north-south, east-west,
+ * then the same two overgrown -- so the index arithmetic below and the loop that draws the sheet
+ * have to agree. Changing one means changing both.
+ */
+export const TRACK_PIECES = 4;
+
+/**
+ * Which piece of line this tile draws.
+ *
+ * `eastWest` is the run's direction, which the caller knows from its neighbours: a rail is part of
+ * a route and a single tile cannot tell which way the route goes.
+ *
+ * `overgrown` is whether anything still uses it. The Aravali needs both in one map -- the strait
+ * crossing is kept because a carriage runs on it, and the sunk cutting is not because the forest
+ * has had it for a lifetime.
+ */
+export function trackFrame(eastWest: boolean, overgrown: boolean): number {
+  return (overgrown ? 2 : 0) + (eastWest ? 1 : 0);
+}

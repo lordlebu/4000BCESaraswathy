@@ -88,6 +88,14 @@ export const CLIFF_SHEET = 'cliffs';
 /** The wall of trees where a forest stops. Same layout again -- see `tools/build-rims.js`. */
 export const TREELINE_SHEET = 'treeline';
 export const DECOR_SHEET = 'decor';
+/**
+ * The railway, which is ground rather than scenery.
+ *
+ * A fourth scatter contract and the narrowest: flat, tile-filling, no sub-tile offset, drawn below
+ * the traveller, and placed by `Tile.track` rather than by what the ground is made of. See
+ * `tools/build-track.js` for why none of the other three fit.
+ */
+export const TRACK_SHEET = 'track';
 
 /** The 1x1 white pixel the fog layer stretches over each tile. See `createTileTextures`. */
 export const FOG_TEXTURE = 'fog:pixel';
@@ -135,6 +143,7 @@ export function loadTileSheets(
     cliffs: string;
     treeline: string;
     decor: string;
+    track: string;
   }
 ): void {
   // One handler for the whole batch rather than one per sheet: `loaderror` fires with the file
@@ -163,6 +172,7 @@ export function loadTileSheets(
   sheet(CLIFF_SHEET, urls.cliffs, TILE_SIZE, TILE_SIZE);
   sheet(TREELINE_SHEET, urls.treeline, TILE_SIZE, TILE_SIZE);
   sheet(DECOR_SHEET, urls.decor, DECOR_CELL, DECOR_CELL);
+  sheet(TRACK_SHEET, urls.track, TILE_SIZE, TILE_SIZE);
 }
 
 /**
