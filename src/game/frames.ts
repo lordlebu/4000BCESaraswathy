@@ -75,7 +75,13 @@ export const PLACE_ORDER: (string | null)[] = [
   'poi_drowned_seawall',
   null,
   'poi_bone_midden',
-  'poi_basalt_quarry'
+  'poi_basalt_quarry',
+  // Appended, never inserted: `KIND_FRAMES` is computed from this array's length and the sheet is
+  // laid out in this order, so anything added has to go on the end.
+  'poi_sunk_cutting',
+  'poi_second_gate',
+  'poi_quiet_atelier',
+  'poi_black_pavement'
 ];
 
 /**
@@ -500,7 +506,6 @@ export const SPLASH_FRAME = PRINTS_FRAME + 1;
  * keeps a track and dry sand does not.
  */
 export const SNOW_PRINTS_FRAME = SPLASH_FRAME + 1;
-
 /**
  * Which mark a step onto this ground leaves, or null where a step leaves nothing.
  *
