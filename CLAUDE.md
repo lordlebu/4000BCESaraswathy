@@ -499,17 +499,34 @@ another repository, it reverses something in the first, or it is urgent and the 
 under review.
 
 **Always end with the pull request link.** Whenever work is pushed, the reply must carry the URL —
-the PR itself if one exists, otherwise the `pull/new/<branch>` compare link the push prints. Not
-the branch name, not "ready to open a PR", not a description of where to click: the link, so it can
-be opened directly.
+the PR itself if one exists, otherwise a compare link. Not the branch name, not "ready to open a
+PR", not a description of where to click: the link, so it can be opened directly.
 
-`gh` is **not installed on this machine**, so the PR usually cannot be opened for you. That does not
-change the obligation, it just means the link is the compare URL and the title and body come with
-it, ready to paste:
+**Open the pull request rather than handing over a link to open one.** `gh` is not installed, but
+that is no longer the whole story: a session with the GitHub MCP tools has
+`mcp__github__create_pull_request` and can open it directly, which is what the reader wanted from
+the link anyway. Check for those tools before settling for a compare URL. This file said for
+months that the PR "usually cannot be opened for you", and that sentence outlived the tooling by
+enough sessions to be worth naming.
+
+**When a compare link is the only option, use the `compare/` form, never `pull/new/`:**
 
 ```
-https://github.com/lordlebu/4000BCESaraswathy/pull/new/<branch>
+https://github.com/lordlebu/4000BCESaraswathy/compare/main...<branch>?expand=1
 ```
+
+`pull/new/<branch>` is what this file used to recommend and it **kept 404ing for the owner**,
+across several sessions, on branches that were definitely pushed.
+
+What is measured: the compare form answers **200** for a pushed branch; `pull/new/` answers **302
+to a login page**, because opening a pull request is a write and the shorthand wants a session
+first. That redirect is not itself the 404 the owner sees — signed in, it should resolve — so the
+cause is *not established*, and the tempting explanation is wrong: the branch containing a slash
+does not break it, and this note said so for about ten minutes before the redirect was actually
+followed.
+
+Prefer the compare form because it is the one verified to work, not because the other is
+understood. If somebody does diagnose `pull/new/`, replace this paragraph with the answer.
 
 Two habits that go with it, both learned by getting them wrong:
 
