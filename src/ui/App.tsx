@@ -30,6 +30,7 @@ import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
 import { carry, gatheredLine, standingLine } from '../content/gathering';
 import { conditionOf, draw, noNodes, takeableAt, type Taking } from '../content/nodes';
+import { recipe } from '../content/making';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
@@ -43,6 +44,7 @@ import { characterFor } from '../game/player';
 import type { World } from '../world/types';
 import { tileHash } from '../world/rng';
 import { isAnimal } from '../content/species';
+import { gestureForProcess } from '../content/making-gestures';
 import {
   GESTURE_VERB,
   blockedReason,
@@ -142,6 +144,11 @@ export function App() {
     day: number;
     /** Set when this is a night rather than a gathering. Carries the shelter kind for the picture. */
     resting?: string;
+    /**
+     * Set when this is a bench job. Carries the recipe, because what is being made is not on the
+     * ground and cannot be recovered from `underfoot` the way a gathered material can.
+     */
+    making?: string;
   } | null>(null);
   /**
    * Whether the front door is still closed.
@@ -521,7 +528,9 @@ export function App() {
       activity
         ? activity.resting
           ? 'rest'
-          : gestureFor(activity.taking[0]!.material, isAnimal)
+          : activity.making
+            ? gestureForProcess(recipe(activity.making)?.process ?? '')
+            : gestureFor(activity.taking[0]!.material, isAnimal)
         : null,
     [activity]
   );
@@ -679,7 +688,24 @@ export function App() {
    */
   const [lastMade, setLastMade] = useState<Step[]>([]);
 
+  /**
+   * Open the bench activity. The making itself happens when the run settles.
+   *
+   * **Checked before opening, not after.** `craft` is the rules layer's answer to whether this can
+   * be made at all -- the satchel, the recipe, the bench -- and a modal that plays through three
+   * beats and then refuses would be a worse version of a disabled button. So the answer is taken
+   * here and the work is redone on settle against the state as it stands then.
+   */
   const makeHere = useCallback(
+    (recipeId: string) => {
+      if (!craft(progress, satchel, recipeId, bench).made) return;
+      setActivity({ taking: [], day: arrival?.day ?? 0, making: recipeId });
+    },
+    [progress, satchel, bench, arrival?.day]
+  );
+
+  /** What the old single click did, run once the bench activity is over. */
+  const finishMaking = useCallback(
     (recipeId: string) => {
       const done = craft(progress, satchel, recipeId, bench);
       if (!done.made) return;
@@ -951,6 +977,19 @@ export function App() {
             // this the gentlest place to learn what the modal is.
             activity.resting
               ? 0
+              : activity.making
+                /**
+                 * **How involved the recipe is, which is data canon already has.**
+                 *
+                 * The obvious reach was the output's rarity, and `Output` does not carry one --
+                 * the cast that would have hidden that was the tell. Ingredient count is the
+                 * honest measure and a better one anyway: a thing needing four materials and a
+                 * kept tool is a harder job than a thing needing one, whatever it makes.
+                 *
+                 * Two ingredients is the median, so this lands most recipes near a stoop's
+                 * ordinary difficulty and reserves the narrow band for the elaborate ones.
+                 */
+                ? Math.min(1, ((recipe(activity.making)?.ingredients.length ?? 1) - 1) / 4)
               : difficultyOf(
                   activity.taking[0]!.material,
                   activityGesture,
@@ -961,7 +1000,13 @@ export function App() {
           creatureId={activityGesture === 'stalk' ? currentCreature?.id ?? null : null}
           creatureName={activityGesture === 'stalk' ? currentCreature?.name ?? null : null}
           variant={activity.resting ?? null}
-          subject={activity.resting ? SHELTER_LABEL[activity.resting] ?? 'Stop for the night' : null}
+          subject={
+            activity.resting
+              ? SHELTER_LABEL[activity.resting] ?? 'Stop for the night'
+              : activity.making
+                ? recipe(activity.making)?.name ?? 'it'
+                : null
+          }
           onClose={() => {
             setActivity(null);
             // The night is spent on the way out rather than when the run settles, so a player who
@@ -969,7 +1014,13 @@ export function App() {
             // it still decides whether a night is legal.
             if (activity.resting) EventBus.emitEvent('camp', {});
           }}
-          onFinish={activity.resting ? () => {} : finishTaking}
+          onFinish={
+            activity.resting
+              ? () => {}
+              : activity.making
+                ? () => finishMaking(activity.making!)
+                : finishTaking
+          }
         />
       )}
 
