@@ -83,7 +83,19 @@ const TOOLS: [string[], string][] = [
   // A bone-picker's sieve, seen face on.
   [['bone-picker'], 'M16 8h8v9h-8zM19 8v9M22 8v9M16 11h8M16 14h8'],
   // A tally of four generations, which is what a custodian with nothing to guard actually keeps.
-  [['keeper', 'customs'], 'M17 7v13M20 7v13M23 7v13M15 13h10']
+  [['keeper', 'customs'], 'M17 7v13M20 7v13M23 7v13M15 13h10'],
+  // A scavenger's pry bar, bent at the working end. Odri lifts rail chairs out of a forest floor
+  // with it, which is a lever's whole job and looks like nothing else in this list.
+  [['scavenger'], 'M17 20l6-12M23 8l-3 1M23 8l1 3'],
+  // A nomad's tent peg and guy line: the two things you carry because the tent itself is felt and
+  // rolls. Terke pitches above a ford and moves on.
+  [['nomad'], 'M20 6v12M20 18l-4 3M20 18l4 3M16 21h8'],
+  // A stone-reader's hammer, square-headed and short-handled. Sesh taps basalt and listens, which
+  // is the least dramatic possible way to hold the deepest history on the map.
+  [['stone-reader'], 'M18 21l4-8M20 10h5v4h-5zM20 12h-2'],
+  // A line-keeper's lamp on a hook, which is what you hold up when the carriage is late and the
+  // light has gone. Hesh has one and mostly does not need it.
+  [['line-keeper'], 'M20 5v3M17 8h6l-1 8h-4zM18 12h4']
 ];
 
 /** The tool for a role, or null for a person whose trade has no drawing yet. */

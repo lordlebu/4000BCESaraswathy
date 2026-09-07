@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.12.0",
+  "canon_version": "2.12.1",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -80,6 +80,37 @@
         "npc_marn"
       ],
       "notes": "Botany, and the one where the player materially improves something rather than merely understanding it. Neither party is wrong here -- both are incompletely right, which is the map's thesis in miniature.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "discovery_bones_in_one_stone",
+      "type": "discovery",
+      "name": "Bones in One Stone",
+      "discipline": "evolution",
+      "found_at": [
+        "poi_fang_bed",
+        "poi_scale_shore"
+      ],
+      "levels": [
+        {
+          "entry": "A seam of bone in the black pavement: heavy skulls, a pair of long teeth in the upper jaw, nothing like them alive."
+        },
+        {
+          "entry": "A short walk away, three-toed trackways in the same stone, walking toward water that was not there yet."
+        },
+        {
+          "entry": "They are the same rock. Same layer, same hexagons, same weathering."
+        },
+        {
+          "entry": "The teeth replace from the back forward, like the skeleton in the midden and unlike anything in the delta."
+        },
+        {
+          "entry": "Two kinds of animal that share nothing, lying in one stone that formed after both. I can describe the rock and I cannot describe how they came to be in it together."
+        }
+      ],
+      "notes": "Ends unresolved: described exactly, explained not at all.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1166,154 +1197,122 @@
       ]
     },
     {
-      "id": "discovery_the_kept_wall",
+      "id": "discovery_the_forest_took_it",
       "type": "discovery",
-      "name": "The Kept Wall",
+      "name": "What the Forest Took",
       "discipline": "archaeology",
       "found_at": [
-        "poi_kept_stones"
+        "poi_sunk_cutting",
+        "poi_second_line"
       ],
       "levels": [
         {
-          "entry": "Dry stone round a shoulder of the range, enclosing a hollow with nothing in it."
+          "entry": "Iron rails in the floor of a green cutting, with roots up between the sleepers."
         },
         {
-          "entry": "The wall is a course or two higher than weather would have left it. Somebody has been putting stones back."
+          "entry": "A signal post with a tree through the frame. The tree is younger than the post by a long way and the post has not been moved."
         },
         {
-          "entry": "There is no path to it. The grass at the foot is not grown over, which means it is walked and not often."
+          "entry": "The cutting is dug, not natural -- both banks are spoil and the spoil is graded."
         },
         {
-          "entry": "The gate has been closed with newer stone, laid from the inside."
+          "entry": "There is a second embankment beside it, same height, same age, carrying nothing. They doubled it."
         },
         {
-          "entry": "A wall in repair around an empty place, and the people at the rail-head will talk about the ore all day and go quiet about this. I have not asked twice."
+          "entry": "You do not double a line for a few people and a market. This carried enough traffic to need two, and then it carried none, and the difference is not written anywhere I can find."
         }
       ],
-      "notes": "Aravali. Deliberately unresolved at the last rung -- the diary describes exactly and refuses to guess, which is the discipline this game is about.",
+      "notes": "Ends unresolved: described exactly, explained not at all.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
     },
     {
-      "id": "discovery_the_line_that_floats",
+      "id": "discovery_the_kept_bench",
       "type": "discovery",
-      "name": "The Line That Floats",
-      "discipline": "archaeology",
+      "name": "The Kept Bench",
+      "discipline": "botany",
       "found_at": [
-        "poi_rail_head",
-        "poi_far_landing"
+        "poi_quiet_atelier"
       ],
       "levels": [
         {
-          "entry": "Iron rail running out over the strait. Nothing under it and no legs down to the water."
+          "entry": "A glasshouse in a clearing, panes mostly whole, benches and seed trays inside."
         },
         {
-          "entry": "The rail is bedded on the same black ore, in short lengths, laid end to end."
+          "entry": "The trays are sorted and labelled, and the labels face out so they can be read from the aisle. Somebody works here."
         },
         {
-          "entry": "The carriage does not touch the rail. There is a hand's width of nothing between them the whole way over."
+          "entry": "Grass seed, mostly, and steppe varieties -- and a shelf of soil samples from ground that is not local, each one worse than the last."
         },
         {
-          "entry": "Bolt holes along the underside of the rail, and no bolts, and no rust in the holes. It was built to be taken up again."
+          "entry": "The dust is weeks deep, not years. Whoever keeps this is coming back to it."
         },
         {
-          "entry": "Somebody worked out that the ore that makes the islands impossible makes the crossing cheap, and then built a road they could unbuild. I would like to know what they were expecting."
+          "entry": "They are not growing food here. They are working out what will grow in dirt that has stopped growing anything, which is a much stranger thing to be doing in a forest this healthy."
         }
       ],
-      "notes": "Aravali. Deliberately unresolved at the last rung -- the diary describes exactly and refuses to guess, which is the discipline this game is about.",
+      "notes": "Ends unresolved: described exactly, explained not at all.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
     },
     {
-      "id": "discovery_the_ore_that_lifts",
+      "id": "discovery_the_other_doors",
       "type": "discovery",
-      "name": "The Ore That Lifts",
+      "name": "The Other Doors",
       "discipline": "anomalies",
       "found_at": [
-        "poi_lodestone_face"
+        "poi_second_gate"
       ],
       "levels": [
         {
-          "entry": "Black rock in the island's flank. Grit from it does not lie down; it stands on end and points."
+          "entry": "A second doorway, out past the salt, framed in the same dressed basalt as the swept one."
         },
         {
-          "entry": "It points the same way here as it does on the far island, and neither way is north."
+          "entry": "No path to it. Nobody sweeps it and nobody warns you off it either."
         },
         {
-          "entry": "A knife laid on the face will not lie flat. Held above it, it is lighter than it is in my hand."
+          "entry": "Same courses, same joints, same stone. Built by whoever built the other, and not later."
         },
         {
-          "entry": "The whole island is this. Not standing on it -- made of it, all the way through, which is why the edges crumble and the middle does not."
+          "entry": "Pell says there are more. Says it the way you would say there are more wells."
         },
         {
-          "entry": "So the island is held up by what it is made of, and the ore weighs less the more of it there is together. I have written that down twice and it is still what the measurements say."
+          "entry": "So the Gate Court is not the gate. It is the one they kept, and keeping one and abandoning the rest is a decision somebody made and nobody remembers making."
         }
       ],
-      "notes": "Aravali. Deliberately unresolved at the last rung -- the diary describes exactly and refuses to guess, which is the discipline this game is about.",
+      "notes": "Ends unresolved: described exactly, explained not at all.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
     },
     {
-      "id": "discovery_the_strait_narrows",
+      "id": "discovery_three_crossings",
       "type": "discovery",
-      "name": "Why the Crossing Is Here",
-      "discipline": "geography",
+      "name": "Three Crossings, One Ford",
+      "discipline": "archaeology",
       "found_at": [
-        "poi_rail_head"
+        "poi_vedda_ford"
       ],
       "levels": [
         {
-          "entry": "The sea between the shores is a mile or so. East of here it opens and does not close again."
+          "entry": "A bar of shingle you can wade. The nomads use it and so does everything with four legs."
         },
         {
-          "entry": "Both headlands are the same black-and-grey stone in the same courses, tilted the same way."
+          "entry": "There are stones set in the bed, worn round, laid about a pace apart. River stones do not line up."
         },
         {
-          "entry": "They are one hill with the middle gone. The strait is where it broke, not where it was cut."
+          "entry": "They are under the modern silt, which means they were laid before it, which means before the line."
         },
         {
-          "entry": "And the islands are the middle. Two pieces of the same hill, still up, which is the thing nobody here says out loud because it is obvious to them."
+          "entry": "The rail crosses two miles upstream at the narrowest water. This crosses at the shallowest, which is a different question and an older one."
+        },
+        {
+          "entry": "So: forded, then bridged, then forded again, and the ford has not moved. Whoever laid these stones and whoever pitched those tents made the same decision about the same river a very long way apart."
         }
       ],
-      "notes": "Aravali. Four rungs rather than five: this one answers.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
-    },
-    {
-      "id": "discovery_the_water_that_climbs",
-      "type": "discovery",
-      "name": "The Water That Climbs",
-      "discipline": "geography",
-      "found_at": [
-        "poi_first_pier"
-      ],
-      "levels": [
-        {
-          "entry": "Rain falls on the island top and runs off the edge, as rain does."
-        },
-        {
-          "entry": "Under the rim it does not fall. It gathers on the underside and runs upward along it."
-        },
-        {
-          "entry": "It leaves the underside at the island's lowest point and goes on going up, into cloud, and does not come back down here.",
-          "conditions": {
-            "weather": [
-              "rain"
-            ]
-          }
-        },
-        {
-          "entry": "Moss grows on the underside in the direction the water climbs, which is the only way I can measure this when it is not raining."
-        },
-        {
-          "entry": "Whatever holds the island up holds the water up as well, and lets go of it a hundred feet under. I can say where the boundary is to within a pace. I cannot say what it is."
-        }
-      ],
-      "notes": "Aravali. Deliberately unresolved at the last rung -- the diary describes exactly and refuses to guess, which is the discipline this game is about.",
+      "notes": "Ends unresolved: described exactly, explained not at all.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1351,34 +1350,6 @@
         }
       ],
       "notes": "Opens the stair shaft. The reading is deliberately sympathetic to Kavik -- the building was sound and the world moved."
-    },
-    {
-      "id": "discovery_what_grows_on_nothing",
-      "type": "discovery",
-      "name": "What Grows on Nothing",
-      "discipline": "botany",
-      "found_at": [
-        "poi_first_pier",
-        "poi_far_landing"
-      ],
-      "levels": [
-        {
-          "entry": "The island top carries grass, cushion-plant and a stand of mangrove at the edge."
-        },
-        {
-          "entry": "The mangrove roots run out past the rock and hold it. Where they have died back the edge has gone with them."
-        },
-        {
-          "entry": "Moss on the ore grows toward iron. A nail laid on a mat of it is furred over in a season."
-        },
-        {
-          "entry": "The lotus in the climbing water is warm to the hand and stays warm after it is picked, which no other flower here does."
-        }
-      ],
-      "notes": "Aravali. Four rungs rather than five: this one answers.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
     },
     {
       "type": "discovery",

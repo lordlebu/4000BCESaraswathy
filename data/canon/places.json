@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.12.0",
+  "canon_version": "2.12.1",
   "regions": [
     {
       "id": "region_aravali",
@@ -326,7 +326,12 @@
         "poi_first_pier",
         "poi_lodestone_face",
         "poi_far_landing",
-        "poi_kept_stones"
+        "poi_kept_stones",
+        "poi_sunk_cutting",
+        "poi_second_line",
+        "poi_vedda_ford",
+        "poi_quiet_atelier",
+        "poi_nomad_ground"
       ],
       "neighbours": [
         "field_map_lothal",
@@ -363,7 +368,8 @@
         "settlement",
         "hills",
         "coast",
-        "river"
+        "river",
+        "lava_field"
       ],
       "scale": "small",
       "points_of_interest": [
@@ -374,7 +380,11 @@
         "poi_salt_orchard",
         "poi_watch_stair",
         "poi_glass_scar",
-        "poi_caravan_camp"
+        "poi_caravan_camp",
+        "poi_black_pavement",
+        "poi_fang_bed",
+        "poi_scale_shore",
+        "poi_second_gate"
       ],
       "neighbours": [
         "field_map_lothal"
@@ -508,6 +518,27 @@
       "notes": "The evolution discovery. A quarry rather than a dig, so the section is exposed by accident and read by the player rather than presented by a scholar.",
       "epochs": [
         "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "poi_black_pavement",
+      "type": "point_of_interest",
+      "name": "The Black Pavement",
+      "field_map": "field_map_dwarka",
+      "kind": "archaeological_site",
+      "stands": "low",
+      "terrain": [
+        "lava_field",
+        "coast"
+      ],
+      "description": "Basalt columns worn flat, and the ground everything here is built on.",
+      "arrival": "Hexagons underfoot, packed like a honeycomb and rubbed smooth by feet and salt. It goes under the wall, under the court, under the market. Somebody laid a city on top of it and never had to quarry a stone.",
+      "notes": "The rock the gates sit on, and the reason Dwarka is where it is. Canon puts the Asura arrival at the Ganges Lava Sea and says the rift hardened into it; this is the same eruption reaching the coast -- the Scale's volcanic highlands, weathered down and walked on. Nothing arrived here. Something very old is underneath.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "npcs": [
+        "npc_sesh"
       ]
     },
     {
@@ -665,6 +696,27 @@
       "notes": "The solarpunk hook, and what the actionable rung acts on: restorable once the player understands both the poison and the rice."
     },
     {
+      "id": "poi_fang_bed",
+      "type": "point_of_interest",
+      "name": "The Fang Bed",
+      "field_map": "field_map_dwarka",
+      "kind": "eco_site",
+      "stands": "high",
+      "terrain": [
+        "lava_field",
+        "hills"
+      ],
+      "description": "Bones of the wrong animal in the wrong rock.",
+      "arrival": "A seam in the basalt full of bone, and the bone is all one kind of thing: heavy skulls with a pair of long teeth in the upper jaw and nothing like them since. They are lying in rock that formed after they should have been gone.",
+      "notes": "The Fang, in the Scale's ground. `event_fang_vs_scale_wars` says the gorgonopsids held the fern forests and the archosaurs took the volcanic highlands -- so a bed of synapsid bone in basalt is the line being crossed, preserved. The player is not told that; the player is told the teeth do not match anything alive.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "npcs": [
+        "npc_sesh"
+      ]
+    },
+    {
       "id": "poi_far_landing",
       "type": "point_of_interest",
       "name": "The Far Landing",
@@ -696,9 +748,6 @@
       "notes": "The first floating island a player stands on, and the map's teaching moment: the inverted water is right there at the rim, and nothing explains it. Canon does -- lodestone cores of Permian-irradiated ore, a legacy of the shattering of Gondwana -- but nobody on this map says so, because nobody on this map knows.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "npcs": [
-        "npc_hesh"
       ]
     },
     {
@@ -877,9 +926,6 @@
       "notes": "**The trace, and the whole thesis of the map.** Canon puts the Mask Family schism, the Jharwa massacre and the hidden sanctuary of Vara-Ma, Orek and Thren in these ranges. None of that is on stage: Sira and Thren are four hundred years of backstory and this is one afternoon's walking, so the archive's rule holds -- deep-lore figures reach a player as traces.\n\nWhat the player gets is a wall in good repair around an empty hollow, and the fact that somebody is still keeping it. They never learn what happened here. They learn that something did, and that it is not over.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "npcs": [
-        "npc_dala"
       ]
     },
     {
@@ -1029,6 +1075,45 @@
       ]
     },
     {
+      "id": "poi_nomad_ground",
+      "type": "point_of_interest",
+      "name": "Nomad Ground",
+      "field_map": "field_map_aravali",
+      "kind": "settlement",
+      "stands": "low",
+      "terrain": [
+        "plains",
+        "coast"
+      ],
+      "description": "Where the people who still cross put their tents.",
+      "arrival": "Felt tents on the shingle above the ford, guyed low, with the fire in the middle and the animals downstream of it. Nobody has pitched anywhere near the rail-head, which has a roof and a water butt and is a mile off.",
+      "notes": "Sited at the ford rather than the rail-head, deliberately and legibly. The nomads use the crossing the Vedda used and ignore the one the machine age built, because a ford needs no timetable and a river takes animals.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "npcs": [
+        "npc_terke"
+      ]
+    },
+    {
+      "id": "poi_quiet_atelier",
+      "type": "point_of_interest",
+      "name": "The Quiet Atelier",
+      "field_map": "field_map_aravali",
+      "kind": "archaeological_site",
+      "stands": "high",
+      "terrain": [
+        "forest",
+        "hills"
+      ],
+      "description": "A workshop of glass and benches, kept, and nobody in it.",
+      "arrival": "Glass panes in an iron frame, most of them whole, in a clearing that has been kept clear. Benches, seed trays in rows, a press, and jars along a shelf with the labels facing out. There is dust on all of it and not much.",
+      "notes": "**Guyuk's, and she is not here.** `character_guyuk_reborn` -- the Seed-Gleaner -- is aboard the Survival Train in `event_survival_train_solarpunk`, working blasted soil back into growth. This is a second bench she keeps and is not at.\n\nA workshop nobody is currently in suits this map: the Aravali's thesis is ground that remembers what people will not say, and an atelier in use would answer questions the map is built to leave open. The dust says weeks, not years. She is coming back.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
       "id": "poi_rail_head",
       "type": "point_of_interest",
       "name": "The Rail-Head",
@@ -1044,9 +1129,6 @@
       "notes": "The arrival, and the map's one ordinary place. Everything else here is strange -- ore that holds a hill in the air, rain that falls upward, a sanctuary nobody will name -- so the map needs one spot where the strangeness is somebody else's and the business at hand is a timetable.\n\nIt is a settlement rather than a travel_node because people live here; the line is a thing that happens to them.",
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "npcs": [
-        "npc_hesh"
       ]
     },
     {
@@ -1071,6 +1153,63 @@
       "notes": "The botany discovery. An establishment event in progress, which is a slower and more frightening thing than a monster.",
       "epochs": [
         "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "poi_scale_shore",
+      "type": "point_of_interest",
+      "name": "The Scale Shore",
+      "field_map": "field_map_dwarka",
+      "kind": "eco_site",
+      "stands": "low",
+      "terrain": [
+        "lava_field",
+        "coast"
+      ],
+      "description": "Trackways in the stone, going into the sea.",
+      "arrival": "Three-toed prints in the black rock, a stride and a half apart, walking in a straight line toward water that was not there when they were made. They do not come back.",
+      "notes": "The other half of the split, in the same stone as the Fang Bed and a short walk from it. Two kinds of animal that canon says never shared ground, lying in one rock -- which is the whole argument the map makes and never states.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "poi_second_gate",
+      "type": "point_of_interest",
+      "name": "The Second Gate",
+      "field_map": "field_map_dwarka",
+      "kind": "anomaly",
+      "stands": "low",
+      "terrain": [
+        "lava_field",
+        "desert"
+      ],
+      "description": "Another doorway, out past the salt, that nobody sweeps.",
+      "arrival": "The same build as the Gate Court and none of the care: a frame of dressed basalt in a field of it, half-drifted with salt, and no path worn to it. It is not doing anything today.",
+      "notes": "**The gates are plural, and canon always said so.** `event_shadow_pact` and `event_asura_synapsid_domestication` both say \"a Dwarka Gate\", indefinite, and nothing has ever named a second one. This is that -- and the contrast is the point: one gate is swept municipal infrastructure, and this one is a door in a field that everybody has agreed to stop walking to.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "poi_second_line",
+      "type": "point_of_interest",
+      "name": "The Second Line",
+      "field_map": "field_map_aravali",
+      "kind": "archaeological_site",
+      "stands": "low",
+      "terrain": [
+        "forest",
+        "plains"
+      ],
+      "description": "A parallel embankment carrying nothing at all.",
+      "arrival": "An embankment running alongside the first, the same height and the same age, with no iron on it. Either it was lifted or it was never laid.",
+      "notes": "Two lines were built and one was abandoned first, which says the traffic was once heavy enough to need doubling. That is a whole civilisation stated in an earthwork, and nobody on the map remarks on it.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "npcs": [
+        "npc_odri"
       ]
     },
     {
@@ -1099,6 +1238,27 @@
       "notes": "Where the rice discovery lives. The ruin is already doing the restoring; Varuna only has to notice."
     },
     {
+      "id": "poi_sunk_cutting",
+      "type": "point_of_interest",
+      "name": "The Sunk Cutting",
+      "field_map": "field_map_aravali",
+      "kind": "archaeological_site",
+      "stands": "low",
+      "terrain": [
+        "forest",
+        "hills"
+      ],
+      "description": "A rail cutting the forest has closed over.",
+      "arrival": "The ground goes down between two banks and the canopy meets overhead, so it is a green tunnel with iron in the floor of it. Roots have come up between the sleepers and lifted them. A signal post stands in the middle with a tree grown through the frame.",
+      "notes": "The Age of Machinery, reclaimed. This is the thread the map was missing: the line over the strait is not a curiosity, it is the last working piece of something that used to run between two continents. The forest took the rest.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "npcs": [
+        "npc_odri"
+      ]
+    },
+    {
       "type": "point_of_interest",
       "field_map": "field_map_dwarka",
       "id": "poi_tide_market",
@@ -1123,6 +1283,27 @@
       "notes": "Where the people are. Deliberately ordinary: the point of Dwarka is that the extraordinary thing is treated as weather.",
       "epochs": [
         "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "poi_vedda_ford",
+      "type": "point_of_interest",
+      "name": "The Vedda Ford",
+      "field_map": "field_map_aravali",
+      "kind": "wilderness",
+      "stands": "low",
+      "terrain": [
+        "coast",
+        "plains"
+      ],
+      "description": "The old crossing, downstream of everything, still the shallowest water.",
+      "arrival": "Shingle on both banks and a bar between them you can wade at low water. There are stones set in the bed that are not river stones, worn round, laid a pace apart.",
+      "notes": "**The oldest of three crossings, and the one still in use.** The Vedda forded here in `epoch_migrations`, the Age of Machinery bridged it, and the nomads ford it again -- the same water, because water does not care what anybody builds.\n\nThe player finds them in the wrong order: the rail-head first, this last. That is what makes the rail sad rather than impressive. It is the middle of three things, not the end of one.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "npcs": [
+        "npc_terke"
       ]
     },
     {
@@ -1252,100 +1433,6 @@
       ]
     },
     {
-      "id": "npc_dala",
-      "type": "npc",
-      "name": "Dala",
-      "role": "wall-keeper",
-      "found_at": [
-        "poi_kept_stones"
-      ],
-      "language": "kia",
-      "would_settle": false,
-      "knows": [
-        "discovery_the_kept_wall"
-      ],
-      "lines": [
-        {
-          "text": "You have come a long way off the path."
-        },
-        {
-          "text": "It is a wall. It falls down. I put it back. That is the whole of it.",
-          "gives": [
-            "discovery_the_kept_wall"
-          ]
-        },
-        {
-          "text": "There is nothing in there. I have not been in there. My mother had not been in there.",
-          "requires": [
-            "discovery_the_kept_wall"
-          ]
-        },
-        {
-          "text": "You can write it down. Everybody writes it down. The stones do not mind.",
-          "requires": [
-            "discovery_the_kept_wall"
-          ]
-        }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
-      "notes": "**The trace, given a face.** Canon puts the Mask Family schism and the hidden sanctuary in these ranges, and none of that is on stage -- Sira, Meera and Thren are four hundred years of backstory and this map is one afternoon.\n\nSo the player meets somebody who keeps the wall and does not know why, in the third generation of not knowing why. Dala answers every question honestly and the answers do not add up to anything, which is the point: the ground remembers and the people have agreed not to. Nothing Dala says can be pushed past."
-    },
-    {
-      "id": "npc_hesh",
-      "type": "npc",
-      "name": "Hesh",
-      "role": "line-keeper",
-      "found_at": [
-        "poi_rail_head",
-        "poi_first_pier"
-      ],
-      "language": "kia",
-      "would_settle": false,
-      "knows": [
-        "discovery_the_line_that_floats",
-        "discovery_the_ore_that_lifts",
-        "discovery_the_strait_narrows"
-      ],
-      "lines": [
-        {
-          "text": "It runs when it runs. Sit down. You are not the first person to think looking at it will help."
-        },
-        {
-          "text": "No, it does not touch. Hand's width, whole way over. You get used to the quiet or you walk, and there is no walking.",
-          "gives": [
-            "discovery_the_line_that_floats"
-          ]
-        },
-        {
-          "text": "The black stuff under the rail is the same as the islands. Same rock. It wants to be up, so up is where it stays, and we lay iron on it and call that a road.",
-          "requires": [
-            "discovery_the_line_that_floats"
-          ],
-          "gives": [
-            "discovery_the_ore_that_lifts"
-          ]
-        },
-        {
-          "text": "Bolt holes and no bolts. My grandmother said her grandmother said it was built to come up again. Nobody has ever taken it up.",
-          "requires": [
-            "discovery_the_ore_that_lifts"
-          ]
-        },
-        {
-          "text": "Look at the two headlands. Same stone, same tilt, same courses. It was one hill. The middle of it is those two things hanging over the water, and you are about to ride across the gap where it broke.",
-          "requires": [
-            "discovery_the_strait_narrows"
-          ]
-        }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
-      "notes": "Keeps the line and does not explain it, which is the map in one person. Hesh knows the mechanism exactly -- the ore wants to be up -- and has no more curiosity about it than a ferryman has about buoyancy. That is the counterweight to a traveller who writes everything down.\n\nSays nothing at all about the Kept Stones. That silence is deliberate and is not gated on any discovery: asking Hesh about the wall gets you the timetable."
-    },
-    {
       "id": "npc_marn",
       "type": "npc",
       "name": "Marn",
@@ -1404,6 +1491,45 @@
       "epochs": [
         "epoch_post_cataclysm"
       ]
+    },
+    {
+      "id": "npc_odri",
+      "type": "npc",
+      "name": "Odri",
+      "role": "scavenger",
+      "found_at": [
+        "poi_sunk_cutting",
+        "poi_second_line"
+      ],
+      "language": "kia",
+      "would_settle": true,
+      "knows": [
+        "discovery_the_forest_took_it"
+      ],
+      "lines": [
+        {
+          "text": "Careful in the cutting. The sleepers go through where the roots have had them."
+        },
+        {
+          "text": "Chairs, plates, bolts. Good iron, better than anything anybody smelts now, and there is a hundred miles of it under that green.",
+          "gives": [
+            "discovery_the_forest_took_it"
+          ]
+        },
+        {
+          "text": "Two lines. Nobody believes me till they walk the second bank. Two lines, and one lifted before the other stopped.",
+          "requires": [
+            "discovery_the_forest_took_it"
+          ]
+        },
+        {
+          "text": "What ran on it? Something that needed doubling. That is all the iron will tell you and I have asked it a lot."
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "Knows the Age of Machinery from the wrong end -- as a source of good metal -- which is the honest way a person in a forest would know it. Odri has better evidence about the era than any scholar on the map and no framework to put it in, and is entirely content with that."
     },
     {
       "id": "npc_okhi",
@@ -1523,6 +1649,45 @@
       ]
     },
     {
+      "id": "npc_sesh",
+      "type": "npc",
+      "name": "Sesh",
+      "role": "stone-reader",
+      "found_at": [
+        "poi_black_pavement",
+        "poi_fang_bed"
+      ],
+      "language": "kia",
+      "would_settle": true,
+      "knows": [
+        "discovery_bones_in_one_stone"
+      ],
+      "lines": [
+        {
+          "text": "You are standing on it. Everybody stands on it. It goes under the whole town."
+        },
+        {
+          "text": "Hexagons. All the way down as far as anybody has dug, and nobody has dug far, because why would you."
+        },
+        {
+          "text": "The bone seam is up by the hill. Big teeth, two of them, top jaw. Not a fish and not a cat.",
+          "gives": [
+            "discovery_bones_in_one_stone"
+          ]
+        },
+        {
+          "text": "And the bird tracks are in the same rock, down at the shore. I have shown a dozen people and you are the second to go and look at both.",
+          "requires": [
+            "discovery_bones_in_one_stone"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "Dwarka's local knowledge being simply right, which is that map's thesis. Sesh has the observation exactly and no theory, and the one thing Sesh notices about visitors is which of them bother to walk to both sites."
+    },
+    {
       "id": "npc_sura",
       "type": "npc",
       "name": "Sura",
@@ -1581,6 +1746,45 @@
       "epochs": [
         "epoch_post_cataclysm"
       ]
+    },
+    {
+      "id": "npc_terke",
+      "type": "npc",
+      "name": "Terke",
+      "role": "nomad",
+      "found_at": [
+        "poi_nomad_ground",
+        "poi_vedda_ford"
+      ],
+      "language": "maru",
+      "would_settle": false,
+      "knows": [
+        "discovery_three_crossings"
+      ],
+      "lines": [
+        {
+          "text": "Animals will not go on the iron. Would you? It hums."
+        },
+        {
+          "text": "We cross at the shingle. Always the shingle. My mother crossed at the shingle and hers.",
+          "gives": [
+            "discovery_three_crossings"
+          ]
+        },
+        {
+          "text": "There are stones down there, set in the bed. Not ours. They were there when we started coming and we use them, so.",
+          "requires": [
+            "discovery_three_crossings"
+          ]
+        },
+        {
+          "text": "The rail people ask why we do not ride. We ask why they wait."
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "The living end of the map's oldest thread. Terke fords where the Vedda forded and has no interest in the line at all -- not hostility, just a different set of needs. Animals, water, no timetable.\n\nSays nothing about the Age of Machinery because it is not a thing that happened to them."
     },
     {
       "id": "npc_thrali",
