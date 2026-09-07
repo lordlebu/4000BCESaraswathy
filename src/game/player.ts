@@ -11,7 +11,12 @@
 // `assets/mithra-overworld.png` is a second character on exactly the same layout, so anything here
 // works for either — see `CHARACTERS`.
 
-import Phaser from 'phaser';
+// **Type-only, and that is what keeps this file testable.** CLAUDE.md lists `player.ts` among the
+// files in `game/` that import no Phaser so `test/` can cover them, and that was true of the
+// intent and false of the code: a value import pulls in the engine, which reaches for a real 2D
+// canvas on load and so runs under neither Node nor jsdom. `Phaser` appears here only as the type
+// of a scene being handed in, so `import type` says exactly that and disappears at compile time.
+import type Phaser from 'phaser';
 
 
 
@@ -60,6 +65,31 @@ const FLIP_X = false;
 /** Contact, pass, contact, pass — the classic four-frame walk, built from the row's own poses. */
 const walkOrder = (row: number): number[] => [row + 2, row + 0, row + 3, row + 1];
 
+/** Frames in a walk cycle, and the rate they were authored at. */
+export const WALK_FRAMES = 4;
+export const WALK_FPS = 7;
+
+/**
+ * How fast to run the walk so the feet keep up with the ground.
+ *
+ * **A fixed frame rate cannot match a variable step.** The cycle is four frames at 7fps, so it
+ * takes 571ms; a step across plains takes 425ms and a step through wetland twice that. At a fixed
+ * rate the legs and the ground disagree on every tile but the one the rate happened to suit, which
+ * is what makes a walk read as skating.
+ *
+ * So the cycle is scaled to the step: one full stride per tile, whatever the tile costs. Slow
+ * ground now slows the legs as well as the traveller, which is the reading `travelCost` always
+ * wanted -- wading looks like wading rather than like the same walk playing over slower movement.
+ *
+ * Clamped, because a pathological duration should degrade to a strange-looking walk rather than to
+ * a blur or a freeze.
+ */
+export function walkTimeScale(stepMs: number): number {
+  if (!Number.isFinite(stepMs) || stepMs <= 0) return 1;
+  const cycleMs = (WALK_FRAMES / WALK_FPS) * 1000;
+  return Math.min(2, Math.max(0.5, cycleMs / stepMs));
+}
+
 /** Two near-identical standing poses, so idling breathes rather than freezes. */
 const idleOrder = (row: number): number[] => [row + 0, row + 1];
 
@@ -107,8 +137,9 @@ export function createCharacterAnimations(scene: Phaser.Scene, key: string): voi
   for (const facing of ['down', 'up', 'left', 'right'] as const) {
     const walk = WALK_ROW[facing];
     define('idle', facing, idleOrder(walk), 1.2);
-    // Roughly a frame per step at the pace the player actually walks.
-    define('walk', facing, walkOrder(walk), 7);
+    // The base rate. `walkTimeScale` stretches it to the step actually being taken, so this is the
+    // rate for a step of average cost rather than the rate every step runs at.
+    define('walk', facing, walkOrder(walk), WALK_FPS);
 
     // One frame, so there is nothing to cycle. Kept as an animation rather than a static frame so
     // `animFor` returns the same shape for all three actions and the scene needs no special case.

@@ -65,6 +65,7 @@ import {
   type CharacterArt,
   facingFromStep,
   loadCharacterSheet,
+  walkTimeScale,
   type Facing
 } from '../player';
 import { DAY_MS, phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
@@ -264,6 +265,15 @@ export class WorldScene extends Phaser.Scene {
   private beaten = new Set<string>();
   private moving = false;
   private queuedPath: Point[] = [];
+
+  /**
+   * How fast the walk cycle runs for the step in flight, so the feet match the ground.
+   *
+   * Held on the scene rather than passed around because `updateAnimation` is the one place that
+   * touches the sprite's animation, and it has to reapply this every time it starts the walk --
+   * Phaser's `timeScale` lives on the sprite and would otherwise leak into the idle.
+   */
+  private walkScale = 1;
   private facing: Facing = 'down';
   /**
    * Whose sheet the sprite draws from.
@@ -591,6 +601,9 @@ export class WorldScene extends Phaser.Scene {
       poiAt(this.built, this.at) !== null;
     const action = actionFor(this.moving, atRest);
     const { key, flipX } = animFor(this.character.key, this.facing, action);
+    // Reapplied on every call rather than only on a change: `timeScale` lives on the sprite, so a
+    // walk left at 1.34 would otherwise run the idle a third fast for the rest of the journey.
+    this.player.anims.timeScale = action === 'walk' ? this.walkScale : 1;
     if (this.player.anims.currentAnim?.key !== key) this.player.play(key);
     this.player.setFlipX(flipX);
   }
@@ -720,7 +733,14 @@ export class WorldScene extends Phaser.Scene {
     keyboard.on(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN, (event: KeyboardEvent) => {
       // Typing is not walking. See `typing()` -- this is the half a player notices, and the poll
       // in `update` is the half that would still have moved them a frame later.
-      if (this.typing()) return;
+      if (this.typing()) {
+      // Settle first. Focusing the album's search field mid-step would otherwise leave the walk
+      // cycle running: the step completes, `moving` goes false, and this guard returns before
+      // anything decides what the traveller should be doing instead -- so he jogs on the spot for
+      // as long as the player is typing.
+      this.updateAnimation();
+      return;
+    }
       const zoom = ZOOM_KEYS[event.code];
       if (zoom !== undefined) {
         this.onZoom({ step: zoom });
@@ -1088,7 +1108,14 @@ export class WorldScene extends Phaser.Scene {
     // A held key must be ignored while typing too, or holding "a" to repeat a letter walks west
     // for as long as the key is down. Checked separately from the listener above because the two
     // paths are independent: one catches a tap too short for a frame, the other a key still held.
-    if (this.typing()) return;
+    if (this.typing()) {
+      // Settle first. Focusing the album's search field mid-step would otherwise leave the walk
+      // cycle running: the step completes, `moving` goes false, and this guard returns before
+      // anything decides what the traveller should be doing instead -- so he jogs on the spot for
+      // as long as the player is typing.
+      this.updateAnimation();
+      return;
+    }
 
     const held =
       (this.cursors.up.isDown || this.wasd.up.isDown ? [0, -1] : null) ??
@@ -1106,7 +1133,15 @@ export class WorldScene extends Phaser.Scene {
     }
 
     const next = this.queuedPath.shift();
-    if (next) this.step(next);
+    if (next) {
+      this.step(next);
+      return;
+    }
+
+    // Nothing held and nothing queued: the walk is actually over, so let it settle. This is the
+    // only point in the loop that knows that -- a step finishing does not mean walking has
+    // stopped, it means one tile has been crossed.
+    this.updateAnimation();
   }
 
   private step(target: Point): void {
@@ -1126,16 +1161,19 @@ export class WorldScene extends Phaser.Scene {
     // Tiredness slows the walk and nothing else. It never blocks a step, never makes ground
     // unwalkable and never reaches `canAdvance` -- see the invariants at the top of fatigue.ts.
     const pace = this.fatigueOn ? paceFor(this.fatigue()) : 1;
+    const duration = STEP_MS * cost * pace;
     this.leaveTrace(this.at, tile.biome);
     this.moving = true;
     this.at = target;
+    // One stride per tile, however long this tile takes to cross.
+    this.walkScale = walkTimeScale(duration);
     this.updateAnimation();
 
     this.tweens.add({
       targets: this.player,
       x: target.x * TILE_SIZE + TILE_SIZE / 2,
       y: target.y * TILE_SIZE + TILE_SIZE - 2,
-      duration: STEP_MS * cost * pace,
+      duration,
       ease: 'Sine.easeInOut',
       // Re-sorted at the start of the step rather than the end: he should be behind the grass of
       // the tile he is entering from the moment he begins to enter it.
@@ -1143,7 +1181,12 @@ export class WorldScene extends Phaser.Scene {
       onComplete: () => {
         this.moving = false;
         this.arriveAt(target);
-        this.updateAnimation();
+        // **Deliberately does not touch the animation.** Dropping to idle here is what made the
+        // walk stutter: the next step is decided a frame later in `update`, so a held direction
+        // went walk, idle, walk, idle -- and because the key changed each time, every tile
+        // restarted the cycle from its first frame. A 425ms step against a 571ms cycle meant the
+        // last frames were never drawn at all. `update` settles to idle when there is genuinely
+        // nothing left to do, which is the only place that can tell the difference.
       }
     });
   }
