@@ -35,7 +35,7 @@ npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
 npm run check:data # verify data/canon/ matches the canon release it came from
 npm run perf       # frame cost on the renderer CI has -- see docs/rendering.md
-npm run build:sprite # rebuild assets/varuna-walk.png from assets/source/
+npm run build:sprite # rebuild every traveller's sheet; add an id to do just one
 ```
 
 ### The browser suite is split, and the split is deliberate
@@ -115,8 +115,27 @@ cross. None needs new art.
 
 ### Sprite art is generated too
 
-`assets/varuna-walk.png` is **built, not hand-made** — run `npm run build:sprite` rather than
-editing it. The originals live in `assets/source/`.
+`assets/<id>-overworld.png` is **built, not hand-made** — run `npm run build:sprite <id>` rather
+than editing it. `tools/characters.json` is the manifest: a sixth traveller is a row in it.
+
+**A walking source belongs in `assets/source/`, tracked.** All five started in
+`assets/source/dump/`, which is git-ignored, so the documented rebuild only ever ran on the one
+machine holding them and failed outright on a fresh clone — the table below says a file a
+`tools/` script reads to build something is tracked, and these are exactly that. They are moving
+across as new art arrives; `mithra-walking.png` is the first.
+
+Until a character's *sitting* source moves too, it declares `"sit": { "keep": 4 }` — carry the
+seated frames already in the built sheet. That keeps a walk-only rebuild reproducible for
+everybody instead of a hand-stitch somebody has to remember, and it reverts to a normal `source`
+the day the sitting art lands.
+
+**Check the profile rows by eye, at about 18×, before believing a sheet.** The four rows are
+assumed to arrive as down, up, right, left, and Mithra's did not — the two profiles were the other
+way round, so walking east played a figure facing west while it slid east. `--frames` reorders as
+well as selects, so the fix is a frame list in the manifest. Two different pixel heuristics were
+tried on this and **both got it wrong on two of the five characters**: hair that frames the face on
+both sides defeats a skin-versus-hair test, and a symmetric headdress defeats a centroid one.
+Looking at it took a minute and was right.
 
 Image models do not hand back usable game sprites. The first attempt had registration guides drawn
 across the figure; the second painted the transparency checkerboard on as opaque grey and

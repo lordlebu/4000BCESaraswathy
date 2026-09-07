@@ -39,8 +39,27 @@
       "id": "mithra",
       "name": "Mithra",
       "colours": 26,
-      "walk": { "source": "assets/source/dump/Mithra_walking.png" },
-      "sit": { "source": "assets/source/dump/3 M characters sitting.png", "frames": [0, 3, 6] }
+      "$walk_comment": [
+        "Mithra's profile rows arrive the other way round, and only Mithra's do.",
+        "",
+        "findSprites returns this sheet as down, up, LEFT, right -- so the built sheet put the",
+        "left-facing art at frames 8-11, which is where WALK_ROW in src/game/player.ts says the",
+        "right-facing art lives. Walking east played a figure facing west while it slid east: a",
+        "moonwalk, and the one every other character does not do.",
+        "",
+        "Reordered here rather than in the game. The four-row convention is one every other sheet",
+        "already keeps, and one character's art should not bend it for the other four. --frames",
+        "reorders as well as selects (boxes = wanted.map(...)), so naming all sixteen in the order",
+        "the game expects is the whole fix.",
+        "",
+        "Verified by eye at 18x, which is the only way this class of fault is caught: frame 10",
+        "faces left and frame 14 faces right in the source, and the pair swap under this list."
+      ],
+      "walk": {
+        "source": "assets/source/mithra-walking.png",
+        "frames": [0, 1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 8, 9, 10, 11]
+      },
+      "sit": { "keep": 4 }
     },
     {
       "id": "malacite",

@@ -42,6 +42,48 @@ function sheetFrames(file, cellWidth) {
   return buf.readUInt32BE(16) / cellWidth;
 }
 
+/**
+ * Lift the last few frames out of a sheet that is already built.
+ *
+ * **This exists because the sitting art is not in the repository and cannot be.** Every character's
+ * sources lived in `assets/source/dump/`, which is git-ignored -- so `build:sprite` only ever ran
+ * on the one machine that happened to hold them, and on a fresh clone the documented rebuild
+ * command failed outright. The walking sheets are moving into `assets/source/` where the project's
+ * own rule says a build input belongs; the sitting sheets are packed several characters to a file
+ * and have not been re-cut yet.
+ *
+ * So a character may declare `"sit": { "keep": 4 }`, meaning *the sitting frames are already in my
+ * built sheet, carry them across*. That makes a walk-only rebuild reproducible by anybody rather
+ * than a hand-stitch somebody has to remember, and it costs nothing once real sitting sources
+ * land: replace `keep` with a `source` and it builds like the rest.
+ *
+ * It refuses rather than guesses when the sheet it would copy from is missing or short, because a
+ * character silently losing its seated pose is exactly the kind of "nearly right" this file was
+ * written to stop.
+ */
+function keepFrames(builtSheet, out, cell, count) {
+  const { decodePng, encodePng } = require('./sprite-png.js');
+  if (!fs.existsSync(builtSheet)) {
+    throw new Error(`sit.keep needs ${path.relative(ROOT, builtSheet)}, which is not built yet`);
+  }
+  const img = decodePng(builtSheet);
+  const have = img.width / cell.width;
+  if (have < count) {
+    throw new Error(`sit.keep wants ${count} frames but ${path.relative(ROOT, builtSheet)} has ${have}`);
+  }
+  const width = cell.width * count;
+  const kept = Buffer.alloc(width * cell.height * 4);
+  for (let i = 0; i < count; i += 1) {
+    const from = have - count + i;
+    for (let y = 0; y < cell.height; y += 1) {
+      const src = (y * img.width + from * cell.width) * 4;
+      const dst = (y * width + i * cell.width) * 4;
+      img.data.copy(kept, dst, src, src + cell.width * 4);
+    }
+  }
+  fs.writeFileSync(out, encodePng(width, cell.height, kept));
+}
+
 /** Run the existing builder. It owns every pixel decision; this only says what to feed it. */
 function build(source, out, cell, colours, frames) {
   const args = [BUILDER, source, out, String(cell.width), String(cell.height), `--colours=${colours}`];
@@ -129,7 +171,12 @@ function main() {
     const walkOut = path.join(tmp, `${c.id}-walk.png`);
     const sitOut = path.join(tmp, `${c.id}-sit.png`);
     build(path.join(ROOT, c.walk.source), walkOut, cell, c.colours, c.walk.frames);
-    build(path.join(ROOT, c.sit.source), sitOut, cell, c.colours, c.sit.frames);
+    if (c.sit.keep) {
+      console.log(`  keeping ${c.sit.keep} sitting frame(s) from the built sheet`);
+      keepFrames(out, sitOut, cell, c.sit.keep);
+    } else {
+      build(path.join(ROOT, c.sit.source), sitOut, cell, c.colours, c.sit.frames);
+    }
 
     const walkN = sheetFrames(walkOut, cell.width);
     const sitN = sheetFrames(sitOut, cell.width);
