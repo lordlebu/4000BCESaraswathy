@@ -402,6 +402,50 @@ The two shapes are worth naming separately:
 The tell for the second one is a check that fails *everywhere at once* on its first run. Genuine
 absence is usually patchy; universal failure is more often the harness.
 
+## A spec asserts a mechanic's *shape*, so changing the shape breaks it
+
+Resting used to be one click: press the row, the night passes, the row greys out because there is
+no bed on offer in the morning. `e2e/fatigue.spec.ts` said exactly that, and it was right for as
+long as it was true.
+
+Then resting became an activity like taking something — a painted card, three beats, and the night
+spent on the way *out* of it. The click now opens a card, and the spec went on asserting the
+morning had arrived while the player was still looking at dusk. It failed on `main`, alone, in an
+otherwise green suite of eighty.
+
+There is no way to write that spec so the change would not break it, and it should not be tried:
+the spec's whole job is to hold the mechanic's shape still. **What matters is that the shape change
+and the spec change travel in the same commit**, and the thing that decides whether they do is
+whether the browser suite runs before the merge and not after it.
+
+It did not here. The pull request that made resting an activity was merged **twelve seconds** after
+it was opened, and the one before it in thirty-seven — so `main` was the first place either ever
+ran. Every failure this session had already been fixed on a branch by the time anyone read it,
+which is the specific waste a required check exists to prevent. A required check that is merged
+past is a check nobody is running.
+
+## A flag that doubles as content only latches when the content is there
+
+The same change left a second fault behind it, and it is the more portable of the two.
+
+The activity modal held its settled state as `string | null` — the sentence the run ended on,
+doubling as *has this run ended*. Every gesture that comes off a tile has a material to name, so
+the sentence is never empty and the flag always latches. A rest promises nothing. Its line came
+back `''`, and `''` is not null:
+
+- the card's prose rendered the empty string, because `??` falls back on null and not on empty;
+- the timing bar and the strike button never went away, so a finished night never looked finished;
+- the settle effect ran again on the next render and paid `onFinish` **twice** — the double
+  payment this component's own test file names as the most expensive fault it can have.
+
+Nine unit tests covered that modal and none of them opened it on a rest, because every fixture had
+a material in it. **A fixture set that never contains the empty case cannot find the empty case**,
+and the empty case is usually the one a later feature introduces.
+
+The fix is not a cleverer falsiness check. It is that a run settling on an empty sentence is a
+legitimate state, so the flag has to be something other than the sentence — here `{ line: string }
+| null`, where the object is the flag and the string is only what it carries.
+
 ## Write measurements down, or measure them again
 
 The sprite heights were measured by hand three times in one session — each time in a throwaway

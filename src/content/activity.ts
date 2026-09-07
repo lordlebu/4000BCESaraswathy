@@ -148,9 +148,15 @@ export function settle(attempt: Attempt, promised: readonly Taking[]): Taking[] 
  * Written per grade and gesture rather than assembled, for the reason `describeRoutine` states:
  * this game's progression *is* the writing, and a sentence stitched from fragments reads like a
  * status bar.
+ *
+ * **`material` is nullable because a rest has none, and that was a mechanic nobody could see.**
+ * The three `rest` sentences below never name a material -- a night is not about a thing -- and
+ * the caller had no material to pass, so it skipped this function entirely and settled on an
+ * empty line. Every rest line here was unreachable prose. Only `rest` may pass null: the other
+ * three gestures always come from a tile that promised something, and each of them names it.
  */
-export function attemptLine(gesture: Gesture, grade: Grade, material: Material): string {
-  const what = material.name.toLowerCase();
+export function attemptLine(gesture: Gesture, grade: Grade, material: Material | null): string {
+  const what = material?.name.toLowerCase() ?? 'it';
   if (grade === 'clean') {
     switch (gesture) {
       case 'rest':

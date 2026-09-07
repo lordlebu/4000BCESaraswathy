@@ -114,6 +114,25 @@ test('the camp button appears at a camp after dark, and sleeping brings the morn
   const camp = rest(page);
   await expect(camp).toBeEnabled({ timeout: 10_000 });
   await camp.click();
+
+  // **A night is an activity now, and this is the assertion that broke when it became one.** The
+  // click used to spend the night by itself; it opens the painted card instead, and the night is
+  // spent on the way out of it -- see the `camp` event in `App.tsx`. So the old shape of this test
+  // asserted the morning had arrived while the player was still looking at dusk, and it failed on
+  // `main` rather than on the pull request that changed the mechanic, because nothing here walks
+  // the card.
+  const night = page.locator('.activity-veil');
+  await expect(night, 'stopping for the night opened no activity').toBeVisible();
+
+  // Wait for the run to settle before reaching for the way out, which is not politeness: the way
+  // out is one button whose *label* changes when the run ends, and this suite has already lost a
+  // run to clicking one mid-change. Once the timing bar is gone the label is final.
+  await expect(page.locator('.activity-track'), 'the night never finished').toBeHidden({
+    timeout: 20_000
+  });
+  await page.locator('.activity-choice', { hasText: 'Start the day' }).click();
+  await expect(night).toBeHidden();
+
   // Sleeping moves the sky. Whatever the journal says afterwards, it must still be saying it.
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
   // Slept: it is morning now, so the same tile will not offer a bed again.
