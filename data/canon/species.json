@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.7.0",
+  "canon_version": "2.11.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -1070,24 +1070,6 @@
       "journal_prompt": "A predatory aquatic beetle that swims in hot mineral springs, feeding on larval vent-shrimps.",
       "mood": "fearsome",
       "source_index": 54
-    },
-    {
-      "id": "fauna_sky_faring_grasshopper",
-      "type": "fauna",
-      "name": "Sky-Faring Grasshopper",
-      "scientific": "Melanoplus caelius",
-      "clade": "insect",
-      "region": "saraswati-godavari-deltas",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "common",
-      "journal_prompt": "A lightweight, gas-buoyant grasshopper that migrates between floating islands, feeding on sky-bramble leaves.",
-      "mood": "graceful",
-      "source_index": 55,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
     },
     {
       "id": "fauna_vrkshasmara",
@@ -3158,130 +3140,6 @@
       "source_index": 175
     },
     {
-      "id": "fauna_aero_manta_high_altitude_beedu",
-      "type": "fauna",
-      "name": "Aero-Manta / High-Altitude Beedu",
-      "scientific": "Sarasvatimanta sky",
-      "clade": "fish",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "sky_underside"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A massive, pale cousin of the desert Beedu that nests on the underside of floating islands, grazing on sky coral.",
-      "mood": "graceful",
-      "source_index": 176,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_cloud_weaver_spider_gaganjala",
-      "type": "fauna",
-      "name": "Cloud-Weaver Spider / Gaganjala",
-      "scientific": "Aranea nubis",
-      "clade": "arachnid",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A massive arachnid that weaves static-charged webs between airborne mangrove roots, hunting small flying creatures.",
-      "mood": "fearsome",
-      "source_index": 177,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_cognitavi_cloud_hermit",
-      "type": "fauna",
-      "name": "Cognitavi Cloud-Hermit",
-      "scientific": "Cognitavi solitarius",
-      "clade": "bird",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A highly advanced, solitary subspecies of navigator bird that establishes isolated monasteries on the highest floating peaks.",
-      "mood": "graceful",
-      "sentient": true,
-      "source_index": 178,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_sky_faring_orca",
-      "type": "fauna",
-      "name": "Sky-Faring Orca",
-      "scientific": "Orcinus volans",
-      "clade": "mammal",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A giant marine mammal that has adapted to glide through the dense, prana-rich clouds, its fins modified into wide membranes.",
-      "mood": "graceful",
-      "source_index": 179,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_floating_island_shrew",
-      "type": "fauna",
-      "name": "Floating-Island Shrew",
-      "scientific": "Sorex levitatus",
-      "clade": "mammal",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A tiny rodent with hollow bones and webbed toes, gliding between moss-covered floating rocks to forage for insects.",
-      "mood": "graceful",
-      "source_index": 180,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_sky_gull",
-      "type": "fauna",
-      "name": "Sky-Gull",
-      "scientific": "Larus caelius",
-      "clade": "bird",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A white shorebird that nests on the lodestone cliffs of the floating islands, riding high-altitude wind currents.",
-      "mood": "graceful",
-      "source_index": 181,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_cloud_leopard",
-      "type": "fauna",
-      "name": "Cloud-Leopard",
-      "scientific": "Neofelis nubis",
-      "clade": "mammal",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A beautifully patterned predator that climbs aero-mangrove branches, hunting sky-shrews and young birds in low gravity.",
-      "mood": "fearsome",
-      "source_index": 182,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
       "id": "fauna_lodestone_beetle",
       "type": "fauna",
       "name": "Lodestone Beetle",
@@ -3291,66 +3149,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "An insect with a metallic, magnetic carapace that feeds on mineral deposits along the floating island cores.",
       "mood": "graceful",
       "source_index": 183,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_static_charged_wasp",
-      "type": "fauna",
-      "name": "Static-Charged Wasp",
-      "scientific": "Vespa electrica",
-      "clade": "insect",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A giant wasp species whose wings generate static electricity as they fly, delivering a shocking sting to defend its nest.",
-      "mood": "watchful",
-      "source_index": 184,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_sky_turtle",
-      "type": "fauna",
-      "name": "Sky-Turtle",
-      "scientific": "Chelonia caelia",
-      "clade": "reptile",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A small, lightweight turtle with a hollow, gas-filled shell, drifting lazily through the clouds between floating oases.",
-      "mood": "graceful",
-      "source_index": 185,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_aero_snail",
-      "type": "fauna",
-      "name": "Aero-Snail",
-      "scientific": "Helix caelia",
-      "clade": "mollusc",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A land snail with a thin, lightweight shell that uses a mucus parachute to glide from island to island during high winds.",
-      "mood": "graceful",
-      "source_index": 186,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_cloud_cricket",
@@ -3362,47 +3166,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "An insect that produces high-frequency, melodic chirps that echo through the thin, cold air of the high altitude routes.",
       "mood": "watchful",
       "source_index": 187,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_sky_snake",
-      "type": "fauna",
-      "name": "Sky-Snake",
-      "scientific": "Chrysopelea caelia",
-      "clade": "reptile",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A slender, green serpent that flattens its body to glide between hanging vines of neighboring floating islands.",
-      "mood": "graceful",
-      "source_index": 188,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_mist_lurking_bat",
-      "type": "fauna",
-      "name": "Mist-Lurking Bat",
-      "scientific": "Myotis nubis",
-      "clade": "mammal",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A small, white bat that uses echolocation to hunt cloud-crickets and moths inside the island caves.",
-      "mood": "fearsome",
-      "source_index": 189,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_gargoyle_bat",
@@ -3415,12 +3184,12 @@
         "sky_island",
         "sky_underside"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A dark, stone-skinned bat of the shadowed undersides, feeding on large insects during the night.",
       "mood": "watchful",
       "source_index": 190,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_aero_moth",
@@ -3432,12 +3201,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A large moth with soft, dusty wings patterned like grey clouds, drawing toward the glow of sky-brambles.",
       "mood": "luminous",
       "source_index": 191,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_floating_island_chameleon",
@@ -3449,47 +3218,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A lizard that changes color to match the glowing moss, using its prehensile tail to hang from sky-mangrove roots.",
       "mood": "luminous",
       "source_index": 192,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_sky_dragon_fly",
-      "type": "fauna",
-      "name": "Sky-Dragon Fly",
-      "scientific": "Anax caelius",
-      "clade": "insect",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A giant, predatory insect with four independent wings, hunting smaller moths and flies with extreme speed.",
-      "mood": "fearsome",
-      "source_index": 193,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_prana_feeder_finch",
-      "type": "fauna",
-      "name": "Prana-Feeder Finch",
-      "scientific": "Fringilla prana",
-      "clade": "bird",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A small, brightly colored bird that absorbs atmospheric life-force, its song bringing a sense of calm to travelers.",
-      "mood": "watchful",
-      "source_index": 194,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_cloud_squirrel",
@@ -3502,47 +3236,12 @@
         "sky_island",
         "open_sky"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A rodent with exceptionally long, bushy tail used as a rudder, leaping impossible distances in the low-gravity environment.",
       "mood": "playful",
       "source_index": 195,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_sky_faring_jellyfish",
-      "type": "fauna",
-      "name": "Sky-Faring Jellyfish",
-      "scientific": "Aurelia caelia",
-      "clade": "cnidarian",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "An airborne, translucent organism that drifts on wind currents, filtering high-altitude plankton with stinging tentacles.",
-      "mood": "graceful",
-      "source_index": 196,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_lodestone_snail",
-      "type": "fauna",
-      "name": "Lodestone Snail",
-      "scientific": "Helix magneticus",
-      "clade": "mollusc",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A snail with an iron-rich shell that climbs the magnetized cliffs of the floating islands, sensing magnetic fields.",
-      "mood": "graceful",
-      "source_index": 197,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_cloud_lurking_gecko",
@@ -3555,30 +3254,12 @@
         "sky_island",
         "sky_underside"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A pale green gecko with large, adhesive pads, hunting moths and wasps on the underside of floating rocks.",
       "mood": "fearsome",
       "source_index": 198,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_sky_faring_otter",
-      "type": "fauna",
-      "name": "Sky-Faring Otter",
-      "scientific": "Lutra caelia",
-      "clade": "mammal",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "An agile mammal that glides between floating pools using skin membranes, hunting sky-shrews and beetles.",
-      "mood": "fearsome",
-      "source_index": 199,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_mist_valley_thrush",
@@ -3590,29 +3271,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A bird with a sweet, echoing song that nests in the high, misty valleys, feeding on sky-bramble berries.",
       "mood": "watchful",
       "source_index": 200,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_aero_weevil",
-      "type": "fauna",
-      "name": "Aero-Weevil",
-      "scientific": "Curculio caelius",
-      "clade": "insect",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A beetle with a long snout that drills into the tough, gas-filled gourds to lay its eggs inside.",
-      "mood": "watchful",
-      "source_index": 201,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_sky_faring_crab",
@@ -3624,30 +3288,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A light-shelled crab that climbs the aerial roots of sky-mangroves, feeding on moss and small insects.",
       "mood": "watchful",
       "source_index": 202,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_cloud_weaver_spiderling",
-      "type": "fauna",
-      "name": "Cloud-Weaver Spiderling",
-      "scientific": "Aranea nubis minor",
-      "clade": "arachnid",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A young spider that uses long silk threads to balloon through the air, traveling between distant floating islands.",
-      "mood": "graceful",
-      "source_index": 203,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_high_altitude_falcon",
@@ -3659,30 +3305,12 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A swift predator that hunts sky-gulls and finches, nesting on the sheer vertical cliffs of the highest islands.",
       "mood": "fearsome",
       "source_index": 204,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "fauna_prana_absorbing_butterfly",
-      "type": "fauna",
-      "name": "Prana-absorbing Butterfly",
-      "scientific": "Danaus caelius",
-      "clade": "insect",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A large butterfly with glowing, translucent wings that feeds on the nectar of prana-lotuses, spreading glowing pollen.",
-      "mood": "luminous",
-      "source_index": 205,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
       "id": "fauna_colossal_void_devourer",
@@ -3861,29 +3489,6 @@
       "subclade": "ember_born"
     },
     {
-      "id": "fauna_asura_tainted_gargoyle",
-      "type": "fauna",
-      "name": "Asura-Tainted Gargoyle",
-      "scientific": "Māyā-born tuli",
-      "clade": "construct",
-      "region": "asura-conjurations",
-      "biomes": [
-        "sky_island",
-        "sky_underside"
-      ],
-      "placement": "lore",
-      "rarity": "mythic",
-      "journal_prompt": "A Māyā-born thing in the shape of a Tuli, its skin calcified into a stone-like hide. It animates only at night, and hunts.",
-      "mood": "uncanny",
-      "source_index": 216,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity.",
-      "taxonomy": {
-        "notes": "Māyā-born, in the shape of a Tuli. The old binomial `Tuli calcified` carried the right subject and the wrong grammar -- Tuli is a people, not a genus, and `calcified` is an English epithet of the kind canon has already replaced twice. Filed as a construct because it is made rather than born, which also settles what had been read as a devolved hominid."
-      },
-      "notes": "Māyā-born construct in Tuli shape, hide calcified to stone. Nocturnal.",
-      "sentient": true
-    },
-    {
       "id": "fauna_lethal_cave_spectre",
       "type": "fauna",
       "name": "Lethal Cave-Spectre",
@@ -3969,27 +3574,6 @@
       "source_index": 221
     },
     {
-      "id": "fauna_estemmenosuchus_executioner",
-      "type": "fauna",
-      "name": "Estemmenosuchus Executioner",
-      "scientific": "Estemmenosuchus asuricus",
-      "clade": "synapsid",
-      "region": "asura-conjurations",
-      "biomes": [
-        "underworld"
-      ],
-      "placement": "lore",
-      "rarity": "mythic",
-      "journal_prompt": "A massive, armored floodplain omnivore mutated with double jaw-strength, used for public execution rituals in Naraka.",
-      "mood": "uncanny",
-      "source_index": 222,
-      "crosses_at": [
-        "event_naraka_portal",
-        "settlement_dwarka"
-      ],
-      "placement_note": "Native to the Naraka rifts, not to this realm's water or ground. Naraka creatures cross through gates: the standing Dwarka Gate (settlement_dwarka, event_shadow_pact) and the portal Guyuk tore open over the Hyrkanian steppe, whose outcomes record a beast spill (event_naraka_portal). So one met here should be met at a gate and nowhere else. `underworld` is not renderable yet, so the export holds this as lore; when a gate exists as a landmark, add that biome."
-    },
-    {
       "id": "fauna_scutosaurus_shield_beast",
       "type": "fauna",
       "name": "Scutosaurus Shield-Beast",
@@ -4023,27 +3607,6 @@
       "source_index": 224
     },
     {
-      "id": "fauna_underworld_blood_leech",
-      "type": "fauna",
-      "name": "Underworld Blood-Leech",
-      "scientific": "Hirudo asurica",
-      "clade": "worm",
-      "region": "asura-conjurations",
-      "biomes": [
-        "underworld"
-      ],
-      "placement": "lore",
-      "rarity": "mythic",
-      "journal_prompt": "A giant aquatic parasite of the Naraka rivers that grows up to 3 feet, draining the vitality of anything that falls into the sulfurous waters.",
-      "mood": "watchful",
-      "source_index": 225,
-      "crosses_at": [
-        "event_naraka_portal",
-        "settlement_dwarka"
-      ],
-      "placement_note": "Native to the Naraka rifts, not to this realm's water or ground. Naraka creatures cross through gates: the standing Dwarka Gate (settlement_dwarka, event_shadow_pact) and the portal Guyuk tore open over the Hyrkanian steppe, whose outcomes record a beast spill (event_naraka_portal). So one met here should be met at a gate and nowhere else. `underworld` is not renderable yet, so the export holds this as lore; when a gate exists as a landmark, add that biome."
-    },
-    {
       "id": "fauna_asura_tainted_bat",
       "type": "fauna",
       "name": "Asura-Tainted Bat",
@@ -4059,27 +3622,6 @@
       "journal_prompt": "A small, red-eyed bat that has mutated under the influence of Asura planets, feeding on blood and glowing insects.",
       "mood": "uncanny",
       "source_index": 226
-    },
-    {
-      "id": "fauna_underworld_water_snake",
-      "type": "fauna",
-      "name": "Underworld Water-Snake",
-      "scientific": "Serpens asuricus",
-      "clade": "reptile",
-      "region": "asura-conjurations",
-      "biomes": [
-        "underworld"
-      ],
-      "placement": "lore",
-      "rarity": "mythic",
-      "journal_prompt": "A highly venomous, dark-scaled snake that swims in the sulfuric rivers of Naraka, its bite causing immediate paralysis.",
-      "mood": "fearsome",
-      "source_index": 227,
-      "crosses_at": [
-        "event_naraka_portal",
-        "settlement_dwarka"
-      ],
-      "placement_note": "Native to the Naraka rifts, not to this realm's water or ground. Naraka creatures cross through gates: the standing Dwarka Gate (settlement_dwarka, event_shadow_pact) and the portal Guyuk tore open over the Hyrkanian steppe, whose outcomes record a beast spill (event_naraka_portal). So one met here should be met at a gate and nowhere else. `underworld` is not renderable yet, so the export holds this as lore; when a gate exists as a landmark, add that biome."
     },
     {
       "id": "fauna_clay_born_watcher",
@@ -4201,27 +3743,6 @@
       "journal_prompt": "A giant owl with four eyes that has mutated near portals, hunting night-stalkers and small primates.",
       "mood": "uncanny",
       "source_index": 234
-    },
-    {
-      "id": "fauna_void_born_leech",
-      "type": "fauna",
-      "name": "Void-Born Leech",
-      "scientific": "Hirudo titan",
-      "clade": "worm",
-      "region": "asura-conjurations",
-      "biomes": [
-        "underworld"
-      ],
-      "placement": "lore",
-      "rarity": "mythic",
-      "journal_prompt": "A giant, 6-foot leech of the Naraka rifts that attaches to larger monsters, draining their magical energy.",
-      "mood": "watchful",
-      "source_index": 235,
-      "crosses_at": [
-        "event_naraka_portal",
-        "settlement_dwarka"
-      ],
-      "placement_note": "Native to the Naraka rifts, not to this realm's water or ground. Naraka creatures cross through gates: the standing Dwarka Gate (settlement_dwarka, event_shadow_pact) and the portal Guyuk tore open over the Hyrkanian steppe, whose outcomes record a beast spill (event_naraka_portal). So one met here should be met at a gate and nowhere else. `underworld` is not renderable yet, so the export holds this as lore; when a gate exists as a landmark, add that biome."
     },
     {
       "id": "fauna_shrima",
@@ -4499,27 +4020,6 @@
       "source_index": 245
     },
     {
-      "id": "fauna_heartwood_warden",
-      "type": "fauna",
-      "name": "Heartwood Warden",
-      "scientific": "Homunculus silvaticus",
-      "clade": "construct",
-      "subclade": "forest_born",
-      "sentient": true,
-      "region": "asura-conjurations",
-      "biomes": [
-        "forest",
-        "wetland"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "mood": "patient",
-      "journal_prompt": "It has not moved since you sat down. You are no longer certain it is a tree.",
-      "notes": "A maya-born shaped from heartwood, leaf-mould, spore and sap rather than from mud or fire. Slower than either, and the only one of the three that keeps growing after it is made -- an old warden is indistinguishable from the wood it stands in until it turns its head. Sentient, like the rest of the maya-born: a person made of forest, not an animal shaped like one.",
-      "placement_note": "Exists in canon and does not spawn. Making it an encounter would add it to the forest and wetland pools, which changes what a player meets on tiles they have already walked -- a game decision rather than a lore one. The Asura-Tainted Gargoyle is filed the same way. Promote it deliberately when the spawn change is wanted.",
-      "source_index": 246
-    },
-    {
       "id": "fauna_honey_guide_bird",
       "type": "fauna",
       "name": "Honey-Guide Bird",
@@ -4571,31 +4071,6 @@
       "journal_prompt": "A heavy crab sidles between the mangrove roots, one claw raised like a man carrying something awkward.",
       "mood": "watchful",
       "source_index": 248
-    },
-    {
-      "id": "fauna_megalosaurus",
-      "type": "fauna",
-      "name": "Megalosaurus",
-      "scientific": "Megalosaurus jambhudweepensis",
-      "diet": "Carnivore",
-      "habitats": [
-        "hyrkanian_steppe"
-      ],
-      "behaviour": [
-        "rampaging",
-        "large_theropod"
-      ],
-      "notes": "Appeared during the Naraka portal event; killed Nirigili’s Elephantbird mount.",
-      "biomes": [
-        "underworld"
-      ],
-      "placement": "lore",
-      "placement_note": "Native to Naraka. It entered this realm through the portal Guyuk tore open over the Hyrkanian steppe and killed Nirigili's Elephantbird mount -- the event records both the beast spill and that loss (event_naraka_portal). Not ambient fauna: it is met at that crossing, not across the map.",
-      "crosses_at": [
-        "event_naraka_portal"
-      ],
-      "clade": "dinosaur",
-      "source_index": 249
     },
     {
       "id": "fauna_plateau_ibex",
@@ -4765,35 +4240,6 @@
       "journal_prompt": "A spotted cat watches from the reed line with eyes set forward like a person's, and you understand that you are being considered.",
       "mood": "watchful",
       "source_index": 255
-    },
-    {
-      "id": "fauna_tendua_manticore",
-      "type": "fauna",
-      "name": "Tendua Manticore",
-      "scientific": "Manticora tendua",
-      "clade": "spectre",
-      "taxonomy": {
-        "notes": "Asura-tainted aberration; winged leopard with human face"
-      },
-      "diet": "Carnivore",
-      "habitats": [
-        "settlement_lothal",
-        "region_saraswati_delta"
-      ],
-      "behaviour": [
-        "predatory",
-        "infant_hunter",
-        "asura_born"
-      ],
-      "related_species": [
-        "fauna_tendua",
-        "fauna_spotted_marsh_tendua"
-      ],
-      "notes": "Birthed when Nila desecrated Kavik's tower with forbidden Asura mantras. Six-foot winged leopard with human face that hunted Lothal's infants. Central to Tendua Crisis.",
-      "biomes": [],
-      "placement": "lore",
-      "placement_note": "Held out of play deliberately. Asura-born horror, birthed when Nila desecrated Kavik's tower. The cozy-tone question -- whether the Asura-tainted set is encounterable, journal-only, or gated behind a later mode -- is still open (docs/bestiary.md, Open Questions #4). Empty `biomes` here is a decision, not an untagged entity.",
-      "source_index": 256
     }
   ],
   "flora": [
@@ -5635,11 +5081,11 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "Trees growing on the absolute edges of floating islands, plunging their roots downward into the open sky to harvest cloud-moisture.",
       "source_index": 50,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. **`flavour` rather than `encounter`, because that is what the game reads for a plant** -- `species.ts` indexes flora by `flavour` and fauna by `encounter`, since a plant is something you find growing rather than somebody you meet. Promoting these to `encounter` first put them in the bundle and left `floraIn` empty, which the game's own coverage test caught."
     },
     {
       "id": "flora_levitation_gourd_sky_balloon",
@@ -5652,11 +5098,11 @@
         "sky_island",
         "open_sky"
       ],
-      "placement": "lore",
+      "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A trailing vine producing massive, hollow gourds that trap lighter-than-air volcanic gases, used by mariners to patch blimps.",
       "source_index": 51,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. **`flavour` rather than `encounter`, because that is what the game reads for a plant** -- `species.ts` indexes flora by `flavour` and fauna by `encounter`, since a plant is something you find growing rather than somebody you meet. Promoting these to `encounter` first put them in the bundle and left `floraIn` empty, which the game's own coverage test caught."
     },
     {
       "id": "flora_static_charged_bramble",
@@ -5668,44 +5114,11 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "Thorny bushes that feed on electrical discharges of high-altitude storms, glowing with residual lightning and delivering a shocking sting.",
       "source_index": 52,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "flora_blue_pulse_root",
-      "type": "flora",
-      "name": "Blue Pulse-Root",
-      "scientific": "Nirnroot caerulea",
-      "growth_form": "root",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island",
-        "open_sky"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A glowing plant species that absorbs bioluminescent trace minerals from the airborne soil, emitting a soft blue light.",
-      "source_index": 53,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "flora_toxic_crimson_root",
-      "type": "flora",
-      "name": "Toxic Crimson Root",
-      "scientific": "Nirnroot rubra",
-      "growth_form": "root",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A rare, red-glowing variant of nirnroot whose roots exude a highly toxic sap used by assassins and sky-pirates.",
-      "source_index": 54,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. **`flavour` rather than `encounter`, because that is what the game reads for a plant** -- `species.ts` indexes flora by `flavour` and fauna by `encounter`, since a plant is something you find growing rather than somebody you meet. Promoting these to `encounter` first put them in the bundle and left `floraIn` empty, which the game's own coverage test caught."
     },
     {
       "id": "flora_sun_catcher_herb",
@@ -5717,27 +5130,11 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A silicate-absorbing plant with leaves that mirror stained glass, concentrating golden sunlight for deep-time healing.",
       "source_index": 55,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "flora_moon_reflecting_mint",
-      "type": "flora",
-      "name": "Moon-Reflecting Mint",
-      "scientific": "Glassa luna",
-      "growth_form": "shrub",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "An elegant herb whose translucent, silver-rimmed leaves reflect moonlight, used by sky-elves to brew soothing, prophetic teas.",
-      "source_index": 56,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. **`flavour` rather than `encounter`, because that is what the game reads for a plant** -- `species.ts` indexes flora by `flavour` and fauna by `encounter`, since a plant is something you find growing rather than somebody you meet. Promoting these to `encounter` first put them in the bundle and left `floraIn` empty, which the game's own coverage test caught."
     },
     {
       "id": "flora_prana_lotus",
@@ -5749,27 +5146,11 @@
       "biomes": [
         "sky_island"
       ],
-      "placement": "lore",
+      "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A beautiful lotus species that grows in the inverted waterfalls, its floating petals absorbing high-altitude prana radiation.",
       "source_index": 57,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
-    },
-    {
-      "id": "flora_cloud_weaver_vine",
-      "type": "flora",
-      "name": "Cloud-Weaver Vine",
-      "scientific": "Vitis nubis",
-      "growth_form": "vine",
-      "region": "tethys-sky-routes",
-      "biomes": [
-        "sky_island"
-      ],
-      "placement": "lore",
-      "rarity": "rare",
-      "journal_prompt": "A tough, climbing vine that spans the gap between close floating islands, forming natural rope bridges.",
-      "source_index": 58,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. **`flavour` rather than `encounter`, because that is what the game reads for a plant** -- `species.ts` indexes flora by `flavour` and fauna by `encounter`, since a plant is something you find growing rather than somebody you meet. Promoting these to `encounter` first put them in the bundle and left `floraIn` empty, which the game's own coverage test caught."
     },
     {
       "id": "flora_lodestone_moss",
@@ -5779,13 +5160,14 @@
       "growth_form": "moss",
       "region": "tethys-sky-routes",
       "biomes": [
-        "sky_island"
+        "sky_island",
+        "sky_underside"
       ],
-      "placement": "lore",
+      "placement": "flavour",
       "rarity": "rare",
-      "journal_prompt": "A dense, dark green moss that covers the magnetized cores of the floating islands, aligning its spores with the Earth's magnetic poles.",
+      "journal_prompt": "A dense, dark green moss that covers the magnetized cores of the floating islands, aligning its spores with the Earth's magnetic poles, and it grows down over the rim onto the underside where the ore is bare.",
       "source_index": 59,
-      "placement_note": "Lives on the floating islands. `sky_island` and its neighbours are real canon biomes but are not renderable yet, so the export holds this as lore until a sky mode exists. This is a stated home, not an untagged entity."
+      "placement_note": "Placeable since the sky tiles were painted. **`flavour` rather than `encounter`, because that is what the game reads for a plant** -- `species.ts` indexes flora by `flavour` and fauna by `encounter`, since a plant is something you find growing rather than somebody you meet. Promoting these to `encounter` first put them in the bundle and left `floraIn` empty, which the game's own coverage test caught."
     },
     {
       "id": "flora_plunging_fire_siege_tree",
@@ -5864,26 +5246,6 @@
       "source_index": 64
     },
     {
-      "id": "flora_fever_root",
-      "type": "flora",
-      "name": "Fever-Root",
-      "scientific": "Curcuma asurica",
-      "growth_form": "root",
-      "region": "asura-conjurations",
-      "biomes": [
-        "underworld"
-      ],
-      "placement": "lore",
-      "rarity": "mythic",
-      "journal_prompt": "A mutated turmeric plant that grows near underworld rifts, its toxic, black rhizomes causing intense hallucinations when touched.",
-      "source_index": 65,
-      "crosses_at": [
-        "event_naraka_portal",
-        "settlement_dwarka"
-      ],
-      "placement_note": "Native to the Naraka rifts, not to this realm's water or ground. Naraka creatures cross through gates: the standing Dwarka Gate (settlement_dwarka, event_shadow_pact) and the portal Guyuk tore open over the Hyrkanian steppe, whose outcomes record a beast spill (event_naraka_portal). So one met here should be met at a gate and nowhere else. `underworld` is not renderable yet, so the export holds this as lore; when a gate exists as a landmark, add that biome."
-    },
-    {
       "id": "flora_cursed_ash_fern",
       "type": "flora",
       "name": "Cursed Ash-Fern",
@@ -5928,26 +5290,6 @@
       "rarity": "mythic",
       "journal_prompt": "A rose bush with razor-sharp black petals that secrete a deadly coagulant, growing in the ruins of desecrated temples.",
       "source_index": 68
-    },
-    {
-      "id": "flora_naraka_pitcher_plant",
-      "type": "flora",
-      "name": "Naraka Pitcher-Plant",
-      "scientific": "Nepenthes asurica",
-      "growth_form": "pitcher",
-      "region": "asura-conjurations",
-      "biomes": [
-        "underworld"
-      ],
-      "placement": "lore",
-      "rarity": "mythic",
-      "journal_prompt": "A colossal carnivorous plant of the twilight zone, its wide, acid-filled pitcher capable of digesting entire small primates.",
-      "source_index": 69,
-      "crosses_at": [
-        "event_naraka_portal",
-        "settlement_dwarka"
-      ],
-      "placement_note": "Native to the Naraka rifts, not to this realm's water or ground. Naraka creatures cross through gates: the standing Dwarka Gate (settlement_dwarka, event_shadow_pact) and the portal Guyuk tore open over the Hyrkanian steppe, whose outcomes record a beast spill (event_naraka_portal). So one met here should be met at a gate and nowhere else. `underworld` is not renderable yet, so the export holds this as lore; when a gate exists as a landmark, add that biome."
     },
     {
       "id": "flora_asura_thorn",

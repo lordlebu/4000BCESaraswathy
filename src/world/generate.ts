@@ -30,7 +30,11 @@ export const DEFAULT_HEIGHT = 24;
  */
 const UNWALKABLE: ReadonlySet<string> = new Set(['sea', 'open_sky', 'sky_underside']);
 
-export function isWalkable(tile: Pick<Tile, 'biome'>): boolean {
+export function isWalkable(tile: Pick<Tile, 'biome' | 'track'>): boolean {
+  // A railway makes otherwise impassable ground walkable without changing what the ground *is*.
+  // The Aravali line crosses open sea on trestles: the water below stays water and stays
+  // navigable, and only the walking changes.
+  if (tile.track) return true;
   return !UNWALKABLE.has(tile.biome);
 }
 

@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.7.0",
+  "canon_version": "2.11.0",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -1167,6 +1167,119 @@
       "renews": "seasonal",
       "notes": "Drawn from the gas bladders that hold a beedu up over the dunes. Thin, almost colourless, and it burns with very little smoke -- which is why a desert crossing carries it and a river settlement, with mahua oil to hand, does not bother.",
       "source_index": 61
+    },
+    {
+      "id": "material_lodestone_grit",
+      "type": "material",
+      "name": "Lodestone grit",
+      "classes": [
+        "stone",
+        "metal"
+      ],
+      "found_in": [
+        "sky_island",
+        "sky_underside"
+      ],
+      "rarity": "rare",
+      "renews": "never",
+      "notes": "The islands are held up by it. What can be worked loose from an exposed core is a coarse black grit that will not settle in a bowl -- it stands on end and points, which is what a compass is for and why no compass works within a mile of one. Taken from the rock, not from anything living.",
+      "source_index": 62
+    },
+    {
+      "id": "material_prana_pollen",
+      "type": "material",
+      "name": "Prana-pollen",
+      "classes": [
+        "physic",
+        "pigment"
+      ],
+      "won_from": [
+        "flora_prana_lotus"
+      ],
+      "found_in": [
+        "sky_island"
+      ],
+      "rarity": "rare",
+      "renews": "seasonal",
+      "notes": "Shaken from the lotus that grows in the inverted falls. Faintly warm in the hand and keeps its warmth for a day after; the cloud-hermits are said to take it for the altitude, though what it treats is not agreed.",
+      "source_index": 63
+    },
+    {
+      "id": "material_sky_moss",
+      "type": "material",
+      "name": "Lodestone moss",
+      "classes": [
+        "fibre",
+        "physic"
+      ],
+      "won_from": [
+        "flora_lodestone_moss"
+      ],
+      "found_in": [
+        "sky_island",
+        "sky_underside"
+      ],
+      "rarity": "rare",
+      "renews": "fast",
+      "notes": "Grows in mats over the ore and takes some of its habit -- a handful pulls very slightly toward iron. Dries to a wadding that holds a dressing in place without a lashing, which is most of why anyone climbs for it.",
+      "source_index": 64
+    },
+    {
+      "id": "material_gourd_shell",
+      "type": "material",
+      "name": "Sky-balloon shell",
+      "classes": [
+        "fibre",
+        "fuel"
+      ],
+      "won_from": [
+        "flora_levitation_gourd_sky_balloon"
+      ],
+      "found_in": [
+        "sky_island"
+      ],
+      "rarity": "rare",
+      "renews": "seasonal",
+      "notes": "The gourd is lighter than the air it displaces while it is on the vine, and merely very light once it is cut. Halved and dried it is a float, a bailer, or the body of a small drum.",
+      "source_index": 65
+    },
+    {
+      "id": "material_aero_bark",
+      "type": "material",
+      "name": "Aero-mangrove bark",
+      "classes": [
+        "timber",
+        "resin"
+      ],
+      "won_from": [
+        "flora_aero_mangrove_vayu_vriksha"
+      ],
+      "found_in": [
+        "sky_island"
+      ],
+      "rarity": "rare",
+      "renews": "slow",
+      "notes": "Stripped from the trees that hold the island edges together. Cures to a board that resists splitting along the grain the way ordinary timber does not, which is the reason the trestles are built of it.",
+      "source_index": 66
+    },
+    {
+      "id": "material_static_sap",
+      "type": "material",
+      "name": "Static sap",
+      "classes": [
+        "resin",
+        "fuel"
+      ],
+      "won_from": [
+        "flora_static_charged_bramble"
+      ],
+      "found_in": [
+        "sky_island"
+      ],
+      "rarity": "rare",
+      "renews": "seasonal",
+      "notes": "Bled from the bramble, and it crackles as it leaves the cut. Sets hard and clear, and a bead of it will lift a hair from the back of your hand across a finger-width of air.",
+      "source_index": 67
     }
   ],
   "items": [
@@ -4831,6 +4944,30 @@
       ],
       "notes": "Copper-sheathed along every edge a hand would touch, with triangular figures worked into the wheel faces. Found only in graves, and only ever with a body in it.\n\n**Canon files it as a cart, and the argument is the point.** Its wheels are solid -- three planks and a copper rim, the same construction as the household cart above -- and a spoked wheel is what would make it a chariot. So the people who bury one are burying something that looks like a war machine and is built like a farm vehicle, and canon does not know which of those they meant. Recording the dispute rather than settling it is the same call made about the Shattering: the question is better than any answer available.",
       "source_index": 12
+    },
+    {
+      "id": "vehicle_lodestone_train",
+      "type": "vehicle",
+      "name": "Lodestone car",
+      "kind": "machine",
+      "crosses": [
+        "open_sky",
+        "sky_island",
+        "coast",
+        "plains",
+        "settlement"
+      ],
+      "capacity": 12,
+      "materials": [
+        "material_lodestone_grit",
+        "material_aero_bark",
+        "material_bronze"
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "The line across the Aravali strait does not stand on anything. It is laid on lodestone -- the same Permian-irradiated ore that holds the islands up -- and it hangs at the height the ore wants, which is why the rails run level over open water and why nothing has ever been built under them. Boats pass beneath without lowering a mast.\n\nThe car is the second half of the same trick: sledges of ore beneath a timber body, riding the repulsion rather than rolling on it. It does not touch the rail and it makes almost no sound, which unsettles people more than the height does.\n\n**One car, not a train.** It seats a dozen with their bundles and it goes back and forth across the strait, which is the whole of what it does -- the crossing is short and there is nothing at either end that needs moving in quantity. Nobody has coupled a second one to it and nobody has needed to.\n\nDistinct from the Workshop Train, which canon calls a travelling apothecary rather than transport: that one crosses broken country and is not trying to get anywhere, and it is a train in the sense of a household strung out along a road. This is a box on a rail.",
+      "source_index": 13
     }
   ],
   "conformance": {

@@ -96,7 +96,20 @@ const KIND_FRAMES: Record<string, number> = {
   anomaly: PLACE_ORDER.length + 1,
   settlement: PLACE_ORDER.length + 2,
   wilderness: PLACE_ORDER.length + 3,
-  travel_node: PLACE_ORDER.length + 4
+  travel_node: PLACE_ORDER.length + 4,
+  /**
+   * **Borrowed rather than drawn, and deliberately.**
+   *
+   * `archaeological_site` is in canon's schema and no map used one until the Aravali's Kept
+   * Stones, so it had no marker and `adapterCoverage.test.ts` caught it the moment one existed.
+   *
+   * It takes the wilderness marker -- worn steps -- because the two are the same *kind of sight*:
+   * a made thing that nobody is making any more, found in country where nothing else is built.
+   * Drawing a sixth marker for one place would be inventing an icon to say what this one already
+   * says. When a second archaeological site exists and the two disagree, that is the moment to
+   * draw it.
+   */
+  archaeological_site: PLACE_ORDER.length + 3
 };
 
 /**

@@ -48,6 +48,20 @@ export interface Tile extends Point {
   biome: BiomeId;
   /** Small per-tile jitter so rivers meander instead of running straight downhill. */
   riverBias: number;
+  /**
+   * A railway crosses here.
+   *
+   * **A flag rather than a biome, because the sea underneath stays sea.** The first attempt turned
+   * the crossed tiles into `coast`, which is a causeway -- piled stone at sea level -- and that is
+   * not what the Aravali line is. It runs *over* open water on trestles: a boat can pass beneath
+   * it, the water is navigable, and the tile is still sea in every way that matters to weather,
+   * to what lives there, and to what it looks like.
+   *
+   * What it changes is only whether a traveller can walk it, which is why `isWalkable` reads this
+   * and nothing else does. Overlays like `river` and `settlement` are biomes because they replace
+   * the ground; a bridge does not replace the water it spans.
+   */
+  track?: boolean;
 }
 
 export interface NamedPlace extends Point {

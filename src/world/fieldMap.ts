@@ -12,6 +12,7 @@
 
 import { band } from './classify';
 import { stampCamp, stampTableland } from './tableland';
+import { stampIslands, stampLine, stampStrait, startOnTheNearShore } from './crossing';
 import { easeRoutes, tourOrder } from './routes';
 import { generateWorld } from './generate';
 import { tileHash } from './rng';
@@ -292,6 +293,15 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // After the palette, like the settlement patch: a drift is something that happened to the
   // ground rather than a climate the ground has, and the classifier deals only in climates.
   stampTableland(world, palette);
+  // The crossing: a strait across the map and two islands hanging over it. Same reasoning as the
+  // drifts -- an island is a place rather than a climate, so the classifier cannot make one.
+  stampStrait(world, palette);
+  // The line last, and through the islands: they are its piers, and without it the far shore
+  // cannot be reached at all.
+  stampLine(world, palette, stampIslands(world, palette));
+  // The strait is cut after the generator chose a start, so on a crossing that start can be left
+  // standing in open water. Only moves it when it actually is.
+  if (palette.has('sky_island')) startOnTheNearShore(world);
   const walkable = new Set<BiomeId>(
     world.tiles.flat().map((t) => t.biome).filter((b) => palette.has(b))
   );

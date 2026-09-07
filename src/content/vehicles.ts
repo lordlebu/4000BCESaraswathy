@@ -37,9 +37,13 @@ export function forBiome(biome: BiomeId): Vehicle[] {
 /**
  * Biomes a traveller could reach with this craft that walking cannot manage.
  *
- * `sea` is the whole answer today and will stay the interesting one: it is the only biome in
- * `data/biomes.json` that is not walkable, so it is the only ground where a boat is the
- * difference between arriving and not.
+ * `sea` was the whole answer for a long time -- the only biome in `data/biomes.json` that is not
+ * walkable, and so the only ground where a boat is the difference between arriving and not.
+ *
+ * **The Aravali added two more**, and with them the first reason to board anything. `sky_underside`
+ * is unwalkable by nature, and `open_sky` is what the lodestone line hangs in. A crossing that a
+ * player can walk end to end is a bridge; one they ride is a railway, and the difference is this
+ * function having more than one answer.
  */
 export function opensUp(vehicleId: string, walkable: ReadonlySet<string>): BiomeId[] {
   const v = vehicles.find((x) => x.id === vehicleId);

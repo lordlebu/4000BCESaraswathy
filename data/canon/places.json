@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.7.0",
+  "canon_version": "2.11.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -304,6 +304,52 @@
   ],
   "field_maps": [
     {
+      "id": "field_map_aravali",
+      "type": "field_map",
+      "name": "The Aravali Crossing",
+      "region": "region_aravali",
+      "seed_biomes": [
+        "hills",
+        "mountains",
+        "forest",
+        "plains",
+        "coast",
+        "sea",
+        "river",
+        "settlement",
+        "sky_island",
+        "sky_underside"
+      ],
+      "scale": "large",
+      "points_of_interest": [
+        "poi_rail_head",
+        "poi_first_pier",
+        "poi_lodestone_face",
+        "poi_far_landing",
+        "poi_kept_stones"
+      ],
+      "neighbours": [
+        "field_map_lothal",
+        "field_map_narmada"
+      ],
+      "arrival": "The ranges come down to the water in steps of grey stone, and stop. Where they stop there is a rail-head, a shed, and a line of iron running out over the strait on trestles of pale timber. Two islands hang above the water along it, holding themselves up out of nothing anybody here will explain, and the rain that falls on their undersides falls upward. The far shore is a green smudge that is not Jambhudweepa. People cross. Nobody says much about the islands.",
+      "notes": "Fourth field map, and the first that is a *crossing* rather than a country -- Lothal is a delta, Narmada a plateau, Dwarka a basin, and this is four bands walked in sequence from one shore to another. The Shattered Sea narrows here, which is the whole reason a line was built at this point and nowhere else on that coast; Tamralinga keeps its ships and its pearl routes further east.\n\nThe thesis is the one thing Aravali has that no other map does: this is where the Mask Family broke. Canon puts the schism, the Jharwa massacre and the hidden sanctuary in these ranges. None of that is on stage -- Sira, Thren and Meera are four hundred years of backstory and a map is one afternoon -- so it reaches the player as *traces*, the way Lothal already carries the same family. The ground remembers something the people here have agreed not to say.\n\nOn the palette: The two sky biomes are declared here and **stamped as patches after classification**, not left to the classifier -- an island is a place, not a climate, exactly as `snow` is on the Narmada. Declaring them anyway is what the Narmada does with `snow` and it is what makes the species and materials that live there reachable: `check_playability` reads this list. `plains` and `coast` are in the palette because the region's own note asks for a cheap biome -- hills, forest and mountains are all travel cost 2 or worse, and this map is about walking a long way in one direction.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "climate": {
+        "clear": 40,
+        "mist": 34,
+        "rain": 21,
+        "storm": 5
+      },
+      "coordinates": {
+        "x": 51,
+        "y": 30
+      },
+      "relief": "island"
+    },
+    {
       "id": "field_map_dwarka",
       "type": "field_map",
       "name": "North Dwarka",
@@ -380,6 +426,7 @@
       "arrival": "The delta takes a long time to become a city. Reeds, then reed-and-mud, then mud with brick in it, and then brick cut by someone who expected it to last. The tower is visible from a good way out, or the half of it still standing. Somebody has hung washing across the third storey.",
       "notes": "Opening field map. Lothal after the Great Shattering: the Harappan city is a half-buried relic and survivors are camped inside it rather than beside it, so the same ground is a settlement and a ruin at once. Kept small and legible -- this is where the player learns how to look. Forest and hills were added to the palette late: with only wetland, river, settlement and coast, the engine reclassified everything it could not match and the whole map came out 55% coast and 45% wetland -- two biomes, and a delta that read as flat. They are appended, not inserted, because the engine takes the first palette entry as its fallback. Plains was deliberately left out: adding it takes back every reclassified plains tile at once and drops wetland from 45% to 2%, which would stop this being a delta at all. Sits at the centre of what is left, and every other map is reached from here -- which is why it is the opening one. Sea added to the palette. Lothal is a harbour -- it needs water to be a harbour of -- and the generator had always been able to make open water here while `applyPalette` reclassified all of it to coast, so the opening map of a game about a delta port contained no sea at all. It sits last because the first entry is the engine's fallback and wetland must stay dominant.\n\nPlains was tried and reverted: with cheap ground available the low middle became plains across 53% of the map, which fixes the travel-cost curve by destroying the delta. The same trap as the first palette change -- variety must not cost a map its thesis. Relief is `delta`: Lothal is a harbour on a delta, so its easy ground is the channels and the water's edge rather than any high ground. Plains added once the landform shaping was in: the shapers dry the interior into the classifier's plains window on purpose, because that window is the only cheap non-coastal ground there is, and without `plains` in the palette every one of those tiles was reclassified straight back to wetland. This is not the earlier attempt that flooded the map -- that one added plains while the shaping still made the middle *wetter*, so the fallback swallowed everything. Appended, so wetland stays the first entry and therefore dominant.",
       "neighbours": [
+        "field_map_aravali",
         "field_map_dwarka",
         "field_map_narmada"
       ],
@@ -420,6 +467,7 @@
         "poi_high_camp"
       ],
       "neighbours": [
+        "field_map_aravali",
         "field_map_lothal"
       ],
       "arrival": "The road up the scarp is the only part of the plateau anyone built. Everything above it was already here: black rock in steps a hundred feet high, holding a flat green country the sea never reached. They will tell you at the top that this is why the University is here. They are right, and it is not the whole reason.",
@@ -617,6 +665,40 @@
       "notes": "The solarpunk hook, and what the actionable rung acts on: restorable once the player understands both the poison and the rice."
     },
     {
+      "id": "poi_far_landing",
+      "type": "point_of_interest",
+      "name": "The Far Landing",
+      "field_map": "field_map_aravali",
+      "kind": "travel_node",
+      "stands": "high",
+      "terrain": [
+        "sky_island"
+      ],
+      "description": "The second island, and the last of Jambhudweepa.",
+      "arrival": "Another island, smaller, and the far shore visible past it as a green line that is not home. There is a bell on a post here, and a mark cut into the rail where somebody has been counting something.",
+      "notes": "The second pier and the turn of the map: from here the player is looking at somewhere else rather than back at where they started. The bell and the tally are the only human marks on either island, and they are deliberately unexplained.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "poi_first_pier",
+      "type": "point_of_interest",
+      "name": "The First Pier",
+      "field_map": "field_map_aravali",
+      "kind": "travel_node",
+      "stands": "high",
+      "terrain": [
+        "sky_island"
+      ],
+      "description": "The nearer island, where the line comes ashore in the air.",
+      "arrival": "The track runs out over nothing and then there is ground under it -- grass, low cushion-plant, a stand of aero-mangrove holding the edge together with its roots. Walk to the rim and the rain that is falling on the underside is falling the wrong way.",
+      "notes": "The first floating island a player stands on, and the map's teaching moment: the inverted water is right there at the rim, and nothing explains it. Canon does -- lodestone cores of Permian-irradiated ore, a legacy of the shattering of Gondwana -- but nobody on this map says so, because nobody on this map knows.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
       "type": "point_of_interest",
       "field_map": "field_map_dwarka",
       "id": "poi_gate_court",
@@ -777,6 +859,41 @@
       "notes": "Kavik's tower, the landmark settlement_lothal records. Enterable rather than merely visited, and the undercroft gates on knowing the safe channels -- a player who has not done the mangrove work cannot reach the best of it."
     },
     {
+      "id": "poi_kept_stones",
+      "type": "point_of_interest",
+      "name": "The Kept Stones",
+      "field_map": "field_map_aravali",
+      "kind": "archaeological_site",
+      "stands": "high",
+      "terrain": [
+        "hills",
+        "mountains"
+      ],
+      "description": "A wall somebody still repairs, around nothing anybody will name.",
+      "arrival": "Dry stone, a course or two higher than the weather would leave it, running round a shoulder of the range and enclosing a hollow with nothing in it. The gap that would be a gate has been closed with newer stone. There is no path to it and the grass at the foot is not grown over.",
+      "notes": "**The trace, and the whole thesis of the map.** Canon puts the Mask Family schism, the Jharwa massacre and the hidden sanctuary of Vara-Ma, Orek and Thren in these ranges. None of that is on stage: Sira and Thren are four hundred years of backstory and this is one afternoon's walking, so the archive's rule holds -- deep-lore figures reach a player as traces.\n\nWhat the player gets is a wall in good repair around an empty hollow, and the fact that somebody is still keeping it. They never learn what happened here. They learn that something did, and that it is not over.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "poi_lodestone_face",
+      "type": "point_of_interest",
+      "name": "The Lodestone Face",
+      "field_map": "field_map_aravali",
+      "kind": "eco_site",
+      "stands": "high",
+      "terrain": [
+        "sky_island"
+      ],
+      "description": "An exposed core, and the only place the ore can be worked.",
+      "arrival": "A wound in the island's flank where something took a bite out of it, and the rock inside is black and faintly wrong. Grit stands on end where it has fallen. A dropped knife does not lie flat.",
+      "notes": "Where lodestone grit comes from, and the map's one `never`-renewing material. The island is held up by this: taking it is the closest the game comes to asking whether a thing should be taken at all, and nothing in the text says so out loud.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
       "id": "poi_long_archive",
       "type": "point_of_interest",
       "name": "The Long Archive",
@@ -901,6 +1018,24 @@
       "description": "Nine halls around a yard, and every one of them measuring something.",
       "arrival": "It is smaller than the word suggests and busier than the quiet suggests. Nine halls, a yard with a rain gauge in it that has been read twice a day for four hundred and eleven years, and a great many people being careful. Nobody here is a fool. That turns out to matter more than the alternative would have.",
       "notes": "The academy as a place rather than a citation. Deliberately sympathetic -- the scholars are rigorous and generous with the player, which is what makes the structural error land.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "poi_rail_head",
+      "type": "point_of_interest",
+      "name": "The Rail-Head",
+      "field_map": "field_map_aravali",
+      "kind": "settlement",
+      "stands": "low",
+      "terrain": [
+        "coast",
+        "plains"
+      ],
+      "description": "Where the line begins, and where everybody waits for it.",
+      "arrival": "A shed, a water butt, a length of platform, and the iron running away north over the water on legs of pale timber. People sit on their bundles with the patience of those who have done this before. Nobody looks at the islands, which is its own kind of looking.",
+      "notes": "The arrival, and the map's one ordinary place. Everything else here is strange -- ore that holds a hill in the air, rain that falls upward, a sanctuary nobody will name -- so the map needs one spot where the strangeness is somebody else's and the business at hand is a timetable.\n\nIt is a settlement rather than a travel_node because people live here; the line is a thing that happens to them.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1598,17 +1733,17 @@
       "id": "sky_island",
       "name": "Floating Island",
       "realm": "sky",
-      "renderable": false,
+      "renderable": true,
       "region": "region_tethys_sky_routes",
-      "notes": "The island surface itself — glowing moss, prismatic glass herbs, aero-mangrove groves at the edges. Held up by lodestone cores of Permian-irradiated ore."
+      "notes": "The island surface itself — glowing moss, prismatic glass herbs, aero-mangrove groves at the edges. Held up by lodestone cores of Permian-irradiated ore. Renderable since the tiles were painted: `sky_island.png` and `sky_underside.png` are sliced into the terrain sheet and carried in TERRAIN_ORDER."
     },
     {
       "id": "sky_underside",
       "name": "Island Underside",
       "realm": "sky",
-      "renderable": false,
+      "renderable": true,
       "region": "region_tethys_sky_routes",
-      "notes": "The inverted world beneath an island, where gravity is warped and rainwater falls upward. Sky coral calcifies here and holds the crumbling rock together; the Asura-tainted gargoyles shelter in it."
+      "notes": "The inverted world beneath an island, where gravity is warped and rainwater falls upward. Sky coral calcifies here and holds the crumbling rock together; the Asura-tainted gargoyles shelter in it. Renderable since the tiles were painted: `sky_island.png` and `sky_underside.png` are sliced into the terrain sheet and carried in TERRAIN_ORDER."
     },
     {
       "id": "open_sky",
