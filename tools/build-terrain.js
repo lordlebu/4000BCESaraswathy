@@ -378,6 +378,11 @@ const LANDMARKS = {
 
 // Canon's authored places. Only the archaeological sites are drawn individually -- the rest of the
 // 24 points of interest still use the diamond marker.
+// Vehicles. One so far -- the lodestone carriage that crosses the Aravali strait.
+const VEHICLES = {
+  'lodestone-carriage': 'carriage.png'
+};
+
 const PLACES = {
   'kavik-tower': 'poi-kavik-tower.png',
   'silted-granary': 'poi-silted-granary.png',
@@ -387,6 +392,14 @@ const PLACES = {
   'customs-house': 'poi-customs-house.png',
   'bone-midden': 'poi-bone-midden.png',
   'basalt-quarry': 'poi-stepped-quarry.png',
+  // The Aravali and the Dwarka basalt. Four new places drawn individually rather than taking a
+  // kind marker, because each is the reason its map exists: a signal post the forest grew through,
+  // a door on a salt flat nobody sweeps, a glasshouse somebody keeps, and the pavement the gates
+  // stand on.
+  'sunk-cutting': 'poi-sunk-cutting.png',
+  'second-gate': 'poi-second-gate.png',
+  'quiet-atelier': 'poi-quiet-atelier.png',
+  'black-pavement': 'poi-black-pavement.png',
   // Kind markers, for the places that have no art of their own. Sixteen of canon's twenty-four
   // points of interest share five kinds, and a marker that says "an anomaly is here" carries more
   // than a diamond while claiming less than a wrong building would.
@@ -421,6 +434,13 @@ const TILE_VARIANTS = 4;
 const TILE = { width: 32 * SCALE, height: 32 * SCALE };
 const OBJECT = { width: 32 * SCALE, height: 32 * SCALE };
 const PLACE = { width: 32 * SCALE, height: 40 * SCALE };
+/**
+ * A vehicle cell.
+ *
+ * Wider than it is tall, unlike everything else on the map: a carriage is a long body seen from
+ * above and cropping it square would take the ends off. 48x32 at the base scale.
+ */
+const VEHICLE = { width: 48 * SCALE, height: 32 * SCALE };
 const HUT = { width: 20 * SCALE, height: 22 * SCALE };
 
 /**
@@ -605,6 +625,7 @@ function main() {
   buildStrip(TILES, TILE, false, threshold, 48, path.join(OUT, 'terrain.png'), 'terrain', true, TILE_VARIANTS);
   buildStrip(LANDMARKS, OBJECT, true, threshold, 40, path.join(OUT, 'landmarks.png'), 'landmarks', true);
   buildStrip(PLACES, PLACE, true, threshold, 40, path.join(OUT, 'places.png'), 'places', true);
+  buildStrip(VEHICLES, VEHICLE, true, threshold, 40, path.join(OUT, 'vehicles.png'), 'vehicles', true);
 
   // The huts arrive as one sheet of four separated figures, so they are sliced rather than listed.
   const hutsFile = path.join(SRC, 'huts.png');
