@@ -35,7 +35,7 @@ npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
 npm run check:data # verify data/canon/ matches the canon release it came from
 npm run perf       # frame cost on the renderer CI has -- see docs/rendering.md
-npm run build:sprite # rebuild assets/varuna-walk.png from assets/source/
+npm run build:sprite # rebuild every traveller's sheet; add an id to do just one
 ```
 
 ### The browser suite is split, and the split is deliberate
@@ -115,8 +115,27 @@ cross. None needs new art.
 
 ### Sprite art is generated too
 
-`assets/varuna-walk.png` is **built, not hand-made** — run `npm run build:sprite` rather than
-editing it. The originals live in `assets/source/`.
+`assets/<id>-overworld.png` is **built, not hand-made** — run `npm run build:sprite <id>` rather
+than editing it. `tools/characters.json` is the manifest: a sixth traveller is a row in it.
+
+**A walking source belongs in `assets/source/`, tracked.** All five started in
+`assets/source/dump/`, which is git-ignored, so the documented rebuild only ever ran on the one
+machine holding them and failed outright on a fresh clone — the table below says a file a
+`tools/` script reads to build something is tracked, and these are exactly that. They are moving
+across as new art arrives; `mithra-walking.png` is the first.
+
+Until a character's *sitting* source moves too, it declares `"sit": { "keep": 4 }` — carry the
+seated frames already in the built sheet. That keeps a walk-only rebuild reproducible for
+everybody instead of a hand-stitch somebody has to remember, and it reverts to a normal `source`
+the day the sitting art lands.
+
+**Check the profile rows by eye, at about 18×, before believing a sheet.** The four rows are
+assumed to arrive as down, up, right, left, and Mithra's did not — the two profiles were the other
+way round, so walking east played a figure facing west while it slid east. `--frames` reorders as
+well as selects, so the fix is a frame list in the manifest. Two different pixel heuristics were
+tried on this and **both got it wrong on two of the five characters**: hair that frames the face on
+both sides defeats a skin-versus-hair test, and a symmetric headdress defeats a centroid one.
+Looking at it took a minute and was right.
 
 Image models do not hand back usable game sprites. The first attempt had registration guides drawn
 across the figure; the second painted the transparency checkerboard on as opaque grey and
@@ -480,17 +499,34 @@ another repository, it reverses something in the first, or it is urgent and the 
 under review.
 
 **Always end with the pull request link.** Whenever work is pushed, the reply must carry the URL —
-the PR itself if one exists, otherwise the `pull/new/<branch>` compare link the push prints. Not
-the branch name, not "ready to open a PR", not a description of where to click: the link, so it can
-be opened directly.
+the PR itself if one exists, otherwise a compare link. Not the branch name, not "ready to open a
+PR", not a description of where to click: the link, so it can be opened directly.
 
-`gh` is **not installed on this machine**, so the PR usually cannot be opened for you. That does not
-change the obligation, it just means the link is the compare URL and the title and body come with
-it, ready to paste:
+**Open the pull request rather than handing over a link to open one.** `gh` is not installed, but
+that is no longer the whole story: a session with the GitHub MCP tools has
+`mcp__github__create_pull_request` and can open it directly, which is what the reader wanted from
+the link anyway. Check for those tools before settling for a compare URL. This file said for
+months that the PR "usually cannot be opened for you", and that sentence outlived the tooling by
+enough sessions to be worth naming.
+
+**When a compare link is the only option, use the `compare/` form, never `pull/new/`:**
 
 ```
-https://github.com/lordlebu/4000BCESaraswathy/pull/new/<branch>
+https://github.com/lordlebu/4000BCESaraswathy/compare/main...<branch>?expand=1
 ```
+
+`pull/new/<branch>` is what this file used to recommend and it **kept 404ing for the owner**,
+across several sessions, on branches that were definitely pushed.
+
+What is measured: the compare form answers **200** for a pushed branch; `pull/new/` answers **302
+to a login page**, because opening a pull request is a write and the shorthand wants a session
+first. That redirect is not itself the 404 the owner sees — signed in, it should resolve — so the
+cause is *not established*, and the tempting explanation is wrong: the branch containing a slash
+does not break it, and this note said so for about ten minutes before the redirect was actually
+followed.
+
+Prefer the compare form because it is the one verified to work, not because the other is
+understood. If somebody does diagnose `pull/new/`, replace this paragraph with the answer.
 
 Two habits that go with it, both learned by getting them wrong:
 
