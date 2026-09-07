@@ -46,6 +46,37 @@ const BEAT_MS = 1500;
 /** How often the marker's position is recomputed. 60fps is pointless for a bar this size. */
 const TICK_MS = 32;
 
+/**
+ * What the pressing button says, per gesture.
+ *
+ * **A night is not struck.** This was an inline `gesture === 'stalk'` conditional, which was right
+ * while every gesture came off a tile and each one hit something. Resting is the fourth and it
+ * hits nothing: "Strike" over a painting of a camp at dusk describes an act nobody is performing.
+ *
+ * A table rather than a longer ternary, so a fifth gesture has to name its own word rather than
+ * inherit a stoop's by falling off the end of one.
+ */
+const PRESS_LABEL: Partial<Record<Gesture, string>> = {
+  stalk: 'Move now',
+  rest: 'Settle in'
+};
+
+/**
+ * The way out, before the run settles and after it.
+ *
+ * "Put it in the satchel" is the wrong promise for a night, which puts nothing anywhere -- and
+ * "Leave it" is worse than wrong on a rest: the night is spent on the way out of this card
+ * whatever the beats did (see the `camp` event in `App.tsx`), so a label offering to back out
+ * would be a lie about the one thing the player is deciding.
+ */
+const WAY_OUT: Partial<Record<Gesture, string>> = {
+  rest: 'Sleep now'
+};
+
+const WAY_OUT_DONE: Partial<Record<Gesture, string>> = {
+  rest: 'Start the day'
+};
+
 export interface ActivityModalProps {
   open: boolean;
   gesture: Gesture;
@@ -92,7 +123,24 @@ export function ActivityModal({
 }: ActivityModalProps) {
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [marker, setMarker] = useState(0);
-  const [done, setDone] = useState<string | null>(null);
+  /**
+   * The run's outcome once it has settled, wrapping the sentence it ended on.
+   *
+   * **An object rather than the bare string, and that is a fix rather than a style.** This was a
+   * `string | null` doing two jobs at once -- *has it settled* and *what does it say* -- which
+   * holds exactly as long as every run has something to say. A rest has nothing: it promises no
+   * material, so the line came back `''`, and the flag never latched. Three faults followed, all
+   * of them visible in the game:
+   *
+   *   * the prose went **blank** on settling, because `??` falls back on null and not on `''`;
+   *   * the track, the beats and the strike button stayed, so a finished night never looked
+   *     finished and the way out still offered to leave it;
+   *   * the settle effect ran again on the next render and called `onFinish` a second time --
+   *     the double payment this file's own tests call the most expensive fault it can have.
+   *
+   * A run that settles on an empty sentence is a real state, so the flag cannot be the sentence.
+   */
+  const [done, setDone] = useState<{ line: string } | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const startedAt = useRef(0);
 
@@ -167,9 +215,12 @@ export function ActivityModal({
   useEffect(() => {
     if (!attempt || !isOver(attempt) || done) return;
     const taken = settle(attempt, promised);
-    const first = taken[0]?.material ?? promised[0]?.material;
-    const line = first ? attemptLine(gesture, gradeOf(attempt), first) : '';
-    setDone(line);
+    // A rest is the one gesture with no material behind it, and its lines never name one. The
+    // other three always come from a tile that promised something, so the guard stays the old
+    // defensive one rather than becoming a second rule about which gesture gets prose.
+    const first = taken[0]?.material ?? promised[0]?.material ?? null;
+    const line = first || gesture === 'rest' ? attemptLine(gesture, gradeOf(attempt), first) : '';
+    setDone({ line });
     onFinish(taken, line);
   }, [attempt, done, promised, gesture, onFinish]);
 
@@ -215,7 +266,7 @@ export function ActivityModal({
             {/* Only a stalk is about the animal; everything else is about the material. Passing
                 the creature regardless put "Painted Deer comes out of the ground" on a flint
                 quarry, which the browser caught and no unit test could. */}
-            {done ?? gestureLine(gesture, gesture === 'stalk' ? creatureName ?? what : what)}
+            {done?.line || gestureLine(gesture, gesture === 'stalk' ? creatureName ?? what : what)}
           </p>
 
           {!done && (
@@ -266,11 +317,13 @@ export function ActivityModal({
           <div className="activity-choices">
             {!done && (
               <button type="button" className="activity-choice primary" onClick={strike}>
-                {gesture === 'stalk' ? 'Move now' : 'Strike'}
+                {PRESS_LABEL[gesture] ?? 'Strike'}
               </button>
             )}
             <button type="button" ref={closeRef} className="activity-choice" onClick={onClose}>
-              {done ? 'Put it in the satchel' : 'Leave it'}
+              {done
+                ? WAY_OUT_DONE[gesture] ?? 'Put it in the satchel'
+                : WAY_OUT[gesture] ?? 'Leave it'}
             </button>
           </div>
         </div>

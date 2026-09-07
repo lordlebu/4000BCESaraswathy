@@ -14,7 +14,11 @@
 //     twice, and the satchel and the ground would disagree about what left the tile;
 //   * the modal opens and plays with **no art at all**, which is the state the repository is in
 //     today and the state every new gesture starts in;
-//   * closing without finishing takes nothing, so "Leave it" leaves it.
+//   * closing without finishing takes nothing, so "Leave it" leaves it;
+//   * the modal opens on a gesture that **promises nothing** -- a night -- which every fixture
+//     here used to have a material in, and which was consequently broken in three ways at once.
+//     See `docs/testing.md`, "A flag that doubles as content only latches when the content is
+//     there".
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
@@ -176,6 +180,54 @@ describe('the activity modal', () => {
     fireEvent.click(screen.getByRole('button', { name: /Strike/ }));
 
     expect(onFinish, 'the run restarted when the parent re-rendered').toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * **Resting, which is the gesture with nothing in it -- and the one that was broken.**
+   *
+   * Every other gesture comes off a tile that promised a material, so `promised` is never empty
+   * and the settled line is never blank. A night promises nothing. That single difference walked
+   * straight through the component: the line came back `''`, the flag that said "this run is over"
+   * *was* that line, and so the run never registered as over. The card went blank, kept its timing
+   * bar and its strike button, and paid `onFinish` twice.
+   *
+   * All four assertions below failed before `done` stopped being the sentence. Grouped in one case
+   * on purpose -- they are one fault seen from four sides, and splitting them would suggest a
+   * component can have three of them and not the fourth.
+   */
+  it('settles a rest, which promises nothing', () => {
+    const { onFinish } = open({
+      gesture: 'rest',
+      promised: [],
+      variant: 'camp',
+      subject: 'Make camp for the night'
+    });
+    for (let i = 0; i < BEATS; i += 1) {
+      const button = screen.queryByRole('button', { name: /Settle in/ });
+      if (button) fireEvent.click(button);
+    }
+
+    // Settled once, not twice.
+    expect(onFinish, 'a night with nothing in it settled more than once').toHaveBeenCalledTimes(1);
+    // The card says how the night went. `attemptLine` has three sentences for a rest and nothing
+    // could reach any of them.
+    const prose = document.querySelector('.activity-prose')?.textContent ?? '';
+    expect(prose.length, 'the card went blank when the night finished').toBeGreaterThan(10);
+    // And it looks finished: no bar to aim at, and no strike.
+    expect(document.querySelector('.activity-track'), 'a settled night still had a timing bar')
+      .toBeNull();
+    // The way out says what pressing it does. "Put it in the satchel" puts no night anywhere.
+    expect(screen.getByRole('button', { name: /Start the day/ })).toBeTruthy();
+  });
+
+  /**
+   * A night is spent on the way out of the card whatever the beats did, so the escape hatch must
+   * not offer to back out of one. Every other gesture keeps "Leave it", which does leave it.
+   */
+  it('does not offer to leave a night it is going to spend anyway', () => {
+    open({ gesture: 'rest', promised: [], subject: 'Make camp for the night' });
+    expect(screen.queryByRole('button', { name: /Leave it/ })).toBeNull();
+    expect(screen.getByRole('button', { name: /Sleep now/ })).toBeTruthy();
   });
 
   it('closes on Escape', () => {
