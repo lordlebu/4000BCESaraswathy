@@ -4948,7 +4948,7 @@
     {
       "id": "vehicle_lodestone_train",
       "type": "vehicle",
-      "name": "Lodestone train",
+      "name": "Lodestone car",
       "kind": "machine",
       "crosses": [
         "open_sky",
@@ -4957,7 +4957,7 @@
         "plains",
         "settlement"
       ],
-      "capacity": 40,
+      "capacity": 12,
       "materials": [
         "material_lodestone_grit",
         "material_aero_bark",
@@ -4966,7 +4966,7 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "The line across the Aravali strait does not stand on anything. It is laid on lodestone -- the same Permian-irradiated ore that holds the islands up -- and it hangs at the height the ore wants, which is why the rails run level over open water and why nothing has ever been built under them. Boats pass beneath without lowering a mast.\n\nThe train is the second half of the same trick: sledges of ore beneath a timber body, riding the repulsion rather than rolling on it. It does not touch the rail and it makes almost no sound, which unsettles people more than the height does.\n\nDistinct from the Workshop Train, which is a travelling apothecary that crosses broken country and is not trying to get anywhere. This one is transport and nothing else: it exists because the strait is the one place the Shattered Sea narrows, and because somebody worked out that the ore that makes the islands impossible also makes the crossing cheap.",
+      "notes": "The line across the Aravali strait does not stand on anything. It is laid on lodestone -- the same Permian-irradiated ore that holds the islands up -- and it hangs at the height the ore wants, which is why the rails run level over open water and why nothing has ever been built under them. Boats pass beneath without lowering a mast.\n\nThe car is the second half of the same trick: sledges of ore beneath a timber body, riding the repulsion rather than rolling on it. It does not touch the rail and it makes almost no sound, which unsettles people more than the height does.\n\n**One car, not a train.** It seats a dozen with their bundles and it goes back and forth across the strait, which is the whole of what it does -- the crossing is short and there is nothing at either end that needs moving in quantity. Nobody has coupled a second one to it and nobody has needed to.\n\nDistinct from the Workshop Train, which canon calls a travelling apothecary rather than transport: that one crosses broken country and is not trying to get anywhere, and it is a train in the sense of a household strung out along a road. This is a box on a rail.",
       "source_index": 13
     }
   ],
