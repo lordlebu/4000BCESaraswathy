@@ -25,15 +25,25 @@
       "id": "varuna",
       "name": "Varuna",
       "colours": 30,
-      "walk": { "source": "assets/source/dump/varuna_walkingNew.png" },
-      "sit": { "source": "assets/source/dump/Varuna Guyuk Sitting.png", "frames": [4, 5, 6, 7] }
+      "walk": { "source": "assets/source/varuna-walking.png" },
+      "sit": { "keep": 4 }
     },
     {
       "id": "guyuk",
       "name": "Guyuk",
       "colours": 30,
-      "walk": { "source": "assets/source/dump/Guyuk MOngke walking.png" },
-      "sit": { "source": "assets/source/dump/Varuna Guyuk Sitting.png", "frames": [0, 1, 2, 3] }
+      "$walk_comment": [
+        "Rows arrive down, up, LEFT, right in this source, so the profiles swap -- see the same",
+        "note on Mithra. Worth knowing that Guyuk's *previous* art did not need this: the old",
+        "sheet was already right, and the new art is ordered the other way round. Row order is a",
+        "property of the file in hand, never of the character, so it gets checked every time a",
+        "sheet is replaced rather than assumed to match what it replaces."
+      ],
+      "walk": {
+        "source": "assets/source/guyuk-walking.png",
+        "frames": [0, 1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 8, 9, 10, 11]
+      },
+      "sit": { "keep": 4 }
     },
     {
       "id": "mithra",
