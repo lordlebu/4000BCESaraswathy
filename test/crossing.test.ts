@@ -12,6 +12,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { canBoardAt, trackRoute } from '../src/world/crossing';
+import { planTrack } from '../src/game/scenePlan';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
@@ -172,5 +173,41 @@ describe('the Aravali crossing', () => {
     // And somewhere along it a traveller can actually get on: the shores and the islands.
     const boardable = route.filter((p) => canBoardAt(world, p));
     expect(boardable.length, 'there is nowhere to board the line at all').toBeGreaterThan(4);
+  });
+
+  /**
+   * **The line is drawn, and only where it is laid.**
+   *
+   * `Tile.track` says a rail crosses here; this is the layer that puts one on the screen. It is a
+   * fourth scatter contract -- flat, tile-filling, no offset, placed from the world rather than
+   * from the ground -- because none of the three that existed fit. Overdraw refused it outright:
+   * `frames.test.ts` forbids anything reaching above half the cell, and a rail fills its tile.
+   */
+  it('draws a rail on every tracked tile and nowhere else', () => {
+    const world = aravali();
+    const rails = planTrack(world);
+    const tracked = world.tiles.flat().filter((t) => t.track);
+    expect(rails.length, 'the line is laid but not drawn').toBe(tracked.length);
+    for (const rail of rails) {
+      expect(world.tiles[rail.y]![rail.x]!.track, `a rail at ${rail.x},${rail.y} is off the line`).toBe(true);
+    }
+  });
+
+  it('lets the forest have the stretches nothing runs on', () => {
+    // Measured: 122 sound and 70 overgrown. The strait crossing is kept because a carriage uses
+    // it; the land approaches through forest and hills are not, which is the whole story of the
+    // map stated in which frame a tile draws.
+    const rails = planTrack(aravali());
+    const overgrown = rails.filter((r) => r.frame >= 2);
+    expect(overgrown.length, 'no stretch of line has been reclaimed').toBeGreaterThan(10);
+    expect(rails.length - overgrown.length, 'no stretch of line is still kept').toBeGreaterThan(10);
+  });
+
+  it('leaves every other map without a rail', () => {
+    for (const map of fieldMaps) {
+      if (map.id === 'field_map_aravali') continue;
+      const world = buildFieldMap(map, { seed: DEFAULT_SEED }).world;
+      expect(planTrack(world), `${map.id} grew a railway`).toEqual([]);
+    }
   });
 });
