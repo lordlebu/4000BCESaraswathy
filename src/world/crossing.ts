@@ -23,27 +23,44 @@ import type { BiomeId, Point, World } from './types';
  * pinches. A fifth of the map is enough water to be a real crossing and little enough to read as
  * a strait rather than an ocean.
  */
-const STRAIT = 0.26;
+const STRAIT = 0.5;
 
 /** Where the strait sits, measured from the near shore. Leaves room for a shore on both sides. */
-const STRAIT_AT = 0.37;
+const STRAIT_AT = 0.25;
 
 /**
- * How far across the islands sit, as fractions of the map. Both over water, spaced along the line.
+ * Which rows the islands sit on, as fractions of the map.
  *
- * **They have to clear each other, and the margin is bigger than it looks.** At 0.46 and 0.56 on a
- * 64-tile map the centres are six rows apart against a radius of five plus a rim, so the two
- * merged into one long blob -- not what the reference shows and not what "two islands" means.
+ * **Measured, and the first two attempts were both wrong.** At 0.46/0.56 the rims overlapped and
+ * the pair rendered as one blob. At 0.44/0.63 the runs came out *ten rows and four* -- lopsided,
+ * one row apart, filling rows 24-38 of 64. That is a 23% band in the middle of the map, which is
+ * a nick rather than a crossing.
  *
- * The first correction *looked* right in a printed map and was not: the debug render skipped every
- * other row, and the rows were in fact contiguous 25-38. A test that asked the tiles rather than
- * the picture caught it. 0.44 and 0.63 is twelve rows between centres against a radius of six --
- * open water between them, and both still inside the strait.
+ * The fault was fractions: a fraction of a 64-row map is not something you can picture, and both
+ * numbers looked reasonable and produced neither what the reference shows nor what "two islands"
+ * means.
+ *
+ * A third and two thirds, against a strait that now runs from a quarter to three quarters. That
+ * puts roughly twenty rows between the island centres -- the line between them is most of the
+ * crossing rather than a gap in a blob -- and both sit well inside open water.
  */
-const ISLANDS = [0.44, 0.63];
+const ISLANDS = [1 / 3, 2 / 3];
 
-/** How wide an island is, in tiles, at its equator. */
-const ISLAND_RADIUS = 5;
+/** How wide an island is, in tiles, at its equator. Equal, because two islands are two of a kind. */
+const ISLAND_RADIUS = 6;
+
+/**
+ * How high an island stands, on the 0-1 elevation scale.
+ *
+ * **This is what gives the rims their cliffs, and it was the missing piece.** The stamp wrote
+ * biome and left elevation alone, so an island sat in band 0 -- at sea level as far as every
+ * height rule in the game was concerned -- and `planCliffs` drew nothing at its edge.
+ *
+ * Above `THRESHOLDS.HILLS` (0.66) puts it in band 1, one band over the water it hangs above, which
+ * is exactly the condition `cliffAt` looks for. The cliff sheet then fills the rim slot with rock
+ * the same way the treeline fills it with crowns, and neither needs new machinery.
+ */
+const ISLAND_HEIGHT = 0.75;
 
 /**
  * Cut the strait: a band of open water across the map, with coast on both banks.
@@ -117,9 +134,15 @@ export function stampIslands(world: World, palette: ReadonlySet<BiomeId>): Point
         // Round, with the seed roughening the edge by a tile so two islands are not twins.
         const rough = tileHash(world.seed, x, y, 'rim') % 2;
         const d = Math.sqrt(dx * dx + dy * dy);
-        if (d <= ISLAND_RADIUS - 1 + rough) tile.biome = 'sky_island';
-        else if (d <= ISLAND_RADIUS + rough && palette.has('sky_underside')) {
+        if (d <= ISLAND_RADIUS - 1 + rough) {
+          tile.biome = 'sky_island';
+          // **Raised out of band 0, which is what earns the rim its cliffs.** See ISLAND_HEIGHT.
+          tile.elevation = ISLAND_HEIGHT;
+        } else if (d <= ISLAND_RADIUS + rough && palette.has('sky_underside')) {
           tile.biome = 'sky_underside';
+          // The rim stands as high as the top it hangs from -- it *is* the island's edge, seen
+          // from the side. Left at sea level it would read as a beach around a hill.
+          tile.elevation = ISLAND_HEIGHT;
         }
       }
     }
@@ -185,27 +208,31 @@ export function stampLine(world: World, _palette: ReadonlySet<BiomeId>, islands:
 }
 
 /**
- * Put the traveller on the near shore.
+ * Put the traveller on the **southern** shore, which is the one they come from.
  *
- * **The strait is cut after the start is chosen**, so on a crossing the generator's start can end
- * up in open water -- measured, it landed at 51,28 with sea on all four sides, and
- * `landform.test.ts` reported one reachable tile out of 2,856. The generator is not wrong; it
- * simply picked before this map existed.
+ * **This function used to be called `startOnTheNearShore` and searched the north**, which is a
+ * name describing the thing it did not do. It passed every test, because the tests asked whether
+ * the start was on land -- which it was -- and nothing asked whether it was on the shore the
+ * player arrives from. Measured, it put the traveller at y=22 on a 64-row map: the far side.
  *
- * Nearest walkable land on the near side, searched outward from where the generator wanted to be,
+ * South is not arbitrary. Jambhudweepa is home and the map's own arrival text calls the far bank
+ * "a green smudge that is not Jambhudweepa", so walking north is walking away. Both shores carry
+ * about 1,200 walkable tiles, so choosing the right one costs nothing.
+ *
+ * Nearest walkable land below the strait, searched outward from where the generator wanted to be,
  * so the choice still respects whatever it was optimising for.
  */
-export function startOnTheNearShore(world: World): void {
-  const strait = Math.floor(world.height * STRAIT_AT);
+export function startOnTheSouthernShore(world: World): void {
+  const strait = Math.floor(world.height * (STRAIT_AT + STRAIT));
   const walkable = (x: number, y: number): boolean => {
     const tile = world.tiles[y]?.[x];
     return !!tile && tile.biome !== 'sea' && tile.biome !== 'sky_underside' && !tile.track;
   };
-  if (walkable(world.start.x, world.start.y) && world.start.y < strait) return;
+  if (walkable(world.start.x, world.start.y) && world.start.y > strait) return;
 
   let best: Point | null = null;
   let bestDistance = Infinity;
-  for (let y = 0; y < strait; y += 1) {
+  for (let y = strait + 1; y < world.height; y += 1) {
     for (let x = 0; x < world.width; x += 1) {
       if (!walkable(x, y)) continue;
       const d = (x - world.start.x) ** 2 + (y - world.start.y) ** 2;
