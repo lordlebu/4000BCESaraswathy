@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.14.0",
+  "canon_version": "2.15.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -1123,7 +1123,10 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "shore": "near"
+      "shore": "near",
+      "npcs": [
+        "npc_ila"
+      ]
     },
     {
       "id": "poi_rail_head",
@@ -1143,7 +1146,8 @@
         "epoch_post_cataclysm"
       ],
       "npcs": [
-        "npc_hesh"
+        "npc_hesh",
+        "npc_ila"
       ],
       "shore": "near"
     },
@@ -1544,6 +1548,54 @@
         "epoch_post_cataclysm"
       ],
       "notes": "Keeps the line and does not explain it, which is the map in one person. Hesh knows the mechanism exactly -- the ore wants to be up -- and has no more curiosity about it than a ferryman has about buoyancy. That is the counterweight to a traveller who writes everything down.\n\nSays nothing at all about the Kept Stones. That silence is deliberate and is not gated on any discovery: asking Hesh about the wall gets you the timetable."
+    },
+    {
+      "id": "npc_ila",
+      "type": "npc",
+      "name": "Ila",
+      "role": "apothecary",
+      "found_at": [
+        "poi_quiet_atelier",
+        "poi_rail_head"
+      ],
+      "language": "kia",
+      "would_settle": true,
+      "knows": [
+        "discovery_the_kept_bench"
+      ],
+      "lines": [
+        {
+          "text": "The glass is hers. I only keep it swept and the trays turned."
+        },
+        {
+          "text": "She is not coming this month. She sends soil, and I plant it, and I write down what comes up. Mostly nothing comes up.",
+          "gives": [
+            "discovery_the_kept_bench"
+          ]
+        },
+        {
+          "text": "That is the point of it -- the nothing. If you only sow good dirt you learn what you already knew. She wants the ground that has stopped, and a list of what will still take in it.",
+          "requires": [
+            "discovery_the_kept_bench"
+          ]
+        },
+        {
+          "text": "Physic first, because sick people cannot wait for a harvest. Neem for the skin, brahmi for the head, haritaki for everything nobody has a name for. Then the grasses, because grass holds a slope. Then whatever will feed anyone.",
+          "requires": [
+            "discovery_the_kept_bench"
+          ]
+        },
+        {
+          "text": "The lotus in the falling-up water keeps its warmth after it is picked. I have not worked out what that is for. She will know, or she will write to somebody who does.",
+          "requires": [
+            "discovery_the_kept_bench"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "**The apothecary thread, given somebody to say it.** The brief for this map asked that a player learn how apothecary works and how it rebuilds -- and the atelier said soil samples and seed trays, which is agriculture. Ila is the half that was missing: physic first because sick people cannot wait for a harvest, then grass because grass holds a slope, then food.\n\nAn apprentice rather than Guyuk herself. Canon has the Seed-Gleaner aboard the Survival Train in `event_survival_train_solarpunk`, and a workshop nobody is currently in is the stronger image for this map anyway. Ila keeps it, plants what Guyuk sends, and writes down what comes up -- which is mostly nothing, and the nothing is the data.\n\nShe is at the rail-head as well as the bench, because that is where the soil arrives and where the letters go."
     },
     {
       "id": "npc_marn",

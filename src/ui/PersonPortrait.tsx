@@ -95,7 +95,11 @@ const TOOLS: [string[], string][] = [
   [['stone-reader'], 'M18 21l4-8M20 10h5v4h-5zM20 12h-2'],
   // A line-keeper's lamp on a hook, which is what you hold up when the carriage is late and the
   // light has gone. Hesh has one and mostly does not need it.
-  [['line-keeper'], 'M20 5v3M17 8h6l-1 8h-4zM18 12h4']
+  [['line-keeper'], 'M20 5v3M17 8h6l-1 8h-4zM18 12h4'],
+  // An apothecary's mortar with the pestle standing in it. Ila grinds physic at a bench in a
+  // glasshouse, and the mortar is the one tool that says medicine rather than cooking -- a bowl
+  // this heavy is for breaking bark and seed, not for stirring.
+  [['apothecary'], 'M22 6l-3 6M16 13h8v2a4 4 0 0 1-8 0zM17 21h6']
 ];
 
 /** The tool for a role, or null for a person whose trade has no drawing yet. */

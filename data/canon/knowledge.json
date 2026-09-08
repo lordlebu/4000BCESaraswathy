@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.14.0",
+  "canon_version": "2.15.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -1531,6 +1531,36 @@
       "epochs": [
         "epoch_post_cataclysm"
       ]
+    },
+    {
+      "id": "discovery_what_will_still_grow",
+      "type": "discovery",
+      "name": "What Will Still Grow",
+      "discipline": "botany",
+      "found_at": [
+        "poi_quiet_atelier"
+      ],
+      "levels": [
+        {
+          "entry": "Trays of soil under the glass, each one labelled, each one worse than the last."
+        },
+        {
+          "entry": "Not local dirt. It is carried in -- ash, salt-crust, sand off a scald -- and the labels are places, not dates."
+        },
+        {
+          "entry": "Physic seed goes in first: neem, brahmi, haritaki. Where anything takes at all, it is these."
+        },
+        {
+          "entry": "Then grass, in the trays where the physic took. Never in the ones where it did not, which is a rule somebody arrived at rather than guessed."
+        },
+        {
+          "entry": "So the order is medicine, then something to hold the slope, then food -- and the reason is that people are sick before they are hungry, and a slope that moves takes the field with it. It is a method for putting a country back, written as a shelf of failed trays."
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "The apothecary as a *method* rather than a trade: physic, then grass, then food, in that order and for stated reasons. This is the solarpunk thread the map was missing -- rebuilding as something a person does at a bench with a list, not as a mood."
     },
     {
       "type": "discovery",
