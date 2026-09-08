@@ -10,8 +10,23 @@
 
 import { expect, type Page } from '@playwright/test';
 
-/** How long to wait for a step to land before assuming it went nowhere. */
-const ARRIVAL_TIMEOUT = 4_000;
+/**
+ * How long to wait for a step to land before assuming it went nowhere.
+ *
+ * **Twelve seconds, and the number is about the renderer rather than the tween.** A step is
+ * `STEP_MS * cost * pace` -- 425ms on ordinary ground -- so four seconds was nearly ten times the
+ * work and still failed: `travellers.spec.ts` reported "guyuk would not walk" on CI and again on
+ * its retry, and reproduced in the CI container at 6 of 7 failing with two workers.
+ *
+ * The same spec passes 6 of 7 with `--workers=1` in the same container. That is the whole
+ * diagnosis: the tween is not slow, the *frame* is, because a software renderer sharing four
+ * cores with a second worker can stall past any bound tuned against tween length.
+ *
+ * Raising it costs nothing on a green run -- the wait ends the moment the journal changes -- and
+ * the timeout was never a failure anyway: it is swallowed, because a step onto identical ground
+ * genuinely reads the same. It only ever needed to outlast a stall.
+ */
+const ARRIVAL_TIMEOUT = 12_000;
 
 /** Take one step, and return when the traveller has actually arrived somewhere new. */
 export async function step(page: Page, key: string): Promise<void> {
