@@ -197,30 +197,86 @@ export function stampIslands(world: World, palette: ReadonlySet<BiomeId>): Point
         if (tile.biome !== 'sea' && tile.biome !== 'sky_island' && tile.biome !== 'sky_underside') {
           continue;
         }
-        // Rounded, with the seed roughening the edge by a tile so two islands are not twins.
+        // Rounded, with the seed roughening the edge so two islands are not twins.
+        //
+        // **The roughness is per column, not per tile.** A hash on `(x, y)` let every tile of the
+        // boundary decide for itself, which is not an outline -- it is static along the edge, and
+        // it is why the island came out blocky with single squares poking off it. Hashing the
+        // column alone moves the whole of one column's edge in or out together, which is what an
+        // irregular coast looks like. It also cannot strand a tile, which the per-tile version
+        // managed twice.
         //
         // The distance is normalised against each axis, so `d` is 1 exactly on the ellipse and the
-        // same two thresholds below still mean "top" and "rim" whatever shape the island is.
-        const rough = tileHash(world.seed, x, y, 'rim') % 2;
+        // threshold below still means "top" whatever shape the island is.
+        //
+        // **There is no rim case here any more.** The underside used to be a ring stamped just
+        // inside the ellipse, which took a tile of grass off the island all the way round and gave
+        // it a grey moat -- a crater rather than a shelf. It hangs underneath now: see
+        // `hangTheShelf`.
+        const rough = tileHash(world.seed, x, 0, 'rim') % 2;
         const ex = dx / ISLAND_RADIUS_X;
         const ey = dy / ISLAND_RADIUS_Y;
         const d = Math.sqrt(ex * ex + ey * ey) * ISLAND_RADIUS_Y;
-        if (d <= ISLAND_RADIUS_Y - 1 + rough) {
+        if (d <= ISLAND_RADIUS_Y + rough) {
           tile.biome = 'sky_island';
-          // **Raised out of band 0, which is what earns the rim its cliffs.** See ISLAND_HEIGHT.
+          // **Raised out of band 0, which is what earns the shelf its cliffs.** See ISLAND_HEIGHT.
           tile.elevation = ISLAND_HEIGHT;
-        } else if (d <= ISLAND_RADIUS_Y + rough && palette.has('sky_underside')) {
-          tile.biome = 'sky_underside';
-          // A band below the top and a band above the water: the shelf the island hangs from.
-          // This is the step `cliffAt` reads to put rock along the rim. See ISLAND_RIM_HEIGHT.
-          tile.elevation = ISLAND_RIM_HEIGHT;
         }
       }
     }
   }
 
   for (const centre of centres) firmUp(world, centre);
+  if (palette.has('sky_underside')) for (const centre of centres) hangTheShelf(world, centre);
   return centres;
+}
+
+/**
+ * How far the rock face hangs below the island, in rows.
+ *
+ * Two, plus a row of raggedness. Enough to read as a wall of columns rather than a lip, and about
+ * what the reference shows -- the face is roughly a fifth as deep as the island is wide.
+ */
+const SHELF_DEPTH = 2;
+
+/**
+ * Hang the rock face under the island's lower edge.
+ *
+ * **Below it, not around it, and that is the whole difference.** The underside used to be a ring
+ * stamped just inside the ellipse: the outermost tiles of the island *became* rock, so the grass
+ * had a grey moat round it that reads as a crater, and the island lost a tile of walkable top all
+ * the way round to a biome that is deliberately not walkable.
+ *
+ * Looking at a floating island from above and slightly in front -- which is what the reference
+ * does and what this camera does -- the grass runs clean to the edge on the far side, and the near
+ * side is a wall of rock hanging under the lip. So the face goes on the water *below* the
+ * silhouette and the island keeps all of its top.
+ *
+ * A band below the top and a band above the water, which is the step `cliffAt` reads to draw rock
+ * along the joint. See ISLAND_RIM_HEIGHT.
+ */
+function hangTheShelf(world: World, centre: Point): void {
+  const isTop = (x: number, y: number) => world.tiles[y]?.[x]?.biome === 'sky_island';
+
+  for (let dx = -ISLAND_RADIUS_X - 2; dx <= ISLAND_RADIUS_X + 2; dx += 1) {
+    const x = centre.x + dx;
+    // The lowest row of island top in this column is the lip the face hangs from.
+    let lip: number | null = null;
+    for (let dy = -ISLAND_RADIUS_Y - 2; dy <= ISLAND_RADIUS_Y + 2; dy += 1) {
+      if (isTop(x, centre.y + dy)) lip = centre.y + dy;
+    }
+    if (lip === null) continue;
+
+    // Ragged by a row, so the bottom of the face is broken rock rather than a ruled line.
+    const depth = SHELF_DEPTH + (tileHash(world.seed, x, 0, 'shelf') % 2);
+    for (let i = 1; i <= depth; i += 1) {
+      const tile = world.tiles[lip + i]?.[x];
+      // Only over open water. A face that overwrites the next island, or a shore, is not hanging.
+      if (!tile || tile.biome !== 'sea') continue;
+      tile.biome = 'sky_underside';
+      tile.elevation = ISLAND_RIM_HEIGHT;
+    }
+  }
 }
 
 /**
@@ -272,13 +328,18 @@ function firmUp(world: World, centre: Point): void {
 }
 
 /**
- * How wide the line is, in tiles either side of its centre.
+ * How wide the line is, in tiles either side of its centre. Zero -- one railway.
  *
- * One, so the walkable causeway is three tiles across. Wide enough that a player does not have to
- * thread a needle at a tile's precision, narrow enough that it reads as a line laid over water
- * rather than as a spit of land.
+ * **It was one *either side*, and that drew three railways.** The reasoning was about walking: the
+ * rail was the only way across, so it was three tiles wide to save a player threading a needle at
+ * a tile's precision. But `planTrack` draws a full set of rails on every tile carrying the flag,
+ * so a three-tile causeway is three parallel tracks running side by side up the middle of the sea
+ * -- which is what the screenshot showed, and is nothing like a railway.
+ *
+ * The premise is gone in any case. The ropes are what a person climbs; the rail is what the
+ * carriage runs on, and a carriage runs on one line.
  */
-const LINE_HALF_WIDTH = 1;
+const LINE_HALF_WIDTH = 0;
 
 /**
  * How wide a rope is, either side of centre. Zero -- one tile.
@@ -363,8 +424,12 @@ export function stampLine(world: World, _palette: ReadonlySet<BiomeId>, islands:
  *
  * Enough to read as a stretch of track rather than a sleeper, short enough that it is plainly a
  * stub. The rail-head is where it stops.
+ *
+ * Raised from eight when the line narrowed to a single tile. It was eight *rows* of three-tile
+ * causeway -- twenty-four tiles of derelict track -- and one tile wide it came out at nine, which
+ * is a sleeper again. The length on the ground is what reads, not the row count.
  */
-const APPROACH = 8;
+const APPROACH = 14;
 
 /** The old line running inland from where the rope came ashore. */
 function derelictApproach(world: World, x: number, from: number, step: -1 | 1): void {

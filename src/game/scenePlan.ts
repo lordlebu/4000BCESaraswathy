@@ -46,6 +46,7 @@ import { landmarkKindFor } from '../content/landmarks';
 import { band } from '../world/classify';
 import { tileHash } from '../world/rng';
 import type { FieldMapWorld } from '../world/fieldMap';
+import type { BiomeId } from '../world/types';
 
 /** Which sheet a placement draws from. `marker` is the fallback glyph, which has no sheet. */
 export type PlacementSheet =
@@ -512,6 +513,16 @@ export function planScene(built: FieldMapWorld): Placement[] {
  *
  * Drawn at `underfoot`, like decor: the traveller walks over the rails rather than behind them.
  */
+/**
+ * Ground that can take a line back: anything with something growing on it.
+ *
+ * Not `coast` or `desert` -- sand does not reclaim -- and not water or the sky biomes, where the
+ * crossing is deliberately kept clear because it is the part still in use.
+ */
+const GROWS_OVER: ReadonlySet<BiomeId> = new Set<BiomeId>([
+  'forest', 'hills', 'plains', 'wetland', 'mountains', 'river'
+]);
+
 export function planTrack(world: FieldMapWorld['world']): Placement[] {
   const out: Placement[] = [];
   const tracked = (x: number, y: number): boolean => world.tiles[y]?.[x]?.track === true;
@@ -529,7 +540,17 @@ export function planTrack(world: FieldMapWorld['world']): Placement[] {
 
       // Overgrown where nothing runs: the strait crossing is kept and the land approaches are not.
       // Read off the ground rather than stored, so a line laid across new country needs no edit.
-      const overgrown = tile.biome === 'forest' || tile.biome === 'hills';
+      //
+      // **Anything growing, rather than a list of two biomes.** It named `forest` and `hills`,
+      // which happened to be the whole of the land the line crossed while the line ran shore to
+      // shore. The approaches are stubs on the near shore now, and the southern one runs mostly
+      // through `plains` -- so two thirds of the derelict track was drawn as kept rail through
+      // open grass, which is the one stretch nothing has run on for four hundred years.
+      //
+      // The real question is whether there is anything here to grow over it. Sand and bare rock
+      // cannot; grass, scrub and trees can. That is a property of the ground, so it is asked of
+      // the ground.
+      const overgrown = GROWS_OVER.has(tile.biome);
 
       out.push({
         sheet: 'track',

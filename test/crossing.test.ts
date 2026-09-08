@@ -11,7 +11,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { canBoardAt, shoreheads, trackRoute } from '../src/world/crossing';
+import { canBoardAt, railSpan, shoreheads, trackRoute } from '../src/world/crossing';
 import { band } from '../src/world/classify';
 import { planCliffs, planTrack } from '../src/game/scenePlan';
 import { fieldMap, fieldMaps } from '../src/content/places';
@@ -64,6 +64,28 @@ describe('the Aravali crossing', () => {
     // rows each with 8 between them, so the gap was smaller than either island. It is now wider
     // than an island is tall, which is what "two islands" has to mean on screen.
     expect(gap, 'the islands are not far enough apart to read as two').toBeGreaterThan(9);
+  });
+
+  it('lays one railway, not several side by side', () => {
+    // **Three parallel tracks ran up the middle of the sea, and every test passed.** The line was
+    // stamped a tile either side of centre so a player would not have to thread a needle walking
+    // it, from when the rail was the only way across. But `planTrack` draws a full set of rails on
+    // every tile carrying the flag, so "three tiles wide" is not a wide railway -- it is three
+    // railways. Nothing asked how many, only whether the route was continuous and one column
+    // wide, and the route was always the centre column of the three.
+    //
+    // The ropes carry the walking now, so the premise is gone as well as the look.
+    for (const seed of ['a', 'b', 'c']) {
+      const world = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, { seed }).world;
+      const span = railSpan(world);
+      expect(span, `${seed}: no rail span`).not.toBeNull();
+
+      // Every row of the rail carries exactly one tile of line.
+      for (let y = span!.from; y <= span!.to; y += 1) {
+        const across = world.tiles[y]!.filter((t) => t.track).length;
+        expect(across, `${seed}: row ${y} carries ${across} lines abreast`).toBe(1);
+      }
+    }
   });
 
   it('never lays rail past the last ground at either end', () => {
