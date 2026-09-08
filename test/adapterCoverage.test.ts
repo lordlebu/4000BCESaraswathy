@@ -92,7 +92,7 @@ const COVERAGE: Record<string, Coverage> = {
       'related_entities']
   },
   'places.npcs': {
-    adapted: ['id', 'name', 'role', 'found_at', 'would_settle', 'language', 'knows', 'lines'],
+    adapted: ['id', 'name', 'role', 'sex', 'found_at', 'would_settle', 'language', 'knows', 'lines'],
     skipped: [...EDITORIAL,
       // Which canon character this person descends from. Lineage is book material.
       'descended_from']

@@ -132,6 +132,16 @@ export interface Npc {
   id: string;
   name: string;
   role: string;
+  /**
+   * Male or female, or null where canon has not said.
+   *
+   * Canon records it because it tracks descent -- `descended_from` on people, reincarnation on
+   * characters, and a Mask Family schism running four hundred years through named parents and
+   * children. A lineage cannot be followed without knowing who can bear a child.
+   *
+   * Not a pronoun. An earlier field tried to be both and could be neither.
+   */
+  sex: 'male' | 'female' | null;
   foundAt: string[];
   /** Whether they would join the settlement at the end, having been helped. */
   wouldSettle: boolean;
@@ -155,7 +165,7 @@ interface RawPoi {
   ruin_of?: string;
 }
 interface RawNpc {
-  id: string; name: string; role?: string; found_at?: string[]; would_settle?: boolean;
+  id: string; name: string; role?: string; sex?: string; found_at?: string[]; would_settle?: boolean;
   language?: string; knows?: string[];
   lines?: { text: string; requires?: string[]; gives?: string[]; costs?: string }[];
 }
@@ -205,6 +215,7 @@ export const npcs: Npc[] = raw.npcs.map((n) => ({
   id: n.id,
   name: n.name,
   role: n.role ?? '',
+  sex: (n.sex ?? null) as 'male' | 'female' | null,
   foundAt: n.found_at ?? [],
   wouldSettle: n.would_settle === true,
   language: n.language ?? '',

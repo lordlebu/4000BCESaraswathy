@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.15.0",
+  "canon_version": "2.17.0",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -2426,6 +2426,23 @@
       ],
       "notes": "Resin softened and rolled with pepper. Worth carrying a long way, which is most of why the stands are overworked.",
       "source_index": 73
+    },
+    {
+      "id": "item_sinew_bow",
+      "type": "item",
+      "name": "Sinew-backed bow",
+      "kind": "weapon",
+      "affords": [
+        "cut",
+        "deter"
+      ],
+      "materials": [
+        "material_teak_timber",
+        "material_sinew",
+        "material_deer_antler"
+      ],
+      "notes": "A short bow for horseback and broken ground: a timber belly, sinew glued along the back to take the stretch, antler let into the tips. The sinew is what makes it -- dried, it tightens as it goes, which no plant fibre does, and canon says exactly that on the material itself.\n\nShort because of where it is used. A long bow is drawn standing still on flat ground, and the people who carry these are moving, on slopes, among animals.\n\nAffords `cut` and `deter`, like every other weapon here. Nothing in canon affords killing, and the sling entry says why: the record has slings keeping birds off a crop far more often than it has them doing anything else.",
+      "source_index": 74
     }
   ],
   "processes": [
@@ -4670,6 +4687,33 @@
       ],
       "notes": "Softened over heat and rolled between the palms with pepper.",
       "source_index": 81
+    },
+    {
+      "id": "recipe_sinew_bow",
+      "type": "recipe",
+      "name": "Backing a bow",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_teak_timber"
+        },
+        {
+          "material": "material_sinew"
+        },
+        {
+          "material": "material_deer_antler"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_sinew_bow"
+        }
+      ],
+      "notes": "The sinew goes on wet and the bow is not finished until it has dried, which is weeks. Nobody makes one in a hurry and nobody makes their first one alone.",
+      "source_index": 82,
+      "taught_by": [
+        "npc_anu"
+      ]
     }
   ],
   "vehicles": [
@@ -5221,6 +5265,10 @@
       "item_guggul_pill": [
         "heal",
         "trade"
+      ],
+      "item_sinew_bow": [
+        "cut",
+        "deter"
       ]
     }
   }
