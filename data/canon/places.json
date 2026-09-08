@@ -1386,7 +1386,6 @@
       "type": "npc",
       "name": "Anu",
       "role": "hunter",
-      "pronoun": "they",
       "found_at": [
         "poi_nomad_ground",
         "poi_vedda_ford",
@@ -1432,7 +1431,8 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "**A hunter who mostly does not hunt**, which is the only version of this that fits the game around it. Every weapon in canon affords `cut` and `deter` and nothing anywhere affords killing -- the sling note says the record has slings keeping birds off a crop far more often than doing anything else. Anu works the same way: walks ahead of the herd, is seen, and the thing goes elsewhere.\n\nThey also carry an answer the materials layer needs and nobody on these maps was asked for. Canon has goat hide, croc hide, sinew, boar tusk and leviathan bone, all `won_from` a living animal, and the game hands them over with the same gesture that cuts a reed. Anu is where a player finds out what that involves: one animal, the one that was going to die anyway, and nothing left behind.\n\nAntler is the line that matters. Shed each year and gathered off the ground, costing nothing but the walking -- canon says precisely that on `material_deer_antler`, and Anu has clearly noticed.\n\nTakes `they`, which the pronoun field admits and is not a fallback for unstated. Anu walks ahead of Terke's herd and belongs to the same high-country people."
+      "notes": "**A hunter who mostly does not hunt**, which is the only version of this that fits the game around it. Every weapon in canon affords `cut` and `deter` and nothing anywhere affords killing -- the sling note says the record has slings keeping birds off a crop far more often than doing anything else. Anu works the same way: walks ahead of the herd, is seen, and the thing goes elsewhere.\n\nThey also carry an answer the materials layer needs and nobody on these maps was asked for. Canon has goat hide, croc hide, sinew, boar tusk and leviathan bone, all `won_from` a living animal, and the game hands them over with the same gesture that cuts a reed. Anu is where a player finds out what that involves: one animal, the one that was going to die anyway, and nothing left behind.\n\nAntler is the line that matters. Shed each year and gathered off the ground, costing nothing but the walking -- canon says precisely that on `material_deer_antler`, and Anu has clearly noticed.\n\nWalks ahead of Terke's herd and belongs to the same high-country people.",
+      "sex": "male"
     },
     {
       "id": "npc_bekh",
@@ -1510,7 +1510,7 @@
       "descended_from": [
         "character_kavik"
       ],
-      "pronoun": "she"
+      "sex": "female"
     },
     {
       "id": "npc_dala",
@@ -1552,7 +1552,7 @@
         "epoch_post_cataclysm"
       ],
       "notes": "**The trace, given a face.** Canon puts the Mask Family schism and the hidden sanctuary in these ranges, and none of that is on stage -- Sira, Meera and Thren are four hundred years of backstory and this map is one afternoon.\n\nSo the player meets somebody who keeps the wall and does not know why, in the third generation of not knowing why. Dala answers every question honestly and the answers do not add up to anything, which is the point: the ground remembers and the people have agreed not to. Nothing Dala says can be pushed past.",
-      "pronoun": "he"
+      "sex": "male"
     },
     {
       "id": "npc_hesh",
@@ -1606,7 +1606,7 @@
         "epoch_post_cataclysm"
       ],
       "notes": "Keeps the line and does not explain it, which is the map in one person. Hesh knows the mechanism exactly -- the ore wants to be up -- and has no more curiosity about it than a ferryman has about buoyancy. That is the counterweight to a traveller who writes everything down.\n\nSays nothing at all about the Kept Stones. That silence is deliberate and is not gated on any discovery: asking Hesh about the wall gets you the timetable.",
-      "pronoun": "she"
+      "sex": "female"
     },
     {
       "id": "npc_ila",
@@ -1655,7 +1655,7 @@
         "epoch_post_cataclysm"
       ],
       "notes": "**The apothecary thread, given somebody to say it.** The brief for this map asked that a player learn how apothecary works and how it rebuilds -- and the atelier said soil samples and seed trays, which is agriculture. Ila is the half that was missing: physic first because sick people cannot wait for a harvest, then grass because grass holds a slope, then food.\n\nAn apprentice rather than Guyuk herself. Canon has the Seed-Gleaner aboard the Survival Train in `event_survival_train_solarpunk`, and a workshop nobody is currently in is the stronger image for this map anyway. Ila keeps it, plants what Guyuk sends, and writes down what comes up -- which is mostly nothing, and the nothing is the data.\n\nShe is at the rail-head as well as the bench, because that is where the soil arrives and where the letters go.",
-      "pronoun": "she"
+      "sex": "female"
     },
     {
       "id": "npc_marn",
@@ -1716,7 +1716,7 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "pronoun": "he"
+      "sex": "male"
     },
     {
       "id": "npc_odri",
@@ -1756,7 +1756,7 @@
         "epoch_post_cataclysm"
       ],
       "notes": "Knows the Age of Machinery from the wrong end -- as a source of good metal -- which is the honest way a person in a forest would know it. Odri has better evidence about the era than any scholar on the map and no framework to put it in, and is entirely content with that.",
-      "pronoun": "she"
+      "sex": "female"
     },
     {
       "id": "npc_okhi",
@@ -1815,7 +1815,7 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "pronoun": "she"
+      "sex": "female"
     },
     {
       "id": "npc_pell",
@@ -1875,7 +1875,7 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "pronoun": "he"
+      "sex": "male"
     },
     {
       "id": "npc_sesh",
@@ -1915,7 +1915,7 @@
         "epoch_post_cataclysm"
       ],
       "notes": "Dwarka's local knowledge being simply right, which is that map's thesis. Sesh has the observation exactly and no theory, and the one thing Sesh notices about visitors is which of them bother to walk to both sites.",
-      "pronoun": "he"
+      "sex": "male"
     },
     {
       "id": "npc_sura",
@@ -1976,7 +1976,7 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "pronoun": "she"
+      "sex": "female"
     },
     {
       "id": "npc_terke",
@@ -2016,7 +2016,7 @@
         "epoch_post_cataclysm"
       ],
       "notes": "The living end of the map's oldest thread. Terke fords where the Vedda forded and has no interest in the line at all -- not hostility, just a different set of needs. Animals, water, no timetable.\n\nSays nothing about the Age of Machinery because it is not a thing that happened to them.",
-      "pronoun": "she"
+      "sex": "female"
     },
     {
       "id": "npc_thrali",
@@ -2085,7 +2085,7 @@
         "epoch_post_cataclysm"
       ],
       "notes": "Delta fisher, Kia by descent, half his grandfather's vocabulary lost. Gives the opening hook and is the first person the player can materially help. Would settle -- he has nothing holding him here but the fishing.",
-      "pronoun": "he"
+      "sex": "male"
     },
     {
       "id": "npc_uma",
@@ -2142,7 +2142,7 @@
         "epoch_post_cataclysm"
       ],
       "notes": "Keeps the camp's roofs on. The smallest possible help, and deliberately the first one available: the player learns that knowing when to cut a reed counts as helping.",
-      "pronoun": "she"
+      "sex": "female"
     },
     {
       "id": "npc_vessa",
@@ -2193,7 +2193,7 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "pronoun": "she"
+      "sex": "female"
     }
   ],
   "biomes": [
