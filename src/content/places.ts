@@ -132,6 +132,14 @@ export interface Npc {
   id: string;
   name: string;
   role: string;
+  /**
+   * Which pronoun this person takes, or null where canon has not said.
+   *
+   * Canon carried these implicitly in prose -- Pell's son, Uma's life -- which meant reading a
+   * discovery to find out and left the six people added later with no answer at all. Stated in
+   * canon now, because a portrait has to draw somebody.
+   */
+  pronoun: 'he' | 'she' | 'they' | null;
   foundAt: string[];
   /** Whether they would join the settlement at the end, having been helped. */
   wouldSettle: boolean;
@@ -155,7 +163,7 @@ interface RawPoi {
   ruin_of?: string;
 }
 interface RawNpc {
-  id: string; name: string; role?: string; found_at?: string[]; would_settle?: boolean;
+  id: string; name: string; role?: string; pronoun?: string; found_at?: string[]; would_settle?: boolean;
   language?: string; knows?: string[];
   lines?: { text: string; requires?: string[]; gives?: string[]; costs?: string }[];
 }
@@ -205,6 +213,7 @@ export const npcs: Npc[] = raw.npcs.map((n) => ({
   id: n.id,
   name: n.name,
   role: n.role ?? '',
+  pronoun: (n.pronoun ?? null) as 'he' | 'she' | 'they' | null,
   foundAt: n.found_at ?? [],
   wouldSettle: n.would_settle === true,
   language: n.language ?? '',

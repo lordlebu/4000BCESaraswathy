@@ -99,7 +99,14 @@ const TOOLS: [string[], string][] = [
   // An apothecary's mortar with the pestle standing in it. Ila grinds physic at a bench in a
   // glasshouse, and the mortar is the one tool that says medicine rather than cooking -- a bowl
   // this heavy is for breaking bark and seed, not for stirring.
-  [['apothecary'], 'M22 6l-3 6M16 13h8v2a4 4 0 0 1-8 0zM17 21h6']
+  [['apothecary'], 'M22 6l-3 6M16 13h8v2a4 4 0 0 1-8 0zM17 21h6'],
+  // A stonewaller's block, held against the hip the way a heavy thing is carried rather than
+  // lifted. Dala used to share Pell's broom by sharing the words "wall-keeper", and they are not
+  // the same job: Pell sweeps a gate, Dala puts stones back on a wall around nothing.
+  [['stonewaller'], 'M15 14h10v6H15zM15 17h10M20 14v3M17.5 17v3M22.5 17v3'],
+  // A drover's goad and a coil of rope. Terke moves animals across a ford, which is a trade
+  // rather than the way of life "nomad" named -- and a goad is what the job looks like in a hand.
+  [['drover'], 'M17 21L23 7M15 12a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0M16.5 12h3']
 ];
 
 /** The tool for a role, or null for a person whose trade has no drawing yet. */
