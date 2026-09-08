@@ -13,7 +13,7 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { canBoardAt, railSpan, shoreheads, trackRoute } from '../src/world/crossing';
 import { band } from '../src/world/classify';
-import { planCliffs, planTrack } from '../src/game/scenePlan';
+import { planCliffs, planIslandShadow, planTrack } from '../src/game/scenePlan';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
@@ -64,6 +64,39 @@ describe('the Aravali crossing', () => {
     // rows each with 8 between them, so the gap was smaller than either island. It is now wider
     // than an island is tall, which is what "two islands" has to mean on screen.
     expect(gap, 'the islands are not far enough apart to read as two').toBeGreaterThan(9);
+  });
+
+  it('casts a shadow on the water, so the islands read as floating', () => {
+    // **The one thing that says the island is not simply an island.** Grass to the edge, a rock
+    // face under the lip, cliffs along the joint -- all of that is equally true of a sea stack.
+    // What separates them is that light gets under one of them.
+    const world = aravali();
+    const shadow = planIslandShadow(world);
+    expect(shadow.length, 'the islands cast no shadow').toBeGreaterThan(30);
+
+    for (const tile of shadow) {
+      expect(
+        world.tiles[tile.y]![tile.x]!.biome,
+        `shadow at ${tile.x},${tile.y} is not on open water`
+      ).toBe('sea');
+      // Something of the island is above it, within reach.
+      const above = [1, 2, 3, 4].some((up) => {
+        const biome = world.tiles[tile.y - up]?.[tile.x]?.biome;
+        return biome === 'sky_island' || biome === 'sky_underside';
+      });
+      expect(above, `shadow at ${tile.x},${tile.y} has nothing above it`).toBe(true);
+      expect(tile.alpha!, 'a shadow with no darkness in it').toBeGreaterThan(0);
+      expect(tile.alpha!, 'the shadow is opaque').toBeLessThan(0.5);
+    }
+
+    // And nowhere else: three of the four maps have no islands, so nothing hangs over their water.
+    for (const map of fieldMaps) {
+      if (map.id === 'field_map_aravali') continue;
+      expect(
+        planIslandShadow(buildFieldMap(map, {}).world).length,
+        `${map.id} has shadows without islands`
+      ).toBe(0);
+    }
   });
 
   it('lays one railway, not several side by side', () => {
