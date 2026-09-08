@@ -15,13 +15,23 @@ import { step } from './walk';
  * indexing into the candidate list. A searched seed is a fixture and goes stale like one, though
  * far less often now: see the note in `fielddiary.spec.ts` for what changed.
  *
+ * Stale a third time when `terrainBias` began reading canon's `terrain` list in the order canon
+ * writes it rather than as an unordered set. The dockyard's first-choice ground is `wetland`, so
+ * on `dock-5226` it moved from 35,41 to 6,23 and these specs walked two steps into empty marsh.
+ * That is the fixture doing its job -- the placement is better and the pin was out of date -- and
+ * it is exactly the failure mode the note above describes. `dock-8` puts it at 9,42 on open plains.
+ *
+ * `dock-9` was tried first and came back **flaky in the container** -- three of five passing
+ * only on retry. Its start tile is in a river, and the two are not interchangeable to the
+ * walk. Cheap to find because `tools/ci-local.sh` runs the real image; invisible from a log.
+ *
  * Thrali stands there and offers the silver-water question, and the water itself is found
  * there — so one place holds the whole loop: hear the question, look at the thing, settle.
  * Opened at midnight because the bloom only shows at night, which is the point of that rung.
  */
-const SEED = 'dock-5226';
-// Two tiles north of poi_drowned_dockyard at (35,41), so the two ArrowDowns still walk.
-const AT_NIGHT = `/?seed=${SEED}&hour=0&at=35,39`;
+const SEED = 'dock-8';
+// Two tiles north of poi_drowned_dockyard at (9,42), so the two ArrowDowns still walk.
+const AT_NIGHT = `/?seed=${SEED}&hour=0&at=9,40`;
 
 async function boot(page: Page) {
   await page.goto(AT_NIGHT);
