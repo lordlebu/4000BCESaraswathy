@@ -237,6 +237,11 @@ describe('the destination stands on its own ground', () => {
 });
 
 describe('every map has ground that is not all one thing', () => {
+  /** The same world `mix` counts, built the same way, so the two never disagree. */
+  function build(mapId: string) {
+    return buildFieldMap(fieldMaps.find((m) => m.id === mapId)!, {});
+  }
+
   /** How much of a built map each biome covers, as a fraction. */
   function mix(mapId: string): Map<string, number> {
     const map = fieldMaps.find((m) => m.id === mapId)!;
@@ -331,12 +336,54 @@ describe('every map has ground that is not all one thing', () => {
     // becoming something else. `classifyBiome` now takes the palette, so there is nothing to
     // repair.
     //
-    // `landmark` is the one exception and is stamped deliberately: it is the destination of the
-    // journey, it is authored rather than classified, and no palette lists it.
+    // `landmark` is stamped deliberately: it is the destination of the journey, it is authored
+    // rather than classified, and no palette lists it.
+    //
+    // **A camp is the second of these, and it is the same kind of exception rather than a new
+    // one.** The Aravali has no town -- canon does not put `settlement` in its palette, correctly,
+    // because the people on that map are all passing through -- and a household that stops for the
+    // night is a *place*, stamped after classification exactly like the landmark and the islands.
+    // The felt goes down on `settlement` ground because that is what earns it tents and a name.
+    //
+    // So the exception is allowed only where a camp was actually pitched, and the next assertion
+    // pins it to the camp's own footprint. Blanket-allowing `settlement` everywhere would let the
+    // ruined-city patch back onto a map that has no city in it, which is the bug this pair exists
+    // to catch.
     for (const map of fieldMaps) {
+      const world = build(map.id).world;
       const allowed = new Set<string>([...map.seedBiomes, 'landmark']);
+      if (world.camp) allowed.add('settlement');
       const stray = [...mix(map.id).keys()].filter((biome) => !allowed.has(biome));
       expect(stray, `${map.id} generated ${stray.join(', ')}, which is not in its palette`).toEqual([]);
+    }
+  });
+
+  it('puts no town on a map canon gave no town to', () => {
+    // The Aravali grew a ruined city in the far south, clipped by the map edge and straddling the
+    // railway, and named it -- at 57,22, which is open sea. Nothing in canon has ever mentioned a
+    // settlement on that map. `settlement` was in its `seed_biomes`, and `applyPalette` grows a
+    // patch wherever that word appears.
+    //
+    // The only felt allowed on it is the nomad camp's, and it must be exactly the camp.
+    // **Across seeds, because one seed proves nothing here.** The patch centre is a hash, so on
+    // any given seed it may land inside the strait and be painted over by water before anyone
+    // sees it. Deleting the guard in `applyPalette` and running the default seed produced a clean
+    // map and a passing test; the city was there and the sea had swallowed it. Eight seeds is
+    // enough that a hash cannot hide a patch a twelfth of the map across in all of them.
+    const map = fieldMaps.find((m) => m.id === 'field_map_aravali')!;
+    for (const seed of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']) {
+      const world = buildFieldMap(map, { seed }).world;
+      expect(world.settlement, `${seed}: a map with no town still named one`).toBeNull();
+
+      const felt = world.tiles.flat().filter((t) => t.biome === 'settlement');
+      expect(world.camp, `${seed}: the nomad ground got no tents`).not.toBeNull();
+      for (const tile of felt) {
+        const away = Math.abs(tile.x - world.camp!.at.x) + Math.abs(tile.y - world.camp!.at.y);
+        expect(
+          away,
+          `${seed}: settlement at ${tile.x},${tile.y} is not part of the camp`
+        ).toBeLessThanOrEqual(world.camp!.radius);
+      }
     }
   });
 

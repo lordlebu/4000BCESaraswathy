@@ -60,7 +60,43 @@ describe('the Aravali crossing', () => {
     expect(longer / shorter, 'one island is much bigger than the other').toBeLessThan(1.5);
 
     const gap = south[0]! - north[north.length - 1]! - 1;
-    expect(gap, 'the islands are not far enough apart to read as two').toBeGreaterThan(5);
+    // Raised from 5. At 8 the pair read as one shape with a nick in it -- the islands were 11
+    // rows each with 8 between them, so the gap was smaller than either island. It is now wider
+    // than an island is tall, which is what "two islands" has to mean on screen.
+    expect(gap, 'the islands are not far enough apart to read as two').toBeGreaterThan(9);
+  });
+
+  it('never lays rail past the last ground at either end', () => {
+    // **The line ran off the map, and nothing asked.** `stampLine` sets the flag down the full
+    // height so it meets land wherever the coast falls, and beyond the coast it went on setting it
+    // across open sea to row 0 and row 63 -- fifteen tiles of railway over the ocean, drawn,
+    // leading nowhere.
+    //
+    // `trackRoute` trimmed exactly this, which is what hid it: every test asked about the *route*,
+    // so a train would never have appeared out of the water, and meanwhile `planTrack` read the
+    // untrimmed flag and drew rails there. Two readings of one flag, one of them trimmed.
+    //
+    // Across seeds, because where the coast falls is a function of the seed.
+    const map = fieldMaps.find((m) => m.id === 'field_map_aravali')!;
+    for (const seed of ['a', 'b', 'c', 'd', 'e']) {
+      const world = buildFieldMap(map, { seed }).world;
+      const columns = new Map<number, number[]>();
+      for (const tile of world.tiles.flat()) {
+        if (!tile.track) continue;
+        columns.set(tile.x, [...(columns.get(tile.x) ?? []), tile.y]);
+      }
+      expect(columns.size, `${seed}: no line was laid at all`).toBeGreaterThan(0);
+
+      for (const [x, ys] of columns) {
+        for (const end of [Math.min(...ys), Math.max(...ys)]) {
+          const biome = world.tiles[end]![x]!.biome;
+          expect(
+            biome === 'sea' || biome === 'sky_underside',
+            `${seed}: the line ends at ${x},${end} over ${biome}, with nothing under it`
+          ).toBe(false);
+        }
+      }
+    }
   });
 
   /**
@@ -76,7 +112,23 @@ describe('the Aravali crossing', () => {
       if (tile.biome !== 'sky_island' && tile.biome !== 'sky_underside') continue;
       expect(band(tile.elevation), `${tile.x},${tile.y} is at sea level`).toBeGreaterThan(0);
     }
-    expect(planCliffs(world).length, 'the islands have no cliff faces').toBeGreaterThan(20);
+    // **Counted on the islands, which the old assertion did not do.** It measured
+    // `planCliffs(world).length` -- every cliff anywhere on the map -- and passed at over twenty
+    // while the islands had none at all. The mainland's own height steps were carrying it. When
+    // the strait widened there was less mainland, the number fell to 1, and only then did it
+    // become visible that the thing the test is named for had never been true.
+    //
+    // It could not have been: the top and its rim were both at 0.75, and `cliffAt` needs one band
+    // over its neighbour and refuses to draw against water. Equal-to-equal and against-sea were
+    // the only two edges an island had.
+    const sky = new Set(
+      world.tiles
+        .flat()
+        .filter((t) => t.biome === 'sky_island' || t.biome === 'sky_underside')
+        .map((t) => `${t.x},${t.y}`)
+    );
+    const onTheIslands = planCliffs(world).filter((c) => sky.has(`${c.x},${c.y}`));
+    expect(onTheIslands.length, 'the islands have no cliff faces of their own').toBeGreaterThan(20);
   });
 
   /**

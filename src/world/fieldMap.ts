@@ -11,10 +11,10 @@
 // Free of React and Phaser, like everything in `world/`, so the tests exercise what ships.
 
 import { band } from './classify';
-import { stampCamp, stampTableland } from './tableland';
-import { stampIslands, stampLine, stampStrait, startOnTheSouthernShore } from './crossing';
+import { stampCamp, stampHighCamp, stampTableland } from './tableland';
+import { stampIslands, stampLine, stampStrait, startOnTheSouthernShore, trackRoute } from './crossing';
 import { easeRoutes, tourOrder } from './routes';
-import { generateWorld } from './generate';
+import { generateWorld, isWalkable } from './generate';
 import { tileHash } from './rng';
 import type { BiomeId, Point, Tile, World } from './types';
 import { type FieldMap, type PointOfInterest, poisOn } from '../content/places';
@@ -39,6 +39,9 @@ export interface FieldMapWorld {
  * A point with no `terrain` accepts anywhere walkable — that is the honest reading of
  * canon staying quiet, rather than a reason to drop it.
  */
+/** Ground that only exists on a crossing, and that a fallback must never hand out. */
+const SKY: ReadonlySet<BiomeId> = new Set<BiomeId>(['sky_island', 'sky_underside']);
+
 function suitable(tile: Tile, poi: PointOfInterest, walkable: Set<BiomeId>): boolean {
   if (!walkable.has(tile.biome)) return false;
   return poi.terrain.length === 0 || poi.terrain.includes(tile.biome);
@@ -117,7 +120,32 @@ function applyPalette(world: World, palette: Set<BiomeId>): void {
     .map((r) => ({ ...r, path: r.path.filter((p) => world.tiles[p.y]?.[p.x]?.biome === 'river') }))
     .filter((r) => r.path.length >= 2);
 
-  if (!palette.has('settlement')) return;
+  if (!palette.has('settlement')) {
+    // **And the record goes with the ground.** `placeSettlement` picks a tile and names it before
+    // the palette is ever consulted, so on a map with no town the name survived with nothing under
+    // it -- the Aravali carried a settlement called Halghat at 57,22, which is open sea, and the
+    // journal was ready to announce that the traveller had set out from it.
+    world.settlement = null;
+
+    // **And the tile it was naming.** `placeSettlement` runs in the generator, before any palette
+    // is consulted, and stamps one tile `settlement` to be the village. Clearing the record left
+    // that tile standing: a single square of village ground with a hut drawn on it, in the middle
+    // of a map that has no village, and the multi-seed guard found it on the third seed it tried.
+    //
+    // Filled from whatever is around it, because that is what would have been there. There is only
+    // ever one such tile, so its neighbours are ordinary country.
+    for (const tile of world.tiles.flat()) {
+      if (tile.biome !== 'settlement') continue;
+      const around = [
+        world.tiles[tile.y - 1]?.[tile.x],
+        world.tiles[tile.y + 1]?.[tile.x],
+        world.tiles[tile.y]?.[tile.x - 1],
+        world.tiles[tile.y]?.[tile.x + 1]
+      ].filter((t): t is Tile => !!t && t.biome !== 'settlement' && palette.has(t.biome));
+      if (around.length > 0) tile.biome = around[0]!.biome;
+    }
+    return;
+  }
 
   // A ruined city, in tiles. Small enough to walk out of, large enough to hold its own
   // landmarks -- roughly a twelfth of the map across.
@@ -222,13 +250,50 @@ function pick(
  */
 function shoreBias(world: World, poi: PointOfInterest, at: Point): number {
   if (poi.shore === 'either') return 1;
+  const middle = middleOfTheWater(world);
+  if (middle === null) return 1;
+  return (poi.shore === 'near') === at.y > middle ? 4 : 0.25;
+}
+
+/**
+ * The row the water is centred on, or null on a map with no water.
+ *
+ * Cached per world because `shoreBias` is called once per candidate tile and this walks all four
+ * thousand of them. A world's sea is settled long before placement runs -- the strait, the islands
+ * and the line are all stamped first -- so there is nothing to invalidate.
+ */
+const waterMiddle = new WeakMap<World, { row: number | null }>();
+function middleOfTheWater(world: World): number | null {
+  const cached = waterMiddle.get(world);
+  if (cached) return cached.row;
+  const water = world.tiles.flat().filter((t) => t.biome === 'sea');
   // A crossing is a map with a strait in it. Without one there is no near and no far, so canon's
   // opinion is simply not applicable rather than wrong.
-  const water = world.tiles.flat().filter((t) => t.biome === 'sea');
-  if (water.length === 0) return 1;
-  const middle = water.reduce((sum, t) => sum + t.y, 0) / water.length;
-  const near = at.y > middle;
-  return (poi.shore === 'near') === near ? 4 : 0.25;
+  const row = water.length === 0 ? null : water.reduce((sum, t) => sum + t.y, 0) / water.length;
+  waterMiddle.set(world, { row });
+  return row;
+}
+
+/**
+ * Whether this tile is on the side of the water canon puts the place on.
+ *
+ * **A filter, where `shoreBias` is only a weight -- and the difference is which of canon's two
+ * opinions gives way first.** A place says what ground it wants (`terrain`) and which side of the
+ * water it is on (`shore`), and when a map cannot satisfy both, one has to lose.
+ *
+ * It should be the ground. The Kept Stones wants hills and stands on the far shore; the far shore
+ * of the Aravali has no hills on it, so with both as weights the place crossed the sea to find
+ * some and ended up at 51,51 -- in Jambhudweepa, on the shore the player starts on, when the whole
+ * point of it is that it is over there. Being on the wrong ground is a place that reads slightly
+ * off. Being on the wrong shore is a different place.
+ *
+ * Only the Aravali says anything but `either`, so on the other three maps this is not reached.
+ */
+function onTheRightShore(world: World, poi: PointOfInterest, at: Point): boolean {
+  if (poi.shore === 'either') return true;
+  const middle = middleOfTheWater(world);
+  if (middle === null) return true;
+  return (poi.shore === 'near') === at.y > middle;
 }
 
 function heightBias(world: World, poi: PointOfInterest, at: Point): number {
@@ -252,7 +317,8 @@ function placeOne(
   const crowded = (at: Point) =>
     taken.some((t) => Math.abs(t.x - at.x) + Math.abs(t.y - at.y) < minDistance);
 
-  const exact = gather(world, (t) => suitable(t, poi, walkable));
+  const rightShore = (t: Tile) => onTheRightShore(world, poi, t);
+  const exact = gather(world, (t) => suitable(t, poi, walkable) && rightShore(t));
 
   // Best case: the terrain canon asked for, with room around it.
   const spaced = pick(world, poi, exact, crowded);
@@ -268,7 +334,37 @@ function placeOne(
   // village in it. Widening to the field map's own palette keeps the place on ground the
   // map is made of rather than dropping it, and `unplaced` stays meaningful for the case
   // where even that fails.
-  const anywhereOnTheMap = gather(world, (t) => palette.has(t.biome));
+  //
+  // **Still ground, though.** A palette is a list of what the country is *made of* and `sea` is in
+  // three of the four, so "anywhere in the palette" included open water -- and it put The Kept
+  // Stones at 58,28 on the Aravali, which is a quarter mile out in the Shattered Sea. It surfaced
+  // when the strait widened and took the far shore's high ground with it, but the fault was
+  // always here: the last resort had no floor under it. `isWalkable` is the game's one answer to
+  // what a person can stand on, and it is the same one `reachableFrom` walks by.
+  //
+  // **And not in the sky, unless canon asked for the sky.** The islands are the most distinctive
+  // ground on the only map that has any, and a fallback is by definition placing something that
+  // did not get what it wanted -- so it must not hand out the one ground a player will read as
+  // deliberate. The Kept Stones wants hills and the far shore has none once the strait is at its
+  // full width, so it fell through to here and landed on the northern island, on the railway,
+  // beside the two places that are *supposed* to be up there.
+  // **Walkable is not the same as ground, and the railway is the difference.** `isWalkable` says
+  // yes to a track tile whatever is under it -- that is the whole point of the line -- so a
+  // fallback filtered on it put The Kept Stones at 32,26, standing on the rails a dozen rows out
+  // over open sea. Asking the same rule with the track taken away is asking "is there anything
+  // here to stand on", which is the actual question.
+  const ground = (t: Tile) =>
+    palette.has(t.biome) &&
+    isWalkable({ biome: t.biome, track: false }) &&
+    (!SKY.has(t.biome) || poi.terrain.includes(t.biome));
+
+  // **The ground gives way before the shore does.** See `onTheRightShore`: which side of the
+  // water a place is on is a fact about which country it is in, and no amount of correct soil
+  // makes up for being in the wrong one.
+  const overThere = pick(world, poi, gather(world, (t) => ground(t) && rightShore(t)), occupied);
+  if (overThere) return overThere;
+
+  const anywhereOnTheMap = gather(world, ground);
   return pick(world, poi, anywhereOnTheMap, occupied);
 }
 
@@ -350,8 +446,36 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // tile is excluded on the same terms as a tile another place is standing on.
   const taken: Point[] = [world.start];
 
+  // **Places the line decides, rather than the terrain.**
+  //
+  // The Rail-Head is "where the line comes ashore", and scoring tiles by biome cannot express
+  // that: its canon terrain is coast and plains, which is most of the near shore, so it landed at
+  // 61,50 -- twenty-eight tiles along the beach from the rail it is named after, on a map whose
+  // whole subject is the crossing. A player who starts beside the line walks *away* from it to
+  // reach the place for boarding.
+  //
+  // So it is anchored, the same way the High Camp is anchored to canon's tile and the traveller is
+  // anchored to the line's own column. Canon says which shore; the line says which tile on it.
+  const anchors = new Map<string, Point>();
+  const line = trackRoute(world);
+  if (line.length > 0) {
+    // North to south, so the near end is last. Beside the rails rather than on them: a player
+    // standing on the line cannot see it.
+    const ashore = line[line.length - 1]!;
+    const beside = [
+      { x: ashore.x - 2, y: ashore.y },
+      { x: ashore.x + 2, y: ashore.y },
+      { x: ashore.x - 2, y: ashore.y - 1 },
+      { x: ashore.x + 2, y: ashore.y - 1 }
+    ].find((p) => {
+      const tile = world.tiles[p.y]?.[p.x];
+      return !!tile && !tile.track && isWalkable(tile) && !(p.x === world.start.x && p.y === world.start.y);
+    });
+    if (beside) anchors.set('poi_rail_head', beside);
+  }
+
   for (const poi of poisOn(fieldMap.id)) {
-    const at = placeOne(world, poi, walkable, palette, taken, spacing);
+    const at = anchors.get(poi.id) ?? placeOne(world, poi, walkable, palette, taken, spacing);
     if (at) {
       placed.push({ poi, at });
       taken.push(at);
@@ -371,7 +495,23 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // where the content landed. An earlier version guessed a spot beside a drift, and then anchored
   // to the terraces; canon naming the place settles it properly.
   const highCamp = placed.find((p) => p.poi.id === 'poi_high_camp');
-  stampCamp(world, palette, highCamp?.at ?? null);
+  stampHighCamp(world, highCamp?.at ?? null);
+
+  // The Nomad Ground on the Aravali, which had no tents on it at all.
+  //
+  // The same felt as the High Camp and the same people -- canon has Terke's herd on both maps --
+  // but the ground rule is this map's. A crossing is walked in bands, and the two things a tent
+  // must not stand on here are the water and the railway.
+  //
+  // It got nothing for as long as `stampCamp` asked whether `settlement` was in the palette: the
+  // Aravali has no town in it, correctly, and so the one household that *does* stop here was
+  // refused on a question about cities. See `stampCamp`.
+  const nomadGround = placed.find((p) => p.poi.id === 'poi_nomad_ground');
+  stampCamp(
+    world,
+    nomadGround?.at ?? null,
+    (tile) => tile.biome !== 'sea' && tile.biome !== 'sky_underside' && !tile.track
+  );
 
   // Ease the ground between the places, now that we know where they ended up.
   //
