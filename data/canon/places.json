@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.12.1",
+  "canon_version": "2.13.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -748,6 +748,9 @@
       "notes": "The first floating island a player stands on, and the map's teaching moment: the inverted water is right there at the rim, and nothing explains it. Canon does -- lodestone cores of Permian-irradiated ore, a legacy of the shattering of Gondwana -- but nobody on this map says so, because nobody on this map knows.",
       "epochs": [
         "epoch_post_cataclysm"
+      ],
+      "npcs": [
+        "npc_hesh"
       ]
     },
     {
@@ -926,6 +929,9 @@
       "notes": "**The trace, and the whole thesis of the map.** Canon puts the Mask Family schism, the Jharwa massacre and the hidden sanctuary of Vara-Ma, Orek and Thren in these ranges. None of that is on stage: Sira and Thren are four hundred years of backstory and this is one afternoon's walking, so the archive's rule holds -- deep-lore figures reach a player as traces.\n\nWhat the player gets is a wall in good repair around an empty hollow, and the fact that somebody is still keeping it. They never learn what happened here. They learn that something did, and that it is not over.",
       "epochs": [
         "epoch_post_cataclysm"
+      ],
+      "npcs": [
+        "npc_dala"
       ]
     },
     {
@@ -1129,6 +1135,9 @@
       "notes": "The arrival, and the map's one ordinary place. Everything else here is strange -- ore that holds a hill in the air, rain that falls upward, a sanctuary nobody will name -- so the map needs one spot where the strangeness is somebody else's and the business at hand is a timetable.\n\nIt is a settlement rather than a travel_node because people live here; the line is a thing that happens to them.",
       "epochs": [
         "epoch_post_cataclysm"
+      ],
+      "npcs": [
+        "npc_hesh"
       ]
     },
     {
@@ -1431,6 +1440,100 @@
       "descended_from": [
         "character_kavik"
       ]
+    },
+    {
+      "id": "npc_dala",
+      "type": "npc",
+      "name": "Dala",
+      "role": "wall-keeper",
+      "found_at": [
+        "poi_kept_stones"
+      ],
+      "language": "kia",
+      "would_settle": false,
+      "knows": [
+        "discovery_the_kept_wall"
+      ],
+      "lines": [
+        {
+          "text": "You have come a long way off the path."
+        },
+        {
+          "text": "It is a wall. It falls down. I put it back. That is the whole of it.",
+          "gives": [
+            "discovery_the_kept_wall"
+          ]
+        },
+        {
+          "text": "There is nothing in there. I have not been in there. My mother had not been in there.",
+          "requires": [
+            "discovery_the_kept_wall"
+          ]
+        },
+        {
+          "text": "You can write it down. Everybody writes it down. The stones do not mind.",
+          "requires": [
+            "discovery_the_kept_wall"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "**The trace, given a face.** Canon puts the Mask Family schism and the hidden sanctuary in these ranges, and none of that is on stage -- Sira, Meera and Thren are four hundred years of backstory and this map is one afternoon.\n\nSo the player meets somebody who keeps the wall and does not know why, in the third generation of not knowing why. Dala answers every question honestly and the answers do not add up to anything, which is the point: the ground remembers and the people have agreed not to. Nothing Dala says can be pushed past."
+    },
+    {
+      "id": "npc_hesh",
+      "type": "npc",
+      "name": "Hesh",
+      "role": "line-keeper",
+      "found_at": [
+        "poi_rail_head",
+        "poi_first_pier"
+      ],
+      "language": "kia",
+      "would_settle": false,
+      "knows": [
+        "discovery_the_line_that_floats",
+        "discovery_the_ore_that_lifts",
+        "discovery_the_strait_narrows"
+      ],
+      "lines": [
+        {
+          "text": "It runs when it runs. Sit down. You are not the first person to think looking at it will help."
+        },
+        {
+          "text": "No, it does not touch. Hand's width, whole way over. You get used to the quiet or you walk, and there is no walking.",
+          "gives": [
+            "discovery_the_line_that_floats"
+          ]
+        },
+        {
+          "text": "The black stuff under the rail is the same as the islands. Same rock. It wants to be up, so up is where it stays, and we lay iron on it and call that a road.",
+          "requires": [
+            "discovery_the_line_that_floats"
+          ],
+          "gives": [
+            "discovery_the_ore_that_lifts"
+          ]
+        },
+        {
+          "text": "Bolt holes and no bolts. My grandmother said her grandmother said it was built to come up again. Nobody has ever taken it up.",
+          "requires": [
+            "discovery_the_ore_that_lifts"
+          ]
+        },
+        {
+          "text": "Look at the two headlands. Same stone, same tilt, same courses. It was one hill. The middle of it is those two things hanging over the water, and you are about to ride across the gap where it broke.",
+          "requires": [
+            "discovery_the_strait_narrows"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "Keeps the line and does not explain it, which is the map in one person. Hesh knows the mechanism exactly -- the ore wants to be up -- and has no more curiosity about it than a ferryman has about buoyancy. That is the counterweight to a traveller who writes everything down.\n\nSays nothing at all about the Kept Stones. That silence is deliberate and is not gated on any discovery: asking Hesh about the wall gets you the timetable."
     },
     {
       "id": "npc_marn",

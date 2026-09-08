@@ -12,7 +12,8 @@
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { canBoardAt, trackRoute } from '../src/world/crossing';
-import { planTrack } from '../src/game/scenePlan';
+import { band } from '../src/world/classify';
+import { planCliffs, planTrack } from '../src/game/scenePlan';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
@@ -37,6 +38,60 @@ describe('the Aravali crossing', () => {
       if (sorted[i]! - sorted[i - 1]! > 1) gaps += 1;
     }
     expect(gaps, 'the two islands merged into one blob').toBe(1);
+
+    // **Two of a kind, and far apart.** The gap count alone passed while the runs were ten rows
+    // and four, one row apart -- a blob with a nick in it rather than a crossing. So this asserts
+    // the shape the earlier version got wrong: comparable islands, with real water between them.
+    const runs: number[][] = [];
+    let run = [sorted[0]!];
+    for (let i = 1; i < sorted.length; i += 1) {
+      if (sorted[i]! - sorted[i - 1]! === 1) run.push(sorted[i]!);
+      else {
+        runs.push(run);
+        run = [sorted[i]!];
+      }
+    }
+    runs.push(run);
+    expect(runs.length, 'not two islands').toBe(2);
+
+    const [north, south] = runs as [number[], number[]];
+    const shorter = Math.min(north.length, south.length);
+    const longer = Math.max(north.length, south.length);
+    expect(longer / shorter, 'one island is much bigger than the other').toBeLessThan(1.5);
+
+    const gap = south[0]! - north[north.length - 1]! - 1;
+    expect(gap, 'the islands are not far enough apart to read as two').toBeGreaterThan(5);
+  });
+
+  /**
+   * **The islands stand above the water, which is what earns them cliffs.**
+   *
+   * The stamp wrote biome and left elevation alone, so an island sat in band 0 -- at sea level as
+   * far as every height rule knew -- and `planCliffs` drew nothing at its rim. `cliffAt` wants one
+   * band over its neighbour, so this is the condition the whole look depends on.
+   */
+  it('stands the islands a band above the sea, and gives them cliffs', () => {
+    const world = aravali();
+    for (const tile of world.tiles.flat()) {
+      if (tile.biome !== 'sky_island' && tile.biome !== 'sky_underside') continue;
+      expect(band(tile.elevation), `${tile.x},${tile.y} is at sea level`).toBeGreaterThan(0);
+    }
+    expect(planCliffs(world).length, 'the islands have no cliff faces').toBeGreaterThan(20);
+  });
+
+  /**
+   * **The traveller starts on the shore they come from.**
+   *
+   * This function was called `startOnTheNearShore` and searched the *north* -- a name describing
+   * the thing it did not do. It passed every test because they asked whether the start was on
+   * land, and none asked which side of the water it was on. Measured, y=22 of 64: the far bank.
+   *
+   * Jambhudweepa is home and the arrival text calls the far side "a green smudge that is not
+   * Jambhudweepa", so walking north is walking away.
+   */
+  it('starts the traveller on the southern shore', () => {
+    const world = aravali();
+    expect(world.start.y, 'the traveller starts on the far bank').toBeGreaterThan(world.height / 2);
   });
 
   it('never puts an island on land', () => {

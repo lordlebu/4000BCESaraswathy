@@ -12,7 +12,7 @@
 
 import { band } from './classify';
 import { stampCamp, stampTableland } from './tableland';
-import { stampIslands, stampLine, stampStrait, startOnTheNearShore } from './crossing';
+import { stampIslands, stampLine, stampStrait, startOnTheSouthernShore } from './crossing';
 import { easeRoutes, tourOrder } from './routes';
 import { generateWorld } from './generate';
 import { tileHash } from './rng';
@@ -300,8 +300,8 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // cannot be reached at all.
   stampLine(world, palette, stampIslands(world, palette));
   // The strait is cut after the generator chose a start, so on a crossing that start can be left
-  // standing in open water. Only moves it when it actually is.
-  if (palette.has('sky_island')) startOnTheNearShore(world);
+  // standing in open water -- or, as it was, on the far shore. Only moves it when it must.
+  if (palette.has('sky_island')) startOnTheSouthernShore(world);
   const walkable = new Set<BiomeId>(
     world.tiles.flat().map((t) => t.biome).filter((b) => palette.has(b))
   );
