@@ -56,6 +56,9 @@ each is a fresh decision whenever somebody wants it, not a debt this programme o
 | **The shoreline pass** | item 4 | Reeds and foam on the *land* side of every water edge. Code, no art. |
 | **Fauna 21–40** | the plate queue | 20 painted of the 40 listed. Worth about 16% more encounters. Pure art, and the intake takes them whenever they arrive. |
 
+The shoreline pass has since been picked up: `docs/shoreline-plan.md` plans it as one stage of an
+embossed bank, and states why an emboss is not the dissolve this programme declined.
+
 ### Closed by a decision rather than by work
 
 Both of these were in the plan and are now settled the other way, which is not the same as being
