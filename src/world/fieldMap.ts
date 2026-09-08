@@ -13,6 +13,7 @@
 import { band } from './classify';
 import { stampCamp, stampHighCamp, stampTableland } from './tableland';
 import { shoreheads, stampIslands, stampLine, stampStrait, startOnTheSouthernShore } from './crossing';
+import { stampBasalt } from './basalt';
 import { easeRoutes, tourOrder } from './routes';
 import { generateWorld, isWalkable } from './generate';
 import { tileHash } from './rng';
@@ -174,6 +175,25 @@ function applyPalette(world: World, palette: Set<BiomeId>): void {
       if (tile) tile.biome = 'settlement';
     }
   }
+
+  // **And the record names the city that is actually here.**
+  //
+  // `placeSettlement` picks a tile in the generator, before any palette is consulted, and names
+  // it; this patch is then grown somewhere else entirely, from a different hash. So every map had
+  // two settlements -- a named point with nothing on it, and forty tiles of city with no name --
+  // and they were never in the same place. Measured across six seeds on Dwarka: one settlement
+  // tile in forty ever fell within a tile of the record.
+  //
+  // Nothing had noticed because nothing had asked. The journal reads the record for "you set out
+  // from Voshikoli" and the huts are drawn from the tiles, and neither one ever compares them. It
+  // surfaced when the basalt tried to lay itself under the city and put the rock twenty tiles from
+  // the streets.
+  //
+  // The name is kept -- it is the same seed and the same city -- and only the position is
+  // corrected, to the middle of the ground the city is standing on.
+  if (world.settlement) {
+    world.settlement = { ...world.settlement, x: cx, y: cy };
+  }
 }
 
 function gather(world: World, accept: (tile: Tile) => boolean): Point[] {
@@ -220,7 +240,8 @@ function pick(
     const score =
       tileHash(world.seed, at.x, at.y, `poi:${poi.id}`) *
       heightBias(world, poi, at) *
-      shoreBias(world, poi, at);
+      shoreBias(world, poi, at) *
+      terrainBias(world, poi, at);
     if (score > bestScore || (score === bestScore && best !== null && (at.y < best.y || (at.y === best.y && at.x < best.x)))) {
       best = at;
       bestScore = score;
@@ -309,6 +330,30 @@ function onTheRightShore(world: World, poi: PointOfInterest, at: Point): boolean
   const middle = middleOfTheWater(world);
   if (middle === null) return true;
   return (poi.shore === 'near') === at.y > middle;
+}
+
+/**
+ * How much a place wants the *first* ground canon named for it.
+ *
+ * **`terrain` is written in preference order and was being read as a set.** Canon says The Black
+ * Pavement stands on `["lava_field", "coast"]` and describes it as "the ground everything here is
+ * built on" -- it *is* the basalt. `suitable` only asks whether the tile's biome appears in the
+ * list at all, so once the pavement existed the place was equally happy on any coast tile on the
+ * map, and the hash put it on one: a place named for a rock, standing on sand, with the rock a
+ * dozen tiles away.
+ *
+ * The same reading fixes The Scale Shore, whose trackways are cut *into* the stone.
+ *
+ * A weight rather than a filter, on the pattern `heightBias` sets and for its stated reason: a
+ * map whose first-choice ground does not exist must still place the thing. Where the ground is
+ * there, this makes it overwhelmingly likely to win; where it is not, every candidate is scaled
+ * alike and the ordering is exactly what it was -- so the three maps with no `lava_field` in
+ * their palette cannot notice.
+ */
+function terrainBias(world: World, poi: PointOfInterest, at: Point): number {
+  if (poi.terrain.length < 2) return 1;
+  const biome = world.tiles[at.y]?.[at.x]?.biome;
+  return biome !== undefined && biome === poi.terrain[0] ? 4 : 1;
 }
 
 function heightBias(world: World, poi: PointOfInterest, at: Point): number {
@@ -455,6 +500,11 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // After the palette, like the settlement patch: a drift is something that happened to the
   // ground rather than a climate the ground has, and the classifier deals only in climates.
   stampTableland(world, palette);
+  // The rock Dwarka is built on: an old flow that reached the coast and hardened. Same reasoning
+  // again, and the same omission that kept the drifts off the plateau for a while -- `lava_field`
+  // is in canon's palette and has painted ground, decor and overdraw waiting for it, and until
+  // now nothing put a single tile of it on the map.
+  stampBasalt(world, palette);
   // The crossing: a strait across the map and two islands hanging over it. Same reasoning as the
   // drifts -- an island is a place rather than a climate, so the classifier cannot make one.
   stampStrait(world, palette);
