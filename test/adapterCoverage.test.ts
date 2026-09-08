@@ -74,7 +74,7 @@ const COVERAGE: Record<string, Coverage> = {
     skipped: [...EDITORIAL, 'uses', 'placement_note', 'crosses_at']
   },
   'places.field_maps': {
-    adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'points_of_interest',
+    adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'proportion', 'points_of_interest',
       'neighbours', 'arrival', 'climate', 'coordinates', 'relief'],
     skipped: [...EDITORIAL,
       // The name canon used before. There are around four Dwarkas in Jambhudweepa, so the one

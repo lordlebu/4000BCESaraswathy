@@ -11,9 +11,9 @@
 
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { canBoardAt, trackRoute } from '../src/world/crossing';
+import { canBoardAt, railSpan, shoreheads, trackRoute } from '../src/world/crossing';
 import { band } from '../src/world/classify';
-import { planCliffs, planTrack } from '../src/game/scenePlan';
+import { planCliffs, planIslandShadow, planTrack } from '../src/game/scenePlan';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
@@ -64,6 +64,61 @@ describe('the Aravali crossing', () => {
     // rows each with 8 between them, so the gap was smaller than either island. It is now wider
     // than an island is tall, which is what "two islands" has to mean on screen.
     expect(gap, 'the islands are not far enough apart to read as two').toBeGreaterThan(9);
+  });
+
+  it('casts a shadow on the water, so the islands read as floating', () => {
+    // **The one thing that says the island is not simply an island.** Grass to the edge, a rock
+    // face under the lip, cliffs along the joint -- all of that is equally true of a sea stack.
+    // What separates them is that light gets under one of them.
+    const world = aravali();
+    const shadow = planIslandShadow(world);
+    expect(shadow.length, 'the islands cast no shadow').toBeGreaterThan(30);
+
+    for (const tile of shadow) {
+      expect(
+        world.tiles[tile.y]![tile.x]!.biome,
+        `shadow at ${tile.x},${tile.y} is not on open water`
+      ).toBe('sea');
+      // Something of the island is above it, within reach.
+      const above = [1, 2, 3, 4].some((up) => {
+        const biome = world.tiles[tile.y - up]?.[tile.x]?.biome;
+        return biome === 'sky_island' || biome === 'sky_underside';
+      });
+      expect(above, `shadow at ${tile.x},${tile.y} has nothing above it`).toBe(true);
+      expect(tile.alpha!, 'a shadow with no darkness in it').toBeGreaterThan(0);
+      expect(tile.alpha!, 'the shadow is opaque').toBeLessThan(0.5);
+    }
+
+    // And nowhere else: three of the four maps have no islands, so nothing hangs over their water.
+    for (const map of fieldMaps) {
+      if (map.id === 'field_map_aravali') continue;
+      expect(
+        planIslandShadow(buildFieldMap(map, {}).world).length,
+        `${map.id} has shadows without islands`
+      ).toBe(0);
+    }
+  });
+
+  it('lays one railway, not several side by side', () => {
+    // **Three parallel tracks ran up the middle of the sea, and every test passed.** The line was
+    // stamped a tile either side of centre so a player would not have to thread a needle walking
+    // it, from when the rail was the only way across. But `planTrack` draws a full set of rails on
+    // every tile carrying the flag, so "three tiles wide" is not a wide railway -- it is three
+    // railways. Nothing asked how many, only whether the route was continuous and one column
+    // wide, and the route was always the centre column of the three.
+    //
+    // The ropes carry the walking now, so the premise is gone as well as the look.
+    for (const seed of ['a', 'b', 'c']) {
+      const world = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, { seed }).world;
+      const span = railSpan(world);
+      expect(span, `${seed}: no rail span`).not.toBeNull();
+
+      // Every row of the rail carries exactly one tile of line.
+      for (let y = span!.from; y <= span!.to; y += 1) {
+        const across = world.tiles[y]!.filter((t) => t.track).length;
+        expect(across, `${seed}: row ${y} carries ${across} lines abreast`).toBe(1);
+      }
+    }
   });
 
   it('never lays rail past the last ground at either end', () => {
@@ -254,10 +309,14 @@ describe('the Aravali crossing', () => {
    * one shore to the other with no gap in it, because a train that has to jump a tile is not on
    * rails.
    */
-  it('carries a continuous route from one shore to the other', () => {
+  it('carries a continuous route from one island to the other', () => {
+    // **Island to island, which is a change of premise rather than a change of number.** The route
+    // used to run shore to shore, and the test asked for more than half the map. The rail is now
+    // only the span between the two islands -- the shore ends are rope, and a carriage does not
+    // run on a rope -- so the right question is whether both ends are standing on an island.
     const world = aravali();
     const route = trackRoute(world);
-    expect(route.length, 'the line has no route').toBeGreaterThan(world.height / 2);
+    expect(route.length, 'the line has no route').toBeGreaterThan(10);
 
     // No gaps: consecutive tiles, all the way down.
     for (let i = 1; i < route.length; i += 1) {
@@ -267,11 +326,24 @@ describe('the Aravali crossing', () => {
     // One column, so a train has somewhere definite to sit rather than three abreast.
     expect(new Set(route.map((p) => p.x)).size, 'the route wanders between columns').toBe(1);
 
-    // Both ends on land: a line that begins over water begins nowhere.
-    const first = world.tiles[route[0]!.y]![route[0]!.x]!;
-    const last = world.tiles[route[route.length - 1]!.y]![route[route.length - 1]!.x]!;
-    expect(first.biome, 'the line starts over open water').not.toBe('sea');
-    expect(last.biome, 'the line ends over open water').not.toBe('sea');
+    // Both ends on an island, which is what the rail is strung between and what holds it up.
+    for (const end of [route[0]!, route[route.length - 1]!]) {
+      expect(
+        world.tiles[end.y]![end.x]!.biome,
+        `the rail ends at ${end.x},${end.y}, which is not an island`
+      ).toBe('sky_island');
+    }
+
+    // And the ropes reach ground on both shores, or the islands cannot be got onto at all.
+    const heads = shoreheads(world);
+    for (const [side, head] of Object.entries(heads)) {
+      expect(head, `no rope came ashore on the ${side} side`).not.toBeNull();
+      const biome = world.tiles[head!.y]![head!.x]!.biome;
+      expect(
+        biome === 'sea' || biome === 'sky_underside' || biome === 'sky_island',
+        `the ${side} rope ends at ${head!.x},${head!.y} over ${biome} rather than on a shore`
+      ).toBe(false);
+    }
   });
 
   it('can only be boarded where there is something to stand on', () => {

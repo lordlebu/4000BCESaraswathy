@@ -46,6 +46,7 @@ import { landmarkKindFor } from '../content/landmarks';
 import { band } from '../world/classify';
 import { tileHash } from '../world/rng';
 import type { FieldMapWorld } from '../world/fieldMap';
+import type { BiomeId } from '../world/types';
 
 /** Which sheet a placement draws from. `marker` is the fallback glyph, which has no sheet. */
 export type PlacementSheet =
@@ -59,7 +60,8 @@ export type PlacementSheet =
   | 'track'
   | 'cliffs'
   | 'treeline'
-  | 'marker';
+  | 'marker'
+  | 'shadow';
 
 export interface Placement {
   sheet: PlacementSheet;
@@ -71,6 +73,11 @@ export interface Placement {
   depth: number;
   /** Set on anything the scene needs to find again -- markers, for the fog to reveal. */
   name?: string;
+  /**
+   * How solid to draw this, 0 to 1. Present only on the shadow, which is the one placement whose
+   * whole content is how dark it is.
+   */
+  alpha?: number;
   /**
    * Present only on things that sway. Carrying both frames and the phase here means `update` does
    * no lookups: it reads the number it was given.
@@ -492,6 +499,7 @@ export function planScene(built: FieldMapWorld): Placement[] {
     ...planDecor(built.world, builtOn),
     // After decor, before the huts: the line is laid *on* the ground and things stand beside it,
     // so a rail draws over a scattered stone and under a building.
+    ...planIslandShadow(built.world),
     ...planTrack(built.world),
     ...huts,
     ...planOverdraw(built.world, builtOn),
@@ -512,6 +520,77 @@ export function planScene(built: FieldMapWorld): Placement[] {
  *
  * Drawn at `underfoot`, like decor: the traveller walks over the rails rather than behind them.
  */
+/**
+ * Ground that can take a line back: anything with something growing on it.
+ *
+ * Not `coast` or `desert` -- sand does not reclaim -- and not water or the sky biomes, where the
+ * crossing is deliberately kept clear because it is the part still in use.
+ */
+const GROWS_OVER: ReadonlySet<BiomeId> = new Set<BiomeId>([
+  'forest', 'hills', 'plains', 'wetland', 'mountains', 'river'
+]);
+
+/**
+ * How far an island's shadow reaches across the water, in rows.
+ *
+ * Four. Far enough to read as a gap between the island and the sea, near enough that it is plainly
+ * this island's shadow and not weather.
+ */
+const SHADOW_REACH = 4;
+
+/** How dark the shadow is directly under the lip, before it fades out with distance. */
+const SHADOW_DARKEST = 0.34;
+
+/**
+ * The shadow an island casts on the water under it.
+ *
+ * **The one thing that says the island is not simply an island.** Everything else about a floating
+ * shelf -- the grass to the edge, the rock face hanging under the lip, the cliffs along the joint
+ * -- is equally true of a sea stack. What separates them is that light gets underneath one of
+ * them, and the water below goes dark.
+ *
+ * No art. It is a tinted quad over open water, which is what a shadow on the sea is, and the scene
+ * special-cases it the way it already special-cases the marker glyph. Adding a sheet would mean
+ * painting four frames of "dark blue" and keeping them in step with the sea texture.
+ *
+ * Only over `sea`, and only below the rock face, so it never darkens a shore, a rail or the next
+ * island down. It fades with distance from the lip, because the edge of a hard-edged shadow is a
+ * second silhouette and the eye reads it as an object.
+ */
+export function planIslandShadow(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  const hangs = (x: number, y: number): boolean => {
+    const biome = world.tiles[y]?.[x]?.biome;
+    return biome === 'sky_island' || biome === 'sky_underside';
+  };
+
+  for (let x = 0; x < world.width; x += 1) {
+    for (let y = 0; y < world.height; y += 1) {
+      if (world.tiles[y]![x]!.biome !== 'sea') continue;
+
+      // How far above this tile the island's lowest edge sits, if it is above at all.
+      let below = 0;
+      for (let up = 1; up <= SHADOW_REACH; up += 1) {
+        if (hangs(x, y - up)) {
+          below = up;
+          break;
+        }
+      }
+      if (below === 0) continue;
+
+      out.push({
+        sheet: 'shadow',
+        frame: 0,
+        x,
+        y,
+        depth: depthFor(y, ROW_SLOT.underfoot),
+        alpha: SHADOW_DARKEST * (1 - (below - 1) / SHADOW_REACH)
+      });
+    }
+  }
+  return out;
+}
+
 export function planTrack(world: FieldMapWorld['world']): Placement[] {
   const out: Placement[] = [];
   const tracked = (x: number, y: number): boolean => world.tiles[y]?.[x]?.track === true;
@@ -529,7 +608,17 @@ export function planTrack(world: FieldMapWorld['world']): Placement[] {
 
       // Overgrown where nothing runs: the strait crossing is kept and the land approaches are not.
       // Read off the ground rather than stored, so a line laid across new country needs no edit.
-      const overgrown = tile.biome === 'forest' || tile.biome === 'hills';
+      //
+      // **Anything growing, rather than a list of two biomes.** It named `forest` and `hills`,
+      // which happened to be the whole of the land the line crossed while the line ran shore to
+      // shore. The approaches are stubs on the near shore now, and the southern one runs mostly
+      // through `plains` -- so two thirds of the derelict track was drawn as kept rail through
+      // open grass, which is the one stretch nothing has run on for four hundred years.
+      //
+      // The real question is whether there is anything here to grow over it. Sand and bare rock
+      // cannot; grass, scrub and trees can. That is a property of the ground, so it is asked of
+      // the ground.
+      const overgrown = GROWS_OVER.has(tile.biome);
 
       out.push({
         sheet: 'track',

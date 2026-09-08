@@ -44,8 +44,13 @@ import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
 import { ROW_SLOT, depthFor } from '../frames';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 
-/** Which loaded texture each kind of placement draws from. `marker` is a glyph and has none. */
-const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker'>, string> = {
+/**
+ * Which loaded texture each kind of placement draws from.
+ *
+ * `marker` is a glyph and has none; `shadow` is a tinted quad and has none either -- see
+ * `planIslandShadow` for why the island's shadow is not four frames of painted dark blue.
+ */
+const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker' | 'shadow'>, string> = {
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
@@ -499,6 +504,17 @@ export class WorldScene extends Phaser.Scene {
       const jy = (item.offset?.y ?? 0) * TILE_SIZE;
       const cx = item.x * TILE_SIZE + TILE_SIZE / 2 + jx;
       const cy = item.y * TILE_SIZE + TILE_SIZE / 2 + jy;
+
+      // The shadow an island casts on the water: a flat quad, darkest under the lip and fading
+      // out across `SHADOW_REACH` rows. It is what makes a floating shelf read as floating rather
+      // than as a sea stack, and it needs no art to say so.
+      if (item.sheet === 'shadow') {
+        const shade = this.add
+          .rectangle(cx, cy, TILE_SIZE, TILE_SIZE, 0x0b1c30, item.alpha ?? 0.3)
+          .setDepth(item.depth);
+        this.tileOwned.push({ sprite: shade as unknown as Phaser.GameObjects.Image, x: item.x, y: item.y });
+        continue;
+      }
 
       if (item.sheet === 'marker') {
         this.add

@@ -20,6 +20,11 @@ export interface FieldMap {
   /** The palette the generator draws terrain from, roughly in order of dominance. */
   seedBiomes: BiomeId[];
   scale: 'small' | 'large';
+  /**
+   * The shape of the ground, as distinct from its size. Absent in canon means square, which is
+   * what every map was until the crossing needed otherwise. See the field map schema.
+   */
+  proportion: 'square' | 'portrait';
   pointsOfInterest: string[];
   /**
    * Field maps reachable from this one — the overworld's edges.
@@ -155,7 +160,7 @@ export interface Npc {
 
 interface RawFieldMap {
   id: string; name: string; region: string; seed_biomes: string[];
-  scale?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
+  scale?: string; proportion?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
   climate?: Climate; coordinates?: { x: number; y: number }; relief?: string;
 }
 interface RawPoi {
@@ -182,6 +187,7 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   region: m.region,
   seedBiomes: m.seed_biomes as BiomeId[],
   scale: (m.scale ?? 'small') as 'small' | 'large',
+  proportion: (m.proportion ?? 'square') as 'square' | 'portrait',
   pointsOfInterest: m.points_of_interest ?? [],
   neighbours: m.neighbours ?? [],
   climate: m.climate ?? DELTA_CLIMATE,

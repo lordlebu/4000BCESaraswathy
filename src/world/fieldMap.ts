@@ -12,7 +12,7 @@
 
 import { band } from './classify';
 import { stampCamp, stampHighCamp, stampTableland } from './tableland';
-import { stampIslands, stampLine, stampStrait, startOnTheSouthernShore, trackRoute } from './crossing';
+import { shoreheads, stampIslands, stampLine, stampStrait, startOnTheSouthernShore } from './crossing';
 import { easeRoutes, tourOrder } from './routes';
 import { generateWorld, isWalkable } from './generate';
 import { tileHash } from './rng';
@@ -39,6 +39,21 @@ export interface FieldMapWorld {
  * A point with no `terrain` accepts anywhere walkable — that is the honest reading of
  * canon staying quiet, rather than a reason to drop it.
  */
+/**
+ * How far from the edge a place must stand, in tiles.
+ *
+ * **A place on the outermost row is half off the map.** Nothing stopped one until the Aravali went
+ * portrait: on a square map the edges are mostly sea and the terrain filter kept places inland by
+ * accident, and on a 44-wide one The Second Line landed at 2,65 -- the bottom-left corner, against
+ * two edges at once -- and the Nomad Ground at 42,51, with the water on one side and the end of
+ * the world on the other, leaving its camp one tile of room to pitch two tents in.
+ *
+ * A weight would not do here. Being near the edge is not a preference like height or shore; the
+ * camera cannot centre on it and the fence cannot be drawn round it. So it is a filter, with the
+ * usual ladder underneath: if nothing at all qualifies, the last resort still places the thing.
+ */
+const MARGIN = 3;
+
 /** Ground that only exists on a crossing, and that a fallback must never hand out. */
 const SKY: ReadonlySet<BiomeId> = new Set<BiomeId>(['sky_island', 'sky_underside']);
 
@@ -318,7 +333,9 @@ function placeOne(
     taken.some((t) => Math.abs(t.x - at.x) + Math.abs(t.y - at.y) < minDistance);
 
   const rightShore = (t: Tile) => onTheRightShore(world, poi, t);
-  const exact = gather(world, (t) => suitable(t, poi, walkable) && rightShore(t));
+  const inland = (t: Tile) =>
+    t.x >= MARGIN && t.y >= MARGIN && t.x < world.width - MARGIN && t.y < world.height - MARGIN;
+  const exact = gather(world, (t) => suitable(t, poi, walkable) && rightShore(t) && inland(t));
 
   // Best case: the terrain canon asked for, with room around it.
   const spaced = pick(world, poi, exact, crowded);
@@ -361,12 +378,31 @@ function placeOne(
   // **The ground gives way before the shore does.** See `onTheRightShore`: which side of the
   // water a place is on is a fact about which country it is in, and no amount of correct soil
   // makes up for being in the wrong one.
-  const overThere = pick(world, poi, gather(world, (t) => ground(t) && rightShore(t)), occupied);
+  const overThere = pick(
+    world,
+    poi,
+    gather(world, (t) => ground(t) && rightShore(t) && inland(t)),
+    occupied
+  );
   if (overThere) return overThere;
 
   const anywhereOnTheMap = gather(world, ground);
   return pick(world, poi, anywhereOnTheMap, occupied);
 }
+
+/**
+ * How big a map is, by the two things canon says about its shape.
+ *
+ * **Portrait is not a square with a crop.** A crossing is walked in one direction -- shore, water,
+ * islands, far shore -- and drawn square it cannot be any of those properly at once: the sea has
+ * to read as a sea across the full width, which leaves the shores too thin to raise hills on and
+ * the islands too close to read as two. 44 by 66 is the reference's own two-to-three, and it is
+ * *fewer* tiles than 64 by 64 rather than more, so nothing gets slower.
+ */
+const EXTENT: Record<'square' | 'portrait', Record<'small' | 'large', { width: number; height: number }>> = {
+  square: { small: { width: 48, height: 48 }, large: { width: 64, height: 64 } },
+  portrait: { small: { width: 34, height: 50 }, large: { width: 44, height: 66 } }
+};
 
 export interface BuildOptions {
   seed?: string;
@@ -395,8 +431,8 @@ export interface BuildOptions {
 export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): FieldMapWorld {
   const {
     seed = fieldMap.id,
-    width = fieldMap.scale === 'large' ? 64 : 48,
-    height = fieldMap.scale === 'large' ? 64 : 48,
+    width = EXTENT[fieldMap.proportion][fieldMap.scale].width,
+    height = EXTENT[fieldMap.proportion][fieldMap.scale].height,
     spacing = 6
   } = options;
 
@@ -457,20 +493,40 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // So it is anchored, the same way the High Camp is anchored to canon's tile and the traveller is
   // anchored to the line's own column. Canon says which shore; the line says which tile on it.
   const anchors = new Map<string, Point>();
-  const line = trackRoute(world);
-  if (line.length > 0) {
-    // North to south, so the near end is last. Beside the rails rather than on them: a player
-    // standing on the line cannot see it.
-    const ashore = line[line.length - 1]!;
-    const beside = [
-      { x: ashore.x - 2, y: ashore.y },
-      { x: ashore.x + 2, y: ashore.y },
-      { x: ashore.x - 2, y: ashore.y - 1 },
-      { x: ashore.x + 2, y: ashore.y - 1 }
-    ].find((p) => {
+  // **Where the rope comes ashore, not where the rail ends.** `trackRoute` is now the rail alone --
+  // island to island -- so its southern end is the middle of a floating island, and anchoring the
+  // Rail-Head there put the place a player arrives at out over the sea. The Rail-Head is on the
+  // beach: it is the shed and the buffers at the bottom of the ladder.
+  const ashore = shoreheads(world).near;
+  const railHead = poisOn(fieldMap.id).find((p) => p.id === 'poi_rail_head');
+  if (ashore && railHead) {
+    // Beside the buffers rather than on them, and on the ground canon says the place stands on.
+    //
+    // **The second half of that matters now that the shores differ.** The southern landmass is the
+    // Aravali coming down to the sea, so its beach climbs into band 1 within a tile or two, and
+    // taking the first free neighbour put a place canon marks `stands: low` on a hillside -- and
+    // once, on band-2 mountains. The candidates are ranked by whether the height matches instead,
+    // over a couple of tiles' reach, so the anchor still means "at the rail-head" and the choice
+    // among the tiles there is canon's.
+    const wantsHigh = railHead.stands === 'high';
+    const nearby: Point[] = [];
+    for (let dy = -2; dy <= 2; dy += 1) {
+      for (let dx = -3; dx <= 3; dx += 1) {
+        if (Math.abs(dx) < 2 && dy === 0) continue; // never on the line itself
+        nearby.push({ x: ashore.x + dx, y: ashore.y + dy });
+      }
+    }
+
+    const usable = nearby.filter((p) => {
       const tile = world.tiles[p.y]?.[p.x];
-      return !!tile && !tile.track && isWalkable(tile) && !(p.x === world.start.x && p.y === world.start.y);
+      if (!tile || tile.track || !isWalkable(tile)) return false;
+      return !(p.x === world.start.x && p.y === world.start.y);
     });
+    const fits = usable.filter((p) => {
+      const high = band(world.tiles[p.y]![p.x]!.elevation) > 0;
+      return railHead.stands === 'either' || high === wantsHigh;
+    });
+    const beside = (fits.length > 0 ? fits : usable)[0];
     if (beside) anchors.set('poi_rail_head', beside);
   }
 

@@ -730,6 +730,18 @@ export function App() {
       dispatch({ type: 'standing-on', poiId: null });
       dispatch({ type: 'close-interrupt', which: 'overworld' });
       discovered.current = [];
+      // **The address bar says which country you are in**, the same way it already says which
+      // seed and which character. `?map=` has been *read* since field maps shipped and never
+      // written, so the URL described the last thing you typed rather than the thing on screen --
+      // and a reload silently put you back on Lothal.
+      //
+      // That is not only a tidiness problem. It made a map impossible to report a bug about: a
+      // screenshot of the Aravali came with a URL that would open Lothal, and the two were
+      // compared as though they were the same map. It also makes every map one link away, which
+      // is what a test wants and what somebody looking for the crossing wants.
+      const url = new URL(window.location.href);
+      url.searchParams.set('map', next);
+      window.history.replaceState(null, '', url);
       EventBus.emitEvent('travel-to', { fieldMapId: next, seed });
     },
     [seed]
