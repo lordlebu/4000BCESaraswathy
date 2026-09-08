@@ -106,7 +106,11 @@ const TOOLS: [string[], string][] = [
   [['stonewaller'], 'M15 14h10v6H15zM15 17h10M20 14v3M17.5 17v3M22.5 17v3'],
   // A drover's goad and a coil of rope. Terke moves animals across a ford, which is a trade
   // rather than the way of life "nomad" named -- and a goad is what the job looks like in a hand.
-  [['drover'], 'M17 21L23 7M15 12a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0M16.5 12h3']
+  [['drover'], 'M17 21L23 7M15 12a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0M16.5 12h3'],
+  // A hunter's short bow, unstrung and carried rather than drawn. Anu walks ahead of a herd and
+  // mostly comes back with nothing, so a bow at full draw would be the wrong picture entirely --
+  // and canon agrees: every weapon in it affords `cut` and `deter`, and nothing affords killing.
+  [['hunter'], 'M18 6a9 9 0 0 1 0 15M18 6l-1 15']
 ];
 
 /** The tool for a role, or null for a person whose trade has no drawing yet. */

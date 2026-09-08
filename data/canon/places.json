@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.16.0",
+  "canon_version": "2.17.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -1102,7 +1102,8 @@
         "epoch_post_cataclysm"
       ],
       "npcs": [
-        "npc_terke"
+        "npc_terke",
+        "npc_anu"
       ],
       "shore": "near"
     },
@@ -1276,7 +1277,8 @@
         "epoch_post_cataclysm"
       ],
       "npcs": [
-        "npc_odri"
+        "npc_odri",
+        "npc_anu"
       ],
       "shore": "near"
     },
@@ -1325,7 +1327,8 @@
         "epoch_post_cataclysm"
       ],
       "npcs": [
-        "npc_terke"
+        "npc_terke",
+        "npc_anu"
       ],
       "shore": "near"
     },
@@ -1378,6 +1381,59 @@
     }
   ],
   "npcs": [
+    {
+      "id": "npc_anu",
+      "type": "npc",
+      "name": "Anu",
+      "role": "hunter",
+      "pronoun": "they",
+      "found_at": [
+        "poi_nomad_ground",
+        "poi_vedda_ford",
+        "poi_sunk_cutting"
+      ],
+      "language": "maru",
+      "would_settle": false,
+      "knows": [
+        "discovery_what_a_hunter_leaves"
+      ],
+      "lines": [
+        {
+          "text": "Terke moves the animals. I walk ahead of them and watch what else is walking."
+        },
+        {
+          "text": "Mostly I am not hunting. Mostly I am standing where a thing can see me, so it goes elsewhere and nobody has to do anything about it.",
+          "gives": [
+            "discovery_what_a_hunter_leaves"
+          ]
+        },
+        {
+          "text": "When I do take one it is one, and it is the one that was going to die this winter anyway. You learn to tell. That is most of the skill and none of the stories.",
+          "requires": [
+            "discovery_what_a_hunter_leaves"
+          ]
+        },
+        {
+          "text": "Hide, sinew, the long bones, the gut. Antler you find on the ground in spring and take nothing for at all, which is the best of it and costs only the walking.",
+          "requires": [
+            "discovery_what_a_hunter_leaves"
+          ],
+          "gives": [
+            "recipe_sinew_bow"
+          ]
+        },
+        {
+          "text": "The bow is sinew on timber. It tightens as it dries, which no rope does. So the animal gives you the thing that draws the bow that takes the animal. You can sit with that or you can not.",
+          "requires": [
+            "recipe_sinew_bow"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "**A hunter who mostly does not hunt**, which is the only version of this that fits the game around it. Every weapon in canon affords `cut` and `deter` and nothing anywhere affords killing -- the sling note says the record has slings keeping birds off a crop far more often than doing anything else. Anu works the same way: walks ahead of the herd, is seen, and the thing goes elsewhere.\n\nThey also carry an answer the materials layer needs and nobody on these maps was asked for. Canon has goat hide, croc hide, sinew, boar tusk and leviathan bone, all `won_from` a living animal, and the game hands them over with the same gesture that cuts a reed. Anu is where a player finds out what that involves: one animal, the one that was going to die anyway, and nothing left behind.\n\nAntler is the line that matters. Shed each year and gathered off the ground, costing nothing but the walking -- canon says precisely that on `material_deer_antler`, and Anu has clearly noticed.\n\nTakes `they`, which the pronoun field admits and is not a fallback for unstated. Anu walks ahead of Terke's herd and belongs to the same high-country people."
+    },
     {
       "id": "npc_bekh",
       "type": "npc",
