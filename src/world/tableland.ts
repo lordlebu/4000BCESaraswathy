@@ -12,7 +12,7 @@
 
 import { band } from './classify';
 import { tileHash } from './rng';
-import type { BiomeId, Point, World } from './types';
+import type { BiomeId, Point, Tile, World } from './types';
 
 /**
  * How big an enclosed patch has to be before it counts as a tableland.
@@ -157,27 +157,44 @@ const CAMP_RADIUS = 1;
  *
  * The tile canon placed keeps its own ground, so the arrival is the place rather than a tent
  * standing on it.
+ *
+ * **It no longer asks the palette's permission, and that was a real bug rather than tidying.** It
+ * used to return early unless the map's `seed_biomes` contained `settlement`, which is a question
+ * about the *climate* of a country -- and the Aravali is a crossing whose people are all passing
+ * through, so canon rightly does not describe it as urban. The nomad ground got no tents at all.
+ * A camp is a **place**, stamped after classification like the drifts and the islands, and a
+ * household that moves with the grass does not need a town nearby before it can stop for the
+ * night.
+ *
+ * Which ground will take a tent is the caller's to say, because it differs by map: see
+ * `stampHighCamp` for the plateau's rule.
  */
-export function stampCamp(world: World, palette: ReadonlySet<BiomeId>, at: Point | null): void {
-  if (!palette.has('settlement') || !at) return;
-
-  const country = tablelands(world)[0];
-  if (!country) return;
-  const onTop = new Set(country.map((p) => `${p.x},${p.y}`));
+export function stampCamp(world: World, at: Point | null, pitchable: (tile: Tile) => boolean): void {
+  if (!at) return;
 
   let pitched = 0;
   for (let dy = -CAMP_RADIUS; dy <= CAMP_RADIUS; dy += 1) {
     for (let dx = -CAMP_RADIUS; dx <= CAMP_RADIUS; dx += 1) {
       if (Math.abs(dx) + Math.abs(dy) > CAMP_RADIUS) continue;
       if (dx === 0 && dy === 0) continue;
-      const x = at.x + dx;
-      const y = at.y + dy;
-      const tile = world.tiles[y]?.[x];
-      // On the tableland, and never over a drift: the snow is the camp's water.
-      if (!tile || !onTop.has(`${x},${y}`) || tile.biome === 'snow') continue;
+      const tile = world.tiles[at.y + dy]?.[at.x + dx];
+      if (!tile || !pitchable(tile)) continue;
       tile.biome = 'settlement';
       pitched += 1;
     }
   }
   if (pitched > 0) world.camp = { at, radius: CAMP_RADIUS };
+}
+
+/**
+ * The High Camp on the Narmada plateau: on the tableland, and never over a drift.
+ *
+ * The ground rule is this map's, which is why it lives here rather than in the general stamper.
+ * The snow is the camp's water and you do not pitch a tent in your own well.
+ */
+export function stampHighCamp(world: World, at: Point | null): void {
+  const country = tablelands(world)[0];
+  if (!country) return;
+  const onTop = new Set(country.map((p) => `${p.x},${p.y}`));
+  stampCamp(world, at, (tile) => onTop.has(`${tile.x},${tile.y}`) && tile.biome !== 'snow');
 }

@@ -20,13 +20,24 @@ import type { BiomeId, Point, World } from './types';
  *
  * **The sea narrows here, and that is the whole reason a line was built at this point.** Canon
  * keeps the Shattered Sea a sea — Tamralinga still has its ships — and the Aravali is where it
- * pinches. A fifth of the map is enough water to be a real crossing and little enough to read as
- * a strait rather than an ocean.
+ * pinches. Wide enough to be a real crossing, narrow enough to read as a strait rather than an
+ * ocean.
+ *
+ * **Widened from a half, and then pulled back from seven tenths.** A half left eight rows between
+ * the islands, which is less than an island is tall, so the pair read as one shape with a nick in
+ * it. Seven tenths separated them properly and cost too much: the shores fell to six or seven rows
+ * each, too thin for the landform shaper to raise any height on, and the map's high ground went
+ * with them. The Quiet Atelier stands high and had nowhere high to stand; The Kept Stones wants
+ * hills and the far shore had none left.
+ *
+ * Sixty-two hundredths keeps twelve rows of shore at each end, which is what carries the relief.
+ * The separation is bought by making the islands smaller instead. Measured: shores at rows 0-11
+ * and 51-63, islands at 15-24 and 37-46, twelve rows of open water between them.
  */
-const STRAIT = 0.5;
+const STRAIT = 0.62;
 
 /** Where the strait sits, measured from the near shore. Leaves room for a shore on both sides. */
-const STRAIT_AT = 0.25;
+const STRAIT_AT = 0.19;
 
 /**
  * Which rows the islands sit on, as fractions of the map.
@@ -40,14 +51,24 @@ const STRAIT_AT = 0.25;
  * numbers looked reasonable and produced neither what the reference shows nor what "two islands"
  * means.
  *
- * A third and two thirds, against a strait that now runs from a quarter to three quarters. That
- * puts roughly twenty rows between the island centres -- the line between them is most of the
- * crossing rather than a gap in a blob -- and both sit well inside open water.
+ * A third and two thirds, against a strait running from a quarter to three quarters, put the runs
+ * at 17-27 and 36-46: eleven rows each with eight between them, so the gap was *smaller than
+ * either island*. On screen that is one shape with a nick in it, which is how it was reported.
+ *
+ * These are pushed to the ends of the widened strait and the radius cut with them, so the gap is
+ * wider than an island is tall. Measured: runs of 15-24 and 37-46, ten rows each, twelve rows
+ * between, and the two within five per cent of the same size.
  */
-const ISLANDS = [1 / 3, 2 / 3];
+const ISLANDS = [0.32, 0.66];
 
-/** How wide an island is, in tiles, at its equator. Equal, because two islands are two of a kind. */
-const ISLAND_RADIUS = 6;
+/**
+ * How wide an island is, in tiles, at its equator. Equal, because two islands are two of a kind.
+ *
+ * Cut from six. On a sixty-four row map the strait cannot be wide enough to hold two islands
+ * apart *and* leave shores thick enough to carry hills, so the separation is bought here instead:
+ * a smaller island leaves more water between, and the rim still draws fifty cliff faces.
+ */
+const ISLAND_RADIUS = 4;
 
 /**
  * How high an island stands, on the 0-1 elevation scale.
@@ -56,11 +77,30 @@ const ISLAND_RADIUS = 6;
  * biome and left elevation alone, so an island sat in band 0 -- at sea level as far as every
  * height rule in the game was concerned -- and `planCliffs` drew nothing at its edge.
  *
- * Above `THRESHOLDS.HILLS` (0.66) puts it in band 1, one band over the water it hangs above, which
- * is exactly the condition `cliffAt` looks for. The cliff sheet then fills the rim slot with rock
- * the same way the treeline fills it with crowns, and neither needs new machinery.
+ * Above `THRESHOLDS.MOUNTAINS` (0.82) puts it in band 2 -- one band over its own rim, which is the
+ * edge `cliffAt` can actually see. It used to be 0.75, band 1, on the reasoning that one band over
+ * the *sea* was enough; it is not, because `cliffAt` refuses to draw a face against water. The
+ * cliff sheet then fills the rim slot with rock the same way the treeline fills it with crowns,
+ * and neither needs new machinery.
  */
-const ISLAND_HEIGHT = 0.75;
+const ISLAND_HEIGHT = 0.9;
+
+/**
+ * How high the rim stands, on the same scale.
+ *
+ * **One band below the top, and this is what actually draws the cliff.** The top was raised out of
+ * band 0 so it would stop reading as sea level, and a test then asserted the islands "have cliff
+ * faces" and passed -- while counting every cliff on the map. The islands had none and never had.
+ *
+ * `cliffAt` wants one band over its neighbour and refuses to draw against water, so an island top
+ * at band 1 ringed in a rim also at band 1, itself surrounded by sea, could not produce a face
+ * anywhere: the only two edges available were equal-to-equal and against-water. Both are silent.
+ *
+ * Top at band 2, rim at band 1 gives the rim its rock. It is also the honest reading of what the
+ * underside *is* -- the shelf hangs below the ground it holds up, so it is lower, and canon's own
+ * words for it are "the inverted world beneath an island".
+ */
+const ISLAND_RIM_HEIGHT = 0.75;
 
 /**
  * Cut the strait: a band of open water across the map, with coast on both banks.
@@ -140,9 +180,9 @@ export function stampIslands(world: World, palette: ReadonlySet<BiomeId>): Point
           tile.elevation = ISLAND_HEIGHT;
         } else if (d <= ISLAND_RADIUS + rough && palette.has('sky_underside')) {
           tile.biome = 'sky_underside';
-          // The rim stands as high as the top it hangs from -- it *is* the island's edge, seen
-          // from the side. Left at sea level it would read as a beach around a hill.
-          tile.elevation = ISLAND_HEIGHT;
+          // A band below the top and a band above the water: the shelf the island hangs from.
+          // This is the step `cliffAt` reads to put rock along the rim. See ISLAND_RIM_HEIGHT.
+          tile.elevation = ISLAND_RIM_HEIGHT;
         }
       }
     }
@@ -203,6 +243,61 @@ export function stampLine(world: World, _palette: ReadonlySet<BiomeId>, islands:
       // shore is unreachable. The track is the one place the edge has been made passable, which
       // is precisely what a pier is.
       tile.track = true;
+    }
+  }
+
+  trimToTheShores(world, x);
+}
+
+/**
+ * Cut the rail back to the last ground it stands on, at each end.
+ *
+ * **The line was running off the map, and this is why.** The stamp above deliberately runs the
+ * full height so the rail meets land wherever the coast happens to fall -- but the coast is not
+ * the map edge, and beyond it the flag went on being set across open sea to row 0 and row 63.
+ * Measured on the Aravali: fifteen tiles of rail hanging over the ocean at the northern edge,
+ * going nowhere, drawn as track because `planTrack` reads the flag and the flag was true.
+ *
+ * `trackRoute` already trimmed exactly this, which is what disguised it: a train would never have
+ * appeared out of the sea, so every test that asked about the *route* passed while the thing on
+ * screen was wrong. The route was right and the rails were not, because they are two different
+ * readings of the same flag and only one of them had been trimmed.
+ *
+ * Per column rather than across all three, because the coast wobbles by design -- a strait with
+ * two ruled banks reads as a canal somebody dug. So the rail ends raggedly, within a tile or two,
+ * which is what track meeting an uneven shore looks like.
+ *
+ * The water *between* the shores is untouched. That stretch is the crossing.
+ */
+function trimToTheShores(world: World, centre: number): void {
+  const solid = (x: number, y: number): boolean => {
+    const biome = world.tiles[y]?.[x]?.biome;
+    return biome !== undefined && biome !== 'sea' && biome !== 'sky_underside';
+  };
+
+  for (let dx = -LINE_HALF_WIDTH; dx <= LINE_HALF_WIDTH; dx += 1) {
+    const x = centre + dx;
+    if (world.tiles[0]?.[x] === undefined) continue;
+
+    let first = 0;
+    while (first < world.height && !solid(x, first)) first += 1;
+    if (first === world.height) {
+      // A column with no ground under it anywhere is not a railway. Clear it rather than leave a
+      // line drawn across open water from edge to edge.
+      for (let y = 0; y < world.height; y += 1) {
+        const tile = world.tiles[y]?.[x];
+        if (tile) tile.track = false;
+      }
+      continue;
+    }
+
+    let last = world.height - 1;
+    while (last > first && !solid(x, last)) last -= 1;
+
+    for (let y = 0; y < world.height; y += 1) {
+      if (y >= first && y <= last) continue;
+      const tile = world.tiles[y]?.[x];
+      if (tile) tile.track = false;
     }
   }
 }

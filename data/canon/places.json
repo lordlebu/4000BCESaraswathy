@@ -316,7 +316,6 @@
         "coast",
         "sea",
         "river",
-        "settlement",
         "sky_island",
         "sky_underside"
       ],
@@ -338,7 +337,7 @@
         "field_map_narmada"
       ],
       "arrival": "The ranges come down to the water in steps of grey stone, and stop. Where they stop there is a rail-head, a shed, and a line of iron running out over the strait on trestles of pale timber. Two islands hang above the water along it, holding themselves up out of nothing anybody here will explain, and the rain that falls on their undersides falls upward. The far shore is a green smudge that is not Jambhudweepa. People cross. Nobody says much about the islands.",
-      "notes": "Fourth field map, and the first that is a *crossing* rather than a country -- Lothal is a delta, Narmada a plateau, Dwarka a basin, and this is four bands walked in sequence from one shore to another. The Shattered Sea narrows here, which is the whole reason a line was built at this point and nowhere else on that coast; Tamralinga keeps its ships and its pearl routes further east.\n\nThe thesis is the one thing Aravali has that no other map does: this is where the Mask Family broke. Canon puts the schism, the Jharwa massacre and the hidden sanctuary in these ranges. None of that is on stage -- Sira, Thren and Meera are four hundred years of backstory and a map is one afternoon -- so it reaches the player as *traces*, the way Lothal already carries the same family. The ground remembers something the people here have agreed not to say.\n\nOn the palette: The two sky biomes are declared here and **stamped as patches after classification**, not left to the classifier -- an island is a place, not a climate, exactly as `snow` is on the Narmada. Declaring them anyway is what the Narmada does with `snow` and it is what makes the species and materials that live there reachable: `check_playability` reads this list. `plains` and `coast` are in the palette because the region's own note asks for a cheap biome -- hills, forest and mountains are all travel cost 2 or worse, and this map is about walking a long way in one direction.",
+      "notes": "Fourth field map, and the first that is a *crossing* rather than a country -- Lothal is a delta, Narmada a plateau, Dwarka a basin, and this is four bands walked in sequence from one shore to another. The Shattered Sea narrows here, which is the whole reason a line was built at this point and nowhere else on that coast; Tamralinga keeps its ships and its pearl routes further east.\n\nThe thesis is the one thing Aravali has that no other map does: this is where the Mask Family broke. Canon puts the schism, the Jharwa massacre and the hidden sanctuary in these ranges. None of that is on stage -- Sira, Thren and Meera are four hundred years of backstory and a map is one afternoon -- so it reaches the player as *traces*, the way Lothal already carries the same family. The ground remembers something the people here have agreed not to say.\n\nOn the palette: The two sky biomes are declared here and **stamped as patches after classification**, not left to the classifier -- an island is a place, not a climate, exactly as `snow` is on the Narmada. Declaring them anyway is what the Narmada does with `snow` and it is what makes the species and materials that live there reachable: `check_playability` reads this list. `plains` and `coast` are in the palette because the region's own note asks for a cheap biome -- hills, forest and mountains are all travel cost 2 or worse, and this map is about walking a long way in one direction.\n\n**No `settlement`, and that is the one thing this palette says by omission.** Every other field map has a town in it; this one has a rail-head, a ford, a nomad ground and a workshop nobody is supposed to find. The people here are passing through -- that is the whole brief -- and the moment `settlement` appeared in this list the game grew a ruined city in the far south that nothing in canon had ever mentioned, and named it.\n\nThe camp is not an exception to this. A camp is a *place*, stamped where canon puts it, and it does not need the country around it to be described as urban before somebody can pitch a tent on it.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -728,11 +727,11 @@
       ],
       "description": "The second island, and the last of Jambhudweepa.",
       "arrival": "Another island, smaller, and the far shore visible past it as a green line that is not home. There is a bell on a post here, and a mark cut into the rail where somebody has been counting something.",
-      "notes": "The second pier and the turn of the map: from here the player is looking at somewhere else rather than back at where they started. The bell and the tally are the only human marks on either island, and they are deliberately unexplained.",
+      "notes": "The second pier and the turn of the map: from here the player is looking at somewhere else rather than back at where they started. The bell and the tally are the only human marks on either island, and they are deliberately unexplained.\n\n**`shore: far`.** \"The second island\" -- the far one, reached last. See The First Pier for why this had to be said out loud.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "shore": "either"
+      "shore": "far"
     },
     {
       "id": "poi_first_pier",
@@ -746,14 +745,14 @@
       ],
       "description": "The nearer island, where the line comes ashore in the air.",
       "arrival": "The track runs out over nothing and then there is ground under it -- grass, low cushion-plant, a stand of aero-mangrove holding the edge together with its roots. Walk to the rim and the rain that is falling on the underside is falling the wrong way.",
-      "notes": "The first floating island a player stands on, and the map's teaching moment: the inverted water is right there at the rim, and nothing explains it. Canon does -- lodestone cores of Permian-irradiated ore, a legacy of the shattering of Gondwana -- but nobody on this map says so, because nobody on this map knows.",
+      "notes": "The first floating island a player stands on, and the map's teaching moment: the inverted water is right there at the rim, and nothing explains it. Canon does -- lodestone cores of Permian-irradiated ore, a legacy of the shattering of Gondwana -- but nobody on this map says so, because nobody on this map knows.\n\n**`shore: near`, because the description already said so and the placement could not hear it.** \"The nearer island\" is the first line of this entry, and with `shore: either` the game put this and The Far Landing three rows apart on the *same* island while the other one stood empty. The two piers are the two ends of the crossing; putting them on one island is the map drawn wrong.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
       "npcs": [
         "npc_hesh"
       ],
-      "shore": "either"
+      "shore": "near"
     },
     {
       "type": "point_of_interest",
@@ -949,11 +948,11 @@
       ],
       "description": "An exposed core, and the only place the ore can be worked.",
       "arrival": "A wound in the island's flank where something took a bite out of it, and the rock inside is black and faintly wrong. Grit stands on end where it has fallen. A dropped knife does not lie flat.",
-      "notes": "Where lodestone grit comes from, and the map's one `never`-renewing material. The island is held up by this: taking it is the closest the game comes to asking whether a thing should be taken at all, and nothing in the text says so out loud.",
+      "notes": "Where lodestone grit comes from, and the map's one `never`-renewing material. The island is held up by this: taking it is the closest the game comes to asking whether a thing should be taken at all, and nothing in the text says so out loud.\n\n**`shore: far`.** The ore face is on the second island rather than the first, so the question it asks -- whether the thing holding the island up should be taken off it -- is put to a player who has already crossed rather than one still learning what an island is.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "shore": "either"
+      "shore": "far"
     },
     {
       "id": "poi_long_archive",
