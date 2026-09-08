@@ -11,7 +11,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { canBoardAt, trackRoute } from '../src/world/crossing';
+import { canBoardAt, shoreheads, trackRoute } from '../src/world/crossing';
 import { band } from '../src/world/classify';
 import { planCliffs, planTrack } from '../src/game/scenePlan';
 import { fieldMap, fieldMaps } from '../src/content/places';
@@ -254,10 +254,14 @@ describe('the Aravali crossing', () => {
    * one shore to the other with no gap in it, because a train that has to jump a tile is not on
    * rails.
    */
-  it('carries a continuous route from one shore to the other', () => {
+  it('carries a continuous route from one island to the other', () => {
+    // **Island to island, which is a change of premise rather than a change of number.** The route
+    // used to run shore to shore, and the test asked for more than half the map. The rail is now
+    // only the span between the two islands -- the shore ends are rope, and a carriage does not
+    // run on a rope -- so the right question is whether both ends are standing on an island.
     const world = aravali();
     const route = trackRoute(world);
-    expect(route.length, 'the line has no route').toBeGreaterThan(world.height / 2);
+    expect(route.length, 'the line has no route').toBeGreaterThan(10);
 
     // No gaps: consecutive tiles, all the way down.
     for (let i = 1; i < route.length; i += 1) {
@@ -267,11 +271,24 @@ describe('the Aravali crossing', () => {
     // One column, so a train has somewhere definite to sit rather than three abreast.
     expect(new Set(route.map((p) => p.x)).size, 'the route wanders between columns').toBe(1);
 
-    // Both ends on land: a line that begins over water begins nowhere.
-    const first = world.tiles[route[0]!.y]![route[0]!.x]!;
-    const last = world.tiles[route[route.length - 1]!.y]![route[route.length - 1]!.x]!;
-    expect(first.biome, 'the line starts over open water').not.toBe('sea');
-    expect(last.biome, 'the line ends over open water').not.toBe('sea');
+    // Both ends on an island, which is what the rail is strung between and what holds it up.
+    for (const end of [route[0]!, route[route.length - 1]!]) {
+      expect(
+        world.tiles[end.y]![end.x]!.biome,
+        `the rail ends at ${end.x},${end.y}, which is not an island`
+      ).toBe('sky_island');
+    }
+
+    // And the ropes reach ground on both shores, or the islands cannot be got onto at all.
+    const heads = shoreheads(world);
+    for (const [side, head] of Object.entries(heads)) {
+      expect(head, `no rope came ashore on the ${side} side`).not.toBeNull();
+      const biome = world.tiles[head!.y]![head!.x]!.biome;
+      expect(
+        biome === 'sea' || biome === 'sky_underside' || biome === 'sky_island',
+        `the ${side} rope ends at ${head!.x},${head!.y} over ${biome} rather than on a shore`
+      ).toBe(false);
+    }
   });
 
   it('can only be boarded where there is something to stand on', () => {

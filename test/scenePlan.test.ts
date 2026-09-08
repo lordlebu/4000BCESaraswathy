@@ -262,14 +262,32 @@ describe('the plan is a function of the world and nothing else', () => {
       for (const hut of huts) {
         expect(built.world.tiles[hut.y]![hut.x]!.biome, `${id}: hut off settlement ground`).toBe('settlement');
       }
-      const settlement = built.world.tiles.flat().filter((t) => t.biome === 'settlement').length;
-      // Two in three, so a village has courtyards rather than being wall to wall.
-      expect(huts.length).toBeLessThan(settlement);
-      // **Except where the whole settlement is a camp.** The Aravali has no town, so its only
-      // felt is the nomad ground's four tiles, and "two in three" cannot be said about four: two
-      // huts on four tiles is the correct density and `> settlement / 2` reads it as a failure.
-      // The courtyard rule is about villages; a camp is two tents and the space between them.
-      expect(huts.length).toBeGreaterThanOrEqual(Math.floor(settlement / 2));
+      // **The courtyard rule is about villages, and a camp is not a village.** Two in three keeps
+      // a town from being wall-to-wall brick. A camp is three or four tiles of trodden ground with
+      // a tent on each -- that is what a camp *is*, and the Aravali has no town at all, so on that
+      // map every settlement tile is camp and the rule has nothing to say.
+      //
+      // So the density is asserted over the village tiles only, and the camp is checked for what
+      // is true of a camp: it has tents, and not more tents than ground.
+      const camp = built.world.camp;
+      const felt = built.world.tiles.flat().filter((t) => t.biome === 'settlement');
+      const inCamp = (p: { x: number; y: number }) =>
+        camp !== null &&
+        Math.abs(p.x - camp.at.x) <= camp.radius &&
+        Math.abs(p.y - camp.at.y) <= camp.radius;
+
+      const village = felt.filter((t) => !inCamp(t)).length;
+      const villageHuts = huts.filter((h) => !inCamp(h)).length;
+      if (village > 0) {
+        expect(villageHuts, `${id}: the village is wall to wall`).toBeLessThan(village);
+        expect(villageHuts, `${id}: the village is empty`).toBeGreaterThan(village / 2);
+      }
+
+      const campGround = felt.length - village;
+      if (campGround > 0) {
+        expect(huts.length - villageHuts, `${id}: the camp has no tents`).toBeGreaterThan(0);
+        expect(huts.length - villageHuts, `${id}: more tents than ground`).toBeLessThanOrEqual(campGround);
+      }
     }
   });
 
