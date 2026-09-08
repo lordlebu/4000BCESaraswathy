@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.13.0",
+  "canon_version": "2.14.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -731,7 +731,8 @@
       "notes": "The second pier and the turn of the map: from here the player is looking at somewhere else rather than back at where they started. The bell and the tally are the only human marks on either island, and they are deliberately unexplained.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "shore": "either"
     },
     {
       "id": "poi_first_pier",
@@ -751,7 +752,8 @@
       ],
       "npcs": [
         "npc_hesh"
-      ]
+      ],
+      "shore": "either"
     },
     {
       "type": "point_of_interest",
@@ -932,7 +934,8 @@
       ],
       "npcs": [
         "npc_dala"
-      ]
+      ],
+      "shore": "far"
     },
     {
       "id": "poi_lodestone_face",
@@ -949,7 +952,8 @@
       "notes": "Where lodestone grit comes from, and the map's one `never`-renewing material. The island is held up by this: taking it is the closest the game comes to asking whether a thing should be taken at all, and nothing in the text says so out loud.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "shore": "either"
     },
     {
       "id": "poi_long_archive",
@@ -1099,7 +1103,8 @@
       ],
       "npcs": [
         "npc_terke"
-      ]
+      ],
+      "shore": "near"
     },
     {
       "id": "poi_quiet_atelier",
@@ -1117,7 +1122,8 @@
       "notes": "**Guyuk's, and she is not here.** `character_guyuk_reborn` -- the Seed-Gleaner -- is aboard the Survival Train in `event_survival_train_solarpunk`, working blasted soil back into growth. This is a second bench she keeps and is not at.\n\nA workshop nobody is currently in suits this map: the Aravali's thesis is ground that remembers what people will not say, and an atelier in use would answer questions the map is built to leave open. The dust says weeks, not years. She is coming back.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "shore": "near"
     },
     {
       "id": "poi_rail_head",
@@ -1138,7 +1144,8 @@
       ],
       "npcs": [
         "npc_hesh"
-      ]
+      ],
+      "shore": "near"
     },
     {
       "type": "point_of_interest",
@@ -1219,7 +1226,8 @@
       ],
       "npcs": [
         "npc_odri"
-      ]
+      ],
+      "shore": "near"
     },
     {
       "type": "point_of_interest",
@@ -1265,7 +1273,8 @@
       ],
       "npcs": [
         "npc_odri"
-      ]
+      ],
+      "shore": "near"
     },
     {
       "type": "point_of_interest",
@@ -1313,7 +1322,8 @@
       ],
       "npcs": [
         "npc_terke"
-      ]
+      ],
+      "shore": "near"
     },
     {
       "id": "poi_walking_spring",

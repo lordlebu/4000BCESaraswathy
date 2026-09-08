@@ -174,7 +174,10 @@ function pick(
 
   for (const at of candidates) {
     if (reject(at)) continue;
-    const score = tileHash(world.seed, at.x, at.y, `poi:${poi.id}`) * heightBias(world, poi, at);
+    const score =
+      tileHash(world.seed, at.x, at.y, `poi:${poi.id}`) *
+      heightBias(world, poi, at) *
+      shoreBias(world, poi, at);
     if (score > bestScore || (score === bestScore && best !== null && (at.y < best.y || (at.y === best.y && at.x < best.x)))) {
       best = at;
       bestScore = score;
@@ -201,6 +204,33 @@ function pick(
  * than clustering every high-standing place onto the single highest tile, which is what a
  * strict "highest wins" rule would do.
  */
+/**
+ * Keep a place on the shore canon puts it on.
+ *
+ * **The same shape as `heightBias`, and for the same reason.** On a map that is one country a
+ * place can go anywhere the terrain allows; on a *crossing* there are two shores, and which one a
+ * place sits on is as much a fact about it as what it stands on. Canon says so in `shore`.
+ *
+ * Without this the Rail-Head -- the place a player arrives at, where people wait for the carriage
+ * -- landed at 17,11 on the **northern** bank, 54 tiles from the traveller and across the water it
+ * exists to cross. Nomad Ground landed north too, while its own notes place it above a ford that
+ * is forty tiles south.
+ *
+ * A multiplier rather than a filter, exactly as the height bias is: the wanted shore becomes
+ * overwhelmingly likely without collapsing every near-shore place onto one tile. It costs nothing
+ * on a map with no strait, where every place is `either` and every candidate scales the same.
+ */
+function shoreBias(world: World, poi: PointOfInterest, at: Point): number {
+  if (poi.shore === 'either') return 1;
+  // A crossing is a map with a strait in it. Without one there is no near and no far, so canon's
+  // opinion is simply not applicable rather than wrong.
+  const water = world.tiles.flat().filter((t) => t.biome === 'sea');
+  if (water.length === 0) return 1;
+  const middle = water.reduce((sum, t) => sum + t.y, 0) / water.length;
+  const near = at.y > middle;
+  return (poi.shore === 'near') === near ? 4 : 0.25;
+}
+
 function heightBias(world: World, poi: PointOfInterest, at: Point): number {
   if (poi.stands === 'either') return 1;
   const tile = world.tiles[at.y]?.[at.x];

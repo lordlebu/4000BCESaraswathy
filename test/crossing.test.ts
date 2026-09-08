@@ -89,9 +89,23 @@ describe('the Aravali crossing', () => {
    * Jambhudweepa is home and the arrival text calls the far side "a green smudge that is not
    * Jambhudweepa", so walking north is walking away.
    */
-  it('starts the traveller on the southern shore', () => {
+  it('starts the traveller on the southern shore, at the line', () => {
     const world = aravali();
     expect(world.start.y, 'the traveller starts on the far bank').toBeGreaterThan(world.height / 2);
+
+    // **Beside the rail, not merely south of the water.** Pointing the search south fixed the
+    // shore and left a second fault: it looked for the tile nearest the *generator's* original
+    // start, which was north-east, so it landed on the south-east corner -- 22 tiles from the rail
+    // and 8 from the settlement. A player opened the map on an unremarkable stretch of coast with
+    // no line and nothing to walk toward, on a map whose whole subject is a crossing.
+    const tracked = world.tiles.flat().filter((t) => t.track);
+    const nearest = Math.min(
+      ...tracked.map((t) => Math.abs(t.x - world.start.x) + Math.abs(t.y - world.start.y))
+    );
+    expect(nearest, 'the line is not in sight of where the player begins').toBeLessThan(4);
+
+    // And not *on* it: standing on the rail is the one place you cannot see it.
+    expect(world.tiles[world.start.y]![world.start.x]!.track, 'the player starts on the rail').toBeFalsy();
   });
 
   it('never puts an island on land', () => {
@@ -264,5 +278,42 @@ describe('the Aravali crossing', () => {
       const world = buildFieldMap(map, { seed: DEFAULT_SEED }).world;
       expect(planTrack(world), `${map.id} grew a railway`).toEqual([]);
     }
+  });
+
+  /**
+   * **Canon says which shore, and the generator listens.**
+   *
+   * On a map that is one country a place can go anywhere the terrain allows. On a *crossing* there
+   * are two shores, and which one a place sits on is as much a fact about it as what it stands on.
+   *
+   * Without `shore` the Rail-Head -- the place a player arrives at, where people wait for the
+   * carriage -- landed at 17,11 on the **northern** bank: 54 tiles away, across the water it
+   * exists to cross. Nomad Ground landed north as well, while its own notes put it above a ford
+   * forty tiles south.
+   */
+  it('puts each place on the shore canon names', () => {
+    const built = buildFieldMap(fieldMap('field_map_aravali')!, { seed: DEFAULT_SEED });
+    const water = built.world.tiles.flat().filter((t) => t.biome === 'sea');
+    const middle = water.reduce((sum, t) => sum + t.y, 0) / water.length;
+
+    for (const placed of built.placed) {
+      if (placed.poi.shore === 'either') continue;
+      const near = placed.at.y > middle;
+      expect(
+        near,
+        `${placed.poi.name} wants the ${placed.poi.shore} shore and sits at ${placed.at.x},${placed.at.y}`
+      ).toBe(placed.poi.shore === 'near');
+    }
+  });
+
+  it('leaves the arrival within sight of the rail-head', () => {
+    // The place a player arrives at should be reachable from where they begin, on a map whose
+    // subject is a crossing. 54 tiles was the measured distance before `shore` existed.
+    const built = buildFieldMap(fieldMap('field_map_aravali')!, { seed: DEFAULT_SEED });
+    const head = built.placed.find((p) => p.poi.id === 'poi_rail_head');
+    expect(head, 'the rail-head was not placed').toBeTruthy();
+    const d =
+      Math.abs(head!.at.x - built.world.start.x) + Math.abs(head!.at.y - built.world.start.y);
+    expect(d, 'the rail-head is on the far side of the map from the player').toBeLessThan(30);
   });
 });

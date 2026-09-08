@@ -208,41 +208,49 @@ export function stampLine(world: World, _palette: ReadonlySet<BiomeId>, islands:
 }
 
 /**
- * Put the traveller on the **southern** shore, which is the one they come from.
+ * Put the traveller on the southern shore, **at the line**.
  *
- * **This function used to be called `startOnTheNearShore` and searched the north**, which is a
- * name describing the thing it did not do. It passed every test, because the tests asked whether
- * the start was on land -- which it was -- and nothing asked whether it was on the shore the
- * player arrives from. Measured, it put the traveller at y=22 on a 64-row map: the far side.
+ * Two faults, found one after the other, and the second only visible on screen.
  *
- * South is not arbitrary. Jambhudweepa is home and the map's own arrival text calls the far bank
- * "a green smudge that is not Jambhudweepa", so walking north is walking away. Both shores carry
- * about 1,200 walkable tiles, so choosing the right one costs nothing.
+ * It was `startOnTheNearShore` and searched the *north* -- a name describing the thing it did not
+ * do. It passed every test because they asked whether the start was on land, which it was, and
+ * none asked which side of the water it was on.
  *
- * Nearest walkable land below the strait, searched outward from where the generator wanted to be,
- * so the choice still respects whatever it was optimising for.
+ * Pointing it south fixed the shore and left the second fault untouched: it looked for the tile
+ * nearest **the generator's original start**, which was in the north-east, so it landed on the
+ * south-*east* corner -- 22 tiles from the rail and 8 from the settlement. A player opened the map
+ * on an unremarkable stretch of coast with no line, no buildings and nothing to walk toward. The
+ * map is a crossing and the crossing was off screen.
+ *
+ * So the anchor is the line itself. Jambhudweepa is home, the far bank is "a green smudge that is
+ * not Jambhudweepa", and the first thing a player should see is the thing they are meant to cross.
  */
 export function startOnTheSouthernShore(world: World): void {
   const strait = Math.floor(world.height * (STRAIT_AT + STRAIT));
   const walkable = (x: number, y: number): boolean => {
     const tile = world.tiles[y]?.[x];
-    return !!tile && tile.biome !== 'sea' && tile.biome !== 'sky_underside' && !tile.track;
+    return !!tile && tile.biome !== 'sea' && tile.biome !== 'sky_underside';
   };
-  if (walkable(world.start.x, world.start.y) && world.start.y > strait) return;
 
-  let best: Point | null = null;
-  let bestDistance = Infinity;
-  for (let y = strait + 1; y < world.height; y += 1) {
-    for (let x = 0; x < world.width; x += 1) {
-      if (!walkable(x, y)) continue;
-      const d = (x - world.start.x) ** 2 + (y - world.start.y) ** 2;
-      if (d < bestDistance) {
-        bestDistance = d;
-        best = { x, y };
+  // The line's own column, which is where the rail-head is. `stampLine` runs it down the middle of
+  // the islands, so this is the same column the carriage will one day sit on.
+  const tracked = world.tiles.flat().filter((t) => t.track);
+  if (tracked.length === 0) return;
+  const column = Math.round(tracked.reduce((sum, t) => sum + t.x, 0) / tracked.length);
+
+  // The first walkable ground south of the strait, on that column or as near to it as the shore
+  // allows. Walking outward in rings keeps it beside the line rather than merely below it.
+  for (let y = strait + 2; y < world.height; y += 1) {
+    for (let spread = 0; spread < world.width; spread += 1) {
+      for (const x of [column - spread, column + spread]) {
+        if (!walkable(x, y)) continue;
+        // Never on the rail itself: a player standing on the line cannot see it.
+        if (world.tiles[y]?.[x]?.track) continue;
+        world.start = { x, y };
+        return;
       }
     }
   }
-  if (best) world.start = best;
 }
 
 /**

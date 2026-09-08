@@ -87,6 +87,14 @@ export interface PointOfInterest {
    * rule: a map with no high ground still has to put the place somewhere.
    */
   stands: 'high' | 'low' | 'either';
+  /**
+   * Which side of a crossing this place is on.
+   *
+   * `either` for every map that is one country rather than two shores, which is all of them but
+   * the Aravali. See `shoreBias` for why a generator with no opinion put the rail-head on the
+   * wrong side of the water.
+   */
+  shore: 'near' | 'far' | 'either';
   description: string;
   arrival: string;
   discoveries: string[];
@@ -141,7 +149,7 @@ interface RawFieldMap {
   climate?: Climate; coordinates?: { x: number; y: number }; relief?: string;
 }
 interface RawPoi {
-  id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string;
+  id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string; shore?: string;
   description?: string; arrival?: string; discoveries?: string[]; npcs?: string[];
   sub_locations?: { id: string; name: string; description?: string; requires?: string[] }[];
   ruin_of?: string;
@@ -179,6 +187,7 @@ export const pointsOfInterest: PointOfInterest[] = raw.points_of_interest.map((p
   kind: p.kind as PoiKind,
   terrain: (p.terrain ?? []) as BiomeId[],
   stands: (p.stands ?? 'either') as 'high' | 'low' | 'either',
+  shore: (p.shore ?? 'either') as 'near' | 'far' | 'either',
   description: p.description ?? '',
   arrival: p.arrival ?? '',
   discoveries: p.discoveries ?? [],
