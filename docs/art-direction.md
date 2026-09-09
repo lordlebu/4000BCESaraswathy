@@ -12,6 +12,71 @@ are settled, and which are still open.
 Read this before proposing a change of direction. Two have been proposed and one was reverted; the
 reasoning is here so a third does not repeat either.
 
+## The direction changed on 2026-09-09: solarpunk, and brighter
+
+**Sprites are now 16-bit-era solarpunk watercolour pixel art. Plates are brighter, with water in
+motion.** Muted is over.
+
+**This applies to new art only.** Nothing is being redrawn. Everything in `assets/` and
+`src/ui/plates/` stays exactly as it is, and the direction below describes what the *next* asset
+should look like, not a debt against the existing ones.
+
+### "16-bit NES" was asked for, and those are two different machines
+
+Worth resolving in writing, because a future reader will otherwise re-litigate it. The NES is an
+**8-bit** console: three colours plus transparency per 8×8 tile, about 25 on screen from a fixed
+54-colour hardware palette. It cannot express a wash, a soft gradient or a bounce light — the
+hardware has nowhere to put them. **16-bit** means the SNES and Mega Drive era: 15-bit colour, up to
+sixteen colours per sprite palette, and that is precisely the era of painterly, softly dithered
+pixel art.
+
+Watercolour and solarpunk both want the second. So the direction is **16-bit, SNES-era**, and the
+word NES should not appear in a prompt — asking for it would fight everything else in the sentence.
+
+**The pipeline already agreed with this before anyone said so.** `tools/build-sprite-sheet.js`
+quantises every figure to a shared **22-colour** palette. That is 16-bit sizing. Under a real NES
+constraint every sprite currently shipped would be illegal by a factor of seven.
+
+### What solarpunk changes, concretely
+
+| | Was | Is |
+|---|---|---|
+| Saturation | muted, washed, "nothing that glows" | **clean and bright**, saturated where light falls; still pigment rather than neon |
+| Light | gentle contrast, flat ambient | **warm direct sun**, with bounce light in the shadows rather than dead grey |
+| Greens | olive and grey-green | **living greens**, the colour of a thing that is growing rather than drying |
+| Darks | warm near-black plum-brown | unchanged — a coloured dark, never `#000000` |
+| Paper base | off-cream | unchanged for plates; sprites sit on transparency and never needed one |
+| Mood | a naturalist's quiet study | the same study **on a good morning** — abundance and repair, not decay |
+
+Solarpunk here is a *light* and a *mood*, not a set of props. It does not mean adding solar panels
+and brass to a 4000 BCE setting; canon decides what exists and this decides how it is lit.
+
+### This reverses rule §3 below, deliberately
+
+Rule §3 says *"Keep the palette. It was never the part that was wrong."* That was true when it was
+written — every asset that had looked wrong had looked wrong for structure — and it is now
+**overruled by preference rather than by evidence**, which is a legitimate reason and worth naming
+as the actual one. The rule is kept below rather than deleted, because its reasoning still applies
+to *structure*: a new asset that reads badly is still far more likely to be a silhouette or a
+projection problem than a hue problem.
+
+### The cost nobody has paid yet: a mixed map
+
+New art is brighter, old art is muted, and **they will sit on the same screen**. A bright traveller
+walking over washed-out ground is a real and visible mismatch, and "no redraw" means it does not
+resolve on its own.
+
+Two ways out, neither started, both cheap to state:
+
+1. **Accept the transition.** The map is mixed until enough of it has been replaced. Honest, free,
+   and looks unfinished for as long as it lasts.
+2. **Lift the old art at the build step.** Every sheet is *reprocessed* by a `tools/build-*.js`
+   script from sources — so a saturation and value curve applied there would brighten the entire
+   existing set with **no redrawing at all**, which is exactly the constraint asked for. It is a
+   filter in one place per builder, and it is reversible because the sources are untouched.
+
+Option 2 is the one worth trying first, and it is not in any plan yet.
+
 ## Where the direction actually stands
 
 **Ground and objects: painted. Figures and portraits: pixel art.** That split is deliberate and is
@@ -62,7 +127,7 @@ in placed objects, which have known positions and can be kept out of his way.
 
 This is why the decor layer exists and why it was the change that most improved the map.
 
-### 3. Keep the palette. It was never the part that was wrong.
+### 3. Keep the palette. It was never the part that was wrong. *(overruled 2026-09-09 — see the top of this file; kept because its argument about structure still holds)*
 
 The paper/ink/biome swatches in `art-brief.md` survived the direction change unchanged and should
 survive the next one. Every asset that has looked wrong here looked wrong for *structure* — a

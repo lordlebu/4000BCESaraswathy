@@ -50,10 +50,18 @@ already sitting in `assets/source/dump/` — see the provenance section below. `
 are now the denser ChatGPT versions rather than the sparse Gemini ones. They are still pixel art;
 they are simply much better pixel art, and worth having while the painted set is prompted.
 
-Think a **watercolour field study in a naturalist's notebook**, not a screen at all:
+**Updated 2026-09-09 — solarpunk, and brighter. New art only; nothing is being redrawn.** See the
+top of `docs/art-direction.md` for the ruling, including why *16-bit* means the SNES era and why the
+word *NES* must not go in a prompt: that machine is 8-bit, gets three colours per tile, and cannot
+express a wash at all. The sprite pipeline already quantises to a 22-colour shared palette, which is
+16-bit sizing.
 
-- **Muted, low-saturation colour.** Unchanged, and the one thing carried over whole. Every hue
-  reads as though slightly washed. No neon, no pure saturated primaries, nothing that glows.
+Think a **watercolour field study in a naturalist's notebook**, on a bright morning:
+
+- **Clean, sunlit colour.** *Changed.* This used to read "muted, low-saturation, nothing that
+  glows", and every asset in `assets/` was made to that. New art is **luminous** — saturated where
+  the light falls, with warm bounce light in the shadows instead of flat grey, and living greens
+  rather than olive. Still pigment on paper: bright is not neon, and nothing emits light.
 - **Warm paper base**, never pure white. Off-cream, the colour of good sketchbook paper.
 - **Gentle contrast.** Darks are a warm near-black (a deep plum-brown), not `#000000`.
 - **Soft gradients within a shape are correct**, and are the point. A reed bed is lighter where
