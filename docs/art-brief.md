@@ -50,10 +50,18 @@ already sitting in `assets/source/dump/` — see the provenance section below. `
 are now the denser ChatGPT versions rather than the sparse Gemini ones. They are still pixel art;
 they are simply much better pixel art, and worth having while the painted set is prompted.
 
-Think a **watercolour field study in a naturalist's notebook**, not a screen at all:
+**Updated 2026-09-09 — solarpunk, and brighter. New art only; nothing is being redrawn.** See the
+top of `docs/art-direction.md` for the ruling, including why *16-bit* means the SNES era and why the
+word *NES* must not go in a prompt: that machine is 8-bit, gets three colours per tile, and cannot
+express a wash at all. The sprite pipeline already quantises to a 22-colour shared palette, which is
+16-bit sizing.
 
-- **Muted, low-saturation colour.** Unchanged, and the one thing carried over whole. Every hue
-  reads as though slightly washed. No neon, no pure saturated primaries, nothing that glows.
+Think a **watercolour field study in a naturalist's notebook**, on a bright morning:
+
+- **Clean, sunlit colour.** *Changed.* This used to read "muted, low-saturation, nothing that
+  glows", and every asset in `assets/` was made to that. New art is **luminous** — saturated where
+  the light falls, with warm bounce light in the shadows instead of flat grey, and living greens
+  rather than olive. Still pigment on paper: bright is not neon, and nothing emits light.
 - **Warm paper base**, never pure white. Off-cream, the colour of good sketchbook paper.
 - **Gentle contrast.** Darks are a warm near-black (a deep plum-brown), not `#000000`.
 - **Soft gradients within a shape are correct**, and are the point. A reed bed is lighter where
@@ -113,7 +121,9 @@ working, and the frames are 1.3 KB. A painted figure would also have to survive 
 26×40 over painted ground, which is the hardest legibility problem in the project and buys the
 least. Varuna reads as a drawn figure in a painted world — which is what `endgame.png` shows.
 
-**Prompt blocks below Asset 2 that still say "cozy colour e-ink" and "crisp pixel art" have not
+**Asset 0's prompt was rewritten on 2026-09-09 for the solarpunk direction; Asset 1's was not,
+because Asset 1 is superseded by Asset 0 and is kept only as a record.** Other prompt blocks below
+Asset 2 that still say "cozy colour e-ink" and "crisp pixel art" have not
 been converted.** For Assets 0, 1 and 4 that is correct and they should be used as written. For
 Asset 2b and Asset 3 it is not — those need the painted prompt from Asset 2, adapted. They are
 left unconverted rather than half-converted so it is obvious which is which.
@@ -227,16 +237,35 @@ three-quarter.
 | `varuna-right.png` | side view, facing right |
 | `varuna-left.png` | side view, facing left — or skip it, the game mirrors `right` |
 
+**Rewritten 2026-09-09 for the solarpunk direction.** The old block asked for *cozy colour e-ink:
+muted desaturated colour, matte and flat, no gradients, no dithering* — which is the direction that
+was replaced, and pasting it now would produce a figure that does not match anything new beside it.
+The container rules are unchanged; the palette and the shading are not.
+
 > **Prompt (change the facing each time):**
-> Single pixel art sprite of an elderly travelling scholar for a cozy top-down exploration game,
-> **facing [the viewer / away from the viewer / to the right]**. Wide-brimmed soft blue hat, deep
-> muted indigo robe, grey beard, brown boots, satchel strap, wooden staff. Cozy colour e-ink
-> palette: muted desaturated colour, warm off-cream highlights, warm near-black outlines instead of
-> pure black, matte and flat. Exactly 26 pixels wide by 40 pixels tall, true pixel art, every pixel
-> a flat solid colour, hard edges, no anti-aliasing, no gradients, no dithering inside the figure.
-> Save as lossless PNG with a genuine alpha channel: the background must be fully transparent, not
-> a grey checkerboard. No grid, no guide lines, no centre cross, no alignment marks, no drop shadow,
-> no border, no text, no watermark. One centred figure filling the frame, feet at the bottom edge.
+> Single **16-bit SNES-era** pixel art sprite of an elderly travelling scholar for a cozy top-down
+> exploration game, **facing [the viewer / away from the viewer / to the right]**. Wide-brimmed soft
+> blue hat, indigo robe, grey beard, brown boots, satchel strap, wooden staff. **Solarpunk
+> watercolour palette: clean sunlit colour, saturated where the light falls, warm bounce light in
+> the shadows rather than flat grey, living greens.** Bright but never neon, and nothing glows or
+> emits light. **Warm near-black for outlines and darks, never pure black.** **Shade the figure the
+> way a SNES sprite is shaded: two or three tones per material, hard-edged, with light dithering
+> only where one tone meets another — no soft airbrushed gradients.** **At most 22 distinct colours
+> in the whole figure.** Exactly 26 pixels wide by 40 pixels tall, true pixel art, every pixel a
+> flat solid colour, hard edges, no anti-aliasing. Save as lossless PNG with a genuine alpha
+> channel: the background must be fully transparent, not a grey checkerboard. No grid, no guide
+> lines, no centre cross, no alignment marks, no drop shadow, no border, no text, no watermark. One
+> centred figure filling the frame, feet at the bottom edge.
+
+**The 22 is not a style choice, it is the pipeline.** `tools/build-sprite-sheet.js` quantises every
+sheet to a shared 22-colour palette, so a figure drawn with eighty colours is *going* to be reduced
+to twenty-two — better that the artist chooses which twenty-two than that a quantiser does. It is
+also, not coincidentally, about a SNES sprite palette: sixteen per palette, and a figure may use
+more than one.
+
+**And never write "NES" in this prompt.** That machine gets three colours plus transparency per
+8×8 tile and cannot express any of the shading asked for above; naming it fights every other word
+in the sentence. See the top of `docs/art-direction.md`.
 
 If the model insists on producing something large, that is still fine **as long as it is lossless
 and the blocks are clean** — `tools/build-sprite-sheet.js` resamples any size down to the game's

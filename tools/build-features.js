@@ -570,6 +570,71 @@ function woodpile() {
   return pixels;
 }
 
+/**
+ * A cushion shrub for a sky island: low, wind-flattened, blue-green.
+ *
+ * **A mass, which is the case the loop wins.** `docs/art-direction.md` rule 1 sorts this sheet in
+ * two: grass, scree, an anthill and a cactus came out right because they *are* masses a loop can
+ * state exactly, and the neem, palm, pine and mangrove are placeholders because a tree is
+ * recognised by its silhouette. A cushion plant has no silhouette to get wrong -- it is a hummock
+ * -- so it belongs on the generated side of that line.
+ *
+ * Wider than tall, because everything on a rim four hundred metres up grows sideways.
+ */
+function skyShrub(side) {
+  const pixels = canvas();
+  const cx = Math.round(CELL / 2 + side * (OFFSET - 2));
+  const base = CELL - 5;
+  const dark = hex('#3f6a63');
+  const mid = hex('#4f8278');
+  const light = hex('#6fa294');
+
+  // Two overlapping hummocks rather than one, so a run of them is not a row of identical domes.
+  blob(pixels, cx - 2, base - 3, 6, 4, dark);
+  blob(pixels, cx + 3, base - 2, 5, 3, mid);
+  // The lit upper face, one row proud -- the same trick the snow pine uses for its laden edges.
+  blob(pixels, cx - 2, base - 5, 4, 2, light);
+  blob(pixels, cx + 3, base - 4, 3, 1, light);
+  // A few sprigs breaking the outline, so it is a plant rather than a stone.
+  for (const [dx, dy] of [[-7, -4], [-5, -6], [6, -5], [8, -3]]) {
+    fill(pixels, cx + dx, base + dy, cx + dx, base + dy + 1, mid);
+  }
+  return pixels;
+}
+
+/**
+ * The conifer of the floating islands: the hill pine's build, in the island's palette.
+ *
+ * **Consistent with what ships rather than new.** The snow pine is already the hill pine redrawn
+ * for a different ground, and this is the third of that family: same depth-from-the-tip width so
+ * it is not a cone on its point, a paler trunk, and needles toward the blue end to sit with the
+ * crystal and the cushion plants.
+ *
+ * It is also, honestly, the same placeholder the art docs name -- a conifer a loop can draw reads
+ * as a wedge, and only drawn art fixes that. `docs/art-brief.md` carries the prompt for the
+ * replacement; this is what stands on the islands until it arrives.
+ */
+function skyPine(side) {
+  const pixels = canvas();
+  const cx = Math.round(CELL / 2 + side * OFFSET);
+  const dark = hex('#35565c');
+  const light = hex('#4d7b78');
+
+  fill(pixels, cx, CELL - 4, cx, CELL - 1, hex('#5b5142'));
+
+  // Leaning, which the other two do not. Wind is the whole character of this ground.
+  const top = 7;
+  const bottom = CELL - 5;
+  const height = bottom - top;
+  for (let y = top; y <= bottom; y += 1) {
+    const t = (y - top) / height;
+    const width = Math.round(1 + t * 3);
+    const lean = Math.round((1 - t) * side * 2);
+    fill(pixels, cx - width + lean, y, cx + width + lean, y, (y - top) % 4 === 0 ? light : dark);
+  }
+  return pixels;
+}
+
 // --- what to build --------------------------------------------------------
 
 /**
@@ -599,7 +664,11 @@ const FEATURES = [
   { id: 'pine-snow', sides: 2, draw: snowPine },
   { id: 'crystal-sky_island', sides: 2, draw: crystalShard },
   { id: 'column-lava_field', sides: 2, draw: basaltColumn },
-  { id: 'snag-snow', sides: 2, draw: snowSnag }
+  { id: 'snag-snow', sides: 2, draw: snowSnag },
+  // The islands stop being bare rock with a crystal on it. A shrub and a conifer, so the ground
+  // has something growing as well as something mineral.
+  { id: 'shrub-sky_island', sides: 2, draw: skyShrub },
+  { id: 'pine-sky_island', sides: 2, draw: skyPine }
 ];
 
 /**

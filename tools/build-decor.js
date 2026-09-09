@@ -221,6 +221,65 @@ function shadow(pixels, cx, cy, rx, ry) {
  * and a pad on the river is river-green. `docs/art-brief.md` keeps the palette; these sit one or
  * two steps off it.
  */
+/**
+ * Roots hanging off the underside of a floating shelf.
+ *
+ * **The inverse of `tuft`, and that is the whole point.** Every other growing thing on this sheet
+ * rises from a base toward the light; these fall from the rock above toward nothing. Same strokes,
+ * drawn downward.
+ *
+ * They start at `CEILING` rather than at the cell's top edge because the ceiling is where this
+ * layer is allowed to begin -- so what is drawn is the *lower length* of a root, with the rock it
+ * comes out of on the tile above. A full curtain of root wants the feature layer and drawn art;
+ * see `docs/props-and-rims-plan.md`.
+ */
+function roots(dark, light, count) {
+  return (px, seed) => {
+    const cx = CELL / 2 + between(-8, 8, seed, 'rx');
+    const top = CEILING + 1;
+    for (let i = 0; i < count; i += 1) {
+      const lean = between(-10, 10, seed, 'lean', i);
+      const len = between(CELL * 0.14, CELL * 0.3, seed, 'len', i);
+      const colour = hex(i % 3 === 0 ? light : dark);
+
+      // **Thick where it leaves the rock, thin where it ends.** A root of even width reads as
+      // string; the taper is what makes it woody. `stroke` takes one width, so the root is drawn
+      // as a run of short segments and the width comes down along it.
+      const steps = 6;
+      for (let step = 0; step < steps; step += 1) {
+        const t0 = step / steps;
+        const t1 = (step + 1) / steps;
+        const width = Math.max(1, Math.round(3 * (1 - t0)));
+        stroke(
+          px,
+          cx + lean * t0, top + len * t0,
+          cx + lean * t1, top + len * t1,
+          width,
+          colour
+        );
+      }
+    }
+  };
+}
+
+/**
+ * A nest under the lip.
+ *
+ * Somewhere nothing can climb to is exactly where a bird builds, which is the only reason this
+ * belongs on a surface with no ground: it is not standing on anything, it is wedged under
+ * something. A cup of twigs with a paler lining, and no eggs -- a nest with eggs in it reads as a
+ * thing to take, and this is a game about looking.
+ */
+function nest(twig, lining) {
+  return (px, seed) => {
+    const cx = CELL / 2 + between(-7, 7, seed, 'nx');
+    const cy = CELL * 0.82;
+    shadow(px, cx, cy + 3, 8, 3);
+    blob(px, cx, cy, 7, 5, hex(twig), seed, 0.3);
+    blob(px, cx, cy - 1, 4, 2, hex(lining), seed + 1, 0.2);
+  };
+}
+
 const PROPS = [
   // --- water and wetland ---
   { id: 'lily-pad', biomes: ['river', 'wetland'], draw: pad('#4f7d52', '#638f5f') },
@@ -295,7 +354,13 @@ const PROPS = [
   { id: 'crystal-grit', biomes: ['sky_island'], draw: stones('#3fa8a8', '#79d6cf', 4) },
   // Moss on the weathered stone, which is what says this ground is old rather than new.
   { id: 'sky-moss', biomes: ['sky_island'], draw: patch('#6f8f72', 6) },
-  { id: 'crystal-flower', biomes: ['sky_island'], draw: flower('#7f9e74', '#b8cdd2', '#e8f0f0') }
+  { id: 'crystal-flower', biomes: ['sky_island'], draw: flower('#7f9e74', '#b8cdd2', '#e8f0f0') },
+  // The underside, which carried nothing at all. It is the one surface in this projection you see
+  // side-on rather than from above, so what belongs here hangs off it or is wedged under it.
+  { id: 'hanging-root', biomes: ['sky_underside'], draw: roots('#6b5a46', '#8a7a60', 5) },
+  { id: 'root-tangle', biomes: ['sky_underside'], draw: roots('#5a4c3c', '#7a6a52', 8) },
+  { id: 'cling-moss', biomes: ['sky_underside'], draw: patch('#5f7d68', 5) },
+  { id: 'sky-nest', biomes: ['sky_underside'], draw: nest('#7a6647', '#a89372') }
 ];
 
 /** A lily pad: a flat disc with a wedge cut out of it. */

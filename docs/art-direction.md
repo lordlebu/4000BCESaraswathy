@@ -12,6 +12,127 @@ are settled, and which are still open.
 Read this before proposing a change of direction. Two have been proposed and one was reverted; the
 reasoning is here so a third does not repeat either.
 
+## The direction changed on 2026-09-09, and it has three axes
+
+**Corrected the same day.** The first version of this section said "solarpunk, and brighter" and
+made *colour* carry the change — bright, saturated, living greens. That collapsed three independent
+decisions into one and got the palette wrong. They are separated below, and the palette is the one
+that did **not** move.
+
+**This applies to new art only.** Nothing is being redrawn. Everything in `assets/` and
+`src/ui/plates/` stays exactly as it is, and the direction below describes what the *next* asset
+should look like, not a debt against the existing ones.
+
+### "16-bit NES" was asked for, and those are two different machines
+
+Worth resolving in writing, because a future reader will otherwise re-litigate it. The NES is an
+**8-bit** console: three colours plus transparency per 8×8 tile, about 25 on screen from a fixed
+54-colour hardware palette. It cannot express a wash, a soft gradient or a bounce light — the
+hardware has nowhere to put them. **16-bit** means the SNES and Mega Drive era: 15-bit colour, up to
+sixteen colours per sprite palette, and that is precisely the era of painterly, softly dithered
+pixel art.
+
+Watercolour and solarpunk both want the second. So the direction is **16-bit, SNES-era**, and the
+word NES should not appear in a prompt — asking for it would fight everything else in the sentence.
+
+**The pipeline already agreed with this before anyone said so.** `tools/build-sprite-sheet.js`
+quantises every figure to a shared **22-colour** palette. That is 16-bit sizing. Under a real NES
+constraint every sprite currently shipped would be illegal by a factor of seven.
+
+### The three axes, and they are independent
+
+| Axis | Setting | What it governs |
+|---|---|---|
+| **Pixelation** | **16-bit, SNES-era** | *How the pixels behave.* Two or three tones per material, hard edges, light dithering where tones meet, sixteen-ish colours per palette. **Changed.** |
+| **Colouration** | **cozy colour e-ink: muted, desaturated, matte** | *What the colours are.* Every hue slightly washed, warm off-cream highlights, warm near-black instead of pure black. **Unchanged, and carried over whole.** |
+| **Theme** | **bronze age moving directly to solarpunk** | *What is depicted and its mood.* Abundance, repair, infrastructure that works, growing things. **Changed.** |
+
+Reading them as one is what produced the wrong first draft. A sprite can be shaded like a SNES
+sprite and still be painted in a washed, matte palette — that combination is well precedented and is
+roughly the register *Sword & Sworcery* and *Eastward* sit in. Nothing about 16-bit shading requires
+saturated colour; the console could do either.
+
+### Theme is a content axis, and it is the one that will misfire in a prompt
+
+**Do not put "solarpunk" in a style block.** Image models read it as a prop list and return solar
+panels, brass gauges and hanging gardens — anachronisms in a 4000 BCE setting, and canon decides
+what exists here, not the renderer.
+
+The theme belongs in the **subject** line instead, as what the picture is *of* and how it feels:
+country that is being tended rather than exhausted, structures that are maintained, growth that
+looks deliberate. *Bronze age moving directly to solarpunk* is a statement about the world's
+trajectory — this civilisation skipping the extractive middle — and it shows up as **what is in the
+frame**, not as what colour it is.
+
+### The palette did not change, which un-does most of the first draft
+
+Sprites keep the cozy colour e-ink palette: muted, desaturated, matte, warm off-cream highlights,
+warm near-black rather than pure black. **The mixed-map problem the first draft worried about
+mostly evaporates with it** — new sprites sit in the same palette as everything already in
+`assets/`, so the only visible difference is that new figures are shaded with more tonal steps.
+
+**The plates are the deliberate exception.** They are asked to be brighter, with water in motion —
+see `docs/plate-prompts.md`. That is not an inconsistency: a plate is an illustration held close in
+a notebook, where a sprite is 26×40 pixels on top of terrain and has to stay quiet enough not to
+shout at the ground it is standing on.
+
+### This reverses rule §3 below, deliberately
+
+Rule §3 says *"Keep the palette. It was never the part that was wrong."* That was true when it was
+written — every asset that had looked wrong had looked wrong for structure — and it is now
+**overruled by preference rather than by evidence**, which is a legitimate reason and worth naming
+as the actual one. The rule is kept below rather than deleted, because its reasoning still applies
+to *structure*: a new asset that reads badly is still far more likely to be a silhouette or a
+projection problem than a hue problem.
+
+### Brightness is state, not style — and that resolves the whole argument
+
+**The best version of this came last and supersedes the two above.** "Solarpunk, and brighter" is
+not a palette the art is drawn in. It is **what the world becomes where Varuna has worked**:
+buildings get upgraded, country gets tended, and those places brighten toward solarpunk while the
+rest stays muted.
+
+That reframes every difficulty this section has been circling:
+
+- **The muted e-ink palette is the world's starting condition**, not an old direction to be replaced.
+  It stays, and it is what "before" looks like.
+- **Solarpunk brightness is the "after"**, applied per object rather than per sheet.
+- **The mixed map is the mechanic, not a cost.** Two sections above worried that new bright art would
+  sit badly beside old muted art. Under this reading that contrast is the entire point — you can see
+  where you have been and what you have mended.
+- **The global build-step brightness lift is now actively wrong**, not merely withdrawn. Lifting
+  every existing sheet would erase precisely the distinction the mechanic depends on.
+
+**The engine already does this once, which is the shape to copy.** `trackFrame(eastWest, overgrown)`
+picks rail art from *world state* rather than from what the ground is made of — kept line where
+something still runs, overgrown where nothing has for four hundred years. An upgraded building is
+the same question asked of a hut: one thing, two appearances, chosen by what has happened to it.
+
+So the art cost of the mechanic is **a second appearance per upgradeable thing**, not a second
+palette for the game. Two routes, and neither is decided:
+
+1. **A second frame per building**, drawn. Honest and expensive: it doubles the hut sheet.
+2. **A palette shift at draw time** — the same frame, tinted and lifted toward the solarpunk end.
+   Cheap, uniform, and it cannot add what a drawn upgrade would (panels, planting, repair).
+
+Route 2 is the one to prototype, because it costs a tint and answers whether the *idea* reads before
+anything is drawn twice.
+
+**None of this is built and none of it is planned yet.** It is recorded here because it changes what
+the direction is *for*: not a new look, a visible reward.
+
+### What is left of the mixed-map cost
+
+Much less than the first draft claimed, because the palette held. What does differ is *shading*: a
+new figure carries more tonal steps than the ones drawn under the old flat-colour rule, so a fresh
+sprite will read as slightly rounder beside an older one. That is a small and forgivable drift, and
+it resolves as figures are replaced.
+
+The build-step option is **withdrawn, and then withdrawn again for a better reason** — see the
+section above. It existed to lift old art to a brighter palette; there is no brighter palette to
+lift to, and under the progression reading a global lift would destroy the contrast the mechanic is
+made of.
+
 ## Where the direction actually stands
 
 **Ground and objects: painted. Figures and portraits: pixel art.** That split is deliberate and is
@@ -62,7 +183,7 @@ in placed objects, which have known positions and can be kept out of his way.
 
 This is why the decor layer exists and why it was the change that most improved the map.
 
-### 3. Keep the palette. It was never the part that was wrong.
+### 3. Keep the palette. It was never the part that was wrong. *(overruled 2026-09-09 — see the top of this file; kept because its argument about structure still holds)*
 
 The paper/ink/biome swatches in `art-brief.md` survived the direction change unchanged and should
 survive the next one. Every asset that has looked wrong here looked wrong for *structure* — a

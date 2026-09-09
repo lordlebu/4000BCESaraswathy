@@ -390,6 +390,39 @@ export function shoreTextureKey(scene: Phaser.Scene, edge: Edge, maskFrame: numb
 }
 
 /**
+ * The shade on the underside of a floating shelf: dense against the rock above, gone by the bottom.
+ *
+ * **Ambient occlusion, and the same claim `planIslandShadow` makes about the sea.** That one
+ * darkens the water below an island because light does not get underneath it; this darkens the
+ * underside rock for the same reason and on the same gradient -- hard against the lip the island
+ * hangs from, fading with distance from it. Without it the underside is a flat slab of stone lit
+ * exactly like the top, which is the one thing it cannot be.
+ *
+ * A vertical gradient over the whole cell rather than a band, because the whole cell is in shade
+ * and only the amount changes. One texture for the map: the underside is one biome, and every tile
+ * of it wants the same fall-off.
+ */
+export function undersideShadeKey(scene: Phaser.Scene): string {
+  const key = 'shade:underside';
+  if (scene.textures.exists(key)) return key;
+
+  const canvas = scene.textures.createCanvas(key, TILE_SIZE, TILE_SIZE);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  const fall = context.createLinearGradient(0, 0, 0, TILE_SIZE);
+  // The same ink the island's shadow puts on the water, so the two read as one light doing one
+  // thing rather than as two effects that happen to be dark.
+  fall.addColorStop(0, 'rgba(11,28,48,0.52)');
+  fall.addColorStop(0.45, 'rgba(11,28,48,0.28)');
+  fall.addColorStop(1, 'rgba(11,28,48,0.04)');
+  context.fillStyle = fall;
+  context.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  canvas.refresh();
+  return key;
+}
+
+/**
  * A stand-in tile for ground the art has not caught up with.
  *
  * **This is what stops new terrain waiting on a drawing.** `assets/terrain.png` is built by

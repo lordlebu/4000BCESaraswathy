@@ -33,6 +33,7 @@ import {
   blendTextureKey,
   shoreTextureKey,
   bankTextureKey,
+  undersideShadeKey,
   CLIFF_SHEET,
   TREELINE_SHEET,
   createTileTextures,
@@ -51,9 +52,13 @@ import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
  *
  * `marker` is a glyph and has none; `shadow` is a tinted quad and has none either -- see
  * `planIslandShadow` for why the island's shadow is not four frames of painted dark blue. `shore`
- * is baked per edge and variant rather than loaded, so `shoreTextureKey` names its texture instead.
+ * is baked per edge and variant rather than loaded, so `shoreTextureKey` names its texture
+ * instead, and `contact` is the one shadow texture the traveller already uses.
  */
-const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker' | 'shadow' | 'shore'>, string> = {
+const SHEET_KEY: Record<
+  Exclude<PlacementSheet, 'marker' | 'shadow' | 'shore' | 'contact' | 'underside'>,
+  string
+> = {
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
@@ -556,6 +561,28 @@ export class WorldScene extends Phaser.Scene {
           .setOrigin(anchor.x, anchor.y)
           .setDepth(item.depth);
         this.tileOwned.push({ sprite: band, x: item.x, y: item.y });
+        continue;
+      }
+
+      // The contact shadow under anything that stands up. One texture, sized here rather than in
+      // the plan for the same reason a pixel position is: the plan says "there is a shadow at the
+      // foot of this", and how wide a shadow is in pixels is this file's business.
+      // The shade on a shelf's underside: one baked gradient, a whole cell, dense at the top.
+      if (item.sheet === 'underside') {
+        const shade = this.add
+          .image(cx, cy, undersideShadeKey(this))
+          .setAlpha(item.alpha ?? 1)
+          .setDepth(item.depth);
+        this.tileOwned.push({ sprite: shade, x: item.x, y: item.y });
+        continue;
+      }
+
+      if (item.sheet === 'contact') {
+        const shade = this.add
+          .image(cx, cy, SHADOW_TEXTURE)
+          .setDisplaySize(TILE_SIZE * 0.5, TILE_SIZE * 0.17)
+          .setDepth(item.depth);
+        this.tileOwned.push({ sprite: shade, x: item.x, y: item.y });
         continue;
       }
 

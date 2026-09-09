@@ -19,6 +19,34 @@ are the animals that have no plate yet.
 
 ## The style block
 
+**Changed 2026-09-09: brighter, and water in motion.** The twenty plates already painted stay as
+they are — this is what the *next* one asks for. The old block is kept below the new one, because a
+plate painted to it is not wrong, it is just earlier.
+
+> Watercolour natural-history plate from a field naturalist's notebook, ancient South Asia,
+> 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. **Solarpunk
+> light: clean, bright, sunlit colour, saturated where the light falls, with warm bounce light in
+> the shadows rather than flat grey — luminous pigment, never neon and never glowing.** Soft
+> gradients within each shape and gentle ambient shading where the animal meets the ground. Warm
+> near-black for the darks, never pure black. **Living greens — the colour of a thing growing, not
+> drying.** One animal, seen side-on or three-quarter, filling most of the frame, with only a
+> suggestion of its habitat behind it — a few strokes, not a landscape. **Where the habitat is
+> water, paint it moving: ripples, flow lines, a curl of spray, light broken on a moving surface —
+> water in motion rather than a flat wash.** Calm and unhurried; there is no threat in this world
+> and nothing is snarling or hunting. Square image, 1024×1024. Not photographic: no lens blur, no
+> specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no
+> watermark, no signature, no grid, no colour swatches.
+>
+> **Subject:** *(one line from below)*
+
+**"Moving water" means painted motion, not animation.** A plate is one PNG, `build-plates.js`
+ingests one image, and `SpeciesPlate` draws one frame. Animating them is a separate decision with a
+real price — a sheet per plate, a player, and frame budget on a layer that currently costs nothing —
+and nothing here assumes it.
+
+<details>
+<summary>The previous block, for reference</summary>
+
 > Watercolour natural-history plate from a field naturalist's notebook, ancient South Asia,
 > 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted,
 > low-saturation colour — nothing neon, nothing that glows. Soft gradients within each shape and
@@ -28,8 +56,8 @@ are the animals that have no plate yet.
 > is no threat in this world and nothing is snarling or hunting. Square image, 1024×1024. Not
 > photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label,
 > no border, no frame, no watermark, no signature, no grid, no colour swatches.
->
-> **Subject:** *(one line from below)*
+
+</details>
 
 ---
 
