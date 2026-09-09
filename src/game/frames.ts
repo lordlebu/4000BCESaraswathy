@@ -414,6 +414,100 @@ export function cliffFrame(edge: Edge, variant: number): number {
 }
 
 /**
+ * The six corner and cap pieces of `assets/cliffs.png`, in sheet order.
+ *
+ * Appended after the sixteen edge frames, never inserted, because the engine indexes by position:
+ * `tools/build-rims.js` writes them in this order and this list mirrors it, the same agreement
+ * `EDGE_ORDER` holds with `build-edges.js`.
+ */
+export const CORNER_ORDER = [
+  'outer-se',
+  'outer-sw',
+  'inner-se',
+  'inner-sw',
+  'cap-e',
+  'cap-w'
+] as const;
+
+export type CornerPiece = (typeof CORNER_ORDER)[number];
+
+/** Where the corner pieces start: after every edge frame. */
+export const CORNER_BASE = EDGE_ORDER.length * EDGE_VARIANTS;
+
+/** Frame of one corner or cap piece. */
+export function cornerFrame(piece: CornerPiece): number {
+  return CORNER_BASE + CORNER_ORDER.indexOf(piece);
+}
+
+/** What a tile draws where its rock face turns or stops, and which bands that replaces. */
+export interface CliffTurn {
+  /** Corner and cap frames this tile draws. */
+  pieces: CornerPiece[];
+  /** Edges `planCliffs` must not band here, because a piece already carries them. */
+  suppress: Edge[];
+}
+
+/**
+ * Whether a tile's faces turn a corner, and what to draw instead of the bands if they do.
+ *
+ * **A corner piece replaces both bands rather than covering the join between them.** `place()` in
+ * `build-rims.js` lays the south band across the full cell width and the east band down the full
+ * cell height, so on a tile that faces both they already overlap -- there was never a gap. What is
+ * wrong is that two pieces of rock texture meet in a T-junction instead of turning, and painting
+ * something *over* that only adds a third. So the two bands come off and one piece goes on.
+ *
+ * Only the south corners exist. The north lip is 26px against the south face's 62, so a turn there
+ * is a quarter of the pixels and reads as a texture seam rather than a wrong corner -- and asking
+ * for four more paintings to fix it would have cost another art round for the least visible half.
+ * North and west faces keep their bands and the rubble `planCliffJoints` already drops on them.
+ *
+ * `outer-*` and `inner-*` cover the same two edges and are used as two **variants** of one turn,
+ * chosen by hash. That is not what those names mean in a Godot terrain set, where the distinction
+ * is about the diagonal neighbour -- but it is what the paintings are, and inventing a diagonal
+ * rule the art does not draw would put the wrong piece on half the corners.
+ */
+export function cliffTurn(
+  faces: Record<Edge, boolean>,
+  carriesOn: { east: boolean; west: boolean },
+  variant: number
+): CliffTurn {
+  const pieces: CornerPiece[] = [];
+  const suppress = new Set<Edge>();
+
+  if (faces.s && faces.e) {
+    pieces.push(variant % 2 === 0 ? 'outer-se' : 'inner-se');
+    suppress.add('s');
+    suppress.add('e');
+  }
+  if (faces.s && faces.w) {
+    pieces.push(variant % 2 === 0 ? 'outer-sw' : 'inner-sw');
+    suppress.add('s');
+    suppress.add('w');
+  }
+
+  if (pieces.length === 0 && faces.s) {
+    // A run that stops. Asked of the neighbour rather than of this tile, which is the whole
+    // difference between a rim that knows it is a run and one that does not.
+    const endsEast = !faces.e && !carriesOn.east;
+    const endsWest = !faces.w && !carriesOn.west;
+    // **A one-tile wall takes both caps, which is the opposite of what this said first.** The
+    // argument for refusing them was that `cap-e` is rock down the left and `cap-w` rock down the
+    // right, so together they would union into a solid block with the rubble buried in the middle.
+    // Drawn and looked at, that is simply not what happens: the two overlap where both are rock
+    // anyway, and the result crumbles at both ends with rock in the middle -- exactly what a lone
+    // stub should be. What ships without them is a slab with two square cuts, which is worse.
+    //
+    // Most runs *are* one tile -- 18 of 26 on the Aravali, 21 of 32 on the Narmada -- so this is
+    // the common case, not a corner of it.
+    if (endsEast) pieces.push('cap-e');
+    if (endsWest) pieces.push('cap-w');
+    if (endsEast || endsWest) suppress.add('s');
+  }
+
+  return { pieces, suppress: [...suppress] };
+}
+
+/**
  * A treeline is drawn on the *forest* tile, along the edge facing open ground.
  *
  * The same rim the cliff is, filled with trees instead of rock -- and the reference that taught the

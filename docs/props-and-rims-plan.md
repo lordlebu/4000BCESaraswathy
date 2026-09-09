@@ -27,7 +27,7 @@ Sized in the scene rather than the plan (`0.5 × 0.17` of a cell against the tra
 `0.62 × 0.2`), dropped `0.28` of a cell below centre because the feature sheet draws each object
 standing on the lower third of its cell.
 
-## 2. Cliff runs stop dead and corners notch · **half shipped**
+## 2. Cliff runs stop dead and corners notch · **shipped**
 
 Measured, because "the cliffs look sharp" needed a number: **roughly a third of cliff tiles are
 corners** — 84 of Narmada's 310, 42 of Lothal's 125, 46 of the Aravali's 208. So this is the common
@@ -77,6 +77,93 @@ isn't one. Asset 2e below is that piece.
 
 **The selection logic is already asking the right question**, so when corner frames exist only the
 sheet changes.
+
+### The other half, shipped: the art arrived and the rim turns
+
+`assets/source/cliff-corners.png` is a 3 × 2 grid of six painted pieces, appended to the cliff sheet
+as frames 16–21. `cliffTurn` in `frames.ts` decides what a tile does at its corners; `planCliffs`
+emits the piece **and drops the bands it stands in for**; `planCliffJoints` stands down wherever a
+piece now carries its own turn. Per map: 30 corners on Lothal and Dwarka, 60 on the Narmada, 63 on
+the Aravali, and every one of the six pieces reaches every map.
+
+Three rulings inside it that are not obvious from the code:
+
+**Only the south corners exist.** The north lip is 26px against the south face's 62, so a turn there
+is a quarter of the pixels and reads as a texture seam rather than a wrong corner. Four more
+paintings for the least visible half was not worth another art round; north and west faces keep
+their bands and the rubble they already had.
+
+**`outer-*` and `inner-*` are used as two variants of one turn**, chosen by hash. That is *not* what
+those names mean in a Godot terrain set, where the distinction is about the diagonal neighbour — but
+it is what the paintings actually are, and inventing a diagonal rule the art does not draw would put
+the wrong piece on half the corners.
+
+**A one-tile wall takes no cap at either end.** `cap-e` is rock down the left and rubble to the
+right; `cap-w` is its mirror. Emitting both on a lone tile unions them into a solid block with the
+rubble buried in the middle, which says the opposite of what a cap is for. It keeps its plain band
+and the scree at each end.
+
+### What it cost, and what it still gets wrong
+
+The cliff layer goes **769 sprites → 643 (−16.4%)** and **3.76M → 4.91M blended pixels (+30.9%)**,
+because a corner is a full 128 quad where the two bands it replaces were 62 × 128 and 28 × 128.
+Against the decor layer's measured 2.6 ms per million on SwiftShader that is about **+3 ms on a
+67 ms frame**, and fewer draw calls.
+
+Two things are honestly still wrong, both recorded rather than fixed:
+
+**The corner art was a different painting from the band art** — mean colour matched almost exactly,
+`[128, 111, 92]` against `[135, 117, 94]`, but the corners were a fine cobble mosaic where the bands
+were large smooth boulders, so adjacent tiles read as two rocks. **Resolved by replacing the whole
+sheet**: `cliff-edges.png` and `cliff-corners.png` are one pixel-art set, generated back to back, so
+they match by construction. `Gemini_Stones.png` is superseded and has moved to
+`assets/source/dump/`; it is still in git history if the watercolour is ever wanted back.
+
+**What is still worth a re-roll, recorded rather than hidden.** The south face is better than what
+it replaced — bigger boulders, a real soil base, more contrast. Two things are not:
+
+- **The north lip crops to soil and grass with no rock in it.** The source draws its rock below the
+  soil, and a lip is the top fifth of the cell, so the crop takes the part with no stone in it. The
+  prompt lacked one sentence: *the lip must show rock, not only the soil above it.*
+- **The corner pieces sit lighter than the south band they continue.** Measured, the corners match
+  the edge sheet as a whole almost exactly — `[141, 119, 83]` against `[145, 118, 81]` — so they are
+  not off-palette. It is the *south row* that is deliberately darker at `[112, 92, 70]`, which is
+  correct: the brief asks for the south to be a shaded wall where the other three are lit lips. So
+  the corner is mismatched only against the one row it stands beside. A build-time gain would fix
+  the horizontal arm and break the vertical one, which stands in for a lighter east band — so this
+  is left to the painting rather than the pipeline, the same call as the arm-depth stretch.
+
+**A corner's horizontal arm was 34px deep where a straight band is 62 — fixed by baking, not by
+scaling.** Matching the depth by scaling needs a 1.8× vertical stretch that stands every boulder up
+taller than the ones beside it, so instead the band goes *underneath* the corner in the sheet and the
+corner supplies only the turn. Every corner now measures exactly 62 at the columns where it meets a
+straight run. That is the distinction between the two kinds of piece: **a corner turns the wall, so
+it needs the wall; a cap ends the wall, so it replaces it** — caps are not baked, and still taper
+60 → 29 into rubble.
+
+Baked rather than stacked as two sprites in the scene: the stacked version was measured at **+69%
+blended pixels** on the cliff layer, where baking costs nothing beyond the corner quad already drawn.
+
+What a rim still gets wrong beyond this — that its outline is a straight line on the cell boundary at
+all — is a bigger programme than this plan, and is written up in `docs/continuous-edges-plan.md`.
+
+### The two builder faults this found, which looked like art faults
+
+Both were diagnosed as bad art first, and both were `tools/build-rims.js`:
+
+**Keying a sheet that was already transparent.** `isKey`'s second branch removes the brief's "warm
+paper undertone" (r > 205, g > 198, b > 168). A rejected candidate painted its limestone near-white,
+so that branch ate the highlight off every boulder and the frames came back full of holes — which
+read as a botched painting until the holes were traced back here. The builder now skips the key
+entirely when the source already carries real alpha. On the sheet that shipped it would still have
+punched out 0.6% of the stone as scattered white speckles.
+
+**Resampling the whole cell.** Painted corners arrive with air around them — 62–74% of each cell was
+empty — so scaling the cell whole left the rock stopping short of the boundary: **0px deep at the
+left and right columns where a band is 62**, a gap in the wall *and* a step in its height. Cropping
+to the art's own bounding box and fitting by width fixed both. Fitting by *area* instead is the trap:
+the caps measure 433 × 202, and squaring that stands every boulder up 2× taller than the wall it is
+ending.
 
 ## 3. The islands were bare rock with a gem on them · **shipped, and wants better art**
 
@@ -157,7 +244,32 @@ Asset 7's root curtain is the small half of it.
 
 ## The art still wanted
 
-### Asset 2e — cliff corners and caps, so a rim can turn
+### Asset 2e — cliff corners and caps · **delivered, in the sheet**
+
+Kept below as the record of what was asked for and what four rounds of it produced, because the
+prompt was wrong twice in ways that were not obvious until the frames were measured.
+
+**What the prompt was missing.** "A lip along the top and a tall face down one side" describes a
+*wall*. It never said the two things that decide whether a piece is usable:
+
+1. **Which quarter of the cell must be empty.** A corner is drawn on the *high* tile, so the
+   quadrant the rock does not wrap is flat plateau and something else draws there. Rounds one and
+   two came back **73–93% rock in both top quadrants** — every corner would have covered the ground
+   it was standing on. `test/frames.test.ts` now asserts this per piece, which is the one check that
+   catches bad corner art without anybody looking at it.
+2. **That the rock runs off the cell edge and is cut flat there.** A piece floating clear of its
+   own boundary cannot butt against the straight band next door.
+
+Two other rejections worth keeping: a sheet drawn in **isometric extruded prisms with black
+keylines** (the map's rock is near-top-down and has no outlines anywhere), and a **coursed-masonry**
+lip, which is the dry-stone-wall failure `docs/art-direction.md` already records. Both rejects are in
+`assets/source/dump/`.
+
+And the container moved into code rather than into the prompt, the same call the magenta background
+already got: every generated sheet came back **3 across × 2 down** whatever was asked for, so
+`build-rims.js` reads 3 × 2.
+
+### The original ask, for the record
 
 Extends the rim sheet in `docs/art-brief.md` Asset 2d, which already has a proven intake:
 `tools/build-rims.js` keys a 4 × 4 magenta grid, and this is a fifth and sixth row of the same

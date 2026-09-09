@@ -17,6 +17,8 @@ import {
   featureIsUnderfoot,
   overdrawIsUnderfoot,
   EDGE_ORDER,
+  CORNER_BASE,
+  CORNER_ORDER,
   EDGE_STEP,
   EDGE_VARIANTS,
   FENCE_FIRST,
@@ -24,6 +26,7 @@ import {
   FENCE_PIECES,
   GROUND_DEPTH_BASE
 } from '../src/game/frames';
+import type { Edge } from '../src/game/frames';
 import { band } from '../src/world/classify';
 
 const worlds = fieldMaps.map((map) => ({ id: map.id, built: buildFieldMap(map, {}) }));
@@ -538,6 +541,16 @@ describe('a treeline stands where the forest stops', () => {
   });
 });
 
+/** Which edge bands each corner piece stands in for. Mirrors `cliffTurn` in `frames.ts`. */
+const CORNER_COVERS: Record<string, Edge[]> = {
+  'outer-se': ['s', 'e'],
+  'inner-se': ['s', 'e'],
+  'outer-sw': ['s', 'w'],
+  'inner-sw': ['s', 'w'],
+  'cap-e': ['s'],
+  'cap-w': ['s']
+};
+
 describe('a cliff never fences in the water', () => {
   it('draws no rock face where either side is water', () => {
     // Rivers are carved after the elevation field is laid down, so a river keeps the height of the
@@ -549,18 +562,27 @@ describe('a cliff never fences in the water', () => {
       const { tiles, width, height } = built.world;
       for (const c of planScene(built).filter((p) => p.sheet === 'cliffs')) {
         expect(WATER.has(tiles[c.y]![c.x]!.biome), `${id}: cliff standing in water at ${key(c)}`).toBe(false);
-        // The edge this particular frame is for, not every neighbour the tile has. A first version
+        // The edges this particular frame is for, not every neighbour the tile has. A first version
         // checked all four and failed on a hills tile that has a river to one side and correctly
         // draws its face on another -- the placement was right and the assertion was not.
-        const edge = EDGE_ORDER[Math.floor(c.frame / EDGE_VARIANTS)]!;
-        const { dx, dy } = EDGE_STEP[edge];
-        const nx = c.x + dx;
-        const ny = c.y + dy;
-        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
-        expect(
-          WATER.has(tiles[ny]![nx]!.biome),
-          `${id}: cliff at ${key(c)} drops onto water to the ${edge}`
-        ).toBe(false);
+        //
+        // A corner piece stands in for two bands at once, so it answers for both of them. Reading
+        // its frame as an edge index instead would run off the end of EDGE_ORDER and quietly check
+        // nothing, which is how the water rule could come back on exactly the tiles that turn.
+        const edges =
+          c.frame >= CORNER_BASE
+            ? CORNER_COVERS[CORNER_ORDER[c.frame - CORNER_BASE]!]!
+            : [EDGE_ORDER[Math.floor(c.frame / EDGE_VARIANTS)]!];
+        for (const edge of edges) {
+          const { dx, dy } = EDGE_STEP[edge];
+          const nx = c.x + dx;
+          const ny = c.y + dy;
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+          expect(
+            WATER.has(tiles[ny]![nx]!.biome),
+            `${id}: cliff at ${key(c)} drops onto water to the ${edge}`
+          ).toBe(false);
+        }
       }
     }
   });

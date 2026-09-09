@@ -33,6 +33,8 @@ import {
   SHORE_PROPS,
   cliffAt,
   cliffFrame,
+  cliffTurn,
+  cornerFrame,
   treelineAt,
   depthFor,
   edgeMaskFrame,
@@ -50,7 +52,7 @@ import { band } from '../world/classify';
 import { tileHash } from '../world/rng';
 import type { FieldMapWorld } from '../world/fieldMap';
 import type { BiomeId } from '../world/types';
-import type { Edge } from './frames';
+import type { CliffTurn, Edge } from './frames';
 
 /** Which sheet a placement draws from. `marker` is the fallback glyph, which has no sheet. */
 export type PlacementSheet =
@@ -374,27 +376,202 @@ export function planShoreProps(
  * sorted by row like the things that stand up, one slot under the traveller -- he walks along the
  * top of a ledge and in front of the face below him, which is what both of those should look like.
  */
+/**
+ * The elevation bands the cliff layer draws from: the world's own, run through one majority filter.
+ *
+ * **A drawing decision, not a terrain change.** `band()` quantises elevation to 0, 1 or 2, and the
+ * boundary between two bands follows a noise contour, so at tile resolution it zigzags. Every zigzag
+ * becomes an axis-aligned wall segment, and the result reads as a hedge maze rather than a landform:
+ * a *low* tile ringed by higher neighbours gets four faces pointed at it by those neighbours, which
+ * draws a pen around one square of grass. Across the four maps there were 20 tiles enclosed on three
+ * sides or more; one majority pass leaves 2, and takes 11-24% of all faces with it.
+ *
+ * Nothing outside this file sees it. Biomes, walkability, travel cost and every saved journey are
+ * decided from `world/classify.ts` at generation time and are untouched, so this needs no
+ * `SAVE_VERSION` bump -- the same seed still generates the same world, and only the rock drawn on
+ * its slopes moves.
+ *
+ * One pass rather than two on purpose. A second takes a further 3-6% of faces and starts rounding
+ * off real headlands, which is paying landform for tidiness.
+ */
+const CLIFF_BANDS = new WeakMap<object, number[][]>();
+
+function cliffBands(world: FieldMapWorld['world']): number[][] {
+  const cached = CLIFF_BANDS.get(world);
+  if (cached) return cached;
+  const raw = world.tiles.map((row) => row.map((t) => band(t.elevation) as number));
+  const out = raw.map((row) => [...row]);
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      const votes = [0, 0, 0];
+      for (let dy = -1; dy <= 1; dy += 1) {
+        for (let dx = -1; dx <= 1; dx += 1) {
+          const v = raw[y + dy]?.[x + dx];
+          if (v !== undefined) votes[v]! += 1;
+        }
+      }
+      out[y]![x] = votes.indexOf(Math.max(...votes));
+    }
+  }
+  CLIFF_BANDS.set(world, out);
+  return out;
+}
+
+function facesAt(world: FieldMapWorld['world'], x: number, y: number, edge: Edge): boolean {
+  const tile = world.tiles[y]?.[x];
+  if (!tile) return false;
+  const here = band(tile.elevation);
+  if (here === 0) return false; // nothing to fall away from
+  const { dx, dy } = EDGE_STEP[edge];
+  // A map edge is not a cliff. The world simply stops there, and drawing a face along it would
+  // fence the player in with a wall that has nothing on the other side.
+  const neighbour = world.tiles[y + dy]?.[x + dx];
+  if (!neighbour) return false;
+  if (!cliffAt(here, band(neighbour.elevation), tile.biome, neighbour.biome)) return false;
+
+  // **The smooth contour only ever takes faces away, never adds them.** Asking the smoothed grid
+  // instead of the real one is the obvious move and it invents rock: a majority filter will raise a
+  // genuinely low tile to match its neighbours, and then a face gets drawn standing on lowland,
+  // facing a neighbour that is not actually below it. Two tests said so immediately. Intersecting
+  // the two keeps every face standing on ground that is really high and really drops away, and
+  // still drops the ones that exist only because the contour wobbled by one tile.
+  const smooth = cliffBands(world);
+  return smooth[y]![x]! > smooth[y + dy]![x + dx]!;
+}
+
+/**
+ * Loose stone at the foot of a rock face, on the tile below it.
+ *
+ * **The one thing that makes a wall stand on the ground rather than be pasted over it.** A south
+ * face currently meets flat grass across a single pixel row -- the sharpest edge in the scene, and
+ * the one the eye reads as "tile" first. Real rock sheds a talus, so the stone here is both what
+ * softens the seam and what would actually be lying there, the same argument `planCliffJoints` won
+ * on for run ends.
+ *
+ * It is the cheap half of "the rim should nudge into the surrounding tile": debris crossing the
+ * boundary, with no new art and nothing drawn outside a cell. See `docs/continuous-edges-plan.md`.
+ */
+const TALUS_PROPS: readonly string[] = ['scree', 'pebbles', 'boulder-small'];
+
+/** How far down the tile below a face the talus reaches, and how far across it spreads. */
+const TALUS_DROP = -0.34;
+const TALUS_SPREAD = 0.3;
+
+export function planCliffTalus(
+  world: FieldMapWorld['world'],
+  builtOn: ReadonlySet<string>
+): Placement[] {
+  const out: Placement[] = [];
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      if (!facesAt(world, x, y, 's')) continue;
+      const below = world.tiles[y + 1]?.[x];
+      // Nothing is shed into water, for the reason `cliffAt` refuses a face there at all.
+      if (!below || below.biome === 'sea' || below.biome === 'river') continue;
+      // And nothing onto a roof, for the reason paddy once grew through one.
+      if (builtOn.has(`${x},${y + 1}`)) continue;
+
+      // Two or three stones, so a long run does not repeat as a stripe.
+      const roll = tileHash(world.seed, x, y, 'talus');
+      const count = 2 + (roll % 2);
+      for (let i = 0; i < count; i += 1) {
+        const pick = tileHash(world.seed, x, y, `talus-prop-${i}`);
+        const prop = TALUS_PROPS[pick % TALUS_PROPS.length]!;
+        const frame = decorFrame(prop, tileHash(world.seed, x, y, `talus-frame-${i}`));
+        if (frame === null) continue;
+        const jitter = (tileHash(world.seed, x, y, `talus-x-${i}`) % 100) / 100 - 0.5;
+        out.push({
+          sheet: 'decor',
+          frame,
+          x,
+          y: y + 1,
+          offset: { x: jitter * 2 * TALUS_SPREAD, y: TALUS_DROP + (i / count) * 0.18 },
+          // On the tile it has fallen onto, in that tile's own undergrowth slot, so a player
+          // standing there walks in front of it rather than behind.
+          depth: depthFor(y + 1, ROW_SLOT.undergrowth)
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * What this tile's rock face does at its corners, and which of its bands that replaces.
+ *
+ * One function asked by both passes, so a corner cannot be drawn by one and tidied by the other.
+ */
+function turnAt(world: FieldMapWorld['world'], x: number, y: number): CliffTurn {
+  const faces = {
+    n: facesAt(world, x, y, 'n'),
+    e: facesAt(world, x, y, 'e'),
+    s: facesAt(world, x, y, 's'),
+    w: facesAt(world, x, y, 'w')
+  };
+  return cliffTurn(
+    faces,
+    {
+      east: facesAt(world, x + 1, y, 's'),
+      west: facesAt(world, x - 1, y, 's')
+    },
+    tileHash(world.seed, x, y, 'cliff-turn')
+  );
+}
+
+/**
+ * How far a rim face reaches past the cell that owns it, as a fraction of a tile.
+ *
+ * **The rim's outline was the tile grid, and that is what made it read as tiles.** A band is drawn
+ * inside its own cell and stops dead on the boundary, so every wall in the scene was an
+ * axis-aligned segment exactly 128 pixels long, sixteen of them to a screen. Letting the face hang
+ * over the tile it drops onto puts the silhouette off the grid, which is the whole of *"they need
+ * to nicely nudge into surrounding tiles"*.
+ *
+ * **North is zero, and that is not an oversight.** The other three are faces -- you are looking at
+ * a wall, and a wall overhangs what is below it. North is a *lip*: the top of the break, seen from
+ * above. Hanging it over the tile above would lay rock across ground that is higher than the rock.
+ *
+ * The side faces get half of what the south face gets, because they are 28px wide against its 62
+ * and the same absolute reach would push most of the strip out of its own cell.
+ *
+ * Depth already works out and was checked rather than assumed: a face on row *y* draws at
+ * `depthFor(y, undergrowth)` = 10y+1, and a player standing on row *y*+1 draws at 10y+15, so the
+ * player walks in front of an overhanging face rather than behind it.
+ */
+const OVERHANG: Record<Edge, { x: number; y: number }> = {
+  n: { x: 0, y: 0 },
+  e: { x: 0.06, y: 0 },
+  s: { x: 0, y: 0.12 },
+  w: { x: -0.06, y: 0 }
+};
+
 export function planCliffs(world: FieldMapWorld['world']): Placement[] {
   const out: Placement[] = [];
   for (let y = 0; y < world.height; y += 1) {
     for (let x = 0; x < world.width; x += 1) {
-      const tile = world.tiles[y]![x]!;
-      const here = band(tile.elevation);
-      if (here === 0) continue; // nothing to fall away from
+      const turn = turnAt(world, x, y);
       for (const edge of EDGE_ORDER) {
-        const { dx, dy } = EDGE_STEP[edge];
-        const nx = x + dx;
-        const ny = y + dy;
-        // A map edge is not a cliff. The world simply stops there, and drawing a face along it
-        // would fence the player in with a wall that has nothing on the other side.
-        if (nx < 0 || ny < 0 || nx >= world.width || ny >= world.height) continue;
-        const neighbour = world.tiles[ny]![nx]!;
-        if (!cliffAt(here, band(neighbour.elevation), tile.biome, neighbour.biome)) continue;
+        if (turn.suppress.includes(edge)) continue;
+        if (!facesAt(world, x, y, edge)) continue;
         out.push({
           sheet: 'cliffs',
           frame: cliffFrame(edge, tileHash(world.seed, x, y, `cliff-${edge}`)),
           x,
           y,
+          offset: OVERHANG[edge],
+          depth: depthFor(y, ROW_SLOT.undergrowth)
+        });
+      }
+      // After the bands, so a corner overdraws anything a neighbour's band bleeds across the seam.
+      for (const piece of turn.pieces) {
+        out.push({
+          sheet: 'cliffs',
+          frame: cornerFrame(piece),
+          x,
+          y,
+          // A corner carries a south band inside it, so it hangs the same way that band does, or
+          // the wall would step at the very seam the corner exists to smooth.
+          offset: OVERHANG.s,
           depth: depthFor(y, ROW_SLOT.undergrowth)
         });
       }
@@ -483,16 +660,7 @@ export function planCliffJoints(world: FieldMapWorld['world']): Placement[] {
   const out: Placement[] = [];
 
   /** Whether the tile at x,y drops away on this edge -- the same question `planCliffs` asks. */
-  const faces = (x: number, y: number, edge: Edge): boolean => {
-    const tile = world.tiles[y]?.[x];
-    if (!tile) return false;
-    const here = band(tile.elevation);
-    if (here === 0) return false;
-    const { dx, dy } = EDGE_STEP[edge];
-    const neighbour = world.tiles[y + dy]?.[x + dx];
-    if (!neighbour) return false;
-    return cliffAt(here, band(neighbour.elevation), tile.biome, neighbour.biome);
-  };
+  const faces = (x: number, y: number, edge: Edge): boolean => facesAt(world, x, y, edge);
 
   // The four cell corners, each named by the two edges that meet there.
   const CORNERS: readonly { a: Edge; b: Edge; x: number; y: number }[] = [
@@ -504,6 +672,15 @@ export function planCliffJoints(world: FieldMapWorld['world']): Placement[] {
 
   for (let y = 0; y < world.height; y += 1) {
     for (let x = 0; x < world.width; x += 1) {
+      // Which of this tile's bands a corner piece has taken over. The joint layer exists to stand
+      // in for corner art that did not exist; where the art now covers an edge it carries its own
+      // turn and its own crumbling end, so a boulder there would be rubble on top of painted-in
+      // rubble -- and the joint, not the art, would be what looked wrong.
+      //
+      // Checked per *reason* rather than per tile. A tile can perfectly well have a replaced south
+      // band and still need rubble where its north face stops, and a blanket "this tile has a
+      // corner" test would drop that.
+      const turned = turnAt(world, x, y).suppress;
       for (const corner of CORNERS) {
         const alongX = corner.b === 'e' ? 1 : -1;
         const alongY = corner.a === 's' ? 1 : -1;
@@ -518,6 +695,11 @@ export function planCliffJoints(world: FieldMapWorld['world']): Placement[] {
         const endOfRow = hasA && !hasB && !faces(x + alongX, y, corner.a);
         const endOfColumn = hasB && !hasA && !faces(x, y + alongY, corner.b);
         if (!elbow && !endOfRow && !endOfColumn) continue;
+        // An elbow is covered when either of its bands is; a run's end is covered when the band
+        // that run is made of is.
+        if (elbow && (turned.includes(corner.a) || turned.includes(corner.b))) continue;
+        if (endOfRow && turned.includes(corner.a)) continue;
+        if (endOfColumn && turned.includes(corner.b)) continue;
 
         // Rubble, from the stones the decor sheet already carries. An elbow gathers more than a
         // run's end does, so it gets the bigger stone.
@@ -572,6 +754,10 @@ export function planTreeline(world: FieldMapWorld['world']): Placement[] {
           frame: cliffFrame(edge, tileHash(world.seed, x, y, `treeline-${edge}`)),
           x,
           y,
+          // The same overhang the rock gets. A rim is a slot, so what fixes the silhouette on one
+          // material fixes it on the other -- a canopy spilling over the open ground beside it is
+          // exactly what the wall of trees should do.
+          offset: OVERHANG[edge],
           depth: depthFor(y, ROW_SLOT.undergrowth)
         });
       }
@@ -854,6 +1040,7 @@ export function planScene(built: FieldMapWorld): Placement[] {
     // After the faces, so a stone covers the end of the band it is tidying rather than sitting
     // behind it.
     ...planCliffJoints(built.world),
+    ...planCliffTalus(built.world, builtOn),
     ...planTreeline(built.world),
     ...planDecor(built.world, builtOn),
     ...planShoreProps(built.world, builtOn),

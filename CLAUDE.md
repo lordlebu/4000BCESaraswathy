@@ -200,6 +200,7 @@ The art docs, in the order they are useful:
 | `docs/rendering.md` | why the frame costs what it costs, and the four levers when it costs more |
 | `docs/shoreline-plan.md` | the coast and riverbank emboss: what is planned, and what it must not touch |
 | `docs/props-and-rims-plan.md` | prop shadows, cliff joints, island flora and underside shading — and the art still wanted |
+| `docs/continuous-edges-plan.md` | why a rim still reads as a tile, and the three mechanisms that would stop it |
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with

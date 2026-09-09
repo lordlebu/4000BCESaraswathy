@@ -11,6 +11,9 @@ import {
   GRID,
   EDGE_ORDER,
   EDGE_VARIANTS,
+  CORNER_ORDER,
+  CORNER_BASE,
+  cornerFrame,
   HUT_VARIANTS,
   FIRST_YURT,
   hutFrame,
@@ -735,11 +738,14 @@ describe('the rim sheets are built the way the engine indexes them', () => {
   // magenta 4x4 painting into a transparent strip. Every failure that pass can have is invisible
   // in the source file and obvious in the game, so it is checked here rather than by looking.
 
+  /** Extra frames appended after the sixteen edge ones. Only the cliff sheet has any. */
+  const EXTRA: Record<string, number> = { cliffs: CORNER_ORDER.length, treeline: 0 };
+
   for (const sheet of ['cliffs', 'treeline'] as const) {
-    it(`${sheet}: is one row of EDGE_ORDER x EDGE_VARIANTS frames`, () => {
+    it(`${sheet}: is one row of EDGE_ORDER x EDGE_VARIANTS frames, plus any corners`, () => {
       const { width, height } = pngSize(`assets/${sheet}.png`);
       expect(height).toBe(GRID);
-      expect(width).toBe(GRID * EDGE_ORDER.length * EDGE_VARIANTS);
+      expect(width).toBe(GRID * (EDGE_ORDER.length * EDGE_VARIANTS + EXTRA[sheet]!));
     });
 
     it(`${sheet}: keeps no trace of the chroma key`, () => {
@@ -759,12 +765,64 @@ describe('the rim sheets are built the way the engine indexes them', () => {
       expect(tinted, `${sheet} has magenta fringing`).toBeLessThan(100);
     });
 
+    if (sheet === 'cliffs') {
+      it('cliffs: each corner piece keeps the quarter of the cell it must leave bare', () => {
+        // **The one assertion that catches bad corner art on its own.** A corner frame is drawn on
+        // the *high* tile: the rock wraps two edges and the opposite quarter has to stay empty so
+        // the plateau's own ground texture shows through it. Two generated sheets were rejected for
+        // failing exactly this -- one measured 73-93% rock in *both* top quadrants, so every corner
+        // would have covered the ground it was standing on -- and both looked fine in the source
+        // file. Checking it here means the next sheet is checked by arithmetic rather than by
+        // whoever remembers to look.
+        //
+        // Named per piece rather than counted, for the reason the file header gives: a total across
+        // six frames passes while one of them is solid.
+        const bare: Record<string, [number, number]> = {
+          // piece -> the quadrant that must be empty, as [column, row] with 0 = first half.
+          'outer-se': [0, 0],
+          'outer-sw': [1, 0],
+          'inner-se': [0, 0],
+          'inner-sw': [1, 0],
+          'cap-e': [1, 0],
+          'cap-w': [0, 0]
+        };
+        const { rows, stride } = decode('assets/cliffs.png');
+        const half = GRID / 2;
+        for (const piece of CORNER_ORDER) {
+          const ox = cornerFrame(piece) * GRID;
+          const [qx, qy] = bare[piece]!;
+          let opaque = 0;
+          for (let y = qy * half; y < (qy + 1) * half; y += 1) {
+            for (let x = qx * half; x < (qx + 1) * half; x += 1) {
+              if (rows[y * stride + (ox + x) * 4 + 3]! > 24) opaque += 1;
+            }
+          }
+          const filled = opaque / (half * half);
+          expect(filled, `${piece}: its bare quarter is ${Math.round(filled * 100)}% rock`)
+            .toBeLessThan(0.05);
+        }
+      });
+
+      it('cliffs: the corner frames sit after every edge frame', () => {
+        // Appended, never inserted. Inserting one would shift every edge frame by its own width and
+        // silently repaint every rim on every map, which no other test would notice.
+        expect(CORNER_BASE).toBe(EDGE_ORDER.length * EDGE_VARIANTS);
+        const sheet = pngSize('assets/cliffs.png');
+        for (const piece of CORNER_ORDER) {
+          expect(cornerFrame(piece)).toBeGreaterThanOrEqual(CORNER_BASE);
+          expect(cornerFrame(piece) * GRID).toBeLessThan(sheet.width);
+        }
+      });
+    }
+
     it(`${sheet}: puts each frame's art against the edge it is named for`, () => {
       // A frame indexed as 'n' whose art sits at the bottom draws a ledge on the wrong side of the
       // tile. Nothing throws; the map just looks wrong in a way that is hard to attribute.
-      const { rows, width, stride } = decode(`assets/${sheet}.png`);
+      const { rows, stride } = decode(`assets/${sheet}.png`);
       const solid = (x: number, y: number) => rows[y * stride + x * 4 + 3]! > 24;
-      const frames = width / GRID;
+      // Edge frames only. The corners appended after them occupy two edges at once by design, so
+      // asking which single edge they sit against has no answer -- they get their own case above.
+      const frames = EDGE_ORDER.length * EDGE_VARIANTS;
       for (let f = 0; f < frames; f += 1) {
         const edge = EDGE_ORDER[Math.floor(f / EDGE_VARIANTS)]!;
         const ox = f * GRID;
