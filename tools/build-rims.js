@@ -61,6 +61,30 @@ const ROWS = ['n', 'e', 's', 'w'];
 const DEPTH = { n: 0.20, e: 0.22, s: 0.48, w: 0.22 };
 
 /**
+ * The six corner and cap pieces, in sheet order, appended after the sixteen edge frames.
+ *
+ * **A corner frame replaces both edge bands on its tile rather than covering the join between
+ * them.** `place` lays the south band across the full cell width and the east band down the full
+ * cell height, so on a corner tile those two already overlap -- there is no gap to fill, and what
+ * is wrong is that two pieces of rock texture meet in a T-junction instead of turning. So each of
+ * these cells has to be a whole corner of rock, carrying the lip along one side *and* the tall face
+ * down the other. See `docs/props-and-rims-plan.md`.
+ *
+ * Order is a contract with `frames.ts`, the same way `ROWS` is: appended, never inserted, because
+ * the engine indexes by position.
+ */
+const CORNERS = ['outer-se', 'outer-sw', 'inner-se', 'inner-sw', 'cap-e', 'cap-w'];
+
+/**
+ * Corners are cropped to the full cell rather than to a band.
+ *
+ * A band is cropped back to where its art stops because it is a strip against one edge. A corner
+ * is not a strip: it occupies two edges at once and the interesting part is the turn between them,
+ * which sits in the middle of the cell. Cropping it like a band would cut the turn out.
+ */
+const CORNER_DEPTH = 1;
+
+/**
  * These are a ceiling, not a target. The art decides, up to this.
  *
  * The prompt asked for an eighth on the lip edges and two fifths on the face; the paintings came
@@ -76,7 +100,10 @@ const DEPTH = { n: 0.20, e: 0.22, s: 0.48, w: 0.22 };
 
 /** Sheets to build: source file in assets/source, output name in assets. */
 const SHEETS = [
-  { id: 'cliffs', from: 'Gemini_Stones.png', to: 'cliffs.png' },
+  // `corners` is optional and names a 2x3 magenta grid of the six pieces in `CORNERS` order.
+  // Absent, the sheet is built with sixteen edge frames exactly as before -- which is what ships
+  // today, and why this is safe to have in place before the art exists.
+  { id: 'cliffs', from: 'Gemini_Stones.png', to: 'cliffs.png', corners: 'cliff-corners.png' },
   { id: 'treeline', from: 'Gemini_tree-rim2.png', to: 'treeline.png' }
 ];
 
@@ -377,7 +404,7 @@ function place(band, bandW, bandH, edge) {
 
 // --- build ----------------------------------------------------------------
 
-function buildSheet({ id, from, to }, apply) {
+function buildSheet({ id, from, to, corners }, apply) {
   const file = path.join(SRC, from);
   if (!fs.existsSync(file)) {
     console.log(`  ${id}: ${from} not found -- skipped`);
@@ -435,9 +462,63 @@ function buildSheet({ id, from, to }, apply) {
     report.push(`${edge}: ${depths.join(', ')}px`);
   });
 
-  const png = encodePng(sheetW, CELL, sheet);
+  // --- the corner and cap pieces, appended -------------------------------
+  //
+  // Absent, nothing changes and the sheet is the sixteen edge frames it has always been. Present,
+  // six more frames go on the end in `CORNERS` order -- appended rather than inserted, because the
+  // engine indexes by position and inserting would silently repaint every rim on the map.
+  let frames = ROWS.length * VARIANTS;
+  let wide = sheet;
+  let wideW = sheetW;
+  const cornerFile = corners ? path.join(SRC, corners) : null;
+  if (cornerFile && fs.existsSync(cornerFile)) {
+    const grid = decodePng(cornerFile);
+    const cols = 2;
+    const rows = 3;
+    const cw = Math.floor(grid.width / cols);
+    const ch = Math.floor(grid.height / rows);
+
+    wideW = sheetW + CORNERS.length * CELL;
+    wide = Buffer.alloc(wideW * CELL * 4);
+    for (let y = 0; y < CELL; y += 1) {
+      const fromRow = y * sheetW * 4;
+      sheet.copy(wide, y * wideW * 4, fromRow, fromRow + sheetW * 4);
+    }
+
+    CORNERS.forEach((name, index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      const cell = Buffer.alloc(cw * ch * 4);
+      for (let y = 0; y < ch; y += 1) {
+        for (let x = 0; x < cw; x += 1) {
+          const si = ((row * ch + y) * grid.width + col * cw + x) * 4;
+          const di = (y * cw + x) * 4;
+          cell[di] = grid.data[si];
+          cell[di + 1] = grid.data[si + 1];
+          cell[di + 2] = grid.data[si + 2];
+          cell[di + 3] = grid.data[si + 3];
+        }
+      }
+      const keyed = key(cell, cw, ch);
+      // Whole cell, not a band: the turn a corner exists to draw sits in the middle of it, and a
+      // band crop would cut exactly that out. See CORNER_DEPTH.
+      const box = { x0: 0, x1: cw, y0: 0, y1: ch };
+      const band = resample(keyed, cw, box, Math.round(CELL * CORNER_DEPTH), Math.round(CELL * CORNER_DEPTH));
+      const ox = sheetW + index * CELL;
+      for (let y = 0; y < CELL; y += 1) {
+        const fromRow = y * CELL * 4;
+        band.copy(wide, (y * wideW + ox) * 4, fromRow, fromRow + CELL * 4);
+      }
+      report.push(`${name}`);
+    });
+    frames += CORNERS.length;
+  } else if (corners) {
+    console.log(`    (no ${corners} yet -- sixteen edge frames only)`);
+  }
+
+  const png = encodePng(wideW, CELL, wide);
   const kb = (png.length / 1024).toFixed(1);
-  console.log(`  ${id}: ${from} (${img.width}x${img.height}) -> ${to} ${sheetW}x${CELL}, ${kb} KB`);
+  console.log(`  ${id}: ${from} (${img.width}x${img.height}) -> ${to} ${wideW}x${CELL}, ${frames} frames, ${kb} KB`);
   console.log(`    ${report.join('   ')}`);
   if (apply) fs.writeFileSync(path.join(OUT, to), png);
   return png;

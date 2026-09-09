@@ -37,7 +37,21 @@ case, not an edge case.
 
 `cliffFrame(edge, variant)` picks from four directions and four variants **and asks nothing about
 its neighbours**. That is why a run ends on a straight vertical cut no rock ever made, and why two
-perpendicular faces on one tile meet at a right angle with a notch in the elbow.
+perpendicular faces on one tile do not turn into one another.
+
+**Corrected after reading `place()` in `tools/build-rims.js`: the elbow is not a gap.** The south
+band is laid across the *full* cell width and the east band down the *full* cell height, so on a
+corner tile the two already overlap in the corner quadrant. Nothing is missing there. What is wrong
+is that two different pieces of rock texture meet at a right angle in a T-junction — the face does
+not *turn*, it collides with itself.
+
+That changes what Asset 2e has to be, and the first draft of this plan had it backwards:
+
+> **A corner frame replaces both bands on that tile. It does not fill a notch between them.**
+
+Which in turn means the selection work is not only "pick a corner frame" — it is also **suppress the
+two edge bands that corner stands in for**. A corner drawn *over* the existing pair would be a third
+texture on top of a collision rather than a fix for it.
 
 **The industry answer to this is autotiling** — choose the frame from a bitmask of which neighbours
 share the state, with inner and outer corner pieces drawn for the purpose. Godot's terrain sets,
@@ -157,8 +171,20 @@ Six pieces, which is the minimum that lets a run read as continuous:
 | inner corner ×2 | the concave elbow, where the ground wraps around a notch |
 | end cap ×2 | where a run stops: the face tapering into rubble and soil rather than cut off square |
 
-Then `cliffFrame` grows a neighbour bitmask and `planCliffJoints` becomes a fallback for grounds
-with no corner art rather than the main event.
+**Each corner cell must be a complete tile-corner of rock**, carrying both the along-the-top lip and
+the tall face down one side, because it stands in for a north/south band *and* an east/west one. A
+cell drawn as just the turn, meant to be laid over two existing bands, cannot be used — see the
+diagnosis above.
+
+Then `cliffFrame` grows a neighbour bitmask, `planCliffs` **stops emitting the two edge bands on a
+tile that draws a corner**, and `planCliffJoints` becomes a fallback for grounds with no corner art
+rather than the main event.
+
+**Nothing of that selection work is worth writing before the frames exist.** A selector that picks
+frames which are not on the sheet is the "written, tested, and never called" shape this repository
+has shipped three mechanics without — and here it would be worse than inert, because suppressing the
+edge bands in favour of a frame that does not exist would leave the corner tile blank. The pipeline
+half is safe to build ahead of the art; the selection half is not.
 
 ### Asset 7 — sky-island flora, and the intake it needs first
 

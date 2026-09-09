@@ -85,6 +85,42 @@ as the actual one. The rule is kept below rather than deleted, because its reaso
 to *structure*: a new asset that reads badly is still far more likely to be a silhouette or a
 projection problem than a hue problem.
 
+### Brightness is state, not style — and that resolves the whole argument
+
+**The best version of this came last and supersedes the two above.** "Solarpunk, and brighter" is
+not a palette the art is drawn in. It is **what the world becomes where Varuna has worked**:
+buildings get upgraded, country gets tended, and those places brighten toward solarpunk while the
+rest stays muted.
+
+That reframes every difficulty this section has been circling:
+
+- **The muted e-ink palette is the world's starting condition**, not an old direction to be replaced.
+  It stays, and it is what "before" looks like.
+- **Solarpunk brightness is the "after"**, applied per object rather than per sheet.
+- **The mixed map is the mechanic, not a cost.** Two sections above worried that new bright art would
+  sit badly beside old muted art. Under this reading that contrast is the entire point — you can see
+  where you have been and what you have mended.
+- **The global build-step brightness lift is now actively wrong**, not merely withdrawn. Lifting
+  every existing sheet would erase precisely the distinction the mechanic depends on.
+
+**The engine already does this once, which is the shape to copy.** `trackFrame(eastWest, overgrown)`
+picks rail art from *world state* rather than from what the ground is made of — kept line where
+something still runs, overgrown where nothing has for four hundred years. An upgraded building is
+the same question asked of a hut: one thing, two appearances, chosen by what has happened to it.
+
+So the art cost of the mechanic is **a second appearance per upgradeable thing**, not a second
+palette for the game. Two routes, and neither is decided:
+
+1. **A second frame per building**, drawn. Honest and expensive: it doubles the hut sheet.
+2. **A palette shift at draw time** — the same frame, tinted and lifted toward the solarpunk end.
+   Cheap, uniform, and it cannot add what a drawn upgrade would (panels, planting, repair).
+
+Route 2 is the one to prototype, because it costs a tint and answers whether the *idea* reads before
+anything is drawn twice.
+
+**None of this is built and none of it is planned yet.** It is recorded here because it changes what
+the direction is *for*: not a new look, a visible reward.
+
 ### What is left of the mixed-map cost
 
 Much less than the first draft claimed, because the palette held. What does differ is *shading*: a
@@ -92,8 +128,10 @@ new figure carries more tonal steps than the ones drawn under the old flat-colou
 sprite will read as slightly rounder beside an older one. That is a small and forgivable drift, and
 it resolves as figures are replaced.
 
-The build-step option is therefore **withdrawn rather than parked**: it existed to lift old art to a
-brighter palette, and there is no longer a brighter palette to lift it to.
+The build-step option is **withdrawn, and then withdrawn again for a better reason** — see the
+section above. It existed to lift old art to a brighter palette; there is no brighter palette to
+lift to, and under the progression reading a global lift would destroy the contrast the mechanic is
+made of.
 
 ## Where the direction actually stands
 
