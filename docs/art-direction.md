@@ -12,10 +12,12 @@ are settled, and which are still open.
 Read this before proposing a change of direction. Two have been proposed and one was reverted; the
 reasoning is here so a third does not repeat either.
 
-## The direction changed on 2026-09-09: solarpunk, and brighter
+## The direction changed on 2026-09-09, and it has three axes
 
-**Sprites are now 16-bit-era solarpunk watercolour pixel art. Plates are brighter, with water in
-motion.** Muted is over.
+**Corrected the same day.** The first version of this section said "solarpunk, and brighter" and
+made *colour* carry the change — bright, saturated, living greens. That collapsed three independent
+decisions into one and got the palette wrong. They are separated below, and the palette is the one
+that did **not** move.
 
 **This applies to new art only.** Nothing is being redrawn. Everything in `assets/` and
 `src/ui/plates/` stays exactly as it is, and the direction below describes what the *next* asset
@@ -37,19 +39,42 @@ word NES should not appear in a prompt — asking for it would fight everything 
 quantises every figure to a shared **22-colour** palette. That is 16-bit sizing. Under a real NES
 constraint every sprite currently shipped would be illegal by a factor of seven.
 
-### What solarpunk changes, concretely
+### The three axes, and they are independent
 
-| | Was | Is |
+| Axis | Setting | What it governs |
 |---|---|---|
-| Saturation | muted, washed, "nothing that glows" | **clean and bright**, saturated where light falls; still pigment rather than neon |
-| Light | gentle contrast, flat ambient | **warm direct sun**, with bounce light in the shadows rather than dead grey |
-| Greens | olive and grey-green | **living greens**, the colour of a thing that is growing rather than drying |
-| Darks | warm near-black plum-brown | unchanged — a coloured dark, never `#000000` |
-| Paper base | off-cream | unchanged for plates; sprites sit on transparency and never needed one |
-| Mood | a naturalist's quiet study | the same study **on a good morning** — abundance and repair, not decay |
+| **Pixelation** | **16-bit, SNES-era** | *How the pixels behave.* Two or three tones per material, hard edges, light dithering where tones meet, sixteen-ish colours per palette. **Changed.** |
+| **Colouration** | **cozy colour e-ink: muted, desaturated, matte** | *What the colours are.* Every hue slightly washed, warm off-cream highlights, warm near-black instead of pure black. **Unchanged, and carried over whole.** |
+| **Theme** | **bronze age moving directly to solarpunk** | *What is depicted and its mood.* Abundance, repair, infrastructure that works, growing things. **Changed.** |
 
-Solarpunk here is a *light* and a *mood*, not a set of props. It does not mean adding solar panels
-and brass to a 4000 BCE setting; canon decides what exists and this decides how it is lit.
+Reading them as one is what produced the wrong first draft. A sprite can be shaded like a SNES
+sprite and still be painted in a washed, matte palette — that combination is well precedented and is
+roughly the register *Sword & Sworcery* and *Eastward* sit in. Nothing about 16-bit shading requires
+saturated colour; the console could do either.
+
+### Theme is a content axis, and it is the one that will misfire in a prompt
+
+**Do not put "solarpunk" in a style block.** Image models read it as a prop list and return solar
+panels, brass gauges and hanging gardens — anachronisms in a 4000 BCE setting, and canon decides
+what exists here, not the renderer.
+
+The theme belongs in the **subject** line instead, as what the picture is *of* and how it feels:
+country that is being tended rather than exhausted, structures that are maintained, growth that
+looks deliberate. *Bronze age moving directly to solarpunk* is a statement about the world's
+trajectory — this civilisation skipping the extractive middle — and it shows up as **what is in the
+frame**, not as what colour it is.
+
+### The palette did not change, which un-does most of the first draft
+
+Sprites keep the cozy colour e-ink palette: muted, desaturated, matte, warm off-cream highlights,
+warm near-black rather than pure black. **The mixed-map problem the first draft worried about
+mostly evaporates with it** — new sprites sit in the same palette as everything already in
+`assets/`, so the only visible difference is that new figures are shaded with more tonal steps.
+
+**The plates are the deliberate exception.** They are asked to be brighter, with water in motion —
+see `docs/plate-prompts.md`. That is not an inconsistency: a plate is an illustration held close in
+a notebook, where a sprite is 26×40 pixels on top of terrain and has to stay quiet enough not to
+shout at the ground it is standing on.
 
 ### This reverses rule §3 below, deliberately
 
@@ -60,22 +85,15 @@ as the actual one. The rule is kept below rather than deleted, because its reaso
 to *structure*: a new asset that reads badly is still far more likely to be a silhouette or a
 projection problem than a hue problem.
 
-### The cost nobody has paid yet: a mixed map
+### What is left of the mixed-map cost
 
-New art is brighter, old art is muted, and **they will sit on the same screen**. A bright traveller
-walking over washed-out ground is a real and visible mismatch, and "no redraw" means it does not
-resolve on its own.
+Much less than the first draft claimed, because the palette held. What does differ is *shading*: a
+new figure carries more tonal steps than the ones drawn under the old flat-colour rule, so a fresh
+sprite will read as slightly rounder beside an older one. That is a small and forgivable drift, and
+it resolves as figures are replaced.
 
-Two ways out, neither started, both cheap to state:
-
-1. **Accept the transition.** The map is mixed until enough of it has been replaced. Honest, free,
-   and looks unfinished for as long as it lasts.
-2. **Lift the old art at the build step.** Every sheet is *reprocessed* by a `tools/build-*.js`
-   script from sources — so a saturation and value curve applied there would brighten the entire
-   existing set with **no redrawing at all**, which is exactly the constraint asked for. It is a
-   filter in one place per builder, and it is reversible because the sources are untouched.
-
-Option 2 is the one worth trying first, and it is not in any plan yet.
+The build-step option is therefore **withdrawn rather than parked**: it existed to lift old art to a
+brighter palette, and there is no longer a brighter palette to lift it to.
 
 ## Where the direction actually stands
 
