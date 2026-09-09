@@ -119,14 +119,19 @@ sheet**: `cliff-edges.png` and `cliff-corners.png` are one pixel-art set, genera
 they match by construction. `Gemini_Stones.png` is superseded and has moved to
 `assets/source/dump/`; it is still in git history if the watercolour is ever wanted back.
 
-**What the new set is worse at, recorded rather than hidden.** Its south face is better — bigger
-boulders, darker soil, more contrast. Its other three rows are worse than the sheet it replaced:
-the north lip crops to soil and grass with no rock in it, and the east and west strips are drawn as
-*horizontal* slabs stacked up a narrow column where the old ones were vertically stacked boulders,
-so at 28px wide they read as streaks. That is the art rather than the crop — the source strips are
-drawn that way. A re-roll wants two sentences the prompt did not have: **the lip must show rock and
-not only the soil above it**, and **a side strip is a vertical stack of rounded boulders, never
-horizontal layers**.
+**What is still worth a re-roll, recorded rather than hidden.** The south face is better than what
+it replaced — bigger boulders, a real soil base, more contrast. Two things are not:
+
+- **The north lip crops to soil and grass with no rock in it.** The source draws its rock below the
+  soil, and a lip is the top fifth of the cell, so the crop takes the part with no stone in it. The
+  prompt lacked one sentence: *the lip must show rock, not only the soil above it.*
+- **The corner pieces sit lighter than the south band they continue.** Measured, the corners match
+  the edge sheet as a whole almost exactly — `[141, 119, 83]` against `[145, 118, 81]` — so they are
+  not off-palette. It is the *south row* that is deliberately darker at `[112, 92, 70]`, which is
+  correct: the brief asks for the south to be a shaded wall where the other three are lit lips. So
+  the corner is mismatched only against the one row it stands beside. A build-time gain would fix
+  the horizontal arm and break the vertical one, which stands in for a lighter east band — so this
+  is left to the painting rather than the pipeline, the same call as the arm-depth stretch.
 
 **A corner's horizontal arm was 34px deep where a straight band is 62 — fixed by baking, not by
 scaling.** Matching the depth by scaling needs a 1.8× vertical stretch that stands every boulder up

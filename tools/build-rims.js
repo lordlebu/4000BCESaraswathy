@@ -259,6 +259,44 @@ function isKey(data, i) {
 }
 
 /**
+ * Does this sheet carry real transparency already, rather than a chroma-key backdrop?
+ */
+function hasAlpha(data, width, height) {
+  for (let i = 0; i < width * height; i += 1) {
+    if (data[i * 4 + 3] < 250) return true;
+  }
+  return false;
+}
+
+/**
+ * Snap a sheet that already has alpha to hard edges, and drop the matte halo with them.
+ *
+ * **Soft alpha on pixel art is a defect, not a feature**, so this is not a compromise. A sheet cut
+ * from its background by a model arrives with a band of partial alpha around every shape, and that
+ * band carries the colour it was cut *from*: measured on the sheet that shipped, 1,952 of its
+ * 33,111 semi-transparent pixels were saturated red or orange, which is a red rim around every
+ * boulder once it is drawn over grass. Nothing in this art is red.
+ *
+ * Recolouring them is what `key`'s de-fringe does for magenta, and it can do that because it knows
+ * exactly which colour contaminated them. Here it does not, so the honest move is to drop the band:
+ * an edge one pixel tighter, and no halo at any alpha.
+ */
+function harden(data, width, height) {
+  const out = Buffer.alloc(width * height * 4);
+  for (let i = 0; i < width * height; i += 1) {
+    if (data[i * 4 + 3] < ALPHA_FLOOR) continue;
+    out[i * 4] = data[i * 4];
+    out[i * 4 + 1] = data[i * 4 + 1];
+    out[i * 4 + 2] = data[i * 4 + 2];
+    out[i * 4 + 3] = 255;
+  }
+  return out;
+}
+
+/** How opaque a pixel must be to survive `harden`. Below this it is matte, not art. */
+const ALPHA_FLOOR = 200;
+
+/**
  * Replace the key colour with real transparency, and de-fringe what is left.
  *
  * The de-fringe is the part that matters. Anti-aliased art over magenta leaves a pink halo one to
@@ -376,7 +414,7 @@ const LINE_COVERAGE = 1 / 12;
  * Asking a model to hit exact pixel boundaries has failed on layout twice already (2x3 versus 3x2,
  * and art floating clear of its own cell edges). Finding the gutters is arithmetic.
  */
-function contentRuns(cell, width, height, axis) {
+function contentRuns(cell, width, height, axis, expect) {
   const opaque = (x, y) => cell[(y * width + x) * 4 + 3] > 24;
   const outer = axis === 'y' ? height : width;
   const inner = axis === 'y' ? width : height;
@@ -407,16 +445,26 @@ function contentRuns(cell, width, height, axis) {
     }
   }
   if (start !== null) runs.push([start, outer]);
-  // Join runs separated by a hairline. A cell whose art has a thin waist reads as two runs, and a
-  // real gutter between two cells is far wider than that.
-  const joined = [];
-  for (const run of runs) {
-    const last = joined[joined.length - 1];
-    if (last && run[0] - last[1] < outer / 60) last[1] = run[1];
-    else joined.push([...run]);
-  }
   // Ignore slivers: a stray mark between two cells is not a cell.
-  return joined.filter(([a, b]) => b - a > outer / 40);
+  const kept = runs.filter(([a, b]) => b - a > outer / 40);
+  if (kept.length <= expect) return kept;
+
+  // **Close the narrowest gaps, and only as many as it takes.** A cell whose art has a thin waist
+  // reads as two runs and has to be rejoined; two cells with a narrow gutter between them must not
+  // be. A fixed threshold cannot tell those apart and picking one got it wrong in both directions:
+  // at a sixtieth of the sheet it welded the south and west rows together, because their gutter was
+  // 15px where a row's internal break was 21. Merging smallest-gap-first until the count is right
+  // needs no threshold at all -- the expected count is the constraint.
+  const merged = kept.map((r) => [...r]);
+  while (merged.length > expect) {
+    let at = 0;
+    for (let i = 1; i < merged.length - 1; i += 1) {
+      if (merged[i + 1][0] - merged[i][1] < merged[at + 1][0] - merged[at][1]) at = i;
+    }
+    merged[at][1] = merged[at + 1][1];
+    merged.splice(at + 1, 1);
+  }
+  return merged;
 }
 
 /**
@@ -426,7 +474,7 @@ function contentRuns(cell, width, height, axis) {
  * so, because a silently wrong slice is the failure this whole function exists to stop.
  */
 function findGrid(cell, width, height, rows, cols, note) {
-  const bands = contentRuns(cell, width, height, 'y');
+  const bands = contentRuns(cell, width, height, 'y', rows);
   let yRanges;
   if (bands.length === rows) {
     yRanges = bands;
@@ -440,7 +488,7 @@ function findGrid(cell, width, height, rows, cols, note) {
   return yRanges.map(([y0, y1], r) => {
     const strip = Buffer.alloc(width * (y1 - y0) * 4);
     cell.copy(strip, 0, y0 * width * 4, y1 * width * 4);
-    const groups = contentRuns(strip, width, y1 - y0, 'x');
+    const groups = contentRuns(strip, width, y1 - y0, 'x', cols);
     let xRanges;
     if (groups.length === cols) {
       xRanges = groups;
@@ -516,7 +564,10 @@ function buildSheet({ id, from, to, corners }, apply) {
   const img = decodePng(file);
   // Key the whole sheet once, then find its gutters. Both have to happen before anything is sliced:
   // a gutter is only visible once the magenta is transparent.
-  const wholeKeyed = key(img.data, img.width, img.height);
+  const cut = hasAlpha(img.data, img.width, img.height);
+  const wholeKeyed = cut
+    ? harden(img.data, img.width, img.height)
+    : key(img.data, img.width, img.height);
   const warnings = [];
   const grid = findGrid(wholeKeyed, img.width, img.height, ROWS.length, VARIANTS, (m) =>
     warnings.push(m)
@@ -611,12 +662,7 @@ function buildSheet({ id, from, to, corners }, apply) {
     // and would be punched out as scattered white speckles. A rejected candidate painted in
     // near-white limestone lost most of every boulder the same way -- which read as a fault in the
     // art until the holes were traced back to here.
-    const alreadyCut = (() => {
-      for (let i = 0; i < grid.width * grid.height; i += 1) {
-        if (grid.data[i * 4 + 3] < 250) return true;
-      }
-      return false;
-    })();
+    const alreadyCut = hasAlpha(grid.data, grid.width, grid.height);
 
     wideW = sheetW + CORNERS.length * CELL;
     wide = Buffer.alloc(wideW * CELL * 4);
@@ -639,7 +685,7 @@ function buildSheet({ id, from, to, corners }, apply) {
           cell[di + 3] = grid.data[si + 3];
         }
       }
-      const keyed = alreadyCut ? cell : key(cell, cw, ch);
+      const keyed = alreadyCut ? harden(cell, cw, ch) : key(cell, cw, ch);
       const box = contentBox(keyed, cw, ch);
 
       // **Fit to width, keep the aspect, sit on the floor.** Stretching the box to a square is the

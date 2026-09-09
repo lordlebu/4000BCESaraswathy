@@ -52,6 +52,22 @@ The grid is now found from the sheet's own gutters, with an even split as a repo
 is the same call as keying the magenta and cropping to content: the model reliably paints four rows
 of four, and reliably will not put them on exact pixel boundaries.
 
+**Merging by count, not by threshold.** Finding gutters means deciding whether a break in the art is
+a gutter or a waist in one cell's painting, and a fixed width cannot tell them apart. It got it
+wrong in both directions: at a sixtieth of the sheet it welded the south and west rows together,
+because their gutter measured 15px where a row's own internal break measured 21. The runs are now
+merged smallest-gap-first only until the count matches what is expected, which needs no threshold at
+all — the expected count is the constraint. Both sheets slice with no fallback now, the treeline
+included.
+
+**And a fourth: a matte halo on art that arrives already cut out.** A sheet cut from its background
+by a model carries a band of partial alpha around every shape, and that band holds the colour it was
+cut *from* — 1,952 of one sheet's 33,111 semi-transparent pixels were saturated red or orange, which
+is a red rim around every boulder once it is drawn over grass. Nothing in that art is red. `key`'s
+de-fringe cannot help, because it works by knowing exactly which colour contaminated the pixel and
+here it does not. So `harden` drops the band outright: an edge one pixel tighter, and no halo at any
+alpha. **Soft alpha on pixel art is a defect anyway**, so this is not a compromise.
+
 ### And two measurements that decide what is worth building
 
 **The median south-face run is one tile.** Across the four maps: 83 runs of one tile, 31 of two, 10
