@@ -118,10 +118,19 @@ are large smooth boulders, so adjacent tiles read as two rocks. No build-time tr
 texture frequency. Fixing it means repainting one side to match the other, which is its own art
 round and is not scheduled.
 
-**A corner's horizontal arm is 34px deep where a straight band is 62.** So a corner meeting a run on
-its open side steps down. The caps do *not* have this problem — they land at 60–61px — because the
-crop below fits them by width. Matching the corners too would need a 1.8× vertical stretch that
-would stand every boulder up taller than the ones beside it, which is worse than the step.
+**A corner's horizontal arm was 34px deep where a straight band is 62 — fixed by baking, not by
+scaling.** Matching the depth by scaling needs a 1.8× vertical stretch that stands every boulder up
+taller than the ones beside it, so instead the band goes *underneath* the corner in the sheet and the
+corner supplies only the turn. Every corner now measures exactly 62 at the columns where it meets a
+straight run. That is the distinction between the two kinds of piece: **a corner turns the wall, so
+it needs the wall; a cap ends the wall, so it replaces it** — caps are not baked, and still taper
+60 → 29 into rubble.
+
+Baked rather than stacked as two sprites in the scene: the stacked version was measured at **+69%
+blended pixels** on the cliff layer, where baking costs nothing beyond the corner quad already drawn.
+
+What a rim still gets wrong beyond this — that its outline is a straight line on the cell boundary at
+all — is a bigger programme than this plan, and is written up in `docs/continuous-edges-plan.md`.
 
 ### The two builder faults this found, which looked like art faults
 

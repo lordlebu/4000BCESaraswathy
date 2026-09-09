@@ -570,12 +570,50 @@ function buildSheet({ id, from, to, corners }, apply) {
       // Against the bottom, the same edge `place` puts a south band against: a corner and the run
       // it continues have to stand on the same line or the wall visibly steps at the seam.
       const frame = place(band, CELL, tall, 's');
+
+      // **A corner is baked over a south band; a cap is not.** The painted corners' two arms are
+      // about equal thickness, but the game's are not -- a south face is 62px deep and an east face
+      // 28 wide -- so a corner scaled to fit the cell lands a 34px horizontal arm against a 62px
+      // band and the wall visibly steps down at every turn. No scaling fixes that: matching the
+      // depth needs a 1.8x vertical stretch that stands every boulder up taller than the ones
+      // beside it.
+      //
+      // So the band goes underneath and the corner supplies the turn on top. That is the whole
+      // distinction between the two kinds of piece: **a corner turns the wall, so it needs the
+      // wall; a cap ends the wall, so it replaces it.** Baking rather than stacking two sprites in
+      // the scene is worth the arithmetic here -- measured, the stacked version put the cliff layer
+      // at +69% blended pixels where this costs nothing over the corner quad already drawn.
+      if (!name.startsWith('cap-')) {
+        // One south variant per piece, so the four corners look as different from each other as
+        // the four straight variants do.
+        const under = (ROWS.indexOf('s') * VARIANTS + index % VARIANTS) * CELL;
+        for (let y = 0; y < CELL; y += 1) {
+          for (let x = 0; x < CELL; x += 1) {
+            const f = (y * CELL + x) * 4;
+            if (frame[f + 3] === 255) continue; // corner already covers this pixel outright
+            const b = (y * sheetW + under + x) * 4;
+            const ba = sheet[b + 3];
+            if (ba === 0) continue;
+            // Band under corner: standard source-over with the corner as the source.
+            const ca = frame[f + 3];
+            const outA = ca + (ba * (255 - ca)) / 255;
+            if (outA === 0) continue;
+            for (let k = 0; k < 3; k += 1) {
+              frame[f + k] = Math.round(
+                (frame[f + k] * ca + sheet[b + k] * ba * (1 - ca / 255)) / outA
+              );
+            }
+            frame[f + 3] = Math.round(outA);
+          }
+        }
+      }
+
       const ox = sheetW + index * CELL;
       for (let y = 0; y < CELL; y += 1) {
         const fromRow = y * CELL * 4;
         frame.copy(wide, (y * wideW + ox) * 4, fromRow, fromRow + CELL * 4);
       }
-      report.push(`${name} ${tall}px`);
+      report.push(`${name} ${tall}px${name.startsWith('cap-') ? '' : '+band'}`);
     });
     frames += CORNERS.length;
   } else if (corners) {
