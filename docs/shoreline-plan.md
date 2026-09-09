@@ -1,8 +1,9 @@
 # Shoreline plan — an embossed bank, not a dissolved one
 
-**Stages 1 to 3 have shipped.** What follows is the plan as it was argued, corrected against the
-map as it stands after the crossing and basalt work, with what each stage actually cost recorded
-where the estimate used to be. Stage 4 is still optional and still unstarted.
+**Stages 1 to 3 have shipped and merged** (PR #168). What follows is the plan as it was argued,
+corrected against the map as it stands after the crossing and basalt work, with what each stage
+actually cost recorded where the estimate used to be. Stage 4 is still optional and still
+unstarted.
 
 The shore was the last hard edge on the map. Every other boundary was softened in phase 07: two
 biomes meeting bleed into each other through a torn mask, a height terrace grows a rock face, a
@@ -275,13 +276,22 @@ So, per stage, and not negotiable:
 3. If a stage costs more than ~10% of the frame on the software rasteriser, shrink the band before
    shipping it, not after.
 
-**Of those three, (1) was done by hand and (3) was enforced; (2) has not been run.** `npm run perf`
-launches its own Chromium at the revision this repo pins, and the session that built stages 1–3
-had a different one installed, so the A/B above was measured through the same SwiftShader
-rasteriser by the method the doc describes rather than by the tool. `npm run test:ci` needs Docker
-and was not available either. **The browser suite is therefore unverified for this change** — it is
-the one gate still owed, and the layer is close enough to its budget that it is worth paying
-before merging rather than after.
+**All three are now paid, though (2) was paid by CI rather than locally.** `npm run perf` launches
+its own Chromium at the revision this repo pins and the session that built stages 1–3 had a
+different one installed, so the A/B above was measured through the same SwiftShader rasteriser by
+the method the doc describes rather than by the tool; `npm run test:ci` needs Docker, which was not
+available either. What settled it was PR #168: **`check` and `browser` both green**, and then the
+full suite on `main` — the one that adds the `@slow` playthrough walk, which is the walk-heavy spec
+a 9.5% frame cost was most likely to push past its budget.
+
+**What the CI clock does *not* settle.** That PR's browser job ran 21.7 minutes against a
+pre-shoreline band of 9.7–19.5 for the same fast suite, which looks like a cost — but the band is
+the point: the same workflow on unchanged code has varied close to twofold, and `main`'s full-suite
+runs sit anywhere from 10.2 to 21.2 minutes. One sample against noise that wide is not evidence of
+anything, and reading it as one would be the mistake `docs/rendering.md` names twice (the morning
+67 ms that was 283 ms by evening; the ratio-against-a-reference that amplified noise instead of
+cancelling it). The minimum-frame A/B above is the measurement that means something, precisely
+because it was taken with everything else held still.
 
 ## What this plan does not touch
 
@@ -376,12 +386,23 @@ Whether stage 4 is ever wanted is a question for somebody looking at a shore, no
 document. By rule §1 of `docs/art-direction.md` — *generate textures, prompt silhouettes* — a
 gradient under a mask is the case a loop wins, and the three that shipped are all that case.
 
-## Still owed
+## Closed since, and what is left
 
-1. **`npm run test:ci`**, per the gate above. The one unpaid check.
-2. **A look at dusk.** The sky tint is a full-screen rectangle above everything, and a dark band
-   under a dark tint can go muddy. Checked at noon only.
-3. **Decor floats over the shadow.** Lily pads on a shore tile are row-sorted at `underfoot`
+**The browser gate is paid.** PR #168 went green on both required jobs and merged; `main`'s
+post-merge run repeats it with the `@slow` walk included. See the gate section for why the wall
+clock alongside it proves less than it appears to.
+
+**Dusk holds.** The specific worry was that a dark band under the full-screen sky tint would go
+muddy. Screenshotted at noon and at dusk on the same Lothal shore: at dusk the contact shadow reads
+as a warm-grey bank rather than a smear, and the sand lip still separates from the ground behind
+it. *Night is not conclusively checked* — under a pinned wall clock the frame did not darken much,
+so the tint at hour 22 was not really exercised. Dusk was the stated risk and dusk is answered.
+
+Two things remain, and neither is a defect:
+
+1. **Decor floats over the shadow.** Lily pads on a shore tile are row-sorted at `underfoot`
    (depth ≥ 100) and the band sits at 60, so a pad inside the shaded band is not shaded. Accepted
    deliberately: suppressing decor on shore water tiles would cost 385 of Lothal's props, which is
-   the worse trade.
+   the worse trade. Revisit only if somebody notices it in play.
+2. **Stage 4, painted rim art.** Still optional, still unstarted, and still behind the plate queue
+   for image-model time. The question is for somebody looking at a shore, not for this document.
