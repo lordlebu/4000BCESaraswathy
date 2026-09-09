@@ -280,13 +280,12 @@ So, per stage, and not negotiable:
 its own Chromium at the revision this repo pins and the session that built stages 1–3 had a
 different one installed, so the A/B above was measured through the same SwiftShader rasteriser by
 the method the doc describes rather than by the tool; `npm run test:ci` needs Docker, which was not
-available either. What settled it was PR #168: **`check` and `browser` both green**, and then the
-full suite on `main` — the one that adds the `@slow` playthrough walk, which is the walk-heavy spec
-a 9.5% frame cost was most likely to push past its budget.
+available either. What settled it was PR #168 — **`check` and `browser` both green** — and then the full suite on
+`main`, which adds the `@slow` playthrough walk and also passed.
 
-**What the CI clock does *not* settle.** That PR's browser job ran 21.7 minutes against a
-pre-shoreline band of 9.7–19.5 for the same fast suite, which looks like a cost — but the band is
-the point: the same workflow on unchanged code has varied close to twofold, and `main`'s full-suite
+**What the CI clock does *not* settle.** That PR's browser job ran 21.7 minutes against a pre-shoreline
+band of 9.7–19.5 for the same fast suite, and `main`'s full suite then ran 21.25 against 18.2. Both
+look like a cost — but the band is the point: the same workflow on unchanged code has varied close to twofold, and `main`'s full-suite
 runs sit anywhere from 10.2 to 21.2 minutes. One sample against noise that wide is not evidence of
 anything, and reading it as one would be the mistake `docs/rendering.md` names twice (the morning
 67 ms that was 283 ms by evening; the ratio-against-a-reference that amplified noise instead of
@@ -388,9 +387,11 @@ gradient under a mask is the case a loop wins, and the three that shipped are al
 
 ## Closed since, and what is left
 
-**The browser gate is paid.** PR #168 went green on both required jobs and merged; `main`'s
-post-merge run repeats it with the `@slow` walk included. See the gate section for why the wall
-clock alongside it proves less than it appears to.
+**The browser gate is paid.** PR #168 went green on both required jobs and merged, and `main`'s
+post-merge run then repeated it with the `@slow` playthrough walk included — **green**, browser
+suite 21.25 minutes against the 18.2 of the last pre-shoreline merge. That is the walk-heavy spec a
+9.5% frame cost was most likely to push past its budget, and it did not. See the gate section for
+why the three minutes beside it prove less than they appear to.
 
 **Dusk holds.** The specific worry was that a dark band under the full-screen sky tint would go
 muddy. Screenshotted at noon and at dusk on the same Lothal shore: at dusk the contact shadow reads
