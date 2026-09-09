@@ -490,14 +490,18 @@ export function cliffTurn(
     // difference between a rim that knows it is a run and one that does not.
     const endsEast = !faces.e && !carriesOn.east;
     const endsWest = !faces.w && !carriesOn.west;
-    // Both ends on one tile is a one-tile wall, and the two caps would union into a solid block --
-    // rock down the left from `cap-e`, rock down the right from `cap-w`, rubble buried in the
-    // middle. That is the opposite of what a cap says, so a lone tile keeps its plain band and the
-    // scree `planCliffJoints` already puts at each end.
-    if (endsEast !== endsWest) {
-      pieces.push(endsEast ? 'cap-e' : 'cap-w');
-      suppress.add('s');
-    }
+    // **A one-tile wall takes both caps, which is the opposite of what this said first.** The
+    // argument for refusing them was that `cap-e` is rock down the left and `cap-w` rock down the
+    // right, so together they would union into a solid block with the rubble buried in the middle.
+    // Drawn and looked at, that is simply not what happens: the two overlap where both are rock
+    // anyway, and the result crumbles at both ends with rock in the middle -- exactly what a lone
+    // stub should be. What ships without them is a slab with two square cuts, which is worse.
+    //
+    // Most runs *are* one tile -- 18 of 26 on the Aravali, 21 of 32 on the Narmada -- so this is
+    // the common case, not a corner of it.
+    if (endsEast) pieces.push('cap-e');
+    if (endsWest) pieces.push('cap-w');
+    if (endsEast || endsWest) suppress.add('s');
   }
 
   return { pieces, suppress: [...suppress] };

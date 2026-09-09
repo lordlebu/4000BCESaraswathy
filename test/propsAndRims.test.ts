@@ -210,9 +210,10 @@ describe('a rock face turns instead of meeting itself', () => {
   });
 
   it('turns a corner, caps a run that stops, and leaves a lone tile alone', () => {
-    // The rule itself, away from any map. The last case is the one worth pinning: two caps on one
-    // tile union into a solid block -- rock down the left from cap-e, rock down the right from
-    // cap-w -- which says the opposite of what a cap is for.
+    // The rule itself, away from any map. The last case is the one worth pinning, and it was wrong
+    // in the other direction first: two caps on one tile were refused on the argument that they
+    // would union into a solid block. Rendered and looked at, they crumble at both ends with rock
+    // between, which is what a lone stub is. Most runs are one tile, so it is the common case.
     const none = { n: false, e: false, s: false, w: false };
 
     const se = cliffTurn({ ...none, s: true, e: true }, { east: false, west: false }, 0);
@@ -232,8 +233,8 @@ describe('a rock face turns instead of meeting itself', () => {
     expect(middle.suppress).toEqual([]);
 
     const lone = cliffTurn({ ...none, s: true }, { east: false, west: false }, 0);
-    expect(lone.pieces, 'a one-tile wall takes no cap at either end').toEqual([]);
-    expect(lone.suppress, 'and keeps its band').toEqual([]);
+    expect(lone.pieces, 'a one-tile wall crumbles at both ends').toEqual(['cap-e', 'cap-w']);
+    expect(lone.suppress, 'and drops the slab between them').toEqual(['s']);
   });
 });
 

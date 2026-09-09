@@ -110,6 +110,21 @@ smoothing was not worth it, having measured horizontal *run length* — which ba
 is the number of faces the contour generates at all, and that is what makes the maze. The conclusion
 against a seed-breaking terrain change still holds; the reasoning under it did not.
 
+### A one-tile wall, which is most of them
+
+`cliffTurn` refused to cap a lone tile, on the argument that `cap-e` is rock down the left and
+`cap-w` rock down the right, so together they would union into a solid block with the rubble buried
+in the middle. **Drawn and looked at, that is not what happens.** The two overlap where both are
+rock anyway, and the result crumbles at both ends with rock between them — which is what a lone stub
+should be. What shipped instead was a slab with two square cuts.
+
+It matters because it is the common case, not a corner of it: 18 of 26 south runs on the Aravali and
+21 of 32 on the Narmada are a single tile.
+
+Worth keeping as a method note. The refusal was reasoned about carefully and was wrong, and one
+render of four options settled it in a minute — the same lesson as the sprite rows, where two pixel
+heuristics both got it wrong and looking at the sheet was right.
+
 ## The three mechanisms, cheapest first
 
 Mechanism B is **built**. A and C are not.
