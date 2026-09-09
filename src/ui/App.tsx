@@ -29,6 +29,8 @@ import { WorkshopPanel } from './WorkshopPanel';
 import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
 import { carry, gatheredLine, standingLine } from '../content/gathering';
+import { rideFrom } from '../content/vehicles';
+import { canBoardAt, trackRoute } from '../world/crossing';
 import { conditionOf, draw, noNodes, takeableAt, type Taking } from '../content/nodes';
 import { recipe } from '../content/making';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
@@ -594,6 +596,20 @@ export function App() {
         ? blockedReason(gesture, routine, currentCreature?.name ?? null)
         : null;
 
+    // **Asked of the rule, never recomputed here.** `rideFrom` decides whether there is a line,
+    // where it goes and which carriage runs it; this reads the answer and writes a sentence about
+    // it. A panel that worked out the far station itself would be a second copy of `railSpan`.
+    const ride = world && arrival ? rideFrom(world, arrival.at) : null;
+    // Why the row is *there* when it is refused, which is this panel's convention: a line you are
+    // standing on but cannot board from teaches that the carriage calls at the islands.
+    const onTheLine = Boolean(
+      world && arrival && world.tiles[arrival.at.y]?.[arrival.at.x]?.track
+    );
+    const lineOnThisMap = Boolean(world && trackRoute(world).length > 0);
+    const atTheFarEnd = Boolean(
+      world && arrival && !ride && canBoardAt(world, arrival.at)
+    );
+
     return [
       {
         id: 'take',
@@ -617,9 +633,35 @@ export function App() {
         // it settles on its own -- but it is the same shape of act, and the night should look like
         // one rather than happening between two frames.
         onDo: () => setActivity({ taking: [], day: arrival?.day ?? 0, resting: shelter })
-      }
+      },
+      // The line is one map's furniture, so the row only exists where there is a line. Every other
+      // row here is about ground that exists everywhere; this one would be a permanent "there is no
+      // railway" on three maps out of four, which teaches nothing.
+      ...(lineOnThisMap
+        ? [
+            {
+              id: 'ride',
+              label: ride ? `Ride the ${ride.vehicle.name.toLowerCase()}` : 'Ride the line',
+              detail: ride
+                ? `${ride.tiles} tiles of rail, at a quarter of the walking.`
+                : undefined,
+              mark: '🚋',
+              blocked: ride
+                ? null
+                : atTheFarEnd
+                  ? 'You are at the far station. The line runs the other way.'
+                  : onTheLine
+                    ? 'Out on the span. The carriage calls at the islands.'
+                    : 'Not on the line.',
+              key: 'B',
+              onDo: () => {
+                if (ride) EventBus.emitEvent('ride', { to: ride.to });
+              }
+            } satisfies TileAction
+          ]
+        : [])
     ];
-  }, [underfoot, arrival, nodes, pickUp, currentCreature, moment]);
+  }, [underfoot, arrival, nodes, pickUp, currentCreature, moment, world]);
 
   /**
    * A key for each thing you can do here.
@@ -647,7 +689,8 @@ export function App() {
       // something the player is reading is how a stray press loses a run.
       if (activity) return;
 
-      const wanted = e.code === 'KeyE' ? 'take' : e.code === 'KeyR' ? 'rest' : null;
+      const wanted =
+        e.code === 'KeyE' ? 'take' : e.code === 'KeyR' ? 'rest' : e.code === 'KeyB' ? 'ride' : null;
       if (!wanted) return;
       const action = tileActions.find((a) => a.id === wanted);
       if (!action || action.blocked) return;

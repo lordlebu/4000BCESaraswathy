@@ -166,6 +166,17 @@ export interface UiToGame {
   'viewport-insets': { right: number; bottom: number };
   /** Step the zoom in or out, or hand it back to the automatic fit. */
   zoom: { step: number | 'reset' };
+  /**
+   * Board the line and be carried to the far station.
+   *
+   * The destination rather than "ride": the rule that decides where a ride ends lives in
+   * `content/vehicles.ts`, and a scene that recomputed it would be a second copy of it. React asks
+   * the rule and sends the answer; the scene moves the traveller and charges the clock.
+   *
+   * Ignored unless the traveller is standing somewhere `canBoardAt` allows, which the scene
+   * re-checks -- an event is a request, and the scene owns whether it is honoured.
+   */
+  ride: { to: { x: number; y: number } };
 }
 
 type Events = GameToUi & UiToGame;

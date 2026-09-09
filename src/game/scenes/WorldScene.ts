@@ -17,7 +17,7 @@ import cliffsUrl from '../../../assets/cliffs.png';
 import treelineUrl from '../../../assets/treeline.png';
 import decorUrl from '../../../assets/decor.png';
 import trackUrl from '../../../assets/track.png';
-import { EventBus } from '../EventBus';
+import { EventBus, type UiToGame } from '../EventBus';
 import {
   FEATURE_SHEET,
   FOG_TEXTURE,
@@ -96,6 +96,8 @@ import {
   type Facing
 } from '../player';
 import { DAY_MS, phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
+import { RIDE_SHARE, rideFrom } from '../../content/vehicles';
+import { trackRoute } from '../../world/crossing';
 import { fatigueAt, fatigueEnabled, fatigueNote, paceFor, restUntilMorning } from '../fatigue';
 import { duskNote, isDark, lightLeft, shelterAt, spendNight, type Shelter } from '../night';
 import { momentAt } from '../moment';
@@ -824,6 +826,7 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('viewport-insets', this.onInsets);
     EventBus.onEvent('zoom', this.onZoom);
     EventBus.onEvent('camp', this.onCamp);
+    EventBus.onEvent('ride', this.onRide);
     EventBus.onEvent('set-character', this.onSetCharacter);
 
     // Fires on rotation as well as on a window resize, which is exactly when the zoom and the
@@ -842,6 +845,7 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('viewport-insets', this.onInsets);
       EventBus.offEvent('zoom', this.onZoom);
       EventBus.offEvent('camp', this.onCamp);
+      EventBus.offEvent('ride', this.onRide);
       this.input.off(Phaser.Input.Events.POINTER_WHEEL);
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
       this.input.off(Phaser.Input.Events.POINTER_UP);
@@ -998,6 +1002,31 @@ export class WorldScene extends Phaser.Scene {
    */
   private onCamp = (): void => {
     this.tryStop();
+  };
+
+  /**
+   * Board the line and be carried to the far station.
+   *
+   * **The scene re-asks the rule rather than trusting the event.** React sends where it thinks the
+   * ride ends, and this checks that against `rideFrom` from where the traveller actually is. An
+   * event is a request; a stale panel or a key pressed mid-step must not teleport anybody.
+   *
+   * Not a tween. A walk animates because the walking is the game; a ride is the part you skip,
+   * which is the whole reason to take it -- so it lands, reveals what the line passed, and charges
+   * a quarter of what walking the same tiles would have cost in daylight.
+   */
+  private onRide = ({ to }: UiToGame['ride']): void => {
+    const ride = rideFrom(this.world, this.at);
+    if (!ride) return;
+    if (ride.to.x !== to.x || ride.to.y !== to.y) return;
+
+    // You saw the line go by. Revealing the route is what makes the ride feel like travel rather
+    // than a jump, and it is also true: the fog is what has been looked at.
+    for (const p of trackRoute(this.world)) this.revealAround(p);
+
+    this.travelled += travelTimeMs(ride.tiles) * RIDE_SHARE;
+    this.at = ride.to;
+    this.arriveAt(ride.to);
   };
 
   /**
