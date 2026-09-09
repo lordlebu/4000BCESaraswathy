@@ -124,6 +124,7 @@ npm run test:e2e
 - [World generator design](docs/world-generator.md) — generation inputs, passes, success criteria
 - [Bestiary and herbarium](docs/bestiary.md) — where the species came from, kept for provenance
 - [The ground that gives](docs/the-ground-that-gives.md) — gathering, resource nodes, and the two design rulings behind them
+- [Handover: the crossing and the basalt](docs/handover-crossing-and-basalt.md) — both plans closed, the stamp rule they leave behind, and what is still open
 - [Testing notes](docs/testing.md) — what the failures here have cost, and the rules that came out of them
 - [Art brief](docs/art-brief.md) — how the character art is specified, and what went wrong twice
 - [Source layout](src/README.md) — the four layers and the rules between them

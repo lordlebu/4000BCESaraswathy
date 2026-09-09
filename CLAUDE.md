@@ -445,10 +445,15 @@ readings; change them here and change them there.
   page it ends in predate points of interest, so there are two notions of arriving somewhere.
   Retiring the older one was proposed three times and declined: it works, its tests pass, and it is
   the shape the original game had. It goes only for a design reason, never as tidying.
-- **`lava_field` cannot be drawn.** Canon names it and 36 species live there, but there is no tile,
-  so `src/content/canon.ts` filters it out and those species keep `mountains` alongside it. The
-  Ganges Lava Sea is unbuildable-looking until someone makes a 32×32 tile — see `docs/art-brief.md`,
-  Asset 2b.
+- **A renderable biome that nothing stamps does not exist.** `lava_field` had a painted tile, a
+  terrain frame, six decor props, basalt columns, 25 creatures, 6 plants, a `renderable: true` in
+  `data/biomes.json` and canon's palette entry for Dwarka with four points of interest asking to
+  stand on it — and the map generated **zero tiles of it on every seed**, because nobody had
+  written the stamp. `classifyBiome` only emits the eight biomes in `ALL_TERRAIN`; `snow`, the two
+  sky biomes and `lava_field` are *places*, stamped after classification by `tableland.ts`,
+  `crossing.ts` and `basalt.ts`. Every test passed throughout, because none asked whether any of it
+  was on the map. When canon adds a renderable biome, the stamp is the work — the tile is the easy
+  half.
 - **`feat/react-upgrade` is abandoned, not merged.** Its atmosphere components (`FogOfWar`,
   `DayNightCycle`, `AmbientParticles`) are DOM reimplementations of things Phaser does natively,
   and it carries a weaker generator. It survives only as a visual reference. Do not merge it.
@@ -457,6 +462,11 @@ readings; change them here and change them there.
   8 plants each. `mountains` (51) and `desert` (35) are still far richer than `landmark` (4), because
   the bestiary was authored by region and the mountainous and arid regions are the biggest sections.
   85 species remain `placement: "lore"` — the sky and Asura sets, which are inert by design.
+  **And a biome nothing draws hides its own data errors.** All 31 species carrying `lava_field`
+  carried the identical pair `lava_field, mountains` — a bestiary import, not authored biology —
+  and it had swept up eight polar species. A glacial ribbon-seal was offered on warm basalt in a
+  cold desert the first evening the ground existed. Canon's lint now refuses a species whose name
+  says one climate and whose biomes say another.
 - Rivers usually terminate in wetland deltas rather than reaching open sea, and on Dwarka
   they cannot reach it at all: that map has no sea in its palette since it was dried out. That reads well for the
   Saraswati setting but does not literally meet the "rivers connect highlands to sea" line in

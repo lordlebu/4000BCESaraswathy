@@ -11,7 +11,9 @@
 
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { canBoardAt, trackRoute } from '../src/world/crossing';
+import { canBoardAt, railSpan, shoreheads, trackRoute } from '../src/world/crossing';
+import { band } from '../src/world/classify';
+import { planCliffs, planIslandShadow, planTrack } from '../src/game/scenePlan';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
@@ -36,6 +38,181 @@ describe('the Aravali crossing', () => {
       if (sorted[i]! - sorted[i - 1]! > 1) gaps += 1;
     }
     expect(gaps, 'the two islands merged into one blob').toBe(1);
+
+    // **Two of a kind, and far apart.** The gap count alone passed while the runs were ten rows
+    // and four, one row apart -- a blob with a nick in it rather than a crossing. So this asserts
+    // the shape the earlier version got wrong: comparable islands, with real water between them.
+    const runs: number[][] = [];
+    let run = [sorted[0]!];
+    for (let i = 1; i < sorted.length; i += 1) {
+      if (sorted[i]! - sorted[i - 1]! === 1) run.push(sorted[i]!);
+      else {
+        runs.push(run);
+        run = [sorted[i]!];
+      }
+    }
+    runs.push(run);
+    expect(runs.length, 'not two islands').toBe(2);
+
+    const [north, south] = runs as [number[], number[]];
+    const shorter = Math.min(north.length, south.length);
+    const longer = Math.max(north.length, south.length);
+    expect(longer / shorter, 'one island is much bigger than the other').toBeLessThan(1.5);
+
+    const gap = south[0]! - north[north.length - 1]! - 1;
+    // Raised from 5. At 8 the pair read as one shape with a nick in it -- the islands were 11
+    // rows each with 8 between them, so the gap was smaller than either island. It is now wider
+    // than an island is tall, which is what "two islands" has to mean on screen.
+    expect(gap, 'the islands are not far enough apart to read as two').toBeGreaterThan(9);
+  });
+
+  it('casts a shadow on the water, so the islands read as floating', () => {
+    // **The one thing that says the island is not simply an island.** Grass to the edge, a rock
+    // face under the lip, cliffs along the joint -- all of that is equally true of a sea stack.
+    // What separates them is that light gets under one of them.
+    const world = aravali();
+    const shadow = planIslandShadow(world);
+    expect(shadow.length, 'the islands cast no shadow').toBeGreaterThan(30);
+
+    for (const tile of shadow) {
+      expect(
+        world.tiles[tile.y]![tile.x]!.biome,
+        `shadow at ${tile.x},${tile.y} is not on open water`
+      ).toBe('sea');
+      // Something of the island is above it, within reach.
+      const above = [1, 2, 3, 4].some((up) => {
+        const biome = world.tiles[tile.y - up]?.[tile.x]?.biome;
+        return biome === 'sky_island' || biome === 'sky_underside';
+      });
+      expect(above, `shadow at ${tile.x},${tile.y} has nothing above it`).toBe(true);
+      expect(tile.alpha!, 'a shadow with no darkness in it').toBeGreaterThan(0);
+      expect(tile.alpha!, 'the shadow is opaque').toBeLessThan(0.5);
+    }
+
+    // And nowhere else: three of the four maps have no islands, so nothing hangs over their water.
+    for (const map of fieldMaps) {
+      if (map.id === 'field_map_aravali') continue;
+      expect(
+        planIslandShadow(buildFieldMap(map, {}).world).length,
+        `${map.id} has shadows without islands`
+      ).toBe(0);
+    }
+  });
+
+  it('lays one railway, not several side by side', () => {
+    // **Three parallel tracks ran up the middle of the sea, and every test passed.** The line was
+    // stamped a tile either side of centre so a player would not have to thread a needle walking
+    // it, from when the rail was the only way across. But `planTrack` draws a full set of rails on
+    // every tile carrying the flag, so "three tiles wide" is not a wide railway -- it is three
+    // railways. Nothing asked how many, only whether the route was continuous and one column
+    // wide, and the route was always the centre column of the three.
+    //
+    // The ropes carry the walking now, so the premise is gone as well as the look.
+    for (const seed of ['a', 'b', 'c']) {
+      const world = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, { seed }).world;
+      const span = railSpan(world);
+      expect(span, `${seed}: no rail span`).not.toBeNull();
+
+      // Every row of the rail carries exactly one tile of line.
+      for (let y = span!.from; y <= span!.to; y += 1) {
+        const across = world.tiles[y]!.filter((t) => t.track).length;
+        expect(across, `${seed}: row ${y} carries ${across} lines abreast`).toBe(1);
+      }
+    }
+  });
+
+  it('never lays rail past the last ground at either end', () => {
+    // **The line ran off the map, and nothing asked.** `stampLine` sets the flag down the full
+    // height so it meets land wherever the coast falls, and beyond the coast it went on setting it
+    // across open sea to row 0 and row 63 -- fifteen tiles of railway over the ocean, drawn,
+    // leading nowhere.
+    //
+    // `trackRoute` trimmed exactly this, which is what hid it: every test asked about the *route*,
+    // so a train would never have appeared out of the water, and meanwhile `planTrack` read the
+    // untrimmed flag and drew rails there. Two readings of one flag, one of them trimmed.
+    //
+    // Across seeds, because where the coast falls is a function of the seed.
+    const map = fieldMaps.find((m) => m.id === 'field_map_aravali')!;
+    for (const seed of ['a', 'b', 'c', 'd', 'e']) {
+      const world = buildFieldMap(map, { seed }).world;
+      const columns = new Map<number, number[]>();
+      for (const tile of world.tiles.flat()) {
+        if (!tile.track) continue;
+        columns.set(tile.x, [...(columns.get(tile.x) ?? []), tile.y]);
+      }
+      expect(columns.size, `${seed}: no line was laid at all`).toBeGreaterThan(0);
+
+      for (const [x, ys] of columns) {
+        for (const end of [Math.min(...ys), Math.max(...ys)]) {
+          const biome = world.tiles[end]![x]!.biome;
+          expect(
+            biome === 'sea' || biome === 'sky_underside',
+            `${seed}: the line ends at ${x},${end} over ${biome}, with nothing under it`
+          ).toBe(false);
+        }
+      }
+    }
+  });
+
+  /**
+   * **The islands stand above the water, which is what earns them cliffs.**
+   *
+   * The stamp wrote biome and left elevation alone, so an island sat in band 0 -- at sea level as
+   * far as every height rule knew -- and `planCliffs` drew nothing at its rim. `cliffAt` wants one
+   * band over its neighbour, so this is the condition the whole look depends on.
+   */
+  it('stands the islands a band above the sea, and gives them cliffs', () => {
+    const world = aravali();
+    for (const tile of world.tiles.flat()) {
+      if (tile.biome !== 'sky_island' && tile.biome !== 'sky_underside') continue;
+      expect(band(tile.elevation), `${tile.x},${tile.y} is at sea level`).toBeGreaterThan(0);
+    }
+    // **Counted on the islands, which the old assertion did not do.** It measured
+    // `planCliffs(world).length` -- every cliff anywhere on the map -- and passed at over twenty
+    // while the islands had none at all. The mainland's own height steps were carrying it. When
+    // the strait widened there was less mainland, the number fell to 1, and only then did it
+    // become visible that the thing the test is named for had never been true.
+    //
+    // It could not have been: the top and its rim were both at 0.75, and `cliffAt` needs one band
+    // over its neighbour and refuses to draw against water. Equal-to-equal and against-sea were
+    // the only two edges an island had.
+    const sky = new Set(
+      world.tiles
+        .flat()
+        .filter((t) => t.biome === 'sky_island' || t.biome === 'sky_underside')
+        .map((t) => `${t.x},${t.y}`)
+    );
+    const onTheIslands = planCliffs(world).filter((c) => sky.has(`${c.x},${c.y}`));
+    expect(onTheIslands.length, 'the islands have no cliff faces of their own').toBeGreaterThan(20);
+  });
+
+  /**
+   * **The traveller starts on the shore they come from.**
+   *
+   * This function was called `startOnTheNearShore` and searched the *north* -- a name describing
+   * the thing it did not do. It passed every test because they asked whether the start was on
+   * land, and none asked which side of the water it was on. Measured, y=22 of 64: the far bank.
+   *
+   * Jambhudweepa is home and the arrival text calls the far side "a green smudge that is not
+   * Jambhudweepa", so walking north is walking away.
+   */
+  it('starts the traveller on the southern shore, at the line', () => {
+    const world = aravali();
+    expect(world.start.y, 'the traveller starts on the far bank').toBeGreaterThan(world.height / 2);
+
+    // **Beside the rail, not merely south of the water.** Pointing the search south fixed the
+    // shore and left a second fault: it looked for the tile nearest the *generator's* original
+    // start, which was north-east, so it landed on the south-east corner -- 22 tiles from the rail
+    // and 8 from the settlement. A player opened the map on an unremarkable stretch of coast with
+    // no line and nothing to walk toward, on a map whose whole subject is a crossing.
+    const tracked = world.tiles.flat().filter((t) => t.track);
+    const nearest = Math.min(
+      ...tracked.map((t) => Math.abs(t.x - world.start.x) + Math.abs(t.y - world.start.y))
+    );
+    expect(nearest, 'the line is not in sight of where the player begins').toBeLessThan(4);
+
+    // And not *on* it: standing on the rail is the one place you cannot see it.
+    expect(world.tiles[world.start.y]![world.start.x]!.track, 'the player starts on the rail').toBeFalsy();
   });
 
   it('never puts an island on land', () => {
@@ -132,10 +309,14 @@ describe('the Aravali crossing', () => {
    * one shore to the other with no gap in it, because a train that has to jump a tile is not on
    * rails.
    */
-  it('carries a continuous route from one shore to the other', () => {
+  it('carries a continuous route from one island to the other', () => {
+    // **Island to island, which is a change of premise rather than a change of number.** The route
+    // used to run shore to shore, and the test asked for more than half the map. The rail is now
+    // only the span between the two islands -- the shore ends are rope, and a carriage does not
+    // run on a rope -- so the right question is whether both ends are standing on an island.
     const world = aravali();
     const route = trackRoute(world);
-    expect(route.length, 'the line has no route').toBeGreaterThan(world.height / 2);
+    expect(route.length, 'the line has no route').toBeGreaterThan(10);
 
     // No gaps: consecutive tiles, all the way down.
     for (let i = 1; i < route.length; i += 1) {
@@ -145,11 +326,24 @@ describe('the Aravali crossing', () => {
     // One column, so a train has somewhere definite to sit rather than three abreast.
     expect(new Set(route.map((p) => p.x)).size, 'the route wanders between columns').toBe(1);
 
-    // Both ends on land: a line that begins over water begins nowhere.
-    const first = world.tiles[route[0]!.y]![route[0]!.x]!;
-    const last = world.tiles[route[route.length - 1]!.y]![route[route.length - 1]!.x]!;
-    expect(first.biome, 'the line starts over open water').not.toBe('sea');
-    expect(last.biome, 'the line ends over open water').not.toBe('sea');
+    // Both ends on an island, which is what the rail is strung between and what holds it up.
+    for (const end of [route[0]!, route[route.length - 1]!]) {
+      expect(
+        world.tiles[end.y]![end.x]!.biome,
+        `the rail ends at ${end.x},${end.y}, which is not an island`
+      ).toBe('sky_island');
+    }
+
+    // And the ropes reach ground on both shores, or the islands cannot be got onto at all.
+    const heads = shoreheads(world);
+    for (const [side, head] of Object.entries(heads)) {
+      expect(head, `no rope came ashore on the ${side} side`).not.toBeNull();
+      const biome = world.tiles[head!.y]![head!.x]!.biome;
+      expect(
+        biome === 'sea' || biome === 'sky_underside' || biome === 'sky_island',
+        `the ${side} rope ends at ${head!.x},${head!.y} over ${biome} rather than on a shore`
+      ).toBe(false);
+    }
   });
 
   it('can only be boarded where there is something to stand on', () => {
@@ -172,5 +366,78 @@ describe('the Aravali crossing', () => {
     // And somewhere along it a traveller can actually get on: the shores and the islands.
     const boardable = route.filter((p) => canBoardAt(world, p));
     expect(boardable.length, 'there is nowhere to board the line at all').toBeGreaterThan(4);
+  });
+
+  /**
+   * **The line is drawn, and only where it is laid.**
+   *
+   * `Tile.track` says a rail crosses here; this is the layer that puts one on the screen. It is a
+   * fourth scatter contract -- flat, tile-filling, no offset, placed from the world rather than
+   * from the ground -- because none of the three that existed fit. Overdraw refused it outright:
+   * `frames.test.ts` forbids anything reaching above half the cell, and a rail fills its tile.
+   */
+  it('draws a rail on every tracked tile and nowhere else', () => {
+    const world = aravali();
+    const rails = planTrack(world);
+    const tracked = world.tiles.flat().filter((t) => t.track);
+    expect(rails.length, 'the line is laid but not drawn').toBe(tracked.length);
+    for (const rail of rails) {
+      expect(world.tiles[rail.y]![rail.x]!.track, `a rail at ${rail.x},${rail.y} is off the line`).toBe(true);
+    }
+  });
+
+  it('lets the forest have the stretches nothing runs on', () => {
+    // Measured: 122 sound and 70 overgrown. The strait crossing is kept because a carriage uses
+    // it; the land approaches through forest and hills are not, which is the whole story of the
+    // map stated in which frame a tile draws.
+    const rails = planTrack(aravali());
+    const overgrown = rails.filter((r) => r.frame >= 2);
+    expect(overgrown.length, 'no stretch of line has been reclaimed').toBeGreaterThan(10);
+    expect(rails.length - overgrown.length, 'no stretch of line is still kept').toBeGreaterThan(10);
+  });
+
+  it('leaves every other map without a rail', () => {
+    for (const map of fieldMaps) {
+      if (map.id === 'field_map_aravali') continue;
+      const world = buildFieldMap(map, { seed: DEFAULT_SEED }).world;
+      expect(planTrack(world), `${map.id} grew a railway`).toEqual([]);
+    }
+  });
+
+  /**
+   * **Canon says which shore, and the generator listens.**
+   *
+   * On a map that is one country a place can go anywhere the terrain allows. On a *crossing* there
+   * are two shores, and which one a place sits on is as much a fact about it as what it stands on.
+   *
+   * Without `shore` the Rail-Head -- the place a player arrives at, where people wait for the
+   * carriage -- landed at 17,11 on the **northern** bank: 54 tiles away, across the water it
+   * exists to cross. Nomad Ground landed north as well, while its own notes put it above a ford
+   * forty tiles south.
+   */
+  it('puts each place on the shore canon names', () => {
+    const built = buildFieldMap(fieldMap('field_map_aravali')!, { seed: DEFAULT_SEED });
+    const water = built.world.tiles.flat().filter((t) => t.biome === 'sea');
+    const middle = water.reduce((sum, t) => sum + t.y, 0) / water.length;
+
+    for (const placed of built.placed) {
+      if (placed.poi.shore === 'either') continue;
+      const near = placed.at.y > middle;
+      expect(
+        near,
+        `${placed.poi.name} wants the ${placed.poi.shore} shore and sits at ${placed.at.x},${placed.at.y}`
+      ).toBe(placed.poi.shore === 'near');
+    }
+  });
+
+  it('leaves the arrival within sight of the rail-head', () => {
+    // The place a player arrives at should be reachable from where they begin, on a map whose
+    // subject is a crossing. 54 tiles was the measured distance before `shore` existed.
+    const built = buildFieldMap(fieldMap('field_map_aravali')!, { seed: DEFAULT_SEED });
+    const head = built.placed.find((p) => p.poi.id === 'poi_rail_head');
+    expect(head, 'the rail-head was not placed').toBeTruthy();
+    const d =
+      Math.abs(head!.at.x - built.world.start.x) + Math.abs(head!.at.y - built.world.start.y);
+    expect(d, 'the rail-head is on the far side of the map from the player').toBeLessThan(30);
   });
 });

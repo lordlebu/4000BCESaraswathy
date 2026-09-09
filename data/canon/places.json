@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.12.1",
+  "canon_version": "2.18.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -316,7 +316,6 @@
         "coast",
         "sea",
         "river",
-        "settlement",
         "sky_island",
         "sky_underside"
       ],
@@ -338,7 +337,7 @@
         "field_map_narmada"
       ],
       "arrival": "The ranges come down to the water in steps of grey stone, and stop. Where they stop there is a rail-head, a shed, and a line of iron running out over the strait on trestles of pale timber. Two islands hang above the water along it, holding themselves up out of nothing anybody here will explain, and the rain that falls on their undersides falls upward. The far shore is a green smudge that is not Jambhudweepa. People cross. Nobody says much about the islands.",
-      "notes": "Fourth field map, and the first that is a *crossing* rather than a country -- Lothal is a delta, Narmada a plateau, Dwarka a basin, and this is four bands walked in sequence from one shore to another. The Shattered Sea narrows here, which is the whole reason a line was built at this point and nowhere else on that coast; Tamralinga keeps its ships and its pearl routes further east.\n\nThe thesis is the one thing Aravali has that no other map does: this is where the Mask Family broke. Canon puts the schism, the Jharwa massacre and the hidden sanctuary in these ranges. None of that is on stage -- Sira, Thren and Meera are four hundred years of backstory and a map is one afternoon -- so it reaches the player as *traces*, the way Lothal already carries the same family. The ground remembers something the people here have agreed not to say.\n\nOn the palette: The two sky biomes are declared here and **stamped as patches after classification**, not left to the classifier -- an island is a place, not a climate, exactly as `snow` is on the Narmada. Declaring them anyway is what the Narmada does with `snow` and it is what makes the species and materials that live there reachable: `check_playability` reads this list. `plains` and `coast` are in the palette because the region's own note asks for a cheap biome -- hills, forest and mountains are all travel cost 2 or worse, and this map is about walking a long way in one direction.",
+      "notes": "Fourth field map, and the first that is a *crossing* rather than a country -- Lothal is a delta, Narmada a plateau, Dwarka a basin, and this is four bands walked in sequence from one shore to another. The Shattered Sea narrows here, which is the whole reason a line was built at this point and nowhere else on that coast; Tamralinga keeps its ships and its pearl routes further east.\n\nThe thesis is the one thing Aravali has that no other map does: this is where the Mask Family broke. Canon puts the schism, the Jharwa massacre and the hidden sanctuary in these ranges. None of that is on stage -- Sira, Thren and Meera are four hundred years of backstory and a map is one afternoon -- so it reaches the player as *traces*, the way Lothal already carries the same family. The ground remembers something the people here have agreed not to say.\n\nOn the palette: The two sky biomes are declared here and **stamped as patches after classification**, not left to the classifier -- an island is a place, not a climate, exactly as `snow` is on the Narmada. Declaring them anyway is what the Narmada does with `snow` and it is what makes the species and materials that live there reachable: `check_playability` reads this list. `plains` and `coast` are in the palette because the region's own note asks for a cheap biome -- hills, forest and mountains are all travel cost 2 or worse, and this map is about walking a long way in one direction.\n\n**No `settlement`, and that is the one thing this palette says by omission.** Every other field map has a town in it; this one has a rail-head, a ford, a nomad ground and a workshop nobody is supposed to find. The people here are passing through -- that is the whole brief -- and the moment `settlement` appeared in this list the game grew a ruined city in the far south that nothing in canon had ever mentioned, and named it.\n\nThe camp is not an exception to this. A camp is a *place*, stamped where canon puts it, and it does not need the country around it to be described as urban before somebody can pitch a tent on it.\n\n**`proportion: portrait`.** This map is a sequence rather than a country you wander: shore, water, islands, far shore, walked in that order. Square, it could not be any of those things properly at once -- the sea had to be wide enough to read as a sea across the full width, which left twelve rows of shore at each end with no room for the hills The Quiet Atelier hides in, and put the two islands close enough together that they read as one shape with a nick in it. Tall, the crossing is long and the country stays narrow, which is what a strait is.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -352,7 +351,8 @@
         "x": 51,
         "y": 30
       },
-      "relief": "island"
+      "relief": "island",
+      "proportion": "portrait"
     },
     {
       "id": "field_map_dwarka",
@@ -728,10 +728,11 @@
       ],
       "description": "The second island, and the last of Jambhudweepa.",
       "arrival": "Another island, smaller, and the far shore visible past it as a green line that is not home. There is a bell on a post here, and a mark cut into the rail where somebody has been counting something.",
-      "notes": "The second pier and the turn of the map: from here the player is looking at somewhere else rather than back at where they started. The bell and the tally are the only human marks on either island, and they are deliberately unexplained.",
+      "notes": "The second pier and the turn of the map: from here the player is looking at somewhere else rather than back at where they started. The bell and the tally are the only human marks on either island, and they are deliberately unexplained.\n\n**`shore: far`.** \"The second island\" -- the far one, reached last. See The First Pier for why this had to be said out loud.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "shore": "far"
     },
     {
       "id": "poi_first_pier",
@@ -745,10 +746,14 @@
       ],
       "description": "The nearer island, where the line comes ashore in the air.",
       "arrival": "The track runs out over nothing and then there is ground under it -- grass, low cushion-plant, a stand of aero-mangrove holding the edge together with its roots. Walk to the rim and the rain that is falling on the underside is falling the wrong way.",
-      "notes": "The first floating island a player stands on, and the map's teaching moment: the inverted water is right there at the rim, and nothing explains it. Canon does -- lodestone cores of Permian-irradiated ore, a legacy of the shattering of Gondwana -- but nobody on this map says so, because nobody on this map knows.",
+      "notes": "The first floating island a player stands on, and the map's teaching moment: the inverted water is right there at the rim, and nothing explains it. Canon does -- lodestone cores of Permian-irradiated ore, a legacy of the shattering of Gondwana -- but nobody on this map says so, because nobody on this map knows.\n\n**`shore: near`, because the description already said so and the placement could not hear it.** \"The nearer island\" is the first line of this entry, and with `shore: either` the game put this and The Far Landing three rows apart on the *same* island while the other one stood empty. The two piers are the two ends of the crossing; putting them on one island is the map drawn wrong.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "npcs": [
+        "npc_hesh"
+      ],
+      "shore": "near"
     },
     {
       "type": "point_of_interest",
@@ -926,7 +931,11 @@
       "notes": "**The trace, and the whole thesis of the map.** Canon puts the Mask Family schism, the Jharwa massacre and the hidden sanctuary of Vara-Ma, Orek and Thren in these ranges. None of that is on stage: Sira and Thren are four hundred years of backstory and this is one afternoon's walking, so the archive's rule holds -- deep-lore figures reach a player as traces.\n\nWhat the player gets is a wall in good repair around an empty hollow, and the fact that somebody is still keeping it. They never learn what happened here. They learn that something did, and that it is not over.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "npcs": [
+        "npc_dala"
+      ],
+      "shore": "far"
     },
     {
       "id": "poi_lodestone_face",
@@ -940,10 +949,11 @@
       ],
       "description": "An exposed core, and the only place the ore can be worked.",
       "arrival": "A wound in the island's flank where something took a bite out of it, and the rock inside is black and faintly wrong. Grit stands on end where it has fallen. A dropped knife does not lie flat.",
-      "notes": "Where lodestone grit comes from, and the map's one `never`-renewing material. The island is held up by this: taking it is the closest the game comes to asking whether a thing should be taken at all, and nothing in the text says so out loud.",
+      "notes": "Where lodestone grit comes from, and the map's one `never`-renewing material. The island is held up by this: taking it is the closest the game comes to asking whether a thing should be taken at all, and nothing in the text says so out loud.\n\n**`shore: far`.** The ore face is on the second island rather than the first, so the question it asks -- whether the thing holding the island up should be taken off it -- is put to a player who has already crossed rather than one still learning what an island is.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "shore": "far"
     },
     {
       "id": "poi_long_archive",
@@ -1092,8 +1102,10 @@
         "epoch_post_cataclysm"
       ],
       "npcs": [
-        "npc_terke"
-      ]
+        "npc_terke",
+        "npc_anu"
+      ],
+      "shore": "near"
     },
     {
       "id": "poi_quiet_atelier",
@@ -1111,6 +1123,10 @@
       "notes": "**Guyuk's, and she is not here.** `character_guyuk_reborn` -- the Seed-Gleaner -- is aboard the Survival Train in `event_survival_train_solarpunk`, working blasted soil back into growth. This is a second bench she keeps and is not at.\n\nA workshop nobody is currently in suits this map: the Aravali's thesis is ground that remembers what people will not say, and an atelier in use would answer questions the map is built to leave open. The dust says weeks, not years. She is coming back.",
       "epochs": [
         "epoch_post_cataclysm"
+      ],
+      "shore": "near",
+      "npcs": [
+        "npc_ila"
       ]
     },
     {
@@ -1129,7 +1145,12 @@
       "notes": "The arrival, and the map's one ordinary place. Everything else here is strange -- ore that holds a hill in the air, rain that falls upward, a sanctuary nobody will name -- so the map needs one spot where the strangeness is somebody else's and the business at hand is a timetable.\n\nIt is a settlement rather than a travel_node because people live here; the line is a thing that happens to them.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "npcs": [
+        "npc_hesh",
+        "npc_ila"
+      ],
+      "shore": "near"
     },
     {
       "type": "point_of_interest",
@@ -1210,7 +1231,8 @@
       ],
       "npcs": [
         "npc_odri"
-      ]
+      ],
+      "shore": "near"
     },
     {
       "type": "point_of_interest",
@@ -1255,8 +1277,10 @@
         "epoch_post_cataclysm"
       ],
       "npcs": [
-        "npc_odri"
-      ]
+        "npc_odri",
+        "npc_anu"
+      ],
+      "shore": "near"
     },
     {
       "type": "point_of_interest",
@@ -1303,8 +1327,10 @@
         "epoch_post_cataclysm"
       ],
       "npcs": [
-        "npc_terke"
-      ]
+        "npc_terke",
+        "npc_anu"
+      ],
+      "shore": "near"
     },
     {
       "id": "poi_walking_spring",
@@ -1355,6 +1381,59 @@
     }
   ],
   "npcs": [
+    {
+      "id": "npc_anu",
+      "type": "npc",
+      "name": "Anu",
+      "role": "hunter",
+      "found_at": [
+        "poi_nomad_ground",
+        "poi_vedda_ford",
+        "poi_sunk_cutting"
+      ],
+      "language": "maru",
+      "would_settle": false,
+      "knows": [
+        "discovery_what_a_hunter_leaves"
+      ],
+      "lines": [
+        {
+          "text": "Terke moves the animals. I walk ahead of them and watch what else is walking."
+        },
+        {
+          "text": "Mostly I am not hunting. Mostly I am standing where a thing can see me, so it goes elsewhere and nobody has to do anything about it.",
+          "gives": [
+            "discovery_what_a_hunter_leaves"
+          ]
+        },
+        {
+          "text": "When I do take one it is one, and it is the one that was going to die this winter anyway. You learn to tell. That is most of the skill and none of the stories.",
+          "requires": [
+            "discovery_what_a_hunter_leaves"
+          ]
+        },
+        {
+          "text": "Hide, sinew, the long bones, the gut. Antler you find on the ground in spring and take nothing for at all, which is the best of it and costs only the walking.",
+          "requires": [
+            "discovery_what_a_hunter_leaves"
+          ],
+          "gives": [
+            "recipe_sinew_bow"
+          ]
+        },
+        {
+          "text": "The bow is sinew on timber. It tightens as it dries, which no rope does. So the animal gives you the thing that draws the bow that takes the animal. You can sit with that or you can not.",
+          "requires": [
+            "recipe_sinew_bow"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "**A hunter who mostly does not hunt**, which is the only version of this that fits the game around it. Every weapon in canon affords `cut` and `deter` and nothing anywhere affords killing -- the sling note says the record has slings keeping birds off a crop far more often than doing anything else. Anu works the same way: walks ahead of the herd, is seen, and the thing goes elsewhere.\n\nThey also carry an answer the materials layer needs and nobody on these maps was asked for. Canon has goat hide, croc hide, sinew, boar tusk and leviathan bone, all `won_from` a living animal, and the game hands them over with the same gesture that cuts a reed. Anu is where a player finds out what that involves: one animal, the one that was going to die anyway, and nothing left behind.\n\nAntler is the line that matters. Shed each year and gathered off the ground, costing nothing but the walking -- canon says precisely that on `material_deer_antler`, and Anu has clearly noticed.\n\nWalks ahead of Terke's herd and belongs to the same high-country people.",
+      "sex": "male"
+    },
     {
       "id": "npc_bekh",
       "type": "npc",
@@ -1430,7 +1509,153 @@
       "notes": "Mask Family remnant with no masks and no family, related to character_kavik far enough back that the line means little to her. Would NOT settle -- she is the one who stays, because somebody has to be here when the rest go. The ending is better for her refusing.",
       "descended_from": [
         "character_kavik"
-      ]
+      ],
+      "sex": "female"
+    },
+    {
+      "id": "npc_dala",
+      "type": "npc",
+      "name": "Dala",
+      "role": "stonewaller",
+      "found_at": [
+        "poi_kept_stones"
+      ],
+      "language": "kia",
+      "would_settle": false,
+      "knows": [
+        "discovery_the_kept_wall"
+      ],
+      "lines": [
+        {
+          "text": "You have come a long way off the path."
+        },
+        {
+          "text": "It is a wall. It falls down. I put it back. That is the whole of it.",
+          "gives": [
+            "discovery_the_kept_wall"
+          ]
+        },
+        {
+          "text": "There is nothing in there. I have not been in there. My mother had not been in there.",
+          "requires": [
+            "discovery_the_kept_wall"
+          ]
+        },
+        {
+          "text": "You can write it down. Everybody writes it down. The stones do not mind.",
+          "requires": [
+            "discovery_the_kept_wall"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "**The trace, given a face.** Canon puts the Mask Family schism and the hidden sanctuary in these ranges, and none of that is on stage -- Sira, Meera and Thren are four hundred years of backstory and this map is one afternoon.\n\nSo the player meets somebody who keeps the wall and does not know why, in the third generation of not knowing why. Dala answers every question honestly and the answers do not add up to anything, which is the point: the ground remembers and the people have agreed not to. Nothing Dala says can be pushed past.",
+      "sex": "male"
+    },
+    {
+      "id": "npc_hesh",
+      "type": "npc",
+      "name": "Hesh",
+      "role": "line-keeper",
+      "found_at": [
+        "poi_rail_head",
+        "poi_first_pier"
+      ],
+      "language": "kia",
+      "would_settle": false,
+      "knows": [
+        "discovery_the_line_that_floats",
+        "discovery_the_ore_that_lifts",
+        "discovery_the_strait_narrows"
+      ],
+      "lines": [
+        {
+          "text": "It runs when it runs. Sit down. You are not the first person to think looking at it will help."
+        },
+        {
+          "text": "No, it does not touch. Hand's width, whole way over. You get used to the quiet or you walk, and there is no walking.",
+          "gives": [
+            "discovery_the_line_that_floats"
+          ]
+        },
+        {
+          "text": "The black stuff under the rail is the same as the islands. Same rock. It wants to be up, so up is where it stays, and we lay iron on it and call that a road.",
+          "requires": [
+            "discovery_the_line_that_floats"
+          ],
+          "gives": [
+            "discovery_the_ore_that_lifts"
+          ]
+        },
+        {
+          "text": "Bolt holes and no bolts. My grandmother said her grandmother said it was built to come up again. Nobody has ever taken it up.",
+          "requires": [
+            "discovery_the_ore_that_lifts"
+          ]
+        },
+        {
+          "text": "Look at the two headlands. Same stone, same tilt, same courses. It was one hill. The middle of it is those two things hanging over the water, and you are about to ride across the gap where it broke.",
+          "requires": [
+            "discovery_the_strait_narrows"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "Keeps the line and does not explain it, which is the map in one person. Hesh knows the mechanism exactly -- the ore wants to be up -- and has no more curiosity about it than a ferryman has about buoyancy. That is the counterweight to a traveller who writes everything down.\n\nSays nothing at all about the Kept Stones. That silence is deliberate and is not gated on any discovery: asking Hesh about the wall gets you the timetable.",
+      "sex": "female"
+    },
+    {
+      "id": "npc_ila",
+      "type": "npc",
+      "name": "Ila",
+      "role": "apothecary",
+      "found_at": [
+        "poi_quiet_atelier",
+        "poi_rail_head"
+      ],
+      "language": "kia",
+      "would_settle": true,
+      "knows": [
+        "discovery_the_kept_bench"
+      ],
+      "lines": [
+        {
+          "text": "The glass is hers. I only keep it swept and the trays turned."
+        },
+        {
+          "text": "She is not coming this month. She sends soil, and I plant it, and I write down what comes up. Mostly nothing comes up.",
+          "gives": [
+            "discovery_the_kept_bench"
+          ]
+        },
+        {
+          "text": "That is the point of it -- the nothing. If you only sow good dirt you learn what you already knew. She wants the ground that has stopped, and a list of what will still take in it.",
+          "requires": [
+            "discovery_the_kept_bench"
+          ]
+        },
+        {
+          "text": "Physic first, because sick people cannot wait for a harvest. Neem for the skin, brahmi for the head, haritaki for everything nobody has a name for. Then the grasses, because grass holds a slope. Then whatever will feed anyone.",
+          "requires": [
+            "discovery_the_kept_bench"
+          ]
+        },
+        {
+          "text": "The lotus in the falling-up water keeps its warmth after it is picked. I have not worked out what that is for. She will know, or she will write to somebody who does.",
+          "requires": [
+            "discovery_the_kept_bench"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "**The apothecary thread, given somebody to say it.** The brief for this map asked that a player learn how apothecary works and how it rebuilds -- and the atelier said soil samples and seed trays, which is agriculture. Ila is the half that was missing: physic first because sick people cannot wait for a harvest, then grass because grass holds a slope, then food.\n\nAn apprentice rather than Guyuk herself. Canon has the Seed-Gleaner aboard the Survival Train in `event_survival_train_solarpunk`, and a workshop nobody is currently in is the stronger image for this map anyway. Ila keeps it, plants what Guyuk sends, and writes down what comes up -- which is mostly nothing, and the nothing is the data.\n\nShe is at the rail-head as well as the bench, because that is where the soil arrives and where the letters go.",
+      "sex": "female"
     },
     {
       "id": "npc_marn",
@@ -1490,13 +1715,14 @@
       "notes": "Holds two of the map's answers inside ordinary vocabulary and has never had a reason to examine either. The counterpart to Thrali, and pointedly not a wise elder -- he is a working herder with a job on.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "sex": "male"
     },
     {
       "id": "npc_odri",
       "type": "npc",
       "name": "Odri",
-      "role": "scavenger",
+      "role": "iron-scavenger",
       "found_at": [
         "poi_sunk_cutting",
         "poi_second_line"
@@ -1529,7 +1755,8 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "Knows the Age of Machinery from the wrong end -- as a source of good metal -- which is the honest way a person in a forest would know it. Odri has better evidence about the era than any scholar on the map and no framework to put it in, and is entirely content with that."
+      "notes": "Knows the Age of Machinery from the wrong end -- as a source of good metal -- which is the honest way a person in a forest would know it. Odri has better evidence about the era than any scholar on the map and no framework to put it in, and is entirely content with that.",
+      "sex": "female"
     },
     {
       "id": "npc_okhi",
@@ -1587,7 +1814,8 @@
       "notes": "The one who will not come. Deliberately not a tragedy and not a rebuke -- she is right that somebody has to stay, and the ending should let her be right rather than treating her as a failed recruitment.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "sex": "female"
     },
     {
       "id": "npc_pell",
@@ -1646,7 +1874,8 @@
       "notes": "The one who will not come, and for the opposite reason to Bekh: not somebody has to stay, but the work does not end and that is not an argument for stopping. Sweeps an interdimensional gate as municipal maintenance.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "sex": "male"
     },
     {
       "id": "npc_sesh",
@@ -1685,7 +1914,8 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "Dwarka's local knowledge being simply right, which is that map's thesis. Sesh has the observation exactly and no theory, and the one thing Sesh notices about visitors is which of them bother to walk to both sites."
+      "notes": "Dwarka's local knowledge being simply right, which is that map's thesis. Sesh has the observation exactly and no theory, and the one thing Sesh notices about visitors is which of them bother to walk to both sites.",
+      "sex": "male"
     },
     {
       "id": "npc_sura",
@@ -1745,13 +1975,14 @@
       "notes": "Holds four hundred years of stratigraphy as a family trade and has never been asked. Would settle -- the midden is a living, not a home.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "sex": "female"
     },
     {
       "id": "npc_terke",
       "type": "npc",
       "name": "Terke",
-      "role": "nomad",
+      "role": "drover",
       "found_at": [
         "poi_nomad_ground",
         "poi_vedda_ford"
@@ -1784,7 +2015,8 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "The living end of the map's oldest thread. Terke fords where the Vedda forded and has no interest in the line at all -- not hostility, just a different set of needs. Animals, water, no timetable.\n\nSays nothing about the Age of Machinery because it is not a thing that happened to them."
+      "notes": "The living end of the map's oldest thread. Terke fords where the Vedda forded and has no interest in the line at all -- not hostility, just a different set of needs. Animals, water, no timetable.\n\nSays nothing about the Age of Machinery because it is not a thing that happened to them.",
+      "sex": "female"
     },
     {
       "id": "npc_thrali",
@@ -1852,7 +2084,8 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "Delta fisher, Kia by descent, half his grandfather's vocabulary lost. Gives the opening hook and is the first person the player can materially help. Would settle -- he has nothing holding him here but the fishing."
+      "notes": "Delta fisher, Kia by descent, half his grandfather's vocabulary lost. Gives the opening hook and is the first person the player can materially help. Would settle -- he has nothing holding him here but the fishing.",
+      "sex": "male"
     },
     {
       "id": "npc_uma",
@@ -1908,7 +2141,8 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "Keeps the camp's roofs on. The smallest possible help, and deliberately the first one available: the player learns that knowing when to cut a reed counts as helping."
+      "notes": "Keeps the camp's roofs on. The smallest possible help, and deliberately the first one available: the player learns that knowing when to cut a reed counts as helping.",
+      "sex": "female"
     },
     {
       "id": "npc_vessa",
@@ -1958,7 +2192,8 @@
       "notes": "The scholar who is already most of the way there and cannot say so in an acceptable form. Would settle -- she has been looking for somewhere the question is allowed.",
       "epochs": [
         "epoch_post_cataclysm"
-      ]
+      ],
+      "sex": "female"
     }
   ],
   "biomes": [

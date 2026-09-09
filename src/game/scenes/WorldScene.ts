@@ -16,6 +16,7 @@ import edgesUrl from '../../../assets/edges.png';
 import cliffsUrl from '../../../assets/cliffs.png';
 import treelineUrl from '../../../assets/treeline.png';
 import decorUrl from '../../../assets/decor.png';
+import trackUrl from '../../../assets/track.png';
 import { EventBus } from '../EventBus';
 import {
   FEATURE_SHEET,
@@ -26,6 +27,7 @@ import {
   PLACE_SHEET,
   TERRAIN_SHEET,
   DECOR_SHEET,
+  TRACK_SHEET,
   SHADOW_TEXTURE,
   TILE_SIZE,
   blendTextureKey,
@@ -42,8 +44,13 @@ import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
 import { ROW_SLOT, depthFor } from '../frames';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 
-/** Which loaded texture each kind of placement draws from. `marker` is a glyph and has none. */
-const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker'>, string> = {
+/**
+ * Which loaded texture each kind of placement draws from.
+ *
+ * `marker` is a glyph and has none; `shadow` is a tinted quad and has none either -- see
+ * `planIslandShadow` for why the island's shadow is not four frames of painted dark blue.
+ */
+const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker' | 'shadow'>, string> = {
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
@@ -51,6 +58,7 @@ const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker'>, string> = {
   places: PLACE_SHEET,
   landmarks: LANDMARK_SHEET,
   decor: DECOR_SHEET,
+  track: TRACK_SHEET,
   cliffs: CLIFF_SHEET,
   treeline: TREELINE_SHEET
 };
@@ -367,7 +375,8 @@ export class WorldScene extends Phaser.Scene {
       edges: edgesUrl,
       cliffs: cliffsUrl,
       treeline: treelineUrl,
-      decor: decorUrl
+      decor: decorUrl,
+      track: trackUrl
     });
   }
 
@@ -495,6 +504,17 @@ export class WorldScene extends Phaser.Scene {
       const jy = (item.offset?.y ?? 0) * TILE_SIZE;
       const cx = item.x * TILE_SIZE + TILE_SIZE / 2 + jx;
       const cy = item.y * TILE_SIZE + TILE_SIZE / 2 + jy;
+
+      // The shadow an island casts on the water: a flat quad, darkest under the lip and fading
+      // out across `SHADOW_REACH` rows. It is what makes a floating shelf read as floating rather
+      // than as a sea stack, and it needs no art to say so.
+      if (item.sheet === 'shadow') {
+        const shade = this.add
+          .rectangle(cx, cy, TILE_SIZE, TILE_SIZE, 0x0b1c30, item.alpha ?? 0.3)
+          .setDepth(item.depth);
+        this.tileOwned.push({ sprite: shade as unknown as Phaser.GameObjects.Image, x: item.x, y: item.y });
+        continue;
+      }
 
       if (item.sheet === 'marker') {
         this.add

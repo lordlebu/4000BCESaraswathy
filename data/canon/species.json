@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.12.1",
+  "canon_version": "2.18.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -2737,14 +2737,15 @@
       "clade": "fish",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "An ancient fish species possessing natural antifreeze glycoproteins, glowing with a pale blue light beneath glacial ice.",
       "mood": "luminous",
-      "source_index": 152
+      "source_index": 152,
+      "notes": "\n\n**Moved off `lava_field`**, with the seals and the petrels and for the same reason. A frost-whiskered fish on warm basalt is the same import artefact, and the Shambala ice-pike it sits beside in the bestiary went to the snow in the same pass."
     },
     {
       "id": "fauna_shambala_ice_pike",
@@ -2754,14 +2755,15 @@
       "clade": "fish",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A predatory, crystal-scaled fish of the frozen mountain lakes, specializing in hunting frost-whisker carp near glacier edges.",
       "mood": "fearsome",
-      "source_index": 153
+      "source_index": 153,
+      "notes": "\n\n**Moved off `lava_field`.** This was filed as living on cooled basalt and in mountains, which put an ice animal on warm volcanic rock in a cold *desert* -- the game duly offered it to a player standing on the Black Pavement at Dwarka, hunting beneath ice shelves that are several thousand miles away.\n\nIt is a bulk-import artefact rather than a judgement anybody made: every one of the thirty-one species carrying `lava_field` carried the identical pair `lava_field, mountains`, with no variation at all, and the batch swept up seven polar entries along with two dozen genuinely volcanic ones. `snow, mountains` already existed and already held the glacial ice-flea and the glacial snow-hare -- the same prefix as this, split across two imports.\n\nIt stayed invisible while nothing drew `lava_field`. The moment the game grew a stamp for it, the seal appeared."
     },
     {
       "id": "fauna_basalt_cave_lurker",
@@ -2856,14 +2858,15 @@
       "clade": "mammal",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A robust marine mammal with a thick layer of blubber, hunting Sarovar fish beneath the ice shelves of the deep south.",
       "mood": "fearsome",
-      "source_index": 159
+      "source_index": 159,
+      "notes": "\n\n**Moved off `lava_field`.** This was filed as living on cooled basalt and in mountains, which put an ice animal on warm volcanic rock in a cold *desert* -- the game duly offered it to a player standing on the Black Pavement at Dwarka, hunting beneath ice shelves that are several thousand miles away.\n\nIt is a bulk-import artefact rather than a judgement anybody made: every one of the thirty-one species carrying `lava_field` carried the identical pair `lava_field, mountains`, with no variation at all, and the batch swept up seven polar entries along with two dozen genuinely volcanic ones. `snow, mountains` already existed and already held the glacial ice-flea and the glacial snow-hare -- the same prefix as this, split across two imports.\n\nIt stayed invisible while nothing drew `lava_field`. The moment the game grew a stamp for it, the seal appeared."
     },
     {
       "id": "fauna_volcanic_salamander",
@@ -2890,14 +2893,15 @@
       "clade": "bird",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A dark-winged bird that flies along the immense glacial cliffs of the deep south, nesting in rocky crevices.",
       "mood": "watchful",
-      "source_index": 161
+      "source_index": 161,
+      "notes": "\n\n**Moved off `lava_field`.** This was filed as living on cooled basalt and in mountains, which put an ice animal on warm volcanic rock in a cold *desert* -- the game duly offered it to a player standing on the Black Pavement at Dwarka, hunting beneath ice shelves that are several thousand miles away.\n\nIt is a bulk-import artefact rather than a judgement anybody made: every one of the thirty-one species carrying `lava_field` carried the identical pair `lava_field, mountains`, with no variation at all, and the batch swept up seven polar entries along with two dozen genuinely volcanic ones. `snow, mountains` already existed and already held the glacial ice-flea and the glacial snow-hare -- the same prefix as this, split across two imports.\n\nIt stayed invisible while nothing drew `lava_field`. The moment the game grew a stamp for it, the seal appeared."
     },
     {
       "id": "fauna_soot_winged_falcon",
@@ -2958,14 +2962,15 @@
       "clade": "bird",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A fierce, scavenging seabird that nests near the glacial bays, stealing fish from seals and other birds.",
       "mood": "watchful",
-      "source_index": 165
+      "source_index": 165,
+      "notes": "\n\n**Moved off `lava_field`.** This was filed as living on cooled basalt and in mountains, which put an ice animal on warm volcanic rock in a cold *desert* -- the game duly offered it to a player standing on the Black Pavement at Dwarka, hunting beneath ice shelves that are several thousand miles away.\n\nIt is a bulk-import artefact rather than a judgement anybody made: every one of the thirty-one species carrying `lava_field` carried the identical pair `lava_field, mountains`, with no variation at all, and the batch swept up seven polar entries along with two dozen genuinely volcanic ones. `snow, mountains` already existed and already held the glacial ice-flea and the glacial snow-hare -- the same prefix as this, split across two imports.\n\nIt stayed invisible while nothing drew `lava_field`. The moment the game grew a stamp for it, the seal appeared."
     },
     {
       "id": "fauna_lava_basalt_centipede",
@@ -3113,14 +3118,15 @@
       "clade": "mammal",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "encounter",
       "rarity": "rare",
       "journal_prompt": "A marine mammal with distinctive white band markings, hunting Sarovar fish beneath the ice shelves.",
       "mood": "fearsome",
-      "source_index": 174
+      "source_index": 174,
+      "notes": "\n\n**Moved off `lava_field`.** This was filed as living on cooled basalt and in mountains, which put an ice animal on warm volcanic rock in a cold *desert* -- the game duly offered it to a player standing on the Black Pavement at Dwarka, hunting beneath ice shelves that are several thousand miles away.\n\nIt is a bulk-import artefact rather than a judgement anybody made: every one of the thirty-one species carrying `lava_field` carried the identical pair `lava_field, mountains`, with no variation at all, and the batch swept up seven polar entries along with two dozen genuinely volcanic ones. `snow, mountains` already existed and already held the glacial ice-flea and the glacial snow-hare -- the same prefix as this, split across two imports.\n\nIt stayed invisible while nothing drew `lava_field`. The moment the game grew a stamp for it, the seal appeared."
     },
     {
       "id": "fauna_volcanic_ash_moth",
@@ -5031,13 +5037,14 @@
       "growth_form": "moss",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A dense, cushioning moss that thrives on glacier-bound stones, providing insulation for snow-hare nests.",
-      "source_index": 47
+      "source_index": 47,
+      "notes": "\n\n**Moved off `lava_field`.** This was filed as living on cooled basalt and in mountains, which put an ice animal on warm volcanic rock in a cold *desert* -- the game duly offered it to a player standing on the Black Pavement at Dwarka, hunting beneath ice shelves that are several thousand miles away.\n\nIt is a bulk-import artefact rather than a judgement anybody made: every one of the thirty-one species carrying `lava_field` carried the identical pair `lava_field, mountains`, with no variation at all, and the batch swept up seven polar entries along with two dozen genuinely volcanic ones. `snow, mountains` already existed and already held the glacial ice-flea and the glacial snow-hare -- the same prefix as this, split across two imports.\n\nIt stayed invisible while nothing drew `lava_field`. The moment the game grew a stamp for it, the seal appeared."
     },
     {
       "id": "flora_antarctic_kelp_grass",
@@ -5047,13 +5054,14 @@
       "growth_form": "grass",
       "region": "ganges-lava-sea",
       "biomes": [
-        "lava_field",
+        "snow",
         "mountains"
       ],
       "placement": "flavour",
       "rarity": "rare",
       "journal_prompt": "A tough, cold-tolerant sea-grass that forms dense beds along the glacial shores, feeding seals and small fish.",
-      "source_index": 48
+      "source_index": 48,
+      "notes": "\n\n**Moved off `lava_field`.** This was filed as living on cooled basalt and in mountains, which put an ice animal on warm volcanic rock in a cold *desert* -- the game duly offered it to a player standing on the Black Pavement at Dwarka, hunting beneath ice shelves that are several thousand miles away.\n\nIt is a bulk-import artefact rather than a judgement anybody made: every one of the thirty-one species carrying `lava_field` carried the identical pair `lava_field, mountains`, with no variation at all, and the batch swept up seven polar entries along with two dozen genuinely volcanic ones. `snow, mountains` already existed and already held the glacial ice-flea and the glacial snow-hare -- the same prefix as this, split across two imports.\n\nIt stayed invisible while nothing drew `lava_field`. The moment the game grew a stamp for it, the seal appeared."
     },
     {
       "id": "flora_volcanic_sulfur_flower",

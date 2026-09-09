@@ -115,13 +115,77 @@ thresholds against that normalised range — so a local change to any additive t
 everything. Damping the delta's spine drove hills from 6.7% to 25.9% this way. Measure all three
 maps after touching any shaping term.
 
+## The crossing, and what a fourth landform cost
+
+The Aravali is the fourth field map and the first that is a **sequence** rather than a country:
+stony shore, water, islands, far shore, walked in that order. Almost everything it needed was a
+thing the generator could not say, and each one is now written down here because the next map like
+it will need the same.
+
+**A map's shape is canon's to state.** `proportion` — `square` or `portrait`, absent meaning
+square — sits beside `relief` and `scale` on the field map. Drawn square the crossing could not be
+any of its four bands properly at once: the sea had to read as a sea across the full width, which
+left twelve rows of shore at each end with no room for relief and put the islands close enough to
+read as one shape with a nick in it. 44×66 is the reference's own 2:3 and *fewer* tiles than
+64×64, so nothing got slower.
+
+**Islands are ellipses, not circles.** Round was why they had to be shrunk to make room for each
+other: a circle wide enough to look right is also tall enough to close the gap. Nineteen across and
+twelve deep, with fourteen rows of water between.
+
+**The rock face hangs below the island, not around it.** The first version stamped `sky_underside`
+just inside the ellipse, so the island's outermost tiles *became* rock — a grey moat that reads as
+a crater, and a tile of walkable top lost all the way round to a biome that is deliberately not
+walkable.
+
+**Both shores are different countries**, which canon's own arrival text had said all along: near is
+*"the ranges come down to the water in steps of grey stone"*, far is *"a green smudge that is not
+Jambhudweepa"*. One term of elevation tilted south and one of moisture tilted north; measured, the
+north is 289 forest and 1 hill, the south 158 hills and 17 mountains against 25 forest.
+
+**`Tile.track` is a flag, not a biome** — the sea below it stays sea and stays navigable. The rail
+runs between the islands only, because the islands are what hold the line up; ropes climb from each
+shore, and a stub of derelict line runs inland from each landfall, which is canon's *"a rail-head,
+a shed, and a line of iron"*. Which stretch is rail and which is rope is **derived** from where the
+islands are (`railSpan`) rather than stored, so the drawing and the carriage's route cannot drift
+apart.
+
+**A shadow is what makes it float.** Grass to the edge, a face under the lip and cliffs along the
+joint are all equally true of a sea stack; what separates a floating shelf is that light gets
+underneath. It is a tinted quad rather than a sheet, special-cased in the scene like the marker
+glyph.
+
+Three of these were caught by tests that were **asking the wrong question**, which is the pattern
+worth carrying forward: a cliff test that counted every cliff on the map and so passed at "over
+twenty" while the islands had none; a route test that asked whether the run was continuous and one
+column wide, while three parallel railways ran up the middle of the sea; and a walkability test
+that asked whether the start was on land, but never which side of the water.
+
 **1. `relief` cannot express visual relief.** Canyons, cliff faces and a two-tile-wide Narmada
 were all asked for and none is expressible today. They belong with the classifier rewrite rather
 than before it.
 
-**2. Tiles for `lava_field`, the sky biomes and the train track** are blocked on source art —
-`tools/build-terrain.js` converts art, it does not invent it. Canon's half of lava is largely
-done.
+**2. Tiles for `lava_field`, the sky biomes and the train track — done, and the last of them
+taught the most.**
+
+All three have art and ship. What the work found is that *having a tile is not the same as having
+the ground*, and the gap between those two is invisible to every test that was watching.
+
+`classifyBiome` only ever emits the eight biomes in `ALL_TERRAIN`. `snow`, `sky_island`,
+`sky_underside` and `lava_field` are not among them and never will be: they are **places**, not
+climates, and a place is stamped onto finished ground after classification. `tableland.ts` stamps
+the drifts, `crossing.ts` stamps the islands and the line — and for `lava_field` nobody ever wrote
+the stamp.
+
+So it had painted ground, a terrain frame, six decor props, basalt columns on the overdraw sheet,
+25 creatures, 6 plants, a place in `data/biomes.json` and canon's palette entry for Dwarka with
+four points of interest asking to stand on it. **And the map generated zero tiles of it on every
+seed.** All four places silently took their second-choice terrain. Nothing failed, because nothing
+asked whether any of it was on the map — that is now the first assertion in `test/basalt.test.ts`.
+
+The rule this leaves: **a renderable biome that no module stamps is a biome that does not exist.**
+When canon adds one, `basalt.ts` is the shape to copy — describe what the thing *is* (an old flow
+the city was built on) so the rule picks out the map that has one, rather than naming the map.
 
 **3. Hardening — done, and two of its three items were not real.**
 

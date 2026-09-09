@@ -10,8 +10,10 @@
 import { expect, test, type Page } from '@playwright/test';
 import { step } from './walk';
 
-const SEED = 'dock-5226';
-const AT_NIGHT = `/?seed=${SEED}&hour=0&at=35,39`;
+// The same searched seed `questions.spec.ts` uses, and stale for the same reason -- see the note
+// there. Thrali stands at the drowned dockyard, two steps south of the start.
+const SEED = 'dock-8';
+const AT_NIGHT = `/?seed=${SEED}&hour=0&at=9,40`;
 
 async function walkToThrali(page: Page) {
   await page.goto(AT_NIGHT);

@@ -84,12 +84,24 @@ function delta(at: Place): Shaping {
  *
  * A wider, deeper shore than a delta's, and it does not care which edge -- that is the difference
  * between "half of this city is underwater" and "this river meets the sea here".
+ *
+ * **The two shores are not the same country, and canon says so in the arrival text.** Near side:
+ * "the ranges come down to the water in steps of grey stone, and stop". Far side: "a green smudge
+ * that is not Jambhudweepa". One is the Aravali coming down to the sea and the other is somewhere
+ * else, and drawing both as the same damp green coast threw that away -- along with the hills The
+ * Quiet Atelier hides in and the high stone The Kept Stones stand on.
+ *
+ * So elevation is tilted south and moisture north. The south rises into hills and mountains with
+ * the range in it; the north stays low, wet and wooded. It costs one term each and it is the
+ * difference between a crossing that goes somewhere and a crossing between two of the same place.
  */
 function island(at: Place): Shaping {
   const inland = ramp(at.edgeDistance * 3.0);
+  // 0 in the north, 1 in the south. `north` runs 0 at the top edge to 1 at the bottom.
+  const southward = at.north;
   return {
-    elevation: inland * 0.34 - shore(at) * 0.42,
-    moisture: 0.14 - inland * 0.1
+    elevation: inland * 0.34 - shore(at) * 0.42 + (southward - 0.5) * 0.55,
+    moisture: 0.14 - inland * 0.1 + (0.5 - southward) * 0.22
   };
 }
 

@@ -74,7 +74,7 @@ const COVERAGE: Record<string, Coverage> = {
     skipped: [...EDITORIAL, 'uses', 'placement_note', 'crosses_at']
   },
   'places.field_maps': {
-    adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'points_of_interest',
+    adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'proportion', 'points_of_interest',
       'neighbours', 'arrival', 'climate', 'coordinates', 'relief'],
     skipped: [...EDITORIAL,
       // The name canon used before. There are around four Dwarkas in Jambhudweepa, so the one
@@ -84,7 +84,7 @@ const COVERAGE: Record<string, Coverage> = {
       'aliases']
   },
   'places.points_of_interest': {
-    adapted: ['id', 'name', 'field_map', 'kind', 'terrain', 'stands', 'description', 'arrival',
+    adapted: ['id', 'name', 'field_map', 'kind', 'terrain', 'stands', 'shore', 'description', 'arrival',
       'discoveries', 'npcs', 'sub_locations', 'ruin_of'],
     skipped: [...EDITORIAL,
       // Canon cross-references — the character or event a place belongs to. Useful to the
@@ -92,7 +92,7 @@ const COVERAGE: Record<string, Coverage> = {
       'related_entities']
   },
   'places.npcs': {
-    adapted: ['id', 'name', 'role', 'found_at', 'would_settle', 'language', 'knows', 'lines'],
+    adapted: ['id', 'name', 'role', 'sex', 'found_at', 'would_settle', 'language', 'knows', 'lines'],
     skipped: [...EDITORIAL,
       // Which canon character this person descends from. Lineage is book material.
       'descended_from']

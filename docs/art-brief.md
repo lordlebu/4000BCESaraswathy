@@ -101,7 +101,7 @@ The change is **ground and objects, not figures**. That is a deliberate split, n
 | Asset | Direction | Why |
 | --- | --- | --- |
 | 2 · terrain tiles | **Painted**, 128×128 | Rebuilt from the 2048² source, see below |
-| 2b · `lava_field` | **Painted**, 128×128 | Still blocked, still blocking content |
+| 2b · `lava_field` | **Painted**, 128×128 | Shipped. The tile was never the last blocker — see below |
 | 3 · landmarks | **Painted**, 128×128 | Objects standing on painted ground |
 | *new* · decor props | **Painted** | Lily pads, rocks, reeds — see Asset 5 |
 | 0 · walk cycle | **Pixel, unchanged** | `build-sprite-sheet.js` and its 22-colour palette stay exactly as they are |
@@ -516,17 +516,33 @@ lighting gradient. If the *variety* test fails, the swatch is too uniform to be 
 variants. Neither is a judgement of the painting; both are cheap to re-prompt with one rule
 tightened.
 
-### Asset 2b — `lava_field`, the twelfth tile (blocked, and blocking content)
+### Asset 2b — `lava_field`, the twelfth tile (done, and the tile was not the blocker)
 
-`lava_field` is the one biome canon names that the engine cannot draw, and it is not a nicety:
-**forty species live in the Ganges Lava Sea, and thirty-six of them are currently filed under
-`mountains`** because there was nowhere better to put them. Canon now names the right ground;
-the engine filters it straight back out, because a biome with no tile is not renderable.
+`lava_field` was the one biome canon named that the engine could not draw. **Forty species live in
+the Ganges Lava Sea and thirty-six were filed under `mountains`** because there was nowhere better
+to put them, and the engine filtered the right ground straight back out, because a biome with no
+tile is not renderable.
 
-Until this tile exists those species keep `mountains` alongside `lava_field` — deliberately, since
-a species left with no drawable ground stops being placed in the world at all. **Once the tile
-lands, tell the canon side and the pairing gets undone**, and the basalt plains become real
-places you can stand on.
+The tile shipped. Nothing happened.
+
+**A tile makes a biome drawable; it does not put any of it on a map.** `classifyBiome` only ever
+emits the eight biomes in `ALL_TERRAIN`, and `lava_field` is not one of them — it is a *place*,
+like the snow drifts and the floating islands, and a place is stamped onto finished ground after
+classification. `tableland.ts` and `crossing.ts` do that for theirs; for the basalt nobody had
+written the stamp. So the painted tile, the terrain frame, six decor props, the basalt columns,
+25 creatures, 6 plants and four points of interest asking to stand on it all sat behind a map that
+generated **zero tiles of it on every seed**, and every test passed.
+
+`src/world/basalt.ts` is that stamp. The city is built on the rock, which is canon's own
+arrangement — *"It goes under the wall, under the court, under the market"* — so the flow is
+centred on the settlement rather than run along a coast, which matters because Dwarka's sea has
+left and the map has no water to run to.
+
+**The pairing was undone**, as this section always said it would be. What it did not predict is
+what the undoing found: all thirty-one species carrying `lava_field` carried the *identical* pair
+`lava_field, mountains`, and the batch had swept up eight polar species — a glacial ribbon-seal
+was offered to a player standing on warm basalt in a cold desert. A biome nothing draws hides its
+own data errors, and drawing it is what surfaced them.
 
 The region, in canon's own words: active volcanic rifts that cool and solidify into vast jagged
 black basalt plains and lava fields, where magma meets ocean. Its fauna are armoured and

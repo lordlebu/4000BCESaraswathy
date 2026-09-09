@@ -151,8 +151,10 @@ From `art-brief.md`, restated because each was learned by losing an asset:
   deliberately rather than by drift.
 - **Real trees.** The forest features are bamboo, a bee colony and a fallen log. A convincing
   broadleaf wood needs prompted art, and the rule in §1 says a loop will not get there.
-- **`lava_field`.** Canon names it and 36 species live there; there is no tile, so `canon.ts`
-  filters it out.
+- ~~**`lava_field`.** Canon names it and 36 species live there; there is no tile, so `canon.ts`
+  filters it out.~~ **Done.** The tile shipped, and then nothing appeared for another two months,
+  because a tile makes a biome *drawable* and a stamp is what puts it on a map. See `art-brief.md`
+  Asset 2b.
 - **`Guyuk_walking.png`.** Sixteen clean frames of a canon character, held for later. It fails both
   layout checks Varuna's sheet passes, so its row order cannot be assumed — see `art-brief.md`.
 - **Whether 128 is the right grid.** It quadrupled texture memory and broke three latent

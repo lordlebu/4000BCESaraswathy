@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.12.1",
+  "canon_version": "2.18.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -1258,6 +1258,97 @@
       ]
     },
     {
+      "id": "discovery_the_kept_wall",
+      "type": "discovery",
+      "name": "The Kept Wall",
+      "discipline": "archaeology",
+      "found_at": [
+        "poi_kept_stones"
+      ],
+      "levels": [
+        {
+          "entry": "Dry stone round a shoulder of the range, enclosing a hollow with nothing in it."
+        },
+        {
+          "entry": "The wall is a course or two higher than weather would have left it. Somebody has been putting stones back."
+        },
+        {
+          "entry": "There is no path to it. The grass at the foot is not grown over, which means it is walked and not often."
+        },
+        {
+          "entry": "The gate has been closed with newer stone, laid from the inside."
+        },
+        {
+          "entry": "A wall in repair around an empty place, and the people at the rail-head will talk about the ore all day and go quiet about this. I have not asked twice."
+        }
+      ],
+      "notes": "Aravali. Deliberately unresolved at the last rung -- the diary describes exactly and refuses to guess, which is the discipline this game is about.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "discovery_the_line_that_floats",
+      "type": "discovery",
+      "name": "The Line That Floats",
+      "discipline": "archaeology",
+      "found_at": [
+        "poi_rail_head",
+        "poi_far_landing"
+      ],
+      "levels": [
+        {
+          "entry": "Iron rail running out over the strait. Nothing under it and no legs down to the water."
+        },
+        {
+          "entry": "The rail is bedded on the same black ore, in short lengths, laid end to end."
+        },
+        {
+          "entry": "The carriage does not touch the rail. There is a hand's width of nothing between them the whole way over."
+        },
+        {
+          "entry": "Bolt holes along the underside of the rail, and no bolts, and no rust in the holes. It was built to be taken up again."
+        },
+        {
+          "entry": "Somebody worked out that the ore that makes the islands impossible makes the crossing cheap, and then built a road they could unbuild. I would like to know what they were expecting."
+        }
+      ],
+      "notes": "Aravali. Deliberately unresolved at the last rung -- the diary describes exactly and refuses to guess, which is the discipline this game is about.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "discovery_the_ore_that_lifts",
+      "type": "discovery",
+      "name": "The Ore That Lifts",
+      "discipline": "anomalies",
+      "found_at": [
+        "poi_lodestone_face"
+      ],
+      "levels": [
+        {
+          "entry": "Black rock in the island's flank. Grit from it does not lie down; it stands on end and points."
+        },
+        {
+          "entry": "It points the same way here as it does on the far island, and neither way is north."
+        },
+        {
+          "entry": "A knife laid on the face will not lie flat. Held above it, it is lighter than it is in my hand."
+        },
+        {
+          "entry": "The whole island is this. Not standing on it -- made of it, all the way through, which is why the edges crumble and the middle does not."
+        },
+        {
+          "entry": "So the island is held up by what it is made of, and the ore weighs less the more of it there is together. I have written that down twice and it is still what the measurements say."
+        }
+      ],
+      "notes": "Aravali. Deliberately unresolved at the last rung -- the diary describes exactly and refuses to guess, which is the discipline this game is about.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
       "id": "discovery_the_other_doors",
       "type": "discovery",
       "name": "The Other Doors",
@@ -1283,6 +1374,68 @@
         }
       ],
       "notes": "Ends unresolved: described exactly, explained not at all.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "discovery_the_strait_narrows",
+      "type": "discovery",
+      "name": "Why the Crossing Is Here",
+      "discipline": "geography",
+      "found_at": [
+        "poi_rail_head"
+      ],
+      "levels": [
+        {
+          "entry": "The sea between the shores is a mile or so. East of here it opens and does not close again."
+        },
+        {
+          "entry": "Both headlands are the same black-and-grey stone in the same courses, tilted the same way."
+        },
+        {
+          "entry": "They are one hill with the middle gone. The strait is where it broke, not where it was cut."
+        },
+        {
+          "entry": "And the islands are the middle. Two pieces of the same hill, still up, which is the thing nobody here says out loud because it is obvious to them."
+        }
+      ],
+      "notes": "Aravali. Four rungs rather than five: this one answers.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "discovery_the_water_that_climbs",
+      "type": "discovery",
+      "name": "The Water That Climbs",
+      "discipline": "geography",
+      "found_at": [
+        "poi_first_pier"
+      ],
+      "levels": [
+        {
+          "entry": "Rain falls on the island top and runs off the edge, as rain does."
+        },
+        {
+          "entry": "Under the rim it does not fall. It gathers on the underside and runs upward along it."
+        },
+        {
+          "entry": "It leaves the underside at the island's lowest point and goes on going up, into cloud, and does not come back down here.",
+          "conditions": {
+            "weather": [
+              "rain"
+            ]
+          }
+        },
+        {
+          "entry": "Moss grows on the underside in the direction the water climbs, which is the only way I can measure this when it is not raining."
+        },
+        {
+          "entry": "Whatever holds the island up holds the water up as well, and lets go of it a hundred feet under. I can say where the boundary is to within a pace. I cannot say what it is."
+        }
+      ],
+      "notes": "Aravali. Deliberately unresolved at the last rung -- the diary describes exactly and refuses to guess, which is the discipline this game is about.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1350,6 +1503,95 @@
         }
       ],
       "notes": "Opens the stair shaft. The reading is deliberately sympathetic to Kavik -- the building was sound and the world moved."
+    },
+    {
+      "id": "discovery_what_a_hunter_leaves",
+      "type": "discovery",
+      "name": "What a Hunter Leaves",
+      "discipline": "zoology",
+      "found_at": [
+        "poi_nomad_ground",
+        "poi_vedda_ford"
+      ],
+      "levels": [
+        {
+          "entry": "Somebody walks ahead of the herd carrying a short bow, and comes back with nothing most days."
+        },
+        {
+          "entry": "The bow is timber with sinew glued along the back and antler let into the tips. Short enough to draw on a slope."
+        },
+        {
+          "entry": "When something is taken it is one animal, and it is old or lame. I asked how that is decided and was told you learn to tell, which is not an answer I can write down."
+        },
+        {
+          "entry": "Nothing is left. Hide, sinew, long bones, gut -- and the antler was not taken at all, it was picked up in spring where it fell."
+        },
+        {
+          "entry": "So the bow is sinew, and sinew is skinning, and the bow is what makes the skinning possible. It goes round. They know it goes round; it came up before I raised it."
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "The ethic of taking, given to a person rather than stated as a rule. The materials layer has hide, sinew, tusk and bone all `won_from` living animals, and the game hands them over as easily as a reed. This is the one place the cost is said out loud, and it is said by somebody who does it rather than by somebody objecting."
+    },
+    {
+      "id": "discovery_what_grows_on_nothing",
+      "type": "discovery",
+      "name": "What Grows on Nothing",
+      "discipline": "botany",
+      "found_at": [
+        "poi_first_pier",
+        "poi_far_landing"
+      ],
+      "levels": [
+        {
+          "entry": "The island top carries grass, cushion-plant and a stand of mangrove at the edge."
+        },
+        {
+          "entry": "The mangrove roots run out past the rock and hold it. Where they have died back the edge has gone with them."
+        },
+        {
+          "entry": "Moss on the ore grows toward iron. A nail laid on a mat of it is furred over in a season."
+        },
+        {
+          "entry": "The lotus in the climbing water is warm to the hand and stays warm after it is picked, which no other flower here does."
+        }
+      ],
+      "notes": "Aravali. Four rungs rather than five: this one answers.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "discovery_what_will_still_grow",
+      "type": "discovery",
+      "name": "What Will Still Grow",
+      "discipline": "botany",
+      "found_at": [
+        "poi_quiet_atelier"
+      ],
+      "levels": [
+        {
+          "entry": "Trays of soil under the glass, each one labelled, each one worse than the last."
+        },
+        {
+          "entry": "Not local dirt. It is carried in -- ash, salt-crust, sand off a scald -- and the labels are places, not dates."
+        },
+        {
+          "entry": "Physic seed goes in first: neem, brahmi, haritaki. Where anything takes at all, it is these."
+        },
+        {
+          "entry": "Then grass, in the trays where the physic took. Never in the ones where it did not, which is a rule somebody arrived at rather than guessed."
+        },
+        {
+          "entry": "So the order is medicine, then something to hold the slope, then food -- and the reason is that people are sick before they are hungry, and a slope that moves takes the field with it. It is a method for putting a country back, written as a shelf of failed trays."
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "The apothecary as a *method* rather than a trade: physic, then grass, then food, in that order and for stated reasons. This is the solarpunk thread the map was missing -- rebuilding as something a person does at a bench with a list, not as a mood."
     },
     {
       "type": "discovery",

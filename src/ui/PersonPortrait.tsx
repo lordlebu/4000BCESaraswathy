@@ -95,7 +95,26 @@ const TOOLS: [string[], string][] = [
   [['stone-reader'], 'M18 21l4-8M20 10h5v4h-5zM20 12h-2'],
   // A line-keeper's lamp on a hook, which is what you hold up when the carriage is late and the
   // light has gone. Hesh has one and mostly does not need it.
-  [['line-keeper'], 'M20 5v3M17 8h6l-1 8h-4zM18 12h4']
+  [['line-keeper'], 'M20 5v3M17 8h6l-1 8h-4zM18 12h4'],
+  // An apothecary's mortar with the pestle standing in it. Ila grinds physic at a bench in a
+  // glasshouse, and the mortar is the one tool that says medicine rather than cooking -- a bowl
+  // this heavy is for breaking bark and seed, not for stirring.
+  [['apothecary'], 'M22 6l-3 6M16 13h8v2a4 4 0 0 1-8 0zM17 21h6'],
+  // A stonewaller's block, held against the hip the way a heavy thing is carried rather than
+  // lifted. Dala used to share Pell's broom by sharing the words "wall-keeper", and they are not
+  // the same job: Pell sweeps a gate, Dala puts stones back on a wall around nothing.
+  [['stonewaller'], 'M15 14h10v6H15zM15 17h10M20 14v3M17.5 17v3M22.5 17v3'],
+  // A drover's goad and a coil of rope. Terke moves animals across a ford, which is a trade
+  // rather than the way of life "nomad" named -- and a goad is what the job looks like in a hand.
+  [['drover'], 'M17 21L23 7M15 12a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0M16.5 12h3'],
+  // A hunter's short bow, strung and carried rather than drawn: one curved limb and the string as
+  // a chord across it. Anu walks ahead of a herd and mostly comes back with nothing, so a bow at
+  // full draw would be the wrong picture -- and canon agrees, since every weapon in it affords
+  // `cut` and `deter` and nothing anywhere affords killing.
+  //
+  // The comment said *unstrung* first, which the path has never drawn: a stave with no chord is a
+  // stick. Strung-but-lowered is also the truer image for somebody walking with it all day.
+  [['hunter'], 'M18 6a9 9 0 0 1 0 15M18 6l-1 15']
 ];
 
 /** The tool for a role, or null for a person whose trade has no drawing yet. */

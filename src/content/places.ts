@@ -20,6 +20,11 @@ export interface FieldMap {
   /** The palette the generator draws terrain from, roughly in order of dominance. */
   seedBiomes: BiomeId[];
   scale: 'small' | 'large';
+  /**
+   * The shape of the ground, as distinct from its size. Absent in canon means square, which is
+   * what every map was until the crossing needed otherwise. See the field map schema.
+   */
+  proportion: 'square' | 'portrait';
   pointsOfInterest: string[];
   /**
    * Field maps reachable from this one — the overworld's edges.
@@ -87,6 +92,14 @@ export interface PointOfInterest {
    * rule: a map with no high ground still has to put the place somewhere.
    */
   stands: 'high' | 'low' | 'either';
+  /**
+   * Which side of a crossing this place is on.
+   *
+   * `either` for every map that is one country rather than two shores, which is all of them but
+   * the Aravali. See `shoreBias` for why a generator with no opinion put the rail-head on the
+   * wrong side of the water.
+   */
+  shore: 'near' | 'far' | 'either';
   description: string;
   arrival: string;
   discoveries: string[];
@@ -124,6 +137,16 @@ export interface Npc {
   id: string;
   name: string;
   role: string;
+  /**
+   * Male or female, or null where canon has not said.
+   *
+   * Canon records it because it tracks descent -- `descended_from` on people, reincarnation on
+   * characters, and a Mask Family schism running four hundred years through named parents and
+   * children. A lineage cannot be followed without knowing who can bear a child.
+   *
+   * Not a pronoun. An earlier field tried to be both and could be neither.
+   */
+  sex: 'male' | 'female' | null;
   foundAt: string[];
   /** Whether they would join the settlement at the end, having been helped. */
   wouldSettle: boolean;
@@ -137,17 +160,17 @@ export interface Npc {
 
 interface RawFieldMap {
   id: string; name: string; region: string; seed_biomes: string[];
-  scale?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
+  scale?: string; proportion?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
   climate?: Climate; coordinates?: { x: number; y: number }; relief?: string;
 }
 interface RawPoi {
-  id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string;
+  id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string; shore?: string;
   description?: string; arrival?: string; discoveries?: string[]; npcs?: string[];
   sub_locations?: { id: string; name: string; description?: string; requires?: string[] }[];
   ruin_of?: string;
 }
 interface RawNpc {
-  id: string; name: string; role?: string; found_at?: string[]; would_settle?: boolean;
+  id: string; name: string; role?: string; sex?: string; found_at?: string[]; would_settle?: boolean;
   language?: string; knows?: string[];
   lines?: { text: string; requires?: string[]; gives?: string[]; costs?: string }[];
 }
@@ -164,6 +187,7 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   region: m.region,
   seedBiomes: m.seed_biomes as BiomeId[],
   scale: (m.scale ?? 'small') as 'small' | 'large',
+  proportion: (m.proportion ?? 'square') as 'square' | 'portrait',
   pointsOfInterest: m.points_of_interest ?? [],
   neighbours: m.neighbours ?? [],
   climate: m.climate ?? DELTA_CLIMATE,
@@ -179,6 +203,7 @@ export const pointsOfInterest: PointOfInterest[] = raw.points_of_interest.map((p
   kind: p.kind as PoiKind,
   terrain: (p.terrain ?? []) as BiomeId[],
   stands: (p.stands ?? 'either') as 'high' | 'low' | 'either',
+  shore: (p.shore ?? 'either') as 'near' | 'far' | 'either',
   description: p.description ?? '',
   arrival: p.arrival ?? '',
   discoveries: p.discoveries ?? [],
@@ -196,6 +221,7 @@ export const npcs: Npc[] = raw.npcs.map((n) => ({
   id: n.id,
   name: n.name,
   role: n.role ?? '',
+  sex: (n.sex ?? null) as 'male' | 'female' | null,
   foundAt: n.found_at ?? [],
   wouldSettle: n.would_settle === true,
   language: n.language ?? '',
