@@ -243,7 +243,11 @@ export const DECOR_ORDER = [
   'wind-seed',
   'crystal-grit',
   'sky-moss',
-  'crystal-flower'
+  'crystal-flower',
+  'hanging-root',
+  'root-tangle',
+  'cling-moss',
+  'sky-nest'
 ] as const;
 
 /**
@@ -275,10 +279,23 @@ export const DECOR_BY_BIOME: Partial<Record<BiomeId, readonly string[]>> = {
   // it has not covered, so a buried stone and a bare twig do more here than they do anywhere else.
   snow: ['snow-stone', 'wind-crust', 'snow-twig', 'snow-drift', 'frost-tuft', 'snow-tracks'],
   // High turf, weathered stone, and the crystal the islands are known for.
-  sky_island: ['cushion-plant', 'sky-stone', 'wind-seed', 'crystal-grit', 'sky-moss', 'crystal-flower']
+  sky_island: ['cushion-plant', 'sky-stone', 'wind-seed', 'crystal-grit', 'sky-moss', 'crystal-flower'],
+  /**
+   * **The underside is the one surface you see side-on**, and it used to carry nothing.
+   *
+   * It was excluded on the reading that it is "the far side of a boundary rather than ground, and
+   * nothing stands on it". The first half is right and the conclusion did not follow: nothing
+   * *stands* on it, but things hang off it and wedge under it, which is what a shelf's underside
+   * has on it in the first place. Roots trail out of the rock the island holds up -- canon's own
+   * aero-mangrove "plunges its roots downward into the open sky" -- and a bird nests exactly where
+   * nothing can climb.
+   *
+   * Nothing here is drawn standing on a floor, which is what keeps it honest: `roots` in
+   * `tools/build-decor.js` is `tuft` upside down, and the nest is wedged rather than placed.
+   */
+  sky_underside: ['hanging-root', 'root-tangle', 'cling-moss', 'sky-nest']
   // `sea` is not walked on and `landmark` stays bare, so the destination is what the eye finds --
-  // the same two exclusions the overdraw layer makes, for the same reasons. `sky_underside` joins
-  // them: it is the far side of a boundary rather than ground, and nothing stands on it.
+  // the same two exclusions the overdraw layer makes, for the same reasons.
 };
 
 /** Frame index of one prop variant, or null if the name is not on the sheet. */
@@ -588,12 +605,18 @@ export const FEATURES: Record<string, { biome: BiomeId; frames: number[] }> = {
   pine: { biome: 'hills', frames: [21, 22] },
   boulder: { biome: 'hills', frames: [23] },
   cactus: { biome: 'desert', frames: [24, 25] },
-  // A snowfield and a sky island each get one tall thing, and on those two grounds it is
-  // the only vertical there is.
+  // A snowfield gets one tall thing, and on that ground it is the only vertical there is.
   snowPine: { biome: 'snow', frames: [26, 27] },
   crystalCluster: { biome: 'sky_island', frames: [28, 29] },
   basaltColumn: { biome: 'lava_field', frames: [30, 31] },
-  snowSnag: { biome: 'snow', frames: [32, 33] }
+  snowSnag: { biome: 'snow', frames: [32, 33] },
+  // **The islands were mineral and nothing else.** A crystal shard was the whole of what stood on
+  // 296 tiles of the Aravali, so the ground read as bare rock somebody had dropped a gem on. A
+  // shrub and a conifer give it something growing, and the shrub is the one that carries it: a
+  // cushion plant is a mass, which is the case a loop draws well, where the conifer is the
+  // placeholder family `docs/art-brief.md` now has a prompt to replace.
+  skyShrub: { biome: 'sky_island', frames: [34, 35] },
+  skyPine: { biome: 'sky_island', frames: [36, 37] }
 };
 
 /**

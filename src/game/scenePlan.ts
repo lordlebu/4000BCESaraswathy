@@ -61,6 +61,8 @@ export type PlacementSheet =
   | 'places'
   | 'landmarks'
   | 'decor'
+  | 'contact'
+  | 'underside'
   | 'bank'
   | 'shore'
   | 'track'
@@ -127,6 +129,15 @@ const EDGE_DEPTH = 50;
 
 /** How long one sway takes. Slow: this is a game about a quiet walk, not a windy one. */
 export const SWAY_PERIOD = 2000;
+
+/**
+ * How far below a cell's centre a feature's contact shadow sits, in fractions of a cell.
+ *
+ * Measured against the art rather than chosen: the feature sheet draws each object standing on the
+ * lower third of its cell, so a shadow at the centre floats above the trunk and one at the cell
+ * edge slides onto the tile below.
+ */
+const FEATURE_SHADOW_DROP = 0.28;
 
 /** Two settlement tiles in three get a hut, which leaves courtyards and paths between them. */
 const HUT_DENSITY = 3;
@@ -393,6 +404,144 @@ export function planCliffs(world: FieldMapWorld['world']): Placement[] {
 }
 
 /**
+ * How far up an underside tile looks for the shelf that is shading it.
+ *
+ * Four, matching `SHADOW_REACH` -- the two are the same light and disagreeing about its reach
+ * would be visible exactly where they meet, at the island's rim.
+ */
+const UNDERSIDE_REACH = 4;
+
+/** The least shade any underside carries, however far it hangs from the shelf above it. */
+const UNDERSIDE_FLOOR = 0.45;
+
+/**
+ * The shade under a floating shelf, on the shelf's own underside.
+ *
+ * `planIslandShadow` darkens the *sea* below an island, which is what says the island floats. This
+ * is the other half of the same light: the underside rock itself is in shade, hard against the lip
+ * it hangs from and fading downward, because nothing lights the bottom of a thing that is over you.
+ *
+ * Flat depth, just above the terrain and below anything hanging off it -- the roots and the nests
+ * are on that rock, so they are in the shade rather than behind it.
+ */
+export function planUndersideShade(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      if (world.tiles[y]![x]!.biome !== 'sky_underside') continue;
+
+      // **How much island is over this tile**, which is what decides how dark it is. Directly
+      // under the shelf is the deepest shade; further down the hanging rock the light gets in
+      // round the rim. Measured by looking up, which is the same lookup `planIslandShadow` does
+      // from the sea -- one light, asked the same question from both sides of the rock.
+      let above = 0;
+      for (let up = 1; up <= UNDERSIDE_REACH; up += 1) {
+        if (world.tiles[y - up]?.[x]?.biome !== 'sky_island') continue;
+        above = up;
+        break;
+      }
+
+      out.push({
+        sheet: 'underside',
+        frame: 0,
+        x,
+        y,
+        depth: EDGE_DEPTH,
+        // Full weight immediately under the shelf, easing off with distance from it. A tile with
+        // no island above it at all still takes the floor: it is the underside of *something*,
+        // and the far side of a shelf is never lit like the top.
+        alpha: above === 0
+          ? UNDERSIDE_FLOOR
+          : UNDERSIDE_FLOOR + (1 - UNDERSIDE_FLOOR) * (1 - (above - 1) / UNDERSIDE_REACH)
+      });
+    }
+  }
+  return out;
+}
+
+/**
+ * The stones where a rock face turns a corner or simply stops.
+ *
+ * **The rim layer draws one band per boundary tile and asks nothing about its neighbours**, which
+ * is what makes a run of cliff end in mid-air. Two perpendicular faces on one tile meet at a right
+ * angle with a notch in the elbow, and the last tile of a run finishes on a straight vertical cut
+ * that no rock ever made. Measured on the real maps, roughly a third of cliff tiles are corners:
+ * 84 of Narmada's 310, 42 of Lothal's 125.
+ *
+ * **The industry answer to this is autotiling** -- pick the frame from a bitmask of which
+ * neighbours share the state, with inner and outer corner pieces drawn for the purpose. That is
+ * what Godot's terrain sets, RPG Maker's autotiles and Tiled's Wang sets all are, and it is where
+ * this should end up: `cliffFrame(edge, variant)` currently cannot express a corner because the
+ * sheet has no corner to express.
+ *
+ * This is the half that needs no new art, and it is a real technique rather than a stopgap: **rubble
+ * at the joint**. Scree gathers exactly where a face turns or ends, so a stone there is both what
+ * hides the seam and what would actually be lying there. When corner frames are drawn, the
+ * selection below already asks the right question and only the sheet changes.
+ */
+export function planCliffJoints(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+
+  /** Whether the tile at x,y drops away on this edge -- the same question `planCliffs` asks. */
+  const faces = (x: number, y: number, edge: Edge): boolean => {
+    const tile = world.tiles[y]?.[x];
+    if (!tile) return false;
+    const here = band(tile.elevation);
+    if (here === 0) return false;
+    const { dx, dy } = EDGE_STEP[edge];
+    const neighbour = world.tiles[y + dy]?.[x + dx];
+    if (!neighbour) return false;
+    return cliffAt(here, band(neighbour.elevation), tile.biome, neighbour.biome);
+  };
+
+  // The four cell corners, each named by the two edges that meet there.
+  const CORNERS: readonly { a: Edge; b: Edge; x: number; y: number }[] = [
+    { a: 'n', b: 'w', x: -0.36, y: -0.30 },
+    { a: 'n', b: 'e', x: 0.36, y: -0.30 },
+    { a: 's', b: 'w', x: -0.36, y: 0.34 },
+    { a: 's', b: 'e', x: 0.36, y: 0.34 }
+  ];
+
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      for (const corner of CORNERS) {
+        const alongX = corner.b === 'e' ? 1 : -1;
+        const alongY = corner.a === 's' ? 1 : -1;
+        const hasA = faces(x, y, corner.a);
+        const hasB = faces(x, y, corner.b);
+
+        // An elbow: two faces meet here and leave a notch between them.
+        const elbow = hasA && hasB;
+        // A run that stops: this face reaches the corner and the next tile along does not carry
+        // it on. Asked of the neighbour rather than of this tile, which is the whole difference
+        // between a rim that knows it is a run and one that does not.
+        const endOfRow = hasA && !hasB && !faces(x + alongX, y, corner.a);
+        const endOfColumn = hasB && !hasA && !faces(x, y + alongY, corner.b);
+        if (!elbow && !endOfRow && !endOfColumn) continue;
+
+        // Rubble, from the stones the decor sheet already carries. An elbow gathers more than a
+        // run's end does, so it gets the bigger stone.
+        const prop = elbow ? 'boulder-small' : 'scree';
+        const frame = decorFrame(prop, tileHash(world.seed, x, y, `joint-${corner.a}${corner.b}`));
+        if (frame === null) continue;
+
+        out.push({
+          sheet: 'decor',
+          frame,
+          x,
+          y,
+          offset: { x: corner.x, y: corner.y },
+          // With the face rather than under it: the rubble is part of the rock, and drawing it in
+          // the flat ground band would put it behind the very band it is covering the end of.
+          depth: depthFor(y, ROW_SLOT.undergrowth)
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/**
  * The wall of trees where a forest meets open ground.
  *
  * The same layer as `planCliffs` with a different predicate and a different sheet -- which is the
@@ -588,6 +737,29 @@ export function planOverdraw(world: FieldMapWorld['world'], builtOn: ReadonlySet
         tileHash(world.seed, x, y, 'feature-pick')
       );
       if (feature !== null) {
+        // **A thing that stands up needs to touch the ground it stands on.** Without it a tree is
+        // a sticker on the terrain: the eye reads no contact, so the trunk floats however well the
+        // trunk is drawn. It is the cheapest depth cue in the book and the game already owns the
+        // texture -- the traveller has had one since the phase that added him, and the reasoning
+        // for keeping it is in `docs/rendering.md` under what survived the vignette.
+        //
+        // Only under the ones that stand. A fallen log, stepping stones and a tussock lie flat, and
+        // a shadow drawn under a thing already lying on the ground is a smudge -- `featureIsUnderfoot`
+        // is the same answer the depth slot is chosen from, so the two cannot disagree.
+        if (!featureIsUnderfoot(feature)) {
+          out.push({
+            sheet: 'contact',
+            frame: 0,
+            x,
+            y,
+            // Under the feature's base rather than its middle. The sprite fills its cell and stands
+            // on the lower part of it, so the shadow belongs below centre.
+            offset: { x: 0, y: FEATURE_SHADOW_DROP },
+            // Underfoot: on the ground, over the terrain, beneath everything that stands in it --
+            // including the feature it belongs to.
+            depth: underfoot
+          });
+        }
         out.push({
           sheet: 'features',
           frame: feature,
@@ -677,7 +849,11 @@ export function planScene(built: FieldMapWorld): Placement[] {
     // it lies on water that may itself be a blend of river into sea.
     ...planBank(built.world),
     ...planShore(built.world),
+    ...planUndersideShade(built.world),
     ...planCliffs(built.world),
+    // After the faces, so a stone covers the end of the band it is tidying rather than sitting
+    // behind it.
+    ...planCliffJoints(built.world),
     ...planTreeline(built.world),
     ...planDecor(built.world, builtOn),
     ...planShoreProps(built.world, builtOn),
