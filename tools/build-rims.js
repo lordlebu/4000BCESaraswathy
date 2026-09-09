@@ -76,13 +76,19 @@ const DEPTH = { n: 0.20, e: 0.22, s: 0.48, w: 0.22 };
 const CORNERS = ['outer-se', 'outer-sw', 'inner-se', 'inner-sw', 'cap-e', 'cap-w'];
 
 /**
- * Corners are cropped to the full cell rather than to a band.
+ * Corners are cropped to their own art, not to a band and not to the whole cell.
  *
- * A band is cropped back to where its art stops because it is a strip against one edge. A corner
- * is not a strip: it occupies two edges at once and the interesting part is the turn between them,
- * which sits in the middle of the cell. Cropping it like a band would cut the turn out.
+ * A band is cropped back to one edge because it is a strip. A corner is not a strip -- it occupies
+ * two edges at once and the turn between them sits in the middle -- so it is cropped to the
+ * bounding box of everything opaque in the cell instead, and that box is scaled to fill the frame.
+ *
+ * **Taking the whole cell instead is what a first pass did, and it broke both seams.** Painted
+ * corners arrive with air around them: measured on the sheet that shipped, 62-74% of each cell was
+ * empty and the art floated clear of every side. Resampled whole, the rock stopped short of the
+ * cell boundary -- 0px deep at the left and right columns where a straight south band is 62 -- so a
+ * corner meeting a run showed a gap in the wall *and* a step down in its height. Cropping to the
+ * art pushes the arms back out to the edges, where the band next door is waiting for them.
  */
-const CORNER_DEPTH = 1;
 
 /**
  * These are a ceiling, not a target. The art decides, up to this.
@@ -100,7 +106,8 @@ const CORNER_DEPTH = 1;
 
 /** Sheets to build: source file in assets/source, output name in assets. */
 const SHEETS = [
-  // `corners` is optional and names a 2x3 magenta grid of the six pieces in `CORNERS` order.
+  // `corners` is optional and names a 3x2 grid of the six pieces in `CORNERS` order, magenta
+  // or already transparent.
   // Absent, the sheet is built with sixteen edge frames exactly as before -- which is what ships
   // today, and why this is safe to have in place before the art exists.
   { id: 'cliffs', from: 'Gemini_Stones.png', to: 'cliffs.png', corners: 'cliff-corners.png' },
@@ -389,6 +396,39 @@ function contentDepth(cell, size, edge) {
   return 0;
 }
 
+/**
+ * The bounding box of everything opaque in a cell.
+ *
+ * Same job `contentDepth` does for a band, in two dimensions: find where the art really is rather
+ * than trusting the layout it was asked for. It uses the same coverage floor, so a stray speck near
+ * a corner of the canvas cannot drag the box out to the full cell and undo the crop -- which is the
+ * failure `LINE_COVERAGE` was added for in the first place.
+ */
+function contentBox(cell, width, height) {
+  const opaque = (x, y) => cell[(y * width + x) * 4 + 3] > 24;
+  const needCol = Math.max(2, Math.round(height * LINE_COVERAGE));
+  const needRow = Math.max(2, Math.round(width * LINE_COVERAGE));
+  const colHas = (x) => {
+    let n = 0;
+    for (let y = 0; y < height; y += 1) if (opaque(x, y) && (n += 1) >= needCol) return true;
+    return false;
+  };
+  const rowHas = (y) => {
+    let n = 0;
+    for (let x = 0; x < width; x += 1) if (opaque(x, y) && (n += 1) >= needRow) return true;
+    return false;
+  };
+  let x0 = 0;
+  let x1 = width;
+  let y0 = 0;
+  let y1 = height;
+  while (x0 < width - 1 && !colHas(x0)) x0 += 1;
+  while (x1 > x0 + 1 && !colHas(x1 - 1)) x1 -= 1;
+  while (y0 < height - 1 && !rowHas(y0)) y0 += 1;
+  while (y1 > y0 + 1 && !rowHas(y1 - 1)) y1 -= 1;
+  return { x0, x1, y0, y1 };
+}
+
 /** Place a band of art against the correct edge of an otherwise empty cell. */
 function place(band, bandW, bandH, edge) {
   const out = Buffer.alloc(CELL * CELL * 4);
@@ -473,10 +513,26 @@ function buildSheet({ id, from, to, corners }, apply) {
   const cornerFile = corners ? path.join(SRC, corners) : null;
   if (cornerFile && fs.existsSync(cornerFile)) {
     const grid = decodePng(cornerFile);
-    const cols = 2;
-    const rows = 3;
+    // Three across, two down. The edge sheets are 4x4 because they hold sixteen frames; six pieces
+    // do not divide that way, and every generated sheet came back 3x2 whatever the prompt asked
+    // for. Same call as the magenta background above: ask for what the model reliably does and put
+    // the container problem here, where it is arithmetic.
+    const cols = 3;
+    const rows = 2;
     const cw = Math.floor(grid.width / cols);
     const ch = Math.floor(grid.height / rows);
+    // **Only key a sheet that needs keying.** The key exists because image models will not hand
+    // back transparency; when one does, running it anyway is pure damage. Measured on the sheet
+    // that shipped: 0.6% of its opaque stone matches the "warm paper undertone" branch of `isKey`
+    // and would be punched out as scattered white speckles. A rejected candidate painted in
+    // near-white limestone lost most of every boulder the same way -- which read as a fault in the
+    // art until the holes were traced back to here.
+    const alreadyCut = (() => {
+      for (let i = 0; i < grid.width * grid.height; i += 1) {
+        if (grid.data[i * 4 + 3] < 250) return true;
+      }
+      return false;
+    })();
 
     wideW = sheetW + CORNERS.length * CELL;
     wide = Buffer.alloc(wideW * CELL * 4);
@@ -499,17 +555,27 @@ function buildSheet({ id, from, to, corners }, apply) {
           cell[di + 3] = grid.data[si + 3];
         }
       }
-      const keyed = key(cell, cw, ch);
-      // Whole cell, not a band: the turn a corner exists to draw sits in the middle of it, and a
-      // band crop would cut exactly that out. See CORNER_DEPTH.
-      const box = { x0: 0, x1: cw, y0: 0, y1: ch };
-      const band = resample(keyed, cw, box, Math.round(CELL * CORNER_DEPTH), Math.round(CELL * CORNER_DEPTH));
+      const keyed = alreadyCut ? cell : key(cell, cw, ch);
+      const box = contentBox(keyed, cw, ch);
+
+      // **Fit to width, keep the aspect, sit on the floor.** Stretching the box to a square is the
+      // obvious move and it ruins the caps: theirs measures 433x202, so squaring it stands every
+      // boulder up 2x taller than the ones in the wall it is ending. Scaling by width alone gives
+      // the caps a 60px band -- within a pixel or two of the 62 a straight south face is -- and
+      // costs the corner pieces a few empty rows at the top, where there is nothing drawn anyway.
+      const boxW = box.x1 - box.x0;
+      const boxH = box.y1 - box.y0;
+      const tall = Math.min(CELL, Math.max(1, Math.round((boxH * CELL) / boxW)));
+      const band = resample(keyed, cw, box, CELL, tall);
+      // Against the bottom, the same edge `place` puts a south band against: a corner and the run
+      // it continues have to stand on the same line or the wall visibly steps at the seam.
+      const frame = place(band, CELL, tall, 's');
       const ox = sheetW + index * CELL;
       for (let y = 0; y < CELL; y += 1) {
         const fromRow = y * CELL * 4;
-        band.copy(wide, (y * wideW + ox) * 4, fromRow, fromRow + CELL * 4);
+        frame.copy(wide, (y * wideW + ox) * 4, fromRow, fromRow + CELL * 4);
       }
-      report.push(`${name}`);
+      report.push(`${name} ${tall}px`);
     });
     frames += CORNERS.length;
   } else if (corners) {

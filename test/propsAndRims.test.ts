@@ -12,9 +12,15 @@ import {
   FEATURES,
   GROUND_DEPTH_BASE,
   ROW_SLOT,
+  CORNER_BASE,
+  CORNER_ORDER,
+  EDGE_ORDER,
+  EDGE_VARIANTS,
+  cliffTurn,
   depthFor,
   featureIsUnderfoot
 } from '../src/game/frames';
+import type { CornerPiece, Edge } from '../src/game/frames';
 
 const worlds = fieldMaps.map((map) => ({ id: map.id, built: buildFieldMap(map, {}) }));
 const only = (id: string) => worlds.find((w) => w.id === id)!;
@@ -102,6 +108,122 @@ describe('a rock face knows where it stops', () => {
         expect(firstDecor, `${id}: joints emitted before the faces`).toBeGreaterThan(lastCliff);
       }
     }
+  });
+});
+
+describe('a rock face turns instead of meeting itself', () => {
+  /** Which edge band a frame index is, or null if it is a corner piece. */
+  const edgeOf = (frame: number): Edge | null =>
+    frame >= CORNER_BASE ? null : EDGE_ORDER[Math.floor(frame / EDGE_VARIANTS)]!;
+
+  /** Which edges a corner piece stands in for. */
+  const covers: Record<CornerPiece, Edge[]> = {
+    'outer-se': ['s', 'e'],
+    'inner-se': ['s', 'e'],
+    'outer-sw': ['s', 'w'],
+    'inner-sw': ['s', 'w'],
+    'cap-e': ['s'],
+    'cap-w': ['s']
+  };
+
+  it('replaces the two bands rather than drawing a third thing over them', () => {
+    // The whole point of the piece. `place()` already lays the south band across the full cell
+    // width and the east band down the full cell height, so on a corner tile they overlap -- there
+    // was never a gap to fill. Leaving the bands in and adding a corner on top would put three
+    // pieces of rock texture where the complaint was about two.
+    for (const { id, built } of worlds) {
+      const cliffs = planCliffs(built.world);
+      const byTile = new Map<string, number[]>();
+      for (const c of cliffs) {
+        const key = `${c.x},${c.y}`;
+        byTile.set(key, [...(byTile.get(key) ?? []), c.frame]);
+      }
+      for (const [key, frames] of byTile) {
+        const corners = frames.filter((f) => f >= CORNER_BASE);
+        if (corners.length === 0) continue;
+        const replaced = new Set(
+          corners.flatMap((f) => covers[CORNER_ORDER[f - CORNER_BASE]!]!)
+        );
+        for (const frame of frames) {
+          const edge = edgeOf(frame);
+          if (edge === null) continue;
+          expect(replaced.has(edge), `${id}: band '${edge}' still drawn under a corner at ${key}`)
+            .toBe(false);
+        }
+      }
+    }
+  });
+
+  it('uses every piece somewhere, on every map', () => {
+    // The `lava_field` bug in miniature: art, a frame, a rule, and zero of it on the map. Six
+    // paintings were commissioned and a selection rule that could only ever reach four of them
+    // would look exactly like this working.
+    for (const { id, built } of worlds) {
+      const used = new Set(
+        planCliffs(built.world)
+          .filter((c) => c.frame >= CORNER_BASE)
+          .map((c) => CORNER_ORDER[c.frame - CORNER_BASE]!)
+      );
+      for (const piece of CORNER_ORDER) {
+        expect(used.has(piece), `${id}: never draws ${piece}`).toBe(true);
+      }
+    }
+  });
+
+  it('stands the joint rubble down where a piece carries its own turn', () => {
+    // `planCliffJoints` exists to stand in for corner art that did not exist. Now that it does,
+    // leaving both on would drop a boulder on top of a corner that already has rubble painted into
+    // it -- and the joint layer, not the art, would be the thing to blame for how it looked.
+    for (const { id, built } of worlds) {
+      const world = built.world;
+      const suppressed = new Set<string>();
+      for (const c of planCliffs(world)) {
+        if (c.frame < CORNER_BASE) continue;
+        for (const e of covers[CORNER_ORDER[c.frame - CORNER_BASE]!]!) {
+          suppressed.add(`${c.x},${c.y},${e}`);
+        }
+      }
+      expect(suppressed.size, `${id}: no corners at all`).toBeGreaterThan(0);
+
+      // Every joint at a *south* cell-corner sits on a tile whose south band survives. Restricted
+      // to the south ones on purpose: a tile can have its south band replaced by a corner and still
+      // need rubble where its north face stops, and asserting per tile rather than per corner
+      // would forbid that. The offset says which corner it is -- south corners sit below centre.
+      for (const joint of planCliffJoints(world)) {
+        if ((joint.offset?.y ?? 0) < 0) continue;
+        expect(
+          suppressed.has(`${joint.x},${joint.y},s`),
+          `${id}: joint at ${joint.x},${joint.y} sits on a replaced south band`
+        ).toBe(false);
+      }
+    }
+  });
+
+  it('turns a corner, caps a run that stops, and leaves a lone tile alone', () => {
+    // The rule itself, away from any map. The last case is the one worth pinning: two caps on one
+    // tile union into a solid block -- rock down the left from cap-e, rock down the right from
+    // cap-w -- which says the opposite of what a cap is for.
+    const none = { n: false, e: false, s: false, w: false };
+
+    const se = cliffTurn({ ...none, s: true, e: true }, { east: false, west: false }, 0);
+    expect(se.pieces).toEqual(['outer-se']);
+    expect([...se.suppress].sort()).toEqual(['e', 's']);
+
+    const seOdd = cliffTurn({ ...none, s: true, e: true }, { east: false, west: false }, 1);
+    expect(seOdd.pieces, 'the two se paintings are used as variants of one turn')
+      .toEqual(['inner-se']);
+
+    const runEnd = cliffTurn({ ...none, s: true }, { east: false, west: true }, 0);
+    expect(runEnd.pieces, 'a run reaching its east end crumbles there').toEqual(['cap-e']);
+    expect(runEnd.suppress).toEqual(['s']);
+
+    const middle = cliffTurn({ ...none, s: true }, { east: true, west: true }, 0);
+    expect(middle.pieces, 'mid-run is a plain band').toEqual([]);
+    expect(middle.suppress).toEqual([]);
+
+    const lone = cliffTurn({ ...none, s: true }, { east: false, west: false }, 0);
+    expect(lone.pieces, 'a one-tile wall takes no cap at either end').toEqual([]);
+    expect(lone.suppress, 'and keeps its band').toEqual([]);
   });
 });
 

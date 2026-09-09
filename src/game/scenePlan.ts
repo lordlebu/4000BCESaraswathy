@@ -33,6 +33,8 @@ import {
   SHORE_PROPS,
   cliffAt,
   cliffFrame,
+  cliffTurn,
+  cornerFrame,
   treelineAt,
   depthFor,
   edgeMaskFrame,
@@ -50,7 +52,7 @@ import { band } from '../world/classify';
 import { tileHash } from '../world/rng';
 import type { FieldMapWorld } from '../world/fieldMap';
 import type { BiomeId } from '../world/types';
-import type { Edge } from './frames';
+import type { CliffTurn, Edge } from './frames';
 
 /** Which sheet a placement draws from. `marker` is the fallback glyph, which has no sheet. */
 export type PlacementSheet =
@@ -374,25 +376,62 @@ export function planShoreProps(
  * sorted by row like the things that stand up, one slot under the traveller -- he walks along the
  * top of a ledge and in front of the face below him, which is what both of those should look like.
  */
+function facesAt(world: FieldMapWorld['world'], x: number, y: number, edge: Edge): boolean {
+  const tile = world.tiles[y]?.[x];
+  if (!tile) return false;
+  const here = band(tile.elevation);
+  if (here === 0) return false; // nothing to fall away from
+  const { dx, dy } = EDGE_STEP[edge];
+  // A map edge is not a cliff. The world simply stops there, and drawing a face along it would
+  // fence the player in with a wall that has nothing on the other side.
+  const neighbour = world.tiles[y + dy]?.[x + dx];
+  if (!neighbour) return false;
+  return cliffAt(here, band(neighbour.elevation), tile.biome, neighbour.biome);
+}
+
+/**
+ * What this tile's rock face does at its corners, and which of its bands that replaces.
+ *
+ * One function asked by both passes, so a corner cannot be drawn by one and tidied by the other.
+ */
+function turnAt(world: FieldMapWorld['world'], x: number, y: number): CliffTurn {
+  const faces = {
+    n: facesAt(world, x, y, 'n'),
+    e: facesAt(world, x, y, 'e'),
+    s: facesAt(world, x, y, 's'),
+    w: facesAt(world, x, y, 'w')
+  };
+  return cliffTurn(
+    faces,
+    {
+      east: facesAt(world, x + 1, y, 's'),
+      west: facesAt(world, x - 1, y, 's')
+    },
+    tileHash(world.seed, x, y, 'cliff-turn')
+  );
+}
+
 export function planCliffs(world: FieldMapWorld['world']): Placement[] {
   const out: Placement[] = [];
   for (let y = 0; y < world.height; y += 1) {
     for (let x = 0; x < world.width; x += 1) {
-      const tile = world.tiles[y]![x]!;
-      const here = band(tile.elevation);
-      if (here === 0) continue; // nothing to fall away from
+      const turn = turnAt(world, x, y);
       for (const edge of EDGE_ORDER) {
-        const { dx, dy } = EDGE_STEP[edge];
-        const nx = x + dx;
-        const ny = y + dy;
-        // A map edge is not a cliff. The world simply stops there, and drawing a face along it
-        // would fence the player in with a wall that has nothing on the other side.
-        if (nx < 0 || ny < 0 || nx >= world.width || ny >= world.height) continue;
-        const neighbour = world.tiles[ny]![nx]!;
-        if (!cliffAt(here, band(neighbour.elevation), tile.biome, neighbour.biome)) continue;
+        if (turn.suppress.includes(edge)) continue;
+        if (!facesAt(world, x, y, edge)) continue;
         out.push({
           sheet: 'cliffs',
           frame: cliffFrame(edge, tileHash(world.seed, x, y, `cliff-${edge}`)),
+          x,
+          y,
+          depth: depthFor(y, ROW_SLOT.undergrowth)
+        });
+      }
+      // After the bands, so a corner overdraws anything a neighbour's band bleeds across the seam.
+      for (const piece of turn.pieces) {
+        out.push({
+          sheet: 'cliffs',
+          frame: cornerFrame(piece),
           x,
           y,
           depth: depthFor(y, ROW_SLOT.undergrowth)
@@ -483,16 +522,7 @@ export function planCliffJoints(world: FieldMapWorld['world']): Placement[] {
   const out: Placement[] = [];
 
   /** Whether the tile at x,y drops away on this edge -- the same question `planCliffs` asks. */
-  const faces = (x: number, y: number, edge: Edge): boolean => {
-    const tile = world.tiles[y]?.[x];
-    if (!tile) return false;
-    const here = band(tile.elevation);
-    if (here === 0) return false;
-    const { dx, dy } = EDGE_STEP[edge];
-    const neighbour = world.tiles[y + dy]?.[x + dx];
-    if (!neighbour) return false;
-    return cliffAt(here, band(neighbour.elevation), tile.biome, neighbour.biome);
-  };
+  const faces = (x: number, y: number, edge: Edge): boolean => facesAt(world, x, y, edge);
 
   // The four cell corners, each named by the two edges that meet there.
   const CORNERS: readonly { a: Edge; b: Edge; x: number; y: number }[] = [
@@ -504,6 +534,15 @@ export function planCliffJoints(world: FieldMapWorld['world']): Placement[] {
 
   for (let y = 0; y < world.height; y += 1) {
     for (let x = 0; x < world.width; x += 1) {
+      // Which of this tile's bands a corner piece has taken over. The joint layer exists to stand
+      // in for corner art that did not exist; where the art now covers an edge it carries its own
+      // turn and its own crumbling end, so a boulder there would be rubble on top of painted-in
+      // rubble -- and the joint, not the art, would be what looked wrong.
+      //
+      // Checked per *reason* rather than per tile. A tile can perfectly well have a replaced south
+      // band and still need rubble where its north face stops, and a blanket "this tile has a
+      // corner" test would drop that.
+      const turned = turnAt(world, x, y).suppress;
       for (const corner of CORNERS) {
         const alongX = corner.b === 'e' ? 1 : -1;
         const alongY = corner.a === 's' ? 1 : -1;
@@ -518,6 +557,11 @@ export function planCliffJoints(world: FieldMapWorld['world']): Placement[] {
         const endOfRow = hasA && !hasB && !faces(x + alongX, y, corner.a);
         const endOfColumn = hasB && !hasA && !faces(x, y + alongY, corner.b);
         if (!elbow && !endOfRow && !endOfColumn) continue;
+        // An elbow is covered when either of its bands is; a run's end is covered when the band
+        // that run is made of is.
+        if (elbow && (turned.includes(corner.a) || turned.includes(corner.b))) continue;
+        if (endOfRow && turned.includes(corner.a)) continue;
+        if (endOfColumn && turned.includes(corner.b)) continue;
 
         // Rubble, from the stones the decor sheet already carries. An elbow gathers more than a
         // run's end does, so it gets the bigger stone.
