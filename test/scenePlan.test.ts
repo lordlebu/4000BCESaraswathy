@@ -21,7 +21,8 @@ import {
   EDGE_VARIANTS,
   FENCE_FIRST,
   FIRST_YURT,
-  FENCE_PIECES
+  FENCE_PIECES,
+  GROUND_DEPTH_BASE
 } from '../src/game/frames';
 import { band } from '../src/world/classify';
 
@@ -207,9 +208,13 @@ describe('nothing hides the traveller or what he is walking towards', () => {
     // The bug that made grass a dozen rows south of the traveller draw across his face: one flat
     // depth for the whole layer, which knows nothing about position.
     //
-    // The edge blend is exempt, and is the only thing that is: it *is* ground rather than something
-    // standing on it, so it sits in one flat band below every row. See `planEdges`, and the two
-    // assertions below that pin it there.
+    // The flat ground band is exempt. Anything below `GROUND_DEPTH_BASE` *is* ground rather than
+    // something standing on it, so it sits in one flat band under every row: the edge blend, the
+    // bank lip that is one, and the shore band that lies on the water. See `planEdges` and
+    // `planShore`, and the assertions below that pin all three there.
+    //
+    // It used to test `maskFrame !== undefined`, which named the blend rather than the category,
+    // and so failed the moment a second flat-ground layer arrived.
     // Collect, then assert once. Two `expect` calls per placement is around forty thousand of
     // them across the three maps, and each one builds a matcher and formats a message whether or
     // not it fails -- the test took 27 seconds and timed out at five once the cliff and treeline
@@ -220,7 +225,7 @@ describe('nothing hides the traveller or what he is walking towards', () => {
     const strays: string[] = [];
     for (const { id, built } of worlds) {
       for (const item of planScene(built)) {
-        if (item.maskFrame !== undefined) continue;
+        if (item.depth < GROUND_DEPTH_BASE) continue;
         if (item.depth >= depthFor(item.y, bottom) && item.depth <= depthFor(item.y, top)) continue;
         strays.push(`${id}: ${item.sheet} at ${key(item)} is outside its row's band`);
       }
@@ -234,7 +239,7 @@ describe('nothing hides the traveller or what he is walking towards', () => {
       const deepestByRow = new Map<number, number>();
       const shallowestByRow = new Map<number, number>();
       for (const p of plan) {
-        if (p.maskFrame !== undefined) continue;
+        if (p.depth < GROUND_DEPTH_BASE) continue;
         deepestByRow.set(p.y, Math.max(deepestByRow.get(p.y) ?? -Infinity, p.depth));
         shallowestByRow.set(p.y, Math.min(shallowestByRow.get(p.y) ?? Infinity, p.depth));
       }
@@ -324,7 +329,10 @@ describe('the plan is a function of the world and nothing else', () => {
     // Two rules that are easy to get half-right. Blending one side only moves the straight line
     // rather than removing it; blending water to land turns a definite coast into a vague one.
     for (const { id, built } of worlds) {
-      const blends = planScene(built).filter((p) => p.maskFrame !== undefined);
+      // Banks bake through the same pair and are not blends: a bank is a third biome laid inside
+      // one cell, which is exactly what is allowed at a shoreline and what `planBank` is for.
+      // `test/shore.test.ts` holds them to their own rule.
+      const blends = planScene(built).filter((p) => p.maskFrame !== undefined && p.sheet !== 'bank');
       expect(blends.length, `${id}: no edge blending at all`).toBeGreaterThan(0);
 
       const water = new Set(['sea', 'river']);

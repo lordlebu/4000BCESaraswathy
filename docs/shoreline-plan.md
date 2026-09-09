@@ -1,12 +1,16 @@
 # Shoreline plan — an embossed bank, not a dissolved one
 
-The shore is the last hard edge on the map. Every other boundary was softened in phase 07: two
+**Stages 1 to 3 have shipped.** What follows is the plan as it was argued, corrected against the
+map as it stands after the crossing and basalt work, with what each stage actually cost recorded
+where the estimate used to be. Stage 4 is still optional and still unstarted.
+
+The shore was the last hard edge on the map. Every other boundary was softened in phase 07: two
 biomes meeting bleed into each other through a torn mask, a height terrace grows a rock face, a
-forest grows a treeline. Water was deliberately left out of all three, and what it has today is what
-an opaque square gives you — a 128-pixel staircase between the ground and the water, with nothing on
+forest grows a treeline. Water was deliberately left out of all three, and what it had was what an
+opaque square gives you — a 128-pixel staircase between the ground and the water, with nothing on
 either side of it.
 
-This is the plan to fix that **without reopening the ruling that put it there**.
+This is how that was fixed **without reopening the ruling that put it there**.
 
 ## The ruling this lives under, and why it is not in the way
 
@@ -42,38 +46,54 @@ So the two rulings sit together cleanly:
 This plan also takes over the other half of that item — **the shoreline pass**, parked as *"reeds
 and foam on the land side of every water edge. Code, no art."* It is stage 3.
 
+### The argument was accepted here before it was made here
+
+`planIslandShadow` shipped with the Aravali crossing, and it is this plan's thesis at a hundred
+metres instead of one. An island's shadow on the sea exists because *"everything else about a
+floating shelf — the grass to the edge, the rock face hanging under the lip, the cliffs along the
+joint — is equally true of a sea stack. What separates them is that light gets underneath one of
+them, and the water below goes dark."*
+
+A bank is the same claim at a metre, and it inherits two decisions along with it: that a shadow on
+water is **a tint rather than art**, and that it **fades with distance**, because the edge of a
+hard-edged shadow is a second silhouette and the eye reads it as an object.
+
 ## What is there now, measured
 
-Counted over all four field maps at their authored seeds, on the tiles a player can actually reach:
+Counted by running the real generators over all four field maps at their authored seeds. **These
+numbers are not the ones this plan was written against** — the crossing work re-shaped the Aravali
+to 44×66 and moved Lothal's river — which is the argument for re-running the count rather than
+quoting it.
 
-| Map | Size | Objects in the plan | Land→water edges | Land tiles touching water | Water tiles touching land |
+| Map | Size | Objects in the plan | Land→water edges | Of those, an island rim | Land tiles on a shore |
 |---|---|---|---|---|---|
-| Lothal | 48×48 | 5,105 | **693** | 539 (23.4%) | 428 |
-| Aravali | 64×64 | 7,570 | 623 | 466 (11.4%) | 432 |
-| Narmada | 64×64 | 9,816 | 281 | 217 (5.3%) | 140 |
-| Dwarka | 48×48 | 5,186 | 115 | 103 (4.5%) | 52 |
+| Lothal | 48×48 | 5,187 | **643** | 0 | 497 (21.6%) |
+| Aravali | 44×66 | 3,933 | 409 | **148** | 289 (10.0%) |
+| Narmada | 64×64 | 9,841 | 281 | 0 | 217 (5.3%) |
+| Dwarka | 48×48 | 5,195 | 115 | 0 | 103 (4.5%) |
 
-Two things in that table decide the design.
+**Lothal is the map this is for.** Over a fifth of its tiles stand on a shore, its river is 445 of
+the 643 edges, and it is the map that teaches looking. Dwarka has no sea at all since it was dried
+out, so every one of its 115 edges is a riverbank.
 
-**Lothal is the map this is for.** Nearly a quarter of its tiles stand on a shore, its river is 495
-of the 693 edges, and it is the map that teaches looking. Dwarka has no sea at all since it was
-dried out, so every one of its 115 edges is a riverbank.
-
-**The four directions are almost evenly split** — on Lothal, n 181 / e 154 / s 194 / w 164. There is
-no "the shore mostly faces south" shortcut to be had; all four edges need art.
+**The four directions come out almost even** — on Lothal, n 165 / e 145 / s 178 / w 155. There is
+no "the shore mostly faces south" shortcut; all four edges need art.
 
 And the land on the far side of the line is not one material:
 
-| Map | What the land side actually is |
+| Map | What the land side is, by edge count |
 |---|---|
-| Lothal | plains 278, coast 208, wetland 108, forest 79, hills 11, settlement 7, landmark 2 |
-| Aravali | coast 437, forest 88, plains 49, **sky_underside 35, sky_island 14** |
-| Narmada | plains 241, forest 35, settlement 3, hills 2 |
-| Dwarka | plains 100, coast 9, desert 5, settlement 1 |
+| Lothal | plains 244 · coast 211 · forest 102 · wetland 69 · hills 8 · settlement 7 · landmark 2 |
+| Aravali | coast 220 · **sky_island 84 · sky_underside 64** · plains 21 · forest 17 · hills 3 |
+| Narmada | plains 241 · forest 35 · settlement 3 · hills 2 |
+| Dwarka | plains 101 · coast 9 · desert 4 · settlement 1 |
 
-The sky rows are the reason a shore predicate cannot simply be "not water". The Aravali crossing
-puts a sky island and its underside over a strait; a sand beach along the rim of a floating island
-is nonsense, and 49 edges would have got one.
+Those two sky rows are the reason a shore predicate cannot simply be "not water", and the reason
+is stronger than it was when this plan was drafted. **The island rims already carry two
+treatments**: `crossing.ts` sets the underside a band below the island top *specifically* so
+`cliffAt` can see the step and fill the rim with rock, and `planIslandShadow` darkens the sea
+beneath it. A bank lip and a bank shadow would be a third and a fourth on one boundary — 148 edges
+of it on the Aravali, more than a third of that map's shoreline.
 
 ## The design: three bands, and the eye crosses all three
 
@@ -87,7 +107,7 @@ five, over about two thirds of a tile:
 
 Each of those is one stage below, each ships on its own, and each is measurable by itself.
 
-### Stage 1 — the shadow in the water
+### Stage 1 — the shadow in the water · **shipped**
 
 **One sprite per water-side shore edge**, drawn inside the water cell against the edge it shares
 with land: darkest where it meets the bank, gone by about a third of a cell out, with a ragged inner
@@ -117,7 +137,14 @@ at a lower level.
 - **Rule §1 of `docs/art-direction.md` says generate this rather than prompt it.** A gradient under a
   mask is a mass a loop can state exactly; the rule's failures were all silhouettes.
 
-### Stage 2 — the bank lip on the land side
+**What shipped needs three passes, not two.** A gradient, then `destination-in` with the mask
+strip, then *a short unmasked gradient over the first quarter of the band*. Without the third, the
+contact shadow is as thin as 4 px wherever the tear happens to be shallow — the masks vary from a
+tenth of their nominal reach to all of it — and a bank's contact shadow that comes and goes reads
+as dirt on the screen rather than as a bank. **The ragged part has to be the fade; the contact has
+to be continuous.**
+
+### Stage 2 — the bank lip on the land side · **shipped**
 
 **One sprite per land-side shore edge where the land is not already sand**: a band of beach material
 inside the land cell, ragged on its landward contour, so the ground does not run to the waterline as
@@ -125,8 +152,15 @@ grass.
 
 Mechanically this is an ordinary edge blend whose source is a **third** biome — the `coast` tile,
 drawn into a plains or forest cell through a torn mask. Nothing bleeds across the water line; the
-land grows a beach on its own side of it. `blendTextureKey` already bakes exactly this pair, so the
-naive version of this stage is a placement record and a lookup table.
+land grows a beach on its own side of it.
+
+**And it is a band, which is the correction this stage needed.** This section used to end by
+noting that `blendTextureKey` already bakes exactly that pair, so the naive version was "a
+placement record and a lookup table". That was true, it shipped that way first, and it is what put
+the layer over its own budget — 377 full cells is more blended pixel than 643 bands, so the *lip*
+was the expensive half, not the shadow. A mask reaching a third of a cell cannot paint past 48 px,
+so five eighths of each of those cells was a transparent quad the GPU blended anyway.
+`bankTextureKey` crops it to the strip that can show. See the cost section.
 
 The table is what keeps it honest:
 
@@ -137,20 +171,28 @@ The table is what keeps it honest:
 | **wetland** | none | a marsh has no beach — it gets reeds in stage 3 |
 | **sky_island, sky_underside** | none | not a shore at all |
 
-That table is not tidiness: it cuts the stage from 693 sprites to **377** on Lothal, 137 on Aravali,
-281 on Narmada, 106 on Dwarka — because coast and wetland are 316 of Lothal's 693 edges and sky is
-49 of Aravali's.
+That table is not tidiness: on the map as it stands it cuts the stage from 643 sprites to **363**
+on Lothal and from 409 to **41** on the Aravali, because coast and wetland are 280 of Lothal's
+edges and the island rims are 148 of the Aravali's. Anything absent from the table is absent on
+purpose — no lip is the safe answer, and a biome that turns out to want one is a row here rather
+than a change anywhere else.
 
-### Stage 3 — the shoreline pass (the parked item)
+### Stage 3 — the shoreline pass · **shipped**
 
 Reeds, driftwood and shells on the **land** side of a water edge, from props that already exist on
 the decor sheet: `reed-tuft` and `marsh-stone` against a river, `pebbles`, `shell` and
 `driftwood-small` against sea. One extra prop on a land tile that touches water, chosen from a shore
 set rather than the tile's own biome set.
 
-This is a change to `planDecor`'s prop choice for 539 tiles at worst, no new art, no new layer, and
-it is the half of endgame item 4 that was always live. It is listed third because stages 1 and 2 may
-well be enough, and a prop is the easiest thing here to overdo.
+No new art, no new layer, and it is the half of endgame item 4 that was always live. It is listed
+third because stages 1 and 2 may well be enough, and a prop is the easiest thing here to overdo.
+
+**What shipped is one detail past the plan**: the prop is pushed three tenths of a cell *toward*
+the water it faces rather than jittered across the cell like ordinary decor, and it is
+`planShoreProps` rather than a change inside `planDecor` — the choice is about the neighbour, and
+every other prop on the map is about the tile. The offset is the difference between a shore and a
+shore-shaped scattering, and `test/shore.test.ts` asserts it by stepping from each prop's offset to
+the tile it leans toward and requiring water there.
 
 ### Stage 4 — painted rim art, **only if 1–3 do not carry it**
 
@@ -169,31 +211,54 @@ Fill rate is what scales, not object count (`docs/rendering.md`). So the questio
 tells you to ask — *what fraction of its cell is actually opaque?* — is the design question here,
 and the answer sets the texture size.
 
-Densest on-screen count, measured as the worst 24×18 tile window on each map:
+Densest on-screen count, measured as the worst 24×18 tile window on each map, counting water-side
+edges:
 
-| Map | Worst 10×7 | Worst 20×14 | Worst 24×18 |
-|---|---|---|---|
-| Lothal | 46 | 117 | **172** |
-| Aravali | 32 | 84 | 112 |
-| Narmada | 38 | 77 | 95 |
-| Dwarka | 25 | 54 | 73 |
-
-At 172 sprites on screen:
-
-| Shape | Pixels blended per frame | Against the decor precedent |
+| Map | Worst 20×14 | Worst 24×18 |
 |---|---|---|
-| Full 128 cell | 2.82 M | 47% of the mistake that doubled the frame |
-| **128×48 band** | **1.06 M** | 17% |
+| Lothal | 125 | **163** |
+| Aravali | 78 | 96 |
+| Narmada | 77 | 95 |
+| Dwarka | 54 | 73 |
 
-The decor layer at ~370 props in full cells was 6.06 M blended pixels and cost 83 ms against 67 ms
-on CI's software rasteriser; moving it to a 64 cell fixed it. That is the whole argument for baking
-the shore band at **128×48 for n/s and 48×128 for e/w** rather than a full cell — the mask reaches a
-third of 128, which is 43 pixels, so 48 holds all of the art and none of the empty.
+The decor layer is the precedent: ~370 props in full 128 cells was 6.06 M blended pixels and cost
+83 ms a frame against 67 on CI's software rasteriser, and moving it to a 64 cell fixed it. A mask
+reaching a third of 128 is 43 px, so a 48-px band holds all of the art and none of the empty.
 
-The cost of that choice is one small thing in the scene: a band is not centred in its cell, so
+### What it actually measured, and the correction it forced
+
+`npm run perf` compares against a baseline you record immediately before the change, which is not
+available from a session that has already made it — so this is the A/B the same doc describes:
+same commit, same seed, same 1280×900 viewport, the layer flipped in place rather than measured
+against another commit, two runs a side, standing at 20,18 on Lothal, which is the densest shore
+window on the map this layer exists for. **Renderer: SwiftShader** — the software rasteriser, which
+is the one that decides whether the browser job stays green.
+
+Reading the **minimum** frame, which `docs/rendering.md` argues drifts least:
+
+| | Min frame | Against the layer off |
+|---|---|---|
+| Layer off | 148.9 ms | — |
+| **Bank as a full cell** | 166.7 ms | **+11.9%** |
+| **Bank as a band** | 163.0 ms | **+9.5%** |
+
+The medians agree on the shape — 161.6 → 182.5 → 177.3, so +12.9% and +9.7%.
+
+**The gate below is ~10%, so the first of those failed it**, and the diagnosis is the useful part:
+the shadow was already a band and the lip was not, and there are fewer lips than shadows. 377 full
+cells is 6.18 M blended pixels against 643 bands at 3.95 M — so *the cheap-looking half was the
+expensive one*, precisely because "reuse `blendTextureKey` and it's a lookup table" was the
+line of least resistance. `bankTextureKey` crops it, and the layer comes in under the gate.
+
+Two honest caveats on that 9.5%. It is **the worst place on the worst map** — the same walk on the
+Narmada measures 142.9 ms with the layer on, below Lothal's figure with it off — and it is **not a
+lot of headroom**. If a later layer wants some of the frame back, this one's band is the obvious
+place to take it: 48 → 40 px is a fifth of it, and the only thing lost is the tail of a fade.
+
+The cost of the band shape is one small thing in the scene: a band is not centred in its cell, so
 `WorldScene` needs a four-entry origin table (`n → (0.5, 0)`, `s → (0.5, 1)`, and so on) and the
-placement carries an `edge`. That is a pixel position, which is the scene's business — the plan says
-which edge, the scene knows where the top of a cell is.
+placement carries an `edge`. That is a pixel position, which is the scene's business — the plan
+says which edge, the scene knows where the top of a cell is.
 
 ### The budget gate
 
@@ -209,6 +274,14 @@ So, per stage, and not negotiable:
    reproduce.
 3. If a stage costs more than ~10% of the frame on the software rasteriser, shrink the band before
    shipping it, not after.
+
+**Of those three, (1) was done by hand and (3) was enforced; (2) has not been run.** `npm run perf`
+launches its own Chromium at the revision this repo pins, and the session that built stages 1–3
+had a different one installed, so the A/B above was measured through the same SwiftShader
+rasteriser by the method the doc describes rather than by the tool. `npm run test:ci` needs Docker
+and was not available either. **The browser suite is therefore unverified for this change** — it is
+the one gate still owed, and the layer is close enough to its budget that it is worth paying
+before merging rather than after.
 
 ## What this plan does not touch
 
@@ -230,14 +303,32 @@ browser suite is slow and this repo has already paid for four branches that shou
 
 ## Tests
 
-A new `test/shore.test.ts`, run against all four real field maps rather than a fixture — the same
-argument `test/scenePlan.test.ts` makes:
+`test/shore.test.ts`, ten cases, run against all four real field maps rather than a fixture — the
+same argument `test/scenePlan.test.ts` makes. Three of them are written against the lesson in
+`docs/handover-crossing-and-basalt.md` about assertions that pass while being about the wrong
+thing:
 
-- every land/water boundary emits **exactly one** shadow band, on the water side;
-- **no** shore placement where both sides are water, or where either side is a sky biome;
-- a bank lip appears only where the table above allows one, and never on `coast` or `wetland`;
-- shore depth is below `GROUND_DEPTH_BASE`, so it is ground and cannot draw over a hut;
-- the same seed produces the same placements, in the same order.
+- exactly one shadow band per water-side edge, on the water side, facing land, never twice;
+- **the Aravali's islands specifically**, counted as sky edges and asserted at zero bands and zero
+  lips — a map-wide count would have passed on that map's 261 mainland edges while the islands
+  quietly grew beaches;
+- a lip only where the material table allows one, and never on `coast` or `wetland`;
+- every shore placement below `GROUND_DEPTH_BASE`, so it is ground and cannot draw over a hut;
+- the mask index on the row for the edge the band is pinned to — a tear fading the wrong way is
+  invisible to every other assertion here and obvious on screen;
+- props leaning toward the water rather than jittered across the cell;
+- the same plan twice, so a journey stays shareable in a link;
+- and that all of it **reaches `planScene`**, because this repo has three rules that were written,
+  tested, and had no caller, so the mechanic did not exist in the shipped game while every test
+  passed.
+
+**One existing test had to change, and it was wrong rather than inconvenient.**
+`test/scenePlan.test.ts` exempted the flat ground band from its row-sorting rules by testing
+`maskFrame !== undefined` — which names the edge blend rather than the category it belongs to, and
+so failed the moment a second flat-ground layer arrived. It tests `depth < GROUND_DEPTH_BASE` now,
+which is the actual rule. Its shoreline assertion also had to learn that a bank is not a blend:
+`blends()` is unchanged and still refuses every land/water pair, and `planBank` is a third biome
+inside one cell, which is a different thing and has its own test.
 
 Nothing new in `e2e/`. The playthrough walk already crosses both of Lothal's water bodies, which is
 what would catch a texture that failed to bake.
@@ -262,27 +353,35 @@ what would catch a texture that failed to bake.
 ## What could still go wrong
 
 - **A river is walkable.** `data/biomes.json` marks `river` walkable and the player fords one. If the
-  shadow reads as a drop rather than a bank, wading into it looks wrong — so keep the band shallow
-  and light, and check it by walking in rather than by looking at a screenshot.
-- **Decor floats over the shadow.** Lily pads on a shore tile are row-sorted at `underfoot` (depth
-  ≥ 100) and the shadow sits at 60, so a pad inside the shaded band will not be shaded. Accept it
-  first — suppressing decor on shore water tiles would cost 428 of Lothal's props, which is worse.
-- **Dusk.** The sky tint is a full-screen rectangle above everything, and a dark band under a dark
-  tint can go muddy. Look at a shore at dusk and at `FOG_REMEMBERED`, not only at noon.
+  shadow reads as a drop rather than a bank, wading into it looks wrong — so the band is kept
+  shallow and light, and it wants checking by walking in rather than by looking at a screenshot.
+  Two of the four maps ford rivers constantly; Dwarka has nothing but riverbank.
 - **The bands are drawn on different tiles**, so their two ragged contours never overlap and there is
   no double-outline risk — but they do both start from the same straight shared edge, and if both are
-  cut too shallow that straight edge is still what the eye finds. The bank lip is what breaks it;
-  stage 2 is not optional decoration.
+  cut too shallow that straight edge is still what the eye finds. The bank lip is what breaks it,
+  which is why stage 2 was never optional decoration — and why cropping it to a band was worth
+  doing properly rather than dropping it to stay inside the budget.
 
 ## Effort
 
-| Stage | Estimate | Ships on its own |
+| Stage | Estimated | Actual |
 |---|---|---|
-| 0 · baseline: `perf --save`, a screenshot of the same three shores on each map | half a session | — |
-| 1 · the shadow in the water | one session | yes, and it is most of the effect |
-| 2 · the bank lip | one session | yes |
-| 3 · the shoreline props | half a session | yes |
-| 4 · painted rim art | one session plus a generation round trip | only if 1–3 fall short |
+| 0 · baseline | ½ session | folded into stage 1; the baseline was taken by flipping the layer |
+| 1 · the shadow in the water | 1 session | as estimated |
+| 2 · the bank lip | 1 session | as estimated, plus the band rebake the budget forced |
+| 3 · the shoreline props | ½ session | as estimated |
+| 4 · painted rim art | 1 session + a round trip | **not started, and still optional** |
 
-Two to three sessions for a shore that reads as a bank, and a fourth only if the generated version
-is not good enough — which, by rule §1, it usually is for a mass and usually is not for a silhouette.
+Whether stage 4 is ever wanted is a question for somebody looking at a shore, not for this
+document. By rule §1 of `docs/art-direction.md` — *generate textures, prompt silhouettes* — a
+gradient under a mask is the case a loop wins, and the three that shipped are all that case.
+
+## Still owed
+
+1. **`npm run test:ci`**, per the gate above. The one unpaid check.
+2. **A look at dusk.** The sky tint is a full-screen rectangle above everything, and a dark band
+   under a dark tint can go muddy. Checked at noon only.
+3. **Decor floats over the shadow.** Lily pads on a shore tile are row-sorted at `underfoot`
+   (depth ≥ 100) and the band sits at 60, so a pad inside the shaded band is not shaded. Accepted
+   deliberately: suppressing decor on shore water tiles would cost 385 of Lothal's props, which is
+   the worse trade.

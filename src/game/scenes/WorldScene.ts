@@ -31,6 +31,8 @@ import {
   SHADOW_TEXTURE,
   TILE_SIZE,
   blendTextureKey,
+  shoreTextureKey,
+  bankTextureKey,
   CLIFF_SHEET,
   TREELINE_SHEET,
   createTileTextures,
@@ -41,16 +43,17 @@ import {
   traceFrameFor
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
-import { ROW_SLOT, depthFor } from '../frames';
+import { ROW_SLOT, depthFor, type Edge } from '../frames';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 
 /**
  * Which loaded texture each kind of placement draws from.
  *
  * `marker` is a glyph and has none; `shadow` is a tinted quad and has none either -- see
- * `planIslandShadow` for why the island's shadow is not four frames of painted dark blue.
+ * `planIslandShadow` for why the island's shadow is not four frames of painted dark blue. `shore`
+ * is baked per edge and variant rather than loaded, so `shoreTextureKey` names its texture instead.
  */
-const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker' | 'shadow'>, string> = {
+const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker' | 'shadow' | 'shore'>, string> = {
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
@@ -58,9 +61,25 @@ const SHEET_KEY: Record<Exclude<PlacementSheet, 'marker' | 'shadow'>, string> = 
   places: PLACE_SHEET,
   landmarks: LANDMARK_SHEET,
   decor: DECOR_SHEET,
+  // The bank draws terrain through a mask, so it is baked rather than looked up -- this entry
+  // exists for completeness and is never reached.
+  bank: TERRAIN_SHEET,
   track: TRACK_SHEET,
   cliffs: CLIFF_SHEET,
   treeline: TREELINE_SHEET
+};
+
+/**
+ * Where a shore band's own edge sits inside its cell, as a fraction of one.
+ *
+ * The band is pinned to the side facing land, so its origin and its position are the same pair of
+ * numbers: a north band hangs from the top edge at (0.5, 0), a west band from the left at (0, 0.5).
+ */
+const SHORE_ANCHOR: Record<Edge, { x: number; y: number }> = {
+  n: { x: 0.5, y: 0 },
+  s: { x: 0.5, y: 1 },
+  w: { x: 0, y: 0.5 },
+  e: { x: 1, y: 0.5 }
 };
 import {
   PLAYER_FRAME,
@@ -513,6 +532,28 @@ export class WorldScene extends Phaser.Scene {
           .rectangle(cx, cy, TILE_SIZE, TILE_SIZE, 0x0b1c30, item.alpha ?? 0.3)
           .setDepth(item.depth);
         this.tileOwned.push({ sprite: shade as unknown as Phaser.GameObjects.Image, x: item.x, y: item.y });
+        continue;
+      }
+
+      // The two band layers: the bank lip inside the land cell, the bank's shadow inside the
+      // water one. They are the only placements here that do not sit at `cx, cy`, because a band
+      // is pinned to one side of its cell rather than centred in it. Which side is the
+      // plan's answer -- `item.edge` -- and where that side falls in pixels is this file's, the
+      // same division the sub-tile decor offset above is drawn on.
+      if (item.sheet === 'shore' || item.sheet === 'bank') {
+        const edge = item.edge ?? 'n';
+        const anchor = SHORE_ANCHOR[edge];
+        const band = this.add
+          .image(
+            item.x * TILE_SIZE + anchor.x * TILE_SIZE,
+            item.y * TILE_SIZE + anchor.y * TILE_SIZE,
+            item.sheet === 'bank'
+              ? bankTextureKey(this, item.frame, edge, item.maskFrame ?? 0)
+              : shoreTextureKey(this, edge, item.frame)
+          )
+          .setOrigin(anchor.x, anchor.y)
+          .setDepth(item.depth);
+        this.tileOwned.push({ sprite: band, x: item.x, y: item.y });
         continue;
       }
 
