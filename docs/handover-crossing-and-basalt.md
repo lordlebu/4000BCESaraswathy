@@ -113,14 +113,19 @@ runs the real image, one spec at a time.
 
 | # | Item | Where |
 |---|---|---|
-| 1 | **The railcar.** `src/content/vehicles.ts` has **zero importers**. Nothing builds or boards it. `railSpan`, `trackRoute` and `canBoardAt` all exist and go unused. This is the largest single gap and the obvious next piece. | `src/content/vehicles.ts` |
+| ~~1~~ | ~~**The railcar.**~~ **Done.** `rideFrom` boards at either island and carries the traveller the length of the strait for a quarter of the walking time. The framing above was half right: the pieces did all exist, but the gap was not only wiring. `isWalkable` returns true for *any* tile carrying `track`, so the whole line was already walkable and a carriage could not unlock ground — it had to be a convenience or nothing, since making the rail unwalkable puts a gate in front of the only journey. And the obvious wiring is a trap: the Lodestone carriage's canon `crosses` omits `sea` and `open_sky`, while its own route is 10 sea + 3 sky_underside + 9 sky_island, so gating the ride on the biome refuses to run it on its own line over 13 of 22 tiles. The line is a flag, not a biome. See `src/content/vehicles.ts`. | shipped |
 | 2 | **26 of 42 sky species are `placement: lore`.** The Aravali's islands have 10 creatures and 6 plants, which works — but two thirds of the authored sky life cannot appear, and it is what blocks a Tethys Sky Routes map. | canon `database/fauna`, `database/flora` |
 | 3 | **The 31 lava species have empty descriptions.** This is why the new lint rule has to guess from names. With descriptions it could read biology. | canon |
 | 4 | `work.png` shows winnowing, not quarrying. Keep it for a crafting scene; regenerate a hammerstone one. | `assets/source/` |
 | 5 | Panel count — 14+ reachable at once, wants a grouping pass. | `src/ui/` |
 
-Items 2 and 3 are canon work. Item 1 is game work and needs no new art: the carriage is already
-drawn (`assets/vehicles.png`).
+Items 2 and 3 are canon work. Item 1 is done — and needed no new art, as predicted: the carriage
+was already drawn (`assets/vehicles.png`), and the ride reuses it.
+
+**The lesson from item 1 is worth carrying to items 4 and 5.** "Every piece it needs already
+exists" was true and still hid two decisions — one about design (a convenience, not a gate) and
+one about data (the carriage's `crosses` list does not describe its own line). A gap that looks
+like wiring is worth measuring before it is wired.
 
 ---
 
