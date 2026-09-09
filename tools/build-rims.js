@@ -110,7 +110,7 @@ const SHEETS = [
   // or already transparent.
   // Absent, the sheet is built with sixteen edge frames exactly as before -- which is what ships
   // today, and why this is safe to have in place before the art exists.
-  { id: 'cliffs', from: 'Gemini_Stones.png', to: 'cliffs.png', corners: 'cliff-corners.png' },
+  { id: 'cliffs', from: 'cliff-edges.png', to: 'cliffs.png', corners: 'cliff-corners.png' },
   { id: 'treeline', from: 'Gemini_tree-rim2.png', to: 'treeline.png' }
 ];
 
@@ -364,45 +364,108 @@ function resample(src, sw, box, outW, outH) {
 const LINE_COVERAGE = 1 / 12;
 
 /**
- * The part of a keyed cell that actually holds art, measured rather than assumed.
+ * Runs of lines that hold art, along one axis of a keyed image.
  *
- * The model is asked for a depth and paints approximately that -- in practice consistently deeper,
- * around 180px where 72 was requested -- so neither the request nor a fixed fraction is the right
- * crop. This finds where the art really stops, scanning in from the far side and ignoring lines too
- * sparse to be part of the mass.
+ * **The grid is found, not assumed, and that is the third container problem to move in here.** The
+ * prompt asks for a 4 x 4 grid and every sheet so far has delivered four rows of four cells -- but
+ * not on exact quarters. One arrived with its rows at y 25-144, 209-515, 604-818 and 842-1176 in a
+ * 1240-tall image, so three of the four straddled a quarter cut and every extracted cell was part
+ * of one row plus part of the next. The sheet before it happened to sit inside its quarters and
+ * hid the assumption entirely.
+ *
+ * Asking a model to hit exact pixel boundaries has failed on layout twice already (2x3 versus 3x2,
+ * and art floating clear of its own cell edges). Finding the gutters is arithmetic.
  */
-function contentDepth(cell, size, edge) {
-  const opaque = (x, y) => cell[(y * size + x) * 4 + 3] > 24;
-  const need = Math.max(2, Math.round(size * LINE_COVERAGE));
-  const rowHas = (y) => {
+function contentRuns(cell, width, height, axis) {
+  const opaque = (x, y) => cell[(y * width + x) * 4 + 3] > 24;
+  const outer = axis === 'y' ? height : width;
+  const inner = axis === 'y' ? width : height;
+  // **A far looser bar than `LINE_COVERAGE`, on purpose.** That constant asks "is this line part of
+  // the mass of the art", which is the right question for a depth crop and the wrong one here: a
+  // gutter is magenta all the way across, so anything at all makes a line content. Reusing the
+  // twelfth split the four narrow east strips into five bands, because a row crossing them is only
+  // about a twelfth covered and flickers either side of the bar. A couple of stray specks still
+  // must not bridge two cells, hence not zero.
+  const need = Math.max(3, Math.round(inner * 0.01));
+  const has = (i) => {
     let n = 0;
-    for (let x = 0; x < size; x += 1) if (opaque(x, y) && (n += 1) >= need) return true;
+    for (let j = 0; j < inner; j += 1) {
+      const x = axis === 'y' ? j : i;
+      const y = axis === 'y' ? i : j;
+      if (opaque(x, y) && (n += 1) >= need) return true;
+    }
     return false;
   };
-  const colHas = (x) => {
-    let n = 0;
-    for (let y = 0; y < size; y += 1) if (opaque(x, y) && (n += 1) >= need) return true;
-    return false;
-  };
-  if (edge === 'n') {
-    for (let y = size - 1; y >= 0; y -= 1) if (rowHas(y)) return y + 1;
-  } else if (edge === 's') {
-    for (let y = 0; y < size; y += 1) if (rowHas(y)) return size - y;
-  } else if (edge === 'w') {
-    for (let x = size - 1; x >= 0; x -= 1) if (colHas(x)) return x + 1;
-  } else {
-    for (let x = 0; x < size; x += 1) if (colHas(x)) return size - x;
+  const runs = [];
+  let start = null;
+  for (let i = 0; i < outer; i += 1) {
+    if (has(i)) {
+      if (start === null) start = i;
+    } else if (start !== null) {
+      runs.push([start, i]);
+      start = null;
+    }
   }
-  return 0;
+  if (start !== null) runs.push([start, outer]);
+  // Join runs separated by a hairline. A cell whose art has a thin waist reads as two runs, and a
+  // real gutter between two cells is far wider than that.
+  const joined = [];
+  for (const run of runs) {
+    const last = joined[joined.length - 1];
+    if (last && run[0] - last[1] < outer / 60) last[1] = run[1];
+    else joined.push([...run]);
+  }
+  // Ignore slivers: a stray mark between two cells is not a cell.
+  return joined.filter(([a, b]) => b - a > outer / 40);
+}
+
+/**
+ * Slice a keyed sheet into `rows` x `cols` cell rectangles, by its own gutters where it has them.
+ *
+ * Falls back to even division per axis when the run count does not match what is expected, and says
+ * so, because a silently wrong slice is the failure this whole function exists to stop.
+ */
+function findGrid(cell, width, height, rows, cols, note) {
+  const bands = contentRuns(cell, width, height, 'y');
+  let yRanges;
+  if (bands.length === rows) {
+    yRanges = bands;
+  } else {
+    note(`found ${bands.length} row bands, expected ${rows} -- falling back to even rows`);
+    yRanges = Array.from({ length: rows }, (_, r) => [
+      Math.round((r * height) / rows),
+      Math.round(((r + 1) * height) / rows)
+    ]);
+  }
+  return yRanges.map(([y0, y1], r) => {
+    const strip = Buffer.alloc(width * (y1 - y0) * 4);
+    cell.copy(strip, 0, y0 * width * 4, y1 * width * 4);
+    const groups = contentRuns(strip, width, y1 - y0, 'x');
+    let xRanges;
+    if (groups.length === cols) {
+      xRanges = groups;
+    } else {
+      note(`row ${r}: found ${groups.length} cells, expected ${cols} -- falling back to even columns`);
+      xRanges = Array.from({ length: cols }, (_, c) => [
+        Math.round((c * width) / cols),
+        Math.round(((c + 1) * width) / cols)
+      ]);
+    }
+    return xRanges.map(([x0, x1]) => ({ x0, x1, y0, y1 }));
+  });
 }
 
 /**
  * The bounding box of everything opaque in a cell.
  *
- * Same job `contentDepth` does for a band, in two dimensions: find where the art really is rather
- * than trusting the layout it was asked for. It uses the same coverage floor, so a stray speck near
- * a corner of the canvas cannot drag the box out to the full cell and undo the crop -- which is the
- * failure `LINE_COVERAGE` was added for in the first place.
+ * Find where the art really is rather than trusting the layout it was asked for. Every sheet so
+ * far has painted approximately the depth it was asked for and never exactly, so neither the
+ * request nor a fixed fraction is the right crop.
+ *
+ * It uses `LINE_COVERAGE` as a floor, so a stray speck near a corner of the canvas cannot drag the
+ * box out to the full cell and undo the crop. Two cliff frames once measured the whole cell on the
+ * strength of a handful of loose pixels near the far edge, when what was actually opaque was a band
+ * a fifth that deep.
  */
 function contentBox(cell, width, height) {
   const opaque = (x, y) => cell[(y * width + x) * 4 + 3] > 24;
@@ -451,9 +514,13 @@ function buildSheet({ id, from, to, corners }, apply) {
     return null;
   }
   const img = decodePng(file);
-  const cols = VARIANTS;
-  const cellW = Math.floor(img.width / cols);
-  const cellH = Math.floor(img.height / ROWS.length);
+  // Key the whole sheet once, then find its gutters. Both have to happen before anything is sliced:
+  // a gutter is only visible once the magenta is transparent.
+  const wholeKeyed = key(img.data, img.width, img.height);
+  const warnings = [];
+  const grid = findGrid(wholeKeyed, img.width, img.height, ROWS.length, VARIANTS, (m) =>
+    warnings.push(m)
+  );
   const sheet = Buffer.alloc(CELL * VARIANTS * ROWS.length * CELL * 4);
   const sheetW = CELL * VARIANTS * ROWS.length;
   const report = [];
@@ -461,33 +528,50 @@ function buildSheet({ id, from, to, corners }, apply) {
   ROWS.forEach((edge, row) => {
     const depths = [];
     for (let v = 0; v < VARIANTS; v += 1) {
-      // Lift one cell out of the grid and key it. Gridlines drawn between frames are the key colour
-      // too, so they disappear here rather than needing to be found.
-      const cell = Buffer.alloc(cellW * cellH * 4);
+      // Lift one cell out of the grid. It is cut from the already-keyed sheet, so gridlines drawn
+      // between frames are gone before the gutters were measured rather than after.
+      const rect = grid[row][v];
+      const cellW = rect.x1 - rect.x0;
+      const cellH = rect.y1 - rect.y0;
+      const keyed = Buffer.alloc(cellW * cellH * 4);
       for (let y = 0; y < cellH; y += 1) {
-        for (let x = 0; x < cellW; x += 1) {
-          const si = ((row * cellH + y) * img.width + v * cellW + x) * 4;
-          const di = (y * cellW + x) * 4;
-          cell[di] = img.data[si];
-          cell[di + 1] = img.data[si + 1];
-          cell[di + 2] = img.data[si + 2];
-          cell[di + 3] = img.data[si + 3];
-        }
+        const from = ((rect.y0 + y) * img.width + rect.x0) * 4;
+        wholeKeyed.copy(keyed, y * cellW * 4, from, from + cellW * 4);
       }
-      const keyed = key(cell, cellW, cellH);
 
-      // Crop to the art, but never past the depth the layout allows: a frame where the model
-      // over-painted must not push a taller band than the engine expects.
-      const measured = contentDepth(keyed, Math.min(cellW, cellH), edge);
-      const limit = Math.round(DEPTH[edge] * Math.min(cellW, cellH));
-      const deep = Math.min(measured || limit, limit);
+      // **Crop to where the art is, in both axes.** Along the named direction that is a depth
+      // crop, capped so an over-painted frame cannot push a taller band than the engine expects.
+      // Across it, the crop is what makes a run of bands join up at all.
+      //
+      // That second half was added when a sheet arrived with every frame floating inside its cell:
+      // the south row spanned 5%..93% of its width and the east row's four variants started at 76,
+      // 30, 64 and 28 per cent, so no frame touched the edge it is named for. Laid end to end that
+      // is a gap in the wall at every tile boundary, and a strip that is not against its own side.
+      // The sheet before it happened to touch at 1%..99% and hid the assumption completely.
+      const content = contentBox(keyed, cellW, cellH);
       const horizontal = edge === 'n' || edge === 's';
+      const across = Math.min(cellW, cellH);
+      const span = horizontal ? content.y1 - content.y0 : content.x1 - content.x0;
+      const limit = Math.round(DEPTH[edge] * across);
+      const deep = Math.min(span || limit, limit);
       const box = horizontal
-        ? { x0: 0, x1: cellW, y0: edge === 'n' ? 0 : cellH - deep, y1: edge === 'n' ? deep : cellH }
-        : { x0: edge === 'w' ? 0 : cellW - deep, x1: edge === 'w' ? deep : cellW, y0: 0, y1: cellH };
+        ? {
+            x0: content.x0,
+            x1: content.x1,
+            y0: edge === 'n' ? content.y0 : content.y1 - deep,
+            y1: edge === 'n' ? content.y0 + deep : content.y1
+          }
+        : {
+            y0: content.y0,
+            y1: content.y1,
+            x0: edge === 'w' ? content.x0 : content.x1 - deep,
+            x1: edge === 'w' ? content.x0 + deep : content.x1
+          };
 
-      const bandW = horizontal ? CELL : Math.max(1, Math.round((deep / cellW) * CELL));
-      const bandH = horizontal ? Math.max(1, Math.round((deep / cellH) * CELL)) : CELL;
+      // The perpendicular axis is stretched to the whole cell -- that is the join. The named axis
+      // keeps its measured proportion.
+      const bandW = horizontal ? CELL : Math.max(1, Math.round((deep / across) * CELL));
+      const bandH = horizontal ? Math.max(1, Math.round((deep / across) * CELL)) : CELL;
       const band = resample(keyed, cellW, box, bandW, bandH);
       const frame = place(band, bandW, bandH, edge);
 
@@ -584,9 +668,29 @@ function buildSheet({ id, from, to, corners }, apply) {
       // the scene is worth the arithmetic here -- measured, the stacked version put the cliff layer
       // at +69% blended pixels where this costs nothing over the corner quad already drawn.
       if (!name.startsWith('cap-')) {
-        // One south variant per piece, so the four corners look as different from each other as
-        // the four straight variants do.
-        const under = (ROWS.indexOf('s') * VARIANTS + index % VARIANTS) * CELL;
+        // **Pick the band variant by what it does at the open end.** The straight variants are
+        // deliberately ragged -- two of the four carry no art at all in their leftmost column, and
+        // that is what makes a run of them not read as one extruded strip. On a corner that
+        // raggedness lands in the worst possible place: the open end is the one the neighbouring
+        // tile's band has to meet, and picking blind put it at 41px against a 62px neighbour on
+        // half the pieces. So the variant is chosen rather than hashed, by measuring coverage in
+        // the column that matters.
+        //
+        // A corner whose vertical arm is on the right runs its horizontal arm out to the left, and
+        // the other way round.
+        const openX = name.endsWith('-se') ? 0 : CELL - 1;
+        const depthAt = (variant, x) => {
+          const base = (ROWS.indexOf('s') * VARIANTS + variant) * CELL;
+          for (let y = 0; y < CELL; y += 1) {
+            if (sheet[(y * sheetW + base + x) * 4 + 3] > 24) return CELL - y;
+          }
+          return 0;
+        };
+        let best = 0;
+        for (let v = 1; v < VARIANTS; v += 1) {
+          if (depthAt(v, openX) > depthAt(best, openX)) best = v;
+        }
+        const under = (ROWS.indexOf('s') * VARIANTS + best) * CELL;
         for (let y = 0; y < CELL; y += 1) {
           for (let x = 0; x < CELL; x += 1) {
             const f = (y * CELL + x) * 4;
@@ -624,6 +728,7 @@ function buildSheet({ id, from, to, corners }, apply) {
   const kb = (png.length / 1024).toFixed(1);
   console.log(`  ${id}: ${from} (${img.width}x${img.height}) -> ${to} ${wideW}x${CELL}, ${frames} frames, ${kb} KB`);
   console.log(`    ${report.join('   ')}`);
+  for (const w of warnings) console.log(`    ! ${w}`);
   if (apply) fs.writeFileSync(path.join(OUT, to), png);
   return png;
 }

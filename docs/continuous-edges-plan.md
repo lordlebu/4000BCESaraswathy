@@ -31,6 +31,27 @@ talus of loose stone into the ground below it, which is what makes a cliff read 
 something rather than being pasted over it. `planCliffJoints` already scatters stone — but only at a
 run's *ends*, never along its base.
 
+### And one that was worse than all three, now fixed
+
+**Every treeline in the shipped game had a gap at every tile boundary.** Measured on
+`assets/treeline.png` as it stood: the south band's depth at columns 0 and 127 was **0 on all four
+variants**, so a run of forest edge was four islands with daylight between them rather than a wall
+of trees. The cliff sheet mostly touched, so nothing ever pointed at the shared cause.
+
+The cause was the intake, not the art. `tools/build-rims.js` cropped each frame to its content in
+the *named* direction only and took the full cell across it, which is correct only if the painting
+happens to run to its own cell edges. It now crops in both axes and stretches the perpendicular one
+to fill the cell, so the join is made rather than hoped for. Both sheets now read the full 62px at
+every column a neighbour has to meet.
+
+**A third container problem moved into code at the same time.** The builder sliced the 4 × 4 grid at
+exact quarters. A sheet arrived with its rows at y 25–144, 209–515, 604–818 and 842–1176 in a
+1240-tall image — three of the four straddling a quarter cut — so every extracted cell was part of
+one row plus part of the next, and every downstream measurement was of a cell that did not exist.
+The grid is now found from the sheet's own gutters, with an even split as a reported fallback. That
+is the same call as keying the magenta and cropping to content: the model reliably paints four rows
+of four, and reliably will not put them on exact pixel boundaries.
+
 ### And two measurements that decide what is worth building
 
 **The median south-face run is one tile.** Across the four maps: 83 runs of one tile, 31 of two, 10

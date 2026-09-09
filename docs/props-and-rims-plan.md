@@ -112,11 +112,21 @@ Against the decor layer's measured 2.6 ms per million on SwiftShader that is abo
 
 Two things are honestly still wrong, both recorded rather than fixed:
 
-**The corner art is a different painting from the band art.** Mean colour matches almost exactly —
-`[128, 111, 92]` against `[135, 117, 94]` — but the corners are a fine cobble mosaic where the bands
-are large smooth boulders, so adjacent tiles read as two rocks. No build-time transform fixes
-texture frequency. Fixing it means repainting one side to match the other, which is its own art
-round and is not scheduled.
+**The corner art was a different painting from the band art** — mean colour matched almost exactly,
+`[128, 111, 92]` against `[135, 117, 94]`, but the corners were a fine cobble mosaic where the bands
+were large smooth boulders, so adjacent tiles read as two rocks. **Resolved by replacing the whole
+sheet**: `cliff-edges.png` and `cliff-corners.png` are one pixel-art set, generated back to back, so
+they match by construction. `Gemini_Stones.png` is superseded and has moved to
+`assets/source/dump/`; it is still in git history if the watercolour is ever wanted back.
+
+**What the new set is worse at, recorded rather than hidden.** Its south face is better — bigger
+boulders, darker soil, more contrast. Its other three rows are worse than the sheet it replaced:
+the north lip crops to soil and grass with no rock in it, and the east and west strips are drawn as
+*horizontal* slabs stacked up a narrow column where the old ones were vertically stacked boulders,
+so at 28px wide they read as streaks. That is the art rather than the crop — the source strips are
+drawn that way. A re-roll wants two sentences the prompt did not have: **the lip must show rock and
+not only the soil above it**, and **a side strip is a vertical stack of rounded boulders, never
+horizontal layers**.
 
 **A corner's horizontal arm was 34px deep where a straight band is 62 — fixed by baking, not by
 scaling.** Matching the depth by scaling needs a 1.8× vertical stretch that stands every boulder up
