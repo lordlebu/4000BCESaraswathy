@@ -735,3 +735,89 @@ export const TRACK_PIECES = 4;
 export function trackFrame(eastWest: boolean, overgrown: boolean): number {
   return (overgrown ? 2 : 0) + (eastWest ? 1 : 0);
 }
+
+// --- the shore -------------------------------------------------------------
+
+/**
+ * The sky biomes, which are land in every predicate above and are not a shore in any of them.
+ *
+ * An island's rim already carries two treatments: `crossing.ts` sets the underside a band below
+ * the top so `cliffAt` fills the rim with rock, and `planIslandShadow` darkens the sea beneath it.
+ * A sand lip and a bank shadow on the same boundary would be a third and a fourth, and a beach
+ * along the rim of a floating shelf is not a thing that happens.
+ *
+ * Measured on the Aravali, this is 148 of its 409 land-water edges -- so it is the difference
+ * between a rule and a rule with a hole in it.
+ */
+const SKY: ReadonlySet<BiomeId> = new Set<BiomeId>(['sky_island', 'sky_underside']);
+
+/**
+ * Whether a water tile should draw the bank's shadow along this edge.
+ *
+ * **Asked of the water tile, not the land one**, which is what separates this from every other rim
+ * on the map. A cliff belongs to the ledge it is the edge of and a treeline to the forest, so both
+ * draw on the high side. A bank's *shadow* falls on the thing below it, and the thing below a bank
+ * is the water -- so it is the low side that draws, and it draws inside its own cell.
+ *
+ * That is also why this does not reopen the ruling `blends` states. A dissolve makes the land's
+ * outline uncertain; this leaves the outline exactly where the tiles put it and gives it relief.
+ * Nothing crosses the line in either direction.
+ */
+export function shoreAt(here: BiomeId, there: BiomeId): boolean {
+  return WATER.has(here) && !WATER.has(there) && !SKY.has(there);
+}
+
+/**
+ * What a stretch of land puts down where it meets water, or null for the ones that put down
+ * nothing.
+ *
+ * A bank is silt and sand, so most ground grows a beach on its own side of the waterline -- drawn
+ * as an ordinary edge blend whose source is a *third* biome, which is the whole trick: the `coast`
+ * tile bleeds into a plains cell through a torn mask, and neither neighbour bleeds anywhere.
+ *
+ * Three answers are null, for three different reasons:
+ *
+ *   * `coast` is already the beach. A lip of coast inside a coast cell draws nothing.
+ *   * `wetland` has no beach. A marsh runs to the water as marsh; it gets reeds instead.
+ *   * the sky biomes are not a shore at all -- see `SKY`.
+ *
+ * Anything absent from the table is absent on purpose: no lip is the safe answer, and a biome that
+ * turns out to want one is a row here rather than a change anywhere else.
+ */
+const BANK_SOURCE: Partial<Record<BiomeId, BiomeId>> = {
+  plains: 'coast',
+  forest: 'coast',
+  hills: 'coast',
+  desert: 'coast',
+  settlement: 'coast',
+  landmark: 'coast'
+};
+
+/** The bank material for a land tile facing water, or null if that ground grows no beach. */
+export function bankSource(here: BiomeId, there: BiomeId): BiomeId | null {
+  if (WATER.has(here) || !WATER.has(there)) return null;
+  return BANK_SOURCE[here] ?? null;
+}
+
+/**
+ * How deep the shore band reaches into the water cell, in pixels of art.
+ *
+ * Three eighths of a cell, which is a shape decision rather than a taste one. The torn masks in
+ * `assets/edges.png` reach a third of a cell -- 43px at this grid -- so 48 holds all of the art
+ * and none of the empty, and the layer costs 1.06M blended pixels a frame at its worst on-screen
+ * count instead of the 2.82M a full cell would. Fill rate is what scales; see `docs/rendering.md`,
+ * and the decor layer, which learned this the expensive way.
+ */
+export const SHORE_BAND = Math.round(GRID * 0.375);
+
+/**
+ * Props that stand at a waterline, by the water they stand at.
+ *
+ * The parked half of endgame item 4, and it needs no art: every one of these is already on the
+ * decor sheet, drawn for the biome on the other side of the line. Reeds belong at a river's edge
+ * whether or not the tile they stand on is marsh, and a shell belongs where the sea leaves it.
+ */
+export const SHORE_PROPS: Record<'sea' | 'river', readonly string[]> = {
+  sea: ['pebbles', 'shell', 'driftwood-small'],
+  river: ['reed-tuft', 'marsh-stone', 'reed-tuft']
+};

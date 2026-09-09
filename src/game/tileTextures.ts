@@ -14,7 +14,7 @@
 // building the fog disc.
 
 import Phaser from 'phaser';
-import { GRID, DECOR_CELL } from './frames';
+import { GRID, DECOR_CELL, SHORE_BAND, type Edge } from './frames';
 
 export {
   GRID,
@@ -218,6 +218,173 @@ export function blendTextureKey(scene: Phaser.Scene, terrainFrame: number, maskF
     0, 0, TILE_SIZE, TILE_SIZE
   );
   context.globalCompositeOperation = 'source-over';
+  canvas.refresh();
+  return key;
+}
+
+/**
+ * The bank's shadow, baked once per edge and variant.
+ *
+ * **A band, not a cell.** The other baked texture here -- `blendTextureKey` -- is a whole tile,
+ * because a bleed can start anywhere in one. A shore band is pinned to one edge and reaches three
+ * eighths of the way in, so a full cell would be five eighths transparent and the GPU would blend
+ * every pixel of it. At the worst on-screen count measured on Lothal that is the difference
+ * between 2.82M and 1.06M pixels a frame; see `SHORE_BAND`.
+ *
+ * **The tear is not drawn here either.** `assets/edges.png` already holds four edges by four
+ * variants of ragged alpha reaching a third of a cell, built for the blend layer, so the shore
+ * fades out along the same irregular contour every other boundary on the map uses. Taking the
+ * strip of that mask nearest the edge is the whole of the shape work.
+ *
+ * Three passes, and the last one is the one that matters:
+ *
+ *   1. a gradient from the waterline inward -- a pale wet line, then the darkest shade a few
+ *      pixels in, then away to nothing;
+ *   2. `destination-in` with the mask, so the fade ends raggedly rather than on a straight line;
+ *   3. a short unmasked gradient over the first quarter of the band.
+ *
+ * Without (3) the shadow would be as thin as 4px wherever the tear happened to be shallow -- the
+ * masks vary from a tenth of their reach to all of it -- and a bank's contact shadow that comes and
+ * goes reads as dirt on the screen rather than as a bank. The ragged part is the *fade*; the
+ * contact is continuous.
+ *
+ * Keyed `shore:<edge>:<maskFrame>`, so a map builds at most sixteen of them.
+ */
+/**
+ * The shape of a band pinned to one edge of a cell, and the strip of a 128 frame it reads from.
+ *
+ * Shared by the two band layers because they are the same rectangle seen from opposite sides of
+ * the waterline: the bank lip inside the land cell, the bank's shadow inside the water one.
+ */
+function bandGeometry(edge: Edge): {
+  width: number;
+  height: number;
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+  cutX: number;
+  cutY: number;
+  cutWidth: number;
+  cutHeight: number;
+} {
+  const horizontal = edge === 'n' || edge === 's';
+  const width = horizontal ? TILE_SIZE : SHORE_BAND;
+  const height = horizontal ? SHORE_BAND : TILE_SIZE;
+  return {
+    width,
+    height,
+    // The waterline is the edge the other ground is on; the band reaches inward from there.
+    from: { x: edge === 'e' ? width : 0, y: edge === 's' ? height : 0 },
+    to: { x: edge === 'w' ? width : 0, y: edge === 'n' ? height : 0 },
+    cutX: edge === 'e' ? TILE_SIZE - SHORE_BAND : 0,
+    cutY: edge === 's' ? TILE_SIZE - SHORE_BAND : 0,
+    cutWidth: horizontal ? TILE_SIZE : SHORE_BAND,
+    cutHeight: horizontal ? SHORE_BAND : TILE_SIZE
+  };
+}
+
+/**
+ * The beach a stretch of land puts down where it meets water.
+ *
+ * The same pair `blendTextureKey` bakes -- a terrain frame behind a torn mask -- cut down to the
+ * strip that can actually show. **That crop is not tidiness, it is the whole cost of the layer.**
+ * Baking the bank as a full cell was measured on the densest shore on Lothal at 12% of the frame
+ * on CI's software rasteriser, against a gate of 10, and the lip was the expensive half: 377 full
+ * cells is more blended pixel than 643 bands. A mask that reaches a third of a cell cannot paint
+ * anything past 48 pixels, so five eighths of that cell was a transparent quad the GPU blended
+ * anyway.
+ *
+ * Keyed `bank:<terrainFrame>:<edge>:<maskFrame>`.
+ */
+export function bankTextureKey(
+  scene: Phaser.Scene,
+  terrainFrame: number,
+  edge: Edge,
+  maskFrame: number
+): string {
+  const key = `bank:${terrainFrame}:${edge}:${maskFrame}`;
+  if (scene.textures.exists(key)) return key;
+
+  const box = bandGeometry(edge);
+  const canvas = scene.textures.createCanvas(key, box.width, box.height);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  const terrain = scene.textures.getFrame(TERRAIN_SHEET, terrainFrame);
+  const mask = scene.textures.getFrame(EDGE_SHEET, maskFrame);
+  if (!terrain || !mask) return key;
+
+  // The same strip of the source as of the mask, so the sand keeps the part of its own texture
+  // that belongs against this edge rather than an arbitrary crop of the middle.
+  context.drawImage(
+    terrain.source.image as CanvasImageSource,
+    terrain.cutX + box.cutX, terrain.cutY + box.cutY, box.cutWidth, box.cutHeight,
+    0, 0, box.width, box.height
+  );
+  context.globalCompositeOperation = 'destination-in';
+  context.drawImage(
+    mask.source.image as CanvasImageSource,
+    mask.cutX + box.cutX, mask.cutY + box.cutY, box.cutWidth, box.cutHeight,
+    0, 0, box.width, box.height
+  );
+  context.globalCompositeOperation = 'source-over';
+  canvas.refresh();
+  return key;
+}
+
+export function shoreTextureKey(scene: Phaser.Scene, edge: Edge, maskFrame: number): string {
+  const key = `shore:${edge}:${maskFrame}`;
+  if (scene.textures.exists(key)) return key;
+
+  const horizontal = edge === 'n' || edge === 's';
+  const box = bandGeometry(edge);
+  const { width, height, from, to } = box;
+
+  const canvas = scene.textures.createCanvas(key, width, height);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  const mask = scene.textures.getFrame(EDGE_SHEET, maskFrame);
+  if (!mask) return key;
+
+  const full = context.createLinearGradient(from.x, from.y, to.x, to.y);
+  // Wet sand catching the light, then the shade under the lip, then the open water. The dark is
+  // the same ink `planIslandShadow` puts on the sea, because it is the same claim: light does not
+  // get in here.
+  full.addColorStop(0, 'rgba(232,201,130,0.42)');
+  full.addColorStop(0.055, 'rgba(11,28,48,0.46)');
+  full.addColorStop(0.34, 'rgba(11,28,48,0.30)');
+  full.addColorStop(1, 'rgba(11,28,48,0)');
+  context.fillStyle = full;
+  context.fillRect(0, 0, width, height);
+
+  // Only where the tear allows. The strip of the mask nearest this edge is the one whose alpha
+  // runs from solid at the boundary to nothing inland, which is the profile the band wants.
+  context.globalCompositeOperation = 'destination-in';
+  context.drawImage(
+    mask.source.image as CanvasImageSource,
+    mask.cutX + box.cutX, mask.cutY + box.cutY, box.cutWidth, box.cutHeight,
+    0, 0, width, height
+  );
+  context.globalCompositeOperation = 'source-over';
+
+  // The contact, which does not get to be ragged.
+  const contactSpan = 0.26;
+  const contact = context.createLinearGradient(
+    from.x, from.y,
+    horizontal ? from.x : from.x + (to.x - from.x) * contactSpan,
+    horizontal ? from.y + (to.y - from.y) * contactSpan : from.y
+  );
+  contact.addColorStop(0, 'rgba(232,201,130,0.42)');
+  contact.addColorStop(0.2, 'rgba(11,28,48,0.44)');
+  contact.addColorStop(1, 'rgba(11,28,48,0)');
+  context.fillStyle = contact;
+  context.fillRect(
+    edge === 'e' ? width - Math.round(width * contactSpan) : 0,
+    edge === 's' ? height - Math.round(height * contactSpan) : 0,
+    horizontal ? width : Math.round(width * contactSpan),
+    horizontal ? Math.round(height * contactSpan) : height
+  );
+
   canvas.refresh();
   return key;
 }

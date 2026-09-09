@@ -28,6 +28,9 @@ import {
   hutFrame,
   ROW_SLOT,
   blends,
+  shoreAt,
+  bankSource,
+  SHORE_PROPS,
   cliffAt,
   cliffFrame,
   treelineAt,
@@ -47,6 +50,7 @@ import { band } from '../world/classify';
 import { tileHash } from '../world/rng';
 import type { FieldMapWorld } from '../world/fieldMap';
 import type { BiomeId } from '../world/types';
+import type { Edge } from './frames';
 
 /** Which sheet a placement draws from. `marker` is the fallback glyph, which has no sheet. */
 export type PlacementSheet =
@@ -57,6 +61,8 @@ export type PlacementSheet =
   | 'places'
   | 'landmarks'
   | 'decor'
+  | 'bank'
+  | 'shore'
   | 'track'
   | 'cliffs'
   | 'treeline'
@@ -95,6 +101,12 @@ export interface Placement {
    * the cell it belongs to and a tile's props do not drift onto a neighbour that may be water.
    */
   offset?: { x: number; y: number };
+  /**
+   * Which side of its own cell a band is pinned to. Present only on the shore band, which is the
+   * one placement that is not a whole cell -- everything else is centred in one and needs no
+   * answer to this.
+   */
+  edge?: Edge;
   /**
    * Present only on the edge-blend layer, which is the one placement that needs two frames.
    *
@@ -161,6 +173,173 @@ export function planEdges(world: FieldMapWorld['world']): Placement[] {
           depth: EDGE_DEPTH
         });
       }
+    }
+  }
+  return out;
+}
+
+/**
+ * Where the shore band sits: above the ground and the blends on it, below anything standing.
+ *
+ * Six rather than the blend's fifty because it draws *over* a blend -- `sea` and `river` bleed
+ * into each other, and a bank's shadow lies on whatever water is there. Flat rather than
+ * row-sorted for the reason `planEdges` gives: this is ground, and sorting it by row would let a
+ * shadow cast in one row draw over something standing in the next.
+ */
+const SHORE_DEPTH = 60;
+
+/**
+ * The shadow a bank casts on the water beside it.
+ *
+ * **The last hard edge on the map.** Every other boundary was given relief in phase 07 -- a torn
+ * blend where two grounds meet, a rock face where a terrace drops, a wall of crowns where the
+ * forest stops -- and water was left out of all three, so a coast is a staircase between two flat
+ * colours with nothing on either side of it.
+ *
+ * What it is not is the dissolve `blends` refuses. That one makes the land's outline uncertain,
+ * and a coastline is the one boundary here that is genuinely definite. This keeps the outline
+ * exactly and moves it out of the plane: the water beside the land is drawn as a surface lying
+ * below it, with a wet line at the contact and the bank's shade falling inward. Nothing crosses
+ * the line, in either direction.
+ *
+ * The argument is already accepted elsewhere in this file. `planIslandShadow` darkens the sea
+ * under a floating shelf because that is the only thing separating a floating shelf from a sea
+ * stack -- light gets underneath one of them. A bank is the same claim at a metre.
+ *
+ * One placement per water-side edge, drawn inside the water cell: 643 at worst on Lothal, 163 of
+ * them on screen at once in the densest window measured.
+ */
+export function planShore(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      const here = world.tiles[y]![x]!.biome;
+      for (const edge of EDGE_ORDER) {
+        const { dx, dy } = EDGE_STEP[edge];
+        const nx = x + dx;
+        const ny = y + dy;
+        // The map edge is not a shore, for the reason it is not a cliff: the world stops there
+        // rather than the water.
+        if (nx < 0 || ny < 0 || nx >= world.width || ny >= world.height) continue;
+        if (!shoreAt(here, world.tiles[ny]![nx]!.biome)) continue;
+        out.push({
+          sheet: 'shore',
+          frame: edgeMaskFrame(edge, tileHash(world.seed, x, y, `shore-${edge}`)),
+          edge,
+          x,
+          y,
+          depth: SHORE_DEPTH
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * The beach a stretch of land puts down where it meets water.
+ *
+ * An ordinary edge blend, and deliberately so -- the same baked pair `planEdges` emits, the same
+ * torn masks, the same depth. What is new is only the *source*: a third biome rather than either
+ * neighbour, so `coast` bleeds into a plains cell and the water stays exactly where it was.
+ *
+ * It is the half of this that does the seamless work. The shadow alone gives the water a level;
+ * without a lip the ground still runs to the waterline as grass, and a straight edge between two
+ * flat greens is still a straight edge. `bankSource` decides which ground grows one, and three
+ * answers are null on purpose -- see the table there.
+ */
+export function planBank(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      const here = world.tiles[y]![x]!.biome;
+      for (const edge of EDGE_ORDER) {
+        const { dx, dy } = EDGE_STEP[edge];
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= world.width || ny >= world.height) continue;
+        const material = bankSource(here, world.tiles[ny]![nx]!.biome);
+        if (material === null) continue;
+        out.push({
+          // Its own name, though it draws from the terrain sheet and bakes through the same pair
+          // as a blend. A blend says *these two grounds meet gradually*; a bank says *this ground
+          // ends in sand*, and only one of those is allowed at a shoreline. A test that cannot
+          // tell them apart has to either miss the second or forbid the first.
+          //
+          // And it is a band rather than a cell, which the name also buys: a blend can start
+          // anywhere in its tile, a bank cannot start away from its own waterline. Measured, that
+          // crop is the difference between this layer costing 12% of the frame and 8.
+          sheet: 'bank',
+          frame: tileFrame(material),
+          maskFrame: edgeMaskFrame(edge, tileHash(world.seed, x, y, `bank-${edge}`)),
+          edge,
+          x,
+          y,
+          depth: EDGE_DEPTH
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Reeds and shells at the waterline -- the pass parked as the live half of endgame item 4.
+ *
+ * One prop on a land tile that touches water, chosen by the water it touches rather than by the
+ * ground it stands on, and pushed toward the edge it faces instead of jittered across the cell.
+ * That last part is the difference between a shore and a shore-shaped scattering: reeds stand in
+ * the shallows, not four tenths of a tile up the bank.
+ *
+ * Separate from `planDecor` rather than folded into it, because the choice is about the neighbour
+ * and every other prop on the map is about the tile.
+ */
+export function planShoreProps(
+  world: FieldMapWorld['world'],
+  builtOn: ReadonlySet<string>
+): Placement[] {
+  const out: Placement[] = [];
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      if (builtOn.has(`${x},${y}`)) continue;
+      const here = world.tiles[y]![x]!.biome;
+      // Only ground that grows a bank grows anything on it. The sky biomes and the water itself
+      // are excluded by the same table, which is the point of having one.
+      let facing: Edge | null = null;
+      let water: 'sea' | 'river' | null = null;
+      for (const edge of EDGE_ORDER) {
+        const { dx, dy } = EDGE_STEP[edge];
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= world.width || ny >= world.height) continue;
+        const there = world.tiles[ny]![nx]!.biome;
+        if (there !== 'sea' && there !== 'river') continue;
+        if (bankSource(here, there) === null && here !== 'wetland' && here !== 'coast') continue;
+        facing = edge;
+        water = there;
+        break;
+      }
+      if (facing === null || water === null) continue;
+
+      // Two shores in three, so a bank has gaps in it rather than a hedge of reeds.
+      if (tileHash(world.seed, x, y, 'shore-prop') % 3 === 0) continue;
+
+      const props = SHORE_PROPS[water];
+      const prop = props[tileHash(world.seed, x, y, 'shore-pick') % props.length]!;
+      const frame = decorFrame(prop, tileHash(world.seed, x, y, 'shore-var'));
+      if (frame === null) continue;
+
+      const { dx, dy } = EDGE_STEP[facing];
+      const drift = (tileHash(world.seed, x, y, 'shore-drift') % 1000) / 5000 - 0.1;
+      out.push({
+        sheet: 'decor',
+        frame,
+        x,
+        y,
+        // Three tenths of a cell toward the water, and a tenth of drift along the edge.
+        offset: { x: dx * 0.3 + (dx === 0 ? drift : 0), y: dy * 0.3 + (dy === 0 ? drift : 0) },
+        depth: depthFor(y, ROW_SLOT.underfoot)
+      });
     }
   }
   return out;
@@ -494,9 +673,14 @@ export function planScene(built: FieldMapWorld): Placement[] {
   // lies on it, then the huts and the overdraw that stand in it, and the markers above everything.
   return [
     ...planEdges(built.world),
+    // The bank is an edge blend and sits with them; the shadow it casts goes just above, because
+    // it lies on water that may itself be a blend of river into sea.
+    ...planBank(built.world),
+    ...planShore(built.world),
     ...planCliffs(built.world),
     ...planTreeline(built.world),
     ...planDecor(built.world, builtOn),
+    ...planShoreProps(built.world, builtOn),
     // After decor, before the huts: the line is laid *on* the ground and things stand beside it,
     // so a rail draws over a scattered stone and under a building.
     ...planIslandShadow(built.world),

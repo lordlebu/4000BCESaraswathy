@@ -198,6 +198,7 @@ The art docs, in the order they are useful:
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |
 | `docs/plate-prompts.md` | the species plate queue, per-tool prompt notes, and the emoji tables |
 | `docs/rendering.md` | why the frame costs what it costs, and the four levers when it costs more |
+| `docs/shoreline-plan.md` | the coast and riverbank emboss: what is planned, and what it must not touch |
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
