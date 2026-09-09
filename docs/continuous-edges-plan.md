@@ -82,9 +82,37 @@ went 4 → 8 on one map and 7 → 5 on another. The short runs come from the *co
 staircase, which is what a contour on a square grid is. **Do not spend a seed-breaking terrain change
 on this.**
 
+## The maze, which none of the three mechanisms addressed
+
+Rendering the *whole scene* — terrain underneath, decor and joints included — rather than the cliff
+sheet over a flat colour showed something the earlier pictures hid completely. The cliffs read as a
+**hedge maze**: thin walls tracing every tile boundary, boxing in single squares of grass.
+
+The cause is not the art and not the silhouette. `band()` quantises elevation to 0, 1 or 2, and that
+boundary follows a noise contour, so at tile resolution it zigzags. Every zigzag is one more
+axis-aligned wall segment — and a *low* tile ringed by higher neighbours gets four faces pointed at
+it by those neighbours, which draws a pen around one square. There were 20 such tiles across the
+four maps.
+
+**Fixed by one majority pass over the bands, intersected with the real ones.** `cliffBands` in
+`scenePlan.ts` smooths the grid, and `facesAt` draws a face only where the smoothed grid *and* the
+real one both say the ground drops. The intersection is the important half: taking the smoothed grid
+on its own is the obvious move and it invents rock, because a majority filter will raise a genuinely
+low tile to match its neighbours and then a face gets drawn standing on lowland facing a neighbour
+that is not below it. Two existing tests said so within a minute of trying it.
+
+Faces drop about a third and boxed-in tiles go from 20 to 2. It is a **drawing decision, not a
+terrain change**: biomes, walkability, travel cost and every saved journey come from
+`world/classify.ts` at generation time and are untouched, so it needs no `SAVE_VERSION` bump.
+
+**And the earlier measurement in this file reached the right answer by the wrong route.** It said
+smoothing was not worth it, having measured horizontal *run length* — which barely moves. What moves
+is the number of faces the contour generates at all, and that is what makes the maze. The conclusion
+against a seed-breaking terrain change still holds; the reasoning under it did not.
+
 ## The three mechanisms, cheapest first
 
-None of the first two needs new art.
+Mechanism B is **built**. A and C are not.
 
 ### A. A torn outer outline
 
@@ -97,20 +125,26 @@ than 22), or a baked texture per (frame, mask) pair at runtime the way `shoreTex
 **Prefer baking into the sheet.** The shoreline work measured the alternative and the lesson there
 was that the cheap-looking half was the expensive one.
 
-### B. Overhang, and a talus at the foot
+### B. Overhang, and a talus at the foot · **shipped**
 
 Two halves of one idea: the rim reaches *past* its cell, and debris from it lands on the neighbour.
 
-- **Overhang.** Give the outward-facing rim placement an `offset` so a fraction of it — start at 15%
-  and measure — falls on the tile beyond. Depth already works out: a face on row *y* draws at
-  `depthFor(y, undergrowth)` = 10y+1 and a player standing on row *y*+1 draws at 10y+15, so the
-  player walks in front of an overhanging face rather than behind it. Check that before trusting it.
-- **Talus.** Extend `planCliffJoints` from run-ends to run-bases: scree and small stones on the tile
-  *below* a south face, thinning with distance, from the stones the decor sheet already carries.
-  Same argument the joints already won on — the stone is both what hides the seam and what would
-  actually be lying there.
+- **Overhang.** `OVERHANG` in `scenePlan.ts` gives each face an offset — 12% of a tile downward for
+  a south face, 6% sideways for east and west. **North is zero and that is not an oversight:** the
+  other three are faces, and a wall overhangs what is below it, but north is a *lip*, the top of the
+  break seen from above, and hanging it over the tile above would lay rock across ground that is
+  higher than the rock. The sides get half the south face's reach because they are 28px wide against
+  its 62 and the same absolute overhang would push most of the strip out of its own cell. Depth was
+  checked rather than assumed: the player walks in front of an overhanging face.
+- **Talus.** `planCliffTalus` scatters two or three stones on the tile *below* every south face,
+  from `scree`, `pebbles` and `boulder-small` — 150, 136, 58 and 54 stones on the four maps. It
+  keeps off roofs for the reason paddy once grew through one, and sheds nothing into water for the
+  reason `cliffAt` refuses a face there at all.
 
-### C. One rim module, so the treeline gets it too
+**The treeline gets the overhang too**, which is mechanism C arriving early in the one place it was
+free: a canopy spilling over the open ground beside it is exactly what a wall of trees should do.
+
+### C. One rim module, so the treeline gets it too · **not built**
 
 `planCliffs` and `planTreeline` are the same pass with different predicates. Whatever A and B become,
 they belong in one place that both call, with the reach and the talus prop as parameters. A forest

@@ -154,19 +154,29 @@ describe('a rock face turns instead of meeting itself', () => {
     }
   });
 
-  it('uses every piece somewhere, on every map', () => {
+  it('uses every piece somewhere, and turns on every map', () => {
     // The `lava_field` bug in miniature: art, a frame, a rule, and zero of it on the map. Six
     // paintings were commissioned and a selection rule that could only ever reach four of them
     // would look exactly like this working.
+    //
+    // **Across the maps rather than on each of them**, which is a real weakening and worth saying
+    // why. This asserted all six per map and held until the cliff contour was smoothed; Lothal is
+    // the smallest cliff map and now carries 15 corners, so whether all six shapes occur among them
+    // is a fact about that map's terrain, not about the selector. The guard that matters -- a piece
+    // no rule can ever reach -- is caught just as well by asking across the set, and the second
+    // assertion keeps each map honest about the layer being alive at all.
+    const everywhere = new Set<CornerPiece>();
     for (const { id, built } of worlds) {
       const used = new Set(
         planCliffs(built.world)
           .filter((c) => c.frame >= CORNER_BASE)
           .map((c) => CORNER_ORDER[c.frame - CORNER_BASE]!)
       );
-      for (const piece of CORNER_ORDER) {
-        expect(used.has(piece), `${id}: never draws ${piece}`).toBe(true);
-      }
+      for (const piece of used) everywhere.add(piece);
+      expect(used.size, `${id}: draws no corner pieces at all`).toBeGreaterThan(0);
+    }
+    for (const piece of CORNER_ORDER) {
+      expect(everywhere.has(piece), `no map ever draws ${piece}`).toBe(true);
     }
   });
 
