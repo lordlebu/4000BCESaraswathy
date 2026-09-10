@@ -90,6 +90,11 @@ export const FLORA_SHEET = 'flora';
 export const CLIFF_SHEET = 'cliffs';
 /** The wall of trees where a forest stops. Same layout again -- see `tools/build-rims.js`. */
 export const TREELINE_SHEET = 'treeline';
+/**
+ * Growth spilling over the lip of a floating island. The third rim, same 4x4 layout as the other
+ * two -- see `tools/build-rims.js` for why the format generalised to a plant.
+ */
+export const OVERHANG_SHEET = 'overhang';
 export const DECOR_SHEET = 'decor';
 /**
  * The railway, which is ground rather than scenery.
@@ -146,6 +151,7 @@ export function loadTileSheets(
     cliffs: string;
     flora: string;
     treeline: string;
+    overhang: string;
     decor: string;
     track: string;
   }
@@ -176,6 +182,7 @@ export function loadTileSheets(
   sheet(CLIFF_SHEET, urls.cliffs, TILE_SIZE, TILE_SIZE);
   sheet(FLORA_SHEET, urls.flora, TILE_SIZE, TILE_SIZE);
   sheet(TREELINE_SHEET, urls.treeline, TILE_SIZE, TILE_SIZE);
+  sheet(OVERHANG_SHEET, urls.overhang, TILE_SIZE, TILE_SIZE);
   sheet(DECOR_SHEET, urls.decor, DECOR_CELL, DECOR_CELL);
   sheet(TRACK_SHEET, urls.track, TILE_SIZE, TILE_SIZE);
 }

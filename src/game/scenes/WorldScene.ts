@@ -16,6 +16,7 @@ import floraUrl from '../../../assets/flora.png';
 import edgesUrl from '../../../assets/edges.png';
 import cliffsUrl from '../../../assets/cliffs.png';
 import treelineUrl from '../../../assets/treeline.png';
+import overhangUrl from '../../../assets/overhang.png';
 import decorUrl from '../../../assets/decor.png';
 import trackUrl from '../../../assets/track.png';
 import { EventBus, type UiToGame } from '../EventBus';
@@ -41,6 +42,7 @@ import {
   undersideShadeKey,
   CLIFF_SHEET,
   TREELINE_SHEET,
+  OVERHANG_SHEET,
   createTileTextures,
   loadTileSheets,
   tileFrame,
@@ -80,7 +82,8 @@ const SHEET_KEY: Record<
   bank: TERRAIN_SHEET,
   track: TRACK_SHEET,
   cliffs: CLIFF_SHEET,
-  treeline: TREELINE_SHEET
+  treeline: TREELINE_SHEET,
+  overhang: OVERHANG_SHEET
 };
 
 /**
@@ -421,6 +424,7 @@ export class WorldScene extends Phaser.Scene {
       edges: edgesUrl,
       cliffs: cliffsUrl,
       treeline: treelineUrl,
+      overhang: overhangUrl,
       decor: decorUrl,
       track: trackUrl
     });

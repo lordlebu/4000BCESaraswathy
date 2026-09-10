@@ -526,6 +526,23 @@ export function treelineAt(here: BiomeId, there: BiomeId): boolean {
   return here === 'forest' && there !== 'forest';
 }
 
+/**
+ * Whether growth spills over this boundary.
+ *
+ * **The island's edge, and only the island's.** A shelf hanging in open air is the one place on any
+ * map where ground simply stops and there is nothing under it, which is what makes a plant reaching
+ * over the lip read as a plant rather than as scenery: it has somewhere to hang.
+ *
+ * Water counts as the ground it grows from -- a pool runs to the island's edge and goes over it,
+ * and the bank there is still the island. What it may not hang over is more island: that is a
+ * lawn, not an overhang.
+ */
+export function overhangAt(here: BiomeId, there: BiomeId): boolean {
+  const onTheIsland = here === 'sky_island' || here === 'sky_water';
+  const stillTheIsland = there === 'sky_island' || there === 'sky_water';
+  return onTheIsland && !stillTheIsland;
+}
+
 /** The frame for a landmark kind, or null if that kind has no art yet. */
 export function landmarkFrame(kindId: string): number | null {
   const index = LANDMARK_ORDER.indexOf(kindId);

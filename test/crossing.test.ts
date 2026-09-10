@@ -13,8 +13,15 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { canBoardAt, railSpan, shoreheads, trackRoute } from '../src/world/crossing';
 import { band } from '../src/world/classify';
-import { planClouds, planCliffs, planIslandShadow, planTrack, planWaterfall } from '../src/game/scenePlan';
-import { CLOUD_PATTERNS, FALL_FRAMES } from '../src/game/frames';
+import {
+  planClouds,
+  planCliffs,
+  planIslandShadow,
+  planOverhang,
+  planTrack,
+  planWaterfall
+} from '../src/game/scenePlan';
+import { CLOUD_PATTERNS, EDGE_ORDER, EDGE_VARIANTS, FALL_FRAMES } from '../src/game/frames';
 import { isWalkable } from '../src/world/generate';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
@@ -703,6 +710,57 @@ describe('the pool on the island, and where it goes over', () => {
       expect(world.tiles.flat().some((t) => t.biome === 'sky_water'), `${map.id} grew a sky pool`)
         .toBe(false);
       expect(planWaterfall(world).length, `${map.id} grew a waterfall`).toBe(0);
+    }
+  });
+});
+
+describe('the plant that hangs over the island edge', () => {
+  it('grows only where the ground actually stops', () => {
+    // **A rim, not a feature, and this is the assertion that keeps it one.** A feature sits inside
+    // a cell; a rim belongs to the boundary between two, and growth spilling over a lip is exactly
+    // that. So every frame must sit on island ground whose neighbour on that side is *not* island
+    // ground -- a plant hanging over more island is a lawn.
+    const world = aravali();
+    const over = planOverhang(world);
+    expect(over.length, 'nothing hangs over the islands at all').toBeGreaterThan(20);
+
+    const island = (x: number, y: number) => {
+      const b = world.tiles[y]?.[x]?.biome;
+      return b === 'sky_island' || b === 'sky_water';
+    };
+    const step = { n: [0, -1], e: [1, 0], s: [0, 1], w: [-1, 0] } as const;
+    for (const p of over) {
+      expect(island(p.x, p.y), `overhang at ${p.x},${p.y} is not on the island`).toBe(true);
+      // **The edge is in the frame, not in `Placement.edge`.** `planRim` encodes it the way
+      // `cliffFrame` does -- `EDGE_ORDER.indexOf(edge) * EDGE_VARIANTS + variant` -- and `edge` on
+      // the placement is for the shore band, which is the one layer pinned to a side of its cell
+      // rather than centred in it. Reading the wrong one gives every frame 'n' and a test that
+      // passes for the wrong reason.
+      const which = EDGE_ORDER[Math.floor(p.frame / EDGE_VARIANTS)]!;
+      const [dx, dy] = step[which];
+      expect(
+        island(p.x + dx, p.y + dy),
+        `overhang at ${p.x},${p.y} hangs over more island to the ${which}`
+      ).toBe(false);
+    }
+  });
+
+  it('hangs over the pool edge too, because a bank is still the island', () => {
+    // Water runs to the island's edge and goes over it, and the ground it runs across is the same
+    // ground. Excluding `sky_water` would leave a bare lip exactly where the waterfall is, which is
+    // the one stretch of edge a player looks at.
+    const world = aravali();
+    const onWater = planOverhang(world).filter(
+      (p) => world.tiles[p.y]![p.x]!.biome === 'sky_water'
+    );
+    expect(onWater.length, 'the pool edge grows nothing').toBeGreaterThan(0);
+  });
+
+  it('leaves the maps with no island alone', () => {
+    for (const map of fieldMaps) {
+      if (map.id === 'field_map_aravali') continue;
+      const world = buildFieldMap(map, { seed: map.id }).world;
+      expect(planOverhang(world).length, `${map.id} grew an overhang`).toBe(0);
     }
   });
 });

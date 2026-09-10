@@ -38,6 +38,7 @@ import {
   FALL_FRAMES,
   cornerFrame,
   treelineAt,
+  overhangAt,
   depthFor,
   edgeMaskFrame,
   tileFrame,
@@ -74,6 +75,7 @@ export type PlacementSheet =
   | 'track'
   | 'cliffs'
   | 'treeline'
+  | 'overhang'
   | 'marker'
   | 'cloud'
   | 'waterfall'
@@ -809,6 +811,38 @@ export function planTreeline(world: FieldMapWorld['world']): Placement[] {
  * `builtOn` keeps props off hut tiles, for the reason paddy once grew through a roof: a stone drawn
  * under a building is either invisible or, worse, visible through a doorway it has no business in.
  */
+/**
+ * The plant that hangs over the island's edge.
+ *
+ * **A rim, not a feature, and the distinction is the whole reason this is four lines.** A feature
+ * sits inside one cell; a rim belongs to the *boundary between* two, which is exactly what growth
+ * spilling over a lip is. `planCliffs` and `planTreeline` are the same call with a different
+ * predicate and a different sheet, and the note at the top of `build-rims.js` predicted a third --
+ * it guessed a settlement palisade and got a plant.
+ *
+ * It draws with the treeline rather than with the cliffs, at `undergrowth`: the rock face is the
+ * island's edge and this is what has grown on it, so it goes over.
+ *
+ * **Not to be read as the `OVERHANG` table above**, which is how far *any* rim frame leans out of
+ * its own cell. The two are related -- this layer is the one that leans furthest -- but one is a
+ * sheet and the other is four offsets.
+ */
+export function planOverhang(world: FieldMapWorld['world']): Placement[] {
+  return planRim(world, {
+    sheet: 'overhang',
+    key: 'overhang',
+    faces: (x, y, edge) => {
+      const here = world.tiles[y]?.[x]?.biome;
+      const { dx, dy } = EDGE_STEP[edge];
+      const neighbour = world.tiles[y + dy]?.[x + dx];
+      // The map edge is not an overhang, for the same reason it is not a cliff: the world stops
+      // there rather than the island.
+      if (!here || !neighbour) return false;
+      return overhangAt(here, neighbour.biome);
+    }
+  });
+}
+
 export function planDecor(world: FieldMapWorld['world'], builtOn: ReadonlySet<string>): Placement[] {
   const out: Placement[] = [];
   for (let y = 0; y < world.height; y += 1) {
@@ -1077,6 +1111,9 @@ export function planScene(built: FieldMapWorld): Placement[] {
     ...planCliffJoints(built.world),
     ...planCliffTalus(built.world, builtOn),
     ...planTreeline(built.world),
+    // After the treeline, before the decor: growth over an island's lip is a rim like those two,
+    // and it hangs in front of the rock face it grew on.
+    ...planOverhang(built.world),
     ...planDecor(built.world, builtOn),
     ...planShoreProps(built.world, builtOn),
     // After decor, before the huts: the line is laid *on* the ground and things stand beside it,
