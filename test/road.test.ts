@@ -16,7 +16,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps } from '../src/content/places';
-import { easeRoutes, tourOrder } from '../src/world/routes';
+import { easeRoutes } from '../src/world/routes';
 import { planRoad, planScene } from '../src/game/scenePlan';
 import { roadFrame, ROAD_PIECES, trackFrame, TRACK_PIECES } from '../src/game/frames';
 import { isWalkable } from '../src/world/generate';
