@@ -90,19 +90,38 @@ before it is drawn, not after.
 
 ## The pieces, cheapest first
 
-### A. Cushion shrubs should not cast · **no art, one line**
+### A. Cushion shrubs should not cast · **shipped**
 
 Measured while answering a separate question: a cushion shrub is 128 × 90 and bottom-anchored, so
 it covers its own contact ellipse. It belongs in `UNDERFOOT_FEATURES` beside the fallen log and the
 tussock — *a shadow under something already lying on the ground is a smudge rather than a cue*,
 which is the rule that set already exists for. The mangroves keep theirs and should.
 
-### B. A shaped underside · **no art**
+### B. A shaped underside · **shipped**
 
-The rim is stamped as a uniform ring. Deepen it southward and thin it east–west so the island
-reads as a body with a bottom rather than a disc with a border. This is arithmetic in
-`stampIslands`, and the rim art already in the cliff sheet fills it — the same way the treeline
-fills the rim slot with crowns.
+Half of this was already right: `hangTheShelf` hangs the rock *below* the island rather than
+ringing it, which is what stops the grass having a grey moat round it.
+
+What was uniform is the **depth** — `SHELF_DEPTH = 2` under the middle of the island and under its
+far tips alike, which says the rock is a border rather than a mass. It now tapers: deepest under
+the centre column, thinning to `SHELF_MIN` at the east and west tips, following the ellipse the
+island is already made of. Letting the taper reach zero was tried and is wrong — the outermost
+columns then hang over open water with nothing under them, which reads as the grass being cut off
+with scissors.
+
+**83 → 112 underside tiles, and the walkable top is untouched at 296.** That last number is
+asserted, because the shelf was moved out from under the island precisely so it would stop eating
+walkable ground.
+
+Two things the render showed that the numbers did not:
+
+- The island's lower boundary is a **staircase**, because a curved edge on a square grid always is.
+  With two rows of shelf it read as a thin curve; at four it is more visible. Measured, only **6 of
+  112** underside tiles are pinched between island to their east and west, and none are stranded —
+  so this is the contour, not a bug, and the cliff rim draws along it.
+- The shade and the cast shadow are what make it read as *floating*, and both are runtime-baked
+  textures with no file in `assets/`. Any renderer that loads `assets/*.png` will show flat grey
+  rock over undarkened water and badly understate it.
 
 ### C. A waterfall · **art wanted**
 

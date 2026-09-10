@@ -868,7 +868,12 @@ const UNDERFOOT_FEATURES = new Set([
   'driftwood',
   'boulder',
   'woodpile',
-  'tussock'
+  'tussock',
+  // A cushion plant is a low hummock hugging the ground, and its painted frame is 128 x 90
+  // bottom-anchored -- so it covers its own contact ellipse completely. Drawing one under it is
+  // the smudge this set exists to prevent, and it was invisible anyway. The mangrove beside it on
+  // the same ground keeps its shadow, which is the whole distinction: one stands, one lies.
+  'skyShrub'
 ]);
 
 /** Does this overdraw frame lie on the ground rather than stand in it? */

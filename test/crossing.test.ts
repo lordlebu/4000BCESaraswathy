@@ -441,3 +441,44 @@ describe('the Aravali crossing', () => {
     expect(d, 'the rail-head is on the far side of the map from the player').toBeLessThan(30);
   });
 });
+
+describe('the shelf hangs as a body, not a skirt', () => {
+  it('hangs deeper under the middle of an island than under its tips', () => {
+    // A uniform depth is a rectangle with a ragged bottom -- the same rock under the centre of the
+    // island as under its far edges, which says the shelf is a border rather than a mass. The
+    // reference is a rounded underside coming to a point, and the island is already an ellipse, so
+    // the taper is one cosine.
+    //
+    // Measured as a comparison rather than against fixed numbers: whatever `SHELF_DEPTH` is tuned
+    // to, the middle has to hang further than the tips or the taper is not doing anything.
+    const world = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, {}).world;
+    const depthByColumn = new Map<number, number>();
+    for (const row of world.tiles) {
+      for (const tile of row) {
+        if (tile.biome !== 'sky_underside') continue;
+        depthByColumn.set(tile.x, (depthByColumn.get(tile.x) ?? 0) + 1);
+      }
+    }
+    const columns = [...depthByColumn.keys()].sort((a, b) => a - b);
+    expect(columns.length, 'no shelf at all').toBeGreaterThan(6);
+
+    const middle = columns[Math.floor(columns.length / 2)]!;
+    const deepest = Math.max(...columns.map((c) => depthByColumn.get(c)!));
+    const tips = [columns[0]!, columns[columns.length - 1]!].map((c) => depthByColumn.get(c)!);
+    expect(depthByColumn.get(middle)!, 'the middle should hang further than the tips')
+      .toBeGreaterThan(Math.min(...tips));
+    expect(deepest, 'the shelf never gets deep enough to read as a body').toBeGreaterThanOrEqual(3);
+    // And every column still hangs something: a tip with no rock under it reads as the grass
+    // having been cut off with scissors.
+    expect(Math.min(...tips), 'an island tip hangs over nothing').toBeGreaterThan(0);
+  });
+
+  it('leaves the walkable top alone', () => {
+    // The taper is about what hangs *below*. If it ever eats island top, the map loses walkable
+    // ground and the places standing on it go with it -- which is the moat the shelf was moved out
+    // of in the first place.
+    const world = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, {}).world;
+    const top = world.tiles.flat().filter((t) => t.biome === 'sky_island').length;
+    expect(top, 'island top changed size when only the shelf should have').toBe(296);
+  });
+});
