@@ -410,7 +410,7 @@ four tiles; walkable water cannot sever anything. Keep the function until the ch
 `landform.test.ts` is the thing that will say — but expect to delete it, and say so in the commit
 rather than leaving a guard nobody can explain.
 
-## K. Roads · **blocked on art that can tile** — see below
+## K. Roads · **shipped, drawn in code** — see below
 
 `easeRoutes` in `world/routes.ts` walks a cost-aware line between every pair of placed points of
 interest and softens the ground along it. Its doc comment says, in as many words:
@@ -475,6 +475,16 @@ exact shape and its four cells each reach exactly the edges they should, so `too
 is a crop, a resample and a fourteen-colour snap. Confirmed on screen at the boundary: plank and
 hemp north of the rail span, thin dark iron inside it.
 
+**K then shipped anyway, drawn rather than painted**, and the rejected sheet is the argument for
+it. The one property a tiling run must have — *leave the cell at a fixed width, on a fixed centre,
+in every frame* — is what a loop gets right by construction and what a prompt has to be talked
+into. `tools/build-road.js` states it as two constants, `BAND` and `MIDDLE`, and draws all four
+frames from them: there is nowhere for a frame to disagree. It follows `build-track.js`, which has
+drawn the rails in code since the crossing existed for the same reason.
+
+Painted art that does tile still replaces it, and the corrected prompt is in `docs/art-brief.md`
+under Asset 2f. The sheet's *shape* is the contract, not its pixels.
+
 The road sheet cannot tile, and the numbers are worth keeping because they say what to ask for
 instead. Its eight cells were drawn as **eight pictures of a road** rather than eight tiles cut
 from one grid: no cell reaches any edge of its box, the content boxes are all different sizes, the
@@ -483,6 +493,33 @@ across. Two pieces laid side by side therefore meet at neither the same width no
 It is in `assets/source/dump/` rather than deleted, and K stays open until a sheet arrives whose
 run **touches the cell edge at a fixed width and a fixed centre** — which is the whole of what a
 tiling run needs and the one thing the prompt did not say.
+
+**Three things K got wrong that only building it found.**
+
+*`easeRoutes` does not return the road, and its own doc comment said it did.* The plan quoted that
+comment — *"Returns the tiles that were changed, which is what a caller needs to draw the road"* —
+and built on it. The returned list holds only tiles whose **biome changed**, so a route over ground
+that was already cheap contributes nothing. Measured across the four maps: 7 tiles against a
+110-tile route on the Aravali, 13 against 123 on Dwarka, 21 against 93 on Lothal, 64 against 104 on
+Narmada. **Between 88% and 97% of the road was missing**, and missing precisely where the walking is
+easiest — which is where a path actually gets worn. `easeRoutes` now returns `{ line, eased }` and
+the two are documented as different facts.
+
+*Routes have been planned through the underside of a floating island.* `routable` in `routes.ts`
+read `tile.biome !== 'sea'` under a comment claiming it mirrored `isWalkable` — and `isWalkable`
+grew `open_sky` and `sky_underside` when the islands were stamped. Nothing noticed, because
+`EASED` has no entry for either biome and nothing drew the line, so a route through solid rock cost
+nothing and showed nowhere. Drawing the road surfaced it: `road at 22,57 is on sky_underside`. It
+calls `isWalkable` now. **Duplicating the rule was never the problem** — `world/` may not import the
+content layer, and `crossingCost` duplicates the travel costs for that reason. Duplicating it as a
+*different expression* of the same idea was: a set membership on one side and a single inequality on
+the other cannot drift loudly.
+
+*A route prefers a river, and a road drawn on one is still wrong.* Easing turns wetland into river
+on purpose and `crossingCost` gives river the same 1 as plains, so the line genuinely runs down
+watercourses — and the first build drew packed earth over open water for a dozen tiles south of
+Lothal's settlement. The road stops at the bank now. The gap is a ford, which says something true
+rather than hiding something.
 
 **And one thing round three did not plan for, found by looking at the render.** The aero-mangrove
 was landing on the island's interior. Its sprite is half root and the wedge of rock those roots

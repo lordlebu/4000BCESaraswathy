@@ -124,6 +124,16 @@ export const TRACK_SHEET = 'track';
  */
 export const ROPE_SHEET = 'rope';
 
+/**
+ * The worn path between the places: the same four pieces again, in packed earth.
+ *
+ * Third sheet on one contract, which is the point of having a contract. Drawn in code by
+ * `tools/build-road.js` after a painted sheet came back unable to tile -- see that file's header
+ * and `docs/art-brief.md` Asset 2f. Alpha at the band's edges rather than a hard silhouette, so the
+ * ground it is worn into shows through and the path sits *in* the grass rather than on it.
+ */
+export const ROAD_SHEET = 'road';
+
 /** The 1x1 white pixel the fog layer stretches over each tile. See `createTileTextures`. */
 export const FOG_TEXTURE = 'fog:pixel';
 
@@ -173,6 +183,7 @@ export function loadTileSheets(
     overhang: string;
     trees: string;
     rope: string;
+    road: string;
     decor: string;
     track: string;
   }
@@ -208,6 +219,7 @@ export function loadTileSheets(
   sheet(DECOR_SHEET, urls.decor, DECOR_CELL, DECOR_CELL);
   sheet(TRACK_SHEET, urls.track, TILE_SIZE, TILE_SIZE);
   sheet(ROPE_SHEET, urls.rope, TILE_SIZE, TILE_SIZE);
+  sheet(ROAD_SHEET, urls.road, TILE_SIZE, TILE_SIZE);
 }
 
 /**

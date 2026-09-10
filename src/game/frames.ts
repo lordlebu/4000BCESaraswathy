@@ -1016,6 +1016,28 @@ export function trackFrame(eastWest: boolean, overgrown: boolean): number {
   return (overgrown ? 2 : 0) + (eastWest ? 1 : 0);
 }
 
+/**
+ * How many pieces the road sheet carries. The track sheet's four, in the track sheet's order.
+ *
+ * The contract is with `tools/build-road.js`, which draws the same four runs in the same sequence
+ * for the same reason: north-south, east-west, then the same two with a verge.
+ */
+export const ROAD_PIECES = TRACK_PIECES;
+
+/**
+ * Which piece of path this tile draws.
+ *
+ * **Its own function despite being `trackFrame`'s arithmetic**, and the reason is the second
+ * argument rather than the first. On a railway the second pair means *derelict* -- nothing has run
+ * here in a lifetime, which is a fact about the line. On a path it means a **verge**: grass at the
+ * edges of ground that grows grass, which is true of a path on the day it is cut and never true of
+ * one over sand. Same index, different question, so a caller reading this signature is told which
+ * question it is answering.
+ */
+export function roadFrame(eastWest: boolean, verge: boolean): number {
+  return (verge ? 2 : 0) + (eastWest ? 1 : 0);
+}
+
 // --- the shore -------------------------------------------------------------
 
 /**

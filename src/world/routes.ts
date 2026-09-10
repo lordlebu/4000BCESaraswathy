@@ -15,6 +15,7 @@
 // not a coincidence: the road and the drawing of the road should be the same fact.
 
 import { findPath } from './pathfind';
+import { isWalkable } from './generate';
 import type { BiomeId, Point, Tile } from './types';
 
 /**
@@ -55,9 +56,27 @@ export function crossingCost(tile: Tile): number {
   return CROSSING[tile.biome] ?? 1;
 }
 
-/** Only the sea stops a route, which mirrors `isWalkable` in `generate.ts`. */
+/**
+ * Whether a route may pass through this tile. `isWalkable`'s answer, asked of `isWalkable`.
+ *
+ * **This used to be `tile.biome !== 'sea'` with a comment saying it mirrored `isWalkable`, and the
+ * mirror had gone two biomes stale.** `UNWALKABLE` grew `open_sky` and `sky_underside` when the
+ * floating islands were stamped, and nothing here noticed -- so every tour on the Aravali has been
+ * routed *through the underside of an island*, which is open air with rock hanging in it.
+ *
+ * It was invisible for two reasons that both stopped being true at once. Easing changes nothing
+ * there, because `EASED` has no entry for either biome; and nothing drew the line, so a route
+ * through solid rock cost nothing and showed nowhere. Drawing the road is what surfaced it, and
+ * `test/road.test.ts` failed by name on `road at 22,57 is on sky_underside`.
+ *
+ * Duplicating the *rule* was never the problem -- `CLAUDE.md` is explicit that `world/` may not
+ * import the content layer, and `crossingCost` above duplicates the travel costs for that reason.
+ * Duplicating it as a **different expression of the same idea** was: a set membership on one side
+ * and a single inequality on the other cannot drift loudly. Calling the function removes the copy
+ * entirely, and `generate.ts` imports nothing from here, so there is no cycle to pay for it.
+ */
 export function routable(tile: Tile): boolean {
-  return tile.biome !== 'sea';
+  return isWalkable(tile);
 }
 
 export interface EaseOptions {
@@ -91,11 +110,38 @@ export interface EaseOptions {
 }
 
 /**
+ * The two facts an ease produces, which are not the same fact.
+ *
+ * **`eased` is not the road, and the comment that said it was cost a phase.** It holds only the
+ * tiles whose *biome changed* -- so a route running over ground that was already cheap touches
+ * nothing at all, and a drawing taken from it is a scatter of scraps where the country happened to
+ * be hard. Measured across the four maps: 7 tiles against a 110-tile route on the Aravali, 13
+ * against 123 on Dwarka, 21 against 93 on Lothal, 64 against 104 on Narmada. **Between 88% and 97%
+ * of the road was missing**, and it was missing exactly where the walking is easiest, which is
+ * where a path gets worn in real life.
+ *
+ * `line` is the road: every tile the route steps on, one wide, in the order it was walked.
+ */
+export interface EasedRoutes {
+  /** Every tile the route stepped on, one tile wide. This is what draws a road. */
+  line: Point[];
+  /** Only the tiles whose biome the ease changed. This is what asserts the ground got softer. */
+  eased: Point[];
+}
+
+/**
  * Soften the ground along the routes between `stops`, in place.
  *
- * Returns the tiles that were changed, which is what a caller needs to draw the road or to assert
- * that a route exists. Stops are joined in the order given: the caller decides what the network
- * looks like, because canon knows which places belong together and this does not.
+ * Returns both the line the route walked and the tiles the easing changed -- see `EasedRoutes` for
+ * why those are different and which one draws a road. Stops are joined in the order given: the
+ * caller decides what the network looks like, because canon knows which places belong together and
+ * this does not.
+ *
+ * **The line is computed leg by leg against ground earlier legs have already softened**, which is
+ * the honest answer rather than an artefact: a second route to the same place follows the track
+ * the first one cut, because by then that track is the cheapest ground there is. Re-running
+ * `findPath` afterwards on the finished world would give a different and worse line, since every
+ * leg would see softening that had not happened when it was walked.
  */
 export function easeRoutes(
   tiles: Tile[][],
@@ -103,9 +149,11 @@ export function easeRoutes(
   height: number,
   stops: readonly Point[],
   { radius = 1, costOf = crossingCost, isWalkable = routable, keep }: EaseOptions = {}
-): Point[] {
-  const touched: Point[] = [];
+): EasedRoutes {
+  const eased: Point[] = [];
   const seen = new Set<string>();
+  const line: Point[] = [];
+  const walked = new Set<string>();
 
   for (let i = 0; i + 1 < stops.length; i += 1) {
     const from = stops[i]!;
@@ -115,25 +163,34 @@ export function easeRoutes(
     const path = findPath(tiles, width, height, from, to, isWalkable, costOf);
 
     for (const step of [from, ...path]) {
+      // The line is the road, and it is collected whether or not this tile needed softening --
+      // which is the whole difference between the two lists. Deduplicated across legs, because a
+      // tour revisits its own junctions and a road drawn twice is a road drawn once.
+      const here = `${step.x},${step.y}`;
+      if (!walked.has(here)) {
+        walked.add(here);
+        line.push({ x: step.x, y: step.y });
+      }
+
       for (let dy = -radius; dy <= radius; dy += 1) {
         for (let dx = -radius; dx <= radius; dx += 1) {
           // Manhattan, so the corridor has soft ends rather than square ones.
           if (Math.abs(dx) + Math.abs(dy) > radius) continue;
           const tile = tiles[step.y + dy]?.[step.x + dx];
           if (!tile) continue;
-          const eased = EASED[tile.biome];
-          if (!eased) continue;
+          const softer = EASED[tile.biome];
+          if (!softer) continue;
           const key = `${tile.x},${tile.y}`;
           if (seen.has(key) || keep?.has(key)) continue;
           seen.add(key);
-          tile.biome = eased;
-          touched.push({ x: tile.x, y: tile.y });
+          tile.biome = softer;
+          eased.push({ x: tile.x, y: tile.y });
         }
       }
     }
   }
 
-  return touched;
+  return { line, eased };
 }
 
 /**

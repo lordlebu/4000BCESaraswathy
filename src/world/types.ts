@@ -68,6 +68,22 @@ export interface Tile extends Point {
    * the ground; a bridge does not replace the water it spans.
    */
   track?: boolean;
+  /**
+   * A worn path runs through here.
+   *
+   * **A flag rather than a biome, for `track`'s reason exactly**: a road does not replace the grass
+   * it is worn into. Plains with a path through them are still plains -- to the weather, to what
+   * grows there, to what the journal says about the ground -- and the only new fact is that people
+   * have walked this way often enough to show.
+   *
+   * Unlike `track` it changes nothing about walkability. Every tile that carries it was already
+   * walkable, because it is a line `findPath` returned.
+   *
+   * This is the route between the places, kept from `easeRoutes` rather than recomputed. The two
+   * are not interchangeable: see `EasedRoutes` in `routes.ts` for why the *eased* tiles are not
+   * the road, and what taking them for the road would have drawn.
+   */
+  road?: boolean;
 }
 
 export interface NamedPlace extends Point {

@@ -1206,7 +1206,15 @@ the road was supposed to leave the cell.
 
 It is in `assets/source/dump/road-runs-misaligned-rejected.png`. **The one thing the prompt did not
 say is the one thing a tiling run needs** — that the run must leave the cell at a fixed width and a
-fixed centre. The corrected prompt says it three ways, because saying it once did not take:
+fixed centre.
+
+**The road ships drawn in code in the meantime**, by `tools/build-road.js`, following
+`tools/build-track.js`, which has drawn the rails that way since the crossing existed. That failure
+above is the argument for it: the fixed width and fixed centre are two constants there, `BAND` and
+`MIDDLE`, and all four frames are drawn from them, so there is nowhere for a frame to disagree.
+Painted art still replaces it the day a sheet arrives that tiles — the sheet's *shape* is the
+contract, not its pixels — and this is the prompt to get one. It says the edge rule three ways,
+because saying it once did not take:
 
 > A **terrain sprite sheet for a top-down 2D game**, drawn on a **solid pure magenta background,
 > hex #FF00FF**, arranged as a **1 row × 4 columns grid** of **four square cells**. Each cell shows
