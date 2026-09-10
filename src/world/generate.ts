@@ -28,19 +28,19 @@ export const DEFAULT_HEIGHT = 24;
  * and a rule naming one biome could not say so. `test/species.test.ts` holds this set and
  * `data/biomes.json` to the same answer, which is what caught it.
  */
-const UNWALKABLE: ReadonlySet<string> = new Set([
-  'sea',
-  'open_sky',
-  'sky_underside',
-  // **Water, and not the wadeable kind.** It was walkable at cost 1 for one turn, on the reasoning
-  // that a pool which severed an island would strand the places on the far side of it. That is a
-  // real risk and it is not what makes this decision: a walkable biome is ground a player stands
-  // on, gathers from and reads a journal entry about, and `frames.test.ts` said so immediately by
-  // demanding decor for it. A few tiles of water about to go over a waterfall is not somewhere to
-  // stand. `pourAPool` keeps the channel one tile wide for the severing, which is the right place
-  // for that argument.
-  'sky_water'
-]);
+const UNWALKABLE: ReadonlySet<string> = new Set(['sea', 'open_sky', 'sky_underside']);
+
+// **`sky_water` was here and is not any more, and the reasoning is worth keeping.**
+//
+// It shipped walkable at cost 1 for a turn, then unwalkable, and is now walkable at cost 3. The
+// middle position was right for its stated reason -- `frames.test.ts` demanded decor for it,
+// because a walkable biome is ground a player stands on and gathers from -- and it made the most
+// distinctive ground on the map something to look at rather than to be in.
+//
+// What resolves it is that *wading is not standing*. A pool has no ground to put decor on, which
+// is the same exemption `landmark` already holds for a different reason, and `travelCost: 3` makes
+// crossing it three times the work of plains without a line of movement code: `WorldScene`
+// computes `STEP_MS * cost * pace` and always has.
 
 export function isWalkable(tile: Pick<Tile, 'biome' | 'track'>): boolean {
   // A railway makes otherwise impassable ground walkable without changing what the ground *is*.

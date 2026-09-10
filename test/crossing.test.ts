@@ -13,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { canBoardAt, railSpan, shoreheads, trackRoute } from '../src/world/crossing';
 import { band } from '../src/world/classify';
+import biomesData from '../data/biomes.json';
 import {
   planClouds,
   planCliffs,
@@ -761,6 +762,54 @@ describe('the plant that hangs over the island edge', () => {
       if (map.id === 'field_map_aravali') continue;
       const world = buildFieldMap(map, { seed: map.id }).world;
       expect(planOverhang(world).length, `${map.id} grew an overhang`).toBe(0);
+    }
+  });
+});
+
+describe('the pool is waded, not stood in', () => {
+  it('is walkable, and costs what a wade costs', () => {
+    // Slow movement needs no movement code: `WorldScene` computes `STEP_MS * cost * pace`, and
+    // `cost` is this number. Three is what a mountain costs, which is the right order for water at
+    // the waist -- and it is the whole of "very slow" as a change.
+    const pool = (biomesData as { id: string; walkable: boolean; travelCost: number | null }[])
+      .find((b) => b.id === 'sky_water')!;
+    expect(pool.walkable, 'the pool cannot be waded').toBe(true);
+    expect(pool.travelCost, 'wading is not slower than walking').toBeGreaterThan(1);
+  });
+
+  it('never walls a walkable tile off, on twelve seeds', () => {
+    // **Twelve rather than one, and the number is not decoration.** `floodTheSlivers` was going to
+    // be deleted once the water became walkable -- the reasoning being that walkable water cannot
+    // wall anything off. Removing it passed every test on the default seed and stranded a tile on
+    // seed `a`, because water is not the only thing doing the walling: the shelf is unwalkable
+    // rock, and the pool only has to take the *last* connection.
+    //
+    // A guard whose failure is seed-dependent cannot be retired by a suite that runs one seed.
+    // This is the sweep that would have caught it without the removal being tried.
+    for (const seed of ['aravali', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'seed-1', 'seed-2', 'zzz', 'q7']) {
+      const world = buildFieldMap(fieldMap('field_map_aravali')!, { seed }).world;
+      const walkable = world.tiles.flat().filter((t) => isWalkable(t)).length;
+
+      const seen = new Set<string>([`${world.start.x},${world.start.y}`]);
+      const queue = [world.start];
+      while (queue.length > 0) {
+        const at = queue.shift()!;
+        for (const next of [
+          { x: at.x - 1, y: at.y },
+          { x: at.x + 1, y: at.y },
+          { x: at.x, y: at.y - 1 },
+          { x: at.x, y: at.y + 1 }
+        ]) {
+          const tile = world.tiles[next.y]?.[next.x];
+          if (!tile || !isWalkable(tile)) continue;
+          const key = `${next.x},${next.y}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          queue.push(next);
+        }
+      }
+      expect(seen.size, `seed ${seed}: ${walkable - seen.size} walkable tiles cannot be reached`)
+        .toBe(walkable);
     }
   });
 });
