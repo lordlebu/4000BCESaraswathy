@@ -99,10 +99,51 @@ function island(at: Place): Shaping {
   const inland = ramp(at.edgeDistance * 3.0);
   // 0 in the north, 1 in the south. `north` runs 0 at the top edge to 1 at the bottom.
   const southward = at.north;
+  const wall = farWall(at);
   return {
-    elevation: inland * 0.34 - shore(at) * 0.42 + (southward - 0.5) * 0.55,
+    elevation:
+      inland * 0.34 +
+      // **The far rim climbs instead of drowning.** See `farWall`: the shore drop is cancelled as
+      // the wall takes over, so the two do not fight over the same rows.
+      -shore(at) * 0.42 * (1 - wall) +
+      (southward - 0.5) * 0.55 +
+      wall * FAR_WALL_LIFT,
     moisture: 0.14 - inland * 0.1 + (0.5 - southward) * 0.22
   };
+}
+
+/**
+ * How deep the far shore's high ground runs, and how high it stands.
+ *
+ * **Two faults, and they turn out to be the same one.** The tilt above is what makes the two banks
+ * different countries, and it works by pushing the north down -- but canon puts The Kept Stones
+ * over there and says it `stands: high`. Measured at 44 x 66: **one** tile of band-1 ground in 478
+ * of far-shore land, and the placement test passed because the place was standing on that one
+ * tile. Grow the map and it goes -- at 52 x 78 the far shore has no band-1 ground at all, the
+ * fallback runs out of candidates, and the stones land on a beach in the map's corner. The size
+ * did not cause that; it revealed it.
+ *
+ * The second is what the far rim looked like: `shore` drops every edge of the map to water, so
+ * above the far shore's forest sat a band of open sea running off the top of the screen -- a strip
+ * of nothing at the end of the country the player is walking towards.
+ *
+ * One term answers both. The far rim **climbs** rather than falls: the ground runs off the top of
+ * the map as high stone, which is what the near shore already does with the Aravali range and what
+ * canon's own arrival text describes on this side -- "a green smudge", seen from across a strait,
+ * is a coastline with something behind it. The shore drop is faded out as the wall comes in, so
+ * the rim is not asked to be a beach and a mountain at once.
+ *
+ * **Deep enough to stand on, short of the range in the south.** The lift lands the crest inside
+ * band 2 and leaves the water's edge in band 0, which is what the rail-head, the ford and the
+ * nomad ground are all written to stand on. Widening it instead of raising it is what closes the
+ * gap between the banks, and the gap is the whole reason the tilt is there.
+ */
+const FAR_WALL_DEPTH = 0.17;
+const FAR_WALL_LIFT = 0.88;
+
+/** 1 along the far rim, falling to 0 where the far shore's low ground begins. */
+function farWall(at: Place): number {
+  return ramp(1 - at.north / FAR_WALL_DEPTH);
 }
 
 /**

@@ -12,7 +12,14 @@
 
 import { band } from './classify';
 import { stampCamp, stampHighCamp, stampTableland } from './tableland';
-import { shoreheads, stampIslands, stampLine, stampStrait, startOnTheSouthernShore } from './crossing';
+import {
+  canBoardAt,
+  shoreheads,
+  stampIslands,
+  stampLine,
+  stampStrait,
+  startOnTheSouthernShore
+} from './crossing';
 import { stampBasalt } from './basalt';
 import { easeRoutes, tourOrder } from './routes';
 import { generateWorld, isWalkable } from './generate';
@@ -441,12 +448,29 @@ function placeOne(
  * **Portrait is not a square with a crop.** A crossing is walked in one direction -- shore, water,
  * islands, far shore -- and drawn square it cannot be any of those properly at once: the sea has
  * to read as a sea across the full width, which leaves the shores too thin to raise hills on and
- * the islands too close to read as two. 44 by 66 is the reference's own two-to-three, and it is
- * *fewer* tiles than 64 by 64 rather than more, so nothing gets slower.
+ * the islands too close to read as two. The two-to-three ratio is the reference's own.
+ *
+ * **Grown from 44 x 66, and a ceiling decided the number.** Bigger islands were wanted, and
+ * `crossing.ts` records why they could not simply take a bigger radius on the old map: the
+ * separation between them is bought by making them smaller, and taking it back off the shores
+ * leaves six or seven rows -- too thin for the landform shaper, and two points of interest lose the
+ * high ground they are written to stand on. So the room came from the map instead, and the islands
+ * took it: the ellipse is 21 tiles across now against seventeen.
+ *
+ * 52 x 78 is **4,056 tiles against a square large map's 4,096**, and that is the bound that
+ * matters: the scene builds a sprite per tile for the whole map, so tile count *is* frame cost, and
+ * the square maps already ship at 64 x 64 and already pass the browser suite. 56 x 84 would be
+ * 4,704 -- past every map that has ever been measured here, on a guess.
+ *
+ * **Growing it broke one thing, and the break was worth having.** `poi_kept_stones` stands high on
+ * the far shore, and the far shore had exactly one tile of band-1 ground in 478 -- the placement
+ * had been resting on a single tile of noise, and the extra rows diluted it away. The answer is in
+ * `landform.ts`: the far rim climbs into stone rather than falling to water, which is both the
+ * ground the stones stand on and the end of a strip of open sea nobody could reach.
  */
 const EXTENT: Record<'square' | 'portrait', Record<'small' | 'large', { width: number; height: number }>> = {
   square: { small: { width: 48, height: 48 }, large: { width: 64, height: 64 } },
-  portrait: { small: { width: 34, height: 50 }, large: { width: 44, height: 66 } }
+  portrait: { small: { width: 34, height: 50 }, large: { width: 52, height: 78 } }
 };
 
 export interface BuildOptions {
@@ -669,9 +693,10 @@ export function poiAt(built: FieldMapWorld, at: Point): PlacedPoi | null {
 /**
  * Where the traveller begins: the map's own start tile, or a tile named in the query string.
  *
- * `?at=poi_drowned_dockyard` starts on that place; `?at=12,30` starts on those coordinates. This
- * is the same kind of hook as `?hour=21`, and it exists for the same reason: to check something
- * without first arranging the world so that it happens.
+ * `?at=poi_drowned_dockyard` starts on that place; `?at=board` starts wherever a traveller could
+ * board the line; `?at=12,30` starts on those coordinates. This is the same kind of hook as
+ * `?hour=21`, and it exists for the same reason: to check something without first arranging the
+ * world so that it happens.
  *
  * **It is here to stop the browser suite depending on generated layout.** Four e2e fixtures were
  * *searched* seeds -- worlds found by brute force because a place happened to land two steps from
@@ -679,6 +704,13 @@ export function poiAt(built: FieldMapWorld, at: Point): PlacedPoi | null {
  * four times, cost twelve CI failures on one occasion, and the last re-search found no seed at
  * all with the walk the spec wanted. A test that needs to stand somewhere should say where it
  * wants to stand, which is what shipped debug commands are for in every game that has them.
+ *
+ * **A coordinate is still a searched seed, and `?at=board` is the lesson arriving a second time.**
+ * `e2e/riding.spec.ts` stood at `23,23` because that was a rail tile on the northern island of a
+ * 44 x 66 map. Growing the map to 52 x 78 moved the line and left the spec standing on grass two
+ * tiles from it, with the ride row correctly disabled -- a green change and a red suite, and the
+ * failure said nothing about the map having grown. A spec that needs to board should ask for
+ * somewhere it can board.
  *
  * An unparseable or unplaced value falls back to the real start rather than throwing: this is a
  * convenience for testing and must never be able to break the game for a player who types one in.
@@ -689,6 +721,19 @@ export function startTileFor(built: FieldMapWorld, search: string): Point {
 
   const named = built.placed.find((p) => p.poi.id === asked);
   if (named) return { ...named.at };
+
+  // The seaward end of the boardable stretch, so a ride from here crosses the strait rather than
+  // stepping off at the next island along. `canBoardAt` is the game's own answer to the question,
+  // so this cannot drift from what the ride row offers.
+  if (asked === 'board') {
+    const boardable = built.world.tiles
+      .flat()
+      .filter((t) => canBoardAt(built.world, t))
+      .sort((a, b) => a.y - b.y);
+    const first = boardable[0];
+    if (first) return { x: first.x, y: first.y };
+    return { ...built.world.start };
+  }
 
   const [x, y] = asked.split(',').map((n) => Number.parseInt(n, 10));
   const inside =

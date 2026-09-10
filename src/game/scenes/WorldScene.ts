@@ -31,6 +31,7 @@ import {
   DECOR_SHEET,
   TRACK_SHEET,
   SHADOW_TEXTURE,
+  cloudTextureKey,
   TILE_SIZE,
   blendTextureKey,
   shoreTextureKey,
@@ -58,7 +59,7 @@ import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
  * instead, and `contact` is the one shadow texture the traveller already uses.
  */
 const SHEET_KEY: Record<
-  Exclude<PlacementSheet, 'marker' | 'shadow' | 'shore' | 'contact' | 'underside'>,
+  Exclude<PlacementSheet, 'marker' | 'shadow' | 'shore' | 'contact' | 'underside' | 'cloud'>,
   string
 > = {
   terrain: TERRAIN_SHEET,
@@ -578,6 +579,18 @@ export class WorldScene extends Phaser.Scene {
           .setAlpha(item.alpha ?? 1)
           .setDepth(item.depth);
         this.tileOwned.push({ sprite: shade, x: item.x, y: item.y });
+        continue;
+      }
+
+      // A bank of voxel cloud over the open water. One baked texture per pattern, faded by the
+      // plan's alpha -- the shape of a cloud lives across tiles, so the tile carries how solid it
+      // is and the texture carries only what it is made of. See `cloudTextureKey`.
+      if (item.sheet === 'cloud') {
+        const puff = this.add
+          .image(cx, cy, cloudTextureKey(this, item.frame))
+          .setAlpha(item.alpha ?? 1)
+          .setDepth(item.depth);
+        this.tileOwned.push({ sprite: puff, x: item.x, y: item.y });
         continue;
       }
 

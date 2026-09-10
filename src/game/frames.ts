@@ -1018,3 +1018,23 @@ export const SHORE_PROPS: Record<'sea' | 'river', readonly string[]> = {
   sea: ['pebbles', 'shell', 'driftwood-small'],
   river: ['reed-tuft', 'marsh-stone', 'reed-tuft']
 };
+
+/**
+ * How many voxels a cloud tile is divided into, on each axis.
+ *
+ * Four, so a voxel is a quarter of a walkable tile. That is the size asked for and it is the whole
+ * look: cloud built of blocks rather than airbrushed, which sits with pixel art in a way a soft
+ * gradient does not.
+ */
+export const CLOUD_VOXELS = 4;
+
+/**
+ * How many voxel patterns a cloud tile can be drawn with. Picked per tile by hash, so a bank of
+ * cloud is not one stamp repeated.
+ *
+ * **Here rather than in either of the two files that need it.** `scenePlan.ts` names a pattern and
+ * `tileTextures.ts` bakes one, and the plan cannot import the builder -- it is Phaser-free, which
+ * is what lets `test/` cover it under Node. Two copies of this number is exactly the kind of pair
+ * that drifts and then draws nothing, so both read it from here.
+ */
+export const CLOUD_PATTERNS = 6;

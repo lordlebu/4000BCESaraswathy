@@ -13,9 +13,18 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { canBoardAt, railSpan, shoreheads, trackRoute } from '../src/world/crossing';
 import { band } from '../src/world/classify';
-import { planCliffs, planIslandShadow, planTrack } from '../src/game/scenePlan';
+import { planClouds, planCliffs, planIslandShadow, planTrack } from '../src/game/scenePlan';
+import { CLOUD_PATTERNS } from '../src/game/frames';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
+
+/**
+ * How far below its own lowest top row an island's shelf can reach, in tiles.
+ *
+ * Only wide enough to read one island: the pair are twelve rows apart, so a window any wider finds
+ * the far island's top under the near one's shelf.
+ */
+const SHELF_REACH = 8;
 
 const aravali = () => buildFieldMap(fieldMap('field_map_aravali')!, { seed: DEFAULT_SEED }).world;
 
@@ -473,12 +482,121 @@ describe('the shelf hangs as a body, not a skirt', () => {
     expect(Math.min(...tips), 'an island tip hangs over nothing').toBeGreaterThan(0);
   });
 
-  it('leaves the walkable top alone', () => {
-    // The taper is about what hangs *below*. If it ever eats island top, the map loses walkable
-    // ground and the places standing on it go with it -- which is the moat the shelf was moved out
-    // of in the first place.
+  it('never hangs the shelf where island top belongs', () => {
+    // The taper is about what hangs *below*. If it ever ate island top, the map would lose walkable
+    // ground and the places standing on it would go too -- which is the moat the shelf was moved
+    // out of in the first place.
+    //
+    // **Stated as a relationship rather than a count**, which is a correction: this pinned the
+    // island at 296 tiles, and that is a fact about one radius on one map size rather than about
+    // the taper. It failed the moment either was experimented with, which is a test objecting to
+    // the wrong thing.
     const world = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, {}).world;
-    const top = world.tiles.flat().filter((t) => t.biome === 'sky_island').length;
-    expect(top, 'island top changed size when only the shelf should have').toBe(296);
+    const top = world.tiles.flat().filter((t) => t.biome === 'sky_island');
+    expect(top.length, 'no island at all').toBeGreaterThan(100);
+
+    // **Split into the two islands, because every question below is about one of them.** They
+    // share columns -- the pair sits on one line up the middle of the map -- so anything asked
+    // per *column* across the whole map answers about whichever island happens to be lower.
+    const rows = [...new Set(top.map((t) => t.y))].sort((a, b) => a - b);
+    const blobs: (typeof top)[] = [[]];
+    let previous = rows[0]!;
+    for (const y of rows) {
+      if (y - previous > 1) blobs.push([]);
+      blobs[blobs.length - 1]!.push(...top.filter((t) => t.y === y));
+      previous = y;
+    }
+    expect(blobs.length, 'the pair read as one island').toBe(2);
+
+    // **And no shelf tile sits above the top it hangs from**, asked island by island. Asking it
+    // per *column across the whole map* finds the far island under every shelf tile of the near
+    // one and fails on a map that is perfectly correct -- the two sit on one line up the middle,
+    // twelve rows apart, which is well inside an island's own height. That is how the first
+    // version of this went wrong.
+    for (const blob of blobs) {
+      const first = Math.min(...blob.map((t) => t.y));
+      const last = Math.max(...blob.map((t) => t.y));
+      const lip = new Map<number, number>();
+      for (const t of blob) lip.set(t.x, Math.max(lip.get(t.x) ?? -1, t.y));
+
+      for (const row of world.tiles) {
+        for (const t of row) {
+          if (t.biome !== 'sky_underside') continue;
+          // This island's own band: its top, and the rows the shelf can reach below it.
+          if (t.y < first || t.y > last + SHELF_REACH) continue;
+          const under = lip.get(t.x);
+          if (under === undefined) continue; // off the island's ends, so nothing to be above
+          expect(t.y, `shelf at ${t.x},${t.y} sits above this island's top at ${t.x},${under}`)
+            .toBeGreaterThan(under);
+        }
+      }
+    }
+  });
+});
+
+describe('cloud over the strait, and outside the islands', () => {
+  it('never puts a cloud on anything a player has to see', () => {
+    // **The whole safety argument for the layer is this test.** A cloud is translucent and drawn
+    // above the water, so if it could land anywhere but open sea it would be a haze over the
+    // thing underneath -- a shore, a shelf, a point of interest, or the railway, which is the only
+    // way across the map. It is cheap to keep it off all of them and expensive to notice later.
+    const world = aravali();
+    const clouds = planClouds(world);
+    expect(clouds.length, 'the crossing has no cloud over it at all').toBeGreaterThan(20);
+
+    for (const puff of clouds) {
+      const tile = world.tiles[puff.y]![puff.x]!;
+      expect(tile.biome, `cloud at ${puff.x},${puff.y} is not over open water`).toBe('sea');
+      expect(tile.track ?? false, `cloud at ${puff.x},${puff.y} covers the railway`).toBe(false);
+    }
+  });
+
+  it('draws each tile with a pattern the scene can bake', () => {
+    // The plan names a pattern and `tileTextures` bakes one. Both read `CLOUD_PATTERNS` from
+    // `frames.ts` so they cannot drift, and this is the assertion that says so out loud -- a plan
+    // naming a pattern with no texture behind it draws nothing at all, silently.
+    for (const puff of planClouds(aravali())) {
+      expect(puff.frame).toBeGreaterThanOrEqual(0);
+      expect(puff.frame, 'no texture is baked for this pattern').toBeLessThan(CLOUD_PATTERNS);
+      expect(puff.alpha ?? 0, 'a cloud you cannot see still costs a quad').toBeGreaterThan(0.05);
+      expect(puff.alpha ?? 1, 'cloud thick enough to hide the sea under it').toBeLessThan(0.7);
+    }
+  });
+
+  it('gathers into banks rather than scattering', () => {
+    // **A cloud is a cluster, and a scatter of single translucent cells is the map's own grid.**
+    // The falloff from each heart is what carries the shape, so almost every cloud tile should
+    // have another beside it; a lone tile is the ragged edge of a bank, not the rule.
+    const clouds = planClouds(aravali());
+    const at = new Set(clouds.map((c) => `${c.x},${c.y}`));
+    const lonely = clouds.filter(
+      (c) =>
+        !at.has(`${c.x - 1},${c.y}`) &&
+        !at.has(`${c.x + 1},${c.y}`) &&
+        !at.has(`${c.x},${c.y - 1}`) &&
+        !at.has(`${c.x},${c.y + 1}`)
+    );
+    expect(lonely.length / clouds.length, 'the cloud is a scatter, not banks').toBeLessThan(0.1);
+  });
+
+  it('costs less than the layer it sits beside', () => {
+    // **Blended fill is the budget** -- `docs/rendering.md` -- and this is a full-cell translucent
+    // quad, the expensive kind. Decor is the layer that has been measured against the frame
+    // budget, so it is the yardstick: cloud stays under it, and a change that pushes past this is
+    // a change that wants `npm run perf` run before it lands.
+    const world = aravali();
+    const clouds = planClouds(world);
+    const sea = world.tiles.flat().filter((t) => t.biome === 'sea').length;
+    expect(clouds.length / sea, 'cloud covers too much of the water').toBeLessThan(0.3);
+  });
+
+  it('leaves the maps with no sky in them alone', () => {
+    // Cloud over Lothal's harbour is a different picture and a different argument. This one is
+    // about the air between a floating island and the sea, so it only exists where there is one.
+    for (const map of fieldMaps) {
+      if (map.id === 'field_map_aravali') continue;
+      const world = buildFieldMap(map, { seed: map.id }).world;
+      expect(planClouds(world).length, `${map.id} grew weather it never asked for`).toBe(0);
+    }
   });
 });

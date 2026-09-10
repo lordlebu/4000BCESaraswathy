@@ -14,7 +14,7 @@
 // building the fog disc.
 
 import Phaser from 'phaser';
-import { GRID, DECOR_CELL, SHORE_BAND, type Edge } from './frames';
+import { GRID, DECOR_CELL, SHORE_BAND, CLOUD_VOXELS, type Edge } from './frames';
 
 export {
   GRID,
@@ -423,6 +423,62 @@ export function undersideShadeKey(scene: Phaser.Scene): string {
   fall.addColorStop(1, 'rgba(11,28,48,0.04)');
   context.fillStyle = fall;
   context.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  canvas.refresh();
+  return key;
+}
+
+/**
+ * One tile of cloud, built out of quarter-tile voxels at varying translucency.
+ *
+ * **Baked, and that is what makes it affordable.** The obvious way to draw sixteen voxels is
+ * sixteen quads, which would put 3,000 blended objects over the Aravali's sea and cost more than
+ * everything else on the map put together -- `docs/rendering.md` is clear that fill rate is the
+ * budget and that blended fill is the expensive kind. Baked once into a texture, a cloud tile is
+ * one quad with an alpha channel: the same cost as a tile of water, drawn twice.
+ *
+ * **The voxels are not shaded toward the tile's edge, deliberately.** Fading a cloud out at its own
+ * cell boundary is the obvious way to make one tile look like a puff, and a field of them is then a
+ * grid of puffs -- the tile seam arriving by a fourth route, after the ground textures, the
+ * repeating mottle and the rim layers each had to be argued out of it. The *shape* of a cloud is
+ * carried by `planClouds`, which fades a whole tile's alpha with its distance from the cloud's
+ * heart. Inside a tile the voxels only vary, and a few of them are missing.
+ *
+ * The colour is the pale end of the sky rather than white: white on a dark sea is a hole in the
+ * screen, and these sit over the same water the islands' shadow darkens.
+ */
+export function cloudTextureKey(scene: Phaser.Scene, pattern: number): string {
+  const key = `cloud:${pattern}`;
+  if (scene.textures.exists(key)) return key;
+
+  const canvas = scene.textures.createCanvas(key, TILE_SIZE, TILE_SIZE);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  context.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
+
+  let seed = Math.imul(pattern + 1, 2654435761);
+  const next = () => {
+    seed = Math.imul(seed ^ (seed >>> 15), 2246822507);
+    seed ^= seed >>> 13;
+    return (seed >>> 0) / 4294967296;
+  };
+
+  const voxel = TILE_SIZE / CLOUD_VOXELS;
+  for (let vy = 0; vy < CLOUD_VOXELS; vy += 1) {
+    for (let vx = 0; vx < CLOUD_VOXELS; vx += 1) {
+      const roll = next();
+      // One voxel in six is simply absent, which is what keeps a bank of cloud ragged rather than
+      // rectangular. The rest run from half-lit to nearly solid.
+      if (roll < 0.16) continue;
+      // Lit from above, like everything else on this map: the top row of voxels is the brightest.
+      const lit = 1 - (vy / (CLOUD_VOXELS - 1)) * 0.22;
+      context.globalAlpha = (0.5 + next() * 0.5) * lit;
+      context.fillStyle = next() < 0.35 ? '#cfdcec' : '#e9f0f8';
+      context.fillRect(vx * voxel, vy * voxel, voxel, voxel);
+    }
+  }
+  context.globalAlpha = 1;
+
   canvas.refresh();
   return key;
 }

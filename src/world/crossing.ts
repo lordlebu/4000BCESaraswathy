@@ -56,10 +56,16 @@ const STRAIT_AT = 0.19;
  * either island*. On screen that is one shape with a nick in it, which is how it was reported.
  *
  * These are pushed to the ends of the widened strait and the radius cut with them, so the gap is
- * wider than an island is tall. Measured: runs of 15-24 and 37-46, ten rows each, twelve rows
- * between, and the two within five per cent of the same size.
+ * wider than an island is tall.
+ *
+ * **Re-measured on the 52 x 78 map**, where the strait is forty-nine rows rather than forty-one
+ * and there is room to place the pair rather than merely fit it. Nudged off the ends by two
+ * hundredths, because at 0.32 the northern island came within a single row of the far shore's
+ * beach: not touching, so nothing failed, but on screen an island hanging over open water was
+ * about to graze the sand. Measured now: tops at 21-31 and 46-56, eleven rows each, fourteen rows
+ * of open sea between, and four rows of clearance off each bank.
  */
-const ISLANDS = [0.32, 0.66];
+const ISLANDS = [0.34, 0.66];
 
 /**
  * How high the strait's own beaches stand. Below `THRESHOLDS.HILLS`, so a bank is band 0.
@@ -78,11 +84,18 @@ const BEACH_HEIGHT = 0.5;
  * they had to be shrunk to make room for each other: a circle big enough to look like the
  * reference across is also tall enough to close the gap between them.
  *
- * An ellipse gets both. Seventeen tiles across on a forty-four wide map is the reference's own
+ * An ellipse gets both. Twenty-one tiles across on a fifty-two wide map is the reference's own
  * proportion, and eleven deep leaves fourteen rows of open water between the pair -- wider than
  * an island, which is what "two islands" has to mean on screen.
+ *
+ * **The width grew with the map and the depth did not**, and that asymmetry is the whole reason
+ * the map grew. Across, an island can have whatever the map is wide; down, it is competing with
+ * the gap between the pair and the two rows of clearance that keep either one from touching a
+ * bank -- a strait of forty-nine rows holds two elevens, a gap wider than either, and not much
+ * else. Twelve deep closes the gap to less than an island is tall, which is the fault this file
+ * has already recorded twice.
  */
-const ISLAND_RADIUS_X = 8;
+const ISLAND_RADIUS_X = 10;
 const ISLAND_RADIUS_Y = 5;
 
 /**

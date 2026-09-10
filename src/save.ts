@@ -82,10 +82,15 @@ const PREFIX = 'south-of-tethys';
  * and would read correctly, but an absent `travelled` would claim every journey is on its first
  * morning, and every node a returning player had emptied would look freshly cut.
  *
+ * **14 is the ground moving under a saved journey**, which is the other kind and needs no payload
+ * change at all. The Aravali grew to 52 x 78, its far shore climbs into stone instead of drowning
+ * at the rim, and its islands are wider -- so the same seed generates different tiles, and every
+ * remembered position, node and fog mask in an older save refers to a map that no longer exists.
+ *
  * Read strictly rather than migrated: a version mismatch drops the save. That is the existing
  * behaviour and it stays, because a half-understood journey is worse than a fresh one.
  */
-export const SAVE_VERSION = 13;
+export const SAVE_VERSION = 14;
 
 export interface Journey {
   version: number;

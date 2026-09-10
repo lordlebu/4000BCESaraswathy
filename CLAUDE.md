@@ -403,8 +403,8 @@ because where the places landed is not known yet — and it is what makes a vall
 two places rather than a landform one happens to sit in.
 
 **A tile is 0.375 km, not one.** `landmarkHint` promises a landmark on the far side "will take most
-of the day", which was arithmetic when maps were 36 tiles across. They are 48 and 64 now, and the
-promise had quietly become false: a day bought 23 steps of walking while the furthest tile from any
+of the day", which was arithmetic when maps were 36 tiles across. They are 48 and 64 square, with
+the Aravali crossing 52 × 78 in portrait, and the promise had quietly become false: a day bought 23 steps of walking while the furthest tile from any
 shelter measured 72. A day buys about eighty steps now, which is what makes "set out at dawn and
 you can reach shelter" true rather than hopeful.
 
@@ -558,10 +558,12 @@ Two habits that go with it, both learned by getting them wrong:
   from `world/rng.ts`. `game/dayNight.ts` is the one place allowed to read the wall clock, because
   what the sky looks like while you walk is presentation, not world state.
 - Saved journeys live in `localStorage` keyed by seed and carry a `version`; bump `SAVE_VERSION` in
-  `src/save.ts` when the payload shape changes so old saves are discarded rather than misread. It is
-  at 7 — the collection replacing the old sketch list moved it to 6, and the landform work
-  moved it again, because the same seed now generates different ground — and `Progress` (rungs, words,
-  answered, questions) plus `collection` are the parts that matter.
+  `src/save.ts` when the payload shape changes so old saves are discarded rather than misread.
+  **Two things move it and only one of them is a payload change**: the other is the ground moving
+  under a saved journey, because a remembered position, node and fog mask all name tiles that a new
+  generator no longer produces. It is at 14 — the collection replacing the old sketch list moved it
+  to 6, resource nodes to 12, and the Aravali growing to 52 × 78 moved it again — and `Progress`
+  (rungs, words, answered, questions) plus `collection` are the parts that matter.
 - **Dev dependencies grew by three, for a reason.** `jsdom`, `@testing-library/react` and
   `@testing-library/dom` exist because three panel bugs reached a browser before anything noticed.
   Node stays the default test environment; panel files opt in with `// @vitest-environment jsdom`,
