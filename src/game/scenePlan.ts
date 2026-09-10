@@ -34,6 +34,7 @@ import {
   cliffAt,
   cliffFrame,
   cliffTurn,
+  CLOUD_PATTERNS,
   cornerFrame,
   treelineAt,
   depthFor,
@@ -73,6 +74,7 @@ export type PlacementSheet =
   | 'cliffs'
   | 'treeline'
   | 'marker'
+  | 'cloud'
   | 'shadow';
 
 export interface Placement {
@@ -1079,6 +1081,9 @@ export function planScene(built: FieldMapWorld): Placement[] {
     // so a rail draws over a scattered stone and under a building.
     ...planIslandShadow(built.world),
     ...planTrack(built.world),
+    // After the rails, because a cloud drifts over the line and not under it -- and after the
+    // shadow, which is on the water rather than in the air above it.
+    ...planClouds(built.world),
     ...huts,
     ...planOverdraw(built.world, builtOn),
     ...planMarkers(built)
@@ -1165,6 +1170,114 @@ export function planIslandShadow(world: FieldMapWorld['world']): Placement[] {
         alpha: SHADOW_DARKEST * (1 - (below - 1) / SHADOW_REACH)
       });
     }
+  }
+  return out;
+}
+
+/**
+ * How far a cloud reaches from its heart, in tiles across and down.
+ *
+ * Wider than deep, because that is what a cloud seen from above and slightly in front looks like
+ * and because the map is a portrait: a round cloud three tiles across is a sixth of the strait's
+ * width and reads as a blot.
+ */
+const CLOUD_REACH_X = 3;
+const CLOUD_REACH_Y = 2;
+
+/** How solid a cloud is at its heart. */
+const CLOUD_DENSEST = 0.62;
+
+/** Below this a cloud tile is not worth a quad -- it is a pane of glass over the water. */
+const CLOUD_FAINTEST = 0.1;
+
+/**
+ * One sea tile in this many is the heart of a cloud.
+ *
+ * **Not the reciprocal of the coverage, which is worth knowing before tuning it.** Each heart
+ * covers a couple of dozen tiles and the ellipses overlap, so fewer hearts can cover *more* water:
+ * one in seventy measures 397 tiles and one in a hundred measures 418, because the sparser hearts
+ * overlap each other less. Tune by measuring, not by arithmetic.
+ *
+ * At one in a hundred the strait comes out **418 quads over 22.5% of the water**, in a scene of
+ * 7,041 placements. `docs/rendering.md` records that blended fill is the budget and that a
+ * full-cell translucent quad is the expensive kind, so the layer was measured rather than
+ * reasoned about: `npm run perf` on the software rasteriser puts it inside the noise floor,
+ * best frame 249.9 ms before and 250.0 ms after.
+ */
+const CLOUD_ONE_IN = 100;
+
+/**
+ * Weather over the strait: banks of voxel cloud on the open water, outside the islands.
+ *
+ * **Outside the silhouette, which is a decision rather than a limitation.** Cloud *inside* the
+ * island -- vapour clinging under the shelf, a collar round the rim -- was the other option and it
+ * is the one that fights everything already there: the shelf's shade, the shadow on the water and
+ * the cliffs along the joint are three layers all saying "this thing floats", and a fourth drawn
+ * on top of them says it less clearly rather than more. Out on the water a cloud says something
+ * none of those do, which is that there is air between the island and the sea.
+ *
+ * So a cloud tile is only ever a *sea* tile. It never covers the island, the shelf, a shore or a
+ * point of interest, and it cannot hide anything a player has to see. The one thing on open water
+ * it does have to stay off is the railway, which is the only way across.
+ *
+ * **A cloud is a cluster, not a tile.** Scattering translucent cells one at a time gives a mist
+ * with the map's own grid in it. Hearts are picked from the hash and a soft ellipse is stamped
+ * around each, so alpha falls from the middle outward and the *shape* lives across tiles -- which
+ * is also why the voxels inside a tile are not faded at its edge. See `cloudTextureKey`.
+ *
+ * Only on a map with islands on it. Cloud over Lothal's harbour is a different picture and a
+ * different argument, and this one is about the sky.
+ */
+export function planClouds(world: FieldMapWorld['world']): Placement[] {
+  const hasSky = world.tiles.some((row) => row.some((t) => t.biome === 'sky_island'));
+  if (!hasSky) return [];
+
+  // Density per tile, taken as the strongest of however many clouds overlap it. Adding them
+  // instead lets two thin clouds make an opaque one, which is a fog bank rather than weather.
+  const density = new Map<string, number>();
+  const open = (x: number, y: number): boolean => {
+    const tile = world.tiles[y]?.[x];
+    return tile !== undefined && tile.biome === 'sea' && tile.track !== true;
+  };
+
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      if (!open(x, y)) continue;
+      if (tileHash(world.seed, x, y, 'cloud') % CLOUD_ONE_IN !== 0) continue;
+
+      for (let dy = -CLOUD_REACH_Y; dy <= CLOUD_REACH_Y; dy += 1) {
+        for (let dx = -CLOUD_REACH_X; dx <= CLOUD_REACH_X; dx += 1) {
+          const cx = x + dx;
+          const cy = y + dy;
+          if (!open(cx, cy)) continue;
+          const ex = dx / (CLOUD_REACH_X + 1);
+          const ey = dy / (CLOUD_REACH_Y + 1);
+          const out = Math.sqrt(ex * ex + ey * ey);
+          if (out > 1) continue;
+          // Ragged at the edge by a tenth, so the ellipse is a cloud rather than a lens.
+          const ragged = (tileHash(world.seed, cx, cy, 'puff') % 20) / 100;
+          const alpha = CLOUD_DENSEST * (1 - out * out) - ragged;
+          const key = `${cx},${cy}`;
+          if (alpha > (density.get(key) ?? 0)) density.set(key, alpha);
+        }
+      }
+    }
+  }
+
+  const out: Placement[] = [];
+  for (const [key, alpha] of density) {
+    if (alpha < CLOUD_FAINTEST) continue;
+    const [x, y] = key.split(',').map(Number) as [number, number];
+    out.push({
+      sheet: 'cloud',
+      frame: tileHash(world.seed, x, y, 'voxel') % CLOUD_PATTERNS,
+      x,
+      y,
+      // Above the water, the island's shadow on it and the rails, and below anything that stands
+      // up: a cloud between the eye and the sea, not one draped over the crossing.
+      depth: depthFor(y, ROW_SLOT.undergrowth),
+      alpha
+    });
   }
   return out;
 }

@@ -13,7 +13,8 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { canBoardAt, railSpan, shoreheads, trackRoute } from '../src/world/crossing';
 import { band } from '../src/world/classify';
-import { planCliffs, planIslandShadow, planTrack } from '../src/game/scenePlan';
+import { planClouds, planCliffs, planIslandShadow, planTrack } from '../src/game/scenePlan';
+import { CLOUD_PATTERNS } from '../src/game/frames';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
@@ -529,6 +530,73 @@ describe('the shelf hangs as a body, not a skirt', () => {
             .toBeGreaterThan(under);
         }
       }
+    }
+  });
+});
+
+describe('cloud over the strait, and outside the islands', () => {
+  it('never puts a cloud on anything a player has to see', () => {
+    // **The whole safety argument for the layer is this test.** A cloud is translucent and drawn
+    // above the water, so if it could land anywhere but open sea it would be a haze over the
+    // thing underneath -- a shore, a shelf, a point of interest, or the railway, which is the only
+    // way across the map. It is cheap to keep it off all of them and expensive to notice later.
+    const world = aravali();
+    const clouds = planClouds(world);
+    expect(clouds.length, 'the crossing has no cloud over it at all').toBeGreaterThan(20);
+
+    for (const puff of clouds) {
+      const tile = world.tiles[puff.y]![puff.x]!;
+      expect(tile.biome, `cloud at ${puff.x},${puff.y} is not over open water`).toBe('sea');
+      expect(tile.track ?? false, `cloud at ${puff.x},${puff.y} covers the railway`).toBe(false);
+    }
+  });
+
+  it('draws each tile with a pattern the scene can bake', () => {
+    // The plan names a pattern and `tileTextures` bakes one. Both read `CLOUD_PATTERNS` from
+    // `frames.ts` so they cannot drift, and this is the assertion that says so out loud -- a plan
+    // naming a pattern with no texture behind it draws nothing at all, silently.
+    for (const puff of planClouds(aravali())) {
+      expect(puff.frame).toBeGreaterThanOrEqual(0);
+      expect(puff.frame, 'no texture is baked for this pattern').toBeLessThan(CLOUD_PATTERNS);
+      expect(puff.alpha ?? 0, 'a cloud you cannot see still costs a quad').toBeGreaterThan(0.05);
+      expect(puff.alpha ?? 1, 'cloud thick enough to hide the sea under it').toBeLessThan(0.7);
+    }
+  });
+
+  it('gathers into banks rather than scattering', () => {
+    // **A cloud is a cluster, and a scatter of single translucent cells is the map's own grid.**
+    // The falloff from each heart is what carries the shape, so almost every cloud tile should
+    // have another beside it; a lone tile is the ragged edge of a bank, not the rule.
+    const clouds = planClouds(aravali());
+    const at = new Set(clouds.map((c) => `${c.x},${c.y}`));
+    const lonely = clouds.filter(
+      (c) =>
+        !at.has(`${c.x - 1},${c.y}`) &&
+        !at.has(`${c.x + 1},${c.y}`) &&
+        !at.has(`${c.x},${c.y - 1}`) &&
+        !at.has(`${c.x},${c.y + 1}`)
+    );
+    expect(lonely.length / clouds.length, 'the cloud is a scatter, not banks').toBeLessThan(0.1);
+  });
+
+  it('costs less than the layer it sits beside', () => {
+    // **Blended fill is the budget** -- `docs/rendering.md` -- and this is a full-cell translucent
+    // quad, the expensive kind. Decor is the layer that has been measured against the frame
+    // budget, so it is the yardstick: cloud stays under it, and a change that pushes past this is
+    // a change that wants `npm run perf` run before it lands.
+    const world = aravali();
+    const clouds = planClouds(world);
+    const sea = world.tiles.flat().filter((t) => t.biome === 'sea').length;
+    expect(clouds.length / sea, 'cloud covers too much of the water').toBeLessThan(0.3);
+  });
+
+  it('leaves the maps with no sky in them alone', () => {
+    // Cloud over Lothal's harbour is a different picture and a different argument. This one is
+    // about the air between a floating island and the sea, so it only exists where there is one.
+    for (const map of fieldMaps) {
+      if (map.id === 'field_map_aravali') continue;
+      const world = buildFieldMap(map, { seed: map.id }).world;
+      expect(planClouds(world).length, `${map.id} grew weather it never asked for`).toBe(0);
     }
   });
 });

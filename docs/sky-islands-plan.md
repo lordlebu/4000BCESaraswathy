@@ -49,18 +49,35 @@ So the islands are the size they are **because two points of interest need the s
 them by widening `ISLAND_RADIUS_X`/`_Y` takes rows straight back off the shore and breaks the same
 two POIs that were broken last time.
 
-Today: the Aravali is **44 × 66 = 2,904 tiles**, islands are ellipses of radius 8 × 5 at
-`ISLANDS = [0.32, 0.66]`, giving **296 island tiles and 83 underside**, occupying rows 15–48 and
-columns 12–33.
+It was **44 × 66 = 2,904 tiles** with islands of radius 8 × 5 at `ISLANDS = [0.32, 0.66]`.
 
-**The honest way to get bigger islands is to grow the map, not the islands' share.** Lothal and the
-Narmada are 48 and 64 across; the Aravali is 44 × 66. Taking it to something like 56 × 80 leaves
-`STRAIT`, the shore rows and the POI relief exactly as measured, and buys island radius out of new
-ground rather than out of the far shore.
+**The honest way to get bigger islands is to grow the map, not the islands' share** — and that is
+what shipped. The Aravali is **52 × 78 = 4,056 tiles**, against a square large map's 4,096, which
+is the bound that matters: the scene builds a sprite per tile, so tile count *is* frame cost, and
+64 × 64 already passes the browser suite. The islands took the room across: radius **10 × 5**, 21
+tiles wide against seventeen.
 
-**Either way it is a seed change**: the stamp decides biomes, so every existing journey generates
-different ground. That is a `SAVE_VERSION` bump in `src/save.ts` — the same call the landform work
-made — and it should be stated in the PR rather than discovered by a player.
+**Across only, and that asymmetry is the finding.** Depth is not competing with the map, it is
+competing with the gap between the pair and the clearance off each bank. A 49-row strait holds two
+elevens, a gap wider than either, and little else; twelve deep closes the gap to less than an
+island is tall, which is the fault `crossing.ts` has already recorded twice. `ISLANDS` moved to
+`[0.34, 0.66]` because at 0.32 the northern island came within a single row of the far shore's
+beach — not touching, so nothing failed, but about to graze the sand.
+
+**Growing the map broke one test, and the break was worth having.** `poi_kept_stones` stands high
+on the far shore, and the far shore held **one** tile of band-1 ground in 478 — the placement had
+been resting on a single tile of noise. At 52 × 78 it had none at all and the stones landed on a
+beach in the map's corner. *The size did not cause that; it revealed it.*
+
+The fix is in `landform.ts` and it answers a second complaint at the same time: `shore` drops every
+edge of the map to water, which put a band of open sea above the far shore's forest — a strip of
+nothing at the end of the country the player walks towards. **The far rim climbs instead**, the
+shore drop fading out as a wall of stone comes in, so the rim is not asked to be a beach and a
+mountain at once. Measured: far shore 348 band-1 and 23 band-2, near shore 339 and 25 — two
+comparable countries, with the Aravali range still the taller.
+
+**It is a seed change**, so `SAVE_VERSION` went to 14. The stamp decides biomes; every existing
+journey generates different ground.
 
 ## Third, the layer separation you asked for already exists
 
@@ -142,41 +159,61 @@ off biome rather than off where the biome came from.
 walkable and what is reachable, and that simulation is the thing that catches a map you cannot
 actually cross.
 
-### E. Clouds · **art wanted, and the one I would push back on**
+### E. Clouds · **shipped, outside the silhouette, and no art was needed**
 
 Drifting cloud over the play area **hides the player and what they are standing on**. This is a
 game about looking closely at things; an overlay that intermittently obscures the ground is
-working against the only verb the game has.
+working against the only verb the game has. So what shipped is the version that does not have that
+problem: **cloud on open water only** — `planClouds` emits a placement for a `sea` tile and nothing
+else, never over walkable ground, a shore, a shelf, a point of interest, or the railway, which is
+the only way across.
 
-Two versions that do not have that problem:
+**It is built out of voxels a quarter of a tile across, and that turned out to be the cheap
+option.** Sixteen quads a tile would put three thousand blended objects over the strait, which is
+more than everything else on the map together — `docs/rendering.md` is clear that blended fill is
+the budget. Baked into a texture, a cloud tile is **one quad with an alpha channel**: a tile of
+water, drawn twice. Six patterns exist, picked per tile by hash, and `CLOUD_PATTERNS` lives in
+`frames.ts` because the plan cannot import the texture builder and two copies of that number would
+drift and then draw nothing.
 
-- **Cloud outside the island silhouette only** — over `sea` and `open_sky`, never over walkable
-  ground. It frames the islands and sells the height without ever covering a discovery.
-- **A parallax band at the map's edges**, below the ground layer entirely, so it reads as depth
-  under the world rather than weather over it.
+**The shape lives across tiles, not inside one.** Hearts are hashed out of the sea and a soft
+ellipse is stamped round each, so alpha falls from the middle outward — which is also why the
+voxels inside a tile are *not* faded at its edge. Fading each cell out at its own boundary is the
+obvious way to make one tile look like a puff, and a field of them is then a grid of puffs: the
+tile seam arriving by a fourth route after the ground textures, the mottle and the rim layers each
+had to be argued out of it.
 
-If cloud over the ground is wanted anyway, it should be **thin, slow and high-alpha**, and it
-should be a setting rather than a fact — the same way the older landmark loop is kept.
+Measured on the Aravali: **418 quads over 22.5% of the water**, in a scene of 7,041 placements, and
+`npm run perf` on the software rasteriser puts it inside the noise floor — best frame 249.9 ms
+before and 250.0 ms after. The coverage is *not* the reciprocal of `CLOUD_ONE_IN`, which is worth
+knowing before tuning it: one heart in seventy covers 397 tiles and one in a hundred covers 418,
+because sparser hearts overlap each other less.
 
-`game/dayNight.ts` is the one file allowed to read the wall clock, because what the sky looks like
-while you walk is presentation rather than world state. Drifting cloud belongs there or nowhere.
+**It does not move**, and that is deliberate for now. `SWAY_PERIOD` alternates two frames, which on
+a bank of voxels is a flicker rather than a drift; real motion wants a tweened offset and belongs
+with `game/dayNight.ts`, the one file allowed to read the wall clock, because what the sky looks
+like while you walk is presentation rather than world state.
 
 ## What this plan will not do
 
 **It will not change the projection.** See the top.
 
-**It will not put cloud between the player and the ground by default.** See E.
+**It will not put cloud between the player and the ground.** See E — cloud is a sea tile or it is
+nothing.
 
-**It will not grow the islands at the shores' expense.** See the measurement in `crossing.ts`. If
-the map does not grow, the islands do not either.
+**It will not grow the islands at the shores' expense.** See the measurement in `crossing.ts`. The
+map grew and the islands took the room across; down, the gap between the pair is the constraint and
+it has not moved.
 
 ## The art actually wanted
 
-Two sheets, and neither is large:
+One sheet, and it is not large:
 
 1. **A waterfall**, two frames, falling from a rim edge and thinning downward.
-2. **Cloud**, as soft shapes with clear space around them so they can be scattered rather than
-   tiled.
+
+**Cloud is off this list.** It was on it as "soft shapes with clear space around them", and the
+answer turned out to be a texture built in code out of quarter-tile blocks — which is both cheaper
+than a painted sheet and a better fit for pixel art than anything soft would have been. See E.
 
 Everything else here is arithmetic on stamps and depth slots.
 
