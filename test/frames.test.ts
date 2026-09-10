@@ -748,6 +748,35 @@ describe('the rim sheets are built the way the engine indexes them', () => {
       expect(width).toBe(GRID * (EDGE_ORDER.length * EDGE_VARIANTS + EXTRA[sheet]!));
     });
 
+    it(`${sheet}: tears the inner edge of a band rather than ruling it straight`, () => {
+      // The line that made a rim read as a tile was never the outer silhouette -- the art draws
+      // rubble there -- but the *inner* one: `place` lays each band as a rectangle, so the top of
+      // every south face sat at exactly the same pixel across the whole cell, sixteen dead straight
+      // lines to a screen.
+      //
+      // Asserted as a spread rather than a shape, because the shape is noise and the claim is only
+      // that it is not a ruler. A flat top comes back as a spread of 0 and fails by name.
+      const { rows, stride } = decode(`assets/${sheet}.png`);
+      const top = (frame: number, x: number) => {
+        for (let y = 0; y < GRID; y += 1) {
+          if (rows[y * stride + (frame * GRID + x) * 4 + 3]! > 24) return y;
+        }
+        return GRID;
+      };
+      // The south row: four variants, each measured across its own width.
+      for (let v = 0; v < EDGE_VARIANTS; v += 1) {
+        const frame = EDGE_ORDER.indexOf('s') * EDGE_VARIANTS + v;
+        const tops: number[] = [];
+        for (let x = 0; x < GRID; x += 4) tops.push(top(frame, x));
+        const spread = Math.max(...tops) - Math.min(...tops);
+        expect(spread, `${sheet} s variant ${v}: the top of the wall is a straight line`)
+          .toBeGreaterThan(3);
+        // And it must still be a wall: a tear that ate the band would pass the test above.
+        expect(Math.max(...tops), `${sheet} s variant ${v}: the tear ate the band`)
+          .toBeLessThan(GRID - 20);
+      }
+    });
+
     it(`${sheet}: keeps no trace of the chroma key`, () => {
       // The bug: keying on brightness left the shadow under every south face, which is magenta
       // blended toward black, not bright magenta. 4,341 lilac pixels that looked fine over the
