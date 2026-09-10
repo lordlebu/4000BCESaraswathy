@@ -12,7 +12,14 @@
 
 import { band } from './classify';
 import { stampCamp, stampHighCamp, stampTableland } from './tableland';
-import { shoreheads, stampIslands, stampLine, stampStrait, startOnTheSouthernShore } from './crossing';
+import {
+  canBoardAt,
+  shoreheads,
+  stampIslands,
+  stampLine,
+  stampStrait,
+  startOnTheSouthernShore
+} from './crossing';
 import { stampBasalt } from './basalt';
 import { easeRoutes, tourOrder } from './routes';
 import { generateWorld, isWalkable } from './generate';
@@ -686,9 +693,10 @@ export function poiAt(built: FieldMapWorld, at: Point): PlacedPoi | null {
 /**
  * Where the traveller begins: the map's own start tile, or a tile named in the query string.
  *
- * `?at=poi_drowned_dockyard` starts on that place; `?at=12,30` starts on those coordinates. This
- * is the same kind of hook as `?hour=21`, and it exists for the same reason: to check something
- * without first arranging the world so that it happens.
+ * `?at=poi_drowned_dockyard` starts on that place; `?at=board` starts wherever a traveller could
+ * board the line; `?at=12,30` starts on those coordinates. This is the same kind of hook as
+ * `?hour=21`, and it exists for the same reason: to check something without first arranging the
+ * world so that it happens.
  *
  * **It is here to stop the browser suite depending on generated layout.** Four e2e fixtures were
  * *searched* seeds -- worlds found by brute force because a place happened to land two steps from
@@ -696,6 +704,13 @@ export function poiAt(built: FieldMapWorld, at: Point): PlacedPoi | null {
  * four times, cost twelve CI failures on one occasion, and the last re-search found no seed at
  * all with the walk the spec wanted. A test that needs to stand somewhere should say where it
  * wants to stand, which is what shipped debug commands are for in every game that has them.
+ *
+ * **A coordinate is still a searched seed, and `?at=board` is the lesson arriving a second time.**
+ * `e2e/riding.spec.ts` stood at `23,23` because that was a rail tile on the northern island of a
+ * 44 x 66 map. Growing the map to 52 x 78 moved the line and left the spec standing on grass two
+ * tiles from it, with the ride row correctly disabled -- a green change and a red suite, and the
+ * failure said nothing about the map having grown. A spec that needs to board should ask for
+ * somewhere it can board.
  *
  * An unparseable or unplaced value falls back to the real start rather than throwing: this is a
  * convenience for testing and must never be able to break the game for a player who types one in.
@@ -706,6 +721,19 @@ export function startTileFor(built: FieldMapWorld, search: string): Point {
 
   const named = built.placed.find((p) => p.poi.id === asked);
   if (named) return { ...named.at };
+
+  // The seaward end of the boardable stretch, so a ride from here crosses the strait rather than
+  // stepping off at the next island along. `canBoardAt` is the game's own answer to the question,
+  // so this cannot drift from what the ride row offers.
+  if (asked === 'board') {
+    const boardable = built.world.tiles
+      .flat()
+      .filter((t) => canBoardAt(built.world, t))
+      .sort((a, b) => a.y - b.y);
+    const first = boardable[0];
+    if (first) return { x: first.x, y: first.y };
+    return { ...built.world.start };
+  }
 
   const [x, y] = asked.split(',').map((n) => Number.parseInt(n, 10));
   const inside =

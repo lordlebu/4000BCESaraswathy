@@ -9,7 +9,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'fs';
-import { buildFieldMap } from '../src/world/fieldMap';
+import { buildFieldMap, startTileFor } from '../src/world/fieldMap';
 import { fieldMaps } from '../src/content/places';
 import { trackRoute, canBoardAt, railSpan } from '../src/world/crossing';
 import { isWalkable } from '../src/world/generate';
@@ -131,5 +131,43 @@ describe('the line can be ridden', () => {
     );
     expect(scene, 'the scene must listen').toContain("onEvent('ride'");
     expect(scene, 'and must re-check the rule rather than trust the event').toContain('rideFrom');
+  });
+});
+
+describe('the debug anchor the browser suite boards from', () => {
+  it('puts the traveller somewhere the line can actually be boarded', () => {
+    // **This exists because a coordinate is a searched seed with extra steps.**
+    // `e2e/riding.spec.ts` stood at `23,23`, which was rail on the northern island of a 44 x 66
+    // map. The map grew to 52 x 78, the line moved, and the spec came up standing on grass with
+    // the ride row correctly disabled -- one red browser job whose message said nothing about the
+    // map having changed size.
+    //
+    // `?at=board` resolves through `canBoardAt`, the same rule the ride row asks, so the anchor
+    // and the offer cannot drift apart. This is the assertion that says so under Node, in
+    // milliseconds, rather than in a nine-minute browser run.
+    const built = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, {});
+    const at = startTileFor(built, '?at=board');
+    const tile = built.world.tiles[at.y]![at.x]!;
+    expect(canBoardAt(built.world, tile), `${at.x},${at.y} is not a boarding point`).toBe(true);
+  });
+
+  it('boards at the near end, so the ride is a crossing rather than a step', () => {
+    // Both islands are boardable and the rail runs between them. Taking the northernmost means a
+    // ride from the anchor spans the strait, which is what the browser spec asserts by watching
+    // the journal heading move more than ten rows.
+    const built = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, {});
+    const at = startTileFor(built, '?at=board');
+    const span = railSpan(built.world)!;
+    expect(Math.abs(span.to - at.y), 'the far end of the line is not a crossing away')
+      .toBeGreaterThan(10);
+  });
+
+  it('falls back to the real start on a map with no line', () => {
+    // The hook must never be able to break the game for a player who types one in.
+    for (const map of fieldMaps) {
+      if (map.id === 'field_map_aravali') continue;
+      const built = buildFieldMap(map, {});
+      expect(startTileFor(built, '?at=board')).toEqual(built.world.start);
+    }
   });
 });
