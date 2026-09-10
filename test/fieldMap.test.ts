@@ -353,6 +353,15 @@ describe('every map has ground that is not all one thing', () => {
       const world = build(map.id).world;
       const allowed = new Set<string>([...map.seedBiomes, 'landmark']);
       if (world.camp) allowed.add('settlement');
+      // **`sky_water` is exempt for the same reason `landmark` is, and the reason matters.** It is
+      // a pool stamped inside the island patch after classification -- a place, not a climate.
+      //
+      // Putting it in `seed_biomes` to satisfy this test would be the exact trap `CLAUDE.md`
+      // records about `lava_field`: the palette is what the classifier divides elevation and
+      // moisture among, so a map listing it would come out roughly a third sky water. The stamp is
+      // bounded by `pourAPool` instead -- it can only write over `sky_island`, so it cannot reach
+      // a map with no island on it however this list is written.
+      if (map.seedBiomes.includes('sky_island')) allowed.add('sky_water');
       const stray = [...mix(map.id).keys()].filter((biome) => !allowed.has(biome));
       expect(stray, `${map.id} generated ${stray.join(', ')}, which is not in its palette`).toEqual([]);
     }

@@ -69,7 +69,10 @@ export const BIOME_CODES: readonly BiomeId[] = [
   // Appended, not inserted. This list is positional -- a code is an index into it -- and every
   // baked world on disk was written against the order above, so putting 'snow' next to
   // 'mountains' where it belongs conceptually would silently re-terrain every saved map.
-  'snow'
+  'snow',
+  // Appended for the same reason as 'snow', and it is the rule rather than the exception now:
+  // a new biome goes on the end of this list whatever it is and wherever it belongs.
+  'sky_water'
 ];
 
 const codeOf = new Map<BiomeId, string>(BIOME_CODES.map((b, i) => [b, i.toString(36)]));

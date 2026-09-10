@@ -14,7 +14,7 @@
 // building the fog disc.
 
 import Phaser from 'phaser';
-import { GRID, DECOR_CELL, SHORE_BAND, CLOUD_VOXELS, type Edge } from './frames';
+import { GRID, DECOR_CELL, SHORE_BAND, CLOUD_VOXELS, FALL_FRAMES, tileFrame, type Edge } from './frames';
 
 export {
   GRID,
@@ -423,6 +423,101 @@ export function undersideShadeKey(scene: Phaser.Scene): string {
   fall.addColorStop(1, 'rgba(11,28,48,0.04)');
   context.fillStyle = fall;
   context.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  canvas.refresh();
+  return key;
+}
+
+/**
+ * Standing water on a floating island: the river tile under a pale wash.
+ *
+ * **Baked rather than painted, and that is the cheap half of adding this biome.** `tileTextures`
+ * already bakes six textures and `blendTextureKey` is the exact precedent -- draw a terrain frame
+ * into a canvas, composite something over it, hand Phaser a key. A second painted water tile would
+ * have to be kept in step with the first by hand, and would mean a slot in `terrain.png` and a row
+ * in `tools/build-terrain.js` for what is, honestly, the same water in a different light.
+ *
+ * **Paler and greener than the river, because there is nothing under it.** A river reads blue
+ * partly from its own depth and partly from the bed: silt, stones, the shadow of a bank. A pool on
+ * a shelf a thousand feet up has open air below the rock that holds it and sky above it, so it
+ * goes thin, bright and toward aquamarine. Canon has rainwater falling *upward* under these
+ * islands; the water on top of one should not look like the Saraswati.
+ *
+ * `screen` rather than a flat overlay: multiplying a wash over the tile would dull the highlights
+ * that make water read as water, and those highlights are the whole of what the river tile has.
+ */
+export function skyWaterTileKey(scene: Phaser.Scene, variant: number): string {
+  const key = `sky-water:${variant}`;
+  if (scene.textures.exists(key)) return key;
+
+  const canvas = scene.textures.createCanvas(key, TILE_SIZE, TILE_SIZE);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  const river = scene.textures.getFrame(TERRAIN_SHEET, tileFrame('river', variant));
+  if (!river) return key;
+
+  context.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
+  context.drawImage(
+    river.source.image as CanvasImageSource,
+    river.cutX, river.cutY, river.cutWidth, river.cutHeight,
+    0, 0, TILE_SIZE, TILE_SIZE
+  );
+  context.globalCompositeOperation = 'screen';
+  context.fillStyle = 'rgba(96,178,190,0.42)';
+  context.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  context.globalCompositeOperation = 'source-over';
+  canvas.refresh();
+  return key;
+}
+
+/**
+ * One tile of falling water, built out of the same quarter-tile voxels the cloud is.
+ *
+ * **This is the case voxels suit better than the cloud did.** The cloud is deliberately still,
+ * because alternating two frames of voxel reads as a flicker rather than a drift. Falling water is
+ * the opposite: the flicker *is* the effect. Two frames whose voxel columns are offset by half a
+ * voxel, run through the `SWAY_PERIOD` machinery that already alternates every swaying sprite, is
+ * water going over an edge -- and it costs one quad per tile and no art at all.
+ *
+ * **Columns rather than a field, because water falls in threads.** Each voxel column runs the full
+ * height of the tile at one brightness, so a stack of these tiles reads as continuous streaks down
+ * the rock rather than as a grid of blocks. The gaps between columns are what makes it water and
+ * not a wall, so a third of them are empty.
+ */
+export function waterfallTextureKey(scene: Phaser.Scene, frame: number): string {
+  const key = `fall:${frame}`;
+  if (scene.textures.exists(key)) return key;
+
+  const canvas = scene.textures.createCanvas(key, TILE_SIZE, TILE_SIZE);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  context.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
+  const voxel = TILE_SIZE / CLOUD_VOXELS;
+  // Half a voxel between the two frames: enough that the eye reads movement, small enough that it
+  // reads as the *same* water moving rather than as two different pictures.
+  const drop = (frame % FALL_FRAMES) * (voxel / 2);
+
+  let seed = Math.imul(frame + 7, 2654435761);
+  const next = () => {
+    seed = Math.imul(seed ^ (seed >>> 15), 2246822507);
+    seed ^= seed >>> 13;
+    return (seed >>> 0) / 4294967296;
+  };
+
+  for (let vx = 0; vx < CLOUD_VOXELS; vx += 1) {
+    // A third of the columns are air. Water that filled the cell would be a pane of glass.
+    if (next() < 0.34) continue;
+    const bright = 0.45 + next() * 0.45;
+    for (let vy = -1; vy < CLOUD_VOXELS + 1; vy += 1) {
+      // Broken along its length as well as across it, so a thread has beads in it.
+      const lit = next() < 0.2 ? bright * 0.45 : bright;
+      context.globalAlpha = lit;
+      context.fillStyle = next() < 0.4 ? '#bfe4f2' : '#eaf6fb';
+      context.fillRect(vx * voxel, vy * voxel + drop, voxel, voxel);
+    }
+  }
+  context.globalAlpha = 1;
   canvas.refresh();
   return key;
 }

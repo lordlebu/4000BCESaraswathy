@@ -32,6 +32,8 @@ import {
   TRACK_SHEET,
   SHADOW_TEXTURE,
   cloudTextureKey,
+  skyWaterTileKey,
+  waterfallTextureKey,
   TILE_SIZE,
   blendTextureKey,
   shoreTextureKey,
@@ -59,7 +61,10 @@ import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
  * instead, and `contact` is the one shadow texture the traveller already uses.
  */
 const SHEET_KEY: Record<
-  Exclude<PlacementSheet, 'marker' | 'shadow' | 'shore' | 'contact' | 'underside' | 'cloud'>,
+  Exclude<
+    PlacementSheet,
+    'marker' | 'shadow' | 'shore' | 'contact' | 'underside' | 'cloud' | 'waterfall'
+  >,
   string
 > = {
   terrain: TERRAIN_SHEET,
@@ -275,6 +280,15 @@ export class WorldScene extends Phaser.Scene {
   private tileSprites: Phaser.GameObjects.Image[][] = [];
   /** Everything swaying at depth 21, with the two frames it alternates and its own phase. */
   private overdraw: { sprite: Phaser.GameObjects.Image; rest: number; lean: number; phase: number }[] = [];
+  /**
+   * Falling water, kept apart from `overdraw` for one mechanical reason.
+   *
+   * Both alternate two frames on the same beat. But a reed's two frames are frames of one loaded
+   * sheet, so `updateSway` swaps them with `setFrame`; a fall's two frames are separately *baked
+   * textures*, and swapping those needs `setTexture`. One list calling the wrong method on half its
+   * members would draw nothing and say nothing, so they are two lists.
+   */
+  private falls: { sprite: Phaser.GameObjects.Image; rest: number; lean: number; phase: number }[] = [];
   private fogSprites: Phaser.GameObjects.Image[][] = [];
   /**
    * Every static thing that belongs to a tile, so it can be hidden when the camera cannot see it.
@@ -375,6 +389,7 @@ export class WorldScene extends Phaser.Scene {
     this.tileOwned = [];
     this.culled = null;
     this.overdraw = [];
+    this.falls = [];
     this.queuedPath = [];
     this.moving = false;
     this.facing = 'down';
@@ -420,6 +435,9 @@ export class WorldScene extends Phaser.Scene {
    * drawn as plains -- see `placeholderTileKey`.
    */
   private groundArt(biome: BiomeId, variant: number): { key: string; frame?: number } {
+    // Water on a floating island: the river tile under a pale wash, baked rather than painted.
+    // It has no slot in `terrain.png` on purpose -- see `skyWaterTileKey`.
+    if (biome === 'sky_water') return { key: skyWaterTileKey(this, variant) };
     if (hasTileArt(biome)) return { key: TERRAIN_SHEET, frame: tileFrame(biome, variant) };
     const known = biomeFor(biome);
     return {
@@ -594,6 +612,22 @@ export class WorldScene extends Phaser.Scene {
         continue;
       }
 
+      // Falling water. Two baked frames offset by half a voxel, joined to the same sway array the
+      // reeds use -- so the fall animates for the cost of the comparison `updateSway` already does.
+      if (item.sheet === 'waterfall') {
+        const fall = this.add
+          .image(cx, cy, waterfallTextureKey(this, item.frame))
+          .setAlpha(item.alpha ?? 1)
+          .setDepth(item.depth);
+        if (item.sway) {
+          // The frames are separate textures rather than frames of one sheet, so this cannot go
+          // in `this.overdraw` with the rest -- that list calls `setFrame`. See `updateFalls`.
+          this.falls.push({ sprite: fall, ...item.sway });
+        }
+        this.tileOwned.push({ sprite: fall, x: item.x, y: item.y });
+        continue;
+      }
+
       if (item.sheet === 'contact') {
         const shade = this.add
           .image(cx, cy, SHADOW_TEXTURE)
@@ -655,6 +689,21 @@ export class WorldScene extends Phaser.Scene {
     for (const item of this.overdraw) {
       const leaning = ((now + item.phase) % SWAY_PERIOD) * 2 > SWAY_PERIOD;
       item.sprite.setFrame(leaning ? item.lean : item.rest);
+    }
+    this.updateFalls(now);
+  }
+
+  /**
+   * The same beat, applied to falling water.
+   *
+   * Separate from `updateSway` only because the two frames of a fall are baked textures rather than
+   * frames of a sheet -- see `falls`. Phaser skips the work when the texture has not changed, so
+   * this costs a comparison per tile of water exactly as the sway does.
+   */
+  private updateFalls(now: number): void {
+    for (const item of this.falls) {
+      const dropped = ((now + item.phase) % SWAY_PERIOD) * 2 > SWAY_PERIOD;
+      item.sprite.setTexture(waterfallTextureKey(this, dropped ? item.lean : item.rest));
     }
   }
 

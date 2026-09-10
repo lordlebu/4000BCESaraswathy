@@ -431,6 +431,54 @@ const SCALE = 4;
  * reported seeing.
  */
 const TILE_VARIANTS = 4;
+
+/**
+ * How many colours the whole terrain strip is snapped to.
+ *
+ * **The ground was `painted` and is not any more, and this number is the reason it works.** The
+ * `painted` flag picks an averaging sampler and skips the palette snap, and it was set on the
+ * argument that quantising a watercolour wash reintroduces banding. That argument was sound about
+ * washes and the premise under it was false: `art-direction.md` records the measurement -- the
+ * eleven sources are *pixel art drawn large*, and their 439-1,400 distinct colours are PNG noise
+ * rather than gradients. Averaging was not preserving painting, it was blurring pixel art.
+ *
+ * 64 across fifteen biomes and four variants is roughly four tones a material, which is the
+ * register `art-direction.md` names for 16-bit: *"two or three tones per material, hard edges,
+ * light dithering where tones meet"*. The figures have gone through the same snap at 22 since the
+ * beginning -- `build-sprite-sheet.js` -- so this is the ground catching up with the sprites
+ * rather than a new direction.
+ *
+ * **Per sheet, not per biome**, which is what keeps the map one place: every ground is quantised
+ * against the same shared palette, so a coast and a plain are lit by the same light.
+ */
+const TERRAIN_COLOURS = 16;
+
+/**
+ * How many screen pixels one pixel of ground art covers.
+ *
+ * **This is the lever, and the two obvious ones are not.** The source canvas is not it: 2048 is a
+ * *generation* size and the builder already reduces it sixteen-fold, so asking for a smaller
+ * source only gives the sampler less to work with. The palette is not it either -- snapping a tile
+ * to sixteen colours was measured and came back very nearly the tile it replaced, because
+ * quantising colour does not make pixels bigger.
+ *
+ * Chunk does. At 4 a tile carries 32 x 32 pixels of art blown up by a whole number, which is a
+ * SNES tilemap's own resolution for a cell this size and is the reason the era looks the way it
+ * does. `player.ts` already scales the figures by a whole number for the same reason and says so:
+ * a fractional scale is what makes pixel art shimmer.
+ */
+const TERRAIN_CHUNK = 1;
+
+/**
+ * Whether the ground is sampled by averaging (painted) or by most-common-colour with a palette
+ * snap (pixel art).
+ *
+ * **Still `true`, and the switch beside it is the point of this change.** Flipping it and
+ * `TERRAIN_CHUNK` together turns every ground into flat 16-bit pixel art in one line, and turning
+ * them back restores exactly what ships today -- verified byte-for-byte, which is the only claim
+ * worth making about a refactor of a build step.
+ */
+const TERRAIN_PAINTED = true;
 const TILE = { width: 32 * SCALE, height: 32 * SCALE };
 const OBJECT = { width: 32 * SCALE, height: 32 * SCALE };
 const PLACE = { width: 32 * SCALE, height: 40 * SCALE };
@@ -573,7 +621,26 @@ function sheetLayout(count, cellWidth) {
   return { columns, rows: Math.ceil(count / columns) };
 }
 
-function buildStrip(entries, cell, anchorBottom, threshold, colours, outFile, label, painted, variants = 1) {
+/**
+ * Blow a small frame up to a cell, one source pixel to a `chunk` x `chunk` block.
+ *
+ * **Nearest neighbour and a whole-number factor, or it is not pixel art.** A fractional scale is
+ * what makes pixel art shimmer, which is the reason `player.ts` scales the figures by a whole
+ * number and says so.
+ */
+function chunkUp(frame, small, cell, chunk) {
+  const out = Buffer.alloc(cell.width * cell.height * 4);
+  for (let y = 0; y < cell.height; y += 1) {
+    const sy = Math.floor(y / chunk);
+    for (let x = 0; x < cell.width; x += 1) {
+      const from = (sy * small.width + Math.floor(x / chunk)) * 4;
+      frame.copy(out, (y * cell.width + x) * 4, from, from + 4);
+    }
+  }
+  return out;
+}
+
+function buildStrip(entries, cell, anchorBottom, threshold, colours, outFile, label, painted, variants = 1, chunk = 1) {
   const names = Object.keys(entries);
   // Frame order is name-major: every variant of the first name, then of the second. `tileFrame`
   // in frames.ts mirrors this, and a test asserts the sheet is the width that implies.
@@ -587,15 +654,54 @@ function buildStrip(entries, cell, anchorBottom, threshold, colours, outFile, la
     // Tiles share a border so they meet seamlessly; objects sit on the ground and have no edge to
     // continue, so `anchorBottom` skips all of it. `base` is variant 0 -- see `shareBorder`.
     let base = null;
+    // Every variant of one biome, kept aside so they can be snapped to *one* palette together --
+    // see the block after this loop.
+    const madeForThisName = [];
     for (let v = 0; v < variants; v += 1) {
       const box = anchorBottom ? contentBox(img) : variantBox(img, v, variants);
       if (!box) throw new Error(`${entries[name]}: nothing opaque to place`);
-      let frame = resample(img, box, cell, threshold, anchorBottom, painted);
+      // **Sampled at the art's own resolution, not the cell's.** A 128-pixel tile carrying 128
+      // pixels of detail is a photograph of ground however few colours it uses -- the chunk is
+      // what makes it read as drawn. Everything below (the wrap, the shared border, the palette
+      // snap) happens at that resolution too, so a snapped colour covers a whole block rather
+      // than one screen pixel.
+      const small = { width: cell.width / chunk, height: cell.height / chunk };
+      let frame = resample(img, box, small, threshold, anchorBottom, painted);
       if (!anchorBottom && variants > 1) {
-        frame = wrapCell(frame, cell);
+        frame = wrapCell(frame, small);
         if (v === 0) base = frame;
-        else frame = shareBorder(base, frame, cell);
+        else frame = shareBorder(base, frame, small);
       }
+      madeForThisName.push(frame);
+    }
+
+    // **The palette is per biome, and one measurement is why.**
+    //
+    // Snapping the whole strip to a single shared palette was tried first and is worse than what
+    // it replaced. Sixty-four colours across fifteen very different grounds is about four apiece,
+    // and the residual detail in each tile then snaps to *whatever entry is nearest anywhere in
+    // the sheet* -- so plains grass tufts came out red, hills picked up blue speckle, and the
+    // island's seed-heads turned into harsh white dots borrowed from the snow. Cross-contamination,
+    // not flatness.
+    //
+    // Per biome is also what the machine being referenced actually did: the SNES held several
+    // small palettes and assigned one per tile, rather than one palette for the whole tileset.
+    // The four variants of a biome share theirs, because they are the same ground and a variant
+    // that drifted in tone would read as a patch of somewhere else.
+    if (!painted) {
+      // `Buffer.concat` copies, and `quantise` writes in place -- so the result has to be split
+      // back into the frames it came from or the snap is applied to a buffer nobody reads. It was,
+      // for one build: the sheet came out 1,669 KB against 1,710 painted, which is the size of
+      // doing nothing, and that number is the only reason it was caught.
+      const together = Buffer.concat(madeForThisName);
+      quantise(together, colours);
+      const span = (cell.width / chunk) * (cell.height / chunk) * 4;
+      madeForThisName.forEach((frame, v) => together.copy(frame, 0, v * span, (v + 1) * span));
+    }
+
+    const small = { width: cell.width / chunk, height: cell.height / chunk };
+    madeForThisName.forEach((made, v) => {
+      const frame = chunk > 1 ? chunkUp(made, small, cell, chunk) : made;
       const index = nameIndex * variants + v;
       const ox = (index % columns) * cell.width;
       const oy = Math.floor(index / columns) * cell.height;
@@ -604,12 +710,11 @@ function buildStrip(entries, cell, anchorBottom, threshold, colours, outFile, la
         const to = ((oy + y) * sheetWidth + ox) * 4;
         frame.copy(sheet, to, from, from + cell.width * 4);
       }
-    }
+    });
   });
-  const palette = painted ? null : quantise(sheet, colours);
   fs.writeFileSync(outFile, encodePng(sheetWidth, sheetHeight, sheet));
   const kb = (fs.statSync(outFile).size / 1024).toFixed(1);
-  const how = painted ? 'painted' : `${palette.length} colours`;
+  const how = painted ? 'painted' : `${colours} colours a biome`;
   const count = variants > 1 ? `${names.length}x${variants} frames` : `${names.length} frames`;
   console.log(`${label}: ${count} of ${cell.width}x${cell.height} in ${columns}x${rows}, ${how}, ${kb} KB`);
   console.log(`  order: ${names.join(', ')}`);
@@ -622,7 +727,7 @@ function main() {
   };
   const threshold = arg('threshold', 0.22);
 
-  buildStrip(TILES, TILE, false, threshold, 48, path.join(OUT, 'terrain.png'), 'terrain', true, TILE_VARIANTS);
+  buildStrip(TILES, TILE, false, threshold, TERRAIN_COLOURS, path.join(OUT, 'terrain.png'), 'terrain', TERRAIN_PAINTED, TILE_VARIANTS, TERRAIN_CHUNK);
   buildStrip(LANDMARKS, OBJECT, true, threshold, 40, path.join(OUT, 'landmarks.png'), 'landmarks', true);
   buildStrip(PLACES, PLACE, true, threshold, 40, path.join(OUT, 'places.png'), 'places', true);
   buildStrip(VEHICLES, VEHICLE, true, threshold, 40, path.join(OUT, 'vehicles.png'), 'vehicles', true);

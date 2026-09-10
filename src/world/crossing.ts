@@ -241,7 +241,128 @@ export function stampIslands(world: World, palette: ReadonlySet<BiomeId>): Point
 
   for (const centre of centres) firmUp(world, centre);
   if (palette.has('sky_underside')) for (const centre of centres) hangTheShelf(world, centre);
+  // After the shelf, because the outflow runs to the island's lower rim and the rim is only
+  // final once the shelf has been hung under it.
+  for (const centre of centres) pourAPool(world, centre);
   return centres;
+}
+
+/**
+ * How far the pool reaches from its own middle, in tiles.
+ *
+ * Wide and shallow, like the island. Big enough to be a place on the map rather than a puddle,
+ * small enough that it does not eat the walkable top two points of interest stand on. Measured on
+ * the Aravali: 69 tiles of water against 296 of island top, so about **35 of 183 per island** --
+ * a fifth, once the channel and whatever slivers it strands are counted in.
+ */
+const POOL_REACH_X = 3;
+const POOL_REACH_Y = 2;
+
+/**
+ * Standing water on the island, and the run that carries it off the edge.
+ *
+ * **The pool is not the point; the outflow is.** A pond in the middle of a floating island is a
+ * texture change. What makes it read as a floating island is water going *over the side* -- the
+ * reference's whole silhouette is a river crossing the top and falling into open air -- and that
+ * needs water actually touching the lower rim for the fall to hang from. So this stamps both: a
+ * blob off-centre, and a one-tile channel from its lowest edge down to wherever the island stops.
+ *
+ * **Walkable, at cost 1, and that is deliberate.** A pool that severed the island would put the
+ * places on the far side of it out of reach, and `landform.test.ts` would say so as "cut in two".
+ * Making it walkable means the channel cannot isolate anything however it lands, which is worth
+ * more than the realism of not being able to wade an ankle-deep pool.
+ *
+ * Elevation is left alone. The island's top stands at `ISLAND_HEIGHT` so that `cliffAt` can see a
+ * step at its rim, and dropping the pool below that would cut a notch in the cliff exactly where
+ * the water goes over -- which is the one place the rock should read as continuous.
+ */
+function pourAPool(world: World, centre: Point): void {
+  const isTop = (x: number, y: number) => world.tiles[y]?.[x]?.biome === 'sky_island';
+
+  // Off-centre, so the pool is a feature of the island rather than a bullseye in it. West of the
+  // middle: the line runs up the centre and water over the rails reads as a flood.
+  const px = centre.x - Math.floor(ISLAND_RADIUS_X / 2);
+  const py = centre.y + ((tileHash(world.seed, centre.y, 0, 'pool') % 3) - 1);
+
+  const wet = (x: number, y: number): boolean => {
+    const tile = world.tiles[y]?.[x];
+    // Only the island's own top, and never the railway -- the line is the thing a player has to be
+    // able to follow, and water drawn over it is the one place this layer could confuse the map.
+    if (!tile || tile.biome !== 'sky_island' || tile.track === true) return false;
+    tile.biome = 'sky_water';
+    return true;
+  };
+
+  for (let dy = -POOL_REACH_Y; dy <= POOL_REACH_Y; dy += 1) {
+    for (let dx = -POOL_REACH_X; dx <= POOL_REACH_X; dx += 1) {
+      const ex = dx / (POOL_REACH_X + 1);
+      const ey = dy / (POOL_REACH_Y + 1);
+      if (Math.sqrt(ex * ex + ey * ey) > 1) continue;
+      wet(px + dx, py + dy);
+    }
+  }
+
+  // The outflow: straight down its own column until the island stops. Straight rather than
+  // wandering, because a channel that meanders across a twelve-row island is a river and this is
+  // a few tiles of water finding the nearest edge.
+  for (let y = py + POOL_REACH_Y; isTop(px, y) || world.tiles[y]?.[px]?.biome === 'sky_water'; y += 1) {
+    if (!wet(px, y) && world.tiles[y]?.[px]?.biome !== 'sky_water') break;
+  }
+
+  floodTheSlivers(world, centre);
+}
+
+/**
+ * Any scrap of island top the channel cut off becomes water too.
+ *
+ * **The channel severs ground, and this is measured rather than feared.** `landform.test.ts`
+ * reported the Aravali "cut in two: expected 2031 to be 2035" the first time the pool went in --
+ * four tiles, the wedge between the outflow and the island's own edge, walled off by unwalkable
+ * water on one side and open air on the other.
+ *
+ * Four tiles is not a place. Nothing can be reached there, nothing will be placed there, and a
+ * player who could see it would only wonder why they cannot get to it -- so it is not ground, it
+ * is the far side of the water, and the honest thing is to say so. This is `firmUp`'s flood run a
+ * second time for a second reason: that one demotes stranded top to rim after the *rim* is
+ * roughened, this one floods it after the *channel* is cut.
+ *
+ * Widening the channel or steering it around the wedge were both tried in the head and neither
+ * survives contact: where the wedge falls depends on the hashed pool offset and the roughened
+ * island edge, so any rule that avoids it on this seed meets it on another.
+ */
+function floodTheSlivers(world: World, centre: Point): void {
+  const isTop = (x: number, y: number) => world.tiles[y]?.[x]?.biome === 'sky_island';
+  if (!isTop(centre.x, centre.y)) return;
+
+  const joined = new Set<string>([`${centre.x},${centre.y}`]);
+  const queue: Point[] = [centre];
+  while (queue.length > 0) {
+    const at = queue.shift()!;
+    for (const next of [
+      { x: at.x - 1, y: at.y },
+      { x: at.x + 1, y: at.y },
+      { x: at.x, y: at.y - 1 },
+      { x: at.x, y: at.y + 1 }
+    ]) {
+      const key = `${next.x},${next.y}`;
+      if (joined.has(key) || !isTop(next.x, next.y)) continue;
+      joined.add(key);
+      queue.push(next);
+    }
+  }
+
+  for (let dy = -ISLAND_RADIUS_Y - 1; dy <= ISLAND_RADIUS_Y + 1; dy += 1) {
+    for (let dx = -ISLAND_RADIUS_X - 1; dx <= ISLAND_RADIUS_X + 1; dx += 1) {
+      const x = centre.x + dx;
+      const y = centre.y + dy;
+      const tile = world.tiles[y]?.[x];
+      if (!tile || tile.biome !== 'sky_island' || joined.has(`${x},${y}`)) continue;
+      // Never the railway. The line is walkable wherever it runs and flooding under it would put
+      // water where a player is standing, which is the one thing this layer must not do.
+      if (tile.track === true) continue;
+      tile.biome = 'sky_water';
+    }
+  }
 }
 
 /**

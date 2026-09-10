@@ -176,9 +176,9 @@
     "walkable": true,
     "travelCost": 2,
     "tone": "suspended",
-    "color": "#a8b6c6",
+    "color": "#64ad37",
     "symbol": "◍",
-    "description": "A shelf of pale rock adrift in open air, grass clinging to its rim.",
+    "description": "A shelf of rock adrift in open air, grass to its very edge.",
     "regions": [
       "tethys-sky-routes"
     ]
@@ -189,9 +189,22 @@
     "walkable": false,
     "travelCost": null,
     "tone": "inverted",
-    "color": "#6b7688",
+    "color": "#6b5e55",
     "symbol": "◌",
     "description": "The raw underside of a floating shelf, root-hung and hollow, with nothing below it.",
+    "regions": [
+      "tethys-sky-routes"
+    ]
+  },
+  {
+    "id": "sky_water",
+    "name": "Sky Water",
+    "walkable": false,
+    "travelCost": null,
+    "tone": "weightless",
+    "color": "#8fd6e6",
+    "symbol": "≋",
+    "description": "A pool caught on the shelf, thin and bright, with nothing but air beneath the rock that holds it.",
     "regions": [
       "tethys-sky-routes"
     ]
