@@ -65,6 +65,7 @@ export type PlacementSheet =
   | 'overdraw'
   | 'features'
   | 'flora'
+  | 'trees'
   | 'places'
   | 'landmarks'
   | 'decor'

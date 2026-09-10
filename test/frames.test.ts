@@ -61,6 +61,9 @@ function pngSize(file: string): { width: number; height: number } {
  * rendered black, because the upload had failed and nothing said so. Counting both axes is what
  * makes these assertions independent of that layout.
  */
+/** Height of a cell in `trees.png`. Mirrors TALL in tools/build-flora.js -- 32:44 at SCALE 4. */
+const TREE_CELL_HEIGHT = 176;
+
 function frameCount(file: string, cellWidth = GRID, cellHeight = GRID): number {
   const { rows, width, height, stride } = decode(file);
   const columns = width / cellWidth;
@@ -478,15 +481,24 @@ describe('features may be tall because they stand aside', () => {
     expect(Math.max(...generated)).toBeLessThan(featureFrames);
     expect(new Set(generated).size).toBe(generated.length);
 
-    // The painted sheet is exact: it is built from a manifest, so every frame is claimed and
-    // nothing points past the end.
+    // **The painted sheets point past the end of nothing, and that is all they promise now.**
+    // `flora.png` was asserted exact -- every frame claimed, none spare -- on the reasoning that it
+    // is built from a manifest. It is, and the manifest outgrew it: the aero-mangroves moved to
+    // `trees.png`, which has a taller cell because a tree whose roots are half its height cannot
+    // be drawn in a square one. Flora frames 0 and 1 are unclaimed now, left rather than
+    // renumbering the two entries after them -- the same call the generated sheet made at 34-37,
+    // and recorded in the same place.
     const floraFrames = frameCount('assets/flora.png');
-    const painted = Object.values(FEATURES)
-      .filter((f) => f.sheet === 'flora')
-      .flatMap((f) => f.frames);
     expect(floraFrames, 'flora.png should hold one frame per piece').toBe(FLORA_ORDER.length);
-    expect(new Set(painted).size).toBe(painted.length);
-    expect(painted.length).toBe(floraFrames);
+
+    for (const [sheet, file] of [['flora', 'assets/flora.png'], ['trees', 'assets/trees.png']] as const) {
+      const claimed = Object.values(FEATURES)
+        .filter((f) => f.sheet === sheet)
+        .flatMap((f) => f.frames);
+      expect(new Set(claimed).size, `${sheet} claims a frame twice`).toBe(claimed.length);
+      expect(Math.max(...claimed), `${sheet} points past the end of its sheet`)
+        .toBeLessThan(frameCount(file, GRID, sheet === 'trees' ? TREE_CELL_HEIGHT : GRID));
+    }
   });
 
   it('keeps anything tall away from the centre of its tile', () => {

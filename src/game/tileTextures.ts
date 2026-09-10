@@ -87,6 +87,16 @@ export const EDGE_SHEET = 'edges';
 /** The painted flora sheet, built by `tools/build-flora.js`. */
 export const FLORA_SHEET = 'flora';
 
+/**
+ * The aero-mangroves, which stand taller than their tile.
+ *
+ * A fourth bottom-anchored sheet beside `places`, `huts` and `landmarks`, and for their reason: a
+ * tree whose roots are half its height cannot be drawn in a square cell without the canopy
+ * vanishing. 32:44 at the same SCALE as everything else -- see TALL in tools/build-flora.js.
+ */
+export const TREE_SHEET = 'trees';
+const TREE_HEIGHT = (TILE_SIZE / 32) * 44;
+
 export const CLIFF_SHEET = 'cliffs';
 /** The wall of trees where a forest stops. Same layout again -- see `tools/build-rims.js`. */
 export const TREELINE_SHEET = 'treeline';
@@ -152,6 +162,7 @@ export function loadTileSheets(
     flora: string;
     treeline: string;
     overhang: string;
+    trees: string;
     decor: string;
     track: string;
   }
@@ -181,6 +192,7 @@ export function loadTileSheets(
   sheet(EDGE_SHEET, urls.edges, TILE_SIZE, TILE_SIZE);
   sheet(CLIFF_SHEET, urls.cliffs, TILE_SIZE, TILE_SIZE);
   sheet(FLORA_SHEET, urls.flora, TILE_SIZE, TILE_SIZE);
+  sheet(TREE_SHEET, urls.trees, TILE_SIZE, TREE_HEIGHT);
   sheet(TREELINE_SHEET, urls.treeline, TILE_SIZE, TILE_SIZE);
   sheet(OVERHANG_SHEET, urls.overhang, TILE_SIZE, TILE_SIZE);
   sheet(DECOR_SHEET, urls.decor, DECOR_CELL, DECOR_CELL);

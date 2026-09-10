@@ -17,6 +17,7 @@ import edgesUrl from '../../../assets/edges.png';
 import cliffsUrl from '../../../assets/cliffs.png';
 import treelineUrl from '../../../assets/treeline.png';
 import overhangUrl from '../../../assets/overhang.png';
+import treesUrl from '../../../assets/trees.png';
 import decorUrl from '../../../assets/decor.png';
 import trackUrl from '../../../assets/track.png';
 import { EventBus, type UiToGame } from '../EventBus';
@@ -43,6 +44,7 @@ import {
   CLIFF_SHEET,
   TREELINE_SHEET,
   OVERHANG_SHEET,
+  TREE_SHEET,
   createTileTextures,
   loadTileSheets,
   tileFrame,
@@ -83,7 +85,8 @@ const SHEET_KEY: Record<
   track: TRACK_SHEET,
   cliffs: CLIFF_SHEET,
   treeline: TREELINE_SHEET,
-  overhang: OVERHANG_SHEET
+  overhang: OVERHANG_SHEET,
+  trees: TREE_SHEET
 };
 
 /**
@@ -425,6 +428,7 @@ export class WorldScene extends Phaser.Scene {
       cliffs: cliffsUrl,
       treeline: treelineUrl,
       overhang: overhangUrl,
+      trees: treesUrl,
       decor: decorUrl,
       track: trackUrl
     });
@@ -668,7 +672,13 @@ export class WorldScene extends Phaser.Scene {
 
       // Huts, places and landmarks are bottom-anchored so a tower stands on its tile and rises
       // into the one above; ground cover fills its cell.
-      const anchored = item.sheet === 'huts' || item.sheet === 'places' || item.sheet === 'landmarks';
+      // Bottom-anchored: a tower, a hut, a landmark and now a tree all stand *on* their tile and
+      // rise into the one above, rather than filling a cell the way ground cover does.
+      const anchored =
+        item.sheet === 'huts' ||
+        item.sheet === 'places' ||
+        item.sheet === 'landmarks' ||
+        item.sheet === 'trees';
       const sprite = this.add
         .image(cx, anchored ? item.y * TILE_SIZE + TILE_SIZE : cy, SHEET_KEY[item.sheet], item.frame)
         .setDepth(item.depth);

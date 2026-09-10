@@ -49,6 +49,41 @@ const PIECES = [
 /** Source sheets, read in order; their items concatenate into `PIECES`. */
 const SHEETS = ['sky-flora.png'];
 
+/**
+ * How tall a tree cell is, against the 128 a flora cell is wide.
+ *
+ * **A tree that reads at this scale cannot be square**, and the engine already has the contract for
+ * one that isn't: `places`, `huts` and `landmarks` are all drawn `setOrigin(0.5, 1)` and allowed to
+ * rise into the tile above. 128 x 176 is 32:44 at the same SCALE the rest of the art uses, and it
+ * is what the source's own proportion asks for -- the aero-mangroves arrive at roughly 543 x 724,
+ * which fits that box with two pixels to spare.
+ *
+ * Square would have worked and would have been wrong. Canon's tree *"plunges its roots into open
+ * sky"*, and the roots are half its height: fitting them into a 128 box shrinks the canopy to
+ * nothing, which is how the tree that shipped before ended up reading as a shrub.
+ */
+const TALL = { width: 128, height: 176 };
+
+/** The trees, in frame order. All stand on the ground, so all are bottom-anchored. */
+const TREES = [
+  { id: 'aero-mangrove-1', anchor: 'bottom' },
+  { id: 'aero-mangrove-2', anchor: 'bottom' },
+  { id: 'aero-mangrove-3', anchor: 'bottom' },
+  { id: 'aero-mangrove-4', anchor: 'bottom' }
+];
+
+/**
+ * The two sheets this builds, because they differ only in cell size and contents.
+ *
+ * Kept as a table rather than two copies of `main`: the second sheet arrived wanting a taller cell
+ * and nothing else, and a copy would have been two places to fix the next time the cut-out or the
+ * resampler changed.
+ */
+const OUTPUTS = [
+  { file: 'flora.png', cell: { width: CELL, height: CELL }, pieces: PIECES, from: SHEETS },
+  { file: 'trees.png', cell: TALL, pieces: TREES, from: ['sky-trees.png'] }
+];
+
 function decodePng(file) {
   const buf = fs.readFileSync(file);
   const width = buf.readUInt32BE(16);
@@ -396,16 +431,20 @@ function resample(src, sw, box, outW, outH) {
 
 function main() {
   const apply = process.argv.includes('--apply');
-  console.log(apply ? 'Building the flora sheet:' : 'Building the flora sheet (dry run, pass --apply to write):');
+  console.log(apply ? 'Building flora sheets:' : 'Building flora sheets (dry run, pass --apply to write):');
+  for (const out of OUTPUTS) buildSheet(out, apply);
+  if (!apply) console.log('\n  Nothing written.');
+}
 
+function buildSheet({ file, cell, pieces, from }, apply) {
   const frames = [];
-  for (const name of SHEETS) {
-    const file = path.join(SRC, name);
-    if (!fs.existsSync(file)) {
+  for (const name of from) {
+    const path_ = path.join(SRC, name);
+    if (!fs.existsSync(path_)) {
       console.log(`  ${name} not found -- skipped`);
       continue;
     }
-    const img = decodePng(file);
+    const img = decodePng(path_);
     const cut = cutOut(img);
     const items = findItems(cut, img.width, img.height);
     console.log(`  ${name} (${img.width}x${img.height}) -> ${items.length} items`);
@@ -415,37 +454,36 @@ function main() {
       // Fit inside the cell, keeping the aspect. A plant that is wider than tall stays wider than
       // tall: stretching it to a square is what turned a cap into a 2x-tall boulder in the rim
       // builder, and a cushion shrub is exactly that shape.
-      const scale = Math.min(CELL / bw, CELL / bh);
+      const scale = Math.min(cell.width / bw, cell.height / bh);
       const w = Math.max(1, Math.round(bw * scale));
       const h = Math.max(1, Math.round(bh * scale));
       frames.push({ art: resample(cut, img.width, box, w, h), w, h });
     }
   }
 
-  if (frames.length !== PIECES.length) {
-    console.log(`\n  ! found ${frames.length} items, expected ${PIECES.length} -- check the source sheet`);
+  if (frames.length !== pieces.length) {
+    console.log(`\n  ! found ${frames.length} items, expected ${pieces.length} -- check the source sheet`);
   }
 
-  const count = Math.min(frames.length, PIECES.length);
-  const sheetW = CELL * count;
-  const sheet = Buffer.alloc(sheetW * CELL * 4);
+  const count = Math.min(frames.length, pieces.length);
+  const sheetW = cell.width * count;
+  const sheet = Buffer.alloc(sheetW * cell.height * 4);
   for (let i = 0; i < count; i += 1) {
     const { art, w, h } = frames[i];
-    const piece = PIECES[i];
+    const piece = pieces[i];
     // Centred across, and against the edge the piece meets the world at.
-    const ox = i * CELL + Math.round((CELL - w) / 2);
-    const oy = piece.anchor === 'top' ? 0 : CELL - h;
+    const ox = i * cell.width + Math.round((cell.width - w) / 2);
+    const oy = piece.anchor === 'top' ? 0 : cell.height - h;
     for (let y = 0; y < h; y += 1) {
-      const from = y * w * 4;
-      art.copy(sheet, ((oy + y) * sheetW + ox) * 4, from, from + w * 4);
+      const fromRow = y * w * 4;
+      art.copy(sheet, ((oy + y) * sheetW + ox) * 4, fromRow, fromRow + w * 4);
     }
     console.log(`    ${piece.id.padEnd(17)} ${w}x${h}  anchored ${piece.anchor}`);
   }
 
-  const png = encodePng(sheetW, CELL, sheet);
-  console.log(`  -> flora.png ${sheetW}x${CELL}, ${count} frames, ${(png.length / 1024).toFixed(1)} KB`);
-  if (apply) fs.writeFileSync(path.join(OUT, 'flora.png'), png);
-  else console.log('\n  Nothing written.');
+  const png = encodePng(sheetW, cell.height, sheet);
+  console.log(`  -> ${file} ${sheetW}x${cell.height}, ${count} frames, ${(png.length / 1024).toFixed(1)} KB`);
+  if (apply) fs.writeFileSync(path.join(OUT, file), png);
 }
 
 main();

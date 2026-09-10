@@ -727,10 +727,13 @@ export const FLORA_ORDER = [
  * thing would be a shadow cast by nothing. It still draws in the canopy slot, because it hangs in
  * front of the rock rather than under it -- which is why it cannot simply be marked underfoot.
  */
+/** Which sheet a feature's frames index. See `FeatureArt.sheet`. */
+export type FeatureSheet = 'features' | 'flora' | 'trees';
+
 export interface FeatureArt {
   biome: BiomeId;
   frames: number[];
-  sheet?: 'features' | 'flora';
+  sheet?: FeatureSheet;
   contact?: false;
 }
 
@@ -766,7 +769,19 @@ export const FEATURES: Record<string, FeatureArt> = {
   // *Aero-Mangrove*, which grows on the rim of a floating island and plunges its roots into open
   // sky. The generated frames 34-37 are left on the features sheet unused rather than renumbering
   // everything after them for nothing.
-  aeroMangrove: { biome: 'sky_island', sheet: 'flora', frames: [0, 1] },
+  // **Four trees, and four *variants* rather than two sway poses.** The note on this table says a
+  // thing with a trunk carries mirrored variants so a run of tiles does not build a hedge down one
+  // side of the map, and `featureFrame` picks one by hash -- so four entries here is four different
+  // trees on the ground, which is what the sheet holds.
+  //
+  // It moved off the flora sheet because the flora cell is square and this tree cannot be. Canon's
+  // Aero-Mangrove *"plunges its roots into open sky"*, the roots are half its height, and fitting
+  // those into 128 shrinks the canopy to nothing -- which is exactly how the version before this
+  // ended up reading as a shrub. `trees.png` is 128 x 176 and bottom-anchored, the contract
+  // `places`, `huts` and `landmarks` already use. Flora frames 0 and 1 are left unused rather than
+  // renumbering the two entries after them for nothing, the same call the features sheet made at
+  // 34-37.
+  aeroMangrove: { biome: 'sky_island', sheet: 'trees', frames: [0, 1, 2, 3] },
   skyShrub: { biome: 'sky_island', sheet: 'flora', frames: [2, 3] },
   // Hangs from the rock above rather than standing on it, so it casts nothing. See `FeatureArt`.
   rootCurtain: { biome: 'sky_underside', sheet: 'flora', frames: [4, 5], contact: false }
@@ -784,7 +799,7 @@ export const FEATURE_RARITY = 12;
 /** Every frame available on a given ground, flattened. */
 /** One drawable feature: which sheet, which frame in it. */
 export interface FeaturePick {
-  sheet: 'features' | 'flora';
+  sheet: FeatureSheet;
   frame: number;
 }
 
@@ -900,7 +915,7 @@ export function overdrawIsUnderfoot(frame: number): boolean {
 }
 
 /** Does this feature frame lie on the ground rather than stand on it? */
-export function featureIsUnderfoot(frame: number, sheet: 'features' | 'flora' = 'features'): boolean {
+export function featureIsUnderfoot(frame: number, sheet: FeatureSheet = 'features'): boolean {
   for (const [name, entry] of Object.entries(FEATURES)) {
     if ((entry.sheet ?? 'features') !== sheet) continue;
     if (entry.frames.includes(frame)) return UNDERFOOT_FEATURES.has(name);
@@ -918,7 +933,7 @@ export function featureIsUnderfoot(frame: number, sheet: 'features' | 'flora' = 
  */
 export function featureCastsContact(
   frame: number,
-  sheet: 'features' | 'flora' = 'features'
+  sheet: FeatureSheet = 'features'
 ): boolean {
   for (const entry of Object.values(FEATURES)) {
     if ((entry.sheet ?? 'features') !== sheet) continue;
