@@ -9,6 +9,7 @@ import { readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
 import {
   GRID,
+  UNDERFOOT_FEATURES,
   EDGE_ORDER,
   EDGE_VARIANTS,
   CORNER_ORDER,
@@ -61,6 +62,9 @@ function pngSize(file: string): { width: number; height: number } {
  * rendered black, because the upload had failed and nothing said so. Counting both axes is what
  * makes these assertions independent of that layout.
  */
+/** Height of a cell in `trees.png`. Mirrors TALL in tools/build-flora.js -- 32:44 at SCALE 4. */
+const TREE_CELL_HEIGHT = 176;
+
 function frameCount(file: string, cellWidth = GRID, cellHeight = GRID): number {
   const { rows, width, height, stride } = decode(file);
   const columns = width / cellWidth;
@@ -478,15 +482,46 @@ describe('features may be tall because they stand aside', () => {
     expect(Math.max(...generated)).toBeLessThan(featureFrames);
     expect(new Set(generated).size).toBe(generated.length);
 
-    // The painted sheet is exact: it is built from a manifest, so every frame is claimed and
-    // nothing points past the end.
+    // **The painted sheets point past the end of nothing, and that is all they promise now.**
+    // `flora.png` was asserted exact -- every frame claimed, none spare -- on the reasoning that it
+    // is built from a manifest. It is, and the manifest outgrew it: the aero-mangroves moved to
+    // `trees.png`, which has a taller cell because a tree whose roots are half its height cannot
+    // be drawn in a square one. Flora frames 0 and 1 are unclaimed now, left rather than
+    // renumbering the two entries after them -- the same call the generated sheet made at 34-37,
+    // and recorded in the same place.
     const floraFrames = frameCount('assets/flora.png');
-    const painted = Object.values(FEATURES)
-      .filter((f) => f.sheet === 'flora')
-      .flatMap((f) => f.frames);
     expect(floraFrames, 'flora.png should hold one frame per piece').toBe(FLORA_ORDER.length);
-    expect(new Set(painted).size).toBe(painted.length);
-    expect(painted.length).toBe(floraFrames);
+
+    for (const [sheet, file] of [['flora', 'assets/flora.png'], ['trees', 'assets/trees.png']] as const) {
+      const entries = Object.entries(FEATURES).filter(([, f]) => f.sheet === sheet);
+      const claimed = entries.flatMap(([, f]) => f.frames);
+      expect(Math.max(...claimed), `${sheet} points past the end of its sheet`)
+        .toBeLessThan(frameCount(file, GRID, sheet === 'trees' ? TREE_CELL_HEIGHT : GRID));
+
+      // **Sharing frames is allowed; disagreeing about them is not.** This asserted every frame was
+      // claimed once, which caught nothing real and refused something reasonable: the same tree
+      // stands on the island and in the pool, and drawing it twice into the sheet to satisfy a
+      // count would be two copies of one picture.
+      //
+      // What the rule was protecting is real, though, and this is it stated properly.
+      // `featureIsUnderfoot` and `featureCastsContact` scan FEATURES and answer from the *first*
+      // entry whose frames include the number -- so two entries sharing a frame while disagreeing
+      // about whether it stands up or casts a shadow would silently take whichever was declared
+      // first, and the wrong answer would look exactly like the right one.
+      const byFrame = new Map<number, { underfoot: boolean; contact: boolean }[]>();
+      for (const [name, entry] of entries) {
+        for (const frame of entry.frames) {
+          const list = byFrame.get(frame) ?? [];
+          list.push({ underfoot: UNDERFOOT_FEATURES.has(name), contact: entry.contact !== false });
+          byFrame.set(frame, list);
+        }
+      }
+      for (const [frame, claims] of byFrame) {
+        const agreed = new Set(claims.map((c) => `${c.underfoot}/${c.contact}`));
+        expect(agreed.size, `${sheet} frame ${frame} is claimed with conflicting shadow rules`)
+          .toBe(1);
+      }
+    }
   });
 
   it('keeps anything tall away from the centre of its tile', () => {

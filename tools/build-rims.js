@@ -111,7 +111,17 @@ const SHEETS = [
   // Absent, the sheet is built with sixteen edge frames exactly as before -- which is what ships
   // today, and why this is safe to have in place before the art exists.
   { id: 'cliffs', from: 'cliff-edges.png', to: 'cliffs.png', corners: 'cliff-corners.png' },
-  { id: 'treeline', from: 'Gemini_tree-rim2.png', to: 'treeline.png' }
+  { id: 'treeline', from: 'Gemini_tree-rim2.png', to: 'treeline.png' },
+  // **The third rim, and the one that proves the format generalises.** Cliffs and treelines were
+  // both "the edge of something", and the note above them predicted a settlement palisade as the
+  // obvious third. It was a plant instead: growth spilling over the lip of a floating island and
+  // hanging into the air below it, which no ground texture can carry for the same reason a slope
+  // cannot.
+  //
+  // Arrives with real alpha rather than on magenta, which this builder already handles -- see the
+  // `alreadyCut` branch in `buildSheet`. That path exists because keying a sheet that already had
+  // alpha once ate the limestone highlights out of a cliff.
+  { id: 'overhang', from: 'overhang-edges.png', to: 'overhang.png' }
 ];
 
 // --- PNG ------------------------------------------------------------------

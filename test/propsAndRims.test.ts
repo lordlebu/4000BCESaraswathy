@@ -31,12 +31,19 @@ describe('things that stand up touch the ground', () => {
   it('gives every standing feature a shadow, and every flat one none', () => {
     for (const { id, built } of worlds) {
       const plan = planScene(built);
-      // Both sheets. Painted flora is a feature like any other and must obey the same rule -- and
-      // frame numbers are only unique within a sheet, so every question has to name one.
-      const feats = plan.filter((p) => p.sheet === 'features' || p.sheet === 'flora');
+      // **Every feature sheet, listed once.** This named `features` and `flora` by hand and then
+      // missed `trees` when the mangroves moved to their own taller cell -- so the trees kept
+      // casting shadows the scene drew and this counted neither, and the failure read as
+      // "expected 118 to be 102" rather than as "a sheet was added". Derived from one list now,
+      // so a fourth sheet joins the question instead of slipping past it.
+      //
+      // Frame numbers are only unique within a sheet, which is why every question below names one.
+      const FEATURE_SHEETS = ['features', 'flora', 'trees'] as const;
+      const isFeature = (p: { sheet: string }) =>
+        (FEATURE_SHEETS as readonly string[]).includes(p.sheet);
+      const feats = plan.filter(isFeature);
       const shadows = plan.filter((p) => p.sheet === 'contact');
-      const sheetOf = (p: { sheet: string }): 'features' | 'flora' =>
-        p.sheet === 'flora' ? 'flora' : 'features';
+      const sheetOf = (p: { sheet: string }) => p.sheet as (typeof FEATURE_SHEETS)[number];
       const standing = feats.filter((f) => !featureIsUnderfoot(f.frame, sheetOf(f)));
       const flat = feats.filter((f) => featureIsUnderfoot(f.frame, sheetOf(f)));
       // A root curtain hangs from rock above and touches no ground, so it stands without casting.
@@ -300,9 +307,15 @@ describe('the floating islands have something growing on them', () => {
     expect(sky.map(([name]) => name).sort()).toEqual(['aeroMangrove', 'crystalCluster', 'skyShrub']);
     // And the two plants are painted rather than drawn. The conifer that used to stand here was a
     // placeholder from the family `docs/art-direction.md` says a loop cannot draw.
+    //
+    // **Painted, on either painted sheet.** This named `flora` and had to widen: the mangrove moved
+    // to `trees.png`, whose cell is 128 x 176 because a tree with roots half its height loses its
+    // canopy in a square one. What the test is actually about is that neither plant is a generated
+    // stand-in, and that survives the move.
     for (const [name, entry] of sky) {
       if (name === 'crystalCluster') continue;
-      expect(entry.sheet, `${name} should come from the painted sheet`).toBe('flora');
+      expect(entry.sheet, `${name} should come from a painted sheet`).not.toBe('features');
+      expect(entry.sheet, `${name} should come from a painted sheet`).toBeDefined();
     }
   });
 
@@ -363,8 +376,9 @@ describe('the floating islands have something growing on them', () => {
   it('keeps every entry inside the sheet it names', () => {
     // An entry pointing past the end of its sheet draws nothing and fails silently, which is how a
     // whole biome's art goes missing without a test noticing. Per sheet now, because frame numbers
-    // are only unique within one: `build-features.js` emits 38 and `build-flora.js` emits 6.
-    const limit = { features: 38, flora: FLORA_ORDER.length };
+    // are only unique within one: `build-features.js` emits 38 and `build-flora.js` emits 6 of
+    // flora and 4 of trees.
+    const limit: Record<string, number> = { features: 38, flora: FLORA_ORDER.length, trees: 4 };
     for (const [name, entry] of Object.entries(FEATURES)) {
       const sheet = entry.sheet ?? 'features';
       for (const frame of entry.frames) {

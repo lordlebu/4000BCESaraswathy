@@ -526,6 +526,23 @@ export function treelineAt(here: BiomeId, there: BiomeId): boolean {
   return here === 'forest' && there !== 'forest';
 }
 
+/**
+ * Whether growth spills over this boundary.
+ *
+ * **The island's edge, and only the island's.** A shelf hanging in open air is the one place on any
+ * map where ground simply stops and there is nothing under it, which is what makes a plant reaching
+ * over the lip read as a plant rather than as scenery: it has somewhere to hang.
+ *
+ * Water counts as the ground it grows from -- a pool runs to the island's edge and goes over it,
+ * and the bank there is still the island. What it may not hang over is more island: that is a
+ * lawn, not an overhang.
+ */
+export function overhangAt(here: BiomeId, there: BiomeId): boolean {
+  const onTheIsland = here === 'sky_island' || here === 'sky_water';
+  const stillTheIsland = there === 'sky_island' || there === 'sky_water';
+  return onTheIsland && !stillTheIsland;
+}
+
 /** The frame for a landmark kind, or null if that kind has no art yet. */
 export function landmarkFrame(kindId: string): number | null {
   const index = LANDMARK_ORDER.indexOf(kindId);
@@ -710,10 +727,13 @@ export const FLORA_ORDER = [
  * thing would be a shadow cast by nothing. It still draws in the canopy slot, because it hangs in
  * front of the rock rather than under it -- which is why it cannot simply be marked underfoot.
  */
+/** Which sheet a feature's frames index. See `FeatureArt.sheet`. */
+export type FeatureSheet = 'features' | 'flora' | 'trees';
+
 export interface FeatureArt {
   biome: BiomeId;
   frames: number[];
-  sheet?: 'features' | 'flora';
+  sheet?: FeatureSheet;
   contact?: false;
 }
 
@@ -749,7 +769,26 @@ export const FEATURES: Record<string, FeatureArt> = {
   // *Aero-Mangrove*, which grows on the rim of a floating island and plunges its roots into open
   // sky. The generated frames 34-37 are left on the features sheet unused rather than renumbering
   // everything after them for nothing.
-  aeroMangrove: { biome: 'sky_island', sheet: 'flora', frames: [0, 1] },
+  // **Four trees, and four *variants* rather than two sway poses.** The note on this table says a
+  // thing with a trunk carries mirrored variants so a run of tiles does not build a hedge down one
+  // side of the map, and `featureFrame` picks one by hash -- so four entries here is four different
+  // trees on the ground, which is what the sheet holds.
+  //
+  // It moved off the flora sheet because the flora cell is square and this tree cannot be. Canon's
+  // Aero-Mangrove *"plunges its roots into open sky"*, the roots are half its height, and fitting
+  // those into 128 shrinks the canopy to nothing -- which is exactly how the version before this
+  // ended up reading as a shrub. `trees.png` is 128 x 176 and bottom-anchored, the contract
+  // `places`, `huts` and `landmarks` already use. Flora frames 0 and 1 are left unused rather than
+  // renumbering the two entries after them for nothing, the same call the features sheet made at
+  // 34-37.
+  aeroMangrove: { biome: 'sky_island', sheet: 'trees', frames: [0, 1, 2, 3] },
+  // **And in the pool, which is where a mangrove belongs.** A mangrove stands in water on stilt
+  // roots -- that is the whole shape of the tree and the reason canon named this one for it -- so
+  // the sky pool is the most natural ground on the island for it rather than an odd one.
+  //
+  // The pool is unwalkable, so a tree there can never stand between a player and where they are
+  // going; it is scenery in the one place on the map that is purely to be looked at.
+  wadingMangrove: { biome: 'sky_water', sheet: 'trees', frames: [0, 1, 2, 3] },
   skyShrub: { biome: 'sky_island', sheet: 'flora', frames: [2, 3] },
   // Hangs from the rock above rather than standing on it, so it casts nothing. See `FeatureArt`.
   rootCurtain: { biome: 'sky_underside', sheet: 'flora', frames: [4, 5], contact: false }
@@ -767,7 +806,7 @@ export const FEATURE_RARITY = 12;
 /** Every frame available on a given ground, flattened. */
 /** One drawable feature: which sheet, which frame in it. */
 export interface FeaturePick {
-  sheet: 'features' | 'flora';
+  sheet: FeatureSheet;
   frame: number;
 }
 
@@ -860,7 +899,15 @@ const UNDERFOOT_PLANTS = new Set(['moss-hills']);
  * tallest thing here at sixteen pixels while lying flat on the water. What decides it is what the
  * thing is.
  */
-const UNDERFOOT_FEATURES = new Set([
+/**
+ * Features that lie on the ground rather than standing up in it.
+ *
+ * **Exported for one test, and the test is worth it.** `featureIsUnderfoot` answers by *frame* and
+ * this set is keyed by *name*, so two entries sharing a frame while disagreeing about whether it
+ * stands up would silently take whichever was declared first -- and the wrong answer looks exactly
+ * like the right one. `frames.test.ts` asserts they agree; it cannot without seeing this.
+ */
+export const UNDERFOOT_FEATURES = new Set([
   'lotus',
   'steppingStones',
   'anthill',
@@ -883,7 +930,7 @@ export function overdrawIsUnderfoot(frame: number): boolean {
 }
 
 /** Does this feature frame lie on the ground rather than stand on it? */
-export function featureIsUnderfoot(frame: number, sheet: 'features' | 'flora' = 'features'): boolean {
+export function featureIsUnderfoot(frame: number, sheet: FeatureSheet = 'features'): boolean {
   for (const [name, entry] of Object.entries(FEATURES)) {
     if ((entry.sheet ?? 'features') !== sheet) continue;
     if (entry.frames.includes(frame)) return UNDERFOOT_FEATURES.has(name);
@@ -901,7 +948,7 @@ export function featureIsUnderfoot(frame: number, sheet: 'features' | 'flora' = 
  */
 export function featureCastsContact(
   frame: number,
-  sheet: 'features' | 'flora' = 'features'
+  sheet: FeatureSheet = 'features'
 ): boolean {
   for (const entry of Object.values(FEATURES)) {
     if ((entry.sheet ?? 'features') !== sheet) continue;
