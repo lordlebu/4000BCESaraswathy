@@ -18,7 +18,9 @@ import {
   EDGE_VARIANTS,
   cliffTurn,
   depthFor,
-  featureIsUnderfoot
+  featureIsUnderfoot,
+  featureCastsContact,
+  FLORA_ORDER
 } from '../src/game/frames';
 import type { CornerPiece, Edge } from '../src/game/frames';
 
@@ -29,12 +31,21 @@ describe('things that stand up touch the ground', () => {
   it('gives every standing feature a shadow, and every flat one none', () => {
     for (const { id, built } of worlds) {
       const plan = planScene(built);
-      const feats = plan.filter((p) => p.sheet === 'features');
+      // Both sheets. Painted flora is a feature like any other and must obey the same rule -- and
+      // frame numbers are only unique within a sheet, so every question has to name one.
+      const feats = plan.filter((p) => p.sheet === 'features' || p.sheet === 'flora');
       const shadows = plan.filter((p) => p.sheet === 'contact');
-      const standing = feats.filter((f) => !featureIsUnderfoot(f.frame));
-      const flat = feats.filter((f) => featureIsUnderfoot(f.frame));
+      const sheetOf = (p: { sheet: string }): 'features' | 'flora' =>
+        p.sheet === 'flora' ? 'flora' : 'features';
+      const standing = feats.filter((f) => !featureIsUnderfoot(f.frame, sheetOf(f)));
+      const flat = feats.filter((f) => featureIsUnderfoot(f.frame, sheetOf(f)));
+      // A root curtain hangs from rock above and touches no ground, so it stands without casting.
+      const casting = standing.filter((f) => featureCastsContact(f.frame, sheetOf(f)));
+      expect(casting.length, `${id}: nothing that stands and casts`).toBeGreaterThan(0);
+      expect(standing.length - casting.length, `${id}: expected some non-casting flora`)
+        .toBeGreaterThanOrEqual(0);
 
-      expect(shadows.length, `${id}: one shadow per standing feature`).toBe(standing.length);
+      expect(shadows.length, `${id}: one shadow per standing feature that casts`).toBe(casting.length);
       expect(standing.length, `${id}: should have things that stand up`).toBeGreaterThan(0);
 
       // The flat ones are the point of the split, so assert they exist rather than assuming.
@@ -286,7 +297,13 @@ describe('the floating islands have something growing on them', () => {
   it('gives sky_island more than one mineral thing to stand on it', () => {
     // Before this, 296 tiles of the Aravali carried a crystal shard and nothing else.
     const sky = Object.entries(FEATURES).filter(([, e]) => e.biome === 'sky_island');
-    expect(sky.map(([name]) => name).sort()).toEqual(['crystalCluster', 'skyPine', 'skyShrub']);
+    expect(sky.map(([name]) => name).sort()).toEqual(['aeroMangrove', 'crystalCluster', 'skyShrub']);
+    // And the two plants are painted rather than drawn. The conifer that used to stand here was a
+    // placeholder from the family `docs/art-direction.md` says a loop cannot draw.
+    for (const [name, entry] of sky) {
+      if (name === 'crystalCluster') continue;
+      expect(entry.sheet, `${name} should come from the painted sheet`).toBe('flora');
+    }
   });
 
   it('actually places them on the Aravali, which is the only map with islands', () => {
@@ -295,10 +312,10 @@ describe('the floating islands have something growing on them', () => {
     const { built } = only('field_map_aravali');
     const skyFrames = new Set([
       ...FEATURES.skyShrub!.frames,
-      ...FEATURES.skyPine!.frames
+      ...FEATURES.aeroMangrove!.frames
     ]);
     const placed = planScene(built).filter(
-      (p) => p.sheet === 'features' && skyFrames.has(p.frame)
+      (p) => p.sheet === 'flora' && skyFrames.has(p.frame)
     );
     expect(placed.length, 'no new island flora reached the map').toBeGreaterThan(0);
 
@@ -343,10 +360,32 @@ describe('the floating islands have something growing on them', () => {
     }
   });
 
-  it('keeps the new frames inside the sheet the builder wrote', () => {
-    // `tools/build-features.js` emits 38 frames. An entry pointing past the end draws nothing and
-    // fails silently, which is how a whole biome's art can go missing without a test noticing.
-    const highest = Math.max(...Object.values(FEATURES).flatMap((e) => e.frames));
-    expect(highest).toBe(37);
+  it('keeps every entry inside the sheet it names', () => {
+    // An entry pointing past the end of its sheet draws nothing and fails silently, which is how a
+    // whole biome's art goes missing without a test noticing. Per sheet now, because frame numbers
+    // are only unique within one: `build-features.js` emits 38 and `build-flora.js` emits 6.
+    const limit = { features: 38, flora: FLORA_ORDER.length };
+    for (const [name, entry] of Object.entries(FEATURES)) {
+      const sheet = entry.sheet ?? 'features';
+      for (const frame of entry.frames) {
+        expect(frame, `${name} points past the end of ${sheet}.png`).toBeLessThan(limit[sheet]);
+      }
+    }
+  });
+
+  it('hangs the root curtains off the underside, and lets them cast nothing', () => {
+    // The third case the shadow rule needed: not standing, not lying flat. A curtain hangs from the
+    // rock above and touches no ground, so an ellipse under it would be a shadow cast by nothing --
+    // but it still draws in front of that rock, so it cannot simply be called underfoot either.
+    expect(FEATURES.rootCurtain!.biome).toBe('sky_underside');
+    for (const frame of FEATURES.rootCurtain!.frames) {
+      expect(featureCastsContact(frame, 'flora'), 'a hanging root cast a ground shadow').toBe(false);
+      expect(featureIsUnderfoot(frame, 'flora'), 'a hanging root sank into the ground').toBe(false);
+    }
+    const { built } = only('field_map_aravali');
+    const placed = planScene(built).filter(
+      (p) => p.sheet === 'flora' && FEATURES.rootCurtain!.frames.includes(p.frame)
+    );
+    expect(placed.length, 'no root curtain reached the underside').toBeGreaterThan(0);
   });
 });

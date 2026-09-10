@@ -681,7 +681,43 @@ export function swayFrame(rest: number): number {
  * variants so a run of tiles does not build a hedge down one side of the map; low things that sit
  * centred carry one.
  */
-export const FEATURES: Record<string, { biome: BiomeId; frames: number[] }> = {
+/**
+ * Frame order of `assets/flora.png`, matching `PIECES` in `tools/build-flora.js`.
+ *
+ * A second sheet rather than more frames on `features.png`, because the two are built by different
+ * tools: `build-features.js` draws its 38 frames in code and would overwrite anything appended to
+ * them. Keeping them apart means neither builder can silently eat the other's work.
+ */
+export const FLORA_ORDER = [
+  'aero-mangrove-a',
+  'aero-mangrove-b',
+  'cushion-shrub-a',
+  'cushion-shrub-b',
+  'root-curtain-a',
+  'root-curtain-b'
+] as const;
+
+/**
+ * What a feature is drawn from, and whether it casts a contact shadow.
+ *
+ * `sheet` defaults to the generated features sheet; `'flora'` is the painted one. **Frame numbers
+ * are only unique within a sheet**, so anything that reads a frame back -- `featureIsUnderfoot`
+ * most of all -- has to be told which sheet it came from. Frame 0 is a neem tree on one and an
+ * aero-mangrove on the other.
+ *
+ * `contact: false` is for the one thing that neither stands nor lies: a curtain of root hangs from
+ * rock *above* and touches no ground at all, so the ellipse `planFeatures` puts under a standing
+ * thing would be a shadow cast by nothing. It still draws in the canopy slot, because it hangs in
+ * front of the rock rather than under it -- which is why it cannot simply be marked underfoot.
+ */
+export interface FeatureArt {
+  biome: BiomeId;
+  frames: number[];
+  sheet?: 'features' | 'flora';
+  contact?: false;
+}
+
+export const FEATURES: Record<string, FeatureArt> = {
   neem: { biome: 'plains', frames: [0, 1] },
   anthill: { biome: 'plains', frames: [2, 3] },
   bamboo: { biome: 'forest', frames: [4, 5] },
@@ -705,12 +741,18 @@ export const FEATURES: Record<string, { biome: BiomeId; frames: number[] }> = {
   basaltColumn: { biome: 'lava_field', frames: [30, 31] },
   snowSnag: { biome: 'snow', frames: [32, 33] },
   // **The islands were mineral and nothing else.** A crystal shard was the whole of what stood on
-  // 296 tiles of the Aravali, so the ground read as bare rock somebody had dropped a gem on. A
-  // shrub and a conifer give it something growing, and the shrub is the one that carries it: a
-  // cushion plant is a mass, which is the case a loop draws well, where the conifer is the
-  // placeholder family `docs/art-brief.md` now has a prompt to replace.
-  skyShrub: { biome: 'sky_island', frames: [34, 35] },
-  skyPine: { biome: 'sky_island', frames: [36, 37] }
+  // 296 tiles of the Aravali, so the ground read as bare rock somebody had dropped a gem on.
+  //
+  // Both plants are now painted rather than drawn. The conifer that stood here was always a
+  // placeholder -- `docs/art-direction.md` says a tree is a silhouette and lists *neem, palm, pine,
+  // mangrove* as what a loop cannot draw -- and canon names the right tree anyway: the
+  // *Aero-Mangrove*, which grows on the rim of a floating island and plunges its roots into open
+  // sky. The generated frames 34-37 are left on the features sheet unused rather than renumbering
+  // everything after them for nothing.
+  aeroMangrove: { biome: 'sky_island', sheet: 'flora', frames: [0, 1] },
+  skyShrub: { biome: 'sky_island', sheet: 'flora', frames: [2, 3] },
+  // Hangs from the rock above rather than standing on it, so it casts nothing. See `FeatureArt`.
+  rootCurtain: { biome: 'sky_underside', sheet: 'flora', frames: [4, 5], contact: false }
 };
 
 /**
@@ -723,20 +765,33 @@ export const FEATURES: Record<string, { biome: BiomeId; frames: number[] }> = {
 export const FEATURE_RARITY = 12;
 
 /** Every frame available on a given ground, flattened. */
+/** One drawable feature: which sheet, which frame in it. */
+export interface FeaturePick {
+  sheet: 'features' | 'flora';
+  frame: number;
+}
+
 const FEATURES_BY_BIOME = (() => {
-  const index: Partial<Record<BiomeId, number[]>> = {};
+  const index: Partial<Record<BiomeId, FeaturePick[]>> = {};
   for (const entry of Object.values(FEATURES)) {
-    (index[entry.biome] ??= []).push(...entry.frames);
+    const sheet = entry.sheet ?? 'features';
+    for (const frame of entry.frames) (index[entry.biome] ??= []).push({ sheet, frame });
   }
   return index;
 })();
 
-/** The feature frame for this tile, or null — which is the usual answer. */
-export function featureFrame(biome: BiomeId, roll: number, pick: number): number | null {
+/**
+ * The feature for this tile, or null — which is the usual answer.
+ *
+ * **One draw per tile, across both sheets.** The painted flora could have been a second pass, and
+ * then a sky-island tile would sometimes carry a crystal *and* a mangrove standing in each other.
+ * Putting them in one table keeps the choice single, which is what `FEATURE_RARITY` is tuning.
+ */
+export function featureFrame(biome: BiomeId, roll: number, pick: number): FeaturePick | null {
   if (roll % FEATURE_RARITY !== 0) return null;
-  const frames = FEATURES_BY_BIOME[biome];
-  if (!frames || frames.length === 0) return null;
-  return frames[pick % frames.length]!;
+  const picks = FEATURES_BY_BIOME[biome];
+  if (!picks || picks.length === 0) return null;
+  return picks[pick % picks.length]!;
 }
 
 // --- how the world is stacked --------------------------------------------
@@ -823,11 +878,31 @@ export function overdrawIsUnderfoot(frame: number): boolean {
 }
 
 /** Does this feature frame lie on the ground rather than stand on it? */
-export function featureIsUnderfoot(frame: number): boolean {
+export function featureIsUnderfoot(frame: number, sheet: 'features' | 'flora' = 'features'): boolean {
   for (const [name, entry] of Object.entries(FEATURES)) {
+    if ((entry.sheet ?? 'features') !== sheet) continue;
     if (entry.frames.includes(frame)) return UNDERFOOT_FEATURES.has(name);
   }
   return false;
+}
+
+/**
+ * Whether this feature puts a contact shadow on the ground under it.
+ *
+ * Standing things do; flat things do not, because a shadow under something already lying on the
+ * ground is a smudge rather than a cue. And one thing is neither: a root curtain hangs from rock
+ * above and touches no ground, so it casts nothing while still drawing in front of the rock. That
+ * is why this is its own question rather than the inverse of `featureIsUnderfoot`.
+ */
+export function featureCastsContact(
+  frame: number,
+  sheet: 'features' | 'flora' = 'features'
+): boolean {
+  for (const entry of Object.values(FEATURES)) {
+    if ((entry.sheet ?? 'features') !== sheet) continue;
+    if (entry.frames.includes(frame)) return entry.contact !== false;
+  }
+  return true;
 }
 
 /**

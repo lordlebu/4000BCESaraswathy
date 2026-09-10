@@ -305,7 +305,34 @@ has shipped three mechanics without — and here it would be worse than inert, b
 edge bands in favour of a frame that does not exist would leave the corner tile blank. The pipeline
 half is safe to build ahead of the art; the selection half is not.
 
-### Asset 7 — sky-island flora, and the intake it needs first
+### Asset 7 — sky-island flora · **shipped**
+
+Both halves landed. `tools/build-flora.js` is the intake the features sheet never had, and
+`assets/flora.png` carries six painted pieces: two aero-mangroves, two cushion shrubs, two root
+curtains. All six reach the Aravali — 27 placements, every piece used, and none on the three maps
+with no sky in them.
+
+**The conifer is gone.** It was always a placeholder from the family `docs/art-direction.md` says a
+loop cannot draw, and canon named the right tree all along: the *Aero-Mangrove*, which grows on the
+rim of a floating island and plunges its roots into open sky.
+
+Three rulings inside the wiring:
+
+- **One draw per tile, across both sheets.** The painted flora could have been a second pass, and
+  then a sky-island tile would sometimes carry a crystal *and* a mangrove standing in each other.
+  One table keeps the choice single, which is what `FEATURE_RARITY` is tuning.
+- **Frame numbers are only unique within a sheet.** Frame 0 is a neem tree on one and an
+  aero-mangrove on the other, so everything that reads a frame back — `featureIsUnderfoot` most of
+  all — now has to be told which sheet it came from.
+- **A root curtain is a third case the shadow rule did not have.** It neither stands nor lies flat:
+  it hangs from rock above and touches no ground, so the contact ellipse would be a shadow cast by
+  nothing — but it still draws in front of that rock, so it cannot be called underfoot either.
+  Hence `featureCastsContact` as its own question rather than the inverse of the depth slot.
+
+Frames 34–37 of the generated sheet are left in place, unused, rather than renumbering everything
+after them for nothing.
+
+### The original ask, for the record
 
 **This one is not just a prompt.** `tools/build-features.js` *draws* every feature in code — there
 is no path that ingests painted art into the features sheet, the way `build-rims.js` does for rims.
