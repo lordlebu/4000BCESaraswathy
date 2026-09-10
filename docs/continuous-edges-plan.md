@@ -224,17 +224,32 @@ you would see it on.
 
 **A terrain change.** See the measurement above.
 
-## The one thing that does need art
+## Closed
 
-The corner pieces and the straight bands are **two different paintings**. Mean colour matches almost
-exactly — `[128, 111, 92]` against `[135, 117, 94]` — but the corners are a fine cobble mosaic where
-the bands are large smooth boulders, so adjacent tiles read as two rocks. No build-time transform
-fixes texture frequency; only repainting one side to match the other does.
+All three mechanisms are built, and the art this called for has arrived. What is left is carried
+below as *recorded* rather than open — the distinction `docs/endgame-plan.md` uses for what it
+measured and chose not to chase.
 
-**When that round happens, commission the whole sheet at once** — sixteen edge frames and six corners
-in one painting — rather than matching a new corner to an old band. That resolves the mismatch by
-construction, which is the same argument that says a corner should be baked over the band it
-continues rather than scaled to match it.
+### The thing that needed art, and got it
+
+The corner pieces and the straight bands were **two different paintings**. Mean colour matched
+almost exactly — `[128, 111, 92]` against `[135, 117, 94]` — but the corners were a fine cobble
+mosaic where the bands were large smooth boulders, so adjacent tiles read as two rocks. No
+build-time transform fixes texture frequency.
+
+**Resolved by commissioning the whole sheet at once** — sixteen edge frames and six corners in one
+painting, rather than matching a new corner to an old band. That is the same argument that says a
+corner should be baked over the band it continues rather than scaled to match it: fix it by
+construction, not by transform.
+
+### What is recorded rather than open
+
+**The corners still sit lighter than the south band they continue.** Measured after the re-roll,
+they match the edge sheet *as a whole* almost exactly — `[141, 119, 83]` against `[145, 118, 81]` —
+and it is the **south row** that is deliberately darker at `[112, 92, 70]`, because it is a shaded
+wall where the other three are lit lips. So the corner is mismatched only against the one row it
+stands beside. A build-time gain would fix the horizontal arm and break the vertical one, which
+stands in for a lighter east band. It wants paint, not code, and it is not blocking anything.
 
 And state the numbers in the prompt, because the two things that went wrong twice were both
 unstated: **which quarter of each corner cell must be empty**, and **that the rock runs off the cell

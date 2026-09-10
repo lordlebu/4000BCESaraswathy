@@ -29,6 +29,7 @@ import {
   TERRAIN_ORDER,
   tileFrame,
   FEATURES,
+  FLORA_ORDER,
   FEATURE_RARITY,
   OVERDRAW_PLANTS,
   PRINTS_FRAME,
@@ -463,12 +464,29 @@ describe('features may be tall because they stand aside', () => {
   // world into a set of obstructions the traveller keeps vanishing into.
 
   it('has a frame for every feature the code indexes', () => {
-    const frames = frameCount('assets/features.png');
-    const claimed = Object.values(FEATURES).flatMap((f) => f.frames);
-    expect(Math.max(...claimed)).toBe(frames - 1);
-    // No frame claimed twice, and none left unclaimed.
-    expect(new Set(claimed).size).toBe(claimed.length);
-    expect(claimed.length).toBe(frames);
+    // Per sheet, because frame numbers are only unique within one -- frame 0 is a neem tree on the
+    // generated sheet and an aero-mangrove on the painted one.
+    //
+    // The generated sheet is the looser of the two: four of its frames (34-37) are the cushion and
+    // conifer the painted flora replaced, left in place rather than renumbering everything after
+    // them for nothing. So it asserts no frame is claimed twice and none points past the end, but
+    // not that every frame is claimed.
+    const featureFrames = frameCount('assets/features.png');
+    const generated = Object.values(FEATURES)
+      .filter((f) => (f.sheet ?? 'features') === 'features')
+      .flatMap((f) => f.frames);
+    expect(Math.max(...generated)).toBeLessThan(featureFrames);
+    expect(new Set(generated).size).toBe(generated.length);
+
+    // The painted sheet is exact: it is built from a manifest, so every frame is claimed and
+    // nothing points past the end.
+    const floraFrames = frameCount('assets/flora.png');
+    const painted = Object.values(FEATURES)
+      .filter((f) => f.sheet === 'flora')
+      .flatMap((f) => f.frames);
+    expect(floraFrames, 'flora.png should hold one frame per piece').toBe(FLORA_ORDER.length);
+    expect(new Set(painted).size).toBe(painted.length);
+    expect(painted.length).toBe(floraFrames);
   });
 
   it('keeps anything tall away from the centre of its tile', () => {

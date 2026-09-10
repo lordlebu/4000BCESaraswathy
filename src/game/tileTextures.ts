@@ -84,6 +84,9 @@ export const OVERDRAW_SHEET = 'overdraw';
 export const FEATURE_SHEET = 'features';
 export const EDGE_SHEET = 'edges';
 /** The rock face where a height terrace drops away. Same 4x4 layout as the torn masks. */
+/** The painted flora sheet, built by `tools/build-flora.js`. */
+export const FLORA_SHEET = 'flora';
+
 export const CLIFF_SHEET = 'cliffs';
 /** The wall of trees where a forest stops. Same layout again -- see `tools/build-rims.js`. */
 export const TREELINE_SHEET = 'treeline';
@@ -141,6 +144,7 @@ export function loadTileSheets(
     features: string;
     edges: string;
     cliffs: string;
+    flora: string;
     treeline: string;
     decor: string;
     track: string;
@@ -170,6 +174,7 @@ export function loadTileSheets(
   sheet(FEATURE_SHEET, urls.features, TILE_SIZE, TILE_SIZE);
   sheet(EDGE_SHEET, urls.edges, TILE_SIZE, TILE_SIZE);
   sheet(CLIFF_SHEET, urls.cliffs, TILE_SIZE, TILE_SIZE);
+  sheet(FLORA_SHEET, urls.flora, TILE_SIZE, TILE_SIZE);
   sheet(TREELINE_SHEET, urls.treeline, TILE_SIZE, TILE_SIZE);
   sheet(DECOR_SHEET, urls.decor, DECOR_CELL, DECOR_CELL);
   sheet(TRACK_SHEET, urls.track, TILE_SIZE, TILE_SIZE);

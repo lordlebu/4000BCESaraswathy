@@ -41,6 +41,7 @@ import {
   tileFrame,
   featureFrame,
   featureIsUnderfoot,
+  featureCastsContact,
   landmarkFrame,
   overdrawIsUnderfoot,
   overdrawFrame,
@@ -60,6 +61,7 @@ export type PlacementSheet =
   | 'huts'
   | 'overdraw'
   | 'features'
+  | 'flora'
   | 'places'
   | 'landmarks'
   | 'decor'
@@ -956,9 +958,12 @@ export function planOverdraw(world: FieldMapWorld['world'], builtOn: ReadonlySet
         // for keeping it is in `docs/rendering.md` under what survived the vignette.
         //
         // Only under the ones that stand. A fallen log, stepping stones and a tussock lie flat, and
-        // a shadow drawn under a thing already lying on the ground is a smudge -- `featureIsUnderfoot`
-        // is the same answer the depth slot is chosen from, so the two cannot disagree.
-        if (!featureIsUnderfoot(feature)) {
+        // a shadow drawn under a thing already lying on the ground is a smudge. A root curtain is
+        // the third case -- it hangs from rock above and touches no ground, so it casts nothing
+        // while still drawing in front of that rock, which is why this asks its own question rather
+        // than inverting the depth slot's.
+        if (!featureIsUnderfoot(feature.frame, feature.sheet) &&
+            featureCastsContact(feature.frame, feature.sheet)) {
           out.push({
             sheet: 'contact',
             frame: 0,
@@ -973,11 +978,11 @@ export function planOverdraw(world: FieldMapWorld['world'], builtOn: ReadonlySet
           });
         }
         out.push({
-          sheet: 'features',
-          frame: feature,
+          sheet: feature.sheet,
+          frame: feature.frame,
           x,
           y,
-          depth: featureIsUnderfoot(feature) ? underfoot : canopy
+          depth: featureIsUnderfoot(feature.frame, feature.sheet) ? underfoot : canopy
         });
         continue;
       }

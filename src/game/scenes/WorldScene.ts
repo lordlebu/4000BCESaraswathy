@@ -12,6 +12,7 @@ import placesUrl from '../../../assets/places.png';
 import hutsUrl from '../../../assets/huts.png';
 import overdrawUrl from '../../../assets/overdraw.png';
 import featuresUrl from '../../../assets/features.png';
+import floraUrl from '../../../assets/flora.png';
 import edgesUrl from '../../../assets/edges.png';
 import cliffsUrl from '../../../assets/cliffs.png';
 import treelineUrl from '../../../assets/treeline.png';
@@ -20,6 +21,7 @@ import trackUrl from '../../../assets/track.png';
 import { EventBus, type UiToGame } from '../EventBus';
 import {
   FEATURE_SHEET,
+  FLORA_SHEET,
   FOG_TEXTURE,
   HUT_SHEET,
   OVERDRAW_SHEET,
@@ -63,6 +65,7 @@ const SHEET_KEY: Record<
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
   features: FEATURE_SHEET,
+  flora: FLORA_SHEET,
   places: PLACE_SHEET,
   landmarks: LANDMARK_SHEET,
   decor: DECOR_SHEET,
@@ -398,6 +401,7 @@ export class WorldScene extends Phaser.Scene {
       huts: hutsUrl,
       overdraw: overdrawUrl,
       features: featuresUrl,
+      flora: floraUrl,
       edges: edgesUrl,
       cliffs: cliffsUrl,
       treeline: treelineUrl,
