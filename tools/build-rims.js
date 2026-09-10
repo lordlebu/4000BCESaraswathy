@@ -540,6 +540,73 @@ function contentBox(cell, width, height) {
   return { x0, x1, y0, y1 };
 }
 
+/**
+ * Where the tear goes, and how deep, as a fraction of the band's own depth.
+ *
+ * **The torn edge is the band's *inner* one, which is the opposite of where you first reach for.**
+ * A rim's outer silhouette is already ragged -- the art draws rubble and loose stone there, and the
+ * overhang in `scenePlan.ts` pushes it off the boundary. What still reads as a grid is the line on
+ * the *other* side: `place` lays each band as a rectangle, so the top of every south face is dead
+ * straight at exactly 62px across the full cell, sixteen such lines to a screen. Tearing it makes
+ * the wall's height vary along its length, which is what a rock face does.
+ *
+ * A third of the band rather than the mask's full 34% of a cell. `assets/edges.png` was drawn to
+ * bleed one ground into another across a whole tile; a face is 62px deep and 28 wide, and a tear at
+ * the mask's nominal reach would eat two thirds of it.
+ */
+const TEAR = 0.3;
+
+/** The depth a straight south band lands at, and so the line a corner's arm is torn along. */
+const SOUTH_DEPTH = Math.round(CELL * 0.48);
+
+/** The mask edge that tears a band's inner side: the far side from the one it is named for. */
+const INNER = { n: 's', e: 'w', s: 'n', w: 'e' };
+
+/**
+ * Bite a torn edge out of a band's inner side, using the masks the ground blend already uses.
+ *
+ * Reusing them rather than writing a second noise field is worth it for more than the lines saved:
+ * the tear on a cliff then has the same character as the tear between two grounds, so the map has
+ * one way of not being a grid rather than two that nearly match. `build-edges.js` explains why the
+ * mask looks the way it does -- varying depth, an eased falloff, four variants.
+ *
+ * `guard` is given a column (or row) and returns false where the tear must not bite. A corner piece
+ * needs it: its horizontal arm should tear like any band, but its vertical arm rises to the top of
+ * the cell and cutting a notch out of that would open a hole in the very turn the piece exists for.
+ */
+function tear(frame, edge, deep, masks, maskW, variant, guard = () => true) {
+  const horizontal = edge === 'n' || edge === 's';
+  const bite = Math.max(1, Math.round(deep * TEAR));
+  const maskFrame = ['n', 'e', 's', 'w'].indexOf(INNER[edge]) * VARIANTS + (variant % VARIANTS);
+  const mx = maskFrame * CELL;
+
+  for (let i = 0; i < bite; i += 1) {
+    // Read the mask at its own scale rather than stretching its falloff across the bite. Its reach
+    // already varies 19-30px per column, which is the raggedness wanted, and `bite` only caps how
+    // deep that is allowed to go.
+    const into = i;
+    for (let j = 0; j < CELL; j += 1) {
+      if (!guard(j)) continue;
+      // The inner edge, stepping inward by i.
+      const x = horizontal ? j : edge === 'e' ? CELL - deep + i : deep - 1 - i;
+      const y = horizontal ? (edge === 's' ? CELL - deep + i : deep - 1 - i) : j;
+      if (x < 0 || y < 0 || x >= CELL || y >= CELL) continue;
+
+      // The mask cell, read from its own named edge inward by the same amount.
+      const inner = INNER[edge];
+      const sx = inner === 'w' ? into : inner === 'e' ? CELL - 1 - into : j;
+      const sy = inner === 'n' ? into : inner === 's' ? CELL - 1 - into : j;
+      // **Thresholded, not blended, and that is the difference between a tear and a fade.** Using
+      // the mask's alpha as a multiplier is the obvious reading of it and gives a soft gradient
+      // along the top of every wall -- which is the dissolved shoreline `docs/endgame-plan.md`
+      // records as built and reverted. A tear keeps a hard boundary and varies *where* it is; the
+      // mask's per-column reach is exactly that variation.
+      if (masks[(sy * maskW + mx + sx) * 4 + 3] < 128) continue;
+      frame[(y * CELL + x) * 4 + 3] = 0;
+    }
+  }
+}
+
 /** Place a band of art against the correct edge of an otherwise empty cell. */
 function place(band, bandW, bandH, edge) {
   const out = Buffer.alloc(CELL * CELL * 4);
@@ -554,6 +621,15 @@ function place(band, bandW, bandH, edge) {
 }
 
 // --- build ----------------------------------------------------------------
+
+/** The torn masks the ground blend uses, loaded once. Absent, rims keep their straight inner edge. */
+let MASKS = null;
+function masks() {
+  if (MASKS !== undefined && MASKS !== null) return MASKS;
+  const file = path.join(OUT, 'edges.png');
+  MASKS = fs.existsSync(file) ? decodePng(file) : false;
+  return MASKS;
+}
 
 function buildSheet({ id, from, to, corners }, apply) {
   const file = path.join(SRC, from);
@@ -625,6 +701,9 @@ function buildSheet({ id, from, to, corners }, apply) {
       const bandH = horizontal ? Math.max(1, Math.round((deep / across) * CELL)) : CELL;
       const band = resample(keyed, cellW, box, bandW, bandH);
       const frame = place(band, bandW, bandH, edge);
+
+      const m = masks();
+      if (m) tear(frame, edge, horizontal ? bandH : bandW, m.data, m.width, v);
 
       const index = row * VARIANTS + v;
       const ox = index * CELL;
@@ -756,6 +835,25 @@ function buildSheet({ id, from, to, corners }, apply) {
             frame[f + 3] = Math.round(outA);
           }
         }
+      }
+
+      // Tear the corner's horizontal arm the same way its neighbours are torn, or a straight turn
+      // sits between two ragged runs and is the only tile-shaped thing left in the wall.
+      //
+      // The guard is the whole difficulty. A corner's vertical arm rises to the top of the cell, and
+      // the tear works inward from a fixed line -- so without it the bite would cut a notch clean
+      // through the arm, opening a hole in the turn the piece exists to draw. Columns whose art
+      // starts well above the band line are that arm, and are left alone.
+      // Caps are torn too. Their thick end is the one that joins a run, so leaving them straight put
+      // a 9px step exactly where a cap meets the band it is ending.
+      const m2 = masks();
+      if (m2) {
+        const bandTop = CELL - SOUTH_DEPTH;
+        const topAt = (x) => {
+          for (let y = 0; y < CELL; y += 1) if (frame[(y * CELL + x) * 4 + 3] > 24) return y;
+          return CELL;
+        };
+        tear(frame, 's', SOUTH_DEPTH, m2.data, m2.width, index, (x) => topAt(x) >= bandTop - 6);
       }
 
       const ox = sheetW + index * CELL;

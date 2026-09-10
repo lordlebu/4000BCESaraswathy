@@ -129,7 +129,40 @@ heuristics both got it wrong and looking at the sheet was right.
 
 Mechanism B is **built**. A and C are not.
 
-### A. A torn outer outline
+### A. A torn inner outline · **shipped, and the name was wrong**
+
+Written up as a *torn outer outline*, and that was the wrong edge. A rim's outer silhouette was
+never the problem: the art draws rubble and loose stone along it, and the overhang pushes it off the
+boundary anyway. What ruled the grid was the **inner** edge — `place` lays each band as a rectangle,
+so the top of every south face sat at exactly the same pixel across the whole cell, sixteen dead
+straight lines to a screen.
+
+`tear` in `build-rims.js` bites that line out with the masks `assets/edges.png` already holds, one
+mask variant per band variant, so the wall's height now varies 70–80px across a cell where it was a
+flat 66. Reusing the ground blend's masks rather than writing a second noise field is worth more
+than the lines saved: a tear on a cliff then has the same character as a tear between two grounds,
+so the map has one way of not being a grid rather than two that nearly match.
+
+**Thresholded, not blended, and that is the whole difference between a tear and a fade.** Using the
+mask's alpha as a multiplier is the obvious reading of it, and it was tried first: it gives a soft
+gradient along the top of every wall, which is the dissolved shoreline `docs/endgame-plan.md`
+records as built and reverted. A tear keeps a hard boundary and varies *where* it is; the mask's
+per-column reach is exactly that variation, so the mask is read at its own scale rather than
+stretched.
+
+Two things it must not do, both guarded:
+
+- **Cut through a corner's vertical arm.** That arm rises to the top of the cell and the tear works
+  inward from a fixed line, so without a guard the bite opens a hole in the very turn the piece
+  exists to draw. Columns whose art starts well above the band line are left alone.
+- **Skip the caps.** They were excluded at first and that put a 9px step exactly where a cap meets
+  the run it is ending — the thick end of a cap is the end that joins.
+
+`test/frames.test.ts` asserts the spread rather than the shape: the shape is noise, and the claim is
+only that the top is not a ruler. A flat top comes back as a spread of 0 and fails by name; a tear
+deep enough to eat the band fails the second assertion beside it.
+
+### A, as originally written
 
 Mask the rim's outer edge with the same torn masks the ground blend uses, keyed by `tileHash` so it
 is deterministic and stable across a save. The rim's *inner* edge — the one against the cell it
