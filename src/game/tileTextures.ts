@@ -115,6 +115,15 @@ export const DECOR_SHEET = 'decor';
  */
 export const TRACK_SHEET = 'track';
 
+/**
+ * The rope crossing: the same four pieces as the rail, in hemp and timber.
+ *
+ * A second sheet rather than a second flag -- see `planTrack`. Built by `tools/build-rope.js` from
+ * painted art at the same 32-pixel grid the rail is drawn at in code, so the two sit at the same
+ * resolution and the same whole-number upscale.
+ */
+export const ROPE_SHEET = 'rope';
+
 /** The 1x1 white pixel the fog layer stretches over each tile. See `createTileTextures`. */
 export const FOG_TEXTURE = 'fog:pixel';
 
@@ -163,6 +172,7 @@ export function loadTileSheets(
     treeline: string;
     overhang: string;
     trees: string;
+    rope: string;
     decor: string;
     track: string;
   }
@@ -197,6 +207,7 @@ export function loadTileSheets(
   sheet(OVERHANG_SHEET, urls.overhang, TILE_SIZE, TILE_SIZE);
   sheet(DECOR_SHEET, urls.decor, DECOR_CELL, DECOR_CELL);
   sheet(TRACK_SHEET, urls.track, TILE_SIZE, TILE_SIZE);
+  sheet(ROPE_SHEET, urls.rope, TILE_SIZE, TILE_SIZE);
 }
 
 /**

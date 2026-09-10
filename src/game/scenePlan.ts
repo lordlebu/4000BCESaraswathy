@@ -51,6 +51,7 @@ import {
   placeFrame,
   swayFrame
 } from './frames';
+import { isRail } from '../world/crossing';
 import { landmarkKindFor } from '../content/landmarks';
 import { band } from '../world/classify';
 import { tileHash } from '../world/rng';
@@ -74,6 +75,7 @@ export type PlacementSheet =
   | 'bank'
   | 'shore'
   | 'track'
+  | 'rope'
   | 'cliffs'
   | 'treeline'
   | 'overhang'
@@ -1426,8 +1428,18 @@ export function planTrack(world: FieldMapWorld['world']): Placement[] {
       // the ground.
       const overgrown = GROWS_OVER.has(tile.biome);
 
+      // **Which of the two things this stretch is, asked rather than assumed.**
+      //
+      // `crossing.ts` made rail and rope one `Tile.track` flag on purpose -- "a second flag would
+      // be a second thing to keep true" -- and gave `isRail` the job of separating them from where
+      // the islands are. It was right, and then nothing here called it: the sheet was `track`
+      // everywhere, so the rope ladder up an island's flank was drawn as iron railway and the two
+      // halves of the crossing looked identical.
+      //
+      // A sheet name, not a frame: the two draw the same four pieces in the same order, because
+      // `trackFrame`'s contract is about direction and wear rather than about material.
       out.push({
-        sheet: 'track',
+        sheet: isRail(world, y) ? 'track' : 'rope',
         frame: trackFrame(eastWest, overgrown),
         x,
         y,

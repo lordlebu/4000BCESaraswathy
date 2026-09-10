@@ -813,3 +813,46 @@ describe('the pool is waded, not stood in', () => {
     }
   });
 });
+
+describe('the rope is not drawn as iron', () => {
+  it('draws rail between the islands and rope everywhere else the line runs', () => {
+    // **`isRail` existed, was tested, and nothing drew from it.** `crossing.ts` made rail and rope
+    // one `Tile.track` flag on purpose -- "a second flag would be a second thing to keep true" --
+    // and gave `railSpan` the job of separating them. `planTrack` then drew the `track` sheet on
+    // every tile carrying the flag, so the rope ladder up an island's flank rendered as railway.
+    //
+    // The same shape as the three faults `CLAUDE.md` records under the rules layer, and the same
+    // guard: assert the drawing goes through the rule rather than around it.
+    const world = aravali();
+    const span = railSpan(world)!;
+    const laid = planTrack(world);
+    expect(laid.length, 'no line was drawn at all').toBeGreaterThan(20);
+
+    const iron = laid.filter((p) => p.sheet === 'track');
+    const hemp = laid.filter((p) => p.sheet === 'rope');
+    expect(iron.length, 'no rail between the islands').toBeGreaterThan(0);
+    expect(hemp.length, 'no rope reaching either shore').toBeGreaterThan(0);
+
+    for (const p of iron) {
+      expect(p.y, `rail drawn at row ${p.y}, outside the span ${span.from}-${span.to}`)
+        .toBeGreaterThanOrEqual(span.from);
+      expect(p.y).toBeLessThanOrEqual(span.to);
+    }
+    for (const p of hemp) {
+      expect(
+        p.y < span.from || p.y > span.to,
+        `rope drawn at row ${p.y}, inside the rail span ${span.from}-${span.to}`
+      ).toBe(true);
+    }
+  });
+
+  it('keeps both sheets on one frame contract', () => {
+    // The two draw the same four pieces in the same order, because `trackFrame` is about direction
+    // and wear rather than about material. A rope sheet with its own numbering would be a second
+    // contract to keep in step, which is the thing `Tile.track` was written to avoid.
+    for (const p of planTrack(aravali())) {
+      expect(p.frame, `${p.sheet} frame ${p.frame} is outside the four pieces`).toBeLessThan(4);
+      expect(p.frame).toBeGreaterThanOrEqual(0);
+    }
+  });
+});
