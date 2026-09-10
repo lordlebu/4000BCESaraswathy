@@ -172,7 +172,7 @@ to the art's own bounding box and fitting by width fixed both. Fitting by *area*
 the caps measure 433 × 202, and squaring that stands every boulder up 2× taller than the wall it is
 ending.
 
-## 3. The islands were bare rock with a gem on them · **shipped, and wants better art**
+## 3. The islands were bare rock with a gem on them · **shipped**
 
 296 tiles of `sky_island` on the Aravali, and the only thing standing on any of them was a crystal
 shard. The ground read as mineral and nothing else.
@@ -239,17 +239,38 @@ Two parts, and they compose:
 The gradient uses the same ink as the island's shadow on the water, so the two read as one light
 doing one thing rather than as two dark effects that happen to coincide.
 
-### What the reference frame shows that this does not yet do
+### What the reference frame shows that this does not do — and what comes after this plan
 
-The reference is columnar rock **tapering to a point** below each island, with rope ladders down
-and the rail structure between the two. The underside here is a flat band of tiles instead: the
-shade is right, the *silhouette* is not. That is a terrain-generation and art question rather than a
-lighting one, and it is not in this plan — but it is the next thing that would move that map, and
-Asset 7's root curtain is the small half of it.
+The reference is columnar rock **tapering to a point** below each island, with rope ladders down and
+the rail structure between the two. The underside here is a flat band of tiles instead: **the shade
+is right, the silhouette is not.**
+
+That is the honest limit of this programme, and it is worth being precise about why it is a
+different one rather than an unfinished corner of this. Everything in this plan is a *drawing*
+decision — which frame, at what depth, with what offset — and none of it changes what the world is.
+An island that tapers is the opposite: `sky_island` and `sky_underside` are stamped as rectangular
+patches by `world/crossing.ts`, so a taper is a change to the **shape of the ground**, and that is
+`world/`, a seed change, and a `SAVE_VERSION` bump.
+
+Asset 7's root curtain is the small half of it and has landed. The large half — a stamp that carves
+the underside into columns, plus the rim art a column needs — is the next programme, not the tail of
+this one.
+
+Two things this plan learned that it should carry over:
+
+- **Render the whole scene before believing anything.** The hedge maze was invisible for days
+  because every picture was one sheet over a flat colour. An island silhouette will be judged the
+  same way, and by the same mistake if nobody looks at terrain, decor and shade together.
+- **A patch stamped after classification is a place, not a climate.** That is the rule that put the
+  sky biomes on the map at all, and any taper has to be written inside it rather than around it.
 
 ---
 
-## The art still wanted
+## The art, all of it delivered
+
+Both sheets arrived and both are in the game. The prompts are kept below as the record of what was
+asked for and what the rounds of it produced, because in each case the prompt was wrong in ways that
+were not obvious until the frames were measured — and the corrections are the reusable part.
 
 ### Asset 2e — cliff corners and caps · **delivered, in the sheet**
 
