@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.18.0",
+  "canon_version": "2.19.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -2286,6 +2286,14 @@
       "renderable": true,
       "region": "region_tethys_sky_routes",
       "notes": "The inverted world beneath an island, where gravity is warped and rainwater falls upward. Sky coral calcifies here and holds the crumbling rock together; the Asura-tainted gargoyles shelter in it. Renderable since the tiles were painted: `sky_island.png` and `sky_underside.png` are sliced into the terrain sheet and carried in TERRAIN_ORDER."
+    },
+    {
+      "id": "sky_water",
+      "name": "Sky Water",
+      "realm": "sky",
+      "renderable": true,
+      "region": "region_tethys_sky_routes",
+      "notes": "Standing water caught on a floating island: rain that fell on the shelf and never reached the ground, held in a hollow of the lodestone rock and spilling off the lip as a fall. Its own biome rather than `river` because a pool with nothing under it is not a river -- it has no source, no mouth, and everything that lives in it was born there."
     },
     {
       "id": "open_sky",
