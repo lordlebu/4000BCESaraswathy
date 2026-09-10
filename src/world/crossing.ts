@@ -237,7 +237,10 @@ export function stampIslands(world: World, palette: ReadonlySet<BiomeId>): Point
  * Two, plus a row of raggedness. Enough to read as a wall of columns rather than a lip, and about
  * what the reference shows -- the face is roughly a fifth as deep as the island is wide.
  */
-const SHELF_DEPTH = 2;
+const SHELF_DEPTH = 4;
+
+/** The least any column hangs, so the island's east and west tips still stand on something. */
+const SHELF_MIN = 1;
 
 /**
  * Hang the rock face under the island's lower edge.
@@ -267,8 +270,20 @@ function hangTheShelf(world: World, centre: Point): void {
     }
     if (lip === null) continue;
 
+    // **Tapered, so the shelf reads as a body hanging under the island rather than a skirt.**
+    // A uniform depth is a rectangle with a ragged bottom: the same two rows under the middle of
+    // the island as under its far tips, which says the rock is a border rather than a mass. What
+    // the reference actually shows is a rounded underside, deepest below the centre and thinning
+    // to nothing at the edges -- and that is one cosine away, because the island is already an
+    // ellipse and the column's distance from its centre is already known.
+    //
+    // `SHELF_MIN` keeps a row under the tips. Letting the taper reach zero leaves the island's
+    // easternmost and westernmost columns hanging over open water with no rock under them at all,
+    // which reads as the grass being cut off with scissors.
+    const across = Math.min(1, Math.abs(dx) / (ISLAND_RADIUS_X + 1));
+    const rounded = Math.round(SHELF_DEPTH * Math.sqrt(Math.max(0, 1 - across * across)));
     // Ragged by a row, so the bottom of the face is broken rock rather than a ruled line.
-    const depth = SHELF_DEPTH + (tileHash(world.seed, x, 0, 'shelf') % 2);
+    const depth = Math.max(SHELF_MIN, rounded) + (tileHash(world.seed, x, 0, 'shelf') % 2);
     for (let i = 1; i <= depth; i += 1) {
       const tile = world.tiles[lip + i]?.[x];
       // Only over open water. A face that overwrites the next island, or a shore, is not hanging.
