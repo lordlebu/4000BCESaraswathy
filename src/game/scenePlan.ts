@@ -545,23 +545,63 @@ const OVERHANG: Record<Edge, { x: number; y: number }> = {
   w: { x: -0.06, y: 0 }
 };
 
-export function planCliffs(world: FieldMapWorld['world']): Placement[] {
+/**
+ * One rim pass, which both the rock and the trees are.
+ *
+ * A **rim** is the edge of something drawn on the boundary tile: the rock face where a terrace drops
+ * away, the wall of trees where a forest stops. They were two functions with the same body and
+ * different predicates, and keeping them apart cost exactly what you would expect — the overhang was
+ * written for the cliff and had to be *remembered* for the treeline, and the torn inner edge in
+ * `build-rims.js` only reached both because the sheets happen to share a builder.
+ *
+ * The reference that established this shape proved it is a slot rather than a coincidence: it drew
+ * the identical structure in nine materials, one of them a wooden palisade. So a third rim — a
+ * settlement palisade is the obvious one — is a predicate and a sheet name, not a new pass.
+ *
+ * What stays outside: the corner and cap pieces, and the talus. Those are things the *rock* does,
+ * and a forest edge has no elbow to turn or scree to shed.
+ */
+interface Rim {
+  /** Which sheet the bands are drawn from. */
+  sheet: PlacementSheet;
+  /** Used for the per-tile variant hash, so two rims on one tile do not pick the same variant. */
+  key: string;
+  /** Whether this tile shows a face on this edge. */
+  faces(x: number, y: number, edge: Edge): boolean;
+}
+
+function planRim(world: FieldMapWorld['world'], rim: Rim): Placement[] {
   const out: Placement[] = [];
   for (let y = 0; y < world.height; y += 1) {
     for (let x = 0; x < world.width; x += 1) {
-      const turn = turnAt(world, x, y);
       for (const edge of EDGE_ORDER) {
-        if (turn.suppress.includes(edge)) continue;
-        if (!facesAt(world, x, y, edge)) continue;
+        if (!rim.faces(x, y, edge)) continue;
         out.push({
-          sheet: 'cliffs',
-          frame: cliffFrame(edge, tileHash(world.seed, x, y, `cliff-${edge}`)),
+          sheet: rim.sheet,
+          frame: cliffFrame(edge, tileHash(world.seed, x, y, `${rim.key}-${edge}`)),
           x,
           y,
           offset: OVERHANG[edge],
           depth: depthFor(y, ROW_SLOT.undergrowth)
         });
       }
+    }
+  }
+  return out;
+}
+
+export function planCliffs(world: FieldMapWorld['world']): Placement[] {
+  // The bands, from the shared pass. A tile that turns suppresses the edges its corner stands in
+  // for, so the predicate asks the turn as well as the drop.
+  const out: Placement[] = planRim(world, {
+    sheet: 'cliffs',
+    key: 'cliff',
+    faces: (x, y, edge) =>
+      facesAt(world, x, y, edge) && !turnAt(world, x, y).suppress.includes(edge)
+  });
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      const turn = turnAt(world, x, y);
       // After the bands, so a corner overdraws anything a neighbour's band bleeds across the seam.
       for (const piece of turn.pieces) {
         out.push({
@@ -736,34 +776,20 @@ export function planCliffJoints(world: FieldMapWorld['world']): Placement[] {
  * the walker rather than sitting in a flat band.
  */
 export function planTreeline(world: FieldMapWorld['world']): Placement[] {
-  const out: Placement[] = [];
-  for (let y = 0; y < world.height; y += 1) {
-    for (let x = 0; x < world.width; x += 1) {
-      const here = world.tiles[y]![x]!.biome;
-      if (here !== 'forest') continue;
-      for (const edge of EDGE_ORDER) {
-        const { dx, dy } = EDGE_STEP[edge];
-        const nx = x + dx;
-        const ny = y + dy;
-        // The map edge is not a treeline, for the same reason it is not a cliff: the world stops
-        // there rather than the forest.
-        if (nx < 0 || ny < 0 || nx >= world.width || ny >= world.height) continue;
-        if (!treelineAt(here, world.tiles[ny]![nx]!.biome)) continue;
-        out.push({
-          sheet: 'treeline',
-          frame: cliffFrame(edge, tileHash(world.seed, x, y, `treeline-${edge}`)),
-          x,
-          y,
-          // The same overhang the rock gets. A rim is a slot, so what fixes the silhouette on one
-          // material fixes it on the other -- a canopy spilling over the open ground beside it is
-          // exactly what the wall of trees should do.
-          offset: OVERHANG[edge],
-          depth: depthFor(y, ROW_SLOT.undergrowth)
-        });
-      }
+  return planRim(world, {
+    sheet: 'treeline',
+    key: 'treeline',
+    faces: (x, y, edge) => {
+      const here = world.tiles[y]?.[x]?.biome;
+      if (here !== 'forest') return false;
+      const { dx, dy } = EDGE_STEP[edge];
+      // The map edge is not a treeline, for the same reason it is not a cliff: the world stops
+      // there rather than the forest.
+      const neighbour = world.tiles[y + dy]?.[x + dx];
+      if (!neighbour) return false;
+      return treelineAt(here, neighbour.biome);
     }
-  }
-  return out;
+  });
 }
 
 /**
