@@ -782,6 +782,13 @@ export const FEATURES: Record<string, FeatureArt> = {
   // renumbering the two entries after them for nothing, the same call the features sheet made at
   // 34-37.
   aeroMangrove: { biome: 'sky_island', sheet: 'trees', frames: [0, 1, 2, 3] },
+  // **And in the pool, which is where a mangrove belongs.** A mangrove stands in water on stilt
+  // roots -- that is the whole shape of the tree and the reason canon named this one for it -- so
+  // the sky pool is the most natural ground on the island for it rather than an odd one.
+  //
+  // The pool is unwalkable, so a tree there can never stand between a player and where they are
+  // going; it is scenery in the one place on the map that is purely to be looked at.
+  wadingMangrove: { biome: 'sky_water', sheet: 'trees', frames: [0, 1, 2, 3] },
   skyShrub: { biome: 'sky_island', sheet: 'flora', frames: [2, 3] },
   // Hangs from the rock above rather than standing on it, so it casts nothing. See `FeatureArt`.
   rootCurtain: { biome: 'sky_underside', sheet: 'flora', frames: [4, 5], contact: false }
@@ -892,7 +899,15 @@ const UNDERFOOT_PLANTS = new Set(['moss-hills']);
  * tallest thing here at sixteen pixels while lying flat on the water. What decides it is what the
  * thing is.
  */
-const UNDERFOOT_FEATURES = new Set([
+/**
+ * Features that lie on the ground rather than standing up in it.
+ *
+ * **Exported for one test, and the test is worth it.** `featureIsUnderfoot` answers by *frame* and
+ * this set is keyed by *name*, so two entries sharing a frame while disagreeing about whether it
+ * stands up would silently take whichever was declared first -- and the wrong answer looks exactly
+ * like the right one. `frames.test.ts` asserts they agree; it cannot without seeing this.
+ */
+export const UNDERFOOT_FEATURES = new Set([
   'lotus',
   'steppingStones',
   'anthill',

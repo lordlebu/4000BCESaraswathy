@@ -9,6 +9,7 @@ import { readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
 import {
   GRID,
+  UNDERFOOT_FEATURES,
   EDGE_ORDER,
   EDGE_VARIANTS,
   CORNER_ORDER,
@@ -492,12 +493,34 @@ describe('features may be tall because they stand aside', () => {
     expect(floraFrames, 'flora.png should hold one frame per piece').toBe(FLORA_ORDER.length);
 
     for (const [sheet, file] of [['flora', 'assets/flora.png'], ['trees', 'assets/trees.png']] as const) {
-      const claimed = Object.values(FEATURES)
-        .filter((f) => f.sheet === sheet)
-        .flatMap((f) => f.frames);
-      expect(new Set(claimed).size, `${sheet} claims a frame twice`).toBe(claimed.length);
+      const entries = Object.entries(FEATURES).filter(([, f]) => f.sheet === sheet);
+      const claimed = entries.flatMap(([, f]) => f.frames);
       expect(Math.max(...claimed), `${sheet} points past the end of its sheet`)
         .toBeLessThan(frameCount(file, GRID, sheet === 'trees' ? TREE_CELL_HEIGHT : GRID));
+
+      // **Sharing frames is allowed; disagreeing about them is not.** This asserted every frame was
+      // claimed once, which caught nothing real and refused something reasonable: the same tree
+      // stands on the island and in the pool, and drawing it twice into the sheet to satisfy a
+      // count would be two copies of one picture.
+      //
+      // What the rule was protecting is real, though, and this is it stated properly.
+      // `featureIsUnderfoot` and `featureCastsContact` scan FEATURES and answer from the *first*
+      // entry whose frames include the number -- so two entries sharing a frame while disagreeing
+      // about whether it stands up or casts a shadow would silently take whichever was declared
+      // first, and the wrong answer would look exactly like the right one.
+      const byFrame = new Map<number, { underfoot: boolean; contact: boolean }[]>();
+      for (const [name, entry] of entries) {
+        for (const frame of entry.frames) {
+          const list = byFrame.get(frame) ?? [];
+          list.push({ underfoot: UNDERFOOT_FEATURES.has(name), contact: entry.contact !== false });
+          byFrame.set(frame, list);
+        }
+      }
+      for (const [frame, claims] of byFrame) {
+        const agreed = new Set(claims.map((c) => `${c.underfoot}/${c.contact}`));
+        expect(agreed.size, `${sheet} frame ${frame} is claimed with conflicting shadow rules`)
+          .toBe(1);
+      }
     }
   });
 
