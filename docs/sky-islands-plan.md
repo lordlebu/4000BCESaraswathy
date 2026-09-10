@@ -380,7 +380,7 @@ call for the reason `frames.test.ts` gave at the time, and it leaves the most di
 the map as something to look at rather than to be in. Three asks, and the useful finding is that
 **each of them already has its seam cut in the codebase**. Nothing here is new machinery.
 
-## J. Wading · **the slow part is already free**
+## J. Wading · **shipped, and the art half was never needed** — see below
 
 The pool becomes walkable and the traveller goes into it to the waist.
 
@@ -410,7 +410,7 @@ four tiles; walkable water cannot sever anything. Keep the function until the ch
 `landform.test.ts` is the thing that will say — but expect to delete it, and say so in the commit
 rather than leaving a guard nobody can explain.
 
-## K. Roads · **the path already exists and is thrown away**
+## K. Roads · **blocked on art that can tile** — see below
 
 `easeRoutes` in `world/routes.ts` walks a cost-aware line between every pair of placed points of
 interest and softens the ground along it. Its doc comment says, in as many words:
@@ -438,7 +438,7 @@ and never on a tile that already carries `track`.
 **Art:** a worn dirt path, in the Asset 2d rim format — the same 4 × 4 grid, because a road is an
 edge-aware run exactly as a rail is.
 
-## L. Telling the rope from the rail · **the seam is cut, nothing reads it**
+## L. Telling the rope from the rail · **shipped** — see below
 
 `crossing.ts` exports `isRail(world, y)`, and its comment explains that rail and rope are one flag
 precisely so they cannot drift apart, with `railSpan` deciding which is which. `scenePlan.ts` does
@@ -450,6 +450,55 @@ which is already written, already tested, and already the single source of that 
 
 **Art:** rope ladder and hanging cable, SNES, in the same track-sheet layout `tools/build-track.js`
 already reads.
+
+## What round three measured
+
+**J shipped without the quad, and the plan above was talked out of it.** The plan called for a
+baked gradient drawn over the lower part of the figure, and the ask that came back was *"why does
+wading need art, can't you split the sprite and change the part below waist to a translucent
+gradient?"* — which is better, and Phaser 4 does it on one sprite: `setAlpha(topLeft, topRight,
+bottomLeft, bottomRight)` takes four corner values, so `setAlpha(1, 1, 0.42, 0.42)` ramps the
+existing walker to translucent from the waist down with no crop, no second sprite and no second
+animation. The shadow is hidden while wading, because a figure standing in water casts onto water.
+What did ship as a baked texture is the waterline itself — one narrow quad at 0.46 of a tile,
+narrowed from full width after its straight ends showed outside the silhouette.
+
+**`floodTheSlivers` did not go, and the plan was wrong to expect it to.** The reasoning read
+soundly — walkable water cannot sever an island — and it is true on the default seed, where
+deleting the function left everything green. A twelve-seed sweep found seed `a` still stranding a
+tile: the pool is not the only thing that cuts an island, and a top can be severed by the shape it
+was stamped in. The function stayed, the sweep became a permanent test, and the lesson is the one
+`docs/testing.md` already carries — one seed is not a measurement.
+
+**L shipped, and the road half of the same batch did not.** The rope sheet ingests at `track.png`'s
+exact shape and its four cells each reach exactly the edges they should, so `tools/build-rope.js`
+is a crop, a resample and a fourteen-colour snap. Confirmed on screen at the boundary: plank and
+hemp north of the rail span, thin dark iron inside it.
+
+The road sheet cannot tile, and the numbers are worth keeping because they say what to ask for
+instead. Its eight cells were drawn as **eight pictures of a road** rather than eight tiles cut
+from one grid: no cell reaches any edge of its box, the content boxes are all different sizes, the
+crossing width runs from 25% to 81% of its box, and the centre line sits anywhere from 24% to 72%
+across. Two pieces laid side by side therefore meet at neither the same width nor the same height.
+It is in `assets/source/dump/` rather than deleted, and K stays open until a sheet arrives whose
+run **touches the cell edge at a fixed width and a fixed centre** — which is the whole of what a
+tiling run needs and the one thing the prompt did not say.
+
+**And one thing round three did not plan for, found by looking at the render.** The aero-mangrove
+was landing on the island's interior. Its sprite is half root and the wedge of rock those roots
+grip — canon has it *"growing on the absolute edges of floating islands, plunging its roots
+downward into the open sky"* — and placement asked only which biome the tile was. Inland there is
+no sky under it, so it drew as a slab of rock hanging a tile above the grass.
+
+`FeatureArt.rim` now gates a feature to a tile whose ground stops on at least one side, asking the
+same question `planOverhang` asks per edge, so the tree and the rock face beneath it cannot
+disagree about where the edge is. It picks from a second per-biome list rather than being dropped
+after the pick, because dropping it would thin the island's middle — where the walking happens — by
+however many frames the rim entry happens to carry.
+
+This is the same shape as every other fault this document records: **the rule was right, the
+drawing never asked.** It is also the argument for the last line of round one — render the whole
+scene before believing any of it. Every test passed while a tree floated.
 
 ## What round three is not
 
