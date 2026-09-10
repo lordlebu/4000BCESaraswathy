@@ -22,7 +22,7 @@ import {
 } from './crossing';
 import { stampBasalt } from './basalt';
 import { easeRoutes, tourOrder } from './routes';
-import { generateWorld, isWalkable } from './generate';
+import { generateWorld, isWalkable, reachableFrom } from './generate';
 import { tileHash } from './rng';
 import type { BiomeId, Point, Tile, World } from './types';
 import { type FieldMap, type PointOfInterest, poisOn } from '../content/places';
@@ -239,6 +239,8 @@ function pick(
   candidates: Point[],
   reject: (at: Point) => boolean
 ): Point | null {
+  // The landmark carries a `terrain` and a `name` as well as a position, and both stay: the great
+  // banyan is the same banyan wherever it is standing. Only where it is moves.
   let best: Point | null = null;
   let bestScore = -Infinity;
 
@@ -538,6 +540,8 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // The strait is cut after the generator chose a start, so on a crossing that start can be left
   // standing in open water -- or, as it was, on the far shore. Only moves it when it must.
   if (palette.has('sky_island')) startOnTheSouthernShore(world);
+  // The landmark was chosen against a world this palette has since rewritten. See `groundTheLandmark`.
+  groundTheLandmark(world);
   const walkable = new Set<BiomeId>(
     world.tiles.flat().map((t) => t.biome).filter((b) => palette.has(b))
   );
@@ -683,6 +687,59 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   if (landmark) landmark.biome = 'landmark';
 
   return { fieldMap, world, placed, unplaced };
+}
+
+/**
+ * Move the landmark onto ground a walker can reach, if the palette has stranded it.
+ *
+ * **The landmark is chosen against a world that no longer exists by the time it is stamped.**
+ * `placeLandmark` picks a distant *reachable* tile with an interesting biome, which is correct for
+ * the procedural walk it was written for. A field map then runs `applyPalette` over the whole grid
+ * and stamps a strait, two islands and a rail across it — and none of that re-checks a decision
+ * made earlier. The coordinates survive; the ground under them does not.
+ *
+ * Measured on the Aravali, which is about half water: over twelve seeds the landmark came out
+ * **walled in on six of them** — sitting on a tile ringed by open sea with no walkable neighbour at
+ * all. The compass in the older landmark loop pointed at a great banyan nobody could ever stand
+ * beside, and `landmarkHint` promised it was a day's walk away.
+ *
+ * So this runs after every stamp and before placement, and only when it must: if the landmark has
+ * somewhere to be reached from, it does not move. When it must move it goes to the **nearest
+ * reachable tile**, which keeps the distance the loop is built on — the old spot was already far
+ * from the start, and a neighbour of it still is.
+ *
+ * Nothing random, for the reason everything in `world/` is: the same seed must produce the same
+ * map, and a relocation that drew a number would break that.
+ */
+function groundTheLandmark(world: World): void {
+  const reachable = reachableFrom(world.tiles, world.width, world.height, world.start);
+  const standing = (x: number, y: number) => reachable.has(`${x},${y}`);
+
+  // Already fine: either the landmark's own tile can be walked to, or something beside it can.
+  const beside = [
+    { x: world.landmark.x, y: world.landmark.y },
+    { x: world.landmark.x - 1, y: world.landmark.y },
+    { x: world.landmark.x + 1, y: world.landmark.y },
+    { x: world.landmark.x, y: world.landmark.y - 1 },
+    { x: world.landmark.x, y: world.landmark.y + 1 }
+  ];
+  if (beside.some((p) => standing(p.x, p.y))) return;
+
+  let best: Point | null = null;
+  let nearest = Infinity;
+  for (const row of world.tiles) {
+    for (const tile of row) {
+      if (!standing(tile.x, tile.y)) continue;
+      const away = Math.abs(tile.x - world.landmark.x) + Math.abs(tile.y - world.landmark.y);
+      // Ties break toward the top-left by scanning order, which is arbitrary and deterministic --
+      // the two properties this needs.
+      if (away < nearest) {
+        nearest = away;
+        best = { x: tile.x, y: tile.y };
+      }
+    }
+  }
+  if (best) world.landmark = { ...world.landmark, x: best.x, y: best.y };
 }
 
 /** The point of interest standing on a tile, if any. */

@@ -199,8 +199,8 @@
   {
     "id": "sky_water",
     "name": "Sky Water",
-    "walkable": false,
-    "travelCost": null,
+    "walkable": true,
+    "travelCost": 3,
     "tone": "weightless",
     "color": "#8fd6e6",
     "symbol": "≋",

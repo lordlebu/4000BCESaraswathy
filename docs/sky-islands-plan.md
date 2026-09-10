@@ -370,3 +370,90 @@ does: a delta cannot grow a pool however the palette is written.
 
 F and G next — two texture swaps, and they will change the look of the map more than anything else
 here. Then H and I, which are new sheets and new intakes.
+
+---
+
+# Round three: the pool is scenery, and three things that are nearly free
+
+Round two closed with the islands looking right and the pool **unwalkable** — which was the correct
+call for the reason `frames.test.ts` gave at the time, and it leaves the most distinctive ground on
+the map as something to look at rather than to be in. Three asks, and the useful finding is that
+**each of them already has its seam cut in the codebase**. Nothing here is new machinery.
+
+## J. Wading · **the slow part is already free**
+
+The pool becomes walkable and the traveller goes into it to the waist.
+
+**Slowness costs nothing.** `WorldScene` computes `duration = STEP_MS * cost * pace`, where `cost`
+is `travelCost` from `data/biomes.json`. Sky water at `travelCost: 3` is already a wade — the same
+number that makes mountains three times the walk of plains. There is no new movement code and no
+special case.
+
+**The waterline is one baked quad, not a second sprite.** The obvious implementation is two cropped
+copies of the figure, and it is worse: it doubles the sprite the animation drives and puts the
+seam's exact height in two places. Instead, when the traveller stands on `sky_water`, draw a single
+tile-wide quad over the lower part of him at `walker + 1`, filled with a vertical gradient baked
+once — dense at the waterline, thinning downward. `undersideShadeKey` is the same texture built the
+same way for the same reason, and the gradient *is* the "gradient of translucency" asked for: the
+figure shows through it more the deeper it goes.
+
+**What the decor test will say, and why it is right to overrule it here.** Making a biome walkable
+brings back *"walkable ground with nothing lying on it"* — the objection that made the pool
+unwalkable in the first place. `landmark` is already in the exempt list while being walkable, on
+the grounds that it stays clear so the thing standing on it is what the eye finds. A pool earns the
+same exemption for a better reason: **you wade it, you do not stand on it**, so there is no ground
+there to put anything on. Add `sky_water` to the `bare` set with that sentence, rather than
+inventing decor to satisfy a count.
+
+**And `floodTheSlivers` can go.** It exists because unwalkable water severed the island and stranded
+four tiles; walkable water cannot sever anything. Keep the function until the change is measured —
+`landform.test.ts` is the thing that will say — but expect to delete it, and say so in the commit
+rather than leaving a guard nobody can explain.
+
+## K. Roads · **the path already exists and is thrown away**
+
+`easeRoutes` in `world/routes.ts` walks a cost-aware line between every pair of placed points of
+interest and softens the ground along it. Its doc comment says, in as many words:
+
+> *"Returns the tiles that were changed, which is what a caller needs to draw the road or to assert
+> that a route exists."*
+
+`fieldMap.ts` calls it and **discards the return value.** So every map already computes the road
+somebody would have walked, and nothing has ever drawn it. That is the exact shape of the three
+faults `CLAUDE.md` records under the rules layer — a rule written, tested, and with no caller.
+
+The work is therefore small and entirely known:
+
+1. Keep the returned tiles and set a `road?: boolean` on each — a flag, not a biome, for the reason
+   `Tile.track`'s comment already gives: *"a bridge does not replace the water it spans"*, and a
+   worn path does not replace the grass it is worn into.
+2. `planRoad` is `planTrack` with a different flag and a different sheet, including its trick of
+   reading the neighbours to decide which way the run goes.
+3. `SAVE_VERSION` moves: a tile gains a field.
+
+**The one judgement call is where a road may not go.** The rail is already drawn from a flag and
+the two would fight on the crossing; a road across open sea is nonsense in any case. Ground only,
+and never on a tile that already carries `track`.
+
+**Art:** a worn dirt path, in the Asset 2d rim format — the same 4 × 4 grid, because a road is an
+edge-aware run exactly as a rail is.
+
+## L. Telling the rope from the rail · **the seam is cut, nothing reads it**
+
+`crossing.ts` exports `isRail(world, y)`, and its comment explains that rail and rope are one flag
+precisely so they cannot drift apart, with `railSpan` deciding which is which. `scenePlan.ts` does
+not import it. `planTrack` draws the same sheet from the beach to the far island, so the rope
+ladder up an island's flank is drawn as iron rail — which is why they look identical.
+
+So: a second sheet, and one call to `isRail` to choose between them. The rule that says which is
+which is already written, already tested, and already the single source of that answer.
+
+**Art:** rope ladder and hanging cable, SNES, in the same track-sheet layout `tools/build-track.js`
+already reads.
+
+## What round three is not
+
+**It is not buildings.** Those are their own programme and their own document — see
+`docs/sky-buildings-plan.md`. A bridge piece, a ruined marble temple and a turning windmill are
+three new sheets, one new placement contract and an animation that is not the two-frame sway, and
+folding them in here would make a plan that cannot be finished in one pass.

@@ -664,7 +664,13 @@ describe('the decor sheet and the code agree', () => {
     // The exclusions are deliberate and named, so adding a biome cannot quietly join them:
     // `sea` is not walked on, `landmark` stays clear so the thing standing on it is what the eye
     // finds, and `sky_underside` is the far side of a boundary rather than ground.
-    const bare = new Set(['sea', 'landmark', 'sky_underside', 'open_sky', 'underworld']);
+    // `sky_water` is walkable and exempt, which needs saying rather than assuming. A pool has no
+    // ground in it: you **wade** it, you do not stand on it, so there is nothing there for a prop
+    // to lie on. That is the same shape as `landmark`'s exemption -- walkable, deliberately bare --
+    // for a different reason, and it is why this list names its members rather than deriving them.
+    const bare = new Set([
+      'sea', 'landmark', 'sky_underside', 'sky_water', 'open_sky', 'underworld'
+    ]);
     const walkable = (biomesData as { id: string; walkable: boolean }[])
       .filter((b) => b.walkable && !bare.has(b.id))
       .map((b) => b.id);

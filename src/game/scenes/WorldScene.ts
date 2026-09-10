@@ -18,6 +18,7 @@ import cliffsUrl from '../../../assets/cliffs.png';
 import treelineUrl from '../../../assets/treeline.png';
 import overhangUrl from '../../../assets/overhang.png';
 import treesUrl from '../../../assets/trees.png';
+import ropeUrl from '../../../assets/rope.png';
 import decorUrl from '../../../assets/decor.png';
 import trackUrl from '../../../assets/track.png';
 import { EventBus, type UiToGame } from '../EventBus';
@@ -36,6 +37,7 @@ import {
   cloudTextureKey,
   skyWaterTileKey,
   waterfallTextureKey,
+  waterlineKey,
   TILE_SIZE,
   blendTextureKey,
   shoreTextureKey,
@@ -45,6 +47,7 @@ import {
   TREELINE_SHEET,
   OVERHANG_SHEET,
   TREE_SHEET,
+  ROPE_SHEET,
   createTileTextures,
   loadTileSheets,
   tileFrame,
@@ -86,7 +89,8 @@ const SHEET_KEY: Record<
   cliffs: CLIFF_SHEET,
   treeline: TREELINE_SHEET,
   overhang: OVERHANG_SHEET,
-  trees: TREE_SHEET
+  trees: TREE_SHEET,
+  rope: ROPE_SHEET
 };
 
 /**
@@ -219,6 +223,16 @@ const ZOOM_STEP_RATIO = 1.35;
  */
 const STEP_MS = 425;
 
+/**
+ * How much of the traveller survives at his feet while he is wading.
+ *
+ * Phaser interpolates between the corner alphas, so this is the bottom of a ramp that starts at 1
+ * at his head. Low enough that the legs plainly go into the water, high enough that he is still a
+ * figure rather than a floating torso -- below about a third he stops reading as a person standing
+ * in something and starts reading as one cut in half.
+ */
+const WADE_ALPHA = 0.42;
+
 /** Keys that change the zoom. `0` gives it back to the automatic fit. */
 const ZOOM_KEYS: Record<string, number | 'reset'> = {
   Equal: 1,
@@ -295,6 +309,13 @@ export class WorldScene extends Phaser.Scene {
    * members would draw nothing and say nothing, so they are two lists.
    */
   private falls: { sprite: Phaser.GameObjects.Image; rest: number; lean: number; phase: number }[] = [];
+  /**
+   * The water drawn over the traveller's legs while he is wading. Hidden everywhere else.
+   *
+   * One sprite for the whole journey rather than one per water tile: it follows him, and only one
+   * of him exists.
+   */
+  private waterline!: Phaser.GameObjects.Image;
   private fogSprites: Phaser.GameObjects.Image[][] = [];
   /**
    * Every static thing that belongs to a tile, so it can be hidden when the camera cannot see it.
@@ -429,6 +450,7 @@ export class WorldScene extends Phaser.Scene {
       treeline: treelineUrl,
       overhang: overhangUrl,
       trees: treesUrl,
+      rope: ropeUrl,
       decor: decorUrl,
       track: trackUrl
     });
@@ -751,6 +773,19 @@ export class WorldScene extends Phaser.Scene {
       .setOrigin(0.5, 1)
       .setDisplaySize(PLAYER_FRAME.width * figureScale, PLAYER_FRAME.height * figureScale);
     this.player.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+
+    // After the player, so it is over him in the display list as well as in depth -- the same
+    // argument the shadow makes in reverse, and equal depths resolve by insertion order.
+    //
+    // Two thirds of a tile tall: the traveller stands 40 art pixels in a 32 cell and is anchored by
+    // his feet, so this covers him from about the knee down and leaves the diary and the staff
+    // clear of it.
+    this.waterline = this.add
+      .image(0, 0, waterlineKey(this))
+      .setOrigin(0.5, 1)
+      .setDisplaySize(TILE_SIZE * 0.86, TILE_SIZE * 0.62)
+      .setVisible(false);
+
     this.updateAnimation();
     this.placePlayer(this.at);
   }
@@ -797,6 +832,36 @@ export class WorldScene extends Phaser.Scene {
    */
   private moveShadow(): void {
     this.shadow.setPosition(this.player.x, this.player.y - 1);
+    this.moveWaterline();
+  }
+
+  /**
+   * Keep the water on the traveller's legs, and only while he is in it.
+   *
+   * Read off the *tile he is heading to* rather than off his tween position, so he enters the water
+   * as he arrives rather than halfway across the boundary -- the same reason `moveShadow` reads the
+   * sprite and this reads the tile: one is about where he looks, the other about what he is in.
+   */
+  private moveWaterline(): void {
+    const wading = this.world.tiles[this.at.y]?.[this.at.x]?.biome === 'sky_water';
+    this.waterline.setVisible(wading);
+    if (wading) this.waterline.setPosition(this.player.x, this.player.y);
+
+    // **The figure itself goes translucent downward, and it costs one sprite.**
+    //
+    // The obvious build is two cropped copies -- an opaque upper half and a faded lower one -- and
+    // the reason not to is that it doubles the sprite the walk animation drives and puts the
+    // waterline's height in two places that must agree forever. Phaser carries a per-corner alpha
+    // on every game object, so one sprite ramps from opaque at the head to `WADE_ALPHA` at the
+    // feet with no crop, no second animation and no art.
+    //
+    // The ramp is linear over the whole figure rather than starting at the waist, which is not
+    // quite what "lower body" means -- the quad above is what resolves it. Its gradient is
+    // brightest exactly at the surface, so the eye reads a waterline there and takes the fade
+    // below as water rather than as a figure dissolving.
+    this.player.setAlpha(1, 1, wading ? WADE_ALPHA : 1, wading ? WADE_ALPHA : 1);
+    // A wader casts no shadow on ground he is not standing on.
+    this.shadow.setVisible(!wading);
   }
 
   /**
@@ -808,6 +873,9 @@ export class WorldScene extends Phaser.Scene {
    */
   private sortPlayer(row: number): void {
     this.player.setDepth(depthFor(row, ROW_SLOT.walker));
+    // Over him, under anything standing in the same row: water is in front of a wader and behind
+    // the reeds on the bank.
+    this.waterline.setDepth(depthFor(row, ROW_SLOT.walker) + 1);
     // One slot below him, in the same row band. `underfoot` is where decor lives, which is right:
     // a shadow is a mark on the ground, and it should pass under a stone the way the ground does.
     this.shadow.setDepth(depthFor(row, ROW_SLOT.underfoot));

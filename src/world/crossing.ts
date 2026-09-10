@@ -320,6 +320,17 @@ function pourAPool(world: World, centre: Point): void {
  * four tiles, the wedge between the outflow and the island's own edge, walled off by unwalkable
  * water on one side and open air on the other.
  *
+ * **It still severs ground now that the water is walkable, which was predicted otherwise.**
+ * `docs/sky-islands-plan.md` said this function could go once wading arrived, on the reasoning that
+ * walkable water cannot wall anything off. It was tried: every test passed on the default seed, and
+ * a sweep of twelve seeds found seed `a` stranding one tile anyway. Water is not the only thing
+ * doing the walling -- the shelf is unwalkable rock, and the pool only has to take the *last*
+ * connection for a scrap to be cut off by the two together.
+ *
+ * The lesson is the cheaper one: a guard whose failure is seed-dependent cannot be retired by a
+ * suite that runs one seed. `test/crossing.test.ts` sweeps twelve now, which is what would have
+ * caught this without the removal being tried.
+ *
  * Four tiles is not a place. Nothing can be reached there, nothing will be placed there, and a
  * player who could see it would only wonder why they cannot get to it -- so it is not ground, it
  * is the far side of the water, and the honest thing is to say so. This is `firmUp`'s flood run a

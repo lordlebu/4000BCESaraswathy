@@ -51,6 +51,7 @@ import {
   placeFrame,
   swayFrame
 } from './frames';
+import { isRail } from '../world/crossing';
 import { landmarkKindFor } from '../content/landmarks';
 import { band } from '../world/classify';
 import { tileHash } from '../world/rng';
@@ -74,6 +75,7 @@ export type PlacementSheet =
   | 'bank'
   | 'shore'
   | 'track'
+  | 'rope'
   | 'cliffs'
   | 'treeline'
   | 'overhang'
@@ -844,6 +846,24 @@ export function planOverhang(world: FieldMapWorld['world']): Placement[] {
   });
 }
 
+/**
+ * Is this tile at the edge of its own ground, with the drop drawn under one of its sides?
+ *
+ * The same question `planOverhang` asks per edge, asked once for the whole tile, so a feature that
+ * has to hang off something -- see `FeatureArt.rim` -- lands only where there is something to hang
+ * off. Off-map counts as inland here and not as an edge, which is `planOverhang`'s ruling too: the
+ * world stops there rather than the island.
+ */
+function onIslandRim(world: FieldMapWorld['world'], x: number, y: number): boolean {
+  const here = world.tiles[y]?.[x]?.biome;
+  if (!here) return false;
+  return EDGE_ORDER.some((edge) => {
+    const { dx, dy } = EDGE_STEP[edge];
+    const neighbour = world.tiles[y + dy]?.[x + dx];
+    return neighbour !== undefined && overhangAt(here, neighbour.biome);
+  });
+}
+
 export function planDecor(world: FieldMapWorld['world'], builtOn: ReadonlySet<string>): Placement[] {
   const out: Placement[] = [];
   for (let y = 0; y < world.height; y += 1) {
@@ -987,7 +1007,8 @@ export function planOverdraw(world: FieldMapWorld['world'], builtOn: ReadonlySet
       const feature = featureFrame(
         biome,
         tileHash(world.seed, x, y, 'feature-present'),
-        tileHash(world.seed, x, y, 'feature-pick')
+        tileHash(world.seed, x, y, 'feature-pick'),
+        onIslandRim(world, x, y)
       );
       if (feature !== null) {
         // **A thing that stands up needs to touch the ground it stands on.** Without it a tree is
@@ -1426,8 +1447,18 @@ export function planTrack(world: FieldMapWorld['world']): Placement[] {
       // the ground.
       const overgrown = GROWS_OVER.has(tile.biome);
 
+      // **Which of the two things this stretch is, asked rather than assumed.**
+      //
+      // `crossing.ts` made rail and rope one `Tile.track` flag on purpose -- "a second flag would
+      // be a second thing to keep true" -- and gave `isRail` the job of separating them from where
+      // the islands are. It was right, and then nothing here called it: the sheet was `track`
+      // everywhere, so the rope ladder up an island's flank was drawn as iron railway and the two
+      // halves of the crossing looked identical.
+      //
+      // A sheet name, not a frame: the two draw the same four pieces in the same order, because
+      // `trackFrame`'s contract is about direction and wear rather than about material.
       out.push({
-        sheet: 'track',
+        sheet: isRail(world, y) ? 'track' : 'rope',
         frame: trackFrame(eastWest, overgrown),
         x,
         y,

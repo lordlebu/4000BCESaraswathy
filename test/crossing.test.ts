@@ -13,11 +13,13 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { canBoardAt, railSpan, shoreheads, trackRoute } from '../src/world/crossing';
 import { band } from '../src/world/classify';
+import biomesData from '../data/biomes.json';
 import {
   planClouds,
   planCliffs,
   planIslandShadow,
   planOverhang,
+  planScene,
   planTrack,
   planWaterfall
 } from '../src/game/scenePlan';
@@ -34,7 +36,8 @@ import { DEFAULT_SEED } from '../src/ui/seed';
  */
 const SHELF_REACH = 8;
 
-const aravali = () => buildFieldMap(fieldMap('field_map_aravali')!, { seed: DEFAULT_SEED }).world;
+const aravaliScene = () => buildFieldMap(fieldMap('field_map_aravali')!, { seed: DEFAULT_SEED });
+const aravali = () => aravaliScene().world;
 
 describe('the Aravali crossing', () => {
   it('is a map the game knows about', () => {
@@ -761,6 +764,158 @@ describe('the plant that hangs over the island edge', () => {
       if (map.id === 'field_map_aravali') continue;
       const world = buildFieldMap(map, { seed: map.id }).world;
       expect(planOverhang(world).length, `${map.id} grew an overhang`).toBe(0);
+    }
+  });
+});
+
+describe('the tree that hangs off the edge hangs off an edge', () => {
+  /** Tiles where the ground stops on at least one side -- the only place a rim feature may stand. */
+  const rimTiles = (world: ReturnType<typeof aravali>) => {
+    const island = (x: number, y: number) => {
+      const b = world.tiles[y]?.[x]?.biome;
+      return b === 'sky_island' || b === 'sky_water';
+    };
+    const at = new Set<string>();
+    for (const row of world.tiles) {
+      for (const tile of row) {
+        if (!island(tile.x, tile.y)) continue;
+        const stops = ([[0, -1], [1, 0], [0, 1], [-1, 0]] as const).some(([dx, dy]) => {
+          const there = world.tiles[tile.y + dy]?.[tile.x + dx];
+          return there !== undefined && !island(there.x, there.y);
+        });
+        if (stops) at.add(`${tile.x},${tile.y}`);
+      }
+    }
+    return at;
+  };
+
+  it('never puts an aero-mangrove on ground with island on all four sides', () => {
+    // **Half the sprite is root and the rock those roots grip**, because canon has this tree
+    // *"growing on the absolute edges of floating islands, plunging its roots downward into the
+    // open sky"*. Inland there is no sky under it: the slab reads as a rock floating a tile above
+    // the grass, which is what it looked like on the map before `FeatureArt.rim` existed. Placed by
+    // biome alone it landed inland roughly as often as on the rim, so this is not a rare case.
+    const scene = aravaliScene();
+    const world = scene.world;
+    const rim = rimTiles(world);
+    const trees = planScene(scene).filter((p) => p.sheet === 'trees');
+    expect(trees.length, 'no tree is drawn on the islands at all').toBeGreaterThan(0);
+
+    for (const tree of trees) {
+      // The pool is the exception the rim gate does not cover and does not need to: a wading
+      // mangrove stands *in* water on its stilt roots, which is the shape of the tree.
+      if (world.tiles[tree.y]![tree.x]!.biome === 'sky_water') continue;
+      expect(
+        rim.has(`${tree.x},${tree.y}`),
+        `a mangrove at ${tree.x},${tree.y} hangs over solid island`
+      ).toBe(true);
+    }
+  });
+
+  it('still leaves the island interior something to look at', () => {
+    // The gate takes four of the six sky-island picks away from an inland tile. If it took the
+    // rest with them the middle of the island would go bare -- which is the failure the two lists
+    // in `frames.ts` exist to avoid, and it would be invisible in the test above.
+    const scene = aravaliScene();
+    const world = scene.world;
+    const rim = rimTiles(world);
+    const inland = planScene(scene).filter(
+      (p) =>
+        (p.sheet === 'features' || p.sheet === 'flora' || p.sheet === 'trees') &&
+        world.tiles[p.y]![p.x]!.biome === 'sky_island' &&
+        !rim.has(`${p.x},${p.y}`)
+    );
+    expect(inland.length, 'the island interior grows nothing').toBeGreaterThan(5);
+  });
+});
+
+describe('the pool is waded, not stood in', () => {
+  it('is walkable, and costs what a wade costs', () => {
+    // Slow movement needs no movement code: `WorldScene` computes `STEP_MS * cost * pace`, and
+    // `cost` is this number. Three is what a mountain costs, which is the right order for water at
+    // the waist -- and it is the whole of "very slow" as a change.
+    const pool = (biomesData as { id: string; walkable: boolean; travelCost: number | null }[])
+      .find((b) => b.id === 'sky_water')!;
+    expect(pool.walkable, 'the pool cannot be waded').toBe(true);
+    expect(pool.travelCost, 'wading is not slower than walking').toBeGreaterThan(1);
+  });
+
+  it('never walls a walkable tile off, on twelve seeds', () => {
+    // **Twelve rather than one, and the number is not decoration.** `floodTheSlivers` was going to
+    // be deleted once the water became walkable -- the reasoning being that walkable water cannot
+    // wall anything off. Removing it passed every test on the default seed and stranded a tile on
+    // seed `a`, because water is not the only thing doing the walling: the shelf is unwalkable
+    // rock, and the pool only has to take the *last* connection.
+    //
+    // A guard whose failure is seed-dependent cannot be retired by a suite that runs one seed.
+    // This is the sweep that would have caught it without the removal being tried.
+    for (const seed of ['aravali', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'seed-1', 'seed-2', 'zzz', 'q7']) {
+      const world = buildFieldMap(fieldMap('field_map_aravali')!, { seed }).world;
+      const walkable = world.tiles.flat().filter((t) => isWalkable(t)).length;
+
+      const seen = new Set<string>([`${world.start.x},${world.start.y}`]);
+      const queue = [world.start];
+      while (queue.length > 0) {
+        const at = queue.shift()!;
+        for (const next of [
+          { x: at.x - 1, y: at.y },
+          { x: at.x + 1, y: at.y },
+          { x: at.x, y: at.y - 1 },
+          { x: at.x, y: at.y + 1 }
+        ]) {
+          const tile = world.tiles[next.y]?.[next.x];
+          if (!tile || !isWalkable(tile)) continue;
+          const key = `${next.x},${next.y}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          queue.push(next);
+        }
+      }
+      expect(seen.size, `seed ${seed}: ${walkable - seen.size} walkable tiles cannot be reached`)
+        .toBe(walkable);
+    }
+  });
+});
+
+describe('the rope is not drawn as iron', () => {
+  it('draws rail between the islands and rope everywhere else the line runs', () => {
+    // **`isRail` existed, was tested, and nothing drew from it.** `crossing.ts` made rail and rope
+    // one `Tile.track` flag on purpose -- "a second flag would be a second thing to keep true" --
+    // and gave `railSpan` the job of separating them. `planTrack` then drew the `track` sheet on
+    // every tile carrying the flag, so the rope ladder up an island's flank rendered as railway.
+    //
+    // The same shape as the three faults `CLAUDE.md` records under the rules layer, and the same
+    // guard: assert the drawing goes through the rule rather than around it.
+    const world = aravali();
+    const span = railSpan(world)!;
+    const laid = planTrack(world);
+    expect(laid.length, 'no line was drawn at all').toBeGreaterThan(20);
+
+    const iron = laid.filter((p) => p.sheet === 'track');
+    const hemp = laid.filter((p) => p.sheet === 'rope');
+    expect(iron.length, 'no rail between the islands').toBeGreaterThan(0);
+    expect(hemp.length, 'no rope reaching either shore').toBeGreaterThan(0);
+
+    for (const p of iron) {
+      expect(p.y, `rail drawn at row ${p.y}, outside the span ${span.from}-${span.to}`)
+        .toBeGreaterThanOrEqual(span.from);
+      expect(p.y).toBeLessThanOrEqual(span.to);
+    }
+    for (const p of hemp) {
+      expect(
+        p.y < span.from || p.y > span.to,
+        `rope drawn at row ${p.y}, inside the rail span ${span.from}-${span.to}`
+      ).toBe(true);
+    }
+  });
+
+  it('keeps both sheets on one frame contract', () => {
+    // The two draw the same four pieces in the same order, because `trackFrame` is about direction
+    // and wear rather than about material. A rope sheet with its own numbering would be a second
+    // contract to keep in step, which is the thing `Tile.track` was written to avoid.
+    for (const p of planTrack(aravali())) {
+      expect(p.frame, `${p.sheet} frame ${p.frame} is outside the four pieces`).toBeLessThan(4);
+      expect(p.frame).toBeGreaterThanOrEqual(0);
     }
   });
 });

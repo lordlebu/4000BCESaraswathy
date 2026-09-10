@@ -91,10 +91,15 @@ const PREFIX = 'south-of-tethys';
  * and a channel over the side, so tiles that were walkable island top are unwalkable water now.
  * A remembered position could be standing in one.
  *
+ * **16 is the ground moving twice over.** The sky pools are walkable now, so a route a save
+ * remembers may be a different walk; and `groundTheLandmark` moves the landmark onto reachable
+ * ground, which on six of twelve Aravali seeds it was not. A remembered compass bearing points
+ * somewhere else.
+ *
  * Read strictly rather than migrated: a version mismatch drops the save. That is the existing
  * behaviour and it stays, because a half-understood journey is worse than a fresh one.
  */
-export const SAVE_VERSION = 15;
+export const SAVE_VERSION = 16;
 
 export interface Journey {
   version: number;

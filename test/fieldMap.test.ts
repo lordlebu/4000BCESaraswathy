@@ -6,6 +6,7 @@
 // someone tries to walk it.
 
 import { describe, expect, it } from 'vitest';
+import { isWalkable } from '../src/world/generate';
 import { buildFieldMap, poiAt } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps, poi, poisOn, npcsAt, neighboursOf } from '../src/content/places';
 import { band } from '../src/world/classify';
@@ -411,5 +412,41 @@ describe('every map has ground that is not all one thing', () => {
     expect(m.get('coast') ?? 0, 'the old waterline is gone').toBeGreaterThan(0.05);
     const dry = (m.get('plains') ?? 0) + (m.get('desert') ?? 0) + (m.get('hills') ?? 0);
     expect(dry, 'a dead harbour in a cold desert should be mostly dry').toBeGreaterThan(0.4);
+  });
+});
+
+describe('the landmark is somewhere a walker can get to', () => {
+  it('is never walled in, on twelve seeds across every map', () => {
+    // **The landmark is chosen against a world the palette then rewrites.** `placeLandmark` picks a
+    // distant *reachable* tile, which is right for the procedural walk it was written for; a field
+    // map then runs `applyPalette` over the whole grid and stamps a strait, two islands and a rail
+    // across it, and none of that re-checks the earlier decision. The coordinates survive and the
+    // ground under them does not.
+    //
+    // Measured before `groundTheLandmark`: on the Aravali, which is about half water, the landmark
+    // came out ringed by open sea with no walkable neighbour on **six of twelve seeds**. The
+    // compass in the older landmark loop pointed at a banyan nobody could stand beside, and
+    // `landmarkHint` promised it was a day's walk away.
+    //
+    // Twelve seeds rather than one because that is what it took to see it: the default seed was
+    // fine, which is why this went unnoticed for as long as the loop has existed.
+    const seeds = ['aravali', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'seed-1', 'seed-2', 'zzz', 'q7'];
+    for (const map of fieldMaps) {
+      for (const seed of seeds) {
+        const world = buildFieldMap(map, { seed }).world;
+        const at = world.landmark;
+        const around = [
+          world.tiles[at.y]?.[at.x],
+          world.tiles[at.y - 1]?.[at.x],
+          world.tiles[at.y + 1]?.[at.x],
+          world.tiles[at.y]?.[at.x - 1],
+          world.tiles[at.y]?.[at.x + 1]
+        ].filter((t) => t !== undefined);
+        expect(
+          around.some((t) => isWalkable(t!)),
+          `${map.id} seed ${seed}: the landmark at ${at.x},${at.y} has no walkable tile beside it`
+        ).toBe(true);
+      }
+    }
   });
 });

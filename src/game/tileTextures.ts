@@ -115,6 +115,15 @@ export const DECOR_SHEET = 'decor';
  */
 export const TRACK_SHEET = 'track';
 
+/**
+ * The rope crossing: the same four pieces as the rail, in hemp and timber.
+ *
+ * A second sheet rather than a second flag -- see `planTrack`. Built by `tools/build-rope.js` from
+ * painted art at the same 32-pixel grid the rail is drawn at in code, so the two sit at the same
+ * resolution and the same whole-number upscale.
+ */
+export const ROPE_SHEET = 'rope';
+
 /** The 1x1 white pixel the fog layer stretches over each tile. See `createTileTextures`. */
 export const FOG_TEXTURE = 'fog:pixel';
 
@@ -163,6 +172,7 @@ export function loadTileSheets(
     treeline: string;
     overhang: string;
     trees: string;
+    rope: string;
     decor: string;
     track: string;
   }
@@ -197,6 +207,7 @@ export function loadTileSheets(
   sheet(OVERHANG_SHEET, urls.overhang, TILE_SIZE, TILE_SIZE);
   sheet(DECOR_SHEET, urls.decor, DECOR_CELL, DECOR_CELL);
   sheet(TRACK_SHEET, urls.track, TILE_SIZE, TILE_SIZE);
+  sheet(ROPE_SHEET, urls.rope, TILE_SIZE, TILE_SIZE);
 }
 
 /**
@@ -593,6 +604,45 @@ export function cloudTextureKey(scene: Phaser.Scene, pattern: number): string {
   }
   context.globalAlpha = 1;
 
+  canvas.refresh();
+  return key;
+}
+
+/**
+ * The water a wading traveller stands in, drawn over his legs.
+ *
+ * **One quad, not a second sprite, and that is the whole design.** The obvious build is two cropped
+ * copies of the figure -- an upper half drawn normally and a lower half at reduced alpha -- and it
+ * is worse twice: it doubles the sprite the walk animation drives, and it puts the waterline's
+ * exact height in two places that have to agree forever.
+ *
+ * So the figure is drawn once, untouched, and this is laid over his lower half. It is the *water*
+ * in front of him rather than a see-through version of him, which is also what is physically
+ * happening, and it means the animation, the flip, the tint and the frame timing all stay in one
+ * place and know nothing about wading.
+ *
+ * A gradient rather than a flat wash, because a hard line across the shins reads as a costume. It
+ * is densest a little below the surface and thins downward, so more of him shows the deeper he
+ * goes -- which is the wrong way round for real water and the right way round for reading a figure
+ * at this size. The same trick and the same reason as `undersideShadeKey`.
+ */
+export function waterlineKey(scene: Phaser.Scene): string {
+  const key = 'water:line';
+  if (scene.textures.exists(key)) return key;
+
+  const canvas = scene.textures.createCanvas(key, TILE_SIZE, TILE_SIZE);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  context.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
+  const fall = context.createLinearGradient(0, 0, 0, TILE_SIZE);
+  // The surface itself, brightest: a rim of lit water where the figure breaks it.
+  fall.addColorStop(0, 'rgba(190,232,242,0.86)');
+  fall.addColorStop(0.14, 'rgba(120,196,214,0.72)');
+  fall.addColorStop(0.55, 'rgba(74,150,178,0.44)');
+  fall.addColorStop(1, 'rgba(52,116,150,0.24)');
+  context.fillStyle = fall;
+  context.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
   canvas.refresh();
   return key;
 }
