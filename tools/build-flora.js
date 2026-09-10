@@ -81,7 +81,19 @@ const TREES = [
  */
 const OUTPUTS = [
   { file: 'flora.png', cell: { width: CELL, height: CELL }, pieces: PIECES, from: SHEETS },
-  { file: 'trees.png', cell: TALL, pieces: TREES, from: ['sky-trees.png'] }
+  // **`soft` keeps the drawn alpha instead of hardening it, and it is declared rather than
+  // sniffed.** `ALPHA_FLOOR` at 200 exists because a keyed sheet arrives with a halo of
+  // semi-transparent matte around every shape, and soft alpha on pixel art is a defect. It is
+  // exactly wrong here: the mangroves are drawn with their roots fading out where they enter the
+  // water, an alpha ramp running from 32 to 224, and hardening deleted most of it and flattened
+  // the rest -- the trees came out 105 and 88 tall against the 155 and 140 they should be, because
+  // the box shrank to the solid part.
+  //
+  // A heuristic could tell a broad gradient from a thin halo. `art-direction.md` records what
+  // happened the last two times a pixel heuristic was trusted over a declaration here: both got it
+  // wrong on two of five characters, and looking took a minute. The author knows whether they drew
+  // a fade, so they say so.
+  { file: 'trees.png', cell: TALL, pieces: TREES, from: ['sky-trees.png'], soft: true }
 ];
 
 function decodePng(file) {
@@ -238,20 +250,32 @@ function hasAlpha(data, width, height) {
  * exactly which colour contaminated them. Here it does not, so the honest move is to drop the band:
  * an edge one pixel tighter, and no halo at any alpha.
  */
-function harden(data, width, height) {
+function harden(data, width, height, soft = false) {
+  const floor = soft ? FADE_FLOOR : ALPHA_FLOOR;
   const out = Buffer.alloc(width * height * 4);
   for (let i = 0; i < width * height; i += 1) {
-    if (data[i * 4 + 3] < ALPHA_FLOOR) continue;
+    const alpha = data[i * 4 + 3];
+    if (alpha < floor) continue;
     out[i * 4] = data[i * 4];
     out[i * 4 + 1] = data[i * 4 + 1];
     out[i * 4 + 2] = data[i * 4 + 2];
-    out[i * 4 + 3] = 255;
+    // **Soft sheets keep their alpha; everything else is forced opaque.** Flattening a drawn
+    // gradient to 255 is not a tidy-up, it is deleting the drawing.
+    out[i * 4 + 3] = soft ? alpha : 255;
   }
   return out;
 }
 
 /** How opaque a pixel must be to survive `harden`. Below this it is matte, not art. */
 const ALPHA_FLOOR = 200;
+
+/**
+ * The floor for a sheet that was *drawn* with soft alpha, rather than left with a matte halo.
+ *
+ * Low enough to keep a deliberate gradient and high enough to drop encoder noise. See `SOFT` in
+ * `OUTPUTS` for why this is declared per sheet rather than sniffed.
+ */
+const FADE_FLOOR = 8;
 
 /**
  * Replace the key colour with real transparency, and de-fringe what is left.
@@ -311,8 +335,8 @@ function key(cell, width, height) {
  * `build-rims.js` needs one: the question here is "is this line empty", not "is this line part of
  * the mass". A couple of stray specks still must not bridge two items, hence not zero.
  */
-function runs(cell, width, height, axis) {
-  const opaque = (x, y) => cell[(y * width + x) * 4 + 3] > 24;
+function runs(cell, width, height, axis, floor = 24) {
+  const opaque = (x, y) => cell[(y * width + x) * 4 + 3] > floor;
   const outer = axis === 'y' ? height : width;
   const inner = axis === 'y' ? width : height;
   const need = Math.max(3, Math.round(inner * 0.004));
@@ -341,19 +365,84 @@ function runs(cell, width, height, axis) {
 }
 
 /** Every item on a sheet, in reading order: bands top to bottom, items left to right. */
-function findItems(cell, width, height) {
+/**
+ * Cut the widest item at its thinnest column, until there are as many items as the manifest wants.
+ *
+ * **Because two trees touching is a drawing, not a defect.** `findItems` separates by clear
+ * columns, which is the right rule and is defeated the moment two canopies overlap by a pixel: the
+ * fourth aero-mangrove sheet came back with items three and four joined into one box 1,063 wide,
+ * and the builder faithfully squashed that pair into a single 128-wide cell.
+ *
+ * `build-rims.js` solved the mirror image of this and its lesson transfers whole: it merges bands
+ * smallest-gap-first **only until the count matches**, because a fixed threshold welded two rows
+ * whose gutter happened to be narrower than another row's internal break. So this splits
+ * widest-first and only until the count matches, rather than cutting anywhere a column looks thin.
+ *
+ * The cut goes at the emptiest interior column, which for two overlapping trees is the seam
+ * between them. Kept away from the outer fifth of the box on each side: the thinnest column of a
+ * *single* item is usually just inside its own edge, and cutting there would shave a sliver off
+ * one tree rather than separate two.
+ */
+function splitWidest(items, cell, width, wanted) {
+  const coverage = (box, x) => {
+    let n = 0;
+    for (let y = box.y0; y <= box.y1; y += 1) if (cell[(y * width + x) * 4 + 3] > FADE_FLOOR) n += 1;
+    return n;
+  };
+
+  while (items.length < wanted) {
+    let widest = 0;
+    for (let i = 1; i < items.length; i += 1) {
+      if (items[i].x1 - items[i].x0 > items[widest].x1 - items[widest].x0) widest = i;
+    }
+    const box = items[widest];
+    const span = box.x1 - box.x0;
+    const margin = Math.floor(span / 5);
+    if (span < 8) break;
+
+    let cut = box.x0 + margin;
+    let thinnest = Infinity;
+    for (let x = box.x0 + margin; x <= box.x1 - margin; x += 1) {
+      const n = coverage(box, x);
+      if (n < thinnest) {
+        thinnest = n;
+        cut = x;
+      }
+    }
+
+    // Tighten each half vertically: the two things either side of a seam rarely share an extent.
+    const half = (x0, x1) => {
+      let y0 = box.y1;
+      let y1 = box.y0;
+      for (let x = x0; x <= x1; x += 1) {
+        for (let y = box.y0; y <= box.y1; y += 1) {
+          if (cell[(y * width + x) * 4 + 3] <= FADE_FLOOR) continue;
+          if (y < y0) y0 = y;
+          if (y > y1) y1 = y;
+        }
+      }
+      return { x0, x1, y0, y1 };
+    };
+
+    items.splice(widest, 1, half(box.x0, cut), half(cut + 1, box.x1));
+    console.log(`    split the widest item at column ${cut} (${thinnest} opaque pixels there)`);
+  }
+  return items;
+}
+
+function findItems(cell, width, height, floor = 24) {
   const items = [];
-  for (const [y0, y1] of runs(cell, width, height, 'y')) {
+  for (const [y0, y1] of runs(cell, width, height, 'y', floor)) {
     const strip = Buffer.alloc(width * (y1 - y0) * 4);
     cell.copy(strip, 0, y0 * width * 4, y1 * width * 4);
-    for (const [x0, x1] of runs(strip, width, y1 - y0, 'x')) {
+    for (const [x0, x1] of runs(strip, width, y1 - y0, 'x', floor)) {
       // Tighten vertically inside this item: two items sharing a band need not share its extent.
       const box = Buffer.alloc((x1 - x0) * (y1 - y0) * 4);
       for (let y = 0; y < y1 - y0; y += 1) {
         const from = ((y0 + y) * width + x0) * 4;
         cell.copy(box, y * (x1 - x0) * 4, from, from + (x1 - x0) * 4);
       }
-      const tight = runs(box, x1 - x0, y1 - y0, 'y');
+      const tight = runs(box, x1 - x0, y1 - y0, 'y', floor);
       if (tight.length === 0) continue;
       items.push({
         x0,
@@ -375,9 +464,9 @@ function findItems(cell, width, height) {
  * rather than a feature, so `harden` dropping that band costs nothing. A sheet with no alpha at all
  * is a magenta grid instead, and `key` handles it.
  */
-function cutOut(img) {
+function cutOut(img, soft = false) {
   return hasAlpha(img.data, img.width, img.height)
-    ? harden(img.data, img.width, img.height)
+    ? harden(img.data, img.width, img.height, soft)
     : key(img.data, img.width, img.height);
 }
 
@@ -436,7 +525,7 @@ function main() {
   if (!apply) console.log('\n  Nothing written.');
 }
 
-function buildSheet({ file, cell, pieces, from }, apply) {
+function buildSheet({ file, cell, pieces, from, soft = false }, apply) {
   const frames = [];
   for (const name of from) {
     const path_ = path.join(SRC, name);
@@ -445,9 +534,13 @@ function buildSheet({ file, cell, pieces, from }, apply) {
       continue;
     }
     const img = decodePng(path_);
-    const cut = cutOut(img);
-    const items = findItems(cut, img.width, img.height);
-    console.log(`  ${name} (${img.width}x${img.height}) -> ${items.length} items`);
+    const cut = cutOut(img, soft);
+    const found = findItems(cut, img.width, img.height, soft ? FADE_FLOOR : 24);
+    // Only ever splits *up to* the count the manifest wants, and only when the finder came up
+    // short -- see `splitWidest`. A sheet whose items separate cleanly never reaches it.
+    const items = splitWidest(found, cut, img.width, pieces.length);
+    const how = items.length === found.length ? '' : ` (${found.length} found, split to ${items.length})`;
+    console.log(`  ${name} (${img.width}x${img.height}) -> ${items.length} items${how}`);
     for (const box of items) {
       const bw = box.x1 - box.x0;
       const bh = box.y1 - box.y0;

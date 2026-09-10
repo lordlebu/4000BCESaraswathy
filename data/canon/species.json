@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.18.0",
+  "canon_version": "2.19.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -4246,6 +4246,58 @@
       "journal_prompt": "A spotted cat watches from the reed line with eyes set forward like a person's, and you understand that you are being considered.",
       "mood": "watchful",
       "source_index": 255
+    },
+    {
+      "id": "fauna_lodestone_minnow",
+      "type": "fauna",
+      "name": "Lodestone Minnow",
+      "scientific": "Puntius magnetis",
+      "clade": "fish",
+      "region": "tethys-sky-routes",
+      "biomes": [
+        "sky_water"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "A finger-length shoaling fish with iron in its scales. The shoal turns all at once and always to the same quarter, which is the direction of the lodestone core holding the island up -- so a pool of them is a compass nobody built.",
+      "mood": "playful",
+      "source_index": 257,
+      "placement_note": "Placeable since the pools were stamped. `sky_water` is renderable and the Aravali carries two of them."
+    },
+    {
+      "id": "fauna_fallwater_loach",
+      "type": "fauna",
+      "name": "Fallwater Loach",
+      "scientific": "Nemacheilus praecipitis",
+      "clade": "fish",
+      "region": "tethys-sky-routes",
+      "biomes": [
+        "sky_water"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "journal_prompt": "A flat-bellied fish that holds station on the stone at the very lip where the pool goes over, mouth into the current, grazing the film of algae the moving water keeps clean. What happens to the ones that lose their grip is not recorded, because nobody has ever been underneath to look.",
+      "mood": "patient",
+      "source_index": 258,
+      "placement_note": "Placeable since the pools were stamped. `sky_water` is renderable and the Aravali carries two of them."
+    },
+    {
+      "id": "fauna_upfalling_elver",
+      "type": "fauna",
+      "name": "Upfalling Elver",
+      "scientific": "Anguilla ascendens",
+      "clade": "fish",
+      "region": "tethys-sky-routes",
+      "biomes": [
+        "sky_water",
+        "sky_underside"
+      ],
+      "placement": "encounter",
+      "rarity": "mythic",
+      "journal_prompt": "A young eel, hand-long and glass-clear, climbing the underside of a floating island through rain that is falling upward. Canon says gravity is warped beneath a shelf and that rainwater goes the wrong way there; this is the animal that uses it. Where the elvers come from is the question -- there is no sea within a day of the sky routes, and no adult has ever been taken from a pool.",
+      "mood": "uncanny",
+      "source_index": 259,
+      "placement_note": "Placeable since the pools were stamped. Tagged to the underside as well because that is the half of its life a walker on the rim can actually see."
     }
   ],
   "flora": [
