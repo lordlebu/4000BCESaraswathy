@@ -1068,3 +1068,101 @@ the side would be the only structure in the world that had turned its back.
 
 Then `HUT_VARIANTS` from 4 to 6. The tool prints the frame count it sliced, so a sheet that came
 back with three figures rather than two says so before anything is wired.
+
+## Asset 2e — the sky islands, round two
+
+Four drawings, for the four asks in `docs/sky-islands-plan.md` that code could not answer. Nothing
+here is a new technique: two are ground textures, one is a rim sheet in the Asset 2d format, and one
+is a bottom-anchored figure like a hut. What is new is the subject and, in one case, a number.
+
+### 1 — `sky_island.png`, replacing the sage wash
+
+The built tile reads as a faded lawn. The ask is grass.
+
+**The green is constrained and this is the part to get right.** Two grounds under about 25 apart in
+RGB stop being tellable apart — the rule that made `hills` olive rather than ochre. Measured against
+the palette: a natural grass green `#6f9e52` sits **33 from `forest`**, and `#8ec46a` sits **18 from
+`plains`**. The window between them is narrow.
+
+**Aim the overall value at `#7fb35e`** — 41 from plains, 54 from forest. Brighter and more yellow
+than forest, deeper and more saturated than plains.
+
+> A **seamless tiling texture** for a **top-down 2D game**, 2048 × 2048, painted in soft watercolour
+> and gouache on paper, visible paper grain. **Meadow grass on a high shelf**: fine blade strokes in
+> clumps and tufts, a few bare patches of pale stone showing through where the soil is thin, tiny
+> white and cream seed-heads scattered sparsely. Overall value a clear grass green — brighter and
+> more yellow than a forest canopy, deeper and more saturated than dry lowland pasture. **Lit flatly
+> from above with no cast shadows and no single light direction.** No horizon, no sky, no objects,
+> no trees, no path, no border, no vignette, no text. Must tile seamlessly on all four edges.
+
+### 2 — `sky_underside.png`, rock rather than rubble
+
+The built tile is brown-mauve gravel and reads as dirt. Canon says *"the raw underside of a floating
+shelf, root-hung and hollow"* — the shelf was **torn off something**, and torn rock has faces.
+
+**It is a wall, not a floor**, and that is the one thing to say in the prompt. These tiles sit below
+the island in screen space and stand for the face you see from slightly in front, so the light has
+to fall down it rather than onto it. A texture lit from directly above reads as gravel seen from a
+helicopter, which is exactly what the current one does.
+
+> A **seamless tiling texture** for a **top-down 2D game**, 2048 × 2048, painted in soft watercolour
+> and gouache on paper, visible paper grain. **The broken underside of a torn-away slab of bedrock,
+> seen face-on**: large angular fractured blocks with flat facets, deep shadowed clefts between
+> them, sharp fresh edges where the rock has snapped rather than weathered, a few hair-fine mineral
+> veins. Cool grey-brown stone. **Light falls from the top of the image downward**, so the upper
+> faces catch it and the clefts stay dark. No soil, no gravel, no scree, no pebbles, no grass, no
+> roots, no sky, no border, no text. Must tile seamlessly on all four edges.
+
+### 3 — an overhang bush, as a rim sheet
+
+The Asset 2d format exactly — a 4 × 4 grid on solid magenta, keyed and packed by
+`tools/build-rims.js`. The material is vegetation spilling over the island's lip and hanging into
+the air below it.
+
+**The asymmetry rule is the same and matters more here**, because a thing that hangs has an obvious
+direction. South is the money frame: the bush growing at the edge and trailing *downward* out of the
+cell. North is a thin fringe of leaf-tips seen from above. East and west are profiles.
+
+> A **sprite sheet for a top-down 2D game**, drawn on a **solid pure magenta background, hex
+> #FF00FF**, arranged as a **4 rows × 4 columns grid** with clear magenta gutters between every row
+> and column and a magenta margin all round. Each cell is one tile of **vegetation growing over the
+> edge of a cliff and hanging down into open air**: small tough leaves, wiry trailing stems, a few
+> pale flowers. Painted in soft watercolour and gouache, visible paper grain, deep green with
+> yellow-green highlights.
+>
+> **Row 1 — the top edge:** a thin fringe of leaf-tips along the upper edge of the cell, seen from
+> above, most of the cell empty magenta.
+> **Row 2 — the right edge:** the plant in profile against the right side, stems trailing right and
+> down.
+> **Row 3 — the bottom edge:** the money frame. The plant rooted along the upper part of the cell
+> and **spilling downward**, stems and leaves reaching to the bottom edge and running off it.
+> **Row 4 — the left edge:** the mirror of row 2.
+>
+> Four variants across each row: different clump shapes, none identical. The plant must **run off
+> the cell edge it hangs from** rather than stopping short of it. No ground, no rock, no sky, no
+> outline, no drop shadow, no text, no grid lines, no labels.
+
+### 4 — the Aero-Mangrove, taller than its tile
+
+`aeroMangrove` exists at 128 × 128, drawn centred like every other feature, and a tree that reads at
+that scale cannot be square. This one is **bottom-anchored and overhangs**, which is the contract
+`places`, `huts` and `landmarks` already use — the scene sets `setOrigin(0.5, 1)` for those sheets
+and lets them rise into the tile above.
+
+Canon: *"grows on the rim of a floating island and plunges its roots into open sky"*. The roots are
+the whole character and they must be **visible below the trunk**, not hidden under a canopy.
+
+> A **sprite sheet for a top-down 2D game**, drawn on a **solid pure magenta background, hex
+> #FF00FF**, arranged as a **1 row × 4 columns grid** with clear magenta gutters and margin. Each
+> cell is one **strange mangrove-like tree**, drawn taller than it is wide, standing on the bottom
+> edge of its cell: a stilted tangle of pale aerial roots at the base, a short leaning trunk, and a
+> wide flat canopy of small blue-green leaves. **The roots splay outward and downward past the
+> bottom edge of the cell**, as if reaching into empty air. Painted in soft watercolour and gouache,
+> visible paper grain. Seen from **slightly above and in front** — the canopy foreshortened, the
+> roots and trunk visible below it.
+>
+> Four variants: two upright, two leaning as if into wind, all different heights. No ground, no
+> shadow, no sky, no outline, no text, no grid lines, no labels.
+
+**Check the built sheet by eye at about 18× before believing it.** Two pixel heuristics have already
+got sheet orientation wrong on two of five characters here; looking took a minute and was right.
