@@ -238,6 +238,50 @@ describe('a rock face turns instead of meeting itself', () => {
   });
 });
 
+describe('a rim is a slot, and both materials sit in it', () => {
+  it('gives the treeline the same overhang the rock gets', () => {
+    // The reason `planRim` exists. These were two functions with the same body and different
+    // predicates, and the overhang was written for the cliff and had to be *remembered* for the
+    // treeline -- exactly the kind of thing that gets remembered once and then not again.
+    //
+    // Asserted by comparing the two sheets rather than against a constant, so it stays true if the
+    // reach is retuned: whatever a rock face does at an edge, a wall of trees does too.
+    for (const { id, built } of worlds) {
+      const plan = planScene(built);
+      const byEdge = (sheet: string) => {
+        const seen = new Map<number, { x: number; y: number }>();
+        for (const p of plan) {
+          if (p.sheet !== sheet) continue;
+          if (p.frame >= CORNER_BASE) continue; // corners are the rock's own business
+          seen.set(Math.floor(p.frame / EDGE_VARIANTS), p.offset ?? { x: 0, y: 0 });
+        }
+        return seen;
+      };
+      const rock = byEdge('cliffs');
+      const trees = byEdge('treeline');
+      expect(rock.size, `${id}: no cliff bands to compare against`).toBeGreaterThan(0);
+      for (const [edge, offset] of trees) {
+        const same = rock.get(edge);
+        if (!same) continue; // that edge simply has no rock on this map
+        expect(offset, `${id}: treeline edge ${EDGE_ORDER[edge]} hangs differently from rock`)
+          .toEqual(same);
+      }
+    }
+  });
+
+  it('leaves the corners and the talus to the rock', () => {
+    // The other half of the split: a forest edge has no elbow to turn and no scree to shed, so the
+    // shared pass must not have swept those in.
+    for (const { id, built } of worlds) {
+      const plan = planScene(built);
+      for (const p of plan) {
+        if (p.sheet !== 'treeline') continue;
+        expect(p.frame, `${id}: a treeline drew a corner piece`).toBeLessThan(CORNER_BASE);
+      }
+    }
+  });
+});
+
 describe('the floating islands have something growing on them', () => {
   it('gives sky_island more than one mineral thing to stand on it', () => {
     // Before this, 296 tiles of the Aravali carried a crystal shard and nothing else.

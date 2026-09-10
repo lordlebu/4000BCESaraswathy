@@ -192,12 +192,23 @@ Two halves of one idea: the rim reaches *past* its cell, and debris from it land
 **The treeline gets the overhang too**, which is mechanism C arriving early in the one place it was
 free: a canopy spilling over the open ground beside it is exactly what a wall of trees should do.
 
-### C. One rim module, so the treeline gets it too · **not built**
+### C. One rim module, so the treeline gets it too · **shipped**
 
 `planCliffs` and `planTreeline` are the same pass with different predicates. Whatever A and B become,
 they belong in one place that both call, with the reach and the talus prop as parameters. A forest
 edge wants a canopy spilling into the open tile and leaf litter at its foot; a cliff wants rock
 overhanging and scree. Same shape, different furniture.
+
+`planRim` is that place. `planCliffs` and `planTreeline` are now a predicate and a sheet name each,
+and the corner pieces and the talus stay outside it — those are things the *rock* does, and a forest
+edge has no elbow to turn or scree to shed. The refactor is behaviour-preserving: placement counts
+are identical on all four maps.
+
+**It earns its keep by what it makes impossible.** The overhang was written for the cliff and had to
+be *remembered* for the treeline, which is exactly the kind of thing that gets remembered once and
+then not again. A test now compares the two sheets against each other rather than against a
+constant, so whatever a rock face does at an edge, a wall of trees does too, and it stays true if the
+reach is retuned.
 
 **This is the part to get right structurally**, because the rim slot has already proved it is a slot:
 the reference sheet that established the shape drew the identical structure in nine materials, one of
