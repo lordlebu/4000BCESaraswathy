@@ -122,9 +122,16 @@ they match by construction. `Gemini_Stones.png` is superseded and has moved to
 **What is still worth a re-roll, recorded rather than hidden.** The south face is better than what
 it replaced — bigger boulders, a real soil base, more contrast. Two things are not:
 
-- **The north lip crops to soil and grass with no rock in it.** The source draws its rock below the
-  soil, and a lip is the top fifth of the cell, so the crop takes the part with no stone in it. The
-  prompt lacked one sentence: *the lip must show rock, not only the soil above it.*
+- ~~**The north lip crops to soil and grass with no rock in it.**~~ **Fixed by a re-roll.** The
+  source had drawn its rock *below* the soil, and a lip is the top fifth of the cell, so the crop
+  took the part with no stone in it. Two sentences the prompt lacked did it: *the lip must show
+  rock, not only the soil above it*, and *a side strip is a vertical stack of rounded boulders,
+  never horizontal layers*. Both landed on the first re-roll.
+
+  A third candidate was rejected on a measurement worth recording: its gutters were true magenta
+  `(252, 0, 248)` but the background *inside* each cell was pale pink `(223, 149, 198)` — two
+  different colours. That pink sits just under the keyer's chroma bar, so it would have survived as
+  an opaque fill in every cell. **A chroma key is one colour or it is not a key.**
 - **The corner pieces sit lighter than the south band they continue.** Measured, the corners match
   the edge sheet as a whole almost exactly — `[141, 119, 83]` against `[145, 118, 81]` — so they are
   not off-palette. It is the *south row* that is deliberately darker at `[112, 92, 70]`, which is
