@@ -1166,3 +1166,101 @@ the whole character and they must be **visible below the trunk**, not hidden und
 
 **Check the built sheet by eye at about 18× before believing it.** Two pixel heuristics have already
 got sheet orientation wrong on two of five characters here; looking took a minute and was right.
+
+## Asset 2f — the sky islands, round three
+
+Two sheets were asked for in this round. One arrived usable and is in the game; the other cannot
+tile, and why it cannot is the useful half of this section.
+
+### 1 — the rope crossing · **shipped**
+
+`assets/source/rope-runs.png` came in as 2172 × 724, four cells of 543 × 724, and every cell reached
+exactly the edges it needed to — north-south, east-west, north-south, east-west. `tools/build-rope.js`
+takes a centred square from each cell, resamples to 32 × 32 by most-common colour, snaps to fourteen
+shared colours and upscales four times, so the output is `assets/rope.png` at 512 × 128: byte-for-byte
+the same shape as `assets/track.png`, which is what lets `planTrack` pick a sheet and keep its index
+arithmetic.
+
+The prompt that produced it, kept because it worked:
+
+> A **sprite sheet for a top-down 2D game**, drawn on a **solid pure magenta background, hex
+> #FF00FF**, arranged as a **1 row × 4 columns grid**. Each cell shows a **rope-and-plank walkway
+> seen from directly above**, in **16-bit SNES pixel art**: pale hemp ropes running along both
+> sides, weathered timber planks lashed across between them. Cell 1: the walkway running **top to
+> bottom, touching the top and bottom edges of the cell**. Cell 2: the same walkway running **left
+> to right, touching the left and right edges**. Cells 3 and 4: the same two runs, **worn** — a
+> plank missing, ropes frayed, moss in the gaps. Limited palette, hard pixel edges, no
+> anti-aliasing, no outline, no shadow, no text, no grid lines, no labels.
+
+### 2 — the road · **rejected, and the reason is a rule**
+
+`005b49b1` came in as 1536 × 1024, eight cells of 384 × 512, and **no cell touches any edge of its
+box.** Measured, cell by cell, the content boxes are 184 × 501, 372 × 197, 372 × 333, 269 × 333,
+273 × 364, 280 × 369, 372 × 501 and 165 × 304; the crossing width runs from **25% to 81%** of its
+box and the centre line sits anywhere from **24% to 72%** across.
+
+They are eight pictures of a road, not eight tiles cut from one grid. Lay any two side by side and
+they meet at neither the same width nor the same height, so the run breaks at every seam. No
+ingest script can fix this: a builder can crop, resample and recolour, but it cannot invent where
+the road was supposed to leave the cell.
+
+It is in `assets/source/dump/road-runs-misaligned-rejected.png`. **The one thing the prompt did not
+say is the one thing a tiling run needs** — that the run must leave the cell at a fixed width and a
+fixed centre.
+
+**The road ships drawn in code in the meantime**, by `tools/build-road.js`, following
+`tools/build-track.js`, which has drawn the rails that way since the crossing existed. That failure
+above is the argument for it: the fixed width and fixed centre are two constants there, `BAND` and
+`MIDDLE`, and all four frames are drawn from them, so there is nowhere for a frame to disagree.
+Painted art still replaces it the day a sheet arrives that tiles — the sheet's *shape* is the
+contract, not its pixels — and this is the prompt to get one. It says the edge rule three ways,
+because saying it once did not take:
+
+> A **terrain sprite sheet for a top-down 2D game**, drawn on a **solid pure magenta background,
+> hex #FF00FF**, arranged as a **1 row × 4 columns grid** of **four square cells**. Each cell shows
+> a **worn dirt footpath seen from directly above**, in **16-bit SNES pixel art**: pale packed
+> earth, a few loose pebbles, grass tufts fraying the edges.
+>
+> **The path must run edge to edge and be identical where it leaves the cell.** In every cell the
+> path is **exactly one third of the cell wide**, and it is **exactly centred** on the cell — the
+> same width and the same centre in all four, so any two cells placed next to each other join
+> without a step.
+>
+> Cell 1: the path running **top to bottom**, crossing the **full height**, touching the top edge
+> and the bottom edge. Cell 2: the path running **left to right**, crossing the **full width**,
+> touching the left edge and the right edge. Cells 3 and 4: the same two runs, more overgrown —
+> grass closing in from both sides, the earth broken up — but **the path still leaves the cell at
+> the same width and the same centre**.
+>
+> Limited palette, hard pixel edges, no anti-aliasing, no outline, no drop shadow, no text, no grid
+> lines, no labels, no border around the cells.
+
+### 3 — the crystal cluster, the last generated feature on the island
+
+`crystalCluster` is frames 28 and 29 of `features.png` and it is not painted: it is a flat two-tone
+cone from the old generated path, one pink and one teal, with four sparkles and no shading. It was
+acceptable when the islands were bare rock and it is the odd thing out now that the grass, the
+shrubs and the mangrove are all painted — and the rim gate on the mangrove made it **more** visible,
+not less, because it is now half of what an inland tile can grow.
+
+It also stands on a point. A crystal that a hand could tip over does not read as something the
+island grew.
+
+> A **sprite sheet for a top-down 2D game**, drawn on a **solid pure magenta background, hex
+> #FF00FF**, arranged as a **1 row × 4 columns grid** with clear magenta gutters. Each cell shows a
+> **cluster of raw mineral crystals pushing up out of the ground**, in **16-bit SNES pixel art**,
+> seen from **slightly above and in front**.
+>
+> Each cluster is **three to five angular shards of different heights**, leaning apart rather than
+> parallel, growing from a **broad rocky base of broken stone and a few loose chips** — the base is
+> wider than the tallest shard and sits on the **bottom edge of the cell**, so the cluster reads as
+> bedded into the ground rather than balanced on a point. Faceted, with a lit face and a shadowed
+> face on every shard, and a pale highlight along one edge.
+>
+> Two cells in **cool blue-green**, two in **dusty rose**. Limited palette, hard pixel edges, no
+> anti-aliasing, no outline, no cast shadow on the ground, no sky, no text, no grid lines, no
+> labels.
+
+The sheet drops in as four frames on the features sheet at 128 × 128. Frames 28 and 29 are
+replaced in place and the other two take **34 and 35**, which the generated conifer left empty when
+the aero-mangrove superseded it — so four variants cost nothing and no entry after them renumbers.

@@ -19,6 +19,7 @@ import treelineUrl from '../../../assets/treeline.png';
 import overhangUrl from '../../../assets/overhang.png';
 import treesUrl from '../../../assets/trees.png';
 import ropeUrl from '../../../assets/rope.png';
+import roadUrl from '../../../assets/road.png';
 import decorUrl from '../../../assets/decor.png';
 import trackUrl from '../../../assets/track.png';
 import { EventBus, type UiToGame } from '../EventBus';
@@ -48,6 +49,7 @@ import {
   OVERHANG_SHEET,
   TREE_SHEET,
   ROPE_SHEET,
+  ROAD_SHEET,
   createTileTextures,
   loadTileSheets,
   tileFrame,
@@ -90,7 +92,8 @@ const SHEET_KEY: Record<
   treeline: TREELINE_SHEET,
   overhang: OVERHANG_SHEET,
   trees: TREE_SHEET,
-  rope: ROPE_SHEET
+  rope: ROPE_SHEET,
+  road: ROAD_SHEET
 };
 
 /**
@@ -451,6 +454,7 @@ export class WorldScene extends Phaser.Scene {
       overhang: overhangUrl,
       trees: treesUrl,
       rope: ropeUrl,
+      road: roadUrl,
       decor: decorUrl,
       track: trackUrl
     });

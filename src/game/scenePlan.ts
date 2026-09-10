@@ -21,6 +21,7 @@ import {
   decorCount,
   decorFrame,
   trackFrame,
+  roadFrame,
   EDGE_ORDER,
   EDGE_STEP,
   FENCE_SIDE,
@@ -76,6 +77,7 @@ export type PlacementSheet =
   | 'shore'
   | 'track'
   | 'rope'
+  | 'road'
   | 'cliffs'
   | 'treeline'
   | 'overhang'
@@ -1141,6 +1143,13 @@ export function planScene(built: FieldMapWorld): Placement[] {
     // After decor, before the huts: the line is laid *on* the ground and things stand beside it,
     // so a rail draws over a scattered stone and under a building.
     ...planIslandShadow(built.world),
+    // **The road, and the reason this line is here at all.** `easeRoutes` has returned the way
+    // between the places since routes were written and `fieldMap.ts` discarded it, so every map
+    // has had a road nobody could see -- the same shape as the three faults `CLAUDE.md` records
+    // under the rules layer, and `test/road.test.ts` is the guard that it stays drawn.
+    //
+    // Before the rail, because where the two ever meet the iron is laid over the earth.
+    ...planRoad(built.world),
     ...planTrack(built.world),
     // After the rails, because a cloud drifts over the line and not under it -- and after the
     // shadow, which is on the water rather than in the air above it.
@@ -1413,6 +1422,62 @@ export function planWaterfall(world: FieldMapWorld['world']): Placement[] {
           }
         });
       }
+    }
+  }
+  return out;
+}
+
+/**
+ * Every tile of worn path, and which way it runs.
+ *
+ * `planTrack`'s shape exactly, because a road and a railway are the same *kind* of thing: a run
+ * that belongs to a route rather than to a kind of ground, placed by a flag, drawn flat and
+ * tile-filling under the walker, and needing its neighbours to know which way it goes. Two
+ * functions rather than one with a parameter, because the two differ in what they read off the
+ * ground and the shared version was three conditionals wearing a trenchcoat.
+ *
+ * **The road never draws where the rail does.** `fieldMap.ts` refuses the flag on a tracked tile
+ * rather than this refusing to draw it, so there is one place the rule lives; this asserts nothing
+ * about it and simply never sees such a tile.
+ */
+export function planRoad(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  const worn = (x: number, y: number): boolean => world.tiles[y]?.[x]?.road === true;
+
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      const tile = world.tiles[y]![x]!;
+      if (!tile.road) continue;
+
+      // East-west when the path's neighbours are to the sides rather than above and below. A lone
+      // tile with neither falls to north-south, as the rail does.
+      const alongX = worn(x - 1, y) || worn(x + 1, y);
+      const alongY = worn(x, y - 1) || worn(x, y + 1);
+      const eastWest = alongX && !alongY;
+
+      // **The second pair of frames is a verge, not disuse**, which is where this parts company
+      // with the rail. An unused railway is a fact about the railway; a path through meadow has
+      // grass at its edges on the day it is cut, and a path over sand or bare rock never does
+      // however long it lies. So the question is the same one `planTrack` asks -- is there
+      // anything here that grows -- and the answer means something different.
+      const verge = GROWS_OVER.has(tile.biome);
+
+      out.push({
+        sheet: 'road',
+        frame: roadFrame(eastWest, verge),
+        x,
+        y,
+        // `underfoot`, the same slot the rail uses, and **not a slot of its own one below it**.
+        // That was the first attempt and `scenePlan.test.ts` refused it by name -- every placement
+        // at or above `GROUND_DEPTH_BASE` has to sit inside its row's band, and inventing a step
+        // under the bottom slot puts it outside. The band is the contract; a private half-step
+        // through it is how a layer stops being sorted with everything else.
+        //
+        // Order within a tie does the job instead, which is what `planEdges` and `planShore`
+        // already rely on: `planScene` lists the road before the rail, and equal depths draw in
+        // the order they were added. Where the two ever meet, the iron is laid over the earth.
+        depth: depthFor(y, ROW_SLOT.underfoot)
+      });
     }
   }
   return out;

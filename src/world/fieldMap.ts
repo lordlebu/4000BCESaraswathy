@@ -22,6 +22,21 @@ import {
 } from './crossing';
 import { stampBasalt } from './basalt';
 import { easeRoutes, tourOrder } from './routes';
+
+/**
+ * Water a route crosses rather than follows, where the road stops and a ford begins.
+ *
+ * **A route prefers a river, and that is right; a road drawn on one is not.** `crossingCost` gives
+ * `river` the same 1 as plains deliberately -- easing turns wetland *into* river because the
+ * delta's answer to crossing a marsh is to follow the channel, not to drain it. So the line
+ * genuinely runs down watercourses, and the first version of the road drew packed earth over open
+ * water for a dozen tiles south of Lothal's settlement.
+ *
+ * The road stops at the bank and starts again on the other side. The gap is the ford, and it says
+ * something true rather than hiding something: you get your feet wet here. Nothing else changes --
+ * the tile is still walkable, still costs what it costs, and the route still goes this way.
+ */
+const FORDED: ReadonlySet<BiomeId> = new Set<BiomeId>(['river', 'sky_water']);
 import { generateWorld, isWalkable, reachableFrom } from './generate';
 import { tileHash } from './rng';
 import type { BiomeId, Point, Tile, World } from './types';
@@ -663,7 +678,7 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   const route = tourOrder(placed.map((p) => p.at), world.start);
   // Wet landforms get a wider corridor -- see `radius` in routes.ts for why.
   const wet = fieldMap.relief === 'delta' || fieldMap.relief === 'island';
-  easeRoutes(world.tiles, world.width, world.height, [world.start, ...route], {
+  const { line } = easeRoutes(world.tiles, world.width, world.height, [world.start, ...route], {
     radius: wet ? 2 : 1,
     // Never soften the ground a place is standing on, or the landmark's tile.
     keep: new Set([
@@ -671,6 +686,20 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
       `${world.landmark.x},${world.landmark.y}`
     ])
   });
+
+  // **And keep the line, which is the part that was thrown away for as long as routes have
+  // existed.** Every map has computed the way somebody would walk between its places since the day
+  // `easeRoutes` was written, and nothing has ever drawn it -- the same shape as the three faults
+  // `CLAUDE.md` records under the rules layer, one layer down.
+  //
+  // The rail is excluded rather than overdrawn. Both are runs drawn from a flag by the same
+  // neighbour-reading planner, and a tile carrying both would draw a dirt path through iron
+  // sleepers; the crossing is a railway, and where it goes it is the only thing there.
+  for (const at of line) {
+    const tile = world.tiles[at.y]?.[at.x];
+    if (!tile || tile.track || FORDED.has(tile.biome)) continue;
+    tile.road = true;
+  }
 
   // Put the landmark back, *after* placement has read the ground.
   //

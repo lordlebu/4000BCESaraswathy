@@ -91,12 +91,14 @@ First run installs them; later runs start immediately.
 
 ### The ground is finished; the maps are what is left
 
-Fifteen biomes now, and the last four arrived as **patches rather than palettes** — a distinction
-worth keeping, because getting it wrong is how a map becomes a third lava. `seed_biomes` is a
-*climate* palette: the classifier divides elevation and moisture among whatever is listed, so
-anything in it becomes a large region. `lava_field`, `snow`, `sky_island` and `sky_underside` are
-places instead, stamped after classification the way the settlement already is — its comment says
-why, and it is the whole rule: *a city is a place, not a climate*.
+Eighteen entries in `data/biomes.json` now, and the classifier emits **eight** of them: the
+`ALL_TERRAIN` list in `classify.ts`. Everything else arrived as a **patch rather than a palette** —
+a distinction worth keeping, because getting it wrong is how a map becomes a third lava.
+`seed_biomes` is a *climate* palette: the classifier divides elevation and moisture among whatever
+is listed, so anything in it becomes a large region. `lava_field`, `snow`, `sky_island`,
+`sky_underside` and `sky_water` are places instead, stamped after classification the way the
+settlement already is — its comment says why, and it is the whole rule: *a city is a place, not a
+climate*.
 
 `snow` is not in `ELEVATION_ORDER` or `GROUND_PREFERENCE` at all, so the classifier **cannot**
 produce it. It exists only where `world/tableland.ts` stamps it, which is what keeps it off a
@@ -291,8 +293,12 @@ so the file is kept as the readable reference for why a species landed where it 
 run without `ALLOW_RETIRED_SPECIES_BUILD`, because running it would overwrite the export with a
 narrower version of the same data.
 
-Sky species and Asura conjurations remain `placement: "lore"` and never appear in play: the sky has
-no ground-biome equivalent, and the tone question for the Asura horrors is still open.
+**The sky half of that is no longer true, and it was the sky islands that changed it.** Nineteen
+sky species now stand on real ground: the islands, the underside and the pool are stamped biomes
+with painted tiles, so a species tagged to one has somewhere to be. Twenty-six sky species are
+still `placement: "lore"` — the open-sky and high-altitude sets, which have no ground equivalent
+and are inert on purpose — alongside nine Asura conjurations whose tone question is still open.
+Thirty-five in total, against the 85 this file used to claim.
 
 ### Layers, and the rules between them
 
@@ -464,7 +470,8 @@ readings; change them here and change them there.
   and three creatures; canon species were tagged into them, and they now hold 6 and 7 creatures with
   8 plants each. `mountains` (51) and `desert` (35) are still far richer than `landmark` (4), because
   the bestiary was authored by region and the mountainous and arid regions are the biggest sections.
-  85 species remain `placement: "lore"` — the sky and Asura sets, which are inert by design.
+  35 species remain `placement: "lore"` — 26 open-sky and 9 Asura, inert by design. It was 85
+  before the sky islands gave the sky-island, underside and pool species ground to stand on.
   **And a biome nothing draws hides its own data errors.** All 31 species carrying `lava_field`
   carried the identical pair `lava_field, mountains` — a bestiary import, not authored biology —
   and it had swept up eight polar species. A glacial ribbon-seal was offered on warm basalt in a
@@ -561,9 +568,12 @@ Two habits that go with it, both learned by getting them wrong:
   `src/save.ts` when the payload shape changes so old saves are discarded rather than misread.
   **Two things move it and only one of them is a payload change**: the other is the ground moving
   under a saved journey, because a remembered position, node and fog mask all name tiles that a new
-  generator no longer produces. It is at 14 — the collection replacing the old sketch list moved it
-  to 6, resource nodes to 12, and the Aravali growing to 52 × 78 moved it again — and `Progress`
-  (rungs, words, answered, questions) plus `collection` are the parts that matter.
+  generator no longer produces. It is at 16 — the collection replacing the old sketch list moved it
+  to 6, resource nodes to 12, the Aravali growing to 52 × 78 moved it again, stamping the sky pool
+  moved it to 15, and making that pool walkable moved it to 16 — and `Progress` (rungs, words,
+  answered, questions) plus `collection` are the parts that matter. **The last two are the same
+  ground twice**, which is the clearest case this rule has: neither changed the payload's shape, and
+  both changed what a remembered tile means.
 - **Dev dependencies grew by three, for a reason.** `jsdom`, `@testing-library/react` and
   `@testing-library/dom` exist because three panel bugs reached a browser before anything noticed.
   Node stays the default test environment; panel files opt in with `// @vitest-environment jsdom`,

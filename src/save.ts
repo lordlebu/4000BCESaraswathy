@@ -96,10 +96,17 @@ const PREFIX = 'south-of-tethys';
  * ground, which on six of twelve Aravali seeds it was not. A remembered compass bearing points
  * somewhere else.
  *
+ * **17 is the payload changing, which is the first kind and the first of those since 12.** A tile
+ * grew a `road` flag. Nothing about the ground moved -- a road is worn into whatever was already
+ * there and changes no biome, no walkability and no cost -- but a baked world from an older save
+ * has no such flag on any tile, so it would load as a map with the route between its places
+ * invisible. That is not a broken save; it is a save that quietly looks like the bug this change
+ * exists to fix, which is worse to leave than to drop.
+ *
  * Read strictly rather than migrated: a version mismatch drops the save. That is the existing
  * behaviour and it stays, because a half-understood journey is worse than a fresh one.
  */
-export const SAVE_VERSION = 16;
+export const SAVE_VERSION = 17;
 
 export interface Journey {
   version: number;
