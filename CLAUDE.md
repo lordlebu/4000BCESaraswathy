@@ -201,6 +201,7 @@ The art docs, in the order they are useful:
 | `docs/shoreline-plan.md` | the coast and riverbank emboss: what is planned, and what it must not touch |
 | `docs/props-and-rims-plan.md` | prop shadows, cliff joints, island flora and underside shading — and the art still wanted |
 | `docs/continuous-edges-plan.md` | why a rim still reads as a tile, and the three mechanisms that would stop it |
+| `docs/sky-islands-plan.md` | the floating islands: what the reference cannot buy, and what the layers can |
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
