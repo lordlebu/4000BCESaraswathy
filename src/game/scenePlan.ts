@@ -35,6 +35,7 @@ import {
   cliffFrame,
   cliffTurn,
   CLOUD_PATTERNS,
+  FALL_FRAMES,
   cornerFrame,
   treelineAt,
   depthFor,
@@ -75,6 +76,7 @@ export type PlacementSheet =
   | 'treeline'
   | 'marker'
   | 'cloud'
+  | 'waterfall'
   | 'shadow';
 
 export interface Placement {
@@ -1084,6 +1086,9 @@ export function planScene(built: FieldMapWorld): Placement[] {
     // After the rails, because a cloud drifts over the line and not under it -- and after the
     // shadow, which is on the water rather than in the air above it.
     ...planClouds(built.world),
+    // After the cloud, because a fall is in front of the weather rather than behind it, and after
+    // the cliffs it runs down: water before a rock face is what a waterfall is.
+    ...planWaterfall(built.world),
     ...huts,
     ...planOverdraw(built.world, builtOn),
     ...planMarkers(built)
@@ -1278,6 +1283,78 @@ export function planClouds(world: FieldMapWorld['world']): Placement[] {
       depth: depthFor(y, ROW_SLOT.undergrowth),
       alpha
     });
+  }
+  return out;
+}
+
+/**
+ * How far a fall carries below the lip it goes over, in tiles.
+ *
+ * Far enough to clear the shelf hanging under the island -- `SHELF_DEPTH` is four plus a ragged
+ * row -- and a little further, so the water is seen to *end* in air rather than to stop at the
+ * rock. Anything longer is a curtain reaching for a sea that is not there.
+ */
+const FALL_REACH = 8;
+
+/** How solid the water is where it goes over, before it thins with the drop. */
+const FALL_DENSEST = 0.85;
+
+/**
+ * The waterfall: where the island's pool goes over the side.
+ *
+ * **It hangs from water, not from rock**, which is the whole reason `pourAPool` bothers with an
+ * outflow. A fall drawn at any old cliff edge is decoration; a fall drawn where a channel actually
+ * reaches the rim is the end of something the player can walk beside, and it is the silhouette the
+ * reference is built around.
+ *
+ * So the lip is a `sky_water` tile with nothing walkable below it, and the fall is the column of
+ * tiles under that lip -- straight down through the shelf and a little way into open air, fading
+ * as it goes. It draws over the rock face rather than beside it, because water in front of a cliff
+ * is what a waterfall *is*.
+ *
+ * **The motion is free.** Two baked frames offset by half a voxel, handed to the scene as `sway`,
+ * which is the same array `updateSway` already walks once a frame for every reed and crown on the
+ * map. The phase is hashed per tile so a column does not blink in unison -- which on falling water
+ * would read as a strobe rather than as a stream.
+ */
+export function planWaterfall(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  const biomeAt = (x: number, y: number) => world.tiles[y]?.[x]?.biome;
+
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      if (biomeAt(x, y) !== 'sky_water') continue;
+      // The lip: water with no island under it. Water in the middle of the pool goes over nothing.
+      const under = biomeAt(x, y + 1);
+      if (under === 'sky_water' || under === 'sky_island') continue;
+
+      for (let drop = 1; drop <= FALL_REACH; drop += 1) {
+        const below = biomeAt(x, y + drop);
+        // Down the rock and out into the air below it, and nothing else. A fall that carried on
+        // over a shore or the next island along is a column of water standing on the ground.
+        if (below !== 'sky_underside' && below !== 'sea') break;
+
+        const rest = tileHash(world.seed, x, y + drop, 'fall') % FALL_FRAMES;
+        out.push({
+          sheet: 'waterfall',
+          frame: rest,
+          x,
+          y: y + drop,
+          // Above the rock face it falls in front of, below anything that stands up.
+          depth: depthFor(y + drop, ROW_SLOT.undergrowth),
+          // Thinning with the drop, so the water is spent by the time it reaches open air rather
+          // than cut off. The last tile or two is spray.
+          alpha: FALL_DENSEST * (1 - (drop - 1) / FALL_REACH),
+          sway: {
+            rest,
+            lean: (rest + 1) % FALL_FRAMES,
+            // Per tile, so the column does not blink in unison -- which on falling water reads as
+            // a strobe rather than as a stream.
+            phase: tileHash(world.seed, x, y + drop, 'fall-phase') % 1000
+          }
+        });
+      }
+    }
   }
   return out;
 }

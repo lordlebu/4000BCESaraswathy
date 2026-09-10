@@ -27,6 +27,12 @@ export type BiomeId =
   | 'lava_field'
   | 'sky_island'
   | 'sky_underside'
+  // Standing water on a floating island, and its own biome rather than `river` with a filter.
+  // `data/biomes.json` is the one place a biome's journal line lives, and a pool hanging in the
+  // sky is not "a bright river line braiding the land together" -- the alternative is deciding
+  // the prose from what a tile's neighbours are, which is a second implementation of the
+  // description and will drift. See docs/sky-islands-plan.md.
+  | 'sky_water'
   | 'open_sky'
   | 'underworld';
 

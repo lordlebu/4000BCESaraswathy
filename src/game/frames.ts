@@ -1038,3 +1038,13 @@ export const CLOUD_VOXELS = 4;
  * that drifts and then draws nothing, so both read it from here.
  */
 export const CLOUD_PATTERNS = 6;
+
+/**
+ * How many frames of falling water exist. Two, alternated by `SWAY_PERIOD`.
+ *
+ * Two is the whole animation and it is enough: the frames differ by half a voxel of vertical
+ * offset, so the eye reads one sheet of water moving rather than two pictures swapping. A third
+ * frame would need a third offset that is not a half of anything, and the loop would start to
+ * read as a stutter.
+ */
+export const FALL_FRAMES = 2;

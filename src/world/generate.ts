@@ -28,7 +28,19 @@ export const DEFAULT_HEIGHT = 24;
  * and a rule naming one biome could not say so. `test/species.test.ts` holds this set and
  * `data/biomes.json` to the same answer, which is what caught it.
  */
-const UNWALKABLE: ReadonlySet<string> = new Set(['sea', 'open_sky', 'sky_underside']);
+const UNWALKABLE: ReadonlySet<string> = new Set([
+  'sea',
+  'open_sky',
+  'sky_underside',
+  // **Water, and not the wadeable kind.** It was walkable at cost 1 for one turn, on the reasoning
+  // that a pool which severed an island would strand the places on the far side of it. That is a
+  // real risk and it is not what makes this decision: a walkable biome is ground a player stands
+  // on, gathers from and reads a journal entry about, and `frames.test.ts` said so immediately by
+  // demanding decor for it. A few tiles of water about to go over a waterfall is not somewhere to
+  // stand. `pourAPool` keeps the channel one tile wide for the severing, which is the right place
+  // for that argument.
+  'sky_water'
+]);
 
 export function isWalkable(tile: Pick<Tile, 'biome' | 'track'>): boolean {
   // A railway makes otherwise impassable ground walkable without changing what the ground *is*.

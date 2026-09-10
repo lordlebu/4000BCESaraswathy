@@ -226,3 +226,147 @@ a biome index where `tileFrame` wants `index * TILE_VARIANTS + variant`.
 
 An island silhouette is a whole-scene judgement — terrain, rim, decor, shade and overlay together
 — and it will be misjudged the same way by the same shortcut.
+
+---
+
+# Round two: the islands as a place, not a shelf
+
+Opened after the 52 × 78 map and the voxel cloud landed and the verdict on looking at it was that
+the islands still read as *grey rock with something growing on it*. Six asks, one reference image,
+and one of the six turns out to be constrained by a number.
+
+## What the reference can and cannot buy, again
+
+The reference is **isometric**. This game is near-top-down, and the top of the plan already records
+why that is not negotiable. But the useful half of that sentence is what a top-down camera *can*
+still show, and it is more than it looks: the cliff face, the treeline, the coast band and the
+underside shade are all **rim layers** — art drawn on a boundary tile, showing a *side* in a view
+that has no sides. Three of the six asks below are rim layers, and that is why they are affordable.
+
+What genuinely cannot cross over: stilt-rooted trees seen in three-quarter view, a visible cliff
+wall with ivy on it as one object, and the long tapering roots hanging in open air below the
+island. The first two become rim layers. The third becomes a rim layer *hanging downward*, which
+the codebase has not drawn before and is the one new mechanism here.
+
+## The six, and what each one costs
+
+### F. Grass on the island top · **art wanted**, and a number constrains it
+
+`assets/source/sky_island.png` is a soft sage watercolour and the built tile reads as a faded lawn.
+`data/biomes.json` calls it `#a8b6c6` — pale blue-grey — and describes it as *"a shelf of pale rock
+adrift in open air, grass clinging to its rim"*. The ask is that it read as grass.
+
+**The obvious green is not available.** `docs/art-direction.md` records that two grounds under about
+25 apart in RGB stop being tellable apart, and that is why `hills` is olive rather than ochre.
+Measured against the palette:
+
+| candidate | nearest ground | distance |
+|---|---|---|
+| `#6f9e52` (a natural grass green) | **forest** `#4f9a5a` | **33** |
+| `#86bb62` | plains `#9fc96b` | 30 |
+| `#8ec46a` | plains `#9fc96b` | **18** |
+| **`#7fb35e`** | plains `#9fc96b` | **41** (forest: 54) |
+
+So the island's grass has to thread between `forest` below it and `plains` above it, and the window
+is narrow. **`#7fb35e`** is the middle of it — a real grass green, 41 from plains and 54 from
+forest, and 100 away from the pale grey it replaces.
+
+**The mitigating fact, which is worth knowing before treating this as a hard wall:** an island tile
+never touches `plains` or `forest` on the map. It borders `sea` and `sky_underside` and nothing
+else, by construction in `crossing.ts`. The confusion this rule guards against is two grounds
+*adjacent* on screen. So the real risk here is the overview map and the legend swatch, not the walk
+— which is why the window can be threaded rather than abandoned.
+
+### G. Rock, not rubble, on the underside · **art wanted**
+
+The built `sky_underside` tile is brown-mauve gravel: it reads as dirt. Canon says *"the raw
+underside of a floating shelf, root-hung and hollow"*. It should read as **broken stone** — blocky,
+faceted, with real light on the facets — because the shelf is a piece of ground that was torn off
+something, and torn rock has faces.
+
+### H. Overhang bush on the rim · **art wanted, and it is a rim layer**
+
+Vegetation spilling over the island's edge and hanging into the tile below. `planTreeline` is
+already exactly this shape — a predicate over a boundary and a sheet of four edge frames — so the
+mechanism costs a predicate (`sky_island` above, not-`sky_island` below) and a sheet name.
+
+`rootCurtain` already exists on the flora sheet and is a *feature*: one item inside one underside
+cell. This is different and both should stand — a curtain hangs under the rock, a bush spills over
+the lip.
+
+### I. A bigger, stranger tree · **art wanted**
+
+`aeroMangrove` exists and is 128 × 128, drawn centred in its cell like every other feature. Canon's
+Aero-Mangrove *"grows on the rim of a floating island and plunges its roots into open sky"*, and
+the reference's trees are the most distinctive thing in it.
+
+A tree that reads at that scale has to be **taller than its tile and bottom-anchored**, which is
+the contract `places`, `huts` and `landmarks` already use — `PLACE_HEIGHT` is `TILE_SIZE / 32 * 40`
+and the scene already sets `setOrigin(0.5, 1)` for those three sheets. So this is a fourth
+bottom-anchored sheet rather than a new mechanism.
+
+### D. Water on the island · **shipped** — see below
+
+### C. A waterfall · **shipped, and no art was needed** — see below
+
+## D and C together: the pool and the fall
+
+These two ship as one piece because neither is worth anything alone, and neither needs art.
+
+**`sky_water` is its own biome, not `river` with a filter.** A pool on a floating island is not the
+Saraswati: canon puts *"rainwater falling upward"* under these shelves, and `data/biomes.json` is
+the one place a biome's own journal line lives. Reusing `river` would print *"a bright river line
+braids the land together"* about a pool hanging in the sky, and the alternative — special-casing
+the prose by what the tile's neighbours are — is a second implementation of biome description that
+will drift. Four biomes have been added this way already and the drill is known.
+
+**Its tile is baked in code rather than painted**, which is the one piece of this that is cheaper
+than it looks. `tileTextures.ts` already bakes six textures — the edge blend, the bank, the shore
+band, the underside shade, the cloud and the placeholder — and the blend is the exact precedent:
+draw a terrain frame into a canvas, composite something over it, hand Phaser a key. Sky water is
+the `river` frame under a pale aquamarine wash: thinner, brighter and less blue than water with a
+riverbed under it, because there is nothing under this one but air.
+
+**The fall is voxels, and this is the case they suit better than the clouds did.** The cloud is
+still because two alternated frames of voxel read as a flicker rather than a drift. Falling water
+is the opposite: a column of quarter-tile voxels shifted by half a voxel between two frames, run
+through the `SWAY_PERIOD` machinery that already alternates every swaying sprite, *is* falling —
+the flicker is the effect. It costs one quad per tile, the same as the cloud, and no art.
+
+Where it hangs: from a `sky_water` tile that touches the island's lower rim, down through the
+`sky_underside` rows, thinning as it goes and ending in a few voxels of spray over open sea.
+
+**`check_playability.py` in the canon repo has to be re-run after D.** Water on an island changes
+what is walkable and what is reachable, and that simulation is the thing that catches a map you
+cannot cross.
+
+## What C and D measured
+
+**69 tiles of water against 296 of island top** — about 35 of 183 per island, a fifth once the
+channel and the slivers it strands are counted in. **39 tiles of falling water**, in a scene of
+around 7,000 placements, at one quad each.
+
+**The channel severs ground, and that was measured rather than feared.** The first build put the
+pool in and `landform.test.ts` said the Aravali was "cut in two: expected 2031 to be 2035" — four
+tiles, the wedge between the outflow and the island's own edge, walled off by water on one side and
+open air on the other. Four tiles is not a place: nothing can be reached there and nothing will be
+placed there, so `floodTheSlivers` makes it water, which is what it is. Steering the channel around
+the wedge does not survive contact — where the wedge falls depends on the hashed pool offset and
+the roughened island edge, so a rule that avoids it on this seed meets it on the next.
+
+**The pool is unwalkable, and a test decided that.** It shipped walkable at cost 1 for one turn, on
+the severing argument above. `frames.test.ts` failed immediately with *"walkable ground with nothing
+lying on it"* — because a walkable biome is ground a player stands on, gathers from and reads a
+journal entry about, and there is no decor for a pond. That is the right objection: a few tiles of
+water about to go over a waterfall is not somewhere to stand.
+
+**`sky_water` is deliberately not in any `seed_biomes`.** Putting it there to satisfy the palette
+test would be the exact trap `CLAUDE.md` records about `lava_field` — the palette is what the
+classifier divides elevation and moisture among, so a map listing it would come out roughly a third
+sky water. `pourAPool` can only write over `sky_island`, which bounds it far better than a list
+does: a delta cannot grow a pool however the palette is written.
+
+## The order for what is left
+
+F and G next — two texture swaps, and they will change the look of the map more than anything else
+here. Then H and I, which are new sheets and new intakes.

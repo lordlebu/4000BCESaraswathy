@@ -209,6 +209,12 @@ function collection(path: string): unknown[] {
   return (BUNDLES[bundle]?.[name] ?? []) as unknown[];
 }
 
+/**
+ * Biomes whose tile is built in code rather than painted, so absence from `terrain.png` is by
+ * design. `tileTextures.ts` is the list's other end.
+ */
+const BAKED_TILES: ReadonlySet<string> = new Set(['sky_water']);
+
 describe('every field canon exports is accounted for', () => {
   for (const [path, cover] of Object.entries(COVERAGE)) {
     it(`${path}`, () => {
@@ -322,8 +328,16 @@ describe('the artwork points at places that exist', () => {
     // arrived with art rather than as a stand-in. The two left are the two whose species are all
     // authored `lore` -- an authorial decision rather than a missing drawing, which is what
     // canon's own note on biomes.json says.
+    //
+    // **Absent from `TERRAIN_ORDER` no longer means "drawn from colour and symbol".** `sky_water`
+    // has no slot in `terrain.png` and never will: its tile is *baked* from the river frame under a
+    // wash, the way the edge blend and the cloud are, so it has real art and simply not painted
+    // art. Reading the two as the same thing would have this ledger growing every time a texture
+    // is built in code, which is the opposite of what it is for.
     const biomes = (biomesData as { id: string }[]).map((b) => b.id);
-    const standIns = biomes.filter((id) => !TERRAIN_ORDER.includes(id as (typeof TERRAIN_ORDER)[number]));
+    const standIns = biomes
+      .filter((id) => !TERRAIN_ORDER.includes(id as (typeof TERRAIN_ORDER)[number]))
+      .filter((id) => !BAKED_TILES.has(id));
     expect(standIns.sort()).toEqual(['open_sky', 'underworld'].sort());
   });
 

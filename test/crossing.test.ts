@@ -13,8 +13,9 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { canBoardAt, railSpan, shoreheads, trackRoute } from '../src/world/crossing';
 import { band } from '../src/world/classify';
-import { planClouds, planCliffs, planIslandShadow, planTrack } from '../src/game/scenePlan';
-import { CLOUD_PATTERNS } from '../src/game/frames';
+import { planClouds, planCliffs, planIslandShadow, planTrack, planWaterfall } from '../src/game/scenePlan';
+import { CLOUD_PATTERNS, FALL_FRAMES } from '../src/game/frames';
+import { isWalkable } from '../src/world/generate';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
@@ -597,6 +598,111 @@ describe('cloud over the strait, and outside the islands', () => {
       if (map.id === 'field_map_aravali') continue;
       const world = buildFieldMap(map, { seed: map.id }).world;
       expect(planClouds(world).length, `${map.id} grew weather it never asked for`).toBe(0);
+    }
+  });
+});
+
+describe('the pool on the island, and where it goes over', () => {
+  it('puts water on both islands and nowhere else', () => {
+    const world = aravali();
+    const pool = world.tiles.flat().filter((t) => t.biome === 'sky_water');
+    expect(pool.length, 'no pool was stamped at all').toBeGreaterThan(20);
+
+    // A pool is stamped *inside* the island patch, so every tile of it must have been island top
+    // a moment earlier. This is what keeps a biome that is not in any palette off every other map:
+    // `pourAPool` can only write over `sky_island`, so a delta cannot grow one however the palette
+    // is written.
+    for (const t of pool) {
+      const neighbours = [
+        world.tiles[t.y - 1]?.[t.x],
+        world.tiles[t.y + 1]?.[t.x],
+        world.tiles[t.y]?.[t.x - 1],
+        world.tiles[t.y]?.[t.x + 1]
+      ].filter(Boolean);
+      const touchesTheIsland = neighbours.some(
+        (n) => n!.biome === 'sky_island' || n!.biome === 'sky_water' || n!.biome === 'sky_underside'
+      );
+      expect(touchesTheIsland, `water at ${t.x},${t.y} is not on an island`).toBe(true);
+    }
+  });
+
+  it('never floods the railway', () => {
+    // The line is the only way across the map and it is walkable wherever it runs. Water drawn
+    // over it would put a player standing in a pool, which is the one thing this layer must not
+    // do -- and both the stamp and the sliver flood have to honour it, not just the stamp.
+    const world = aravali();
+    for (const t of world.tiles.flat()) {
+      if (t.biome !== 'sky_water') continue;
+      expect(t.track ?? false, `the pool covered the rail at ${t.x},${t.y}`).toBe(false);
+    }
+  });
+
+  it('leaves no scrap of island a walker cannot reach', () => {
+    // **The channel severs ground, and this is the assertion that made it visible.** The first
+    // version cut four tiles off between the outflow and the island's edge and `landform.test.ts`
+    // reported the whole map "cut in two". `floodTheSlivers` turns a scrap like that into water,
+    // which is what it is. Asked here as well, in the islands' own file, because the map-wide test
+    // reports a number rather than a place.
+    const world = aravali();
+    const top = world.tiles.flat().filter((t) => t.biome === 'sky_island');
+    for (const t of top) {
+      const walkableNeighbours = [
+        world.tiles[t.y - 1]?.[t.x],
+        world.tiles[t.y + 1]?.[t.x],
+        world.tiles[t.y]?.[t.x - 1],
+        world.tiles[t.y]?.[t.x + 1]
+      ].filter((n) => n && isWalkable(n));
+      expect(walkableNeighbours.length, `island tile ${t.x},${t.y} is walled in`).toBeGreaterThan(0);
+    }
+  });
+
+  it('hangs the fall from water, never from bare rock', () => {
+    // **The whole reason `pourAPool` bothers with an outflow.** A fall drawn at any cliff edge is
+    // decoration; one drawn where a channel actually reaches the rim is the end of something the
+    // player can walk beside. So every column of falling water must have a `sky_water` tile
+    // directly above the first tile of it.
+    const world = aravali();
+    const fall = planWaterfall(world);
+    expect(fall.length, 'nothing falls anywhere').toBeGreaterThan(5);
+
+    const wet = new Set(
+      world.tiles.flat().filter((t) => t.biome === 'sky_water').map((t) => `${t.x},${t.y}`)
+    );
+    const falling = new Set(fall.map((f) => `${f.x},${f.y}`));
+    for (const f of fall) {
+      const above = `${f.x},${f.y - 1}`;
+      expect(
+        wet.has(above) || falling.has(above),
+        `water at ${f.x},${f.y} falls from nothing`
+      ).toBe(true);
+      // Only down the rock and out into the air below it. A fall over a shore or the next island
+      // along is a column of water standing on the ground.
+      const on = world.tiles[f.y]![f.x]!.biome;
+      expect(['sky_underside', 'sea'], `the fall reached ${on}`).toContain(on);
+    }
+  });
+
+  it('animates for free, and out of step with itself', () => {
+    // Two baked frames on the `SWAY_PERIOD` beat, phased per tile. In unison a column of falling
+    // water strobes; phased, it streams.
+    const fall = planWaterfall(aravali());
+    for (const f of fall) {
+      expect(f.sway, 'a fall with no motion').toBeTruthy();
+      expect(f.sway!.rest).toBeLessThan(FALL_FRAMES);
+      expect(f.sway!.lean).toBeLessThan(FALL_FRAMES);
+      expect(f.sway!.rest, 'both frames the same is a still image').not.toBe(f.sway!.lean);
+    }
+    expect(new Set(fall.map((f) => f.sway!.phase)).size, 'every tile falls on the same beat')
+      .toBeGreaterThan(1);
+  });
+
+  it('leaves the maps with no island alone', () => {
+    for (const map of fieldMaps) {
+      if (map.id === 'field_map_aravali') continue;
+      const world = buildFieldMap(map, { seed: map.id }).world;
+      expect(world.tiles.flat().some((t) => t.biome === 'sky_water'), `${map.id} grew a sky pool`)
+        .toBe(false);
+      expect(planWaterfall(world).length, `${map.id} grew a waterfall`).toBe(0);
     }
   });
 });

@@ -197,6 +197,19 @@
     ]
   },
   {
+    "id": "sky_water",
+    "name": "Sky Water",
+    "walkable": false,
+    "travelCost": null,
+    "tone": "weightless",
+    "color": "#8fd6e6",
+    "symbol": "≋",
+    "description": "A pool caught on the shelf, thin and bright, with nothing but air beneath the rock that holds it.",
+    "regions": [
+      "tethys-sky-routes"
+    ]
+  },
+  {
     "id": "open_sky",
     "name": "Open Sky",
     "walkable": false,
