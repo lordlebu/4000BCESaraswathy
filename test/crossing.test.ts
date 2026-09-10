@@ -19,6 +19,7 @@ import {
   planCliffs,
   planIslandShadow,
   planOverhang,
+  planScene,
   planTrack,
   planWaterfall
 } from '../src/game/scenePlan';
@@ -35,7 +36,8 @@ import { DEFAULT_SEED } from '../src/ui/seed';
  */
 const SHELF_REACH = 8;
 
-const aravali = () => buildFieldMap(fieldMap('field_map_aravali')!, { seed: DEFAULT_SEED }).world;
+const aravaliScene = () => buildFieldMap(fieldMap('field_map_aravali')!, { seed: DEFAULT_SEED });
+const aravali = () => aravaliScene().world;
 
 describe('the Aravali crossing', () => {
   it('is a map the game knows about', () => {
@@ -763,6 +765,67 @@ describe('the plant that hangs over the island edge', () => {
       const world = buildFieldMap(map, { seed: map.id }).world;
       expect(planOverhang(world).length, `${map.id} grew an overhang`).toBe(0);
     }
+  });
+});
+
+describe('the tree that hangs off the edge hangs off an edge', () => {
+  /** Tiles where the ground stops on at least one side -- the only place a rim feature may stand. */
+  const rimTiles = (world: ReturnType<typeof aravali>) => {
+    const island = (x: number, y: number) => {
+      const b = world.tiles[y]?.[x]?.biome;
+      return b === 'sky_island' || b === 'sky_water';
+    };
+    const at = new Set<string>();
+    for (const row of world.tiles) {
+      for (const tile of row) {
+        if (!island(tile.x, tile.y)) continue;
+        const stops = ([[0, -1], [1, 0], [0, 1], [-1, 0]] as const).some(([dx, dy]) => {
+          const there = world.tiles[tile.y + dy]?.[tile.x + dx];
+          return there !== undefined && !island(there.x, there.y);
+        });
+        if (stops) at.add(`${tile.x},${tile.y}`);
+      }
+    }
+    return at;
+  };
+
+  it('never puts an aero-mangrove on ground with island on all four sides', () => {
+    // **Half the sprite is root and the rock those roots grip**, because canon has this tree
+    // *"growing on the absolute edges of floating islands, plunging its roots downward into the
+    // open sky"*. Inland there is no sky under it: the slab reads as a rock floating a tile above
+    // the grass, which is what it looked like on the map before `FeatureArt.rim` existed. Placed by
+    // biome alone it landed inland roughly as often as on the rim, so this is not a rare case.
+    const scene = aravaliScene();
+    const world = scene.world;
+    const rim = rimTiles(world);
+    const trees = planScene(scene).filter((p) => p.sheet === 'trees');
+    expect(trees.length, 'no tree is drawn on the islands at all').toBeGreaterThan(0);
+
+    for (const tree of trees) {
+      // The pool is the exception the rim gate does not cover and does not need to: a wading
+      // mangrove stands *in* water on its stilt roots, which is the shape of the tree.
+      if (world.tiles[tree.y]![tree.x]!.biome === 'sky_water') continue;
+      expect(
+        rim.has(`${tree.x},${tree.y}`),
+        `a mangrove at ${tree.x},${tree.y} hangs over solid island`
+      ).toBe(true);
+    }
+  });
+
+  it('still leaves the island interior something to look at', () => {
+    // The gate takes four of the six sky-island picks away from an inland tile. If it took the
+    // rest with them the middle of the island would go bare -- which is the failure the two lists
+    // in `frames.ts` exist to avoid, and it would be invisible in the test above.
+    const scene = aravaliScene();
+    const world = scene.world;
+    const rim = rimTiles(world);
+    const inland = planScene(scene).filter(
+      (p) =>
+        (p.sheet === 'features' || p.sheet === 'flora' || p.sheet === 'trees') &&
+        world.tiles[p.y]![p.x]!.biome === 'sky_island' &&
+        !rim.has(`${p.x},${p.y}`)
+    );
+    expect(inland.length, 'the island interior grows nothing').toBeGreaterThan(5);
   });
 });
 

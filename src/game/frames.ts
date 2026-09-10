@@ -735,6 +735,20 @@ export interface FeatureArt {
   frames: number[];
   sheet?: FeatureSheet;
   contact?: false;
+  /**
+   * Only on a tile at the edge of its ground, never inland.
+   *
+   * **A tree drawn hanging is a tree that has to hang off something.** The aero-mangrove's art is
+   * its root mass and the wedge of rock those roots grip -- half the sprite, by canon's own
+   * description, which has it *"growing on the absolute edges of floating islands, plunging its
+   * roots downward into the open sky"*. Placed by biome alone it landed inland as often as on the
+   * rim, and inland it reads as a slab of rock floating a tile above the grass with a tree on it.
+   *
+   * The gate is the same question `overhangAt` asks and the same one the overhang rim is drawn
+   * from -- island ground with a neighbour that is not -- so a rim feature and the rock face under
+   * it always agree about where the edge is.
+   */
+  rim?: true;
 }
 
 export const FEATURES: Record<string, FeatureArt> = {
@@ -781,7 +795,7 @@ export const FEATURES: Record<string, FeatureArt> = {
   // `places`, `huts` and `landmarks` already use. Flora frames 0 and 1 are left unused rather than
   // renumbering the two entries after them for nothing, the same call the features sheet made at
   // 34-37.
-  aeroMangrove: { biome: 'sky_island', sheet: 'trees', frames: [0, 1, 2, 3] },
+  aeroMangrove: { biome: 'sky_island', sheet: 'trees', frames: [0, 1, 2, 3], rim: true },
   // **And in the pool, which is where a mangrove belongs.** A mangrove stands in water on stilt
   // roots -- that is the whole shape of the tree and the reason canon named this one for it -- so
   // the sky pool is the most natural ground on the island for it rather than an odd one.
@@ -810,13 +824,30 @@ export interface FeaturePick {
   frame: number;
 }
 
-const FEATURES_BY_BIOME = (() => {
-  const index: Partial<Record<BiomeId, FeaturePick[]>> = {};
+/**
+ * Every frame available on a given ground, flattened -- once for a tile on the rim of its ground
+ * and once for a tile inland.
+ *
+ * **Two lists rather than one list and a skip.** Dropping a rim feature after the pick would leave
+ * the inland tile bare, so the ground would thin out in the middle exactly where a walker spends
+ * their time -- and it would thin by however many frames the rim entry happens to carry, which is
+ * a density that nobody chose. Picking from the list the tile is entitled to keeps
+ * `FEATURE_RARITY` meaning the same thing everywhere.
+ *
+ * Every biome with no rim entry gets the same array twice, so this costs nothing but the
+ * aero-mangrove.
+ */
+const [FEATURES_BY_BIOME, INLAND_FEATURES_BY_BIOME] = (() => {
+  const all: Partial<Record<BiomeId, FeaturePick[]>> = {};
+  const inland: Partial<Record<BiomeId, FeaturePick[]>> = {};
   for (const entry of Object.values(FEATURES)) {
     const sheet = entry.sheet ?? 'features';
-    for (const frame of entry.frames) (index[entry.biome] ??= []).push({ sheet, frame });
+    for (const frame of entry.frames) {
+      (all[entry.biome] ??= []).push({ sheet, frame });
+      if (!entry.rim) (inland[entry.biome] ??= []).push({ sheet, frame });
+    }
   }
-  return index;
+  return [all, inland] as const;
 })();
 
 /**
@@ -826,9 +857,14 @@ const FEATURES_BY_BIOME = (() => {
  * then a sky-island tile would sometimes carry a crystal *and* a mangrove standing in each other.
  * Putting them in one table keeps the choice single, which is what `FEATURE_RARITY` is tuning.
  */
-export function featureFrame(biome: BiomeId, roll: number, pick: number): FeaturePick | null {
+export function featureFrame(
+  biome: BiomeId,
+  roll: number,
+  pick: number,
+  onRim = true
+): FeaturePick | null {
   if (roll % FEATURE_RARITY !== 0) return null;
-  const picks = FEATURES_BY_BIOME[biome];
+  const picks = (onRim ? FEATURES_BY_BIOME : INLAND_FEATURES_BY_BIOME)[biome];
   if (!picks || picks.length === 0) return null;
   return picks[pick % picks.length]!;
 }
