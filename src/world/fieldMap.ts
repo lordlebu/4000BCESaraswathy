@@ -441,12 +441,29 @@ function placeOne(
  * **Portrait is not a square with a crop.** A crossing is walked in one direction -- shore, water,
  * islands, far shore -- and drawn square it cannot be any of those properly at once: the sea has
  * to read as a sea across the full width, which leaves the shores too thin to raise hills on and
- * the islands too close to read as two. 44 by 66 is the reference's own two-to-three, and it is
- * *fewer* tiles than 64 by 64 rather than more, so nothing gets slower.
+ * the islands too close to read as two. The two-to-three ratio is the reference's own.
+ *
+ * **Grown from 44 x 66, and a ceiling decided the number.** Bigger islands were wanted, and
+ * `crossing.ts` records why they could not simply take a bigger radius on the old map: the
+ * separation between them is bought by making them smaller, and taking it back off the shores
+ * leaves six or seven rows -- too thin for the landform shaper, and two points of interest lose the
+ * high ground they are written to stand on. So the room came from the map instead, and the islands
+ * took it: the ellipse is 21 tiles across now against seventeen.
+ *
+ * 52 x 78 is **4,056 tiles against a square large map's 4,096**, and that is the bound that
+ * matters: the scene builds a sprite per tile for the whole map, so tile count *is* frame cost, and
+ * the square maps already ship at 64 x 64 and already pass the browser suite. 56 x 84 would be
+ * 4,704 -- past every map that has ever been measured here, on a guess.
+ *
+ * **Growing it broke one thing, and the break was worth having.** `poi_kept_stones` stands high on
+ * the far shore, and the far shore had exactly one tile of band-1 ground in 478 -- the placement
+ * had been resting on a single tile of noise, and the extra rows diluted it away. The answer is in
+ * `landform.ts`: the far rim climbs into stone rather than falling to water, which is both the
+ * ground the stones stand on and the end of a strip of open sea nobody could reach.
  */
 const EXTENT: Record<'square' | 'portrait', Record<'small' | 'large', { width: number; height: number }>> = {
   square: { small: { width: 48, height: 48 }, large: { width: 64, height: 64 } },
-  portrait: { small: { width: 34, height: 50 }, large: { width: 44, height: 66 } }
+  portrait: { small: { width: 34, height: 50 }, large: { width: 52, height: 78 } }
 };
 
 export interface BuildOptions {

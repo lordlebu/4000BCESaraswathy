@@ -17,6 +17,14 @@ import { planCliffs, planIslandShadow, planTrack } from '../src/game/scenePlan';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
+/**
+ * How far below its own lowest top row an island's shelf can reach, in tiles.
+ *
+ * Only wide enough to read one island: the pair are twelve rows apart, so a window any wider finds
+ * the far island's top under the near one's shelf.
+ */
+const SHELF_REACH = 8;
+
 const aravali = () => buildFieldMap(fieldMap('field_map_aravali')!, { seed: DEFAULT_SEED }).world;
 
 describe('the Aravali crossing', () => {
@@ -473,12 +481,54 @@ describe('the shelf hangs as a body, not a skirt', () => {
     expect(Math.min(...tips), 'an island tip hangs over nothing').toBeGreaterThan(0);
   });
 
-  it('leaves the walkable top alone', () => {
-    // The taper is about what hangs *below*. If it ever eats island top, the map loses walkable
-    // ground and the places standing on it go with it -- which is the moat the shelf was moved out
-    // of in the first place.
+  it('never hangs the shelf where island top belongs', () => {
+    // The taper is about what hangs *below*. If it ever ate island top, the map would lose walkable
+    // ground and the places standing on it would go too -- which is the moat the shelf was moved
+    // out of in the first place.
+    //
+    // **Stated as a relationship rather than a count**, which is a correction: this pinned the
+    // island at 296 tiles, and that is a fact about one radius on one map size rather than about
+    // the taper. It failed the moment either was experimented with, which is a test objecting to
+    // the wrong thing.
     const world = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, {}).world;
-    const top = world.tiles.flat().filter((t) => t.biome === 'sky_island').length;
-    expect(top, 'island top changed size when only the shelf should have').toBe(296);
+    const top = world.tiles.flat().filter((t) => t.biome === 'sky_island');
+    expect(top.length, 'no island at all').toBeGreaterThan(100);
+
+    // **Split into the two islands, because every question below is about one of them.** They
+    // share columns -- the pair sits on one line up the middle of the map -- so anything asked
+    // per *column* across the whole map answers about whichever island happens to be lower.
+    const rows = [...new Set(top.map((t) => t.y))].sort((a, b) => a - b);
+    const blobs: (typeof top)[] = [[]];
+    let previous = rows[0]!;
+    for (const y of rows) {
+      if (y - previous > 1) blobs.push([]);
+      blobs[blobs.length - 1]!.push(...top.filter((t) => t.y === y));
+      previous = y;
+    }
+    expect(blobs.length, 'the pair read as one island').toBe(2);
+
+    // **And no shelf tile sits above the top it hangs from**, asked island by island. Asking it
+    // per *column across the whole map* finds the far island under every shelf tile of the near
+    // one and fails on a map that is perfectly correct -- the two sit on one line up the middle,
+    // twelve rows apart, which is well inside an island's own height. That is how the first
+    // version of this went wrong.
+    for (const blob of blobs) {
+      const first = Math.min(...blob.map((t) => t.y));
+      const last = Math.max(...blob.map((t) => t.y));
+      const lip = new Map<number, number>();
+      for (const t of blob) lip.set(t.x, Math.max(lip.get(t.x) ?? -1, t.y));
+
+      for (const row of world.tiles) {
+        for (const t of row) {
+          if (t.biome !== 'sky_underside') continue;
+          // This island's own band: its top, and the rows the shelf can reach below it.
+          if (t.y < first || t.y > last + SHELF_REACH) continue;
+          const under = lip.get(t.x);
+          if (under === undefined) continue; // off the island's ends, so nothing to be above
+          expect(t.y, `shelf at ${t.x},${t.y} sits above this island's top at ${t.x},${under}`)
+            .toBeGreaterThan(under);
+        }
+      }
+    }
   });
 });
