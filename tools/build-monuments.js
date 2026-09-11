@@ -51,16 +51,12 @@ const JOBS = [
      * buildings.
      */
     anchor: 'bottom'
-  },
-  {
-    name: 'windmill',
-    source: 'windmill-turning.png',
-    cells: 6,
-    width: 256,
-    height: 480,
-    colours: 22,
-    anchor: 'bottom'
   }
+  // **The windmill was the second job here and is not any more.** It asked a painter for six cells
+  // of one mill at fifteen degrees apart, and what came back had the tower at `y 79-709`
+  // pixel-identically in all six -- six copies of one position, with the rotation the sheet existed
+  // for simply absent. `tools/build-windmill.js` takes one wheel and turns it here instead, which
+  // is fewer things for a painter to get right and a source that can be re-stepped at any angle.
 ];
 
 // --- PNG ------------------------------------------------------------------
@@ -331,4 +327,10 @@ function main() {
   }
 }
 
-main();
+// **The intake pieces are shared, not copied.** `build-windmill.js` needs the same decoder, the
+// same background key and the same median-cut quantiser, and a second copy of any of them is a
+// second place for the magenta-hue fix and the black cut at 24 to be got wrong. Exported rather
+// than duplicated; `main` still runs when this file is invoked directly.
+module.exports = { decodePng, isBackground, contentBox, resample, quantise, intoCell, encodePng };
+
+if (require.main === module) main();

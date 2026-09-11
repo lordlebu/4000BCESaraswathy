@@ -1493,6 +1493,29 @@ are the names of the dead; at 128 pixels wide they must read as *inscription* an
 glyphs, because any glyph an image model invents will be a real script saying something nobody
 wrote. Rows of marks say "names" perfectly well at this size.
 
+### What arrived, measured
+
+All three came back at once. Two ship; one is parked, and the parked one is not the failure the
+road sheet was.
+
+| | Verdict | Measured |
+|---|---|---|
+| **blade wheel** | **ships** | hub 0.5 px off the image centre horizontally, 2 px vertically — 0.04% and 0.16%. Sails reach 505 px of an allowed 627, so a rotation clears the corners with **19.5% margin**. First sheet in this programme that was right first time. |
+| **tower** | **ships** | content 668 × 1381, aspect **0.484** against the 0.500 a 128 × 256 cell wants; centred at 49.1%. Bare mounting boss, no sails. |
+| **bridge** | **parked** | runs agree tightly *within* an orientation — north–south 219/221 px wide, east–west 239/238 tall — but **no cell reaches its edges** (97% and 95% of the run axis), and the two orientations disagree by 9%, which would step at a corner. |
+
+**The background that looked wrong was not.** The wheel arrived on what renders as white, and white
+would have been fatal — the sails are cream, so keying it would have eaten them. It measures as
+**alpha 0**: transparent, and already handled. Checking beat assuming by about thirty seconds.
+
+**The bridge is not the road failure repeated.** The road sheet's four cells disagreed with each
+other — 25–81% of their box, centres from 24% to 72% — and no builder can invent where a run was
+meant to leave a cell. These cells agree with each other to within 1%; they are simply drawn a few
+per cent short of the border, and that *is* something an intake can correct by cropping to the run
+and resampling to the cell. The right time to write that intake is when there is a gap to span, so
+the source sits in `assets/source/dump/` (untracked) until then, and the honest reason it is parked
+is the one below rather than the measurement.
+
 ### 4 — the bridge, on the crossing's contract
 
 512 × 128, four frames, **the same sheet shape as `track.png` and `rope.png`** — north-south,
