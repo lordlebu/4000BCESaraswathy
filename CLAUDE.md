@@ -204,6 +204,8 @@ The art docs, in the order they are useful:
 | `docs/props-and-rims-plan.md` | prop shadows, cliff joints, island flora and underside shading — and the art still wanted |
 | `docs/continuous-edges-plan.md` | why a rim still reads as a tile, and the three mechanisms that would stop it |
 | `docs/sky-islands-plan.md` | the floating islands: what the reference cannot buy, and what the layers can |
+| `docs/sky-buildings-plan.md` | the temple, the mill and the bridge — closed |
+| `docs/placing-the-buildings-plan.md` | how painted buildings reach the map, and what each check proves |
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
@@ -268,7 +270,7 @@ SouthOfTethys/database/  →  utils/export_canon_bundle.py  →  data/canon/spec
 ```
 
 **Everything in `data/canon/` is generated. Never hand-edit it.** Canon lives in the sibling
-`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 424 entities
+`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 720 entities
 across species, places, discoveries and world. To change any of it, edit the canon entity there and
 re-run `python utils/export_canon_bundle.py --apply`.
 
@@ -463,6 +465,12 @@ readings; change them here and change them there.
   `crossing.ts` and `basalt.ts`. Every test passed throughout, because none asked whether any of it
   was on the map. When canon adds a renderable biome, the stamp is the work — the tile is the easy
   half.
+  **The same fault had a fifth instance and it is now fixed.** `monuments.png`, the two windmill
+  sheets and `bridge.png` were all built, tested and loaded by nothing: every point of interest was
+  drawn from the *generated* `places.png`, so the painted temple had canon, art, a placement and a
+  green test, and a player saw the placeholder. Points of interest can draw a painted sheet now —
+  see `docs/placing-the-buildings-plan.md`. `vehicles.png` is the one that is still built and never
+  loaded, and it predates all of this.
 - **`feat/react-upgrade` is abandoned, not merged.** Its atmosphere components (`FogOfWar`,
   `DayNightCycle`, `AmbientParticles`) are DOM reimplementations of things Phaser does natively,
   and it carries a weaker generator. It survives only as a visual reference. Do not merge it.

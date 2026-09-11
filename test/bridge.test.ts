@@ -21,7 +21,13 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { inflateSync } from 'node:zlib';
-import { ROAD_PIECES, TRACK_PIECES } from '../src/game/frames';
+import { ROAD_PIECES, TRACK_PIECES, BRIDGE_PIECES } from '../src/game/frames';
+import { buildFieldMap } from '../src/world/fieldMap';
+import { fieldMaps } from '../src/content/places';
+import { planPlanks, planScene } from '../src/game/scenePlan';
+import { isWalkable } from '../src/world/generate';
+import { stepCost, CROSSING_ON_FOOT } from '../src/content/species';
+import { DEFAULT_SEED } from '../src/ui/seed';
 
 const ASSETS = join(dirname(fileURLToPath(import.meta.url)), '..', 'assets');
 
@@ -155,5 +161,59 @@ describe('the bridge tiles', () => {
       }
       expect(differs / (CELL * CELL), `frames ${fresh} and ${worn} are the same picture`).toBeGreaterThan(0.02);
     }
+  });
+});
+
+describe('the planks are on the map', () => {
+  it('lays one across every island notch, on every seed', () => {
+    // **The measurement that reversed the decision to park this sheet.** `docs/sky-buildings-plan.md`
+    // said the only gap on the islands was one tile wide and used it to argue the bridge had
+    // nothing to span. Counting instead of remembering found 9 to 19 notches a seed — holes in the
+    // island top with island on both sides, which a walker had to go round for no visible reason.
+    for (const seed of [DEFAULT_SEED, 'a', 'b', 'c', 'x']) {
+      const { world } = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, { seed });
+      const planks = world.tiles.flat().filter((t) => t.plank);
+      expect(planks.length, `seed ${seed}: the islands have no planks at all`).toBeGreaterThan(0);
+      for (const t of planks) {
+        const left = world.tiles[t.y]?.[t.x - 1]?.biome === 'sky_island';
+        const right = world.tiles[t.y]?.[t.x + 1]?.biome === 'sky_island';
+        const up = world.tiles[t.y - 1]?.[t.x]?.biome === 'sky_island';
+        const down = world.tiles[t.y + 1]?.[t.x]?.biome === 'sky_island';
+        expect(
+          (left && right) || (up && down),
+          `seed ${seed}: the plank at ${t.x},${t.y} has sky on one side — that is a rim, not a notch`
+        ).toBe(true);
+      }
+    }
+  });
+
+  it('makes the notch walkable, at the crossing&apos;s price rather than the grass&apos;s', () => {
+    const { world } = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, { seed: DEFAULT_SEED });
+    const plank = world.tiles.flat().find((t) => t.plank)!;
+    expect(isWalkable(plank), 'a plank you cannot walk on is scenery').toBe(true);
+    expect(stepCost(plank.biome), 'crossing a plank over open sky should cost what wading costs').toBe(
+      CROSSING_ON_FOOT
+    );
+  });
+
+  it('draws every plank exactly once, on a frame the sheet holds', () => {
+    const { world } = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, { seed: DEFAULT_SEED });
+    const drawn = planPlanks(world);
+    expect(drawn.length, 'a plank is flagged and nothing draws it').toBe(
+      world.tiles.flat().filter((t) => t.plank).length
+    );
+    expect(new Set(drawn.map((d) => `${d.x},${d.y}`)).size, 'a plank is drawn twice').toBe(drawn.length);
+    for (const p of drawn) {
+      expect(p.frame, `frame ${p.frame} is off the sheet`).toBeGreaterThanOrEqual(0);
+      expect(p.frame, `frame ${p.frame} is off the sheet`).toBeLessThan(BRIDGE_PIECES);
+    }
+  });
+
+  it('reaches the screen, which is the whole point of the change', () => {
+    const scene = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, { seed: DEFAULT_SEED });
+    const drawn = planScene(scene).filter((p) => p.sheet === 'bridge');
+    expect(drawn.length, 'the planks are flagged but nothing draws them').toBe(
+      scene.world.tiles.flat().filter((t) => t.plank).length
+    );
   });
 });

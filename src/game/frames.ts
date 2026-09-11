@@ -10,6 +10,7 @@
 // repaints the world.
 
 import type { BiomeId } from '../world/types';
+import windmill from '../../assets/windmill.json';
 
 /**
  * The world grid, in pixels of art. `tileTextures.ts` re-exports this as the engine's TILE_SIZE.
@@ -550,6 +551,65 @@ export function landmarkFrame(kindId: string): number | null {
 }
 
 /** The frame for an authored place, or null — most points of interest keep the diamond marker. */
+/**
+ * Frame layout of `assets/monuments.png`, written by `tools/build-monuments.js`.
+ *
+ * Three states of one ruin: whole, dome collapsed with the inner arches open, and nothing left but
+ * the plinth and four column stubs.
+ */
+export const MONUMENT_FRAMES = { whole: 0, collapsed: 1, plinth: 2 } as const;
+
+/**
+ * Which points of interest are drawn from the painted sheet rather than the generated one.
+ *
+ * **The frame is not a roll.** `poi_alms_step`'s arrival text describes a specific building --
+ * *"seven small spires stand around a dome that has split"* -- so the game draws that one. Canon
+ * says what a place looks like and the game does not get a second opinion; picking a state per seed
+ * would make the prose wrong on two seeds in three.
+ *
+ * The other two frames stay in the sheet for the day a second ruin wants them, and because the
+ * third is the one that carries the point of the place: the plinth, and the names on it, outlasting
+ * the temple that was the offering.
+ */
+export interface PaintedPlace {
+  /** Which painted sheet the building itself is drawn from. */
+  sheet: 'monuments' | 'windmill';
+  frame: number;
+  /**
+   * A second sprite drawn on top of the first and advanced by the clock.
+   *
+   * Present only on the mill. `boss` is where the hub sits inside the building's cell, as a
+   * fraction of it, and it comes from `assets/windmill.json` rather than being typed here --
+   * the builder computes it and a second copy would be a second place for it to drift, which is
+   * how `routable` sat two biomes behind `isWalkable` for a whole round without anyone noticing.
+   */
+  turning?: { frames: number; boss: { x: number; y: number }; cell: number };
+}
+
+const PAINTED_PLACES: Record<string, PaintedPlace> = {
+  poi_alms_step: { sheet: 'monuments', frame: MONUMENT_FRAMES.whole },
+  poi_grit_mill: {
+    sheet: 'windmill',
+    frame: 0,
+    turning: { frames: windmill.steps, boss: windmill.boss, cell: windmill.blade }
+  }
+};
+
+/**
+ * The painted building a place draws, or `null` if it has none.
+ *
+ * Checked *before* `placeFrame`, because a place with painted art must never fall through to the
+ * generated sheet -- which is exactly the state this repository shipped in: `monuments.png` built,
+ * `poi_alms_step` authored and placed, a passing test proving it lands on the island, and a
+ * code-drawn placeholder on screen.
+ */
+export function paintedPlace(poiId: string): PaintedPlace | null {
+  return PAINTED_PLACES[poiId] ?? null;
+}
+
+/** How long the mill takes to turn a quarter, in milliseconds. */
+export const BLADE_PERIOD = 2400;
+
 export function placeFrame(poiId: string, kind?: string): number | null {
   // **The High Camp is a settlement of tents, and the settlement marker is a house.**
   //
@@ -1023,6 +1083,8 @@ export function trackFrame(eastWest: boolean, overgrown: boolean): number {
  * for the same reason: north-south, east-west, then the same two with a verge.
  */
 export const ROAD_PIECES = TRACK_PIECES;
+/** And the planks, for the same reason: one shape, three sheets. */
+export const BRIDGE_PIECES = TRACK_PIECES;
 
 /**
  * Which piece of path this tile draws.
@@ -1034,6 +1096,16 @@ export const ROAD_PIECES = TRACK_PIECES;
  * one over sand. Same index, different question, so a caller reading this signature is told which
  * question it is answering.
  */
+/**
+ * Which plank piece to draw. `track.png`'s order exactly -- see `tools/build-bridge.js`.
+ *
+ * The worn pair is chosen per tile rather than per island: a plank somebody replaced last season
+ * next to one they have not is what a maintained crossing actually looks like.
+ */
+export function bridgeFrame(eastWest: boolean, worn: boolean): number {
+  return trackFrame(eastWest, worn);
+}
+
 export function roadFrame(eastWest: boolean, verge: boolean): number {
   return (verge ? 2 : 0) + (eastWest ? 1 : 0);
 }

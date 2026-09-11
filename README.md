@@ -39,7 +39,7 @@ clock.
 - **A generator that produces real geography.** Terrain is built from octaves of value noise over a
   seeded highland spine, so every seed has hills, mountains and rivers running off them to the
   water. `test/generator.test.ts` asserts this on twenty seeds.
-- **257 creatures and 116 plants**, placed by biome, each with authored journal prose.
+- **231 creatures and 110 plants**, placed by biome, each with authored journal prose.
 - **Invented place names.** Settlements, rivers and landmarks are named from seeded syllables —
   Thenavati, Hudhukoli, the Shanesarin — so a map reads as a country rather than a grid.
 - **Seven kinds of landmark**, each suited to the ground it stands on, each with a written page for
@@ -58,7 +58,7 @@ clock.
   and it regrows on canon's own schedule — days, a season, years, or never. Stone never regrows;
   working the ground *reveals* more of it, which is why a district that gave up six hundred
   stone still has some.
-- **Fifteen kinds of ground**, including snow above the treeline, cooled lava, and the turf of a
+- **Eighteen kinds of ground**, including snow above the treeline, cooled lava, and the turf of a
   sky island. Each carries its own scatter and its own tall things.
 - **A journal you can take with you**, as a markdown file or a rendered page of writing.
 
@@ -78,16 +78,17 @@ The browser suite needs `npx playwright install chromium` once.
 
 ## World content
 
-The flora and fauna canon lives in the **SouthOfTethys** repository, not here — 257 fauna and 90
-flora among 424 entities, alongside the field maps, discoveries, questions, people and vocabulary
+The flora and fauna canon lives in the **SouthOfTethys** repository, not here — 231 fauna and 110
+flora among 720 entities, alongside the field maps, discoveries, questions, people and vocabulary
 the game is made of. [docs/bestiary.md](docs/bestiary.md) is the prose document those species were
-originally extracted from, kept for provenance; it is no longer upstream of anything. 300 species across seven
+originally extracted from, kept for provenance; it is no longer upstream of anything. 341 species across seven
 regions, from the Saraswati deltas to the Asura-tainted horrors.
 
 `data/canon/` is **generated** by `utils/export_canon_bundle.py` in the canon repository and must
-never be hand-edited; `npm run check:data` fails if it drifts. The old line about regenerating from
-the bestiary described a pipeline that no longer exists — run
-`npm run build:data` rather than editing them. CI fails if the committed copies have drifted.
+never be hand-edited; `npm run check:data` fails if it drifts. **No command in this repository
+rebuilds it** — for a while this paragraph ended by naming one that had never existed as a script
+here, which is worse than saying nothing because it costs the reader the time to find out. To
+change any of it, edit the entity in `SouthOfTethys` and re-export from there.
 `data/biomes.json` and `data/landmarks.json` are hand-written.
 
 Character art is generated too: `assets/*-overworld.png` are built from the full-size sheets in

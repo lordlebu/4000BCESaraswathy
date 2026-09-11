@@ -42,11 +42,13 @@ const UNWALKABLE: ReadonlySet<string> = new Set(['sea', 'open_sky', 'sky_undersi
 // crossing it three times the work of plains without a line of movement code: `WorldScene`
 // computes `STEP_MS * cost * pace` and always has.
 
-export function isWalkable(tile: Pick<Tile, 'biome' | 'track'>): boolean {
+export function isWalkable(tile: Pick<Tile, 'biome' | 'track' | 'plank'>): boolean {
   // A railway makes otherwise impassable ground walkable without changing what the ground *is*.
   // The Aravali line crosses open sea on trestles: the water below stays water and stays
   // navigable, and only the walking changes.
   if (tile.track) return true;
+  // A plank over a notch in a floating island, for the same reason and at the same cost.
+  if (tile.plank) return true;
   return !UNWALKABLE.has(tile.biome);
 }
 

@@ -15,6 +15,7 @@
 
 import Phaser from 'phaser';
 import { GRID, DECOR_CELL, SHORE_BAND, CLOUD_VOXELS, FALL_FRAMES, tileFrame, type Edge } from './frames';
+import windmill from '../../assets/windmill.json';
 
 export {
   GRID,
@@ -96,6 +97,32 @@ export const FLORA_SHEET = 'flora';
  */
 export const TREE_SHEET = 'trees';
 const TREE_HEIGHT = (TILE_SIZE / 32) * 44;
+
+/**
+ * Buildings bigger than a tile, painted rather than generated.
+ *
+ * **The only sheet here whose cell is wider than a tile, and it costs the engine nothing.**
+ * `WorldScene` draws an anchored sprite with `setOrigin(0.5, 1)` and never calls
+ * `setDisplaySize`, so a sheet's cell size *is* its size on screen -- which means "can a building
+ * take more than one tile" was never a code question, only a number in a builder.
+ *
+ * 256 x 416 is two tiles wide and three and a quarter tall. At the `places` cell of 128 x 160 the
+ * temple's seven spires merged into one lumpy ridge and its plinth courses became a grey stripe:
+ * you could tell it was a pale ruin and not that it was a temple.
+ *
+ * What it does cost is worth knowing before it surprises somebody. A sprite this tall covers three
+ * rows above its anchor, and one this wide overhangs half a tile either side of its column, so two
+ * painted places landing adjacent would overlap. There is one painted place today. That is the
+ * reason not to paint every point of interest at this size, rather than a defect in this one.
+ */
+export const MONUMENT_SHEET = 'monuments';
+/** The mill's tower, and the wheel that turns on it — two sheets because only one of them moves. */
+export const WINDMILL_SHEET = 'windmill';
+export const BLADE_SHEET = 'blades';
+/** Planks over the island notches — `track.png`'s four pieces again, in weathered timber. */
+export const BRIDGE_SHEET = 'bridge';
+const MONUMENT_WIDTH = TILE_SIZE * 2;
+const MONUMENT_HEIGHT = (TILE_SIZE / 32) * 104;
 
 export const CLIFF_SHEET = 'cliffs';
 /** The wall of trees where a forest stops. Same layout again -- see `tools/build-rims.js`. */
@@ -182,6 +209,10 @@ export function loadTileSheets(
     treeline: string;
     overhang: string;
     trees: string;
+    monuments: string;
+    windmill: string;
+    blades: string;
+    bridge: string;
     rope: string;
     road: string;
     decor: string;
@@ -207,6 +238,10 @@ export function loadTileSheets(
   sheet(TERRAIN_SHEET, urls.terrain, TILE_SIZE, TILE_SIZE);
   sheet(LANDMARK_SHEET, urls.landmarks, TILE_SIZE, TILE_SIZE);
   sheet(PLACE_SHEET, urls.places, TILE_SIZE, PLACE_HEIGHT);
+  sheet(MONUMENT_SHEET, urls.monuments, MONUMENT_WIDTH, MONUMENT_HEIGHT);
+  sheet(WINDMILL_SHEET, urls.windmill, windmill.tower.width, windmill.tower.height);
+  sheet(BLADE_SHEET, urls.blades, windmill.blade, windmill.blade);
+  sheet(BRIDGE_SHEET, urls.bridge, TILE_SIZE, TILE_SIZE);
   sheet(HUT_SHEET, urls.huts, HUT_WIDTH, HUT_HEIGHT);
   sheet(OVERDRAW_SHEET, urls.overdraw, TILE_SIZE, TILE_SIZE);
   sheet(FEATURE_SHEET, urls.features, TILE_SIZE, TILE_SIZE);

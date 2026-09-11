@@ -84,6 +84,19 @@ export interface Tile extends Point {
    * the road, and what taking them for the road would have drawn.
    */
   road?: boolean;
+  /**
+   * A plank laid across a one-tile notch in a floating island.
+   *
+   * **Unlike `road` and like `track`, this changes walkability** — it is the whole point of it.
+   * The islands come out of `stampIslands` with gaps in them: measured across five seeds of the
+   * Aravali, **9 to 19** one-tile holes with island on both sides, which a walker has to go round
+   * for no reason a player can see. The plank is what someone living up here would do about that,
+   * and it is the only thing on the map the mill's tenant has visibly done outside their own door.
+   *
+   * It costs what the crossing costs on foot rather than what grass costs: the biome underneath is
+   * still open sky, so `stepCost` falls through to `CROSSING_ON_FOOT`.
+   */
+  plank?: boolean;
 }
 
 export interface NamedPlace extends Point {

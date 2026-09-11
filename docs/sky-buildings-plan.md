@@ -161,7 +161,19 @@ So the fix is a regeneration of the blades with the angles stated one by one, wh
 `docs/art-brief.md` Asset 2g now does. The framing does not need to change -- the art's 1:1.90 is
 already close to the 1:1.875 cell it is built at.
 
-## Where this actually stands, and the one piece that is missing
+## Closed, 2026-09-11 — and one thing here was wrong
+
+All three buildings are drawn. See `docs/placing-the-buildings-plan.md` for how.
+
+**The claim below that the only gap on the islands is one tile wide is false.** It was used to argue
+the bridge sheet had nothing to span and should stay parked, and it survived two rounds because
+nobody counted. There are **9 to 19** one-tile notches per seed on the Aravali with island on both
+sides. The planks are laid across them now.
+
+The status table below is kept as it stood rather than corrected in place, because the gap between
+what it says and what shipped is the useful part.
+
+## Where this stood before it closed, and the one piece that was missing
 
 **Three buildings have art. None of them is on the map.** Measured by listing every sheet `src/`
 loads against every sheet in `assets/`:

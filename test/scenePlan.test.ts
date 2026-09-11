@@ -10,6 +10,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMaps } from '../src/content/places';
+import { DEFAULT_SEED } from '../src/ui/seed';
 import { planScene, planHuts, planOverdraw, SWAY_PERIOD } from '../src/game/scenePlan';
 import {
   ROW_SLOT,
@@ -18,6 +19,8 @@ import {
   overdrawIsUnderfoot,
   EDGE_ORDER,
   CORNER_BASE,
+  MONUMENT_FRAMES,
+  paintedPlace,
   CORNER_ORDER,
   EDGE_STEP,
   EDGE_VARIANTS,
@@ -584,6 +587,96 @@ describe('a cliff never fences in the water', () => {
           ).toBe(false);
         }
       }
+    }
+  });
+});
+
+describe('a place with painted art is drawn from the painted sheet', () => {
+  // **The state this repository actually shipped in, expressed as an assertion.**
+  // `monuments.png` was built, `poi_alms_step` was authored in canon, placed on the near island,
+  // and had a passing test proving it lands there — and the player saw the code-drawn placeholder,
+  // because `planMarkers` sent every point of interest to `places`. Nothing here could have said
+  // so: the sheet was the right size, the canon was right, the placement was right.
+  //
+  // This is the same fault `CLAUDE.md` records three times under the rules layer and once more
+  // under `lava_field`: built, tested, believed, and connected to nothing.
+  it('draws the temple from monuments.png, not from the generated places sheet', () => {
+    const map = fieldMaps.find((m) => m.id === 'field_map_aravali')!;
+    const scene = buildFieldMap(map, { seed: DEFAULT_SEED });
+    const drawn = planScene(scene).filter((p) => p.name === 'poi:poi_alms_step');
+    expect(drawn.length, 'the temple is not drawn at all').toBe(1);
+    expect(
+      drawn[0].sheet,
+      `the temple is drawn from "${drawn[0].sheet}" — a painted place fell through to the generated sheet`
+    ).toBe('monuments');
+    expect(drawn[0].frame, 'the temple should draw the whole building canon describes').toBe(
+      MONUMENT_FRAMES.whole
+    );
+  });
+
+  it('never sends a painted place to the places sheet, on any map or seed', () => {
+    for (const map of fieldMaps) {
+      for (const seed of [DEFAULT_SEED, 'a', 'b']) {
+        const scene = buildFieldMap(map, { seed });
+        for (const { poi } of scene.placed) {
+          const painted = paintedPlace(poi.id);
+          if (painted === null) continue;
+          const drawn = planScene(scene).filter((p) => p.name === `poi:${poi.id}`);
+          // The sheet the table declares, whichever it is -- the point is that it is never the
+          // generated `places` strip or the fallback glyph. An earlier version of this named
+          // `monuments` literally and failed the moment a second painted building existed, which
+          // is the assertion testing the example rather than the rule.
+          expect(
+            drawn.map((d) => d.sheet),
+            `${map.id}/${seed}: ${poi.id} has painted art and was drawn from the wrong sheet`
+          ).toEqual([painted.sheet]);
+        }
+      }
+    }
+  });
+});
+
+describe('the mill is drawn, and it turns', () => {
+  const aravali = () => buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, { seed: DEFAULT_SEED });
+
+  it('draws the tower and the wheel as two sprites', () => {
+    // **They cannot be one image.** The wheel turns and the tower does not, so a single sheet would
+    // need twelve copies of the building — which is exactly the sheet that arrived and was
+    // rejected, with the tower pixel-identical in all six cells and the rotation absent.
+    const drawn = planScene(aravali());
+    const tower = drawn.filter((p) => p.name === 'poi:poi_grit_mill');
+    const wheel = drawn.filter((p) => p.name === 'blades:poi_grit_mill');
+    expect(tower.map((t) => t.sheet), 'the mill tower is not drawn from its painted sheet').toEqual(['windmill']);
+    expect(wheel.map((w) => w.sheet), 'the wheel is not drawn').toEqual(['blades']);
+    expect(wheel[0].spin?.frames, 'the wheel has no loop').toBe(12);
+  });
+
+  it('puts the wheel above its own tower, never behind it', () => {
+    const drawn = planScene(aravali());
+    const tower = drawn.find((p) => p.name === 'poi:poi_grit_mill')!;
+    const wheel = drawn.find((p) => p.name === 'blades:poi_grit_mill')!;
+    expect(wheel.depth, 'the wheel sorts behind the mill it is mounted on').toBeGreaterThan(tower.depth);
+    expect(wheel.x, 'the wheel is not on the mill&apos;s tile').toBe(tower.x);
+    expect(wheel.y).toBe(tower.y);
+  });
+
+  it('hangs the wheel on the boss rather than in the middle of the tile', () => {
+    // The offset comes from `assets/windmill.json`, which the builder writes. A wheel drawn at the
+    // tile centre sits at the mill's waist; the boss is most of a tile higher.
+    const wheel = planScene(aravali()).find((p) => p.name === 'blades:poi_grit_mill')!;
+    expect(wheel.offset, 'the wheel has no offset, so it will draw at the tile centre').toBeDefined();
+    expect(wheel.offset!.y, 'the wheel is not lifted to the boss').toBeLessThan(-0.3);
+  });
+
+  it('stands on a sky island on every seed', () => {
+    for (const seed of [DEFAULT_SEED, 'a', 'b', 'c']) {
+      const scene = buildFieldMap(fieldMaps.find((m) => m.id === 'field_map_aravali')!, { seed });
+      const placed = scene.placed.find((p) => p.poi.id === 'poi_grit_mill');
+      expect(placed, `seed ${seed}: the mill was never placed`).toBeDefined();
+      const tile = scene.world.tiles[placed!.at.y]?.[placed!.at.x];
+      expect(tile?.biome, `seed ${seed}: the mill stands at ${placed!.at.x},${placed!.at.y} on ${tile?.biome}`).toBe(
+        'sky_island'
+      );
     }
   });
 });

@@ -50,9 +50,12 @@ import {
   overdrawIsUnderfoot,
   overdrawFrame,
   placeFrame,
+  paintedPlace,
+  BLADE_PERIOD,
+  bridgeFrame,
   swayFrame
 } from './frames';
-import { isRope } from '../world/crossing';
+import { isRope, plankRunsEastWest } from '../world/crossing';
 import { landmarkKindFor } from '../content/landmarks';
 import { band } from '../world/classify';
 import { tileHash } from '../world/rng';
@@ -69,6 +72,10 @@ export type PlacementSheet =
   | 'flora'
   | 'trees'
   | 'places'
+  | 'monuments'
+  | 'windmill'
+  | 'blades'
+  | 'bridge'
   | 'landmarks'
   | 'decor'
   | 'contact'
@@ -107,6 +114,14 @@ export interface Placement {
    */
   sway?: { rest: number; lean: number; phase: number };
   /**
+   * Present only on the mill's wheel: how many frames the loop has and how long it takes.
+   *
+   * **The same beat as `sway`, one step further.** `updateSway` reduces the clock to a boolean --
+   * two frames, a halfway test -- which reads as motion on a reed and as a *strobe* on anything
+   * that rotates. A wheel wants an index, so this carries the count rather than a pair.
+   */
+  spin?: { frames: number; period: number; cell: number };
+  /**
    * Sub-tile offset, in fractions of a cell, present only on decor.
    *
    * The jitter is the entire point of that layer. A prop drawn at the centre of its cell puts every
@@ -144,6 +159,9 @@ const EDGE_DEPTH = 50;
 
 /** How long one sway takes. Slow: this is a game about a quiet walk, not a windy one. */
 export const SWAY_PERIOD = 2000;
+
+/** The mill tower's cell, from the builder's manifest -- see `assets/windmill.json`. */
+const TOWER_CELL = { width: 128, height: 256 };
 
 /**
  * How far below a cell's centre a feature's contact shadow sits, in fractions of a cell.
@@ -1097,15 +1115,43 @@ export function planMarkers(built: FieldMapWorld): Placement[] {
   // marker reads better than the wrong building, which is why `placeFrame` returns null rather
   // than falling back to a frame.
   for (const { poi, at } of built.placed) {
-    const frame = placeFrame(poi.id, poi.kind);
+    // **Painted art wins, and is asked for first.** A place with a painted building must never
+    // fall through to the generated sheet: that is the exact state this shipped in, with
+    // `monuments.png` built, the temple authored and placed, a green test proving it lands on the
+    // island, and a code-drawn placeholder on screen.
+    const painted = paintedPlace(poi.id);
+    const frame = painted?.frame ?? placeFrame(poi.id, poi.kind);
     out.push({
-      sheet: frame === null ? 'marker' : 'places',
+      sheet: painted ? painted.sheet : frame === null ? 'marker' : 'places',
       frame: frame ?? -1,
       x: at.x,
       y: at.y,
       depth: depthFor(at.y, ROW_SLOT.marker),
       name: `poi:${poi.id}`
     });
+
+    // **The wheel is a second sprite, and it has to be.** It turns and the tower does not, so they
+    // cannot be one image without twelve copies of the building -- which is exactly the sheet that
+    // arrived and was rejected. Drawn a hair above its own tower so it is never sorted behind it.
+    if (painted?.turning) {
+      const { boss, cell, frames } = painted.turning;
+      // The tower is bottom-anchored, so its cell runs from (y+1) upward. Put the hub where the
+      // builder measured it, expressed against the tile centre the scene draws everything else at.
+      const tower = TOWER_CELL;
+      out.push({
+        sheet: 'blades',
+        frame: 0,
+        x: at.x,
+        y: at.y,
+        depth: depthFor(at.y, ROW_SLOT.marker) + 1,
+        name: `blades:${poi.id}`,
+        offset: {
+          x: boss.x - 0.5,
+          y: (tower.height * (boss.y - 1)) / tower.width + 0.5
+        },
+        spin: { frames, period: BLADE_PERIOD, cell }
+      });
+    }
   }
   return out;
 }
@@ -1151,6 +1197,7 @@ export function planScene(built: FieldMapWorld): Placement[] {
     // Before the rail, because where the two ever meet the iron is laid over the earth.
     ...planRoad(built.world),
     ...planTrack(built.world),
+    ...planPlanks(built.world),
     // After the rails, because a cloud drifts over the line and not under it -- and after the
     // shadow, which is on the water rather than in the air above it.
     ...planClouds(built.world),
@@ -1534,6 +1581,33 @@ export function planTrack(world: FieldMapWorld['world']): Placement[] {
         frame: trackFrame(eastWest, overgrown),
         x,
         y,
+        depth: depthFor(y, ROW_SLOT.underfoot)
+      });
+    }
+  }
+  return out;
+}
+
+
+/**
+ * The planks over the island notches.
+ *
+ * `planTrack`'s shape with a different flag and a different sheet -- which is the third time that
+ * shape has paid for itself, after the rope and the road. The worn variant is picked from the
+ * tile's own hash so the two do not alternate in a stripe.
+ */
+export function planPlanks(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      if (!world.tiles[y][x].plank) continue;
+      out.push({
+        sheet: 'bridge',
+        frame: bridgeFrame(plankRunsEastWest(world, x, y), tileHash(world.seed, x, y, 'plank-wear') % 4 === 0),
+        x,
+        y,
+        // Underfoot, like the rail and the road: it is ground to stand on, not a thing standing on
+        // ground. A player crossing a notch walks *over* the plank, not behind it.
         depth: depthFor(y, ROW_SLOT.underfoot)
       });
     }

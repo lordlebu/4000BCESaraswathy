@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.21.1",
+  "canon_version": "2.22.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -325,6 +325,7 @@
         "poi_first_pier",
         "poi_alms_step",
         "poi_lodestone_face",
+        "poi_grit_mill",
         "poi_far_landing",
         "poi_kept_stones",
         "poi_sunk_cutting",
@@ -838,6 +839,24 @@
       "epochs": [
         "epoch_post_cataclysm"
       ]
+    },
+    {
+      "id": "poi_grit_mill",
+      "type": "point_of_interest",
+      "name": "The Grit Mill",
+      "field_map": "field_map_aravali",
+      "kind": "anomaly",
+      "stands": "high",
+      "terrain": [
+        "sky_island"
+      ],
+      "description": "A mill in good repair, turning, with nobody in sight and nothing to sell to.",
+      "arrival": "White ceramic, rounded like a pot, braced in pale wood that somebody has oiled this year. A vine has been trained up one side rather than pulled off it. There are planters by the door with something flowering in them. The sails turn steadily in air that is not obviously moving, and inside, behind the door, the querns are running: you can feel it through the boards before you hear it. What comes out is black grit, bagged, stacked, more of it than anyone has carried down in a long time. Nobody answers.",
+      "notes": "**The thesis: the one thing up here that is looked after.** `poi_alms_step` says a people were here and are gone; this says somebody is here now. Two buildings, a few hundred paces apart, arguing. That opposition is the reason to have both, and it is why the mill is drawn cared-for down to the oiled wood and the trained vine rather than as another picturesque ruin -- the islands already have one of those.\n\n**And what it is grinding is the island.** The mill takes lodestone from `poi_lodestone_face`, which is the same island's exposed core and the map's one `never`-renewing material -- the ore that holds the whole thing up. So the only working industry on the Aravali crossing is quietly consuming the reason there is anything to stand on. Nothing in the text says so; the two places are on the same island and a player who has read `discovery_the_ore_that_lifts` can put it together. It sharpens the question the ore face already asks rather than answering it.\n\n**Nobody is on stage, and that is the map's own method.** `field_map_aravali`'s thesis is traces: *the ground remembers something the people here have agreed not to say*. The Quiet Atelier is a workshop nobody is supposed to find; this is a mill nobody is minding. Putting a miller here with lines to say would make it an errand instead of a question.\n\n**`anomaly` rather than `settlement`.** The map declares no settlement anywhere and says so deliberately -- everyone here is passing through, and the one time `settlement` entered that palette the generator grew a ruined city nothing in canon had mentioned. A tended mill on a floating island with no customers is anomalous in exactly the map's own terms.\n\n**Why the far island.** `poi_first_pier` and `poi_alms_step` stand on the near one, `poi_far_landing` and `poi_lodestone_face` on the far. This balances them three and three, and puts the mill on the same ground as the ore it is eating.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "shore": "far"
     },
     {
       "id": "poi_herders_terraces",
