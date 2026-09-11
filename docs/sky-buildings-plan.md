@@ -161,6 +161,37 @@ So the fix is a regeneration of the blades with the angles stated one by one, wh
 `docs/art-brief.md` Asset 2g now does. The framing does not need to change -- the art's 1:1.90 is
 already close to the 1:1.875 cell it is built at.
 
+## Where this actually stands, and the one piece that is missing
+
+**Three buildings have art. None of them is on the map.** Measured by listing every sheet `src/`
+loads against every sheet in `assets/`:
+
+| | canon entity | painted sheet | **loaded by the game** |
+|---|---|---|---|
+| N — temple | `poi_alms_step` | `monuments.png` | **no** |
+| O — windmill | none yet | `windmill-tower.png`, `windmill-blades.png` | **no** |
+| M — bridge | n/a | `bridge.png` | **no**, correctly — nothing to span |
+
+**It is one missing piece rather than three.** `scenePlan.ts` draws every point of interest with
+`sheet: 'places'`, and `places.png` is *generated* by `tools/build-terrain.js`. There is no path by
+which a point of interest can draw a **painted** sheet at all. So the temple has canon, has art, is
+placed on the near island and has a passing test proving it lands there — and a player sees the
+code-drawn placeholder.
+
+That is this repository's oldest fault wearing new clothes. `CLAUDE.md` records it three times under
+the rules layer (a rule written, tested, and with no caller, so the mechanic did not exist while
+every test passed) and once more under `lava_field`, where a biome had a painted tile, six props,
+25 creatures and four points of interest asking to stand on it and generated **zero tiles on every
+seed**. A fourth instance already predates this programme: `vehicles.png` is built and never loaded
+either.
+
+**So the next piece of work is a painted-sheet path for points of interest**, and it finishes the
+temple outright — no new art, no new canon, no decision needed. The windmill then needs only a canon
+entity and the blade modulo; the bridge waits for a gap, as the order below already says.
+
+**Do not close this programme until something painted is visible in a browser.** Closing it with
+three undrawn sheets would file three fresh instances of the fault the programme exists to avoid.
+
 ## The order
 
 **N first** — it needs no new contract, no new animation, and one canon entity. It is the piece
