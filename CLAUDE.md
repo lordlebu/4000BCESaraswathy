@@ -519,6 +519,16 @@ Split into a second branch only when the work genuinely cannot travel with the f
 another repository, it reverses something in the first, or it is urgent and the first is still
 under review.
 
+**That habit is now enforced, because remembering it kept failing.** `.claude/hooks/push-gate.sh`
+runs on every `git push` and refuses one that would add commits to a branch whose pull request has
+already merged — the failure that orphaned a commit after #183 and was not the first of its kind. It
+asks git rather than GitHub, since `gh` is not installed and a hook cannot reach the MCP tools: a
+remote branch contained in `origin/main` has landed. It refuses only the case that is actually
+broken — new commits sitting on the *pre-merge* tip, reaching no review and no `main` — and allows
+the branch restarted from the merged base, with a one-off reminder that the merged pull request
+cannot be reused and a new one is needed. The script's header carries the four conditions and the
+one case it knowingly cannot see. `ALLOW_MERGED_PUSH=1` in front of the command overrides it.
+
 **Always end with the pull request link.** Whenever work is pushed, the reply must carry the URL —
 the PR itself if one exists, otherwise a compare link. Not the branch name, not "ready to open a
 PR", not a description of where to click: the link, so it can be opened directly.
