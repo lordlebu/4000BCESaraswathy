@@ -453,7 +453,7 @@ describe('the landmark is somewhere a walker can get to', () => {
 
 describe('a point of interest stands on the ground canon gave it', () => {
   // **Canon can ask for ground the map does not produce, and nothing else would say so.**
-  // `poi_stacked_temple` declares `terrain: ["sky_island"]` and `shore: near`, and the sky
+  // `poi_alms_step` declares `terrain: ["sky_island"]` and `shore: near`, and the sky
   // islands are *stamped* after classification rather than emitted by the classifier -- which is
   // exactly the shape of the `lava_field` fault `CLAUDE.md` records: a biome with art, species and
   // points of interest asking to stand on it, and zero tiles of it on every seed, because nobody
@@ -462,15 +462,15 @@ describe('a point of interest stands on the ground canon gave it', () => {
   //
   // So this asks. It is cheap, and it is the only thing between a canon edit and a temple in
   // the sea.
-  it('puts the stacked temple on an island, on every seed', () => {
+  it('puts the alms step on an island, on every seed', () => {
     for (const seed of ['varuna', 'a', 'b', 'c', 'lothal', 'x']) {
       const scene = buildFieldMap(fieldMap('field_map_aravali')!, { seed });
-      const placed = scene.placed.find((p) => p.poi.id === 'poi_stacked_temple');
-      expect(placed, `seed ${seed}: the temple was never placed at all`).toBeDefined();
+      const placed = scene.placed.find((p) => p.poi.id === 'poi_alms_step');
+      expect(placed, `seed ${seed}: the alms step was never placed at all`).toBeDefined();
       const tile = scene.world.tiles[placed!.at.y]?.[placed!.at.x];
       expect(
         tile?.biome,
-        `seed ${seed}: the temple stands at ${placed!.at.x},${placed!.at.y} on ${tile?.biome}`
+        `seed ${seed}: the alms step stands at ${placed!.at.x},${placed!.at.y} on ${tile?.biome}`
       ).toBe('sky_island');
     }
   });

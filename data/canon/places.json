@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.21.0",
+  "canon_version": "2.21.1",
   "regions": [
     {
       "id": "region_aravali",
@@ -323,7 +323,7 @@
       "points_of_interest": [
         "poi_rail_head",
         "poi_first_pier",
-        "poi_stacked_temple",
+        "poi_alms_step",
         "poi_lodestone_face",
         "poi_far_landing",
         "poi_kept_stones",
@@ -500,6 +500,27 @@
     }
   ],
   "points_of_interest": [
+    {
+      "id": "poi_alms_step",
+      "type": "point_of_interest",
+      "name": "The Alms Step",
+      "field_map": "field_map_aravali",
+      "kind": "archaeological_site",
+      "stands": "high",
+      "terrain": [
+        "sky_island"
+      ],
+      "description": "A domed temple on a high stepped plinth, and the names are on the step.",
+      "arrival": "Seven small spires stand around a dome that has split, and the doorway beneath them is a pointed arch with nothing behind it but dark. Lichen has taken the bottom two feet of everything. Dressed blocks lie scattered well out from the walls, far enough that they came off the top. The plinth it all stands on is pale stone, waist high, with steps down the front worn into dishes at the middle of each tread -- and along the plinth's face, cut small and shallow and running the whole length and round the corner, there are names. There are more names than a village.",
+      "notes": "**The thesis is a tribute, and the ground it is standing on.** The names along the plinth are the Jharwa dead of `event_aravali_massacre`, and the temple above them was raised by the people whose grandfathers did it. That is meant to stay unresolved in both directions: Ranu and Bela were manipulated by Sira rather than acting on their own, so this is not a monument built by monsters -- and it is still a monument built by the winners on the exact ground they took.\n\nIt is `field_map_aravali`'s own declared thesis made literal. The map says *the ground remembers something the people here have agreed not to say*. Here it is saying it, in writing, at knee height, under a building that is busy falling off the top of it.\n\n**The plinth outlives the temple, and that is the whole place.** The art gives three states -- whole, dome collapsed with the inner arches open, and finally nothing but the plinth and four column stubs -- so in the last of them the memorial is all that is left of the monument. Nobody intended that. The dome was the offering and the names were the excuse for it, and the dome is what goes.\n\nThe worn dishes in the treads are the other half of the same point: those were worn by people climbing up to give, not by people climbing up to read.\n\n**And nothing destroys it.** No sack, no fire, no cataclysm. The line stops running, the passengers stop coming, the alms stop, the purohits leave, and there is nobody left to pay for repairs -- `event_the_last_puja` carries that. The ending is deliberately smaller than the tragedy underneath it, because a memorial does not get to choose how it ends either.\n\n**Why the near island.** `poi_first_pier` is the only other thing on the near island, against `poi_far_landing` and `poi_lodestone_face` on the far one, so this balances the two. It also puts the temple on the side a passenger reaches first, which is the side alms would have been given on -- the geography and the economy have to agree or the ending does not land.\n\n**On prana and lodestone, which look like a contradiction and are not.** `mythology_the_seats_of_the_players` has the islands rise on prana vayu as humans appeared; `poi_lodestone_face` has the ore holding the island up now. Those are a beginning and a mechanism, not two answers to one question: the breath lifted the land, the ore keeps it lifted. Written here because the next person to read both will otherwise file it as a canon error and 'fix' one of them.\n\n**This entity was rewritten to match the art rather than the reverse.** It was first authored as a temple built in four stacked courses of four materials, and the painted sheet is a single-period domed temple -- seven spires, an ogee arch, carved friezes, one plinth. The art is better and it is what ships, so the prose follows it. The stacked reading survives as an alternative prompt block in the game's `docs/art-brief.md` and is not canon.",
+      "epochs": [
+        "epoch_migrations",
+        "epoch_civilization_dawn",
+        "epoch_current",
+        "epoch_post_cataclysm"
+      ],
+      "shore": "near"
+    },
     {
       "id": "poi_basalt_quarry",
       "type": "point_of_interest",
@@ -1259,27 +1280,6 @@
       "description": "A grid of brick chambers filled to the brim with silt, and something growing out of them.",
       "arrival": "The granary held the city's grain on raised platforms so the flood could not reach it. The flood has since reached it. What is remarkable is not that the chambers filled but that the crop came back on its own, red and thin, growing out of the tops of the walls.",
       "notes": "Where the rice discovery lives. The ruin is already doing the restoring; Varuna only has to notice."
-    },
-    {
-      "id": "poi_stacked_temple",
-      "type": "point_of_interest",
-      "name": "The Stacked Temple",
-      "field_map": "field_map_aravali",
-      "kind": "archaeological_site",
-      "stands": "high",
-      "terrain": [
-        "sky_island"
-      ],
-      "description": "A temple built on a temple built on a temple, and nobody left to lay the next course.",
-      "arrival": "It goes up in steps, and every step is a different century's idea of what a god is owed. The lowest course is river stone laid dry, and the joints are packed with something that was once cloth. Above that, dressed sandstone. Above that, marble that came from somewhere there is no road to. The top course is a ring of scaffolding holes with nothing in them. On the bottom course, at ankle height, cut small and close together, there are names. There are more names than a village.",
-      "notes": "**The thesis: a tribute, and the ground it is standing on.** The names on the lowest course are the Jharwa dead of `event_aravali_massacre` -- and the temple was raised over them by the people whose grandfathers did it. Each age built higher and richer on the last, so what the stack actually records is guilt compounding into architecture. That reading is meant to stay uncomfortable and unresolved in both directions: Ranu and Bela were manipulated by Sira rather than acting on their own, so this is not a monument built by monsters, and it is still a monument built by the winners on the exact ground they took.\n\nIt is the map's own declared thesis made literal. `field_map_aravali` says *the ground remembers something the people here have agreed not to say* -- here the ground is saying it, in writing, at ankle height, under four hundred years of increasingly expensive stone that nobody has to crouch down to read past.\n\n**And it did not fall to anything.** No sack, no fire, no cataclysm. The line stopped running, so the passengers stopped coming, so the alms stopped, so the purohits left, so there was nobody to pay the builders. The top course is unfinished because a timetable changed. That is the note the whole place ends on and it is deliberately smaller than the tragedy underneath it -- a memorial does not get to choose how it ends either.\n\n**Why the near island.** `poi_first_pier` is the only other thing standing on the near island, against `poi_far_landing` and `poi_lodestone_face` on the far one, so this balances the two. It also puts the temple on the side a passenger reaches first, which is the side alms would have been given on -- the geography and the economy have to agree or the ending does not land.\n\n**On prana and lodestone, which look like a contradiction and are not.** `mythology_the_seats_of_the_players` has the islands rise on prana vayu as humans appeared; `poi_lodestone_face` has the ore holding the island up now. Those are a beginning and a mechanism, not two answers to one question: the breath lifted the land, the ore keeps it lifted. Written down here because the next person to read both will otherwise file it as a canon error and 'fix' one of them.",
-      "epochs": [
-        "epoch_migrations",
-        "epoch_civilization_dawn",
-        "epoch_current",
-        "epoch_post_cataclysm"
-      ],
-      "shore": "near"
     },
     {
       "id": "poi_sunk_cutting",

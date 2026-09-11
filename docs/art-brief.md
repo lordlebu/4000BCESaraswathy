@@ -1368,11 +1368,24 @@ filtering and an arbitrary rotation resamples straight off that grid, so the sai
 they turn. Rotating at *build* time keeps every frame palette-true and costs the look nothing. A
 four-sail wheel repeats every 90°, so **12 frames at 7.5°** is a seamless loop.
 
-**The temple wants redrawing against canon.** `poi_stacked_temple` landed after the 2g sheet was
-painted and it describes a different building: four courses of four materials stacked by four
-different centuries, and names cut small at ankle height on the lowest one. The 2g prompt asked for
-a columned marble ruin. The stack is the entire point of the place — it is what makes the
-architecture a *record* — so the art follows canon here rather than the other way round.
+**The temple did not want redrawing, and this block said it did.** The claim above, in an earlier
+version of this file, was that `poi_stacked_temple` described four stacked courses and the painted
+sheet did not, so the art should follow canon. **It was written without looking at the sheet**, which
+is the one habit this whole programme is built on. Looking settled it in about ten seconds: the art
+is a single-period domed temple — seven small spires around a split dome, an ogee-arched doorway,
+carved friezes, all on one high stepped plinth — and its three frames are a *decay sequence*, whole
+to dome-collapsed to nothing-but-plinth.
+
+That is better than the stack, and canon was rewritten to it. **The plinth is the only thing
+present in all three frames**, so the names of the dead belong on the plinth and the third frame is
+the memorial outlasting the monument — which is a sharper version of the same idea than four courses
+of masonry ever was. The entity is `poi_alms_step` now; "The Stacked Temple" was a name for a
+building that does not stack.
+
+**Both temple prompts are kept, as two options rather than a correction.** Asset 2g §1 is the sheet
+that shipped. §3 below is the stacked alternative — it is **not canon** and nothing in the game
+points at it, but it is a different and usable building if a second temple is ever wanted somewhere
+else. Neither supersedes the other.
 
 **The bridge prompt is here, and the bridge still must not be stamped.** `docs/sky-buildings-plan.md`
 and this repo's Known issues both say it: the only gap on the islands today is one tile wide, which
@@ -1438,10 +1451,12 @@ Same mill as the 2g sheet, minus the wheel. 128 × 256, bottom-anchored.
 > Negative: steampunk, rivets, rust, soot, smokestack, iron plating, gears, pipes, Victorian,
 > grimy, sails, blades, windmill vanes.
 
-### 3 — the stacked temple, against canon
+### 3 — the stacked temple, as an alternative building
 
-128 × 160 per cell, three variants, bottom-anchored — the `places` contract, unchanged from 2g.
-What changes is the building.
+**Not canon, and not a replacement for the sheet that shipped.** `poi_alms_step` describes the
+domed temple of Asset 2g §1, which is what the game draws. This is a second, different temple, kept
+on file because it is a good building and the format is identical: 128 × 160 per cell, three
+variants, bottom-anchored — the `places` contract, unchanged.
 
 > A **sprite sheet for a top-down 2D game**, drawn on a **solid pure magenta background, hex
 > #FF00FF**, arranged as a **1 row × 3 columns grid** with clear magenta gutters and margin. Each
