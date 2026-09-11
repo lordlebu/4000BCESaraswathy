@@ -206,6 +206,12 @@ The art docs, in the order they are useful:
 | `docs/sky-islands-plan.md` | the floating islands: what the reference cannot buy, and what the layers can |
 | `docs/sky-buildings-plan.md` | the temple, the mill and the bridge — closed |
 | `docs/placing-the-buildings-plan.md` | how painted buildings reach the map, and what each check proves |
+
+**`.claude/skills/session-craft/` is the one to read first in a new session.** It carries what the
+*environment* does rather than what the code is: the Playwright build-number mismatch that reads as
+a missing install, the branch deletion that is refused at the proxy by every route, why `gh` is
+half useless here, and the habits that catch this codebase's signature bug — something built,
+tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side companion.
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
