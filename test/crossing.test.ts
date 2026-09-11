@@ -878,14 +878,21 @@ describe('the pool is waded, not stood in', () => {
 });
 
 describe('the rope is not drawn as iron', () => {
-  it('draws rail between the islands and rope everywhere else the line runs', () => {
+  it('hangs rope only where there is nothing underneath, and iron everywhere else', () => {
     // **`isRail` existed, was tested, and nothing drew from it.** `crossing.ts` made rail and rope
     // one `Tile.track` flag on purpose -- "a second flag would be a second thing to keep true" --
     // and gave `railSpan` the job of separating them. `planTrack` then drew the `track` sheet on
     // every tile carrying the flag, so the rope ladder up an island's flank rendered as railway.
     //
-    // The same shape as the three faults `CLAUDE.md` records under the rules layer, and the same
-    // guard: assert the drawing goes through the rule rather than around it.
+    // **And the first fix for that was wrong in the other direction, which is what this now
+    // pins.** It asked `isRail` alone and drew rope on everything outside the span -- but outside
+    // the span is not rope. Most of it is the *derelict approach*, the fourteen-tile stub of old
+    // iron `derelictApproach` lays back off each beach, which is what The Rail-Head stands on.
+    // Measured on the default seed: 49 of the line's 75 tiles came out as rope, running across
+    // hills, forest and plains to the top and bottom edges of the map, so the whole column read as
+    // one continuous ladder and the span actually over water could not be picked out of it.
+    //
+    // The rule is per-tile and physical: a rope is where there is nothing underneath.
     const world = aravali();
     const span = railSpan(world)!;
     const laid = planTrack(world);
@@ -893,20 +900,48 @@ describe('the rope is not drawn as iron', () => {
 
     const iron = laid.filter((p) => p.sheet === 'track');
     const hemp = laid.filter((p) => p.sheet === 'rope');
-    expect(iron.length, 'no rail between the islands').toBeGreaterThan(0);
+    expect(iron.length, 'no iron anywhere on the line').toBeGreaterThan(0);
     expect(hemp.length, 'no rope reaching either shore').toBeGreaterThan(0);
 
-    for (const p of iron) {
-      expect(p.y, `rail drawn at row ${p.y}, outside the span ${span.from}-${span.to}`)
-        .toBeGreaterThanOrEqual(span.from);
-      expect(p.y).toBeLessThanOrEqual(span.to);
-    }
+    /** Ground the flag is the only reason a walker can be on. */
+    const overTheVoid = (x: number, y: number) => {
+      const tile = world.tiles[y]?.[x];
+      return tile !== undefined && !isWalkable({ biome: tile.biome, track: false });
+    };
+
     for (const p of hemp) {
       expect(
         p.y < span.from || p.y > span.to,
         `rope drawn at row ${p.y}, inside the rail span ${span.from}-${span.to}`
       ).toBe(true);
+      // Over the void, or anchoring onto the ground within a tile or two of it. Nothing further:
+      // a ladder lying in the middle of a field is the fault this replaced.
+      const near = [-2, -1, 0, 1, 2].some((d) => overTheVoid(p.x, p.y + d));
+      expect(near, `rope at ${p.x},${p.y} is more than two tiles from anything to span`).toBe(true);
     }
+
+    for (const p of iron) {
+      // Iron is either the carriage's own stretch -- which crosses open water on the lodestone,
+      // deliberately -- or it is standing on solid ground.
+      const onTheRail = p.y >= span.from && p.y <= span.to;
+      expect(
+        onTheRail || !overTheVoid(p.x, p.y),
+        `iron at ${p.x},${p.y} hangs over nothing and is outside the rail span`
+      ).toBe(true);
+    }
+  });
+
+  it('keeps the rope to the crossing rather than running it off the map', () => {
+    // The regression this is really guarding, stated as a number. The line spans the map's whole
+    // height; the water it has to cross does not. If the rope is ever most of the line again, it is
+    // being drawn on ground rather than over a gap.
+    const world = aravali();
+    const laid = planTrack(world);
+    const hemp = laid.filter((p) => p.sheet === 'rope').length;
+    expect(
+      hemp / laid.length,
+      `${hemp} of ${laid.length} line tiles are rope -- it is running along the ground again`
+    ).toBeLessThan(0.4);
   });
 
   it('keeps both sheets on one frame contract', () => {
