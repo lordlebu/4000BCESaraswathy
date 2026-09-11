@@ -1347,3 +1347,193 @@ looked at, because a sprite three tiles high covers whatever is two rows behind 
 six evenly spaced positions across ninety degrees is exactly one seamless loop. It is also why this
 cannot ride `SWAY_PERIOD` like everything else that moves here: two alternated frames read as motion
 on a reed and as a **strobe** on a rotating blade. See `docs/sky-buildings-plan.md` section O.
+
+## Asset 2h — the buildings, corrected and completed
+
+Supersedes the windmill half of Asset 2g, and adds the two pieces that block on art rather than on
+engine work. Three things changed between 2g and here, and each of them was measured rather than
+preferred.
+
+**The windmill is now two images, not one sheet of six.** The six-cell sheet arrived with the tower
+occupying `y 79-709` **pixel-identically in every cell** — six copies of one position, so the
+rotation the sheet was for is not in it. Asking again for "six cells at fifteen degrees" is asking
+for the thing that already failed. The fix is to stop asking a painter for a rotation at all:
+**hand over one blade wheel, and let a builder rotate it.** `tools/build-windmill.js` turns the
+single wheel by N steps, snaps each to the shared palette, and emits the sheet, which is both fewer
+things to get right and a source that can be re-rotated at any step count later.
+
+That also answers "can it rotate smoothly through vector". Not as vector — Phaser rasterises SVG at
+load — and **not at runtime either**, because this game draws at integer scale with `NEAREST`
+filtering and an arbitrary rotation resamples straight off that grid, so the sail edges crawl as
+they turn. Rotating at *build* time keeps every frame palette-true and costs the look nothing. A
+four-sail wheel repeats every 90°, so **12 frames at 7.5°** is a seamless loop.
+
+**The temple did not want redrawing, and this block said it did.** The claim above, in an earlier
+version of this file, was that `poi_stacked_temple` described four stacked courses and the painted
+sheet did not, so the art should follow canon. **It was written without looking at the sheet**, which
+is the one habit this whole programme is built on. Looking settled it in about ten seconds: the art
+is a single-period domed temple — seven small spires around a split dome, an ogee-arched doorway,
+carved friezes, all on one high stepped plinth — and its three frames are a *decay sequence*, whole
+to dome-collapsed to nothing-but-plinth.
+
+That is better than the stack, and canon was rewritten to it. **The plinth is the only thing
+present in all three frames**, so the names of the dead belong on the plinth and the third frame is
+the memorial outlasting the monument — which is a sharper version of the same idea than four courses
+of masonry ever was. The entity is `poi_alms_step` now; "The Stacked Temple" was a name for a
+building that does not stack.
+
+**Both temple prompts are kept, as two options rather than a correction.** Asset 2g §1 is the sheet
+that shipped. §3 below is the stacked alternative — it is **not canon** and nothing in the game
+points at it, but it is a different and usable building if a second temple is ever wanted somewhere
+else. Neither supersedes the other.
+
+**The bridge prompt is here, and the bridge still must not be stamped.** `docs/sky-buildings-plan.md`
+and this repo's Known issues both say it: the only gap on the islands today is one tile wide, which
+is a plank. Painting the sheet early is cheap and harmless; *stamping* a bridge with nothing to span
+is the `lava_field` fault, where art, species and four points of interest existed for a biome that
+generated zero tiles on every seed. Art ready and unused is fine. Art ready and wired to nothing is
+the bug.
+
+### 1 — the windmill blade wheel, alone
+
+One square image. The hub must be dead centre, because the builder rotates the image about its own
+centre and anything off-centre wobbles as it turns.
+
+> A **single square image** of a **windmill blade wheel, alone** — no tower, no building, no
+> scaffolding, nothing else in frame. Drawn on a **solid pure magenta background, hex #FF00FF**.
+>
+> **Four slender sails on a central hub, seen straight on, face-on to the viewer** — not angled, not
+> in perspective, as flat to the camera as a clock face. **16-bit SNES pixel art.**
+>
+> The sails are **rounded white ceramic** — warm off-white: cream, bone and pale ivory with a faint
+> blue-grey in the shadows, **never pure white** — set in **pale wooden spars and framing** in honey
+> and oak tones, the grain showing, with visible pegged joints. A few small brass fittings at the
+> hub. Weathered and faded rather than glossy; cared-for, not derelict.
+>
+> **The hub sits exactly at the centre of the image**, and the four sails are **the same length**
+> and **evenly spaced at ninety degrees**. Leave a **margin of empty magenta at every edge** — the
+> sail tips must not touch or approach the border, because this image is going to be rotated about
+> its own centre and anything near a corner will be clipped.
+>
+> Draw **one position only**. Do not draw a sequence, do not draw multiple frames, do not draw a
+> grid, do not show the same wheel more than once.
+>
+> Limited palette, hard pixel edges, no anti-aliasing, no outline, no drop shadow, no ground, no
+> sky, no text, no labels.
+>
+> Negative: steampunk, rivets, rust, soot, iron plating, gears, pipes, Victorian, grimy, tower,
+> building, multiple frames, sprite sheet, perspective.
+
+### 2 — the windmill tower, with no blades
+
+Same mill as the 2g sheet, minus the wheel. 128 × 256, bottom-anchored.
+
+> A **single image** of a **solarpunk windmill tower with no blades on it**, drawn on a **solid pure
+> magenta background, hex #FF00FF**. The image is **twice as tall as it is wide**. **16-bit SNES
+> pixel art**, seen from **slightly above and in front**.
+>
+> The tower is a **smooth rounded form in glazed ceramic** — softly bulging, narrowing toward a
+> domed cap, no hard corners anywhere. The glaze is **warm off-white: cream, bone and pale ivory
+> with a faint blue-grey in the shadows**, never pure white, with a soft sheen along one side where
+> the light catches the curve. Around it is **beautiful pale wooden joinery** in honey and oak tones:
+> carved beams braced against the ceramic, a fretwork balcony, turned posts, visible pegged joints,
+> the grain showing. **Living plants** — a climbing vine up one side, moss in the joints, a planter
+> at the base.
+>
+> On the front face there is a **bare mounting boss** where a sail wheel would attach — a small
+> brass-collared hub with **nothing mounted on it**. **Do not draw sails, blades, vanes or a wheel
+> of any kind.**
+>
+> **The tower stands on the bottom edge of the image**, with empty magenta above it. Clean,
+> cared-for, nothing rusted or sooty. Limited palette, hard pixel edges, no anti-aliasing, no
+> outline, no drop shadow, no ground, no sky, no text, no labels.
+>
+> Negative: steampunk, rivets, rust, soot, smokestack, iron plating, gears, pipes, Victorian,
+> grimy, sails, blades, windmill vanes.
+
+### 3 — the stacked temple, as an alternative building
+
+**Not canon, and not a replacement for the sheet that shipped.** `poi_alms_step` describes the
+domed temple of Asset 2g §1, which is what the game draws. This is a second, different temple, kept
+on file because it is a good building and the format is identical: 128 × 160 per cell, three
+variants, bottom-anchored — the `places` contract, unchanged.
+
+> A **sprite sheet for a top-down 2D game**, drawn on a **solid pure magenta background, hex
+> #FF00FF**, arranged as a **1 row × 3 columns grid** with clear magenta gutters and margin. Each
+> cell is **taller than it is wide, in a 4:5 ratio**. **16-bit SNES pixel art**, seen from **slightly
+> above and in front**.
+>
+> Each cell shows **a ruined temple built as four stacked courses, each course a different material
+> from a different century**, one on top of the other like a layer cake of masonry, **each course
+> smaller than the one below it** so the whole thing steps inward as it rises:
+>
+> - **Bottom course — rough grey river stone**, laid dry without mortar, squat and heavy. Along its
+>   face at the very bottom, **many small marks cut close together in rows**, like dense rows of tiny
+>   inscription.
+> - **Second course — dressed tan sandstone**, neat rectangular blocks, plain.
+> - **Third course — pale marble**, finer, with carving and a few slender columns. Warm and dirty:
+>   **bone, cream and pale grey-beige, never pure white**, lichen-stained, darker grime in the carved
+>   shadows.
+> - **Top course — unfinished**. A low ring of stubs and **a row of small square holes where
+>   scaffolding beams were**, with nothing in them and no roof. It stops mid-build.
+>
+> **Nothing is intact and nothing is maintained** — fallen blocks at the foot, weeds in the joints,
+> a lean to the upper courses.
+>
+> **The temple stands on the bottom edge of its cell** — the lowest course and the fallen blocks
+> touch the bottom border, with empty magenta above the unfinished top. Three variants: one fairly
+> complete, one with the marble course half-collapsed, one where the upper courses have mostly gone
+> and the river-stone base with its rows of marks is the clearest thing left.
+>
+> Limited palette, hard pixel edges, no anti-aliasing, no outline, no drop shadow, no ground, no
+> sky, no text, no readable letters, no grid lines, no labels.
+
+**"No readable letters" is deliberate and it is not a style note.** The marks on the bottom course
+are the names of the dead; at 128 pixels wide they must read as *inscription* and never resolve into
+glyphs, because any glyph an image model invents will be a real script saying something nobody
+wrote. Rows of marks say "names" perfectly well at this size.
+
+### 4 — the bridge, on the crossing's contract
+
+512 × 128, four frames, **the same sheet shape as `track.png` and `rope.png`** — north-south,
+east-west, then the same two worn. That is not a coincidence to be improved on: it is what lets
+`planTrack` pick a third sheet with its index arithmetic untouched, which is exactly how the rope
+shipped without an engine change.
+
+> A **sprite sheet for a top-down 2D game**, drawn on a **solid pure magenta background, hex
+> #FF00FF**, arranged as a **1 row × 4 columns grid** with clear magenta gutters. Each cell is
+> **exactly square**. **16-bit SNES pixel art**, seen **straight down from directly above**.
+>
+> Each cell is one square tile of a **narrow wooden plank bridge**, seen from overhead: crosswise
+> planks laid over two long side rails, with a low rope handline along each edge.
+>
+> The timber is **pale weathered wood** — honey and grey-brown, the grain showing, a few boards
+> paler or darker than their neighbours. The ropes are **dull hemp**.
+>
+> - **Cell 1:** the bridge running **north–south**, top to bottom.
+> - **Cell 2:** the bridge running **east–west**, left to right.
+> - **Cell 3:** the same north–south run, **older** — greyer timber, a cracked board, a missing
+>   plank or two showing the gap between.
+> - **Cell 4:** the same east–west run, **older**, in the same way.
+>
+> **The most important rule, and it is about the edges.** In every cell the bridge must be the
+> **same width**, **exactly centred**, and it must **run from one border of the cell right to the
+> opposite border** — the planks are **cut off by the cell edge**, touching it, not stopping short
+> of it. The bridge occupies roughly **the middle third** of the cell's width.
+>
+> **Every cell must match every other cell at its edges**, so that any two cells placed side by side
+> join into one continuous bridge with **no step, no jog and no change of width** at the seam. Where
+> a cell's edge is crossed by the bridge, the planks, both side rails and both handlines must be at
+> **exactly the same position and thickness** in all four cells.
+>
+> **Do not centre a complete little bridge inside each cell.** Do not leave a margin of background
+> between the bridge and the cell border on the ends it runs to. A cell whose bridge floats in the
+> middle without touching two opposite edges is unusable.
+>
+> Limited palette, hard pixel edges, no anti-aliasing, no outline, no drop shadow, no water, no
+> ground, no sky, no text, no grid lines, no labels.
+
+**The edge rule is stated three separate ways on purpose.** Saying it once did not take: the first
+road sheet came back with pieces 25–81% of their box, centred anywhere from 24% to 72%, and not one
+of the four touched an edge. That sheet was unusable and was replaced by a code-drawn one. A builder
+can crop, resample and recolour; it cannot invent where a run was supposed to leave the cell.
