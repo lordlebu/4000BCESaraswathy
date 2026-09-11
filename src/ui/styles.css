@@ -694,7 +694,7 @@ button.ghost:hover:not(:disabled) {
 /* --- The sheet behind the map button ------------------------------------- */
 
 .sheet {
-  position: absolute;
+  position: fixed;
   z-index: 4;
   top: var(--safe-top);
   left: var(--safe-left);
@@ -752,7 +752,7 @@ button.ghost:hover:not(:disabled) {
 /* --- Arrival ------------------------------------------------------------- */
 
 .arrival-veil {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 5;
   display: grid;
@@ -1110,8 +1110,14 @@ button.ghost:hover:not(:disabled) {
  * strike is drawn in the accent ink rather than greyed, because the player wrote it and
  * being wrong earlier is the point of the mechanic. */
 
+/* Pinned to the viewport rather than to `.stage`.
+ *
+ * These render through `Modal`, which portals them out of `#root` so the whole application can be
+ * marked `inert` behind them with one attribute. That puts them outside `.stage`'s containing
+ * block, and `fixed` is what they always meant anyway: `.stage` is itself `position: fixed;
+ * inset: 0` and nothing on the page scrolls, so this is the same rectangle by a shorter route. */
 .diary-veil {
-  position: absolute;
+  position: fixed;
   inset: 0;
   display: flex;
   align-items: stretch;

@@ -16,6 +16,7 @@ import { type CanonSource, searchCanon } from './canonClient';
 import { classify, compare, crossReference, speciesFor } from '../content/investigate';
 import { discoveries, discovery, fieldQuestion } from '../content/knowledge';
 import { rungOf, type Progress } from '../journey';
+import { Modal } from './Modal';
 
 /** The canon entities the player has met, via the discoveries they have noticed. */
 export function specimensIn(progress: Progress): string[] {
@@ -77,7 +78,7 @@ export function FieldKit({ progress, open, onClose, canResearch }: FieldKitProps
     );
 
   return (
-    <div className="diary-veil" role="dialog" aria-modal="true" aria-label="Field kit">
+    <Modal open label="Field kit" onClose={onClose}>
       <section className="diary diary-filling">
         <header className="diary-head">
           <div>
@@ -231,6 +232,6 @@ export function FieldKit({ progress, open, onClose, canResearch }: FieldKitProps
           </>
         )}
       </section>
-    </div>
+    </Modal>
   );
 }

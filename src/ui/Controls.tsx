@@ -10,6 +10,7 @@ import { EventBus } from '../game/EventBus';
 import { biomes } from '../content/species';
 import { SeedBar } from './SeedBar';
 import { TravellerPicker } from './TravellerPicker';
+import { Modal } from './Modal';
 
 export interface ControlsProps {
   seed: string;
@@ -211,8 +212,16 @@ export function Controls({
         </button>
       </div>
 
-      {sheet && (
-        <div className="sheet" role="dialog" aria-label="Map and journey">
+      {/* No veil: this is a panel in a corner rather than a page over the world, and giving it a
+          backdrop would have been a visible change in a stage that promised none. It gets the
+          trap, the Escape and the focus restore all the same -- it had none of the three. */}
+      <Modal
+        open={sheet}
+        label="Map and journey"
+        onClose={() => setSheet(false)}
+        veilClassName={null}
+      >
+        <div className="sheet">
           <button
             type="button"
             className="sheet-close"
@@ -255,7 +264,7 @@ export function Controls({
 
           {metCount > 0 && <h3>Met so far ({metCount})</h3>}
         </div>
-      )}
+      </Modal>
     </>
   );
 }

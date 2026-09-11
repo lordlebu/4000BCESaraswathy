@@ -32,6 +32,7 @@ import { GESTURE_VERB, gestureLine, type Gesture } from '../content/gestures';
 import type { Taking } from '../content/nodes';
 import { sceneFor } from './scenes';
 import { plateFor } from './plates';
+import { Modal } from './Modal';
 
 /**
  * How long one beat gives you, in milliseconds.
@@ -170,17 +171,9 @@ export function ActivityModal({
     setMarker(0);
     setDone(null);
     startedAt.current = performance.now();
-    closeRef.current?.focus();
+    // Focus is `Modal`'s to place, from `initialFocus` below. Two components reaching for the
+    // same focus is how it ends up somewhere neither of them meant.
   }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
 
   /**
    * The marker sweeps, and a beat that is never answered times out.
@@ -247,11 +240,12 @@ export function ActivityModal({
   const band = attempt.bands[Math.min(attempt.beats.length, BEATS - 1)] ?? 0;
 
   return (
-    <div
-      className="diary-veil activity-veil"
-      role="dialog"
-      aria-modal="true"
-      aria-label={GESTURE_VERB[gesture]}
+    <Modal
+      open
+      label={GESTURE_VERB[gesture]}
+      onClose={onClose}
+      veilClassName="diary-veil activity-veil"
+      initialFocus={closeRef}
     >
       <section className="activity-card">
         {picture ? (
@@ -328,6 +322,6 @@ export function ActivityModal({
           </div>
         </div>
       </section>
-    </div>
+    </Modal>
   );
 }

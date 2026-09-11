@@ -18,9 +18,10 @@
 //   much room as the ones who accept. A player who reads this should not feel they failed to
 //   collect somebody.
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { type Progress, gatherable, linesFor, restored, staying } from '../journey';
 import { npc, poi } from '../content/places';
+import { Modal } from './Modal';
 
 export interface EndingProps {
   progress: Progress;
@@ -42,15 +43,8 @@ function refusal(progress: Progress, npcId: string): string | null {
 export function Ending({ progress, open, onClose }: EndingProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  // Escape, the focus trap and putting focus back belong to `Modal`. What stays here is where
+  // focus *starts* — the way out, which is this panel's own judgement rather than a mechanic.
 
   if (!open) return null;
 
@@ -60,7 +54,7 @@ export function Ending({ progress, open, onClose }: EndingProps) {
   const nobody = coming.length === 0 && stays.length === 0;
 
   return (
-    <div className="diary-veil" role="dialog" aria-modal="true" aria-label="If you stopped here">
+    <Modal open label="If you stopped here" onClose={onClose} initialFocus={closeRef}>
       <section className="diary diary-filling ending">
         <header className="diary-head">
           <div>
@@ -142,7 +136,7 @@ export function Ending({ progress, open, onClose }: EndingProps) {
           </>
         )}
       </section>
-    </div>
+    </Modal>
   );
 }
 

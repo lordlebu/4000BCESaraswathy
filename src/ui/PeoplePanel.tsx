@@ -12,13 +12,14 @@
 // preference: the album holds 145-193 species per map and this holds eight people, so tabs and
 // search would be furniture around a list that fits on one screen.
 
-import { type ReactNode, useEffect, useRef } from 'react';
+import { type ReactNode, useRef } from 'react';
 import { type Acquaintance, met, threadWith } from '../content/people';
 import { discovery, fieldQuestion, word } from '../content/knowledge';
 import { recipe } from '../content/making';
 import { poi } from '../content/places';
 import type { Progress } from '../journey';
 import { PersonPortrait } from './PersonPortrait';
+import { Modal } from './Modal';
 
 /** How large a portrait is in the record. Smaller than the 96 of a conversation: nobody is speaking. */
 const PORTRAIT_SIZE = 56;
@@ -54,22 +55,15 @@ export function PeoplePanel({ progress, open, onClose, tabs }: PeoplePanelProps)
 
   // Escape closes it and focus starts on the way out, matching the diary and the album. The map
   // keeps running underneath: a book you opened, not a stopped world.
-  useEffect(() => {
-    if (!open) return;
-    closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  // Escape, the focus trap and putting focus back belong to `Modal`. What stays here is where
+  // focus *starts* — the way out, which is this panel's own judgement rather than a mechanic.
 
   if (!open) return null;
 
   const people = met(progress);
 
   return (
-    <div className="diary-veil" role="dialog" aria-modal="true" aria-label="People">
+    <Modal open label="People" onClose={onClose} initialFocus={closeRef}>
       <section className="diary diary-filling">
         {tabs}
         <header className="diary-head">
@@ -98,7 +92,7 @@ export function PeoplePanel({ progress, open, onClose, tabs }: PeoplePanelProps)
           </ul>
         )}
       </section>
-    </div>
+    </Modal>
   );
 }
 

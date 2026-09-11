@@ -55,6 +55,7 @@ import {
   type Gesture
 } from '../content/gestures';
 import { ActivityModal } from './ActivityModal';
+import { Modal } from './Modal';
 
 /**
  * Which country to open on, for a link that wants to start somewhere other than Lothal.
@@ -1121,8 +1122,13 @@ export function App() {
 
       {/* The arrival still stops the world for a moment, but it can no longer sit below the map —
           there is no below. It comes to the middle, which is where you want to read it anyway. */}
-      {arrivalPage && (
-        <div className="arrival-veil">
+      <Modal
+        open={Boolean(arrivalPage)}
+        label="A page of the journal"
+        onClose={() => setArrivalPage(null)}
+        veilClassName="arrival-veil"
+      >
+        {arrivalPage && (
           <section className="arrival" aria-live="polite">
             <h2>{arrivalPage.title}</h2>
             <p>{arrivalPage.body}</p>
@@ -1136,8 +1142,8 @@ export function App() {
               </button>
             </div>
           </section>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   );
 }

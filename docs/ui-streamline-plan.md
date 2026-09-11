@@ -232,6 +232,71 @@ reasons, exactly as now. Nothing is hidden: what moves is the subset a player ca
 to somewhere it cannot be scrolled away from. The hotkeys keep deriving from the same `tileActions`
 array, so the second copy this codebase has paid for before still cannot happen.
 
+### B′. What a tile says it has, and how you act on it
+
+Moves A and B say *where* the tile's information goes. This says what it looks like when it gets
+there, because the current arrangement splits one fact across three places and the split is not
+in the data.
+
+**Today.** The flora and the fauna are two `<dl>` notes in a two-column grid — a name, a painted
+plate or an emoji, and canon's prose. What the ground *offers* is nowhere near them: it is a
+sentence inside the `detail` of a button. "Two bundles of reed fibre, and salt-crust on ground
+already worked." That sentence is the only readout of a tile's resources in the game, it is
+written as prose, and it is the subtitle of a verb.
+
+**And the data does not agree with that split.** `yieldsAt` builds a tile's offering from exactly
+three sources: the plant standing here, the animal standing here, and what the ground is made of.
+Every material traces to one of them through canon's `won_from`. The reed fibre *is* the reed. The
+notes name the reed in one column and a button describes its fibre in another, and nothing on
+screen says they are the same thing.
+
+**The proposal: one row of chips, and a chip is a button.**
+
+The peek row holds `[where you are] · [what is here] · [what else you can do]`. The middle is a row
+of chips, one per thing the tile holds:
+
+| Chip | Reads | Does |
+|---|---|---|
+| a material | the gesture's mark, the name, `×2` | starts that gathering — `gestureFor` already says whether it is a stoop, a stalk or a work |
+| the plant | its `SpeciesIcon`, its name | opens the read height at its note |
+| the creature | its plate thumbnail or mark, its name | the same |
+
+Three things follow from that, and each is the reason to do it rather than a consequence to
+manage.
+
+**The count is a number again.** `×2` scans; "two bundles of reed fibre" does not, and a player
+reads this on every step. Depletion rides on the chip's own form rather than on a clause —
+`conditionOf` already returns exactly three states, `untouched`, `picked-over` and `bare`, so they
+become a full, half and hollow mark. Semantic state in shape as well as in words, which is what
+lets a player see a worked district at a glance instead of reading four subtitles.
+
+**The verb and its subject stop being separated.** Today the button says *Stoop* and its subtitle
+says what for. A chip that is the material *and* the action says both in one object, and it is the
+action a player takes on most steps of the game. The rail beside it then carries only the verbs
+that are not about a particular thing — rest, ride, the workshop — which is three or four buttons
+rather than one button and a sentence.
+
+**A bare node keeps its chip.** Hollow, unpressable, with the reason in the read height. That is
+`TileActions`' ruling held to exactly: *a disabled row reading "needs a settlement" is how a player
+learns settlements do anything at all.* It is also the only place the game ever teaches that a
+worked reed bed comes back and a flint nodule does not.
+
+**The prose does not move into a chip.** Canon's writing about a species is the field notes' whole
+point and it belongs at read height, with the painted plate given more room than the `<dd>` of a
+two-column grid currently allows. The division is: **the chip is the index entry, the note is the
+entry.** Peek says *there is a reed here, two bundles of it, and you may take them*; read says what
+a reed is.
+
+**What this must not break.** `gatheredLine` and `standingLine` stay — they are the prose the
+diary and the travel log keep, and this changes only what the dock draws. The blocked-action ruling
+is honoured above rather than traded away. And the chip row is bounded by the data: a tile offers
+what one plant, one animal and one ground between them yield, which is one to three materials in
+the shipped bundle, so this is a row and not a wall.
+
+**Where it leads.** The chip is the entrance to the activity card, and the card is the thing the
+art is for. One tap on a thing you can see gets a painting of hands doing it — which is the loop
+worth making short, and the reason this sits in stage 4 rather than waiting for the rest.
+
 ### C. A conversation is a mode, not a list item
 
 `PlacePanel`'s "Who is here" becomes a row of portraits with names — a list of who, not three
@@ -334,10 +399,12 @@ that quietly eats the map fails rather than being noticed a year later. It belon
 `reachable.spec.ts` — both are about arrangement rather than content, and both exist because a
 layout can look right in a screenshot and be unusable in the hand.
 
-### Stage 4 — the action rail
+### Stage 4 — the action rail and the tile chips
 
-`TileActions` splits: available rows to the rail in the dock's peek row, blocked rows to the read
-height, both from the same array. Hotkeys unchanged.
+`TileActions` splits: the verbs that are not about a particular thing go to the rail in the dock's
+peek row, blocked rows to the read height, both from the same array. Hotkeys unchanged. The
+materials become chips per B′ above — mark, name, count, condition — and a chip starts its own
+gathering.
 
 *Proved by:* `test/tileActions.test.tsx` for the split, `e2e/gathering.spec.ts` and
 `e2e/making.spec.ts` for the paths — both already drive these buttons and will need their selectors

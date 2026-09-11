@@ -14,7 +14,7 @@
 // Presentation, plus one optional network call. The species records come from the bundle, so
 // every entry is fully readable offline; asking canon only ever adds.
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   type Collection,
@@ -29,6 +29,7 @@ import { TERRAIN_ORDER } from '../game/frames';
 import { searchCanon, type CanonSource } from './canonClient';
 import type { Creature, Flora } from '../world/types';
 import { SpeciesIcon } from './SpeciesIcon';
+import { Modal } from './Modal';
 
 /** Fauna carry a mood; flora do not. Narrower than a cast, and it is the only difference shown. */
 function moodOf(species: Creature | Flora): string | null {
@@ -152,15 +153,8 @@ export function CollectionPanel({
   // Escape closes it and focus starts on the way out, matching the diary. This was the one
   // modal without either, which is the sort of inconsistency a keyboard finds immediately and
   // a mouse never does. The map keeps running underneath: a book you opened, not a stopped world.
-  useEffect(() => {
-    if (!open) return;
-    closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  // Escape, the focus trap and putting focus back belong to `Modal`. What stays here is where
+  // focus *starts* — the way out, which is this panel's own judgement rather than a mechanic.
 
   if (!open) return null;
 
@@ -173,7 +167,7 @@ export function CollectionPanel({
   const groups = byBiome(found, TERRAIN_ORDER);
 
   return (
-    <div className="diary-veil" role="dialog" aria-modal="true" aria-label="Collection">
+    <Modal open label="Collection" onClose={onClose} initialFocus={closeRef}>
       <section className="diary diary-filling">
         {tabs}
         <header className="diary-head">
@@ -236,6 +230,6 @@ export function CollectionPanel({
           </>
         )}
       </section>
-    </div>
+    </Modal>
   );
 }
