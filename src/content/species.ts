@@ -144,3 +144,31 @@ export function floraFor(tile: Point & { biome: BiomeId }, seed: string): Flora 
 export function travelCost(biome: BiomeId): number | null {
   return biomeFor(biome)?.travelCost ?? null;
 }
+
+/**
+ * What a step costs on ground that is only walkable because something was built over it.
+ *
+ * **Three, the same as wading the sky pool, and for the same reason.** The pool was given
+ * `travelCost: 3` so that going into water is felt rather than merely permitted. A rope ladder over
+ * open sea and a railway crossed on foot are the same kind of going: slow, deliberate, hands
+ * occupied. Charging the plains rate made the most precarious stretch on the map the fastest
+ * walking on it.
+ *
+ * It is a constant rather than a column in `data/biomes.json` because it is not a fact about the
+ * ground. `sea` has no travel cost and should not gain one -- the sea is impassable, and what is
+ * being priced here is the *structure*, which the biome knows nothing about.
+ */
+export const CROSSING_ON_FOOT = 3;
+
+/**
+ * What one step onto this tile costs, including the ground a walker can only reach by structure.
+ *
+ * **The `null` case is not a missing number, it is the crossing**, which is what makes one function
+ * safe to share. `travelCost` is null for exactly `sea`, `sky_underside` and `open_sky` -- the three
+ * biomes in `UNWALKABLE` -- so the only way a walker is ever standing on one is `Tile.track`. The
+ * fallback therefore fires on the rope and the rail and nowhere else, and it used to be `?? 1`
+ * written out twice in `WorldScene`.
+ */
+export function stepCost(biome: BiomeId): number {
+  return travelCost(biome) ?? CROSSING_ON_FOOT;
+}

@@ -25,6 +25,7 @@ import {
 } from '../src/game/scenePlan';
 import { CLOUD_PATTERNS, EDGE_ORDER, EDGE_VARIANTS, FALL_FRAMES } from '../src/game/frames';
 import { isWalkable } from '../src/world/generate';
+import { CROSSING_ON_FOOT, stepCost } from '../src/content/species';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
@@ -826,6 +827,64 @@ describe('the tree that hangs off the edge hangs off an edge', () => {
         !rim.has(`${p.x},${p.y}`)
     );
     expect(inland.length, 'the island interior grows nothing').toBeGreaterThan(5);
+  });
+});
+
+describe('crossing on foot costs what wading costs', () => {
+  it('charges a step on the line over the void the same as a step in the pool', () => {
+    // **The fallback was never "a missing number, call it easy".** `travelCost` is null for exactly
+    // `sea`, `sky_underside` and `open_sky` -- the three biomes in `UNWALKABLE` -- so the only way a
+    // walker is ever standing on one is `Tile.track`. `WorldScene` read it as `?? 1` in two places,
+    // which made the rope ladder over open sea and the railway crossed on foot the *fastest*
+    // walking on the map, while the sky pool beside them was deliberately given 3 so that going
+    // into water is felt rather than merely permitted. Same kind of going; same number.
+    const pool = (biomesData as { id: string; travelCost: number | null }[])
+      .find((b) => b.id === 'sky_water')!;
+    expect(CROSSING_ON_FOOT, 'the crossing is cheaper than the pool beside it')
+      .toBe(pool.travelCost);
+
+    for (const biome of ['sea', 'sky_underside', 'open_sky'] as const) {
+      expect(stepCost(biome), `${biome} is priced as ordinary ground`).toBe(CROSSING_ON_FOOT);
+    }
+    // And ground that has its own cost keeps it, so this changed nothing a walker already knew.
+    expect(stepCost('plains')).toBe(1);
+    expect(stepCost('mountains')).toBe(3);
+  });
+
+  it('is the only place the fallback can fire', () => {
+    // The claim the one shared function rests on: no *walkable* biome has a null cost, so
+    // `stepCost` never quietly reprices real ground. If one ever does, this says so rather than
+    // the map getting slower for a reason nobody chose.
+    const rows = biomesData as { id: string; walkable: boolean; travelCost: number | null }[];
+    const priced = rows.filter((b) => b.travelCost === null).map((b) => b.id);
+    expect(priced.sort(), 'the set of costless biomes moved').toEqual(
+      ['open_sky', 'sea', 'sky_underside']
+    );
+    for (const b of rows) {
+      if (b.travelCost !== null) continue;
+      expect(b.walkable, `${b.id} is walkable with no cost of its own`).toBe(false);
+    }
+  });
+
+  it('leaves the route planner alone, and that is measured rather than assumed', () => {
+    // `routes.ts` keeps its own cost table -- `world/` may not import the content layer -- and it
+    // still charges the crossing 1. Making the two agree would change which line `easeRoutes`
+    // walks, which changes the maps and moves `SAVE_VERSION`.
+    //
+    // It would buy nothing. `fieldMap.ts` refuses the road flag on a tracked tile, so of the 23
+    // line tiles over the void on the Aravali, **none carries road** -- and `EASED` has no entry
+    // for `sea` or `sky_underside`, so nothing is softened there either. The route is forced in any
+    // case: the crossing is the only way over. Reshaping every map for an invisible difference is
+    // the trade this declines.
+    const world = aravali();
+    const overTheVoid = world.tiles
+      .flat()
+      .filter((t) => t.track && !isWalkable({ biome: t.biome, track: false }));
+    expect(overTheVoid.length, 'the line crosses nothing').toBeGreaterThan(0);
+    expect(
+      overTheVoid.filter((t) => t.road).map((t) => `${t.x},${t.y}`),
+      'a road is drawn on the crossing, so the planner cost now matters'
+    ).toEqual([]);
   });
 });
 
