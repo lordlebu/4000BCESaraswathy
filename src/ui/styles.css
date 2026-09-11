@@ -468,17 +468,9 @@ button.ghost:hover:not(:disabled) {
  * The only nudges are optical. Emoji glyphs are drawn a little large for their em, so 0.95 brings
  * one back to the weight of the words beside it, and they sit slightly high, so the baseline shift
  * puts it back on the line. */
-/* A plate stands in for the mark at the same size, so a row with one does not jump.
-   `object-fit: cover` because the plates are square and any future one might not be. */
-.species-plate {
-  width: 2.4em;
-  height: 2.4em;
-  object-fit: cover;
-  border-radius: 3px;
-  margin-right: 0.3em;
-  align-self: center;
-  flex: 0 0 auto;
-}
+/* `.species-plate` was here. A plate is drawn by `.plate-open-mark img` now, at the same 2.4em, so
+   a row with one still does not jump against a row with an emoji -- it is a control rather than an
+   image because pressing it opens the painting. See "A plate you can open" below. */
 
 .species-emoji {
   font-size: 0.95em;
@@ -490,19 +482,8 @@ button.ghost:hover:not(:disabled) {
   color: var(--muted);
 }
 
-.note-plate {
-  float: right;
-  width: 7.5em;
-  max-width: 40%;
-  margin: 0 0 6px 12px;
-  border: 1px solid rgba(52, 38, 58, 0.35);
-  border-radius: 2px;
-  /* The paper behind it shows at the edge, so the plate reads as pasted into the notebook rather
-     than printed on the page. */
-  padding: 3px;
-  background: rgba(255, 246, 223, 0.55);
-  box-shadow: 0 1px 4px rgba(20, 14, 24, 0.18);
-}
+/* `.note-plate` was here, and the plate pasted into the field notes is now `.plate-open-note img`
+   -- same float, same 7.5em, same border. See "A plate you can open" below. */
 
 /* The float has to be cleared or a long plate beside a one-line note overhangs the section below
    it -- which on a two-column layout means a creature's picture landing in the plant's column. */
@@ -1605,6 +1586,154 @@ button.ghost:hover:not(:disabled) {
   .stage:has(.journal) .place-veil {
     bottom: calc(var(--safe-bottom) + 46dvh);
   }
+}
+
+
+/* --- A plate you can open ------------------------------------------------
+ *
+ * The twenty painted plates are 384 square and were never drawn above 120px. These two rules turn
+ * the thumbnail into a control without changing its size: same box, same radius, same place in
+ * the line, plus a hairline that appears on hover and focus so it reads as something to press.
+ *
+ * `button` here resets rather than inherits. The global button style is a filled terracotta pill,
+ * which would put a lozenge behind every plate in the album. */
+.plate-open {
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  cursor: zoom-in;
+  line-height: 0;
+  transition: border-color 120ms ease, filter 120ms ease;
+}
+
+.plate-open:hover,
+.plate-open:focus-visible {
+  border-color: var(--accent);
+  filter: brightness(1.04);
+}
+
+/* The thumbnail in a list keeps `.species-plate`'s box exactly, so a row with a plate still does
+   not jump against a row with an emoji. */
+.plate-open-mark {
+  align-self: center;
+  flex: 0 0 auto;
+}
+
+.plate-open-mark img {
+  display: block;
+  width: 2.4em;
+  height: 2.4em;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+/* And the one pasted into the field notes keeps `.note-plate`'s float and margin. */
+.plate-open-note {
+  float: right;
+  margin: 0 0 6px 12px;
+  max-width: 40%;
+}
+
+.plate-open-note img {
+  display: block;
+  width: 7.5em;
+  max-width: 100%;
+  border: 1px solid rgba(52, 38, 58, 0.35);
+  border-radius: 2px;
+}
+
+/* --- The plate, open ----------------------------------------------------
+ *
+ * Built on the activity card's shape rather than on the diary's, because it is the same kind of
+ * thing: a picture with a few lines under it, not a page. `.diary-veil` supplies the backdrop and
+ * this centres on it. */
+.plate-card-veil {
+  align-items: center;
+  justify-content: center;
+}
+
+/* **Not `.specimen`, and the name is the whole point of this comment.**
+ *
+ * That class was taken. The field kit already uses it for the little pill chips naming the two
+ * things being compared, five hundred lines further down this same file -- so the first version of
+ * this card was declared here, overridden there, and rendered as a transparent 999px-radius
+ * lozenge with the album showing straight through its text. Every rule was valid; the sheet simply
+ * has one flat namespace and no way to say a name is spoken for.
+ *
+ * The card was also silently restyling those chips in the other direction, giving each one
+ * `width: min(24rem, 100%)` and `overflow: hidden`.
+ *
+ * This is fault 8 in `docs/ui-streamline-plan.md` arriving on schedule: 2,286 lines, one
+ * namespace, and the collision found by looking at a screenshot rather than by anything failing. */
+.plate-card {
+  width: min(24rem, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--paper);
+  border-radius: 6px;
+  box-shadow: 0 18px 44px rgba(27, 20, 32, 0.5);
+}
+
+/* Square, because every plate is. The width caps at 384px, which is the file's own size -- a
+   watercolour scaled past its pixels looks soft, and these were painted to be looked at. */
+.plate-card-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 384px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.plate-card-body {
+  padding: 1rem 1.15rem 1.15rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.plate-card-name {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.plate-card-binomial {
+  margin: -0.3rem 0 0;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.plate-card-prose {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.plate-card-facts {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.plate-card-facts span {
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}
+
+.plate-card-close {
+  justify-self: start;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
 }
 
 /* ── Reachable without a mouse ──────────────────────────────────────────────────────────────

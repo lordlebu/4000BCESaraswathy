@@ -1,7 +1,8 @@
 # UI streamline plan — the map is the screen, and it is 27% of it
 
-**Nothing here has shipped.** This is the plan as argued, with the measurements it was argued
-from. Read it alongside `docs/ui-handoff.md`, which is the design record for the arrangement this
+**Stage 1 has shipped; the rest has not.** This is the plan as argued, with the measurements it
+was argued from, and the shipped stage marked where it sits. The plate view under B′ shipped
+alongside it. Read it alongside `docs/ui-handoff.md`, which is the design record for the arrangement this
 proposes to change and explains why most of it is the way it is. That document's one live rule —
 *ask `journey.ts`, do not reimplement it* — is untouched by everything below, and every stage here
 is a rearrangement of presentation with no new rule in a component.
@@ -191,8 +192,17 @@ row, so the mark and the label dim with the state and the sentence stays readabl
 ### 8. One 2,286-line stylesheet with an ad-hoc z scale
 
 `z-index` values in use: 2, 3, 4, 5, 35, 40, 60, 100 — no scale, and one comment in the file works
-out a stacking conflict by reasoning about the numbers. This has not broken anything yet. It is the
-kind of thing that breaks once, expensively, when a new panel picks a number.
+out a stacking conflict by reasoning about the numbers.
+
+**It has now broken something, and the first new panel is what did it.** The opened plate card was
+written as `.specimen` — a name already taken five hundred lines further down by the field kit's
+comparison chips. Both declarations were valid, the later one won, and the card rendered as a
+transparent 999-pixel lozenge with the album showing straight through its text; in the other
+direction it was giving each of those chips `width: min(24rem, 100%)` and `overflow: hidden`.
+Nothing failed. It was found by taking a screenshot.
+
+One flat namespace, no way to say a name is spoken for, and a sheet long enough that nobody reads
+the other end of it before picking a class name. Stage 6 is where this gets a scale and a split.
 
 ## The shape proposed
 
@@ -287,6 +297,13 @@ two-column grid currently allows. The division is: **the chip is the index entry
 entry.** Peek says *there is a reed here, two bundles of it, and you may take them*; read says what
 a reed is.
 
+**The plate is a way in, and that part has shipped.** The twenty painted plates were drawn at 2.4em
+in the album and 7.5em in the field notes, out of files that are 384 square — so nine tenths of
+every painting was discarded at the one moment a player had gone looking for it. Pressing one now
+opens it at full size with canon's prose underneath, in a card built on the activity card's shape.
+See `src/ui/Specimen.tsx`. The same argument applies to the chips above: a thumbnail is an index
+entry, and there should be somewhere for the entry itself to be.
+
 **What this must not break.** `gatheredLine` and `standingLine` stay — they are the prose the
 diary and the travel log keep, and this changes only what the dock draws. The blocked-action ruling
 is honoured above rather than traded away. And the chip row is bounded by the data: a tile offers
@@ -340,7 +357,7 @@ Each stage is independently mergeable and each names the test that proves it. Th
 branch** — the repo's rule, and doubly right here because the browser suite is slow and these all
 touch the same files.
 
-### Stage 1 — the modal primitive · no visible change
+### Stage 1 — the modal primitive · **shipped**
 
 One `<Modal>` in `src/ui/Modal.tsx`: veil, `role="dialog"`, `aria-modal`, Escape, focus in on open,
 **focus trap**, **focus restored to the invoking control on close**, and `inert` on the stage behind

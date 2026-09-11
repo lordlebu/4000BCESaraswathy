@@ -36,7 +36,9 @@
 // holding a mouse.
 
 import {
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -46,13 +48,43 @@ import {
 import { createPortal } from 'react-dom';
 
 /**
- * How many modals are open.
+ * How deeply nested this modal is: 1 for one over the map, 2 for one opened from inside it.
  *
- * Module-level rather than per-component, because `inert` is one attribute on one element and two
- * open modals must not have the first one to close clear it for the second. The workshop opening
- * over the records is the real case.
+ * **Nesting is read from the tree rather than inferred from what opened first, and the difference
+ * is the whole of this note.** A painted plate opens over the album (see `Specimen.tsx`), so two
+ * modals are now on screen at once and something has to say which is on top. The obvious answer —
+ * a stack pushed in an effect — is *backwards*, because React runs a child's effects **before its
+ * parent's**: the inner plate would register first and the outer album would come out on top of
+ * it. Every consequence of that is wrong in the same direction. The album would answer an Escape
+ * meant for the plate, and its veil, appended to the body later, would paint over the picture.
+ *
+ * A context is the fact itself. A modal's depth is its parent's plus one, decided while rendering
+ * the tree that nests them, and nothing about timing can get it wrong.
  */
-let openCount = 0;
+const Depth = createContext(0);
+
+/**
+ * Every open modal, by identity, with its depth.
+ *
+ * A `Map` rather than an array: insertion order is preserved, so the topmost is the *last* entry
+ * at the greatest depth -- depth first for nesting, insertion second for two panels opened at the
+ * same level. It also does the job a plain count used to, because `inert` is one attribute on one
+ * element and the first modal to close must not clear it for the second.
+ */
+const showing = new Map<symbol, number>();
+
+/** Whether this modal is the one a key should reach. */
+function isTopmost(me: symbol): boolean {
+  let top: symbol | null = null;
+  let best = -1;
+  for (const [id, depth] of showing) {
+    if (depth >= best) {
+      best = depth;
+      top = id;
+    }
+  }
+  return top === me;
+}
 
 /** What `#root` looked like before the first modal opened, so closing the last one restores it. */
 function setAppInert(inert: boolean): void {
@@ -131,6 +163,10 @@ export function Modal({
   const panel = useRef<HTMLDivElement>(null);
   /** Who had focus when this opened. Restored on the way out. */
   const opener = useRef<HTMLElement | null>(null);
+  /** This instance's identity, so two modals can never compare equal. */
+  const me = useRef(Symbol('modal')).current;
+  /** One deeper than whatever this is rendered inside. See the note on `Depth`. */
+  const depth = useContext(Depth) + 1;
 
   // **The portal's node is made during render and attached before paint.** Making it in the effect
   // instead is the obvious way round and does not work: the render that would use it has already
@@ -160,8 +196,8 @@ export function Modal({
 
     opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
-    openCount += 1;
-    if (openCount === 1) setAppInert(true);
+    showing.set(me, depth);
+    if (showing.size === 1) setAppInert(true);
 
     // Focus moves in now rather than on the next frame. A child's effects run before its parent's
     // in React, so by the time this executes every panel below has mounted and settled -- and a
@@ -171,8 +207,10 @@ export function Modal({
     if (container) (initialFocus?.current ?? focusable(container)[0] ?? container).focus();
 
     const onKey = (e: KeyboardEvent) => {
+      // Only the topmost modal answers. See the note on `Depth`.
+      if (!isTopmost(me)) return;
+
       if (e.key === 'Escape' && onClose) {
-        e.stopPropagation();
         onClose();
         return;
       }
@@ -212,8 +250,8 @@ export function Modal({
 
     return () => {
       window.removeEventListener('keydown', onKey, true);
-      openCount = Math.max(0, openCount - 1);
-      if (openCount === 0) setAppInert(false);
+      showing.delete(me);
+      if (showing.size === 0) setAppInert(false);
 
       // Only if it is still there. A control that opened a panel and was then removed by what the
       // panel did -- the Workshop button disappears when the last recipe is made -- would throw
@@ -224,6 +262,9 @@ export function Modal({
     };
     // `initialFocus` is a ref object and stable; including it would re-run the whole effect on
     // every render of a panel that happens to build one inline.
+    // `me` is a stable identity created once per instance, `depth` comes from a context that only
+    // changes when the tree does, and `initialFocus` is a ref object; including any of them would
+    // re-run the whole effect on an unrelated render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, onClose]);
 
@@ -247,9 +288,15 @@ export function Modal({
       // Focusable as a last resort, for a panel holding no controls at all. `-1` keeps it out of
       // the tab order while still allowing `focus()`.
       tabIndex={-1}
+      // **Only a nested modal takes a z-index from here.** Portal nodes are appended to the body in
+      // effect order, which is child-first, so a plate opened from the album lands *before* the
+      // album's own node and would be painted over by it. Lifting the inner one settles that
+      // without touching the stylesheet -- and at depth 1 nothing is set at all, so `.diary-veil`
+      // keeps its 40, the map sheet its 4 and the front door its 60, exactly as before.
+      style={depth > 1 ? { zIndex: 40 + depth } : undefined}
       onClick={veilClassName ? onVeilClick : undefined}
     >
-      {children}
+      <Depth.Provider value={depth}>{children}</Depth.Provider>
     </div>
   );
 

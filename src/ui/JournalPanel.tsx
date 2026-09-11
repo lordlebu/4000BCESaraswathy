@@ -10,6 +10,7 @@ import type { ReactNode } from 'react';
 import type { FieldNote, JournalEntry } from '../content/journal';
 import { SpeciesIcon } from './SpeciesIcon';
 import { plateFor } from './plates';
+import { PlateButton } from './Specimen';
 
 /**
  * A specimen label: what it is called, and what it is.
@@ -43,10 +44,11 @@ function Note({ note, kind }: { note: FieldNote; kind: 'creature' | 'flora' }) {
         <span>{note.name}</span>
       </dt>
       <dd>
-        {plate && (
-          // Decorative: the name and the note beside it already say what this is, and a screen
-          // reader announcing the species a third time is worse than one announcing it twice.
-          <img className="note-plate" src={plate} alt="" aria-hidden="true" loading="lazy" />
+        {plate && note.species && (
+          // Openable, like the one in the album: this is where a player *meets* the animal, so it
+          // is the first place they would try to look closer at the painting. `PlateButton` owns
+          // its own open state, which is what keeps a tapped picture out of `App`'s journey state.
+          <PlateButton speciesId={note.species.id} name={note.name} variant="note" />
         )}
         {note.note}
       </dd>

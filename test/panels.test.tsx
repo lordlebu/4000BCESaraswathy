@@ -879,7 +879,7 @@ describe('the field notes draw a mark for every species', () => {
         place={{ poiId: null } as never}
       actions={[]} />
     );
-    expect(baseElement.querySelectorAll('.note-plate')).toHaveLength(0);
+    expect(baseElement.querySelectorAll('.plate-open-note')).toHaveLength(0);
     expect(baseElement.querySelectorAll('.note-plated')).toHaveLength(0);
   });
 
@@ -945,7 +945,13 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
         place={{ poiId: null } as never}
       actions={[]} />
     );
-    expect(baseElement.querySelectorAll('.note-plate')).toHaveLength(1);
+    // **The plate is a control now**, so the image sits inside a button -- see `Specimen.tsx`.
+    // The file is 384 square and was never drawn above 120 here; pressing it opens the painting.
+    expect(baseElement.querySelectorAll('.plate-open-note img')).toHaveLength(1);
+    expect(
+      baseElement.querySelector('.plate-open-note')!.getAttribute('aria-label'),
+      'the plate says nothing about what pressing it does'
+    ).toMatch(/see the plate/);
     // Not both: the plate *is* the picture, and a small silhouette beside it is noise.
     expect(baseElement.querySelectorAll('.note dt .species-icon')).toHaveLength(0);
   });
@@ -958,7 +964,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
         place={{ poiId: null } as never}
       actions={[]} />
     );
-    expect(baseElement.querySelectorAll('.note-plate')).toHaveLength(0);
+    expect(baseElement.querySelectorAll('.plate-open-note')).toHaveLength(0);
     expect(baseElement.querySelectorAll('.note dt .species-emoji')).toHaveLength(1);
   });
 
@@ -970,7 +976,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
         place={{ poiId: null } as never}
       actions={[]} />
     );
-    const img = baseElement.querySelector('.note-plate')!;
+    const img = baseElement.querySelector('.plate-open-note img')!;
     expect(img.getAttribute('alt')).toBe('');
     expect(img.getAttribute('aria-hidden')).toBe('true');
   });

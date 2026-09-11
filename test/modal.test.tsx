@@ -15,7 +15,7 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Modal } from '../src/ui/Modal';
 
 afterEach(cleanup);
@@ -161,6 +161,68 @@ describe('the modal primitive', () => {
       first.unmount();
       expect(root.hasAttribute('inert')).toBe(true);
       second.unmount();
+      expect(root.hasAttribute('inert')).toBe(false);
+    });
+  });
+
+  describe('two at once', () => {
+    /**
+     * An album with a plate open over it — the real case, as a controlled pair.
+     *
+     * Controlled, and the word is load-bearing. An earlier version of this test rendered the album
+     * with `onClose={noop}`, so the outer panel could not close and the assertion passed whatever
+     * the primitive did. A test that cannot fail is worse than no test.
+     */
+    function Stacked() {
+      const [outer, setOuter] = useState(true);
+      const [inner, setInner] = useState(true);
+      return (
+        <Modal open={outer} label="Album" onClose={() => setOuter(false)}>
+          <section>
+            <button type="button">Browse</button>
+            <Modal open={inner} label="Plate" onClose={() => setInner(false)}>
+              <section>
+                <button type="button">Look</button>
+              </section>
+            </Modal>
+          </section>
+        </Modal>
+      );
+    }
+
+    it('Escape closes the top one and leaves the one underneath', () => {
+      // Both listen on the window in the capture phase, where listeners on one target fire in
+      // registration order — so the outer modal, registered first, would answer a key meant for the
+      // inner one. A player pressing Escape to put a picture down would lose the album behind it.
+      withRoot();
+      render(<Stacked />);
+
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(screen.queryByRole('dialog', { name: 'Plate' }), 'the plate should have closed').toBeNull();
+      expect(
+        screen.queryByRole('dialog', { name: 'Album' }),
+        'the album closed too — the wrong modal answered Escape'
+      ).not.toBeNull();
+    });
+
+    it('hands the keyboard back when the top one goes', () => {
+      withRoot();
+      render(<Stacked />);
+
+      fireEvent.keyDown(window, { key: 'Escape' });
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(screen.queryByRole('dialog', { name: 'Album' })).toBeNull();
+    });
+
+    it('keeps the application inert until both have gone', () => {
+      const root = withRoot();
+      render(<Stacked />);
+      expect(root.hasAttribute('inert')).toBe(true);
+
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(root.hasAttribute('inert')).toBe(true);
+
+      fireEvent.keyDown(window, { key: 'Escape' });
       expect(root.hasAttribute('inert')).toBe(false);
     });
   });
