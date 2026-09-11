@@ -10,6 +10,7 @@ import { isWalkable } from '../src/world/generate';
 import { buildFieldMap, poiAt } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps, poi, poisOn, npcsAt, neighboursOf } from '../src/content/places';
 import { band } from '../src/world/classify';
+import { DEFAULT_SEED } from '../src/ui/seed';
 import { biomes } from '../src/content/species';
 import { landmarkKindFor } from '../src/content/landmarks';
 
@@ -472,6 +473,36 @@ describe('a point of interest stands on the ground canon gave it', () => {
         tile?.biome,
         `seed ${seed}: the alms step stands at ${placed!.at.x},${placed!.at.y} on ${tile?.biome}`
       ).toBe('sky_island');
+    }
+  });
+});
+
+describe('nothing is built on the railway', () => {
+  // **Found by looking at a render, not by a test.** The crossing uses the islands as its piers, so
+  // the line runs straight across the only ground a sky point of interest can stand on, and the
+  // placer was content to put one on the sleepers. It was invisible for as long as a place was a
+  // 32-pixel diamond; the first two-tile painted windmill made it obvious in one frame. On the
+  // default seed it was landing *two* places on the track, and one of them predated the mill.
+  it('places nothing on a track tile, on any map or seed', () => {
+    for (const map of fieldMaps) {
+      for (const seed of [DEFAULT_SEED, 'a', 'b', 'c', 'x']) {
+        const scene = buildFieldMap(map, { seed });
+        const onTheLine = scene.placed
+          .filter((p) => scene.world.tiles[p.at.y]?.[p.at.x]?.track)
+          .map((p) => `${p.poi.id} at ${p.at.x},${p.at.y}`);
+        expect(onTheLine, `${map.id}/${seed}: built on the railway`).toEqual([]);
+      }
+    }
+  });
+
+  it('still finds a home for everything canon lists', () => {
+    // Taking tiles away from a placer can strand the last few, and the islands are narrow. This is
+    // the guard that the fix above did not buy its tidiness with an unplaceable point of interest.
+    for (const map of fieldMaps) {
+      for (const seed of [DEFAULT_SEED, 'a', 'b']) {
+        const scene = buildFieldMap(map, { seed });
+        expect(scene.unplaced.map((p) => p.id), `${map.id}/${seed}: stranded`).toEqual([]);
+      }
     }
   });
 });

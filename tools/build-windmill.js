@@ -181,9 +181,32 @@ function buildBlades() {
   console.log(`  step ${(90 / STEPS).toFixed(1)} degrees, loop closes at 90`);
 }
 
+/**
+ * Write the numbers the game needs beside the sheets that carry them.
+ *
+ * **The boss offset must not be typed twice.** The game has to know where on the tower the wheel
+ * mounts, and that is this builder's number -- a copy of it in `frames.ts` would be a second place
+ * for it to be right, which is the same shape as `routable` drifting two biomes behind
+ * `isWalkable` and going unnoticed for a whole round. The builder computes it, the builder writes
+ * it, and `frames.ts` imports it.
+ */
+function writeManifest() {
+  const file = path.join(OUT, 'windmill.json');
+  const manifest = {
+    tower: { width: TOWER_W, height: TOWER_H },
+    blade: BLADE,
+    steps: STEPS,
+    boss: BOSS,
+    note: 'Written by tools/build-windmill.js. Do not hand-edit -- rerun the builder.'
+  };
+  fs.writeFileSync(file, JSON.stringify(manifest, null, 2) + '\n');
+  console.log(`  manifest -> assets/windmill.json`);
+}
+
 function main() {
   buildTower();
   buildBlades();
+  writeManifest();
   console.log(`  boss at ${(BOSS.x * 100).toFixed(1)}%, ${(BOSS.y * 100).toFixed(1)}% of the tower cell`);
 }
 

@@ -1,0 +1,13 @@
+{
+  "tower": {
+    "width": 128,
+    "height": 256
+  },
+  "blade": 96,
+  "steps": 12,
+  "boss": {
+    "x": 0.49,
+    "y": 0.44
+  },
+  "note": "Written by tools/build-windmill.js. Do not hand-edit -- rerun the builder."
+}

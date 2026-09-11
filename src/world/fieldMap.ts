@@ -16,6 +16,7 @@ import {
   canBoardAt,
   shoreheads,
   stampIslands,
+  plankTheNotches,
   stampLine,
   stampStrait,
   startOnTheSouthernShore
@@ -82,6 +83,16 @@ const SKY: ReadonlySet<BiomeId> = new Set<BiomeId>(['sky_island', 'sky_underside
 
 function suitable(tile: Tile, poi: PointOfInterest, walkable: Set<BiomeId>): boolean {
   if (!walkable.has(tile.biome)) return false;
+  // **Never on the line.** The crossing uses the islands as its piers, so the rail runs straight
+  // across the only ground a sky point of interest can stand on -- and the placer was happy to put
+  // a building on the sleepers. It went unnoticed for as long as a place was a 32-pixel diamond:
+  // on the default seed both `poi_lodestone_face` and the mill landed on the track, and it was
+  // invisible until a two-tile painted windmill was drawn standing on a railway.
+  //
+  // The plank is not excluded with it. A plank *is* ground -- it is there so a walker can cross a
+  // notch -- and a place reached by one is reached, which is the same reason `road` does not
+  // disqualify a tile either.
+  if (tile.track) return false;
   return poi.terrain.length === 0 || poi.terrain.includes(tile.biome);
 }
 
@@ -552,6 +563,9 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // The line last, and through the islands: they are its piers, and without it the far shore
   // cannot be reached at all.
   stampLine(world, palette, stampIslands(world, palette));
+  // The islands come out with holes in them -- 9 to 19 one-tile notches a seed, measured. Planked
+  // before anything reads walkability, because this is the one stamp that changes it.
+  plankTheNotches(world);
   // The strait is cut after the generator chose a start, so on a crossing that start can be left
   // standing in open water -- or, as it was, on the far shore. Only moves it when it must.
   if (palette.has('sky_island')) startOnTheSouthernShore(world);

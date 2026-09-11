@@ -106,7 +106,7 @@ const PREFIX = 'south-of-tethys';
  * Read strictly rather than migrated: a version mismatch drops the save. That is the existing
  * behaviour and it stays, because a half-understood journey is worse than a fresh one.
  */
-export const SAVE_VERSION = 17;
+export const SAVE_VERSION = 18;
 
 export interface Journey {
   version: number;

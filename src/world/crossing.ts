@@ -849,3 +849,48 @@ export function canBoardAt(world: World, at: Point): boolean {
   // bottom of a ladder; the carriage is up on the line, and the line starts at an island.
   return isRail(world, at.y);
 }
+
+
+/**
+ * Lay a plank across every one-tile notch in a floating island.
+ *
+ * **This is the answer to a question the buildings plan got wrong.** That plan said the only gap on
+ * the islands was the one-tile channel from the pool to the rim, which is a plank -- and used it to
+ * argue the bridge sheet had nothing to span and should stay parked. Counting instead of
+ * remembering found **9 to 19** notches per seed on the Aravali, every seed, with `sky_island` on
+ * both sides: holes in the island top that a walker has to go round for no reason a player can see.
+ *
+ * A notch is a tile that cannot be walked, is not already the crossing, and has island directly
+ * opposite itself on one axis. That last condition is what keeps planks off the island's *rim* --
+ * a tile with sky on one side is an edge, not a gap, and a plank to nowhere is worse than a hole.
+ *
+ * Run after `stampIslands` and before anything that reads walkability, because it changes it.
+ */
+export function plankTheNotches(world: World): number {
+  const island = (x: number, y: number): boolean => world.tiles[y]?.[x]?.biome === 'sky_island';
+  let laid = 0;
+  for (let y = 1; y < world.height - 1; y += 1) {
+    for (let x = 1; x < world.width - 1; x += 1) {
+      const tile = world.tiles[y][x];
+      if (tile.track || isWalkable(tile)) continue;
+      const eastWest = island(x - 1, y) && island(x + 1, y);
+      const northSouth = island(x, y - 1) && island(x, y + 1);
+      if (!eastWest && !northSouth) continue;
+      tile.plank = true;
+      laid += 1;
+    }
+  }
+  return laid;
+}
+
+/**
+ * Which way a plank runs, for the sheet to pick a frame.
+ *
+ * Read from the ground either side rather than stored, for `isRope`'s reason: a second flag is a
+ * second thing to keep true. A notch bridged on both axes draws east-west, which is arbitrary and
+ * only reachable on a one-tile island nobody can stand on anyway.
+ */
+export function plankRunsEastWest(world: World, x: number, y: number): boolean {
+  const island = (px: number, py: number): boolean => world.tiles[py]?.[px]?.biome === 'sky_island';
+  return island(x - 1, y) && island(x + 1, y);
+}

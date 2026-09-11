@@ -9,6 +9,10 @@ import Phaser from 'phaser';
 import terrainUrl from '../../../assets/terrain.png';
 import landmarksUrl from '../../../assets/landmarks.png';
 import placesUrl from '../../../assets/places.png';
+import monumentsUrl from '../../../assets/monuments.png';
+import windmillUrl from '../../../assets/windmill-tower.png';
+import bladesUrl from '../../../assets/windmill-blades.png';
+import bridgeUrl from '../../../assets/bridge.png';
 import hutsUrl from '../../../assets/huts.png';
 import overdrawUrl from '../../../assets/overdraw.png';
 import featuresUrl from '../../../assets/features.png';
@@ -31,6 +35,10 @@ import {
   OVERDRAW_SHEET,
   LANDMARK_SHEET,
   PLACE_SHEET,
+  MONUMENT_SHEET,
+  WINDMILL_SHEET,
+  BLADE_SHEET,
+  BRIDGE_SHEET,
   TERRAIN_SHEET,
   DECOR_SHEET,
   TRACK_SHEET,
@@ -82,6 +90,10 @@ const SHEET_KEY: Record<
   features: FEATURE_SHEET,
   flora: FLORA_SHEET,
   places: PLACE_SHEET,
+  monuments: MONUMENT_SHEET,
+  windmill: WINDMILL_SHEET,
+  blades: BLADE_SHEET,
+  bridge: BRIDGE_SHEET,
   landmarks: LANDMARK_SHEET,
   decor: DECOR_SHEET,
   // The bank draws terrain through a mask, so it is baked rather than looked up -- this entry
@@ -303,6 +315,13 @@ export class WorldScene extends Phaser.Scene {
   private tileSprites: Phaser.GameObjects.Image[][] = [];
   /** Everything swaying at depth 21, with the two frames it alternates and its own phase. */
   private overdraw: { sprite: Phaser.GameObjects.Image; rest: number; lean: number; phase: number }[] = [];
+  /** The mill's wheel, and anything else that turns on an index rather than a toggle. */
+  private spinning: {
+    sprite: Phaser.GameObjects.Image;
+    frames: number;
+    period: number;
+    phase: number;
+  }[] = [];
   /**
    * Falling water, kept apart from `overdraw` for one mechanical reason.
    *
@@ -419,6 +438,7 @@ export class WorldScene extends Phaser.Scene {
     this.tileOwned = [];
     this.culled = null;
     this.overdraw = [];
+    this.spinning = [];
     this.falls = [];
     this.queuedPath = [];
     this.moving = false;
@@ -444,6 +464,10 @@ export class WorldScene extends Phaser.Scene {
       terrain: terrainUrl,
       landmarks: landmarksUrl,
       places: placesUrl,
+      monuments: monumentsUrl,
+      windmill: windmillUrl,
+      blades: bladesUrl,
+      bridge: bridgeUrl,
       huts: hutsUrl,
       overdraw: overdrawUrl,
       features: featuresUrl,
@@ -696,6 +720,25 @@ export class WorldScene extends Phaser.Scene {
         continue;
       }
 
+      // The mill's wheel: centred on the boss the builder measured rather than on the tile, and
+      // advanced by the clock. It is the one sprite here that is neither anchored to its tile's
+      // bottom edge nor centred in its cell.
+      if (item.spin) {
+        const wheel = this.add
+          .image(cx + (item.offset?.x ?? 0) * TILE_SIZE, cy + (item.offset?.y ?? 0) * TILE_SIZE, SHEET_KEY[item.sheet], 0)
+          .setDepth(item.depth);
+        if (item.name) wheel.setName(item.name);
+        this.spinning.push({
+          sprite: wheel,
+          frames: item.spin.frames,
+          period: item.spin.period,
+          // Two mills on one map must not turn in lockstep. Nothing here has two, so this is the
+          // same insurance `sway` carries for a field of reeds.
+          phase: tileHash(this.world.seed, item.x, item.y, "blade-phase") % item.spin.period
+        });
+        continue;
+      }
+
       // Huts, places and landmarks are bottom-anchored so a tower stands on its tile and rises
       // into the one above; ground cover fills its cell.
       // Bottom-anchored: a tower, a hut, a landmark and now a tree all stand *on* their tile and
@@ -703,6 +746,8 @@ export class WorldScene extends Phaser.Scene {
       const anchored =
         item.sheet === 'huts' ||
         item.sheet === 'places' ||
+        item.sheet === 'monuments' ||
+        item.sheet === 'windmill' ||
         item.sheet === 'landmarks' ||
         item.sheet === 'trees';
       const sprite = this.add
@@ -724,6 +769,21 @@ export class WorldScene extends Phaser.Scene {
    * Phaser skips the work when it has not changed, so this costs a comparison per tile rather than
    * a redraw. The phase offset is what stops a field looking like one blinking object.
    */
+  /**
+   * Turn every wheel, one index per frame.
+   *
+   * **`updateSway`'s beat, one step further.** That reduces the clock to a boolean -- two frames,
+   * a halfway test -- which reads as motion on a reed and as a *strobe* on anything that rotates.
+   * This reduces it to an index instead, and costs the same: one pass, one `setFrame` that Phaser
+   * skips when the index has not changed.
+   */
+  private updateSpin(now: number): void {
+    for (const item of this.spinning) {
+      const through = ((now + item.phase) % item.period) / item.period;
+      item.sprite.setFrame(Math.floor(through * item.frames) % item.frames);
+    }
+  }
+
   private updateSway(): void {
     const now = this.time.now;
     for (const item of this.overdraw) {
@@ -731,6 +791,7 @@ export class WorldScene extends Phaser.Scene {
       item.sprite.setFrame(leaning ? item.lean : item.rest);
     }
     this.updateFalls(now);
+    this.updateSpin(now);
   }
 
   /**
