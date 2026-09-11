@@ -111,6 +111,56 @@ its own row's depth covers whatever is two rows behind it, which is correct for 
 if a point of interest is up there. That is measurable before any art exists: stamp a placeholder
 at the height being considered and look.
 
+## What the art measured, when it arrived
+
+**The temple wanted more than a tile, and the measurement is why.** Its art is 448 x 731. Forced
+into the `places` cell at 128 x 160, the seven shikhara spires merge into one lumpy ridge, the
+carved bands on the drum vanish and the plinth courses become a single grey stripe -- you can tell
+it is a pale ruin and not that it is a temple. At **256 x 416** every spire is separate, the arches
+have depth, the steps read as steps and the fallen blocks are individual objects with lichen on
+them.
+
+It cost nothing in the engine. `WorldScene` draws an anchored sprite with `add.image(...)` and
+`setOrigin(0.5, 1)` and **never calls `setDisplaySize`**, so a sheet's cell size *is* its on-screen
+size: a wider cell is a wider building. What it costs instead is two facts worth knowing -- a
+sprite three tiles tall covers three rows above its anchor, and one two tiles wide overhangs half a
+tile either side of its column, so two places landing adjacent would overlap.
+
+`tools/build-monuments.js` is the intake, at a cell per building rather than one shared cell, which
+is the call `trees` already made when it left the flora sheet.
+
+**A palette lesson that generalises past this sheet.** The first ingest picked its palette by
+popularity and wrecked the marble: a temple is mostly one bright cream, so the top twenty-four kept
+that and threw the mid-tones away, leaving near-white against near-black -- the exact "hole in the
+screen" this document warns the marble must not become. It read as the art's fault and was not.
+Median cut splits the colour *volume* instead, so a tone that is rare but far from everything else
+keeps a slot. **A popularity palette ruins any subject that is mostly one colour**, which is most
+buildings.
+
+### The windmill's tower is right and its blades are not
+
+The tower came back genuinely identical in all six frames -- same vertical extent, same centre --
+so the hard half of the instruction landed. The blade cycle did not, and it shows both in the
+numbers and on screen:
+
+* frame 6 is **closer to frame 1 than frame 2 is** (6.5% against 8.0% silhouette difference over
+  the blade band), which is the signature of turning past the loop point rather than stopping short
+  of it;
+* the step-to-step differences run **3.8% to 10.4%**, so the positions are not evenly spaced. Frames
+  3 and 4 are nearly the same pose.
+
+Played as a six-frame loop that is an uneven rotation with a stutter in it. Dropping a frame does
+not fix it, because the remaining five are still unevenly spaced.
+
+**Measuring the angles directly did not work**, and it is worth saying so rather than quoting the
+numbers it produced: fitting a four-fold blade axis per frame gave a 31-35% concentration with the
+hub estimate jumping between y 240 and y 380, which is not a lock. The silhouette comparison is the
+evidence; the angle fit is not.
+
+So the fix is a regeneration of the blades with the angles stated one by one, which
+`docs/art-brief.md` Asset 2g now does. The framing does not need to change -- the art's 1:1.90 is
+already close to the 1:1.875 cell it is built at.
+
 ## The order
 
 **N first** — it needs no new contract, no new animation, and one canon entity. It is the piece
