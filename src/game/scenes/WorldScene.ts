@@ -135,7 +135,7 @@ import {
   landmarkHint,
   whereNextHint
 } from '../../content/journal';
-import { biomeFor, travelCost } from '../../content/species';
+import { biomeFor, stepCost } from '../../content/species';
 import { isWalkable } from '../../world/generate';
 import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
@@ -962,7 +962,7 @@ export class WorldScene extends Phaser.Scene {
         this.at,
         target,
         isWalkable,
-        (tile) => travelCost(tile.biome) ?? 1
+        (tile) => stepCost(tile.biome)
       );
     });
 
@@ -1423,7 +1423,11 @@ export class WorldScene extends Phaser.Scene {
 
     // Wetland and hills take longer to cross than open plains. `travelCost` sat unread in
     // data/biomes.json until now; this is the friction the design asks for — slower, never unsafe.
-    const cost = travelCost(tile.biome) ?? 1;
+    //
+    // `stepCost` rather than `travelCost(...) ?? 1`, because that fallback was never "a missing
+    // number, call it easy": it fires only where a walker is standing on the crossing over open
+    // water or open air, and that is the slowest going on the map rather than the fastest.
+    const cost = stepCost(tile.biome);
     // The same cost buys the step twice: how long the tween takes on the screen, and how much of
     // the day the walking spends. The second is what keeps the sun honest.
     this.travelled += travelTimeMs(cost);

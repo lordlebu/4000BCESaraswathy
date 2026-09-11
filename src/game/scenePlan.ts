@@ -52,7 +52,7 @@ import {
   placeFrame,
   swayFrame
 } from './frames';
-import { isRail } from '../world/crossing';
+import { isRope } from '../world/crossing';
 import { landmarkKindFor } from '../content/landmarks';
 import { band } from '../world/classify';
 import { tileHash } from '../world/rng';
@@ -1522,8 +1522,15 @@ export function planTrack(world: FieldMapWorld['world']): Placement[] {
       //
       // A sheet name, not a frame: the two draw the same four pieces in the same order, because
       // `trackFrame`'s contract is about direction and wear rather than about material.
+      //
+      // **`isRope` rather than `!isRail`, and that is a correction.** Not-rail is not rope: most of
+      // the line outside the carriage's span is the *derelict approach*, a stub of old iron running
+      // back off each beach. Asking `isRail` alone drew fourteen tiles of rope ladder across plains
+      // and forest at each end, out to the edge of the map, so the whole column read as one ladder
+      // and the span that is actually a rope could not be picked out of it. A rope is where there
+      // is nothing underneath; see `isRope`.
       out.push({
-        sheet: isRail(world, y) ? 'track' : 'rope',
+        sheet: isRope(world, x, y) ? 'rope' : 'track',
         frame: trackFrame(eastWest, overgrown),
         x,
         y,

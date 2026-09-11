@@ -13,6 +13,7 @@
 // Pure, and free of React and Phaser like the rest of `world/`.
 
 import { tileHash } from './rng';
+import { isWalkable } from './generate';
 import type { BiomeId, Point, World } from './types';
 
 /**
@@ -698,10 +699,55 @@ export function shoreheads(world: World): { near: Point | null; far: Point | nul
   };
 }
 
-/** Whether the line at this row is rail rather than rope. */
+/** Whether the line at this row is the carriage's own: island to island, and nothing beyond. */
 export function isRail(world: World, y: number): boolean {
   const span = railSpan(world);
   return span !== null && y >= span.from && y <= span.to;
+}
+
+/**
+ * How far a rope reaches onto solid ground at each end, in tiles.
+ *
+ * Two. A rope has to *land* -- a span that stops exactly where the ground starts reads as ending in
+ * mid-air, and the anchor is the couple of tiles of ladder lying on the beach and over the island's
+ * rim that say it is tied to something. More than two and the ladder is walking inland, which is
+ * the fault this whole function exists to fix.
+ */
+const ROPE_ANCHOR = 2;
+
+/**
+ * Whether this stretch of the line is a hanging rope rather than iron.
+ *
+ * **Asked of the tile, not of the row, and that is the whole correction.** The drawing used to ask
+ * `isRail` alone: rail inside the span, rope everywhere else. But "everywhere else" is not rope --
+ * most of it is the *derelict approach*, the stub of old iron `derelictApproach` lays back off each
+ * beach, which canon calls a rail-head and which The Rail-Head stands on. Fourteen tiles of it at
+ * each end were being drawn as rope ladder lying across plains and forest, out to the edge of the
+ * map, so the crossing read as one continuous ladder down the whole column and the actual span over
+ * the water was indistinguishable from the fields either side of it.
+ *
+ * A rope is where there is nothing underneath: open water, or the air beneath an island. Everything
+ * else on the line is iron -- kept between the islands, derelict on the approaches, which
+ * `planTrack` already tells apart by reading the ground.
+ *
+ * **The carriage's own stretch is iron even over water**, which is why `railSpan` is checked first.
+ * The line between the islands crosses the open strait on the lodestone that holds the islands up;
+ * that it has nothing under it is the point, not a reason to draw a ladder there.
+ */
+export function isRope(world: World, x: number, y: number): boolean {
+  if (isRail(world, y)) return false;
+
+  // Nothing under it but air or water -- the flag is the only reason a walker can be here.
+  const overTheVoid = (at: number): boolean => {
+    const tile = world.tiles[at]?.[x];
+    return tile !== undefined && !isWalkable({ biome: tile.biome, track: false });
+  };
+
+  if (overTheVoid(y)) return true;
+  for (let reach = 1; reach <= ROPE_ANCHOR; reach += 1) {
+    if (overTheVoid(y - reach) || overTheVoid(y + reach)) return true;
+  }
+  return false;
 }
 
 

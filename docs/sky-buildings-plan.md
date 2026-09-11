@@ -69,6 +69,23 @@ Two problems, and only the first is solved.
 
 **The building is easy.** Bottom-anchored, taller than its tile, exactly the tree contract.
 
+**Solarpunk, not steampunk, and that is a change of direction.** The first ask named a steampunk
+mill and the first prompt was written for one — riveted iron, rust, exposed gearing. What it should
+be is **rounded glazed ceramic with fine pale woodwork on it**: soft bulging forms, carved bracing
+and a fretwork balcony, brass only at the hub, plants growing up it.
+
+The reason to keep it is that it gives the two buildings opposite jobs. **The temple is a ruin in
+dead marble; the mill is cared for.** One says a people were here and are gone, the other says
+somebody is here now — and the islands have nothing else on them that says either. Two derelicts
+would say one thing twice.
+
+**Both hit the same palette rule, and it is the one the clouds already failed.** Near-white on a
+`#64ad37` island is the highest contrast anywhere on the map. The marble wants to be bone and the
+glaze wants to be cream — warm off-white with a blue-grey in the shadows — or each reads as a hole
+in the screen the way white clouds did before they were pulled back to `#e9f0f8`. The material
+reads from the *form* here, not from the brightness: ceramic is what curves, marble is what has
+straight broken edges.
+
 **The blades are not.** Everything that moves on this map moves by `SWAY_PERIOD` — two frames
 alternated on one beat, which is a reed leaning and a sheet of water falling and reads as motion
 because those things twitch. **Rotation does not work that way.** Two frames of a turning blade is

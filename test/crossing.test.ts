@@ -25,6 +25,7 @@ import {
 } from '../src/game/scenePlan';
 import { CLOUD_PATTERNS, EDGE_ORDER, EDGE_VARIANTS, FALL_FRAMES } from '../src/game/frames';
 import { isWalkable } from '../src/world/generate';
+import { CROSSING_ON_FOOT, stepCost } from '../src/content/species';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
@@ -829,6 +830,64 @@ describe('the tree that hangs off the edge hangs off an edge', () => {
   });
 });
 
+describe('crossing on foot costs what wading costs', () => {
+  it('charges a step on the line over the void the same as a step in the pool', () => {
+    // **The fallback was never "a missing number, call it easy".** `travelCost` is null for exactly
+    // `sea`, `sky_underside` and `open_sky` -- the three biomes in `UNWALKABLE` -- so the only way a
+    // walker is ever standing on one is `Tile.track`. `WorldScene` read it as `?? 1` in two places,
+    // which made the rope ladder over open sea and the railway crossed on foot the *fastest*
+    // walking on the map, while the sky pool beside them was deliberately given 3 so that going
+    // into water is felt rather than merely permitted. Same kind of going; same number.
+    const pool = (biomesData as { id: string; travelCost: number | null }[])
+      .find((b) => b.id === 'sky_water')!;
+    expect(CROSSING_ON_FOOT, 'the crossing is cheaper than the pool beside it')
+      .toBe(pool.travelCost);
+
+    for (const biome of ['sea', 'sky_underside', 'open_sky'] as const) {
+      expect(stepCost(biome), `${biome} is priced as ordinary ground`).toBe(CROSSING_ON_FOOT);
+    }
+    // And ground that has its own cost keeps it, so this changed nothing a walker already knew.
+    expect(stepCost('plains')).toBe(1);
+    expect(stepCost('mountains')).toBe(3);
+  });
+
+  it('is the only place the fallback can fire', () => {
+    // The claim the one shared function rests on: no *walkable* biome has a null cost, so
+    // `stepCost` never quietly reprices real ground. If one ever does, this says so rather than
+    // the map getting slower for a reason nobody chose.
+    const rows = biomesData as { id: string; walkable: boolean; travelCost: number | null }[];
+    const priced = rows.filter((b) => b.travelCost === null).map((b) => b.id);
+    expect(priced.sort(), 'the set of costless biomes moved').toEqual(
+      ['open_sky', 'sea', 'sky_underside']
+    );
+    for (const b of rows) {
+      if (b.travelCost !== null) continue;
+      expect(b.walkable, `${b.id} is walkable with no cost of its own`).toBe(false);
+    }
+  });
+
+  it('leaves the route planner alone, and that is measured rather than assumed', () => {
+    // `routes.ts` keeps its own cost table -- `world/` may not import the content layer -- and it
+    // still charges the crossing 1. Making the two agree would change which line `easeRoutes`
+    // walks, which changes the maps and moves `SAVE_VERSION`.
+    //
+    // It would buy nothing. `fieldMap.ts` refuses the road flag on a tracked tile, so of the 23
+    // line tiles over the void on the Aravali, **none carries road** -- and `EASED` has no entry
+    // for `sea` or `sky_underside`, so nothing is softened there either. The route is forced in any
+    // case: the crossing is the only way over. Reshaping every map for an invisible difference is
+    // the trade this declines.
+    const world = aravali();
+    const overTheVoid = world.tiles
+      .flat()
+      .filter((t) => t.track && !isWalkable({ biome: t.biome, track: false }));
+    expect(overTheVoid.length, 'the line crosses nothing').toBeGreaterThan(0);
+    expect(
+      overTheVoid.filter((t) => t.road).map((t) => `${t.x},${t.y}`),
+      'a road is drawn on the crossing, so the planner cost now matters'
+    ).toEqual([]);
+  });
+});
+
 describe('the pool is waded, not stood in', () => {
   it('is walkable, and costs what a wade costs', () => {
     // Slow movement needs no movement code: `WorldScene` computes `STEP_MS * cost * pace`, and
@@ -878,14 +937,21 @@ describe('the pool is waded, not stood in', () => {
 });
 
 describe('the rope is not drawn as iron', () => {
-  it('draws rail between the islands and rope everywhere else the line runs', () => {
+  it('hangs rope only where there is nothing underneath, and iron everywhere else', () => {
     // **`isRail` existed, was tested, and nothing drew from it.** `crossing.ts` made rail and rope
     // one `Tile.track` flag on purpose -- "a second flag would be a second thing to keep true" --
     // and gave `railSpan` the job of separating them. `planTrack` then drew the `track` sheet on
     // every tile carrying the flag, so the rope ladder up an island's flank rendered as railway.
     //
-    // The same shape as the three faults `CLAUDE.md` records under the rules layer, and the same
-    // guard: assert the drawing goes through the rule rather than around it.
+    // **And the first fix for that was wrong in the other direction, which is what this now
+    // pins.** It asked `isRail` alone and drew rope on everything outside the span -- but outside
+    // the span is not rope. Most of it is the *derelict approach*, the fourteen-tile stub of old
+    // iron `derelictApproach` lays back off each beach, which is what The Rail-Head stands on.
+    // Measured on the default seed: 49 of the line's 75 tiles came out as rope, running across
+    // hills, forest and plains to the top and bottom edges of the map, so the whole column read as
+    // one continuous ladder and the span actually over water could not be picked out of it.
+    //
+    // The rule is per-tile and physical: a rope is where there is nothing underneath.
     const world = aravali();
     const span = railSpan(world)!;
     const laid = planTrack(world);
@@ -893,20 +959,48 @@ describe('the rope is not drawn as iron', () => {
 
     const iron = laid.filter((p) => p.sheet === 'track');
     const hemp = laid.filter((p) => p.sheet === 'rope');
-    expect(iron.length, 'no rail between the islands').toBeGreaterThan(0);
+    expect(iron.length, 'no iron anywhere on the line').toBeGreaterThan(0);
     expect(hemp.length, 'no rope reaching either shore').toBeGreaterThan(0);
 
-    for (const p of iron) {
-      expect(p.y, `rail drawn at row ${p.y}, outside the span ${span.from}-${span.to}`)
-        .toBeGreaterThanOrEqual(span.from);
-      expect(p.y).toBeLessThanOrEqual(span.to);
-    }
+    /** Ground the flag is the only reason a walker can be on. */
+    const overTheVoid = (x: number, y: number) => {
+      const tile = world.tiles[y]?.[x];
+      return tile !== undefined && !isWalkable({ biome: tile.biome, track: false });
+    };
+
     for (const p of hemp) {
       expect(
         p.y < span.from || p.y > span.to,
         `rope drawn at row ${p.y}, inside the rail span ${span.from}-${span.to}`
       ).toBe(true);
+      // Over the void, or anchoring onto the ground within a tile or two of it. Nothing further:
+      // a ladder lying in the middle of a field is the fault this replaced.
+      const near = [-2, -1, 0, 1, 2].some((d) => overTheVoid(p.x, p.y + d));
+      expect(near, `rope at ${p.x},${p.y} is more than two tiles from anything to span`).toBe(true);
     }
+
+    for (const p of iron) {
+      // Iron is either the carriage's own stretch -- which crosses open water on the lodestone,
+      // deliberately -- or it is standing on solid ground.
+      const onTheRail = p.y >= span.from && p.y <= span.to;
+      expect(
+        onTheRail || !overTheVoid(p.x, p.y),
+        `iron at ${p.x},${p.y} hangs over nothing and is outside the rail span`
+      ).toBe(true);
+    }
+  });
+
+  it('keeps the rope to the crossing rather than running it off the map', () => {
+    // The regression this is really guarding, stated as a number. The line spans the map's whole
+    // height; the water it has to cross does not. If the rope is ever most of the line again, it is
+    // being drawn on ground rather than over a gap.
+    const world = aravali();
+    const laid = planTrack(world);
+    const hemp = laid.filter((p) => p.sheet === 'rope').length;
+    expect(
+      hemp / laid.length,
+      `${hemp} of ${laid.length} line tiles are rope -- it is running along the ground again`
+    ).toBeLessThan(0.4);
   });
 
   it('keeps both sheets on one frame contract', () => {
