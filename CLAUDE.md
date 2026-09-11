@@ -213,6 +213,7 @@ a missing install, the branch deletion that is refused at the proxy by every rou
 half useless here, and the habits that catch this codebase's signature bug — something built,
 tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side companion.
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
+| `docs/ui-streamline-plan.md` | what the chrome costs the map, measured, and the four moves that give it back |
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
 `npx vitest run -t "some test name"`.
