@@ -1502,19 +1502,27 @@ road sheet was.
 |---|---|---|
 | **blade wheel** | **ships** | hub 0.5 px off the image centre horizontally, 2 px vertically — 0.04% and 0.16%. Sails reach 505 px of an allowed 627, so a rotation clears the corners with **19.5% margin**. First sheet in this programme that was right first time. |
 | **tower** | **ships** | content 668 × 1381, aspect **0.484** against the 0.500 a 128 × 256 cell wants; centred at 49.1%. Bare mounting boss, no sails. |
-| **bridge** | **parked** | runs agree tightly *within* an orientation — north–south 219/221 px wide, east–west 239/238 tall — but **no cell reaches its edges** (97% and 95% of the run axis), and the two orientations disagree by 9%, which would step at a corner. |
+| **bridge** (first) | rejected | runs agreed within an orientation but no cell reached its edges, and the two orientations disagreed by 9% |
+| **bridge** (second) | **ships** | redrawn and taken in. Runs identical along their axis — north–south 693/693 px, east–west 518/518 — centres 49.3–50.3%, drawn 95.5% of the cell. `tools/build-bridge.js` stretches that last **4.5%** to the border and normalises both orientations to one 52 px band. |
 
 **The background that looked wrong was not.** The wheel arrived on what renders as white, and white
 would have been fatal — the sails are cream, so keying it would have eaten them. It measures as
 **alpha 0**: transparent, and already handled. Checking beat assuming by about thirty seconds.
 
-**The bridge is not the road failure repeated.** The road sheet's four cells disagreed with each
-other — 25–81% of their box, centres from 24% to 72% — and no builder can invent where a run was
-meant to leave a cell. These cells agree with each other to within 1%; they are simply drawn a few
-per cent short of the border, and that *is* something an intake can correct by cropping to the run
-and resampling to the cell. The right time to write that intake is when there is a gap to span, so
-the source sits in `assets/source/dump/` (untracked) until then, and the honest reason it is parked
-is the one below rather than the measurement.
+**The bridge was never the road failure repeated, and the second sheet proved it.** The road's four
+cells disagreed with *each other* — 25–81% of their box, centres from 24% to 72% — and no builder
+can invent where a run was meant to leave a cell, which is why that sheet was replaced by a
+code-drawn one. The bridge's cells agree to about one per cent and are merely drawn short of the
+border, which an intake *can* correct by cropping to the run and resampling it to fill the cell.
+
+So it is built: `assets/bridge.png`, 512 × 128, four frames in `track.png`'s exact order, 16.4 KB.
+After the builder the band is **52 px in all four frames, centred on 64 in all four**, which is why
+`test/bridge.test.ts` asserts exact numbers rather than tolerances — a threshold there would be
+inventing slack the pipeline does not need. That test fails by naming the gap: shortening a run by
+four pixels reports *"frame 1: the run starts 4 px right of the left border"*.
+
+**Nothing draws it, and that is still deliberate.** The only gap on the islands is one tile wide,
+which is a plank. Art banked and unused is fine; art wired to nothing is the `lava_field` fault.
 
 ### 4 — the bridge, on the crossing's contract
 
