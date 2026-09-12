@@ -1,6 +1,6 @@
 ---
 name: session-craft
-description: Environment gotchas and working practices for Varuna's Field Diary (the 4000BCESaraswathy game repo and its SouthOfTethys canon sibling). Read this early in any session in these repositories, and consult it whenever you are about to push or delete a branch, run the Playwright suite, reach for gh, take new art into a builder, check that something actually draws, or write a test with a threshold in it. Several items here are hard refusals and version mismatches that look exactly like a broken setup and are not, so checking here first saves a round of wrong diagnosis.
+description: Environment gotchas and working practices for Varuna's Field Diary (the 4000BCESaraswathy game repo and its SouthOfTethys canon sibling). Read this early in any session in these repositories, and consult it whenever you are about to push or delete a branch, run the Playwright suite, reach for gh, take new art into a builder, change anything in src/ui, check that something actually draws, or write a test with a threshold in it. Several items here are hard refusals and version mismatches that look exactly like a broken setup and are not, so checking here first saves a round of wrong diagnosis.
 ---
 
 # Working in these repositories
@@ -131,6 +131,38 @@ This caught one assertion that passed for the wrong reason, and one that was tes
 rather than the *rule* — it named a sheet literally and broke the moment a second painted sheet
 existed. If an assertion names a specific value where it means "whatever the table says", it will
 fail on the next addition rather than on a real fault.
+
+### The interface has its own set of invisible faults
+
+The same shape as the rest of this file: each was built, believed, and connected to nothing, and
+none of them failed anything.
+
+- **A focus trap under jsdom.** `offsetParent` is **always null** there, so the usual
+  "drop the hidden controls" filter drops every control and the trap wraps to nothing while its
+  tests pass. `Element.checkVisibility()` answers for ancestors too and behaves under jsdom.
+- **A portal is not in `render()`'s container.** Query `baseElement` — `document.body` — or every
+  assertion about a modal searches an empty div and reports the panel missing.
+- **A class name is taken.** `styles.css` is one flat namespace over two thousand lines. `.specimen`
+  had been used by the field kit five hundred lines below where the plate card claimed it; the later
+  rule won, the card rendered as a transparent lozenge, and the card was restyling the field kit's
+  chips in the other direction. Grep before naming a class, and *look at the thing* afterwards.
+- **Two modals and effect order.** React runs a child's effects **before its parent's**, so a stack
+  of open modals pushed from an effect comes out inside-first: the outer panel answers keys meant
+  for the inner one and its veil paints over it. Nesting depth has to come from the tree — a
+  context — not from when something registered.
+- **A panel that grows with its content moves the camera.** The insets React reports are measured
+  from the dock, so anything that changes its height while the player stands still drags the map.
+  `e2e/hours.spec.ts` guards it and is worth reading before giving any panel an automatic size.
+
+### A browser spec cannot import `src/content/`
+
+`SAVE_VERSION` lives in `src/save.ts`, which pulls in `collection.ts`, `satchel.ts` and `nodes.ts`,
+whose JSON imports need an attribute Node will not infer. The spec does not fail an assertion — it
+never loads, and Playwright reports **"No tests found"**, which reads as a bad glob.
+
+Read what you need out of the running page instead. And when seeding `localStorage`, write it with
+`page.addInitScript` before a reload: a direct write is overwritten by the live page saving its own
+state a moment later, and the failure looks exactly like the feature not working.
 
 ### Measure the signal before choosing the threshold
 

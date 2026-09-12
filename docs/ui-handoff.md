@@ -5,6 +5,14 @@ and everything described here has since been built**, so read it as a design rec
 as a contract: it explains why the panels behave as they do, which is knowledge that outlived
 the arrangement it was written for.
 
+**And the arrangement itself has moved on.** In September 2026 the field notes and the place panel
+stopped being two panels dividing the bottom of the screen and became one dock with one occupant,
+every dialog went behind a single `Modal`, and how much of the screen the chrome may take became a
+browser test rather than a matter of taste. Where this document describes a *layout*, read
+`docs/ui-streamline-plan.md` instead — it carries the measurements, the four corrections that
+reversed its own arguments, and what was declined. Where this document describes a *rule*, it is
+still live.
+
 Two things in it are still live rules rather than history — *ask `journey.ts`, do not
 reimplement it*, and the layering constraints under "Standing constraints". Both are enforced by
 tests. The rest describes work that is done.

@@ -446,6 +446,69 @@ The fix is not a cleverer falsiness check. It is that a run settling on an empty
 legitimate state, so the flag has to be something other than the sentence — here `{ line: string }
 | null`, where the object is the flag and the string is only what it carries.
 
+## jsdom has no layout, and three things follow from it
+
+All three cost a round in the interface work, and none of them announces itself — a suite that
+believes it is testing a thing keeps passing while the thing is untested.
+
+**`offsetParent` is always null.** The modal's focus trap filtered its candidates with
+`el.offsetParent !== null`, which is the usual way to drop a hidden control. Under jsdom that drops
+*every* control, so the trap found nothing to wrap to and the tests would have passed on a trap that
+did nothing. `Element.checkVisibility()` is the one API that answers for an ancestor as well as the
+element, and jsdom is happy to say "visible" when nothing has told it otherwise, which is the right
+answer in a test.
+
+**A portal is not in the render container.** Every modal renders outside `#root` so the application
+behind it can be marked `inert` with one attribute. `render()` returns a `container` that no longer
+holds any of it; Testing Library's **`baseElement`** is `document.body` and is the documented way to
+query a portal. `container` is still right for exactly one assertion — that a *closed* panel renders
+nothing, which is a question about the container rather than about the page.
+
+**There is no such thing as "in front".** Whether the right modal is on top of the other is a
+question only a browser can answer, and `e2e/plates.spec.ts` asks it with `elementFromPoint` at the
+centre of the picture: what would the browser hand a click to. The component test proves the right
+modal *answers Escape*; that is a different claim, and both are needed.
+
+## Seeding a save from a spec: write it into the next load
+
+Putting a collection into `localStorage` and reading it back in the same page **does not work**. The
+page is live, the step's arrival settles a moment later, and the game saves its own in-memory state
+straight over the edit — the album then opens on whatever was actually met and the failure looks
+like the feature is broken.
+
+`page.addInitScript` writes into the *next* load, before any application code runs. So: boot, take
+one step so the game writes a save, read what it wrote, edit it, hand it to an init script, reload.
+
+Reading the save back is also how `SAVE_VERSION` is obtained. Importing it from `src/save.ts` drags
+`collection.ts`, `satchel.ts` and `nodes.ts` into Playwright's Node runtime, where their JSON
+imports need an attribute Node will not infer — and the spec does not fail an assertion, it never
+loads at all, reported as "No tests found". Hard-coding the number instead goes stale the next time
+the ground moves under a save, which `save.ts` says happens for two different reasons.
+
+## A test that passes because something vanished
+
+Two browser assertions read `overlap('.place', '.journal') === 0` — the two panels divide the bottom
+of the screen, so their rectangles must not intersect. The dock made them take turns in one slot, so
+`.journal` is simply not on the page while a place is open, and the helper returns `0` when either
+element is missing. **Both assertions would have gone on passing, against an arrangement they no
+longer describe.**
+
+The general form: an assertion phrased as *"these two things do not collide"* is satisfied by one of
+them not existing. When the shape changes, re-read what the old assertion was protecting rather than
+checking whether it still goes green — here it was *leaving a place reveals the notes rather than
+clearing the screen*, which is now the reducer's and tested there, plus a browser test that walks
+the controls a player actually has.
+
+## Name a fixture that cannot change category
+
+`test/specimen.test.tsx` needs one species with a painted plate and one without. Naming them —
+`river-otter` and `sweet-indigo` — is a suite that fails the day somebody paints a sweet indigo, on
+a feature working perfectly. Both are found from the data now, so the tests follow the folder.
+
+Where the data cannot be imported, as in the browser spec, **name the half that only grows**: a
+plate is added and never taken away, so a painted species is a safe constant and an unpainted one is
+not.
+
 ## Write measurements down, or measure them again
 
 The sprite heights were measured by hand three times in one session — each time in a throwaway
