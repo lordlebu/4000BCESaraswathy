@@ -214,6 +214,7 @@ half useless here, and the habits that catch this codebase's signature bug — s
 tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side companion.
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 | `docs/ui-streamline-plan.md` | what the chrome costs the map, measured, and the four moves that give it back |
+| `docs/ui-affordances-plan.md` | what the screen says once the map has the room — open, and two faults it found |
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
 `npx vitest run -t "some test name"`.
