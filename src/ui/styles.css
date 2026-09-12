@@ -632,6 +632,25 @@ button.ghost:hover:not(:disabled) {
 
 .dock .tile-action-list {
   display: flex;
+  /* **`row` is the whole of this rule, and leaving it out made the comment above a lie.**
+   *
+   * The base `.tile-action-list`, three hundred lines up, is `flex-direction: column` -- it is the
+   * blocked list, which really is a column of sentences. This rule redeclared `display: flex` and
+   * `flex-wrap` and never redeclared the direction, so the rail inherited `column`, every chip
+   * stretched to the full width on the cross axis, and the rail has been **a column at every
+   * device size since it shipped**.
+   *
+   * Nothing failed. The buttons were pill-shaped and as wide as their words, exactly as
+   * `.tile-action > button` below intends, so a screenshot looked deliberate -- a column of neat
+   * pills. What it cost was 65 pixels of dock, and on a landscape phone it put the second chip
+   * twelve pixels below the bottom of the screen. Measured: the rail is 115px as a column and 50px
+   * as a row.
+   *
+   * It is the `.specimen` fault in a descendant selector: a later rule partially overriding an
+   * earlier one, in one flat namespace, with no visible symptom. `test/stylesheet.test.ts` cannot
+   * see this one -- its guard is a bare class declared twice -- which is worth knowing before
+   * trusting that guard to cover the whole class of fault. */
+  flex-direction: row;
   flex-wrap: wrap;
   gap: 6px;
 }

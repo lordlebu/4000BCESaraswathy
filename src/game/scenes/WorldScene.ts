@@ -154,6 +154,7 @@ import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
 import { isCamp } from '../../content/camps';
 import { findPath } from '../../world/pathfind';
+import { NO_GESTURE, pressed, released, type Gesture } from '../gesture';
 import { tileHash } from '../../world/rng';
 import type { BiomeId, Point, Tile, World } from '../../world/types';
 
@@ -414,6 +415,14 @@ export class WorldScene extends Phaser.Scene {
   private zoomChoice: number | null = null;
   /** Distance between two fingers on the previous frame, for pinch. Zero when not pinching. */
   private pinchFrom = 0;
+  /**
+   * How many fingers are down, and whether this gesture was ever two.
+   *
+   * Read by the tap-to-walk handler, which used to have no idea a pinch was happening -- so every
+   * two-finger zoom ended by sending the traveller wherever a finger happened to lift. The rule is
+   * in `game/gesture.ts`, outside the scene, so `test/` can exercise it.
+   */
+  private gesture: Gesture = NO_GESTURE;
   /** The last moment announced, so the UI is told when it changes rather than every frame. */
   private lastMoment = '';
   /** The zoom last announced, so the DOM mirror is written only when it moves. */
@@ -448,6 +457,7 @@ export class WorldScene extends Phaser.Scene {
     this.standingOn = null;
     this.lastMoment = '';
     this.momentCheckedAt = -Infinity;
+    this.gesture = NO_GESTURE;
     this.lastZoom = 0;
     // The map opens on the light of the hour the player is actually in, then drifts from there.
     // `?hour=21` overrides it, so the evening can be checked without waiting for the evening.
@@ -1006,8 +1016,21 @@ export class WorldScene extends Phaser.Scene {
     };
     document.addEventListener('keydown', this.swallowWhileTyping, true);
 
+    // **Counted here rather than polled in `update`.** Two fingers that arrive and leave inside one
+    // frame would never be seen by `updatePinch`, and the release still has to be refused -- so the
+    // count is kept from the events themselves and the pinch reads it, not the other way round.
+    this.input.on(Phaser.Input.Events.POINTER_DOWN, () => {
+      this.gesture = pressed(this.gesture);
+    });
+
     // Tap or click to walk: the only way to play on a phone.
     this.input.on(Phaser.Input.Events.POINTER_UP, (pointer: Phaser.Input.Pointer) => {
+      // Not if a second finger was involved. Lifting either finger at the end of a pinch fires this
+      // too, and for months that walked the traveller off to wherever the zoom happened to end.
+      const { gesture, walk } = released(this.gesture);
+      this.gesture = gesture;
+      if (!walk) return;
+
       const world = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
       const target = {
         x: Math.floor(world.x / TILE_SIZE),
@@ -1089,6 +1112,7 @@ export class WorldScene extends Phaser.Scene {
       this.input.off(Phaser.Input.Events.POINTER_WHEEL);
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
       this.input.off(Phaser.Input.Events.POINTER_UP);
+      this.input.off(Phaser.Input.Events.POINTER_DOWN);
       keyboard.off(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN);
     });
   }

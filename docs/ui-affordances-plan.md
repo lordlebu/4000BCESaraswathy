@@ -99,8 +99,31 @@ rail   y = 299 .. 414        dock  y = 277 .. 378        viewport height 390
 
 The dock is 101 pixels at peek (26dvh of 390). The handle and the rail alone want 137. The body is
 squeezed to **zero**, the rail overflows the dock by 36 pixels, `overflow` is `visible` so nothing
-scrolls, and the last twelve pixels of *Unroll the bedding here* are off the screen. The chips stack
-into a column at that width rather than sitting in a row.
+scrolls, and the last twelve pixels of *Unroll the bedding here* are off the screen.
+
+**And the cause is not the one this plan first wrote down.** It was recorded as a budget problem —
+the dock too short for what it holds — and it is not. The chips stack into a column *at every device
+size*, and they were never supposed to:
+
+```
+.dock .tile-action-list { display: flex; flex-wrap: wrap; gap: 6px; }
+```
+
+The base `.tile-action-list`, three hundred lines above, is `flex-direction: column` — it is the
+blocked list, which really is a column of sentences. This rule redeclares `display` and `flex-wrap`
+and **never redeclares the direction**, so the rail inherits `column`, every chip stretches to the
+full width on the cross axis, and the rail has been a column since it shipped. The comment directly
+above it reads *"Inside the dock the actions are a row, not a list"*.
+
+Nothing failed, and nothing looked wrong: `.tile-action > button` sets `width: auto`, so the buttons
+were pill-shaped and as wide as their words. A screenshot showed a tidy column of pills and read as
+deliberate. Measured, it cost **65 pixels of dock at every size** — the rail is 115px as a column and
+50px as a row — and on a landscape phone those 65 pixels are the twelve that went off the bottom.
+
+It is the `.specimen` fault in a descendant selector: a later rule partially overriding an earlier
+one, in one flat namespace, with no visible symptom. **`test/stylesheet.test.ts` cannot see this
+one** — its guard is a bare class declared twice at the top level — which is worth knowing before
+trusting that guard to cover the whole class of fault.
 
 **Nothing in the suite asks.** `e2e/reachable.spec.ts` — the spec whose entire purpose is "can every
 control actually be pressed", written after a button ran off the right edge of a phone — walks
@@ -191,6 +214,18 @@ say where it went:
 
 > *"Put the satchel away — bring it back from the Map sheet"*
 
+**And the switch does not survive a reload**, which is the half neither the report nor this plan's
+first draft noticed. `satchelRibbon` lives in `surface.ts`, the UI reducer, and `Journey` in
+`save.ts` has no field for it — so the strip is back every time the game boots. An option to stop
+looking at something that forgets itself on every visit is not really an option, and move B carries
+this or it has not answered the ask.
+
+It goes in its own `localStorage` key rather than into the save. `Journey` is *world* state — where
+you are, what you know, what the ground has left — and it is versioned: adding a field means bumping
+`SAVE_VERSION`, which **discards every existing journey**. Throwing away a player's progress to
+remember a toggle is the wrong trade by a wide margin, and a preference is not part of a journey
+anyway. The field notes' own toggle has the same gap and gets the same treatment.
+
 *Declined, and worth writing down:* a 44px stub that stays behind so the strip can be summoned back
 in place. It is a smaller permanent thing on screen, and a permanent thing on screen is exactly what
 was asked to be rid of. The map sheet is a real, discoverable home for it and already holds the
@@ -265,13 +300,56 @@ second step, after the first is on screen and has been lived with.
 
 | | What | Why this order |
 |---|---|---|
-| **1** | P1 and P2, and `reachable.spec.ts` extended to the action rail | Both are bugs; both block a later stage; the rail guard is overdue on its own |
+| **1** · **shipped** | P1 and P2, and `reachable.spec.ts` extended to the action rail | Both are bugs; both block a later stage; the rail guard is overdue on its own |
 | **2** | A — the standing row | The largest of the four, and the one the geometry of stage 1 makes possible |
 | **3** | B and C — the satchel dismiss, the zoom on touch | Small, independent, and both are about giving the map back |
 | **4** | D — the hour | New data across the bus, so it goes last and alone |
 
 One branch, one pull request, per this repository's rule. Stage 1 is worth pushing before stage 2 is
 written, because it is a fix rather than a change.
+
+### What stage 1 actually did
+
+**P1 was one missing declaration.** `flex-direction: row` on `.dock .tile-action-list`. Measured
+after: the rail is **65px** where it was 115, and on a landscape phone both chips sit on one row
+inside the dock with nothing off the screen. The dock's own height is unchanged — these are fixed
+heights and stay fixed — so what the 50 pixels buy is **body**: 0 → 13px on a landscape phone,
+70 → 120px on a desktop. That is the room move A was going to have to argue for, and it turns out to
+have been there all along.
+
+A phone in portrait still stacks the two chips, and that is correct rather than outstanding: 189px
+and 234px with a gap do not fit in a 334px row, so they wrap, which is what `flex-wrap` is for.
+Nothing was off the screen there to begin with.
+
+**P2 is `src/game/gesture.ts`**, a pure module outside the scene for the same reason `dayNight.ts`
+and `fatigue.ts` are outside it — `test/` exercises the rule that ships. The case that matters is
+the *second* release: a pinch ends in two `POINTER_UP`s and by the second one only one finger was
+ever down, so clearing the flag on release reproduces the whole bug on the second finger. Checked by
+writing that version: *"release 2 of 3 walked the traveller"*.
+
+A distance threshold was declined. "The finger moved more than N pixels so it was a drag" is the
+other half of how this is usually written, and there is nothing to drag on this map — no panning, no
+selection — so all such a rule could do is silently refuse a walk to somebody whose thumb slid four
+pixels. The fault was multi-touch; the guard is multi-touch.
+
+**Two things about the browser half are worth keeping**, because both cost a round and neither is
+guessable:
+
+- **Phaser starts its `TouchManager` only when the device reports touch.** In an ordinary desktop
+  context every pointer event — even one labelled `pointerType: 'touch'` — goes through the mouse
+  manager, which fills only `mousePointer`. `input.pointer1` and `input.pointer2` stay untouched and
+  `updatePinch` never runs. Measured while writing the spec: `navigator.maxTouchPoints` was 0 and
+  the zoom never moved. `test.use({ hasTouch: true })`, and drive it through CDP's
+  `Input.dispatchTouchEvent` — `page.touchscreen` is single-touch and cannot express the thing under
+  test.
+- **The gesture needs real frames.** Dispatched in one tick, every event lands in a single frame:
+  `updatePinch` polls `isDown` once a frame, so it saw both fingers arrive and both leave at once,
+  seeded its reference distance, and never got a second look. The spec failed while the game worked.
+
+And the assertion that matters is the one proving the spec is not passing for the wrong reason. The
+pinch is centred on the canvas, which is where the traveller is standing — so a tap resolving to
+their own tile would move nobody and the spec would pass with the guard deleted. It was checked by
+deleting it: the traveller walked, and the spec failed.
 
 ---
 

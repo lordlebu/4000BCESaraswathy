@@ -154,6 +154,19 @@ none of them failed anything.
   of open modals pushed from an effect comes out inside-first: the outer panel answers keys meant
   for the inner one and its veil paints over it. Nesting depth has to come from the tree — a
   context — not from when something registered.
+- **A descendant rule that redeclares `display` must redeclare `flex-direction`.** The dock's action
+  rail set `display: flex; flex-wrap: wrap` and inherited `column` from a base rule three hundred
+  lines above, so chips a comment calls "a row, not a list" were a column at every size — 115px of
+  dock instead of 65, and the second chip twelve pixels off the bottom of a landscape phone.
+  `width: auto` on the buttons kept them pill-shaped, so the screenshot looked deliberate.
+  `test/stylesheet.test.ts` does **not** cover this shape: its guard is a bare class declared twice.
+- **A spec cannot drive two fingers without `test.use({ hasTouch: true })`.** Phaser starts its
+  `TouchManager` only when the device reports touch; otherwise every pointer event — including one
+  labelled `pointerType: 'touch'` — goes through the mouse manager and `input.pointer1`/`pointer2`
+  are never filled. Measured: `navigator.maxTouchPoints` 0, and the pinch simply did nothing. Drive
+  it through CDP `Input.dispatchTouchEvent` (`page.touchscreen` is single-touch), and **put real
+  waits between the phases** — `updatePinch` polls once a frame, so a gesture dispatched in one tick
+  is invisible to it and the spec fails against working code.
 - **A panel that grows with its content moves the camera.** The insets React reports are measured
   from the dock, so anything that changes its height while the player stands still drags the map.
   `e2e/hours.spec.ts` guards it and is worth reading before giving any panel an automatic size.

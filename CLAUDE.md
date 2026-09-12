@@ -421,6 +421,35 @@ does not need a permanent row: the bar was two rows and 96px, and is one row and
 strip is `width: max-content` for the same reason — it was a full-width 1204px band to hold 274px of
 chips.
 
+**A descendant rule that redeclares `display` must redeclare `flex-direction` too.** The dock's
+action rail is `display: flex; flex-wrap: wrap` and inherited `column` from the base
+`.tile-action-list` three hundred lines above, so the chips the comment calls *"a row, not a list"*
+had been a column at every device size since they shipped — 115px of dock instead of 65, and on a
+landscape phone that put the second chip twelve pixels below the bottom of the screen. Nothing
+failed: `width: auto` on the buttons kept them pill-shaped, so a screenshot looked deliberate.
+**`test/stylesheet.test.ts` does not catch this shape** — its guard is a bare class declared twice
+at the top level, and this is a descendant selector partially overriding another.
+
+**`e2e/reachable.spec.ts` walks the action rail as well as the chrome.** It used to walk
+`.controls .control, .zoom button` only, so the buttons a player presses to *play* — taking,
+resting, riding — were never checked for being on the screen. That is how the rail ran off the
+bottom of a landscape phone unnoticed. A blocked chip is exempt from the enabled check and from
+nothing else; it still has to be visible, because a greyed row is how a mechanic is taught.
+
+**A pinch must not walk the traveller, and `src/game/gesture.ts` is why.** Tap-to-walk is bound to
+`POINTER_UP` and the map is pinch-to-zoom; the two knew nothing about each other, so lifting either
+finger at the end of a zoom sent the traveller off across the map. The rule lives outside the scene,
+like `dayNight.ts` and `fatigue.ts`, so `test/` can exercise it. The case to keep in mind when
+touching it: **a pinch ends in two releases**, and by the second one only one finger was ever down,
+so clearing the flag on the first release reproduces the bug on the second finger.
+
+**Driving touch from a spec needs two things that are not guessable.** Phaser starts its
+`TouchManager` only when the device reports touch, so without `test.use({ hasTouch: true })` every
+pointer event goes through the mouse manager, `input.pointer1` and `pointer2` stay untouched, and a
+multi-touch spec proves nothing while looking green or red at random. And the gesture needs real
+frames between its phases — `updatePinch` polls once a frame, so a gesture dispatched in one tick is
+never seen. `page.touchscreen` is single-touch; use CDP's `Input.dispatchTouchEvent`.
+
 **`e2e/chrome-budget.spec.ts` is the measurement as a check.** How much of the screen the map keeps,
 at four device sizes, resting and standing in a place. Its floors are set from what was measured,
 not from what was hoped — change the layout and read the failure before changing the number.
