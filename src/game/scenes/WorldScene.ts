@@ -262,6 +262,15 @@ const ZOOM_KEYS: Record<string, number | 'reset'> = {
 /** How far two fingers must move apart or together before it counts as a pinch, in pixels. */
 const PINCH_THRESHOLD = 60;
 
+/**
+ * How many steps the day is reported in.
+ *
+ * Forty-eight: half an in-game hour, about seventy-five real seconds at `DAY_MS`. Fine enough that
+ * the dial reads as moving, coarse enough that React renders for it about once a minute rather than
+ * sixty times a second.
+ */
+const SKY_STEPS = 48;
+
 /** Keys that move the traveller one tile, by KeyboardEvent.code. */
 const STEP_KEYS: Record<string, [number, number]> = {
   ArrowUp: [0, -1],
@@ -425,6 +434,8 @@ export class WorldScene extends Phaser.Scene {
   private gesture: Gesture = NO_GESTURE;
   /** The last moment announced, so the UI is told when it changes rather than every frame. */
   private lastMoment = '';
+  /** The last sky step announced, in forty-eighths of a day. See `sky-changed` in `EventBus.ts`. */
+  private lastSkyStep = NaN;
   /** The zoom last announced, so the DOM mirror is written only when it moves. */
   private lastZoom = 0;
   /** When the moment was last worked out. It turns a few times an hour; sixty times a second
@@ -456,6 +467,7 @@ export class WorldScene extends Phaser.Scene {
     this.restedAt = this.travelled;
     this.standingOn = null;
     this.lastMoment = '';
+    this.lastSkyStep = NaN;
     this.momentCheckedAt = -Infinity;
     this.gesture = NO_GESTURE;
     this.lastZoom = 0;
@@ -1375,7 +1387,8 @@ export class WorldScene extends Phaser.Scene {
   private updateSky(): void {
     // Time passes while you stand still, and walking spends it faster. Sitting on a riverbank for
     // ten real minutes is four hours of the day; so is walking twenty tiles of open grassland.
-    const sky = skyAt(phaseAt(this.time.now + this.travelled, this.startPhase));
+    const phase = phaseAt(this.time.now + this.travelled, this.startPhase);
+    const sky = skyAt(phase);
     this.sky.setFillStyle(sky.colour, sky.alpha);
 
     // Announce the moment only when it actually turns, and only bother asking twice a second.
@@ -1388,6 +1401,15 @@ export class WorldScene extends Phaser.Scene {
       if (key !== this.lastMoment) {
         this.lastMoment = key;
         EventBus.emitEvent('moment-changed', moment);
+      }
+
+      // The sky's own announcement, in steps rather than continuously -- see `sky-changed`. It
+      // shares the half-second check because it is the same question asked of the same clock, and
+      // it is sent from the phase already computed above rather than recomputed.
+      const step = Math.floor(phase * SKY_STEPS);
+      if (step !== this.lastSkyStep) {
+        this.lastSkyStep = step;
+        EventBus.emitEvent('sky-changed', { phase: step / SKY_STEPS, label: sky.label });
       }
     }
   }

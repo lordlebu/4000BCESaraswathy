@@ -1,5 +1,11 @@
 # What is here, what time it is, and what you can put away
 
+**All four stages have shipped.** This is the plan as argued, with the measurements it was argued
+from and each stage marked where it sits. Two of its own diagnoses were corrected in place rather
+than quietly rewritten — P1 was not the budget problem it was written up as, and the standing row's
+chips are readouts where the plan asked for targets — because a plan that only records the parts it
+got right is not worth reading twice.
+
 A second interface plan, opened after `docs/ui-streamline-plan.md` closed. That one was about
 **how much of the screen the map keeps** — it went from 52% to 68% resting and 27% to 39% standing
 in a place, and it is finished. This one is about **what the screen says once the map has the
@@ -259,7 +265,7 @@ because the item was measured.
 absent and a pinch still changes `data-zoom`; and, for P2, that a pinch leaves the traveller where
 they were.
 
-### D — the hour, as a dial
+### D — the hour, as a dial · **shipped**
 
 A sun-and-moon mark in the control bar: one 44px readout whose pointer sits where the day is, filled
 warm through the day and cool through the night, with the weather carried on it when there is
@@ -289,10 +295,12 @@ midnight and at first light; a browser case that `?hour=6` and `?hour=22` draw d
 is the assertion that would have caught "the icon renders and never changes"; and the existing
 one-row bound in `reachable.spec.ts`, unchanged, deciding where it lives.
 
-**The extension into game design, since that was allowed.** A dial that only reports is worth having.
-A dial that says *when the next thing happens* — how long until dusk, which is when resting unlocks
-and half the bestiary changes what it is doing — is worth more, and is the same data. That is a
-second step, after the first is on screen and has been lived with.
+**The extension into game design, since that was allowed.** A dial that only reports is worth having,
+and that is what shipped. A dial that says *when the next thing happens* — how long until dusk, which
+is when resting unlocks and half the bestiary changes what it is doing — is worth more, and is the
+same data. It is deliberately not in this stage: the first version should be lived with before the
+game starts making promises about the future, and "in about an hour" is a duration, which is the
+thing canon is careful never to say.
 
 ---
 
@@ -303,10 +311,55 @@ second step, after the first is on screen and has been lived with.
 | **1** · **shipped** | P1 and P2, and `reachable.spec.ts` extended to the action rail | Both are bugs; both block a later stage; the rail guard is overdue on its own |
 | **2** · **shipped** | A — the standing row | The largest of the four, and the one the geometry of stage 1 makes possible |
 | **3** · **shipped** | B and C — the satchel dismiss, the zoom on touch | Small, independent, and both are about giving the map back |
-| **4** | D — the hour | New data across the bus, so it goes last and alone |
+| **4** · **shipped** | D — the hour | New data across the bus, so it goes last and alone |
 
 One branch, one pull request, per this repository's rule. Stage 1 is worth pushing before stage 2 is
 written, because it is a fix rather than a change.
+
+### What stage 4 actually did
+
+**The boundary held, and it was worth holding.** `sky-changed` carries `{ phase, label }` in the
+engine's own vocabulary rather than widening `moment-changed`, whose payload is a `WorldMoment`
+handed straight to `journey.ts` in canon's five words with no midday. A dial driven off that could
+not tell noon from four in the afternoon, and `momentAt`'s mapping table between the two exists
+precisely to keep them apart.
+
+The phase is **rounded to 1/48 of a day before it is sent** — half an in-game hour, about
+seventy-five real seconds. Unrounded it would be a new value every frame and a React render with
+it; at a forty-eighth the dial reads as moving and nothing renders for it more than about once a
+minute.
+
+**Where it goes was decided by a measurement, and the measurement said no.** The plan's rule was
+that the dial may sit in the control bar *only if `reachable.spec.ts` still finds one row at 360px*.
+It does not: measured, a 44-pixel readout took the bar to **96 pixels and two rows**, which is what
+the last plan spent a whole stage undoing. Worse in play than in the measurement, too — the bar
+grows a *Here* button at a point of interest and a *Workshop* button beside a bench, so the screen
+it was measured on is the emptiest one there is.
+
+So it rides the dock's grip row, which was 22 pixels and is 32: **ten pixels for the hour at every
+height and under every occupant**, against a whole second band of chrome. The handle keeps the
+middle and the dial is pinned to the right, because `justify-content: center` cannot centre one
+child of two. It is present with the notes, with a place, and with somebody talking — the hour
+decides whether an animal can be approached and whether a night can be spent, so it has no business
+disappearing the moment a player stands somewhere.
+
+**A dial and not a clock.** "14:32" is precise about a world that has never once been precise: canon
+says `renews: fast` rather than "in four days", and the whole `tiers.ts` split exists to keep
+durations out of it. The mark traces the sun's own path — phase 0 is six in the morning, so the left
+is first light, the top is noon, the right is evening and the bottom is midnight — and turns to a
+moon at night, read from `skyAt`'s own label so the dial and the wash over the map can never
+disagree. The weather rides on it rather than beside it, for the same reason it is not in the bar.
+
+It is a readout and not a control: there is nothing to press it for, and a button that does nothing
+teaches a player to stop pressing things. `role="img"` with the hour in words, which is also all a
+screen reader needs — the drawing carries nothing the label does not.
+
+**The guard that matters is the last one**, and it is this repository's signature fault in its
+interface form: an icon that renders, looks right in a screenshot, and says the same thing at dawn
+and at midnight. Checked by wiring the dial to a constant:
+
+> the mark did not move across the day — 6: noon, 9: noon, rain, 12: noon, rain, 16: noon, storm,
+> 19: noon, 22: noon, mist
 
 ### What stage 3 actually did
 

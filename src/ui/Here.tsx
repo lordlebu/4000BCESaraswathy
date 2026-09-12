@@ -30,6 +30,7 @@ import type { ReactNode } from 'react';
 import { Conversation, type ConversationProps } from './Conversation';
 import { JournalPanel, type JournalPanelProps } from './JournalPanel';
 import { PlacePanel, type PlacePanelProps } from './PlacePanel';
+import { SkyDial } from './SkyDial';
 import { StandingRow, type StandingRowProps } from './StandingRow';
 import { TileActions, type TileAction } from './TileActions';
 import type { DockHeight } from './surface';
@@ -87,6 +88,20 @@ export interface HereProps {
    * satchel and unrolling the bedding inside the field notes.
    */
   actions: readonly TileAction[];
+  /**
+   * Where the day is, or null before the scene has said.
+   *
+   * **In the dock rather than in the control bar, and a measurement chose that.** The bar is 284
+   * pixels of a 360-pixel phone with about fifty to spare, so a 44-pixel readout looked like it
+   * fitted -- and measured, it took the bar to **96 pixels and two rows**, which is exactly what
+   * the last plan spent a whole stage undoing. It would have been worse than that in play: the bar
+   * grows a *Here* button at a point of interest and a *Workshop* button beside a bench, so the
+   * screen it was measured on is the emptiest one there is.
+   *
+   * The dock's grip row is the other place a player looks to find out where and when they are, it
+   * is present whatever the occupant, and it cannot be scrolled away from.
+   */
+  sky: { phase: number; weather?: string } | null;
   /** How much room the dock has. */
   height: DockHeight;
   /** Pull it open, or push it shut. */
@@ -100,6 +115,7 @@ export function Here({
   conversation,
   canon,
   standing,
+  sky,
   actions,
   height,
   onHeight
@@ -120,18 +136,28 @@ export function Here({
       data-occupant={conversation ? 'conversation' : reading ? 'place' : 'notes'}
       aria-label="Here"
     >
-      {/* A grip, and a real control. The dock can be opened and shut by dragging on a touch screen,
+      {/* The grip row: a handle in the middle and the hour at the end.
+          A grip, and a real control. The dock can be opened and shut by dragging on a touch screen,
           but a drag is not discoverable and is not available to a keyboard -- so the same thing is
           a button that says what it does. */}
-      <button
-        type="button"
-        className="dock-handle"
-        aria-label={HANDLE_LABEL[height]}
-        aria-expanded={height !== 'peek'}
-        onClick={onHeight}
-      >
-        <span className="dock-grip" aria-hidden="true" />
-      </button>
+      <div className="dock-head">
+        <button
+          type="button"
+          className="dock-handle"
+          aria-label={HANDLE_LABEL[height]}
+          aria-expanded={height !== 'peek'}
+          onClick={onHeight}
+        >
+          <span className="dock-grip" aria-hidden="true" />
+        </button>
+
+        {/* Riding the grip row costs the dock ten pixels rather than the control bar a whole second
+            row, and it is here at every height and under every occupant -- the notes, a place, or
+            somebody talking. The hour decides whether an animal can be approached and whether a
+            night can be spent, so it has no business disappearing the moment a player stands
+            somewhere. */}
+        {sky && <SkyDial phase={sky.phase} weather={sky.weather} />}
+      </div>
 
       <div className="dock-body">
         {conversation ? (

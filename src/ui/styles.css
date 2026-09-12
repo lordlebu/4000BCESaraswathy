@@ -334,6 +334,75 @@ button.ghost:hover:not(:disabled) {
 }
 
 
+/* --- The hour ---------------------------------------------------------------
+ *
+ * A readout, not a control: there is nothing to press it for, and a button that does nothing teaches
+ * a player to stop pressing things. So it takes the bar's height and its parchment and none of its
+ * hover or focus behaviour.
+ *
+ * **It rides the dock's grip row, and a measurement put it there.** In the control bar it looked
+ * like it fitted -- 284 pixels of a 360-pixel phone, about fifty to spare -- and took the bar to
+ * **96 pixels and two rows**, which is what the last plan spent a whole stage undoing. Worse in
+ * play than in the measurement, too: the bar grows a *Here* button at a point of interest and a
+ * *Workshop* button beside a bench.
+ *
+ * The grip row was 22 pixels of dock and is 32, which buys the hour at every height and under every
+ * occupant for ten pixels rather than a whole second band of chrome over the map. */
+.sky-dial {
+  position: relative;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+}
+
+.sky-dial svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The horizon and the path, both quiet: they are the frame the mark is read against, and a dial
+   whose furniture competes with its pointer is a decoration. */
+.sky-dial-horizon {
+  stroke: var(--ink-faint);
+  stroke-width: 0.02;
+  opacity: 0.55;
+}
+
+.sky-dial-track {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-width: 0.015;
+  stroke-dasharray: 0.05 0.05;
+  opacity: 0.45;
+}
+
+/* **Warm through the day, cool through the night**, taken from the same two ends of `dayNight.ts`'s
+   keyframes that wash the map -- `first light` is #ffb08a and `night` is #2a3568 -- so the dial and
+   the ground agree about what kind of hour it is. */
+.sky-dial[data-body='sun'] .sky-dial-mark {
+  fill: #e0913f;
+}
+
+.sky-dial[data-body='moon'] .sky-dial-mark {
+  fill: #3d4a80;
+}
+
+/* Bottom-right, clear of the mark's path at every hour: the orbit is a third of the box, so the
+   corner is the one place nothing ever passes through. */
+.sky-dial-weather {
+  position: absolute;
+  right: 1px;
+  bottom: -1px;
+  font-size: 0.6rem;
+  line-height: 1;
+  color: var(--ink-faint);
+}
+
 /* --- What is on screen, inside the map sheet -----------------------------
  *
  * The two toggles that used to sit in the control bar. They decide what is *on screen* rather than
@@ -562,6 +631,28 @@ button.ghost:hover:not(:disabled) {
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+/* **The grip row: the handle centred, the hour at the end.**
+ *
+ * The handle keeps the middle whatever else is in the row, which is what `justify-content: center`
+ * on the row cannot give once there is a second child -- so the dial is taken out of the flow and
+ * pinned to the right instead. The row's height comes from the dial, which is the taller of the
+ * two; see `.sky-dial` for why ten pixels here was the cheapest place to put the hour. */
+.dock-head {
+  flex: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+}
+
+.dock-head .sky-dial {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* The grip. A real button, because a drag is not discoverable and is not available to a keyboard;

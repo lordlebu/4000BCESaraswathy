@@ -253,6 +253,14 @@ export function App() {
   // same formulas, which is two clocks agreeing by luck -- and they would have drifted the
   // moment walking started spending time, which it does.
   const [moment, setMoment] = useState<WorldMoment | null>(null);
+  /**
+   * Where the day is, for the dial.
+   *
+   * **Its own state rather than a field on `moment`**, because `WorldMoment` is handed to
+   * `journey.ts` and is canon's vocabulary -- five words, no midday. See `sky-changed` in
+   * `EventBus.ts`. `null` until the scene has said, which is the first half-second of a journey.
+   */
+  const [skyPhase, setSkyPhase] = useState<number | null>(null);
 
   // The fog set changes on every step, which is far too often to keep in React state — it would
   // re-render the whole panel each tile. The scene owns it; this ref only carries it to the save.
@@ -280,6 +288,7 @@ export function App() {
     const onStandingOn = ({ poiId: id }: GameToUi['standing-on']) =>
       dispatch({ type: 'standing-on', poiId: id });
     const onMoment = (next: GameToUi['moment-changed']) => setMoment(next);
+    const onSky = (next: GameToUi['sky-changed']) => setSkyPhase(next.phase);
     // Who the scene says it is drawing, which is the only authority on it. The picker sets its
     // own state optimistically; this is what corrects it if the scene ever disagreed.
     const onCharacter = ({ characterId: drawn }: GameToUi['character-changed']) => setDrawn(drawn);
@@ -290,6 +299,7 @@ export function App() {
     EventBus.onEvent('landmark-reached', onLandmarkReached);
     EventBus.onEvent('standing-on', onStandingOn);
     EventBus.onEvent('moment-changed', onMoment);
+    EventBus.onEvent('sky-changed', onSky);
     EventBus.onEvent('character-changed', onCharacter);
     return () => {
       EventBus.offEvent('world-ready', onWorldReady);
@@ -298,6 +308,7 @@ export function App() {
       EventBus.offEvent('landmark-reached', onLandmarkReached);
       EventBus.offEvent('standing-on', onStandingOn);
       EventBus.offEvent('moment-changed', onMoment);
+      EventBus.offEvent('sky-changed', onSky);
       EventBus.offEvent('character-changed', onCharacter);
     };
   }, []);
@@ -1140,6 +1151,7 @@ export function App() {
           atLandmark: arrival?.atLandmark ?? false,
           memory,
         }}
+        sky={skyPhase === null ? null : { phase: skyPhase, weather: moment?.weather }}
         standing={{
           creature: arrival?.entry?.creature ?? { name: null, note: '', species: null },
           doing: arrival?.entry?.doing ?? '',

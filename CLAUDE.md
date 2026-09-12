@@ -214,7 +214,7 @@ half useless here, and the habits that catch this codebase's signature bug — s
 tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side companion.
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 | `docs/ui-streamline-plan.md` | what the chrome costs the map, measured, and the four moves that give it back |
-| `docs/ui-affordances-plan.md` | what the screen says once the map has the room — open, and two faults it found |
+| `docs/ui-affordances-plan.md` | what the screen says once the map has the room — closed, and the two faults it found |
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
 `npx vitest run -t "some test name"`.
@@ -437,6 +437,16 @@ where a readout owes 26 — measured, that took the row from 57px to 75 and push
 dock. The row says what is here; the rail says what you can do about it. Use `speciesMark()` rather
 than `SpeciesIcon` anywhere a glyph is wanted without a plate, because `SpeciesIcon` prefers a
 painted plate and a plate is a control.
+
+**The hour is on screen, and the sky says its own thing.** `sky-changed` carries `{ phase, label }`
+in `dayNight.ts`'s vocabulary — six words, including the noon canon has no word for. It is
+deliberately not a field on `moment-changed`, whose payload is a `WorldMoment` handed to
+`journey.ts` in canon's five words; widening it to serve a picture is how two vocabularies quietly
+become one, and `momentAt`'s mapping table exists to keep them apart. The phase is rounded to 1/48
+of a day before it is sent, so React renders for it about once a minute rather than every frame.
+`SkyDial` rides the dock's grip row and not the control bar: measured, a 44px readout in the bar
+took it to **96px and two rows**, and the bar grows more buttons at a place and beside a bench. It
+is a readout, never a control — there is nothing to press it for.
 
 **A preference goes in `src/ui/preferences.ts`, never in the save and never in `surface.ts`.**
 `Journey` is versioned world state: adding a field to it means bumping `SAVE_VERSION`, which
