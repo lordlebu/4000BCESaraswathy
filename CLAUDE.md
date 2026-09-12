@@ -394,11 +394,31 @@ a blocked row at `0.55` put its label at 3.36:1 and, compounding with the detail
 what the ground holds at **2.61:1**. WCAG exempts a disabled control, so nothing was failing — but
 a row this interface calls *teaching* has to be readable.
 
-**`styles.css` is one flat namespace, 2,400 lines long.** Grep a class name before you take it. The
-plate card was written as `.specimen`, which the field kit had already used five hundred lines
-further down; the later rule won and the card rendered as a transparent 999px lozenge, while in the
-other direction it was restyling the field kit's chips. Nothing failed. It was found in a
-screenshot.
+**`styles.css` is one flat namespace, 2,500 lines long, and `test/stylesheet.test.ts` is what keeps
+it honest.** Grep a class name before you take it — the plate card was written as `.specimen`, which
+the field kit had already used five hundred lines further down; the later rule won and the card
+rendered as a transparent 999px lozenge, while in the other direction it was restyling the field
+kit's chips. Nothing failed, and it was found in a screenshot. The guard is narrow on purpose: **a
+bare single class, declared twice at the top level**, which is the shape of that collision.
+`.dock` and `.dock[data-height='peek']` are one component describing its own states; a rule inside
+`@media` is the same rule again and is skipped.
+
+**Splitting the sheet, and `@layer`, were both declined.** Twelve files grep exactly the same as one
+— the collision above would have survived either — while `@layer` changes cascade semantics across
+389 top-level rules and has no visible symptom when it is wrong. The duplicate-class guard is what
+actually prevents the fault, so it is the thing that shipped.
+
+**`z-index` is a named scale in `:root`, and a raw number fails a test.** The sheet held 2, 3, 4, 5,
+35, 40, 60 and 100, and one comment worked out a stacking conflict by reasoning about them. The
+order of the `--z-*` tokens *is* the order things are in front of each other, so a new panel adds a
+token rather than picking a number — including `Modal.tsx`, whose lift for a nested dialog is
+`calc(var(--z-modal) + depth)` and cannot drift away from the sheet.
+
+**The control bar carries travel and time only.** What is *on screen* — field notes, carrying —
+lives in the map sheet under "What is on screen", because a toggle is a preference and a preference
+does not need a permanent row: the bar was two rows and 96px, and is one row and 44px. The satchel
+strip is `width: max-content` for the same reason — it was a full-width 1204px band to hold 274px of
+chips.
 
 **`e2e/chrome-budget.spec.ts` is the measurement as a check.** How much of the screen the map keeps,
 at four device sizes, resting and standing in a place. Its floors are set from what was measured,

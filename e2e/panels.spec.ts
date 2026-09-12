@@ -24,11 +24,20 @@ async function walkToPlace(page: Page) {
 }
 
 test('the field notes can be closed and opened again', async ({ page }) => {
+  // The switch is in the map sheet now rather than the control bar -- see the note in
+  // `Controls.tsx`. The dock rests at peek and the handle moves it between heights; this is the
+  // one control that takes it off the screen altogether, which is what somebody who wants nothing
+  // but the map is asking for.
   await boot(page);
   await expect(page.locator('.journal')).toBeVisible();
-  await page.getByRole('button', { name: /Field notes/ }).click();
-  await expect(page.locator('.journal')).toBeHidden();
-  await page.getByRole('button', { name: /Field notes/ }).click();
+
+  await page.getByRole('button', { name: 'Map', exact: true }).click();
+  // Scoped to `.showing`: the dock's own handle is also named for the field notes -- "Open the
+  // field notes" -- and a role query on the name alone matches both.
+  const toggle = page.locator('.showing', { hasText: 'Field notes' });
+  await toggle.click();
+  await expect(page.locator('.journal')).toHaveCount(0);
+  await toggle.click();
   await expect(page.locator('.journal')).toBeVisible();
 });
 

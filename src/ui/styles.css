@@ -44,6 +44,27 @@
    * A colour rather than an alpha, so it cannot multiply with another one. */
   --ink-faint: #75696f;
 
+
+  /* --- What is in front of what ---------------------------------------------
+   *
+   * **A scale with names, because the numbers were 2, 3, 4, 5, 35, 40, 60 and 100** and one comment
+   * in this file worked out a stacking conflict by reasoning about them. Nothing had broken by then;
+   * the dock's grip disappearing behind the satchel strip was the first time it did, and that was a
+   * height rather than a layer. A new panel picking a number out of the air is the next one.
+   *
+   * The order is the order things are in front of each other, and the gaps are deliberate: a nested
+   * modal takes `--z-modal` plus its depth (see `Modal.tsx`), so there has to be room above it
+   * before the front door. */
+  --z-dock: 2;
+  --z-chrome: 3;
+  --z-sheet: 4;
+  --z-arrival: 5;
+  --z-modal: 40;
+  --z-door: 60;
+  /* The error screen is above everything, including the door: if it is showing, nothing else on the
+     page can be trusted to have rendered. */
+  --z-fallback: 100;
+
   /* Every pinned element clears the notch and the home indicator. index.html sets
      viewport-fit=cover, without which these all resolve to zero. */
   --gutter: 12px;
@@ -111,30 +132,6 @@ body {
  * asset to keep in step with the rest of the art.
  */
 
-/* The tear moved from `.journal` to `.dock` with the parchment: the dock is the sheet of paper and
-   the notes are what is written on it. The place stands in the same slot and gets the same edge,
-   which is the point of there being one dock rather than two panels. */
-.dock {
-  /* A torn top edge. The path is a shallow, irregular run of arcs across the full width; the
-     `fill` beneath it keeps the rest of the panel solid. `mask-size: 100% 100%` stretches it to
-     whatever height the panel settles at, so the tear stays a few pixels tall at any size. */
-  /* A torn top edge: many short segments with a few pixels of jitter, not a run of arcs.
-     Arcs at this width read as scallops -- a decorative wave rather than paper that tore.
-     `preserveAspectRatio='none'` lets one path stretch to any panel width, and the tall
-     viewBox below the tear keeps the rest of the page solid. */
-  --deckle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='300' preserveAspectRatio='none'%3E%3Cpath fill='%23fff' d='M0 5 L14 7.2 L29 5.4 L39 6.4 L49 3.7 L58 7.0 L70 1.7 L85 4.0 L97 2.0 L112 1.9 L130 2.2 L142 5.3 L160 7.2 L178 5.0 L187 7.4 L196 4.8 L207 3.2 L218 4.7 L236 3.4 L258 5.6 L268 5.0 L287 2.6 L297 4.8 L307 4.9 L325 2.7 L344 4.7 L365 3.4 L383 7.0 L397 3.3 L418 2.6 L439 3.0 L457 3.3 L473 6.8 L493 4.2 L511 7.4 L521 4.6 L532 6.0 L543 7.1 L558 1.7 L577 2.0 L594 4.9 L616 3.4 L636 3.6 L652 5.0 L668 1.9 L678 7.2 L694 5.7 L704 1.9 L724 3.4 L742 7.5 L764 4.2 L784 3.8 L803 3.6 L819 3.6 L837 2.2 L846 2.8 L859 2.3 L871 3.9 L893 4.5 L904 4.2 L921 3.2 L932 6.4 L954 4.8 L974 4.0 L988 5.6 L1003 7.2 L1014 2.0 L1025 2.9 L1037 1.6 L1059 5.0 L1072 3.2 L1083 4.0 L1097 5.2 L1111 7.2 L1131 6.7 L1149 5.4 L1169 1.8 L1191 6.2 L1200 5.6 L1200 300 L0 300 Z'/%3E%3C/svg%3E");
-  -webkit-mask-image: var(--deckle);
-  mask-image: var(--deckle);
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  /* The mask eats the top border and the top corners with it, so the radius is dropped there
-     rather than left to show through as two stubs either side of the tear. */
-  border-top: 0;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
 
 /* Paper grain: two very faint gradients at odd angles, so the texture does not read as stripes.
    Drawn on a pseudo-element rather than the panel's own background, which is already carrying
@@ -260,7 +257,7 @@ button.ghost:hover:not(:disabled) {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  z-index: 3;
+  z-index: var(--z-chrome);
   /* The stack is a positioning shell; only its children take pointer events, or the empty space
      beside the bar would swallow clicks meant for the map. */
   pointer-events: none;
@@ -323,7 +320,7 @@ button.ghost:hover:not(:disabled) {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  z-index: 3;
+  z-index: var(--z-chrome);
 }
 
 .zoom .control {
@@ -334,6 +331,49 @@ button.ghost:hover:not(:disabled) {
   padding: 6px 0;
   font-size: 1.05rem;
   line-height: 1;
+}
+
+
+/* --- What is on screen, inside the map sheet -----------------------------
+ *
+ * The two toggles that used to sit in the control bar. They decide what is *on screen* rather than
+ * what the traveller does, and with them in it the bar was two rows and 96 pixels of a phone. Rows
+ * rather than pills because a sheet is a list of settings, and because a label has room to say the
+ * whole thing here: "What you are carrying" rather than "Carrying". */
+.showing-list {
+  list-style: none;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.showing {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 12px;
+  text-align: left;
+  font-size: 0.9rem;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+}
+
+.showing:hover:not(:disabled) {
+  background: rgba(164, 92, 64, 0.1);
+  filter: none;
+}
+
+/* Showing, said in more than colour: the control carries `aria-pressed`, and the row takes weight
+   as well as fill. */
+.showing.is-on {
+  background: rgba(164, 92, 64, 0.2);
+  border-color: var(--accent);
+  font-weight: 600;
 }
 
 /* --- Taking a copy ------------------------------------------------------- */
@@ -400,10 +440,38 @@ button.ghost:hover:not(:disabled) {
   left: var(--safe-left);
   right: var(--safe-right);
   bottom: var(--safe-bottom);
-  z-index: 2;
+  z-index: var(--z-dock);
   display: flex;
   flex-direction: column;
   min-height: 0;
+
+  /* --- The torn top edge, which used to be `.journal`'s ---------------------
+   *
+   * **Declared here rather than in a second `.dock` rule of its own.** It was two rules, and
+   * `test/stylesheet.test.ts` now refuses a bare class declared twice at the top level -- the guard
+   * written after `.specimen` was claimed by two components five hundred lines apart, where the
+   * later rule won and nothing failed. A rule that has to be split is a rule somebody will not find
+   * when they grep for the class. */
+  /* A torn top edge. The path is a shallow, irregular run of arcs across the full width; the
+     `fill` beneath it keeps the rest of the panel solid. `mask-size: 100% 100%` stretches it to
+     whatever height the panel settles at, so the tear stays a few pixels tall at any size. */
+  /* A torn top edge: many short segments with a few pixels of jitter, not a run of arcs.
+     Arcs at this width read as scallops -- a decorative wave rather than paper that tore.
+     `preserveAspectRatio='none'` lets one path stretch to any panel width, and the tall
+     viewBox below the tear keeps the rest of the page solid. */
+  --deckle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='300' preserveAspectRatio='none'%3E%3Cpath fill='%23fff' d='M0 5 L14 7.2 L29 5.4 L39 6.4 L49 3.7 L58 7.0 L70 1.7 L85 4.0 L97 2.0 L112 1.9 L130 2.2 L142 5.3 L160 7.2 L178 5.0 L187 7.4 L196 4.8 L207 3.2 L218 4.7 L236 3.4 L258 5.6 L268 5.0 L287 2.6 L297 4.8 L307 4.9 L325 2.7 L344 4.7 L365 3.4 L383 7.0 L397 3.3 L418 2.6 L439 3.0 L457 3.3 L473 6.8 L493 4.2 L511 7.4 L521 4.6 L532 6.0 L543 7.1 L558 1.7 L577 2.0 L594 4.9 L616 3.4 L636 3.6 L652 5.0 L668 1.9 L678 7.2 L694 5.7 L704 1.9 L724 3.4 L742 7.5 L764 4.2 L784 3.8 L803 3.6 L819 3.6 L837 2.2 L846 2.8 L859 2.3 L871 3.9 L893 4.5 L904 4.2 L921 3.2 L932 6.4 L954 4.8 L974 4.0 L988 5.6 L1003 7.2 L1014 2.0 L1025 2.9 L1037 1.6 L1059 5.0 L1072 3.2 L1083 4.0 L1097 5.2 L1111 7.2 L1131 6.7 L1149 5.4 L1169 1.8 L1191 6.2 L1200 5.6 L1200 300 L0 300 Z'/%3E%3C/svg%3E");
+  -webkit-mask-image: var(--deckle);
+  mask-image: var(--deckle);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  /* The mask eats the top border and the top corners with it, so the radius is dropped there
+     rather than left to show through as two stubs either side of the tear. */
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+
   /* The parchment, the border and the tear come from the shared block at the top of this file.
      Restating them here re-added the top border the deckle exists to remove, which is exactly the
      cascade collision this stylesheet keeps paying for. */
@@ -415,7 +483,7 @@ button.ghost:hover:not(:disabled) {
 /* **A ceiling the dock may never pass, whatever height it is asked for.**
  *
  * Found by looking at a screenshot: on a landscape phone at reading height the dock reached up
- * under the control bar and the satchel strip, which sit at `z-index: 3` against its 2 -- so the
+ * under the control bar and the satchel strip, which sit at `--z-chrome` against its `--z-dock` -- so the
  * grip was *behind* the strip and could not be pressed. The browser said it plainly and unhelpfully:
  * "waiting for element to be visible, enabled and stable", a hundred and fifty times.
  *
@@ -949,7 +1017,7 @@ button.ghost:hover:not(:disabled) {
 
 .sheet {
   position: fixed;
-  z-index: 4;
+  z-index: var(--z-sheet);
   top: var(--safe-top);
   left: var(--safe-left);
   width: min(24rem, calc(100vw - var(--safe-left) - var(--safe-right)));
@@ -1008,7 +1076,7 @@ button.ghost:hover:not(:disabled) {
 .arrival-veil {
   position: fixed;
   inset: 0;
-  z-index: 5;
+  z-index: var(--z-arrival);
   display: grid;
   place-items: center;
   padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
@@ -1104,7 +1172,7 @@ button.ghost:hover:not(:disabled) {
 .fallback {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: var(--z-fallback);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1145,7 +1213,7 @@ button.ghost:hover:not(:disabled) {
  * that otherwise holds only things a player can *do*. One door, tabbed inside.
  *
  * The strip renders into each panel's own `tabs` slot rather than floating over it. Floating was
- * the first attempt: both panels draw a full-screen veil at `z-index: 40`, so tabs positioned
+ * the first attempt: both panels draw a full-screen veil at `--z-modal`, so tabs positioned
  * against the page sat underneath and the second one could not be clicked at all. */
 
 .records-tabs {
@@ -1237,12 +1305,21 @@ button.ghost:hover:not(:disabled) {
      it 44px below the top on the assumption the bar was one row tall. It is two on a 360px
      phone, and the strip landed underneath it -- measured, not guessed. Letting the two stack
      means the strip follows the bar to whatever height it wraps to. */
-  z-index: 3;
+  z-index: var(--z-chrome);
 
   /* A button, but not a control: no pill, no accent fill. Pressing it opens the full satchel and
      that is a secondary action -- the primary use of this element is reading it. */
   display: block;
-  width: auto;
+  /* **As wide as what it holds, not as wide as the bar.**
+   *
+   * `width: auto` on a block child of a flex column stretches: the strip ran the full width of
+   * `.controls-stack`, 1204 pixels of a desktop for six items, which put a band of parchment across
+   * the top of the map and swallowed clicks meant for the ground under it. An idle game's resource
+   * readout never hides and this one still does not; what it stops doing is claiming a screen's
+   * width to say "nothing carried yet". The cap is what stops a traveller carrying twenty kinds of
+   * thing putting the band back. */
+  width: max-content;
+  max-width: 100%;
   text-align: left;
   padding: 5px 10px;
   border: 1px solid var(--edge);
@@ -1374,7 +1451,7 @@ button.ghost:hover:not(:disabled) {
   justify-content: center;
   padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
   background: rgba(27, 20, 32, 0.55);
-  z-index: 40;
+  z-index: var(--z-modal);
 }
 
 .diary {
@@ -2446,7 +2523,7 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 .front-door {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: var(--z-door);
   display: grid;
   place-items: center;
   padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);

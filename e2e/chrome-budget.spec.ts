@@ -62,15 +62,19 @@ async function mapShare(page: Page): Promise<number> {
 /**
  * The resting state of the walk, which is what this plan is actually about.
  *
- * Before the dock these were 51.7, 52.1, 51.8 and 37.3. The floors below sit a few points under
- * what is measured now; the gap between them and the plan's 70% is the control bar, which is
- * stage 6's to take.
+ * Before the dock these were 51.7, 52.1, 51.8 and 37.3. They are 68.2, 68.4, 67.8 and 61.5 after
+ * stage 6 took the control bar from two rows to one and stopped the satchel strip stretching the
+ * width of the screen. The floors sit a few points under that.
+ *
+ * **The plan asked for 70% and did not get it**, and what is left is the dock's own peek row -- the
+ * title, where you are, and what you can do here. That is the last thing worth cutting, so this is
+ * where the number stops.
  */
 const RESTING = [
-  { name: 'desktop', w: 1280, h: 800, floor: 57, was: 51.7 },
-  { name: 'phone portrait', w: 390, h: 844, floor: 55, was: 52.1 },
-  { name: 'small phone', w: 360, h: 800, floor: 55, was: 51.8 },
-  { name: 'phone landscape', w: 844, h: 390, floor: 48, was: 37.3 }
+  { name: 'desktop', w: 1280, h: 800, floor: 64, was: 51.7 },
+  { name: 'phone portrait', w: 390, h: 844, floor: 64, was: 52.1 },
+  { name: 'small phone', w: 360, h: 800, floor: 63, was: 51.8 },
+  { name: 'phone landscape', w: 844, h: 390, floor: 57, was: 37.3 }
 ] as const;
 
 for (const view of RESTING) {
@@ -96,8 +100,8 @@ for (const view of RESTING) {
  * is what proves.
  */
 const READING = [
-  { name: 'desktop', w: 1280, h: 800, floor: 31, was: 27.0 },
-  { name: 'phone portrait', w: 390, h: 844, floor: 30, was: 18.9 }
+  { name: 'desktop', w: 1280, h: 800, floor: 34, was: 27.0 },
+  { name: 'phone portrait', w: 390, h: 844, floor: 31, was: 18.9 }
 ] as const;
 
 for (const view of READING) {

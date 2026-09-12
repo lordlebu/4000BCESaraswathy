@@ -1,6 +1,6 @@
 # UI streamline plan — the map is the screen, and it is 27% of it
 
-**Stages 1 to 5 have shipped; 6 has not.** This is the plan as argued, with the
+**All six stages have shipped.** This is the plan as argued, with the
 measurements it was argued from, and each shipped stage marked where it sits. The plate view under
 B′ shipped alongside them, and fault 7 carries a correction to its own first version. Read it alongside `docs/ui-handoff.md`, which is the design record for the arrangement this
 proposes to change and explains why most of it is the way it is. That document's one live rule —
@@ -426,23 +426,24 @@ below.
 `e2e/chrome-budget.spec.ts` is that measurement as a check. Built, measured, and the numbers are
 what they are rather than what the plan hoped:
 
-| Map visible | Before | After | Guard |
-|---|---|---|---|
-| resting, desktop | 51.7% | **61.5%** | > 57% |
-| resting, phone portrait | 52.1% | **59.6%** | > 55% |
-| resting, small phone | 51.8% | **59.3%** | > 55% |
-| resting, phone landscape | 37.3% | **53.2%** | > 48% |
-| in a place, desktop | 27.0% | **36.0%** | > 31% |
-| in a place, phone portrait | 18.9% | **35.2%** | > 30% |
-| in a place, phone landscape | 17.1% | **14.7%** | — |
-| the place's own writing shown, desktop | 73% | **65%** | — |
-| the place's own writing shown, landscape | 29% | **25%** | > 21% |
+| Map visible | Before | After stage 3 | After stage 6 | Guard |
+|---|---|---|---|---|
+| resting, desktop | 51.7% | 61.5% | **68.2%** | > 64% |
+| resting, phone portrait | 52.1% | 59.6% | **68.4%** | > 64% |
+| resting, small phone | 51.8% | 59.3% | **67.8%** | > 63% |
+| resting, phone landscape | 37.3% | 53.2% | **61.5%** | > 57% |
+| in a place, desktop | 27.0% | 36.0% | **38.7%** | > 34% |
+| in a place, phone portrait | 18.9% | 35.2% | **35.5%** | > 31% |
+| in a place, phone landscape | 17.1% | 14.7% | **19.0%** | — |
+| the place's own writing shown, landscape | 29% | 25% | 25% | > 21% |
 
 **Three of those need saying plainly, and none of them is what the plan predicted.**
 
-*The 70% was not reached.* Resting lands at 59–62% outside landscape. Most of the gap is the
-control bar — two rows and a strip, 148 pixels of a phone — which is stage 6's. The rest is the
-blocked action rows, below.
+*The 70% was not reached — 68.4% is the closest it came.* Stage 6 took the control bar from two rows
+to one and stopped the strip stretching the screen, which was worth six to eight points; what is
+left is **the dock's own peek row**, the title, where you are, and what you can do here. That is the
+last thing worth cutting, so this is where the number stops. Close is the honest answer and 70 was
+always a target rather than a requirement.
 
 *Reading a place shows less of it than before, at reading height.* 65% against 73% on a desktop.
 The dock pays for the handle and the rail — 117 pixels — before it pays for any writing, and the
@@ -451,9 +452,10 @@ handle now goes peek → read → full, and full is the whole page. That third s
 plan; it was added because the measurement showed reading height alone was a step back, and a
 height nothing could reach would have been this codebase's signature bug for the fourth time.
 
-*Landscape-in-a-place went the wrong way.* 14.7% against 17.1%, on the one screen where every trade
-bites at once. It is the honest cost of the rest of the stage and it is recorded rather than
-massaged.
+*Landscape-in-a-place went the wrong way, and then came back.* Stage 3 left it at 14.7% against
+17.1% — the one screen where every trade bites at once — and it is **19.0%** after stage 6, because
+the bar it shares the screen with halved. The intermediate number is left in the table rather than
+quietly improved: it was the honest cost at the time.
 
 Numbers in a document go stale; these are a check now, so the next arrangement that quietly eats
 the map fails rather than being noticed a year later. It belongs with `reachable.spec.ts` — both
@@ -541,14 +543,47 @@ pressed "Go on". So a conversation is sized to its content and the other two occ
 which `data-occupant` on the dock states outright rather than leaving to a `:has()` nobody would
 find. 326 pixels instead of 620, and the map keeps the top half.
 
-### Stage 6 — the bar, and the stylesheet
+### Stage 6 — the bar, and the stylesheet · **shipped**
 
-Notes and Carrying leave the bar; the strip sizes to its content. `styles.css` gets `@layer` with a
-named z scale (`--z-map: 1`, `--z-chrome: 10`, `--z-dock: 20`, `--z-modal: 40`, `--z-veil: 50`), and
-splits along the regions it already comments as sections.
+Notes and Carrying leave the bar for the map sheet, under *What is on screen*, beside the seed and
+the legend. They are the two controls that decide what is **on screen** rather than what the
+traveller **does**, and with them in it the bar was two rows and 96 pixels of a phone. **It is one
+row and 44 pixels now**, at every size measured. Neither switch was removed: the ribbon's off switch
+was reported from play, and a player who wants nothing but the map still has both.
 
-*Proved by:* `e2e/reachable.spec.ts`, unchanged, which should now find one row where it tolerates
-two.
+The satchel strip is `width: max-content` rather than the width of its stack. It was running 1204
+pixels across a desktop to say *"nothing carried yet"*, which put a band of parchment over the top
+of the map and took clicks meant for the ground under it. It is 274 pixels now, and it still never
+hides.
+
+*Proved by:* `e2e/reachable.spec.ts`, which finds one row where it used to tolerate two, plus a new
+case on the strip's width, and the budget spec below.
+
+**The stylesheet got the z scale and a guard, and did not get `@layer` or a split.**
+
+`--z-dock`, `--z-chrome`, `--z-sheet`, `--z-arrival`, `--z-modal`, `--z-door`, `--z-fallback`. The
+numbers were 2, 3, 4, 5, 35, 40, 60 and 100, and one comment in the file worked out a stacking
+conflict by reasoning about them. `Modal.tsx`'s lift for a nested dialog is
+`calc(var(--z-modal) + depth)` now, so it cannot drift away from the scale.
+
+`test/stylesheet.test.ts` is the guard, and it is aimed at the fault this plan actually hit rather
+than at tidiness: **a bare class declared twice at the top level**, which is how `.specimen` was
+claimed by two components five hundred lines apart. It fires on the collision and not on a component
+describing its own states, and both halves were checked by reintroducing the fault.
+
+**`@layer` was declined, and so was splitting the file**, which reverses what this stage promised.
+
+`@layer` changes cascade semantics across every rule in a 2,400-line sheet: everything in a layer
+loses to everything outside it, so wrapping an existing file means auditing all 389 top-level rules
+for a change that has no visible symptom when it goes wrong. That is the same class of fault as the
+collision — invisible, found by screenshot — and worth taking only when something is being built
+rather than while something is being rearranged.
+
+The split was declined because it buys less than it looks like. `grep` works the same on one file or
+twelve, and a guard that fails on a duplicate class is the thing that actually prevents the
+collision; a split would have made the diff enormous and `git blame` worse for no behaviour anybody
+can see. If the file is split later it should be for navigability, as its own change, with the
+import order preserved exactly.
 
 ## What is declined, and why
 

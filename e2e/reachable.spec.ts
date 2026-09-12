@@ -62,8 +62,11 @@ for (const { w, h, name } of SIZES) {
 test('the control bar never buries the map under rows of buttons', async ({ page }) => {
   await boot(page, 360, 800);
   const bar = (await page.locator('.controls').boundingBox())!;
-  // One row on a phone, because the labels drop. Two would be tolerable; three is a wall.
-  expect(bar.height, `control bar is ${bar.height}px tall — it has wrapped too far`).toBeLessThan(120);
+  // **One row, measured at 44px**, since Notes and Carrying moved to the map sheet. It was two and
+  // 96, and this used to tolerate that with a bound of 120 -- "three is a wall". Tightened to what
+  // it actually costs, with room for one wrap if a seventh contextual control ever arrives, because
+  // a guard set well above the truth stops being a guard.
+  expect(bar.height, `control bar is ${bar.height}px tall — it has wrapped too far`).toBeLessThan(100);
 });
 
 test('the satchel strip never sits under the control bar', async ({ page }) => {
@@ -84,12 +87,18 @@ test('the satchel strip never sits under the control bar', async ({ page }) => {
 
 test('the satchel ribbon can be put away for a clean map', async ({ page }) => {
   // Reported from play: the ribbon is useful and permanent, and permanent is the problem -- the
-  // map is what somebody came to look at. It closes like the notes do, from the same bar, and
-  // stays closed until asked for.
+  // map is what somebody came to look at. It stays closable, and stays closed until asked for.
+  //
+  // **The switch moved to the map sheet**, with the notes' one, because the two controls that
+  // decide what is *on screen* were making the bar two rows and 96 pixels of a phone. The ribbon
+  // is also as wide as what it holds now rather than the width of the bar, so the thing that was
+  // reported is much smaller than it was -- but "much smaller" is not "gone", and this still holds
+  // the off switch.
   await boot(page, 1280, 800);
   await expect(page.locator('.satchel-strip')).toBeVisible();
 
-  const toggle = page.getByRole('button', { name: /Satchel ribbon/ });
+  await page.getByRole('button', { name: 'Map', exact: true }).click();
+  const toggle = page.getByRole('button', { name: 'What you are carrying' });
   await toggle.click();
   await expect(page.locator('.satchel-strip')).toHaveCount(0);
   await expect(toggle).toHaveAttribute('aria-pressed', 'false');
@@ -101,6 +110,18 @@ test('the satchel ribbon can be put away for a clean map', async ({ page }) => {
 
   await toggle.click();
   await expect(page.locator('.satchel-strip')).toBeVisible();
+});
+
+test('the strip is as wide as what it holds, not as wide as the bar', async ({ page }) => {
+  // It stretched the full width of the control stack -- 1204 pixels of a desktop to say "nothing
+  // carried yet" -- which put a band of parchment over the map and took clicks meant for the
+  // ground under it.
+  await boot(page, 1280, 800);
+  const strip = (await page.locator('.satchel-strip').boundingBox())!;
+  expect(
+    strip.width,
+    `the strip is ${Math.round(strip.width)}px wide on a 1280px screen`
+  ).toBeLessThan(600);
 });
 
 test('a keyboard user can see where they are', async ({ page }) => {
@@ -122,8 +143,14 @@ test('a keyboard user can see where they are', async ({ page }) => {
 test('a phone still gets words on its buttons', async ({ page }) => {
   // Glyphs alone rescue a screen reader via aria-label and nobody else. If the labels ever go
   // again, this is what says so.
+  //
+  // **Every control has one, rather than "more than three of them do".** The bar was six or seven
+  // buttons when that number was written and is four plus two contextual ones now, so a count is
+  // the wrong question: what matters is that no button is left as a bare glyph.
   await boot(page, 360, 800);
+  const controls = await page.locator('.controls .control').count();
   const labels = page.locator('.controls .control-label');
-  expect(await labels.count()).toBeGreaterThan(3);
+  expect(controls, 'no controls found at all').toBeGreaterThan(2);
+  expect(await labels.count(), 'a control is drawn as a bare glyph').toBe(controls);
   await expect(labels.first()).toBeVisible();
 });

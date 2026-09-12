@@ -291,9 +291,10 @@ export function Modal({
       // **Only a nested modal takes a z-index from here.** Portal nodes are appended to the body in
       // effect order, which is child-first, so a plate opened from the album lands *before* the
       // album's own node and would be painted over by it. Lifting the inner one settles that
-      // without touching the stylesheet -- and at depth 1 nothing is set at all, so `.diary-veil`
-      // keeps its 40, the map sheet its 4 and the front door its 60, exactly as before.
-      style={depth > 1 ? { zIndex: 40 + depth } : undefined}
+      // without touching the stylesheet -- and at depth 1 nothing is set at all, so each veil keeps
+      // the layer its own rule gives it. The number comes from `--z-modal`, so this cannot drift
+      // away from the scale in `styles.css`; the gap above that token is there for exactly this.
+      style={depth > 1 ? { zIndex: `calc(var(--z-modal) + ${depth})` } : undefined}
       onClick={veilClassName ? onVeilClick : undefined}
     >
       <Depth.Provider value={depth}>{children}</Depth.Provider>

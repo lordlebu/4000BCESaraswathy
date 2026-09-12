@@ -146,6 +146,10 @@ none of them failed anything.
   had been used by the field kit five hundred lines below where the plate card claimed it; the later
   rule won, the card rendered as a transparent lozenge, and the card was restyling the field kit's
   chips in the other direction. Grep before naming a class, and *look at the thing* afterwards.
+  `test/stylesheet.test.ts` now refuses a bare class declared twice at the top level, and a
+  `z-index` that is not a `--z-*` token — the second is a fault that had not landed yet, written
+  down because the numbers were 2, 3, 4, 5, 35, 40, 60 and 100 and one comment in the sheet reasoned
+  about them.
 - **Two modals and effect order.** React runs a child's effects **before its parent's**, so a stack
   of open modals pushed from an effect comes out inside-first: the outer panel answers keys meant
   for the inner one and its veil paints over it. Nesting depth has to come from the tree — a

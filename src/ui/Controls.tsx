@@ -4,6 +4,12 @@
 // seeded game still needs a way to change its seed, and a map of coloured tiles still needs a key.
 // So they move behind a single button and open as a sheet over the map, which is closed the great
 // majority of the time.
+//
+// **The bar is four buttons and two that come and go.** It was seven, which is two rows and 96
+// pixels of a 390-pixel phone -- and `reachable.spec.ts` already refused a third row on the grounds
+// that a bar that tall is a wall. The two that left are the ones that decide what is *on screen*
+// rather than what the traveller *does*: they are in the sheet now, under "What is on screen",
+// beside the seed and the legend. Nothing was taken away.
 
 import { useState } from 'react';
 import { EventBus } from '../game/EventBus';
@@ -87,30 +93,15 @@ export function Controls({
           </button>
         )}
 
-        <button
-          type="button"
-          className={notesOpen ? 'control control-on' : 'control'}
-          aria-pressed={notesOpen}
-          aria-label={`Field notes, ${notesOpen ? 'showing' : 'hidden'}`}
-          onClick={onToggleNotes}
-        >
-          <span aria-hidden="true">✒</span>
-          <span className="control-label">Notes</span>
-        </button>
+        {/* **Notes and Carrying are not here any more.** They are the two controls in this bar that
+            do not *do* anything -- they decide what is on screen -- and the bar was two rows and 96
+            pixels on a 390px phone with them in it. They are in the map sheet now, under "What is
+            on screen", which is where the seed and the legend already live.
 
-        {/* The ribbon has an off switch for the same reason the notes do: the map is the thing
-            somebody came to look at, and a permanent band that cannot be dismissed is an
-            obstruction rather than a convenience. Reported from play. */}
-        <button
-          type="button"
-          className={satchelRibbon ? 'control control-on' : 'control'}
-          aria-pressed={satchelRibbon}
-          aria-label={`Satchel ribbon, ${satchelRibbon ? 'showing' : 'hidden'}`}
-          onClick={onToggleSatchelRibbon}
-        >
-          <span aria-hidden="true">◑</span>
-          <span className="control-label">Carrying</span>
-        </button>
+            Neither was removed, and that matters: the ribbon's off switch was reported from play,
+            and a player who wants nothing but the map still has both. What changed is that the dock
+            rests at peek and the strip is as wide as what it holds, so neither is the obstruction
+            that made somebody ask. */}
 
         <button type="button" className="control" aria-label="Where to go" onClick={onOpenOverworld}>
           <span aria-hidden="true">◇</span>
@@ -239,6 +230,32 @@ export function Controls({
             Zoom with the <kbd>+</kbd> and <kbd>−</kbd> buttons, the mouse wheel, or a pinch.{' '}
             <kbd>0</kbd> fits the map to the screen again.
           </p>
+
+          <h3>What is on screen</h3>
+          <ul className="showing-list">
+            <li>
+              <button
+                type="button"
+                className={notesOpen ? 'showing is-on' : 'showing'}
+                aria-pressed={notesOpen}
+                onClick={onToggleNotes}
+              >
+                <span aria-hidden="true">✒</span>
+                Field notes
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                className={satchelRibbon ? 'showing is-on' : 'showing'}
+                aria-pressed={satchelRibbon}
+                onClick={onToggleSatchelRibbon}
+              >
+                <span aria-hidden="true">◑</span>
+                What you are carrying
+              </button>
+            </li>
+          </ul>
 
           <h3>Who you are walking as</h3>
           <TravellerPicker characterId={characterId} onChoose={onCharacter} />

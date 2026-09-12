@@ -9,8 +9,9 @@ the arrangement it was written for.
 stopped being two panels dividing the bottom of the screen and became one dock with one occupant,
 every dialog went behind a single `Modal`, and how much of the screen the chrome may take became a
 browser test rather than a matter of taste. Where this document describes a *layout*, read
-`docs/ui-streamline-plan.md` instead — it carries the measurements, the four corrections that
-reversed its own arguments, and what was declined. Where this document describes a *rule*, it is
+`docs/ui-streamline-plan.md` instead — it carries the measurements, the corrections that reversed
+its own arguments, and what was declined. (A count is the one thing not to put here: it was "four"
+and is now six.) Where this document describes a *rule*, it is
 still live.
 
 Two things in it are still live rules rather than history — *ask `journey.ts`, do not
