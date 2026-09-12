@@ -44,6 +44,27 @@ async function openDiary(page: Page) {
   await expect(page.locator('.diary')).toBeVisible();
 }
 
+/**
+ * Listen to the first person standing here, then go back to the place.
+ *
+ * **Being spoken to now takes one press, and that is a change to the mechanic rather than to the
+ * layout.** Everybody at a place used to talk at once, so standing there was enough to be told
+ * things — which is what these tests relied on. A place lists who is here now and one of them takes
+ * the dock when chosen, so a player who walks in and out again is told nothing by anybody. That is
+ * the right trade: three simultaneous typewriters were not a conversation. But *listening is an
+ * act* is a real ruling and it is stated here, because it is the sort of thing a spec quietly
+ * stops exercising rather than fails on.
+ *
+ * What has not changed is what happens once somebody is talking: no button records a line, because
+ * being told something is how you hear it. `Dialogue` writes it down as its last beat lands.
+ */
+async function listenToSomebody(page: Page) {
+  await page.locator('.who').first().click();
+  await expect(page.locator('.person .said')).not.toHaveCount(0);
+  await page.getByRole('button', { name: 'Back' }).click();
+  await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
+}
+
 test('a question arrives from a person, not from the air', async ({ page }) => {
   await boot(page);
   await openDiary(page);
@@ -55,11 +76,9 @@ test('a question arrives from a person, not from the air', async ({ page }) => {
   await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 
-  // No button. Being told something is how you hear it now -- the diary is Varuna's and he does
-  // not need permission to use it -- so simply standing here and being spoken to is enough. This
-  // used to click "Write it down" and skip when there was none, which meant it silently stopped
-  // running rather than failing when the button was removed.
-  await expect(page.locator('.person .said')).not.toHaveCount(0);
+  // Choose somebody, and no button records what they say: being told something is how you hear it,
+  // and the diary is Varuna's. See `listenToSomebody`.
+  await listenToSomebody(page);
   await page.getByRole('button', { name: 'Leave' }).click();
 
   await openDiary(page);
@@ -71,7 +90,7 @@ test('every reading is shown, including the ones you cannot argue', async ({ pag
   await step(page, 'ArrowDown');
   await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
-  await expect(page.locator('.person .said')).not.toHaveCount(0);
+  await listenToSomebody(page);
   await page.getByRole('button', { name: 'Leave' }).click();
   await openDiary(page);
 
@@ -92,9 +111,17 @@ test('the player can settle a question, and is never told they were wrong', asyn
   // Take everything this place will give. Rounds rather than a single pass: a rung opens the next
   // rung, and hearing a line can unlock another, so one sweep leaves the place unfinished.
   //
-  // Only looking needs clicking. Hearing happens by being here -- the "Write it down" button this
-  // loop used to press no longer exists, and pressing a button that is gone is a silent no-op that
-  // would leave this walking through the motions of a mechanic it had stopped exercising.
+  // Hear everybody first, one at a time -- a line can open a rung, so this has to happen before the
+  // looking rather than beside it. Only looking needs clicking after that: no button records a
+  // line, and pressing a button that is gone is a silent no-op that would leave this walking
+  // through the motions of a mechanic it had stopped exercising.
+  for (let i = 0, people = await page.locator('.who').count(); i < people; i += 1) {
+    await page.locator('.who').nth(i).click();
+    await expect(page.locator('.person')).toHaveCount(1, { timeout: 10_000 });
+    await page.getByRole('button', { name: 'Back' }).click();
+    await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
+  }
+
   for (let round = 0; round < 4; round += 1) {
     const buttons = page.getByRole('button', { name: 'Look closer' });
     for (let i = 0; i < (await buttons.count()); i += 1) {

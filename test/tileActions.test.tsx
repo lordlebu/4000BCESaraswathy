@@ -123,3 +123,65 @@ describe('the key that does it', () => {
     expect(button, 'the key leaked into the accessible name').toBeTruthy();
   });
 });
+
+/**
+ * A blocked row is teaching, so it has to be readable.
+ *
+ * **The stylesheet and this file's own header used to disagree.** The header argues that a blocked
+ * row is content -- *"needs a settlement" is content, "disabled" is not* -- and the row was drawn
+ * at `opacity: 0.55`, which put its label at **3.36:1** against the parchment and, compounding with
+ * the detail line's own 0.82, put what the ground holds at **2.61:1**. WCAG exempts an inactive
+ * control from the contrast rule, so nothing was failing; the design was simply not being kept.
+ *
+ * The dimming is a colour token now (`--ink-faint`, 4.87:1) and cannot multiply with another one.
+ * These assertions are about the *mechanism* rather than the pixels, because jsdom has no
+ * rendering: an alpha on an element that carries words is the thing that went wrong, and it is the
+ * thing worth refusing.
+ */
+describe('a blocked row can be read', () => {
+  /** Every element from `el` up to the row, so a dimming ancestor cannot hide from the check. */
+  const upToRow = (el: Element): Element[] => {
+    const chain: Element[] = [];
+    for (let at: Element | null = el; at && !at.classList.contains('tile-action'); at = at.parentElement) {
+      chain.push(at);
+    }
+    return chain;
+  };
+
+  const dimmed = (el: Element) =>
+    upToRow(el).some((step) => {
+      const inline = (step as HTMLElement).style.opacity;
+      return inline !== '' && Number(inline) < 1;
+    });
+
+  it('states the reason outside the dimmed control, where nothing can fade it', () => {
+    const { container } = render(
+      <TileActions actions={[take({ blocked: 'Needs a settlement.', detail: 'Two bundles of reed fibre.' })]} />
+    );
+    const why = container.querySelector('.tile-action-why')!;
+    expect(why.textContent).toBe('Needs a settlement.');
+    // A sibling of the button rather than a child of it -- which is what has always kept the reason
+    // clear of whatever the button does to itself.
+    expect(why.closest('button'), 'the reason is inside the control it explains').toBeNull();
+    expect(dimmed(why), 'the reason is inside something faded').toBe(false);
+  });
+
+  it('keeps the label and the detail out of an alpha', () => {
+    const { container } = render(
+      <TileActions actions={[take({ blocked: 'Needs a settlement.', detail: 'Two bundles of reed fibre.' })]} />
+    );
+    const label = container.querySelector('.tile-action-label')!;
+    const detail = container.querySelector('.tile-action-detail')!;
+    expect(dimmed(label), 'the label is inside something faded').toBe(false);
+    expect(dimmed(detail), 'the detail is inside something faded').toBe(false);
+  });
+
+  it('still says it is blocked by something that is not a colour', () => {
+    // The whole argument for making the words legible: nothing is lost, because disabled was never
+    // being carried by the fade in the first place.
+    render(<TileActions actions={[take({ blocked: 'Needs a settlement.' })]} />);
+    const button = screen.getByRole('button');
+    expect(button.hasAttribute('disabled'), 'the row no longer reads as unavailable').toBe(true);
+    expect(button.getAttribute('aria-describedby'), 'the reason is not tied to the control').toBeTruthy();
+  });
+});

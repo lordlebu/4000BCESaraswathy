@@ -55,7 +55,11 @@ test('the panel does not resize as the day turns', async ({ page }) => {
   const doings = new Set<string>();
   for (const hour of [0, 3, 6, 9, 12, 15, 18, 21]) {
     await fieldNoteAt(page, hour);
-    const box = await page.locator('.journal').boundingBox();
+    // **`.dock`, not `.journal`.** The camera's insets are measured from the dock -- it is what
+    // covers the bottom of the screen now, and the notes are one of two things standing in it. The
+    // notes' own height varies inside a scroll container and always did; what must not move is the
+    // box the map is fitted around.
+    const box = await page.locator('.dock').boundingBox();
     heights.add(Math.round(box!.height));
     doings.add((await page.locator('.doing').textContent()) ?? '');
   }
@@ -79,7 +83,11 @@ test('the panel does not resize as the day turns, on a narrow phone', async ({ p
   const heights = new Set<number>();
   for (const hour of [0, 6, 12, 18]) {
     await fieldNoteAt(page, hour);
-    const box = await page.locator('.journal').boundingBox();
+    // **`.dock`, not `.journal`.** The camera's insets are measured from the dock -- it is what
+    // covers the bottom of the screen now, and the notes are one of two things standing in it. The
+    // notes' own height varies inside a scroll container and always did; what must not move is the
+    // box the map is fitted around.
+    const box = await page.locator('.dock').boundingBox();
     heights.add(Math.round(box!.height));
   }
 

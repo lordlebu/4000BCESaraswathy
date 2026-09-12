@@ -42,7 +42,12 @@ async function boot(page: Page, query: string) {
   await page.goto(query);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
-  await expect(page.locator('.journal-foot')).toBeVisible();
+  // `.journal`, not `.journal-foot`. The dock rests at peek and the footer is split there: the
+  // dusk and fatigue lines stay, because they are about walking, and the landmark bearing and the
+  // tally of places wait for reading height. An empty footer has no box and is not "visible",
+  // which is what this assertion used to be quietly asserting about a panel it meant to check was
+  // rendered at all.
+  await expect(page.locator('.journal')).toBeVisible();
 }
 
 test('tiredness stays inert when the flag is off', async ({ page }) => {

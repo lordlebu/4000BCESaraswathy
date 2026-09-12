@@ -1,8 +1,8 @@
 # UI streamline plan — the map is the screen, and it is 27% of it
 
-**Stage 1 has shipped; the rest has not.** This is the plan as argued, with the measurements it
-was argued from, and the shipped stage marked where it sits. The plate view under B′ shipped
-alongside it. Read it alongside `docs/ui-handoff.md`, which is the design record for the arrangement this
+**All six stages have shipped.** This is the plan as argued, with the
+measurements it was argued from, and each shipped stage marked where it sits. The plate view under
+B′ shipped alongside them, and fault 7 carries a correction to its own first version. Read it alongside `docs/ui-handoff.md`, which is the design record for the arrangement this
 proposes to change and explains why most of it is the way it is. That document's one live rule —
 *ask `journey.ts`, do not reimplement it* — is untouched by everything below, and every stage here
 is a rearrangement of presentation with no new rule in a component.
@@ -114,7 +114,7 @@ opened meant a journey that *started* on a place never showed them. The fix chos
 space. The alternative it did not consider is that the two are never wanted at once, and one slot
 with a switch in it gives each of them all of the space instead of half.
 
-### 3. Everyone at a place talks at once
+### 3. Everyone at a place talks at once · **fixed**
 
 `PlacePanel` maps over `npcsAt(place.id)` and renders a `<Person>` for each, and every `<Person>`
 mounts a live `Dialogue`. Canon has 15 people over 22 populated points of interest: 16 with one
@@ -173,21 +173,40 @@ a smaller form. They exist because the only alternative the current layout offer
 band and the full-width ribbon. Give the dock a small resting height and one of them stops being
 needed; give the strip its content width and the other does.
 
-### 7. Muted text by `opacity` drops under the contrast floor
+### 7. Muted text by `opacity` drops under the contrast floor · **fixed**
 
-The palette passes. These do not, because they are `opacity` over it rather than a colour:
+The palette passes; these did not, because they were opacity over it rather than a colour.
 
 | | Effective contrast | |
 |---|---|---|
-| `.tile-action.is-blocked > button` — `opacity: 0.55` | **3.36:1** | the reason an action is blocked |
+| `.tile-action.is-blocked > button` — `opacity: 0.55` | **3.36:1** | a blocked action's **label** |
+| the same, compounded with `.tile-action-detail`'s own `0.82` | **2.61:1** | what the ground holds |
 | `.canon-type`, `.canon-distance` — `opacity: .55` | **3.36:1** | |
 | `.canon-note` — `opacity: .65` | **4.46:1** | marginal |
-| `.dialogue-beat:not(.dialogue-current)` — `0.66` | ~4.5:1 | borderline, lines already said |
+| `.dialogue-beat:not(.dialogue-current)` — `0.66` | **4.60:1** | passes; left alone |
 
-The first is the sharp one. `TileActions` argues at length that a blocked row's reason *is* content —
-*"needs a settlement" is content, "disabled" is not* — and then the stylesheet renders it at 3.36:1.
-The fix is a token (`--ink-faint`, at 0.75 equivalent, 6.06:1) rather than an alpha on the whole
-row, so the mark and the label dim with the state and the sentence stays readable.
+**A correction to the first version of this section, which got the target wrong.** It said the
+blocked row's *reason* rendered at 3.36:1. It does not: `.tile-action-why` is a **sibling** of the
+button, outside anything the button fades, at `--muted` and 5.89:1. What the alpha was dimming was
+the label — *what the action is* — and, compounding with the detail line's own 0.82, the line
+saying what is actually on the ground, at **2.61:1**. That is worse than the thing this section
+originally complained about, and it was found by reading the markup rather than the stylesheet.
+
+**And it was never a conformance failure.** WCAG 1.4.3 exempts an inactive user interface component
+from the contrast minimum, and these rows are `disabled`. The argument for fixing it is this
+interface's own: `TileActions` says a blocked row is *teaching* rather than inert — *a row reading
+"needs a settlement" is how a player learns settlements do anything at all* — and a row cannot teach
+what cannot comfortably be read. The exemption is a floor, not the design.
+
+The fix is `--ink-faint` (`#75696f`, **4.87:1**) rather than an alpha, so it cannot multiply with
+another one. Disabled stays carried by the `disabled` attribute, the cursor and the reason line —
+none of which is a colour — and the decorative `aria-hidden` mark keeps a fade, being the one part
+of the row that carries no reading. `test/tileActions.test.tsx` refuses an alpha on any ancestor of
+the label, the detail or the reason.
+
+The dialogue's already-said beats stay at 0.66. They measure 4.60:1, the dimming is doing real work
+separating what is being said now from what was said a moment ago, and this repository's own rule is
+to measure the signal before tuning a threshold.
 
 ### 8. One 2,286-line stylesheet with an ad-hoc z scale
 
@@ -383,16 +402,16 @@ and is worth a look — but it also brings its own top-layer stacking, and a sty
 ad-hoc z-indices is not the place to find that out in the same stage as ten panel migrations.
 Revisit after stage 5.
 
-### Stage 2 — the contrast fixes · one commit
+### Stage 2 — the contrast fixes · **shipped**
 
-`--ink-faint` replaces the four `opacity` mutings above. Blocked action rows dim their mark and
-label and keep the reason at 6.06:1.
+`--ink-faint` replaces the `opacity` mutings above. A blocked row keeps its mark faded and its words
+legible; the reason was never the one at risk, which is the correction recorded in fault 7.
 
 *Proved by:* extending `test/tileActions.test.tsx` to assert the reason is not inside an
 opacity-dimmed element, and a note in `docs/testing.md`. Cheap, and it closes the one place where
 the code's own stated reasoning and the stylesheet disagree.
 
-### Stage 3 — the dock · the big one
+### Stage 3 — the dock · **shipped**
 
 `surface.ts` gains `dockHeight: 'peek' | 'read' | 'full'` with actions to set it; `Here` becomes the
 dock; `.journal` and `.place-veil` stop dividing the bottom of the screen and take turns in one slot.
@@ -404,19 +423,83 @@ provable without a browser, which is the whole reason that file exists. Plus the
 below.
 
 *A new guard, in the repo's own habit of measuring the signal before tuning it.*
-`e2e/chrome-budget.spec.ts` asserts, at the four sizes measured above:
+`e2e/chrome-budget.spec.ts` is that measurement as a check. Built, measured, and the numbers are
+what they are rather than what the plan hoped:
 
-| | Now | Required after |
-|---|---|---|
-| map visible, resting on ordinary ground | 52% / 37% landscape | **≥ 70% / ≥ 60%** |
-| map visible, standing in a place | 27% / 17% landscape | **≥ 50% / ≥ 40%** |
+| Map visible | Before | After stage 3 | After stage 6 | Guard |
+|---|---|---|---|---|
+| resting, desktop | 51.7% | 61.5% | **68.2%** | > 64% |
+| resting, phone portrait | 52.1% | 59.6% | **68.4%** | > 64% |
+| resting, small phone | 51.8% | 59.3% | **67.8%** | > 63% |
+| resting, phone landscape | 37.3% | 53.2% | **61.5%** | > 57% |
+| in a place, desktop | 27.0% | 36.0% | **38.7%** | > 34% |
+| in a place, phone portrait | 18.9% | 35.2% | **35.5%** | > 31% |
+| in a place, phone landscape | 17.1% | 14.7% | **19.0%** | — |
+| the place's own writing shown, landscape | 29% | 25% | 25% | > 21% |
 
-Numbers in a document go stale; this is the same measurement as a check, so the next arrangement
-that quietly eats the map fails rather than being noticed a year later. It belongs with
-`reachable.spec.ts` — both are about arrangement rather than content, and both exist because a
-layout can look right in a screenshot and be unusable in the hand.
+**Three of those need saying plainly, and none of them is what the plan predicted.**
 
-### Stage 4 — the action rail and the tile chips
+*The 70% was not reached — 68.4% is the closest it came.* Stage 6 took the control bar from two rows
+to one and stopped the strip stretching the screen, which was worth six to eight points; what is
+left is **the dock's own peek row**, the title, where you are, and what you can do here. That is the
+last thing worth cutting, so this is where the number stops. Close is the honest answer and 70 was
+always a target rather than a requirement.
+
+*Reading a place shows less of it than before, at reading height.* 65% against 73% on a desktop.
+The dock pays for the handle and the rail — 117 pixels — before it pays for any writing, and the
+old arrangement paid for neither because it had neither. **The answer is the third press**: the
+handle now goes peek → read → full, and full is the whole page. That third step was not in the
+plan; it was added because the measurement showed reading height alone was a step back, and a
+height nothing could reach would have been this codebase's signature bug for the fourth time.
+
+*Landscape-in-a-place went the wrong way, and then came back.* Stage 3 left it at 14.7% against
+17.1% — the one screen where every trade bites at once — and it is **19.0%** after stage 6, because
+the bar it shares the screen with halved. The intermediate number is left in the table rather than
+quietly improved: it was the honest cost at the time.
+
+Numbers in a document go stale; these are a check now, so the next arrangement that quietly eats
+the map fails rather than being noticed a year later. It belongs with `reachable.spec.ts` — both
+are about arrangement rather than content, and both exist because a layout can look right in a
+screenshot and be unusable in the hand.
+
+**Four things this stage learned by looking, none of which a test would have said.**
+
+*The rail had to come with the dock.* Folding the notes and the place into one slot hides every
+verb the moment you stand somewhere — no taking a reed until you press Leave — so the actions moved
+into the dock itself, below whichever occupant is showing. That is move B, a stage early, because
+this stage does not work without it.
+
+*Splitting the rail was tried and reverted.* Available verbs as chips in the dock, blocked rows with
+their reasons in the part that scrolls: it reads well and it **hid the blocked rows at peek**, which
+is not a detail of `TileActions`' ruling but the ruling itself — *every action is listed at all
+times, because a greyed row reading "there is daylight left" is how a player learns resting exists*.
+Every action is a chip at every height now, and what the height decides is whether the **reason**
+is on screen, because a reason is a sentence and needs the room to be one. It costs about three
+points of resting map and it is the correct three points to spend.
+
+*The dock needed a ceiling.* At its most generous reading height on a landscape phone it reached up
+under the control bar, which sits a layer above it, and **the grip ended up behind the satchel
+strip** — unpressable, reported by the browser a hundred and fifty times as "waiting for element to
+be visible, enabled and stable". `--dock-ceiling` keeps it clear by construction. Found in a
+screenshot.
+
+*And peek was hiding the wrong half of the footer.* The first cut hid all of it, which took the
+dusk and fatigue lines with it — the two things in that panel that are about *walking* rather than
+reading, and a player at peek is walking. The light going and legs giving out stay; the landmark
+bearing and the tally of places wait for reading height. The browser suite caught that one, which
+is the half of the split that had a test already.
+
+*The last correction is the one that reverses this plan's own words.* Peek was written as "sized to
+what it holds", on the reasoning that a tile with three things to do needs more room than a tile
+with one. It does — and `hours.spec.ts` failed, measuring the panel at 137 pixels in one hour and
+114 in another. The line saying what a creature is *doing* is the only text here that changes while
+the player stands still, so a content-sized dock breathes as the day turns, React reports new
+insets, and the camera refits: **the map moves under somebody who has not touched anything.** That
+guard predates this plan and is right. Every height is fixed now and the body scrolls when the
+content is taller. The cost is a little blank parchment under a quiet tile, which is the correct
+thing to pay for a map that holds still.
+
+### Stage 4 — the action rail · **shipped with stage 3**, the chips still to come
 
 `TileActions` splits: the verbs that are not about a particular thing go to the rail in the dock's
 peek row, blocked rows to the read height, both from the same array. Hotkeys unchanged. The
@@ -427,24 +510,80 @@ gathering.
 `e2e/making.spec.ts` for the paths — both already drive these buttons and will need their selectors
 moved, which is the useful kind of test churn.
 
-### Stage 5 — conversation as a mode
+### Stage 5 — conversation as a mode · **shipped**
 
-`PlacePanel` lists people; a `Conversation` view owns the dock at full height. One person talking at
-a time.
+`PlacePanel` lists who is here — a face, a name and canon's word for what they do — and choosing
+somebody opens them in the dock. `Conversation.tsx` holds the exchange, unchanged: `linesFor`,
+`meeting`, `beats`, `offerIn` and `moreAfter` are the same pure functions, `Dialogue` still types a
+beat at a time and still counts a line as heard when its last beat lands. What moved is the
+*mounting*. Which of the three things has the dock — the notes, the place, a person — is
+`surface.ts`'s, because that is arbitration.
 
-*Proved by:* `test/conversationFlow.test.tsx` (new, jsdom — the repo's own finding is that *every*
-fault in the interface work was found by rendering a component), `e2e/talking.spec.ts` extended by
-one step, and a case at `poi_lothal_camp` asserting exactly one `Dialogue` is mounted with three
-people present.
+*Proved by:* `test/oneAtATime.test.tsx`, which asserts the count nothing was asserting — at Lothal
+Camp, three people listed and **zero** beats playing until one is chosen, then exactly one exchange
+mounted. The guard was checked by reintroducing the fault: it fails with *"somebody is mid-sentence
+in a list of who is here: expected 3 to be 0"*. Plus six cases in `surface.test.ts` for the
+transitions, and `e2e/talking.spec.ts` extended by one press — every assertion in it unchanged,
+because the exchange did not move.
 
-### Stage 6 — the bar, and the stylesheet
+**And it changes a mechanic, not only a layout, which is worth saying out loud.** Being spoken to
+now takes one press. A player who walks into a place and out again is told nothing by anybody,
+where before everybody spoke at once and the diary filled by standing there. **Listening is an
+act.** That is the right trade — three simultaneous typewriters were not a conversation, and
+choosing who to listen to is ordinary — but it is a ruling rather than a consequence, and two
+browser specs were relying on the old behaviour. They now choose somebody, and
+`e2e/questions.spec.ts` says why in the helper that does it, because this is exactly the sort of
+change a spec quietly stops exercising rather than failing on.
 
-Notes and Carrying leave the bar; the strip sizes to its content. `styles.css` gets `@layer` with a
-named z scale (`--z-map: 1`, `--z-chrome: 10`, `--z-dock: 20`, `--z-modal: 40`, `--z-veil: 50`), and
-splits along the regions it already comments as sections.
+**One correction, and it is the fixed-height rule meeting its first exception.** A conversation
+opened at full height and a short one is 620 pixels of parchment holding one sentence, which is what
+the screenshot showed. Stage 3 made every height fixed so the dock cannot breathe while the player
+stands still — but *nothing in a conversation changes on its own*: a beat arrives because somebody
+pressed "Go on". So a conversation is sized to its content and the other two occupants are not,
+which `data-occupant` on the dock states outright rather than leaving to a `:has()` nobody would
+find. 326 pixels instead of 620, and the map keeps the top half.
 
-*Proved by:* `e2e/reachable.spec.ts`, unchanged, which should now find one row where it tolerates
-two.
+### Stage 6 — the bar, and the stylesheet · **shipped**
+
+Notes and Carrying leave the bar for the map sheet, under *What is on screen*, beside the seed and
+the legend. They are the two controls that decide what is **on screen** rather than what the
+traveller **does**, and with them in it the bar was two rows and 96 pixels of a phone. **It is one
+row and 44 pixels now**, at every size measured. Neither switch was removed: the ribbon's off switch
+was reported from play, and a player who wants nothing but the map still has both.
+
+The satchel strip is `width: max-content` rather than the width of its stack. It was running 1204
+pixels across a desktop to say *"nothing carried yet"*, which put a band of parchment over the top
+of the map and took clicks meant for the ground under it. It is 274 pixels now, and it still never
+hides.
+
+*Proved by:* `e2e/reachable.spec.ts`, which finds one row where it used to tolerate two, plus a new
+case on the strip's width, and the budget spec below.
+
+**The stylesheet got the z scale and a guard, and did not get `@layer` or a split.**
+
+`--z-dock`, `--z-chrome`, `--z-sheet`, `--z-arrival`, `--z-modal`, `--z-door`, `--z-fallback`. The
+numbers were 2, 3, 4, 5, 35, 40, 60 and 100, and one comment in the file worked out a stacking
+conflict by reasoning about them. `Modal.tsx`'s lift for a nested dialog is
+`calc(var(--z-modal) + depth)` now, so it cannot drift away from the scale.
+
+`test/stylesheet.test.ts` is the guard, and it is aimed at the fault this plan actually hit rather
+than at tidiness: **a bare class declared twice at the top level**, which is how `.specimen` was
+claimed by two components five hundred lines apart. It fires on the collision and not on a component
+describing its own states, and both halves were checked by reintroducing the fault.
+
+**`@layer` was declined, and so was splitting the file**, which reverses what this stage promised.
+
+`@layer` changes cascade semantics across every rule in a 2,400-line sheet: everything in a layer
+loses to everything outside it, so wrapping an existing file means auditing all 389 top-level rules
+for a change that has no visible symptom when it goes wrong. That is the same class of fault as the
+collision — invisible, found by screenshot — and worth taking only when something is being built
+rather than while something is being rearranged.
+
+The split was declined because it buys less than it looks like. `grep` works the same on one file or
+twelve, and a guard that fails on a duplicate class is the thing that actually prevents the
+collision; a split would have made the diff enormous and `git blame` worse for no behaviour anybody
+can see. If the file is split later it should be for navigability, as its own change, with the
+import order preserved exactly.
 
 ## What is declined, and why
 

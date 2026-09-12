@@ -334,7 +334,10 @@ Thirty-five in total, against the 85 this file used to claim.
   `dayNight.ts`, `player.ts`, `night.ts`, `arrival.ts`, `fatigue.ts`, `frames.ts` and `scenePlan.ts`
   are the exceptions that import no Phaser, so `test/` can cover them — which is the whole reason
   the placement and night rules live outside the scene.
-- **`src/ui/`** — React chrome. Journal panel, seed bar, layout, styles.
+- **`src/ui/`** — React chrome. The dock along the bottom (`Here.tsx`, `JournalPanel.tsx`,
+  `PlacePanel.tsx`, `TileActions.tsx`), the records and interrupts behind one `Modal.tsx`, the
+  painted plate a species opens into (`Specimen.tsx`), the seed bar, and `styles.css`. What is on
+  screen and how large it is are both decided by `surface.ts`, which is pure and tested under Node.
 
 Four rules hold this together. Breaking any of them is how the codebase gets tangled:
 
@@ -344,6 +347,82 @@ Four rules hold this together. Breaking any of them is how the codebase gets tan
 3. **React never renders a tile.** The two sides talk over `EventBus` and nothing else. A scene
    never calls `setState`; React never holds a scene reference and pokes at sprites.
 4. **Content lives in `data/*.json`.** No hardcoded creature or biome tables in TypeScript.
+
+### The interface: one dock, one door, and a budget
+
+Rearranged across four stages in September 2026 and recorded in full in
+`docs/ui-streamline-plan.md`, which carries the measurements, the corrections and what was
+declined. The short version, because these are rules rather than history:
+
+**The bottom of the screen is one dock with one occupant.** The field notes and the place take
+turns in it; whichever is showing gets all of it. They used to be two panels dividing the bottom
+edge, which left the map 27% of a desktop screen and 17% of a landscape phone. `Here.tsx` renders
+it and `surface.ts` decides how tall it is — `peek`, `read` or `full`.
+
+**The dock's heights are fixed, never sized to their content.** A dock that grows with what it
+holds breathes as the day turns, because the line saying what a creature is *doing* changes while
+the player stands still — React then reports new insets and the camera refits, moving the map under
+somebody who has not touched anything. `e2e/hours.spec.ts` guards it and caught exactly that.
+
+**Every action is listed at every height.** `TileActions` has said so for longer than the dock has
+existed: a greyed row reading *"there is daylight left"* is how a player learns resting exists.
+Splitting the rail so blocked rows only appeared at reading height was tried and reverted. What the
+height decides is whether the *reason* is on screen, because a reason is a sentence.
+
+**Listening is an act.** Being spoken to takes one press: a place lists who is here and you choose.
+A player who walks in and out is told nothing, where before everybody spoke at once and the diary
+filled by standing there. What has *not* changed is that no button records a line — being told
+something is how you hear it, and `Dialogue` writes it down as its last beat lands.
+
+**A conversation is a mode, not a section of a panel.** A place lists who is here; choosing
+somebody opens them in the dock and they have it to themselves. Every NPC used to render at once,
+each with a portrait and a running typewriter — three of them at Lothal Camp, in a panel showing a
+third of itself on a phone. `Conversation.tsx` holds the exchange and the rules under it are
+untouched; what moved is the mounting. It is also the one occupant sized to its content, because
+nothing in it changes without a press.
+
+**Every dialog goes through `src/ui/Modal.tsx`.** It owns Escape, focus in, a Tab trap, focus
+restored to the control that opened it, `inert` on `#root`, and a portal outside it so that `inert`
+is one attribute. Eleven panels each wrote their own twenty lines before it, five of them
+incompletely, and all eleven claimed `aria-modal` while leaving the page tabbable — measured, eight
+of the next ten tab stops were outside the dialog. Nesting depth comes from a **context**, not from
+effect order: React runs a child's effects before its parent's, so a stack pushed in an effect puts
+the inner modal at the bottom and the outer one answers its keys and paints over it.
+
+**Quieten text with a colour, never an alpha.** `--ink-faint` exists because `opacity` multiplies:
+a blocked row at `0.55` put its label at 3.36:1 and, compounding with the detail line's own `0.82`,
+what the ground holds at **2.61:1**. WCAG exempts a disabled control, so nothing was failing — but
+a row this interface calls *teaching* has to be readable.
+
+**`styles.css` is one flat namespace, 2,500 lines long, and `test/stylesheet.test.ts` is what keeps
+it honest.** Grep a class name before you take it — the plate card was written as `.specimen`, which
+the field kit had already used five hundred lines further down; the later rule won and the card
+rendered as a transparent 999px lozenge, while in the other direction it was restyling the field
+kit's chips. Nothing failed, and it was found in a screenshot. The guard is narrow on purpose: **a
+bare single class, declared twice at the top level**, which is the shape of that collision.
+`.dock` and `.dock[data-height='peek']` are one component describing its own states; a rule inside
+`@media` is the same rule again and is skipped.
+
+**Splitting the sheet, and `@layer`, were both declined.** Twelve files grep exactly the same as one
+— the collision above would have survived either — while `@layer` changes cascade semantics across
+389 top-level rules and has no visible symptom when it is wrong. The duplicate-class guard is what
+actually prevents the fault, so it is the thing that shipped.
+
+**`z-index` is a named scale in `:root`, and a raw number fails a test.** The sheet held 2, 3, 4, 5,
+35, 40, 60 and 100, and one comment worked out a stacking conflict by reasoning about them. The
+order of the `--z-*` tokens *is* the order things are in front of each other, so a new panel adds a
+token rather than picking a number — including `Modal.tsx`, whose lift for a nested dialog is
+`calc(var(--z-modal) + depth)` and cannot drift away from the sheet.
+
+**The control bar carries travel and time only.** What is *on screen* — field notes, carrying —
+lives in the map sheet under "What is on screen", because a toggle is a preference and a preference
+does not need a permanent row: the bar was two rows and 96px, and is one row and 44px. The satchel
+strip is `width: max-content` for the same reason — it was a full-width 1204px band to hold 274px of
+chips.
+
+**`e2e/chrome-budget.spec.ts` is the measurement as a check.** How much of the screen the map keeps,
+at four device sizes, resting and standing in a place. Its floors are set from what was measured,
+not from what was hoped — change the layout and read the failure before changing the number.
 
 ### The resource layer, and where its numbers live
 

@@ -7,18 +7,23 @@
 // album's veil lands after the plate's and paints over it unless something lifts the inner one.
 // There is no layout in jsdom and therefore no such thing as in front.
 //
-// The collection is seeded through the game's own save rather than walked to. Twenty of canon's
-// 297 species have a painting, so meeting one by walking is a coin toss on the seed, and a spec
+// The collection is seeded through the game's own save rather than walked to. Only a fraction of
+// canon is painted, so meeting a plated species by walking is a coin toss on the seed, and a spec
 // that is right two thirds of the time is a spec people learn to rerun.
+//
+// **One species is named here and it is the plated one, deliberately.** A plate is added, never
+// taken away, so naming a painted species cannot go stale as the queue is worked down -- while
+// naming an *un*painted one would fail the day somebody paints it. The unit suite finds both halves
+// from the data; this spec cannot, because importing `src/content/` into Playwright's Node runtime
+// trips the JSON-import problem described below.
 
 import { expect, test, type Page } from '@playwright/test';
 import { step } from './walk';
 
 const SEED = 'plate-e2e';
 
-/** A plated animal and an unplated plant, so the album holds one of each. */
+/** A painted animal. See the note above on why this one is named and no unpainted one is. */
 const PLATED = 'river-otter';
-const UNPLATED = 'sweet-indigo';
 
 /**
  * Put a plated animal in the collection, by editing the save the game itself wrote.
@@ -56,8 +61,7 @@ async function bootWithCollection(page: Page) {
   const journey = JSON.parse(saved!) as { collection?: Record<string, unknown> };
   journey.collection = {
     ...(journey.collection ?? {}),
-    [PLATED]: { id: PLATED, kind: 'creature' },
-    [UNPLATED]: { id: UNPLATED, kind: 'flora' }
+    [PLATED]: { id: PLATED, kind: 'creature' }
   };
 
   await page.addInitScript(
