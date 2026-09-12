@@ -1,10 +1,15 @@
 // One painted plate, at the size it was painted.
 //
-// **Twenty watercolour plates existed and nothing in the game ever showed one larger than 120
+// **Watercolour plates shipped for months and nothing in the game ever showed one larger than 120
 // pixels.** In the collection — the screen whose entire job is looking back over what you have met
 // — a plate was drawn at `2.4em`, about 38 pixels, as punctuation beside a name. The files are
-// 384 square. Ninety per cent of every painting was being thrown away at the one moment a player
-// had gone looking for it.
+// **384 square**, which `tools/build-plates.js` sets and this card is sized to. Nine tenths of
+// every painting was being thrown away at the one moment a player had gone looking for it.
+//
+// **The set grows and none of this changes.** `plates.ts` globs the folder, so a new painting is a
+// file drop; `platesFolder.test.ts` catches one filed under the wrong id or left as a raw. Counts
+// are deliberately absent from the prose here, because a count in a comment is a thing that is
+// true the day it is written.
 //
 // So a plate is now a way in. Press it in the album or in the field notes and the painting opens
 // at full size with what canon wrote about the animal underneath it.
@@ -98,9 +103,10 @@ export interface PlateButtonProps {
  * journey, and the surface reducer is deliberately about *panels* rather than about which picture
  * somebody tapped.
  *
- * Renders `null` when there is no plate, which is 277 of canon's 297 species. Callers draw their
- * mark as they always did; this is an addition to the twenty that have a painting, not a
- * replacement for the way the rest are shown.
+ * Renders `null` when there is no plate, which is still most of canon. Callers draw their mark as
+ * they always did: this is an addition to the species that have a painting, never a replacement for
+ * how the rest are shown, so the album does not become two different lists as the queue is worked
+ * down.
  */
 export function PlateButton({ speciesId, name, variant }: PlateButtonProps) {
   const [open, setOpen] = useState(false);

@@ -9,23 +9,35 @@
 // is looking back over what you have met.
 //
 // So these assertions are about size and reach rather than about presence: that the thumbnail is a
-// control, that pressing it opens the file itself, and that the 277 species without a painting are
-// untouched by all of it.
+// control, that pressing it opens the file itself, and that a species with no painting is untouched
+// by all of it.
+//
+// **Nothing here names a species.** The painted set grows -- that is the plan for it -- and a suite
+// that hard-codes "sweet indigo has no plate" fails the day somebody paints one, on a feature that
+// is working perfectly. Both fixtures are found in the data instead, so the suite follows the
+// folder.
 
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { CollectionPanel } from '../src/ui/CollectionPanel';
 import { emptyCollection, metOnTile } from '../src/content/collection';
-import { metSpecies } from '../src/content/species';
+import { creatures, flora, metSpecies } from '../src/content/species';
 import { plateFor } from '../src/ui/plates';
 
 afterEach(cleanup);
 
 const noop = () => {};
 
-/** A plated animal and an unplated plant, so both halves are exercised by one render. */
-const PLATED = 'river-otter';
-const UNPLATED = 'sweet-indigo';
+/**
+ * One species with a painting and one without, found rather than named.
+ *
+ * The painted set is a folder somebody adds files to, so which species is in which half is not a
+ * fact a test may hold. `find` asks the same loader the game asks. If the queue is ever finished and
+ * every species has a plate, `UNPLATED` comes back undefined and the fixture guard below says so in
+ * those words rather than failing somewhere confusing.
+ */
+const PLATED = creatures.find((c) => plateFor(c.id))?.id ?? '';
+const UNPLATED = flora.find((f) => !plateFor(f.id))?.id ?? '';
 
 const met = metOnTile(emptyCollection(), {
   creature: { id: PLATED },
@@ -50,15 +62,21 @@ function plateControl(name: string): HTMLElement {
 }
 
 describe('the fixtures this suite stands on', () => {
-  // Both of these are true today and either could stop being true — a plate is a file somebody
-  // drops in a folder, and canon renames species. A failure here means the fixture went stale,
-  // not that the feature broke, and saying which saves the next reader the hunt.
-  it('has a plate for the creature it tests with', () => {
-    expect(plateFor(PLATED), `${PLATED} has no plate — pick another plated species`).toBeTruthy();
+  // Guarding the guard. These cannot go stale the way named species could, but they can go *empty*
+  // -- if the bundle stops loading, or the plates folder does -- and an empty fixture would make
+  // every assertion below pass against nothing.
+  it('found a painted species to test with', () => {
+    expect(
+      PLATED,
+      'no species in the bundle has a plate — is src/ui/plates/ empty, or has the glob broken?'
+    ).not.toBe('');
   });
 
-  it('has no plate for the plant it tests with', () => {
-    expect(plateFor(UNPLATED), `${UNPLATED} now has a plate — pick another unplated species`).toBeNull();
+  it('found an unpainted species to test with', () => {
+    expect(
+      UNPLATED,
+      'every plant now has a plate, which would be remarkable — pick a different unpainted fixture'
+    ).not.toBe('');
   });
 });
 

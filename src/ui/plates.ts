@@ -1,7 +1,7 @@
 // Which species have a painted plate, and where it is.
 //
-// Canon holds 297 species a player can meet. One painted plate is a good session's work, so the
-// set will never be complete and the panel must not wait for it: `SpeciesIcon` draws a derived
+// Canon holds a few hundred species a player can meet and one painted plate is a good session's
+// work, so the set will never be complete and the panel must not wait for it: `SpeciesIcon` draws a derived
 // silhouette for every species, and a plate replaces one, individually, whenever it arrives.
 //
 // **The whole point of this file is that adding a plate takes no code.** Drop a PNG into

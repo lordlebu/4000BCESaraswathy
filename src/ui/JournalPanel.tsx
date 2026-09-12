@@ -35,6 +35,13 @@ function Note({ note, kind }: { note: FieldNote; kind: 'creature' | 'flora' }) {
   // a decision about what a plant *is* in the notes, not a queue that has not reached them yet.
   // Reading `kind` here rather than relying on there being no flora plates keeps it that way: drop
   // `neem.png` into src/ui/plates/ and it still will not open a block in the field notes.
+  //
+  // **That makes the two panels deliberately asymmetric, and it is not a bug to fix.** The album
+  // draws through `SpeciesIcon`, which prefers a plate for anything that has one -- so a painted
+  // plant would be a thumbnail there, and openable, while these notes keep it as a mark on the
+  // line. The notes are a page of prose with one picture pasted in; the album is a book of
+  // pictures. If that ever changes it is a design decision about the notes, not a consequence of
+  // somebody painting a neem.
   const plate = kind === 'creature' && note.species ? plateFor(note.species.id) : null;
 
   return (

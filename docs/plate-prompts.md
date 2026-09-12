@@ -309,10 +309,35 @@ bottom edge off a portrait, resizes to 384px, and writes `src/ui/plates/<id>.png
 touching: `src/ui/plates.ts` finds the file by name and both panels start drawing it. There is no
 list to update.
 
+### 384 was sized for a thumbnail, and the plate is no longer shown as one
+
+`SIZE` in `tools/build-plates.js` is 384 because the field notes float a plate at 7.5em — about 120
+CSS pixels — and 384 is that doubled for a dense screen, with room over. That reasoning was right
+and is now out of date: **a plate opens at up to 384 CSS pixels** in the card `src/ui/Specimen.tsx`
+draws, so the file is exactly 1:1 on an ordinary screen and upscaled twofold on a retina one.
+
+It is soft there rather than broken — a watercolour enlarged with smooth filtering is not pixel art
+being destroyed — and the trade is deliberate:
+
+- **Going to 768 costs four times the pixels.** The built plates are around 100 KB each; 768 would
+  put them near 400, and the whole argument for this build step is that the queue should be a
+  sensible download rather than a third of a gigabyte.
+- **The existing plates cannot be rebuilt by everybody anyway.** `assets/source/plates/` is
+  gitignored, so only whoever holds the raws can re-run the builder over the set. A fresh clone can
+  build a *new* plate and not re-build an old one. That is the same shape as the character sprites'
+  sources, which are being moved into the repository one at a time for exactly this reason.
+
+So: **do not change `SIZE` for one plate.** If crisper plates are wanted, it is one number and a
+rebuild of the whole folder on the machine holding the raws, and the card's `max-width` in
+`.plate-card-image` follows it. Changing it for a new plate alone gives a set that is half one size
+and half another, which is worse than uniformly soft.
+
 **Both** is load-bearing and was not always true. `plateFor` was called only in `JournalPanel` for a
 long time, so a plate appeared once at the moment of meeting and never again — the collection, whose
-whole job is looking back over what you have met, showed all twenty painted animals as an emoji.
-`SpeciesIcon` prefers a plate now and falls back to the mark, so every caller gets it.
+whole job is looking back over what you have met, showed every painted animal as an emoji.
+`SpeciesIcon` prefers a plate now and falls back to the mark, so every caller gets it. **And in both
+places the plate is now a control**: pressing it opens the painting at full size with canon's prose
+under it. Adding a plate still takes no code — the new file simply becomes openable too.
 
 The join is the fragile part, and it is what `test/speciesMark.test.ts` guards: plates are keyed by
 **engine id** (`desert-fox`) and canon's ids are `fauna_desert_fox`. A change to `engineId` that

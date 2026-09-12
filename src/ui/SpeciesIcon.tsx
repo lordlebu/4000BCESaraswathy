@@ -1,8 +1,9 @@
 // The mark beside a species name, until it has a painted plate.
 //
-// Twenty animals have real watercolour plates. The other 236 animals and all 90 plants get an
-// emoji, chosen from **what canon says the species is** — its clade or its growth form — rather
-// than from anything worked out here.
+// Some animals have a real watercolour plate; everything else gets an emoji, chosen from **what
+// canon says the species is** — its clade or its growth form — rather than from anything worked out
+// here. The painted set grows as art arrives and this file needs no edit when it does: `plateFor`
+// answers per species and the mark is the fallback.
 //
 // **This file used to guess, and the guessing is what it cost.** Two classifiers matched keywords
 // against names and binomials, roughly four hundred lines of them, and between them they were
@@ -133,8 +134,8 @@ export interface SpeciesIconProps {
 export function SpeciesIcon({ species }: SpeciesIconProps) {
   // A painted plate beats a glyph wherever one exists.
   //
-  // Twenty animals have watercolour plates and the collection was showing every one of them as
-  // 🐾, because this component only ever knew about marks -- the plate lookup lived in
+  // The collection was showing every plated animal as 🐾, because this component only ever knew
+  // about marks -- the plate lookup lived in
   // `JournalPanel` alone. So the plates appeared once, in the field notes, at the moment of
   // meeting, and never again in the place built for looking back over what you have met. That is
   // exactly backwards for the screen whose whole job is the collection.
@@ -145,7 +146,7 @@ export function SpeciesIcon({ species }: SpeciesIconProps) {
   // the file is 384 square, so nine tenths of the painting was thrown away on the one screen a
   // player opens to look back at what they met. `PlateButton` draws the same thumbnail and opens
   // the painting at full size -- see `Specimen.tsx`. It returns null when there is no plate, so
-  // the mark below is still what the other 277 species get.
+  // the mark below is still what every unpainted species gets.
   const opens = plateFor(species.id) ? (
     <PlateButton speciesId={species.id} name={species.name} variant="mark" />
   ) : null;
