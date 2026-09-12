@@ -327,3 +327,63 @@ describe('how much room the dock has', () => {
     expect(state.dockHeight).toBe('read');
   });
 });
+
+/**
+ * Somebody talking, which is stage 5 of `docs/ui-streamline-plan.md`.
+ *
+ * The fault: every person at a point of interest rendered at once, each with a portrait and a live
+ * typewriter, stacked in a scroller that showed a third of itself on a landscape phone. Canon has
+ * three of them at Lothal Camp. A conversation is a third occupant of the dock now, and which
+ * occupant has the slot is this reducer's business.
+ */
+describe('listening to somebody', () => {
+  const atAPlace = (): SurfaceAction[] => [{ type: 'standing-on', poiId: 'poi_lothal_camp' }];
+
+  it('nobody is talking to begin with', () => {
+    expect(initialSurface.talkingTo).toBeNull();
+    expect(run(...atAPlace()).talkingTo).toBeNull();
+  });
+
+  it('takes the dock at full height', () => {
+    const state = run(...atAPlace(), { type: 'talk-to', npcId: 'npc_uma' });
+    expect(state.talkingTo).toBe('npc_uma');
+    // Full, because this is the one thing in the game that is nothing but reading.
+    expect(state.dockHeight).toBe('full');
+    expect(state.surface).toBe('here');
+  });
+
+  it('goes back to the place they are standing in, not to the map', () => {
+    // Somebody who has just finished listening is still in the middle of being somewhere.
+    const state = run(...atAPlace(), { type: 'talk-to', npcId: 'npc_uma' }, { type: 'stop-talking' });
+    expect(state.talkingTo).toBeNull();
+    expect(state.placeOpen).toBe(true);
+    expect(state.dockHeight).toBe('read');
+  });
+
+  it('ends when the traveller walks out', () => {
+    // `Dialogue`'s own rule is that being walked out on still counts as having been told, so
+    // nothing is lost by the panel going away -- but it must go away, because a conversation with
+    // somebody you are no longer standing near is a lie about where you are.
+    const state = run(
+      ...atAPlace(),
+      { type: 'talk-to', npcId: 'npc_uma' },
+      { type: 'standing-on', poiId: null }
+    );
+    expect(state.talkingTo).toBeNull();
+    expect(state.dockHeight).toBe('peek');
+  });
+
+  it('ends when the place is put away', () => {
+    const state = run(...atAPlace(), { type: 'talk-to', npcId: 'npc_uma' }, { type: 'close-place' });
+    expect(state.talkingTo).toBeNull();
+  });
+
+  it('holds one person at a time', () => {
+    const state = run(
+      ...atAPlace(),
+      { type: 'talk-to', npcId: 'npc_uma' },
+      { type: 'talk-to', npcId: 'npc_bekh' }
+    );
+    expect(state.talkingTo).toBe('npc_bekh');
+  });
+});

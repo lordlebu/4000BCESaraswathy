@@ -1,6 +1,6 @@
 # UI streamline plan — the map is the screen, and it is 27% of it
 
-**Stages 1 to 4 have shipped; 5 and 6 have not.** This is the plan as argued, with the
+**Stages 1 to 5 have shipped; 6 has not.** This is the plan as argued, with the
 measurements it was argued from, and each shipped stage marked where it sits. The plate view under
 B′ shipped alongside them, and fault 7 carries a correction to its own first version. Read it alongside `docs/ui-handoff.md`, which is the design record for the arrangement this
 proposes to change and explains why most of it is the way it is. That document's one live rule —
@@ -114,7 +114,7 @@ opened meant a journey that *started* on a place never showed them. The fix chos
 space. The alternative it did not consider is that the two are never wanted at once, and one slot
 with a switch in it gives each of them all of the space instead of half.
 
-### 3. Everyone at a place talks at once
+### 3. Everyone at a place talks at once · **fixed**
 
 `PlacePanel` maps over `npcsAt(place.id)` and renders a `<Person>` for each, and every `<Person>`
 mounts a live `Dialogue`. Canon has 15 people over 22 populated points of interest: 16 with one
@@ -508,15 +508,38 @@ gathering.
 `e2e/making.spec.ts` for the paths — both already drive these buttons and will need their selectors
 moved, which is the useful kind of test churn.
 
-### Stage 5 — conversation as a mode
+### Stage 5 — conversation as a mode · **shipped**
 
-`PlacePanel` lists people; a `Conversation` view owns the dock at full height. One person talking at
-a time.
+`PlacePanel` lists who is here — a face, a name and canon's word for what they do — and choosing
+somebody opens them in the dock. `Conversation.tsx` holds the exchange, unchanged: `linesFor`,
+`meeting`, `beats`, `offerIn` and `moreAfter` are the same pure functions, `Dialogue` still types a
+beat at a time and still counts a line as heard when its last beat lands. What moved is the
+*mounting*. Which of the three things has the dock — the notes, the place, a person — is
+`surface.ts`'s, because that is arbitration.
 
-*Proved by:* `test/conversationFlow.test.tsx` (new, jsdom — the repo's own finding is that *every*
-fault in the interface work was found by rendering a component), `e2e/talking.spec.ts` extended by
-one step, and a case at `poi_lothal_camp` asserting exactly one `Dialogue` is mounted with three
-people present.
+*Proved by:* `test/oneAtATime.test.tsx`, which asserts the count nothing was asserting — at Lothal
+Camp, three people listed and **zero** beats playing until one is chosen, then exactly one exchange
+mounted. The guard was checked by reintroducing the fault: it fails with *"somebody is mid-sentence
+in a list of who is here: expected 3 to be 0"*. Plus six cases in `surface.test.ts` for the
+transitions, and `e2e/talking.spec.ts` extended by one press — every assertion in it unchanged,
+because the exchange did not move.
+
+**And it changes a mechanic, not only a layout, which is worth saying out loud.** Being spoken to
+now takes one press. A player who walks into a place and out again is told nothing by anybody,
+where before everybody spoke at once and the diary filled by standing there. **Listening is an
+act.** That is the right trade — three simultaneous typewriters were not a conversation, and
+choosing who to listen to is ordinary — but it is a ruling rather than a consequence, and two
+browser specs were relying on the old behaviour. They now choose somebody, and
+`e2e/questions.spec.ts` says why in the helper that does it, because this is exactly the sort of
+change a spec quietly stops exercising rather than failing on.
+
+**One correction, and it is the fixed-height rule meeting its first exception.** A conversation
+opened at full height and a short one is 620 pixels of parchment holding one sentence, which is what
+the screenshot showed. Stage 3 made every height fixed so the dock cannot breathe while the player
+stands still — but *nothing in a conversation changes on its own*: a beat arrives because somebody
+pressed "Go on". So a conversation is sized to its content and the other two occupants are not,
+which `data-occupant` on the dock states outright rather than leaving to a `:has()` nobody would
+find. 326 pixels instead of 620, and the map keeps the top half.
 
 ### Stage 6 — the bar, and the stylesheet
 

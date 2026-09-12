@@ -231,7 +231,7 @@ export function App() {
    * you had dismissed.
    */
   const [ui, dispatch] = useReducer(surfaceReducer, initialSurface);
-  const { surface, interrupts, standingOn, placeOpen, satchelRibbon, dockHeight } = ui;
+  const { surface, interrupts, standingOn, placeOpen, satchelRibbon, dockHeight, talkingTo } = ui;
 
   // The scene owns the clock and says when it turns. React used to run its own timer off the
   // same formulas, which is two clocks agreeing by luck -- and they would have drifted the
@@ -1115,13 +1115,23 @@ export function App() {
           moment,
           firstVisit: Boolean(standingOn) && !visited.current.has(standingOn!),
           onLook: look,
-          satchel,
-          onListen: listen,
+          onTalkTo: (npcId: string) => dispatch({ type: 'talk-to', npcId }),
           onClose: () => {
             if (standingOn) visited.current.add(standingOn);
             dispatch({ type: 'close-place' });
           }
         }}
+        conversation={
+          talkingTo
+            ? {
+                npcId: talkingTo,
+                progress,
+                satchel,
+                onListen: listen,
+                onClose: () => dispatch({ type: 'stop-talking' })
+              }
+            : null
+        }
         canon={<CanonPanel place={place} status={canon} />}
         actions={tileActions}
       />

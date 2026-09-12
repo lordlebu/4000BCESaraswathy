@@ -369,6 +369,18 @@ existed: a greyed row reading *"there is daylight left"* is how a player learns 
 Splitting the rail so blocked rows only appeared at reading height was tried and reverted. What the
 height decides is whether the *reason* is on screen, because a reason is a sentence.
 
+**Listening is an act.** Being spoken to takes one press: a place lists who is here and you choose.
+A player who walks in and out is told nothing, where before everybody spoke at once and the diary
+filled by standing there. What has *not* changed is that no button records a line — being told
+something is how you hear it, and `Dialogue` writes it down as its last beat lands.
+
+**A conversation is a mode, not a section of a panel.** A place lists who is here; choosing
+somebody opens them in the dock and they have it to themselves. Every NPC used to render at once,
+each with a portrait and a running typewriter — three of them at Lothal Camp, in a panel showing a
+third of itself on a phone. `Conversation.tsx` holds the exchange and the rules under it are
+untouched; what moved is the mounting. It is also the one occupant sized to its content, because
+nothing in it changes without a press.
+
 **Every dialog goes through `src/ui/Modal.tsx`.** It owns Escape, focus in, a Tab trap, focus
 restored to the control that opened it, `inert` on `#root`, and a portal outside it so that `inert`
 is one attribute. Eleven panels each wrote their own twenty lines before it, five of them

@@ -96,6 +96,21 @@ export interface SurfaceState {
    */
   placeOpen: boolean;
   /**
+   * Who is talking, or null when nobody is.
+   *
+   * **A conversation is a third occupant of the dock, not a section of the place panel.** Every
+   * person at a point of interest used to render at once, each with a 96-pixel portrait and its own
+   * running typewriter, stacked in a scroller that showed a third of itself on a landscape phone.
+   * Canon holds three of them at Lothal Camp and two at five other places; their lines average
+   * thirty-two words and run to sixty-one. They are written to be listened to, and two at once is
+   * not a presentation of them.
+   *
+   * Here rather than inside `PlacePanel` because it is arbitration -- who has the slot, and how
+   * tall the slot is -- which is the whole of what this reducer is for. It is also why walking away
+   * can end a conversation without the panel having to know it happened.
+   */
+  talkingTo: string | null;
+  /**
    * Whether the satchel ribbon is showing.
    *
    * Its own flag rather than a `Surface`, because a surface is one-of-many and this is
@@ -130,6 +145,10 @@ export type SurfaceAction =
   | { type: 'standing-on'; poiId: string | null }
   /** Show or hide the satchel ribbon. */
   | { type: 'toggle-satchel-ribbon' }
+  /** Listen to somebody. Takes the dock, at full height. */
+  | { type: 'talk-to'; npcId: string }
+  /** Stop listening, and go back to the place they are standing in. */
+  | { type: 'stop-talking' }
   /** Give the dock a size. */
   | { type: 'dock'; height: DockHeight }
   /**
@@ -162,6 +181,7 @@ export const initialSurface: SurfaceState = {
   interrupts: { ending: false, overworld: false, kit: false, satchel: false, workshop: false },
   standingOn: null,
   placeOpen: false,
+  talkingTo: null,
   // Shown by default, on the same reasoning as the notes: a readout nobody has found is a
   // readout that does not exist. It closes because a permanent band that cannot be dismissed is
   // an obstruction rather than a convenience -- reported from play, and the map is the thing
@@ -191,15 +211,22 @@ export function surfaceReducer(state: SurfaceState, action: SurfaceAction): Surf
       // Reading a place implies being on the `here` surface: it is the layer above the notes,
       // so opening it can never leave the player looking at the diary with a place panel on top.
       const placeOpen = !state.placeOpen;
-      // A place is prose, so it opens at reading height; putting it away gives the map back.
-      return { ...state, surface: 'here', placeOpen, dockHeight: placeOpen ? 'read' : 'peek' };
+      // A place is prose, so it opens at reading height; putting it away gives the map back. And
+      // either way nobody is talking: there is no conversation without a place to have it in.
+      return {
+        ...state,
+        surface: 'here',
+        placeOpen,
+        talkingTo: null,
+        dockHeight: placeOpen ? 'read' : 'peek'
+      };
     }
 
     case 'close-place':
       // Only the place closes. The notes it was covering stay, which is the whole point --
       // "Leave" should reveal what is underneath, not clear the screen. What has changed is that
       // they are revealed at peek: leaving somewhere is a move back towards the map.
-      return { ...state, surface: 'here', placeOpen: false, dockHeight: 'peek' };
+      return { ...state, surface: 'here', placeOpen: false, talkingTo: null, dockHeight: 'peek' };
 
     case 'open-interrupt':
       return { ...state, interrupts: { ...state.interrupts, [action.which]: true } };
@@ -220,12 +247,25 @@ export function surfaceReducer(state: SurfaceState, action: SurfaceAction): Surf
           standingOn: action.poiId,
           surface: 'here',
           placeOpen: true,
+          talkingTo: null,
           dockHeight: 'read'
         };
       }
-      // Walking out gives the map back rather than leaving a page of prose open over it.
-      return { ...state, standingOn: null, placeOpen: false, dockHeight: 'peek' };
+      // Walking out gives the map back rather than leaving a page of prose open over it, and it
+      // ends any conversation -- `Dialogue`'s own rule is that being walked out on still counts as
+      // having been told, so nothing is lost by the panel going away.
+      return { ...state, standingOn: null, placeOpen: false, talkingTo: null, dockHeight: 'peek' };
     }
+
+    case 'talk-to':
+      // Full height, because this is the one thing in the game that is nothing but reading: a
+      // portrait, the words, and one control to go on.
+      return { ...state, surface: 'here', talkingTo: action.npcId, dockHeight: 'full' };
+
+    case 'stop-talking':
+      // Back to the place they were standing in, at the height it opens at. Not to `peek`: somebody
+      // who has just finished listening is still in the middle of being somewhere.
+      return { ...state, talkingTo: null, dockHeight: 'read' };
 
     case 'dock':
       return { ...state, dockHeight: action.height };

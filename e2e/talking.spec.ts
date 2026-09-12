@@ -15,6 +15,13 @@ import { step } from './walk';
 const SEED = 'dock-8';
 const AT_NIGHT = `/?seed=${SEED}&hour=0&at=9,40`;
 
+/**
+ * Walk to the dockyard and choose Thrali out of the people standing there.
+ *
+ * **The choosing is new, and it is the point of stage 5.** Everybody at a place used to talk at
+ * once; a place now lists who is here and one of them takes the dock when chosen. Every assertion
+ * below is unchanged — the exchange itself did not move — and they all now happen one press later.
+ */
 async function walkToThrali(page: Page) {
   await page.goto(AT_NIGHT);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
@@ -22,6 +29,12 @@ async function walkToThrali(page: Page) {
   await step(page, 'ArrowDown');
   await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
+
+  // Nobody is mid-sentence yet, which is the fault this stage fixed.
+  await expect(page.locator('.dialogue-beat')).toHaveCount(0);
+
+  await page.locator('.who', { hasText: 'Thrali' }).click();
+  await expect(page.locator('.person')).toHaveCount(1, { timeout: 10_000 });
 }
 
 test('a person says one thing at a time, not a paragraph', async ({ page }) => {
@@ -74,6 +87,7 @@ test('walking out does not lose what you were told', async ({ page }) => {
   // Leave immediately, without clicking through the exchange. Thrali's first line gives the
   // silver-water question, and a player who stood there while he spoke has been given it --
   // recording only on completion once meant the question was silently dropped on the way out.
+  await page.getByRole('button', { name: 'Back' }).click();
   await page.getByRole('button', { name: 'Leave' }).click();
 
   await page.getByRole('button', { name: /Records/ }).click();
@@ -103,6 +117,7 @@ test('the person you are talking to has a face beside the words', async ({ page 
 test('the People tab keeps a record of who you have met', async ({ page }) => {
   await walkToThrali(page);
   await expect(page.locator('.person .dialogue-beat')).not.toHaveCount(0);
+  await page.getByRole('button', { name: 'Back' }).click();
   await page.getByRole('button', { name: 'Leave' }).click();
 
   await page.getByRole('button', { name: /Records/ }).click();

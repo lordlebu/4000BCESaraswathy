@@ -1,6 +1,7 @@
 // Here: what is in front of you, right now — and how much of the screen it is allowed to take.
 //
-// **One dock, one occupant, three heights.** The field notes and the place used to be two panels
+// **One dock, one occupant, three heights.** The occupant is the field notes, the place under foot,
+// or somebody talking -- and never two of them. The field notes and the place used to be two panels
 // dividing the bottom of the screen between them, each getting half of a half; measured, that left
 // the map at 27% on a desktop and **17% on a landscape phone**, with the place panel showing 29% of
 // its own content in a 135-pixel window. The two are never wanted at once, so they take turns in
@@ -26,6 +27,7 @@
 // Node.
 
 import type { ReactNode } from 'react';
+import { Conversation, type ConversationProps } from './Conversation';
 import { JournalPanel, type JournalPanelProps } from './JournalPanel';
 import { PlacePanel, type PlacePanelProps } from './PlacePanel';
 import { TileActions, type TileAction } from './TileActions';
@@ -51,6 +53,14 @@ export interface HereProps {
   notes: JournalPanelProps;
   /** The place, which takes the slot while it is being read. */
   place: PlacePanelProps;
+  /**
+   * Somebody talking, when a person has been chosen.
+   *
+   * Takes the slot over the place, because a conversation is the one thing in this game that is
+   * nothing but reading -- and because every person at a point of interest used to talk at once.
+   * See `Conversation.tsx`.
+   */
+  conversation: ConversationProps | null;
   /** Canon, when a service is listening. Usually nothing at all. */
   canon?: ReactNode;
   /**
@@ -67,15 +77,32 @@ export interface HereProps {
   onHeight: () => void;
 }
 
-export function Here({ open, notes, place, canon, actions, height, onHeight }: HereProps) {
+export function Here({
+  open,
+  notes,
+  place,
+  conversation,
+  canon,
+  actions,
+  height,
+  onHeight
+}: HereProps) {
   if (!open) return null;
 
-  // `poiId` already carries "am I being read" from the reducer, so this is the whole of the
-  // arbitration on this side: one of the two is in the slot and the other is not rendered.
+  // The reducer has already decided all of this -- `talkingTo` and `poiId` carry it -- so the whole
+  // of the arbitration on this side is picking one of three and rendering nothing else.
   const reading = place.poiId !== null;
 
   return (
-    <section className="dock" data-height={height} aria-label="Here">
+    <section
+      className="dock"
+      data-height={height}
+      // Which of the three has the slot, stated on the element. The stylesheet needs it -- a
+      // conversation is sized to its content where the other two are not -- and it is a better
+      // thing for a test to read than the presence of a child.
+      data-occupant={conversation ? 'conversation' : reading ? 'place' : 'notes'}
+      aria-label="Here"
+    >
       {/* A grip, and a real control. The dock can be opened and shut by dragging on a touch screen,
           but a drag is not discoverable and is not available to a keyboard -- so the same thing is
           a button that says what it does. */}
@@ -90,7 +117,9 @@ export function Here({ open, notes, place, canon, actions, height, onHeight }: H
       </button>
 
       <div className="dock-body">
-        {reading ? (
+        {conversation ? (
+          <Conversation {...conversation} />
+        ) : reading ? (
           <PlacePanel {...place} />
         ) : (
           <JournalPanel {...notes}>{canon}</JournalPanel>

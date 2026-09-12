@@ -461,6 +461,19 @@ button.ghost:hover:not(:disabled) {
   }
 }
 
+/* **A conversation is the one occupant sized to its content, and the reason is specific.**
+ *
+ * The fixed heights above exist so the dock cannot breathe while the player stands still -- the
+ * line about what a creature is *doing* changes on its own, and a dock that follows it drags the
+ * camera. Nothing in a conversation changes on its own: a beat arrives because somebody pressed
+ * "Go on". So it may grow with what has been said, and at full height a short exchange is otherwise
+ * 620 pixels of parchment holding one sentence, which is what the screenshot showed.
+ *
+ * The cap still applies, from `[data-height]` and the ceiling. */
+.dock[data-occupant='conversation'] {
+  height: auto;
+}
+
 /* The occupant scrolls; the handle and the actions do not. That is the whole reason the dock is a
    column rather than one scrolling box: the things you act on stay put while the prose moves. */
 .dock-body {
@@ -1810,6 +1823,81 @@ button.ghost:hover:not(:disabled) {
    nothing left to keep clear of, and the ruling those rules protected -- that leaving a place
    reveals the notes rather than clearing the screen -- is now the reducer's, in `surface.ts`. */
 
+
+
+/* --- Who is here, and one of them talking ---------------------------------
+ *
+ * **A list, because three people used to talk at once.** Every NPC at a point of interest rendered
+ * with a 96-pixel portrait and a running typewriter, stacked in a scroller; Lothal Camp has three of
+ * them. Choosing somebody now opens them in the dock at full height -- see `Conversation.tsx`.
+ *
+ * The row is a real target rather than a name with a face beside it: 44px, the same floor as every
+ * control in this interface, and the whole row is the button so there is nothing to aim at. */
+.who-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 10px;
+  text-align: left;
+  background: rgba(164, 92, 64, 0.08);
+  color: var(--ink);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+}
+
+.who:hover:not(:disabled) {
+  background: rgba(164, 92, 64, 0.16);
+  filter: none;
+}
+
+.who-words {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.who-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Canon's own word for what they do, which is the useful thing to know before choosing who to
+   listen to -- "fisher", "hunter", "potter". */
+.who-role {
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+/* One person, with the dock to themselves. The head names them and offers the way back; everything
+   under it is `.person`, unchanged from when it was a section of the place panel. */
+.conversation {
+  padding: 4px clamp(0.9rem, 2.6vw, 1.5rem) 14px;
+}
+
+.conversation-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.conversation-head h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
 
 /* --- A plate you can open ------------------------------------------------
  *
