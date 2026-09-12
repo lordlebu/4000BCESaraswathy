@@ -30,6 +30,19 @@
   --edge: rgba(52, 38, 58, 0.16);
   --accent: #a45c40;
   --muted: #6d5a68;
+  /* Quieter than --muted and still readable: 4.87:1 on the parchment, against the 4.5:1 the AA
+   * body-text minimum asks for.
+   *
+   * **It exists because `opacity` is not a way to make text quiet.** A blocked action row was dimmed
+   * with `opacity: 0.55`, which put its label at 3.36:1 and -- compounding with the detail line's
+   * own 0.82 -- what the ground holds at **2.61:1**. WCAG exempts an inactive control from the
+   * contrast rule, so that was never a conformance failure; it was a failure against this
+   * interface's own argument, which is that a blocked row is *teaching* and not merely inert. See
+   * `TileActions.tsx`: a row reading "needs a settlement" is how a player learns settlements do
+   * anything at all, and it cannot teach what it cannot be read.
+   *
+   * A colour rather than an alpha, so it cannot multiply with another one. */
+  --ink-faint: #75696f;
 
   /* Every pinned element clears the notch and the home indicator. index.html sets
      viewport-fit=cover, without which these all resolve to zero. */
@@ -654,10 +667,27 @@ button.ghost:hover:not(:disabled) {
 
 /* A blocked action keeps its row and states why, rather than vanishing. The reason is the
    teaching -- a row reading "nothing here to take" tells a player that ground can hold
-   things, where a disappeared row tells them nothing at all. */
+   things, where a disappeared row tells them nothing at all.
+
+   **So it is quietened by colour, not by `opacity`.** The alpha that used to be here dimmed the
+   whole button, which took the label to 3.36:1 and the detail line -- already at 0.82 of its own --
+   to 2.61:1. Disabled is carried by the `disabled` attribute, the cursor and the reason line
+   underneath, none of which is a colour, so nothing is lost by making the words legible. */
 .tile-action.is-blocked > button {
-  opacity: 0.55;
+  color: var(--ink-faint);
   cursor: default;
+}
+
+/* The detail's own dimming is relative to its row, and two of them multiplied. On a blocked row it
+   takes the same faint ink as the label instead of compounding with it. */
+.tile-action.is-blocked .tile-action-detail {
+  opacity: 1;
+}
+
+/* The mark may still fade: it is `aria-hidden` decoration beside a label that says the same thing,
+   so it is the one part of the row carrying no reading. */
+.tile-action.is-blocked .tile-action-mark {
+  opacity: 0.7;
 }
 
 .tile-action-why {
@@ -1075,12 +1105,12 @@ button.ghost:hover:not(:disabled) {
 }
 
 .canon-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.canon-type { opacity: .55; font-size: .74rem; }
+.canon-type { color: var(--ink-faint); font-size: .74rem; }
 /* Distance is the retrieval score; lining the digits up makes the ranking readable. */
-.canon-distance { opacity: .55; font-variant-numeric: tabular-nums; font-size: .74rem; }
+.canon-distance { color: var(--ink-faint); font-variant-numeric: tabular-nums; font-size: .74rem; }
 
 .canon-passage { margin: 0; font-size: .88rem; line-height: 1.55; }
-.canon-note { margin: 0; font-size: .8rem; opacity: .65; }
+.canon-note { margin: 0; font-size: .8rem; color: var(--muted); }
 
 /* ── The diary ──────────────────────────────────────────────────────────────────────────────
  *
@@ -1396,6 +1426,10 @@ button.ghost:hover:not(:disabled) {
  */
 .dialogue { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; }
 .dialogue-beat { margin: 0 0 0.35rem; }
+/* A line already said, dimmed. **Left at 0.66 deliberately**: it measures 4.60:1, which clears the
+   minimum, and this file's own rule is to measure the signal before tuning a threshold. Dimming is
+   also doing real work here -- it is what separates what is being said now from what was said a
+   moment ago. */
 .dialogue-beat:not(.dialogue-current) { opacity: 0.66; }
 .dialogue-current { min-height: 1.2em; }
 
@@ -1591,8 +1625,8 @@ button.ghost:hover:not(:disabled) {
 
 /* --- A plate you can open ------------------------------------------------
  *
- * The twenty painted plates are 384 square and were never drawn above 120px. These two rules turn
- * the thumbnail into a control without changing its size: same box, same radius, same place in
+ * A painted plate is 384 square and was never drawn above 120px anywhere in the game. These two
+ * rules turn the thumbnail into a control without changing its size: same box, same radius, same place in
  * the line, plus a hairline that appears on hover and focus so it reads as something to press.
  *
  * `button` here resets rather than inherits. The global button style is a filled terracotta pill,
@@ -1677,8 +1711,13 @@ button.ghost:hover:not(:disabled) {
   box-shadow: 0 18px 44px rgba(27, 20, 32, 0.5);
 }
 
-/* Square, because every plate is. The width caps at 384px, which is the file's own size -- a
-   watercolour scaled past its pixels looks soft, and these were painted to be looked at. */
+/* Square, because the builder squares every plate.
+ *
+ * **The cap is `SIZE` in `tools/build-plates.js`, not a number chosen here.** At 384 the file is
+ * drawn 1:1 on an ordinary screen; letting the card grow past it would enlarge a watercolour past
+ * its own pixels for no gain. If the builder's size ever moves, this moves with it -- and
+ * `docs/plate-prompts.md` records why it has not: 768 would quadruple the download, and the raws
+ * are gitignored, so the existing set can only be rebuilt by whoever holds them. */
 .plate-card-image {
   width: 100%;
   aspect-ratio: 1 / 1;

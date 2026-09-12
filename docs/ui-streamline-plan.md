@@ -1,8 +1,8 @@
 # UI streamline plan — the map is the screen, and it is 27% of it
 
-**Stage 1 has shipped; the rest has not.** This is the plan as argued, with the measurements it
-was argued from, and the shipped stage marked where it sits. The plate view under B′ shipped
-alongside it. Read it alongside `docs/ui-handoff.md`, which is the design record for the arrangement this
+**Stages 1 and 2 have shipped; the rest has not.** This is the plan as argued, with the
+measurements it was argued from, and each shipped stage marked where it sits. The plate view under
+B′ shipped alongside them, and fault 7 carries a correction to its own first version. Read it alongside `docs/ui-handoff.md`, which is the design record for the arrangement this
 proposes to change and explains why most of it is the way it is. That document's one live rule —
 *ask `journey.ts`, do not reimplement it* — is untouched by everything below, and every stage here
 is a rearrangement of presentation with no new rule in a component.
@@ -173,21 +173,40 @@ a smaller form. They exist because the only alternative the current layout offer
 band and the full-width ribbon. Give the dock a small resting height and one of them stops being
 needed; give the strip its content width and the other does.
 
-### 7. Muted text by `opacity` drops under the contrast floor
+### 7. Muted text by `opacity` drops under the contrast floor · **fixed**
 
-The palette passes. These do not, because they are `opacity` over it rather than a colour:
+The palette passes; these did not, because they were opacity over it rather than a colour.
 
 | | Effective contrast | |
 |---|---|---|
-| `.tile-action.is-blocked > button` — `opacity: 0.55` | **3.36:1** | the reason an action is blocked |
+| `.tile-action.is-blocked > button` — `opacity: 0.55` | **3.36:1** | a blocked action's **label** |
+| the same, compounded with `.tile-action-detail`'s own `0.82` | **2.61:1** | what the ground holds |
 | `.canon-type`, `.canon-distance` — `opacity: .55` | **3.36:1** | |
 | `.canon-note` — `opacity: .65` | **4.46:1** | marginal |
-| `.dialogue-beat:not(.dialogue-current)` — `0.66` | ~4.5:1 | borderline, lines already said |
+| `.dialogue-beat:not(.dialogue-current)` — `0.66` | **4.60:1** | passes; left alone |
 
-The first is the sharp one. `TileActions` argues at length that a blocked row's reason *is* content —
-*"needs a settlement" is content, "disabled" is not* — and then the stylesheet renders it at 3.36:1.
-The fix is a token (`--ink-faint`, at 0.75 equivalent, 6.06:1) rather than an alpha on the whole
-row, so the mark and the label dim with the state and the sentence stays readable.
+**A correction to the first version of this section, which got the target wrong.** It said the
+blocked row's *reason* rendered at 3.36:1. It does not: `.tile-action-why` is a **sibling** of the
+button, outside anything the button fades, at `--muted` and 5.89:1. What the alpha was dimming was
+the label — *what the action is* — and, compounding with the detail line's own 0.82, the line
+saying what is actually on the ground, at **2.61:1**. That is worse than the thing this section
+originally complained about, and it was found by reading the markup rather than the stylesheet.
+
+**And it was never a conformance failure.** WCAG 1.4.3 exempts an inactive user interface component
+from the contrast minimum, and these rows are `disabled`. The argument for fixing it is this
+interface's own: `TileActions` says a blocked row is *teaching* rather than inert — *a row reading
+"needs a settlement" is how a player learns settlements do anything at all* — and a row cannot teach
+what cannot comfortably be read. The exemption is a floor, not the design.
+
+The fix is `--ink-faint` (`#75696f`, **4.87:1**) rather than an alpha, so it cannot multiply with
+another one. Disabled stays carried by the `disabled` attribute, the cursor and the reason line —
+none of which is a colour — and the decorative `aria-hidden` mark keeps a fade, being the one part
+of the row that carries no reading. `test/tileActions.test.tsx` refuses an alpha on any ancestor of
+the label, the detail or the reason.
+
+The dialogue's already-said beats stay at 0.66. They measure 4.60:1, the dimming is doing real work
+separating what is being said now from what was said a moment ago, and this repository's own rule is
+to measure the signal before tuning a threshold.
 
 ### 8. One 2,286-line stylesheet with an ad-hoc z scale
 
@@ -383,10 +402,10 @@ and is worth a look — but it also brings its own top-layer stacking, and a sty
 ad-hoc z-indices is not the place to find that out in the same stage as ten panel migrations.
 Revisit after stage 5.
 
-### Stage 2 — the contrast fixes · one commit
+### Stage 2 — the contrast fixes · **shipped**
 
-`--ink-faint` replaces the four `opacity` mutings above. Blocked action rows dim their mark and
-label and keep the reason at 6.06:1.
+`--ink-faint` replaces the `opacity` mutings above. A blocked row keeps its mark faded and its words
+legible; the reason was never the one at risk, which is the correction recorded in fault 7.
 
 *Proved by:* extending `test/tileActions.test.tsx` to assert the reason is not inside an
 opacity-dimmed element, and a note in `docs/testing.md`. Cheap, and it closes the one place where
