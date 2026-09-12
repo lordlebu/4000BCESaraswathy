@@ -30,6 +30,8 @@ import type { ReactNode } from 'react';
 import { Conversation, type ConversationProps } from './Conversation';
 import { JournalPanel, type JournalPanelProps } from './JournalPanel';
 import { PlacePanel, type PlacePanelProps } from './PlacePanel';
+import { SkyDial } from './SkyDial';
+import { StandingRow, type StandingRowProps } from './StandingRow';
 import { TileActions, type TileAction } from './TileActions';
 import type { DockHeight } from './surface';
 
@@ -64,6 +66,21 @@ export interface HereProps {
   /** Canon, when a service is listening. Usually nothing at all. */
   canon?: ReactNode;
   /**
+   * What is standing on this tile: the animal, the plant, the material.
+   *
+   * **Pinned beside the actions rather than written into the notes, and that is a correction made
+   * by measuring.** It went in `JournalPanel` first, below the surroundings, which reads better and
+   * does not work: the notes scroll, so at peek the body clipped it -- measured, one chip cut off
+   * on a 390-pixel phone, two on a 360, and all three on a landscape one. The row exists because
+   * the tile's contents were hidden behind a gesture; putting it somewhere it can be scrolled away
+   * from would have been the same fault in a new place.
+   *
+   * So it sits where the rail sits, for the rail's own reason. What is here and what you can do
+   * about it are both facts about the ground, they are both wanted at a glance, and neither may be
+   * scrolled out of reach.
+   */
+  standing: StandingRowProps;
+  /**
    * Everything that can be done on this tile.
    *
    * Below the occupant rather than inside it: the notes are prose about where you are, and these
@@ -71,6 +88,20 @@ export interface HereProps {
    * satchel and unrolling the bedding inside the field notes.
    */
   actions: readonly TileAction[];
+  /**
+   * Where the day is, or null before the scene has said.
+   *
+   * **In the dock rather than in the control bar, and a measurement chose that.** The bar is 284
+   * pixels of a 360-pixel phone with about fifty to spare, so a 44-pixel readout looked like it
+   * fitted -- and measured, it took the bar to **96 pixels and two rows**, which is exactly what
+   * the last plan spent a whole stage undoing. It would have been worse than that in play: the bar
+   * grows a *Here* button at a point of interest and a *Workshop* button beside a bench, so the
+   * screen it was measured on is the emptiest one there is.
+   *
+   * The dock's grip row is the other place a player looks to find out where and when they are, it
+   * is present whatever the occupant, and it cannot be scrolled away from.
+   */
+  sky: { phase: number; weather?: string } | null;
   /** How much room the dock has. */
   height: DockHeight;
   /** Pull it open, or push it shut. */
@@ -83,6 +114,8 @@ export function Here({
   place,
   conversation,
   canon,
+  standing,
+  sky,
   actions,
   height,
   onHeight
@@ -103,18 +136,28 @@ export function Here({
       data-occupant={conversation ? 'conversation' : reading ? 'place' : 'notes'}
       aria-label="Here"
     >
-      {/* A grip, and a real control. The dock can be opened and shut by dragging on a touch screen,
+      {/* The grip row: a handle in the middle and the hour at the end.
+          A grip, and a real control. The dock can be opened and shut by dragging on a touch screen,
           but a drag is not discoverable and is not available to a keyboard -- so the same thing is
           a button that says what it does. */}
-      <button
-        type="button"
-        className="dock-handle"
-        aria-label={HANDLE_LABEL[height]}
-        aria-expanded={height !== 'peek'}
-        onClick={onHeight}
-      >
-        <span className="dock-grip" aria-hidden="true" />
-      </button>
+      <div className="dock-head">
+        <button
+          type="button"
+          className="dock-handle"
+          aria-label={HANDLE_LABEL[height]}
+          aria-expanded={height !== 'peek'}
+          onClick={onHeight}
+        >
+          <span className="dock-grip" aria-hidden="true" />
+        </button>
+
+        {/* Riding the grip row costs the dock ten pixels rather than the control bar a whole second
+            row, and it is here at every height and under every occupant -- the notes, a place, or
+            somebody talking. The hour decides whether an animal can be approached and whether a
+            night can be spent, so it has no business disappearing the moment a player stands
+            somewhere. */}
+        {sky && <SkyDial phase={sky.phase} weather={sky.weather} />}
+      </div>
 
       <div className="dock-body">
         {conversation ? (
@@ -125,6 +168,12 @@ export function Here({
           <JournalPanel {...notes}>{canon}</JournalPanel>
         )}
       </div>
+
+      {/* **What is on this ground, at peek only.** The heights above say all of it at length in the
+          notes, so the row would be the same facts twice -- `styles.css` owns that swap, because
+          which of the two a height wants is a fact about the layout and `surface.ts` already owns
+          how tall the dock is. */}
+      <StandingRow {...standing} />
 
       {/* **Every action, at every height, pinned below whatever is showing.**
           Splitting this -- the verbs you can use in the rail, the ones you cannot in the part that

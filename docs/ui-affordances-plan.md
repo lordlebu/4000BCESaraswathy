@@ -1,0 +1,552 @@
+# What is here, what time it is, and what you can put away
+
+**All four stages have shipped.** This is the plan as argued, with the measurements it was argued
+from and each stage marked where it sits. Two of its own diagnoses were corrected in place rather
+than quietly rewritten — P1 was not the budget problem it was written up as, and the standing row's
+chips are readouts where the plan asked for targets — because a plan that only records the parts it
+got right is not worth reading twice.
+
+A second interface plan, opened after `docs/ui-streamline-plan.md` closed. That one was about
+**how much of the screen the map keeps** — it went from 52% to 68% resting and 27% to 39% standing
+in a place, and it is finished. This one is about **what the screen says once the map has the
+room**, which is a different question and was never the first plan's.
+
+Four items, reported from play:
+
+1. What you are carrying should be something you can stop looking at.
+2. The magnifying-glass buttons may not be needed on a touch screen, where pinch already works.
+3. The flora, fauna and materials on a tile should be visible, not something you drag a panel open
+   to read.
+4. The time of day should be shown, and it is not shown anywhere at all.
+
+**Two of the four are blocked by faults found while measuring them**, and both are the shape this
+codebase keeps producing — something that passes every test because nothing was asking. They are
+stage 1 and they are not optional.
+
+---
+
+## What was measured
+
+Chromium, `?seed=dock-8&hour=12&at=9,40` — standing on plains, the resting state of the walk, at
+four device sizes. Everything below is a measurement, not an impression.
+
+### The dock at peek holds nothing about the tile you are standing on
+
+This is the **complete** text of the dock at peek, identical at all four sizes:
+
+> ✿ | Plains at 9, 40 | Open grassland rolls ahead, warm and easy on tired feet. | You can make out
+> forest to the east, coast to the west and south, and river to the north. | ⛏ Work the ground | E |
+> Unroll the bedding here | R
+
+Now the same tile with the dock opened one notch, to reading height:
+
+> **Creatures** — The cliff swift is feeding, and has not decided yet whether you matter. There is
+> dung cake here, for the taking. **Cliff Swift** — Swifts cut the air above the grass in long
+> scything arcs, too fast to count. **Growing here** — 🌸 **Poison Oleander** — Oleander flowers
+> pink and cheerful on the dry margin. Nothing grazes it, and there is a reason for that.
+
+Everything the tile actually holds — the animal, what it is doing, the plant, the material — is in
+the second list. The first list is the *biome* and *what is in the next valley*. `.journal-notes` is
+`display: none` at peek and that is deliberate; what was not noticed is that it takes **all** of the
+tile's content with it.
+
+**And the action chip does not fill the gap.** `Work the ground` carries a detail line reading
+`"Dung cake."` — the answer to *what would I be taking* — and `.tile-action-detail` is hidden at
+peek too. The verb is on screen; the object of it is not.
+
+### Nothing on screen says what time it is
+
+The whole of `#root`, as text, at four hours of the same day:
+
+| `?hour=` | What the interface says about the time |
+|---|---|
+| 6 — first light | *nothing* |
+| 12 — noon | *nothing* |
+| 19 — evening | "The light is going." |
+| 22 — night | "It is dark." |
+
+Two binary warnings, and only once it is nearly too late. There is no clock, no sun, no hour
+anywhere on screen. Meanwhile the hour decides:
+
+- **whether an animal can be approached** — `routineFor(creature, moment)` is why the swift above is
+  *feeding* rather than asleep, and `blockedReason` refuses a stalk at the wrong hour;
+- **whether you may rest** — `"Not yet — there is daylight left."`;
+- **whether a discovery will advance** — canon conditions gate on `time_of_day`.
+
+The player is asked to reason about the hour by three separate systems and is never told it.
+
+### Geometry, for the two items that cost pixels
+
+| | desktop 1280×800 | phone 390×844 | small 360×800 | landscape 844×390 |
+|---|---|---|---|---|
+| dock at peek | 208 | 219 | 208 | **101** |
+| — handle | 22 | 22 | 22 | 22 |
+| — body (the notes) | 70 | 81 | 70 | **0** |
+| — action rail | 115 | 115 | 115 | 115 |
+| control bar | 1204×44 | 314×44 | 284×44 | 768×44 |
+| satchel strip | 274×32 | 274×32 | 274×32 | 274×32 |
+| zoom cluster | 44×94 | 44×94 | 44×94 | 44×94 |
+
+The landscape column is the one to read twice, and it is the first fault.
+
+---
+
+## Two faults found while measuring, which block two of the four items
+
+### P1 — on a landscape phone, the second action is below the bottom of the screen
+
+Measured at 844×390, at peek:
+
+```
+rail   y = 299 .. 414        dock  y = 277 .. 378        viewport height 390
+[⛏ Work the ground]   y = 308..352   ok
+[Unroll the bedding here]  y = 358..402   OFF-BOTTOM by 12px
+```
+
+The dock is 101 pixels at peek (26dvh of 390). The handle and the rail alone want 137. The body is
+squeezed to **zero**, the rail overflows the dock by 36 pixels, `overflow` is `visible` so nothing
+scrolls, and the last twelve pixels of *Unroll the bedding here* are off the screen.
+
+**And the cause is not the one this plan first wrote down.** It was recorded as a budget problem —
+the dock too short for what it holds — and it is not. The chips stack into a column *at every device
+size*, and they were never supposed to:
+
+```
+.dock .tile-action-list { display: flex; flex-wrap: wrap; gap: 6px; }
+```
+
+The base `.tile-action-list`, three hundred lines above, is `flex-direction: column` — it is the
+blocked list, which really is a column of sentences. This rule redeclares `display` and `flex-wrap`
+and **never redeclares the direction**, so the rail inherits `column`, every chip stretches to the
+full width on the cross axis, and the rail has been a column since it shipped. The comment directly
+above it reads *"Inside the dock the actions are a row, not a list"*.
+
+Nothing failed, and nothing looked wrong: `.tile-action > button` sets `width: auto`, so the buttons
+were pill-shaped and as wide as their words. A screenshot showed a tidy column of pills and read as
+deliberate. Measured, it cost **65 pixels of dock at every size** — the rail is 115px as a column and
+50px as a row — and on a landscape phone those 65 pixels are the twelve that went off the bottom.
+
+It is the `.specimen` fault in a descendant selector: a later rule partially overriding an earlier
+one, in one flat namespace, with no visible symptom. **`test/stylesheet.test.ts` cannot see this
+one** — its guard is a bare class declared twice at the top level — which is worth knowing before
+trusting that guard to cover the whole class of fault.
+
+**Nothing in the suite asks.** `e2e/reachable.spec.ts` — the spec whose entire purpose is "can every
+control actually be pressed", written after a button ran off the right edge of a phone — walks
+`.controls .control, .zoom button`. The action rail is not in that selector. **The game's primary
+verbs have never been checked for reachability**, and this is the fifth instance of this
+repository's signature fault: built, tested, believed, and the test was not asking.
+
+Item 3 puts *more* into the dock at peek. It cannot go in over this.
+
+### P2 — a pinch also walks the traveller
+
+`WorldScene` binds tap-to-walk with no guard at all:
+
+```ts
+this.input.on(Phaser.Input.Events.POINTER_UP, (pointer) => {
+  const world = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+  … this.queuedPath = findPath(…)
+});
+```
+
+`updatePinch` tracks two pointers and steps the zoom. Nothing tells the tap handler that a pinch
+happened. Lifting either finger at the end of a two-finger zoom fires `POINTER_UP`, and the
+traveller sets off for wherever that finger was — spending in-game hours on a walk nobody asked for.
+
+Item 2 proposes deleting the zoom buttons on touch **and handing the whole job to pinch**. That
+cannot ship while pinch has this side effect. Fix first, remove second.
+
+---
+
+## The four moves
+
+### A — the standing row: what is under you, at peek · **shipped**
+
+**The trade, and it is a trade rather than an addition.** At peek the dock currently spends its body
+on two lines: the biome's description, and the surroundings — *"You can make out forest to the east,
+coast to the west and south, and river to the north."* That sentence is about **everywhere except
+here**. At the one height whose whole job is *what is in front of you*, the panel is describing the
+horizon.
+
+So at peek, `.surroundings` gives up its place to a **standing row**: one line of chips naming what
+is actually on this tile.
+
+```
+  🐦 Cliff Swift · feeding     🌸 Poison Oleander     ⛏ Dung cake
+```
+
+- **The creature**, with its routine as the second half of the chip — because *feeding* against
+  *asleep* is the difference between a stalk that works and one that is refused, and that is already
+  computed.
+- **The plant**, with its `SpeciesIcon` mark.
+- **Each material on offer**, from `takeableAt` — which already returns `{material, count}` and is
+  already summarised into the chip detail the player cannot see.
+
+Chips rather than prose: a chip is a target as well as a label, so tapping the creature opens its
+plate, tapping the plant opens the plant, and tapping a material opens the take. The row is the
+peek-height answer to *what is here*, and at reading height it steps aside for the full notes rather
+than being repeated.
+
+Nothing new is computed. `entry.creature`, `entry.flora`, `entry.doing` and `takeableAt` are all
+already in `App.tsx`, already handed to the panels, and already thrown away at this height by one
+`display: none`.
+
+*Proved by:* a browser case asserting that, standing on a tile with a creature, a plant and a
+material, all three are readable **without touching the handle** — and a unit case that the row
+names exactly what `takeableAt` returned, so a material that stops being offered stops being named.
+
+*What it costs:* measured, the swap is roughly even — the surroundings line is 21px on a desktop and
+42px on a phone (it wraps), against a 32px chip row. The landscape case is P1's, and has to be
+solved before this is measured at all.
+
+### B — the satchel puts itself away, from where it is · **shipped**
+
+**The switch exists and stage 6 buried it.** Putting the ribbon away was reported from play and has
+had an off switch for months; stage 6 moved that switch out of the control bar and into the map
+sheet, under *What is on screen*. That was right for the bar — a preference does not need a
+permanent row — and it made the thing the player actually asked for **two taps deep inside a menu**,
+with nothing on the strip itself saying it can be dismissed. The complaint is the direct cost of the
+last plan's last stage, and it is fair.
+
+So the strip carries its own dismiss: a `×` at its right-hand end.
+
+**One structural note, because it is the whole of the work.** `.satchel-strip` is a single
+`<button>` wrapping the entire readout. A `<button>` inside a `<button>` is invalid, and browsers
+resolve it by discarding the inner one — so the dismiss cannot simply be added. The strip becomes a
+`<div>` holding two buttons: the readout, which opens the full satchel as it does now, and the
+dismiss. The accessible names carry the round trip, because a control that hides something has to
+say where it went:
+
+> *"Put the satchel away — bring it back from the Map sheet"*
+
+**And the switch does not survive a reload**, which is the half neither the report nor this plan's
+first draft noticed. `satchelRibbon` lives in `surface.ts`, the UI reducer, and `Journey` in
+`save.ts` has no field for it — so the strip is back every time the game boots. An option to stop
+looking at something that forgets itself on every visit is not really an option, and move B carries
+this or it has not answered the ask.
+
+It goes in its own `localStorage` key rather than into the save. `Journey` is *world* state — where
+you are, what you know, what the ground has left — and it is versioned: adding a field means bumping
+`SAVE_VERSION`, which **discards every existing journey**. Throwing away a player's progress to
+remember a toggle is the wrong trade by a wide margin, and a preference is not part of a journey
+anyway. The field notes' own toggle has the same gap and gets the same treatment.
+
+*Declined, and worth writing down:* a 44px stub that stays behind so the strip can be summoned back
+in place. It is a smaller permanent thing on screen, and a permanent thing on screen is exactly what
+was asked to be rid of. The map sheet is a real, discoverable home for it and already holds the
+switch.
+
+*Proved by:* extending `reachable.spec.ts`'s existing *"the satchel ribbon can be put away for a
+clean map"* case to do the round trip from the strip rather than from the sheet — the same
+assertion, reached the way a player reaches it.
+
+### C — the zoom buttons stand down on a touch screen · **shipped**
+
+`@media (hover: none) and (pointer: coarse)` is already in this stylesheet, already hiding
+`.tile-action-key` for exactly this reason, and already carries the note about why it is not a width
+query: *a small desktop browser still has a keyboard*. The same rule hides `.zoom`.
+
+**The counter-argument is in the code and deserves an answer.** `Controls.tsx` says: *"A mouse has a
+wheel and a keyboard has +/−, but a phone has neither, and pinch is not something anyone thinks to
+try on a map that fits the screen already."* That was a discoverability worry and it was reasonable.
+Two things answer it: the map sheet already says *"Zoom with the + and − buttons, the mouse wheel,
+or a pinch"* and is where a player looks for how to play, so the sentence is reworded to put pinch
+first where the buttons are gone; and pinch on a map is now a decade-old convention that people
+arrive already knowing.
+
+**Be honest about the size of the prize.** The cluster is 44×94 — about **1.1%** of a landscape
+phone. This is not a screen-budget move and should not be sold as one. What it buys is that the
+top-right corner of the map stops holding two controls that duplicate a gesture the hand already
+makes. The thing that makes it worth doing at all is P2, which is a real bug that only came to light
+because the item was measured.
+
+*Proved by:* a browser case under Playwright's `hasTouch` device emulation asserting the cluster is
+absent and a pinch still changes `data-zoom`; and, for P2, that a pinch leaves the traveller where
+they were.
+
+### D — the hour, as a dial · **shipped**
+
+A sun-and-moon mark in the control bar: one 44px readout whose pointer sits where the day is, filled
+warm through the day and cool through the night, with the weather carried on it when there is
+weather.
+
+**Where the data comes from, and one boundary worth keeping.** `moment-changed` already crosses the
+`EventBus` carrying `{ timeOfDay, weather }`, and `App.tsx` already holds it — so the wiring exists.
+But that payload is a `WorldMoment`, handed straight to `journey.ts`, and is deliberately in
+**canon's** vocabulary: `dawn | morning | afternoon | evening | night`, five values, with noon folded
+into afternoon because canon has no midday. A dial driven off it cannot tell noon from four in the
+afternoon.
+
+So the sky is announced separately — `sky-changed`, carrying the engine's own label and phase from
+`dayNight.ts` — rather than by widening `WorldMoment`. Canon's vocabulary stays canon's; the picture
+of the sky is the engine's; `momentAt`'s mapping table between them keeps doing the one job it has.
+Widening the shared payload to serve a picture is how the two vocabularies would quietly become one.
+
+**Where it goes is a measurement, not a preference.** The bar is 314px of a 390px phone and 284px of
+a 360px one — about 50px spare against gutters, and a 44px control just fits. *Just* fits is how the
+bar became two rows the first time, and stage 6 spent a whole stage getting it back to one. So the
+dial goes in the bar **only if `reachable.spec.ts` still finds one row at 360px**; if it does not, it
+goes on the dock's head line beside *Plains at 9, 40*, which is the other place a player looks to
+find out where and when they are. The test decides, not the plan.
+
+*Proved by:* a unit case mapping phase to mark across the whole cycle, including the two wraps at
+midnight and at first light; a browser case that `?hour=6` and `?hour=22` draw different marks, which
+is the assertion that would have caught "the icon renders and never changes"; and the existing
+one-row bound in `reachable.spec.ts`, unchanged, deciding where it lives.
+
+**The extension into game design, since that was allowed.** A dial that only reports is worth having,
+and that is what shipped. A dial that says *when the next thing happens* — how long until dusk, which
+is when resting unlocks and half the bestiary changes what it is doing — is worth more, and is the
+same data. It is deliberately not in this stage: the first version should be lived with before the
+game starts making promises about the future, and "in about an hour" is a duration, which is the
+thing canon is careful never to say.
+
+---
+
+## Stages
+
+| | What | Why this order |
+|---|---|---|
+| **1** · **shipped** | P1 and P2, and `reachable.spec.ts` extended to the action rail | Both are bugs; both block a later stage; the rail guard is overdue on its own |
+| **2** · **shipped** | A — the standing row | The largest of the four, and the one the geometry of stage 1 makes possible |
+| **3** · **shipped** | B and C — the satchel dismiss, the zoom on touch | Small, independent, and both are about giving the map back |
+| **4** · **shipped** | D — the hour | New data across the bus, so it goes last and alone |
+
+One branch, one pull request, per this repository's rule. Stage 1 is worth pushing before stage 2 is
+written, because it is a fix rather than a change.
+
+### What stage 4 actually did
+
+**The boundary held, and it was worth holding.** `sky-changed` carries `{ phase, label }` in the
+engine's own vocabulary rather than widening `moment-changed`, whose payload is a `WorldMoment`
+handed straight to `journey.ts` in canon's five words with no midday. A dial driven off that could
+not tell noon from four in the afternoon, and `momentAt`'s mapping table between the two exists
+precisely to keep them apart.
+
+The phase is **rounded to 1/48 of a day before it is sent** — half an in-game hour, about
+seventy-five real seconds. Unrounded it would be a new value every frame and a React render with
+it; at a forty-eighth the dial reads as moving and nothing renders for it more than about once a
+minute.
+
+**Where it goes was decided by a measurement, and the measurement said no.** The plan's rule was
+that the dial may sit in the control bar *only if `reachable.spec.ts` still finds one row at 360px*.
+It does not: measured, a 44-pixel readout took the bar to **96 pixels and two rows**, which is what
+the last plan spent a whole stage undoing. Worse in play than in the measurement, too — the bar
+grows a *Here* button at a point of interest and a *Workshop* button beside a bench, so the screen
+it was measured on is the emptiest one there is.
+
+So it rides the dock's grip row, which was 22 pixels and is 32: **ten pixels for the hour at every
+height and under every occupant**, against a whole second band of chrome. The handle keeps the
+middle and the dial is pinned to the right, because `justify-content: center` cannot centre one
+child of two. It is present with the notes, with a place, and with somebody talking — the hour
+decides whether an animal can be approached and whether a night can be spent, so it has no business
+disappearing the moment a player stands somewhere.
+
+**A dial and not a clock.** "14:32" is precise about a world that has never once been precise: canon
+says `renews: fast` rather than "in four days", and the whole `tiers.ts` split exists to keep
+durations out of it. The mark traces the sun's own path — phase 0 is six in the morning, so the left
+is first light, the top is noon, the right is evening and the bottom is midnight — and turns to a
+moon at night, read from `skyAt`'s own label so the dial and the wash over the map can never
+disagree. The weather rides on it rather than beside it, for the same reason it is not in the bar.
+
+It is a readout and not a control: there is nothing to press it for, and a button that does nothing
+teaches a player to stop pressing things. `role="img"` with the hour in words, which is also all a
+screen reader needs — the drawing carries nothing the label does not.
+
+**The guard that matters is the last one**, and it is this repository's signature fault in its
+interface form: an icon that renders, looks right in a screenshot, and says the same thing at dawn
+and at midnight. Checked by wiring the dial to a constant:
+
+> the mark did not move across the day — 6: noon, 9: noon, rain, 12: noon, rain, 16: noon, storm,
+> 19: noon, 22: noon, mist
+
+### What stage 3 actually did
+
+**B came in two halves and only one of them was reported.** The dismiss is a `×` at the strip's
+right-hand end, and the structural note in the plan turned out to be the whole of that work: the
+strip was one `<button>` wrapping the readout, a `<button>` inside a `<button>` is invalid, and
+browsers resolve it by discarding the inner one. It is a `<div>` holding two controls now, and
+`test/satchelStrip.test.tsx` fails by name if it ever becomes a button again — *"is two controls,
+not a button inside a button"* — because the dismiss would silently stop existing rather than break.
+
+The half nobody reported is that **the choice did not survive a reload.** `satchelRibbon` lives in
+`surface.ts`, which is pure and runs under Node, and `Journey` in `save.ts` has no field for it — so
+the strip came back every boot, with the switch working perfectly each time. An option that forgets
+itself on every visit is not an option.
+
+`src/ui/preferences.ts` is a third place, deliberately, holding the smallest thing it can. Not the
+save, because `Journey` is versioned and adding a field means bumping `SAVE_VERSION`, which discards
+every existing journey — throwing away progress to remember a toggle is the wrong trade by a wide
+margin, and a journey is per-seed while this is not. Not `surface.ts`, because a `localStorage`
+access in the one file most carefully kept free of browser globals would end the reason its
+arbitration is testable.
+
+**Every access is wrapped, and that is not defensiveness.** In a private window the accessor itself
+raises before any value is read, so an unguarded read fails on first render — much worse than
+forgetting a toggle. `test/preferences.test.ts` covers that, plus a stored `"false"` string, a key
+that is not JSON, and a key holding `null`: an unreadable preference is no preference, and the
+default is a good one.
+
+**The field notes' own toggle is deliberately not in there.** Whether the notes show is
+`surface === 'here'` — one of a set that the diary, the album, the people, a place and a conversation
+all take over. Persisting it means persisting which *surface* was open, and restoring somebody into
+an album they left open a week ago is not obviously right. The satchel strip is a flag on its own,
+independent of everything, which is exactly what makes it safe to remember.
+
+**C is four lines of CSS and one honest sentence.** `.zoom` goes under the existing
+`(hover: none) and (pointer: coarse)` — not a width, because a small desktop window still has a
+wheel and a keyboard, and `e2e/touch.spec.ts` has a case that fails if anyone ever simplifies it to
+`max-width`. The map sheet gained a second sentence so a touch screen is told about the pinch
+instead of about buttons it cannot see; telling a phone how to press something invisible is worse
+than saying nothing.
+
+The prize is still 1.1% of a landscape phone and this is still not a screen-budget move. What made
+the item worth doing was P2, which only came to light because it was measured.
+
+**Two things the suite caught that no amount of reading would have.**
+
+The dismiss's label broke five specs across two runs, and the second break is the useful one.
+`getByRole(name)` matches as a case-insensitive **substring**, so the first wording — *"bring it
+back from the Map sheet"* — answered to `{ name: 'Back' }`, the diary's own close button, with a
+strict-mode violation naming both. The apparent lesson was *do not put another control's name in a
+label*, so it became *"show it again from the Map sheet"* — which still contains **Map**, and
+collided with `{ name: /Map/ }` in two more specs one run later.
+
+Which settles where the fix belongs. **The copy was right both times**: a player who has just hidden
+something needs telling where it went, and the place it went is called the Map sheet. Trimming
+product copy to dodge a loose selector is the tail wagging the dog. Six call sites querying short
+common words are `exact` now, which is what they should always have been.
+
+And `the place is readable rather than a letterbox` reported **2%** against a floor of 21, then
+passed on its own a minute later — the signature of a reproduction that is wrong rather than a
+layout that is. Arriving is the one place the dock changes height by itself, `.dock` has a CSS
+transition, and under two workers the measurement landed mid-tween and measured peek. It waits for
+the height to settle now. *Flake* was not the answer; the ruler was early, and a ruler that is
+sometimes early is a check people learn to ignore.
+
+### What stage 2 actually did
+
+The row is real and it says what the plan wanted it to say — the creature with its routine, the
+plant, and each material — at every device size, at rest, with nothing pressed. Four things about
+getting there are worth more than the row itself.
+
+**It is pinned beside the action rail, not written into the notes.** Below the surroundings is where
+it belongs to read, and it does not work: the dock's body scrolls, so at peek it clipped the row —
+measured, one chip cut off on a 390-pixel phone, two on a 360, and **all three on a landscape one**.
+The row exists because the tile's contents were hidden behind a gesture, so putting it somewhere it
+could be scrolled away from would have been the same fault in a new place. It sits where the rail
+sits, for the rail's own stated reason: what is here and what you can do about it are both facts
+about the ground, both wanted at a glance, and neither may be scrolled out of reach.
+
+**Nothing in the row is a button, which reverses what this plan asked for.** Built with chips as
+targets, two things went wrong. The material chip would take, and the rail's `Work the ground` sits
+about forty pixels below it — two controls for one act, which is the arrangement `TileActions` was
+written to end. And a tappable chip owes the interface's 44-pixel floor where a readout owes 26:
+measured, one plate-opening chip took the row from **57 pixels to 75** and pushed the third chip out
+of the dock, the row spending on being pressable the room it exists to buy. So the division is the
+one the dock already makes: this row says what is here, the rail says what you can do about it, and
+looking closer at a plate keeps its place in the notes where a picture has room to be a picture.
+
+That needed `speciesMark()` out of `SpeciesIcon.tsx`, because `SpeciesIcon` itself prefers a painted
+plate wherever one exists — so the row had a button in it while its own comment said it did not.
+Exported as a function rather than leaving the row to reach for `CLADE_MARK` and `FORM_MARK`
+directly: `plantMark` has a keyword pass over both tables, and a second caller choosing a glyph its
+own way is a second implementation that drifts.
+
+**Peek costs more, and the floors come down.** Measured at rest:
+
+| | before the dock | after the bar | after the row |
+|---|---|---|---|
+| desktop | 51.7% | 68.2% | **66.2%** |
+| phone portrait | 52.1% | 68.4% | **63.5%** |
+| small phone | 51.8% | 67.8% | **63.2%** |
+| phone landscape | 37.3% | 61.5% | **44.6%** |
+
+Peek is 28dvh, 31dvh under 34rem where everything wraps, and 43dvh on a short landscape phone.
+**Landscape is arithmetic rather than a preference**: the handle, the heading, the row and the rail
+come to 164 pixels of a 390-pixel screen whatever anyone wants, which is 42% of it. Dropping the
+heading there buys about nine points back and was reverted — `.journal h2` is the readiness sentinel
+every browser spec boots on, so hiding it on one orientation failed three specs for reasons with
+nothing to do with what they test, and the heading is the only thing on screen saying *where* the
+traveller is. The comparison that matters on that screen is not against 61.5 but against **37.3**,
+which is what it had before any of this work with a dock that showed less.
+
+This is the trade stated plainly: chrome taking the map back would be a regression, and content the
+player came for is what the map was cleared *for*.
+
+**And the first version of the browser guard passed with the fault in place.** Comparing each chip's
+bounding box against the dock's is the obvious check and proves almost nothing — a box is still
+reported for an element a scrolling ancestor has clipped away, and `toBeVisible()` is satisfied by
+one too. Checked by clipping the row to twenty pixels with `overflow: hidden`: all four sizes
+passed. `document.elementFromPoint` at the chip's centre asks the question a player asks — is that
+thing there, where I am looking — and catches clipping, covering and falling off the edge at once.
+With the same fault it names the chip: *"not actually visible at 390x844 — clipped, covered, or off
+the edge: ❖Dung cake"*.
+
+### What stage 1 actually did
+
+**P1 was one missing declaration.** `flex-direction: row` on `.dock .tile-action-list`. Measured
+after: the rail is **65px** where it was 115, and on a landscape phone both chips sit on one row
+inside the dock with nothing off the screen. The dock's own height is unchanged — these are fixed
+heights and stay fixed — so what the 50 pixels buy is **body**: 0 → 13px on a landscape phone,
+70 → 120px on a desktop. That is the room move A was going to have to argue for, and it turns out to
+have been there all along.
+
+A phone in portrait still stacks the two chips, and that is correct rather than outstanding: 189px
+and 234px with a gap do not fit in a 334px row, so they wrap, which is what `flex-wrap` is for.
+Nothing was off the screen there to begin with.
+
+**P2 is `src/game/gesture.ts`**, a pure module outside the scene for the same reason `dayNight.ts`
+and `fatigue.ts` are outside it — `test/` exercises the rule that ships. The case that matters is
+the *second* release: a pinch ends in two `POINTER_UP`s and by the second one only one finger was
+ever down, so clearing the flag on release reproduces the whole bug on the second finger. Checked by
+writing that version: *"release 2 of 3 walked the traveller"*.
+
+A distance threshold was declined. "The finger moved more than N pixels so it was a drag" is the
+other half of how this is usually written, and there is nothing to drag on this map — no panning, no
+selection — so all such a rule could do is silently refuse a walk to somebody whose thumb slid four
+pixels. The fault was multi-touch; the guard is multi-touch.
+
+**Two things about the browser half are worth keeping**, because both cost a round and neither is
+guessable:
+
+- **Phaser starts its `TouchManager` only when the device reports touch.** In an ordinary desktop
+  context every pointer event — even one labelled `pointerType: 'touch'` — goes through the mouse
+  manager, which fills only `mousePointer`. `input.pointer1` and `input.pointer2` stay untouched and
+  `updatePinch` never runs. Measured while writing the spec: `navigator.maxTouchPoints` was 0 and
+  the zoom never moved. `test.use({ hasTouch: true })`, and drive it through CDP's
+  `Input.dispatchTouchEvent` — `page.touchscreen` is single-touch and cannot express the thing under
+  test.
+- **The gesture needs real frames.** Dispatched in one tick, every event lands in a single frame:
+  `updatePinch` polls `isDown` once a frame, so it saw both fingers arrive and both leave at once,
+  seeded its reference distance, and never got a second look. The spec failed while the game worked.
+
+And the assertion that matters is the one proving the spec is not passing for the wrong reason. The
+pinch is centred on the canvas, which is where the traveller is standing — so a tap resolving to
+their own tile would move nobody and the spec would pass with the guard deleted. It was checked by
+deleting it: the traveller walked, and the spec failed.
+
+---
+
+## What is declined
+
+**A heads-up display over the map.** Chips floating on the canvas beside the traveller would answer
+item 3 without spending any dock at all. It is declined because React never renders a tile — rule 3
+of the four that hold this codebase together — and the alternative, drawing them in Phaser, puts
+prose and a11y inside the scene. The dock is where writing lives.
+
+**Removing the surroundings line.** Move A takes its place *at peek only*. It is a good sentence
+about a real thing and it belongs at the height that is about reading.
+
+**A numeric clock.** "14:32" is precise about a world that has never once been precise: canon says
+`renews: fast`, not "in four days", and the whole `tiers.ts` split exists to keep durations out of
+canon. A dial says *evening* the way the game says everything else.
+
+**Hiding the action rail at peek to make room.** Tried and reverted during the last plan, and
+`TileActions` is emphatic: every action is listed at all times, because a greyed row reading *"there
+is daylight left"* is how a player learns resting exists.
+
+**Making the satchel strip collapse to a count instead of vanishing.** A third state between showing
+and gone. The ask was to stop having to look at it, and two states answer that; three is a thing to
+learn.

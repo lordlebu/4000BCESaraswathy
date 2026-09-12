@@ -214,6 +214,7 @@ half useless here, and the habits that catch this codebase's signature bug — s
 tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side companion.
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 | `docs/ui-streamline-plan.md` | what the chrome costs the map, measured, and the four moves that give it back |
+| `docs/ui-affordances-plan.md` | what the screen says once the map has the room — closed, and the two faults it found |
 
 Run a single test file with `npx vitest run test/generator.test.ts`, or a single case with
 `npx vitest run -t "some test name"`.
@@ -414,11 +415,88 @@ order of the `--z-*` tokens *is* the order things are in front of each other, so
 token rather than picking a number — including `Modal.tsx`, whose lift for a nested dialog is
 `calc(var(--z-modal) + depth)` and cannot drift away from the sheet.
 
+**The zoom cluster is hidden on a touch screen**, under `(hover: none) and (pointer: coarse)` —
+the same query that hides the keyboard hints, and not a width, because a small desktop window still
+has a wheel and a keyboard. The map sheet carries two sentences about zooming so a phone is told
+about the pinch rather than about buttons it cannot see. The pixels are negligible (44×94, about
+1.1% of a landscape phone); what the item bought was finding that a pinch also walked the traveller.
+
 **The control bar carries travel and time only.** What is *on screen* — field notes, carrying —
 lives in the map sheet under "What is on screen", because a toggle is a preference and a preference
 does not need a permanent row: the bar was two rows and 96px, and is one row and 44px. The satchel
 strip is `width: max-content` for the same reason — it was a full-width 1204px band to hold 274px of
 chips.
+
+**The dock's pinned parts are the standing row and the action rail, and both are pinned for the
+same reason.** `StandingRow` names what is on this tile — the animal with its routine, the plant,
+each material — at peek, where `.journal-notes` is `display: none` and used to take all of it off
+the screen. It went in `JournalPanel` first, which reads better and does not work: the body scrolls,
+so peek clipped it on three of four device sizes. **Nothing in the row is a button.** A chip that
+took would put the take in two places forty pixels apart, and a tappable chip owes the 44px floor
+where a readout owes 26 — measured, that took the row from 57px to 75 and pushed a chip out of the
+dock. The row says what is here; the rail says what you can do about it. Use `speciesMark()` rather
+than `SpeciesIcon` anywhere a glyph is wanted without a plate, because `SpeciesIcon` prefers a
+painted plate and a plate is a control.
+
+**The hour is on screen, and the sky says its own thing.** `sky-changed` carries `{ phase, label }`
+in `dayNight.ts`'s vocabulary — six words, including the noon canon has no word for. It is
+deliberately not a field on `moment-changed`, whose payload is a `WorldMoment` handed to
+`journey.ts` in canon's five words; widening it to serve a picture is how two vocabularies quietly
+become one, and `momentAt`'s mapping table exists to keep them apart. The phase is rounded to 1/48
+of a day before it is sent, so React renders for it about once a minute rather than every frame.
+`SkyDial` rides the dock's grip row and not the control bar: measured, a 44px readout in the bar
+took it to **96px and two rows**, and the bar grows more buttons at a place and beside a bench. It
+is a readout, never a control — there is nothing to press it for.
+
+**A preference goes in `src/ui/preferences.ts`, never in the save and never in `surface.ts`.**
+`Journey` is versioned world state: adding a field to it means bumping `SAVE_VERSION`, which
+discards every existing journey, and throwing away progress to remember a toggle is the wrong trade.
+`surface.ts` is pure and runs under Node, which is why its arbitration is testable — a
+`localStorage` access there ends that. Every access is wrapped in `try`/`catch` because in a private
+window the accessor *raises* rather than returning null, so an unguarded read fails on first render.
+Only the satchel strip is kept: the field notes' toggle is a `Surface`, one of a set that a place or
+a conversation takes over, and persisting which surface was open is a different and larger question.
+
+**The satchel strip is a `<div>` with two buttons, and must stay one.** It was a single `<button>`
+wrapping the readout, so the dismiss could not be added — a `<button>` inside a `<button>` is
+invalid and browsers resolve it by discarding the inner one. `test/satchelStrip.test.tsx` fails by
+name if it becomes a button again, because the dismiss would silently stop existing rather than
+break.
+
+**A bounding box does not prove something is visible.** A box is still reported for an element a
+scrolling ancestor has clipped away, and Playwright's `toBeVisible()` is satisfied by one too — the
+first guard on the standing row passed at all four sizes with the row clipped to twenty pixels.
+`document.elementFromPoint` at the element's centre catches clipping, covering and falling off the
+edge at once, and is what `e2e/standing.spec.ts` asks.
+
+**A descendant rule that redeclares `display` must redeclare `flex-direction` too.** The dock's
+action rail is `display: flex; flex-wrap: wrap` and inherited `column` from the base
+`.tile-action-list` three hundred lines above, so the chips the comment calls *"a row, not a list"*
+had been a column at every device size since they shipped — 115px of dock instead of 65, and on a
+landscape phone that put the second chip twelve pixels below the bottom of the screen. Nothing
+failed: `width: auto` on the buttons kept them pill-shaped, so a screenshot looked deliberate.
+**`test/stylesheet.test.ts` does not catch this shape** — its guard is a bare class declared twice
+at the top level, and this is a descendant selector partially overriding another.
+
+**`e2e/reachable.spec.ts` walks the action rail as well as the chrome.** It used to walk
+`.controls .control, .zoom button` only, so the buttons a player presses to *play* — taking,
+resting, riding — were never checked for being on the screen. That is how the rail ran off the
+bottom of a landscape phone unnoticed. A blocked chip is exempt from the enabled check and from
+nothing else; it still has to be visible, because a greyed row is how a mechanic is taught.
+
+**A pinch must not walk the traveller, and `src/game/gesture.ts` is why.** Tap-to-walk is bound to
+`POINTER_UP` and the map is pinch-to-zoom; the two knew nothing about each other, so lifting either
+finger at the end of a zoom sent the traveller off across the map. The rule lives outside the scene,
+like `dayNight.ts` and `fatigue.ts`, so `test/` can exercise it. The case to keep in mind when
+touching it: **a pinch ends in two releases**, and by the second one only one finger was ever down,
+so clearing the flag on the first release reproduces the bug on the second finger.
+
+**Driving touch from a spec needs two things that are not guessable.** Phaser starts its
+`TouchManager` only when the device reports touch, so without `test.use({ hasTouch: true })` every
+pointer event goes through the mouse manager, `input.pointer1` and `pointer2` stay untouched, and a
+multi-touch spec proves nothing while looking green or red at random. And the gesture needs real
+frames between its phases — `updatePinch` polls once a frame, so a gesture dispatched in one tick is
+never seen. `page.touchscreen` is single-touch; use CDP's `Input.dispatchTouchEvent`.
 
 **`e2e/chrome-budget.spec.ts` is the measurement as a check.** How much of the screen the map keeps,
 at four device sizes, resting and standing in a place. Its floors are set from what was measured,

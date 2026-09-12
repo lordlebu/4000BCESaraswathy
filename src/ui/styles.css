@@ -334,6 +334,75 @@ button.ghost:hover:not(:disabled) {
 }
 
 
+/* --- The hour ---------------------------------------------------------------
+ *
+ * A readout, not a control: there is nothing to press it for, and a button that does nothing teaches
+ * a player to stop pressing things. So it takes the bar's height and its parchment and none of its
+ * hover or focus behaviour.
+ *
+ * **It rides the dock's grip row, and a measurement put it there.** In the control bar it looked
+ * like it fitted -- 284 pixels of a 360-pixel phone, about fifty to spare -- and took the bar to
+ * **96 pixels and two rows**, which is what the last plan spent a whole stage undoing. Worse in
+ * play than in the measurement, too: the bar grows a *Here* button at a point of interest and a
+ * *Workshop* button beside a bench.
+ *
+ * The grip row was 22 pixels of dock and is 32, which buys the hour at every height and under every
+ * occupant for ten pixels rather than a whole second band of chrome over the map. */
+.sky-dial {
+  position: relative;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+}
+
+.sky-dial svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The horizon and the path, both quiet: they are the frame the mark is read against, and a dial
+   whose furniture competes with its pointer is a decoration. */
+.sky-dial-horizon {
+  stroke: var(--ink-faint);
+  stroke-width: 0.02;
+  opacity: 0.55;
+}
+
+.sky-dial-track {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-width: 0.015;
+  stroke-dasharray: 0.05 0.05;
+  opacity: 0.45;
+}
+
+/* **Warm through the day, cool through the night**, taken from the same two ends of `dayNight.ts`'s
+   keyframes that wash the map -- `first light` is #ffb08a and `night` is #2a3568 -- so the dial and
+   the ground agree about what kind of hour it is. */
+.sky-dial[data-body='sun'] .sky-dial-mark {
+  fill: #e0913f;
+}
+
+.sky-dial[data-body='moon'] .sky-dial-mark {
+  fill: #3d4a80;
+}
+
+/* Bottom-right, clear of the mark's path at every hour: the orbit is a third of the box, so the
+   corner is the one place nothing ever passes through. */
+.sky-dial-weather {
+  position: absolute;
+  right: 1px;
+  bottom: -1px;
+  font-size: 0.6rem;
+  line-height: 1;
+  color: var(--ink-faint);
+}
+
 /* --- What is on screen, inside the map sheet -----------------------------
  *
  * The two toggles that used to sit in the control bar. They decide what is *on screen* rather than
@@ -504,8 +573,21 @@ button.ghost:hover:not(:disabled) {
  *
  * So every height is fixed and the body scrolls when the content is taller. The cost is a little
  * blank parchment under a quiet tile; the alternative is a map that twitches. */
+/* **28, and the two extra points are content rather than chrome.**
+ *
+ * It was 26dvh, sized when peek held a title and two sentences about the surrounding country. It
+ * now holds the standing row -- the animal, what it is doing, the plant, the material -- which is
+ * the thing a player is actually deciding about and which used to be one press of the handle away.
+ * Measured on a 360-pixel phone, the row wraps to two lines and the body needed about sixteen more
+ * pixels than 26dvh left it.
+ *
+ * The trade is deliberate and it is worth stating plainly: `docs/ui-streamline-plan.md` won the map
+ * 52% -> 68% of a resting screen, and this spends two of those points on saying what is under the
+ * traveller's feet. Chrome taking the map back would be a regression; content the player came for
+ * is what the map was cleared *for*. `chrome-budget.spec.ts`'s floors move with it, from measurement
+ * rather than from hope. */
 .dock[data-height='peek'] {
-  height: 26dvh;
+  height: 28dvh;
   max-height: var(--dock-ceiling);
 }
 
@@ -551,6 +633,28 @@ button.ghost:hover:not(:disabled) {
   overscroll-behavior: contain;
 }
 
+/* **The grip row: the handle centred, the hour at the end.**
+ *
+ * The handle keeps the middle whatever else is in the row, which is what `justify-content: center`
+ * on the row cannot give once there is a second child -- so the dial is taken out of the flow and
+ * pinned to the right instead. The row's height comes from the dial, which is the taller of the
+ * two; see `.sky-dial` for why ten pixels here was the cheapest place to put the hour. */
+.dock-head {
+  flex: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+}
+
+.dock-head .sky-dial {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 /* The grip. A real button, because a drag is not discoverable and is not available to a keyboard;
    it is drawn as the bar people expect to pull because that is what it is. */
 .dock-handle {
@@ -586,10 +690,29 @@ button.ghost:hover:not(:disabled) {
  *
  * Hidden rather than unmounted: the panels keep one shape at every height, so nothing reflows on
  * the way open and the camera is not dragged around by the notes changing their mind. */
+/* **The trade at peek: what is around you steps aside for what is under you.**
+ *
+ * `.surroundings` is a good sentence about a real thing -- "You can make out forest to the east,
+ * coast to the west and south, and river to the north" -- and it is about *everywhere except here*.
+ * At the one height whose whole job is what is in front of you, the dock was describing the horizon
+ * while `.journal-notes` took the animal, the plant and the material off the screen with it.
+ *
+ * So the two swap by height, and neither is ever on screen twice: the row at peek, the sentence and
+ * the full notes from reading height. */
 .dock[data-height='peek'] .journal-notes,
+/* The biome's own description -- "Open grassland rolls ahead, warm and easy on tired feet" -- is
+   the same sentence on every plains tile in the world. The heading above it already says `Plains at
+   9, 40`, and the row below says what is standing on this particular one. At peek that is the
+   better use of forty pixels; the sentence is back the moment the dock is opened. */
+.dock[data-height='peek'] .journal-place,
+.dock[data-height='peek'] .surroundings,
 .dock[data-height='peek'] .memory,
 .dock[data-height='peek'] .canon,
 .dock[data-height='peek'] .tile-actions-head {
+  display: none;
+}
+
+.dock:not([data-height='peek']) .standing-row {
   display: none;
 }
 
@@ -632,6 +755,25 @@ button.ghost:hover:not(:disabled) {
 
 .dock .tile-action-list {
   display: flex;
+  /* **`row` is the whole of this rule, and leaving it out made the comment above a lie.**
+   *
+   * The base `.tile-action-list`, three hundred lines up, is `flex-direction: column` -- it is the
+   * blocked list, which really is a column of sentences. This rule redeclared `display: flex` and
+   * `flex-wrap` and never redeclared the direction, so the rail inherited `column`, every chip
+   * stretched to the full width on the cross axis, and the rail has been **a column at every
+   * device size since it shipped**.
+   *
+   * Nothing failed. The buttons were pill-shaped and as wide as their words, exactly as
+   * `.tile-action > button` below intends, so a screenshot looked deliberate -- a column of neat
+   * pills. What it cost was 65 pixels of dock, and on a landscape phone it put the second chip
+   * twelve pixels below the bottom of the screen. Measured: the rail is 115px as a column and 50px
+   * as a row.
+   *
+   * It is the `.specimen` fault in a descendant selector: a later rule partially overriding an
+   * earlier one, in one flat namespace, with no visible symptom. `test/stylesheet.test.ts` cannot
+   * see this one -- its guard is a bare class declared twice -- which is worth knowing before
+   * trusting that guard to cover the whole class of fault. */
+  flex-direction: row;
   flex-wrap: wrap;
   gap: 6px;
 }
@@ -686,6 +828,113 @@ button.ghost:hover:not(:disabled) {
 
 .dock[data-height='peek'] .tile-action.is-blocked {
   flex-basis: auto;
+}
+
+/* **A narrow phone pays more for the row, because a narrow phone wraps everything.**
+ *
+ * Measured at 360 and 390 pixels wide: the three chips do not fit in one line (they are about 400
+ * pixels of content in a 334-pixel row) and neither do the two action chips, so the pinned part of
+ * the dock is 72 + 115 + 22 = 209 pixels before the heading gets any. At 28dvh the heading had
+ * twenty. This is the width where "show everything at rest" actually costs something, and it is
+ * scoped to that width rather than charged to every screen. */
+@media (max-width: 34rem) {
+  .dock[data-height='peek'] {
+    height: 31dvh;
+    max-height: var(--dock-ceiling);
+  }
+}
+
+/* --- The standing row ------------------------------------------------------
+ *
+ * What is on this tile, as chips, at the height the walk is spent in. See `StandingRow.tsx` for why
+ * it exists and why the material chips are readouts rather than a second way to take.
+ *
+ * A row that wraps rather than one that scrolls sideways: a horizontal scroller hides its own
+ * contents behind a gesture nobody is told about, and the whole point of this row is that nothing
+ * about the tile is hidden behind a gesture. Two or three chips is the normal case. */
+.standing-row {
+  list-style: none;
+  /* Pinned between the body and the rail, so the dock's scroll cannot take it -- see `Here.tsx`.
+     `flex: none` is the whole of that: without it the row is a flex child of a column that is
+     already over-subscribed at peek and gets shrunk to nothing on the one screen that needs it
+     most. */
+  flex: none;
+  margin: 0;
+  padding: 6px 14px 0;
+  display: flex;
+  /* Named for the same reason the rail now names it: this sheet's base `.tile-action-list` is a
+     column, and a `display: flex` that does not say which way round it runs is how the rail spent
+     its whole life as a column while its comment said otherwise. */
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.standing {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 3px 9px;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* A chip that opens a plate is a control and has to look like one; the rest are readouts and must
+   not, or a player learns to press things that do nothing. `min-height` matches the 44px floor the
+   rest of this interface keeps for anything tappable. */
+.standing-plated {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.standing-plated > .plate-open-standing {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 3px 11px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  background: rgba(164, 92, 64, 0.12);
+  color: var(--ink);
+  text-align: left;
+}
+
+.standing-plated > .plate-open-standing:hover {
+  background: rgba(164, 92, 64, 0.2);
+  filter: none;
+}
+
+.standing-mark {
+  flex: none;
+  color: var(--ink-faint);
+}
+
+.standing-name {
+  font-weight: 600;
+}
+
+/* What the animal is doing, and the count on a material. Quieted with `--ink-faint` rather than an
+   alpha, which is this stylesheet's standing rule: `opacity` multiplies and took a label to 2.61:1
+   the last time it was used for this. */
+.standing-doing {
+  color: var(--ink-faint);
+  font-weight: 400;
+}
+
+.standing-doing::before {
+  content: '· ';
+}
+
+.standing-stuff .standing-doing::before {
+  content: '';
 }
 
 /* --- The field notes ----------------------------------------------------- */
@@ -1307,9 +1556,10 @@ button.ghost:hover:not(:disabled) {
      means the strip follows the bar to whatever height it wraps to. */
   z-index: var(--z-chrome);
 
-  /* A button, but not a control: no pill, no accent fill. Pressing it opens the full satchel and
-     that is a secondary action -- the primary use of this element is reading it. */
-  display: block;
+  /* **A row of two controls now, not one button.** The readout and the dismiss sit side by side --
+     see `SatchelStrip.tsx` for why this element stopped being a `<button>` at all. */
+  display: flex;
+  align-items: stretch;
   /* **As wide as what it holds, not as wide as the bar.**
    *
    * `width: auto` on a block child of a flex column stretches: the strip ran the full width of
@@ -1320,8 +1570,7 @@ button.ghost:hover:not(:disabled) {
    * thing putting the band back. */
   width: max-content;
   max-width: 100%;
-  text-align: left;
-  padding: 5px 10px;
+  padding: 0;
   border: 1px solid var(--edge);
   border-radius: 10px;
   background: var(--panel);
@@ -1335,6 +1584,46 @@ button.ghost:hover:not(:disabled) {
   font-size: 0.78rem;
   font-style: italic;
   color: var(--muted);
+}
+
+.satchel-strip-open {
+  /* A button, but not a control: no pill, no accent fill. Pressing it opens the full satchel and
+     that is a secondary action -- the primary use of this element is reading it. */
+  flex: 1 1 auto;
+  min-width: 0;
+  display: block;
+  text-align: left;
+  padding: 5px 10px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+/* **The one control in this interface under the 44-pixel floor, and the reason is what it does.**
+ * A dismiss sits beside the thing it dismisses, so at 44 it would be a third of the strip's width
+ * on a phone and would read as the strip's main action rather than its corner. The floor exists so
+ * a player can hit what they are aiming at; this is 30 and nothing is packed against it, which is
+ * the case the guidance is about. `reachable.spec.ts` walks the control bar and the action rail and
+ * does not claim this one. */
+.satchel-strip-hide {
+  flex: none;
+  width: 30px;
+  align-self: stretch;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--edge);
+  background: none;
+  color: var(--ink-faint);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.satchel-strip-hide:hover {
+  background: rgba(164, 92, 64, 0.14);
+  color: var(--ink);
+  filter: none;
 }
 
 .satchel-strip-list {
@@ -1387,6 +1676,26 @@ button.ghost:hover:not(:disabled) {
      generous and gets whatever is left under the control bar. On a 390-tall screen **reading a
      place and seeing the map are in direct conflict**, and this is where that is decided in favour
      of reading, with the map one press on the handle away. */
+  /* **Peek has to pay for the row here too, and 390 pixels is where every trade bites at once.**
+   * The handle and the rail take 87 of them whatever happens and the standing row takes 26 more, so
+   * 28dvh -- 109 pixels -- leaves the heading nothing and pushes the row out of the dock entirely.
+   * The handle, the row and the rail come to 128 whatever happens, so this is that plus room for
+   * the heading, measured rather than guessed. */
+  .dock[data-height='peek'] {
+    height: 43dvh;
+    max-height: var(--dock-ceiling);
+  }
+
+  /* **Dropping the heading here too was tried and reverted, and it is worth saying why.**
+   *
+   * The row and the rail are the two things this height is for, so cutting `Plains at 9, 40` gets
+   * peek to 34dvh and about nine points of map back. Two things cost more than that. `.journal h2`
+   * is the readiness sentinel every browser spec boots on -- `await expect(page.locator('.journal
+   * h2')).toBeVisible()` -- so hiding it on one orientation failed three specs for a reason with
+   * nothing to do with what they test, and the fix would have been to teach the whole suite a
+   * special case. And the heading is the only thing on screen that says *where* the traveller is;
+   * the row says what is with them, which is not the same question. */
+
   .dock[data-height='read'] {
     height: 78dvh;
     max-height: var(--dock-ceiling);
@@ -2810,4 +3119,36 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   .tile-action-key {
     display: none;
   }
+
+  /* **And no zoom buttons, because the hand already does it.**
+   *
+   * `Controls.tsx` argued the other way for a long time and the argument was reasonable: *"a mouse
+   * has a wheel and a keyboard has +/-, but a phone has neither, and pinch is not something anyone
+   * thinks to try on a map that fits the screen already."* Two things answer it. The map sheet says
+   * `Zoom with a pinch` where these are gone and is where a player looks for how to play; and pinch
+   * on a map is a convention people arrive already knowing.
+   *
+   * **Be honest about the size of the prize.** The cluster is 44x94 -- about 1.1% of a landscape
+   * phone -- so this is not a screen-budget move and should not be sold as one. What it buys is
+   * that the top-right corner of the map stops holding two controls that duplicate a gesture the
+   * hand already makes. What made it worth doing at all is that measuring it found P2: a pinch also
+   * walked the traveller, every time, and nothing had ever asked.
+   *
+   * The query is the one above and not a width: a small desktop window still has a wheel and a
+   * keyboard, and taking the buttons from it would be the fault this is meant to avoid, backwards. */
+  .zoom {
+    display: none;
+  }
+
+  /* The sheet tells a touch screen about the pinch instead of about buttons it cannot see. */
+  .zoom-help-pointer {
+    display: none;
+  }
+}
+
+/* ...and the other way round everywhere else. Declared here rather than only inside the query, so
+   the default state of both lines is set in one place and neither can be defined only behind a
+   media query. */
+.zoom-help-touch {
+  display: none;
 }

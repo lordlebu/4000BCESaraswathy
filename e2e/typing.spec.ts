@@ -29,7 +29,10 @@ test('typing a word with WASD in it does not walk the traveller', async ({ page 
   // species met. A test that skips itself on a fresh world proves nothing, and this rule is about
   // focus rather than about which of the three fields has it.
   await boot(page);
-  await page.getByRole('button', { name: /Map/ }).click();
+  // `exact`, because `getByRole(name)` matches as a case-insensitive substring and a loose `/Map/`
+  // answers to any label containing the word -- the satchel strip's dismiss says which sheet brings
+  // it back, so it matched too and Playwright reported a strict-mode violation naming both.
+  await page.getByRole('button', { name: 'Map', exact: true }).click();
   await page.waitForTimeout(400);
 
   const box = page.locator('#seed');

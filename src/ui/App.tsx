@@ -18,6 +18,7 @@ import { Ending } from './Ending';
 import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
+import { readShowing, writeShowing } from './preferences';
 import { fieldMap, poi } from '../content/places';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
@@ -230,13 +231,36 @@ export function App() {
    * questions, and conflating them would mean walking off a tile and back to reopen a panel
    * you had dismissed.
    */
-  const [ui, dispatch] = useReducer(surfaceReducer, initialSurface);
+  // **Seeded from what the player chose last time, not from the default every boot.**
+  // The satchel strip has had an off switch for months and it forgot itself on every visit: the
+  // flag lives in the reducer, and the reducer is pure. An option to stop looking at something that
+  // comes back whenever the game is opened is not really an option, which is what was reported.
+  // `preferences.ts` says why this is not in the save.
+  const [ui, dispatch] = useReducer(surfaceReducer, initialSurface, (base) => ({
+    ...base,
+    ...readShowing()
+  }));
   const { surface, interrupts, standingOn, placeOpen, satchelRibbon, dockHeight, talkingTo } = ui;
+
+  // Written when it moves, rather than inside the reducer's case: the reducer is pure and tested
+  // under Node, and a `localStorage` write in it would be both a side effect and a browser global
+  // in the one file most carefully kept free of them.
+  useEffect(() => {
+    writeShowing({ satchelRibbon });
+  }, [satchelRibbon]);
 
   // The scene owns the clock and says when it turns. React used to run its own timer off the
   // same formulas, which is two clocks agreeing by luck -- and they would have drifted the
   // moment walking started spending time, which it does.
   const [moment, setMoment] = useState<WorldMoment | null>(null);
+  /**
+   * Where the day is, for the dial.
+   *
+   * **Its own state rather than a field on `moment`**, because `WorldMoment` is handed to
+   * `journey.ts` and is canon's vocabulary -- five words, no midday. See `sky-changed` in
+   * `EventBus.ts`. `null` until the scene has said, which is the first half-second of a journey.
+   */
+  const [skyPhase, setSkyPhase] = useState<number | null>(null);
 
   // The fog set changes on every step, which is far too often to keep in React state — it would
   // re-render the whole panel each tile. The scene owns it; this ref only carries it to the save.
@@ -264,6 +288,7 @@ export function App() {
     const onStandingOn = ({ poiId: id }: GameToUi['standing-on']) =>
       dispatch({ type: 'standing-on', poiId: id });
     const onMoment = (next: GameToUi['moment-changed']) => setMoment(next);
+    const onSky = (next: GameToUi['sky-changed']) => setSkyPhase(next.phase);
     // Who the scene says it is drawing, which is the only authority on it. The picker sets its
     // own state optimistically; this is what corrects it if the scene ever disagreed.
     const onCharacter = ({ characterId: drawn }: GameToUi['character-changed']) => setDrawn(drawn);
@@ -274,6 +299,7 @@ export function App() {
     EventBus.onEvent('landmark-reached', onLandmarkReached);
     EventBus.onEvent('standing-on', onStandingOn);
     EventBus.onEvent('moment-changed', onMoment);
+    EventBus.onEvent('sky-changed', onSky);
     EventBus.onEvent('character-changed', onCharacter);
     return () => {
       EventBus.offEvent('world-ready', onWorldReady);
@@ -282,6 +308,7 @@ export function App() {
       EventBus.offEvent('landmark-reached', onLandmarkReached);
       EventBus.offEvent('standing-on', onStandingOn);
       EventBus.offEvent('moment-changed', onMoment);
+      EventBus.offEvent('sky-changed', onSky);
       EventBus.offEvent('character-changed', onCharacter);
     };
   }, []);
@@ -476,6 +503,22 @@ export function App() {
   }, [world, arrival]);
 
   /**
+   * What this ground still has to give, in the present tense.
+   *
+   * **Hoisted out of `tileActions` so the notes and the rail read one array.** The rail turns it
+   * into a sentence (`standingLine`) and the standing row turns it into a chip apiece; computing
+   * it twice would let the two disagree about what is on a tile, which is the exact shape of the
+   * bug that once had the journal describing a crane while the sketch recorded an otter.
+   */
+  const standing = useMemo(
+    () =>
+      underfoot
+        ? takeableAt(nodes, underfoot.seed, underfoot.at, underfoot.biome, arrival?.day ?? 0)
+        : [],
+    [underfoot, nodes, arrival?.day]
+  );
+
+  /**
    * Stoop and pick up whatever this tile offers.
    *
    * Done in React straight from the content layer rather than routed through the scene, on
@@ -573,9 +616,7 @@ export function App() {
     // player commits. The whole design rests on this being visible rather than rolled: a stand
     // somebody has been cutting reads as worked ground, and a good cut reads as two.
     const today = arrival?.day ?? 0;
-    const left = underfoot
-      ? takeableAt(nodes, underfoot.seed, underfoot.at, underfoot.biome, today)
-      : [];
+    const left = standing;
     const takeable = underfoot
       ? standingLine(left, (m) =>
           conditionOf(nodes, underfoot.seed, underfoot.at, m, today) === 'picked-over'
@@ -662,7 +703,7 @@ export function App() {
           ]
         : [])
     ];
-  }, [underfoot, arrival, nodes, pickUp, currentCreature, moment, world]);
+  }, [underfoot, arrival, nodes, standing, pickUp, currentCreature, moment, world]);
 
   /**
    * A key for each thing you can do here.
@@ -933,6 +974,7 @@ export function App() {
           <SatchelStrip
             satchel={satchel}
             onOpen={() => dispatch({ type: 'open-interrupt', which: 'satchel' })}
+            onHide={() => dispatch({ type: 'toggle-satchel-ribbon' })}
           />
         )}
       </div>
@@ -1108,6 +1150,13 @@ export function App() {
           discovered: arrival?.discovered ?? 0,
           atLandmark: arrival?.atLandmark ?? false,
           memory,
+        }}
+        sky={skyPhase === null ? null : { phase: skyPhase, weather: moment?.weather }}
+        standing={{
+          creature: arrival?.entry?.creature ?? { name: null, note: '', species: null },
+          doing: arrival?.entry?.doing ?? '',
+          flora: arrival?.entry?.flora ?? { name: null, note: '', species: null },
+          standing
         }}
         place={{
           poiId: placeOpen ? standingOn : null,

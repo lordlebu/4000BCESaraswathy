@@ -62,19 +62,33 @@ async function mapShare(page: Page): Promise<number> {
 /**
  * The resting state of the walk, which is what this plan is actually about.
  *
- * Before the dock these were 51.7, 52.1, 51.8 and 37.3. They are 68.2, 68.4, 67.8 and 61.5 after
- * stage 6 took the control bar from two rows to one and stopped the satchel strip stretching the
- * width of the screen. The floors sit a few points under that.
+ * | | before the dock | after the bar | after the standing row |
+ * |---|---|---|---|
+ * | desktop | 51.7 | 68.2 | **66.2** |
+ * | phone portrait | 52.1 | 68.4 | **63.5** |
+ * | small phone | 51.8 | 67.8 | **63.2** |
+ * | phone landscape | 37.3 | 61.5 | **44.6** |
  *
- * **The plan asked for 70% and did not get it**, and what is left is the dock's own peek row -- the
- * title, where you are, and what you can do here. That is the last thing worth cutting, so this is
- * where the number stops.
+ * **The floors come down, and that is a trade rather than a regression.** The middle column is a
+ * dock that showed a heading and two sentences about the next valley; the right-hand one shows the
+ * animal, what it is doing, the plant, the material and both verbs. `docs/ui-affordances-plan.md`
+ * has the measurement: at peek, `.journal-notes` was `display: none` and took *all* of the tile's
+ * content with it, so everything a player was deciding about lived one press of the handle away.
+ * Chrome taking the map back would be a regression. Content the player came for is what the map was
+ * cleared *for*.
+ *
+ * **Landscape is arithmetic, not a choice, and it is the one to read twice.** On a 390-pixel screen
+ * the handle, the heading, the standing row and the rail come to 164 pixels whatever anyone
+ * prefers -- 42% of the height -- so showing what is on the tile at rest costs 16.9 points there.
+ * Dropping the heading buys nine of them back and was reverted; the note in `styles.css` says why.
+ * The honest comparison is not against 61.5 but against **37.3**, which is what this screen had
+ * before any of this work, with a dock that showed less.
  */
 const RESTING = [
-  { name: 'desktop', w: 1280, h: 800, floor: 64, was: 51.7 },
-  { name: 'phone portrait', w: 390, h: 844, floor: 64, was: 52.1 },
-  { name: 'small phone', w: 360, h: 800, floor: 63, was: 51.8 },
-  { name: 'phone landscape', w: 844, h: 390, floor: 57, was: 37.3 }
+  { name: 'desktop', w: 1280, h: 800, floor: 62, was: 51.7 },
+  { name: 'phone portrait', w: 390, h: 844, floor: 59, was: 52.1 },
+  { name: 'small phone', w: 360, h: 800, floor: 59, was: 51.8 },
+  { name: 'phone landscape', w: 844, h: 390, floor: 41, was: 37.3 }
 ] as const;
 
 for (const view of RESTING) {
@@ -128,6 +142,23 @@ test('the place is readable rather than a letterbox', async ({ page }) => {
   await step(page, 'ArrowDown');
   await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
+
+  // **Wait for the dock to have finished growing, or this measures the animation.**
+  //
+  // Arriving is the one place the dock changes height on its own -- `standing-on` sets `read` --
+  // and `.dock` has a CSS transition, so `clientHeight` mid-tween is peek's. Measured under two
+  // workers this reported **2%** against a floor of 21 and passed on its own a minute later, which
+  // is the signature of a reproduction that is wrong rather than a layout that is: the panel was
+  // fine and the ruler was early.
+  await expect(page.locator('.dock')).toHaveAttribute('data-height', 'read');
+  await page.waitForFunction(() => {
+    const dock = document.querySelector('.dock');
+    if (!dock) return false;
+    const now = Math.round(dock.getBoundingClientRect().height);
+    const settled = (window as unknown as { __dockWas?: number }).__dockWas === now;
+    (window as unknown as { __dockWas?: number }).__dockWas = now;
+    return settled;
+  }, undefined, { timeout: 10_000 });
 
   const shown = await page.evaluate(() => {
     const body = document.querySelector('.dock-body');

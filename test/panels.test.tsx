@@ -42,6 +42,20 @@ import {
 } from '../src/journey';
 import { discoveries, vocabulary } from '../src/content/knowledge';
 
+/**
+ * What is on the ground, for `Here`'s standing row.
+ *
+ * Empty rather than absent: a tile with nothing on it is a real state -- open sea, a salt flat --
+ * and the row renders nothing for it, which is what most of these cases are about.
+ */
+const bare = {
+  creature: { name: null, note: '', species: null },
+  doing: '',
+  flora: { name: null, note: '', species: null },
+  standing: []
+} as const;
+
+
 // The plate loader, mocked -- and mocked at the top of the file because that is where vitest runs
 // it. Written inside the `describe` it belongs to, it still hoisted above every import and merely
 // read as though it were scoped, which vitest now warns about and will later reject.
@@ -465,14 +479,14 @@ describe('here', () => {
     // The label is the whole explanation of shelter -- no tooltip, no legend. A roof, a camp and
     // the bedroll each say what sort of night this will be before the player commits to it.
     const { unmount } = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }}
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }}
             actions={restAction('Sleep under the roof', null)} />
     );
     expect(screen.getByRole('button', { name: /roof/i })).toBeTruthy();
     unmount();
 
     const bed = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }}
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }}
             actions={restAction('Unroll the bedding here', null)} />
     );
     expect(screen.getByRole('button', { name: /bedding/i })).toBeTruthy();
@@ -481,7 +495,7 @@ describe('here', () => {
     // **Blocked, not gone.** The row stays and says why, which is the convention the whole
     // surface is built on: a vanished button teaches a player nothing about the mechanic.
     const { baseElement } = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }}
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }}
             actions={restAction('Unroll the bedding here', 'Not yet -- there is daylight left.')} />
     );
     const button = screen.getByRole('button', { name: /bedding/i }) as HTMLButtonElement;
@@ -492,14 +506,14 @@ describe('here', () => {
   it('shows a tiredness line only when there is one', () => {
     // Null covers both "the flag is off" and "nothing worth saying", which is most of a session.
     const { unmount } = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes, fatigue: 'You have been walking a while.' }}
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes, fatigue: 'You have been walking a while.' }}
             place={{ ...place }} actions={[]} />
     );
     expect(screen.getByText('You have been walking a while.')).toBeTruthy();
     unmount();
 
     const { baseElement } = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes, fatigue: null }} place={{ ...place }} actions={[]} />
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes, fatigue: null }} place={{ ...place }} actions={[]} />
     );
     expect(baseElement.querySelector('.status-tired')).toBeNull();
   });
@@ -508,20 +522,20 @@ describe('here', () => {
     // The empty case is the one worth pinning: an always-rendered paragraph still takes vertical
     // space in a panel that is deliberately tight on a phone.
     const { unmount } = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes, whereNext: 'The Camp would do for the night.' }}
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes, whereNext: 'The Camp would do for the night.' }}
             place={{ ...place }} actions={[]} />
     );
     expect(screen.getByText('The Camp would do for the night.')).toBeTruthy();
     unmount();
 
     const { baseElement } = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes, whereNext: '' }} place={{ ...place }} actions={[]} />
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes, whereNext: '' }} place={{ ...place }} actions={[]} />
     );
     expect(baseElement.querySelector('.status-next')).toBeNull();
   });
 
   it('shows the field notes with no place to stand in', () => {
-    render(<Here conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }} actions={[]} />);
+    render(<Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }} actions={[]} />);
     expect(screen.getByText('Salt flats')).toBeTruthy();
   });
 
@@ -539,7 +553,7 @@ describe('here', () => {
    * end it was written for cannot come back.
    */
   it('gives the slot to the place while it is being read', () => {
-    render(<Here conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />);
+    render(<Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />);
     expect(screen.getByRole('button', { name: 'Leave' })).toBeTruthy();
     expect(screen.queryByText('Salt flats'), 'the notes are sharing the slot again').toBeNull();
   });
@@ -551,19 +565,21 @@ describe('here', () => {
     const dock = () => document.querySelector('.dock')!.getAttribute('data-occupant');
 
     const { unmount } = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }} actions={[]} />
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }} actions={[]} />
     );
     expect(dock()).toBe('notes');
     unmount();
 
     const second = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />
     );
     expect(dock()).toBe('place');
     second.unmount();
 
     render(
       <Here
+        standing={bare}
+        sky={null}
         conversation={{
           npcId: 'npc_uma',
           progress: emptyProgress(),
@@ -589,7 +605,7 @@ describe('here', () => {
     // somewhere would hide every verb until you pressed Leave. The actions are the dock's, not the
     // occupant's, so they survive the swap.
     render(
-      <Here conversation={null}
+      <Here standing={bare} sky={null} conversation={null}
         height="read"
         onHeight={() => {}}
         open
@@ -611,7 +627,7 @@ describe('here', () => {
 
   it('renders nothing at all when the surface is closed', () => {
     const { baseElement } = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open={false} notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open={false} notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />
     );
     expect(baseElement.textContent).toBe('');
   });
@@ -622,7 +638,7 @@ describe('here', () => {
    */
   it('carries canon inside the notes when a service is listening', () => {
     render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }} canon={<p>Canon says something.</p>} actions={[]} />
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }} canon={<p>Canon says something.</p>} actions={[]} />
     );
     expect(screen.getByText('Canon says something.')).toBeTruthy();
   });
@@ -920,7 +936,7 @@ describe('the field notes draw a mark for every species', () => {
 
   it('draws one beside the creature and one beside the plant', () => {
     const { baseElement } = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={note()} place={{ poiId: null } as never} actions={[]} />
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={note()} place={{ poiId: null } as never} actions={[]} />
     );
     // Two marks, one per named species -- and they are inside the term, beside the name, rather
     // than floating in the section heading.
@@ -939,7 +955,7 @@ describe('the field notes draw a mark for every species', () => {
     // *creature* id and still gets none, because the panel decides on `kind` rather than on
     // whether a file happens to exist. Plants being emoji is a decision, not an unpainted queue.
     const { baseElement } = render(
-      <Here conversation={null} height="read" onHeight={() => {}}
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}}
         open
         notes={note({
           flora: {
@@ -963,7 +979,7 @@ describe('the field notes draw a mark for every species', () => {
   it('draws nothing where there is nothing to draw', () => {
     const empty = { name: null, note: 'No creature signs yet.', species: null };
     const { baseElement } = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={note({ creature: empty, flora: empty })} place={{ poiId: null } as never} actions={[]} />
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={note({ creature: empty, flora: empty })} place={{ poiId: null } as never} actions={[]} />
     );
     expect(baseElement.querySelectorAll('.species-emoji')).toHaveLength(0);
   });
@@ -972,7 +988,7 @@ describe('the field notes draw a mark for every species', () => {
     // The heading already names the place; a screen reader announcing "flower, Wetland at 28, 29"
     // is worse than one announcing the place alone.
     const { baseElement } = render(
-      <Here conversation={null} height="read" onHeight={() => {}} open notes={note()} place={{ poiId: null } as never} actions={[]} />
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={note()} place={{ poiId: null } as never} actions={[]} />
     );
     const mark = baseElement.querySelector('.journal-mark');
     expect(mark).not.toBeNull();
@@ -1016,7 +1032,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
 
   it('draws the plate, and drops the silhouette, when one exists', () => {
     const { baseElement } = render(
-      <Here conversation={null} height="read" onHeight={() => {}}
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}}
         open
         notes={notes({ id: 'scythian-wild-ass', name: 'Scythian Wild Ass' })}
         place={{ poiId: null } as never}
@@ -1035,7 +1051,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
 
   it('falls back to the mark for a species with no plate', () => {
     const { baseElement } = render(
-      <Here conversation={null} height="read" onHeight={() => {}}
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}}
         open
         notes={notes({ id: 'a-species-nobody-has-painted', name: 'Unpainted Thing' })}
         place={{ poiId: null } as never}
@@ -1047,7 +1063,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
 
   it('marks the plate decorative, since the name already says what it is', () => {
     const { baseElement } = render(
-      <Here conversation={null} height="read" onHeight={() => {}}
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}}
         open
         notes={notes({ id: 'scythian-wild-ass', name: 'Scythian Wild Ass' })}
         place={{ poiId: null } as never}

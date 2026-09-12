@@ -61,7 +61,10 @@ async function openDiary(page: Page) {
 async function listenToSomebody(page: Page) {
   await page.locator('.who').first().click();
   await expect(page.locator('.person .said')).not.toHaveCount(0);
-  await page.getByRole('button', { name: 'Back' }).click();
+  // `exact`, because `getByRole(name)` matches as a case-insensitive **substring** and "Back" is
+  // three letters that turn up inside other labels. It resolved to two elements the day the satchel
+  // strip gained a dismiss whose name explained where the strip had gone.
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
 }
 
@@ -118,7 +121,7 @@ test('the player can settle a question, and is never told they were wrong', asyn
   for (let i = 0, people = await page.locator('.who').count(); i < people; i += 1) {
     await page.locator('.who').nth(i).click();
     await expect(page.locator('.person')).toHaveCount(1, { timeout: 10_000 });
-    await page.getByRole('button', { name: 'Back' }).click();
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
     await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
   }
 

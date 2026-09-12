@@ -154,6 +154,36 @@ none of them failed anything.
   of open modals pushed from an effect comes out inside-first: the outer panel answers keys meant
   for the inner one and its veil paints over it. Nesting depth has to come from the tree — a
   context — not from when something registered.
+- **`getByRole(name)` matches as a case-insensitive substring, and the fix is `exact: true`, not
+  shorter copy.** One new `aria-label` broke five specs across two runs: it said *"bring it back
+  from the Map sheet"* and answered to `{ name: 'Back' }`, so it was reworded to *"show it again
+  from the Map sheet"* -- which still contains **Map** and collided with `{ name: /Map/ }` a run
+  later. The copy was right both times; a player who hides something has to be told where it went.
+  **Grep the suite for loose queries when you add a label, and make short common words exact.**
+- **Measuring a panel straight after it opens measures the animation.** Arriving somewhere is the
+  one place the dock changes height on its own, and `.dock` has a CSS transition: under two workers
+  a budget check read `clientHeight` mid-tween, reported 2% against a floor of 21, and passed alone
+  a minute later. Wait for the height to stop changing before reading it. The failure looks exactly
+  like a layout regression and is not.
+- **A bounding box does not prove a thing is on screen.** A box is still reported for an element a
+  scrolling ancestor has clipped away, and Playwright's `toBeVisible()` is satisfied by one — the
+  first guard on the standing row passed at all four device sizes with the row clipped to twenty
+  pixels by `overflow: hidden`. `document.elementFromPoint` at the element's centre catches
+  clipping, covering and falling off the edge at once. Check any "is it visible" assertion by
+  clipping the thing, not just by hiding it.
+- **A descendant rule that redeclares `display` must redeclare `flex-direction`.** The dock's action
+  rail set `display: flex; flex-wrap: wrap` and inherited `column` from a base rule three hundred
+  lines above, so chips a comment calls "a row, not a list" were a column at every size — 115px of
+  dock instead of 65, and the second chip twelve pixels off the bottom of a landscape phone.
+  `width: auto` on the buttons kept them pill-shaped, so the screenshot looked deliberate.
+  `test/stylesheet.test.ts` does **not** cover this shape: its guard is a bare class declared twice.
+- **A spec cannot drive two fingers without `test.use({ hasTouch: true })`.** Phaser starts its
+  `TouchManager` only when the device reports touch; otherwise every pointer event — including one
+  labelled `pointerType: 'touch'` — goes through the mouse manager and `input.pointer1`/`pointer2`
+  are never filled. Measured: `navigator.maxTouchPoints` 0, and the pinch simply did nothing. Drive
+  it through CDP `Input.dispatchTouchEvent` (`page.touchscreen` is single-touch), and **put real
+  waits between the phases** — `updatePinch` polls once a frame, so a gesture dispatched in one tick
+  is invisible to it and the spec fails against working code.
 - **A panel that grows with its content moves the camera.** The insets React reports are measured
   from the dock, so anything that changes its height while the player stands still drags the map.
   `e2e/hours.spec.ts` guards it and is worth reading before giving any panel an automatic size.

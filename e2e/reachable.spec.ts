@@ -36,16 +36,37 @@ for (const { w, h, name } of SIZES) {
   test(`every control is on screen and hittable — ${name}`, async ({ page }) => {
     await boot(page, w, h);
 
-    const controls = page.locator('.controls .control, .zoom button');
+    // **The action rail is in this list now, and leaving it out hid a real fault for months.**
+    //
+    // This spec's whole purpose is "can every control actually be pressed", and it walked the
+    // control bar and the zoom cluster -- the chrome around the map -- while the buttons a player
+    // presses to *play* went unchecked. Measured on a landscape phone at peek, `Unroll the bedding
+    // here` ran y=358..402 against a 390px viewport: twelve pixels of it were off the bottom of
+    // the screen, with `overflow: visible` so nothing scrolled to it.
+    //
+    // Taking and resting are the game. They belong in the spec that asks whether the game can be
+    // played on a phone.
+    const controls = page.locator('.controls .control, .zoom button, .dock .tile-actions button');
     const count = await controls.count();
     expect(count, 'no controls found at all').toBeGreaterThan(4);
 
     for (let i = 0; i < count; i += 1) {
       const button = controls.nth(i);
-      const label = (await button.getAttribute('aria-label')) ?? `control ${i}`;
+      // An action chip carries its name as visible text rather than an `aria-label`, so the text
+      // is the fallback -- otherwise every rail failure reads "control 5 runs off the bottom",
+      // which names nothing a person can go and look at.
+      const label =
+        (await button.getAttribute('aria-label')) ??
+        (await button.innerText()).replace(/\s+/g, ' ').trim() ??
+        `control ${i}`;
       const box = (await button.boundingBox())!;
 
       expect(box, `${label} has no box`).not.toBeNull();
+      // A blocked action is greyed and unpressable on purpose -- `TileActions` is emphatic that it
+      // keeps its place -- so `toBeEnabled` below is skipped for those. Being on the screen and
+      // big enough to read is still required of them: a row that teaches by being visible has to
+      // be visible.
+      const blocked = await button.isDisabled();
       expect(box.x, `${label} starts off the left edge`).toBeGreaterThanOrEqual(0);
       expect(box.y, `${label} starts above the top edge`).toBeGreaterThanOrEqual(0);
       expect(box.x + box.width, `${label} runs off the right edge at ${w}px`).toBeLessThanOrEqual(w);
@@ -54,7 +75,7 @@ for (const { w, h, name } of SIZES) {
       expect(box.width, `${label} is too narrow to tap`).toBeGreaterThanOrEqual(MIN_TAP);
 
       // Reachable in the browser's own judgement — not covered, not disabled, actually there.
-      await expect(button, `${label} is not clickable`).toBeEnabled();
+      if (!blocked) await expect(button, `${label} is not clickable`).toBeEnabled();
     }
   });
 }

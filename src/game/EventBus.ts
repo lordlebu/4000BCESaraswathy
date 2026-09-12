@@ -89,6 +89,26 @@ export interface GameToUi {
   'moment-changed': { timeOfDay: string; weather: string };
 
   /**
+   * Where the day is, in the engine's own words, for drawing it.
+   *
+   * **Separate from `moment-changed`, and the separation is the point.** That payload is a
+   * `WorldMoment` handed straight to `journey.ts`, and it is deliberately in **canon's**
+   * vocabulary: `dawn | morning | afternoon | evening | night`, five values, with noon folded into
+   * afternoon because canon has no midday. A dial driven off it cannot tell noon from four in the
+   * afternoon, and widening it to serve a picture is how two vocabularies quietly become one --
+   * `momentAt`'s mapping table between them exists precisely to keep them apart.
+   *
+   * So the sky says its own thing. `label` is `dayNight.ts`'s wash label, six values including the
+   * noon canon does not have; `phase` is where in the cycle it is, 0 at six in the morning.
+   *
+   * **Rounded to 1/48 of a day before it is sent.** The scene spends time continuously, so an
+   * unrounded phase would be a new value every frame and a React render with it. A forty-eighth is
+   * half an in-game hour -- about seventy-five real seconds -- which is fine enough to read as
+   * movement and coarse enough that nothing renders for it more than once a minute or so.
+   */
+  'sky-changed': { phase: number; label: string };
+
+  /**
    * The camera's zoom, whenever it changes.
    *
    * Reflected onto the map container as `data-zoom`. The e2e suite used to infer zoom from the

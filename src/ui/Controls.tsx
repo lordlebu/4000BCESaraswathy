@@ -182,8 +182,14 @@ export function Controls({
         </button>
       </div>
 
-      {/* Zoom. A mouse has a wheel and a keyboard has +/-, but a phone has neither, and pinch is
-          not something anyone thinks to try on a map that fits the screen already. */}
+      {/* Zoom, for anything that is not a finger.
+          **This used to say the opposite and the note is worth keeping.** It read: "a mouse has a
+          wheel and a keyboard has +/-, but a phone has neither, and pinch is not something anyone
+          thinks to try on a map that fits the screen already." That was a discoverability worry and
+          it was a fair one; what answers it is that the map sheet now tells a touch screen about
+          the pinch in its own words, and that pinch on a map is a convention people arrive already
+          knowing. `styles.css` hides this cluster under `(hover: none) and (pointer: coarse)` --
+          not a width, because a small desktop window still has a wheel. */}
       <div className="zoom">
         <button
           type="button"
@@ -226,9 +232,18 @@ export function Controls({
           <p className="muted">
             Walk with <kbd>WASD</kbd> or the arrow keys, or tap where you want to go.
           </p>
-          <p className="muted">
+          {/* **Two sentences, because the buttons are not on every screen.** On a touch screen the
+              zoom cluster is hidden -- see `.zoom` in `styles.css` -- so telling a phone about
+              buttons it cannot see is worse than saying nothing. The sheet is where a player looks
+              to find out how to play, which is the whole reason the cluster could go at all, so it
+              has to be right about which screen it is on. Same query as the rule that hides them:
+              a small desktop window still has a wheel and a keyboard. */}
+          <p className="muted zoom-help-pointer">
             Zoom with the <kbd>+</kbd> and <kbd>−</kbd> buttons, the mouse wheel, or a pinch.{' '}
             <kbd>0</kbd> fits the map to the screen again.
+          </p>
+          <p className="muted zoom-help-touch">
+            Zoom with a pinch — two fingers on the map, drawn together or apart.
           </p>
 
           <h3>What is on screen</h3>
