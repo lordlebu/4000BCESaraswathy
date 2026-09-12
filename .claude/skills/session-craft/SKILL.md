@@ -154,6 +154,17 @@ none of them failed anything.
   of open modals pushed from an effect comes out inside-first: the outer panel answers keys meant
   for the inner one and its veil paints over it. Nesting depth has to come from the tree — a
   context — not from when something registered.
+- **`getByRole(name)` matches as a case-insensitive substring, and the fix is `exact: true`, not
+  shorter copy.** One new `aria-label` broke five specs across two runs: it said *"bring it back
+  from the Map sheet"* and answered to `{ name: 'Back' }`, so it was reworded to *"show it again
+  from the Map sheet"* -- which still contains **Map** and collided with `{ name: /Map/ }` a run
+  later. The copy was right both times; a player who hides something has to be told where it went.
+  **Grep the suite for loose queries when you add a label, and make short common words exact.**
+- **Measuring a panel straight after it opens measures the animation.** Arriving somewhere is the
+  one place the dock changes height on its own, and `.dock` has a CSS transition: under two workers
+  a budget check read `clientHeight` mid-tween, reported 2% against a floor of 21, and passed alone
+  a minute later. Wait for the height to stop changing before reading it. The failure looks exactly
+  like a layout regression and is not.
 - **A bounding box does not prove a thing is on screen.** A box is still reported for an element a
   scrolling ancestor has clipped away, and Playwright's `toBeVisible()` is satisfied by one — the
   first guard on the standing row passed at all four device sizes with the row clipped to twenty

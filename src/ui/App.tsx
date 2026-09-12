@@ -18,6 +18,7 @@ import { Ending } from './Ending';
 import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
+import { readShowing, writeShowing } from './preferences';
 import { fieldMap, poi } from '../content/places';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
@@ -230,8 +231,23 @@ export function App() {
    * questions, and conflating them would mean walking off a tile and back to reopen a panel
    * you had dismissed.
    */
-  const [ui, dispatch] = useReducer(surfaceReducer, initialSurface);
+  // **Seeded from what the player chose last time, not from the default every boot.**
+  // The satchel strip has had an off switch for months and it forgot itself on every visit: the
+  // flag lives in the reducer, and the reducer is pure. An option to stop looking at something that
+  // comes back whenever the game is opened is not really an option, which is what was reported.
+  // `preferences.ts` says why this is not in the save.
+  const [ui, dispatch] = useReducer(surfaceReducer, initialSurface, (base) => ({
+    ...base,
+    ...readShowing()
+  }));
   const { surface, interrupts, standingOn, placeOpen, satchelRibbon, dockHeight, talkingTo } = ui;
+
+  // Written when it moves, rather than inside the reducer's case: the reducer is pure and tested
+  // under Node, and a `localStorage` write in it would be both a side effect and a browser global
+  // in the one file most carefully kept free of them.
+  useEffect(() => {
+    writeShowing({ satchelRibbon });
+  }, [satchelRibbon]);
 
   // The scene owns the clock and says when it turns. React used to run its own timer off the
   // same formulas, which is two clocks agreeing by luck -- and they would have drifted the
@@ -947,6 +963,7 @@ export function App() {
           <SatchelStrip
             satchel={satchel}
             onOpen={() => dispatch({ type: 'open-interrupt', which: 'satchel' })}
+            onHide={() => dispatch({ type: 'toggle-satchel-ribbon' })}
           />
         )}
       </div>

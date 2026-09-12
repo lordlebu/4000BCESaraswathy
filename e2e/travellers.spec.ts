@@ -65,7 +65,10 @@ test('the picker changes who is walking, without restarting the journey', async 
   await step(page, 'KeyD');
   const walked = (await page.locator('.journal h2').textContent()) ?? '';
 
-  await page.getByRole('button', { name: /Map/ }).click();
+  // `exact`, because `getByRole(name)` matches as a case-insensitive substring and a loose `/Map/`
+  // answers to any label containing the word -- the satchel strip's dismiss says which sheet brings
+  // it back, so it matched too and Playwright reported a strict-mode violation naming both.
+  await page.getByRole('button', { name: 'Map', exact: true }).click();
   const picker = page.getByRole('radiogroup', { name: /walking as/i });
   await expect(picker).toBeVisible();
 

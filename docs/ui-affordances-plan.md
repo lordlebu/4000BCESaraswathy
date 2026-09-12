@@ -194,7 +194,7 @@ names exactly what `takeableAt` returned, so a material that stops being offered
 42px on a phone (it wraps), against a 32px chip row. The landscape case is P1's, and has to be
 solved before this is measured at all.
 
-### B — the satchel puts itself away, from where it is
+### B — the satchel puts itself away, from where it is · **shipped**
 
 **The switch exists and stage 6 buried it.** Putting the ribbon away was reported from play and has
 had an off switch for months; stage 6 moved that switch out of the control bar and into the map
@@ -235,7 +235,7 @@ switch.
 clean map"* case to do the round trip from the strip rather than from the sheet — the same
 assertion, reached the way a player reaches it.
 
-### C — the zoom buttons stand down on a touch screen
+### C — the zoom buttons stand down on a touch screen · **shipped**
 
 `@media (hover: none) and (pointer: coarse)` is already in this stylesheet, already hiding
 `.tile-action-key` for exactly this reason, and already carries the note about why it is not a width
@@ -302,11 +302,75 @@ second step, after the first is on screen and has been lived with.
 |---|---|---|
 | **1** · **shipped** | P1 and P2, and `reachable.spec.ts` extended to the action rail | Both are bugs; both block a later stage; the rail guard is overdue on its own |
 | **2** · **shipped** | A — the standing row | The largest of the four, and the one the geometry of stage 1 makes possible |
-| **3** | B and C — the satchel dismiss, the zoom on touch | Small, independent, and both are about giving the map back |
+| **3** · **shipped** | B and C — the satchel dismiss, the zoom on touch | Small, independent, and both are about giving the map back |
 | **4** | D — the hour | New data across the bus, so it goes last and alone |
 
 One branch, one pull request, per this repository's rule. Stage 1 is worth pushing before stage 2 is
 written, because it is a fix rather than a change.
+
+### What stage 3 actually did
+
+**B came in two halves and only one of them was reported.** The dismiss is a `×` at the strip's
+right-hand end, and the structural note in the plan turned out to be the whole of that work: the
+strip was one `<button>` wrapping the readout, a `<button>` inside a `<button>` is invalid, and
+browsers resolve it by discarding the inner one. It is a `<div>` holding two controls now, and
+`test/satchelStrip.test.tsx` fails by name if it ever becomes a button again — *"is two controls,
+not a button inside a button"* — because the dismiss would silently stop existing rather than break.
+
+The half nobody reported is that **the choice did not survive a reload.** `satchelRibbon` lives in
+`surface.ts`, which is pure and runs under Node, and `Journey` in `save.ts` has no field for it — so
+the strip came back every boot, with the switch working perfectly each time. An option that forgets
+itself on every visit is not an option.
+
+`src/ui/preferences.ts` is a third place, deliberately, holding the smallest thing it can. Not the
+save, because `Journey` is versioned and adding a field means bumping `SAVE_VERSION`, which discards
+every existing journey — throwing away progress to remember a toggle is the wrong trade by a wide
+margin, and a journey is per-seed while this is not. Not `surface.ts`, because a `localStorage`
+access in the one file most carefully kept free of browser globals would end the reason its
+arbitration is testable.
+
+**Every access is wrapped, and that is not defensiveness.** In a private window the accessor itself
+raises before any value is read, so an unguarded read fails on first render — much worse than
+forgetting a toggle. `test/preferences.test.ts` covers that, plus a stored `"false"` string, a key
+that is not JSON, and a key holding `null`: an unreadable preference is no preference, and the
+default is a good one.
+
+**The field notes' own toggle is deliberately not in there.** Whether the notes show is
+`surface === 'here'` — one of a set that the diary, the album, the people, a place and a conversation
+all take over. Persisting it means persisting which *surface* was open, and restoring somebody into
+an album they left open a week ago is not obviously right. The satchel strip is a flag on its own,
+independent of everything, which is exactly what makes it safe to remember.
+
+**C is four lines of CSS and one honest sentence.** `.zoom` goes under the existing
+`(hover: none) and (pointer: coarse)` — not a width, because a small desktop window still has a
+wheel and a keyboard, and `e2e/touch.spec.ts` has a case that fails if anyone ever simplifies it to
+`max-width`. The map sheet gained a second sentence so a touch screen is told about the pinch
+instead of about buttons it cannot see; telling a phone how to press something invisible is worse
+than saying nothing.
+
+The prize is still 1.1% of a landscape phone and this is still not a screen-budget move. What made
+the item worth doing was P2, which only came to light because it was measured.
+
+**Two things the suite caught that no amount of reading would have.**
+
+The dismiss's label broke five specs across two runs, and the second break is the useful one.
+`getByRole(name)` matches as a case-insensitive **substring**, so the first wording — *"bring it
+back from the Map sheet"* — answered to `{ name: 'Back' }`, the diary's own close button, with a
+strict-mode violation naming both. The apparent lesson was *do not put another control's name in a
+label*, so it became *"show it again from the Map sheet"* — which still contains **Map**, and
+collided with `{ name: /Map/ }` in two more specs one run later.
+
+Which settles where the fix belongs. **The copy was right both times**: a player who has just hidden
+something needs telling where it went, and the place it went is called the Map sheet. Trimming
+product copy to dodge a loose selector is the tail wagging the dog. Six call sites querying short
+common words are `exact` now, which is what they should always have been.
+
+And `the place is readable rather than a letterbox` reported **2%** against a floor of 21, then
+passed on its own a minute later — the signature of a reproduction that is wrong rather than a
+layout that is. Arriving is the one place the dock changes height by itself, `.dock` has a CSS
+transition, and under two workers the measurement landed mid-tween and measured peek. It waits for
+the height to settle now. *Flake* was not the answer; the ruler was early, and a ruler that is
+sometimes early is a check people learn to ignore.
 
 ### What stage 2 actually did
 

@@ -1465,9 +1465,10 @@ button.ghost:hover:not(:disabled) {
      means the strip follows the bar to whatever height it wraps to. */
   z-index: var(--z-chrome);
 
-  /* A button, but not a control: no pill, no accent fill. Pressing it opens the full satchel and
-     that is a secondary action -- the primary use of this element is reading it. */
-  display: block;
+  /* **A row of two controls now, not one button.** The readout and the dismiss sit side by side --
+     see `SatchelStrip.tsx` for why this element stopped being a `<button>` at all. */
+  display: flex;
+  align-items: stretch;
   /* **As wide as what it holds, not as wide as the bar.**
    *
    * `width: auto` on a block child of a flex column stretches: the strip ran the full width of
@@ -1478,8 +1479,7 @@ button.ghost:hover:not(:disabled) {
    * thing putting the band back. */
   width: max-content;
   max-width: 100%;
-  text-align: left;
-  padding: 5px 10px;
+  padding: 0;
   border: 1px solid var(--edge);
   border-radius: 10px;
   background: var(--panel);
@@ -1493,6 +1493,46 @@ button.ghost:hover:not(:disabled) {
   font-size: 0.78rem;
   font-style: italic;
   color: var(--muted);
+}
+
+.satchel-strip-open {
+  /* A button, but not a control: no pill, no accent fill. Pressing it opens the full satchel and
+     that is a secondary action -- the primary use of this element is reading it. */
+  flex: 1 1 auto;
+  min-width: 0;
+  display: block;
+  text-align: left;
+  padding: 5px 10px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+/* **The one control in this interface under the 44-pixel floor, and the reason is what it does.**
+ * A dismiss sits beside the thing it dismisses, so at 44 it would be a third of the strip's width
+ * on a phone and would read as the strip's main action rather than its corner. The floor exists so
+ * a player can hit what they are aiming at; this is 30 and nothing is packed against it, which is
+ * the case the guidance is about. `reachable.spec.ts` walks the control bar and the action rail and
+ * does not claim this one. */
+.satchel-strip-hide {
+  flex: none;
+  width: 30px;
+  align-self: stretch;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--edge);
+  background: none;
+  color: var(--ink-faint);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.satchel-strip-hide:hover {
+  background: rgba(164, 92, 64, 0.14);
+  color: var(--ink);
+  filter: none;
 }
 
 .satchel-strip-list {
@@ -2988,4 +3028,36 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   .tile-action-key {
     display: none;
   }
+
+  /* **And no zoom buttons, because the hand already does it.**
+   *
+   * `Controls.tsx` argued the other way for a long time and the argument was reasonable: *"a mouse
+   * has a wheel and a keyboard has +/-, but a phone has neither, and pinch is not something anyone
+   * thinks to try on a map that fits the screen already."* Two things answer it. The map sheet says
+   * `Zoom with a pinch` where these are gone and is where a player looks for how to play; and pinch
+   * on a map is a convention people arrive already knowing.
+   *
+   * **Be honest about the size of the prize.** The cluster is 44x94 -- about 1.1% of a landscape
+   * phone -- so this is not a screen-budget move and should not be sold as one. What it buys is
+   * that the top-right corner of the map stops holding two controls that duplicate a gesture the
+   * hand already makes. What made it worth doing at all is that measuring it found P2: a pinch also
+   * walked the traveller, every time, and nothing had ever asked.
+   *
+   * The query is the one above and not a width: a small desktop window still has a wheel and a
+   * keyboard, and taking the buttons from it would be the fault this is meant to avoid, backwards. */
+  .zoom {
+    display: none;
+  }
+
+  /* The sheet tells a touch screen about the pinch instead of about buttons it cannot see. */
+  .zoom-help-pointer {
+    display: none;
+  }
+}
+
+/* ...and the other way round everywhere else. Declared here rather than only inside the query, so
+   the default state of both lines is set in one place and neither can be defined only behind a
+   media query. */
+.zoom-help-touch {
+  display: none;
 }

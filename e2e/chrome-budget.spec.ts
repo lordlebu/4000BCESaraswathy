@@ -143,6 +143,23 @@ test('the place is readable rather than a letterbox', async ({ page }) => {
   await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 
+  // **Wait for the dock to have finished growing, or this measures the animation.**
+  //
+  // Arriving is the one place the dock changes height on its own -- `standing-on` sets `read` --
+  // and `.dock` has a CSS transition, so `clientHeight` mid-tween is peek's. Measured under two
+  // workers this reported **2%** against a floor of 21 and passed on its own a minute later, which
+  // is the signature of a reproduction that is wrong rather than a layout that is: the panel was
+  // fine and the ruler was early.
+  await expect(page.locator('.dock')).toHaveAttribute('data-height', 'read');
+  await page.waitForFunction(() => {
+    const dock = document.querySelector('.dock');
+    if (!dock) return false;
+    const now = Math.round(dock.getBoundingClientRect().height);
+    const settled = (window as unknown as { __dockWas?: number }).__dockWas === now;
+    (window as unknown as { __dockWas?: number }).__dockWas = now;
+    return settled;
+  }, undefined, { timeout: 10_000 });
+
   const shown = await page.evaluate(() => {
     const body = document.querySelector('.dock-body');
     return body ? (100 * body.clientHeight) / body.scrollHeight : 0;

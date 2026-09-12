@@ -415,6 +415,12 @@ order of the `--z-*` tokens *is* the order things are in front of each other, so
 token rather than picking a number — including `Modal.tsx`, whose lift for a nested dialog is
 `calc(var(--z-modal) + depth)` and cannot drift away from the sheet.
 
+**The zoom cluster is hidden on a touch screen**, under `(hover: none) and (pointer: coarse)` —
+the same query that hides the keyboard hints, and not a width, because a small desktop window still
+has a wheel and a keyboard. The map sheet carries two sentences about zooming so a phone is told
+about the pinch rather than about buttons it cannot see. The pixels are negligible (44×94, about
+1.1% of a landscape phone); what the item bought was finding that a pinch also walked the traveller.
+
 **The control bar carries travel and time only.** What is *on screen* — field notes, carrying —
 lives in the map sheet under "What is on screen", because a toggle is a preference and a preference
 does not need a permanent row: the bar was two rows and 96px, and is one row and 44px. The satchel
@@ -431,6 +437,21 @@ where a readout owes 26 — measured, that took the row from 57px to 75 and push
 dock. The row says what is here; the rail says what you can do about it. Use `speciesMark()` rather
 than `SpeciesIcon` anywhere a glyph is wanted without a plate, because `SpeciesIcon` prefers a
 painted plate and a plate is a control.
+
+**A preference goes in `src/ui/preferences.ts`, never in the save and never in `surface.ts`.**
+`Journey` is versioned world state: adding a field to it means bumping `SAVE_VERSION`, which
+discards every existing journey, and throwing away progress to remember a toggle is the wrong trade.
+`surface.ts` is pure and runs under Node, which is why its arbitration is testable — a
+`localStorage` access there ends that. Every access is wrapped in `try`/`catch` because in a private
+window the accessor *raises* rather than returning null, so an unguarded read fails on first render.
+Only the satchel strip is kept: the field notes' toggle is a `Surface`, one of a set that a place or
+a conversation takes over, and persisting which surface was open is a different and larger question.
+
+**The satchel strip is a `<div>` with two buttons, and must stay one.** It was a single `<button>`
+wrapping the readout, so the dismiss could not be added — a `<button>` inside a `<button>` is
+invalid and browsers resolve it by discarding the inner one. `test/satchelStrip.test.tsx` fails by
+name if it becomes a button again, because the dismiss would silently stop existing rather than
+break.
 
 **A bounding box does not prove something is visible.** A box is still reported for an element a
 scrolling ancestor has clipped away, and Playwright's `toBeVisible()` is satisfied by one too — the

@@ -87,7 +87,7 @@ test('walking out does not lose what you were told', async ({ page }) => {
   // Leave immediately, without clicking through the exchange. Thrali's first line gives the
   // silver-water question, and a player who stood there while he spoke has been given it --
   // recording only on completion once meant the question was silently dropped on the way out.
-  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Leave' }).click();
 
   await page.getByRole('button', { name: /Records/ }).click();
@@ -117,7 +117,7 @@ test('the person you are talking to has a face beside the words', async ({ page 
 test('the People tab keeps a record of who you have met', async ({ page }) => {
   await walkToThrali(page);
   await expect(page.locator('.person .dialogue-beat')).not.toHaveCount(0);
-  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Leave' }).click();
 
   await page.getByRole('button', { name: /Records/ }).click();
