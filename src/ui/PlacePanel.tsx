@@ -234,9 +234,12 @@ export function PlacePanel({
   const people = npcsAt(place.id);
   const sub = openSub ? place.subLocations.find((s) => s.id === openSub) : null;
 
+  // **No veil.** This used to draw its own full-screen wrapper and position itself above the field
+  // notes, so the two divided the bottom of the screen and each got half of a half. It is an
+  // occupant of the dock now -- see `Here.tsx` -- and the slot it stands in is the whole of the
+  // bottom rather than a share of it.
   return (
-    <div className="place-veil">
-      <section className="place" aria-live="polite">
+    <section className="place" aria-live="polite">
         <header className="place-head">
           <div>
             <h2>{place.name}</h2>
@@ -331,7 +334,6 @@ export function PlacePanel({
             )}
           </>
         )}
-      </section>
-    </div>
+    </section>
   );
 }

@@ -90,7 +90,8 @@ body {
 
 /* --- Shared parchment ---------------------------------------------------- */
 
-.journal,
+/* `.dock` is in this list because it is the panel the notes used to be -- see "The dock" below. */
+.dock,
 .sheet,
 .arrival {
   background: var(--panel);
@@ -110,7 +111,10 @@ body {
  * asset to keep in step with the rest of the art.
  */
 
-.journal {
+/* The tear moved from `.journal` to `.dock` with the parchment: the dock is the sheet of paper and
+   the notes are what is written on it. The place stands in the same slot and gets the same edge,
+   which is the point of there being one dock rather than two panels. */
+.dock {
   /* A torn top edge. The path is a shallow, irregular run of arcs across the full width; the
      `fill` beneath it keeps the rest of the panel solid. `mask-size: 100% 100%` stretches it to
      whatever height the panel settles at, so the tear stays a few pixels tall at any size. */
@@ -135,7 +139,7 @@ body {
 /* Paper grain: two very faint gradients at odd angles, so the texture does not read as stripes.
    Drawn on a pseudo-element rather than the panel's own background, which is already carrying
    the parchment colour and would have to become a stack to hold both. */
-.journal::before {
+.dock::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -375,14 +379,240 @@ button.ghost:hover:not(:disabled) {
   overflow-wrap: anywhere;
 }
 
-/* --- The field notes ----------------------------------------------------- */
 
-.journal {
-  position: absolute;
+/* --- The dock -------------------------------------------------------------
+ *
+ * One slot along the bottom, one occupant at a time, three heights.
+ *
+ * **What this replaces.** The field notes were pinned full-bleed at 38-46dvh with no state between
+ * that and gone, and the place drew its own veil and sat *above* them, so the two divided the
+ * bottom of the screen and each got half of a half. Measured: the map was 27% of a desktop screen
+ * and 17% of a landscape phone while standing in a place, and the place panel showed 29% of its own
+ * content. `docs/ui-streamline-plan.md` has the table.
+ *
+ * The three heights are not three fractions. **Peek is sized to what it holds** -- the title, where
+ * you are, and the actions -- because a tile with three things to do on it needs more room than a
+ * tile with one, and a number that suits either is wrong for the other. Read and full are fractions
+ * because they are about how much of the map you are willing to give up to read.
+ */
+.dock {
+  position: fixed;
+  left: var(--safe-left);
+  right: var(--safe-right);
+  bottom: var(--safe-bottom);
   z-index: 2;
-  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* The parchment, the border and the tear come from the shared block at the top of this file.
+     Restating them here re-added the top border the deckle exists to remove, which is exactly the
+     cascade collision this stylesheet keeps paying for. */
+  /* Height changes are the one animation here, and they are what makes the dock read as one thing
+     moving rather than two panels swapping. */
+  transition: height 180ms ease;
+}
+
+/* **A ceiling the dock may never pass, whatever height it is asked for.**
+ *
+ * Found by looking at a screenshot: on a landscape phone at reading height the dock reached up
+ * under the control bar and the satchel strip, which sit at `z-index: 3` against its 2 -- so the
+ * grip was *behind* the strip and could not be pressed. The browser said it plainly and unhelpfully:
+ * "waiting for element to be visible, enabled and stable", a hundred and fifty times.
+ *
+ * The control bar is two rows and a strip at worst, and it owns the top of the screen. This keeps
+ * the dock clear of it by construction rather than by a media query per device. */
+:root {
+  --dock-ceiling: calc(100dvh - 7.5rem);
+}
+
+/* **A height, not a maximum, and that is a correction.**
+ *
+ * Peek was sized to what it held, on the reasoning that a tile with three things to do needs more
+ * room than a tile with one. It does -- and `hours.spec.ts` failed, with the panel measuring 137
+ * pixels at one hour and 114 at another. The line about what a creature is *doing* is the one piece
+ * of text here that changes while the player stands still, so a content-sized dock breathes as the
+ * day turns; React reports new insets, the camera refits, and the map moves under somebody who has
+ * not touched anything. That guard predates all of this and it is right.
+ *
+ * So every height is fixed and the body scrolls when the content is taller. The cost is a little
+ * blank parchment under a quiet tile; the alternative is a map that twitches. */
+.dock[data-height='peek'] {
+  height: 26dvh;
+  max-height: var(--dock-ceiling);
+}
+
+/* **56, not 46, and measured.** At 46dvh the dock's body showed 47% of a place -- worse than the
+   73% the old arrangement managed on a desktop, because the rail and the handle take 117 pixels
+   off the top of whatever this number buys. Reading height has to pay for them before it pays for
+   any reading. */
+.dock[data-height='read'] {
+  height: 56dvh;
+  max-height: var(--dock-ceiling);
+}
+
+.dock[data-height='full'] {
+  height: 82dvh;
+  max-height: var(--dock-ceiling);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock {
+    transition: none;
+  }
+}
+
+/* The occupant scrolls; the handle and the actions do not. That is the whole reason the dock is a
+   column rather than one scrolling box: the things you act on stay put while the prose moves. */
+.dock-body {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+/* The grip. A real button, because a drag is not discoverable and is not available to a keyboard;
+   it is drawn as the bar people expect to pull because that is what it is. */
+.dock-handle {
+  flex: none;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 44px of target around a 4px bar -- the same floor every other control in this interface has. */
+  width: 96px;
+  min-height: 22px;
+  padding: 9px 0 5px;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.dock-grip {
+  display: block;
+  width: 42px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(52, 38, 58, 0.3);
+}
+
+.dock-handle:hover .dock-grip,
+.dock-handle:focus-visible .dock-grip {
+  background: var(--accent);
+}
+
+/* **Peek shows where you are and what you can do, and nothing else.**
+ *
+ * Hidden rather than unmounted: the panels keep one shape at every height, so nothing reflows on
+ * the way open and the camera is not dragged around by the notes changing their mind. */
+.dock[data-height='peek'] .journal-notes,
+.dock[data-height='peek'] .memory,
+.dock[data-height='peek'] .canon,
+.dock[data-height='peek'] .tile-actions-head {
+  display: none;
+}
+
+/* **The footer splits at peek, and getting that wrong is what the browser suite caught.**
+ *
+ * The first cut hid the whole of it, which took the dusk and fatigue lines with it -- the two
+ * things in this panel that are about *walking* rather than about reading. A player at peek is
+ * walking. So the light going and legs giving out stay; the landmark bearing, the where-next and
+ * the tally of places discovered wait for the height that is about reading.
+ *
+ * They render only when they have something to say, so peek grows by a line exactly when the game
+ * has a warning and not otherwise. */
+.dock[data-height='peek'] .journal-foot > .status,
+.dock[data-height='peek'] .journal-foot > .status-next,
+.dock[data-height='peek'] .journal-foot > .muted {
+  display: none;
+}
+
+
+
+
+/* --- The action rail ------------------------------------------------------
+ *
+ * **Inside the dock the actions are a row, not a list.** As a column of 44px rows with a mark, a
+ * label and a detail line apiece, three of them came to 130 pixels or more -- and measured on a
+ * landscape phone that left the dock's body **14 pixels of a 447-pixel place**. The verbs were
+ * eating the writing.
+ *
+ * So they are chips: the same rows, the same list, the same order, laid along the bottom of the
+ * dock where they cannot be scrolled away from. This is `docs/ui-streamline-plan.md`'s move B,
+ * arriving with stage 3 rather than stage 4 because stage 3's geometry does not work without it.
+ * The blocked ones keep their reason and their place -- see `TileActions.tsx`, which is emphatic
+ * about it -- and are shown from reading height, where there is room to read them. */
+.dock .tile-actions {
+  flex: none;
+  margin: 0;
+  padding: 8px 14px 12px;
+  border-top: 1px solid var(--edge);
+}
+
+.dock .tile-action-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dock .tile-action {
+  margin: 0;
+  flex: 0 1 auto;
+}
+
+/* The rail needs no heading: it sits in a dock already labelled "Here", and a chip that says
+   "Unroll the bedding" is not waiting to be introduced. The blocked list keeps its own, because
+   "Not from here" is the whole reason those rows are grouped. */
+.dock .tile-actions-rail .tile-actions-head {
+  display: none;
+}
+
+/* A chip is as wide as its words. Without this the button fills the row and two of them stack,
+   which is the column this rail exists to stop being. */
+.dock .tile-actions-rail .tile-action > button {
+  width: auto;
+  gap: 7px;
+  padding: 6px 12px;
+  /* The same 44px floor every control in this interface has. */
+  min-height: 44px;
+  border-radius: 999px;
+}
+
+/* The detail says what is on the ground, and the notes say it too -- `entry.underfoot` is the same
+   fact in a sentence. A second line in every chip buys nothing, so the rail leaves it to them. */
+.dock .tile-actions-rail .tile-action-detail {
+  display: none;
+}
+
+/* **The reason waits for reading height; the row never does.**
+ *
+ * A blocked chip is on screen at peek, greyed and unpressable, because `TileActions` requires every
+ * action to be listed at all times -- that is how a player learns a mechanic exists. What peek
+ * cannot afford is the sentence: a `why` under each chip makes it a full-width block, and a column
+ * of those is the 164 pixels this rail was built to stop being.
+ *
+ * Splitting the list in two -- available in the rail, blocked in the body -- was tried first and
+ * reverted: it hid the blocked rows at peek, which is the ruling, not a detail of it. */
+.dock[data-height='peek'] .tile-action-why {
+  display: none;
+}
+
+/* At reading height the reason is a line of prose under its chip, so the row takes the width it
+   needs and the ones without a reason stay beside each other. */
+.dock .tile-action.is-blocked {
+  flex-basis: 100%;
+}
+
+.dock[data-height='peek'] .tile-action.is-blocked {
+  flex-basis: auto;
+}
+
+/* --- The field notes ----------------------------------------------------- */
+
+/* An occupant of the dock rather than a panel of its own: the dock carries the parchment, the
+   position and the scrolling, and this carries the writing. */
+.journal {
+  padding: 4px 18px 14px;
 }
 
 .journal-head {
@@ -1042,27 +1272,13 @@ button.ghost:hover:not(:disabled) {
 
 /* --- Landscape: log to the right, notes along the bottom beside it -------- */
 
-@media (orientation: landscape) {
-
-  .journal {
-    left: var(--safe-left);
-    right: var(--safe-right);
-    bottom: var(--safe-bottom);
-    max-height: 40dvh;
-  }
-
-}
+/* The notes do not position themselves in either orientation any more: the dock does it once, and
+   its heights are the same whichever way round the screen is. What stays orientation-specific is
+   how the writing inside lays out. */
 
 /* --- Portrait: notes along the bottom ------------------------------------ */
 
 @media (orientation: portrait) {
-
-  .journal {
-    left: var(--safe-left);
-    right: var(--safe-right);
-    bottom: var(--safe-bottom);
-    max-height: 38dvh;
-  }
 
   .journal-notes {
     grid-template-columns: 1fr;
@@ -1071,9 +1287,19 @@ button.ghost:hover:not(:disabled) {
 
 /* A landscape phone is short. Give the map the height back and let the notes stay out of the way
    until they are read. */
+/* A landscape phone is short, so reading height is allowed a little more of it -- and the control
+   labels go, which is the one place in this interface they do. */
 @media (orientation: landscape) and (max-height: 480px) {
-  .journal {
-    max-height: 46dvh;
+  /* **Measured three times, and the third one settled it.** At 52dvh the dock's body had 14 pixels
+     of a 447-pixel place; at 66 it had 146; at 78 it had more still and the grip disappeared behind
+     the satchel strip. A landscape phone is 390 pixels tall, the handle and the rail take 86 of
+     them whatever happens, and the ceiling above takes the rest of the argument -- so this asks for
+     generous and gets whatever is left under the control bar. On a 390-tall screen **reading a
+     place and seeing the map are in direct conflict**, and this is where that is decided in favour
+     of reading, with the map one press on the handle away. */
+  .dock[data-height='read'] {
+    height: 78dvh;
+    max-height: var(--dock-ceiling);
   }
 
   .control-label {
@@ -1281,27 +1507,12 @@ button.ghost:hover:not(:disabled) {
  * Where the diary actually gets written. Same parchment as the diary, but it sits lower and
  * narrower — you are in one place, not reading the whole book. */
 
-.place-veil {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
-  background: rgba(27, 20, 32, 0.4);
-  z-index: 35;
-}
-
+/* **`.place-veil` is gone.** The place drew its own full-screen wrapper and positioned itself above
+   the notes; the two are occupants of one dock now, taking turns in the same slot, so there is
+   nothing to position against. The dock carries the parchment, the scrolling and the edge -- this
+   carries the writing, the same way `.journal` does. */
 .place {
-  width: min(46rem, 100%);
-  max-height: 82%;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background: var(--paper);
-  border: 1px solid var(--edge);
-  border-radius: 10px;
-  box-shadow: 0 14px 40px rgba(27, 20, 32, 0.35);
-  padding: clamp(0.9rem, 2.6vw, 1.5rem);
+  padding: 4px clamp(0.9rem, 2.6vw, 1.5rem) 14px;
 }
 
 .place-head {
@@ -1594,33 +1805,10 @@ button.ghost:hover:not(:disabled) {
   border-color: var(--accent);
 }
 
-/* The place panel shares the bottom of the screen with the field notes rather than covering
- * them. It used to sit on a dark veil over everything, which meant arriving somewhere hid the
- * flora and fauna you had walked there to read. Now only one of the two holds the slot, both
- * can be closed, and the map stays visible behind. */
-.place-veil {
-  background: none;
-  pointer-events: none;
-}
-.place { pointer-events: auto; }
-
-/* And stop short of the field notes, which sit below it. Suppressing the notes while a place
- * was open was the first attempt and it was wrong: a journey that *starts* on a place then
- * never showed them at all, while the Notes button still claimed to be on. Nothing hides
- * anything now — the bottom of the screen is divided instead. */
-.stage:has(.journal) .place-veil {
-  bottom: calc(var(--safe-bottom) + 42dvh);
-}
-@media (orientation: landscape) and (max-height: 480px) {
-  .stage:has(.journal) .place-veil {
-    bottom: calc(var(--safe-bottom) + 48dvh);
-  }
-}
-@media (orientation: portrait) {
-  .stage:has(.journal) .place-veil {
-    bottom: calc(var(--safe-bottom) + 46dvh);
-  }
-}
+/* Three media queries of arithmetic stood here, keeping the place panel clear of whatever fraction
+   of the screen the field notes were taking. The dock holds one occupant at a time, so there is
+   nothing left to keep clear of, and the ruling those rules protected -- that leaving a place
+   reveals the notes rather than clearing the screen -- is now the reducer's, in `surface.ts`. */
 
 
 /* --- A plate you can open ------------------------------------------------

@@ -6,6 +6,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  dockIsOpen,
   initialSurface,
   mapIsCovered,
   surfaceReducer,
@@ -243,5 +244,86 @@ describe('interrupts', () => {
     );
     expect(state.surface).toBeNull();
     expect(mapIsCovered(state)).toBe(true);
+  });
+});
+
+/**
+ * How much room the dock has, which is stage 3 of `docs/ui-streamline-plan.md`.
+ *
+ * The measurement that started it: chrome covered **48% of the screen standing on ordinary ground
+ * and 73% standing in a place** on a desktop, and 83% on a landscape phone. The notes had two
+ * states, all of it or gone, so a player who wanted the map had to take the writing away.
+ *
+ * These are about arbitration rather than pixels — the same reason this reducer was pulled out of
+ * the component at all. What the three names measure on a real screen is
+ * `e2e/chrome-budget.spec.ts`.
+ */
+describe('how much room the dock has', () => {
+  it('rests at peek, so the walk is mostly map', () => {
+    expect(initialSurface.dockHeight).toBe('peek');
+    // And the notes are still the resting *surface*. Peek is a size, not a way of closing them:
+    // a player who lands on a bare map has been given a walking simulator, which is the ruling
+    // the first assertion in this file exists to keep.
+    expect(initialSurface.surface).toBe('here');
+  });
+
+  it('opens to reading height on arriving somewhere', () => {
+    const state = run({ type: 'standing-on', poiId: 'poi_eastern_field' });
+    expect(state.placeOpen).toBe(true);
+    expect(state.dockHeight).toBe('read');
+  });
+
+  it('gives the map back on walking out', () => {
+    const state = run(
+      { type: 'standing-on', poiId: 'poi_eastern_field' },
+      { type: 'standing-on', poiId: null }
+    );
+    expect(state.placeOpen).toBe(false);
+    expect(state.dockHeight).toBe('peek');
+  });
+
+  it('gives the map back on leaving a place without moving', () => {
+    // "Leave" is a move back towards the map, not a swap to a different page of prose.
+    const state = run({ type: 'standing-on', poiId: 'poi_eastern_field' }, { type: 'close-place' });
+    expect(state.dockHeight).toBe('peek');
+    expect(state.surface).toBe('here');
+  });
+
+  it('reopens a place at reading height, having been put away', () => {
+    const state = run(
+      { type: 'standing-on', poiId: 'poi_eastern_field' },
+      { type: 'close-place' },
+      { type: 'toggle-place' }
+    );
+    expect(state.placeOpen).toBe(true);
+    expect(state.dockHeight).toBe('read');
+  });
+
+  it('opens, opens further, and then gets out of the way', () => {
+    // Three steps rather than two. `full` was originally reserved for a conversation and reachable
+    // only by starting one -- and a height nothing can reach is a height that does not exist, which
+    // is this codebase's signature bug. At reading height the dock shows about two thirds of a
+    // place; somebody who wants the whole page has to be able to ask for it.
+    expect(run({ type: 'dock-toggle' }).dockHeight).toBe('read');
+    expect(run({ type: 'dock-toggle' }, { type: 'dock-toggle' }).dockHeight).toBe('full');
+    expect(
+      run({ type: 'dock-toggle' }, { type: 'dock-toggle' }, { type: 'dock-toggle' }).dockHeight
+    ).toBe('peek');
+  });
+
+  it('says when it is showing more than the peek row', () => {
+    expect(dockIsOpen(initialSurface)).toBe(false);
+    expect(dockIsOpen(run({ type: 'dock', height: 'read' }))).toBe(true);
+    // Not the dock at all when the notes are put away, whatever height it was left at.
+    expect(dockIsOpen(run({ type: 'dock', height: 'read' }, { type: 'toggle', surface: 'here' }))).toBe(
+      false
+    );
+  });
+
+  it('leaves the height alone when something else takes the screen', () => {
+    // The diary and the album are their own surfaces over the map. They say nothing about how tall
+    // the dock should be when the player comes back to it.
+    const state = run({ type: 'dock', height: 'read' }, { type: 'toggle', surface: 'progress' });
+    expect(state.dockHeight).toBe('read');
   });
 });

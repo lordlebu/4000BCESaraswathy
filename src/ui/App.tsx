@@ -231,7 +231,7 @@ export function App() {
    * you had dismissed.
    */
   const [ui, dispatch] = useReducer(surfaceReducer, initialSurface);
-  const { surface, interrupts, standingOn, placeOpen, satchelRibbon } = ui;
+  const { surface, interrupts, standingOn, placeOpen, satchelRibbon, dockHeight } = ui;
 
   // The scene owns the clock and says when it turns. React used to run its own timer off the
   // same formulas, which is two clocks agreeing by luck -- and they would have drifted the
@@ -809,6 +809,10 @@ export function App() {
   // different shapes -- a side panel in landscape, a bottom sheet in portrait -- and telling
   // those apart by measuring its width, then deciding which edge it covered, was most of what
   // this effect did. Retiring the panel retires the arithmetic with it.
+  // **The dock is what covers the bottom now, not the notes.** Measuring `.journal` was right when
+  // it was the only thing down there; it is one of two occupants of a slot today, so standing in a
+  // place would have reported nothing covering the map and let the camera centre the traveller
+  // underneath the panel they were reading.
   const hasNotes = Boolean(arrival) && surface === 'here';
   useEffect(() => {
     const stage = document.querySelector('.stage');
@@ -816,7 +820,7 @@ export function App() {
 
     const report = () => {
       const bounds = stage.getBoundingClientRect();
-      const notes = document.querySelector('.journal')?.getBoundingClientRect();
+      const notes = document.querySelector('.dock')?.getBoundingClientRect();
 
       EventBus.emitEvent('viewport-insets', {
         right: 0,
@@ -827,7 +831,7 @@ export function App() {
     report();
     const observer = new ResizeObserver(report);
     observer.observe(stage);
-    for (const panel of document.querySelectorAll('.journal')) observer.observe(panel);
+    for (const panel of document.querySelectorAll('.dock')) observer.observe(panel);
     window.addEventListener('orientationchange', report);
 
     // And again once the scene exists. Phaser boots asynchronously, so the first report can go out
@@ -1092,6 +1096,8 @@ export function App() {
           is a section inside the notes rather than a panel of its own. */}
       <Here
         open={surface === 'here'}
+        height={dockHeight}
+        onHeight={() => dispatch({ type: 'dock-toggle' })}
         notes={{
           entry: arrival?.entry ?? null,
           surroundings: arrival?.surroundings ?? '',

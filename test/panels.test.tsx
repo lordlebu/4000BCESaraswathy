@@ -465,14 +465,14 @@ describe('here', () => {
     // The label is the whole explanation of shelter -- no tooltip, no legend. A roof, a camp and
     // the bedroll each say what sort of night this will be before the player commits to it.
     const { unmount } = render(
-      <Here open notes={{ ...notes }} place={{ ...place }}
+      <Here height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }}
             actions={restAction('Sleep under the roof', null)} />
     );
     expect(screen.getByRole('button', { name: /roof/i })).toBeTruthy();
     unmount();
 
     const bed = render(
-      <Here open notes={{ ...notes }} place={{ ...place }}
+      <Here height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }}
             actions={restAction('Unroll the bedding here', null)} />
     );
     expect(screen.getByRole('button', { name: /bedding/i })).toBeTruthy();
@@ -481,7 +481,7 @@ describe('here', () => {
     // **Blocked, not gone.** The row stays and says why, which is the convention the whole
     // surface is built on: a vanished button teaches a player nothing about the mechanic.
     const { baseElement } = render(
-      <Here open notes={{ ...notes }} place={{ ...place }}
+      <Here height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }}
             actions={restAction('Unroll the bedding here', 'Not yet -- there is daylight left.')} />
     );
     const button = screen.getByRole('button', { name: /bedding/i }) as HTMLButtonElement;
@@ -492,14 +492,14 @@ describe('here', () => {
   it('shows a tiredness line only when there is one', () => {
     // Null covers both "the flag is off" and "nothing worth saying", which is most of a session.
     const { unmount } = render(
-      <Here open notes={{ ...notes, fatigue: 'You have been walking a while.' }}
+      <Here height="read" onHeight={() => {}} open notes={{ ...notes, fatigue: 'You have been walking a while.' }}
             place={{ ...place }} actions={[]} />
     );
     expect(screen.getByText('You have been walking a while.')).toBeTruthy();
     unmount();
 
     const { baseElement } = render(
-      <Here open notes={{ ...notes, fatigue: null }} place={{ ...place }} actions={[]} />
+      <Here height="read" onHeight={() => {}} open notes={{ ...notes, fatigue: null }} place={{ ...place }} actions={[]} />
     );
     expect(baseElement.querySelector('.status-tired')).toBeNull();
   });
@@ -508,33 +508,70 @@ describe('here', () => {
     // The empty case is the one worth pinning: an always-rendered paragraph still takes vertical
     // space in a panel that is deliberately tight on a phone.
     const { unmount } = render(
-      <Here open notes={{ ...notes, whereNext: 'The Camp would do for the night.' }}
+      <Here height="read" onHeight={() => {}} open notes={{ ...notes, whereNext: 'The Camp would do for the night.' }}
             place={{ ...place }} actions={[]} />
     );
     expect(screen.getByText('The Camp would do for the night.')).toBeTruthy();
     unmount();
 
     const { baseElement } = render(
-      <Here open notes={{ ...notes, whereNext: '' }} place={{ ...place }} actions={[]} />
+      <Here height="read" onHeight={() => {}} open notes={{ ...notes, whereNext: '' }} place={{ ...place }} actions={[]} />
     );
     expect(baseElement.querySelector('.status-next')).toBeNull();
   });
 
   it('shows the field notes with no place to stand in', () => {
-    render(<Here open notes={{ ...notes }} place={{ ...place }} actions={[]} />);
+    render(<Here height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }} actions={[]} />);
     expect(screen.getByText('Salt flats')).toBeTruthy();
   });
 
-  /** The layering. A place on top must not take the notes away with it. */
-  it('keeps the notes underneath while a place is open', () => {
-    render(<Here open notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />);
-    expect(screen.getByText('Salt flats')).toBeTruthy();
+  /**
+   * **One slot, one occupant — which replaces the layering this used to assert.**
+   *
+   * The old rule was that a place on top must not take the notes away with it, and it was written
+   * against a layout where the two divided the bottom of the screen and each got half of a half.
+   * Measured, that left the map at 17% of a landscape phone with the place showing 29% of its own
+   * content. They take turns now and whichever is showing gets all of it.
+   *
+   * **What that rule was really protecting still holds and is tested elsewhere**: leaving a place
+   * reveals the notes rather than clearing the screen. That is the reducer's now -- see
+   * `close-place` in `surface.test.ts` -- and `e2e/panels.spec.ts` walks it in a browser. The dead
+   * end it was written for cannot come back.
+   */
+  it('gives the slot to the place while it is being read', () => {
+    render(<Here height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />);
     expect(screen.getByRole('button', { name: 'Leave' })).toBeTruthy();
+    expect(screen.queryByText('Salt flats'), 'the notes are sharing the slot again').toBeNull();
+  });
+
+  it('keeps the actions in reach while a place is being read', () => {
+    // The regression that folding two panels into one would otherwise introduce: standing
+    // somewhere would hide every verb until you pressed Leave. The actions are the dock's, not the
+    // occupant's, so they survive the swap.
+    render(
+      <Here
+        height="read"
+        onHeight={() => {}}
+        open
+        notes={{ ...notes }}
+        place={{ ...place, poiId: 'poi_caravan_camp' }}
+        actions={[
+          {
+            id: 'take',
+            label: 'Take what is here',
+            blocked: null,
+            mark: '❀',
+            onDo: () => {}
+          }
+        ]}
+      />
+    );
+    expect(screen.getByRole('button', { name: /Take what is here/ })).toBeTruthy();
   });
 
   it('renders nothing at all when the surface is closed', () => {
     const { baseElement } = render(
-      <Here open={false} notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />
+      <Here height="read" onHeight={() => {}} open={false} notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />
     );
     expect(baseElement.textContent).toBe('');
   });
@@ -545,7 +582,7 @@ describe('here', () => {
    */
   it('carries canon inside the notes when a service is listening', () => {
     render(
-      <Here open notes={{ ...notes }} place={{ ...place }} canon={<p>Canon says something.</p>} actions={[]} />
+      <Here height="read" onHeight={() => {}} open notes={{ ...notes }} place={{ ...place }} canon={<p>Canon says something.</p>} actions={[]} />
     );
     expect(screen.getByText('Canon says something.')).toBeTruthy();
   });
@@ -843,7 +880,7 @@ describe('the field notes draw a mark for every species', () => {
 
   it('draws one beside the creature and one beside the plant', () => {
     const { baseElement } = render(
-      <Here open notes={note()} place={{ poiId: null } as never} actions={[]} />
+      <Here height="read" onHeight={() => {}} open notes={note()} place={{ poiId: null } as never} actions={[]} />
     );
     // Two marks, one per named species -- and they are inside the term, beside the name, rather
     // than floating in the section heading.
@@ -862,7 +899,7 @@ describe('the field notes draw a mark for every species', () => {
     // *creature* id and still gets none, because the panel decides on `kind` rather than on
     // whether a file happens to exist. Plants being emoji is a decision, not an unpainted queue.
     const { baseElement } = render(
-      <Here
+      <Here height="read" onHeight={() => {}}
         open
         notes={note({
           flora: {
@@ -886,7 +923,7 @@ describe('the field notes draw a mark for every species', () => {
   it('draws nothing where there is nothing to draw', () => {
     const empty = { name: null, note: 'No creature signs yet.', species: null };
     const { baseElement } = render(
-      <Here open notes={note({ creature: empty, flora: empty })} place={{ poiId: null } as never} actions={[]} />
+      <Here height="read" onHeight={() => {}} open notes={note({ creature: empty, flora: empty })} place={{ poiId: null } as never} actions={[]} />
     );
     expect(baseElement.querySelectorAll('.species-emoji')).toHaveLength(0);
   });
@@ -895,7 +932,7 @@ describe('the field notes draw a mark for every species', () => {
     // The heading already names the place; a screen reader announcing "flower, Wetland at 28, 29"
     // is worse than one announcing the place alone.
     const { baseElement } = render(
-      <Here open notes={note()} place={{ poiId: null } as never} actions={[]} />
+      <Here height="read" onHeight={() => {}} open notes={note()} place={{ poiId: null } as never} actions={[]} />
     );
     const mark = baseElement.querySelector('.journal-mark');
     expect(mark).not.toBeNull();
@@ -939,7 +976,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
 
   it('draws the plate, and drops the silhouette, when one exists', () => {
     const { baseElement } = render(
-      <Here
+      <Here height="read" onHeight={() => {}}
         open
         notes={notes({ id: 'scythian-wild-ass', name: 'Scythian Wild Ass' })}
         place={{ poiId: null } as never}
@@ -958,7 +995,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
 
   it('falls back to the mark for a species with no plate', () => {
     const { baseElement } = render(
-      <Here
+      <Here height="read" onHeight={() => {}}
         open
         notes={notes({ id: 'a-species-nobody-has-painted', name: 'Unpainted Thing' })}
         place={{ poiId: null } as never}
@@ -970,7 +1007,7 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
 
   it('marks the plate decorative, since the name already says what it is', () => {
     const { baseElement } = render(
-      <Here
+      <Here height="read" onHeight={() => {}}
         open
         notes={notes({ id: 'scythian-wild-ass', name: 'Scythian Wild Ass' })}
         place={{ poiId: null } as never}

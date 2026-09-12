@@ -1,6 +1,6 @@
 # UI streamline plan — the map is the screen, and it is 27% of it
 
-**Stages 1 and 2 have shipped; the rest has not.** This is the plan as argued, with the
+**Stages 1 to 4 have shipped; 5 and 6 have not.** This is the plan as argued, with the
 measurements it was argued from, and each shipped stage marked where it sits. The plate view under
 B′ shipped alongside them, and fault 7 carries a correction to its own first version. Read it alongside `docs/ui-handoff.md`, which is the design record for the arrangement this
 proposes to change and explains why most of it is the way it is. That document's one live rule —
@@ -411,7 +411,7 @@ legible; the reason was never the one at risk, which is the correction recorded 
 opacity-dimmed element, and a note in `docs/testing.md`. Cheap, and it closes the one place where
 the code's own stated reasoning and the stylesheet disagree.
 
-### Stage 3 — the dock · the big one
+### Stage 3 — the dock · **shipped**
 
 `surface.ts` gains `dockHeight: 'peek' | 'read' | 'full'` with actions to set it; `Here` becomes the
 dock; `.journal` and `.place-veil` stop dividing the bottom of the screen and take turns in one slot.
@@ -423,19 +423,81 @@ provable without a browser, which is the whole reason that file exists. Plus the
 below.
 
 *A new guard, in the repo's own habit of measuring the signal before tuning it.*
-`e2e/chrome-budget.spec.ts` asserts, at the four sizes measured above:
+`e2e/chrome-budget.spec.ts` is that measurement as a check. Built, measured, and the numbers are
+what they are rather than what the plan hoped:
 
-| | Now | Required after |
-|---|---|---|
-| map visible, resting on ordinary ground | 52% / 37% landscape | **≥ 70% / ≥ 60%** |
-| map visible, standing in a place | 27% / 17% landscape | **≥ 50% / ≥ 40%** |
+| Map visible | Before | After | Guard |
+|---|---|---|---|
+| resting, desktop | 51.7% | **61.5%** | > 57% |
+| resting, phone portrait | 52.1% | **59.6%** | > 55% |
+| resting, small phone | 51.8% | **59.3%** | > 55% |
+| resting, phone landscape | 37.3% | **53.2%** | > 48% |
+| in a place, desktop | 27.0% | **36.0%** | > 31% |
+| in a place, phone portrait | 18.9% | **35.2%** | > 30% |
+| in a place, phone landscape | 17.1% | **14.7%** | — |
+| the place's own writing shown, desktop | 73% | **65%** | — |
+| the place's own writing shown, landscape | 29% | **25%** | > 21% |
 
-Numbers in a document go stale; this is the same measurement as a check, so the next arrangement
-that quietly eats the map fails rather than being noticed a year later. It belongs with
-`reachable.spec.ts` — both are about arrangement rather than content, and both exist because a
-layout can look right in a screenshot and be unusable in the hand.
+**Three of those need saying plainly, and none of them is what the plan predicted.**
 
-### Stage 4 — the action rail and the tile chips
+*The 70% was not reached.* Resting lands at 59–62% outside landscape. Most of the gap is the
+control bar — two rows and a strip, 148 pixels of a phone — which is stage 6's. The rest is the
+blocked action rows, below.
+
+*Reading a place shows less of it than before, at reading height.* 65% against 73% on a desktop.
+The dock pays for the handle and the rail — 117 pixels — before it pays for any writing, and the
+old arrangement paid for neither because it had neither. **The answer is the third press**: the
+handle now goes peek → read → full, and full is the whole page. That third step was not in the
+plan; it was added because the measurement showed reading height alone was a step back, and a
+height nothing could reach would have been this codebase's signature bug for the fourth time.
+
+*Landscape-in-a-place went the wrong way.* 14.7% against 17.1%, on the one screen where every trade
+bites at once. It is the honest cost of the rest of the stage and it is recorded rather than
+massaged.
+
+Numbers in a document go stale; these are a check now, so the next arrangement that quietly eats
+the map fails rather than being noticed a year later. It belongs with `reachable.spec.ts` — both
+are about arrangement rather than content, and both exist because a layout can look right in a
+screenshot and be unusable in the hand.
+
+**Four things this stage learned by looking, none of which a test would have said.**
+
+*The rail had to come with the dock.* Folding the notes and the place into one slot hides every
+verb the moment you stand somewhere — no taking a reed until you press Leave — so the actions moved
+into the dock itself, below whichever occupant is showing. That is move B, a stage early, because
+this stage does not work without it.
+
+*Splitting the rail was tried and reverted.* Available verbs as chips in the dock, blocked rows with
+their reasons in the part that scrolls: it reads well and it **hid the blocked rows at peek**, which
+is not a detail of `TileActions`' ruling but the ruling itself — *every action is listed at all
+times, because a greyed row reading "there is daylight left" is how a player learns resting exists*.
+Every action is a chip at every height now, and what the height decides is whether the **reason**
+is on screen, because a reason is a sentence and needs the room to be one. It costs about three
+points of resting map and it is the correct three points to spend.
+
+*The dock needed a ceiling.* At its most generous reading height on a landscape phone it reached up
+under the control bar, which sits a layer above it, and **the grip ended up behind the satchel
+strip** — unpressable, reported by the browser a hundred and fifty times as "waiting for element to
+be visible, enabled and stable". `--dock-ceiling` keeps it clear by construction. Found in a
+screenshot.
+
+*And peek was hiding the wrong half of the footer.* The first cut hid all of it, which took the
+dusk and fatigue lines with it — the two things in that panel that are about *walking* rather than
+reading, and a player at peek is walking. The light going and legs giving out stay; the landmark
+bearing and the tally of places wait for reading height. The browser suite caught that one, which
+is the half of the split that had a test already.
+
+*The last correction is the one that reverses this plan's own words.* Peek was written as "sized to
+what it holds", on the reasoning that a tile with three things to do needs more room than a tile
+with one. It does — and `hours.spec.ts` failed, measuring the panel at 137 pixels in one hour and
+114 in another. The line saying what a creature is *doing* is the only text here that changes while
+the player stands still, so a content-sized dock breathes as the day turns, React reports new
+insets, and the camera refits: **the map moves under somebody who has not touched anything.** That
+guard predates this plan and is right. Every height is fixed now and the body scrolls when the
+content is taller. The cost is a little blank parchment under a quiet tile, which is the correct
+thing to pay for a map that holds still.
+
+### Stage 4 — the action rail · **shipped with stage 3**, the chips still to come
 
 `TileActions` splits: the verbs that are not about a particular thing go to the rail in the dock's
 peek row, blocked rows to the read height, both from the same array. Hotkeys unchanged. The

@@ -62,14 +62,41 @@ export interface TileAction {
 
 export interface TileActionsProps {
   actions: readonly TileAction[];
+  /**
+   * Which half of the split this is drawing.
+   *
+   * **`rail` is what you can do; `list` is what you cannot and why.** They are the same rows from
+   * the same array, rendered in two places because they answer two questions and the answers want
+   * different room: a verb is a target and reads as a chip, while a reason is a sentence and reads
+   * as a line of prose.
+   *
+   * Measured, and that is why this exists rather than one column: as a list of rows with a mark, a
+   * label, a detail and a reason apiece, two actions came to **164 pixels**, which on a landscape
+   * phone left the dock's body 70 pixels of a 447-pixel place. The verbs were eating the writing.
+   *
+   * Nothing is filtered away by this -- `Here` renders both halves, always. See the header above:
+   * a blocked row keeps its place and its reason, because the reason is the teaching.
+   */
+  variant?: 'rail' | 'list';
+  /**
+   * What this group is called: its heading, and its accessible name.
+   *
+   * One string for both, because two would be two things to keep in step and a heading that
+   * disagreed with the name a screen reader reads is the worst of the pair.
+   */
+  label?: string;
 }
 
-export function TileActions({ actions }: TileActionsProps) {
+export function TileActions({
+  actions,
+  variant = 'list',
+  label = 'Here'
+}: TileActionsProps) {
   if (actions.length === 0) return null;
 
   return (
-    <section className="tile-actions" aria-label="What you can do here">
-      <h3 className="tile-actions-head">Here</h3>
+    <section className={`tile-actions tile-actions-${variant}`} aria-label={label}>
+      <h3 className="tile-actions-head">{label}</h3>
       <ul className="tile-action-list">
         {actions.map((action) => (
           <Row key={action.id} action={action} />

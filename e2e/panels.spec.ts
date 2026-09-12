@@ -23,17 +23,6 @@ async function walkToPlace(page: Page) {
   await walkTo(page, ['ArrowDown', 'ArrowDown']);
 }
 
-/** Overlapping area of two elements, in square pixels. */
-async function overlap(page: Page, a: string, b: string): Promise<number> {
-  return page.evaluate(([x, y]) => {
-    const r = (s: string) => document.querySelector(s)?.getBoundingClientRect() ?? null;
-    const p = r(x), q = r(y);
-    if (!p || !q) return 0;
-    return Math.max(0, Math.min(p.right, q.right) - Math.max(p.left, q.left)) *
-           Math.max(0, Math.min(p.bottom, q.bottom) - Math.max(p.top, q.top));
-  }, [a, b]);
-}
-
 test('the field notes can be closed and opened again', async ({ page }) => {
   await boot(page);
   await expect(page.locator('.journal')).toBeVisible();
@@ -43,11 +32,28 @@ test('the field notes can be closed and opened again', async ({ page }) => {
   await expect(page.locator('.journal')).toBeVisible();
 });
 
-test('standing on a place never buries the field notes', async ({ page }) => {
+/**
+ * **This used to assert that the two rectangles did not overlap, and that is no longer the
+ * question.** The notes and the place were two panels dividing the bottom of the screen; they are
+ * one dock with one occupant now, so `.journal` is simply not on the page while a place is being
+ * read — and the old assertion would have gone on passing, because `overlap` returns 0 when either
+ * element is missing. A test that passes because something vanished is worse than no test.
+ *
+ * What the original was protecting was that arriving somewhere does not strand you away from the
+ * notes. That is what is asserted here instead, through the controls a player actually has.
+ */
+test('standing on a place never strands the field notes', async ({ page }) => {
   await boot(page);
   await walkToPlace(page);
-  // The two share the bottom of the screen, so only one of them holds it.
-  expect(await overlap(page, '.place', '.journal')).toBe(0);
+
+  // One occupant: never both at once, which is the dock's whole rule.
+  await expect(page.locator('.place')).toBeVisible();
+  await expect(page.locator('.journal')).toHaveCount(0);
+
+  // And they are one press apart, in both directions, without stepping off the tile.
+  await page.getByRole('button', { name: 'Leave' }).click();
+  await expect(page.locator('.journal')).toBeVisible();
+  await expect(page.locator('.place')).toHaveCount(0);
 });
 
 test('a place can be closed, read around, and opened again without moving', async ({ page }) => {
@@ -71,13 +77,24 @@ test('the Here button only exists where there is a here', async ({ page }) => {
   await expect(page.getByRole('button', { name: /Eastern Field/ })).toHaveCount(1);
 });
 
-test('nothing overlaps in landscape, with every panel open at once', async ({ page }) => {
+test('the dock holds one occupant, and the map keeps the rest of the screen', async ({ page }) => {
   await boot(page, 1280, 800);
   await walkToPlace(page);
-  // The travel log used to be a third panel here. What remains on the glass at once is the
-  // place and the notes underneath it, and they divide the bottom edge rather than stack.
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
-  expect(await overlap(page, '.place', '.journal')).toBe(0);
+
+  // The travel log used to be a third panel here, and before this stage the place and the notes
+  // divided the bottom edge between them. One slot now, and the dock is the only thing along the
+  // bottom -- so what is worth asserting is that it stops well short of the screen.
+  // Reading height is 56dvh by design -- measured, because at 46 the dock showed 47% of a place
+  // against the 73% the old arrangement managed. What this guards is that it stays a fraction of
+  // the screen rather than creeping back to the full-bleed band it replaced.
+  const dock = (await page.locator('.dock').boundingBox())!;
+  expect(dock.height, `the dock is ${Math.round(dock.height)}px of an 800px screen`).toBeLessThan(800 * 0.62);
+
+  // That the actions stay in reach while a place is being read -- the regression folding two panels
+  // into one would otherwise introduce -- is asserted in `test/panels.test.tsx`, where the tile can
+  // be given an action to have. A seed reaches whatever the ground there happens to offer, and a
+  // browser assertion that depends on that is one that passes for the wrong reason on a quiet tile.
 });
 
 /**
