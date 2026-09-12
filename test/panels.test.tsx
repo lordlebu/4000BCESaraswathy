@@ -87,6 +87,16 @@ const noop = () => {};
  */
 afterEach(cleanup);
 
+/**
+ * **A panel's markup is in `document.body`, not in the render container.**
+ *
+ * Every modal renders through `Modal`, which portals it out of `#root` so the application behind
+ * it can be marked `inert` with one attribute. Testing Library's `baseElement` is `document.body`
+ * and is the documented way to query a portal, so that is what these read.
+ *
+ * `container` is still right for the one assertion it is used for: a *closed* panel renders
+ * nothing, and "nothing" is a question about the render container rather than about the page.
+ */
 describe('the diary decides whether it is empty', () => {
   it('says so when nothing at all has happened', () => {
     render(<Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
@@ -123,10 +133,10 @@ describe('the diary keeps the crossings-out', () => {
     let p = advance(emptyProgress(), 'discovery_saltreed_thatch');
     p = advance(p, 'discovery_saltreed_thatch');
 
-    const { container } = render(
+    const { baseElement } = render(
       <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
-    const readings = container.querySelectorAll('.revisions .reading');
+    const readings = baseElement.querySelectorAll('.revisions .reading');
     expect(readings.length).toBe(2);
     // The earlier one is crossed out, not replaced. This is the panel's whole idea.
     expect(readings[0]!.className).toContain('struck');
@@ -134,10 +144,10 @@ describe('the diary keeps the crossings-out', () => {
   });
 
   it('shows no row at all for a discovery never noticed', () => {
-    const { container } = render(
+    const { baseElement } = render(
       <Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
-    expect(container.querySelectorAll('.entry').length).toBe(0);
+    expect(baseElement.querySelectorAll('.entry').length).toBe(0);
   });
 
   it('explains a rung held back by the weather as a reason, not a lock', () => {
@@ -166,11 +176,11 @@ describe('settling a question', () => {
   });
 
   it('lists readings it cannot support, and says what is missing', () => {
-    const { container } = render(
+    const { baseElement } = render(
       <QuestionCard questionId="question_silver_water" progress={emptyProgress()} onAnswer={noop} />
     );
     // Unlike the diary, a question hides nothing: the shape of the disagreement is the content.
-    expect(container.querySelectorAll('.readings li').length).toBeGreaterThan(1);
+    expect(baseElement.querySelectorAll('.readings li').length).toBeGreaterThan(1);
     expect(screen.getAllByText(/You would need/i).length).toBeGreaterThan(0);
   });
 
@@ -188,10 +198,10 @@ describe('settling a question', () => {
   it('records the choice without passing judgement on it', () => {
     let p = climb(emptyProgress(), 'discovery_silver_water');
     p = answer(p, 'question_silver_water', 0);
-    const { container } = render(
+    const { baseElement } = render(
       <QuestionCard questionId="question_silver_water" progress={p} onAnswer={noop} />
     );
-    expect(container.querySelectorAll('.reading-chosen').length).toBe(1);
+    expect(baseElement.querySelectorAll('.reading-chosen').length).toBe(1);
     expect(screen.getByText(/written down/i)).toBeDefined();
     expect(screen.queryByText(/since troubled/i)).toBeNull();
   });
@@ -201,10 +211,10 @@ describe('settling a question', () => {
     p = answer(p, 'question_silver_water', 0);
     p = climb(p, 'discovery_dockyard_reef');
 
-    const { container } = render(
+    const { baseElement } = render(
       <QuestionCard questionId="question_silver_water" progress={p} onAnswer={noop} />
     );
-    expect(within(container).getByText(/Since then/i)).toBeDefined();
+    expect(within(baseElement).getByText(/Since then/i)).toBeDefined();
     expect(screen.getByText(/since troubled/i)).toBeDefined();
   });
 });
@@ -212,20 +222,20 @@ describe('settling a question', () => {
 describe('the knowledge tree', () => {
   it('never claims a discipline the player has not touched', () => {
     const p = climb(emptyProgress(), 'discovery_saltreed_thatch');
-    const { container } = render(
+    const { baseElement } = render(
       <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
-    const shown = [...container.querySelectorAll('.disc-name')].map((e) => e.textContent);
+    const shown = [...baseElement.querySelectorAll('.disc-name')].map((e) => e.textContent);
     expect(shown.length).toBeGreaterThan(0);
     expect(shown.length).toBeLessThan(7);
   });
 
   it('counts rungs rather than discoveries, so half-understanding shows', () => {
     const one = advance(emptyProgress(), 'discovery_saltreed_thatch');
-    const { container } = render(
+    const { baseElement } = render(
       <Diary progress={one} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
-    const bar = container.querySelector('.disc-bar i') as HTMLElement | null;
+    const bar = baseElement.querySelector('.disc-bar i') as HTMLElement | null;
     expect(bar).not.toBeNull();
     const width = parseFloat(bar!.style.width);
     expect(width).toBeGreaterThan(0);
@@ -238,10 +248,10 @@ describe('the panels stay in step with canon', () => {
     // If canon gains a discipline the panel does not name, this is where it shows.
     let p = emptyProgress();
     for (const d of discoveries) p = advance(p, d.id);
-    const { container } = render(
+    const { baseElement } = render(
       <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
-    const shown = new Set([...container.querySelectorAll('.diary-section > h3')].map((e) => e.textContent));
+    const shown = new Set([...baseElement.querySelectorAll('.diary-section > h3')].map((e) => e.textContent));
     const used = new Set(discoveries.map((d) => d.discipline));
     expect(shown.size).toBeGreaterThanOrEqual(used.size);
   });
@@ -267,21 +277,21 @@ describe('the last page', () => {
   it('gives the refusals their own words, and as much room as the acceptances', () => {
     // The bug this exists against is the one that had no UI at all: `gatherable` was written,
     // tested and never called, so the game had no ending.
-    const { container } = render(<Ending progress={everything()} open onClose={noop} />);
+    const { baseElement } = render(<Ending progress={everything()} open onClose={noop} />);
     expect(screen.getByRole('heading', { name: /coming with you/i })).toBeDefined();
     expect(screen.getByRole('heading', { name: /^staying$/i })).toBeDefined();
 
     // Everyone who refuses says why, in their own voice — the quotes live in separate
     // aria-hidden spans, so assert on the line itself rather than hunting glyphs.
-    const staying = container.querySelectorAll('.diary-section')[1] as HTMLElement;
+    const staying = baseElement.querySelectorAll('.diary-section')[1] as HTMLElement;
     const refusals = staying.querySelectorAll('.leaving .said');
     expect(refusals.length).toBeGreaterThan(0);
     for (const said of refusals) expect(said.textContent!.length).toBeGreaterThan(30);
   });
 
   it('nobody is both coming and staying', () => {
-    const { container } = render(<Ending progress={everything()} open onClose={noop} />);
-    const names = [...container.querySelectorAll('.leaving h4')].map((e) => e.textContent);
+    const { baseElement } = render(<Ending progress={everything()} open onClose={noop} />);
+    const names = [...baseElement.querySelectorAll('.leaving h4')].map((e) => e.textContent);
     expect(new Set(names).size).toBe(names.length);
   });
 
@@ -328,8 +338,8 @@ describe('the field kit', () => {
   it('offers only the specimens the player has actually met', () => {
     // A tool that answered about the rest of canon would be a spoiler engine in a lab coat.
     const p = advance(emptyProgress(), 'discovery_saltreed_thatch');
-    const { container } = render(<FieldKit progress={p} open onClose={noop} canResearch={false} />);
-    const chips = [...container.querySelectorAll('.specimen')].map((e) => e.textContent);
+    const { baseElement } = render(<FieldKit progress={p} open onClose={noop} canResearch={false} />);
+    const chips = [...baseElement.querySelectorAll('.specimen')].map((e) => e.textContent);
     expect(chips).toEqual(['Saltreed']);
   });
 
@@ -344,24 +354,24 @@ describe('the field kit', () => {
   it('sets two side by side, and marks the row that differs', () => {
     let p = advance(emptyProgress(), 'discovery_saltreed_thatch');
     p = advance(p, 'discovery_red_rice_survival');
-    const { container } = render(<FieldKit progress={p} open onClose={noop} canResearch={false} />);
+    const { baseElement } = render(<FieldKit progress={p} open onClose={noop} canResearch={false} />);
     fireEvent.click(screen.getByRole('button', { name: 'Saltreed' }));
     fireEvent.click(screen.getByRole('button', { name: /red delta rice/i }));
 
     expect(screen.getByRole('heading', { name: /side by side/i })).toBeDefined();
     // Two plants that differ by name and binomial and agree on region: the point of the tool
     // is that only some rows differ, so both classes must be present.
-    expect(container.querySelectorAll('table.compare tr.differs').length).toBeGreaterThan(0);
-    expect(container.querySelectorAll('table.compare tr.same').length).toBeGreaterThan(0);
+    expect(baseElement.querySelectorAll('table.compare tr.differs').length).toBeGreaterThan(0);
+    expect(baseElement.querySelectorAll('table.compare tr.same').length).toBeGreaterThan(0);
   });
 
   it('never holds more than two at once', () => {
     let p = advance(emptyProgress(), 'discovery_saltreed_thatch');
     p = advance(p, 'discovery_red_rice_survival');
     p = advance(p, 'discovery_ghost_mangrove_channel');
-    const { container } = render(<FieldKit progress={p} open onClose={noop} canResearch={false} />);
-    for (const chip of container.querySelectorAll('.specimen')) fireEvent.click(chip);
-    expect(container.querySelectorAll('.specimen.picked').length).toBe(2);
+    const { baseElement } = render(<FieldKit progress={p} open onClose={noop} canResearch={false} />);
+    for (const chip of baseElement.querySelectorAll('.specimen')) fireEvent.click(chip);
+    expect(baseElement.querySelectorAll('.specimen.picked').length).toBe(2);
   });
 
   it('says so plainly when two things cannot be compared', () => {
@@ -470,13 +480,13 @@ describe('here', () => {
 
     // **Blocked, not gone.** The row stays and says why, which is the convention the whole
     // surface is built on: a vanished button teaches a player nothing about the mechanic.
-    const { container } = render(
+    const { baseElement } = render(
       <Here open notes={{ ...notes }} place={{ ...place }}
             actions={restAction('Unroll the bedding here', 'Not yet -- there is daylight left.')} />
     );
     const button = screen.getByRole('button', { name: /bedding/i }) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
-    expect(container.textContent).toContain('there is daylight left');
+    expect(baseElement.textContent).toContain('there is daylight left');
   });
 
   it('shows a tiredness line only when there is one', () => {
@@ -488,10 +498,10 @@ describe('here', () => {
     expect(screen.getByText('You have been walking a while.')).toBeTruthy();
     unmount();
 
-    const { container } = render(
+    const { baseElement } = render(
       <Here open notes={{ ...notes, fatigue: null }} place={{ ...place }} actions={[]} />
     );
-    expect(container.querySelector('.status-tired')).toBeNull();
+    expect(baseElement.querySelector('.status-tired')).toBeNull();
   });
 
   it('shows where to go next, and nothing when there is nowhere', () => {
@@ -504,10 +514,10 @@ describe('here', () => {
     expect(screen.getByText('The Camp would do for the night.')).toBeTruthy();
     unmount();
 
-    const { container } = render(
+    const { baseElement } = render(
       <Here open notes={{ ...notes, whereNext: '' }} place={{ ...place }} actions={[]} />
     );
-    expect(container.querySelector('.status-next')).toBeNull();
+    expect(baseElement.querySelector('.status-next')).toBeNull();
   });
 
   it('shows the field notes with no place to stand in', () => {
@@ -523,10 +533,10 @@ describe('here', () => {
   });
 
   it('renders nothing at all when the surface is closed', () => {
-    const { container } = render(
+    const { baseElement } = render(
       <Here open={false} notes={{ ...notes }} place={{ ...place, poiId: 'poi_caravan_camp' }} actions={[]} />
     );
-    expect(container.textContent).toBe('');
+    expect(baseElement.textContent).toBe('');
   });
 
   /**
@@ -650,10 +660,10 @@ describe('collection', () => {
   });
 
   it('renders nothing at all when closed', () => {
-    const { container } = render(
+    const { baseElement } = render(
       <CollectionPanel collection={met} open={false} onClose={noop} canAsk={false} />
     );
-    expect(container.textContent).toBe('');
+    expect(baseElement.textContent).toBe('');
   });
 
   it('offers a search once there is enough to search', () => {
@@ -832,7 +842,7 @@ describe('the field notes draw a mark for every species', () => {
   });
 
   it('draws one beside the creature and one beside the plant', () => {
-    const { container } = render(
+    const { baseElement } = render(
       <Here open notes={note()} place={{ poiId: null } as never} actions={[]} />
     );
     // Two marks, one per named species -- and they are inside the term, beside the name, rather
@@ -841,7 +851,7 @@ describe('the field notes draw a mark for every species', () => {
     // Both halves are an emoji now: the mark is punctuation beside a name, and the painted plate
     // is what gets a block of its own. The two use different classifiers -- body plan for an
     // animal, growth form for a plant -- so this also checks they are not the same glyph.
-    const marks = [...container.querySelectorAll('.note dt .species-emoji')];
+    const marks = [...baseElement.querySelectorAll('.note dt .species-emoji')];
     expect(marks).toHaveLength(2);
     expect(marks[0].textContent).not.toBe(marks[1].textContent);
   });
@@ -851,7 +861,7 @@ describe('the field notes draw a mark for every species', () => {
     // fixture alone. What it does prove is the gate: the flora note asks for a plate under a
     // *creature* id and still gets none, because the panel decides on `kind` rather than on
     // whether a file happens to exist. Plants being emoji is a decision, not an unpainted queue.
-    const { container } = render(
+    const { baseElement } = render(
       <Here
         open
         notes={note({
@@ -869,25 +879,25 @@ describe('the field notes draw a mark for every species', () => {
         place={{ poiId: null } as never}
       actions={[]} />
     );
-    expect(container.querySelectorAll('.note-plate')).toHaveLength(0);
-    expect(container.querySelectorAll('.note-plated')).toHaveLength(0);
+    expect(baseElement.querySelectorAll('.plate-open-note')).toHaveLength(0);
+    expect(baseElement.querySelectorAll('.note-plated')).toHaveLength(0);
   });
 
   it('draws nothing where there is nothing to draw', () => {
     const empty = { name: null, note: 'No creature signs yet.', species: null };
-    const { container } = render(
+    const { baseElement } = render(
       <Here open notes={note({ creature: empty, flora: empty })} place={{ poiId: null } as never} actions={[]} />
     );
-    expect(container.querySelectorAll('.species-emoji')).toHaveLength(0);
+    expect(baseElement.querySelectorAll('.species-emoji')).toHaveLength(0);
   });
 
   it('marks the heading dingbat as decorative', () => {
     // The heading already names the place; a screen reader announcing "flower, Wetland at 28, 29"
     // is worse than one announcing the place alone.
-    const { container } = render(
+    const { baseElement } = render(
       <Here open notes={note()} place={{ poiId: null } as never} actions={[]} />
     );
-    const mark = container.querySelector('.journal-mark');
+    const mark = baseElement.querySelector('.journal-mark');
     expect(mark).not.toBeNull();
     expect(mark!.getAttribute('aria-hidden')).toBe('true');
   });
@@ -928,39 +938,45 @@ describe('a painted plate replaces the derived mark, one species at a time', () 
   });
 
   it('draws the plate, and drops the silhouette, when one exists', () => {
-    const { container } = render(
+    const { baseElement } = render(
       <Here
         open
         notes={notes({ id: 'scythian-wild-ass', name: 'Scythian Wild Ass' })}
         place={{ poiId: null } as never}
       actions={[]} />
     );
-    expect(container.querySelectorAll('.note-plate')).toHaveLength(1);
+    // **The plate is a control now**, so the image sits inside a button -- see `Specimen.tsx`.
+    // The file is 384 square and was never drawn above 120 here; pressing it opens the painting.
+    expect(baseElement.querySelectorAll('.plate-open-note img')).toHaveLength(1);
+    expect(
+      baseElement.querySelector('.plate-open-note')!.getAttribute('aria-label'),
+      'the plate says nothing about what pressing it does'
+    ).toMatch(/see the plate/);
     // Not both: the plate *is* the picture, and a small silhouette beside it is noise.
-    expect(container.querySelectorAll('.note dt .species-icon')).toHaveLength(0);
+    expect(baseElement.querySelectorAll('.note dt .species-icon')).toHaveLength(0);
   });
 
   it('falls back to the mark for a species with no plate', () => {
-    const { container } = render(
+    const { baseElement } = render(
       <Here
         open
         notes={notes({ id: 'a-species-nobody-has-painted', name: 'Unpainted Thing' })}
         place={{ poiId: null } as never}
       actions={[]} />
     );
-    expect(container.querySelectorAll('.note-plate')).toHaveLength(0);
-    expect(container.querySelectorAll('.note dt .species-emoji')).toHaveLength(1);
+    expect(baseElement.querySelectorAll('.plate-open-note')).toHaveLength(0);
+    expect(baseElement.querySelectorAll('.note dt .species-emoji')).toHaveLength(1);
   });
 
   it('marks the plate decorative, since the name already says what it is', () => {
-    const { container } = render(
+    const { baseElement } = render(
       <Here
         open
         notes={notes({ id: 'scythian-wild-ass', name: 'Scythian Wild Ass' })}
         place={{ poiId: null } as never}
       actions={[]} />
     );
-    const img = container.querySelector('.note-plate')!;
+    const img = baseElement.querySelector('.plate-open-note img')!;
     expect(img.getAttribute('alt')).toBe('');
     expect(img.getAttribute('aria-hidden')).toBe('true');
   });

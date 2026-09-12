@@ -10,7 +10,7 @@
 // Presentation only. Every rule — whether a rung can advance, why it cannot, which readings
 // of a question are open — is asked of `journey.ts`. Nothing here recomputes a ladder.
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import {
   type Progress,
   type WorldMoment,
@@ -25,6 +25,7 @@ import {
 import { discoveries, discovery, vocabulary, word } from '../content/knowledge';
 import { QuestionCard } from './Questions';
 import { specimensIn } from './FieldKit';
+import { Modal } from './Modal';
 
 /** Canon's discipline ids, in the order a naturalist would keep them. */
 const DISCIPLINE_ORDER = [
@@ -154,17 +155,9 @@ export function Diary({
 }: DiaryProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  // Escape closes it, and focus starts somewhere sensible. The map keeps running underneath;
-  // this is a book you opened, not a modal that stopped the world.
-  useEffect(() => {
-    if (!open) return;
-    closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  // Escape, the focus trap and putting focus back all live in `Modal` now. What is left here is
+  // *where* focus starts, which is the one part that is this panel's own business: the way out,
+  // because a diary is a book you opened rather than a form you are filling in.
 
   if (!open) return null;
 
@@ -185,7 +178,7 @@ export function Diary({
     noticed.length > 0 || questions.length > 0 || Object.keys(languages).length > 0;
 
   return (
-    <div className="diary-veil" role="dialog" aria-modal="true" aria-label="Field diary">
+    <Modal open label="Field diary" onClose={onClose} initialFocus={closeRef}>
       <section className={`diary diary-${density}`}>
         {tabs}
         <header className="diary-head">
@@ -307,7 +300,7 @@ export function Diary({
 
         {footer}
       </section>
-    </div>
+    </Modal>
   );
 }
 

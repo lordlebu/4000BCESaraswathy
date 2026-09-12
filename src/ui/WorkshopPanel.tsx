@@ -33,6 +33,7 @@ import {
 } from '../content/crafting';
 import type { Satchel } from '../content/satchel';
 import { KIND_MARK, PROCESS_MARK, ThingIcon } from './ThingIcon';
+import { Modal } from './Modal';
 
 export interface WorkshopPanelProps {
   satchel: Satchel;
@@ -72,7 +73,7 @@ export function WorkshopPanel({
     // The same modal the satchel uses. `.sheet` is the narrow map panel pinned top-left and was
     // the wrong furniture entirely for a list of recipes -- the screenshot showed it clipped to
     // two lines with the place panel over the top of it.
-    <div className="diary-veil" role="dialog" aria-modal="true" aria-label="Workshop">
+    <Modal open label="Workshop" onClose={onClose}>
       <section className="diary diary-filling workshop">
         <header className="diary-head">
           <div>
@@ -134,7 +135,7 @@ export function WorkshopPanel({
           </p>
         )}
       </section>
-    </div>
+    </Modal>
   );
 }
 

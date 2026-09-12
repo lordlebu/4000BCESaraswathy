@@ -29,6 +29,16 @@ const base = {
   onClose: () => {}
 };
 
+/**
+ * **A panel's markup is in `document.body`, not in the render container.**
+ *
+ * Every modal renders through `Modal`, which portals it out of `#root` so the application behind
+ * it can be marked `inert` with one attribute. Testing Library's `baseElement` is `document.body`
+ * and is the documented way to query a portal, so that is what these read.
+ *
+ * `container` is still right for the one assertion it is used for: a *closed* panel renders
+ * nothing, and "nothing" is a question about the render container rather than about the page.
+ */
 describe('the workshop', () => {
   it('renders nothing when closed', () => {
     const { container } = render(
@@ -99,13 +109,13 @@ describe('the workshop', () => {
     // could never appear however many files landed in `src/ui/marks/`.
     let s = add(emptySatchel(), 'material_reed_fibre', 12);
     s = add(s, 'material_grain', 12);
-    const { container } = render(<WorkshopPanel {...base} satchel={s} />);
+    const { baseElement } = render(<WorkshopPanel {...base} satchel={s} />);
 
-    const verbs = [...container.querySelectorAll('.recipe-verb')].map((n) => n.textContent ?? '');
+    const verbs = [...baseElement.querySelectorAll('.recipe-verb')].map((n) => n.textContent ?? '');
     expect(verbs.length, 'no recipes listed, so this proves nothing').toBeGreaterThan(0);
 
     // At least one drawing on screen, and at least one emoji still doing its job.
-    expect(container.querySelectorAll('.thing-mark-drawn').length).toBeGreaterThan(0);
+    expect(baseElement.querySelectorAll('.thing-mark-drawn').length).toBeGreaterThan(0);
     expect(verbs.some((v) => /\p{Extended_Pictographic}/u.test(v))).toBe(true);
   });
 

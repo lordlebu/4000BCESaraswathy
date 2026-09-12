@@ -14,6 +14,7 @@ import { fieldMap, fieldMaps, neighboursOf, poisOn } from '../content/places';
 import { labelAnchor, nodeFor, overworldShape, viewBoxFor } from '../content/overworldMap';
 import { discoveriesAt } from '../content/knowledge';
 import { isComplete, rungOf, type Progress } from '../journey';
+import { Modal } from './Modal';
 
 export interface OverworldProps {
   current: string;
@@ -103,7 +104,7 @@ export function Overworld({ current, progress, open, onTravel, onClose }: Overwo
   const reachable = neighboursOf(current);
 
   return (
-    <div className="diary-veil" role="dialog" aria-modal="true" aria-label="Where to go">
+    <Modal open label="Where to go" onClose={onClose}>
       <section className="diary diary-filling">
         <header className="diary-head">
           <div>
@@ -162,6 +163,6 @@ export function Overworld({ current, progress, open, onTravel, onClose }: Overwo
           </section>
         )}
       </section>
-    </div>
+    </Modal>
   );
 }

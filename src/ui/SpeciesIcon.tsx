@@ -28,6 +28,7 @@
 import type { Clade, GrowthForm } from '../world/types';
 import type { SpeciesMark } from '../content/journal';
 import { plateFor } from './plates';
+import { PlateButton } from './Specimen';
 
 /**
  * A clade as a mark.
@@ -139,12 +140,16 @@ export function SpeciesIcon({ species }: SpeciesIconProps) {
   // exactly backwards for the screen whose whole job is the collection.
   //
   // `JournalPanel` guards its own call with `!plate`, so it does not draw one twice.
-  const plate = plateFor(species.id);
-  if (plate) {
-    // Decorative: the name sits immediately beside it, and a screen reader announcing the species
-    // twice is worse than announcing it once.
-    return <img className="species-plate" src={plate} alt="" aria-hidden="true" />;
-  }
+  //
+  // **And a plate is a way in rather than a decoration.** It used to render as a bare 2.4em image:
+  // the file is 384 square, so nine tenths of the painting was thrown away on the one screen a
+  // player opens to look back at what they met. `PlateButton` draws the same thumbnail and opens
+  // the painting at full size -- see `Specimen.tsx`. It returns null when there is no plate, so
+  // the mark below is still what the other 277 species get.
+  const opens = plateFor(species.id) ? (
+    <PlateButton speciesId={species.id} name={species.name} variant="mark" />
+  ) : null;
+  if (opens) return opens;
 
   const mark = 'clade' in species ? CLADE_MARK[species.clade] : plantMark(species);
 

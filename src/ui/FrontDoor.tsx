@@ -17,6 +17,7 @@
 
 import { useState } from 'react';
 import { everyCharacter } from '../game/characters';
+import { Modal } from './Modal';
 
 export interface FrontDoorProps {
   /** Whether to show at all. False once the traveller is walking. */
@@ -57,7 +58,11 @@ export function FrontDoor({
   if (!open) return null;
 
   return (
-    <div className="front-door" role="dialog" aria-label="Begin">
+    // No `onClose`: a door is left by choosing something, not by backing out of it, so Escape
+    // does nothing here. It takes the trap and the inerting all the same -- the control bar
+    // renders behind this screen and was tabbable from it, which offered the keyboard a game
+    // that had not started.
+    <Modal open label="Begin" veilClassName="front-door">
       <div className="front-door-panel">
         <h1 className="front-door-title">Varuna&rsquo;s Field Diary</h1>
         <p className="front-door-line">
@@ -116,6 +121,6 @@ export function FrontDoor({
           <span className="front-door-seed-value">{seed}</span>
         </p>
       </div>
-    </div>
+    </Modal>
   );
 }

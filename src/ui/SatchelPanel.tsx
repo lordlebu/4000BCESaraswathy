@@ -13,6 +13,7 @@
 import { item, material } from '../content/making';
 import { KIND_MARK, ThingIcon, materialMark } from './ThingIcon';
 import { type Satchel, count, distinct, itemsHeld, materialsHeld } from '../content/satchel';
+import { Modal } from './Modal';
 
 export interface SatchelPanelProps {
   satchel: Satchel;
@@ -58,7 +59,7 @@ export function SatchelPanel({
   // is the whole point of gating it on people rather than on a level.
 
   return (
-    <div className="diary-veil" role="dialog" aria-modal="true" aria-label="Satchel">
+    <Modal open label="Satchel" onClose={onClose}>
       <section className="diary diary-filling">
         <header className="diary-head">
           <div>
@@ -101,6 +102,6 @@ export function SatchelPanel({
             bag. The two only ever shared a screen because they touch the same materials, which
             is a data relationship rather than a player one. */}
       </section>
-    </div>
+    </Modal>
   );
 }
