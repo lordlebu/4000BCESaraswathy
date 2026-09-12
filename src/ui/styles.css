@@ -504,8 +504,21 @@ button.ghost:hover:not(:disabled) {
  *
  * So every height is fixed and the body scrolls when the content is taller. The cost is a little
  * blank parchment under a quiet tile; the alternative is a map that twitches. */
+/* **28, and the two extra points are content rather than chrome.**
+ *
+ * It was 26dvh, sized when peek held a title and two sentences about the surrounding country. It
+ * now holds the standing row -- the animal, what it is doing, the plant, the material -- which is
+ * the thing a player is actually deciding about and which used to be one press of the handle away.
+ * Measured on a 360-pixel phone, the row wraps to two lines and the body needed about sixteen more
+ * pixels than 26dvh left it.
+ *
+ * The trade is deliberate and it is worth stating plainly: `docs/ui-streamline-plan.md` won the map
+ * 52% -> 68% of a resting screen, and this spends two of those points on saying what is under the
+ * traveller's feet. Chrome taking the map back would be a regression; content the player came for
+ * is what the map was cleared *for*. `chrome-budget.spec.ts`'s floors move with it, from measurement
+ * rather than from hope. */
 .dock[data-height='peek'] {
-  height: 26dvh;
+  height: 28dvh;
   max-height: var(--dock-ceiling);
 }
 
@@ -586,10 +599,29 @@ button.ghost:hover:not(:disabled) {
  *
  * Hidden rather than unmounted: the panels keep one shape at every height, so nothing reflows on
  * the way open and the camera is not dragged around by the notes changing their mind. */
+/* **The trade at peek: what is around you steps aside for what is under you.**
+ *
+ * `.surroundings` is a good sentence about a real thing -- "You can make out forest to the east,
+ * coast to the west and south, and river to the north" -- and it is about *everywhere except here*.
+ * At the one height whose whole job is what is in front of you, the dock was describing the horizon
+ * while `.journal-notes` took the animal, the plant and the material off the screen with it.
+ *
+ * So the two swap by height, and neither is ever on screen twice: the row at peek, the sentence and
+ * the full notes from reading height. */
 .dock[data-height='peek'] .journal-notes,
+/* The biome's own description -- "Open grassland rolls ahead, warm and easy on tired feet" -- is
+   the same sentence on every plains tile in the world. The heading above it already says `Plains at
+   9, 40`, and the row below says what is standing on this particular one. At peek that is the
+   better use of forty pixels; the sentence is back the moment the dock is opened. */
+.dock[data-height='peek'] .journal-place,
+.dock[data-height='peek'] .surroundings,
 .dock[data-height='peek'] .memory,
 .dock[data-height='peek'] .canon,
 .dock[data-height='peek'] .tile-actions-head {
+  display: none;
+}
+
+.dock:not([data-height='peek']) .standing-row {
   display: none;
 }
 
@@ -705,6 +737,113 @@ button.ghost:hover:not(:disabled) {
 
 .dock[data-height='peek'] .tile-action.is-blocked {
   flex-basis: auto;
+}
+
+/* **A narrow phone pays more for the row, because a narrow phone wraps everything.**
+ *
+ * Measured at 360 and 390 pixels wide: the three chips do not fit in one line (they are about 400
+ * pixels of content in a 334-pixel row) and neither do the two action chips, so the pinned part of
+ * the dock is 72 + 115 + 22 = 209 pixels before the heading gets any. At 28dvh the heading had
+ * twenty. This is the width where "show everything at rest" actually costs something, and it is
+ * scoped to that width rather than charged to every screen. */
+@media (max-width: 34rem) {
+  .dock[data-height='peek'] {
+    height: 31dvh;
+    max-height: var(--dock-ceiling);
+  }
+}
+
+/* --- The standing row ------------------------------------------------------
+ *
+ * What is on this tile, as chips, at the height the walk is spent in. See `StandingRow.tsx` for why
+ * it exists and why the material chips are readouts rather than a second way to take.
+ *
+ * A row that wraps rather than one that scrolls sideways: a horizontal scroller hides its own
+ * contents behind a gesture nobody is told about, and the whole point of this row is that nothing
+ * about the tile is hidden behind a gesture. Two or three chips is the normal case. */
+.standing-row {
+  list-style: none;
+  /* Pinned between the body and the rail, so the dock's scroll cannot take it -- see `Here.tsx`.
+     `flex: none` is the whole of that: without it the row is a flex child of a column that is
+     already over-subscribed at peek and gets shrunk to nothing on the one screen that needs it
+     most. */
+  flex: none;
+  margin: 0;
+  padding: 6px 14px 0;
+  display: flex;
+  /* Named for the same reason the rail now names it: this sheet's base `.tile-action-list` is a
+     column, and a `display: flex` that does not say which way round it runs is how the rail spent
+     its whole life as a column while its comment said otherwise. */
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.standing {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 3px 9px;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* A chip that opens a plate is a control and has to look like one; the rest are readouts and must
+   not, or a player learns to press things that do nothing. `min-height` matches the 44px floor the
+   rest of this interface keeps for anything tappable. */
+.standing-plated {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.standing-plated > .plate-open-standing {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 3px 11px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  background: rgba(164, 92, 64, 0.12);
+  color: var(--ink);
+  text-align: left;
+}
+
+.standing-plated > .plate-open-standing:hover {
+  background: rgba(164, 92, 64, 0.2);
+  filter: none;
+}
+
+.standing-mark {
+  flex: none;
+  color: var(--ink-faint);
+}
+
+.standing-name {
+  font-weight: 600;
+}
+
+/* What the animal is doing, and the count on a material. Quieted with `--ink-faint` rather than an
+   alpha, which is this stylesheet's standing rule: `opacity` multiplies and took a label to 2.61:1
+   the last time it was used for this. */
+.standing-doing {
+  color: var(--ink-faint);
+  font-weight: 400;
+}
+
+.standing-doing::before {
+  content: '· ';
+}
+
+.standing-stuff .standing-doing::before {
+  content: '';
 }
 
 /* --- The field notes ----------------------------------------------------- */
@@ -1406,6 +1545,26 @@ button.ghost:hover:not(:disabled) {
      generous and gets whatever is left under the control bar. On a 390-tall screen **reading a
      place and seeing the map are in direct conflict**, and this is where that is decided in favour
      of reading, with the map one press on the handle away. */
+  /* **Peek has to pay for the row here too, and 390 pixels is where every trade bites at once.**
+   * The handle and the rail take 87 of them whatever happens and the standing row takes 26 more, so
+   * 28dvh -- 109 pixels -- leaves the heading nothing and pushes the row out of the dock entirely.
+   * The handle, the row and the rail come to 128 whatever happens, so this is that plus room for
+   * the heading, measured rather than guessed. */
+  .dock[data-height='peek'] {
+    height: 43dvh;
+    max-height: var(--dock-ceiling);
+  }
+
+  /* **Dropping the heading here too was tried and reverted, and it is worth saying why.**
+   *
+   * The row and the rail are the two things this height is for, so cutting `Plains at 9, 40` gets
+   * peek to 34dvh and about nine points of map back. Two things cost more than that. `.journal h2`
+   * is the readiness sentinel every browser spec boots on -- `await expect(page.locator('.journal
+   * h2')).toBeVisible()` -- so hiding it on one orientation failed three specs for a reason with
+   * nothing to do with what they test, and the fix would have been to teach the whole suite a
+   * special case. And the heading is the only thing on screen that says *where* the traveller is;
+   * the row says what is with them, which is not the same question. */
+
   .dock[data-height='read'] {
     height: 78dvh;
     max-height: var(--dock-ceiling);

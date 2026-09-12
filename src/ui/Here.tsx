@@ -30,6 +30,7 @@ import type { ReactNode } from 'react';
 import { Conversation, type ConversationProps } from './Conversation';
 import { JournalPanel, type JournalPanelProps } from './JournalPanel';
 import { PlacePanel, type PlacePanelProps } from './PlacePanel';
+import { StandingRow, type StandingRowProps } from './StandingRow';
 import { TileActions, type TileAction } from './TileActions';
 import type { DockHeight } from './surface';
 
@@ -64,6 +65,21 @@ export interface HereProps {
   /** Canon, when a service is listening. Usually nothing at all. */
   canon?: ReactNode;
   /**
+   * What is standing on this tile: the animal, the plant, the material.
+   *
+   * **Pinned beside the actions rather than written into the notes, and that is a correction made
+   * by measuring.** It went in `JournalPanel` first, below the surroundings, which reads better and
+   * does not work: the notes scroll, so at peek the body clipped it -- measured, one chip cut off
+   * on a 390-pixel phone, two on a 360, and all three on a landscape one. The row exists because
+   * the tile's contents were hidden behind a gesture; putting it somewhere it can be scrolled away
+   * from would have been the same fault in a new place.
+   *
+   * So it sits where the rail sits, for the rail's own reason. What is here and what you can do
+   * about it are both facts about the ground, they are both wanted at a glance, and neither may be
+   * scrolled out of reach.
+   */
+  standing: StandingRowProps;
+  /**
    * Everything that can be done on this tile.
    *
    * Below the occupant rather than inside it: the notes are prose about where you are, and these
@@ -83,6 +99,7 @@ export function Here({
   place,
   conversation,
   canon,
+  standing,
   actions,
   height,
   onHeight
@@ -125,6 +142,12 @@ export function Here({
           <JournalPanel {...notes}>{canon}</JournalPanel>
         )}
       </div>
+
+      {/* **What is on this ground, at peek only.** The heights above say all of it at length in the
+          notes, so the row would be the same facts twice -- `styles.css` owns that swap, because
+          which of the two a height wants is a fact about the layout and `surface.ts` already owns
+          how tall the dock is. */}
+      <StandingRow {...standing} />
 
       {/* **Every action, at every height, pinned below whatever is showing.**
           Splitting this -- the verbs you can use in the rail, the ones you cannot in the part that

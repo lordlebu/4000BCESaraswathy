@@ -125,6 +125,23 @@ export interface SpeciesIconProps {
 // already says which half it is and a second opinion could only disagree with it.
 
 /**
+ * The glyph for one species, with no plate and no markup.
+ *
+ * **For the places that want a label rather than a picture.** `SpeciesIcon` below prefers a painted
+ * plate wherever one exists, which is right on a page and wrong in a chip: a plate is a control, so
+ * it owes the interface's 44-pixel tap floor, and measured that took the standing row from 57
+ * pixels to 75 and pushed a chip out of the dock at peek on a 390-pixel phone -- the row spending,
+ * on being pressable, the room it exists to buy. `StandingRow` wants the glyph alone.
+ *
+ * Exported as a function rather than leaving callers to reach for `CLADE_MARK` and `FORM_MARK`
+ * themselves, because `plantMark` has a keyword pass over the two tables and a second caller
+ * choosing a glyph its own way is a second implementation that drifts.
+ */
+export function speciesMark(species: SpeciesMark): string {
+  return 'clade' in species ? CLADE_MARK[species.clade] : plantMark(species);
+}
+
+/**
  * The mark for one species.
  *
  * Presentational only: it carries no label, because the name it sits beside already says what the
@@ -152,11 +169,9 @@ export function SpeciesIcon({ species }: SpeciesIconProps) {
   ) : null;
   if (opens) return opens;
 
-  const mark = 'clade' in species ? CLADE_MARK[species.clade] : plantMark(species);
-
   return (
     <span className="species-emoji" aria-hidden="true">
-      {mark}
+      {speciesMark(species)}
     </span>
   );
 }

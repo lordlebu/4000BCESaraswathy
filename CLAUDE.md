@@ -421,6 +421,23 @@ does not need a permanent row: the bar was two rows and 96px, and is one row and
 strip is `width: max-content` for the same reason — it was a full-width 1204px band to hold 274px of
 chips.
 
+**The dock's pinned parts are the standing row and the action rail, and both are pinned for the
+same reason.** `StandingRow` names what is on this tile — the animal with its routine, the plant,
+each material — at peek, where `.journal-notes` is `display: none` and used to take all of it off
+the screen. It went in `JournalPanel` first, which reads better and does not work: the body scrolls,
+so peek clipped it on three of four device sizes. **Nothing in the row is a button.** A chip that
+took would put the take in two places forty pixels apart, and a tappable chip owes the 44px floor
+where a readout owes 26 — measured, that took the row from 57px to 75 and pushed a chip out of the
+dock. The row says what is here; the rail says what you can do about it. Use `speciesMark()` rather
+than `SpeciesIcon` anywhere a glyph is wanted without a plate, because `SpeciesIcon` prefers a
+painted plate and a plate is a control.
+
+**A bounding box does not prove something is visible.** A box is still reported for an element a
+scrolling ancestor has clipped away, and Playwright's `toBeVisible()` is satisfied by one too — the
+first guard on the standing row passed at all four sizes with the row clipped to twenty pixels.
+`document.elementFromPoint` at the element's centre catches clipping, covering and falling off the
+edge at once, and is what `e2e/standing.spec.ts` asks.
+
 **A descendant rule that redeclares `display` must redeclare `flex-direction` too.** The dock's
 action rail is `display: flex; flex-wrap: wrap` and inherited `column` from the base
 `.tile-action-list` three hundred lines above, so the chips the comment calls *"a row, not a list"*

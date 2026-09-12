@@ -154,6 +154,12 @@ none of them failed anything.
   of open modals pushed from an effect comes out inside-first: the outer panel answers keys meant
   for the inner one and its veil paints over it. Nesting depth has to come from the tree — a
   context — not from when something registered.
+- **A bounding box does not prove a thing is on screen.** A box is still reported for an element a
+  scrolling ancestor has clipped away, and Playwright's `toBeVisible()` is satisfied by one — the
+  first guard on the standing row passed at all four device sizes with the row clipped to twenty
+  pixels by `overflow: hidden`. `document.elementFromPoint` at the element's centre catches
+  clipping, covering and falling off the edge at once. Check any "is it visible" assertion by
+  clipping the thing, not just by hiding it.
 - **A descendant rule that redeclares `display` must redeclare `flex-direction`.** The dock's action
   rail set `display: flex; flex-wrap: wrap` and inherited `column` from a base rule three hundred
   lines above, so chips a comment calls "a row, not a list" were a column at every size — 115px of

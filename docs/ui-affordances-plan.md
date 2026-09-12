@@ -155,7 +155,7 @@ cannot ship while pinch has this side effect. Fix first, remove second.
 
 ## The four moves
 
-### A — the standing row: what is under you, at peek
+### A — the standing row: what is under you, at peek · **shipped**
 
 **The trade, and it is a trade rather than an addition.** At peek the dock currently spends its body
 on two lines: the biome's description, and the surroundings — *"You can make out forest to the east,
@@ -301,12 +301,71 @@ second step, after the first is on screen and has been lived with.
 | | What | Why this order |
 |---|---|---|
 | **1** · **shipped** | P1 and P2, and `reachable.spec.ts` extended to the action rail | Both are bugs; both block a later stage; the rail guard is overdue on its own |
-| **2** | A — the standing row | The largest of the four, and the one the geometry of stage 1 makes possible |
+| **2** · **shipped** | A — the standing row | The largest of the four, and the one the geometry of stage 1 makes possible |
 | **3** | B and C — the satchel dismiss, the zoom on touch | Small, independent, and both are about giving the map back |
 | **4** | D — the hour | New data across the bus, so it goes last and alone |
 
 One branch, one pull request, per this repository's rule. Stage 1 is worth pushing before stage 2 is
 written, because it is a fix rather than a change.
+
+### What stage 2 actually did
+
+The row is real and it says what the plan wanted it to say — the creature with its routine, the
+plant, and each material — at every device size, at rest, with nothing pressed. Four things about
+getting there are worth more than the row itself.
+
+**It is pinned beside the action rail, not written into the notes.** Below the surroundings is where
+it belongs to read, and it does not work: the dock's body scrolls, so at peek it clipped the row —
+measured, one chip cut off on a 390-pixel phone, two on a 360, and **all three on a landscape one**.
+The row exists because the tile's contents were hidden behind a gesture, so putting it somewhere it
+could be scrolled away from would have been the same fault in a new place. It sits where the rail
+sits, for the rail's own stated reason: what is here and what you can do about it are both facts
+about the ground, both wanted at a glance, and neither may be scrolled out of reach.
+
+**Nothing in the row is a button, which reverses what this plan asked for.** Built with chips as
+targets, two things went wrong. The material chip would take, and the rail's `Work the ground` sits
+about forty pixels below it — two controls for one act, which is the arrangement `TileActions` was
+written to end. And a tappable chip owes the interface's 44-pixel floor where a readout owes 26:
+measured, one plate-opening chip took the row from **57 pixels to 75** and pushed the third chip out
+of the dock, the row spending on being pressable the room it exists to buy. So the division is the
+one the dock already makes: this row says what is here, the rail says what you can do about it, and
+looking closer at a plate keeps its place in the notes where a picture has room to be a picture.
+
+That needed `speciesMark()` out of `SpeciesIcon.tsx`, because `SpeciesIcon` itself prefers a painted
+plate wherever one exists — so the row had a button in it while its own comment said it did not.
+Exported as a function rather than leaving the row to reach for `CLADE_MARK` and `FORM_MARK`
+directly: `plantMark` has a keyword pass over both tables, and a second caller choosing a glyph its
+own way is a second implementation that drifts.
+
+**Peek costs more, and the floors come down.** Measured at rest:
+
+| | before the dock | after the bar | after the row |
+|---|---|---|---|
+| desktop | 51.7% | 68.2% | **66.2%** |
+| phone portrait | 52.1% | 68.4% | **63.5%** |
+| small phone | 51.8% | 67.8% | **63.2%** |
+| phone landscape | 37.3% | 61.5% | **44.6%** |
+
+Peek is 28dvh, 31dvh under 34rem where everything wraps, and 43dvh on a short landscape phone.
+**Landscape is arithmetic rather than a preference**: the handle, the heading, the row and the rail
+come to 164 pixels of a 390-pixel screen whatever anyone wants, which is 42% of it. Dropping the
+heading there buys about nine points back and was reverted — `.journal h2` is the readiness sentinel
+every browser spec boots on, so hiding it on one orientation failed three specs for reasons with
+nothing to do with what they test, and the heading is the only thing on screen saying *where* the
+traveller is. The comparison that matters on that screen is not against 61.5 but against **37.3**,
+which is what it had before any of this work with a dock that showed less.
+
+This is the trade stated plainly: chrome taking the map back would be a regression, and content the
+player came for is what the map was cleared *for*.
+
+**And the first version of the browser guard passed with the fault in place.** Comparing each chip's
+bounding box against the dock's is the obvious check and proves almost nothing — a box is still
+reported for an element a scrolling ancestor has clipped away, and `toBeVisible()` is satisfied by
+one too. Checked by clipping the row to twenty pixels with `overflow: hidden`: all four sizes
+passed. `document.elementFromPoint` at the chip's centre asks the question a player asks — is that
+thing there, where I am looking — and catches clipping, covering and falling off the edge at once.
+With the same fault it names the chip: *"not actually visible at 390x844 — clipped, covered, or off
+the edge: ❖Dung cake"*.
 
 ### What stage 1 actually did
 

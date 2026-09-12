@@ -476,6 +476,22 @@ export function App() {
   }, [world, arrival]);
 
   /**
+   * What this ground still has to give, in the present tense.
+   *
+   * **Hoisted out of `tileActions` so the notes and the rail read one array.** The rail turns it
+   * into a sentence (`standingLine`) and the standing row turns it into a chip apiece; computing
+   * it twice would let the two disagree about what is on a tile, which is the exact shape of the
+   * bug that once had the journal describing a crane while the sketch recorded an otter.
+   */
+  const standing = useMemo(
+    () =>
+      underfoot
+        ? takeableAt(nodes, underfoot.seed, underfoot.at, underfoot.biome, arrival?.day ?? 0)
+        : [],
+    [underfoot, nodes, arrival?.day]
+  );
+
+  /**
    * Stoop and pick up whatever this tile offers.
    *
    * Done in React straight from the content layer rather than routed through the scene, on
@@ -573,9 +589,7 @@ export function App() {
     // player commits. The whole design rests on this being visible rather than rolled: a stand
     // somebody has been cutting reads as worked ground, and a good cut reads as two.
     const today = arrival?.day ?? 0;
-    const left = underfoot
-      ? takeableAt(nodes, underfoot.seed, underfoot.at, underfoot.biome, today)
-      : [];
+    const left = standing;
     const takeable = underfoot
       ? standingLine(left, (m) =>
           conditionOf(nodes, underfoot.seed, underfoot.at, m, today) === 'picked-over'
@@ -662,7 +676,7 @@ export function App() {
           ]
         : [])
     ];
-  }, [underfoot, arrival, nodes, pickUp, currentCreature, moment, world]);
+  }, [underfoot, arrival, nodes, standing, pickUp, currentCreature, moment, world]);
 
   /**
    * A key for each thing you can do here.
@@ -1108,6 +1122,12 @@ export function App() {
           discovered: arrival?.discovered ?? 0,
           atLandmark: arrival?.atLandmark ?? false,
           memory,
+        }}
+        standing={{
+          creature: arrival?.entry?.creature ?? { name: null, note: '', species: null },
+          doing: arrival?.entry?.doing ?? '',
+          flora: arrival?.entry?.flora ?? { name: null, note: '', species: null },
+          standing
         }}
         place={{
           poiId: placeOpen ? standingOn : null,
