@@ -152,7 +152,7 @@ import { isWalkable } from '../../world/generate';
 import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
-import { isCamp } from '../../content/camps';
+import { isCamp, isGrand } from '../../content/camps';
 import { findPath } from '../../world/pathfind';
 import { NO_GESTURE, pressed, released, type Gesture } from '../gesture';
 import { tileHash } from '../../world/rng';
@@ -1346,9 +1346,10 @@ export class WorldScene extends Phaser.Scene {
   private shelterHere(): Shelter {
     const here = poiAt(this.built, this.at);
     return shelterAt({
-      // A settlement has people in it and one of them will share a roof -- the best night there
-      // is, and where the ending goes. A travel node has a fire ring and nobody, which is why
-      // `isCamp` is not enough on its own any more: it covers both and they are now two rungs.
+      // A settlement has people in it and one of them will share a roof. A travel node has a fire
+      // ring and nobody, which is why `isCamp` is not enough on its own any more: it covers both
+      // and they are now two different nights.
+      inPalace: here !== null && isGrand(here.poi),
       inSettlement: here?.poi.kind === 'settlement',
       underRoof: (here?.poi.subLocations ?? []).length > 0,
       atCamp: here !== null && isCamp(here.poi),

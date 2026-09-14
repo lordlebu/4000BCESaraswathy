@@ -21,34 +21,40 @@ import { NIGHT_RESTORES } from '../content/tiers';
 import { hoursToPhase, phaseAt, skyAt } from './dayNight';
 
 /**
- * Where the traveller can spend a night, best first.
+ * Where the traveller can spend a night, grandest first.
  *
- * **Five rungs, and the top one is not a palace.** The obvious ladder ends at one, and it is the
- * wrong word twice over. Canon holds no palace -- the grandest roofed places in the game are a
- * university, a market and a rail-head -- and the setting is the reason: the Indus cities are
- * distinguished from their Mesopotamian and Egyptian contemporaries precisely by what excavation
- * has *not* turned up, with no structure clearly identifiable as a royal palace at any major site.
- * What they have instead is communal: baths, granaries, warehouses, assembly halls.
+ * **Six kinds of place, and they exist for the art and the events rather than for a rest number.**
+ * `NIGHT_RESTORES` is flat: sleeping in the woods and sleeping in a town are worth the same rest.
+ * What differs is what the night *looks* like and, once `content/events.ts` has content, what can
+ * happen in it -- a dream, an animal at the edge of the firelight, somebody arriving in the dark.
+ * Those are scenes and choices, which is a better axis than a percentage.
  *
- * So the best night is a **hall** -- a roof somebody built for everybody -- rather than a room
- * somebody built for himself. That is truer to the ground this game is standing on, and it is
- * where the endgame is going: the ending is settling into a settlement and building for it.
+ * So this is a vocabulary. Each rung is a painting slot (`src/ui/scenes/rest-<kind>.png`) and an
+ * event filter, and adding a seventh is a member here, a label, a mark and a file.
  *
- * **Every rung is reachable, and that was the constraint that shaped the order.** The obvious
- * reading puts a hall above a roof by making it a roofed settlement -- and no settlement in canon
- * has sub-locations, so that rung would have been unreachable on every map. This repository has
- * shipped that fault before: `lava_field` had a painted tile, 31 species and a `renderable: true`,
- * and the generator produced zero tiles of it on every seed.
- *
- * So the ladder is cut where canon already cuts: six settlements, three travel nodes, four roofed
- * places. A settlement outranks a roofed ruin because it has **people** in it, and somebody there
- * has a roof and will share it. A ruin you can get inside outranks a fire ring, because a roof is
- * a roof. `test/night.test.ts` asserts every rung is produced by some real place.
+ * `palace` is a grand settlement -- the biggest place on a map, where the most people are. It is
+ * not a royal anything; this world does not have one, and the word is doing the job "the grandest
+ * town" would do more slowly.
  */
-export type Shelter = 'hall' | 'roof' | 'camp' | 'tent' | 'bedroll' | 'none';
+export type Shelter =
+  | 'palace'
+  | 'settlement'
+  | 'roof'
+  | 'camp'
+  | 'tent'
+  | 'bedroll'
+  | 'none';
 
-/** Best first, which is the order `shelterAt` resolves in and the order a panel should list. */
-export const SHELTER_ORDER: readonly Shelter[] = ['hall', 'roof', 'camp', 'tent', 'bedroll', 'none'];
+/** Grandest first, which is the order `shelterAt` resolves in and the order a panel should list. */
+export const SHELTER_ORDER: readonly Shelter[] = [
+  'palace',
+  'settlement',
+  'roof',
+  'camp',
+  'tent',
+  'bedroll',
+  'none'
+];
 
 /**
  * How the night is spent.
@@ -104,6 +110,8 @@ export function isDark(travelledMs: number, startPhase: number, nowMs = 0): bool
  * for having nothing is written down rather than assumed impossible.
  */
 export interface Ground {
+  /** Standing in the grandest settlement on this map. */
+  inPalace?: boolean;
   /** Standing in a settlement: people, walls, and somebody who will share a roof. */
   inSettlement?: boolean;
   /** A place canon gave sub-locations to -- somewhere you can get inside. */
@@ -115,23 +123,22 @@ export interface Ground {
 }
 
 /**
- * The best night available where the traveller is standing.
+ * Which kind of night this is, where the traveller is standing.
  *
- * Ranked rather than chosen: the caller says what the ground *is* and this file decides what that
- * is worth, so the ordering lives in one place and a panel cannot disagree with the diary about
- * which night somebody had.
+ * Resolved rather than chosen: the caller says what the ground *is* and this file decides which
+ * word that earns, so the vocabulary lives in one place and a panel cannot disagree with the diary
+ * about what sort of night somebody had.
  *
- * **An options object rather than four positional booleans**, which is what this was growing into.
- * Four bare `true`s at a call site is unreadable and the kind of thing that gets transposed
- * silently -- and a transposition here would swap a village for a ruin without failing anything.
+ * **An options object rather than five positional booleans**, which is what this was growing into.
+ * Five bare `true`s at a call site is unreadable and the kind of thing that gets transposed
+ * silently -- and a transposition here would paint the wrong scene without failing anything.
  *
- * The tent ranks **below a camp** on purpose. A hide tent is a good night in the open, not a
- * village -- if it matched the best available nobody would walk to a settlement at dusk, and the
- * night mechanic is older and better than this one. What it buys is that open ground stops being a
- * bad night, which is the whole complaint it answers.
+ * The order is about grandness, not about rest: `NIGHT_RESTORES` is flat. It decides which painting
+ * is shown and, later, which events can happen.
  */
 export function shelterAt(ground: Ground = {}): Shelter {
-  if (ground.inSettlement) return 'hall';
+  if (ground.inPalace) return 'palace';
+  if (ground.inSettlement) return 'settlement';
   if (ground.underRoof) return 'roof';
   if (ground.atCamp) return 'camp';
   if (ground.built === 'tent') return 'tent';
@@ -160,15 +167,26 @@ export function nightRestores(shelter: Shelter): number {
 export function spendNight(shelter: Shelter): NightOutcome {
   const restores = nightRestores(shelter);
   switch (shelter) {
-    case 'hall':
+    case 'palace':
       return {
         shelter,
         restores,
         rested: true,
         writes: true,
         entry:
-          'Slept in the town, and somebody fed me before I could refuse. I wrote up three days '
-          + 'properly and slept after, which is the wrong way round and the best night I have had.'
+          'Slept in the great house, on a floor somebody had swept for me, and was fed before I '
+          + 'could refuse. I wrote up three days properly and slept after, which is the wrong way '
+          + 'round and a good way round.'
+      };
+    case 'settlement':
+      return {
+        shelter,
+        restores,
+        rested: true,
+        writes: true,
+        entry:
+          'Slept in the town. Somebody\u2019s spare room, a lamp I did not have to ration, and the '
+          + 'noise of other people being awake somewhere near.'
       };
     case 'roof':
       return {

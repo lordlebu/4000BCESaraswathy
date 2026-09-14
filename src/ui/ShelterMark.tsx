@@ -11,10 +11,11 @@
 // and sitting out the night is none of those.** Each is a different amount of shelter and each
 // looks like a different amount.
 //
-// **Six now, and the two additions are the ones a player can act on.** A `hall` is a settlement --
-// people, and one of them will share a roof -- and it is where the ending goes. A `tent` is the
-// only rung in the list the player *made*, so it is drawn as a thing that was put up rather than
-// a thing that was found: guy-lines, pegged, and a seam up the front.
+// **Seven now, and the vocabulary is about grandness rather than about rest.** `NIGHT_RESTORES` is
+// flat -- sleeping in the woods and sleeping in a town are worth the same. What these say is what
+// the night *looked* like, and later which events could happen in it. A `tent` is the only one in
+// the list the player made, so it is drawn as a thing that was put up rather than found:
+// guy-lines, pegged, and a seam up the front.
 //
 // Inline SVG rather than a sprite. These are four small line drawings that have to sit on the
 // panel's paper at whatever size the row is, in both light and dark, and `currentColor` gets that
@@ -53,15 +54,24 @@ export function ShelterMark({ shelter, size = 20 }: ShelterMarkProps) {
       aria-hidden="true"
       focusable="false"
     >
-      {shelter === 'hall' && (
+      {shelter === 'palace' && (
+        <>
+          {/* A great house on a terrace, with a colonnade under it. Grand, and deliberately not
+              royal -- no crown, no throne. It is the biggest building in the biggest town. */}
+          <path d="M2 20h20" />
+          <path d="M4 20v-7h16v7" />
+          <path d="M3 13 12 7l9 6" />
+          <path d="M8 20v-4M12 20v-4M16 20v-4" />
+        </>
+      )}
+
+      {shelter === 'settlement' && (
         <>
           {/* Rooftops, plural, with smoke off one of them. A settlement is not a building -- it is
-              the fact that somebody else is awake nearby, which is the whole of why it is the best
-              night on the ladder. */}
+              the fact that somebody else is awake nearby. */}
           <path d="M2 20h20" />
           <path d="M3 20v-6l4-3 4 3v6" />
           <path d="M13 20v-8l4-3 4 3v8" />
-          <path d="M7 20v-3.5h0" />
           <path d="M17 5.5c.9-.8.2-1.6 0-2.5" />
         </>
       )}

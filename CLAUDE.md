@@ -216,6 +216,7 @@ tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side comp
 | `docs/cozy-systems-plan.md` | the seven systems reworked — what shipped, what is left, and why |
 | `docs/art-placement.md` | every slot the interface will draw a picture into, and what falls back |
 | `docs/activity-boards-plan.md` | which bench a place has, how it says so — designed, not built |
+| `docs/events-plan.md` | events: the framework, shipped; the content, not |
 | `docs/ui-streamline-plan.md` | what the chrome costs the map, measured, and the four moves that give it back |
 | `docs/ui-affordances-plan.md` | what the screen says once the map has the room — closed, and the two faults it found |
 
@@ -324,8 +325,8 @@ Thirty-five in total, against the 85 this file used to claim.
   `journal.ts` turns that into prose; `conversation.ts` decides what a person says now;
   `camps.ts` and `kit.ts` answer where you can sleep and what the traveller always carries;
   `making.ts` adapts the crafting bundle and `satchel.ts`, `crafting.ts`, `gathering.ts`,
-  `cooking.ts`, `using.ts` and `vehicles.ts` are the rules over it. All import their JSON at
-  build time.
+  `cooking.ts`, `using.ts` and `vehicles.ts` are the rules over it; `events.ts` holds what can
+  happen *to* you. All import their JSON at build time.
 
   **A satchel is not the kit, and neither replaced the other.** `kit.ts` is the bedroll, lamp,
   diary and staff: fixed, unmanaged, there from the first step. `satchel.ts` is what gets

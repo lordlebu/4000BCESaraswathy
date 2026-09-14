@@ -30,6 +30,7 @@ nothing, throws nothing, and quietly keeps drawing the fallback. That has happen
 | Folder | Named after | Example | Wrong, and silent |
 |---|---|---|---|
 | `plates/` | the **engine** id | `desert-fox.png` | `fauna_desert_fox.png` |
+| `events/` | the event's id | `event_third_night_dream.png` | a title, a slug |
 | `portraits/` | the bare person | `thrali.png` | `npc_thrali.png` |
 | `marks/` | namespace + canon word | `class-fibre.svg` | `fibre.svg` |
 | `scenes/` | the gesture, or gesture-variant | `rest-camp.png` | `resting.png` |
@@ -65,8 +66,26 @@ as a bestiary entry with a button.
 The making variants are named after the bare process word, the same word `PROCESS_MARK` keys on. A
 variant with no painting falls back to the plain gesture, so these can land one at a time.
 
-**Worth doing first:** `fish.png`, then the three rest variants. Those four are moments a player
-meets constantly and the whole set is finishable.
+**The six nights are the set worth finishing.** `rest-<shelter>.png`, one per kind of place a night
+can be spent — `palace`, `settlement`, `roof`, `camp` ✓, `tent`, `bedroll`. This is what the shelter
+vocabulary is *for*: `NIGHT_RESTORES` is flat, so every night is worth the same rest and what
+differs is the picture and, later, what can happen in it. An unpainted kind falls back to
+`rest.png`, so they land one at a time.
+
+**Worth doing first:** `fish.png`, then `rest-tent.png` — the tent is the only night the player
+built, and the one the crafting tree pays for.
+
+### `events/` — something happening to you · 0 of ? · **new**
+
+A dream, an animal at the edge of the firelight, somebody arriving in the dark. **No events are
+authored yet either** — the framework ships before the content on purpose, and
+`docs/events-plan.md` says why.
+
+Not a specimen and not a bench: a moment with the traveller *in* it, the same register as `scenes/`.
+The difference is that a scene is something he is doing and this is something that is happening.
+
+Falls back to the night's own scene, then to `rest.png`, then to a blank panel. An event with no
+painting still fires, still reads and still resolves.
 
 ### `marks/` — the making vocabulary · 4 of 47
 

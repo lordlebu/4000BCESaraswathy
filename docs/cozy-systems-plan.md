@@ -3,7 +3,7 @@
 Crafting, apothecary, cooking, building, stalking, fishing and resting — made simple, made
 intuitive, and made to cost one press.
 
-**Status: Phases 1, 2 and 2b shipped. Phase 3 is art, and is deliberately not a blocker.
+**Status: Phases 1, 2, 2b and 5 shipped. Phase 3 is art, and is deliberately not a blocker.
 Phase 4 — activity boards — is designed in `docs/activity-boards-plan.md` and not built.**
 
 Written during the work rather than after it, because the middle of it is where somebody else
@@ -164,28 +164,25 @@ the whole fix.
 
 ---
 
-## Phase 2b — the night is a ladder, not a switch · **shipped**
+## Phase 2b — six kinds of night, all worth the same · **shipped**
 
-Six rungs — `none`, `bedroll`, `tent`, `camp`, `roof`, `hall` — and the night clears a *fraction*
-of the tiredness rather than all or none. Valheim's comfort model, which is the one the genre has
-actually settled on; Stardew and Animal Crossing skip it entirely and Don't Starve's tent is the
-same idea with two rungs.
+`bedroll`, `tent`, `camp`, `roof`, `settlement`, `palace` — and `NIGHT_RESTORES` is **flat**. Every
+night that is a night restores the same. Only sitting it out with no shelter at all is worth
+nothing, because that is not sleeping.
 
-**The top rung is a hall, not a palace.** Canon holds no palace, and that is the setting rather
-than an oversight: the Indus cities are distinguished from their Mesopotamian and Egyptian
-contemporaries by what excavation has *not* turned up, with no structure clearly identifiable as a
-royal palace at any major site. What they have instead is communal — baths, granaries, warehouses,
-halls. The grandest roofed places in this game are a university, a market and a rail-head. So the
-best night is a roof somebody built for everybody, which is also where the ending goes.
+**A graded version was built and taken back out**, and the correction is worth recording because the
+mistake was a tempting one. It read plausibly — a bedroll worth a third of a night in town — and it
+was answering a question nobody had asked. The shelter kinds exist to be different **places**, not
+different amounts: what a player gets out of where they slept is going to be an *event*, and an
+event is a scene and a choice rather than a percentage.
 
-**Every rung is reachable**, and that constraint decided the order. A hall read as a *roofed
-settlement* would have been unreachable on every map, because no settlement in canon has
-sub-locations — the `lava_field` fault exactly. So the ladder is cut where canon already cuts: six
-settlements (`hall`), four roofed places (`roof`), three travel nodes (`camp`). A settlement
-outranks a roofed ruin because it has people in it and one of them will share a roof.
+So the ladder is a **vocabulary of six paintings and an event filter**. `rest-<shelter>.png` gives
+each one its own night, and `Conditions.shelter` lets a dream happen only in the woods or a visitor
+knock only in a town. That is a far better axis, and it is why Phase 5 exists.
 
-A tent ranks **below** a camp on purpose: if it matched the best available nobody would walk to a
-settlement at dusk. What it buys is that open ground stops being a *bad* night.
+`palace` is a grand settlement — the biggest place on a map, where the most people are. Not a royal
+anything. `camps.isGrand` is a labelled placeholder rule (three or more people) that becomes a
+one-line read of `poi.grand` the day canon authors one.
 
 **And the arithmetic was backwards.** `easedMark` moved out of `WorldScene` into `fatigue.ts`
 because the version written inside the scene added to the rest mark instead of pulling it back —
@@ -193,6 +190,30 @@ which put it ahead of the clock, clamped the negative to zero, and made every ru
 everything. It type-checked, read plausibly and passed all 1,196 tests, because it lived where no
 test could load it. Its new test then found a second fault: `Math.min`/`Math.max` do not clamp a
 `NaN`.
+
+---
+
+## Phase 5 — events · **framework shipped, content not written**
+
+Something happening to you, as opposed to something you did. `docs/events-plan.md` carries it.
+
+A dream on the third night, an animal at the edge of the firelight, somebody arriving in the dark.
+None are written. What is written is the shape they arrive in, so adding one is a row of data and a
+painting rather than a feature.
+
+**`EventCard` reuses `ActivityModal`'s furniture down to the class names**, because three surfaces
+in this interface already turned out to be the same screen wearing different code. An event wants a
+painting, a passage and a short list of plain choices — which is exactly that screen.
+
+It is wired to **`night-passed`, which had no listener at all** until this: emitted every time
+somebody slept, carrying everything a night needs, and read by nothing. The fourth instance of this
+codebase's signature fault, and now a socket with something in it.
+
+Two rulings: every option offered must be takeable (an option needing something the player lacks is
+not offered, rather than offered greyed), and an event can never strand a player (if every choice is
+gated, the last is offered anyway — a scene with no way out is a soft lock).
+
+---
 
 ---
 

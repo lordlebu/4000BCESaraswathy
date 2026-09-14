@@ -149,43 +149,31 @@ export const MEAL_EASES = 0.25;
 /**
  * How much of the walking each kind of night takes back, from 0 to 1.
  *
- * **Five rungs, because a boolean could not hold what the ladder now has to say.** A night used to
- * be `rested: true | false` -- a roof and a camp cleared the tiredness, a bedroll bought the hours
- * and nothing else. That is the right *shape* and too few rungs: it cannot tell a tent you pitched
- * from a fire somebody else banked, and it makes the thing the crafting tree can build either
- * worthless or perfect.
+ * **Every night that is a night restores the same, and that is a decision rather than a stub.**
+ * Sleeping in the woods and sleeping in a town are worth the same rest today. Only sitting it out
+ * with no shelter at all is worth nothing, because that is not sleeping.
  *
- * **The model is Valheim's comfort**, which is the one the genre has actually settled on: what you
- * have built and what you are sleeping under set how much the night is worth, on a scale rather
- * than a switch. Stardew and Animal Crossing both skip this entirely -- their beds are all one bed
- * -- and Don't Starve's tent is a straight upgrade over the ground, which is the same idea with
- * two rungs. Five is the fewest that lets a pitched tent mean something without letting it mean
- * everything.
+ * A graded version of this table was built and taken back out. It read plausibly -- a bedroll worth
+ * a third of a night in town -- and it was answering a question nobody had asked: **the shelter
+ * kinds exist to be different *places*, not different amounts.** What a player gets out of where
+ * they slept is going to be an *event* -- a dream, an animal at the edge of the firelight, somebody
+ * arriving in the dark -- and an event is a scene and a choice, not a number.
  *
- *   `none`      0     — sat it out. No sleep, and the diary records nothing.
- *   `bedroll`   0.35  — the kit, on open ground. Buys the hours and little else; this is exactly
- *                       what `rested: false` used to mean, kept at its old worth on purpose.
- *   `tent`      0.75  — pitched, and yours. The first night in this game a player *earned*.
- *   `camp`      0.85  — a travel node. Somebody’s fire ring, and nobody in it.
- *   `roof`      0.95  — a place you can get inside. Four of those, and all of them ruins.
- *   `hall`      1.00  — a settlement. People, and one of them will share a roof.
+ * So the ladder below is a vocabulary of six places and their art, and this table is deliberately
+ * flat behind it. When the night events land, the thing that varies by shelter is **which events
+ * can happen there**, which is a far more interesting axis than a percentage and is the one
+ * `content/events.ts` is built on.
  *
- * **A tent sits below a camp deliberately.** It is a good night in the open and not a village; if
- * it matched the best available, nobody would ever walk to a settlement at dusk and the oldest
- * mechanic in the game would stop mattering. What the tent buys is that the *open ground* stops
- * being a bad night, which is the whole complaint it answers.
- *
- * The gap from `tent` to `hall` is deliberately small — 0.75 against 1.00 — because the night is
- * not where this game applies pressure. `fatigue.ts` holds four invariants saying tiredness never
- * stops you, so the whole ladder moves a walking pace between 1 and 1.6 and nothing else.
- *
- * Pacing, not canon. Tune by playing.
+ * Keep the mechanism. It costs nothing, `easedMark` is tested, and it is the seam a later design
+ * would come back through. Do not reintroduce a spread without a reason that is not "it seems more
+ * realistic" -- that was the reason the first time.
  */
 export const NIGHT_RESTORES: Record<string, number> = {
   none: 0,
-  bedroll: 0.35,
-  tent: 0.75,
-  camp: 0.85,
-  roof: 0.95,
-  hall: 1
+  bedroll: 1,
+  tent: 1,
+  camp: 1,
+  roof: 1,
+  settlement: 1,
+  palace: 1
 };

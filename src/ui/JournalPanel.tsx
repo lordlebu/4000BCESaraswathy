@@ -82,7 +82,8 @@ function Note({ note, kind }: { note: FieldNote; kind: 'creature' | 'flora' }) {
  * here the player made.
  */
 export const SHELTER_LABEL: Record<string, string> = {
-  hall: 'Take the bed you are offered',
+  palace: 'Take the room in the great house',
+  settlement: 'Take the bed you are offered',
   roof: 'Sleep under the roof',
   camp: 'Make camp for the night',
   tent: 'Pitch the tent here',

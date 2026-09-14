@@ -84,12 +84,13 @@ describe('isDark', () => {
 
 describe('shelterAt', () => {
   /**
-   * **The whole ladder, best first.** The order is the design: a settlement has people in it and
-   * one of them will share a roof; a roofed ruin is a roof and nobody; a travel node is a fire ring
-   * and nobody; a pitched tent is a good night in the open; the bedroll is the floor.
+   * **The whole vocabulary, grandest first.** The order decides which painting a night shows and,
+   * once `content/events.ts` has content, which events can happen in it. It does **not** decide how
+   * much rest the night is worth -- see below.
    */
-  it('ranks a settlement over a roof over a camp over a tent over the bedroll', () => {
-    expect(shelterAt({ inSettlement: true, underRoof: true, atCamp: true })).toBe('hall');
+  it('resolves the grandest thing the ground offers', () => {
+    expect(shelterAt({ inPalace: true, inSettlement: true, underRoof: true })).toBe('palace');
+    expect(shelterAt({ inSettlement: true, underRoof: true, atCamp: true })).toBe('settlement');
     expect(shelterAt({ underRoof: true, atCamp: true })).toBe('roof');
     expect(shelterAt({ atCamp: true, built: 'tent' })).toBe('camp');
     expect(shelterAt({ built: 'tent' })).toBe('tent');
@@ -97,16 +98,22 @@ describe('shelterAt', () => {
   });
 
   /**
-   * **A tent must not match the best available, and this is the guard.**
+   * **Sleeping in the woods and sleeping in a town are worth the same rest, and this is the guard.**
    *
-   * If it did, nobody would ever walk to a settlement at dusk and the oldest mechanic in the game
-   * would stop mattering. What the tent is for is making open ground stop being a *bad* night --
-   * it beats the bedroll and loses to everywhere somebody else already built something.
+   * A graded version of this was built and taken back out: it read plausibly and was answering a
+   * question nobody had asked. The shelter kinds exist to be different *places* -- different art,
+   * and later different events -- not different amounts. Only sitting it out with no shelter at all
+   * is worth nothing, because that is not sleeping.
+   *
+   * If this fails, somebody has reintroduced a spread. `tiers.ts` says what reason would justify
+   * that, and "it seems more realistic" is named there as the one that would not.
    */
-  it('puts a pitched tent above the bedroll and below anywhere with a fire', () => {
-    expect(nightRestores('tent')).toBeGreaterThan(nightRestores('bedroll'));
-    expect(nightRestores('tent')).toBeLessThan(nightRestores('camp'));
-    expect(nightRestores('camp')).toBeLessThan(nightRestores('hall'));
+  it('rests a traveller the same wherever they actually slept', () => {
+    const slept = SHELTER_ORDER.filter((s) => s !== 'none');
+    for (const rung of slept) {
+      expect(nightRestores(rung), `${rung} is worth a different night`).toBe(nightRestores('bedroll'));
+    }
+    expect(nightRestores('none'), 'sitting it out counted as sleep').toBe(0);
   });
 
   /**
@@ -114,18 +121,24 @@ describe('shelterAt', () => {
    *
    * `lava_field` had a painted tile, a terrain frame, 31 species and `renderable: true`, and the
    * generator produced zero tiles of it on every seed -- every test passed throughout because none
-   * asked whether any of it was on the map. A shelter tier nothing produces is the same fault in a
-   * smaller place, and the obvious ladder had one: a hall read as a *roofed settlement*, and no
-   * settlement in canon has sub-locations.
+   * asked whether any of it was on the map. A shelter kind nothing produces is the same fault in a
+   * smaller place, and it costs a painting somebody drew for nothing.
    */
-  it('has a real place behind every rung it can return', () => {
-    const roofed = pois.filter((p) => (p.sub_locations ?? []).length > 0);
+  it('has a real place behind every rung that comes off the map', () => {
     const settlements = pois.filter((p) => p.kind === 'settlement');
-    const travelNodes = pois.filter((p) => p.kind === 'travel_node');
-
-    expect(settlements.length, 'no settlement, so `hall` is unreachable').toBeGreaterThan(0);
-    expect(roofed.length, 'nowhere roofed, so `roof` is unreachable').toBeGreaterThan(0);
-    expect(travelNodes.length, 'no travel node, so `camp` is unreachable').toBeGreaterThan(0);
+    expect(settlements.length, 'no settlement, so `settlement` is unreachable').toBeGreaterThan(0);
+    expect(
+      settlements.length,
+      'nothing to single out as the grandest, so `palace` is unreachable'
+    ).toBeGreaterThan(1);
+    expect(
+      pois.filter((p) => (p.sub_locations ?? []).length > 0).length,
+      'nowhere roofed, so `roof` is unreachable'
+    ).toBeGreaterThan(0);
+    expect(
+      pois.filter((p) => p.kind === 'travel_node').length,
+      'no travel node, so `camp` is unreachable'
+    ).toBeGreaterThan(0);
   });
 
   it('gives every rung a distinct entry, and never writes a night up as a failure', () => {
@@ -133,8 +146,6 @@ describe('shelterAt', () => {
     for (const rung of SHELTER_ORDER) {
       const out = spendNight(rung);
       expect(out.entry.length, `${rung} has no entry`).toBeGreaterThan(10);
-      expect(out.restores, `${rung} restores more than a whole night`).toBeLessThanOrEqual(1);
-      expect(out.restores).toBeGreaterThanOrEqual(0);
       seen.add(out.entry);
     }
     expect(seen.size, 'two rungs share an entry').toBe(SHELTER_ORDER.length);
