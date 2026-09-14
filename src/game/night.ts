@@ -60,9 +60,27 @@ export function isDark(travelledMs: number, startPhase: number, nowMs = 0): bool
  * carrying one. `none` is reachable only if the kit is somehow empty, and is kept so the outcome
  * for having nothing is written down rather than assumed impossible.
  */
-export function shelterAt(underRoof: boolean, atCamp: boolean): Shelter {
+export function shelterAt(
+  underRoof: boolean,
+  atCamp: boolean,
+  /**
+   * What the traveller has *built* to sleep under, from `using.shelterBuilt`.
+   *
+   * **The fourth thing this ranks, and the only one the player can change.** A roof and a camp are
+   * facts about where you are standing; the bedroll is a fact about the kit and has been there
+   * since the first step. A pitched tent is the one night you earned, and it travels -- which is
+   * what finally gives the crafting tree something a player can feel, and what "building" means in
+   * a game about walking rather than settling.
+   *
+   * Ranked at a camp's worth rather than a roof's: a hide tent is a good night in the open and not
+   * a stone room, and letting it match the best available would stop anybody ever walking to a
+   * settlement at dusk. The night mechanic is older and better than this one and keeps its place.
+   */
+  built: 'tent' | null = null
+): Shelter {
   if (underRoof) return 'roof';
   if (atCamp) return 'camp';
+  if (built === 'tent') return 'camp';
   return carries('bedroll') ? 'bedroll' : 'none';
 }
 
@@ -87,7 +105,11 @@ export function spendNight(shelter: Shelter): NightOutcome {
         shelter,
         rested: true,
         writes: true,
-        entry: 'Slept at the camp. Somebody had banked the fire before I got there.'
+        // Written to be true of both camps this now covers: one somebody else banked a fire at,
+        // and one the traveller pitched himself. Naming a fire-ring would be false half the time,
+        // and `shelterAt` deliberately does not tell this function which kind it was -- a good
+        // night in the open is a good night in the open.
+        entry: 'A good night, out of the wind, and warm enough to write by.'
       };
     case 'bedroll':
       return {

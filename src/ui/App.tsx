@@ -27,13 +27,13 @@ import { PeoplePanel } from './PeoplePanel';
 import { met } from '../content/people';
 import { seedFromUrl } from './seed';
 import { WorkshopPanel } from './WorkshopPanel';
-import { distinct, emptySatchel } from '../content/satchel';
+import { canDo, distinct, emptySatchel, itemsHeld } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
 import { carry, gatheredLine, standingLine } from '../content/gathering';
 import { rideFrom } from '../content/vehicles';
 import { canBoardAt, trackRoute } from '../world/crossing';
 import { conditionOf, draw, noNodes, takeableAt, type Taking } from '../content/nodes';
-import { recipe } from '../content/making';
+import { item, recipe } from '../content/making';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
@@ -45,17 +45,40 @@ import { advance, answer, craft, hear, knowsRecipe, type WorldMoment } from '../
 import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import { characterFor } from '../game/player';
 import type { World } from '../world/types';
-import { tileHash } from '../world/rng';
-import { isAnimal } from '../content/species';
+import { isAnimal, isWaterSpecies } from '../content/species';
 import { gestureForProcess } from '../content/making-gestures';
 import {
   GESTURE_VERB,
+  GESTURE_WANTS,
   blockedReason,
-  difficultyOf,
   gestureFor,
+  momentFavours,
   type Gesture
 } from '../content/gestures';
+import type { Preparation } from '../content/activity';
+import { shelterBuilt, use, usedLine, useOf } from '../content/using';
 import { ActivityModal } from './ActivityModal';
+
+/**
+ * The gestures whose subject is an animal, so the card shows its plate rather than a scene.
+ *
+ * A set rather than an `=== 'stalk'` check, because fishing joined it and the comparison was in
+ * four places. Getting this wrong is visible and was: passing the creature regardless put
+ * "Painted Deer comes out of the ground" on a flint quarry.
+ */
+const ABOUT_AN_ANIMAL = new Set<Gesture>(['stalk', 'fish']);
+
+/**
+ * The bare process word for a recipe -- `firing`, not `process_firing`.
+ *
+ * The variant the activity card narrows its painting by, matching what `src/ui/scenes/` is named
+ * after. `PROCESS_MARK` already keys on the same bare word, so the two art folders read canon's
+ * vocabulary the same way.
+ */
+function processWord(recipeId: string): string | null {
+  const id = recipe(recipeId)?.process;
+  return id ? id.replace('process_', '') : null;
+}
 import { Modal } from './Modal';
 
 /**
@@ -576,28 +599,96 @@ export function App() {
           ? 'rest'
           : activity.making
             ? gestureForProcess(recipe(activity.making)?.process ?? '')
-            : gestureFor(activity.taking[0]!.material, isAnimal)
+            : gestureFor(activity.taking[0]!.material, isAnimal, isWaterSpecies)
         : null,
     [activity]
   );
 
   /**
-   * The seeded roll the activity deals its bands from.
+   * What the player brought to the running activity.
    *
-   * **Memoised because its identity is load-bearing.** The modal deals a fresh attempt in an
-   * effect keyed on this function, so an inline arrow -- a new identity every render -- re-deals
-   * the bands on every tick of its own timer. The run then never accumulates a beat and never
-   * settles, which is precisely what the browser showed while all 900 unit tests passed: the
-   * component is correct and the caller was re-mounting it under itself.
+   * **Composed here because this is the only place holding all three answers** -- what is in the
+   * satchel, what the animal is doing, and how tired the traveller is. That is the same
+   * arrangement `knowsRecipeHere` uses and for the same stated reason; `content/activity.ts`
+   * grades it and the card renders it, and neither works any of it out.
+   *
+   * This memo replaced a seeded `roll` function whose *identity* was load-bearing: the card dealt
+   * fresh timing bands in an effect keyed on it, so an inline arrow re-dealt them on every tick of
+   * the card's own timer and the run never settled. Nine unit tests passed throughout and the
+   * browser found it in one click. There is no timer and no deal any more, so the hazard is gone
+   * rather than guarded -- but it is worth remembering why a plain object is the safer shape.
    */
-  const activityRoll = useMemo(
-    () =>
-      underfoot && activity
-        ? (salt: string) =>
-            tileHash(underfoot.seed, underfoot.at.x, underfoot.at.y, `${salt}:${activity.day}`)
-        : () => 0,
-    [underfoot, activity]
+  const preparation = useMemo<Preparation>(() => {
+    const gesture: Gesture | null = activityGesture;
+    if (!gesture) return { wants: null, equipped: false, favourable: true };
+    const wants = GESTURE_WANTS[gesture];
+    return {
+      wants,
+      equipped: wants === null ? false : canDo(satchel, wants),
+      favourable: momentFavours(
+        gesture,
+        currentCreature ? routineFor(currentCreature, moment) : null,
+        {
+          // `fatigueNote` is prose and this needs a fact, so the scene's own word is read rather
+          // than re-derived: it says nothing at all while the traveller is fresh, and says
+          // something only once it is worth saying. That threshold is `fatigue.ts`'s to own.
+          spent: Boolean(arrival?.fatigue),
+          // A night under a roof, at a camp, or in a tent you pitched. The bedroll and the bare
+          // sky are the two that are not -- and `shelterAt` has already decided which this is.
+          sheltered: activity?.resting ? activity.resting !== 'bedroll' && activity.resting !== 'none' : true
+        }
+      )
+    };
+  }, [activityGesture, satchel, currentCreature, moment, arrival?.fatigue, activity?.resting]);
+
+  /**
+   * The name of the thing answering `preparation.wants`, for the card's clause.
+   *
+   * Named rather than counted, because "a flint knife will do the work" teaches which object did
+   * it and "you have 1 cutting tool" teaches nothing. The first carried item that affords it, in
+   * the satchel's own stable order, so the sentence does not change between renders.
+   */
+  const preparationTool = useMemo(() => {
+    const wants = preparation.wants;
+    if (!wants || !preparation.equipped) return null;
+    const id = itemsHeld(satchel).find((held) => item(held)?.affords.includes(wants));
+    return id ? item(id)?.name ?? null : null;
+  }, [preparation.wants, preparation.equipped, satchel]);
+
+  /**
+   * Use something carried: a physic, a meal, or a shelter raised for the night.
+   *
+   * **The one verb that closes the three loops canon had data for and the game had no door to.**
+   * Seven physics, thirteen foods and two shelters could all be crafted and none of them did
+   * anything -- `cooking.ts` had no importer at all for its whole life. `content/using.ts` carries
+   * the reasoning for why this is one verb rather than an apothecary screen, a kitchen and a
+   * camp-builder.
+   *
+   * The satchel is React's and the clock is the scene's, so easing goes over the bus rather than
+   * being applied here. A shelter is not spent, which is why the satchel can come back unchanged
+   * and the `shelter-built` announcement still has to fire.
+   */
+  const useCarried = useCallback(
+    (id: string) => {
+      const what = useOf(id);
+      if (!what) return;
+      setSatchel((s) => use(s, id));
+      if (what.eases > 0) EventBus.emitEvent('ease', { by: what.eases });
+      setMemory(usedLine(id) ?? '');
+    },
+    []
   );
+
+  /**
+   * Tell the scene what is pitched, whenever the satchel changes.
+   *
+   * A push rather than a pull: `night.shelterAt` ranks where you are standing and a tent is the
+   * one input to it that is a fact about what you are carrying. The payload is the whole state, so
+   * a stale value cannot survive a change -- see the event's own note in `EventBus.ts`.
+   */
+  useEffect(() => {
+    EventBus.emitEvent('shelter-built', { built: shelterBuilt(satchel) });
+  }, [satchel]);
 
   /**
    * Everything that can be done on the tile under foot, in one list.
@@ -629,7 +720,7 @@ export function App() {
     // in the position this whole layer exists to fix. The gesture comes from the first material
     // on offer, which is the one the modal will be about.
     const first = left[0]?.material ?? null;
-    const gesture = first ? gestureFor(first, isAnimal) : null;
+    const gesture = first ? gestureFor(first, isAnimal, isWaterSpecies) : null;
     const routine = currentCreature ? routineFor(currentCreature, moment) : null;
     // A stalk is refused when the animal is only sign. `blockedReason` writes the sentence,
     // because the reason is the teaching -- it sends the player back at a better hour.
@@ -1046,6 +1137,7 @@ export function App() {
 
       <SatchelPanel
         satchel={satchel}
+        onUse={useCarried}
         open={interrupts.satchel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'satchel' })}
       />
@@ -1073,35 +1165,16 @@ export function App() {
           open
           gesture={activityGesture}
           promised={activity.taking}
-          difficulty={
-            // A night is not a test of anybody's hands. There is nothing to aim at, so the band is
-            // at its widest and the beats pass on their own -- which is the whole of what makes
-            // this the gentlest place to learn what the modal is.
-            activity.resting
-              ? 0
-              : activity.making
-                /**
-                 * **How involved the recipe is, which is data canon already has.**
-                 *
-                 * The obvious reach was the output's rarity, and `Output` does not carry one --
-                 * the cast that would have hidden that was the tell. Ingredient count is the
-                 * honest measure and a better one anyway: a thing needing four materials and a
-                 * kept tool is a harder job than a thing needing one, whatever it makes.
-                 *
-                 * Two ingredients is the median, so this lands most recipes near a stoop's
-                 * ordinary difficulty and reserves the narrow band for the elaborate ones.
-                 */
-                ? Math.min(1, ((recipe(activity.making)?.ingredients.length ?? 1) - 1) / 4)
-              : difficultyOf(
-                  activity.taking[0]!.material,
-                  activityGesture,
-                  currentCreature ? routineFor(currentCreature, moment) : null
-                )
+          preparation={preparation}
+          toolName={preparationTool}
+          creatureId={ABOUT_AN_ANIMAL.has(activityGesture) ? currentCreature?.id ?? null : null}
+          creatureName={ABOUT_AN_ANIMAL.has(activityGesture) ? currentCreature?.name ?? null : null}
+          /* Which painting to prefer. A night takes the shelter kind, a making takes the process
+             word -- so `make-firing.png` can land later and be picked up with no code, and until
+             it does the plain gesture scene draws. Nothing here is ever blocked on art. */
+          variant={
+            activity.resting ?? (activity.making ? processWord(activity.making) : null)
           }
-          roll={activityRoll}
-          creatureId={activityGesture === 'stalk' ? currentCreature?.id ?? null : null}
-          creatureName={activityGesture === 'stalk' ? currentCreature?.name ?? null : null}
-          variant={activity.resting ?? null}
           subject={
             activity.resting
               ? SHELTER_LABEL[activity.resting] ?? 'Stop for the night'

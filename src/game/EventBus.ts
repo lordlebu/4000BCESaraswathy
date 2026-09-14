@@ -197,6 +197,31 @@ export interface UiToGame {
    * re-checks -- an event is a request, and the scene owns whether it is honoured.
    */
   ride: { to: { x: number; y: number } };
+  /**
+   * What the traveller has built to sleep under, whenever the satchel changes.
+   *
+   * **A push rather than a pull, because the satchel lives in React and the night lives in the
+   * scene.** `night.shelterAt` ranks where you are standing, and a pitched tent is the one input
+   * to it that is a fact about what you are carrying -- so the side that owns the satchel tells
+   * the side that owns the clock, and neither reaches into the other. The scene re-reads nothing:
+   * the payload is the whole state, so a stale value cannot survive a change.
+   *
+   * `content/using.ts` decides what counts. This carries its answer and holds no opinion.
+   */
+  'shelter-built': { built: 'tent' | null };
+  /**
+   * Take some of the walking back out of the traveller's legs.
+   *
+   * Sent when a remedy or a meal is used. A fraction of the tiredness currently carried rather
+   * than an absolute, because `fatigue.ts` measures in milliseconds of walking and React has no
+   * business knowing that -- the scene owns `travelled` and `restedAt` and is the only thing that
+   * can honour this correctly.
+   *
+   * **It can never do harm and never unblocks anything.** Fatigue is a pace between 1 and 1.6 and
+   * `test/fatigue.test.ts` pins four invariants saying so, which is what makes this safe to expose
+   * to an item at all.
+   */
+  ease: { by: number };
 }
 
 type Events = GameToUi & UiToGame;

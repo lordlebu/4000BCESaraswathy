@@ -1,13 +1,20 @@
-// Food, and what eating it is worth.
+// Food, and what cooking it is worth.
 //
-// **Nothing here restores anything.** There is no hunger, no health and no stat a meal moves.
-// A cooked thing gives a line in the diary and a mood, which in a game whose whole
-// progression system is a written journal is not a small thing to give.
+// **There is still no hunger, and there never will be.** That was on the table and refused:
+// hunger coupled to `fatigue.ts` would make eating a thing you *must* do, and `fatigue.ts` holds
+// four invariants whose whole content is that it never stops you. A player who never cooks
+// anything finishes the game.
 //
-// That is the satchel's ruling applied to food specifically: inventory without scarcity. The
-// alternative was on the table and refused — hunger coupled to `fatigue.ts` would have made
-// eating a thing you must do, and `fatigue.ts` holds four invariants whose whole content is
-// that it never stops you.
+// What changed is narrower and is stated in `using.ts`: a meal is an hour sitting down, and an
+// hour sitting down is worth something to a pair of legs. It eases tiredness by `MEAL_EASES` --
+// a quarter of what is carried, half what a physic gives -- and tiredness is a walking pace
+// between 1 and 1.6 and nothing else. Nothing is restored because nothing is depleted.
+//
+// **This module answers what can be cooked; `using.ts` answers what eating it does.** The split is
+// the one this whole layer runs on: canon says what a dish is, the game says what an evening is
+// worth. `eatingLine` used to live here and was the fourth casualty of this codebase's signature
+// fault -- for the whole of its life **nothing imported this file at all**, so the line it wrote
+// could not reach a diary. It is `using.usedLine` now, where the verb that produces it lives.
 //
 // Canon carries the rest of it. A `foodway` says what a dish means — whose it is, when it is
 // eaten, what it marks — and canon deliberately does not export them, so the meanings are in
@@ -53,19 +60,6 @@ export function cookableNow(satchel: Satchel, bench?: Bench): Recipe[] {
  */
 export function canCook(satchel: Satchel, recipeId: string, bench?: Bench): boolean {
   return dishes.some((d) => d.id === recipeId) && canMake(satchel, recipeId, bench);
-}
-
-/**
- * What eating it is like, for the diary.
- *
- * Canon's `notes` on the item is the description; this frames it as an evening rather than
- * as an object. The distinction matters because everything else in the satchel is described
- * as a thing and a meal is described as a time.
- */
-export function eatingLine(itemId: string): string | null {
-  const dish = item(itemId);
-  if (!dish || !isFood(itemId)) return null;
-  return `${dish.name}. ${dish.description}`;
 }
 
 /**

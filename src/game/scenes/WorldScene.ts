@@ -1102,6 +1102,8 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('zoom', this.onZoom);
     EventBus.onEvent('camp', this.onCamp);
     EventBus.onEvent('ride', this.onRide);
+    EventBus.onEvent('shelter-built', this.onShelterBuilt);
+    EventBus.onEvent('ease', this.onEase);
     EventBus.onEvent('set-character', this.onSetCharacter);
 
     // Fires on rotation as well as on a window resize, which is exactly when the zoom and the
@@ -1121,6 +1123,8 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('zoom', this.onZoom);
       EventBus.offEvent('camp', this.onCamp);
       EventBus.offEvent('ride', this.onRide);
+      EventBus.offEvent('shelter-built', this.onShelterBuilt);
+      EventBus.offEvent('ease', this.onEase);
       this.input.off(Phaser.Input.Events.POINTER_WHEEL);
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
       this.input.off(Phaser.Input.Events.POINTER_UP);
@@ -1280,6 +1284,33 @@ export class WorldScene extends Phaser.Scene {
     this.tryStop();
   };
 
+  /** Remember what React says is pitched. The payload is the whole state -- see the event's note. */
+  private onShelterBuilt = ({ built }: UiToGame['shelter-built']): void => {
+    this.builtShelter = built;
+    // The rest row shows which night is on offer, so the panels have to hear about it before the
+    // player next looks at them. Without this the tent would only take effect on the next step.
+    // `arriveAt` on the tile already stood on is the scene's own way of saying "describe here
+    // again" -- `tryStop` ends with exactly this call for the same reason.
+    this.arriveAt(this.at);
+  };
+
+  /**
+   * Take a fraction of the accumulated walking back out of the traveller's legs.
+   *
+   * `restedAt` is a mark on the same accumulator `travelled` counts up, so easing is moving the
+   * mark forward rather than winding the clock back -- the day does not un-happen, only the
+   * tiredness does. Clamped to `travelled` so a remedy can never put the mark into the future,
+   * which would read as negative fatigue and is the one way this could produce a number
+   * `fatigueAt` does not expect.
+   */
+  private onEase = ({ by }: UiToGame['ease']): void => {
+    const carried = Math.max(0, this.travelled - this.restedAt);
+    this.restedAt = Math.min(this.travelled, this.restedAt + carried * Math.min(1, Math.max(0, by)));
+    // Same reason as `onShelterBuilt`: the fatigue line is on screen and has just stopped being
+    // true.
+    this.arriveAt(this.at);
+  };
+
   /**
    * Board the line and be carried to the far station.
    *
@@ -1317,9 +1348,18 @@ export class WorldScene extends Phaser.Scene {
     const here = poiAt(this.built, this.at);
     return shelterAt(
       (here?.poi.subLocations ?? []).length > 0,
-      here !== null && isCamp(here.poi)
+      here !== null && isCamp(here.poi),
+      this.builtShelter
     );
   }
+
+  /**
+   * What the traveller has pitched, from the last `shelter-built` React sent.
+   *
+   * Held rather than asked, because the satchel is React's and this is the wrong side of the
+   * seam to reach across. Null until something is made, which is every journey's first night.
+   */
+  private builtShelter: 'tent' | null = null;
 
   /** Whether stopping for the night would do anything. Only after dark; before it, keep walking. */
   private canStopHere(): boolean {

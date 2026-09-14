@@ -121,3 +121,27 @@ export const REVEAL_PER_NODE = 0.06;
 
 /** The most the base chance can be raised by working the ground. */
 export const REVEAL_CAP = 0.30;
+
+/**
+ * How much of the walking a remedy takes back, as a fraction of the tiredness carried.
+ *
+ * **Half, and the ceiling matters more than the number.** `fatigue.ts` holds four invariants whose
+ * whole content is that tiredness never stops you -- it is a pace between 1 and 1.6 and nothing
+ * else -- so a remedy cannot un-block anything, because nothing was blocked. What it buys is the
+ * back half of a long day without walking to a camp for it.
+ *
+ * Deliberately not the whole of it. A physic that reset tiredness outright would make the four
+ * kinds of night pointless, and the night is the older mechanic and the better one: it is a
+ * decision about where to be at dusk, where this is a decision about what to carry.
+ */
+export const REMEDY_EASES = 0.5;
+
+/**
+ * The same, for a meal. Half what a physic gives, because a physic is the one made *for* it.
+ *
+ * A meal earning anything at all is a change of position worth naming. `cooking.ts` has said since
+ * it was written that "nothing here restores anything" -- correctly, against hunger, which this
+ * still does not have. What it now says is narrower: a meal is an hour sitting down, and an hour
+ * sitting down is worth something to a pair of legs. There is still nothing you must eat.
+ */
+export const MEAL_EASES = 0.25;
