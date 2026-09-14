@@ -1,6 +1,13 @@
 # Activity scenes
 
-Three paintings, one per gesture: `stoop.png`, `stalk.png`, `work.png`.
+Five paintings so far: `stoop.png`, `stalk.png`, `work.png`, `rest.png`, `rest-camp.png`.
+
+**The set grew from three to about twenty-four**, and none of the new ones is a blocker. A fourth
+gesture arrived (`fish`), the night wants one painting per shelter kind, and a making activity can
+now narrow by canon's process word — `stoop-weaving.png`, `work-smelting.png`. Anything unpainted
+falls back to the plain gesture, and a gesture with no painting at all still opens and works.
+
+`docs/art-placement.md` is the queue, in the order worth doing.
 
 Drop a built PNG in here and it appears — `src/ui/scenes.ts` globs this folder, exactly the way
 `plates.ts` globs the species plates. No list to update, no code to change.

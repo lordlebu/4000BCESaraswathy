@@ -33,42 +33,24 @@
 //
 // See `docs/mark-prompts.md` for what to ask an image model for, and which to do first.
 
-/**
- * Every mark in the folder, keyed by the vocabulary word it draws.
- *
- * `eager` for the same reason as the plates: these are looked up during render, and a component
- * deciding *now* whether to draw a picture or an emoji cannot await a promise. Forty-seven small
- * files at most; Vite emits them as ordinary hashed assets and the browser fetches only the ones
- * actually rendered.
- *
- * SVG is admitted alongside the bitmap formats, and is the better choice here — a mark is a line
- * drawing at 20px, which is exactly where a bitmap has to ship at three sizes and an SVG does not.
- */
-const files = import.meta.glob<string>('./marks/*.{svg,png,webp,jpg,jpeg}', {
-  eager: true,
-  query: '?url',
-  import: 'default'
-});
-
-const byWord = new Map<string, string>();
-for (const [path, url] of Object.entries(files)) {
-  const word = path.replace(/^.*\//, '').replace(/\.[^.]+$/, '');
-  byWord.set(word, url);
-}
+import { art, artCount } from './art';
 
 /**
  * The drawn mark for a vocabulary word, or null — which is the usual answer and not a problem.
  *
  * The namespace is required rather than inferred, because `physic` is a legal word in two of them
  * and means two different things. A caller always knows which it is rendering.
+ *
+ * The loader is `art.ts`, shared with the plates, the portraits and the activity scenes. What
+ * stays here is the naming convention, which is the part specific to this folder.
  */
 export type MarkKind = 'class' | 'kind' | 'process';
 
 export function markFor(namespace: MarkKind, word: string): string | null {
-  return byWord.get(`${namespace}-${word}`) ?? null;
+  return art('marks', `${namespace}-${word}`);
 }
 
 /** How many exist. Used by a test, to keep the loader honest about an empty folder. */
 export function markCount(): number {
-  return byWord.size;
+  return artCount('marks');
 }
