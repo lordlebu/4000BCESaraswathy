@@ -20,17 +20,18 @@
 //
 // Pure. No React, no Phaser, no clock.
 
-import type { Material } from './making';
+import type { Affordance, Material } from './making';
 import { isPresent, type Routine } from './routine';
 
 /**
- * The three things a pair of hands can be doing.
+ * The four things a pair of hands can be doing.
  *
- * Measured over canon's 62 materials: 34 come from plants, 13 from animals, and 15 from no
- * living thing at all. That is not a tidy invention -- it is the shape of `won_from`, and it is
- * why three gestures cover the set without a fourth for awkward cases.
+ * Measured over canon's 68 materials: 34 come from plants, 13 from animals -- **three of those
+ * from things that live in water** -- and 15 from no living thing at all. That is not a tidy
+ * invention; it is the shape of `won_from`, and it is why these cover the set without a fifth for
+ * awkward cases.
  */
-export type Gesture = 'stoop' | 'stalk' | 'work' | 'rest';
+export type Gesture = 'stoop' | 'stalk' | 'work' | 'fish' | 'rest';
 
 /**
  * Which gesture this material asks for.
@@ -40,62 +41,106 @@ export type Gesture = 'stoop' | 'stalk' | 'work' | 'rest';
  * -- but it disagrees with `won_from` on real entities, and `won_from` is the field canon lints.
  * A material with no living source is worked out of the ground whatever it is made of.
  *
- * `isAnimal` is injected rather than imported, because this module must not depend on the species
- * tables to answer a question about a material. The caller already holds them.
+ * **`isWater` is checked before `isAnimal`, and the order is the rule.** Everything fished is also
+ * an animal, so testing the broader predicate first would make `fish` unreachable -- which is the
+ * shape of the bug that had a sawfish stalked across a riverbed. Forty-two of canon's 256 fauna are
+ * fish (19), molluscs (12) or crustaceans (11); between them they yield river fish, fish bone,
+ * oyster shell, crayfish carapace, ammonite shell and beedu bladder oil.
+ *
+ * Both predicates are injected rather than imported, because this module must not depend on the
+ * species tables to answer a question about a material. The caller already holds them.
  */
-export function gestureFor(material: Material, isAnimal: (speciesId: string) => boolean): Gesture {
+export function gestureFor(
+  material: Material,
+  isAnimal: (speciesId: string) => boolean,
+  isWater: (speciesId: string) => boolean = () => false
+): Gesture {
   if (material.wonFrom.length === 0) return 'work';
+  if (material.wonFrom.some(isWater)) return 'fish';
   return material.wonFrom.some(isAnimal) ? 'stalk' : 'stoop';
 }
 
 /**
- * How hard this is, from 0 (a windfall) to 1 (the hardest thing on the map).
+ * What each act asks you to be carrying, or null when it asks for nothing.
  *
- * Rarity is the spine of it, because a rare thing being harder to get is the one relationship a
- * player will expect without being told. Everything else here is a small nudge on top.
+ * **An affordance, never a named tool** -- the same rule canon's processes already follow, so a
+ * flint knife, a bronze knife and a glass lancet all answer a stoop and canon can add a fourth
+ * blade without this table moving. Every word here is one canon authors in `affordances.json`.
  *
- * **This is the game's number and canon must never carry it.** Canon says a leviathan is rare;
- * how many beats of a rhythm that is worth is pacing, and pacing is play. It is the same seam
- * `renews` and `DAYS_TO_RETURN` already sit on either side of.
+ * The pairings are meant to be guessable before they are explained, because a player learns this
+ * by noticing it: you cut with something that cuts, you break ground with something that works
+ * it, and a wary animal is kept at arm's length by the thing that deters it. Fishing shares the
+ * stalk's want because a harpoon and a reed spear are what canon gives a person to take a fish
+ * with -- the two acts differ in where they happen and what they wait on, not in what they hold.
+ *
+ * **A rest wants nothing, and that is load-bearing.** The kit's bedroll is always there, so a
+ * night can never be lost for want of a thing to hold; what a night is graded on is the shelter,
+ * which `momentFavours` reads. Making the night need equipment would put the one unavoidable act
+ * in the game behind an item.
  */
-export const DIFFICULTY_BY_RARITY: Record<Material['rarity'], number> = {
-  common: 0.25,
-  rare: 0.55,
-  mythic: 0.8
+export const GESTURE_WANTS: Record<Gesture, Affordance | null> = {
+  stoop: 'cut',
+  stalk: 'deter',
+  fish: 'deter',
+  work: 'work',
+  rest: null
 };
 
 /**
- * A wary animal is harder to close on than a busy one.
+ * How alert an animal is, and so whether the moment is yours.
  *
  * Straight off `routine.ts`, which already models what a creature is doing at this hour and in
- * this weather. A hunting animal is alert and working; a feeding one has, in the module's own
- * words, "not decided yet whether you matter". Calling means mist -- you can hear it and not see
- * it, which is the hardest case of the three.
+ * this weather. A **feeding** animal has, in that module's own words, "not decided yet whether you
+ * matter", and that is the moment to move. A hunting one is alert and working; a calling one is
+ * usually in mist, where you can hear it and not see it.
  *
- * Resting and sheltering are absent from this table on purpose: `isPresent` already refuses those
- * before difficulty is ever asked, and giving them a number here would invite somebody to let a
- * player stalk an animal that is not there.
+ * Resting and sheltering are absent on purpose: `isPresent` already refuses those before this is
+ * ever asked, and naming them here would invite somebody to let a player stalk an animal that is
+ * not there.
  */
-const ALERTNESS: Partial<Record<Routine, number>> = {
-  feeding: 0,
-  hunting: 0.15,
-  calling: 0.25
+const UNHURRIED: Partial<Record<Routine, boolean>> = {
+  feeding: true,
+  hunting: false,
+  calling: false
 };
 
 /**
- * The difficulty of one attempt, in [0, 1].
+ * Whether the moment is with you, which is half of how an act is graded.
  *
- * `routine` is only consulted for a stalk, because it is only about animals. A clamp rather than
- * a raw sum, so adding another nudge later cannot push this past what the modal can render.
+ * **The half a player controls by choosing when and where, rather than by choosing what to
+ * carry.** `activity.gradeOf` takes this and the tool and grades on both, so a player who is
+ * equipped but rushed and one who is ready but empty-handed both get the middle answer -- which
+ * is the reading that makes either preparation worth making on its own.
+ *
+ * What "the moment" means is different per gesture and deliberately so:
+ *
+ *   * a **stalk** or a **cast** waits on the animal, so an unhurried one is the whole of it;
+ *   * a **stoop** and a turn at the **ground** wait on the hands, so being worn out is what
+ *     spoils them -- the one place `fatigue.ts` reaches the making layer, and it reaches it as a
+ *     nudge on a floor that still gives, never as a refusal (invariant 4);
+ *   * a **night** waits on the roof, which the caller reads off the shelter.
+ *
+ * `spent` and `sheltered` are the caller's answers rather than recomputed here, because `App` is
+ * the only thing holding the hour, the fatigue and the ground at once. A default of "not spent,
+ * and sheltered" keeps every test that asks a question about tools from having to state a mood.
  */
-export function difficultyOf(
-  material: Material,
+export function momentFavours(
   gesture: Gesture,
-  routine: Routine | null
-): number {
-  const base = DIFFICULTY_BY_RARITY[material.rarity];
-  const alert = gesture === 'stalk' && routine ? (ALERTNESS[routine] ?? 0) : 0;
-  return Math.min(1, Math.max(0, base + alert));
+  routine: Routine | null,
+  { spent = false, sheltered = true }: { spent?: boolean; sheltered?: boolean } = {}
+): boolean {
+  switch (gesture) {
+    case 'stalk':
+    case 'fish':
+      // No routine at all means nothing is watching you -- a material off a shell bed or a
+      // still pool. That is a good moment rather than an unknown one.
+      return routine === null ? true : (UNHURRIED[routine] ?? false);
+    case 'stoop':
+    case 'work':
+      return !spent;
+    case 'rest':
+      return sheltered;
+  }
 }
 
 /**
@@ -132,6 +177,7 @@ export function blockedReason(
 export const GESTURE_VERB: Record<Gesture, string> = {
   stoop: 'Cut and gather',
   stalk: 'Follow it',
+  fish: 'Fish the shallows',
   work: 'Work the ground',
   rest: 'Stop for the night'
 };
@@ -151,10 +197,12 @@ export function gestureLine(gesture: Gesture, materialName: string): string {
       // of night this is, and the caller passes that word through.
       return `${materialName}. The light is going and there is nothing more to be done with it today.`;
     case 'stoop':
-      return `Taking ${what} asks for a steady hand and a moment's patience. Cut with the rhythm, not against it.`;
+      return `Taking ${what} asks for a steady hand and a blade worth the name. Cut low, and leave the stand something.`;
     case 'stalk':
       return `You cannot simply take ${what}. Move while the animal is busy, and stop when it is not.`;
+    case 'fish':
+      return `${materialName} is in the water and in no hurry. A spear and a still moment, and it is yours.`;
     case 'work':
-      return `${materialName} comes out of the ground or it does not come at all. Strike where the stone wants to part.`;
+      return `${materialName} comes out of the ground or it does not come at all. Strike where the stone wants to part, and let the tool do it.`;
   }
 }

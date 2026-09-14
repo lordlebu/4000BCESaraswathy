@@ -129,12 +129,11 @@ test('the camp button appears at a camp after dark, and sleeping brings the morn
   const night = page.locator('.activity-veil');
   await expect(night, 'stopping for the night opened no activity').toBeVisible();
 
-  // Wait for the run to settle before reaching for the way out, which is not politeness: the way
-  // out is one button whose *label* changes when the run ends, and this suite has already lost a
-  // run to clicking one mid-change. Once the timing bar is gone the label is final.
-  await expect(page.locator('.activity-track'), 'the night never finished').toBeHidden({
-    timeout: 20_000
-  });
+  // Sleep, then start the day. Two presses and no waiting: the card settles when it is told to
+  // and never on its own, so the label on the way out is final the moment the first press lands.
+  // The old shape of this waited for a timing bar to disappear, because the night could finish
+  // between resolving the button and clicking it.
+  await page.locator('.activity-choice.primary').click();
   await page.locator('.activity-choice', { hasText: 'Start the day' }).click();
   await expect(night).toBeHidden();
 

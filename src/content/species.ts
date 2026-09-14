@@ -97,8 +97,38 @@ export function metSpecies(id: string): Creature | Flora | null {
  */
 const animalIds = new Set(creatures.map((c) => c.id));
 
+/** The clades a person fishes for. See `isWaterSpecies`. */
+const WATER_CLADES = new Set(['fish', 'mollusc', 'crustacean']);
+
 export function isAnimal(speciesId: string): boolean {
   return animalIds.has(speciesId);
+}
+
+/**
+ * Whether this species is taken out of water rather than followed across ground.
+ *
+ * Read off canon's `clade`, which the bundle already carries for all 256 fauna and which
+ * `docs/bestiary.md` records was authored precisely because deriving it from names got it wrong
+ * six times. Three clades, and they are the whole of what a person wades or casts for: **fish**
+ * (19 in canon), **mollusc** (12) and **crustacean** (11). Between them they yield river fish,
+ * fish bone, oyster shell, crayfish carapace, ammonite shell and beedu bladder oil.
+ *
+ * Crocodilians are deliberately **not** here, though ten of them live in water and two give hide.
+ * You do not fish for a croc. The clade list is the line between "something you take out of the
+ * water" and "something in the water that would rather you did not" -- and this game has no
+ * combat, so the second one stays a stalk, which is a thing you can be seen doing and walk away
+ * from.
+ *
+ * Here rather than in `gestures.ts` for the same reason `isAnimal` is: it is a fact about the
+ * species tables, and that module must answer a question about a *material* without importing
+ * them.
+ */
+const waterCladeIds = new Set(
+  creatures.filter((c) => WATER_CLADES.has(c.clade)).map((c) => c.id)
+);
+
+export function isWaterSpecies(speciesId: string): boolean {
+  return waterCladeIds.has(speciesId);
 }
 
 export function creaturesIn(biome: BiomeId): Creature[] {

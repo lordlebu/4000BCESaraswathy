@@ -1,31 +1,29 @@
-// Playing a gesture out, and the one property that must survive every future tuning pass.
+// How an act is graded, and the one property that must survive every future tuning pass.
 //
 // What these guard, in order of how expensive the fault would be:
 //
-//   * a minigame can never leave a player worse off than the click it replaced -- this is the
-//     "gathering never gives nothing" ruling, and putting a skill test in front of a material is
-//     precisely the change that would quietly undo it;
-//   * the three gestures are keyed off `won_from` and nothing else, so a beedu manta is stalked
-//     and a reed is stooped over;
+//   * **a poorly prepared act can never leave a player worse off than the plain click** -- this is
+//     the "gathering never gives nothing" ruling, and putting any kind of test in front of a
+//     material is precisely the change that would quietly undo it;
+//   * the grade comes from things a player *decided* -- what they carry and when they came -- and
+//     never from timing, which is the whole of this layer's rewrite;
+//   * gestures are keyed off `won_from` and nothing else, so a beedu manta is stalked, a reed is
+//     stooped over and a sawfish is fished for;
 //   * an animal that is not there cannot be followed, with a reason a player can act on.
 
 import { describe, expect, it } from 'vitest';
 import {
-  BEATS,
-  begin,
-  press,
-  timeout,
-  isOver,
+  type Preparation,
+  attemptLine,
   gradeOf,
-  settle,
-  attemptLine
+  settle
 } from '../src/content/activity';
 import {
-  gestureFor,
-  difficultyOf,
+  GESTURE_WANTS,
   blockedReason,
+  gestureFor,
   gestureLine,
-  DIFFICULTY_BY_RARITY
+  momentFavours
 } from '../src/content/gestures';
 import type { Material } from '../src/content/making';
 import type { Taking } from '../src/content/nodes';
@@ -43,14 +41,26 @@ const material = (over: Partial<Material> = {}): Material =>
     ...over
   }) as Material;
 
-const isAnimal = (id: string) => id.startsWith('beast-');
-const roll = (salt: string) => salt.length * 137;
+const isAnimal = (id: string) => id.startsWith('beast-') || id.startsWith('fish-');
+const isWater = (id: string) => id.startsWith('fish-');
+
+/** A preparation, defaulting to the middle case so a test states only what it is about. */
+const prep = (over: Partial<Preparation> = {}): Preparation => ({
+  wants: 'cut',
+  equipped: false,
+  favourable: false,
+  ...over
+});
+
+const ALL_GESTURES = ['stoop', 'stalk', 'work', 'fish', 'rest'] as const;
+/** The four that come off a tile and therefore always name a material. */
+const TAKING_GESTURES = ['stoop', 'stalk', 'work', 'fish'] as const;
 
 describe('which gesture a material asks for', () => {
   it('reads won_from and nothing else', () => {
-    expect(gestureFor(material({ wonFrom: ['river-reed'] }), isAnimal)).toBe('stoop');
-    expect(gestureFor(material({ wonFrom: ['beast-manta'] }), isAnimal)).toBe('stalk');
-    expect(gestureFor(material({ wonFrom: [] }), isAnimal)).toBe('work');
+    expect(gestureFor(material({ wonFrom: ['river-reed'] }), isAnimal, isWater)).toBe('stoop');
+    expect(gestureFor(material({ wonFrom: ['beast-manta'] }), isAnimal, isWater)).toBe('stalk');
+    expect(gestureFor(material({ wonFrom: [] }), isAnimal, isWater)).toBe('work');
   });
 
   /**
@@ -71,33 +81,94 @@ describe('which gesture a material asks for', () => {
 
   it('stalks anything with an animal among its sources', () => {
     const both = material({ wonFrom: ['river-reed', 'beast-manta'] });
-    expect(gestureFor(both, isAnimal)).toBe('stalk');
+    expect(gestureFor(both, isAnimal, isWater)).toBe('stalk');
+  });
+
+  /**
+   * **Water is tested before animal, and this is the guard for the order.**
+   *
+   * Everything fished is also an animal, so testing the broader predicate first makes `fish`
+   * unreachable -- and it would fail silently, as a sawfish stalked across a riverbed.
+   */
+  it('fishes for a water species rather than stalking it', () => {
+    expect(gestureFor(material({ wonFrom: ['fish-sawfish'] }), isAnimal, isWater)).toBe('fish');
+  });
+
+  /** An older caller that knows nothing about water still gets the behaviour it always had. */
+  it('falls back to stalking when no water predicate is given', () => {
+    expect(gestureFor(material({ wonFrom: ['fish-sawfish'] }), isAnimal)).toBe('stalk');
   });
 });
 
-describe('how hard an attempt is', () => {
-  it('rises with rarity', () => {
-    const c = difficultyOf(material({ rarity: 'common' }), 'stoop', null);
-    const r = difficultyOf(material({ rarity: 'rare' }), 'stoop', null);
-    const m = difficultyOf(material({ rarity: 'mythic' }), 'stoop', null);
-    expect(r).toBeGreaterThan(c);
-    expect(m).toBeGreaterThan(r);
+describe('what an act asks you to be carrying', () => {
+  it('names an affordance for every gesture that takes something', () => {
+    for (const gesture of TAKING_GESTURES) {
+      expect(GESTURE_WANTS[gesture], `${gesture} asks for nothing`).not.toBeNull();
+    }
   });
 
-  it('adds the animal’s alertness, but only when stalking', () => {
-    const m = material({ rarity: 'common', wonFrom: ['beast-manta'] });
-    const feeding = difficultyOf(m, 'stalk', 'feeding');
-    const hunting = difficultyOf(m, 'stalk', 'hunting');
-    expect(hunting).toBeGreaterThan(feeding);
+  /**
+   * **A night must never need an item, and this is why it is a test rather than a comment.**
+   *
+   * The bedroll is in the kit from the first step precisely so a night can never be lost for want
+   * of a thing to hold. Giving `rest` a want would put the one unavoidable act in the game behind
+   * an object, and `gradeOf` would then grade an empty-handed traveller `clumsy` for sleeping.
+   */
+  it('asks nothing of a night', () => {
+    expect(GESTURE_WANTS.rest).toBeNull();
+    expect(gradeOf(prep({ wants: null, equipped: false, favourable: true }))).toBe('clean');
+  });
+});
 
-    // A routine has no business changing how hard a rock is.
-    expect(difficultyOf(m, 'work', 'hunting')).toBe(DIFFICULTY_BY_RARITY.common);
+describe('whether the moment is with you', () => {
+  it('waits on the animal for a stalk and a cast', () => {
+    for (const gesture of ['stalk', 'fish'] as const) {
+      expect(momentFavours(gesture, 'feeding')).toBe(true);
+      expect(momentFavours(gesture, 'hunting')).toBe(false);
+      expect(momentFavours(gesture, 'calling')).toBe(false);
+      // Nothing watching you is a good moment, not an unknown one.
+      expect(momentFavours(gesture, null)).toBe(true);
+    }
   });
 
-  it('never leaves [0, 1], whatever is added', () => {
-    const d = difficultyOf(material({ rarity: 'mythic' }), 'stalk', 'calling');
-    expect(d).toBeLessThanOrEqual(1);
-    expect(d).toBeGreaterThanOrEqual(0);
+  it('waits on the hands for a stoop and a turn at the ground', () => {
+    for (const gesture of ['stoop', 'work'] as const) {
+      expect(momentFavours(gesture, null, { spent: false })).toBe(true);
+      expect(momentFavours(gesture, null, { spent: true })).toBe(false);
+      // A routine has no business changing how a rock or a reed goes.
+      expect(momentFavours(gesture, 'hunting', { spent: false })).toBe(true);
+    }
+  });
+
+  it('waits on the roof for a night', () => {
+    expect(momentFavours('rest', null, { sheltered: true })).toBe(true);
+    expect(momentFavours('rest', null, { sheltered: false })).toBe(false);
+  });
+});
+
+describe('how an act is graded', () => {
+  /**
+   * The whole rule, as a table. A player has to be able to hold this in their head, so if it ever
+   * needs more than four rows to state it has stopped being the thing that was designed.
+   */
+  it('grades on both halves, one half, or neither', () => {
+    expect(gradeOf(prep({ equipped: true, favourable: true }))).toBe('clean');
+    expect(gradeOf(prep({ equipped: true, favourable: false }))).toBe('fair');
+    expect(gradeOf(prep({ equipped: false, favourable: true }))).toBe('fair');
+    expect(gradeOf(prep({ equipped: false, favourable: false }))).toBe('clumsy');
+  });
+
+  /**
+   * **No clock, and this is the guard that keeps it that way.**
+   *
+   * The grade used to come from three beats on a timing track. Everything this module now exports
+   * is a pure function of a plain object, which is what makes the whole layer testable without
+   * simulating time -- and what makes it impossible to reintroduce a reflex test without changing
+   * a signature somebody has to look at.
+   */
+  it('is a pure function of what the player brought', () => {
+    const p = prep({ equipped: true, favourable: true });
+    expect(gradeOf(p)).toBe(gradeOf({ ...p }));
   });
 });
 
@@ -119,70 +190,26 @@ describe('what can be attempted', () => {
   });
 });
 
-describe('playing a run', () => {
-  it('is over after exactly BEATS presses, and ignores more', () => {
-    let a = begin('stoop', 0.3, roll);
-    expect(isOver(a)).toBe(false);
-    for (let i = 0; i < BEATS; i += 1) a = press(a, a.bands[i]!);
-    expect(isOver(a)).toBe(true);
-    expect(a.beats).toHaveLength(BEATS);
-
-    const after = press(a, 0.5);
-    expect(after.beats, 'a press after the run changed it').toHaveLength(BEATS);
-  });
-
-  it('grades a perfect, a partial and an empty run', () => {
-    let clean = begin('stoop', 0.3, roll);
-    for (let i = 0; i < BEATS; i += 1) clean = press(clean, clean.bands[i]!);
-    expect(gradeOf(clean)).toBe('clean');
-
-    let none = begin('stoop', 0.3, roll);
-    for (let i = 0; i < BEATS; i += 1) none = timeout(none);
-    expect(gradeOf(none)).toBe('clumsy');
-
-    let some = begin('stoop', 0.3, roll);
-    some = press(some, some.bands[0]!);
-    some = timeout(some);
-    some = timeout(some);
-    expect(gradeOf(some)).toBe('fair');
-  });
-
-  it('deals a band that fits on the track', () => {
-    for (const difficulty of [0, 0.5, 1]) {
-      const a = begin('work', difficulty, roll);
-      for (const band of a.bands) {
-        expect(band).toBeGreaterThanOrEqual(0);
-        expect(band + a.width, 'a band runs off the end of the track').toBeLessThanOrEqual(1);
-      }
-    }
-  });
-
-  it('is harder to hit when it is harder', () => {
-    expect(begin('stoop', 1, roll).width).toBeLessThan(begin('stoop', 0, roll).width);
-  });
-});
-
 describe('what you leave with', () => {
   const promised: Taking[] = [{ material: material(), count: 1 }];
 
   /**
    * **The floor. This is the most important test in the file.**
    *
-   * "Gathering never gives nothing" is a design ruling with a named guard in `nodes.test.ts`,
-   * and a minigame is exactly the change that would undo it by accident -- a missed beat reads
-   * so naturally as an empty hand that somebody will eventually write it that way.
+   * "Gathering never gives nothing" is a design ruling with a named guard in `nodes.test.ts`, and
+   * grading an act is exactly the change that would undo it by accident -- an unprepared traveller
+   * reads so naturally as an empty hand that somebody will eventually write it that way.
    *
-   * So this asserts the property on the *worst possible run*: every beat missed, at the hardest
-   * difficulty, for every gesture. The player still leaves with what the tile promised before
-   * any of this existed.
+   * So this asserts the property on the *worst possible preparation*: nothing carried, nothing in
+   * your favour, for every gesture. The player still leaves with what the tile promised before any
+   * of this existed.
    */
-  it('never gives less than the plain click did, however badly it goes', () => {
-    for (const gesture of ['stoop', 'stalk', 'work'] as const) {
-      let a = begin(gesture, 1, roll);
-      for (let i = 0; i < BEATS; i += 1) a = timeout(a);
-      expect(gradeOf(a)).toBe('clumsy');
+  it('never gives less than the plain click did, however unprepared', () => {
+    for (const gesture of TAKING_GESTURES) {
+      const grade = gradeOf(prep({ wants: GESTURE_WANTS[gesture] }));
+      expect(grade).toBe('clumsy');
 
-      const got = settle(a, promised);
+      const got = settle(grade, promised);
       expect(got, `${gesture} lost the player a material`).toHaveLength(promised.length);
       for (let i = 0; i < got.length; i += 1) {
         expect(
@@ -193,51 +220,59 @@ describe('what you leave with', () => {
     }
   });
 
-  it('pays a clean run more than a clumsy one', () => {
-    let clean = begin('stoop', 0.3, roll);
-    for (let i = 0; i < BEATS; i += 1) clean = press(clean, clean.bands[i]!);
-
-    let clumsy = begin('stoop', 0.3, roll);
-    for (let i = 0; i < BEATS; i += 1) clumsy = timeout(clumsy);
-
-    expect(settle(clean, promised)[0]!.count).toBeGreaterThan(settle(clumsy, promised)[0]!.count);
+  it('pays a prepared traveller more than an unprepared one', () => {
+    expect(settle('clean', promised)[0]!.count).toBeGreaterThan(
+      settle('clumsy', promised)[0]!.count
+    );
+    // The middle case is the old behaviour, not a half-measure: only a clean act pays extra.
+    expect(settle('fair', promised)[0]!.count).toBe(settle('clumsy', promised)[0]!.count);
   });
 
   it('does not mutate what it was promised', () => {
-    let a = begin('stoop', 0.3, roll);
-    for (let i = 0; i < BEATS; i += 1) a = press(a, a.bands[i]!);
-    settle(a, promised);
+    settle('clean', promised);
     expect(promised[0]!.count, 'settle wrote through to the caller’s array').toBe(1);
   });
 
   it('carries an empty promise through without inventing anything', () => {
-    let a = begin('stoop', 0, roll);
-    for (let i = 0; i < BEATS; i += 1) a = press(a, a.bands[i]!);
-    expect(settle(a, [])).toEqual([]);
+    expect(settle('clean', [])).toEqual([]);
   });
 });
 
 describe('what the journal is told', () => {
   it('writes a distinct line per gesture and grade, and never says failure', () => {
     const seen = new Set<string>();
-    for (const gesture of ['stoop', 'stalk', 'work'] as const) {
+    for (const gesture of ALL_GESTURES) {
       for (const grade of ['clean', 'fair', 'clumsy'] as const) {
-        const line = attemptLine(gesture, grade, material());
+        const line = attemptLine(gesture, grade, gesture === 'rest' ? null : material());
         expect(line.length, 'an empty line reached the journal').toBeGreaterThan(10);
-        // A clumsy run is the *old* behaviour, not a loss. If this vocabulary ever appears the
+        // A clumsy act is the *old* behaviour, not a loss. If this vocabulary ever appears the
         // ruling has been reversed in prose even if the numbers still hold.
-        expect(line, 'a clumsy run was written up as a failure').not.toMatch(
+        expect(line, 'a clumsy act was written up as a failure').not.toMatch(
           /\bfail|nothing|empty[- ]handed|lost it\b/i
         );
         seen.add(line);
       }
     }
-    expect(seen.size, 'two gestures share a line').toBe(9);
+    expect(seen.size, 'two gestures share a line').toBe(ALL_GESTURES.length * 3);
   });
 
   it('says what the gesture is before it is played', () => {
-    for (const gesture of ['stoop', 'stalk', 'work'] as const) {
+    for (const gesture of ALL_GESTURES) {
       expect(gestureLine(gesture, 'Reed fibre').length).toBeGreaterThan(20);
+    }
+  });
+
+  /**
+   * **No line may promise a rhythm, a beat or a moment to hit.**
+   *
+   * The prose outlived the mechanic once already: three `rest` lines sat unreachable for months
+   * because the caller had no material to pass. This is the reverse hazard -- a sentence that
+   * still describes a timing track nobody can play. "Cut with the rhythm, not against it" was
+   * exactly that, and this is what caught it.
+   */
+  it('never tells the player to press in time with anything', () => {
+    for (const gesture of ALL_GESTURES) {
+      expect(gestureLine(gesture, 'Reed fibre')).not.toMatch(/\brhythm|beat|time it|press\b/i);
     }
   });
 });
