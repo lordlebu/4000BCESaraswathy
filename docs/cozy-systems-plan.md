@@ -3,7 +3,8 @@
 Crafting, apothecary, cooking, building, stalking, fishing and resting — made simple, made
 intuitive, and made to cost one press.
 
-**Status: Phase 1 and Phase 2 shipped. Phase 3 is art, and is deliberately not a blocker.**
+**Status: Phases 1, 2 and 2b shipped. Phase 3 is art, and is deliberately not a blocker.
+Phase 4 — activity boards — is designed in `docs/activity-boards-plan.md` and not built.**
 
 Written during the work rather than after it, because the middle of it is where somebody else
 needs to be able to pick it up. `docs/the-ground-that-gives.md` is the map to the resource layer
@@ -163,6 +164,38 @@ the whole fix.
 
 ---
 
+## Phase 2b — the night is a ladder, not a switch · **shipped**
+
+Six rungs — `none`, `bedroll`, `tent`, `camp`, `roof`, `hall` — and the night clears a *fraction*
+of the tiredness rather than all or none. Valheim's comfort model, which is the one the genre has
+actually settled on; Stardew and Animal Crossing skip it entirely and Don't Starve's tent is the
+same idea with two rungs.
+
+**The top rung is a hall, not a palace.** Canon holds no palace, and that is the setting rather
+than an oversight: the Indus cities are distinguished from their Mesopotamian and Egyptian
+contemporaries by what excavation has *not* turned up, with no structure clearly identifiable as a
+royal palace at any major site. What they have instead is communal — baths, granaries, warehouses,
+halls. The grandest roofed places in this game are a university, a market and a rail-head. So the
+best night is a roof somebody built for everybody, which is also where the ending goes.
+
+**Every rung is reachable**, and that constraint decided the order. A hall read as a *roofed
+settlement* would have been unreachable on every map, because no settlement in canon has
+sub-locations — the `lava_field` fault exactly. So the ladder is cut where canon already cuts: six
+settlements (`hall`), four roofed places (`roof`), three travel nodes (`camp`). A settlement
+outranks a roofed ruin because it has people in it and one of them will share a roof.
+
+A tent ranks **below** a camp on purpose: if it matched the best available nobody would walk to a
+settlement at dusk. What it buys is that open ground stops being a *bad* night.
+
+**And the arithmetic was backwards.** `easedMark` moved out of `WorldScene` into `fatigue.ts`
+because the version written inside the scene added to the rest mark instead of pulling it back —
+which put it ahead of the clock, clamped the negative to zero, and made every rung restore
+everything. It type-checked, read plausibly and passed all 1,196 tests, because it lived where no
+test could load it. Its new test then found a second fault: `Math.min`/`Math.max` do not clamp a
+`NaN`.
+
+---
+
 ## Phase 3 — art · **not started, and not a blocker**
 
 Every slot below renders something today. A painting **replaces** what is there; it never fills a
@@ -197,3 +230,20 @@ Canon was **not touched**. Every system here reads data the bundle already shipp
   a real browser with plain clicks, because nothing can settle on its own any more.
 
 1,184 unit tests across 75 files, and the three browser specs above, all green.
+
+
+---
+
+## Phase 4 — activity boards · **designed, not built**
+
+Which bench a place has, said with an icon. `docs/activity-boards-plan.md` carries it in full.
+
+The short version: canon's `performed_at` says only `settlement`, so every settlement works
+everything and no place says what it actually has. But canon already answers the next question down
+through **who is standing where** — and it has already broken its own flat model, because Ila the
+apothecary stands in an archaeological site that `performed_at` says cannot work anything.
+
+Eight stations, derived rather than authored, in the way `gestures.ts` and `routine.ts` already
+derive. Additive before subtractive, and a reachability test before any narrowing — because a
+narrowing made game-side is invisible to canon's `check_playability.py`, and the two repositories
+would disagree while every check on both sides stayed green.

@@ -215,6 +215,7 @@ tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side comp
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 | `docs/cozy-systems-plan.md` | the seven systems reworked — what shipped, what is left, and why |
 | `docs/art-placement.md` | every slot the interface will draw a picture into, and what falls back |
+| `docs/activity-boards-plan.md` | which bench a place has, how it says so — designed, not built |
 | `docs/ui-streamline-plan.md` | what the chrome costs the map, measured, and the four moves that give it back |
 | `docs/ui-affordances-plan.md` | what the screen says once the map has the room — closed, and the two faults it found |
 
