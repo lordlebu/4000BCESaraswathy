@@ -95,6 +95,37 @@ export function canCamp(atCamp: boolean, night: boolean): boolean {
  * waking at midnight because the mechanic only moved a counter would be worse than not resting at
  * all. The new rest mark is that later time, so waking is fully rested.
  */
+/**
+ * Where the rest mark goes after something has taken a fraction of the tiredness away.
+ *
+ * **Pure, and out here rather than in the scene, because getting it backwards is invisible.**
+ * `fatigueAt` measures `travelled - restedAt`, so *more* tiredness means the mark sitting further
+ * behind the clock -- and both callers want to move it *forward*, which is the direction that reads
+ * wrong in prose and right in arithmetic.
+ *
+ * It was written backwards first, inside `WorldScene` where no test could reach it. It
+ * type-checked, read plausibly, and passed all 1,196 tests: adding to the mark instead of pulling
+ * it back put it *ahead* of the clock, `fatigueAt` clamped the negative to zero, and every rung of
+ * the shelter ladder silently restored everything. A tent, a bedroll and a whole night in town
+ * would all have been the same night. That is the exact shape `docs/testing.md` is about -- the
+ * rules that live outside the scene live outside it so this cannot happen.
+ *
+ * `fraction` is how much of the carried tiredness goes: 0 changes nothing, 1 is a full night.
+ * Clamped at both ends, so a caller cannot produce a mark ahead of the clock (negative tiredness)
+ * or behind where it started (tiredness invented out of nowhere).
+ */
+export function easedMark(travelledMs: number, restedAtMs: number, fraction: number): number {
+  const carried = Math.max(0, travelledMs - restedAtMs);
+  // **`Math.min`/`Math.max` do not clamp a NaN**, because every comparison with one is false -- so
+  // the obvious two-sided clamp passes it straight through and the mark becomes NaN, which
+  // `fatigueAt` then propagates into a pace and a tween duration. The fraction reaches here from a
+  // lookup (`NIGHT_RESTORES[shelter] ?? 0`) and from an event payload React sends, so it is not a
+  // value this file gets to assume. Zero is the safe direction: restore nothing rather than
+  // everything. Found by a test that passed a NaN on purpose.
+  const clears = Number.isFinite(fraction) ? Math.min(1, Math.max(0, fraction)) : 0;
+  return travelledMs - carried * (1 - clears);
+}
+
 export function restUntilMorning(
   travelledMs: number,
   startPhase: number,

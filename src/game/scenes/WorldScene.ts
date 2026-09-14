@@ -137,7 +137,7 @@ import {
 import { DAY_MS, phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
 import { RIDE_SHARE, rideFrom } from '../../content/vehicles';
 import { trackRoute } from '../../world/crossing';
-import { fatigueAt, fatigueEnabled, fatigueNote, paceFor, restUntilMorning } from '../fatigue';
+import { easedMark, fatigueAt, fatigueEnabled, fatigueNote, paceFor, restUntilMorning } from '../fatigue';
 import { duskNote, isDark, lightLeft, shelterAt, spendNight, type Shelter } from '../night';
 import { momentAt } from '../moment';
 import {
@@ -1304,8 +1304,7 @@ export class WorldScene extends Phaser.Scene {
    * `fatigueAt` does not expect.
    */
   private onEase = ({ by }: UiToGame['ease']): void => {
-    const carried = Math.max(0, this.travelled - this.restedAt);
-    this.restedAt = Math.min(this.travelled, this.restedAt + carried * Math.min(1, Math.max(0, by)));
+    this.restedAt = easedMark(this.travelled, this.restedAt, by);
     // Same reason as `onShelterBuilt`: the fatigue line is on screen and has just stopped being
     // true.
     this.arriveAt(this.at);
@@ -1346,11 +1345,15 @@ export class WorldScene extends Phaser.Scene {
    */
   private shelterHere(): Shelter {
     const here = poiAt(this.built, this.at);
-    return shelterAt(
-      (here?.poi.subLocations ?? []).length > 0,
-      here !== null && isCamp(here.poi),
-      this.builtShelter
-    );
+    return shelterAt({
+      // A settlement has people in it and one of them will share a roof -- the best night there
+      // is, and where the ending goes. A travel node has a fire ring and nobody, which is why
+      // `isCamp` is not enough on its own any more: it covers both and they are now two rungs.
+      inSettlement: here?.poi.kind === 'settlement',
+      underRoof: (here?.poi.subLocations ?? []).length > 0,
+      atCamp: here !== null && isCamp(here.poi),
+      built: this.builtShelter
+    });
   }
 
   /**
@@ -1401,7 +1404,14 @@ export class WorldScene extends Phaser.Scene {
     const morning = restUntilMorning(this.travelled, this.startPhase, this.time.now);
     this.travelled = morning.travelledMs;
     // Only a real night's sleep resets the tiredness. The bedroll buys the hours, not the rest.
-    if (outcome.rested) this.restedAt = morning.restedAtMs;
+    // **A fraction now, not a switch.** Five rungs of shelter cannot be said with `rested: true`,
+    // so the night eases tiredness the same way a physic does -- one mechanism, not two. A `hall`
+    // restores the lot and lands exactly where the old boolean did; a bedroll clears a third,
+    // where it used to clear nothing.
+    // How much of the night the shelter was worth. `easedMark` owns the direction, out in
+    // `fatigue.ts` where a test can reach it -- see its note for what happened when this
+    // arithmetic lived here.
+    this.restedAt = easedMark(morning.travelledMs, this.restedAt, outcome.restores);
 
     this.updateSky();
     EventBus.emitEvent('night-passed', {

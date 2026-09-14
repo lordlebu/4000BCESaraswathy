@@ -9,6 +9,7 @@
 // on every keystroke in a text input.
 
 import Phaser from 'phaser';
+import type { Shelter } from './night';
 import type { JournalEntry } from '../content/journal';
 import type { Point, World } from '../world/types';
 
@@ -49,7 +50,7 @@ export interface GameToUi {
     /** A word about the fading light, or null while there is plenty. */
     dusk: string | null;
     /** The best shelter where the traveller stands: a roof, a camp, or his own bedroll. */
-    shelter: 'roof' | 'camp' | 'bedroll' | 'none';
+    shelter: Shelter;
     /** Whether stopping for the night would do anything. Only after dark. */
     canCamp: boolean;
     discovered: number;
@@ -137,7 +138,14 @@ export interface GameToUi {
    */
   'night-passed': {
     at: Point;
-    shelter: 'roof' | 'camp' | 'bedroll' | 'none';
+    shelter: Shelter;
+    /**
+     * Whether it counted as a real sleep, for the diary's wording.
+     *
+     * Deliberately still a boolean while `NightOutcome.restores` is a fraction: this is the
+     * *diary's* question rather than the body's, and a bedroll answers it no while still clearing a
+     * third of the walking. See `NightOutcome` for why both exist.
+     */
     rested: boolean;
     entry: string;
   };
