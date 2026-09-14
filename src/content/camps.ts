@@ -26,6 +26,32 @@ export function isCamp(poi: PointOfInterest): boolean {
   return poi.kind === 'settlement' || poi.kind === 'travel_node';
 }
 
+/**
+ * How many people it takes before a settlement counts as a grand one.
+ *
+ * **A placeholder rule, and it is labelled one.** Canon has no field saying which town is the
+ * biggest, so this reads the thing canon does say -- how many people it put there -- and calls the
+ * fullest one grand. Three is where the set actually divides: of canon's six settlements only the
+ * Camp in the Kilns holds three, so exactly one place on the map is a `palace` and the rung is
+ * neither unreachable nor everywhere.
+ *
+ * The day canon authors `poi.grand` (or a size, or a rank), this function becomes a one-line read
+ * of that field and the number goes away. Written here rather than in `night.ts` because it is a
+ * fact about places, and that file must be able to rank a night without importing the place tables
+ * -- the same split `gestures.ts` keeps from the species tables.
+ */
+const GRAND_AT_LEAST = 3;
+
+/**
+ * Whether this is the grandest kind of settlement -- the one a `palace` night happens in.
+ *
+ * Not a royal anything: this world has no king, and the word is doing the job "the grandest town"
+ * would do more slowly. What it means in play is the best-appointed place to sleep on the map.
+ */
+export function isGrand(poi: PointOfInterest): boolean {
+  return poi.kind === 'settlement' && poi.npcs.length >= GRAND_AT_LEAST;
+}
+
 /** Manhattan distance, which is the metric the walk actually uses -- steps are orthogonal. */
 export function stepsBetween(a: Point, b: Point): number {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);

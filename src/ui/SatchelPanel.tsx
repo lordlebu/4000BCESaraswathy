@@ -13,10 +13,25 @@
 import { item, material } from '../content/making';
 import { KIND_MARK, ThingIcon, materialMark } from './ThingIcon';
 import { type Satchel, count, distinct, itemsHeld, materialsHeld } from '../content/satchel';
+import { USE_HEADING, type Use, usableIn } from '../content/using';
 import { Modal } from './Modal';
 
 export interface SatchelPanelProps {
   satchel: Satchel;
+  /**
+   * Use something carried: a physic, a meal, a shelter raised for the night.
+   *
+   * **The door three systems never had.** Canon holds seven physics, thirteen foods and two
+   * shelters; the crafting layer could make every one of them and nothing in the game could do
+   * anything with one. `content/using.ts` decides what a thing is for and what using it costs;
+   * this panel renders the answer and calls back, like every other panel here.
+   *
+   * It lives on the satchel rather than on the tile because using a carried thing is not an act
+   * on the ground you are standing on -- `TileActions` is for those, and says so at the top of its
+   * file. It is also the genre's own arrangement: Stardew, Animal Crossing and Spiritfarer all put
+   * using a thing on the thing itself, and none of them has an apothecary screen.
+   */
+  onUse: (id: string) => void;
   /** True when the tile under foot has something on it. */
   open: boolean;
   onClose: () => void;
@@ -34,7 +49,9 @@ function Stack({ satchel, id }: { satchel: Satchel; id: string }) {
   const label = stuff ? stuff.classes[0]! : (made?.kind ?? 'thing');
   return (
     <li className="stack">
-      <ThingIcon mark={mark} label={label} />
+      {/* `id` lets a painted plate in `src/ui/things/` replace the mark when one lands. Nothing
+          is there today and nothing waits for it — see that folder's loader. */}
+      <ThingIcon mark={mark} label={label} id={id} word={made ? { namespace: 'kind', value: made.kind } : undefined} />
       <span className="stack-name">{what?.name ?? id}</span>
       {n > 1 && <span className="stack-count">×{n}</span>}
       {what?.description && <p className="stack-note">{what.description}</p>}
@@ -42,8 +59,36 @@ function Stack({ satchel, id }: { satchel: Satchel; id: string }) {
   );
 }
 
+/**
+ * One thing you can do something with, and the button that does it.
+ *
+ * The verb comes from `using.ts` and is named for the thing -- "Take it", "Eat it", "Pitch it" --
+ * never "Use". A generic verb on a row is how an interface stops teaching: `TileActions` makes the
+ * same argument at the top of its file, and `promise` underneath is the reason half of it.
+ */
+function UseRow({ use, n, onUse }: { use: Use; n: number; onUse: (id: string) => void }) {
+  const made = item(use.id);
+  return (
+    <li className="stack stack-usable">
+      <ThingIcon
+        mark={made ? KIND_MARK[made.kind] ?? '•' : '•'}
+        label={USE_HEADING[use.kind]}
+        id={use.id}
+        word={made ? { namespace: 'kind', value: made.kind } : undefined}
+      />
+      <span className="stack-name">{use.name}</span>
+      {n > 1 && <span className="stack-count">×{n}</span>}
+      <button type="button" className="stack-use" onClick={() => onUse(use.id)}>
+        {use.verb}
+      </button>
+      <p className="stack-note">{use.promise}</p>
+    </li>
+  );
+}
+
 export function SatchelPanel({
   satchel,
+  onUse,
   open,
   onClose
 }: SatchelPanelProps) {
@@ -51,6 +96,11 @@ export function SatchelPanel({
 
   const stuff = materialsHeld(satchel);
   const made = itemsHeld(satchel);
+  // What is usable, remedies first. Lifted to its own section rather than marking rows inside
+  // "Made", because a player reaching for a physic is not browsing -- they want one row, at the
+  // top, with a verb on it. Everything usable still appears under "Made" as well, where it is
+  // described as an object; here it is described as something to do.
+  const uses = usableIn(satchel);
   // Capped, and the cap is a judgement rather than a limit: a list of everything within reach
   // is 40 rows of things the player cannot do, which reads as a wall rather than as a lead.
 
@@ -74,6 +124,17 @@ export function SatchelPanel({
             Close
           </button>
         </header>
+
+        {uses.length > 0 && (
+          <section className="diary-section satchel-uses">
+            <h3>To hand</h3>
+            <ul className="stacks">
+              {uses.map((u) => (
+                <UseRow key={u.id} use={u} n={count(satchel, u.id)} onUse={onUse} />
+              ))}
+            </ul>
+          </section>
+        )}
 
         {stuff.length > 0 && (
           <section className="diary-section">

@@ -23,6 +23,7 @@ import {
 import { discovery } from '../content/knowledge';
 import { npcsAt, poi } from '../content/places';
 import { PersonPortrait } from './PersonPortrait';
+import { placeArt } from './places';
 
 /** The face beside a name in the list of who is here. Small: this is an index, not a meeting. */
 const FACE_SIZE = 44;
@@ -85,8 +86,19 @@ export function PlacePanel({
   // notes, so the two divided the bottom of the screen and each got half of a half. It is an
   // occupant of the dock now -- see `Here.tsx` -- and the slot it stands in is the whole of the
   // bottom rather than a share of it.
+  // A painted view of the place, or of its kind, or nothing at all — which is every place today.
+  // The panel reads perfectly well without one and always has; this is the hook that makes the
+  // first painting a file rather than a sprint. See `src/ui/places.ts`.
+  const view = placeArt(place.id, place.kind);
+
   return (
     <section className="place" aria-live="polite">
+        {view && (
+          // Decorative: the arrival prose below says what this place is, and a screen reader
+          // announcing a painting of a harbour adds nothing to it. `SpeciesIcon` and the activity
+          // card make the same call.
+          <img className="place-view" src={view} alt="" aria-hidden="true" />
+        )}
         <header className="place-head">
           <div>
             <h2>{place.name}</h2>

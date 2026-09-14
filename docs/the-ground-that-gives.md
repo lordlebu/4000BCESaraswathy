@@ -128,3 +128,34 @@ Depletion does not break that for anything that renews — **waiting is not runn
 
 The report is only worth having because the game keeps the other half of the promise. If a
 `never` node ever regrows, that check silently becomes a list of nothing.
+
+
+---
+
+## What acting on it costs the player
+
+**One press. There is no clock anywhere in this layer**, and that is a ruling rather than a state
+of the code.
+
+For a while there was one. Taking a material opened a card and ran a three-beat timing track at
+1,500 ms a beat — four and a half seconds per material, per craft, per night. The floor held
+throughout, so it could only ever *add*: a player who ignored it got what the click had always
+given and a player who played it got one more. Which means the optimal play was to spend four and a
+half seconds on a reed, forty-odd times, to cross Lothal.
+
+It also contradicted this document. `nodes.ts` says, where it explains why gathering never fails,
+that a skill surface is something "this game does not have and would have to build on purpose" —
+and then one was built, in front of the mechanic that sentence was defending.
+
+**What replaced it reads off decisions the player had already made**, which is the half of the good
+cut that was always missing. A stoop with something that `cut`s goes cleanly; one with tired hands
+does not. A stalk while the animal is feeding goes cleanly; one while it is hunting does not. Both,
+one, or neither — `clean`, `fair`, `clumsy`, and `clumsy` is exactly what the plain click gave.
+
+So the two rulings at the top of this document are now three, and the third is the one that keeps
+the other two honest:
+
+> **Preparation is the skill, never reflexes.** Anything that grades a player on their hands rather
+> than on what they chose to carry and when they chose to come is the wrong instrument for this
+> game — and it is also the change most likely to undo *"gathering never gives nothing"* by
+> accident, because an unready traveller reads so naturally as an empty hand.

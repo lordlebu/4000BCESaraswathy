@@ -31,6 +31,7 @@ import {
   offeredHere,
   withinReach
 } from '../content/crafting';
+import { cookableNow } from '../content/cooking';
 import type { Satchel } from '../content/satchel';
 import { KIND_MARK, PROCESS_MARK, ThingIcon } from './ThingIcon';
 import { Modal } from './Modal';
@@ -65,9 +66,26 @@ export function WorkshopPanel({
 }: WorkshopPanelProps) {
   if (!open) return null;
 
-  const ready = makeableNow(satchel, bench, knows);
+  const everythingReady = makeableNow(satchel, bench, knows);
   const near = withinReach(satchel, bench, knows);
   const here = offeredHere(bench, knows);
+
+  /**
+   * **Food, given its own heading, and that heading is a repair rather than a flourish.**
+   *
+   * `content/cooking.ts` had **zero importers** for the whole of its life -- this codebase's
+   * signature fault, and the fourth instance of it. Every question it answers was already
+   * answerable, so nothing failed; what was missing was anybody asking. Cooking is not a second
+   * crafting system and the module says so itself -- it is crafting whose output happens to be
+   * edible -- so it gets a section rather than a screen, and one import is the whole of the fix.
+   *
+   * It also reads better. A player who has just made a fire and a pot is looking for dinner, and
+   * twelve dishes scattered through a list of eighty-three by alphabet is not a menu.
+   */
+  const readyIds = new Set(everythingReady.map((r) => r.id));
+  const food = cookableNow(satchel, bench).filter((d) => readyIds.has(d.id));
+  const foodIds = new Set(food.map((d) => d.id));
+  const ready = everythingReady.filter((r) => !foodIds.has(r.id));
 
   return (
     // The same modal the satchel uses. `.sheet` is the narrow map panel pinned top-left and was
@@ -96,6 +114,21 @@ export function WorkshopPanel({
                 </li>
               ))}
             </ol>
+          </section>
+        )}
+
+        {food.length > 0 && (
+          <section className="diary-section">
+            {/* Named for the evening rather than for the process. `whereCooked` says it needs no
+                building -- a hearth is a fire somebody built, and a traveller builds one wherever
+                they stop -- so this section is available on open ground and says so by being here
+                at all. */}
+            <h3>To cook</h3>
+            <ul className="recipes">
+              {food.map((r) => (
+                <Makeable key={r.id} recipe={r} ready why={[]} onMake={onMake} />
+              ))}
+            </ul>
           </section>
         )}
 
@@ -129,7 +162,7 @@ export function WorkshopPanel({
           </section>
         )}
 
-        {ready.length === 0 && near.length === 0 && (
+        {ready.length === 0 && near.length === 0 && food.length === 0 && (
           <p className="muted">
             Nothing to make yet. Gather something, or find somewhere that can work it.
           </p>
@@ -190,6 +223,10 @@ function Makeable({
           mark={markFor(recipe)}
           label={item(recipe.outputs[0]?.item ?? '')?.kind ?? 'craft'}
           word={wordFor(recipe)}
+          /* The thing it makes, so a painted plate in `src/ui/things/` replaces the category mark
+             when one lands. A recipe has no plate of its own — what a player is looking for in
+             this list is the object. */
+          id={recipe.outputs[0]?.item ?? recipe.outputs[0]?.material ?? undefined}
         />
         <span className="recipe-name">{recipe.name}</span>
         <button type="button" disabled={!ready} onClick={() => onMake(recipe.id)}>

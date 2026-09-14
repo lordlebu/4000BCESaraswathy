@@ -5,12 +5,32 @@
 // arithmetic against the real maps rather than a hope about pacing.
 
 import { describe, expect, it } from 'vitest';
-import { duskNote, isDark, lightLeft, shelterAt, spendNight } from '../src/game/night';
+import {
+  SHELTER_ORDER,
+  duskNote,
+  isDark,
+  lightLeft,
+  nightRestores,
+  shelterAt,
+  spendNight
+} from '../src/game/night';
+import placesBundle from '../data/canon/places.json';
 import { KIT, carries, useful } from '../src/content/kit';
 import { DAY_MS, hoursToPhase, startPhaseFor, travelTimeMs } from '../src/game/dayNight';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMaps } from '../src/content/places';
 import { isCamp } from '../src/content/camps';
+
+/**
+ * The authored places, read straight from the bundle rather than through the adapter.
+ *
+ * The reachability check below is about what canon *holds*, not about what the engine makes of it
+ * -- going through `content/places.ts` would let an adapter bug hide a missing rung.
+ */
+const pois = placesBundle.points_of_interest as {
+  kind: string;
+  sub_locations?: unknown[];
+}[];
 import { findPath } from '../src/world/pathfind';
 import { isWalkable } from '../src/world/generate';
 import { travelCost } from '../src/content/species';
@@ -63,17 +83,81 @@ describe('isDark', () => {
 });
 
 describe('shelterAt', () => {
-  it('prefers a roof, then a camp, then the bedroll', () => {
-    expect(shelterAt(true, true)).toBe('roof');
-    expect(shelterAt(true, false)).toBe('roof');
-    expect(shelterAt(false, true)).toBe('camp');
-    expect(shelterAt(false, false)).toBe('bedroll');
+  /**
+   * **The whole vocabulary, grandest first.** The order decides which painting a night shows and,
+   * once `content/events.ts` has content, which events can happen in it. It does **not** decide how
+   * much rest the night is worth -- see below.
+   */
+  it('resolves the grandest thing the ground offers', () => {
+    expect(shelterAt({ inPalace: true, inSettlement: true, underRoof: true })).toBe('palace');
+    expect(shelterAt({ inSettlement: true, underRoof: true, atCamp: true })).toBe('settlement');
+    expect(shelterAt({ underRoof: true, atCamp: true })).toBe('roof');
+    expect(shelterAt({ atCamp: true, built: 'tent' })).toBe('camp');
+    expect(shelterAt({ built: 'tent' })).toBe('tent');
+    expect(shelterAt({})).toBe('bedroll');
+  });
+
+  /**
+   * **Sleeping in the woods and sleeping in a town are worth the same rest, and this is the guard.**
+   *
+   * A graded version of this was built and taken back out: it read plausibly and was answering a
+   * question nobody had asked. The shelter kinds exist to be different *places* -- different art,
+   * and later different events -- not different amounts. Only sitting it out with no shelter at all
+   * is worth nothing, because that is not sleeping.
+   *
+   * If this fails, somebody has reintroduced a spread. `tiers.ts` says what reason would justify
+   * that, and "it seems more realistic" is named there as the one that would not.
+   */
+  it('rests a traveller the same wherever they actually slept', () => {
+    const slept = SHELTER_ORDER.filter((s) => s !== 'none');
+    for (const rung of slept) {
+      expect(nightRestores(rung), `${rung} is worth a different night`).toBe(nightRestores('bedroll'));
+    }
+    expect(nightRestores('none'), 'sitting it out counted as sleep').toBe(0);
+  });
+
+  /**
+   * **Every rung has somewhere real to happen, and this is the fault it guards against.**
+   *
+   * `lava_field` had a painted tile, a terrain frame, 31 species and `renderable: true`, and the
+   * generator produced zero tiles of it on every seed -- every test passed throughout because none
+   * asked whether any of it was on the map. A shelter kind nothing produces is the same fault in a
+   * smaller place, and it costs a painting somebody drew for nothing.
+   */
+  it('has a real place behind every rung that comes off the map', () => {
+    const settlements = pois.filter((p) => p.kind === 'settlement');
+    expect(settlements.length, 'no settlement, so `settlement` is unreachable').toBeGreaterThan(0);
+    expect(
+      settlements.length,
+      'nothing to single out as the grandest, so `palace` is unreachable'
+    ).toBeGreaterThan(1);
+    expect(
+      pois.filter((p) => (p.sub_locations ?? []).length > 0).length,
+      'nowhere roofed, so `roof` is unreachable'
+    ).toBeGreaterThan(0);
+    expect(
+      pois.filter((p) => p.kind === 'travel_node').length,
+      'no travel node, so `camp` is unreachable'
+    ).toBeGreaterThan(0);
+  });
+
+  it('gives every rung a distinct entry, and never writes a night up as a failure', () => {
+    const seen = new Set<string>();
+    for (const rung of SHELTER_ORDER) {
+      const out = spendNight(rung);
+      expect(out.entry.length, `${rung} has no entry`).toBeGreaterThan(10);
+      seen.add(out.entry);
+    }
+    expect(seen.size, 'two rungs share an entry').toBe(SHELTER_ORDER.length);
+    // Only sitting it out writes nothing. Every other night counts as a night.
+    expect(spendNight('none').writes).toBe(false);
+    expect(spendNight('bedroll').writes).toBe(true);
   });
 
   it('always offers the bedroll, which is why he carries one', () => {
     // The answer to a map whose furthest corner is further than a day of ordinary walking from any
     // roof. Without it that corner would be a place you could be stranded rather than caught out.
-    expect(shelterAt(false, false)).not.toBe('none');
+    expect(shelterAt({})).not.toBe('none');
   });
 });
 
@@ -104,6 +188,7 @@ describe('spendNight', () => {
     expect(Object.keys(spendNight('bedroll')).sort()).toEqual([
       'entry',
       'rested',
+      'restores',
       'shelter',
       'writes'
     ]);

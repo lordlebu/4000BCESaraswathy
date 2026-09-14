@@ -1,6 +1,31 @@
 # Activity scenes
 
-Three paintings, one per gesture: `stoop.png`, `stalk.png`, `work.png`.
+Five paintings so far: `stoop.png`, `stalk.png`, `work.png`, `rest.png`, `rest-camp.png`.
+
+**The set grew from three to about twenty-four**, and none of the new ones is a blocker. A fourth
+gesture arrived (`fish`), the night wants one painting per shelter kind, and a making activity can
+now narrow by canon's process word — `stoop-weaving.png`, `work-smelting.png`. Anything unpainted
+falls back to the plain gesture, and a gesture with no painting at all still opens and works.
+
+`docs/art-placement.md` is the queue, in the order worth doing.
+
+## The six nights
+
+`rest-<shelter>.png`, one per kind of place a night can be spent. **This is what the shelter
+vocabulary is for** — `NIGHT_RESTORES` is flat, so sleeping in the woods and sleeping in a town are
+worth the same rest, and what differs is the picture and (later) what can happen in it.
+
+| File | The night |
+|---|---|
+| `rest-palace.png` | the great house in the grandest town: a swept floor, a lamp you did not have to ration |
+| `rest-settlement.png` | somebody's spare room, and other people awake nearby |
+| `rest-roof.png` | in out of it, under somebody else's stonework — a ruin, not a home |
+| `rest-camp.png` | a fire ring somebody banked before you got there ✓ *done* |
+| `rest-tent.png` | the hide tent, pitched and pegged — **the only one he built** |
+| `rest-bedroll.png` | oiled cloth on open ground, no fire |
+| `rest.png` | the fallback, when a kind has no painting of its own ✓ *done* |
+
+An unpainted kind falls back to `rest.png`, so these land one at a time and in any order.
 
 Drop a built PNG in here and it appears — `src/ui/scenes.ts` globs this folder, exactly the way
 `plates.ts` globs the species plates. No list to update, no code to change.

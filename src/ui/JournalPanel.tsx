@@ -69,9 +69,24 @@ function Note({ note, kind }: { note: FieldNote; kind: 'creature' | 'flora' }) {
  * No tooltip, no legend, no icon: the label tells the player what kind of night this will be
  * before they commit to it, in the same voice everything else here uses.
  */
+/**
+ * What the rest row says, per rung of the ladder.
+ *
+ * **The label is the whole presentation of this mechanic** -- there is no meter and no number on
+ * screen, so the words are the only thing telling a player what sort of night they are about to
+ * have, before they commit to it. Each one names the *act*, not the place: you take a bed, you
+ * pitch a tent, you unroll bedding. That is the rule `TileActions` states for every row it draws.
+ *
+ * The two new ones are the two a player can do something about. `hall` is a settlement, and being
+ * offered a bed by somebody is the reason it is the best night there is. `tent` is the only rung
+ * here the player made.
+ */
 export const SHELTER_LABEL: Record<string, string> = {
+  palace: 'Take the room in the great house',
+  settlement: 'Take the bed you are offered',
   roof: 'Sleep under the roof',
   camp: 'Make camp for the night',
+  tent: 'Pitch the tent here',
   bedroll: 'Unroll the bedding here',
   none: 'Sit out the night'
 };

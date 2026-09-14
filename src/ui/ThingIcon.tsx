@@ -17,6 +17,7 @@
 
 import type { ItemKind, MaterialClass } from '../content/making';
 import { markFor, type MarkKind } from './marks';
+import { thingArt } from './things';
 
 /**
  * What a material is, as a mark.
@@ -149,6 +150,18 @@ export function materialMark(classes: readonly MaterialClass[]): string {
 export interface ThingIconProps {
   mark: string;
   /**
+   * The canon id of the exact thing, when there is one, so a painted plate can replace the mark.
+   *
+   * **Three tiers, narrowest first**, which is the arrangement every art folder in this interface
+   * now uses: a plate of *this* item (`src/ui/things/item_bronze_knife.png`), then a drawn mark
+   * for its category (`src/ui/marks/kind-tool.svg`), then the emoji. Each is a replacement for the
+   * one below it, so **nothing is ever blocked on art** and the queue can be worked in any order.
+   *
+   * Optional, and the common case is to omit it. A recipe row wears the mark of what it makes
+   * rather than a portrait of it, and a process mark stands for a verb and has no id at all.
+   */
+  id?: string;
+  /**
    * The vocabulary word this stands for, so a drawn mark can replace the emoji.
    *
    * Optional: a caller that has no word still gets its emoji, which is what every caller did
@@ -166,8 +179,12 @@ export interface ThingIconProps {
   label: string;
 }
 
-export function ThingIcon({ mark, label, word }: ThingIconProps) {
-  const drawn = word ? markFor(word.namespace, word.value) : null;
+export function ThingIcon({ mark, label, word, id }: ThingIconProps) {
+  // The thing itself before its category before the emoji. `thingArt` falls back from the id to
+  // `kind-<kind>` on its own, which is why the kind is passed to it as well as used for `word`.
+  const drawn =
+    (id ? thingArt(id, word?.namespace === 'kind' ? word.value : null) : null) ??
+    (word ? markFor(word.namespace, word.value) : null);
   if (drawn) {
     // `alt` is empty and the label goes on the wrapper, so a screen reader hears the category
     // once rather than twice -- the same call the emoji branch makes below.

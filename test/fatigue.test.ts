@@ -8,6 +8,7 @@ import {
   DAY_OF_WALKING_MS,
   MAX_PACE,
   canCamp,
+  easedMark,
   fatigueAt,
   fatigueEnabled,
   fatigueNote,
@@ -214,5 +215,64 @@ describe('the flag', () => {
     expect(fatigueEnabled('?fatigue=yes')).toBe(false);
     expect(fatigueEnabled('?fatigue=1')).toBe(true);
     expect(fatigueEnabled('?seed=lothal&fatigue=1')).toBe(true);
+  });
+});
+
+/**
+ * Easing tiredness, which two different things now do: a night's sleep and a physic or a meal.
+ *
+ * **These exist because the arithmetic was written backwards and nothing noticed.** It lived inside
+ * `WorldScene`, where no test can load it; it type-checked, read plausibly, and passed the whole
+ * suite while silently making every rung of the shelter ladder restore everything -- a tent, a
+ * bedroll and a night in town were the same night. The fix was to move the rule out here, which is
+ * why `dayNight.ts`, `night.ts`, `arrival.ts` and this file import no Phaser in the first place.
+ */
+describe('easedMark', () => {
+  const DAY = DAY_OF_WALKING_MS;
+
+  it('clears exactly the fraction it is given', () => {
+    // Half a day of walking carried, and a night worth half of it: a quarter left.
+    const mark = easedMark(DAY, DAY / 2, 0.5);
+    expect(fatigueAt(DAY, mark)).toBeCloseTo(0.25, 6);
+  });
+
+  /**
+   * **The direction, stated as a test rather than as a comment.** This is the assertion that would
+   * have failed on the version that shipped in a scene: more restoration must leave *less*
+   * tiredness, and the wrong sign makes every value land on zero instead.
+   */
+  it('leaves less tiredness the more it restores, and never the same for every rung', () => {
+    const seen = new Set<number>();
+    let previous = Infinity;
+    for (const restores of [0, 0.35, 0.75, 0.85, 0.95, 1]) {
+      const left = fatigueAt(DAY, easedMark(DAY, 0, restores));
+      expect(left, `restoring ${restores} left more than restoring less`).toBeLessThan(previous);
+      previous = left;
+      seen.add(Number(left.toFixed(6)));
+    }
+    expect(seen.size, 'every rung of the ladder produced the same morning').toBe(6);
+  });
+
+  it('restores nothing at 0 and everything at 1', () => {
+    expect(fatigueAt(DAY, easedMark(DAY, 0, 0))).toBeCloseTo(fatigueAt(DAY, 0), 6);
+    expect(fatigueAt(DAY, easedMark(DAY, 0, 1))).toBe(0);
+  });
+
+  /**
+   * Invariant 4 reaches this too: easing can only ever help. A mark ahead of the clock would be
+   * negative tiredness, and one behind where it started would be tiredness invented out of nothing.
+   */
+  it('never invents tiredness and never puts the mark ahead of the clock', () => {
+    for (const fraction of [-5, 0, 0.5, 1, 7, Number.NaN]) {
+      const mark = easedMark(DAY, DAY / 3, fraction);
+      const left = fatigueAt(DAY, mark);
+      expect(left, `fraction ${fraction} went out of range`).toBeGreaterThanOrEqual(0);
+      expect(left).toBeLessThanOrEqual(fatigueAt(DAY, DAY / 3));
+    }
+  });
+
+  it('is a no-op on somebody who is already rested', () => {
+    expect(easedMark(DAY, DAY, 1)).toBe(DAY);
+    expect(easedMark(DAY, DAY, 0)).toBe(DAY);
   });
 });

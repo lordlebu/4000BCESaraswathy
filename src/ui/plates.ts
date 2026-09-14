@@ -16,39 +16,23 @@
 //
 // See `docs/plate-prompts.md` for what to ask an image model for, and the queue to work down.
 
-/**
- * Every plate in the folder, keyed by engine id.
- *
- * `eager` rather than lazy: these are looked up during render, and a promise cannot be returned
- * from a component that has to decide *now* whether to draw a plate or a silhouette. They are
- * small and there will be a few dozen at most; Vite emits them as ordinary hashed assets and the
- * browser fetches only the ones actually rendered.
- *
- * The glob is deliberately loose about the extension. Whoever adds a plate should not have to
- * discover that the loader only accepts one of them.
- */
-const files = import.meta.glob<string>('./plates/*.{png,webp,jpg,jpeg}', {
-  eager: true,
-  query: '?url',
-  import: 'default'
-});
-
-const byId = new Map<string, string>();
-for (const [path, url] of Object.entries(files)) {
-  const id = path.replace(/^.*\//, '').replace(/\.[^.]+$/, '');
-  byId.set(id, url);
-}
+import { art, artCount } from './art';
 
 /**
  * The painted plate for this species, or null — which is the usual answer and not a problem.
  *
  * `speciesId` is the engine id off a runtime record, e.g. `desert-fox`.
+ *
+ * The loader itself is `art.ts`, shared with the portraits, the marks and the activity scenes:
+ * four copies of the same twenty lines had already begun to disagree about which file extensions
+ * they would accept. What stays here is the thing that is actually specific to this folder and
+ * that has actually cost time — **the naming convention**, written at the top of this file.
  */
 export function plateFor(speciesId: string): string | null {
-  return byId.get(speciesId) ?? null;
+  return art('plates', speciesId);
 }
 
 /** How many exist. Only used by a test, to keep the loader honest about an empty folder. */
 export function plateCount(): number {
-  return byId.size;
+  return artCount('plates');
 }

@@ -1,4 +1,4 @@
-// Taking something, all the way through: the row, the modal, the beats, the satchel.
+// Taking something, all the way through: the row, the card, the press, the satchel.
 //
 // **This is the one path the unit tests structurally cannot cover.** `activity.test.ts` proves the
 // state machine, `activityModal.test.tsx` proves the component, and neither of them proves that
@@ -70,23 +70,23 @@ test('taking something opens an activity, and the activity fills the satchel', a
   // not change shape the day a painting lands.
   await expect(page.locator('.activity-scene')).toBeVisible();
 
-  // Play the beats. Whether they hit is the player's business; that the run *ends* is ours.
-  //
-  // **The run can settle at any instant**, because a beat that is never answered times out on its
-  // own -- so the Strike button may disappear between resolving it and clicking it. On a fast
-  // machine that is rare and on the CI container's software renderer it is routine. `force` and a
-  // short timeout keep this from being a race: a click that lands is a beat, a click that finds
-  // nothing means the run finished without us, and either way the assertion below is the point.
-  const strike = page.locator('.activity-choice.primary');
-  for (let i = 0; i < 3; i += 1) {
-    if ((await strike.count()) === 0) break;
-    await strike.click({ timeout: 5_000 }).catch(() => {});
-  }
+  // **What you brought, said before you commit.** This replaced a three-beat timing track, and
+  // it is the row that tells a player to go and make a knife. If it stops rendering, the game
+  // silently goes back to grading people on something it never mentioned.
+  await expect(page.locator('.activity-ready'), 'the card did not say how ready he is')
+    .toBeVisible();
 
-  // The run settles into a sentence and a way out. The way out is the *same button* throughout --
-  // only its label changes -- which is what stops it being detached mid-click.
+  // **One press does it, and there is nothing to race.** The old version of this loop clicked
+  // three times with `force` and a swallowed timeout, because a beat could time out on its own
+  // between Playwright resolving the button and clicking it -- routine on the CI container's
+  // software renderer, and it read as flakiness for four runs. There is no clock in the card now,
+  // so a plain click is a plain click.
+  await page.locator('.activity-choice.primary').click();
+
   const finish = page.locator('.activity-choice', { hasText: 'Put it in the satchel' });
-  await expect(finish, 'the run never settled').toBeVisible({ timeout: 20_000 });
+  await expect(finish, 'the act never settled').toBeVisible({ timeout: 20_000 });
+  // What actually came up, on the card. The prose says how it went; this says how much.
+  await expect(page.locator('.activity-haul'), 'nothing was shown as taken').toBeVisible();
   await finish.click();
   await expect(modal).toBeHidden();
 

@@ -309,6 +309,22 @@ export function openQuestions(progress: Progress): FieldQuestion[] {
  *
  * Idempotent, so a player may re-hear a line without it meaning anything.
  */
+/**
+ * Take everything a source hands over, whatever kind of thing each one is.
+ *
+ * **The one door into a Progress from outside, and it is exported so there stays one.** A
+ * conversation hands over words, recipes, questions and discoveries; an event's `Choice.grants`
+ * hands over exactly the same kinds of thing, and a second way to apply them would be a second
+ * place for the rules about what a `word_` prefix means to live. `hear` folds `receive` over a
+ * line's `gives`; this is that fold, named, for callers that are not conversations.
+ *
+ * Unknown ids are ignored rather than throwing -- `receive` already works that way, and a typo in
+ * an authored event should cost the player nothing rather than take the game down mid-scene.
+ */
+export function receiveAll(progress: Progress, ids: readonly string[]): Progress {
+  return ids.reduce(receive, progress);
+}
+
 function receive(progress: Progress, id: string): Progress {
   if (id.startsWith('word_')) return learn(progress, id);
   if (id.startsWith('recipe_')) return learnRecipe(progress, id);

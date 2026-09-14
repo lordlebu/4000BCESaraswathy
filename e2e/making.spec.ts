@@ -6,7 +6,7 @@
 // nothing proved App wires them together.
 //
 // It is also the only test that walks the whole economy in one go. `activity.test.ts` knows about
-// beats, `makingGestures.test.ts` knows which gesture a process asks for, and neither of them can
+// grading, `makingGestures.test.ts` knows which gesture a process asks for, and neither of them can
 // tell you that a reed cut on a coast tile is retted into fibre in a satchel.
 
 import { expect, test, type Page } from '@playwright/test';
@@ -35,20 +35,21 @@ async function boot(page: Page) {
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 }
 
-/** Play whatever activity is open through to its end, and close it. */
+/**
+ * Do whatever activity is open, and close it. Two presses.
+ *
+ * **Both are plain clicks, and that is the change worth recording.** This used to loop three times
+ * with `force` and a swallowed timeout, because the card ran a timing track that could settle on
+ * its own between Playwright resolving a button and clicking it. There is no clock in the card
+ * now: nothing settles unless somebody presses it, so nothing can be detached mid-reach.
+ */
 async function playItOut(page: Page) {
   const card = page.locator('[role="dialog"] .activity-card');
   await expect(card).toBeVisible();
 
-  // The run can settle on its own at any instant -- a beat that goes unanswered times out -- so a
-  // strike that finds no button means the run finished without us, which is a legal outcome.
-  const strike = page.locator('.activity-choice.primary');
-  for (let i = 0; i < 3; i += 1) {
-    if ((await strike.count()) === 0) break;
-    await strike.click({ timeout: 5_000 }).catch(() => {});
-  }
+  await page.locator('.activity-choice.primary').click();
 
-  // The way out is one button whose label changes, so it is never detached mid-click.
+  // The way out is one button whose label changes, so it is the same DOM node throughout.
   const wayOut = page.locator('.activity-choices .activity-choice').last();
   await expect(wayOut).toBeVisible({ timeout: 20_000 });
   await wayOut.click();

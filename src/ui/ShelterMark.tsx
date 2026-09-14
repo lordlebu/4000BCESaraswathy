@@ -6,9 +6,16 @@
 // actions wants a mark beside it like every other row, and a font glyph was doing nothing except
 // filling the slot.
 //
-// So this draws the four cases, and the drawing carries the same distinction the label does:
-// **a roof is built, a camp is made, a bedroll is unrolled, and sitting out the night is none of
-// those.** Each is a different amount of shelter and each looks like a different amount.
+// So this draws every case, and the drawing carries the same distinction the label does:
+// **a town is lived in, a roof is built, a camp is made, a tent is pitched, a bedroll is unrolled,
+// and sitting out the night is none of those.** Each is a different amount of shelter and each
+// looks like a different amount.
+//
+// **Seven now, and the vocabulary is about grandness rather than about rest.** `NIGHT_RESTORES` is
+// flat -- sleeping in the woods and sleeping in a town are worth the same. What these say is what
+// the night *looked* like, and later which events could happen in it. A `tent` is the only one in
+// the list the player made, so it is drawn as a thing that was put up rather than found:
+// guy-lines, pegged, and a seam up the front.
 //
 // Inline SVG rather than a sprite. These are four small line drawings that have to sit on the
 // panel's paper at whatever size the row is, in both light and dark, and `currentColor` gets that
@@ -18,7 +25,11 @@
 // Drawn from what canon says the kit is, in `content/kit.ts`: oiled cloth over a reed mat, rolled
 // and strapped. The bedroll is a roll, not a sleeping bag.
 
-export type Shelter = 'roof' | 'camp' | 'bedroll' | 'none';
+// Re-exported rather than redeclared. This was its own four-member union and drifted the moment
+// the ladder grew: `night.ts` owns what a night can be, and a second copy here would have gone on
+// rendering four cases for a six-case type without failing anything.
+export type { Shelter } from '../game/night';
+import type { Shelter } from '../game/night';
 
 export interface ShelterMarkProps {
   shelter: Shelter;
@@ -43,6 +54,40 @@ export function ShelterMark({ shelter, size = 20 }: ShelterMarkProps) {
       aria-hidden="true"
       focusable="false"
     >
+      {shelter === 'palace' && (
+        <>
+          {/* A great house on a terrace, with a colonnade under it. Grand, and deliberately not
+              royal -- no crown, no throne. It is the biggest building in the biggest town. */}
+          <path d="M2 20h20" />
+          <path d="M4 20v-7h16v7" />
+          <path d="M3 13 12 7l9 6" />
+          <path d="M8 20v-4M12 20v-4M16 20v-4" />
+        </>
+      )}
+
+      {shelter === 'settlement' && (
+        <>
+          {/* Rooftops, plural, with smoke off one of them. A settlement is not a building -- it is
+              the fact that somebody else is awake nearby. */}
+          <path d="M2 20h20" />
+          <path d="M3 20v-6l4-3 4 3v6" />
+          <path d="M13 20v-8l4-3 4 3v8" />
+          <path d="M17 5.5c.9-.8.2-1.6 0-2.5" />
+        </>
+      )}
+
+      {shelter === 'tent' && (
+        <>
+          {/* Pitched and pegged, with the seam up the front and the guys out to the ground. The
+              only rung on the ladder the player built, so it reads as put up rather than found. */}
+          <path d="M2 19h20" />
+          <path d="M12 5 4.5 19h15z" />
+          <path d="M12 5v14" />
+          <path d="M4.5 19 2.5 15" />
+          <path d="M19.5 19 21.5 15" />
+        </>
+      )}
+
       {shelter === 'roof' && (
         <>
           {/* A wall and a pitched roof: somebody else built this and you are inside it. */}

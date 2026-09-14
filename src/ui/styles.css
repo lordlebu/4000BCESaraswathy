@@ -2683,6 +2683,23 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 
 /* The satchel. Stacks are a list rather than a grid of slots, deliberately: there is no
  * capacity, so a grid would draw empty boxes that promise a limit the game does not have. */
+/* A painted view of a place, when one exists — which is none of them today.
+ *
+ * Sized by aspect ratio rather than by height, so the panel's shape is decided here and not by
+ * whatever dimensions the first painting happens to have. `max-width: 100%` alongside it because
+ * an `aspect-ratio` box needs it as much as an image does, and the dock must never scroll
+ * sideways. Cropped rather than letterboxed: a band of background above a painting reads as a
+ * broken asset, and `cover` is what the activity card already does. */
+.place-view {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 0.6rem;
+}
+
 .stacks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
 .stack { display: grid; grid-template-columns: auto 1fr auto; gap: 0.2rem 0.6rem; align-items: baseline; }
 .stack-name { font-weight: 600; font-size: 0.92rem; }
@@ -2694,6 +2711,36 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   color: var(--muted);
   line-height: 1.45;
 }
+
+/* **A row with something to do on it.**
+ *
+ * The satchel's other rows are readouts and owe 26px; this one carries a control and owes the
+ * 44px touch floor --- the same measurement `StandingRow` records, from the other side: a chip
+ * that *took* something would have owed 44 and was kept a readout for exactly this reason.
+ *
+ * It reuses `.stack`'s three columns and adds a fourth rather than declaring its own grid, so a
+ * usable row and a plain one line up down the panel. A descendant rule that redeclares `display`
+ * must redeclare the direction too --- that is written down here because the dock's action rail
+ * inherited `column` from three hundred lines away and was a column at every device size for as
+ * long as it shipped. */
+.stack-usable { grid-template-columns: auto 1fr auto auto; align-items: center; }
+
+.stack-use {
+  min-height: 44px;
+  padding: 0.35rem 0.8rem;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: rgba(255, 246, 223, 0.6);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.stack-use:hover { background: rgba(164, 92, 64, 0.12); }
+.stack-use:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .recipes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
 .recipe { border-top: 1px solid var(--edge); padding-top: 0.5rem; }
@@ -3017,51 +3064,74 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   min-height: 3em;
 }
 
-/* The band is drawn rather than described: a player should be able to *see* that a mythic
-   material is harder, instead of being told a difficulty number. */
-.activity-track {
-  position: relative;
-  height: 12px;
-  border-radius: 6px;
-  background: rgba(52, 38, 58, 0.12);
-  overflow: hidden;
-  margin-bottom: 0.6rem;
+/* **What you brought, said before you commit.**
+ *
+ * This replaced a timing track --- a swept bar, a moving band and three beat pips --- and it is
+ * carrying the same job better: the track told a player how well they had just done, and this
+ * tells them what to change. `data-grade` tints it rather than a class per grade, because the
+ * three values come straight from `activity.gradeOf` and an attribute cannot drift from an enum
+ * the way a second vocabulary of class names would.
+ *
+ * Deliberately quiet. It is a note about your own preparation, not a warning: nothing here can
+ * stop the act, and a `clumsy` row is the ordinary outcome the game had before any of this
+ * existed. Coloured with `--ink-faint` rather than an alpha, for the reason that token exists ---
+ * `opacity` multiplies, and this sits above prose that is already dimmed.
+ */
+.activity-ready {
+  margin: 0 0 0.9rem;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--ink-faint);
+  background: rgba(255, 246, 223, 0.5);
+  border-left: 3px solid var(--edge);
+  border-radius: 0 4px 4px 0;
+  /* Two lines either way, so swapping this row for the haul list does not move the buttons under
+     a reaching finger. The same reason `.activity-prose` has a min-height. */
+  min-height: 2.6em;
 }
 
-.activity-band {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  background: rgba(164, 92, 64, 0.42);
-}
+.activity-ready[data-grade='clean'] { border-left-color: var(--accent); }
 
-.activity-marker {
-  position: absolute;
-  top: -2px;
-  bottom: -2px;
-  width: 3px;
-  background: var(--ink);
-  border-radius: 2px;
-}
-
-.activity-beats {
-  display: flex;
-  gap: 0.3rem;
+/* What actually came back. The prose says how it went; this says how much, because "two of reed
+   fibre" in a sentence is easy to miss and the satchel is a screen away. */
+.activity-haul {
   list-style: none;
   margin: 0 0 0.9rem;
   padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.5rem;
+  min-height: 2.6em;
+  align-content: flex-start;
 }
 
-.activity-beat {
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 50%;
+.activity-haul li {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.86rem;
+  color: var(--ink);
+  background: rgba(164, 92, 64, 0.12);
+  border-radius: 999px;
+}
+
+.activity-haul-count { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* The key that commits, on the button itself --- the convention `TileActions` sets and states:
+   a thing not written on screen does not exist, and that holds for keys as much as for actions.
+   Hidden on a touch screen by the same query `.tile-action-key` uses. */
+.activity-key {
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.35rem;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--muted);
   border: 1px solid var(--edge);
+  border-radius: 3px;
 }
 
-.activity-beat.hit { background: var(--accent); border-color: var(--accent); }
-.activity-beat.miss { background: rgba(52, 38, 58, 0.2); }
-.activity-beat.waiting { background: transparent; }
+@media (hover: none) and (pointer: coarse) {
+  .activity-key { display: none; }
+}
 
 .activity-choices {
   display: flex;
@@ -3086,10 +3156,6 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 .activity-choice:hover { background: rgba(164, 92, 64, 0.12); }
 .activity-choice.primary { border-color: var(--accent); font-weight: 600; }
 .activity-choice:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-@media (prefers-reduced-motion: reduce) {
-  .activity-marker { transition: none; }
-}
 
 /* The key that does this action.
  *

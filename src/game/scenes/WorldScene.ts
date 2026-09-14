@@ -137,7 +137,7 @@ import {
 import { DAY_MS, phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
 import { RIDE_SHARE, rideFrom } from '../../content/vehicles';
 import { trackRoute } from '../../world/crossing';
-import { fatigueAt, fatigueEnabled, fatigueNote, paceFor, restUntilMorning } from '../fatigue';
+import { easedMark, fatigueAt, fatigueEnabled, fatigueNote, paceFor, restUntilMorning } from '../fatigue';
 import { duskNote, isDark, lightLeft, shelterAt, spendNight, type Shelter } from '../night';
 import { momentAt } from '../moment';
 import {
@@ -152,7 +152,7 @@ import { isWalkable } from '../../world/generate';
 import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
-import { isCamp } from '../../content/camps';
+import { isCamp, isGrand } from '../../content/camps';
 import { findPath } from '../../world/pathfind';
 import { NO_GESTURE, pressed, released, type Gesture } from '../gesture';
 import { tileHash } from '../../world/rng';
@@ -1102,6 +1102,8 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('zoom', this.onZoom);
     EventBus.onEvent('camp', this.onCamp);
     EventBus.onEvent('ride', this.onRide);
+    EventBus.onEvent('shelter-built', this.onShelterBuilt);
+    EventBus.onEvent('ease', this.onEase);
     EventBus.onEvent('set-character', this.onSetCharacter);
 
     // Fires on rotation as well as on a window resize, which is exactly when the zoom and the
@@ -1121,6 +1123,8 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('zoom', this.onZoom);
       EventBus.offEvent('camp', this.onCamp);
       EventBus.offEvent('ride', this.onRide);
+      EventBus.offEvent('shelter-built', this.onShelterBuilt);
+      EventBus.offEvent('ease', this.onEase);
       this.input.off(Phaser.Input.Events.POINTER_WHEEL);
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
       this.input.off(Phaser.Input.Events.POINTER_UP);
@@ -1280,6 +1284,32 @@ export class WorldScene extends Phaser.Scene {
     this.tryStop();
   };
 
+  /** Remember what React says is pitched. The payload is the whole state -- see the event's note. */
+  private onShelterBuilt = ({ built }: UiToGame['shelter-built']): void => {
+    this.builtShelter = built;
+    // The rest row shows which night is on offer, so the panels have to hear about it before the
+    // player next looks at them. Without this the tent would only take effect on the next step.
+    // `arriveAt` on the tile already stood on is the scene's own way of saying "describe here
+    // again" -- `tryStop` ends with exactly this call for the same reason.
+    this.arriveAt(this.at);
+  };
+
+  /**
+   * Take a fraction of the accumulated walking back out of the traveller's legs.
+   *
+   * `restedAt` is a mark on the same accumulator `travelled` counts up, so easing is moving the
+   * mark forward rather than winding the clock back -- the day does not un-happen, only the
+   * tiredness does. Clamped to `travelled` so a remedy can never put the mark into the future,
+   * which would read as negative fatigue and is the one way this could produce a number
+   * `fatigueAt` does not expect.
+   */
+  private onEase = ({ by }: UiToGame['ease']): void => {
+    this.restedAt = easedMark(this.travelled, this.restedAt, by);
+    // Same reason as `onShelterBuilt`: the fatigue line is on screen and has just stopped being
+    // true.
+    this.arriveAt(this.at);
+  };
+
   /**
    * Board the line and be carried to the far station.
    *
@@ -1315,11 +1345,25 @@ export class WorldScene extends Phaser.Scene {
    */
   private shelterHere(): Shelter {
     const here = poiAt(this.built, this.at);
-    return shelterAt(
-      (here?.poi.subLocations ?? []).length > 0,
-      here !== null && isCamp(here.poi)
-    );
+    return shelterAt({
+      // A settlement has people in it and one of them will share a roof. A travel node has a fire
+      // ring and nobody, which is why `isCamp` is not enough on its own any more: it covers both
+      // and they are now two different nights.
+      inPalace: here !== null && isGrand(here.poi),
+      inSettlement: here?.poi.kind === 'settlement',
+      underRoof: (here?.poi.subLocations ?? []).length > 0,
+      atCamp: here !== null && isCamp(here.poi),
+      built: this.builtShelter
+    });
   }
+
+  /**
+   * What the traveller has pitched, from the last `shelter-built` React sent.
+   *
+   * Held rather than asked, because the satchel is React's and this is the wrong side of the
+   * seam to reach across. Null until something is made, which is every journey's first night.
+   */
+  private builtShelter: 'tent' | null = null;
 
   /** Whether stopping for the night would do anything. Only after dark; before it, keep walking. */
   private canStopHere(): boolean {
@@ -1361,7 +1405,14 @@ export class WorldScene extends Phaser.Scene {
     const morning = restUntilMorning(this.travelled, this.startPhase, this.time.now);
     this.travelled = morning.travelledMs;
     // Only a real night's sleep resets the tiredness. The bedroll buys the hours, not the rest.
-    if (outcome.rested) this.restedAt = morning.restedAtMs;
+    // **A fraction now, not a switch.** Five rungs of shelter cannot be said with `rested: true`,
+    // so the night eases tiredness the same way a physic does -- one mechanism, not two. A `hall`
+    // restores the lot and lands exactly where the old boolean did; a bedroll clears a third,
+    // where it used to clear nothing.
+    // How much of the night the shelter was worth. `easedMark` owns the direction, out in
+    // `fatigue.ts` where a test can reach it -- see its note for what happened when this
+    // arithmetic lived here.
+    this.restedAt = easedMark(morning.travelledMs, this.restedAt, outcome.restores);
 
     this.updateSky();
     EventBus.emitEvent('night-passed', {

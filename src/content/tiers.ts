@@ -121,3 +121,59 @@ export const REVEAL_PER_NODE = 0.06;
 
 /** The most the base chance can be raised by working the ground. */
 export const REVEAL_CAP = 0.30;
+
+/**
+ * How much of the walking a remedy takes back, as a fraction of the tiredness carried.
+ *
+ * **Half, and the ceiling matters more than the number.** `fatigue.ts` holds four invariants whose
+ * whole content is that tiredness never stops you -- it is a pace between 1 and 1.6 and nothing
+ * else -- so a remedy cannot un-block anything, because nothing was blocked. What it buys is the
+ * back half of a long day without walking to a camp for it.
+ *
+ * Deliberately not the whole of it. A physic that reset tiredness outright would make the four
+ * kinds of night pointless, and the night is the older mechanic and the better one: it is a
+ * decision about where to be at dusk, where this is a decision about what to carry.
+ */
+export const REMEDY_EASES = 0.5;
+
+/**
+ * The same, for a meal. Half what a physic gives, because a physic is the one made *for* it.
+ *
+ * A meal earning anything at all is a change of position worth naming. `cooking.ts` has said since
+ * it was written that "nothing here restores anything" -- correctly, against hunger, which this
+ * still does not have. What it now says is narrower: a meal is an hour sitting down, and an hour
+ * sitting down is worth something to a pair of legs. There is still nothing you must eat.
+ */
+export const MEAL_EASES = 0.25;
+
+/**
+ * How much of the walking each kind of night takes back, from 0 to 1.
+ *
+ * **Every night that is a night restores the same, and that is a decision rather than a stub.**
+ * Sleeping in the woods and sleeping in a town are worth the same rest today. Only sitting it out
+ * with no shelter at all is worth nothing, because that is not sleeping.
+ *
+ * A graded version of this table was built and taken back out. It read plausibly -- a bedroll worth
+ * a third of a night in town -- and it was answering a question nobody had asked: **the shelter
+ * kinds exist to be different *places*, not different amounts.** What a player gets out of where
+ * they slept is going to be an *event* -- a dream, an animal at the edge of the firelight, somebody
+ * arriving in the dark -- and an event is a scene and a choice, not a number.
+ *
+ * So the ladder below is a vocabulary of six places and their art, and this table is deliberately
+ * flat behind it. When the night events land, the thing that varies by shelter is **which events
+ * can happen there**, which is a far more interesting axis than a percentage and is the one
+ * `content/events.ts` is built on.
+ *
+ * Keep the mechanism. It costs nothing, `easedMark` is tested, and it is the seam a later design
+ * would come back through. Do not reintroduce a spread without a reason that is not "it seems more
+ * realistic" -- that was the reason the first time.
+ */
+export const NIGHT_RESTORES: Record<string, number> = {
+  none: 0,
+  bedroll: 1,
+  tent: 1,
+  camp: 1,
+  roof: 1,
+  settlement: 1,
+  palace: 1
+};

@@ -27,13 +27,14 @@ import { PeoplePanel } from './PeoplePanel';
 import { met } from '../content/people';
 import { seedFromUrl } from './seed';
 import { WorkshopPanel } from './WorkshopPanel';
-import { distinct, emptySatchel } from '../content/satchel';
+import { canDo, distinct, emptySatchel, itemsHeld } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
 import { carry, gatheredLine, standingLine } from '../content/gathering';
 import { rideFrom } from '../content/vehicles';
 import { canBoardAt, trackRoute } from '../world/crossing';
+import { tileHash } from '../world/rng';
 import { conditionOf, draw, noNodes, takeableAt, type Taking } from '../content/nodes';
-import { recipe } from '../content/making';
+import { item, recipe } from '../content/making';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
@@ -41,21 +42,46 @@ import { type Collection, emptyCollection, metOnTile, size } from '../content/co
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
 import { hasBegun, loadJourney, saveJourney } from '../save';
-import { advance, answer, craft, hear, knowsRecipe, type WorldMoment } from '../journey';
+import { advance, answer, craft, hear, knowsRecipe, receiveAll, type WorldMoment } from '../journey';
 import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import { characterFor } from '../game/player';
 import type { World } from '../world/types';
-import { tileHash } from '../world/rng';
-import { isAnimal } from '../content/species';
+import { isAnimal, isWaterSpecies } from '../content/species';
 import { gestureForProcess } from '../content/making-gestures';
 import {
   GESTURE_VERB,
+  GESTURE_WANTS,
   blockedReason,
-  difficultyOf,
   gestureFor,
+  momentFavours,
   type Gesture
 } from '../content/gestures';
+import type { Preparation } from '../content/activity';
+import { shelterBuilt, use, usedLine, useOf } from '../content/using';
 import { ActivityModal } from './ActivityModal';
+import { EventCard } from './EventCard';
+import { type Choice, type GameEvent, eventNow } from '../content/events';
+
+/**
+ * The gestures whose subject is an animal, so the card shows its plate rather than a scene.
+ *
+ * A set rather than an `=== 'stalk'` check, because fishing joined it and the comparison was in
+ * four places. Getting this wrong is visible and was: passing the creature regardless put
+ * "Painted Deer comes out of the ground" on a flint quarry.
+ */
+const ABOUT_AN_ANIMAL = new Set<Gesture>(['stalk', 'fish']);
+
+/**
+ * The bare process word for a recipe -- `firing`, not `process_firing`.
+ *
+ * The variant the activity card narrows its painting by, matching what `src/ui/scenes/` is named
+ * after. `PROCESS_MARK` already keys on the same bare word, so the two art folders read canon's
+ * vocabulary the same way.
+ */
+function processWord(recipeId: string): string | null {
+  const id = recipe(recipeId)?.process;
+  return id ? id.replace('process_', '') : null;
+}
 import { Modal } from './Modal';
 
 /**
@@ -202,7 +228,18 @@ export function App() {
    */
   const latest = useRef({
     progress: initialJourney.current.progress,
-    satchel: initialJourney.current.satchel ?? emptySatchel()
+    satchel: initialJourney.current.satchel ?? emptySatchel(),
+    /**
+     * What the night needs to know, for the same reason the rest of this ref exists.
+     *
+     * The bus subscription is registered once with an empty dependency list -- re-registering it on
+     * every change would drop events in the gap -- so a handler reading `world` or `day` from the
+     * closure would read whatever they were at boot. `null` and `0` are the honest starting values
+     * and the effect below replaces them on the first commit.
+     */
+    world: null as World | null,
+    fieldMapId: '',
+    day: 0
   });
 
   // Kept in step after every commit, so anything that changes progress or the satchel by another
@@ -212,10 +249,19 @@ export function App() {
     latest.current.satchel = satchel;
   }, [progress, satchel]);
 
+
   // The three scales. `fieldMapId` is the country under foot; `poiId` is the authored place
   // being stood in, if any; a sub-location opens inside the place panel rather than here,
   // because going deeper into a ruin is not leaving it.
   const [fieldMapId, setFieldMapId] = useState(fieldMapFromUrl);
+  // The same arrangement for what the night handler reads. Separate effect because these change on
+  // a different rhythm -- the world once per map, the day once per night -- and bundling them would
+  // make the comment above untrue of half its own dependency list.
+  useEffect(() => {
+    latest.current.world = world;
+    latest.current.fieldMapId = fieldMapId;
+    latest.current.day = arrival?.day ?? 0;
+  }, [world, fieldMapId, arrival?.day]);
   const visited = useRef(new Set<string>());
 
   /**
@@ -293,6 +339,46 @@ export function App() {
     // own state optimistically; this is what corrects it if the scene ever disagreed.
     const onCharacter = ({ characterId: drawn }: GameToUi['character-changed']) => setDrawn(drawn);
 
+    /**
+     * A night passed. Ask whether anything happened in it.
+     *
+     * **`night-passed` had no listener at all until this.** It was emitted every time somebody
+     * slept, carried where they were, what shelter they had and what the diary should say, and
+     * nothing anywhere read it -- the fourth instance in this codebase of a thing built, tested,
+     * believed and wired to nothing. So the event framework is not bolted onto the night; it is
+     * plugged into a socket that was already there and unused.
+     *
+     * There are no events authored yet, so `eventNow` returns null every time and a player sees
+     * exactly what they saw before. That is what a framework with no content should do -- and the
+     * path is live, so the first authored event needs no wiring.
+     */
+    const onNight = ({ at, shelter }: GameToUi['night-passed']) => {
+      const world = latest.current.world;
+      if (!world) return;
+      const p = latest.current.progress;
+      const next = eventNow(
+        {
+          occasion: 'night',
+          shelter,
+          fieldMapId: latest.current.fieldMapId,
+          day: latest.current.day,
+          // Everything the player holds, in the one flat list `Choice.needs` and
+          // `Conditions.requires` are checked against -- words, understood discoveries and the
+          // recipes somebody has shown them. Assembled here because App is the only thing that
+          // holds a Progress.
+          holds: [...p.words, ...Object.keys(p.rungs), ...p.recipes],
+          seen: seenEvents.current
+        },
+        // Seeded on the tile and the day, like every other roll in this codebase: the same seed
+        // must produce the same journal text, and `Math.random` here would make a seed
+        // unshareable and this untestable.
+        (salt) => tileHash(world.seed, at.x, at.y, salt)
+      );
+      if (!next) return;
+      seenEvents.current = [...seenEvents.current, next.id];
+      setHappening({ event: next, shelter });
+    };
+
     EventBus.onEvent('world-ready', onWorldReady);
     EventBus.onEvent('tile-entered', onTileEntered);
     EventBus.onEvent('journey-changed', onJourneyChanged);
@@ -301,6 +387,7 @@ export function App() {
     EventBus.onEvent('moment-changed', onMoment);
     EventBus.onEvent('sky-changed', onSky);
     EventBus.onEvent('character-changed', onCharacter);
+    EventBus.onEvent('night-passed', onNight);
     return () => {
       EventBus.offEvent('world-ready', onWorldReady);
       EventBus.offEvent('tile-entered', onTileEntered);
@@ -310,6 +397,7 @@ export function App() {
       EventBus.offEvent('moment-changed', onMoment);
       EventBus.offEvent('sky-changed', onSky);
       EventBus.offEvent('character-changed', onCharacter);
+      EventBus.offEvent('night-passed', onNight);
     };
   }, []);
 
@@ -576,28 +664,96 @@ export function App() {
           ? 'rest'
           : activity.making
             ? gestureForProcess(recipe(activity.making)?.process ?? '')
-            : gestureFor(activity.taking[0]!.material, isAnimal)
+            : gestureFor(activity.taking[0]!.material, isAnimal, isWaterSpecies)
         : null,
     [activity]
   );
 
   /**
-   * The seeded roll the activity deals its bands from.
+   * What the player brought to the running activity.
    *
-   * **Memoised because its identity is load-bearing.** The modal deals a fresh attempt in an
-   * effect keyed on this function, so an inline arrow -- a new identity every render -- re-deals
-   * the bands on every tick of its own timer. The run then never accumulates a beat and never
-   * settles, which is precisely what the browser showed while all 900 unit tests passed: the
-   * component is correct and the caller was re-mounting it under itself.
+   * **Composed here because this is the only place holding all three answers** -- what is in the
+   * satchel, what the animal is doing, and how tired the traveller is. That is the same
+   * arrangement `knowsRecipeHere` uses and for the same stated reason; `content/activity.ts`
+   * grades it and the card renders it, and neither works any of it out.
+   *
+   * This memo replaced a seeded `roll` function whose *identity* was load-bearing: the card dealt
+   * fresh timing bands in an effect keyed on it, so an inline arrow re-dealt them on every tick of
+   * the card's own timer and the run never settled. Nine unit tests passed throughout and the
+   * browser found it in one click. There is no timer and no deal any more, so the hazard is gone
+   * rather than guarded -- but it is worth remembering why a plain object is the safer shape.
    */
-  const activityRoll = useMemo(
-    () =>
-      underfoot && activity
-        ? (salt: string) =>
-            tileHash(underfoot.seed, underfoot.at.x, underfoot.at.y, `${salt}:${activity.day}`)
-        : () => 0,
-    [underfoot, activity]
+  const preparation = useMemo<Preparation>(() => {
+    const gesture: Gesture | null = activityGesture;
+    if (!gesture) return { wants: null, equipped: false, favourable: true };
+    const wants = GESTURE_WANTS[gesture];
+    return {
+      wants,
+      equipped: wants === null ? false : canDo(satchel, wants),
+      favourable: momentFavours(
+        gesture,
+        currentCreature ? routineFor(currentCreature, moment) : null,
+        {
+          // `fatigueNote` is prose and this needs a fact, so the scene's own word is read rather
+          // than re-derived: it says nothing at all while the traveller is fresh, and says
+          // something only once it is worth saying. That threshold is `fatigue.ts`'s to own.
+          spent: Boolean(arrival?.fatigue),
+          // A night under a roof, at a camp, or in a tent you pitched. The bedroll and the bare
+          // sky are the two that are not -- and `shelterAt` has already decided which this is.
+          sheltered: activity?.resting ? activity.resting !== 'bedroll' && activity.resting !== 'none' : true
+        }
+      )
+    };
+  }, [activityGesture, satchel, currentCreature, moment, arrival?.fatigue, activity?.resting]);
+
+  /**
+   * The name of the thing answering `preparation.wants`, for the card's clause.
+   *
+   * Named rather than counted, because "a flint knife will do the work" teaches which object did
+   * it and "you have 1 cutting tool" teaches nothing. The first carried item that affords it, in
+   * the satchel's own stable order, so the sentence does not change between renders.
+   */
+  const preparationTool = useMemo(() => {
+    const wants = preparation.wants;
+    if (!wants || !preparation.equipped) return null;
+    const id = itemsHeld(satchel).find((held) => item(held)?.affords.includes(wants));
+    return id ? item(id)?.name ?? null : null;
+  }, [preparation.wants, preparation.equipped, satchel]);
+
+  /**
+   * Use something carried: a physic, a meal, or a shelter raised for the night.
+   *
+   * **The one verb that closes the three loops canon had data for and the game had no door to.**
+   * Seven physics, thirteen foods and two shelters could all be crafted and none of them did
+   * anything -- `cooking.ts` had no importer at all for its whole life. `content/using.ts` carries
+   * the reasoning for why this is one verb rather than an apothecary screen, a kitchen and a
+   * camp-builder.
+   *
+   * The satchel is React's and the clock is the scene's, so easing goes over the bus rather than
+   * being applied here. A shelter is not spent, which is why the satchel can come back unchanged
+   * and the `shelter-built` announcement still has to fire.
+   */
+  const useCarried = useCallback(
+    (id: string) => {
+      const what = useOf(id);
+      if (!what) return;
+      setSatchel((s) => use(s, id));
+      if (what.eases > 0) EventBus.emitEvent('ease', { by: what.eases });
+      setMemory(usedLine(id) ?? '');
+    },
+    []
   );
+
+  /**
+   * Tell the scene what is pitched, whenever the satchel changes.
+   *
+   * A push rather than a pull: `night.shelterAt` ranks where you are standing and a tent is the
+   * one input to it that is a fact about what you are carrying. The payload is the whole state, so
+   * a stale value cannot survive a change -- see the event's own note in `EventBus.ts`.
+   */
+  useEffect(() => {
+    EventBus.emitEvent('shelter-built', { built: shelterBuilt(satchel) });
+  }, [satchel]);
 
   /**
    * Everything that can be done on the tile under foot, in one list.
@@ -629,7 +785,7 @@ export function App() {
     // in the position this whole layer exists to fix. The gesture comes from the first material
     // on offer, which is the one the modal will be about.
     const first = left[0]?.material ?? null;
-    const gesture = first ? gestureFor(first, isAnimal) : null;
+    const gesture = first ? gestureFor(first, isAnimal, isWaterSpecies) : null;
     const routine = currentCreature ? routineFor(currentCreature, moment) : null;
     // A stalk is refused when the animal is only sign. `blockedReason` writes the sentence,
     // because the reason is the teaching -- it sends the player back at a better hour.
@@ -772,6 +928,19 @@ export function App() {
    * wants to reread what just happened.
    */
   const [lastMade, setLastMade] = useState<Step[]>([]);
+
+  /**
+   * The event the player is in the middle of, if any, and every one they have already had.
+   *
+   * **Held here rather than in the save, for now.** `seen` decides whether a `once` event comes
+   * round again, which is per-journey state and belongs in `Journey` eventually -- but adding a
+   * field there means bumping `SAVE_VERSION` and discarding every existing journey, and there are
+   * no events yet to be seen. It moves into the save in the same change that authors the first one.
+   */
+  const [happening, setHappening] = useState<{ event: GameEvent; shelter: string | null } | null>(
+    null
+  );
+  const seenEvents = useRef<string[]>([]);
 
   /**
    * Open the bench activity. The making itself happens when the run settles.
@@ -1046,6 +1215,7 @@ export function App() {
 
       <SatchelPanel
         satchel={satchel}
+        onUse={useCarried}
         open={interrupts.satchel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'satchel' })}
       />
@@ -1073,35 +1243,16 @@ export function App() {
           open
           gesture={activityGesture}
           promised={activity.taking}
-          difficulty={
-            // A night is not a test of anybody's hands. There is nothing to aim at, so the band is
-            // at its widest and the beats pass on their own -- which is the whole of what makes
-            // this the gentlest place to learn what the modal is.
-            activity.resting
-              ? 0
-              : activity.making
-                /**
-                 * **How involved the recipe is, which is data canon already has.**
-                 *
-                 * The obvious reach was the output's rarity, and `Output` does not carry one --
-                 * the cast that would have hidden that was the tell. Ingredient count is the
-                 * honest measure and a better one anyway: a thing needing four materials and a
-                 * kept tool is a harder job than a thing needing one, whatever it makes.
-                 *
-                 * Two ingredients is the median, so this lands most recipes near a stoop's
-                 * ordinary difficulty and reserves the narrow band for the elaborate ones.
-                 */
-                ? Math.min(1, ((recipe(activity.making)?.ingredients.length ?? 1) - 1) / 4)
-              : difficultyOf(
-                  activity.taking[0]!.material,
-                  activityGesture,
-                  currentCreature ? routineFor(currentCreature, moment) : null
-                )
+          preparation={preparation}
+          toolName={preparationTool}
+          creatureId={ABOUT_AN_ANIMAL.has(activityGesture) ? currentCreature?.id ?? null : null}
+          creatureName={ABOUT_AN_ANIMAL.has(activityGesture) ? currentCreature?.name ?? null : null}
+          /* Which painting to prefer. A night takes the shelter kind, a making takes the process
+             word -- so `make-firing.png` can land later and be picked up with no code, and until
+             it does the plain gesture scene draws. Nothing here is ever blocked on art. */
+          variant={
+            activity.resting ?? (activity.making ? processWord(activity.making) : null)
           }
-          roll={activityRoll}
-          creatureId={activityGesture === 'stalk' ? currentCreature?.id ?? null : null}
-          creatureName={activityGesture === 'stalk' ? currentCreature?.name ?? null : null}
-          variant={activity.resting ?? null}
           subject={
             activity.resting
               ? SHELTER_LABEL[activity.resting] ?? 'Stop for the night'
@@ -1123,6 +1274,27 @@ export function App() {
                 ? () => finishMaking(activity.making!)
                 : finishTaking
           }
+        />
+      )}
+
+      {/* Something that happened to you, as opposed to something you did. There are no events
+          authored yet, so this never mounts -- the path is live so the first one needs no wiring.
+          It sits beside the activity card because it *is* the activity card's furniture; see
+          `EventCard.tsx` for why that reuse is the point rather than a shortcut. */}
+      {happening && (
+        <EventCard
+          event={happening.event}
+          shelter={happening.shelter}
+          holds={[...progress.words, ...Object.keys(progress.rungs), ...progress.recipes]}
+          onChoose={(choice: Choice) => {
+            // Through the same door a conversation uses. An event grants the same kinds of thing a
+            // person does, so it must not grow a second way to change a Progress.
+            if (choice.grants.length > 0) setProgress((p) => receiveAll(p, choice.grants));
+            // Noted rather than announced, like every other outcome in this game: the progression
+            // is a written journal and a thing that happened to you is a line in it.
+            setMemory(choice.line);
+          }}
+          onClose={() => setHappening(null)}
         />
       )}
 

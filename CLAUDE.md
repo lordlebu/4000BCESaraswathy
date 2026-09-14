@@ -213,6 +213,10 @@ a missing install, the branch deletion that is refused at the proxy by every rou
 half useless here, and the habits that catch this codebase's signature bug — something built,
 tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side companion.
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
+| `docs/cozy-systems-plan.md` | the seven systems reworked — what shipped, what is left, and why |
+| `docs/art-placement.md` | every slot the interface will draw a picture into, and what falls back |
+| `docs/activity-boards-plan.md` | which bench a place has, how it says so — designed, not built |
+| `docs/events-plan.md` | events: the framework, shipped; the content, not |
 | `docs/ui-streamline-plan.md` | what the chrome costs the map, measured, and the four moves that give it back |
 | `docs/ui-affordances-plan.md` | what the screen says once the map has the room — closed, and the two faults it found |
 
@@ -321,8 +325,8 @@ Thirty-five in total, against the 85 this file used to claim.
   `journal.ts` turns that into prose; `conversation.ts` decides what a person says now;
   `camps.ts` and `kit.ts` answer where you can sleep and what the traveller always carries;
   `making.ts` adapts the crafting bundle and `satchel.ts`, `crafting.ts`, `gathering.ts`,
-  `cooking.ts` and `vehicles.ts` are the rules over it. All import their JSON at
-  build time.
+  `cooking.ts`, `using.ts` and `vehicles.ts` are the rules over it; `events.ts` holds what can
+  happen *to* you. All import their JSON at build time.
 
   **A satchel is not the kit, and neither replaced the other.** `kit.ts` is the bedroll, lamp,
   diary and staff: fixed, unmanaged, there from the first step. `satchel.ts` is what gets
@@ -531,6 +535,37 @@ refills — but working the ground reveals more of it nearby, so the world does 
 common stone `slow` was the obvious alternative and is worse twice: untrue of a cut nodule, and
 against a player working a district hard a thirty-day node is emptied thirty times before it
 returns one.
+
+### Acting on it: one press, and preparation decides how well
+
+**There is no clock in any activity, and that is a ruling rather than a state.** Taking, making and
+sleeping all resolve on a single press. They used to run a three-beat timing track — 4.5 seconds of
+rhythm-pressing per material, per craft, per night — and `docs/cozy-systems-plan.md` carries the
+measurement and the genre comparison for why that was the wrong instrument. `test/activityModal.test.tsx`
+advances fake timers a minute and asserts nothing happens, so a clock cannot come back quietly.
+
+The `clean` / `fair` / `clumsy` grade survives and is read off **two things the player decided
+before they pressed anything**: whether they carry something affording what the act asks
+(`GESTURE_WANTS` — a canon affordance, never a named tool), and whether the moment is with them
+(`momentFavours` — an unhurried animal for a stalk or a cast, steady hands for a stoop or the
+ground, a roof for a night). Both, one, or neither. **A night asks for nothing**, because the kit's
+bedroll is always there and a night must never be lost for want of a thing to hold.
+
+`clumsy` is exactly the behaviour the plain click had and is never a failure. The floor is
+structural: `settle` starts from what the tile promised and can only add.
+
+**`using.ts` is one verb over three systems that had canon data and no door.** Seven `physic` items,
+thirteen foods and two shelters could all be crafted and none of them did anything —
+`cooking.ts` had *zero importers* for the whole of its life, the fourth instance of this codebase's
+signature fault. A remedy and a meal ease tiredness (`REMEDY_EASES`, `MEAL_EASES` in `tiers.ts`); a
+shelter is **never spent** and upgrades the night, which is the whole of "building" and needs no new
+save state because `night.shelterAt` already ranked four kinds of night. There is still no hunger,
+no health and nothing that must be eaten.
+
+**Fishing is the fourth gesture**, keyed off canon's `clade` — fish, mollusc, crustacean, and
+deliberately not crocodilian. The water predicate is tested **before** the animal one: everything
+fished is also an animal, so the broader test first makes `fish` unreachable, and it fails silently
+as a sawfish stalked across a riverbed.
 
 ### Module systems differ by directory
 

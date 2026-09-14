@@ -34,12 +34,12 @@ const base = {
 
 describe('the satchel panel', () => {
   it('renders nothing when closed', () => {
-    const { container } = render(<SatchelPanel {...base} satchel={emptySatchel()} open={false} />);
+    const { container } = render(<SatchelPanel onUse={() => {}} {...base} satchel={emptySatchel()} open={false} />);
     expect(container.firstChild).toBeNull();
   });
 
   it('says the satchel is empty without implying anything is wrong', () => {
-    render(<SatchelPanel {...base} satchel={emptySatchel()} />);
+    render(<SatchelPanel onUse={() => {}} {...base} satchel={emptySatchel()} />);
     expect(screen.getByText(/Empty\. Things are picked up as you walk\./)).toBeTruthy();
     // No weight, no capacity, nothing running out. If a number like "0/20" ever appears here
     // the satchel has quietly become an inventory.
@@ -47,7 +47,7 @@ describe('the satchel panel', () => {
   });
 
   it('says plainly when it is empty', () => {
-    render(<SatchelPanel {...base} satchel={emptySatchel()} />);
+    render(<SatchelPanel onUse={() => {}} {...base} satchel={emptySatchel()} />);
     expect(screen.queryByText(/Nothing here worth stooping for\./)).toBeNull();
     expect(screen.queryByRole('button', { name: 'Pick it up' })).toBeNull();
   });
@@ -55,7 +55,7 @@ describe('the satchel panel', () => {
   it('separates stuff from what has been made', () => {
     let s = add(emptySatchel(), 'material_flint', 3);
     s = add(s, 'item_flint_knife', 1);
-    render(<SatchelPanel {...base} satchel={s} />);
+    render(<SatchelPanel onUse={() => {}} {...base} satchel={s} />);
     expect(screen.getByRole('heading', { name: 'Stuff' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Made' })).toBeTruthy();
     expect(screen.getByText('×3')).toBeTruthy();
@@ -77,7 +77,7 @@ describe('the satchel panel', () => {
 
   it('closes when asked', () => {
     const onClose = vi.fn();
-    render(<SatchelPanel {...base} satchel={emptySatchel()} onClose={onClose} />);
+    render(<SatchelPanel onUse={() => {}} {...base} satchel={emptySatchel()} onClose={onClose} />);
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
