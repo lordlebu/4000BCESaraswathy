@@ -1328,8 +1328,18 @@ export function App() {
           /* Which painting to prefer. A night takes the shelter kind, a making takes the process
              word -- so `make-firing.png` can land later and be picked up with no code, and until
              it does the plain gesture scene draws. Nothing here is ever blocked on art. */
+          /**
+           * Which painting to prefer.
+           *
+           * A night takes the shelter kind, a making takes the process word, and **a take on the
+           * ground takes the biome** — so cutting herbs on a cliff and cutting reeds at a waterline
+           * can be two different pictures of the same gesture. All three fall back to the plain
+           * gesture scene, so every one of them is a file and no code, and a variant nobody has
+           * painted is not an error.
+           */
           variant={
-            activity.resting ?? (activity.making ? processWord(activity.making) : null)
+            activity.resting ??
+            (activity.making ? processWord(activity.making) : underfoot?.biome ?? null)
           }
           subject={
             activity.resting

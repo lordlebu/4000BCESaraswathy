@@ -27,6 +27,19 @@ worth the same rest, and what differs is the picture and (later) what can happen
 
 An unpainted kind falls back to `rest.png`, so these land one at a time and in any order.
 
+## The ground a gesture happens on
+
+`stoop-<biome>.png`, `work-<biome>.png`, `stalk-<biome>.png`, `fish-<biome>.png` — one per kind of
+ground, for the cases where the same gesture looks nothing like itself somewhere else. **Cutting
+herbs off a cliff and cutting reeds at a waterline are both a stoop**, and a single painting cannot
+be both.
+
+Biome ids come from `data/biomes.json`: `mountains`, `hills`, `forest`, `wetland`, `river`, `coast`,
+`plains`, `desert`, and the stamped ones — `snow`, `lava_field`, `sky_island`, `sky_underside`.
+
+Entirely optional. An unpainted biome falls back to the plain gesture, which is what every take
+shows today.
+
 Drop a built PNG in here and it appears — `src/ui/scenes.ts` globs this folder, exactly the way
 `plates.ts` globs the species plates. No list to update, no code to change.
 
