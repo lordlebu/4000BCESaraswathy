@@ -127,3 +127,60 @@ describe('whether a journey has begun', () => {
     expect(hasBegun(loadJourney(seed))).toBe(true);
   });
 });
+
+/**
+ * Which events have already happened.
+ *
+ * **Added without bumping `SAVE_VERSION`, following `characterId`'s precedent** — absent means
+ * "none so far", which is true of every journey written before events existed. A bump would have
+ * discarded every save in the world to record an empty list, and throwing away progress to
+ * remember nothing is the wrong trade.
+ */
+describe('seenEvents', () => {
+  it('reads as none when a save predates events entirely', () => {
+    localStorage.setItem(
+      'south-of-tethys:old',
+      JSON.stringify({ version: SAVE_VERSION, discovered: ['1,1'], collection: {}, reached: false })
+    );
+    expect(loadJourney('old').seenEvents).toEqual([]);
+    // And the rest of that journey still loads, which is the whole point of not bumping.
+    expect(loadJourney('old').discovered).toEqual(['1,1']);
+  });
+
+  it('survives a round trip', () => {
+    saveJourney('trip', {
+      discovered: [],
+      collection: {},
+      reached: false,
+      seenEvents: ['event_a', 'event_b']
+    });
+    expect(loadJourney('trip').seenEvents).toEqual(['event_a', 'event_b']);
+  });
+
+  /**
+   * **A non-string must never reach `canHappen`.** It would compare unequal to every id, so every
+   * `once` event the player has already had would quietly come round again — the kind of fault
+   * that looks like a content bug and is a parsing one.
+   */
+  it('keeps only strings, whatever was stored', () => {
+    localStorage.setItem(
+      'south-of-tethys:junk',
+      JSON.stringify({
+        version: SAVE_VERSION,
+        discovered: [],
+        collection: {},
+        reached: false,
+        seenEvents: ['event_a', 42, null, { id: 'event_b' }]
+      })
+    );
+    expect(loadJourney('junk').seenEvents).toEqual(['event_a']);
+  });
+
+  it('reads a non-list as none rather than as something', () => {
+    localStorage.setItem(
+      'south-of-tethys:wrong',
+      JSON.stringify({ version: SAVE_VERSION, discovered: [], collection: {}, reached: false, seenEvents: 'event_a' })
+    );
+    expect(loadJourney('wrong').seenEvents).toEqual([]);
+  });
+});

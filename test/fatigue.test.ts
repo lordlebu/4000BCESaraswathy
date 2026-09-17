@@ -4,6 +4,7 @@
 // first design line is "combat is absent by design" cannot grow a way to lose by accident.
 
 import { describe, expect, it } from 'vitest';
+import { MEAL_EASES, REMEDY_EASES } from '../src/content/tiers';
 import {
   DAY_OF_WALKING_MS,
   MAX_PACE,
@@ -274,5 +275,51 @@ describe('easedMark', () => {
   it('is a no-op on somebody who is already rested', () => {
     expect(easedMark(DAY, DAY, 1)).toBe(DAY);
     expect(easedMark(DAY, DAY, 0)).toBe(DAY);
+  });
+});
+
+/**
+ * What a physic and a meal are actually worth, pinned as relationships rather than as numbers.
+ *
+ * **These shipped as guesses and are now measured** -- see the table in `tiers.ts`. What is pinned
+ * here is not the magnitude, which is a feel question a playthrough settles, but the four
+ * properties that would make any magnitude wrong if they broke.
+ */
+describe('what a remedy and a meal are worth', () => {
+  const DAY = DAY_OF_WALKING_MS;
+  const spent = (frac: number) => fatigueAt(DAY, easedMark(DAY, 0, frac));
+
+  it('keeps a physic worth more than a meal', () => {
+    expect(REMEDY_EASES).toBeGreaterThan(MEAL_EASES);
+    expect(spent(REMEDY_EASES)).toBeLessThan(spent(MEAL_EASES));
+  });
+
+  /**
+   * **Neither may fully rest you.** That is the night's job, and the night is the older and better
+   * mechanic -- a physic that reset tiredness outright would make the six kinds of night pointless.
+   */
+  it('never fully rests anybody', () => {
+    for (const frac of [REMEDY_EASES, MEAL_EASES]) {
+      expect(frac).toBeLessThan(1);
+      expect(spent(frac), 'an item did a whole night’s work').toBeGreaterThan(0);
+    }
+  });
+
+  /** And neither may do nothing, or the row is a button that lies about having an effect. */
+  it('never does nothing', () => {
+    for (const frac of [REMEDY_EASES, MEAL_EASES]) {
+      expect(spent(frac)).toBeLessThan(fatigueAt(DAY, 0));
+    }
+  });
+
+  /**
+   * A fraction of what is carried, never an absolute. A remedy taken fresh is nearly wasted and one
+   * taken spent is worth two days of walking, which is the right shape for a thing you carry and
+   * choose a moment for.
+   */
+  it('scales with how tired the traveller actually is', () => {
+    const fresh = fatigueAt(DAY, DAY * 0.75) - fatigueAt(DAY, easedMark(DAY, DAY * 0.75, REMEDY_EASES));
+    const weary = fatigueAt(DAY, 0) - fatigueAt(DAY, easedMark(DAY, 0, REMEDY_EASES));
+    expect(weary, 'a remedy was worth the same however tired he was').toBeGreaterThan(fresh);
   });
 });

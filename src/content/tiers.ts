@@ -125,14 +125,28 @@ export const REVEAL_CAP = 0.30;
 /**
  * How much of the walking a remedy takes back, as a fraction of the tiredness carried.
  *
- * **Half, and the ceiling matters more than the number.** `fatigue.ts` holds four invariants whose
- * whole content is that tiredness never stops you -- it is a pace between 1 and 1.6 and nothing
- * else -- so a remedy cannot un-block anything, because nothing was blocked. What it buys is the
- * back half of a long day without walking to a camp for it.
+ * **Measured rather than argued, which is this file's own standard.** It shipped as a guess with
+ * "wants a playthrough" written beside it; a playthrough is still the right way to settle how it
+ * *feels*, but what it is *worth* is arithmetic and was never done. From the game's own constants
+ * -- `travelTimeMs` at 45s a step, `DAY_MS`, `DAY_OF_WALKING_MS`:
  *
- * Deliberately not the whole of it. A physic that reset tiredness outright would make the four
- * kinds of night pointless, and the night is the older mechanic and the better one: it is a
- * decision about where to be at dusk, where this is a decision about what to carry.
+ *   a day buys                80 steps of easy ground
+ *   rested to spent          320 steps, so four days of walking
+ *
+ *   remedy, at 25% tired      40 steps back, pace 1.15 -> 1.07
+ *   remedy, at 100% tired    160 steps back, pace 1.60 -> 1.30
+ *   meal,   at 25% tired      20 steps back, pace 1.15 -> 1.11
+ *   meal,   at 100% tired     80 steps back, pace 1.60 -> 1.45
+ *
+ * **A fraction of what is carried, never an absolute, and that is what makes the number safe.** It
+ * scales with how tired you actually are, so a remedy taken fresh is nearly wasted and one taken
+ * spent is worth two days of walking -- which is the right shape for a thing you carry and choose a
+ * moment for. It also means neither can ever fully rest you: that stays the night's job, and the
+ * night is the older and better mechanic.
+ *
+ * The ceiling matters more than either number. `fatigue.ts` holds four invariants whose whole
+ * content is that tiredness never stops you -- it is a pace between 1 and 1.6 and nothing else --
+ * so no value here can unblock anything, because nothing was blocked.
  */
 export const REMEDY_EASES = 0.5;
 

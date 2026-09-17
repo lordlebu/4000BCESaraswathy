@@ -60,7 +60,7 @@ import type { Preparation } from '../content/activity';
 import { shelterBuilt, use, usedLine, useOf } from '../content/using';
 import { ActivityModal } from './ActivityModal';
 import { EventCard } from './EventCard';
-import { type Choice, type GameEvent, eventNow } from '../content/events';
+import { type Choice, type GameEvent, type Occasion, eventNow } from '../content/events';
 import type { Station } from '../content/stations';
 
 /**
@@ -240,7 +240,9 @@ export function App() {
      */
     world: null as World | null,
     fieldMapId: '',
-    day: 0
+    day: 0,
+    /** Where the traveller is standing, for an event that fires from something other than a step. */
+    at: null as { x: number; y: number } | null
   });
 
   // Kept in step after every commit, so anything that changes progress or the satchel by another
@@ -262,7 +264,8 @@ export function App() {
     latest.current.world = world;
     latest.current.fieldMapId = fieldMapId;
     latest.current.day = arrival?.day ?? 0;
-  }, [world, fieldMapId, arrival?.day]);
+    latest.current.at = arrival?.at ?? null;
+  }, [world, fieldMapId, arrival?.day, arrival?.at]);
   const visited = useRef(new Set<string>());
 
   /**
@@ -353,31 +356,81 @@ export function App() {
      * exactly what they saw before. That is what a framework with no content should do -- and the
      * path is live, so the first authored event needs no wiring.
      */
-    const onNight = ({ at, shelter }: GameToUi['night-passed']) => {
+    /**
+     * Ask whether anything happens, and open it if so.
+     *
+     * **One function for all three occasions**, because the only thing that differs between a
+     * night, an arrival and a mile of road is the word and the shelter — everything else is the
+     * same question asked of the same registry with the same seeded roll. Three copies of this
+     * would be three places for the `holds` list to drift out of step.
+     */
+    const maybeHappens = (
+      occasion: Occasion,
+      at: { x: number; y: number },
+      shelter: string | null,
+      salt: string
+    ) => {
       const world = latest.current.world;
       if (!world) return;
       const p = latest.current.progress;
       const next = eventNow(
         {
-          occasion: 'night',
+          occasion,
           shelter,
           fieldMapId: latest.current.fieldMapId,
           day: latest.current.day,
           // Everything the player holds, in the one flat list `Choice.needs` and
-          // `Conditions.requires` are checked against -- words, understood discoveries and the
-          // recipes somebody has shown them. Assembled here because App is the only thing that
-          // holds a Progress.
+          // `Conditions.requires` are checked against -- words, discoveries they have at least
+          // noticed, and recipes somebody has shown them. Assembled here because App is the only
+          // thing that holds a Progress.
           holds: [...p.words, ...Object.keys(p.rungs), ...p.recipes],
           seen: seenEvents.current
         },
-        // Seeded on the tile and the day, like every other roll in this codebase: the same seed
+        // Seeded on the tile and the salt, like every other roll in this codebase: the same seed
         // must produce the same journal text, and `Math.random` here would make a seed
         // unshareable and this untestable.
-        (salt) => tileHash(world.seed, at.x, at.y, salt)
+        (s) => tileHash(world.seed, at.x, at.y, `${salt}:${s}`)
       );
       if (!next) return;
       seenEvents.current = [...seenEvents.current, next.id];
       setHappening({ event: next, shelter });
+    };
+
+    /**
+     * A night passed. Ask whether anything happened in it.
+     *
+     * **`night-passed` had no listener at all** before events: emitted every time somebody slept,
+     * carrying where they were and what shelter they had, and read by nothing.
+     */
+    const onNight = ({ at, shelter }: GameToUi['night-passed']) =>
+      maybeHappens('night', at, shelter, `night:${latest.current.day}`);
+
+    /**
+     * Reached an authored place for the first time this journey.
+     *
+     * `poi-reached` rather than `standing-on`, deliberately: that one is a *state* and re-fires
+     * every time you walk back onto the tile, so an arrival event would replay on every visit.
+     * This one means what its name says.
+     */
+    const onArrived = ({ poiId }: GameToUi['poi-reached']) => {
+      const here = latest.current.at;
+      if (here) maybeHappens('arriving', here, null, `arriving:${poiId}`);
+    };
+
+    /**
+     * Something on the road, at most once a day.
+     *
+     * **The rarity is the caller's, not the event's, and that is the design.** `tile-entered` fires
+     * on every step -- eighty or so a day -- and asking on each one would make a road event either
+     * constant or, if each event guarded its own odds, a die rolled eighty times a day in eighty
+     * different authored places. A day is a rhythm the game already has and a player already feels,
+     * so the question is asked once per day of walking and the event's own `conditions` decide the
+     * rest. No new field, and nothing for an author to remember.
+     */
+    const onRoad = ({ at, day }: GameToUi['tile-entered']) => {
+      if (day === lastRoadDay.current) return;
+      lastRoadDay.current = day;
+      maybeHappens('road', at, null, `road:${day}`);
     };
 
     EventBus.onEvent('world-ready', onWorldReady);
@@ -389,6 +442,8 @@ export function App() {
     EventBus.onEvent('sky-changed', onSky);
     EventBus.onEvent('character-changed', onCharacter);
     EventBus.onEvent('night-passed', onNight);
+    EventBus.onEvent('poi-reached', onArrived);
+    EventBus.onEvent('tile-entered', onRoad);
     return () => {
       EventBus.offEvent('world-ready', onWorldReady);
       EventBus.offEvent('tile-entered', onTileEntered);
@@ -399,6 +454,8 @@ export function App() {
       EventBus.offEvent('sky-changed', onSky);
       EventBus.offEvent('character-changed', onCharacter);
       EventBus.offEvent('night-passed', onNight);
+      EventBus.offEvent('poi-reached', onArrived);
+      EventBus.offEvent('tile-entered', onRoad);
     };
   }, []);
 
@@ -416,7 +473,11 @@ export function App() {
         nodes,
         // The scene owns the clock and reports it with each step; this is only where it is kept
         // so the next boot can hand it back. Nought until the first tile is entered.
-        travelled: travelledRef.current
+        travelled: travelledRef.current,
+        // Which events have already happened, so a `once` event does not come round again after a
+        // reload. Unversioned: absent reads as none, which is true of every journey written before
+        // there were events to have.
+        seenEvents: seenEvents.current
       });
     const timer = window.setInterval(flush, 3000);
     window.addEventListener('pagehide', flush);
@@ -939,6 +1000,9 @@ export function App() {
    */
   const [atStation, setAtStation] = useState<Station | null>(null);
 
+  /** The last day a road event was asked about, so the question is one a day and not one a step. */
+  const lastRoadDay = useRef(-1);
+
   /**
    * The event the player is in the middle of, if any, and every one they have already had.
    *
@@ -950,7 +1014,7 @@ export function App() {
   const [happening, setHappening] = useState<{ event: GameEvent; shelter: string | null } | null>(
     null
   );
-  const seenEvents = useRef<string[]>([]);
+  const seenEvents = useRef<string[]>(initialJourney.current.seenEvents ?? []);
 
   /**
    * Open the bench activity. The making itself happens when the run settles.

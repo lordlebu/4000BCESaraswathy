@@ -83,13 +83,40 @@ A dream and an encounter are arguably the first. A find on the road is the secon
 an array leaves that open and cheap to answer; a JSON file in `data/` would look like a decision
 that had been made.
 
+## All three occasions are wired
+
+`night` fires from `night-passed`. `arriving` fires from **`poi-reached`** — not `standing-on`,
+which is a *state* that re-fires every time you walk back onto the tile and would replay an arrival
+on every visit. `road` fires from `tile-entered`, **at most once per in-game day**.
+
+That last rule is worth stating because it is a design decision rather than a throttle. `tile-entered`
+fires on every step, and a day buys about eighty of them. Asking on each one would make a road event
+either constant or — if each event guarded its own odds — a die rolled eighty times a day in eighty
+different authored places. **A day is a rhythm the game already has and a player already feels**, so
+the question is asked once a day and the event's own `conditions` decide the rest. No new field, and
+nothing for an author to remember.
+
+All three go through one `maybeHappens`, because the only thing that differs between a night, an
+arrival and a mile of road is the word and the shelter. Three copies would be three places for the
+`holds` list to drift out of step.
+
+## `seen` is in the save, and was not worth a version bump
+
+It persists as `Journey.seenEvents`, **optional and unversioned** — following `characterId`'s
+precedent in the same file. Absent means "none so far", which is true of every journey written
+before events existed, because there were none to have. Bumping `SAVE_VERSION` would discard every
+save in the world to record an empty list.
+
+Read defensively: only strings survive, and a non-list reads as none. A non-string reaching
+`canHappen` would compare unequal to every id and quietly replay every `once` event the player had
+already had — the kind of fault that looks like a content bug and is a parsing one.
+
 ## What is still to do
 
-- **Author events.** The framework is unexercised until there is one.
-- **`seen` belongs in the save.** It is a `useRef` today, because adding a field to `Journey` bumps
-  `SAVE_VERSION` and discards every existing journey — and there are no events yet to have seen. It
-  moves in the same change that authors the first one.
-- **The other two occasions have no caller.** `night` is wired; `arriving` and `road` are declared
-  and unused, which is the fault this document keeps naming. They get one when they get content.
+- **Author events.** The framework is unexercised until there is one, and that is the only thing
+  left. Everything it needs is in place: three occasions with callers, `seen` persisted, grants
+  reaching `Progress` through the same door a conversation uses.
+- **Paintings**, one per event, in `src/ui/events/`. Never blocking — an event with no art borrows
+  the night's scene. See `docs/art-handover.md`.
 - **Side quests need no new machinery.** A chain of events granting each other's `requires` is one,
-  and that was the test the `grants`/`requires` pair was designed against.
+  and that was the case the `grants`/`requires` pair was designed against.

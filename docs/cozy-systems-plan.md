@@ -287,32 +287,54 @@ from nothing to complete at the category tier.
 
 Every slot renders something today, so this can be picked up by anybody, in any order, at any time.
 
-### Activity boards — designed, not built
+### Activity boards — built, additive
 
-`docs/activity-boards-plan.md`. Eight stations derived from who stands where; the board is a strip
-of marks under the place's name. Held back deliberately: it changes `placeAllows`, which canon
-co-owns, and a narrowing made game-side is invisible to canon's `check_playability.py` — both
-repositories would disagree while every check on both sides stayed green.
+`docs/activity-boards-plan.md`. Eight benches derived from who stands where, a strip of marks under
+the place's name, and the workshop filtered to the bench you walked up to.
 
-Order of work is in that document. **Additive before subtractive, and a reachability test before
-anything narrows.**
+**The reachability test found a real narrowing on its first run** — `worksProcess` refused
+`process_retting` at the Alms Step, which canon allows, because eleven of the seventeen processes
+name no site and several sit on benches only some places have. The composition moved *inside* the
+function, so no caller can get it wrong and the layer is structurally incapable of closing a
+process.
 
-### Events — framework only
+Only the eight marks are left, and they are art.
 
-`docs/events-plan.md`. Three things, and the first is the one that matters:
+### Events — framework complete, content not written
 
-- **No events are authored.** The registry is empty and the tests drive it that way.
-- **`seen` belongs in the save.** It is a `useRef` today, because adding a field to `Journey` bumps
-  `SAVE_VERSION` and discards every existing journey — and there is nothing yet to have seen. It
-  moves in the same change that authors the first event.
-- **`arriving` and `road` have no caller.** Declared and unused, which is the fault this whole
-  sprint kept naming. They get one when they get content.
+`docs/events-plan.md`. The two framework gaps are closed:
 
-### Two numbers that are guesses
+- **All three occasions have callers.** `night` from `night-passed`, `arriving` from `poi-reached`
+  (not `standing-on`, which re-fires on every return visit), `road` from `tile-entered` **at most
+  once per in-game day** — a rhythm the game already has, rather than a die rolled eighty times a
+  day.
+- **`seen` is in the save**, as `Journey.seenEvents` — optional and unversioned, following
+  `characterId`'s precedent, because absent means "none so far" and that is true of every journey
+  written before events existed.
 
-`REMEDY_EASES` (0.5) and `MEAL_EASES` (0.25) in `tiers.ts`. The *ordering* is right — a physic is
-worth more than a meal — and the magnitudes have never been played. They want a playthrough, not an
-argument.
+**Authoring events is the only thing left**, and it is content rather than framework.
+
+### Two numbers, now measured
+
+`REMEDY_EASES` (0.5) and `MEAL_EASES` (0.25) in `tiers.ts`. They shipped as guesses with "wants a
+playthrough" beside them — and a playthrough is still how *feel* gets settled, but what they are
+*worth* is arithmetic and had never been done. From the game's own constants:
+
+| | steps given back | pace |
+|---|---:|---|
+| a day of walking | 80 | — |
+| rested → spent | 320 (four days) | 1.00 → 1.60 |
+| remedy at 25% tired | 40 | 1.15 → 1.07 |
+| remedy at 100% tired | 160 | 1.60 → 1.30 |
+| meal at 25% tired | 20 | 1.15 → 1.11 |
+| meal at 100% tired | 80 | 1.60 → 1.45 |
+
+A fraction of what is *carried*, never an absolute — so a remedy taken fresh is nearly wasted and
+one taken spent is worth two days of walking, which is the right shape for a thing you carry and
+pick a moment for. Neither can ever fully rest you; that stays the night's job.
+
+`test/fatigue.test.ts` pins the four properties rather than the magnitudes: a physic beats a meal,
+neither fully rests, neither does nothing, and both scale with how tired he actually is.
 
 ### The endgame is out of scope and knows it
 
