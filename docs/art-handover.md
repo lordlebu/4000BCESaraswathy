@@ -88,19 +88,26 @@ All four use the shared style block. Copy it once, then append one subject line.
 >
 > **Subject:** *(one line from below)*
 
+**Do not ask a generator for high resolution.** Every one of these is built down — scenes to
+512×384, plates and portraits to 384 — so whatever comes back above that is thrown away. Asking for
+it buys nothing, and most tools either cannot do it or trade detail for pixels trying. **The aspect
+ratio is the only dimension instruction that matters**, because the build crops to it; a square
+image handed to a 4:3 slot loses its top and bottom. Whatever a tool gives you at the right shape
+is enough.
+
 **Hard requirements, all five, every time.** Each is here because an asset was lost to it:
 
 1. **No text of any kind.** A naturalist illustration *looks* like it should be labelled, so models
    add labels unprompted. This is the most likely failure.
 2. **No border or frame.** The card draws its own edge; a painted one reads as a picture of a picture.
 3. **No watermark, no signature.** A mark across the subject cannot be cropped out.
-4. **The right aspect** — stated per group below. Getting it wrong loses the top and bottom to
-   `object-fit: cover`.
+4. **The right aspect** — stated per group below, and it is the *only* size instruction worth
+   giving. Getting it wrong loses the top and bottom to the build's crop.
 5. **Lossless PNG**, not JPEG.
 
 ### The six nights — `src/ui/scenes/rest-<shelter>.png`
 
-**Landscape 4:3.** A moment, with the traveller in it or just out of frame. These are what the
+**Landscape 4:3**, at whatever size the tool gives. A moment, with the traveller in it or just out of frame. These are what the
 shelter vocabulary is *for*: `NIGHT_RESTORES` is flat, so every night restores the same and what
 differs is the picture and — once events have content — what can happen in it.
 
@@ -118,8 +125,8 @@ time.
 
 ### The six place kinds — `src/ui/places/kind-<kind>.png`
 
-**Landscape, wide — 16:7.** Cropped with `object-fit: cover` across the top of `PlacePanel`, so
-compose for a band. Around 800px wide is plenty; it is never shown larger than the dock.
+**Landscape, wide — 16:7.** Cropped across the top of `PlacePanel`, so compose for a band. Size
+does not matter beyond the shape; it is never shown larger than the dock.
 
 A place view is **a view, not a scene** — no traveller, no hands. The player is standing here and
 looking out.
@@ -139,7 +146,7 @@ gotcha below.
 
 ### The ten item kinds — `src/ui/things/kind-<kind>.png`
 
-**Square, ~256px, transparent background.** Drawn at 20–44px beside a name, so it has to read at a
+**Square, transparent background.** Drawn at 20–44px beside a name, so it has to read at a
 glance: one object, centred, no scene, no hand holding it.
 
 | File | Subject line |
@@ -168,6 +175,29 @@ When there are events, the register is: **a moment with the traveller in it**, t
 *happening*. Firelight, weather, an animal at a distance, a figure on a road.
 
 ---
+
+## How a finished file gets in
+
+**Drop the raw into `assets/source/scenes/` (or `plates/`, `portraits/`) under any name and run the
+builder.** It derives the id, crops to the right aspect, resizes, palettises, and writes the built
+file where the loader globs it.
+
+```bash
+node tools/build-plates.js --scenes      # activity scenes, 4:3 at 512x384
+node tools/build-plates.js --portraits   # people, square at 384
+node tools/build-plates.js               # species plates, square at 384
+node tools/build-plates.js --list        # what it would do, without doing it
+```
+
+**The raws are git-ignored and the built files are tracked.** `assets/source/scenes/` and
+`assets/source/plates/` both sit in `.gitignore` — the raws stay on disk and only the built
+100–160 KB reaches everybody's clone. That is the same arrangement `dump/` uses, for the same
+reason.
+
+**Never drop a raw straight into `src/ui/`.** It is the right picture at ten times the weight and
+the wrong encoding, and nothing will tell you: the game renders it perfectly and the download grows.
+`stoop-mountains.png` arrived at 1200×896 and 1.7 MB against the other scenes' 512×384 and
+135–162 KB, and came out of the builder at 129 KB.
 
 ## Gotchas, all of them paid for
 
