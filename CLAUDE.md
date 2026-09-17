@@ -689,10 +689,12 @@ readings; change them here and change them there.
   and three creatures; canon species were tagged into them, and they now hold 6 and 7 creatures with
   8 plants each. `mountains` (51) and `desert` (35) are still far richer than `landmark` (4), because
   the bestiary was authored by region and the mountainous and arid regions are the biggest sections.
-  **No species is held back any more.** This file claimed 35 `placement: "lore"` and, before that,
-  85; canon 2.22.0 carries none and all 341 reach the engine. Nothing in `src/` reads `placement`,
-  so the holdback was never enforced here in any case — `renderableBiomeIds` is what decides
-  whether a species has ground to stand on.
+  **Thirty-five species are still held back**, and the count in this file has been wrong in both
+  directions: it once claimed 85, and a correction in September 2026 claimed none. Canon's source
+  carries 376 species and marks 35 `placement: "lore"`; `export_canon_bundle.py` drops them, so the
+  bundle holds 341 and shows zero `lore` — which is what the second wrong claim was read off.
+  **Check the source, not the bundle.** Nothing in `src/` reads `placement` because the holdback is
+  applied at the export and there is nothing left to filter.
   **And a biome nothing draws hides its own data errors.** All 31 species carrying `lava_field`
   carried the identical pair `lava_field, mountains` — a bestiary import, not authored biology —
   and it had swept up eight polar species. A glacial ribbon-seal was offered on warm basalt in a
