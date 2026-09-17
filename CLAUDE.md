@@ -214,7 +214,8 @@ half useless here, and the habits that catch this codebase's signature bug — s
 tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side companion.
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 | `docs/cozy-systems-plan.md` | the seven systems reworked — what shipped, what is left, and why |
-| `docs/art-placement.md` | every slot the interface will draw a picture into, and what falls back |
+| `docs/art-handover.md` | **start here for art**: the inventory, the order, the prompts, the gotchas |
+| `docs/art-placement.md` | the mechanism — which folder, which filename, what falls back |
 | `docs/activity-boards-plan.md` | which bench a place has, how it says so — designed, not built |
 | `docs/events-plan.md` | events: the framework, shipped; the content, not |
 | `docs/ui-streamline-plan.md` | what the chrome costs the map, measured, and the four moves that give it back |
@@ -309,10 +310,14 @@ narrower version of the same data.
 
 **The sky half of that is no longer true, and it was the sky islands that changed it.** Nineteen
 sky species now stand on real ground: the islands, the underside and the pool are stamped biomes
-with painted tiles, so a species tagged to one has somewhere to be. Twenty-six sky species are
-still `placement: "lore"` — the open-sky and high-altitude sets, which have no ground equivalent
-and are inert on purpose — alongside nine Asura conjurations whose tone question is still open.
-Thirty-five in total, against the 85 this file used to claim.
+with painted tiles, so a species tagged to one has somewhere to be.
+
+**And the `placement: "lore"` holdback is gone entirely — this file claimed 35 of them, then 85
+before that, and canon 2.22.0 carries none.** All 341 species (231 fauna, 110 flora) reach the
+engine. Worth knowing twice over: nothing in `src/` reads `placement` at all, so "inert by design"
+was never enforced by the game even while it was true of the data — the filter that actually decides
+what a tile can hold is `renderableBiomeIds`, on the biome. If species are ever to be held back
+again, that is a decision for canon's `placement` **and** a reader for it here.
 
 ### Layers, and the rules between them
 
@@ -677,8 +682,10 @@ readings; change them here and change them there.
   and three creatures; canon species were tagged into them, and they now hold 6 and 7 creatures with
   8 plants each. `mountains` (51) and `desert` (35) are still far richer than `landmark` (4), because
   the bestiary was authored by region and the mountainous and arid regions are the biggest sections.
-  35 species remain `placement: "lore"` — 26 open-sky and 9 Asura, inert by design. It was 85
-  before the sky islands gave the sky-island, underside and pool species ground to stand on.
+  **No species is held back any more.** This file claimed 35 `placement: "lore"` and, before that,
+  85; canon 2.22.0 carries none and all 341 reach the engine. Nothing in `src/` reads `placement`,
+  so the holdback was never enforced here in any case — `renderableBiomeIds` is what decides
+  whether a species has ground to stand on.
   **And a biome nothing draws hides its own data errors.** All 31 species carrying `lava_field`
   carried the identical pair `lava_field, mountains` — a bestiary import, not authored biology —
   and it had swept up eight polar species. A glacial ribbon-seal was offered on warm basalt in a

@@ -3,6 +3,10 @@
 Every slot the interface will draw a picture into, what a file must be called, and what is on
 screen until one arrives.
 
+> **Doing the art rather than wiring it? Start at `docs/art-handover.md`.** That is the inventory,
+> the order worth working in, prompts for the four slots that had none, and the gotchas. This file
+> is the mechanism underneath it.
+
 **Nothing here is a blocker and nothing here is a gap.** Every slot already renders something — a
 derived silhouette, a category mark, an emoji, or prose alone. A painting *replaces* what is there.
 So this queue can be worked in any order, in any quantity, by anybody, and each file takes effect
@@ -130,10 +134,16 @@ Shown at 16:7 across the top of `PlacePanel`, cropped rather than letterboxed.
 
 **Worth doing first:** the six kinds.
 
-### `plates/` — species · 20 of 297
+### `plates/` — species · 20 of 341
 
 The long queue, and the one that will never finish. `SpeciesIcon` draws a derived silhouette for
-every species and a plate replaces one individually. See `docs/plate-prompts.md` for the prompts
+every species and a plate replaces one individually.
+
+**341, not 297**, and the correction is worth keeping: canon 2.22.0 ships 231 fauna and 110 flora
+and **every one of them reaches the engine**. The old figure came from an era when some species were
+held back as `placement: "lore"` — inert, with no ground to stand on. Nothing in `src/` reads
+`placement` at all today, and the bundle carries none anyway, so the drawable set is the whole
+bestiary. See `docs/plate-prompts.md` for the prompts
 and the working queue.
 
 **One addition from this rework:** the activity card prefers the animal's plate for a **cast** as

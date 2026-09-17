@@ -3,8 +3,11 @@
 Crafting, apothecary, cooking, building, stalking, fishing and resting — made simple, made
 intuitive, and made to cost one press.
 
-**Status: Phases 1, 2, 2b and 5 shipped. Phase 3 is art, and is deliberately not a blocker.
-Phase 4 — activity boards — is designed in `docs/activity-boards-plan.md` and not built.**
+**Status: Phases 1, 2, 2b and 5 shipped and merged (PR #192). Phase 3 is art, handed over in
+`docs/art-handover.md` and deliberately not a blocker. Phase 4 — activity boards — is designed in
+`docs/activity-boards-plan.md` and not built.**
+
+What is left is listed at the bottom of this file, under **What remains**.
 
 Written during the work rather than after it, because the middle of it is where somebody else
 needs to be able to pick it up. `docs/the-ground-that-gives.md` is the map to the resource layer
@@ -268,3 +271,61 @@ Eight stations, derived rather than authored, in the way `gestures.ts` and `rout
 derive. Additive before subtractive, and a reachability test before any narrowing — because a
 narrowing made game-side is invisible to canon's `check_playability.py`, and the two repositories
 would disagree while every check on both sides stayed green.
+
+---
+
+## What remains
+
+Written at the end of the sprint so the next session does not have to reconstruct it. Nothing here
+is blocking anything else; they are independent.
+
+### Art — handed over, not started
+
+`docs/art-handover.md` is the whole of it: the inventory, the order, prompts for the four slots that
+had none, and every gotcha that has cost an asset. **38 files** take every folder except `plates/`
+from nothing to complete at the category tier.
+
+Every slot renders something today, so this can be picked up by anybody, in any order, at any time.
+
+### Activity boards — designed, not built
+
+`docs/activity-boards-plan.md`. Eight stations derived from who stands where; the board is a strip
+of marks under the place's name. Held back deliberately: it changes `placeAllows`, which canon
+co-owns, and a narrowing made game-side is invisible to canon's `check_playability.py` — both
+repositories would disagree while every check on both sides stayed green.
+
+Order of work is in that document. **Additive before subtractive, and a reachability test before
+anything narrows.**
+
+### Events — framework only
+
+`docs/events-plan.md`. Three things, and the first is the one that matters:
+
+- **No events are authored.** The registry is empty and the tests drive it that way.
+- **`seen` belongs in the save.** It is a `useRef` today, because adding a field to `Journey` bumps
+  `SAVE_VERSION` and discards every existing journey — and there is nothing yet to have seen. It
+  moves in the same change that authors the first event.
+- **`arriving` and `road` have no caller.** Declared and unused, which is the fault this whole
+  sprint kept naming. They get one when they get content.
+
+### Two numbers that are guesses
+
+`REMEDY_EASES` (0.5) and `MEAL_EASES` (0.25) in `tiers.ts`. The *ordering* is right — a physic is
+worth more than a meal — and the magnitudes have never been played. They want a playthrough, not an
+argument.
+
+### The endgame is out of scope and knows it
+
+Settling down on the survival train is not ready. When it lands it changes one thing here: **a place
+you built should outrank a roof somebody lends you**, which is a seventh rung on the shelter ladder
+and belongs with that work rather than ahead of it.
+
+### Doc drift found and fixed on the way out
+
+Two claims had gone stale and are corrected in this sprint:
+
+- **`placement: "lore"` is gone.** `CLAUDE.md` claimed 35 species were held back, and 85 before
+  that; canon 2.22.0 carries none and all 341 reach the engine. Worth knowing twice: **nothing in
+  `src/` reads `placement` at all**, so the holdback was never enforced game-side even while it was
+  true of the data. `renderableBiomeIds` is what actually decides whether a species has ground.
+- **The plate queue is 341, not 297.** Same cause.
