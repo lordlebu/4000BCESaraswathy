@@ -53,7 +53,7 @@ describe('the fixture this suite stands on', () => {
 
 describe('a place with several people in it', () => {
   it('lists them rather than playing them', () => {
-    render(<PlacePanel {...place()} />);
+    render(<PlacePanel onOpenStation={null} {...place()} />);
 
     // Everybody is named...
     for (const person of npcsAt(CROWDED)) {
@@ -69,7 +69,7 @@ describe('a place with several people in it', () => {
   it('says what each of them does, which is how you choose', () => {
     // Canon's own word — fisher, hunter, potter. A row of names alone gives a player no reason to
     // pick one, and picking is the whole of the new interaction.
-    render(<PlacePanel {...place()} />);
+    render(<PlacePanel onOpenStation={null} {...place()} />);
     const roles = [...document.querySelectorAll('.who-role')].map((el) => el.textContent);
     expect(roles.length).toBe(npcsAt(CROWDED).length);
     expect(roles.every(Boolean), 'a person is listed with no role').toBe(true);
@@ -77,7 +77,7 @@ describe('a place with several people in it', () => {
 
   it('hands back who was chosen, and nothing else', () => {
     const chosen = vi.fn();
-    render(<PlacePanel {...place({ onTalkTo: chosen })} />);
+    render(<PlacePanel onOpenStation={null} {...place({ onTalkTo: chosen })} />);
     const first = npcsAt(CROWDED)[0]!;
 
     fireEvent.click(screen.getByRole('button', { name: new RegExp(first.name) }));

@@ -472,6 +472,7 @@ describe('here', () => {
     firstVisit: false,
     onLook: noop,
     onTalkTo: noop,
+    onOpenStation: null,
     onClose: noop
   };
 

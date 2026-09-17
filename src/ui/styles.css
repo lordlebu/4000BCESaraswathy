@@ -2690,6 +2690,67 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
  * an `aspect-ratio` box needs it as much as an image does, and the dock must never scroll
  * sideways. Cropped rather than letterboxed: a band of background above a painting reads as a
  * broken asset, and `cover` is what the activity card already does. */
+/* **What this place can work.** A strip of marks under the name, above the prose — a place already
+ * answers what is here to look at, who is here to talk to and what is further in, and what it can
+ * *work* is the fourth of the same question rather than a fifth panel.
+ *
+ * Wraps rather than scrolls: eight marks at a settlement is two rows on a phone and one on a
+ * desktop, and a row that scrolls sideways hides its own last item. The dock must never scroll
+ * horizontally — only tables, diagrams and code may, each in their own container. */
+.station-board { margin: 0 0 0.6rem; }
+
+.station-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  /* Redeclared beside `display`, deliberately. The dock's action rail inherited `column` from a
+   * base rule three hundred lines above and was a column at every device size for as long as it
+   * shipped — nothing failed, because `width: auto` kept the chips pill-shaped and a screenshot
+   * looked intentional. A descendant rule that redeclares `display` must redeclare direction. */
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.45rem;
+}
+
+/* A readout at peek and a control at read — `App` decides which by passing `onOpen` or null. The
+ * two must line up down the strip whichever they are, so the shared padding lives here. */
+.station,
+.station-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.82rem;
+  color: var(--ink);
+  background: rgba(164, 92, 64, 0.1);
+  border: 1px solid transparent;
+  border-radius: 999px;
+}
+
+/* A pressable mark owes the 44px touch floor where a readout owes 26 — measured on the standing
+ * row, that difference is what pushes a chip out of the dock on a landscape phone. So only the
+ * button takes it. */
+.station-open {
+  min-height: 44px;
+  font-family: inherit;
+  border-color: var(--edge);
+  cursor: pointer;
+}
+
+.station-open:hover { background: rgba(164, 92, 64, 0.2); }
+.station-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.station-name { font-weight: 600; }
+
+/* What the place cannot do, in one sentence rather than eight greyed marks. `--ink-faint` rather
+ * than an alpha, because `opacity` multiplies and this sits near prose that is already dimmed. */
+.station-absent {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
 .place-view {
   display: block;
   width: 100%;

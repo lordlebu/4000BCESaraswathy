@@ -61,6 +61,7 @@ import { shelterBuilt, use, usedLine, useOf } from '../content/using';
 import { ActivityModal } from './ActivityModal';
 import { EventCard } from './EventCard';
 import { type Choice, type GameEvent, eventNow } from '../content/events';
+import type { Station } from '../content/stations';
 
 /**
  * The gestures whose subject is an animal, so the card shows its plate rather than a scene.
@@ -930,6 +931,15 @@ export function App() {
   const [lastMade, setLastMade] = useState<Step[]>([]);
 
   /**
+   * The bench the workshop was opened at, or null for the whole thing.
+   *
+   * Set by the place's station board and cleared when the workshop closes, so walking up to a kiln
+   * and pressing it opens the kiln rather than eighty-three recipes. A filter and never a gate --
+   * `crafting.canMake` still decides what can actually be made.
+   */
+  const [atStation, setAtStation] = useState<Station | null>(null);
+
+  /**
    * The event the player is in the middle of, if any, and every one they have already had.
    *
    * **Held here rather than in the save, for now.** `seen` decides whether a `once` event comes
@@ -1226,8 +1236,12 @@ export function App() {
         knows={knowsRecipeHere}
         onMake={makeHere}
         lastMade={lastMade}
+        station={atStation}
         open={interrupts.workshop}
-        onClose={() => dispatch({ type: 'close-interrupt', which: 'workshop' })}
+        onClose={() => {
+          setAtStation(null);
+          dispatch({ type: 'close-interrupt', which: 'workshop' });
+        }}
       />
 
       <Ending
@@ -1337,6 +1351,21 @@ export function App() {
           firstVisit: Boolean(standingOn) && !visited.current.has(standingOn!),
           onLook: look,
           onTalkTo: (npcId: string) => dispatch({ type: 'talk-to', npcId }),
+          /**
+           * Walk up to a bench and open the workshop at it.
+           *
+           * **Null below reading height**, which makes the board a readout rather than a control:
+           * a pressable mark owes the 44px touch floor where a readout owes 26, and the dock has
+           * measured that difference in chips falling off a landscape phone. The board still says
+           * what is here at every height -- what the height decides is whether it can be pressed.
+           */
+          onOpenStation:
+            dockHeight === 'peek'
+              ? null
+              : (s: Station) => {
+                  setAtStation(s);
+                  dispatch({ type: 'open-interrupt', which: 'workshop' });
+                },
           onClose: () => {
             if (standingOn) visited.current.add(standingOn);
             dispatch({ type: 'close-place' });
