@@ -81,7 +81,7 @@ replaced — so **a new folder of art needs no code either.**
 
 | Folder | Have | Wanted | Fallback while missing | Finishable? |
 |---|---:|---:|---|---|
-| `src/ui/scenes/` | 9 | ~24 | the plain gesture, then a blank panel | **yes** |
+| `src/ui/scenes/` | 10 | ~24 | the plain gesture, then a blank panel | **yes** |
 | `src/ui/marks/` | 4 | 47 | an emoji in `ThingIcon` | **yes** |
 | `src/ui/places/` | 0 | 6 kinds, then 37 | prose alone | **yes**, at the kind tier |
 | `src/ui/things/` | 0 | 10 kinds, then 143 | the category mark, then an emoji | **yes**, at the kind tier |
@@ -113,7 +113,7 @@ game, ten cover all 143 things, ten more cover every item kind. Paint the catego
 Cheapest-first, and each step is independently shippable.
 
 1. **The six nights** — `rest-<shelter>.png`. Six files and the shelter vocabulary means something.
-   **Three done** — `rest-camp`, `rest-tent`, `rest-settlement`. **Three left: `roof`, `bedroll`, `palace`.**
+   **Four done** — `rest-camp`, `rest-tent`, `rest-settlement`, `rest-roof`. **Two left: `bedroll`, `palace`.**
 2. **The six place kinds** — `kind-<poikind>.png` in `places/`. Six files and every place in the game has a view.
 3. **The ten item kinds** — `kind-<itemkind>.png` in `things/`. Ten files and all 143 things have a plate.
 4. ~~**`fish.png`** in `scenes/` — the fourth gesture has no painting at all.~~ **Done.**
@@ -178,10 +178,25 @@ Keep it varied across the set rather than inside any one picture. So far:
 | `fish.png` | young man, long hair, bare-chested |
 | `rest-tent.png` | **older woman, grey, clothed against the cold** |
 | `rest-settlement.png` | **man in his forties, grey-flecked beard, clothed for a day's work** |
+| `rest-roof.png` | woman in her thirties, ornamented, seated by a lamp |
+| `rest-roof.2.png` | the same night, second take — paler, line-and-wash |
 
-**Still wanted: a woman of working age, and a child or a very young person.** Nobody in the set is
-under twenty, and canon has children. Three of the four figures so far are men, against a cast that
-is nine women out of fifteen — so the next two both want women unless the subject argues otherwise.
+**Still wanted: a child or a very young person, and somebody plainly dressed for hard weather.**
+Nobody in the set is under twenty and canon has children. Two of five are women against a cast
+that is nine of fifteen, so keep reaching for women.
+
+`rest-roof` is the first slot to take **two paintings rather than one**, and it is worth saying why
+that was the right answer instead of choosing. Two versions came back, neither strictly better: the
+first is darker and closer to the set's register, the second is paler line-and-wash and reads
+lighter. Arbitrating would have thrown one away, which is the thing this document's first rule
+exists to prevent. **The activity plate already supports takes, so both are in** and the seeded
+`tileHash` picks. That is what the mechanism is for, and this is the first time it has been used
+for its actual purpose rather than as a promise.
+
+Both are a partial hit on the brief rather than a clean one: the age and the sex are right and the
+register is not — she reads as a painted figure at rest rather than a traveller who walked here.
+**Accepted as the best the tool would give**, which is the correct trade. A good-enough painting in
+hand beats a perfect one that does not exist.
 
 ## The gaps: prompts for the slots that had none
 
@@ -223,13 +238,13 @@ differs is the picture and — once events have content — what can happen in i
 |---|---|
 | `rest-palace.png` | A swept upper room in a large mud-brick house at night, a good oil lamp burning steadily on a low table beside an open notebook and a folded travelling cloak, a woven mat bed made up on the floor, warm light on plastered walls. |
 | `rest-settlement.png` *(have)* | A borrowed corner of somebody's house at night, bedding laid on a swept floor, a small lamp, a doorway open onto a lane where one other window is still lit. Quiet and slightly crowded. |
-| `rest-roof.png` | Sheltering inside an old stone ruin at night, bedroll laid on flagstones between fallen blocks, a small lamp throwing light up broken walls, open sky visible through a gap overhead. Nobody has lived here in a long time. |
+| `rest-roof.png` *(have)* | Sheltering inside an old stone ruin at night, bedroll laid on flagstones between fallen blocks, a small lamp throwing light up broken walls, open sky visible through a gap overhead. Nobody has lived here in a long time. |
 | `rest-tent.png` *(have)* | A low hide tent pitched and pegged on open ground at dusk, guy-lines taut, a small fire in front of it, the traveller's staff leaned against the entrance. Newly put up and holding. |
 | `rest-bedroll.png` | An oiled cloth bedroll unrolled on bare open ground at dusk, no fire, a satchel for a pillow, wide empty country and a cold sky. It counts as a night and no more. |
 | `rest.png` *(have)* | the generic fallback — keep it |
 
-`rest-camp.png`, `rest-tent.png` and `rest-settlement.png` already exist, so **`roof`, `bedroll` and
-`palace` are what is left**. An unpainted kind falls back to `rest.png`, so these land one at a time.
+Four of the six exist, so **`bedroll` and `palace` are what is left**. An unpainted kind falls back
+to `rest.png`, so these land one at a time.
 
 ### The six place kinds — `src/ui/places/kind-<kind>.png`
 
@@ -320,6 +335,51 @@ authored as a temple in four stacked courses; the painted sheet was a single dom
 plinth, and the recommendation that followed ("regenerate the art") was written *without opening the
 file*. Looking took ten seconds and reversed it. Canon's entity now follows the painting.
 
+**A moon in a night scene is fine, and a note here said otherwise for about an hour.**
+
+The argument made against it was that `question_silver_water`'s wrong resolution is *"the moon
+draws the water"*, corrected by *"It happens under heavy cloud and at every phase"* — so a rest
+plate showing a full moon every night quietly asserts that every night is clear and full.
+
+**That over-applies the question.** It is about the silver water in the drowned dockyard, and its
+correction is a line Thrali says, not an inference a player draws from a painting of a ruin.
+`src/world/weather.ts` not generating `full_moon` is a fact about the *weather roll* and says
+nothing about what a painting may show — and that distinction was collapsed to make the case.
+
+Canon has moon lore and plenty of it: the moon-seed the Narmada Man gives Jambanson, the
+Bhuta-Kāna fig grown from it, the Silver-Leaved Oracle Fig lineage, the Moonseed Vine, and the
+belief that *the moon is an unyielding archive of his ancient grief*. A moon in the sky is
+world-building rather than a contradiction.
+
+**So the moon stays**, and `rest-roof.png` was rebuilt from the untouched raw to put it back. The
+only thing worth watching is the palette — the first version's moon was lavender, and a saturated
+hue is a real objection where the moon itself is not.
+
+**Jewellery is fine. Gold is not.** Canon has an `ornament` item kind and three items in it —
+`item_shell_bead`, `item_ammonite_pendant`, `item_sandalwood_comb` — so people in this world wear
+things and a figure wearing them is right. What canon has no material for is **gold or silver**:
+`crafting.json` runs to `material_native_copper` and `material_bronze` and stops. The words "gold"
+and "silver" appear in canon only as colour adjectives on species names. So: shell, bone, ammonite,
+copper, bronze, sandalwood — never gold.
+
+This entry exists because a review of `rest-roof.png` listed "gold jewellery" as a fault and meant
+only the gold. **Say the checkable half.** A list that bundles a real objection with a taste one
+gets argued with as a whole, and deserves to be.
+
+**Three things have to know what a take is, and for a while only one did.** `rest.2.png` is a
+second take of the same scene, and `src/ui/art.ts` reads a trailing `.<digits>` that way. But:
+
+- **`tools/build-plates.js`'s `idFor` stripped the dot.** Its last step removes everything that is
+  not a letter, a digit or a hyphen, so `rest-roof.2.png` built as `rest-roof2.png` — which parses
+  as a *variant* named `roof2`, matches no shelter kind, and draws nothing.
+- **`test/scenesFolder.test.ts` split on the dot too**, so a correctly-named take failed the guard
+  as an unknown shelter kind.
+
+Which meant the takes mechanism shipped with a loader that could read a take and a builder that
+could not write one — this codebase's signature fault, in miniature, four commits after the
+mechanism landed. Both are fixed and both carry a comment saying why. **If a fourth place ever
+parses a scene filename, it needs the same two lines.**
+
 **A tool's signature survives on a landscape source, and the builder cannot help you.** Gemini
 signs its work with a small four-pointed sparkle in a bottom corner. `build-plates.js` drops the
 bottom tenth to remove exactly that — but **only when the source is taller than it is wide**, because
@@ -330,6 +390,11 @@ Its comment says so and is right: the first version cropped regardless and took 
 lands in the built file. It did on `rest-settlement.png`, sitting on the dark ledge the lamp stands
 on, and no check catches it — `test/scenesFolder.test.ts` asks about the name, the weight, the
 dimensions and the colour type, and a signature is none of those.
+
+**Most of the time the answer is to leave it.** The sparkle is small, low-contrast and lands on
+dark ground; at 512×384 it reads as a highlight. The standing instruction is to ship it. What
+follows is for the case where it is genuinely conspicuous — and crop it out only if there is no
+other way, because the corner has the picture in it.
 
 There are three ways out and only one of them is right:
 

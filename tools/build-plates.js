@@ -622,14 +622,26 @@ function resample(src, box, size = SIZE, height = size) {
  * Canon has three species this would hit, all of them on the Narmada Plateau.
  */
 function idFor(file, word = 'plate') {
-  return path
-    .basename(file, path.extname(file))
+  const base = path.basename(file, path.extname(file));
+
+  // A trailing `.<digits>` is a take number rather than part of the name -- `src/ui/art.ts` reads
+  // it that way and the activity plate chooses between takes on a seeded hash. Hold it aside
+  // before the sanitiser runs, because the last `replace` below strips everything that is not a
+  // letter, a digit or a hyphen, and that includes the dot: `rest-roof.2.png` built as
+  // `rest-roof2`, which parses as a *variant* named "roof2", matches no shelter kind, and draws
+  // nothing. The loader could take a take and the builder could not make one.
+  const take = base.match(/\.(\d+)$/);
+  const name = take ? base.slice(0, -take[0].length) : base;
+
+  const id = name
     .replace(TOOL_NOISE, '')
     .replace(new RegExp(`^${word}[ _-]+`, 'i'), '')
     .trim()
     .toLowerCase()
     .replace(/[_\s]+/g, '-')
     .replace(/[^a-z0-9-]/g, '');
+
+  return take ? `${id}.${take[1]}` : id;
 }
 
 /**

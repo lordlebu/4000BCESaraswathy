@@ -69,7 +69,12 @@ describe('src/ui/scenes holds built scenes and nothing else', () => {
   });
 
   it.each(files)('%s is named after something a gesture asks for', (file) => {
-    const name = file.replace(/\.[^.]+$/, '');
+    // A trailing `.<digits>` is a take number, not part of the name: `rest-roof.2.png` is a second
+    // painting of the same night and `art.ts` picks between the takes on a seeded hash. Strip it
+    // before parsing, or the variant reads as `roof.2` and a legal file fails as an unknown
+    // shelter kind. Three places have to know about takes -- the loader, the builder's `idFor`
+    // and this guard -- and for a while only the loader did.
+    const name = file.replace(/\.[^.]+$/, '').replace(/\.\d+$/, '');
     const [gesture, ...rest] = name.split('-');
     const variant = rest.join('-');
     expect(

@@ -31,13 +31,32 @@ describe('the painting an activity shows', () => {
   /**
    * **A variant with no painting falls back rather than failing.**
    *
-   * This is what makes `rest-roof.png` a file and no code the day somebody paints it, and it is
-   * also what stops the three shelter kinds that have no art of their own from showing nothing.
+   * This is what makes `rest-roof.png` a file and no code the day somebody paints it — and the
+   * first version of this test asserted the opposite of its own comment. It named `roof` among
+   * the kinds that fall back, so **painting `rest-roof.png` broke it**, and the failure read as a
+   * regression in the loader rather than as art arriving. A test that pins which files exist
+   * cannot also be the test that says a new file needs no code.
+   *
+   * So it asserts the invariant instead: every shelter kind resolves to *something*, and that
+   * something is either its own painting or the plain one. That holds however many of the six
+   * have been painted, which is the property worth guarding.
    */
   it('falls back to the gesture when a variant has no painting', () => {
-    for (const shelter of ['bedroll', 'roof', 'none']) {
-      expect(sceneFor('rest', shelter), `${shelter} showed nothing`).toBe(sceneFor('rest'));
+    const plain = sceneFor('rest');
+    for (const shelter of ['palace', 'settlement', 'roof', 'camp', 'tent', 'bedroll', 'none']) {
+      const shown = sceneFor('rest', shelter);
+      expect(shown, `${shelter} showed nothing`).toBeTruthy();
+      if (shown !== plain) {
+        expect(shown, `${shelter} showed a painting that is not its own`).toContain(
+          `rest-${shelter}`
+        );
+      }
     }
+  });
+
+  /** And a variant nobody will ever paint still falls back rather than throwing. */
+  it('falls back for a variant that does not exist at all', () => {
+    expect(sceneFor('rest', 'not-a-shelter-kind')).toBe(sceneFor('rest'));
   });
 
   it('answers null for a gesture nobody has painted', () => {
