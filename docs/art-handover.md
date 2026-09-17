@@ -121,8 +121,10 @@ Keep it varied across the set rather than inside any one picture. So far:
 |---|---|
 | `stoop-mountains.png` | young man, long hair, bare-chested |
 | `fish.png` | young man, long hair, bare-chested |
+| `rest-tent.png` | **older woman, grey, clothed against the cold** |
 
-**Next several should be women, and at least one should be old.**
+**Still wanted: a middle-aged man clothed for work, and a child or a very young person.** Nobody in
+the set is under twenty or over sixty-five, and canon has both.
 
 ## The gaps: prompts for the slots that had none
 
@@ -244,9 +246,15 @@ node tools/build-plates.js --list        # what it would do, without doing it
 reason.
 
 **Never drop a raw straight into `src/ui/`.** It is the right picture at ten times the weight and
-the wrong encoding, and nothing will tell you: the game renders it perfectly and the download grows.
-`stoop-mountains.png` arrived at 1200×896 and 1.7 MB against the other scenes' 512×384 and
-135–162 KB, and came out of the builder at 129 KB.
+the wrong encoding, and the game renders it perfectly — the download just grows.
+`stoop-mountains.png` arrived at 1200×896 and 1.7 MB and came out of the builder at 129 KB.
+
+**`test/scenesFolder.test.ts` now catches that**, which matters most when art is being added by hand
+rather than through one pipeline. It checks four things per file — the name is a gesture or a real
+variant, the size is under 300 KB, the dimensions are the builder's 512×384, and the colour type is
+palettised — and the failure names the command to run. Dropping the 1.7 MB raw in on purpose fails
+two of them with `1685 KB. A built scene is around 130`. `test/platesFolder.test.ts` is the same
+guard for species plates.
 
 ## Gotchas, all of them paid for
 
