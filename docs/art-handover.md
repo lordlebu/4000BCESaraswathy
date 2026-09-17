@@ -81,13 +81,13 @@ replaced — so **a new folder of art needs no code either.**
 
 | Folder | Have | Wanted | Fallback while missing | Finishable? |
 |---|---:|---:|---|---|
-| `src/ui/scenes/` | 5 | ~24 | the plain gesture, then a blank panel | **yes** |
+| `src/ui/scenes/` | 9 | ~24 | the plain gesture, then a blank panel | **yes** |
 | `src/ui/marks/` | 4 | 47 | an emoji in `ThingIcon` | **yes** |
 | `src/ui/places/` | 0 | 6 kinds, then 37 | prose alone | **yes**, at the kind tier |
 | `src/ui/things/` | 0 | 10 kinds, then 143 | the category mark, then an emoji | **yes**, at the kind tier |
 | `src/ui/events/` | 0 | one per event | the night's scene, then a blank panel | n/a — no events authored |
 | `src/ui/plates/` | 20 | 341 | a derived silhouette | **no, by design** |
-| `src/ui/portraits/` | 14 | 15 | a trade-derived silhouette | **yes** — one left |
+| `src/ui/portraits/` | 14 | 15 | a trade-derived silhouette | **yes** — one left, and it is **Anu** |
 
 **Four of those seven are finishable in a sitting or two**, and three of them are finishable
 *twice over* because they have a category tier underneath: six paintings cover every place in the
@@ -113,11 +113,16 @@ game, ten cover all 143 things, ten more cover every item kind. Paint the catego
 Cheapest-first, and each step is independently shippable.
 
 1. **The six nights** — `rest-<shelter>.png`. Six files and the shelter vocabulary means something.
+   **Three done** — `rest-camp`, `rest-tent`, `rest-settlement`. **Three left: `roof`, `bedroll`, `palace`.**
 2. **The six place kinds** — `kind-<poikind>.png` in `places/`. Six files and every place in the game has a view.
 3. **The ten item kinds** — `kind-<itemkind>.png` in `things/`. Ten files and all 143 things have a plate.
-4. **`fish.png`** in `scenes/` — the fourth gesture has no painting at all.
+4. ~~**`fish.png`** in `scenes/` — the fourth gesture has no painting at all.~~ **Done.**
 5. **The ten `kind-*` marks** — the category tier under (3), for anywhere a mark is wanted rather than a plate.
-6. **Vessa's portrait** — the only one of fifteen missing.
+6. **Anu's portrait** — the only one of fifteen missing. A Maru hunter who walks ahead of Terke's
+   herd: *"Mostly I am standing where a thing can see me, so it goes elsewhere and nobody has to do
+   anything about it."* This file said **Vessa** for as long as it has existed and was simply wrong —
+   `src/ui/portraits/vessa.png` is on disk and has been. Count the folder against canon's fifteen
+   `npc_*` ids rather than trusting the sentence.
 7. **Everything else**, forever: species plates, the seventeen making scenes, the individual places and things.
 
 Steps 1–6 are **38 files** and they move every folder except `plates/` from "nothing" to "complete
@@ -172,9 +177,11 @@ Keep it varied across the set rather than inside any one picture. So far:
 | `stoop-mountains.png` | young man, long hair, bare-chested |
 | `fish.png` | young man, long hair, bare-chested |
 | `rest-tent.png` | **older woman, grey, clothed against the cold** |
+| `rest-settlement.png` | **man in his forties, grey-flecked beard, clothed for a day's work** |
 
-**Still wanted: a middle-aged man clothed for work, and a child or a very young person.** Nobody in
-the set is under twenty or over sixty-five, and canon has both.
+**Still wanted: a woman of working age, and a child or a very young person.** Nobody in the set is
+under twenty, and canon has children. Three of the four figures so far are men, against a cast that
+is nine women out of fifteen — so the next two both want women unless the subject argues otherwise.
 
 ## The gaps: prompts for the slots that had none
 
@@ -215,14 +222,14 @@ differs is the picture and — once events have content — what can happen in i
 | File | Subject line |
 |---|---|
 | `rest-palace.png` | A swept upper room in a large mud-brick house at night, a good oil lamp burning steadily on a low table beside an open notebook and a folded travelling cloak, a woven mat bed made up on the floor, warm light on plastered walls. |
-| `rest-settlement.png` | A borrowed corner of somebody's house at night, bedding laid on a swept floor, a small lamp, a doorway open onto a lane where one other window is still lit. Quiet and slightly crowded. |
+| `rest-settlement.png` *(have)* | A borrowed corner of somebody's house at night, bedding laid on a swept floor, a small lamp, a doorway open onto a lane where one other window is still lit. Quiet and slightly crowded. |
 | `rest-roof.png` | Sheltering inside an old stone ruin at night, bedroll laid on flagstones between fallen blocks, a small lamp throwing light up broken walls, open sky visible through a gap overhead. Nobody has lived here in a long time. |
-| `rest-tent.png` | A low hide tent pitched and pegged on open ground at dusk, guy-lines taut, a small fire in front of it, the traveller's staff leaned against the entrance. Newly put up and holding. |
+| `rest-tent.png` *(have)* | A low hide tent pitched and pegged on open ground at dusk, guy-lines taut, a small fire in front of it, the traveller's staff leaned against the entrance. Newly put up and holding. |
 | `rest-bedroll.png` | An oiled cloth bedroll unrolled on bare open ground at dusk, no fire, a satchel for a pillow, wide empty country and a cold sky. It counts as a night and no more. |
 | `rest.png` *(have)* | the generic fallback — keep it |
 
-`rest-camp.png` already exists. An unpainted kind falls back to `rest.png`, so these land one at a
-time.
+`rest-camp.png`, `rest-tent.png` and `rest-settlement.png` already exist, so **`roof`, `bedroll` and
+`palace` are what is left**. An unpainted kind falls back to `rest.png`, so these land one at a time.
 
 ### The six place kinds — `src/ui/places/kind-<kind>.png`
 
@@ -312,6 +319,37 @@ guard for species plates.
 authored as a temple in four stacked courses; the painted sheet was a single domed temple on one
 plinth, and the recommendation that followed ("regenerate the art") was written *without opening the
 file*. Looking took ten seconds and reversed it. Canon's entity now follows the painting.
+
+**A tool's signature survives on a landscape source, and the builder cannot help you.** Gemini
+signs its work with a small four-pointed sparkle in a bottom corner. `build-plates.js` drops the
+bottom tenth to remove exactly that — but **only when the source is taller than it is wide**, because
+squaring a portrait has to lose that height anyway and cropping a square or landscape image does not.
+Its comment says so and is right: the first version cropped regardless and took a camel's feet off.
+
+**Every activity scene is landscape 4:3.** So on `scenes/` that crop never fires and the sparkle
+lands in the built file. It did on `rest-settlement.png`, sitting on the dark ledge the lamp stands
+on, and no check catches it — `test/scenesFolder.test.ts` asks about the name, the weight, the
+dimensions and the colour type, and a signature is none of those.
+
+There are three ways out and only one of them is right:
+
+| | |
+|---|---|
+| Crop it out | **No.** The sparkle is in the corner of the composition and the corner has the picture in it — on this one it would have taken the lamp. |
+| Regenerate | **No.** The painting was good. Throwing away a good painting over 40px is the trade this whole document argues against. |
+| **Paint it out of the raw, then build** | **Yes.** Copy a clean strip of the same material from the *same rows* so the vertical gradient carries, feather the edges, and rebuild. |
+
+On `rest-settlement.png` that was an 80×82 patch at `1046,734` taken from 100px to the left, with a
+14px feather. It took a minute and the seam is invisible at 2×.
+
+**Write the patched raw as truecolour, not through `encodePng`.** The builder's encoder quantises to
+a palette, which is right for the ~130 KB file that ships and wrong for a 1.07 MP raw that has not
+been resampled yet — quantising first and resampling second is strictly worse than the other order.
+Doing it the wrong way round once is why this paragraph exists.
+
+**And say so in the prompt** — "no watermark, no signature" is already hard requirement 3, and it
+did not stop this. The requirement is worth keeping because it works often enough; it is simply not
+something to rely on.
 
 **A raw from an image model does not go in these folders.** It is 2–8 MB rather than ~100 KB and is
 named `Gemini_plate-desert-fox.png`, which nothing will ever ask for — so it ships the megabytes and
