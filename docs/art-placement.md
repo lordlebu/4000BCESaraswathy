@@ -139,11 +139,14 @@ Shown at 16:7 across the top of `PlacePanel`, cropped rather than letterboxed.
 The long queue, and the one that will never finish. `SpeciesIcon` draws a derived silhouette for
 every species and a plate replaces one individually.
 
-**341, not 297**, and the correction is worth keeping: canon 2.22.0 ships 231 fauna and 110 flora
-and **every one of them reaches the engine**. The old figure came from an era when some species were
-held back as `placement: "lore"` — inert, with no ground to stand on. Nothing in `src/` reads
-`placement` at all today, and the bundle carries none anyway, so the drawable set is the whole
-bestiary. See `docs/plate-prompts.md` for the prompts
+**341, not 297.** Canon's source holds 376 species; `export_canon_bundle.py` drops the 35 that are
+`placement: "lore"`, so the bundle this repo reads holds 231 fauna and 110 flora and **every one of
+them reaches the engine**. 341 is therefore the real plate queue — the held-back 35 never appear in
+the game and need no plate.
+
+The holdback is enforced at the **export boundary**, which is why nothing in `src/` reads
+`placement`. Do not conclude from the bundle alone that it has gone: the bundle shows zero `lore`
+because the filter has already run. See `docs/plate-prompts.md` for the prompts
 and the working queue.
 
 **One addition from this rework:** the activity card prefers the animal's plate for a **cast** as

@@ -14,9 +14,13 @@ that do not have one yet, and the things that have gone wrong before.
 gap. So this queue can be worked in any order, in any quantity, by anybody, and each file takes
 effect the moment it lands — no code, no list to update, no build step.
 
-That is not a convenience. It is what keeps art off the critical path: canon holds 341 species and
-one painted plate is a good session's work, so the set will never be complete and no panel may wait
-for it.
+That is not a convenience. It is what keeps art off the critical path: 341 species reach the game
+and one painted plate is a good session's work, so the set will never be complete and no panel may
+wait for it.
+
+(341 rather than canon's 376: `export_canon_bundle.py` drops the 35 species canon marks
+`placement: "lore"`, so they never reach the game and need no plate. The holdback is applied at the
+export boundary, which is why nothing in `src/` reads the field.)
 
 `src/ui/art.ts` globs `./*/*.{svg,png,webp,jpg,jpeg}`, one directory level wider than the loaders it
 replaced — so **a new folder of art needs no code either.**

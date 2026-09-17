@@ -312,12 +312,19 @@ narrower version of the same data.
 sky species now stand on real ground: the islands, the underside and the pool are stamped biomes
 with painted tiles, so a species tagged to one has somewhere to be.
 
-**And the `placement: "lore"` holdback is gone entirely — this file claimed 35 of them, then 85
-before that, and canon 2.22.0 carries none.** All 341 species (231 fauna, 110 flora) reach the
-engine. Worth knowing twice over: nothing in `src/` reads `placement` at all, so "inert by design"
-was never enforced by the game even while it was true of the data — the filter that actually decides
-what a tile can hold is `renderableBiomeIds`, on the biome. If species are ever to be held back
-again, that is a decision for canon's `placement` **and** a reader for it here.
+**Thirty-five species are still held back as `placement: "lore"`, and the holdback is enforced at
+the export boundary rather than here.** Canon's source carries 376 species; `export_canon_bundle.py`
+drops the `lore` ones on the way out, so the bundle this repo reads holds **341** (231 fauna, 110
+flora) and every one of them reaches the engine.
+
+That is why **nothing in `src/` reads `placement` at all**, and it is the right arrangement rather
+than an omission: a species that cannot be placed never crosses the boundary, so there is no runtime
+filter to forget. The day a sky mode places them, `placement` changes in canon and they cross on the
+next export with no game change at all.
+
+**Check the source, not the bundle, before claiming this has changed.** Reading only
+`data/canon/species.json` shows zero `lore` and invites the conclusion that the holdback is gone —
+it is not, it has already been applied.
 
 ### Layers, and the rules between them
 
