@@ -183,6 +183,18 @@ clone. Only a history rewrite does that, and it breaks every clone and every ope
 so this rule is about not making it worse, not about undoing it.
 
 
+**Art is never discarded.** Once accepted it stays — species plates, portraits, sprites, marks,
+scenes, all of it. `src/ui/art-kept.json` records everything ever accepted and
+`test/artKept.test.ts` fails by name if one goes missing, in both directions. Adding art means
+adding a line; if the check fails, **restore the file rather than removing the line.**
+
+**A better painting is an extra take, not a replacement — on the activity plate only.** `rest.png`,
+then `rest.2.png`, and the game shows one of them chosen by a seeded `tileHash` rather than at
+random. That is `scenes/` and `events/`: the painting in the middle of the screen when you do
+something, where two nights are texture. A fauna plate is the record of *that animal* and a portrait
+is a face, so they take one image and keep it — a `.2` in those folders never draws, and the test
+says so.
+
 **Before touching the art, read the programme that produced it:**
 [Repainting South of Tethys](https://claude.ai/code/artifact/2ee2b8c5-e1e5-429a-ba41-334576ce8ba0) — the illustrated version of `docs/endgame-plan.md`, closed in
 August 2026. It records what was measured and declined as well as what shipped, which is the part
@@ -215,6 +227,7 @@ tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side comp
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 | `docs/cozy-systems-plan.md` | the seven systems reworked — what shipped, what is left, and why |
 | `docs/art-handover.md` | **start here for art**: the inventory, the order, the prompts, the gotchas |
+| `src/ui/art-kept.json` | every piece of art ever accepted — **nothing is ever deleted from it** |
 | `docs/art-placement.md` | the mechanism — which folder, which filename, what falls back |
 | `docs/activity-boards-plan.md` | which bench a place has, how it says so — designed, not built |
 | `docs/events-plan.md` | events: the framework, shipped; the content, not |

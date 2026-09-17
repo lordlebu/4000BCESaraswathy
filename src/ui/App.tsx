@@ -1341,6 +1341,18 @@ export function App() {
             activity.resting ??
             (activity.making ? processWord(activity.making) : underfoot?.biome ?? null)
           }
+          /**
+           * Which of this thing's paintings to show.
+           *
+           * Seeded on the tile and the day, like every other choice the game makes — two players
+           * on one seed see the same night. A second painting never replaces a first, so this is
+           * what decides between them; with one painting it changes nothing.
+           */
+          pick={
+            underfoot
+              ? tileHash(underfoot.seed, underfoot.at.x, underfoot.at.y, `take:${activity.day}`)
+              : 0
+          }
           subject={
             activity.resting
               ? SHELTER_LABEL[activity.resting] ?? 'Stop for the night'

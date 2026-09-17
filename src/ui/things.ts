@@ -35,7 +35,7 @@ import { artCount, firstArt } from './art';
  * plate replaces one whenever it arrives.
  */
 export function thingArt(id: string, kind?: string | null): string | null {
-  return firstArt('things', id, kind ? `kind-${kind}` : null);
+  return firstArt('things', [id, kind ? `kind-${kind}` : null]);
 }
 
 /** How many exist. Used by a test, to keep the loader honest about an empty folder. */

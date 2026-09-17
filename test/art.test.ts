@@ -39,10 +39,10 @@ describe('the art registry', () => {
   });
 
   it('tries names in order and stops at the first that exists', () => {
-    expect(firstArt('scenes', 'no-such-scene', 'stoop')).toBe(art('scenes', 'stoop'));
-    expect(firstArt('scenes', 'no-such-scene', 'also-not-there')).toBeNull();
+    expect(firstArt('scenes', ['no-such-scene', 'stoop'])).toBe(art('scenes', 'stoop'));
+    expect(firstArt('scenes', ['no-such-scene', 'also-not-there'])).toBeNull();
     // A null or undefined in the chain is skipped rather than treated as a name.
-    expect(firstArt('scenes', null, undefined, 'stoop')).toBe(art('scenes', 'stoop'));
+    expect(firstArt('scenes', [null, undefined, 'stoop'])).toBe(art('scenes', 'stoop'));
   });
 });
 

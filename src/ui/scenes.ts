@@ -28,10 +28,14 @@ import { artCount, firstArt } from './art';
  * file and no code, and a variant with no painting is not an error. **Nothing is ever blocked on
  * art**: a gesture with no painting at all still opens, still works, and simply has no picture.
  *
+ * **`pick` chooses between takes when there is more than one painting of the same thing.** A second
+ * night is `rest.2.png` and does not replace `rest.png` — both are kept and one is shown. It must
+ * be seeded rather than random; see `art.ts`.
+ *
  * See `docs/art-placement.md` for the full list of filenames this folder will answer to.
  */
-export function sceneFor(gesture: string, variant?: string | null): string | null {
-  return firstArt('scenes', variant ? `${gesture}-${variant}` : null, gesture);
+export function sceneFor(gesture: string, variant?: string | null, pick = 0): string | null {
+  return firstArt('scenes', [variant ? `${gesture}-${variant}` : null, gesture], pick);
 }
 
 /** How many exist. Used by a test, to keep the loader honest about an empty folder. */

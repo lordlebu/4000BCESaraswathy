@@ -8,6 +8,56 @@ that do not have one yet, and the things that have gone wrong before.
 
 ---
 
+## Art is never discarded
+
+**Once a piece of art is accepted it stays, for good.** Not archived, not superseded, not replaced
+by a better one later — kept, and still shown. That covers *everything*: species plates, portraits,
+sprites, marks, scenes.
+
+**Showing one of several takes is narrower — it is the activity plate only.** That is the painting
+in the middle of the screen when you do something: `scenes/` and `events/`. Two nights are texture,
+and a player seeing a different one is a good surprise.
+
+A species plate is not that. It is the record of **that animal**, and swapping between two drawings
+of a desert fox mid-journey would read as two different foxes. A portrait is a face. A place view is
+a place. A mark is a glyph. Those take one image and keep it.
+
+So a second take of a scene is **added as another take**, never a replacement:
+
+```
+scenes/rest.png        the first night
+scenes/rest.2.png      a second night — both are kept, one is shown
+scenes/rest-camp.png   a night at a camp
+scenes/rest-camp.2.png a second of those
+```
+
+A trailing `.<number>` before the extension is a take number and is not part of the name. Everything
+else in the filename still means what it meant: `rest-camp` is the shelter variant, `stoop-mountains`
+is the ground.
+
+**Which take is shown is seeded, never random.** `App` passes a `tileHash` on the tile and the day,
+exactly as every other choice in this game is made, so two players on one seed see the same night
+and a test can assert it. `Math.random` here would quietly make a seed unshareable.
+
+**A `.2` in any other folder will never draw**, because nothing there picks — it parses as a take
+and is then always passed over. `test/artKept.test.ts` fails on it rather than letting it sit.
+
+### How the rule is enforced, because a rule in a document is not one
+
+Deleting a file is one keystroke; the game keeps working, because every lookup has a fallback; and
+no type, lint or test would notice. That is the same shape as every other silent art fault this
+repository has paid for.
+
+So: **`src/ui/art-kept.json` lists everything ever accepted, and `test/artKept.test.ts` fails by
+name the moment one is missing.** It checks both directions — a recorded file that has gone, and a
+file on disk nobody recorded, because an unrecorded one is exactly the one this guard could not
+protect.
+
+**Adding art means adding a line to that file.** That is the whole cost, and it is deliberate: a
+list that regenerated itself would close neatly around a deletion and enforce nothing.
+
+If the check fails, **restore the file — never remove the line.** That is what the rule means.
+
 ## The one rule that makes this safe to hand over
 
 **Every slot already renders something.** A painting **replaces** what is there; it never fills a
