@@ -75,6 +75,55 @@ at the category tier". That is the whole of the leverage.
 
 ---
 
+## Who these people are
+
+**Every figure in this art is somebody from canon's world, and canon says who lives there.** Two
+paintings in and a default was already forming — both were young men, bare-chested, with long dark
+hair. Nobody chose that; it is what a generator returns when the prompt does not say.
+
+### What canon actually holds
+
+The fifteen people in the game belong to **two language groups**, and it is not close:
+
+| | Who | In the cast |
+|---|---|---|
+| **Kia** | the delta's indigenous marsh-dwelling people, oral-tradition bound, co-rulers with the Harappans since the Stone Pact | **9 of 15** — Thrali, Bekh, Dala, Hesh, Ila, Odri, Pell, Sesh, Sura |
+| **Maru** | the inland and upland group — herders, drovers, hunters, scholars | **5 of 15** — Anu, Marn, Okhi, Terke, Vessa |
+
+Canon's wider list runs much further — `harappan`, `vedda`, `jharwa`, `tuli`, `silvershore`,
+`narmada_scholar`, `vanara`, `maya_born` and more, in `database/cultures.json`.
+
+**The cast is majority women: nine of fifteen.** Uma roofs, Hesh keeps the line, Odri scavenges
+iron, Sura reads four hundred years of stratigraphy, Terke droves. None of those is a soft trade.
+
+### What this means for a prompt
+
+**Canon does not describe anyone's face**, and the art must not invent an ethnic marker it has not
+authored. What it *does* give is livelihood, age, sex and people — so vary those, and let the rest
+be ordinary South Asian without further specification.
+
+Four things to put in a subject line, and the fourth is the one that gets forgotten:
+
+1. **Sex, explicitly**, and reach for a woman by default — the cast is 60% women and the generator's
+   default is not.
+2. **An age**, explicitly. Canon has a *senior* copyist and a *junior* archivist, elders and
+   children. A cast of twenty-five-year-olds is a choice nobody made.
+3. **The trade in the body** — a roofer's shoulders, a drover's legs, a copyist's stoop and eyes.
+   This is what stops "diverse" becoming a coat of paint over one figure.
+4. **Clothed for the work and the weather.** The first two came back bare-chested because nothing
+   said otherwise. A delta fisher in the wet and a herder on a cold upland do not dress alike.
+
+### The running tally
+
+Keep it varied across the set rather than inside any one picture. So far:
+
+| File | Who |
+|---|---|
+| `stoop-mountains.png` | young man, long hair, bare-chested |
+| `fish.png` | young man, long hair, bare-chested |
+
+**Next several should be women, and at least one should be old.**
+
 ## The gaps: prompts for the slots that had none
 
 All four use the shared style block. Copy it once, then append one subject line.
