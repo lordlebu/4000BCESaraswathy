@@ -41,6 +41,7 @@ import {
   overdrawFrame,
   ROW_SLOT,
   depthFor,
+  rowAtFoot,
   featureFrame,
   swayFrame,
   traceFrameFor
@@ -955,4 +956,55 @@ describe('the rim sheets are built the way the engine indexes them', () => {
       expect(south, `${sheet}: south face is not deeper than the north lip`).toBeGreaterThan(north * 1.5);
     });
   }
+});
+
+/**
+ * Where a walker is sorted mid-step, which is the bug a road reported from play.
+ *
+ * `WorldScene` used to re-sort the traveller to the *target* row when a step began, so for the
+ * whole 425ms he carried a depth for a row he had not reached. `walker` is slot 5 of 10, which is
+ * exactly half a row of slack -- so an early commitment spent all of it and inverted him against
+ * anything `underfoot` in the row he was still standing on. Every northward step along a road drew
+ * the road over the traveller.
+ */
+describe('rowAtFoot', () => {
+  it('reads the row the feet are in, not the one they are headed for', () => {
+    // The scene anchors the figure two pixels above the bottom of his tile.
+    const footOf = (row: number) => row * GRID + GRID - 2;
+    expect(rowAtFoot(footOf(0))).toBe(0);
+    expect(rowAtFoot(footOf(10))).toBe(10);
+    expect(rowAtFoot(footOf(37))).toBe(37);
+  });
+
+  it('changes row only once the feet cross the boundary, and that is not the halfway point', () => {
+    // **Deliberately asymmetric, because the feet are.** The scene anchors him two pixels above the
+    // bottom edge of his tile, so walking *south* his feet enter the next tile almost at once,
+    // while walking *north* they stay on the tile he is leaving until the last stride. Both are the
+    // honest answer to "which tile is he standing on", and both are what keep a road under him.
+    const from = 10 * GRID + GRID - 2;
+    const north = 9 * GRID + GRID - 2;
+    const south = 11 * GRID + GRID - 2;
+
+    expect(rowAtFoot(from + (north - from) * 0.1)).toBe(10);
+    expect(rowAtFoot(from + (north - from) * 0.9)).toBe(10);
+    expect(rowAtFoot(north)).toBe(9);
+
+    // Southward, the boundary is two pixels away: 2/128 of the step.
+    expect(rowAtFoot(from + (south - from) * 0.05)).toBe(11);
+  });
+
+  it('keeps a road under the traveller for every step of a northward walk', () => {
+    // The reported bug, as arithmetic: walk from row 10 to row 9 and check at every instant that
+    // the road on whichever tile his feet are on is drawn *below* him.
+    const from = 10 * GRID + GRID - 2;
+    const to = 9 * GRID + GRID - 2;
+    for (let t = 0; t <= 1; t += 0.05) {
+      const footY = from + (to - from) * t;
+      const row = rowAtFoot(footY);
+      const walker = depthFor(row, ROW_SLOT.walker);
+      // The road on the tile he is standing on, and on both neighbours he can see.
+      expect(depthFor(row, ROW_SLOT.underfoot)).toBeLessThan(walker);
+      expect(depthFor(row - 1, ROW_SLOT.underfoot)).toBeLessThan(walker);
+    }
+  });
 });

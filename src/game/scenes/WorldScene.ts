@@ -66,7 +66,7 @@ import {
   traceFrameFor
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
-import { ROW_SLOT, depthFor, type Edge } from '../frames';
+import { ROW_SLOT, depthFor, rowAtFoot, type Edge } from '../frames';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 
 /**
@@ -393,6 +393,8 @@ export class WorldScene extends Phaser.Scene {
    */
   private beaten = new Set<string>();
   private moving = false;
+  /** The row the traveller was last sorted into, so an unchanged row costs no display-list sort. */
+  private sortedRow = -1;
   private queuedPath: Point[] = [];
 
   /**
@@ -978,6 +980,12 @@ export class WorldScene extends Phaser.Scene {
    * of him -- which should be nearer the camera than he is -- draws across his face.
    */
   private sortPlayer(row: number): void {
+    // **Guarded, because a depth change is not free.** Phaser flags the whole display list for a
+    // re-sort when any member's depth moves, and this is now called from a tween's `onUpdate` --
+    // sixty times a step. The row is an integer and changes once per step, so comparing it here
+    // turns sixty re-sorts of ~17,650 objects back into one.
+    if (row === this.sortedRow) return;
+    this.sortedRow = row;
     this.player.setDepth(depthFor(row, ROW_SLOT.walker));
     // Over him, under anything standing in the same row: water is in front of a wader and behind
     // the reeds on the bank.
@@ -1520,6 +1528,21 @@ export class WorldScene extends Phaser.Scene {
       this.travellers.push({ traveller, stops, sprite });
     }
 
+    // **Exposed for the browser suite for the same reason `__travellers` is**: a Node test cannot
+    // see a Phaser sprite, and the things that go wrong with the walker are all on this side of the
+    // line -- which row he is sorted into, whether a step is still in flight, what ground he is
+    // standing on. A freeze reported from play as "the whole game is stuck when I move to a
+    // different tile" could not be reproduced at all until a spec could ask where he actually was.
+    (window as unknown as { __walker?: () => unknown }).__walker = () => ({
+      x: this.at.x,
+      y: this.at.y,
+      biome: this.world.tiles[this.at.y]?.[this.at.x]?.biome ?? null,
+      moving: this.moving,
+      depth: this.player.depth,
+      sortedRow: this.sortedRow,
+      queued: this.queuedPath.length
+    });
+
     // **Exposed for the browser suite, which is the only thing that can see a Phaser sprite.**
     // This codebase's signature fault is a layer that is built, tested and connected to nothing --
     // five recorded instances -- and a Node test can prove every rule in `travellers.ts` while the
@@ -1728,9 +1751,19 @@ export class WorldScene extends Phaser.Scene {
       y: target.y * TILE_SIZE + TILE_SIZE - 2,
       duration,
       ease: 'Sine.easeInOut',
-      // Re-sorted at the start of the step rather than the end: he should be behind the grass of
-      // the tile he is entering from the moment he begins to enter it.
-      onStart: () => this.sortPlayer(target.y),
+      // **Sorted by where his feet are, every frame, rather than by which tile he is headed for.**
+      // This was `onStart: () => this.sortPlayer(target.y)`, on the reasoning that he should go
+      // behind the grass of the tile he is entering from the moment he begins to enter it. That is
+      // half a row early, and half a row is exactly the slack `walker` has -- so stepping north off
+      // a road tile sorted him to 195 while the road he was still standing on sat at 200, and the
+      // road drew over him for the whole step. Reported from play, and it was every northward step
+      // on every road on every map.
+      //
+      // `rowAtFoot` has no such argument to get wrong: he is in the row his feet are in. It also
+      // serves the original intent better -- he passes behind the new row's grass when he reaches
+      // it rather than when he sets off. `sortPlayer` early-outs on an unchanged row, so this costs
+      // one display-list sort per step and not one per frame.
+      onUpdate: () => this.sortPlayer(rowAtFoot(this.player.y)),
       onComplete: () => {
         this.moving = false;
         this.arriveAt(target);
