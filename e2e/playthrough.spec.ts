@@ -136,17 +136,20 @@ async function settle(page: Page, before: string, cap: number): Promise<void> {
     .catch(() => undefined);
 }
 
-// `@slow` is what keeps this off the pull-request path -- see `npm run test:e2e:fast` and the
-// browser job in `.github/workflows/ci.yml`.
+// `@slow` no longer keeps this off any branch. It ran only on `main` once, which is how the loop
+// bug below reached `main` at all, and the walk now runs everywhere -- `.github/workflows/ci.yml`
+// shards the suite four ways instead of holding its slowest test back. The tag survives for
+// `npm run test:e2e:slow`, which is this test on its own, locally.
 //
-// **Not a judgement on the test, which is the most valuable one here.** It is the only thing that
-// crosses a whole map on foot and proves a real playthrough finishes, and it is the reason three
-// separate bugs were caught. It is also, unavoidably, four and a half minutes: `STEP_MS` is 425 ms
-// a tile and no amount of test cleverness makes a tween finish sooner.
+// **The most valuable test here.** It is the only thing that crosses a whole map on foot and
+// proves a real playthrough finishes, and it is the reason three separate bugs were caught.
 //
-// That cost is fine once. It is not fine on every push, where it was most of a seventeen-minute
-// job and where it failed four times running for reasons that had nothing to do with the change
-// under review -- which is how a suite teaches people to ignore it.
+// It is also the most expensive: **134 seconds at a runner's size**, measured September 2026,
+// against the 180-second per-test default in `playwright.config.ts` and the 480 this one asks for
+// below. `STEP_MS` is 425 ms a tile and no amount of test cleverness makes a tween finish sooner,
+// so that number only moves when the route does. Worth re-measuring rather than trusting: the
+// comment it replaces said four and a half minutes, from a version of the walk that no longer
+// exists.
 test('walk from the settlement to the landmark and get a page for it', { tag: '@slow' }, async ({ page }) => {
   // Crossing a 36x24 map on foot takes a while: steps are tweened, and wetland and hills are
   // deliberately slower than plains. This is a real playthrough, so it gets a real budget.
@@ -186,8 +189,9 @@ test('walk from the settlement to the landmark and get a page for it', { tag: '@
    * step-fallback that exists to break a deadlock was never reached. The run then exhausted its
    * 110 legs having covered no ground, while a passing run arrived at leg 47.
    *
-   * That is why this test failed on `main` and not on any pull request: the walk is `@slow` and
-   * pull requests skip it, so it only ever ran after the merge.
+   * That is why this test failed on `main` and not on any pull request: the walk was `@slow` at
+   * the time and pull requests skipped it, so it only ever ran after the merge. That is the fault
+   * the sharded browser job exists to stop repeating.
    *
    * Six is two full there-and-back cycles of the three-tile pace above -- long enough not to fire
    * on an honest detour round water, short enough to break the loop with legs to spare.
