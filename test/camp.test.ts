@@ -137,6 +137,45 @@ describe('a camp is not an enclosure', () => {
 
 });
 
+describe('a camp is not pitched next to a town', () => {
+  it('keeps the tents clear of the city\'s own ground', () => {
+    // **The half the place-to-place spacing rule could not see.** Stepping the gap between *places*
+    // down to a floor of two is right for places -- but a town is not a place, it is a patch of
+    // ground a twelfth of the map across, and its edge reaches out from the point canon named.
+    //
+    // Measured over thirty seeds before this: on Narmada the High Camp landed as close as **6
+    // tiles** from the University with the city's own ground **3 tiles** from the tents, while the
+    // place-to-place rule reported itself perfectly satisfied. After: 11 and 8.
+    //
+    // Canon asks for it in words on the other map -- the Nomad Ground's arrival says the rail-head
+    // is "a mile off" -- and the Aravali already delivered fourteen tiles and more, because the two
+    // places want different shores. This is the floor for the map that did not.
+    const seeds = Array.from({ length: 30 }, (_, i) => `clear${i}`);
+    for (const [mapId] of CAMPED) {
+      for (const seed of seeds) {
+        const built = buildFieldMap(fieldMap(mapId)!, { seed });
+        const world = built.world;
+        if (!world.camp) continue;
+
+        // Nothing may be lost to buy the clearance: a place that cannot be put down is a worse
+        // failure than one put down too near.
+        expect(built.unplaced, `${mapId}/${seed}: placing failed under the clearance`).toEqual([]);
+
+        for (const row of world.tiles) {
+          for (const t of row) {
+            if (t.biome !== 'settlement' || inCamp(world, t.x, t.y)) continue;
+            const away = Math.abs(t.x - world.camp.at.x) + Math.abs(t.y - world.camp.at.y);
+            expect(
+              away,
+              `${mapId}/${seed}: the town reaches ${away} tiles from the tents at ${t.x},${t.y}`
+            ).toBeGreaterThanOrEqual(6);
+          }
+        }
+      }
+    }
+  });
+});
+
 describe('places keep their distance, as far as the ground lets them', () => {
   it('almost never puts two places within a tile of each other', () => {
     // **The spacing rule used to degrade straight to "not literally the same tile".** Measured over

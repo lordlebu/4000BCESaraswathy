@@ -406,14 +406,18 @@ function placeOne(
   walkable: Set<BiomeId>,
   palette: Set<BiomeId>,
   taken: Point[],
-  minDistance: number
+  minDistance: number,
+  allowed: (at: Point) => boolean = () => true
 ): Point | null {
   const occupied = (at: Point) => taken.some((t) => t.x === at.x && t.y === at.y);
 
   const rightShore = (t: Tile) => onTheRightShore(world, poi, t);
   const inland = (t: Tile) =>
     t.x >= MARGIN && t.y >= MARGIN && t.x < world.width - MARGIN && t.y < world.height - MARGIN;
-  const exact = gather(world, (t) => suitable(t, poi, walkable) && rightShore(t) && inland(t));
+  const exact = gather(
+    world,
+    (t) => suitable(t, poi, walkable) && rightShore(t) && inland(t) && allowed(t)
+  );
 
   // Best case: the terrain canon asked for, with room around it.
   //
@@ -657,7 +661,9 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   }
 
   for (const poi of poisOn(fieldMap.id)) {
-    const at = anchors.get(poi.id) ?? placeOne(world, poi, walkable, palette, taken, spacing);
+    const at =
+      anchors.get(poi.id) ??
+      placeOne(world, poi, walkable, palette, taken, spacing, clearOfTown(world, poi));
     if (at) {
       placed.push({ poi, at });
       taken.push(at);
@@ -899,4 +905,49 @@ export function pitchableFor(poi: PointOfInterest | null): (tile: Tile) => boole
     if (ground.size === 0) return tile.biome !== 'sea' && tile.biome !== 'sky_underside';
     return ground.has(tile.biome);
   };
+}
+
+/**
+ * How far a camp is kept from a town, in tiles.
+ *
+ * Eight, which is three kilometres at 0.375 km a tile. Canon asks for less in words -- the Nomad
+ * Ground's arrival says the rail-head is "a mile off", which is four and a bit tiles -- and the
+ * Aravali already delivers fifteen and more because the two places want different shores. This is
+ * the floor for the map that did *not* deliver it.
+ */
+const CAMP_CLEARANCE = 8;
+
+/**
+ * The camps, named where they are stamped so the two lists cannot drift.
+ *
+ * Kept as ids rather than derived, because every signature that looked derivable misfires: a camp
+ * is not "kind `settlement` with non-settlement terrain", since that is also the Rail-Head, which
+ * is a town with a roof and a water butt.
+ */
+const CAMP_POIS: ReadonlySet<string> = new Set(['poi_nomad_ground', 'poi_high_camp']);
+
+/**
+ * Where a camp may be pitched, which is not next to a town.
+ *
+ * **Measured, after a first pass that only fixed half of it.** Spacing between *places* was stepped
+ * down to a floor of two tiles, and that is the right rule for places -- but a town is not a place,
+ * it is a patch of ground a twelfth of the map across, and its edge reaches out from the point
+ * canon named. So on Narmada the High Camp could land six tiles from the University with the city's
+ * own ground three tiles from the tents, while the place-to-place rule reported itself satisfied.
+ *
+ * Asked of the settlement *tiles* rather than of the patch's radius, because at placement time the
+ * only settlement tiles on the map are the town's -- the camps are stamped afterwards -- so this
+ * needs to know nothing about how big a patch is or where its centre went.
+ *
+ * Every other point of interest is unaffected: a town's own places want to be in the town.
+ */
+function clearOfTown(world: World, poi: PointOfInterest): (at: Point) => boolean {
+  if (!CAMP_POIS.has(poi.id)) return () => true;
+  const town: Point[] = [];
+  for (const row of world.tiles) {
+    for (const tile of row) if (tile.biome === 'settlement') town.push({ x: tile.x, y: tile.y });
+  }
+  if (town.length === 0) return () => true;
+  return (at) =>
+    town.every((t) => Math.abs(t.x - at.x) + Math.abs(t.y - at.y) >= CAMP_CLEARANCE);
 }
