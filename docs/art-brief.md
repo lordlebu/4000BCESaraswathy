@@ -1211,10 +1211,21 @@ fixed centre.
 **The road ships drawn in code in the meantime**, by `tools/build-road.js`, following
 `tools/build-track.js`, which has drawn the rails that way since the crossing existed. That failure
 above is the argument for it: the fixed width and fixed centre are two constants there, `BAND` and
-`MIDDLE`, and all four frames are drawn from them, so there is nowhere for a frame to disagree.
+`MIDDLE`, and every frame is drawn from them, so there is nowhere for a frame to disagree.
+
+**And the sheet is sixteen shapes now, not four, which is the strongest argument this page has for
+generating it.** A path is a route and a route turns: measured across the four maps at the default
+seed, **26% to 44% of every map's road tiles are an elbow, a junction, a dead end or a lone stone**
+— 43.7% on the Aravali. The four-piece sheet had no frame for any of them, so `planRoad` drew them
+all as a straight bar and the road broke visibly at every turn it made. Growing a generated sheet
+to the full neighbour mask took an afternoon and could not get a seam wrong, because every frame is
+composed from the same half-run; asking a painter for sixteen tiles that all agree about their
+edges is the failure at the top of this section, sixteen times over.
+
 Painted art still replaces it the day a sheet arrives that tiles — the sheet's *shape* is the
-contract, not its pixels — and this is the prompt to get one. It says the edge rule three ways,
-because saying it once did not take:
+contract, not its pixels — and the prompt below is kept for that. **It asks for the old four cells
+and would now need all sixteen**, which is exactly why nobody should ask: the prompt says the edge
+rule three ways already, because saying it once did not take.
 
 > A **terrain sprite sheet for a top-down 2D game**, drawn on a **solid pure magenta background,
 > hex #FF00FF**, arranged as a **1 row × 4 columns grid** of **four square cells**. Each cell shows

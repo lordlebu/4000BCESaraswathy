@@ -22,7 +22,7 @@ import {
   startOnTheSouthernShore
 } from './crossing';
 import { stampBasalt } from './basalt';
-import { easeRoutes, tourOrder } from './routes';
+import { easeRoutes, thinRoad, tourOrder } from './routes';
 
 /**
  * Water a route crosses rather than follows, where the road stops and a ford begins.
@@ -714,6 +714,14 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
     if (!tile || tile.track || FORDED.has(tile.biome)) continue;
     tile.road = true;
   }
+
+  // **And then narrowed to one tile, because a path worn between two places is one path.**
+  // Two legs of the tour often run alongside each other for a stretch, so the flagged line comes
+  // out two tiles wide in places -- 5% to 17% of every map's road tiles sat in a 2x2 block. That
+  // was invisible while the sheet had two frames and both rows drew the same bar; with stubs and
+  // tees in the sheet each row reaches across to the other and it draws as a ladder. `thinRoad`
+  // never disconnects anything: see its header for the invariant it checks rather than assumes.
+  thinRoad(world.tiles, world.width, world.height);
 
   // Put the landmark back, *after* placement has read the ground.
   //

@@ -152,12 +152,21 @@ export const TRACK_SHEET = 'track';
 export const ROPE_SHEET = 'rope';
 
 /**
- * The worn path between the places: the same four pieces again, in packed earth.
+ * The worn path between the places, in packed earth: sixteen neighbour masks, walked and verged.
  *
- * Third sheet on one contract, which is the point of having a contract. Drawn in code by
- * `tools/build-road.js` after a painted sheet came back unable to tile -- see that file's header
- * and `docs/art-brief.md` Asset 2f. Alpha at the band's edges rather than a hard silhouette, so the
- * ground it is worn into shows through and the path sits *in* the grass rather than on it.
+ * **The one sheet on this contract that outgrew four pieces**, because a path is the only one of
+ * these runs that turns often. The rail and the planks are engineered lines that go where they were
+ * surveyed; a route between places bends round every hill, and measured across the four maps a
+ * quarter to nearly half of every road tile is a corner, a junction or an end.
+ *
+ * Drawn in code by `tools/build-road.js` after a painted sheet came back unable to tile -- see that
+ * file's header and `docs/art-brief.md` Asset 2f. Alpha at the band's edges rather than a hard
+ * silhouette, so the ground it is worn into shows through and the path sits *in* the grass rather
+ * than on it.
+ *
+ * Registered at one tile per frame like the others: the sheet wraps to two rows of sixteen and
+ * Phaser numbers frames left-to-right then top-to-bottom, so nothing here has to know about the
+ * wrap.
  */
 export const ROAD_SHEET = 'road';
 

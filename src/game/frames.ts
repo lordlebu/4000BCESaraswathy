@@ -1077,25 +1077,32 @@ export function trackFrame(eastWest: boolean, overgrown: boolean): number {
 }
 
 /**
- * How many pieces the road sheet carries. The track sheet's four, in the track sheet's order.
+ * The four ways a run can leave a cell, as a bitmask. North, east, south, west.
  *
- * The contract is with `tools/build-road.js`, which draws the same four runs in the same sequence
- * for the same reason: north-south, east-west, then the same two with a verge.
+ * Shared by the road below and by anything else that has to say "which of my neighbours is this
+ * connected to". The values are a contract with `tools/build-road.js`, which composes each frame
+ * from one arm per bit set.
  */
-export const ROAD_PIECES = TRACK_PIECES;
-/** And the planks, for the same reason: one shape, three sheets. */
-export const BRIDGE_PIECES = TRACK_PIECES;
+export const RUN_SIDE = { north: 1, east: 2, south: 4, west: 8 } as const;
 
 /**
- * Which piece of path this tile draws.
+ * How many pieces the road sheet carries: the sixteen neighbour masks, walked and with a verge.
  *
- * **Its own function despite being `trackFrame`'s arithmetic**, and the reason is the second
- * argument rather than the first. On a railway the second pair means *derelict* -- nothing has run
- * here in a lifetime, which is a fact about the line. On a path it means a **verge**: grass at the
- * edges of ground that grows grass, which is true of a path on the day it is cut and never true of
- * one over sand. Same index, different question, so a caller reading this signature is told which
- * question it is answering.
+ * **No longer the track sheet's four, and a measurement is why.** A path is a route and a route
+ * turns -- measured across the four maps at the default seed, 26% to 44% of every map's road tiles
+ * are an elbow, a junction, a dead end or a lone stone, and none of those shapes existed. They all
+ * fell through to the north-south run, so a corner drew a bar that overshot north and never reached
+ * west, and the road broke visibly at every turn.
+ *
+ * The contract is with `tools/build-road.js`, which draws masks 0 to 15 walked and then the same
+ * sixteen with a verge, wrapped into two rows of sixteen. Phaser indexes left-to-right then
+ * top-to-bottom, so the wrap costs no arithmetic here.
  */
+export const ROAD_MASKS = 16;
+export const ROAD_PIECES = ROAD_MASKS * 2;
+/** And the planks, on the track sheet's four: one shape, two sheets. */
+export const BRIDGE_PIECES = TRACK_PIECES;
+
 /**
  * Which plank piece to draw. `track.png`'s order exactly -- see `tools/build-bridge.js`.
  *
@@ -1106,8 +1113,48 @@ export function bridgeFrame(eastWest: boolean, worn: boolean): number {
   return trackFrame(eastWest, worn);
 }
 
-export function roadFrame(eastWest: boolean, verge: boolean): number {
-  return (verge ? 2 : 0) + (eastWest ? 1 : 0);
+/**
+ * Which piece of path this tile draws, from the sides the path leaves by.
+ *
+ * **It takes a mask rather than a direction now, and the difference is the corner.** The old
+ * signature was `(eastWest, verge)`, which can say "this run is horizontal" and cannot say anything
+ * else -- so a tile with a neighbour to the west and one to the south answered `false` and drew a
+ * north-south bar through a cell the road turns in.
+ *
+ * `sides` is a bitmask of `RUN_SIDE`, so every shape a route can make has its own frame: two
+ * straights, four elbows, four tees, a cross, four stubs where the road ends, and the lone stone
+ * for a tile with no road neighbour at all.
+ *
+ * **The second argument still means a verge, not disuse**, and that is still where this parts
+ * company with the rail. An unused railway is a fact about the railway; grass at the edge of a path
+ * is true of a path on the day it is cut and never true of one over sand.
+ */
+export function roadFrame(sides: number, verge: boolean): number {
+  return (verge ? ROAD_MASKS : 0) + (sides & (ROAD_MASKS - 1));
+}
+
+/**
+ * Which sides of this tile the run continues on, as a `RUN_SIDE` mask.
+ *
+ * Lives here rather than in the planner because it is the other half of `roadFrame`'s contract:
+ * the function that reads the neighbours and the function that turns them into a frame have to
+ * agree about which bit means north, and one file holding both is how they cannot drift.
+ *
+ * `connected` is asked of a coordinate rather than given a tile, so a caller can answer it from
+ * whatever flag it is drawing -- the road asks about `road`, and anything else laid along a route
+ * can ask about its own.
+ */
+export function runSides(
+  x: number,
+  y: number,
+  connected: (x: number, y: number) => boolean
+): number {
+  return (
+    (connected(x, y - 1) ? RUN_SIDE.north : 0) |
+    (connected(x + 1, y) ? RUN_SIDE.east : 0) |
+    (connected(x, y + 1) ? RUN_SIDE.south : 0) |
+    (connected(x - 1, y) ? RUN_SIDE.west : 0)
+  );
 }
 
 // --- the shore -------------------------------------------------------------

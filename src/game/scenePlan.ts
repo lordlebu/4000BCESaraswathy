@@ -22,6 +22,7 @@ import {
   decorFrame,
   trackFrame,
   roadFrame,
+  runSides,
   EDGE_ORDER,
   EDGE_STEP,
   FENCE_SIDE,
@@ -1496,11 +1497,12 @@ export function planRoad(world: FieldMapWorld['world']): Placement[] {
       const tile = world.tiles[y]![x]!;
       if (!tile.road) continue;
 
-      // East-west when the path's neighbours are to the sides rather than above and below. A lone
-      // tile with neither falls to north-south, as the rail does.
-      const alongX = worn(x - 1, y) || worn(x + 1, y);
-      const alongY = worn(x, y - 1) || worn(x, y + 1);
-      const eastWest = alongX && !alongY;
+      // **Every side the path leaves by, not "is it horizontal".** The old question could only
+      // answer two ways, so a tile with a neighbour west and another south -- a corner, and a
+      // quarter of every map's road is one -- came out north-south and drew a bar across a cell the
+      // route turns in. `runSides` and `roadFrame` share one file so the bit that means north
+      // cannot drift between the reading and the drawing.
+      const sides = runSides(x, y, worn);
 
       // **The second pair of frames is a verge, not disuse**, which is where this parts company
       // with the rail. An unused railway is a fact about the railway; a path through meadow has
@@ -1511,7 +1513,7 @@ export function planRoad(world: FieldMapWorld['world']): Placement[] {
 
       out.push({
         sheet: 'road',
-        frame: roadFrame(eastWest, verge),
+        frame: roadFrame(sides, verge),
         x,
         y,
         // `underfoot`, the same slot the rail uses, and **not a slot of its own one below it**.
