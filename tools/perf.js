@@ -72,17 +72,36 @@ const NOISE_FLOOR = 0.2;
 const PORT = 4188;
 
 /**
- * The map measured, and why it is the default one rather than the biggest.
+ * The map measured, and why Lothal is still the default.
  *
- * The field map is not selectable from the URL -- the game opens on Lothal and the Narmada Plateau
- * is reached by travelling -- so measuring the 64x64 map would mean driving the travel panel, which
- * is a lot of brittleness for a check meant to be run casually. Lothal is 48x48 and carries around
- * 9,600 objects, which is enough to show any regression that matters: a full-screen pass costs the
- * same everywhere, and a per-tile layer shows here at about half the strength it would there.
+ * Lothal is 48x48 and carries around 9,600 objects, which is enough to show any regression that
+ * matters: a full-screen pass costs the same everywhere, and a per-tile layer shows here at about
+ * half the strength it would on the 64x64 map. Keeping the default fixed is what makes a saved
+ * baseline comparable to the next reading.
+ *
+ * **`--map=` exists because the comment here used to say it could not.** It read "the field map is
+ * not selectable from the URL -- the Narmada Plateau is reached by travelling", and that stopped
+ * being true when `?map=` shipped; `App` has read it ever since. The sentence outlived the code,
+ * which is the fault this file exists to catch in numbers and had quietly acquired in prose.
+ *
+ * It earns its keep immediately: a freeze reported from play was on **North Dwarka, walking towards
+ * the basalt columns in the lava field**, and "is that ground dearer to draw than ordinary ground"
+ * was unanswerable without it. Pass a field map id and, if you like, a seed:
+ *
+ *   npm run perf -- --map=field_map_dwarka --seed=lava-hunt
+ *
+ * Compare only readings taken in one sitting -- see the drift note above, which applies to a
+ * map-to-map comparison exactly as it does to a before-and-after one.
  *
  * The hour is fixed at noon so the sky tint is constant, and the seed is fixed so the terrain is.
  */
-const URL_PATH = '/?seed=perf-guard&hour=12';
+const flag = (name) => {
+  const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
+  return hit ? hit.slice(name.length + 3) : null;
+};
+const MAP = flag('map');
+const SEED = flag('seed') ?? 'perf-guard';
+const URL_PATH = `/?seed=${SEED}&hour=12${MAP ? `&map=${MAP}` : ''}`;
 
 /** Frames sampled, and how many are thrown away while the scene settles. */
 const FRAMES = 110;
