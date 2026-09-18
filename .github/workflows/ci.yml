@@ -93,23 +93,38 @@ jobs:
   #
   # **Four shards, because the suite outgrew one runner and the margin was gone before anybody
   # noticed.** This job used to be a single runner with `timeout-minutes: 30`, sized by a comment
-  # that assumed "the suite takes its usual 4 or 5" minutes. Measured in September 2026, in
-  # `mcr.microsoft.com/playwright` at a hosted runner's exact size — 4 CPUs, 16 GB, SwiftShader —
-  # the 129 tests are **45 CPU-minutes of work**, which two workers finish in **22.5 minutes**.
-  # Against a 30-minute cap that is not a margin, it is a coin toss: six runs of the identical
-  # suite on `main` measured 17.3, 21.9, 22.1, 28.6, 29.3 and 29.3 minutes, and run 35345668203
-  # went over and was killed with 49 tests unreported.
+  # that assumed "the suite takes its usual 4 or 5" minutes. Measured in September 2026, at a
+  # hosted runner's size — 4 CPUs, 16 GB, SwiftShader — the 129 tests are **45 CPU-minutes of
+  # work**, which two workers finish in **22.5 minutes**. Against a 30-minute cap that is not a
+  # margin, it is a coin toss: six runs of the identical suite on `main` measured 17.3, 21.9,
+  # 22.1, 28.6, 29.3 and 29.3 minutes, and run 35345668203 went over and was killed with 49 tests
+  # unreported.
   #
-  # Nothing was wrong with the tests. Nothing was skipped to fix it, and nothing is run anywhere
-  # it was not run before — the work is simply spread across four runners, which is what this
-  # file's own comment said to do when the suite got slow: *split it by time, shard the suite, so
-  # no test is left running only where nobody can act on it.* Modelled against the measured
-  # per-file durations the worst shard is **8.2 minutes**, and it is the worst shard that decides
-  # whether this job goes red.
+  # Nothing was wrong with the tests. Nothing was skipped to fix it, and nothing runs anywhere it
+  # did not run before — the work is spread across four runners, which is what this file's own
+  # comment said to do when the suite got slow: *split it by time, shard the suite, so no test is
+  # left running only where nobody can act on it.*
   #
-  # Playwright balances a shard by test *count* rather than by duration, so the four are uneven —
-  # 2.7 to 8.2 minutes. That is fine and is not worth hand-tuning: the point of the change is
-  # headroom, and the slowest shard already has 21 minutes of it.
+  # **Measured on CI, twice, and the pair is the point:**
+  #
+  #                      shard 1   shard 2   shard 3   shard 4
+  #     35354275483        6.6       6.1      16.7       4.4     one flaky walk
+  #     35366992526        6.6       6.1       6.7       3.6     clean
+  #
+  # A clean run is **6.7 minutes at worst and evenly balanced**. The 16.7 was not the shard: the
+  # map crossing blew its own 480-second budget and `retries: 1` re-ran it, which is ten minutes
+  # on one shard. The second run confirms that rather than leaving it inferred.
+  #
+  # **The cap below is sized against 16.7 and not against 6.7 on purpose**, because the flaky
+  # case is the one that actually happens and the one a cap exists for.
+  #
+  # The walk's budget is recorded rather than tuned -- see `docs/testing.md` and the rule there
+  # about measuring a signal before moving a threshold. Two runs is not yet a signal.
+  #
+  # Raising the shard count is unnecessary and barely works anyway, which is worth knowing before
+  # somebody tries it: modelled on the per-file durations, at six the worst shard is 16.3 minutes
+  # and at eight 11.6, because a handful of files dominate -- `reachable.spec.ts` is 6.6 minutes
+  # by itself -- and a file cannot be split across shards.
   browser-shard:
     needs: browser-scope
     runs-on: ubuntu-latest
@@ -120,12 +135,18 @@ jobs:
       fail-fast: false
       matrix:
         shard: [1, 2, 3, 4]
-    # Has to clear the two install steps retrying *and* the suite still running afterwards.
-    # Worked through: deps can spend 12 and the download 15, but a run where both burn their
-    # full budget is already broken. The case to leave room for is the realistic one -- deps
-    # stalls twice and succeeds on the third attempt, about 14 minutes, then a shard takes its
-    # measured 8. That is the number this cap is now sized against, and it fits with room.
-    timeout-minutes: 30
+    # **Sized from the two step budgets below plus the slowest measured shard, and not from a
+    # hope about either.** The install steps bound themselves at 12 and 15 minutes, so 27 is the
+    # worst they can cost; the slowest shard measured 16.7 -- the run with the flaky walk in it,
+    # deliberately, because a cap is for the bad run and not the good one. 27 + 17 is 44, so this
+    # is 45. On a clean run the whole job is under nine minutes.
+    #
+    # The old 30 was the number that broke: it was chosen when the suite was believed to take
+    # four or five minutes, and it stopped bounding a hang and started deciding runs. A cap is
+    # only a backstop here -- Playwright's own 180-second per-test timeout is what actually
+    # bounds a hung test -- so it should be comfortably above the worst honest run rather than
+    # near it.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
 
@@ -254,8 +275,18 @@ jobs:
       - name: Browser suite
         if: needs.browser-scope.outputs.code == 'true'
         run: npm run test:e2e -- --shard=${{ matrix.shard }}/4
+      # **Uploaded whenever the suite ran, not only when the job failed.** `trace: 'on-first-retry'`
+      # captures exactly what a diagnosis needs, and a flaky test is one that *passed* on the
+      # retry -- so under `if: failure()` the job goes green and throws the trace away. That is
+      # how shard 3's 480-second walk timeout on run 35354275483 left nothing to read. It is the
+      # same shape as the fault `playwright.config.ts` already records, where `github` alone wrote
+      # no files and every failed run uploaded an empty artifact.
+      #
+      # It costs about 230 KB per shard on a green run -- the report shell, since a trace is only
+      # written on a retry and a screenshot only on a failure -- so under a megabyte a run, held
+      # for seven days.
       - uses: actions/upload-artifact@v7
-        if: failure() && needs.browser-scope.outputs.code == 'true'
+        if: '!cancelled() && needs.browser-scope.outputs.code == ''true'''
         with:
           # Unique per shard: upload-artifact refuses to write the same name twice in one run.
           name: playwright-report-${{ matrix.shard }}

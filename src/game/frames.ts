@@ -972,6 +972,36 @@ export function depthFor(row: number, slot: number): number {
   return GROUND_DEPTH_BASE + row * ROW_DEPTH + slot;
 }
 
+/**
+ * The row a walker is *standing in*, read off where his feet are in pixels.
+ *
+ * **A step takes 425ms and a row is an integer, so something has to decide when the walker changes
+ * rows — and doing it at either end of the step is wrong.** `WorldScene` used to re-sort him to the
+ * target row in the tween's `onStart`, reasoning that he should go behind the grass of the tile he
+ * is entering from the moment he begins to enter it. That reads well and is half a row early, which
+ * is exactly enough to invert him against anything `underfoot`:
+ *
+ *     stepping north off row 10   player sorted to row 9   depth 195
+ *     the road he is still on     row 10, `underfoot`      depth 200
+ *
+ * — so the road he is walking on drew over him for the whole step, every step, every northward
+ * tile of every road on every map. `walker` is slot 5 of 10: half a row of slack in each direction,
+ * and an early commitment spends all of it.
+ *
+ * Reading the feet has no such tuning. The walker is in the row his feet are in, at every instant,
+ * and the ordering is right at every instant with no argument about when to switch. It also gets
+ * the original intent for free — he passes behind the new row's grass the moment his feet reach
+ * it, rather than the moment he sets off towards it.
+ *
+ * Integer, deliberately: a fractional row would put him between two bands and `scenePlan.test.ts`
+ * holds that every sorted thing sits inside one. It also means the depth changes once per step
+ * rather than once per frame, and Phaser re-sorts the whole display list when a depth moves — on
+ * a map of ~17,650 objects that is the difference between one sort a step and sixty.
+ */
+export function rowAtFoot(footY: number, tileSize: number = GRID): number {
+  return Math.floor(footY / tileSize);
+}
+
 // --- what lies flat -------------------------------------------------------
 
 /**
