@@ -19,7 +19,13 @@ test('a blocked main thread is noticed, described and kept', async ({ page }) =>
     if (m.type() === 'warning' && m.text().startsWith('[stall]')) warnings.push(m.text());
   });
 
-  expect(await page.evaluate(() => (window as any).__stalls?.length ?? -1), 'the watchdog is not mounted').toBe(0);
+  // **Counted from here rather than asserted to be zero, and the first version got that wrong.**
+  // It read `expect(__stalls.length).toBe(0)` on the reasoning that nothing has stalled yet, and CI
+  // answered 1, then 2 on the retry: **booting the scene on a contended runner really does block the
+  // main thread for over a second**, which is the watchdog reporting a fact and the assertion
+  // calling it a bug. A spec about noticing stalls must not require that none happen.
+  const before = (await page.evaluate(() => (window as any).__stalls?.length ?? -1)) as number;
+  expect(before, 'the watchdog is not mounted at all').toBeGreaterThanOrEqual(0);
 
   // Peg the thread for two and a half seconds, which is well past STALL_MS.
   await page.evaluate(() => {
@@ -35,14 +41,17 @@ test('a blocked main thread is noticed, described and kept', async ({ page }) =>
     walker: { x: number; y: number; biome: string } | null;
   }[];
 
-  expect(stalls.length, 'the block went unnoticed').toBeGreaterThan(0);
-  expect(stalls[0]!.lateBy, 'the gap was measured too short to be the block').toBeGreaterThan(1000);
-  expect(stalls[0]!.walker, 'nothing was recorded about where the walker was').not.toBeNull();
-  expect(typeof stalls[0]!.walker!.biome, 'the walker record is not the shape __walker returns').toBe('string');
+  expect(stalls.length, 'the block went unnoticed').toBeGreaterThan(before);
+  // The one this test caused, which is the last one rather than the first: a boot stall may have
+  // got there first, and its walker is legitimately null because the scene was not up yet.
+  const mine = stalls[stalls.length - 1]!;
+  expect(mine.lateBy, 'the gap was measured too short to be the block').toBeGreaterThan(1000);
+  expect(mine.walker, 'nothing was recorded about where the walker was').not.toBeNull();
+  expect(typeof mine.walker!.biome, 'the walker record is not the shape __walker returns').toBe('string');
   expect(warnings.join(' '), 'no console line a phone could show').toMatch(/^\[stall\] stalled \d+ms at \d+,\d+ on \w+/);
 
   // And it survives the reload that usually follows a freeze.
   const kept = await page.evaluate(() => window.localStorage.getItem('sot.stalls'));
   expect(kept, 'nothing was persisted for a session that gets reloaded').toBeTruthy();
-  expect(JSON.parse(kept!).length).toBeGreaterThan(0);
+  expect(JSON.parse(kept!).length).toBeGreaterThan(before);
 });
