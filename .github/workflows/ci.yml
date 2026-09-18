@@ -5,8 +5,8 @@ on:
     branches: ['**']
   pull_request:
   # Catches what neither of the above can: two pull requests that are each green alone and break
-  # something once they are both on `main`. Also the safety net for the full map crossing, which a
-  # pull request no longer runs -- see the browser job.
+  # something once they are both on `main`. Also the safety net for anything that only shows up
+  # on a quiet runner.
   schedule:
     - cron: '0 3 * * *'
 
@@ -34,32 +34,22 @@ jobs:
       - name: Canon data matches the lock
         run: npm run check:data
 
-  # The unit suite runs under Node and cannot see the canvas. This job is the only thing that
-  # proves Phaser still boots and draws — worth its own runner given how new Phaser 4 is.
-  browser:
+  # Is there any code in this change?
+  #
+  # Its own job rather than a step inside the browser job, because there are four browser jobs now
+  # and the answer is the same for all of them. It is also the only one that needs the full history
+  # the comparison below reads, so the shards get the fast shallow clone.
+  browser-scope:
+    timeout-minutes: 5
     runs-on: ubuntu-latest
-    # Has to clear the two install steps retrying *and* the suite still running afterwards.
-    # Worked through: deps can spend 12 and the download 15, but a run where both burn their
-    # full budget is already broken. The case to leave room for is the realistic one -- deps
-    # stalls twice and succeeds on the third attempt, about 14 minutes, then the suite takes
-    # its usual 4 or 5. At 20 that lands on the cap and the job is killed mid-suite with no
-    # report, which is the least useful failure available.
-    timeout-minutes: 30
+    outputs:
+      code: ${{ steps.scope.outputs.code }}
     steps:
-      # Deliberately not `paths-ignore` on the workflow, and not `if:` on the job.
-      #
-      # Both of those stop the check *reporting*, and a required status check that never
-      # reports leaves a pull request pending forever rather than mergeable. `main` is
-      # protected here, so a docs PR that could not merge would be a worse problem than a
-      # five-minute suite. The job therefore always runs and always goes green; it just does
-      # almost nothing when there is no code in the change.
       - uses: actions/checkout@v7
         with:
           # The comparison below needs history, which the default shallow clone does not have.
           fetch-depth: 0
-
-      - name: Is there any code in this change?
-        id: scope
+      - id: scope
         run: |
           # A push to main re-verifies everything: it is the branch that gets deployed, and
           # being wrong there is expensive in a way that saving four minutes is not.
@@ -98,13 +88,54 @@ jobs:
             echo "documentation only — skipping the browser suite"
           fi
 
+  # The unit suite runs under Node and cannot see the canvas. These jobs are the only thing that
+  # proves Phaser still boots and draws — worth their own runners given how new Phaser 4 is.
+  #
+  # **Four shards, because the suite outgrew one runner and the margin was gone before anybody
+  # noticed.** This job used to be a single runner with `timeout-minutes: 30`, sized by a comment
+  # that assumed "the suite takes its usual 4 or 5" minutes. Measured in September 2026, in
+  # `mcr.microsoft.com/playwright` at a hosted runner's exact size — 4 CPUs, 16 GB, SwiftShader —
+  # the 129 tests are **45 CPU-minutes of work**, which two workers finish in **22.5 minutes**.
+  # Against a 30-minute cap that is not a margin, it is a coin toss: six runs of the identical
+  # suite on `main` measured 17.3, 21.9, 22.1, 28.6, 29.3 and 29.3 minutes, and run 35345668203
+  # went over and was killed with 49 tests unreported.
+  #
+  # Nothing was wrong with the tests. Nothing was skipped to fix it, and nothing is run anywhere
+  # it was not run before — the work is simply spread across four runners, which is what this
+  # file's own comment said to do when the suite got slow: *split it by time, shard the suite, so
+  # no test is left running only where nobody can act on it.* Modelled against the measured
+  # per-file durations the worst shard is **8.2 minutes**, and it is the worst shard that decides
+  # whether this job goes red.
+  #
+  # Playwright balances a shard by test *count* rather than by duration, so the four are uneven —
+  # 2.7 to 8.2 minutes. That is fine and is not worth hand-tuning: the point of the change is
+  # headroom, and the slowest shard already has 21 minutes of it.
+  browser-shard:
+    needs: browser-scope
+    runs-on: ubuntu-latest
+    strategy:
+      # Every shard reports. One shard failing must not cancel the other three, because which
+      # tests the others were about to run is exactly what you want to know while reading the
+      # failure.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    # Has to clear the two install steps retrying *and* the suite still running afterwards.
+    # Worked through: deps can spend 12 and the download 15, but a run where both burn their
+    # full budget is already broken. The case to leave room for is the realistic one -- deps
+    # stalls twice and succeeds on the third attempt, about 14 minutes, then a shard takes its
+    # measured 8. That is the number this cap is now sized against, and it fits with room.
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
       - uses: actions/setup-node@v7
-        if: steps.scope.outputs.code == 'true'
+        if: needs.browser-scope.outputs.code == 'true'
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-        if: steps.scope.outputs.code == 'true'
+        if: needs.browser-scope.outputs.code == 'true'
 
       # Chromium was downloaded on every run, which is about a minute of a job that is already
       # the slowest thing in CI. The key carries the Playwright version, so a bump misses the
@@ -115,11 +146,11 @@ jobs:
       # key across several real browser versions and serve a stale binary.
       - name: Playwright version
         id: pw
-        if: steps.scope.outputs.code == 'true'
+        if: needs.browser-scope.outputs.code == 'true'
         run: echo "v=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v6
         id: pw-cache
-        if: steps.scope.outputs.code == 'true'
+        if: needs.browser-scope.outputs.code == 'true'
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pw.outputs.v }}
@@ -148,7 +179,7 @@ jobs:
       # the install failing outright, and refreshing it is far cheaper than re-fetching forty
       # packages.
       - name: Install Chromium's system dependencies
-        if: steps.scope.outputs.code == 'true'
+        if: needs.browser-scope.outputs.code == 'true'
         timeout-minutes: 12
         run: |
           for attempt in 1 2 3; do
@@ -184,7 +215,7 @@ jobs:
       #
       # A cache hit skips the download entirely, so on most runs this does nothing at all.
       - name: Install Chromium
-        if: steps.scope.outputs.code == 'true'
+        if: needs.browser-scope.outputs.code == 'true'
         timeout-minutes: 15
         run: |
           for attempt in 1 2 3; do
@@ -209,23 +240,49 @@ jobs:
       #
       # The failures were not unrelated. The walk was pacing three tiles for seventy legs and
       # running out of budget, because its stuck-detector could only see a traveller frozen on one
-      # tile and not one looping between several. Fixed in `playthrough.spec.ts`; measured after,
-      # the walk takes about a minute rather than four and a half, against a 5.8-minute suite it
-      # runs *in parallel with*. The wall-clock cost of including it is close to nothing.
+      # tile and not one looping between several. Fixed in `playthrough.spec.ts`.
       #
       # What the split did cost was real: `@slow` on `main` only means the walk first runs **after
       # the merge**, so a pull request goes green, merges, and turns `main` red. That happened
       # three times in one sprint. A check that only fails once it is too late to act cheaply is
       # worse than a slightly slower one.
       #
-      # If the walk ever becomes genuinely slow again, split it by *time* rather than by branch --
-      # shard the suite -- so no test is left running only where nobody can act on it.
+      # **The walk is still the single most expensive test and its budget is worth watching.**
+      # Measured at a runner's size it takes 134 seconds against `playwright.config.ts`'s
+      # 180-second per-test timeout -- comfortable but not generous, and the config's own note
+      # calling it "about a minute" is the stale number that let this creep past unread.
       - name: Browser suite
-        if: steps.scope.outputs.code == 'true'
-        run: npm run test:e2e
+        if: needs.browser-scope.outputs.code == 'true'
+        run: npm run test:e2e -- --shard=${{ matrix.shard }}/4
       - uses: actions/upload-artifact@v7
-        if: failure() && steps.scope.outputs.code == 'true'
+        if: failure() && needs.browser-scope.outputs.code == 'true'
         with:
-          name: playwright-report
+          # Unique per shard: upload-artifact refuses to write the same name twice in one run.
+          name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
           retention-days: 7
+
+  # The required status check, and the only reason this job exists.
+  #
+  # `main`'s ruleset requires a check named `browser`, and a matrix reports as `browser-shard (1)`
+  # and so on -- four names that did not exist yesterday and that the ruleset cannot be taught
+  # without somebody editing repository settings every time the shard count changes. This gate
+  # keeps the name the rule already asks for.
+  #
+  # `if: always()` for the reason the scope step was written the way it was: **a required check
+  # that does not report leaves a pull request pending for ever rather than failing it**, which is
+  # worse than a red one. So it runs whatever the shards did, and reads their aggregate result --
+  # `needs.browser-shard.result` is `success` only when every shard succeeded.
+  browser:
+    needs: browser-shard
+    if: always()
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every shard passed
+        run: |
+          echo "shards: ${{ needs.browser-shard.result }}"
+          [ "${{ needs.browser-shard.result }}" = "success" ] || {
+            echo "::error::at least one browser shard did not pass"
+            exit 1
+          }

@@ -227,27 +227,54 @@ Windows `node_modules` dies on the first import inside Linux; the first run inst
 start immediately. And Docker Desktop on Windows adds real filesystem overhead — a full suite that
 CI does in 17 minutes has taken 31 here. **It reproduces behaviour, not timings.**
 
-## The long walk runs on `main`, not on every push
+## The browser suite is sharded four ways, and the cap is what taught us that
 
-`playthrough.spec.ts` is tagged **`@slow`**. A pull request runs the other 49 tests; `main` and a
-nightly schedule run all 50.
+CI runs everything on every push. `browser-shard` is a matrix of `--shard=N/4` and a gate job named
+`browser` reports their aggregate, because `main`'s ruleset requires a check by that name and a
+matrix reports as `browser-shard (1)`.
 
 ```bash
-npm run test:e2e:fast   # what a pull request runs
-npm run test:e2e:slow   # only the map crossing
+npm run test:e2e                     # all of it
+npm run test:e2e -- --shard=3/4      # one shard, exactly as CI runs it
+npm run test:e2e:fast                # a local shortcut; nothing in CI uses it
 ```
 
-Not a judgement on the test — it is the only one that walks a whole map and proves a real
-playthrough finishes, and it has caught three separate bugs. It is also 4.5 minutes at a runner's
-size, because `STEP_MS` is 425 ms a tile and no test cleverness makes a tween finish sooner.
+**Measured, September 2026, at a runner's size.** 129 tests, **45 CPU-minutes of work**, **22.5
+minutes** on two workers. Sharded: 5.0, 5.2, **8.4** and 3.9 minutes — uneven because Playwright
+balances a shard by test *count* rather than by duration, and it is the slowest one that decides
+whether the check goes red. The map crossing alone is **134 seconds**, against a 180-second
+per-test timeout.
 
-That is fine once and wrong on every push. It was most of a seventeen-minute job and it failed four
-times running on causes unrelated to the change under review. **A check that is usually red for
-reasons you did not cause is a check people learn to ignore**, which is worse than not having one.
+**How it broke, which is the part worth keeping.** The suite ran on one runner under
+`timeout-minutes: 30`, and the comment that chose 30 assumed the suite took "four or five" minutes.
+It took twenty-five. Six runs of *the identical suite* on `main` measured 17.3, 21.9, 22.1, 28.6,
+29.3 and 29.3 minutes; three of them landed within forty seconds of the cap and passed. Then run
+35345668203 went over and was killed with 49 tests unreported.
 
-Nothing is skipped, only moved. The walk still guards every merge to `main`, and the nightly catches
-what neither push nor pull request can: two changes that are green alone and break something once
-they are both in.
+Nothing failed. Nothing was flaky. There was no bad commit to find — which is exactly why this took
+a measurement rather than a reading of the diff, and why the first instinct, that the two tests the
+merge added were at fault, was wrong: they cost **17.8 seconds of 2,692**.
+
+Three lessons, and the third is the one this file exists for:
+
+- **A duration in a comment is a claim, and it rots.** Every timing in this section and in
+  `ci.yml` was written from a real measurement and every one of them was years of commits out of
+  date. Re-measure before trusting one, including these.
+- **A job cap is a budget, not a safety net.** If the thing it bounds has grown into it, the cap
+  stops catching hangs and starts flipping coins.
+- **A check whose result depends on how busy the runner was is not a check.** Which is the same
+  finding as the `@slow` split below, arrived at from the other direction.
+
+### The `@slow` split, retired
+
+`playthrough.spec.ts` used to be held off pull requests by its `@slow` tag, so it first ran *after*
+the merge. A pull request went green, merged, and turned `main` red — three times in one sprint. A
+check that only fails once it is too late to act cheaply is worse than a slower one, so the walk
+runs everywhere now and the cost is absorbed by sharding instead.
+
+The tag survives, and earns its keep locally: `npm run test:e2e:slow` is the map crossing on its
+own. It is the only test that walks a whole map and proves a real playthrough finishes, and it has
+caught three separate bugs.
 
 ## The signal has to be the one the thing actually gives
 

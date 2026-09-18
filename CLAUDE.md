@@ -27,8 +27,8 @@ npm install
 npm run dev        # serve at http://localhost:4173 and open a browser
 npm test           # vitest — rules and content under Node, panels under jsdom
 npm run test:e2e   # playwright — does the game actually boot and draw?
-npm run test:e2e:fast # the same, minus the @slow map crossing — what a PR runs
-npm run test:e2e:slow # only the map crossing — what main and the nightly add
+npm run test:e2e:fast # the same, minus the @slow map crossing — a local shortcut, not what CI runs
+npm run test:e2e:slow # only the map crossing
 npm run test:ci    # the same suite in CI's container, at CI's size — see below
 npm run test:watch # vitest in watch mode
 npm run typecheck  # tsc --noEmit
@@ -38,22 +38,35 @@ npm run perf       # frame cost on the renderer CI has -- see docs/rendering.md
 npm run build:sprite # rebuild every traveller's sheet; add an id to do just one
 ```
 
-### The browser suite is split, and the split is deliberate
+### The browser suite runs on four runners, and the split is by time
 
-The full map crossing in `playthrough.spec.ts` is tagged **`@slow`**. A pull request runs
-everything else; `main` and a nightly schedule run the lot.
+CI runs **everything on every push**, sharded four ways: `browser-shard` is a matrix of
+`--shard=N/4`, and a gate job named `browser` reports their aggregate so `main`'s ruleset keeps
+the check name it already requires. `npm run test:e2e:fast` and `:slow` still exist as local
+shortcuts; nothing in CI uses them.
 
-It is not a judgement on the test — it is the only one that walks a whole map and proves a real
-playthrough finishes, and it has caught three separate bugs. It is also **four and a half minutes**
-at a runner's size, because `STEP_MS` is 425 ms a tile and no test cleverness makes a tween finish
-sooner. That is fine once and wrong on every push: it was most of a seventeen-minute job, and it
-failed four times running for reasons unrelated to the change under review. **A check that is
-usually red for reasons you did not cause is a check people learn to ignore**, which is worse than
-not having it.
+**The numbers, because every previous number in this section went stale without anybody noticing.**
+Measured September 2026 at a hosted runner's exact size — 4 CPUs, 16 GB, SwiftShader — the 129
+tests are **45 CPU-minutes of work**, which two workers finish in **22.5 minutes**. Sharded, the
+slowest of the four is **8.4 minutes** and the fastest 3.9, because Playwright balances a shard by
+test *count* rather than by duration. The single most expensive test is the map crossing at
+**134 seconds**, against `playwright.config.ts`'s 180-second per-test timeout.
 
-Nothing is skipped, only moved. The walk still guards every merge to `main`, and the nightly run
-catches the case neither can — two pull requests that are green alone and break something once
-they are both in.
+**What this replaced, and why.** The suite used to run on one runner under `timeout-minutes: 30`,
+sized by a comment that assumed it took "four or five" minutes. It took twenty-five. Six runs of
+the identical suite on `main` measured 17.3, 21.9, 22.1, 28.6, 29.3 and 29.3 minutes — three of
+them within forty seconds of the cap — and then run 35345668203 went over and was **killed with 49
+tests unreported**. Nothing had failed; nothing was even slow in a way a person could read. A
+two-test pull request was enough to tip it, and any of the three before it could have.
+
+Nothing was skipped to fix that and no test moved off any branch. **A check whose result depends on
+how busy the runner was is not a check**, and the fix is headroom: the slowest shard now has
+twenty-one minutes of it. The same reasoning retired the older `@slow` split — that one kept the
+walk off pull requests, so a PR went green, merged, and turned `main` red, three times in one
+sprint. A check that only fails once it is too late to act cheaply is worse than a slower one.
+
+The tag survives on `playthrough.spec.ts` and earns its keep locally: it is the only test that
+walks a whole map and proves a real playthrough finishes, and it has caught three separate bugs.
 
 ### When CI fails and the suite passes here, run `npm run test:ci`
 
