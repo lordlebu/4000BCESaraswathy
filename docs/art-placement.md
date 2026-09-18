@@ -3,6 +3,10 @@
 Every slot the interface will draw a picture into, what a file must be called, and what is on
 screen until one arrives.
 
+> **Doing the art rather than wiring it? Start at `docs/art-handover.md`.** That is the inventory,
+> the order worth working in, prompts for the four slots that had none, and the gotchas. This file
+> is the mechanism underneath it.
+
 **Nothing here is a blocker and nothing here is a gap.** Every slot already renders something — a
 derived silhouette, a category mark, an emoji, or prose alone. A painting *replaces* what is there.
 So this queue can be worked in any order, in any quantity, by anybody, and each file takes effect
@@ -130,10 +134,19 @@ Shown at 16:7 across the top of `PlacePanel`, cropped rather than letterboxed.
 
 **Worth doing first:** the six kinds.
 
-### `plates/` — species · 20 of 297
+### `plates/` — species · 20 of 341
 
 The long queue, and the one that will never finish. `SpeciesIcon` draws a derived silhouette for
-every species and a plate replaces one individually. See `docs/plate-prompts.md` for the prompts
+every species and a plate replaces one individually.
+
+**341, not 297.** Canon's source holds 376 species; `export_canon_bundle.py` drops the 35 that are
+`placement: "lore"`, so the bundle this repo reads holds 231 fauna and 110 flora and **every one of
+them reaches the engine**. 341 is therefore the real plate queue — the held-back 35 never appear in
+the game and need no plate.
+
+The holdback is enforced at the **export boundary**, which is why nothing in `src/` reads
+`placement`. Do not conclude from the bundle alone that it has gone: the bundle shows zero `lore`
+because the filter has already run. See `docs/plate-prompts.md` for the prompts
 and the working queue.
 
 **One addition from this rework:** the activity card prefers the animal's plate for a **cast** as

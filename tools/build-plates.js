@@ -14,6 +14,7 @@
 //   node tools/build-plates.js --list     # what it would do, without doing it
 //   node tools/build-plates.js --portraits
 //   node tools/build-plates.js --scenes   # the activity scenes, which are 4:3 rather than square
+//   node tools/build-plates.js --places   # the place views, 16:7 -- the band above a place's prose
 //
 // CommonJS, like everything in tools/ -- see tools/package.json.
 
@@ -76,6 +77,32 @@ const KINDS = {
     aspect: 4 / 3,
     word: 'scene',
     label: 'activity scene'
+  },
+  /**
+   * A place view: the band across the top of `PlacePanel`.
+   *
+   * **The widest thing here, and the shape is not negotiable.** `.place-view` in `styles.css` is
+   * `aspect-ratio: 16 / 7` with `object-fit: cover`, so anything squarer loses its top and bottom
+   * to the crop rather than being letterboxed.
+   *
+   * 768 is a judgement rather than a measurement, and the judgement is about weight. The dock is
+   * full viewport width and unconstrained, so on a wide desktop this band is drawn at 1400px or
+   * more and 768 is genuinely upscaled -- but it is a soft watercolour behind and above text,
+   * marked `aria-hidden` and decorative, and six of them at a crisper size is a megabyte and a
+   * half of download for a backdrop. `cover` on a wash is forgiving; a sharp line drawing at this
+   * size would not be, and if the art direction ever moves that way this number moves with it.
+   *
+   * Six `poi.kind` values cover every place in the game, so unlike the plate queue this set
+   * finishes. A place with no painting reads exactly as it did before the folder existed.
+   */
+  place: {
+    raw: path.join(ROOT, 'assets', 'source', 'places'),
+    out: path.join(ROOT, 'src', 'ui', 'places'),
+    size: 768,
+    aspect: 16 / 7,
+    word: 'place',
+    label: 'place view',
+    keepUnderscores: true
   }
 };
 
@@ -621,15 +648,36 @@ function resample(src, box, size = SIZE, height = size) {
  *
  * Canon has three species this would hit, all of them on the Narmada Plateau.
  */
-function idFor(file, word = 'plate') {
-  return path
-    .basename(file, path.extname(file))
+function idFor(file, word = 'plate', keepUnderscores = false) {
+  const base = path.basename(file, path.extname(file));
+
+  // A trailing `.<digits>` is a take number rather than part of the name -- `src/ui/art.ts` reads
+  // it that way and the activity plate chooses between takes on a seeded hash. Hold it aside
+  // before the sanitiser runs, because the last `replace` below strips everything that is not a
+  // letter, a digit or a hyphen, and that includes the dot: `rest-roof.2.png` built as
+  // `rest-roof2`, which parses as a *variant* named "roof2", matches no shelter kind, and draws
+  // nothing. The loader could take a take and the builder could not make one.
+  const take = base.match(/\.(\d+)$/);
+  const name = take ? base.slice(0, -take[0].length) : base;
+
+  // **Whether an underscore survives is per kind, and getting it wrong fails silently.**
+  //
+  // A species id is rewritten on the way in -- `fauna_desert_fox` becomes `desert-fox` -- so the
+  // hyphenation below is right for plates and portraits. A *place* is not: `places.ts` looks up
+  // `kind-${poi.kind}` with canon's value kept whole, and three of canon's six kinds carry an
+  // underscore (`travel_node`, `eco_site`, `archaeological_site`). Hyphenating those builds
+  // `kind-travel-node.png`, which matches nothing, throws nothing, and quietly keeps drawing no
+  // painting at all -- the exact failure `places.ts`'s own header warns about, reached from the
+  // other end.
+  const id = name
     .replace(TOOL_NOISE, '')
     .replace(new RegExp(`^${word}[ _-]+`, 'i'), '')
     .trim()
     .toLowerCase()
-    .replace(/[_\s]+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
+    .replace(keepUnderscores ? /\s+/g : /[_\s]+/g, '-')
+    .replace(keepUnderscores ? /[^a-z0-9_-]/g : /[^a-z0-9-]/g, '');
+
+  return take ? `${id}.${take[1]}` : id;
 }
 
 /**
@@ -655,7 +703,7 @@ function sweepMisplaced(kind = KINDS.plate) {
   for (const file of fs.readdirSync(kind.out)) {
     if (!/\.(png|jpe?g|webp)$/i.test(file)) continue;
     const base = path.basename(file, path.extname(file));
-    if (idFor(file, kind.word) === base) continue; // already built
+    if (idFor(file, kind.word, kind.keepUnderscores) === base) continue; // already built
 
     fs.mkdirSync(kind.raw, { recursive: true });
     const to = path.join(kind.raw, file);
@@ -682,7 +730,9 @@ function main() {
     ? KINDS.portrait
     : process.argv.includes('--scenes')
       ? KINDS.scene
-      : KINDS.plate;
+      : process.argv.includes('--places')
+        ? KINDS.place
+        : KINDS.plate;
   sweepMisplaced(kind);
 
   if (!fs.existsSync(kind.raw)) {
@@ -740,7 +790,7 @@ function main() {
   // build silently replaced the plate that had been chosen with whichever name sorted lower.
   const claims = new Map();
   for (const file of files.sort()) {
-    const id = idFor(file, kind.word);
+    const id = idFor(file, kind.word, kind.keepUnderscores);
     if (!id) continue;
     if (!claims.has(id)) claims.set(id, []);
     claims.get(id).push(file);
@@ -757,7 +807,7 @@ function main() {
   let built = 0;
   let skipped = 0;
   for (const file of files.sort()) {
-    const id = idFor(file, kind.word);
+    const id = idFor(file, kind.word, kind.keepUnderscores);
     if (contested.has(id)) continue;
     if (only && id !== only) continue;
     const dest = path.join(kind.out, `${id}.png`);

@@ -32,6 +32,7 @@ import {
   withinReach
 } from '../content/crafting';
 import { cookableNow } from '../content/cooking';
+import { type Station } from '../content/stations';
 import type { Satchel } from '../content/satchel';
 import { KIND_MARK, PROCESS_MARK, ThingIcon } from './ThingIcon';
 import { Modal } from './Modal';
@@ -51,6 +52,18 @@ export interface WorkshopPanelProps {
    * player -- which is the whole bargain of doing the chain for them.
    */
   lastMade: readonly Step[];
+  /**
+   * The bench the player walked up to, or null for the whole workshop.
+   *
+   * **Set when the workshop is opened from a place's station board**, so eighty-three recipes stop
+   * being one list and become the bench in front of them. Null from the control bar, which is the
+   * old behaviour and still the right one when you are standing in a field.
+   *
+   * A filter, never a gate: what can actually be made is `crafting.canMake` as before, and this
+   * only decides what is *shown*. A station cannot make something unmakeable or refuse something
+   * makeable — see `content/stations.ts` for why that direction is load-bearing.
+   */
+  station: Station | null;
   open: boolean;
   onClose: () => void;
 }
@@ -61,14 +74,19 @@ export function WorkshopPanel({
   knows,
   onMake,
   lastMade,
+  station,
   open,
   onClose
 }: WorkshopPanelProps) {
   if (!open) return null;
 
-  const everythingReady = makeableNow(satchel, bench, knows);
-  const near = withinReach(satchel, bench, knows);
-  const here = offeredHere(bench, knows);
+  // Shown or not shown. `atStation` is identity when nothing is selected, so the unfiltered
+  // workshop is exactly the code path it always was rather than a special case.
+  const atStation = (r: Recipe) => station === null || station.processes.includes(r.process);
+
+  const everythingReady = makeableNow(satchel, bench, knows).filter(atStation);
+  const near = withinReach(satchel, bench, knows).filter(atStation);
+  const here = offeredHere(bench, knows).filter(atStation);
 
   /**
    * **Food, given its own heading, and that heading is a repair rather than a flourish.**
@@ -95,8 +113,10 @@ export function WorkshopPanel({
       <section className="diary diary-filling workshop">
         <header className="diary-head">
           <div>
-            <h2>Workshop</h2>
-            <p className="muted">{whereLine(bench, here.length)}</p>
+            <h2>{station ? station.name : 'Workshop'}</h2>
+            {/* At a bench, the bench says what it is; in the open, the place says what it allows.
+                Two different facts, and showing the wrong one is how a header stops being read. */}
+            <p className="muted">{station ? station.description : whereLine(bench, here.length)}</p>
           </div>
           <button type="button" className="diary-close" onClick={onClose}>
             Close
@@ -164,7 +184,9 @@ export function WorkshopPanel({
 
         {ready.length === 0 && near.length === 0 && food.length === 0 && (
           <p className="muted">
-            Nothing to make yet. Gather something, or find somewhere that can work it.
+            {station
+              ? `Nothing for the ${station.name.toLowerCase()} yet. Gather something it can work.`
+              : 'Nothing to make yet. Gather something, or find somewhere that can work it.'}
           </p>
         )}
       </section>

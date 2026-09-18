@@ -183,6 +183,18 @@ clone. Only a history rewrite does that, and it breaks every clone and every ope
 so this rule is about not making it worse, not about undoing it.
 
 
+**Art is never discarded.** Once accepted it stays — species plates, portraits, sprites, marks,
+scenes, all of it. `src/ui/art-kept.json` records everything ever accepted and
+`test/artKept.test.ts` fails by name if one goes missing, in both directions. Adding art means
+adding a line; if the check fails, **restore the file rather than removing the line.**
+
+**A better painting is an extra take, not a replacement — on the activity plate only.** `rest.png`,
+then `rest.2.png`, and the game shows one of them chosen by a seeded `tileHash` rather than at
+random. That is `scenes/` and `events/`: the painting in the middle of the screen when you do
+something, where two nights are texture. A fauna plate is the record of *that animal* and a portrait
+is a face, so they take one image and keep it — a `.2` in those folders never draws, and the test
+says so.
+
 **Before touching the art, read the programme that produced it:**
 [Repainting South of Tethys](https://claude.ai/code/artifact/2ee2b8c5-e1e5-429a-ba41-334576ce8ba0) — the illustrated version of `docs/endgame-plan.md`, closed in
 August 2026. It records what was measured and declined as well as what shipped, which is the part
@@ -214,7 +226,9 @@ half useless here, and the habits that catch this codebase's signature bug — s
 tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side companion.
 | `docs/the-ground-that-gives.md` | gathering, resource nodes, and where the tuning numbers live |
 | `docs/cozy-systems-plan.md` | the seven systems reworked — what shipped, what is left, and why |
-| `docs/art-placement.md` | every slot the interface will draw a picture into, and what falls back |
+| `docs/art-handover.md` | **start here for art**: the inventory, the order, the prompts, the gotchas |
+| `src/ui/art-kept.json` | every piece of art ever accepted — **nothing is ever deleted from it** |
+| `docs/art-placement.md` | the mechanism — which folder, which filename, what falls back |
 | `docs/activity-boards-plan.md` | which bench a place has, how it says so — designed, not built |
 | `docs/events-plan.md` | events: the framework, shipped; the content, not |
 | `docs/ui-streamline-plan.md` | what the chrome costs the map, measured, and the four moves that give it back |
@@ -309,10 +323,21 @@ narrower version of the same data.
 
 **The sky half of that is no longer true, and it was the sky islands that changed it.** Nineteen
 sky species now stand on real ground: the islands, the underside and the pool are stamped biomes
-with painted tiles, so a species tagged to one has somewhere to be. Twenty-six sky species are
-still `placement: "lore"` — the open-sky and high-altitude sets, which have no ground equivalent
-and are inert on purpose — alongside nine Asura conjurations whose tone question is still open.
-Thirty-five in total, against the 85 this file used to claim.
+with painted tiles, so a species tagged to one has somewhere to be.
+
+**Thirty-five species are still held back as `placement: "lore"`, and the holdback is enforced at
+the export boundary rather than here.** Canon's source carries 376 species; `export_canon_bundle.py`
+drops the `lore` ones on the way out, so the bundle this repo reads holds **341** (231 fauna, 110
+flora) and every one of them reaches the engine.
+
+That is why **nothing in `src/` reads `placement` at all**, and it is the right arrangement rather
+than an omission: a species that cannot be placed never crosses the boundary, so there is no runtime
+filter to forget. The day a sky mode places them, `placement` changes in canon and they cross on the
+next export with no game change at all.
+
+**Check the source, not the bundle, before claiming this has changed.** Reading only
+`data/canon/species.json` shows zero `lore` and invites the conclusion that the holdback is gone —
+it is not, it has already been applied.
 
 ### Layers, and the rules between them
 
@@ -677,8 +702,12 @@ readings; change them here and change them there.
   and three creatures; canon species were tagged into them, and they now hold 6 and 7 creatures with
   8 plants each. `mountains` (51) and `desert` (35) are still far richer than `landmark` (4), because
   the bestiary was authored by region and the mountainous and arid regions are the biggest sections.
-  35 species remain `placement: "lore"` — 26 open-sky and 9 Asura, inert by design. It was 85
-  before the sky islands gave the sky-island, underside and pool species ground to stand on.
+  **Thirty-five species are still held back**, and the count in this file has been wrong in both
+  directions: it once claimed 85, and a correction in September 2026 claimed none. Canon's source
+  carries 376 species and marks 35 `placement: "lore"`; `export_canon_bundle.py` drops them, so the
+  bundle holds 341 and shows zero `lore` — which is what the second wrong claim was read off.
+  **Check the source, not the bundle.** Nothing in `src/` reads `placement` because the holdback is
+  applied at the export and there is nothing left to filter.
   **And a biome nothing draws hides its own data errors.** All 31 species carrying `lava_field`
   carried the identical pair `lava_field, mountains` — a bestiary import, not authored biology —
   and it had swept up eight polar species. A glacial ribbon-seal was offered on warm basalt in a

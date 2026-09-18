@@ -133,6 +133,16 @@ export interface ActivityModalProps {
    * the game already uses for exactly this.
    */
   subject?: string | null;
+  /**
+   * Which painting to show, when this thing has more than one.
+   *
+   * **Seeded by the caller, never random.** Two paintings of a night both stay — a second never
+   * replaces a first — so something has to choose, and the determinism rule is absolute here: the
+   * same seed must produce the same world and the same journal text, and a picture is part of what
+   * a player sees. `App` passes a `tileHash`. Zero, the default, is the first take, which is what
+   * every caller did before there were two of anything.
+   */
+  pick?: number;
   onClose: () => void;
   /** Called once, with what the player actually leaves with. */
   onFinish: (taken: Taking[], line: string) => void;
@@ -148,6 +158,7 @@ export function ActivityModal({
   creatureName,
   variant,
   subject,
+  pick = 0,
   onClose,
   onFinish
 }: ActivityModalProps) {
@@ -223,7 +234,7 @@ export function ActivityModal({
   // the gesture scene is the fallback rather than the other way round.
   const picture =
     ((gesture === 'stalk' || gesture === 'fish') && creatureId ? plateFor(creatureId) : null) ??
-    sceneFor(gesture, variant);
+    sceneFor(gesture, variant, pick);
   const what = subject ?? promised[0]?.material.name ?? 'it';
 
   return (

@@ -39,10 +39,10 @@ describe('the art registry', () => {
   });
 
   it('tries names in order and stops at the first that exists', () => {
-    expect(firstArt('scenes', 'no-such-scene', 'stoop')).toBe(art('scenes', 'stoop'));
-    expect(firstArt('scenes', 'no-such-scene', 'also-not-there')).toBeNull();
+    expect(firstArt('scenes', ['no-such-scene', 'stoop'])).toBe(art('scenes', 'stoop'));
+    expect(firstArt('scenes', ['no-such-scene', 'also-not-there'])).toBeNull();
     // A null or undefined in the chain is skipped rather than treated as a name.
-    expect(firstArt('scenes', null, undefined, 'stoop')).toBe(art('scenes', 'stoop'));
+    expect(firstArt('scenes', [null, undefined, 'stoop'])).toBe(art('scenes', 'stoop'));
   });
 });
 
@@ -77,20 +77,40 @@ describe('the doors on top of it', () => {
 
 describe('the two folders opened for the art still to come', () => {
   /**
-   * **Empty is the expected state and must stay legal.** These were opened ahead of the art so the
-   * first painting is a file rather than a sprint. If either ever throws or reports something on an
-   * empty folder, a fresh clone breaks before anybody has drawn anything.
+   * **Empty must stay legal, and so must full.** These were opened ahead of the art so the first
+   * painting is a file rather than a sprint. If either ever throws on an empty folder, a fresh
+   * clone breaks before anybody has drawn anything.
+   *
+   * The first version of this asserted `toBeNull()` for a settlement, which was true on the day it
+   * was written and **broke the moment `kind-settlement.png` landed** — reading as a loader
+   * regression rather than as art arriving. That is the third test in this repository to pin the
+   * current art inventory instead of the behaviour over it. The question a test here may ask is
+   * *what happens when a lookup misses*, never *what has been painted so far*.
    */
   it('report nothing and draw nothing, without complaint', () => {
     expect(placeArtCount()).toBeGreaterThanOrEqual(0);
     expect(thingArtCount()).toBeGreaterThanOrEqual(0);
-    expect(placeArt('poi_lothal_camp', 'settlement')).toBeNull();
-    expect(thingArt('item_bronze_knife', 'tool')).toBeNull();
+    expect(placeArt('poi_nobody_will_ever_paint', 'not-a-kind')).toBeNull();
+    expect(thingArt('item_nobody_will_ever_paint', 'not-a-kind')).toBeNull();
   });
 
   /** A caller with only a kind passes it as both, which is legal and skips the first lookup. */
   it('accept a kind with no id', () => {
-    expect(placeArt('kind-settlement')).toBeNull();
-    expect(thingArt('kind-tool')).toBeNull();
+    expect(placeArt('kind-not-a-kind')).toBeNull();
+    expect(thingArt('kind-not-a-kind')).toBeNull();
+  });
+
+  /**
+   * **A place falls back to its kind**, which is what makes six paintings cover every place in the
+   * game. Canon's `poi.kind` carries underscores on three of its six values and the file keeps
+   * them: `idFor` hyphenates a species id and must not hyphenate this one, or the lookup misses
+   * and nothing is drawn, silently.
+   */
+  it('finds a kind painting for a place that has none of its own', () => {
+    for (const kind of ['settlement', 'travel_node', 'archaeological_site', 'eco_site', 'anomaly', 'wilderness']) {
+      expect(placeArt('poi_nobody_will_ever_paint', kind), `${kind} has no view`).toBe(
+        art('places', `kind-${kind}`)
+      );
+    }
   });
 });

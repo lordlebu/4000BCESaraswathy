@@ -24,6 +24,8 @@ import { discovery } from '../content/knowledge';
 import { npcsAt, poi } from '../content/places';
 import { PersonPortrait } from './PersonPortrait';
 import { placeArt } from './places';
+import { StationBoard } from './StationBoard';
+import { stationsAt, stationsMissing, type Station } from '../content/stations';
 
 /** The face beside a name in the list of who is here. Small: this is an index, not a meeting. */
 const FACE_SIZE = 44;
@@ -63,6 +65,13 @@ export interface PlacePanelProps {
   onLook: (discoveryId: string) => void;
   /** Listen to somebody. They take the dock; this panel comes back when they are done. */
   onTalkTo: (npcId: string) => void;
+  /**
+   * Open the workshop at one of this place's benches, or null to draw the board as a readout.
+   *
+   * Null at `peek`: a pressable mark owes the 44px touch floor where a readout owes 26, and the
+   * dock has measured that difference in chips falling off a landscape phone.
+   */
+  onOpenStation: ((station: Station) => void) | null;
   onClose: () => void;
 }
 
@@ -73,6 +82,7 @@ export function PlacePanel({
   firstVisit,
   onLook,
   onTalkTo,
+  onOpenStation,
   onClose
 }: PlacePanelProps) {
   const [openSub, setOpenSub] = useState<string | null>(null);
@@ -108,6 +118,16 @@ export function PlacePanel({
             Leave
           </button>
         </header>
+
+        {/* What this place can work, before the prose rather than after it: a player who has
+            walked in to use a bench should not have to read a paragraph to find out there is one.
+            `stations.ts` derives it from who is standing here — see that file, and
+            `docs/activity-boards-plan.md`. */}
+        <StationBoard
+          here={stationsAt(place)}
+          missing={stationsMissing(place)}
+          onOpen={onOpenStation}
+        />
 
         {/* Arrival prose is the writing the place exists for, so it gets room — but only the
             first time. Afterwards the shorter line is the honest thing to show. */}

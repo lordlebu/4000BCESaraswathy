@@ -44,28 +44,77 @@ const files = import.meta.glob<string>('./*/*.{svg,png,webp,jpg,jpeg}', {
   import: 'default'
 });
 
-const byFolder = new Map<string, Map<string, string>>();
+/**
+ * Every take of every name, keyed by folder and then by name.
+ *
+ * **A list rather than one image, because art is never replaced here.** A second painting of a
+ * night does not supersede the first — both are kept and one is chosen, so a picture somebody made
+ * goes on being seen. See `artTakes` for the naming and `docs/art-handover.md` for the rule.
+ *
+ * **Only the activity plate picks between takes**, and that is a scoping decision rather than a
+ * limitation of this map. The plate is the painting in the middle of the screen when you do
+ * something — `scenes/` and `events/` — and showing a different one of two nights is texture. A
+ * species is not: a fauna plate is the record of *that animal*, and swapping between two drawings
+ * of a desert fox mid-journey would read as two different foxes. Portraits are a face, a place view
+ * is a place, a mark is a glyph. Those ask for one image and get `art(folder, name)`, which is take
+ * one and stable.
+ *
+ * Sorted, so the order a filesystem happens to return files in cannot change which take a given
+ * seed picks. Without that, the same journey would show different paintings on two machines, which
+ * is the determinism rule broken by an accident of `readdir`.
+ */
+const byFolder = new Map<string, Map<string, string[]>>();
 for (const [path, url] of Object.entries(files)) {
   // `./scenes/rest-camp.png` -> folder `scenes`, name `rest-camp`.
+  // `./scenes/rest-camp.2.png` -> the same name, a second take.
   const parts = path.split('/');
   const folder = parts[parts.length - 2];
-  const name = parts[parts.length - 1]!.replace(/\.[^.]+$/, '');
+  const file = parts[parts.length - 1]!.replace(/\.[^.]+$/, '');
+  // A trailing `.<digits>` is a take number, not part of the name. Anything else stays: a plate
+  // named after a species with a dot in its id would otherwise lose half of itself.
+  const name = file.replace(/\.\d+$/, '');
   if (!folder) continue;
-  const within = byFolder.get(folder) ?? new Map<string, string>();
-  within.set(name, url);
+  const within = byFolder.get(folder) ?? new Map<string, string[]>();
+  within.set(name, [...(within.get(name) ?? []), url].sort());
   byFolder.set(folder, within);
 }
 
 /**
- * The image in `folder` called `name`, or null -- which is the usual answer and not a problem.
+ * Every painting there is of this thing, in a stable order. Empty when there are none.
  *
- * Null is the whole contract. Every caller of this has a fallback it draws instead, and that is a
- * design commitment rather than defensive coding: canon holds a few hundred species and one
- * painted plate is a good session's work, so the set will never be complete and no panel may wait
- * for it.
+ * **The naming is `<name>.png`, then `<name>.2.png`, `<name>.3.png`.** A take number is a trailing
+ * `.<digits>` before the extension and is not part of the name, so `rest.2.png` is a second night
+ * and `rest-camp.2.png` is a second night at a camp. Everything else in the filename still means
+ * what it meant: `rest-camp` is the shelter variant, `stoop-mountains` the ground.
+ *
+ * Meaningful in `scenes/` and `events/` only — see above. A `.2` in any other folder is parsed the
+ * same way and then never chosen, which is a file that will not draw; `test/artKept.test.ts` fails
+ * on it rather than letting it sit there.
  */
-export function art(folder: string, name: string): string | null {
-  return byFolder.get(folder)?.get(name) ?? null;
+export function artTakes(folder: string, name: string): readonly string[] {
+  return byFolder.get(folder)?.get(name) ?? EMPTY;
+}
+const EMPTY: readonly string[] = Object.freeze([]);
+
+/**
+ * One painting of this thing, or null — which is the usual answer and not a problem.
+ *
+ * Null is the whole contract. Every caller has a fallback it draws instead, and that is a design
+ * commitment rather than defensive coding: canon holds a few hundred species and one painted plate
+ * is a good session's work, so the set will never be complete and no panel may wait for it.
+ *
+ * **`pick` chooses between takes and must be seeded, never random.** The determinism rule in this
+ * codebase is absolute — the same seed must produce the same world and the same journal text — and
+ * a painting is part of what a player sees. Callers pass a `tileHash`, like every other choice the
+ * game makes. Omitted, the first take is used, which is what every caller did before there were
+ * two of anything.
+ */
+export function art(folder: string, name: string, pick = 0): string | null {
+  const takes = artTakes(folder, name);
+  if (takes.length === 0) return null;
+  // `>>> 0` rather than `Math.abs`: a hash is unsigned by intent and a negative pick would index
+  // backwards off the end and return undefined, which reads as "no art" rather than as a bug.
+  return takes[(pick >>> 0) % takes.length]!;
 }
 
 /**
@@ -75,18 +124,29 @@ export function art(folder: string, name: string): string | null {
  * plain making scene. The fallback chain is the caller's to state, because only it knows which
  * way the narrowing runs.
  */
-export function firstArt(folder: string, ...names: (string | null | undefined)[]): string | null {
+export function firstArt(
+  folder: string,
+  names: readonly (string | null | undefined)[],
+  pick = 0
+): string | null {
   for (const name of names) {
     if (!name) continue;
-    const found = art(folder, name);
+    const found = art(folder, name, pick);
     if (found) return found;
   }
   return null;
 }
 
-/** How many images a folder holds. Used by tests, to keep the loader honest about an empty one. */
+/**
+ * How many images a folder holds, counting every take.
+ *
+ * Takes rather than names, because this answers "how much art is there" and two paintings of a
+ * night are two paintings. `artNames` answers the other question.
+ */
 export function artCount(folder: string): number {
-  return byFolder.get(folder)?.size ?? 0;
+  let n = 0;
+  for (const takes of byFolder.get(folder)?.values() ?? []) n += takes.length;
+  return n;
 }
 
 /** Which art folders exist and have something in them. For the manifest test and for tooling. */

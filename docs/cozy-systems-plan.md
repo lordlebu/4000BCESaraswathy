@@ -3,8 +3,11 @@
 Crafting, apothecary, cooking, building, stalking, fishing and resting — made simple, made
 intuitive, and made to cost one press.
 
-**Status: Phases 1, 2, 2b and 5 shipped. Phase 3 is art, and is deliberately not a blocker.
-Phase 4 — activity boards — is designed in `docs/activity-boards-plan.md` and not built.**
+**Status: Phases 1, 2, 2b and 5 shipped and merged (PR #192). Phase 3 is art, handed over in
+`docs/art-handover.md` and deliberately not a blocker. Phase 4 — activity boards — is designed in
+`docs/activity-boards-plan.md` and not built.**
+
+What is left is listed at the bottom of this file, under **What remains**.
 
 Written during the work rather than after it, because the middle of it is where somebody else
 needs to be able to pick it up. `docs/the-ground-that-gives.md` is the map to the resource layer
@@ -268,3 +271,83 @@ Eight stations, derived rather than authored, in the way `gestures.ts` and `rout
 derive. Additive before subtractive, and a reachability test before any narrowing — because a
 narrowing made game-side is invisible to canon's `check_playability.py`, and the two repositories
 would disagree while every check on both sides stayed green.
+
+---
+
+## What remains
+
+Written at the end of the sprint so the next session does not have to reconstruct it. Nothing here
+is blocking anything else; they are independent.
+
+### Art — handed over, not started
+
+`docs/art-handover.md` is the whole of it: the inventory, the order, prompts for the four slots that
+had none, and every gotcha that has cost an asset. **38 files** take every folder except `plates/`
+from nothing to complete at the category tier.
+
+Every slot renders something today, so this can be picked up by anybody, in any order, at any time.
+
+### Activity boards — built, additive
+
+`docs/activity-boards-plan.md`. Eight benches derived from who stands where, a strip of marks under
+the place's name, and the workshop filtered to the bench you walked up to.
+
+**The reachability test found a real narrowing on its first run** — `worksProcess` refused
+`process_retting` at the Alms Step, which canon allows, because eleven of the seventeen processes
+name no site and several sit on benches only some places have. The composition moved *inside* the
+function, so no caller can get it wrong and the layer is structurally incapable of closing a
+process.
+
+Only the eight marks are left, and they are art.
+
+### Events — framework complete, content not written
+
+`docs/events-plan.md`. The two framework gaps are closed:
+
+- **All three occasions have callers.** `night` from `night-passed`, `arriving` from `poi-reached`
+  (not `standing-on`, which re-fires on every return visit), `road` from `tile-entered` **at most
+  once per in-game day** — a rhythm the game already has, rather than a die rolled eighty times a
+  day.
+- **`seen` is in the save**, as `Journey.seenEvents` — optional and unversioned, following
+  `characterId`'s precedent, because absent means "none so far" and that is true of every journey
+  written before events existed.
+
+**Authoring events is the only thing left**, and it is content rather than framework.
+
+### Two numbers, now measured
+
+`REMEDY_EASES` (0.5) and `MEAL_EASES` (0.25) in `tiers.ts`. They shipped as guesses with "wants a
+playthrough" beside them — and a playthrough is still how *feel* gets settled, but what they are
+*worth* is arithmetic and had never been done. From the game's own constants:
+
+| | steps given back | pace |
+|---|---:|---|
+| a day of walking | 80 | — |
+| rested → spent | 320 (four days) | 1.00 → 1.60 |
+| remedy at 25% tired | 40 | 1.15 → 1.07 |
+| remedy at 100% tired | 160 | 1.60 → 1.30 |
+| meal at 25% tired | 20 | 1.15 → 1.11 |
+| meal at 100% tired | 80 | 1.60 → 1.45 |
+
+A fraction of what is *carried*, never an absolute — so a remedy taken fresh is nearly wasted and
+one taken spent is worth two days of walking, which is the right shape for a thing you carry and
+pick a moment for. Neither can ever fully rest you; that stays the night's job.
+
+`test/fatigue.test.ts` pins the four properties rather than the magnitudes: a physic beats a meal,
+neither fully rests, neither does nothing, and both scale with how tired he actually is.
+
+### The endgame is out of scope and knows it
+
+Settling down on the survival train is not ready. When it lands it changes one thing here: **a place
+you built should outrank a roof somebody lends you**, which is a seventh rung on the shelter ladder
+and belongs with that work rather than ahead of it.
+
+### Doc drift found and fixed on the way out
+
+Two claims had gone stale and are corrected in this sprint:
+
+- **`placement: "lore"` is gone.** `CLAUDE.md` claimed 35 species were held back, and 85 before
+  that; canon 2.22.0 carries none and all 341 reach the engine. Worth knowing twice: **nothing in
+  `src/` reads `placement` at all**, so the holdback was never enforced game-side even while it was
+  true of the data. `renderableBiomeIds` is what actually decides whether a species has ground.
+- **The plate queue is 341, not 297.** Same cause.

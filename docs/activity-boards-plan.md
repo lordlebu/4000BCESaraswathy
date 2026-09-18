@@ -2,7 +2,7 @@
 
 What a place can *work*, how it says so, and the icons that carry it.
 
-**Status: designed, not built.** The sleeping ladder in this sprint shipped; this did not. Written
+**Status: built, additive. The marks are the only part left, and they are art.** The sleeping ladder in this sprint shipped; this did not. Written
 first because it changes `placeAllows`, which is a rule canon co-owns — getting it wrong strands a
 recipe, and canon's `check_playability.py` cannot see a narrowing the game makes on its own.
 
@@ -162,8 +162,45 @@ a pipeline, where the terrain art does because it tiles a world.
 
 ## Order of work
 
-1. `content/stations.ts` — the eight, the process grouping, and the derivation from people and kind. Pure, tested.
-2. The reachability test, before anything narrows.
-3. `StationBoard` in `PlacePanel`, additive only.
-4. Workshop filtering by station.
-5. The eight marks. **Last, and never blocking.**
+1. ~~`content/stations.ts`~~ — **done.** The eight, the grouping, the derivation from people and kind.
+2. ~~The reachability test~~ — **done**, and it found the fault below.
+3. ~~`StationBoard` in `PlacePanel`~~ — **done**, additive only.
+4. ~~Workshop filtering by station~~ — **done.** A filter, never a gate.
+5. **The eight marks — still to do, and never blocking.** Emoji stand-ins today; a drawn
+   `station-kiln.svg` lands in `src/ui/marks/` and appears with no code. See `docs/art-handover.md`.
+
+## What the reachability test found, on its first run
+
+**`worksProcess` narrowed, and the composition was in the wrong place.** The first version returned
+the station-derived answer alone and left the caller to compose it with `crafting.placeAllows` — a
+rule somebody forgets. Eleven of canon's seventeen processes name **no site at all**, and several
+sit on benches only some places have, so a bare station check refused `process_retting` at the Alms
+Step, which canon says is fine. That is precisely the narrowing invisible to
+`check_playability.py`.
+
+Fixed by putting the composition **inside** `worksProcess`: canon's answer first, the station
+second, `||` between them. No caller can now get it wrong, and the layer is structurally incapable
+of closing a process.
+
+Two smaller corrections from the same run:
+
+- **Reachability is asserted of processes, not benches.** The first version asked whether every
+  bench existed on every map and failed on Dwarka, which has no apothecary anywhere. Not a fault:
+  purifying and drying name no site, so they are performable there regardless, and a map with no
+  apothecary to *show* is true. What would be a fault is a process nobody on that map can perform.
+- **Wilderness has a tannery**, because Terke the drover and Marn the herder stand at fords. The
+  test asserted `['bench','hearth']` flat and was wrong about the game rather than about the code.
+
+## What it looks like in play
+
+Settlements keep everything — that is the additive floor, and it is what makes this safe. The
+differentiation is at the places that are *not* settlements, which is where it was missing:
+
+| Place | Kind | Benches |
+|---|---|---|
+| The Quiet Atelier | archaeological_site | bench, hearth, **apothecary** — Ila |
+| The Long Archive | archaeological_site | bench, hearth, **apothecary** — Okhi |
+| The Second Line | archaeological_site | bench, hearth, **kiln** — Odri |
+| The Black Pavement | archaeological_site | bench, hearth, **quern** — Sesh |
+| The Bone Midden | archaeological_site | bench, hearth |
+| The Caravan Ground | travel_node | bench, hearth, slip |

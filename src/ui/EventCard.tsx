@@ -38,12 +38,14 @@ export interface EventCardProps {
    * anyway. **Nothing is blocked while the art is missing.**
    */
   shelter?: string | null;
+  /** Which painting, when there is more than one. Seeded by the caller — see `art.ts`. */
+  pick?: number;
   /** Called once, with the choice taken and the line it writes. */
   onChoose: (choice: Choice) => void;
   onClose: () => void;
 }
 
-export function EventCard({ event, holds, shelter, onChoose, onClose }: EventCardProps) {
+export function EventCard({ event, holds, shelter, pick = 0, onChoose, onClose }: EventCardProps) {
   /**
    * The line the chosen option wrote, once one has been taken.
    *
@@ -64,7 +66,7 @@ export function EventCard({ event, holds, shelter, onChoose, onClose }: EventCar
 
   // The event's own painting, then the night's, then nothing. Every step is optional and the card
   // keeps its shape at each one, so it does not jump when art lands.
-  const picture = art('events', event.art) ?? (shelter ? sceneFor('rest', shelter) : null);
+  const picture = art('events', event.art, pick) ?? (shelter ? sceneFor('rest', shelter, pick) : null);
   const choices = choicesFor(event, holds);
 
   return (

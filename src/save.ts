@@ -164,6 +164,19 @@ export interface Journey {
    * and every node would be as freshly cut as the hour it was cut.
    */
   travelled: number;
+  /**
+   * Which events have already happened, so a `once` event does not come round again.
+   *
+   * **Optional rather than versioned, and that follows `characterId`'s precedent above.** Absent
+   * means "none, so far" — which is true of every journey written before events existed, because
+   * there were none to have. Bumping `SAVE_VERSION` would discard every save in the world to
+   * record something that is already true of all of them, and throwing away a player's progress
+   * to remember an empty list is the wrong trade by a wide margin.
+   *
+   * A flat list of ids rather than a record, because the only question ever asked of it is
+   * membership. `content/events.ts` decides what goes in; this only stores it.
+   */
+  seenEvents?: string[];
 }
 
 const empty = (): Journey => ({
@@ -174,7 +187,8 @@ const empty = (): Journey => ({
   progress: emptyProgress(),
   satchel: emptySatchel(),
   nodes: noNodes(),
-  travelled: 0
+  travelled: 0,
+  seenEvents: []
 });
 
 /** Anything unrecognisable becomes an empty progress rather than a half-read one. */
@@ -259,7 +273,13 @@ export function loadJourney(seed: string): Journey {
       travelled:
         typeof parsed.travelled === 'number' && Number.isFinite(parsed.travelled) && parsed.travelled >= 0
           ? parsed.travelled
-          : 0
+          : 0,
+      // Only strings, and absent reads as none. A stored value from some future shape must not
+      // reach `canHappen` as an object, where it would silently never match an id and quietly
+      // replay every `once` event the player has already had.
+      seenEvents: Array.isArray(parsed.seenEvents)
+        ? parsed.seenEvents.filter((id): id is string => typeof id === 'string')
+        : []
     };
   } catch {
     localStorage.removeItem(key(seed));

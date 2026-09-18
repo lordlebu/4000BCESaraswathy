@@ -42,7 +42,7 @@ const base = {
 describe('the workshop', () => {
   it('renders nothing when closed', () => {
     const { container } = render(
-      <WorkshopPanel {...base} satchel={emptySatchel()} open={false} />
+      <WorkshopPanel station={null} {...base} satchel={emptySatchel()} open={false} />
     );
     expect(container.firstChild).toBeNull();
   });
@@ -52,7 +52,7 @@ describe('the workshop', () => {
     // actually offer it and actually call back.
     const onMake = vi.fn();
     const s = add(emptySatchel(), 'material_flint', 2);
-    render(<WorkshopPanel {...base} satchel={s} onMake={onMake} />);
+    render(<WorkshopPanel station={null} {...base} satchel={s} onMake={onMake} />);
 
     expect(screen.getByText('Knapping a flint knife')).toBeTruthy();
     const make = screen.getAllByRole('button', { name: 'Make' })[0]!;
@@ -64,7 +64,7 @@ describe('the workshop', () => {
     // One reed is not a rope. The panel must not merely grey the row out — the reason is the
     // useful part, and it comes from `blockedBy` rather than being written here.
     const s = add(emptySatchel(), 'material_reed_fibre', 1);
-    render(<WorkshopPanel {...base} satchel={s} />);
+    render(<WorkshopPanel station={null} {...base} satchel={s} />);
     expect(screen.getByText('Twisting reed rope')).toBeTruthy();
     expect(screen.getByText(/needs 4 Reed fibre, has 1/)).toBeTruthy();
     // And the button for it is dead rather than absent, so the player can see it is a thing.
@@ -77,10 +77,10 @@ describe('the workshop', () => {
     // Firing needs a settlement. On open ground the panel must say so rather than offering it.
     let s = add(emptySatchel(), 'material_river_clay', 4);
     s = add(s, 'material_dung_cake', 4);
-    const { rerender } = render(<WorkshopPanel {...base} satchel={s} />);
+    const { rerender } = render(<WorkshopPanel station={null} {...base} satchel={s} />);
     expect(screen.getAllByText(/needs to be done at a settlement/).length).toBeGreaterThan(0);
 
-    rerender(<WorkshopPanel {...base} satchel={s} bench={{ kind: 'settlement' }} />);
+    rerender(<WorkshopPanel station={null} {...base} satchel={s} bench={{ kind: 'settlement' }} />);
     expect(screen.queryAllByText(/needs to be done at a settlement/)).toHaveLength(0);
   });
 
@@ -91,13 +91,13 @@ describe('the workshop', () => {
     // can smelt and never find out. Standing somewhere is itself a reason to show a recipe.
     const empty = emptySatchel();
 
-    const { rerender } = render(<WorkshopPanel {...base} satchel={empty} />);
+    const { rerender } = render(<WorkshopPanel station={null} {...base} satchel={empty} />);
     expect(
       screen.getByText(/Out in the open/),
       'open ground should say plainly that it is hand work only'
     ).toBeTruthy();
 
-    rerender(<WorkshopPanel {...base} satchel={empty} bench={{ kind: 'settlement' }} />);
+    rerender(<WorkshopPanel station={null} {...base} satchel={empty} bench={{ kind: 'settlement' }} />);
     expect(screen.getByText(/can be made here that cannot be made in the open/)).toBeTruthy();
     // And the recipes themselves are listed, empty-handed, rather than waiting for materials.
     expect(screen.getAllByRole('button', { name: 'Not yet' }).length).toBeGreaterThan(0);
@@ -109,7 +109,7 @@ describe('the workshop', () => {
     // could never appear however many files landed in `src/ui/marks/`.
     let s = add(emptySatchel(), 'material_reed_fibre', 12);
     s = add(s, 'material_grain', 12);
-    const { baseElement } = render(<WorkshopPanel {...base} satchel={s} />);
+    const { baseElement } = render(<WorkshopPanel station={null} {...base} satchel={s} />);
 
     const verbs = [...baseElement.querySelectorAll('.recipe-verb')].map((n) => n.textContent ?? '');
     expect(verbs.length, 'no recipes listed, so this proves nothing').toBeGreaterThan(0);
@@ -121,7 +121,7 @@ describe('the workshop', () => {
 
   it('closes when asked', () => {
     const onClose = vi.fn();
-    render(<WorkshopPanel {...base} satchel={emptySatchel()} onClose={onClose} />);
+    render(<WorkshopPanel station={null} {...base} satchel={emptySatchel()} onClose={onClose} />);
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });

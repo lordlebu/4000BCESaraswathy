@@ -70,3 +70,7 @@ assets/source/portraits/
 # Kept on disk rather than deleted, the same arrangement as assets/source/dump/: that directory is
 # the provenance record for the art, and this is the provenance record for the brief.
 dump/
+
+# Raw place views, on the same footing as the scenes and plates above: 2-4 MB each against the
+# ~200 KB band that ships into src/ui/places/. Six of them cover every place in the game.
+assets/source/places/
