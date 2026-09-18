@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.25.1",
+  "canon_version": "2.25.2",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -2465,7 +2465,7 @@
     {
       "id": "item_cane_chime",
       "type": "item",
-      "name": "Bhoomwhacker",
+      "name": "Bamboomer",
       "kind": "instrument",
       "affords": [
         "play",
@@ -2475,7 +2475,7 @@
         "material_bamboo_cane",
         "material_reed_fibre"
       ],
-      "notes": "A hand of canes cut to length and bound at the grip, struck against each other, against a saddle, or against whatever is nearest. Each length gives one note and only one, which is why the delta counts an interval in cane rather than in numbers -- two hands of cane is a phrase, and anybody who has walked with a singer knows roughly how far that is.\n\nTuned by shortening, so it only ever goes up. A set that has been on the road ten years is a set that started lower.\n\n**The name is the noise and the ground at once.** *Bhoom* is what a cane does when it is struck and also what the delta calls the ground it grew out of, and nobody who uses the word is doing anything as deliberate as a pun. It is the only instrument here named for its sound rather than its material, which is fair: a flute is a cane and a sitar is a shell, and this is a noise somebody made on purpose before it was an object.",
+      "notes": "A hand of canes cut to length and bound at the grip, struck against each other, against a saddle, or against whatever is nearest. Each length gives one note and only one, which is why the delta counts an interval in cane rather than in numbers -- two hands of cane is a phrase, and anybody who has walked with a singer knows roughly how far that is.\n\nTuned by shortening, so it only ever goes up. A set that has been on the road ten years is a set that started lower.\n\n**The name is the cane and the noise in one word**, which is more than the other two manage: a flute is named for what it is made of and a sitar for its shape, and this is named for both at once. Nobody who says it is doing anything as deliberate as a joke -- it is simply what a bamboo does when you hit it, said quickly.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
