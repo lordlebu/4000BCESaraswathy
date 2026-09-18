@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.22.0",
+  "canon_version": "2.23.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -4298,6 +4298,40 @@
       "mood": "uncanny",
       "source_index": 259,
       "placement_note": "Placeable since the pools were stamped. Tagged to the underside as well because that is the half of its life a walker on the rim can actually see."
+    },
+    {
+      "id": "fauna_drovers_dog",
+      "type": "fauna",
+      "name": "Drover's Dog",
+      "aliases": [
+        "Road dog",
+        "Ford dog"
+      ],
+      "scientific": "Canis familiaris pastoralis",
+      "clade": "mammal",
+      "diet": "Omnivore",
+      "habitats": [
+        "region_aravali",
+        "region_narmada_plateau",
+        "region_saraswati_delta"
+      ],
+      "behaviour": [
+        "commensal",
+        "herd",
+        "guide"
+      ],
+      "notes": "Belongs to nobody in particular and to whichever string of animals is going the right way. It attaches itself at one camp and detaches at another, which over a season carries it further than any of the people it walked with. The drovers do not feed it and would notice at once if it were not there.",
+      "biomes": [
+        "plains",
+        "settlement",
+        "coast",
+        "hills"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "mood": "patient",
+      "journal_prompt": "It has been forty paces ahead since the ford and has not once looked back to check you are still coming, which is either trust or indifference and is probably both.",
+      "source_index": 260
     }
   ],
   "flora": [
@@ -6544,6 +6578,66 @@
       "rarity": "rare",
       "journal_prompt": "Hooded blue flowers on a stem in wet upland shade, the root pale and forked like a small hand.",
       "source_index": 115
+    },
+    {
+      "id": "flora_wayside_knotgrass",
+      "type": "flora",
+      "name": "Wayside Knotgrass",
+      "aliases": [
+        "Doorstep grass",
+        "Trodden knot"
+      ],
+      "scientific": "Polygonum aviculare itineris",
+      "growth_form": "grass",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau",
+        "region_aravali"
+      ],
+      "uses": [
+        "physic",
+        "food"
+      ],
+      "notes": "The plant a path makes. It cannot compete anywhere the taller grasses are left alone, so it lives exactly where feet, wheels and hooves keep knocking everything else down -- a mat of wiry stems flat enough to be walked over without breaking. Where it thins out, the way has not been used this season.",
+      "biomes": [
+        "plains",
+        "settlement",
+        "coast"
+      ],
+      "placement": "flavour",
+      "rarity": "common",
+      "journal_prompt": "A wiry mat pressed into the middle of the path, greener where the feet go than on either side of it, which is the wrong way round until you think about why.",
+      "source_index": 116
+    },
+    {
+      "id": "flora_traveller_burr",
+      "type": "flora",
+      "name": "Traveller's Burr",
+      "aliases": [
+        "Hem-burr",
+        "Fleece-thief"
+      ],
+      "scientific": "Xanthium itinerans",
+      "growth_form": "shrub",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_gedrosian_desert",
+        "region_aravali"
+      ],
+      "uses": [
+        "physic",
+        "dye"
+      ],
+      "notes": "A shoulder-high weed whose seed case is a hooked burr, and whose whole method is other people's journeys. It does not grow where the wind blows; it grows where somebody walked, because a hem, a fleece or a dog carried it there and it dropped off when they stopped. A drover who has crossed the ford picks a dozen out of the animals on the far side, and plants next year's stand doing it.",
+      "biomes": [
+        "plains",
+        "settlement",
+        "desert"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "Hooked green cases at the height of a knee, and three of them already on your hem. You did not notice picking them up and you will not notice putting them down.",
+      "source_index": 117
     }
   ]
 }
