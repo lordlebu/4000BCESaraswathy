@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.24.0",
+  "canon_version": "2.25.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -1726,9 +1726,10 @@
       "knows": [],
       "lines": [
         {
-          "text": "You will hear me before you see me and that is the arrangement. Cane, cut to length -- this one is the water note, this one is two fields of walking, this one I do not use because it sounds like somebody being unwell. Strike them against the saddle, against each other, against your hand if you have a hand going spare.",
+          "text": "You will hear me before you see me and that is the arrangement. Cane, cut to length -- this one is the water note, this one is two fields of walking, this one I do not use because it sounds like somebody being unwell. Cut them long and take them down to the note; they only tune one way. Bind them at the grip or you are carrying three sticks.",
           "gives": [
-            "word_kia_tan"
+            "word_kia_tan",
+            "recipe_cane_chime"
           ]
         },
         {

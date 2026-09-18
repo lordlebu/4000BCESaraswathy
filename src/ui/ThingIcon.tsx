@@ -81,7 +81,11 @@ export const KIND_MARK: Record<ItemKind, string> = {
   light: '🪔',
   record: '📜',
   ornament: '📿',
-  shelter: '⛺'
+  shelter: '⛺',
+  // The eleventh kind, and the mark is the one instrument in the set that is unmistakable at this
+  // size. A flute is a line, a struck cane is three lines, and a long neck over a round body reads
+  // as *instrument* to anybody who has never seen a sitar -- which is the whole job of a mark.
+  instrument: '🪕'
 };
 
 /**
