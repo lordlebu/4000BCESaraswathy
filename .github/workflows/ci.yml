@@ -105,23 +105,26 @@ jobs:
   # comment said to do when the suite got slow: *split it by time, shard the suite, so no test is
   # left running only where nobody can act on it.*
   #
-  # **Measured on CI, run 35354275483, which is what these numbers are now read off** — a local
-  # prediction of 8.2 minutes for the worst shard was published first and is superseded:
+  # **Measured on CI, twice, and the pair is the point:**
   #
-  #     shard 1  6.6 min      shard 3  16.7 min
-  #     shard 2  6.1 min      shard 4   4.4 min
+  #                      shard 1   shard 2   shard 3   shard 4
+  #     35354275483        6.6       6.1      16.7       4.4     one flaky walk
+  #     35366992526        6.6       6.1       6.7       3.6     clean
   #
-  # Playwright balances a shard by test *count* rather than by duration, so they are uneven, and
-  # shard 3 carries `reachable.spec.ts` (6.6 minutes by itself) and the map crossing.
+  # A clean run is **6.7 minutes at worst and evenly balanced**. The 16.7 was not the shard: the
+  # map crossing blew its own 480-second budget and `retries: 1` re-ran it, which is ten minutes
+  # on one shard. The second run confirms that rather than leaving it inferred.
   #
-  # **Most of shard 3's excess was one flaky test, not the shard.** The walk exceeded its own
-  # 480-second budget, and `retries: 1` re-ran it: about eight of those 16.7 minutes. Without it
-  # the shard lands near the predicted 8.4. That is recorded rather than tuned — see
-  # `docs/testing.md`, and the rule there about measuring a signal before moving a threshold.
+  # **The cap below is sized against 16.7 and not against 6.7 on purpose**, because the flaky
+  # case is the one that actually happens and the one a cap exists for.
   #
-  # Raising the shard count barely helps, which is worth knowing before somebody tries it: at six
-  # the worst shard is still 16.3 minutes and at eight it is 11.6, because a handful of files
-  # dominate and a file cannot be split across shards. Headroom is what the cap below buys.
+  # The walk's budget is recorded rather than tuned -- see `docs/testing.md` and the rule there
+  # about measuring a signal before moving a threshold. Two runs is not yet a signal.
+  #
+  # Raising the shard count is unnecessary and barely works anyway, which is worth knowing before
+  # somebody tries it: modelled on the per-file durations, at six the worst shard is 16.3 minutes
+  # and at eight 11.6, because a handful of files dominate -- `reachable.spec.ts` is 6.6 minutes
+  # by itself -- and a file cannot be split across shards.
   browser-shard:
     needs: browser-scope
     runs-on: ubuntu-latest
@@ -134,7 +137,9 @@ jobs:
         shard: [1, 2, 3, 4]
     # **Sized from the two step budgets below plus the slowest measured shard, and not from a
     # hope about either.** The install steps bound themselves at 12 and 15 minutes, so 27 is the
-    # worst they can cost; the slowest shard measured 16.7. 27 + 17 is 44, so this is 45.
+    # worst they can cost; the slowest shard measured 16.7 -- the run with the flaky walk in it,
+    # deliberately, because a cap is for the bad run and not the good one. 27 + 17 is 44, so this
+    # is 45. On a clean run the whole job is under nine minutes.
     #
     # The old 30 was the number that broke: it was chosen when the suite was believed to take
     # four or five minutes, and it stopped bounding a hang and started deciding runs. A cap is
@@ -276,6 +281,10 @@ jobs:
       # how shard 3's 480-second walk timeout on run 35354275483 left nothing to read. It is the
       # same shape as the fault `playwright.config.ts` already records, where `github` alone wrote
       # no files and every failed run uploaded an empty artifact.
+      #
+      # It costs about 230 KB per shard on a green run -- the report shell, since a trace is only
+      # written on a retry and a screenshot only on a failure -- so under a megabyte a run, held
+      # for seven days.
       - uses: actions/upload-artifact@v7
         if: '!cancelled() && needs.browser-scope.outputs.code == ''true'''
         with:

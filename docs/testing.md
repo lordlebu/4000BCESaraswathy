@@ -240,23 +240,33 @@ npm run test:e2e:fast                # a local shortcut; nothing in CI uses it
 ```
 
 **Measured, September 2026.** Unsharded the 129 tests are **45 CPU-minutes of work**, 22.5 minutes
-on two workers. Sharded and read off CI itself, run 35354275483: **6.6, 6.1, 16.7 and 4.4
-minutes** — uneven because Playwright balances a shard by test *count* rather than by duration,
-and it is the slowest that decides whether the check goes red.
+on two workers. Sharded and read off CI itself, twice:
 
-**A local prediction of 8.4 minutes for that worst shard was published before CI had run, and CI
-said 16.7.** Both numbers were honest and the second one is the one to trust. Read the difference
-rather than the headline: about eight of those minutes were the map crossing blowing its own
-480-second budget and being re-run by `retries: 1`, which puts the shard's *own* cost near the
-prediction. The lesson is the one this file keeps relearning — **a measurement taken somewhere
-else is a prediction**, and this box turned out to be 1.1 to 1.3× faster than a hosted runner
-per shard even at the same 4 CPUs and 16 GB.
+| run | shard 1 | shard 2 | shard 3 | shard 4 | |
+|---|---|---|---|---|---|
+| 35354275483 | 6.6 | 6.1 | **16.7** | 4.4 | one flaky walk |
+| 35366992526 | 6.6 | 6.1 | 6.7 | 3.6 | clean |
 
-Raising the shard count barely helps: at six the worst shard is still 16.3 minutes, at eight 11.6,
-because a handful of files dominate and a file cannot be split across shards. `reachable.spec.ts`
-alone is 6.6 minutes, and Playwright says so in the run's own output. Headroom comes from the cap
-instead, which is 45 minutes: the two install steps' own budgets (12 and 15) plus the slowest
-measured shard.
+**Three numbers, one story, and it took all three to get it right.** A local prediction said 8.4
+minutes for the worst shard. The first CI run said 16.7, which looked like the local box being
+twice as fast as a runner. The second CI run said 6.7 — so the box is *not* twice as fast, and
+the 16.7 was the map crossing blowing its own 480-second budget and being re-run by `retries: 1`.
+Ten minutes of one shard was a flaky test, and one measurement could not tell that from a slow
+shard.
+
+The lessons, in the order they were learned the hard way:
+
+- **A measurement taken somewhere else is a prediction.** Publish where it came from.
+- **One measurement of a variable thing is an anecdote.** The reading that looked like a systematic
+  factor was a single flaky test, and the second run is what distinguished them.
+- This box is about 1.1 to 1.3× faster than a hosted runner per shard, at the same 4 CPUs and
+  16 GB — enough to matter, nowhere near the 2× the first comparison suggested.
+
+Raising the shard count is unnecessary and barely works anyway: at six the worst shard is 16.3
+minutes, at eight 11.6, because a handful of files dominate and a file cannot be split across
+shards. `reachable.spec.ts` alone is 6.6 minutes, and Playwright says so in the run's own output.
+Headroom comes from the cap instead, which is 45 minutes: the install steps' own budgets (12 and
+15) plus the **flaky** run's 16.7, because a cap is for the bad run and not the good one.
 
 **How it broke, which is the part worth keeping.** The suite ran on one runner under
 `timeout-minutes: 30`, and the comment that chose 30 assumed the suite took "four or five" minutes.
@@ -277,10 +287,12 @@ Three lessons, and the third is the one this file exists for:
   stops catching hangs and starts flipping coins.
 - **A green job can still be hiding a failure.** Playwright reports a test that failed and passed
   on retry as *flaky*, and the job goes green. The map crossing did exactly that on run
-  35354275483 — a 480-second timeout nobody would have seen. `if: failure()` on the report upload
-  then threw the trace away, so the artifact job existed and preserved nothing; it uploads on any
-  completed run now. **An open item:** the walk's 480-second budget is not reliably enough on a
-  hosted runner, and one occurrence is not yet enough signal to move it.
+  35354275483 — a 480-second timeout nobody would have seen, and ten minutes of a shard nobody
+  could have explained. `if: failure()` on the report upload then threw the trace away, so the
+  artifact step existed and preserved nothing; it uploads on any completed run now, about 230 KB
+  a shard. **An open item:** the walk's 480-second budget is not reliably enough on a hosted
+  runner. It passed cleanly on the very next run, so one occurrence in two is not yet a signal —
+  and the artifact change is what will make the next one readable rather than inferred.
 - **A check whose result depends on how busy the runner was is not a check.** Which is the same
   finding as the `@slow` split below, arrived at from the other direction.
 
