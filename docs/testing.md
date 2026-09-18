@@ -239,11 +239,24 @@ npm run test:e2e -- --shard=3/4      # one shard, exactly as CI runs it
 npm run test:e2e:fast                # a local shortcut; nothing in CI uses it
 ```
 
-**Measured, September 2026, at a runner's size.** 129 tests, **45 CPU-minutes of work**, **22.5
-minutes** on two workers. Sharded: 5.0, 5.2, **8.4** and 3.9 minutes — uneven because Playwright
-balances a shard by test *count* rather than by duration, and it is the slowest one that decides
-whether the check goes red. The map crossing alone is **134 seconds**, against a 180-second
-per-test timeout.
+**Measured, September 2026.** Unsharded the 129 tests are **45 CPU-minutes of work**, 22.5 minutes
+on two workers. Sharded and read off CI itself, run 35354275483: **6.6, 6.1, 16.7 and 4.4
+minutes** — uneven because Playwright balances a shard by test *count* rather than by duration,
+and it is the slowest that decides whether the check goes red.
+
+**A local prediction of 8.4 minutes for that worst shard was published before CI had run, and CI
+said 16.7.** Both numbers were honest and the second one is the one to trust. Read the difference
+rather than the headline: about eight of those minutes were the map crossing blowing its own
+480-second budget and being re-run by `retries: 1`, which puts the shard's *own* cost near the
+prediction. The lesson is the one this file keeps relearning — **a measurement taken somewhere
+else is a prediction**, and this box turned out to be 1.1 to 1.3× faster than a hosted runner
+per shard even at the same 4 CPUs and 16 GB.
+
+Raising the shard count barely helps: at six the worst shard is still 16.3 minutes, at eight 11.6,
+because a handful of files dominate and a file cannot be split across shards. `reachable.spec.ts`
+alone is 6.6 minutes, and Playwright says so in the run's own output. Headroom comes from the cap
+instead, which is 45 minutes: the two install steps' own budgets (12 and 15) plus the slowest
+measured shard.
 
 **How it broke, which is the part worth keeping.** The suite ran on one runner under
 `timeout-minutes: 30`, and the comment that chose 30 assumed the suite took "four or five" minutes.
@@ -262,6 +275,12 @@ Three lessons, and the third is the one this file exists for:
   date. Re-measure before trusting one, including these.
 - **A job cap is a budget, not a safety net.** If the thing it bounds has grown into it, the cap
   stops catching hangs and starts flipping coins.
+- **A green job can still be hiding a failure.** Playwright reports a test that failed and passed
+  on retry as *flaky*, and the job goes green. The map crossing did exactly that on run
+  35354275483 — a 480-second timeout nobody would have seen. `if: failure()` on the report upload
+  then threw the trace away, so the artifact job existed and preserved nothing; it uploads on any
+  completed run now. **An open item:** the walk's 480-second budget is not reliably enough on a
+  hosted runner, and one occurrence is not yet enough signal to move it.
 - **A check whose result depends on how busy the runner was is not a check.** Which is the same
   finding as the `@slow` split below, arrived at from the other direction.
 

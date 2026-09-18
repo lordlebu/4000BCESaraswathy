@@ -45,12 +45,23 @@ CI runs **everything on every push**, sharded four ways: `browser-shard` is a ma
 the check name it already requires. `npm run test:e2e:fast` and `:slow` still exist as local
 shortcuts; nothing in CI uses them.
 
-**The numbers, because every previous number in this section went stale without anybody noticing.**
-Measured September 2026 at a hosted runner's exact size — 4 CPUs, 16 GB, SwiftShader — the 129
-tests are **45 CPU-minutes of work**, which two workers finish in **22.5 minutes**. Sharded, the
-slowest of the four is **8.4 minutes** and the fastest 3.9, because Playwright balances a shard by
-test *count* rather than by duration. The single most expensive test is the map crossing at
-**134 seconds**, against `playwright.config.ts`'s 180-second per-test timeout.
+**The numbers, because every previous number in this section went stale without anybody noticing
+— this one included, which is why it now says where it was measured.** Unsharded, the 129 tests
+are **45 CPU-minutes of work** and two workers finish them in 22.5 minutes. Sharded, measured on
+CI in run 35354275483: **6.6, 6.1, 16.7 and 4.4 minutes**. Playwright balances a shard by test
+*count* rather than by duration, so they are uneven, and shard 3 carries `reachable.spec.ts` — 6.6
+minutes by itself — and the map crossing.
+
+**Shard 3's excess was mostly one flaky test.** The map crossing exceeded its own 480-second
+budget and `retries: 1` re-ran it: about eight of those 16.7 minutes. It is recorded rather than
+tuned, because `docs/testing.md`'s first rule is to measure a signal before moving a threshold,
+and one occurrence is not a signal. What did change is that the browser job now keeps its
+Playwright report on a green run too, so the next occurrence leaves a trace to read.
+
+Raising the shard count barely helps and is worth knowing before trying it: at six the worst shard
+is still 16.3 minutes, at eight 11.6, because a handful of files dominate and a file cannot be
+split across shards. Headroom comes from the cap, which is 45 minutes — the two install steps'
+own budgets (12 and 15) plus the slowest measured shard.
 
 **What this replaced, and why.** The suite used to run on one runner under `timeout-minutes: 30`,
 sized by a comment that assumed it took "four or five" minutes. It took twenty-five. Six runs of
@@ -60,8 +71,8 @@ tests unreported**. Nothing had failed; nothing was even slow in a way a person 
 two-test pull request was enough to tip it, and any of the three before it could have.
 
 Nothing was skipped to fix that and no test moved off any branch. **A check whose result depends on
-how busy the runner was is not a check**, and the fix is headroom: the slowest shard now has
-twenty-one minutes of it. The same reasoning retired the older `@slow` split — that one kept the
+how busy the runner was is not a check**, and the fix is headroom. The same reasoning retired the
+older `@slow` split — that one kept the
 walk off pull requests, so a PR went green, merged, and turned `main` red, three times in one
 sprint. A check that only fails once it is too late to act cheaply is worse than a slower one.
 
