@@ -114,7 +114,17 @@ const TOOLS: [string[], string][] = [
   //
   // The comment said *unstrung* first, which the path has never drawn: a stave with no chord is a
   // stick. Strung-but-lowered is also the truer image for somebody walking with it all day.
-  [['hunter'], 'M18 6a9 9 0 0 1 0 15M18 6l-1 15']
+  [['hunter'], 'M18 6a9 9 0 0 1 0 15M18 6l-1 15'],
+  // A road singer's canes: three lengths cut to three notes, bound at the grip and carried in the
+  // hand they are struck with. Graded height is the whole of the instrument -- a cane gives one
+  // note and only one -- so three bars of three lengths says more about it than a drawing of
+  // somebody playing would at this size.
+  [['singer'], 'M16 21V10M20 21V6M24 21V13M15 17h10'],
+  // A driver's mounting strap and stirrup. Not a goad: the drover above already has one, and canon
+  // is specific that a straight-tusk is "worked rather than tamed" and that what a driver has is
+  // "forty years of being agreed with". A goad would draw the opposite claim. What the job actually
+  // looks like from the ground is the loop you put a foot in to get up nine feet of animal.
+  [['driver'], 'M20 5v9M16 14h8M17 14v2a3 3 0 0 0 6 0v-2']
 ];
 
 /** The tool for a role, or null for a person whose trade has no drawing yet. */
