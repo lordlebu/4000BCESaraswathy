@@ -7,6 +7,7 @@ import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { WorldScene } from './scenes/WorldScene';
 import { EventBus } from './EventBus';
+import { CHECK_MS, KEEP, describeStall, isStall, lateness, remember, type Stall } from './stall';
 
 export interface PhaserGameProps {
   seed: string;
@@ -79,7 +80,43 @@ export function PhaserGame({ seed, discovered, fieldMapId, characterId }: Phaser
     const onZoom = ({ zoom }: { zoom: number }) => node.setAttribute('data-zoom', String(zoom));
     EventBus.onEvent('zoom-changed', onZoom);
 
+    /**
+     * Notice when the page stopped answering, because the report from play is a freeze nobody here
+     * can reproduce -- see `stall.ts` for what was tried.
+     *
+     * Mounted beside the game rather than inside the scene: a stall is a whole-page event, and if
+     * Phaser is the thing that wedged then a check living in its update loop is the one thing that
+     * cannot report it.
+     *
+     * Three channels because the report comes from a phone, where only some of them are reachable:
+     * a console line for remote devtools, `window.__stalls` for a spec or a paste, and
+     * `localStorage` so it survives the reload that usually follows a freeze.
+     */
+    const stalls: { list: Stall[] } = { list: [] };
+    const win = window as unknown as { __stalls?: Stall[] };
+    win.__stalls = stalls.list;
+    let due = performance.now() + CHECK_MS;
+    const watchdog = window.setInterval(() => {
+      const now = performance.now();
+      const lateBy = lateness(due, now);
+      due = now + CHECK_MS;
+      if (!isStall(lateBy, document.visibilityState === 'hidden')) return;
+      const walker = (window as unknown as { __walker?: () => unknown }).__walker?.() ?? null;
+      const stall: Stall = { lateBy, at: now, walker };
+      stalls.list = remember(stalls.list, stall, KEEP);
+      win.__stalls = stalls.list;
+      console.warn(`[stall] ${describeStall(stall)}`);
+      // Wrapped: a private window raises on access rather than returning null, which is the same
+      // hazard `preferences.ts` documents -- and a watchdog that throws is worse than none.
+      try {
+        window.localStorage.setItem('sot.stalls', JSON.stringify(stalls.list));
+      } catch {
+        /* no store, nothing to do */
+      }
+    }, CHECK_MS);
+
     return () => {
+      window.clearInterval(watchdog);
       EventBus.offEvent('zoom-changed', onZoom);
       game.current = null;
       // Held before destroying: `destroy` clears the reference, and this is the one canvas we know
