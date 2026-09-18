@@ -8,6 +8,7 @@
 // somewhere; these prove they hold everywhere a player can actually stand.
 
 import { describe, expect, it } from 'vitest';
+import type { World } from '../src/world/types';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
@@ -142,6 +143,12 @@ describe('nothing hides the traveller or what he is walking towards', () => {
       for (let y = 0; y < world.height; y += 1) {
         for (let x = 0; x < world.width; x += 1) {
           if (world.tiles[y]![x]!.biome !== 'settlement') continue;
+          // **A camp is not an enclosure and must not be counted as one.** Its tiles are
+          // `settlement` like any other, and because it is a radius-one diamond every one of them
+          // is a boundary tile -- so before the fence learned the difference, 100% of every camp
+          // was fenced. See `fencedSides`: a fence is a claim on ground and a household that moves
+          // with the grass does not make one.
+          if (isCamp(world, x, y)) continue;
           const onEdge = [
             [0, 1],
             [0, -1],
@@ -162,7 +169,13 @@ describe('nothing hides the traveller or what he is walking towards', () => {
           .map(key)
       );
 
-      expect(wanted.length, `${id}: no settlement perimeter to fence`).toBeGreaterThan(0);
+      // The Aravali has no town on it -- correctly, it is a crossing whose people are all passing
+      // through -- so its only settlement tiles are the camp's, and it has no perimeter to fence.
+      // A map with nothing to enclose is not a failure of the enclosing.
+      if (wanted.length === 0) {
+        expect(fenced.size, `${id}: fenced something with no settlement on the map`).toBe(0);
+        continue;
+      }
       const missed = wanted.filter((at) => !fenced.has(at));
       expect(missed, `${id}: ${missed.length} of ${wanted.length} boundary tiles unfenced`).toEqual(
         []
@@ -177,6 +190,11 @@ describe('nothing hides the traveller or what he is walking towards', () => {
       const huts = new Set(planHuts(built.world).map(key));
       const fenced = planOverdraw(built.world, huts).filter((p) => isFence(p.frame));
       const onHuts = fenced.filter((p) => huts.has(key(p)));
+      // Skipped where there is no town to fence -- see the note in the test above.
+      if (!hasTown(built.world)) {
+        expect(fenced.length, `${id}: fenced a map with no town on it`).toBe(0);
+        continue;
+      }
       expect(fenced.length, `${id}: no fence anywhere`).toBeGreaterThan(0);
       expect(onHuts.length, `${id}: the boundary stops wherever somebody built`).toBeGreaterThan(0);
     }
@@ -680,3 +698,23 @@ describe('the mill is drawn, and it turns', () => {
     }
   });
 });
+
+/** Whether this tile belongs to the nomad camp rather than to a built settlement. */
+function isCamp(world: World, x: number, y: number): boolean {
+  const { camp } = world;
+  return (
+    camp !== null &&
+    Math.abs(x - camp.at.x) <= camp.radius &&
+    Math.abs(y - camp.at.y) <= camp.radius
+  );
+}
+
+/** Whether any settlement tile on this map is something other than the camp. */
+function hasTown(world: World): boolean {
+  for (const row of world.tiles) {
+    for (const t of row) {
+      if (t.biome === 'settlement' && !isCamp(world, t.x, t.y)) return true;
+    }
+  }
+  return false;
+}

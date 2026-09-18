@@ -409,8 +409,6 @@ function placeOne(
   minDistance: number
 ): Point | null {
   const occupied = (at: Point) => taken.some((t) => t.x === at.x && t.y === at.y);
-  const crowded = (at: Point) =>
-    taken.some((t) => Math.abs(t.x - at.x) + Math.abs(t.y - at.y) < minDistance);
 
   const rightShore = (t: Tile) => onTheRightShore(world, poi, t);
   const inland = (t: Tile) =>
@@ -418,8 +416,29 @@ function placeOne(
   const exact = gather(world, (t) => suitable(t, poi, walkable) && rightShore(t) && inland(t));
 
   // Best case: the terrain canon asked for, with room around it.
-  const spaced = pick(world, poi, exact, crowded);
-  if (spaced) return spaced;
+  //
+  // **And when there is not room, the spacing gives way in steps rather than all at once.** It used
+  // to fall straight from `minDistance` to "not literally the same tile", and measured over twenty
+  // seeds that is what put Kavik Tower **one tile** from Lothal Camp -- mean 4.5 -- and the Bone
+  // Midden two from the Glass Scar.
+  //
+  // The cause is not the rule, it is that some places are authored onto ground that barely exists:
+  // the Glass Scar wants `desert` and Dwarka makes nineteen tiles of it; Lothal Camp and Kavik
+  // Tower both want `settlement`, which is one patch of thirty-three on a 48x48 map. Six apart
+  // inside thirty-three tiles is arithmetically impossible, so the fallback fired every time and
+  // handed back the worst answer it had.
+  //
+  // Halving twice before giving up keeps the cosmetic loss proportional to how tight the map
+  // actually is. Four tiles apart is a short walk; one tile apart is two buildings in each other's
+  // doorway, and there was nothing in between.
+  // Stated rather than halved: halving 6 gives 6, 3 and then 1, which skips the step that matters
+  // and lands back on "adjacent is fine". Four tiles is a short walk and two is a neighbour.
+  for (const room of [minDistance, 4, 2].filter((r) => r <= minDistance)) {
+    const spaced = pick(world, poi, exact, (at: Point) =>
+      taken.some((t) => Math.abs(t.x - at.x) + Math.abs(t.y - at.y) < room)
+    );
+    if (spaced) return spaced;
+  }
 
   // The map is tight but the terrain is right. Crowding is a cosmetic loss; two places on
   // one tile is a correctness one, so give up spacing before giving up the ground.
@@ -663,18 +682,25 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // The Nomad Ground on the Aravali, which had no tents on it at all.
   //
   // The same felt as the High Camp and the same people -- canon has Terke's herd on both maps --
-  // but the ground rule is this map's. A crossing is walked in bands, and the two things a tent
-  // must not stand on here are the water and the railway.
+  // but the ground rule is this map's. A crossing is walked in bands, and a tent must not stand on
+  // the water or the railway.
   //
   // It got nothing for as long as `stampCamp` asked whether `settlement` was in the palette: the
   // Aravali has no town in it, correctly, and so the one household that *does* stop here was
   // refused on a question about cities. See `stampCamp`.
+  //
+  // **And then it had no ground rule at all, which is the fault this line fixes.** The predicate
+  // was "anything that is not sea, sky_underside or rail" -- so the tents could pitch on forest, on
+  // a floating island, on bare mountain. Measured over twenty seeds it landed on plains every time,
+  // which is luck rather than a rule: it is wherever the *place* landed, and the place is placed
+  // against canon's terrain while the tents around it were not.
+  //
+  // So the tents ask canon the same question the place did. `poi_nomad_ground` says
+  // `terrain: [plains, coast]` -- shingle above a ford -- and the camp now pitches on that and
+  // nothing else, which is what makes the arrival's "felt tents on the shingle" true of the
+  // picture as well as of the prose.
   const nomadGround = placed.find((p) => p.poi.id === 'poi_nomad_ground');
-  stampCamp(
-    world,
-    nomadGround?.at ?? null,
-    (tile) => tile.biome !== 'sea' && tile.biome !== 'sky_underside' && !tile.track
-  );
+  stampCamp(world, nomadGround?.at ?? null, pitchableFor(nomadGround?.poi ?? null));
 
   // Ease the ground between the places, now that we know where they ended up.
   //
@@ -848,4 +874,29 @@ export function startTileFor(built: FieldMapWorld, search: string): Point {
     Number.isInteger(x) && Number.isInteger(y) &&
     x >= 0 && y >= 0 && x < built.world.width && y < built.world.height;
   return inside ? { x: x!, y: y! } : { ...built.world.start };
+}
+
+/**
+ * Ground a household would pitch on, read off the place canon put there.
+ *
+ * **Canon already answers this and the camp stamper was not asking.** A point of interest carries
+ * `terrain` -- the ground it may stand on -- and the placer honours it; the tents pitched *around*
+ * that place then took any tile that was not water or rail. So the place obeyed canon and its own
+ * camp did not, and the only thing keeping the tents on sensible ground was that the anchor tile
+ * was on sensible ground.
+ *
+ * The rail is excluded on top, because that is a fact about the tile rather than about the ground:
+ * `Tile.track` is a flag over whatever is underneath it, and a tent pitched between the sleepers is
+ * a tent on a working railway.
+ *
+ * A place with no terrain listed gets the old permissive answer rather than nothing, so a camp
+ * cannot vanish because canon was quiet.
+ */
+export function pitchableFor(poi: PointOfInterest | null): (tile: Tile) => boolean {
+  const ground = new Set<BiomeId>(poi?.terrain ?? []);
+  return (tile) => {
+    if (tile.track) return false;
+    if (ground.size === 0) return tile.biome !== 'sea' && tile.biome !== 'sky_underside';
+    return ground.has(tile.biome);
+  };
 }
