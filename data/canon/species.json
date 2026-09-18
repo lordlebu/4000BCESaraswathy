@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.22.0",
+  "canon_version": "2.25.2",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -4298,6 +4298,73 @@
       "mood": "uncanny",
       "source_index": 259,
       "placement_note": "Placeable since the pools were stamped. Tagged to the underside as well because that is the half of its life a walker on the rim can actually see."
+    },
+    {
+      "id": "fauna_drovers_dog",
+      "type": "fauna",
+      "name": "Dhol",
+      "aliases": [
+        "Dhole",
+        "Road dog",
+        "Whistling dog"
+      ],
+      "scientific": "Cuon alpinus",
+      "clade": "mammal",
+      "diet": "Carnivore",
+      "habitats": [
+        "region_aravali",
+        "region_narmada_plateau",
+        "region_saraswati_delta"
+      ],
+      "behaviour": [
+        "commensal",
+        "herd",
+        "guide"
+      ],
+      "notes": "Not anybody's dog and never was. A pack shadows whichever string of animals is going the right way, keeping a field's distance and taking what falls out of the back of it -- the lame, the old, the afterbirth. The drovers do not feed them, do not drive them off, and would notice at once if they were not there, because a pack that has stopped following is a pack that has found something better to follow.\n\nThey whistle rather than bark. A drover a mile ahead knows from the pitch whether the pack is moving or holding, which is a thing nobody taught either side.",
+      "biomes": [
+        "plains",
+        "settlement",
+        "coast",
+        "hills"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "mood": "watchful",
+      "journal_prompt": "Rust-red, low, and forty paces off the track since the ford. It has not once looked back to check you are still coming, and it has not once let the distance change.",
+      "source_index": 260
+    },
+    {
+      "id": "fauna_narmada_straight_tusk",
+      "type": "fauna",
+      "name": "Narmada Straight-Tusk",
+      "aliases": [
+        "Straight-tusk",
+        "Valley elephant"
+      ],
+      "scientific": "Palaeoloxodon namadicus",
+      "clade": "mammal",
+      "diet": "Herbivore",
+      "habitats": [
+        "region_narmada_plateau"
+      ],
+      "behaviour": [
+        "herd",
+        "cargo",
+        "browsing"
+      ],
+      "notes": "The valley's own elephant, and the largest thing that walks on it. The tusks come out almost straight rather than curving, which is why a pair of them makes a doorway and why the archive has two propped either side of its own.\n\nWorked rather than tamed, and the distinction is one the drivers insist on: an animal that can put a shoulder to a cut block of basalt cannot be made to do anything it has decided against. What a driver has is forty years of being agreed with.",
+      "biomes": [
+        "plains",
+        "forest",
+        "hills",
+        "river"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "mood": "patient",
+      "journal_prompt": "It is browsing at the height of a roof and has not registered you at all. The tusks are wrong -- they go forward rather than out, two pale shafts a shade longer than the animal is tall.",
+      "source_index": 261
     }
   ],
   "flora": [
@@ -6544,6 +6611,66 @@
       "rarity": "rare",
       "journal_prompt": "Hooded blue flowers on a stem in wet upland shade, the root pale and forked like a small hand.",
       "source_index": 115
+    },
+    {
+      "id": "flora_wayside_knotgrass",
+      "type": "flora",
+      "name": "Wayside Knotgrass",
+      "aliases": [
+        "Doorstep grass",
+        "Trodden knot"
+      ],
+      "scientific": "Polygonum aviculare itineris",
+      "growth_form": "grass",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_narmada_plateau",
+        "region_aravali"
+      ],
+      "uses": [
+        "physic",
+        "food"
+      ],
+      "notes": "The plant a path makes. It cannot compete anywhere the taller grasses are left alone, so it lives exactly where feet, wheels and hooves keep knocking everything else down -- a mat of wiry stems flat enough to be walked over without breaking. Where it thins out, the way has not been used this season.",
+      "biomes": [
+        "plains",
+        "settlement",
+        "coast"
+      ],
+      "placement": "flavour",
+      "rarity": "common",
+      "journal_prompt": "A wiry mat pressed into the middle of the path, greener where the feet go than on either side of it, which is the wrong way round until you think about why.",
+      "source_index": 116
+    },
+    {
+      "id": "flora_traveller_burr",
+      "type": "flora",
+      "name": "Traveller's Burr",
+      "aliases": [
+        "Hem-burr",
+        "Fleece-thief"
+      ],
+      "scientific": "Xanthium itinerans",
+      "growth_form": "shrub",
+      "habitats": [
+        "region_saraswati_delta",
+        "region_gedrosian_desert",
+        "region_aravali"
+      ],
+      "uses": [
+        "physic",
+        "dye"
+      ],
+      "notes": "A shoulder-high weed whose seed case is a hooked burr, and whose whole method is other people's journeys. It does not grow where the wind blows; it grows where somebody walked, because a hem, a fleece or a dog carried it there and it dropped off when they stopped. A drover who has crossed the ford picks a dozen out of the animals on the far side, and plants next year's stand doing it.",
+      "biomes": [
+        "plains",
+        "settlement",
+        "desert"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "journal_prompt": "Hooked green cases at the height of a knee, and three of them already on your hem. You did not notice picking them up and you will not notice putting them down.",
+      "source_index": 117
     }
   ]
 }

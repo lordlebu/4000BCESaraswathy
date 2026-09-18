@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.22.0",
+  "canon_version": "2.25.2",
   "regions": [
     {
       "id": "region_aravali",
@@ -541,6 +541,9 @@
       "notes": "The evolution discovery. A quarry rather than a dig, so the section is exposed by accident and read by the player rather than presented by a scholar.",
       "epochs": [
         "epoch_post_cataclysm"
+      ],
+      "npcs": [
+        "npc_moonj"
       ]
     },
     {
@@ -716,7 +719,10 @@
       ],
       "description": "Good flat ground, well watered, and nothing on it.",
       "arrival": "Eight acres of level silt beside a channel that never runs dry, and not a stem on any of it. The camp plants here every spring out of stubbornness and takes nothing off it. Something came up out of the ground during the Shattering and has not gone back down.",
-      "notes": "The solarpunk hook, and what the actionable rung acts on: restorable once the player understands both the poison and the rice."
+      "notes": "The solarpunk hook, and what the actionable rung acts on: restorable once the player understands both the poison and the rice.",
+      "npcs": [
+        "npc_kunch"
+      ]
     },
     {
       "id": "poi_fang_bed",
@@ -1057,7 +1063,8 @@
       "npcs": [
         "npc_thrali",
         "npc_uma",
-        "npc_bekh"
+        "npc_bekh",
+        "npc_kunch"
       ],
       "related_entities": [
         "settlement_lothal",
@@ -1098,7 +1105,10 @@
       ],
       "description": "Pale mangroves standing in a ring, and something at the centre that is not a tree.",
       "arrival": "The Kia did not build the shrine so much as agree about it. A ring of ghost mangrove, a stone with a hollow worn into the top, and a great deal of water that is shallower than it looks if you know where to put your feet.",
-      "notes": "Kia rather than Harappan. Where the channel discovery is learned and the marsh-lurker can be watched."
+      "notes": "Kia rather than Harappan. Where the channel discovery is learned and the marsh-lurker can be watched.",
+      "npcs": [
+        "npc_kunch"
+      ]
     },
     {
       "id": "poi_narmada_university",
@@ -1116,7 +1126,8 @@
         "discovery_archive_baseline"
       ],
       "npcs": [
-        "npc_vessa"
+        "npc_vessa",
+        "npc_moonj"
       ],
       "description": "Nine halls around a yard, and every one of them measuring something.",
       "arrival": "It is smaller than the word suggests and busier than the quiet suggests. Nine halls, a yard with a rain gauge in it that has been read twice a day for four hundred and eleven years, and a great many people being careful. Nobody here is a fool. That turns out to matter more than the alternative would have.",
@@ -1389,7 +1400,8 @@
         "discovery_bitter_millet"
       ],
       "npcs": [
-        "npc_marn"
+        "npc_marn",
+        "npc_moonj"
       ],
       "description": "A spring the archive records at a fixed point, and a line of dead stonework saying otherwise.",
       "arrival": "The water comes out of the hillside cold enough to hurt. Forty paces downslope there is a stone basin, dry, well made, and obviously built to catch exactly this. Forty paces further there is another.",
@@ -1699,6 +1711,49 @@
       "sex": "female"
     },
     {
+      "id": "npc_kunch",
+      "type": "npc",
+      "name": "Kunch",
+      "role": "road singer, up on a bird",
+      "found_at": [
+        "poi_lothal_camp",
+        "poi_marsh_shrine",
+        "poi_eastern_field"
+      ],
+      "language": "kia",
+      "sex": "male",
+      "would_settle": false,
+      "knows": [],
+      "lines": [
+        {
+          "text": "You will hear me before you see me and that is the arrangement. Cane, cut to length -- this one is the water note, this one is two fields of walking, this one I do not use because it sounds like somebody being unwell. Cut them long and take them down to the note; they only tune one way. Bind them at the grip or you are carrying three sticks.",
+          "gives": [
+            "word_kia_tan",
+            "recipe_cane_chime"
+          ]
+        },
+        {
+          "text": "Her name is not your business and she would not answer to it anyway. Nine feet of bad opinion and the only animal on this delta that can see over the reeds, which between us is the whole of why I am up here and not down there with my feet wet.",
+          "requires": [],
+          "gives": []
+        },
+        {
+          "text": "Nobody pays me. People feed me, which is not the same and is more reliable. A song does not go off.",
+          "requires": [],
+          "gives": []
+        },
+        {
+          "text": "The shrine, yes. I do not go in and I do not sing near it. Not for any reason I can give you -- the cane sounds wrong there, flat where it should not be flat, and I have stopped arguing with it.",
+          "requires": [],
+          "gives": []
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "The delta's news, carried at the pace of a large bird. Deliberately gives no discovery and settles nowhere: he is the counterweight to the camp, which is people who stayed, and to the archive over on the plateau, which is people who wrote it down. Kunch does neither and gets there first.\n\nThe instrument is a set of cut canes of graded length, struck rather than blown. Canon does not hold it as an `item` because there is no `kind` for an instrument and no affordance for playing one -- adding either is a vocabulary decision rather than an authoring one. See docs/decisions.md."
+    },
+    {
       "id": "npc_marn",
       "type": "npc",
       "name": "Marn",
@@ -1758,6 +1813,52 @@
         "epoch_post_cataclysm"
       ],
       "sex": "male"
+    },
+    {
+      "id": "npc_moonj",
+      "type": "npc",
+      "name": "Moonj",
+      "role": "driver, to a straight-tusk",
+      "found_at": [
+        "poi_basalt_quarry",
+        "poi_narmada_university",
+        "poi_walking_spring"
+      ],
+      "language": "maru",
+      "sex": "female",
+      "would_settle": false,
+      "knows": [
+        "discovery_quarry_sequence"
+      ],
+      "lines": [
+        {
+          "text": "Bhar. Not the weight -- the weight is the weight, anybody with a rope knows the weight. Bhar is what she has agreed to carry today, and it is always less, and arguing about the difference is how a driver gets a foot broken.",
+          "gives": [
+            "word_maru_bhar"
+          ]
+        },
+        {
+          "text": "Six courses of the hall came up this road on her mother. They will tell you up there that the stone was quarried in such a year by such a hand. The stone was quarried by a hand and moved by an animal, and only one of those is written down.",
+          "requires": [],
+          "gives": []
+        },
+        {
+          "text": "She drinks at the spring and I do not hurry her. It is an hour. I have had that hour every second day of my life and I would not sell it.",
+          "requires": [],
+          "gives": []
+        },
+        {
+          "text": "Nine inches, every course, all the way up. She sets them down to a finger and I have never once told her how far to lower. Somebody up there measured it afterwards and wrote the number in a book, and the number was already in the animal.",
+          "requires": [
+            "discovery_quarry_sequence"
+          ],
+          "gives": []
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "The other half of the University's nine halls: the archive records what was cut and has no word at all for what carried it. Moonj is the person the record leaves out, which is why she is on the plateau and not on it.\n\nShe would not settle. The road between the quarry and the halls is a life she chose, and the ending's roster is people who would come with you -- she has somewhere to be every second day."
     },
     {
       "id": "npc_odri",

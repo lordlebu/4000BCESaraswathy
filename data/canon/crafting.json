@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.22.0",
+  "canon_version": "2.25.2",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -2443,6 +2443,63 @@
       ],
       "notes": "A short bow for horseback and broken ground: a timber belly, sinew glued along the back to take the stretch, antler let into the tips. The sinew is what makes it -- dried, it tightens as it goes, which no plant fibre does, and canon says exactly that on the material itself.\n\nShort because of where it is used. A long bow is drawn standing still on flat ground, and the people who carry these are moving, on slopes, among animals.\n\nAffords `cut` and `deter`, like every other weapon here. Nothing in canon affords killing, and the sling entry says why: the record has slings keeping birds off a crop far more often than it has them doing anything else.",
       "source_index": 74
+    },
+    {
+      "id": "item_reed_flute",
+      "type": "item",
+      "name": "Reed flute",
+      "kind": "instrument",
+      "affords": [
+        "play",
+        "carry"
+      ],
+      "materials": [
+        "material_bamboo_cane"
+      ],
+      "notes": "One length of cane, a notch to blow across and six holes burned rather than cut, because a drilled hole splits the wall and a burned one does not. The cheapest instrument there is and the only one a person makes for themselves on the walk -- an afternoon, and the cane came from the ground they were standing on.\n\nGoes flat when it is wet, which in the delta is most of the year, and everybody plays a little sharp to allow for it.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "source_index": 75
+    },
+    {
+      "id": "item_cane_chime",
+      "type": "item",
+      "name": "Bamboomer",
+      "kind": "instrument",
+      "affords": [
+        "play",
+        "carry"
+      ],
+      "materials": [
+        "material_bamboo_cane",
+        "material_reed_fibre"
+      ],
+      "notes": "A hand of canes cut to length and bound at the grip, struck against each other, against a saddle, or against whatever is nearest. Each length gives one note and only one, which is why the delta counts an interval in cane rather than in numbers -- two hands of cane is a phrase, and anybody who has walked with a singer knows roughly how far that is.\n\nTuned by shortening, so it only ever goes up. A set that has been on the road ten years is a set that started lower.\n\n**The name is the cane and the noise in one word**, which is more than the other two manage: a flute is named for what it is made of and a sitar for its shape, and this is named for both at once. Nobody who says it is doing anything as deliberate as a joke -- it is simply what a bamboo does when you hit it, said quickly.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "source_index": 76
+    },
+    {
+      "id": "item_sitar",
+      "type": "item",
+      "name": "Sitar",
+      "kind": "instrument",
+      "affords": [
+        "play",
+        "trade"
+      ],
+      "materials": [
+        "material_teak_timber",
+        "material_gourd_shell",
+        "material_sinew"
+      ],
+      "notes": "A long neck over a dried sky-balloon shell, with sinew strung the length of it and a second course of thinner strings underneath that nobody touches. Those are the point: they are not played, they are left to sound on their own when the strings above them do, and an instrument that answers itself is worth the year it takes to build.\n\nThe only instrument here that is somebody's trade rather than somebody's afternoon. A flute is cane and a morning; this is seasoned timber, a shell that had to be grown and dried, and a maker who has ruined several.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "source_index": 77
     }
   ],
   "processes": [
@@ -4714,6 +4771,83 @@
       "taught_by": [
         "npc_anu"
       ]
+    },
+    {
+      "id": "recipe_reed_flute",
+      "type": "recipe",
+      "name": "Burning the holes in a cane",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_bamboo_cane"
+        },
+        {
+          "item": "item_flint_knife",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_reed_flute"
+        }
+      ],
+      "notes": "Burned rather than drilled. A bored hole splits the wall along the grain and the cane is finished; a hot point crushes the fibre instead and the edge stays.\n\nNamed as the flint knife rather than as `item_blade`, which is the prototype an edge inherits from and which nothing makes -- a recipe wanting one can never be performed.",
+      "source_index": 83
+    },
+    {
+      "id": "recipe_cane_chime",
+      "type": "recipe",
+      "name": "Cutting a hand of canes to length",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_bamboo_cane",
+          "count": 3
+        },
+        {
+          "material": "material_reed_fibre"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_cane_chime"
+        }
+      ],
+      "notes": "Cut long and shorten to the note, because it only tunes upward. The binding is what makes it one instrument rather than three sticks.",
+      "source_index": 84,
+      "taught_by": [
+        "npc_kunch"
+      ]
+    },
+    {
+      "id": "recipe_sitar",
+      "type": "recipe",
+      "name": "Stringing a neck over a shell",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_teak_timber",
+          "count": 2
+        },
+        {
+          "material": "material_gourd_shell"
+        },
+        {
+          "material": "material_sinew",
+          "count": 2
+        },
+        {
+          "item": "item_bow_drill",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_sitar"
+        }
+      ],
+      "notes": "The sympathetic course is the hard part and the reason this is a trade: the underneath strings have to be true to the ones above them or they answer at the wrong moment and the whole thing sounds ill.",
+      "source_index": 85
     }
   ],
   "vehicles": [
@@ -5269,6 +5403,18 @@
       "item_sinew_bow": [
         "cut",
         "deter"
+      ],
+      "item_reed_flute": [
+        "play",
+        "carry"
+      ],
+      "item_cane_chime": [
+        "play",
+        "carry"
+      ],
+      "item_sitar": [
+        "play",
+        "trade"
       ]
     }
   }

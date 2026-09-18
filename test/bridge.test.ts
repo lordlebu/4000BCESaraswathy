@@ -95,11 +95,23 @@ function extent(f: number) {
 }
 
 describe('the bridge is on the crossing contract', () => {
-  it('is four square frames, the same sheet shape as the rail and the road', () => {
+  it('is four square frames, the same sheet shape as the rail', () => {
     expect(CELL, 'the cell must be square or a north-south run cannot meet an east-west one').toBe(128);
     expect(FRAMES).toBe(4);
-    expect(FRAMES, 'the three run sheets have to stay interchangeable in shape').toBe(TRACK_PIECES);
-    expect(TRACK_PIECES).toBe(ROAD_PIECES);
+    expect(FRAMES, 'the plank and the rail have to stay interchangeable in shape').toBe(TRACK_PIECES);
+  });
+
+  it('is deliberately no longer the road\'s shape', () => {
+    // **The three sheets were one contract and now they are two, and that is a decision rather than
+    // drift.** A railway and a run of planks are *surveyed*: they go where somebody laid them, in
+    // straight runs, and four pieces say everything there is to say. A road is *walked*, and a walk
+    // turns -- measured across the four maps, 26% to 44% of every map's road tiles are an elbow, a
+    // junction or an end, and the four-piece sheet drew all of them as a straight bar.
+    //
+    // So the road grew to the sixteen neighbour masks and these two did not. If a plank run ever
+    // needs a corner this is the test to delete, not the one to satisfy.
+    expect(ROAD_PIECES).not.toBe(TRACK_PIECES);
+    expect(ROAD_PIECES).toBe(32);
   });
 
   it('alternates north-south and east-west, in the order planTrack indexes', () => {

@@ -40,11 +40,14 @@ export type MaterialClass =
  */
 export type Affordance =
   | 'cut' | 'bind' | 'carry' | 'contain' | 'burn' | 'deter' | 'cross'
-  | 'work' | 'mark' | 'trade' | 'eat' | 'heal' | 'shelter';
+  | 'work' | 'mark' | 'trade' | 'eat' | 'heal' | 'shelter'
+  // Passive, like `eat`, and canon's own note says why: the other active words are things an
+  // object does to something else, and an instrument does nothing until somebody picks it up.
+  | 'play';
 
 export type ItemKind =
   | 'tool' | 'weapon' | 'container' | 'textile' | 'food' | 'physic'
-  | 'light' | 'record' | 'ornament' | 'shelter';
+  | 'light' | 'record' | 'ornament' | 'shelter' | 'instrument';
 
 /** Canon's `renewal_rates.json`, in canon's own order: fastest back first. */
 export type Renewal = 'fast' | 'seasonal' | 'slow' | 'never';

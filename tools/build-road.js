@@ -23,6 +23,28 @@
 // geometry with a rule, the same case `build-overdraw.js` states, and arithmetic gets it right
 // first time.
 //
+// **The sheet carries sixteen shapes now rather than two, and a measurement is why.** A path is a
+// route, and a route turns. Measured across the four maps at the default seed, **26% to 44% of
+// every map's road tiles are an elbow, a junction, a dead end or a lone stone** -- on the Aravali
+// that is 23 elbows, 26 tees and 10 stubs out of 135 tiles, 43.7% of the road. None of those shapes
+// existed here, so `planRoad` fell every one of them through to the north-south run: an elbow drew
+// a vertical bar that overshot north and never reached west, and the road broke at every turn it
+// made.
+//
+// Sixteen is the full neighbour mask -- north, east, south and west, one bit each. It is **drawn
+// rather than enumerated**, which is the part that matters: every frame is composed of half-runs,
+// one for each direction the path leaves by, meeting a hub at the centre of the cell. A straight
+// run is two opposite arms, drawn from the same hash against the same coordinates the frame it
+// replaces used, so its edges are the ones that already tiled; an elbow is two perpendicular arms;
+// a lone stone is the hub by itself. Nothing states where a run leaves the cell except the arm, and
+// the arm states it once -- so the guarantee `BAND` and `MIDDLE` carry survives having eight times
+// as many pieces.
+//
+// The straight run is **not** pixel-identical to the old one, and the difference is worth naming
+// rather than glossing: every cell now carries a hub, a rounded patch of the same earth at the
+// middle. A junction is a hole without it. On a straight run it is indistinguishable from what the
+// two arms already put there, which is why it can be drawn unconditionally.
+//
 // CommonJS, like everything in tools/.
 
 const fs = require('fs');
@@ -36,15 +58,40 @@ const OUT = path.join(ROOT, 'assets');
 const CELL = 32;
 const SCALE = 4;
 
-/** How many pieces. Two runs, each freshly walked or half grown over. Matches `TRACK_PIECES`. */
-const PIECES = 4;
+/** Which way the path leaves the cell. One bit each, in the order `frames.ts` reads them. */
+const N = 1;
+const E = 2;
+const S = 4;
+const W = 8;
+
+/** Every combination of those four, which is the whole sheet's first row. */
+const MASKS = 16;
+
+/**
+ * How many pieces: the sixteen masks walked, then the same sixteen with a verge.
+ *
+ * `ROAD_PIECES` in `frames.ts` carries this number and `roadFrame` computes the index from the
+ * layout below, so it is a contract with that function rather than a preference.
+ */
+const PIECES = MASKS * 2;
+
+/**
+ * Sixteen columns and two rows, rather than one strip of thirty-two.
+ *
+ * Phaser indexes a spritesheet left-to-right and then top-to-bottom, so wrapping changes no frame
+ * number -- and a 4,096-pixel strip is a texture some machines decline in one piece. Row 0 is the
+ * walked masks and row 1 is the same masks with a verge, which is exactly what
+ * `(verge ? 16 : 0) + mask` addresses.
+ */
+const COLUMNS = MASKS;
+const ROWS = PIECES / COLUMNS;
 
 /**
  * How wide the path is, in pixels of the authored cell, and where its centre sits.
  *
  * **These two constants are the whole reason this file exists.** A run only tiles if it leaves the
  * cell at the same width and the same centre in every frame; stating them once and drawing all
- * four frames from them makes that true by construction rather than by inspection.
+ * thirty-two frames from them makes that true by construction rather than by inspection.
  *
  * Eleven of thirty-two is a third of the cell, which is what the corrected prompt in
  * `docs/art-brief.md` asks a painter for. Wide enough at 32 pixels to read as something walked
@@ -87,31 +134,31 @@ function noise(a, b, salt) {
   return (h ^ (h >>> 16)) >>> 0;
 }
 
+const half = (BAND - 1) / 2;
+
 /**
- * One piece of path.
+ * One half-run: from the edge the path leaves by, in to the centre of the cell.
  *
- * `eastWest` turns the run through ninety degrees; `overgrown` is the same path after fewer feet
- * have been down it -- grass closing from both sides, the earth broken up. Both are wanted on one
- * map: the walk between two points of interest is used, and the far end of a tour is not.
+ * **The arm is the unit rather than the frame, and that is what makes sixteen shapes safe.** Every
+ * arm is drawn by the same loop against the same `BAND` and `MIDDLE`, so a tee and a straight leave
+ * their shared edge at the identical width on the identical centre. There is no frame in this sheet
+ * that has its own opinion about where a run meets its neighbour.
+ *
+ * `along` runs from the cell edge toward the middle and `across` is the width of the band, exactly
+ * as they did when there were two frames. Which of those is x and which is y is the only thing the
+ * direction changes -- and the wander is keyed on the *map* coordinate rather than on the distance
+ * travelled, so the two halves of a straight run are the same pixels they always were.
  */
-function roadFrame(eastWest, overgrown) {
-  const px = Buffer.alloc(CELL * CELL * 4);
-  const set = (x, y, colour, alpha) => {
-    if (x < 0 || x >= CELL || y < 0 || y >= CELL) return;
-    const p = (y * CELL + x) * 4;
-    px[p] = colour[0];
-    px[p + 1] = colour[1];
-    px[p + 2] = colour[2];
-    px[p + 3] = alpha;
-  };
-  // Along the run, across it. One pair of names for both orientations, so the two cannot drift --
-  // `build-track.js` makes the same call for the same reason.
+function drawArm(set, dir, overgrown) {
+  const vertical = dir === N || dir === S;
+  // Where this arm starts and ends, walking inward. The hub covers the centre itself.
+  const from = dir === N || dir === W ? 0 : MIDDLE;
+  const to = dir === N || dir === W ? MIDDLE : CELL;
+
   const put = (along, across, colour, alpha) =>
-    eastWest ? set(along, across, colour, alpha) : set(across, along, colour, alpha);
+    vertical ? set(across, along, colour, alpha) : set(along, across, colour, alpha);
 
-  const half = (BAND - 1) / 2;
-
-  for (let along = 0; along < CELL; along += 1) {
+  for (let along = from; along < to; along += 1) {
     // **The edge wanders, the width does not.** A band with two straight sides reads as a painted
     // stripe, so each side is nudged a pixel in or out along the run -- but the two nudges are
     // independent and average to nothing, so the run still leaves the cell at BAND and joins its
@@ -150,19 +197,82 @@ function roadFrame(eastWest, overgrown) {
       const d = (noise(along, 3, 17) % (BAND - 4)) - Math.floor((BAND - 4) / 2);
       put(along, MIDDLE + d, STONE, 235);
     }
-  }
 
-  if (overgrown) {
-    // Grass closing in from both sides. It eats into the band rather than sitting beside it --
-    // that is the difference between a path going back to meadow and a path with a verge -- and it
-    // stops two pixels short of the cell edge so the run still meets its neighbour cleanly.
-    for (let along = 1; along < CELL - 1; along += 1) {
-      const reach = noise(along, 4, 23) % 4;
-      for (let g = 0; g < reach; g += 1) {
-        put(along, MIDDLE - half + g, WEED, 220);
-        put(along, MIDDLE + half - g, WEED, 220);
+    if (overgrown) {
+      // Grass closing in from both sides. It eats into the band rather than sitting beside it --
+      // that is the difference between a path going back to meadow and a path with a verge -- and
+      // it stops short of the cell edge so the run still meets its neighbour cleanly.
+      if (along > 0 && along < CELL - 1) {
+        const reach = noise(along, 4, 23) % 4;
+        for (let g = 0; g < reach; g += 1) {
+          put(along, MIDDLE - half + g, WEED, 220);
+          put(along, MIDDLE + half - g, WEED, 220);
+        }
       }
     }
+  }
+}
+
+/**
+ * The hub: the square of ground at the middle of the cell where the arms meet.
+ *
+ * **Drawn for every mask including the empty one**, and that is deliberate rather than tidy. An
+ * elbow leaves one quadrant of the centre uncovered -- neither arm reaches past the middle on its
+ * own axis -- so without a hub a corner has a notch bitten out of its inside edge. A lone tile
+ * without one is nothing at all.
+ *
+ * **It is drawn first and the arms go over it, and getting that order wrong was visible.** Painted
+ * last, the hub *replaced* the arms across an eleven-pixel circle at the middle of every cell, and
+ * because its alpha falls off radially where the arm's falls off across the band, it wrote 202
+ * where the arm had written 255. On a straight run that is a lighter notch once per tile: a road
+ * composited over its own map came out looking like a dashed line, which is how it was caught.
+ * Underneath, a straight run's arms cover it completely and it costs nothing.
+ */
+function drawHub(set, overgrown, lone) {
+  for (let y = MIDDLE - half - 1; y <= MIDDLE + half + 1; y += 1) {
+    for (let x = MIDDLE - half - 1; x <= MIDDLE + half + 1; x += 1) {
+      const dx = x - MIDDLE;
+      const dy = y - MIDDLE;
+      // A rounded patch rather than a square. A square hub shows its own corners at a bend, which
+      // reads as a paving slab somebody dropped at the turn.
+      const reach = Math.hypot(dx, dy);
+      if (reach > half + 0.5) continue;
+
+      const roll = noise(x, y, overgrown ? 8 : 6) % 10;
+      const colour = roll < 2 ? EARTH_LIT : roll < 4 ? EARTH_DARK : EARTH;
+      const fade = reach / (half + 1);
+      // A lone stone is fainter all over -- somewhere a path passed once rather than a junction
+      // hundreds of feet have rounded off.
+      const floor = lone ? 150 : 255;
+      set(x, y, colour, Math.round(floor - fade * fade * 120));
+    }
+  }
+  if (!lone && noise(MIDDLE, MIDDLE, 19) % 2 === 0) {
+    set(MIDDLE + 1, MIDDLE - 2, STONE, 235);
+  }
+}
+
+/**
+ * One piece of path: whichever arms this mask has, and the hub they meet at.
+ *
+ * `mask` is the neighbour bitmask and `overgrown` is the verge. Composed rather than special-cased,
+ * so adding a seventeenth shape is impossible and getting one wrong is impossible with it.
+ */
+function roadFrame(mask, overgrown) {
+  const px = Buffer.alloc(CELL * CELL * 4);
+  const set = (x, y, colour, alpha) => {
+    if (x < 0 || x >= CELL || y < 0 || y >= CELL) return;
+    const p = (y * CELL + x) * 4;
+    px[p] = colour[0];
+    px[p + 1] = colour[1];
+    px[p + 2] = colour[2];
+    px[p + 3] = alpha;
+  };
+
+  // The hub first: the arms are the run and must win wherever they reach. See `drawHub`.
+  drawHub(set, overgrown, mask === 0);
+  for (const dir of [N, E, S, W]) {
+    if (mask & dir) drawArm(set, dir, overgrown);
   }
 
   return px;
@@ -186,35 +296,34 @@ function upscale(src, width, height, factor) {
 }
 
 function main() {
-  // Order: walked north-south, walked east-west, overgrown north-south, overgrown east-west.
-  // `roadFrame` in `frames.ts` computes the index from that order, so it is a contract with this
-  // loop rather than a preference. It is `trackFrame`'s order, deliberately: the two sheets are
-  // interchangeable in shape so one planner draws both.
-  const frames = [
-    roadFrame(false, false),
-    roadFrame(true, false),
-    roadFrame(false, true),
-    roadFrame(true, true)
-  ];
+  // Order: mask 0 to 15 walked, then mask 0 to 15 with a verge, wrapped into two rows of sixteen.
+  // `roadFrame` in `frames.ts` computes the index from exactly that, so this loop is a contract
+  // with that function rather than a preference.
+  const frames = [];
+  for (let verge = 0; verge < 2; verge += 1) {
+    for (let mask = 0; mask < MASKS; mask += 1) frames.push(roadFrame(mask, verge === 1));
+  }
 
-  const sheetWidth = CELL * PIECES;
-  const sheet = Buffer.alloc(sheetWidth * CELL * 4);
+  const sheetWidth = CELL * COLUMNS;
+  const sheetHeight = CELL * ROWS;
+  const sheet = Buffer.alloc(sheetWidth * sheetHeight * 4);
   frames.forEach((frame, index) => {
-    const ox = index * CELL;
+    const ox = (index % COLUMNS) * CELL;
+    const oy = Math.floor(index / COLUMNS) * CELL;
     for (let y = 0; y < CELL; y += 1) {
       const from = y * CELL * 4;
-      const to = (y * sheetWidth + ox) * 4;
+      const to = ((oy + y) * sheetWidth + ox) * 4;
       frame.copy(sheet, to, from, from + CELL * 4);
     }
   });
 
-  const big = upscale(sheet, sheetWidth, CELL, SCALE);
+  const big = upscale(sheet, sheetWidth, sheetHeight, SCALE);
   const file = path.join(OUT, 'road.png');
-  fs.writeFileSync(file, encodePng(sheetWidth * SCALE, CELL * SCALE, big));
+  fs.writeFileSync(file, encodePng(sheetWidth * SCALE, sheetHeight * SCALE, big));
   const kb = (fs.statSync(file).size / 1024).toFixed(1);
   console.log(`road: ${PIECES} frames of ${CELL * SCALE}x${CELL * SCALE}, ${kb} KB`);
   console.log(`  band ${BAND}/${CELL} of the cell, centred on ${MIDDLE} in every frame`);
-  console.log('  order: north-south, east-west, north-south overgrown, east-west overgrown');
+  console.log(`  layout: ${COLUMNS} columns x ${ROWS} rows -- masks 0..15 walked, then 0..15 with a verge`);
 }
 
 main();

@@ -16,9 +16,16 @@
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps } from '../src/content/places';
-import { easeRoutes } from '../src/world/routes';
+import { easeRoutes, thinRoad } from '../src/world/routes';
 import { planRoad, planScene } from '../src/game/scenePlan';
-import { roadFrame, ROAD_PIECES, trackFrame, TRACK_PIECES } from '../src/game/frames';
+import {
+  roadFrame,
+  runSides,
+  ROAD_MASKS,
+  ROAD_PIECES,
+  RUN_SIDE,
+  TRACK_PIECES
+} from '../src/game/frames';
 import { isWalkable } from '../src/world/generate';
 import { DEFAULT_SEED } from '../src/ui/seed';
 import type { World } from '../src/world/types';
@@ -177,26 +184,177 @@ describe('the road reaches the screen', () => {
     }
   });
 
-  it('turns where the run turns', () => {
-    // A path drawn north-south down a run that goes east-west is the failure the neighbour test
-    // exists to prevent, and one frame in four would still be right by accident. Both orientations
-    // have to appear on a map whose route bends, and every route bends.
-    const drawn = planRoad(built('field_map_lothal').world);
-    const northSouth = drawn.filter((p) => p.frame % 2 === 0).length;
-    const eastWest = drawn.length - northSouth;
-    expect(northSouth, 'no north-south run').toBeGreaterThan(0);
-    expect(eastWest, 'no east-west run').toBeGreaterThan(0);
-  });
-
-  it('keeps the same frame contract as the rail', () => {
-    // The two sheets are interchangeable in shape on purpose -- `tools/build-road.js` writes the
-    // same four pieces in the same order `tools/build-track.js` does -- so one planner shape draws
-    // both. If the orders ever part, this says so before the map does.
-    expect(ROAD_PIECES).toBe(TRACK_PIECES);
-    for (const eastWest of [false, true]) {
-      for (const second of [false, true]) {
-        expect(roadFrame(eastWest, second)).toBe(trackFrame(eastWest, second));
+  it('draws the shape the route actually makes, on every tile', () => {
+    // **The guard the four-frame sheet could not have.** A frame is a bitmask of the sides the path
+    // leaves by, so the drawing and the ground can be compared directly: every side the frame opens
+    // must have a road tile beyond it, and every road neighbour must have a side open to it.
+    //
+    // Proven to bite by forcing the frame back to the old north-south answer, which reported
+    // `road at 31,52 draws an opening north onto no road`.
+    for (const map of fieldMaps) {
+      const world = buildFieldMap(map, { seed: DEFAULT_SEED }).world;
+      const road = (x: number, y: number) => world.tiles[y]?.[x]?.road === true;
+      for (const piece of planRoad(world)) {
+        const drawn = piece.frame % ROAD_MASKS;
+        const truth = runSides(piece.x, piece.y, road);
+        expect(
+          drawn,
+          `${map.id}: road at ${piece.x},${piece.y} draws sides ${drawn} over ground that runs ${truth}`
+        ).toBe(truth);
       }
     }
   });
+
+  it('makes every shape a route can make, somewhere', () => {
+    // A sheet of sixteen pieces where only two are ever addressed is the four-frame sheet again
+    // with more files. The four maps between them have to reach a straight, a corner, a junction
+    // and an end -- measured, they reach 43.7% non-straight on the Aravali alone.
+    const seen = new Set<number>();
+    for (const map of fieldMaps) {
+      const world = buildFieldMap(map, { seed: DEFAULT_SEED }).world;
+      for (const piece of planRoad(world)) seen.add(piece.frame % ROAD_MASKS);
+    }
+    const bits = (m: number) => [1, 2, 4, 8].filter((b) => m & b).length;
+    const straight = [...seen].filter((m) => m === 5 || m === 10);
+    const corner = [...seen].filter((m) => bits(m) === 2 && m !== 5 && m !== 10);
+    const junction = [...seen].filter((m) => bits(m) >= 3);
+    const end = [...seen].filter((m) => bits(m) <= 1);
+    expect(straight.length, 'no straight run on any map').toBeGreaterThan(0);
+    expect(corner.length, 'no corner on any map -- the sheet grew for nothing').toBeGreaterThan(0);
+    expect(junction.length, 'no junction on any map').toBeGreaterThan(0);
+    expect(end.length, 'no dead end on any map').toBeGreaterThan(0);
+  });
+
+  it('indexes the verge row by adding the mask count, and nothing else', () => {
+    // The contract with `tools/build-road.js`, which writes masks 0..15 walked and then the same
+    // sixteen with a verge. It is no longer the rail's four-piece order, and that parting is
+    // deliberate rather than drift: a railway is surveyed and a path is walked, so only one of them
+    // needs a corner.
+    expect(ROAD_PIECES).toBe(ROAD_MASKS * 2);
+    expect(ROAD_PIECES).not.toBe(TRACK_PIECES);
+    for (let mask = 0; mask < ROAD_MASKS; mask += 1) {
+      expect(roadFrame(mask, false)).toBe(mask);
+      expect(roadFrame(mask, true)).toBe(mask + ROAD_MASKS);
+    }
+  });
+
+  it('is one tile wide everywhere, and lost nothing by becoming so', () => {
+    // **The artefact the sixteen-piece sheet made visible.** Two legs of the tour often run
+    // alongside each other, so the flagged line came out two tiles wide in places -- 5.0% of
+    // Lothal's road tiles, 8.9% of Dwarka's, 9.7% of the Aravali's and 17.2% of Narmada's sat in a
+    // 2x2 block. Two parallel bars read as a thick road; stubs and tees reaching across between
+    // them read as a ladder.
+    //
+    // Both halves are asserted, and the second is the one that matters: `thinRoad` may not buy a
+    // narrow road by cutting the road in half.
+    for (const map of fieldMaps) {
+      const world = buildFieldMap(map, { seed: DEFAULT_SEED }).world;
+      const road = (x: number, y: number) => world.tiles[y]?.[x]?.road === true;
+      for (let y = 0; y + 1 < world.height; y += 1) {
+        for (let x = 0; x + 1 < world.width; x += 1) {
+          const block = road(x, y) && road(x + 1, y) && road(x, y + 1) && road(x + 1, y + 1);
+          expect(block, `${map.id}: the road is two tiles wide at ${x},${y}`).toBe(false);
+        }
+      }
+    }
+  });
+
+  it('thins a doubled run to one tile and never adds a break', () => {
+    // **Asked of `thinRoad` directly, on ground built for the question.** An earlier version of this
+    // asserted over a finished map and compared a set against a copy of itself, which passes
+    // whatever the function does -- the shape of wrong-but-green this repo has paid for before.
+    //
+    // Two legs running alongside each other: a 2x10 block of road, which is exactly what the tour
+    // produces where it doubles back.
+    const world = built('field_map_lothal').world;
+    for (const row of world.tiles) for (const t of row) t.road = false;
+    for (let x = 4; x < 14; x += 1) {
+      world.tiles[6]![x]!.road = true;
+      world.tiles[7]![x]!.road = true;
+    }
+    const before = roadSet(world);
+    expect(runsOf(before), 'the fixture is not one run').toBe(1);
+
+    const cleared = thinRoad(world.tiles, world.width, world.height);
+    const after = roadSet(world);
+
+    // **Nine, not ten, and the leftover is correct rather than a miss.** It thins to a single
+    // ten-tile run along y=7 plus one tile still standing at 13,6: once its neighbour to the west
+    // has gone that tile is no longer part of any 2x2 block, so nothing asks about it again. The
+    // sheet draws it as a stub off the end of the run, which is what a path that frayed there looks
+    // like -- and removing it would need a second rule about tidiness rather than about width.
+    expect(cleared.length, 'nothing was thinned').toBe(9);
+    expect(after.size).toBe(before.size - cleared.length);
+    expect(runsOf(after), 'thinning broke the run in two').toBe(1);
+    for (let y = 0; y + 1 < world.height; y += 1) {
+      for (let x = 0; x + 1 < world.width; x += 1) {
+        const block =
+          after.has(`${x},${y}`) && after.has(`${x + 1},${y}`) &&
+          after.has(`${x},${y + 1}`) && after.has(`${x + 1},${y + 1}`);
+        expect(block, `still two wide at ${x},${y}`).toBe(false);
+      }
+    }
+  });
+
+  it('leaves a block alone when every tile of it holds the road together', () => {
+    // The case the loop must not force. Four tiles that each carry a leg away from the square are a
+    // junction, not a doubled run -- dropping any of them cuts a spur off, so `runs` goes up and
+    // the candidate is put back. Nothing is cleared and nothing is broken.
+    const world = built('field_map_lothal').world;
+    for (const row of world.tiles) for (const t of row) t.road = false;
+    const on = (x: number, y: number) => { world.tiles[y]![x]!.road = true; };
+    // the square
+    on(10, 10); on(11, 10); on(10, 11); on(11, 11);
+    // one spur out of each corner, so every tile is the only way to its own arm
+    on(10, 9); on(12, 10); on(9, 11); on(11, 12);
+
+    const before = roadSet(world);
+    const cleared = thinRoad(world.tiles, world.width, world.height);
+    const after = roadSet(world);
+
+    expect(cleared.length, 'a junction was thinned away').toBe(0);
+    expect(after.size).toBe(before.size);
+    expect(runsOf(after)).toBe(runsOf(before));
+  });
+
+  it('reads the four sides in the order the builder draws them', () => {
+    // `runSides` and `roadFrame` share a file so the bit that means north cannot drift between the
+    // reading and the drawing -- but the *builder* is a third party in another language, and this
+    // is the only thing that holds it to the same order.
+    const only = (dx: number, dy: number) => (x: number, y: number) => x === dx && y === dy;
+    expect(runSides(0, 0, only(0, -1)), 'north is not bit 1').toBe(RUN_SIDE.north);
+    expect(runSides(0, 0, only(1, 0)), 'east is not bit 2').toBe(RUN_SIDE.east);
+    expect(runSides(0, 0, only(0, 1)), 'south is not bit 4').toBe(RUN_SIDE.south);
+    expect(runSides(0, 0, only(-1, 0)), 'west is not bit 8').toBe(RUN_SIDE.west);
+    expect(runSides(0, 0, () => false), 'a lone tile is not mask 0').toBe(0);
+  });
 });
+
+/** How many four-connected runs a set of road tiles makes. Mirrors `thinRoad`'s own count. */
+function runsOf(on: ReadonlySet<string>): number {
+  const seen = new Set<string>();
+  let count = 0;
+  for (const start of on) {
+    if (seen.has(start)) continue;
+    count += 1;
+    const queue = [start];
+    seen.add(start);
+    while (queue.length) {
+      const [x, y] = queue.pop()!.split(',').map(Number) as [number, number];
+      for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]] as const) {
+        const next = `${x + dx},${y + dy}`;
+        if (!on.has(next) || seen.has(next)) continue;
+        seen.add(next);
+        queue.push(next);
+      }
+    }
+  }
+  return count;
+}
+
+/** Every flagged road tile, as the keys `runsOf` counts over. */
+function roadSet(world: World): Set<string> {
+  const on = new Set<string>();
+  for (const row of world.tiles) for (const t of row) if (t.road) on.add(`${t.x},${t.y}`);
+  return on;
+}

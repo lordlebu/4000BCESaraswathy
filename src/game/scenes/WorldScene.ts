@@ -152,6 +152,12 @@ import { isWalkable } from '../../world/generate';
 import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
+import {
+  stopsOf,
+  travellersOn,
+  whereabouts,
+  type Traveller
+} from '../../content/travellers';
 import { isCamp, isGrand } from '../../content/camps';
 import { findPath } from '../../world/pathfind';
 import { NO_GESTURE, pressed, released, type Gesture } from '../gesture';
@@ -320,6 +326,18 @@ export class WorldScene extends Phaser.Scene {
   private world!: World;
   /** The field map and its placed points of interest. `world` is this one's ground. */
   private built!: FieldMapWorld;
+
+  /**
+   * The other people on the road, and the sprites drawing them.
+   *
+   * Keyed by traveller id rather than held as an array, so a roster that changes between maps
+   * tears down exactly what it should. Nothing about *where* they are lives here -- that is
+   * `whereabouts`, which derives it from the seed, the day and the hour and stores nothing.
+   */
+  private travellers: { traveller: Traveller; stops: Point[]; sprite: Phaser.GameObjects.Sprite }[] = [];
+
+  /** The last phase the travellers were moved for, so they are not recomputed every frame. */
+  private travellersMovedAt = -1;
   /** The place under foot, so the UI is told when it changes rather than on every step. */
   private standingOn: string | null = null;
   private tileSprites: Phaser.GameObjects.Image[][] = [];
@@ -587,6 +605,7 @@ export class WorldScene extends Phaser.Scene {
     this.createGround();
 
     this.createPlayer();
+    this.createTravellers();
     // The initial answer, so the UI never has to assume one.
     this.reportCharacter();
 
@@ -1454,6 +1473,12 @@ export class WorldScene extends Phaser.Scene {
         EventBus.emitEvent('moment-changed', moment);
       }
 
+      // The other people on the road, on the same half-second gate and for the same reason. A
+      // traveller crosses a tile every few in-game minutes, so asking twice a second is already far
+      // more often than the answer changes -- and `whereabouts` walks a cached path, so the cost is
+      // an array index rather than a search.
+      this.updateTravellers(phase);
+
       // The sky's own announcement, in steps rather than continuously -- see `sky-changed`. It
       // shares the half-second check because it is the same question asked of the same clock, and
       // it is sent from the phase already computed above rather than recomputed.
@@ -1462,6 +1487,103 @@ export class WorldScene extends Phaser.Scene {
         this.lastSkyStep = step;
         EventBus.emitEvent('sky-changed', { phase: step / SKY_STEPS, label: sky.label });
       }
+    }
+  }
+
+  /**
+   * Put a sprite on the map for everybody else walking it.
+   *
+   * **Created once and moved, never created per frame.** Three sprites against the largest map's
+   * ~17,650 objects is 0.02%, and `docs/rendering.md` establishes that frame cost tracks canvas
+   * area rather than object count -- so the cost of this layer is three tiles of fill, which is
+   * nothing. What would *not* be nothing is rebuilding them on a clock.
+   *
+   * The player's own sheet is skipped so the traveller never meets themselves: with five sheets and
+   * a roster of three there is always one to move to.
+   */
+  private createTravellers(): void {
+    const figureScale = TILE_SIZE / 32;
+    for (const traveller of travellersOn(this.built.fieldMap.id)) {
+      const stops = stopsOf(traveller, this.built.placed);
+      // A circuit whose stops did not all get placed is not a circuit. Dropping the traveller is
+      // right: inventing a walk for somebody canon only put in one place would put a person on the
+      // road that nothing sent anywhere.
+      if (stops.length < 2) continue;
+
+      const key = traveller.art === this.character.key ? this.otherSheet(traveller.art) : traveller.art;
+      const sprite = this.add
+        .sprite(0, 0, key, 0)
+        .setOrigin(0.5, 1)
+        .setDisplaySize(PLAYER_FRAME.width * figureScale, PLAYER_FRAME.height * figureScale);
+      sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+      sprite.setName(`traveller:${traveller.id}`);
+      this.travellers.push({ traveller, stops, sprite });
+    }
+
+    // **Exposed for the browser suite, which is the only thing that can see a Phaser sprite.**
+    // This codebase's signature fault is a layer that is built, tested and connected to nothing --
+    // five recorded instances -- and a Node test can prove every rule in `travellers.ts` while the
+    // scene never calls any of them. `e2e/road-company.spec.ts` reads this and would fail the day
+    // `createTravellers` stopped being called, which no other check could notice.
+    (window as unknown as { __travellers?: () => unknown[] }).__travellers = () =>
+      this.travellers.map(({ traveller, sprite }) => ({
+        id: traveller.id,
+        named: traveller.npcId !== null,
+        sheet: sprite.texture.key,
+        visible: sprite.visible,
+        x: Math.round(sprite.x),
+        y: Math.round(sprite.y)
+      }));
+  }
+
+  /** Any built sheet but this one, so a traveller is never the player's own figure. */
+  private otherSheet(taken: string): string {
+    const art = everyCharacter().find((c) => c.key !== taken);
+    return art?.key ?? taken;
+  }
+
+  /**
+   * Move everybody to where the hour says they are.
+   *
+   * `whereabouts` is the whole rule and it is asked rather than reimplemented -- the scene owns the
+   * clock and the pixels and nothing else, which is the same split `dayNight.ts` and `fatigue.ts`
+   * already keep.
+   *
+   * **Hidden rather than moved off-screen when they are resting at a place.** A traveller standing
+   * on a point of interest would be drawn over the building, and a player who walks in expects to
+   * find them in the place panel rather than as a figure on the roof. The panel is where a person
+   * at a place lives; the map is where a person between places lives.
+   */
+  private updateTravellers(phase: number): void {
+    if (this.travellers.length === 0) return;
+    // A traveller crosses a tile every few in-game minutes; a hundredth of a day is about fifteen.
+    const step = Math.floor(phase * 100);
+    if (step === this.travellersMovedAt) return;
+    this.travellersMovedAt = step;
+
+    const day = this.dayOfJourney();
+    for (const { stops, sprite } of this.travellers) {
+      const where = whereabouts(this.world, stops, day, phase);
+      if (!where || where.resting) {
+        sprite.setVisible(false);
+        continue;
+      }
+      sprite.setVisible(true);
+      sprite.setPosition(
+        where.at.x * TILE_SIZE + TILE_SIZE / 2,
+        where.at.y * TILE_SIZE + TILE_SIZE - 2
+      );
+      // Sorted by row like everything else that stands on the ground, so a traveller south of the
+      // player passes in front of them and one north of them passes behind.
+      sprite.setDepth(depthFor(where.at.y, ROW_SLOT.walker));
+      const facing = facingFromStep(
+        where.heading === 'east' ? 1 : where.heading === 'west' ? -1 : 0,
+        where.heading === 'south' ? 1 : where.heading === 'north' ? -1 : 0,
+        'down'
+      );
+      const { key, flipX } = animFor(sprite.texture.key, facing, 'walk');
+      if (sprite.anims.currentAnim?.key !== key) sprite.play(key);
+      sprite.setFlipX(flipX);
     }
   }
 

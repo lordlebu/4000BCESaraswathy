@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.22.0",
+  "canon_version": "2.25.2",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -1997,6 +1997,21 @@
     },
     {
       "type": "vocabulary",
+      "language": "kia",
+      "id": "word_kia_tan",
+      "word": "tan / tan-set",
+      "gloss": "a struck note / the road's note",
+      "literal": "hollow / hollow-path",
+      "learned_from": [
+        "npc_kunch"
+      ],
+      "notes": "The same root as the word for a cut reed. A length of cane gives one note and only one, so the delta counts intervals in cane rather than in numbers -- two hands of cane is a phrase, and everybody who has walked with Kunch knows roughly how long that is on the road.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "type": "vocabulary",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -2066,6 +2081,21 @@
         "npc_vessa"
       ],
       "notes": "A year-name rather than a date. Evidence the archive cannot accept, because its form is a story.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "type": "vocabulary",
+      "language": "maru",
+      "id": "word_maru_bhar",
+      "word": "bhar",
+      "gloss": "a load an animal agreed to",
+      "literal": "weight, with consent",
+      "learned_from": [
+        "npc_moonj"
+      ],
+      "notes": "Not the weight of a thing -- maru has an ordinary word for that. `Bhar` is what is actually moving, which on the plateau is always less than what was loaded and is settled between a driver and an animal rather than decided by either. The archive has never found a use for it and the quarry cannot manage without it.",
       "epochs": [
         "epoch_post_cataclysm"
       ]

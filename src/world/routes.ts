@@ -221,3 +221,106 @@ export function tourOrder(stops: readonly Point[], from: Point): Point[] {
   }
   return order;
 }
+
+/**
+ * Narrow the road to one tile wherever two legs of the tour ran alongside each other.
+ *
+ * **This exists because the sixteen-piece road sheet made an old artefact visible.** Legs between
+ * different pairs of places often run parallel and adjacent for a stretch, so the flagged line is
+ * two tiles wide in places -- measured over ten seeds a map, **5.0% of Lothal's road tiles sit in a
+ * 2x2 block, 8.9% of Dwarka's, 9.7% of the Aravali's and 17.2% of Narmada's.** With the old
+ * four-frame sheet that drew as two parallel bars; with a sheet that has stubs and tees it draws as
+ * a ladder, because each row now reaches across to the other. The art is right either way and the
+ * road is what is wrong: a path worn between two places is one path.
+ *
+ * **Never disconnects anything, and that is the whole safety property.** A road already has gaps in
+ * it on purpose -- `fieldMap.ts` refuses the flag on water it fords and on the rail -- so the
+ * invariant cannot be "one component". It is that removing a tile leaves the same number of
+ * connected runs as before, which is checked rather than assumed: a tile is only dropped if the
+ * count is unchanged.
+ *
+ * Deterministic, like everything in `world/`: blocks are found in raster order and the candidate
+ * with the fewest connections outside its own block is dropped first, ties broken on position. The
+ * same seed thins the same tiles on every machine.
+ *
+ * Returns the tiles it cleared, so a caller can say how much it took.
+ */
+export function thinRoad(tiles: Tile[][], width: number, height: number): Point[] {
+  const key = (x: number, y: number) => `${x},${y}`;
+  const road = new Set<string>();
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) if (tiles[y]![x]!.road) road.add(key(x, y));
+  }
+
+  /** How many separate runs of road there are, four-connected like the frames read them. */
+  const runs = (on: ReadonlySet<string>): number => {
+    const seen = new Set<string>();
+    let count = 0;
+    for (const start of on) {
+      if (seen.has(start)) continue;
+      count += 1;
+      const queue = [start];
+      seen.add(start);
+      while (queue.length) {
+        const [sx, sy] = queue.pop()!.split(',').map(Number) as [number, number];
+        for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]] as const) {
+          const next = key(sx + dx, sy + dy);
+          if (!on.has(next) || seen.has(next)) continue;
+          seen.add(next);
+          queue.push(next);
+        }
+      }
+    }
+    return count;
+  };
+
+  const cleared: Point[] = [];
+  let before = runs(road);
+
+  // Repeated passes: dropping one tile can resolve two overlapping blocks, and can also leave a
+  // new one that was hidden behind it. Bounded by the road's own size, so it always terminates.
+  for (let pass = 0; pass < road.size; pass += 1) {
+    let changed = false;
+    for (let y = 0; y + 1 < height && !changed; y += 1) {
+      for (let x = 0; x + 1 < width && !changed; x += 1) {
+        const block: Point[] = [
+          { x, y },
+          { x: x + 1, y },
+          { x, y: y + 1 },
+          { x: x + 1, y: y + 1 }
+        ];
+        if (!block.every((p) => road.has(key(p.x, p.y)))) continue;
+
+        const inBlock = new Set(block.map((p) => key(p.x, p.y)));
+        const outside = (p: Point) =>
+          ([[0, -1], [1, 0], [0, 1], [-1, 0]] as const).filter(([dx, dy]) => {
+            const k = key(p.x + dx, p.y + dy);
+            return road.has(k) && !inBlock.has(k);
+          }).length;
+
+        // Fewest ties to the rest of the road first: that is the corner of the block, and taking a
+        // corner is what turns a square into an elbow rather than cutting a run in half.
+        const order = [...block].sort(
+          (a, b) => outside(a) - outside(b) || a.y - b.y || a.x - b.x
+        );
+        for (const candidate of order) {
+          const k = key(candidate.x, candidate.y);
+          road.delete(k);
+          if (runs(road) === before) {
+            tiles[candidate.y]![candidate.x]!.road = false;
+            cleared.push(candidate);
+            changed = true;
+            break;
+          }
+          road.add(k);
+        }
+        // A block where no tile can go is left alone rather than forced: four tiles that each hold
+        // the road together is a junction, not a doubled leg.
+      }
+    }
+    if (!changed) break;
+    before = runs(road);
+  }
+
+  return cleared;
+}
