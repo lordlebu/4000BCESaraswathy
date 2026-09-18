@@ -578,6 +578,66 @@ The general form: **if a number decides behaviour and you had to compute it, com
 computation, not the number.** A figure in a comment is stale the day the art changes; a generated
 table is not.
 
+## Watching the game from outside: the three debug hooks
+
+The scene exposes three globals, and they exist because **a Node test cannot see a Phaser sprite**
+— every fault in the walker, the travellers or the frame budget lives on the far side of that line.
+They are not a debug build; they ship, because the bug that needs them is the one a player reports.
+
+| hook | answers |
+|---|---|
+| `window.__walker()` | `{x, y, biome, moving, depth, sortedRow, queued}` — where the traveller is, what ground, mid-step or not, which row he is sorted into |
+| `window.__travellers()` | every road traveller: id, whether canon named them, which sheet, visible, position |
+| `window.__stalls` | every time the main thread stopped answering: `{lateBy, at, walker}`, also in `localStorage` under `sot.stalls` |
+
+`__walker` is what made a reported freeze *steerable*: "North Dwarka, towards the basalt columns"
+could not be aimed at until a spec could ask where the traveller had got to, and blind key-pressing
+had been walking him the wrong way across the map for two harnesses.
+
+## Diagnosing a freeze the machine will not reproduce
+
+A freeze reported from play — "the whole game is stuck when I move to a different tile", landscape
+phone — resisted three harnesses. What finally separated the possibilities was three techniques, in
+this order. None of them is obvious and all three are cheap.
+
+**1. A timer that notices it ran late.** `src/game/stall.ts`. A blocked main thread cannot run the
+check either, so the check fires *after* the block and measures the gap. This is the only
+measurement a page can make about its own paralysis, and it is the one that works on a phone, where
+nothing can be attached. Read it back with `window.__stalls` or `localStorage`.
+
+**2. CDP `Debugger.pause` breaks into a busy loop.** When the thread is pegged, `page.evaluate` and
+`page.keyboard.press` both time out — so a spec cannot ask the page anything. The debugger can:
+it interrupts from another thread and `Debugger.paused` hands back the full call stack. That is how
+the tripping `setState` was located. Keep the test alive long enough to pause (`test.setTimeout`),
+which the first attempt did not and so learned nothing.
+
+**3. `Profiler` tells JavaScript from everything else.** Sample at 1ms, then aggregate self time by
+leaf **and** find the longest unbroken run of one leaf, which is the shape a synchronous block has.
+The distinction that matters: `(program)` is time *outside* JS. A profile where `(program)` holds
+2,448ms and no JavaScript frame exceeds 10ms is not a bug in this codebase — it is rasterisation or
+the thread not being scheduled at all.
+
+**The meta-lesson, and it is the uncomfortable one.** Of the four mistakes made hunting this, three
+were already documented in this file — "nothing a starved run reports should be believed", "a cap
+tuned to your own machine is a fixed wait wearing a disguise", and "commit the computation, not the
+number". They were re-learned at a cost of several hours. The gap was not missing prose; it was not
+reading the prose that existed. Prefer re-reading this file over extending it.
+
+## What has been ruled out about that freeze, so it is not re-derived
+
+Open at the time of writing, with the causes eliminated **by measurement**:
+
+| candidate | measured | verdict |
+|---|---|---|
+| `findPath` called from the frame loop | 2–14ms on all three maps with the travellers' own 8:1 cost function | not it |
+| a React render chain | `App` never rendered >40× in 400ms under instrumentation | no chain exists |
+| lava-field fill cost | Dwarka 233ms vs Lothal 267ms, one sitting | *cheaper* than ordinary ground |
+| React `Maximum update depth exceeded` | fires under contention; page keeps running | real, non-fatal, a red herring |
+
+`findPath` does re-sort its whole frontier on every pop and its comment claims "the largest map is
+64x64" when the Aravali is 52×78. Both true, neither worth acting on at 14ms — recorded so the next
+reader does not mistake an ugly loop for a hot one.
+
 ## What is worth adding next
 - **A Python test runner for the canon repo.** `lint_story.py` and `check_playability.py` are
   untested scripts, and one of them shipped a wrong ordering check for months.
