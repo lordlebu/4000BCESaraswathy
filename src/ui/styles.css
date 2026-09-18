@@ -2751,14 +2751,49 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   color: var(--ink-faint);
 }
 
+/* The painted band above a place's prose.
+ *
+ * **`aspect-ratio` alone is a trap here, and `e2e/chrome-budget.spec.ts` caught it the day the
+ * first painting landed.** The dock is full viewport width, so 16:7 of it is 369px on an 844x390
+ * landscape phone and 630px on a desktop -- taller than the dock body in both cases. The place's
+ * readable share fell from 25% to 12.5% against a floor of 21, and the failure is the exact one
+ * the test is named for: the panel became a letterbox.
+ *
+ * So the aspect sets the *shape* and `max-height` sets the *size*, with `object-fit: cover`
+ * cropping between them. That is what "compose for a band" in the prompt was always asking for;
+ * nothing but the CSS was wrong. */
 .place-view {
   display: block;
   width: 100%;
   max-width: 100%;
   aspect-ratio: 16 / 7;
+  max-height: 18dvh;
   object-fit: cover;
   border-radius: 4px;
   margin-bottom: 0.6rem;
+}
+
+/* At peek the body is about forty pixels and every one of them is the standing row's. A decorative
+   band is the first thing to go, on the same reasoning as the biome sentence above. */
+.dock[data-height='peek'] .place-view {
+  display: none;
+}
+
+/* **No room for a picture here, and reading wins.** 18dvh of a 390-pixel screen is 70px against a
+ * dock body of about 93, so trimming is not enough -- this is the one screen where the band is
+ * dropped rather than cropped. Measured: 12.5% of the place on screen with the band, 18.8% with it
+ * capped, 25% with it gone, against a floor of 21.
+ *
+ * **This block has to sit after `.place-view`, not in the landscape query three hundred lines
+ * above.** It was written there first, where the repository's other landscape rules live, and the
+ * base rule below it won on equal specificity -- the cap applied and the `display: none` did not,
+ * which reads in the failure as a fix that half worked. `test/stylesheet.test.ts` cannot catch
+ * this: its guard is a bare class declared twice at the top level and it skips `@media` on
+ * purpose, because a rule inside one is usually the same rule again. Here it was not. */
+@media (orientation: landscape) and (max-height: 480px) {
+  .place-view {
+    display: none;
+  }
 }
 
 .stacks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
