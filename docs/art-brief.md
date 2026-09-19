@@ -1579,3 +1579,376 @@ shipped without an engine change.
 road sheet came back with pieces 25–81% of their box, centred anywhere from 24% to 72%, and not one
 of the four touched an edge. That sheet was unusable and was replaced by a code-drawn one. A builder
 can crop, resample and recolour; it cannot invent where a run was supposed to leave the cell.
+
+---
+
+---
+
+## Asset 7 — three traveller sheets, and that is the whole ask
+
+**The complaint, exactly as reported:** *"I can see NPCs moving, but they are the player characters."*
+They are. `SHEETS` in `src/content/travellers.ts` is the five **playable** characters, and
+`sheetFor` walks down it — so every traveller on every map wears a face the player can also be
+wearing, and on the map you are on, one of them may be wearing yours.
+
+**Three sheets fixes it completely, and three is not a compromise — it is the exact number.**
+`TRAVELLERS_PER_MAP` is 3, and `sheetFor` guarantees no two travellers on a map share a sheet only
+while the roster is no longer than the list. So a list of exactly three non-playable sheets gives
+every map three distinct strangers and makes a collision with the player *impossible* rather than
+unlikely.
+
+Once the three exist, `SHEETS` stops naming playable characters and the fault is gone. No other
+code changes.
+
+### What these three people are
+
+Not portraits of named individuals. **Three travellers who read as different people at a glance**,
+which at 26×40 means three different silhouettes and three different hues — the palette is
+per-character and never shared, because hue is what tells one figure from another at this size.
+
+They are on the road between places all day, so they carry things and they are dressed for walking.
+Beyond that they are deliberately unspecific: the same three sheets serve Anu on the Aravali and
+Bekh on Lothal, and a sheet that is obviously one named person would be wrong in eleven places out
+of twelve.
+
+| Sheet | Reads as | The silhouette |
+| --- | --- | --- |
+| `traveller-carrier.png` | somebody carrying goods between places | a loaded back — the tallest and broadest of the three |
+| `traveller-drover.png` | somebody who walks behind animals | a coiled rope and a long staff held low, the leanest |
+| `traveller-pilgrim.png` | somebody walking for their own reasons | a shawl over the head, hands free, the smallest |
+
+The roles are canon's own words where canon has them: `COMPANY` in `travellers.ts` already carries
+*"carrier, with a loaded back"* and *"drover, behind six animals"*.
+
+### What was measured first, because "same process as Mithra" was not a specification
+
+Mithra's sheet was pointed at as the good one. That turned out to be **measurable**, and nothing was
+measuring it. `node tools/check-sprite.js assets/*-overworld.png` now does:
+
+| sheet | colours | speckle | mean run | |
+| --- | --- | --- | --- | --- |
+| **mithra** | 52 | **26.8%** | **1.59px** | ok |
+| varuna | 59 | 27.8% | 1.47px | ok |
+| guyuk | 60 | 37.2% | 1.42px | fail |
+| mehtar | 67 | 58.5% | 1.18px | fail |
+| malacite | 68 | **64.5%** | 1.14px | fail |
+
+**Speckle** is the share of opaque pixels whose colour matches none of their four neighbours. It is
+the number that matters, because the scene sets `FilterMode.NEAREST`: zooming magnifies hard pixels,
+so a pixel belonging to a shape grows into more of that shape and a pixel belonging to nothing grows
+into a visible speck. **Malacite is two thirds speck.** That is the difference being perceived.
+
+Three things were then tested rather than assumed:
+
+**The quantise target is a weak lever.** Rebuilding Mithra from the *same source* at 18, 22, 26, 34
+and 48 colours moved speckle only 19.8% → 26.6%, and the five builds are **visually identical at 8×
+magnification**. It cannot explain a forty-point gap. Turn it down because it is free, not because
+it fixes anything — and **build these three at 18**, which measured cleanest.
+
+**So the cause is the source art.** Checked at the block size the builder samples with — it takes the
+*most common* colour per 8×8 source block — Mithra's blocks agree 13.8% of the time against
+10.7% for guyuk. A block with no majority emits a colour unrelated to its neighbours, which is
+speckle, one step upstream.
+
+**And "no anti-aliasing" has never once been obeyed.** Every source sheet in this repository is
+**38–43% semi-transparent pixels** — painted and anti-aliased, not pixel art, whatever the prompt
+asked for. The builder crushes it down and the difference between a good sheet and a bad one is
+entirely how well the art survives that. So the prompt below asks for what survives an 8:1 modal
+downsample, and stops pretending the model will hand back a 26×40 grid.
+
+### What Mithra actually is, measured
+
+Frame 0, the standing pose: **625 opaque pixels, 26 colours, and the single most common colour is
+the outline** — `#040201`, holding **24.6% of the whole figure**. The top three colours hold 42%.
+Twenty-one colours hold 1.5% or more each; only five are boundary mush, 4% of the pixels.
+
+She fills **77% of the cell's width and 100% of its height**, feet on the bottom edge.
+
+Her face is **two dark dots**. There is nothing else in it.
+
+That is the specification, and it is why she survives: a heavy dark outline holding a small number of
+large flat areas, with a silhouette — the pointed cap — that identifies her before any detail does.
+
+### The size these are drawn at, which is half the player's
+
+A traveller draws at **2×** where the player draws at **4×** — 52×80 pixels against 104×160 on a 128
+tile. Same 26×40 art, drawn smaller. So **every detail is half the size it is on Varuna**, the face
+is about six screen pixels across, and the silhouette is doing nearly all the work.
+
+### The prompt
+
+**Change only the three bolded character lines and leave everything else identical** — that is what
+keeps the three consistent with each other and with the existing five.
+
+> **Chibi pixel art RPG game, rounded version.** Character sheet, **sixteen figures in four rows of
+> four**, of **[CHARACTER]** for a cozy top-down exploration game.
+>
+> **16-bit SNES-era pixel art, in the style of a clean overworld sprite.** Solarpunk watercolour
+> palette: clean sunlit colour, saturated where the light falls, warm bounce light in the shadows
+> rather than flat grey, living greens. Bright but never neon, and nothing glows or emits light.
+>
+> **A heavy warm near-black outline runs all the way around the figure and around each major part of
+> it — never pure black.** The outline is the single largest element: about a quarter of every figure
+> should be outline.
+>
+> **Two or three tones per material and no more** — one base, one shadow, at most one highlight. Flat
+> areas of solid colour with hard edges between them. **No dithering, no stippling, no gradients, no
+> texture, no fabric weave, no individual hairs, no speckling of any kind.** Every detail must be at
+> least three pixels across at the figure's own scale; anything finer becomes noise.
+>
+> **The silhouette must identify this person on its own**, read as a solid shape with no interior: one
+> strong identifying form — a hat brim, a bundle, a shawl — that no other figure shares.
+>
+> **The identifying form must not swallow the figure.** The pack, staff or shawl occupies at most the
+> top third of the figure's height and never more than a third of its width. The person is still
+> plainly a person, with a **clearly visible head standing free of it** — nothing crossing the face,
+> no strap over the head.
+>
+> **Give the figure one large block of strongly contrasting colour near the top** — a cap, a
+> headcloth, a hood — in a different hue from the skin, the clothing and anything carried, and not
+> broken up by straps or detail crossing it. At the size this is drawn, that block is what tells one
+> traveller from another. **Name the colour of the clothing under it in the same breath**, and make
+> it clearly darker: left unstated, a generator will happily dress the figure in the same value as
+> the block and head and torso merge into one mass.
+>
+> **The figure is the same width from behind as from the front, and the same height in all sixteen
+> frames.** Anything held goes close in against the body in the back view rather than out to the
+> side. The builder fits each figure's own bounding box to the cell, so a back view that is wider
+> than it is tall gets fitted by width and comes up short — which reads in play as the traveller
+> **shrinking as it turns away**.
+>
+> **Anything carried is plain:** no woven or basketwork texture, no foliage, no dangling sprigs, no
+> visible weave, no rope detail. One or two flat colours for the whole of it.
+>
+> **The face is two dark dots for eyes and nothing else.** No nose, no mouth, no eyebrows, no facial
+> shading. It is drawn far too small for any of it.
+>
+> **Row 1 faces the viewer. Row 2 is seen from behind. Row 3 is a side view facing right. Row 4 is
+> the same side view facing left.**
+>
+> **Within each row: the first two frames are PASSING poses with the legs closed — one leg directly
+> in front of the other, the feet together, almost a standing pose. The last two frames are CONTACT
+> poses with the legs wide apart, one foot forward and one foot back, mirrored between them.** Two
+> closed, then two open, in that order. **Do not draw four variations of a stride** — if the legs
+> are apart in all four frames the walk has no cycle in it and the figure shuffles.
+>
+> **Every figure exactly the same height and the same distance from the bottom of its cell.** The
+> figure is **26 units wide by 40 tall in proportion**, fills about three quarters of its cell's width
+> and the full height, and stands with its feet on the bottom edge.
+>
+> Draw it large and clean — around 300 pixels per figure — rather than trying to hit a tiny grid.
+>
+> Lossless PNG with a genuine alpha channel: the background **fully transparent, not a grey
+> checkerboard**. No guides, no grid lines, no row or column labels, no centre cross, no alignment
+> marks, no drop shadows, no border, no text, no watermark.
+
+Substitute for **[CHARACTER]**:
+
+1. **a broad-shouldered carrier in their forties, in a bright ochre-yellow headcloth, with a compact
+   bundle on their back rising no higher than the top of the head, a knee-length undyed tunic and
+   bare feet** — the contrast block is the ochre headcloth
+2. **a lean weathered drover in their fifties, in a compact bleached white headwrap, a dark
+   olive-green sleeveless tunic, a dust-red wrapped skirt and sandals, with a long plain staff held
+   low in one hand** — the contrast block is the white headwrap against the dark tunic
+3. **a slight pilgrim of about twenty, with a deep indigo shawl drawn up over the head and falling to
+   the elbows, both hands free, a plain pale wrap to the ankle and bare feet** — the contrast block
+   is the indigo hood
+
+Three different top blocks — ochre, white, indigo — so no two read alike at a glance, and none of
+them is Mithra's red cap.
+
+**Why that order and not the obvious alternation.** `walkOrder` in `src/game/player.ts` is
+`[row + 2, row + 0, row + 3, row + 1]` — the engine plays the third frame, then the first, then the
+fourth, then the second, which turns *two closed and two open* into contact-pass-contact-pass. A
+sheet drawn to alternate inside the row comes out as open-open-closed-closed once played, and reads
+as a shuffle.
+
+Measured on the profile rows, as the gap between the legs in play order:
+
+| | played sequence | |
+| --- | --- | --- |
+| **mithra** | 5 → **0** → 5 → **0** | closes completely, twice a cycle |
+| varuna | 5 → 2 → 5 → 6 | barely closes |
+| mehtar | 6 → 2 → 5 → 7 | barely closes |
+| malacite | 7 → 5 → 6 → 7 | **never closes** |
+
+Mithra is the only one of the five whose feet actually come together, which is the whole of why her
+walk reads as fluid and the others shuffle. **This is the single most important line in the prompt.**
+
+### What the first delivered sheet measured
+
+The carrier came back and is worth recording rather than re-deriving. **The walk cycle was fixed** —
+stride 6.5 on the profile rows against Mithra's 5.0, the best of any sheet in the repository, so the
+two-closed-then-two-open instruction works. The source was clean: real alpha, nothing to key out, all
+sixteen figures found.
+
+Two things were wrong, and only one of them was the art.
+
+**Speckle was over the bar at 18 colours and under it at 12** — 33.3% against 27.7%. These figures
+carry a load, and a load adds colours the figure does not otherwise need, so **build the traveller
+sheets at 12 rather than the 18 first written here.** Measured across four builds of the same source:
+
+| colours | speckle | mean run | |
+| --- | --- | --- | --- |
+| 12 | **27.7%** | 1.52px | ok |
+| 14 | 29.4% | 1.49px | ok |
+| 18 | 33.3% | 1.42px | fail |
+| 24 | 37.1% | 1.38px | fail |
+
+**And it did not read at the size it is drawn.** At 2× against Mithra at 2×, she is instantly a person
+walking and the carrier is a brown-green blob. Two causes, both visible at 6×: the pack was over half
+the figure with the head tucked behind a strap, and every region sat in the same mid-brown family.
+The amendment above — a third of the height at most, head standing free, one high-contrast block
+near the top, nothing carried carrying texture — is what that cost.
+
+Worth being straight about the limit of this: the read problem was judged **by looking**. An attempt
+to measure it as hue separation did not distinguish the two sheets, so there is no number behind that
+paragraph and none is claimed.
+
+### What the second delivered sheet measured
+
+The drover, on the first attempt. It **passed every automated check** and was still sent back, which
+is the case worth recording: the bar catches noise, not composition.
+
+| | speckle @12 | stride | feet close? | cell heights |
+| --- | --- | --- | --- | --- |
+| carrier | 15.7% | 6.5 / 7.0 | yes, to 0 | 40, 40, 40, 40 |
+| **drover (1st)** | 23.5% | 6.5 / 6.0 | no — 1–3px | **38, 34, 40, 40** |
+| mithra | 26.8% | 5.0 / 5.0 | yes | 40, 40, 40, 40 |
+
+**The height row is the finding.** Every other sheet fills the cell in all four facings; the drover's
+back view filled 34 of 40, because with the staff held out to the side the back view is *wider than
+it is tall* and `resample` fits it by width. In play the figure shrinks about 15% when it turns to
+walk away. Nothing in the brief had said the figure must be the same width from behind, because
+nothing had needed it until something was held.
+
+**And the contrast block did not contrast.** The prompt asked for a white headwrap that differed from
+"the clothing" without ever naming the clothing's colour, so the tunic came back white too and the
+head merged into the torso. At 2× it read as a pale blob with a red bottom beside a carrier that read
+as a person. Both rules above exist because of this sheet.
+
+### Checking one before you commit it
+
+```bash
+npm run build:sprite traveller-carrier
+node tools/check-sprite.js assets/traveller-carrier-overworld.png
+```
+
+**Under 30% speckle and over 1.45px mean run, or send it back.** Those gates are set from Mithra
+rather than chosen — a sheet that merely ties the best one should pass rather than scrape. Three of
+the five existing characters fail them, which is the point: the check exists because nothing caught
+Malacite at 64%.
+
+### Delivering them
+
+`assets/source/` — **tracked**, not `assets/source/dump/`, because a `tools/` script reads them to
+build something. Then a row each in `tools/characters.json` and `npm run build:sprite`.
+
+**Check the profile rows by eye at about 18× before believing a sheet.** Rows 3 and 4 are assumed to
+arrive as right then left, and Mithra's arrived the other way round — so walking east played a figure
+facing west while it slid east. Two pixel heuristics were written to catch this and **both got it
+wrong on two of the five existing characters**; looking at it took a minute and was right. The fix is
+a `frames` list in the manifest, never a change in the game.
+
+---
+
+## Asset 8 — the three faces missing, and they are all travellers
+
+**Fourteen of canon's seventeen people have a painted portrait. The three without one are `anu`,
+`kunch` and `moonj`** — and that is not a coincidence, it is the same gap from the other side: all
+three are circuit-walkers, so they were authored for the travel layer and the portrait batch predates
+it. Anybody without a portrait falls back to a drawn silhouette, which is why nothing looks broken
+and why nobody noticed.
+
+This is the whole remaining portrait set. There is no fourth.
+
+| Who | Language → wash | Where they walk |
+| --- | --- | --- |
+| **Anu**, hunter | `maru` → warm ochre-brown `#8a6a3a` | Nomad Ground → Vedda Ford → Sunk Cutting |
+| **Kunch**, road singer | `kia` → cool blue-green `#3d7a8c` | Lothal Camp → Marsh Shrine → Eastern Field |
+| **Moonj**, driver | `maru` → warm ochre-brown `#8a6a3a` | Basalt Quarry → Narmada University → Walking Spring |
+
+The wash is not decoration: **ink is by language**, so a portrait's tint says who else can hear the
+words this person teaches. `LANGUAGE_INK` in `PersonPortrait.tsx` is where that lives, and the
+painted portrait has to agree with the silhouette it replaces.
+
+### The prompts
+
+Same pipeline as the other fourteen. Save what comes back under any name into
+`assets/source/portraits/`, then `node tools/build-plates.js --portraits`. **The first four
+paragraphs are identical in every portrait prompt** — only the `Subject:` line and the wash colour
+change.
+
+> **Anu** — the file becomes `anu.png`.
+>
+> ```text
+> Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+>
+> One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+>
+> Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
+>
+> Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+>
+> Subject: A hunter, a man of about thirty-five, an unstrung sinew bow carried slack over one shoulder and a shed antler held loosely in the other hand. High dry grassland behind him, a herd somewhere off-frame. He walks ahead of the animals so that things see him and go elsewhere, and he is watching something past the viewer rather than the viewer.
+>
+> Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
+> ```
+
+> **Kunch** — the file becomes `kunch.png`.
+>
+> ```text
+> Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+>
+> One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+>
+> Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
+>
+> Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+>
+> Subject: A road singer, a lean man of about thirty with his hair tied back, holding up a bound bundle of three cut canes of different lengths - an instrument that is struck, not blown, so there is no mouthpiece. Delta reed beds and open water behind him. He is amused and entirely unbothered; he is paid in meals and considers that the better arrangement.
+>
+> Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
+> ```
+
+> **Moonj** — the file becomes `moonj.png`.
+>
+> ```text
+> Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+>
+> One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+>
+> Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
+>
+> Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+>
+> Subject: A driver, a broad-shouldered woman in her sixties with short grey hair, a coiled rope over one shoulder and a short goad held low - a walking stick, never raised. Cut basalt blocks and a quarry face behind her. Steady and unimpressible; she has done the same road every second day of her life and would not sell the hour it takes.
+>
+> Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
+> ```
+
+**A note on Moonj, and it is a rule rather than a detail.** She is the person the University's record
+leaves out — *"the stone was quarried by a hand and moved by an animal, and only one of those is
+written down."* She is the driver, and her portrait must not be a portrait of a driver's animal. Head
+and shoulders, the goad at the lower edge, no elephant in frame.
+
+---
+
+## Out of scope for the travel work
+
+Everything below came up while briefing the road and was **moved out deliberately**. None of it
+blocks the two assets above, and each is a fresh decision whenever somebody wants it rather than a
+debt this work owes.
+
+| Item | Why it is out | What it would cost |
+| --- | --- | --- |
+| **Mounts and vehicles** | An earlier draft asked for two mounts and three carts in four facings each. That is the conveyance layer, not the faces. Every traveller carries a derived `conveyance` and none of it is drawn — `vehicles.png` is built from one painted carriage and loaded by nothing. The half-size figure now leaves room for one when somebody wants it. | ~20 images, plus a `MOUNTS` strip and a draw-order decision |
+| **Named walking sheets** | Eleven of the twelve travellers are canon people, so doing this properly is eleven sheets, not two — and two named faces among ten generic ones reads as an error rather than a feature. The three generic sheets above fix the actual complaint completely. | 11 sheets |
+| **Kunch's bird** | **Not an art item at all.** It has no canon entity: no bird in canon carries `riding` or `cargo` in a wetland or river biome, and the delta's nine are small or middling waders. An animal is a noun, so it is canon's to author before anybody paints one. | one canon entity, then art |
+| **Road furniture** | Cairns, ford posts, boundary stones, stairs where a road meets a scarp. All proposed, none built, and **none of them needs prompted art** — they are masses a loop states exactly, which is rule §1 in `art-direction.md`. `build-road.js` and `build-decor.js` already draw this category. | code, not art |
+
+**The last row is the useful one.** The road sheet itself was code-drawn for exactly this reason: the
+first prompted road came back with pieces 25–81% of their box and not one touching a cell edge, and
+was unusable. A builder can crop, resample and recolour; it cannot invent where a run was supposed to
+leave the cell. Anything roadside that is a shape rather than a face should be generated, not asked
+for.

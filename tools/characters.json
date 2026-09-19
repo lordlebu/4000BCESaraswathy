@@ -72,6 +72,68 @@
       "sit": { "keep": 4 }
     },
     {
+      "$comment": [
+        "Third and last traveller sheet, and the one that completes the set -- `TRAVELLER_SHEETS`",
+        "in content/travellers.ts can only switch when it can cover a whole map, which is three.",
+        "",
+        "Best gait of the three: stride 7.5/7.0 with the feet closing to zero on both profile rows,",
+        "against the carrier's 6.5/7.0 and Mithra's 5.0. The solarpunk theme is in the subject rather",
+        "than the style block -- she walks the road planting and tending what grows along it, which",
+        "is the person who makes canon's three new wayside species true. docs/art-direction.md warns",
+        "that 'solarpunk' in a style block returns solar panels and brass gauges into a 4000 BCE",
+        "setting, so the prompt carries an explicit anachronism block as well."
+      ],
+      "id": "traveller-pilgrim",
+      "name": "A pilgrim",
+      "colours": 12,
+      "walk": { "source": "assets/source/traveller-pilgrim.png" },
+      "sit": { "source": "assets/source/traveller-pilgrim.png", "frames": [0, 4, 8, 12] }
+    },
+    {
+      "$comment": [
+        "Second traveller sheet. Its first attempt passed every automated check and was sent back",
+        "anyway: the back view filled 34 of 40 rows because the staff was held out to the side, so",
+        "the figure shrank about 15% as it turned away -- `resample` fits each figure's own bounding",
+        "box to the cell, and a back view wider than it is tall gets fitted by width. Holding the",
+        "staff close in against the body fixed it: heights are 40,40,40,40 and widths 21-23.",
+        "",
+        "The other fault was the contrast block not contrasting. The prompt asked for a white",
+        "headwrap differing from 'the clothing' without naming the clothing's colour, so the tunic",
+        "came back white too and head and torso merged into one pale mass. The tunic is dark",
+        "olive-green now and the head reads as separate."
+      ],
+      "id": "traveller-drover",
+      "name": "A drover",
+      "colours": 12,
+      "walk": { "source": "assets/source/traveller-drover.png" },
+      "sit": { "source": "assets/source/traveller-drover.png", "frames": [0, 4, 8, 12] }
+    },
+    {
+      "$comment": [
+        "The first sheet that draws a traveller and nobody else. `SHEETS` in content/travellers.ts",
+        "used to be the five playable characters, so everybody met on the road wore a face the",
+        "player could also be wearing -- and on the map you were on, one of the three might be",
+        "wearing yours.",
+        "",
+        "colours: 12, not the 26 Mithra takes. Measured on this exact source: 15.9% speckle at 12",
+        "against 27.4% at 18. A carried load adds colours the figure does not otherwise need, and",
+        "these are drawn at half the player's size where the count is the least visible thing about",
+        "them. `node tools/check-sprite.js` is the check.",
+        "",
+        "sit: the walking source again, taking the first frame of each row. A traveller NEVER sits --",
+        "`updateTravellers` only ever plays 'walk' -- but the builder requires all twenty frames, and",
+        "four standing poses are the honest filler. Inventing a seated pose for a figure nothing ever",
+        "seats would be art nobody looks at. Replace it the day a traveller can be sat down.",
+        "",
+        "No `frames` reorder: checked by eye at 9x, the rows arrive down, up, right, left."
+      ],
+      "id": "traveller-carrier",
+      "name": "A carrier",
+      "colours": 12,
+      "walk": { "source": "assets/source/traveller-carrier.png" },
+      "sit": { "source": "assets/source/traveller-carrier.png", "frames": [0, 4, 8, 12] }
+    },
+    {
       "id": "malacite",
       "name": "Malacite",
       "colours": 34,

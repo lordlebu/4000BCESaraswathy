@@ -23,6 +23,7 @@ import {
   runSides,
   ROAD_MASKS,
   ROAD_PIECES,
+  ROAD_SURFACE,
   RUN_SIDE,
   TRACK_PIECES
 } from '../src/game/frames';
@@ -35,6 +36,14 @@ const built = (id: string, seed = DEFAULT_SEED) =>
 
 const roadTiles = (world: World) =>
   world.tiles.flat().filter((tile) => tile.road === true);
+
+// **Road and ford together, which is what gets drawn.** The two flags are deliberately separate on
+// the tile -- `road` is paved and a ford is not, and the assertion further down that no road lands
+// on water depends on that -- but `planRoad` draws both, because the crossing is the road's third
+// surface rather than a second feature. Counting only `road` here reported 122 against 130 drawn on
+// the Aravali, which was the ford working.
+const wornTiles = (world: World) =>
+  world.tiles.flat().filter((tile) => tile.road === true || tile.ford === true);
 
 describe('easeRoutes hands back two different facts', () => {
   it('returns a line far longer than the tiles it changed', () => {
@@ -169,7 +178,7 @@ describe('the road reaches the screen', () => {
       const scene = buildFieldMap(map, { seed: DEFAULT_SEED });
       const drawn = planScene(scene).filter((p) => p.sheet === 'road');
       expect(drawn.length, `${map.id}: the road is flagged but nothing draws it`)
-        .toBe(roadTiles(scene.world).length);
+        .toBe(wornTiles(scene.world).length);
     }
   });
 
@@ -193,7 +202,14 @@ describe('the road reaches the screen', () => {
     // `road at 31,52 draws an opening north onto no road`.
     for (const map of fieldMaps) {
       const world = buildFieldMap(map, { seed: DEFAULT_SEED }).world;
-      const road = (x: number, y: number) => world.tiles[y]?.[x]?.road === true;
+      // The ford counts as road *to the shape*, and must: the frame is the sides the run leaves
+      // by, and a crossing is a tile the run passes through. Asking `road` alone here reported
+      // `23,10 draws sides 12 over ground that runs 8` -- the west arm reaching the ford at 22,10,
+      // which is the whole point of drawing the crossing.
+      const road = (x: number, y: number) => {
+        const tile = world.tiles[y]?.[x];
+        return tile?.road === true || tile?.ford === true;
+      };
       for (const piece of planRoad(world)) {
         const drawn = piece.frame % ROAD_MASKS;
         const truth = runSides(piece.x, piece.y, road);
@@ -225,16 +241,71 @@ describe('the road reaches the screen', () => {
     expect(end.length, 'no dead end on any map').toBeGreaterThan(0);
   });
 
+  it('draws the crossings, on the ford row, over water and nowhere else', () => {
+    // **The guard on the whole ford change, and it is the signature-fault guard.** A third row on
+    // the sheet, a flag on the tile and a branch in `planRoad` are all provable in isolation while
+    // no map ever produces one -- which is how `lava_field` shipped with painted tiles, 25 creatures
+    // and zero tiles on every seed.
+    //
+    // Measured across five seeds of each map, and this is the number that made the change worth
+    // doing: Lothal draws **23 to 42** crossings against 54 to 87 road tiles, so between a quarter
+    // and 44% of that delta's network was missing. The other three draw 0 to 17, which is why the
+    // gap was only ever reported on Lothal.
+    const seeds = [DEFAULT_SEED, 'a', 'b', 'c', 'd'];
+    for (const map of fieldMaps) {
+      let everAforded = 0;
+      for (const seed of seeds) {
+        const world = buildFieldMap(map, { seed }).world;
+        const crossings = planRoad(world).filter(
+          (p) => Math.floor(p.frame / ROAD_MASKS) === ROAD_SURFACE.ford
+        );
+        everAforded += crossings.length;
+        for (const piece of crossings) {
+          const tile = world.tiles[piece.y]?.[piece.x];
+          // A ford is over water by definition -- it is the tile `fieldMap.ts` withheld `road` from
+          // *because* the biome is wet. Stones drawn on dry ground would be the branch reading the
+          // wrong flag.
+          expect(
+            tile?.biome,
+            `${map.id}/${seed}: a crossing at ${piece.x},${piece.y} is not over water`
+          ).toMatch(/^(river|sky_water)$/);
+          expect(tile?.road, `${map.id}/${seed}: ${piece.x},${piece.y} is both paved and forded`)
+            .not.toBe(true);
+        }
+      }
+      expect(
+        everAforded,
+        `${map.id}: no route on any seed crosses water, so the ford row never draws`
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  it('carries Lothal, which is the map the gap was reported on', () => {
+    // Lothal is a delta and its road has always been the short one -- 54 to 87 tiles against 98 to
+    // 169 elsewhere at the same place spread. The reason was never that the route is shorter: it is
+    // that the route crosses water constantly and every crossing was silently dropped, so the road
+    // read as fragments. Asserted as a share rather than a count, because the counts move with the
+    // maps and the fact does not.
+    for (const seed of [DEFAULT_SEED, 'a', 'b', 'c', 'd']) {
+      const world = buildFieldMap(fieldMap('field_map_lothal')!, { seed }).world;
+      const fords = world.tiles.flat().filter((t) => t.ford === true).length;
+      const worn = wornTiles(world).length;
+      expect(fords / worn, `lothal/${seed}: the crossings stopped mattering`).toBeGreaterThan(0.15);
+    }
+  });
+
   it('indexes the verge row by adding the mask count, and nothing else', () => {
     // The contract with `tools/build-road.js`, which writes masks 0..15 walked and then the same
     // sixteen with a verge. It is no longer the rail's four-piece order, and that parting is
     // deliberate rather than drift: a railway is surveyed and a path is walked, so only one of them
     // needs a corner.
-    expect(ROAD_PIECES).toBe(ROAD_MASKS * 2);
+    expect(ROAD_PIECES).toBe(ROAD_MASKS * 3);
     expect(ROAD_PIECES).not.toBe(TRACK_PIECES);
     for (let mask = 0; mask < ROAD_MASKS; mask += 1) {
-      expect(roadFrame(mask, false)).toBe(mask);
-      expect(roadFrame(mask, true)).toBe(mask + ROAD_MASKS);
+      expect(roadFrame(mask, ROAD_SURFACE.walked)).toBe(mask);
+      expect(roadFrame(mask, ROAD_SURFACE.verge)).toBe(mask + ROAD_MASKS);
+      // The third row, which is the ford. Same sixteen shapes, one row further down the sheet.
+      expect(roadFrame(mask, ROAD_SURFACE.ford)).toBe(mask + ROAD_MASKS * 2);
     }
   });
 

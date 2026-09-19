@@ -9,7 +9,14 @@
 // cannot see is whether the sheet actually loads, which is `e2e/travellers.spec.ts`.
 
 import { describe, expect, it } from 'vitest';
-import { CHARACTERS, characterFor, everyCharacter } from '../src/game/characters';
+import {
+  CHARACTERS,
+  TRAVELLER_ART,
+  characterFor,
+  everyCharacter,
+  everySheet
+} from '../src/game/characters';
+import { PLAYER_FRAME, TRAVELLER_SHRINK, figureScale, travellerScale } from '../src/game/player';
 
 describe('the cast', () => {
   it('holds every traveller the build makes a sheet for', () => {
@@ -69,5 +76,81 @@ describe('characterFor', () => {
     expect(characterFor('toString').key).toBe('varuna');
     expect(characterFor('constructor').key).toBe('varuna');
     expect(characterFor('__proto__').key).toBe('varuna');
+  });
+});
+
+describe('how big a figure is drawn', () => {
+  // **Pure arithmetic, and it is in `player.ts` rather than in the scene precisely so it can be
+  // asserted here.** The numbers were inline in `WorldScene` as `TILE_SIZE / 32` at two call sites,
+  // which is how the travellers came to be exactly the player's size: nothing said they should
+  // differ, so nobody noticed they did not.
+
+  it('scales the player by a whole number, never a fraction', () => {
+    // A fractional scale is what makes pixel art shimmer as it moves. The floor is the rule, and
+    // the guard is that no tile size can produce a fraction -- including the ones between the two
+    // grids this game has actually used.
+    for (const tile of [32, 48, 64, 96, 128, 130]) {
+      const scale = figureScale(tile);
+      expect(Number.isInteger(scale), `tile ${tile} scales by a fraction`).toBe(true);
+      expect(scale, `tile ${tile} scales a figure away`).toBeGreaterThanOrEqual(1);
+    }
+    // The grid the game is on, and the one it grew from.
+    expect(figureScale(128)).toBe(4);
+    expect(figureScale(32)).toBe(1);
+  });
+
+  it('draws everybody else at half that, and never smaller', () => {
+    // **The requirement, stated as the ratio rather than the pixels**: a traveller is half the
+    // player so there is room to draw the mount they are riding. At the 128 grid that is 52x80
+    // against 104x160.
+    expect(travellerScale(128)).toBe(figureScale(128) / TRAVELLER_SHRINK);
+    expect(PLAYER_FRAME.width * travellerScale(128)).toBe(52);
+    expect(PLAYER_FRAME.height * travellerScale(128)).toBe(80);
+
+    // A quarter was the other end of what was asked for and is not reachable by halving twice:
+    // 1x is the art at native size, 26 pixels across a 128 tile, and the floor stops it going
+    // below that on any grid.
+    for (const tile of [32, 48, 64, 96, 128]) {
+      const scale = travellerScale(tile);
+      expect(Number.isInteger(scale), `tile ${tile} scales a traveller by a fraction`).toBe(true);
+      expect(scale, `tile ${tile} scales a traveller away`).toBeGreaterThanOrEqual(1);
+      expect(scale, `tile ${tile} draws a traveller larger than the player`)
+        .toBeLessThanOrEqual(figureScale(tile));
+    }
+  });
+});
+
+describe('the sheets that draw a traveller', () => {
+  // **The join this guards is a name dealt with no art behind it.** `TRAVELLER_SHEETS` in
+  // `content/travellers.ts` is a list of strings -- it has to be, because `content/` does not import
+  // `game/` -- so nothing in the type system connects a dealt name to a loaded texture. Get it wrong
+  // and Phaser draws a green `__MISSING` square, which is the kind of thing that ships.
+
+  it('is never offered as the player, whatever the URL says', () => {
+    // A `?as=traveller-carrier` would put the player in a figure with no sitting art and a name that
+    // reads as a job rather than a person. `characterFor` only knows `CHARACTERS`, and this asserts
+    // that stays true as the traveller list grows.
+    for (const key of Object.keys(TRAVELLER_ART)) {
+      expect(characterFor(key).key, `${key} is reachable as a playable character`).toBe('varuna');
+      expect(everyCharacter().map((c) => c.key)).not.toContain(key);
+    }
+  });
+
+  it('is loaded and animated by the scene, which reads a different list', () => {
+    // The scene iterated `everyCharacter()` for loading and for animations, so a traveller sheet
+    // would have been built, committed and drawn by nothing -- eight recorded instances of that in
+    // this repository. `everySheet` is what it reads now, and it must cover both lists exactly.
+    const sheets = everySheet().map((c) => c.key);
+    for (const key of Object.keys(CHARACTERS)) expect(sheets).toContain(key);
+    for (const key of Object.keys(TRAVELLER_ART)) expect(sheets).toContain(key);
+    expect(sheets.length).toBe(Object.keys(CHARACTERS).length + Object.keys(TRAVELLER_ART).length);
+    expect(new Set(sheets).size, 'two sheets share a key').toBe(sheets.length);
+  });
+
+  it('gives every sheet a url and a name worth printing', () => {
+    for (const art of everySheet()) {
+      expect(art.url, `${art.key} has no sheet`).toBeTruthy();
+      expect(art.name.length, `${art.key} has no name`).toBeGreaterThan(0);
+    }
   });
 });

@@ -743,7 +743,20 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // sleepers; the crossing is a railway, and where it goes it is the only thing there.
   for (const at of line) {
     const tile = world.tiles[at.y]?.[at.x];
-    if (!tile || tile.track || FORDED.has(tile.biome)) continue;
+    if (!tile || tile.track) continue;
+    // **The ford is recorded rather than skipped, which is the whole of the change.** This read
+    // `|| FORDED.has(tile.biome)) continue` and dropped the tile on the floor: the route crossed,
+    // the flag was withheld -- rightly, since canon sites the Nomad Ground at a ford and paving the
+    // river would contradict it -- and the tile then said *nothing*, so the road ended at the water.
+    //
+    // Measured, that costs Lothal about half its visible road: 65 road tiles a seed against 117 and
+    // 138 on the other maps, at the same mean spread between places, with roughly half of them
+    // hugging a waterline. `road` stays false, so nothing downstream mistakes a crossing for a
+    // paved path; `ford` says where the stones go.
+    if (FORDED.has(tile.biome)) {
+      tile.ford = true;
+      continue;
+    }
     tile.road = true;
   }
 

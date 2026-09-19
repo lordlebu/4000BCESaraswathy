@@ -22,6 +22,7 @@ import {
   decorFrame,
   trackFrame,
   roadFrame,
+  ROAD_SURFACE,
   runSides,
   EDGE_ORDER,
   EDGE_STEP,
@@ -1524,12 +1525,20 @@ export function planWaterfall(world: FieldMapWorld['world']): Placement[] {
  */
 export function planRoad(world: FieldMapWorld['world']): Placement[] {
   const out: Placement[] = [];
-  const worn = (x: number, y: number): boolean => world.tiles[y]?.[x]?.road === true;
+  // **Connectivity sees a ford, which is the whole reason the crossing reads as continuous.** If
+  // this asked only about `road`, the tile beside the water would find no neighbour that way and
+  // draw a *stub* -- the road visibly stopping one tile short of the crossing, then starting again
+  // one tile past it. Reading both means the run flows into the stones and out the far side, and the
+  // ford's own frame is chosen by the same mask as everything else.
+  const worn = (x: number, y: number): boolean => {
+    const tile = world.tiles[y]?.[x];
+    return tile?.road === true || tile?.ford === true;
+  };
 
   for (let y = 0; y < world.height; y += 1) {
     for (let x = 0; x < world.width; x += 1) {
       const tile = world.tiles[y]![x]!;
-      if (!tile.road) continue;
+      if (!tile.road && !tile.ford) continue;
 
       // **Every side the path leaves by, not "is it horizontal".** The old question could only
       // answer two ways, so a tile with a neighbour west and another south -- a corner, and a
@@ -1543,11 +1552,17 @@ export function planRoad(world: FieldMapWorld['world']): Placement[] {
       // grass at its edges on the day it is cut, and a path over sand or bare rock never does
       // however long it lies. So the question is the same one `planTrack` asks -- is there
       // anything here that grows -- and the answer means something different.
-      const verge = GROWS_OVER.has(tile.biome);
+      // Which of the three surfaces this tile is worn into. A ford wins over a verge: the tile is
+      // standing in water, so what grows at the edge of a path on dry ground is not the question.
+      const surface = tile.ford
+        ? ROAD_SURFACE.ford
+        : GROWS_OVER.has(tile.biome)
+          ? ROAD_SURFACE.verge
+          : ROAD_SURFACE.walked;
 
       out.push({
         sheet: 'road',
-        frame: roadFrame(sides, verge),
+        frame: roadFrame(sides, surface),
         x,
         y,
         // `underfoot`, the same slot the rail uses, and **not a slot of its own one below it**.

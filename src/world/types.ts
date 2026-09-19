@@ -85,6 +85,24 @@ export interface Tile extends Point {
    */
   road?: boolean;
   /**
+   * Where the route crosses water: the road's own tile, on the far side of the flag.
+   *
+   * **The route has always crossed here and the art has always stopped.** `fieldMap.ts` withholds
+   * `road` on a `FORDED` biome, deliberately -- canon sites the Nomad Ground at a *ford*, so paving
+   * the river would contradict it. What was missing is that the tile said nothing at all, so the
+   * road simply ended at the water and resumed beyond it.
+   *
+   * Measured across sixty generations: a road tile lands on `river` **zero** times, while on Lothal
+   * -- a delta -- about half of every seed's road tiles sit against a waterline. On the other maps
+   * that is six tiles a seed and invisible; on Lothal it is half the network, and the road reads as
+   * fragments rather than as a way across the map.
+   *
+   * So this is `road`'s third surface rather than a second feature. It changes **nothing** about
+   * walking: `river` is walkable at cost 1 and was before. It only records that this is the tile
+   * people cross at, so `planRoad` can draw stones there and the run can be continuous.
+   */
+  ford?: boolean;
+  /**
    * A plank laid across a one-tile notch in a floating island.
    *
    * **Unlike `road` and like `track`, this changes walkability** — it is the whole point of it.

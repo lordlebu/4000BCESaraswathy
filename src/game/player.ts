@@ -24,6 +24,47 @@ import type Phaser from 'phaser';
 export const PLAYER_FRAME = { width: 26, height: 40 };
 
 /**
+ * The grid the figures were drawn against: a 26x40 frame inside a 32-pixel cell.
+ *
+ * Named rather than written `/ 32` at each use, because two call sites scale a figure and they have
+ * to agree about what they are scaling from.
+ */
+export const FIGURE_CELL = 32;
+
+/**
+ * How much bigger than its art a figure is drawn, on this tile size.
+ *
+ * **Whole numbers only, and that is the whole reason this is a function.** A fractional scale is
+ * what makes pixel art shimmer as it moves -- the same argument the ground's textures make -- so
+ * this floors rather than fits, and never goes below 1.
+ */
+export function figureScale(tileSize: number): number {
+  return Math.max(1, Math.floor(tileSize / FIGURE_CELL));
+}
+
+/**
+ * How much smaller everybody else on the road is drawn than the person you are.
+ *
+ * **Two, because two is the only answer that keeps the scale whole.** At a 128 tile the player is
+ * drawn at 4x -- 104x160 pixels -- and halving that is 2x, or 52x80. A quarter would be 1x: the art
+ * at native size, 26 pixels across a 128-pixel tile, which reads as a bird rather than as a person
+ * and is also the point at which the figure stops being legible at all. Anything between the two is
+ * a fractional scale and shimmers.
+ *
+ * The reason they are smaller is not modesty about other people: it is that every traveller carries
+ * a `conveyance` and at the player's size there is nowhere to draw one. 104x160 pixels covers a 128
+ * tile outright, so the mount would be behind the rider whatever order it went in. The figure gives
+ * the animal room *before* the animal exists, which is the order this has to happen in -- no vehicle
+ * sheet is loaded by anything today.
+ */
+export const TRAVELLER_SHRINK = 2;
+
+/** The scale everybody else on the road is drawn at. Whole, for `figureScale`'s reason. */
+export function travellerScale(tileSize: number): number {
+  return Math.max(1, Math.floor(figureScale(tileSize) / TRAVELLER_SHRINK));
+}
+
+/**
  * The sheet is two source images concatenated — a walk sheet then a sitting sheet, each four rows
  * of four — and both layouts were measured rather than assumed:
  *
@@ -97,8 +138,10 @@ const idleOrder = (row: number): number[] => [row + 0, row + 1];
 // Re-exported here because everything that draws a character already imports this file.
 export {
   CHARACTERS,
+  TRAVELLER_ART,
   characterFor,
   everyCharacter,
+  everySheet,
   type CharacterArt,
   type CharacterId
 } from './characters';

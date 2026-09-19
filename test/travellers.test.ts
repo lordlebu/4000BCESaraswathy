@@ -14,6 +14,7 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps, allNpcs, poi } from '../src/content/places';
 import {
+  sheetsToUse,
   stopsOf,
   travellersOn,
   wayBetween,
@@ -218,6 +219,48 @@ describe('nothing about a traveller is saved', () => {
       const first = whereabouts(a.world, stopsOf(t, a.placed), 3, 0.42);
       const second = whereabouts(b.world, stopsOf(t, b.placed), 3, 0.42);
       expect(second).toEqual(first);
+    }
+  });
+});
+
+describe('travellers stop wearing the player\'s face', () => {
+  // **The switchover is tested before the art exists, not after it lands.** The whole point of
+  // `sheetsToUse` being pure and parameterised is that the rule can be proven now -- a test written
+  // afterwards describes what happened rather than checking it, and this repository has a documented
+  // habit of shipping a rule with no caller and a green suite.
+
+  const PLAYABLE = ['mithra', 'mehtar', 'malacite', 'guyuk', 'varuna'];
+  const TRAVELLER = ['traveller-carrier', 'traveller-drover', 'traveller-pilgrim'];
+
+  it('falls back to the playable five while there is no traveller art', () => {
+    expect(sheetsToUse([], PLAYABLE, 3)).toEqual(PLAYABLE);
+  });
+
+  it('switches the day the third sheet lands, and not before', () => {
+    // All or nothing. One or two traveller sheets would put a stranger beside two player faces,
+    // which reads as a bug rather than as progress -- and a name in both lists can be dealt twice,
+    // which breaks the no-repeat guarantee outright.
+    expect(sheetsToUse(TRAVELLER.slice(0, 1), PLAYABLE, 3)).toEqual(PLAYABLE);
+    expect(sheetsToUse(TRAVELLER.slice(0, 2), PLAYABLE, 3)).toEqual(PLAYABLE);
+    expect(sheetsToUse(TRAVELLER, PLAYABLE, 3)).toEqual(TRAVELLER);
+  });
+
+  it('needs exactly TRAVELLERS_PER_MAP sheets, which is why three is the ask', () => {
+    // The number in `docs/art-brief.md` Asset 7 is this constant, and if the cap ever rises the
+    // brief is wrong rather than the code. Asserted so the two cannot drift apart silently.
+    const justUnder = Array.from({ length: TRAVELLERS_PER_MAP - 1 }, (_, i) => `t${i}`);
+    const exact = Array.from({ length: TRAVELLERS_PER_MAP }, (_, i) => `t${i}`);
+    expect(sheetsToUse(justUnder, PLAYABLE)).toEqual(PLAYABLE);
+    expect(sheetsToUse(exact, PLAYABLE)).toEqual(exact);
+  });
+
+  it('gives every map three different figures either way', () => {
+    // The guarantee that must survive the switch: `sheetFor` walks the list by position, so no two
+    // travellers on one map share a sheet while the roster fits. True of the five today and of the
+    // three tomorrow -- and it is *only* true because the list is at least as long as the roster.
+    for (const map of fieldMaps) {
+      const art = travellersOn(map.id).map((t) => t.art);
+      expect(new Set(art).size, `${map.id}: two travellers share a sheet`).toBe(art.length);
     }
   });
 });
