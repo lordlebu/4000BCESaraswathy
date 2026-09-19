@@ -17,6 +17,7 @@ import mithraUrl from '../../assets/mithra-overworld.png';
 import malaciteUrl from '../../assets/malacite-overworld.png';
 import mehtarUrl from '../../assets/mehtar-overworld.png';
 import carrierUrl from '../../assets/traveller-carrier-overworld.png';
+import droverUrl from '../../assets/traveller-drover-overworld.png';
 
 export interface CharacterArt {
   /** Texture key, also the prefix for its animation keys. */
@@ -61,7 +62,8 @@ export type CharacterId = keyof typeof CHARACTERS;
  * asserted by `test/characters.test.ts`, which fails if a name is dealt with no art behind it.
  */
 export const TRAVELLER_ART = {
-  'traveller-carrier': { key: 'traveller-carrier', name: 'A carrier', url: carrierUrl }
+  'traveller-carrier': { key: 'traveller-carrier', name: 'A carrier', url: carrierUrl },
+  'traveller-drover': { key: 'traveller-drover', name: 'A drover', url: droverUrl }
 } as const satisfies Record<string, CharacterArt>;
 
 /**

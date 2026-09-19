@@ -73,6 +73,25 @@
     },
     {
       "$comment": [
+        "Second traveller sheet. Its first attempt passed every automated check and was sent back",
+        "anyway: the back view filled 34 of 40 rows because the staff was held out to the side, so",
+        "the figure shrank about 15% as it turned away -- `resample` fits each figure's own bounding",
+        "box to the cell, and a back view wider than it is tall gets fitted by width. Holding the",
+        "staff close in against the body fixed it: heights are 40,40,40,40 and widths 21-23.",
+        "",
+        "The other fault was the contrast block not contrasting. The prompt asked for a white",
+        "headwrap differing from 'the clothing' without naming the clothing's colour, so the tunic",
+        "came back white too and head and torso merged into one pale mass. The tunic is dark",
+        "olive-green now and the head reads as separate."
+      ],
+      "id": "traveller-drover",
+      "name": "A drover",
+      "colours": 12,
+      "walk": { "source": "assets/source/traveller-drover.png" },
+      "sit": { "source": "assets/source/traveller-drover.png", "frames": [0, 4, 8, 12] }
+    },
+    {
+      "$comment": [
         "The first sheet that draws a traveller and nobody else. `SHEETS` in content/travellers.ts",
         "used to be the five playable characters, so everybody met on the road wore a face the",
         "player could also be wearing -- and on the map you were on, one of the three might be",
