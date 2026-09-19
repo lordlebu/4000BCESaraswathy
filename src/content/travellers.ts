@@ -226,9 +226,13 @@ function circuitPeople(fieldMapId: string): Npc[] {
  * ordering is the point: a map with people who genuinely move gets those people, and only a map
  * without enough of them invents anybody.
  *
- * Measured across the four maps, canon supplies five on the Aravali, three on Dwarka, two on Lothal
- * and one on Narmada -- so the Aravali is capped, Dwarka is exactly filled, and the other two are
- * topped up.
+ * Measured across the four maps, canon supplies five on the Aravali, three on Dwarka, three on
+ * Lothal and two on Narmada -- so the Aravali is capped, Dwarka and Lothal are exactly filled, and
+ * only Narmada is topped up, by one.
+ *
+ * **Those were two and one when this was written**, and Kunch and Moonj moved them: authoring two
+ * people who travel is what filled Lothal outright. The number is worth re-measuring rather than
+ * trusting after any canon pass that adds somebody with more than one `found_at`.
  */
 export function travellersOn(fieldMapId: string): Traveller[] {
   const places = fieldMap(fieldMapId)?.pointsOfInterest ?? [];
