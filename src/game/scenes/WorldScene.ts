@@ -156,10 +156,12 @@ import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
 import {
-  stopsOf,
+  placedCircuit,
+  travellerState,
   travellersOn,
   whereabouts,
-  type Traveller
+  type Traveller,
+  type TravellerState
 } from '../../content/travellers';
 import { isCamp, isGrand } from '../../content/camps';
 import { findPath } from '../../world/pathfind';
@@ -337,7 +339,21 @@ export class WorldScene extends Phaser.Scene {
    * tears down exactly what it should. Nothing about *where* they are lives here -- that is
    * `whereabouts`, which derives it from the seed, the day and the hour and stores nothing.
    */
-  private travellers: { traveller: Traveller; stops: Point[]; sprite: Phaser.GameObjects.Sprite }[] = [];
+  private travellers: {
+    traveller: Traveller;
+    /** The circuit's placed stops, ids and all, so a card can name where somebody is headed. */
+    circuit: { poiId: string; at: Point }[];
+    stops: Point[];
+    sprite: Phaser.GameObjects.Sprite;
+  }[] = [];
+
+  /**
+   * The last states sent to React, as one string.
+   *
+   * Compared rather than diffed: three travellers with three short fields is a key cheaper to build
+   * than the render it saves, and `travellers-changed` exists to be rare.
+   */
+  private travellerStatesSent = '';
 
   /** The last phase the travellers were moved for, so they are not recomputed every frame. */
   private travellersMovedAt = -1;
@@ -1521,7 +1537,8 @@ export class WorldScene extends Phaser.Scene {
     // 104x160 pixels covers a 128 tile outright. `travellerScale` says why two and not a quarter.
     const scale = travellerScale(TILE_SIZE);
     for (const traveller of travellersOn(this.built.fieldMap.id)) {
-      const stops = stopsOf(traveller, this.built.placed);
+      const circuit = placedCircuit(traveller, this.built.placed);
+      const stops = circuit.map((s) => s.at);
       // A circuit whose stops did not all get placed is not a circuit. Dropping the traveller is
       // right: inventing a walk for somebody canon only put in one place would put a person on the
       // road that nothing sent anywhere.
@@ -1534,7 +1551,7 @@ export class WorldScene extends Phaser.Scene {
         .setDisplaySize(PLAYER_FRAME.width * scale, PLAYER_FRAME.height * scale);
       sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
       sprite.setName(`traveller:${traveller.id}`);
-      this.travellers.push({ traveller, stops, sprite });
+      this.travellers.push({ traveller, circuit, stops, sprite });
     }
 
     // **Exposed for the browser suite for the same reason `__travellers` is**: a Node test cannot
@@ -1623,6 +1640,33 @@ export class WorldScene extends Phaser.Scene {
       if (sprite.anims.currentAnim?.key !== key) sprite.play(key);
       sprite.setFlipX(flipX);
     }
+
+    this.reportTravellers(day, phase);
+  }
+
+  /**
+   * Tell React what everybody on the road is doing, when it changes.
+   *
+   * **The scene is the only side that can answer this**, because where a place landed belongs to
+   * one generated world and React never sees the placement. What crosses the seam is the answer
+   * rather than the ingredients: `travellerState` turns a position into places here, so React holds
+   * no tiles and the rule about a traveller's hours stays in `content/`.
+   */
+  private reportTravellers(day: number, phase: number): void {
+    const states = this.travellers
+      .map(({ traveller, circuit, stops }) => ({
+        id: traveller.id,
+        npcId: traveller.npcId,
+        state: travellerState(circuit, whereabouts(this.world, stops, day, phase))
+      }))
+      .filter((t): t is { id: string; npcId: string | null; state: TravellerState } =>
+        t.state !== null
+      );
+
+    const key = JSON.stringify(states);
+    if (key === this.travellerStatesSent) return;
+    this.travellerStatesSent = key;
+    EventBus.emit('travellers-changed', { travellers: states });
   }
 
   /**

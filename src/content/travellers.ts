@@ -24,7 +24,7 @@
 import { findPath } from '../world/pathfind';
 import { isWalkable } from '../world/generate';
 import type { Point, Tile, World } from '../world/types';
-import { allNpcs, fieldMap, poi, type Npc } from './places';
+import { allNpcs, fieldMap, npc, poi, type Npc } from './places';
 import { vehicles } from './making';
 
 /**
@@ -394,22 +394,134 @@ export function stopsOf(
   traveller: Traveller,
   placed: readonly { poi: { id: string }; at: Point }[]
 ): Point[] {
-  const where = new Map(placed.map((p) => [p.poi.id, p.at]));
-  return traveller.circuit.map((id) => where.get(id)).filter((p): p is Point => p !== undefined);
+  return placedCircuit(traveller, placed).map((s) => s.at);
 }
 
 /**
- * What the field notes say about meeting somebody on the road.
+ * The same stops, still carrying which place each one is.
  *
- * Written per case rather than assembled, for the reason `describeRoutine` gives: this game's
- * progression *is* the writing, and a sentence stitched from fragments reads like a status bar.
+ * **`stopsOf` throws the ids away, and the card needs them back.** Saying *on the road to the
+ * Nomad Ground* means naming the stop being walked to, and a tile cannot say which place it is.
+ * The filter lives here rather than in both: a stop canon names that did not get placed is dropped
+ * from the ids and the points together, so the two can never fall out of step and have an index
+ * mean two different legs.
  */
-export function describeTraveller(traveller: Traveller, where: Whereabouts): string {
-  const who = traveller.npcId ? traveller.name : traveller.name.toLowerCase();
-  if (where.resting) {
-    return `${who} is stopped here, and in no hurry to be anywhere else yet.`;
+export function placedCircuit(
+  traveller: Traveller,
+  placed: readonly { poi: { id: string }; at: Point }[]
+): { poiId: string; at: Point }[] {
+  const where = new Map(placed.map((p) => [p.poi.id, p.at]));
+  return traveller.circuit
+    .map((poiId) => ({ poiId, at: where.get(poiId) }))
+    .filter((s): s is { poiId: string; at: Point } => s.at !== undefined);
+}
+
+
+/**
+ * Where a traveller has got to, in the few facts a card can say out loud.
+ *
+ * **Deliberately smaller than `Whereabouts`, and that is the point of it existing.** `Whereabouts`
+ * is tiles and a heading -- everything the scene needs to put a sprite somewhere and nothing a
+ * player would read. This is what somebody would answer if you asked them where they were going,
+ * and it is what crosses the `EventBus` seam, because a tile coordinate is not an answer to that
+ * question and React has no business holding one.
+ */
+export interface TravellerState {
+  /** True while they are stopped at a place: before they set out, and once they have arrived. */
+  resting: boolean;
+  /** The place they are stopped at, or null while they are between two. */
+  atPoi: string | null;
+  /** The stop they are walking to, or null while they are not walking. */
+  boundFor: string | null;
+}
+
+/**
+ * Read the state off a position, without re-deriving the rule that made it.
+ *
+ * The hours a traveller keeps live in `SETS_OUT` and `ARRIVES` and are applied once, in
+ * `whereabouts`. Asking *which place is this tile* is enough to recover the rest, so the rule is
+ * not written twice and cannot be changed in one copy -- the same argument `stopsOf` makes about
+ * dropping an unplaced stop in one place.
+ */
+export function travellerState(
+  circuit: readonly { poiId: string; at: Point }[],
+  where: Whereabouts | null
+): TravellerState | null {
+  if (!where) return null;
+  const idAt = (p: Point) => circuit.find((s) => s.at.x === p.x && s.at.y === p.y)?.poiId ?? null;
+  return {
+    resting: where.resting,
+    atPoi: where.resting ? idAt(where.at) : null,
+    boundFor: where.resting ? null : idAt(where.to)
+  };
+}
+
+/**
+ * One thing a card says about somebody, in the register a chip is read in.
+ *
+ * `kind` rather than a position in the array: the stylesheet and the tests both want to name one
+ * of these, and counting them is how a guard starts passing for the wrong reason.
+ */
+export interface TravellerAttribute {
+  kind: 'doing' | 'who' | 'speaks';
+  label: string;
+}
+
+/**
+ * What a traveller's card says about them while you are talking to them.
+ *
+ * **This is what replaced drawing the mount.** Every traveller carries a `conveyance` and none of
+ * it is drawn; the call was that a player does not need to see the cart to know there is one, and
+ * that a line of standing facts on the person -- what they are doing, what they are, what they
+ * speak -- says more about a stranger met on a road than a cart sprite would.
+ *
+ * **The derived conveyance is deliberately not one of them.** `conveyanceFor` picks a canon vehicle
+ * off the ground a circuit crosses, which is a reasonable guess for road company the engine
+ * invented and a contradiction for a person canon wrote: it gives Kunch a reed raft, and canon has
+ * him *"road singer, up on a bird"*. Canon's `role` is where how-somebody-travels is said, so the
+ * role is shown verbatim and nothing is derived over the top of it. The day canon authors the field
+ * outright -- an `npc.travels_by` -- it becomes a fourth chip and this comment is why it is not one
+ * now.
+ *
+ * Pure, and takes the state rather than a world: the same person on the same leg reads the same on
+ * every machine, which is the rule the whole module is built to keep.
+ */
+export function travellerAttributes(
+  traveller: Traveller,
+  state: TravellerState | null
+): TravellerAttribute[] {
+  const out: TravellerAttribute[] = [];
+
+  if (state) {
+    const place = (id: string | null) => (id ? (poi(id)?.name ?? null) : null);
+    const at = place(state.atPoi);
+    const to = place(state.boundFor);
+    out.push({
+      kind: 'doing',
+      label: state.resting
+        ? at
+          ? `Stopped at ${at}`
+          : 'Stopped, and in no hurry'
+        : to
+          ? `On the road to ${to}`
+          : 'On the road since first light'
+    });
   }
-  return traveller.conveyance
-    ? `${who} is on the road, with the load riding and the walking still theirs.`
-    : `${who} is on the road, walking, and has been since the light came.`;
+
+  // Canon writes a role lower-case and mid-sentence -- "road singer, up on a bird". A chip is not
+  // mid-sentence, so it takes a capital and nothing else: rewriting it would be the engine
+  // paraphrasing canon, and the phrase is the part worth keeping.
+  if (traveller.role) {
+    out.push({ kind: 'who', label: traveller.role[0]!.toUpperCase() + traveller.role.slice(1) });
+  }
+
+  const language = traveller.npcId ? (npc(traveller.npcId)?.language ?? null) : null;
+  if (language) {
+    out.push({
+      kind: 'speaks',
+      label: `Speaks ${language[0]!.toUpperCase()}${language.slice(1)}`
+    });
+  }
+
+  return out;
 }
