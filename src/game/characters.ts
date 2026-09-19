@@ -18,6 +18,7 @@ import malaciteUrl from '../../assets/malacite-overworld.png';
 import mehtarUrl from '../../assets/mehtar-overworld.png';
 import carrierUrl from '../../assets/traveller-carrier-overworld.png';
 import droverUrl from '../../assets/traveller-drover-overworld.png';
+import pilgrimUrl from '../../assets/traveller-pilgrim-overworld.png';
 
 export interface CharacterArt {
   /** Texture key, also the prefix for its animation keys. */
@@ -63,7 +64,8 @@ export type CharacterId = keyof typeof CHARACTERS;
  */
 export const TRAVELLER_ART = {
   'traveller-carrier': { key: 'traveller-carrier', name: 'A carrier', url: carrierUrl },
-  'traveller-drover': { key: 'traveller-drover', name: 'A drover', url: droverUrl }
+  'traveller-drover': { key: 'traveller-drover', name: 'A drover', url: droverUrl },
+  'traveller-pilgrim': { key: 'traveller-pilgrim', name: 'A pilgrim', url: pilgrimUrl }
 } as const satisfies Record<string, CharacterArt>;
 
 /**

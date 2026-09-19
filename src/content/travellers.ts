@@ -114,7 +114,11 @@ export interface Traveller {
  * See `docs/art-brief.md`, Asset 7. When the art lands this list gets the three names, and nothing
  * else in this file changes.
  */
-const TRAVELLER_SHEETS: readonly string[] = [];
+const TRAVELLER_SHEETS: readonly string[] = [
+  'traveller-carrier',
+  'traveller-drover',
+  'traveller-pilgrim'
+];
 
 /**
  * The playable five, used only until there are enough traveller sheets to go round.
