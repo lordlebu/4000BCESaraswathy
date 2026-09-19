@@ -111,7 +111,9 @@ describe('the bridge is on the crossing contract', () => {
     // So the road grew to the sixteen neighbour masks and these two did not. If a plank run ever
     // needs a corner this is the test to delete, not the one to satisfy.
     expect(ROAD_PIECES).not.toBe(TRACK_PIECES);
-    expect(ROAD_PIECES).toBe(32);
+    // Forty-eight since the ford became the road's third surface -- sixteen masks per row, and the
+    // crossing draws from the same sheet precisely so it cannot drift out of alignment with the road.
+    expect(ROAD_PIECES).toBe(48);
   });
 
   it('alternates north-south and east-west, in the order planTrack indexes', () => {

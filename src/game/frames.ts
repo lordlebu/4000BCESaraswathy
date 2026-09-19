@@ -1129,7 +1129,24 @@ export const RUN_SIDE = { north: 1, east: 2, south: 4, west: 8 } as const;
  * top-to-bottom, so the wrap costs no arithmetic here.
  */
 export const ROAD_MASKS = 16;
-export const ROAD_PIECES = ROAD_MASKS * 2;
+
+/**
+ * The three surfaces a run can be worn into, one row of the sheet each.
+ *
+ * **`ford` is a surface of the road rather than a sheet of its own, and that is the load-bearing
+ * choice.** A crossing has to join the road exactly -- same band, same centre, same sixteen shapes
+ * -- and drawing it from the same `drawArm` in `tools/build-road.js` makes that true by
+ * construction. A separate sheet would have to be *kept* aligned, which is the failure the painted
+ * road sheet already demonstrated: eight pictures of a road, no two of which could join.
+ *
+ * It is stones, not planks. Canon sites the Nomad Ground at a **ford**, so a bridge would
+ * contradict it — and nothing about crossing changes, because `river` is walkable at cost 1 and
+ * always was. The art only says where the crossing is.
+ */
+export const ROAD_SURFACE = { walked: 0, verge: 1, ford: 2 } as const;
+export type RoadSurface = (typeof ROAD_SURFACE)[keyof typeof ROAD_SURFACE];
+export const ROAD_SURFACES = 3;
+export const ROAD_PIECES = ROAD_MASKS * ROAD_SURFACES;
 /** And the planks, on the track sheet's four: one shape, two sheets. */
 export const BRIDGE_PIECES = TRACK_PIECES;
 
@@ -1155,12 +1172,14 @@ export function bridgeFrame(eastWest: boolean, worn: boolean): number {
  * straights, four elbows, four tees, a cross, four stubs where the road ends, and the lone stone
  * for a tile with no road neighbour at all.
  *
- * **The second argument still means a verge, not disuse**, and that is still where this parts
- * company with the rail. An unused railway is a fact about the railway; grass at the edge of a path
- * is true of a path on the day it is cut and never true of one over sand.
+ * **The second argument is a surface rather than a verge flag**, and it was a boolean until the
+ * ford arrived. A verge still means grass at the edge and not disuse -- an unused railway is a fact
+ * about the railway, where grass beside a path is true of it the day it is cut and never true of one
+ * over sand. What changed is that "which surface" turned out to have three answers, and a boolean
+ * could only ever hold two.
  */
-export function roadFrame(sides: number, verge: boolean): number {
-  return (verge ? ROAD_MASKS : 0) + (sides & (ROAD_MASKS - 1));
+export function roadFrame(sides: number, surface: RoadSurface): number {
+  return surface * ROAD_MASKS + (sides & (ROAD_MASKS - 1));
 }
 
 /**

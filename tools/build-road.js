@@ -68,20 +68,37 @@ const W = 8;
 const MASKS = 16;
 
 /**
- * How many pieces: the sixteen masks walked, then the same sixteen with a verge.
+ * The three surfaces a run can be worn into, and the row each one occupies.
+ *
+ * **`ford` is here rather than in a sheet of its own, and that is the whole design.** A crossing has
+ * to join the road exactly -- same band, same centre, same sixteen shapes -- and the only way to be
+ * certain of that is to draw it with the same `drawArm` against the same `BAND` and `MIDDLE`. A
+ * separate sheet would have to be *kept* aligned; this one cannot drift, because there is nowhere
+ * for it to disagree.
+ *
+ * It is stones rather than planks, and canon decides that: the Nomad Ground is sited at a **ford**,
+ * and a bridge would contradict it. Stones set in a shallow crossing are what people add to a ford
+ * without turning it into something else -- the walker still wades through `river` at its own cost,
+ * which is unchanged. The art says "this is where it is crossed", which is true.
+ */
+const SURFACE = { walked: 0, verge: 1, ford: 2 };
+const SURFACES = 3;
+
+/**
+ * How many pieces: the sixteen masks once per surface.
  *
  * `ROAD_PIECES` in `frames.ts` carries this number and `roadFrame` computes the index from the
  * layout below, so it is a contract with that function rather than a preference.
  */
-const PIECES = MASKS * 2;
+const PIECES = MASKS * SURFACES;
 
 /**
  * Sixteen columns and two rows, rather than one strip of thirty-two.
  *
  * Phaser indexes a spritesheet left-to-right and then top-to-bottom, so wrapping changes no frame
- * number -- and a 4,096-pixel strip is a texture some machines decline in one piece. Row 0 is the
- * walked masks and row 1 is the same masks with a verge, which is exactly what
- * `(verge ? 16 : 0) + mask` addresses.
+ * number -- and a 4,096-pixel strip is a texture some machines decline in one piece. One row per
+ * surface, in `SURFACE` order: walked, verge, ford -- which is exactly what
+ * `surface * 16 + mask` addresses.
  */
 const COLUMNS = MASKS;
 const ROWS = PIECES / COLUMNS;
@@ -118,6 +135,18 @@ const EARTH = hex('#8a7654');
 const EARTH_LIT = hex('#9c8763');
 const EARTH_DARK = hex('#6f5e42');
 const STONE = hex('#8d8880');
+
+/**
+ * The ford's stones, cooler and greener than the path's dry earth because they are wet.
+ *
+ * There is deliberately **no fill between them**: the gaps are left transparent so the river draws
+ * through, which is what makes a line of stones read as standing *in* water rather than as a grey
+ * road laid over it. `underfoot` in `scenePlan` puts the crossing above the river tile and below the
+ * walker, so what shows between the stones is the water he is stepping over.
+ */
+const WET = hex('#7d8a86');
+const WET_LIT = hex('#9aa7a2');
+const WET_DARK = hex('#5c6865');
 const WEED = hex('#5b6b47');
 
 /**
@@ -149,7 +178,8 @@ const half = (BAND - 1) / 2;
  * direction changes -- and the wander is keyed on the *map* coordinate rather than on the distance
  * travelled, so the two halves of a straight run are the same pixels they always were.
  */
-function drawArm(set, dir, overgrown) {
+function drawArm(set, dir, surface) {
+  const overgrown = surface === SURFACE.verge;
   const vertical = dir === N || dir === S;
   // Where this arm starts and ends, walking inward. The hub covers the centre itself.
   const from = dir === N || dir === W ? 0 : MIDDLE;
@@ -157,6 +187,35 @@ function drawArm(set, dir, overgrown) {
 
   const put = (along, across, colour, alpha) =>
     vertical ? set(across, along, colour, alpha) : set(along, across, colour, alpha);
+
+  // **A ford is the same arm with the earth taken out of it.** Stones across the full band, gaps
+  // left transparent, and the run leaves the cell at `BAND` on `MIDDLE` exactly as the walked
+  // surface does -- so a road tile and a ford tile join with nothing to reconcile.
+  //
+  // **A stone is forced at both ends of the arm**, whatever the stride lands on. Without that, two
+  // adjacent ford tiles can both open on a gap and the crossing shows a one-pixel break at the
+  // seam -- the same class of fault the misaligned painted sheet had, arriving by arithmetic
+  // instead of by hand.
+  if (surface === SURFACE.ford) {
+    for (let along = from; along < to; along += 1) {
+      const atSeam = along === from || along === to - 1;
+      // Three pixels of stone then one of water, which at a band of eleven reads as set stones
+      // rather than as a dashed line.
+      if (!atSeam && along % 4 === 3) continue;
+      for (let d = -half; d <= half; d += 1) {
+        const across = MIDDLE + d;
+        // The stones are rounded off at the band's edges, so the crossing narrows into the water
+        // rather than ending in two square corners.
+        if (Math.abs(d) === half && !atSeam && along % 4 !== 0) continue;
+        const roll = noise(along, d, 23) % 10;
+        const colour = roll < 3 ? WET_LIT : roll < 5 ? WET_DARK : WET;
+        // Wet stone is darker where the water stands against it, which is the outside edge.
+        const fade = Math.abs(d) / (half + 1);
+        put(along, across, colour, Math.round(255 - fade * fade * 70));
+      }
+    }
+    return;
+  }
 
   for (let along = from; along < to; along += 1) {
     // **The edge wanders, the width does not.** A band with two straight sides reads as a painted
@@ -228,7 +287,23 @@ function drawArm(set, dir, overgrown) {
  * composited over its own map came out looking like a dashed line, which is how it was caught.
  * Underneath, a straight run's arms cover it completely and it costs nothing.
  */
-function drawHub(set, overgrown, lone) {
+function drawHub(set, surface, lone) {
+  const overgrown = surface === SURFACE.verge;
+  // The ford's hub is a single wide stone: a crossing turns in the water at most once, and a
+  // mottled patch there would read as silt rather than as something set down to be stood on.
+  if (surface === SURFACE.ford) {
+    for (let y = MIDDLE - half; y <= MIDDLE + half; y += 1) {
+      for (let x = MIDDLE - half; x <= MIDDLE + half; x += 1) {
+        const reach = Math.hypot(x - MIDDLE, y - MIDDLE);
+        if (reach > half + 0.5) continue;
+        const roll = noise(x, y, 29) % 10;
+        const colour = roll < 3 ? WET_LIT : roll < 5 ? WET_DARK : WET;
+        const fade = reach / (half + 1);
+        set(x, y, colour, Math.round((lone ? 200 : 255) - fade * fade * 70));
+      }
+    }
+    return;
+  }
   for (let y = MIDDLE - half - 1; y <= MIDDLE + half + 1; y += 1) {
     for (let x = MIDDLE - half - 1; x <= MIDDLE + half + 1; x += 1) {
       const dx = x - MIDDLE;
@@ -258,7 +333,7 @@ function drawHub(set, overgrown, lone) {
  * `mask` is the neighbour bitmask and `overgrown` is the verge. Composed rather than special-cased,
  * so adding a seventeenth shape is impossible and getting one wrong is impossible with it.
  */
-function roadFrame(mask, overgrown) {
+function roadFrame(mask, surface) {
   const px = Buffer.alloc(CELL * CELL * 4);
   const set = (x, y, colour, alpha) => {
     if (x < 0 || x >= CELL || y < 0 || y >= CELL) return;
@@ -270,9 +345,9 @@ function roadFrame(mask, overgrown) {
   };
 
   // The hub first: the arms are the run and must win wherever they reach. See `drawHub`.
-  drawHub(set, overgrown, mask === 0);
+  drawHub(set, surface, mask === 0);
   for (const dir of [N, E, S, W]) {
-    if (mask & dir) drawArm(set, dir, overgrown);
+    if (mask & dir) drawArm(set, dir, surface);
   }
 
   return px;
@@ -300,8 +375,8 @@ function main() {
   // `roadFrame` in `frames.ts` computes the index from exactly that, so this loop is a contract
   // with that function rather than a preference.
   const frames = [];
-  for (let verge = 0; verge < 2; verge += 1) {
-    for (let mask = 0; mask < MASKS; mask += 1) frames.push(roadFrame(mask, verge === 1));
+  for (let surface = 0; surface < SURFACES; surface += 1) {
+    for (let mask = 0; mask < MASKS; mask += 1) frames.push(roadFrame(mask, surface));
   }
 
   const sheetWidth = CELL * COLUMNS;
@@ -323,7 +398,7 @@ function main() {
   const kb = (fs.statSync(file).size / 1024).toFixed(1);
   console.log(`road: ${PIECES} frames of ${CELL * SCALE}x${CELL * SCALE}, ${kb} KB`);
   console.log(`  band ${BAND}/${CELL} of the cell, centred on ${MIDDLE} in every frame`);
-  console.log(`  layout: ${COLUMNS} columns x ${ROWS} rows -- masks 0..15 walked, then 0..15 with a verge`);
+  console.log(`  layout: ${COLUMNS} columns x ${ROWS} rows -- masks 0..15 per surface: walked, verge, ford`);
 }
 
 main();
