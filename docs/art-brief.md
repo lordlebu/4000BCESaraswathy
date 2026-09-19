@@ -1707,7 +1707,15 @@ keeps the three consistent with each other and with the existing five.
 > **Give the figure one large block of strongly contrasting colour near the top** — a cap, a
 > headcloth, a hood — in a different hue from the skin, the clothing and anything carried, and not
 > broken up by straps or detail crossing it. At the size this is drawn, that block is what tells one
-> traveller from another.
+> traveller from another. **Name the colour of the clothing under it in the same breath**, and make
+> it clearly darker: left unstated, a generator will happily dress the figure in the same value as
+> the block and head and torso merge into one mass.
+>
+> **The figure is the same width from behind as from the front, and the same height in all sixteen
+> frames.** Anything held goes close in against the body in the back view rather than out to the
+> side. The builder fits each figure's own bounding box to the cell, so a back view that is wider
+> than it is tall gets fitted by width and comes up short — which reads in play as the traveller
+> **shrinking as it turns away**.
 >
 > **Anything carried is plain:** no woven or basketwork texture, no foliage, no dangling sprigs, no
 > visible weave, no rope detail. One or two flat colours for the whole of it.
@@ -1739,9 +1747,9 @@ Substitute for **[CHARACTER]**:
 1. **a broad-shouldered carrier in their forties, in a bright ochre-yellow headcloth, with a compact
    bundle on their back rising no higher than the top of the head, a knee-length undyed tunic and
    bare feet** — the contrast block is the ochre headcloth
-2. **a lean weathered drover in their fifties, in a bleached white headwrap, with a long plain staff
-   held low in one hand, a dust-red wrapped skirt, a sleeveless tunic and sandals** — the contrast
-   block is the white headwrap
+2. **a lean weathered drover in their fifties, in a compact bleached white headwrap, a dark
+   olive-green sleeveless tunic, a dust-red wrapped skirt and sandals, with a long plain staff held
+   low in one hand** — the contrast block is the white headwrap against the dark tunic
 3. **a slight pilgrim of about twenty, with a deep indigo shawl drawn up over the head and falling to
    the elbows, both hands free, a plain pale wrap to the ankle and bare feet** — the contrast block
    is the indigo hood
@@ -1796,6 +1804,28 @@ near the top, nothing carried carrying texture — is what that cost.
 Worth being straight about the limit of this: the read problem was judged **by looking**. An attempt
 to measure it as hue separation did not distinguish the two sheets, so there is no number behind that
 paragraph and none is claimed.
+
+### What the second delivered sheet measured
+
+The drover, on the first attempt. It **passed every automated check** and was still sent back, which
+is the case worth recording: the bar catches noise, not composition.
+
+| | speckle @12 | stride | feet close? | cell heights |
+| --- | --- | --- | --- | --- |
+| carrier | 15.7% | 6.5 / 7.0 | yes, to 0 | 40, 40, 40, 40 |
+| **drover (1st)** | 23.5% | 6.5 / 6.0 | no — 1–3px | **38, 34, 40, 40** |
+| mithra | 26.8% | 5.0 / 5.0 | yes | 40, 40, 40, 40 |
+
+**The height row is the finding.** Every other sheet fills the cell in all four facings; the drover's
+back view filled 34 of 40, because with the staff held out to the side the back view is *wider than
+it is tall* and `resample` fits it by width. In play the figure shrinks about 15% when it turns to
+walk away. Nothing in the brief had said the figure must be the same width from behind, because
+nothing had needed it until something was held.
+
+**And the contrast block did not contrast.** The prompt asked for a white headwrap that differed from
+"the clothing" without ever naming the clothing's colour, so the tunic came back white too and the
+head merged into the torso. At 2× it read as a pale blob with a red bottom beside a carrier that read
+as a person. Both rules above exist because of this sheet.
 
 ### Checking one before you commit it
 
