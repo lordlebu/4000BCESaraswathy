@@ -138,8 +138,10 @@ const idleOrder = (row: number): number[] => [row + 0, row + 1];
 // Re-exported here because everything that draws a character already imports this file.
 export {
   CHARACTERS,
+  TRAVELLER_ART,
   characterFor,
   everyCharacter,
+  everySheet,
   type CharacterArt,
   type CharacterId
 } from './characters';

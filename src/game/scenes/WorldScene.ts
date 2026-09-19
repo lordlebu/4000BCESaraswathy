@@ -128,6 +128,7 @@ import {
   characterFor,
   createCharacterAnimations,
   everyCharacter,
+  everySheet,
   figureScale,
   travellerScale,
   type CharacterArt,
@@ -503,7 +504,7 @@ export class WorldScene extends Phaser.Scene {
     // Every sheet, not just the one being walked. They are 9-12 KB each and 55 KB for the set, so
     // loading them all costs less than the machinery to load one lazily and swap textures later --
     // and it means a character can be changed without a scene restart.
-    for (const art of everyCharacter()) loadCharacterSheet(this, art.key, art.url);
+    for (const art of everySheet()) loadCharacterSheet(this, art.key, art.url);
     loadTileSheets(this, {
       terrain: terrainUrl,
       landmarks: landmarksUrl,
@@ -854,7 +855,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createPlayer(): void {
-    for (const art of everyCharacter()) createCharacterAnimations(this, art.key);
+    for (const art of everySheet()) createCharacterAnimations(this, art.key);
     // Varuna stands taller than a tile, so he is anchored by the feet and allowed to overhang.
     //
     // The frame is 26x40 pixels of art and stays that way — the figures are deliberately still

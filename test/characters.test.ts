@@ -9,7 +9,13 @@
 // cannot see is whether the sheet actually loads, which is `e2e/travellers.spec.ts`.
 
 import { describe, expect, it } from 'vitest';
-import { CHARACTERS, characterFor, everyCharacter } from '../src/game/characters';
+import {
+  CHARACTERS,
+  TRAVELLER_ART,
+  characterFor,
+  everyCharacter,
+  everySheet
+} from '../src/game/characters';
 import { PLAYER_FRAME, TRAVELLER_SHRINK, figureScale, travellerScale } from '../src/game/player';
 
 describe('the cast', () => {
@@ -110,6 +116,41 @@ describe('how big a figure is drawn', () => {
       expect(scale, `tile ${tile} scales a traveller away`).toBeGreaterThanOrEqual(1);
       expect(scale, `tile ${tile} draws a traveller larger than the player`)
         .toBeLessThanOrEqual(figureScale(tile));
+    }
+  });
+});
+
+describe('the sheets that draw a traveller', () => {
+  // **The join this guards is a name dealt with no art behind it.** `TRAVELLER_SHEETS` in
+  // `content/travellers.ts` is a list of strings -- it has to be, because `content/` does not import
+  // `game/` -- so nothing in the type system connects a dealt name to a loaded texture. Get it wrong
+  // and Phaser draws a green `__MISSING` square, which is the kind of thing that ships.
+
+  it('is never offered as the player, whatever the URL says', () => {
+    // A `?as=traveller-carrier` would put the player in a figure with no sitting art and a name that
+    // reads as a job rather than a person. `characterFor` only knows `CHARACTERS`, and this asserts
+    // that stays true as the traveller list grows.
+    for (const key of Object.keys(TRAVELLER_ART)) {
+      expect(characterFor(key).key, `${key} is reachable as a playable character`).toBe('varuna');
+      expect(everyCharacter().map((c) => c.key)).not.toContain(key);
+    }
+  });
+
+  it('is loaded and animated by the scene, which reads a different list', () => {
+    // The scene iterated `everyCharacter()` for loading and for animations, so a traveller sheet
+    // would have been built, committed and drawn by nothing -- eight recorded instances of that in
+    // this repository. `everySheet` is what it reads now, and it must cover both lists exactly.
+    const sheets = everySheet().map((c) => c.key);
+    for (const key of Object.keys(CHARACTERS)) expect(sheets).toContain(key);
+    for (const key of Object.keys(TRAVELLER_ART)) expect(sheets).toContain(key);
+    expect(sheets.length).toBe(Object.keys(CHARACTERS).length + Object.keys(TRAVELLER_ART).length);
+    expect(new Set(sheets).size, 'two sheets share a key').toBe(sheets.length);
+  });
+
+  it('gives every sheet a url and a name worth printing', () => {
+    for (const art of everySheet()) {
+      expect(art.url, `${art.key} has no sheet`).toBeTruthy();
+      expect(art.name.length, `${art.key} has no name`).toBeGreaterThan(0);
     }
   });
 });

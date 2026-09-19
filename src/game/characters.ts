@@ -16,6 +16,7 @@ import guyukUrl from '../../assets/guyuk-overworld.png';
 import mithraUrl from '../../assets/mithra-overworld.png';
 import malaciteUrl from '../../assets/malacite-overworld.png';
 import mehtarUrl from '../../assets/mehtar-overworld.png';
+import carrierUrl from '../../assets/traveller-carrier-overworld.png';
 
 export interface CharacterArt {
   /** Texture key, also the prefix for its animation keys. */
@@ -46,6 +47,32 @@ export const CHARACTERS = {
 } as const satisfies Record<string, CharacterArt>;
 
 export type CharacterId = keyof typeof CHARACTERS;
+
+/**
+ * Sheets that draw somebody met on the road, and are never offered as the player.
+ *
+ * **Separate from `CHARACTERS` rather than a flag on it**, because the two lists answer different
+ * questions and only one of them is a menu. `characterFor` must never return one of these: a `?as=`
+ * naming a traveller would put the player in a figure with no sitting art and no name worth showing.
+ *
+ * `TRAVELLER_SHEETS` in `content/travellers.ts` decides which of these actually get dealt to a map,
+ * and holds back until it has enough to cover one -- so a sheet can land here and sit inert until
+ * its two companions arrive. That is deliberate staging rather than the usual fault: the join is
+ * asserted by `test/characters.test.ts`, which fails if a name is dealt with no art behind it.
+ */
+export const TRAVELLER_ART = {
+  'traveller-carrier': { key: 'traveller-carrier', name: 'A carrier', url: carrierUrl }
+} as const satisfies Record<string, CharacterArt>;
+
+/**
+ * Every sheet the scene has to load and animate, playable or not.
+ *
+ * The scene iterated `everyCharacter()` for both, which is how a traveller sheet would have been
+ * built, committed, and drawn by nothing -- this codebase's signature fault, at eight instances.
+ */
+export function everySheet(): CharacterArt[] {
+  return [...Object.values(CHARACTERS), ...Object.values(TRAVELLER_ART)];
+}
 
 /** Every character, in the order they are offered. */
 export function everyCharacter(): CharacterArt[] {

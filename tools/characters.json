@@ -72,6 +72,31 @@
       "sit": { "keep": 4 }
     },
     {
+      "$comment": [
+        "The first sheet that draws a traveller and nobody else. `SHEETS` in content/travellers.ts",
+        "used to be the five playable characters, so everybody met on the road wore a face the",
+        "player could also be wearing -- and on the map you were on, one of the three might be",
+        "wearing yours.",
+        "",
+        "colours: 12, not the 26 Mithra takes. Measured on this exact source: 15.9% speckle at 12",
+        "against 27.4% at 18. A carried load adds colours the figure does not otherwise need, and",
+        "these are drawn at half the player's size where the count is the least visible thing about",
+        "them. `node tools/check-sprite.js` is the check.",
+        "",
+        "sit: the walking source again, taking the first frame of each row. A traveller NEVER sits --",
+        "`updateTravellers` only ever plays 'walk' -- but the builder requires all twenty frames, and",
+        "four standing poses are the honest filler. Inventing a seated pose for a figure nothing ever",
+        "seats would be art nobody looks at. Replace it the day a traveller can be sat down.",
+        "",
+        "No `frames` reorder: checked by eye at 9x, the rows arrive down, up, right, left."
+      ],
+      "id": "traveller-carrier",
+      "name": "A carrier",
+      "colours": 12,
+      "walk": { "source": "assets/source/traveller-carrier.png" },
+      "sit": { "source": "assets/source/traveller-carrier.png", "frames": [0, 4, 8, 12] }
+    },
+    {
       "id": "malacite",
       "name": "Malacite",
       "colours": 34,
