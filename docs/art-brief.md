@@ -1620,30 +1620,98 @@ of twelve.
 The roles are canon's own words where canon has them: `COMPANY` in `travellers.ts` already carries
 *"carrier, with a loaded back"* and *"drover, behind six animals"*.
 
+### What was measured first, because "same process as Mithra" was not a specification
+
+Mithra's sheet was pointed at as the good one. That turned out to be **measurable**, and nothing was
+measuring it. `node tools/check-sprite.js assets/*-overworld.png` now does:
+
+| sheet | colours | speckle | mean run | |
+| --- | --- | --- | --- | --- |
+| **mithra** | 52 | **26.8%** | **1.59px** | ok |
+| varuna | 59 | 27.8% | 1.47px | ok |
+| guyuk | 60 | 37.2% | 1.42px | fail |
+| mehtar | 67 | 58.5% | 1.18px | fail |
+| malacite | 68 | **64.5%** | 1.14px | fail |
+
+**Speckle** is the share of opaque pixels whose colour matches none of their four neighbours. It is
+the number that matters, because the scene sets `FilterMode.NEAREST`: zooming magnifies hard pixels,
+so a pixel belonging to a shape grows into more of that shape and a pixel belonging to nothing grows
+into a visible speck. **Malacite is two thirds speck.** That is the difference being perceived.
+
+Three things were then tested rather than assumed:
+
+**The quantise target is a weak lever.** Rebuilding Mithra from the *same source* at 18, 22, 26, 34
+and 48 colours moved speckle only 19.8% → 26.6%, and the five builds are **visually identical at 8×
+magnification**. It cannot explain a forty-point gap. Turn it down because it is free, not because
+it fixes anything — and **build these three at 18**, which measured cleanest.
+
+**So the cause is the source art.** Checked at the block size the builder samples with — it takes the
+*most common* colour per 8×8 source block — Mithra's blocks agree 13.8% of the time against
+10.7% for guyuk. A block with no majority emits a colour unrelated to its neighbours, which is
+speckle, one step upstream.
+
+**And "no anti-aliasing" has never once been obeyed.** Every source sheet in this repository is
+**38–43% semi-transparent pixels** — painted and anti-aliased, not pixel art, whatever the prompt
+asked for. The builder crushes it down and the difference between a good sheet and a bad one is
+entirely how well the art survives that. So the prompt below asks for what survives an 8:1 modal
+downsample, and stops pretending the model will hand back a 26×40 grid.
+
+### What Mithra actually is, measured
+
+Frame 0, the standing pose: **625 opaque pixels, 26 colours, and the single most common colour is
+the outline** — `#040201`, holding **24.6% of the whole figure**. The top three colours hold 42%.
+Twenty-one colours hold 1.5% or more each; only five are boundary mush, 4% of the pixels.
+
+She fills **77% of the cell's width and 100% of its height**, feet on the bottom edge.
+
+Her face is **two dark dots**. There is nothing else in it.
+
+That is the specification, and it is why she survives: a heavy dark outline holding a small number of
+large flat areas, with a silhouette — the pointed cap — that identifies her before any detail does.
+
+### The size these are drawn at, which is half the player's
+
+A traveller draws at **2×** where the player draws at **4×** — 52×80 pixels against 104×160 on a 128
+tile. Same 26×40 art, drawn smaller. So **every detail is half the size it is on Varuna**, the face
+is about six screen pixels across, and the silhouette is doing nearly all the work.
+
 ### The prompt
 
-Same process as Mithra's sheet, which is the one the quality was asked for. **Change the three
-bolded character lines each time and leave everything else identical** — that is what keeps the
-three consistent with each other and with the existing five.
+**Change only the three bolded character lines and leave everything else identical** — that is what
+keeps the three consistent with each other and with the existing five.
 
 > Pixel art character sheet, **sixteen figures in four rows of four**, of **[CHARACTER]** for a cozy
 > top-down exploration game.
 >
-> **16-bit SNES-era pixel art. Solarpunk watercolour palette: clean sunlit colour, saturated where
-> the light falls, warm bounce light in the shadows rather than flat grey, living greens.** Bright
-> but never neon, and nothing glows or emits light. **Warm near-black for outlines and darks, never
-> pure black.** **Shade the figure the way a SNES sprite is shaded: two or three tones per material,
-> hard-edged, with light dithering only where one tone meets another — no soft airbrushed
-> gradients.** **At most 22 distinct colours in the whole sheet.**
+> **16-bit SNES-era pixel art, in the style of a clean overworld sprite.** Solarpunk watercolour
+> palette: clean sunlit colour, saturated where the light falls, warm bounce light in the shadows
+> rather than flat grey, living greens. Bright but never neon, and nothing glows or emits light.
+>
+> **A heavy warm near-black outline runs all the way around the figure and around each major part of
+> it — never pure black.** The outline is the single largest element: about a quarter of every figure
+> should be outline.
+>
+> **Two or three tones per material and no more** — one base, one shadow, at most one highlight. Flat
+> areas of solid colour with hard edges between them. **No dithering, no stippling, no gradients, no
+> texture, no fabric weave, no individual hairs, no speckling of any kind.** Every detail must be at
+> least three pixels across at the figure's own scale; anything finer becomes noise.
+>
+> **The silhouette must identify this person on its own**, read as a solid shape with no interior: one
+> strong identifying form — a hat brim, a bundle, a shawl — that no other figure shares.
+>
+> **The face is two dark dots for eyes and nothing else.** No nose, no mouth, no eyebrows, no facial
+> shading. It is drawn far too small for any of it.
 >
 > **Row 1 faces the viewer. Row 2 is seen from behind. Row 3 is a side view facing right. Row 4 is
 > the same side view facing left.** Within each row the four frames are one walk cycle in the order
 > **contact, passing, contact, passing** — frames 1 and 3 are the contacts with the legs apart,
 > frames 2 and 4 are the passing poses.
 >
-> **Every figure exactly the same height and the same distance from the bottom of its cell**, and
-> **26 pixels wide by 40 pixels tall in proportion**. Every pixel a flat solid colour, hard edges,
-> no anti-aliasing.
+> **Every figure exactly the same height and the same distance from the bottom of its cell.** The
+> figure is **26 units wide by 40 tall in proportion**, fills about three quarters of its cell's width
+> and the full height, and stands with its feet on the bottom edge.
+>
+> Draw it large and clean — around 300 pixels per figure — rather than trying to hit a tiny grid.
 >
 > Lossless PNG with a genuine alpha channel: the background **fully transparent, not a grey
 > checkerboard**. No guides, no grid lines, no row or column labels, no centre cross, no alignment
@@ -1651,12 +1719,27 @@ three consistent with each other and with the existing five.
 
 Substitute for **[CHARACTER]**:
 
-1. **a broad-shouldered carrier in their forties, with a tall bundle roped high on their back, a
-   brow strap across the forehead taking its weight, a knee-length undyed tunic and bare feet**
-2. **a lean weathered drover in their fifties, with a coiled rope over one shoulder and a long
-   staff held low in one hand, a dust-red wrapped skirt, a sleeveless tunic and sandals**
-3. **a slight pilgrim of about twenty, with a deep indigo shawl drawn over the head and both hands
-   free, a plain pale wrap to the ankle and bare feet**
+1. **a broad-shouldered carrier in their forties, with a tall bundle roped high on their back
+   standing well above the shoulders, a brow strap across the forehead taking its weight, a
+   knee-length undyed tunic and bare feet** — the silhouette is the bundle
+2. **a lean weathered drover in their fifties, with a coiled rope over one shoulder and a long staff
+   held low in one hand, a dust-red wrapped skirt, a sleeveless tunic and sandals** — the silhouette
+   is the staff
+3. **a slight pilgrim of about twenty, with a deep indigo shawl drawn up over the head and falling to
+   the elbows, both hands free, a plain pale wrap to the ankle and bare feet** — the silhouette is
+   the shawl's hood
+
+### Checking one before you commit it
+
+```bash
+npm run build:sprite traveller-carrier
+node tools/check-sprite.js assets/traveller-carrier-overworld.png
+```
+
+**Under 30% speckle and over 1.45px mean run, or send it back.** Those gates are set from Mithra
+rather than chosen — a sheet that merely ties the best one should pass rather than scrape. Three of
+the five existing characters fail them, which is the point: the check exists because nothing caught
+Malacite at 64%.
 
 ### Delivering them
 
