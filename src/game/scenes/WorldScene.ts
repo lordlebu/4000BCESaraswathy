@@ -128,6 +128,8 @@ import {
   characterFor,
   createCharacterAnimations,
   everyCharacter,
+  figureScale,
+  travellerScale,
   type CharacterArt,
   facingFromStep,
   loadCharacterSheet,
@@ -863,7 +865,7 @@ export class WorldScene extends Phaser.Scene {
     // So he is scaled by the same whole number the grid grew by. Whole, not fitted: a fractional
     // scale is what makes pixel art shimmer as it moves, and that reason survives the direction
     // change even though the ground's version of it did not.
-    const figureScale = TILE_SIZE / 32;
+    const scale = figureScale(TILE_SIZE);
 
     // Created before the player so it is beneath him in the display list as well as in depth --
     // equal depths resolve by insertion order, and his own shadow drawn over his boots is worse
@@ -879,7 +881,7 @@ export class WorldScene extends Phaser.Scene {
     this.player = this.add
       .sprite(0, 0, this.character.key, 0)
       .setOrigin(0.5, 1)
-      .setDisplaySize(PLAYER_FRAME.width * figureScale, PLAYER_FRAME.height * figureScale);
+      .setDisplaySize(PLAYER_FRAME.width * scale, PLAYER_FRAME.height * scale);
     this.player.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
 
     // After the player, so it is over him in the display list as well as in depth -- the same
@@ -1510,7 +1512,13 @@ export class WorldScene extends Phaser.Scene {
    * a roster of three there is always one to move to.
    */
   private createTravellers(): void {
-    const figureScale = TILE_SIZE / 32;
+    // **Half the player's size, and the reason is the mount rather than modesty.** Every traveller
+    // on every map carries a `conveyance` -- eight ox and Harappan carts, a reed raft and the
+    // lodestone train, measured across the four maps -- and none of it is drawn yet: `vehicles.png`
+    // is built by `tools/build-terrain.js` from one painted carriage and loaded by nothing. At the
+    // player's 4x there was no room to draw one under the figure even once the art exists, because
+    // 104x160 pixels covers a 128 tile outright. `travellerScale` says why two and not a quarter.
+    const scale = travellerScale(TILE_SIZE);
     for (const traveller of travellersOn(this.built.fieldMap.id)) {
       const stops = stopsOf(traveller, this.built.placed);
       // A circuit whose stops did not all get placed is not a circuit. Dropping the traveller is
@@ -1522,7 +1530,7 @@ export class WorldScene extends Phaser.Scene {
       const sprite = this.add
         .sprite(0, 0, key, 0)
         .setOrigin(0.5, 1)
-        .setDisplaySize(PLAYER_FRAME.width * figureScale, PLAYER_FRAME.height * figureScale);
+        .setDisplaySize(PLAYER_FRAME.width * scale, PLAYER_FRAME.height * scale);
       sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
       sprite.setName(`traveller:${traveller.id}`);
       this.travellers.push({ traveller, stops, sprite });
@@ -1555,7 +1563,13 @@ export class WorldScene extends Phaser.Scene {
         sheet: sprite.texture.key,
         visible: sprite.visible,
         x: Math.round(sprite.x),
-        y: Math.round(sprite.y)
+        y: Math.round(sprite.y),
+        // **How big they are drawn, and the player's own size to compare it against.** A ratio the
+        // scene applies is not provable from Node: `travellerScale` can be right while
+        // `createTravellers` uses the other one, which is exactly what it did.
+        w: Math.round(sprite.displayWidth),
+        h: Math.round(sprite.displayHeight),
+        playerH: Math.round(this.player.displayHeight)
       }));
   }
 

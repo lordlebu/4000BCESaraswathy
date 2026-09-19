@@ -12,7 +12,17 @@
 
 import { expect, test, type Page } from '@playwright/test';
 
-type Seen = { id: string; named: boolean; sheet: string; visible: boolean; x: number; y: number };
+type Seen = {
+  id: string;
+  named: boolean;
+  sheet: string;
+  visible: boolean;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  playerH: number;
+};
 
 const read = (page: Page) =>
   page.evaluate(
@@ -50,6 +60,26 @@ test('the map carries other people, and they are drawn from the built sheets', a
   // No two the same figure: three copies of one face reads as a bug even when it is not.
   expect(new Set(seen.map((t) => t.sheet)).size, 'two travellers share a sheet').toBe(seen.length);
   expect(warnings, 'a traveller sheet did not load').toEqual([]);
+});
+
+test('they are drawn smaller than the player, to leave the mount room', async ({ page }) => {
+  // **The ratio, asserted where it is actually applied.** `test/characters.test.ts` proves
+  // `travellerScale` halves `figureScale`; nothing under Node can prove the scene calls the right
+  // one, and it called the same one for both for as long as travellers have existed -- so every
+  // figure on the road was the player's own 104x160, which covers a 128 tile outright and leaves
+  // nowhere to draw the cart or the raft each of them is carrying.
+  //
+  // Half is the target and the bounds are loose on purpose: this is guarding against "the same
+  // size" and "a speck", not pinning a number that the grid could legitimately move.
+  const seen = await bootAt(page, '12');
+  expect(seen.length, 'nobody to measure').toBeGreaterThan(0);
+  for (const t of seen) {
+    expect(t.h, `${t.id} is drawn at the player's own height`).toBeLessThan(t.playerH);
+    expect(t.h / t.playerH, `${t.id} is barely smaller than the player`).toBeLessThanOrEqual(0.55);
+    expect(t.h / t.playerH, `${t.id} is drawn as a speck`).toBeGreaterThanOrEqual(0.25);
+    // Still the same 26x40 art, so the aspect cannot have been squashed on the way down.
+    expect(t.w / t.h, `${t.id} is drawn out of shape`).toBeCloseTo(26 / 40, 1);
+  }
 });
 
 test('they are out at noon and stopped at a place in the small hours', async ({ page }) => {
