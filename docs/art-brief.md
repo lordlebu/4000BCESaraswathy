@@ -1582,192 +1582,192 @@ can crop, resample and recolour; it cannot invent where a run was supposed to le
 
 ---
 
-## Asset 7 — the road company: two travellers and what carries them
+---
 
-**Why this is wanted.** Three travellers walk each map on a derived circuit, and they are drawn from
-the *player* sheets — so meeting somebody on the road means meeting Varuna or Mithra coming the other
-way. They are now drawn at half the player's size (52×80 on a 128 tile, the art at 2×) precisely to
-leave room under them for what carries them, and **nothing is drawn there yet**: `vehicles.png` is
-built from one painted carriage and is loaded by nothing.
+## Asset 7 — three traveller sheets, and that is the whole ask
 
-### The finding that makes this cheap: the mounts need no rider in them
+**The complaint, exactly as reported:** *"I can see NPCs moving, but they are the player characters."*
+They are. `SHEETS` in `src/content/travellers.ts` is the five **playable** characters, and
+`sheetFor` walks down it — so every traveller on every map wears a face the player can also be
+wearing, and on the map you are on, one of them may be wearing yours.
 
-Every built character sheet already carries **one seated frame per facing** — `SIT_ROW` in
-`src/game/player.ts` is `{ down: 16, up: 17, right: 18, left: 19 }`. So a rider on a mount is the
-existing seated frame drawn on top of the mount, and every mount serves every rider. Ask for the
-animal or the cart **alone**, and never with a figure on it.
+**Three sheets fixes it completely, and three is not a compromise — it is the exact number.**
+`TRAVELLERS_PER_MAP` is 3, and `sheetFor` guarantees no two travellers on a map share a sheet only
+while the roster is no longer than the list. So a list of exactly three non-playable sheets gives
+every map three distinct strangers and makes a collision with the player *impossible* rather than
+unlikely.
 
-### 1 — Kunch, and the gap in canon behind him
+Once the three exist, `SHEETS` stops naming playable characters and the fault is gone. No other
+code changes.
 
-`npc_kunch` is the delta's road singer, and canon describes his mount only inside his own dialogue:
+### What these three people are
 
-> *"Her name is not your business and she would not answer to it anyway. Nine feet of bad opinion
-> and the only animal on this delta that can see over the reeds, which between us is the whole of why
-> I am up here and not down there with my feet wet."*
+Not portraits of named individuals. **Three travellers who read as different people at a glance**,
+which at 26×40 means three different silhouettes and three different hues — the palette is
+per-character and never shared, because hue is what tells one figure from another at this size.
 
-**There is no fauna entity for that animal.** Searched: no bird in canon carries `riding` or `cargo`
-in a wetland or river biome, and the delta's nine birds are all small or middling waders. The nearest
-two are `fauna_crested_marsh_runner` (flightless, delta, but a lotus-runner rather than a mount) and
-`fauna_giant_riding_ostrich` (genuinely rideable, `behaviour: [riding, cargo]` — but Tushara-trained
-and desert-and-steppe, on the wrong side of the subcontinent).
+They are on the road between places all day, so they carry things and they are dressed for walking.
+Beyond that they are deliberately unspecific: the same three sheets serve Anu on the Aravali and
+Bekh on Lothal, and a sheet that is obviously one named person would be wrong in eleven places out
+of twelve.
 
-That is a **canon** job, not a game one: the animal is a noun. Until the entity exists the art below
-is drawn from Kunch's line, which is the only description there is.
+| Sheet | Reads as | The silhouette |
+| --- | --- | --- |
+| `traveller-carrier.png` | somebody carrying goods between places | a loaded back — the tallest and broadest of the three |
+| `traveller-drover.png` | somebody who walks behind animals | a coiled rope and a long staff held low, the leanest |
+| `traveller-pilgrim.png` | somebody walking for their own reasons | a shawl over the head, hands free, the smallest |
 
-Also worth knowing before the art is wired: the game currently derives Kunch's conveyance from the
-ground he crosses and gets `vehicle_reed_raft`, and Moonj's `vehicle_ox_cart`. Both **contradict
-canon**, and `conveyanceFor` in `src/content/travellers.ts` is where that is decided.
+The roles are canon's own words where canon has them: `COMPANY` in `travellers.ts` already carries
+*"carrier, with a loaded back"* and *"drover, behind six animals"*.
 
-> **Prompt — Kunch's bird (four images, change the facing each time):**
-> Single **16-bit SNES-era** pixel art sprite of a **nine-foot flightless wading bird** for a cozy
-> top-down exploration game, seen from a **high three-quarter overhead angle**, **facing [the viewer
-> / away from the viewer / to the right / to the left]**, standing on nothing.
-> A long heavy neck held in a shallow S, a deep straight spear-shaped beak, a small hard eye, **legs
-> long enough that the body sits well clear of reed height**, wide splayed toes for mud. Plumage
-> **slate and ash grey over a paler breast**, a few long dark plumes trailing from the back of the
-> head, and the barest warm ochre on the beak and legs. She is **irritable and unimpressed**, not
-> fierce — no raptor's hooked bill, no spread wings, no threat display.
-> **A plain woven pad and a girth strap across her back, empty, with no rider.**
-> **Solarpunk watercolour palette: clean sunlit colour, saturated where the light falls, warm bounce
-> light in the shadows rather than flat grey.** Bright but never neon, nothing glows. **Warm
-> near-black for outlines and darks, never pure black.** **Shade it the way a SNES sprite is shaded:
-> two or three tones per material, hard-edged, with light dithering only where one tone meets
-> another — no soft airbrushed gradients.** **At most 22 distinct colours in the whole figure.**
-> True pixel art, every pixel a flat solid colour, hard edges, no anti-aliasing. **Proportions about
-> 3 wide to 4 tall.** Lossless PNG with a genuine alpha channel: the background fully transparent,
-> not a grey checkerboard. A soft contact shadow directly under the feet is wanted; no ground, no
-> water, no reeds, no sky, no pedestal. No grid, no guide lines, no centre cross, no alignment marks,
-> no border, no text, no watermark. One centred animal filling the frame, **feet at the bottom
-> edge**.
+### The prompt
 
-Plus his own walking sheet, so he stops being Mithra:
+Same process as Mithra's sheet, which is the one the quality was asked for. **Change the three
+bolded character lines each time and leave everything else identical** — that is what keeps the
+three consistent with each other and with the existing five.
 
-> **Prompt — Kunch, 4×4 walking sheet:** Pixel art character sheet, **sixteen figures in four rows
-> of four**, of a lean **delta road singer** for a cozy top-down exploration game, in the same
-> **16-bit SNES-era** style, palette and scale as the existing sheets. Bare-headed, black hair tied
-> back, **sun-faded saffron wrap over one shoulder**, bare legs, **a bundle of three cut canes of
-> different lengths slung at his hip** — struck, not blown, so no mouthpiece. Nothing on his feet.
-> **Row 1 faces the viewer, row 2 is seen from behind, row 3 is a side view facing right, row 4 is
-> the same side view facing left.** Within each row the four frames are one walk cycle in the order
-> **contact, passing, contact, passing**. Every figure the same height, the same distance from the
-> bottom of its cell, and **26 pixels wide by 40 pixels tall in proportion**. **At most 22 distinct
-> colours in the whole sheet.** Warm near-black for outlines, never pure black. Lossless PNG, genuine
-> alpha channel, fully transparent background — not a grey checkerboard. No guides, no grid lines, no
-> row labels, no drop shadows, no text, no watermark.
-
-### 2 — Moonj and the straight-tusk, which canon does hold
-
-`npc_moonj` is the driver the University's record leaves out, and her animal is a real canon entity:
-`fauna_narmada_straight_tusk`, *Palaeoloxodon namadicus*, mood **patient**, `behaviour: [herd, cargo,
-browsing]`. Canon's own two descriptions are the brief:
-
-> *"The tusks come out almost straight rather than curving, which is why a pair of them makes a
-> doorway."* … *"It is browsing at the height of a roof… two pale shafts a shade longer than the
-> animal is tall."*
+> Pixel art character sheet, **sixteen figures in four rows of four**, of **[CHARACTER]** for a cozy
+> top-down exploration game.
 >
-> And Moonj on working it: *"an animal that can put a shoulder to a cut block of basalt cannot be
-> made to do anything it has decided against. What a driver has is forty years of being agreed
-> with."*
-
-> **Prompt — the straight-tusk (four images, change the facing each time):**
-> Single **16-bit SNES-era** pixel art sprite of a **huge ancient elephant** for a cozy top-down
-> exploration game, seen from a **high three-quarter overhead angle**, **facing [the viewer / away
-> from the viewer / to the right / to the left]**, standing on nothing.
-> **The tusks are the whole point: they come out almost dead straight and point forward rather than
-> curving out or up, two pale shafts slightly longer than the animal is tall.** A high domed skull,
-> small ears for an elephant, tall pillar legs, a deep barrel body. Hide **warm grey-brown with dust
-> paler along the back**, tusks **bone and ivory, never white**. She is **patient and entirely
-> unbothered** — head level, no trumpeting, no raised trunk, no charge.
-> **A plain rope harness and a folded pad across the shoulders, empty, with no rider**, and **no
-> howdah, no platform, no cargo, no chains.**
-> **Solarpunk watercolour palette: clean sunlit colour, saturated where the light falls, warm bounce
-> light in the shadows rather than flat grey.** Bright but never neon, nothing glows. **Warm
-> near-black for outlines and darks, never pure black.** **Two or three tones per material,
+> **16-bit SNES-era pixel art. Solarpunk watercolour palette: clean sunlit colour, saturated where
+> the light falls, warm bounce light in the shadows rather than flat grey, living greens.** Bright
+> but never neon, and nothing glows or emits light. **Warm near-black for outlines and darks, never
+> pure black.** **Shade the figure the way a SNES sprite is shaded: two or three tones per material,
 > hard-edged, with light dithering only where one tone meets another — no soft airbrushed
-> gradients.** **At most 22 distinct colours.** True pixel art, flat solid colour per pixel, hard
-> edges, no anti-aliasing. **Proportions about 3 wide to 2 tall** — she is wider than she is deep
-> from above. Lossless PNG with a genuine alpha channel, fully transparent background, not a grey
-> checkerboard. A soft contact shadow under the feet is wanted; no ground, no vegetation, no sky, no
-> pedestal. No grid, no guide lines, no centre cross, no alignment marks, no border, no text, no
-> watermark. One centred animal filling the frame, **feet at the bottom edge**.
-
-> **Prompt — Moonj, 4×4 walking sheet:** Pixel art character sheet, **sixteen figures in four rows
-> of four**, of a weathered **woman driver in her sixties** for a cozy top-down exploration game, in
-> the same **16-bit SNES-era** style, palette and scale as the existing sheets. Short grey hair, a
-> **dust-red wrapped skirt and a sleeveless undyed tunic**, **a coiled rope over one shoulder and a
-> short goad held low in one hand** — a walking stick, never a whip, never raised. Sandals. Broad
-> shoulders and a flat unhurried stride.
-> **Row 1 faces the viewer, row 2 is seen from behind, row 3 is a side view facing right, row 4 is
+> gradients.** **At most 22 distinct colours in the whole sheet.**
+>
+> **Row 1 faces the viewer. Row 2 is seen from behind. Row 3 is a side view facing right. Row 4 is
 > the same side view facing left.** Within each row the four frames are one walk cycle in the order
-> **contact, passing, contact, passing**. Every figure the same height, the same distance from the
-> bottom of its cell, **26 pixels wide by 40 pixels tall in proportion**. **At most 22 distinct
-> colours in the whole sheet.** Warm near-black outlines, never pure black. Lossless PNG, genuine
-> alpha channel, fully transparent background — not a grey checkerboard. No guides, no grid lines, no
-> row labels, no drop shadows, no text, no watermark.
-
-### 3 — the three vehicles the other nine travellers use
-
-Measured across the four maps: **eight** travellers derive a cart (`vehicle_harappan_cart` six times,
-`vehicle_ox_cart` five), one a `vehicle_reed_raft`, one the `vehicle_lodestone_train`. So these three
-cover every traveller who is not Kunch or Moonj.
-
-Canon's notes are the brief, and the Harappan cart's is unusually specific:
-
-> **Harappan cart** — *"Two solid wheels of three planks dowelled together, and an axle that turns
-> with them rather than under them — so the whole undercarriage groans and a driver is heard coming
-> from a field away."*
+> **contact, passing, contact, passing** — frames 1 and 3 are the contacts with the legs apart,
+> frames 2 and 4 are the passing poses.
 >
-> **Ox cart** — *"Solid wheels, no springs, and a pace nobody hurries."*
+> **Every figure exactly the same height and the same distance from the bottom of its cell**, and
+> **26 pixels wide by 40 pixels tall in proportion**. Every pixel a flat solid colour, hard edges,
+> no anti-aliasing.
 >
-> **Reed raft** — *"Bundled reed lashed to a cane frame. Rots in a season and is rebuilt in a
-> morning."*
+> Lossless PNG with a genuine alpha channel: the background **fully transparent, not a grey
+> checkerboard**. No guides, no grid lines, no row or column labels, no centre cross, no alignment
+> marks, no drop shadows, no border, no text, no watermark.
 
-The existing `assets/source/carriage.png` is the format reference: **one subject, anchored at the
-bottom of a cell wider than it is tall.** The vehicle cell is 48×32 at `SCALE 4`, so **192×128**, and
-it is built with `painted: true` — the averaging sampler, no palette snap — so these three may be
-**painted watercolour rather than pixel art**, matching the terrain and the places rather than the
-figures.
+Substitute for **[CHARACTER]**:
 
-> **Prompt — the three vehicles (one image each, four facings each):**
-> A **painted watercolour** game asset of a **[Harappan bullock cart / heavy ox cart / bundled reed
-> raft]** for a cozy top-down exploration game, seen from a **high three-quarter overhead angle**,
-> **facing [the viewer / away / right / left]**, standing on nothing, **empty — no driver, no
-> passengers, no animals in the traces.**
-> - **Harappan cart:** two **solid** wheels, each visibly **three straight planks dowelled edge to
->   edge**, a plain open box bed of pale teak, a single long draught pole forward with a yoke bar
->   across its end. Undecorated and well used.
-> - **Ox cart:** heavier and deeper than the Harappan, **solid wheels**, a plank bed with low sides,
->   a stout pole and yoke. Grey-weathered timber, no ironwork, no springs, no canopy.
-> - **Reed raft:** **bundles of pale dry reed lashed in a row to a cane frame**, the lashings dark
->   and visible, one long punt pole lying along it. Low, flat, new-looking — it is rebuilt every
->   season.
-> **Solarpunk watercolour palette: clean sunlit colour, saturated where the light falls, warm bounce
-> light in the shadows rather than flat grey.** Bright but never neon, nothing glows. Warm near-black
-> for the darkest darks, never pure black. Visible brushwork and paper tooth are wanted; **no lens
-> blur, no specular highlights, no 3D render, no photographic detail.**
-> **Proportions about 3 wide to 2 tall.** Lossless PNG with a genuine alpha channel, background fully
-> transparent — not a grey checkerboard, not white. A soft contact shadow directly beneath it is
-> wanted; **no ground, no road, no water, no sky, no pedestal, no cast environment.** No guides, no
-> grid lines, no centre cross, no border, no text, no watermark. One subject filling the frame,
-> **its lowest point at the bottom edge of the image.**
+1. **a broad-shouldered carrier in their forties, with a tall bundle roped high on their back, a
+   brow strap across the forehead taking its weight, a knee-length undyed tunic and bare feet**
+2. **a lean weathered drover in their fifties, with a coiled rope over one shoulder and a long
+   staff held low in one hand, a dust-red wrapped skirt, a sleeveless tunic and sandals**
+3. **a slight pilgrim of about twenty, with a deep indigo shawl drawn over the head and both hands
+   free, a plain pale wrap to the ankle and bare feet**
 
-### What to do with them
+### Delivering them
 
-Drop them in `assets/source/` — **tracked**, not `assets/source/dump/`, because a `tools/` script
-reads them to build something, which is the rule the table at the top of `CLAUDE.md` states. Names
-the builders will expect:
+`assets/source/` — **tracked**, not `assets/source/dump/`, because a `tools/` script reads them to
+build something. Then a row each in `tools/characters.json` and `npm run build:sprite`.
 
-| File | Built by |
-| --- | --- |
-| `kunch-walking.png`, `moonj-walking.png` | `npm run build:sprite` — a row each in `tools/characters.json` |
-| `kunch-bird-{down,up,right,left}.png` | `tools/build-terrain.js`, a new `MOUNTS` strip |
-| `straight-tusk-{down,up,right,left}.png` | the same strip |
-| `harappan-cart-{down,up,right,left}.png` | the `VEHICLES` strip, which already exists and is loaded by nothing |
-| `ox-cart-{down,up,right,left}.png` | the same |
-| `reed-raft-{down,up,right,left}.png` | the same |
+**Check the profile rows by eye at about 18× before believing a sheet.** Rows 3 and 4 are assumed to
+arrive as right then left, and Mithra's arrived the other way round — so walking east played a figure
+facing west while it slid east. Two pixel heuristics were written to catch this and **both got it
+wrong on two of the five existing characters**; looking at it took a minute and was right. The fix is
+a `frames` list in the manifest, never a change in the game.
 
-**Check the walking sheets' profile rows by eye at about 18× before believing them.** Two different
-pixel heuristics were tried on this and **both got it wrong on two of the five existing characters**
-— hair framing the face defeats a skin-versus-hair test, and a symmetric headdress defeats a centroid
-one. Mithra's two profiles arrived swapped and the fix is a `frames` list in the manifest, never a
-change in the game.
+---
+
+## Asset 8 — the three faces missing, and they are all travellers
+
+**Fourteen of canon's seventeen people have a painted portrait. The three without one are `anu`,
+`kunch` and `moonj`** — and that is not a coincidence, it is the same gap from the other side: all
+three are circuit-walkers, so they were authored for the travel layer and the portrait batch predates
+it. Anybody without a portrait falls back to a drawn silhouette, which is why nothing looks broken
+and why nobody noticed.
+
+This is the whole remaining portrait set. There is no fourth.
+
+| Who | Language → wash | Where they walk |
+| --- | --- | --- |
+| **Anu**, hunter | `maru` → warm ochre-brown `#8a6a3a` | Nomad Ground → Vedda Ford → Sunk Cutting |
+| **Kunch**, road singer | `kia` → cool blue-green `#3d7a8c` | Lothal Camp → Marsh Shrine → Eastern Field |
+| **Moonj**, driver | `maru` → warm ochre-brown `#8a6a3a` | Basalt Quarry → Narmada University → Walking Spring |
+
+The wash is not decoration: **ink is by language**, so a portrait's tint says who else can hear the
+words this person teaches. `LANGUAGE_INK` in `PersonPortrait.tsx` is where that lives, and the
+painted portrait has to agree with the silhouette it replaces.
+
+### The prompts
+
+Same pipeline as the other fourteen. Save what comes back under any name into
+`assets/source/portraits/`, then `node tools/build-plates.js --portraits`. **The first four
+paragraphs are identical in every portrait prompt** — only the `Subject:` line and the wash colour
+change.
+
+> **Anu** — the file becomes `anu.png`.
+>
+> ```text
+> Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+>
+> One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+>
+> Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
+>
+> Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+>
+> Subject: A hunter, a man of about thirty-five, an unstrung sinew bow carried slack over one shoulder and a shed antler held loosely in the other hand. High dry grassland behind him, a herd somewhere off-frame. He walks ahead of the animals so that things see him and go elsewhere, and he is watching something past the viewer rather than the viewer.
+>
+> Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
+> ```
+
+> **Kunch** — the file becomes `kunch.png`.
+>
+> ```text
+> Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+>
+> One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+>
+> Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
+>
+> Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+>
+> Subject: A road singer, a lean man of about thirty with his hair tied back, holding up a bound bundle of three cut canes of different lengths - an instrument that is struck, not blown, so there is no mouthpiece. Delta reed beds and open water behind him. He is amused and entirely unbothered; he is paid in meals and considers that the better arrangement.
+>
+> Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
+> ```
+
+> **Moonj** — the file becomes `moonj.png`.
+>
+> ```text
+> Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+>
+> One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+>
+> Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
+>
+> Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+>
+> Subject: A driver, a broad-shouldered woman in her sixties with short grey hair, a coiled rope over one shoulder and a short goad held low - a walking stick, never raised. Cut basalt blocks and a quarry face behind her. Steady and unimpressible; she has done the same road every second day of her life and would not sell the hour it takes.
+>
+> Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
+> ```
+
+**A note on Moonj, and it is a rule rather than a detail.** She is the person the University's record
+leaves out — *"the stone was quarried by a hand and moved by an animal, and only one of those is
+written down."* She is the driver, and her portrait must not be a portrait of a driver's animal. Head
+and shoulders, the goad at the lower edge, no elephant in frame.
+
+---
+
+## Out of scope for the travel work
+
+Everything below came up while briefing the road and was **moved out deliberately**. None of it
+blocks the two assets above, and each is a fresh decision whenever somebody wants it rather than a
+debt this work owes.
+
+| Item | Why it is out | What it would cost |
+| --- | --- | --- |
+| **Mounts and vehicles** | An earlier draft asked for two mounts and three carts in four facings each. That is the conveyance layer, not the faces. Every traveller carries a derived `conveyance` and none of it is drawn — `vehicles.png` is built from one painted carriage and loaded by nothing. The half-size figure now leaves room for one when somebody wants it. | ~20 images, plus a `MOUNTS` strip and a draw-order decision |
+| **Named walking sheets** | Eleven of the twelve travellers are canon people, so doing this properly is eleven sheets, not two — and two named faces among ten generic ones reads as an error rather than a feature. The three generic sheets above fix the actual complaint completely. | 11 sheets |
+| **Kunch's bird** | **Not an art item at all.** It has no canon entity: no bird in canon carries `riding` or `cargo` in a wetland or river biome, and the delta's nine are small or middling waders. An animal is a noun, so it is canon's to author before anybody paints one. | one canon entity, then art |
+| **Road furniture** | Cairns, ford posts, boundary stones, stairs where a road meets a scarp. All proposed, none built, and **none of them needs prompted art** — they are masses a loop states exactly, which is rule §1 in `art-direction.md`. `build-road.js` and `build-decor.js` already draw this category. | code, not art |
+
+**The last row is the useful one.** The road sheet itself was code-drawn for exactly this reason: the
+first prompted road came back with pieces 25–81% of their box and not one touching a cell edge, and
+was unusable. A builder can crop, resample and recolour; it cannot invent where a run was supposed to
+leave the cell. Anything roadside that is a shape rather than a face should be generated, not asked
+for.
