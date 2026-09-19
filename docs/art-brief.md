@@ -1680,8 +1680,8 @@ is about six screen pixels across, and the silhouette is doing nearly all the wo
 **Change only the three bolded character lines and leave everything else identical** — that is what
 keeps the three consistent with each other and with the existing five.
 
-> Pixel art character sheet, **sixteen figures in four rows of four**, of **[CHARACTER]** for a cozy
-> top-down exploration game.
+> **Chibi pixel art RPG game, rounded version.** Character sheet, **sixteen figures in four rows of
+> four**, of **[CHARACTER]** for a cozy top-down exploration game.
 >
 > **16-bit SNES-era pixel art, in the style of a clean overworld sprite.** Solarpunk watercolour
 > palette: clean sunlit colour, saturated where the light falls, warm bounce light in the shadows
@@ -1698,6 +1698,19 @@ keeps the three consistent with each other and with the existing five.
 >
 > **The silhouette must identify this person on its own**, read as a solid shape with no interior: one
 > strong identifying form — a hat brim, a bundle, a shawl — that no other figure shares.
+>
+> **The identifying form must not swallow the figure.** The pack, staff or shawl occupies at most the
+> top third of the figure's height and never more than a third of its width. The person is still
+> plainly a person, with a **clearly visible head standing free of it** — nothing crossing the face,
+> no strap over the head.
+>
+> **Give the figure one large block of strongly contrasting colour near the top** — a cap, a
+> headcloth, a hood — in a different hue from the skin, the clothing and anything carried, and not
+> broken up by straps or detail crossing it. At the size this is drawn, that block is what tells one
+> traveller from another.
+>
+> **Anything carried is plain:** no woven or basketwork texture, no foliage, no dangling sprigs, no
+> visible weave, no rope detail. One or two flat colours for the whole of it.
 >
 > **The face is two dark dots for eyes and nothing else.** No nose, no mouth, no eyebrows, no facial
 > shading. It is drawn far too small for any of it.
@@ -1723,15 +1736,18 @@ keeps the three consistent with each other and with the existing five.
 
 Substitute for **[CHARACTER]**:
 
-1. **a broad-shouldered carrier in their forties, with a tall bundle roped high on their back
-   standing well above the shoulders, a brow strap across the forehead taking its weight, a
-   knee-length undyed tunic and bare feet** — the silhouette is the bundle
-2. **a lean weathered drover in their fifties, with a coiled rope over one shoulder and a long staff
-   held low in one hand, a dust-red wrapped skirt, a sleeveless tunic and sandals** — the silhouette
-   is the staff
+1. **a broad-shouldered carrier in their forties, in a bright ochre-yellow headcloth, with a compact
+   bundle on their back rising no higher than the top of the head, a knee-length undyed tunic and
+   bare feet** — the contrast block is the ochre headcloth
+2. **a lean weathered drover in their fifties, in a bleached white headwrap, with a long plain staff
+   held low in one hand, a dust-red wrapped skirt, a sleeveless tunic and sandals** — the contrast
+   block is the white headwrap
 3. **a slight pilgrim of about twenty, with a deep indigo shawl drawn up over the head and falling to
-   the elbows, both hands free, a plain pale wrap to the ankle and bare feet** — the silhouette is
-   the shawl's hood
+   the elbows, both hands free, a plain pale wrap to the ankle and bare feet** — the contrast block
+   is the indigo hood
+
+Three different top blocks — ochre, white, indigo — so no two read alike at a glance, and none of
+them is Mithra's red cap.
 
 **Why that order and not the obvious alternation.** `walkOrder` in `src/game/player.ts` is
 `[row + 2, row + 0, row + 3, row + 1]` — the engine plays the third frame, then the first, then the
@@ -1750,6 +1766,36 @@ Measured on the profile rows, as the gap between the legs in play order:
 
 Mithra is the only one of the five whose feet actually come together, which is the whole of why her
 walk reads as fluid and the others shuffle. **This is the single most important line in the prompt.**
+
+### What the first delivered sheet measured
+
+The carrier came back and is worth recording rather than re-deriving. **The walk cycle was fixed** —
+stride 6.5 on the profile rows against Mithra's 5.0, the best of any sheet in the repository, so the
+two-closed-then-two-open instruction works. The source was clean: real alpha, nothing to key out, all
+sixteen figures found.
+
+Two things were wrong, and only one of them was the art.
+
+**Speckle was over the bar at 18 colours and under it at 12** — 33.3% against 27.7%. These figures
+carry a load, and a load adds colours the figure does not otherwise need, so **build the traveller
+sheets at 12 rather than the 18 first written here.** Measured across four builds of the same source:
+
+| colours | speckle | mean run | |
+| --- | --- | --- | --- |
+| 12 | **27.7%** | 1.52px | ok |
+| 14 | 29.4% | 1.49px | ok |
+| 18 | 33.3% | 1.42px | fail |
+| 24 | 37.1% | 1.38px | fail |
+
+**And it did not read at the size it is drawn.** At 2× against Mithra at 2×, she is instantly a person
+walking and the carrier is a brown-green blob. Two causes, both visible at 6×: the pack was over half
+the figure with the head tucked behind a strap, and every region sat in the same mid-brown family.
+The amendment above — a third of the height at most, head standing free, one high-contrast block
+near the top, nothing carried carrying texture — is what that cost.
+
+Worth being straight about the limit of this: the read problem was judged **by looking**. An attempt
+to measure it as hue separation did not distinguish the two sheets, so there is no number behind that
+paragraph and none is claimed.
 
 ### Checking one before you commit it
 
