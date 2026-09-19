@@ -14,8 +14,11 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps, allNpcs, poi } from '../src/content/places';
 import {
+  placedCircuit,
   sheetsToUse,
   stopsOf,
+  travellerAttributes,
+  travellerState,
   travellersOn,
   wayBetween,
   whereabouts,
@@ -262,5 +265,74 @@ describe('travellers stop wearing the player\'s face', () => {
       const art = travellersOn(map.id).map((t) => t.art);
       expect(new Set(art).size, `${map.id}: two travellers share a sheet`).toBe(art.length);
     }
+  });
+});
+
+describe('what a card says about somebody on the road', () => {
+  // Thrali walks Lothal Camp and the Drowned Dockyard, which is the circuit `e2e/talking.spec.ts`
+  // meets him on. Using the person the browser test uses keeps the two halves arguing about the
+  // same case rather than about two.
+  const lothal = built('field_map_lothal');
+  const thrali = () => travellersOn('field_map_lothal').find((t) => t.npcId === 'npc_thrali')!;
+
+  const stateOf = (day: number, hour: number) => {
+    const t = thrali();
+    const circuit = placedCircuit(t, lothal.placed);
+    return travellerState(circuit, whereabouts(lothal.world, circuit.map((s) => s.at), day, hoursToPhase(hour)));
+  };
+
+  it('names the place somebody is walking to, not the tile', () => {
+    const state = stateOf(0, 12);
+    expect(state, 'Thrali is not on this map any more').not.toBeNull();
+    expect(state!.resting).toBe(false);
+    expect(state!.boundFor, 'midday and bound nowhere').not.toBeNull();
+
+    const label = travellerAttributes(thrali(), state).find((a) => a.kind === 'doing')!.label;
+    expect(label).toMatch(/^On the road to /);
+    // The name canon gives the place, not its id. A card saying `poi_lothal_camp` is a card
+    // showing the database to a player.
+    expect(label).toContain(poi(state!.boundFor!)!.name);
+  });
+
+  it('says where somebody is stopped, once they have stopped', () => {
+    const state = stateOf(0, 23);
+    expect(state!.resting).toBe(true);
+    expect(state!.boundFor, 'nobody stopped is bound anywhere tonight').toBeNull();
+    expect(travellerAttributes(thrali(), state)[0]!.label).toMatch(/^Stopped at /);
+  });
+
+  it('carries canon\'s role and language verbatim, capitalised and nothing else', () => {
+    const traits = travellerAttributes(thrali(), stateOf(0, 12));
+    const who = traits.find((a) => a.kind === 'who')!;
+    const speaks = traits.find((a) => a.kind === 'speaks')!;
+    expect(who.label).toBe('Fisher');
+    expect(speaks.label).toBe('Speaks Kia');
+  });
+
+  it('never tells a player how a canon person travels', () => {
+    // The ruling this replaced the mount art with. `conveyanceFor` reads a vehicle off the ground
+    // a circuit crosses, which is a guess -- and for Kunch it guesses a raft while canon has him
+    // "road singer, up on a bird". So the derived conveyance stays out of the card and canon's own
+    // role is what says it. If a chip ever names a vehicle, this is the rule that broke.
+    for (const map of fieldMaps) {
+      for (const traveller of travellersOn(map.id)) {
+        const labels = travellerAttributes(traveller, null).map((a) => a.label);
+        expect(labels.every((l) => !/raft|cart|sled|carriage/i.test(l)), traveller.id).toBe(true);
+      }
+    }
+
+    const kunch = travellersOn('field_map_lothal').find((t) => t.npcId === 'npc_kunch');
+    if (kunch) {
+      expect(kunch.conveyance, 'the guess this ruling is about has gone away').not.toBeUndefined();
+      expect(travellerAttributes(kunch, null).find((a) => a.kind === 'who')!.label).toContain('bird');
+    }
+  });
+
+  it('says nothing about where somebody is when nothing has reported it', () => {
+    // The state arrives over the EventBus and a card can render before the first one lands. Two
+    // chips and no invented whereabouts is the right answer; a "Stopped" chip would be a claim.
+    const traits = travellerAttributes(thrali(), null);
+    expect(traits.some((a) => a.kind === 'doing')).toBe(false);
+    expect(traits.length).toBe(2);
   });
 });

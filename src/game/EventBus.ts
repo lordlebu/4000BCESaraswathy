@@ -12,6 +12,7 @@ import Phaser from 'phaser';
 import type { Shelter } from './night';
 import type { JournalEntry } from '../content/journal';
 import type { Point, World } from '../world/types';
+import type { TravellerState } from '../content/travellers';
 
 /** Scene → React. */
 export interface GameToUi {
@@ -119,6 +120,23 @@ export interface GameToUi {
    * exact instead of statistical, and is worth knowing when debugging besides.
    */
   'zoom-changed': { zoom: number };
+
+  /**
+   * Where everybody else on the road has got to.
+   *
+   * **Sent only when one of them changes what they are doing**, not on the tick that moves them.
+   * Travellers step about a hundred times a day; the answer to *where are you going* changes twice
+   * -- at dawn when they set out and at dusk when they arrive -- so a payload per step would be a
+   * React render a second to say the same three words. The scene compares the states it just built
+   * against the last ones it sent and stays quiet when they match.
+   *
+   * It carries places rather than tiles on purpose: see `TravellerState`. React is the side that
+   * turns this into the chips on somebody's card, and a tile coordinate is not something a person
+   * would say about where they are headed.
+   */
+  'travellers-changed': {
+    travellers: { id: string; npcId: string | null; state: TravellerState }[];
+  };
 
   /**
    * The traveller reached an authored place for the first time this journey.

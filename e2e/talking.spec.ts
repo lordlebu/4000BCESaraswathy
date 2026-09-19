@@ -139,3 +139,34 @@ test('the People tab is empty before anybody has been spoken to', async ({ page 
   await page.getByRole('tab', { name: /People/ }).click();
   await expect(page.getByText(/have not talked to anybody/i)).toBeVisible();
 });
+
+test('a person who walks a circuit says where they are going', async ({ page }) => {
+  // **The guard against this codebase's signature fault.** The chips are computed in `content/`,
+  // carried over `travellers-changed` and rendered in `Conversation` -- three seams, each with its
+  // own passing unit test, and the mechanic still does not exist unless the scene actually sends
+  // the event. Only a browser can see that: the placement a traveller's circuit is measured
+  // against belongs to one generated world, and React never holds it.
+  //
+  // Thrali is a circuit-walker on Lothal -- Lothal Camp and this dockyard -- so he is the person
+  // already being met here and the one the Node test uses.
+  await walkToThrali(page);
+
+  const traits = page.locator('.person-traits .person-trait');
+  await expect(traits).toHaveCount(3, { timeout: 20_000 });
+
+  // What he is and what he speaks come from canon and are fixed; where he is depends on the hour,
+  // and the spec arrives at midnight, so he is stopped rather than walking.
+  await expect(traits.nth(0)).toContainText(/^Stopped/);
+  await expect(traits.nth(1)).toHaveText('Fisher');
+  await expect(traits.nth(2)).toHaveText('Speaks Kia');
+
+  // A bounding box is reported for an element a scrolling ancestor has clipped away, so the chip
+  // is asked whether it is the thing at its own centre -- the same instrument `standing.spec.ts`
+  // uses, and for the same reason.
+  const onScreen = await traits.nth(0).evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+    return hit !== null && (hit === el || el.contains(hit));
+  });
+  expect(onScreen, 'the chips are in the dock but not on the screen').toBe(true);
+});

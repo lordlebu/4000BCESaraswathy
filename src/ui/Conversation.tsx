@@ -21,6 +21,7 @@
 import { useCallback, useState } from 'react';
 import { type Progress, isFirstMeeting, lineIsSpent, linesFor } from '../journey';
 import { npc, type Line, type Npc } from '../content/places';
+import type { TravellerAttribute } from '../content/travellers';
 import { type Turn, beats, meeting, moreAfter, offerIn, quietNote } from '../content/conversation';
 import type { Satchel } from '../content/satchel';
 import { nameOf } from '../content/making';
@@ -186,12 +187,28 @@ export interface ConversationProps {
    * else, so a bedroll and a rope span were unobtainable.
    */
   satchel: Satchel;
+  /**
+   * What this person is, if they are somebody who walks a circuit -- null for everybody else.
+   *
+   * **Passed in rather than worked out here**, because only the scene knows where a place landed
+   * and therefore where anybody has got to. `App` asks `travellerAttributes` and hands over the
+   * answer, which is the same arrangement every other rule in this panel has: the UI asks, it
+   * never reimplements.
+   */
+  traits: TravellerAttribute[] | null;
   onListen: (npcId: string, lineIndex: number) => void;
   /** Stop listening. The place they are standing in comes back. */
   onClose: () => void;
 }
 
-export function Conversation({ npcId, progress, satchel, onListen, onClose }: ConversationProps) {
+export function Conversation({
+  npcId,
+  progress,
+  satchel,
+  traits,
+  onListen,
+  onClose
+}: ConversationProps) {
   const person = npc(npcId);
   // Canon and the save can disagree after a bundle changes, and a conversation with nobody is
   // better closed than rendered blank.
@@ -205,6 +222,22 @@ export function Conversation({ npcId, progress, satchel, onListen, onClose }: Co
           Back
         </button>
       </header>
+
+      {/* **What the mount would have said, said instead.** Nobody's cart or bird is drawn under
+          them on the map, and the call was that a stranger on a road is better described than
+          illustrated: where they are going, what they are, what they speak. A readout and not a
+          control -- there is nothing to press one for, which is why these are `li` and not
+          buttons, and why the 26px floor a readout owes applies rather than the 44px a tappable
+          chip would. */}
+      {traits && (
+        <ul className="person-traits" aria-label={`What ${person.name} is`}>
+          {traits.map((trait) => (
+            <li key={trait.kind} className="person-trait" data-trait={trait.kind}>
+              {trait.label}
+            </li>
+          ))}
+        </ul>
+      )}
 
       <Person person={person} progress={progress} satchel={satchel} onListen={onListen} />
     </section>

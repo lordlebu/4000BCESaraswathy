@@ -585,6 +585,7 @@ describe('here', () => {
           npcId: 'npc_uma',
           progress: emptyProgress(),
           satchel: emptySatchel(),
+          traits: null,
           onListen: noop,
           onClose: noop
         }}
@@ -1091,9 +1092,40 @@ describe('handing something over', () => {
   const base = {
     npcId: 'npc_uma',
     progress: emptyProgress(),
+    traits: null,
     onListen: noop,
     onClose: noop
   };
+
+  it('shows what a circuit-walker is, above what they say', () => {
+    // The chips are a readout and the panel is handed them rather than working them out -- so what
+    // this proves is the rendering: three facts, in the order a road teaches them, and none of them
+    // a control. A `button` here would owe 44px and would put the same act in two places.
+    render(
+      <Conversation
+        {...base}
+        satchel={emptySatchel()}
+        traits={[
+          { kind: 'doing', label: 'On the road to Lothal Camp' },
+          { kind: 'who', label: 'Fisher' },
+          { kind: 'speaks', label: 'Speaks Kia' }
+        ]}
+      />
+    );
+    const chips = screen.getAllByRole('listitem');
+    expect(chips.map((c) => c.textContent)).toEqual([
+      'On the road to Lothal Camp',
+      'Fisher',
+      'Speaks Kia'
+    ]);
+    expect(screen.queryByRole('button', { name: /On the road/ })).toBeNull();
+  });
+
+  it('shows no chips at all for somebody who stands in one place', () => {
+    // Fourteen of canon's seventeen. An empty row would be a border and a gap saying nothing.
+    render(<Conversation {...base} satchel={emptySatchel()} traits={null} />);
+    expect(screen.queryByRole('list', { name: /What .* is/ })).toBeNull();
+  });
 
   it('says nothing about a gift while the traveller carries nothing', () => {
     render(<Conversation {...base} satchel={emptySatchel()} />);

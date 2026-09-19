@@ -87,7 +87,8 @@ replaced — so **a new folder of art needs no code either.**
 | `src/ui/things/` | 0 | 10 kinds, then 143 | the category mark, then an emoji | **yes**, at the kind tier |
 | `src/ui/events/` | 0 | one per event | the night's scene, then a blank panel | n/a — no events authored |
 | `src/ui/plates/` | 20 | 341 | a derived silhouette | **no, by design** |
-| `src/ui/portraits/` | 14 | 15 | a trade-derived silhouette | **yes** — one left, and it is **Anu** |
+| `src/ui/portraits/` | 17 | 17 | a trade-derived silhouette | **done** — everybody in canon has a face |
+| `assets/traveller-*.png` | 3 | 3 | a playable character's sheet, which was the bug | **done** — see `art-brief.md` Asset 7 |
 
 **Four of those seven are finishable in a sitting or two**, and three of them are finishable
 *twice over* because they have a category tier underneath: six paintings cover every place in the
@@ -118,15 +119,19 @@ Cheapest-first, and each step is independently shippable.
 3. **The ten item kinds** — `kind-<itemkind>.png` in `things/`. Ten files and all 143 things have a plate.
 4. ~~**`fish.png`** in `scenes/` — the fourth gesture has no painting at all.~~ **Done.**
 5. **The ten `kind-*` marks** — the category tier under (3), for anywhere a mark is wanted rather than a plate.
-6. **Anu's portrait** — the only one of fifteen missing. A Maru hunter who walks ahead of Terke's
-   herd: *"Mostly I am standing where a thing can see me, so it goes elsewhere and nobody has to do
-   anything about it."* This file said **Vessa** for as long as it has existed and was simply wrong —
-   `src/ui/portraits/vessa.png` is on disk and has been. Count the folder against canon's fifteen
-   `npc_*` ids rather than trusting the sentence.
+6. ~~**Anu's portrait**~~ **Done, and so is every other face.** `src/ui/portraits/` holds
+   **seventeen against canon's seventeen `npc_*` ids** — Anu, Kunch and Moonj were the last three,
+   and all three were circuit-walkers because the portrait batch predates the travel layer.
+   **This row has been wrong twice**: it said *Vessa* for as long as it existed while
+   `src/ui/portraits/vessa.png` was on disk, and it said fifteen people after canon had grown to
+   seventeen. **Count the folder against canon rather than trusting the sentence** — nothing
+   enforces this: `test/portraits.test.ts` checks that every portrait names somebody canon has,
+   and not that everybody canon has holds a portrait, because a missing one falls back to a
+   silhouette by design and is not a failure.
 7. **Everything else**, forever: species plates, the seventeen making scenes, the individual places and things.
 
-Steps 1–6 are **38 files** and they move every folder except `plates/` from "nothing" to "complete
-at the category tier". That is the whole of the leverage.
+Steps 1–5 are **37 files** and they move every folder except `plates/` from "nothing" to "complete
+at the category tier". That is the whole of the leverage. Step 6 is done.
 
 ---
 
