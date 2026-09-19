@@ -32,7 +32,7 @@ somebody wants it.
 | The ford crossings | **Shipped** — PR 197 |
 | Travellers at half the player's size, on their own three sheets | **Shipped** — PR 197 |
 | Three traveller sheets and the last three portraits | **Shipped** — PR 197, `docs/art-brief.md` Assets 7 and 8 |
-| What a traveller is, said rather than drawn | **Shipped** — *Say how a traveller travels* |
+| What a traveller is, said rather than drawn | **Shipped** — PR 198 |
 | Drawing the mount | **Declined** — see below |
 
 ## The road
@@ -175,6 +175,7 @@ Three notes on the build, each of which is a rule somewhere else in this repo:
 | Item | What it needs |
 |---|---|
 | **Waypoints** — cairns, ford posts, boundary stones | Art and a placement pass. The road says *here is the way* and never *how far, and to what*. |
+| **The railway and the bridge planks** | The 16-way mask shipped for the road alone. `trackFrame(eastWest, overgrown)` still takes a boolean and `TRACK_PIECES` is still 4, so a line that turns has the same fault the road had — measured smaller, and not measured recently. |
 | **The stair where a road meets a scarp** | A rim-layer sheet and a rule in `routes.ts`. The road currently climbs a cliff as though it were flat. |
 | **The landing at a dead end** | Canon has water routes the road stops dead at. A landing is where a road admits the next stretch is a boat. |
 | **A sixth `travel` gesture** | Canon's `cross` items have no verb over them, the same shape as the `using.ts` gap. |
