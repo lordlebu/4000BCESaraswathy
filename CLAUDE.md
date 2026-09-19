@@ -250,6 +250,7 @@ The art docs, in the order they are useful:
 | `docs/sky-islands-plan.md` | the floating islands: what the reference cannot buy, and what the layers can |
 | `docs/sky-buildings-plan.md` | the temple, the mill and the bridge — closed |
 | `docs/placing-the-buildings-plan.md` | how painted buildings reach the map, and what each check proves |
+| `docs/roads-and-travellers-plan.md` | the road, the people on it and their art — closed, and what was declined |
 
 **`.claude/skills/session-craft/` is the one to read first in a new session.** It carries what the
 *environment* does rather than what the code is: the Playwright build-number mismatch that reads as
@@ -442,6 +443,16 @@ each with a portrait and a running typewriter — three of them at Lothal Camp, 
 third of itself on a phone. `Conversation.tsx` holds the exchange and the rules under it are
 untouched; what moved is the mounting. It is also the one occupant sized to its content, because
 nothing in it changes without a press.
+
+**A traveller's state is said, not drawn.** Somebody who walks a circuit carries three chips above
+the words — where they are going, what they are, what they speak — and no mount is drawn under
+anybody. `vehicles.png` is still built and loaded by nothing, and that is now a decision rather
+than a gap: a stranger met on a road is better described than illustrated. **The derived
+`conveyance` is deliberately not one of the chips**, because `conveyanceFor` guesses a vehicle off
+the ground a circuit crosses and contradicts canon three times out of eleven — Kunch gets a reed
+raft where canon has him *"road singer, up on a bird"*. Canon's `role` is where that is said. The
+chips cross three seams with a passing unit test each, so `e2e/talking.spec.ts` is what proves the
+mechanic exists at all. `docs/roads-and-travellers-plan.md` carries the ruling.
 
 **Every dialog goes through `src/ui/Modal.tsx`.** It owns Escape, focus in, a Tab trap, focus
 restored to the control that opened it, `inert` on `#root`, and a portal outside it so that `inert`

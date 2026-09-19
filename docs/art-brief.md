@@ -1584,7 +1584,17 @@ can crop, resample and recolour; it cannot invent where a run was supposed to le
 
 ---
 
-## Asset 7 — three traveller sheets, and that is the whole ask
+## Asset 7 — three traveller sheets, and that is the whole ask · **shipped**
+
+> **All three landed and are in the game.** `assets/traveller-carrier-overworld.png`,
+> `-drover-` and `-pilgrim-`, with their rows in `tools/characters.json` and their sources in
+> `assets/source/`. `TRAVELLER_SHEETS` is full, so `sheetsToUse` has switched and no traveller
+> wears a player's face any more. Two of the three were rejected once and regenerated; what that
+> cost, and the two rules it bought, are below and in `docs/roads-and-travellers-plan.md`.
+>
+> The brief is kept because it is the specification a **fourth** sheet would be built against, and
+> because the measured sections below are the only written record of what "same process as Mithra"
+> turned out to mean.
 
 **The complaint, exactly as reported:** *"I can see NPCs moving, but they are the player characters."*
 They are. `SHEETS` in `src/content/travellers.ts` is the five **playable** characters, and
@@ -1852,7 +1862,12 @@ a `frames` list in the manifest, never a change in the game.
 
 ---
 
-## Asset 8 — the three faces missing, and they are all travellers
+## Asset 8 — the three faces missing, and they are all travellers · **shipped**
+
+> **All three landed.** `src/ui/portraits/` now holds **seventeen against canon's seventeen** —
+> everybody in canon has a face, and there is no next portrait to brief. Two liberties were taken
+> with the prompts below and both stand: Anu came back with a Central Asian face, and Kunch's wrap
+> came back patterned. `docs/roads-and-travellers-plan.md` says why each was kept.
 
 **Fourteen of canon's seventeen people have a painted portrait. The three without one are `anu`,
 `kunch` and `moonj`** — and that is not a coincidence, it is the same gap from the other side: all
@@ -1942,7 +1957,7 @@ debt this work owes.
 
 | Item | Why it is out | What it would cost |
 | --- | --- | --- |
-| **Mounts and vehicles** | An earlier draft asked for two mounts and three carts in four facings each. That is the conveyance layer, not the faces. Every traveller carries a derived `conveyance` and none of it is drawn — `vehicles.png` is built from one painted carriage and loaded by nothing. The half-size figure now leaves room for one when somebody wants it. | ~20 images, plus a `MOUNTS` strip and a draw-order decision |
+| **Mounts and vehicles** | **Now declined outright rather than deferred.** It was the conveyance layer and not the faces; the call since is that a stranger on a road is better described than illustrated, so talking to a circuit-walker shows what they are doing, what they are and what they speak instead. `docs/roads-and-travellers-plan.md` carries the ruling and the three canon contradictions the derived `conveyance` turned out to hold. | ~20 images, plus a `MOUNTS` strip and a draw-order decision — and a canon entity for Kunch's bird first |
 | **Named walking sheets** | Eleven of the twelve travellers are canon people, so doing this properly is eleven sheets, not two — and two named faces among ten generic ones reads as an error rather than a feature. The three generic sheets above fix the actual complaint completely. | 11 sheets |
 | **Kunch's bird** | **Not an art item at all.** It has no canon entity: no bird in canon carries `riding` or `cargo` in a wetland or river biome, and the delta's nine are small or middling waders. An animal is a noun, so it is canon's to author before anybody paints one. | one canon entity, then art |
 | **Road furniture** | Cairns, ford posts, boundary stones, stairs where a road meets a scarp. All proposed, none built, and **none of them needs prompted art** — they are masses a loop states exactly, which is rule §1 in `art-direction.md`. `build-road.js` and `build-decor.js` already draw this category. | code, not art |

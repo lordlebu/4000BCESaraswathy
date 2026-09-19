@@ -93,6 +93,7 @@ describe('one of them, talking', () => {
         npcId={npcsAt(CROWDED)[0]!.id}
         progress={emptyProgress()}
         satchel={emptySatchel()}
+        traits={null}
         onListen={noop}
         onClose={noop}
         {...over}

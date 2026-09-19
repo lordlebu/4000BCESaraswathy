@@ -2285,6 +2285,52 @@ button.ghost:hover:not(:disabled) {
   font-size: 1.25rem;
 }
 
+/* --- What somebody is, above what they say --------------------------------
+ *
+ * Three short facts about a person who walks a circuit: where they are going, what they are, what
+ * they speak. They sit between the name and the words because that is the order you would learn
+ * them in on a road, and because putting them under the exchange would push them off a phone.
+ *
+ * **A row, not a list**, and `flex-direction` is redeclared beside `display` deliberately: the
+ * action rail inherited `column` from a base rule three hundred lines above and was a column at
+ * every device size for as long as it shipped. Anything here that redeclares `display` redeclares
+ * the direction with it.
+ *
+ * Quietened with `--ink-faint` rather than an `opacity`, for the reason that token exists: alpha
+ * multiplies, and these sit on a card that already carries one. */
+.person-traits {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0 0 0.9rem;
+  padding: 0;
+}
+
+.person-trait {
+  /* 26px, the floor a readout owes. A tappable chip owes 44 and these are not tappable -- the
+   * standing row settled that argument and this follows it. */
+  min-height: 26px;
+  display: flex;
+  align-items: center;
+  /* `--ink-faint`, not `--rule`: that token is never declared anywhere in this sheet. The one
+   * other rule using it carries a fallback and works; a bare `var(--rule)` resolves to nothing and
+   * the border simply does not draw, which looks like a design choice in a screenshot. */
+  border: 1px solid var(--ink-faint);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
+/* Where they are headed is the one that changes while you stand there, so it is the one that reads
+ * as ink rather than as a footnote. */
+.person-trait[data-trait='doing'] {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
 /* --- A plate you can open ------------------------------------------------
  *
  * A painted plate is 384 square and was never drawn above 120px anywhere in the game. These two

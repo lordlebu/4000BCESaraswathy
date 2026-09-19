@@ -20,6 +20,7 @@ import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { readShowing, writeShowing } from './preferences';
 import { fieldMap, poi } from '../content/places';
+import { travellerAttributes, travellersOn } from '../content/travellers';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
 import { RecordTabs, type RecordTab } from './Records';
@@ -141,6 +142,11 @@ export function App() {
   // keeping them separate is what lets a test tell a working picker from a highlighted button.
   const [drawn, setDrawn] = useState('');
   const [world, setWorld] = useState<World | null>(null);
+
+  // What everybody else on the road is doing, as the scene last reported it. Held rather than
+  // asked for, because only the scene can answer it -- `travellers-changed` says why -- and it
+  // changes twice a day, so a listener costs less than a poll.
+  const [travellerStates, setTravellerStates] = useState<GameToUi['travellers-changed']['travellers']>([]);
   const [arrival, setArrival] = useState<Arrival | null>(null);
   const [collection, setCollection] = useState<Collection>(initialJourney.current.collection);
   const [memory, setMemory] = useState('');
@@ -339,6 +345,7 @@ export function App() {
       dispatch({ type: 'standing-on', poiId: id });
     const onMoment = (next: GameToUi['moment-changed']) => setMoment(next);
     const onSky = (next: GameToUi['sky-changed']) => setSkyPhase(next.phase);
+    const onTravellers = (next: GameToUi['travellers-changed']) => setTravellerStates(next.travellers);
     // Who the scene says it is drawing, which is the only authority on it. The picker sets its
     // own state optimistically; this is what corrects it if the scene ever disagreed.
     const onCharacter = ({ characterId: drawn }: GameToUi['character-changed']) => setDrawn(drawn);
@@ -440,6 +447,7 @@ export function App() {
     EventBus.onEvent('standing-on', onStandingOn);
     EventBus.onEvent('moment-changed', onMoment);
     EventBus.onEvent('sky-changed', onSky);
+    EventBus.onEvent('travellers-changed', onTravellers);
     EventBus.onEvent('character-changed', onCharacter);
     EventBus.onEvent('night-passed', onNight);
     EventBus.onEvent('poi-reached', onArrived);
@@ -452,6 +460,7 @@ export function App() {
       EventBus.offEvent('standing-on', onStandingOn);
       EventBus.offEvent('moment-changed', onMoment);
       EventBus.offEvent('sky-changed', onSky);
+      EventBus.offEvent('travellers-changed', onTravellers);
       EventBus.offEvent('character-changed', onCharacter);
       EventBus.offEvent('night-passed', onNight);
       EventBus.offEvent('poi-reached', onArrived);
@@ -487,6 +496,23 @@ export function App() {
       flush();
     };
   }, [seed, collection, reached, progress, satchel]);
+
+  /**
+   * What the person being talked to is, if they are also somebody who walks a circuit.
+   *
+   * **Null for everybody else, and most people are everybody else.** Fourteen of canon's seventeen
+   * stand in one place; a card only says where somebody is headed when there is somewhere they are
+   * headed. The traveller is matched on `npcId` rather than on name, because road company carry
+   * none and two of them could otherwise answer to the same label.
+   */
+  const travellerTraits = useMemo(() => {
+    if (!talkingTo) return null;
+    const traveller = travellersOn(fieldMapId).find((t) => t.npcId === talkingTo);
+    if (!traveller) return null;
+    const reported = travellerStates.find((t) => t.id === traveller.id);
+    const traits = travellerAttributes(traveller, reported?.state ?? null);
+    return traits.length > 0 ? traits : null;
+  }, [talkingTo, fieldMapId, travellerStates]);
 
   const currentCreature = useMemo(() => {
     if (!world || !arrival) return null;
@@ -1463,6 +1489,7 @@ export function App() {
                 npcId: talkingTo,
                 progress,
                 satchel,
+                traits: travellerTraits,
                 onListen: listen,
                 onClose: () => dispatch({ type: 'stop-talking' })
               }
