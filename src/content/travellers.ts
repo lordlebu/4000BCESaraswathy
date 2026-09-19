@@ -98,7 +98,26 @@ export interface Traveller {
 }
 
 /**
- * The sheets a traveller may be drawn with: the five built travellers.
+ * Sheets that draw a traveller and nobody else.
+ *
+ * **Empty on purpose, and filling it is the whole of the fix.** The complaint is that everybody met
+ * on the road is a playable character: `PLAYABLE_SHEETS` below is the five the player chooses from,
+ * so a traveller always wears a face the player can also be wearing -- and on the map you are on,
+ * one of the three may be wearing yours.
+ *
+ * Three entries is not a target, it is the exact number. `sheetFor` guarantees no two travellers on
+ * a map share a sheet only while the roster is no longer than the list it walks, and
+ * `TRAVELLERS_PER_MAP` is 3 -- so three traveller-only sheets give every map three distinct
+ * strangers and make a collision with the player impossible rather than unlikely. A fourth would
+ * add variety and fix nothing.
+ *
+ * See `docs/art-brief.md`, Asset 7. When the art lands this list gets the three names, and nothing
+ * else in this file changes.
+ */
+const TRAVELLER_SHEETS: readonly string[] = [];
+
+/**
+ * The playable five, used only until there are enough traveller sheets to go round.
  *
  * **Assigned by position in the roster rather than by a hash of the id, and the first attempt got
  * that wrong.** Hashing the id is stable and reads as the tidier rule, but two ids can hash to the
@@ -109,11 +128,33 @@ export interface Traveller {
  * The offset is a hash of the *map*, so the four maps do not all lead with the same face, and
  * adding a place to canon does not restyle anybody.
  */
-const SHEETS = ['mithra', 'mehtar', 'malacite', 'guyuk', 'varuna'] as const;
+const PLAYABLE_SHEETS: readonly string[] = ['mithra', 'mehtar', 'malacite', 'guyuk', 'varuna'];
+
+/**
+ * Which list to draw travellers from.
+ *
+ * **All or nothing, deliberately.** Mixing a part-filled traveller list with the playable five
+ * would put one stranger and two player faces on a map, which reads as a bug rather than as
+ * progress -- and it would break the no-repeat guarantee, because a name appearing in both lists
+ * can be dealt twice. So the switch happens only once the traveller list can cover a whole map on
+ * its own.
+ *
+ * Pure and parameterised so the *rule* is testable rather than only its current answer: the day the
+ * art lands there must be a test that already proved the switchover, not one written afterwards to
+ * describe it.
+ */
+export function sheetsToUse(
+  travellerOnly: readonly string[],
+  playable: readonly string[],
+  perMap: number = TRAVELLERS_PER_MAP
+): readonly string[] {
+  return travellerOnly.length >= perMap ? travellerOnly : playable;
+}
 
 /** The sheet for the nth traveller on a map, with no two alike. */
 function sheetFor(fieldMapId: string, index: number): string {
-  return SHEETS[(hashOf(fieldMapId) + index) % SHEETS.length]!;
+  const sheets = sheetsToUse(TRAVELLER_SHEETS, PLAYABLE_SHEETS);
+  return sheets[(hashOf(fieldMapId) + index) % sheets.length]!;
 }
 
 /** A cheap stable hash over a string, so an id picks the same sheet on every machine. */
