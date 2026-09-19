@@ -1703,9 +1703,13 @@ keeps the three consistent with each other and with the existing five.
 > shading. It is drawn far too small for any of it.
 >
 > **Row 1 faces the viewer. Row 2 is seen from behind. Row 3 is a side view facing right. Row 4 is
-> the same side view facing left.** Within each row the four frames are one walk cycle in the order
-> **contact, passing, contact, passing** — frames 1 and 3 are the contacts with the legs apart,
-> frames 2 and 4 are the passing poses.
+> the same side view facing left.**
+>
+> **Within each row: the first two frames are PASSING poses with the legs closed — one leg directly
+> in front of the other, the feet together, almost a standing pose. The last two frames are CONTACT
+> poses with the legs wide apart, one foot forward and one foot back, mirrored between them.** Two
+> closed, then two open, in that order. **Do not draw four variations of a stride** — if the legs
+> are apart in all four frames the walk has no cycle in it and the figure shuffles.
 >
 > **Every figure exactly the same height and the same distance from the bottom of its cell.** The
 > figure is **26 units wide by 40 tall in proportion**, fills about three quarters of its cell's width
@@ -1728,6 +1732,24 @@ Substitute for **[CHARACTER]**:
 3. **a slight pilgrim of about twenty, with a deep indigo shawl drawn up over the head and falling to
    the elbows, both hands free, a plain pale wrap to the ankle and bare feet** — the silhouette is
    the shawl's hood
+
+**Why that order and not the obvious alternation.** `walkOrder` in `src/game/player.ts` is
+`[row + 2, row + 0, row + 3, row + 1]` — the engine plays the third frame, then the first, then the
+fourth, then the second, which turns *two closed and two open* into contact-pass-contact-pass. A
+sheet drawn to alternate inside the row comes out as open-open-closed-closed once played, and reads
+as a shuffle.
+
+Measured on the profile rows, as the gap between the legs in play order:
+
+| | played sequence | |
+| --- | --- | --- |
+| **mithra** | 5 → **0** → 5 → **0** | closes completely, twice a cycle |
+| varuna | 5 → 2 → 5 → 6 | barely closes |
+| mehtar | 6 → 2 → 5 → 7 | barely closes |
+| malacite | 7 → 5 → 6 → 7 | **never closes** |
+
+Mithra is the only one of the five whose feet actually come together, which is the whole of why her
+walk reads as fluid and the others shuffle. **This is the single most important line in the prompt.**
 
 ### Checking one before you commit it
 
