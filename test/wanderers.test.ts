@@ -21,6 +21,8 @@ import {
   wanderersOn
 } from '../src/content/wanderers';
 import { hoursToPhase } from '../src/game/dayNight';
+import { GRID, markerSize } from '../src/game/frames';
+import { PLAYER_FRAME, figureScale, travellerScale } from '../src/game/player';
 import { DEFAULT_SEED } from '../src/ui/seed';
 import type { Creature } from '../src/world/types';
 
@@ -237,6 +239,40 @@ describe('what the animals give is actually findable', () => {
           `effectively unreachable. Check the species' rarity and how much of its biome the map grows.`
       ).toBeGreaterThanOrEqual(FLOOR);
     }
+  });
+});
+
+describe('an animal is drawn at the scale of the people on the road', () => {
+  // **`tileTextures.ts` does not import `player.ts`, so this is where the two are held together.**
+  // Same arrangement `travellers.ts` keeps with `dayNight.ts` and for the same reason: the
+  // dependency would run the wrong way, so the agreement is asserted rather than shared.
+  //
+  // The rule: a wanderer is drawn to the same height as a traveller -- half the player, per
+  // `TRAVELLER_SHRINK` -- and as wide as its own shape needs. The first version sized against the
+  // tile instead and put the whale at nearly twice the player's width.
+  it('is no taller than a traveller, and never as tall as the player', () => {
+    const tile = GRID;
+    const npcTall = PLAYER_FRAME.height * travellerScale(tile);
+    const playerTall = PLAYER_FRAME.height * figureScale(tile);
+
+    for (const id of ['narmada-walking-whale', 'sivatherium', 'vasuki-indicus']) {
+      const h = markerSize(id).h;
+      expect(h, `${id} is taller than a traveller`).toBeLessThanOrEqual(npcTall + 1);
+      expect(h, `${id} is as tall as the player`).toBeLessThan(playerTall);
+      expect(h, `${id} is too small to read`).toBeGreaterThan(npcTall * 0.4);
+    }
+  });
+
+  it('keeps each animal its own shape', () => {
+    // A giraffid is taller than it is long; a serpent is far longer than it is tall. If these ever
+    // come out equal again, every animal is being drawn as the same body -- which is what happened.
+    const whale = markerSize('narmada-walking-whale');
+    const siva = markerSize('sivatherium');
+    const vasuki = markerSize('vasuki-indicus');
+
+    expect(siva.h, 'the giraffid is not standing up').toBeGreaterThan(siva.w);
+    expect(whale.w / whale.h, 'the whale is not long and low').toBeGreaterThan(1.5);
+    expect(vasuki.w / vasuki.h, 'the serpent is not long enough').toBeGreaterThan(2.5);
   });
 });
 
