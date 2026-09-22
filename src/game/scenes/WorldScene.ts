@@ -64,6 +64,7 @@ import {
   hasTileArt,
   placeholderTileKey,
   traceFrameFor,
+  markerSize,
   wandererMarkerKey
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
@@ -165,7 +166,13 @@ import {
   type TravellerState
 } from '../../content/travellers';
 import { wanderersOn, wandererAt, type Wanderer } from '../../content/wanderers';
-import { loadWandererArt, paintedKey, paintedWanderer, paintedWandererIds } from '../wandererArt';
+import {
+  facingArt,
+  hasPaintedArt,
+  loadWandererArt,
+  paintedKey,
+  paintedWandererIds
+} from '../wandererArt';
 import { isCamp, isGrand } from '../../content/camps';
 import { findPath } from '../../world/pathfind';
 import { NO_GESTURE, pressed, released, type Gesture } from '../gesture';
@@ -1632,6 +1639,7 @@ export class WorldScene extends Phaser.Scene {
         .setVisible(false);
       sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
       sprite.setName(`wanderer:${wanderer.id}`);
+      this.sizeWanderer(wanderer, sprite);
       this.wanderers.push({ wanderer, sprite });
     }
 
@@ -1657,14 +1665,40 @@ export class WorldScene extends Phaser.Scene {
    * The texture a wanderer is drawn from: the painting if one exists, the stand-in otherwise.
    *
    * **The one place that decides, so art arriving is a file and not an edit.** Drop
-   * `assets/wanderers/<species id>.png` in and this returns it instead -- see `wandererArt.ts` for
-   * the convention and `wandererMarkerKey` for what is drawn until then.
+   * `assets/wanderers/<species id>-<facing>.png` in and this returns it instead -- see
+   * `wandererArt.ts` for the convention and the fallback chain, and `wandererMarkerKey` for what is
+   * drawn until then.
    */
-  private wandererTexture(wanderer: Wanderer, facing: 'left' | 'right'): string {
-    const painted = paintedWanderer(wanderer.id);
-    if (painted && this.textures.exists(paintedKey(wanderer.id))) return paintedKey(wanderer.id);
+  private wandererTexture(wanderer: Wanderer, facing: Facing): string {
+    const key = paintedKey(wanderer.id, facing);
+    if (facingArt(wanderer.id, facing) && this.textures.exists(key)) return key;
     const home = biomeFor(wanderer.species.biomes[0] ?? 'river');
-    return wandererMarkerKey(this, wanderer.id, home?.color ?? '#5d7f86', facing);
+    // The stand-in only draws a side view, so a north or south heading borrows the nearer side --
+    // the same fallback `facingArt` makes, kept here so the two cannot disagree about it.
+    const side = facing === 'left' ? 'left' : 'right';
+    return wandererMarkerKey(this, wanderer.id, home?.color ?? '#5d7f86', side);
+  }
+
+  /**
+   * How big a wanderer is drawn, painting or stand-in.
+   *
+   * **A painting is whatever size it was cut at, so it has to be told.** The stand-in is built at
+   * `markerSize` already; a painted frame arrives at several hundred pixels and would cover a
+   * quarter of the screen. Scaled to the same box -- traveller height, own width -- so swapping the
+   * art in changes the picture and not the scale.
+   */
+  private sizeWanderer(wanderer: Wanderer, sprite: Phaser.GameObjects.Image): void {
+    if (!hasPaintedArt(wanderer.id)) return;
+    const box = markerSize(wanderer.id);
+    const src = sprite.texture.getSourceImage() as { width: number; height: number };
+    if (!src?.width || !src?.height) return;
+    // **Scaled by height alone, not by fitting inside the box.** Fitting by the tighter ratio was
+    // the obvious answer and is visibly wrong: a side view is long, so it hits the width bound and
+    // shrinks, while the front view of the same animal is narrow and does not -- which drew a whale
+    // three times bigger walking towards you than walking across. One animal is one size whichever
+    // way it faces, so height is the only bound and a long animal is simply allowed to be long.
+    const scale = box.h / src.height;
+    sprite.setDisplaySize(Math.round(src.width * scale), Math.round(src.height * scale));
   }
 
   /**
@@ -1700,12 +1734,24 @@ export class WorldScene extends Phaser.Scene {
       // Facing is the marker itself rather than a flip, because the texture is cached per facing --
       // see `wandererMarkerKey`. Kept as it was while standing still, so a resting animal does not
       // snap round to face east the moment it stops.
-      if (where.heading === 'east' || where.heading === 'west') {
-        const facing = where.heading === 'west' ? 'left' : 'right';
-        sprite.setTexture(this.wandererTexture(wanderer, facing));
-        // A painting is one image and is mirrored by the engine; the stand-in is cached per facing
-        // and must not be flipped again on top of that.
-        sprite.setFlipX(paintedWanderer(wanderer.id) !== null && facing === 'left');
+      // **Four facings now that the art has four.** Kept as it was while standing still, so a
+      // resting animal does not snap round to face east the moment it stops. Never flipped: both
+      // the paintings and the stand-in are drawn per facing, and a flip on top would mirror an
+      // animal that is already facing the right way.
+      if (where.heading) {
+        const facing: Facing =
+          where.heading === 'west'
+            ? 'left'
+            : where.heading === 'east'
+              ? 'right'
+              : where.heading === 'north'
+                ? 'up'
+                : 'down';
+        const next = this.wandererTexture(wanderer, facing);
+        if (sprite.texture.key !== next) {
+          sprite.setTexture(next);
+          this.sizeWanderer(wanderer, sprite);
+        }
       }
     }
   }
