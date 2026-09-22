@@ -43,7 +43,6 @@
       "helps": [
         "npc_vessa"
       ],
-      "notes": "The thesis. Seven rungs, and gated on two other discoveries so it cannot be reached by walking into the building -- the player has to bring the plateau's evidence in with them. Deliberately sympathetic to the University in the last line.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -79,7 +78,6 @@
       "helps": [
         "npc_marn"
       ],
-      "notes": "Botany, and the one where the player materially improves something rather than merely understanding it. Neither party is wrong here -- both are incompletely right, which is the map's thesis in miniature.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -110,7 +108,6 @@
           "entry": "Two kinds of animal that share nothing, lying in one stone that formed after both. I can describe the rock and I cannot describe how they came to be in it together."
         }
       ],
-      "notes": "Ends unresolved: described exactly, explained not at all.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -163,8 +160,7 @@
             "discovery_ghost_mangrove_channel"
           ]
         }
-      ],
-      "notes": "The mask thread, extending `discovery_mask_niche` without resolving it. Canon knows the answer -- `event_tendua_crisis` and `event_mask_retrieval` name Nila, Asha, iKnaya and Varna -- and none of those names appears here, on purpose: who took it should stay unanswered, and `lint_story.py` now enforces that against the cast list rather than trusting it. The niche's own note says who took the mask 'should stay unanswered for a long time; the diary needs entries the player cannot finish', and this is written to that constraint rather than around it.\n\nWhat Varuna can reach is the *event*: a chamber, opened and closed in a hurry, something burned, a shelf cut for the thing the stair niche also held, and mortar that dates it after the collapse. What he cannot reach is a person. The last rung says so out loud, which is the honest end of an archaeological reading and a better entry than a solved case.\n\nEvery prerequisite is on Lothal. `word_kia_uvai` comes from Thrali after `discovery_ghost_mangrove_channel`, which this also requires and which opens the flooded undercroft in the first place -- so the word is always gettable before this chain needs it. That ordering is deliberate: the two-bar trap is requiring a word an NPC only gives once the requiring chain is already finished."
+      ]
     },
     {
       "id": "discovery_cloud_stair",
@@ -205,7 +201,6 @@
       "related_discoveries": [
         "discovery_escarpment_wind"
       ],
-      "notes": "Deliberately unresolved. The last rung is the diary refusing to guess, which is the discipline the whole game is about; the sky routes are a later map's problem.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -237,8 +232,7 @@
         {
           "entry": "The sluice is silted shut. It has been a closed pool since the Shattering, and everything in it has been in it that whole time."
         }
-      ],
-      "notes": "Archaeology that unlocks two other chains. Being a closed system is what makes it evidence for both the salt and the lurker."
+      ]
     },
     {
       "id": "discovery_double_classified",
@@ -277,7 +271,6 @@
       "helps": [
         "npc_okhi"
       ],
-      "notes": "The self-referential one: this is the binomial-contradiction problem the two repos actually had, put in the fiction. Resolves without villainy -- the failure is structural, not personal.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -312,7 +305,6 @@
       "related_discoveries": [
         "discovery_cloud_stair"
       ],
-      "notes": "The mundane half of the anomaly, and the prerequisite for the interesting half. Establishes real physics on the scarp so that what the stair does cannot be explained by it.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -354,7 +346,6 @@
       "restores": [
         "poi_salt_orchard"
       ],
-      "notes": "An establishment event in progress, which is slower and worse than a monster. The last rung is the only place on this map where the player knows something the locals do not.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -396,7 +387,6 @@
       "answers": [
         "question_what_comes_through"
       ],
-      "notes": "The anomaly, approached as a naturalist would: rule out the tide, rule out the hour, notice the correlation, then notice the correlation is not a cause. Ends honestly short of an explanation. Rewritten when Dwarka was dried out: the sea left rather than the land sinking, so a rung that assumed a live tide now reads against its absence. The chain is stronger for it — a city keeping a tide schedule for water that stopped arriving is a better observation than one keeping it for water that is still there.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -447,8 +437,7 @@
         {
           "entry": "Thrali can work the far banks again. It is a morning's walk to show him and it will double the ground his family can fish."
         }
-      ],
-      "notes": "Canon already said the ghost mangrove marks safe channels; this is that fact turned into gameplay. Gates the tower undercroft, so botany opens archaeology."
+      ]
     },
     {
       "id": "discovery_glass_scar",
@@ -486,7 +475,6 @@
           "entry": "I can date it and describe it and I cannot say what it is. I have written down the bearing, which points at the gate court, and I am aware that is not an explanation."
         }
       ],
-      "notes": "Deliberately unresolved, like the Cloud Stair. Its job is to date the ending, not to explain it, and the diary says so. Moved to Dwarka. Rung 3 used to be dated against the fossil channel and is now dated against the harbour floor and the seawalls, which is the same argument with the evidence that survived. The bearing pointing at the gate is new and deliberately unresolved -- its job is still to date the ending, not to explain it.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -537,8 +525,7 @@
             "discovery_red_rice_survival"
           ]
         }
-      ],
-      "notes": "The water half. Nothing is invented: the mill was there, the fall never stopped, and the discovery is that a wall is actually a blocked machine. Requires `discovery_red_rice_survival` twice over -- once to know what was ground here, once because threshing eight acres only matters if the eight acres are sown, which is that chain's own last rung."
+      ]
     },
     {
       "type": "discovery",
@@ -581,8 +568,7 @@
         {
           "entry": "Turn the spring kiln to face the plateau and it will fire in a day on half the reed. Uma has cut that reed every spring of her life and burnt it for grey brick."
         }
-      ],
-      "notes": "The wind half of the winter chain, and deliberately the smallest. Nothing is built and nothing is invented -- a kiln mouth is moved, because the tower already recorded which way the wind blows and nobody had read it as advice. Requires `discovery_tower_collapse`, which is the archaeology on the same map: the tower is the evidence, not a separate errand."
+      ]
     },
     {
       "id": "discovery_market_ledger",
@@ -612,7 +598,6 @@
       "answers": [
         "question_what_ends_dwarka"
       ],
-      "notes": "Local record-keeping outperforming the academy again, and this time entirely by accident -- the ledger was for taxes. Rewritten when Dwarka was dried out: the sea left rather than the land sinking, so a rung that assumed a live tide now reads against its absence. The chain is stronger for it — a city keeping a tide schedule for water that stopped arriving is a better observation than one keeping it for water that is still there.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -655,8 +640,7 @@
             "discovery_dockyard_reef"
           ]
         }
-      ],
-      "notes": "Pure natural history, no help attached. Not every discovery should mend something -- most should just be worth knowing."
+      ]
     },
     {
       "type": "discovery",
@@ -683,8 +667,7 @@
             "word_kia_thal"
           ]
         }
-      ],
-      "notes": "Left open on purpose. Who took the mask is not answerable in this slice and should stay unanswered for a long time -- the diary needs entries the player cannot finish."
+      ]
     },
     {
       "id": "discovery_midden_layers",
@@ -720,7 +703,6 @@
       "helps": [
         "npc_sura"
       ],
-      "notes": "Turns the anomaly from an incident into a condition, which is the map's whole argument. The clustering is left unexplained on purpose.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -767,7 +749,6 @@
       "helps": [
         "npc_marn"
       ],
-      "notes": "Geography, and the first crack in the archive's authority. The measurement was not wrong -- it was a single measurement of a thing that moves, which is a different and much more forgivable error.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -810,8 +791,7 @@
             "discovery_dockyard_reef"
           ]
         }
-      ],
-      "notes": "The problem half of the field chain. Stops at connected: understanding the salt is not the same as fixing it, and the fix belongs to the rice."
+      ]
     },
     {
       "id": "discovery_quarry_sequence",
@@ -849,7 +829,6 @@
       "answers": [
         "question_two_names"
       ],
-      "notes": "Evolution, and the discipline Lothal never used. The section is read bottom-up by the player rather than explained; the clear-weather gate is literal -- you cannot see the graduation in flat light.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -906,8 +885,7 @@
             "discovery_poisoned_ground"
           ]
         }
-      ],
-      "notes": "The slice's central chain, and the clearest case of knowledge being help: five rungs of ordinary botany, then the field. Deliberately requires the poison discovery, so the player cannot act before they understand."
+      ]
     },
     {
       "id": "discovery_road_follows_water",
@@ -937,7 +915,6 @@
           ]
         }
       ],
-      "notes": "The map's quietest discovery and possibly its best: habit outliving the reason for it, with nobody at fault. Moved to Dwarka with the Caravan Ground. Its last rung used to require `discovery_channel_gravel`, which retired with the Dry Harbour; it now rests on the seawall chain, which dates the sea's departure from the other direction. The transplant is close to free because the chain was always about a road outliving the water it was laid beside, and that is Dwarka's whole premise now.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -990,8 +967,7 @@
             "discovery_poisoned_ground"
           ]
         }
-      ],
-      "notes": "The glass, sourced on Lothal rather than at the Glass Scar. The plan for this chain wanted the Scar, which is on Narmada -- but all 24 existing prerequisites are within a single map, so requiring it would have been the first cross-map dependency in the game and a design decision rather than an authoring one. The eastern field already weeps brine and already has ash tipped in it, so the material was on the map the whole time. The Scar has since moved to Dwarka with the Dry Harbour's retirement, so it is still the grander version of the same fact and still on another map -- the cross-map dependency stays available to whoever decides the game should have one."
+      ]
     },
     {
       "type": "discovery",
@@ -1025,8 +1001,7 @@
         {
           "entry": "Uma has been re-roofing the same three kilns every year of her life for want of somebody telling her when to cut."
         }
-      ],
-      "notes": "Small, quick, and the first time the player helps anyone. Four rungs, ending in help -- proof that the actionable rung does not require a grand chain."
+      ]
     },
     {
       "id": "discovery_seawall_courses",
@@ -1064,7 +1039,6 @@
       "helps": [
         "npc_pell"
       ],
-      "notes": "The sober counterweight. A map about a supernatural door should be clear that the thing actually destroying the place is ordinary sea-level rise. Rewritten when Dwarka was dried out: the sea left rather than the land sinking, so a rung that assumed a live tide now reads against its absence. The chain is stronger for it — a city keeping a tide schedule for water that stopped arriving is a better observation than one keeping it for water that is still there.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1108,8 +1082,7 @@
             "word_kia_thal"
           ]
         }
-      ],
-      "notes": "The opening hook from the design's first thirty minutes. Resolves ecologically without making the local explanation wrong -- the Kia phrase is a compressed version of the same fact."
+      ]
     },
     {
       "id": "discovery_terrace_script",
@@ -1152,7 +1125,6 @@
       "helps": [
         "npc_okhi"
       ],
-      "notes": "Linguistics, the other unused discipline. The script is mundane on purpose -- a works ledger, not a prophecy. The plateau's past is administrative, which is a truer kind of old.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1191,7 +1163,6 @@
       "restores": [
         "poi_herders_terraces"
       ],
-      "notes": "The archaeology through-line. Resolves as engineering without making the herders ignorant -- they have the observation and not the question, which is the commonest way to not know something.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1222,7 +1193,6 @@
           "entry": "You do not double a line for a few people and a market. This carried enough traffic to need two, and then it carried none, and the difference is not written anywhere I can find."
         }
       ],
-      "notes": "Ends unresolved: described exactly, explained not at all.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1252,7 +1222,6 @@
           "entry": "They are not growing food here. They are working out what will grow in dirt that has stopped growing anything, which is a much stranger thing to be doing in a forest this healthy."
         }
       ],
-      "notes": "Ends unresolved: described exactly, explained not at all.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1282,7 +1251,6 @@
           "entry": "A wall in repair around an empty place, and the people at the rail-head will talk about the ore all day and go quiet about this. I have not asked twice."
         }
       ],
-      "notes": "Aravali. Deliberately unresolved at the last rung -- the diary describes exactly and refuses to guess, which is the discipline this game is about.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1313,7 +1281,6 @@
           "entry": "Somebody worked out that the ore that makes the islands impossible makes the crossing cheap, and then built a road they could unbuild. I would like to know what they were expecting."
         }
       ],
-      "notes": "Aravali. Deliberately unresolved at the last rung -- the diary describes exactly and refuses to guess, which is the discipline this game is about.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1343,7 +1310,6 @@
           "entry": "So the island is held up by what it is made of, and the ore weighs less the more of it there is together. I have written that down twice and it is still what the measurements say."
         }
       ],
-      "notes": "Aravali. Deliberately unresolved at the last rung -- the diary describes exactly and refuses to guess, which is the discipline this game is about.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1373,7 +1339,6 @@
           "entry": "So the Gate Court is not the gate. It is the one they kept, and keeping one and abandoning the rest is a decision somebody made and nobody remembers making."
         }
       ],
-      "notes": "Ends unresolved: described exactly, explained not at all.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1400,7 +1365,6 @@
           "entry": "And the islands are the middle. Two pieces of the same hill, still up, which is the thing nobody here says out loud because it is obvious to them."
         }
       ],
-      "notes": "Aravali. Four rungs rather than five: this one answers.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1435,7 +1399,6 @@
           "entry": "Whatever holds the island up holds the water up as well, and lets go of it a hundred feet under. I can say where the boundary is to within a pace. I cannot say what it is."
         }
       ],
-      "notes": "Aravali. Deliberately unresolved at the last rung -- the diary describes exactly and refuses to guess, which is the discipline this game is about.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1465,7 +1428,6 @@
           "entry": "So: forded, then bridged, then forded again, and the ford has not moved. Whoever laid these stones and whoever pitched those tents made the same decision about the same river a very long way apart."
         }
       ],
-      "notes": "Ends unresolved: described exactly, explained not at all.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1501,8 +1463,7 @@
         {
           "entry": "Kavik built for a delta that drained. After the Shattering it stopped draining. The tower did not fail; the ground under it changed its mind."
         }
-      ],
-      "notes": "Opens the stair shaft. The reading is deliberately sympathetic to Kavik -- the building was sound and the world moved."
+      ]
     },
     {
       "id": "discovery_whale_in_the_hills",
@@ -1549,7 +1510,6 @@
         "discovery_quarry_sequence",
         "discovery_bones_in_one_stone"
       ],
-      "notes": "The far end of the strand the quarry face begins. Deliberately takes nothing: there is no material, no recipe and no node -- meeting it is the whole of it, which is the case this map makes about what a record is for. The fourth and fifth rungs gate on discovery_quarry_sequence because the graduated shell bed is what makes a living intermediate mean anything; met without it, this is only a strange animal. Anchored on the Eocene archaeocetes of the subcontinent -- Ambulocetus and Indohyus -- which were freshwater and were found in these rocks.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1582,8 +1542,7 @@
       ],
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "notes": "The ethic of taking, given to a person rather than stated as a rule. The materials layer has hide, sinew, tusk and bone all `won_from` living animals, and the game hands them over as easily as a reed. This is the one place the cost is said out loud, and it is said by somebody who does it rather than by somebody objecting."
+      ]
     },
     {
       "id": "discovery_what_grows_on_nothing",
@@ -1608,7 +1567,6 @@
           "entry": "The lotus in the climbing water is warm to the hand and stays warm after it is picked, which no other flower here does."
         }
       ],
-      "notes": "Aravali. Four rungs rather than five: this one answers.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1640,8 +1598,7 @@
       ],
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "notes": "The apothecary as a *method* rather than a trade: physic, then grass, then food, in that order and for stated reasons. This is the solarpunk thread the map was missing -- rebuilding as something a person does at a bench with a list, not as a mood."
+      ]
     },
     {
       "type": "discovery",
@@ -1702,8 +1659,7 @@
             "discovery_salt_glass"
           ]
         }
-      ],
-      "notes": "The capstone, and deliberately not a machine. The three chains under it were each already useful alone; this is the rung where the player notices they are one system, which is the only thing being 'built'. Requires all three and is required by nothing -- the graph runs one way. Written to stay in the diary's register: the last rung is a camp not moving, not a train arriving."
+      ]
     },
     {
       "id": "discovery_wrong_anatomy",
@@ -1740,7 +1696,6 @@
       "answers": [
         "question_what_comes_through"
       ],
-      "notes": "The evolution discovery, and the one that makes the academy's answers untenable. Deliberately unglamorous -- the remarkable thing is in a rubbish heap, because that is where the city put it.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1782,8 +1737,7 @@
       ],
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "notes": "The slice's proof that knowledge is help. Both readings are reasonable; only one leads to eight acres of crop, and reaching it needs botany and archaeology together."
+      ]
     },
     {
       "id": "question_moving_spring",
@@ -1816,7 +1770,6 @@
       ],
       "local_knowledge": "Marn's grandmother named a year for it. The herders rebuilt the catch basin twice and did not think this remarkable enough to mention to anyone at the University, who did not ask.",
       "academic_hypothesis": "A fixed spring, surveyed once in 371 and never resurveyed, since springs do not move. The archive is internally consistent and has simply never been checked against the hill.",
-      "notes": "The forgiving reading -- blaming the surveyor -- is the wrong one, and it is wrong in the direction the player will be tempted by after Lothal. Being anti-academy is not the same as being right either.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1856,8 +1809,7 @@
       ],
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "notes": "The opening question. The academic reading is available first and is wrong, which is the point: the player should be able to close the entry early and be mistaken."
+      ]
     },
     {
       "id": "question_terrace_purpose",
@@ -1900,7 +1852,6 @@
       ],
       "local_knowledge": "Marn's people graze them, maintain the odd fallen course out of habit, and have no account of who built them. They will tell you the ground up there stays wet, and offer it as a fact about the ground.",
       "academic_hypothesis": "The survey of 388 assigns them a devotional function on the grounds of scale and effort, reasoning that no agricultural return could justify the labour. The reasoning is sound and the premise -- that the population was the present population -- is assumed rather than established.",
-      "notes": "Two wrong readings rather than one, and the second is the sympathetic error: crediting the locals is not the same as being right about them.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1937,7 +1888,6 @@
       ],
       "local_knowledge": "Marn has one word for the bird and another for an old one, in the way one has a word for a colt and a horse. He is surprised the question is a question.",
       "academic_hypothesis": "Two species, on the authority of two independent careful descriptions. No mechanism exists in the University for a catalogue entry to be revisited, so the duplication is invisible from inside.",
-      "notes": "The binomial contradiction the two repos actually had, written into the fiction. The sound reading needs the quarry section because it takes seeing graduated forms in the rock to accept a graduated form in the air.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1986,7 +1936,6 @@
       ],
       "local_knowledge": "Sura will tell you the gate opens in mist, that you sweep after, and that the bones go in the midden with everything else. She is not being mystical. She is telling you the procedure, the way you would explain bins.",
       "academic_hypothesis": "The Narmada position is that Dwarka is a trading port with an old story and poor record-keeping, and that every specimen produced so far has been either a misidentified juvenile or a hoax. No scholar has been to the midden.",
-      "notes": "The map's thesis, and the one question in the game where the local account is simply correct and the academy simply wrong. Both wrong readings are respectable and one of them is what a good naturalist would reach for second.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -2023,7 +1972,6 @@
       ],
       "local_knowledge": "Pell has rebuilt the inner wall once in his life and expects his son to do it again. He does not connect that to anything; it is simply what the wall is for.",
       "academic_hypothesis": "The survey of 402 records the Dwarka coastline as stable, on the basis of a single visit and the outermost wall being described as a breakwater.",
-      "notes": "The counterweight question, and the one where the player's own appetite for a good story is the thing being tested. The unsound reading is the one this map has spent the whole time making attractive.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -2040,7 +1988,6 @@
       "learned_from": [
         "npc_sura"
       ],
-      "notes": "A stratigraphic term in a language with no word for stratigraphy. The bone-pickers needed to tell each other which layer they meant.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -2055,7 +2002,6 @@
       "learned_from": [
         "npc_kunch"
       ],
-      "notes": "The same root as the word for a cut reed. A length of cane gives one note and only one, so the delta counts intervals in cane rather than in numbers -- two hands of cane is a phrase, and everybody who has walked with Kunch knows roughly how long that is on the road.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -2072,8 +2018,7 @@
       "literal": "A prefix rather than a word. Attaches to what the water is holding: thal-uvai, water holding memory; thal-set, water holding a path.",
       "learned_from": [
         "npc_thrali"
-      ],
-      "notes": "The key that opens the Kia readings. Thrali has half of it; Bekh supplies the rest by using it without explaining."
+      ]
     },
     {
       "type": "vocabulary",
@@ -2088,8 +2033,7 @@
       "learned_from": [
         "npc_bekh",
         "poi_marsh_shrine"
-      ],
-      "notes": "Names the channel before the player can see it, which is the point -- the language encodes the ecology."
+      ]
     },
     {
       "type": "vocabulary",
@@ -2102,8 +2046,7 @@
       "gloss": "memory, or a thing remembered",
       "learned_from": [
         "npc_thrali"
-      ],
-      "notes": "Completes thal-uvai. Compresses an entire trophic chain into a phrase that sounds like superstition."
+      ]
     },
     {
       "type": "vocabulary",
@@ -2115,7 +2058,6 @@
       "learned_from": [
         "npc_pell"
       ],
-      "notes": "Distinguishes the mist that does something from the mist that does not, which is a distinction the University has no vocabulary for and no reason to want.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -2130,7 +2072,6 @@
       "learned_from": [
         "npc_vessa"
       ],
-      "notes": "A year-name rather than a date. Evidence the archive cannot accept, because its form is a story.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -2145,7 +2086,6 @@
       "learned_from": [
         "npc_moonj"
       ],
-      "notes": "Not the weight of a thing -- maru has an ordinary word for that. `Bhar` is what is actually moving, which on the plateau is always less than what was loaded and is settled between a driver and an animal rather than decided by either. The archive has never found a use for it and the quarry cannot manage without it.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -2160,7 +2100,6 @@
       "learned_from": [
         "npc_marn"
       ],
-      "notes": "The word that turns two hundred courses of stone from ornament into engineering. The herders kept the meaning inside the noun for long enough that nobody had to remember it.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -2175,7 +2114,6 @@
       "learned_from": [
         "npc_okhi"
       ],
-      "notes": "Two words for one animal at two ages, which is a more accurate taxonomy than the archive's two species and was never intended as one.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
