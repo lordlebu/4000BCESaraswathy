@@ -155,7 +155,7 @@ const COVERAGE: Record<string, Coverage> = {
     skipped: ['type', 'source_index']
   },
   'crafting.recipes': {
-    adapted: ['id', 'name', 'process', 'ingredients', 'outputs', 'known_by', 'taught_by', 'notes'],
+    adapted: ['id', 'name', 'process', 'ingredients', 'outputs', 'known_by', 'taught_by'],
     skipped: ['type', 'epochs', 'source_index']
   },
   'crafting.vehicles': {

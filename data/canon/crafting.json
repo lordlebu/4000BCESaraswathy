@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.26.0",
+  "canon_version": "2.28.0",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -1280,6 +1280,65 @@
       "renews": "seasonal",
       "notes": "Bled from the bramble, and it crackles as it leaves the cut. Sets hard and clear, and a bead of it will lift a hair from the back of your hand across a finger-width of air.",
       "source_index": 67
+    },
+    {
+      "id": "material_sivatherium_milk",
+      "type": "material",
+      "name": "Sivatherium milk",
+      "classes": [
+        "milk"
+      ],
+      "won_from": [
+        "fauna_sivatherium"
+      ],
+      "found_in": [
+        "hills",
+        "forest"
+      ],
+      "rarity": "rare",
+      "renews": "fast",
+      "notes": "Thick, faintly sweet, and yellow rather than white from the leaves she browses. Taken from a cow that is standing willingly, which is the only way it is taken at all -- a sivatherium that does not want to be milked walks away, and there is no version of this where she is held.\n\nA cow in milk is in milk tomorrow. What is scarce is not the milk but the meeting: she is on one tile of a plateau, and she moves.",
+      "source_index": 68
+    },
+    {
+      "id": "material_shed_snakeskin",
+      "type": "material",
+      "name": "Shed snakeskin",
+      "classes": [
+        "hide"
+      ],
+      "won_from": [
+        "fauna_vasuki_indicus"
+      ],
+      "found_in": [
+        "desert",
+        "hills"
+      ],
+      "rarity": "common",
+      "renews": "seasonal",
+      "notes": "A whole shed, jaw to tail, dry as paper and patterned like water over stone. It takes an oiling to be worth anything and then it is the toughest light sheet anybody here has: it does not wet through and it does not crack.\n\nNothing is taken from a living animal. A serpent sheds when it grows, and the ground where it shed once is the ground it sheds on again -- so this is found by knowing where to look rather than won.",
+      "source_index": 69
+    },
+    {
+      "id": "material_viper_venom",
+      "type": "material",
+      "name": "Viper venom",
+      "classes": [
+        "poison"
+      ],
+      "won_from": [
+        "fauna_glass_scaled_viper",
+        "fauna_crimson_eyed_adder",
+        "fauna_dune_viper",
+        "fauna_taklamakan_sand_viper"
+      ],
+      "found_in": [
+        "desert"
+      ],
+      "rarity": "common",
+      "renews": "slow",
+      "notes": "Taken from a desert viper held behind the head over the rim of a cup, a few drops at a time, and the animal is let go where it was found. Clear, faintly yellow, and it dries to a varnish. Four serpents of the dry country give it and the caravan people do not much distinguish between them -- what matters is the milking, and a milked viper needs weeks before it is worth milking again.\n\nThe only thing it can become is medicine: canon's affordance vocabulary has no word for harm, so the recipes that consume a poison are the ones that purify it -- which is what the tradition it comes from does with a venom.",
+      "source_index": 70
     }
   ],
   "items": [
@@ -2500,6 +2559,51 @@
         "epoch_post_cataclysm"
       ],
       "source_index": 77
+    },
+    {
+      "id": "item_hill_curd",
+      "type": "item",
+      "name": "Hill curd",
+      "kind": "food",
+      "affords": [
+        "eat"
+      ],
+      "materials": [
+        "material_sivatherium_milk"
+      ],
+      "notes": "Milk set overnight in a covered pot near the embers, sharp and thick enough to stand a spoon in. The herders carry it wrapped in leaves and eat it with parched grain; it keeps two days in the cold of the plateau and one anywhere else.\n\nA curd is proof that somebody stood beside a wild animal long enough to be given something, and went home and made supper of it.",
+      "source_index": 78
+    },
+    {
+      "id": "item_antivenin",
+      "type": "item",
+      "name": "Drawn antivenin",
+      "kind": "physic",
+      "affords": [
+        "heal"
+      ],
+      "materials": [
+        "material_viper_venom",
+        "material_neem_bark"
+      ],
+      "notes": "Venom cut with neem bark and worked over low heat until it will not kill, which the caravan people have done for longer than anyone here can account for and cannot explain. It is carried by everybody who walks the salt roads and used perhaps twice in a life.\n\nThe joke the Tide Market makes of it is that the cure and the poison come off the same animal on the same afternoon, and the only difference is an hour's work.",
+      "source_index": 79
+    },
+    {
+      "id": "item_serpent_mantle",
+      "type": "item",
+      "name": "Serpent mantle",
+      "kind": "textile",
+      "affords": [
+        "mark",
+        "shelter"
+      ],
+      "materials": [
+        "material_shed_snakeskin",
+        "material_mahua_oil"
+      ],
+      "notes": "A shed oiled soft and cut into a shoulder cloak, the pattern running unbroken from collar to hem because it came off one animal in one piece. It sheds rain and it is warm out of all proportion to its weight.\n\nIt tells anyone who sees it that you found a Vasuki shed and knew what to do with it, and it is a better night out of doors.",
+      "source_index": 80
     }
   ],
   "processes": [
@@ -2706,7 +2810,6 @@
           "count": 2
         }
       ],
-      "notes": "Nine days in standing water, then combed. The one recipe here that turns a thing into more of itself, because retting is what makes gathered reed into usable fibre at all.",
       "source_index": 0
     },
     {
@@ -2725,7 +2828,6 @@
           "item": "item_reed_rope"
         }
       ],
-      "notes": "Four handfuls to a working length. Wants a whorl, which is any item that works.",
       "source_index": 1
     },
     {
@@ -2744,7 +2846,6 @@
           "item": "item_husk_hawser"
         }
       ],
-      "notes": "Heavier and slower than reed, and it will still be there next season.",
       "source_index": 2,
       "taught_by": [
         "npc_pell"
@@ -2766,7 +2867,6 @@
           "item": "item_sinew_lashing"
         }
       ],
-      "notes": "Split, wetted and wound on while damp. Tightens as it dries, which is the whole point.",
       "source_index": 3
     },
     {
@@ -2789,7 +2889,6 @@
           "item": "item_reed_mat"
         }
       ],
-      "notes": "Any fibre will do, which is what a tag ingredient is for -- reed in the delta, husk on the coast, and the recipe does not have to know which.",
       "source_index": 4,
       "taught_by": [
         "npc_uma"
@@ -2815,7 +2914,6 @@
           "item": "item_carry_basket"
         }
       ],
-      "notes": "Split cane ribs, then any fibre for the weft.",
       "source_index": 5
     },
     {
@@ -2837,7 +2935,6 @@
           "item": "item_fish_weir"
         }
       ],
-      "notes": "Built in the water and left. What it catches is not sorted, which is why the fish it gives is named for the river.",
       "source_index": 6,
       "taught_by": [
         "npc_thrali"
@@ -2866,7 +2963,6 @@
       "known_by": [
         "tushara"
       ],
-      "notes": "Known on the steppe and in the hills, where staying warm wet is the only question.",
       "source_index": 7,
       "taught_by": [
         "npc_marn"
@@ -2899,7 +2995,6 @@
       "known_by": [
         "harappan"
       ],
-      "notes": "Green out of the vat, blue in the air. Half its worth is that everyone has watched it happen.",
       "source_index": 8
     },
     {
@@ -2926,7 +3021,6 @@
           "item": "item_sail_cloth"
         }
       ],
-      "notes": "Coarse and heavy. The difference between a boat that drifts and a boat that goes.",
       "source_index": 9
     },
     {
@@ -2945,7 +3039,6 @@
           "item": "item_flint_knife"
         }
       ],
-      "notes": "An afternoon's work, sharp for a week, replaced without ceremony.",
       "source_index": 10
     },
     {
@@ -2963,7 +3056,6 @@
           "item": "item_glass_lancet"
         }
       ],
-      "notes": "Magma-glass or scar-glass, whichever the ground offers -- they knap the same, which is why they share a class.",
       "source_index": 11
     },
     {
@@ -2987,7 +3079,6 @@
           "item": "item_stone_adze"
         }
       ],
-      "notes": "The blade set across the haft, not along it. That difference matters enormously to a boat.",
       "source_index": 12
     },
     {
@@ -3008,7 +3099,6 @@
           "item": "item_antler_pick"
         }
       ],
-      "notes": "Free, in the sense that the deer left it lying there.",
       "source_index": 13
     },
     {
@@ -3030,7 +3120,6 @@
           "item": "item_bone_awl"
         }
       ],
-      "notes": "Bores a hole and scores a line, with the same point.",
       "source_index": 14,
       "taught_by": [
         "npc_sura"
@@ -3058,7 +3147,6 @@
           "item": "item_bow_drill"
         }
       ],
-      "notes": "Holes and fire, the same motion at different patience.",
       "source_index": 15
     },
     {
@@ -3084,7 +3172,6 @@
           "item": "item_loom_frame"
         }
       ],
-      "notes": "Upright, weighted, taken apart to travel. Every woven thing waits on this one.",
       "source_index": 16
     },
     {
@@ -3107,7 +3194,6 @@
           "item": "item_grinding_quern"
         }
       ],
-      "notes": "Two stones, dressed to sit true. The household that owns one does not lend it.",
       "source_index": 17
     },
     {
@@ -3129,7 +3215,6 @@
           "item": "item_walking_staff"
         }
       ],
-      "notes": "Shoulder height, worn smooth at the grip in its own time.",
       "source_index": 18
     },
     {
@@ -3151,7 +3236,6 @@
           "item": "item_mud_shoes"
         }
       ],
-      "notes": "Splayed frames under the foot. A salt flat becomes ground you can cross.",
       "source_index": 19
     },
     {
@@ -3173,7 +3257,6 @@
           "item": "item_tally_stick"
         }
       ],
-      "notes": "Notched and split so both halves must agree. A contract nobody can argue with.",
       "source_index": 20,
       "taught_by": [
         "npc_vessa"
@@ -3198,7 +3281,6 @@
           "item": "item_sandalwood_comb"
         }
       ],
-      "notes": "Keeps its scent for a lifetime, which is most of why anyone carries one.",
       "source_index": 21
     },
     {
@@ -3225,7 +3307,6 @@
       "known_by": [
         "harappan"
       ],
-      "notes": "The smallest unit of worth anybody agrees on, and Harappa is where they are made.",
       "source_index": 22,
       "taught_by": [
         "npc_sura"
@@ -3250,7 +3331,6 @@
           "item": "item_ammonite_pendant"
         }
       ],
-      "notes": "A spiral somebody found already made.",
       "source_index": 23,
       "taught_by": [
         "npc_sura"
@@ -3277,7 +3357,6 @@
           "item": "item_bone_harpoon"
         }
       ],
-      "notes": "The rostral tooth arrives barbed. Very little is done to it.",
       "source_index": 24,
       "taught_by": [
         "npc_thrali"
@@ -3304,7 +3383,6 @@
           "item": "item_reed_spear"
         }
       ],
-      "notes": "Held level, it moves a herd. That is its recorded use.",
       "source_index": 25
     },
     {
@@ -3328,7 +3406,6 @@
           "item": "item_boar_spear"
         }
       ],
-      "notes": "Cross-barred below the head, so that what it stops does not walk up it.",
       "source_index": 26
     },
     {
@@ -3350,7 +3427,6 @@
           "item": "item_hunting_sling"
         }
       ],
-      "notes": "Two cords and a pouch. Keeps birds off a crop far more often than anything else.",
       "source_index": 27,
       "taught_by": [
         "npc_marn"
@@ -3375,7 +3451,6 @@
           "item": "item_fire_rattle"
         }
       ],
-      "notes": "Shells on a line. The clearest case in canon that a weapon is not about harm.",
       "source_index": 28
     },
     {
@@ -3398,7 +3473,6 @@
           "count": 3
         }
       ],
-      "notes": "Old fired pots, crushed back into new clay so the new one survives the kiln. The only material in canon that can only be made out of itself.",
       "source_index": 29
     },
     {
@@ -3421,7 +3495,6 @@
           "item": "item_storage_jar"
         }
       ],
-      "notes": "A grain surplus is not a harvest. It is one of these.",
       "source_index": 30,
       "taught_by": [
         "npc_bekh"
@@ -3450,7 +3523,6 @@
           "item": "item_cooking_pot"
         }
       ],
-      "notes": "Coarse-tempered so it survives the fire it is made for.",
       "source_index": 31
     },
     {
@@ -3471,7 +3543,6 @@
           "item": "item_oil_lamp"
         }
       ],
-      "notes": "A closed lamp with a shielded wick, the kind that survives being carried.",
       "source_index": 32
     },
     {
@@ -3494,7 +3565,6 @@
           "item": "item_charcoal_brazier"
         }
       ],
-      "notes": "Portable fire. Lets heat happen where there is none.",
       "source_index": 33
     },
     {
@@ -3519,7 +3589,6 @@
       "known_by": [
         "harappan"
       ],
-      "notes": "Says who packed it and that nobody has opened it since.",
       "source_index": 34
     },
     {
@@ -3543,7 +3612,6 @@
           "item": "item_resin_flask"
         }
       ],
-      "notes": "Small, stoppered, worth more full than the room it sits in.",
       "source_index": 35
     },
     {
@@ -3570,7 +3638,6 @@
           "item": "item_grain_bin"
         }
       ],
-      "notes": "Mud-plastered basketwork, taller than a person. Does not move once filled -- the first object here only a settlement can own.",
       "source_index": 36,
       "taught_by": [
         "npc_uma"
@@ -3593,7 +3660,6 @@
           "count": 2
         }
       ],
-      "notes": "Burnt slow under turf. The only fuel hot enough to melt anything.",
       "source_index": 37
     },
     {
@@ -3620,7 +3686,6 @@
           "count": 2
         }
       ],
-      "notes": "In a covered pit. Nothing floats without it.",
       "source_index": 38
     },
     {
@@ -3643,7 +3708,6 @@
           "count": 2
         }
       ],
-      "notes": "Bright, brief, and gone in the rain.",
       "source_index": 39
     },
     {
@@ -3665,7 +3729,6 @@
           "count": 2
         }
       ],
-      "notes": "Kept dry against the body. Usually the difference between a cold night and a warm one.",
       "source_index": 40
     },
     {
@@ -3693,7 +3756,6 @@
           "count": 2
         }
       ],
-      "notes": "Bark liquor and time. Nobody will let you do it upwind of them.",
       "source_index": 41,
       "taught_by": [
         "npc_marn"
@@ -3721,7 +3783,6 @@
           "item": "item_water_skin"
         }
       ],
-      "notes": "Tastes of the pitch. Everyone stopped noticing generations ago.",
       "source_index": 42
     },
     {
@@ -3745,7 +3806,6 @@
           "item": "item_bedroll"
         }
       ],
-      "notes": "Oiled cloth over a reed mat. It has been rained on.",
       "source_index": 43,
       "taught_by": [
         "npc_uma"
@@ -3777,7 +3837,6 @@
       "known_by": [
         "tushara"
       ],
-      "notes": "Two people to raise and one to strike.",
       "source_index": 44
     },
     {
@@ -3800,7 +3859,6 @@
           "item": "item_rope_span"
         }
       ],
-      "notes": "A line fixed both banks and a loop to hang from. Wants two people, which is why Teshk will not leave.",
       "source_index": 45,
       "taught_by": [
         "npc_pell"
@@ -3825,7 +3883,6 @@
           "item": "item_salt_box"
         }
       ],
-      "notes": "Wood rather than clay, because salt draws water and a fired jar sweats.",
       "source_index": 46,
       "taught_by": [
         "npc_bekh"
@@ -3863,7 +3920,6 @@
         "epoch_civilization_dawn",
         "epoch_current"
       ],
-      "notes": "Canon is a bronze world with iron as a rumour. Nothing above this line goes further.",
       "source_index": 47
     },
     {
@@ -3897,7 +3953,6 @@
         "epoch_civilization_dawn",
         "epoch_current"
       ],
-      "notes": "Copper and tin. Worth more than the person carrying it usually is.",
       "source_index": 48
     },
     {
@@ -3926,7 +3981,6 @@
         "epoch_civilization_dawn",
         "epoch_current"
       ],
-      "notes": "Holds an edge and takes a new one.",
       "source_index": 49
     },
     {
@@ -3958,7 +4012,6 @@
         "epoch_civilization_dawn",
         "epoch_current"
       ],
-      "notes": "What dressed sandstone is dressed with. A settlement with these has a mason.",
       "source_index": 50
     },
     {
@@ -3987,7 +4040,6 @@
         "epoch_civilization_dawn",
         "epoch_current"
       ],
-      "notes": "Socketed, so it outlives its shaft. Traded far past where anyone can make one.",
       "source_index": 51
     },
     {
@@ -4011,7 +4063,6 @@
           "count": 3
         }
       ],
-      "notes": "Ground and washed. The oldest pigment anybody has.",
       "source_index": 52
     },
     {
@@ -4034,7 +4085,6 @@
           "count": 2
         }
       ],
-      "notes": "Soot on a cold plate held over a flame.",
       "source_index": 53
     },
     {
@@ -4061,7 +4111,6 @@
       "known_by": [
         "harappan"
       ],
-      "notes": "Stinks for a fortnight. Then it is worth what it is worth.",
       "source_index": 54
     },
     {
@@ -4087,7 +4136,6 @@
           "item": "item_ink_cake"
         }
       ],
-      "notes": "Soot bound with gum and dried into a block. What Varuna's diary is written in.",
       "source_index": 55,
       "taught_by": [
         "npc_okhi"
@@ -4113,7 +4161,6 @@
           "count": 2
         }
       ],
-      "notes": "Recut every few lines, and lost constantly.",
       "source_index": 56,
       "taught_by": [
         "npc_vessa"
@@ -4140,7 +4187,6 @@
           "count": 3
         }
       ],
-      "notes": "Cut, boiled, dried, smoothed. Takes a scored line better than it takes ink.",
       "source_index": 57,
       "taught_by": [
         "npc_okhi"
@@ -4169,7 +4215,6 @@
           "item": "item_field_diary"
         }
       ],
-      "notes": "The crossings-out are the useful part. A first guess is worth keeping once it is wrong.",
       "source_index": 58,
       "taught_by": [
         "npc_okhi"
@@ -4196,7 +4241,6 @@
           "count": 3
         }
       ],
-      "notes": "Under a beam or a stone, with something underneath to catch it.",
       "source_index": 59
     },
     {
@@ -4220,7 +4264,6 @@
           "count": 3
         }
       ],
-      "notes": "Any grain. The quern does not care and neither does the recipe.",
       "source_index": 60
     },
     {
@@ -4246,7 +4289,6 @@
       "known_by": [
         "harappan"
       ],
-      "notes": "What you eat in a year the rice did badly and the flood did well.",
       "source_index": 61
     },
     {
@@ -4269,7 +4311,6 @@
           "count": 2
         }
       ],
-      "notes": "Split, salted, racked. Keeps a season and travels anywhere.",
       "source_index": 62,
       "taught_by": [
         "npc_thrali"
@@ -4291,7 +4332,6 @@
           "item": "item_date_block"
         }
       ],
-      "notes": "Wrapped in leaf. Why a desert crossing is arithmetic rather than a gamble.",
       "source_index": 63
     },
     {
@@ -4313,7 +4353,6 @@
           "item": "item_tamarind_paste"
         }
       ],
-      "notes": "Sour enough to make bad water drinkable and worse food interesting.",
       "source_index": 64
     },
     {
@@ -4338,7 +4377,6 @@
           "item": "item_salt_fish_stew"
         }
       ],
-      "notes": "The pot everything ends up in. Nobody writes it down and everybody makes it.",
       "source_index": 65
     },
     {
@@ -4360,7 +4398,6 @@
           "item": "item_spiced_rice"
         }
       ],
-      "notes": "What a settlement eats when there is nothing to mark.",
       "source_index": 66
     },
     {
@@ -4386,7 +4423,6 @@
           "count": 2
         }
       ],
-      "notes": "Baked hard. Made to be carried rather than enjoyed, and it tastes like it.",
       "source_index": 67
     },
     {
@@ -4412,7 +4448,6 @@
       "known_by": [
         "jharwa"
       ],
-      "notes": "Fermented, not distilled. Strong enough.",
       "source_index": 68
     },
     {
@@ -4434,7 +4469,6 @@
           "item": "item_neem_salve"
         }
       ],
-      "notes": "Bitter, oily, keeps a wound clean.",
       "source_index": 69
     },
     {
@@ -4458,7 +4492,6 @@
           "item": "item_myrrh_poultice"
         }
       ],
-      "notes": "The salve canon already names on the thorn, spread on bast.",
       "source_index": 70
     },
     {
@@ -4480,7 +4513,6 @@
           "item": "item_shilajit_tonic"
         }
       ],
-      "notes": "Scraped from high rock and taken in water.",
       "source_index": 71
     },
     {
@@ -4511,7 +4543,6 @@
       "known_by": [
         "harappan"
       ],
-      "notes": "Fourteen, counted. A cook who is one short does not make it with thirteen -- they go back out.",
       "source_index": 72
     },
     {
@@ -4535,7 +4566,6 @@
           "count": 2
         }
       ],
-      "notes": "Sliced, salted and left on a mat in the sun for four days.",
       "source_index": 73
     },
     {
@@ -4563,7 +4593,6 @@
           "count": 1
         }
       ],
-      "notes": "Oil taken to smoking, then seed and pod dropped in off the heat. Poured over at the end.",
       "source_index": 74
     },
     {
@@ -4594,7 +4623,6 @@
       "known_by": [
         "harappan"
       ],
-      "notes": "Cooked until it pulls apart in threads. Hands are oiled first or the sap will not come off.",
       "source_index": 75
     },
     {
@@ -4618,7 +4646,6 @@
           "count": 2
         }
       ],
-      "notes": "A second oil for the delta, and a hotter one. Canon keeps one oil material -- what changes is which seed the press was fed.",
       "source_index": 76
     },
     {
@@ -4642,7 +4669,6 @@
           "count": 2
         }
       ],
-      "notes": "A fortnight of soaking, the liquor thrown away and replaced daily. **The only kind of recipe that consumes a poison in canon**, and that is deliberate rather than an omission: there is no word in `affordances.json` for what a thing made to harm somebody would be for.",
       "source_index": 77
     },
     {
@@ -4670,7 +4696,6 @@
           "count": 4
         }
       ],
-      "notes": "Ground into oil and divided small. The dividing is the safeguard and is done in company.",
       "source_index": 78
     },
     {
@@ -4694,7 +4719,6 @@
           "count": 2
         }
       ],
-      "notes": "Warmed, not boiled. Taken at night.",
       "source_index": 79
     },
     {
@@ -4718,7 +4742,6 @@
           "count": 2
         }
       ],
-      "notes": "Dried until it rattles, then ground fine enough to float.",
       "source_index": 80
     },
     {
@@ -4742,7 +4765,6 @@
           "count": 3
         }
       ],
-      "notes": "Softened over heat and rolled between the palms with pepper.",
       "source_index": 81
     },
     {
@@ -4766,7 +4788,6 @@
           "item": "item_sinew_bow"
         }
       ],
-      "notes": "The sinew goes on wet and the bow is not finished until it has dried, which is weeks. Nobody makes one in a hurry and nobody makes their first one alone.",
       "source_index": 82,
       "taught_by": [
         "npc_anu"
@@ -4791,7 +4812,6 @@
           "item": "item_reed_flute"
         }
       ],
-      "notes": "Burned rather than drilled. A bored hole splits the wall along the grain and the cane is finished; a hot point crushes the fibre instead and the edge stays.\n\nNamed as the flint knife rather than as `item_blade`, which is the prototype an edge inherits from and which nothing makes -- a recipe wanting one can never be performed.",
       "source_index": 83
     },
     {
@@ -4813,7 +4833,6 @@
           "item": "item_cane_chime"
         }
       ],
-      "notes": "Cut long and shorten to the note, because it only tunes upward. The binding is what makes it one instrument rather than three sticks.",
       "source_index": 84,
       "taught_by": [
         "npc_kunch"
@@ -4846,8 +4865,86 @@
           "item": "item_sitar"
         }
       ],
-      "notes": "The sympathetic course is the hard part and the reason this is a trade: the underneath strings have to be true to the ones above them or they answer at the wrong moment and the whole thing sounds ill.",
       "source_index": 85
+    },
+    {
+      "id": "recipe_hill_curd",
+      "type": "recipe",
+      "name": "Setting the hill curd",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "tag": "#milk",
+          "count": 2
+        },
+        {
+          "item": "item_cooking_pot",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_hill_curd"
+        }
+      ],
+      "known_by": [
+        "maru"
+      ],
+      "source_index": 86
+    },
+    {
+      "id": "recipe_antivenin",
+      "type": "recipe",
+      "name": "Drawing the venom",
+      "process": "process_purifying",
+      "ingredients": [
+        {
+          "tag": "#poison",
+          "count": 1
+        },
+        {
+          "material": "material_neem_bark",
+          "count": 2
+        },
+        {
+          "item": "item_cooking_pot",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_antivenin"
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "source_index": 87
+    },
+    {
+      "id": "recipe_serpent_mantle",
+      "type": "recipe",
+      "name": "Oiling the shed",
+      "process": "process_tanning",
+      "ingredients": [
+        {
+          "material": "material_shed_snakeskin",
+          "count": 1
+        },
+        {
+          "tag": "#oil",
+          "count": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_serpent_mantle"
+        }
+      ],
+      "known_by": [
+        "harappan"
+      ],
+      "source_index": 88
     }
   ],
   "vehicles": [
@@ -5415,6 +5512,16 @@
       "item_sitar": [
         "play",
         "trade"
+      ],
+      "item_hill_curd": [
+        "eat"
+      ],
+      "item_antivenin": [
+        "heal"
+      ],
+      "item_serpent_mantle": [
+        "mark",
+        "shelter"
       ]
     }
   }

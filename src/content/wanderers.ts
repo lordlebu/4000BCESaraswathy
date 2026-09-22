@@ -107,7 +107,8 @@ export interface Wanderer {
  * database, which is where somebody authoring the next wanderer will be looking.
  */
 const WANDERS: Record<string, string[]> = {
-  field_map_narmada: ['fauna_narmada_walking_whale']
+  field_map_narmada: ['fauna_narmada_walking_whale', 'fauna_sivatherium'],
+  field_map_dwarka: ['fauna_vasuki_indicus']
 };
 
 /**

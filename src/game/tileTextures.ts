@@ -808,11 +808,43 @@ export function placeholderTileKey(
  * would be fitted by width and come out a fifth of the height of everything else. Tier 1 in the
  * plan is one still marker per animal for exactly this reason.
  *
- * What it draws: a long low body with a raised head, in the animal's own colour, standing on a
- * shadow. Not a glyph and not a swatch -- a shape that reads at tile scale as a big animal facing
- * a direction, which is all the marker has to say before the painting lands. Cached per species
- * and facing under `wanderer:<id>:<facing>`.
+ * What it draws: a body in the animal's own colour, standing on a shadow, in one of three builds.
+ * Not a glyph and not a swatch -- a shape that reads at tile scale as a particular kind of big
+ * animal facing a direction, which is all the marker has to say before the painting lands.
+ *
+ * **Three builds rather than one, because one was visibly wrong.** The first version drew every
+ * wanderer as the whale -- a long low four-legged body, 192x84 for all of them -- so a browsing
+ * giraffid twice a man's height and an eleven-metre legless serpent came out the same silhouette
+ * at the same size. Nothing failed: the browser spec asserted each sprite had a width and a
+ * height, and all three had the same ones. It took looking at a screenshot.
+ *
+ * Cached per species and facing under `wanderer:<id>:<facing>`.
  */
+/**
+ * How each wanderer is put together: how big, and what shape of body.
+ *
+ * Keyed by engine species id, with a fallback, because this is a stand-in and a stand-in that
+ * throws for an unknown animal is worse than one that draws a generic quadruped. Sizes are in
+ * tiles; the player is one tile tall.
+ *
+ * `shape` picks the body:
+ *   `wader`   a long low body on four short legs, head raised -- the walking whale
+ *   `browser` a deep body on four long legs with a raised neck and head -- the giraffid
+ *   `serpent` a thick tapering S-curve, no legs at all
+ */
+const BUILDS: Record<string, { long: number; tall: number; shape: 'wader' | 'browser' | 'serpent' }> = {
+  // Roughly three metres and low to the ground: longer than tall by about two to one, standing a
+  // little under a person's height at the shoulder.
+  'narmada-walking-whale': { long: 1.5, tall: 0.66, shape: 'wader' },
+  // Shoulder-high to a tall man and taller again at the head, which is the whole of why canon
+  // says it takes the leaves nothing else reaches. Taller than it is long.
+  sivatherium: { long: 1.1, tall: 1.35, shape: 'browser' },
+  // Eleven to fifteen metres, coiled rather than extended, so it is drawn as a long shallow curve
+  // that is much wider than tall -- the one marker that would be absurd as a figure in a cell.
+  'vasuki-indicus': { long: 1.9, tall: 0.5, shape: 'serpent' },
+  default: { long: 1.3, tall: 0.8, shape: 'wader' }
+};
+
 export function wandererMarkerKey(
   scene: Phaser.Scene,
   speciesId: string,
@@ -822,16 +854,13 @@ export function wandererMarkerKey(
   const key = `wanderer:${speciesId}:${facing}`;
   if (scene.textures.exists(key)) return key;
 
-  // **A tile and a half long, two thirds of a tile tall, and both numbers come from looking.**
-  // The first version was two tiles by one, which put an animal larger than the player in the
-  // river -- it read as a landmark rather than as something you could walk up to. Nothing failed:
-  // the browser spec asserted the sprite had a width and a height, and it had both.
-  //
-  // The proportions are the animal's rather than the cell's. An Ambulocetus was roughly three
-  // metres and low to the ground, so it is longer than it is tall by about two to one and stands
-  // a little under a person's height at the shoulder.
-  const w = Math.round(TILE_SIZE * 1.5);
-  const h = Math.round(TILE_SIZE * 0.66);
+  // **The proportions are the animal's rather than the cell's, and they come from looking.**
+  // The earlier single size was two tiles by one, which put something larger than the player in
+  // the river -- it read as a landmark rather than as a thing you could walk up to. A tile is
+  // `TILE_SIZE` and the player is one tile tall, so these are read against that.
+  const build = BUILDS[speciesId] ?? BUILDS.default!;
+  const w = Math.round(TILE_SIZE * build.long);
+  const h = Math.round(TILE_SIZE * build.tall);
   const canvas = scene.textures.createCanvas(key, w, h);
   const context = canvas?.getContext();
   if (!canvas || !context) return key;
@@ -853,55 +882,140 @@ export function wandererMarkerKey(
   context.fill();
   context.globalAlpha = 1;
 
-  // **The legs first, so the body is drawn over their tops.** Drawn after the body they read as
-  // four posts standing behind a hull -- which is exactly how the first version looked when it was
-  // finally put on screen and looked at. A limb joins a body; it does not abut it.
-  //
-  // The whole point of this animal is that it walks, so they are drawn rather than implied: near
-  // pair and far pair, the far pair darker and shorter, which is what says "four legs" at a size
-  // too small to draw a joint.
-  context.fillStyle = shade(base, -0.40);
-  for (const at of [0.40, 0.66]) {
-    context.fillRect(w * at, h * 0.56, w * 0.05, h * 0.26);
+  if (build.shape === 'serpent') {
+    // No legs, and that is the point of the build existing: a madtsoiid kills by holding. Drawn
+    // as a tapering band along a shallow S so it reads as length rather than as a log -- a
+    // straight bar at this size looks like a fallen branch.
+    const segs = 26;
+    for (let i = 0; i < segs; i += 1) {
+      const t = i / (segs - 1);
+      const x = w * (0.04 + t * 0.9);
+      // Two gentle lobes, flattening toward the tail so the curve does not read as a spring.
+      const y = h * (0.60 + Math.sin(t * Math.PI * 1.7) * 0.16 * (1 - t * 0.35));
+      // Thickest a third of the way along, tapering hard to the tail and a little to the neck.
+      const thick = h * 0.20 * Math.sin(Math.min(1, 0.25 + t * 0.9) * Math.PI);
+      context.fillStyle = shade(base, -0.06 - t * 0.12);
+      context.beginPath();
+      context.ellipse(x, y, Math.max(1, w * 0.035), Math.max(1, thick), 0, 0, Math.PI * 2);
+      context.fill();
+    }
+    // The head: blunt and slightly wider than the neck, at the leading end.
+    const hx = w * 0.95;
+    const hy = h * (0.60 + Math.sin(Math.PI * 1.7) * 0.10);
+    context.fillStyle = shade(base, 0.06);
+    context.beginPath();
+    context.ellipse(hx, hy, w * 0.055, h * 0.15, 0, 0, Math.PI * 2);
+    context.fill();
+    context.fillStyle = shade(base, -0.62);
+    context.beginPath();
+    context.arc(hx + w * 0.012, hy - h * 0.04, Math.max(1, w * 0.014), 0, Math.PI * 2);
+    context.fill();
+  } else if (build.shape === 'browser') {
+    // Four long legs, a deep chest and a neck carried up. The legs are most of the height here,
+    // which is the difference between a giraffid and everything else on the map.
+    context.fillStyle = shade(base, -0.40);
+    for (const at of [0.40, 0.62]) {
+      context.fillRect(w * at, h * 0.50, w * 0.06, h * 0.40);
+    }
+    context.fillStyle = shade(base, -0.26);
+    for (const at of [0.30, 0.54]) {
+      context.fillRect(w * at, h * 0.50, w * 0.07, h * 0.44);
+    }
+
+    // The body: deep through the chest rather than long.
+    context.fillStyle = shade(base, -0.08);
+    context.beginPath();
+    context.ellipse(w * 0.46, h * 0.44, w * 0.26, h * 0.16, 0, 0, Math.PI * 2);
+    context.fill();
+
+    // A short tail.
+    context.beginPath();
+    context.moveTo(w * 0.22, h * 0.42);
+    context.lineTo(w * 0.10, h * 0.30);
+    context.lineTo(w * 0.16, h * 0.50);
+    context.closePath();
+    context.fill();
+
+    // The neck, carried up and forward.
+    context.beginPath();
+    context.moveTo(w * 0.60, h * 0.50);
+    context.lineTo(w * 0.70, h * 0.14);
+    context.lineTo(w * 0.80, h * 0.16);
+    context.lineTo(w * 0.72, h * 0.50);
+    context.closePath();
+    context.fill();
+
+    // The head, small at the top of the neck.
+    context.fillStyle = shade(base, 0.06);
+    context.beginPath();
+    context.ellipse(w * 0.78, h * 0.13, w * 0.10, h * 0.07, 0, 0, Math.PI * 2);
+    context.fill();
+
+    // **Four horns, which is what identifies this animal at all.** Two small and conical above
+    // the eyes, two broad and palmate behind -- canon's own description, and the only thing that
+    // separates the silhouette from a large deer.
+    context.fillStyle = shade(base, -0.34);
+    context.beginPath();
+    context.moveTo(w * 0.82, h * 0.09);
+    context.lineTo(w * 0.86, h * 0.02);
+    context.lineTo(w * 0.80, h * 0.06);
+    context.closePath();
+    context.fill();
+    context.beginPath();
+    context.ellipse(w * 0.71, h * 0.05, w * 0.075, h * 0.045, -0.4, 0, Math.PI * 2);
+    context.fill();
+
+    context.fillStyle = shade(base, -0.62);
+    context.beginPath();
+    context.arc(w * 0.82, h * 0.12, Math.max(1, w * 0.018), 0, Math.PI * 2);
+    context.fill();
+  } else {
+    // **The legs first, so the body is drawn over their tops.** Drawn after the body they read as
+    // four posts standing behind a hull -- which is exactly how the first version looked when it
+    // was finally put on screen and looked at. A limb joins a body; it does not abut it.
+    context.fillStyle = shade(base, -0.40);
+    for (const at of [0.40, 0.66]) {
+      context.fillRect(w * at, h * 0.56, w * 0.05, h * 0.26);
+    }
+    context.fillStyle = shade(base, -0.26);
+    for (const at of [0.32, 0.58]) {
+      context.fillRect(w * at, h * 0.56, w * 0.055, h * 0.30);
+    }
+
+    // The body: a long ellipse lying along the ground, tapering to a tail at the back.
+    context.fillStyle = shade(base, -0.08);
+    context.beginPath();
+    context.ellipse(w * 0.47, h * 0.50, w * 0.31, h * 0.20, 0, 0, Math.PI * 2);
+    context.fill();
+
+    // The tail, a wedge off the back.
+    context.beginPath();
+    context.moveTo(w * 0.20, h * 0.50);
+    context.lineTo(w * 0.03, h * 0.36);
+    context.lineTo(w * 0.05, h * 0.60);
+    context.closePath();
+    context.fill();
+
+    // The head and the long jaw, raised off the shoulders.
+    context.fillStyle = shade(base, 0.06);
+    context.beginPath();
+    context.ellipse(w * 0.76, h * 0.38, w * 0.125, h * 0.145, 0, 0, Math.PI * 2);
+    context.fill();
+    context.fillStyle = shade(base, -0.04);
+    context.beginPath();
+    context.moveTo(w * 0.81, h * 0.33);
+    context.lineTo(w * 0.99, h * 0.43);
+    context.lineTo(w * 0.81, h * 0.49);
+    context.closePath();
+    context.fill();
+
+    // One eye, in the darkest shade of the same hue rather than in white -- the same rule the
+    // placeholder tile keeps, so this reads as unfinished art and never as a debug marker.
+    context.fillStyle = shade(base, -0.62);
+    context.beginPath();
+    context.arc(w * 0.79, h * 0.34, Math.max(1, w * 0.018), 0, Math.PI * 2);
+    context.fill();
   }
-  context.fillStyle = shade(base, -0.26);
-  for (const at of [0.32, 0.58]) {
-    context.fillRect(w * at, h * 0.56, w * 0.055, h * 0.30);
-  }
-
-  // The body: a long ellipse lying along the ground, tapering to a tail at the back.
-  context.fillStyle = shade(base, -0.08);
-  context.beginPath();
-  context.ellipse(w * 0.47, h * 0.50, w * 0.31, h * 0.20, 0, 0, Math.PI * 2);
-  context.fill();
-
-  // The tail, a wedge off the back.
-  context.beginPath();
-  context.moveTo(w * 0.20, h * 0.50);
-  context.lineTo(w * 0.03, h * 0.36);
-  context.lineTo(w * 0.05, h * 0.60);
-  context.closePath();
-  context.fill();
-
-  // The head and the long jaw, raised off the shoulders.
-  context.fillStyle = shade(base, 0.06);
-  context.beginPath();
-  context.ellipse(w * 0.76, h * 0.38, w * 0.125, h * 0.145, 0, 0, Math.PI * 2);
-  context.fill();
-  context.fillStyle = shade(base, -0.04);
-  context.beginPath();
-  context.moveTo(w * 0.81, h * 0.33);
-  context.lineTo(w * 0.99, h * 0.43);
-  context.lineTo(w * 0.81, h * 0.49);
-  context.closePath();
-  context.fill();
-
-  // One eye, in the darkest shade of the same hue rather than in white -- the same rule the
-  // placeholder tile keeps, so this reads as unfinished art and never as a debug marker.
-  context.fillStyle = shade(base, -0.62);
-  context.beginPath();
-  context.arc(w * 0.79, h * 0.34, Math.max(1, w * 0.018), 0, Math.PI * 2);
-  context.fill();
 
   canvas.refresh();
   return key;

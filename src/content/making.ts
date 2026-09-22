@@ -29,7 +29,11 @@ import type { BiomeId, Rarity } from '../world/types';
 export type MaterialClass =
   | 'fibre' | 'timber' | 'bone' | 'hide' | 'shell' | 'resin' | 'clay' | 'stone'
   | 'glass' | 'metal' | 'salt' | 'pigment' | 'grain' | 'produce' | 'flesh'
-  | 'oil' | 'fuel' | 'physic' | 'spice' | 'poison';
+  | 'oil' | 'fuel' | 'physic' | 'spice' | 'poison'
+  // Milk and what sets from it, taken from a living animal. Its own class rather than a `flesh`
+  // or an `oil` because those both end an animal and this one leaves it standing -- which is the
+  // distinction that lets a wandering animal give something.
+  | 'milk';
 
 /**
  * What an object lets a person do, from `database/affordances.json`.

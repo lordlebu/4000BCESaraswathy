@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.26.0",
+  "canon_version": "2.28.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -4394,6 +4394,68 @@
       "mood": "patient",
       "region": "narmada-vindhya",
       "source_index": 263
+    },
+    {
+      "id": "fauna_sivatherium",
+      "type": "fauna",
+      "name": "Sivatherium",
+      "scientific": "Sivatherium giganteum",
+      "clade": "mammal",
+      "diet": "Herbivore",
+      "habitats": [
+        "region_narmada_plateau"
+      ],
+      "behaviour": [
+        "browsing",
+        "herding",
+        "unhurried"
+      ],
+      "related_species": [
+        "fauna_cloud_antelope"
+      ],
+      "notes": "A giraffid built like an ox: shoulder-high to a tall man, heavy in the chest, with two pairs of horns -- small and conical above the eyes, broad and palmate behind them, like a moose's carried on a giraffe's neck. It browses the hill margins in threes and fours, taking the high leaves nothing else reaches, and moves between two or three feeding grounds across a day.\n\nIt is not afraid of people and this is the whole of why it matters. The herders' word for it means something nearer \"the tall neighbour\" than \"the game\": a cow in milk will stand to be milked by somebody who has brought her something and is not in a hurry, which is a relationship rather than a hunt. The first canon giraffid, and the only animal in the record that gives without being ended.",
+      "biomes": [
+        "hills",
+        "forest"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "journal_prompt": "Four horns, and the back pair are flat as a palm held open. She let me come inside ten feet and went on stripping the high branches, and the herder's girl walked straight up to her shoulder with a bowl as though to a byre.",
+      "mood": "gentle",
+      "region": "narmada-vindhya",
+      "source_index": 264
+    },
+    {
+      "id": "fauna_vasuki_indicus",
+      "type": "fauna",
+      "name": "Vasuki",
+      "scientific": "Vasuki indicus",
+      "clade": "reptile",
+      "diet": "Carnivore",
+      "habitats": [
+        "region_gedrosian_desert",
+        "region_saraswati_delta"
+      ],
+      "behaviour": [
+        "constricting",
+        "solitary",
+        "basking"
+      ],
+      "related_species": [
+        "fauna_delta_reed_python",
+        "fauna_narmada_rock_python"
+      ],
+      "notes": "Eleven to fifteen metres, thick through as a man's chest, and no venom at all -- it is a madtsoiid, and it kills by holding. It lies up in the rock shade through the heat and moves at the edges of the day, which is when you find a track across a dune four hand-spans wide and no animal at the end of it.\n\nWhat it leaves is the skin. A snake this size sheds in one piece and the piece is longer than a boat, lying in the lee of a rock like something discarded rather than something lost. The caravan people do not hunt it and do not need to: they follow the sheds, and a serpent that has shed once will shed again in the same handful of places. Which is why it is recorded as uncommon rather than as a wonder -- the animal is hard to be shown, but the sign of it is all over the rock country if you know the shape of a track.",
+      "biomes": [
+        "desert",
+        "hills"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "journal_prompt": "The track crosses the dune and does not stop, and it is as wide as both my hands laid end to end. I followed it to a rock shelf and found the skin instead of the animal -- whole, from jaw to tail, the eye-caps still in it, and longer than the boat we came down on.",
+      "mood": "uncanny",
+      "region": "gedrosian-taklamakan",
+      "source_index": 265
     }
   ],
   "flora": [

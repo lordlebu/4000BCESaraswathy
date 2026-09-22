@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.26.0",
+  "canon_version": "2.28.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -345,6 +345,40 @@
       ],
       "restores": [
         "poi_salt_orchard"
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "discovery_frill_in_hand",
+      "type": "discovery",
+      "name": "The Frill in Hand",
+      "discipline": "zoology",
+      "subject": "fauna_frilled_shringasaurus",
+      "found_at": [
+        "poi_tide_market",
+        "poi_caravan_camp"
+      ],
+      "levels": [
+        {
+          "entry": "There is a young shringasaurus in a pen behind the fish stalls, about the size of a large dog, and the frill is not grown -- a ridge of skin over the neck with the horns still soft under it."
+        },
+        {
+          "entry": "It is not thriving. The frill should be warm to the hand and thin enough to see the light through; this one is thick, dull and cool, and it holds the same corner of the pen all day facing the wall."
+        },
+        {
+          "entry": "The frill is not for show and not for shade alone. It is full of vessels and it is how the animal sheds heat -- which is why the adults hold open ground and do not shelter, and why one penned against a wall is slowly cooking in its own shade."
+        },
+        {
+          "entry": "So it cannot be kept anywhere it cannot walk away from the heat, which is to say it cannot be kept. Marn's people have a word, *bhar* -- a load an animal agreed to. The herders use it of a beast that carries. Nobody has ever used it of this one, and that is not an accident of vocabulary."
+        }
+      ],
+      "answers": [
+        "question_kept_animal"
+      ],
+      "related_discoveries": [
+        "discovery_market_ledger"
       ],
       "epochs": [
         "epoch_post_cataclysm"
@@ -1735,6 +1769,42 @@
           "sound": true
         }
       ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "question_kept_animal",
+      "type": "field_question",
+      "question": "Can a frilled shringasaurus be kept?",
+      "discipline": "zoology",
+      "raised_at": "poi_tide_market",
+      "raised_by": "npc_sura",
+      "evidence": [
+        "discovery_market_ledger",
+        "discovery_frill_in_hand"
+      ],
+      "resolutions": [
+        {
+          "conclusion": "Yes, if it is taken young enough. The juvenile at the market is alive and eating, which settles it.",
+          "requires": [
+            "discovery_frill_in_hand"
+          ],
+          "sound": false,
+          "revisit": "It is eating, but it is eating less each week, and the ledger has the same entry four times in nine years -- always a juvenile, never the same one twice.",
+          "revisit_after": "discovery_market_ledger"
+        },
+        {
+          "conclusion": "No. They are bought young four or five times a decade and none has lived two years; the ledger records the purchases and never a sale, a death or a grown animal. It is not a pet that keeps escaping. It is an animal that does not survive being kept, bought again each time by somebody who was not told.",
+          "requires": [
+            "discovery_market_ledger",
+            "discovery_frill_in_hand"
+          ],
+          "sound": true
+        }
+      ],
+      "local_knowledge": "The drovers will not take one on the caravan at any price and give no reason beyond that it is bad luck on the road -- which is the right answer arrived at from the wrong direction, and four generations quicker than the ledger arrives at it.",
+      "academic_hypothesis": "A Narmada zoology would say the animal is territorial and solitary and therefore unsuited to confinement, which is true, correctly reasoned, and stops one step short: it explains the distress and not the deaths.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
