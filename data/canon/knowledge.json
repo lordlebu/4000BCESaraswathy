@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.25.2",
+  "canon_version": "2.26.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -1503,6 +1503,56 @@
         }
       ],
       "notes": "Opens the stair shaft. The reading is deliberately sympathetic to Kavik -- the building was sound and the world moved."
+    },
+    {
+      "id": "discovery_whale_in_the_hills",
+      "type": "discovery",
+      "name": "The Whale in the Hills",
+      "discipline": "evolution",
+      "subject": "fauna_narmada_walking_whale",
+      "found_at": [
+        "poi_basalt_quarry",
+        "poi_walking_spring"
+      ],
+      "levels": [
+        {
+          "entry": "Something large moves in the bend below the quarry. It is not a crocodile. I have watched crocodiles and they do not do that with their backs."
+        },
+        {
+          "entry": "It left the water. Four legs, short and thick, and it carried its weight on them badly but it carried it. The track is a hand across and sunk deep -- this is a heavy animal that has chosen to be in the shallows."
+        },
+        {
+          "entry": "The head settles it, and I did not want it settled. That is a whale's jaw. The ear is set in bone the way a whale's is. It is a whale and it is walking and it is eight hundred miles from the sea.",
+          "conditions": {
+            "weather": [
+              "clear"
+            ]
+          }
+        },
+        {
+          "entry": "Then the sea was here, or it was not and this animal never needed one. The second is the harder thought and I think it is the right one: it is not stranded. It lives here. Whatever it is becoming, or has come from, happened in fresh water.",
+          "requires": [
+            "discovery_quarry_sequence"
+          ]
+        },
+        {
+          "entry": "Nine inches of shells in the quarry face change from round to ridged and the archive collected none of them. This animal is the same absence, standing up and breathing. The record was cut by people who decided what belonged in it -- and a whale with legs in the Narmada did not.",
+          "requires": [
+            "discovery_quarry_sequence"
+          ]
+        }
+      ],
+      "answers": [
+        "question_two_names"
+      ],
+      "related_discoveries": [
+        "discovery_quarry_sequence",
+        "discovery_bones_in_one_stone"
+      ],
+      "notes": "The far end of the strand the quarry face begins. Deliberately takes nothing: there is no material, no recipe and no node -- meeting it is the whole of it, which is the case this map makes about what a record is for. The fourth and fifth rungs gate on discovery_quarry_sequence because the graduated shell bed is what makes a living intermediate mean anything; met without it, this is only a strange animal. Anchored on the Eocene archaeocetes of the subcontinent -- Ambulocetus and Indohyus -- which were freshwater and were found in these rocks.",
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
     },
     {
       "id": "discovery_what_a_hunter_leaves",

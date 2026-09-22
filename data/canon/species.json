@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.25.2",
+  "canon_version": "2.26.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -4365,6 +4365,35 @@
       "mood": "patient",
       "journal_prompt": "It is browsing at the height of a roof and has not registered you at all. The tusks are wrong -- they go forward rather than out, two pale shafts a shade longer than the animal is tall.",
       "source_index": 261
+    },
+    {
+      "id": "fauna_narmada_walking_whale",
+      "type": "fauna",
+      "name": "Narmada Walking Whale",
+      "scientific": "Ambulocetus narmadensis",
+      "clade": "mammal",
+      "diet": "Carnivore",
+      "habitats": [
+        "region_narmada_plateau"
+      ],
+      "behaviour": [
+        "wading",
+        "solitary",
+        "ambush"
+      ],
+      "related_species": [
+        "fauna_tethys_river_dolphin"
+      ],
+      "notes": "A whale with legs, in a river, eight hundred miles from any sea. Longer than a man is tall and heavier than a bullock, with the short thick limbs of something that swims better than it walks and walks well enough to leave the water. It hunts the shallows at the bend below the quarry, lying still with only the long jaw under the surface. It hauls out on the bank to rest and to move between pools, but it does not leave the water for long: the legs carry it well enough over gravel and badly over anything else. The archive holds no specimen and no account of one; the quarry face holds the ash band that buried its relatives, nine inches of it. It is the animal the record does not contain, still standing in the river the record was cut from.",
+      "biomes": [
+        "river"
+      ],
+      "placement": "encounter",
+      "rarity": "mythic",
+      "journal_prompt": "It came out of the water on legs. Not flippers used as legs -- legs, with feet, and it put its weight on them one at a time the way a heavy animal does, and then it turned its head and the head was a whale's.",
+      "mood": "patient",
+      "region": "narmada-vindhya",
+      "source_index": 263
     }
   ],
   "flora": [

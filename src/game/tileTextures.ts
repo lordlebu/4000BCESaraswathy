@@ -795,6 +795,118 @@ export function placeholderTileKey(
   return key;
 }
 
+/**
+ * A stand-in figure for an animal that walks the map before its painting exists.
+ *
+ * **The same bargain `placeholderTileKey` makes, for the same reason.** An overworld figure is
+ * built by `tools/build-sprite-sheet.js` from art in `assets/source/`, and that script converts a
+ * painting rather than inventing one -- so a wanderer with no source PNG could not be drawn at all,
+ * and the quest behind it would wait on a painter. This draws something honest instead.
+ *
+ * It is deliberately **not** a character sheet, and could not be one: the manifest fits each figure
+ * to a single 26x40 cell, and every frame of a five-metre whale is wider than it is tall, so it
+ * would be fitted by width and come out a fifth of the height of everything else. Tier 1 in the
+ * plan is one still marker per animal for exactly this reason.
+ *
+ * What it draws: a long low body with a raised head, in the animal's own colour, standing on a
+ * shadow. Not a glyph and not a swatch -- a shape that reads at tile scale as a big animal facing
+ * a direction, which is all the marker has to say before the painting lands. Cached per species
+ * and facing under `wanderer:<id>:<facing>`.
+ */
+export function wandererMarkerKey(
+  scene: Phaser.Scene,
+  speciesId: string,
+  colour: string,
+  facing: 'left' | 'right'
+): string {
+  const key = `wanderer:${speciesId}:${facing}`;
+  if (scene.textures.exists(key)) return key;
+
+  // **A tile and a half long, two thirds of a tile tall, and both numbers come from looking.**
+  // The first version was two tiles by one, which put an animal larger than the player in the
+  // river -- it read as a landmark rather than as something you could walk up to. Nothing failed:
+  // the browser spec asserted the sprite had a width and a height, and it had both.
+  //
+  // The proportions are the animal's rather than the cell's. An Ambulocetus was roughly three
+  // metres and low to the ground, so it is longer than it is tall by about two to one and stands
+  // a little under a person's height at the shoulder.
+  const w = Math.round(TILE_SIZE * 1.5);
+  const h = Math.round(TILE_SIZE * 0.66);
+  const canvas = scene.textures.createCanvas(key, w, h);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  const base = parseHex(colour);
+  // Mirrored by drawing, not by `setFlipX`, because the marker is cached per facing anyway and a
+  // flipped sprite would also mirror the shadow's offset -- which is lit from one side.
+  if (facing === 'left') {
+    context.translate(w, 0);
+    context.scale(-1, 1);
+  }
+
+  // The shadow first, so the body sits on it rather than floating. A figure drawn without one
+  // hovers a tile above the ground, which is a fault this repository has actually shipped.
+  context.globalAlpha = 0.22;
+  context.fillStyle = 'rgb(0, 0, 0)';
+  context.beginPath();
+  context.ellipse(w * 0.5, h * 0.93, w * 0.32, h * 0.06, 0, 0, Math.PI * 2);
+  context.fill();
+  context.globalAlpha = 1;
+
+  // **The legs first, so the body is drawn over their tops.** Drawn after the body they read as
+  // four posts standing behind a hull -- which is exactly how the first version looked when it was
+  // finally put on screen and looked at. A limb joins a body; it does not abut it.
+  //
+  // The whole point of this animal is that it walks, so they are drawn rather than implied: near
+  // pair and far pair, the far pair darker and shorter, which is what says "four legs" at a size
+  // too small to draw a joint.
+  context.fillStyle = shade(base, -0.40);
+  for (const at of [0.40, 0.66]) {
+    context.fillRect(w * at, h * 0.56, w * 0.05, h * 0.26);
+  }
+  context.fillStyle = shade(base, -0.26);
+  for (const at of [0.32, 0.58]) {
+    context.fillRect(w * at, h * 0.56, w * 0.055, h * 0.30);
+  }
+
+  // The body: a long ellipse lying along the ground, tapering to a tail at the back.
+  context.fillStyle = shade(base, -0.08);
+  context.beginPath();
+  context.ellipse(w * 0.47, h * 0.50, w * 0.31, h * 0.20, 0, 0, Math.PI * 2);
+  context.fill();
+
+  // The tail, a wedge off the back.
+  context.beginPath();
+  context.moveTo(w * 0.20, h * 0.50);
+  context.lineTo(w * 0.03, h * 0.36);
+  context.lineTo(w * 0.05, h * 0.60);
+  context.closePath();
+  context.fill();
+
+  // The head and the long jaw, raised off the shoulders.
+  context.fillStyle = shade(base, 0.06);
+  context.beginPath();
+  context.ellipse(w * 0.76, h * 0.38, w * 0.125, h * 0.145, 0, 0, Math.PI * 2);
+  context.fill();
+  context.fillStyle = shade(base, -0.04);
+  context.beginPath();
+  context.moveTo(w * 0.81, h * 0.33);
+  context.lineTo(w * 0.99, h * 0.43);
+  context.lineTo(w * 0.81, h * 0.49);
+  context.closePath();
+  context.fill();
+
+  // One eye, in the darkest shade of the same hue rather than in white -- the same rule the
+  // placeholder tile keeps, so this reads as unfinished art and never as a debug marker.
+  context.fillStyle = shade(base, -0.62);
+  context.beginPath();
+  context.arc(w * 0.79, h * 0.34, Math.max(1, w * 0.018), 0, Math.PI * 2);
+  context.fill();
+
+  canvas.refresh();
+  return key;
+}
+
 interface Rgb {
   r: number;
   g: number;

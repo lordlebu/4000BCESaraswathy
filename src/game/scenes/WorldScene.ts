@@ -63,7 +63,8 @@ import {
   tileFrame,
   hasTileArt,
   placeholderTileKey,
-  traceFrameFor
+  traceFrameFor,
+  wandererMarkerKey
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
 import { ROW_SLOT, depthFor, rowAtFoot, type Edge } from '../frames';
@@ -163,6 +164,8 @@ import {
   type Traveller,
   type TravellerState
 } from '../../content/travellers';
+import { wanderersOn, wandererAt, type Wanderer } from '../../content/wanderers';
+import { loadWandererArt, paintedKey, paintedWanderer, paintedWandererIds } from '../wandererArt';
 import { isCamp, isGrand } from '../../content/camps';
 import { findPath } from '../../world/pathfind';
 import { NO_GESTURE, pressed, released, type Gesture } from '../gesture';
@@ -357,6 +360,18 @@ export class WorldScene extends Phaser.Scene {
 
   /** The last phase the travellers were moved for, so they are not recomputed every frame. */
   private travellersMovedAt = -1;
+
+  /**
+   * The animals walking their own ground, and the sprites drawing them.
+   *
+   * Same shape and same bargain as `travellers` above: the circuit is held because it is a fact
+   * about this generated world, and the position is not, because `wandererAt` derives it from the
+   * seed, the day and the hour and stores nothing.
+   */
+  private wanderers: { wanderer: Wanderer; sprite: Phaser.GameObjects.Image }[] = [];
+
+  /** The last phase the wanderers were moved for. Separate from the travellers' so neither gates the other. */
+  private wanderersMovedAt = -1;
   /** The place under foot, so the UI is told when it changes rather than on every step. */
   private standingOn: string | null = null;
   private tileSprites: Phaser.GameObjects.Image[][] = [];
@@ -521,6 +536,10 @@ export class WorldScene extends Phaser.Scene {
     // loading them all costs less than the machinery to load one lazily and swap textures later --
     // and it means a character can be changed without a scene restart.
     for (const art of everySheet()) loadCharacterSheet(this, art.key, art.url);
+    // Every painted animal, not just this map's, for the same reason the character sheets are all
+    // loaded: `built` is not assigned until `create`, so `preload` cannot know which map it is
+    // about to draw. There are none today and one per quest thereafter, at a few KB each.
+    loadWandererArt(this, paintedWandererIds());
     loadTileSheets(this, {
       terrain: terrainUrl,
       landmarks: landmarksUrl,
@@ -627,6 +646,7 @@ export class WorldScene extends Phaser.Scene {
 
     this.createPlayer();
     this.createTravellers();
+    this.createWanderers();
     // The initial answer, so the UI never has to assume one.
     this.reportCharacter();
 
@@ -1505,6 +1525,9 @@ export class WorldScene extends Phaser.Scene {
       // more often than the answer changes -- and `whereabouts` walks a cached path, so the cost is
       // an array index rather than a search.
       this.updateTravellers(phase);
+      // The animals that are somewhere rather than everywhere, on the same gate and for the same
+      // reason -- a wanderer moves no faster than a drover does.
+      this.updateWanderers(phase);
 
       // The sky's own announcement, in steps rather than continuously -- see `sky-changed`. It
       // shares the half-second check because it is the same question asked of the same clock, and
@@ -1589,6 +1612,102 @@ export class WorldScene extends Phaser.Scene {
         h: Math.round(sprite.displayHeight),
         playerH: Math.round(this.player.displayHeight)
       }));
+  }
+
+  /**
+   * Put the map's animals on their ground.
+   *
+   * **Drawn from a built texture rather than a sheet, and that is not a shortcut.** A character
+   * sheet fits each figure to one 26x40 cell, and every frame of a wading whale is wider than it is
+   * tall -- fitted by width it would come out a fifth the height of a person. `wandererMarkerKey`
+   * draws the stand-in until a painting exists; see its own note for the bargain.
+   */
+  private createWanderers(): void {
+    for (const wanderer of wanderersOn(this.built.fieldMap.id, this.world)) {
+      // The animal's own ground gives it its colour, so the marker belongs to the place it stands
+      // in rather than being a colour somebody picked. Canon already carries one per biome.
+      const sprite = this.add
+        .image(0, 0, this.wandererTexture(wanderer, 'right'))
+        .setOrigin(0.5, 1)
+        .setVisible(false);
+      sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+      sprite.setName(`wanderer:${wanderer.id}`);
+      this.wanderers.push({ wanderer, sprite });
+    }
+
+    // **Exposed for the browser suite for the same reason `__travellers` is, and it is the half
+    // that matters.** Every rule in `wanderers.ts` is proved under Node while this scene calls none
+    // of them -- which is this codebase's signature fault, five times recorded. `e2e/wanderers.spec.ts`
+    // reads this and fails the day `createWanderers` stops being called.
+    (window as unknown as { __wanderers?: () => unknown[] }).__wanderers = () =>
+      this.wanderers.map(({ wanderer, sprite }) => ({
+        id: wanderer.id,
+        name: wanderer.species.name,
+        stops: wanderer.circuit.length,
+        texture: sprite.texture.key,
+        visible: sprite.visible,
+        x: Math.round(sprite.x),
+        y: Math.round(sprite.y),
+        w: Math.round(sprite.displayWidth),
+        h: Math.round(sprite.displayHeight)
+      }));
+  }
+
+  /**
+   * The texture a wanderer is drawn from: the painting if one exists, the stand-in otherwise.
+   *
+   * **The one place that decides, so art arriving is a file and not an edit.** Drop
+   * `assets/wanderers/<species id>.png` in and this returns it instead -- see `wandererArt.ts` for
+   * the convention and `wandererMarkerKey` for what is drawn until then.
+   */
+  private wandererTexture(wanderer: Wanderer, facing: 'left' | 'right'): string {
+    const painted = paintedWanderer(wanderer.id);
+    if (painted && this.textures.exists(paintedKey(wanderer.id))) return paintedKey(wanderer.id);
+    const home = biomeFor(wanderer.species.biomes[0] ?? 'river');
+    return wandererMarkerKey(this, wanderer.id, home?.color ?? '#5d7f86', facing);
+  }
+
+  /**
+   * Move the animals to where the hour says they are.
+   *
+   * **Visible when resting, which is the one place this deliberately differs from a traveller.** A
+   * person who has arrived somewhere is hidden, because they belong in the place panel rather than
+   * standing on the roof of the building. An animal has no panel to be in and no building to stand
+   * on: hiding it at its stop would mean the whale exists only while crossing between pools, and
+   * coming alongside one is the whole of the quest.
+   */
+  private updateWanderers(phase: number): void {
+    if (this.wanderers.length === 0) return;
+    const step = Math.floor(phase * 100);
+    if (step === this.wanderersMovedAt) return;
+    this.wanderersMovedAt = step;
+
+    const day = this.dayOfJourney();
+    for (const { wanderer, sprite } of this.wanderers) {
+      const where = wandererAt(this.world, wanderer, day, phase);
+      if (!where) {
+        sprite.setVisible(false);
+        continue;
+      }
+      sprite.setVisible(true);
+      sprite.setPosition(
+        where.at.x * TILE_SIZE + TILE_SIZE / 2,
+        where.at.y * TILE_SIZE + TILE_SIZE - 2
+      );
+      // Sorted by row like everything else standing on the ground, so an animal south of the player
+      // passes in front and one north of them passes behind.
+      sprite.setDepth(depthFor(where.at.y, ROW_SLOT.walker));
+      // Facing is the marker itself rather than a flip, because the texture is cached per facing --
+      // see `wandererMarkerKey`. Kept as it was while standing still, so a resting animal does not
+      // snap round to face east the moment it stops.
+      if (where.heading === 'east' || where.heading === 'west') {
+        const facing = where.heading === 'west' ? 'left' : 'right';
+        sprite.setTexture(this.wandererTexture(wanderer, facing));
+        // A painting is one image and is mirrored by the engine; the stand-in is cached per facing
+        // and must not be flipped again on top of that.
+        sprite.setFlipX(paintedWanderer(wanderer.id) !== null && facing === 'left');
+      }
+    }
   }
 
   /** Any built sheet but this one, so a traveller is never the player's own figure. */
