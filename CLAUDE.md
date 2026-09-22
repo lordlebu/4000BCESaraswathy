@@ -329,7 +329,7 @@ SouthOfTethys/database/  →  utils/export_canon_bundle.py  →  data/canon/spec
 ```
 
 **Everything in `data/canon/` is generated. Never hand-edit it.** Canon lives in the sibling
-`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 734 entities
+`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 736 entities
 across species, places, discoveries and world. To change any of it, edit the canon entity there and
 re-run `python utils/export_canon_bundle.py --apply`.
 
@@ -360,7 +360,7 @@ with painted tiles, so a species tagged to one has somewhere to be.
 
 **Thirty-five species are still held back as `placement: "lore"`, and the holdback is enforced at
 the export boundary rather than here.** Canon's source carries 376 species; `export_canon_bundle.py`
-drops the `lore` ones on the way out, so the bundle this repo reads holds **345** (233 fauna, 112
+drops the `lore` ones on the way out, so the bundle this repo reads holds **346** (234 fauna, 112
 flora) and every one of them reaches the engine.
 
 That is why **nothing in `src/` reads `placement` at all**, and it is the right arrangement rather

@@ -39,7 +39,7 @@ clock.
 - **A generator that produces real geography.** Terrain is built from octaves of value noise over a
   seeded highland spine, so every seed has hills, mountains and rivers running off them to the
   water. `test/generator.test.ts` asserts this on twenty seeds.
-- **233 creatures and 112 plants**, placed by biome, each with authored journal prose.
+- **234 creatures and 112 plants**, placed by biome, each with authored journal prose.
 - **Invented place names.** Settlements, rivers and landmarks are named from seeded syllables —
   Thenavati, Hudhukoli, the Shanesarin — so a map reads as a country rather than a grid.
 - **Seven kinds of landmark**, each suited to the ground it stands on, each with a written page for
@@ -78,10 +78,10 @@ The browser suite needs `npx playwright install chromium` once.
 
 ## World content
 
-The flora and fauna canon lives in the **SouthOfTethys** repository, not here — 233 fauna and 112
-flora among 734 entities, alongside the field maps, discoveries, questions, people and vocabulary
+The flora and fauna canon lives in the **SouthOfTethys** repository, not here — 234 fauna and 112
+flora among 736 entities, alongside the field maps, discoveries, questions, people and vocabulary
 the game is made of. [docs/bestiary.md](docs/bestiary.md) is the prose document those species were
-originally extracted from, kept for provenance; it is no longer upstream of anything. 345 species across seven
+originally extracted from, kept for provenance; it is no longer upstream of anything. 346 species across seven
 regions, from the Saraswati deltas to the Asura-tainted horrors.
 
 `data/canon/` is **generated** by `utils/export_canon_bundle.py` in the canon repository and must
