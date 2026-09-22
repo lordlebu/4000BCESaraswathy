@@ -57,7 +57,11 @@ export const CLASS_MARK: Record<MaterialClass, string> = {
   // A sealed jar, not a skull. Canon records poisons as substances and has no vocabulary for
   // harm at all -- nothing can be made of one except medicine -- so a mark that read as a
   // threat would say more than canon does.
-  poison: '🫙'
+  poison: '🫙',
+  // Added when canon did. Its own class rather than a `flesh` or an `oil`, because every other
+  // animal material in the bundle ends an animal and this one leaves it standing -- which is the
+  // distinction a game with no combat is built on.
+  milk: '🥛'
 };
 
 /**

@@ -169,6 +169,32 @@ describe('coming alongside', () => {
   });
 });
 
+describe('every authored wanderer actually resolves', () => {
+  // The list in `wanderers.ts` is names; this is the check that each name finds a species in the
+  // bundle and wins a circuit on real ground. A typo, a `lore` placement or a biome the map does
+  // not grow all fail the same silent way -- `wanderersOn` drops them and the animal simply never
+  // appears, which is this codebase's signature fault wearing a data hat.
+  it('puts the whale and the sivatherium on the Narmada', () => {
+    const on = wanderersOn('field_map_narmada', narmada()).map((w) => w.id);
+    expect(on).toContain('narmada-walking-whale');
+    expect(on).toContain('sivatherium');
+  });
+
+  it('puts Vasuki in the Dwarka desert', () => {
+    const on = wanderersOn('field_map_dwarka', built('field_map_dwarka')).map((w) => w.id);
+    expect(on).toContain('vasuki-indicus');
+  });
+
+  it('gives every one of them a circuit it can walk', () => {
+    for (const map of ['field_map_narmada', 'field_map_dwarka']) {
+      const world = built(map);
+      for (const w of wanderersOn(map, world)) {
+        expect(w.circuit.length, `${w.id} has no circuit on ${map}`).toBeGreaterThanOrEqual(2);
+      }
+    }
+  });
+});
+
 describe('a map with nothing authored to wander', () => {
   it('is empty rather than inventing an animal', () => {
     expect(wanderersOn('field_map_lothal', built('field_map_lothal'))).toEqual([]);
