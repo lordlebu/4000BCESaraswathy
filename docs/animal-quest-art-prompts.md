@@ -4,9 +4,17 @@ Every image the four animal quests want, with the prompt for each. Companion to
 [`plate-prompts.md`](plate-prompts.md), which owns the species-plate style block and the
 per-tool notes; this file does not repeat them.
 
-**Nothing here is a blocker.** Every one of these has a working fallback in the game today — an
-emoji mark, a generated marker, the night's own scene — so they land one at a time, in any order,
-and each replaces a stand-in the moment it arrives.
+**Status, 2026-09-22: the plates and the overworld sprites are done.** Groups A and B are painted
+and in the game; C, D and E are still open and all three have working fallbacks, so they land one
+at a time in any order and nothing waits on them.
+
+| Group | | |
+|---|---|---|
+| A · species plates | **done** | 4 painted, built to `src/ui/plates/` |
+| B · overworld sprites | **done** | 12 frames, four facings each, in `assets/wanderers/` |
+| C · activity scenes | open | falls back to the plain gesture painting |
+| D · event paintings | open | falls back to the night's own scene |
+| E · thing plates | open | falls back to a `ThingIcon` mark — **and a mark is a fine answer here** |
 
 Read the three hard rules below before generating anything. Each one is here because an asset was
 lost to it.
@@ -51,7 +59,7 @@ and keeps it**, because it is the record of that animal.
 
 ---
 
-## A. Species plates — four animals
+## A. Species plates — four animals ✅ done
 
 Square, 1024×1024, watercolour. **Use the style block from
 [`plate-prompts.md`](plate-prompts.md)** — the 2026-09-09 one, brighter with water in motion — and
@@ -73,45 +81,50 @@ where models reach for a threat pose unprompted.
 
 ---
 
-## B. Overworld markers — three animals
+## B. Overworld sprites — three animals ✅ done
 
-**This is the set that replaces live placeholder code**, so it is the highest-value group here. The
-game currently draws a generated stand-in: a shape built from canvas primitives in
-`wandererMarkerKey`. Drop a real painting in `assets/wanderers/` and it supersedes the stand-in with
-no code change.
+**This is the set that replaced live placeholder code.** The game drew a generated stand-in built
+from canvas primitives in `wandererMarkerKey`; art in `assets/wanderers/` now supersedes it, and
+the stand-in remains as the fallback for any animal added later.
 
-Full spec in [`assets/wanderers/README.md`](../assets/wanderers/README.md). The essentials:
+Twelve frames in: **four facings each** — right, left, down, up — for the whale, the sivatherium
+and Vasuki. Full spec in [`assets/wanderers/README.md`](../assets/wanderers/README.md).
 
-- **One image, facing right.** Not a sheet, not a walk cycle, not a sequence. The engine mirrors it
-  for the other direction. *Asking a painter for a sequence is a mistake this repo has already
-  made — a six-cell sheet came back pixel-identical in every cell.*
-- **Side on, feet at the very bottom edge.** The sprite is anchored bottom-centre, so a gap under
-  the feet draws the animal floating above the grass. That has shipped here before.
-- **Transparent background.** Not white, not magenta. Alpha zero renders as white in some previews —
-  check the corner pixels really are `rgba(0,0,0,0)`.
-- **The cell's size is its size on screen.** Nothing rescales these. A tile is 128px.
+### What the next one should ask for
 
-> **Style:** Small pixel-art sprite for a top-down 2D game, side view, facing right. Painterly
-> pixel art with soft dithering, not hard-edged 8-bit. Warm naturalistic colour, readable as a
-> silhouette at a glance. Fully transparent background — no ground, no shadow, no scenery, no
-> border. The animal's feet touch the very bottom edge of the image. No text, no watermark, no
-> signature.
+> **Style:** Small pixel-art sprite for a top-down 2D game, side view. Painterly pixel art with
+> soft dithering, not hard-edged 8-bit. Warm naturalistic colour, readable as a silhouette at a
+> glance. Fully transparent background — no ground, no scenery, no border. No text, no watermark,
+> no signature.
 >
-> **Subject:** *(one line below)*
+> **Subject:** Four views of the same animal in one image, evenly spaced and not overlapping:
+> facing right, facing left, seen from the front, seen from behind. *(then the animal)*
 
-| File | Size | Subject |
-|---|---|---|
-| `narmada-walking-whale.png` | 192 × 84 | A wading whale with four short legs, long-jawed, low and heavy, mid-stride. About a tile and a half long and two thirds of a tile tall. |
-| `sivatherium.png` | 150 × 140 | A heavy giraffid with four horns — two small above the eyes, two broad and palmate behind — standing, head slightly raised. Roughly as tall as it is long. |
-| `vasuki-indicus.png` | 210 × 70 | An immense serpent in a long shallow S-curve, head at the right, body thick and tapering to the tail. Low to the ground, longer than anything else on the map. |
+Four *viewpoints* is a different ask from four frames of a walk cycle, and it worked first time.
+A **sequence** is the thing not to ask for — a six-cell windmill sheet once came back
+pixel-identical in every cell, which is why nothing here is animated.
 
-*Sizes are guidance, not a contract — they are the stand-in's proportions, which were chosen so a
-three-metre animal reads correctly beside a player one tile tall. Over about two tiles long and it
-reads as a landmark rather than something you can walk up to.*
+### Three things learned taking these in
+
+- **Ask for the four views in one image, then split it.** `tools/build-wanderers.js` finds each
+  view as a connected run of opaque pixels rather than cutting on a grid, because the three sheets
+  that arrived were a row of four, a 2×2, and a row whose middle two animals *touch at the muzzle*.
+  An even-quarter split cut two of them in half — measured, not guessed.
+- **Paint at any size.** `sizeWanderer` scales by the animal's height from `frames.ts`. Scaling to
+  *fit a box* was tried and is visibly wrong: a long side view hits the width bound and shrinks
+  while the narrow front view of the same animal does not, so the whale came out three times bigger
+  walking towards you than walking across.
+- **Transparent, and check it rather than trusting the preview.** These arrived with a soft halo
+  around each animal (alpha under 40) which is invisible against grass, and a maximum alpha of 254
+  rather than 255, which is invisible anywhere. Neither was worth a pass to fix — but *measure the
+  corner pixels* before believing a background is clear.
+
+On screen, against a traveller's 80px and the player's 160px: **whale 56, sivatherium 80,
+Vasuki 40.**
 
 ---
 
-## C. Activity scenes — the moment of doing it
+## C. Activity scenes — the moment of doing it · open
 
 Goes in `src/ui/scenes/`. Named `<gesture>-<something>.png`; the gestures are `stoop`, `work`,
 `stalk`, `fish`, `rest`. An unpainted variant falls back to the plain gesture, which already exists —
@@ -137,7 +150,7 @@ specimen and not a landscape.
 
 ---
 
-## D. Event paintings — the scenes with a story in them
+## D. Event paintings — the scenes with a story in them · open
 
 Goes in `src/ui/events/`, named after the event id. **Wide: the card crops to roughly 16:7, so
 compose for a band rather than a square.** An event with no painting still fires and reads — the card
@@ -167,7 +180,7 @@ being cruel, which is precisely the point.
 
 ---
 
-## E. Thing plates — the made objects
+## E. Thing plates — the made objects · open, and optional
 
 Goes in `src/ui/things/`, **canon ids kept whole**. These replace an emoji mark that already works,
 so they are the most optional group of all.

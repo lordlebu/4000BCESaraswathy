@@ -386,6 +386,14 @@ it is not, it has already been applied.
   `cooking.ts`, `using.ts` and `vehicles.ts` are the rules over it; `events.ts` holds what can
   happen *to* you. All import their JSON at build time.
 
+  **`travellers.ts` and `wanderers.ts` are the same arithmetic with different circuits.** A
+  traveller walks between points of interest, an animal between tiles of its own habitat, and
+  `whereabouts` is imported by the second rather than reimplemented — one position model, one set
+  of hours, one place for the next bug in it to be fixed. Neither saves anything: a position is a
+  pure function of the seed, the day and the hour, which is why adding animals that move cost no
+  `SAVE_VERSION` bump. An animal that is a *property of a tile* is still `species.ts`; a wanderer
+  is an actor, and the two answer different questions.
+
   **A satchel is not the kit, and neither replaced the other.** `kit.ts` is the bedroll, lamp,
   diary and staff: fixed, unmanaged, there from the first step. `satchel.ts` is what gets
   picked up along the way. The kit's argument against consumables still stands — there is no
@@ -396,7 +404,9 @@ it is not, it has already been applied.
   `PhaserGame.tsx` owns the `Phaser.Game` lifecycle; `EventBus.ts` is the seam to React.
   `dayNight.ts`, `player.ts`, `night.ts`, `arrival.ts`, `fatigue.ts`, `frames.ts` and `scenePlan.ts`
   are the exceptions that import no Phaser, so `test/` can cover them — which is the whole reason
-  the placement and night rules live outside the scene.
+  the placement and night rules live outside the scene. `wandererArt.ts` globs `assets/wanderers/`
+  so a painted animal needs no registration, and the sizes it is drawn at live in `frames.ts` for
+  the same reason everything else does: `tileTextures.ts` cannot be imported under Node.
 - **`src/ui/`** — React chrome. The dock along the bottom (`Here.tsx`, `JournalPanel.tsx`,
   `PlacePanel.tsx`, `TileActions.tsx`), the records and interrupts behind one `Modal.tsx`, the
   painted plate a species opens into (`Specimen.tsx`), the seed bar, and `styles.css`. What is on

@@ -61,10 +61,12 @@ test('the Narmada carries a walking whale, and it is drawn', async ({ page }) =>
   // stationary animal -- so anything that arrives here has at least two stops.
   expect(whale!.stops, 'the whale has no circuit to walk').toBeGreaterThanOrEqual(2);
 
-  // Drawn from the built stand-in, not from a texture Phaser could not find. The key is asserted
-  // by prefix rather than in full: the facing half changes as it turns, and naming the whole key
-  // would make this fail the first time the animal walked west.
-  expect(whale!.texture).toContain('wanderer:narmada-walking-whale');
+  // Drawn from a real texture rather than one Phaser could not find -- either the painting
+  // (`wanderer-art:<id>:<facing>`) or the generated stand-in (`wanderer:<id>:<facing>`). Both are
+  // correct and which one is in play depends only on whether `assets/wanderers/` has art yet, so
+  // asserting one of them would fail the day the other arrived. It did: this named the stand-in
+  // and broke the moment the whale was painted.
+  expect(whale!.texture).toMatch(/^wanderer(-art)?:narmada-walking-whale/);
   expect(whale!.visible, 'the whale exists but is not being drawn').toBe(true);
   expect(whale!.w, 'the whale is drawn at no width').toBeGreaterThan(0);
   expect(whale!.h, 'the whale is drawn at no height').toBeGreaterThan(0);

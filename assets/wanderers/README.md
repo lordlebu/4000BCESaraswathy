@@ -1,11 +1,23 @@
 # Painted animals for the overworld
 
-One still picture per species, named after its **engine id** — the id the canon bundle uses, with
-the `fauna_` prefix dropped and underscores turned into hyphens.
+One still picture per species **per facing**, named after the engine id — the id the canon bundle
+uses, with the `fauna_` prefix dropped and underscores turned into hyphens — then the facing.
 
 ```
-assets/wanderers/narmada-walking-whale.png
+assets/wanderers/narmada-walking-whale-right.png
+assets/wanderers/narmada-walking-whale-left.png
+assets/wanderers/narmada-walking-whale-down.png
+assets/wanderers/narmada-walking-whale-up.png
 ```
+
+**Fewer is fine.** `facingArt` falls back along a chain, so an animal with only a right view is
+drawn facing right whichever way it walks — better than not drawn at all. A bare
+`<id>.png` with no facing still works and answers for every direction.
+
+**The usual way in is a sheet.** Drop one image holding all four views in `assets/source/dump/`,
+add its id to `SHEETS` in `tools/build-wanderers.js`, and run it — the frames are found by flooding
+connected pixels rather than cut on a grid, because the three sheets that exist are a row of four,
+a 2x2, and a row whose middle two animals touch.
 
 Drop the file in and it appears. Nothing to register: `src/game/wandererArt.ts` globs this folder,
 `WorldScene.wandererTexture` prefers a painting over the generated stand-in, and the browser check
@@ -13,19 +25,20 @@ in `e2e/wanderers.spec.ts` goes on passing either way.
 
 ## What to draw
 
-**One image, facing right.** Not a sheet and not a sequence — the engine mirrors it for the other
-direction. Asking a painter for a sequence is a mistake this repository has already made and
-written down: a six-cell sheet came back pixel-identical in every cell.
+**Four still views: right, left, down, up.** Not a walk cycle — nothing is animated, and asking a
+painter for a *sequence* is a mistake this repository has already made and written down (a six-cell
+sheet came back pixel-identical in every cell). Four distinct viewpoints of a standing animal is a
+different ask and it works.
 
 **Side on, standing on the ground.** The sprite is anchored at the bottom centre
 (`setOrigin(0.5, 1)`), so the animal's feet belong at the very bottom edge of the image. A gap
 there draws the animal floating above the grass, which is a fault that has shipped here before.
 
-**A cell's size is its size on screen.** `WorldScene` never calls `setDisplaySize` on these, so
-whatever you paint is what appears. A tile is 128 pixels. The stand-in is 192 × 84 — about a tile
-and a half long and two thirds of a tile tall — which is roughly right for a three-metre animal
-beside a person who is one tile tall. Bigger than about two tiles and it reads as a landmark rather
-than as something you can walk up to.
+**Paint at any size; the game scales by height.** `sizeWanderer` fits each frame to the animal's
+own height in `frames.ts` — the same height a traveller is drawn at, half the player — and lets the
+width fall where it may. That is deliberate: scaling to *fit a box* made a long side view shrink
+while the narrow front view of the same animal did not, so a whale was three times bigger walking
+towards you than walking across.
 
 **Transparent background**, not white and not magenta. Alpha zero renders as white in some
 previews, so check the corner pixels are actually `rgba(0,0,0,0)` before sending it.

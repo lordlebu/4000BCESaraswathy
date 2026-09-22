@@ -14,7 +14,7 @@
 // building the fog disc.
 
 import Phaser from 'phaser';
-import { GRID, DECOR_CELL, SHORE_BAND, CLOUD_VOXELS, FALL_FRAMES, tileFrame, type Edge } from './frames';
+import { GRID, DECOR_CELL, SHORE_BAND, CLOUD_VOXELS, FALL_FRAMES, tileFrame, wandererBuild, markerSize, type Edge } from './frames';
 import windmill from '../../assets/windmill.json';
 
 export {
@@ -52,7 +52,9 @@ export {
   swayFrame,
   traceFrameFor,
   tileFrame,
-  hasTileArt
+  hasTileArt,
+  markerSize,
+  wandererBuild
 } from './frames';
 
 /**
@@ -820,31 +822,6 @@ export function placeholderTileKey(
  *
  * Cached per species and facing under `wanderer:<id>:<facing>`.
  */
-/**
- * How each wanderer is put together: how big, and what shape of body.
- *
- * Keyed by engine species id, with a fallback, because this is a stand-in and a stand-in that
- * throws for an unknown animal is worse than one that draws a generic quadruped. Sizes are in
- * tiles; the player is one tile tall.
- *
- * `shape` picks the body:
- *   `wader`   a long low body on four short legs, head raised -- the walking whale
- *   `browser` a deep body on four long legs with a raised neck and head -- the giraffid
- *   `serpent` a thick tapering S-curve, no legs at all
- */
-const BUILDS: Record<string, { long: number; tall: number; shape: 'wader' | 'browser' | 'serpent' }> = {
-  // Roughly three metres and low to the ground: longer than tall by about two to one, standing a
-  // little under a person's height at the shoulder.
-  'narmada-walking-whale': { long: 1.5, tall: 0.66, shape: 'wader' },
-  // Shoulder-high to a tall man and taller again at the head, which is the whole of why canon
-  // says it takes the leaves nothing else reaches. Taller than it is long.
-  sivatherium: { long: 1.1, tall: 1.35, shape: 'browser' },
-  // Eleven to fifteen metres, coiled rather than extended, so it is drawn as a long shallow curve
-  // that is much wider than tall -- the one marker that would be absurd as a figure in a cell.
-  'vasuki-indicus': { long: 1.9, tall: 0.5, shape: 'serpent' },
-  default: { long: 1.3, tall: 0.8, shape: 'wader' }
-};
-
 export function wandererMarkerKey(
   scene: Phaser.Scene,
   speciesId: string,
@@ -858,9 +835,8 @@ export function wandererMarkerKey(
   // The earlier single size was two tiles by one, which put something larger than the player in
   // the river -- it read as a landmark rather than as a thing you could walk up to. A tile is
   // `TILE_SIZE` and the player is one tile tall, so these are read against that.
-  const build = BUILDS[speciesId] ?? BUILDS.default!;
-  const w = Math.round(TILE_SIZE * build.long);
-  const h = Math.round(TILE_SIZE * build.tall);
+  const build = wandererBuild(speciesId);
+  const { w, h } = markerSize(speciesId);
   const canvas = scene.textures.createCanvas(key, w, h);
   const context = canvas?.getContext();
   if (!canvas || !context) return key;
