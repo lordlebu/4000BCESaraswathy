@@ -33,4 +33,6 @@ form, and `JournalPanel` refuses a plate for one on `kind` rather than on whethe
 so dropping `neem.png` in here does nothing at all.
 
 The queue worth painting first, the prompts for it, and what to change per image model are in
-`docs/plate-prompts.md`.
+`docs/plate-prompts.md`. The four animals of the wandering-animal quests -- plus their overworld
+markers, activity scenes, event paintings and thing plates -- are in
+`docs/animal-quest-art-prompts.md`.
