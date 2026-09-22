@@ -10,6 +10,7 @@ import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap } from '../src/content/places';
 import { isWalkable } from '../src/world/generate';
 import { engineId } from '../src/content/canon';
+import { yieldsAt } from '../src/content/gathering';
 import { metSpecies } from '../src/content/species';
 import {
   CIRCUIT_TILES,
@@ -191,6 +192,50 @@ describe('every authored wanderer actually resolves', () => {
       for (const w of wanderersOn(map, world)) {
         expect(w.circuit.length, `${w.id} has no circuit on ${map}`).toBeGreaterThanOrEqual(2);
       }
+    }
+  });
+});
+
+describe('what the animals give is actually findable', () => {
+  // **The check `check_playability.py` cannot make, and the fault it missed.** Canon's gate asks
+  // whether a material is obtainable *somewhere* -- biome overlap with a species that yields it --
+  // and all three of these passed it while being unobtainable in practice. The game picks the
+  // creature on a tile by rendezvous hash weighted by rarity, then rolls again on the material's
+  // own rarity, and the two multiply: a `mythic` serpent on a map with twenty desert tiles came
+  // out at zero tiles across twelve seeds.
+  //
+  // Measured before it was asserted. After fixing the placement, over twelve seeds of the two
+  // maps: snakeskin on 10 seeds, milk on 11, venom on 7 -- venom lowest because every venomous
+  // snake in canon is desert-only and Dwarka has 20 desert tiles out of 4096. The floor is set at
+  // 4 of 12, well under every measured value and well over the zero this caught.
+  const SEEDS = 12;
+  const FLOOR = 4;
+
+  it('offers each animal material on most seeds, not in theory', () => {
+    const want = ['material_shed_snakeskin', 'material_viper_venom', 'material_sivatherium_milk'];
+    const seen: Record<string, Set<string>> = {};
+    for (const w of want) seen[w] = new Set();
+
+    for (let s = 0; s < SEEDS; s += 1) {
+      const seed = `reach-${s}`;
+      for (const map of ['field_map_narmada', 'field_map_dwarka']) {
+        const world = built(map, seed);
+        for (let y = 0; y < world.height; y += 1) {
+          for (let x = 0; x < world.width; x += 1) {
+            for (const m of yieldsAt(seed, { x, y }, world.tiles[y]![x]!.biome)) {
+              if (want.includes(m.id)) seen[m.id]!.add(seed);
+            }
+          }
+        }
+      }
+    }
+
+    for (const w of want) {
+      expect(
+        seen[w]!.size,
+        `${w} is gatherable on only ${seen[w]!.size} of ${SEEDS} seeds -- authored, exported, and ` +
+          `effectively unreachable. Check the species' rarity and how much of its biome the map grows.`
+      ).toBeGreaterThanOrEqual(FLOOR);
     }
   });
 });
