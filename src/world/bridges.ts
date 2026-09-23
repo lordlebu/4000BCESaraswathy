@@ -11,8 +11,8 @@
 // anything wider stays a ford. That is the city-builder rule (Cities: Skylines and Banished place a
 // bridge on the short wet run of a road), sized to what one crew with timber could span.
 //
-// A bridge is also straight: a crossing that turns mid-stream, as routes do over a diagonal river,
-// stays a ford.
+// A bridge is also straight, and the road carries straight through it: a crossing that turns
+// mid-stream, as routes do over a diagonal river or where a branch meets the bank, stays a ford.
 //
 // Two things are never bridged:
 //
@@ -75,6 +75,11 @@ export function bridgeTheCrossings(world: World, fordPlaces: readonly Point[] = 
       // river, so a crossing that does stays a ford.
       const straight = run.every((t) => t.y === run[0]!.y) || run.every((t) => t.x === run[0]!.x);
       if (!straight) continue;
+      // **And the road must carry straight through it**, arriving at one end and leaving at the
+      // other along the same line. A one-tile crossing is straight either way, and the road can still
+      // turn on it -- in from the west, out to the south -- which is a deck turning mid-stream again,
+      // one tile shorter. Found on Lothal once the network grew branches.
+      if (!carriedThrough(tiles, run)) continue;
       const claimed = run.some((t) =>
         fordPlaces.some((p) => Math.abs(p.x - t.x) + Math.abs(p.y - t.y) <= FORD_CLAIM)
       );
@@ -88,6 +93,22 @@ export function bridgeTheCrossings(world: World, fordPlaces: readonly Point[] = 
     }
   }
   return spans;
+}
+
+/** Whether the road runs into one end of `run` and out of the other, along the run's own line. */
+function carriedThrough(tiles: Tile[][], run: Tile[]): boolean {
+  const road = (x: number, y: number) => {
+    const t = tiles[y]?.[x];
+    return Boolean(t && (t.road || t.ford || t.bridge));
+  };
+  const xs = run.map((t) => t.x);
+  const ys = run.map((t) => t.y);
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const eastWest = y0 === y1 && road(x0 - 1, y0) && road(x1 + 1, y0);
+  const northSouth = x0 === x1 && road(x0, y0 - 1) && road(x0, y1 + 1);
+  // A run of two or more has one line; a single tile may be crossed either way, but only straight.
+  if (run.length > 1) return y0 === y1 ? eastWest : northSouth;
+  return eastWest || northSouth;
 }
 
 function isRiverFord(tile: Tile): boolean {

@@ -22,7 +22,7 @@ import {
   startOnTheSouthernShore
 } from './crossing';
 import { stampBasalt } from './basalt';
-import { easeRoutes, thinRoad, tourOrder } from './routes';
+import { easeRoutes, networkLegs, thinRoad } from './routes';
 import { bridgeTheCrossings, FORDED_PLACES } from './bridges';
 
 /**
@@ -264,7 +264,9 @@ function pick(
   world: World,
   poi: PointOfInterest,
   candidates: Point[],
-  reject: (at: Point) => boolean
+  reject: (at: Point) => boolean,
+  /** A weight for how well this tile spreads the places out; see `placeOne`. */
+  spread?: (at: Point) => number
 ): Point | null {
   // The landmark carries a `terrain` and a `name` as well as a position, and both stay: the great
   // banyan is the same banyan wherever it is standing. Only where it is moves.
@@ -277,7 +279,8 @@ function pick(
       tileHash(world.seed, at.x, at.y, `poi:${poi.id}`) *
       heightBias(world, poi, at) *
       shoreBias(world, poi, at) *
-      terrainBias(world, poi, at);
+      terrainBias(world, poi, at) *
+      (spread?.(at) ?? 1);
     if (score > bestScore || (score === bestScore && best !== null && (at.y < best.y || (at.y === best.y && at.x < best.x)))) {
       best = at;
       bestScore = score;
@@ -408,7 +411,8 @@ function placeOne(
   palette: Set<BiomeId>,
   taken: Point[],
   minDistance: number,
-  allowed: (at: Point) => boolean = () => true
+  allowed: (at: Point) => boolean = () => true,
+  placesOnMap = 1
 ): Point | null {
   const occupied = (at: Point) => taken.some((t) => t.x === at.x && t.y === at.y);
 
@@ -438,9 +442,28 @@ function placeOne(
   // doorway, and there was nothing in between.
   // Stated rather than halved: halving 6 gives 6, 3 and then 1, which skips the step that matters
   // and lands back on "adjacent is fine". Four tiles is a short walk and two is a neighbour.
+  // **Spread as a weight, then the old ladder as the floor.** Each candidate's score is scaled by
+  // how far it stands from the places already down, against the spacing an even layout would have
+  // (`spreadFor`) -- so the hash no longer clusters places wherever it likes. Measured over ten
+  // seeds a map, it was a Clark-Evans ratio of 0.95 to 1.02, a random scatter, with a quarter of
+  // Narmada empty on most seeds.
+  //
+  // A weight and not a rung, and that was learned: as a hard first rung it outranked the ground canon
+  // gives a place, and two of Dwarka's four places named for the basalt ended up off it. Standing on
+  // its own ground (`terrainBias`, x4) still beats standing a little closer to a neighbour.
+  const spread = spreadFor(world, placesOnMap);
+  const roomOf = (at: Point) =>
+    taken.length === 0
+      ? 1
+      : Math.min(1, Math.min(...taken.map((t) => Math.abs(t.x - at.x) + Math.abs(t.y - at.y))) / spread) ** 1.5;
   for (const room of [minDistance, 4, 2].filter((r) => r <= minDistance)) {
-    const spaced = pick(world, poi, exact, (at: Point) =>
-      taken.some((t) => Math.abs(t.x - at.x) + Math.abs(t.y - at.y) < room)
+    const spaced = pick(
+      world,
+      poi,
+      exact,
+      (at: Point) => taken.some((t) => Math.abs(t.x - at.x) + Math.abs(t.y - at.y) < room),
+      (at: Point) =>
+        roomOf(at) * (taken.some((t) => quarterOf(world, t) === quarterOf(world, at)) ? 1 : 1.6)
     );
     if (spaced) return spaced;
   }
@@ -492,6 +515,22 @@ function placeOne(
 
   const anywhereOnTheMap = gather(world, ground);
   return pick(world, poi, anywhereOnTheMap, occupied);
+}
+
+/**
+ * The spacing an even layout of `count` places would have on this map, in Manhattan tiles.
+ *
+ * Three quarters of the side of the square each place would own if the map were shared out evenly
+ * -- the Poisson-disc radius a best-candidate placer aims for. Lothal's six places on 48 x 48 ask
+ * for 15; Dwarka's twelve for 10. Where terrain cannot give that, the ladder in `placeOne` gives way.
+ */
+function spreadFor(world: World, count: number): number {
+  return Math.max(6, Math.round(0.75 * Math.sqrt((world.width * world.height) / Math.max(1, count))));
+}
+
+/** Which quarter of the map a tile is in, so a place prefers a quarter nobody has taken yet. */
+function quarterOf(world: World, at: Point): number {
+  return (at.x < world.width / 2 ? 0 : 1) + (at.y < world.height / 2 ? 0 : 2);
 }
 
 /**
@@ -664,7 +703,7 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   for (const poi of poisOn(fieldMap.id)) {
     const at =
       anchors.get(poi.id) ??
-      placeOne(world, poi, walkable, palette, taken, spacing, clearOfTown(world, poi));
+      placeOne(world, poi, walkable, palette, taken, spacing, clearOfTown(world, poi), poisOn(fieldMap.id).length);
     if (at) {
       placed.push({ poi, at });
       taken.push(at);
@@ -722,10 +761,13 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   //
   // Before the landmark stamp, so the landmark's own tile is never softened, and before the fog
   // and species passes so nothing has read the ground yet.
-  const route = tourOrder(placed.map((p) => p.at), world.start);
+  // A network rather than a chain: a spanning tree over the start and the places, with a loop or
+  // two. See `networkLegs` for why the chain it replaces was the fault.
+  const stops = [world.start, ...placed.map((p) => p.at)];
   // Wet landforms get a wider corridor -- see `radius` in routes.ts for why.
   const wet = fieldMap.relief === 'delta' || fieldMap.relief === 'island';
-  const { line } = easeRoutes(world.tiles, world.width, world.height, [world.start, ...route], {
+  const { line } = easeRoutes(world.tiles, world.width, world.height, stops, {
+    legs: networkLegs(stops),
     radius: wet ? 2 : 1,
     // Never soften the ground a place is standing on, or the landmark's tile.
     keep: new Set([

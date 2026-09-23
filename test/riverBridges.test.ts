@@ -69,6 +69,15 @@ describe('which crossings are bridged', () => {
     expect(flagged(w, 'ford')).toHaveLength(3);
   });
 
+  it('fords a one-tile crossing the road turns on', () => {
+    // In from the west, out to the south: straight as a run, not as a road.
+    const w = world(['RF.', '.R.']);
+    w.tiles[1]![1]!.road = true;
+    bridgeTheCrossings(w);
+    expect(flagged(w, 'bridge')).toEqual([]);
+    expect(flagged(w, 'ford')).toEqual(['1,0']);
+  });
+
   it('never bridges the sky pools', () => {
     // The islands keep their own crossing and their own art.
     const w = world(['RSR']);
