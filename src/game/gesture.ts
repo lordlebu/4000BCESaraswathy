@@ -59,3 +59,21 @@ export function released(gesture: Gesture): { gesture: Gesture; walk: boolean } 
     walk: !gesture.multi
   };
 }
+
+/**
+ * A finger or button came up somewhere the map could not see: off the canvas, over a panel,
+ * outside the window. It ends that pointer and never walks.
+ *
+ * **This is the other half of `released`, and for a long time there was no other half.** The scene
+ * listened for `POINTER_UP`, which Phaser fires only for a release *over the canvas*. Press on the
+ * map, drag onto a panel, let go -- and the count stayed at one for good. Every click after that
+ * arrived as a second pointer, `multi` went true, and `released` refused it. Tap-to-walk was dead
+ * until a reload, on every map, with the page otherwise answering normally: reported from play as
+ * "the player will not move", and reproduced in a browser at ten clicks out of ten refused.
+ *
+ * A release off the map is not a tap on it, so it never walks -- but it has to be counted, or the
+ * gesture never ends.
+ */
+export function lost(gesture: Gesture): Gesture {
+  return released(gesture).gesture;
+}

@@ -9,7 +9,7 @@
 // release -- reproduces the whole bug on the second finger.
 
 import { describe, expect, it } from 'vitest';
-import { NO_GESTURE, pressed, released, type Gesture } from '../src/game/gesture';
+import { NO_GESTURE, lost, pressed, released, type Gesture } from '../src/game/gesture';
 
 /** Press n fingers, in order. */
 function press(n: number, from: Gesture = NO_GESTURE): Gesture {
@@ -83,5 +83,36 @@ describe('three fingers, and other things hands do', () => {
     const { gesture, walk } = released(NO_GESTURE);
     expect(gesture.down).toBe(0);
     expect(walk).toBe(true);
+  });
+});
+
+describe('a press released off the map', () => {
+  // Reported from play on every map as "the player will not move": press on the map, drag onto a
+  // panel, let go. The scene never heard the release, so the next click counted as a second finger.
+  it('does not walk', () => {
+    // `lost` returns only the gesture: there is no walk to report, by construction.
+    expect(lost(press(1))).toEqual(NO_GESTURE);
+  });
+
+  it('does not swallow the click that comes after it', () => {
+    const after = lost(press(1));
+    expect(released(pressed(after)).walk).toBe(true);
+  });
+
+  it('is what swallowed every click when it went unheard', () => {
+    // The fault itself, kept as a statement of why `lost` exists: skip it, and the next click is
+    // refused, and so is the one after that.
+    let g = press(1);
+    for (let i = 0; i < 3; i += 1) {
+      const step = released(pressed(g));
+      expect(step.walk, `click ${i + 1} after an unheard release`).toBe(false);
+      g = step.gesture;
+    }
+  });
+
+  it('still refuses both halves of a pinch that ends off the map', () => {
+    const first = lost(press(2));
+    expect(first.down).toBe(1);
+    expect(released(first).walk).toBe(false);
   });
 });

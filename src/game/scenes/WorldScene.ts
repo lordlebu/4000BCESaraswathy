@@ -174,8 +174,8 @@ import {
   paintedWandererIds
 } from '../wandererArt';
 import { isCamp, isGrand } from '../../content/camps';
-import { findPath } from '../../world/pathfind';
-import { NO_GESTURE, pressed, released, type Gesture } from '../gesture';
+import { findPath, nearestReachable } from '../../world/pathfind';
+import { NO_GESTURE, lost, pressed, released, type Gesture } from '../gesture';
 import { tileHash } from '../../world/rng';
 import type { BiomeId, Point, Tile, World } from '../../world/types';
 
@@ -996,6 +996,31 @@ export class WorldScene extends Phaser.Scene {
    * as he arrives rather than halfway across the boundary -- the same reason `moveShadow` reads the
    * sprite and this reads the tile: one is about where he looks, the other about what he is in.
    */
+  /**
+   * A small cross where a click could not be reached, fading as the walker sets off.
+   *
+   * Drawn in code: it is a signal, not a thing in the world, and it sits above the fog because
+   * the tiles it most often lands on -- open sea, the far shore -- are the ones still fogged.
+   */
+  private markNoWayThrough(at: Point): void {
+    const cx = at.x * TILE_SIZE + TILE_SIZE / 2;
+    const cy = at.y * TILE_SIZE + TILE_SIZE / 2;
+    const arm = TILE_SIZE * 0.18;
+    const mark = this.add.graphics().setDepth(DEPTH_FOG + 1);
+    mark.lineStyle(Math.max(4, TILE_SIZE / 24), 0xf3e6cc, 0.95);
+    mark.strokeCircle(cx, cy, TILE_SIZE * 0.3);
+    mark.lineBetween(cx - arm, cy - arm, cx + arm, cy + arm);
+    mark.lineBetween(cx - arm, cy + arm, cx + arm, cy - arm);
+    this.tweens.add({
+      targets: mark,
+      alpha: 0,
+      delay: 350,
+      duration: 700,
+      ease: 'Quad.easeIn',
+      onComplete: () => mark.destroy()
+    });
+  }
+
   private moveWaterline(): void {
     const wading = this.world.tiles[this.at.y]?.[this.at.x]?.biome === 'sky_water';
     this.waterline.setVisible(wading);
@@ -1058,6 +1083,8 @@ export class WorldScene extends Phaser.Scene {
    */
   /** Removed on shutdown; see `bindInput`. */
   private swallowWhileTyping: ((event: KeyboardEvent) => void) | null = null;
+  /** Forget every pointer when the window loses focus mid-press. See `bindInput`. */
+  private forgetPointers: (() => void) | null = null;
 
   private typing(): boolean {
     const el = document.activeElement as HTMLElement | null;
@@ -1108,6 +1135,20 @@ export class WorldScene extends Phaser.Scene {
       this.gesture = pressed(this.gesture);
     });
 
+    // **A release the map cannot see still ends the press.** Phaser reports a button let go off the
+    // canvas as `POINTER_UP_OUTSIDE`, never as `POINTER_UP`, and without this the count below never
+    // came back to zero: one drag off the map and every later click read as a second finger and
+    // was refused, for the rest of the session. See `lost` in `game/gesture.ts`.
+    this.input.on(Phaser.Input.Events.POINTER_UP_OUTSIDE, () => {
+      this.gesture = lost(this.gesture);
+    });
+    // Alt-tab with a button held, a system dialog, a phone call over the game: the release goes to
+    // somebody else entirely and neither event arrives. Nothing is pressed once focus has gone.
+    this.forgetPointers = () => {
+      this.gesture = NO_GESTURE;
+    };
+    window.addEventListener('blur', this.forgetPointers);
+
     // Tap or click to walk: the only way to play on a phone.
     this.input.on(Phaser.Input.Events.POINTER_UP, (pointer: Phaser.Input.Pointer) => {
       // Not if a second finger was involved. Lifting either finger at the end of a pinch fires this
@@ -1124,15 +1165,21 @@ export class WorldScene extends Phaser.Scene {
       // Weighted, so a tap across a range walks round it rather than over it. The scene has
       // always paid `travelCost` per step; until now only the *duration* knew about it and the
       // route did not, so tap-to-walk reliably chose the slowest line available to it.
-      this.queuedPath = findPath(
-        this.world.tiles,
-        this.world.width,
-        this.world.height,
-        this.at,
-        target,
-        isWalkable,
-        (tile) => stepCost(tile.biome)
-      );
+      const cost = (tile: Tile) => stepCost(tile.biome);
+      const { tiles, width, height } = this.world;
+      this.queuedPath = findPath(tiles, width, height, this.at, target, isWalkable, cost);
+
+      // **A click is never ignored.** An empty path used to mean "stand still", with nothing to
+      // say the click was heard -- so a tile across the water or over the edge of an island read
+      // as a frozen game. Walk as near as the ground allows, and mark where the click landed so
+      // it is plain there was no way through rather than no response.
+      const inside = target.x >= 0 && target.y >= 0 && target.x < width && target.y < height;
+      const already = target.x === this.at.x && target.y === this.at.y;
+      if (this.queuedPath.length === 0 && inside && !already) {
+        const near = nearestReachable(tiles, width, height, this.at, target, isWalkable);
+        if (near) this.queuedPath = findPath(tiles, width, height, this.at, near, isWalkable, cost);
+        this.markNoWayThrough(target);
+      }
     });
 
     // A tap of a key must never be swallowed.
@@ -1187,6 +1234,10 @@ export class WorldScene extends Phaser.Scene {
       if (this.swallowWhileTyping) {
         document.removeEventListener('keydown', this.swallowWhileTyping, true);
         this.swallowWhileTyping = null;
+      }
+      if (this.forgetPointers) {
+        window.removeEventListener('blur', this.forgetPointers);
+        this.forgetPointers = null;
       }
       EventBus.offEvent('new-journey', this.onNewJourney);
       EventBus.offEvent('resume-journey', this.onNewJourney);
@@ -1596,7 +1647,16 @@ export class WorldScene extends Phaser.Scene {
       moving: this.moving,
       depth: this.player.depth,
       sortedRow: this.sortedRow,
-      queued: this.queuedPath.length
+      queued: this.queuedPath.length,
+      // Where he is on the canvas, and how big a tile is there, so a spec can click a *particular*
+      // tile rather than a guessed pixel. A guess is a searched seed by another name: the first
+      // version of `e2e/release-off-map.spec.ts` clicked "far left", landed on walkable ground,
+      // and passed with the behaviour it was testing removed.
+      screen: {
+        x: (this.player.x - this.cameras.main.worldView.x) * this.cameras.main.zoom,
+        y: (this.player.y - this.cameras.main.worldView.y) * this.cameras.main.zoom
+      },
+      cell: TILE_SIZE * this.cameras.main.zoom
     });
 
     // **Exposed for the browser suite, which is the only thing that can see a Phaser sprite.**

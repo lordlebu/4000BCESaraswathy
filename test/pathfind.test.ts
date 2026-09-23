@@ -5,7 +5,13 @@
 // other test here guards against the change breaking something that already worked.
 
 import { describe, expect, it } from 'vitest';
-import { findPath } from '../src/world/pathfind';
+import { findPath, nearestReachable } from '../src/world/pathfind';
+import { orthogonalNeighbours } from '../src/world/rivers';
+import { buildFieldMap } from '../src/world/fieldMap';
+import { fieldMaps } from '../src/content/places';
+import { isWalkable } from '../src/world/generate';
+import { stepCost } from '../src/content/species';
+import { tileHash } from '../src/world/rng';
 import type { BiomeId, Point, Tile } from '../src/world/types';
 
 /** A grid from rows of single characters. `#` is unwalkable, `^` is dear, `.` is cheap. */
@@ -156,5 +162,104 @@ describe('findPath is deterministic', () => {
       const d = Math.abs(steps[i]!.x - steps[i - 1]!.x) + Math.abs(steps[i]!.y - steps[i - 1]!.y);
       expect(d, `step ${i} is not a single orthogonal move`).toBe(1);
     }
+  });
+});
+
+/**
+ * `findPath` as it was before the heap: the whole frontier re-sorted on every step. Kept here as
+ * the reference, so the claim that the heap changed no path is checked rather than argued.
+ */
+function sortedArrayPath(
+  tiles: Tile[][], width: number, height: number, from: Point, to: Point,
+  walk: (t: Tile) => boolean, costOf: (t: Tile) => number
+): Point[] {
+  if (from.x === to.x && from.y === to.y) return [];
+  if (!walk(tiles[to.y]![to.x]!)) return [];
+  const key = (p: Point) => `${p.x},${p.y}`;
+  const cameFrom = new Map<string, Point | null>([[key(from), null]]);
+  const best = new Map<string, number>([[key(from), 0]]);
+  const frontier: { at: Point; cost: number; seq: number }[] = [{ at: from, cost: 0, seq: 0 }];
+  let seq = 1;
+  while (frontier.length) {
+    frontier.sort((a, b) => a.cost - b.cost || a.at.y - b.at.y || a.at.x - b.at.x || a.seq - b.seq);
+    const { at: tile, cost } = frontier.shift()!;
+    if (tile.x === to.x && tile.y === to.y) {
+      const path: Point[] = [];
+      let step: Point | null | undefined = tile;
+      while (step && !(step.x === from.x && step.y === from.y)) {
+        path.push(step);
+        step = cameFrom.get(key(step));
+      }
+      return path.reverse();
+    }
+    if (cost > (best.get(key(tile)) ?? Infinity)) continue;
+    for (const next of orthogonalNeighbours(tile, width, height)) {
+      const at = tiles[next.y]![next.x]!;
+      if (!walk(at)) continue;
+      const total = cost + Math.max(costOf(at), 1);
+      if (total >= (best.get(key(next)) ?? Infinity)) continue;
+      best.set(key(next), total);
+      cameFrom.set(key(next), tile);
+      frontier.push({ at: next, cost: total, seq: seq++ });
+    }
+  }
+  return [];
+}
+
+describe('the heap changed no path', () => {
+  // Equal-cost routes are everywhere on real ground, and the tie-break is what keeps a tap and a
+  // traveller walking the same line on every run. A heap with the same total order must pop the
+  // same sequence; this is the check that it does.
+  for (const map of fieldMaps) {
+    it(`${map.id}: the same path as the sorted array, on 40 real walks`, () => {
+      const { world } = buildFieldMap(map, { seed: 'heap-test' });
+      const open = world.tiles.flat().filter((t) => isWalkable(t));
+      const cost = (t: Tile) => stepCost(t.biome);
+      for (let i = 0; i < 40; i += 1) {
+        const from = open[tileHash('heap-test', i, 0, 'from') % open.length]!;
+        const to = open[tileHash('heap-test', i, 1, 'to') % open.length]!;
+        expect(findPath(world.tiles, world.width, world.height, from, to, isWalkable, cost)).toEqual(
+          sortedArrayPath(world.tiles, world.width, world.height, from, to, isWalkable, cost)
+        );
+      }
+    });
+  }
+});
+
+describe('a click on somewhere unreachable', () => {
+  it('walks to the reachable tile nearest it', () => {
+    const { tiles, width, height } = grid([
+      '.....#...',
+      '.....#...',
+      '.....#...'
+    ]);
+    // The far side of the wall cannot be reached; the nearest tile this side of it can.
+    expect(nearestReachable(tiles, width, height, { x: 0, y: 1 }, { x: 7, y: 1 }, walkable)).toEqual({ x: 4, y: 1 });
+  });
+
+  it('walks to the shore when the click is on the water', () => {
+    const { tiles, width, height } = grid([
+      '...##',
+      '...##',
+      '...##'
+    ]);
+    expect(nearestReachable(tiles, width, height, { x: 0, y: 0 }, { x: 4, y: 2 }, walkable)).toEqual({ x: 2, y: 2 });
+  });
+
+  it('says so when the walker is already as close as the ground allows', () => {
+    const { tiles, width, height } = grid(['..#..']);
+    expect(nearestReachable(tiles, width, height, { x: 1, y: 0 }, { x: 4, y: 0 }, walkable)).toBeNull();
+  });
+
+  it('breaks a tie the same way every time', () => {
+    // Two tiles equally near the target: the one nearer the walker wins, then the upper one.
+    const { tiles, width, height } = grid([
+      '...',
+      '.#.',
+      '...'
+    ]);
+    const a = nearestReachable(tiles, width, height, { x: 0, y: 0 }, { x: 1, y: 1 }, walkable);
+    expect(a).toEqual({ x: 1, y: 0 });
+    expect(nearestReachable(tiles, width, height, { x: 0, y: 0 }, { x: 1, y: 1 }, walkable)).toEqual(a);
   });
 });
