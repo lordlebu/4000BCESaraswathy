@@ -32,6 +32,8 @@ import {
   ROW_SLOT,
   blends,
   shoreAt,
+  sunkAt,
+  SUNK_ALPHA,
   bankSource,
   SHORE_PROPS,
   cliffAt,
@@ -270,14 +272,18 @@ export function planShore(world: FieldMapWorld['world']): Placement[] {
         // The map edge is not a shore, for the reason it is not a cliff: the world stops there
         // rather than the water.
         if (nx < 0 || ny < 0 || nx >= world.width || ny >= world.height) continue;
-        if (!shoreAt(here, world.tiles[ny]![nx]!.biome)) continue;
+        const there = world.tiles[ny]![nx]!.biome;
+        // A river bank, full strength; or a swamp's shallower step down from dry ground, lighter.
+        const sunk = sunkAt(here, there);
+        if (!shoreAt(here, there) && !sunk) continue;
         out.push({
           sheet: 'shore',
           frame: edgeMaskFrame(edge, tileHash(world.seed, x, y, `shore-${edge}`)),
           edge,
           x,
           y,
-          depth: SHORE_DEPTH
+          depth: SHORE_DEPTH,
+          ...(sunk ? { alpha: SUNK_ALPHA } : {})
         });
       }
     }

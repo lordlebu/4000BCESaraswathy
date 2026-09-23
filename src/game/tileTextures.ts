@@ -771,6 +771,42 @@ export function waterlineKey(scene: Phaser.Scene): string {
 }
 
 /**
+ * The ring of disturbed water where a wader breaks the surface.
+ *
+ * For the river and the swamp, where the figure is cut at a depth rather than faded (see
+ * `game/wading.ts`). A soft oval rather than a band: the first build laid the sky pool's rectangle
+ * of water across the cut, and at a waist it read as a pane of glass held in front of him. An oval
+ * is what a body standing in water makes, and it is the treatment shallow water gets in the games
+ * that settled this.
+ */
+export function rippleKey(scene: Phaser.Scene): string {
+  const key = 'water:ripple';
+  if (scene.textures.exists(key)) return key;
+
+  const width = TILE_SIZE;
+  const height = Math.round(TILE_SIZE * 0.3);
+  const canvas = scene.textures.createCanvas(key, width, height);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  const cx = width / 2;
+  const cy = height / 2;
+  // A faint wash inside the ring, so the cut edge of the figure sits in water rather than on it.
+  context.fillStyle = 'rgba(150,208,224,0.35)';
+  context.beginPath();
+  context.ellipse(cx, cy, width * 0.4, height * 0.36, 0, 0, Math.PI * 2);
+  context.fill();
+  // The ring itself: the bright line where the surface meets him.
+  context.strokeStyle = 'rgba(226,246,250,0.85)';
+  context.lineWidth = Math.max(2, Math.round(TILE_SIZE / 40));
+  context.beginPath();
+  context.ellipse(cx, cy, width * 0.4, height * 0.36, 0, 0, Math.PI * 2);
+  context.stroke();
+  canvas.refresh();
+  return key;
+}
+
+/**
  * A stand-in tile for ground the art has not caught up with.
  *
  * **This is what stops new terrain waiting on a drawing.** `assets/terrain.png` is built by

@@ -52,6 +52,7 @@ import {
   shoreTextureKey,
   bankTextureKey,
   riverBridgeTextureKey,
+  rippleKey,
   undersideShadeKey,
   CLIFF_SHEET,
   TREELINE_SHEET,
@@ -178,6 +179,7 @@ import {
 import { isCamp, isGrand } from '../../content/camps';
 import { findPath, nearestReachable } from '../../world/pathfind';
 import { NO_GESTURE, lost, pressed, released, type Gesture } from '../gesture';
+import { wadeFor, type Wade } from '../wading';
 import { tileHash } from '../../world/rng';
 import type { BiomeId, Point, Tile, World } from '../../world/types';
 
@@ -409,6 +411,12 @@ export class WorldScene extends Phaser.Scene {
    * of him exists.
    */
   private waterline!: Phaser.GameObjects.Image;
+  /** The ring where a wader in the river or the swamp breaks the surface. */
+  private ripple!: Phaser.GameObjects.Image;
+  /** What the traveller is standing in, as `moveWaterline` last drew it. See `game/wading.ts`. */
+  private wade: Wade = { kind: 'dry' };
+  /** The depth the crop was last set to, so a step's sixty updates set it once. */
+  private cutDepth = 0;
   private fogSprites: Phaser.GameObjects.Image[][] = [];
   /**
    * Every static thing that belongs to a tile, so it can be hidden when the camera cannot see it.
@@ -731,6 +739,7 @@ export class WorldScene extends Phaser.Scene {
               : shoreTextureKey(this, edge, item.frame)
           )
           .setOrigin(anchor.x, anchor.y)
+          .setAlpha(item.alpha ?? 1)
           .setDepth(item.depth);
         this.tileOwned.push({ sprite: band, x: item.x, y: item.y });
         continue;
@@ -949,6 +958,10 @@ export class WorldScene extends Phaser.Scene {
       .setOrigin(0.5, 1)
       .setDisplaySize(TILE_SIZE * 0.86, TILE_SIZE * 0.62)
       .setVisible(false);
+    this.ripple = this.add
+      .image(0, 0, rippleKey(this))
+      .setDisplaySize(TILE_SIZE * 0.62, TILE_SIZE * 0.19)
+      .setVisible(false);
 
     this.updateAnimation();
     this.placePlayer(this.at);
@@ -1032,25 +1045,42 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private moveWaterline(): void {
-    const wading = this.world.tiles[this.at.y]?.[this.at.x]?.biome === 'sky_water';
-    this.waterline.setVisible(wading);
-    if (wading) this.waterline.setPosition(this.player.x, this.player.y);
+    const wade = wadeFor(this.world.tiles[this.at.y]?.[this.at.x]);
+    this.wade = wade;
 
-    // **The figure itself goes translucent downward, and it costs one sprite.**
+    // **The sky pools keep their own look.** The island art and its treatment are kept separate from
+    // the ground's, so this branch is exactly what it was.
     //
-    // The obvious build is two cropped copies -- an opaque upper half and a faded lower one -- and
-    // the reason not to is that it doubles the sprite the walk animation drives and puts the
-    // waterline's height in two places that must agree forever. Phaser carries a per-corner alpha
-    // on every game object, so one sprite ramps from opaque at the head to `WADE_ALPHA` at the
-    // feet with no crop, no second animation and no art.
-    //
-    // The ramp is linear over the whole figure rather than starting at the waist, which is not
-    // quite what "lower body" means -- the quad above is what resolves it. Its gradient is
-    // brightest exactly at the surface, so the eye reads a waterline there and takes the fade
-    // below as water rather than as a figure dissolving.
-    this.player.setAlpha(1, 1, wading ? WADE_ALPHA : 1, wading ? WADE_ALPHA : 1);
+    // The figure itself goes translucent downward, and it costs one sprite. Phaser carries a
+    // per-corner alpha on every game object, so one sprite ramps from opaque at the head to
+    // `WADE_ALPHA` at the feet with no crop, no second animation and no art; the quad over it is
+    // brightest at the surface, so the eye reads a waterline there and takes the fade below as
+    // water rather than as a figure dissolving.
+    const sky = wade.kind === 'sky';
+    this.player.setAlpha(1, 1, sky ? WADE_ALPHA : 1, sky ? WADE_ALPHA : 1);
+
+    // **River and swamp are cut at a depth instead** -- waist, shins at a ford, feet in a swamp --
+    // which is how Pokemon and Stardew draw shallow water. The figure below the surface is cropped
+    // away and the water's gradient laid across the cut, so he stands *in* the river rather than
+    // fading into it, and the frames, the flip and the walk cycle know nothing about it: a crop is a
+    // rectangle on whichever frame is showing.
+    const depth = wade.kind === 'cut' ? wade.depth : 0;
+    if (depth !== this.cutDepth) {
+      this.cutDepth = depth;
+      const frame = this.player.frame;
+      if (depth > 0) this.player.setCrop(0, 0, frame.width, Math.round(frame.height * (1 - depth)));
+      else this.player.setCrop();
+    }
+
+    this.waterline.setVisible(sky);
+    if (sky) this.waterline.setPosition(this.player.x, this.player.y);
+    // A ring on the surface at the cut, so the edge of the figure sits in the water.
+    this.ripple.setVisible(depth > 0);
+    if (depth > 0) {
+      this.ripple.setPosition(this.player.x, this.player.y - this.player.displayHeight * depth);
+    }
     // A wader casts no shadow on ground he is not standing on.
-    this.shadow.setVisible(!wading);
+    this.shadow.setVisible(wade.kind === 'dry');
   }
 
   /**
@@ -1071,6 +1101,7 @@ export class WorldScene extends Phaser.Scene {
     // Over him, under anything standing in the same row: water is in front of a wader and behind
     // the reeds on the bank.
     this.waterline.setDepth(depthFor(row, ROW_SLOT.walker) + 1);
+    this.ripple.setDepth(depthFor(row, ROW_SLOT.walker) + 1);
     // One slot below him, in the same row band. `underfoot` is where decor lives, which is right:
     // a shadow is a mark on the ground, and it should pass under a stone the way the ground does.
     this.shadow.setDepth(depthFor(row, ROW_SLOT.underfoot));
@@ -1677,6 +1708,8 @@ export class WorldScene extends Phaser.Scene {
       x: this.at.x,
       y: this.at.y,
       biome: this.world.tiles[this.at.y]?.[this.at.x]?.biome ?? null,
+      // How he is drawn in water, so a spec can hold the wading table to the screen.
+      wade: this.wade,
       moving: this.moving,
       depth: this.player.depth,
       sortedRow: this.sortedRow,

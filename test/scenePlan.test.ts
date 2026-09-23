@@ -374,8 +374,12 @@ describe('the plan is a function of the world and nothing else', () => {
         const crossesWater = neighbours.some((n) => water.has(n) !== water.has(here));
         const differs = neighbours.some((n) => n !== here);
         expect(differs, `${id}: blend at ${key(item)} with no differing neighbour`).toBe(true);
-        // If every differing neighbour were across water, this tile should have had no blend.
-        if (!neighbours.some((n) => n !== here && water.has(n) === water.has(here))) {
+        // If every differing neighbour were across water, this tile should have had no blend --
+        // except marsh against river, which is not a shoreline: a swamp is level with the water and
+        // bleeds into it (see `blends`).
+        const marshRiver = (n: string) =>
+          (n === 'wetland' && here === 'river') || (n === 'river' && here === 'wetland');
+        if (!neighbours.some((n) => n !== here && (water.has(n) === water.has(here) || marshRiver(n!)))) {
           expect(crossesWater, `${id}: blended a shoreline at ${key(item)}`).toBe(false);
         }
       }

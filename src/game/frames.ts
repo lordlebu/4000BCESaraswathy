@@ -363,9 +363,17 @@ const WATER: ReadonlySet<BiomeId> = new Set<BiomeId>(['sea', 'river']);
 
 export function blends(here: BiomeId, there: BiomeId): boolean {
   if (here === there) return false;
+  // **Except where marsh meets river, which is not a shore.** A swamp sits at the river's level --
+  // wet ground the water runs out into -- so the two bleed into each other rather than meeting at
+  // a line. Reported from play as "swamps should nicely bleed into the river water".
+  if (isMarshAndRiver(here, there)) return true;
   // A shore is a line, and should stay one.
   if (WATER.has(here) !== WATER.has(there)) return false;
   return true;
+}
+
+function isMarshAndRiver(a: BiomeId, b: BiomeId): boolean {
+  return (a === 'wetland' && b === 'river') || (a === 'river' && b === 'wetland');
 }
 
 // --- the cliff edge ------------------------------------------------------
@@ -1257,8 +1265,27 @@ const SKY: ReadonlySet<BiomeId> = new Set<BiomeId>(['sky_island', 'sky_underside
  * Nothing crosses the line in either direction.
  */
 export function shoreAt(here: BiomeId, there: BiomeId): boolean {
-  return WATER.has(here) && !WATER.has(there) && !SKY.has(there);
+  // Not against marsh: a swamp is level with the water, so there is no bank to cast a shadow.
+  return WATER.has(here) && !WATER.has(there) && !SKY.has(there) && there !== 'wetland';
 }
+
+/**
+ * Whether a swamp tile should draw a *lighter* bank shadow along this edge: where it meets dry land.
+ *
+ * **The swamp's relief, and the reason it no longer reads as ordinary land.** A river looks sunk
+ * because `shoreAt` lays the bank's shadow inside the water cell. A swamp had none of it, so it sat
+ * at the height of the grass beside it -- reported from play as "swamps are the same as normal
+ * land". It is a step down, level with the river, so it gets the same shadow at the edge it shares
+ * with dry ground, at about half the strength: a shallow step rather than a bank.
+ *
+ * Not against water (it is level with it), not against more swamp, and not against the sky biomes.
+ */
+export function sunkAt(here: BiomeId, there: BiomeId): boolean {
+  return here === 'wetland' && there !== 'wetland' && !WATER.has(there) && !SKY.has(there);
+}
+
+/** How strong the swamp's step is, against the river bank's full shadow. */
+export const SUNK_ALPHA = 0.5;
 
 /**
  * What a stretch of land puts down where it meets water, or null for the ones that put down
