@@ -296,18 +296,28 @@ export interface Whereabouts {
  * The way between two stops, preferring the road.
  *
  * **Cached, because it is a pure function of the ground and this is asked once a tick.** The cache
- * is keyed on the world's seed and the two ends, so two worlds never share an answer and a
- * regenerated map never reads a stale one.
+ * hangs off the world object itself, so two worlds never share an answer and a regenerated map
+ * never reads a stale one.
+ *
+ * It was keyed on the seed and the two ends, which is not a world: every map of one journey shares
+ * the seed, so a leg on Lothal and a leg on Dwarka between the same two coordinates were the same
+ * key, and whichever was asked first answered for both. A `WeakMap` on the world cannot collide
+ * and lets a finished map's paths go with it.
  *
  * The road is preferred rather than required: a route between two places may cross a ford, where
  * `fieldMap.ts` deliberately refuses the flag, and a traveller who would not get their feet wet
  * would be stuck on the bank for ever.
  */
-const paths = new Map<string, Point[]>();
+const paths = new WeakMap<World, Map<string, Point[]>>();
 
 export function wayBetween(world: World, from: Point, to: Point): Point[] {
-  const key = `${world.seed}:${from.x},${from.y}>${to.x},${to.y}`;
-  const had = paths.get(key);
+  let known = paths.get(world);
+  if (!known) {
+    known = new Map();
+    paths.set(world, known);
+  }
+  const key = `${from.x},${from.y}>${to.x},${to.y}`;
+  const had = known.get(key);
   if (had) return had;
 
   const walked = findPath(
@@ -323,7 +333,7 @@ export function wayBetween(world: World, from: Point, to: Point): Point[] {
     (tile: Tile) => (tile.road ? 1 : 8)
   );
   const full = [from, ...walked];
-  paths.set(key, full);
+  known.set(key, full);
   return full;
 }
 
