@@ -42,6 +42,7 @@ import {
   BLADE_SHEET,
   BRIDGE_SHEET,
   RIVER_BRIDGE_SHEET,
+  DUGOUT_IMAGE,
   TERRAIN_SHEET,
   DECOR_SHEET,
   TRACK_SHEET,
@@ -182,6 +183,8 @@ import { isCamp, isGrand } from '../../content/camps';
 import { findPath, nearestReachable } from '../../world/pathfind';
 import { NO_GESTURE, lost, pressed, released, type Gesture } from '../gesture';
 import { wadeFor, type Wade } from '../wading';
+import { afloatAfter, PADDLE_STEP, routeCost } from '../afloat';
+import { boatFor } from '../../content/kit';
 import { tileHash } from '../../world/rng';
 import type { BiomeId, Point, Tile, World } from '../../world/types';
 
@@ -275,6 +278,20 @@ const STEP_MS = 425;
  * in something and starts reading as one cut in half.
  */
 const WADE_ALPHA = 0.42;
+
+/**
+ * The dugout's gunwale, in pixels from the top of `assets/dugout.png`: where the back of the hull
+ * (the hollow, behind him) is cut from the front (the side, in front of him). Measured on the art
+ * `tools/draw-river-art.py` draws; a painted hull with a different rim changes this number.
+ */
+const DUGOUT_RIM = 58;
+/** How far below the gunwale a seated traveller's feet are: the depth he sits in the hull. */
+const DUGOUT_SEAT = 34;
+/**
+ * How far a traveller afloat is drawn above his tile's foot. Without it the hull hangs a third of a
+ * tile into the row below, where the next row's ground and props sort over it.
+ */
+const FLOAT_LIFT = 32;
 
 /** Keys that change the zoom. `0` gives it back to the automatic fit. */
 const ZOOM_KEYS: Record<string, number | 'reset'> = {
@@ -459,6 +476,15 @@ export class WorldScene extends Phaser.Scene {
    */
   private walkScale = 1;
   private facing: Facing = 'down';
+  /** Which side he last paddled toward: a side-view hull has no bow-on picture for up and down. */
+  private side: 'left' | 'right' = 'right';
+  /** Whether this map puts a boat in the kit -- canon's `vehicles`, read through `boatFor`. */
+  private boat = false;
+  /** Whether he is in the dugout. See `game/afloat.ts` for when that changes. */
+  private afloat = false;
+  /** The dugout, as two layers: the hollow behind him, and the hull's side in front of him. */
+  private hullBack!: Phaser.GameObjects.Image;
+  private hullFront!: Phaser.GameObjects.Image;
   /**
    * Whose sheet the sprite draws from.
    *
@@ -536,6 +562,7 @@ export class WorldScene extends Phaser.Scene {
     this.queuedPath = [];
     this.moving = false;
     this.facing = 'down';
+    this.afloat = false;
     this.travelled = data.travelled ?? 0;
     this.restedAt = this.travelled;
     this.standingOn = null;
@@ -623,6 +650,10 @@ export class WorldScene extends Phaser.Scene {
     this.built = worldFor(map, data.seed);
     this.world = this.built.world;
     this.at = startTileFor(this.built, window.location.search);
+    this.boat = boatFor(this.built.fieldMap.vehicles) !== null;
+    // Starting on the river with a boat in the kit is starting in it.
+    const standing = this.world.tiles[this.at.y]?.[this.at.x];
+    this.afloat = standing ? afloatAfter(false, standing, this.boat) : false;
 
     const { width, height } = this.world;
     const pixelWidth = width * TILE_SIZE;
@@ -958,6 +989,12 @@ export class WorldScene extends Phaser.Scene {
       .image(0, 0, rippleKey(this))
       .setDisplaySize(TILE_SIZE * 0.62, TILE_SIZE * 0.19)
       .setVisible(false);
+    // The dugout, cut at its gunwale into the part behind him and the part in front, so he sits in
+    // it rather than on it or behind it. Native size: two tiles long, at the figures' own scale.
+    this.hullBack = this.add.image(0, 0, DUGOUT_IMAGE).setOrigin(0.5, 0).setVisible(false);
+    this.hullBack.setCrop(0, 0, this.hullBack.width, DUGOUT_RIM + 4);
+    this.hullFront = this.add.image(0, 0, DUGOUT_IMAGE).setOrigin(0.5, 0).setVisible(false);
+    this.hullFront.setCrop(0, DUGOUT_RIM - 2, this.hullFront.width, this.hullFront.height - DUGOUT_RIM + 2);
 
     this.updateAnimation();
     this.placePlayer(this.at);
@@ -977,8 +1014,10 @@ export class WorldScene extends Phaser.Scene {
     const atRest =
       (this.at.x === this.world.landmark.x && this.at.y === this.world.landmark.y) ||
       poiAt(this.built, this.at) !== null;
-    const action = actionFor(this.moving, atRest);
-    const { key, flipX } = animFor(this.character.key, this.facing, action);
+    // In the dugout he sits, facing the side he is paddling toward, moving or not.
+    const action = this.afloat ? 'sit' : actionFor(this.moving, atRest);
+    const facing = this.afloat ? this.side : this.facing;
+    const { key, flipX } = animFor(this.character.key, facing, action);
     // Reapplied on every call rather than only on a change: `timeScale` lives on the sprite, so a
     // walk left at 1.34 would otherwise run the idle a third fast for the rest of the journey.
     this.player.anims.timeScale = action === 'walk' ? this.walkScale : 1;
@@ -989,6 +1028,7 @@ export class WorldScene extends Phaser.Scene {
   /** Point the sprite the way it is walking, mirroring the side view for leftward steps. */
   private faceTowards(dx: number, dy: number): void {
     this.facing = facingFromStep(dx, dy, this.facing);
+    if (dx !== 0) this.side = dx > 0 ? 'right' : 'left';
   }
 
   private placePlayer(at: Point): void {
@@ -1041,6 +1081,33 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private moveWaterline(): void {
+    // **In the dugout, the hull is the water line.** He is drawn a little higher so the hull stays in
+    // his own row, seated, with the hollow behind him and the side of the hull in front; a wide ring
+    // under the hull is the wake. None of the wading applies: he is on the water, not in it.
+    this.player.setOrigin(0.5, this.afloat ? 1 + FLOAT_LIFT / this.player.displayHeight : 1);
+    this.hullBack.setVisible(this.afloat);
+    this.hullFront.setVisible(this.afloat);
+    if (this.afloat) {
+      const top = this.player.y - FLOAT_LIFT - DUGOUT_SEAT - DUGOUT_RIM;
+      const flip = this.side === 'left';
+      this.hullBack.setPosition(this.player.x, top).setFlipX(flip);
+      this.hullFront.setPosition(this.player.x, top).setFlipX(flip);
+      this.wade = { kind: 'dry' };
+      this.player.setAlpha(1);
+      if (this.cutDepth !== 0) {
+        this.cutDepth = 0;
+        this.player.setCrop();
+      }
+      this.waterline.setVisible(false);
+      this.shadow.setVisible(false);
+      this.ripple
+        .setVisible(true)
+        .setDisplaySize(TILE_SIZE * 1.7, TILE_SIZE * 0.3)
+        .setPosition(this.player.x, top + this.hullFront.height - 14);
+      return;
+    }
+    this.ripple.setDisplaySize(TILE_SIZE * 0.62, TILE_SIZE * 0.19);
+
     const wade = wadeFor(this.world.tiles[this.at.y]?.[this.at.x]);
     this.wade = wade;
 
@@ -1098,6 +1165,9 @@ export class WorldScene extends Phaser.Scene {
     // the reeds on the bank.
     this.waterline.setDepth(depthFor(row, ROW_SLOT.walker) + 1);
     this.ripple.setDepth(depthFor(row, ROW_SLOT.walker) + 1);
+    // The hollow behind him; the side of the hull in front of him and of the wake.
+    this.hullBack.setDepth(depthFor(row, ROW_SLOT.walker) - 0.5);
+    this.hullFront.setDepth(depthFor(row, ROW_SLOT.walker) + 1.5);
     // One slot below him, in the same row band. `underfoot` is where decor lives, which is right:
     // a shadow is a mark on the ground, and it should pass under a stone the way the ground does.
     this.shadow.setDepth(depthFor(row, ROW_SLOT.underfoot));
@@ -1220,7 +1290,7 @@ export class WorldScene extends Phaser.Scene {
       // always paid `travelCost` per step; until now only the *duration* knew about it and the
       // route did not, so tap-to-walk reliably chose the slowest line available to it.
       // By the road as well as the ground, so a click across country walks the path where one runs.
-      const cost = (tile: Tile) => stepCostOn(tile);
+      const cost = (tile: Tile) => routeCost(tile, this.boat, this.afloat);
       const { tiles, width, height } = this.world;
       this.queuedPath = findPath(tiles, width, height, this.at, target, isWalkable, cost);
 
@@ -1706,6 +1776,8 @@ export class WorldScene extends Phaser.Scene {
       biome: this.world.tiles[this.at.y]?.[this.at.x]?.biome ?? null,
       // How he is drawn in water, so a spec can hold the wading table to the screen.
       wade: this.wade,
+      // Whether he is in the dugout, for `e2e/dugout.spec.ts`.
+      afloat: this.afloat,
       moving: this.moving,
       depth: this.player.depth,
       sortedRow: this.sortedRow,
@@ -2079,7 +2151,11 @@ export class WorldScene extends Phaser.Scene {
     //
     // `stepCostOn` rather than `stepCost`, because a worn road is quicker than the ground it runs
     // over -- `ROAD_STEP` says why it is flat.
-    const cost = stepCostOn(tile);
+    //
+    // And in the dugout the water is the quick going: `afloatAfter` decides whether this step is
+    // paddled, which is also the moment he climbs in or steps ashore.
+    this.afloat = afloatAfter(this.afloat, tile, this.boat);
+    const cost = this.afloat ? PADDLE_STEP : stepCostOn(tile);
     // The same cost buys the step twice: how long the tween takes on the screen, and how much of
     // the day the walking spends. The second is what keeps the sun honest.
     this.travelled += travelTimeMs(cost);

@@ -70,3 +70,26 @@ export function carries(id: string): boolean {
 export function useful(): readonly KitItem[] {
   return KIT.filter((item) => item.affords !== null);
 }
+
+/**
+ * The boat a map puts in the kit, or null.
+ *
+ * **Carried from the first morning, and only where canon lays one ready.** Canon's `vehicles` on a
+ * field map says which craft are simply *there* -- today the dugout at Lothal, and nowhere else. The
+ * owner's ruling is that it is in the kit from the start on that map, rather than found: step from a
+ * bank into the river and you are paddling. It belongs to the map, so leaving Lothal leaves it.
+ *
+ * A kit item rather than a satchel entry for the kit's own reason: fixed, never dropped, never
+ * managed. See canon's `docs/decisions.md`, *A dugout at Lothal*.
+ */
+export const DUGOUT: KitItem = {
+  id: 'vehicle_log_dugout',
+  name: 'Dugout',
+  description:
+    'One trunk, burnt and adzed hollow, lighter than it looks. The river is slow going on foot and quick in this.',
+  affords: 'Paddle the channels and the swamp: step from any bank into the river.'
+};
+
+export function boatFor(vehicles: readonly string[]): KitItem | null {
+  return vehicles.includes(DUGOUT.id) ? DUGOUT : null;
+}
