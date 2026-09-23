@@ -20,3 +20,26 @@ export function seedFromUrl(): string {
   const fromQuery = new URLSearchParams(window.location.search).get('seed');
   return fromQuery?.trim() || DEFAULT_SEED;
 }
+
+/** Words a random seed is made of: a time or a weather, then something you might meet. */
+const SEED_FIRST = [
+  'monsoon', 'saffron', 'evening', 'dawn', 'salt', 'silt', 'amber', 'river',
+  'dry', 'green', 'ember', 'misty', 'copper', 'reed', 'tide', 'dusk'
+] as const;
+const SEED_SECOND = [
+  'heron', 'banyan', 'lotus', 'delta', 'crane', 'ferry', 'kiln', 'shrine',
+  'lantern', 'harbour', 'jackal', 'mango', 'bead', 'mask', 'granary', 'ford'
+] as const;
+
+/**
+ * A new seed, chosen for you, readable enough to say aloud and pass on: `monsoon-heron-42`.
+ *
+ * **Words rather than digits, because a seed here is something people share.** The whole world
+ * travels in the link, and "try saffron-kiln-17" survives a conversation where a ten-digit number
+ * does not. 16 x 16 x 100 is 25,600 maps, which is plenty for a button that means "surprise me";
+ * anybody who wants a particular map types its seed instead.
+ */
+export function randomSeed(random: () => number = Math.random): string {
+  const pick = <T,>(list: readonly T[]) => list[Math.floor(random() * list.length) % list.length]!;
+  return `${pick(SEED_FIRST)}-${pick(SEED_SECOND)}-${Math.floor(random() * 100)}`;
+}
