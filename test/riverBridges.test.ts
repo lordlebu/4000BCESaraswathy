@@ -6,6 +6,8 @@
 // fires on a map is this codebase's signature fault.
 
 import { describe, expect, it } from 'vitest';
+import { createRequire } from 'node:module';
+import { join } from 'node:path';
 import { bridgeTheCrossings, FORDED_PLACES, MAX_SPAN } from '../src/world/bridges';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMaps } from '../src/content/places';
@@ -190,5 +192,56 @@ describe('what the walking costs', () => {
   it('makes a river slow going on foot', () => {
     expect(stepCost('river')).toBe(3);
     expect(stepCostOn({ biome: 'river' })).toBe(3);
+  });
+});
+
+// The sheets on disk, held to the frame contract. Decoded with the tools' own reader rather than a
+// third copy of it.
+const { decodePng } = createRequire(import.meta.url)('../tools/sprite-png.js') as {
+  decodePng: (file: string) => { width: number; height: number; data: Uint8Array };
+};
+const ASSETS = join(__dirname, '..', 'assets');
+
+describe('the art on disk', () => {
+  const sheet = decodePng(join(ASSETS, 'river-bridge.png'));
+  const cell = 128;
+  const alphaAt = (x: number, y: number) => sheet.data[(y * sheet.width + x) * 4 + 3]!;
+
+  it('is eight 128 px frames, the contract riverBridgeFrame indexes', () => {
+    expect(sheet.height).toBe(cell);
+    expect(sheet.width).toBe(RIVER_BRIDGE_FRAMES * cell);
+  });
+
+  it('draws something in every frame, on a transparent ground', () => {
+    for (let f = 0; f < RIVER_BRIDGE_FRAMES; f += 1) {
+      let solid = 0;
+      for (let y = 0; y < cell; y += 1) {
+        for (let x = 0; x < cell; x += 1) if (alphaAt(f * cell + x, y) === 255) solid += 1;
+      }
+      expect(solid, `frame ${f} is empty`).toBeGreaterThan(cell * cell * 0.1);
+    }
+    // An east-west frame's top corner is open water, not a keyed-out colour left behind.
+    expect(alphaAt(2, 2)).toBe(0);
+  });
+
+  it('casts its shadow in every frame, whichever way the bridge runs', () => {
+    // The builder lights the run after turning it, so north-south frames get a shadow too. Partly
+    // transparent pixels are the shadow; a frame with none was built without its height.
+    for (let f = 0; f < RIVER_BRIDGE_FRAMES; f += 1) {
+      let shade = 0;
+      for (let y = 0; y < cell; y += 1) {
+        for (let x = 0; x < cell; x += 1) {
+          const a = alphaAt(f * cell + x, y);
+          if (a > 20 && a < 200) shade += 1;
+        }
+      }
+      expect(shade, `frame ${f} casts no shadow`).toBeGreaterThan(40);
+    }
+  });
+
+  it('ships the dugout keyed, two tiles long', () => {
+    const hull = decodePng(join(ASSETS, 'dugout.png'));
+    expect([hull.width, hull.height]).toEqual([256, 128]);
+    expect(hull.data[3], 'the magenta was not keyed out').toBe(0);
   });
 });

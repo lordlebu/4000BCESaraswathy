@@ -1183,9 +1183,9 @@ export const RIVER_BRIDGE_FRAMES = 8;
  *
  * **Separate from `bridgeFrame`, which is the planks over the island notches.** The islands keep
  * their own art; a river bridge is a different structure with its own sheet. The contract is the
- * one the art brief asks for -- a single overhead image of a three-tile span, which the builder
- * cuts into start, middle and end and rotates for north-south -- and until that image exists the
- * same eight frames are drawn in code by `riverBridgeTextureKey`.
+ * one the art brief asks for -- a single overhead image of a three-tile span, which
+ * `tools/build-river-craft.js` cuts into start, middle and end, turns for north-south, and then
+ * lights, so the shadow falls the same way whichever way the bridge runs.
  */
 export function riverBridgeFrame(eastWest: boolean, piece: SpanPiece): number {
   return (eastWest ? 0 : 4) + piece;
