@@ -1161,6 +1161,29 @@ export function bridgeFrame(eastWest: boolean, worn: boolean): number {
 }
 
 /**
+ * Where a tile sits along a river bridge. The bank end is `start` on the west or north, `end` on the
+ * east or south; `single` is a one-tile span, which is both.
+ */
+export const SPAN_PIECE = { start: 0, middle: 1, end: 2, single: 3 } as const;
+export type SpanPiece = (typeof SPAN_PIECE)[keyof typeof SPAN_PIECE];
+
+/** Frames on the river-bridge sheet: four pieces running east-west, then the same four north-south. */
+export const RIVER_BRIDGE_FRAMES = 8;
+
+/**
+ * Which river-bridge piece to draw.
+ *
+ * **Separate from `bridgeFrame`, which is the planks over the island notches.** The islands keep
+ * their own art; a river bridge is a different structure with its own sheet. The contract is the
+ * one the art brief asks for -- a single overhead image of a three-tile span, which the builder
+ * cuts into start, middle and end and rotates for north-south -- and until that image exists the
+ * same eight frames are drawn in code by `riverBridgeTextureKey`.
+ */
+export function riverBridgeFrame(eastWest: boolean, piece: SpanPiece): number {
+  return (eastWest ? 0 : 4) + piece;
+}
+
+/**
  * Which piece of path this tile draws, from the sides the path leaves by.
  *
  * **It takes a mask rather than a direction now, and the difference is the corner.** The old

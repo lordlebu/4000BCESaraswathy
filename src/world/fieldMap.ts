@@ -23,6 +23,7 @@ import {
 } from './crossing';
 import { stampBasalt } from './basalt';
 import { easeRoutes, thinRoad, tourOrder } from './routes';
+import { bridgeTheCrossings, FORDED_PLACES } from './bridges';
 
 /**
  * Water a route crosses rather than follows, where the road stops and a ford begins.
@@ -767,6 +768,14 @@ export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): F
   // tees in the sheet each row reaches across to the other and it draws as a ladder. `thinRoad`
   // never disconnects anything: see its header for the invariant it checks rather than assumes.
   thinRoad(world.tiles, world.width, world.height);
+
+  // **Bridge the short crossings.** Routes cross rivers where they are narrowest now that a river is
+  // slow going on foot, and a crossing of three tiles or fewer gets a bridge rather than stepping
+  // stones -- except beside a place canon puts at a ford. See `world/bridges.ts`.
+  bridgeTheCrossings(
+    world,
+    placed.filter((p) => FORDED_PLACES.has(p.poi.id)).map((p) => p.at)
+  );
 
   // Put the landmark back, *after* placement has read the ground.
   //

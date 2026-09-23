@@ -51,6 +51,7 @@ import {
   blendTextureKey,
   shoreTextureKey,
   bankTextureKey,
+  riverBridgeTextureKey,
   undersideShadeKey,
   CLIFF_SHEET,
   TREELINE_SHEET,
@@ -77,12 +78,13 @@ import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
  * `marker` is a glyph and has none; `shadow` is a tinted quad and has none either -- see
  * `planIslandShadow` for why the island's shadow is not four frames of painted dark blue. `shore`
  * is baked per edge and variant rather than loaded, so `shoreTextureKey` names its texture
- * instead, and `contact` is the one shadow texture the traveller already uses.
+ * instead, and `contact` is the one shadow texture the traveller already uses. `riverBridge` is
+ * drawn in code by `riverBridgeTextureKey` until the painted bridge arrives.
  */
 const SHEET_KEY: Record<
   Exclude<
     PlacementSheet,
-    'marker' | 'shadow' | 'shore' | 'contact' | 'underside' | 'cloud' | 'waterfall'
+    'marker' | 'shadow' | 'shore' | 'contact' | 'underside' | 'cloud' | 'waterfall' | 'riverBridge'
   >,
   string
 > = {
@@ -152,7 +154,7 @@ import {
   landmarkHint,
   whereNextHint
 } from '../../content/journal';
-import { biomeFor, stepCost } from '../../content/species';
+import { biomeFor, stepCostOn } from '../../content/species';
 import { isWalkable } from '../../world/generate';
 import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
@@ -738,6 +740,14 @@ export class WorldScene extends Phaser.Scene {
       // the plan for the same reason a pixel position is: the plan says "there is a shadow at the
       // foot of this", and how wide a shadow is in pixels is this file's business.
       // The shade on a shelf's underside: one baked gradient, a whole cell, dense at the top.
+      // A bridge over a river crossing. Drawn in code until the painted sheet arrives; the frame is
+      // the same contract either way, so swapping the art is a change to the texture and nothing here.
+      if (item.sheet === 'riverBridge') {
+        const deck = this.add.image(cx, cy, riverBridgeTextureKey(this, item.frame)).setDepth(item.depth);
+        this.tileOwned.push({ sprite: deck, x: item.x, y: item.y });
+        continue;
+      }
+
       if (item.sheet === 'underside') {
         const shade = this.add
           .image(cx, cy, undersideShadeKey(this))
@@ -1165,7 +1175,8 @@ export class WorldScene extends Phaser.Scene {
       // Weighted, so a tap across a range walks round it rather than over it. The scene has
       // always paid `travelCost` per step; until now only the *duration* knew about it and the
       // route did not, so tap-to-walk reliably chose the slowest line available to it.
-      const cost = (tile: Tile) => stepCost(tile.biome);
+      // By the road as well as the ground, so a click across country walks the path where one runs.
+      const cost = (tile: Tile) => stepCostOn(tile);
       const { tiles, width, height } = this.world;
       this.queuedPath = findPath(tiles, width, height, this.at, target, isWalkable, cost);
 
@@ -2014,7 +2025,10 @@ export class WorldScene extends Phaser.Scene {
     // `stepCost` rather than `travelCost(...) ?? 1`, because that fallback was never "a missing
     // number, call it easy": it fires only where a walker is standing on the crossing over open
     // water or open air, and that is the slowest going on the map rather than the fastest.
-    const cost = stepCost(tile.biome);
+    //
+    // `stepCostOn` rather than `stepCost`, because a worn road is quicker than the ground it runs
+    // over -- `ROAD_STEP` says why it is flat.
+    const cost = stepCostOn(tile);
     // The same cost buys the step twice: how long the tween takes on the screen, and how much of
     // the day the walking spends. The second is what keeps the sun honest.
     this.travelled += travelTimeMs(cost);

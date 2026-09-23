@@ -76,8 +76,11 @@ export function findPath(
     for (const next of orthogonalNeighbours(tile, width, height)) {
       const at = tiles[next.y]![next.x]!;
       if (!isWalkable(at)) continue;
-      // A non-positive cost would let a cycle be walked for free and never terminate.
-      const stepCost = Math.max(costOf(at), 1);
+      // A non-positive cost would let a cycle be walked for free and never terminate. Only that is
+      // refused: this was `Math.max(cost, 1)`, which also flattened a road's 0.75 to the plains
+      // rate, so a click across country never preferred the path.
+      const raw = costOf(at);
+      const stepCost = raw > 0 ? raw : 1;
       const total = cost + stepCost;
       const nextKey = key(next);
       if (total >= (best.get(nextKey) ?? Infinity)) continue;

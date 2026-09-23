@@ -123,7 +123,7 @@
     "id": "river",
     "name": "River",
     "walkable": true,
-    "travelCost": 1,
+    "travelCost": 3,
     "tone": "life-giving",
     "color": "#4fa3d9",
     "symbol": "≈",

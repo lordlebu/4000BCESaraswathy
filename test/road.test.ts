@@ -17,7 +17,7 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps } from '../src/content/places';
 import { easeRoutes, thinRoad } from '../src/world/routes';
-import { planRoad, planScene } from '../src/game/scenePlan';
+import { planRiverBridges, planRoad, planScene } from '../src/game/scenePlan';
 import {
   roadFrame,
   runSides,
@@ -43,7 +43,7 @@ const roadTiles = (world: World) =>
 // surface rather than a second feature. Counting only `road` here reported 122 against 130 drawn on
 // the Aravali, which was the ford working.
 const wornTiles = (world: World) =>
-  world.tiles.flat().filter((tile) => tile.road === true || tile.ford === true);
+  world.tiles.flat().filter((tile) => tile.road === true || tile.ford === true || tile.bridge === true);
 
 describe('easeRoutes hands back two different facts', () => {
   it('returns a line far longer than the tiles it changed', () => {
@@ -121,11 +121,11 @@ describe('the road is on the ground', () => {
   });
 
   it('never draws on water — it stops at the bank and fords', () => {
-    // **A route prefers a river and a road on one is still wrong.** Easing turns wetland into
-    // river on purpose -- the delta's answer to crossing a marsh is to follow the channel -- and
-    // `crossingCost` gives river the same 1 as plains, so the line really does run down
-    // watercourses. The first version drew packed earth over open water for a dozen tiles south of
-    // Lothal's settlement, which is what this now refuses.
+    // **A road on a river is wrong however the route got there.** Routes used to run down
+    // watercourses -- a river cost what plains cost, and easing turned marsh into river -- and the
+    // first version drew packed earth over open water for a dozen tiles south of Lothal's
+    // settlement. Routes cross water now rather than follow it, and where they do the tile is a
+    // ford or a bridge, never `road`.
     for (const map of fieldMaps) {
       const world = buildFieldMap(map, { seed: DEFAULT_SEED }).world;
       const wet = roadTiles(world).filter(
@@ -176,7 +176,8 @@ describe('the road reaches the screen', () => {
     // is the same bug moved one file along, and every test above would still pass.
     for (const map of fieldMaps) {
       const scene = buildFieldMap(map, { seed: DEFAULT_SEED });
-      const drawn = planScene(scene).filter((p) => p.sheet === 'road');
+      // A bridge is part of the road and draws on its own sheet, so both are counted.
+      const drawn = planScene(scene).filter((p) => p.sheet === 'road' || p.sheet === 'riverBridge');
       expect(drawn.length, `${map.id}: the road is flagged but nothing draws it`)
         .toBe(wornTiles(scene.world).length);
     }
@@ -205,10 +206,11 @@ describe('the road reaches the screen', () => {
       // The ford counts as road *to the shape*, and must: the frame is the sides the run leaves
       // by, and a crossing is a tile the run passes through. Asking `road` alone here reported
       // `23,10 draws sides 12 over ground that runs 8` -- the west arm reaching the ford at 22,10,
-      // which is the whole point of drawing the crossing.
+      // which is the whole point of drawing the crossing. A bridge counts for the same reason: the
+      // road runs onto the deck, and a road that drew a stub at the bank would be the fault again.
       const road = (x: number, y: number) => {
         const tile = world.tiles[y]?.[x];
-        return tile?.road === true || tile?.ford === true;
+        return tile?.road === true || tile?.ford === true || tile?.bridge === true;
       };
       for (const piece of planRoad(world)) {
         const drawn = piece.frame % ROAD_MASKS;
@@ -252,6 +254,7 @@ describe('the road reaches the screen', () => {
     // and 44% of that delta's network was missing. The other three draw 0 to 17, which is why the
     // gap was only ever reported on Lothal.
     const seeds = [DEFAULT_SEED, 'a', 'b', 'c', 'd'];
+    let crossingsDrawn = 0;
     for (const map of fieldMaps) {
       let everAforded = 0;
       for (const seed of seeds) {
@@ -273,25 +276,36 @@ describe('the road reaches the screen', () => {
             .not.toBe(true);
         }
       }
-      expect(
-        everAforded,
-        `${map.id}: no route on any seed crosses water, so the ford row never draws`
-      ).toBeGreaterThan(0);
+      for (const seed of seeds) {
+        crossingsDrawn += planRiverBridges(buildFieldMap(map, { seed }).world).length;
+      }
+      crossingsDrawn += everAforded;
     }
+    // **A crossing is a ford or a bridge now, and the guard is that they draw somewhere.** This
+    // asserted fords on every map, which was true while routes ran down rivers. With a river at
+    // cost 3 they cross where the water is narrowest, the short crossings are bridged, and a map
+    // whose places sit on one side of its water can go five seeds without crossing at all --
+    // Dwarka does, legitimately. Each crossing that does draw is still checked above.
+    expect(crossingsDrawn, 'no route on any map crosses water, so nothing ever draws a crossing')
+      .toBeGreaterThan(0);
   });
 
-  it('carries Lothal, which is the map the gap was reported on', () => {
-    // Lothal is a delta and its road has always been the short one -- 54 to 87 tiles against 98 to
-    // 169 elsewhere at the same place spread. The reason was never that the route is shorter: it is
-    // that the route crosses water constantly and every crossing was silently dropped, so the road
-    // read as fragments. Asserted as a share rather than a count, because the counts move with the
-    // maps and the fact does not.
+  it("crosses Lothal's channels rather than walking down them", () => {
+    // Lothal is where this was reported. Its road used to be the short one and read as fragments,
+    // because the route ran *down* channels -- 41 tiles a seed in the water, one stretch 27 long --
+    // and every wet tile was dropped from the drawing. The drawing was fixed first (the ford row);
+    // then the cause: a river costs 3 on foot and easing no longer turns marsh into river, so the
+    // route crosses where the water is narrowest. Both halves are asserted: the crossings are short
+    // enough to bridge, and they are still drawn.
+    let crossings = 0;
     for (const seed of [DEFAULT_SEED, 'a', 'b', 'c', 'd']) {
       const world = buildFieldMap(fieldMap('field_map_lothal')!, { seed }).world;
-      const fords = world.tiles.flat().filter((t) => t.ford === true).length;
+      const wet = world.tiles.flat().filter((t) => t.ford === true || t.bridge === true).length;
       const worn = wornTiles(world).length;
-      expect(fords / worn, `lothal/${seed}: the crossings stopped mattering`).toBeGreaterThan(0.15);
+      expect(wet / worn, `lothal/${seed}: the road is following the water again`).toBeLessThan(0.1);
+      crossings += wet;
     }
+    expect(crossings, 'lothal: no crossing drawn on any seed').toBeGreaterThan(0);
   });
 
   it('indexes the verge row by adding the mask count, and nothing else', () => {

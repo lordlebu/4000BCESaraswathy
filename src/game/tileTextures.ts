@@ -516,6 +516,71 @@ export function undersideShadeKey(scene: Phaser.Scene): string {
 }
 
 /**
+ * A stand-in river bridge, drawn in code: one of the eight frames `riverBridgeFrame` names.
+ *
+ * **A placeholder with a known replacement.** The owner is providing a painted bridge -- one
+ * overhead image of a three-tile span -- and the builder will cut it into these same frames. Until
+ * then this draws the shape plainly: a timber deck as wide as the road band, planks across it, a
+ * darker rail along each side, and a stone footing on the bank end of an end piece. Overhead, so
+ * the north-south frames are the east-west ones turned a quarter.
+ */
+export function riverBridgeTextureKey(scene: Phaser.Scene, frame: number): string {
+  const key = `bridge:river:${frame}`;
+  if (scene.textures.exists(key)) return key;
+
+  const canvas = scene.textures.createCanvas(key, TILE_SIZE, TILE_SIZE);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  const T = TILE_SIZE;
+  const eastWest = frame < 4;
+  const piece = frame % 4; // 0 start, 1 middle, 2 end, 3 single -- see SPAN_PIECE
+  if (!eastWest) {
+    // Draw it east-west and turn the canvas: overhead art has no side to show.
+    context.translate(T, 0);
+    context.rotate(Math.PI / 2);
+  }
+
+  const deckTop = Math.round(T * 0.3);
+  const deckHeight = Math.round(T * 0.4);
+  const footing = Math.round(T * 0.16);
+  const westFoot = piece === 0 || piece === 3;
+  const eastFoot = piece === 2 || piece === 3;
+  const x0 = westFoot ? footing : 0;
+  const x1 = eastFoot ? T - footing : T;
+
+  // Stone footings where the deck meets the bank.
+  context.fillStyle = '#8b8577';
+  if (westFoot) context.fillRect(0, deckTop - 6, footing, deckHeight + 12);
+  if (eastFoot) context.fillRect(T - footing, deckTop - 6, footing, deckHeight + 12);
+
+  // The deck, and its shadow on the water just below it.
+  context.fillStyle = 'rgba(11,28,48,0.28)';
+  context.fillRect(x0, deckTop + deckHeight, x1 - x0, Math.round(T * 0.06));
+  context.fillStyle = '#9a7449';
+  context.fillRect(x0, deckTop, x1 - x0, deckHeight);
+
+  // Planks across the deck.
+  context.strokeStyle = '#6e5031';
+  context.lineWidth = 2;
+  for (let x = x0 + T / 10; x < x1; x += T / 10) {
+    context.beginPath();
+    context.moveTo(Math.round(x) + 0.5, deckTop);
+    context.lineTo(Math.round(x) + 0.5, deckTop + deckHeight);
+    context.stroke();
+  }
+
+  // A rail along each side.
+  context.fillStyle = '#5a3f24';
+  const rail = Math.max(4, Math.round(T * 0.05));
+  context.fillRect(x0, deckTop, x1 - x0, rail);
+  context.fillRect(x0, deckTop + deckHeight - rail, x1 - x0, rail);
+
+  canvas.refresh();
+  return key;
+}
+
+/**
  * Standing water on a floating island: the river tile under a pale wash.
  *
  * **Baked rather than painted, and that is the cheap half of adding this biome.** `tileTextures`

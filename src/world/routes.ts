@@ -22,8 +22,15 @@ import type { BiomeId, Point, Tile } from './types';
  * What each biome becomes when a route is eased through it.
  *
  * Softening rather than flattening: hills become the plains between them, forest opens to the
- * clearing a track would follow, mountains drop to a pass. Wetland becomes river, which is the
- * delta's whole answer -- you do not drain a marsh to cross it, you follow the channel.
+ * clearing a track would follow, mountains drop to a pass.
+ *
+ * **Wetland is no longer eased, and it used to become river.** That was the delta's answer while a
+ * river cost what plains cost: you do not drain a marsh to cross it, you follow the channel. Once
+ * a river became slow going on foot (cost 3, waist-deep), easing marsh *into* river made every
+ * route across Lothal harder to walk rather than easier, and manufactured channels for the road to
+ * run down -- 41 route tiles a seed in water, one stretch 27 tiles long. Following the channel is
+ * now the dugout's job, which is canon's `vehicles` on Lothal. On foot the road crosses the marsh
+ * as a path, which is what a raised track through reeds is.
  *
  * Sea, coast, settlement and landmark are absent deliberately. A route must not fill in water,
  * pave a beach, or overwrite authored ground.
@@ -32,7 +39,6 @@ const EASED: Partial<Record<BiomeId, BiomeId>> = {
   mountains: 'hills',
   hills: 'plains',
   forest: 'plains',
-  wetland: 'river',
   desert: 'plains'
 };
 
@@ -46,9 +52,11 @@ const EASED: Partial<Record<BiomeId, BiomeId>> = {
  * line.
  */
 const CROSSING: Partial<Record<BiomeId, number>> = {
-  coast: 1, plains: 1, river: 1, settlement: 1, landmark: 1,
+  coast: 1, plains: 1, settlement: 1, landmark: 1,
   forest: 2, wetland: 2, hills: 2, desert: 2,
-  mountains: 3
+  // River was 1, the same as plains, and routes ran *down* channels for it. At 3 a route crosses
+  // water where it is narrowest instead, which is where a bridge can go.
+  mountains: 3, river: 3
 };
 
 /** Cost of entering a tile, on the same scale the game uses. */
@@ -86,11 +94,14 @@ export interface EaseOptions {
    * One, and deliberately narrow. A three-wide corridor between six places erases the map's
    * character -- the point is a track through difficult country, not a cleared plain.
    *
-   * Wet maps take two. A delta's interior is marsh by definition, so no shaping can make it cheap
-   * and the only honest cheap ground is the channel network itself; a one-wide thread through 60%
-   * wetland reads as a scratch rather than as the way people actually move. Measured: a delta at
-   * radius 1 leaves the interior at cost 1.84, and the whole point of the landform is that you
-   * follow the water.
+   * Wet maps take two. A delta's interior is marsh by definition, so no shaping can make it cheap,
+   * and a one-wide thread through it reads as a scratch rather than as the way people move.
+   * Measured: a delta at radius 1 leaves the interior at cost 1.84.
+   *
+   * This used to end "the whole point of the landform is that you follow the water", and the
+   * easing turned marsh into river to make that true. It no longer does -- see `EASED` -- because a
+   * river is slow going on foot now and following the water is the dugout's job. The wider corridor
+   * still opens the forest and hills beside the track.
    */
   radius?: number;
   /** Cost of entering a tile, so routes are eased along the way somebody would actually walk. */

@@ -55,6 +55,8 @@ import {
   paintedPlace,
   BLADE_PERIOD,
   bridgeFrame,
+  riverBridgeFrame,
+  SPAN_PIECE,
   swayFrame
 } from './frames';
 import { isRope, plankRunsEastWest } from '../world/crossing';
@@ -78,6 +80,7 @@ export type PlacementSheet =
   | 'windmill'
   | 'blades'
   | 'bridge'
+  | 'riverBridge'
   | 'landmarks'
   | 'decor'
   | 'contact'
@@ -1232,6 +1235,7 @@ export function planScene(built: FieldMapWorld): Placement[] {
     //
     // Before the rail, because where the two ever meet the iron is laid over the earth.
     ...planRoad(built.world),
+    ...planRiverBridges(built.world),
     ...planTrack(built.world),
     ...planPlanks(built.world),
     // After the rails, because a cloud drifts over the line and not under it -- and after the
@@ -1532,7 +1536,7 @@ export function planRoad(world: FieldMapWorld['world']): Placement[] {
   // ford's own frame is chosen by the same mask as everything else.
   const worn = (x: number, y: number): boolean => {
     const tile = world.tiles[y]?.[x];
-    return tile?.road === true || tile?.ford === true;
+    return tile?.road === true || tile?.ford === true || tile?.bridge === true;
   };
 
   for (let y = 0; y < world.height; y += 1) {
@@ -1639,6 +1643,55 @@ export function planTrack(world: FieldMapWorld['world']): Placement[] {
   return out;
 }
 
+
+/**
+ * The bridges over the river crossings.
+ *
+ * `planRoad` draws the road up to the bank and reads a bridge as connected, so the road runs onto
+ * the deck without a stub; this draws the deck. The direction comes from the road it carries -- a
+ * bridge with road east or west runs east-west -- and failing that from the river under it, which a
+ * bridge crosses rather than follows. Which piece a tile is comes from its neighbours along that
+ * direction, so a span of any length is start, middles, end.
+ */
+export function planRiverBridges(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  const at = (x: number, y: number) => world.tiles[y]?.[x];
+  const carries = (x: number, y: number) => {
+    const t = at(x, y);
+    return t?.road === true || t?.ford === true || t?.bridge === true;
+  };
+  const bridged = (x: number, y: number) => at(x, y)?.bridge === true;
+
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      if (!world.tiles[y]![x]!.bridge) continue;
+      const alongX = carries(x - 1, y) || carries(x + 1, y);
+      const alongY = carries(x, y - 1) || carries(x, y + 1);
+      // The river runs north-south under a bridge that runs east-west, so with no road to read,
+      // water above and below says which way the deck goes.
+      const riverNS = at(x, y - 1)?.biome === 'river' && at(x, y + 1)?.biome === 'river';
+      const eastWest = alongX && !alongY ? true : alongY && !alongX ? false : riverNS;
+      const before = eastWest ? bridged(x - 1, y) : bridged(x, y - 1);
+      const after = eastWest ? bridged(x + 1, y) : bridged(x, y + 1);
+      const piece = before && after
+        ? SPAN_PIECE.middle
+        : after
+          ? SPAN_PIECE.start
+          : before
+            ? SPAN_PIECE.end
+            : SPAN_PIECE.single;
+      out.push({
+        sheet: 'riverBridge',
+        frame: riverBridgeFrame(eastWest, piece),
+        x,
+        y,
+        // Underfoot, like the road it carries: a walker crosses *on* it, not behind it.
+        depth: depthFor(y, ROW_SLOT.underfoot)
+      });
+    }
+  }
+  return out;
+}
 
 /**
  * The planks over the island notches.
