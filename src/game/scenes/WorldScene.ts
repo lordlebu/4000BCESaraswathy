@@ -1095,6 +1095,8 @@ export class WorldScene extends Phaser.Scene {
   private swallowWhileTyping: ((event: KeyboardEvent) => void) | null = null;
   /** Forget every pointer when the window loses focus mid-press. See `bindInput`. */
   private forgetPointers: (() => void) | null = null;
+  /** Switch the game's keyboard off while a text field has focus. See `bindInput`. */
+  private watchFocus: (() => void) | null = null;
 
   private typing(): boolean {
     const el = document.activeElement as HTMLElement | null;
@@ -1137,6 +1139,21 @@ export class WorldScene extends Phaser.Scene {
       event.stopImmediatePropagation();
     };
     document.addEventListener('keydown', this.swallowWhileTyping, true);
+
+    // **The keyboard is off while a text field has focus, and every key is let go on the way in and
+    // out.** Reported from play: on a phone, typing a seed with a W in it walked the traveller.
+    // Everything above keys off `event.code`, and a phone's soft keyboard often sends a letter with
+    // no code at all -- so nothing swallowed it, Phaser marked W as held, and the key-up that should
+    // have released it never came the same way. The moment the field lost focus, `update` saw a held
+    // key and walked. Turning Phaser's keyboard off while editing means it records nothing to be stuck,
+    // and `resetKeys` on each change drops anything recorded before. This is the usual rule for a game
+    // canvas beside a form: the form owns the keys while it has focus, whatever the keys report.
+    this.watchFocus = () => {
+      keyboard.enabled = !this.typing();
+      keyboard.resetKeys();
+    };
+    document.addEventListener('focusin', this.watchFocus);
+    document.addEventListener('focusout', this.watchFocus);
 
     // **Counted here rather than polled in `update`.** Two fingers that arrive and leave inside one
     // frame would never be seen by `updatePinch`, and the release still has to be refused -- so the
@@ -1249,6 +1266,11 @@ export class WorldScene extends Phaser.Scene {
       if (this.forgetPointers) {
         window.removeEventListener('blur', this.forgetPointers);
         this.forgetPointers = null;
+      }
+      if (this.watchFocus) {
+        document.removeEventListener('focusin', this.watchFocus);
+        document.removeEventListener('focusout', this.watchFocus);
+        this.watchFocus = null;
       }
       EventBus.offEvent('new-journey', this.onNewJourney);
       EventBus.offEvent('resume-journey', this.onNewJourney);
