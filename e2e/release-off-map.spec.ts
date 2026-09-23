@@ -95,18 +95,26 @@ test('a click on open air walks toward it instead of doing nothing', async ({ pa
     timeout: 60_000
   });
   // The camera fades in and settles its zoom after boot; a tile's screen position read before that
-  // is somewhere else by the time the click lands. Wait until two readings agree.
+  // is somewhere else by the time the click lands. Wait until two readings agree to within two
+  // pixels -- not exactly: under CI's software renderer the camera's smooth follow is still creeping
+  // by fractions of a pixel long after it is effectively still, and an exact match timed out there.
+  // Two pixels is nothing against a tile of about eighty.
   await page.waitForFunction(
     () => {
       const w = (window as unknown as { __walker?: () => Walker }).__walker?.();
-      const g = globalThis as { __last?: string };
-      const now = w ? `${Math.round(w.screen.x)},${Math.round(w.screen.y)},${w.cell}` : '';
-      const still = now !== '' && now === g.__last;
-      g.__last = now;
-      return still;
+      const g = globalThis as { __last?: { x: number; y: number; cell: number } };
+      if (!w) return false;
+      const last = g.__last;
+      g.__last = { x: w.screen.x, y: w.screen.y, cell: w.cell };
+      return (
+        last !== undefined &&
+        last.cell === w.cell &&
+        Math.abs(last.x - w.screen.x) <= 2 &&
+        Math.abs(last.y - w.screen.y) <= 2
+      );
     },
     null,
-    { timeout: 20_000, polling: 300 }
+    { timeout: 60_000, polling: 300 }
   );
 
   const baked = await page.evaluate(

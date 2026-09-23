@@ -190,3 +190,55 @@ export async function approachPlace(
   }
   throw new Error(`${map}/${seed}: no side of ${poiId} at ${px},${py} has two tiles of dry land`);
 }
+
+/** Ground that costs 1 to step onto: the quickest step there is short of a road. */
+const OPEN = new Set(['plains', 'coast', 'settlement']);
+
+const openGroundFound = new Map<string, string>();
+
+/**
+ * A tile of open, cheap ground with the same immediately east of it, found in the stored world --
+ * for a spec that needs to take one ordinary step and does not care where.
+ *
+ * **Why it has to be cheap, measured.** `travellers.spec.ts` stood at a named tile and pressed D.
+ * That tile was river until marsh stopped being eased into river, and swamp afterwards: a step of
+ * cost 2 instead of 1. Under CI's software renderer the first seconds after boot run at a few
+ * frames a second and Phaser caps how far a tween advances per frame, so a step's wall time scales
+ * with its cost -- and the cost-2 step overran the twelve-second wait, "would not walk", on nearly
+ * every run of the branch while the page itself booted exactly as fast as before (median 1.52s
+ * against 1.53s, five loads each, in the CI image). Ordinary ground makes it the step it meant.
+ */
+export async function openGround(
+  page: Page,
+  seed: string,
+  map = 'field_map_lothal'
+): Promise<string> {
+  const remembered = openGroundFound.get(`${seed}:${map}`);
+  if (remembered) return remembered;
+  await page.goto(`/?seed=${seed}&map=${map}`);
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
+  const baked = await page.evaluate(
+    (k) =>
+      JSON.parse(localStorage.getItem(k) ?? 'null') as {
+        biomes: string[];
+        placed: [string, number, number][];
+      } | null,
+    `south-of-tethys:world:${seed}:${map}`
+  );
+  if (!baked) throw new Error(`${map}/${seed}: no stored world to read the ground from`);
+  const places = new Set(baked.placed.map(([, x, y]) => `${x},${y}`));
+  const open = (x: number, y: number) => {
+    const code = baked.biomes[y]?.[x];
+    if (code === undefined || places.has(`${x},${y}`)) return false;
+    return OPEN.has(BIOME_CODES[Number.parseInt(code, 36)] ?? '');
+  };
+  for (let y = 2; y < baked.biomes.length - 2; y += 1) {
+    for (let x = 2; x < baked.biomes[0]!.length - 3; x += 1) {
+      if (open(x, y) && open(x + 1, y)) {
+        openGroundFound.set(`${seed}:${map}`, `${x},${y}`);
+        return `${x},${y}`;
+      }
+    }
+  }
+  throw new Error(`${map}/${seed}: no open ground with open ground east of it`);
+}

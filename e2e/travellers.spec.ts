@@ -10,7 +10,7 @@
 // and `?hour=`: seeing something should not require playing to it.
 
 import { expect, test, type Page } from '@playwright/test';
-import { step } from './walk';
+import { openGround, step } from './walk';
 
 const SEED = 'poi-1621';
 
@@ -26,7 +26,9 @@ async function bootAs(page: Page, as: string): Promise<string[]> {
   });
   page.on('pageerror', (error) => problems.push(`uncaught: ${error.message}`));
 
-  await page.goto(`/?seed=${SEED}&hour=12&at=10,8&as=${as}`);
+  // Somewhere the step east is onto ordinary ground -- see `openGround` for why it has to be.
+  const at = await openGround(page, SEED);
+  await page.goto(`/?seed=${SEED}&map=field_map_lothal&hour=12&at=${at}&as=${as}`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
   return problems;
