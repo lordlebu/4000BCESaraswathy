@@ -57,6 +57,17 @@ export interface FieldMap {
    * has not declared one, which the generator reads as a plain bowl.
    */
   relief: string | null;
+  /**
+   * Craft lying ready on this map when the traveller arrives, as canon vehicle ids. Empty for
+   * every map but Lothal, which has the dugout.
+   *
+   * **Presence, not an unlock.** Canon says a dugout is *here*; everything about using one --
+   * where it is moored, boarding, speed, that the traveller keeps it in the kit after stepping
+   * ashore -- is play, and lives in the game. A vehicle can only travel over its own `crosses`
+   * biomes, and canon's lint refuses one listed on a map with none of them in its palette.
+   * See canon's `docs/decisions.md`, *A dugout at Lothal*.
+   */
+  vehicles: string[];
   /** What the player reads on first arriving. */
   arrival: string;
 }
@@ -161,7 +172,7 @@ export interface Npc {
 interface RawFieldMap {
   id: string; name: string; region: string; seed_biomes: string[];
   scale?: string; proportion?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
-  climate?: Climate; coordinates?: { x: number; y: number }; relief?: string;
+  climate?: Climate; coordinates?: { x: number; y: number }; relief?: string; vehicles?: string[];
 }
 interface RawPoi {
   id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string; shore?: string;
@@ -193,6 +204,7 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   climate: m.climate ?? DELTA_CLIMATE,
   coordinates: m.coordinates ?? null,
   relief: m.relief ?? null,
+  vehicles: m.vehicles ?? [],
   arrival: m.arrival ?? ''
 }));
 

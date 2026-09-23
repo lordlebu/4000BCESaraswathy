@@ -75,7 +75,7 @@ const COVERAGE: Record<string, Coverage> = {
   },
   'places.field_maps': {
     adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'proportion', 'points_of_interest',
-      'neighbours', 'arrival', 'climate', 'coordinates', 'relief'],
+      'neighbours', 'arrival', 'climate', 'coordinates', 'relief', 'vehicles'],
     skipped: [...EDITORIAL,
       // The name canon used before. There are around four Dwarkas in Jambhudweepa, so the one
       // this game walks became North Dwarka and the bare name was kept as an alias so canon's

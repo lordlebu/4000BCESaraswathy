@@ -432,6 +432,9 @@
         "poi_marsh_shrine",
         "poi_eastern_field"
       ],
+      "vehicles": [
+        "vehicle_log_dugout"
+      ],
       "epochs": [
         "epoch_post_cataclysm"
       ],

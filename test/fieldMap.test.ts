@@ -13,6 +13,7 @@ import { band } from '../src/world/classify';
 import { DEFAULT_SEED } from '../src/ui/seed';
 import { biomes } from '../src/content/species';
 import { landmarkKindFor } from '../src/content/landmarks';
+import { vehicles } from '../src/content/vehicles';
 
 const lothal = fieldMap('field_map_lothal');
 
@@ -502,6 +503,29 @@ describe('nothing is built on the railway', () => {
       for (const seed of [DEFAULT_SEED, 'a', 'b']) {
         const scene = buildFieldMap(map, { seed });
         expect(scene.unplaced.map((p) => p.id), `${map.id}/${seed}: stranded`).toEqual([]);
+      }
+    }
+  });
+});
+
+describe('craft that are already on a map', () => {
+  // Canon's `vehicles` on a field map: presence, not an unlock. Lothal is the only map with one,
+  // and that is asserted by name so a second map gaining a boat is a decision somebody sees here
+  // rather than a bundle change nobody reads.
+  it('only Lothal lists any, and it lists the dugout', () => {
+    const listing = fieldMaps.filter((m) => m.vehicles.length > 0).map((m) => [m.id, m.vehicles]);
+    expect(listing).toEqual([['field_map_lothal', ['vehicle_log_dugout']]]);
+  });
+
+  // Canon's lint refuses this too. It is repeated because the game is what would silently fail to
+  // offer the boat, and a bundle exported from an older canon would not have been through the lint.
+  it('every listed craft is a vehicle the game knows, and can travel on that map', () => {
+    for (const map of fieldMaps) {
+      for (const id of map.vehicles) {
+        const craft = vehicles.find((v) => v.id === id);
+        expect(craft, `${map.id} lists ${id}, which is not in the crafting bundle`).toBeDefined();
+        const floats = craft!.crosses.some((b) => map.seedBiomes.includes(b));
+        expect(floats, `${id} crosses none of ${map.id}'s palette`).toBe(true);
       }
     }
   });
