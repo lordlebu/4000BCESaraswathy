@@ -3,7 +3,8 @@ import { fieldMaps } from '../src/content/places';
 import { creatureFor, floraFor, travelCost } from '../src/content/species';
 import { BIOME_CODES, bakeWorld, rebake, restoreWorld, type BakedWorld } from '../src/world/bake';
 import biomesData from '../data/biomes.json';
-import type { BiomeId } from '../src/world/types';
+import type { BiomeId, Tile } from '../src/world/types';
+import { reachableFrom } from '../src/world/generate';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { band } from '../src/world/classify';
 
@@ -33,10 +34,33 @@ describe('a world survives being baked and restored', () => {
         for (let x = 0; x < built.world.width; x += 1) {
           const before = built.world.tiles[y]![x]!;
           const after = back.world.tiles[y]![x]!;
-          expect(after.biome).toBe(before.biome);
+          // **The whole tile, less a named list of what is deliberately not kept.** This compared
+          // biome, band and cost by name, so the four flags that grew on `Tile` later -- road,
+          // ford, track, plank -- were never compared, never stored, and every reload lost them.
+          // Naming what is *excluded* instead means a new field fails here until it is either
+          // stored or added to this list with a reason.
+          expect(atRest(after), `tile ${x},${y}`).toEqual(atRest(before));
           // The raw elevation is deliberately not preserved; the band is all anything reads.
           expect(band(after.elevation)).toBe(band(before.elevation));
           expect(travelCost(after.biome)).toBe(travelCost(before.biome));
+        }
+      }
+    });
+
+    it(`${map.id}: everywhere reachable before a reload is reachable after it`, () => {
+      // The fault this format version exists for, stated as the player met it. The Aravali lost its
+      // rail and planks on every reload, and with them 59% of the map and six of its twelve places.
+      for (const seed of ['bake-test', 'a', 'b', 'c', 'd']) {
+        const built = buildFieldMap(map, { seed });
+        const back = rebake(built)!;
+        const w = built.world;
+        const before = reachableFrom(w.tiles, w.width, w.height, w.start);
+        const after = reachableFrom(back.world.tiles, w.width, w.height, back.world.start);
+        expect(after.size, `${seed}: reachable tiles after a reload`).toBe(before.size);
+        for (const { poi, at } of built.placed) {
+          expect(after.has(`${at.x},${at.y}`), `${seed}: ${poi.id} after a reload`).toBe(
+            before.has(`${at.x},${at.y}`)
+          );
         }
       }
     });
@@ -132,6 +156,21 @@ describe('a bake that cannot be trusted is refused rather than half-read', () =>
     expect(restoreWorld(baked, maps[0]!)).toBeNull();
   });
 
+  it('refuses a flag character outside the flags it knows', () => {
+    const baked = bakedOf();
+    baked.flags[2] = 'z' + baked.flags[2]!.slice(1);
+    expect(restoreWorld(baked, maps[0]!)).toBeNull();
+  });
+
+  it('refuses a version-2 bake, which has no flags, so the world is regenerated whole', () => {
+    // Reading one would restore the ground and silently drop every road, ford, rail and plank --
+    // the exact state this version exists to end.
+    const baked = bakedOf() as Partial<BakedWorld>;
+    baked.bakeVersion = 2;
+    delete baked.flags;
+    expect(restoreWorld(baked as BakedWorld, maps[0]!)).toBeNull();
+  });
+
   it('refuses a biome character it does not know', () => {
     const baked = bakedOf();
     baked.biomes[2] = 'z' + baked.biomes[2]!.slice(1);
@@ -146,3 +185,16 @@ describe('a bake that cannot be trusted is refused rather than half-read', () =>
     expect(back.placed.some((p) => p.poi.id === 'poi_that_canon_removed')).toBe(false);
   });
 });
+
+/**
+ * A tile without the fields a bake deliberately does not keep.
+ *
+ * `moisture`, `temperature` and `riverBias` are generator inputs nothing reads afterwards, and
+ * `elevation` is kept only as its band -- compared separately. Everything else must come back.
+ */
+function atRest(tile: Tile): Partial<Tile> {
+  const { moisture: _m, temperature: _t, riverBias: _r, elevation: _e, ...kept } = tile;
+  // A flag set `false` means what an absent one means -- `thinRoad` clears a road tile by writing
+  // `false` rather than deleting the key -- so the two are compared as the same thing.
+  return Object.fromEntries(Object.entries(kept).filter(([, v]) => v !== false)) as Partial<Tile>;
+}
