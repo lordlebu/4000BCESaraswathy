@@ -65,7 +65,9 @@ export const BAKE_VERSION = 3;
  * **Append only.** A flag's position is its bit, and every stored world was written against the
  * order below.
  */
-export const TILE_FLAGS = ['road', 'ford', 'track', 'plank'] as const;
+// `bridge` was appended without a format bump: it is a fifth bit, so a v3 world written before it
+// still decodes exactly -- it simply has no bridges, which is true of the routes it was built with.
+export const TILE_FLAGS = ['road', 'ford', 'track', 'plank', 'bridge'] as const;
 export type TileFlag = (typeof TILE_FLAGS)[number];
 
 /** One base-36 character: the flags a tile carries, as a bitmask over `TILE_FLAGS`. */

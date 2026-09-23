@@ -115,6 +115,16 @@ export interface Tile extends Point {
    * still open sky, so `stepCost` falls through to `CROSSING_ON_FOOT`.
    */
   plank?: boolean;
+  /**
+   * A bridge carries the road over this river tile.
+   *
+   * Set by `bridgeTheCrossings` on a short river crossing -- three tiles or fewer -- in place of
+   * `ford`, so a tile carries at most one of `road`, `ford` and `bridge`. Like `road` it changes
+   * nothing about walkability (a river is walkable anyway) and like `road` it changes the cost: a
+   * step onto it is priced as road, not as wading. See `world/bridges.ts` for the rule and the two
+   * crossings it never bridges.
+   */
+  bridge?: boolean;
 }
 
 export interface NamedPlace extends Point {

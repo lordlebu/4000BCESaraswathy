@@ -13,7 +13,7 @@
 import biomesData from '../../data/biomes.json';
 import { creatures as canonCreatures, flora as canonFlora } from './canon';
 import { weightedPickFor } from '../world/rng';
-import type { Biome, BiomeId, Creature, Flora, Placement, Point, Rarity } from '../world/types';
+import type { Biome, BiomeId, Creature, Flora, Placement, Point, Rarity, Tile } from '../world/types';
 
 // Biome presentation -- colour, symbol, walkability, travel cost, journal description --
 // is authored here. Canon says which biomes exist; it has no opinion on what they look like.
@@ -201,4 +201,27 @@ export const CROSSING_ON_FOOT = 3;
  */
 export function stepCost(biome: BiomeId): number {
   return travelCost(biome) ?? CROSSING_ON_FOOT;
+}
+
+/**
+ * What a step costs on a worn road, whatever the road runs over.
+ *
+ * **A flat cost rather than a discount on the ground**, which is how roads work in the games that
+ * made roads matter -- Civilization prices a road the same across plain and hill. A discount would
+ * leave a road through marsh slower than open grass beside it, and the ask was that paths be the
+ * most easily walked ground on every map. Three quarters of the plains rate: quicker than any open
+ * ground, not so quick that leaving the road for a flower is a chore.
+ */
+export const ROAD_STEP = 0.75;
+
+/**
+ * What one step onto this tile costs, reading the road as well as the ground.
+ *
+ * `stepCost` answers for the biome alone and stays, because weather, fatigue tables and tests ask
+ * about ground. This is the question the walker actually asks: the scene times its steps by it, and
+ * tap-to-walk routes by it -- so a click across country prefers the road, the way a person would.
+ */
+export function stepCostOn(tile: Pick<Tile, 'biome' | 'road' | 'bridge'>): number {
+  // A bridge is road over water: priced as the road, never as the wading underneath it.
+  return tile.road || tile.bridge ? ROAD_STEP : stepCost(tile.biome);
 }

@@ -12,7 +12,7 @@ import type { World } from '../src/world/types';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMaps } from '../src/content/places';
 import { DEFAULT_SEED } from '../src/ui/seed';
-import { planScene, planHuts, planOverdraw, SWAY_PERIOD } from '../src/game/scenePlan';
+import { inTheCamp, planScene, planHuts, planOverdraw, SWAY_PERIOD } from '../src/game/scenePlan';
 import {
   ROW_SLOT,
   depthFor,
@@ -39,6 +39,24 @@ const key = (p: { x: number; y: number }) => `${p.x},${p.y}`;
 /** Whether an overdraw frame is one of the sixteen fence pieces rather than something growing. */
 const isFence = (frame: number): boolean =>
   frame >= FENCE_FIRST && frame < FENCE_FIRST + FENCE_PIECES;
+
+describe('felt for the camps, brick for the towns, and never the other way', () => {
+  // Reported as a rule the owner had worked on: nomad yurts are not put in settlements, and huts do
+  // not end up in nomad camps. `hutFrame` keeps the two pools apart by construction; this holds it on
+  // every map and several seeds, now that huts follow the road and the places have moved.
+  it('draws a yurt exactly where a camp is, and a hut everywhere else', () => {
+    for (const map of fieldMaps) {
+      for (const seed of ['felt-a', 'felt-b', 'felt-c', undefined]) {
+        const built = buildFieldMap(map, seed === undefined ? {} : { seed });
+        for (const hut of planHuts(built.world)) {
+          const felt = hut.frame >= FIRST_YURT;
+          expect(felt, `${map.id}/${seed ?? 'default'}: ${felt ? 'a yurt in town' : 'a hut in the camp'} at ${hut.x},${hut.y}`)
+            .toBe(inTheCamp(built.world, hut.x, hut.y));
+        }
+      }
+    }
+  });
+});
 
 describe('a nomad camp is felt, not brick', () => {
   /**
@@ -305,14 +323,19 @@ describe('the plan is a function of the world and nothing else', () => {
         Math.abs(p.x - camp.at.x) <= camp.radius &&
         Math.abs(p.y - camp.at.y) <= camp.radius;
 
-      const village = felt.filter((t) => !inCamp(t)).length;
+      // Counted over the ground a hut may stand on: huts follow the road now and never stand on it,
+      // so a street tile is not an empty plot. Three in four beside the road and one in two behind it
+      // puts well over a third of the buildable ground under a roof, and never all of it.
+      const onRoad = (t: { road?: boolean; ford?: boolean; bridge?: boolean }) =>
+        Boolean(t.road || t.ford || t.bridge);
+      const village = felt.filter((t) => !inCamp(t) && !onRoad(t)).length;
       const villageHuts = huts.filter((h) => !inCamp(h)).length;
       if (village > 0) {
         expect(villageHuts, `${id}: the village is wall to wall`).toBeLessThan(village);
-        expect(villageHuts, `${id}: the village is empty`).toBeGreaterThan(village / 2);
+        expect(villageHuts, `${id}: the village is empty`).toBeGreaterThan(village * 0.4);
       }
 
-      const campGround = felt.length - village;
+      const campGround = felt.filter((t) => inCamp(t) && !onRoad(t)).length;
       if (campGround > 0) {
         expect(huts.length - villageHuts, `${id}: the camp has no tents`).toBeGreaterThan(0);
         expect(huts.length - villageHuts, `${id}: more tents than ground`).toBeLessThanOrEqual(campGround);
@@ -374,8 +397,12 @@ describe('the plan is a function of the world and nothing else', () => {
         const crossesWater = neighbours.some((n) => water.has(n) !== water.has(here));
         const differs = neighbours.some((n) => n !== here);
         expect(differs, `${id}: blend at ${key(item)} with no differing neighbour`).toBe(true);
-        // If every differing neighbour were across water, this tile should have had no blend.
-        if (!neighbours.some((n) => n !== here && water.has(n) === water.has(here))) {
+        // If every differing neighbour were across water, this tile should have had no blend --
+        // except marsh against river, which is not a shoreline: a swamp is level with the water and
+        // bleeds into it (see `blends`).
+        const marshRiver = (n: string) =>
+          (n === 'wetland' && here === 'river') || (n === 'river' && here === 'wetland');
+        if (!neighbours.some((n) => n !== here && (water.has(n) === water.has(here) || marshRiver(n!)))) {
           expect(crossesWater, `${id}: blended a shoreline at ${key(item)}`).toBe(false);
         }
       }

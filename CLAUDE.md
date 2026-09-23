@@ -251,6 +251,7 @@ The art docs, in the order they are useful:
 | `docs/sky-buildings-plan.md` | the temple, the mill and the bridge — closed |
 | `docs/placing-the-buildings-plan.md` | how painted buildings reach the map, and what each check proves |
 | `docs/roads-and-travellers-plan.md` | the road, the people on it and their art — closed, and what was declined |
+| `docs/roads-and-wet-ground.md` | reloads that kept the road, bridges, wading, the dugout, lit roads, spread places — closed |
 
 **`.claude/skills/session-craft/` is the one to read first in a new session.** It carries what the
 *environment* does rather than what the code is: the Playwright build-number mismatch that reads as
@@ -683,9 +684,13 @@ Two rules in there are easy to get backwards and both were:
   it more expensive.
 
 `world/routes.ts` runs **after** placement and eases the ground along the routes between the
-places, turning mountains to hills and wetland to river. That cannot be done while shaping,
+places, turning mountains to hills and forest to plains. That cannot be done while shaping,
 because where the places landed is not known yet — and it is what makes a valley the path between
-two places rather than a landform one happens to sit in.
+two places rather than a landform one happens to sit in. It no longer turns wetland into river:
+a river costs 3 on foot now, and following the water is the dugout's job on Lothal. The routes are
+a network — a spanning tree over the places with up to two loops (`networkLegs`) — not the chain
+they were, and a short straight crossing of a river is a bridge (`world/bridges.ts`).
+`docs/roads-and-wet-ground.md` has the whole programme.
 
 **A tile is 0.375 km, not one.** `landmarkHint` promises a landmark on the far side "will take most
 of the day", which was arithmetic when maps were 36 tiles across. They are 48 and 64 square, with

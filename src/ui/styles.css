@@ -1320,6 +1320,13 @@ button.ghost:hover:not(:disabled) {
   min-width: 0;
 }
 
+.seed-bar .seed-hint {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 /* --- Arrival ------------------------------------------------------------- */
 
 .arrival-veil {

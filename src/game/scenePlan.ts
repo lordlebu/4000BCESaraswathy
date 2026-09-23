@@ -32,6 +32,8 @@ import {
   ROW_SLOT,
   blends,
   shoreAt,
+  sunkAt,
+  SUNK_ALPHA,
   bankSource,
   SHORE_PROPS,
   cliffAt,
@@ -55,12 +57,15 @@ import {
   paintedPlace,
   BLADE_PERIOD,
   bridgeFrame,
+  riverBridgeFrame,
+  SPAN_PIECE,
   swayFrame
 } from './frames';
 import { isRope, plankRunsEastWest } from '../world/crossing';
 import { landmarkKindFor } from '../content/landmarks';
 import { band } from '../world/classify';
 import { tileHash } from '../world/rng';
+import { lampSites } from './roadLight';
 import type { FieldMapWorld } from '../world/fieldMap';
 import type { BiomeId } from '../world/types';
 import type { CliffTurn, Edge } from './frames';
@@ -78,6 +83,8 @@ export type PlacementSheet =
   | 'windmill'
   | 'blades'
   | 'bridge'
+  | 'riverBridge'
+  | 'lamp'
   | 'landmarks'
   | 'decor'
   | 'contact'
@@ -174,8 +181,6 @@ const TOWER_CELL = { width: 128, height: 256 };
  */
 const FEATURE_SHADOW_DROP = 0.28;
 
-/** Two settlement tiles in three get a hut, which leaves courtyards and paths between them. */
-const HUT_DENSITY = 3;
 
 /** Two eligible tiles in three grow something, so a field has ways through it. */
 const OVERDRAW_DENSITY = 3;
@@ -267,14 +272,18 @@ export function planShore(world: FieldMapWorld['world']): Placement[] {
         // The map edge is not a shore, for the reason it is not a cliff: the world stops there
         // rather than the water.
         if (nx < 0 || ny < 0 || nx >= world.width || ny >= world.height) continue;
-        if (!shoreAt(here, world.tiles[ny]![nx]!.biome)) continue;
+        const there = world.tiles[ny]![nx]!.biome;
+        // A river bank, full strength; or a swamp's shallower step down from dry ground, lighter.
+        const sunk = sunkAt(here, there);
+        if (!shoreAt(here, there) && !sunk) continue;
         out.push({
           sheet: 'shore',
           frame: edgeMaskFrame(edge, tileHash(world.seed, x, y, `shore-${edge}`)),
           edge,
           x,
           y,
-          depth: SHORE_DEPTH
+          depth: SHORE_DEPTH,
+          ...(sunk ? { alpha: SUNK_ALPHA } : {})
         });
       }
     }
@@ -928,19 +937,42 @@ export function planDecor(world: FieldMapWorld['world'], builtOn: ReadonlySet<st
  * repeating texture they appear once per tile forever, in a perfect grid -- an endless orchard of
  * identical huts rather than a village.
  */
-export function planHuts(world: FieldMapWorld['world']): Placement[] {
+export function planHuts(
+  world: FieldMapWorld['world'],
+  keepClear: ReadonlySet<string> = new Set()
+): Placement[] {
   const out: Placement[] = [];
+  const road = (x: number, y: number) => {
+    const t = world.tiles[y]?.[x];
+    return Boolean(t && (t.road || t.ford || t.bridge));
+  };
   for (let y = 0; y < world.height; y += 1) {
     for (let x = 0; x < world.width; x += 1) {
       if (world.tiles[y]![x]!.biome !== 'settlement') continue;
-      if (tileHash(world.seed, x, y, 'hut-present') % HUT_DENSITY === 0) continue;
+      // **The street first, then the houses.** Never on the road itself -- a hut drawn on the path
+      // blocked it in the picture if not in the walking -- and never in a place's forecourt. Beside
+      // the road, seven tiles in eight are built on, so the buildings line it; further back, two in
+      // three, the density the whole town used to have. Road-first layout is how generated towns
+      // read as towns rather than as a spatter (Parish and Muller; RimWorld's settlements).
+      //
+      // Denser beside the road than it was anywhere, on purpose: the road and the forecourts now
+      // take ground the huts used to have, and the first tuning (three in four, one in two) halved
+      // every town -- Lothal 30 huts to 14, measured. These put the towns back near what they were.
+      if (road(x, y) || keepClear.has(`${x},${y}`)) continue;
+      const inCampHere = inTheCamp(world, x, y);
+      // A camp is a few tents on trodden ground, one on each tile; the thinning is the town's.
+      if (!inCampHere) {
+        const frontage = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => road(x + dx!, y + dy!));
+        const roll = tileHash(world.seed, x, y, 'hut-present');
+        if (frontage ? roll % 8 === 0 : roll % 3 === 0) continue;
+      }
       // **A nomad camp is felt and nothing else.** Its tiles are `settlement` like any other --
       // that is what earns them huts and a name in the journal -- so the only thing separating the
       // two is which frames they may draw. People who are not from here do not build in mud brick.
       //
       // They do not build a fence either, and that half used to be missing: see `fencedSides`,
       // which asks this same question now rather than fencing every tile of every camp.
-      const inCamp = inTheCamp(world, x, y);
+      const inCamp = inCampHere;
       out.push({
         sheet: 'huts',
         frame: hutFrame(tileHash(world.seed, x, y, 'hut-variant'), inCamp),
@@ -962,7 +994,7 @@ export function planHuts(world: FieldMapWorld['world']): Placement[] {
  * because a second caller needs the identical question and two copies of a radius test is how the
  * tents and the fence would come to disagree about where the camp ends.
  */
-function inTheCamp(world: FieldMapWorld['world'], x: number, y: number): boolean {
+export function inTheCamp(world: FieldMapWorld['world'], x: number, y: number): boolean {
   const { camp } = world;
   return (
     camp !== null &&
@@ -1200,8 +1232,11 @@ export function planMarkers(built: FieldMapWorld): Placement[] {
  * world return the same plan, which is what makes it worth asserting against.
  */
 export function planScene(built: FieldMapWorld): Placement[] {
-  const huts = planHuts(built.world);
-  const builtOn = new Set(huts.map((h) => `${h.x},${h.y}`));
+  // **A forecourt round every place**: the tile it stands on and the eight around it, kept clear of
+  // huts, scrub and props, so a place has ground in front of it and the road arrives somewhere.
+  const forecourt = forecourtsOf(built);
+  const huts = planHuts(built.world, forecourt);
+  const builtOn = new Set([...huts.map((h) => `${h.x},${h.y}`), ...forecourt]);
   // Edges first: they are ground. Then cliffs, which are where that ground ends. Then decor, which
   // lies on it, then the huts and the overdraw that stand in it, and the markers above everything.
   return [
@@ -1232,6 +1267,7 @@ export function planScene(built: FieldMapWorld): Placement[] {
     //
     // Before the rail, because where the two ever meet the iron is laid over the earth.
     ...planRoad(built.world),
+    ...planRiverBridges(built.world),
     ...planTrack(built.world),
     ...planPlanks(built.world),
     // After the rails, because a cloud drifts over the line and not under it -- and after the
@@ -1242,6 +1278,7 @@ export function planScene(built: FieldMapWorld): Placement[] {
     ...planWaterfall(built.world),
     ...huts,
     ...planOverdraw(built.world, builtOn),
+    ...planLamps(built),
     ...planMarkers(built)
   ];
 }
@@ -1532,7 +1569,7 @@ export function planRoad(world: FieldMapWorld['world']): Placement[] {
   // ford's own frame is chosen by the same mask as everything else.
   const worn = (x: number, y: number): boolean => {
     const tile = world.tiles[y]?.[x];
-    return tile?.road === true || tile?.ford === true;
+    return tile?.road === true || tile?.ford === true || tile?.bridge === true;
   };
 
   for (let y = 0; y < world.height; y += 1) {
@@ -1639,6 +1676,111 @@ export function planTrack(world: FieldMapWorld['world']): Placement[] {
   return out;
 }
 
+
+/** The places whose ground is a camp, and so pitch tents rather than keep a forecourt. */
+const CAMPS: ReadonlySet<string> = new Set(['poi_nomad_ground', 'poi_high_camp']);
+
+/**
+ * The tiles each place keeps clear: its own and the eight around it.
+ *
+ * **Not a camp's.** A camp's tents *are* the place -- clearing round the Nomad Ground or the High
+ * Camp took every tent they had.
+ */
+export function forecourtsOf(built: FieldMapWorld): Set<string> {
+  const out = new Set<string>();
+  for (const { poi, at } of built.placed) {
+    if (CAMPS.has(poi.id)) continue;
+    for (let dy = -1; dy <= 1; dy += 1) {
+      for (let dx = -1; dx <= 1; dx += 1) out.add(`${at.x + dx},${at.y + dy}`);
+    }
+  }
+  return out;
+}
+
+/**
+ * The lamps along the road -- see `game/roadLight.ts` for where they stand and why.
+ *
+ * Never on a tile a place stands on, or the landmark's: the road runs *to* the places, and a post
+ * planted in a doorway would be the lamp's fault, not the building's. Stood at the east verge of its
+ * tile, so it is beside the road rather than in the middle of it.
+ */
+export function planLamps(built: FieldMapWorld): Placement[] {
+  const taken = new Set([
+    ...built.placed.map((p) => `${p.at.x},${p.at.y}`),
+    `${built.world.landmark.x},${built.world.landmark.y}`
+  ]);
+  return lampSites(built.world)
+    .filter((p) => !taken.has(`${p.x},${p.y}`))
+    .map((p) => ({
+      sheet: 'lamp' as const,
+      frame: 0,
+      x: p.x,
+      y: p.y,
+      depth: depthFor(p.y, ROW_SLOT.marker),
+      offset: { x: 0.34, y: 0 }
+    }));
+}
+
+/**
+ * The bridges over the river crossings.
+ *
+ * `planRoad` draws the road up to the bank and reads a bridge as connected, so the road runs onto
+ * the deck without a stub; this draws the deck. The direction comes from the road it carries -- a
+ * bridge with road east or west runs east-west -- and failing that from the river under it, which a
+ * bridge crosses rather than follows. Which piece a tile is comes from its neighbours along that
+ * direction, so a span of any length is start, middles, end.
+ */
+export function planRiverBridges(world: FieldMapWorld['world']): Placement[] {
+  const out: Placement[] = [];
+  const at = (x: number, y: number) => world.tiles[y]?.[x];
+  const carries = (x: number, y: number) => {
+    const t = at(x, y);
+    return t?.road === true || t?.ford === true || t?.bridge === true;
+  };
+  const bridged = (x: number, y: number) => at(x, y)?.bridge === true;
+
+  for (let y = 0; y < world.height; y += 1) {
+    for (let x = 0; x < world.width; x += 1) {
+      if (!world.tiles[y]![x]!.bridge) continue;
+      // Along its span if it has one; a one-tile bridge runs the way the road passes straight over
+      // it -- road on *both* sides -- which is what `bridgeTheCrossings` required before building it.
+      // A side road touching one end does not turn the deck. Failing both, the river under it says:
+      // it runs north-south under a bridge that runs east-west.
+      const spanX = bridged(x - 1, y) || bridged(x + 1, y);
+      const spanY = bridged(x, y - 1) || bridged(x, y + 1);
+      const throughX = carries(x - 1, y) && carries(x + 1, y);
+      const throughY = carries(x, y - 1) && carries(x, y + 1);
+      const riverNS = at(x, y - 1)?.biome === 'river' && at(x, y + 1)?.biome === 'river';
+      const eastWest = spanX
+        ? true
+        : spanY
+          ? false
+          : throughX && !throughY
+            ? true
+            : throughY && !throughX
+              ? false
+              : riverNS;
+      const before = eastWest ? bridged(x - 1, y) : bridged(x, y - 1);
+      const after = eastWest ? bridged(x + 1, y) : bridged(x, y + 1);
+      const piece = before && after
+        ? SPAN_PIECE.middle
+        : after
+          ? SPAN_PIECE.start
+          : before
+            ? SPAN_PIECE.end
+            : SPAN_PIECE.single;
+      out.push({
+        sheet: 'riverBridge',
+        frame: riverBridgeFrame(eastWest, piece),
+        x,
+        y,
+        // Underfoot, like the road it carries: a walker crosses *on* it, not behind it.
+        depth: depthFor(y, ROW_SLOT.underfoot)
+      });
+    }
+  }
+  return out;
+}
 
 /**
  * The planks over the island notches.

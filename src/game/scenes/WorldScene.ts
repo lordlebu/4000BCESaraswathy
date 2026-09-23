@@ -13,6 +13,9 @@ import monumentsUrl from '../../../assets/monuments.png';
 import windmillUrl from '../../../assets/windmill-tower.png';
 import bladesUrl from '../../../assets/windmill-blades.png';
 import bridgeUrl from '../../../assets/bridge.png';
+import riverBridgeUrl from '../../../assets/river-bridge.png';
+import dugoutUrl from '../../../assets/dugout.png';
+import lampUrl from '../../../assets/lamp-post.png';
 import hutsUrl from '../../../assets/huts.png';
 import overdrawUrl from '../../../assets/overdraw.png';
 import featuresUrl from '../../../assets/features.png';
@@ -39,6 +42,10 @@ import {
   WINDMILL_SHEET,
   BLADE_SHEET,
   BRIDGE_SHEET,
+  RIVER_BRIDGE_SHEET,
+  DUGOUT_IMAGE,
+  LAMP_SHEET,
+  lampGlowKey,
   TERRAIN_SHEET,
   DECOR_SHEET,
   TRACK_SHEET,
@@ -51,6 +58,7 @@ import {
   blendTextureKey,
   shoreTextureKey,
   bankTextureKey,
+  rippleKey,
   undersideShadeKey,
   CLIFF_SHEET,
   TREELINE_SHEET,
@@ -96,6 +104,8 @@ const SHEET_KEY: Record<
   windmill: WINDMILL_SHEET,
   blades: BLADE_SHEET,
   bridge: BRIDGE_SHEET,
+  riverBridge: RIVER_BRIDGE_SHEET,
+  lamp: LAMP_SHEET,
   landmarks: LANDMARK_SHEET,
   decor: DECOR_SHEET,
   // The bank draws terrain through a mask, so it is baked rather than looked up -- this entry
@@ -152,7 +162,7 @@ import {
   landmarkHint,
   whereNextHint
 } from '../../content/journal';
-import { biomeFor, stepCost } from '../../content/species';
+import { biomeFor, stepCostOn } from '../../content/species';
 import { isWalkable } from '../../world/generate';
 import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
@@ -176,6 +186,10 @@ import {
 import { isCamp, isGrand } from '../../content/camps';
 import { findPath, nearestReachable } from '../../world/pathfind';
 import { NO_GESTURE, lost, pressed, released, type Gesture } from '../gesture';
+import { wadeFor, type Wade } from '../wading';
+import { afloatAfter, PADDLE_STEP, routeCost } from '../afloat';
+import { glowStrength, roadAhead } from '../roadLight';
+import { boatFor } from '../../content/kit';
 import { tileHash } from '../../world/rng';
 import type { BiomeId, Point, Tile, World } from '../../world/types';
 
@@ -269,6 +283,20 @@ const STEP_MS = 425;
  * in something and starts reading as one cut in half.
  */
 const WADE_ALPHA = 0.42;
+
+/**
+ * The dugout's gunwale, in pixels from the top of `assets/dugout.png`: where the back of the hull
+ * (the hollow, behind him) is cut from the front (the side, in front of him). Measured on the art
+ * `tools/draw-river-art.py` draws; a painted hull with a different rim changes this number.
+ */
+const DUGOUT_RIM = 58;
+/** How far below the gunwale a seated traveller's feet are: the depth he sits in the hull. */
+const DUGOUT_SEAT = 34;
+/**
+ * How far a traveller afloat is drawn above his tile's foot. Without it the hull hangs a third of a
+ * tile into the row below, where the next row's ground and props sort over it.
+ */
+const FLOAT_LIFT = 32;
 
 /** Keys that change the zoom. `0` gives it back to the automatic fit. */
 const ZOOM_KEYS: Record<string, number | 'reset'> = {
@@ -407,6 +435,12 @@ export class WorldScene extends Phaser.Scene {
    * of him exists.
    */
   private waterline!: Phaser.GameObjects.Image;
+  /** The ring where a wader in the river or the swamp breaks the surface. */
+  private ripple!: Phaser.GameObjects.Image;
+  /** What the traveller is standing in, as `moveWaterline` last drew it. See `game/wading.ts`. */
+  private wade: Wade = { kind: 'dry' };
+  /** The depth the crop was last set to, so a step's sixty updates set it once. */
+  private cutDepth = 0;
   private fogSprites: Phaser.GameObjects.Image[][] = [];
   /**
    * Every static thing that belongs to a tile, so it can be hidden when the camera cannot see it.
@@ -447,6 +481,22 @@ export class WorldScene extends Phaser.Scene {
    */
   private walkScale = 1;
   private facing: Facing = 'down';
+  /**
+   * The lamps' pools of light, by the tile each lamp stands on. Hidden until that tile is found, so
+   * a lamp never gives away a road the traveller has not seen; brightened by `updateSky` with the dark.
+   */
+  private glows: { key: string; sprite: Phaser.GameObjects.Image }[] = [];
+  /** The strength the glows were last set to, so an unchanged sky costs nothing. */
+  private glowAt = -1;
+  /** Which side he last paddled toward: a side-view hull has no bow-on picture for up and down. */
+  private side: 'left' | 'right' = 'right';
+  /** Whether this map puts a boat in the kit -- canon's `vehicles`, read through `boatFor`. */
+  private boat = false;
+  /** Whether he is in the dugout. See `game/afloat.ts` for when that changes. */
+  private afloat = false;
+  /** The dugout, as two layers: the hollow behind him, and the hull's side in front of him. */
+  private hullBack!: Phaser.GameObjects.Image;
+  private hullFront!: Phaser.GameObjects.Image;
   /**
    * Whose sheet the sprite draws from.
    *
@@ -524,6 +574,9 @@ export class WorldScene extends Phaser.Scene {
     this.queuedPath = [];
     this.moving = false;
     this.facing = 'down';
+    this.afloat = false;
+    this.glows = [];
+    this.glowAt = -1;
     this.travelled = data.travelled ?? 0;
     this.restedAt = this.travelled;
     this.standingOn = null;
@@ -555,6 +608,9 @@ export class WorldScene extends Phaser.Scene {
       windmill: windmillUrl,
       blades: bladesUrl,
       bridge: bridgeUrl,
+      riverBridge: riverBridgeUrl,
+      dugout: dugoutUrl,
+      lamp: lampUrl,
       huts: hutsUrl,
       overdraw: overdrawUrl,
       features: featuresUrl,
@@ -609,6 +665,10 @@ export class WorldScene extends Phaser.Scene {
     this.built = worldFor(map, data.seed);
     this.world = this.built.world;
     this.at = startTileFor(this.built, window.location.search);
+    this.boat = boatFor(this.built.fieldMap.vehicles) !== null;
+    // Starting on the river with a boat in the kit is starting in it.
+    const standing = this.world.tiles[this.at.y]?.[this.at.x];
+    this.afloat = standing ? afloatAfter(false, standing, this.boat) : false;
 
     const { width, height } = this.world;
     const pixelWidth = width * TILE_SIZE;
@@ -729,6 +789,7 @@ export class WorldScene extends Phaser.Scene {
               : shoreTextureKey(this, edge, item.frame)
           )
           .setOrigin(anchor.x, anchor.y)
+          .setAlpha(item.alpha ?? 1)
           .setDepth(item.depth);
         this.tileOwned.push({ sprite: band, x: item.x, y: item.y });
         continue;
@@ -838,13 +899,18 @@ export class WorldScene extends Phaser.Scene {
         item.sheet === 'monuments' ||
         item.sheet === 'windmill' ||
         item.sheet === 'landmarks' ||
-        item.sheet === 'trees';
+        item.sheet === 'trees' ||
+        item.sheet === 'lamp';
       const sprite = this.add
         .image(cx, anchored ? item.y * TILE_SIZE + TILE_SIZE : cy, SHEET_KEY[item.sheet], item.frame)
         .setDepth(item.depth);
       if (anchored) sprite.setOrigin(0.5, 1);
       if (item.name) sprite.setName(item.name);
       if (item.sway) this.overdraw.push({ sprite, ...item.sway });
+      if (item.sheet === 'lamp') {
+        sprite.setX(cx);
+        this.addGlow(item.x, item.y, cx, item.y * TILE_SIZE + TILE_SIZE * 0.55);
+      }
       // Markers are found by name for the fog reveal and must stay in the list; everything else
       // that belongs to one tile can be hidden with it.
       if (!item.name) this.tileOwned.push({ sprite, x: item.x, y: item.y });
@@ -939,6 +1005,16 @@ export class WorldScene extends Phaser.Scene {
       .setOrigin(0.5, 1)
       .setDisplaySize(TILE_SIZE * 0.86, TILE_SIZE * 0.62)
       .setVisible(false);
+    this.ripple = this.add
+      .image(0, 0, rippleKey(this))
+      .setDisplaySize(TILE_SIZE * 0.62, TILE_SIZE * 0.19)
+      .setVisible(false);
+    // The dugout, cut at its gunwale into the part behind him and the part in front, so he sits in
+    // it rather than on it or behind it. Native size: two tiles long, at the figures' own scale.
+    this.hullBack = this.add.image(0, 0, DUGOUT_IMAGE).setOrigin(0.5, 0).setVisible(false);
+    this.hullBack.setCrop(0, 0, this.hullBack.width, DUGOUT_RIM + 4);
+    this.hullFront = this.add.image(0, 0, DUGOUT_IMAGE).setOrigin(0.5, 0).setVisible(false);
+    this.hullFront.setCrop(0, DUGOUT_RIM - 2, this.hullFront.width, this.hullFront.height - DUGOUT_RIM + 2);
 
     this.updateAnimation();
     this.placePlayer(this.at);
@@ -958,8 +1034,10 @@ export class WorldScene extends Phaser.Scene {
     const atRest =
       (this.at.x === this.world.landmark.x && this.at.y === this.world.landmark.y) ||
       poiAt(this.built, this.at) !== null;
-    const action = actionFor(this.moving, atRest);
-    const { key, flipX } = animFor(this.character.key, this.facing, action);
+    // In the dugout he sits, facing the side he is paddling toward, moving or not.
+    const action = this.afloat ? 'sit' : actionFor(this.moving, atRest);
+    const facing = this.afloat ? this.side : this.facing;
+    const { key, flipX } = animFor(this.character.key, facing, action);
     // Reapplied on every call rather than only on a change: `timeScale` lives on the sprite, so a
     // walk left at 1.34 would otherwise run the idle a third fast for the rest of the journey.
     this.player.anims.timeScale = action === 'walk' ? this.walkScale : 1;
@@ -970,6 +1048,7 @@ export class WorldScene extends Phaser.Scene {
   /** Point the sprite the way it is walking, mirroring the side view for leftward steps. */
   private faceTowards(dx: number, dy: number): void {
     this.facing = facingFromStep(dx, dy, this.facing);
+    if (dx !== 0) this.side = dx > 0 ? 'right' : 'left';
   }
 
   private placePlayer(at: Point): void {
@@ -1022,25 +1101,69 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private moveWaterline(): void {
-    const wading = this.world.tiles[this.at.y]?.[this.at.x]?.biome === 'sky_water';
-    this.waterline.setVisible(wading);
-    if (wading) this.waterline.setPosition(this.player.x, this.player.y);
+    // **In the dugout, the hull is the water line.** He is drawn a little higher so the hull stays in
+    // his own row, seated, with the hollow behind him and the side of the hull in front; a wide ring
+    // under the hull is the wake. None of the wading applies: he is on the water, not in it.
+    this.player.setOrigin(0.5, this.afloat ? 1 + FLOAT_LIFT / this.player.displayHeight : 1);
+    this.hullBack.setVisible(this.afloat);
+    this.hullFront.setVisible(this.afloat);
+    if (this.afloat) {
+      const top = this.player.y - FLOAT_LIFT - DUGOUT_SEAT - DUGOUT_RIM;
+      const flip = this.side === 'left';
+      this.hullBack.setPosition(this.player.x, top).setFlipX(flip);
+      this.hullFront.setPosition(this.player.x, top).setFlipX(flip);
+      this.wade = { kind: 'dry' };
+      this.player.setAlpha(1);
+      if (this.cutDepth !== 0) {
+        this.cutDepth = 0;
+        this.player.setCrop();
+      }
+      this.waterline.setVisible(false);
+      this.shadow.setVisible(false);
+      this.ripple
+        .setVisible(true)
+        .setDisplaySize(TILE_SIZE * 1.7, TILE_SIZE * 0.3)
+        .setPosition(this.player.x, top + this.hullFront.height - 14);
+      return;
+    }
+    this.ripple.setDisplaySize(TILE_SIZE * 0.62, TILE_SIZE * 0.19);
 
-    // **The figure itself goes translucent downward, and it costs one sprite.**
+    const wade = wadeFor(this.world.tiles[this.at.y]?.[this.at.x]);
+    this.wade = wade;
+
+    // **The sky pools keep their own look.** The island art and its treatment are kept separate from
+    // the ground's, so this branch is exactly what it was.
     //
-    // The obvious build is two cropped copies -- an opaque upper half and a faded lower one -- and
-    // the reason not to is that it doubles the sprite the walk animation drives and puts the
-    // waterline's height in two places that must agree forever. Phaser carries a per-corner alpha
-    // on every game object, so one sprite ramps from opaque at the head to `WADE_ALPHA` at the
-    // feet with no crop, no second animation and no art.
-    //
-    // The ramp is linear over the whole figure rather than starting at the waist, which is not
-    // quite what "lower body" means -- the quad above is what resolves it. Its gradient is
-    // brightest exactly at the surface, so the eye reads a waterline there and takes the fade
-    // below as water rather than as a figure dissolving.
-    this.player.setAlpha(1, 1, wading ? WADE_ALPHA : 1, wading ? WADE_ALPHA : 1);
+    // The figure itself goes translucent downward, and it costs one sprite. Phaser carries a
+    // per-corner alpha on every game object, so one sprite ramps from opaque at the head to
+    // `WADE_ALPHA` at the feet with no crop, no second animation and no art; the quad over it is
+    // brightest at the surface, so the eye reads a waterline there and takes the fade below as
+    // water rather than as a figure dissolving.
+    const sky = wade.kind === 'sky';
+    this.player.setAlpha(1, 1, sky ? WADE_ALPHA : 1, sky ? WADE_ALPHA : 1);
+
+    // **River and swamp are cut at a depth instead** -- waist, shins at a ford, feet in a swamp --
+    // which is how Pokemon and Stardew draw shallow water. The figure below the surface is cropped
+    // away and the water's gradient laid across the cut, so he stands *in* the river rather than
+    // fading into it, and the frames, the flip and the walk cycle know nothing about it: a crop is a
+    // rectangle on whichever frame is showing.
+    const depth = wade.kind === 'cut' ? wade.depth : 0;
+    if (depth !== this.cutDepth) {
+      this.cutDepth = depth;
+      const frame = this.player.frame;
+      if (depth > 0) this.player.setCrop(0, 0, frame.width, Math.round(frame.height * (1 - depth)));
+      else this.player.setCrop();
+    }
+
+    this.waterline.setVisible(sky);
+    if (sky) this.waterline.setPosition(this.player.x, this.player.y);
+    // A ring on the surface at the cut, so the edge of the figure sits in the water.
+    this.ripple.setVisible(depth > 0);
+    if (depth > 0) {
+      this.ripple.setPosition(this.player.x, this.player.y - this.player.displayHeight * depth);
+    }
     // A wader casts no shadow on ground he is not standing on.
-    this.shadow.setVisible(!wading);
+    this.shadow.setVisible(wade.kind === 'dry');
   }
 
   /**
@@ -1061,6 +1184,10 @@ export class WorldScene extends Phaser.Scene {
     // Over him, under anything standing in the same row: water is in front of a wader and behind
     // the reeds on the bank.
     this.waterline.setDepth(depthFor(row, ROW_SLOT.walker) + 1);
+    this.ripple.setDepth(depthFor(row, ROW_SLOT.walker) + 1);
+    // The hollow behind him; the side of the hull in front of him and of the wake.
+    this.hullBack.setDepth(depthFor(row, ROW_SLOT.walker) - 0.5);
+    this.hullFront.setDepth(depthFor(row, ROW_SLOT.walker) + 1.5);
     // One slot below him, in the same row band. `underfoot` is where decor lives, which is right:
     // a shadow is a mark on the ground, and it should pass under a stone the way the ground does.
     this.shadow.setDepth(depthFor(row, ROW_SLOT.underfoot));
@@ -1085,6 +1212,8 @@ export class WorldScene extends Phaser.Scene {
   private swallowWhileTyping: ((event: KeyboardEvent) => void) | null = null;
   /** Forget every pointer when the window loses focus mid-press. See `bindInput`. */
   private forgetPointers: (() => void) | null = null;
+  /** Switch the game's keyboard off while a text field has focus. See `bindInput`. */
+  private watchFocus: (() => void) | null = null;
 
   private typing(): boolean {
     const el = document.activeElement as HTMLElement | null;
@@ -1128,6 +1257,21 @@ export class WorldScene extends Phaser.Scene {
     };
     document.addEventListener('keydown', this.swallowWhileTyping, true);
 
+    // **The keyboard is off while a text field has focus, and every key is let go on the way in and
+    // out.** Reported from play: on a phone, typing a seed with a W in it walked the traveller.
+    // Everything above keys off `event.code`, and a phone's soft keyboard often sends a letter with
+    // no code at all -- so nothing swallowed it, Phaser marked W as held, and the key-up that should
+    // have released it never came the same way. The moment the field lost focus, `update` saw a held
+    // key and walked. Turning Phaser's keyboard off while editing means it records nothing to be stuck,
+    // and `resetKeys` on each change drops anything recorded before. This is the usual rule for a game
+    // canvas beside a form: the form owns the keys while it has focus, whatever the keys report.
+    this.watchFocus = () => {
+      keyboard.enabled = !this.typing();
+      keyboard.resetKeys();
+    };
+    document.addEventListener('focusin', this.watchFocus);
+    document.addEventListener('focusout', this.watchFocus);
+
     // **Counted here rather than polled in `update`.** Two fingers that arrive and leave inside one
     // frame would never be seen by `updatePinch`, and the release still has to be refused -- so the
     // count is kept from the events themselves and the pinch reads it, not the other way round.
@@ -1165,7 +1309,8 @@ export class WorldScene extends Phaser.Scene {
       // Weighted, so a tap across a range walks round it rather than over it. The scene has
       // always paid `travelCost` per step; until now only the *duration* knew about it and the
       // route did not, so tap-to-walk reliably chose the slowest line available to it.
-      const cost = (tile: Tile) => stepCost(tile.biome);
+      // By the road as well as the ground, so a click across country walks the path where one runs.
+      const cost = (tile: Tile) => routeCost(tile, this.boat, this.afloat);
       const { tiles, width, height } = this.world;
       this.queuedPath = findPath(tiles, width, height, this.at, target, isWalkable, cost);
 
@@ -1238,6 +1383,11 @@ export class WorldScene extends Phaser.Scene {
       if (this.forgetPointers) {
         window.removeEventListener('blur', this.forgetPointers);
         this.forgetPointers = null;
+      }
+      if (this.watchFocus) {
+        document.removeEventListener('focusin', this.watchFocus);
+        document.removeEventListener('focusout', this.watchFocus);
+        this.watchFocus = null;
       }
       EventBus.offEvent('new-journey', this.onNewJourney);
       EventBus.offEvent('resume-journey', this.onNewJourney);
@@ -1565,6 +1715,12 @@ export class WorldScene extends Phaser.Scene {
     const phase = phaseAt(this.time.now + this.travelled, this.startPhase);
     const sky = skyAt(phase);
     this.sky.setFillStyle(sky.colour, sky.alpha);
+    // The lamps come on with the dark: see `glowStrength`.
+    const glow = Math.round(glowStrength(sky.alpha) * 100) / 100;
+    if (glow !== this.glowAt) {
+      this.glowAt = glow;
+      for (const g of this.glows) g.sprite.setAlpha(glow);
+    }
 
     // Announce the moment only when it actually turns, and only bother asking twice a second.
     // A weather spell is three in-game hours; checking every frame is work for nothing and
@@ -1644,6 +1800,10 @@ export class WorldScene extends Phaser.Scene {
       x: this.at.x,
       y: this.at.y,
       biome: this.world.tiles[this.at.y]?.[this.at.x]?.biome ?? null,
+      // How he is drawn in water, so a spec can hold the wading table to the screen.
+      wade: this.wade,
+      // Whether he is in the dugout, for `e2e/dugout.spec.ts`.
+      afloat: this.afloat,
       moving: this.moving,
       depth: this.player.depth,
       sortedRow: this.sortedRow,
@@ -2014,7 +2174,14 @@ export class WorldScene extends Phaser.Scene {
     // `stepCost` rather than `travelCost(...) ?? 1`, because that fallback was never "a missing
     // number, call it easy": it fires only where a walker is standing on the crossing over open
     // water or open air, and that is the slowest going on the map rather than the fastest.
-    const cost = stepCost(tile.biome);
+    //
+    // `stepCostOn` rather than `stepCost`, because a worn road is quicker than the ground it runs
+    // over -- `ROAD_STEP` says why it is flat.
+    //
+    // And in the dugout the water is the quick going: `afloatAfter` decides whether this step is
+    // paddled, which is also the moment he climbs in or steps ashore.
+    this.afloat = afloatAfter(this.afloat, tile, this.boat);
+    const cost = this.afloat ? PADDLE_STEP : stepCostOn(tile);
     // The same cost buys the step twice: how long the tween takes on the screen, and how much of
     // the day the walking spends. The second is what keeps the sun honest.
     this.travelled += travelTimeMs(cost);
@@ -2109,6 +2276,18 @@ export class WorldScene extends Phaser.Scene {
    * been, dark where they have not. Ground already walked never goes fully dark again — the map
    * is a memory, not a flashlight — but letting it dim is what makes moving feel like moving.
    */
+  /** A lamp's light, over the night's tint, shown once its tile has been found. */
+  private addGlow(x: number, y: number, px: number, py: number): void {
+    const key = `${x},${y}`;
+    const sprite = this.add
+      .image(px, py, lampGlowKey(this))
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setDepth(DEPTH_SKY + 1)
+      .setAlpha(Math.max(0, this.glowAt))
+      .setVisible(this.discovered.has(key));
+    this.glows.push({ key, sprite });
+  }
+
   private revealAround(at: Point): void {
     const nowVisible = new Set<string>();
     for (let dy = -SIGHT_RADIUS - 1; dy <= SIGHT_RADIUS + 1; dy += 1) {
@@ -2129,12 +2308,25 @@ export class WorldScene extends Phaser.Scene {
       }
     }
 
+    // **The road ahead is seen from the road.** Standing on or beside it clears the fog along it for
+    // `ROAD_SIGHT` tiles each way, to the remembered shade -- the owner's ruling: revealed as you walk
+    // it, never the whole network at once. See `game/roadLight.ts`.
+    for (const key of roadAhead(this.world, at)) {
+      this.discovered.add(key);
+      if (nowVisible.has(key)) continue;
+      const [x, y] = key.split(',').map(Number);
+      this.setFog(x!, y!, FOG_REMEMBERED, true);
+    }
+
     for (const key of this.visible) {
       if (nowVisible.has(key)) continue;
       const [x, y] = key.split(',').map(Number);
       this.setFog(x!, y!, FOG_REMEMBERED, true);
     }
     this.visible = nowVisible;
+
+    // A lamp is lit once its tile is known.
+    for (const g of this.glows) if (!g.sprite.visible && this.discovered.has(g.key)) g.sprite.setVisible(true);
   }
 
   private arriveAt(at: Point): void {

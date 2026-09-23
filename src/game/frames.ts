@@ -363,9 +363,17 @@ const WATER: ReadonlySet<BiomeId> = new Set<BiomeId>(['sea', 'river']);
 
 export function blends(here: BiomeId, there: BiomeId): boolean {
   if (here === there) return false;
+  // **Except where marsh meets river, which is not a shore.** A swamp sits at the river's level --
+  // wet ground the water runs out into -- so the two bleed into each other rather than meeting at
+  // a line. Reported from play as "swamps should nicely bleed into the river water".
+  if (isMarshAndRiver(here, there)) return true;
   // A shore is a line, and should stay one.
   if (WATER.has(here) !== WATER.has(there)) return false;
   return true;
+}
+
+function isMarshAndRiver(a: BiomeId, b: BiomeId): boolean {
+  return (a === 'wetland' && b === 'river') || (a === 'river' && b === 'wetland');
 }
 
 // --- the cliff edge ------------------------------------------------------
@@ -1161,6 +1169,29 @@ export function bridgeFrame(eastWest: boolean, worn: boolean): number {
 }
 
 /**
+ * Where a tile sits along a river bridge. The bank end is `start` on the west or north, `end` on the
+ * east or south; `single` is a one-tile span, which is both.
+ */
+export const SPAN_PIECE = { start: 0, middle: 1, end: 2, single: 3 } as const;
+export type SpanPiece = (typeof SPAN_PIECE)[keyof typeof SPAN_PIECE];
+
+/** Frames on the river-bridge sheet: four pieces running east-west, then the same four north-south. */
+export const RIVER_BRIDGE_FRAMES = 8;
+
+/**
+ * Which river-bridge piece to draw.
+ *
+ * **Separate from `bridgeFrame`, which is the planks over the island notches.** The islands keep
+ * their own art; a river bridge is a different structure with its own sheet. The contract is the
+ * one the art brief asks for -- a single overhead image of a three-tile span, which
+ * `tools/build-river-craft.js` cuts into start, middle and end, turns for north-south, and then
+ * lights, so the shadow falls the same way whichever way the bridge runs.
+ */
+export function riverBridgeFrame(eastWest: boolean, piece: SpanPiece): number {
+  return (eastWest ? 0 : 4) + piece;
+}
+
+/**
  * Which piece of path this tile draws, from the sides the path leaves by.
  *
  * **It takes a mask rather than a direction now, and the difference is the corner.** The old
@@ -1234,8 +1265,27 @@ const SKY: ReadonlySet<BiomeId> = new Set<BiomeId>(['sky_island', 'sky_underside
  * Nothing crosses the line in either direction.
  */
 export function shoreAt(here: BiomeId, there: BiomeId): boolean {
-  return WATER.has(here) && !WATER.has(there) && !SKY.has(there);
+  // Not against marsh: a swamp is level with the water, so there is no bank to cast a shadow.
+  return WATER.has(here) && !WATER.has(there) && !SKY.has(there) && there !== 'wetland';
 }
+
+/**
+ * Whether a swamp tile should draw a *lighter* bank shadow along this edge: where it meets dry land.
+ *
+ * **The swamp's relief, and the reason it no longer reads as ordinary land.** A river looks sunk
+ * because `shoreAt` lays the bank's shadow inside the water cell. A swamp had none of it, so it sat
+ * at the height of the grass beside it -- reported from play as "swamps are the same as normal
+ * land". It is a step down, level with the river, so it gets the same shadow at the edge it shares
+ * with dry ground, at about half the strength: a shallow step rather than a bank.
+ *
+ * Not against water (it is level with it), not against more swamp, and not against the sky biomes.
+ */
+export function sunkAt(here: BiomeId, there: BiomeId): boolean {
+  return here === 'wetland' && there !== 'wetland' && !WATER.has(there) && !SKY.has(there);
+}
+
+/** How strong the swamp's step is, against the river bank's full shadow. */
+export const SUNK_ALPHA = 0.5;
 
 /**
  * What a stretch of land puts down where it meets water, or null for the ones that put down

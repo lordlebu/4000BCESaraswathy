@@ -13,6 +13,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMaps } from '../src/content/places';
+import type { BiomeId } from '../src/world/types';
 import {
   planScene,
   planShore,
@@ -27,7 +28,10 @@ import {
   SHORE_BAND,
   GRID,
   bankSource,
-  shoreAt
+  blends,
+  shoreAt,
+  sunkAt,
+  SUNK_ALPHA
 } from '../src/game/frames';
 
 const worlds = fieldMaps.map((map) => ({ id: map.id, built: buildFieldMap(map, {}) }));
@@ -38,7 +42,10 @@ const SKY = new Set(['sky_island', 'sky_underside']);
 const key = (p: { x: number; y: number }) => `${p.x},${p.y}`;
 
 /** Every land/water boundary on a map, counted from the water side. */
-function shoreEdges(world: ReturnType<typeof buildFieldMap>['world']): number {
+function shoreEdges(
+  world: ReturnType<typeof buildFieldMap>['world'],
+  rule: (here: BiomeId, there: BiomeId) => boolean = shoreAt
+): number {
   let n = 0;
   for (let y = 0; y < world.height; y += 1) {
     for (let x = 0; x < world.width; x += 1) {
@@ -47,7 +54,7 @@ function shoreEdges(world: ReturnType<typeof buildFieldMap>['world']): number {
         const { dx, dy } = EDGE_STEP[edge];
         const there = world.tiles[y + dy]?.[x + dx]?.biome;
         if (there === undefined) continue;
-        if (shoreAt(here, there)) n += 1;
+        if (rule(here, there)) n += 1;
       }
     }
   }
@@ -60,7 +67,9 @@ describe('the shore keeps its line and gains a thickness', () => {
     // a river bend faces land on three sides and wants three, and not on the land side, because a
     // bank's shadow falls on the thing below it.
     for (const { id, built } of worlds) {
-      const bands = planShore(built.world);
+      // The swamp's lighter step is the same layer and is checked separately below; this is the
+      // river bank's full-strength shadow, and its rule is unchanged.
+      const bands = planShore(built.world).filter((band) => band.alpha === undefined);
       const expected = shoreEdges(built.world);
       expect(bands.length, `${id}: one band per water-side edge`).toBe(expected);
 
@@ -80,6 +89,40 @@ describe('the shore keeps its line and gains a thickness', () => {
         seen.add(once);
       }
     }
+  });
+
+  it('casts no bank between a swamp and the river it runs into', () => {
+    // A swamp is level with the water. A shadow there would put a step where there is none, and
+    // the two are meant to bleed into each other -- `blends` lets them.
+    expect(shoreAt('river', 'wetland')).toBe(false);
+    expect(shoreAt('sea', 'wetland')).toBe(false);
+    expect(blends('wetland', 'river')).toBe(true);
+    expect(blends('river', 'wetland')).toBe(true);
+    // And the rest of the shoreline is untouched: grass still meets water at a line.
+    expect(shoreAt('river', 'plains')).toBe(true);
+    expect(blends('plains', 'river')).toBe(false);
+  });
+
+  it('sinks a swamp a step below the dry ground beside it, lighter than a bank', () => {
+    // Reported from play: swamps looked like ordinary land. The step is the river bank's shadow at
+    // `SUNK_ALPHA`, drawn inside the swamp along every edge it shares with dry ground.
+    let sunkDrawn = 0;
+    for (const { id, built } of worlds) {
+      const sunk = planShore(built.world).filter((band) => band.alpha !== undefined);
+      expect(sunk.length, `${id}: one light band per swamp-to-dry edge`).toBe(
+        shoreEdges(built.world, sunkAt)
+      );
+      for (const band of sunk) {
+        expect(band.alpha).toBe(SUNK_ALPHA);
+        expect(built.world.tiles[band.y]![band.x]!.biome, `${id}: a light band off the swamp`).toBe('wetland');
+        const { dx, dy } = EDGE_STEP[band.edge!];
+        const there = built.world.tiles[band.y + dy]?.[band.x + dx]?.biome;
+        expect(there === 'wetland' || WATER.has(there!), `${id}: a step toward ${there}`).toBe(false);
+      }
+      sunkDrawn += sunk.length;
+    }
+    expect(sunkDrawn, 'no swamp on any map got its step').toBeGreaterThan(0);
+    expect(SUNK_ALPHA).toBeLessThan(1);
   });
 
   it('leaves the floating islands alone, which is 148 edges on the Aravali', () => {

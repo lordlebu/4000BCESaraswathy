@@ -123,6 +123,18 @@ export const WINDMILL_SHEET = 'windmill';
 export const BLADE_SHEET = 'blades';
 /** Planks over the island notches — `track.png`'s four pieces again, in weathered timber. */
 export const BRIDGE_SHEET = 'bridge';
+/**
+ * The bridges over river crossings: eight 128 px frames, `riverBridgeFrame`'s contract, built by
+ * `tools/build-river-craft.js` from one overhead drawing. Separate from `BRIDGE_SHEET`, which is the
+ * planks over the island notches -- the island art is kept apart from the ground's.
+ */
+export const RIVER_BRIDGE_SHEET = 'riverBridge';
+/** The dugout's hull, one image, bow to the right. Lothal's canoe sits in it. */
+export const DUGOUT_IMAGE = 'dugout';
+/** The road lamp: one 64 x 128 frame standing on its base. Drawn by `tools/draw-river-art.py`. */
+export const LAMP_SHEET = 'lamp';
+export const LAMP_WIDTH = 64;
+export const LAMP_HEIGHT = 128;
 const MONUMENT_WIDTH = TILE_SIZE * 2;
 const MONUMENT_HEIGHT = (TILE_SIZE / 32) * 104;
 
@@ -224,6 +236,9 @@ export function loadTileSheets(
     windmill: string;
     blades: string;
     bridge: string;
+    riverBridge: string;
+    dugout: string;
+    lamp: string;
     rope: string;
     road: string;
     decor: string;
@@ -266,6 +281,38 @@ export function loadTileSheets(
   sheet(TRACK_SHEET, urls.track, TILE_SIZE, TILE_SIZE);
   sheet(ROPE_SHEET, urls.rope, TILE_SIZE, TILE_SIZE);
   sheet(ROAD_SHEET, urls.road, TILE_SIZE, TILE_SIZE);
+  sheet(RIVER_BRIDGE_SHEET, urls.riverBridge, TILE_SIZE, TILE_SIZE);
+  if (!scene.textures.exists(DUGOUT_IMAGE)) scene.load.image(DUGOUT_IMAGE, urls.dugout);
+  sheet(LAMP_SHEET, urls.lamp, LAMP_WIDTH, LAMP_HEIGHT);
+}
+
+/**
+ * A lamp's pool of light: a warm radial gradient, laid over the night with additive blending.
+ *
+ * Additive rather than erased out of the night's tint, because the night is one rectangle and the
+ * lamps are many; adding light is the standard way to light a 2D scene that has no normal maps, and
+ * it costs one sprite a lamp. Wider than tall, since the light falls on ground seen at an angle.
+ */
+export function lampGlowKey(scene: Phaser.Scene): string {
+  const key = 'light:lamp';
+  if (scene.textures.exists(key)) return key;
+  const w = TILE_SIZE * 3;
+  const h = TILE_SIZE * 2;
+  const canvas = scene.textures.createCanvas(key, w, h);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+  context.save();
+  context.translate(w / 2, h / 2);
+  context.scale(1, h / w);
+  const glow = context.createRadialGradient(0, 0, 0, 0, 0, w / 2);
+  glow.addColorStop(0, 'rgba(255,200,120,0.55)');
+  glow.addColorStop(0.35, 'rgba(255,170,90,0.28)');
+  glow.addColorStop(1, 'rgba(255,150,70,0)');
+  context.fillStyle = glow;
+  context.fillRect(-w / 2, -w / 2, w, w);
+  context.restore();
+  canvas.refresh();
+  return key;
 }
 
 /**
@@ -701,6 +748,42 @@ export function waterlineKey(scene: Phaser.Scene): string {
   fall.addColorStop(1, 'rgba(52,116,150,0.24)');
   context.fillStyle = fall;
   context.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+  canvas.refresh();
+  return key;
+}
+
+/**
+ * The ring of disturbed water where a wader breaks the surface.
+ *
+ * For the river and the swamp, where the figure is cut at a depth rather than faded (see
+ * `game/wading.ts`). A soft oval rather than a band: the first build laid the sky pool's rectangle
+ * of water across the cut, and at a waist it read as a pane of glass held in front of him. An oval
+ * is what a body standing in water makes, and it is the treatment shallow water gets in the games
+ * that settled this.
+ */
+export function rippleKey(scene: Phaser.Scene): string {
+  const key = 'water:ripple';
+  if (scene.textures.exists(key)) return key;
+
+  const width = TILE_SIZE;
+  const height = Math.round(TILE_SIZE * 0.3);
+  const canvas = scene.textures.createCanvas(key, width, height);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+
+  const cx = width / 2;
+  const cy = height / 2;
+  // A faint wash inside the ring, so the cut edge of the figure sits in water rather than on it.
+  context.fillStyle = 'rgba(150,208,224,0.35)';
+  context.beginPath();
+  context.ellipse(cx, cy, width * 0.4, height * 0.36, 0, 0, Math.PI * 2);
+  context.fill();
+  // The ring itself: the bright line where the surface meets him.
+  context.strokeStyle = 'rgba(226,246,250,0.85)';
+  context.lineWidth = Math.max(2, Math.round(TILE_SIZE / 40));
+  context.beginPath();
+  context.ellipse(cx, cy, width * 0.4, height * 0.36, 0, 0, Math.PI * 2);
+  context.stroke();
   canvas.refresh();
   return key;
 }
