@@ -1,5 +1,5 @@
 /**
- * The river bridge sheet and the dugout, from `assets/source/`.
+ * The river bridge sheet, the dugout and the road lamp, from `assets/source/`.
  *
  *   node tools/build-river-craft.js
  *
@@ -226,5 +226,14 @@ function buildDugout() {
   console.log(`dugout: ${hull.width}x${hull.height}, ${(fs.statSync(file).size / 1024).toFixed(1)} KB`);
 }
 
+/** The road lamp: copied through keyed, like the dugout. One 64 x 128 frame, standing on its base. */
+function buildLamp() {
+  const lamp = keyed(decodePng(path.join(SRC, 'lamp-post.png')));
+  const file = path.join(OUT, 'lamp-post.png');
+  fs.writeFileSync(file, encodePng(lamp.width, lamp.height, Buffer.from(lamp.data.buffer)));
+  console.log(`lamp-post: ${lamp.width}x${lamp.height}, ${(fs.statSync(file).size / 1024).toFixed(1)} KB`);
+}
+
 buildBridge();
 buildDugout();
+buildLamp();

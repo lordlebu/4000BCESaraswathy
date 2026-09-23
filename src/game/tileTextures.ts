@@ -131,6 +131,10 @@ export const BRIDGE_SHEET = 'bridge';
 export const RIVER_BRIDGE_SHEET = 'riverBridge';
 /** The dugout's hull, one image, bow to the right. Lothal's canoe sits in it. */
 export const DUGOUT_IMAGE = 'dugout';
+/** The road lamp: one 64 x 128 frame standing on its base. Drawn by `tools/draw-river-art.py`. */
+export const LAMP_SHEET = 'lamp';
+export const LAMP_WIDTH = 64;
+export const LAMP_HEIGHT = 128;
 const MONUMENT_WIDTH = TILE_SIZE * 2;
 const MONUMENT_HEIGHT = (TILE_SIZE / 32) * 104;
 
@@ -234,6 +238,7 @@ export function loadTileSheets(
     bridge: string;
     riverBridge: string;
     dugout: string;
+    lamp: string;
     rope: string;
     road: string;
     decor: string;
@@ -278,6 +283,36 @@ export function loadTileSheets(
   sheet(ROAD_SHEET, urls.road, TILE_SIZE, TILE_SIZE);
   sheet(RIVER_BRIDGE_SHEET, urls.riverBridge, TILE_SIZE, TILE_SIZE);
   if (!scene.textures.exists(DUGOUT_IMAGE)) scene.load.image(DUGOUT_IMAGE, urls.dugout);
+  sheet(LAMP_SHEET, urls.lamp, LAMP_WIDTH, LAMP_HEIGHT);
+}
+
+/**
+ * A lamp's pool of light: a warm radial gradient, laid over the night with additive blending.
+ *
+ * Additive rather than erased out of the night's tint, because the night is one rectangle and the
+ * lamps are many; adding light is the standard way to light a 2D scene that has no normal maps, and
+ * it costs one sprite a lamp. Wider than tall, since the light falls on ground seen at an angle.
+ */
+export function lampGlowKey(scene: Phaser.Scene): string {
+  const key = 'light:lamp';
+  if (scene.textures.exists(key)) return key;
+  const w = TILE_SIZE * 3;
+  const h = TILE_SIZE * 2;
+  const canvas = scene.textures.createCanvas(key, w, h);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return key;
+  context.save();
+  context.translate(w / 2, h / 2);
+  context.scale(1, h / w);
+  const glow = context.createRadialGradient(0, 0, 0, 0, 0, w / 2);
+  glow.addColorStop(0, 'rgba(255,200,120,0.55)');
+  glow.addColorStop(0.35, 'rgba(255,170,90,0.28)');
+  glow.addColorStop(1, 'rgba(255,150,70,0)');
+  context.fillStyle = glow;
+  context.fillRect(-w / 2, -w / 2, w, w);
+  context.restore();
+  canvas.refresh();
+  return key;
 }
 
 /**

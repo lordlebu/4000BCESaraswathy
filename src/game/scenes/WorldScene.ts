@@ -15,6 +15,7 @@ import bladesUrl from '../../../assets/windmill-blades.png';
 import bridgeUrl from '../../../assets/bridge.png';
 import riverBridgeUrl from '../../../assets/river-bridge.png';
 import dugoutUrl from '../../../assets/dugout.png';
+import lampUrl from '../../../assets/lamp-post.png';
 import hutsUrl from '../../../assets/huts.png';
 import overdrawUrl from '../../../assets/overdraw.png';
 import featuresUrl from '../../../assets/features.png';
@@ -43,6 +44,8 @@ import {
   BRIDGE_SHEET,
   RIVER_BRIDGE_SHEET,
   DUGOUT_IMAGE,
+  LAMP_SHEET,
+  lampGlowKey,
   TERRAIN_SHEET,
   DECOR_SHEET,
   TRACK_SHEET,
@@ -102,6 +105,7 @@ const SHEET_KEY: Record<
   blades: BLADE_SHEET,
   bridge: BRIDGE_SHEET,
   riverBridge: RIVER_BRIDGE_SHEET,
+  lamp: LAMP_SHEET,
   landmarks: LANDMARK_SHEET,
   decor: DECOR_SHEET,
   // The bank draws terrain through a mask, so it is baked rather than looked up -- this entry
@@ -184,6 +188,7 @@ import { findPath, nearestReachable } from '../../world/pathfind';
 import { NO_GESTURE, lost, pressed, released, type Gesture } from '../gesture';
 import { wadeFor, type Wade } from '../wading';
 import { afloatAfter, PADDLE_STEP, routeCost } from '../afloat';
+import { glowStrength, roadAhead } from '../roadLight';
 import { boatFor } from '../../content/kit';
 import { tileHash } from '../../world/rng';
 import type { BiomeId, Point, Tile, World } from '../../world/types';
@@ -476,6 +481,13 @@ export class WorldScene extends Phaser.Scene {
    */
   private walkScale = 1;
   private facing: Facing = 'down';
+  /**
+   * The lamps' pools of light, by the tile each lamp stands on. Hidden until that tile is found, so
+   * a lamp never gives away a road the traveller has not seen; brightened by `updateSky` with the dark.
+   */
+  private glows: { key: string; sprite: Phaser.GameObjects.Image }[] = [];
+  /** The strength the glows were last set to, so an unchanged sky costs nothing. */
+  private glowAt = -1;
   /** Which side he last paddled toward: a side-view hull has no bow-on picture for up and down. */
   private side: 'left' | 'right' = 'right';
   /** Whether this map puts a boat in the kit -- canon's `vehicles`, read through `boatFor`. */
@@ -563,6 +575,8 @@ export class WorldScene extends Phaser.Scene {
     this.moving = false;
     this.facing = 'down';
     this.afloat = false;
+    this.glows = [];
+    this.glowAt = -1;
     this.travelled = data.travelled ?? 0;
     this.restedAt = this.travelled;
     this.standingOn = null;
@@ -596,6 +610,7 @@ export class WorldScene extends Phaser.Scene {
       bridge: bridgeUrl,
       riverBridge: riverBridgeUrl,
       dugout: dugoutUrl,
+      lamp: lampUrl,
       huts: hutsUrl,
       overdraw: overdrawUrl,
       features: featuresUrl,
@@ -884,13 +899,18 @@ export class WorldScene extends Phaser.Scene {
         item.sheet === 'monuments' ||
         item.sheet === 'windmill' ||
         item.sheet === 'landmarks' ||
-        item.sheet === 'trees';
+        item.sheet === 'trees' ||
+        item.sheet === 'lamp';
       const sprite = this.add
         .image(cx, anchored ? item.y * TILE_SIZE + TILE_SIZE : cy, SHEET_KEY[item.sheet], item.frame)
         .setDepth(item.depth);
       if (anchored) sprite.setOrigin(0.5, 1);
       if (item.name) sprite.setName(item.name);
       if (item.sway) this.overdraw.push({ sprite, ...item.sway });
+      if (item.sheet === 'lamp') {
+        sprite.setX(cx);
+        this.addGlow(item.x, item.y, cx, item.y * TILE_SIZE + TILE_SIZE * 0.55);
+      }
       // Markers are found by name for the fog reveal and must stay in the list; everything else
       // that belongs to one tile can be hidden with it.
       if (!item.name) this.tileOwned.push({ sprite, x: item.x, y: item.y });
@@ -1695,6 +1715,12 @@ export class WorldScene extends Phaser.Scene {
     const phase = phaseAt(this.time.now + this.travelled, this.startPhase);
     const sky = skyAt(phase);
     this.sky.setFillStyle(sky.colour, sky.alpha);
+    // The lamps come on with the dark: see `glowStrength`.
+    const glow = Math.round(glowStrength(sky.alpha) * 100) / 100;
+    if (glow !== this.glowAt) {
+      this.glowAt = glow;
+      for (const g of this.glows) g.sprite.setAlpha(glow);
+    }
 
     // Announce the moment only when it actually turns, and only bother asking twice a second.
     // A weather spell is three in-game hours; checking every frame is work for nothing and
@@ -2250,6 +2276,18 @@ export class WorldScene extends Phaser.Scene {
    * been, dark where they have not. Ground already walked never goes fully dark again — the map
    * is a memory, not a flashlight — but letting it dim is what makes moving feel like moving.
    */
+  /** A lamp's light, over the night's tint, shown once its tile has been found. */
+  private addGlow(x: number, y: number, px: number, py: number): void {
+    const key = `${x},${y}`;
+    const sprite = this.add
+      .image(px, py, lampGlowKey(this))
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setDepth(DEPTH_SKY + 1)
+      .setAlpha(Math.max(0, this.glowAt))
+      .setVisible(this.discovered.has(key));
+    this.glows.push({ key, sprite });
+  }
+
   private revealAround(at: Point): void {
     const nowVisible = new Set<string>();
     for (let dy = -SIGHT_RADIUS - 1; dy <= SIGHT_RADIUS + 1; dy += 1) {
@@ -2270,12 +2308,25 @@ export class WorldScene extends Phaser.Scene {
       }
     }
 
+    // **The road ahead is seen from the road.** Standing on or beside it clears the fog along it for
+    // `ROAD_SIGHT` tiles each way, to the remembered shade -- the owner's ruling: revealed as you walk
+    // it, never the whole network at once. See `game/roadLight.ts`.
+    for (const key of roadAhead(this.world, at)) {
+      this.discovered.add(key);
+      if (nowVisible.has(key)) continue;
+      const [x, y] = key.split(',').map(Number);
+      this.setFog(x!, y!, FOG_REMEMBERED, true);
+    }
+
     for (const key of this.visible) {
       if (nowVisible.has(key)) continue;
       const [x, y] = key.split(',').map(Number);
       this.setFog(x!, y!, FOG_REMEMBERED, true);
     }
     this.visible = nowVisible;
+
+    // A lamp is lit once its tile is known.
+    for (const g of this.glows) if (!g.sprite.visible && this.discovered.has(g.key)) g.sprite.setVisible(true);
   }
 
   private arriveAt(at: Point): void {

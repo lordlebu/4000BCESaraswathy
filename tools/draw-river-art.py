@@ -1,11 +1,11 @@
 """
-The river bridge and the dugout, drawn in code.
+The river bridge, the dugout and the road lamp, drawn in code.
 
-**These are the art, not placeholders for it.** The owner asked for a painted bridge and a
-dugout, the prompts were written (see the Roads and Wet Ground plan), and the code-drawn versions
-were looked at on the game's own river tiles and kept. If painted art arrives later it replaces
-the two files this writes, and nothing downstream changes: `tools/build-river-craft.js` reads
-whatever is in `assets/source/`.
+**These are the art, not placeholders for it.** The owner asked for a painted bridge, a dugout
+and a road lamp, the prompts were written (see the Roads and Wet Ground plan), and the code-drawn
+versions were looked at on the game's own tiles and kept. If painted art arrives later it replaces
+the files this writes, and nothing downstream changes: `tools/build-river-craft.js` reads whatever
+is in `assets/source/`.
 
 Two rules the drawings keep, because the builder depends on them:
 
@@ -126,8 +126,36 @@ def dugout() -> Image.Image:
     return im
 
 
+def lamp_post() -> Image.Image:
+    """A roadside oil lamp on a timber post, three-quarter view, standing on its base. 64 x 128."""
+    w, h = 64, 128
+    im = Image.new("RGBA", (w, h), MAGENTA)
+    d = ImageDraw.Draw(im)
+    px, base = 26, h - 4
+    # A fitted stone foot, lit on top.
+    d.rectangle([px - 12, base - 8, px + 12, base], fill=(118, 110, 94, 255))
+    d.line([(px - 12, base - 8), (px + 12, base - 8)], fill=(158, 150, 128, 255))
+    # The post: timber, lit on its west side, darker on its east.
+    d.rectangle([px - 5, base - 88, px + 5, base - 8], fill=(92, 64, 38, 255))
+    d.rectangle([px - 5, base - 88, px - 2, base - 8], fill=(118, 84, 50, 255))
+    d.rectangle([px + 3, base - 88, px + 5, base - 8], fill=(70, 48, 28, 255))
+    d.rectangle([px - 6, base - 91, px + 6, base - 88], fill=(126, 90, 54, 255))
+    # The bracket, and a clay lamp hanging from it.
+    d.rectangle([px + 5, base - 84, px + 22, base - 80], fill=(92, 64, 38, 255))
+    d.line([(px + 20, base - 80), (px + 20, base - 74)], fill=(60, 42, 26, 255))
+    d.polygon([(px + 12, base - 74), (px + 30, base - 74), (px + 27, base - 62), (px + 15, base - 62)],
+              fill=(170, 88, 52, 255))
+    d.rectangle([px + 14, base - 74, px + 28, base - 72], fill=(198, 112, 68, 255))
+    d.line([(px + 15, base - 66), (px + 27, base - 66)], fill=(138, 68, 40, 255))
+    # A small flame: the lamp is trimmed and burning. Its light at night is drawn by the game.
+    d.ellipse([px + 18, base - 82, px + 24, base - 73], fill=(255, 208, 110, 255))
+    d.ellipse([px + 19, base - 79, px + 23, base - 74], fill=(255, 244, 200, 255))
+    return im
+
+
 if __name__ == "__main__":
     SOURCE.mkdir(parents=True, exist_ok=True)
     bridge().save(SOURCE / "river-bridge.png")
     dugout().save(SOURCE / "dugout.png")
-    print("wrote assets/source/river-bridge.png and assets/source/dugout.png")
+    lamp_post().save(SOURCE / "lamp-post.png")
+    print("wrote river-bridge.png, dugout.png and lamp-post.png in assets/source/")

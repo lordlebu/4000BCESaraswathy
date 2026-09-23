@@ -65,6 +65,7 @@ import { isRope, plankRunsEastWest } from '../world/crossing';
 import { landmarkKindFor } from '../content/landmarks';
 import { band } from '../world/classify';
 import { tileHash } from '../world/rng';
+import { lampSites } from './roadLight';
 import type { FieldMapWorld } from '../world/fieldMap';
 import type { BiomeId } from '../world/types';
 import type { CliffTurn, Edge } from './frames';
@@ -83,6 +84,7 @@ export type PlacementSheet =
   | 'blades'
   | 'bridge'
   | 'riverBridge'
+  | 'lamp'
   | 'landmarks'
   | 'decor'
   | 'contact'
@@ -1252,6 +1254,7 @@ export function planScene(built: FieldMapWorld): Placement[] {
     ...planWaterfall(built.world),
     ...huts,
     ...planOverdraw(built.world, builtOn),
+    ...planLamps(built),
     ...planMarkers(built)
   ];
 }
@@ -1649,6 +1652,30 @@ export function planTrack(world: FieldMapWorld['world']): Placement[] {
   return out;
 }
 
+
+/**
+ * The lamps along the road -- see `game/roadLight.ts` for where they stand and why.
+ *
+ * Never on a tile a place stands on, or the landmark's: the road runs *to* the places, and a post
+ * planted in a doorway would be the lamp's fault, not the building's. Stood at the east verge of its
+ * tile, so it is beside the road rather than in the middle of it.
+ */
+export function planLamps(built: FieldMapWorld): Placement[] {
+  const taken = new Set([
+    ...built.placed.map((p) => `${p.at.x},${p.at.y}`),
+    `${built.world.landmark.x},${built.world.landmark.y}`
+  ]);
+  return lampSites(built.world)
+    .filter((p) => !taken.has(`${p.x},${p.y}`))
+    .map((p) => ({
+      sheet: 'lamp' as const,
+      frame: 0,
+      x: p.x,
+      y: p.y,
+      depth: depthFor(p.y, ROW_SLOT.marker),
+      offset: { x: 0.34, y: 0 }
+    }));
+}
 
 /**
  * The bridges over the river crossings.
