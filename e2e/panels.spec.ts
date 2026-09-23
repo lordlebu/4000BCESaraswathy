@@ -5,22 +5,27 @@
 // reopened without stepping off the tile and back on.
 
 import { expect, test, type Page } from '@playwright/test';
-import { step, walkTo } from './walk';
+import { approachPlace, step, walkTo } from './walk';
 
 // Shares `fielddiary.spec.ts`'s fixture: two steps south of the start is an authored place.
 // See the note there for why searched seeds go stale and what stopped most of it.
 const SEED = 'poi-1621';
 
+/** The steps from where `boot` stood the traveller onto the Eastern Field. */
+let toPlace: string[] = [];
+
 async function boot(page: Page, w = 1280, h = 800) {
   await page.setViewportSize({ width: w, height: h });
-  // Two tiles north of poi_eastern_field at (10,10); `walkToPlace` walks the rest.
-  await page.goto(`/?seed=${SEED}&hour=12&at=10,8`);
+  // Two tiles from poi_eastern_field, wherever it landed -- see `approachPlace`.
+  const { at, keys } = await approachPlace(page, SEED, 'poi_eastern_field');
+  toPlace = keys;
+  await page.goto(`/?seed=${SEED}&map=field_map_lothal&hour=12&at=${at}`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 }
 
 async function walkToPlace(page: Page) {
-  await walkTo(page, ['ArrowDown', 'ArrowDown']);
+  await walkTo(page, toPlace);
 }
 
 test('the field notes can be closed and opened again', async ({ page }) => {

@@ -9,6 +9,7 @@
 // Waiting for the journal to report a new tile waits for the actual arrival.
 
 import { expect, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 
 /**
  * How long to wait for a step to land before assuming it went nowhere.
@@ -124,4 +125,68 @@ async function surfaces(page: Page): Promise<string> {
 export async function walkTo(page: Page, keys: string[], timeout = 20_000): Promise<void> {
   for (const key of keys) await step(page, key);
   await expect(page.locator('.place')).toBeVisible({ timeout });
+}
+
+/**
+ * The biome order the stored world encodes with, read out of the source -- `e2e/baked.spec.ts`
+ * gives the reason: importing it drags in the canon bundle, which Playwright's loader refuses.
+ */
+const BIOME_CODES = [...readFileSync('src/world/bake.ts', 'utf8')
+  .split('export const BIOME_CODES')[1]!
+  .split('];')[0]!
+  .matchAll(/'([a-z_]+)'/g)].map((m) => m[1]!);
+
+/** Ground a walk up to a place may start on and cross: dry land, not water and not air. */
+const APPROACHABLE = new Set(['plains', 'coast', 'forest', 'hills', 'settlement', 'desert', 'wetland', 'mountains', 'snow']);
+
+/**
+ * Where to stand to walk onto a place, and the two steps that get there -- read from the world the
+ * game actually built, never written down.
+ *
+ * **Every spec that walked onto a place used to name the tile**, "two north of the Eastern Field at
+ * 10,10", and a coordinate is a searched seed by another name: the day placement changed, the
+ * places moved and six specs walked two steps into nothing. This boots the seed once, reads where
+ * the place landed from the stored world, and picks the first side with two tiles of dry land to
+ * approach over. Arrival is what opens a place, so the traveller has to step onto it rather than
+ * start on it.
+ */
+export async function approachPlace(
+  page: Page,
+  seed: string,
+  poiId: string,
+  map = 'field_map_lothal'
+): Promise<{ at: string; keys: string[] }> {
+  await page.goto(`/?seed=${seed}&map=${map}`);
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
+  const baked = await page.evaluate(
+    (k) =>
+      JSON.parse(localStorage.getItem(k) ?? 'null') as {
+        biomes: string[];
+        placed: [string, number, number][];
+      } | null,
+    `south-of-tethys:world:${seed}:${map}`
+  );
+  if (!baked) throw new Error(`${map}/${seed}: no stored world to read the places from`);
+  const found = baked.placed.find(([id]) => id === poiId);
+  if (!found) throw new Error(`${map}/${seed}: ${poiId} was not placed`);
+  const [, px, py] = found;
+  const places = new Set(baked.placed.map(([, x, y]) => `${x},${y}`));
+  const land = (x: number, y: number) => {
+    const code = baked.biomes[y]?.[x];
+    if (code === undefined || places.has(`${x},${y}`)) return false;
+    return APPROACHABLE.has(BIOME_CODES[Number.parseInt(code, 36)] ?? '');
+  };
+  // From the north first, as the old fixtures did, then the other three sides.
+  const sides: [number, number, string][] = [
+    [0, -1, 'ArrowDown'],
+    [-1, 0, 'ArrowRight'],
+    [1, 0, 'ArrowLeft'],
+    [0, 1, 'ArrowUp']
+  ];
+  for (const [dx, dy, key] of sides) {
+    if (land(px + dx, py + dy) && land(px + 2 * dx, py + 2 * dy)) {
+      return { at: `${px + 2 * dx},${py + 2 * dy}`, keys: [key, key] };
+    }
+  }
+  throw new Error(`${map}/${seed}: no side of ${poiId} at ${px},${py} has two tiles of dry land`);
 }

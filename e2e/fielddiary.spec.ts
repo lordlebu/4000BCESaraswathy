@@ -35,7 +35,7 @@
 // all of them ones that walk somewhere. Re-run the search rather than widening the timeouts.
 
 import { expect, test, type Page } from '@playwright/test';
-import { step } from './walk';
+import { approachPlace, step } from './walk';
 
 /**
  * The seed no longer has to be searched.
@@ -45,9 +45,10 @@ import { step } from './walk';
  */
 const SEED = 'poi-1621';
 
-async function boot(page: Page) {
-  // Two tiles north of poi_eastern_field at (10,10), so the two ArrowDowns below still walk.
-  await page.goto(`/?seed=${SEED}&at=10,8`);
+/** Boot two tiles from the Eastern Field, wherever it landed, and hand back the steps onto it. */
+async function boot(page: Page): Promise<string[]> {
+  const { at, keys } = await approachPlace(page, SEED, 'poi_eastern_field');
+  await page.goto(`/?seed=${SEED}&map=field_map_lothal&at=${at}`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   // The journal only writes once the scene has placed the traveller.
   //
@@ -58,13 +59,16 @@ async function boot(page: Page) {
   // busiest pays for that, which is why the failure moved between specs from run to run and never
   // pointed at a cause. A generous boot wait costs nothing on a green run.
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
+  return keys;
+}
+
+async function walkOn(page: Page, keys: string[]) {
+  for (const key of keys) await step(page, key);
 }
 
 
 test('stand on an authored place, and it opens', async ({ page }) => {
-  await boot(page);
-  await step(page, 'ArrowDown');
-  await step(page, 'ArrowDown');
+  await walkOn(page, await boot(page));
 
   const place = page.locator('.place');
   await expect(place).toBeVisible({ timeout: 20_000 });
@@ -74,9 +78,7 @@ test('stand on an authored place, and it opens', async ({ page }) => {
 });
 
 test('looking closer writes the diary, and the diary keeps the crossings-out', async ({ page }) => {
-  await boot(page);
-  await step(page, 'ArrowDown');
-  await step(page, 'ArrowDown');
+  await walkOn(page, await boot(page));
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 
   // Climb whatever this place will give us without any other knowledge.
@@ -101,9 +103,7 @@ test('looking closer writes the diary, and the diary keeps the crossings-out', a
 });
 
 test('the diary survives a reload', async ({ page }) => {
-  await boot(page);
-  await step(page, 'ArrowDown');
-  await step(page, 'ArrowDown');
+  await walkOn(page, await boot(page));
   // Twenty seconds rather than ten, and the reason is worth keeping: nothing here is slow, the
   // margin was simply thin. `step` already waits on the journal changing rather than on a clock,
   // so this is only covering the panel's own mount -- but the whole suite shares one machine, and
@@ -163,13 +163,12 @@ test('the diary survives a reload', async ({ page }) => {
 });
 
 test('an instance is a place you go into, and it says why when you cannot', async ({ page }) => {
-  // Three tiles north of Kavik's Tower at (39,8), so the three ArrowDowns below still walk.
-  await page.goto('/?seed=poi-1621&at=39,5');
+  // Two tiles from Kavik's Tower, wherever placement put it -- see `approachPlace`.
+  const { at, keys } = await approachPlace(page, SEED, 'poi_kavik_tower');
+  await page.goto(`/?seed=${SEED}&map=field_map_lothal&at=${at}`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
-  await step(page, 'ArrowDown');
-  await step(page, 'ArrowDown');
-  await step(page, 'ArrowDown');
+  await walkOn(page, keys);
 
   const place = page.locator('.place');
   await expect(place).toBeVisible({ timeout: 20_000 });
