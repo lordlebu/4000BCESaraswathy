@@ -95,11 +95,26 @@ const WALK_ROW = { down: 0, up: 4, right: 8, left: 12 } as const;
  */
 const SIT_ROW = { down: 16, up: 17, right: 18, left: 19 } as const;
 
+/**
+ * **A seated side view is the left profile, mirrored for right.** Frame 18 is meant to face right,
+ * and on no sheet did it: looked at by eye at 8x beside each character's walking profiles, four of
+ * the five players have two left-facing seated frames, and Varuna's pair was swapped. Nobody saw it
+ * until the dugout, where he sat facing the stern of a boat going the other way.
+ *
+ * The walk is not mirrored (see `FLIP_X`), because a satchel changing shoulder every other step
+ * reads as a different person. A seated figure does not step, so there is no alternation to see.
+ */
+const SEATED_PROFILE = SIT_ROW.left;
+export const sitFrame = (facing: Facing): { frame: number; flipX: boolean } =>
+  facing === 'left' || facing === 'right'
+    ? { frame: SEATED_PROFILE, flipX: facing === 'right' }
+    : { frame: SIT_ROW[facing], flipX: false };
+
 export type Facing = 'up' | 'down' | 'left' | 'right';
 
 /**
- * Both profiles are drawn, so nothing is mirrored. Mirroring a hand-drawn walk moves the satchel
- * to the other shoulder, which reads as a different person on alternate steps.
+ * Both walking profiles are drawn, so no walk is mirrored. Mirroring a hand-drawn walk moves the
+ * satchel to the other shoulder, which reads as a different person on alternate steps.
  */
 const FLIP_X = false;
 
@@ -186,7 +201,7 @@ export function createCharacterAnimations(scene: Phaser.Scene, key: string): voi
 
     // One frame, so there is nothing to cycle. Kept as an animation rather than a static frame so
     // `animFor` returns the same shape for all three actions and the scene needs no special case.
-    define('sit', facing, [SIT_ROW[facing]], 0.9);
+    define('sit', facing, [sitFrame(facing).frame], 0.9);
   }
 }
 
@@ -198,7 +213,8 @@ export function animFor(
   facing: Facing,
   action: Action
 ): { key: string; flipX: boolean } {
-  return { key: animKey(character, action, facing), flipX: FLIP_X };
+  const flipX = action === 'sit' ? sitFrame(facing).flipX : FLIP_X;
+  return { key: animKey(character, action, facing), flipX };
 }
 
 /**

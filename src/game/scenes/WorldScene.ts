@@ -15,6 +15,9 @@ import bladesUrl from '../../../assets/windmill-blades.png';
 import bridgeUrl from '../../../assets/bridge.png';
 import riverBridgeUrl from '../../../assets/river-bridge.png';
 import dugoutUrl from '../../../assets/dugout.png';
+import dugoutNorthUrl from '../../../assets/dugout-north.png';
+import dugoutSouthUrl from '../../../assets/dugout-south.png';
+import carriageUrl from '../../../assets/carriage-end.png';
 import lampUrl from '../../../assets/lamp-post.png';
 import hutsUrl from '../../../assets/huts.png';
 import overdrawUrl from '../../../assets/overdraw.png';
@@ -43,12 +46,12 @@ import {
   BLADE_SHEET,
   BRIDGE_SHEET,
   RIVER_BRIDGE_SHEET,
-  DUGOUT_IMAGE,
   LAMP_SHEET,
   lampGlowKey,
   TERRAIN_SHEET,
   DECOR_SHEET,
   TRACK_SHEET,
+  CARRIAGE_IMAGE,
   SHADOW_TEXTURE,
   cloudTextureKey,
   skyWaterTileKey,
@@ -76,7 +79,7 @@ import {
   wandererMarkerKey
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
-import { ROW_SLOT, depthFor, rowAtFoot, type Edge } from '../frames';
+import { DUGOUT_VIEWS, ROW_SLOT, depthFor, dugoutFor, rowAtFoot, type DugoutView, type Edge } from '../frames';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 
 /**
@@ -273,6 +276,17 @@ const ZOOM_STEP_RATIO = 1.35;
  * rather than something tuned at the same time as this.
  */
 const STEP_MS = 425;
+/**
+ * How long the carriage takes over a tile of line, on the screen.
+ *
+ * **Not the clock's number.** The ride still charges `RIDE_SHARE` -- a quarter of walking -- against
+ * the day. This is only how long it takes to watch, and it was first that same quarter, 106ms a
+ * tile: the strait went by in two and a half seconds and read as a blur. Slowed on request to a
+ * little over half a walker's step, about six seconds island to island, so the car is seen.
+ */
+const RIDE_TILE_MS = 240;
+/** How much of the way to the traveller the camera closes each frame: a soft trail behind a walk. */
+const FOLLOW_LERP = 0.09;
 
 /**
  * How much of the traveller survives at his feet while he is wading.
@@ -284,19 +298,6 @@ const STEP_MS = 425;
  */
 const WADE_ALPHA = 0.42;
 
-/**
- * The dugout's gunwale, in pixels from the top of `assets/dugout.png`: where the back of the hull
- * (the hollow, behind him) is cut from the front (the side, in front of him). Measured on the art
- * `tools/draw-river-art.py` draws; a painted hull with a different rim changes this number.
- */
-const DUGOUT_RIM = 58;
-/** How far below the gunwale a seated traveller's feet are: the depth he sits in the hull. */
-const DUGOUT_SEAT = 34;
-/**
- * How far a traveller afloat is drawn above his tile's foot. Without it the hull hangs a third of a
- * tile into the row below, where the next row's ground and props sort over it.
- */
-const FLOAT_LIFT = 32;
 
 /** Keys that change the zoom. `0` gives it back to the automatic fit. */
 const ZOOM_KEYS: Record<string, number | 'reset'> = {
@@ -488,8 +489,6 @@ export class WorldScene extends Phaser.Scene {
   private glows: { key: string; sprite: Phaser.GameObjects.Image }[] = [];
   /** The strength the glows were last set to, so an unchanged sky costs nothing. */
   private glowAt = -1;
-  /** Which side he last paddled toward: a side-view hull has no bow-on picture for up and down. */
-  private side: 'left' | 'right' = 'right';
   /** Whether this map puts a boat in the kit -- canon's `vehicles`, read through `boatFor`. */
   private boat = false;
   /** Whether he is in the dugout. See `game/afloat.ts` for when that changes. */
@@ -497,6 +496,12 @@ export class WorldScene extends Phaser.Scene {
   /** The dugout, as two layers: the hollow behind him, and the hull's side in front of him. */
   private hullBack!: Phaser.GameObjects.Image;
   private hullFront!: Phaser.GameObjects.Image;
+  /** Which of the three hulls is on them now, so a step that keeps the heading does not re-crop. */
+  private hullView: DugoutView | null = null;
+  /** The lodestone carriage, shown only while it is carrying him. See `onRide`. */
+  private carriage!: Phaser.GameObjects.Image;
+  /** Whether he is aboard it, which is also why he cannot be seen. */
+  private riding = false;
   /**
    * Whose sheet the sprite draws from.
    *
@@ -610,6 +615,9 @@ export class WorldScene extends Phaser.Scene {
       bridge: bridgeUrl,
       riverBridge: riverBridgeUrl,
       dugout: dugoutUrl,
+      dugoutNorth: dugoutNorthUrl,
+      dugoutSouth: dugoutSouthUrl,
+      carriage: carriageUrl,
       lamp: lampUrl,
       huts: hutsUrl,
       overdraw: overdrawUrl,
@@ -729,7 +737,7 @@ export class WorldScene extends Phaser.Scene {
     // Bounds are not set here: they depend on the zoom and on what the panels are covering, so
     // `applyCamera` owns them and recomputes them on every resize and every zoom step.
     this.cameras.main.setBackgroundColor('#1b1420');
-    this.cameras.main.startFollow(this.player, true, 0.09, 0.09);
+    this.cameras.main.startFollow(this.player, true, FOLLOW_LERP, FOLLOW_LERP);
     this.applyCamera();
     this.cameras.main.fadeIn(600, 27, 20, 32);
 
@@ -1010,11 +1018,12 @@ export class WorldScene extends Phaser.Scene {
       .setDisplaySize(TILE_SIZE * 0.62, TILE_SIZE * 0.19)
       .setVisible(false);
     // The dugout, cut at its gunwale into the part behind him and the part in front, so he sits in
-    // it rather than on it or behind it. Native size: two tiles long, at the figures' own scale.
-    this.hullBack = this.add.image(0, 0, DUGOUT_IMAGE).setOrigin(0.5, 0).setVisible(false);
-    this.hullBack.setCrop(0, 0, this.hullBack.width, DUGOUT_RIM + 4);
-    this.hullFront = this.add.image(0, 0, DUGOUT_IMAGE).setOrigin(0.5, 0).setVisible(false);
-    this.hullFront.setCrop(0, DUGOUT_RIM - 2, this.hullFront.width, this.hullFront.height - DUGOUT_RIM + 2);
+    // it rather than on it or behind it. Native size; which of the three it is follows his heading,
+    // and `moveWaterline` swaps the texture and the cut together.
+    this.hullBack = this.add.image(0, 0, DUGOUT_VIEWS.side.image).setOrigin(0.5, 0).setVisible(false);
+    this.hullFront = this.add.image(0, 0, DUGOUT_VIEWS.side.image).setOrigin(0.5, 0).setVisible(false);
+    // Anchored at the foot of its shadow, like everything else that stands on the map.
+    this.carriage = this.add.image(0, 0, CARRIAGE_IMAGE).setOrigin(0.5, 1).setVisible(false);
 
     this.updateAnimation();
     this.placePlayer(this.at);
@@ -1034,10 +1043,9 @@ export class WorldScene extends Phaser.Scene {
     const atRest =
       (this.at.x === this.world.landmark.x && this.at.y === this.world.landmark.y) ||
       poiAt(this.built, this.at) !== null;
-    // In the dugout he sits, facing the side he is paddling toward, moving or not.
+    // In the dugout he sits, facing the way he is paddling, moving or not.
     const action = this.afloat ? 'sit' : actionFor(this.moving, atRest);
-    const facing = this.afloat ? this.side : this.facing;
-    const { key, flipX } = animFor(this.character.key, facing, action);
+    const { key, flipX } = animFor(this.character.key, this.facing, action);
     // Reapplied on every call rather than only on a change: `timeScale` lives on the sprite, so a
     // walk left at 1.34 would otherwise run the idle a third fast for the rest of the journey.
     this.player.anims.timeScale = action === 'walk' ? this.walkScale : 1;
@@ -1048,7 +1056,6 @@ export class WorldScene extends Phaser.Scene {
   /** Point the sprite the way it is walking, mirroring the side view for leftward steps. */
   private faceTowards(dx: number, dy: number): void {
     this.facing = facingFromStep(dx, dy, this.facing);
-    if (dx !== 0) this.side = dx > 0 ? 'right' : 'left';
   }
 
   private placePlayer(at: Point): void {
@@ -1101,17 +1108,34 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private moveWaterline(): void {
+    // Aboard the carriage he is out of sight, and so is everything drawn around his feet. This runs
+    // every frame from `update`, so it is here rather than once in `onRide`, or the shadow comes back.
+    if (this.riding) {
+      this.shadow.setVisible(false);
+      this.waterline.setVisible(false);
+      this.ripple.setVisible(false);
+      return;
+    }
     // **In the dugout, the hull is the water line.** He is drawn a little higher so the hull stays in
     // his own row, seated, with the hollow behind him and the side of the hull in front; a wide ring
     // under the hull is the wake. None of the wading applies: he is on the water, not in it.
-    this.player.setOrigin(0.5, this.afloat ? 1 + FLOAT_LIFT / this.player.displayHeight : 1);
+    const { view, flipX } = dugoutFor(this.facing);
+    const hull = DUGOUT_VIEWS[view];
+    this.player.setOrigin(0.5, this.afloat ? 1 + hull.lift / this.player.displayHeight : 1);
     this.hullBack.setVisible(this.afloat);
     this.hullFront.setVisible(this.afloat);
     if (this.afloat) {
-      const top = this.player.y - FLOAT_LIFT - DUGOUT_SEAT - DUGOUT_RIM;
-      const flip = this.side === 'left';
-      this.hullBack.setPosition(this.player.x, top).setFlipX(flip);
-      this.hullFront.setPosition(this.player.x, top).setFlipX(flip);
+      if (this.hullView !== view) {
+        this.hullView = view;
+        this.hullBack.setTexture(hull.image);
+        this.hullFront.setTexture(hull.image);
+        const { width, height } = this.hullBack;
+        this.hullBack.setCrop(0, 0, width, hull.rim + 4);
+        this.hullFront.setCrop(0, hull.rim - 2, width, height - hull.rim + 2);
+      }
+      const top = this.player.y - hull.lift - hull.seat - hull.rim;
+      this.hullBack.setPosition(this.player.x, top).setFlipX(flipX);
+      this.hullFront.setPosition(this.player.x, top).setFlipX(flipX);
       this.wade = { kind: 'dry' };
       this.player.setAlpha(1);
       if (this.cutDepth !== 0) {
@@ -1122,8 +1146,8 @@ export class WorldScene extends Phaser.Scene {
       this.shadow.setVisible(false);
       this.ripple
         .setVisible(true)
-        .setDisplaySize(TILE_SIZE * 1.7, TILE_SIZE * 0.3)
-        .setPosition(this.player.x, top + this.hullFront.height - 14);
+        .setDisplaySize(hull.wake.width, TILE_SIZE * 0.3)
+        .setPosition(this.player.x, top + hull.wake.y);
       return;
     }
     this.ripple.setDisplaySize(TILE_SIZE * 0.62, TILE_SIZE * 0.19);
@@ -1591,11 +1615,18 @@ export class WorldScene extends Phaser.Scene {
    * ride ends, and this checks that against `rideFrom` from where the traveller actually is. An
    * event is a request; a stale panel or a key pressed mid-step must not teleport anybody.
    *
-   * Not a tween. A walk animates because the walking is the game; a ride is the part you skip,
-   * which is the whole reason to take it -- so it lands, reveals what the line passed, and charges
-   * a quarter of what walking the same tiles would have cost in daylight.
+   * **The carriage is on the screen for the ride, and he is in it.** This was an instant jump, on
+   * the reasoning that a ride is the part you skip. It still costs the day a quarter of the
+   * walking; on the screen the car eases out of one station, runs the line and eases into the
+   * other, with the camera on it -- `RIDE_TILE_MS` says how long that takes and why it is not the
+   * clock's number. The Lodestone carriage exists for a player now rather than only in canon.
+   *
+   * He is hidden while aboard rather than drawn on the roof. The car is drawn end-on because the
+   * line runs north to south (see `tools/draw-carriage.py`), so it is the same picture both ways.
    */
   private onRide = ({ to }: UiToGame['ride']): void => {
+    // Mid-step or already aboard: the rule below would be asked of a tile he is leaving.
+    if (this.moving) return;
     const ride = rideFrom(this.world, this.at);
     if (!ride) return;
     if (ride.to.x !== to.x || ride.to.y !== to.y) return;
@@ -1605,8 +1636,42 @@ export class WorldScene extends Phaser.Scene {
     for (const p of trackRoute(this.world)) this.revealAround(p);
 
     this.travelled += travelTimeMs(ride.tiles) * RIDE_SHARE;
+    this.faceTowards(0, Math.sign(ride.to.y - ride.from.y));
+    this.queuedPath = [];
+    this.moving = true;
+    this.riding = true;
     this.at = ride.to;
-    this.arriveAt(ride.to);
+    this.player.setVisible(false);
+    const board = () => this.carriage.setPosition(this.player.x, this.player.y).setDepth(this.player.depth);
+    this.carriage.setVisible(true);
+    board();
+    // **Held on the car, not eased after it.** The walk's 9% a frame is a gentle trail at walking
+    // pace; at four times that pace, on a slow frame rate, it fell so far behind that the carriage
+    // ran the whole strait under the dock and was never seen. The car eases in and out of the
+    // stations itself, so a locked camera still starts and stops softly.
+    this.cameras.main.setLerp(1, 1);
+
+    this.tweens.add({
+      targets: this.player,
+      x: ride.to.x * TILE_SIZE + TILE_SIZE / 2,
+      y: ride.to.y * TILE_SIZE + TILE_SIZE - 2,
+      duration: RIDE_TILE_MS * ride.tiles,
+      ease: 'Sine.easeInOut',
+      onUpdate: () => {
+        this.sortPlayer(rowAtFoot(this.player.y));
+        board();
+      },
+      onComplete: () => {
+        this.carriage.setVisible(false);
+        this.cameras.main.setLerp(FOLLOW_LERP, FOLLOW_LERP);
+        this.player.setVisible(true);
+        this.riding = false;
+        this.moveShadow();
+        this.moving = false;
+        this.updateAnimation();
+        this.arriveAt(ride.to);
+      }
+    });
   };
 
   /**
@@ -1804,6 +1869,10 @@ export class WorldScene extends Phaser.Scene {
       wade: this.wade,
       // Whether he is in the dugout, for `e2e/dugout.spec.ts`.
       afloat: this.afloat,
+      // Whether the carriage is carrying him, and whether it is on the screen while it does --
+      // for `e2e/riding.spec.ts`, which is the only thing that can tell the two apart.
+      riding: this.riding,
+      carriage: this.carriage.visible,
       moving: this.moving,
       depth: this.player.depth,
       sortedRow: this.sortedRow,

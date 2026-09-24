@@ -6,6 +6,9 @@
 // times, so the two halves are written together or not at all.
 
 import { describe, expect, it } from 'vitest';
+import { createRequire } from 'node:module';
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap } from '../src/content/places';
 import { isWalkable } from '../src/world/generate';
@@ -279,5 +282,63 @@ describe('an animal is drawn at the scale of the people on the road', () => {
 describe('a map with nothing authored to wander', () => {
   it('is empty rather than inventing an animal', () => {
     expect(wanderersOn('field_map_lothal', built('field_map_lothal'))).toEqual([]);
+  });
+});
+
+describe('a painted view is one animal', () => {
+  // The builder used to cut each view by its bounding box, which brought a neighbour in wherever
+  // one reached into the box: the sivatherium walking towards you had a strip of its own side view's
+  // tail and hind leg down its left edge, and walking left, another antler in its top corner. A view
+  // now keeps only its own blob -- `tools/build-wanderers.js` -- and this holds the shipped files to
+  // it: one solid shape, and nothing solid apart from it bigger than a speck.
+  const { decodePng } = createRequire(import.meta.url)('../tools/sprite-png.js') as {
+    decodePng: (file: string) => { width: number; height: number; data: Uint8Array };
+  };
+  const DIR = join(__dirname, '..', 'assets', 'wanderers');
+  const SOLID = 40; // the builder's own threshold: the glow is under it, the bodies well over
+  const SPECK = 0.01;
+
+  /** The sizes of every eight-connected run of solid pixels, biggest first. */
+  function shapes(file: string): number[] {
+    const { width: w, height: h, data } = decodePng(join(DIR, file));
+    const seen = new Uint8Array(w * h);
+    const sizes: number[] = [];
+    for (let start = 0; start < w * h; start += 1) {
+      if (seen[start] || data[start * 4 + 3]! <= SOLID) continue;
+      let size = 0;
+      const stack = [start];
+      seen[start] = 1;
+      while (stack.length) {
+        const i = stack.pop()!;
+        size += 1;
+        const x = i % w;
+        const y = (i / w) | 0;
+        for (let dy = -1; dy <= 1; dy += 1) {
+          for (let dx = -1; dx <= 1; dx += 1) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+            const j = ny * w + nx;
+            if (seen[j] || data[j * 4 + 3]! <= SOLID) continue;
+            seen[j] = 1;
+            stack.push(j);
+          }
+        }
+      }
+      sizes.push(size);
+    }
+    return sizes.sort((a, b) => b - a);
+  }
+
+  const files = readdirSync(DIR).filter((f) => f.endsWith('.png'));
+
+  it('has painted views to check', () => {
+    expect(files.length).toBeGreaterThan(0);
+  });
+
+  it.each(files)('%s carries nothing of its neighbours', (file) => {
+    const [animal, ...rest] = shapes(file);
+    const strays = rest.filter((n) => n > animal! * SPECK);
+    expect(strays, `${file}: pieces of another view cut in with it`).toEqual([]);
   });
 });

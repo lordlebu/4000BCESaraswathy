@@ -1429,3 +1429,35 @@ export function markerSize(speciesId: string): { w: number; h: number } {
   return { w: Math.round(GRID * build.long), h: Math.round(GRID * build.tall) };
 }
 
+
+/**
+ * The dugout, from three sides: bow right (flipped for west), and end-on for north and south.
+ *
+ * It used to be the side view whichever way he paddled -- a boat going north drawn crossing the
+ * screen -- and it was two tiles long, a figure and a half longer than the figure sitting in it.
+ * The three images come from `tools/draw-river-art.py`; the numbers below were measured on them,
+ * and `test/riverBridges.test.ts` checks each one against the art rather than trusting it.
+ *
+ * - `rim`: the row, from the top of the image, where the hull is cut into the part behind him and
+ *   the part in front. The side view's near gunwale; the end views' widest point, a little below.
+ * - `seat`: how far below that cut his feet are, which is how deep he sits in the hull.
+ * - `lift`: how far above his tile's foot he is drawn, so the hull keeps to his own row rather than
+ *   hanging into the next, where that row's ground and props would sort over it.
+ * - `wake`: the ring on the water, as the row it sits on and its width.
+ */
+export type DugoutView = 'side' | 'north' | 'south';
+export const DUGOUT_VIEWS: Record<
+  DugoutView,
+  { image: string; rim: number; seat: number; lift: number; wake: { y: number; width: number } }
+> = {
+  side: { image: 'dugout', rim: 30, seat: 22, lift: 16, wake: { y: 60, width: 176 } },
+  north: { image: 'dugout-north', rim: 100, seat: 30, lift: 48, wake: { y: 186, width: 116 } },
+  south: { image: 'dugout-south', rim: 100, seat: 30, lift: 48, wake: { y: 186, width: 116 } }
+};
+
+/** Which hull to draw for the way he is paddling, and whether to mirror it. */
+export function dugoutFor(facing: 'up' | 'down' | 'left' | 'right'): { view: DugoutView; flipX: boolean } {
+  if (facing === 'up') return { view: 'north', flipX: false };
+  if (facing === 'down') return { view: 'south', flipX: false };
+  return { view: 'side', flipX: facing === 'left' };
+}

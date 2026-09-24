@@ -219,11 +219,14 @@ function buildBridge() {
   console.log(`river-bridge: ${frames.length} frames of ${T}x${T}, ${(fs.statSync(file).size / 1024).toFixed(1)} KB`);
 }
 
+/** The side view, flipped by the game for west, and the two end-on views for north and south. */
 function buildDugout() {
-  const hull = keyed(decodePng(path.join(SRC, 'dugout.png')));
-  const file = path.join(OUT, 'dugout.png');
-  fs.writeFileSync(file, encodePng(hull.width, hull.height, Buffer.from(hull.data.buffer)));
-  console.log(`dugout: ${hull.width}x${hull.height}, ${(fs.statSync(file).size / 1024).toFixed(1)} KB`);
+  for (const name of ['dugout', 'dugout-north', 'dugout-south']) {
+    const hull = keyed(decodePng(path.join(SRC, `${name}.png`)));
+    const file = path.join(OUT, `${name}.png`);
+    fs.writeFileSync(file, encodePng(hull.width, hull.height, Buffer.from(hull.data.buffer)));
+    console.log(`${name}: ${hull.width}x${hull.height}, ${(fs.statSync(file).size / 1024).toFixed(1)} KB`);
+  }
 }
 
 /** The road lamp: copied through keyed, like the dugout. One 64 x 128 frame, standing on its base. */
