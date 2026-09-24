@@ -32,10 +32,19 @@ test('the line can be boarded, and it carries you across', async ({ page }) => {
   const before = (await page.locator('.journal h2').textContent()) ?? '';
   await page.keyboard.press('KeyB');
 
+  // **The carriage is on the screen while it carries him.** `vehicles.png` was built from the
+  // painted carriage and loaded by nothing for the whole life of this mechanic, so the ride was a
+  // jump with no car in it. Asked of the scene mid-ride, since only the scene can see a sprite.
+  type Walker = { riding: boolean; carriage: boolean };
+  const walker = () => page.evaluate(() => (window as unknown as { __walker: () => Walker }).__walker());
+  await expect.poll(async () => (await walker()).riding, { timeout: 5_000 }).toBe(true);
+  expect((await walker()).carriage, 'riding with no carriage drawn').toBe(true);
+
   // Arriving somewhere else is the whole assertion. The row's own numbers are checked in
   // `test/riding.test.ts`; what a browser adds is that the key reaches the scene at all.
   await expect(page.locator('.journal h2')).not.toHaveText(before, { timeout: 15_000 });
   const after = (await page.locator('.journal h2').textContent()) ?? '';
+  expect(await walker(), 'the carriage stayed on the map after the ride').toMatchObject({ riding: false, carriage: false });
 
   // Both ends are islands, and the ride runs the length of the strait rather than a step.
   const rowOf = (text: string) => Number(text.split(',').pop());

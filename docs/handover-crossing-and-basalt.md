@@ -120,7 +120,11 @@ runs the real image, one spec at a time.
 | 5 | Panel count — 14+ reachable at once, wants a grouping pass. | `src/ui/` |
 
 Items 2 and 3 are canon work. Item 1 is done — and needed no new art, as predicted: the carriage
-was already drawn (`assets/vehicles.png`), and the ride reuses it.
+was already drawn (`assets/vehicles.png`), and the ride reuses it. **That last clause was not
+true**: `vehicles.png` was loaded by nothing and the ride was an instant jump with no car in it. It
+is side-on, and the line runs north to south, so the ride now draws `assets/carriage-end.png` --
+the same car end-on, with potted plants along its roof, by `tools/draw-carriage.py` -- running the
+line with the camera on it. `e2e/riding.spec.ts` asks the scene whether it is on screen mid-ride.
 
 **The lesson from item 1 is worth carrying to items 4 and 5.** "Every piece it needs already
 exists" was true and still hid two decisions — one about design (a convenience, not a gate) and

@@ -134,6 +134,11 @@ export const DUGOUT_IMAGE = DUGOUT_VIEWS.side.image;
 /** The same hull end-on: stern toward you for north, bow toward you for south. */
 export const DUGOUT_NORTH_IMAGE = DUGOUT_VIEWS.north.image;
 export const DUGOUT_SOUTH_IMAGE = DUGOUT_VIEWS.south.image;
+/**
+ * The lodestone carriage end-on, drawn while it carries the traveller down the Aravali line. The
+ * line runs north to south, so this rather than `vehicles.png`'s side view. By `tools/draw-carriage.py`.
+ */
+export const CARRIAGE_IMAGE = 'carriage-end';
 /** The road lamp: one 64 x 128 frame standing on its base. Drawn by `tools/draw-river-art.py`. */
 export const LAMP_SHEET = 'lamp';
 export const LAMP_WIDTH = 64;
@@ -243,6 +248,7 @@ export function loadTileSheets(
     dugout: string;
     dugoutNorth: string;
     dugoutSouth: string;
+    carriage: string;
     lamp: string;
     rope: string;
     road: string;
@@ -290,6 +296,7 @@ export function loadTileSheets(
   if (!scene.textures.exists(DUGOUT_IMAGE)) scene.load.image(DUGOUT_IMAGE, urls.dugout);
   if (!scene.textures.exists(DUGOUT_NORTH_IMAGE)) scene.load.image(DUGOUT_NORTH_IMAGE, urls.dugoutNorth);
   if (!scene.textures.exists(DUGOUT_SOUTH_IMAGE)) scene.load.image(DUGOUT_SOUTH_IMAGE, urls.dugoutSouth);
+  if (!scene.textures.exists(CARRIAGE_IMAGE)) scene.load.image(CARRIAGE_IMAGE, urls.carriage);
   sheet(LAMP_SHEET, urls.lamp, LAMP_WIDTH, LAMP_HEIGHT);
 }
 
