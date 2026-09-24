@@ -57,11 +57,16 @@ function sheetFrames(file, cellWidth) {
  * than a hand-stitch somebody has to remember, and it costs nothing once real sitting sources
  * land: replace `keep` with a `source` and it builds like the rest.
  *
+ * `order` reorders what is carried, the way `frames` reorders a source: `[0, 1, 3, 2]` swaps the
+ * last two. Varuna's seated profiles were built the wrong way round -- frame 18, which the game
+ * reads as facing right, faced left -- and a kept frame can only be put right by carrying it to
+ * the right place, since there is no source to rebuild it from.
+ *
  * It refuses rather than guesses when the sheet it would copy from is missing or short, because a
  * character silently losing its seated pose is exactly the kind of "nearly right" this file was
  * written to stop.
  */
-function keepFrames(builtSheet, out, cell, count) {
+function keepFrames(builtSheet, out, cell, count, order) {
   const { decodePng, encodePng } = require('./sprite-png.js');
   if (!fs.existsSync(builtSheet)) {
     throw new Error(`sit.keep needs ${path.relative(ROOT, builtSheet)}, which is not built yet`);
@@ -74,7 +79,7 @@ function keepFrames(builtSheet, out, cell, count) {
   const width = cell.width * count;
   const kept = Buffer.alloc(width * cell.height * 4);
   for (let i = 0; i < count; i += 1) {
-    const from = have - count + i;
+    const from = have - count + (order ? order[i] : i);
     for (let y = 0; y < cell.height; y += 1) {
       const src = (y * img.width + from * cell.width) * 4;
       const dst = (y * width + i * cell.width) * 4;
@@ -173,7 +178,7 @@ function main() {
     build(path.join(ROOT, c.walk.source), walkOut, cell, c.colours, c.walk.frames);
     if (c.sit.keep) {
       console.log(`  keeping ${c.sit.keep} sitting frame(s) from the built sheet`);
-      keepFrames(out, sitOut, cell, c.sit.keep);
+      keepFrames(out, sitOut, cell, c.sit.keep, c.sit.order);
     } else {
       build(path.join(ROOT, c.sit.source), sitOut, cell, c.colours, c.sit.frames);
     }

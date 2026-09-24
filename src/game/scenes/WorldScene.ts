@@ -15,6 +15,8 @@ import bladesUrl from '../../../assets/windmill-blades.png';
 import bridgeUrl from '../../../assets/bridge.png';
 import riverBridgeUrl from '../../../assets/river-bridge.png';
 import dugoutUrl from '../../../assets/dugout.png';
+import dugoutNorthUrl from '../../../assets/dugout-north.png';
+import dugoutSouthUrl from '../../../assets/dugout-south.png';
 import lampUrl from '../../../assets/lamp-post.png';
 import hutsUrl from '../../../assets/huts.png';
 import overdrawUrl from '../../../assets/overdraw.png';
@@ -43,7 +45,6 @@ import {
   BLADE_SHEET,
   BRIDGE_SHEET,
   RIVER_BRIDGE_SHEET,
-  DUGOUT_IMAGE,
   LAMP_SHEET,
   lampGlowKey,
   TERRAIN_SHEET,
@@ -76,7 +77,7 @@ import {
   wandererMarkerKey
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
-import { ROW_SLOT, depthFor, rowAtFoot, type Edge } from '../frames';
+import { DUGOUT_VIEWS, ROW_SLOT, depthFor, dugoutFor, rowAtFoot, type DugoutView, type Edge } from '../frames';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 
 /**
@@ -284,19 +285,6 @@ const STEP_MS = 425;
  */
 const WADE_ALPHA = 0.42;
 
-/**
- * The dugout's gunwale, in pixels from the top of `assets/dugout.png`: where the back of the hull
- * (the hollow, behind him) is cut from the front (the side, in front of him). Measured on the art
- * `tools/draw-river-art.py` draws; a painted hull with a different rim changes this number.
- */
-const DUGOUT_RIM = 58;
-/** How far below the gunwale a seated traveller's feet are: the depth he sits in the hull. */
-const DUGOUT_SEAT = 34;
-/**
- * How far a traveller afloat is drawn above his tile's foot. Without it the hull hangs a third of a
- * tile into the row below, where the next row's ground and props sort over it.
- */
-const FLOAT_LIFT = 32;
 
 /** Keys that change the zoom. `0` gives it back to the automatic fit. */
 const ZOOM_KEYS: Record<string, number | 'reset'> = {
@@ -488,8 +476,6 @@ export class WorldScene extends Phaser.Scene {
   private glows: { key: string; sprite: Phaser.GameObjects.Image }[] = [];
   /** The strength the glows were last set to, so an unchanged sky costs nothing. */
   private glowAt = -1;
-  /** Which side he last paddled toward: a side-view hull has no bow-on picture for up and down. */
-  private side: 'left' | 'right' = 'right';
   /** Whether this map puts a boat in the kit -- canon's `vehicles`, read through `boatFor`. */
   private boat = false;
   /** Whether he is in the dugout. See `game/afloat.ts` for when that changes. */
@@ -497,6 +483,8 @@ export class WorldScene extends Phaser.Scene {
   /** The dugout, as two layers: the hollow behind him, and the hull's side in front of him. */
   private hullBack!: Phaser.GameObjects.Image;
   private hullFront!: Phaser.GameObjects.Image;
+  /** Which of the three hulls is on them now, so a step that keeps the heading does not re-crop. */
+  private hullView: DugoutView | null = null;
   /**
    * Whose sheet the sprite draws from.
    *
@@ -610,6 +598,8 @@ export class WorldScene extends Phaser.Scene {
       bridge: bridgeUrl,
       riverBridge: riverBridgeUrl,
       dugout: dugoutUrl,
+      dugoutNorth: dugoutNorthUrl,
+      dugoutSouth: dugoutSouthUrl,
       lamp: lampUrl,
       huts: hutsUrl,
       overdraw: overdrawUrl,
@@ -1010,11 +1000,10 @@ export class WorldScene extends Phaser.Scene {
       .setDisplaySize(TILE_SIZE * 0.62, TILE_SIZE * 0.19)
       .setVisible(false);
     // The dugout, cut at its gunwale into the part behind him and the part in front, so he sits in
-    // it rather than on it or behind it. Native size: two tiles long, at the figures' own scale.
-    this.hullBack = this.add.image(0, 0, DUGOUT_IMAGE).setOrigin(0.5, 0).setVisible(false);
-    this.hullBack.setCrop(0, 0, this.hullBack.width, DUGOUT_RIM + 4);
-    this.hullFront = this.add.image(0, 0, DUGOUT_IMAGE).setOrigin(0.5, 0).setVisible(false);
-    this.hullFront.setCrop(0, DUGOUT_RIM - 2, this.hullFront.width, this.hullFront.height - DUGOUT_RIM + 2);
+    // it rather than on it or behind it. Native size; which of the three it is follows his heading,
+    // and `moveWaterline` swaps the texture and the cut together.
+    this.hullBack = this.add.image(0, 0, DUGOUT_VIEWS.side.image).setOrigin(0.5, 0).setVisible(false);
+    this.hullFront = this.add.image(0, 0, DUGOUT_VIEWS.side.image).setOrigin(0.5, 0).setVisible(false);
 
     this.updateAnimation();
     this.placePlayer(this.at);
@@ -1034,10 +1023,9 @@ export class WorldScene extends Phaser.Scene {
     const atRest =
       (this.at.x === this.world.landmark.x && this.at.y === this.world.landmark.y) ||
       poiAt(this.built, this.at) !== null;
-    // In the dugout he sits, facing the side he is paddling toward, moving or not.
+    // In the dugout he sits, facing the way he is paddling, moving or not.
     const action = this.afloat ? 'sit' : actionFor(this.moving, atRest);
-    const facing = this.afloat ? this.side : this.facing;
-    const { key, flipX } = animFor(this.character.key, facing, action);
+    const { key, flipX } = animFor(this.character.key, this.facing, action);
     // Reapplied on every call rather than only on a change: `timeScale` lives on the sprite, so a
     // walk left at 1.34 would otherwise run the idle a third fast for the rest of the journey.
     this.player.anims.timeScale = action === 'walk' ? this.walkScale : 1;
@@ -1048,7 +1036,6 @@ export class WorldScene extends Phaser.Scene {
   /** Point the sprite the way it is walking, mirroring the side view for leftward steps. */
   private faceTowards(dx: number, dy: number): void {
     this.facing = facingFromStep(dx, dy, this.facing);
-    if (dx !== 0) this.side = dx > 0 ? 'right' : 'left';
   }
 
   private placePlayer(at: Point): void {
@@ -1104,14 +1091,23 @@ export class WorldScene extends Phaser.Scene {
     // **In the dugout, the hull is the water line.** He is drawn a little higher so the hull stays in
     // his own row, seated, with the hollow behind him and the side of the hull in front; a wide ring
     // under the hull is the wake. None of the wading applies: he is on the water, not in it.
-    this.player.setOrigin(0.5, this.afloat ? 1 + FLOAT_LIFT / this.player.displayHeight : 1);
+    const { view, flipX } = dugoutFor(this.facing);
+    const hull = DUGOUT_VIEWS[view];
+    this.player.setOrigin(0.5, this.afloat ? 1 + hull.lift / this.player.displayHeight : 1);
     this.hullBack.setVisible(this.afloat);
     this.hullFront.setVisible(this.afloat);
     if (this.afloat) {
-      const top = this.player.y - FLOAT_LIFT - DUGOUT_SEAT - DUGOUT_RIM;
-      const flip = this.side === 'left';
-      this.hullBack.setPosition(this.player.x, top).setFlipX(flip);
-      this.hullFront.setPosition(this.player.x, top).setFlipX(flip);
+      if (this.hullView !== view) {
+        this.hullView = view;
+        this.hullBack.setTexture(hull.image);
+        this.hullFront.setTexture(hull.image);
+        const { width, height } = this.hullBack;
+        this.hullBack.setCrop(0, 0, width, hull.rim + 4);
+        this.hullFront.setCrop(0, hull.rim - 2, width, height - hull.rim + 2);
+      }
+      const top = this.player.y - hull.lift - hull.seat - hull.rim;
+      this.hullBack.setPosition(this.player.x, top).setFlipX(flipX);
+      this.hullFront.setPosition(this.player.x, top).setFlipX(flipX);
       this.wade = { kind: 'dry' };
       this.player.setAlpha(1);
       if (this.cutDepth !== 0) {
@@ -1122,8 +1118,8 @@ export class WorldScene extends Phaser.Scene {
       this.shadow.setVisible(false);
       this.ripple
         .setVisible(true)
-        .setDisplaySize(TILE_SIZE * 1.7, TILE_SIZE * 0.3)
-        .setPosition(this.player.x, top + this.hullFront.height - 14);
+        .setDisplaySize(hull.wake.width, TILE_SIZE * 0.3)
+        .setPosition(this.player.x, top + hull.wake.y);
       return;
     }
     this.ripple.setDisplaySize(TILE_SIZE * 0.62, TILE_SIZE * 0.19);

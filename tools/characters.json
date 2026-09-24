@@ -26,7 +26,12 @@
       "name": "Varuna",
       "colours": 30,
       "walk": { "source": "assets/source/varuna-walking.png" },
-      "sit": { "keep": 4 }
+      "$sit_comment": [
+        "Seated right and left were built the wrong way round: frame 18 faced left and 19 right,",
+        "checked by eye at 8x beside his walking profiles. In the dugout that sat him facing the",
+        "stern. `order` carries them across swapped; there is no seated source to rebuild from."
+      ],
+      "sit": { "keep": 4, "order": [0, 1, 3, 2] }
     },
     {
       "id": "guyuk",

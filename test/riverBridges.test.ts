@@ -248,9 +248,11 @@ describe('the art on disk', () => {
     }
   });
 
-  it('ships the dugout keyed, two tiles long', () => {
+  it('ships the dugout keyed, a tile and a half long', () => {
+    // It was 256 x 128, two tiles: 2.4 times the length of the figure sitting in it. The end-on
+    // views and the numbers the scene cuts them at are held to the art in `test/dugout.test.ts`.
     const hull = decodePng(join(ASSETS, 'dugout.png'));
-    expect([hull.width, hull.height]).toEqual([256, 128]);
+    expect([hull.width, hull.height]).toEqual([192, 72]);
     expect(hull.data[3], 'the magenta was not keyed out').toBe(0);
   });
 });

@@ -13,8 +13,10 @@ Two rules the drawings keep, because the builder depends on them:
     east-west ones turned a quarter, and a shadow turned with them would fall east. So the height
     -- the south faces and the shadow on the water -- is added by the builder after turning, and
     the light comes from the north whichever way a bridge runs.
-  * **The dugout is three-quarter view, bow to the right**, like the travellers who sit in it. The
-    game flips it for west; there is no rotation, so it may carry its own shading.
+  * **The dugout is three-quarter view, bow to the right**, like the travellers who sit in it, with
+    two end-on views for north and south. The game flips the side view for west; there is no
+    rotation, so it may carry its own shading -- and its signs, which read mirrored going west, as
+    a carving does from the boat's other side.
 
 Pillow, and run by hand; nothing in CI calls it:
 
@@ -85,45 +87,189 @@ def bridge() -> Image.Image:
     return im
 
 
+# The dugout is drawn on a grid of doubled pixels, and small. It was 256 x 128 at single pixels:
+# two whole tiles long, finer-grained than the 4x figure sitting in it, and with its hollow drawn
+# as an ellipse that rose above the gunwale -- the opening floated over the hull instead of being
+# cut into it. Now the opening is the lens *between* the two gunwales, so it cannot leave the rim.
+DUGOUT_ART = (96, 36)      # art pixels; doubled on the way out to 192 x 72, a tile and a half long
+DUGOUT_RIM = 15            # the near gunwale amidships, in art pixels (30 in the built image)
+DUGOUT_ENDS = (3, 92)      # stern and bow
+
+# Indus signs, five art pixels tall, scored along the strake in light brown. The seals of the
+# Saraswati run right to left, and so does this: read from the bow. Warli was the other thing asked
+# for and was set aside -- it is a far later tradition than 4000 BCE, and these are the period's
+# own marks. Six signs is a length the seals keep to: most inscriptions are five or fewer.
+INDUS_SIGNS = [
+    ["#.#.#", "#.#.#", "#####", "..#..", "..#.."],   # the comb, or trident
+    [".###.", "#...#", "#.#.#", "#...#", ".###."],   # the wheel: a ring with a hub
+    ["#...#", "#...#", "#...#", ".#.#.", "..#.."],   # the jar, the commonest sign of all
+    [".#.", "###", ".#.", "#.#", "#.#"],             # the man
+    ["..#..", ".###.", "#.#.#", ".###.", "#...#"],   # the fish
+    ["#.#", "#.#", "#.#", "#.#", "#.#"],             # strokes: a numeral
+]
+
+
 def dugout() -> Image.Image:
-    """An empty dugout, side view, bow right, three-quarter from above, on magenta. 256 x 128."""
-    w, h = 256, 128
+    """An empty dugout, side view, bow right, three-quarter from above, on magenta. 192 x 72."""
+    import math
+    rng = random.Random(11)
+    w, h = DUGOUT_ART
+    x0, x1 = DUGOUT_ENDS
+    ink, rim_lit, sign = (38, 24, 16, 255), (190, 138, 84, 255), (214, 172, 116, 255)
+    side = [(140, 92, 54, 255), (112, 72, 42, 255), (82, 52, 30, 255), (60, 38, 22, 255)]
+    inside = [(98, 64, 38, 255), (70, 46, 28, 255), (40, 27, 19, 255)]
+    grain, end_grain = (94, 60, 34, 255), (150, 104, 62, 255)
+
+    def t_of(x: float) -> float:
+        return min(max((x - x0) / (x1 - x0), 0.0), 1.0)
+
+    def near(x: float) -> float:
+        """The near gunwale: level amidships, sweeping up to the bow, a touch up at the stern."""
+        t = t_of(x)
+        return DUGOUT_RIM - max(0.0, (t - 0.78) / 0.22) ** 2 * 7 - max(0.0, (0.1 - t) / 0.1) ** 2 * 2
+
+    def far(x: float) -> float:
+        """The far gunwale, seen over the hollow from a little above: the lens closes at the ends."""
+        return near(x) - 7 * math.sin(math.pi * t_of(x)) ** 0.6
+
+    def keel(x: float) -> float:
+        """A round-bottomed log: deepest amidships, a raked cut up to the bow, a short blunt stern."""
+        t = t_of(x)
+        return near(x) + max(2.0, 14 * min(1.0, t / 0.08) ** 0.5 * min(1.0, (1 - t) / 0.24) ** 0.8)
+
     im = Image.new("RGBA", (w, h), MAGENTA)
-    d = ImageDraw.Draw(im)
-    rim = 58  # the gunwale; the hull fills the lower two thirds
-    d.polygon([(10, rim + 2), (40, rim - 2), (200, rim - 6), (236, rim - 12), (250, rim - 8), (252, rim + 2),
-               (244, rim + 26), (226, h - 16), (140, h - 8), (40, h - 10), (16, h - 22), (6, rim + 18)],
-              fill=(58, 36, 22, 255))
-    d.polygon([(14, rim + 4), (42, rim + 1), (200, rim - 3), (234, rim - 8), (246, rim - 5), (247, rim + 3),
-               (240, rim + 24), (223, h - 19), (140, h - 11), (42, h - 13), (19, h - 24), (10, rim + 18)],
-              fill=(104, 66, 38, 255))
-    # A lit upper strake, a shade band, and the waterline.
-    d.polygon([(14, rim + 4), (42, rim + 1), (200, rim - 3), (234, rim - 8), (246, rim - 5), (246, rim + 4),
-               (236, rim + 10), (200, rim + 8), (42, rim + 12), (14, rim + 14)], fill=(138, 90, 52, 255))
-    d.polygon([(19, h - 24), (42, h - 13), (140, h - 11), (223, h - 19), (230, h - 26), (140, h - 20), (42, h - 22)],
-              fill=(76, 48, 28, 255))
-    d.line([(24, h - 18), (140, h - 10), (222, h - 18)], fill=(40, 28, 20, 255), width=2)
+    px = im.load()
+    cols = {x: (round(far(x)), round(near(x)), round(keel(x))) for x in range(x0, x1 + 1)}
+    for x, (f, n, k) in cols.items():
+        # The opening: the far wall's inside face, then the floor in the near wall's shadow.
+        for y in range(f, n):
+            d = (y - f) / max(1, n - f)
+            px[x, y] = inside[0] if d < 0.35 else inside[1] if d < 0.7 else inside[2]
+        # The near side, lit under the gunwale and darkening as it turns under toward the keel.
+        for y in range(n, k + 1):
+            d = (y - n) / max(1, k - n)
+            px[x, y] = side[0] if d < 0.22 else side[1] if d < 0.62 else side[2] if d < 0.88 else side[3]
     # Grain running with the log.
-    for gy in (rim + 20, rim + 30, rim + 40):
-        pts = [(gx, gy + random.choice([-1, 0, 0, 1]) - int((gx - 24) * 0.02)) for gx in range(24, 232, 8)]
-        d.line(pts, fill=(86, 54, 30, 255), width=1)
-    # The hollow, charred and adzed, seen from slightly above.
-    d.ellipse([30, rim - 22, 222, rim + 8], fill=(34, 24, 18, 255))
-    d.ellipse([36, rim - 18, 216, rim + 4], fill=(52, 34, 22, 255))
-    for x in range(48, 206, 11):
-        y = rim - 10 + random.choice([-2, 0, 2])
-        d.arc([x, y - 5, x + 12, y + 6], 200, 340, fill=(84, 56, 34, 255), width=2)
-        if random.random() < 0.5:
-            d.point([(x + 5, y + 3)], fill=(24, 18, 14, 255))
-    # The near lip of the hollow, lit, following the rim rather than crossing it.
-    d.arc([30, rim - 22, 222, rim + 8], 10, 170, fill=(176, 122, 72, 255), width=3)
-    # Blunt, adzed ends: a squared stern and a bow cut up at a slant, end grain showing.
-    d.polygon([(6, rim + 2), (18, rim - 2), (22, rim + 20), (10, rim + 22)], fill=(90, 58, 34, 255))
-    d.line([(9, rim + 6), (19, rim + 4)], fill=(120, 80, 46, 255))
-    d.line([(10, rim + 12), (20, rim + 10)], fill=(120, 80, 46, 255))
-    d.polygon([(226, rim - 8), (246, rim - 14), (252, rim - 4), (238, rim + 6)], fill=(126, 84, 48, 255))
-    d.line([(232, rim - 6), (246, rim - 11)], fill=(150, 102, 60, 255))
-    return im
+    for g in (0.42, 0.7):
+        for x in range(x0 + 4, x1 - 6):
+            f, n, k = cols[x]
+            y = round(n + (k - n) * g)
+            if rng.random() < 0.8 and n + 2 < y < k - 1:
+                px[x, y] = grain
+    # Both gunwales lit along their tops.
+    for x, (f, n, k) in cols.items():
+        px[x, n] = rim_lit
+        if f < n:
+            px[x, f] = rim_lit
+    # The stern is cut square, and shows the log's end grain.
+    for y in range(cols[x0][1], cols[x0][2] + 1):
+        px[x0, y] = px[x0 + 1, y] = end_grain
+    # One art pixel of ink around the whole silhouette, as the figures have.
+    solid = {(x, y) for x in range(w) for y in range(h) if px[x, y] != MAGENTA}
+    for x in range(w):
+        for y in range(h):
+            if (x, y) not in solid and any((x + dx, y + dy) in solid
+                                           for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                px[x, y] = ink
+    # The signs, amidships, three art pixels under the gunwale.
+    x = 26
+    for glyph in INDUS_SIGNS:
+        gw = len(glyph[0])
+        top = max(cols[c][1] for c in range(x, x + gw)) + 3
+        for j, row in enumerate(glyph):
+            for i, c in enumerate(row):
+                if c == "#":
+                    px[x + i, top + j] = sign
+        x += gw + 3
+    return im.resize((w * 2, h * 2), Image.NEAREST)
+
+
+def dugout_end(bow_near: bool) -> Image.Image:
+    """
+    The dugout end-on, on magenta, for paddling north (stern toward you) and south (bow toward
+    you). 104 x 200: as long on screen as the side view, since the game's three-quarter view barely
+    foreshortens, and a beam that clears the seated figure's knees. Drawn round first, it read as a
+    bowl -- the fault the side view had just been redrawn for.
+    """
+    import math
+    rng = random.Random(5)
+    w, h = 52, 100
+    top, bot = 4, 84        # the rim, far end to near end
+    half, ext = 23, 10      # half the beam inside the rim; how much of the near end's outside shows
+    cx = (w - 1) / 2
+    ink, rim_lit, sign = (38, 24, 16, 255), (190, 138, 84, 255), (214, 172, 116, 255)
+    side = [(140, 92, 54, 255), (112, 72, 42, 255), (82, 52, 30, 255), (60, 38, 22, 255)]
+    inside = [(98, 64, 38, 255), (70, 46, 28, 255), (40, 27, 19, 255)]
+    end_grain, ring, adze = (150, 104, 62, 255), (120, 80, 46, 255), (58, 38, 25, 255)
+
+    def hw(y: float) -> float:
+        """Half the opening's width at row y: a pointed bow, and a stern cut square."""
+        s = (y - top) / (bot - top)
+        if not 0 <= s <= 1:
+            return -1
+        v = math.sin(math.pi * s) ** 0.45
+        if bow_near and s < 0.5:
+            v = max(v, 0.3)
+        if not bow_near and s > 0.5:
+            v = max(v, 0.42)
+        return half * v
+
+    im = Image.new("RGBA", (w, h), MAGENTA)
+    px = im.load()
+    widest = (top + bot) // 2
+    # The near end's outside, under its rim: the lower half of the opening, dropped by `ext`.
+    for y in range(widest + 1, bot + ext + 1):
+        for x in range(w):
+            for d in range(ext + 1):
+                if y - d > widest and abs(x - cx) <= hw(y - d):
+                    f = d / ext
+                    px[x, y] = side[0] if f < 0.25 else side[1] if f < 0.6 else side[2] if f < 0.9 else side[3]
+                    break
+    # The opening: the far end's inside face, the side walls' inside faces, the floor between.
+    for y in range(top, bot + 1):
+        r, s = hw(y), (y - top) / (bot - top)
+        for x in range(w):
+            dx = abs(x - cx)
+            if dx <= r:
+                px[x, y] = inside[0] if s < 0.12 else inside[1] if (s < 0.18 or dx > r - 2.5) else inside[2]
+    # Adze marks across the floor.
+    for y in range(top + 12, bot - 6, 5):
+        r = hw(y)
+        for x in range(round(cx - r + 5), round(cx + r - 5), 6):
+            xx = x + rng.choice((0, 1, 2))
+            if px[xx, y] == inside[2] and px[xx + 2, y] == inside[2]:
+                px[xx, y] = px[xx + 1, y] = px[xx + 2, y] = adze
+    # The rim, lit all round.
+    for y in range(top, bot + 1):
+        r = hw(y)
+        for x in range(w):
+            dx = abs(x - cx)
+            if r - 1.5 < dx <= r or (y in (top, bot) and dx <= r):
+                px[x, y] = rim_lit
+    if bow_near:
+        # The fish, on the bow: the same sign that runs along the side, where it would be seen first.
+        glyph = INDUS_SIGNS[4]
+        x0, y0 = round(cx) - 2, bot + 3
+        for j, row in enumerate(glyph):
+            for i, c in enumerate(row):
+                if c == "#":
+                    px[x0 + i, y0 + j] = sign
+    else:
+        # The stern, square and toward you: the log's end grain, and its growth rings.
+        r = hw(bot)
+        for y in range(bot + 1, bot + ext):
+            for x in range(w):
+                if abs(x - cx) <= r - 1:
+                    px[x, y] = end_grain
+        for x in range(round(cx - r + 3), round(cx + r - 2), 4):
+            px[x, bot + ext // 2] = ring
+    solid = {(x, y) for x in range(w) for y in range(h) if px[x, y] != MAGENTA}
+    for x in range(w):
+        for y in range(h):
+            if (x, y) not in solid and any((x + dx, y + dy) in solid
+                                           for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                px[x, y] = ink
+    return im.resize((w * 2, h * 2), Image.NEAREST)
 
 
 def lamp_post() -> Image.Image:
@@ -157,5 +303,7 @@ if __name__ == "__main__":
     SOURCE.mkdir(parents=True, exist_ok=True)
     bridge().save(SOURCE / "river-bridge.png")
     dugout().save(SOURCE / "dugout.png")
+    dugout_end(bow_near=False).save(SOURCE / "dugout-north.png")
+    dugout_end(bow_near=True).save(SOURCE / "dugout-south.png")
     lamp_post().save(SOURCE / "lamp-post.png")
-    print("wrote river-bridge.png, dugout.png and lamp-post.png in assets/source/")
+    print("wrote river-bridge.png, the three dugouts and lamp-post.png in assets/source/")

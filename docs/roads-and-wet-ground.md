@@ -68,6 +68,14 @@ published plan, if painted versions are ever wanted.
 
 ## Left
 
-Nothing in the seven asks. Two things noticed and not done: a traveller or a wandering animal does
-not wade or paddle (the player does); and the hull has no bow-on picture, so paddling north or south
-shows the side view.
+Nothing in the seven asks. One thing noticed and not done: a traveller or a wandering animal does
+not wade or paddle (the player does).
+
+The other thing noticed here is done. The hull had no bow-on picture, so paddling north or south
+showed the side view; it now has three views -- side-on (mirrored for west), stern-on going north and
+bow-on going south -- chosen by `dugoutFor` in `game/frames.ts`. The redraw also brought the hull
+down from two tiles long to a tile and a half, cut its hollow into the rim rather than laying it
+above, and scored a line of Indus signs along the strake in light brown. The traveller sat facing
+the stern until then: no character sheet's seated-right frame faced right, so seated side views are
+now the left profile mirrored (`sitFrame` in `game/player.ts`). `test/dugout.test.ts` holds all of
+it to the art.
