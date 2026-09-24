@@ -58,11 +58,30 @@ async function bankOf(page: Page, seed: string, map: string) {
   throw new Error(`${map}/${seed}: no bank beside open river`);
 }
 
+/**
+ * How long to wait for a step to finish: a minute, and the number is measured rather than derived.
+ *
+ * **Slow, not stuck, and slow in proportion to the step.** The wade test steps into a river on foot,
+ * cost 3, 1275ms of tween. Phaser credits a stalled frame with no more than the last sane one, so on
+ * a starved software renderer a step takes wall time in proportion to its *frames*, not its
+ * milliseconds. Traced in CI's container starved to one CPU beside `reachable.spec.ts`: the
+ * traveller creeps across the tile with a stall recorded every four seconds, and arrives after
+ * **38.7 seconds**, twice, and 6.9 on the third. Paddling on Lothal (cost 0.5) needs a sixth of the
+ * frames, which is why it passed beside the wade when `main` went red.
+ *
+ * This was 10 seconds and failed `main` on the run and its retry. `walk.ts`'s twelve-second budget
+ * scaled by the cost, 36, was tried next and was exactly what the trace exceeded. A minute clears
+ * the worst measured by half again. It costs a green run nothing -- unstarved at CI's four CPUs the
+ * same wade takes 1.7 to 3.5 seconds, and the wait ends the moment he stops.
+ */
+const STEP_BUDGET = 60_000;
+
 async function step(page: Page, key: string) {
   await page.keyboard.press(key);
   await page.waitForTimeout(300);
   await page.waitForFunction(() => !(window as unknown as { __walker: () => Walker }).__walker().moving, null, {
-    timeout: 10_000
+    timeout: STEP_BUDGET,
+    polling: 50
   });
 }
 
