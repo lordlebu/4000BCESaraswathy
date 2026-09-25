@@ -80,6 +80,49 @@ sessions** and most of `gh`'s pull-request surface is GraphQL.
 The GitHub MCP tools already do everything `gh` can do here, so installing it buys almost nothing.
 Reach for `mcp__github__*` instead.
 
+### Reproducing CI here: Docker is installed but not running
+
+`npm run test:ci` needs a Docker daemon, and a cloud session starts without one. `docker ps` fails
+with *"no such file or directory"* on `/var/run/docker.sock`, which looks like Docker is missing. It
+is not. Start it, then use `sudo docker`:
+
+```bash
+(sudo dockerd > /tmp/dockerd.log 2>&1 &)
+until [ -S /var/run/docker.sock ]; do sleep 1; done
+sudo docker pull mcr.microsoft.com/playwright:v$(node -p "require('@playwright/test/package.json').version")-noble
+```
+
+`tools/ci-local.sh` installs Linux `node_modules` into a named volume, because a Windows or macOS
+checkout's cannot run inside Linux. **This machine is Linux, so skip the volume and mount the
+checkout's own.** That also means nothing has to be installed through the proxy from inside the
+container:
+
+```bash
+sudo docker run --rm --cpus=4 --memory=16g -v "$(pwd):/w" -w /w -e CI=true \
+  mcr.microsoft.com/playwright:v1.62.1-noble bash -lc 'npx playwright test e2e/dugout.spec.ts'
+```
+
+The container mounts the working tree, so **do not edit specs or source while it runs**. A spec
+Playwright has already listed can be reloaded by a fresh worker partway through the run.
+
+### CI's Playwright report cannot be downloaded
+
+`actions_get` › `download_workflow_run_artifact` returns a blob-storage URL, and the proxy refuses it
+(`CONNECT tunnel failed, response 403`). The trace and the failure screenshot are out of reach.
+`get_job_logs` with `failed_only` and a generous `tail_lines` is what there is. Read the timestamps
+and the shard's total time, and then reproduce rather than reason.
+
+### Starving the container exposes a timing fault that four CPUs hides
+
+At CI's four CPUs the container can pass what the runner fails. **One CPU, with
+`e2e/reachable.spec.ts` running beside the suspect on a second worker, starves the software
+renderer** badly enough to show a frame-bound fault. That is harsher than CI, and `docs/testing.md`
+warns a harsher harness invents failures. So use it to *see the mechanism*, and take the budget from
+what it measures, not from its pass/fail. The dugout wade was found this way. A scratch spec that
+polled `__walker()` every few seconds showed the traveller creeping rather than stuck, which is the
+difference between a budget and a bug. `docs/testing.md` › *A starved frame counts as one frame*
+has the whole case.
+
 ---
 
 ## Checking your own work
