@@ -112,6 +112,12 @@ const COVERAGE: Record<string, Coverage> = {
     adapted: ['id', 'name', 'renderable'],
     skipped: ['notes', 'realm', 'region']
   },
+  // The names canon's living peoples give their children, dealt to the strangers on the road by
+  // `content/peoples.ts`. Only cultures that carry names cross, so there is nothing to skip.
+  'places.peoples': {
+    adapted: ['id', 'given_names'],
+    skipped: []
+  },
   'knowledge.discoveries': {
     adapted: ['id', 'name', 'discipline', 'subject', 'found_at', 'levels', 'answers',
       'helps', 'restores'],
@@ -230,6 +236,27 @@ describe('every field canon exports is accounted for', () => {
       ).toEqual([]);
     });
   }
+});
+
+describe('no whole collection arrives unannounced', () => {
+  /**
+   * **The gap the field checks cannot see.** Every test above walks a collection it was told
+   * about. When canon exported `peoples` for the first time, every one of them passed, because
+   * none of them had heard of it -- a new collection is exactly as unread as a new field, and
+   * this is the same guard one level up.
+   */
+  it('lists every collection each bundle ships', () => {
+    // `canon_version` is the stamp; `conformance` is canon's answer key, read by its own test.
+    const known = new Set([...Object.keys(COVERAGE), 'crafting.conformance']);
+    const unknown: string[] = [];
+    for (const [bundle, payload] of Object.entries(BUNDLES)) {
+      for (const key of Object.keys(payload)) {
+        if (key === 'canon_version') continue;
+        if (!known.has(`${bundle}.${key}`)) unknown.push(`${bundle}.${key}`);
+      }
+    }
+    expect(unknown, 'canon ships a collection nothing here mentions').toEqual([]);
+  });
 });
 
 describe('nested shapes too, where the rules live', () => {

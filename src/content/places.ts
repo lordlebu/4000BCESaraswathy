@@ -190,7 +190,21 @@ const raw = placesBundle as {
   field_maps: RawFieldMap[];
   points_of_interest: RawPoi[];
   npcs: RawNpc[];
+  peoples?: { id: string; given_names: string[] }[];
 };
+
+/**
+ * The names each of canon's living peoples gives its children, keyed by culture id.
+ *
+ * **Canon's, not the game's.** A name is a noun, and the strangers on the road were the first
+ * people the game met that canon had not written -- so canon declared names for their peoples in
+ * `cultures.json` rather than the engine inventing any. Only cultures that carry a list cross the
+ * export. Absent entirely in a bundle older than 2.29.0, which reads as no names: strangers then
+ * stay "a carrier", which is what they were.
+ */
+export const givenNames: Readonly<Record<string, readonly string[]>> = Object.fromEntries(
+  (raw.peoples ?? []).map((p) => [p.id, Object.freeze([...p.given_names])])
+);
 
 export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   id: m.id,

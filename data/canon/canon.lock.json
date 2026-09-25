@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.28.0",
+  "canon_version": "2.29.0",
   "counts": {
     "fauna": 236,
     "flora": 112,
@@ -17,9 +17,9 @@
     "vehicles": 14
   },
   "sha256": {
-    "species.json": "2560aea326eb6c48debe0e0df552f9b97f2c8a2a36c722a5996b596413bcdb0a",
-    "places.json": "a2356f8e2c10dd4a4ef5fdd34ddb642438200172bac504816ac3b9393647fda0",
-    "knowledge.json": "7f48aa7984af52aff862a12673a968b22ca692b261075df9175fad8faff3e857",
-    "crafting.json": "693bbb26ca44cf43a001878abfbd409ddf200f5b2bca2ca03d2e3eb4ed454a40"
+    "species.json": "db75ca4cd168dbcb17d0f887257f5fdd46e7e1973c9c27ee9f87a0c4a70fb089",
+    "places.json": "e28ce9f35a0c2c6aab9cb9082bd32e9b77211299be73e5815b66dd895c00fee0",
+    "knowledge.json": "81d6f356e15738717e1a52a6c9e820d3c096a01b4873276356df6d36f04abff5",
+    "crafting.json": "89d843a962448f99cc19ff870056364ac3e89e67dbe159b2a669c6c6e1800ccf"
   }
 }
