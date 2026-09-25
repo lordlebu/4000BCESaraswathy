@@ -25,6 +25,7 @@ import { type Choice, type GameEvent, choicesFor } from '../content/events';
 import { art } from './art';
 import { sceneFor } from './scenes';
 import { Modal } from './Modal';
+import { StrangerFace } from './StrangerFace';
 
 export interface EventCardProps {
   event: GameEvent;
@@ -79,7 +80,17 @@ export function EventCard({ event, holds, shelter, pick = 0, onChoose, onClose }
         )}
 
         <div className="activity-body">
-          <h2 className="activity-title">{event.title}</h2>
+          {/* The stranger this is about, beside the title, when it is about somebody. The painting
+              above is the moment; this is who is in it -- the same person, in the same dyes, as
+              the figure walking the map. */}
+          {event.stranger ? (
+            <div className="event-heading">
+              <StrangerFace stranger={event.stranger} size={40} />
+              <h2 className="activity-title">{event.title}</h2>
+            </div>
+          ) : (
+            <h2 className="activity-title">{event.title}</h2>
+          )}
           <p className="activity-prose">{taken?.line || event.prose}</p>
 
           <div className="activity-choices">

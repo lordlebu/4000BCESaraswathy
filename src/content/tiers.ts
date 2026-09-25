@@ -191,3 +191,33 @@ export const NIGHT_RESTORES: Record<string, number> = {
   settlement: 1,
   palace: 1
 };
+
+/**
+ * How rarely a woven event happens, as one in N chances each time the question is asked.
+ *
+ * **Authored events are not rationed by this; only woven ones are.** An authored event is somebody's
+ * deliberate scene with its own `conditions`, and it fires whenever those hold. A woven event can be
+ * made from almost any tile, so without a ration one would open on every night, every arrival and
+ * every day of road -- and a thing that always happens is furniture, not an event.
+ *
+ * What the numbers mean in play, given how often each question is asked:
+ *
+ * - `road` is asked once per day of walking (see `onRoad` in `App.tsx`), so 3 is about one
+ *   meeting on the road every three days.
+ * - `night` is asked every time somebody sleeps: one night in three has something in it.
+ * - `arriving` is asked once per place per journey, so about a third of places greet you.
+ * - `working` is asked after every take, and a take is the commonest act in the game -- so it is
+ *   the rarest, one in six, or the satchel fills to a running commentary.
+ *
+ * Tune here and nowhere else. `test/happenings.test.ts` measures the realised rate over many rolls
+ * and fails if it drifts far from what this table says.
+ */
+export const WOVEN_ONE_IN: Record<'night' | 'arriving' | 'road' | 'working', number> = {
+  night: 3,
+  arriving: 3,
+  road: 3,
+  working: 6
+};
+
+/** How much a woven event eases, when it eases at all. Company on the road is worth less than a meal. */
+export const COMPANY_EASES = 0.15;

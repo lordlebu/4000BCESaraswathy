@@ -18,6 +18,8 @@
 //
 // Pure and free of React and Phaser, like the rest of `content/`. No clock: the caller says when.
 
+import type { Look } from './looks';
+
 /**
  * Where an event can find you.
  *
@@ -28,8 +30,13 @@
  *
  * `shelter` narrows a night to the kinds of place it can happen in, and an empty list means
  * anywhere you can sleep. That is the axis the flat rest table left open.
+ *
+ * **`working` is the fourth, and it is what joins the activity layer to this one.** It fires when a
+ * take settles and its card closes -- a heron landing while you cut reeds, a second thing turned
+ * up under the first. Taking was the one act with no chance of anything happening around it, which
+ * made the busiest verb in the game the least eventful.
  */
-export type Occasion = 'night' | 'arriving' | 'road';
+export type Occasion = 'night' | 'arriving' | 'road' | 'working';
 
 /** What an event needs to be true before it can happen. All of them, or it does not fire. */
 export interface Conditions {
@@ -73,6 +80,35 @@ export interface Choice {
    * grant each other's `requires`, which needs no further machinery.
    */
   grants: string[];
+  /**
+   * Materials put into the satchel, for something found or given.
+   *
+   * **Separate from `grants`, because they reach different stores.** A grant changes what the
+   * player *knows* and goes through `journey.receiveAll`; a material is something *carried* and goes
+   * into the satchel. Folding them into one list would put a `mat_` prefix rule in the rules layer.
+   * Optional, so every event written before it still type-checks.
+   */
+  gives?: { id: string; n: number }[];
+  /**
+   * How much tiredness it takes off, on the same scale as `REMEDY_EASES` and `MEAL_EASES`.
+   *
+   * Through the scene's existing `ease` door, which is what a remedy already uses -- a bowl by
+   * somebody's fire eases you exactly the way a bowl out of your own satchel does.
+   */
+  eases?: number;
+}
+
+/**
+ * Somebody an event is about, so the card can show their face.
+ *
+ * The road company `travellers.ts` puts on the map, carried with the look they wear there -- which
+ * is what makes the face on the card the person on the road rather than a stranger who happens to
+ * share their trade.
+ */
+export interface EventStranger {
+  id: string;
+  role: string;
+  look: Look;
 }
 
 export interface GameEvent {
@@ -100,6 +136,8 @@ export interface GameEvent {
    * should assume when authoring, which is why it is named for the restrictive case.
    */
   once: boolean;
+  /** Who it is about, when it is about somebody. Only woven events carry one today. */
+  stranger?: EventStranger;
 }
 
 /**

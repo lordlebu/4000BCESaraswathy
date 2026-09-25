@@ -3204,6 +3204,19 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   color: var(--ink);
 }
 
+/*
+ * An event about somebody: their face beside the title. The title keeps its own margin, so the
+ * row aligns on the text rather than on the face and a card without a stranger is unchanged.
+ */
+.event-heading {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.35rem;
+}
+.event-heading .activity-title { margin: 0; }
+
 .activity-prose {
   margin: 0 0 0.9rem;
   color: var(--muted);

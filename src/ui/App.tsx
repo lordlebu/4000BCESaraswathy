@@ -28,7 +28,7 @@ import { PeoplePanel } from './PeoplePanel';
 import { met } from '../content/people';
 import { seedFromUrl } from './seed';
 import { WorkshopPanel } from './WorkshopPanel';
-import { canDo, distinct, emptySatchel, itemsHeld } from '../content/satchel';
+import { add as addToSatchel, canDo, distinct, emptySatchel, itemsHeld } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
 import { carry, gatheredLine, standingLine } from '../content/gathering';
 import { rideFrom } from '../content/vehicles';
@@ -61,7 +61,8 @@ import type { Preparation } from '../content/activity';
 import { shelterBuilt, use, usedLine, useOf } from '../content/using';
 import { ActivityModal } from './ActivityModal';
 import { EventCard } from './EventCard';
-import { type Choice, type GameEvent, type Occasion, eventNow } from '../content/events';
+import { type Choice, type GameEvent, type Occasion } from '../content/events';
+import { happeningNow, surroundingsAt } from '../content/happenings';
 import type { Station } from '../content/stations';
 
 /**
@@ -248,7 +249,9 @@ export function App() {
     fieldMapId: '',
     day: 0,
     /** Where the traveller is standing, for an event that fires from something other than a step. */
-    at: null as { x: number; y: number } | null
+    at: null as { x: number; y: number } | null,
+    /** The hour and the sky, for a woven event -- rain on the road needs to know it is raining. */
+    moment: null as WorldMoment | null
   });
 
   // Kept in step after every commit, so anything that changes progress or the satchel by another
@@ -273,6 +276,19 @@ export function App() {
     latest.current.at = arrival?.at ?? null;
   }, [world, fieldMapId, arrival?.day, arrival?.at]);
   const visited = useRef(new Set<string>());
+  /** `maybeHappens`, once the bus effect has made it. Null for the first render only. */
+  const happens = useRef<
+    | ((
+        occasion: Occasion,
+        at: { x: number; y: number },
+        shelter: string | null,
+        salt: string,
+        extra?: { poiId?: string | null; taken?: readonly string[] }
+      ) => void)
+    | null
+  >(null);
+  /** What the last take carried off, so the `working` question does not turn up the same thing. */
+  const lastTaken = useRef<string[]>([]);
 
   /**
    * One value decides what is on screen; the rules are in `surface.ts` and tested under Node.
@@ -343,7 +359,10 @@ export function App() {
     // must not close the album or the diary, which are not about the tile being left.
     const onStandingOn = ({ poiId: id }: GameToUi['standing-on']) =>
       dispatch({ type: 'standing-on', poiId: id });
-    const onMoment = (next: GameToUi['moment-changed']) => setMoment(next);
+    const onMoment = (next: GameToUi['moment-changed']) => {
+      latest.current.moment = next;
+      setMoment(next);
+    };
     const onSky = (next: GameToUi['sky-changed']) => setSkyPhase(next.phase);
     const onTravellers = (next: GameToUi['travellers-changed']) => setTravellerStates(next.travellers);
     // Who the scene says it is drawing, which is the only authority on it. The picker sets its
@@ -375,12 +394,17 @@ export function App() {
       occasion: Occasion,
       at: { x: number; y: number },
       shelter: string | null,
-      salt: string
+      salt: string,
+      extra: { poiId?: string | null; taken?: readonly string[] } = {}
     ) => {
       const world = latest.current.world;
       if (!world) return;
       const p = latest.current.progress;
-      const next = eventNow(
+      // Seeded on the tile and the salt, like every other roll in this codebase: the same seed
+      // must produce the same journal text, and `Math.random` here would make a seed
+      // unshareable and this untestable.
+      const roll = (s: string) => tileHash(world.seed, at.x, at.y, `${salt}:${s}`);
+      const next = happeningNow(
         {
           occasion,
           shelter,
@@ -393,10 +417,10 @@ export function App() {
           holds: [...p.words, ...Object.keys(p.rungs), ...p.recipes],
           seen: seenEvents.current
         },
-        // Seeded on the tile and the salt, like every other roll in this codebase: the same seed
-        // must produce the same journal text, and `Math.random` here would make a seed
-        // unshareable and this untestable.
-        (s) => tileHash(world.seed, at.x, at.y, `${salt}:${s}`)
+        roll,
+        // What is here to make an event out of, when nothing authored can happen -- see
+        // `happenings.ts`. Read from the same world and tile the roll is seeded on.
+        surroundingsAt(world, at, latest.current.fieldMapId, latest.current.moment, roll, extra)
       );
       if (!next) return;
       seenEvents.current = [...seenEvents.current, next.id];
@@ -421,7 +445,7 @@ export function App() {
      */
     const onArrived = ({ poiId }: GameToUi['poi-reached']) => {
       const here = latest.current.at;
-      if (here) maybeHappens('arriving', here, null, `arriving:${poiId}`);
+      if (here) maybeHappens('arriving', here, null, `arriving:${poiId}`, { poiId });
     };
 
     /**
@@ -439,6 +463,10 @@ export function App() {
       lastRoadDay.current = day;
       maybeHappens('road', at, null, `road:${day}`);
     };
+
+    // Handed out of the effect so the activity card can ask too: a take is not a bus event, it is a
+    // modal React owns, and closing it is where the `working` question belongs.
+    happens.current = maybeHappens;
 
     EventBus.onEvent('world-ready', onWorldReady);
     EventBus.onEvent('tile-entered', onTileEntered);
@@ -730,6 +758,7 @@ export function App() {
       const today = arrival?.day ?? 0;
       setSatchel((s) => carry(s, taken));
       setNodes((n) => draw(n, underfoot.seed, underfoot.at, taken, today));
+      lastTaken.current = taken.map((t) => t.material.id);
       // Noted rather than announced. The whole progression of this game is a written journal, so
       // a good cut is a sentence in the field notes and not a number in a badge. The activity's
       // own line wins when it has one, because it says how the hands went as well as what was cut.
@@ -1392,6 +1421,20 @@ export function App() {
             // changes their mind has not already slept. `camp` is the rules layer's own event and
             // it still decides whether a night is legal.
             if (activity.resting) EventBus.emitEvent('camp', {});
+            // Something happening around the work, asked as the card closes rather than when the
+            // take settles so the two cards never stand on each other. Only a take that carried
+            // something off: closing the card without taking is changing your mind, not working.
+            else if (!activity.making && lastTaken.current.length > 0 && underfoot) {
+              const taken = lastTaken.current;
+              lastTaken.current = [];
+              happens.current?.(
+                'working',
+                underfoot.at,
+                null,
+                `working:${activity.day}:${underfoot.at.x},${underfoot.at.y}`,
+                { taken }
+              );
+            }
           }}
           onFinish={
             activity.resting
@@ -1416,6 +1459,13 @@ export function App() {
             // Through the same door a conversation uses. An event grants the same kinds of thing a
             // person does, so it must not grow a second way to change a Progress.
             if (choice.grants.length > 0) setProgress((p) => receiveAll(p, choice.grants));
+            // Something found or given goes in the satchel, and something eased goes to the scene
+            // through the door a remedy already uses -- see `Choice.gives` and `Choice.eases`.
+            if (choice.gives && choice.gives.length > 0) {
+              const given = choice.gives;
+              setSatchel((s) => given.reduce((held, g) => addToSatchel(held, g.id, g.n), s));
+            }
+            if (choice.eases && choice.eases > 0) EventBus.emitEvent('ease', { by: choice.eases });
             // Noted rather than announced, like every other outcome in this game: the progression
             // is a written journal and a thing that happened to you is a line in it.
             setMemory(choice.line);

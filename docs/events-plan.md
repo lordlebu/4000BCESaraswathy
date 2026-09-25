@@ -2,8 +2,15 @@
 
 Something happening to you, as opposed to something you did.
 
-**Status: framework shipped, content not written.** That order is deliberate and this document is
-mostly about why.
+**Status: framework shipped; authored content not written; ordinary events are now woven.** That
+order is deliberate and this document is mostly about why.
+
+> **Since this was written:** `content/happenings.ts` makes ordinary events on the spot — tracks
+> across the path, rain on the plain, a carrier falling in beside you — from what is already on the
+> tile, whenever no authored event can happen. It is rationed, never grants knowledge, and goes
+> through the same card, `seen` list and seeded roll. A fourth occasion, `working`, fires after a
+> take. See `docs/strangers-and-happenings.md`. Everything below about *authored* events still
+> stands, and an authored event always wins.
 
 ---
 
