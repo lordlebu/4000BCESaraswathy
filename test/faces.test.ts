@@ -9,9 +9,11 @@ import { artNames } from '../src/ui/art';
 import { facesFor } from '../src/ui/StrangerFace';
 import { STRANGER_CULTURES } from '../src/content/travellers';
 
-const { idFor } = createRequire(import.meta.url)('../tools/build-plates.js') as {
-  idFor: (file: string, word?: string) => string;
+const { idFor, KINDS } = createRequire(import.meta.url)('../tools/build-plates.js') as {
+  idFor: (file: string, word?: string, keepUnderscores?: boolean) => string;
+  KINDS: { face: { word: string; keepUnderscores?: boolean } };
 };
+const faceId = (file: string) => idFor(file, KINDS.face.word, KINDS.face.keepUnderscores);
 
 // `String.raw`, because in a plain template literal `\d` is not an escape and quietly becomes `d` --
 // which is how this pattern demanded the letters "d{2}", matched no name at all, and passed for as
@@ -35,8 +37,10 @@ describe('the face pool', () => {
   });
 
   it('builds a raw from any image tool into its place in the pool', () => {
-    expect(idFor('Gemini face-harappan-m-01.png', 'face')).toBe('harappan-m-01');
-    expect(idFor('kia-f-02.png', 'face')).toBe('kia-f-02');
-    expect(idFor('ChatGPT face any-01.png', 'face')).toBe('any-01');
+    expect(faceId('Gemini face-harappan-m-01.png')).toBe('harappan-m-01');
+    expect(faceId('kia-f-02.png')).toBe('kia-f-02');
+    expect(faceId('ChatGPT face any-01.png')).toBe('any-01');
+    // Canon's culture ids keep their underscore, or the face is built for a people that is not one.
+    expect(faceId('asura_hybrid-m-01.png')).toBe('asura_hybrid-m-01');
   });
 });

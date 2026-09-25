@@ -73,7 +73,10 @@ const KINDS = {
     out: path.join(ROOT, 'src', 'ui', 'faces'),
     size: 256,
     word: 'face',
-    label: 'stranger face'
+    label: 'stranger face',
+    // The pool is keyed by canon's culture ids, and several carry an underscore -- `asura_hybrid`,
+    // `maya_born`. Hyphenating one would build a face no people is ever dealt, silently.
+    keepUnderscores: true
   },
   /**
    * An event painting: the picture at the top of the card when something happens to you.

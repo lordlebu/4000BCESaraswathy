@@ -44,7 +44,6 @@ import {
 } from './events';
 import happeningsText from '../../data/happenings.json';
 import { type Material, material, materialsIn } from './making';
-import { dyeName } from './looks';
 import { fieldMap, poi, type PointOfInterest } from './places';
 import { rhythmOf } from './routine';
 import { biomeFor, creatureFor, creaturesIn, floraFor, isAnimal } from './species';
@@ -354,7 +353,6 @@ const company: Template = ({ stranger, elsewhere, moment }, _roll, now) => {
     stranger.id,
     {
       role: stranger.role,
-      dye: dyeName(stranger.look.cloth),
       elsewhere: placeName(elsewhere),
       name: stranger.givenName ?? ''
     },
@@ -378,7 +376,7 @@ const companyAgain: Template = ({ stranger, moment }, _roll, now) => {
     'road',
     'company-again',
     stranger.id,
-    { trade: stranger.role.split(',')[0]!, dye: dyeName(stranger.look.cloth), name: stranger.givenName ?? '' },
+    { trade: stranger.role.split(',')[0]!, name: stranger.givenName ?? '' },
     [{ id: 'catch-up', eases: COMPANY_EASES }, { id: 'wave' }],
     { variant: named(stranger), stranger }
   );

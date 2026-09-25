@@ -60,6 +60,6 @@ describe('the layers', () => {
     // Guards the guard: if the pattern stopped matching, both checks above would pass on nothing.
     const scene = importsOf(join(SRC, 'game', 'scenes', 'WorldScene.ts'));
     expect(scene).toContain('phaser');
-    expect(importsOf(join(SRC, 'content', 'happenings.ts'))).toContain('./looks');
+    expect(importsOf(join(SRC, 'content', 'happenings.ts'))).toContain('./tiers');
   });
 });

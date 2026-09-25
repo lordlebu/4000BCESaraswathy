@@ -343,6 +343,27 @@ The simulation's bands (0.5 to 1.1 events a day, at most seven quiet days, no ki
 well outside what was measured, so they fail on a change of rhythm and not on noise. Proven to
 bite: with `again_after` ignored, it reports every event that came back too soon.
 
+## The asuras — 26 September 2026
+
+The owner drew two asura faces as kin of the Maru. **For now they are Maru** (`maru-m-03`,
+`maru-f-04`) and are dealt as any Maru face is. The prose no longer names a stranger's dye, since a
+painted face carries its own colours and could contradict it.
+
+**Making them `asura_hybrid` and closely tied to the Maru is small in code and gated on two
+things only the owner can supply: a few sentences of lore, and one sprite sheet.**
+
+| Piece | Where | Size |
+|---|---|---|
+| Say they are alive now, and kin to the Maru | canon `cultures.json`: `asura_hybrid` today holds one character, in deep antiquity. It needs the era, a `kin` or similar link to `maru`, `dress`, `art_reference` and `given_names`. A lint check that the link names a real culture. | half a session, once the lore is written |
+| Let them walk | game: `asura_hybrid` in `STRANGER_CULTURES`, one road-company entry, and a rule for where they walk — the natural one is *beside the Maru*, on the maps whose people are mostly Maru | under a session |
+| Their faces | rename `maru-m-03` and `maru-f-04` to `asura_hybrid-m-01` and `-f-01`. The builder now keeps the underscore; before this change it would have built `asura-hybrid-…` and nobody would ever have been dealt it | minutes |
+| Their body | a new traveller sheet, Asset 9 in `docs/art-brief.md`, then `looks.json` colours chosen by eye | art first; then under a session |
+
+**Where the lore has to decide, not the code:** whether asuras are met on the road at all in this
+era, or only in some places; whether they speak Maru; and what they are called. Canon removed
+`asura` as a culture on purpose — it had meant a culture, a species and a creature prefix at once
+— so `asura_hybrid` is the right existing home, and `maya_born` the other candidate.
+
 ## Still open
 
 - **Paintings.** The 22 faces and 13 event paintings (`docs/event-prompts.md`) are with the owner.

@@ -80,12 +80,11 @@
       "again_after": null,
       "slots": [
         "role",
-        "dye",
         "elsewhere",
         "name"
       ],
       "title": "Company on the road",
-      "prose": "A {role}, falls in beside you for a stretch. Dressed in {dye} gone pale with the road's dust, and in no hurry to be anywhere but walking.",
+      "prose": "A {role}, falls in beside you for a stretch, dusty from the road and in no hurry to be anywhere but walking.",
       "choices": {
         "walk": {
           "label": "Walk together a while",
@@ -112,13 +111,12 @@
       "again_after": 8,
       "slots": [
         "trade",
-        "dye",
         "name"
       ],
       "title": "A face you know",
       "prose": {
-        "named": "{name}, the {trade} from the other day, is on the road ahead, still in {dye}, and lifts a hand when they see it is you.",
-        "unnamed": "The {trade} from the other day is on the road ahead, still in {dye}, and lifts a hand when they see it is you."
+        "named": "{name}, the {trade} from the other day, is on the road ahead, and lifts a hand when they see it is you.",
+        "unnamed": "The {trade} from the other day is on the road ahead, and lifts a hand when they see it is you."
       },
       "choices": {
         "catch-up": {

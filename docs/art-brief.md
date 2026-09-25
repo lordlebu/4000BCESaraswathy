@@ -1862,6 +1862,47 @@ a `frames` list in the manifest, never a change in the game.
 
 ---
 
+## Asset 9 — two nomad traveller sheets · **wanted**
+
+**Why these two.** Canon now says the Maru dress for the upland in fur and skin over wool and felt
+(`cultures.json`, `dress`), but a Maru drover on the road walks in the drover sheet from Asset 7 —
+an olive tunic and a white headwrap. And the owner's two asura faces (`maru-m-03`, `maru-f-04`) are
+kin of the Maru and need a body of their own before they can be told apart on the road. So: one
+upland nomad, and one asura nomad.
+
+**Same prompt as Asset 7, word for word; substitute only the character line.** Everything Asset 7
+learned still applies — two closed then two open in each row, the same width from behind, one
+strong contrasting block near the top with the clothing under it named and darker, the carried
+thing plain and inside a third of the figure.
+
+4. **`traveller-nomad.png` — a stocky upland nomad in their thirties, in a bright madder-red felt
+   cap, a thick dark-brown goatskin coat worn hair-out to the knee over a grey wool tunic, felt
+   boots, and a short rolled felt blanket strapped across the top of the back, no higher than the
+   head** — the contrast block is the red cap against the dark-brown coat.
+5. **`traveller-asura.png` — a tall horned nomad, two ram's horns curling back from the temples and
+   rising no more than a hand above the head, a turquoise headcloth wound between the horns, a
+   dark-grey fur cloak to the knee over a rust-red wool tunic, bare feet, and a plain staff held
+   close against the body** — the contrast block is the turquoise headcloth; the horns are the
+   silhouette no other traveller has.
+
+**One rule more for the asura, because of the horns.** The builder fits each figure's own bounding
+box to the 26×40 cell, so anything sticking out is paid for by the whole figure shrinking. Keep the
+horns inside the shoulders' width and within a hand of the head, in all four facings, or the asura
+walks smaller than everybody else.
+
+### After the art arrives
+
+1. Save each into `assets/source/` under its name and add a row to `tools/characters.json` —
+   `colours: 12`, and `sit` taking the first frame of each row as the other travellers do.
+2. `npm run build:sprite traveller-nomad`, then `node tools/check-sprite.js` on the result: under 30%
+   speckle and over 1.45 px mean run, or send it back. **Check the profile rows by eye at about
+   18×** — row order is a property of the file in hand.
+3. Add it to `TRAVELLER_ART` in `src/game/characters.ts`, and its skin, cloth and second-garment
+   colours to `assets/looks.json`, chosen by lighting each colour magenta and looking.
+   `test/looks.test.ts` fails if a listed colour is not in the built sheet.
+4. Point the Maru drover at `traveller-nomad` in `COMPANY` (`src/content/travellers.ts`). The asura
+   sheet waits for its people; see `docs/strangers-and-happenings.md`.
+
 ## Asset 8 — the three faces missing, and they are all travellers · **shipped**
 
 > **All three landed.** `src/ui/portraits/` now holds **seventeen against canon's seventeen** —

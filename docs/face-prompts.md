@@ -96,17 +96,11 @@ node tools/build-plates.js --faces --force --only=maru-f-02 --crop=136,0,260
 The last also keeps a small painted signature in `maru-f-02`'s bottom corner out of the frame, and
 the third a strip of painted paper edge along `harappan-f-04`'s top.
 
-**Two asuras are held, not rejected.** `maru-m-asura01` and `maru-f-asuraprincess01` are the
-owner's, drawn as related to the Maru, with their lore still to come. They build cleanly (the
-man wants `--crop=95,15,230`, the princess none) but are not in the pool, for two reasons:
-
-- As `maru-` faces they would be dealt to ordinary Maru drovers on the road. An asura prince
-  greeting you as "a drover, behind six animals" is a lore claim nobody has made yet.
-- Canon has no `asura` people to name them by. `cultures.json` removed `asura` deliberately — it
-  had meant a culture, a species and a creature prefix at once — and holds `maya_born` and
-  `asura_hybrid` instead. Which of those, or a new people, these two are is the lore to write.
-
-They wait in `assets/source/dump/` (kept on disk, not tracked) until that is decided.
+**The two asuras are in the pool as Maru, for now**, at the owner's word: `maru-m-03` (from
+`maru-m-asura01`, `--crop=95,15,230`) and `maru-f-04` (from `maru-f-asuraprincess01`, uncropped).
+Until the asura people are written they are dealt like any Maru face — an asura may walk as a Maru
+drover. When canon gives them a people of their own, they move to that people's names; see "The
+asuras" in `docs/strangers-and-happenings.md` for what that takes.
 
 ---
 
