@@ -254,7 +254,7 @@ neither was added.
 looks) or a *verb* (what happens to you), and the canon/game split gives both to the game. A name
 is a *noun*, so it is canon's.
 
-- **Canon 2.29.0** gives `harappan`, `kia` and `maru` twelve `given_names` each in
+- **Canon 2.29.0** gives `harappan` and `kia` twelve `given_names` each and `maru` sixteen in
   `database/cultures.json`, written in each people's sound and checked against every person, place
   and word in canon. Its lint refuses a given name that already exists or that two peoples share.
   Exported as `peoples` in `places.json`, only for cultures that carry names. See canon's
