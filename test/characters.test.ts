@@ -17,7 +17,8 @@ import {
   characterFor,
   everyCharacter,
   everySheet,
-  frameOf
+  frameOf,
+  NAMED_ART
 } from '../src/game/characters';
 import { PLAYER_FRAME, TRAVELLER_SHRINK, figureScale, travellerScale } from '../src/game/player';
 
@@ -146,7 +147,10 @@ describe('the sheets that draw a traveller', () => {
     const sheets = everySheet().map((c) => c.key);
     for (const key of Object.keys(CHARACTERS)) expect(sheets).toContain(key);
     for (const key of Object.keys(TRAVELLER_ART)) expect(sheets).toContain(key);
-    expect(sheets.length).toBe(Object.keys(CHARACTERS).length + Object.keys(TRAVELLER_ART).length);
+    for (const key of Object.keys(NAMED_ART)) expect(sheets).toContain(key);
+    expect(sheets.length).toBe(
+      Object.keys(CHARACTERS).length + Object.keys(TRAVELLER_ART).length + Object.keys(NAMED_ART).length
+    );
     expect(new Set(sheets).size, 'two sheets share a key').toBe(sheets.length);
   });
 

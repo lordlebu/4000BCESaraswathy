@@ -20,6 +20,7 @@ import carrierUrl from '../../assets/traveller-carrier-overworld.png';
 import droverUrl from '../../assets/traveller-drover-overworld.png';
 import pilgrimUrl from '../../assets/traveller-pilgrim-overworld.png';
 import nomadUrl from '../../assets/traveller-nomad-overworld.png';
+import princessUrl from '../../assets/asura-princess-overworld.png';
 
 export interface CharacterArt {
   /** Texture key, also the prefix for its animation keys. */
@@ -88,6 +89,22 @@ export const TRAVELLER_ART = {
   }
 } as const satisfies Record<string, CharacterArt>;
 
+/**
+ * Sheets that draw one named person, never dealt at random and never re-dyed.
+ *
+ * **Separate from `TRAVELLER_ART`** because that list is the road's bodies: every one of them has
+ * colours in `assets/looks.json` and can be dealt to anybody. A named person is only drawn when
+ * something of theirs puts them on the map -- `content/visitors.ts`, for the princess.
+ */
+export const NAMED_ART = {
+  'asura-princess': {
+    key: 'asura-princess',
+    name: 'The Asura-Tainted Princess',
+    url: princessUrl,
+    frame: { width: 28, height: 44 }
+  }
+} as const satisfies Record<string, CharacterArt>;
+
 /** The cell a sheet was built at, by texture key. The shared one for anything that does not say. */
 export function frameOf(key: string): { width: number; height: number } {
   const art = (everySheet() as CharacterArt[]).find((a) => a.key === key);
@@ -101,7 +118,7 @@ export function frameOf(key: string): { width: number; height: number } {
  * built, committed, and drawn by nothing -- this codebase's signature fault, at eight instances.
  */
 export function everySheet(): CharacterArt[] {
-  return [...Object.values(CHARACTERS), ...Object.values(TRAVELLER_ART)];
+  return [...Object.values(CHARACTERS), ...Object.values(TRAVELLER_ART), ...Object.values(NAMED_ART)];
 }
 
 /** Every character, in the order they are offered. */

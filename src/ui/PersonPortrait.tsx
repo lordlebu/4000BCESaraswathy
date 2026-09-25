@@ -124,7 +124,11 @@ const TOOLS: [string[], string][] = [
   // is specific that a straight-tusk is "worked rather than tamed" and that what a driver has is
   // "forty years of being agreed with". A goad would draw the opposite claim. What the job actually
   // looks like from the ground is the loop you put a foot in to get up nine feet of animal.
-  [['driver'], 'M20 5v9M16 14h8M17 14v2a3 3 0 0 0 6 0v-2']
+  [['driver'], 'M20 5v9M16 14h8M17 14v2a3 3 0 0 0 6 0v-2'],
+  // A seedling from a mound, for the Asura-Tainted Princess: canon gives her mastery of cultivation,
+  // and what she wants of the plateau is that it grow more than goats. She has a painted portrait,
+  // so this is the fallback for a folder that has lost it.
+  [['exile'], 'M20 21v-7M20 14c0-3-3-4-5-4 0 3 2 5 5 4zM20 12c0-3 3-5 5-5 0 3-2 5-5 5zM16 21h8']
 ];
 
 /** The tool for a role, or null for a person whose trade has no drawing yet. */

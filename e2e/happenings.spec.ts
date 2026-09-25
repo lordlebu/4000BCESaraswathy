@@ -83,3 +83,37 @@ test('sheltering a stranger is remembered, so the kindness can come back', async
     )
     .toEqual([expect.stringMatching(/^sheltered:field_map_[a-z]+:company_[a-z]+$/)]);
 });
+
+test('the Asura-Tainted Princess walks up and says hi', async ({ page }) => {
+  // The first person who comes to you rather than waiting to be found. In play she does it the
+  // first time you reach the Cloud Stair; `__approach` sends the same message from wherever you
+  // are, so what this proves is the walk and the conversation it opens.
+  await page.goto('?seed=princess&map=field_map_narmada&hour=10');
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          () => (window as unknown as { __approach?: (id: string) => boolean }).__approach?.('npc_asura_princess') ?? false
+        ),
+      { timeout: 20_000 }
+    )
+    .toBe(true);
+
+  // Her conversation opens once she has walked over, with her own portrait and her own first line.
+  const dock = page.locator('.dock[data-occupant="conversation"]');
+  await expect(dock).toBeVisible({ timeout: 15_000 });
+  await expect(dock).toContainText('The Asura-Tainted Princess');
+  await expect(dock).toContainText('Hi.', { timeout: 15_000 });
+  await expect(dock.locator('img.person-portrait')).toBeVisible();
+
+  // And she is standing beside the traveller, a head taller than a traveller from the road.
+  type Visitor = { npcId: string; visible: boolean; x: number; y: number; player: { x: number; y: number }; h: number };
+  const [her] = (await page.evaluate(
+    () => (window as unknown as { __visitors?: () => unknown[] }).__visitors?.() ?? []
+  )) as Visitor[];
+  expect(her?.npcId).toBe('npc_asura_princess');
+  expect(her!.visible).toBe(true);
+  expect(Math.max(Math.abs(her!.x - her!.player.x), Math.abs(her!.y - her!.player.y)), 'not beside the traveller').toBeLessThanOrEqual(1);
+  expect(her!.h, 'drawn at her own taller cell').toBe(88);
+});

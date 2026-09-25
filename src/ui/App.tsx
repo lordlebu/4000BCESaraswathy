@@ -63,6 +63,7 @@ import { ActivityModal } from './ActivityModal';
 import { EventCard } from './EventCard';
 import { type Choice, type GameEvent, type Occasion } from '../content/events';
 import { happeningNow, surroundingsAt } from '../content/happenings';
+import { APPROACHES, approachAt, approachId } from '../content/visitors';
 import type { Station } from '../content/stations';
 
 /**
@@ -467,6 +468,14 @@ export function App() {
      * This one means what its name says.
      */
     const onArrived = ({ poiId }: GameToUi['poi-reached']) => {
+      // Somebody who comes over, the first time you arrive where they are. They take the arrival:
+      // a card and a person walking up at once would be two things asking for the same moment.
+      const approach = approachAt(poiId, seenEvents.current);
+      if (approach) {
+        seenEvents.current = [...seenEvents.current, approachId(approach)];
+        EventBus.emitEvent('approach', { npcId: approach.npcId, sheet: approach.sheet });
+        return;
+      }
       const here = latest.current.at;
       if (here) maybeHappens('arriving', here, null, `arriving:${poiId}`, { poiId });
     };
@@ -491,6 +500,21 @@ export function App() {
     // modal React owns, and closing it is where the `working` question belongs.
     happens.current = maybeHappens;
 
+    /** They have walked up and are standing beside you: open what they have to say. */
+    const onApproached = ({ npcId }: GameToUi['approached']) => dispatch({ type: 'talk-to', npcId });
+
+    /**
+     * The inspector for approaches, beside `__happen`: bring somebody over now, wherever you are.
+     * The same bus message a first arrival sends, so what it proves is the walk and the wiring.
+     */
+    (window as unknown as { __approach?: (npcId: string) => boolean }).__approach = (npcId) => {
+      const approach = APPROACHES.find((a) => a.npcId === npcId);
+      if (!approach || !latest.current.at) return false;
+      EventBus.emitEvent('approach', { npcId: approach.npcId, sheet: approach.sheet });
+      return true;
+    };
+
+    EventBus.onEvent('approached', onApproached);
     EventBus.onEvent('world-ready', onWorldReady);
     EventBus.onEvent('tile-entered', onTileEntered);
     EventBus.onEvent('journey-changed', onJourneyChanged);
@@ -512,6 +536,7 @@ export function App() {
       EventBus.offEvent('moment-changed', onMoment);
       EventBus.offEvent('sky-changed', onSky);
       EventBus.offEvent('travellers-changed', onTravellers);
+      EventBus.offEvent('approached', onApproached);
       EventBus.offEvent('character-changed', onCharacter);
       EventBus.offEvent('night-passed', onNight);
       EventBus.offEvent('poi-reached', onArrived);

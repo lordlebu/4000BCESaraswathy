@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.29.0",
+  "canon_version": "2.30.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -653,6 +653,9 @@
       "notes": "The anomaly, and the hook toward region_tethys_sky_routes for a later map. Deliberately unresolved -- the ladder ends at a good description rather than an explanation, because some things should stay open.",
       "epochs": [
         "epoch_post_cataclysm"
+      ],
+      "npcs": [
+        "npc_asura_princess"
       ]
     },
     {
@@ -1489,6 +1492,35 @@
       ],
       "notes": "**A hunter who mostly does not hunt**, which is the only version of this that fits the game around it. Every weapon in canon affords `cut` and `deter` and nothing anywhere affords killing -- the sling note says the record has slings keeping birds off a crop far more often than doing anything else. Anu works the same way: walks ahead of the herd, is seen, and the thing goes elsewhere.\n\nThey also carry an answer the materials layer needs and nobody on these maps was asked for. Canon has goat hide, croc hide, sinew, boar tusk and leviathan bone, all `won_from` a living animal, and the game hands them over with the same gesture that cuts a reed. Anu is where a player finds out what that involves: one animal, the one that was going to die anyway, and nothing left behind.\n\nAntler is the line that matters. Shed each year and gathered off the ground, costing nothing but the walking -- canon says precisely that on `material_deer_antler`, and Anu has clearly noticed.\n\nWalks ahead of Terke's herd and belongs to the same high-country people.",
       "sex": "male"
+    },
+    {
+      "id": "npc_asura_princess",
+      "type": "npc",
+      "name": "The Asura-Tainted Princess",
+      "character": "character_asura_tainted_princess",
+      "sex": "female",
+      "role": "exile of the plateau, awake again",
+      "found_at": [
+        "poi_cloud_stair"
+      ],
+      "would_settle": false,
+      "knows": [],
+      "lines": [
+        {
+          "text": "Hi. You walk like somebody who came a long way to look at a stair. So did I, once. I have had a long time to think about it since."
+        },
+        {
+          "text": "These terraces could grow more than goats, if anybody asked them properly. My people are hungry in places you have not been yet. When you know what grows here, come and tell me, and I will tell you what I know about making it grow.",
+          "requires": [],
+          "gives": [
+            "question_terrace_purpose"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "notes": "The Asura-Tainted Princess, woken after the Cataclysm, at the edge of the Narmada plateau. The first time the traveller reaches the Cloud Stair she walks up to them rather than waiting to be found; that is the game's doing, and her words are these lines. No language, so she is understood from the first word: she has had a very long time to learn how people talk. Her quest is not written. Her second line hands over `question_terrace_purpose` -- the terraces' sound answer is contour irrigation for a population the archive never recorded, and she is old enough to have seen it. It is the question Marn already gives, so nothing new becomes reachable; it is what makes meeting her leave a trace in the diary."
     },
     {
       "id": "npc_bekh",

@@ -416,6 +416,27 @@ of you and asks one thing; doing it climbs her ladder a rung and unlocks the nex
 each a rung, ending with her choosing to stay on her plateau or walk on with you — the game's ending
 already asks every person you helped that question.
 
+## She walks up and says hi — 26 September 2026
+
+**The first step of her, shipped.** The owner gave her history (in canon now: the forbidden union,
+the unicorn bled into a Dwarka Gate, the exile over the Tethys, her waking after the Cataclysm) and
+asked only that she walk up and say hello — her quest stays unwritten.
+
+- **Where:** the Cloud Stair, on the Narmada. The owner first said the Dwarka portal, then moved her,
+  because the road's nomads walk the Narmada and not Dwarka. The Narmada is the plateau, and the
+  Cloud Stair its anomaly.
+- **Who:** `npc_asura_princess` in canon 2.30.0, linked to her character. Two lines: *"Hi. You walk
+  like somebody who came a long way to look at a stair…"*, and one about the terraces growing more
+  than goats, which hands over the terraces' question — the sound answer is contour irrigation for
+  a population nobody recorded. That hand-over is what records meeting her in the diary.
+- **How:** `content/visitors.ts` says that at the Cloud Stair, the first time, she comes over. The
+  scene finds a tile three to six away with a way in, walks her up to stand beside you in her own
+  taller sheet, and says so; the conversation opens. Everything after that is the ordinary
+  conversation: her portrait (the owner's painting, moved out of the stranger pool so she is never
+  also met as an anonymous drover), her lines, the diary.
+- **Checked** in a browser by `e2e/happenings.spec.ts`, through the `__approach` inspector: she
+  stops beside the traveller, drawn 88 px tall, and the dock opens on her portrait and "Hi."
+
 ## Still open
 
 - **Paintings.** The 22 faces and 13 event paintings (`docs/event-prompts.md`) are with the owner.
