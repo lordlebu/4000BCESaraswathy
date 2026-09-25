@@ -270,7 +270,8 @@ tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side comp
 | `docs/art-placement.md` | the mechanism — which folder, which filename, what falls back |
 | `docs/activity-boards-plan.md` | which bench a place has, how it says so — designed, not built |
 | `docs/events-plan.md` | events: the framework, shipped; authored content, not |
-| `docs/strangers-and-happenings.md` | re-dyed strangers and their faces, and events woven from the tile |
+| `docs/strangers-and-happenings.md` | re-dyed strangers and faces, woven events, the decisions, and canon's peoples surveyed |
+| `docs/face-prompts.md` | the 22 stranger-face prompts, ready to paste, and how the pool is named |
 | `docs/scaling-study.md` | what the codebase will cost to grow, measured, and what to change first |
 | `docs/ui-streamline-plan.md` | what the chrome costs the map, measured, and the four moves that give it back |
 | `docs/ui-affordances-plan.md` | what the screen says once the map has the room — closed, and the two faults it found |
@@ -895,6 +896,10 @@ Two habits that go with it, both learned by getting them wrong:
   answered, questions) plus `collection` are the parts that matter. **The last two are the same
   ground twice**, which is the clearest case this rule has: neither changed the payload's shape, and
   both changed what a remembered tile means.
+  **Since the save split, a ground move no longer costs the diary.** `KNOWLEDGE_VERSION` versions
+  what the player knows (progress, collection, satchel, events seen, strangers met, the clock) and
+  `SAVE_VERSION` only where they are (fog, landmark, nodes). Bump `SAVE_VERSION` when the ground
+  moves; bump `KNOWLEDGE_VERSION` only when the knowledge half changes shape.
 - **Dev dependencies grew by three, for a reason.** `jsdom`, `@testing-library/react` and
   `@testing-library/dom` exist because three panel bugs reached a browser before anything noticed.
   Node stays the default test environment; panel files opt in with `// @vitest-environment jsdom`,

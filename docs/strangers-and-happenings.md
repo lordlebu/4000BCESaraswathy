@@ -171,24 +171,90 @@ signature fault. Proven by making `cookfire`'s condition unreachable; the failur
 
 ---
 
+## Decisions, 25 September 2026
+
+The published plan asked nine questions. The owner took the recommendation on Q1 to Q6 and Q9, and
+answered Q7 and Q8 directly.
+
+| | Question | Decision | Status |
+|---|---|---|---|
+| Q1 | Should strangers walk every map? | Two road company on every map, **beside** canon's travellers, never instead of them (`ROAD_COMPANY_PER_MAP`) | **built** |
+| Q2 | May two travellers share a body? | Road company wear the body of their trade; dyes tell them apart. Canon's named people keep distinct bodies | **built** |
+| Q3 | Authored events: canon's or the game's? | Split: world-true events become a canon entity type; woven and player-only ones stay here. **Canon already uses `event_` for timeline history**, so the new type needs another name | recorded; canon work, Phase 4 |
+| Q4 | Can strangers have names? | Canon exports a per-people list of given names, and the game deals them by hash. Until then, strangers stay "a carrier" | recorded; canon work, Phase 3 |
+| Q5 | May events remember between days? | Yes, in the what-you-know half of the save. First use: `met`, so a stranger recognises you | **built** |
+| Q6 | How often? | Keep `WOVEN_ONE_IN` until the simulation report and a play session say otherwise | kept |
+| Q7 | Faces | 22 faces by people and gender: Harappan 6 men and 4 women, Kia 4 men and 2 women, Maru 2 and 2, `any` 2. Prompts in `docs/face-prompts.md` | **pool built; art with the owner** |
+| Q8 | Translation? | English only, with Jambhudweepan nouns. No message-format layer | recorded; nothing to build |
+| Q9 | Save split first? | Yes | **built** |
+
+The owner's list said "Harappan settler male" twice, 6 and then 4. The second is read as
+**female**, which is what the prompts say. Correct it there if it meant something else.
+
+### What was built for them
+
+- **Strangers on every map (Q1, Q2).** A carrier walks every map, because loads go down every
+  road. The second stranger follows canon's population: a Kia pilgrim where the map's named people
+  mostly speak Kia, a Maru drover where they mostly speak Maru. Measured: the Narmada gets the
+  drover; Lothal, Dwarka and the Aravali the pilgrim.
+- **The save in two halves (Q9).** `KNOWLEDGE_VERSION` versions what you know: progress,
+  collection, satchel, events seen, strangers met, the clock and who you are.
+  `SAVE_VERSION` versions where you are: fog, the landmark, drawn nodes. **Ground moving now bumps
+  only the second**, and the diary survives. A save from before the split reads as knowledge
+  version 1, so nobody loses anything to this change either.
+- **A stranger who knows you (Q5).** Choosing anything in a stranger's event records them in
+  `met`. The next time the road brings them, it is *"A face you know"*, not a first meeting.
+  Strangers are counted per map, since the carrier on Lothal and the carrier on Dwarka are two
+  people.
+- **Faces by people (Q7).** `<culture>-<f|m>-NN` or `any-NN`, dealt from the stranger's own people
+  and the `any-` faces. `node tools/build-plates.js --faces` builds them.
+
+### Found on the way, and fixed
+
+- **Every map change kept the last map's people.** Phaser's `restart` reuses the scene instance,
+  and `init` never reset the traveller or wanderer lists. So each map crossed added its roster to
+  the last one's: destroyed sprites, still moved every tick and still reported to React. Measured
+  in the new browser test: 5 travellers before a crossing, 10 after. Reset in `init` now.
+- **Dyed sheets are released with their map**, animations included. Animations belong to the game,
+  not the scene, and still name the frames of a removed texture. Removing only the texture would
+  leave a returning look playing dead frames.
+- **A new seed inherited the old one's `seen` list.** `generate` reloaded progress and the satchel
+  but not the events, so the new journey saved the old one's as its own.
+
+---
+
+## Canon's peoples, surveyed
+
+Asked for directly: *not only the Kia; which civilisations does the lore name, so the game adheres
+to them?* Canon declares 27 cultures in `database/cultures.json`, across six epochs. What decides
+whether one can walk these roads is **the era**: `DESIGN.md` sets the game in Epoch 5, after the
+Great Shattering, and a people is alive there only if canon puts them there.
+
+| People | In Epoch 5 on these maps? | What canon says | Used for strangers |
+|---|---|---|---|
+| **Harappan** | yes | the delta's settlers; Lothal is their half-buried city, survivors camped inside it; Mehtar carries the line into this era | carrier, every map |
+| **Kia** | yes | "indigenous marsh-dwelling population of the delta, oral-tradition bound"; most of Lothal's, Dwarka's and the Aravali's people speak Kia | pilgrim |
+| **Maru** | yes | the plateau herders, and the nomads at the Aravali's ford; everyone on the Narmada speaks Maru | drover |
+| Silvershore | as stragglers | river lords of silver and debt; the Lothal camp holds "a Silvershore straggler" among its survivors | not yet; a candidate for a later face pair |
+| Tamralinga | offstage | "keeps its ships and its pearl routes further east" of the Aravali coast | not yet; a candidate for a sea-trader at the rail-head |
+| Explorer, ancient court | yes, as playable people | the Survival Train's Mithra and Guyuk, Malacite's claimed descent | never: the player's own cast |
+| Jharwa, Vedda, Tushara | history | the Aravali massacre, the ford's first crossers, Guyuk's birth people; none alive in this era | never |
+| Tuli, Vanara, Yaksha, celestial and the rest | other epochs or places | the Shattered Sea, deep antiquity, the gods | never |
+
+**Faces and strangers follow the first three rows.** Silvershore and Tamralinga are real peoples of
+this era who could plausibly be met. Each would be a small addition: a culture in
+`STRANGER_CULTURES`, a road-company entry and a face pair. Neither is in the owner's list, so
+neither was added.
+
+---
+
 ## Still open
 
-- **Strangers only meet you on Narmada.** Aravali, Dwarka and Lothal fill all three traveller slots
-  with canon's own circuit-walkers, so the road company — the only people a woven event can bring to
-  you — exist on one map of four. Raising `TRAVELLERS_PER_MAP`, or letting company walk alongside the
-  cap, is a design call rather than a fix, and `travellers.ts` records why the cap is three.
-- **Narmada's road-company carrier wears the pilgrim's body.** `sheetFor` deals bodies by position
-  so that no two travellers on a map share one (tested in `travellers.test.ts`), and Marn has
-  already taken the carrier. So the one stranger a woven event can introduce is announced as *"a
-  carrier, with a loaded back"* beside a hooded face. This predates the looks work, which only makes
-  it visible. Re-dyeing removes the reason for the rule: two carriers in different dyes are two
-  people. Matching road company to the body of their trade would fix it, but it reverses a tested
-  guarantee, so it is left for a decision rather than changed here.
-- **No browser spec forces a woven event open.** The path is typechecked and the rules are tested,
-  but proving the card mounts in a real page needs a seed searched for a night that fires, or a hook
-  to force one. Worth doing before the first *authored* event lands, which will use the same path.
-- **Paintings.** `woven-<template>` in `src/ui/events/` (eleven of them), and faces in
-  `src/ui/faces/`. Neither blocks anything.
+- **No browser spec forces a woven event open.** The path is typed and the rules are tested, but
+  proving the card mounts in a real page needs a debug hook to force one. It is the next Phase 1
+  item.
+- **Paintings.** The 22 faces are with the owner. The event paintings, `woven-<template>` in
+  `src/ui/events/`, are not started. Neither blocks anything.
 - **More bodies.** A fourth traveller sheet is a row in `tools/characters.json` and an entry in
-  `assets/looks.json` chosen by eye. With re-dyeing, a fourth body buys a new *silhouette*, which is
+  `assets/looks.json`, chosen by eye. With re-dyeing, a new body buys a new *silhouette*, which is
   the one thing colour cannot.
