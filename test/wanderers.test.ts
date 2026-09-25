@@ -24,7 +24,7 @@ import {
   wanderersOn
 } from '../src/content/wanderers';
 import { hoursToPhase } from '../src/game/dayNight';
-import { GRID, WANDERER_LONG, markerSize, paintedHeight } from '../src/game/frames';
+import { GRID, WANDERER_BOX, boxFor, markerSize, paintedHeight } from '../src/game/frames';
 import { PLAYER_FRAME, figureScale } from '../src/game/player';
 import { DEFAULT_SEED } from '../src/ui/seed';
 import type { Creature } from '../src/world/types';
@@ -245,43 +245,66 @@ describe('what the animals give is actually findable', () => {
   });
 });
 
-describe('an animal is drawn two tiles long', () => {
-  // **The rule changed, on the owner's ruling, and this is where it changed.** It was "a wanderer is
-  // drawn to a traveller's height, half the player", and met in the game the sivatherium read as a
-  // fawn at Varuna's knee. Now an animal is `WANDERER_LONG` tiles long side-on, painting and
-  // stand-in alike, and stands as tall as that makes it -- the giraffid well over the player.
+describe("every animal fits the walking whale's box", () => {
+  // **The rule changed twice, on the owner's rulings, and this is where it changed.** It was "a
+  // wanderer is drawn to a traveller's height", and the sivatherium read as a fawn at Varuna's knee.
+  // Then "two tiles long", and it stood three tiles high. The whale at two tiles was the one called
+  // right, so now every side view is fitted to the whale's box -- `WANDERER_BOX` -- touching one side
+  // of it, and the stand-in is drawn the size the painting will be.
   const { decodePng } = createRequire(import.meta.url)('../tools/sprite-png.js') as {
     decodePng: (file: string) => { width: number; height: number };
   };
   const side = (id: string) => decodePng(join(__dirname, '..', 'assets', 'wanderers', `${id}-right.png`));
+  const drawn = (id: string) => {
+    const art = side(id);
+    const h = paintedHeight(id, art);
+    return { w: (h * art.width) / art.height, h };
+  };
   const ANIMALS = ['narmada-walking-whale', 'sivatherium', 'vasuki-indicus'];
+  const boxW = WANDERER_BOX.long * GRID;
+  const boxH = WANDERER_BOX.tall * GRID;
 
-  it('draws each painted side view two tiles long', () => {
+  it('fits each painted side view inside its box, touching one side of it', () => {
     for (const id of ANIMALS) {
-      const art = side(id);
-      const long = (paintedHeight(id, art) * art.width) / art.height;
-      expect(Math.abs(long - WANDERER_LONG * GRID), `${id} is ${Math.round(long)}px side-on`).toBeLessThanOrEqual(1);
+      const { w, h } = drawn(id);
+      const boxW = boxFor(id).long * GRID;
+      const boxH = boxFor(id).tall * GRID;
+      expect(w, `${id} is ${Math.round(w)}px long, past the box`).toBeLessThanOrEqual(boxW + 1);
+      expect(h, `${id} is ${h}px high, past the box`).toBeLessThanOrEqual(boxH + 1);
+      const touches = Math.abs(w - boxW) <= 1 || Math.abs(h - boxH) <= 1;
+      expect(touches, `${id} at ${Math.round(w)}x${h} touches no side of the box: drawn too small`).toBe(true);
     }
   });
 
+  it('is the box the whale fills', () => {
+    const { w, h } = drawn('narmada-walking-whale');
+    expect(Math.abs(w - boxW), 'the whale is not two tiles long').toBeLessThanOrEqual(1);
+    expect(Math.abs(h - boxH), 'the whale does not fill the box').toBeLessThanOrEqual(1.5);
+  });
+
   it('draws the stand-in the size the painting will be', () => {
-    // So the art arriving changes the picture and not the size. `tall` is the painted side view's
-    // own proportion; this fails by name if a repainted animal changes shape without it.
+    // So the art arriving changes the picture and not the size. This fails by name if a repainted
+    // animal changes shape without its `long` and `tall` in `frames.ts`.
     for (const id of ANIMALS) {
       const marker = markerSize(id);
-      expect(marker.w, `${id}'s stand-in is not two tiles long`).toBe(WANDERER_LONG * GRID);
-      const painted = paintedHeight(id, side(id));
-      expect(Math.abs(marker.h - painted) / painted, `${id}: stand-in ${marker.h}px, painting ${painted}px`)
+      const painted = drawn(id);
+      expect(Math.abs(marker.w - painted.w) / painted.w, `${id}: stand-in ${marker.w}px long, painting ${Math.round(painted.w)}px`)
+        .toBeLessThan(0.03);
+      expect(Math.abs(marker.h - painted.h) / painted.h, `${id}: stand-in ${marker.h}px high, painting ${painted.h}px`)
         .toBeLessThan(0.03);
     }
   });
 
-  it('stands the giraffid over the player, and keeps the whale and the serpent low', () => {
+  it('lets only the giraffid look down on the player, and not by much', () => {
+    // Half the three tiles it stood at when every animal was two tiles long, on the owner's ask.
     const playerTall = PLAYER_FRAME.height * figureScale(GRID);
-    expect(paintedHeight('sivatherium', side('sivatherium')), 'the sivatherium is shorter than Varuna')
-      .toBeGreaterThan(playerTall * 2);
+    const siva = drawn('sivatherium').h;
+    expect(siva, 'the sivatherium is no taller than the player').toBeGreaterThan(playerTall);
+    expect(siva, 'the sivatherium towers over the player').toBeLessThan(playerTall * 1.3);
     for (const id of ['narmada-walking-whale', 'vasuki-indicus']) {
-      expect(paintedHeight(id, side(id)), `${id} stands taller than the player`).toBeLessThan(playerTall);
+      const { h } = drawn(id);
+      expect(h, `${id} stands taller than the player`).toBeLessThan(playerTall);
+      expect(h, `${id} is too small to read beside the player`).toBeGreaterThan(playerTall / 2);
     }
   });
 

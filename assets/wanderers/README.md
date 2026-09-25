@@ -19,6 +19,13 @@ add its id to `SHEETS` in `tools/build-wanderers.js`, and run it — the frames 
 connected pixels rather than cut on a grid, because the three sheets that exist are a row of four,
 a 2x2, and a row whose middle two animals touch.
 
+**Each frame keeps its own blob and nothing else in its box.** Cutting by bounding box alone brought
+a neighbour in wherever one reached into it, and two sivatherium views shipped with pieces of the
+next view. The builder now labels every pixel with its blob and keeps only the frame's own, plus
+the glow within six pixels. `node tools/build-wanderers.js --tidy` does the same to frames already
+built, since the sheets live in the git-ignored dump. `test/wanderers.test.ts` fails by name on any
+painted view with a second solid piece.
+
 Drop the file in and it appears. Nothing to register: `src/game/wandererArt.ts` globs this folder,
 `WorldScene.wandererTexture` prefers a painting over the generated stand-in, and the browser check
 in `e2e/wanderers.spec.ts` goes on passing either way.
@@ -34,16 +41,19 @@ different ask and it works.
 (`setOrigin(0.5, 1)`), so the animal's feet belong at the very bottom edge of the image. A gap
 there draws the animal floating above the grass, which is a fault that has shipped here before.
 
-**Paint at any size; the game scales from the side view.** An animal is `WANDERER_LONG` tiles
-long side-on — two, since the sivatherium was met at a traveller's height and read as a fawn at
-Varuna's knee. `sizeWanderer` scales the `-right` view to that length and draws every other facing
-at the same height, letting its width fall where it may. That is deliberate: scaling each frame to
-*fit a box* made a long side view shrink while the narrow front view of the same animal did not, so
-a whale was three times bigger walking towards you than walking across.
+**Paint at any size; the game scales from the side view.** Every animal is fitted to the walking
+whale's box, `WANDERER_BOX` in `frames.ts`: two tiles long and a little under the player's height.
+`sizeWanderer` scales the `-right` view until it touches one side of the box, so a long animal is
+two tiles long and a tall one stands the box's height. It then draws every other facing at that same
+height. The sivatherium alone has a taller box (`TALLER`), and stands a fifth over Varuna.
+
+Scaling each frame to *fit a box on its own* was tried first and is wrong: a long side view shrinks
+while the narrow front view of the same animal does not, so a whale was three times bigger walking
+towards you than walking across.
 
 **So the side view's proportions set the size.** A repainted animal that changes shape changes how
-tall it stands. `test/wanderers.test.ts` holds each painting to two tiles and fails by name if the
-stand-in's `tall` in `frames.ts` no longer matches the new art.
+big it is drawn. `test/wanderers.test.ts` holds each painting to its box, and fails by name if the
+stand-in's `long` and `tall` in `frames.ts` no longer match the new art.
 
 **Transparent background**, not white and not magenta. Alpha zero renders as white in some
 previews, so check the corner pixels are actually `rgba(0,0,0,0)` before sending it.

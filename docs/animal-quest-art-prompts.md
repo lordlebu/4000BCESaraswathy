@@ -110,20 +110,28 @@ pixel-identical in every cell, which is why nothing here is animated.
   view as a connected run of opaque pixels rather than cutting on a grid, because the three sheets
   that arrived were a row of four, a 2×2, and a row whose middle two animals *touch at the muzzle*.
   An even-quarter split cut two of them in half — measured, not guessed.
-- **Paint at any size.** `sizeWanderer` scales by the animal's height from `frames.ts`. Scaling to
-  *fit a box* was tried and is visibly wrong: a long side view hits the width bound and shrinks
-  while the narrow front view of the same animal does not, so the whale came out three times bigger
-  walking towards you than walking across.
+- **Paint at any size.** `sizeWanderer` fits the *side view* to the animal's box in `frames.ts`
+  and draws every other facing at that height. Scaling each facing to fit on its own was tried and
+  is visibly wrong: a long side view hits the width bound and shrinks while the narrow front view of
+  the same animal does not, so the whale came out three times bigger walking towards you than
+  walking across.
+- **A view is its blob, not its bounding box.** Cutting each view by its box brought a neighbour in
+  wherever one reached into it: the sivatherium's front view shipped with the side view's tail and
+  hind leg down its left edge. The builder now keeps each view's own pixels and glow, and
+  `test/wanderers.test.ts` refuses a painted view with a second solid piece.
 - **Transparent, and check it rather than trusting the preview.** These arrived with a soft halo
   around each animal (alpha under 40) which is invisible against grass, and a maximum alpha of 254
   rather than 255, which is invisible anywhere. Neither was worth a pass to fix — but *measure the
   corner pixels* before believing a background is clear.
 
-On screen, against a traveller's 80px and the player's 160px, each animal is **two tiles long
-side-on** (`WANDERER_LONG` in `src/game/frames.ts`), which stands them at: **whale 140,
-sivatherium 386, Vasuki 97.** They were drawn at a traveller's height until the sivatherium was met
-in the game and read as a fawn at Varuna's knee. At two tiles it stands about 2.4 times the player,
-which is close to the real animal.
+On screen, against a traveller's 80px and the player's 160px, every animal is fitted to the
+walking whale's box, two tiles long and 139px high (`WANDERER_BOX` in `src/game/frames.ts`):
+**whale 255 × 139, Vasuki 256 × 97, sivatherium 128 × 193** side-on, the giraffid alone in a taller
+box of its own. It got there in three steps, each set by looking at it in the game:
+- At a traveller's height, the sivatherium read as a fawn at Varuna's knee.
+- At two tiles long, it stood three tiles high, two and a half times the player.
+- The whale at two tiles was the one that looked right, and the sivatherium was asked to stand
+  slightly taller, at half the three tiles.
 
 ---
 

@@ -161,7 +161,12 @@ across as new art arrives; `mithra-walking.png` is the first.
 Until a character's *sitting* source moves too, it declares `"sit": { "keep": 4 }` — carry the
 seated frames already in the built sheet. That keeps a walk-only rebuild reproducible for
 everybody instead of a hand-stitch somebody has to remember, and it reverts to a normal `source`
-the day the sitting art lands.
+the day the sitting art lands. `keep` takes an `order` too: Varuna's two seated profiles were built
+swapped, and `"order": [0, 1, 3, 2]` carries them across the right way round.
+
+**A seated side view is the left profile, mirrored for right** (`sitFrame` in `game/player.ts`).
+No sheet's "seated, facing right" frame faced right, so the traveller sat facing the stern of the
+dugout until it was looked at. Walking is never mirrored; a seated figure has no step to betray it.
 
 **Check the profile rows by eye, at about 18×, before believing a sheet.** The four rows are
 assumed to arrive as down, up, right, left, and Mithra's did not — the two profiles were the other
@@ -752,7 +757,10 @@ readings; change them here and change them there.
   drawn from the *generated* `places.png`, so the painted temple had canon, art, a placement and a
   green test, and a player saw the placeholder. Points of interest can draw a painted sheet now —
   see `docs/placing-the-buildings-plan.md`. `vehicles.png` is the one that is still built and never
-  loaded, and it predates all of this.
+  loaded, and it predates all of this. **That is not the same as the carriage being undrawn:** the
+  Lodestone Line runs north to south and `vehicles.png` is side-on, so a ride draws
+  `assets/carriage-end.png` (by `tools/draw-carriage.py`) end-on, on the loop's clock, and
+  `e2e/riding.spec.ts` checks it is on screen mid-ride.
 - **`feat/react-upgrade` is abandoned, not merged.** Its atmosphere components (`FogOfWar`,
   `DayNightCycle`, `AmbientParticles`) are DOM reimplementations of things Phaser does natively,
   and it carries a weaker generator. It survives only as a visual reference. Do not merge it.
