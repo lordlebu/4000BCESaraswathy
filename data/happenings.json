@@ -1,0 +1,230 @@
+{
+  "$comment": [
+    "The words of every woven event. The rules for when each can happen are in src/content/happenings.ts;",
+    "everything a player reads is here, so a sentence can be rewritten without touching code.",
+    "",
+    "Each template names the `slots` it may use, and a slot is written {like_this}. The code fills them",
+    "from what is on the tile; test/happenings.test.ts refuses a slot a template did not declare, a",
+    "template the code has and this file does not (or the other way round), and a choice nobody uses.",
+    "",
+    "A value is a string, or a record of variants when one template says different things in",
+    "different circumstances: the three kinds of weather, or whether you know a stranger's name yet.",
+    "",
+    "Diary voice: second person, past the moment, British spelling. Nobody fails; every choice is a",
+    "real one with its own line. Strangers are 'they'. English only, with Jambhudweepan nouns, by",
+    "decision (docs/strangers-and-happenings.md, Q8)."
+  ],
+  "templates": {
+    "tracks": {
+      "slots": ["animal", "a_animal", "ground"],
+      "title": "Tracks across the path",
+      "prose": "Pressed into the ground across your way, and fresh: the tracks of {a_animal}. They cross from one side to the other and are lost in {ground} a few strides on.",
+      "choices": {
+        "follow": {
+          "label": "Follow them a little way",
+          "line": "You follow the {animal}'s tracks until the ground stops holding them. You never see it. You know now where it crosses, which is most of what anybody who tracks for a living knows."
+        },
+        "leave": {
+          "label": "Step round them",
+          "line": "You step round the tracks rather than over them, and leave them for whoever comes by next."
+        }
+      }
+    },
+    "dropped": {
+      "slots": ["material"],
+      "title": "Something on the road",
+      "prose": "Somebody has dropped a little {material} at the side of the road. Fallen from a load, by the look of it, and not worth going back for.",
+      "choices": {
+        "take": {
+          "label": "Pick it up",
+          "line": "You pick up the {material}. Whoever dropped it was carrying more than they could keep hold of."
+        },
+        "leave": {
+          "label": "Leave it where it fell",
+          "line": "You leave the {material} where it fell, in case whoever dropped it comes back along the road."
+        }
+      }
+    },
+    "company": {
+      "slots": ["role", "dye", "elsewhere", "name"],
+      "title": "Company on the road",
+      "prose": "A {role}, falls in beside you for a stretch. Dressed in {dye} gone pale with the road's dust, and in no hurry to be anywhere but walking.",
+      "choices": {
+        "walk": {
+          "label": "Walk together a while",
+          "line": {
+            "named": "You walk together as far as the next turning. Their name is {name}, and that is most of what they say; the miles go easier for it.",
+            "unnamed": "You walk together as far as the next turning. Neither of you says much, and the miles go easier for it."
+          }
+        },
+        "ask": {
+          "label": "Ask the way",
+          "line": {
+            "named": "They point you on toward {elsewhere}, and say it is further than it looks. It usually is. They give their name as {name} before they turn off.",
+            "unnamed": "They point you on toward {elsewhere}, and say it is further than it looks. It usually is."
+          }
+        }
+      }
+    },
+    "company-again": {
+      "slots": ["trade", "dye", "name"],
+      "title": "A face you know",
+      "prose": {
+        "named": "{name}, the {trade} from the other day, is on the road ahead, still in {dye}, and lifts a hand when they see it is you.",
+        "unnamed": "The {trade} from the other day is on the road ahead, still in {dye}, and lifts a hand when they see it is you."
+      },
+      "choices": {
+        "catch-up": {
+          "label": "Catch them up",
+          "line": "You fall in together as if you had arranged it. They remember which way you were going, which is more than most people do."
+        },
+        "wave": {
+          "label": "Lift a hand back",
+          "line": "You lift a hand back and let the road carry them on ahead. It is good to be known somewhere."
+        }
+      }
+    },
+    "weather": {
+      "slots": ["ground", "plant"],
+      "title": {
+        "rain": "Rain on the road",
+        "mist": "The mist comes down",
+        "storm": "The sky breaks"
+      },
+      "prose": {
+        "rain": "Rain comes across {ground} in a grey sheet, and then it is on you.",
+        "mist": "The mist comes down so quickly that {ground} behind you is gone before you have turned to look.",
+        "storm": "The sky goes the colour of a bruise, and the first of the wind flattens {ground} ahead of you."
+      },
+      "choices": {
+        "wait": {
+          "label": "Wait it out under the {plant}",
+          "line": "You wait under the {plant} until the worst has passed. It is not a roof, but it is a good deal better than none."
+        },
+        "stand": {
+          "label": "Stand and let it pass",
+          "line": "You turn your back to it and wait where you are. It passes, as it always does, and {ground} comes back washed."
+        },
+        "on": {
+          "label": "Walk on through it",
+          "line": {
+            "rain": "You walk on through it, soaked within a hundred steps, after which there is nothing more it can do to you.",
+            "mist": "You walk on slowly, counting steps, and the ground comes back one stride at a time.",
+            "storm": "You walk on with your head down, and the storm goes over you rather than through you."
+          }
+        }
+      }
+    },
+    "night-sounds": {
+      "slots": ["a_animal"],
+      "title": "Something beyond the lamp",
+      "prose": "Late, with the lamp turned low, something moves at the edge of its light. By the sound of it, {a_animal}: out at the hour it likes best, and not much interested in you.",
+      "choices": {
+        "listen": {
+          "label": "Keep still and listen",
+          "line": "You keep still and listen until it has gone about its business. You could not have drawn it, but you would know that sound again."
+        },
+        "lamp": {
+          "label": "Turn up the lamp",
+          "line": "You turn up the lamp. For a moment there are two eyes at the edge of the light, and then there are none."
+        }
+      }
+    },
+    "dream": {
+      "slots": ["ground"],
+      "title": "A dream",
+      "prose": "You dream of {ground} before anybody had walked there: the same ground, the same light, and nobody at all to write it down.",
+      "choices": {
+        "write": {
+          "label": "Write it down before it goes",
+          "line": "You write it down by feel in the dark. In the morning half of it will not read, and the other half is better than you remembered."
+        },
+        "let": {
+          "label": "Let it go",
+          "line": "You let it go. By first light you remember only that it was quiet."
+        }
+      }
+    },
+    "knock": {
+      "slots": ["role", "elsewhere", "name"],
+      "title": "Somebody after dark",
+      "prose": "After dark there is a voice at the edge of your shelter: a {role}, caught out by the night and asking whether there is room for one more.",
+      "choices": {
+        "room": {
+          "label": "Make room",
+          "line": {
+            "named": "They give their name as {name}, sleep sitting up against their load, and are gone before you wake. The night was warmer for two.",
+            "unnamed": "They sleep sitting up against their load and are gone before you wake. The night was warmer for two."
+          }
+        },
+        "point": {
+          "label": "Point them on",
+          "line": {
+            "named": "You point them on toward {elsewhere}. They thank you, say their name is {name} in case you meet again, and go.",
+            "unnamed": "You point them on toward {elsewhere}. They thank you and go, and the night is quiet again."
+          }
+        }
+      }
+    },
+    "cairn": {
+      "slots": ["place", "count"],
+      "title": "Stones at the edge",
+      "prose": "At the edge of {place} somebody once began a little pile of stones, and everybody who has arrived since has added one.",
+      "choices": {
+        "add": {
+          "label": "Add a stone",
+          "line": "You add a stone to the pile. It is not a large one, but it is yours, and it will be here after you have gone."
+        },
+        "count": {
+          "label": "Count them",
+          "line": "You count {count} before you lose your place, which is a great many arrivals for somewhere this quiet."
+        }
+      }
+    },
+    "cookfire": {
+      "slots": ["place"],
+      "title": "A fire already lit",
+      "prose": "There is smoke going up at {place}, and the smell of something in a pot. Whoever is tending it waves you over before you have properly arrived.",
+      "choices": {
+        "eat": {
+          "label": "Accept a bowl",
+          "line": "You eat sitting on your heels by the fire. Nobody asks where you have come from until the bowl is empty, which is good manners anywhere."
+        },
+        "wave": {
+          "label": "Wave back and go on",
+          "line": "You wave back and go on into {place}. The smell follows you further than the smoke does."
+        }
+      }
+    },
+    "watched": {
+      "slots": ["a_animal"],
+      "title": "Being watched",
+      "prose": "You look up from the work to find {a_animal} watching you from close by, with the air of something that has seen this done before and thinks you are doing it wrong.",
+      "choices": {
+        "carry-on": {
+          "label": "Carry on regardless",
+          "line": "You carry on. When you look up again it has gone, satisfied or disappointed; there is no telling which."
+        },
+        "watch": {
+          "label": "Stop and watch it back",
+          "line": "You stop and watch it back. Neither of you moves for a long moment, and then it decides you are not interesting and goes."
+        }
+      }
+    },
+    "underneath": {
+      "slots": ["material"],
+      "title": "Something underneath",
+      "prose": "Under what you were taking, the ground gives up something else: a little {material}, turned up by the work.",
+      "choices": {
+        "keep": {
+          "label": "Keep it",
+          "line": "You keep the {material}. The ground is generous to anybody who bothers to look at it."
+        },
+        "back": {
+          "label": "Put it back",
+          "line": "You put it back where it was and press the earth down over it."
+        }
+      }
+    }
+  }
+}

@@ -11,6 +11,10 @@ import type { Point } from '../src/world/types';
 import { anyConditions, choicesFor, type Circumstance, type GameEvent, type Occasion } from '../src/content/events';
 import {
   TEMPLATES,
+  TEXT,
+  choicesUsed,
+  fill,
+  slotsIn,
   happeningNow,
   surroundingsAt,
   wovenFor,
@@ -211,5 +215,72 @@ describe('a stranger remembers you', () => {
     const ids = new Set(sampled.filter((x) => x.around.stranger).map((x) => x.around.stranger!.id));
     const carriers = [...ids].filter((id) => id.endsWith(':company_carrier'));
     expect(carriers.length, 'a carrier walks every map').toBe(fieldMaps.length);
+  });
+});
+
+describe('the words live in data, and the data matches the code', () => {
+  const strings = (value: unknown): string[] =>
+    typeof value === 'string' ? [value] : value && typeof value === 'object' ? Object.values(value).flatMap(strings) : [];
+
+  it('has words for every template the code has, and no template the code lacks', () => {
+    const code = Object.values(TEMPLATES).flat().map((t) => t.kind).sort();
+    expect(Object.keys(TEXT).sort()).toEqual(code);
+  });
+
+  it('uses only the slots each template declares', () => {
+    const bad: string[] = [];
+    for (const [kind, words] of Object.entries(TEXT)) {
+      for (const text of strings([words.title, words.prose, words.choices])) {
+        for (const slot of slotsIn(text)) if (!words.slots.includes(slot)) bad.push(`${kind}: {${slot}}`);
+      }
+    }
+    expect(bad, 'a slot the template never fills would print as a hole').toEqual([]);
+  });
+
+  it('offers every choice the words file has, somewhere on the real maps', () => {
+    // `sampled` above has built every template across the four maps, so every choice the code can
+    // offer has been offered. One the file has and nothing offers is dead text.
+    expect(sampled.length).toBeGreaterThan(0);
+    const unused = Object.entries(TEXT).flatMap(([kind, words]) =>
+      Object.keys(words.choices).filter((id) => !choicesUsed().has(`${kind}.${id}`)).map((id) => `${kind}.${id}`)
+    );
+    expect(unused).toEqual([]);
+  });
+
+  it('leaves an unfilled slot visible rather than swallowing it', () => {
+    expect(fill('under the {plant}', {})).toBe('under the {plant}');
+    expect(fill('{count} stones', { count: 12 })).toBe('12 stones');
+  });
+});
+
+describe('strangers have names, and you learn them', () => {
+  it('tells you their canon name in whichever choice you make at the first meeting', () => {
+    const first = sampled.filter((x) => x.event.id.startsWith('woven:company:') || x.event.id.startsWith('woven:knock:'));
+    expect(first.length).toBeGreaterThan(0);
+    for (const { event } of first) {
+      const name = event.stranger!.givenName;
+      expect(name, `${event.id} has no name`).toBeTruthy();
+      // Not in the prose -- you do not know it yet -- and in every line, because any choice is how
+      // you come to know it.
+      expect(event.prose).not.toContain(name!);
+      for (const choice of event.choices) expect(choice.line, `${event.id}/${choice.id}`).toContain(name!);
+    }
+  });
+
+  it('greets you by that name the second time', () => {
+    const again = sampled.filter((x) => x.event.id.startsWith('woven:company-again:'));
+    expect(again.length).toBeGreaterThan(0);
+    for (const { event } of again) expect(event.prose.startsWith(event.stranger!.givenName!)).toBe(true);
+  });
+});
+
+describe('the inspector', () => {
+  it('opens a named template on demand, ration and all', () => {
+    const { around } = sampled.find((x) => x.event.id.startsWith('woven:dream:'))!;
+    // A roll that the ration would always refuse.
+    const refuse: Roll = () => 1;
+    expect(happeningNow(now('night', { shelter: 'roof' }), refuse, around, [])).toBeNull();
+    const forced = happeningNow(now('night', { shelter: 'roof' }), refuse, around, [], { kind: 'dream' });
+    expect(forced?.id.startsWith('woven:dream:')).toBe(true);
   });
 });
