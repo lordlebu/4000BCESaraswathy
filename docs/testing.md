@@ -373,6 +373,73 @@ The test is whether you can say *where the time goes* before you touch the numbe
 steps, compare local against CI, and only then decide. Widening because a spec failed and you do
 not know why is the thing the rule forbids, and it stays forbidden.
 
+## A starved frame counts as one frame, so a step's wait scales with its cost
+
+**Reported as `main` going red after PR 206**, which had not touched the code that failed.
+`e2e/dugout.spec.ts` › *"on a map without a boat, the same step is a wade"* timed out at
+`page.waitForFunction: Timeout 10000ms exceeded`, on the run and on its retry, while the Lothal test
+beside it passed. The same test had passed on the pull request and on the two runs of `main` before
+it.
+
+### The mechanism
+
+Phaser does not advance the game by wall time. `TimeStep.smoothDelta` in
+`node_modules/phaser/src/core/TimeStep.js` does two things that matter on a slow renderer:
+
+- **A frame longer than 200ms** (`1000 / minFps`, where `minFps` defaults to 5) is treated as a bad
+  frame and credited with the *last sane* delta instead of its real length.
+- **For 120 frames after boot** (`panicMax`), and whenever the page is not focused, every delta is
+  capped at one 60fps frame, 16.7ms.
+
+So on a software renderer that is starved of CPU, a tween does not finish after its length in
+milliseconds. It finishes after its length in **frames**, however long those frames take. A step is
+`STEP_MS * cost` of tween, so the frames it needs grow with its cost:
+
+| step | cost | tween | frames at 16.7ms |
+|---|---|---|---|
+| paddling on Lothal | 0.5 | 212ms | ~13 |
+| plains on foot | 1 | 425ms | ~25 |
+| a river on foot (the wade) | 3 | 1275ms | ~76 |
+
+That is why the wade failed and the paddle beside it did not. It is also why `walk.ts`'s 12-second
+arrival budget, sized for ordinary ground, does not carry over to a river.
+
+### How it was diagnosed
+
+1. **The CI log first.** `get_job_logs` through the GitHub tools gave the failing test and the
+   timings: both attempts failed within seconds of each other, and the shard ran in 7.3 minutes
+   against 3.5 in the local container, so the runner was about twice as slow as the reproduction.
+   The Playwright report artifact could not be downloaded: its blob-storage URL is refused by the
+   session's proxy.
+2. **Ruled out the clock.** The spec pins no `?hour=`, so the wall clock chooses the hour and CI ran
+   at 22:03 UTC. The same step at all 24 hours passed locally. `startPhaseFor` is the only wall-clock
+   read, and `?hour=` overrides it.
+3. **Ruled out a kill.** Nothing calls `killTweensOf(this.player)`, and only walking and riding set
+   `moving`. So "stuck forever" would need a tween that never completes. Nothing in the wading
+   branch of `moveWaterline` blocks or allocates per frame.
+4. **Reproduced in CI's image** (see *Reproduce CI before diagnosing CI*). At CI's 4 CPUs the wade
+   passed and took 1.7 to 1.9 seconds; at 2 CPUs, 1.8 to 3.5. **Starved to one CPU, with
+   `reachable.spec.ts` running beside it on a second worker, the old 10-second bound failed both
+   dugout tests.** That harness is harsher than CI, which *Reproduce CI* warns can invent failures.
+   It was used here to expose the mechanism, not to calibrate a rule the rest of the suite follows.
+5. **Traced it: slow, not stuck.** A scratch spec read `__walker()` every three seconds during the
+   step. The traveller crept across the tile, `__stalls` recorded one stall about every four
+   seconds, and he arrived after **38.7 seconds** twice and 6.9 seconds once.
+6. **Measured the budget rather than deriving it.** `walk.ts`'s 12 seconds times the cost, 36, was
+   tried first and was exactly what the trace exceeded. The wait is now `STEP_BUDGET = 60_000` in
+   `e2e/dugout.spec.ts`, half again the worst measured. In the same one-CPU harness where the old
+   bound failed both dugout tests, three repeats of both beside `reachable.spec.ts` passed, 42 of 42
+   with retries off.
+
+### The rule it adds
+
+**Size a step's wait by the frames it needs, not the milliseconds.** When a spec waits for a tween,
+its budget has to cover the step's *cost* at the worst frame rate CI gives, because Phaser will not
+let a starved frame count for more than one. A generous bound costs a green run nothing, since
+`waitForFunction` returns the moment the condition holds. This is the *too-small budget* column of
+the table above, and it came with the thing that column asks for: where the time goes, measured,
+before the number moved.
+
 ## Match CI's parallelism locally
 
 Local `workers` was pinned at 3 while CI leaves it to Playwright and gets 1–2. Adding seven
