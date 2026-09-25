@@ -58,6 +58,10 @@ stand-in's `long` and `tall` in `frames.ts` no longer match the new art.
 **Transparent background**, not white and not magenta. Alpha zero renders as white in some
 previews, so check the corner pixels are actually `rgba(0,0,0,0)` before sending it.
 
+**No shadow, painted or drawn.** Animals and travellers are drawn without one, on the owner's
+ruling; only the player casts a shadow. So don't paint one under the feet either. It would be the
+only shadow on the map that isn't the player's.
+
 ## After it lands
 
 Add the path to `src/ui/art-kept.json` — `test/artKept.test.ts` fails by name in both directions,

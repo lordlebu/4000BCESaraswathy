@@ -400,6 +400,10 @@ it is not, it has already been applied.
   `SAVE_VERSION` bump. An animal that is a *property of a tile* is still `species.ts`; a wanderer
   is an actor, and the two answer different questions.
 
+  **Only the player casts a shadow.** Travellers and wandering animals are drawn with none, on the
+  owner's ruling, so do not add one to either as tidying. The other use of the shadow texture is
+  the `contact` shade under props on the ground.
+
   **A satchel is not the kit, and neither replaced the other.** `kit.ts` is the bedroll, lamp,
   diary and staff: fixed, unmanaged, there from the first step. `satchel.ts` is what gets
   picked up along the way. The kit's argument against consumables still stands — there is no
