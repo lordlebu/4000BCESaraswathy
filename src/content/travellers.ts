@@ -24,7 +24,8 @@
 import { findPath } from '../world/pathfind';
 import { isWalkable } from '../world/generate';
 import type { Point, Tile, World } from '../world/types';
-import { allNpcs, fieldMap, npc, poi, type Npc } from './places';
+import { allNpcs, fieldMap, givenNames, npc, poi, type Npc } from './places';
+import { weightedPickFor } from '../world/rng';
 import { vehicles } from './making';
 import { type Look, lookFor } from './looks';
 
@@ -98,6 +99,15 @@ export interface Traveller {
   art: string;
   /** Which of canon's peoples they are, for road company. Null for a named person, who has a portrait. */
   culture: StrangerCulture | null;
+  /**
+   * What a stranger is called, from their people's names in canon. Null for a named person, whose
+   * name is `name`, and for a stranger whose people canon has given no names.
+   *
+   * **Held apart from `name` rather than replacing it**, because a player does not know it yet:
+   * "A carrier" is what the road shows you, and the given name is what you learn by walking with
+   * them. `happenings.ts` decides when that is.
+   */
+  givenName: string | null;
   /**
    * How that sheet is dyed for them, or null to draw it as painted.
    *
@@ -228,6 +238,17 @@ const COMPANY: readonly {
   { id: 'company_pilgrim', name: 'A pilgrim', role: 'pilgrim, tending the wayside', body: 'traveller-pilgrim', culture: 'kia' }
 ];
 
+/**
+ * A stranger's given name, dealt from their people's list by rendezvous hash of who they are.
+ *
+ * The same stranger is called the same thing on every machine, and a name added to canon takes
+ * only the strangers it outright wins -- nobody already known is renamed by a canon release.
+ */
+export function givenNameFor(culture: string, who: string): string | null {
+  const names = givenNames[culture] ?? [];
+  return weightedPickFor(names, 'given-name', { x: 0, y: 0 }, who, (n) => n, () => 1);
+}
+
 /** Canon's language to canon's culture, for the two that are both. */
 const CULTURE_OF_LANGUAGE: Record<string, StrangerCulture> = { kia: 'kia', maru: 'maru' };
 
@@ -318,7 +339,8 @@ export function travellersOn(fieldMapId: string): Traveller[] {
       conveyance: conveyanceFor(grounds),
       art: sheetFor(fieldMapId, out.length),
       look: lookFor(person.id, sheetFor(fieldMapId, out.length)),
-      culture: null
+      culture: null,
+      givenName: null
     });
   }
 
@@ -342,7 +364,8 @@ export function travellersOn(fieldMapId: string): Traveller[] {
         conveyance: conveyanceFor(grounds),
         art: who.body,
         look: lookFor(`${fieldMapId}:${who.id}`, who.body),
-        culture: who.culture
+        culture: who.culture,
+        givenName: givenNameFor(who.culture, `${fieldMapId}:${who.id}`)
       });
     }
   }

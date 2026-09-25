@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.28.0",
+  "canon_version": "2.29.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -2462,6 +2462,63 @@
       "renderable": true,
       "region": "region_ganges_lava_sea",
       "notes": "The molten surface and scalding shallows of the Ganges Lava Lake, where magma meets ocean. Distinct from the volcanic highlands around it, which are ordinary mountains and remain renderable. Renderable since the engine gained placeholder tiles: a biome with no drawn art is now drawn from its own colour and symbol rather than being undrawable, so the 29 encounterable fauna and 7 flora that live here can finally be met. The sky biomes and the underworld stay unrenderable because every species in them is authored `lore` -- that is an authorial decision, not a missing drawing."
+    }
+  ],
+  "peoples": [
+    {
+      "id": "harappan",
+      "given_names": [
+        "Tharek",
+        "Mehrun",
+        "Orun",
+        "Saalik",
+        "Rethik",
+        "Daavik",
+        "Veren",
+        "Ishkal",
+        "Naaren",
+        "Pethar",
+        "Oshen",
+        "Iskaa"
+      ]
+    },
+    {
+      "id": "kia",
+      "given_names": [
+        "Dakh",
+        "Uvi",
+        "Nesh",
+        "Thesk",
+        "Rekh",
+        "Nakh",
+        "Vaani",
+        "Ekhi",
+        "Tavi",
+        "Hura",
+        "Othu",
+        "Brekh"
+      ]
+    },
+    {
+      "id": "maru",
+      "given_names": [
+        "Bhoon",
+        "Kherne",
+        "Lenje",
+        "Anje",
+        "Okre",
+        "Dharn",
+        "Venj",
+        "Dhune",
+        "Oonu",
+        "Kalje",
+        "Nurme",
+        "Palke",
+        "Malu",
+        "Kolu",
+        "Dholu",
+        "Solu"
+      ]
     }
   ]
 }

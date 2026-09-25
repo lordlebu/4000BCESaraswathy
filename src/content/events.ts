@@ -112,6 +112,8 @@ export interface EventStranger {
   look: Look;
   /** Which of canon's peoples they are, so the face comes from the right part of the pool. */
   culture: StrangerCulture | null;
+  /** The name their people gave them, from canon. Told to you in the first event they are in. */
+  givenName: string | null;
 }
 
 export interface GameEvent {

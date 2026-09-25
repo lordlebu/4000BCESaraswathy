@@ -42,6 +42,7 @@ import {
   eventNow,
   events as authored
 } from './events';
+import happeningsText from '../../data/happenings.json';
 import { type Material, materialsIn } from './making';
 import { dyeName } from './looks';
 import { fieldMap, poi, type PointOfInterest } from './places';
@@ -112,7 +113,13 @@ export function surroundingsAt(
     // Qualified by the map, because the carrier on Lothal and the carrier on Dwarka are two people --
     // the same rule their looks are keyed by. Unqualified, meeting one would count as meeting both.
     stranger: who
-      ? { id: `${fieldMapId}:${who.id}`, role: who.role, look: who.look!, culture: who.culture }
+      ? {
+          id: `${fieldMapId}:${who.id}`,
+          role: who.role,
+          look: who.look!,
+          culture: who.culture,
+          givenName: who.givenName
+        }
       : null,
     taken: extra.taken ?? []
   };
@@ -175,64 +182,123 @@ function underfoot(biome: BiomeId, except: readonly string[]): Material[] {
  */
 const SHELTERING: readonly string[] = ['tree', 'palm', 'shrub'];
 
-const choice = (id: string, label: string, line: string, extra: Partial<Choice> = {}): Choice => ({
-  id,
-  label,
-  needs: [],
-  line,
-  grants: [],
-  ...extra
-});
+// ---------------------------------------------------------------------------------------------
+// The words, which live in `data/happenings.json`.
 
-const woven = (
+/** A piece of text: one string, or a record of variants chosen by the template. */
+type Text = string | Readonly<Record<string, string>>;
+
+interface TemplateText {
+  slots: readonly string[];
+  title: Text;
+  prose: Text;
+  choices: Readonly<Record<string, { label: Text; line: Text }>>;
+}
+
+/** Every template's words, keyed by kind. See the file's own `$comment` for the rules. */
+export const TEXT: Readonly<Record<string, TemplateText>> = (
+  happeningsText as unknown as { templates: Record<string, TemplateText> }
+).templates;
+
+/** The slots a string asks for, in order: `{a_animal}` and `{ground}` from one sentence. */
+export function slotsIn(text: string): string[] {
+  return [...text.matchAll(/\{([a-z_]+)\}/g)].map((m) => m[1]!);
+}
+
+/**
+ * Put the tile's facts into a sentence.
+ *
+ * A slot with no value is **left written as a slot** rather than dropped, so a missing fact shows
+ * as `{plant}` in the prose, which `test/happenings.test.ts` refuses, instead of as a sentence that
+ * quietly reads "under the ".
+ */
+export function fill(text: string, slots: Readonly<Record<string, string | number>>): string {
+  return text.replace(/\{([a-z_]+)\}/g, (whole, key: string) => (key in slots ? String(slots[key]) : whole));
+}
+
+/** One variant of a piece of text. A plain string has only one. */
+function pick(text: Text, variant: string | undefined): string {
+  if (typeof text === 'string') return text;
+  return (variant !== undefined ? text[variant] : undefined) ?? Object.values(text)[0] ?? '';
+}
+
+/** Which kind's choices have been built at least once, so the test can find a choice nobody uses. */
+const used = new Set<string>();
+export function choicesUsed(): ReadonlySet<string> {
+  return used;
+}
+
+interface ChoiceSpec {
+  id: string;
+  /** Which variant of this choice's label and line, when it has several. */
+  variant?: string;
+  gives?: Choice['gives'];
+  eases?: number;
+}
+
+/**
+ * Build a woven event from its kind's words and the facts that fill them.
+ *
+ * Throws on a kind or a choice the words file does not have. That is a mismatch between code and
+ * data, not a state a player can reach, and failing loudly under test is how it is found.
+ */
+function woven(
   occasion: Occasion,
   kind: string,
   subject: string,
-  title: string,
-  prose: string,
-  choices: Choice[],
-  stranger?: EventStranger
-): GameEvent => ({
-  id: `woven:${kind}:${subject}`,
-  title,
-  occasion,
-  conditions: anyConditions(),
-  prose,
-  // Named for the template rather than the subject, so one painting of tracks serves every animal.
-  // Missing today, like every event painting, and the card borrows the night's scene or a blank.
-  art: `woven-${kind}`,
-  choices,
-  once: true,
-  ...(stranger ? { stranger } : {})
-});
+  slots: Readonly<Record<string, string | number>>,
+  choices: readonly ChoiceSpec[],
+  options: { variant?: string; stranger?: EventStranger } = {}
+): GameEvent {
+  const words = TEXT[kind];
+  if (!words) throw new Error(`data/happenings.json has no template '${kind}'`);
+  return {
+    id: `woven:${kind}:${subject}`,
+    title: fill(pick(words.title, options.variant), slots),
+    occasion,
+    conditions: anyConditions(),
+    prose: fill(pick(words.prose, options.variant), slots),
+    // Named for the template rather than the subject, so one painting of tracks serves every animal.
+    // Missing today, like every event painting, and the card borrows the night's scene or a blank.
+    art: `woven-${kind}`,
+    choices: choices.map((spec) => {
+      const text = words.choices[spec.id];
+      if (!text) throw new Error(`data/happenings.json: '${kind}' has no choice '${spec.id}'`);
+      used.add(`${kind}.${spec.id}`);
+      const variant = spec.variant ?? options.variant;
+      return {
+        id: spec.id,
+        label: fill(pick(text.label, variant), slots),
+        needs: [],
+        line: fill(pick(text.line, variant), slots),
+        grants: [],
+        ...(spec.gives ? { gives: spec.gives } : {}),
+        ...(spec.eases ? { eases: spec.eases } : {})
+      };
+    }),
+    once: true,
+    ...(options.stranger ? { stranger: options.stranger } : {})
+  };
+}
 
 type Template = (around: Surroundings, roll: Roll, now: Circumstance) => GameEvent | null;
+
+/** Whether you would know this stranger's name, which decides the variant a line is told in. */
+const named = (stranger: EventStranger) => (stranger.givenName ? 'named' : 'unnamed');
+
+/** Road company are only on the road by day -- `whereabouts` has them at a place from dusk. */
+const byDay = (moment: Surroundings['moment']) => !moment || ['morning', 'afternoon'].includes(moment.timeOfDay);
 
 // ---------------------------------------------------------------------------------------------
 // The road. Asked once per day of walking.
 
 const tracks: Template = ({ creature, biome }) => {
   if (!creature || !isAnimal(creature.id)) return null;
-  const name = lower(creature.name);
-  return woven(
-    'road',
-    'tracks',
-    creature.id,
-    'Tracks across the path',
-    `Pressed into the ground across your way, and fresh: the tracks of ${a(name)}. They cross from one side to the other and are lost in ${ground(biome)} a few strides on.`,
-    [
-      choice(
-        'follow',
-        'Follow them a little way',
-        `You follow the ${name}'s tracks until the ground stops holding them. You never see it. You know now where it crosses, which is most of what anybody who tracks for a living knows.`
-      ),
-      choice(
-        'leave',
-        'Step round them',
-        'You step round the tracks rather than over them, and leave them for whoever comes by next.'
-      )
-    ]
-  );
+  const animal = lower(creature.name);
+  return woven('road', 'tracks', creature.id, { animal, a_animal: a(animal), ground: ground(biome) }, [
+    { id: 'follow' },
+    { id: 'leave' }
+  ]);
 };
 
 const dropped: Template = ({ onRoad, biome, taken }, roll) => {
@@ -240,53 +306,30 @@ const dropped: Template = ({ onRoad, biome, taken }, roll) => {
   const can = droppable(biome, taken);
   if (can.length === 0) return null;
   const m = can[roll('dropped') % can.length]!;
-  const name = lower(m.name);
-  return woven(
-    'road',
-    'dropped',
-    m.id,
-    'Something on the road',
-    `Somebody has dropped a little ${name} at the side of the road. Fallen from a load, by the look of it, and not worth going back for.`,
-    [
-      choice('take', 'Pick it up', `You pick up the ${name}. Whoever dropped it was carrying more than they could keep hold of.`, {
-        gives: [{ id: m.id, n: 1 }]
-      }),
-      choice(
-        'leave',
-        'Leave it where it fell',
-        `You leave the ${name} where it fell, in case whoever dropped it comes back along the road.`
-      )
-    ]
-  );
+  return woven('road', 'dropped', m.id, { material: lower(m.name) }, [
+    { id: 'take', gives: [{ id: m.id, n: 1 }] },
+    { id: 'leave' }
+  ]);
 };
 
 const company: Template = ({ stranger, elsewhere, moment }, _roll, now) => {
-  if (!stranger || !elsewhere) return null;
-  // Road company are only on the road by day -- `whereabouts` has them at a place from dusk to
-  // morning -- so meeting one after dark would contradict the map.
-  if (moment && !['morning', 'afternoon'].includes(moment.timeOfDay)) return null;
+  if (!stranger || !elsewhere || !byDay(moment)) return null;
   // Somebody you have met is met differently -- see `companyAgain`.
   if (now.met?.includes(stranger.id)) return null;
   return woven(
     'road',
     'company',
     stranger.id,
-    'Company on the road',
-    `A ${stranger.role}, falls in beside you for a stretch. Dressed in ${dyeName(stranger.look.cloth)} gone pale with the road's dust, and in no hurry to be anywhere but walking.`,
-    [
-      choice(
-        'walk',
-        'Walk together a while',
-        'You walk together as far as the next turning. Neither of you says much, and the miles go easier for it.',
-        { eases: COMPANY_EASES }
-      ),
-      choice(
-        'ask',
-        'Ask the way',
-        `They point you on toward ${placeName(elsewhere)}, and say it is further than it looks. It usually is.`
-      )
-    ],
-    stranger
+    {
+      role: stranger.role,
+      dye: dyeName(stranger.look.cloth),
+      elsewhere: placeName(elsewhere),
+      name: stranger.givenName ?? ''
+    },
+    // Their name is in the line of whichever choice you make: walking with somebody or asking them
+    // the way is how you learn what they are called.
+    [{ id: 'walk', eases: COMPANY_EASES }, { id: 'ask' }],
+    { variant: named(stranger), stranger }
   );
 };
 
@@ -294,80 +337,35 @@ const company: Template = ({ stranger, elsewhere, moment }, _roll, now) => {
  * The same stranger, the second time.
  *
  * **What the save's `met` list is for.** A face on the road that knows yours is the smallest thing
- * that makes a road feel lived on, and it needs exactly one fact kept between days. Still no name
- * and no words -- they lift a hand, they do not introduce themselves.
+ * that makes a road feel lived on, and it needs exactly one fact kept between days. By now you
+ * know their name, because every first meeting ends with it.
  */
 const companyAgain: Template = ({ stranger, moment }, _roll, now) => {
-  if (!stranger || !now.met?.includes(stranger.id)) return null;
-  if (moment && !['morning', 'afternoon'].includes(moment.timeOfDay)) return null;
+  if (!stranger || !now.met?.includes(stranger.id) || !byDay(moment)) return null;
   return woven(
     'road',
     'company-again',
     stranger.id,
-    'A face you know',
-    `The ${stranger.role.split(',')[0]} from the other day is on the road ahead, still in ${dyeName(stranger.look.cloth)}, and lifts a hand when they see it is you.`,
-    [
-      choice(
-        'catch-up',
-        'Catch them up',
-        'You fall in together as if you had arranged it. They remember which way you were going, which is more than most people do.',
-        { eases: COMPANY_EASES }
-      ),
-      choice(
-        'wave',
-        'Lift a hand back',
-        'You lift a hand back and let the road carry them on ahead. It is good to be known somewhere.'
-      )
-    ],
-    stranger
+    { trade: stranger.role.split(',')[0]!, dye: dyeName(stranger.look.cloth), name: stranger.givenName ?? '' },
+    [{ id: 'catch-up', eases: COMPANY_EASES }, { id: 'wave' }],
+    { variant: named(stranger), stranger }
   );
-};
-
-const WEATHER_TITLE: Record<string, string> = {
-  rain: 'Rain on the road',
-  mist: 'The mist comes down',
-  storm: 'The sky breaks'
 };
 
 const weather: Template = ({ moment, biome, flora }) => {
   const sky = moment?.weather;
-  if (!sky || !WEATHER_TITLE[sky]) return null;
-  const where = ground(biome);
-  const prose =
-    sky === 'rain'
-      ? `Rain comes across ${where} in a grey sheet, and then it is on you.`
-      : sky === 'mist'
-        ? `The mist comes down so quickly that ${where} behind you is gone before you have turned to look.`
-        : `The sky goes the colour of a bruise, and the first of the wind flattens ${where} ahead of you.`;
-  const onward =
-    sky === 'rain'
-      ? 'You walk on through it, soaked within a hundred steps, after which there is nothing more it can do to you.'
-      : sky === 'mist'
-        ? 'You walk on slowly, counting steps, and the ground comes back one stride at a time.'
-        : 'You walk on with your head down, and the storm goes over you rather than through you.';
-  const choices = [choice('on', 'Walk on through it', onward)];
-  if (flora && SHELTERING.includes(flora.growthForm)) {
-    const plant = lower(flora.name);
-    choices.unshift(
-      choice(
-        'wait',
-        `Wait it out under the ${plant}`,
-        `You wait under the ${plant} until the worst has passed. It is not a roof, but it is a good deal better than none.`,
-        { eases: COMPANY_EASES }
-      )
-    );
-  } else {
-    // Nothing to shelter under is not no choice. Standing it out is a real one, and it keeps the
-    // card at two options wherever it is met -- a weather card with one button is a notice.
-    choices.unshift(
-      choice(
-        'stand',
-        'Stand and let it pass',
-        `You turn your back to it and wait where you are. It passes, as it always does, and ${where} comes back washed.`
-      )
-    );
-  }
-  return woven('road', 'weather', `${sky}:${biome}`, WEATHER_TITLE[sky]!, prose, choices);
+  if (sky !== 'rain' && sky !== 'mist' && sky !== 'storm') return null;
+  const shelter = flora && SHELTERING.includes(flora.growthForm) ? lower(flora.name) : null;
+  // Nothing to shelter under is not no choice. Standing it out is a real one, and it keeps the card
+  // at two options wherever it is met -- a weather card with one button is a notice.
+  return woven(
+    'road',
+    'weather',
+    `${sky}:${biome}`,
+    { ground: ground(biome), plant: shelter ?? '' },
+    [shelter ? { id: 'wait', eases: COMPANY_EASES } : { id: 'stand' }, { id: 'on' }],
+    { variant: sky }
+  );
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -379,44 +377,11 @@ const nightSounds: Template = ({ biome }, roll) => {
   const out = creaturesIn(biome).filter((c) => isAnimal(c.id) && rhythmOf(c) === 'nocturnal');
   if (out.length === 0) return null;
   const c = out[roll('night-sounds') % out.length]!;
-  const name = lower(c.name);
-  return woven(
-    'night',
-    'night-sounds',
-    c.id,
-    'Something beyond the lamp',
-    `Late, with the lamp turned low, something moves at the edge of its light. By the sound of it, ${a(name)}: out at the hour it likes best, and not much interested in you.`,
-    [
-      choice(
-        'listen',
-        'Keep still and listen',
-        'You keep still and listen until it has gone about its business. You could not have drawn it, but you would know that sound again.'
-      ),
-      choice(
-        'lamp',
-        'Turn up the lamp',
-        'You turn up the lamp. For a moment there are two eyes at the edge of the light, and then there are none.'
-      )
-    ]
-  );
+  return woven('night', 'night-sounds', c.id, { a_animal: a(lower(c.name)) }, [{ id: 'listen' }, { id: 'lamp' }]);
 };
 
 const dream: Template = ({ biome }) =>
-  woven(
-    'night',
-    'dream',
-    biome,
-    'A dream',
-    `You dream of ${ground(biome)} before anybody had walked there: the same ground, the same light, and nobody at all to write it down.`,
-    [
-      choice(
-        'write',
-        'Write it down before it goes',
-        'You write it down by feel in the dark. In the morning half of it will not read, and the other half is better than you remembered.'
-      ),
-      choice('let', 'Let it go', 'You let it go. By first light you remember only that it was quiet.')
-    ]
-  );
+  woven('night', 'dream', biome, { ground: ground(biome) }, [{ id: 'write' }, { id: 'let' }]);
 
 /** Nights with a threshold somebody could come to. A bedroll in the open has none. */
 const KNOCKABLE = ['tent', 'camp', 'roof', 'settlement', 'palace'];
@@ -427,22 +392,9 @@ const knock: Template = ({ stranger, elsewhere }, _roll, now) => {
     'night',
     'knock',
     stranger.id,
-    'Somebody after dark',
-    `After dark there is a voice at the edge of your shelter: a ${stranger.role}, caught out by the night and asking whether there is room for one more.`,
-    [
-      choice(
-        'room',
-        'Make room',
-        'They sleep sitting up against their load and are gone before you wake. The night was warmer for two.',
-        { eases: COMPANY_EASES }
-      ),
-      choice(
-        'point',
-        'Point them on',
-        `You point them on toward ${placeName(elsewhere)}. They thank you and go, and the night is quiet again.`
-      )
-    ],
-    stranger
+    { role: stranger.role, elsewhere: placeName(elsewhere), name: stranger.givenName ?? '' },
+    [{ id: 'room', eases: COMPANY_EASES }, { id: 'point' }],
+    { variant: named(stranger), stranger }
   );
 };
 
@@ -451,50 +403,18 @@ const knock: Template = ({ stranger, elsewhere }, _roll, now) => {
 
 const cairn: Template = ({ place }, roll) => {
   if (!place || place.kind === 'settlement') return null;
-  const stones = 20 + (roll('cairn') % 60);
-  return woven(
-    'arriving',
-    'cairn',
-    place.id,
-    'Stones at the edge',
-    `At the edge of ${placeName(place)} somebody once began a little pile of stones, and everybody who has arrived since has added one.`,
-    [
-      choice(
-        'add',
-        'Add a stone',
-        'You add a stone to the pile. It is not a large one, but it is yours, and it will be here after you have gone.'
-      ),
-      choice(
-        'count',
-        'Count them',
-        `You count ${stones} before you lose your place, which is a great many arrivals for somewhere this quiet.`
-      )
-    ]
-  );
+  return woven('arriving', 'cairn', place.id, { place: placeName(place), count: 20 + (roll('cairn') % 60) }, [
+    { id: 'add' },
+    { id: 'count' }
+  ]);
 };
 
 const cookfire: Template = ({ place }) => {
   if (!place || (place.kind !== 'settlement' && place.kind !== 'travel_node')) return null;
-  return woven(
-    'arriving',
-    'cookfire',
-    place.id,
-    'A fire already lit',
-    `There is smoke going up at ${placeName(place)}, and the smell of something in a pot. Whoever is tending it waves you over before you have properly arrived.`,
-    [
-      choice(
-        'eat',
-        'Accept a bowl',
-        'You eat sitting on your heels by the fire. Nobody asks where you have come from until the bowl is empty, which is good manners anywhere.',
-        { eases: MEAL_EASES }
-      ),
-      choice(
-        'wave',
-        'Wave back and go on',
-        `You wave back and go on into ${placeName(place)}. The smell follows you further than the smoke does.`
-      )
-    ]
-  );
+  return woven('arriving', 'cookfire', place.id, { place: placeName(place) }, [
+    { id: 'eat', eases: MEAL_EASES },
+    { id: 'wave' }
+  ]);
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -502,66 +422,58 @@ const cookfire: Template = ({ place }) => {
 
 const watched: Template = ({ creature }) => {
   if (!creature || !isAnimal(creature.id)) return null;
-  const name = lower(creature.name);
-  return woven(
-    'working',
-    'watched',
-    creature.id,
-    'Being watched',
-    `You look up from the work to find ${a(name)} watching you from close by, with the air of something that has seen this done before and thinks you are doing it wrong.`,
-    [
-      choice(
-        'carry-on',
-        'Carry on regardless',
-        'You carry on. When you look up again it has gone, satisfied or disappointed; there is no telling which.'
-      ),
-      choice(
-        'watch',
-        'Stop and watch it back',
-        'You stop and watch it back. Neither of you moves for a long moment, and then it decides you are not interesting and goes.'
-      )
-    ]
-  );
+  return woven('working', 'watched', creature.id, { a_animal: a(lower(creature.name)) }, [
+    { id: 'carry-on' },
+    { id: 'watch' }
+  ]);
 };
 
 const underneath: Template = ({ biome, taken }, roll) => {
   const can = underfoot(biome, taken);
   if (can.length === 0) return null;
   const m = can[roll('underneath') % can.length]!;
-  const name = lower(m.name);
-  return woven(
-    'working',
-    'underneath',
-    m.id,
-    'Something underneath',
-    `Under what you were taking, the ground gives up something else: a little ${name}, turned up by the work.`,
-    [
-      choice('keep', 'Keep it', `You keep the ${name}. The ground is generous to anybody who bothers to look at it.`, {
-        gives: [{ id: m.id, n: 1 }]
-      }),
-      choice('back', 'Put it back', 'You put it back where it was and press the earth down over it.')
-    ]
-  );
+  return woven('working', 'underneath', m.id, { material: lower(m.name) }, [
+    { id: 'keep', gives: [{ id: m.id, n: 1 }] },
+    { id: 'back' }
+  ]);
 };
 
 /**
- * Every template, by the occasion it answers.
+ * Every template, by the occasion it answers, and the kind its words are filed under.
  *
- * Adding one is a function and a line here. The order is the order a tie would break in and
- * nothing else -- the pick is seeded over the ones that can happen, not the first that can.
+ * Adding one is a function, a line here and an entry in `data/happenings.json`. The order is the
+ * order a tie would break in and nothing else -- the pick is seeded over the ones that can happen,
+ * not the first that can.
  */
-export const TEMPLATES: Readonly<Record<Occasion, readonly Template[]>> = {
-  road: [tracks, dropped, company, companyAgain, weather],
-  night: [nightSounds, dream, knock],
-  arriving: [cairn, cookfire],
-  working: [watched, underneath]
+export const TEMPLATES: Readonly<Record<Occasion, readonly { kind: string; make: Template }[]>> = {
+  road: [
+    { kind: 'tracks', make: tracks },
+    { kind: 'dropped', make: dropped },
+    { kind: 'company', make: company },
+    { kind: 'company-again', make: companyAgain },
+    { kind: 'weather', make: weather }
+  ],
+  night: [
+    { kind: 'night-sounds', make: nightSounds },
+    { kind: 'dream', make: dream },
+    { kind: 'knock', make: knock }
+  ],
+  arriving: [
+    { kind: 'cairn', make: cairn },
+    { kind: 'cookfire', make: cookfire }
+  ],
+  working: [
+    { kind: 'watched', make: watched },
+    { kind: 'underneath', make: underneath }
+  ]
 };
 
 /** Every woven event that could happen right now, before the ration. For tests and for tuning. */
-export function wovenFor(now: Circumstance, around: Surroundings, roll: Roll): GameEvent[] {
+export function wovenFor(now: Circumstance, around: Surroundings, roll: Roll, kind?: string): GameEvent[] {
   const out: GameEvent[] = [];
   for (const template of TEMPLATES[now.occasion]) {
-    const event = template(around, roll, now);
+    if (kind && template.kind !== kind) continue;
+    const event = template.make(around, roll, now);
     if (event && !now.seen.includes(event.id)) out.push(event);
   }
   return out;
@@ -576,17 +488,21 @@ export function wovenFor(now: Circumstance, around: Surroundings, roll: Roll): G
  *
  * `around` may be null -- no world yet, or a tile off the map -- and then only an authored event
  * can happen, which is exactly what `eventNow` did before this existed.
+ *
+ * `force` is for the inspector: skip the ration, and optionally ask for one `kind`. It is how a
+ * browser test, or somebody writing a new template, opens a card without walking for three days.
  */
 export function happeningNow(
   now: Circumstance,
   roll: Roll,
   around: Surroundings | null,
-  from: readonly GameEvent[] = authored
+  from: readonly GameEvent[] = authored,
+  force: { kind?: string } | null = null
 ): GameEvent | null {
-  const written = eventNow(now, roll, from);
+  const written = force?.kind ? null : eventNow(now, roll, from);
   if (written || !around) return written;
-  if (roll(`woven:${now.occasion}:${now.day}`) % WOVEN_ONE_IN[now.occasion] !== 0) return null;
-  const could = wovenFor(now, around, roll);
+  if (!force && roll(`woven:${now.occasion}:${now.day}`) % WOVEN_ONE_IN[now.occasion] !== 0) return null;
+  const could = wovenFor(now, around, roll, force?.kind);
   if (could.length === 0) return null;
   return could[roll(`woven-pick:${now.occasion}:${now.day}`) % could.length] ?? null;
 }

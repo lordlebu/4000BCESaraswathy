@@ -251,7 +251,9 @@ export function App() {
     /** Where the traveller is standing, for an event that fires from something other than a step. */
     at: null as { x: number; y: number } | null,
     /** The hour and the sky, for a woven event -- rain on the road needs to know it is raining. */
-    moment: null as WorldMoment | null
+    moment: null as WorldMoment | null,
+    /** The authored place being stood in, for the inspector to ask an arrival of. */
+    poiId: null as string | null
   });
 
   // Kept in step after every commit, so anything that changes progress or the satchel by another
@@ -284,7 +286,7 @@ export function App() {
         shelter: string | null,
         salt: string,
         extra?: { poiId?: string | null; taken?: readonly string[] }
-      ) => void)
+      ) => boolean)
     | null
   >(null);
   /** What the last take carried off, so the `working` question does not turn up the same thing. */
@@ -313,6 +315,9 @@ export function App() {
     ...readShowing()
   }));
   const { surface, interrupts, standingOn, placeOpen, satchelRibbon, dockHeight, talkingTo } = ui;
+  useEffect(() => {
+    latest.current.poiId = standingOn;
+  }, [standingOn]);
 
   // Written when it moves, rather than inside the reducer's case: the reducer is pure and tested
   // under Node, and a `localStorage` write in it would be both a side effect and a browser global
@@ -370,19 +375,6 @@ export function App() {
     const onCharacter = ({ characterId: drawn }: GameToUi['character-changed']) => setDrawn(drawn);
 
     /**
-     * A night passed. Ask whether anything happened in it.
-     *
-     * **`night-passed` had no listener at all until this.** It was emitted every time somebody
-     * slept, carried where they were, what shelter they had and what the diary should say, and
-     * nothing anywhere read it -- the fourth instance in this codebase of a thing built, tested,
-     * believed and wired to nothing. So the event framework is not bolted onto the night; it is
-     * plugged into a socket that was already there and unused.
-     *
-     * There are no events authored yet, so `eventNow` returns null every time and a player sees
-     * exactly what they saw before. That is what a framework with no content should do -- and the
-     * path is live, so the first authored event needs no wiring.
-     */
-    /**
      * Ask whether anything happens, and open it if so.
      *
      * **One function for all three occasions**, because the only thing that differs between a
@@ -395,10 +387,10 @@ export function App() {
       at: { x: number; y: number },
       shelter: string | null,
       salt: string,
-      extra: { poiId?: string | null; taken?: readonly string[] } = {}
-    ) => {
+      extra: { poiId?: string | null; taken?: readonly string[]; force?: { kind?: string } } = {}
+    ): boolean => {
       const world = latest.current.world;
-      if (!world) return;
+      if (!world) return false;
       const p = latest.current.progress;
       // Seeded on the tile and the salt, like every other roll in this codebase: the same seed
       // must produce the same journal text, and `Math.random` here would make a seed
@@ -421,11 +413,37 @@ export function App() {
         roll,
         // What is here to make an event out of, when nothing authored can happen -- see
         // `happenings.ts`. Read from the same world and tile the roll is seeded on.
-        surroundingsAt(world, at, latest.current.fieldMapId, latest.current.moment, roll, extra)
+        surroundingsAt(world, at, latest.current.fieldMapId, latest.current.moment, roll, extra),
+        undefined,
+        extra.force ?? null
       );
-      if (!next) return;
+      if (!next) return false;
       seenEvents.current = [...seenEvents.current, next.id];
       setHappening({ event: next, shelter });
+      return true;
+    };
+
+    /**
+     * **The inspector: open an event now, without walking for three days to be rationed one.**
+     *
+     * `__happen('road')` asks the road question with the ration skipped; `__happen('night',
+     * 'knock', 'roof')` asks for one template on one kind of night. It goes through exactly the path
+     * a real step does -- the same surroundings, the same `seen` and `met`, the same card -- so what
+     * it proves is the wiring, which no Node test can see. Exposed the way the scene exposes
+     * `__walker` and `__travellers`, and for the same reason: `e2e/happenings.spec.ts` reads it.
+     * Returns whether a card opened.
+     */
+    (window as unknown as { __happen?: (o: Occasion, kind?: string, shelter?: string) => boolean }).__happen = (
+      occasion,
+      kind,
+      shelter
+    ) => {
+      const here = latest.current.at;
+      if (!here) return false;
+      return maybeHappens(occasion, here, shelter ?? null, `inspect:${occasion}`, {
+        poiId: latest.current.poiId,
+        force: kind ? { kind } : {}
+      });
     };
 
     /**

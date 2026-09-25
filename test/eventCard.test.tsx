@@ -39,7 +39,7 @@ const event = (over: Partial<GameEvent> = {}): GameEvent => ({
     }
   ],
   once: true,
-  stranger: { id: 'company_carrier', role: 'carrier, with a loaded back', look, culture: 'harappan' },
+  stranger: { id: 'company_carrier', role: 'carrier, with a loaded back', look, culture: 'harappan', givenName: 'Tharek' },
   ...over
 });
 
