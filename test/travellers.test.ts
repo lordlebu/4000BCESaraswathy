@@ -22,8 +22,10 @@ import {
   travellersOn,
   wayBetween,
   whereabouts,
+  ROAD_COMPANY_PER_MAP,
   TRAVELLERS_PER_MAP
 } from '../src/content/travellers';
+import { lookKey } from '../src/content/looks';
 import { isWalkable } from '../src/world/generate';
 import { hoursToPhase, skyAt } from '../src/game/dayNight';
 import { DEFAULT_SEED } from '../src/ui/seed';
@@ -45,11 +47,16 @@ describe('canon already knows who travels', () => {
     expect(terke?.foundAt).toContain('poi_vedda_ford');
   });
 
-  it('puts two or three people on every map, canon first', () => {
+  it('puts canon’s people first and two strangers beside them on every map', () => {
     for (const map of fieldMaps) {
       const roster = travellersOn(map.id);
-      expect(roster.length, `${map.id}: nobody travels here`).toBeGreaterThan(0);
-      expect(roster.length, `${map.id}: too many on the road`).toBeLessThanOrEqual(TRAVELLERS_PER_MAP);
+      const named = roster.filter((t) => t.npcId !== null);
+      const company = roster.filter((t) => t.npcId === null);
+      expect(named.length, `${map.id}: nobody canon wrote travels here`).toBeGreaterThan(0);
+      expect(named.length, `${map.id}: too many named on the road`).toBeLessThanOrEqual(TRAVELLERS_PER_MAP);
+      // **Every map, not only the one canon left room on.** Strangers used to fill what canon left
+      // empty, which put them on the Narmada alone and every stranger event with them.
+      expect(company.length, `${map.id}: no road company`).toBe(ROAD_COMPANY_PER_MAP);
 
       // **Canon's own circuit-walkers come first and road company only fills what is left.** A map
       // with people who genuinely move must get those people; only a map without enough of them
@@ -72,9 +79,10 @@ describe('canon already knows who travels', () => {
         }
       }
 
-      // No two drawn as the same figure -- three copies of one face reads as a bug.
-      expect(new Set(roster.map((t) => t.art)).size, `${map.id}: two travellers share a sheet`)
-        .toBe(roster.length);
+      // No two drawn as the same figure -- copies of one face read as a bug. Judged by the look now
+      // rather than the body, because two carriers in different dyes are two people.
+      const drawn = roster.map((t) => (t.look ? lookKey(t.look) : t.art));
+      expect(new Set(drawn).size, `${map.id}: two travellers are drawn alike`).toBe(roster.length);
     }
   });
 
@@ -257,14 +265,39 @@ describe('travellers stop wearing the player\'s face', () => {
     expect(sheetsToUse(exact, PLAYABLE)).toEqual(exact);
   });
 
-  it('gives every map three different figures either way', () => {
+  it('gives canon’s people on every map three different figures either way', () => {
     // The guarantee that must survive the switch: `sheetFor` walks the list by position, so no two
-    // travellers on one map share a sheet while the roster fits. True of the five today and of the
-    // three tomorrow -- and it is *only* true because the list is at least as long as the roster.
+    // *named* travellers on one map share a sheet while the roster fits. Road company are outside
+    // it on purpose -- they wear the body of their trade, and their dyes tell them apart.
     for (const map of fieldMaps) {
-      const art = travellersOn(map.id).map((t) => t.art);
-      expect(new Set(art).size, `${map.id}: two travellers share a sheet`).toBe(art.length);
+      const art = travellersOn(map.id).filter((t) => t.npcId !== null).map((t) => t.art);
+      expect(new Set(art).size, `${map.id}: two named travellers share a sheet`).toBe(art.length);
     }
+  });
+
+  it('dresses road company as their trade, from the people canon gives it', () => {
+    const body: Record<string, string> = {
+      company_carrier: 'traveller-carrier',
+      company_drover: 'traveller-drover',
+      company_pilgrim: 'traveller-pilgrim'
+    };
+    const culture: Record<string, string> = {
+      company_carrier: 'harappan',
+      company_drover: 'maru',
+      company_pilgrim: 'kia'
+    };
+    for (const map of fieldMaps) {
+      for (const t of travellersOn(map.id).filter((x) => x.npcId === null)) {
+        expect(t.art, `${map.id}/${t.id}`).toBe(body[t.id]);
+        expect(t.culture, `${map.id}/${t.id}`).toBe(culture[t.id]);
+      }
+    }
+    // The Narmada is canon's Maru country, and the delta is the Kia's.
+    const second = (id: string) => travellersOn(id).filter((t) => t.npcId === null).map((t) => t.id);
+    expect(second('field_map_narmada')).toContain('company_drover');
+    expect(second('field_map_lothal')).toContain('company_pilgrim');
+    // And loads go down every road.
+    for (const map of fieldMaps) expect(second(map.id)).toContain('company_carrier');
   });
 });
 

@@ -245,6 +245,21 @@ export function dyeSheet(scene: Phaser.Scene, baseKey: string, look: Look): stri
   return key;
 }
 
+/**
+ * Release a dyed sheet and every animation cut from it.
+ *
+ * **Both, or neither.** Animations live on the game rather than the scene, and each holds the
+ * frames of the texture it was made from. Removing only the texture leaves `walk` and `idle` naming
+ * frames that no longer exist -- and `createCharacterAnimations` skips a key that exists, so the
+ * same look rebuilt on a return visit would play the dead ones.
+ */
+export function forgetSheet(scene: Phaser.Scene, key: string): void {
+  for (const action of ['idle', 'walk', 'sit']) {
+    for (const facing of ['down', 'up', 'left', 'right'] as const) scene.anims.remove(animKey(key, action, facing));
+  }
+  if (scene.textures.exists(key)) scene.textures.remove(key);
+}
+
 export type Action = 'idle' | 'walk' | 'sit';
 
 /** The animation to play, and whether the sprite needs mirroring. */

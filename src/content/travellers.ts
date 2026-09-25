@@ -96,6 +96,8 @@ export interface Traveller {
   conveyance: string | null;
   /** Which built character sheet draws them. */
   art: string;
+  /** Which of canon's peoples they are, for road company. Null for a named person, who has a portrait. */
+  culture: StrangerCulture | null;
   /**
    * How that sheet is dyed for them, or null to draw it as painted.
    *
@@ -182,20 +184,75 @@ function hashOf(text: string): number {
 }
 
 /**
+ * How many strangers walk each map, on top of canon's own travellers.
+ *
+ * **Outside the cap, and that is the decision rather than a slip.** Road company used to fill only
+ * what canon left empty, so three of four maps had none and every woven event about a stranger
+ * could only happen on the Narmada. They now walk every map beside canon's people, never instead of
+ * them: the cap on named travellers is untouched.
+ */
+export const ROAD_COMPANY_PER_MAP = 2;
+
+/**
+ * Which of canon's peoples a stranger belongs to. Canon's own culture ids, never a second list.
+ *
+ * Only the three living on these maps in the game's era, which `docs/strangers-and-happenings.md`
+ * surveys: the delta's Harappan settlers and Kia clan, and the Maru herders of the plateau and the
+ * nomad ground. The Jharwa and the Vedda are history here, and a stranger is somebody alive.
+ */
+export const STRANGER_CULTURES = ['harappan', 'kia', 'maru'] as const;
+export type StrangerCulture = (typeof STRANGER_CULTURES)[number];
+
+/**
  * The road company: the people a road has that nobody wrote down.
  *
- * **Two of them, and they carry no words.** Everything a named person says is authored in canon and
- * reached through `lines`; these have none and must never grow any. What they have instead is a
- * trade and a load, which is what a road actually shows you about somebody before they speak.
+ * **They carry no words.** Everything a named person says is authored in canon and reached through
+ * `lines`; these have none and must never grow any. What they have instead is a trade and a load,
+ * which is what a road actually shows you about somebody before they speak.
  *
- * Their circuits are filled in from whatever places the map has, because that is the honest thing
- * an unnamed carrier does: they are going between two of the places that exist, and which two is
- * not a fact about the world.
+ * **Each wears the body of their trade**, now that dyeing tells two carriers apart -- so the carrier
+ * a woven event introduces is drawn as a carrier, where position-dealing once put him in the
+ * pilgrim's hood. And each belongs to the people canon gives that work: the drover is Maru, as
+ * Terke is; the carrier is of the Harappan settlers whose loads go down every road; the pilgrim
+ * tends the wayside toward the Kia's marsh shrines.
  */
-const COMPANY: readonly { id: string; name: string; role: string }[] = [
-  { id: 'company_carrier', name: 'A carrier', role: 'carrier, with a loaded back' },
-  { id: 'company_drover', name: 'A drover', role: 'drover, behind six animals' }
+const COMPANY: readonly {
+  id: string;
+  name: string;
+  role: string;
+  body: string;
+  culture: StrangerCulture;
+}[] = [
+  { id: 'company_carrier', name: 'A carrier', role: 'carrier, with a loaded back', body: 'traveller-carrier', culture: 'harappan' },
+  { id: 'company_drover', name: 'A drover', role: 'drover, behind six animals', body: 'traveller-drover', culture: 'maru' },
+  { id: 'company_pilgrim', name: 'A pilgrim', role: 'pilgrim, tending the wayside', body: 'traveller-pilgrim', culture: 'kia' }
 ];
+
+/** Canon's language to canon's culture, for the two that are both. */
+const CULTURE_OF_LANGUAGE: Record<string, StrangerCulture> = { kia: 'kia', maru: 'maru' };
+
+/**
+ * Which road company walk this map.
+ *
+ * **The carrier walks every map**: loads go down every road. The second is whichever of the Kia
+ * pilgrim and the Maru drover canon's own people on this map mostly are -- counted off the language
+ * each named person on the map speaks -- so the Narmada's herders get a drover and the delta's
+ * fishers get a pilgrim. A tie goes to the pilgrim, by the order above, not by chance.
+ */
+function companyOn(fieldMapId: string): typeof COMPANY {
+  const here = new Set(fieldMap(fieldMapId)?.pointsOfInterest ?? []);
+  const counts: Partial<Record<StrangerCulture, number>> = {};
+  for (const person of allNpcs()) {
+    if (!person.foundAt.some((id) => here.has(id))) continue;
+    const culture = CULTURE_OF_LANGUAGE[person.language];
+    if (culture) counts[culture] = (counts[culture] ?? 0) + 1;
+  }
+  const carrier = COMPANY[0]!;
+  const others = COMPANY.slice(1).sort(
+    (a, b) => (counts[b.culture] ?? 0) - (counts[a.culture] ?? 0) || (a.id === 'company_pilgrim' ? -1 : 1)
+  );
+  return [carrier, ...others].slice(0, ROAD_COMPANY_PER_MAP);
+}
 
 /**
  * Which conveyance suits a circuit, or null for on foot.
@@ -232,9 +289,8 @@ function circuitPeople(fieldMapId: string): Npc[] {
 /**
  * Everybody travelling on this map.
  *
- * Canon's own circuit-walkers first and road company after, capped at `TRAVELLERS_PER_MAP`. That
- * ordering is the point: a map with people who genuinely move gets those people, and only a map
- * without enough of them invents anybody.
+ * Canon's own circuit-walkers first, capped at `TRAVELLERS_PER_MAP`, and then `ROAD_COMPANY_PER_MAP`
+ * strangers on every map. Canon's people are never displaced: the strangers walk beside them.
  *
  * Measured across the four maps, canon supplies five on the Aravali, three on Dwarka, three on
  * Lothal and two on Narmada -- so the Aravali is capped, Dwarka and Lothal are exactly filled, and
@@ -261,32 +317,34 @@ export function travellersOn(fieldMapId: string): Traveller[] {
       circuit,
       conveyance: conveyanceFor(grounds),
       art: sheetFor(fieldMapId, out.length),
-      look: lookFor(person.id, sheetFor(fieldMapId, out.length))
+      look: lookFor(person.id, sheetFor(fieldMapId, out.length)),
+      culture: null
     });
   }
 
-  // Road company fills what canon did not, walking between places the map actually has. Their
-  // circuit is chosen by a hash of the map and their own id, so it is the same on every machine and
-  // does not move when a place is added ahead of them in canon's list.
-  for (const who of COMPANY) {
-    if (out.length >= TRAVELLERS_PER_MAP) break;
-    if (places.length < 2) break;
-    const salt = hashOf(`${fieldMapId}:${who.id}`);
-    const first = places[salt % places.length]!;
-    const second = places[(salt + 1 + (salt >> 8) % (places.length - 1)) % places.length]!;
-    if (first === second) continue;
-    const circuit = [first, second];
-    const grounds = new Set(circuit.flatMap((id) => poi(id)?.terrain ?? []));
-    out.push({
-      id: who.id,
-      name: who.name,
-      role: who.role,
-      npcId: null,
-      circuit,
-      conveyance: conveyanceFor(grounds),
-      art: sheetFor(fieldMapId, out.length),
-      look: lookFor(`${fieldMapId}:${who.id}`, sheetFor(fieldMapId, out.length))
-    });
+  // Road company walk beside canon's people, between places the map actually has. Their circuit is
+  // chosen by a hash of the map and their own id, so it is the same on every machine and does not
+  // move when a place is added ahead of them in canon's list.
+  if (places.length >= 2) {
+    for (const who of companyOn(fieldMapId)) {
+      const salt = hashOf(`${fieldMapId}:${who.id}`);
+      const first = places[salt % places.length]!;
+      const second = places[(salt + 1 + (salt >> 8) % (places.length - 1)) % places.length]!;
+      if (first === second) continue;
+      const circuit = [first, second];
+      const grounds = new Set(circuit.flatMap((id) => poi(id)?.terrain ?? []));
+      out.push({
+        id: who.id,
+        name: who.name,
+        role: who.role,
+        npcId: null,
+        circuit,
+        conveyance: conveyanceFor(grounds),
+        art: who.body,
+        look: lookFor(`${fieldMapId}:${who.id}`, who.body),
+        culture: who.culture
+      });
+    }
   }
 
   return out;
