@@ -13,6 +13,7 @@
 //   node tools/build-plates.js --force    # rebuild all of them
 //   node tools/build-plates.js --list     # what it would do, without doing it
 //   node tools/build-plates.js --portraits
+//   node tools/build-plates.js --faces
 //   node tools/build-plates.js --scenes   # the activity scenes, which are 4:3 rather than square
 //   node tools/build-plates.js --places   # the place views, 16:7 -- the band above a place's prose
 //
@@ -58,6 +59,20 @@ const KINDS = {
     size: 256,
     word: 'portrait',
     label: 'portrait'
+  },
+  /**
+   * A stranger's face: the pool `src/ui/StrangerFace.tsx` deals from.
+   *
+   * A portrait in every respect but whose it is -- the same size and the same squaring -- so it
+   * shares the portrait's numbers. The name is not a person but a place in the pool,
+   * `<culture>-<f|m>-NN` or `any-NN`, and `test/faces.test.ts` refuses one that is neither.
+   */
+  face: {
+    raw: path.join(ROOT, 'assets', 'source', 'faces'),
+    out: path.join(ROOT, 'src', 'ui', 'faces'),
+    size: 256,
+    word: 'face',
+    label: 'stranger face'
   },
   /**
    * An activity scene: the painting at the top of the activity modal.
@@ -728,7 +743,9 @@ function main() {
   // between folders on somebody who only meant to build one.
   const kind = process.argv.includes('--portraits')
     ? KINDS.portrait
-    : process.argv.includes('--scenes')
+    : process.argv.includes('--faces')
+      ? KINDS.face
+      : process.argv.includes('--scenes')
       ? KINDS.scene
       : process.argv.includes('--places')
         ? KINDS.place

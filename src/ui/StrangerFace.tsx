@@ -33,10 +33,27 @@ const HEADWEAR: Record<Headwear, string | null> = {
   bare: null
 };
 
-/** The painted face for this stranger, if the pool holds any. Seeded, so it never changes. */
-export function paintedFaceFor(id: string): string | null {
-  const names = artNames('faces');
-  const name = weightedPickFor(names, 'face', { x: 0, y: 0 }, id, (n) => n, () => 1);
+/**
+ * The painted faces a stranger of this people may be given: their own culture's, and the handful
+ * named `any-` that could be anybody from anywhere.
+ *
+ * **Named `<culture>-<f|m>-NN`, so the pool is read off the filenames and nothing is registered.**
+ * `harappan-m-03.png` is a Harappan man; `any-01.png` is nobody in particular. A culture with no
+ * faces yet falls back to the `any-` ones, and with none of those to the drawn face -- so the pool
+ * can fill one painting at a time, in any order.
+ *
+ * The gender in the name is the painting's, and it goes no further: every line of event prose
+ * calls a stranger "they", so no face can put a word in the text that contradicts it.
+ */
+export function facesFor(culture: string | null, names: readonly string[] = artNames('faces')): string[] {
+  const own = culture ? names.filter((n) => n.startsWith(`${culture}-`)) : [];
+  const anybody = names.filter((n) => n.startsWith('any-'));
+  return [...own, ...anybody];
+}
+
+/** The painted face for this stranger, if the pool holds one for them. Seeded, so it never changes. */
+export function paintedFaceFor(id: string, culture: string | null = null): string | null {
+  const name = weightedPickFor(facesFor(culture), 'face', { x: 0, y: 0 }, id, (n) => n, () => 1);
   return name ? art('faces', name) : null;
 }
 
@@ -47,7 +64,7 @@ export interface StrangerFaceProps {
 
 /** Presentational, like `PersonPortrait`: the title beside it already says who this is. */
 export function StrangerFace({ stranger, size = 40 }: StrangerFaceProps) {
-  const painted = paintedFaceFor(stranger.id);
+  const painted = paintedFaceFor(stranger.id, stranger.culture);
   if (painted) {
     return (
       <img
