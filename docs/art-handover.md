@@ -85,7 +85,7 @@ replaced — so **a new folder of art needs no code either.**
 | `src/ui/marks/` | 4 | 47 | an emoji in `ThingIcon` | **yes** |
 | `src/ui/places/` | 0 | 6 kinds, then 37 | prose alone | **yes**, at the kind tier |
 | `src/ui/things/` | 0 | 10 kinds, then 143 | the category mark, then an emoji | **yes**, at the kind tier |
-| `src/ui/events/` | 0 | one per event | the night's scene, then a blank panel | n/a — no events authored |
+| `src/ui/events/` | 0 | one per kind, 13 | the night's scene, then a blank panel | `docs/event-prompts.md` |
 | `src/ui/plates/` | 20 | 341 | a derived silhouette | **no, by design** |
 | `src/ui/portraits/` | 17 | 17 | a trade-derived silhouette | **done** — everybody in canon has a face |
 | `assets/traveller-*.png` | 3 | 3 | a playable character's sheet, which was the bug | **done** — see `art-brief.md` Asset 7 |
@@ -293,14 +293,15 @@ glance: one object, centred, no scene, no hand holding it.
 Materials share the folder and the same rule: `material_reed_fibre.png`, square, one substance on a
 plain ground.
 
-### Events — `src/ui/events/<event id>.png`
+### Events — `src/ui/events/woven-<kind>.png`
 
-**Landscape 4:3.** Nothing to draw yet: `content/events.ts` ships an empty registry on purpose, and
-the framework is in place so the first authored event needs no wiring. See `docs/events-plan.md`.
+**Landscape 4:3**, the event card's own shape. Thirteen kinds of woven event happen today, and each
+wants one painting that serves every event of its kind. **The prompts are in
+`docs/event-prompts.md`**, ready to paste; build them with `node tools/build-plates.js --events`.
 
-When there are events, the register is: **a moment with the traveller in it**, the same as `scenes/`
-— the difference is that a scene is something he is *doing* and an event is something that is
-*happening*. Firelight, weather, an animal at a distance, a figure on a road.
+The register is **a moment with the traveller in it**, the same as `scenes/`. The difference is
+that a scene is something the traveller is *doing* and an event is something that is *happening*:
+firelight, weather, an animal at a distance, a figure on a road.
 
 ---
 

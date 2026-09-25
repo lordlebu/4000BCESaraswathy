@@ -14,6 +14,7 @@
 //   node tools/build-plates.js --list     # what it would do, without doing it
 //   node tools/build-plates.js --portraits
 //   node tools/build-plates.js --faces
+//   node tools/build-plates.js --events   # event paintings, 4:3 like the activity scenes
 //   node tools/build-plates.js --scenes   # the activity scenes, which are 4:3 rather than square
 //   node tools/build-plates.js --places   # the place views, 16:7 -- the band above a place's prose
 //
@@ -73,6 +74,21 @@ const KINDS = {
     size: 256,
     word: 'face',
     label: 'stranger face'
+  },
+  /**
+   * An event painting: the picture at the top of the card when something happens to you.
+   *
+   * The event card is the activity card's furniture (`EventCard.tsx`), so it is the activity
+   * scene's shape and size exactly. Named after the event -- `woven-tracks` for every set of tracks
+   * on the road -- so one painting serves every animal or stranger that kind of event is about.
+   */
+  event: {
+    raw: path.join(ROOT, 'assets', 'source', 'events'),
+    out: path.join(ROOT, 'src', 'ui', 'events'),
+    size: 512,
+    aspect: 4 / 3,
+    word: 'event',
+    label: 'event painting'
   },
   /**
    * An activity scene: the painting at the top of the activity modal.
@@ -745,6 +761,8 @@ function main() {
     ? KINDS.portrait
     : process.argv.includes('--faces')
       ? KINDS.face
+      : process.argv.includes('--events')
+        ? KINDS.event
       : process.argv.includes('--scenes')
       ? KINDS.scene
       : process.argv.includes('--places')

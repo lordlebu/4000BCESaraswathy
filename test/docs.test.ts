@@ -91,3 +91,16 @@ describe('CLAUDE.md says where the save version is', () => {
     expect(claude).toContain(`It is at ${actual} —`);
   });
 });
+
+describe('every woven event has its art request written', () => {
+  it('names a prompt in docs/event-prompts.md for every kind in data/happenings.json', () => {
+    // A new template should arrive with the picture it wants. Without this, the words land, the
+    // card borrows a night scene for ever, and nobody is asked to paint anything.
+    const prompts = readFileSync(join(ROOT, 'docs', 'event-prompts.md'), 'utf8');
+    const kinds = Object.keys(
+      (JSON.parse(readFileSync(join(ROOT, 'data', 'happenings.json'), 'utf8')) as { templates: object }).templates
+    );
+    const missing = kinds.filter((kind) => !prompts.includes(`\`woven-${kind}\``));
+    expect(missing, 'kinds with no painting prompt').toEqual([]);
+  });
+});
