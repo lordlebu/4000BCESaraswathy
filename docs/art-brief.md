@@ -1903,6 +1903,42 @@ walks smaller than everybody else.
 4. Point the Maru drover at `traveller-nomad` in `COMPANY` (`src/content/travellers.ts`). The asura
    sheet waits for its people; see `docs/strangers-and-happenings.md`.
 
+## Asset 10 — the Asura-Tainted Princess, her own sheet · **wanted**
+
+**Not a traveller from the pool: one named person, and canon has already written her.**
+`character_asura_tainted_princess` in canon is `asura_hybrid`, **immortal and alive** — the child
+of Prince Varunesh and the asura princess Manjalaya — with *"heavy curled ram horns, violet
+gemstones"*, marked by Aryaman with golden constellations in dreams, and living *"in eternal
+isolation on a rocky plateau"*. Because she is immortal she can walk in the game's own era as the
+same person, with no reincarnation to write. The owner's face `maru-f-04` is her.
+
+**Same prompt as Asset 7, word for word; substitute only the character line.** Her sheet is apart
+from Asset 9's because she is apart: one person, recognisable wherever she is met, so her top block
+and silhouette must be unlike any traveller's.
+
+6. **`asura-princess.png` — a young-looking asura princess who is far older than she looks, two heavy
+   ram's horns curling back from the temples and down behind the ears, never rising above the top of
+   the head, a violet jewelled headpiece set between the horns, a deep crimson travelling coat to the
+   ankle trimmed with pale fur over a dark indigo tunic, and bare feet** — the contrast block is the
+   violet headpiece against the dark crimson coat; the down-curling horns are the silhouette no one
+   else has.
+
+**Canon's details that do not survive 26×40, left out on purpose:** the golden constellation marks
+and the individual gemstones. Asset 7's rule — every detail at least three pixels across — turns
+them into speckle. They belong on her portrait, where there is room.
+
+**The horns, in her case, curl down.** Asset 9's rule for the asura nomad holds doubly: the builder
+fits the whole figure to the cell, so horns that rise or spread shrink her. Curling back and down,
+inside the head's height and the shoulders' width, keeps her the same size as everybody else.
+
+### After the art arrives
+
+The same steps as Asset 9 — a row in `tools/characters.json`, `npm run build:sprite asura-princess`,
+`check-sprite.js`, the profile rows checked by eye at 18× — with one difference: she is not added to
+`TRAVELLER_SHEETS` or `assets/looks.json`. A named person is never dealt at random or re-dyed; she is
+drawn only when her own encounters put her on the map. See "The Asura-Tainted Princess" in
+`docs/strangers-and-happenings.md`.
+
 ## Asset 8 — the three faces missing, and they are all travellers · **shipped**
 
 > **All three landed.** `src/ui/portraits/` now holds **seventeen against canon's seventeen** —

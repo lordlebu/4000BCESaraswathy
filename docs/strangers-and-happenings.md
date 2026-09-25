@@ -364,6 +364,50 @@ era, or only in some places; whether they speak Maru; and what they are called. 
 `asura` as a culture on purpose — it had meant a culture, a species and a creature prefix at once
 — so `asura_hybrid` is the right existing home, and `maya_born` the other candidate.
 
+## The Asura-Tainted Princess — can she be a real character? Yes
+
+The owner asked whether the asura princess (`maru-f-04`) could become a fully fleshed character who
+comes looking for the player with quests. **She can, and canon has done a third of the work.**
+
+**What canon already says.** `character_asura_tainted_princess`: `asura_hybrid`, **immortal and
+alive**, the child of Prince Varunesh and the asura princess Manjalaya. *"Heavy curled ram horns,
+violet gemstones. Marked by Aryaman with golden constellations in dreams. Lives in eternal isolation
+on a rocky plateau."* Her roles are `isolated_royal` and `dream_prophet`.
+
+That settles the three questions that usually stall a character like this:
+
+- **She can be in this era as herself.** Immortal and alive; no reincarnation to write.
+- **She belongs to the Maru's country.** A rocky plateau is the Narmada, where everybody canon
+  names speaks Maru — which is where the owner already put her.
+- **She has a way to find you that the game already has.** She is a dream-prophet, and the game has
+  night events. She can reach you in a dream long before she meets you on the road.
+
+**The one lore question only the owner can answer:** *eternal isolation* is her canon, so why does
+she leave the plateau now, and why for you? That is the spine of her quest line, and it should be
+the owner's.
+
+### What it would take
+
+| Piece | Where | What | Size |
+|---|---|---|---|
+| Her story | canon, owner writes (or approves a draft) | why she comes down; three or four beats; what she asks and what she gives | the owner's writing |
+| Authored encounters | canon | the new entity type Q3 decided on (not `event_`, which is the timeline): an occasion, what it requires, the lines, what each choice grants. Schema, template in `AUTHORING.md`, lint, export | 1–2 sessions |
+| A quest ladder | canon | a discovery of her own, climbed by her encounters, so her quest lives in the diary like every other progression here. No new progression system | inside the above |
+| Read them in the game | game | authored events from canon's bundle replace the empty `events` array; an event gains a `speaker` shown with her portrait | 1 session |
+| She bumps into you | game | when one of her road encounters fires, the scene draws her sprite at the edge of view and walks her to the player before the card opens. A new scene behaviour, tested in the browser | 1 session |
+| Her art | owner | the sprite (Asset 10 in `docs/art-brief.md`); her portrait is `maru-f-04`, moved out of the stranger pool so she is never also met as an anonymous drover | art |
+
+**About four to five sessions of code across both repositories, once the story exists, and no new
+dependency.** Everything it stands on is already built: authored events win over woven ones and
+are unrationed; chains run on flags in the save; a ladder in the diary is how this game has always
+shown progress; lines gated on what you hold are how every named person already speaks.
+
+**The recommended shape, for the owner to rewrite:** she first appears in a dream on the Narmada
+(night, requires nothing); the dream leaves a flag; days later, on the road, she is standing ahead
+of you and asks one thing; doing it climbs her ladder a rung and unlocks the next. Three meetings,
+each a rung, ending with her choosing to stay on her plateau or walk on with you — the game's ending
+already asks every person you helped that question.
+
 ## Still open
 
 - **Paintings.** The 22 faces and 13 event paintings (`docs/event-prompts.md`) are with the owner.

@@ -877,17 +877,22 @@ function main() {
       continue;
     }
 
-    if (crop && (crop.x + crop.side > img.width || crop.y + crop.side > img.height)) {
+    const aspect = kind.aspect ?? 1;
+    // An explicit crop takes the kind's own shape: `size` is its width, and a 4:3 scene or event is
+    // three quarters as tall. Without `tall` the resampler read a *square* and squashed it into
+    // 4:3, and the edge check below tested a square too -- neither was ever hit, because nothing
+    // had cropped a landscape kind before the event paintings.
+    const cropBox = crop ? { ...crop, tall: Math.round(crop.side / aspect) } : null;
+    if (cropBox && (cropBox.x + cropBox.side > img.width || cropBox.y + cropBox.tall > img.height)) {
       console.log(`  !  ${file} -> crop runs past the edge of a ${img.width}x${img.height} image`);
       continue;
     }
-    const aspect = kind.aspect ?? 1;
-    const box = crop ?? squareBox(img.width, img.height, borderInset(img), aspect);
+    const box = cropBox ?? squareBox(img.width, img.height, borderInset(img), aspect);
     const tall = Math.round(kind.size / aspect);
     fs.writeFileSync(dest, encodePng(kind.size, tall, resample(img, box, kind.size, tall)));
     const kb = (fs.statSync(dest).size / 1024).toFixed(0);
     const notes = [];
-    if (crop) notes.push(`cropped to ${crop.x},${crop.y} +${crop.side}`);
+    if (cropBox) notes.push(`cropped to ${cropBox.x},${cropBox.y} +${cropBox.side}x${cropBox.tall}`);
     if (box.inset) notes.push(`${box.inset}px border stripped`);
     if (box.trimmed) notes.push(`bottom ${box.trimmed}px dropped`);
     const trim = notes.length ? `, ${notes.join(', ')}` : '';
