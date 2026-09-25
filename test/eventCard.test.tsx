@@ -5,8 +5,8 @@
 // Rendered rather than reasoned about, because every fault the interface work found was found by
 // rendering a component. What this guards:
 //
-//   * a stranger's face is on the card, drawn in the colours their figure wears on the road --
-//     read off the same table, so the card and the map cannot disagree;
+//   * a stranger's face is on the card: a painted one from their own people's part of the pool
+//     when the pool has one, and otherwise drawn in the colours their figure wears on the road;
 //   * an event about nobody is unchanged, with no empty face slot;
 //   * a woven choice hands its caller the whole choice, `gives` and `eases` included, exactly once.
 
@@ -17,6 +17,25 @@ import { anyConditions, type GameEvent } from '../src/content/events';
 import { lookFor, swatchesFor } from '../src/content/looks';
 
 afterEach(cleanup);
+
+/**
+ * Whether the face pool reads as empty, for the one test of the drawn fallback.
+ *
+ * The pool is real art now -- twenty-four faces -- so every people has painted ones and the drawn
+ * face is only reached when a pool is empty. That is still the state every new people starts in,
+ * so it is still tested, by hiding the pool rather than by deleting art.
+ */
+let emptyPool = false;
+vi.mock('../src/ui/art', async (original) => {
+  const actual = await original<typeof import('../src/ui/art')>();
+  return {
+    ...actual,
+    artNames: (folder: string) => (folder === 'faces' && emptyPool ? [] : actual.artNames(folder))
+  };
+});
+afterEach(() => {
+  emptyPool = false;
+});
 
 const look = lookFor('field_map_narmada:company_carrier', 'traveller-carrier')!;
 
@@ -44,7 +63,17 @@ const event = (over: Partial<GameEvent> = {}): GameEvent => ({
 });
 
 describe('the card with a stranger on it', () => {
-  it('draws their face in the dyes their figure wears', () => {
+  it('shows a painted face from their own people when the pool has one', () => {
+    const { baseElement } = render(<EventCard event={event()} holds={[]} onChoose={() => {}} onClose={() => {}} />);
+    const face = baseElement.querySelector('img.stranger-face');
+    expect(face, 'no painted face on the card').not.toBeNull();
+    // A Harappan carrier is dealt a Harappan face or one that could be anybody -- never a Kia's.
+    expect(face!.getAttribute('src')).toMatch(/(harappan-[fm]-\d{2}|any-\d{2})/);
+    expect(face!.closest('.event-heading')?.querySelector('h2')?.textContent).toBe('Company on the road');
+  });
+
+  it('draws their face in the dyes their figure wears when the pool has none', () => {
+    emptyPool = true;
     const { baseElement } = render(<EventCard event={event()} holds={[]} onChoose={() => {}} onClose={() => {}} />);
     const face = baseElement.querySelector('svg.stranger-face');
     expect(face, 'no face on the card').not.toBeNull();

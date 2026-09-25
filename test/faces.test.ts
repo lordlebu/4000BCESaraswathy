@@ -13,7 +13,10 @@ const { idFor } = createRequire(import.meta.url)('../tools/build-plates.js') as 
   idFor: (file: string, word?: string) => string;
 };
 
-const NAME = new RegExp(`^(?:(?:${STRANGER_CULTURES.join('|')})-[fm]-\d{2}|any-\d{2})$`);
+// `String.raw`, because in a plain template literal `\d` is not an escape and quietly becomes `d` --
+// which is how this pattern demanded the letters "d{2}", matched no name at all, and passed for as
+// long as the pool was empty.
+const NAME = new RegExp(String.raw`^(?:(?:${STRANGER_CULTURES.join('|')})-[fm]-\d{2}|any-\d{2})$`);
 
 describe('the face pool', () => {
   it('names every face by a culture strangers have, a gender, and a number', () => {
