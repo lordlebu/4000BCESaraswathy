@@ -369,3 +369,19 @@ describe('what a card says about somebody on the road', () => {
     expect(traits.length).toBe(2);
   });
 });
+
+describe('strangers’ names', () => {
+  it('never gives two strangers of one people the same name, on any map', () => {
+    const byPeople = new Map<string, string[]>();
+    for (const map of fieldMaps) {
+      for (const t of travellersOn(map.id)) {
+        if (!t.culture || !t.givenName) continue;
+        byPeople.set(t.culture, [...(byPeople.get(t.culture) ?? []), t.givenName]);
+      }
+    }
+    expect(byPeople.size, 'no named strangers at all').toBeGreaterThan(0);
+    for (const [people, names] of byPeople) {
+      expect(new Set(names).size, `${people}: ${names.join(', ')}`).toBe(names.length);
+    }
+  });
+});
