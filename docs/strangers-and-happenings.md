@@ -181,7 +181,7 @@ answered Q7 and Q8 directly.
 | Q1 | Should strangers walk every map? | Two road company on every map, **beside** canon's travellers, never instead of them (`ROAD_COMPANY_PER_MAP`) | **built** |
 | Q2 | May two travellers share a body? | Road company wear the body of their trade; dyes tell them apart. Canon's named people keep distinct bodies | **built** |
 | Q3 | Authored events: canon's or the game's? | Split: world-true events become a canon entity type; woven and player-only ones stay here. **Canon already uses `event_` for timeline history**, so the new type needs another name | recorded; canon work, Phase 4 |
-| Q4 | Can strangers have names? | Canon exports a per-people list of given names, and the game deals them by hash. Until then, strangers stay "a carrier" | recorded; canon work, Phase 3 |
+| Q4 | Can strangers have names? | Canon exports a per-people list of given names, and the game deals them by hash | **built** (canon 2.29.0) |
 | Q5 | May events remember between days? | Yes, in the what-you-know half of the save. First use: `met`, so a stranger recognises you | **built** |
 | Q6 | How often? | Keep `WOVEN_ONE_IN` until the simulation report and a play session say otherwise | kept |
 | Q7 | Faces | 22 faces by people and gender: Harappan 6 men and 4 women, Kia 4 men and 2 women, Maru 2 and 2, `any` 2. Prompts in `docs/face-prompts.md` | **pool built; art with the owner** |
@@ -248,13 +248,44 @@ neither was added.
 
 ---
 
+## Names, and the rest of Phase 1 — 25 September 2026
+
+**The first lore change this work needed.** Everything before it was a *view* (how a stranger
+looks) or a *verb* (what happens to you), and the canon/game split gives both to the game. A name
+is a *noun*, so it is canon's.
+
+- **Canon 2.29.0** gives `harappan`, `kia` and `maru` twelve `given_names` each in
+  `database/cultures.json`, written in each people's sound and checked against every person, place
+  and word in canon. Its lint refuses a given name that already exists or that two peoples share.
+  Exported as `peoples` in `places.json`, only for cultures that carry names. See canon's
+  `docs/decisions.md`.
+- **Dealt by rendezvous hash** in `givenNameFor`: the same stranger has the same name everywhere,
+  and a name added to canon renames nobody already known.
+- **Learned, not shown.** The road shows you "a carrier, with a loaded back"; any choice you make
+  at a first meeting ends with their name, and *"A face you know"* opens with it. Names are
+  ungendered, as canon's are, so a name can never contradict a face.
+- **A new guard in `test/adapterCoverage.test.ts`**: every *collection* a bundle ships must be
+  declared, not only every field. `peoples` passed every existing check while nothing read it.
+
+**Phase 1 is done.** Its last two items:
+
+- **Event words are data.** Every title, passage, label and line is in `data/happenings.json`,
+  with named slots (`{a_animal}`, `{ground}`, `{name}`) and variants where one template says
+  different things. The code keeps only when each can happen. `test/happenings.test.ts` holds the
+  file and the code to each other: the same templates on both sides, no undeclared slot, no choice
+  nothing offers, and no slot left unfilled in anything the four maps produce.
+- **The inspector.** `window.__happen(occasion, kind?, shelter?)` opens an event through the real
+  path with only the ration skipped. `e2e/happenings.spec.ts` uses it to prove a card opens and
+  closes in a real page, and that a stranger tells you their name and greets you by it the next
+  day. Both halves were proven to bite.
+
 ## Still open
 
-- **No browser spec forces a woven event open.** The path is typed and the rules are tested, but
-  proving the card mounts in a real page needs a debug hook to force one. It is the next Phase 1
-  item.
-- **Paintings.** The 22 faces are with the owner. The event paintings, `woven-<template>` in
+- **Paintings.** The 22 faces are with the owner. The event paintings, `woven-<kind>` in
   `src/ui/events/`, are not started. Neither blocks anything.
+- **Phase 2**: storylet weights and cooldowns, a pacing director, event chains, and a seed-sweep
+  simulation report.
+- **Authored events in canon (Q3)** need a new entity type, not `event_`.
 - **More bodies.** A fourth traveller sheet is a row in `tools/characters.json` and an entry in
   `assets/looks.json`, chosen by eye. With re-dyeing, a new body buys a new *silhouette*, which is
   the one thing colour cannot.

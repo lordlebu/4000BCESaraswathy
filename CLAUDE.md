@@ -394,7 +394,7 @@ it is not, it has already been applied.
   `making.ts` adapts the crafting bundle and `satchel.ts`, `crafting.ts`, `gathering.ts`,
   `cooking.ts`, `using.ts` and `vehicles.ts` are the rules over it; `events.ts` holds what can
   happen *to* you, and `happenings.ts` weaves ordinary events on the spot from what is on the tile
-  when nothing authored can happen; `looks.ts` dyes the three traveller bodies into a road of
+  when nothing authored can happen, taking every word from `data/happenings.json`; `looks.ts` dyes the three traveller bodies into a road of
   strangers. All import their JSON at build time.
 
   **`travellers.ts` and `wanderers.ts` are the same arithmetic with different circuits.** A
