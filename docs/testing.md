@@ -431,7 +431,25 @@ arrival budget, sized for ordinary ground, does not carry over to a river.
    bound failed both dugout tests, three repeats of both beside `reachable.spec.ts` passed, 42 of 42
    with retries off.
 
+### The same fault in the ride, and the other way out of it
+
+The pull request carrying that fix went red on shard 3 for the same reason, in code added the day
+before: `e2e/riding.spec.ts` waited 15 seconds for the traveller to arrive after boarding the
+Lodestone Line, on the run and the retry, and he had not. The ride was a tween of `RIDE_TILE_MS`
+(240ms) × 25 tiles, six seconds of game time and about 360 frames: minutes, on a starved runner.
+
+Raising that wait was not the fix. 360 frames at the frame rates measured above runs past the
+180-second test timeout, and a player on a slow phone would have watched the same crawl. **A ride is
+presentation, not play**, so `updateRide` in `WorldScene` now moves the car on
+`this.game.loop.now`, Phaser's raw, unclamped frame time, with the same `Sine.easeInOut` curve. A
+starved machine draws fewer frames of it and the car still arrives after six seconds. A walking step
+stays a tween, because its walk cycle, depth sort and water line are drawn across the frames in
+between, and skipping them would show.
+
 ### The rule it adds
+
+**A presentation animation that a test or a player waits on runs on the loop's clock.** A tween is
+frame-bound, so use one only where every frame of it matters.
 
 **Size a step's wait by the frames it needs, not the milliseconds.** When a spec waits for a tween,
 its budget has to cover the step's *cost* at the worst frame rate CI gives, because Phaser will not

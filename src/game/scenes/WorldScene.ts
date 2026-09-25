@@ -502,6 +502,9 @@ export class WorldScene extends Phaser.Scene {
   private carriage!: Phaser.GameObjects.Image;
   /** Whether he is aboard it, which is also why he cannot be seen. */
   private riding = false;
+  /** The ride in flight: where from and to in pixels, and when it set out on the loop's clock. */
+  private ride: { from: { x: number; y: number }; to: { x: number; y: number }; at: Point; start: number; ms: number } | null =
+    null;
   /**
    * Whose sheet the sprite draws from.
    *
@@ -580,6 +583,11 @@ export class WorldScene extends Phaser.Scene {
     this.moving = false;
     this.facing = 'down';
     this.afloat = false;
+    // The hulls and the carriage are rebuilt by `create`, so which hull they wear and any ride in
+    // flight belong to the old scene: a stale `hullView` would skip re-texturing the new hull.
+    this.hullView = null;
+    this.ride = null;
+    this.riding = false;
     this.glows = [];
     this.glowAt = -1;
     this.travelled = data.travelled ?? 0;
@@ -1642,37 +1650,60 @@ export class WorldScene extends Phaser.Scene {
     this.riding = true;
     this.at = ride.to;
     this.player.setVisible(false);
-    const board = () => this.carriage.setPosition(this.player.x, this.player.y).setDepth(this.player.depth);
-    this.carriage.setVisible(true);
-    board();
+    this.carriage.setVisible(true).setPosition(this.player.x, this.player.y).setDepth(this.player.depth);
     // **Held on the car, not eased after it.** The walk's 9% a frame is a gentle trail at walking
     // pace; at four times that pace, on a slow frame rate, it fell so far behind that the carriage
     // ran the whole strait under the dock and was never seen. The car eases in and out of the
     // stations itself, so a locked camera still starts and stops softly.
     this.cameras.main.setLerp(1, 1);
 
-    this.tweens.add({
-      targets: this.player,
-      x: ride.to.x * TILE_SIZE + TILE_SIZE / 2,
-      y: ride.to.y * TILE_SIZE + TILE_SIZE - 2,
-      duration: RIDE_TILE_MS * ride.tiles,
-      ease: 'Sine.easeInOut',
-      onUpdate: () => {
-        this.sortPlayer(rowAtFoot(this.player.y));
-        board();
-      },
-      onComplete: () => {
-        this.carriage.setVisible(false);
-        this.cameras.main.setLerp(FOLLOW_LERP, FOLLOW_LERP);
-        this.player.setVisible(true);
-        this.riding = false;
-        this.moveShadow();
-        this.moving = false;
-        this.updateAnimation();
-        this.arriveAt(ride.to);
-      }
-    });
+    this.ride = {
+      from: { x: this.player.x, y: this.player.y },
+      to: { x: ride.to.x * TILE_SIZE + TILE_SIZE / 2, y: ride.to.y * TILE_SIZE + TILE_SIZE - 2 },
+      at: ride.to,
+      start: this.game.loop.now,
+      ms: RIDE_TILE_MS * ride.tiles
+    };
   };
+
+  /**
+   * Carry the ride one frame further, and land it when its time is up.
+   *
+   * **On the loop's clock, not a tween's.** This was a tween, and a tween advances by Phaser's
+   * *smoothed* delta, which credits a stalled frame with no more than the last sane one. A ride is
+   * six seconds of tween, about 360 frames, so on a starved renderer it took as long as those frames
+   * took: `e2e/riding.spec.ts` waited fifteen seconds for him to arrive, twice, on a CI runner, and he
+   * had not. A player on a slow phone would have watched the same crawl for a minute.
+   *
+   * `game.loop.now` is the raw time the frame began, unclamped, so the car arrives after its six
+   * seconds however few frames are drawn on the way -- a slow machine sees it jump further between
+   * frames rather than take longer. A ride is presentation, not play: nothing about it depends on
+   * the frames in between, which is why this is safe here and would not be for a step, whose walk
+   * cycle and sorting are drawn across it. The ease is the tween's own, `Sine.easeInOut`.
+   */
+  private updateRide(): void {
+    const ride = this.ride;
+    if (!ride) return;
+    const t = Math.min(1, (this.game.loop.now - ride.start) / ride.ms);
+    const eased = Phaser.Math.Easing.Sine.InOut(t);
+    this.player.setPosition(
+      ride.from.x + (ride.to.x - ride.from.x) * eased,
+      ride.from.y + (ride.to.y - ride.from.y) * eased
+    );
+    this.sortPlayer(rowAtFoot(this.player.y));
+    this.carriage.setPosition(this.player.x, this.player.y).setDepth(this.player.depth);
+    if (t < 1) return;
+
+    this.ride = null;
+    this.carriage.setVisible(false);
+    this.cameras.main.setLerp(FOLLOW_LERP, FOLLOW_LERP);
+    this.player.setVisible(true);
+    this.riding = false;
+    this.moveShadow();
+    this.moving = false;
+    this.updateAnimation();
+    this.arriveAt(ride.at);
+  }
 
   /**
    * The best shelter where the traveller is standing.
@@ -2185,6 +2216,7 @@ export class WorldScene extends Phaser.Scene {
     this.updateSky();
     this.updatePinch();
     this.updateSway();
+    this.updateRide();
 
     if (this.moving) return;
 
