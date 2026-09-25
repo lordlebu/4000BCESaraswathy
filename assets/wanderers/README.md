@@ -34,11 +34,16 @@ different ask and it works.
 (`setOrigin(0.5, 1)`), so the animal's feet belong at the very bottom edge of the image. A gap
 there draws the animal floating above the grass, which is a fault that has shipped here before.
 
-**Paint at any size; the game scales by height.** `sizeWanderer` fits each frame to the animal's
-own height in `frames.ts` — the same height a traveller is drawn at, half the player — and lets the
-width fall where it may. That is deliberate: scaling to *fit a box* made a long side view shrink
-while the narrow front view of the same animal did not, so a whale was three times bigger walking
-towards you than walking across.
+**Paint at any size; the game scales from the side view.** An animal is `WANDERER_LONG` tiles
+long side-on — two, since the sivatherium was met at a traveller's height and read as a fawn at
+Varuna's knee. `sizeWanderer` scales the `-right` view to that length and draws every other facing
+at the same height, letting its width fall where it may. That is deliberate: scaling each frame to
+*fit a box* made a long side view shrink while the narrow front view of the same animal did not, so
+a whale was three times bigger walking towards you than walking across.
+
+**So the side view's proportions set the size.** A repainted animal that changes shape changes how
+tall it stands. `test/wanderers.test.ts` holds each painting to two tiles and fails by name if the
+stand-in's `tall` in `frames.ts` no longer matches the new art.
 
 **Transparent background**, not white and not magenta. Alpha zero renders as white in some
 previews, so check the corner pixels are actually `rgba(0,0,0,0)` before sending it.

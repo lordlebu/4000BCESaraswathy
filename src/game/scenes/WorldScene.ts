@@ -75,7 +75,7 @@ import {
   hasTileArt,
   placeholderTileKey,
   traceFrameFor,
-  markerSize,
+  paintedHeight,
   wandererMarkerKey
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
@@ -2003,21 +2003,25 @@ export class WorldScene extends Phaser.Scene {
    * How big a wanderer is drawn, painting or stand-in.
    *
    * **A painting is whatever size it was cut at, so it has to be told.** The stand-in is built at
-   * `markerSize` already; a painted frame arrives at several hundred pixels and would cover a
-   * quarter of the screen. Scaled to the same box -- traveller height, own width -- so swapping the
-   * art in changes the picture and not the scale.
+   * `markerSize` already; a painted frame arrives at several hundred pixels. Its side view is
+   * measured and scaled to the animal's length in tiles, and whichever facing is showing is drawn at
+   * the height that gives -- `paintedHeight` in `frames.ts` holds the arithmetic, so a test can hold
+   * it to the real art.
+   *
+   * **Scaled by height, not by fitting inside a box.** Fitting by the tighter ratio was the obvious
+   * answer and is visibly wrong: a side view is long, so it hits the width bound and shrinks, while
+   * the front view of the same animal is narrow and does not -- which drew a whale three times
+   * bigger walking towards you than walking across. One animal is one size whichever way it faces.
    */
   private sizeWanderer(wanderer: Wanderer, sprite: Phaser.GameObjects.Image): void {
     if (!hasPaintedArt(wanderer.id)) return;
-    const box = markerSize(wanderer.id);
     const src = sprite.texture.getSourceImage() as { width: number; height: number };
     if (!src?.width || !src?.height) return;
-    // **Scaled by height alone, not by fitting inside the box.** Fitting by the tighter ratio was
-    // the obvious answer and is visibly wrong: a side view is long, so it hits the width bound and
-    // shrinks, while the front view of the same animal is narrow and does not -- which drew a whale
-    // three times bigger walking towards you than walking across. One animal is one size whichever
-    // way it faces, so height is the only bound and a long animal is simply allowed to be long.
-    const scale = box.h / src.height;
+    const sideKey = paintedKey(wanderer.id, 'right');
+    const side = this.textures.exists(sideKey)
+      ? (this.textures.get(sideKey).getSourceImage() as { width: number; height: number })
+      : src;
+    const scale = paintedHeight(wanderer.id, side) / src.height;
     sprite.setDisplaySize(Math.round(src.width * scale), Math.round(src.height * scale));
   }
 

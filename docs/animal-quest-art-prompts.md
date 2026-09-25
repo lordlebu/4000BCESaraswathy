@@ -119,8 +119,11 @@ pixel-identical in every cell, which is why nothing here is animated.
   rather than 255, which is invisible anywhere. Neither was worth a pass to fix — but *measure the
   corner pixels* before believing a background is clear.
 
-On screen, against a traveller's 80px and the player's 160px: **whale 56, sivatherium 80,
-Vasuki 40.**
+On screen, against a traveller's 80px and the player's 160px, each animal is **two tiles long
+side-on** (`WANDERER_LONG` in `src/game/frames.ts`), which stands them at: **whale 140,
+sivatherium 386, Vasuki 97.** They were drawn at a traveller's height until the sivatherium was met
+in the game and read as a fawn at Varuna's knee. At two tiles it stands about 2.4 times the player,
+which is close to the real animal.
 
 ---
 

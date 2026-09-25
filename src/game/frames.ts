@@ -1378,38 +1378,34 @@ export const FALL_FRAMES = 2;
  * Keyed by engine species id, with a fallback, because this is a stand-in and one that throws for
  * an unknown animal is worse than one that draws a generic quadruped.
  *
- * **Sized against the other people on the road, not against the tile.** At a 128 tile the player
- * is drawn 104x160 and everybody else is halved to 52x80 -- see `TRAVELLER_SHRINK` in
- * `game/player.ts` for why two is the only whole answer. An animal is drawn to the *same 80px
- * height* as a traveller and as wide as its own shape needs, so it reads as a creature about the
- * size of a person and never competes with the player for the eye.
+ * **`long` is the one number that sizes an animal: its length side-on, in tiles.** A painted
+ * animal is scaled so its side view is exactly that long, and every other facing is drawn at the
+ * height that gives -- see `paintedHeight`. The stand-in is drawn `long` by `tall` tiles, `tall`
+ * being the painted side view's own proportion, so the picture arriving changes the picture and
+ * not the size.
  *
- * 80px of a 128 tile is `0.625`, which is where `tall` comes from; `long` is then each animal's
- * own proportion against that height. The numbers are not repeated from `player.ts` because
- * `tileTextures` does not import it -- `test/wanderers.test.ts` asserts the two agree instead,
- * which is the same arrangement `travellers.ts` keeps with `dayNight.ts`.
+ * **Two tiles, on the owner's ruling, and bigger than the people.** The first table drew every
+ * animal at a traveller's height, 80px, "so it never competes with the player for the eye". Met in
+ * the game, the sivatherium read as a fawn at Varuna's knee: a giraffid that stood taller than a
+ * man at the shoulder, drawn half his height. At two tiles long it stands about 2.4 times the
+ * player, which is close to the truth, and the whale and Vasuki are long and low beside it.
  *
- * The first version of this table sized everything against the tile instead, which put the whale
- * at 192x84 -- nearly twice the player's width -- and the sivatherium taller than the player.
- *
- * `shape` picks the body:
+ * `shape` picks the stand-in's body:
  *   `wader`   a long low body on four short legs, head raised -- the walking whale
  *   `browser` a deep body on four long legs with a raised neck and head -- the giraffid
  *   `serpent` a thick tapering S-curve, no legs at all
  */
-export const NPC_TALL = 0.625;
+export const WANDERER_LONG = 2;
 
 const BUILDS: Record<string, { long: number; tall: number; shape: 'wader' | 'browser' | 'serpent' }> = {
-  // Three metres and low to the ground: a bit over twice as long as tall, and it does not stand
-  // as high at the shoulder as a person -- so a little under the traveller height.
-  'narmada-walking-whale': { long: 0.94, tall: NPC_TALL * 0.7, shape: 'wader' },
-  // Shoulder-high to a tall man and taller again at the head, which is why canon says it takes
-  // the leaves nothing else reaches. Full traveller height, and narrow.
-  sivatherium: { long: 0.52, tall: NPC_TALL, shape: 'browser' },
-  // Eleven to fifteen metres but coiled and flat to the ground: the longest thing on the map and
-  // the shortest. This is the one that would be absurd fitted into a figure's cell.
-  'vasuki-indicus': { long: 1.17, tall: NPC_TALL * 0.5, shape: 'serpent' },
-  default: { long: 0.8, tall: NPC_TALL * 0.8, shape: 'wader' }
+  // Three metres and low to the ground: its side view is 586 x 319, so two tiles long is 1.09 high.
+  'narmada-walking-whale': { long: WANDERER_LONG, tall: 1.09, shape: 'wader' },
+  // Shoulder-high to a tall man and taller again at the ossicones: 463 x 698 side-on, so two tiles
+  // long stands three tiles high -- the one animal on the map taller than it is long.
+  sivatherium: { long: WANDERER_LONG, tall: 3.01, shape: 'browser' },
+  // Eleven to fifteen metres but coiled and flat to the ground: 740 x 280, 0.76 high at two tiles.
+  'vasuki-indicus': { long: WANDERER_LONG, tall: 0.76, shape: 'serpent' },
+  default: { long: 1.5, tall: 0.94, shape: 'wader' }
 };
 
 /** The build for one wanderer, or the fallback. */
@@ -1427,6 +1423,19 @@ export function wandererBuild(speciesId: string): { long: number; tall: number; 
 export function markerSize(speciesId: string): { w: number; h: number } {
   const build = wandererBuild(speciesId);
   return { w: Math.round(GRID * build.long), h: Math.round(GRID * build.tall) };
+}
+
+/**
+ * How tall to draw a painted wanderer, in pixels, given its side view's size as painted.
+ *
+ * **Measured off the side view, and applied to every facing.** The side view is the one whose
+ * length means something, so it is scaled to `long` tiles; the front and back views are then drawn
+ * at the same *height*, which keeps one animal one size whichever way it walks. Scaling each facing
+ * to fit a box was tried first and drew the whale three times bigger walking towards you than
+ * walking across.
+ */
+export function paintedHeight(speciesId: string, side: { width: number; height: number }): number {
+  return Math.round((GRID * wandererBuild(speciesId).long * side.height) / side.width);
 }
 
 
