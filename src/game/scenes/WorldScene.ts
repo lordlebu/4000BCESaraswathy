@@ -142,6 +142,7 @@ import {
   animFor,
   characterFor,
   createCharacterAnimations,
+  dyeSheet,
   everyCharacter,
   everySheet,
   figureScale,
@@ -1877,7 +1878,11 @@ export class WorldScene extends Phaser.Scene {
       // road that nothing sent anywhere.
       if (stops.length < 2) continue;
 
-      const key = traveller.art === this.character.key ? this.otherSheet(traveller.art) : traveller.art;
+      const body = traveller.art === this.character.key ? this.otherSheet(traveller.art) : traveller.art;
+      // Re-dyed to this person's look when the body has one, so three painted strangers read as
+      // many. Only when the body is the one the look was chosen for: a look names the colours of
+      // one sheet, and applied to the player-avoidance fallback it would match nothing.
+      const key = traveller.look && traveller.look.body === body ? dyeSheet(this, body, traveller.look) : body;
       const sprite = this.add
         .sprite(0, 0, key, 0)
         .setOrigin(0.5, 1)

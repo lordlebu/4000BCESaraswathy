@@ -1,0 +1,49 @@
+{
+  "$comment": [
+    "Which colours in each traveller body can be re-dyed, and what they are.",
+    "",
+    "A body is a built sheet from `tools/characters.json`; a look is that body with its cloth and",
+    "skin re-coloured, so three painted strangers become a road of them without a fourth painting.",
+    "See `src/content/looks.ts` for the rule and `docs/strangers-and-happenings.md` for why.",
+    "",
+    "**Chosen by eye, not detected.** Each list was found by lighting one colour of the built sheet",
+    "magenta at 6x across every frame and looking -- the rule the character sheets already cost two",
+    "wrong heuristics to learn. The sheets are speckled, so a garment is several near-identical",
+    "colours rather than one, and every one of them has to be listed or the garment comes out",
+    "spotted. Most common first: the first entry is the swatch a face is drawn in.",
+    "",
+    "`test/looks.test.ts` fails if a listed colour is no longer in the sheet -- which is exactly",
+    "what rebuilding a body with `npm run build:sprite` would do -- so a stale list cannot quietly",
+    "stop dyeing anything. Re-derive by eye when it fires; do not delete the entry.",
+    "",
+    "`face` says which garment a drawn face wears on its head and its shoulders: `cloth`, `second`,",
+    "or a painted colour for one that is never dyed -- the drover's turban is cream in every frame,",
+    "so a face that dyed it would contradict the figure on the road.",
+    "",
+    "Only traveller bodies are here. The playable five are the player's own face and are never",
+    "re-dyed: a stranger wearing a recoloured Varuna is still Varuna."
+  ],
+  "bodies": {
+    "traveller-carrier": {
+      "headwear": "wrap",
+      "skin": ["#dd793d", "#e17d41", "#e17c3e", "#dc793d", "#e17c3f", "#e48344"],
+      "cloth": ["#fcad24", "#fdb227"],
+      "second": ["#57583a", "#857942", "#857943"],
+      "face": { "headwear": "cloth", "shoulders": "second" }
+    },
+    "traveller-drover": {
+      "headwear": "turban",
+      "skin": ["#d67a3d", "#da8143", "#d77d41", "#d87d41", "#d98244"],
+      "cloth": ["#b64131"],
+      "second": ["#5c5d35", "#464727", "#474828", "#5b5c35"],
+      "face": { "headwear": "#f9e3cc", "shoulders": "second" }
+    },
+    "traveller-pilgrim": {
+      "headwear": "hood",
+      "skin": ["#d57d43", "#d88246", "#d57c42", "#d88347"],
+      "cloth": ["#323766", "#262747", "#2d325b", "#2a2d55"],
+      "second": [],
+      "face": { "headwear": "cloth", "shoulders": "cloth" }
+    }
+  }
+}

@@ -17,6 +17,8 @@
 // canvas on load and so runs under neither Node nor jsdom. `Phaser` appears here only as the type
 // of a scene being handed in, so `import type` says exactly that and disappears at compile time.
 import type Phaser from 'phaser';
+import { type Look, lookKey, recolourTable } from '../content/looks';
+import { recolourPixels } from './recolour';
 
 
 
@@ -203,6 +205,44 @@ export function createCharacterAnimations(scene: Phaser.Scene, key: string): voi
     // `animFor` returns the same shape for all three actions and the scene needs no special case.
     define('sit', facing, [sitFrame(facing).frame], 0.9);
   }
+}
+
+/**
+ * A traveller body re-dyed to one look, as a texture of its own. Returns the key to draw with.
+ *
+ * **Built once per distinct look, at runtime, from the sheet already loaded.** Three bodies times
+ * four skins times fifty-six dye pairs is far too many sheets to build and ship, and every one of
+ * them would be a PNG in the bundle -- where this is a canvas the size of one sheet, made only for
+ * the handful of people actually on the map. The bundle does not grow by a byte.
+ *
+ * Falls back to the undyed body if anything is missing, because a stranger in the painter's own
+ * colours is a working game and a missing texture is a green box.
+ */
+export function dyeSheet(scene: Phaser.Scene, baseKey: string, look: Look): string {
+  const key = lookKey(look);
+  if (scene.textures.exists(key)) return key;
+  if (!scene.textures.exists(baseKey)) return baseKey;
+
+  const source = scene.textures.get(baseKey).getSourceImage() as { width: number; height: number };
+  const { width, height } = source;
+  const canvas = scene.textures.createCanvas(key, width, height);
+  const context = canvas?.getContext();
+  if (!canvas || !context) return baseKey;
+
+  context.drawImage(source as CanvasImageSource, 0, 0);
+  const pixels = context.getImageData(0, 0, width, height);
+  recolourPixels(pixels.data, recolourTable(look));
+  context.putImageData(pixels, 0, 0);
+
+  // The same cells `loadCharacterSheet` cuts, numbered the same way, so every animation and frame
+  // index that works on the body works on its dyed copy unchanged.
+  const frames = Math.floor(width / PLAYER_FRAME.width);
+  for (let i = 0; i < frames; i += 1) {
+    canvas.add(i, 0, i * PLAYER_FRAME.width, 0, PLAYER_FRAME.width, PLAYER_FRAME.height);
+  }
+  canvas.refresh();
+  createCharacterAnimations(scene, key);
+  return key;
 }
 
 export type Action = 'idle' | 'walk' | 'sit';

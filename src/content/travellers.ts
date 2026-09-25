@@ -26,6 +26,7 @@ import { isWalkable } from '../world/generate';
 import type { Point, Tile, World } from '../world/types';
 import { allNpcs, fieldMap, npc, poi, type Npc } from './places';
 import { vehicles } from './making';
+import { type Look, lookFor } from './looks';
 
 /**
  * How many travellers a map carries.
@@ -95,6 +96,15 @@ export interface Traveller {
   conveyance: string | null;
   /** Which built character sheet draws them. */
   art: string;
+  /**
+   * How that sheet is dyed for them, or null to draw it as painted.
+   *
+   * **This is what lets three bodies be a road of strangers.** Before it, the carrier on every
+   * map was the same person in the same clothes. See `looks.ts`. Keyed on the canon id for a named
+   * person, so they wear the same thing on every map, and on the map as well for road company, who
+   * are different people wherever they are met.
+   */
+  look: Look | null;
 }
 
 /**
@@ -250,7 +260,8 @@ export function travellersOn(fieldMapId: string): Traveller[] {
       npcId: person.id,
       circuit,
       conveyance: conveyanceFor(grounds),
-      art: sheetFor(fieldMapId, out.length)
+      art: sheetFor(fieldMapId, out.length),
+      look: lookFor(person.id, sheetFor(fieldMapId, out.length))
     });
   }
 
@@ -273,7 +284,8 @@ export function travellersOn(fieldMapId: string): Traveller[] {
       npcId: null,
       circuit,
       conveyance: conveyanceFor(grounds),
-      art: sheetFor(fieldMapId, out.length)
+      art: sheetFor(fieldMapId, out.length),
+      look: lookFor(`${fieldMapId}:${who.id}`, sheetFor(fieldMapId, out.length))
     });
   }
 
