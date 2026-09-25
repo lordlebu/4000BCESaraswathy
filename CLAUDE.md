@@ -269,7 +269,9 @@ tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side comp
 | `src/ui/art-kept.json` | every piece of art ever accepted — **nothing is ever deleted from it** |
 | `docs/art-placement.md` | the mechanism — which folder, which filename, what falls back |
 | `docs/activity-boards-plan.md` | which bench a place has, how it says so — designed, not built |
-| `docs/events-plan.md` | events: the framework, shipped; the content, not |
+| `docs/events-plan.md` | events: the framework, shipped; authored content, not |
+| `docs/strangers-and-happenings.md` | re-dyed strangers and their faces, and events woven from the tile |
+| `docs/scaling-study.md` | what the codebase will cost to grow, measured, and what to change first |
 | `docs/ui-streamline-plan.md` | what the chrome costs the map, measured, and the four moves that give it back |
 | `docs/ui-affordances-plan.md` | what the screen says once the map has the room — closed, and the two faults it found |
 
@@ -390,7 +392,9 @@ it is not, it has already been applied.
   `camps.ts` and `kit.ts` answer where you can sleep and what the traveller always carries;
   `making.ts` adapts the crafting bundle and `satchel.ts`, `crafting.ts`, `gathering.ts`,
   `cooking.ts`, `using.ts` and `vehicles.ts` are the rules over it; `events.ts` holds what can
-  happen *to* you. All import their JSON at build time.
+  happen *to* you, and `happenings.ts` weaves ordinary events on the spot from what is on the tile
+  when nothing authored can happen; `looks.ts` dyes the three traveller bodies into a road of
+  strangers. All import their JSON at build time.
 
   **`travellers.ts` and `wanderers.ts` are the same arithmetic with different circuits.** A
   traveller walks between points of interest, an animal between tiles of its own habitat, and
@@ -884,9 +888,10 @@ Two habits that go with it, both learned by getting them wrong:
   `src/save.ts` when the payload shape changes so old saves are discarded rather than misread.
   **Two things move it and only one of them is a payload change**: the other is the ground moving
   under a saved journey, because a remembered position, node and fog mask all name tiles that a new
-  generator no longer produces. It is at 16 — the collection replacing the old sketch list moved it
+  generator no longer produces. It is at 18 — the collection replacing the old sketch list moved it
   to 6, resource nodes to 12, the Aravali growing to 52 × 78 moved it again, stamping the sky pool
-  moved it to 15, and making that pool walkable moved it to 16 — and `Progress` (rungs, words,
+  moved it to 15, making that pool walkable moved it to 16, a tile's `road` flag to 17 and placing
+  the painted buildings to 18 — and `Progress` (rungs, words,
   answered, questions) plus `collection` are the parts that matter. **The last two are the same
   ground twice**, which is the clearest case this rule has: neither changed the payload's shape, and
   both changed what a remembered tile means.

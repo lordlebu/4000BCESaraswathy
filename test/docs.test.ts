@@ -79,3 +79,15 @@ describe('the README only names commands that exist', () => {
     expect(missing, `README names scripts that do not exist: ${missing.join(', ')}`).toEqual([]);
   });
 });
+
+describe('CLAUDE.md says where the save version is', () => {
+  it('names the SAVE_VERSION the code actually has', () => {
+    // It said 16 for two bumps after the code reached 18 -- and every bump discards every journey
+    // in existence, which is the one number here a reader most needs to be right.
+    const claude = readFileSync(join(ROOT, 'CLAUDE.md'), 'utf8');
+    const save = readFileSync(join(ROOT, 'src', 'save.ts'), 'utf8');
+    const actual = save.match(/export const SAVE_VERSION = (\d+);/)?.[1];
+    expect(actual, 'could not read SAVE_VERSION out of src/save.ts').toBeDefined();
+    expect(claude).toContain(`It is at ${actual} —`);
+  });
+});
