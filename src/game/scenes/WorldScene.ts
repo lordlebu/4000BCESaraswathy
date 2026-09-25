@@ -142,7 +142,9 @@ import {
   animFor,
   characterFor,
   createCharacterAnimations,
+  dyeSheet,
   everyCharacter,
+  forgetSheet,
   everySheet,
   figureScale,
   travellerScale,
@@ -590,6 +592,14 @@ export class WorldScene extends Phaser.Scene {
     this.riding = false;
     this.glows = [];
     this.glowAt = -1;
+    // The people on the road belong to the map they walk. Never reset before, so every map change
+    // kept the last map's travellers and wanderers in these lists with their sprites destroyed:
+    // moved every tick, reported to React, and counted by `__travellers`.
+    this.travellers = [];
+    this.travellersMovedAt = -1;
+    this.travellerStatesSent = '';
+    this.wanderers = [];
+    this.wanderersMovedAt = -1;
     this.travelled = data.travelled ?? 0;
     this.restedAt = this.travelled;
     this.standingOn = null;
@@ -1877,7 +1887,11 @@ export class WorldScene extends Phaser.Scene {
       // road that nothing sent anywhere.
       if (stops.length < 2) continue;
 
-      const key = traveller.art === this.character.key ? this.otherSheet(traveller.art) : traveller.art;
+      const body = traveller.art === this.character.key ? this.otherSheet(traveller.art) : traveller.art;
+      // Re-dyed to this person's look when the body has one, so three painted strangers read as
+      // many. Only when the body is the one the look was chosen for: a look names the colours of
+      // one sheet, and applied to the player-avoidance fallback it would match nothing.
+      const key = traveller.look && traveller.look.body === body ? dyeSheet(this, body, traveller.look) : body;
       const sprite = this.add
         .sprite(0, 0, key, 0)
         .setOrigin(0.5, 1)
@@ -1885,6 +1899,14 @@ export class WorldScene extends Phaser.Scene {
       sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
       sprite.setName(`traveller:${traveller.id}`);
       this.travellers.push({ traveller, circuit, stops, sprite });
+    }
+
+    // A dyed sheet is made per look, and the looks belong to one map. Release the ones this roster
+    // does not wear, so a journey across every map holds one map's strangers rather than all of
+    // them. Only dyed keys (`body~skin~cloth~second`): the painted bodies are loaded once and kept.
+    const worn = new Set(this.travellers.map(({ sprite }) => sprite.texture.key));
+    for (const key of this.textures.getTextureKeys()) {
+      if (key.includes('~') && !worn.has(key)) forgetSheet(this, key);
     }
 
     // **Exposed for the browser suite for the same reason `__travellers` is**: a Node test cannot

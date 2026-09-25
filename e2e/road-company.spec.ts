@@ -53,12 +53,17 @@ test('the map carries other people, and they are drawn from the built sheets', a
   const seen = await bootAt(page, '12');
 
   expect(seen.length, 'nobody is travelling on this map').toBeGreaterThan(0);
-  expect(seen.length, 'more travellers than the roster allows').toBeLessThanOrEqual(3);
+  // Three of canon's people at most, and two strangers beside them on every map --
+  // `TRAVELLERS_PER_MAP` plus `ROAD_COMPANY_PER_MAP`. Written out rather than imported, because a
+  // spec that imports `src/content/` never loads (see the session-craft skill).
+  expect(seen.length, 'more travellers than the roster allows').toBeLessThanOrEqual(5);
+  expect(seen.filter((t) => !t.named).length, 'no road company on this map').toBeGreaterThan(0);
   // Canon supplies the circuits, so at least one of them is a person canon wrote rather than road
   // company the game invented.
   expect(seen.some((t) => t.named), 'every traveller is unnamed road company').toBe(true);
-  // No two the same figure: three copies of one face reads as a bug even when it is not.
-  expect(new Set(seen.map((t) => t.sheet)).size, 'two travellers share a sheet').toBe(seen.length);
+  // No two the same figure: copies of one face read as a bug even when they are not. The texture
+  // key names the body *and* its dyes, so two carriers in different cloth are two keys.
+  expect(new Set(seen.map((t) => t.sheet)).size, 'two travellers are drawn alike').toBe(seen.length);
   expect(warnings, 'a traveller sheet did not load').toEqual([]);
 });
 
@@ -101,4 +106,23 @@ test('they are out at noon and stopped at a place in the small hours', async ({ 
   });
   expect(moved.length, 'every traveller is on the same tile at noon as at two in the morning')
     .toBeGreaterThan(0);
+});
+
+test('a map change leaves the last map’s people behind', async ({ page }) => {
+  // **The scene is reused, not rebuilt, when you travel.** Phaser's `restart` re-enters `init` on
+  // the same instance, and the traveller list was never reset there, so every map crossed added its
+  // roster to the last one's -- sprites destroyed, entries kept, all of them moved every tick and
+  // reported to React. One map's worth is the most there should ever be.
+  const before = await bootAt(page, '12');
+  await page.getByRole('button', { name: 'Where to go' }).click();
+  const sheet = page.locator('.diary');
+  await sheet.getByRole('button', { name: 'Travel' }).first().click();
+  await expect(sheet).toBeHidden();
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await page.waitForTimeout(2500);
+
+  const after = await read(page);
+  expect(after, 'no travellers after travelling').not.toBeNull();
+  expect(after!.length, `${before.length} before, ${after!.length} after`).toBeLessThanOrEqual(5);
+  expect(new Set(after!.map((t) => t.id)).size, 'a traveller is listed twice').toBe(after!.length);
 });

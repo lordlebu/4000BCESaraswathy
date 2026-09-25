@@ -55,8 +55,8 @@ const NEUTRAL_INK = '#6b5c6f';
  * beside or across the body. Keeping the shared part shared is what stops ten portraits reading as
  * ten unrelated marks -- these are people of one place, doing different jobs in it.
  */
-const HEAD = 'M8.5 5a3.2 3.2 0 0 1 0 6.4 3.2 3.2 0 0 1 0-6.4z';
-const SHOULDERS = 'M2 21c0-4 2.9-6.6 6.5-6.6S15 17 15 21z';
+export const HEAD = 'M8.5 5a3.2 3.2 0 0 1 0 6.4 3.2 3.2 0 0 1 0-6.4z';
+export const SHOULDERS = 'M2 21c0-4 2.9-6.6 6.5-6.6S15 17 15 21z';
 
 /**
  * What each person is holding or wearing, keyed by the trade canon gives them.

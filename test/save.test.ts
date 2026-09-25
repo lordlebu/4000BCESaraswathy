@@ -9,7 +9,7 @@
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { SAVE_VERSION, clearJourney, hasBegun, loadJourney, saveJourney } from '../src/save';
+import { KNOWLEDGE_VERSION, SAVE_VERSION, clearJourney, hasBegun, loadJourney, saveJourney } from '../src/save';
 import { emptyCollection, metOnTile } from '../src/content/collection';
 import { emptyProgress } from '../src/journey';
 
@@ -182,5 +182,71 @@ describe('seenEvents', () => {
       JSON.stringify({ version: SAVE_VERSION, discovered: [], collection: {}, reached: false, seenEvents: 'event_a' })
     );
     expect(loadJourney('wrong').seenEvents).toEqual([]);
+  });
+});
+
+describe('the ground moving keeps what you know', () => {
+  /**
+   * **Why the save has two halves.** Most of the eighteen `SAVE_VERSION` bumps were the ground
+   * moving, and each one threw away the diary along with the fog. Now a ground bump empties only
+   * the half that names tiles.
+   */
+  const known = {
+    collection: { saltreed: { id: 'saltreed', kind: 'flora' } },
+    progress: { ...emptyProgress(), words: ['word_kia_tide'] },
+    satchel: { material_reed_fibre: 3 },
+    travelled: 5_000,
+    seenEvents: ['woven:dream:wetland'],
+    met: ['field_map_lothal:company_carrier'],
+    characterId: 'mithra'
+  };
+
+  it('keeps the diary, the satchel and the people met when only the ground moved', () => {
+    writeRaw({
+      version: SAVE_VERSION - 1,
+      knowledgeVersion: KNOWLEDGE_VERSION,
+      discovered: ['3,4'],
+      reached: true,
+      nodes: { '3,4': { left: 0, day: 1 } },
+      ...known
+    });
+    const back = loadJourney(SEED);
+    expect(back.progress.words).toEqual(['word_kia_tide']);
+    expect(back.collection.saltreed).toEqual({ id: 'saltreed', kind: 'flora' });
+    expect(back.satchel).toEqual({ material_reed_fibre: 3 });
+    expect(back.seenEvents).toEqual(['woven:dream:wetland']);
+    expect(back.met).toEqual(['field_map_lothal:company_carrier']);
+    expect(back.travelled).toBe(5_000);
+    expect(back.characterId).toBe('mithra');
+    // And forgets exactly the tiles, which name ground that is not there any more.
+    expect(back.discovered).toEqual([]);
+    expect(back.reached).toBe(false);
+    expect(back.nodes).toEqual({});
+    // A journey whose fog was reset but whose clock ran is still one somebody is on.
+    expect(hasBegun(back)).toBe(true);
+  });
+
+  it('keeps the fog when only what-you-know changed shape', () => {
+    writeRaw({ version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION + 1, discovered: ['3,4'], reached: true, ...known });
+    const back = loadJourney(SEED);
+    expect(back.discovered).toEqual(['3,4']);
+    expect(back.progress).toEqual(emptyProgress());
+    expect(back.satchel).toEqual({});
+  });
+
+  it('reads a save from before the split as knowledge version 1', () => {
+    // Written by the build before this one: `version` 18 and no `knowledgeVersion` at all.
+    writeRaw({ version: 18, discovered: ['1,1'], reached: false, ...known });
+    const back = loadJourney(SEED);
+    expect(back.progress.words).toEqual(['word_kia_tide']);
+    expect(back.discovered).toEqual(SAVE_VERSION === 18 ? ['1,1'] : []);
+  });
+
+  it('stamps both versions on every save it writes', () => {
+    saveJourney(SEED, { discovered: [], collection: {}, reached: false, met: ['a:b'] });
+    const raw = JSON.parse(localStorage.getItem(`south-of-tethys:${SEED}`)!);
+    expect(raw.version).toBe(SAVE_VERSION);
+    expect(raw.knowledgeVersion).toBe(KNOWLEDGE_VERSION);
+    expect(loadJourney(SEED).met).toEqual(['a:b']);
   });
 });

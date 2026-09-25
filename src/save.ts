@@ -103,13 +103,47 @@ const PREFIX = 'south-of-tethys';
  * invisible. That is not a broken save; it is a save that quietly looks like the bug this change
  * exists to fix, which is worse to leave than to drop.
  *
- * Read strictly rather than migrated: a version mismatch drops the save. That is the existing
- * behaviour and it stays, because a half-understood journey is worse than a fresh one.
+ * Read strictly rather than migrated: a version mismatch drops what it versions. That is the
+ * existing behaviour and it stays, because a half-understood journey is worse than a fresh one --
+ * but since `KNOWLEDGE_VERSION` it drops only the half that moved. See there.
  */
 export const SAVE_VERSION = 18;
 
+/**
+ * The version of **what the player knows**, counted separately from `SAVE_VERSION` above.
+ *
+ * **Why there are two now.** Of the eighteen bumps above, most were the ground moving -- 7, 10,
+ * 11, 14, 15, 16 and 18 -- and every one of them threw away the diary with the fog. A remembered
+ * tile genuinely means nothing on ground that moved; a rung climbed, a word learned, a plant met
+ * and a satchel of reeds mean exactly what they meant. So the payload is two halves with two
+ * versions:
+ *
+ * | half | fields | versioned by |
+ * |---|---|---|
+ * | where you are | `discovered`, `nodes`, `reached` | `SAVE_VERSION` |
+ * | what you know | `progress`, `collection`, `satchel`, `seenEvents`, `met`, `travelled`, `characterId` | this |
+ *
+ * **Ground moving bumps `SAVE_VERSION` only**: the player keeps everything they learned and wakes
+ * with fresh fog on the new ground. A change to the *shape* of the second half bumps this, and
+ * drops it exactly as a mismatch always has -- the rule that a half-understood journey is worse
+ * than a fresh one still holds, one half at a time.
+ *
+ * `travelled` is knowledge, not ground: it is the journey's clock, and a day count means the same
+ * on any map. Nodes regrow against it, and the nodes are dropped with the ground.
+ *
+ * 1 is the shape `SAVE_VERSION` 18 wrote, which is why a save from before the split carrying 18
+ * reads as knowledge version 1: nothing about those fields changed when the halves were named.
+ */
+export const KNOWLEDGE_VERSION = 1;
+
+/** The `SAVE_VERSION` whose payload already had knowledge version 1's shape, before it was stamped. */
+const KNOWLEDGE_1_UNSTAMPED = 18;
+
 export interface Journey {
+  /** The where-you-are half's version. See `SAVE_VERSION`. */
   version: number;
+  /** The what-you-know half's version. See `KNOWLEDGE_VERSION`. */
+  knowledgeVersion: number;
   /**
    * Who was walking.
    *
@@ -177,10 +211,18 @@ export interface Journey {
    * membership. `content/events.ts` decides what goes in; this only stores it.
    */
   seenEvents?: string[];
+  /**
+   * The strangers the player has met in an event, by the id their event carried.
+   *
+   * What lets somebody on the road recognise you the second time. Optional and unversioned on
+   * `seenEvents`' precedent: absent is "nobody yet", which is true of every older save.
+   */
+  met?: string[];
 }
 
 const empty = (): Journey => ({
   version: SAVE_VERSION,
+  knowledgeVersion: KNOWLEDGE_VERSION,
   discovered: [],
   collection: {},
   reached: false,
@@ -188,8 +230,14 @@ const empty = (): Journey => ({
   satchel: emptySatchel(),
   nodes: noNodes(),
   travelled: 0,
-  seenEvents: []
+  seenEvents: [],
+  met: []
 });
+
+/** A list of strings, or none. A stored value from some other shape must never reach a caller. */
+function readIds(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : [];
+}
 
 /** Anything unrecognisable becomes an empty progress rather than a half-read one. */
 function readProgress(value: unknown): Progress {
@@ -253,34 +301,56 @@ export function loadJourney(seed: string): Journey {
 
   try {
     const parsed = JSON.parse(raw) as Partial<Journey>;
-    if (parsed.version !== SAVE_VERSION) {
+    // Each half is read if its own version matches, and emptied if it does not. Only when neither
+    // half can be read is the save removed -- which is what a mismatch used to do to all of it.
+    const groundOk = parsed.version === SAVE_VERSION;
+    const knowledgeOk =
+      (parsed.knowledgeVersion ??
+        (parsed.version === KNOWLEDGE_1_UNSTAMPED ? 1 : undefined)) === KNOWLEDGE_VERSION;
+    if (!groundOk && !knowledgeOk) {
       localStorage.removeItem(key(seed));
       return empty();
     }
-    return {
-      version: SAVE_VERSION,
-      // A string or nothing. An id the build no longer knows resolves to Varuna at the point of
-      // use rather than here, so an old save naming a retired character still loads.
-      characterId: typeof parsed.characterId === 'string' ? parsed.characterId : undefined,
-      discovered: Array.isArray(parsed.discovered) ? parsed.discovered : [],
-      collection: readCollection(parsed.collection),
-      reached: parsed.reached === true,
-      progress: readProgress(parsed.progress),
-      satchel: readSatchel(parsed.satchel),
-      nodes: readNodes(parsed.nodes),
-      // A clock that is not a finite number is no clock. Nought is a fresh journey, which is
-      // exactly what every save written before nodes existed is.
-      travelled:
-        typeof parsed.travelled === 'number' && Number.isFinite(parsed.travelled) && parsed.travelled >= 0
-          ? parsed.travelled
-          : 0,
-      // Only strings, and absent reads as none. A stored value from some future shape must not
-      // reach `canHappen` as an object, where it would silently never match an id and quietly
-      // replay every `once` event the player has already had.
-      seenEvents: Array.isArray(parsed.seenEvents)
-        ? parsed.seenEvents.filter((id): id is string => typeof id === 'string')
-        : []
-    };
+    const fresh = empty();
+    const knowledge = knowledgeOk
+      ? {
+          // A string or nothing. An id the build no longer knows resolves to Varuna at the point of
+          // use rather than here, so an old save naming a retired character still loads.
+          characterId: typeof parsed.characterId === 'string' ? parsed.characterId : undefined,
+          collection: readCollection(parsed.collection),
+          progress: readProgress(parsed.progress),
+          satchel: readSatchel(parsed.satchel),
+          // A clock that is not a finite number is no clock. Nought is a fresh journey, which is
+          // exactly what every save written before nodes existed is.
+          travelled:
+            typeof parsed.travelled === 'number' && Number.isFinite(parsed.travelled) && parsed.travelled >= 0
+              ? parsed.travelled
+              : 0,
+          // Only strings, and absent reads as none. A stored value from some future shape must not
+          // reach `canHappen` as an object, where it would silently never match an id and quietly
+          // replay every `once` event the player has already had.
+          seenEvents: readIds(parsed.seenEvents),
+          met: readIds(parsed.met)
+        }
+      : {
+          characterId: undefined,
+          collection: fresh.collection,
+          progress: fresh.progress,
+          satchel: fresh.satchel,
+          travelled: 0,
+          seenEvents: [],
+          met: []
+        };
+    const ground = groundOk
+      ? {
+          discovered: Array.isArray(parsed.discovered) ? parsed.discovered : [],
+          reached: parsed.reached === true,
+          nodes: readNodes(parsed.nodes)
+        }
+      : // The ground moved under this journey. What was known stands; the fog, the landmark and
+        // what was drawn from each tile named ground that is not there any more.
+        { discovered: [], reached: false, nodes: fresh.nodes };
+    return { version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, ...knowledge, ...ground };
   } catch {
     localStorage.removeItem(key(seed));
     return empty();
@@ -296,7 +366,7 @@ export function loadJourney(seed: string): Journey {
  */
 export function saveJourney(
   seed: string,
-  journey: Omit<Journey, 'version' | 'progress' | 'satchel' | 'nodes' | 'travelled'> & {
+  journey: Omit<Journey, 'version' | 'knowledgeVersion' | 'progress' | 'satchel' | 'nodes' | 'travelled'> & {
     progress?: Progress;
     satchel?: Satchel;
     nodes?: Nodes;
@@ -316,6 +386,7 @@ export function saveJourney(
         : null;
     const payload: Journey = {
       version: SAVE_VERSION,
+      knowledgeVersion: KNOWLEDGE_VERSION,
       ...journey,
       progress: journey.progress ?? stored!.progress,
       satchel: journey.satchel ?? stored!.satchel,
