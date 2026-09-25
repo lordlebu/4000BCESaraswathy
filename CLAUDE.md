@@ -35,6 +35,7 @@ npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
 npm run check:data # verify data/canon/ matches the canon release it came from
 npm run perf       # frame cost on the renderer CI has -- see docs/rendering.md
+npm run simulate   # walk hundreds of seeded journeys through the event layer and print the rhythm
 npm run build:sprite # rebuild every traveller's sheet; add an id to do just one
 ```
 
@@ -272,6 +273,7 @@ tested, believed and wired to nothing. `SouthOfTethys` carries a canon-side comp
 | `docs/events-plan.md` | events: the framework, shipped; authored content, not |
 | `docs/strangers-and-happenings.md` | re-dyed strangers and faces, woven events, the decisions, and canon's peoples surveyed |
 | `docs/face-prompts.md` | the 22 stranger-face prompts, ready to paste, and how the pool is named |
+| `docs/event-prompts.md` | the 13 event-painting prompts, one per kind of woven event |
 | `docs/scaling-study.md` | what the codebase will cost to grow, measured, and what to change first |
 | `docs/ui-streamline-plan.md` | what the chrome costs the map, measured, and the four moves that give it back |
 | `docs/ui-affordances-plan.md` | what the screen says once the map has the room — closed, and the two faults it found |

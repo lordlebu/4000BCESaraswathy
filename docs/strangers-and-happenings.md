@@ -279,12 +279,75 @@ is a *noun*, so it is canon's.
   closes in a real page, and that a stranger tells you their name and greets you by it the next
   day. Both halves were proven to bite.
 
+## Phase 2: storylets, a pacer, chains, and a simulation — 25 September 2026
+
+**Storylets.** Each kind in `data/happenings.json` now carries its own rules beside its words:
+`weight`, `tags`, a `cooldown` before the kind can happen again at all, and `again_after`, the days
+before the *same subject* can come round again (null means once). A dream of the wetland can recur a
+month on; a first meeting never does. The day each event last happened is kept in the save
+(`eventDays`, what-you-know half), so this survives a reload and a ground bump.
+
+**The pacer** (`paceFor`, tuned in `tiers.ts` as `PACE`). The chance `WOVEN_ONE_IN` gives is leaned
+on by how long the road has been quiet: a third as likely the same day as another event, two
+thirds the day after, as written for two to four days, half again after five, twice after eight.
+Never above `PACE_CEILING`. It is RimWorld's storyteller idea turned toward calm: it paces rhythm,
+and there is no threat in it to pace.
+
+**The first day belongs to the place** (`WOVEN_FROM_DAY`). Found by a browser spec, not designed
+in: the pacer first counted a fresh journey as a long quiet stretch, which doubled the chance at
+the very first arrival, and `e2e/talking.spec.ts` walked into the Drowned Dockyard to find a
+*Stones at the edge* card covering Thrali. That is the worst moment for a card in play as well as
+in a test. So nothing woven happens on day zero, and a fresh journey counts as an ordinary day.
+Authored events and the inspector are not held back.
+
+**Variety** (`pickWoven`). Events are picked by rendezvous over their ids, weighted, and a kind
+sharing a tag with anything from the last three days weighs a third as much. Measured under test:
+tracks the day after an animal at night come up well under three quarters as often.
+
+**Chains.** A choice can leave a flag (`sets`), and a template can need one (`requires`); both
+are in the words file, and flags live in the save. The first chain: make room for a stranger after
+dark, and later on the road they hold out something of their people's (red delta rice from a
+Harappan carrier, reed fibre from a Kia pilgrim, cliff-goat hair from a Maru drover). Turning
+it down is a real choice too. `e2e/happenings.spec.ts` proves the flag reaches the saved journey.
+
+**No stranger shares a name with another of their people**, on any map. The whole road is dealt
+at once, each stranger taking their best-ranked name nobody of their people has.
+
+### What the simulation measured
+
+`test/simulation.test.ts` walks seeded journeys over all four maps through the real `happeningNow`:
+a road question, an arrival, three takes and a night each day, choosing by hash so both branches
+of every card get walked. It checks the storylet rules as it goes, and `npm run simulate` runs it
+larger and prints the report. Measured at 25 journeys a map over 60 days (6,000 days of road):
+
+| measure | value |
+|---|---|
+| woven events per day | 0.74 |
+| days with at least one event | 63% |
+| longest run of quiet days | 4 |
+| road / night / arriving / working per day | 0.26 / 0.18 / 0.03 / 0.27 |
+| materials given per 30 days | 1.8 |
+| strangers recognised / kindnesses returned | 435 / 73 |
+| storylet rule violations | 0 |
+
+**Two findings, left for the owner rather than tuned** (Q6 said keep the ration until the report
+and a play session speak):
+
+- **Something happens on two days in three.** That is what the documented rations produce once
+  the pacer has damped them. Work (one take in six) is as common as the road.
+- **Animals are half of everything**: tracks, sounds at night and being watched together make up
+  about 49%, because nearly every tile has an animal on it. Variety damping keeps them from
+  running back to back; it does not change their share.
+
+The simulation's bands (0.5 to 1.1 events a day, at most seven quiet days, no kind above 30%) sit
+well outside what was measured, so they fail on a change of rhythm and not on noise. Proven to
+bite: with `again_after` ignored, it reports every event that came back too soon.
+
 ## Still open
 
-- **Paintings.** The 22 faces are with the owner. The event paintings, `woven-<kind>` in
-  `src/ui/events/`, are not started. Neither blocks anything.
-- **Phase 2**: storylet weights and cooldowns, a pacing director, event chains, and a seed-sweep
-  simulation report.
+- **Paintings.** The 22 faces and 13 event paintings (`docs/event-prompts.md`) are with the owner.
+  Neither blocks anything.
+- **The rhythm questions above**, once the owner has played it.
 - **Authored events in canon (Q3)** need a new entity type, not `event_`.
 - **More bodies.** A fourth traveller sheet is a row in `tools/characters.json` and an entry in
   `assets/looks.json`, chosen by eye. With re-dyeing, a new body buys a new *silhouette*, which is
