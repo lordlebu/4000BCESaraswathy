@@ -408,7 +408,9 @@ export function App() {
           // thing that holds a Progress.
           holds: [...p.words, ...Object.keys(p.rungs), ...p.recipes],
           seen: seenEvents.current,
-          met: metStrangers.current
+          met: metStrangers.current,
+          last: eventDays.current,
+          flags: journeyFlags.current
         },
         roll,
         // What is here to make an event out of, when nothing authored can happen -- see
@@ -418,7 +420,9 @@ export function App() {
         extra.force ?? null
       );
       if (!next) return false;
-      seenEvents.current = [...seenEvents.current, next.id];
+      // A storylet can come round again, so `seen` must not grow a copy of it each time.
+      if (!seenEvents.current.includes(next.id)) seenEvents.current = [...seenEvents.current, next.id];
+      eventDays.current = { ...eventDays.current, [next.id]: latest.current.day };
       setHappening({ event: next, shelter });
       return true;
     };
@@ -535,7 +539,10 @@ export function App() {
         // there were events to have.
         seenEvents: seenEvents.current,
         // Strangers you have met, so somebody on the road can know you the second time.
-        met: metStrangers.current
+        met: metStrangers.current,
+        // When each event last happened, and what earlier choices left behind.
+        eventDays: eventDays.current,
+        flags: journeyFlags.current
       });
     const timer = window.setInterval(flush, 3000);
     window.addEventListener('pagehide', flush);
@@ -610,6 +617,8 @@ export function App() {
     // inherited the old one's `seen` list and saved it as its own.
     seenEvents.current = loaded.seenEvents ?? [];
     metStrangers.current = loaded.met ?? [];
+    eventDays.current = loaded.eventDays ?? {};
+    journeyFlags.current = loaded.flags ?? [];
     setMemory('');
     setArrivalPage(null);
     setReached(false);
@@ -1096,6 +1105,9 @@ export function App() {
   );
   const seenEvents = useRef<string[]>(initialJourney.current.seenEvents ?? []);
   const metStrangers = useRef<string[]>(initialJourney.current.met ?? []);
+  /** When each event last happened, and the flags choices have left. See `Journey`. */
+  const eventDays = useRef<Record<string, number>>(initialJourney.current.eventDays ?? {});
+  const journeyFlags = useRef<string[]>(initialJourney.current.flags ?? []);
 
   /**
    * Open the bench activity. The making itself happens when the run settles.
@@ -1492,6 +1504,10 @@ export function App() {
               setSatchel((s) => given.reduce((held, g) => addToSatchel(held, g.id, g.n), s));
             }
             if (choice.eases && choice.eases > 0) EventBus.emitEvent('ease', { by: choice.eases });
+            // What this choice leaves behind, for a later event to find.
+            for (const flag of choice.sets ?? []) {
+              if (!journeyFlags.current.includes(flag)) journeyFlags.current = [...journeyFlags.current, flag];
+            }
             // Whoever this was about, you have met now.
             const stranger = happening.event.stranger;
             if (stranger && !metStrangers.current.includes(stranger.id)) {

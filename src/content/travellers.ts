@@ -24,7 +24,7 @@
 import { findPath } from '../world/pathfind';
 import { isWalkable } from '../world/generate';
 import type { Point, Tile, World } from '../world/types';
-import { allNpcs, fieldMap, givenNames, npc, poi, type Npc } from './places';
+import { allNpcs, fieldMap, fieldMaps, givenNames, npc, poi, type Npc } from './places';
 import { weightedPickFor } from '../world/rng';
 import { vehicles } from './making';
 import { type Look, lookFor } from './looks';
@@ -241,12 +241,43 @@ const COMPANY: readonly {
 /**
  * A stranger's given name, dealt from their people's list by rendezvous hash of who they are.
  *
- * The same stranger is called the same thing on every machine, and a name added to canon takes
- * only the strangers it outright wins -- nobody already known is renamed by a canon release.
+ * **No two strangers of one people share a name, on any map.** Dealt one at a time the carrier on
+ * the Aravali and the carrier on Lothal both came out Rethik -- two people, one name, and a player
+ * would reasonably read it as somebody following them. So the whole road is dealt at once: every
+ * stranger in a stable order takes their best-ranked name that nobody of their people has taken.
+ * A name added to canon still only takes the strangers it wins; a people with more strangers than
+ * names starts again from the full list rather than leaving anybody nameless.
  */
-export function givenNameFor(culture: string, who: string): string | null {
-  const names = givenNames[culture] ?? [];
-  return weightedPickFor(names, 'given-name', { x: 0, y: 0 }, who, (n) => n, () => 1);
+export function givenNameFor(who: string): string | null {
+  return dealtNames().get(who) ?? null;
+}
+
+let dealt: Map<string, string> | null = null;
+
+function dealtNames(): Map<string, string> {
+  if (dealt) return dealt;
+  const byCulture = new Map<string, string[]>();
+  for (const map of fieldMaps) {
+    for (const who of companyOn(map.id)) {
+      const list = byCulture.get(who.culture) ?? [];
+      list.push(`${map.id}:${who.id}`);
+      byCulture.set(who.culture, list);
+    }
+  }
+  const out = new Map<string, string>();
+  for (const [culture, strangers] of byCulture) {
+    const names = givenNames[culture] ?? [];
+    const taken = new Set<string>();
+    for (const key of [...strangers].sort()) {
+      const free = names.filter((n) => !taken.has(n));
+      const name = weightedPickFor(free.length > 0 ? free : names, 'given-name', { x: 0, y: 0 }, key, (n) => n, () => 1);
+      if (!name) continue;
+      taken.add(name);
+      out.set(key, name);
+    }
+  }
+  dealt = out;
+  return out;
 }
 
 /** Canon's language to canon's culture, for the two that are both. */
@@ -365,7 +396,7 @@ export function travellersOn(fieldMapId: string): Traveller[] {
         art: who.body,
         look: lookFor(`${fieldMapId}:${who.id}`, who.body),
         culture: who.culture,
-        givenName: givenNameFor(who.culture, `${fieldMapId}:${who.id}`)
+        givenName: givenNameFor(`${fieldMapId}:${who.id}`)
       });
     }
   }

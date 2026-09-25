@@ -221,3 +221,46 @@ export const WOVEN_ONE_IN: Record<'night' | 'arriving' | 'road' | 'working', num
 
 /** How much a woven event eases, when it eases at all. Company on the road is worth less than a meal. */
 export const COMPANY_EASES = 0.15;
+
+/**
+ * The pacer: how the ration leans on how long it has been since anything happened.
+ *
+ * **A cozy storyteller, not a dramatic one.** `RimWorld`'s storytellers pace incidents against what
+ * the colony has just been through; this does the same for a walk, with no threat in it anywhere.
+ * The day after something happened, the road is quieter; after a long quiet stretch it leans in. A
+ * multiplier on `WOVEN_ONE_IN`'s chance, by whole days since the last woven event of any kind, and
+ * the last entry holds for every longer gap.
+ *
+ * Read as: the same day as another event, a third as likely; a day after, two thirds; two to four
+ * days, as `WOVEN_ONE_IN` says; five to seven, half again; eight or more, twice. A fresh journey
+ * with nothing yet counts as an ordinary day, and nothing woven happens before `WOVEN_FROM_DAY`.
+ * `test/simulation.test.ts` measures what this produces over hundreds of journeys.
+ */
+export const PACE: readonly { fromDay: number; times: number }[] = [
+  { fromDay: 0, times: 0.35 },
+  { fromDay: 1, times: 0.7 },
+  { fromDay: 2, times: 1 },
+  { fromDay: 5, times: 1.5 },
+  { fromDay: 8, times: 2 }
+];
+
+/** No woven event is ever more likely than this, however long the quiet. A sure thing is furniture. */
+export const PACE_CEILING = 0.85;
+
+/**
+ * Variety: a kind sharing a tag with anything from the last `VARIETY_DAYS` days is picked
+ * `VARIETY_DAMP` times as often. Two animals in a row can happen; it just usually does not.
+ */
+export const VARIETY_DAYS = 3;
+export const VARIETY_DAMP = 0.35;
+
+/**
+ * The first day a woven event can happen on. Day zero is the journey's first.
+ *
+ * **The first day belongs to the place.** A player who has just arrived is learning where they are,
+ * who is here and what the ground gives, and a card about tracks on the road lands on top of all of
+ * that. Games that deal random events commonly hold them back at the start for exactly this; here
+ * it is one day. Authored events are not held back -- somebody who wrote a first-night dream meant
+ * it for the first night -- and the inspector (`window.__happen`) is not either.
+ */
+export const WOVEN_FROM_DAY = 1;

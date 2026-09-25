@@ -12,11 +12,29 @@
     "",
     "Diary voice: second person, past the moment, British spelling. Nobody fails; every choice is a",
     "real one with its own line. Strangers are 'they'. English only, with Jambhudweepan nouns, by",
-    "decision (docs/strangers-and-happenings.md, Q8)."
+    "decision (docs/strangers-and-happenings.md, Q8).",
+    "",
+    "Storylet fields, read by the code rather than shown: `weight` (how often this kind is picked",
+    "among those that could happen), `tags` (a kind sharing a tag with something from the last few",
+    "days is picked less, so the road varies), `cooldown` (days before this kind can happen again at",
+    "all), and `again_after` (days before the same subject can come round again; null means once).",
+    "`sets` names flags a choice leaves behind, and `requires` names flags a template needs, so one",
+    "event can lead to another -- {stranger} in either is the stranger the event is about. `gifts`",
+    "is what a stranger of each people gives, by canon material id."
   ],
   "templates": {
     "tracks": {
-      "slots": ["animal", "a_animal", "ground"],
+      "weight": 3,
+      "tags": [
+        "animal"
+      ],
+      "cooldown": 2,
+      "again_after": 20,
+      "slots": [
+        "animal",
+        "a_animal",
+        "ground"
+      ],
       "title": "Tracks across the path",
       "prose": "Pressed into the ground across your way, and fresh: the tracks of {a_animal}. They cross from one side to the other and are lost in {ground} a few strides on.",
       "choices": {
@@ -31,7 +49,15 @@
       }
     },
     "dropped": {
-      "slots": ["material"],
+      "weight": 2,
+      "tags": [
+        "find"
+      ],
+      "cooldown": 3,
+      "again_after": 30,
+      "slots": [
+        "material"
+      ],
       "title": "Something on the road",
       "prose": "Somebody has dropped a little {material} at the side of the road. Fallen from a load, by the look of it, and not worth going back for.",
       "choices": {
@@ -46,7 +72,18 @@
       }
     },
     "company": {
-      "slots": ["role", "dye", "elsewhere", "name"],
+      "weight": 3,
+      "tags": [
+        "stranger"
+      ],
+      "cooldown": 2,
+      "again_after": null,
+      "slots": [
+        "role",
+        "dye",
+        "elsewhere",
+        "name"
+      ],
       "title": "Company on the road",
       "prose": "A {role}, falls in beside you for a stretch. Dressed in {dye} gone pale with the road's dust, and in no hurry to be anywhere but walking.",
       "choices": {
@@ -67,7 +104,17 @@
       }
     },
     "company-again": {
-      "slots": ["trade", "dye", "name"],
+      "weight": 3,
+      "tags": [
+        "stranger"
+      ],
+      "cooldown": 3,
+      "again_after": 8,
+      "slots": [
+        "trade",
+        "dye",
+        "name"
+      ],
       "title": "A face you know",
       "prose": {
         "named": "{name}, the {trade} from the other day, is on the road ahead, still in {dye}, and lifts a hand when they see it is you.",
@@ -85,7 +132,16 @@
       }
     },
     "weather": {
-      "slots": ["ground", "plant"],
+      "weight": 2,
+      "tags": [
+        "weather"
+      ],
+      "cooldown": 2,
+      "again_after": 10,
+      "slots": [
+        "ground",
+        "plant"
+      ],
       "title": {
         "rain": "Rain on the road",
         "mist": "The mist comes down",
@@ -116,7 +172,15 @@
       }
     },
     "night-sounds": {
-      "slots": ["a_animal"],
+      "weight": 3,
+      "tags": [
+        "animal"
+      ],
+      "cooldown": 2,
+      "again_after": 15,
+      "slots": [
+        "a_animal"
+      ],
       "title": "Something beyond the lamp",
       "prose": "Late, with the lamp turned low, something moves at the edge of its light. By the sound of it, {a_animal}: out at the hour it likes best, and not much interested in you.",
       "choices": {
@@ -131,7 +195,15 @@
       }
     },
     "dream": {
-      "slots": ["ground"],
+      "weight": 1,
+      "tags": [
+        "dream"
+      ],
+      "cooldown": 5,
+      "again_after": 30,
+      "slots": [
+        "ground"
+      ],
       "title": "A dream",
       "prose": "You dream of {ground} before anybody had walked there: the same ground, the same light, and nobody at all to write it down.",
       "choices": {
@@ -146,7 +218,17 @@
       }
     },
     "knock": {
-      "slots": ["role", "elsewhere", "name"],
+      "weight": 2,
+      "tags": [
+        "stranger"
+      ],
+      "cooldown": 4,
+      "again_after": null,
+      "slots": [
+        "role",
+        "elsewhere",
+        "name"
+      ],
       "title": "Somebody after dark",
       "prose": "After dark there is a voice at the edge of your shelter: a {role}, caught out by the night and asking whether there is room for one more.",
       "choices": {
@@ -164,10 +246,24 @@
             "unnamed": "You point them on toward {elsewhere}. They thank you and go, and the night is quiet again."
           }
         }
+      },
+      "sets": {
+        "room": [
+          "sheltered:{stranger}"
+        ]
       }
     },
     "cairn": {
-      "slots": ["place", "count"],
+      "weight": 2,
+      "tags": [
+        "place"
+      ],
+      "cooldown": 0,
+      "again_after": null,
+      "slots": [
+        "place",
+        "count"
+      ],
       "title": "Stones at the edge",
       "prose": "At the edge of {place} somebody once began a little pile of stones, and everybody who has arrived since has added one.",
       "choices": {
@@ -182,7 +278,15 @@
       }
     },
     "cookfire": {
-      "slots": ["place"],
+      "weight": 3,
+      "tags": [
+        "place"
+      ],
+      "cooldown": 0,
+      "again_after": null,
+      "slots": [
+        "place"
+      ],
       "title": "A fire already lit",
       "prose": "There is smoke going up at {place}, and the smell of something in a pot. Whoever is tending it waves you over before you have properly arrived.",
       "choices": {
@@ -197,7 +301,15 @@
       }
     },
     "watched": {
-      "slots": ["a_animal"],
+      "weight": 2,
+      "tags": [
+        "animal"
+      ],
+      "cooldown": 2,
+      "again_after": 15,
+      "slots": [
+        "a_animal"
+      ],
       "title": "Being watched",
       "prose": "You look up from the work to find {a_animal} watching you from close by, with the air of something that has seen this done before and thinks you are doing it wrong.",
       "choices": {
@@ -212,7 +324,15 @@
       }
     },
     "underneath": {
-      "slots": ["material"],
+      "weight": 2,
+      "tags": [
+        "find"
+      ],
+      "cooldown": 3,
+      "again_after": 20,
+      "slots": [
+        "material"
+      ],
       "title": "Something underneath",
       "prose": "Under what you were taking, the ground gives up something else: a little {material}, turned up by the work.",
       "choices": {
@@ -223,6 +343,42 @@
         "back": {
           "label": "Put it back",
           "line": "You put it back where it was and press the earth down over it."
+        }
+      }
+    },
+    "kindness-returned": {
+      "weight": 6,
+      "tags": [
+        "stranger"
+      ],
+      "cooldown": 0,
+      "again_after": null,
+      "requires": [
+        "sheltered:{stranger}"
+      ],
+      "gifts": {
+        "harappan": "material_delta_rice",
+        "kia": "material_reed_fibre",
+        "maru": "material_goat_hair"
+      },
+      "slots": [
+        "name",
+        "gift",
+        "trade"
+      ],
+      "title": "Kindness returned",
+      "prose": {
+        "named": "{name}, the {trade} you gave a corner of your shelter to, is waiting at the side of the road with a little {gift} held out, and will not hear that there was no debt.",
+        "unnamed": "The {trade} you gave a corner of your shelter to is waiting at the side of the road with a little {gift} held out, and will not hear that there was no debt."
+      },
+      "choices": {
+        "accept": {
+          "label": "Take it, and thank them",
+          "line": "You take the {gift}. It is not much, which is exactly why it matters: it was carried all this way for you."
+        },
+        "decline": {
+          "label": "Tell them to keep it",
+          "line": "You tell them to keep it for the road. They look at you for a long moment, then laugh and put it away, and the two of you part square."
         }
       }
     }

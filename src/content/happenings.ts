@@ -43,12 +43,22 @@ import {
   events as authored
 } from './events';
 import happeningsText from '../../data/happenings.json';
-import { type Material, materialsIn } from './making';
+import { type Material, material, materialsIn } from './making';
 import { dyeName } from './looks';
 import { fieldMap, poi, type PointOfInterest } from './places';
 import { rhythmOf } from './routine';
 import { biomeFor, creatureFor, creaturesIn, floraFor, isAnimal } from './species';
-import { COMPANY_EASES, MEAL_EASES, WOVEN_ONE_IN } from './tiers';
+import {
+  COMPANY_EASES,
+  MEAL_EASES,
+  PACE,
+  PACE_CEILING,
+  VARIETY_DAMP,
+  VARIETY_DAYS,
+  WOVEN_FROM_DAY,
+  WOVEN_ONE_IN
+} from './tiers';
+import { rendezvousPick } from '../world/rng';
 import { travellersOn } from './travellers';
 
 /** A seeded roll, as `eventNow` takes it: the same salt always gives the same number. */
@@ -189,6 +199,20 @@ const SHELTERING: readonly string[] = ['tree', 'palm', 'shrub'];
 type Text = string | Readonly<Record<string, string>>;
 
 interface TemplateText {
+  /** How often this kind is picked among those that could happen. */
+  weight: number;
+  /** A kind sharing a tag with something recent is picked less. See `VARIETY_DAMP`. */
+  tags: readonly string[];
+  /** Days before this kind can happen again at all. */
+  cooldown: number;
+  /** Days before the same subject can come round again; null means once. */
+  again_after: number | null;
+  /** Flags each choice leaves behind. `{stranger}` is the stranger the event is about. */
+  sets?: Readonly<Record<string, readonly string[]>>;
+  /** Flags this kind needs before it can happen, in the same terms. */
+  requires?: readonly string[];
+  /** What a stranger of each people gives, by canon material id. */
+  gifts?: Readonly<Record<string, string>>;
   slots: readonly string[];
   title: Text;
   prose: Text;
@@ -266,6 +290,7 @@ function woven(
       if (!text) throw new Error(`data/happenings.json: '${kind}' has no choice '${spec.id}'`);
       used.add(`${kind}.${spec.id}`);
       const variant = spec.variant ?? options.variant;
+      const sets = (words.sets?.[spec.id] ?? []).map((flag) => flagFor(flag, options.stranger));
       return {
         id: spec.id,
         label: fill(pick(text.label, variant), slots),
@@ -273,15 +298,22 @@ function woven(
         line: fill(pick(text.line, variant), slots),
         grants: [],
         ...(spec.gives ? { gives: spec.gives } : {}),
-        ...(spec.eases ? { eases: spec.eases } : {})
+        ...(spec.eases ? { eases: spec.eases } : {}),
+        ...(sets.length > 0 ? { sets } : {})
       };
     }),
-    once: true,
+    // Once, unless the kind says the same subject may come round again -- `wovenFor` decides when.
+    once: words.again_after === null,
     ...(options.stranger ? { stranger: options.stranger } : {})
   };
 }
 
 type Template = (around: Surroundings, roll: Roll, now: Circumstance) => GameEvent | null;
+
+/** A flag written in the words file, with `{stranger}` made into the stranger it is about. */
+function flagFor(flag: string, stranger: EventStranger | undefined | null): string {
+  return flag.replace('{stranger}', stranger?.id ?? '');
+}
 
 /** Whether you would know this stranger's name, which decides the variant a line is told in. */
 const named = (stranger: EventStranger) => (stranger.givenName ? 'named' : 'unnamed');
@@ -438,6 +470,34 @@ const underneath: Template = ({ biome, taken }, roll) => {
   ]);
 };
 
+// ---------------------------------------------------------------------------------------------
+// Chains. An event that needs another to have happened first.
+
+/**
+ * The stranger you sheltered, met again on the road with something for you.
+ *
+ * **The chain the flags exist for.** Making room after dark leaves `sheltered:<stranger>`; this
+ * needs it. What they give is their people's -- rice from a Harappan carrier, reed from a Kia
+ * pilgrim, goat hair from a Maru drover -- so the gift says who they are. Both choices are real:
+ * turning it down is a kindness too, and costs nothing.
+ */
+const kindnessReturned: Template = ({ stranger, moment }, _roll, now) => {
+  if (!stranger || !byDay(moment)) return null;
+  const words = TEXT['kindness-returned']!;
+  if (!(words.requires ?? []).every((flag) => now.flags?.includes(flagFor(flag, stranger)))) return null;
+  const giftId = stranger.culture ? words.gifts?.[stranger.culture] : undefined;
+  const gift = giftId ? material(giftId) : null;
+  if (!gift) return null;
+  return woven(
+    'road',
+    'kindness-returned',
+    stranger.id,
+    { name: stranger.givenName ?? '', gift: lower(gift.name), trade: stranger.role.split(',')[0]! },
+    [{ id: 'accept', gives: [{ id: gift.id, n: 1 }] }, { id: 'decline' }],
+    { variant: named(stranger), stranger }
+  );
+};
+
 /**
  * Every template, by the occasion it answers, and the kind its words are filed under.
  *
@@ -451,6 +511,7 @@ export const TEMPLATES: Readonly<Record<Occasion, readonly { kind: string; make:
     { kind: 'dropped', make: dropped },
     { kind: 'company', make: company },
     { kind: 'company-again', make: companyAgain },
+    { kind: 'kindness-returned', make: kindnessReturned },
     { kind: 'weather', make: weather }
   ],
   night: [
@@ -468,23 +529,98 @@ export const TEMPLATES: Readonly<Record<Occasion, readonly { kind: string; make:
   ]
 };
 
+/** The kind an event id belongs to: `woven:tracks:x` is `tracks`. Null for an authored event. */
+export function kindOf(id: string): string | null {
+  return id.startsWith('woven:') ? (id.split(':')[1] ?? null) : null;
+}
+
+/** The last day anything of this kind happened, from the journey's record. */
+function lastOfKind(kind: string, last: Readonly<Record<string, number>>): number | null {
+  let latest: number | null = null;
+  for (const [id, day] of Object.entries(last)) {
+    if (kindOf(id) === kind && (latest === null || day > latest)) latest = day;
+  }
+  return latest;
+}
+
+/**
+ * Whether this event may happen now, by its storylet rules.
+ *
+ * **Seen is not the end any more.** A kind with `again_after` can bring the same subject round
+ * once that many days have passed -- a second dream of the same wetland a month on is texture, the
+ * same one the next night is a stuck record. A kind with `cooldown` waits that long after *any* of
+ * its kind. An event seen before `last` was kept (an older save) counts as long ago.
+ */
+function mayHappen(event: GameEvent, kind: string, now: Circumstance): boolean {
+  const words = TEXT[kind];
+  if (!words) return false;
+  const last = now.last ?? {};
+  const kindDay = lastOfKind(kind, last);
+  if (kindDay !== null && now.day - kindDay < words.cooldown) return false;
+  if (!now.seen.includes(event.id) && last[event.id] === undefined) return true;
+  if (words.again_after === null) return false;
+  const when = last[event.id];
+  return when === undefined || now.day - when >= words.again_after;
+}
+
 /** Every woven event that could happen right now, before the ration. For tests and for tuning. */
 export function wovenFor(now: Circumstance, around: Surroundings, roll: Roll, kind?: string): GameEvent[] {
   const out: GameEvent[] = [];
   for (const template of TEMPLATES[now.occasion]) {
     if (kind && template.kind !== kind) continue;
     const event = template.make(around, roll, now);
-    if (event && !now.seen.includes(event.id)) out.push(event);
+    if (event && mayHappen(event, template.kind, now)) out.push(event);
   }
   return out;
+}
+
+/**
+ * How much likelier than `WOVEN_ONE_IN` a woven event is today, from how long the road has been
+ * quiet. See `PACE`: fewer right after something, more after a long stretch of nothing.
+ */
+export function paceFor(now: Pick<Circumstance, 'day' | 'last'>): number {
+  const days = Object.entries(now.last ?? {})
+    .filter(([id]) => kindOf(id) !== null)
+    .map(([, day]) => day);
+  // A journey with nothing yet is an ordinary day, not a long quiet one. Counting it as the long gap
+  // made the very first arrival the likeliest moment for a card, which is the worst moment for one.
+  const quiet = days.length === 0 ? 2 : now.day - Math.max(...days);
+  let times = PACE[0]!.times;
+  for (const step of PACE) if (quiet >= step.fromDay) times = step.times;
+  return times;
+}
+
+/**
+ * Pick one of the events that could happen, by weight, favouring what has not happened lately.
+ *
+ * Rendezvous over event ids, so adding a template takes only the days it wins. A kind sharing a
+ * tag with anything from the last `VARIETY_DAYS` days weighs `VARIETY_DAMP` as much.
+ */
+export function pickWoven(could: readonly GameEvent[], now: Circumstance, roll: Roll): GameEvent | null {
+  const recent = new Set<string>();
+  for (const [id, day] of Object.entries(now.last ?? {})) {
+    const kind = kindOf(id);
+    if (kind && now.day - day < VARIETY_DAYS) for (const tag of TEXT[kind]?.tags ?? []) recent.add(tag);
+  }
+  return rendezvousPick(
+    could,
+    (id) => roll(`woven-pick:${now.occasion}:${now.day}:${id}`),
+    (e) => e.id,
+    (e) => {
+      const words = TEXT[kindOf(e.id) ?? ''];
+      if (!words) return 0;
+      return words.weight * (words.tags.some((t) => recent.has(t)) ? VARIETY_DAMP : 1);
+    }
+  );
 }
 
 /**
  * The one thing that happens now, authored or woven, or null.
  *
  * **Authored first, always, and unrationed.** Somebody who wrote a scene wrote it to be seen, and
- * `conditions` already say when. Only when none can happen is a woven one considered, and then only
- * one time in `WOVEN_ONE_IN[occasion]`.
+ * `conditions` already say when. Only when none can happen is a woven one considered, and then with
+ * a chance of `WOVEN_ONE_IN[occasion]` leaned on by the pacer (`paceFor`), and picked by weight with
+ * variety favoured (`pickWoven`).
  *
  * `around` may be null -- no world yet, or a tile off the map -- and then only an authored event
  * can happen, which is exactly what `eventNow` did before this existed.
@@ -501,8 +637,12 @@ export function happeningNow(
 ): GameEvent | null {
   const written = force?.kind ? null : eventNow(now, roll, from);
   if (written || !around) return written;
-  if (!force && roll(`woven:${now.occasion}:${now.day}`) % WOVEN_ONE_IN[now.occasion] !== 0) return null;
+  if (!force) {
+    if (now.day < WOVEN_FROM_DAY) return null;
+    const chance = Math.min(PACE_CEILING, paceFor(now) / WOVEN_ONE_IN[now.occasion]);
+    if ((roll(`woven:${now.occasion}:${now.day}`) % 10_000) / 10_000 >= chance) return null;
+  }
   const could = wovenFor(now, around, roll, force?.kind);
   if (could.length === 0) return null;
-  return could[roll(`woven-pick:${now.occasion}:${now.day}`) % could.length] ?? null;
+  return pickWoven(could, now, roll);
 }

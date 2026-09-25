@@ -97,6 +97,14 @@ export interface Choice {
    * somebody's fire eases you exactly the way a bowl out of your own satchel does.
    */
   eases?: number;
+  /**
+   * Flags this choice leaves behind, for a later event to find -- `sheltered:<stranger>`.
+   *
+   * **How one event leads to another without a quest system.** A flag is a fact about this
+   * journey that only the game cares about, kept in the save's what-you-know half. It is never a
+   * word or a discovery -- those are canon's and go through `grants`.
+   */
+  sets?: string[];
 }
 
 /**
@@ -188,6 +196,10 @@ export interface Circumstance {
   seen: readonly string[];
   /** Strangers an event has already introduced, by their event id. Absent means nobody yet. */
   met?: readonly string[];
+  /** The day each event last happened, by id, so a storylet can come round again. Absent means never. */
+  last?: Readonly<Record<string, number>>;
+  /** Flags earlier choices left behind. Absent means none. */
+  flags?: readonly string[];
 }
 
 /** Whether this event can happen, given where and when the player is. */

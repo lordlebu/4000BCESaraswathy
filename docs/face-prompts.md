@@ -1,10 +1,10 @@
 # Stranger face prompts — ready to paste
 
 Twenty-two faces for the road company, by people and gender. **Each block below is the whole
-prompt**: copy one, paste it into an image tool, done. The first four paragraphs are the portrait
-style from `docs/portrait-prompts.md`, word for word except where a portrait says "their trade"
-and a stranger is simply on the road, so a face sits beside a painted portrait without looking
-like a different game.
+prompt**: copy one, paste it into an image tool, done. The watercolour style and the head-and-
+shoulders framing are the portraits' own, from `docs/portrait-prompts.md`, so a face sits beside a
+painted portrait without looking like a different game. What differs is the clothing, and that
+difference is deliberate — see below.
 
 ## Getting them in
 
@@ -33,23 +33,39 @@ moves only the strangers it wins.
 The gender is the painting's and goes no further. Every line of event prose calls a stranger
 *they*.
 
-## Why these peoples, and these cues
+## How these people look, and where that comes from
 
-The game is set in canon's **Epoch 5, after the Great Shattering** (`DESIGN.md`). Of the peoples
-canon names, three are alive on these four maps in that era, and the road company are drawn from
-them. See `docs/strangers-and-happenings.md` for the survey.
+**Canon says, since 25 September 2026.** Each of the three peoples carries `dress` and
+`art_reference` on its culture in canon's `database/cultures.json`, set by the owner. `dress` is
+canon: what the people wear. `art_reference` names real-world peoples as a reference for faces and
+builds, and is marked in every entry as reference only — nobody in this world is those peoples.
+Every prompt below quotes both, so a painter never has to guess.
 
-| Pool | Canon culture | Where canon puts them | Cues used | Wash |
+**Why the old prompts said plain undyed cloth and no jewellery.** Canon described nobody's
+appearance, and art that invented it would have been the game writing canon. That rule was right
+and is still the rule for anything canon has not said; what changed is that canon now says. The
+strangers on the road had worn dyed cloth all along (`src/content/looks.ts`), so the plain-cloth
+prompts had quietly come to disagree with the game.
+
+| Pool | Canon culture | Dress, from canon | Reference looks | Wash |
 |---|---|---|---|---|
-| `harappan-*` | `harappan` | the delta's settlers; Lothal is their half-buried city, with survivors camped inside it | fired brick, kilns, loads, shell beads, carts | fired-brick `#8c5e4a` |
-| `kia-*` | `kia` | "indigenous marsh-dwelling population of the delta", oral tradition | reeds, nets, tidewater, salt pans, mangrove | blue-green `#3d7a8c`, as Kia portraits |
-| `maru-*` | `maru` | the plateau herders and the nomads of the Aravali's ford | fords, felt, goat-hair rope, curd, basalt terraces | ochre-brown `#8a6a3a`, as Maru portraits |
-| `any-*` | none | anybody | hooded or wrapped, hard to place | grey-mauve `#6b5c6f`, as Uma's |
+| `harappan-*` | `harappan` | dyed cotton; gold, silver, lapis and carnelian when they have them | Gujarat, Sindh, Punjab; women married in from beyond the realm after Bengal and Odisha | fired-brick `#8c5e4a` |
+| `kia-*` | `kia` | light dyed cloth; flowers in the hair or as garlands; hair coiled, braided and pinned with shell and bone | Maharashtra, the Konkan, Kerala; some Austronesian, as far as the Philippines | blue-green `#3d7a8c` |
+| `maru-*` | `maru` | fur and skin over wool and felt, dyed cloth where traded | Himachal, Nepal; some Tibetan; not all East Asian | ochre-brown `#8a6a3a` |
+| `any-*` | none | whatever the road has given | hard to place | grey-mauve `#6b5c6f` |
 
-**No jewellery, even the canon kind.** Canon has a bead custom — one bead a season from a child's
-birth — and it would be the truest detail here. It is left out because the portraits' rule is no
-jewellery, and one face breaking it would make that face read as more important than the rest.
-The bead-driller carries a bead as work instead.
+**Each face names one of the eight dyes the sprites wear** — madder, indigo, turmeric, lac, leaf,
+ochre, undyed, charcoal — so the pool covers the same palette as the road.
+
+**Three things every prompt asks for, and why.** An individual face rather than a type, because a
+people drawn as a costume is the failure most likely to come back from a generator and the most
+harmful one. Fully clothed with the shoulders and chest covered, because the first portraits came
+back bare-chested when nothing said otherwise. And "striking" and "full-figured" rather than
+anything stronger, because image tools read the stronger words as a request to glamorise.
+
+**The named people's portraits are unchanged.** `docs/portrait-prompts.md` still asks for plain
+cloth, and the seventeen painted portraits follow it. Whether to repaint them in their people's dress
+is the owner's call; nothing here assumes it.
 
 ---
 
@@ -64,13 +80,15 @@ Save the result as `assets/source/faces/harappan-m-01.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A carrier of about thirty, a man of the Harappan settlers, a rope-bound load frame on his back with one strap in his fist. The fired-brick street of a half-buried city behind him. Paused mid-stride, squinting down the road at how far is left.
+Their people: Harappan settlers. They wear cotton, wrapped and draped, dyed or left the colour of the boll, and wear their wealth where it can be seen when they have any - a little gold or silver at the ear, wrist or nose, beads of lapis lazuli or carnelian. Families take wives from beyond their realm. For faces and builds, reference the peoples of Gujarat, Sindh and Punjab (reference only).
+
+Subject: A carrier of about thirty, a man whose looks follow Sindh, in a madder-red cotton shawl with a single lapis bead on a cord at his throat, a rope-bound load frame on his back with one strap in his fist. The fired-brick street of a half-buried city behind him. Paused mid-stride, squinting down the road at how far is left.
 
 Bias the surrounding wash fired-brick red-brown (#8c5e4a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -82,13 +100,15 @@ Save the result as `assets/source/faces/harappan-m-02.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A cart-hand of about twenty, a young man of the Harappan settlers, forearms still grey with kiln ash. Low kiln sheds and stacked brick behind him. Wiping his brow with the back of a wrist, in the middle of a long day.
+Their people: Harappan settlers. They wear cotton, wrapped and draped, dyed or left the colour of the boll, and wear their wealth where it can be seen when they have any - a little gold or silver at the ear, wrist or nose, beads of lapis lazuli or carnelian. Families take wives from beyond their realm. For faces and builds, reference the peoples of Gujarat, Sindh and Punjab (reference only).
+
+Subject: A cart-hand of about twenty, a young man whose looks follow Punjab, in undyed cotton with a small silver ring in one ear, forearms still grey with kiln ash. Low kiln sheds and stacked brick behind him. Wiping his brow with the back of a wrist.
 
 Bias the surrounding wash fired-brick red-brown (#8c5e4a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -100,13 +120,15 @@ Save the result as `assets/source/faces/harappan-m-03.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A trader of about fifty, a man of the Harappan settlers, a stoppered clay jar balanced on one shoulder. A doorway in old brick courses behind him. Polite and wary, weighing up a stranger before he says anything.
+Their people: Harappan settlers. They wear cotton, wrapped and draped, dyed or left the colour of the boll, and wear their wealth where it can be seen when they have any - a little gold or silver at the ear, wrist or nose, beads of lapis lazuli or carnelian. Families take wives from beyond their realm. For faces and builds, reference the peoples of Gujarat, Sindh and Punjab (reference only).
+
+Subject: A trader of about fifty, a man whose looks follow Gujarat, in an indigo cotton wrap, a string of carnelian beads and a gold ring, a stoppered clay jar balanced on one shoulder. A doorway in old brick courses behind him. Polite and wary, weighing up a stranger.
 
 Bias the surrounding wash fired-brick red-brown (#8c5e4a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -118,13 +140,15 @@ Save the result as `assets/source/faces/harappan-m-04.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A brickmaker of about forty, a man of the Harappan settlers, a wooden brick mould tucked under one arm. Drowned courses of ancient brick behind him. Tired and good-humoured, the look of somebody who has rebuilt the same wall more than once.
+Their people: Harappan settlers. They wear cotton, wrapped and draped, dyed or left the colour of the boll, and wear their wealth where it can be seen when they have any - a little gold or silver at the ear, wrist or nose, beads of lapis lazuli or carnelian. Families take wives from beyond their realm. For faces and builds, reference the peoples of Gujarat, Sindh and Punjab (reference only).
+
+Subject: A brickmaker of about forty, a man whose looks follow Punjab, in an ochre cotton wrap with a plain silver bangle, a wooden brick mould tucked under one arm. Drowned courses of ancient brick behind him. Tired and good-humoured.
 
 Bias the surrounding wash fired-brick red-brown (#8c5e4a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -136,13 +160,15 @@ Save the result as `assets/source/faces/harappan-m-05.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A road trader of about thirty-five, a man of the Harappan settlers, a knotted counting cord running through his fingers. A cart track and a brick milestone behind him. Frowning at the count, lips moving.
+Their people: Harappan settlers. They wear cotton, wrapped and draped, dyed or left the colour of the boll, and wear their wealth where it can be seen when they have any - a little gold or silver at the ear, wrist or nose, beads of lapis lazuli or carnelian. Families take wives from beyond their realm. For faces and builds, reference the peoples of Gujarat, Sindh and Punjab (reference only).
+
+Subject: A road trader of about thirty-five, a man whose looks follow Gujarat, a turmeric-yellow cloth wound round his head and a knotted counting cord running through his fingers. A cart track and a brick milestone behind him. Frowning at the count, lips moving.
 
 Bias the surrounding wash fired-brick red-brown (#8c5e4a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -154,13 +180,15 @@ Save the result as `assets/source/faces/harappan-m-06.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A water carrier of about twenty-five, a man of the Harappan settlers, a leather water skin slung across his chest. White salt flats behind him. Thirsty himself, glancing along the road.
+Their people: Harappan settlers. They wear cotton, wrapped and draped, dyed or left the colour of the boll, and wear their wealth where it can be seen when they have any - a little gold or silver at the ear, wrist or nose, beads of lapis lazuli or carnelian. Families take wives from beyond their realm. For faces and builds, reference the peoples of Gujarat, Sindh and Punjab (reference only).
+
+Subject: A water carrier of about twenty-five, a man whose looks follow Sindh, in a leaf-green cotton wrap with no ornament at all, a leather water skin slung across his chest. White salt flats behind him. Thirsty himself, glancing along the road.
 
 Bias the surrounding wash fired-brick red-brown (#8c5e4a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -172,13 +200,15 @@ Save the result as `assets/source/faces/harappan-f-01.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A carrier of about thirty, a woman of the Harappan settlers, steadying a head-load with one raised hand. Fired-brick ruins behind her. Focused on the footing ahead rather than on the viewer.
+Their people: Harappan settlers. They wear cotton, wrapped and draped, dyed or left the colour of the boll, and wear their wealth where it can be seen when they have any - a little gold or silver at the ear, wrist or nose, beads of lapis lazuli or carnelian. Families take wives from beyond their realm. For faces and builds, reference the peoples of Gujarat, Sindh and Punjab (reference only).
+
+Subject: A carrier of about thirty, a striking woman whose looks follow Gujarat, in madder-red cotton with small silver earrings and anklets just out of frame, steadying a head-load with one raised hand. Fired-brick ruins behind her. Focused on the footing ahead.
 
 Bias the surrounding wash fired-brick red-brown (#8c5e4a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -190,13 +220,15 @@ Save the result as `assets/source/faces/harappan-f-02.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A kiln-tender of about forty-five, a woman of the Harappan settlers, face flushed from the heat, a long wooden rake at the lower edge. The dim mouth of a kiln behind her. Matter-of-fact, in the middle of a job that will not wait.
+Their people: Harappan settlers. They wear cotton, wrapped and draped, dyed or left the colour of the boll, and wear their wealth where it can be seen when they have any - a little gold or silver at the ear, wrist or nose, beads of lapis lazuli or carnelian. Families take wives from beyond their realm. For faces and builds, reference the peoples of Gujarat, Sindh and Punjab (reference only).
+
+Subject: A kiln-tender of about forty-five, a woman whose looks follow Sindh, in ochre cotton with a gold stud in her nose, face flushed from the heat, a long wooden rake at the lower edge. The dim mouth of a kiln behind her. Matter-of-fact, in the middle of a job that will not wait.
 
 Bias the surrounding wash fired-brick red-brown (#8c5e4a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -208,13 +240,15 @@ Save the result as `assets/source/faces/harappan-f-03.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A bead-driller of about twenty, a young woman of the Harappan settlers, a small bow drill and a shell bead held close at the lower edge. A workbench of broken shell behind her. Concentrating hard, not yet looking up.
+Their people: Harappan settlers. They wear cotton, wrapped and draped, dyed or left the colour of the boll, and wear their wealth where it can be seen when they have any - a little gold or silver at the ear, wrist or nose, beads of lapis lazuli or carnelian. Families take wives from beyond their realm. For faces and builds, reference the peoples of Gujarat, Sindh and Punjab (reference only).
+
+Subject: A bead-driller of about twenty, a striking young woman married in from beyond the realm, whose looks follow Bengal, in lac-crimson cotton with lapis drops at her ears, a small bow drill and a shell bead held close at the lower edge. A workbench of broken shell behind her. Concentrating hard.
 
 Bias the surrounding wash fired-brick red-brown (#8c5e4a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -226,13 +260,15 @@ Save the result as `assets/source/faces/harappan-f-04.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A market trader of about fifty, a woman of the Harappan settlers, a reed basket of dried fish on her hip. An awning and brick stalls behind her. Shrewd and faintly amused, the moment before naming a price.
+Their people: Harappan settlers. They wear cotton, wrapped and draped, dyed or left the colour of the boll, and wear their wealth where it can be seen when they have any - a little gold or silver at the ear, wrist or nose, beads of lapis lazuli or carnelian. Families take wives from beyond their realm. For faces and builds, reference the peoples of Gujarat, Sindh and Punjab (reference only).
+
+Subject: A market trader of about fifty, a woman married in from beyond the realm, whose looks follow Odisha, in indigo cotton with heavy gold earrings, a reed basket of dried fish on her hip. An awning and brick stalls behind her. Shrewd and faintly amused, the moment before naming a price.
 
 Bias the surrounding wash fired-brick red-brown (#8c5e4a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -246,13 +282,15 @@ Save the result as `assets/source/faces/kia-m-01.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A delta fisher of about thirty-five, a man of the Kia clan, a wet net over one shoulder. Reeds and tidewater behind him. Listening to something far off across the marsh.
+Their people: the Kia, the delta's own marsh-dwelling clan. Light wrapped cloth in the marsh's colours; flowers worn in the hair, behind the ear or as a garland; hair dressed with care - coiled, braided, pinned with shell and bone - by men and women alike. Their women are full-figured. For faces and builds, reference the peoples of Maharashtra, the Konkan coast and Kerala, and for some, Austronesian peoples as far as the Philippines (reference only).
+
+Subject: A delta fisher of about thirty-five, a man whose looks follow the Konkan coast, a madder-red cloth over one shoulder and a red flower tucked behind his ear, his hair coiled high and pinned with bone, a wet net over the other shoulder. Reeds and tidewater behind him. Listening to something far off across the marsh.
 
 Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
 ```
@@ -264,13 +302,15 @@ Save the result as `assets/source/faces/kia-m-02.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A reed-cutter of about twenty, a young man of the Kia clan, a sheaf of cut reed and a bone knife at the lower edge. Mangrove roots behind him. Quick-eyed, half turned to go.
+Their people: the Kia, the delta's own marsh-dwelling clan. Light wrapped cloth in the marsh's colours; flowers worn in the hair, behind the ear or as a garland; hair dressed with care - coiled, braided, pinned with shell and bone - by men and women alike. Their women are full-figured. For faces and builds, reference the peoples of Maharashtra, the Konkan coast and Kerala, and for some, Austronesian peoples as far as the Philippines (reference only).
+
+Subject: A reed-cutter of about twenty, a young man whose looks follow Austronesian peoples of the Philippines, in a leaf-green wrap, his long hair braided and tied in an ornate knot with a white flower in it, a sheaf of cut reed and a bone knife at the lower edge. Mangrove roots behind him. Quick-eyed, half turned to go.
 
 Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
 ```
@@ -282,13 +322,15 @@ Save the result as `assets/source/faces/kia-m-03.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A marsh guide of about fifty, a man of the Kia clan, the top of a punt pole at the lower edge. Open channels and low mist behind him. Calm, skin weathered by salt wind, not a sage - he poles for a living.
+Their people: the Kia, the delta's own marsh-dwelling clan. Light wrapped cloth in the marsh's colours; flowers worn in the hair, behind the ear or as a garland; hair dressed with care - coiled, braided, pinned with shell and bone - by men and women alike. Their women are full-figured. For faces and builds, reference the peoples of Maharashtra, the Konkan coast and Kerala, and for some, Austronesian peoples as far as the Philippines (reference only).
+
+Subject: A marsh guide of about fifty, a man whose looks follow Kerala, in undyed cloth with a string of jasmine round his neck and grey hair drawn into a careful topknot, the top of a punt pole at the lower edge. Open channels and low mist behind him. Calm, weathered by salt wind.
 
 Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
 ```
@@ -300,13 +342,15 @@ Save the result as `assets/source/faces/kia-m-04.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A salt-raker of about thirty, a man of the Kia clan, a wooden rake over his shoulder. A white salt pan behind him. Eyes narrowed against the glare off the salt.
+Their people: the Kia, the delta's own marsh-dwelling clan. Light wrapped cloth in the marsh's colours; flowers worn in the hair, behind the ear or as a garland; hair dressed with care - coiled, braided, pinned with shell and bone - by men and women alike. Their women are full-figured. For faces and builds, reference the peoples of Maharashtra, the Konkan coast and Kerala, and for some, Austronesian peoples as far as the Philippines (reference only).
+
+Subject: A salt-raker of about thirty, a man whose looks follow Maharashtra, in turmeric-yellow cloth, his hair bound in an elaborate plait pinned with shell, a wooden rake over his shoulder. A white salt pan behind him. Eyes narrowed against the glare.
 
 Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
 ```
@@ -318,13 +362,15 @@ Save the result as `assets/source/faces/kia-f-01.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A keeper of remembered stories of about forty, a woman of the Kia clan, mid-recitation with one hand raised as if counting back through generations. Mangrove shade behind her. Intent on getting the order right; the clan keeps its history by mouth.
+Their people: the Kia, the delta's own marsh-dwelling clan. Light wrapped cloth in the marsh's colours; flowers worn in the hair, behind the ear or as a garland; hair dressed with care - coiled, braided, pinned with shell and bone - by men and women alike. Their women are full-figured. For faces and builds, reference the peoples of Maharashtra, the Konkan coast and Kerala, and for some, Austronesian peoples as far as the Philippines (reference only).
+
+Subject: A keeper of remembered stories of about forty, a full-figured woman whose looks follow Kerala, in turmeric-yellow cloth with jasmine wound through an elaborately coiled mass of hair, mid-recitation with one hand raised as if counting back through generations. Mangrove shade behind her. Intent on getting the order right.
 
 Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
 ```
@@ -336,13 +382,15 @@ Save the result as `assets/source/faces/kia-f-02.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A crab-catcher of about twenty-five, a young woman of the Kia clan, a woven reed trap at the lower edge. Mudflats behind her. Amused at somebody's clumsiness just out of frame.
+Their people: the Kia, the delta's own marsh-dwelling clan. Light wrapped cloth in the marsh's colours; flowers worn in the hair, behind the ear or as a garland; hair dressed with care - coiled, braided, pinned with shell and bone - by men and women alike. Their women are full-figured. For faces and builds, reference the peoples of Maharashtra, the Konkan coast and Kerala, and for some, Austronesian peoples as far as the Philippines (reference only).
+
+Subject: A crab-catcher of about twenty-five, a full-figured young woman whose looks follow Austronesian peoples of the Philippines, in indigo cloth with a red hibiscus behind her ear and her hair in ornate braids pinned with shell, a woven reed trap at the lower edge. Mudflats behind her. Amused at somebody's clumsiness just out of frame.
 
 Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
 ```
@@ -356,13 +404,15 @@ Save the result as `assets/source/faces/maru-m-01.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A drover of about thirty, a man of the Maru-speaking herders, a goad and a coil of goat-hair rope at the lower edge. A river ford behind him. Watching his animals somewhere past the viewer.
+Their people: the Maru, newer nomads of the uplands. They dress for cold nights and high ground: animal fur and skin - goat, sheep - worn as vests, cloaks and collars over wool and felt, with dyed cloth where they have traded for it. For faces and builds, reference the peoples of Himachal and Nepal, and for some, Tibetan peoples; not everybody among them looks East Asian (reference only).
+
+Subject: A drover of about thirty, a man whose looks follow Himachal, in a goatskin vest with the hair still on over a madder-red wool tunic, a goad and a coil of goat-hair rope at the lower edge. A river ford behind him. Watching his animals somewhere past the viewer.
 
 Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -374,13 +424,15 @@ Save the result as `assets/source/faces/maru-m-02.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A herder of about twenty, a young man of the Maru-speaking herders, a rolled felt blanket over one shoulder. A terraced hillside and low cloud behind him. Cold wind, breath just visible.
+Their people: the Maru, newer nomads of the uplands. They dress for cold nights and high ground: animal fur and skin - goat, sheep - worn as vests, cloaks and collars over wool and felt, with dyed cloth where they have traded for it. For faces and builds, reference the peoples of Himachal and Nepal, and for some, Tibetan peoples; not everybody among them looks East Asian (reference only).
+
+Subject: A herder of about twenty, a young man whose looks follow Nepal, in a sheepskin cloak worn fleece-inward over undyed felt, a rolled felt blanket over one shoulder. A terraced hillside and low cloud behind him. Cold wind, breath just visible.
 
 Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -392,13 +444,15 @@ Save the result as `assets/source/faces/maru-f-01.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A woman of about thirty-five of the Maru-speaking nomads, a skin bag of setting curd at the lower edge. A low felt tent behind her. Brisk, with somewhere to be before the light goes.
+Their people: the Maru, newer nomads of the uplands. They dress for cold nights and high ground: animal fur and skin - goat, sheep - worn as vests, cloaks and collars over wool and felt, with dyed cloth where they have traded for it. For faces and builds, reference the peoples of Himachal and Nepal, and for some, Tibetan peoples; not everybody among them looks East Asian (reference only).
+
+Subject: A woman of about thirty-five whose looks follow Tibetan peoples, in a hide coat lined with fur and an indigo sash, her hair in two long braids, a skin bag of setting curd at the lower edge. A low felt tent behind her. Brisk, with somewhere to be before the light goes.
 
 Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -410,13 +464,15 @@ Save the result as `assets/source/faces/maru-f-02.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A goatherd of about twenty, a young woman of the Maru-speaking herders, the head of a kid goat held in her arm at the lower edge. A dark basalt ledge behind her. Wind in her hair, half laughing at the goat.
+Their people: the Maru, newer nomads of the uplands. They dress for cold nights and high ground: animal fur and skin - goat, sheep - worn as vests, cloaks and collars over wool and felt, with dyed cloth where they have traded for it. For faces and builds, reference the peoples of Himachal and Nepal, and for some, Tibetan peoples; not everybody among them looks East Asian (reference only).
+
+Subject: A goatherd of about twenty, a young woman whose looks follow Himachal, in a goat-hair shawl with a fur collar over an ochre wool tunic, the head of a kid goat held in her arm at the lower edge. A dark basalt ledge behind her. Wind in her hair, half laughing at the goat.
 
 Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
 ```
@@ -430,11 +486,13 @@ Save the result as `assets/source/faces/any-01.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Their people: impossible to say. A traveller whose origin, age and gender are hard to place, dressed in whatever the road has given them.
 
 Subject: A traveller whose age, people and gender are hard to place, a hood of plain undyed cloth half-shadowing the face. Road dust and a long empty track behind. Looking past the viewer at the road ahead.
 
@@ -448,13 +506,15 @@ Save the result as `assets/source/faces/any-02.png`.
 ```text
 Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
 
-One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in plain, much-worn cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of what they carry at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. An ordinary traveller met on a road, fully clothed in the dress of their own people as described below, with the shoulders and chest covered. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
 
-Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
+An individual with a face of their own - specific, dignified and unglamorised - never a costume, a type or a caricature of a people. Not an important person: no crown, no insignia, no throne-room finery, whatever their people wear day to day. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody on the road.
 
 Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
 
-Subject: A wanderer of indeterminate age and gender, head wrapped in plain cloth against the sun so only the eyes and brow are clear, a lean face. A pale desert-edge road behind. Steady and unreadable.
+Their people: impossible to say. A traveller whose origin, age and gender are hard to place, dressed in whatever the road has given them.
+
+Subject: A wanderer of indeterminate age and gender, head wrapped in charcoal-grey cloth against the sun so only the eyes and brow are clear, a lean face. A pale desert-edge road behind. Steady and unreadable.
 
 Bias the surrounding wash neutral grey-mauve (#6b5c6f) - a tint in the paper and the shadows, not a costume.
 ```

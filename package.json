@@ -18,6 +18,7 @@
     "test:ci": "bash tools/ci-local.sh",
     "check:data": "node tools/check-canon-lock.js",
     "perf": "node tools/perf.js",
+    "simulate": "node tools/simulate.js",
     "build:sprite": "node tools/build-characters.js",
     "check:sprite": "node tools/build-characters.js --check"
   },
