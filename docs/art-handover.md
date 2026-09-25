@@ -158,9 +158,13 @@ iron, Sura reads four hundred years of stratigraphy, Terke droves. None of those
 
 ### What this means for a prompt
 
-**Canon does not describe anyone's face**, and the art must not invent an ethnic marker it has not
-authored. What it *does* give is livelihood, age, sex and people — so vary those, and let the rest
-be ordinary South Asian without further specification.
+**Canon now describes the three living peoples**, and nothing else. Since 25 September 2026 each of
+`harappan`, `kia` and `maru` in canon's `database/cultures.json` carries `dress` (canon: what they
+wear and how they adorn themselves) and `art_reference` (real-world peoples as a painter's reference
+for faces and builds, marked reference only). Follow both for anybody of those peoples; the
+stranger-face prompts in `docs/face-prompts.md` quote them in full. For anyone canon has *not*
+described, the old rule holds: the art must not invent an ethnic marker canon has not authored. What
+canon always gives is livelihood, age, sex and people — so vary those.
 
 Four things to put in a subject line, and the fourth is the one that gets forgotten:
 

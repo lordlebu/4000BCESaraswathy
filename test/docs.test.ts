@@ -19,7 +19,7 @@
 // is the same guard on this side of the line.
 
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import lock from '../data/canon/canon.lock.json';
@@ -102,5 +102,27 @@ describe('every woven event has its art request written', () => {
     );
     const missing = kinds.filter((kind) => !prompts.includes(`\`woven-${kind}\``));
     expect(missing, 'kinds with no painting prompt').toEqual([]);
+  });
+});
+
+describe('every document is readable text', () => {
+  it('decodes every doc and data file as UTF-8, strictly', () => {
+    // `docs/event-prompts.md` shipped with its prompts in cp1252 -- written through a Windows shell
+    // redirect -- and every test that read it passed, because `readFileSync(..., 'utf8')` quietly
+    // swaps a bad byte for U+FFFD. A strict decoder refuses instead, which is the only way to see it.
+    const strict = new TextDecoder('utf-8', { fatal: true });
+    const walk = (dir: string): string[] =>
+      readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) =>
+        e.isDirectory() ? walk(join(dir, e.name)) : /\.(md|json)$/.test(e.name) ? [join(dir, e.name)] : []
+      );
+    const bad: string[] = [];
+    for (const file of [...walk('docs'), ...walk('data'), 'README.md', 'CLAUDE.md']) {
+      try {
+        strict.decode(readFileSync(join(ROOT, file)));
+      } catch {
+        bad.push(file);
+      }
+    }
+    expect(bad, 'files that are not valid UTF-8').toEqual([]);
   });
 });
