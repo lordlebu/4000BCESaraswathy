@@ -24,8 +24,8 @@ import {
   wanderersOn
 } from '../src/content/wanderers';
 import { hoursToPhase } from '../src/game/dayNight';
-import { GRID, markerSize } from '../src/game/frames';
-import { PLAYER_FRAME, figureScale, travellerScale } from '../src/game/player';
+import { GRID, WANDERER_BOX, boxFor, markerSize, paintedHeight } from '../src/game/frames';
+import { PLAYER_FRAME, figureScale } from '../src/game/player';
 import { DEFAULT_SEED } from '../src/ui/seed';
 import type { Creature } from '../src/world/types';
 
@@ -245,24 +245,66 @@ describe('what the animals give is actually findable', () => {
   });
 });
 
-describe('an animal is drawn at the scale of the people on the road', () => {
-  // **`tileTextures.ts` does not import `player.ts`, so this is where the two are held together.**
-  // Same arrangement `travellers.ts` keeps with `dayNight.ts` and for the same reason: the
-  // dependency would run the wrong way, so the agreement is asserted rather than shared.
-  //
-  // The rule: a wanderer is drawn to the same height as a traveller -- half the player, per
-  // `TRAVELLER_SHRINK` -- and as wide as its own shape needs. The first version sized against the
-  // tile instead and put the whale at nearly twice the player's width.
-  it('is no taller than a traveller, and never as tall as the player', () => {
-    const tile = GRID;
-    const npcTall = PLAYER_FRAME.height * travellerScale(tile);
-    const playerTall = PLAYER_FRAME.height * figureScale(tile);
+describe("every animal fits the walking whale's box", () => {
+  // **The rule changed twice, on the owner's rulings, and this is where it changed.** It was "a
+  // wanderer is drawn to a traveller's height", and the sivatherium read as a fawn at Varuna's knee.
+  // Then "two tiles long", and it stood three tiles high. The whale at two tiles was the one called
+  // right, so now every side view is fitted to the whale's box -- `WANDERER_BOX` -- touching one side
+  // of it, and the stand-in is drawn the size the painting will be.
+  const { decodePng } = createRequire(import.meta.url)('../tools/sprite-png.js') as {
+    decodePng: (file: string) => { width: number; height: number };
+  };
+  const side = (id: string) => decodePng(join(__dirname, '..', 'assets', 'wanderers', `${id}-right.png`));
+  const drawn = (id: string) => {
+    const art = side(id);
+    const h = paintedHeight(id, art);
+    return { w: (h * art.width) / art.height, h };
+  };
+  const ANIMALS = ['narmada-walking-whale', 'sivatherium', 'vasuki-indicus'];
+  const boxW = WANDERER_BOX.long * GRID;
+  const boxH = WANDERER_BOX.tall * GRID;
 
-    for (const id of ['narmada-walking-whale', 'sivatherium', 'vasuki-indicus']) {
-      const h = markerSize(id).h;
-      expect(h, `${id} is taller than a traveller`).toBeLessThanOrEqual(npcTall + 1);
-      expect(h, `${id} is as tall as the player`).toBeLessThan(playerTall);
-      expect(h, `${id} is too small to read`).toBeGreaterThan(npcTall * 0.4);
+  it('fits each painted side view inside its box, touching one side of it', () => {
+    for (const id of ANIMALS) {
+      const { w, h } = drawn(id);
+      const boxW = boxFor(id).long * GRID;
+      const boxH = boxFor(id).tall * GRID;
+      expect(w, `${id} is ${Math.round(w)}px long, past the box`).toBeLessThanOrEqual(boxW + 1);
+      expect(h, `${id} is ${h}px high, past the box`).toBeLessThanOrEqual(boxH + 1);
+      const touches = Math.abs(w - boxW) <= 1 || Math.abs(h - boxH) <= 1;
+      expect(touches, `${id} at ${Math.round(w)}x${h} touches no side of the box: drawn too small`).toBe(true);
+    }
+  });
+
+  it('is the box the whale fills', () => {
+    const { w, h } = drawn('narmada-walking-whale');
+    expect(Math.abs(w - boxW), 'the whale is not two tiles long').toBeLessThanOrEqual(1);
+    expect(Math.abs(h - boxH), 'the whale does not fill the box').toBeLessThanOrEqual(1.5);
+  });
+
+  it('draws the stand-in the size the painting will be', () => {
+    // So the art arriving changes the picture and not the size. This fails by name if a repainted
+    // animal changes shape without its `long` and `tall` in `frames.ts`.
+    for (const id of ANIMALS) {
+      const marker = markerSize(id);
+      const painted = drawn(id);
+      expect(Math.abs(marker.w - painted.w) / painted.w, `${id}: stand-in ${marker.w}px long, painting ${Math.round(painted.w)}px`)
+        .toBeLessThan(0.03);
+      expect(Math.abs(marker.h - painted.h) / painted.h, `${id}: stand-in ${marker.h}px high, painting ${painted.h}px`)
+        .toBeLessThan(0.03);
+    }
+  });
+
+  it('lets only the giraffid look down on the player, and not by much', () => {
+    // Half the three tiles it stood at when every animal was two tiles long, on the owner's ask.
+    const playerTall = PLAYER_FRAME.height * figureScale(GRID);
+    const siva = drawn('sivatherium').h;
+    expect(siva, 'the sivatherium is no taller than the player').toBeGreaterThan(playerTall);
+    expect(siva, 'the sivatherium towers over the player').toBeLessThan(playerTall * 1.3);
+    for (const id of ['narmada-walking-whale', 'vasuki-indicus']) {
+      const { h } = drawn(id);
+      expect(h, `${id} stands taller than the player`).toBeLessThan(playerTall);
+      expect(h, `${id} is too small to read beside the player`).toBeGreaterThan(playerTall / 2);
     }
   });
 

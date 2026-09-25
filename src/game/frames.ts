@@ -1378,38 +1378,53 @@ export const FALL_FRAMES = 2;
  * Keyed by engine species id, with a fallback, because this is a stand-in and one that throws for
  * an unknown animal is worse than one that draws a generic quadruped.
  *
- * **Sized against the other people on the road, not against the tile.** At a 128 tile the player
- * is drawn 104x160 and everybody else is halved to 52x80 -- see `TRAVELLER_SHRINK` in
- * `game/player.ts` for why two is the only whole answer. An animal is drawn to the *same 80px
- * height* as a traveller and as wide as its own shape needs, so it reads as a creature about the
- * size of a person and never competes with the player for the eye.
+ * **Every animal fits the walking whale's box: `WANDERER_BOX`, two tiles long and 1.09 high.** The
+ * whale drawn two tiles long side-on was the one the owner called right, "and all the animals
+ * should be that size". So each side view is scaled up until it touches one side of that box: the
+ * whale fills it, Vasuki touches the ends and stays two tiles long, flat to the ground, and the
+ * sivatherium -- taller than it is long -- touches the top of a box of its own, a little taller
+ * than the player (`TALLER`).
  *
- * 80px of a 128 tile is `0.625`, which is where `tall` comes from; `long` is then each animal's
- * own proportion against that height. The numbers are not repeated from `player.ts` because
- * `tileTextures` does not import it -- `test/wanderers.test.ts` asserts the two agree instead,
- * which is the same arrangement `travellers.ts` keeps with `dayNight.ts`.
+ * How it got here, so nobody walks it back by accident: every animal was first drawn at a
+ * traveller's height, 80px, and the sivatherium read as a fawn at Varuna's knee; then every animal
+ * two tiles long, and the sivatherium stood three tiles high, two and a half times the player.
+ * The box keeps what was right about each: nothing is small, and only the giraffid looks down on
+ * the traveller, and not by much.
  *
- * The first version of this table sized everything against the tile instead, which put the whale
- * at 192x84 -- nearly twice the player's width -- and the sivatherium taller than the player.
+ * `long` and `tall` below are the stand-in's size, in tiles, and are the painted side view fitted
+ * to the box -- `test/wanderers.test.ts` fails by name when a repainted animal changes shape
+ * without them.
  *
- * `shape` picks the body:
+ * `shape` picks the stand-in's body:
  *   `wader`   a long low body on four short legs, head raised -- the walking whale
  *   `browser` a deep body on four long legs with a raised neck and head -- the giraffid
  *   `serpent` a thick tapering S-curve, no legs at all
  */
-export const NPC_TALL = 0.625;
+export const WANDERER_BOX = { long: 2, tall: 1.09 } as const;
+
+/**
+ * The one animal allowed out of the whale's box, and how far.
+ *
+ * **The sivatherium stands 1.51 tiles, taller than the player.** Fitted to the whale's height it
+ * read as small for a giraffid that stood over a man at the shoulder; the owner asked for it
+ * "slightly taller, maybe half" the three tiles it had stood at two tiles long. Half is 193px on a
+ * 128 tile -- a fifth over Varuna's 160 -- and exactly one tile long side-on.
+ */
+const TALLER: Record<string, number> = { sivatherium: 1.51 };
+
+/** The box an animal's side view is fitted to, in tiles. */
+export function boxFor(speciesId: string): { long: number; tall: number } {
+  return { long: WANDERER_BOX.long, tall: TALLER[speciesId] ?? WANDERER_BOX.tall };
+}
 
 const BUILDS: Record<string, { long: number; tall: number; shape: 'wader' | 'browser' | 'serpent' }> = {
-  // Three metres and low to the ground: a bit over twice as long as tall, and it does not stand
-  // as high at the shoulder as a person -- so a little under the traveller height.
-  'narmada-walking-whale': { long: 0.94, tall: NPC_TALL * 0.7, shape: 'wader' },
-  // Shoulder-high to a tall man and taller again at the head, which is why canon says it takes
-  // the leaves nothing else reaches. Full traveller height, and narrow.
-  sivatherium: { long: 0.52, tall: NPC_TALL, shape: 'browser' },
-  // Eleven to fifteen metres but coiled and flat to the ground: the longest thing on the map and
-  // the shortest. This is the one that would be absurd fitted into a figure's cell.
-  'vasuki-indicus': { long: 1.17, tall: NPC_TALL * 0.5, shape: 'serpent' },
-  default: { long: 0.8, tall: NPC_TALL * 0.8, shape: 'wader' }
+  // Three metres and low to the ground. Side-on 586 x 319: it fills the box, and defines it.
+  'narmada-walking-whale': { long: 2, tall: 1.09, shape: 'wader' },
+  // Taller than it is long, 463 x 698 side-on, so it touches the top of its own box: see `TALLER`.
+  sivatherium: { long: 1.0, tall: 1.51, shape: 'browser' },
+  // Eleven to fifteen metres, coiled and flat. 740 x 280 touches the ends: two tiles, 0.76 high.
+  'vasuki-indicus': { long: 2, tall: 0.76, shape: 'serpent' },
+  default: { long: 1.5, tall: 0.94, shape: 'wader' }
 };
 
 /** The build for one wanderer, or the fallback. */
@@ -1427,6 +1442,21 @@ export function wandererBuild(speciesId: string): { long: number; tall: number; 
 export function markerSize(speciesId: string): { w: number; h: number } {
   const build = wandererBuild(speciesId);
   return { w: Math.round(GRID * build.long), h: Math.round(GRID * build.tall) };
+}
+
+/**
+ * How tall to draw a painted wanderer, in pixels, given its side view's size as painted.
+ *
+ * **Fitted to `WANDERER_BOX` off the side view, then applied to every facing.** The side view is
+ * scaled up until it touches one side of the box -- its length or its height, whichever it reaches
+ * first -- and the front and back views are drawn at the same *height*, which keeps one animal one
+ * size whichever way it walks. Scaling each facing to fit on its own was tried first and drew the
+ * whale three times bigger walking towards you than walking across.
+ */
+export function paintedHeight(speciesId: string, side: { width: number; height: number }): number {
+  const box = boxFor(speciesId);
+  const byLength = (GRID * box.long * side.height) / side.width;
+  return Math.round(Math.min(byLength, GRID * box.tall));
 }
 
 

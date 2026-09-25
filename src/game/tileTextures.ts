@@ -54,6 +54,7 @@ export {
   tileFrame,
   hasTileArt,
   markerSize,
+  paintedHeight,
   wandererBuild
 } from './frames';
 
