@@ -234,7 +234,9 @@ const COMPANY: readonly {
   culture: StrangerCulture;
 }[] = [
   { id: 'company_carrier', name: 'A carrier', role: 'carrier, with a loaded back', body: 'traveller-carrier', culture: 'harappan' },
-  { id: 'company_drover', name: 'A drover', role: 'drover, behind six animals', body: 'traveller-drover', culture: 'maru' },
+  // The upland nomad's body, fur and skin as canon dresses the Maru -- Asset 9. The drover sheet
+  // (olive tunic, white headwrap) stays for the named travellers `sheetFor` deals it to.
+  { id: 'company_drover', name: 'A drover', role: 'drover, behind six animals', body: 'traveller-nomad', culture: 'maru' },
   { id: 'company_pilgrim', name: 'A pilgrim', role: 'pilgrim, tending the wayside', body: 'traveller-pilgrim', culture: 'kia' }
 ];
 

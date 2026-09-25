@@ -364,6 +364,14 @@ era, or only in some places; whether they speak Maru; and what they are called. 
 `asura` as a culture on purpose — it had meant a culture, a species and a creature prefix at once
 — so `asura_hybrid` is the right existing home, and `maya_born` the other candidate.
 
+## New bodies — 26 September 2026
+
+**The Maru drover now walks as an upland nomad**, in fur and a red felt cap (`traveller-nomad`,
+Asset 9), with its colours in `assets/looks.json` so each drover is still dyed as their own person.
+The named travellers `sheetFor` deals keep the three original bodies. **The asura nomad and the
+princess are built and staged**: a head taller than everybody, and drawn by nothing until the
+asuras have a people and the princess her story. See Assets 9 and 10 in `docs/art-brief.md`.
+
 ## The Asura-Tainted Princess — can she be a real character? Yes
 
 The owner asked whether the asura princess (`maru-f-04`) could become a fully fleshed character who

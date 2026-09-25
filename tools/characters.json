@@ -151,6 +151,50 @@
       "colours": 34,
       "walk": { "source": "assets/source/dump/Mehtar_walking.png" },
       "sit": { "source": "assets/source/dump/3 M characters sitting.png", "frames": [2, 5, 8] }
+    },
+    {
+      "$comment": [
+        "Asset 9 in docs/art-brief.md: the upland Maru nomad, fur-clad, for every Maru drover on",
+        "the road. Canon dresses the Maru in fur and skin; the drover sheet is an olive tunic and a",
+        "white headwrap. Rows arrive down, up, right, left -- checked by eye at 18x.",
+        "",
+        "cell 31 wide, not 26: the earflaps and blanket roll make it wide, and at 26 the builder fits",
+        "the front and back views by width, 34-35 px tall against 40 in profile -- the figure would",
+        "shrink 15% every time it turned toward or away from you. Asset 7 recorded this exact fault."
+      ],
+      "id": "traveller-nomad",
+      "name": "A nomad",
+      "colours": 12,
+      "cell": { "width": 31, "height": 40 },
+      "walk": { "source": "assets/source/traveller-nomad.png" },
+      "sit": { "source": "assets/source/traveller-nomad.png", "frames": [0, 4, 8, 12] }
+    },
+    {
+      "$comment": [
+        "Asset 9: the horned asura nomad. Its own cell, four rows taller than everybody's, because",
+        "the owner asked for the asuras to stand slightly taller and a whole-number scale is the only",
+        "one that stays sharp. Built and staged: nothing draws it until canon gives the asuras a",
+        "people -- see docs/strangers-and-happenings.md."
+      ],
+      "id": "traveller-asura",
+      "name": "A horned traveller",
+      "colours": 12,
+      "cell": { "width": 28, "height": 44 },
+      "walk": { "source": "assets/source/traveller-asura.png" },
+      "sit": { "source": "assets/source/traveller-asura.png", "frames": [0, 4, 8, 12] }
+    },
+    {
+      "$comment": [
+        "Asset 10: canon's Asura-Tainted Princess, one named person, taller like the asura nomad.",
+        "Never dealt at random or re-dyed, so she is not in TRAVELLER_SHEETS or assets/looks.json;",
+        "she is drawn when her own encounters put her on the map, once her story is written."
+      ],
+      "id": "asura-princess",
+      "name": "The Asura-Tainted Princess",
+      "colours": 12,
+      "cell": { "width": 28, "height": 44 },
+      "walk": { "source": "assets/source/asura-princess.png" },
+      "sit": { "source": "assets/source/asura-princess.png", "frames": [0, 4, 8, 12] }
     }
   ]
 }

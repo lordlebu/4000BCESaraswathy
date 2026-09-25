@@ -140,7 +140,7 @@ function joinSheets(parts, out, cell, repeatLast) {
 
 function main() {
   const manifest = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
-  const { cell, characters } = manifest;
+  const { cell: sharedCell, characters } = manifest;
   const args = process.argv.slice(2);
   const check = args.includes('--check');
   const only = args.filter((a) => !a.startsWith('--'));
@@ -157,6 +157,11 @@ function main() {
   let failed = 0;
 
   for (const c of wanted) {
+    // A character may carry its own cell. The asuras stand a head-height taller than everybody
+    // else, and the only honest way to draw that at a whole-number scale is more rows of art: a
+    // fractional display scale makes pixel art shimmer. Width stays shared so frames still cut on
+    // the same grid.
+    const cell = c.cell ?? sharedCell;
     const out = path.join(OUT_DIR, `${c.id}-overworld.png`);
     const rel = path.relative(ROOT, out);
 

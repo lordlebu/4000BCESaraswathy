@@ -19,6 +19,7 @@ import mehtarUrl from '../../assets/mehtar-overworld.png';
 import carrierUrl from '../../assets/traveller-carrier-overworld.png';
 import droverUrl from '../../assets/traveller-drover-overworld.png';
 import pilgrimUrl from '../../assets/traveller-pilgrim-overworld.png';
+import nomadUrl from '../../assets/traveller-nomad-overworld.png';
 
 export interface CharacterArt {
   /** Texture key, also the prefix for its animation keys. */
@@ -27,7 +28,19 @@ export interface CharacterArt {
   name: string;
   /** The built sheet, imported so the bundler fingerprints it and emits it. */
   url: string;
+  /**
+   * The cell this sheet was built at, when it is not the shared 26x40.
+   *
+   * **A wide figure gets a wide cell, a tall one a tall cell** -- `tools/characters.json` says which,
+   * and `test/characters.test.ts` holds the two to each other. At the shared cell the builder fits a
+   * wide figure by its width, so it shrinks every time it turns to face you; and the asuras stand
+   * taller than everybody, which a whole-number scale can only draw with more rows of art.
+   */
+  frame?: { width: number; height: number };
 }
+
+/** The shared cell every sheet is built at unless it says otherwise. `player.ts` re-exports it. */
+export const SHARED_FRAME = { width: 26, height: 40 } as const;
 
 /**
  * Everybody who can be walked, in the order they are offered.
@@ -65,8 +78,21 @@ export type CharacterId = keyof typeof CHARACTERS;
 export const TRAVELLER_ART = {
   'traveller-carrier': { key: 'traveller-carrier', name: 'A carrier', url: carrierUrl },
   'traveller-drover': { key: 'traveller-drover', name: 'A drover', url: droverUrl },
-  'traveller-pilgrim': { key: 'traveller-pilgrim', name: 'A pilgrim', url: pilgrimUrl }
+  'traveller-pilgrim': { key: 'traveller-pilgrim', name: 'A pilgrim', url: pilgrimUrl },
+  // Asset 9: the upland Maru nomad, for every Maru drover. Built in a wider cell -- see `frame`.
+  'traveller-nomad': {
+    key: 'traveller-nomad',
+    name: 'A nomad',
+    url: nomadUrl,
+    frame: { width: 31, height: 40 }
+  }
 } as const satisfies Record<string, CharacterArt>;
+
+/** The cell a sheet was built at, by texture key. The shared one for anything that does not say. */
+export function frameOf(key: string): { width: number; height: number } {
+  const art = (everySheet() as CharacterArt[]).find((a) => a.key === key);
+  return art?.frame ?? SHARED_FRAME;
+}
 
 /**
  * Every sheet the scene has to load and animate, playable or not.

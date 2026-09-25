@@ -1862,7 +1862,11 @@ a `frames` list in the manifest, never a change in the game.
 
 ---
 
-## Asset 9 — two nomad traveller sheets · **wanted**
+## Asset 9 — two nomad traveller sheets · **delivered 26 September**
+
+> **Both landed and built.** `traveller-nomad` walks the road as every Maru drover now;
+> `traveller-asura` is built and staged until canon gives the asuras a people. What the build found
+> is recorded under "What the delivered sheets measured", below Asset 10.
 
 **Why these two.** Canon now says the Maru dress for the upland in fur and skin over wool and felt
 (`cultures.json`, `dress`), but a Maru drover on the road walks in the drover sheet from Asset 7 —
@@ -1903,7 +1907,9 @@ walks smaller than everybody else.
 4. Point the Maru drover at `traveller-nomad` in `COMPANY` (`src/content/travellers.ts`). The asura
    sheet waits for its people; see `docs/strangers-and-happenings.md`.
 
-## Asset 10 — the Asura-Tainted Princess, her own sheet · **wanted**
+## Asset 10 — the Asura-Tainted Princess, her own sheet · **delivered 26 September**
+
+> **Landed and built, and staged** until her story is written: nothing draws her yet.
 
 **Not a traveller from the pool: one named person, and canon has already written her.**
 `character_asura_tainted_princess` in canon is `asura_hybrid`, **immortal and alive** — the child
@@ -1938,6 +1944,28 @@ The same steps as Asset 9 — a row in `tools/characters.json`, `npm run build:s
 `TRAVELLER_SHEETS` or `assets/looks.json`. A named person is never dealt at random or re-dyed; she is
 drawn only when her own encounters put her on the map. See "The Asura-Tainted Princess" in
 `docs/strangers-and-happenings.md`.
+
+### What the delivered sheets measured
+
+All three came back clean: real alpha, four rows of four, rows in the order the game expects
+(down, up, right, left — checked by eye at 8×), and each row two closed poses then two open. All
+three pass `check-sprite.js`: speckle 21–27% and mean runs of 1.55–1.67 px, against 30% and 1.45.
+
+**The asuras stand taller, at the owner's request, and it is done with more rows of art.** A
+sheet may now carry its own `cell` in `tools/characters.json`; the two asura sheets are 44 rows
+where everybody else is 40, so they stand about a tenth taller at the same whole-number scale and
+stay as sharp as everyone else. A fractional display scale would have made them shimmer.
+
+**Wide figures get a wide cell, or they shrink as they turn.** At the shared 26-wide cell the
+nomad came out 34–35 px tall facing you and 40 in profile — its earflaps and blanket roll make it
+wide, and the builder fits a wide figure by its width. It would have shrunk 15% every time it
+turned toward or away from you, which is the exact fault Asset 7 recorded with the drover. Measured,
+and fixed with cells sized from the figures: the nomad 31 × 40, the asura and the princess
+28 × 44. All three now stand full height in all four facings.
+
+The game reads each sheet's cell through `frameOf` (`src/game/characters.ts`) to load it, cut its
+recoloured copy and draw it; `test/characters.test.ts` fails if a sheet is loaded at a cell other
+than the one it was built at, which would cut every frame half one figure and half the next.
 
 ## Asset 8 — the three faces missing, and they are all travellers · **shipped**
 

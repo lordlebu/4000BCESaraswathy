@@ -146,6 +146,7 @@ import {
   everyCharacter,
   forgetSheet,
   everySheet,
+  frameOf,
   figureScale,
   travellerScale,
   type CharacterArt,
@@ -618,7 +619,7 @@ export class WorldScene extends Phaser.Scene {
     // Every sheet, not just the one being walked. They are 9-12 KB each and 55 KB for the set, so
     // loading them all costs less than the machinery to load one lazily and swap textures later --
     // and it means a character can be changed without a scene restart.
-    for (const art of everySheet()) loadCharacterSheet(this, art.key, art.url);
+    for (const art of everySheet()) loadCharacterSheet(this, art.key, art.url, frameOf(art.key));
     // Every painted animal, not just this map's, for the same reason the character sheets are all
     // loaded: `built` is not assigned until `create`, so `preload` cannot know which map it is
     // about to draw. There are none today and one per quest thereafter, at a few KB each.
@@ -1891,11 +1892,15 @@ export class WorldScene extends Phaser.Scene {
       // Re-dyed to this person's look when the body has one, so three painted strangers read as
       // many. Only when the body is the one the look was chosen for: a look names the colours of
       // one sheet, and applied to the player-avoidance fallback it would match nothing.
-      const key = traveller.look && traveller.look.body === body ? dyeSheet(this, body, traveller.look) : body;
+      // The cell the body was built at: a wide or tall figure has its own, so it is cut and drawn at
+      // that size rather than squeezed into the shared 26x40. Feet stay on the anchor either way.
+      const frame = frameOf(body);
+      const key =
+        traveller.look && traveller.look.body === body ? dyeSheet(this, body, traveller.look, frame) : body;
       const sprite = this.add
         .sprite(0, 0, key, 0)
         .setOrigin(0.5, 1)
-        .setDisplaySize(PLAYER_FRAME.width * scale, PLAYER_FRAME.height * scale);
+        .setDisplaySize(frame.width * scale, frame.height * scale);
       sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
       sprite.setName(`traveller:${traveller.id}`);
       this.travellers.push({ traveller, circuit, stops, sprite });
