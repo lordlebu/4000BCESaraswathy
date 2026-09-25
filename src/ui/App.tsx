@@ -415,7 +415,8 @@ export function App() {
           // noticed, and recipes somebody has shown them. Assembled here because App is the only
           // thing that holds a Progress.
           holds: [...p.words, ...Object.keys(p.rungs), ...p.recipes],
-          seen: seenEvents.current
+          seen: seenEvents.current,
+          met: metStrangers.current
         },
         roll,
         // What is here to make an event out of, when nothing authored can happen -- see
@@ -514,7 +515,9 @@ export function App() {
         // Which events have already happened, so a `once` event does not come round again after a
         // reload. Unversioned: absent reads as none, which is true of every journey written before
         // there were events to have.
-        seenEvents: seenEvents.current
+        seenEvents: seenEvents.current,
+        // Strangers you have met, so somebody on the road can know you the second time.
+        met: metStrangers.current
       });
     const timer = window.setInterval(flush, 3000);
     window.addEventListener('pagehide', flush);
@@ -581,9 +584,14 @@ export function App() {
     discovered.current = [];
     // The collection is trip-scoped: a new world is a new walk, not a continuing album.
     setCollection(emptyCollection());
-    setProgress(loadJourney(next).progress);
+    const loaded = loadJourney(next);
+    setProgress(loaded.progress);
     // A new world is a new walk. What was in the satchel belonged to the old one.
-    setSatchel(loadJourney(next).satchel);
+    setSatchel(loaded.satchel);
+    // And so did the events and the people in them. These were never reloaded here, so a new seed
+    // inherited the old one's `seen` list and saved it as its own.
+    seenEvents.current = loaded.seenEvents ?? [];
+    metStrangers.current = loaded.met ?? [];
     setMemory('');
     setArrivalPage(null);
     setReached(false);
@@ -1059,17 +1067,17 @@ export function App() {
   const lastRoadDay = useRef(-1);
 
   /**
-   * The event the player is in the middle of, if any, and every one they have already had.
+   * The event the player is in the middle of, if any, every one they have already had, and every
+   * stranger an event has introduced them to.
    *
-   * **Held here rather than in the save, for now.** `seen` decides whether a `once` event comes
-   * round again, which is per-journey state and belongs in `Journey` eventually -- but adding a
-   * field there means bumping `SAVE_VERSION` and discarding every existing journey, and there are
-   * no events yet to be seen. It moves into the save in the same change that authors the first one.
+   * Held in refs because the bus handlers read them, and written to the save with the rest of
+   * the journey -- both in the what-you-know half, so they survive the ground moving.
    */
   const [happening, setHappening] = useState<{ event: GameEvent; shelter: string | null } | null>(
     null
   );
   const seenEvents = useRef<string[]>(initialJourney.current.seenEvents ?? []);
+  const metStrangers = useRef<string[]>(initialJourney.current.met ?? []);
 
   /**
    * Open the bench activity. The making itself happens when the run settles.
@@ -1466,6 +1474,11 @@ export function App() {
               setSatchel((s) => given.reduce((held, g) => addToSatchel(held, g.id, g.n), s));
             }
             if (choice.eases && choice.eases > 0) EventBus.emitEvent('ease', { by: choice.eases });
+            // Whoever this was about, you have met now.
+            const stranger = happening.event.stranger;
+            if (stranger && !metStrangers.current.includes(stranger.id)) {
+              metStrangers.current = [...metStrangers.current, stranger.id];
+            }
             // Noted rather than announced, like every other outcome in this game: the progression
             // is a written journal and a thing that happened to you is a line in it.
             setMemory(choice.line);

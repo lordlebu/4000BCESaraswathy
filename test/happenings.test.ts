@@ -62,7 +62,10 @@ const sampled: { event: GameEvent; around: Surroundings }[] = (() => {
             const poiId = occasion === 'arriving' ? built.placed[(x + y) % built.placed.length]?.poi.id : null;
             const around = surroundingsAt(world, at, map.id, moment, roll, { poiId });
             if (!around) continue;
-            const c = now(occasion, { fieldMapId: map.id, shelter: occasion === 'night' ? SHELTERS[k + 1]! : null });
+            // Half the samples have already met this map's stranger, so the second meeting is
+            // reachable too -- it needs one fact from the save and nothing else.
+            const met = k % 2 && around.stranger ? [around.stranger.id] : [];
+            const c = now(occasion, { fieldMapId: map.id, shelter: occasion === 'night' ? SHELTERS[k + 1]! : null, met });
             for (const event of wovenFor(c, around, roll)) out.push({ event, around });
           }
         });
@@ -190,5 +193,23 @@ describe('every template happens somewhere', () => {
     const kinds = new Set(sampled.map(({ event }) => event.id.split(':')[1]));
     const expected = Object.values(TEMPLATES).flat().length;
     expect(kinds.size, `only these fired: ${[...kinds].sort().join(', ')}`).toBe(expected);
+  });
+});
+
+describe('a stranger remembers you', () => {
+  it('meets you as a stranger once, and as somebody known after', () => {
+    const { around } = sampled.find((x) => x.around.stranger && x.event.id.startsWith('woven:company:'))!;
+    const noon = { ...around, moment: MOMENTS[0]! };
+    const ids = (met: string[]) => wovenFor(now('road', { met }), noon, () => 0).map((e) => e.id.split(':')[1]);
+    expect(ids([])).toContain('company');
+    expect(ids([])).not.toContain('company-again');
+    expect(ids([noon.stranger!.id])).toContain('company-again');
+    expect(ids([noon.stranger!.id])).not.toContain('company');
+  });
+
+  it('counts the carrier on one map as a different person from the carrier on another', () => {
+    const ids = new Set(sampled.filter((x) => x.around.stranger).map((x) => x.around.stranger!.id));
+    const carriers = [...ids].filter((id) => id.endsWith(':company_carrier'));
+    expect(carriers.length, 'a carrier walks every map').toBe(fieldMaps.length);
   });
 });

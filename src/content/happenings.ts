@@ -109,7 +109,11 @@ export function surroundingsAt(
     moment,
     place,
     elsewhere: others.length > 0 ? others[roll('elsewhere') % others.length]! : null,
-    stranger: who ? { id: who.id, role: who.role, look: who.look! } : null,
+    // Qualified by the map, because the carrier on Lothal and the carrier on Dwarka are two people --
+    // the same rule their looks are keyed by. Unqualified, meeting one would count as meeting both.
+    stranger: who
+      ? { id: `${fieldMapId}:${who.id}`, role: who.role, look: who.look!, culture: who.culture }
+      : null,
     taken: extra.taken ?? []
   };
 }
@@ -256,11 +260,13 @@ const dropped: Template = ({ onRoad, biome, taken }, roll) => {
   );
 };
 
-const company: Template = ({ stranger, elsewhere, moment }) => {
+const company: Template = ({ stranger, elsewhere, moment }, _roll, now) => {
   if (!stranger || !elsewhere) return null;
   // Road company are only on the road by day -- `whereabouts` has them at a place from dusk to
   // morning -- so meeting one after dark would contradict the map.
   if (moment && !['morning', 'afternoon'].includes(moment.timeOfDay)) return null;
+  // Somebody you have met is met differently -- see `companyAgain`.
+  if (now.met?.includes(stranger.id)) return null;
   return woven(
     'road',
     'company',
@@ -278,6 +284,39 @@ const company: Template = ({ stranger, elsewhere, moment }) => {
         'ask',
         'Ask the way',
         `They point you on toward ${placeName(elsewhere)}, and say it is further than it looks. It usually is.`
+      )
+    ],
+    stranger
+  );
+};
+
+/**
+ * The same stranger, the second time.
+ *
+ * **What the save's `met` list is for.** A face on the road that knows yours is the smallest thing
+ * that makes a road feel lived on, and it needs exactly one fact kept between days. Still no name
+ * and no words -- they lift a hand, they do not introduce themselves.
+ */
+const companyAgain: Template = ({ stranger, moment }, _roll, now) => {
+  if (!stranger || !now.met?.includes(stranger.id)) return null;
+  if (moment && !['morning', 'afternoon'].includes(moment.timeOfDay)) return null;
+  return woven(
+    'road',
+    'company-again',
+    stranger.id,
+    'A face you know',
+    `The ${stranger.role.split(',')[0]} from the other day is on the road ahead, still in ${dyeName(stranger.look.cloth)}, and lifts a hand when they see it is you.`,
+    [
+      choice(
+        'catch-up',
+        'Catch them up',
+        'You fall in together as if you had arranged it. They remember which way you were going, which is more than most people do.',
+        { eases: COMPANY_EASES }
+      ),
+      choice(
+        'wave',
+        'Lift a hand back',
+        'You lift a hand back and let the road carry them on ahead. It is good to be known somewhere.'
       )
     ],
     stranger
@@ -512,7 +551,7 @@ const underneath: Template = ({ biome, taken }, roll) => {
  * nothing else -- the pick is seeded over the ones that can happen, not the first that can.
  */
 export const TEMPLATES: Readonly<Record<Occasion, readonly Template[]>> = {
-  road: [tracks, dropped, company, weather],
+  road: [tracks, dropped, company, companyAgain, weather],
   night: [nightSounds, dream, knock],
   arriving: [cairn, cookfire],
   working: [watched, underneath]

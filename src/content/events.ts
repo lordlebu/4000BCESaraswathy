@@ -19,6 +19,7 @@
 // Pure and free of React and Phaser, like the rest of `content/`. No clock: the caller says when.
 
 import type { Look } from './looks';
+import type { StrangerCulture } from './travellers';
 
 /**
  * Where an event can find you.
@@ -109,6 +110,8 @@ export interface EventStranger {
   id: string;
   role: string;
   look: Look;
+  /** Which of canon's peoples they are, so the face comes from the right part of the pool. */
+  culture: StrangerCulture | null;
 }
 
 export interface GameEvent {
@@ -181,6 +184,8 @@ export interface Circumstance {
   holds: readonly string[];
   /** Event ids already seen, so a `once` event does not come round again. */
   seen: readonly string[];
+  /** Strangers an event has already introduced, by their event id. Absent means nobody yet. */
+  met?: readonly string[];
 }
 
 /** Whether this event can happen, given where and when the player is. */
