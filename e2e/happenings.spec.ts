@@ -62,3 +62,24 @@ test('a stranger tells you their name, and greets you by it the next time', asyn
   await expect(card(page).locator('h2')).toHaveText('A face you know');
   await expect(card(page).locator('.activity-prose')).toContainText(`${name}, the`);
 });
+
+test('sheltering a stranger is remembered, so the kindness can come back', async ({ page }) => {
+  // The chain's other half is proven under Node; what only a page can prove is that a choice's
+  // `sets` reaches the saved journey, where the road will look for it.
+  await boot(page);
+  await happen(page, 'night', 'knock', 'roof');
+  await expect(card(page).locator('h2')).toHaveText('Somebody after dark');
+  await card(page).getByRole('button', { name: 'Make room' }).click();
+  await card(page).getByRole('button', { name: 'Go on' }).click();
+
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const raw = localStorage.getItem('south-of-tethys:happenings');
+          return raw ? ((JSON.parse(raw) as { flags?: string[] }).flags ?? []) : [];
+        }),
+      { timeout: 15_000 }
+    )
+    .toEqual([expect.stringMatching(/^sheltered:field_map_[a-z]+:company_[a-z]+$/)]);
+});

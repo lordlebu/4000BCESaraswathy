@@ -13,6 +13,9 @@ import {
   TEMPLATES,
   TEXT,
   choicesUsed,
+  kindOf,
+  paceFor,
+  pickWoven,
   fill,
   slotsIn,
   happeningNow,
@@ -69,7 +72,14 @@ const sampled: { event: GameEvent; around: Surroundings }[] = (() => {
             // Half the samples have already met this map's stranger, so the second meeting is
             // reachable too -- it needs one fact from the save and nothing else.
             const met = k % 2 && around.stranger ? [around.stranger.id] : [];
-            const c = now(occasion, { fieldMapId: map.id, shelter: occasion === 'night' ? SHELTERS[k + 1]! : null, met });
+            // And the morning samples have sheltered them, so the chain that needs it is reached too.
+            const flags = k === 0 && around.stranger ? [`sheltered:${around.stranger.id}`] : [];
+            const c = now(occasion, {
+              fieldMapId: map.id,
+              shelter: occasion === 'night' ? SHELTERS[k + 1]! : null,
+              met,
+              flags
+            });
             for (const event of wovenFor(c, around, roll)) out.push({ event, around });
           }
         });
@@ -106,9 +116,11 @@ describe('the three rulings', () => {
     }
   });
 
-  it('rations woven events to about one in N', () => {
-    // Measured over many days on one busy tile, with every template able to fire. The band is wide
-    // because a hash is not a die, but a ration that had stopped working would be at 100%.
+  it('rations woven events to about one in N on an ordinary day', () => {
+    // Measured over many days on one busy tile, with every template able to fire and the last
+    // event three days back -- the stretch where the pacer leaves `WOVEN_ONE_IN` exactly as it is.
+    // The band is wide because a hash is not a die, but a ration that had stopped working would
+    // be at 100%.
     const built = buildFieldMap(fieldMap('field_map_lothal')!, { seed: DEFAULT_SEED });
     const at = built.placed[0]!.at;
     for (const occasion of OCCASIONS) {
@@ -119,7 +131,8 @@ describe('the three rulings', () => {
         const around = surroundingsAt(built.world, at, 'field_map_lothal', MOMENTS[1]!, roll, {
           poiId: built.placed[0]!.poi.id
         });
-        if (happeningNow(now(occasion, { day }), roll, around, [])) fired += 1;
+        const last = { 'woven:dream:elsewhere': day };
+        if (happeningNow(now(occasion, { day: day + 3, last }), roll, around, [])) fired += 1;
       }
       const expected = 1 / WOVEN_ONE_IN[occasion];
       expect(fired / days, `${occasion} fired ${fired} of ${days}`).toBeGreaterThan(expected * 0.6);
@@ -167,11 +180,21 @@ describe('it behaves like an event', () => {
     }
   });
 
-  it('does not come round again once seen', () => {
-    const { event, around } = sampled.find((s) => s.event.occasion === 'road')!;
-    const roll: Roll = () => 0;
-    const again = wovenFor(now('road', { seen: [event.id] }), around, roll);
-    expect(again.map((e) => e.id)).not.toContain(event.id);
+  it('never brings a once-only event round again', () => {
+    const { event, around } = sampled.find((s) => s.event.id.startsWith('woven:company:'))!;
+    const noon = { ...around, moment: MOMENTS[0]! };
+    const later = wovenFor(now('road', { seen: [event.id], last: { [event.id]: 0 }, day: 500 }), noon, () => 0);
+    expect(later.map((e) => e.id)).not.toContain(event.id);
+  });
+
+  it('brings a storylet round again only after its wait, and a kind only after its cooldown', () => {
+    const { event, around } = sampled.find((s) => s.event.id.startsWith('woven:tracks:'))!;
+    const ids = (day: number, last: Record<string, number>) =>
+      wovenFor(now('road', { seen: [event.id], last, day }), around, () => 0).map((e) => e.id);
+    // Tracks: `again_after` 20 for the same animal, `cooldown` 2 for any tracks at all.
+    expect(ids(10, { [event.id]: 0 })).not.toContain(event.id);
+    expect(ids(20, { [event.id]: 0 })).toContain(event.id);
+    expect(ids(21, { [event.id]: 0, 'woven:tracks:another-animal': 20 })).not.toContain(event.id);
   });
 
   it('does nothing without a world, exactly as before it existed', () => {
@@ -278,9 +301,76 @@ describe('the inspector', () => {
   it('opens a named template on demand, ration and all', () => {
     const { around } = sampled.find((x) => x.event.id.startsWith('woven:dream:'))!;
     // A roll that the ration would always refuse.
-    const refuse: Roll = () => 1;
+    const refuse: Roll = () => 9_999;
     expect(happeningNow(now('night', { shelter: 'roof' }), refuse, around, [])).toBeNull();
     const forced = happeningNow(now('night', { shelter: 'roof' }), refuse, around, [], { kind: 'dream' });
     expect(forced?.id.startsWith('woven:dream:')).toBe(true);
+  });
+});
+
+describe('the pacer', () => {
+  it('is quieter the day after something, and leans in after a long quiet', () => {
+    const at = (quiet: number) => paceFor({ day: 100, last: { 'woven:dream:x': 100 - quiet } });
+    expect(at(0)).toBeLessThan(at(1));
+    expect(at(1)).toBeLessThan(at(3));
+    expect(at(3)).toBe(1);
+    expect(at(6)).toBeGreaterThan(at(3));
+    expect(at(30)).toBeGreaterThanOrEqual(at(6));
+    // A fresh journey is an ordinary day. It was the long gap first, which made the very first
+    // arrival the likeliest moment for a card -- and a browser spec walking into a place met one.
+    expect(paceFor({ day: 0, last: {} })).toBe(1);
+    // An authored event in the record is not the road's rhythm.
+    expect(paceFor({ day: 100, last: { event_written: 100 } })).toBe(1);
+  });
+
+  it('leaves the first day to the place', () => {
+    const { around } = sampled.find((x) => x.event.id.startsWith('woven:dream:'))!;
+    const always: Roll = () => 0;
+    expect(happeningNow(now('night', { day: 0 }), always, around, [])).toBeNull();
+    expect(happeningNow(now('night', { day: 1 }), always, around, [])).not.toBeNull();
+    // The inspector is not held back: it is how a card is opened on purpose.
+    expect(happeningNow(now('night', { day: 0 }), always, around, [], { kind: 'dream' })).not.toBeNull();
+  });
+
+  it('favours a kind unlike whatever happened in the last few days', () => {
+    const { around } = sampled.find((x) => x.event.id.startsWith('woven:tracks:'))!;
+    const noon = { ...around, moment: MOMENTS[1]! };
+    let animal = 0;
+    let animalAfterAnimal = 0;
+    for (let day = 10; day < 410; day += 1) {
+      const roll = rollAt('pacer', { x: day, y: 1 }, 'x');
+      const fresh = now('road', { day });
+      const tired = now('road', { day, last: { 'woven:night-sounds:owl': day - 1 } });
+      const a = wovenFor(fresh, noon, roll);
+      const b = wovenFor(tired, noon, roll);
+      if (a.length < 2) continue;
+      if (kindOf(pickWoven(a, fresh, roll)!.id) === 'tracks') animal += 1;
+      if (kindOf(pickWoven(b, tired, roll)!.id) === 'tracks') animalAfterAnimal += 1;
+    }
+    expect(animal, 'tracks never picked at all').toBeGreaterThan(0);
+    expect(animalAfterAnimal, `${animalAfterAnimal} after an animal, ${animal} otherwise`).toBeLessThan(animal * 0.75);
+  });
+});
+
+describe('one event leads to another', () => {
+  it('shelters a stranger at night, and meets them with a gift on the road', () => {
+    const knock = sampled.find((x) => x.event.id.startsWith('woven:knock:'))!;
+    const room = knock.event.choices.find((c) => c.id === 'room')!;
+    expect(room.sets).toEqual([`sheltered:${knock.event.stranger!.id}`]);
+
+    const noon = { ...knock.around, moment: MOMENTS[0]! };
+    const road = (flags: string[]) => wovenFor(now('road', { flags }), noon, () => 0, 'kindness-returned');
+    expect(road([]), 'the gift came without the kindness').toEqual([]);
+    const [gift] = road(room.sets!);
+    expect(gift, 'the kindness was never returned').toBeTruthy();
+    const accept = gift!.choices.find((c) => c.id === 'accept')!;
+    expect(accept.gives?.length).toBe(1);
+    expect(material(accept.gives![0]!.id), 'the gift is not a canon material').not.toBeNull();
+  });
+
+  it('gives each people something of their own, from canon', () => {
+    for (const [people, id] of Object.entries(TEXT['kindness-returned']!.gifts ?? {})) {
+      expect(material(id), `${people} gives ${id}`).not.toBeNull();
+    }
   });
 });

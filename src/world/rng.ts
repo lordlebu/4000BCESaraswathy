@@ -142,6 +142,38 @@ export function weightedPickFor<T>(
   return best;
 }
 
+/**
+ * `weightedPickFor`'s rule, for a caller that holds a seeded hash rather than a tile.
+ *
+ * The event layer is handed a `roll` -- a `tileHash` already bound to a tile and a salt -- and
+ * needs the same guarantee the species picker has: weights honoured in proportion, and a new
+ * candidate taking only what it outright wins. Same score, same `avalanche`, same tie-break on id;
+ * the only difference is where the hash comes from.
+ */
+export function rendezvousPick<T>(
+  candidates: readonly T[],
+  hash: (salt: string) => number,
+  idOf: (item: T) => string,
+  weightOf: (item: T) => number
+): T | null {
+  let best: T | null = null;
+  let bestScore = -Infinity;
+  let bestId = '';
+  for (const candidate of candidates) {
+    const weight = weightOf(candidate);
+    if (weight <= 0) continue;
+    const id = idOf(candidate);
+    const unit = (avalanche(hash(id) >>> 0) + 0.5) / 4294967296;
+    const score = -weight / Math.log(unit);
+    if (score > bestScore || (score === bestScore && id < bestId)) {
+      best = candidate;
+      bestScore = score;
+      bestId = id;
+    }
+  }
+  return best;
+}
+
 /** Fisher-Yates against a seeded stream. `Array.sort(() => random() - 0.5)` is not a shuffle. */
 export function shuffle<T>(list: readonly T[], random: Random): T[] {
   const out = list.slice();

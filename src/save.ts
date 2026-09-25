@@ -121,7 +121,7 @@ export const SAVE_VERSION = 18;
  * | half | fields | versioned by |
  * |---|---|---|
  * | where you are | `discovered`, `nodes`, `reached` | `SAVE_VERSION` |
- * | what you know | `progress`, `collection`, `satchel`, `seenEvents`, `met`, `travelled`, `characterId` | this |
+ * | what you know | `progress`, `collection`, `satchel`, `seenEvents`, `met`, `eventDays`, `flags`, `travelled`, `characterId` | this |
  *
  * **Ground moving bumps `SAVE_VERSION` only**: the player keeps everything they learned and wakes
  * with fresh fog on the new ground. A change to the *shape* of the second half bumps this, and
@@ -218,6 +218,14 @@ export interface Journey {
    * `seenEvents`' precedent: absent is "nobody yet", which is true of every older save.
    */
   met?: string[];
+  /**
+   * The day each event last happened, by id. What lets a storylet come round again after its
+   * `again_after`, and the pacer know how long the road has been quiet. Optional on `met`'s
+   * precedent: absent is "never", which is true of every older save.
+   */
+  eventDays?: Record<string, number>;
+  /** Flags earlier choices left behind, for a later event to find -- `sheltered:<stranger>`. */
+  flags?: string[];
 }
 
 const empty = (): Journey => ({
@@ -231,8 +239,20 @@ const empty = (): Journey => ({
   nodes: noNodes(),
   travelled: 0,
   seenEvents: [],
-  met: []
+  met: [],
+  eventDays: {},
+  flags: []
 });
+
+/** A record of whole, non-negative day numbers, or none. Anything else in it is dropped. */
+function readDays(value: unknown): Record<string, number> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const out: Record<string, number> = {};
+  for (const [id, day] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof day === 'number' && Number.isInteger(day) && day >= 0) out[id] = day;
+  }
+  return out;
+}
 
 /** A list of strings, or none. A stored value from some other shape must never reach a caller. */
 function readIds(value: unknown): string[] {
@@ -330,7 +350,9 @@ export function loadJourney(seed: string): Journey {
           // reach `canHappen` as an object, where it would silently never match an id and quietly
           // replay every `once` event the player has already had.
           seenEvents: readIds(parsed.seenEvents),
-          met: readIds(parsed.met)
+          met: readIds(parsed.met),
+          eventDays: readDays(parsed.eventDays),
+          flags: readIds(parsed.flags)
         }
       : {
           characterId: undefined,
@@ -339,7 +361,9 @@ export function loadJourney(seed: string): Journey {
           satchel: fresh.satchel,
           travelled: 0,
           seenEvents: [],
-          met: []
+          met: [],
+          eventDays: {},
+          flags: []
         };
     const ground = groundOk
       ? {
