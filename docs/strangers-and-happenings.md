@@ -6,10 +6,11 @@ Two asks, answered together because each turned out to need the other:
    pregenerated bodies and faces, without touching the lore repository.
 2. **Stronger events and activities** — and whether an event can be made on the fly.
 
-**Status: concluded, 26 September 2026.** Both asks shipped, and every phase's work that could be
-done without new art or new lore is done: strangers with faces and names, storylets with a pacer
-and chains, the asura princess who walks up to you, written happenings from canon, and budgets on
-the page's size. What is left waits on the owner's art or writing, and is listed at the end.
+**Status: closed, 27 September 2026.** Both asks shipped, and the plan is closed with its art in:
+strangers with faces and names, storylets with a pacer and chains, the asura princess who walks up
+to you and asks for the Fourteen, the Violet-Horned Clan on the road, written happenings from canon
+with their paintings, and budgets on the page's size. What follows the plan is optional, and is
+listed at the end.
 
 ---
 
@@ -524,15 +525,29 @@ something only she gives, or a player who already held the gift would never be o
 Finishing the terraces now helps her, so she is among the people helped at the end; she stays with
 her people rather than settling.
 
-## Still open, and why each waits
+## Closed — 27 September 2026
 
-Nothing here blocks anything, and each waits on something only the owner can supply.
+**The art is in.** The three written happenings' paintings arrived and were built as
+`src/ui/events/happening_*.png`, kept in `src/ui/art-kept.json`. None had a technical fault, so none
+was cropped. Two take a different line from their prompts -- the tower is painted whole and solid
+rather than dreamlike, and the Caravan Ground has the sea beside it where the prose says the water
+left sixty years ago -- which is the owner's call and was kept as drawn. `e2e/happenings.spec.ts`
+now asserts the card draws *Where you stop*'s own painting rather than the night's scene.
 
-- **The three drafts**: rewrite or approve. Merging canon's pull request is the approval.
-- **Paintings for the three happenings**, if wanted (`src/ui/events/happening_*.png`, the event
-  painting brief in `docs/event-prompts.md`).
-- **The Clan's given names**: drafted, for the owner to rewrite. More asura faces, if wanted: today
-  the Clan share the `any-` faces beside their one.
+**Every picture the game asks for exists**: thirteen woven kinds (and a second take of one), three
+written happenings, twenty-six faces, and the walking sheets. The plan is closed on that.
+
+**How art is asked for is now a standard**, at the owner's request: ready-to-copy prompt cards on
+the published plan page, mirrored into the repo's brief by one script. It is written into
+`.claude/skills/session-craft/SKILL.md` under "Taking art in", so the next session does it too.
+
+## After this plan
+
+Nothing here blocks anything, and none of it is planned.
+
+- **The drafts are canon now**: merging approved the three happenings and the Clan's twelve given
+  names. Rewrite any of them in canon whenever.
+- **More asura faces**, if wanted: the Clan share the `any-` faces beside their one.
 - **The princess's quest beyond the Fourteen**: unwritten, as asked.
 
 **This work builds the framework, and stops there** (the owner, 27 September). What follows is

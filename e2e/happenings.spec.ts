@@ -52,6 +52,8 @@ test('a written happening opens on arriving where it belongs, and happens once',
 
   await expect(card(page).locator('h2')).toHaveText('Where you stop');
   await expect(card(page)).toContainText('This is where you stop, she says.');
+  // Its own painting, found by the canon id underscores and all -- not the night's scene.
+  await expect(card(page).locator('img.activity-scene')).toHaveAttribute('src', /happening_where_you_stop/);
   await card(page).getByRole('button', { name: 'Ask who stopped here first' }).click();
   await expect(card(page)).toContainText("Her grandfather's caravan stopped here");
   await card(page).getByRole('button', { name: 'Go on' }).click();
