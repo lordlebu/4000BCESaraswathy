@@ -505,10 +505,16 @@ Nothing here blocks anything, and each waits on something only the owner can sup
 - **Asuras as their own people** (`asura_hybrid`, kin of the Maru): waits on the lore the owner said
   they would write. The code side is under a session, and the walking sheet is built.
 - **The princess's quest**: unwritten, as asked.
-- **Silvershore stragglers and Tamralinga traders**: recommended not yet. Each needs names in canon
-  and a pair of faces.
-- **Layered headwear and loads**: waits on hand-registered art parts. Image models have not
-  returned them.
+
+**This work builds the framework, and stops there** (the owner, 27 September). What follows is
+recorded so it is not lost, and is not planned:
+
+- **Out of scope, for later: Silvershore stragglers and Tamralinga traders.** Both peoples are alive
+  in this era. Each would be a culture in `STRANGER_CULTURES`, given names in canon, a road-company
+  entry and a pair of faces -- no new mechanism.
+- **An idea, not started: layered headwear and loads.** Overlays registered to per-frame anchors on
+  each body, so four bodies, four headwear and five loads make eighty silhouettes before any dye.
+  It waits on hand-registered art parts, which image models have not returned.
 - **More bodies.** A fourth traveller sheet is a row in `tools/characters.json` and an entry in
   `assets/looks.json`, chosen by eye. With re-dyeing, a new body buys a new *silhouette*, which is
   the one thing colour cannot.
