@@ -6,8 +6,10 @@ Two asks, answered together because each turned out to need the other:
    pregenerated bodies and faces, without touching the lore repository.
 2. **Stronger events and activities** — and whether an event can be made on the fly.
 
-**Status: both shipped.** What follows is what was found, what was built, what was checked and
-what is still open.
+**Status: concluded, 26 September 2026.** Both asks shipped, and every phase's work that could be
+done without new art or new lore is done: strangers with faces and names, storylets with a pacer
+and chains, the asura princess who walks up to you, written happenings from canon, and budgets on
+the page's size. What is left waits on the owner's art or writing, and is listed at the end.
 
 ---
 
@@ -180,10 +182,10 @@ answered Q7 and Q8 directly.
 |---|---|---|---|
 | Q1 | Should strangers walk every map? | Two road company on every map, **beside** canon's travellers, never instead of them (`ROAD_COMPANY_PER_MAP`) | **built** |
 | Q2 | May two travellers share a body? | Road company wear the body of their trade; dyes tell them apart. Canon's named people keep distinct bodies | **built** |
-| Q3 | Authored events: canon's or the game's? | Split: world-true events become a canon entity type; woven and player-only ones stay here. **Canon already uses `event_` for timeline history**, so the new type needs another name | recorded; canon work, Phase 4 |
+| Q3 | Authored events: canon's or the game's? | Split: world-true events become a canon entity type; woven and player-only ones stay here. **Canon already uses `event_` for timeline history**, so the new type is `happening_` | **built** (canon 2.31.0, three drafts) |
 | Q4 | Can strangers have names? | Canon exports a per-people list of given names, and the game deals them by hash | **built** (canon 2.29.0) |
 | Q5 | May events remember between days? | Yes, in the what-you-know half of the save. First use: `met`, so a stranger recognises you | **built** |
-| Q6 | How often? | Keep `WOVEN_ONE_IN` until the simulation report and a play session say otherwise | kept |
+| Q6 | How often? | Kept until the simulation spoke; then, 26 September, on the recommendation: gathering one take in nine, and tracks and being watched at half weight | **tuned** |
 | Q7 | Faces | 22 faces by people and gender: Harappan 6 men and 4 women, Kia 4 men and 2 women, Maru 2 and 2, `any` 2. Prompts in `docs/face-prompts.md` | **pool built; art with the owner** |
 | Q8 | Translation? | English only, with Jambhudweepan nouns. No message-format layer | recorded; nothing to build |
 | Q9 | Save split first? | Yes | **built** |
@@ -343,6 +345,23 @@ The simulation's bands (0.5 to 1.1 events a day, at most seven quiet days, no ki
 well outside what was measured, so they fail on a change of rhythm and not on noise. Proven to
 bite: with `again_after` ignored, it reports every event that came back too soon.
 
+**Decided, 26 September: both recommendations taken.** `WOVEN_ONE_IN.working` is nine, and in
+`data/happenings.json` tracks weigh 1.5 (from 3) and being watched 1 (from 2). Measured the same way:
+
+| measure | before | after |
+|---|---|---|
+| woven events per day | 0.74 | 0.68 |
+| days with at least one event | 63% | 59% |
+| working events per day | 0.27 | 0.19 |
+| animals' share (tracks, night sounds, watched) | 51% | 46% |
+| longest run of quiet days | 4 | 5 |
+
+**Less than the recommendation promised, and said plainly.** It forecast about one day in two; it is
+59%, because the pacer leans in after a quiet stretch and gives back some of what the ration took.
+And sounds at night rose from 13% to 16%, filling part of the room tracks and watching gave up, since
+nothing halved them. If the road still feels busy in play, night sounds are the next weight to
+halve.
+
 ## The asuras — 26 September 2026
 
 The owner drew two asura faces as kin of the Maru. **For now they are Maru** (`maru-m-03`,
@@ -437,12 +456,59 @@ asked only that she walk up and say hello — her quest stays unwritten.
 - **Checked** in a browser by `e2e/happenings.spec.ts`, through the `__approach` inspector: she
   stops beside the traveller, drawn 88 px tall, and the dock opens on her portrait and "Hi."
 
-## Still open
+## Written happenings: Phase 4 — 26 September 2026
 
-- **Paintings.** The 22 faces and 13 event paintings (`docs/event-prompts.md`) are with the owner.
-  Neither blocks anything.
-- **The rhythm questions above**, once the owner has played it.
-- **Authored events in canon (Q3)** need a new entity type, not `event_`.
+**Q3, built.** What is true of the world is canon's; what the game weaves from a tile stays here.
+
+- **Canon's new type is `happening_`**, in `database/happenings/` (canon 2.31.0), exported in
+  `places.json` beside the people standing in the same places. It says where (maps, and for an
+  arrival its points), on which of the game's four occasions, what must have been *seen*, the
+  prose, and up to three choices granting what a line may grant. **It never says which day or how
+  often**, the ruling `renews` already made. Canon's `check_playability.py` counts the grants and
+  refuses one that is not a discovery, word, question or recipe.
+- **The game reads them as its registry.** `events` in `src/content/events.ts` was an empty array
+  wired to a caller for months; `fromCanon` now fills it. A written happening wins over a woven one
+  whenever it can happen, is never rationed, and happens once. `Conditions` gained `pois`, because
+  an arrival at one point is not an arrival at its neighbour.
+- **Three drafts, one per map's thesis**, each granting only what another route already reaches,
+  so nothing new becomes reachable and the owner can rewrite them freely:
+  - *The tower, standing*: a Lothal night, once the tower's collapse is seen. You dream it whole
+    and climb it, and at shoulder height the empty niche is not empty. Points at the Empty Niche.
+  - *Counting years*: the Narmada road, once the moving spring is seen. An old herder names her
+    years by what happened in them, back to *anu-shivit*, the year the water walked. Gives the
+    word Vessa gives.
+  - *Where you stop*: arriving at Dwarka's Caravan Ground, which has stood empty since it moved
+    from the Dry Harbour. A drover says this is where you stop, because this is where you stop.
+    Points at the road that follows water.
+- **Checked** by `test/events.test.ts` (the adapter to what canon ships, and that an arrival is
+  narrowed to its point, which was proven to bite) and in a browser by `e2e/happenings.spec.ts`:
+  arriving at the Caravan Ground opens *Where you stop* through the real path, once. With the
+  point left out of the wiring, the test gets a woven *A fire already lit* instead.
+- **Art is optional.** Each draws `src/ui/events/<id>.png` if it exists, and the shelter's own scene
+  if not.
+
+**The budget, collected on again.** The three took canon's bundle to 558.9 KB of its 560. Canon now
+withholds `notes` from regions, maps, points of interest and people as well: after reading every
+reader of `places.json` in this repo, none reads it. 526.2 KB.
+
+**And the page's own budget.** Canon's gate sees only canon's files. `tools/check-bundle-size.js`
+(`npm run check:size`, in CI after the build) measures the app's chunk against 950 KB: 844.5 KB
+today, Phaser not counted. That was Phase 4's last item: content budgets on every pull request.
+
+## Still open, and why each waits
+
+Nothing here blocks anything, and each waits on something only the owner can supply.
+
+- **The three drafts**: rewrite or approve. Merging canon's pull request is the approval.
+- **Paintings for the three happenings**, if wanted (`src/ui/events/happening_*.png`, the event
+  painting brief in `docs/event-prompts.md`).
+- **Asuras as their own people** (`asura_hybrid`, kin of the Maru): waits on the lore the owner said
+  they would write. The code side is under a session, and the walking sheet is built.
+- **The princess's quest**: unwritten, as asked.
+- **Silvershore stragglers and Tamralinga traders**: recommended not yet. Each needs names in canon
+  and a pair of faces.
+- **Layered headwear and loads**: waits on hand-registered art parts. Image models have not
+  returned them.
 - **More bodies.** A fourth traveller sheet is a row in `tools/characters.json` and an entry in
   `assets/looks.json`, chosen by eye. With re-dyeing, a new body buys a new *silhouette*, which is
   the one thing colour cannot.

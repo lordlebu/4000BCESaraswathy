@@ -101,6 +101,12 @@ const COVERAGE: Record<string, Coverage> = {
       // is the npc's own name, role and lines.
       'character']
   },
+  'places.happenings': {
+    // Canon's written happenings, adapted by `fromCanon` in `src/content/events.ts`. `at` becomes
+    // `conditions.pois`, `field_maps` `conditions.fieldMaps`.
+    adapted: ['id', 'title', 'occasion', 'field_maps', 'at', 'requires', 'prose', 'choices'],
+    skipped: [...EDITORIAL]
+  },
   'places.regions': {
     // Only `bestiary_region` is read, to recover a species' region from its habitats.
     adapted: ['id', 'bestiary_region'],
@@ -189,6 +195,10 @@ const NESTED: Record<string, Coverage> = {
     adapted: ['text', 'requires', 'gives', 'costs'],
     skipped: []
   },
+  'happenings.choices': {
+    adapted: ['label', 'line', 'needs', 'grants'],
+    skipped: []
+  },
   'discoveries.levels': {
     adapted: ['entry', 'requires', 'conditions', 'needs_tool'],
     skipped: []
@@ -267,6 +277,7 @@ describe('nested shapes too, where the rules live', () => {
   const sources: Record<string, unknown[]> = {
     'points_of_interest.sub_locations': collection('places.points_of_interest'),
     'npcs.lines': collection('places.npcs'),
+    'happenings.choices': collection('places.happenings'),
     'discoveries.levels': collection('knowledge.discoveries'),
     'field_questions.resolutions': collection('knowledge.field_questions')
   };
