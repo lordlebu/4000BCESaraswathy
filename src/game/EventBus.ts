@@ -148,6 +148,14 @@ export interface GameToUi {
   'poi-reached': { poiId: string; fieldMapId: string };
 
   /**
+   * Somebody who came over has reached the traveller, and is standing beside them now.
+   *
+   * The scene says so because only the scene knows when the walk ends; React opens their
+   * conversation on hearing it. See `content/visitors.ts`.
+   */
+  approached: { npcId: string };
+
+  /**
    * A night passed. The clock has moved to first light.
    *
    * `at` is where he already was: he wakes where he stopped, and this event reports the position
@@ -248,6 +256,9 @@ export interface UiToGame {
    * to an item at all.
    */
   ease: { by: number };
+
+  /** Walk this person up to the traveller from a little way off, in this sheet. */
+  approach: { npcId: string; sheet: string };
 }
 
 type Events = GameToUi & UiToGame;

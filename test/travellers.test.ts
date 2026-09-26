@@ -278,7 +278,7 @@ describe('travellers stop wearing the player\'s face', () => {
   it('dresses road company as their trade, from the people canon gives it', () => {
     const body: Record<string, string> = {
       company_carrier: 'traveller-carrier',
-      company_drover: 'traveller-drover',
+      company_drover: 'traveller-nomad',
       company_pilgrim: 'traveller-pilgrim'
     };
     const culture: Record<string, string> = {

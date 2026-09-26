@@ -38,6 +38,13 @@
       "second": ["#5c5d35", "#464727", "#474828", "#5b5c35"],
       "face": { "headwear": "#f9e3cc", "shoulders": "second" }
     },
+    "traveller-nomad": {
+      "headwear": "hood",
+      "skin": ["#f9863a", "#f9873a"],
+      "cloth": ["#fa251b", "#f81b18"],
+      "second": ["#592a18", "#64321d", "#663621", "#663521", "#63321d", "#4b2315"],
+      "face": { "headwear": "cloth", "shoulders": "second" }
+    },
     "traveller-pilgrim": {
       "headwear": "hood",
       "skin": ["#d57d43", "#d88246", "#d57c42", "#d88347"],

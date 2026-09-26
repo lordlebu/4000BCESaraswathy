@@ -343,6 +343,100 @@ The simulation's bands (0.5 to 1.1 events a day, at most seven quiet days, no ki
 well outside what was measured, so they fail on a change of rhythm and not on noise. Proven to
 bite: with `again_after` ignored, it reports every event that came back too soon.
 
+## The asuras — 26 September 2026
+
+The owner drew two asura faces as kin of the Maru. **For now they are Maru** (`maru-m-03`,
+`maru-f-04`) and are dealt as any Maru face is. The prose no longer names a stranger's dye, since a
+painted face carries its own colours and could contradict it.
+
+**Making them `asura_hybrid` and closely tied to the Maru is small in code and gated on two
+things only the owner can supply: a few sentences of lore, and one sprite sheet.**
+
+| Piece | Where | Size |
+|---|---|---|
+| Say they are alive now, and kin to the Maru | canon `cultures.json`: `asura_hybrid` today holds one character, in deep antiquity. It needs the era, a `kin` or similar link to `maru`, `dress`, `art_reference` and `given_names`. A lint check that the link names a real culture. | half a session, once the lore is written |
+| Let them walk | game: `asura_hybrid` in `STRANGER_CULTURES`, one road-company entry, and a rule for where they walk — the natural one is *beside the Maru*, on the maps whose people are mostly Maru | under a session |
+| Their faces | rename `maru-m-03` and `maru-f-04` to `asura_hybrid-m-01` and `-f-01`. The builder now keeps the underscore; before this change it would have built `asura-hybrid-…` and nobody would ever have been dealt it | minutes |
+| Their body | a new traveller sheet, Asset 9 in `docs/art-brief.md`, then `looks.json` colours chosen by eye | art first; then under a session |
+
+**Where the lore has to decide, not the code:** whether asuras are met on the road at all in this
+era, or only in some places; whether they speak Maru; and what they are called. Canon removed
+`asura` as a culture on purpose — it had meant a culture, a species and a creature prefix at once
+— so `asura_hybrid` is the right existing home, and `maya_born` the other candidate.
+
+## New bodies — 26 September 2026
+
+**The Maru drover now walks as an upland nomad**, in fur and a red felt cap (`traveller-nomad`,
+Asset 9), with its colours in `assets/looks.json` so each drover is still dyed as their own person.
+The named travellers `sheetFor` deals keep the three original bodies. **The asura nomad and the
+princess are built and staged**: a head taller than everybody, and drawn by nothing until the
+asuras have a people and the princess her story. See Assets 9 and 10 in `docs/art-brief.md`.
+
+## The Asura-Tainted Princess — can she be a real character? Yes
+
+The owner asked whether the asura princess (`maru-f-04`) could become a fully fleshed character who
+comes looking for the player with quests. **She can, and canon has done a third of the work.**
+
+**What canon already says.** `character_asura_tainted_princess`: `asura_hybrid`, **immortal and
+alive**, the child of Prince Varunesh and the asura princess Manjalaya. *"Heavy curled ram horns,
+violet gemstones. Marked by Aryaman with golden constellations in dreams. Lives in eternal isolation
+on a rocky plateau."* Her roles are `isolated_royal` and `dream_prophet`.
+
+That settles the three questions that usually stall a character like this:
+
+- **She can be in this era as herself.** Immortal and alive; no reincarnation to write.
+- **She belongs to the Maru's country.** A rocky plateau is the Narmada, where everybody canon
+  names speaks Maru — which is where the owner already put her.
+- **She has a way to find you that the game already has.** She is a dream-prophet, and the game has
+  night events. She can reach you in a dream long before she meets you on the road.
+
+**The one lore question only the owner can answer:** *eternal isolation* is her canon, so why does
+she leave the plateau now, and why for you? That is the spine of her quest line, and it should be
+the owner's.
+
+### What it would take
+
+| Piece | Where | What | Size |
+|---|---|---|---|
+| Her story | canon, owner writes (or approves a draft) | why she comes down; three or four beats; what she asks and what she gives | the owner's writing |
+| Authored encounters | canon | the new entity type Q3 decided on (not `event_`, which is the timeline): an occasion, what it requires, the lines, what each choice grants. Schema, template in `AUTHORING.md`, lint, export | 1–2 sessions |
+| A quest ladder | canon | a discovery of her own, climbed by her encounters, so her quest lives in the diary like every other progression here. No new progression system | inside the above |
+| Read them in the game | game | authored events from canon's bundle replace the empty `events` array; an event gains a `speaker` shown with her portrait | 1 session |
+| She bumps into you | game | when one of her road encounters fires, the scene draws her sprite at the edge of view and walks her to the player before the card opens. A new scene behaviour, tested in the browser | 1 session |
+| Her art | owner | the sprite (Asset 10 in `docs/art-brief.md`); her portrait is `maru-f-04`, moved out of the stranger pool so she is never also met as an anonymous drover | art |
+
+**About four to five sessions of code across both repositories, once the story exists, and no new
+dependency.** Everything it stands on is already built: authored events win over woven ones and
+are unrationed; chains run on flags in the save; a ladder in the diary is how this game has always
+shown progress; lines gated on what you hold are how every named person already speaks.
+
+**The recommended shape, for the owner to rewrite:** she first appears in a dream on the Narmada
+(night, requires nothing); the dream leaves a flag; days later, on the road, she is standing ahead
+of you and asks one thing; doing it climbs her ladder a rung and unlocks the next. Three meetings,
+each a rung, ending with her choosing to stay on her plateau or walk on with you — the game's ending
+already asks every person you helped that question.
+
+## She walks up and says hi — 26 September 2026
+
+**The first step of her, shipped.** The owner gave her history (in canon now: the forbidden union,
+the unicorn bled into a Dwarka Gate, the exile over the Tethys, her waking after the Cataclysm) and
+asked only that she walk up and say hello — her quest stays unwritten.
+
+- **Where:** the Cloud Stair, on the Narmada. The owner first said the Dwarka portal, then moved her,
+  because the road's nomads walk the Narmada and not Dwarka. The Narmada is the plateau, and the
+  Cloud Stair its anomaly.
+- **Who:** `npc_asura_princess` in canon 2.30.0, linked to her character. Two lines: *"Hi. You walk
+  like somebody who came a long way to look at a stair…"*, and one about the terraces growing more
+  than goats, which hands over the terraces' question — the sound answer is contour irrigation for
+  a population nobody recorded. That hand-over is what records meeting her in the diary.
+- **How:** `content/visitors.ts` says that at the Cloud Stair, the first time, she comes over. The
+  scene finds a tile three to six away with a way in, walks her up to stand beside you in her own
+  taller sheet, and says so; the conversation opens. Everything after that is the ordinary
+  conversation: her portrait (the owner's painting, moved out of the stranger pool so she is never
+  also met as an anonymous drover), her lines, the diary.
+- **Checked** in a browser by `e2e/happenings.spec.ts`, through the `__approach` inspector: she
+  stops beside the traveller, drawn 88 px tall, and the dock opens on her portrait and "Hi."
+
 ## Still open
 
 - **Paintings.** The 22 faces and 13 event paintings (`docs/event-prompts.md`) are with the owner.

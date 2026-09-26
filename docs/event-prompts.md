@@ -34,6 +34,31 @@ event with no painting borrows the night's scene, and failing that shows a blank
 `test/docs.test.ts` fails if a kind in `data/happenings.json` has no prompt here, so a new template
 arrives with its art request.
 
+## What arrived — 26 September 2026
+
+**All thirteen, and a second take of `woven-dropped`**, built as `woven-dropped.2` — the card
+chooses between takes on a seeded hash, so both are seen. Every one decoded and built cleanly to
+512 × 384; the builder took the painted frame off four on its own.
+
+**Six carried a torn-paper edge the builder did not see**, which the hard requirements count as a
+frame: the card draws its own edge, and a painted one reads as a picture of a picture. Each was
+cropped a few percent inside the paper. The build does not remember a crop, so these reproduce
+what shipped:
+
+```bash
+node tools/build-plates.js --events --force --only=woven-company --crop=66,10,636
+node tools/build-plates.js --events --force --only=woven-dropped --crop=66,10,636
+node tools/build-plates.js --events --force --only=woven-tracks --crop=66,10,636
+node tools/build-plates.js --events --force --only=woven-watched --crop=140,110,2140
+node tools/build-plates.js --events --force --only=woven-cairn --crop=160,140,2080
+node tools/build-plates.js --events --force --only=woven-dropped.2 --crop=170,150,2060
+```
+
+**`--crop` on a 4:3 kind was broken, and is fixed.** The explicit crop carried no height, so the
+resampler read a *square* and squashed it into 4:3, and the edge check tested a square too. Nothing
+had cropped a landscape kind before, so it had never shown. The crop now takes the kind's own
+shape: `size` is the width and the height follows the aspect.
+
 ---
 
 ## The prompts

@@ -67,6 +67,41 @@ anything stronger, because image tools read the stronger words as a request to g
 cloth, and the seventeen painted portraits follow it. Whether to repaint them in their people's dress
 is the owner's call; nothing here assumes it.
 
+## What arrived — 26 September 2026
+
+**Twenty-four faces are in the pool**: all twenty-two asked for, and two the owner added —
+`kia-f-03` and `maru-f-03`. Any number is fine; the pool deals whatever is there.
+
+**Every one survived the build.** All are 8-bit PNG, RGB or RGBA, from 512 to 2048 px, so each is
+built *down* to 256; none needed its colours rescued, and the automatic frame-strip took only blank
+paper (up to 111 px on the 2048 px sources). Each was checked by eye at 256 px and again at 40 px,
+the size the event card actually draws a face.
+
+**Eight needed a crop, and it is a technical fix, not an art note.** A half- or full-length figure
+reads at 256 px and turns into a smudge at 40, so these were cropped to head and shoulders from
+the painting as it is. `--crop` is not remembered by the build, so a `--force` rebuild would undo
+it — these are the commands that reproduce what shipped:
+
+```bash
+node tools/build-plates.js --faces --force --only=harappan-f-01 --crop=66,10,300
+node tools/build-plates.js --faces --force --only=harappan-f-02 --crop=133,13,330
+node tools/build-plates.js --faces --force --only=harappan-f-04 --crop=270,25,637
+node tools/build-plates.js --faces --force --only=kia-f-01 --crop=121,0,726
+node tools/build-plates.js --faces --force --only=kia-f-02 --crop=215,0,735
+node tools/build-plates.js --faces --force --only=kia-f-03 --crop=235,0,735
+node tools/build-plates.js --faces --force --only=kia-m-04 --crop=70,0,300
+node tools/build-plates.js --faces --force --only=maru-f-02 --crop=136,0,260
+```
+
+The last also keeps a small painted signature in `maru-f-02`'s bottom corner out of the frame, and
+the third a strip of painted paper edge along `harappan-f-04`'s top.
+
+**The two asuras are in the pool as Maru, for now**, at the owner's word: `maru-m-03` (from
+`maru-m-asura01`, `--crop=95,15,230`) and `maru-f-04` (from `maru-f-asuraprincess01`, uncropped).
+Until the asura people are written they are dealt like any Maru face — an asura may walk as a Maru
+drover. When canon gives them a people of their own, they move to that people's names; see "The
+asuras" in `docs/strangers-and-happenings.md` for what that takes.
+
 ---
 
 ## The prompts

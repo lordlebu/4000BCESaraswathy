@@ -8,13 +8,17 @@
 // Runs under Node, which is only possible because characters.ts imports no Phaser. What it
 // cannot see is whether the sheet actually loads, which is `e2e/travellers.spec.ts`.
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   CHARACTERS,
   TRAVELLER_ART,
   characterFor,
   everyCharacter,
-  everySheet
+  everySheet,
+  frameOf,
+  NAMED_ART
 } from '../src/game/characters';
 import { PLAYER_FRAME, TRAVELLER_SHRINK, figureScale, travellerScale } from '../src/game/player';
 
@@ -143,7 +147,10 @@ describe('the sheets that draw a traveller', () => {
     const sheets = everySheet().map((c) => c.key);
     for (const key of Object.keys(CHARACTERS)) expect(sheets).toContain(key);
     for (const key of Object.keys(TRAVELLER_ART)) expect(sheets).toContain(key);
-    expect(sheets.length).toBe(Object.keys(CHARACTERS).length + Object.keys(TRAVELLER_ART).length);
+    for (const key of Object.keys(NAMED_ART)) expect(sheets).toContain(key);
+    expect(sheets.length).toBe(
+      Object.keys(CHARACTERS).length + Object.keys(TRAVELLER_ART).length + Object.keys(NAMED_ART).length
+    );
     expect(new Set(sheets).size, 'two sheets share a key').toBe(sheets.length);
   });
 
@@ -151,6 +158,41 @@ describe('the sheets that draw a traveller', () => {
     for (const art of everySheet()) {
       expect(art.url, `${art.key} has no sheet`).toBeTruthy();
       expect(art.name.length, `${art.key} has no name`).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('the cells a sheet was built at', () => {
+  // `tools/characters.json` builds a sheet at its own cell when it says so, and `characters.ts`
+  // loads it at `frame`. Neither knows about the other, so a sheet rebuilt at a new width would be
+  // cut on the wrong grid -- every frame half one figure and half the next -- with nothing failing.
+  const manifest = JSON.parse(
+    readFileSync(join(__dirname, '..', 'tools', 'characters.json'), 'utf8')
+  ) as { cell: { width: number; height: number }; characters: { id: string; cell?: { width: number; height: number } }[] };
+
+  it('loads every sheet at the cell it was built at', () => {
+    for (const art of everySheet()) {
+      const row = manifest.characters.find((c) => c.id === art.key);
+      expect(row, `${art.key} is loaded but the manifest does not build it`).toBeDefined();
+      expect(frameOf(art.key), art.key).toEqual(row!.cell ?? manifest.cell);
+    }
+  });
+
+  it('builds each sheet to exactly twenty frames of that cell', () => {
+    for (const row of manifest.characters) {
+      const png = join(__dirname, '..', 'assets', `${row.id}-overworld.png`);
+      const buf = readFileSync(png);
+      const cell = row.cell ?? manifest.cell;
+      expect(buf.readUInt32BE(16), `${row.id} width`).toBe(cell.width * 20);
+      expect(buf.readUInt32BE(20), `${row.id} height`).toBe(cell.height);
+    }
+  });
+
+  it('draws the asuras taller than everybody, and nobody shorter than the shared cell', () => {
+    const tall = manifest.characters.filter((c) => (c.cell?.height ?? manifest.cell.height) > manifest.cell.height);
+    expect(tall.map((c) => c.id).sort()).toEqual(['asura-princess', 'traveller-asura']);
+    for (const row of manifest.characters) {
+      expect((row.cell ?? manifest.cell).height, row.id).toBeGreaterThanOrEqual(manifest.cell.height);
     }
   });
 });

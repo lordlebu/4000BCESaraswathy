@@ -19,11 +19,17 @@
 import type Phaser from 'phaser';
 import { type Look, lookKey, recolourTable } from '../content/looks';
 import { recolourPixels } from './recolour';
+import { SHARED_FRAME } from './characters';
 
 
 
-/** One cell. Frames are bottom-aligned in the cell, so the feet sit on the anchor point. */
-export const PLAYER_FRAME = { width: 26, height: 40 };
+/**
+ * One cell. Frames are bottom-aligned in the cell, so the feet sit on the anchor point.
+ *
+ * The shared cell; a sheet may be built at its own (`CharacterArt.frame`, `frameOf`), and then is
+ * loaded, cut and drawn at that size. The player's five all use this one.
+ */
+export const PLAYER_FRAME = SHARED_FRAME;
 
 /**
  * The grid the figures were drawn against: a 26x40 frame inside a 32-pixel cell.
@@ -159,6 +165,7 @@ export {
   characterFor,
   everyCharacter,
   everySheet,
+  frameOf,
   type CharacterArt,
   type CharacterId
 } from './characters';
@@ -166,11 +173,16 @@ export {
 const animKey = (character: string, action: string, facing: Facing): string =>
   `${character}-${action}-${facing}`;
 
-export function loadCharacterSheet(scene: Phaser.Scene, key: string, url: string): void {
+export function loadCharacterSheet(
+  scene: Phaser.Scene,
+  key: string,
+  url: string,
+  frame: { width: number; height: number } = PLAYER_FRAME
+): void {
   if (scene.textures.exists(key)) return;
   scene.load.spritesheet(key, url, {
-    frameWidth: PLAYER_FRAME.width,
-    frameHeight: PLAYER_FRAME.height
+    frameWidth: frame.width,
+    frameHeight: frame.height
   });
 }
 
@@ -218,7 +230,12 @@ export function createCharacterAnimations(scene: Phaser.Scene, key: string): voi
  * Falls back to the undyed body if anything is missing, because a stranger in the painter's own
  * colours is a working game and a missing texture is a green box.
  */
-export function dyeSheet(scene: Phaser.Scene, baseKey: string, look: Look): string {
+export function dyeSheet(
+  scene: Phaser.Scene,
+  baseKey: string,
+  look: Look,
+  frame: { width: number; height: number } = PLAYER_FRAME
+): string {
   const key = lookKey(look);
   if (scene.textures.exists(key)) return key;
   if (!scene.textures.exists(baseKey)) return baseKey;
@@ -236,9 +253,9 @@ export function dyeSheet(scene: Phaser.Scene, baseKey: string, look: Look): stri
 
   // The same cells `loadCharacterSheet` cuts, numbered the same way, so every animation and frame
   // index that works on the body works on its dyed copy unchanged.
-  const frames = Math.floor(width / PLAYER_FRAME.width);
+  const frames = Math.floor(width / frame.width);
   for (let i = 0; i < frames; i += 1) {
-    canvas.add(i, 0, i * PLAYER_FRAME.width, 0, PLAYER_FRAME.width, PLAYER_FRAME.height);
+    canvas.add(i, 0, i * frame.width, 0, frame.width, frame.height);
   }
   canvas.refresh();
   createCharacterAnimations(scene, key);

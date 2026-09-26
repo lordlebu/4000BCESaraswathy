@@ -95,7 +95,11 @@ const COVERAGE: Record<string, Coverage> = {
     adapted: ['id', 'name', 'role', 'sex', 'found_at', 'would_settle', 'language', 'knows', 'lines'],
     skipped: [...EDITORIAL,
       // Which canon character this person descends from. Lineage is book material.
-      'descended_from']
+      'descended_from',
+      // Which canon character this person *is*, for the one person who is both -- the Asura-Tainted
+      // Princess. Her history lives on the character, which is book material; what the game meets
+      // is the npc's own name, role and lines.
+      'character']
   },
   'places.regions': {
     // Only `bestiary_region` is read, to recover a species' region from its habitats.

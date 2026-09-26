@@ -1862,6 +1862,111 @@ a `frames` list in the manifest, never a change in the game.
 
 ---
 
+## Asset 9 — two nomad traveller sheets · **delivered 26 September**
+
+> **Both landed and built.** `traveller-nomad` walks the road as every Maru drover now;
+> `traveller-asura` is built and staged until canon gives the asuras a people. What the build found
+> is recorded under "What the delivered sheets measured", below Asset 10.
+
+**Why these two.** Canon now says the Maru dress for the upland in fur and skin over wool and felt
+(`cultures.json`, `dress`), but a Maru drover on the road walks in the drover sheet from Asset 7 —
+an olive tunic and a white headwrap. And the owner's two asura faces (`maru-m-03`, `maru-f-04`) are
+kin of the Maru and need a body of their own before they can be told apart on the road. So: one
+upland nomad, and one asura nomad.
+
+**Same prompt as Asset 7, word for word; substitute only the character line.** Everything Asset 7
+learned still applies — two closed then two open in each row, the same width from behind, one
+strong contrasting block near the top with the clothing under it named and darker, the carried
+thing plain and inside a third of the figure.
+
+4. **`traveller-nomad.png` — a stocky upland nomad in their thirties, in a bright madder-red felt
+   cap, a thick dark-brown goatskin coat worn hair-out to the knee over a grey wool tunic, felt
+   boots, and a short rolled felt blanket strapped across the top of the back, no higher than the
+   head** — the contrast block is the red cap against the dark-brown coat.
+5. **`traveller-asura.png` — a tall horned nomad, two ram's horns curling back from the temples and
+   rising no more than a hand above the head, a turquoise headcloth wound between the horns, a
+   dark-grey fur cloak to the knee over a rust-red wool tunic, bare feet, and a plain staff held
+   close against the body** — the contrast block is the turquoise headcloth; the horns are the
+   silhouette no other traveller has.
+
+**One rule more for the asura, because of the horns.** The builder fits each figure's own bounding
+box to the 26×40 cell, so anything sticking out is paid for by the whole figure shrinking. Keep the
+horns inside the shoulders' width and within a hand of the head, in all four facings, or the asura
+walks smaller than everybody else.
+
+### After the art arrives
+
+1. Save each into `assets/source/` under its name and add a row to `tools/characters.json` —
+   `colours: 12`, and `sit` taking the first frame of each row as the other travellers do.
+2. `npm run build:sprite traveller-nomad`, then `node tools/check-sprite.js` on the result: under 30%
+   speckle and over 1.45 px mean run, or send it back. **Check the profile rows by eye at about
+   18×** — row order is a property of the file in hand.
+3. Add it to `TRAVELLER_ART` in `src/game/characters.ts`, and its skin, cloth and second-garment
+   colours to `assets/looks.json`, chosen by lighting each colour magenta and looking.
+   `test/looks.test.ts` fails if a listed colour is not in the built sheet.
+4. Point the Maru drover at `traveller-nomad` in `COMPANY` (`src/content/travellers.ts`). The asura
+   sheet waits for its people; see `docs/strangers-and-happenings.md`.
+
+## Asset 10 — the Asura-Tainted Princess, her own sheet · **delivered 26 September**
+
+> **Landed and built, and staged** until her story is written: nothing draws her yet.
+
+**Not a traveller from the pool: one named person, and canon has already written her.**
+`character_asura_tainted_princess` in canon is `asura_hybrid`, **immortal and alive** — the child
+of Prince Varunesh and the asura princess Manjalaya — with *"heavy curled ram horns, violet
+gemstones"*, marked by Aryaman with golden constellations in dreams, and living *"in eternal
+isolation on a rocky plateau"*. Because she is immortal she can walk in the game's own era as the
+same person, with no reincarnation to write. The owner's face `maru-f-04` is her.
+
+**Same prompt as Asset 7, word for word; substitute only the character line.** Her sheet is apart
+from Asset 9's because she is apart: one person, recognisable wherever she is met, so her top block
+and silhouette must be unlike any traveller's.
+
+6. **`asura-princess.png` — a young-looking asura princess who is far older than she looks, two heavy
+   ram's horns curling back from the temples and down behind the ears, never rising above the top of
+   the head, a violet jewelled headpiece set between the horns, a deep crimson travelling coat to the
+   ankle trimmed with pale fur over a dark indigo tunic, and bare feet** — the contrast block is the
+   violet headpiece against the dark crimson coat; the down-curling horns are the silhouette no one
+   else has.
+
+**Canon's details that do not survive 26×40, left out on purpose:** the golden constellation marks
+and the individual gemstones. Asset 7's rule — every detail at least three pixels across — turns
+them into speckle. They belong on her portrait, where there is room.
+
+**The horns, in her case, curl down.** Asset 9's rule for the asura nomad holds doubly: the builder
+fits the whole figure to the cell, so horns that rise or spread shrink her. Curling back and down,
+inside the head's height and the shoulders' width, keeps her the same size as everybody else.
+
+### After the art arrives
+
+The same steps as Asset 9 — a row in `tools/characters.json`, `npm run build:sprite asura-princess`,
+`check-sprite.js`, the profile rows checked by eye at 18× — with one difference: she is not added to
+`TRAVELLER_SHEETS` or `assets/looks.json`. A named person is never dealt at random or re-dyed; she is
+drawn only when her own encounters put her on the map. See "The Asura-Tainted Princess" in
+`docs/strangers-and-happenings.md`.
+
+### What the delivered sheets measured
+
+All three came back clean: real alpha, four rows of four, rows in the order the game expects
+(down, up, right, left — checked by eye at 8×), and each row two closed poses then two open. All
+three pass `check-sprite.js`: speckle 21–27% and mean runs of 1.55–1.67 px, against 30% and 1.45.
+
+**The asuras stand taller, at the owner's request, and it is done with more rows of art.** A
+sheet may now carry its own `cell` in `tools/characters.json`; the two asura sheets are 44 rows
+where everybody else is 40, so they stand about a tenth taller at the same whole-number scale and
+stay as sharp as everyone else. A fractional display scale would have made them shimmer.
+
+**Wide figures get a wide cell, or they shrink as they turn.** At the shared 26-wide cell the
+nomad came out 34–35 px tall facing you and 40 in profile — its earflaps and blanket roll make it
+wide, and the builder fits a wide figure by its width. It would have shrunk 15% every time it
+turned toward or away from you, which is the exact fault Asset 7 recorded with the drover. Measured,
+and fixed with cells sized from the figures: the nomad 31 × 40, the asura and the princess
+28 × 44. All three now stand full height in all four facings.
+
+The game reads each sheet's cell through `frameOf` (`src/game/characters.ts`) to load it, cut its
+recoloured copy and draw it; `test/characters.test.ts` fails if a sheet is loaded at a cell other
+than the one it was built at, which would cut every frame half one figure and half the next.
+
 ## Asset 8 — the three faces missing, and they are all travellers · **shipped**
 
 > **All three landed.** `src/ui/portraits/` now holds **seventeen against canon's seventeen** —

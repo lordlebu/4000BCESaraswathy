@@ -74,3 +74,9 @@ dump/
 # Raw place views, on the same footing as the scenes and plates above: 2-4 MB each against the
 # ~200 KB band that ships into src/ui/places/. Six of them cover every place in the game.
 assets/source/places/
+
+# Raw stranger faces and event paintings, on the same footing as the portraits above: 0.3-9 MB each as
+# the image tools returned them, against the ~50 KB `tools/build-plates.js --faces` / `--events`
+# writes into src/ui/ and ships. Keep them on disk; the built file is what the game reads.
+assets/source/faces/
+assets/source/events/

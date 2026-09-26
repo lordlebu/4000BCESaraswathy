@@ -146,6 +146,7 @@ import {
   everyCharacter,
   forgetSheet,
   everySheet,
+  frameOf,
   figureScale,
   travellerScale,
   type CharacterArt,
@@ -323,6 +324,16 @@ const PINCH_THRESHOLD = 60;
  */
 const SKY_STEPS = 48;
 
+/**
+ * How long somebody coming over takes per tile, in milliseconds. Unhurried: a person walking up to
+ * say hello, not a courier. Four tiles at this pace is about a second and a half.
+ */
+const VISITOR_STEP_MS = 360;
+
+/** Where a visitor stands on a tile: centred, feet two pixels up from its bottom edge, as travellers do. */
+const visitorX = (p: Point): number => p.x * TILE_SIZE + TILE_SIZE / 2;
+const visitorY = (p: Point): number => p.y * TILE_SIZE + TILE_SIZE - 2;
+
 /** Keys that move the traveller one tile, by KeyboardEvent.code. */
 const STEP_KEYS: Record<string, [number, number]> = {
   ArrowUp: [0, -1],
@@ -380,6 +391,18 @@ export class WorldScene extends Phaser.Scene {
    * tears down exactly what it should. Nothing about *where* they are lives here -- that is
    * `whereabouts`, which derives it from the seed, the day and the hour and stores nothing.
    */
+  /**
+   * People who walked up to the traveller, standing where they stopped. Reset in `init` with the
+   * travellers, for the same reason: a restart reuses this scene.
+   */
+  private visitors: {
+    npcId: string;
+    sheet: string;
+    sprite: Phaser.GameObjects.Sprite;
+    /** The walk in flight, on the loop's clock: the tiles, and when it set out. Null once arrived. */
+    walk: { route: Point[]; start: number; leg: number } | null;
+  }[] = [];
+
   private travellers: {
     traveller: Traveller;
     /** The circuit's placed stops, ids and all, so a card can name where somebody is headed. */
@@ -600,6 +623,7 @@ export class WorldScene extends Phaser.Scene {
     this.travellerStatesSent = '';
     this.wanderers = [];
     this.wanderersMovedAt = -1;
+    this.visitors = [];
     this.travelled = data.travelled ?? 0;
     this.restedAt = this.travelled;
     this.standingOn = null;
@@ -618,7 +642,7 @@ export class WorldScene extends Phaser.Scene {
     // Every sheet, not just the one being walked. They are 9-12 KB each and 55 KB for the set, so
     // loading them all costs less than the machinery to load one lazily and swap textures later --
     // and it means a character can be changed without a scene restart.
-    for (const art of everySheet()) loadCharacterSheet(this, art.key, art.url);
+    for (const art of everySheet()) loadCharacterSheet(this, art.key, art.url, frameOf(art.key));
     // Every painted animal, not just this map's, for the same reason the character sheets are all
     // loaded: `built` is not assigned until `create`, so `preload` cannot know which map it is
     // about to draw. There are none today and one per quest thereafter, at a few KB each.
@@ -1411,6 +1435,7 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('ride', this.onRide);
     EventBus.onEvent('shelter-built', this.onShelterBuilt);
     EventBus.onEvent('ease', this.onEase);
+    EventBus.onEvent('approach', this.onApproach);
     EventBus.onEvent('set-character', this.onSetCharacter);
 
     // Fires on rotation as well as on a window resize, which is exactly when the zoom and the
@@ -1441,6 +1466,7 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('ride', this.onRide);
       EventBus.offEvent('shelter-built', this.onShelterBuilt);
       EventBus.offEvent('ease', this.onEase);
+      EventBus.offEvent('approach', this.onApproach);
       this.input.off(Phaser.Input.Events.POINTER_WHEEL);
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
       this.input.off(Phaser.Input.Events.POINTER_UP);
@@ -1619,6 +1645,103 @@ export class WorldScene extends Phaser.Scene {
    * which would read as negative fatigue and is the one way this could produce a number
    * `fatigueAt` does not expect.
    */
+  /**
+   * Somebody comes over: appear a little way off, walk up to stand beside the traveller, then say so.
+   *
+   * **A few tiles away, on ground that joins.** Rings of three to six tiles are searched in a fixed
+   * order for a walkable tile with a path in, so the same arrival looks the same on every machine,
+   * and nobody appears across a river they cannot cross. The walk stops one tile short: they stand
+   * beside you, not on you. If nothing joins -- an island of one tile -- they appear beside you.
+   */
+  private onApproach = ({ npcId, sheet }: UiToGame['approach']): void => {
+    const route = this.approachRoute();
+    const frame = frameOf(sheet);
+    const scale = travellerScale(TILE_SIZE);
+    const start = route[0]!;
+    const sprite = this.add
+      .sprite(visitorX(start), visitorY(start), sheet, 0)
+      .setOrigin(0.5, 1)
+      .setDisplaySize(frame.width * scale, frame.height * scale)
+      .setDepth(depthFor(start.y, ROW_SLOT.walker));
+    sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+    sprite.setName(`visitor:${npcId}`);
+    this.visitors.push({ npcId, sheet, sprite, walk: { route, start: this.game.loop.now, leg: -1 } });
+    // A route of one tile is somebody who appears already beside you; `updateVisitors` lands them on
+    // the next frame like anybody else, so there is one way to arrive.
+  };
+
+  /**
+   * Carry everybody who is coming over one frame further, and land them when their time is up.
+   *
+   * **On the loop's clock, not a tween's -- the carriage's lesson, learned twice.** This was a chain
+   * of tweens first, and a tween advances by Phaser's *smoothed* delta, which credits a stalled
+   * frame with no more than the last sane one. Under load a boot on the Narmada draws about a frame a
+   * second, so a 360 ms step took tens of seconds: measured, 28% of the first step done after two and
+   * a half seconds, and `e2e/happenings.spec.ts` gave up on her at fifteen, on a CI runner and on
+   * this machine with four workers. `updateRide` records the same fault on the Lodestone Line.
+   *
+   * `game.loop.now` is the raw frame time, unclamped, so she arrives after her
+   * `VISITOR_STEP_MS` a tile however few frames are drawn -- a slow machine sees her cover more
+   * ground between frames, not take longer. Her walk animation and row sorting follow the leg she
+   * is on.
+   */
+  private updateVisitors(): void {
+    for (const visitor of this.visitors) {
+      const walk = visitor.walk;
+      if (!walk) continue;
+      const { route } = walk;
+      const elapsed = this.game.loop.now - walk.start;
+      const legs = route.length - 1;
+      const leg = Math.floor(elapsed / VISITOR_STEP_MS);
+      if (leg >= legs) {
+        // Arrived. Stand on the last tile, face the traveller, and tell React to open the conversation.
+        const last = route[legs]!;
+        const before = route[legs - 1] ?? last;
+        visitor.sprite.setPosition(visitorX(last), visitorY(last)).setDepth(depthFor(last.y, ROW_SLOT.walker));
+        const facing = facingFromStep(this.at.x - last.x, this.at.y - last.y, facingFromStep(last.x - before.x, last.y - before.y, 'down'));
+        const { key, flipX } = animFor(visitor.sheet, facing, 'idle');
+        visitor.sprite.play(key, true).setFlipX(flipX);
+        visitor.walk = null;
+        EventBus.emitEvent('approached', { npcId: visitor.npcId });
+        continue;
+      }
+      const from = route[leg]!;
+      const to = route[leg + 1]!;
+      const t = (elapsed - leg * VISITOR_STEP_MS) / VISITOR_STEP_MS;
+      visitor.sprite.setPosition(
+        visitorX(from) + (visitorX(to) - visitorX(from)) * t,
+        visitorY(from) + (visitorY(to) - visitorY(from)) * t
+      );
+      if (leg !== walk.leg) {
+        // A new leg: turn to face it, and sort into the row being walked into.
+        walk.leg = leg;
+        const { key, flipX } = animFor(visitor.sheet, facingFromStep(to.x - from.x, to.y - from.y, 'down'), 'walk');
+        visitor.sprite.play(key, true).setFlipX(flipX);
+        visitor.sprite.setDepth(depthFor(Math.max(from.y, to.y), ROW_SLOT.walker));
+      }
+    }
+  }
+
+  /** The tiles somebody walks to come and stand beside the traveller, starting where they appear. */
+  private approachRoute(): Point[] {
+    const { tiles, width, height } = this.world;
+    for (const r of [4, 3, 5, 6]) {
+      for (let dy = -r; dy <= r; dy += 1) {
+        for (let dx = -r; dx <= r; dx += 1) {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+          const from = { x: this.at.x + dx, y: this.at.y + dy };
+          const tile = tiles[from.y]?.[from.x];
+          if (!tile || !isWalkable(tile)) continue;
+          const walked = findPath(tiles, width, height, from, this.at, isWalkable);
+          // `findPath` leaves out where it starts and ends on the goal; stop one tile short of it.
+          if (walked.length < 2 || walked.length > r * 2 + 2) continue;
+          return [from, ...walked.slice(0, -1)];
+        }
+      }
+    }
+    return [this.at];
+  }
+
   private onEase = ({ by }: UiToGame['ease']): void => {
     this.restedAt = easedMark(this.travelled, this.restedAt, by);
     // Same reason as `onShelterBuilt`: the fatigue line is on screen and has just stopped being
@@ -1891,11 +2014,15 @@ export class WorldScene extends Phaser.Scene {
       // Re-dyed to this person's look when the body has one, so three painted strangers read as
       // many. Only when the body is the one the look was chosen for: a look names the colours of
       // one sheet, and applied to the player-avoidance fallback it would match nothing.
-      const key = traveller.look && traveller.look.body === body ? dyeSheet(this, body, traveller.look) : body;
+      // The cell the body was built at: a wide or tall figure has its own, so it is cut and drawn at
+      // that size rather than squeezed into the shared 26x40. Feet stay on the anchor either way.
+      const frame = frameOf(body);
+      const key =
+        traveller.look && traveller.look.body === body ? dyeSheet(this, body, traveller.look, frame) : body;
       const sprite = this.add
         .sprite(0, 0, key, 0)
         .setOrigin(0.5, 1)
-        .setDisplaySize(PLAYER_FRAME.width * scale, PLAYER_FRAME.height * scale);
+        .setDisplaySize(frame.width * scale, frame.height * scale);
       sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
       sprite.setName(`traveller:${traveller.id}`);
       this.travellers.push({ traveller, circuit, stops, sprite });
@@ -1940,6 +2067,18 @@ export class WorldScene extends Phaser.Scene {
       },
       cell: TILE_SIZE * this.cameras.main.zoom
     });
+
+    // Who has walked up, and where they stopped, for `e2e/happenings.spec.ts`.
+    (window as unknown as { __visitors?: () => unknown[] }).__visitors = () =>
+      this.visitors.map(({ npcId, sheet, sprite }) => ({
+        npcId,
+        sheet,
+        visible: sprite.visible,
+        x: Math.floor(sprite.x / TILE_SIZE),
+        y: Math.floor((sprite.y - 1) / TILE_SIZE),
+        player: { x: this.at.x, y: this.at.y },
+        h: Math.round(sprite.displayHeight)
+      }));
 
     // **Exposed for the browser suite, which is the only thing that can see a Phaser sprite.**
     // This codebase's signature fault is a layer that is built, tested and connected to nothing --
@@ -2243,6 +2382,7 @@ export class WorldScene extends Phaser.Scene {
     this.updatePinch();
     this.updateSway();
     this.updateRide();
+    this.updateVisitors();
 
     if (this.moving) return;
 
