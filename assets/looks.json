@@ -24,6 +24,13 @@
     "re-dyed: a stranger wearing a recoloured Varuna is still Varuna."
   ],
   "bodies": {
+    "traveller-asura": {
+      "headwear": "wrap",
+      "skin": ["#fcb375", "#fcab6b", "#fcb476"],
+      "cloth": ["#0193ac", "#027688", "#018da6"],
+      "second": ["#6b5649", "#58453a", "#57453b"],
+      "face": { "headwear": "cloth", "shoulders": "second" }
+    },
     "traveller-carrier": {
       "headwear": "wrap",
       "skin": ["#dd793d", "#e17d41", "#e17c3e", "#dc793d", "#e17c3f", "#e48344"],

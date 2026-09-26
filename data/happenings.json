@@ -357,7 +357,8 @@
       "gifts": {
         "harappan": "material_delta_rice",
         "kia": "material_reed_fibre",
-        "maru": "material_goat_hair"
+        "maru": "material_goat_hair",
+        "asura_hybrid": "material_shilajit"
       },
       "slots": [
         "name",

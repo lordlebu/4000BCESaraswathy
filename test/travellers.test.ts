@@ -47,7 +47,7 @@ describe('canon already knows who travels', () => {
     expect(terke?.foundAt).toContain('poi_vedda_ford');
   });
 
-  it('puts canon’s people first and two strangers beside them on every map', () => {
+  it('puts canon’s people first and two strangers beside them on every map, and kin beside those', () => {
     for (const map of fieldMaps) {
       const roster = travellersOn(map.id);
       const named = roster.filter((t) => t.npcId !== null);
@@ -56,7 +56,11 @@ describe('canon already knows who travels', () => {
       expect(named.length, `${map.id}: too many named on the road`).toBeLessThanOrEqual(TRAVELLERS_PER_MAP);
       // **Every map, not only the one canon left room on.** Strangers used to fill what canon left
       // empty, which put them on the Narmada alone and every stranger event with them.
-      expect(company.length, `${map.id}: no road company`).toBe(ROAD_COMPANY_PER_MAP);
+      // Kin come on top: the dolmen-keeper walks wherever the Maru drover does, and nowhere else.
+      const kin = company.filter((t) => t.id === 'company_keeper');
+      const drover = company.some((t) => t.id === 'company_drover');
+      expect(kin.length, `${map.id}: the dolmen-keeper walks exactly where the drover does`).toBe(drover ? 1 : 0);
+      expect(company.length - kin.length, `${map.id}: no road company`).toBe(ROAD_COMPANY_PER_MAP);
 
       // **Canon's own circuit-walkers come first and road company only fills what is left.** A map
       // with people who genuinely move must get those people; only a map without enough of them
@@ -279,12 +283,14 @@ describe('travellers stop wearing the player\'s face', () => {
     const body: Record<string, string> = {
       company_carrier: 'traveller-carrier',
       company_drover: 'traveller-nomad',
-      company_pilgrim: 'traveller-pilgrim'
+      company_pilgrim: 'traveller-pilgrim',
+      company_keeper: 'traveller-asura'
     };
     const culture: Record<string, string> = {
       company_carrier: 'harappan',
       company_drover: 'maru',
-      company_pilgrim: 'kia'
+      company_pilgrim: 'kia',
+      company_keeper: 'asura_hybrid'
     };
     for (const map of fieldMaps) {
       for (const t of travellersOn(map.id).filter((x) => x.npcId === null)) {
@@ -296,6 +302,9 @@ describe('travellers stop wearing the player\'s face', () => {
     const second = (id: string) => travellersOn(id).filter((t) => t.npcId === null).map((t) => t.id);
     expect(second('field_map_narmada')).toContain('company_drover');
     expect(second('field_map_lothal')).toContain('company_pilgrim');
+    // The Violet-Horned Clan walk the basalt plateau with the Maru, where their elder stands.
+    expect(second('field_map_narmada')).toContain('company_keeper');
+    expect(second('field_map_lothal')).not.toContain('company_keeper');
     // And loads go down every road.
     for (const map of fieldMaps) expect(second(map.id)).toContain('company_carrier');
   });

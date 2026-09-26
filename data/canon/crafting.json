@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.31.0",
+  "canon_version": "2.32.0",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -2604,6 +2604,22 @@
       ],
       "notes": "A shed oiled soft and cut into a shoulder cloak, the pattern running unbroken from collar to hem because it came off one animal in one piece. It sheds rain and it is warm out of all proportion to its weight.\n\nIt tells anyone who sees it that you found a Vasuki shed and knew what to do with it, and it is a better night out of doors.",
       "source_index": 80
+    },
+    {
+      "id": "item_root_tea",
+      "type": "item",
+      "name": "Root tea",
+      "kind": "physic",
+      "affords": [
+        "heal",
+        "eat"
+      ],
+      "materials": [
+        "material_ginger_root",
+        "material_ashwagandha_root"
+      ],
+      "notes": "Ginger and ashwagandha root cooked slow, never boiled hard. The Violet-Horned Clan brew it in copper pots on their basalt terraces, with turmeric and a root the plateau does not grow; this is the traveller's version, from what can be gathered. For tiredness, which canon distinguishes from illness.",
+      "source_index": 81
     }
   ],
   "processes": [
@@ -4945,6 +4961,32 @@
         "harappan"
       ],
       "source_index": 88
+    },
+    {
+      "id": "recipe_root_tea",
+      "type": "recipe",
+      "name": "Cooking root tea",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "material": "material_ginger_root",
+          "count": 1
+        },
+        {
+          "material": "material_ashwagandha_root",
+          "count": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_root_tea",
+          "count": 2
+        }
+      ],
+      "taught_by": [
+        "npc_asura_princess"
+      ],
+      "source_index": 89
     }
   ],
   "vehicles": [
@@ -5522,6 +5564,10 @@
       "item_serpent_mantle": [
         "mark",
         "shelter"
+      ],
+      "item_root_tea": [
+        "heal",
+        "eat"
       ]
     }
   }

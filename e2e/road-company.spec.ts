@@ -53,10 +53,11 @@ test('the map carries other people, and they are drawn from the built sheets', a
   const seen = await bootAt(page, '12');
 
   expect(seen.length, 'nobody is travelling on this map').toBeGreaterThan(0);
-  // Three of canon's people at most, and two strangers beside them on every map --
-  // `TRAVELLERS_PER_MAP` plus `ROAD_COMPANY_PER_MAP`. Written out rather than imported, because a
-  // spec that imports `src/content/` never loads (see the session-craft skill).
-  expect(seen.length, 'more travellers than the roster allows').toBeLessThanOrEqual(5);
+  // Three of canon's people at most, two strangers beside them on every map, and one kin where the
+  // Maru walk -- `TRAVELLERS_PER_MAP` plus `ROAD_COMPANY_PER_MAP` plus the dolmen-keeper. Written out
+  // rather than imported, because a spec that imports `src/content/` never loads (see the
+  // session-craft skill).
+  expect(seen.length, 'more travellers than the roster allows').toBeLessThanOrEqual(6);
   expect(seen.filter((t) => !t.named).length, 'no road company on this map').toBeGreaterThan(0);
   // Canon supplies the circuits, so at least one of them is a person canon wrote rather than road
   // company the game invented.
@@ -123,6 +124,23 @@ test('a map change leaves the last map’s people behind', async ({ page }) => {
 
   const after = await read(page);
   expect(after, 'no travellers after travelling').not.toBeNull();
-  expect(after!.length, `${before.length} before, ${after!.length} after`).toBeLessThanOrEqual(5);
+  expect(after!.length, `${before.length} before, ${after!.length} after`).toBeLessThanOrEqual(6);
   expect(new Set(after!.map((t) => t.id)).size, 'a traveller is listed twice').toBe(after!.length);
+});
+
+test('a dolmen-keeper walks the Narmada beside the Maru, a head taller', async ({ page }) => {
+  // **The Violet-Horned Clan, on the road.** `test/travellers.test.ts` proves the roster puts a
+  // dolmen-keeper wherever the Maru drover walks; this proves the scene draws them, in their own
+  // taller sheet, re-dyed like any stranger. The asura sheet was built and staged for a whole
+  // round with nothing drawing it, which is the fault this exists to catch.
+  await page.goto('/?seed=road-company&hour=12&map=field_map_narmada&door=open');
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await page.waitForTimeout(1500);
+  const seen = (await read(page))!;
+  const keeper = seen.find((t) => t.id === 'company_keeper');
+  expect(keeper, `no dolmen-keeper among ${seen.map((t) => t.id).join(', ')}`).toBeDefined();
+  expect(keeper!.sheet, 'the keeper is not drawn from the asura sheet').toContain('traveller-asura');
+  const carrier = seen.find((t) => t.id === 'company_carrier');
+  expect(carrier, 'no carrier to measure against').toBeDefined();
+  expect(keeper!.h, 'the keeper is not taller than the carrier').toBeGreaterThan(carrier!.h);
 });
