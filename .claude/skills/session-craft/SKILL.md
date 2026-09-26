@@ -303,6 +303,28 @@ echo '{"tool_name":"Bash","tool_input":{"command":"git push"}}' | .claude/hooks/
 
 ## Taking art in
 
+### Asking for art: ready-to-copy prompts on the plan page
+
+**The owner's standard, 27 September 2026: every art ask arrives as a prompt card on the published
+plan page**, not as prose in a reply. The Strangers and Happenings page
+(<https://claude.ai/artifact/5pjrkgx3vwTQ1ZTpyFV3B6>) is the model; its `.face-card` markup, the
+`Copy prompt` button and the `data-copy` script at the foot of the page are the pattern to reuse.
+
+- **One card per file**: the exact file name, one line on what it is and why the game needs it,
+  `Save as assets/source/...`, a *Copy prompt* button, and the whole prompt in a `<details>`.
+- **The same prompt goes into the repo's brief** -- `docs/event-prompts.md`, `docs/face-prompts.md`,
+  `docs/art-brief.md` -- written by **one script** that renders both, so the page and the brief
+  cannot differ. `test/docs.test.ts` holds a brief to the kinds the game has.
+- **A prompt is the kind's shared style block word for word, then its frame paragraph, then one
+  `Subject:` line.** Only the subject changes between cards; that is what keeps a set coherent.
+- **Name the file exactly as the game looks it up**, underscores and all. The builder once
+  hyphenated face and event names, and a painting saved under the right name built under a name
+  nothing drew (`test/faces.test.ts`, `test/events.test.ts` hold it now).
+- **When it arrives** (the owner drops files in `assets/source/dump/`): reject only a technical
+  fault -- a frame, a torn edge, text, a broken build -- never a style choice; crop and record the
+  crop command; build; add to `src/ui/art-kept.json`; and assert in a browser test that the game
+  draws *that* file, not a fallback.
+
 ### Never ask a painter for a sequence
 
 A sheet of "six cells, the blades fifteen degrees apart" came back with the tower **pixel-identical

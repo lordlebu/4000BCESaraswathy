@@ -235,6 +235,10 @@ The card finds a painting by the happening's id, underscores and all (the builde
 this change), and borrows the night's scene or shows a blank band while one is missing. They are
 drafts in canon until the owner approves them, so paint once the words have settled.
 
+**Arrived 27 September 2026, all three**, built as `src/ui/events/happening_*.png` with their
+underscores. No frame, edge or text to crop. The card draws them by id, and
+`e2e/happenings.spec.ts` checks *Where you stop* is drawn from its own painting.
+
 #### `happening_tower_standing` — The tower, standing
 
 Lothal, at night, once the tower's collapse has been seen. Save as `assets/source/events/happening_tower_standing.png`.
