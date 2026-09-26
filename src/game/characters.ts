@@ -20,6 +20,7 @@ import carrierUrl from '../../assets/traveller-carrier-overworld.png';
 import droverUrl from '../../assets/traveller-drover-overworld.png';
 import pilgrimUrl from '../../assets/traveller-pilgrim-overworld.png';
 import nomadUrl from '../../assets/traveller-nomad-overworld.png';
+import asuraUrl from '../../assets/traveller-asura-overworld.png';
 import princessUrl from '../../assets/asura-princess-overworld.png';
 
 export interface CharacterArt {
@@ -86,6 +87,14 @@ export const TRAVELLER_ART = {
     name: 'A nomad',
     url: nomadUrl,
     frame: { width: 31, height: 40 }
+  },
+  // Asset 9's horned nomad, for the Violet-Horned Clan who walk beside the Maru. A head taller than
+  // everybody, built with more rows of art rather than scaled -- see `frame`.
+  'traveller-asura': {
+    key: 'traveller-asura',
+    name: 'A dolmen-keeper',
+    url: asuraUrl,
+    frame: { width: 28, height: 44 }
   }
 } as const satisfies Record<string, CharacterArt>;
 

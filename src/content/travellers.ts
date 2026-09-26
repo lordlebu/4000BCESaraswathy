@@ -194,23 +194,28 @@ function hashOf(text: string): number {
 }
 
 /**
- * How many strangers walk each map, on top of canon's own travellers.
+ * How many strangers walk each map, on top of canon's own travellers -- before kin.
  *
  * **Outside the cap, and that is the decision rather than a slip.** Road company used to fill only
  * what canon left empty, so three of four maps had none and every woven event about a stranger
  * could only happen on the Narmada. They now walk every map beside canon's people, never instead of
  * them: the cap on named travellers is untouched.
+ *
+ * A people who walk `beside` another come on top of this, wherever that people does: the
+ * Violet-Horned Clan with the Maru. See `companyOn`.
  */
 export const ROAD_COMPANY_PER_MAP = 2;
 
 /**
  * Which of canon's peoples a stranger belongs to. Canon's own culture ids, never a second list.
  *
- * Only the three living on these maps in the game's era, which `docs/strangers-and-happenings.md`
- * surveys: the delta's Harappan settlers and Kia clan, and the Maru herders of the plateau and the
- * nomad ground. The Jharwa and the Vedda are history here, and a stranger is somebody alive.
+ * Only those living on these maps in the game's era, which `docs/strangers-and-happenings.md`
+ * surveys: the delta's Harappan settlers and Kia clan, the Maru herders of the plateau and the
+ * nomad ground, and the Violet-Horned Clan (`asura_hybrid`), the asura-blooded people canon gave an
+ * Epoch 5 life of their own, who trade and walk with the Maru. The Jharwa and the Vedda are history
+ * here, and a stranger is somebody alive.
  */
-export const STRANGER_CULTURES = ['harappan', 'kia', 'maru'] as const;
+export const STRANGER_CULTURES = ['harappan', 'kia', 'maru', 'asura_hybrid'] as const;
 export type StrangerCulture = (typeof STRANGER_CULTURES)[number];
 
 /**
@@ -232,12 +237,24 @@ const COMPANY: readonly {
   role: string;
   body: string;
   culture: StrangerCulture;
+  /** Walks wherever this people's stranger does, on top of the two. Absent for the two themselves. */
+  beside?: StrangerCulture;
 }[] = [
   { id: 'company_carrier', name: 'A carrier', role: 'carrier, with a loaded back', body: 'traveller-carrier', culture: 'harappan' },
   // The upland nomad's body, fur and skin as canon dresses the Maru -- Asset 9. The drover sheet
   // (olive tunic, white headwrap) stays for the named travellers `sheetFor` deals it to.
   { id: 'company_drover', name: 'A drover', role: 'drover, behind six animals', body: 'traveller-nomad', culture: 'maru' },
-  { id: 'company_pilgrim', name: 'A pilgrim', role: 'pilgrim, tending the wayside', body: 'traveller-pilgrim', culture: 'kia' }
+  { id: 'company_pilgrim', name: 'A pilgrim', role: 'pilgrim, tending the wayside', body: 'traveller-pilgrim', culture: 'kia' },
+  // The Violet-Horned Clan, who keep the fallen dolmens with bone flutes and bells, and trade with the
+  // Maru on the basalt plateau (canon's `asura_hybrid` note). Kin who walk beside the drover.
+  {
+    id: 'company_keeper',
+    name: 'A dolmen-keeper',
+    role: 'dolmen-keeper, a bone flute at the belt',
+    body: 'traveller-asura',
+    culture: 'asura_hybrid',
+    beside: 'maru'
+  }
 ];
 
 /**
@@ -292,6 +309,10 @@ const CULTURE_OF_LANGUAGE: Record<string, StrangerCulture> = { kia: 'kia', maru:
  * pilgrim and the Maru drover canon's own people on this map mostly are -- counted off the language
  * each named person on the map speaks -- so the Narmada's herders get a drover and the delta's
  * fishers get a pilgrim. A tie goes to the pilgrim, by the order above, not by chance.
+ *
+ * **Then kin.** A people who walk `beside` one already chosen come too: the dolmen-keeper wherever
+ * the Maru drover walks. Canon's asura-blooded clan has no language of its own to count, so it is
+ * placed by whom it travels with -- which is also what canon says of it.
  */
 function companyOn(fieldMapId: string): typeof COMPANY {
   const here = new Set(fieldMap(fieldMapId)?.pointsOfInterest ?? []);
@@ -302,10 +323,12 @@ function companyOn(fieldMapId: string): typeof COMPANY {
     if (culture) counts[culture] = (counts[culture] ?? 0) + 1;
   }
   const carrier = COMPANY[0]!;
-  const others = COMPANY.slice(1).sort(
-    (a, b) => (counts[b.culture] ?? 0) - (counts[a.culture] ?? 0) || (a.id === 'company_pilgrim' ? -1 : 1)
-  );
-  return [carrier, ...others].slice(0, ROAD_COMPANY_PER_MAP);
+  const others = COMPANY.slice(1)
+    .filter((c) => !c.beside)
+    .sort((a, b) => (counts[b.culture] ?? 0) - (counts[a.culture] ?? 0) || (a.id === 'company_pilgrim' ? -1 : 1));
+  const walking = [carrier, ...others].slice(0, ROAD_COMPANY_PER_MAP);
+  const kin = COMPANY.filter((c) => c.beside && walking.some((w) => w.culture === c.beside));
+  return [...walking, ...kin];
 }
 
 /**

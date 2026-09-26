@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.31.0",
+  "canon_version": "2.32.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -1199,6 +1199,9 @@
       ],
       "epochs": [
         "epoch_post_cataclysm"
+      ],
+      "helps": [
+        "npc_asura_princess"
       ]
     },
     {

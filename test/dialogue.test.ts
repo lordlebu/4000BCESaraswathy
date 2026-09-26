@@ -235,7 +235,7 @@ describe('a line with a price', () => {
   });
 });
 
-describe('the two gifts canon actually authors', () => {
+describe('the gifts canon actually authors', () => {
   it('are reachable only by carrying the thing', () => {
     for (const person of allNpcs()) {
       for (const l of person.lines) {
@@ -247,8 +247,15 @@ describe('the two gifts canon actually authors', () => {
     }
   });
 
-  it('are exactly two, so one offer slot per person is enough', () => {
+  /**
+   * The panel has one offer slot per person. Uma's, Pell's, and the princess's Fourteen are each a
+   * person's only price; a second priced line on one person would need a second slot.
+   */
+  it('are at most one per person, so one offer slot per person is enough', () => {
+    for (const person of allNpcs()) {
+      expect(person.lines.filter((l) => l.costs).length, person.name).toBeLessThanOrEqual(1);
+    }
     const n = allNpcs().reduce((c, p) => c + p.lines.filter((l) => l.costs).length, 0);
-    expect(n).toBe(2);
+    expect(n).toBe(3);
   });
 });
