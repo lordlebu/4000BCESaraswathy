@@ -8,7 +8,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 
-type Happen = (occasion: string, kind?: string, shelter?: string) => boolean;
+type Happen = (occasion: string, kind?: string, shelter?: string, poiId?: string) => boolean;
 
 async function boot(page: Page) {
   // Mid-morning, so road company are out on the road rather than stopped at a place.
@@ -31,6 +31,39 @@ async function happen(page: Page, occasion: string, kind: string, shelter?: stri
 }
 
 const card = (page: Page) => page.locator('.activity-card');
+
+/**
+ * **A written happening, from canon, through the same card.** Arriving at the Caravan Ground asks the
+ * arrival question with that point; *Where you stop* is canon's `happening_where_you_stop`, narrowed
+ * to it, and a written happening wins over a woven one whenever it can happen -- no ration.
+ */
+test('a written happening opens on arriving where it belongs, and happens once', async ({ page }) => {
+  await page.goto('?seed=happenings&map=field_map_dwarka&door=open');
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() =>
+          (window as unknown as { __happen?: Happen }).__happen?.('arriving', undefined, undefined, 'poi_caravan_camp') ?? false
+        ),
+      { timeout: 20_000 }
+    )
+    .toBe(true);
+
+  await expect(card(page).locator('h2')).toHaveText('Where you stop');
+  await expect(card(page)).toContainText('This is where you stop, she says.');
+  await card(page).getByRole('button', { name: 'Ask who stopped here first' }).click();
+  await expect(card(page)).toContainText("Her grandfather's caravan stopped here");
+  await card(page).getByRole('button', { name: 'Go on' }).click();
+  await expect(card(page)).toBeHidden();
+
+  // Once. Arriving again finds nothing written, so a woven arrival may open or nothing may -- but
+  // never *Where you stop* a second time.
+  const again = await page.evaluate(
+    () => (window as unknown as { __happen?: Happen }).__happen?.('arriving', undefined, undefined, 'poi_caravan_camp') ?? false
+  );
+  if (again) await expect(card(page).locator('h2')).not.toHaveText('Where you stop');
+});
 
 test('a woven event opens, is chosen, and closes', async ({ page }) => {
   await boot(page);

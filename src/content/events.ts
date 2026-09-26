@@ -18,6 +18,7 @@
 //
 // Pure and free of React and Phaser, like the rest of `content/`. No clock: the caller says when.
 
+import placesBundle from '../../data/canon/places.json';
 import type { Look } from './looks';
 import type { StrangerCulture } from './travellers';
 
@@ -49,6 +50,13 @@ export interface Conditions {
   fromDay: number;
   /** Discovery or word ids the player must already hold. Empty means no requirement. */
   requires: string[];
+  /**
+   * Points of interest an arrival belongs to. Empty means anywhere on the map.
+   *
+   * Canon's `at`: *Where you stop* happens on reaching the Caravan Ground, not on reaching any
+   * point of North Dwarka. Only an arrival has a point, so only an arrival is narrowed by it.
+   */
+  pois: string[];
 }
 
 /**
@@ -153,35 +161,73 @@ export interface GameEvent {
   stranger?: EventStranger;
 }
 
+/** A written happening as canon exports it, in `places.json` beside the people standing there. */
+interface RawHappening {
+  id: string;
+  title: string;
+  occasion: Occasion;
+  field_maps?: string[];
+  at?: string[];
+  requires?: string[];
+  prose: string;
+  choices: { label: string; line: string; needs?: string[]; grants?: string[] }[];
+}
+
 /**
- * Every event there is.
+ * One of canon's happenings, as the game's event.
  *
- * **Empty, and that is a real state rather than an oversight.** The content is a later piece of
- * work and the user has said so; what ships now is the shape. `eventsFor` returns nothing, the
- * night card is unchanged, and no player sees a difference -- which is exactly what a framework
- * with no content should do.
+ * **Canon says where, on what occasion, and what must have been seen; the game says the rest.**
+ * `fromDay` is zero and `shelter` empty because canon never speaks of days or of the game's kinds
+ * of night -- the same line `renews` draws. Once, because a written scene is a scene and not
+ * weather: the woven layer is what comes round again.
  *
- * It is still wired to a caller, because a framework with no caller is this codebase's signature
- * fault and `journey.ts` names three instances of it at the top of its own file. The night asks
- * this question every time somebody sleeps; today the answer is always "nothing happened".
- *
- * Authored here rather than in `data/` for now, deliberately. An event carries prose, and every
- * other body of prose in this game lives in canon -- so when these stop being placeholders the
- * question is whether they are canon's (a thing that is true of the world) or the game's (a thing
- * that happens to one player). Dreams and encounters are arguably the first; a find on the road is
- * the second. Putting them in a TypeScript array keeps that question open and cheap to answer,
- * where a JSON file in `data/` would look like a decision that had been made.
+ * A choice's id is its position, `c0`, `c1`: canon's choices have no ids, and nothing outside this
+ * event ever names one.
  */
-export const events: readonly GameEvent[] = [];
+export function fromCanon(h: RawHappening): GameEvent {
+  return {
+    id: h.id,
+    title: h.title,
+    occasion: h.occasion,
+    conditions: anyConditions({
+      fieldMaps: h.field_maps ?? [],
+      pois: h.at ?? [],
+      requires: h.requires ?? []
+    }),
+    prose: h.prose,
+    art: h.id,
+    choices: h.choices.map((c, i) => ({
+      id: `c${i}`,
+      label: c.label,
+      needs: c.needs ?? [],
+      line: c.line,
+      grants: c.grants ?? []
+    })),
+    once: true
+  };
+}
+
+/**
+ * Every written event there is: canon's happenings.
+ *
+ * **Canon's, because they are true of the world** -- a dream the delta has, a herder on the terrace
+ * wall, what the Caravan Ground is doing when you arrive. That was the open question this array
+ * used to keep cheap to answer (Q3 in `docs/strangers-and-happenings.md`), and the owner settled it:
+ * what is true of the world is canon's, and what the game weaves from a tile stays here in
+ * `happenings.ts`. So these come from the bundle like people and places do, and a new one is a
+ * canon entity and a re-export, never an edit here.
+ *
+ * It was empty for a long time on purpose -- the framework shipped before its content, and was
+ * wired to a caller the whole while, so the first entry needed no feature.
+ */
+export const events: readonly GameEvent[] = (
+  (placesBundle as { happenings?: RawHappening[] }).happenings ?? []
+).map(fromCanon);
 
 /** Sensible blanks, so an author writes only what is unusual about their event. */
-export const anyConditions = (over: Partial<Conditions> = {}): Conditions => ({
-  shelter: [],
-  fieldMaps: [],
-  fromDay: 0,
-  requires: [],
-  ...over
-});
+export function anyConditions(over: Partial<Conditions> = {}): Conditions {
+  return { shelter: [], fieldMaps: [], fromDay: 0, requires: [], pois: [], ...over };
+}
 
 /** What the caller knows when it asks whether anything is happening. */
 export interface Circumstance {
@@ -200,14 +246,17 @@ export interface Circumstance {
   last?: Readonly<Record<string, number>>;
   /** Flags earlier choices left behind. Absent means none. */
   flags?: readonly string[];
+  /** The point of interest just reached, for an arrival. Absent or null anywhere else. */
+  poiId?: string | null;
 }
 
 /** Whether this event can happen, given where and when the player is. */
 export function canHappen(event: GameEvent, now: Circumstance): boolean {
   if (event.occasion !== now.occasion) return false;
   if (event.once && now.seen.includes(event.id)) return false;
-  const { shelter, fieldMaps, fromDay, requires } = event.conditions;
+  const { shelter, fieldMaps, fromDay, requires, pois } = event.conditions;
   if (now.day < fromDay) return false;
+  if (pois.length > 0 && (!now.poiId || !pois.includes(now.poiId))) return false;
   if (shelter.length > 0 && (now.shelter === null || !shelter.includes(now.shelter))) return false;
   if (fieldMaps.length > 0 && !fieldMaps.includes(now.fieldMapId)) return false;
   return requires.every((id) => now.holds.includes(id));

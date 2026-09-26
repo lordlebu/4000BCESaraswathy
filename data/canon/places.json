@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.30.0",
+  "canon_version": "2.31.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -42,8 +42,7 @@
           37,
           39
         ]
-      ],
-      "notes": "Stony ranges. Site of Mask Family schism, Jharwa massacre, and hidden sanctuary of Vara-Ma/Orek/Thren."
+      ]
     },
     {
       "id": "region_ganges_lava_sea",
@@ -92,8 +91,7 @@
       ],
       "landmarks": [
         "Ganges Lava Lake"
-      ],
-      "notes": "One of the most extreme magmatic zones in the setting: active volcanic rifts that cool and solidify into vast jagged black basalt plains and lava fields. Extreme zone where magma meets ocean. Deep-sea vent lineages were pushed to the surface here and evolved obsidian carapaces that withstand direct magma exposure; extremophile gastropods fuse basalt and metallic ore into armoured shells along the lake shores. The fauna are heavily armoured and heat-resistant, often fused with volcanic minerals. The bestiary groups the magmatic and glacial extremes together, with underworld portals at the far end. Species here default to rare."
+      ]
     },
     {
       "id": "region_gedrosian_desert",
@@ -131,8 +129,7 @@
           0,
           19
         ]
-      ],
-      "notes": "Arid interior, and young: the harbour, the fossil channel and the caravan road all date the water's departure to within cultural memory rather than to geological time. Forty authored species, all desert-placeable."
+      ]
     },
     {
       "id": "region_narmada_plateau",
@@ -176,8 +173,7 @@
       ],
       "landmarks": [
         "Narmada University"
-      ],
-      "notes": "Volcanic highlands. Site of academic culture in later eras and source of Narmada Man blessing."
+      ]
     },
     {
       "id": "region_saraswati_delta",
@@ -227,8 +223,7 @@
         "wetlands",
         "marshes",
         "mangroves"
-      ],
-      "notes": "Primary setting of Civilization Dawn / Lothal Era. Home to Harappan settlers and Kia clan."
+      ]
     },
     {
       "id": "region_shattered_sea",
@@ -279,8 +274,7 @@
         "Tamralinga Port",
         "Cognitavi bird-fortresses",
         "Mappa Mundi rainforests"
-      ],
-      "notes": "Marine and island belt east of the delta, grouped in the bestiary with the deep rainforests of Mappa Mundi. The Cognitavi claim the volatile sea and build their own bird-fortresses here, holding integrated nests on the coral docks of Tamralinga Port; Tuli seafarers of the Vanga Maritime League work the pearl routes under Cognitavi guidance. The Mappa Mundi rainforests are the refuge of the displaced Silvanus and Sylvian lineages after the Vanara cataclysm."
+      ]
     },
     {
       "id": "region_tethys_sky_routes",
@@ -298,7 +292,6 @@
         "Cognitavi cloud-monasteries",
         "inverted waterfalls"
       ],
-      "notes": "Sky-oases above the Tethys Sea. The islands are held up by lodestone cores of hyper-magnetised, Permian-irradiated ore that repels the Earth's field into localised anti-gravity bubbles, a legacy of the shattering of Gondwana; warped gravity on the undersides sends rainwater overflowing upward as inverted waterfalls. Home to the bark-skinned Vyom-Yakshis, the Cognitavi Cloud-Hermits and their monasteries, and traded by orca-blimp mariners.",
       "biomes_note": "Deliberately empty. Sky species have no equivalent among the ten ground biomes, so everything filed here is held as lore and never placed on a tile."
     }
   ],
@@ -339,7 +332,6 @@
         "field_map_narmada"
       ],
       "arrival": "The ranges come down to the water in steps of grey stone, and stop. Where they stop there is a rail-head, a shed, and a line of iron running out over the strait on trestles of pale timber. Two islands hang above the water along it, holding themselves up out of nothing anybody here will explain, and the rain that falls on their undersides falls upward. The far shore is a green smudge that is not Jambhudweepa. People cross. Nobody says much about the islands.",
-      "notes": "Fourth field map, and the first that is a *crossing* rather than a country -- Lothal is a delta, Narmada a plateau, Dwarka a basin, and this is four bands walked in sequence from one shore to another. The Shattered Sea narrows here, which is the whole reason a line was built at this point and nowhere else on that coast; Tamralinga keeps its ships and its pearl routes further east.\n\nThe thesis is the one thing Aravali has that no other map does: this is where the Mask Family broke. Canon puts the schism, the Jharwa massacre and the hidden sanctuary in these ranges. None of that is on stage -- Sira, Thren and Meera are four hundred years of backstory and a map is one afternoon -- so it reaches the player as *traces*, the way Lothal already carries the same family. The ground remembers something the people here have agreed not to say.\n\nOn the palette: The two sky biomes are declared here and **stamped as patches after classification**, not left to the classifier -- an island is a place, not a climate, exactly as `snow` is on the Narmada. Declaring them anyway is what the Narmada does with `snow` and it is what makes the species and materials that live there reachable: `check_playability` reads this list. `plains` and `coast` are in the palette because the region's own note asks for a cheap biome -- hills, forest and mountains are all travel cost 2 or worse, and this map is about walking a long way in one direction.\n\n**No `settlement`, and that is the one thing this palette says by omission.** Every other field map has a town in it; this one has a rail-head, a ford, a nomad ground and a workshop nobody is supposed to find. The people here are passing through -- that is the whole brief -- and the moment `settlement` appeared in this list the game grew a ruined city in the far south that nothing in canon had ever mentioned, and named it.\n\nThe camp is not an exception to this. A camp is a *place*, stamped where canon puts it, and it does not need the country around it to be described as urban before somebody can pitch a tent on it.\n\n**`proportion: portrait`.** This map is a sequence rather than a country you wander: shore, water, islands, far shore, walked in that order. Square, it could not be any of those things properly at once -- the sea had to be wide enough to read as a sea across the full width, which left twelve rows of shore at each end with no room for the hills The Quiet Atelier hides in, and put the two islands close enough together that they read as one shape with a nick in it. Tall, the crossing is long and the country stays narrow, which is what a strait is.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -398,7 +390,6 @@
         "storm": 4
       },
       "arrival": "Half of Dwarka is under the dust and the half that is not has been rebuilt twice on top of itself. The sea left inside living memory and nobody here treats that as a disaster or the gate as a wonder. Both are simply conditions, like weather, and the whole city is still arranged around a shoreline that stopped arriving.",
-      "notes": "Third field map, and the one where the method is tested: local knowledge is not merely useful here, it is right, and the academy's three tidy explanations are all wrong. Gives `crosses_at` a consumer without making the crossing species placeable -- you find what they left, never the animal.\n\n**Dried out deliberately.** Dwarka was an island city; the Shattering took the sea away rather than the land, so it is now a cold high desert built around a dead harbour. Almost nothing authored here had to change, because every discovery on this map is about reading what water *did* -- three seawalls each founded higher than the last read better standing in dust than standing in surf, and a salt orchard with no sea to explain the salt is a better question than one with an obvious answer.\n\nThe terrain reason is as real as the lore one: a wetland-dominant palette cannot produce cheap ground, because wetland, forest and hills are all travel cost 2 and the classifier's only cheap non-coastal window is dry. The map read as uniformly slow whatever shaping was applied to it. `coast` and `river` stay in the palette for the old waterline and the one channel that still runs; `sea` is gone, which is the whole point.\n\nGained the Glass Scar and the Caravan Ground when the Dry Harbour was retired. Both are desert-native and this is now the only desert map, so they had nowhere else to go -- and both read better here. Eight points of interest rather than six, which is the first map to exceed the six every field map has carried since the beginning.\n\nOne of several Dwarkas on Jambhudweep. This is the northern one -- the harbour with the Gate, and the one the game walks. The name was bare `Dwarka` while canon held only one, which stopped being true; `Dwarka` is kept as an alias so older references still read.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -439,7 +430,6 @@
         "epoch_post_cataclysm"
       ],
       "arrival": "The delta takes a long time to become a city. Reeds, then reed-and-mud, then mud with brick in it, and then brick cut by someone who expected it to last. The tower is visible from a good way out, or the half of it still standing. Somebody has hung washing across the third storey.",
-      "notes": "Opening field map. Lothal after the Great Shattering: the Harappan city is a half-buried relic and survivors are camped inside it rather than beside it, so the same ground is a settlement and a ruin at once. Kept small and legible -- this is where the player learns how to look. Forest and hills were added to the palette late: with only wetland, river, settlement and coast, the engine reclassified everything it could not match and the whole map came out 55% coast and 45% wetland -- two biomes, and a delta that read as flat. They are appended, not inserted, because the engine takes the first palette entry as its fallback. Plains was deliberately left out: adding it takes back every reclassified plains tile at once and drops wetland from 45% to 2%, which would stop this being a delta at all. Sits at the centre of what is left, and every other map is reached from here -- which is why it is the opening one. Sea added to the palette. Lothal is a harbour -- it needs water to be a harbour of -- and the generator had always been able to make open water here while `applyPalette` reclassified all of it to coast, so the opening map of a game about a delta port contained no sea at all. It sits last because the first entry is the engine's fallback and wetland must stay dominant.\n\nPlains was tried and reverted: with cheap ground available the low middle became plains across 53% of the map, which fixes the travel-cost curve by destroying the delta. The same trap as the first palette change -- variety must not cost a map its thesis. Relief is `delta`: Lothal is a harbour on a delta, so its easy ground is the channels and the water's edge rather than any high ground. Plains added once the landform shaping was in: the shapers dry the interior into the classifier's plains window on purpose, because that window is the only cheap non-coastal ground there is, and without `plains` in the palette every one of those tiles was reclassified straight back to wetland. This is not the earlier attempt that flooded the map -- that one added plains while the shaping still made the middle *wetter*, so the fallback swallowed everything. Appended, so wetland stays the first entry and therefore dominant.",
       "neighbours": [
         "field_map_aravali",
         "field_map_dwarka",
@@ -486,7 +476,6 @@
         "field_map_lothal"
       ],
       "arrival": "The road up the scarp is the only part of the plateau anyone built. Everything above it was already here: black rock in steps a hundred feet high, holding a flat green country the sea never reached. They will tell you at the top that this is why the University is here. They are right, and it is not the whole reason.",
-      "notes": "Second field map, and the counterweight to Lothal. At Lothal local knowledge was right and the academy was quoted from a distance; here the academy is a room the player stands in. The Long Archive is not foolish -- it is rigorous and its record begins at the Shattering, so it has four hundred years of excellent measurements against a baseline that is itself the wound. Large scale, hills and mountains, so the overworld reads as travel rather than as two versions of the same map. High and apart. The plateau is the only place on the overworld that is neither delta nor desert, and the distance from Lothal is the point -- reaching the university is a journey out of the country you started in. Relief is `plateau`: canon's own arrival text says black rock in steps a hundred feet high holding a flat green country, so the surface is walkable and the drama is at the scarp. The map was previously 62% forest and 35% hills at a uniform travel cost of 2 -- high country with no flat anything in it, which is not the place canon describes. Plains added with it: a plateau needs flat ground to be flat, and the palette had none -- hills, mountains and forest are all travel cost 2 or 3, so the only cost-1 tile on the whole map was `settlement`. Appended rather than inserted, since the first entry is the engine's fallback and hills must stay dominant; the shaping is what keeps plains on the surface and hills at the scarp, rather than letting plains flood the map as it did when tried on Lothal. The Dry Harbour was retired and is no longer a neighbour, so the plateau is reached from Lothal alone.\n\n**The palette gained `river`, which it should never have lacked.** This map is named for a river and had none: the generator carved channels, `applyPalette` found no `river` in the palette and no `wetland` or `coast` to turn them into, and dropped every one to the fallback biome. Ten named watercourses survived as paths pointing at tiles of hill and plain. Nothing read them, which is why it went unnoticed for as long as the map has existed.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -516,7 +505,6 @@
       ],
       "description": "A domed temple on a high stepped plinth, and the names are on the step.",
       "arrival": "Seven small spires stand around a dome that has split, and the doorway beneath them is a pointed arch with nothing behind it but dark. Lichen has taken the bottom two feet of everything. Dressed blocks lie scattered well out from the walls, far enough that they came off the top. The plinth it all stands on is pale stone, waist high, with steps down the front worn into dishes at the middle of each tread -- and along the plinth's face, cut small and shallow and running the whole length and round the corner, there are names. There are more names than a village.",
-      "notes": "**The thesis is a tribute, and the ground it is standing on.** The names along the plinth are the Jharwa dead of `event_aravali_massacre`, and the temple above them was raised by the people whose grandfathers did it. That is meant to stay unresolved in both directions: Ranu and Bela were manipulated by Sira rather than acting on their own, so this is not a monument built by monsters -- and it is still a monument built by the winners on the exact ground they took.\n\nIt is `field_map_aravali`'s own declared thesis made literal. The map says *the ground remembers something the people here have agreed not to say*. Here it is saying it, in writing, at knee height, under a building that is busy falling off the top of it.\n\n**The plinth outlives the temple, and that is the whole place.** The art gives three states -- whole, dome collapsed with the inner arches open, and finally nothing but the plinth and four column stubs -- so in the last of them the memorial is all that is left of the monument. Nobody intended that. The dome was the offering and the names were the excuse for it, and the dome is what goes.\n\nThe worn dishes in the treads are the other half of the same point: those were worn by people climbing up to give, not by people climbing up to read.\n\n**And nothing destroys it.** No sack, no fire, no cataclysm. The line stops running, the passengers stop coming, the alms stop, the purohits leave, and there is nobody left to pay for repairs -- `event_the_last_puja` carries that. The ending is deliberately smaller than the tragedy underneath it, because a memorial does not get to choose how it ends either.\n\n**Why the near island.** `poi_first_pier` is the only other thing on the near island, against `poi_far_landing` and `poi_lodestone_face` on the far one, so this balances the two. It also puts the temple on the side a passenger reaches first, which is the side alms would have been given on -- the geography and the economy have to agree or the ending does not land.\n\n**On prana and lodestone, which look like a contradiction and are not.** `mythology_the_seats_of_the_players` has the islands rise on prana vayu as humans appeared; `poi_lodestone_face` has the ore holding the island up now. Those are a beginning and a mechanism, not two answers to one question: the breath lifted the land, the ore keeps it lifted. Written here because the next person to read both will otherwise file it as a canon error and 'fix' one of them.\n\n**This entity was rewritten to match the art rather than the reverse.** It was first authored as a temple built in four stacked courses of four materials, and the painted sheet is a single-period domed temple -- seven spires, an ogee arch, carved friezes, one plinth. The art is better and it is what ships, so the prose follows it. The stacked reading survives as an alternative prompt block in the game's `docs/art-brief.md` and is not canon.",
       "epochs": [
         "epoch_migrations",
         "epoch_civilization_dawn",
@@ -541,7 +529,6 @@
       ],
       "description": "Cut basalt in courses, and between two of the courses, a bed of something else.",
       "arrival": "They quarried here for the halls and stopped when they hit a seam that would not dress. The seam is nine inches of pale ash between two floods of black rock, and it is full of small dead things lying in the order they died.",
-      "notes": "The evolution discovery. A quarry rather than a dig, so the section is exposed by accident and read by the player rather than presented by a scholar.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -562,7 +549,6 @@
       ],
       "description": "Basalt columns worn flat, and the ground everything here is built on.",
       "arrival": "Hexagons underfoot, packed like a honeycomb and rubbed smooth by feet and salt. It goes under the wall, under the court, under the market. Somebody laid a city on top of it and never had to quarry a stone.",
-      "notes": "The rock the gates sit on, and the reason Dwarka is where it is. Canon puts the Asura arrival at the Ganges Lava Sea and says the rift hardened into it; this is the same eruption reaching the coast -- the Scale's volcanic highlands, weathered down and walked on. Nothing arrived here. Something very old is underneath.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -590,7 +576,6 @@
       ],
       "description": "Where the city puts what it cannot eat, cannot burn, and does not want.",
       "arrival": "Every settlement has a midden and this one has the usual fish spine and oyster shell and broken pot. It also has, at intervals, layers of something else — and the intervals are the interesting part.",
-      "notes": "Evidence rather than encounter. The crossing species stay `lore` and unplaceable; what the player finds is what they left.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -611,7 +596,6 @@
       "npcs": [],
       "description": "Where the road stops for the night, and has for longer than the road has made sense.",
       "arrival": "The camp is on the wrong side of the ridge for shelter and the wrong distance from the water that is no longer there, and every caravan still stops here, because this is where you stop.",
-      "notes": "The road is the map's other clock: it still follows a river that is not there. Moved from the Dry Harbour when that map was retired. Teshk did not come with it -- he was a Dry Harbour person -- so this is a camp with nobody in it, which suits a road that outlived its reason.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -650,7 +634,6 @@
       ],
       "description": "A stair up the scarp that keeps going after the scarp stops.",
       "arrival": "You can follow it with your eye until the cloud takes it, and the cloud is not always there, and it goes up past where the cloud is. Nobody at the University will say it is not a stair. They will say it has not been surveyed.",
-      "notes": "The anomaly, and the hook toward region_tethys_sky_routes for a later map. Deliberately unresolved -- the ladder ends at a good description rather than an explanation, because some things should stay open.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -680,8 +663,7 @@
         "settlement_lothal"
       ],
       "description": "Straight lines under the water, at what used to be a quayside.",
-      "arrival": "The basin was cut square and lined with fired brick, and salt water has been in it long enough that a reef has taken the corners. Fish that have never seen the open sea live in a harbour that no longer reaches it.",
-      "notes": "Lothal's dock. An archaeological site being eaten by an ecological one, which is the tone of the whole era."
+      "arrival": "The basin was cut square and lined with fired brick, and salt water has been in it long enough that a reef has taken the corners. Fish that have never seen the open sea live in a harbour that no longer reaches it."
     },
     {
       "type": "point_of_interest",
@@ -700,7 +682,6 @@
       ],
       "description": "Three seawalls, one behind the other, each built when the last stopped working.",
       "arrival": "You can wade the outermost at low water and stand on the innermost without getting your feet wet, and between them is four hundred years of a city agreeing, twice, that the sea had won that round.",
-      "notes": "The geography discovery and the sober counterweight to the gate: the thing actually destroying Dwarka is the sea, which nobody finds remarkable either.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -725,7 +706,6 @@
       ],
       "description": "Good flat ground, well watered, and nothing on it.",
       "arrival": "Eight acres of level silt beside a channel that never runs dry, and not a stem on any of it. The camp plants here every spring out of stubbornness and takes nothing off it. Something came up out of the ground during the Shattering and has not gone back down.",
-      "notes": "The solarpunk hook, and what the actionable rung acts on: restorable once the player understands both the poison and the rice.",
       "npcs": [
         "npc_kunch"
       ]
@@ -743,7 +723,6 @@
       ],
       "description": "Bones of the wrong animal in the wrong rock.",
       "arrival": "A seam in the basalt full of bone, and the bone is all one kind of thing: heavy skulls with a pair of long teeth in the upper jaw and nothing like them since. They are lying in rock that formed after they should have been gone.",
-      "notes": "The Fang, in the Scale's ground. `event_fang_vs_scale_wars` says the gorgonopsids held the fern forests and the archosaurs took the volcanic highlands -- so a bed of synapsid bone in basalt is the line being crossed, preserved. The player is not told that; the player is told the teeth do not match anything alive.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -763,7 +742,6 @@
       ],
       "description": "The second island, and the last of Jambhudweepa.",
       "arrival": "Another island, smaller, and the far shore visible past it as a green line that is not home. There is a bell on a post here, and a mark cut into the rail where somebody has been counting something.",
-      "notes": "The second pier and the turn of the map: from here the player is looking at somewhere else rather than back at where they started. The bell and the tally are the only human marks on either island, and they are deliberately unexplained.\n\n**`shore: far`.** \"The second island\" -- the far one, reached last. See The First Pier for why this had to be said out loud.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -781,7 +759,6 @@
       ],
       "description": "The nearer island, where the line comes ashore in the air.",
       "arrival": "The track runs out over nothing and then there is ground under it -- grass, low cushion-plant, a stand of aero-mangrove holding the edge together with its roots. Walk to the rim and the rain that is falling on the underside is falling the wrong way.",
-      "notes": "The first floating island a player stands on, and the map's teaching moment: the inverted water is right there at the rim, and nothing explains it. Canon does -- lodestone cores of Permian-irradiated ore, a legacy of the shattering of Gondwana -- but nobody on this map says so, because nobody on this map knows.\n\n**`shore: near`, because the description already said so and the placement could not hear it.** \"The nearer island\" is the first line of this entry, and with `shore: either` the game put this and The Far Landing three rows apart on the *same* island while the other one stood empty. The two piers are the two ends of the crossing; putting them on one island is the map drawn wrong.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -828,7 +805,6 @@
       ],
       "description": "A swept courtyard with a doorway in it that does not lead anywhere in this city.",
       "arrival": "It is swept. That is the first thing, and it undoes most of what you were prepared for: somebody sweeps the gate court, the way somebody sweeps a threshing floor, because things come through and the mess has to go somewhere.",
-      "notes": "The anomaly, presented as municipal infrastructure. The horror of it, if there is any, is entirely in how unremarkable the locals find it.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -847,7 +823,6 @@
       ],
       "description": "A seam of fused sand, running straight, where nothing should have been hot enough.",
       "arrival": "Green-black glass, in a line you could follow at a walk, and under it sand that was never heated at all. Whatever did this did it fast enough that the heat had no time to go downwards. It runs out of the dry harbour and towards the gate, and nobody in the city will say whether that is a coincidence.",
-      "notes": "The anomaly, and the map's only unexplained thing. Kept small and undramatic: it is a date stamp more than a mystery. Moved from the Dry Harbour when that map was retired. It belongs here better than it did there: a seam of fused sand pointing at a doorway things come through is a question, where the same seam in an empty desert was only a curiosity. Still unresolved, and still meant to stay that way.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -864,7 +839,6 @@
       ],
       "description": "A mill in good repair, turning, with nobody in sight and nothing to sell to.",
       "arrival": "White ceramic, rounded like a pot, braced in pale wood that somebody has oiled this year. A vine has been trained up one side rather than pulled off it. There are planters by the door with something flowering in them. The sails turn steadily in air that is not obviously moving, and inside, behind the door, the querns are running: you can feel it through the boards before you hear it. What comes out is black grit, bagged, stacked, more of it than anyone has carried down in a long time. Nobody answers.",
-      "notes": "**The thesis: the one thing up here that is looked after.** `poi_alms_step` says a people were here and are gone; this says somebody is here now. Two buildings, a few hundred paces apart, arguing. That opposition is the reason to have both, and it is why the mill is drawn cared-for down to the oiled wood and the trained vine rather than as another picturesque ruin -- the islands already have one of those.\n\n**And what it is grinding is the island.** The mill takes lodestone from `poi_lodestone_face`, which is the same island's exposed core and the map's one `never`-renewing material -- the ore that holds the whole thing up. So the only working industry on the Aravali crossing is quietly consuming the reason there is anything to stand on. Nothing in the text says so; the two places are on the same island and a player who has read `discovery_the_ore_that_lifts` can put it together. It sharpens the question the ore face already asks rather than answering it.\n\n**Nobody is on stage, and that is the map's own method.** `field_map_aravali`'s thesis is traces: *the ground remembers something the people here have agreed not to say*. The Quiet Atelier is a workshop nobody is supposed to find; this is a mill nobody is minding. Putting a miller here with lines to say would make it an errand instead of a question.\n\n**`anomaly` rather than `settlement`.** The map declares no settlement anywhere and says so deliberately -- everyone here is passing through, and the one time `settlement` entered that palette the generator grew a ruined city nothing in canon had mentioned. A tended mill on a floating island with no customers is anomalous in exactly the map's own terms.\n\n**Why the far island.** `poi_first_pier` and `poi_alms_step` stand on the near one, `poi_far_landing` and `poi_lodestone_face` on the far. This balances them three and three, and puts the mill on the same ground as the ore it is eating.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -889,7 +863,6 @@
       ],
       "description": "Stone steps up a hillside, grazed by goats, described in the archive as ornamental.",
       "arrival": "Two hundred steps of dry-laid stone, each one a little lower at the outer edge than the inner. Marn's goats are on them. The University's survey calls them a devotional feature and gives them a paragraph.",
-      "notes": "The archaeology discovery and the restore target. A paragraph in the survey against two hundred courses of deliberate engineering is the whole argument of this map in one image.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -910,7 +883,6 @@
       ],
       "description": "Two felt tents on the plateau, pitched where the grazing is and moved when it is not.",
       "arrival": "Two round tents of stretched felt, guyed against a wind that does not stop, with stones on the ropes and a ring of hurdles round the whole of it. Marn's people winter lower down and are up here from the thaw. The University has a word for the terraces and no word for this.",
-      "notes": "The second settlement on this map, and the counterweight to the first. The Narmada University is nine halls that measure things and has stood where it stands for four hundred years; this is two tents that move with the grass. Both are settlements, and the map says something by holding both -- the archive's whole difficulty is that it records what stays and has no method for what moves.\n\nDeliberately small. Two tents is a household, not a village: it is the number that makes the University's nine halls read as an institution rather than as a bigger version of the same thing.\n\nMarn stands here as well as on the terraces because they are one life. The steps are where the goats are in the day and this is where he sleeps, which is also why the game pitches this beside them rather than anywhere else on the plateau.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -965,8 +937,7 @@
         "epoch_post_cataclysm"
       ],
       "description": "Four storeys of red sandstone where the chronicles promise twenty-two.",
-      "arrival": "It did not topple. It sat down. The upper courses came straight through the lower ones and the whole thing settled into the delta mud like a foot into silt, which is why four storeys are still square and true and everything above them is a slope of dressed stone.",
-      "notes": "Kavik's tower, the landmark settlement_lothal records. Enterable rather than merely visited, and the undercroft gates on knowing the safe channels -- a player who has not done the mangrove work cannot reach the best of it."
+      "arrival": "It did not topple. It sat down. The upper courses came straight through the lower ones and the whole thing settled into the delta mud like a foot into silt, which is why four storeys are still square and true and everything above them is a slope of dressed stone."
     },
     {
       "id": "poi_kept_stones",
@@ -981,7 +952,6 @@
       ],
       "description": "A wall somebody still repairs, around nothing anybody will name.",
       "arrival": "Dry stone, a course or two higher than the weather would leave it, running round a shoulder of the range and enclosing a hollow with nothing in it. The gap that would be a gate has been closed with newer stone. There is no path to it and the grass at the foot is not grown over.",
-      "notes": "**The trace, and the whole thesis of the map.** Canon puts the Mask Family schism, the Jharwa massacre and the hidden sanctuary of Vara-Ma, Orek and Thren in these ranges. None of that is on stage: Sira and Thren are four hundred years of backstory and this is one afternoon's walking, so the archive's rule holds -- deep-lore figures reach a player as traces.\n\nWhat the player gets is a wall in good repair around an empty hollow, and the fact that somebody is still keeping it. They never learn what happened here. They learn that something did, and that it is not over.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -1002,7 +972,6 @@
       ],
       "description": "An exposed core, and the only place the ore can be worked.",
       "arrival": "A wound in the island's flank where something took a bite out of it, and the rock inside is black and faintly wrong. Grit stands on end where it has fallen. A dropped knife does not lie flat.",
-      "notes": "Where lodestone grit comes from, and the map's one `never`-renewing material. The island is held up by this: taking it is the closest the game comes to asking whether a thing should be taken at all, and nothing in the text says so out loud.\n\n**`shore: far`.** The ore face is on the second island rather than the first, so the question it asks -- whether the thing holding the island up should be taken off it -- is put to a player who has already crossed rather than one still learning what an island is.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -1051,7 +1020,6 @@
       ],
       "description": "Four hundred and eleven years of measurements, kept perfectly.",
       "arrival": "The stacks run back further than the lamps reach. Okhi says there are eleven thousand bound volumes and that she has personally copied four hundred of them, and then, without any change of tone, that she has no idea whether the oldest are true, only that they are old.",
-      "notes": "Where the through-line resolves. The sequence stacks gate on discovery_archive_baseline so the player cannot be handed the thesis before earning it; the unread shelf gates on a word, which is the point at which the plateau's own script stops being decoration.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1086,8 +1054,7 @@
         "epoch_post_cataclysm"
       ],
       "description": "Smoke, and washing strung between two courses of Harappan brick.",
-      "arrival": "Forty-odd people live in the kiln quarter, because the kilns were built to hold heat and still do. Nobody has repaired anything so much as leaned things against other things until they stopped falling. A child watches you from a doorway that used to be a flue.",
-      "notes": "The living settlement, inside the ruin. Deliberately not a quest hub: people here trade leads, tea and old maps. Mixed survivors -- a Mask Family remnant, a Silvershore straggler, delta fishers -- thrown together by the Collapse rather than by kinship."
+      "arrival": "Forty-odd people live in the kiln quarter, because the kilns were built to hold heat and still do. Nobody has repaired anything so much as leaned things against other things until they stopped falling. A child watches you from a doorway that used to be a flue."
     },
     {
       "type": "point_of_interest",
@@ -1111,7 +1078,6 @@
       ],
       "description": "Pale mangroves standing in a ring, and something at the centre that is not a tree.",
       "arrival": "The Kia did not build the shrine so much as agree about it. A ring of ghost mangrove, a stone with a hollow worn into the top, and a great deal of water that is shallower than it looks if you know where to put your feet.",
-      "notes": "Kia rather than Harappan. Where the channel discovery is learned and the marsh-lurker can be watched.",
       "npcs": [
         "npc_kunch"
       ]
@@ -1137,7 +1103,6 @@
       ],
       "description": "Nine halls around a yard, and every one of them measuring something.",
       "arrival": "It is smaller than the word suggests and busier than the quiet suggests. Nine halls, a yard with a rain gauge in it that has been read twice a day for four hundred and eleven years, and a great many people being careful. Nobody here is a fool. That turns out to matter more than the alternative would have.",
-      "notes": "The academy as a place rather than a citation. Deliberately sympathetic -- the scholars are rigorous and generous with the player, which is what makes the structural error land.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1155,7 +1120,6 @@
       ],
       "description": "Where the people who still cross put their tents.",
       "arrival": "Felt tents on the shingle above the ford, guyed low, with the fire in the middle and the animals downstream of it. Nobody has pitched anywhere near the rail-head, which has a roof and a water butt and is a mile off.",
-      "notes": "Sited at the ford rather than the rail-head, deliberately and legibly. The nomads use the crossing the Vedda used and ignore the one the machine age built, because a ford needs no timetable and a river takes animals.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -1178,7 +1142,6 @@
       ],
       "description": "A workshop of glass and benches, kept, and nobody in it.",
       "arrival": "Glass panes in an iron frame, most of them whole, in a clearing that has been kept clear. Benches, seed trays in rows, a press, and jars along a shelf with the labels facing out. There is dust on all of it and not much.",
-      "notes": "**Guyuk's, and she is not here.** `character_guyuk_reborn` -- the Seed-Gleaner -- is aboard the Survival Train in `event_survival_train_solarpunk`, working blasted soil back into growth. This is a second bench she keeps and is not at.\n\nA workshop nobody is currently in suits this map: the Aravali's thesis is ground that remembers what people will not say, and an atelier in use would answer questions the map is built to leave open. The dust says weeks, not years. She is coming back.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -1200,7 +1163,6 @@
       ],
       "description": "Where the line begins, and where everybody waits for it.",
       "arrival": "A shed, a water butt, a length of platform, and the iron running away north over the water on legs of pale timber. People sit on their bundles with the patience of those who have done this before. Nobody looks at the islands, which is its own kind of looking.",
-      "notes": "The arrival, and the map's one ordinary place. Everything else here is strange -- ore that holds a hill in the air, rain that falls upward, a sanctuary nobody will name -- so the map needs one spot where the strangeness is somebody else's and the business at hand is a timetable.\n\nIt is a settlement rather than a travel_node because people live here; the line is a thing that happens to them.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -1229,7 +1191,6 @@
       ],
       "description": "Fruit trees dying at one end and something else doing well at the other.",
       "arrival": "The orchard is half orchard. The seaward rows are salt-killed and standing, and through them, in the shade the dead trees still cast, something with the wrong leaf shape is doing extremely well.",
-      "notes": "The botany discovery. An establishment event in progress, which is a slower and more frightening thing than a monster.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1247,7 +1208,6 @@
       ],
       "description": "Trackways in the stone, going into the sea.",
       "arrival": "Three-toed prints in the black rock, a stride and a half apart, walking in a straight line toward water that was not there when they were made. They do not come back.",
-      "notes": "The other half of the split, in the same stone as the Fang Bed and a short walk from it. Two kinds of animal that canon says never shared ground, lying in one rock -- which is the whole argument the map makes and never states.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1265,7 +1225,6 @@
       ],
       "description": "Another doorway, out past the salt, that nobody sweeps.",
       "arrival": "The same build as the Gate Court and none of the care: a frame of dressed basalt in a field of it, half-drifted with salt, and no path worn to it. It is not doing anything today.",
-      "notes": "**The gates are plural, and canon always said so.** `event_shadow_pact` and `event_asura_synapsid_domestication` both say \"a Dwarka Gate\", indefinite, and nothing has ever named a second one. This is that -- and the contrast is the point: one gate is swept municipal infrastructure, and this one is a door in a field that everybody has agreed to stop walking to.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1283,7 +1242,6 @@
       ],
       "description": "A parallel embankment carrying nothing at all.",
       "arrival": "An embankment running alongside the first, the same height and the same age, with no iron on it. Either it was lifted or it was never laid.",
-      "notes": "Two lines were built and one was abandoned first, which says the traffic was once heavy enough to need doubling. That is a whole civilisation stated in an earthwork, and nobody on the map remarks on it.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -1314,8 +1272,7 @@
         "settlement_lothal"
       ],
       "description": "A grid of brick chambers filled to the brim with silt, and something growing out of them.",
-      "arrival": "The granary held the city's grain on raised platforms so the flood could not reach it. The flood has since reached it. What is remarkable is not that the chambers filled but that the crop came back on its own, red and thin, growing out of the tops of the walls.",
-      "notes": "Where the rice discovery lives. The ruin is already doing the restoring; Varuna only has to notice."
+      "arrival": "The granary held the city's grain on raised platforms so the flood could not reach it. The flood has since reached it. What is remarkable is not that the chambers filled but that the crop came back on its own, red and thin, growing out of the tops of the walls."
     },
     {
       "id": "poi_sunk_cutting",
@@ -1330,7 +1287,6 @@
       ],
       "description": "A rail cutting the forest has closed over.",
       "arrival": "The ground goes down between two banks and the canopy meets overhead, so it is a green tunnel with iron in the floor of it. Roots have come up between the sleepers and lifted them. A signal post stands in the middle with a tree grown through the frame.",
-      "notes": "The Age of Machinery, reclaimed. This is the thread the map was missing: the line over the strait is not a curiosity, it is the last working piece of something that used to run between two continents. The forest took the rest.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -1362,7 +1318,6 @@
       ],
       "description": "Trading twice a day, around a tide that decides when the floor is a floor.",
       "arrival": "The market runs on the low water and stops on the high, so the day has two mornings and two evenings and everybody's sense of time is bent around it. Prices are quoted in what the tide will allow rather than in what a thing is worth.",
-      "notes": "Where the people are. Deliberately ordinary: the point of Dwarka is that the extraordinary thing is treated as weather.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1380,7 +1335,6 @@
       ],
       "description": "The old crossing, downstream of everything, still the shallowest water.",
       "arrival": "Shingle on both banks and a bar between them you can wade at low water. There are stones set in the bed that are not river stones, worn round, laid a pace apart.",
-      "notes": "**The oldest of three crossings, and the one still in use.** The Vedda forded here in `epoch_migrations`, the Age of Machinery bridged it, and the nomads ford it again -- the same water, because water does not care what anybody builds.\n\nThe player finds them in the wrong order: the rail-head first, this last. That is what makes the rail sad rather than impressive. It is the middle of three things, not the end of one.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -1411,7 +1365,6 @@
       ],
       "description": "A spring the archive records at a fixed point, and a line of dead stonework saying otherwise.",
       "arrival": "The water comes out of the hillside cold enough to hurt. Forty paces downslope there is a stone basin, dry, well made, and obviously built to catch exactly this. Forty paces further there is another.",
-      "notes": "Geography and botany both. The dry basins are the evidence and they are visible on arrival -- the player can see the answer before they can explain it, which is the right order.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1433,7 +1386,6 @@
       ],
       "description": "Steps up the old wall, kept clear, with a good view of the court.",
       "arrival": "Somebody keeps these steps clear of weed, and there is a worn patch at the top where people stand. They are not watching the sea from here.",
-      "notes": "The observation post. Exists so the gate can be watched over time rather than visited once, which is what its discovery needs.`hills` was added to the terrain when `stands` did: a lookout confined to coast and settlement could never actually be sited on the high ground it is for.",
       "epochs": [
         "epoch_post_cataclysm"
       ]
@@ -1490,7 +1442,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "**A hunter who mostly does not hunt**, which is the only version of this that fits the game around it. Every weapon in canon affords `cut` and `deter` and nothing anywhere affords killing -- the sling note says the record has slings keeping birds off a crop far more often than doing anything else. Anu works the same way: walks ahead of the herd, is seen, and the thing goes elsewhere.\n\nThey also carry an answer the materials layer needs and nobody on these maps was asked for. Canon has goat hide, croc hide, sinew, boar tusk and leviathan bone, all `won_from` a living animal, and the game hands them over with the same gesture that cuts a reed. Anu is where a player finds out what that involves: one animal, the one that was going to die anyway, and nothing left behind.\n\nAntler is the line that matters. Shed each year and gathered off the ground, costing nothing but the walking -- canon says precisely that on `material_deer_antler`, and Anu has clearly noticed.\n\nWalks ahead of Terke's herd and belongs to the same high-country people.",
       "sex": "male"
     },
     {
@@ -1519,8 +1470,7 @@
       ],
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "notes": "The Asura-Tainted Princess, woken after the Cataclysm, at the edge of the Narmada plateau. The first time the traveller reaches the Cloud Stair she walks up to them rather than waiting to be found; that is the game's doing, and her words are these lines. No language, so she is understood from the first word: she has had a very long time to learn how people talk. Her quest is not written. Her second line hands over `question_terrace_purpose` -- the terraces' sound answer is contour irrigation for a population the archive never recorded, and she is old enough to have seen it. It is the question Marn already gives, so nothing new becomes reachable; it is what makes meeting her leave a trace in the diary."
+      ]
     },
     {
       "id": "npc_bekh",
@@ -1594,7 +1544,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "Mask Family remnant with no masks and no family, related to character_kavik far enough back that the line means little to her. Would NOT settle -- she is the one who stays, because somebody has to be here when the rest go. The ending is better for her refusing.",
       "descended_from": [
         "character_kavik"
       ],
@@ -1639,7 +1588,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "**The trace, given a face.** Canon puts the Mask Family schism and the hidden sanctuary in these ranges, and none of that is on stage -- Sira, Meera and Thren are four hundred years of backstory and this map is one afternoon.\n\nSo the player meets somebody who keeps the wall and does not know why, in the third generation of not knowing why. Dala answers every question honestly and the answers do not add up to anything, which is the point: the ground remembers and the people have agreed not to. Nothing Dala says can be pushed past.",
       "sex": "male"
     },
     {
@@ -1693,7 +1641,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "Keeps the line and does not explain it, which is the map in one person. Hesh knows the mechanism exactly -- the ore wants to be up -- and has no more curiosity about it than a ferryman has about buoyancy. That is the counterweight to a traveller who writes everything down.\n\nSays nothing at all about the Kept Stones. That silence is deliberate and is not gated on any discovery: asking Hesh about the wall gets you the timetable.",
       "sex": "female"
     },
     {
@@ -1742,7 +1689,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "**The apothecary thread, given somebody to say it.** The brief for this map asked that a player learn how apothecary works and how it rebuilds -- and the atelier said soil samples and seed trays, which is agriculture. Ila is the half that was missing: physic first because sick people cannot wait for a harvest, then grass because grass holds a slope, then food.\n\nAn apprentice rather than Guyuk herself. Canon has the Seed-Gleaner aboard the Survival Train in `event_survival_train_solarpunk`, and a workshop nobody is currently in is the stronger image for this map anyway. Ila keeps it, plants what Guyuk sends, and writes down what comes up -- which is mostly nothing, and the nothing is the data.\n\nShe is at the rail-head as well as the bench, because that is where the soil arrives and where the letters go.",
       "sex": "female"
     },
     {
@@ -1785,8 +1731,7 @@
       ],
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "notes": "The delta's news, carried at the pace of a large bird. Deliberately gives no discovery and settles nowhere: he is the counterweight to the camp, which is people who stayed, and to the archive over on the plateau, which is people who wrote it down. Kunch does neither and gets there first.\n\nThe instrument is a set of cut canes of graded length, struck rather than blown. Canon does not hold it as an `item` because there is no `kind` for an instrument and no affordance for playing one -- adding either is a vocabulary decision rather than an authoring one. See docs/decisions.md."
+      ]
     },
     {
       "id": "npc_marn",
@@ -1843,7 +1788,6 @@
           ]
         }
       ],
-      "notes": "Holds two of the map's answers inside ordinary vocabulary and has never had a reason to examine either. The counterpart to Thrali, and pointedly not a wise elder -- he is a working herder with a job on.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -1892,8 +1836,7 @@
       ],
       "epochs": [
         "epoch_post_cataclysm"
-      ],
-      "notes": "The other half of the University's nine halls: the archive records what was cut and has no word at all for what carried it. Moonj is the person the record leaves out, which is why she is on the plateau and not on it.\n\nShe would not settle. The road between the quarry and the halls is a life she chose, and the ending's roster is people who would come with you -- she has somewhere to be every second day."
+      ]
     },
     {
       "id": "npc_odri",
@@ -1932,7 +1875,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "Knows the Age of Machinery from the wrong end -- as a source of good metal -- which is the honest way a person in a forest would know it. Odri has better evidence about the era than any scholar on the map and no framework to put it in, and is entirely content with that.",
       "sex": "female"
     },
     {
@@ -1988,7 +1930,6 @@
           ]
         }
       ],
-      "notes": "The one who will not come. Deliberately not a tragedy and not a rebuke -- she is right that somebody has to stay, and the ending should let her be right rather than treating her as a failed recruitment.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -2048,7 +1989,6 @@
           ]
         }
       ],
-      "notes": "The one who will not come, and for the opposite reason to Bekh: not somebody has to stay, but the work does not end and that is not an argument for stopping. Sweeps an interdimensional gate as municipal maintenance.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -2091,7 +2031,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "Dwarka's local knowledge being simply right, which is that map's thesis. Sesh has the observation exactly and no theory, and the one thing Sesh notices about visitors is which of them bother to walk to both sites.",
       "sex": "male"
     },
     {
@@ -2149,7 +2088,6 @@
           ]
         }
       ],
-      "notes": "Holds four hundred years of stratigraphy as a family trade and has never been asked. Would settle -- the midden is a living, not a home.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
@@ -2192,7 +2130,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "The living end of the map's oldest thread. Terke fords where the Vedda forded and has no interest in the line at all -- not hostility, just a different set of needs. Animals, water, no timetable.\n\nSays nothing about the Age of Machinery because it is not a thing that happened to them.",
       "sex": "female"
     },
     {
@@ -2261,7 +2198,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "Delta fisher, Kia by descent, half his grandfather's vocabulary lost. Gives the opening hook and is the first person the player can materially help. Would settle -- he has nothing holding him here but the fishing.",
       "sex": "male"
     },
     {
@@ -2318,7 +2254,6 @@
       "epochs": [
         "epoch_post_cataclysm"
       ],
-      "notes": "Keeps the camp's roofs on. The smallest possible help, and deliberately the first one available: the player learns that knowing when to cut a reed counts as helping.",
       "sex": "female"
     },
     {
@@ -2366,11 +2301,108 @@
           ]
         }
       ],
-      "notes": "The scholar who is already most of the way there and cannot say so in an acceptable form. Would settle -- she has been looking for somewhere the question is allowed.",
       "epochs": [
         "epoch_post_cataclysm"
       ],
       "sex": "female"
+    }
+  ],
+  "happenings": [
+    {
+      "id": "happening_tower_standing",
+      "type": "happening",
+      "title": "The tower, standing",
+      "occasion": "night",
+      "field_maps": [
+        "field_map_lothal"
+      ],
+      "requires": [
+        "discovery_tower_collapse"
+      ],
+      "prose": "You dream of Kavik's tower before it sat down: all twenty-two storeys, dry ground to the horizon, and the stair going up through the middle of it. You climb. At shoulder height there is a niche in the stair wall, and something in it is looking out at you with a face that is not a face. You wake before you reach it.",
+      "choices": [
+        {
+          "label": "Write it down before it goes",
+          "line": "You write down the niche and the height of it, by feel, in the dark. In the morning the page is mostly scrawl, but the height is legible: shoulder height, on the stair.",
+          "grants": [
+            "discovery_mask_niche"
+          ]
+        },
+        {
+          "label": "Lie still and let it fade",
+          "line": "You lie still and let the tower go back to rubble. What stays is the niche, and the feeling of being looked at by something that was meant to be there.",
+          "grants": [
+            "discovery_mask_niche"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "happening_where_you_stop",
+      "type": "happening",
+      "title": "Where you stop",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_dwarka"
+      ],
+      "at": [
+        "poi_caravan_camp"
+      ],
+      "prose": "A caravan is already unloading when you arrive: donkeys hobbled, water skins stacked, a fire started in a ring of stones blackened by a great many fires before it. You ask the drover why they camp here, on the wrong side of the ridge and a long walk from the well. She looks at you as if you had asked why the sun comes up in the east. This is where you stop, she says. Everybody stops here.",
+      "choices": [
+        {
+          "label": "Ask who stopped here first",
+          "line": "Her grandfather's caravan stopped here, she says, and his grandfather's before that. Nobody remembers a reason. You look at the line the road takes into camp and wonder what it is following.",
+          "grants": [
+            "discovery_road_follows_water"
+          ]
+        },
+        {
+          "label": "Stop here too",
+          "line": "You unroll your bedding beside theirs. It is a bad place to camp, exposed and far from water, and everybody in it sleeps well, because this is where you stop.",
+          "grants": [
+            "discovery_road_follows_water"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    },
+    {
+      "id": "happening_year_names",
+      "type": "happening",
+      "title": "Counting years",
+      "occasion": "road",
+      "field_maps": [
+        "field_map_narmada"
+      ],
+      "requires": [
+        "discovery_moving_spring"
+      ],
+      "prose": "An old herder is resting on the terrace wall while her goats work the slope below. She tells you, without being asked, that she was born in the year the goats went up early, married in the year of the long frost, and that her mother used to say the water had walked in the year before she was born. Nobody on the plateau counts years any other way, she says, except the people in the halls, and they only started when everything broke.",
+      "choices": [
+        {
+          "label": "Ask what the water's year is called",
+          "line": "She says it twice, slowly, so you have it: anu-shivit, the year it walked. The spring has a name for its own last move, and nobody wrote it down in a hall.",
+          "grants": [
+            "word_maru_anu"
+          ]
+        },
+        {
+          "label": "Sit with her a while",
+          "line": "You sit on the wall while she names the years back to her grandmother's. Somewhere in there is the year the water walked -- anu-shivit, she calls it -- and it is older than the halls' first page.",
+          "grants": [
+            "word_maru_anu"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
     }
   ],
   "biomes": [

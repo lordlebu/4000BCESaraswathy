@@ -411,7 +411,8 @@ export function App() {
           seen: seenEvents.current,
           met: metStrangers.current,
           last: eventDays.current,
-          flags: journeyFlags.current
+          flags: journeyFlags.current,
+          poiId: extra.poiId ?? null
         },
         roll,
         // What is here to make an event out of, when nothing authored can happen -- see
@@ -437,16 +438,19 @@ export function App() {
      * it proves is the wiring, which no Node test can see. Exposed the way the scene exposes
      * `__walker` and `__travellers`, and for the same reason: `e2e/happenings.spec.ts` reads it.
      * Returns whether a card opened.
+     *
+     * `poiId` says which point an `arriving` is at, for a written happening narrowed to one -- *Where
+     * you stop* belongs to the Caravan Ground. Absent, it is wherever the traveller is standing.
      */
-    (window as unknown as { __happen?: (o: Occasion, kind?: string, shelter?: string) => boolean }).__happen = (
-      occasion,
-      kind,
-      shelter
-    ) => {
+    (
+      window as unknown as {
+        __happen?: (o: Occasion, kind?: string, shelter?: string, poiId?: string) => boolean;
+      }
+    ).__happen = (occasion, kind, shelter, poiId) => {
       const here = latest.current.at;
       if (!here) return false;
       return maybeHappens(occasion, here, shelter ?? null, `inspect:${occasion}`, {
-        poiId: latest.current.poiId,
+        poiId: poiId ?? latest.current.poiId,
         force: kind ? { kind } : {}
       });
     };

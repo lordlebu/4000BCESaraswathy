@@ -27,6 +27,10 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      # The app's own chunk against a budget. Canon's bundle is budgeted in the canon repo, but that
+      # gate sees only canon's files; this sees everything Vite put in the page. See the tool.
+      - name: App chunk inside its budget
+        run: npm run check:size
       # The generated data files are a projection of the species canon in the SouthOfTethys
       # repo, which is not in this checkout — so CI cannot rebuild them to compare. They are
       # checked against data/canon.lock.json instead, which catches a hand-edit to a generated

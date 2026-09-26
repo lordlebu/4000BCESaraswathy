@@ -207,7 +207,10 @@ export const NIGHT_RESTORES: Record<string, number> = {
  * - `night` is asked every time somebody sleeps: one night in three has something in it.
  * - `arriving` is asked once per place per journey, so about a third of places greet you.
  * - `working` is asked after every take, and a take is the commonest act in the game -- so it is
- *   the rarest, one in six, or the satchel fills to a running commentary.
+ *   the rarest, one in nine, or the satchel fills to a running commentary. It was one in six
+ *   until the simulation showed gathering making as many events as the road (0.27 a day each);
+ *   nine brings it to 0.19, and days with anything in them from 63% to 59%. The owner's call,
+ *   26 September, on the recommendation in `docs/strangers-and-happenings.md`.
  *
  * Tune here and nowhere else. `test/happenings.test.ts` measures the realised rate over many rolls
  * and fails if it drifts far from what this table says.
@@ -216,7 +219,7 @@ export const WOVEN_ONE_IN: Record<'night' | 'arriving' | 'road' | 'working', num
   night: 3,
   arriving: 3,
   road: 3,
-  working: 6
+  working: 9
 };
 
 /** How much a woven event eases, when it eases at all. Company on the road is worth less than a meal. */
