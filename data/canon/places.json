@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.31.0",
+  "canon_version": "2.32.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -1461,10 +1461,24 @@
           "text": "Hi. You walk like somebody who came a long way to look at a stair. So did I, once. I have had a long time to think about it since."
         },
         {
-          "text": "These terraces could grow more than goats, if anybody asked them properly. My people are hungry in places you have not been yet. When you know what grows here, come and tell me, and I will tell you what I know about making it grow.",
+          "text": "These terraces could grow more than goats, if anybody asked them properly. My people are hungry in places you have not been yet. When you know what grows here, come and tell me, and I will tell you what I know about making it grow. And if you would be a friend of mine, cook me the Fourteen: fourteen bitter greens in one pot, counted. Nobody has cooked for me in a very long time.",
           "requires": [],
           "gives": [
             "question_terrace_purpose"
+          ]
+        },
+        {
+          "text": "Is that the Fourteen? -- Fourteen. You counted. Then we are friends, and friends drink something kinder than bitter greens afterwards. Ginger and ashwagandha root, cooked slow in whatever pot you have. My people brew it in copper up on the terraces. Now you can.",
+          "requires": [],
+          "costs": "item_choddo_shak",
+          "gives": [
+            "recipe_root_tea"
+          ]
+        },
+        {
+          "text": "You have been up on the terraces. Look at the fall of the courses: a finger in a pace, along the hill and not down it. Whoever built them was feeding far more people than live up here now, and my people are some of what is left of them. Work out how they held the water and you will have worked out how we eat. That is what I know about making it grow.",
+          "requires": [
+            "discovery_terrace_water"
           ]
         }
       ],
@@ -2561,6 +2575,23 @@
         "Hura",
         "Othu",
         "Brekh"
+      ]
+    },
+    {
+      "id": "asura_hybrid",
+      "given_names": [
+        "Vishaya",
+        "Aurvesh",
+        "Nairali",
+        "Kelvaya",
+        "Tukvaya",
+        "Mandesh",
+        "Ishkai",
+        "Ruvaya",
+        "Zhaivel",
+        "Orvanu",
+        "Daivesh",
+        "Kaumali"
       ]
     },
     {

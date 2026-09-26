@@ -495,6 +495,35 @@ reader of `places.json` in this repo, none reads it. 526.2 KB.
 (`npm run check:size`, in CI after the build) measures the app's chunk against 950 KB: 844.5 KB
 today, Phaser not counted. That was Phase 4's last item: content budgets on every pull request.
 
+## The Violet-Horned Clan, and the princess's task — 27 September 2026
+
+**The asuras are their own people now.** The owner gave them their Epoch 5 life: the Violet-Horned
+Clan, or the Dolmen-Keepers, a peaceful people who heal poisoned ground, keep the fallen asura
+dolmens with flutes and bells, farm basalt terraces, and trade with the Maru. The Asura-Tainted
+Princess is their elder.
+
+- **Canon 2.32.0** writes it onto the existing `asura_hybrid` rather than the proposed
+  `culture_asura_solarpunk`: that is already the princess's people, and canon's culture ids carry
+  no prefix. Twelve given names were drafted in the sound of canon's asura names, for the owner to
+  rewrite. See canon's `docs/decisions.md`.
+- **On the road: a dolmen-keeper**, `company_keeper`, in the taller asura sheet that had been built
+  and staged with nothing drawing it. They walk `beside` the Maru, on top of the two strangers,
+  wherever the Maru drover does, which today is the Narmada, the basalt plateau where their elder
+  stands. Re-dyed like any stranger (`assets/looks.json`: headcloth, fur cloak, skin). A kindness
+  returned by one of them is shilajit, mineral from the basalt they live in.
+- **Their face**: `maru-m-03` is `asura_hybrid-m-01` now, the owner's horned man; the Clan are
+  otherwise dealt the `any-` faces until more are painted.
+- **Checked** by `test/travellers.test.ts` (the keeper walks exactly where the drover does) and in a
+  browser by `e2e/road-company.spec.ts` (on the Narmada, from the asura sheet, taller than the
+  carrier).
+
+**The princess's one task: cook her the Fourteen.** Her second line asks for it; a third, priced as
+Uma's and Pell's are, takes `item_choddo_shak` and, in return for her friendship, teaches **root
+tea** (ginger and ashwagandha root), the Clan's drink, which nobody else teaches. It has to give
+something only she gives, or a player who already held the gift would never be offered the trade.
+Finishing the terraces now helps her, so she is among the people helped at the end; she stays with
+her people rather than settling.
+
 ## Still open, and why each waits
 
 Nothing here blocks anything, and each waits on something only the owner can supply.
@@ -502,9 +531,9 @@ Nothing here blocks anything, and each waits on something only the owner can sup
 - **The three drafts**: rewrite or approve. Merging canon's pull request is the approval.
 - **Paintings for the three happenings**, if wanted (`src/ui/events/happening_*.png`, the event
   painting brief in `docs/event-prompts.md`).
-- **Asuras as their own people** (`asura_hybrid`, kin of the Maru): waits on the lore the owner said
-  they would write. The code side is under a session, and the walking sheet is built.
-- **The princess's quest**: unwritten, as asked.
+- **The Clan's given names**: drafted, for the owner to rewrite. More asura faces, if wanted: today
+  the Clan share the `any-` faces beside their one.
+- **The princess's quest beyond the Fourteen**: unwritten, as asked.
 
 **This work builds the framework, and stops there** (the owner, 27 September). What follows is
 recorded so it is not lost, and is not planned:
