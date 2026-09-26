@@ -226,3 +226,47 @@ Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - see
 
 Subject: Close on hands brushing loose earth away from something just turned up by a digging stick - a nodule of stone, a lump of clay - with the rest of the day's gathering set aside in a basket.
 ```
+
+## Written happenings (3) — canon's, 26 September 2026
+
+Canon's `happening_` entities are single scenes rather than kinds, so **each painting is of one
+particular moment**, and a particular place and person are fine; the traveller still stays anybody.
+The card finds a painting by the happening's id, underscores and all (the builder keeps them since
+this change), and borrows the night's scene or shows a blank band while one is missing. They are
+drafts in canon until the owner approves them, so paint once the words have settled.
+
+#### `happening_tower_standing` — The tower, standing
+
+Lothal, at night, once the tower's collapse has been seen. Save as `assets/source/events/happening_tower_standing.png`.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. One particular moment in one particular place, so the place and the people in it can be specific. The traveller, if seen at all, is seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: A dream of a tall tower of fired brick and dressed stone, many storeys high, standing whole and upright on dry flat ground under a pale sky, where the real one lies sunk in a wet delta. A stair rises through its core. At shoulder height in the stair wall is a shaped, lined, empty niche, dark inside, with the faint sense that something in it is looking out - but nothing is shown in it. Edges soft and slightly dissolving, as if remembered rather than seen.
+```
+
+#### `happening_year_names` — Counting years
+
+The Narmada road, once the moving spring has been seen. Save as `assets/source/events/happening_year_names.png`.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. One particular moment in one particular place, so the place and the people in it can be specific. The traveller, if seen at all, is seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: Late afternoon on a high dark-basalt plateau. An old Maru herder woman rests on a dry-stone terrace wall, wrapped in a goatskin coat worn hair-out and a felt cap, weathered upland face in the Himachali or Nepali manner. Below her, goats work a slope of old terraces. The traveller sits beside her on the wall, seen from behind, listening. Wide sky, long light, a spring's pale line of wet rock in the distance.
+```
+
+#### `happening_where_you_stop` — Where you stop
+
+Arriving at North Dwarka's Caravan Ground. Save as `assets/source/events/happening_where_you_stop.png`.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. One particular moment in one particular place, so the place and the people in it can be specific. The traveller, if seen at all, is seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: Dusk at a caravan camp on bare cold-desert ground, on the exposed side of a low ridge. Donkeys hobbled, water skins stacked, a small fire in a ring of stones blackened by a great many fires before it. A Kia woman drover in dyed cloth, flowers in her ornately dressed hair, sets down a load and gestures at the ground as if the answer were obvious. The road curves into camp along a faint old shoreline, with no water anywhere near.
+```

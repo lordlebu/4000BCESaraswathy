@@ -9,6 +9,7 @@
 // The registry itself is canon's now (`happening_` entities, exported in `places.json`), and the
 // last block holds the adapter to what canon actually ships.
 
+import { createRequire } from 'node:module';
 import { describe, expect, it } from 'vitest';
 import {
   type Circumstance,
@@ -23,6 +24,11 @@ import {
 import { fieldMap, poi } from '../src/content/places';
 import knowledgeBundle from '../data/canon/knowledge.json';
 import craftingBundle from '../data/canon/crafting.json';
+
+const { idFor, KINDS } = createRequire(import.meta.url)('../tools/build-plates.js') as {
+  idFor: (file: string, word?: string, keepUnderscores?: boolean) => string;
+  KINDS: { event: { word: string; keepUnderscores?: boolean } };
+};
 
 const event = (over: Partial<GameEvent> = {}): GameEvent => ({
   id: 'event_test',
@@ -136,6 +142,18 @@ describe("canon's happenings", () => {
     expect(canHappen(stop!, arriving(at))).toBe(true);
     expect(canHappen(stop!, arriving('poi_somewhere_else'))).toBe(false);
     expect(canHappen(stop!, arriving(null))).toBe(false);
+  });
+
+  /**
+   * **A painting saved under the event's name builds under the event's name.** The card looks its
+   * art up by `art`, which is the canon id, underscores and all; the builder used to hyphenate every
+   * event painting, so `happening_tower_standing.png` would have built as a picture nothing draws.
+   */
+  it('keep their painting names through the builder', () => {
+    const built = (file: string) => idFor(file, KINDS.event.word, KINDS.event.keepUnderscores);
+    for (const e of events) expect(built(`${e.art}.png`)).toBe(e.art);
+    expect(built('ChatGPT happening_where_you_stop.png')).toBe('happening_where_you_stop');
+    expect(built('woven-dream.png')).toBe('woven-dream');
   });
 
   it('wait for what they require to have been seen', () => {

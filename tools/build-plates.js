@@ -91,7 +91,11 @@ const KINDS = {
     size: 512,
     aspect: 4 / 3,
     word: 'event',
-    label: 'event painting'
+    label: 'event painting',
+    // Canon's written happenings are named `happening_tower_standing`, and the card looks a painting
+    // up by the event's id. Hyphenating it would build a picture no event ever draws -- the trap the
+    // face pool fell into first. Woven names are hyphenated already and are unaffected.
+    keepUnderscores: true
   },
   /**
    * An activity scene: the painting at the top of the activity modal.
