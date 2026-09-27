@@ -374,3 +374,34 @@ describe('one event leads to another', () => {
     }
   });
 });
+
+describe('walking with a stranger you chose', () => {
+  // Reported from play: no stranger on the road could be spoken to. The action rail now offers to
+  // walk with whoever is beside you, and the card has to be about *them* and has to open when asked.
+  const built = buildFieldMap(fieldMap('field_map_lothal')!, { seed: DEFAULT_SEED });
+  const at = built.placed[0]!.at;
+  const morning = { timeOfDay: 'morning', weather: 'clear' };
+
+  it('is about the stranger beside you, not whichever the road would pick', () => {
+    const roll = rollAt(built.world.seed, at, 'walk-with');
+    const strangers = ['company_carrier', 'company_pilgrim'];
+    for (const id of strangers) {
+      const around = surroundingsAt(built.world, at, 'field_map_lothal', morning, roll, { strangerId: id });
+      expect(around?.stranger?.id, `asked for ${id}`).toBe(`field_map_lothal:${id}`);
+    }
+  });
+
+  it('opens when asked, even when the road has had company lately', () => {
+    const roll = rollAt(built.world.seed, at, 'walk-with');
+    const around = surroundingsAt(built.world, at, 'field_map_lothal', morning, roll, {
+      strangerId: 'company_carrier'
+    })!;
+    const key = around.stranger!.id;
+    // Met yesterday, and the road's own pacing would refuse a second meeting for days.
+    const yesterday = now('road', { day: 4, met: [key], last: { [`woven:company-again:${key}`]: 3 } });
+    expect(wovenFor(yesterday, around, roll, 'company-again'), 'the road should refuse this on its own').toEqual([]);
+
+    const asked = happeningNow(yesterday, roll, around, [], { kind: 'company-again', asked: true });
+    expect(asked?.id, 'asking did not open the card').toBe(`woven:company-again:${key}`);
+  });
+});

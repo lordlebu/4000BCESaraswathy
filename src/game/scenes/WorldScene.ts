@@ -175,6 +175,7 @@ import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
 import {
   hoursFor,
+  nearby,
   placedCircuit,
   travellerState,
   travellersOn,
@@ -420,6 +421,10 @@ export class WorldScene extends Phaser.Scene {
    * than the render it saves, and `travellers-changed` exists to be rare.
    */
   private travellerStatesSent = '';
+  /** Where each walking traveller was last drawn, after `untangle`. Nobody resting is in it. */
+  private travellerTiles = new Map<string, Point>();
+  /** The last `travellers-nearby` sent, so an unchanged answer is not sent again. */
+  private nearbySent = '';
 
   /** The last phase the travellers were moved for, so they are not recomputed every frame. */
   private travellersMovedAt = -1;
@@ -623,6 +628,8 @@ export class WorldScene extends Phaser.Scene {
     this.travellers = [];
     this.travellersMovedAt = -1;
     this.travellerStatesSent = '';
+    this.travellerTiles = new Map();
+    this.nearbySent = '';
     this.wanderers = [];
     this.wanderersMovedAt = -1;
     this.visitors = [];
@@ -2095,6 +2102,9 @@ export class WorldScene extends Phaser.Scene {
         visible: sprite.visible,
         x: Math.round(sprite.x),
         y: Math.round(sprite.y),
+        // The tile they are drawn on after `untangle`, or null while resting. So a spec can stand
+        // somebody beside them without guessing a coordinate -- see `e2e/road-talk.spec.ts`.
+        tile: this.travellerTiles.get(traveller.id) ?? null,
         // **How big they are drawn, and the player's own size to compare it against.** A ratio the
         // scene applies is not provable from Node: `travellerScale` can be right while
         // `createTravellers` uses the other one, which is exactly what it did.
@@ -2276,6 +2286,7 @@ export class WorldScene extends Phaser.Scene {
       where: whereabouts(this.world, stops, day, phase, hoursFor(traveller.id))
     }));
     const room = untangle(this.world, placed, [this.at]);
+    this.travellerTiles = room;
     this.travellers.forEach(({ sprite }, i) => {
       const where = placed[i]!.where;
       if (!where || where.resting) {
@@ -2299,6 +2310,25 @@ export class WorldScene extends Phaser.Scene {
     });
 
     this.reportTravellers(day, phase);
+    this.reportNearby();
+  }
+
+  /**
+   * Tell React who is walking near the player, when that changes.
+   *
+   * Ids and a step count, never tiles -- React holds no tiles. Asked after travellers move and after
+   * the player does, since either can bring somebody alongside.
+   */
+  private reportNearby(): void {
+    const close = nearby(this.travellerTiles, this.at).map(({ id, beside }) => ({
+      id,
+      npcId: this.travellers.find((t) => t.traveller.id === id)?.traveller.npcId ?? null,
+      beside
+    }));
+    const key = JSON.stringify(close);
+    if (key === this.nearbySent) return;
+    this.nearbySent = key;
+    EventBus.emit('travellers-nearby', { travellers: close });
   }
 
   /**
@@ -2626,6 +2656,7 @@ export class WorldScene extends Phaser.Scene {
       atLandmark
     });
     EventBus.emitEvent('journey-changed', { discovered: [...this.discovered] });
+    this.reportNearby();
 
     // What is under foot, every time it changes. The UI decides whether that opens anything;
     // the scene only reports the ground, which is the division everywhere else in this file.

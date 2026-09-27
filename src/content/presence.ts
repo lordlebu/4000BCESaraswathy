@@ -137,3 +137,45 @@ export function companyLine(presence: Presence): string | null {
   for (const a of away) parts.push(a.says);
   return parts.join(' ');
 }
+
+/** Somebody on the road the player can walk up to, as the action rail offers them. */
+export interface RoadTalk {
+  travellerId: string;
+  /** The canon person, whose conversation opens. Null for a stranger, who walks with you instead. */
+  npcId: string | null;
+  label: string;
+  /** Why not yet, or null when they are beside you. */
+  blocked: string | null;
+}
+
+/**
+ * The action-rail row for the nearest person on the road, or null when nobody is near.
+ *
+ * **Greyed until you are beside them, and that is the teaching.** Reported from play: nobody on the
+ * road could be spoken to. A row that appears as somebody comes into view, saying who they are and
+ * to walk up beside them, is how a player learns the road has people to meet. `near` is the scene's
+ * `travellers-nearby`, closest first; `met` is the save's list of strangers met, keyed by map.
+ */
+export function roadTalk(
+  near: readonly { id: string; npcId: string | null; beside: boolean }[],
+  fieldMapId: string,
+  met: readonly string[]
+): RoadTalk | null {
+  const first = near[0];
+  if (!first) return null;
+  const traveller = travellersOn(fieldMapId).find((t) => t.id === first.id);
+  if (!traveller) return null;
+  const known = met.includes(`${fieldMapId}:${traveller.id}`) && traveller.givenName !== null;
+  const who = traveller.npcId
+    ? traveller.name
+    : known
+      ? traveller.givenName!
+      : `the ${traveller.role.split(',')[0]}`;
+  const Who = who[0]!.toUpperCase() + who.slice(1);
+  return {
+    travellerId: traveller.id,
+    npcId: traveller.npcId,
+    label: traveller.npcId ? `Talk to ${who}` : `Walk with ${who}`,
+    blocked: first.beside ? null : `${Who} is on the road nearby. Walk up beside them.`
+  };
+}

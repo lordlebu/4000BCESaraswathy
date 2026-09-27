@@ -635,6 +635,43 @@ export function untangle(
 }
 
 /**
+ * How far off somebody on the road counts as nearby: close enough that the action rail names them.
+ *
+ * Six tiles is about what the camera shows either side of the player at its closest, so a row never
+ * names somebody the player cannot see.
+ */
+export const NEARBY_TILES = 6;
+
+/** Somebody walking near the player, and whether they are close enough to talk to. */
+export interface Nearby {
+  id: string;
+  /** Steps away, counting diagonals as one. */
+  steps: number;
+  /** Beside the player: one tile, including diagonals. What talking needs. */
+  beside: boolean;
+}
+
+/**
+ * Who is walking near the player, closest first.
+ *
+ * **This is what makes the road a place people can be met.** Reported from play: nobody on the
+ * road could be spoken to, and the only stranger who ever talked was the princess, because she
+ * walks up to you. Takes the tiles `untangle` gave out, so it answers about where people are drawn.
+ */
+export function nearby(
+  drawn: ReadonlyMap<string, Point>,
+  player: Point,
+  range: number = NEARBY_TILES
+): Nearby[] {
+  const out: Nearby[] = [];
+  for (const [id, at] of drawn) {
+    const steps = Math.max(Math.abs(at.x - player.x), Math.abs(at.y - player.y));
+    if (steps <= range) out.push({ id, steps, beside: steps <= 1 });
+  }
+  return out.sort((a, b) => a.steps - b.steps || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+}
+
+/**
  * The stops of a circuit, resolved to tiles.
  *
  * Takes the placed points of interest rather than looking them up, because where a place landed is

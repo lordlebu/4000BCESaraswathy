@@ -139,6 +139,16 @@ export interface GameToUi {
   };
 
   /**
+   * Who is walking near the player, closest first, and who is close enough to talk to.
+   *
+   * Sent when it changes. Ids rather than tiles, for the same reason as `travellers-changed`: React
+   * turns this into a row on the action rail, "Talk to Kunch", and needs to know who, not where.
+   */
+  'travellers-nearby': {
+    travellers: { id: string; npcId: string | null; beside: boolean }[];
+  };
+
+  /**
    * The traveller reached an authored place for the first time this journey.
    *
    * Separate from `standing-on` on purpose. That one is a *state* the UI depends on — it fires

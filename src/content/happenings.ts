@@ -100,7 +100,7 @@ export function surroundingsAt(
   fieldMapId: string,
   moment: { timeOfDay: string; weather: string } | null,
   roll: Roll,
-  extra: { poiId?: string | null; taken?: readonly string[] } = {}
+  extra: { poiId?: string | null; taken?: readonly string[]; strangerId?: string | null } = {}
 ): Surroundings | null {
   const tile = world.tiles[at.y]?.[at.x];
   if (!tile) return null;
@@ -110,7 +110,9 @@ export function surroundingsAt(
     .map((id) => poi(id))
     .filter((p): p is PointOfInterest => p !== null);
   const company = travellersOn(fieldMapId).filter((t) => t.npcId === null && t.look !== null);
-  const who = company.length > 0 ? company[roll('stranger') % company.length]! : null;
+  // The stranger the player walked up to, when there is one. Otherwise the road chooses.
+  const chosen = extra.strangerId ? (company.find((t) => t.id === extra.strangerId) ?? null) : null;
+  const who = chosen ?? (company.length > 0 ? company[roll('stranger') % company.length]! : null);
   return {
     biome: tile.biome,
     onRoad: Boolean(tile.road),
@@ -562,12 +564,20 @@ function mayHappen(event: GameEvent, kind: string, now: Circumstance): boolean {
 }
 
 /** Every woven event that could happen right now, before the ration. For tests and for tuning. */
-export function wovenFor(now: Circumstance, around: Surroundings, roll: Roll, kind?: string): GameEvent[] {
+export function wovenFor(
+  now: Circumstance,
+  around: Surroundings,
+  roll: Roll,
+  kind?: string,
+  asked = false
+): GameEvent[] {
   const out: GameEvent[] = [];
   for (const template of TEMPLATES[now.occasion]) {
     if (kind && template.kind !== kind) continue;
     const event = template.make(around, roll, now);
-    if (event && mayHappen(event, template.kind, now)) out.push(event);
+    // **Asked for, it happens.** Cooldowns and `again_after` pace what the road offers on its own;
+    // they are not a reason to refuse somebody who walked up to a stranger and chose to talk.
+    if (event && (asked || mayHappen(event, template.kind, now))) out.push(event);
   }
   return out;
 }
@@ -625,13 +635,14 @@ export function pickWoven(could: readonly GameEvent[], now: Circumstance, roll: 
  *
  * `force` is for the inspector: skip the ration, and optionally ask for one `kind`. It is how a
  * browser test, or somebody writing a new template, opens a card without walking for three days.
+ * `asked` is the player choosing it -- walking with a stranger -- and skips the storylet pacing too.
  */
 export function happeningNow(
   now: Circumstance,
   roll: Roll,
   around: Surroundings | null,
   from: readonly GameEvent[] = authored,
-  force: { kind?: string } | null = null
+  force: { kind?: string; asked?: boolean } | null = null
 ): GameEvent | null {
   const written = force?.kind ? null : eventNow(now, roll, from);
   if (written || !around) return written;
@@ -640,7 +651,7 @@ export function happeningNow(
     const chance = Math.min(PACE_CEILING, paceFor(now) / WOVEN_ONE_IN[now.occasion]);
     if ((roll(`woven:${now.occasion}:${now.day}`) % 10_000) / 10_000 >= chance) return null;
   }
-  const could = wovenFor(now, around, roll, force?.kind);
+  const could = wovenFor(now, around, roll, force?.kind, force?.asked ?? false);
   if (could.length === 0) return null;
   return pickWoven(could, now, roll);
 }

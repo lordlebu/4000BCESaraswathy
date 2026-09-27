@@ -64,7 +64,7 @@ import { EventCard } from './EventCard';
 import { type Choice, type GameEvent, type Occasion } from '../content/events';
 import { happeningNow, surroundingsAt } from '../content/happenings';
 import { APPROACHES, approachAt, approachId } from '../content/visitors';
-import { whoIsHere } from '../content/presence';
+import { roadTalk, whoIsHere } from '../content/presence';
 import type { Station } from '../content/stations';
 
 /**
@@ -134,6 +134,9 @@ export function App() {
   // Read the save once. Calling loadJourney per state initialiser would parse the same JSON
   // three times and, worse, let the three copies drift.
   const initialJourney = useRef(loadJourney(seedFromUrl()));
+  // Every stranger an event has introduced the player to. Up here rather than with the other event
+  // refs below, because the action rail reads it while rendering, to call somebody by name.
+  const metStrangers = useRef<string[]>(initialJourney.current.met ?? []);
 
   const [seed, setSeed] = useState(seedFromUrl);
   // Who is walking. Part of the journey rather than a setting: a save belongs to a traveller, so
@@ -150,6 +153,8 @@ export function App() {
   // asked for, because only the scene can answer it -- `travellers-changed` says why -- and it
   // changes twice a day, so a listener costs less than a poll.
   const [travellerStates, setTravellerStates] = useState<GameToUi['travellers-changed']['travellers']>([]);
+  // Who is walking near the traveller, closest first -- the scene's answer, for the action rail.
+  const [nearbyTravellers, setNearbyTravellers] = useState<GameToUi['travellers-nearby']['travellers']>([]);
   const [arrival, setArrival] = useState<Arrival | null>(null);
   const [collection, setCollection] = useState<Collection>(initialJourney.current.collection);
   const [memory, setMemory] = useState('');
@@ -287,7 +292,12 @@ export function App() {
         at: { x: number; y: number },
         shelter: string | null,
         salt: string,
-        extra?: { poiId?: string | null; taken?: readonly string[] }
+        extra?: {
+          poiId?: string | null;
+          taken?: readonly string[];
+          strangerId?: string | null;
+          force?: { kind?: string; asked?: boolean };
+        }
       ) => boolean)
     | null
   >(null);
@@ -372,6 +382,7 @@ export function App() {
     };
     const onSky = (next: GameToUi['sky-changed']) => setSkyPhase(next.phase);
     const onTravellers = (next: GameToUi['travellers-changed']) => setTravellerStates(next.travellers);
+    const onNearby = (next: GameToUi['travellers-nearby']) => setNearbyTravellers(next.travellers);
     // Who the scene says it is drawing, which is the only authority on it. The picker sets its
     // own state optimistically; this is what corrects it if the scene ever disagreed.
     const onCharacter = ({ characterId: drawn }: GameToUi['character-changed']) => setDrawn(drawn);
@@ -389,7 +400,12 @@ export function App() {
       at: { x: number; y: number },
       shelter: string | null,
       salt: string,
-      extra: { poiId?: string | null; taken?: readonly string[]; force?: { kind?: string } } = {}
+      extra: {
+        poiId?: string | null;
+        taken?: readonly string[];
+        strangerId?: string | null;
+        force?: { kind?: string; asked?: boolean };
+      } = {}
     ): boolean => {
       const world = latest.current.world;
       if (!world) return false;
@@ -528,6 +544,7 @@ export function App() {
     EventBus.onEvent('moment-changed', onMoment);
     EventBus.onEvent('sky-changed', onSky);
     EventBus.onEvent('travellers-changed', onTravellers);
+    EventBus.onEvent('travellers-nearby', onNearby);
     EventBus.onEvent('character-changed', onCharacter);
     EventBus.onEvent('night-passed', onNight);
     EventBus.onEvent('poi-reached', onArrived);
@@ -541,6 +558,7 @@ export function App() {
       EventBus.offEvent('moment-changed', onMoment);
       EventBus.offEvent('sky-changed', onSky);
       EventBus.offEvent('travellers-changed', onTravellers);
+      EventBus.offEvent('travellers-nearby', onNearby);
       EventBus.offEvent('approached', onApproached);
       EventBus.offEvent('character-changed', onCharacter);
       EventBus.offEvent('night-passed', onNight);
@@ -1002,6 +1020,11 @@ export function App() {
       world && arrival && !ride && canBoardAt(world, arrival.at)
     );
 
+    // Somebody on the road near enough to see. **Asked of `roadTalk`**, which says who they are and
+    // whether they are close enough yet; the row only exists while somebody is in view, and comes
+    // last so a chip that wraps on a small screen is this one rather than one of the steady three.
+    const talk = roadTalk(nearbyTravellers, fieldMapId, metStrangers.current);
+
     return [
       {
         id: 'take',
@@ -1051,9 +1074,34 @@ export function App() {
               }
             } satisfies TileAction
           ]
+        : []),
+      ...(talk
+        ? [
+            {
+              id: 'talk',
+              label: talk.label,
+              mark: talk.npcId ? '💬' : '👣',
+              blocked: talk.blocked,
+              key: 'T',
+              onDo: () => {
+                if (talk.npcId) {
+                  dispatch({ type: 'talk-to', npcId: talk.npcId });
+                  return;
+                }
+                if (!arrival) return;
+                // A stranger has no lines of their own: walking with them is the company card, about
+                // this stranger, opened because the player asked rather than rationed by the road.
+                const key = `${fieldMapId}:${talk.travellerId}`;
+                happens.current?.('road', arrival.at, null, `walk-with:${arrival.day}:${talk.travellerId}`, {
+                  strangerId: talk.travellerId,
+                  force: { kind: metStrangers.current.includes(key) ? 'company-again' : 'company', asked: true }
+                });
+              }
+            } satisfies TileAction
+          ]
         : [])
     ];
-  }, [underfoot, arrival, nodes, standing, pickUp, currentCreature, moment, world]);
+  }, [underfoot, arrival, nodes, standing, pickUp, currentCreature, moment, world, nearbyTravellers, fieldMapId]);
 
   /**
    * A key for each thing you can do here.
@@ -1082,7 +1130,15 @@ export function App() {
       if (activity) return;
 
       const wanted =
-        e.code === 'KeyE' ? 'take' : e.code === 'KeyR' ? 'rest' : e.code === 'KeyB' ? 'ride' : null;
+        e.code === 'KeyE'
+          ? 'take'
+          : e.code === 'KeyR'
+            ? 'rest'
+            : e.code === 'KeyB'
+              ? 'ride'
+              : e.code === 'KeyT'
+                ? 'talk'
+                : null;
       if (!wanted) return;
       const action = tileActions.find((a) => a.id === wanted);
       if (!action || action.blocked) return;
@@ -1146,7 +1202,6 @@ export function App() {
     null
   );
   const seenEvents = useRef<string[]>(initialJourney.current.seenEvents ?? []);
-  const metStrangers = useRef<string[]>(initialJourney.current.met ?? []);
   /** When each event last happened, and the flags choices have left. See `Journey`. */
   const eventDays = useRef<Record<string, number>>(initialJourney.current.eventDays ?? {});
   const journeyFlags = useRef<string[]>(initialJourney.current.flags ?? []);

@@ -8,9 +8,11 @@
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps, npc, npcsAt } from '../src/content/places';
-import { companyLine, whoIsHere, type Reported } from '../src/content/presence';
+import { companyLine, roadTalk, whoIsHere, type Reported } from '../src/content/presence';
 import {
+  NEARBY_TILES,
   hoursFor,
+  nearby,
   placedCircuit,
   travellerState,
   travellersOn,
@@ -150,5 +152,47 @@ describe('the line a place opens with', () => {
       .find(({ p }) => npcsAt(p).length === 0);
     expect(nobody, 'every place has somebody -- pick another fixture').toBeTruthy();
     expect(companyLine(whoIsHere(nobody!.p, nobody!.m, 0, []))).toBeNull();
+  });
+});
+
+describe('meeting people on the road', () => {
+  it('names whoever is closest, and only those in view', () => {
+    const drawn = new Map([
+      ['b', { x: 12, y: 10 }],
+      ['a', { x: 11, y: 11 }],
+      ['far', { x: 30, y: 30 }]
+    ]);
+    const near = nearby(drawn, { x: 10, y: 10 });
+    expect(near.map((n) => n.id)).toEqual(['a', 'b']);
+    expect(near[0]).toEqual({ id: 'a', steps: 1, beside: true });
+    expect(near[1]!.beside).toBe(false);
+    expect(nearby(drawn, { x: 10, y: 10 }, 0)).toEqual([]);
+    expect(near.some((n) => n.id === 'far'), `somebody ${NEARBY_TILES}+ tiles off is named`).toBe(false);
+  });
+
+  it('offers to talk to a named traveller, and walk with a stranger', () => {
+    const lothal = travellersOn('field_map_lothal');
+    const named = lothal.find((t) => t.npcId !== null)!;
+    const stranger = lothal.find((t) => t.npcId === null)!;
+
+    const talk = roadTalk([{ id: named.id, npcId: named.npcId, beside: true }], 'field_map_lothal', []);
+    expect(talk).toEqual({ travellerId: named.id, npcId: named.npcId, label: `Talk to ${named.name}`, blocked: null });
+
+    const walk = roadTalk([{ id: stranger.id, npcId: null, beside: true }], 'field_map_lothal', []);
+    expect(walk?.label).toBe(`Walk with the ${stranger.role.split(',')[0]}`);
+    expect(walk?.npcId).toBeNull();
+
+    // Once met, by the name they gave.
+    const again = roadTalk([{ id: stranger.id, npcId: null, beside: true }], 'field_map_lothal', [
+      `field_map_lothal:${stranger.id}`
+    ]);
+    expect(again?.label).toBe(`Walk with ${stranger.givenName}`);
+  });
+
+  it('greys the row until you are beside them, and says how to get there', () => {
+    const named = travellersOn('field_map_lothal').find((t) => t.npcId !== null)!;
+    const far = roadTalk([{ id: named.id, npcId: named.npcId, beside: false }], 'field_map_lothal', []);
+    expect(far?.blocked).toBe(`${named.name} is on the road nearby. Walk up beside them.`);
+    expect(roadTalk([], 'field_map_lothal', [])).toBeNull();
   });
 });
