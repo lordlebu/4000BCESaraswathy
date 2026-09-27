@@ -52,6 +52,7 @@ import {
   isComplete,
   knowsQuestion,
   knowsRecipe,
+  reasonToSpeak,
   receiveAll,
   rungOf,
   type WorldMoment
@@ -77,11 +78,18 @@ import { type Choice, type GameEvent, type Occasion } from '../content/events';
 import { happeningNow, surroundingsAt } from '../content/happenings';
 import { APPROACHES, approachAt, approachId } from '../content/visitors';
 import { peopleAtPlaces, roadTalk, whoIsHere } from '../content/presence';
+import { type Bumped, whoSpeaksFirst } from '../content/bumping';
 import { rumourAt, rumourFor, rumoursOn } from '../content/rumours';
 import { standingOn as howKnownOn, warmTo } from '../content/standing';
 import { offeredAt } from '../content/knowledge';
 import type { Talk } from '../content/happenings';
 import type { Station } from '../content/stations';
+
+/**
+ * How long after walking into a place somebody there may call out. Long enough for the arrival's own
+ * beat -- the zoom, an approach, a card -- to have taken the moment if it was going to.
+ */
+const SPEAK_FIRST_AFTER_MS = 1500;
 
 /**
  * The gestures whose subject is an animal, so the card shows its plate rather than a scene.
@@ -1060,6 +1068,95 @@ export function App() {
     [progress, fieldMapId, arrival?.day, travellerStates, world]
   );
 
+  /**
+   * Somebody speaking first, when the player bumps into them.
+   *
+   * The owner's brief: named people especially, and especially on a first meeting or when they want
+   * something. Who has a reason is `reasonToSpeak`; who actually speaks, on a seeded chance and at
+   * most once a day each, is `whoSpeaksFirst`. Never while anything else is on screen: a card, a
+   * conversation, an activity or a dialog already has the moment.
+   *
+   * Kept in a ref and rebuilt each render, because the place check runs on a timer and must read
+   * the state as it is when the timer fires, not as it was when it was set.
+   */
+  const spokenFirst = useRef(new Set<string>());
+  /**
+   * Whether anybody may speak first at all. **Off under browser automation, by the same reasoning
+   * as the front door**: fifty-odd browser tests walk into places and choose somebody from the list,
+   * and a person calling out a moment later would race every one of them. `?chatter=on` asks for it
+   * back, and `e2e/speaks-first.spec.ts` does.
+   */
+  const [chatter] = useState(() => {
+    const asked = new URLSearchParams(window.location.search).get('chatter');
+    if (asked === 'on') return true;
+    if (asked === 'off') return false;
+    return !navigator.webdriver;
+  });
+  const speakFirst = useRef<(near: readonly Bumped[]) => void>(() => {});
+  speakFirst.current = (near) => {
+    if (!chatter || !world || !arrival || happening || ui.talkingTo || activity || atTheDoor) return;
+    if (Object.values(interrupts).some(Boolean)) return;
+    const day = arrival.day;
+    const who = whoSpeaksFirst(
+      near,
+      day,
+      spokenFirst.current,
+      (salt) => (tileHash(world.seed, 0, 0, salt) % 10_000) / 10_000
+    );
+    if (!who) return;
+    spokenFirst.current.add(`${who.key}@${day}`);
+    if (who.npcId) {
+      if (who.reason === 'first') journeyFlags.current = [...journeyFlags.current, `spoke:${who.npcId}`];
+      dispatch({ type: 'talk-to', npcId: who.npcId });
+      return;
+    }
+    if (!who.travellerId) return;
+    const met = metStrangers.current.includes(who.key);
+    happens.current?.('road', arrival.at, null, `spoke-first:${day}:${who.travellerId}`, {
+      strangerId: who.travellerId,
+      talk: met ? talkFor(who.travellerId, arrival.at) : null,
+      force: { kind: met ? 'small-talk' : 'company', asked: true }
+    });
+  };
+
+  /** Who has a reason to speak first, of the named people given. */
+  const bumpedNamed = useCallback(
+    (npcIds: readonly string[], travellerOf: (npcId: string) => string | null): Bumped[] =>
+      npcIds.flatMap((npcId) => {
+        const reason = reasonToSpeak(progress, npcId, satchel, journeyFlags.current.includes(`spoke:${npcId}`));
+        return reason ? [{ key: npcId, npcId, travellerId: travellerOf(npcId), reason }] : [];
+      }),
+    [progress, satchel]
+  );
+
+  // On the road: whoever has just come alongside.
+  useEffect(() => {
+    const beside = nearbyTravellers.filter((t) => t.beside);
+    if (beside.length === 0) return;
+    const named = bumpedNamed(
+      beside.flatMap((t) => (t.npcId ? [t.npcId] : [])),
+      (npcId) => beside.find((t) => t.npcId === npcId)?.id ?? null
+    );
+    const strangers: Bumped[] = beside
+      .filter((t) => t.npcId === null)
+      .map((t) => ({ key: `${fieldMapId}:${t.id}`, npcId: null, travellerId: t.id, reason: 'passing' }));
+    speakFirst.current([...named, ...strangers]);
+  }, [nearbyTravellers, bumpedNamed, fieldMapId]);
+
+  // In a place: whoever is here, a moment after walking in, once the arrival has had its turn --
+  // the princess walking up, a rumour kept, a card. The timer reads the state it finds then.
+  useEffect(() => {
+    if (!standingOn || !presence || presence.here.length === 0) return;
+    const named = bumpedNamed(
+      presence.here.map((n) => n.id),
+      () => null
+    );
+    if (named.length === 0) return;
+    const timer = window.setTimeout(() => speakFirst.current(named), SPEAK_FIRST_AFTER_MS);
+    return () => window.clearTimeout(timer);
+    // Only on walking in: a change of who is here while you stand there is not bumping into them.
+  }, [standingOn]);
+
   const tileActions = useMemo<TileAction[]>(() => {
     // What is left here and how much of it comes up, so the row can say both *before* the
     // player commits. The whole design rests on this being visible rather than rolled: a stand
@@ -1264,7 +1361,6 @@ export function App() {
    */
   const knowsRecipeHere = useCallback(
     (recipeId: string) => knowsRecipe(progress, recipeId),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [progress.recipes]
   );
 

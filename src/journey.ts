@@ -9,6 +9,7 @@
 // that wants to know whether a discovery can advance calls `canAdvance`, and does not
 // reimplement the ladder.
 
+import { asksSomething } from './content/bumping';
 import {
   type Discovery,
   type FieldQuestion,
@@ -430,6 +431,31 @@ export function isFirstMeeting(progress: Progress, npcId: string): boolean {
   const who = npc(npcId);
   if (!who) return false;
   return !who.lines.some((l) => l.gives.length > 0 && lineIsSpent(progress, l));
+}
+
+/**
+ * Why this person might speak first, or null when they have no reason to.
+ *
+ * `'first'` for somebody never spoken to, and `'wants'` for somebody with a line that asks
+ * something of the player -- see `asksSomething` in `content/bumping.ts`. A person with nothing new
+ * to say has no reason: calling you over to repeat themselves would be a chore. Whether they
+ * actually do speak first, and how often, is `whoSpeaksFirst`'s.
+ *
+ * `spokeBefore` is whether they have already called out a first meeting, which the caller keeps in
+ * the journey's flags -- somebody whose lines hand nothing over reads as a first meeting on every
+ * visit, and must introduce themselves unprompted only once.
+ */
+export function reasonToSpeak(
+  progress: Progress,
+  npcId: string,
+  carrying: Satchel,
+  spokeBefore: boolean
+): 'first' | 'wants' | null {
+  const lines = linesFor(progress, npcId, carrying);
+  if (lines.length === 0) return null;
+  if (!spokeBefore && isFirstMeeting(progress, npcId)) return 'first';
+  if (lines.some((l) => asksSomething(l, lineIsSpent(progress, l)))) return 'wants';
+  return null;
 }
 
 /**
