@@ -211,6 +211,120 @@ Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and t
 
 ---
 
+## The holders of ground — asked 27 September 2026
+
+The Settling In plan's six new people: the ones who hold the ground a traveller asks to build on.
+Same four shared paragraphs as the eight above, so they sit beside them. Until one arrives the
+profile draws the ink figure with the tool of their trade.
+
+### Hasme, morol of the camp, Lothal
+
+Save what comes back as anything you like, then build it. The file becomes `hasme.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A woman in late middle age who is the one the camp asks when a thing has to be decided about ground, holding a bundle of notched tally sticks tied with cord. A pale salt-crusted field and a line of trees behind her. She has kept everybody off that field for years and thinks it a kindness.
+
+Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
+```
+
+### Drel, rice-cutter, dada of the granary, Lothal
+
+Save what comes back as anything you like, then build it. The file becomes `drel.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A wiry man in middle age with a short curved sickle held low, a few stalks of red rice in his other hand. An old brick wall with rice growing along its top behind him. He got to the granary first every autumn and has come to think of it as his.
+
+Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
+```
+
+### Ushi, keeper of the salt orchard, Dwarka
+
+Save what comes back as anything you like, then build it. The file becomes `ushi.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A woman in middle age with a clay watering jar on her hip, sleeves pushed up, mud to the wrists. A row of dry-country fruit trees behind her, the nearer ones healthy. She has always known it is not the salt, and has stopped expecting anyone to ask.
+
+Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
+```
+
+### Jarro, dada of the Caravan Ground, Dwarka
+
+Save what comes back as anything you like, then build it. The file becomes `jarro.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A broad, weathered man in middle age with a full water-skin slung by its neck from one hand, the other resting on it. A stone well-head and a bit of pale desert behind him. He keeps the well, is paid for it in water, and is patient with people who have not understood why the road goes the long way.
+
+Bias the surrounding wash cool blue-green (#3d7a8c) - a tint in the paper and the shadows, not a costume.
+```
+
+### Ardhi, steward of the University’s ground, Narmada
+
+Save what comes back as anything you like, then build it. The file becomes `ardhi.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A precise woman in middle age holding a tall wooden surveyor's rod marked in alternating ticks, a folded ground-book tucked under her arm. The edge of a long hall and open grass behind her. She has trusted the survey for nineteen years and is not wrong to; only about where it starts.
+
+Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
+```
+
+### Tolla, head herder, dada of the high grazing, Narmada
+
+Save what comes back as anything you like, then build it. The file becomes `tolla.png`.
+
+```text
+Watercolour portrait from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black.
+
+One person, head and shoulders only: the head fills the upper third of the frame and the picture ends at the top of the chest, with at most a hint of their tool at the lower edge. Seen three-quarter or side-on, with only a suggestion of where they are behind them - a few strokes, not a landscape. A working person caught mid-task or holding the tool of their trade, fully clothed in plain undyed cloth that covers the shoulders and chest. Calm and unhurried; nobody is posing, nobody is presiding, and nobody is smiling for a picture.
+
+Not a portrait of an important person: no jewellery, no insignia, no headdress, no fine fabric, no staff, no robe. Not an elder or a sage. Not a nude, a torso study, or a half-length figure - this is a head-and-shoulders portrait of somebody at work.
+
+Square image, 1024x1024. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature, no grid.
+
+Subject: A lean man in middle age with a herder's crook, felt cloak pulled round his shoulders against the wind, hair blown sideways. A green stone terrace and a drop of open sky behind him. He decides which goats go on which step and has never trusted the wind at the edge.
+
+Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
+```
+
 ## Why the prompts say what they say
 
 Nothing here is a step to follow — all of it is already inside every block above. It is written

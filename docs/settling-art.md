@@ -139,6 +139,111 @@ Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - see
 Subject: Evening in a new small settlement among trees: a pale ceramic windmill tower with turning sails rising above the forest canopy, a glasshouse glowing warm from inside beside it, and a few people carrying bundles and a rolled mat along a path towards them, seen from behind and at a distance. Lamps being lit. Warm and quiet, a sense of arriving home.
 ```
 
+## Dwarka and the Narmada — asked 27 September 2026
+
+**Both maps settle now** (canon 2.35.0), and until these arrive they draw Lothal's mill and
+glasshouse, which is wrong in a way a player will notice: Dwarka builds a **wind-pump over a well**
+with a solar still beside it, because what a cold desert lacks is sweet water; the Narmada builds a
+**mill on the scarp edge**, turned by the lift that comes up the escarpment. The unfinished stages
+keep Lothal's scaffold sprites -- a scaffold is a scaffold -- so each map asks only for its finished
+building, as a tower and a separate vane wheel exactly like the mill already in the game.
+
+#### `windpump-tower` — Dwarka's wind-pump, without its vanes
+
+Save as `assets/source/windpump-tower.png`.
+
+The finished building on Dwarka: a wind-pump over the Caravan Ground's well, or the salt orchard's.
+
+Where it shows: on the chosen ground on Dwarka, on sand and dry grass, once the third stage is built. Two tiles tall.
+
+Shape: 128 × 256 on the grid, twice as tall as wide, bottom-anchored. The vanes are a separate image.
+
+```text
+16-bit SNES pixel art, seen from slightly above and in front, on a solid pure magenta background, hex #FF00FF. The same solarpunk craft as the ceramic windmill already in the game - clean, cared-for, pale honey-coloured wood with pegged joints and the grain showing, living plants where they can take hold - but built for a cold desert harbour town: dressed sandstone and pale timber rather than glazed ceramic. Limited palette, hard pixel edges, no anti-aliasing, no outline, no drop shadow, no ground, no sky, no text, no labels. Draw one image only: not a sequence, not a sprite sheet, not a grid, not the same building twice.
+
+Subject: A tall open lattice tower of pale weathered poles, guyed with thick three-strand rope to pegs, standing on a round well-head of dressed sandstone blocks. A pump rod runs down the middle of the lattice into the well; a small wooden trough on the well-head catches the water. At the top of the tower, a round hub where vanes would attach, but no vanes. The image is twice as tall as it is wide, and the tower stands on the bottom edge with empty magenta above it.
+
+Negative: steampunk, iron, rivets, rust, soot, gears, pipes, Victorian, oil derrick, vanes, blades, sails, windmill cap, multiple frames, sprite sheet
+```
+
+#### `windpump-vanes` — Dwarka's wind-pump vanes
+
+Save as `assets/source/windpump-vanes.png`.
+
+The pump's turning wheel. The game spins it on the hub, on the same clock as the Grit Mill's.
+
+Where it shows: on the hub at the top of `windpump-tower`.
+
+Shape: square, face-on, the hub dead centre. Built to 96 × 96 like the mill's blades.
+
+```text
+16-bit SNES pixel art, seen from slightly above and in front, on a solid pure magenta background, hex #FF00FF. Seen straight on, face-on, perfectly centred, as a flat wheel. Limited palette, hard pixel edges, no anti-aliasing, no outline, no drop shadow, no ground, no sky, no text, no labels. Draw one image only: not a sequence, not a sprite sheet, not a grid, not the same building twice.
+
+Subject: A many-bladed wind-pump wheel of split bamboo slats, twelve to sixteen narrow vanes set at a slight angle round a small wooden hub, bound at the rim with rope. Pale honey bamboo, a little sun-bleached. Nothing else in the image.
+
+Negative: tower, pole, ground, perspective, tilted, iron, metal, rivets, fewer than twelve vanes, four sails, multiple frames, sprite sheet
+```
+
+#### `still-house` — Dwarka's solar still
+
+Save as `assets/source/still-house.png`.
+
+Beside the pump, in place of Lothal's glasshouse: shallow trays of brine under slanted glass, where the sun takes the salt and leaves the water.
+
+Where it shows: one tile beside the pump on Dwarka, once the third stage is built.
+
+Shape: 256 × 192 on the grid, the same cell as the greenhouse, bottom-anchored.
+
+```text
+16-bit SNES pixel art, seen from slightly above and in front, on a solid pure magenta background, hex #FF00FF. The same solarpunk glasswork as the Quiet Atelier's greenhouse - pale wood frames, clear pale-green glass, clean and cared-for - but low and long, built for sun rather than for plants. Limited palette, hard pixel edges, no anti-aliasing, no outline, no drop shadow, no ground, no sky, no text, no labels. Draw one image only: not a sequence, not a sprite sheet, not a grid, not the same building twice.
+
+Subject: A low, long glasshouse only knee-to-waist high, its roof panes slanted towards the sun in a shallow ridge, sitting on a sandstone footing. Through the glass, shallow clay trays of pale brine with salt crusting at the edges, and beads of fresh water running down the inside of the panes into a wooden gutter that drips into a covered clay jar at one end. Two young date palms in pots beside it.
+
+Negative: tall greenhouse, conservatory, dome, iron frame, rivets, rust, steampunk, plastic, modern, multiple frames, sprite sheet
+```
+
+#### `scarp-mill-tower` — The Narmada's scarp mill, without its sails
+
+Save as `assets/source/scarp-mill-tower.png`.
+
+The finished building on the Narmada: a mill on level ground near the University's yard or on the herders' top terrace, turned by the wind that stands up the scarp.
+
+Where it shows: on the chosen ground on the Narmada plateau, on grass and hill, once the third stage is built. Two tiles tall.
+
+Shape: 128 × 256 on the grid, twice as tall as wide, bottom-anchored. The sails are a separate image.
+
+```text
+16-bit SNES pixel art, seen from slightly above and in front, on a solid pure magenta background, hex #FF00FF. The same solarpunk craft as the ceramic windmill already in the game - clean, cared-for, living plants where they can take hold - but built from the plateau's own black basalt and pale cane. Limited palette, hard pixel edges, no anti-aliasing, no outline, no drop shadow, no ground, no sky, no text, no labels. Draw one image only: not a sequence, not a sprite sheet, not a grid, not the same building twice.
+
+Subject: A slender tower of pale bamboo cane, lashed at every joint with dark sinew, rising from a squat round footing of squared black basalt blocks. The tower tapers a little towards the top, where a small wooden cap carries a hub for sails, but no sails. A little moss and a flowering creeper on the basalt footing. The image is twice as tall as it is wide, and the tower stands on the bottom edge with empty magenta above it.
+
+Negative: steampunk, iron, rivets, rust, soot, gears, pipes, Victorian, sails, blades, vanes, stone tower, brick, multiple frames, sprite sheet
+```
+
+#### `scarp-mill-sails` — The Narmada mill's sails
+
+Save as `assets/source/scarp-mill-sails.png`.
+
+The mill's turning wheel. The game spins it on the hub.
+
+Where it shows: on the hub at the top of `scarp-mill-tower`.
+
+Shape: square, face-on, the hub dead centre. Built to 96 × 96 like the mill's blades.
+
+```text
+16-bit SNES pixel art, seen from slightly above and in front, on a solid pure magenta background, hex #FF00FF. Seen straight on, face-on, perfectly centred, as a flat wheel. Limited palette, hard pixel edges, no anti-aliasing, no outline, no drop shadow, no ground, no sky, no text, no labels. Draw one image only: not a sequence, not a sprite sheet, not a grid, not the same building twice.
+
+Subject: Four long windmill sails of scraped pale goat hide stretched on bamboo cane frames, laced to the spars with cord, round a small wooden hub. Warm cream and pale tan hide, a little translucent where the light comes through. Nothing else in the image.
+
+Negative: tower, pole, ground, perspective, tilted, canvas, iron, metal, more than four sails, multiple frames, sprite sheet
+```
+
+#### And the people who hold the ground
+
+Six portraits, in `docs/portrait-prompts.md` under **The holders of ground**: Hasme and Drel on
+Lothal, Ushi and Jarro on Dwarka, Ardhi and Tolla on the Narmada. Until one arrives the profile
+draws the ink figure with the tool of their trade, as it does for every stranger.
+
 ## What arrived — 27 September 2026
 
 **All six.** None had a fault that needed more than a crop, so none was sent back.
