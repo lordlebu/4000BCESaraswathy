@@ -262,6 +262,12 @@ export interface UiToGame {
    */
   'people-at-places': { places: { poiId: string; people: { npcId: string; fresh: boolean }[] }[] };
   /**
+   * The homestead on this map: the place whose ground it stands beside, and how many of its stages
+   * stand. Null place, or nought stages, draws nothing. React holds the journey's flags and asks
+   * `content/homestead.ts`; the scene draws what it is told.
+   */
+  'homestead-changed': { poiId: string | null; stage: number };
+  /**
    * Take some of the walking back out of the traveller's legs.
    *
    * Sent when a remedy or a meal is used. A fraction of the tiredness currently carried rather

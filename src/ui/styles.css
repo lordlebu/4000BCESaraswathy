@@ -2503,6 +2503,44 @@ button.ghost:hover:not(:disabled) {
  * **256, not the plate's 384, and never more.** Portraits and stranger faces are built to 256 square
  * by `tools/build-plates.js`; drawn larger a watercolour goes soft, which is the fading the owner
  * asked this card to avoid. Narrower screens shrink it, never the other way. See `Profile.tsx`. */
+/* The settled page's painting: the people moving in, across the top, at the size it was built. */
+.ending-picture {
+  display: block;
+  width: min(512px, 100%);
+  aspect-ratio: 4 / 3;
+  margin: 0 auto 0.75rem;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.ending-settled {
+  margin: 0.4rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+/* Building at a homestead's ground, in the place panel. */
+.settling-title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.settling-line {
+  margin: 0.3rem 0 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* What the holder is still worried about, set apart from what they just said. */
+.negotiation-worry {
+  font-style: italic;
+}
+
+/* The negotiation holds more choices than any event card, so its painting gives up height: still
+ * the painting, cropped to a band a third of the screen tall, so the answers fit without a hunt. */
+.negotiation .activity-scene {
+  max-height: 34vh;
+}
+
 .profile-card-image {
   display: flex;
   justify-content: center;

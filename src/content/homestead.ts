@@ -257,14 +257,14 @@ export function optionsFor(homestead: Homestead, ground: Ground, holdings: Holdi
   const onMap = mapDiscoveries(homestead.fieldMapId);
   for (const d of holdings.finished) {
     if (!onMap.has(d) && !named.has(d)) continue;
-    out.push({ kind: 'show', id: d, label: `Show what you understood of ${discovery(d)?.name ?? d}` });
+    out.push({ kind: 'show', id: d, label: `Show: ${discovery(d)?.name ?? d}` });
   }
   for (const who of holdings.helped) {
     if (!peopleHere.includes(who) || who === ground.heldBy) continue;
-    out.push({ kind: 'vouch', id: who, label: `Ask ${npc(who)?.name ?? who} to speak for you` });
+    out.push({ kind: 'vouch', id: who, label: `Vouch: ${npc(who)?.name ?? who} speaks for you` });
   }
   for (const [id, n] of Object.entries(holdings.carried).slice(0, 4)) {
-    if (n > 0) out.push({ kind: 'offer', id, label: `Offer ${nameOf(id)}` });
+    if (n > 0) out.push({ kind: 'offer', id, label: `Offer: ${nameOf(id)}` });
   }
   return out;
 }

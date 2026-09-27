@@ -22,9 +22,16 @@ import { useRef } from 'react';
 import { type Progress, gatherable, linesFor, restored, staying } from '../journey';
 import { npc, poi } from '../content/places';
 import { Modal } from './Modal';
+import { art } from './art';
 
 export interface EndingProps {
   progress: Progress;
+  /**
+   * The homestead settled on this map, when there is one: it heads the page, with the painting of
+   * the people moving in and what canon says of it, and the page speaks for this map's people only.
+   * Null before settling, when the page is the old "if you stopped here".
+   */
+  settlement?: { name: string; prose: string; people: readonly string[] } | null;
   open: boolean;
   onClose: () => void;
 }
@@ -40,7 +47,7 @@ function refusal(progress: Progress, npcId: string): string | null {
   return linesFor(progress, npcId).at(-1)?.text ?? null;
 }
 
-export function Ending({ progress, open, onClose }: EndingProps) {
+export function Ending({ progress, settlement = null, open, onClose }: EndingProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   // Escape, the focus trap and putting focus back belong to `Modal`. What stays here is where
@@ -48,17 +55,22 @@ export function Ending({ progress, open, onClose }: EndingProps) {
 
   if (!open) return null;
 
-  const coming = gatherable(progress);
-  const stays = staying(progress);
+  // Settled, the page is about this map: who moves in here and who stays where they are.
+  const here = (id: string) => !settlement || settlement.people.includes(id);
+  const coming = gatherable(progress).filter(here);
+  const stays = staying(progress).filter(here);
+  const picture = settlement ? art('events', 'settle-home') : null;
   const put = restored(progress);
   const nobody = coming.length === 0 && stays.length === 0;
 
   return (
-    <Modal open label="If you stopped here" onClose={onClose} initialFocus={closeRef}>
+    <Modal open label={settlement ? settlement.name : 'If you stopped here'} onClose={onClose} initialFocus={closeRef}>
       <section className="diary diary-filling ending">
+        {picture && <img className="ending-picture" src={picture} alt="" aria-hidden="true" />}
         <header className="diary-head">
           <div>
-            <h2>If you stopped here</h2>
+            <h2>{settlement ? settlement.name : 'If you stopped here'}</h2>
+            {settlement && <p className="ending-settled">{settlement.prose}</p>}
             <p className="diary-sub">
               {nobody
                 ? 'Nobody yet. Understanding something is what makes it possible to help.'
@@ -79,7 +91,7 @@ export function Ending({ progress, open, onClose }: EndingProps) {
           <>
             {coming.length > 0 && (
               <section className="diary-section">
-                <h3>Coming with you</h3>
+                <h3>{settlement ? 'Moving in' : 'Coming with you'}</h3>
                 {coming.map((id) => {
                   const who = npc(id);
                   return (
