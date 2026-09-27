@@ -130,7 +130,14 @@ const TOOLS: [string[], string][] = [
   // A seedling from a mound, for the Asura-Tainted Princess: canon gives her mastery of cultivation,
   // and what she wants of the plateau is that it grow more than goats. She has a painted portrait,
   // so this is the fallback for a folder that has lost it.
-  [['exile'], 'M20 21v-7M20 14c0-3-3-4-5-4 0 3 2 5 5 4zM20 12c0-3 3-5 5-5 0 3-2 5-5 5zM16 21h8']
+  [['exile'], 'M20 21v-7M20 14c0-3-3-4-5-4 0 3 2 5 5 4zM20 12c0-3 3-5 5-5 0 3-2 5-5 5zM16 21h8'],
+  // A surveyor's rod, marked off in alternating long and short ticks. Ardhi keeps the University's
+  // ground book, and the rod is the thing that book is written with.
+  [['steward', 'surveyor'], 'M20 4v17M20 7h2M20 10h3M20 13h2M20 16h3M20 19h2'],
+  // A water-skin, tied at the neck. Last on purpose: a dada is whoever got there first, so Drel and
+  // Tolla keep their sickle and crook, and only Jarro -- who keeps the Caravan Ground's well, and
+  // takes a skin of water a season for it -- reaches this.
+  [['dada'], 'M18.5 7h3M19 7v2.5c-2 1-3 3-3 5.5a4 4 0 0 0 8 0c0-2.5-1-4.5-3-5.5V7']
 ];
 
 /** The tool for a role, or null for a person whose trade has no drawing yet. */

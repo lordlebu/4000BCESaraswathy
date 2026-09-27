@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.34.0",
+  "canon_version": "2.36.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -41,10 +41,8 @@
         "question_moving_spring"
       ],
       "helps": [
-        "npc_vessa"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
+        "npc_vessa",
+        "npc_ardhi"
       ]
     },
     {
@@ -77,9 +75,6 @@
       ],
       "helps": [
         "npc_marn"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -107,16 +102,10 @@
         {
           "entry": "Two kinds of animal that share nothing, lying in one stone that formed after both. I can describe the rock and I cannot describe how they came to be in it together."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_chamber_below",
       "name": "Somebody Came Back For It",
       "discipline": "archaeology",
@@ -200,16 +189,10 @@
       ],
       "related_discoveries": [
         "discovery_escarpment_wind"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_dockyard_reef",
       "name": "A Reef in a Square Basin",
       "discipline": "archaeology",
@@ -270,9 +253,6 @@
       ],
       "helps": [
         "npc_okhi"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -305,8 +285,8 @@
       "related_discoveries": [
         "discovery_cloud_stair"
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
+      "helps": [
+        "npc_tolla"
       ]
     },
     {
@@ -341,13 +321,11 @@
         }
       ],
       "helps": [
-        "npc_sura"
+        "npc_sura",
+        "npc_ushi"
       ],
       "restores": [
         "poi_salt_orchard"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -379,9 +357,6 @@
       ],
       "related_discoveries": [
         "discovery_market_ledger"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -420,16 +395,10 @@
       ],
       "answers": [
         "question_what_comes_through"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_ghost_mangrove_channel",
       "name": "The Pale Mangroves Mark the Channel",
       "discipline": "botany",
@@ -508,16 +477,10 @@
         {
           "entry": "I can date it and describe it and I cannot say what it is. I have written down the bearing, which points at the gate court, and I am aware that is not an explanation."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_granary_fall",
       "name": "The Channel Still Falls",
       "discipline": "archaeology",
@@ -564,9 +527,6 @@
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_kiln_draught",
       "name": "The Wind That Took the Tower Will Fire a Kiln",
       "discipline": "archaeology",
@@ -632,16 +592,10 @@
       ],
       "answers": [
         "question_what_ends_dwarka"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_marsh_lurker_habits",
       "name": "The Lurker Waits Where the Water Warms",
       "discipline": "zoology",
@@ -679,9 +633,6 @@
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_mask_niche",
       "name": "The Empty Niche",
       "discipline": "archaeology",
@@ -737,9 +688,6 @@
       ],
       "helps": [
         "npc_sura"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -783,16 +731,10 @@
       ],
       "helps": [
         "npc_marn"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_poisoned_ground",
       "name": "What Came Up in the Eastern Field",
       "discipline": "geography",
@@ -863,16 +805,10 @@
       ],
       "answers": [
         "question_two_names"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_red_rice_survival",
       "name": "Red Delta Rice, Wild",
       "discipline": "botany",
@@ -951,15 +887,12 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
+      "helps": [
+        "npc_jarro"
       ]
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_salt_glass",
       "name": "What the Field Gives Instead of Grain",
       "discipline": "geography",
@@ -1007,9 +940,6 @@
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_saltreed_thatch",
       "name": "Saltreed, and What It Is For",
       "discipline": "botany",
@@ -1074,16 +1004,10 @@
       ],
       "helps": [
         "npc_pell"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_silver_water",
       "name": "When the Channel Runs Silver",
       "discipline": "anomalies",
@@ -1160,9 +1084,6 @@
       ],
       "helps": [
         "npc_okhi"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1199,9 +1120,6 @@
       "restores": [
         "poi_herders_terraces"
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "helps": [
         "npc_asura_princess"
       ]
@@ -1231,9 +1149,6 @@
         {
           "entry": "You do not double a line for a few people and a market. This carried enough traffic to need two, and then it carried none, and the difference is not written anywhere I can find."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1260,9 +1175,6 @@
         {
           "entry": "They are not growing food here. They are working out what will grow in dirt that has stopped growing anything, which is a much stranger thing to be doing in a forest this healthy."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1289,9 +1201,6 @@
         {
           "entry": "A wall in repair around an empty place, and the people at the rail-head will talk about the ore all day and go quiet about this. I have not asked twice."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1319,9 +1228,6 @@
         {
           "entry": "Somebody worked out that the ore that makes the islands impossible makes the crossing cheap, and then built a road they could unbuild. I would like to know what they were expecting."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1348,9 +1254,6 @@
         {
           "entry": "So the island is held up by what it is made of, and the ore weighs less the more of it there is together. I have written that down twice and it is still what the measurements say."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1377,9 +1280,6 @@
         {
           "entry": "So the Gate Court is not the gate. It is the one they kept, and keeping one and abandoning the rest is a decision somebody made and nobody remembers making."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1403,9 +1303,6 @@
         {
           "entry": "And the islands are the middle. Two pieces of the same hill, still up, which is the thing nobody here says out loud because it is obvious to them."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1437,9 +1334,6 @@
         {
           "entry": "Whatever holds the island up holds the water up as well, and lets go of it a hundred feet under. I can say where the boundary is to within a pace. I cannot say what it is."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1466,16 +1360,10 @@
         {
           "entry": "So: forded, then bridged, then forded again, and the ford has not moved. Whoever laid these stones and whoever pitched those tents made the same decision about the same river a very long way apart."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_tower_collapse",
       "name": "How the Tower Sat Down",
       "discipline": "archaeology",
@@ -1548,9 +1436,6 @@
       "related_discoveries": [
         "discovery_quarry_sequence",
         "discovery_bones_in_one_stone"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1578,9 +1463,6 @@
         {
           "entry": "So the bow is sinew, and sinew is skinning, and the bow is what makes the skinning possible. It goes round. They know it goes round; it came up before I raised it."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1605,9 +1487,6 @@
         {
           "entry": "The lotus in the climbing water is warm to the hand and stays warm after it is picked, which no other flower here does."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1634,16 +1513,10 @@
         {
           "entry": "So the order is medicine, then something to hold the slope, then food -- and the reason is that people are sick before they are hungry, and a slope that moves takes the field with it. It is a method for putting a country back, written as a shelf of failed trays."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
       "type": "discovery",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "discovery_winter_line",
       "name": "The Camp Can Winter Here",
       "discipline": "archaeology",
@@ -1734,9 +1607,6 @@
       ],
       "answers": [
         "question_what_comes_through"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     }
   ],
@@ -1773,9 +1643,6 @@
           ],
           "sound": true
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1809,10 +1676,7 @@
         }
       ],
       "local_knowledge": "The drovers will not take one on the caravan at any price and give no reason beyond that it is bad luck on the road -- which is the right answer arrived at from the wrong direction, and four generations quicker than the ledger arrives at it.",
-      "academic_hypothesis": "A Narmada zoology would say the animal is territorial and solitary and therefore unsuited to confinement, which is true, correctly reasoned, and stops one step short: it explains the distress and not the deaths.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "academic_hypothesis": "A Narmada zoology would say the animal is territorial and solitary and therefore unsuited to confinement, which is true, correctly reasoned, and stops one step short: it explains the distress and not the deaths."
     },
     {
       "id": "question_moving_spring",
@@ -1844,10 +1708,7 @@
         "discovery_moving_spring"
       ],
       "local_knowledge": "Marn's grandmother named a year for it. The herders rebuilt the catch basin twice and did not think this remarkable enough to mention to anyone at the University, who did not ask.",
-      "academic_hypothesis": "A fixed spring, surveyed once in 371 and never resurveyed, since springs do not move. The archive is internally consistent and has simply never been checked against the hill.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "academic_hypothesis": "A fixed spring, surveyed once in 371 and never resurveyed, since springs do not move. The archive is internally consistent and has simply never been checked against the hill."
     },
     {
       "id": "question_silver_water",
@@ -1881,9 +1742,6 @@
           ],
           "sound": true
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1926,10 +1784,7 @@
         "discovery_terrace_script"
       ],
       "local_knowledge": "Marn's people graze them, maintain the odd fallen course out of habit, and have no account of who built them. They will tell you the ground up there stays wet, and offer it as a fact about the ground.",
-      "academic_hypothesis": "The survey of 388 assigns them a devotional function on the grounds of scale and effort, reasoning that no agricultural return could justify the labour. The reasoning is sound and the premise -- that the population was the present population -- is assumed rather than established.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "academic_hypothesis": "The survey of 388 assigns them a devotional function on the grounds of scale and effort, reasoning that no agricultural return could justify the labour. The reasoning is sound and the premise -- that the population was the present population -- is assumed rather than established."
     },
     {
       "id": "question_two_names",
@@ -1962,10 +1817,7 @@
         "discovery_quarry_sequence"
       ],
       "local_knowledge": "Marn has one word for the bird and another for an old one, in the way one has a word for a colt and a horse. He is surprised the question is a question.",
-      "academic_hypothesis": "Two species, on the authority of two independent careful descriptions. No mechanism exists in the University for a catalogue entry to be revisited, so the duplication is invisible from inside.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "academic_hypothesis": "Two species, on the authority of two independent careful descriptions. No mechanism exists in the University for a catalogue entry to be revisited, so the duplication is invisible from inside."
     },
     {
       "id": "question_what_comes_through",
@@ -2010,10 +1862,7 @@
         }
       ],
       "local_knowledge": "Sura will tell you the gate opens in mist, that you sweep after, and that the bones go in the midden with everything else. She is not being mystical. She is telling you the procedure, the way you would explain bins.",
-      "academic_hypothesis": "The Narmada position is that Dwarka is a trading port with an old story and poor record-keeping, and that every specimen produced so far has been either a misidentified juvenile or a hoax. No scholar has been to the midden.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "academic_hypothesis": "The Narmada position is that Dwarka is a trading port with an old story and poor record-keeping, and that every specimen produced so far has been either a misidentified juvenile or a hoax. No scholar has been to the midden."
     },
     {
       "id": "question_what_ends_dwarka",
@@ -2046,10 +1895,7 @@
         }
       ],
       "local_knowledge": "Pell has rebuilt the inner wall once in his life and expects his son to do it again. He does not connect that to anything; it is simply what the wall is for.",
-      "academic_hypothesis": "The survey of 402 records the Dwarka coastline as stable, on the basis of a single visit and the outermost wall being described as a breakwater.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "academic_hypothesis": "The survey of 402 records the Dwarka coastline as stable, on the basis of a single visit and the outermost wall being described as a breakwater."
     }
   ],
   "vocabulary": [
@@ -2063,9 +1909,6 @@
       "learned_from": [
         "npc_sura",
         "npc_drel"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -2076,17 +1919,12 @@
       "gloss": "a struck note / the road's note",
       "literal": "hollow / hollow-path",
       "learned_from": [
-        "npc_kunch"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
+        "npc_kunch",
+        "npc_jarro"
       ]
     },
     {
       "type": "vocabulary",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "word_kia_thal",
       "word": "thal-",
       "language": "kia",
@@ -2098,9 +1936,6 @@
     },
     {
       "type": "vocabulary",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "word_kia_thal_set",
       "word": "thal-set",
       "language": "kia",
@@ -2113,15 +1948,13 @@
     },
     {
       "type": "vocabulary",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "word_kia_uvai",
       "word": "uvai",
       "language": "kia",
       "gloss": "memory, or a thing remembered",
       "learned_from": [
-        "npc_thrali"
+        "npc_thrali",
+        "npc_ushi"
       ]
     },
     {
@@ -2133,9 +1966,6 @@
       "literal": "the other side's weather",
       "learned_from": [
         "npc_pell"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -2147,9 +1977,6 @@
       "literal": "the year it walked",
       "learned_from": [
         "npc_vessa"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -2160,10 +1987,8 @@
       "gloss": "a load an animal agreed to",
       "literal": "weight, with consent",
       "learned_from": [
-        "npc_moonj"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
+        "npc_moonj",
+        "npc_tolla"
       ]
     },
     {
@@ -2175,9 +2000,6 @@
       "literal": "held water",
       "learned_from": [
         "npc_marn"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -2189,9 +2011,6 @@
       "literal": "grey / long grey",
       "learned_from": [
         "npc_okhi"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     }
   ]

@@ -80,6 +80,7 @@ import { happeningNow, surroundingsAt } from '../content/happenings';
 import { APPROACHES, approachAt, approachId } from '../content/visitors';
 import { peopleAtPlaces, roadTalk, whoIsHere } from '../content/presence';
 import { type Bumped, whoSpeaksFirst } from '../content/bumping';
+import { atCamp, encampmentOn, type Encampment } from '../content/encampments';
 import { rumourAt, rumourFor, rumoursOn } from '../content/rumours';
 import { standingOn as howKnownOn, warmTo } from '../content/standing';
 import { discoveries, offeredAt } from '../content/knowledge';
@@ -339,6 +340,7 @@ export function App() {
           taken?: readonly string[];
           strangerId?: string | null;
           talk?: Talk | null;
+          camp?: Encampment | null;
           force?: { kind?: string; asked?: boolean };
         }
       ) => boolean)
@@ -451,6 +453,7 @@ export function App() {
         taken?: readonly string[];
         strangerId?: string | null;
         talk?: Talk | null;
+        camp?: Encampment | null;
         force?: { kind?: string; asked?: boolean };
       } = {}
     ): boolean => {
@@ -575,6 +578,18 @@ export function App() {
       maybeHappens('road', at, null, `road:${day}`);
     };
 
+    /**
+     * Walking up to a camp opens its scene, once a camp. Asked for rather than rationed: a camp is
+     * somewhere the player went, and the road's pacing is for what happens to them on the way.
+     */
+    const onCampSeen = ({ at, day }: GameToUi['tile-entered']) => {
+      const world = latest.current.world;
+      if (!world) return;
+      const camp = encampmentOn(world, latest.current.fieldMapId, fieldPlaced.current, day);
+      if (!camp || !atCamp(camp, at) || seenEvents.current.includes(`woven:camp:${camp.id}`)) return;
+      maybeHappens('arriving', at, null, `camp:${camp.id}`, { camp, force: { kind: 'camp', asked: true } });
+    };
+
     // Handed out of the effect so the activity card can ask too: a take is not a bus event, it is a
     // modal React owns, and closing it is where the `working` question belongs.
     happens.current = maybeHappens;
@@ -607,6 +622,7 @@ export function App() {
     EventBus.onEvent('night-passed', onNight);
     EventBus.onEvent('poi-reached', onArrived);
     EventBus.onEvent('tile-entered', onRoad);
+    EventBus.onEvent('tile-entered', onCampSeen);
     return () => {
       EventBus.offEvent('world-ready', onWorldReady);
       EventBus.offEvent('tile-entered', onTileEntered);
@@ -622,6 +638,7 @@ export function App() {
       EventBus.offEvent('night-passed', onNight);
       EventBus.offEvent('poi-reached', onArrived);
       EventBus.offEvent('tile-entered', onRoad);
+      EventBus.offEvent('tile-entered', onCampSeen);
     };
   }, []);
 
@@ -1101,7 +1118,8 @@ export function App() {
         whereIs: (npcId) =>
           places.find((p) => whoIsHere(p, fieldMapId, day, travellerStates).here.some((n) => n.id === npcId)) ??
           null,
-        flags: journeyFlags.current
+        flags: journeyFlags.current,
+        camp: world ? encampmentOn(world, fieldMapId, fieldPlaced.current, day) : null
       });
       const seed = world?.seed ?? '';
       return {
@@ -1739,6 +1757,7 @@ export function App() {
         <PhaserGame
           seed={seed}
           discovered={initialJourney.current.discovered}
+          travelled={initialJourney.current.travelled}
           fieldMapId={fieldMapFromUrl()}
           characterId={characterId}
         />
@@ -1920,7 +1939,7 @@ export function App() {
           void homeTick;
           const homestead = homesteadOn(fieldMapId);
           if (!homestead || !homesteadState(fieldMapId, journeyFlags.current).settled) return null;
-          return { name: homestead.name, prose: homestead.settled, people: peopleOfMap };
+          return { name: homestead.name, prose: homestead.settled, people: peopleOfMap, fieldMapId };
         })()}
         open={interrupts.ending}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'ending' })}

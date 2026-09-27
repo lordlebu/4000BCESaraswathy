@@ -24,7 +24,10 @@
     "",
     "`lines` holds further sentences a template adds to its prose by name -- small talk's rumours, one",
     "per kind. {rumour} and {rumour_at} in `sets` are the rumour a stranger passed on and the place it",
-    "names (src/content/rumours.ts)."
+    "names (src/content/rumours.ts).",
+    "",
+    "`camp` is asked for by walking up to a camp (src/content/encampments.ts) and never rationed, so its",
+    "weight is nought; its variants are the four kinds of camp."
   ],
   "templates": {
     "tracks": {
@@ -414,6 +417,12 @@
         "question": {
           "someone": "{person}, at {place}, has a question nobody there can settle, they say, and they think you might.",
           "nobody": "There is a question at {place} nobody can settle, they say, and they think you might."
+        },
+        "camp": {
+          "adventurers": "There are adventurers camped out past {place}, they say, arguing over a map, and they would be glad of somebody who can read one.",
+          "dacoits": "There is a dacoit band out past {place}, they say. Not to worry: they take the salt carriers' toll and leave walkers alone.",
+          "pilgrims": "Pilgrims have stopped out past {place}, they say, on their way somewhere, and they sing in the evenings.",
+          "drovers": "Drovers have folded their goats out past {place}, they say, and could use a hand with the gate."
         }
       },
       "title": "On the road with {name}",
@@ -458,7 +467,8 @@
       "prose": {
         "place": "This is {place}, where {name} sent you. It is as they said, and you are glad you came.",
         "person": "{name} said somebody at {place} was asking after you, and somebody is.",
-        "question": "{name} said there was a question at {place} nobody could settle. You can hear it being argued before you are properly there."
+        "question": "{name} said there was a question at {place} nobody could settle. You can hear it being argued before you are properly there.",
+        "camp": "{name} said there were people camped out past {place}. From here you can see their smoke."
       },
       "choices": {
         "note": {
@@ -468,6 +478,69 @@
         "look": {
           "label": "Look around first",
           "line": "You put the diary away and look around. There is time to write it down later."
+        }
+      }
+    },
+    "camp": {
+      "weight": 0,
+      "tags": [
+        "camp"
+      ],
+      "cooldown": 0,
+      "again_after": null,
+      "slots": [
+        "place",
+        "ground",
+        "material"
+      ],
+      "title": {
+        "adventurers": "Adventurers' fire",
+        "dacoits": "A dacoit band",
+        "pilgrims": "Pilgrims resting",
+        "drovers": "A drovers' fold"
+      },
+      "prose": {
+        "adventurers": "A lean-to and a fire out on {ground}, well past {place}, and three people with more rope than sense arguing over a scratched map. They wave you in before you have decided whether to go.",
+        "dacoits": "Smoke from a hollow on {ground}, past {place}. A dacoit band, and they have seen you. Nobody reaches for anything. The one who seems to lead them only looks, and waits to see what you want.",
+        "pilgrims": "Pilgrims camped on {ground}, past {place}, on their way to somewhere they will not name to a stranger. Somebody is singing under their breath, and stops when you come near.",
+        "drovers": "A fold of hurdles on {ground}, past {place}, full of goats, and two drovers mending the gate. One of them nods at the gap and then at you, as if you had been sent for."
+      },
+      "choices": {
+        "sit": {
+          "label": {
+            "adventurers": "Sit by their fire",
+            "pilgrims": "Sit with them a while"
+          },
+          "line": {
+            "adventurers": "You sit, and are shown the map, and are told what three different people think it means. The fire is good and nobody is in a hurry.",
+            "pilgrims": "You sit. The singing starts again, quieter, and nobody asks where you are going either."
+          }
+        },
+        "ask": {
+          "label": {
+            "adventurers": "Ask what they have found",
+            "pilgrims": "Ask where the road is good"
+          },
+          "line": {
+            "adventurers": "They show you what the ground out here gives, and press a little {material} into your hands as if it were nothing.",
+            "pilgrims": "They tell you which stretches are firm after rain and which are not, and send you off with a little {material} for the road."
+          }
+        },
+        "talk": {
+          "label": "Ask what the road is costing them",
+          "line": "They hold the ford at the bottom of the valley in the dry months and take a toll off the salt carriers. Not off you: a naturalist is not worth the walk, they say, and it is meant kindly."
+        },
+        "share": {
+          "label": "Sit and eat with them",
+          "line": "You eat with them. They are poorer company than they would like you to think, and better than they mean to be. Nobody asks you for anything."
+        },
+        "help": {
+          "label": "Help hang the gate",
+          "line": "You hold the hurdle while they lash it. When it is done one of them pulls a twist of {material} off the nearest goat and hands it to you without a word."
+        },
+        "rest": {
+          "label": "Rest by the fold",
+          "line": "You sit against the hurdles and listen to the goats settle. It is the quietest place you have been in days."
         }
       }
     }

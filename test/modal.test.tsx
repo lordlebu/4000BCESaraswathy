@@ -267,4 +267,18 @@ describe('the modal primitive', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Unreachable' })).toBeNull();
   });
+
+  it('leaves focus where it is when re-rendered with a new onClose', () => {
+    // A parent that builds `onClose` inline hands over a new function every render. That used to
+    // re-run the open effect and throw focus back to the first control -- out of a plate open on
+    // top, in `plates.spec.ts`. Only opening moves focus in.
+    const { rerender } = render(<Panel onClose={() => undefined} />);
+    screen.getByRole('button', { name: 'Middle' }).focus();
+    const latest = vi.fn();
+    rerender(<Panel onClose={latest} />);
+    expect(document.activeElement?.textContent).toBe('Middle');
+    // And Escape still reaches the newest one.
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(latest).toHaveBeenCalledOnce();
+  });
 });

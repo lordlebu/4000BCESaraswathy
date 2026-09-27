@@ -167,6 +167,19 @@ export function Modal({
   const me = useRef(Symbol('modal')).current;
   /** One deeper than whatever this is rendered inside. See the note on `Depth`. */
   const depth = useContext(Depth) + 1;
+  /**
+   * The latest `onClose`, read when a key arrives rather than captured when the modal opened.
+   *
+   * **It used to be a dependency of the effect below, and that was a focus thief.** A parent that
+   * builds `onClose` inline hands over a new function on every render, and each one re-ran the whole
+   * effect: the cleanup put focus back on the opener, then the setup moved it to the first control
+   * -- the album's Close button -- *even with a plate open on top of it*. Anything that re-rendered
+   * the app while a plate was open took the keyboard out of the plate, which `plates.spec.ts` caught
+   * as one or two tab stops in ten escaping under a loaded CI runner. Opening is the only thing that
+   * should move focus in, so the effect keys on `open` alone.
+   */
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
 
   // **The portal's node is made during render and attached before paint.** Making it in the effect
   // instead is the obvious way round and does not work: the render that would use it has already
@@ -210,8 +223,8 @@ export function Modal({
       // Only the topmost modal answers. See the note on `Depth`.
       if (!isTopmost(me)) return;
 
-      if (e.key === 'Escape' && onClose) {
-        onClose();
+      if (e.key === 'Escape' && closeRef.current) {
+        closeRef.current();
         return;
       }
 
@@ -260,13 +273,12 @@ export function Modal({
       if (back && document.contains(back)) back.focus();
       opener.current = null;
     };
-    // `initialFocus` is a ref object and stable; including it would re-run the whole effect on
-    // every render of a panel that happens to build one inline.
     // `me` is a stable identity created once per instance, `depth` comes from a context that only
-    // changes when the tree does, and `initialFocus` is a ref object; including any of them would
-    // re-run the whole effect on an unrelated render.
+    // changes when the tree does, `initialFocus` is a ref object, and `onClose` is read through
+    // `closeRef`; including any of them would re-run the whole effect -- and move focus -- on an
+    // unrelated render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, onClose]);
+  }, [open]);
 
   const onVeilClick = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {

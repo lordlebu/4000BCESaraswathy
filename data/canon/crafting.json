@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.34.0",
+  "canon_version": "2.36.0",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -1593,10 +1593,6 @@
       "materials": [
         "material_bronze"
       ],
-      "epochs": [
-        "epoch_civilization_dawn",
-        "epoch_current"
-      ],
       "notes": "Holds an edge, takes a new one, and is worth more than the person carrying it usually is.",
       "source_index": 17
     },
@@ -1645,10 +1641,6 @@
       ],
       "materials": [
         "material_bronze"
-      ],
-      "epochs": [
-        "epoch_civilization_dawn",
-        "epoch_current"
       ],
       "notes": "What dressed sandstone is dressed with. A settlement that has these has a mason.",
       "source_index": 20
@@ -1777,10 +1769,6 @@
       ],
       "materials": [
         "material_bronze"
-      ],
-      "epochs": [
-        "epoch_civilization_dawn",
-        "epoch_current"
       ],
       "notes": "Socketed, so it outlives its shaft. Traded far past where anybody can make one.",
       "source_index": 28
@@ -2516,9 +2504,6 @@
         "material_bamboo_cane"
       ],
       "notes": "One length of cane, a notch to blow across and six holes burned rather than cut, because a drilled hole splits the wall and a burned one does not. The cheapest instrument there is and the only one a person makes for themselves on the walk -- an afternoon, and the cane came from the ground they were standing on.\n\nGoes flat when it is wet, which in the delta is most of the year, and everybody plays a little sharp to allow for it.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "source_index": 75
     },
     {
@@ -2535,9 +2520,6 @@
         "material_reed_fibre"
       ],
       "notes": "A hand of canes cut to length and bound at the grip, struck against each other, against a saddle, or against whatever is nearest. Each length gives one note and only one, which is why the delta counts an interval in cane rather than in numbers -- two hands of cane is a phrase, and anybody who has walked with a singer knows roughly how far that is.\n\nTuned by shortening, so it only ever goes up. A set that has been on the road ten years is a set that started lower.\n\n**The name is the cane and the noise in one word**, which is more than the other two manage: a flute is named for what it is made of and a sitar for its shape, and this is named for both at once. Nobody who says it is doing anything as deliberate as a joke -- it is simply what a bamboo does when you hit it, said quickly.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "source_index": 76
     },
     {
@@ -2555,9 +2537,6 @@
         "material_sinew"
       ],
       "notes": "A long neck over a dried sky-balloon shell, with sinew strung the length of it and a second course of thinner strings underneath that nobody touches. Those are the point: they are not played, they are left to sound on their own when the strings above them do, and an instrument that answers itself is worth the year it takes to build.\n\nThe only instrument here that is somebody's trade rather than somebody's afternoon. A flute is cane and a morning; this is seasoned timber, a shell that had to be grown and dried, and a maker who has ruined several.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "source_index": 77
     },
     {
@@ -3932,10 +3911,6 @@
       "known_by": [
         "harappan"
       ],
-      "epochs": [
-        "epoch_civilization_dawn",
-        "epoch_current"
-      ],
       "source_index": 47
     },
     {
@@ -3965,10 +3940,6 @@
       "known_by": [
         "harappan"
       ],
-      "epochs": [
-        "epoch_civilization_dawn",
-        "epoch_current"
-      ],
       "source_index": 48
     },
     {
@@ -3992,10 +3963,6 @@
       ],
       "known_by": [
         "harappan"
-      ],
-      "epochs": [
-        "epoch_civilization_dawn",
-        "epoch_current"
       ],
       "source_index": 49
     },
@@ -4024,10 +3991,6 @@
       "known_by": [
         "harappan"
       ],
-      "epochs": [
-        "epoch_civilization_dawn",
-        "epoch_current"
-      ],
       "source_index": 50
     },
     {
@@ -4051,10 +4014,6 @@
       ],
       "known_by": [
         "harappan"
-      ],
-      "epochs": [
-        "epoch_civilization_dawn",
-        "epoch_current"
       ],
       "source_index": 51
     },
@@ -5160,9 +5119,6 @@
       "exemplars": [
         "place_leviathans_rib"
       ],
-      "epochs": [
-        "epoch_current"
-      ],
       "notes": "Canon states the Abyssal Blue's bone plate is harvested for building maritime vessels. This is that claim made into a ship: a single rib is a keel, and the Leviathan's Rib is the one canon names.",
       "source_index": 8
     },
@@ -5182,9 +5138,6 @@
       ],
       "exemplars": [
         "place_ekranoplan"
-      ],
-      "epochs": [
-        "epoch_current"
       ],
       "notes": "Flies a few metres above the water and cannot go higher, which makes it neither a boat nor an aircraft and useless anywhere but the open Tethys. The Battered Ekranoplan is the one canon has, bought cheap off delta salvagers.",
       "source_index": 9
@@ -5208,9 +5161,6 @@
       "exemplars": [
         "place_survival_train"
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "notes": "A travelling apothecary and workshop rather than transport. The Survival Train gathers the displaced across the broken country, which is a use for a vehicle that has nothing to do with getting anywhere.",
       "source_index": 10
     },
@@ -5232,10 +5182,6 @@
         "material_sinew",
         "material_palm_husk"
       ],
-      "epochs": [
-        "epoch_civilization_dawn",
-        "epoch_current"
-      ],
       "notes": "Two solid wheels of three planks dowelled together, and an axle that turns with them rather than under them -- so the whole undercarriage groans and a driver is heard coming from a field away. Nobody has improved on it because nothing about it is difficult: a household can cut one, and a broken wheel is three new planks.\n\nThe commonest vehicle in canon and the least remarked on, which is the usual fate of the thing everybody has. It is drawn in miniature more often than it is written about -- small clay carts turn up in every settlement, in numbers that make more sense as toys than as votives, though canon does not insist on either.",
       "source_index": 11
     },
@@ -5254,10 +5200,6 @@
         "material_teak_timber",
         "material_native_copper",
         "material_croc_hide"
-      ],
-      "epochs": [
-        "epoch_civilization_dawn",
-        "epoch_current"
       ],
       "notes": "Copper-sheathed along every edge a hand would touch, with triangular figures worked into the wheel faces. Found only in graves, and only ever with a body in it.\n\n**Canon files it as a cart, and the argument is the point.** Its wheels are solid -- three planks and a copper rim, the same construction as the household cart above -- and a spoked wheel is what would make it a chariot. So the people who bury one are burying something that looks like a war machine and is built like a farm vehicle, and canon does not know which of those they meant. Recording the dispute rather than settling it is the same call made about the Shattering: the question is better than any answer available.",
       "source_index": 12
@@ -5279,9 +5221,6 @@
         "material_lodestone_grit",
         "material_aero_bark",
         "material_bronze"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ],
       "notes": "The line across the Aravali strait does not stand on anything. It is laid on lodestone -- the same Permian-irradiated ore that holds the islands up -- and it hangs at the height the ore wants, which is why the rails run level over open water and why nothing has ever been built under them. Boats pass beneath without lowering a mast.\n\nThe carriage is the second half of the same trick: sledges of ore beneath a timber body, riding the repulsion rather than rolling on it. It does not touch the rail and it makes almost no sound, which unsettles people more than the height does.\n\n**One carriage, not a train.** It seats a dozen with their bundles and goes back and forth across the strait, which is the whole of what it does -- the crossing is short and there is nothing at either end that needs moving in quantity. Nobody has coupled a second one to it and nobody has needed to.\n\nIt has no bogies. A bogie is the wheeled truck a carriage rides on, and this rides on sledges of lodestone that never touch the rail -- which is why it makes no sound, and why nobody here has a word for the part that would be doing the rolling.\n\nDistinct from the Workshop Train, which canon calls a travelling apothecary rather than transport: that one crosses broken country and is not trying to get anywhere, and it is a train in the sense of a household strung out along a road. This is a box on a rail.",
       "source_index": 13

@@ -30,7 +30,7 @@ const AGREED = [
   `homestead:${MAP}:eased:stranger`
 ];
 
-async function seeded(page: Page, save: { flags?: string[]; satchel?: Record<string, number> }) {
+async function seeded(page: Page, save: { flags?: string[]; satchel?: Record<string, number>; map?: string; at?: string }) {
   await page.addInitScript(
     ({ key, journey }) => {
       try {
@@ -50,7 +50,7 @@ async function seeded(page: Page, save: { flags?: string[]; satchel?: Record<str
       }
     }
   );
-  await page.goto(`/?seed=${SEED}&map=${MAP}&hour=12&at=poi_eastern_field`);
+  await page.goto(`/?seed=${SEED}&map=${save.map ?? MAP}&hour=12&at=${save.at ?? 'poi_eastern_field'}`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 }
@@ -120,3 +120,23 @@ test('settled, the mill turns beside its greenhouse and the page is headed by th
   await expect(ending.locator('img.ending-picture')).toHaveAttribute('src', /settle-home/);
   await expect(ending).toContainText('a place people lived');
 });
+
+// Dwarka and the Narmada finish with their own buildings, not Lothal's mill: a wind-pump and its
+// solar still, and a scarp mill with its glasshouse (and a hive, where the ground beside it allows).
+for (const [map, ground, at, worries, expected] of [
+  ['field_map_dwarka', 'ground_caravan_rise', 'poi_caravan_camp', ['long_way', 'sea', 'toll'],
+    ['homestead:homestead-windpump-tower', 'homestead:homestead-windpump-vanes', 'homestead:homestead-still-house']],
+  ['field_map_narmada', 'ground_university_east', 'poi_narmada_university', ['no_record', 'water', 'nothing_built'],
+    ['homestead:homestead-scarp-mill-tower', 'homestead:homestead-scarp-mill-sails', 'homestead:homestead-greenhouse']]
+] as const) {
+  test(`settled on ${map}, its own building stands`, async ({ page }) => {
+    const flags = [
+      `homestead:${map}:ground:${ground}`,
+      ...worries.map((w) => `homestead:${map}:eased:${w}`),
+      ...['foundation', 'tower', 'sails'].map((s) => `homestead:${map}:built:${s}`),
+      `homestead:${map}:settled`
+    ];
+    await seeded(page, { flags, map, at });
+    await expect.poll(async () => (await drawn(page)).slice(0, 3), { timeout: 10_000 }).toEqual([...expected]);
+  });
+}

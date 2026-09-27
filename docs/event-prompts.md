@@ -1,6 +1,6 @@
 # Event painting prompts — ready to paste
 
-Fifteen paintings, one for each kind of woven event in `data/happenings.json`. **Each block below is
+Sixteen paintings, one for each kind of woven event in `data/happenings.json`. **Each block below is
 the whole prompt**: copy one, paste it into an image tool, done. The first paragraph is the shared
 style block from `docs/art-handover.md`, unchanged, so these sit beside the activity scenes; the
 second says what every event painting has to be.
@@ -206,7 +206,7 @@ Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - see
 Subject: Seen from inside a lamp-lit shelter at night: the low doorway, and outside it in the dark a woman traveller with a load set down at her feet, asking to come in. Warm light inside, blue night outside.
 ```
 
-### Arriving (3)
+### Arriving (4)
 
 #### `woven-cairn` — Stones at the edge
 
@@ -247,6 +247,20 @@ Watercolour illustration from a field naturalist's notebook, ancient South Asia,
 Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
 
 Subject: The traveller's hands holding an open field notebook with a small ink sketch of a route and a place, and beyond the page, at the end of the path, the real place just coming into view - a low ruin or a cluster of shelters - matching the sketch. Soft morning light.
+```
+
+#### `woven-camp` — A camp where the roads do not reach
+
+Save as `assets/source/events/woven-camp.png`. Added 27 September 2026 with Phase 3 of the Settling In plan: camps that pitch for a few days away from every road -- adventurers, a dacoit band, pilgrims or drovers.
+
+Where it shows: across the top of the card when the traveller walks up to a camp. One painting serves all four kinds, so it must not say whose camp it is: under it the card says *Adventurers' fire*, *A dacoit band*, *Pilgrims resting* or *A drovers' fold*. Nobody in it is threatening; the dacoits in this world take a toll off salt carriers and nothing off the traveller.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: A small camp in open country far from any road, seen from a little distance in the late afternoon: a lean-to of poles and hide, a low fire with a pot on three stones, a few bundles and a staff leaning on the lean-to, and two or three figures sitting round the fire, too far off to make out faces. Rough grass and a line of low hills behind. Quiet and ordinary, somewhere people stop for a few days and move on.
 ```
 
 ### While working (2)
