@@ -7,12 +7,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Varuna's Field Diary** — a cozy 2D browser naturalist RPG. Combat is absent by design; creatures
 are observed, not fought.
 
-The player travels between authored **field maps** (three, joined by roads), walks each one,
-stands in **points of interest**, talks to the people there, and looks closely at things. Looking
-closely climbs a **discovery** one rung, and each rung rewrites its diary entry — *the diary is the
-progression system*, and there are no experience points anywhere. Understanding things well enough
-lets you settle **field questions**, possibly wrongly, and reach an **ending** where the people your
-work helped either come with you or explain why they are staying.
+The player travels between authored **field maps** (four, left only from each map's cart point),
+walks each one, stands in **points of interest**, talks to the people there, and looks closely at
+things. Looking closely climbs a **discovery** one rung, and each rung rewrites its diary entry —
+*the diary is the progression system*, and there are no experience points anywhere. Understanding
+things well enough lets you settle **field questions**, possibly wrongly. Helping a map's people
+earns its trust, and on Lothal, Dwarka and the Narmada that trust is spent **settling**: talking a
+ground's holder round, building in three stages, and a settlement page where the people who backed
+it move in. The Aravali is never settled; it is the crossing.
 
 The older loop — a procedural world with a landmark to find and a travel journal to export — still
 runs underneath, deliberately kept. See "Known issues".
@@ -246,6 +248,8 @@ The art docs, in the order they are useful:
 
 | File | What it holds |
 |---|---|
+| `docs/retrospective.md` | **read first**: the whole project to 28 September 2026, what worked, what did not, what next |
+| `docs/settling-in.md` | the Settling In plan, concluded: camps, cart points, homesteads, and what was measured |
 | `docs/endgame-plan.md` | the programme, closed; what shipped, what is parked, what was declined |
 | `docs/art-direction.md` | the five rules the art follows, and what each one cost to learn |
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |
@@ -510,6 +514,10 @@ incompletely, and all eleven claimed `aria-modal` while leaving the page tabbabl
 of the next ten tab stops were outside the dialog. Nesting depth comes from a **context**, not from
 effect order: React runs a child's effects before its parent's, so a stack pushed in an effect puts
 the inner modal at the bottom and the outer one answers its keys and paints over it.
+**Its open effect keys on `open` alone** and reads `onClose` through a ref: with `onClose` as a
+dependency, any app re-render that built a fresh one re-ran the effect and threw focus out of a plate
+open on top -- `plates.spec.ts` failing two runs in three on CI, never locally until run at six
+workers. `test/modal.test.tsx` holds it.
 
 **Quieten text with a colour, never an alpha.** `--ink-faint` exists because `opacity` multiplies:
 a blocked row at `0.55` put its label at 3.36:1 and, compounding with the detail line's own `0.82`,
@@ -622,6 +630,31 @@ never seen. `page.touchscreen` is single-touch; use CDP's `Input.dispatchTouchEv
 **`e2e/chrome-budget.spec.ts` is the measurement as a check.** How much of the screen the map keeps,
 at four device sizes, resting and standing in a place. Its floors are set from what was measured,
 not from what was hoped — change the layout and read the failure before changing the number.
+
+### Settling: camps, cart points and homesteads
+
+The Settling In plan, built 27 September 2026; `docs/settling-in.md` is the record and the
+retrospective. The rules, because they are rules rather than history:
+
+- **A map is left only from its cart point** (canon's `departs_from`; `mayLeaveFrom` and
+  `arrivalPoint` in `content/places.ts`). Arriving sets you down at the next map's first.
+- **Camps are a pure function of seed, map and day** (`content/encampments.ts`): one at a time,
+  three days a turn, on dry ground away from places and roads. Walking up to one asks for its card
+  with `force: {kind: 'camp', asked: true}`, which `happeningNow` returns before any weighting --
+  a weight-0 template is otherwise never picked. Nothing is saved.
+- **Settling is flags in the save's knowledge half**, `homestead:<map>:ground|eased|built|settled`,
+  so it cost no `SAVE_VERSION` bump. `content/homestead.ts` holds every rule; the Negotiation card and
+  the place panel only ask. **Nothing is lost by a wrong answer**: listening draws a hint, a miss gets
+  the holder's `not_that`, and an offered thing is shown, not taken.
+- **A building stands only on dry, level ground**: plains, desert, settlement or hills, off every way,
+  and no dry neighbour at another elevation band (`buildable`, within `BUILD_RADIUS` 6). The owner's
+  ruling after the first mill went up in Lothal's marsh. No room says so; it never builds wet.
+- **Each map's finished building is the builder's** (`tools/build-homestead.js` `FINISHED`, read by
+  the scene from `assets/homestead.json`): its tower cell, wheel and hub. **Mills stand taller than a
+  tile**, on the owner's word -- the pump's cell is 192 wide because its guy ropes otherwise shrank it.
+  A map with no entry finishes with the Grit Mill. The unfinished stages are Lothal's scaffold on every map.
+- **The saved clock goes back to the scene** (`travelled` into `PhaserGame`). It did not, and every
+  reload was day 0 -- which hid every camp and quietly reset the day's pacing.
 
 ### The resource layer, and where its numbers live
 
