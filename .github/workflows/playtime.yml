@@ -1,0 +1,61 @@
+name: Morning play time
+
+# How long each map takes to play, and the rhythm of the event layer, measured every morning.
+#
+# `npm run simulate` prints two reports: the event simulation (`test/simulation.test.ts`) and
+# minutes per map as a floor (`test/minutes.test.ts`). This puts both on the run's summary page and
+# keeps the file for 90 days, so the numbers can be read back over time -- a change to canon that
+# adds a hundred words to a place shows up the next morning without anybody running anything.
+#
+# A report, not a gate. It is deliberately not part of `ci.yml` and not a required check: the
+# minutes are a measurement for a design question (the Settling In plan's Q10), and a slower map is
+# not a broken build. It still fails red if the simulation's own rule checks fail, since that is what
+# `simulate` already does.
+#
+# Free on a public repository. About two minutes of runner time a day.
+
+on:
+  schedule:
+    # Six in the morning in India (UTC+05:30), which is 00:30 UTC, so the report is waiting at the
+    # start of the day. GitHub's cron is always UTC, and a scheduled run can start some minutes late
+    # when runners are busy. Clear of `ci.yml`'s nightly run at 03:00 UTC.
+    - cron: '30 0 * * *'
+  # A button on the Actions tab, to run it now.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  playtime:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Simulate
+        # `--silent` keeps npm's own banner out of the report. The report is kept even when the
+        # simulation's checks fail, because the numbers are most worth reading then.
+        run: |
+          set -o pipefail
+          npm run --silent simulate | tee playtime.md
+      - name: Put the report on the summary page
+        if: always()
+        run: |
+          {
+            echo "_Commit ${GITHUB_SHA::7}, $(date -u '+%Y-%m-%d %H:%M UTC')_"
+            echo
+            cat playtime.md 2>/dev/null || echo 'The simulation wrote no report.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playtime-${{ github.run_number }}
+          path: playtime.md
+          retention-days: 90
+          if-no-files-found: ignore

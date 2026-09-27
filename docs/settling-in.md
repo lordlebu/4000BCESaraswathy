@@ -52,7 +52,9 @@ Two things the browser suite found, and what was done:
 
 ## How long a map takes
 
-`test/minutes.test.ts`, printed by `npm run simulate`. A floor, not a forecast: a nearest-first tour
+`test/minutes.test.ts`, printed by `npm run simulate`, and run every morning at 06:00 IST by
+`.github/workflows/playtime.yml`, which puts the report on the run's summary page and keeps it for
+90 days. A floor, not a forecast: a nearest-first tour
 of every place at the scene's step time and each tile's cost, every word read at 200 a minute, 1.5
 seconds a press, each discovery counted once however many places offer it. Measured on 27
 September over eight seeds, after the fix below:
