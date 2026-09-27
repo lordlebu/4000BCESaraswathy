@@ -141,6 +141,12 @@ Subject: Weather coming across open grassland in grey sheets, the traveller smal
 
 Save as `assets/source/events/woven-small-talk.png`. Added 27 September 2026 with Phase 2 of the Settling In plan: walking with a stranger you have met.
 
+Where it shows: across the top of the event card titled *On the road with {name}*, whenever the
+player walks with a stranger they have already met, or the stranger falls in beside them unasked.
+Under it the stranger's face and a line such as *"Rethik falls in beside you and talks easily about
+the plains. People here know who you are now."*, often followed by where somebody is, or a place
+worth seeing. The pointing hand is the rumour; nothing on the far side of it should be identifiable.
+
 ```text
 Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
 
@@ -216,6 +222,11 @@ Subject: A cooking pot on three stones over a small fire at the edge of a mud-br
 #### `woven-rumour-kept` — As you were told
 
 Save as `assets/source/events/woven-rumour-kept.png`. Added 27 September 2026: arriving where a stranger's rumour sent you.
+
+Where it shows: across the top of the card titled *As you were told*, the first time the player
+reaches a place a stranger's rumour named. Under it: *"This is the Drowned Dockyard, where Rethik
+sent you. It is as they said, and you are glad you came."* The same painting serves every place on
+every map, so the place at the end of the path must stay generic -- a shape, not a landmark.
 
 ```text
 Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.

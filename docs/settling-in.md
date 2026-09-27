@@ -71,8 +71,32 @@ Asking the way leaves `heard:` and `told:` flags, and reaching the place a rumou
 generates events"; Phase 3's camps become rumours of the same kind.
 
 **Left for the lore repo:** named people noticing your standing, which is a line or two each and
-canon's to write. And a gap found while testing: **no Aravali discovery helps anybody on the
-Aravali**, so it can be "known" but never "trusted", and its ending gathers nobody.
+canon's to write.
+
+**The Aravali is not settled, by the owner's ruling of 27 September: "it is all about crossing the
+sea."** No discovery there helps anybody there, which testing found and which is now the point
+rather than a gap: its people are passing through, it can know you but not trust you, and the
+settlement loop is for Lothal, Dwarka and the Narmada. Its cart points are the First Pier and the
+Far Landing, and its story is the strait.
+
+## Found and fixed: the Narmada was drawn above the Aravali
+
+The owner: the Aravali is the topmost part of insular India, joined to Asia by the floating islands
+and the line. The travel screen drew the Narmada Plateau above it. Nothing had moved: the Narmada's
+pin was placed at (58, 20) on 19 August, before the regions were traced off the drawn map, and never
+brought into its own region. Canon 2.33.0 moves it to (52, 42) and pins the Aravali at (51, 30) as
+the topmost anchor. With both on the east, the travel screen then cut their names off; the drawing
+now fits every name, measured in the browser.
+
+## Somebody speaking first
+
+The owner asked for chats that start without the player -- named people especially, on a first
+meeting or when they want something. `content/bumping.ts` and `reasonToSpeak`: a first meeting
+(chance 0.6, once ever), wanting something (0.5: a question they cannot settle, or a thing of theirs
+you are carrying), a stranger passing (0.2); once a day per person, never over something else on
+screen. It happens on coming alongside somebody on the road and a moment after walking into a place.
+
+
 
 ## How long a map takes
 
