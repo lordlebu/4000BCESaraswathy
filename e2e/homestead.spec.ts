@@ -89,6 +89,27 @@ test('Hasme is talked round, worry by worry, and agrees', async ({ page }) => {
   await expect(building(page)).toContainText('Needs 4 river clay');
 });
 
+// The owner, 28 September: on Drel's card "Show" did nothing. It did -- but the whole card
+// scrolled, so pressing an answer near the bottom put the reply at the top, out of sight. On a
+// phone, with a full list, the reply to the last answer must be on screen.
+test('the reply to the last answer is on screen, even on a phone with a long list', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 740 });
+  await seeded(page, { at: 'poi_silted_granary', satchel: { material_sandstone: 2, material_river_clay: 1, material_reed_fibre: 1 } });
+  await building(page).getByRole('button', { name: 'Ask Drel about building here' }).click();
+  const card = page.locator('.negotiation');
+  await expect(card).toBeVisible();
+  const last = card.locator('.activity-choice:not(.ghost)').last();
+  await last.scrollIntoViewIfNeeded();
+  const label = (await last.textContent()) ?? '';
+  await last.click();
+  const you = card.locator('.negotiation-you');
+  await expect(you).toBeInViewport();
+  await expect(card.locator('.negotiation-reply')).toBeInViewport();
+  expect(label.length).toBeGreaterThan(0);
+  // And the answer says it has been tried.
+  await expect(card.locator('.activity-choice.tried')).toHaveCount(1);
+});
+
 test('the foundation spends what it needs, has its card, and stands on the map', async ({ page }) => {
   await seeded(page, { flags: AGREED, satchel: { material_river_clay: 4, material_reed_fibre: 3 } });
   const lay = building(page).getByRole('button', { name: 'Lay the foundation' });
