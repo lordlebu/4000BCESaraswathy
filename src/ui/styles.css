@@ -2535,10 +2535,56 @@ button.ghost:hover:not(:disabled) {
   font-style: italic;
 }
 
+/* What the player just did, quieter than what the holder says back to it. */
+.negotiation-you {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* What listening drew out, kept on the card for as long as that worry stands. */
+.negotiation-hint {
+  font-size: 0.9rem;
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--edge);
+}
+
+/* Every answer tried: said plainly, so leaving reads as the right move, not a failure. */
+.negotiation-none {
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+
+/* An answer that missed this worry. Still pressable, since a miss costs nothing, but visibly spent. */
+.activity-choice.tried {
+  opacity: 0.6;
+}
+.tried-mark {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
 /* The negotiation holds more choices than any event card, so its painting gives up height: still
- * the painting, cropped to a band a third of the screen tall, so the answers fit without a hunt. */
+ * the painting, cropped to a band, so the answers fit without a hunt. */
 .negotiation .activity-scene {
-  max-height: 34vh;
+  max-height: 26vh;
+}
+
+/* **The conversation stays put and only the answers scroll.** With a full diary the card holds a
+ * dozen answers, and when the whole body scrolled, pressing one near the bottom put the holder's
+ * reply at the top, out of sight: the owner reported that Show "did nothing" (28 September). */
+.negotiation .activity-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.negotiation .activity-choices {
+  flex: 1 1 auto;
+  min-height: 7rem;
+  overflow-y: auto;
+  padding: 2px;
+  margin-top: 0.4rem;
 }
 
 .profile-card-image {
