@@ -19,7 +19,7 @@ import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { readShowing, writeShowing } from './preferences';
-import { fieldMap, npc, poi } from '../content/places';
+import { arrivalPoint, fieldMap, npc, poi } from '../content/places';
 import { travellerAttributes, travellersOn } from '../content/travellers';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
@@ -86,6 +86,7 @@ import { discoveries, offeredAt } from '../content/knowledge';
 import {
   agreed as groundAgreed,
   build as buildStage,
+  buildingTiles,
   groundAt,
   homesteadOn,
   mayAsk,
@@ -173,6 +174,8 @@ export function App() {
   // Read the save once. Calling loadJourney per state initialiser would parse the same JSON
   // three times and, worse, let the three copies drift.
   const initialJourney = useRef(loadJourney(seedFromUrl()));
+  /** Where this map's places landed, from the scene's `world-ready`. See `settling`. */
+  const fieldPlaced = useRef<{ poiId: string; at: { x: number; y: number } }[]>([]);
   // Every stranger an event has introduced the player to. Up here rather than with the other event
   // refs below, because the action rail reads it while rendering, to call somebody by name.
   const metStrangers = useRef<string[]>(initialJourney.current.met ?? []);
@@ -396,7 +399,10 @@ export function App() {
   const discovered = useRef<string[]>(initialJourney.current.discovered);
 
   useEffect(() => {
-    const onWorldReady = ({ world: next }: GameToUi['world-ready']) => setWorld(next);
+    const onWorldReady = ({ world: next, places }: GameToUi['world-ready']) => {
+      fieldPlaced.current = places ?? [];
+      setWorld(next);
+    };
     const onTileEntered = (payload: Arrival) => {
       setArrival(payload);
       setMemory('');
@@ -1551,6 +1557,17 @@ export function App() {
         }
       };
     }
+    // Dry, level ground near enough to build on, or the ground says it has none. The owner's rule
+    // is not bent to fit a wet seed: no mill in the marsh.
+    const placed = world ? fieldPlaced.current : [];
+    const at = placed.find((p) => p.poiId === ground.at)?.at;
+    if (world && at && !buildingTiles(world, at, placed.map((p) => p.at))) {
+      return {
+        title: ground.name,
+        lines: [ground.prose, "There's no dry, level ground near enough here to build on."],
+        action: null
+      };
+    }
     const ask = mayAsk(homestead, ground, state, standing);
     return {
       title: ground.name,
@@ -1561,7 +1578,7 @@ export function App() {
         onDo: () => setNegotiatingAt(ground.id)
       }
     };
-  }, [homeTick, standingOn, fieldMapId, progress, satchel, holdings, peopleOfMap, setHomeFlags]);
+  }, [homeTick, standingOn, fieldMapId, progress, satchel, holdings, peopleOfMap, setHomeFlags, world]);
 
   // Tell the scene what stands, whenever it changes and whenever a map is drawn.
   useEffect(() => {
@@ -1630,6 +1647,12 @@ export function App() {
       // is what a test wants and what somebody looking for the crossing wants.
       const url = new URL(window.location.href);
       url.searchParams.set('map', next);
+      // **Set down at the new map's cart point**, which is where the cart goes. Written as `?at=`,
+      // which the scene already reads, so a reload keeps you there -- and an `?at=` naming a place on
+      // the map just left can no longer follow you across.
+      const arrive = arrivalPoint(next);
+      if (arrive) url.searchParams.set('at', arrive);
+      else url.searchParams.delete('at');
       window.history.replaceState(null, '', url);
       EventBus.emitEvent('travel-to', { fieldMapId: next, seed });
     },
@@ -2022,6 +2045,7 @@ export function App() {
         current={fieldMapId}
         progress={progress}
         met={metStrangers.current}
+        standingOn={standingOn}
         open={interrupts.overworld}
         onTravel={travel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'overworld' })}

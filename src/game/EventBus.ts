@@ -17,7 +17,11 @@ import type { TravellerState } from '../content/travellers';
 /** Scene → React. */
 export interface GameToUi {
   /** A world was generated and the scene is drawing it. */
-  'world-ready': { world: World };
+  /**
+   * The map is drawn. `places` is where its points of interest landed, which only the scene knows;
+   * React needs it to ask whether a homestead's ground has dry land near enough to build on.
+   */
+  'world-ready': { world: World; places?: { poiId: string; at: Point }[] };
   /**
    * Who the scene is actually drawing.
    *

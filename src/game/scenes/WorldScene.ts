@@ -830,7 +830,10 @@ export class WorldScene extends Phaser.Scene {
       const [x, y] = key.split(',').map(Number);
       this.setFog(x!, y!, FOG_REMEMBERED);
     }
-    EventBus.emitEvent('world-ready', { world: this.world });
+    EventBus.emitEvent('world-ready', {
+      world: this.world,
+      places: this.built.placed.map((p) => ({ poiId: p.poi.id, at: p.at }))
+    });
     this.arriveAt(this.at);
   }
 

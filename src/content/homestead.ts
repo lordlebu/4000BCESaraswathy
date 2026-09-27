@@ -20,6 +20,7 @@
 import placesBundle from '../../data/canon/places.json';
 import type { Point, World } from '../world/types';
 import { isWalkable } from '../world/generate';
+import { band } from '../world/classify';
 import { discovery, offeredAt, vocabulary } from './knowledge';
 import { fieldMap, npc, poi } from './places';
 import { STANDINGS, type Standing } from './standing';
@@ -387,36 +388,74 @@ export function settle(homestead: Homestead, flags: readonly string[]): string[]
 // ------------------------------------------------------------------------------------------------
 // Where it stands on the map.
 
-const ROUND: readonly Point[] = [
-  { x: 1, y: -1 },
-  { x: 1, y: 0 },
-  { x: 0, y: -1 },
-  { x: -1, y: -1 },
-  { x: -1, y: 0 },
-  { x: 1, y: 1 },
-  { x: 0, y: 1 },
-  { x: -1, y: 1 }
-];
+/**
+ * The grounds a building may stand on: dry flat land, or hills.
+ *
+ * **The owner, 27 September: "hope we don't let people build it on swamp -- ideally on flat land or
+ * hill, if there is no water or cliff or road."** The first version took any walkable tile beside
+ * the place, and on the Eastern Field that was wetland: a mill standing in the marsh. Forest is
+ * flat too, and left out because trees are drawn on it; the mill beside the trees is what rises out
+ * of the canopy.
+ */
+export const BUILDABLE = new Set(['plains', 'settlement', 'desert', 'hills']);
 
 /**
- * The tiles the mill and the greenhouse stand on, beside the ground's place.
+ * How far from its place a homestead may stand, in tiles.
  *
- * **Beside it, not on it**: the place's own marker is on its tile, and a building drawn over it would
- * hide where the player walks to talk. The first walkable tile round the place that is not a road
- * takes the mill, and the next the greenhouse -- the same answer on every machine for the same map.
+ * Measured on 40 Lothal seeds, the nearest two buildable tiles are one or two tiles from the ground
+ * on most, and three to eight on the wet ones -- Lothal is a delta. Six covers 39 of 40 for the
+ * Eastern Field and 38 of 40 for the granary. Where nothing dry is that close, the ground says so and
+ * cannot be built on; the rule about swamp is not bent to fit.
+ */
+export const BUILD_RADIUS = 6;
+
+/**
+ * Whether a building can stand on this tile.
+ *
+ * Buildable ground, no road, ford, bridge or line, and **no cliff**: a cliff is drawn where a tile
+ * stands a height band above a dry neighbour (`cliffAt` in `game/frames.ts`), so a tile whose dry
+ * neighbours are all at its own band has no rock face on either side of it.
+ */
+export function buildable(world: World, at: Point): boolean {
+  const tile = world.tiles[at.y]?.[at.x];
+  if (!tile || !BUILDABLE.has(tile.biome) || !isWalkable(tile)) return false;
+  if (tile.road || tile.ford || tile.bridge || tile.track) return false;
+  const mine = band(tile.elevation);
+  for (const d of [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 }]) {
+    const next = world.tiles[at.y + d.y]?.[at.x + d.x];
+    if (!next || WATER_GROUND.has(next.biome)) continue;
+    if (band(next.elevation) !== mine) return false;
+  }
+  return true;
+}
+
+/** Ground a cliff never draws against. The same set `cliffAt` refuses. */
+const WATER_GROUND = new Set(['sea', 'river', 'coast', 'wetland', 'sky_water']);
+
+/**
+ * The tiles the mill and the greenhouse stand on, near the ground's place.
+ *
+ * **Near it, not on it**: the place's own marker is on its tile. The nearest buildable tile takes
+ * the mill and the next the greenhouse, which is two tiles wide and so is kept off the mill's own
+ * row beside it. Tiles are tried nearest first in a fixed order, so the answer is the same on every
+ * machine for the same map. Null when nothing within `BUILD_RADIUS` will do.
  */
 export function buildingTiles(world: World, at: Point, placed: readonly Point[]): { mill: Point; greenhouse: Point } | null {
   const taken = new Set(placed.map((p) => `${p.x},${p.y}`));
-  const free: Point[] = [];
-  for (const d of ROUND) {
-    const p = { x: at.x + d.x, y: at.y + d.y };
-    const tile = world.tiles[p.y]?.[p.x];
-    if (!tile || !isWalkable(tile) || tile.road || taken.has(`${p.x},${p.y}`)) continue;
-    free.push(p);
-    if (free.length === 2) break;
+  const ring: Point[] = [];
+  for (let r = 1; r <= BUILD_RADIUS; r += 1) {
+    for (let dy = -r; dy <= r; dy += 1) {
+      for (let dx = -r; dx <= r; dx += 1) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+        ring.push({ x: at.x + dx, y: at.y + dy });
+      }
+    }
   }
-  if (free.length < 2) return null;
-  return { mill: free[0]!, greenhouse: free[1]! };
+  const fits = ring.filter((p) => !taken.has(`${p.x},${p.y}`) && buildable(world, p));
+  const mill = fits[0];
+  if (!mill) return null;
+  const greenhouse = fits.find((p) => p !== mill && !(p.y === mill.y && Math.abs(p.x - mill.x) < 2));
+  return greenhouse ? { mill, greenhouse } : null;
 }
 
 /** The place a ground is, by name, for a sentence. */

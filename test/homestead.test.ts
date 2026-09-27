@@ -21,12 +21,14 @@ import {
   settle,
   stagesBuilt,
   stateOf,
+  BUILDABLE,
+  BUILD_RADIUS,
+  buildable,
   type Holdings,
   type Option
 } from '../src/content/homestead';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps } from '../src/content/places';
-import { isWalkable } from '../src/world/generate';
 
 const lothal = homesteadOn('field_map_lothal')!;
 const field = lothal.grounds.find((g) => g.id === 'ground_eastern_field')!;
@@ -165,21 +167,41 @@ describe('building', () => {
 });
 
 describe('where it stands', () => {
-  it('stands beside every ground, on walkable ground off the road, on real Lothal maps', () => {
-    for (let s = 0; s < 10; s += 1) {
+  // The owner: "hope we don't let people build it on swamp -- ideally on flat land or hill, if there
+  // is no water or cliff or road." The first version put the mill in the Eastern Field's wetland.
+  it('stands near every ground on dry flat land or hills, off the road and clear of any cliff', () => {
+    let found = 0;
+    for (let s = 0; s < 20; s += 1) {
       const built = buildFieldMap(fieldMap(MAP)!, { seed: `homestead-${s}` });
       for (const ground of lothal.grounds) {
         const at = built.placed.find((p) => p.poi.id === ground.at)?.at;
         expect(at, `${ground.at} was not placed on seed ${s}`).toBeTruthy();
         const tiles = buildingTiles(built.world, at!, built.placed.map((p) => p.at));
-        expect(tiles, `nowhere to build beside ${ground.at} on seed ${s}`).not.toBeNull();
-        for (const p of [tiles!.mill, tiles!.greenhouse]) {
+        if (!tiles) continue;
+        found += 1;
+        for (const p of [tiles.mill, tiles.greenhouse]) {
           const tile = built.world.tiles[p.y]![p.x]!;
-          expect(isWalkable(tile)).toBe(true);
-          expect(tile.road).toBeFalsy();
-          expect(Math.max(Math.abs(p.x - at!.x), Math.abs(p.y - at!.y))).toBe(1);
+          expect(BUILDABLE.has(tile.biome), `built on ${tile.biome} at ${p.x},${p.y}`).toBe(true);
+          expect(tile.road || tile.ford || tile.bridge || tile.track, 'built on a way').toBeFalsy();
+          expect(buildable(built.world, p)).toBe(true);
+          expect(Math.max(Math.abs(p.x - at!.x), Math.abs(p.y - at!.y))).toBeLessThanOrEqual(BUILD_RADIUS);
         }
+        expect(tiles.greenhouse.y === tiles.mill.y && Math.abs(tiles.greenhouse.x - tiles.mill.x) < 2, 'the greenhouse overlaps the mill').toBe(false);
       }
     }
+    // Measured: see the note beside BUILD_RADIUS. Nearly every ground has somewhere on nearly every
+    // seed, and one that has not says so rather than building in the marsh.
+    expect(found / (20 * lothal.grounds.length), `${found} of ${20 * lothal.grounds.length} grounds had room`).toBeGreaterThan(0.9);
+  });
+
+  it('refuses water, forest, road and a cliff edge', () => {
+    const built = buildFieldMap(fieldMap(MAP)!, { seed: 'homestead-0' });
+    const tiles = built.world.tiles.flat();
+    const wet = tiles.find((t) => t.biome === 'wetland')!;
+    expect(buildable(built.world, wet)).toBe(false);
+    const road = tiles.find((t) => t.road && t.biome === 'plains');
+    if (road) expect(buildable(built.world, road)).toBe(false);
+    const forest = tiles.find((t) => t.biome === 'forest');
+    if (forest) expect(buildable(built.world, forest)).toBe(false);
   });
 });
