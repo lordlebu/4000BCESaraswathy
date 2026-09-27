@@ -10,7 +10,7 @@
 // control to be a 40px target at six viewport sizes, and an SVG node is not that. The drawing
 // sits above it as orientation, and every place remains reachable by a real button underneath.
 
-import { fieldMap, fieldMaps, neighboursOf, poisOn } from '../content/places';
+import { fieldMap, fieldMaps, mayLeaveFrom, neighboursOf, poisOn } from '../content/places';
 import { labelAnchor, nodeFor, overworldShape, viewBoxFor } from '../content/overworldMap';
 import { discoveriesAt } from '../content/knowledge';
 import { isComplete, rungOf, type Progress } from '../journey';
@@ -22,6 +22,8 @@ export interface OverworldProps {
   progress: Progress;
   /** Strangers met, as the save keeps them -- one of the things a map knows you by. */
   met: readonly string[];
+  /** The place the traveller stands in, or null. Travel is offered only at a cart point. */
+  standingOn?: string | null;
   open: boolean;
   onTravel: (fieldMapId: string) => void;
   onClose: () => void;
@@ -100,11 +102,13 @@ function OverworldSketch({ current, reachable }: { current: string; reachable: s
   );
 }
 
-export function Overworld({ current, progress, met, open, onTravel, onClose }: OverworldProps) {
+export function Overworld({ current, progress, met, standingOn: at = null, open, onTravel, onClose }: OverworldProps) {
   if (!open) return null;
 
   const here = fieldMap(current);
   const reachable = neighboursOf(current);
+  // The map can be read from anywhere; the cart only leaves from its own yard. See `mayLeaveFrom`.
+  const leave = mayLeaveFrom(current, at);
 
   return (
     <Modal open label="Where to go" onClose={onClose}>
@@ -127,6 +131,7 @@ export function Overworld({ current, progress, met, open, onTravel, onClose }: O
 
         <section className="diary-section">
           <h3>From here</h3>
+          {!leave.ok && reachable.length > 0 && <p className="muted overworld-cart">{leave.why}</p>}
           {reachable.length === 0 ? (
             <p className="muted">
               Nothing is authored beyond this place yet. The road exists; the country at the end
@@ -150,7 +155,7 @@ export function Overworld({ current, progress, met, open, onTravel, onClose }: O
                         ` · ${STANDING_WORDS[standingOn(m.id, { finished: (id) => isComplete(progress, id), met }).standing]}`}
                     </p>
                   </div>
-                  <button type="button" onClick={() => onTravel(m.id)}>
+                  <button type="button" onClick={() => onTravel(m.id)} disabled={!leave.ok}>
                     Travel
                   </button>
                 </div>

@@ -189,20 +189,34 @@ test('an instance is a place you go into, and it says why when you cannot', asyn
   await expect(deeper.locator('.look')).toHaveCount(3);
 });
 
-test('the overworld joins the two field maps', async ({ page }) => {
+test('the overworld joins the two field maps, from where the cart leaves', async ({ page }) => {
+  // Away from the cart point the map can be read and nothing can be boarded: every Travel is
+  // greyed, and the sheet says where the cart leaves from. The owner's ruling of 27 September.
   await boot(page);
   await page.getByRole('button', { name: 'Where to go' }).click();
-
   const sheet = page.locator('.diary');
+  await expect(sheet).toBeVisible();
+  await expect(sheet).toContainText('The cart leaves from the Camp in the Kilns.');
+  await expect(sheet.getByRole('button', { name: 'Travel' }).first()).toBeDisabled();
+
+  // At the Camp in the Kilns, Lothal's cart point, it runs.
+  await page.goto(`/?seed=${SEED}&map=field_map_lothal&at=poi_lothal_camp`);
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('button', { name: 'Where to go' }).click();
   await expect(sheet).toBeVisible();
   await expect(sheet.locator('h2')).toHaveText('Where to go');
   await expect(sheet).toContainText('Lothal');
   await expect(sheet).toContainText('Narmada');
 
-  await sheet.getByRole('button', { name: 'Travel' }).first().click();
+  // The Narmada's row, by name: the order of the neighbours is canon's and not this test's.
+  await sheet.locator('.look', { hasText: 'Narmada' }).getByRole('button', { name: 'Travel' }).click();
   await expect(sheet).toBeHidden();
 
-  // A different country: the plateau is large where Lothal is small, so the map is rebuilt.
+  // A different country: the plateau is large where Lothal is small, so the map is rebuilt, and
+  // the cart sets the traveller down at the new map's own cart point -- standing in the High Camp.
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
-  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
+  await expect(page).toHaveURL(/map=field_map_narmada/);
+  await expect(page).toHaveURL(/at=poi_high_camp/);
+  await expect(page.locator('.place h2')).toHaveText(/High Camp/, { timeout: 20_000 });
 });
