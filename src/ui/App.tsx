@@ -1939,7 +1939,7 @@ export function App() {
           void homeTick;
           const homestead = homesteadOn(fieldMapId);
           if (!homestead || !homesteadState(fieldMapId, journeyFlags.current).settled) return null;
-          return { name: homestead.name, prose: homestead.settled, people: peopleOfMap };
+          return { name: homestead.name, prose: homestead.settled, people: peopleOfMap, fieldMapId };
         })()}
         open={interrupts.ending}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'ending' })}

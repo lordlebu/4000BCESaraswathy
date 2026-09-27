@@ -31,7 +31,12 @@ export interface EndingProps {
    * the people moving in and what canon says of it, and the page speaks for this map's people only.
    * Null before settling, when the page is the old "if you stopped here".
    */
-  settlement?: { name: string; prose: string; people: readonly string[] } | null;
+  /**
+   * The settled map. `fieldMapId` picks its own painting, `settle-home-<map>` (`settle-home-dwarka`),
+   * when the owner has painted one, and the shared `settle-home` -- Lothal's mill among the trees --
+   * until then.
+   */
+  settlement?: { name: string; prose: string; people: readonly string[]; fieldMapId?: string } | null;
   open: boolean;
   onClose: () => void;
 }
@@ -59,7 +64,8 @@ export function Ending({ progress, settlement = null, open, onClose }: EndingPro
   const here = (id: string) => !settlement || settlement.people.includes(id);
   const coming = gatherable(progress).filter(here);
   const stays = staying(progress).filter(here);
-  const picture = settlement ? art('events', 'settle-home') : null;
+  const own = settlement?.fieldMapId ? `settle-home-${settlement.fieldMapId.replace(/^field_map_/, '')}` : null;
+  const picture = settlement ? ((own && art('events', own)) || art('events', 'settle-home')) : null;
   const put = restored(progress);
   const nobody = coming.length === 0 && stays.length === 0;
 

@@ -244,6 +244,42 @@ Six portraits, in `docs/portrait-prompts.md` under **The holders of ground**: Ha
 Lothal, Ushi and Jarro on Dwarka, Ardhi and Tolla on the Narmada. Until one arrives the profile
 draws the ink figure with the tool of their trade, as it does for every stranger.
 
+## The settlement page, per map — asked 27 September 2026
+
+`settle-home` is Lothal's mill among the trees, and until now it headed every map's settlement page. The page now looks for `settle-home-<map>` first and falls back to it, so each of these shows the moment it is built.
+
+#### `settle-home-dwarka` — Settling in, Dwarka
+
+Save as `assets/source/events/settle-home-dwarka.png`.
+
+Where it shows: across the top of Dwarka's settlement page, in place of Lothal's.
+
+Shape: landscape 4:3, built to 512 × 384, like `settle-home`.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: Evening on a low sandy rise above a dry basin, beside an old stone well: a tall wind-pump of pale lashed poles with a many-vaned bamboo wheel turning against a pale sky, water running from its spout into a wooden trough, and beside it a long low glasshouse over shallow trays with young date palms in pots. A few people coming up the rise from a distant town, carrying bundles and a rolled mat, seen from behind; one lamp already lit in the glasshouse. Dry grass, pale dust, a line of old stone walls far off where the sea once was. Warm and quiet, a sense of arriving home.
+```
+
+#### `settle-home-narmada` — Settling in, the Narmada
+
+Save as `assets/source/events/settle-home-narmada.png`.
+
+Where it shows: across the top of the Narmada's settlement page, in place of Lothal's.
+
+Shape: landscape 4:3, built to 512 × 384, like `settle-home`.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: Evening on the edge of a high green plateau above a dark basalt escarpment: a slender windmill of pale cane lashed with dark cord, four scraped-hide sails turning in the wind that rises up the scarp, and beside it a small glasshouse glowing warm from inside and a straw beehive on a little thatched stand. Stone terraces step away down the hillside with goats on them, and in the distance the long low halls of a university. People arriving from both directions at once, herders from the terraces and scholars from the halls, seen from behind and at a distance, not quite sure who should speak first. Lamps being lit. Warm and quiet, a sense of arriving home.
+```
+
 ## What arrived — 27 September 2026, evening
 
 **All five buildings, and an apiary nobody asked for.** None was sent back.
