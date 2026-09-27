@@ -174,9 +174,12 @@ import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
 import {
+  hoursFor,
+  nearby,
   placedCircuit,
   travellerState,
   travellersOn,
+  untangle,
   whereabouts,
   type Traveller,
   type TravellerState
@@ -209,6 +212,14 @@ import type { BiomeId, Point, Tile, World } from '../../world/types';
 const FOG_UNKNOWN = 0.6;
 const FOG_REMEMBERED = 0.2;
 const FOG_VISIBLE = 0;
+
+/**
+ * The pips drawn at a place's door for the people in it: a dark dot each on a pale ring, and a
+ * turmeric one for somebody with something new to say. Ink and turmeric are the diary's own colours.
+ */
+const PIP_INK = 0x3a2f2a;
+const PIP_NEWS = 0xd9a21b;
+const PIP_RING = 0xf4ecd8;
 
 /** How far the traveller can see. */
 const SIGHT_RADIUS = 2;
@@ -418,6 +429,16 @@ export class WorldScene extends Phaser.Scene {
    * than the render it saves, and `travellers-changed` exists to be rare.
    */
   private travellerStatesSent = '';
+  /** Where each walking traveller was last drawn, after `untangle`. Nobody resting is in it. */
+  private travellerTiles = new Map<string, Point>();
+  /** The last `travellers-nearby` sent, so an unchanged answer is not sent again. */
+  private nearbySent = '';
+  /**
+   * A pip per person at each place's door, and which tile each set belongs to. See `drawPips`.
+   * React's last answer is kept so a map change or a new discovery can redraw without asking again.
+   */
+  private pips: { poiId: string; key: string; count: number; g: Phaser.GameObjects.Graphics }[] = [];
+  private pipsWanted: UiToGame['people-at-places']['places'] = [];
 
   /** The last phase the travellers were moved for, so they are not recomputed every frame. */
   private travellersMovedAt = -1;
@@ -621,6 +642,11 @@ export class WorldScene extends Phaser.Scene {
     this.travellers = [];
     this.travellersMovedAt = -1;
     this.travellerStatesSent = '';
+    this.travellerTiles = new Map();
+    this.nearbySent = '';
+    // The last map's pips went with its display list; the next map's arrive from React.
+    this.pips = [];
+    this.pipsWanted = [];
     this.wanderers = [];
     this.wanderersMovedAt = -1;
     this.visitors = [];
@@ -1434,6 +1460,7 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('camp', this.onCamp);
     EventBus.onEvent('ride', this.onRide);
     EventBus.onEvent('shelter-built', this.onShelterBuilt);
+    EventBus.onEvent('people-at-places', this.onPeopleAtPlaces);
     EventBus.onEvent('ease', this.onEase);
     EventBus.onEvent('approach', this.onApproach);
     EventBus.onEvent('set-character', this.onSetCharacter);
@@ -1465,6 +1492,7 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('camp', this.onCamp);
       EventBus.offEvent('ride', this.onRide);
       EventBus.offEvent('shelter-built', this.onShelterBuilt);
+      EventBus.offEvent('people-at-places', this.onPeopleAtPlaces);
       EventBus.offEvent('ease', this.onEase);
       EventBus.offEvent('approach', this.onApproach);
       this.input.off(Phaser.Input.Events.POINTER_WHEEL);
@@ -1627,6 +1655,55 @@ export class WorldScene extends Phaser.Scene {
   };
 
   /** Remember what React says is pitched. The payload is the whole state -- see the event's note. */
+  /** Who is at each place, from React. Drawn at once and kept for the next redraw. */
+  private onPeopleAtPlaces = ({ places }: UiToGame['people-at-places']): void => {
+    this.pipsWanted = places;
+    this.drawPips();
+  };
+
+  /**
+   * A small round pip for each person at a place, at its door, and a warm one for anybody with
+   * something new to say.
+   *
+   * **So a player can see from the road who is where.** Reported from play: walking into a place
+   * was the only way to learn who was in it, because the map rightly draws nobody standing on a
+   * roof. Pips rather than faces: a painted portrait at the size of a tile's doorstep is a smudge,
+   * and a count with one bright dot answers the two questions that matter from a distance -- is
+   * anybody there, and does anybody have news.
+   *
+   * At most five, drawn in front of the building on its own row, and hidden until the place has
+   * been seen, so the map never tells a player about a place before the fog does.
+   */
+  private drawPips(): void {
+    for (const pip of this.pips) pip.g.destroy();
+    this.pips = [];
+    if (!this.built) return;
+    const r = Math.max(4, Math.round(TILE_SIZE * 0.07));
+    const gap = r * 2.8;
+    for (const { poiId, people } of this.pipsWanted) {
+      const at = this.built.placed.find((p) => p.poi.id === poiId)?.at;
+      if (!at || people.length === 0) continue;
+      const shown = people.slice(0, 5);
+      const left = at.x * TILE_SIZE + TILE_SIZE / 2 - (gap * (shown.length - 1)) / 2;
+      const y = at.y * TILE_SIZE + TILE_SIZE - r - 3;
+      const g = this.add.graphics();
+      shown.forEach(({ fresh }, i) => {
+        g.fillStyle(PIP_RING, 1).fillCircle(left + i * gap, y, r + 2);
+        g.fillStyle(fresh ? PIP_NEWS : PIP_INK, 1).fillCircle(left + i * gap, y, r);
+      });
+      g.setDepth(depthFor(at.y, ROW_SLOT.canopy + 1));
+      g.setName(`pips:${poiId}`);
+      this.pips.push({ poiId, key: `${at.x},${at.y}`, count: people.length, g });
+    }
+    this.showPips();
+  }
+
+  /** Pips show once their place is discovered, and not while the player stands on it. */
+  private showPips(): void {
+    const here = `${this.at.x},${this.at.y}`;
+    for (const pip of this.pips) pip.g.setVisible(this.discovered.has(pip.key) && pip.key !== here);
+  }
+
   private onShelterBuilt = ({ built }: UiToGame['shelter-built']): void => {
     this.builtShelter = built;
     // The rest row shows which night is on offer, so the panels have to hear about it before the
@@ -2085,6 +2162,11 @@ export class WorldScene extends Phaser.Scene {
     // five recorded instances -- and a Node test can prove every rule in `travellers.ts` while the
     // scene never calls any of them. `e2e/road-company.spec.ts` reads this and would fail the day
     // `createTravellers` stopped being called, which no other check could notice.
+    // The pips at each place's door, for `e2e/who-is-here.spec.ts`: which places, how many people,
+    // and whether they are showing. Read off the scene because only the scene draws them.
+    (window as unknown as { __pips?: () => unknown[] }).__pips = () =>
+      this.pips.map(({ poiId, count, g }) => ({ poiId, count, visible: g.visible }));
+
     (window as unknown as { __travellers?: () => unknown[] }).__travellers = () =>
       this.travellers.map(({ traveller, sprite }) => ({
         id: traveller.id,
@@ -2093,6 +2175,9 @@ export class WorldScene extends Phaser.Scene {
         visible: sprite.visible,
         x: Math.round(sprite.x),
         y: Math.round(sprite.y),
+        // The tile they are drawn on after `untangle`, or null while resting. So a spec can stand
+        // somebody beside them without guessing a coordinate -- see `e2e/road-talk.spec.ts`.
+        tile: this.travellerTiles.get(traveller.id) ?? null,
         // **How big they are drawn, and the player's own size to compare it against.** A ratio the
         // scene applies is not provable from Node: `travellerScale` can be right while
         // `createTravellers` uses the other one, which is exactly what it did.
@@ -2267,20 +2352,26 @@ export class WorldScene extends Phaser.Scene {
     this.travellersMovedAt = step;
 
     const day = this.dayOfJourney();
-    for (const { stops, sprite } of this.travellers) {
-      const where = whereabouts(this.world, stops, day, phase);
+    // Everybody's position first, then room made between them: whether somebody steps aside depends
+    // on who else is on the tile, so it cannot be decided one traveller at a time.
+    const placed = this.travellers.map(({ traveller, stops }) => ({
+      id: traveller.id,
+      where: whereabouts(this.world, stops, day, phase, hoursFor(traveller.id))
+    }));
+    const room = untangle(this.world, placed, [this.at]);
+    this.travellerTiles = room;
+    this.travellers.forEach(({ sprite }, i) => {
+      const where = placed[i]!.where;
       if (!where || where.resting) {
         sprite.setVisible(false);
-        continue;
+        return;
       }
+      const at = room.get(placed[i]!.id) ?? where.at;
       sprite.setVisible(true);
-      sprite.setPosition(
-        where.at.x * TILE_SIZE + TILE_SIZE / 2,
-        where.at.y * TILE_SIZE + TILE_SIZE - 2
-      );
+      sprite.setPosition(at.x * TILE_SIZE + TILE_SIZE / 2, at.y * TILE_SIZE + TILE_SIZE - 2);
       // Sorted by row like everything else that stands on the ground, so a traveller south of the
       // player passes in front of them and one north of them passes behind.
-      sprite.setDepth(depthFor(where.at.y, ROW_SLOT.walker));
+      sprite.setDepth(depthFor(at.y, ROW_SLOT.walker));
       const facing = facingFromStep(
         where.heading === 'east' ? 1 : where.heading === 'west' ? -1 : 0,
         where.heading === 'south' ? 1 : where.heading === 'north' ? -1 : 0,
@@ -2289,9 +2380,28 @@ export class WorldScene extends Phaser.Scene {
       const { key, flipX } = animFor(sprite.texture.key, facing, 'walk');
       if (sprite.anims.currentAnim?.key !== key) sprite.play(key);
       sprite.setFlipX(flipX);
-    }
+    });
 
     this.reportTravellers(day, phase);
+    this.reportNearby();
+  }
+
+  /**
+   * Tell React who is walking near the player, when that changes.
+   *
+   * Ids and a step count, never tiles -- React holds no tiles. Asked after travellers move and after
+   * the player does, since either can bring somebody alongside.
+   */
+  private reportNearby(): void {
+    const close = nearby(this.travellerTiles, this.at).map(({ id, beside }) => ({
+      id,
+      npcId: this.travellers.find((t) => t.traveller.id === id)?.traveller.npcId ?? null,
+      beside
+    }));
+    const key = JSON.stringify(close);
+    if (key === this.nearbySent) return;
+    this.nearbySent = key;
+    EventBus.emit('travellers-nearby', { travellers: close });
   }
 
   /**
@@ -2307,7 +2417,7 @@ export class WorldScene extends Phaser.Scene {
       .map(({ traveller, circuit, stops }) => ({
         id: traveller.id,
         npcId: traveller.npcId,
-        state: travellerState(circuit, whereabouts(this.world, stops, day, phase))
+        state: travellerState(circuit, whereabouts(this.world, stops, day, phase, hoursFor(traveller.id)))
       }))
       .filter((t): t is { id: string; npcId: string | null; state: TravellerState } =>
         t.state !== null
@@ -2594,6 +2704,7 @@ export class WorldScene extends Phaser.Scene {
 
     // A lamp is lit once its tile is known.
     for (const g of this.glows) if (!g.sprite.visible && this.discovered.has(g.key)) g.sprite.setVisible(true);
+    this.showPips();
   }
 
   private arriveAt(at: Point): void {
@@ -2619,6 +2730,7 @@ export class WorldScene extends Phaser.Scene {
       atLandmark
     });
     EventBus.emitEvent('journey-changed', { discovered: [...this.discovered] });
+    this.reportNearby();
 
     // What is under foot, every time it changes. The UI decides whether that opens anything;
     // the scene only reports the ground, which is the division everywhere else in this file.

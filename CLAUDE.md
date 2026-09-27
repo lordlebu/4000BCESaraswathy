@@ -35,7 +35,8 @@ npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
 npm run check:data # verify data/canon/ matches the canon release it came from
 npm run perf       # frame cost on the renderer CI has -- see docs/rendering.md
-npm run simulate   # walk hundreds of seeded journeys through the event layer and print the rhythm
+npm run simulate   # walk hundreds of seeded journeys through the event layer and print the rhythm,
+                   # then how many minutes each map takes to play, as a floor (test/minutes.test.ts)
 npm run build:sprite # rebuild every traveller's sheet; add an id to do just one
 ```
 
@@ -470,6 +471,18 @@ each with a portrait and a running typewriter — three of them at Lothal Camp, 
 third of itself on a phone. `Conversation.tsx` holds the exchange and the rules under it are
 untouched; what moved is the mounting. It is also the one occupant sized to its content, because
 nothing in it changes without a press.
+
+**A place says who is in it now, first.** `content/presence.ts` answers from where people are --
+canon's `found_at` is everywhere somebody *ever* goes, and reading it as a set put Kunch at three
+places at once. The panel lists who is here before anything else, with one line for where the
+others went, and the map draws a pip per person at each place's door. Nobody is drawn standing at a
+place; the pips and the panel are how a player knows. See `docs/settling-in.md`.
+
+**Anybody walking near can be talked to, and the row shares the rest row's slot.** The scene reports
+who is within six tiles (`travellers-nearby`) and the rail names the nearest, greyed until you are
+beside them. While somebody is near and resting is refused for the daylight, the talk row stands
+where the rest row would be: people walk only by day, and on a 360-pixel phone a fourth chip ran off
+the screen. `e2e/road-talk.spec.ts` asserts the rail is no longer than it was.
 
 **A traveller's state is said, not drawn.** Somebody who walks a circuit carries three chips above
 the words — where they are going, what they are, what they speak — and no mount is drawn under

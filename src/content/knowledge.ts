@@ -196,6 +196,23 @@ export function discoveriesAt(poiId: string): Discovery[] {
   return discoveries.filter((d) => d.foundAt.includes(poiId));
 }
 
+/**
+ * Every discovery a place offers to look at: the place's own list first, in its order, then any
+ * whose `found_at` names the place and the list does not.
+ *
+ * **Canon attaches a discovery to a place from both sides, and the two disagree.** Eighteen
+ * discoveries at 26 places are named only in their own `found_at` -- every one on the Aravali
+ * among them -- and the place panel, reading only the place's list, never offered them. `found_at`
+ * is what canon's playability check and the Overworld both read, so it is the authority; the
+ * place's list is kept first because it is the order an author chose.
+ */
+export function offeredAt(poiId: string, listed: readonly string[]): string[] {
+  const more = discoveriesAt(poiId)
+    .map((d) => d.id)
+    .filter((id) => !listed.includes(id));
+  return [...listed, ...more];
+}
+
 /** The last rung. Reaching it is what turns understanding into help. */
 export function lastRung(d: Discovery): number {
   return d.rungs.length - 1;

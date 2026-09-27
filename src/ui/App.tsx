@@ -43,7 +43,16 @@ import { type Collection, emptyCollection, metOnTile, size } from '../content/co
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
 import { hasBegun, loadJourney, saveJourney } from '../save';
-import { advance, answer, craft, hear, knowsRecipe, receiveAll, type WorldMoment } from '../journey';
+import {
+  advance,
+  answer,
+  craft,
+  hasSomethingNew,
+  hear,
+  knowsRecipe,
+  receiveAll,
+  type WorldMoment
+} from '../journey';
 import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import { characterFor } from '../game/player';
 import type { World } from '../world/types';
@@ -64,6 +73,7 @@ import { EventCard } from './EventCard';
 import { type Choice, type GameEvent, type Occasion } from '../content/events';
 import { happeningNow, surroundingsAt } from '../content/happenings';
 import { APPROACHES, approachAt, approachId } from '../content/visitors';
+import { peopleAtPlaces, roadTalk, whoIsHere } from '../content/presence';
 import type { Station } from '../content/stations';
 
 /**
@@ -133,6 +143,9 @@ export function App() {
   // Read the save once. Calling loadJourney per state initialiser would parse the same JSON
   // three times and, worse, let the three copies drift.
   const initialJourney = useRef(loadJourney(seedFromUrl()));
+  // Every stranger an event has introduced the player to. Up here rather than with the other event
+  // refs below, because the action rail reads it while rendering, to call somebody by name.
+  const metStrangers = useRef<string[]>(initialJourney.current.met ?? []);
 
   const [seed, setSeed] = useState(seedFromUrl);
   // Who is walking. Part of the journey rather than a setting: a save belongs to a traveller, so
@@ -149,6 +162,8 @@ export function App() {
   // asked for, because only the scene can answer it -- `travellers-changed` says why -- and it
   // changes twice a day, so a listener costs less than a poll.
   const [travellerStates, setTravellerStates] = useState<GameToUi['travellers-changed']['travellers']>([]);
+  // Who is walking near the traveller, closest first -- the scene's answer, for the action rail.
+  const [nearbyTravellers, setNearbyTravellers] = useState<GameToUi['travellers-nearby']['travellers']>([]);
   const [arrival, setArrival] = useState<Arrival | null>(null);
   const [collection, setCollection] = useState<Collection>(initialJourney.current.collection);
   const [memory, setMemory] = useState('');
@@ -286,7 +301,12 @@ export function App() {
         at: { x: number; y: number },
         shelter: string | null,
         salt: string,
-        extra?: { poiId?: string | null; taken?: readonly string[] }
+        extra?: {
+          poiId?: string | null;
+          taken?: readonly string[];
+          strangerId?: string | null;
+          force?: { kind?: string; asked?: boolean };
+        }
       ) => boolean)
     | null
   >(null);
@@ -371,6 +391,7 @@ export function App() {
     };
     const onSky = (next: GameToUi['sky-changed']) => setSkyPhase(next.phase);
     const onTravellers = (next: GameToUi['travellers-changed']) => setTravellerStates(next.travellers);
+    const onNearby = (next: GameToUi['travellers-nearby']) => setNearbyTravellers(next.travellers);
     // Who the scene says it is drawing, which is the only authority on it. The picker sets its
     // own state optimistically; this is what corrects it if the scene ever disagreed.
     const onCharacter = ({ characterId: drawn }: GameToUi['character-changed']) => setDrawn(drawn);
@@ -388,7 +409,12 @@ export function App() {
       at: { x: number; y: number },
       shelter: string | null,
       salt: string,
-      extra: { poiId?: string | null; taken?: readonly string[]; force?: { kind?: string } } = {}
+      extra: {
+        poiId?: string | null;
+        taken?: readonly string[];
+        strangerId?: string | null;
+        force?: { kind?: string; asked?: boolean };
+      } = {}
     ): boolean => {
       const world = latest.current.world;
       if (!world) return false;
@@ -527,6 +553,7 @@ export function App() {
     EventBus.onEvent('moment-changed', onMoment);
     EventBus.onEvent('sky-changed', onSky);
     EventBus.onEvent('travellers-changed', onTravellers);
+    EventBus.onEvent('travellers-nearby', onNearby);
     EventBus.onEvent('character-changed', onCharacter);
     EventBus.onEvent('night-passed', onNight);
     EventBus.onEvent('poi-reached', onArrived);
@@ -540,6 +567,7 @@ export function App() {
       EventBus.offEvent('moment-changed', onMoment);
       EventBus.offEvent('sky-changed', onSky);
       EventBus.offEvent('travellers-changed', onTravellers);
+      EventBus.offEvent('travellers-nearby', onNearby);
       EventBus.offEvent('approached', onApproached);
       EventBus.offEvent('character-changed', onCharacter);
       EventBus.offEvent('night-passed', onNight);
@@ -598,6 +626,18 @@ export function App() {
     const traits = travellerAttributes(traveller, reported?.state ?? null);
     return traits.length > 0 ? traits : null;
   }, [talkingTo, fieldMapId, travellerStates]);
+
+  /**
+   * Who is at the place being stood in, and where its other people have gone.
+   *
+   * Asked of `content/presence.ts` rather than read off canon's `found_at`, which lists everybody
+   * who ever visits a place as if they were all there at once. Travellers are placed by what the
+   * scene last reported, so this moves when they do.
+   */
+  const presence = useMemo(
+    () => (standingOn ? whoIsHere(standingOn, fieldMapId, arrival?.day ?? 0, travellerStates) : null),
+    [standingOn, fieldMapId, arrival?.day, travellerStates]
+  );
 
   const currentCreature = useMemo(() => {
     if (!world || !arrival) return null;
@@ -937,6 +977,22 @@ export function App() {
   }, [satchel]);
 
   /**
+   * Tell the scene who is at each place, for the pips at their doors.
+   *
+   * Pushed from here because whether somebody has something new to say is a question about the
+   * diary, and the diary is React's. `world` is in the list so the first answer goes out once the
+   * scene is listening, and again after every map change.
+   */
+  useEffect(() => {
+    if (!world) return;
+    EventBus.emitEvent('people-at-places', {
+      places: peopleAtPlaces(fieldMapId, arrival?.day ?? 0, travellerStates, (id) =>
+        hasSomethingNew(progress, id)
+      )
+    });
+  }, [world, fieldMapId, arrival?.day, travellerStates, progress]);
+
+  /**
    * Everything that can be done on the tile under foot, in one list.
    *
    * Assembled here because this is the only place that already holds all three answers -- what
@@ -989,6 +1045,11 @@ export function App() {
       world && arrival && !ride && canBoardAt(world, arrival.at)
     );
 
+    // Somebody on the road near enough to see. **Asked of `roadTalk`**, which says who they are and
+    // whether they are close enough yet; the row only exists while somebody is in view, and comes
+    // last so a chip that wraps on a small screen is this one rather than one of the steady three.
+    const talk = roadTalk(nearbyTravellers, fieldMapId, metStrangers.current);
+
     return [
       {
         id: 'take',
@@ -999,6 +1060,13 @@ export function App() {
         key: 'E',
         onDo: pickUp
       },
+      // **The talk row stands in the rest row's place while resting is refused for the daylight.**
+      // People walk only by day, and by day this row can only ever say "there is daylight left" --
+      // both rows are about what the hour is for. Measured on a 360-pixel phone with a busy tile,
+      // the rail has room for two chips, and a fourth row ran off the bottom of the screen.
+      ...(talk && !arrival?.canCamp
+        ? []
+        : [
       {
         id: 'rest',
         label: SHELTER_LABEL[shelter] ?? 'Stop for the night',
@@ -1012,7 +1080,8 @@ export function App() {
         // it settles on its own -- but it is the same shape of act, and the night should look like
         // one rather than happening between two frames.
         onDo: () => setActivity({ taking: [], day: arrival?.day ?? 0, resting: shelter })
-      },
+      } satisfies TileAction
+          ]),
       // The line is one map's furniture, so the row only exists where there is a line. Every other
       // row here is about ground that exists everywhere; this one would be a permanent "there is no
       // railway" on three maps out of four, which teaches nothing.
@@ -1038,9 +1107,34 @@ export function App() {
               }
             } satisfies TileAction
           ]
+        : []),
+      ...(talk
+        ? [
+            {
+              id: 'talk',
+              label: talk.label,
+              mark: talk.npcId ? '💬' : '👣',
+              blocked: talk.blocked,
+              key: 'T',
+              onDo: () => {
+                if (talk.npcId) {
+                  dispatch({ type: 'talk-to', npcId: talk.npcId });
+                  return;
+                }
+                if (!arrival) return;
+                // A stranger has no lines of their own: walking with them is the company card, about
+                // this stranger, opened because the player asked rather than rationed by the road.
+                const key = `${fieldMapId}:${talk.travellerId}`;
+                happens.current?.('road', arrival.at, null, `walk-with:${arrival.day}:${talk.travellerId}`, {
+                  strangerId: talk.travellerId,
+                  force: { kind: metStrangers.current.includes(key) ? 'company-again' : 'company', asked: true }
+                });
+              }
+            } satisfies TileAction
+          ]
         : [])
     ];
-  }, [underfoot, arrival, nodes, standing, pickUp, currentCreature, moment, world]);
+  }, [underfoot, arrival, nodes, standing, pickUp, currentCreature, moment, world, nearbyTravellers, fieldMapId]);
 
   /**
    * A key for each thing you can do here.
@@ -1069,7 +1163,15 @@ export function App() {
       if (activity) return;
 
       const wanted =
-        e.code === 'KeyE' ? 'take' : e.code === 'KeyR' ? 'rest' : e.code === 'KeyB' ? 'ride' : null;
+        e.code === 'KeyE'
+          ? 'take'
+          : e.code === 'KeyR'
+            ? 'rest'
+            : e.code === 'KeyB'
+              ? 'ride'
+              : e.code === 'KeyT'
+                ? 'talk'
+                : null;
       if (!wanted) return;
       const action = tileActions.find((a) => a.id === wanted);
       if (!action || action.blocked) return;
@@ -1133,7 +1235,6 @@ export function App() {
     null
   );
   const seenEvents = useRef<string[]>(initialJourney.current.seenEvents ?? []);
-  const metStrangers = useRef<string[]>(initialJourney.current.met ?? []);
   /** When each event last happened, and the flags choices have left. See `Journey`. */
   const eventDays = useRef<Record<string, number>>(initialJourney.current.eventDays ?? {});
   const journeyFlags = useRef<string[]>(initialJourney.current.flags ?? []);
@@ -1584,6 +1685,7 @@ export function App() {
         }}
         place={{
           poiId: placeOpen ? standingOn : null,
+          presence,
           progress,
           moment,
           firstVisit: Boolean(standingOn) && !visited.current.has(standingOn!),

@@ -2264,6 +2264,14 @@ button.ghost:hover:not(:disabled) {
   font-size: 0.95rem;
 }
 
+/* Where the people who belong here have gone, in one quiet line under the list: a direction,
+   not somebody to press. */
+.who-away {
+  margin: 0.4rem 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+}
+
 /* Canon's own word for what they do, which is the useful thing to know before choosing who to
    listen to -- "fisher", "hunter", "potter". */
 .who-role {

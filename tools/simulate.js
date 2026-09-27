@@ -3,6 +3,8 @@
 //   npm run simulate                 # 25 journeys a map, 60 days each
 //   npm run simulate -- 50 90        # 50 journeys a map, 90 days each
 //
+// It also prints how many minutes each map takes to play, as a floor -- see `test/minutes.test.ts`.
+//
 // The simulation itself is `test/simulation.test.ts`, which CI runs small on every push so its
 // rules and bands are always checked. This runs the same file larger and prints the report it
 // writes, because the event layer's code is TypeScript that imports JSON, and Vitest is the one
@@ -19,9 +21,19 @@ const journeys = process.argv[2] ?? '25';
 const days = process.argv[3] ?? '60';
 const out = path.join(os.tmpdir(), `sot-simulation-${process.pid}.md`);
 
-const run = spawnSync('npx', ['vitest', 'run', 'test/simulation.test.ts'], {
+// The second report: how many minutes each map takes, as a floor. `test/minutes.test.ts` says how.
+const minutes = path.join(os.tmpdir(), `sot-minutes-${process.pid}.md`);
+
+const run = spawnSync('npx', ['vitest', 'run', 'test/simulation.test.ts', 'test/minutes.test.ts'], {
   cwd: path.resolve(__dirname, '..'),
-  env: { ...process.env, SIM_JOURNEYS: journeys, SIM_DAYS: days, SIM_OUT: out },
+  env: {
+    ...process.env,
+    SIM_JOURNEYS: journeys,
+    SIM_DAYS: days,
+    SIM_OUT: out,
+    MINUTES_SEEDS: '8',
+    MINUTES_OUT: minutes
+  },
   stdio: ['ignore', 'ignore', 'inherit'],
   shell: process.platform === 'win32'
 });
@@ -32,6 +44,11 @@ if (!fs.existsSync(out)) {
 }
 process.stdout.write(fs.readFileSync(out, 'utf8'));
 fs.unlinkSync(out);
+if (fs.existsSync(minutes)) {
+  process.stdout.write(`
+${fs.readFileSync(minutes, 'utf8')}`);
+  fs.unlinkSync(minutes);
+}
 if (run.status !== 0) {
   console.error('\nThe simulation ran, and one of its checks failed -- the report above is what it measured.');
   process.exit(run.status);

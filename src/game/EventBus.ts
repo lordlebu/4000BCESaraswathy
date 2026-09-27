@@ -139,6 +139,16 @@ export interface GameToUi {
   };
 
   /**
+   * Who is walking near the player, closest first, and who is close enough to talk to.
+   *
+   * Sent when it changes. Ids rather than tiles, for the same reason as `travellers-changed`: React
+   * turns this into a row on the action rail, "Talk to Kunch", and needs to know who, not where.
+   */
+  'travellers-nearby': {
+    travellers: { id: string; npcId: string | null; beside: boolean }[];
+  };
+
+  /**
    * The traveller reached an authored place for the first time this journey.
    *
    * Separate from `standing-on` on purpose. That one is a *state* the UI depends on — it fires
@@ -243,6 +253,14 @@ export interface UiToGame {
    * `content/using.ts` decides what counts. This carries its answer and holds no opinion.
    */
   'shelter-built': { built: 'tent' | null };
+  /**
+   * Who is at each place on this map, for the pips drawn at its door.
+   *
+   * **Pushed from React because "has something new to say" is a question about the diary**, and the
+   * diary lives in React. `peopleAtPlaces` in `content/presence.ts` builds it; the scene draws a pip
+   * per person and holds no opinion about who. The whole state each time, so nothing stale survives.
+   */
+  'people-at-places': { places: { poiId: string; people: { npcId: string; fresh: boolean }[] }[] };
   /**
    * Take some of the walking back out of the traveller's legs.
    *

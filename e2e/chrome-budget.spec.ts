@@ -136,8 +136,8 @@ for (const view of READING) {
 test('the place is readable rather than a letterbox', async ({ page }) => {
   // The other half of the measurement, and the one the old arrangement was worst at: the panel
   // showed 349 of its 477 pixels on a desktop and **135 of 473** on a landscape phone. What is
-  // asserted is the share of the writing on screen, not the pixels, so it survives canon giving a
-  // place more to say.
+  // asserted is the reading area's height. It was the share of the writing on screen, which was
+  // believed to survive canon giving a place more to say and does not -- see the note at the end.
   await boot(page, 844, 390);
   await step(page, 'ArrowDown');
   await step(page, 'ArrowDown');
@@ -160,19 +160,29 @@ test('the place is readable rather than a letterbox', async ({ page }) => {
     return settled;
   }, undefined, { timeout: 10_000 });
 
-  const shown = await page.evaluate(() => {
+  const { shown, tall } = await page.evaluate(() => {
     const body = document.querySelector('.dock-body');
-    return body ? (100 * body.clientHeight) / body.scrollHeight : 0;
+    return body
+      ? { shown: (100 * body.clientHeight) / body.scrollHeight, tall: body.clientHeight }
+      : { shown: 0, tall: 0 };
   });
+  // **The reading height, in pixels -- not the share of the writing, which is what this asserted
+  // until canon gave the dockyard more to say.** The share is visible height over total height, so
+  // it falls whenever a place gains content, however good the layout: when the place panel began
+  // offering the discoveries canon names only in `found_at`, the dockyard gained one, its writing
+  // went from 455 pixels to 514, and the share fell from 22% to 20% with the reading area exactly
+  // 101 pixels tall both times. What this test is for -- the place is readable rather than a
+  // letterbox -- is that height. 96 is the old floor of 21% taken of the 455 pixels it was set on.
+  //
   // 25% measured at reading height, against 29% before. **A 390-pixel-tall screen is where every
   // trade in this stage bites at once**: the handle and the rail take 117 pixels before a word is
   // drawn, and the blocked rows keep their place because `TileActions` requires it. What a player
   // has that they did not have before is a third press on the handle, which takes the dock to full
   // and the place to the whole page. This floor guards the reading height, not the best available.
   expect(
-    shown,
-    `${shown.toFixed(0)}% of the place is on screen on a landscape phone, against 29% before`
-  ).toBeGreaterThan(21);
+    tall,
+    `the place reads through ${tall} pixels on a landscape phone (${shown.toFixed(0)}% of its writing), against 101 measured`
+  ).toBeGreaterThanOrEqual(96);
 });
 
 test('the handle gives the map back', async ({ page }) => {
