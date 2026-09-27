@@ -37,4 +37,6 @@ test('a place a stranger sent you to keeps the promise on arriving', async ({ pa
   await expect(card).toBeVisible({ timeout: 20_000 });
   await expect(card.locator('h2')).toHaveText('As you were told');
   await expect(card.locator('.activity-prose')).toContainText('the Drowned Dockyard');
+  // Its own painting, not a borrowed scene or the blank band.
+  await expect(card.locator('img.activity-scene')).toHaveAttribute('src', /woven-rumour-kept/);
 });
