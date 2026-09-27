@@ -59,6 +59,19 @@ resampler read a *square* and squashed it into 4:3, and the edge check tested a 
 had cropped a landscape kind before, so it had never shown. The crop now takes the kind's own
 shape: `size` is the width and the height follows the aspect.
 
+## What arrived — 27 September 2026
+
+**`woven-small-talk` and `woven-rumour-kept`**, the two Phase 2 paintings, both 768 × 512 and both
+built to 512 × 384. The small-talk painting carried a torn-paper edge, measured at 11 to 31 pixels
+deep on each side (the right edge reads deeper only because the pale sky matches the paper), and was
+cropped just inside it; the other is full-bleed and built as it came. Two browser specs check each
+card draws its own painting.
+
+```bash
+node tools/build-plates.js --events --force --only=woven-small-talk --crop=86,33,596
+node tools/build-plates.js --events --force --only=woven-rumour-kept
+```
+
 ---
 
 ## The prompts

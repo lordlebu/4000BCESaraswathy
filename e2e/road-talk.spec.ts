@@ -126,4 +126,6 @@ test('beside a stranger, walking with them opens a card about them', async ({ pa
   await row.click();
   await expect(card).toBeVisible({ timeout: 10_000 });
   await expect(card.locator('h2')).toHaveText(`On the road with ${name}`);
+  // Its own painting, not a borrowed scene or the blank band.
+  await expect(card.locator('img.activity-scene')).toHaveAttribute('src', /woven-small-talk/);
 });

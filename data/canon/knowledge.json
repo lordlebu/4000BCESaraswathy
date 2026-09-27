@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.33.0",
+  "canon_version": "2.34.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -526,7 +526,8 @@
         "poi_silted_granary"
       ],
       "helps": [
-        "npc_bekh"
+        "npc_bekh",
+        "npc_drel"
       ],
       "restores": [
         "poi_silted_granary"
@@ -880,7 +881,8 @@
         "poi_silted_granary"
       ],
       "helps": [
-        "npc_bekh"
+        "npc_bekh",
+        "npc_hasme"
       ],
       "restores": [
         "poi_eastern_field"
@@ -2059,7 +2061,8 @@
       "gloss": "the thin layer",
       "literal": "not-ours bone",
       "learned_from": [
-        "npc_sura"
+        "npc_sura",
+        "npc_drel"
       ],
       "epochs": [
         "epoch_post_cataclysm"

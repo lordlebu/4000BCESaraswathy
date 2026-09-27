@@ -17,7 +17,11 @@ import type { TravellerState } from '../content/travellers';
 /** Scene → React. */
 export interface GameToUi {
   /** A world was generated and the scene is drawing it. */
-  'world-ready': { world: World };
+  /**
+   * The map is drawn. `places` is where its points of interest landed, which only the scene knows;
+   * React needs it to ask whether a homestead's ground has dry land near enough to build on.
+   */
+  'world-ready': { world: World; places?: { poiId: string; at: Point }[] };
   /**
    * Who the scene is actually drawing.
    *
@@ -261,6 +265,12 @@ export interface UiToGame {
    * per person and holds no opinion about who. The whole state each time, so nothing stale survives.
    */
   'people-at-places': { places: { poiId: string; people: { npcId: string; fresh: boolean }[] }[] };
+  /**
+   * The homestead on this map: the place whose ground it stands beside, and how many of its stages
+   * stand. Null place, or nought stages, draws nothing. React holds the journey's flags and asks
+   * `content/homestead.ts`; the scene draws what it is told.
+   */
+  'homestead-changed': { poiId: string | null; stage: number };
   /**
    * Take some of the walking back out of the traveller's legs.
    *

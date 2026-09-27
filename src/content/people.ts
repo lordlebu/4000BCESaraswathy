@@ -13,7 +13,8 @@
 import type { Progress } from '../journey';
 import { isComplete, isFirstMeeting, lineIsSpent, rungOf } from '../journey';
 import { discoveries } from './knowledge';
-import { allNpcs, type Npc } from './places';
+import { allNpcs, poi, type Npc } from './places';
+import { travellersOn, type StrangerCulture, type Traveller } from './travellers';
 
 /** One person, as a record rather than as somebody standing in front of you. */
 export interface Acquaintance {
@@ -92,3 +93,51 @@ export function threadWith(progress: Progress, person: Npc): string | null {
     ? 'There is more here, once you have seen more.'
     : 'There is more they could tell you.';
 }
+
+/** A stranger met on the road, as a record: who they are, and where their road runs. */
+export interface StrangerMet {
+  /** As the save keeps it: `<fieldMapId>:<traveller id>`. */
+  key: string;
+  traveller: Traveller;
+  /** The map they walk. A carrier on Lothal and a carrier on Dwarka are two people. */
+  fieldMapId: string;
+  /** The two places their circuit runs between, by name. */
+  between: string[];
+}
+
+/**
+ * The strangers the player has met, in the order they were met.
+ *
+ * Read off the save's `met` list, which the company card writes when you learn a name. A key
+ * naming a map or a stranger the roster no longer has is dropped rather than shown half-drawn.
+ */
+export function strangersMet(keys: readonly string[]): StrangerMet[] {
+  const out: StrangerMet[] = [];
+  for (const key of keys) {
+    const [fieldMapId, travellerId] = key.split(':');
+    if (!fieldMapId || !travellerId) continue;
+    const traveller = travellersOn(fieldMapId).find((t) => t.id === travellerId && t.npcId === null);
+    if (!traveller) continue;
+    out.push({
+      key,
+      traveller,
+      fieldMapId,
+      between: traveller.circuit.map((id) => poi(id)?.name).filter((n): n is string => Boolean(n))
+    });
+  }
+  return out;
+}
+
+/**
+ * What a people is called, for the few a stranger can belong to.
+ *
+ * Canon's culture records carry dress and reference looks but no display name, so these are the
+ * words the game already uses for them -- and the Violet-Horned Clan is what canon's own note on
+ * `asura_hybrid` calls the asura-blooded people who walk with the Maru.
+ */
+export const PEOPLE_NAMES: Readonly<Record<StrangerCulture, string>> = {
+  harappan: 'Harappan',
+  kia: 'Kia',
+  maru: 'Maru',
+  asura_hybrid: 'Violet-Horned Clan'
+};

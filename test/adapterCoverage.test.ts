@@ -75,7 +75,7 @@ const COVERAGE: Record<string, Coverage> = {
   },
   'places.field_maps': {
     adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'proportion', 'points_of_interest',
-      'neighbours', 'arrival', 'climate', 'coordinates', 'relief', 'vehicles'],
+      'neighbours', 'arrival', 'climate', 'coordinates', 'relief', 'vehicles', 'departs_from'],
     skipped: [...EDITORIAL,
       // The name canon used before. There are around four Dwarkas in Jambhudweepa, so the one
       // this game walks became North Dwarka and the bare name was kept as an alias so canon's
@@ -105,6 +105,12 @@ const COVERAGE: Record<string, Coverage> = {
     // Canon's written happenings, adapted by `fromCanon` in `src/content/events.ts`. `at` becomes
     // `conditions.pois`, `field_maps` `conditions.fieldMaps`.
     adapted: ['id', 'title', 'occasion', 'field_maps', 'at', 'requires', 'prose', 'choices'],
+    skipped: [...EDITORIAL]
+  },
+  'places.homesteads': {
+    // What the player may build on a map, adapted by `homesteads` in `src/content/homestead.ts`.
+    // Grounds, worries and stages are read whole; their fields are the settling loop's.
+    adapted: ['id', 'name', 'field_map', 'grounds', 'stages', 'settled'],
     skipped: [...EDITORIAL]
   },
   'places.regions': {

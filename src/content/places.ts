@@ -35,6 +35,12 @@ export interface FieldMap {
    */
   neighbours: string[];
   /**
+   * Where the cart, the boat or the line leaves this map from: the only places a traveller can go on
+   * to a neighbour. The first is where somebody arriving is set down. The owner's ruling of 27
+   * September -- maps are left from designated places, as a cart leaves a yard and not a field.
+   */
+  departsFrom: string[];
+  /**
    * The sky this place gets, as relative weights per weather.
    *
    * Canon owns it because a delta and a desert should not share one. Falls back to the
@@ -173,6 +179,7 @@ interface RawFieldMap {
   id: string; name: string; region: string; seed_biomes: string[];
   scale?: string; proportion?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
   climate?: Climate; coordinates?: { x: number; y: number }; relief?: string; vehicles?: string[];
+  departs_from?: string[];
 }
 interface RawPoi {
   id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string; shore?: string;
@@ -219,6 +226,7 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   coordinates: m.coordinates ?? null,
   relief: m.relief ?? null,
   vehicles: m.vehicles ?? [],
+  departsFrom: m.departs_from ?? [],
   arrival: m.arrival ?? ''
 }));
 
@@ -308,6 +316,25 @@ export function allNpcs(): Npc[] {
  * Silently drops an id canon names but does not define, so a half-authored edge cannot crash
  * the overworld — `neighbours` on the raw entity is still there if you need to see the gap.
  */
+/**
+ * Whether the traveller can leave this map from where they stand, or where they would have to go.
+ *
+ * A map with no cart points in canon can be left from anywhere, which is every map before the ruling
+ * and any added without them; canon's lint now refuses a map with neighbours and none.
+ */
+export function mayLeaveFrom(fieldMapId: string, standingOn: string | null): { ok: true } | { ok: false; why: string } {
+  const points = fieldMap(fieldMapId)?.departsFrom ?? [];
+  if (points.length === 0 || (standingOn && points.includes(standingOn))) return { ok: true };
+  const names = points.map((id) => (poi(id)?.name ?? id).replace(/^The /, 'the '));
+  const where = names.length === 1 ? names[0]! : `${names.slice(0, -1).join(', ')} or ${names.at(-1)}`;
+  return { ok: false, why: `The cart leaves from ${where}.` };
+}
+
+/** Where somebody arriving on this map is set down: its first cart point, or null for its start. */
+export function arrivalPoint(fieldMapId: string): string | null {
+  return fieldMap(fieldMapId)?.departsFrom[0] ?? null;
+}
+
 export function neighboursOf(fieldMapId: string): FieldMap[] {
   const from = fieldMap(fieldMapId);
   if (!from) return [];

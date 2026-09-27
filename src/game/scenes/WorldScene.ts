@@ -12,6 +12,10 @@ import placesUrl from '../../../assets/places.png';
 import monumentsUrl from '../../../assets/monuments.png';
 import windmillUrl from '../../../assets/windmill-tower.png';
 import bladesUrl from '../../../assets/windmill-blades.png';
+import stageOneUrl from '../../../assets/windmill-stage-1.png';
+import stageTwoUrl from '../../../assets/windmill-stage-2.png';
+import greenhouseUrl from '../../../assets/greenhouse.png';
+import windmillManifest from '../../../assets/windmill.json';
 import bridgeUrl from '../../../assets/bridge.png';
 import riverBridgeUrl from '../../../assets/river-bridge.png';
 import dugoutUrl from '../../../assets/dugout.png';
@@ -79,7 +83,8 @@ import {
   wandererMarkerKey
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
-import { DUGOUT_VIEWS, ROW_SLOT, depthFor, dugoutFor, rowAtFoot, type DugoutView, type Edge } from '../frames';
+import { BLADE_PERIOD, DUGOUT_VIEWS, ROW_SLOT, depthFor, dugoutFor, rowAtFoot, type DugoutView, type Edge } from '../frames';
+import { buildingTiles } from '../../content/homestead';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 
 /**
@@ -459,6 +464,9 @@ export class WorldScene extends Phaser.Scene {
   private tileSprites: Phaser.GameObjects.Image[][] = [];
   /** Everything swaying at depth 21, with the two frames it alternates and its own phase. */
   private overdraw: { sprite: Phaser.GameObjects.Image; rest: number; lean: number; phase: number }[] = [];
+  /** What the homestead draws, and what React last asked for. See `drawHomestead`. */
+  private homesteadSprites: Phaser.GameObjects.Image[] = [];
+  private homesteadWanted: UiToGame['homestead-changed'] = { poiId: null, stage: 0 };
   /** The mill's wheel, and anything else that turns on an index rather than a toggle. */
   private spinning: {
     sprite: Phaser.GameObjects.Image;
@@ -624,6 +632,8 @@ export class WorldScene extends Phaser.Scene {
     this.culled = null;
     this.overdraw = [];
     this.spinning = [];
+    this.homesteadSprites = [];
+    this.homesteadWanted = { poiId: null, stage: 0 };
     this.falls = [];
     this.queuedPath = [];
     this.moving = false;
@@ -673,6 +683,10 @@ export class WorldScene extends Phaser.Scene {
     // loaded: `built` is not assigned until `create`, so `preload` cannot know which map it is
     // about to draw. There are none today and one per quest thereafter, at a few KB each.
     loadWandererArt(this, paintedWandererIds());
+    // The homestead's unfinished mill and its greenhouse: single images, drawn only once built.
+    this.load.image('homestead-stage-1', stageOneUrl);
+    this.load.image('homestead-stage-2', stageTwoUrl);
+    this.load.image('homestead-greenhouse', greenhouseUrl);
     loadTileSheets(this, {
       terrain: terrainUrl,
       landmarks: landmarksUrl,
@@ -816,7 +830,10 @@ export class WorldScene extends Phaser.Scene {
       const [x, y] = key.split(',').map(Number);
       this.setFog(x!, y!, FOG_REMEMBERED);
     }
-    EventBus.emitEvent('world-ready', { world: this.world });
+    EventBus.emitEvent('world-ready', {
+      world: this.world,
+      places: this.built.placed.map((p) => ({ poiId: p.poi.id, at: p.at }))
+    });
     this.arriveAt(this.at);
   }
 
@@ -1461,6 +1478,7 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('ride', this.onRide);
     EventBus.onEvent('shelter-built', this.onShelterBuilt);
     EventBus.onEvent('people-at-places', this.onPeopleAtPlaces);
+    EventBus.onEvent('homestead-changed', this.onHomestead);
     EventBus.onEvent('ease', this.onEase);
     EventBus.onEvent('approach', this.onApproach);
     EventBus.onEvent('set-character', this.onSetCharacter);
@@ -1493,6 +1511,7 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('ride', this.onRide);
       EventBus.offEvent('shelter-built', this.onShelterBuilt);
       EventBus.offEvent('people-at-places', this.onPeopleAtPlaces);
+      EventBus.offEvent('homestead-changed', this.onHomestead);
       EventBus.offEvent('ease', this.onEase);
       EventBus.offEvent('approach', this.onApproach);
       this.input.off(Phaser.Input.Events.POINTER_WHEEL);
@@ -1655,6 +1674,64 @@ export class WorldScene extends Phaser.Scene {
   };
 
   /** Remember what React says is pitched. The payload is the whole state -- see the event's note. */
+  /** The homestead, from React. Drawn at once and kept for a redraw. */
+  private onHomestead = (wanted: UiToGame['homestead-changed']): void => {
+    this.homesteadWanted = wanted;
+    this.drawHomestead();
+  };
+
+  /**
+   * The mill going up beside its ground, and the greenhouse once it stands.
+   *
+   * **Beside the place, never on it** -- `buildingTiles` picks two walkable tiles in the place's
+   * forecourt, which the scene plan keeps clear, so the trees beyond it frame the mill rising over
+   * the canopy. Stage one and two are the unfinished sprites from `tools/build-homestead.js`; the
+   * third is the Grit Mill's own tower and wheel, turning on the same clock, and the greenhouse.
+   */
+  private drawHomestead(): void {
+    for (const sprite of this.homesteadSprites) sprite.destroy();
+    this.spinning = this.spinning.filter((s) => !this.homesteadSprites.includes(s.sprite));
+    this.homesteadSprites = [];
+    const { poiId, stage } = this.homesteadWanted;
+    if (!this.built || !poiId || stage <= 0) return;
+    const at = this.built.placed.find((p) => p.poi.id === poiId)?.at;
+    if (!at) return;
+    const tiles = buildingTiles(this.world, at, this.built.placed.map((p) => p.at));
+    if (!tiles) return;
+
+    const standing = (key: string, tile: { x: number; y: number }, frame?: number) => {
+      const sprite = this.add
+        .image(tile.x * TILE_SIZE + TILE_SIZE / 2, tile.y * TILE_SIZE + TILE_SIZE, key, frame)
+        .setOrigin(0.5, 1)
+        .setDepth(depthFor(tile.y, ROW_SLOT.marker));
+      sprite.setName(`homestead:${key}`);
+      this.homesteadSprites.push(sprite);
+      return sprite;
+    };
+
+    if (stage === 1) standing('homestead-stage-1', tiles.mill);
+    else if (stage === 2) standing('homestead-stage-2', tiles.mill);
+    else {
+      standing(SHEET_KEY.windmill, tiles.mill, 0);
+      // The wheel on the tower's boss, placed exactly as the scene plan places the Grit Mill's.
+      const { tower, boss } = windmillManifest;
+      const cx = tiles.mill.x * TILE_SIZE + TILE_SIZE / 2;
+      const cy = tiles.mill.y * TILE_SIZE + TILE_SIZE / 2;
+      const wheel = this.add
+        .image(
+          cx + (boss.x - 0.5) * TILE_SIZE,
+          cy + ((tower.height * (boss.y - 1)) / tower.width + 0.5) * TILE_SIZE,
+          SHEET_KEY.blades,
+          0
+        )
+        .setDepth(depthFor(tiles.mill.y, ROW_SLOT.marker) + 1);
+      wheel.setName('homestead:blades');
+      this.homesteadSprites.push(wheel);
+      this.spinning.push({ sprite: wheel, frames: windmillManifest.steps, period: BLADE_PERIOD, phase: 0 });
+      standing('homestead-greenhouse', tiles.greenhouse);
+    }
+  }
+
   /** Who is at each place, from React. Drawn at once and kept for the next redraw. */
   private onPeopleAtPlaces = ({ places }: UiToGame['people-at-places']): void => {
     this.pipsWanted = places;
@@ -2162,6 +2239,10 @@ export class WorldScene extends Phaser.Scene {
     // five recorded instances -- and a Node test can prove every rule in `travellers.ts` while the
     // scene never calls any of them. `e2e/road-company.spec.ts` reads this and would fail the day
     // `createTravellers` stopped being called, which no other check could notice.
+    // What the homestead is drawing, for `e2e/homestead.spec.ts`: the sprites by name.
+    (window as unknown as { __homestead?: () => string[] }).__homestead = () =>
+      this.homesteadSprites.map((s) => s.name);
+
     // The pips at each place's door, for `e2e/who-is-here.spec.ts`: which places, how many people,
     // and whether they are showing. Read off the scene because only the scene draws them.
     (window as unknown as { __pips?: () => unknown[] }).__pips = () =>

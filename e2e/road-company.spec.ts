@@ -115,6 +115,10 @@ test('a map change leaves the last map’s people behind', async ({ page }) => {
   // roster to the last one's -- sprites destroyed, entries kept, all of them moved every tick and
   // reported to React. One map's worth is the most there should ever be.
   const before = await bootAt(page, '12');
+  // The cart leaves from the Camp in the Kilns, so stand there to board it.
+  await page.goto('/?seed=road-company&hour=12&at=poi_lothal_camp');
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
   await page.getByRole('button', { name: 'Where to go' }).click();
   const sheet = page.locator('.diary');
   await sheet.getByRole('button', { name: 'Travel' }).first().click();

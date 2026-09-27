@@ -1,6 +1,9 @@
 // How long a map takes to play, estimated from what is on it.
 //
-// **The endgame plan sets a target of ten to fifteen minutes a map, and nobody had measured one.**
+// **There is no time limit on a map.** The owner's ruling of 27 September: what the game aims for is
+// ten to fifteen minutes of focus a sitting, the industry's cosy-game session -- a Stardew Valley day
+// is about thirteen real minutes -- each ending somewhere a player can stop. So this reports how many
+// such sittings a map holds, and nobody had measured even that.
 // This is the instrument, not the target: it walks a tour of every place on the map along the
 // routes travellers take, at the scene's step time and each tile's travel cost, and adds the time
 // to read everything the map's places, people and discoveries say, plus a moment for each press.
@@ -34,6 +37,8 @@ const STEP_MS = 425;
 const READING_WPM = 200;
 /** A press, and the moment of deciding to make it: a look closer, a "go on", a choice. */
 const PRESS_SECONDS = 1.5;
+/** One sitting: the middle of the owner's ten to fifteen minutes of focus. */
+const SITTING_MINUTES = 12.5;
 
 const words = (text: string) => text.split(/\s+/).filter(Boolean).length;
 
@@ -144,15 +149,15 @@ function measured(): Map<string, Estimate> {
 function report(all: Map<string, Estimate>): string {
   const rows = [...all].map(([id, e]) => {
     const total = e.walk + e.read + e.press;
-    return `| ${id.replace('field_map_', '')} | ${e.places} | ${e.people} | ${e.rungs} | ${Math.round(e.words)} | ${e.walk.toFixed(1)} | ${e.read.toFixed(1)} | ${e.press.toFixed(1)} | **${total.toFixed(1)}** |`;
+    return `| ${id.replace('field_map_', '')} | ${e.places} | ${e.people} | ${e.rungs} | ${Math.round(e.words)} | ${e.walk.toFixed(1)} | ${e.read.toFixed(1)} | ${e.press.toFixed(1)} | **${total.toFixed(1)}** | ${(total / SITTING_MINUTES).toFixed(1)} |`;
   });
   return [
     `## Minutes per map (a floor, over ${SEEDS} seed${SEEDS === 1 ? '' : 's'})`,
     '',
-    `A nearest-first tour of every place at ${STEP_MS} ms a step times each tile's cost, every word read at ${READING_WPM} a minute, ${PRESS_SECONDS} s a press. Target: 10 to 15.`,
+    `A nearest-first tour of every place at ${STEP_MS} ms a step times each tile's cost, every word read at ${READING_WPM} a minute, ${PRESS_SECONDS} s a press. No limit per map; the aim is sittings of 10 to 15 minutes of focus, so \`sittings\` is the total over ${SITTING_MINUTES}.`,
     '',
-    '| map | places | people | rungs | words | walk | read | press | total |',
-    '|---|---|---|---|---|---|---|---|---|',
+    '| map | places | people | rungs | words | walk | read | press | total | sittings |',
+    '|---|---|---|---|---|---|---|---|---|---|',
     ...rows,
     ''
   ].join('\n');

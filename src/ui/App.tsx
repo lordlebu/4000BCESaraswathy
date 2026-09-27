@@ -19,7 +19,7 @@ import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { readShowing, writeShowing } from './preferences';
-import { fieldMap, poi } from '../content/places';
+import { arrivalPoint, fieldMap, npc, poi } from '../content/places';
 import { travellerAttributes, travellersOn } from '../content/travellers';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
@@ -28,7 +28,7 @@ import { PeoplePanel } from './PeoplePanel';
 import { met } from '../content/people';
 import { seedFromUrl } from './seed';
 import { WorkshopPanel } from './WorkshopPanel';
-import { add as addToSatchel, canDo, distinct, emptySatchel, itemsHeld } from '../content/satchel';
+import { add as addToSatchel, canDo, distinct, emptySatchel, itemsHeld, remove as takeFromSatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
 import { carry, gatheredLine, standingLine } from '../content/gathering';
 import { rideFrom } from '../content/vehicles';
@@ -74,14 +74,30 @@ import type { Preparation } from '../content/activity';
 import { shelterBuilt, use, usedLine, useOf } from '../content/using';
 import { ActivityModal } from './ActivityModal';
 import { EventCard } from './EventCard';
-import { type Choice, type GameEvent, type Occasion } from '../content/events';
+import { anyConditions, type Choice, type GameEvent, type Occasion } from '../content/events';
+import type { SettlingView } from './PlacePanel';
 import { happeningNow, surroundingsAt } from '../content/happenings';
 import { APPROACHES, approachAt, approachId } from '../content/visitors';
 import { peopleAtPlaces, roadTalk, whoIsHere } from '../content/presence';
 import { type Bumped, whoSpeaksFirst } from '../content/bumping';
 import { rumourAt, rumourFor, rumoursOn } from '../content/rumours';
 import { standingOn as howKnownOn, warmTo } from '../content/standing';
-import { offeredAt } from '../content/knowledge';
+import { discoveries, offeredAt } from '../content/knowledge';
+import {
+  agreed as groundAgreed,
+  build as buildStage,
+  buildingTiles,
+  groundAt,
+  homesteadOn,
+  mayAsk,
+  mayBuild,
+  readyToSettle,
+  settle as settleHome,
+  stagesBuilt,
+  stateOf as homesteadState,
+  type Holdings
+} from '../content/homestead';
+import { Negotiation } from './Negotiation';
 import type { Talk } from '../content/happenings';
 import type { Station } from '../content/stations';
 
@@ -158,6 +174,8 @@ export function App() {
   // Read the save once. Calling loadJourney per state initialiser would parse the same JSON
   // three times and, worse, let the three copies drift.
   const initialJourney = useRef(loadJourney(seedFromUrl()));
+  /** Where this map's places landed, from the scene's `world-ready`. See `settling`. */
+  const fieldPlaced = useRef<{ poiId: string; at: { x: number; y: number } }[]>([]);
   // Every stranger an event has introduced the player to. Up here rather than with the other event
   // refs below, because the action rail reads it while rendering, to call somebody by name.
   const metStrangers = useRef<string[]>(initialJourney.current.met ?? []);
@@ -381,7 +399,10 @@ export function App() {
   const discovered = useRef<string[]>(initialJourney.current.discovered);
 
   useEffect(() => {
-    const onWorldReady = ({ world: next }: GameToUi['world-ready']) => setWorld(next);
+    const onWorldReady = ({ world: next, places }: GameToUi['world-ready']) => {
+      fieldPlaced.current = places ?? [];
+      setWorld(next);
+    };
     const onTileEntered = (payload: Arrival) => {
       setArrival(payload);
       setMemory('');
@@ -662,6 +683,30 @@ export function App() {
    * who ever visits a place as if they were all there at once. Travellers are placed by what the
    * scene last reported, so this moves when they do.
    */
+  /**
+   * What the player holds that a holder could be answered with, and who on this map could help.
+   *
+   * Asked of the rules, never worked out here: a discovery is finished when `isComplete` says so,
+   * and a person is helped when a finished discovery names them -- the fact the ending reads.
+   */
+  const holdings = useMemo<Holdings>(() => {
+    const finished = discoveries.filter((d) => isComplete(progress, d.id));
+    return {
+      words: progress.words,
+      finished: finished.map((d) => d.id),
+      helped: [...new Set(finished.flatMap((d) => d.helps))],
+      carried: satchel
+    };
+  }, [progress, satchel]);
+  const peopleOfMap = useMemo(
+    () => [
+      ...new Set(
+        (fieldMap(fieldMapId)?.pointsOfInterest ?? []).flatMap((p) => whoIsHere(p, fieldMapId, 0, []).here.map((n) => n.id))
+      )
+    ],
+    [fieldMapId]
+  );
+
   const presence = useMemo(
     () => (standingOn ? whoIsHere(standingOn, fieldMapId, arrival?.day ?? 0, travellerStates) : null),
     [standingOn, fieldMapId, arrival?.day, travellerStates]
@@ -1399,6 +1444,18 @@ export function App() {
    * Held in refs because the bus handlers read them, and written to the save with the rest of
    * the journey -- both in the what-you-know half, so they survive the ground moving.
    */
+  /**
+   * Settling: which ground is being talked about, and a tick that moves whenever the homestead's
+   * flags do, so everything reading them renders again. The flags themselves live in
+   * `journeyFlags` with the rest of the journey's, and are saved with it.
+   */
+  const [negotiatingAt, setNegotiatingAt] = useState<string | null>(null);
+  const [homeTick, setHomeTick] = useState(0);
+  const setHomeFlags = useCallback((next: string[]) => {
+    journeyFlags.current = next;
+    setHomeTick((n) => n + 1);
+  }, []);
+
   const [happening, setHappening] = useState<{ event: GameEvent; shelter: string | null } | null>(
     null
   );
@@ -1406,6 +1463,136 @@ export function App() {
   /** When each event last happened, and the flags choices have left. See `Journey`. */
   const eventDays = useRef<Record<string, number>>(initialJourney.current.eventDays ?? {});
   const journeyFlags = useRef<string[]>(initialJourney.current.flags ?? []);
+
+  /**
+   * The homestead as the place you stand in sees it: what it says, and the one thing to do next.
+   *
+   * **In the place panel, not the action rail**, because it is about this place and the rail holds
+   * two chips on a small phone. Every refusal is a sentence, as the rail's are: why a holder will
+   * not hear you yet, what a stage is short of. Asked of `content/homestead.ts` throughout.
+   */
+  const settling = useMemo<SettlingView | null>(() => {
+    void homeTick;
+    const here = standingOn ? groundAt(standingOn) : null;
+    if (!here || here.homestead.fieldMapId !== fieldMapId) return null;
+    const { homestead, ground } = here;
+    const state = homesteadState(fieldMapId, journeyFlags.current);
+    const holder = npc(ground.heldBy)?.name ?? 'The holder';
+    const facts = { finished: (id: string) => isComplete(progress, id), met: metStrangers.current };
+    const standing = howKnownOn(fieldMapId, facts).standing;
+    const helpedHere = peopleOfMap.filter((id) => holdings.helped.includes(id)).length;
+    const chosen = homestead.grounds.find((g) => g.id === state.ground) ?? null;
+    const building = chosen && groundAgreed(chosen, state) ? chosen : null;
+
+    if (state.settled) {
+      return building?.id === ground.id
+        ? {
+            title: homestead.name,
+            lines: ['The people who backed it live here now.'],
+            action: {
+              label: 'Read the settlement page',
+              blocked: null,
+              onDo: () => dispatch({ type: 'open-interrupt', which: 'ending' })
+            }
+          }
+        : { title: homestead.name, lines: [`You settled at ${chosen?.name ?? 'another ground'}.`], action: null };
+    }
+    if (building && building.id !== ground.id) {
+      return { title: ground.name, lines: [`You are building at ${building.name}.`], action: null };
+    }
+    if (building) {
+      const built = stagesBuilt(homestead, state);
+      const lines = [`${built} of ${homestead.stages.length} stages stand.`];
+      if (readyToSettle(homestead, state)) {
+        return {
+          title: homestead.name,
+          lines,
+          action: {
+            label: 'Settle here',
+            blocked: null,
+            onDo: () => {
+              setHomeFlags(settleHome(homestead, journeyFlags.current));
+              dispatch({ type: 'open-interrupt', which: 'ending' });
+            }
+          }
+        };
+      }
+      const may = mayBuild(homestead, state, satchel, helpedHere);
+      const next = homestead.stages[built]!;
+      return {
+        title: homestead.name,
+        lines,
+        action: {
+          label: next.name,
+          blocked: may.ok ? null : may.why,
+          onDo: () => {
+            if (!may.ok) return;
+            const done = buildStage(homestead, journeyFlags.current, may.stage);
+            setSatchel((bag) => done.spends.reduce((b, need) => takeFromSatchel(b, need.id, need.count), bag));
+            setHomeFlags(done.flags);
+            // The stage is a moment, so it gets a card: the painting of the ground, what the diary
+            // says of the stage, and one way on.
+            setHappening({
+              event: {
+                id: `homestead:${may.stage.id}`,
+                title: may.stage.name,
+                occasion: 'arriving',
+                conditions: anyConditions(),
+                prose: may.stage.prose,
+                art: 'settle-ground',
+                choices: [
+                  {
+                    id: 'look',
+                    label: 'Stand back and look at it',
+                    needs: [],
+                    line: 'You stand back and look at it for a long while, and somebody beside you does the same.',
+                    grants: []
+                  }
+                ],
+                once: true
+              },
+              shelter: null
+            });
+          }
+        }
+      };
+    }
+    // Dry, level ground near enough to build on, or the ground says it has none. The owner's rule
+    // is not bent to fit a wet seed: no mill in the marsh.
+    const placed = world ? fieldPlaced.current : [];
+    const at = placed.find((p) => p.poiId === ground.at)?.at;
+    if (world && at && !buildingTiles(world, at, placed.map((p) => p.at))) {
+      return {
+        title: ground.name,
+        lines: [ground.prose, "There's no dry, level ground near enough here to build on."],
+        action: null
+      };
+    }
+    const ask = mayAsk(homestead, ground, state, standing);
+    return {
+      title: ground.name,
+      lines: [ground.prose],
+      action: {
+        label: `Ask ${holder} about building here`,
+        blocked: ask.ok ? null : ask.why,
+        onDo: () => setNegotiatingAt(ground.id)
+      }
+    };
+  }, [homeTick, standingOn, fieldMapId, progress, satchel, holdings, peopleOfMap, setHomeFlags, world]);
+
+  // Tell the scene what stands, whenever it changes and whenever a map is drawn.
+  useEffect(() => {
+    void homeTick;
+    if (!world) return;
+    const homestead = homesteadOn(fieldMapId);
+    const state = homesteadState(fieldMapId, journeyFlags.current);
+    const ground = homestead?.grounds.find((g) => g.id === state.ground) ?? null;
+    const standing = homestead && ground && groundAgreed(ground, state);
+    EventBus.emitEvent('homestead-changed', {
+      poiId: standing ? ground!.at : null,
+      stage: standing ? stagesBuilt(homestead!, state) : 0
+    });
+  }, [world, fieldMapId, homeTick]);
 
   /**
    * Open the bench activity. The making itself happens when the run settles.
@@ -1460,6 +1647,12 @@ export function App() {
       // is what a test wants and what somebody looking for the crossing wants.
       const url = new URL(window.location.href);
       url.searchParams.set('map', next);
+      // **Set down at the new map's cart point**, which is where the cart goes. Written as `?at=`,
+      // which the scene already reads, so a reload keeps you there -- and an `?at=` naming a place on
+      // the map just left can no longer follow you across.
+      const arrive = arrivalPoint(next);
+      if (arrive) url.searchParams.set('at', arrive);
+      else url.searchParams.delete('at');
       window.history.replaceState(null, '', url);
       EventBus.emitEvent('travel-to', { fieldMapId: next, seed });
     },
@@ -1667,6 +1860,7 @@ export function App() {
           />
         }
         progress={progress}
+        strangers={metStrangers.current}
         open={surface === 'people'}
         onClose={() => dispatch({ type: 'close' })}
       />
@@ -1699,8 +1893,35 @@ export function App() {
         }}
       />
 
+      {(() => {
+        // The negotiation at a ground, mounted only while it is open. `key` so a new ground starts
+        // a new conversation rather than carrying the last one's words.
+        const here = negotiatingAt ? homesteadOn(fieldMapId) : null;
+        const ground = here?.grounds.find((g) => g.id === negotiatingAt) ?? null;
+        if (!here || !ground) return null;
+        return (
+          <Negotiation
+            key={ground.id}
+            open
+            homestead={here}
+            ground={ground}
+            flags={journeyFlags.current}
+            holdings={holdings}
+            peopleHere={peopleOfMap}
+            onFlags={setHomeFlags}
+            onClose={() => setNegotiatingAt(null)}
+          />
+        );
+      })()}
+
       <Ending
         progress={progress}
+        settlement={(() => {
+          void homeTick;
+          const homestead = homesteadOn(fieldMapId);
+          if (!homestead || !homesteadState(fieldMapId, journeyFlags.current).settled) return null;
+          return { name: homestead.name, prose: homestead.settled, people: peopleOfMap };
+        })()}
         open={interrupts.ending}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'ending' })}
       />
@@ -1790,6 +2011,7 @@ export function App() {
         <EventCard
           event={happening.event}
           shelter={happening.shelter}
+          met={metStrangers.current}
           holds={[...progress.words, ...Object.keys(progress.rungs), ...progress.recipes]}
           onChoose={(choice: Choice) => {
             // Through the same door a conversation uses. An event grants the same kinds of thing a
@@ -1823,6 +2045,7 @@ export function App() {
         current={fieldMapId}
         progress={progress}
         met={metStrangers.current}
+        standingOn={standingOn}
         open={interrupts.overworld}
         onTravel={travel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'overworld' })}
@@ -1855,6 +2078,7 @@ export function App() {
         place={{
           poiId: placeOpen ? standingOn : null,
           presence,
+          settling,
           progress,
           moment,
           firstVisit: Boolean(standingOn) && !visited.current.has(standingOn!),

@@ -54,6 +54,13 @@ function why(progress: Progress, id: string, moment: WorldMoment | null): string
   return `You would need to understand ${discovery(first)?.name ?? 'something else'} first.`;
 }
 
+/** The homestead as one place sees it: a heading, what is true, and the one thing to do next. */
+export interface SettlingView {
+  title: string;
+  lines: string[];
+  action: { label: string; blocked: string | null; onDo: () => void } | null;
+}
+
 export interface PlacePanelProps {
   poiId: string | null;
   /**
@@ -62,6 +69,11 @@ export interface PlacePanelProps {
    * nobody, which is only right while there is no place.
    */
   presence: Presence | null;
+  /**
+   * Building here, when this place is a homestead's ground -- asked of `content/homestead.ts` by
+   * App, which holds the journey's flags. Null at every other place.
+   */
+  settling?: SettlingView | null;
   progress: Progress;
   moment: WorldMoment | null;
   /** True the first time this place is entered in a session — the long prose goes up once. */
@@ -85,6 +97,7 @@ export interface PlacePanelProps {
 export function PlacePanel({
   poiId,
   presence,
+  settling = null,
   progress,
   moment,
   firstVisit,
@@ -164,6 +177,30 @@ export function PlacePanel({
             walked in to use a bench should not have to read a paragraph to find out there is one.
             `stations.ts` derives it from who is standing here — see that file, and
             `docs/activity-boards-plan.md`. */}
+        {/* **Building here**, at a homestead's ground: what it is, and the one thing to do next. A
+            refusal is a sentence, as the action rail's are -- it is how settling is taught. */}
+        {settling && !sub && (
+          <section className="place-section settling">
+            <h3>Building here</h3>
+            <h4 className="settling-title">{settling.title}</h4>
+            {settling.lines.map((line) => (
+              <p key={line} className="settling-line">
+                {line}
+              </p>
+            ))}
+            {settling.action && (
+              <div className="look">
+                <div className="look-text">
+                  {settling.action.blocked && <p className="muted">{settling.action.blocked}</p>}
+                </div>
+                <button type="button" onClick={settling.action.onDo} disabled={settling.action.blocked !== null}>
+                  {settling.action.label}
+                </button>
+              </div>
+            )}
+          </section>
+        )}
+
         <StationBoard
           here={stationsAt(place)}
           missing={stationsMissing(place)}
