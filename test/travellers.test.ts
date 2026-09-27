@@ -14,6 +14,8 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps, allNpcs, poi } from '../src/content/places';
 import {
+  hoursFor,
+  untangle,
   placedCircuit,
   sheetsToUse,
   stopsOf,
@@ -125,7 +127,9 @@ describe('where the hour puts them', () => {
     expect(roster.length, 'nobody to ask').toBeGreaterThan(0);
 
     const outAt = (phase: number) =>
-      roster.some((t) => whereabouts(world.world, stopsOf(t, world.placed), 0, phase)?.resting === false);
+      roster.some(
+        (t) => whereabouts(world.world, stopsOf(t, world.placed), 0, phase, hoursFor(t.id))?.resting === false
+      );
 
     for (const hour of [7, 9, 12, 15, 17]) {
       const phase = hoursToPhase(hour);
@@ -220,6 +224,89 @@ describe('where the hour puts them', () => {
     // Measured on the default seed: the ways run mostly on the path they are drawn to prefer. A
     // share rather than a count, because the number moves with the maps and the point does not.
     expect(onRoad / total, `${onRoad} of ${total} steps were on the road`).toBeGreaterThan(0.3);
+  });
+});
+
+describe('two people are never one figure', () => {
+  // Reported from play once the roads went in: travellers walking on top of each other. Measured
+  // over 8 seeds, the four maps, 30 days and 100 moments a day, two walkers shared a tile in 5,775
+  // of 96,000 moments when everybody kept the same hours. Staggering the hours alone only brought
+  // that to 4,665 -- the roads still funnel every leg onto the same tiles -- so the guarantee is
+  // `untangle`, and the hours are only there so people are not all on the road at once.
+
+  it('keeps everybody’s own hours near first light and early evening', () => {
+    const everybody = fieldMaps.flatMap((m) => travellersOn(m.id));
+    const outs = new Set<number>();
+    for (const t of everybody) {
+      const hours = hoursFor(t.id);
+      outs.add(hours.out);
+      expect(hours.out, `${t.id} sets out before six`).toBeGreaterThanOrEqual(hoursToPhase(6));
+      expect(hours.out, `${t.id} sets out after eight`).toBeLessThanOrEqual(hoursToPhase(8));
+      // Eleven hours on the road whenever the day starts.
+      expect((hours.in - hours.out) * 24, `${t.id} walks a different length of day`).toBeCloseTo(11, 5);
+      expect(skyAt(hours.out).label, `${t.id} sets out in the dark`).not.toBe('night');
+      expect(skyAt(hours.in).label, `${t.id} is still walking after dark`).not.toBe('night');
+    }
+    expect(outs.size, 'everybody still keeps the same hours').toBeGreaterThan(everybody.length / 2);
+  });
+
+  it('never draws two walkers on one tile, on any map', () => {
+    let moments = 0;
+    for (let s = 0; s < 25; s += 1) {
+      for (const map of fieldMaps) {
+        const world = built(map.id, `untangle-${s}`);
+        const roster = travellersOn(map.id)
+          .map((t) => ({ id: t.id, stops: stopsOf(t, world.placed) }))
+          .filter((r) => r.stops.length >= 2);
+        for (let day = 0; day < 30; day += 1) {
+          for (let m = 0; m < 100; m += 1) {
+            const placed = roster.map((r) => ({
+              id: r.id,
+              where: whereabouts(world.world, r.stops, day, m / 100, hoursFor(r.id))
+            }));
+            const room = untangle(world.world, placed);
+            const tiles = [...room.values()].map((p) => `${p.x},${p.y}`);
+            expect(new Set(tiles).size, `${map.id} seed ${s} day ${day} at ${m}: two walkers on one tile`).toBe(
+              tiles.length
+            );
+            moments += 1;
+          }
+        }
+      }
+    }
+    expect(moments).toBe(25 * fieldMaps.length * 30 * 100);
+  });
+
+  it('steps aside onto walkable ground next to the path, and never onto the player', () => {
+    const world = built('field_map_lothal');
+    const tile = world.placed[0]!.at;
+    const where = { at: tile, heading: 'east' as const, resting: false, from: tile, to: tile };
+    const room = untangle(world.world, [
+      { id: 'a', where },
+      { id: 'b', where },
+      { id: 'c', where }
+    ], [tile]);
+
+    const spots = [...room.values()];
+    expect(new Set(spots.map((p) => `${p.x},${p.y}`)).size, 'two of them share a tile').toBe(3);
+    for (const p of spots) {
+      expect(`${p.x},${p.y}`, 'somebody is standing on the player').not.toBe(`${tile.x},${tile.y}`);
+      expect(Math.max(Math.abs(p.x - tile.x), Math.abs(p.y - tile.y)), 'stepped further than a pace').toBe(1);
+      expect(isWalkable(world.world.tiles[p.y]![p.x]!), `stepped onto unwalkable ground at ${p.x},${p.y}`).toBe(true);
+    }
+  });
+
+  it('leaves somebody resting where they are, and makes no room for them', () => {
+    const world = built('field_map_lothal');
+    const tile = world.placed[0]!.at;
+    const resting = { at: tile, heading: null, resting: true, from: tile, to: tile };
+    const walking = { ...resting, heading: 'east' as const, resting: false };
+    const room = untangle(world.world, [
+      { id: 'a', where: resting },
+      { id: 'b', where: walking }
+    ]);
+    expect(room.has('a'), 'a resting traveller was given a tile').toBe(false);
+    expect(room.get('b'), 'a walker was moved aside for somebody who is not drawn').toEqual(tile);
   });
 });
 

@@ -174,9 +174,11 @@ import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
 import {
+  hoursFor,
   placedCircuit,
   travellerState,
   travellersOn,
+  untangle,
   whereabouts,
   type Traveller,
   type TravellerState
@@ -2267,20 +2269,25 @@ export class WorldScene extends Phaser.Scene {
     this.travellersMovedAt = step;
 
     const day = this.dayOfJourney();
-    for (const { stops, sprite } of this.travellers) {
-      const where = whereabouts(this.world, stops, day, phase);
+    // Everybody's position first, then room made between them: whether somebody steps aside depends
+    // on who else is on the tile, so it cannot be decided one traveller at a time.
+    const placed = this.travellers.map(({ traveller, stops }) => ({
+      id: traveller.id,
+      where: whereabouts(this.world, stops, day, phase, hoursFor(traveller.id))
+    }));
+    const room = untangle(this.world, placed, [this.at]);
+    this.travellers.forEach(({ sprite }, i) => {
+      const where = placed[i]!.where;
       if (!where || where.resting) {
         sprite.setVisible(false);
-        continue;
+        return;
       }
+      const at = room.get(placed[i]!.id) ?? where.at;
       sprite.setVisible(true);
-      sprite.setPosition(
-        where.at.x * TILE_SIZE + TILE_SIZE / 2,
-        where.at.y * TILE_SIZE + TILE_SIZE - 2
-      );
+      sprite.setPosition(at.x * TILE_SIZE + TILE_SIZE / 2, at.y * TILE_SIZE + TILE_SIZE - 2);
       // Sorted by row like everything else that stands on the ground, so a traveller south of the
       // player passes in front of them and one north of them passes behind.
-      sprite.setDepth(depthFor(where.at.y, ROW_SLOT.walker));
+      sprite.setDepth(depthFor(at.y, ROW_SLOT.walker));
       const facing = facingFromStep(
         where.heading === 'east' ? 1 : where.heading === 'west' ? -1 : 0,
         where.heading === 'south' ? 1 : where.heading === 'north' ? -1 : 0,
@@ -2289,7 +2296,7 @@ export class WorldScene extends Phaser.Scene {
       const { key, flipX } = animFor(sprite.texture.key, facing, 'walk');
       if (sprite.anims.currentAnim?.key !== key) sprite.play(key);
       sprite.setFlipX(flipX);
-    }
+    });
 
     this.reportTravellers(day, phase);
   }
@@ -2307,7 +2314,7 @@ export class WorldScene extends Phaser.Scene {
       .map(({ traveller, circuit, stops }) => ({
         id: traveller.id,
         npcId: traveller.npcId,
-        state: travellerState(circuit, whereabouts(this.world, stops, day, phase))
+        state: travellerState(circuit, whereabouts(this.world, stops, day, phase, hoursFor(traveller.id)))
       }))
       .filter((t): t is { id: string; npcId: string | null; state: TravellerState } =>
         t.state !== null

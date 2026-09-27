@@ -71,6 +71,38 @@ const SETS_OUT = AT_HOUR(7);
 const ARRIVES = AT_HOUR(18);
 
 /**
+ * The hours one traveller keeps: when they set out and when they arrive, as phases.
+ *
+ * **Everybody used to keep the same two, and that is how two people became one figure.** Every
+ * traveller left at seven and arrived at six, and `wayBetween` pulls every route onto the road, so
+ * two people whose legs share a stretch of it were drawn on top of each other all day. Reported
+ * from play once the roads went in.
+ */
+export interface Hours {
+  out: number;
+  in: number;
+}
+
+/** The hours everybody kept before, and what an animal still keeps. */
+export const COMMON_HOURS: Hours = { out: SETS_OUT, in: ARRIVES };
+
+/**
+ * How far either side of seven a traveller's own morning falls, in minutes.
+ *
+ * An hour each way, so somebody is always setting out around first light and always in by the
+ * early evening. The day's walk stays eleven hours whenever it starts: a late riser arrives late,
+ * which keeps "at a place at dawn and at a place at dusk" true for everybody.
+ */
+export const SET_OUT_SPREAD_MINUTES = 60;
+
+/** Which hours this traveller keeps. Fixed by who they are, so it is the same on every machine. */
+export function hoursFor(travellerId: string): Hours {
+  const span = SET_OUT_SPREAD_MINUTES * 2 + 1;
+  const hour = 7 + ((hashOf(`hours:${travellerId}`) % span) - SET_OUT_SPREAD_MINUTES) / 60;
+  return { out: AT_HOUR(hour), in: AT_HOUR(hour + 11) };
+}
+
+/**
  * Somebody walking between places.
  *
  * Four fields and no state. `circuit` is where they go, `conveyance` is what carries them, and both
@@ -506,7 +538,8 @@ export function whereabouts(
   world: World,
   stops: readonly Point[],
   day: number,
-  phase: number
+  phase: number,
+  hours: Hours = COMMON_HOURS
 ): Whereabouts | null {
   if (stops.length < 2) return null;
 
@@ -519,10 +552,10 @@ export function whereabouts(
   // is the honest answer -- better a person in a place than a person nowhere.
   if (way.length < 2) return { at: from, heading: null, resting: true, from, to };
 
-  if (phase < SETS_OUT) return { at: from, heading: null, resting: true, from, to };
-  if (phase >= ARRIVES) return { at: to, heading: null, resting: true, from, to };
+  if (phase < hours.out) return { at: from, heading: null, resting: true, from, to };
+  if (phase >= hours.in) return { at: to, heading: null, resting: true, from, to };
 
-  const along = (phase - SETS_OUT) / (ARRIVES - SETS_OUT);
+  const along = (phase - hours.out) / (hours.in - hours.out);
   // `way` includes both ends, so the last index is the destination and `along` of 1 would land on
   // it exactly at the moment `ARRIVES` takes over. Clamped so a rounding error cannot read past it.
   const index = Math.min(way.length - 1, Math.floor(along * (way.length - 1)));
@@ -543,6 +576,62 @@ export function whereabouts(
           : 'north';
 
   return { at, heading, resting: false, from, to };
+}
+
+/** Where to look for room, in order: the four sides first, so a step aside reads as one. */
+const ROOM: readonly Point[] = [
+  { x: 0, y: -1 },
+  { x: 1, y: 0 },
+  { x: 0, y: 1 },
+  { x: -1, y: 0 },
+  { x: 1, y: -1 },
+  { x: 1, y: 1 },
+  { x: -1, y: 1 },
+  { x: -1, y: -1 }
+];
+
+/**
+ * Give everybody walking a tile of their own.
+ *
+ * **Staggered hours make a shared tile rarer; this makes it impossible.** Two people can still
+ * meet on a leg they share, and the player can walk straight into somebody. Taken in id order, the
+ * first to claim a tile keeps it and a later arrival steps onto the nearest walkable tile beside it
+ * that nobody holds -- the road's edge, or a pace behind. Somebody hemmed in on every side stays
+ * where they are, since standing on another person is better than standing in the sea.
+ *
+ * Only people who are walking are moved. Somebody resting is at a place and not drawn at all, so
+ * making room for them would push a walker aside for nobody.
+ *
+ * `reserved` is ground somebody else is already standing on: the player.
+ */
+export function untangle(
+  world: World,
+  walkers: readonly { id: string; where: Whereabouts | null }[],
+  reserved: readonly Point[] = []
+): Map<string, Point> {
+  const key = (p: Point) => `${p.x},${p.y}`;
+  const taken = new Set(reserved.map(key));
+  const out = new Map<string, Point>();
+  const walking = walkers
+    .filter((w): w is { id: string; where: Whereabouts } => w.where !== null && !w.where.resting)
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+
+  for (const { id, where } of walking) {
+    let at = where.at;
+    if (taken.has(key(at))) {
+      for (const d of ROOM) {
+        const next = { x: at.x + d.x, y: at.y + d.y };
+        const tile = world.tiles[next.y]?.[next.x];
+        if (tile && isWalkable(tile) && !taken.has(key(next))) {
+          at = next;
+          break;
+        }
+      }
+    }
+    taken.add(key(at));
+    out.set(id, at);
+  }
+  return out;
 }
 
 /**
