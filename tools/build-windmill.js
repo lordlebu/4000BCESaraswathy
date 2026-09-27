@@ -210,4 +210,8 @@ function main() {
   console.log(`  boss at ${(BOSS.x * 100).toFixed(1)}%, ${(BOSS.y * 100).toFixed(1)}% of the tower cell`);
 }
 
-main();
+// The rotation is shared with the homestead's other mills (`build-homestead.js`), which turn on the
+// same terms: rotated here, snapped to one palette, blitted axis-aligned.
+module.exports = { rotate, drawnRadius };
+
+if (require.main === module) main();

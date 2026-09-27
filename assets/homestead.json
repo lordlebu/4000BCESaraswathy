@@ -23,5 +23,43 @@
       "height": 110
     }
   },
+  "finished": {
+    "field_map_dwarka": {
+      "tower": "windpump-tower",
+      "cell": {
+        "width": 192,
+        "height": 288
+      },
+      "water": {
+        "frames": 6
+      },
+      "wheel": "windpump-vanes",
+      "house": "still-house",
+      "blade": 112,
+      "boss": {
+        "x": 0.499,
+        "y": 0.031
+      },
+      "steps": 12,
+      "small": 64
+    },
+    "field_map_narmada": {
+      "tower": "scarp-mill-tower",
+      "cell": {
+        "width": 128,
+        "height": 256
+      },
+      "wheel": "scarp-mill-sails",
+      "house": "greenhouse",
+      "extra": "apiary",
+      "blade": 112,
+      "boss": {
+        "x": 0.495,
+        "y": 0.054
+      },
+      "steps": 12,
+      "small": 64
+    }
+  },
   "note": "Written by tools/build-homestead.js. Do not hand-edit -- rerun the builder."
 }

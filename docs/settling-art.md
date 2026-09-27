@@ -244,6 +244,36 @@ Six portraits, in `docs/portrait-prompts.md` under **The holders of ground**: Ha
 Lothal, Ushi and Jarro on Dwarka, Ardhi and Tolla on the Narmada. Until one arrives the profile
 draws the ink figure with the tool of their trade, as it does for every stranger.
 
+## What arrived — 27 September 2026, evening
+
+**All five buildings, and an apiary nobody asked for.** None was sent back.
+
+- **`still-house`** came back first with a transparency checkerboard painted into its pixels -- a
+  technical fault, since no keyer can tell those squares from glass highlights -- and the owner
+  re-exported it on real alpha the same evening. That second file is the source.
+- **`windpump-tower`** splays its guy ropes well outside the lattice, so in the one-tile cell the
+  ropes set the scale and the pump stood only a tile and a half tall. The owner's rule is that the
+  mills stand taller than a tile, like the Grit Mill, so its cell is 192 × 288 instead: two and a
+  quarter tiles, with the ropes half a tile into the neighbours. The scene places the wheel from
+  each map's own cell, so nothing else had to know.
+- **The pump's water moves**, at the owner's asking. The tower is built as six frames with a glint
+  sliding down the spout and across the trough one pixel a frame, cycled by the scene every 720 ms
+  (`moveWater` in the builder). The painted highlights could not be found by colour -- quantised,
+  they are the trough's own cream -- so a cream pixel counts as water when two of its neighbours are.
+- **The wheels** turn at build time exactly as the Grit Mill's does (`rotate` is shared from
+  `build-windmill.js`), twelve frames to a quarter-turn. Both are 112 pixels, a little larger than
+  the Grit Mill's 96, because both towers are slimmer and the sails read small beside them. Hubs
+  were measured from the source's rows and then checked by eye in a composite: the pump's at
+  49.9%, 3.1% of its cell, the scarp mill's at 49.5%, 5.4%.
+- **`apiary`** is the owner's own addition, meant for the Narmada and smaller than the buildings:
+  64 × 64, half a tile, drawn on the mill's far side from the glasshouse when that tile is dry, level
+  ground. Canon's finished stage on the plateau now mentions the hive.
+- The Narmada's glasshouse is Lothal's, as canon describes one of the same kind.
+
+```bash
+node tools/build-homestead.js
+```
+
 ## What arrived — 27 September 2026
 
 **All six.** None had a fault that needed more than a crop, so none was sent back.

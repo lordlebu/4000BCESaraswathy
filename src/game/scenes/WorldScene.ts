@@ -16,6 +16,13 @@ import stageOneUrl from '../../../assets/windmill-stage-1.png';
 import stageTwoUrl from '../../../assets/windmill-stage-2.png';
 import greenhouseUrl from '../../../assets/greenhouse.png';
 import windmillManifest from '../../../assets/windmill.json';
+import homesteadManifest from '../../../assets/homestead.json';
+import windpumpTowerUrl from '../../../assets/windpump-tower.png';
+import windpumpVanesUrl from '../../../assets/windpump-vanes.png';
+import stillHouseUrl from '../../../assets/still-house.png';
+import scarpMillTowerUrl from '../../../assets/scarp-mill-tower.png';
+import scarpMillSailsUrl from '../../../assets/scarp-mill-sails.png';
+import apiaryUrl from '../../../assets/apiary.png';
 import bridgeUrl from '../../../assets/bridge.png';
 import riverBridgeUrl from '../../../assets/river-bridge.png';
 import dugoutUrl from '../../../assets/dugout.png';
@@ -84,7 +91,7 @@ import {
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
 import { BLADE_PERIOD, DUGOUT_VIEWS, FIRST_YURT, ROW_SLOT, depthFor, dugoutFor, placeFrame, rowAtFoot, type DugoutView, type Edge } from '../frames';
-import { buildingTiles } from '../../content/homestead';
+import { buildable, buildingTiles } from '../../content/homestead';
 import { encampmentOn } from '../../content/encampments';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 
@@ -96,6 +103,45 @@ import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
  * is baked per edge and variant rather than loaded, so `shoreTextureKey` names its texture
  * instead, and `contact` is the one shadow texture the traveller already uses.
  */
+
+/**
+ * A map's own finished building, from `tools/build-homestead.js`: a tower, a wheel turned at build
+ * time, a house beside it and perhaps one small thing more. Maps without one -- Lothal -- finish with
+ * the Grit Mill's tower and wheel and the greenhouse. The names are the builder's; the URLs are here
+ * because Vite has to see each import.
+ */
+interface FinishedBuilding {
+  tower: string;
+  wheel: string;
+  house: string;
+  extra?: string;
+  blade: number;
+  steps: number;
+  small: number;
+  /** The tower's cell in pixels. Not always a tile wide: Dwarka's pump splays its guy ropes. */
+  cell: { width: number; height: number };
+  boss: { x: number; y: number };
+  /** When the tower carries moving water, it is a sheet of this many frames. Dwarka's pump. */
+  water?: { frames: number };
+}
+/**
+ * One loop of the pump's water, in milliseconds: six frames at 120 each. Quicker than the wheel,
+ * because water falls faster than a vane turns -- and slow enough that the glint is followed down
+ * the spout rather than seen as a flicker.
+ */
+const WATER_PERIOD = 720;
+const FINISHED = (homesteadManifest as { finished?: Record<string, FinishedBuilding> }).finished ?? {};
+const HOMESTEAD_ART: Record<string, string> = {
+  'windpump-tower': windpumpTowerUrl,
+  'windpump-vanes': windpumpVanesUrl,
+  'still-house': stillHouseUrl,
+  'scarp-mill-tower': scarpMillTowerUrl,
+  'scarp-mill-sails': scarpMillSailsUrl,
+  apiary: apiaryUrl
+};
+/** The texture a homestead piece is loaded under. The greenhouse is the one every map may share. */
+const homesteadKey = (name: string) => (name === 'greenhouse' ? 'homestead-greenhouse' : `homestead-${name}`);
+
 const SHEET_KEY: Record<
   Exclude<
     PlacementSheet,
@@ -691,6 +737,18 @@ export class WorldScene extends Phaser.Scene {
     this.load.image('homestead-stage-1', stageOneUrl);
     this.load.image('homestead-stage-2', stageTwoUrl);
     this.load.image('homestead-greenhouse', greenhouseUrl);
+    // And every map's finished building, for the reason the character sheets are all loaded.
+    for (const f of Object.values(FINISHED)) {
+      const towerUrl = HOMESTEAD_ART[f.tower];
+      if (towerUrl && f.water) {
+        this.load.spritesheet(homesteadKey(f.tower), towerUrl, { frameWidth: f.cell.width, frameHeight: f.cell.height });
+      } else if (towerUrl) this.load.image(homesteadKey(f.tower), towerUrl);
+      for (const name of [f.house, f.extra]) {
+        if (name && HOMESTEAD_ART[name]) this.load.image(homesteadKey(name), HOMESTEAD_ART[name]);
+      }
+      const wheel = HOMESTEAD_ART[f.wheel];
+      if (wheel) this.load.spritesheet(homesteadKey(f.wheel), wheel, { frameWidth: f.blade, frameHeight: f.blade });
+    }
     loadTileSheets(this, {
       terrain: terrainUrl,
       landmarks: landmarksUrl,
@@ -1716,23 +1774,33 @@ export class WorldScene extends Phaser.Scene {
     if (stage === 1) standing('homestead-stage-1', tiles.mill);
     else if (stage === 2) standing('homestead-stage-2', tiles.mill);
     else {
-      standing(SHEET_KEY.windmill, tiles.mill, 0);
-      // The wheel on the tower's boss, placed exactly as the scene plan places the Grit Mill's.
-      const { tower, boss } = windmillManifest;
+      // This map's own building if the builder made one, otherwise the Grit Mill's.
+      const own = FINISHED[this.built.fieldMap.id];
+      const tower = own ? homesteadKey(own.tower) : SHEET_KEY.windmill;
+      const wheelKey = own ? homesteadKey(own.wheel) : SHEET_KEY.blades;
+      const boss = own?.boss ?? windmillManifest.boss;
+      const cell = own?.cell ?? windmillManifest.tower;
+      const towerSprite = standing(tower, tiles.mill, own && !own.water ? undefined : 0);
+      if (own?.water) this.spinning.push({ sprite: towerSprite, frames: own.water.frames, period: WATER_PERIOD, phase: 0 });
+      // The wheel on the tower's boss. Sprites draw at their own pixel size, bottom-centred on the
+      // tile, so the boss is an offset in the cell's pixels from the tile's bottom centre -- the
+      // same place the scene plan's formula puts the Grit Mill's, for a cell of any width.
       const cx = tiles.mill.x * TILE_SIZE + TILE_SIZE / 2;
-      const cy = tiles.mill.y * TILE_SIZE + TILE_SIZE / 2;
+      const bottom = (tiles.mill.y + 1) * TILE_SIZE;
       const wheel = this.add
-        .image(
-          cx + (boss.x - 0.5) * TILE_SIZE,
-          cy + ((tower.height * (boss.y - 1)) / tower.width + 0.5) * TILE_SIZE,
-          SHEET_KEY.blades,
-          0
-        )
+        .image(cx + (boss.x - 0.5) * cell.width, bottom - (1 - boss.y) * cell.height, wheelKey, 0)
         .setDepth(depthFor(tiles.mill.y, ROW_SLOT.marker) + 1);
-      wheel.setName('homestead:blades');
+      wheel.setName(own ? `homestead:${wheelKey}` : 'homestead:blades');
       this.homesteadSprites.push(wheel);
-      this.spinning.push({ sprite: wheel, frames: windmillManifest.steps, period: BLADE_PERIOD, phase: 0 });
-      standing('homestead-greenhouse', tiles.greenhouse);
+      this.spinning.push({ sprite: wheel, frames: own?.steps ?? windmillManifest.steps, period: BLADE_PERIOD, phase: 0 });
+      standing(own ? homesteadKey(own.house) : 'homestead-greenhouse', tiles.greenhouse);
+      // One small thing more -- the Narmada's hive -- on the mill's other side, if that is ground a
+      // thing may stand on. Half a tile, so it reads as smaller than the buildings.
+      if (own?.extra) {
+        const side = tiles.greenhouse.x >= tiles.mill.x ? -1 : 1;
+        const spot = { x: tiles.mill.x + side, y: tiles.mill.y };
+        if (buildable(this.world, spot)) standing(homesteadKey(own.extra), spot);
+      }
     }
   }
 

@@ -325,6 +325,24 @@ Subject: A lean man in middle age with a herder's crook, felt cloak pulled round
 Bias the surrounding wash warm ochre-brown (#8a6a3a) - a tint in the paper and the shadows, not a costume.
 ```
 
+## The holders of ground — what arrived, 27 September 2026
+
+**All six, and all six ship.** Jarro came back in a horned, feathered bronze helmet with a sickle,
+a long way from a well-keeper with a water-skin; that is style, and style is never a reason to send a
+portrait back. Hasme and Ardhi built as they came. Drel, Ushi and Tolla each carried the image
+tool's four-pointed sparkle low in the bottom-right corner, which the automatic corner crop did not
+reach at 2048 pixels; each was cropped above and left of it. A second Drel (`homestead_farmer.png`,
+768 px, half-length) is in the dump and not used -- the first is the tighter head and shoulders.
+
+```bash
+node tools/build-plates.js --portraits --only=hasme
+node tools/build-plates.js --portraits --only=jarro
+node tools/build-plates.js --portraits --only=ardhi
+node tools/build-plates.js --portraits --only=drel --force --crop=0,0,1744
+node tools/build-plates.js --portraits --only=ushi --force --crop=0,0,1744
+node tools/build-plates.js --portraits --only=tolla --force --crop=0,0,1744
+```
+
 ## Why the prompts say what they say
 
 Nothing here is a step to follow — all of it is already inside every block above. It is written
