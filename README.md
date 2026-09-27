@@ -2,9 +2,10 @@
 
 *Part of **The Ark of South Tethys: A Solarpunk Odyssey** — stories from the edge of time.*
 
-A cozy 2D exploration game set in an invented ancient South Asia. You walk a seeded map of river
-deltas, monsoon forest, ochre hill country and a highland spine, keeping a travel journal of the
-terrain, creatures and plants you pass, until you find the landmark the elders told you about.
+A cozy 2D exploration game set in an invented ancient South Asia. You are Varuna, a naturalist,
+travelling four field maps of river delta, cold desert harbour, basalt plateau and the Aravali
+crossing. You look closely at what lives and lies there, help the people you meet, and on three of
+the maps settle among them, building a place they back and move into.
 
 **There is no combat and no threat.** Creatures are observed, not fought. The feeling to aim for is
 a quiet afternoon walk with a sketchbook.
@@ -61,6 +62,12 @@ clock.
 - **Eighteen kinds of ground**, including snow above the treeline, cooled lava, and the turf of a
   sky island. Each carries its own scatter and its own tall things.
 - **A journal you can take with you**, as a markdown file or a rendered page of writing.
+- **People who are where they are.** A place says who is in it now, strangers on the road can be
+  talked to and remember you, and what they say about camps and places turns into events.
+- **Settling, talked rather than fought.** On Lothal, Dwarka and the Narmada you win a ground's
+  holder round by listening, showing what you have learned and having the people you helped vouch
+  for you. Then you build in three stages and the people move in. See
+  [docs/settling-in.md](docs/settling-in.md).
 
 ## Commands
 
@@ -120,6 +127,9 @@ npm run test:e2e
 
 - [CLAUDE.md](CLAUDE.md) — architecture, commands and known issues, for anyone (or any agent)
   picking up the code
+- [Retrospective](docs/retrospective.md) — the whole project from its first commit to the Settling
+  In plan: what worked, what did not, and what to do next
+- [Settling In](docs/settling-in.md) — the endgame plan, concluded: camps, cart points and homesteads
 - [Phaser plan](docs/phaser-plan.md) — the current plan and the four weeks to a hosted demo
 - [Game plan](docs/game-plan.md) — vision, MVP, gameplay loop, milestones
 - [World generator design](docs/world-generator.md) — generation inputs, passes, success criteria

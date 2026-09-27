@@ -5,6 +5,10 @@ readable version, with the phases, the pushback and the questions, is the publis
 [Settling In](https://claude.ai/artifact/YTD1Y7MXFxtXRWStDaYm2c). This file is the repository's copy
 of what was decided and what was measured, so it survives the page.
 
+**Concluded 28 September 2026.** All six phases are built and merged: game #216–#219, canon
+#141–#143. Lothal, Dwarka and the Narmada settle; the Aravali is the crossing. What the project
+learned from it, and from everything before it, is in `docs/retrospective.md`.
+
 ## Decided, 27 September 2026
 
 The owner took every recommendation:
@@ -96,7 +100,50 @@ meeting or when they want something. `content/bumping.ts` and `reasonToSpeak`: a
 you are carrying), a stranger passing (0.2); once a day per person, never over something else on
 screen. It happens on coming alongside somebody on the road and a moment after walking into a place.
 
+## Phase 3: camps that come and go
 
+`content/encampments.ts`. One camp at a time: three days in each six, from the first day on, on dry
+ground at least five tiles from any place and three from any road, ranked furthest from a road first.
+The kind is one of adventurers, dacoits, pilgrims or drovers, and everything is seeded from the map
+and the day, with nothing saved. People mention it while it stands (a `camp` rumour). Walking up to
+it opens the `camp` card once, asked for rather than rationed: `force: {asked: true}` returns the
+card before any weighting, because a weight-0 template otherwise never wins. Every choice is
+takeable and none is worse.
+
+**The browser spec found a bug older than camps.** The saved clock was never handed back to the
+scene, so every reload was day 0, and day 0 has no camp. `PhaserGame` now takes `travelled`.
+
+## Phase 4: cart points
+
+Canon's `departs_from` names where each map is left from: the Camp in the Kilns, the High Camp, the
+Caravan Ground, and the First Pier or the Far Landing. The travel screen reads the map anywhere and
+offers the cart only there (`mayLeaveFrom`). Arriving sets you down at the next map's first
+(`arrivalPoint`).
+
+## Phase 5: settling Lothal
+
+Canon's `homestead` type (`database/homesteads/`) declares each ground, its holder, their worries,
+what answers each, and three building stages. `content/homestead.ts` holds every rule, and the save
+holds only flags (`homestead:<map>:…`), so no version bump was needed. Asking needs the map to *know*
+you. The Negotiation card offers everything you have, never only the right answers: listen, a word
+of their tongue, show a finished discovery, have a helped person vouch, offer something carried. A
+miss costs nothing. Each stage spends materials and needs helped people's hands, and the settlement
+page lists who moves in.
+
+**The owner's ruling after the first mill went up in the marsh:** a building stands only on dry,
+level plains, desert, settlement or hills, off every road and clear of any cliff, within six tiles
+of its ground. Measured over 40 seeds, 39 of Lothal's eastern-field grounds and 38 of the
+granary's have room; the rest say there is no room rather than building wet.
+
+## Phase 6: Dwarka and the Narmada
+
+Each carries its map's thesis. On Dwarka, where local knowledge is simply right, Ushi at the salt
+orchard and Jarro at the Caravan Ground are right before the player is: it is not the salt, and the
+road goes the long way for a reason. On the Narmada, whose record begins at the wound, Ardhi, the
+University's steward, trusts the survey; Tolla, the head herder, fears the wind the mill will
+turn. Every ground on both maps had room on 40 of 40 seeds. The owner's art gives each map its own
+finished building: the pump (with moving water) and still, and the scarp mill with a hive. Mills
+stand taller than a tile, by the owner's rule.
 
 ## How long a map takes
 
@@ -104,20 +151,20 @@ screen. It happens on coming alongside somebody on the road and a moment after w
 `.github/workflows/playtime.yml`, which puts the report on the run's summary page and keeps it for
 90 days. A floor, not a forecast: a nearest-first tour
 of every place at the scene's step time and each tile's cost, every word read at 200 a minute, 1.5
-seconds a press, each discovery counted once however many places offer it. Measured on 27
-September over eight seeds, after the fix below:
+seconds a press, each discovery counted once however many places offer it. Measured on 28
+September over eight seeds, with the settling people in:
 
-| map | places | people | rungs | words | walk | read | press | total |
-|---|---|---|---|---|---|---|---|---|
-| Aravali | 12 | 6 | 53 | 2,480 | 2.2 | 12.4 | 3.1 | 17.7 |
-| Dwarka | 12 | 3 | 55 | 2,301 | 2.4 | 11.5 | 2.4 | 16.3 |
-| Lothal | 6 | 4 | 78 | 3,198 | 1.4 | 16.0 | 3.9 | 21.3 |
-| Narmada | 7 | 5 | 55 | 2,708 | 1.8 | 13.5 | 3.2 | 18.5 |
+| map | places | people | rungs | words | walk | read | press | total | sittings |
+|---|---|---|---|---|---|---|---|---|---|
+| Aravali | 12 | 6 | 53 | 2,480 | 2.2 | 12.4 | 3.1 | 17.7 | 1.4 |
+| Dwarka | 12 | 5 | 55 | 2,530 | 2.4 | 12.7 | 2.9 | 18.0 | 1.4 |
+| Lothal | 6 | 6 | 78 | 3,393 | 1.4 | 17.0 | 4.3 | 22.7 | 1.8 |
+| Narmada | 7 | 7 | 55 | 2,920 | 1.8 | 14.6 | 3.8 | 20.2 | 1.6 |
 
-**Every map is already past fifteen minutes before any settling is added**, almost all of it
-reading. The target in the plan assumed the maps were short; they are not. Settling adds about six
-minutes, which puts the four at roughly 22 to 27. Either the target moves, or the diaries are
-trimmed. That is the owner's call, on the plan page as Q10.
+**Q10, the owner's answer: there is no time limit on a map.** The aim is 10 to 15 minutes of focus
+per sitting, the usual length of a cozy-game session, so `sittings` is the total over 12.5. Every
+map is past fifteen minutes as a floor, almost all of it reading, so a map is one and a half to two
+sittings. What nothing checks yet is that each sitting has somewhere natural to stop.
 
 Before the fix below, the same measurement gave the Aravali zero rungs and ten minutes.
 
