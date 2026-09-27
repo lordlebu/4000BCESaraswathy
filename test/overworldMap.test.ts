@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 import {
   distanceBetween,
   labelAnchor,
+  labelExtent,
   nodeFor,
   overworldShape,
   viewBoxFor
@@ -165,19 +166,37 @@ describe('the drawing fits what is drawn', () => {
     }
   });
 
-  it('leans the outermost labels inward', () => {
-    // On a 360px phone the easternmost name ran off the right edge. Padding is in canon's units
-    // and a name's width is in glyphs, so there is no padding correct for both "The Dry Harbour"
-    // and "Lothal" -- anchoring sizes the problem away instead.
+  it('leans the outer labels inward', () => {
+    // On a 360px phone the easternmost name ran off the right edge. The outer fifth of the spread
+    // leans in, not only the outermost map: with the Aravali one unit short of the Narmada, only the
+    // Narmada leaned and the Aravali's name ran off the drawing.
     const xs = shape.nodes.map((n) => n.x);
-    const east = shape.nodes.find((n) => n.x === Math.max(...xs))!;
-    const west = shape.nodes.find((n) => n.x === Math.min(...xs))!;
-    expect(labelAnchor(shape, east)).toBe('end');
-    expect(labelAnchor(shape, west)).toBe('start');
+    const [min, max] = [Math.min(...xs), Math.max(...xs)];
+    const band = (max - min) / 5;
+    for (const n of shape.nodes) {
+      const expected = n.x >= max - band ? 'end' : n.x <= min + band ? 'start' : 'middle';
+      expect(labelAnchor(shape, n), n.name).toBe(expected);
+    }
+    expect(shape.nodes.some((n) => labelAnchor(shape, n) === 'end')).toBe(true);
+    expect(shape.nodes.some((n) => labelAnchor(shape, n) === 'start')).toBe(true);
+  });
 
-    // Anything between them centres, which is the common case.
-    const middle = shape.nodes.filter((n) => n !== east && n !== west);
-    for (const n of middle) expect(labelAnchor(shape, n)).toBe('middle');
+  it('fits every name inside the drawing, not only every dot', () => {
+    // Found by looking at the screen after the Narmada moved into its region: two names of about
+    // fifty units each on a continent thirty-six wide, and both were cut off.
+    const [x, , w] = viewBoxFor(shape).split(' ').map(Number) as [number, number, number, number];
+    for (const n of shape.nodes) {
+      const { left, right } = labelExtent(shape, n);
+      expect(left, `${n.name} starts left of the drawing`).toBeGreaterThanOrEqual(x);
+      expect(right, `${n.name} ends right of the drawing`).toBeLessThanOrEqual(x + w);
+    }
+  });
+
+  it('keeps the Aravali topmost, as the owner ruled', () => {
+    // "The Aravali is the top-most part of insular India, and connects to Asia by the floating
+    // island and the train line." Canon pins it; this holds the drawing to it. y grows southward.
+    const aravali = shape.nodes.find((n) => n.id === 'field_map_aravali')!;
+    for (const n of shape.nodes) expect(aravali.y, `${n.name} is drawn above the Aravali`).toBeLessThanOrEqual(n.y);
   });
 
   it('falls back to canon’s square when nothing is placed', () => {
