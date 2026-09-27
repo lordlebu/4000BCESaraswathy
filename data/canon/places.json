@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.34.0",
+  "canon_version": "2.35.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -332,9 +332,6 @@
         "field_map_narmada"
       ],
       "arrival": "The ranges come down to the water in steps of grey stone, and stop. Where they stop there is a rail-head, a shed, and a line of iron running out over the strait on trestles of pale timber. Two islands hang above the water along it, holding themselves up out of nothing anybody here will explain, and the rain that falls on their undersides falls upward. The far shore is a green smudge that is not Jambhudweepa. People cross. Nobody says much about the islands.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "climate": {
         "clear": 40,
         "mist": 34,
@@ -394,9 +391,6 @@
         "storm": 4
       },
       "arrival": "Half of Dwarka is under the dust and the half that is not has been rebuilt twice on top of itself. The sea left inside living memory and nobody here treats that as a disaster or the gate as a wonder. Both are simply conditions, like weather, and the whole city is still arranged around a shoreline that stopped arriving.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "coordinates": {
         "x": 16,
         "y": 64
@@ -432,9 +426,6 @@
       ],
       "vehicles": [
         "vehicle_log_dugout"
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ],
       "arrival": "The delta takes a long time to become a city. Reeds, then reed-and-mud, then mud with brick in it, and then brick cut by someone who expected it to last. The tower is visible from a good way out, or the half of it still standing. Somebody has hung washing across the third storey.",
       "neighbours": [
@@ -486,9 +477,6 @@
         "field_map_lothal"
       ],
       "arrival": "The road up the scarp is the only part of the plateau anyone built. Everything above it was already here: black rock in steps a hundred feet high, holding a flat green country the sea never reached. They will tell you at the top that this is why the University is here. They are right, and it is not the whole reason.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "climate": {
         "clear": 52,
         "mist": 30,
@@ -518,12 +506,6 @@
       ],
       "description": "A domed temple on a high stepped plinth, and the names are on the step.",
       "arrival": "Seven small spires stand around a dome that has split, and the doorway beneath them is a pointed arch with nothing behind it but dark. Lichen has taken the bottom two feet of everything. Dressed blocks lie scattered well out from the walls, far enough that they came off the top. The plinth it all stands on is pale stone, waist high, with steps down the front worn into dishes at the middle of each tread -- and along the plinth's face, cut small and shallow and running the whole length and round the corner, there are names. There are more names than a village.",
-      "epochs": [
-        "epoch_migrations",
-        "epoch_civilization_dawn",
-        "epoch_current",
-        "epoch_post_cataclysm"
-      ],
       "shore": "near"
     },
     {
@@ -542,9 +524,6 @@
       ],
       "description": "Cut basalt in courses, and between two of the courses, a bed of something else.",
       "arrival": "They quarried here for the halls and stopped when they hit a seam that would not dress. The seam is nine inches of pale ash between two floods of black rock, and it is full of small dead things lying in the order they died.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "npcs": [
         "npc_moonj"
       ]
@@ -562,9 +541,6 @@
       ],
       "description": "Basalt columns worn flat, and the ground everything here is built on.",
       "arrival": "Hexagons underfoot, packed like a honeycomb and rubbed smooth by feet and salt. It goes under the wall, under the court, under the market. Somebody laid a city on top of it and never had to quarry a stone.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "npcs": [
         "npc_sesh"
       ]
@@ -588,10 +564,7 @@
         "npc_sura"
       ],
       "description": "Where the city puts what it cannot eat, cannot burn, and does not want.",
-      "arrival": "Every settlement has a midden and this one has the usual fish spine and oyster shell and broken pot. It also has, at intervals, layers of something else — and the intervals are the interesting part.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "Every settlement has a midden and this one has the usual fish spine and oyster shell and broken pot. It also has, at intervals, layers of something else — and the intervals are the interesting part."
     },
     {
       "type": "point_of_interest",
@@ -606,12 +579,11 @@
       "discoveries": [
         "discovery_road_follows_water"
       ],
-      "npcs": [],
+      "npcs": [
+        "npc_jarro"
+      ],
       "description": "Where the road stops for the night, and has for longer than the road has made sense.",
-      "arrival": "The camp is on the wrong side of the ridge for shelter and the wrong distance from the water that is no longer there, and every caravan still stops here, because this is where you stop.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "The camp is on the wrong side of the ridge for shelter and the wrong distance from the water that is no longer there, and every caravan still stops here, because this is where you stop."
     },
     {
       "id": "poi_cloud_stair",
@@ -647,9 +619,6 @@
       ],
       "description": "A stair up the scarp that keeps going after the scarp stops.",
       "arrival": "You can follow it with your eye until the cloud takes it, and the cloud is not always there, and it goes up past where the cloud is. Nobody at the University will say it is not a stair. They will say it has not been surveyed.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "npcs": [
         "npc_asura_princess"
       ]
@@ -657,9 +626,6 @@
     {
       "type": "point_of_interest",
       "field_map": "field_map_lothal",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "poi_drowned_dockyard",
       "name": "The Drowned Dockyard",
       "kind": "eco_site",
@@ -694,17 +660,11 @@
         "discovery_seawall_courses"
       ],
       "description": "Three seawalls, one behind the other, each built when the last stopped working.",
-      "arrival": "You can wade the outermost at low water and stand on the innermost without getting your feet wet, and between them is four hundred years of a city agreeing, twice, that the sea had won that round.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "You can wade the outermost at low water and stand on the innermost without getting your feet wet, and between them is four hundred years of a city agreeing, twice, that the sea had won that round."
     },
     {
       "type": "point_of_interest",
       "field_map": "field_map_lothal",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "poi_eastern_field",
       "name": "The Eastern Field",
       "kind": "eco_site",
@@ -737,9 +697,6 @@
       ],
       "description": "Bones of the wrong animal in the wrong rock.",
       "arrival": "A seam in the basalt full of bone, and the bone is all one kind of thing: heavy skulls with a pair of long teeth in the upper jaw and nothing like them since. They are lying in rock that formed after they should have been gone.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "npcs": [
         "npc_sesh"
       ]
@@ -756,9 +713,6 @@
       ],
       "description": "The second island, and the last of Jambhudweepa.",
       "arrival": "Another island, smaller, and the far shore visible past it as a green line that is not home. There is a bell on a post here, and a mark cut into the rail where somebody has been counting something.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "shore": "far"
     },
     {
@@ -773,9 +727,6 @@
       ],
       "description": "The nearer island, where the line comes ashore in the air.",
       "arrival": "The track runs out over nothing and then there is ground under it -- grass, low cushion-plant, a stand of aero-mangrove holding the edge together with its roots. Walk to the rim and the rain that is falling on the underside is falling the wrong way.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "npcs": [
         "npc_hesh"
       ],
@@ -818,10 +769,7 @@
         }
       ],
       "description": "A swept courtyard with a doorway in it that does not lead anywhere in this city.",
-      "arrival": "It is swept. That is the first thing, and it undoes most of what you were prepared for: somebody sweeps the gate court, the way somebody sweeps a threshing floor, because things come through and the mess has to go somewhere.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "It is swept. That is the first thing, and it undoes most of what you were prepared for: somebody sweeps the gate court, the way somebody sweeps a threshing floor, because things come through and the mess has to go somewhere."
     },
     {
       "type": "point_of_interest",
@@ -836,10 +784,7 @@
         "discovery_glass_scar"
       ],
       "description": "A seam of fused sand, running straight, where nothing should have been hot enough.",
-      "arrival": "Green-black glass, in a line you could follow at a walk, and under it sand that was never heated at all. Whatever did this did it fast enough that the heat had no time to go downwards. It runs out of the dry harbour and towards the gate, and nobody in the city will say whether that is a coincidence.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "Green-black glass, in a line you could follow at a walk, and under it sand that was never heated at all. Whatever did this did it fast enough that the heat had no time to go downwards. It runs out of the dry harbour and towards the gate, and nobody in the city will say whether that is a coincidence."
     },
     {
       "id": "poi_grit_mill",
@@ -853,9 +798,6 @@
       ],
       "description": "A mill in good repair, turning, with nobody in sight and nothing to sell to.",
       "arrival": "White ceramic, rounded like a pot, braced in pale wood that somebody has oiled this year. A vine has been trained up one side rather than pulled off it. There are planters by the door with something flowering in them. The sails turn steadily in air that is not obviously moving, and inside, behind the door, the querns are running: you can feel it through the boards before you hear it. What comes out is black grit, bagged, stacked, more of it than anyone has carried down in a long time. Nobody answers.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "shore": "far"
     },
     {
@@ -873,13 +815,11 @@
         "discovery_terrace_water"
       ],
       "npcs": [
-        "npc_marn"
+        "npc_marn",
+        "npc_tolla"
       ],
       "description": "Stone steps up a hillside, grazed by goats, described in the archive as ornamental.",
-      "arrival": "Two hundred steps of dry-laid stone, each one a little lower at the outer edge than the inner. Marn's goats are on them. The University's survey calls them a devotional feature and gives them a paragraph.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "Two hundred steps of dry-laid stone, each one a little lower at the outer edge than the inner. Marn's goats are on them. The University's survey calls them a devotional feature and gives them a paragraph."
     },
     {
       "id": "poi_high_camp",
@@ -896,10 +836,7 @@
         "npc_marn"
       ],
       "description": "Two felt tents on the plateau, pitched where the grazing is and moved when it is not.",
-      "arrival": "Two round tents of stretched felt, guyed against a wind that does not stop, with stones on the ropes and a ring of hurdles round the whole of it. Marn's people winter lower down and are up here from the thaw. The University has a word for the terraces and no word for this.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "Two round tents of stretched felt, guyed against a wind that does not stop, with stones on the ropes and a ring of hurdles round the whole of it. Marn's people winter lower down and are up here from the thaw. The University has a word for the terraces and no word for this."
     },
     {
       "id": "poi_kavik_tower",
@@ -947,9 +884,6 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "description": "Four storeys of red sandstone where the chronicles promise twenty-two.",
       "arrival": "It did not topple. It sat down. The upper courses came straight through the lower ones and the whole thing settled into the delta mud like a foot into silt, which is why four storeys are still square and true and everything above them is a slope of dressed stone."
     },
@@ -966,9 +900,6 @@
       ],
       "description": "A wall somebody still repairs, around nothing anybody will name.",
       "arrival": "Dry stone, a course or two higher than the weather would leave it, running round a shoulder of the range and enclosing a hollow with nothing in it. The gap that would be a gate has been closed with newer stone. There is no path to it and the grass at the foot is not grown over.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "npcs": [
         "npc_dala"
       ],
@@ -986,9 +917,6 @@
       ],
       "description": "An exposed core, and the only place the ore can be worked.",
       "arrival": "A wound in the island's flank where something took a bite out of it, and the rock inside is black and faintly wrong. Grit stands on end where it has fallen. A dropped knife does not lie flat.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "shore": "far"
     },
     {
@@ -1033,10 +961,7 @@
         }
       ],
       "description": "Four hundred and eleven years of measurements, kept perfectly.",
-      "arrival": "The stacks run back further than the lamps reach. Okhi says there are eleven thousand bound volumes and that she has personally copied four hundred of them, and then, without any change of tone, that she has no idea whether the oldest are true, only that they are old.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "The stacks run back further than the lamps reach. Okhi says there are eleven thousand bound volumes and that she has personally copied four hundred of them, and then, without any change of tone, that she has no idea whether the oldest are true, only that they are old."
     },
     {
       "id": "poi_lothal_camp",
@@ -1064,18 +989,12 @@
         "discovery_kiln_draught",
         "discovery_winter_line"
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "description": "Smoke, and washing strung between two courses of Harappan brick.",
       "arrival": "Forty-odd people live in the kiln quarter, because the kilns were built to hold heat and still do. Nobody has repaired anything so much as leaned things against other things until they stopped falling. A child watches you from a doorway that used to be a flue."
     },
     {
       "type": "point_of_interest",
       "field_map": "field_map_lothal",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "poi_marsh_shrine",
       "name": "The Marsh Shrine",
       "kind": "anomaly",
@@ -1113,13 +1032,11 @@
       ],
       "npcs": [
         "npc_vessa",
-        "npc_moonj"
+        "npc_moonj",
+        "npc_ardhi"
       ],
       "description": "Nine halls around a yard, and every one of them measuring something.",
-      "arrival": "It is smaller than the word suggests and busier than the quiet suggests. Nine halls, a yard with a rain gauge in it that has been read twice a day for four hundred and eleven years, and a great many people being careful. Nobody here is a fool. That turns out to matter more than the alternative would have.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "It is smaller than the word suggests and busier than the quiet suggests. Nine halls, a yard with a rain gauge in it that has been read twice a day for four hundred and eleven years, and a great many people being careful. Nobody here is a fool. That turns out to matter more than the alternative would have."
     },
     {
       "id": "poi_nomad_ground",
@@ -1134,9 +1051,6 @@
       ],
       "description": "Where the people who still cross put their tents.",
       "arrival": "Felt tents on the shingle above the ford, guyed low, with the fire in the middle and the animals downstream of it. Nobody has pitched anywhere near the rail-head, which has a roof and a water butt and is a mile off.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "npcs": [
         "npc_terke",
         "npc_anu"
@@ -1156,9 +1070,6 @@
       ],
       "description": "A workshop of glass and benches, kept, and nobody in it.",
       "arrival": "Glass panes in an iron frame, most of them whole, in a clearing that has been kept clear. Benches, seed trays in rows, a press, and jars along a shelf with the labels facing out. There is dust on all of it and not much.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "shore": "near",
       "npcs": [
         "npc_ila"
@@ -1177,9 +1088,6 @@
       ],
       "description": "Where the line begins, and where everybody waits for it.",
       "arrival": "A shed, a water butt, a length of platform, and the iron running away north over the water on legs of pale timber. People sit on their bundles with the patience of those who have done this before. Nobody looks at the islands, which is its own kind of looking.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "npcs": [
         "npc_hesh",
         "npc_ila"
@@ -1201,13 +1109,11 @@
         "discovery_fever_root_spread"
       ],
       "npcs": [
-        "npc_sura"
+        "npc_sura",
+        "npc_ushi"
       ],
       "description": "Fruit trees dying at one end and something else doing well at the other.",
-      "arrival": "The orchard is half orchard. The seaward rows are salt-killed and standing, and through them, in the shade the dead trees still cast, something with the wrong leaf shape is doing extremely well.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "The orchard is half orchard. The seaward rows are salt-killed and standing, and through them, in the shade the dead trees still cast, something with the wrong leaf shape is doing extremely well."
     },
     {
       "id": "poi_scale_shore",
@@ -1221,10 +1127,7 @@
         "coast"
       ],
       "description": "Trackways in the stone, going into the sea.",
-      "arrival": "Three-toed prints in the black rock, a stride and a half apart, walking in a straight line toward water that was not there when they were made. They do not come back.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "Three-toed prints in the black rock, a stride and a half apart, walking in a straight line toward water that was not there when they were made. They do not come back."
     },
     {
       "id": "poi_second_gate",
@@ -1238,10 +1141,7 @@
         "desert"
       ],
       "description": "Another doorway, out past the salt, that nobody sweeps.",
-      "arrival": "The same build as the Gate Court and none of the care: a frame of dressed basalt in a field of it, half-drifted with salt, and no path worn to it. It is not doing anything today.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "The same build as the Gate Court and none of the care: a frame of dressed basalt in a field of it, half-drifted with salt, and no path worn to it. It is not doing anything today."
     },
     {
       "id": "poi_second_line",
@@ -1256,9 +1156,6 @@
       ],
       "description": "A parallel embankment carrying nothing at all.",
       "arrival": "An embankment running alongside the first, the same height and the same age, with no iron on it. Either it was lifted or it was never laid.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "npcs": [
         "npc_odri"
       ],
@@ -1267,9 +1164,6 @@
     {
       "type": "point_of_interest",
       "field_map": "field_map_lothal",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "id": "poi_silted_granary",
       "name": "The Silted Granary",
       "kind": "archaeological_site",
@@ -1304,9 +1198,6 @@
       ],
       "description": "A rail cutting the forest has closed over.",
       "arrival": "The ground goes down between two banks and the canopy meets overhead, so it is a green tunnel with iron in the floor of it. Roots have come up between the sleepers and lifted them. A signal post stands in the middle with a tree grown through the frame.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "npcs": [
         "npc_odri",
         "npc_anu"
@@ -1334,10 +1225,7 @@
         "npc_pell"
       ],
       "description": "Trading twice a day, around a tide that decides when the floor is a floor.",
-      "arrival": "The market runs on the low water and stops on the high, so the day has two mornings and two evenings and everybody's sense of time is bent around it. Prices are quoted in what the tide will allow rather than in what a thing is worth.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "The market runs on the low water and stops on the high, so the day has two mornings and two evenings and everybody's sense of time is bent around it. Prices are quoted in what the tide will allow rather than in what a thing is worth."
     },
     {
       "id": "poi_vedda_ford",
@@ -1352,9 +1240,6 @@
       ],
       "description": "The old crossing, downstream of everything, still the shallowest water.",
       "arrival": "Shingle on both banks and a bar between them you can wade at low water. There are stones set in the bed that are not river stones, worn round, laid a pace apart.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "npcs": [
         "npc_terke",
         "npc_anu"
@@ -1381,10 +1266,7 @@
         "npc_moonj"
       ],
       "description": "A spring the archive records at a fixed point, and a line of dead stonework saying otherwise.",
-      "arrival": "The water comes out of the hillside cold enough to hurt. Forty paces downslope there is a stone basin, dry, well made, and obviously built to catch exactly this. Forty paces further there is another.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "The water comes out of the hillside cold enough to hurt. Forty paces downslope there is a stone basin, dry, well made, and obviously built to catch exactly this. Forty paces further there is another."
     },
     {
       "type": "point_of_interest",
@@ -1402,10 +1284,7 @@
         "discovery_gate_rhythm"
       ],
       "description": "Steps up the old wall, kept clear, with a good view of the court.",
-      "arrival": "Somebody keeps these steps clear of weed, and there is a worn patch at the top where people stand. They are not watching the sea from here.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "arrival": "Somebody keeps these steps clear of weed, and there is a worn patch at the top where people stand. They are not watching the sea from here."
     }
   ],
   "npcs": [
@@ -1456,10 +1335,42 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "sex": "male"
+    },
+    {
+      "id": "npc_ardhi",
+      "type": "npc",
+      "name": "Ardhi",
+      "role": "steward of the University's ground",
+      "found_at": [
+        "poi_narmada_university"
+      ],
+      "language": "maru",
+      "would_settle": false,
+      "knows": [
+        "discovery_archive_baseline"
+      ],
+      "lines": [
+        {
+          "text": "You have come from the spring. Everybody does, eventually, and asks me why it is not where the survey puts it. I say the survey is correct. I have been saying it for nineteen years.",
+          "gives": [
+            "question_moving_spring"
+          ]
+        },
+        {
+          "text": "Every post-hole on the plateau is in the survey, and every one was dug after the road. Nothing goes up on University ground that the survey has not seen."
+        },
+        {
+          "text": "I keep the ground book. The archive keeps what happened; I keep where it is allowed to happen. It is less interesting and I prefer it."
+        },
+        {
+          "text": "Before the first entry. -- Nineteen years, and I never once asked what the first page was written after.",
+          "requires": [
+            "discovery_archive_baseline"
+          ]
+        }
+      ],
+      "sex": "female"
     },
     {
       "id": "npc_asura_princess",
@@ -1498,9 +1409,6 @@
             "discovery_terrace_water"
           ]
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1572,9 +1480,6 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "descended_from": [
         "character_kavik"
       ],
@@ -1616,9 +1521,6 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "sex": "male"
     },
     {
@@ -1651,9 +1553,6 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "sex": "male"
     },
     {
@@ -1685,9 +1584,6 @@
             "discovery_red_rice_survival"
           ]
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ],
       "sex": "female"
     },
@@ -1739,9 +1635,6 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "sex": "female"
     },
     {
@@ -1787,10 +1680,42 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "sex": "female"
+    },
+    {
+      "id": "npc_jarro",
+      "type": "npc",
+      "name": "Jarro",
+      "role": "dada of the Caravan Ground",
+      "found_at": [
+        "poi_caravan_camp"
+      ],
+      "language": "kia",
+      "would_settle": false,
+      "knows": [
+        "discovery_road_follows_water"
+      ],
+      "lines": [
+        {
+          "text": "Hear that? Strike the flag by the well and it rings hollow. Tan, the drivers call it -- the road's note. Where the ground rings like that, the road goes round.",
+          "gives": [
+            "word_kia_tan"
+          ]
+        },
+        {
+          "text": "Every stall on this rise pays the well a skin of water a season. I keep the well. So they pay me, and I keep the well. It is not complicated."
+        },
+        {
+          "text": "University people draw me a straight line across the basin every year and tell me I am losing a day. I give them a skin of water for the walk and they come back the long way."
+        },
+        {
+          "text": "So you walked it. -- Now you know why nobody here needs telling.",
+          "requires": [
+            "discovery_road_follows_water"
+          ]
+        }
+      ],
+      "sex": "male"
     },
     {
       "id": "npc_kunch",
@@ -1829,9 +1754,6 @@
           "requires": [],
           "gives": []
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1889,9 +1811,6 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "sex": "male"
     },
     {
@@ -1934,9 +1853,6 @@
           ],
           "gives": []
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -1972,9 +1888,6 @@
         {
           "text": "What ran on it? Something that needed doubling. That is all the iron will tell you and I have asked it a lot."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ],
       "sex": "female"
     },
@@ -2030,9 +1943,6 @@
             "discovery_double_classified"
           ]
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ],
       "sex": "female"
     },
@@ -2090,9 +2000,6 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "sex": "male"
     },
     {
@@ -2128,9 +2035,6 @@
             "discovery_bones_in_one_stone"
           ]
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ],
       "sex": "male"
     },
@@ -2189,9 +2093,6 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "sex": "female"
     },
     {
@@ -2227,9 +2128,6 @@
         {
           "text": "The rail people ask why we do not ride. We ask why they wait."
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ],
       "sex": "female"
     },
@@ -2296,8 +2194,38 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
+      "sex": "male"
+    },
+    {
+      "id": "npc_tolla",
+      "type": "npc",
+      "name": "Tolla",
+      "role": "head herder, dada of the high grazing",
+      "found_at": [
+        "poi_herders_terraces"
+      ],
+      "language": "maru",
+      "would_settle": true,
+      "knows": [],
+      "lines": [
+        {
+          "text": "A goat carries what it agreed to carry and not a handful more. Bhar, we say -- a load with consent in it. Put a thing on a goat without asking and it will lie down in the road and be right.",
+          "gives": [
+            "word_maru_bhar"
+          ]
+        },
+        {
+          "text": "The top step is the goats' in the dry months. It always has been. The University calls it ornamental, and I let them."
+        },
+        {
+          "text": "The wind comes over the edge up here like a hand. It took my father's tent. It has taken better things than that."
+        },
+        {
+          "text": "You stood in it. On purpose. -- Then you know it is not only taking.",
+          "requires": [
+            "discovery_escarpment_wind"
+          ]
+        }
       ],
       "sex": "male"
     },
@@ -2352,8 +2280,40 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
+      "sex": "female"
+    },
+    {
+      "id": "npc_ushi",
+      "type": "npc",
+      "name": "Ushi",
+      "role": "keeper of the salt orchard, morol of the market's growers",
+      "found_at": [
+        "poi_salt_orchard"
+      ],
+      "language": "kia",
+      "would_settle": true,
+      "knows": [
+        "discovery_fever_root_spread"
+      ],
+      "lines": [
+        {
+          "text": "Water them from the landward end, always. My grandmother said so and she was right about everything else. -- The market calls that uvai: a thing remembered by somebody who is not here to be asked why.",
+          "gives": [
+            "word_kia_uvai"
+          ]
+        },
+        {
+          "text": "Every surveyor who comes down from the plateau tells me it is the salt. It has been salt here since before the orchard. The trees did well in it for sixty years."
+        },
+        {
+          "text": "I am the one the growers send to the market when there is an argument about water. There is always an argument about water."
+        },
+        {
+          "text": "Fever-root. -- I have been pulling it up for ten years and calling it a weed. It is not a weed. It is winning.",
+          "requires": [
+            "discovery_fever_root_spread"
+          ]
+        }
       ],
       "sex": "female"
     },
@@ -2402,9 +2362,6 @@
           ]
         }
       ],
-      "epochs": [
-        "epoch_post_cataclysm"
-      ],
       "sex": "female"
     }
   ],
@@ -2436,9 +2393,6 @@
             "discovery_mask_niche"
           ]
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -2468,9 +2422,6 @@
             "discovery_road_follows_water"
           ]
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     },
     {
@@ -2500,13 +2451,194 @@
             "word_maru_anu"
           ]
         }
-      ],
-      "epochs": [
-        "epoch_post_cataclysm"
       ]
     }
   ],
   "homesteads": [
+    {
+      "id": "homestead_dwarka",
+      "type": "homestead",
+      "name": "The pump on the long way",
+      "field_map": "field_map_dwarka",
+      "grounds": [
+        {
+          "id": "ground_orchard_dry_end",
+          "at": "poi_salt_orchard",
+          "name": "The orchard's dry end",
+          "held_by": "npc_ushi",
+          "prose": "The landward rows of the salt orchard, on firm ground above the crust, where the trees are still doing well and the wind comes in off the basin without anything in its way. Ushi waters them from this end, always, and does not intend to stop.",
+          "worries": [
+            {
+              "id": "dying",
+              "says": "The trees are dying from the sea end. You are going to tell me it is the salt. Everybody from up the coast tells me it is the salt.",
+              "hint": "She is not asking to be told. She knows it is not the salt, and she is waiting to see whether you have looked at what is doing well where the trees are not.",
+              "not_that": "That is the salt answer again, in better words.",
+              "eased": "Fever-root. Taking the ground a finger at a time, and making it no good for anything else. -- I said it was not the salt. Nobody listens to the one who does the watering.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_fever_root_spread"
+                }
+              ]
+            },
+            {
+              "id": "again",
+              "says": "And the sea will not be back. It has left before and it will leave again, and a thing built for it coming back is a thing that will be wrong in my lifetime.",
+              "hint": "She is not frightened of the sea going. She wants to know you have understood that it goes -- the midden says so, or anybody who picks it.",
+              "not_that": "That does not tell me you know what happens here.",
+              "eased": "Yes. Layer on layer of it, and a word for it, and a place for the bones. You have read it. Good.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_midden_layers"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_sura"
+                }
+              ]
+            },
+            {
+              "id": "stranger",
+              "says": "And you are from the plateau, or from the delta, or somewhere they measure things. The orchard does not need measuring.",
+              "hint": "She wants you to have learned something here rather than brought it: a word of the market's, or somebody of Dwarka's to speak for you.",
+              "not_that": "That is where you are from. I asked what you have learned here.",
+              "eased": "You have been listening, then. That is rarer than you would think.",
+              "met_by": [
+                {
+                  "approach": "tongue"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_pell"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_sura"
+                }
+              ]
+            }
+          ],
+          "agrees": "Put it at the dry end, then, and turn the pump to the landward well -- the old one, the one my grandmother used. And pull the fever-root on your way past. Every time."
+        },
+        {
+          "id": "ground_caravan_rise",
+          "at": "poi_caravan_camp",
+          "name": "The caravan rise",
+          "held_by": "npc_jarro",
+          "prose": "A low rise above the Caravan Ground, where the road stops for the night beside a well older than the road. The flagstones round the well ring hollow if you strike them, and every stall on the rise pays Jarro for the water.",
+          "worries": [
+            {
+              "id": "long_way",
+              "says": "The road goes the long way round the basin. You want to build on the long way. Tell me why it is long, and I will tell you whether you can.",
+              "hint": "He knows why. He is not asking you to find out; he is asking whether you already have. Somebody who had walked the road as it goes would know what it goes round.",
+              "not_that": "That is a University answer. They draw a straight line and come back the long way.",
+              "eased": "Water. It goes where the water was, and the water was here. -- Nobody needs to be told that twice.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_road_follows_water"
+                }
+              ]
+            },
+            {
+              "id": "sea",
+              "says": "And a pump. For what -- the harbour? There is no harbour. The sea is not coming back, whatever they tell each other in the gate court.",
+              "hint": "He wants to know you have stopped waiting for the sea. The walls could tell you that, or the market's slates, or the man who keeps them.",
+              "not_that": "You are still building for the sea. It has gone.",
+              "eased": "Later every year. It is on the slates, and the walls say it, and you have read them both. Then you are pumping from the well, like a sensible person.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_seawall_courses"
+                },
+                {
+                  "approach": "show",
+                  "discovery": "discovery_market_ledger"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_pell"
+                }
+              ]
+            },
+            {
+              "id": "toll",
+              "says": "And the rise pays the well. Every stall pays. A pump on my rise pays as well, or the drivers ask why they do.",
+              "hint": "He does not want paying so much as he wants to be seen to be paid. Anything the road would trade for, shown to him, would do.",
+              "not_that": "That is not something a driver would take for water.",
+              "eased": "That will do. Keep it -- I only wanted it said in front of the drivers that you would.",
+              "met_by": [
+                {
+                  "approach": "offer",
+                  "material": "material_date_fruit"
+                },
+                {
+                  "approach": "offer",
+                  "material": "material_salt_crust"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_ushi"
+                }
+              ]
+            }
+          ],
+          "agrees": "Build it by the well, then. Where the flag rings. And when it turns, the first skin is the well's -- which is to say mine."
+        }
+      ],
+      "stages": [
+        {
+          "id": "foundation",
+          "name": "Lay the footing",
+          "needs": [
+            {
+              "id": "material_sandstone",
+              "count": 4
+            },
+            {
+              "id": "material_palm_husk",
+              "count": 3
+            }
+          ],
+          "backers": 1,
+          "prose": "Dressed sandstone in a ring on the firm ground, packed with husk against the wind, and a scaffold of old harbour spars lashed round it. Somebody you helped brought a cart for the stone and said it was going that way anyway."
+        },
+        {
+          "id": "tower",
+          "name": "Raise the tower",
+          "needs": [
+            {
+              "id": "material_mangrove_pole",
+              "count": 3
+            },
+            {
+              "id": "item_husk_hawser",
+              "count": 1
+            }
+          ],
+          "backers": 2,
+          "prose": "A lattice of mangrove poles, guyed with husk hawser laid the way Pell lays it, three strands against the twist. From the top you can see the whole basin, the road going the long way round it, and exactly what it goes round."
+        },
+        {
+          "id": "sails",
+          "name": "Hang the vanes, and fill the still",
+          "needs": [
+            {
+              "id": "material_bamboo_cane",
+              "count": 3
+            },
+            {
+              "id": "material_date_fruit",
+              "count": 3
+            }
+          ],
+          "backers": 2,
+          "prose": "Bamboo vanes that turned the first morning and lifted water the first afternoon. Beside the pump a glasshouse of salt-glass over shallow trays, where the sun takes the brine and leaves the water, and date palms set in the first beds of it."
+        }
+      ],
+      "settled": "They came up from the market at evening -- growers, a driver or two, somebody's grandmother -- and nobody said it was a place yet. The vanes turned. The still dripped. By dark there was a lamp in the glasshouse and a queue at the well, and Jarro was taking nothing from anybody, and pretending he was."
+    },
     {
       "id": "homestead_lothal",
       "type": "homestead",
@@ -2672,10 +2804,191 @@
           "prose": "Four sails of fired clay on bamboo spars, and they turned the first afternoon. Beside the mill, a glasshouse of salt-glass panes over the seedlings, and the first red rice from the granary walls in the ground below it."
         }
       ],
-      "settled": "They came along the path at evening with bundles and a rolled mat, and lit the lamps. Nobody made a speech. The mill turned over the trees, and the glasshouse was warm inside, and it was, without anybody deciding it, a place people lived.",
-      "epochs": [
-        "epoch_post_cataclysm"
-      ]
+      "settled": "They came along the path at evening with bundles and a rolled mat, and lit the lamps. Nobody made a speech. The mill turned over the trees, and the glasshouse was warm inside, and it was, without anybody deciding it, a place people lived."
+    },
+    {
+      "id": "homestead_narmada",
+      "type": "homestead",
+      "name": "The mill at the edge of the survey",
+      "field_map": "field_map_narmada",
+      "grounds": [
+        {
+          "id": "ground_university_east",
+          "at": "poi_narmada_university",
+          "name": "The yard's east edge",
+          "held_by": "npc_ardhi",
+          "prose": "Level ground past the ninth hall, where the University's yard runs out into grass and the scarp wind comes across unbroken. It is in the survey as empty, has been for four hundred years, and Ardhi keeps it that way.",
+          "worries": [
+            {
+              "id": "no_record",
+              "says": "There is no record of anything standing on the east edge. Four hundred years and not a post-hole. Nothing goes up where the record says nothing was.",
+              "hint": "She trusts the archive the way other people trust ground. Somebody who knew where the record begins could show her what it cannot have seen.",
+              "not_that": "That is not in the record, so I cannot weigh it.",
+              "eased": "It starts at the wound. -- Then 'nothing was here' only ever meant 'nothing was here after'. Very well. I shall have to write that down somewhere I will see it.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_archive_baseline"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_vessa"
+                }
+              ]
+            },
+            {
+              "id": "water",
+              "says": "And a glasshouse wants water, and the survey puts the spring a mile from the east edge. It has not moved in four hundred years.",
+              "hint": "The survey is exact about where the spring was on one day. Somebody who had followed the dead stonework up the hill would know where it is now.",
+              "not_that": "The spring is where the survey says. Everything is.",
+              "eased": "Three moves. And the survey caught it on the day of the second. -- It is closer than a mile, then. I shall not be the one to tell the archive.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_moving_spring"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_marn"
+                }
+              ]
+            },
+            {
+              "id": "nothing_built",
+              "says": "And nobody on the plateau builds. Everything above the scarp was already here. We measure it. That is what the University is for.",
+              "hint": "She says it as if it were a law of the ground. The terraces would argue, if anybody could read them, or if anybody had asked what they water.",
+              "not_that": "That is a thing somebody found. I said built.",
+              "eased": "Construction records. On the unread shelf. -- Then somebody built all of it, and we have been measuring their work and calling it the weather.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_terrace_script"
+                },
+                {
+                  "approach": "show",
+                  "discovery": "discovery_terrace_water"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_okhi"
+                }
+              ]
+            }
+          ],
+          "agrees": "Build it on the east edge. I shall enter it in the ground book on the day it goes up, which will make it the first thing in four hundred years the University has watched being built rather than found."
+        },
+        {
+          "id": "ground_top_terrace",
+          "at": "poi_herders_terraces",
+          "name": "The top terrace",
+          "held_by": "npc_tolla",
+          "prose": "The highest step of the terraces, flat and dry, with the scarp dropping away beyond it and the whole plateau below. The goats graze it in the dry months. The wind comes over the edge hard enough to lean on.",
+          "worries": [
+            {
+              "id": "grazing",
+              "says": "The top step is the goats' in the dry months. Build on it and they go without. I will not have that.",
+              "hint": "He is counting fodder. Somebody who knew what else grows up here -- a thing the University's lists call poison -- would take the count off his mind.",
+              "not_that": "That does not feed a goat.",
+              "eased": "The millet. The bitter one. -- Soak it, you say, and it is food. The goats have been telling me that for years and I have been pulling them off it.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_bitter_millet"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_marn"
+                }
+              ]
+            },
+            {
+              "id": "wind",
+              "says": "And the wind. It comes over the edge like a hand. It took my father's tent. You want to hang sails in that?",
+              "hint": "He thinks of the wind only as the thing that takes. Somebody who had stood in it on purpose, and learned how it stands, would know what it could turn.",
+              "not_that": "The wind does not care about that.",
+              "eased": "Lift. It does not blow across, it stands up the scarp. -- Then it will turn a mill all year and never take it. Fine. Fine.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_escarpment_wind"
+                }
+              ]
+            },
+            {
+              "id": "stranger",
+              "says": "And you are down from somewhere. Everybody up here is from up here, even the University, even if it will not say so.",
+              "hint": "He wants you spoken for up here: in the herders' own words, or by somebody the plateau owes.",
+              "not_that": "That is yours. I asked what is ours.",
+              "eased": "Somebody up here will answer for you. Then you are from up here, as far as the goats are concerned.",
+              "met_by": [
+                {
+                  "approach": "tongue"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_marn"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_asura_princess"
+                }
+              ]
+            }
+          ],
+          "agrees": "The top step, then, with its back to the edge. Sow the bitter millet on the step below it, and the first flour off the mill is the goats'. They were here first."
+        }
+      ],
+      "stages": [
+        {
+          "id": "foundation",
+          "name": "Lay the footing",
+          "needs": [
+            {
+              "id": "material_basalt",
+              "count": 4
+            },
+            {
+              "id": "material_bark_bast",
+              "count": 3
+            }
+          ],
+          "backers": 1,
+          "prose": "Squared basalt from the stepped quarry in a ring on the level ground, bedded in bast against the frost, and a scaffold of poles. Somebody you helped brought the stone down on a straight-tusk and would not say whose idea it was."
+        },
+        {
+          "id": "tower",
+          "name": "Raise the tower",
+          "needs": [
+            {
+              "id": "material_bamboo_cane",
+              "count": 3
+            },
+            {
+              "id": "item_sinew_lashing",
+              "count": 1
+            }
+          ],
+          "backers": 2,
+          "prose": "A tower of cane lashed with sinew, light enough that the lift nearly takes it off the scaffold. From the top course you can see the terraces all the way down, and see that they are a farm."
+        },
+        {
+          "id": "sails",
+          "name": "Hang the sails, and sow the millet",
+          "needs": [
+            {
+              "id": "material_goat_hide",
+              "count": 3
+            },
+            {
+              "id": "material_bamboo_cane",
+              "count": 2
+            }
+          ],
+          "backers": 3,
+          "prose": "Four sails of scraped hide on cane spars, set into the lift, turning before they were fully tied. Beside the mill a glasshouse, warm against the plateau's cold nights, with the bitter millet in trays under it, soaking, the way Marn says."
+        }
+      ],
+      "settled": "They came up from the halls and down from the grazing at the same hour, which has not happened on the plateau in living memory, and stood about in the lamplight not quite knowing who should speak first. Nobody did. The mill turned on the lift. Somebody wrote it down."
     }
   ],
   "biomes": [

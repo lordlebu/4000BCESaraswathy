@@ -24,11 +24,14 @@ import {
   BUILDABLE,
   BUILD_RADIUS,
   buildable,
+  homesteads,
+  type Answer,
   type Holdings,
   type Option
 } from '../src/content/homestead';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { fieldMap, fieldMaps } from '../src/content/places';
+import { fieldMap, fieldMaps, npc, poi } from '../src/content/places';
+import { offeredAt } from '../src/content/knowledge';
 
 const lothal = homesteadOn('field_map_lothal')!;
 const field = lothal.grounds.find((g) => g.id === 'ground_eastern_field')!;
@@ -47,6 +50,63 @@ describe('which maps can be settled', () => {
     expect(groundAt('poi_eastern_field')?.ground.id).toBe('ground_eastern_field');
     expect(groundAt('poi_kavik_tower')).toBeNull();
   });
+
+  it('has one on Dwarka and the Narmada too, each ground held by somebody who is there', () => {
+    expect(homesteads.map((h) => h.fieldMapId).sort()).toEqual(['field_map_dwarka', 'field_map_lothal', 'field_map_narmada']);
+    for (const h of homesteads) {
+      for (const g of h.grounds) {
+        expect(fieldMap(h.fieldMapId)!.pointsOfInterest, `${g.id} is off its map`).toContain(g.at);
+        expect(npc(g.heldBy)?.foundAt, `${g.heldBy} is never at ${g.at}`).toContain(g.at);
+      }
+    }
+  });
+});
+
+// Every homestead, not only Lothal's, walked to agreement with the first answer each worry names --
+// and each of those answers is something the player can come by on that same map, since the card
+// offers only this map's discoveries and this map's people.
+const asOption = (m: Answer): Option => ({
+  kind: m.approach,
+  id: m.discovery ?? m.person ?? m.material ?? m.word ?? null,
+  label: ''
+});
+
+describe('every homestead', () => {
+  for (const h of homesteads) {
+    const people = new Set(fieldMap(h.fieldMapId)!.pointsOfInterest.flatMap((p) => poi(p)?.npcs ?? []));
+    const shown = new Set(fieldMap(h.fieldMapId)!.pointsOfInterest.flatMap((p) => offeredAt(p, poi(p)?.discoveries ?? [])));
+
+    it(`${h.id}: every worry is answered by something on its own map`, () => {
+      for (const g of h.grounds) {
+        for (const w of g.worries) {
+          for (const m of w.metBy) {
+            if (m.approach === 'show') expect(shown, `${g.id}/${w.id} shows ${m.discovery}, not found on ${h.fieldMapId}`).toContain(m.discovery);
+            if (m.approach === 'vouch') expect(people, `${g.id}/${w.id} wants ${m.person}, not on ${h.fieldMapId}`).toContain(m.person);
+          }
+        }
+      }
+    });
+
+    it(`${h.id}: each ground is talked round to agreement, then built and settled`, () => {
+      for (const g of h.grounds) {
+        let flags: string[] = [];
+        for (const w of g.worries) {
+          const reply = respond(h, g, flags, asOption(w.metBy[0]!));
+          expect(reply.eased, `${g.id}/${w.id} was not eased by its own first answer`).toBe(true);
+          flags = reply.flags;
+        }
+        expect(agreed(g, stateOf(h.fieldMapId, flags))).toBe(true);
+        const plenty = Object.fromEntries(h.stages.flatMap((s) => s.needs.map((n) => [n.id, 99])));
+        for (const _ of h.stages) {
+          const may = mayBuild(h, stateOf(h.fieldMapId, flags), plenty, 9);
+          expect(may.ok).toBe(true);
+          if (!may.ok) return;
+          flags = build(h, flags, may.stage).flags;
+        }
+        expect(stateOf(h.fieldMapId, settle(h, flags)).settled).toBe(true);
+      }
+    });
+  }
 });
 
 describe('asking', () => {
@@ -192,6 +252,25 @@ describe('where it stands', () => {
     // Measured: see the note beside BUILD_RADIUS. Nearly every ground has somewhere on nearly every
     // seed, and one that has not says so rather than building in the marsh.
     expect(found / (20 * lothal.grounds.length), `${found} of ${20 * lothal.grounds.length} grounds had room`).toBeGreaterThan(0.9);
+  });
+
+  it('has room beside the grounds of the other maps too', () => {
+    for (const h of homesteads) {
+      if (h.fieldMapId === MAP) continue;
+      let found = 0;
+      const seeds = 8;
+      for (let s = 0; s < seeds; s += 1) {
+        const built = buildFieldMap(fieldMap(h.fieldMapId)!, { seed: `homestead-${s}` });
+        for (const ground of h.grounds) {
+          const at = built.placed.find((p) => p.poi.id === ground.at)?.at;
+          expect(at, `${ground.at} was not placed on seed ${s}`).toBeTruthy();
+          if (buildingTiles(built.world, at!, built.placed.map((p) => p.at))) found += 1;
+        }
+      }
+      // Measured over 40 seeds a ground: every Dwarka and Narmada ground had room on all 40. Their
+      // grounds stand on desert, plains and hill, where Lothal's stand in the delta's wetland.
+      expect(found / (seeds * h.grounds.length), `${h.id}: ${found} of ${seeds * h.grounds.length} grounds had room`).toBeGreaterThan(0.95);
+    }
   });
 
   it('refuses water, forest, road and a cliff edge', () => {
