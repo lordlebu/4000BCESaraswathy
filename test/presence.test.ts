@@ -21,8 +21,14 @@ import {
 import { hoursToPhase } from '../src/game/dayNight';
 
 /** What the scene would report for a map at one moment: the same calls `reportTravellers` makes. */
+// One build per map and seed: the ground does not change with the hour, and rebuilding it for each
+// of a hundred moments took the suite past its time budget under load.
+const builds = new Map<string, ReturnType<typeof buildFieldMap>>();
+
 function reportFor(fieldMapId: string, seed: string, day: number, hour: number): Reported[] {
-  const built = buildFieldMap(fieldMap(fieldMapId)!, { seed });
+  const key = `${fieldMapId}:${seed}`;
+  const built = builds.get(key) ?? buildFieldMap(fieldMap(fieldMapId)!, { seed });
+  builds.set(key, built);
   const out: Reported[] = [];
   for (const t of travellersOn(fieldMapId)) {
     const circuit = placedCircuit(t, built.placed);

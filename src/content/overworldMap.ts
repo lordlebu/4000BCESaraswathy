@@ -80,39 +80,71 @@ export function nodeFor(shape: OverworldShape, id: string): MapNode | null {
 }
 
 /**
- * A viewBox that fits the placed maps, with room for their labels.
+ * How tall a map's name is drawn, in canon's units. `.overworld-name` in `styles.css` says the same.
+ */
+export const LABEL_SIZE = 5;
+
+/**
+ * How wide a character of a name is, as a share of `LABEL_SIZE`.
+ *
+ * An estimate, on the generous side. Measured in the browser on 27 September with `getBBox`, the
+ * four names ran 0.46 to 0.53 of the size a character in the page's serif, and 0.59 for the bold
+ * one -- the map you are on is drawn bold, and any of them can be.
+ */
+const GLYPH = 0.6;
+
+/** Where a node's name starts and ends, left to right, in canon's units. */
+export function labelExtent(shape: OverworldShape, node: MapNode): { left: number; right: number } {
+  const width = node.name.length * LABEL_SIZE * GLYPH;
+  const anchor = labelAnchor(shape, node);
+  if (anchor === 'end') return { left: node.x - width, right: node.x };
+  if (anchor === 'start') return { left: node.x, right: node.x + width };
+  return { left: node.x - width / 2, right: node.x + width / 2 };
+}
+
+/**
+ * A viewBox that fits the placed maps and their names.
  *
  * Canon's units are 0-100, but four maps never fill that square -- drawing the whole box left a
  * band of empty page below the continent as tall as the continent itself. Fitting to the content
  * is also what stops the topmost label being clipped, since a name is drawn above its dot and the
  * dot can sit on the very edge of the used area.
  *
- * `pad` is in the same units. It has to clear a label's height rather than a dot's radius.
+ * **Sideways, it fits the names too, not only the dots.** Once the Narmada moved into its own region
+ * on 27 September the continent was 36 units wide and its two eastern names were 50 each, so a
+ * box padded from the dots cut both of them off. `pad` still clears a label's height above the top
+ * dot and a dot's width at the sides.
  */
 export function viewBoxFor(shape: OverworldShape, pad = 12): string {
   if (shape.nodes.length === 0) return '0 0 100 100';
-  const xs = shape.nodes.map((n) => n.x);
   const ys = shape.nodes.map((n) => n.y);
-  const minX = Math.min(...xs) - pad;
+  const edge = 4;
+  const lefts = shape.nodes.map((n) => Math.min(n.x - edge, labelExtent(shape, n).left));
+  const rights = shape.nodes.map((n) => Math.max(n.x + edge, labelExtent(shape, n).right));
+  const minX = Math.floor(Math.min(...lefts) - 2);
+  const maxX = Math.ceil(Math.max(...rights) + 2);
   const minY = Math.min(...ys) - pad;
-  const width = Math.max(...xs) - Math.min(...xs) + pad * 2;
   const height = Math.max(...ys) - Math.min(...ys) + pad * 2;
-  return `${minX} ${minY} ${width} ${height}`;
+  return `${minX} ${minY} ${maxX - minX} ${height}`;
 }
 
 /**
  * Which way a node's label should lean.
  *
- * A centred label on the easternmost map runs off the right of the viewBox, because padding is
- * measured in canon's units and a name's width is measured in glyphs -- there is no padding that
- * is correct for both "The Dry Harbour" and "Lothal". Anchoring the outermost labels inward sizes
- * the problem away instead of guessing at it. Caught on a 360px phone, where the harbour's name
- * ran off the edge.
+ * A centred label on an eastern map runs off the right of the drawing, and on a western one off the
+ * left. Anchoring the outer labels inward keeps a long name over the continent rather than past it.
+ * Caught on a 360px phone, where the harbour's name ran off the edge.
+ *
+ * **The outer fifth of the spread, not only the outermost map.** With the Aravali and the Narmada one
+ * unit apart on the east, only the easternmost leaned in and the other ran off the right.
  */
 export function labelAnchor(shape: OverworldShape, node: MapNode): 'start' | 'middle' | 'end' {
   if (shape.nodes.length < 2) return 'middle';
   const xs = shape.nodes.map((n) => n.x);
-  if (node.x === Math.max(...xs)) return 'end';
-  if (node.x === Math.min(...xs)) return 'start';
+  const min = Math.min(...xs);
+  const max = Math.max(...xs);
+  const band = (max - min) / 5;
+  if (node.x >= max - band) return 'end';
+  if (node.x <= min + band) return 'start';
   return 'middle';
 }

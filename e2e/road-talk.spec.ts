@@ -112,4 +112,18 @@ test('beside a stranger, walking with them opens a card about them', async ({ pa
   await expect(card).toBeVisible({ timeout: 10_000 });
   // About somebody: the card carries the stranger's face beside its title.
   await expect(card.locator('.event-heading')).toBeVisible();
+
+  // The first time is the company card, and walking together is how you learn their name.
+  await expect(card.locator('h2')).toHaveText('Company on the road');
+  await card.getByRole('button', { name: 'Walk together a while' }).click();
+  const line = (await card.locator('.activity-prose').textContent()) ?? '';
+  const name = line.match(/Their name is (\w+)/)?.[1];
+  expect(name, `no name in "${line}"`).toBeTruthy();
+  await card.getByRole('button', { name: 'Go on' }).click();
+  await expect(card).toBeHidden();
+
+  // The second time is small talk: how the map knows you, and perhaps what they have heard.
+  await row.click();
+  await expect(card).toBeVisible({ timeout: 10_000 });
+  await expect(card.locator('h2')).toHaveText(`On the road with ${name}`);
 });

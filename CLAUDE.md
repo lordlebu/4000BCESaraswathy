@@ -465,6 +465,15 @@ A player who walks in and out is told nothing, where before everybody spoke at o
 filled by standing there. What has *not* changed is that no button records a line — being told
 something is how you hear it, and `Dialogue` writes it down as its last beat lands.
 
+**Somebody with a reason may speak first, and that is the one exception, on the owner's word of 27
+September.** A named person on a first meeting, or with a line that asks something of you -- a
+question they cannot settle, a thing of theirs they have just seen you carrying -- may call out as
+you walk in or come alongside, on a seeded chance and at most once a day (`content/bumping.ts`,
+`reasonToSpeak` in `journey.ts`). A stranger may fall in on the road. A person with nothing new
+never does. **Off under browser automation**, like the front door, because every spec that walks
+into a place and chooses somebody would be raced by them; `?chatter=on` asks for it back and
+`e2e/speaks-first.spec.ts` does.
+
 **A conversation is a mode, not a section of a panel.** A place lists who is here; choosing
 somebody opens them in the dock and they have it to themselves. Every NPC used to render at once,
 each with a portrait and a running typewriter — three of them at Lothal Camp, in a panel showing a

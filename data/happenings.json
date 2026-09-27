@@ -20,7 +20,11 @@
     "all), and `again_after` (days before the same subject can come round again; null means once).",
     "`sets` names flags a choice leaves behind, and `requires` names flags a template needs, so one",
     "event can lead to another -- {stranger} in either is the stranger the event is about. `gifts`",
-    "is what a stranger of each people gives, by canon material id."
+    "is what a stranger of each people gives, by canon material id.",
+    "",
+    "`lines` holds further sentences a template adds to its prose by name -- small talk's rumours, one",
+    "per kind. {rumour} and {rumour_at} in `sets` are the rumour a stranger passed on and the place it",
+    "names (src/content/rumours.ts)."
   ],
   "templates": {
     "tracks": {
@@ -378,6 +382,92 @@
         "decline": {
           "label": "Tell them to keep it",
           "line": "You tell them to keep it for the road. They look at you for a long moment, then laugh and put it away, and the two of you part square."
+        }
+      }
+    },
+    "small-talk": {
+      "weight": 3,
+      "tags": [
+        "stranger"
+      ],
+      "cooldown": 0,
+      "again_after": 1,
+      "sets": {
+        "ask": [
+          "heard:{rumour}",
+          "told:{rumour}@{rumour_at}@{stranger}"
+        ],
+        "thank": [
+          "heard:{rumour}"
+        ]
+      },
+      "slots": [
+        "name",
+        "trade",
+        "ground",
+        "place",
+        "person"
+      ],
+      "lines": {
+        "place": "They ask whether you have been out to {place} yet, and say you should go once.",
+        "person": "{person} was asking after you, they say; you will find them at {place}.",
+        "question": {
+          "someone": "{person}, at {place}, has a question nobody there can settle, they say, and they think you might.",
+          "nobody": "There is a question at {place} nobody can settle, they say, and they think you might."
+        }
+      },
+      "title": "On the road with {name}",
+      "prose": {
+        "cold": "{name} gives you a nod and a word about {ground}, and not much more. Nobody of their people has reason yet to think of you one way or the other.",
+        "stranger": "{name} falls in beside you. Nobody on these roads knows you yet, they say, but their own people speak well of you.",
+        "heard-of": "{name} falls in beside you. They have heard of you on these roads, and of what you did for their people.",
+        "known": "{name} falls in beside you and talks easily about {ground}. People here know who you are now.",
+        "trusted": "{name} walks with you as if you were one of their own, and says as much. Word travels on these roads, and the word about you is good."
+      },
+      "choices": {
+        "ask": {
+          "label": "Ask the way there",
+          "line": "{name} tells you the way to {place}, and you write it down before you forget it."
+        },
+        "thank": {
+          "label": "Thank them, and keep your road",
+          "line": "You thank them and keep to your own road. {place} will keep."
+        },
+        "walk": {
+          "label": "Walk together a while",
+          "line": "You walk together as far as the next turning, talking about nothing much, and the miles go easier for it."
+        },
+        "part": {
+          "label": "Wish them a good road",
+          "line": "You wish each other a good road and go your separate ways."
+        }
+      }
+    },
+    "rumour-kept": {
+      "weight": 4,
+      "tags": [
+        "stranger"
+      ],
+      "cooldown": 0,
+      "again_after": null,
+      "slots": [
+        "name",
+        "place"
+      ],
+      "title": "As you were told",
+      "prose": {
+        "place": "This is {place}, where {name} sent you. It is as they said, and you are glad you came.",
+        "person": "{name} said somebody at {place} was asking after you, and somebody is.",
+        "question": "{name} said there was a question at {place} nobody could settle. You can hear it being argued before you are properly there."
+      },
+      "choices": {
+        "note": {
+          "label": "Write down who sent you",
+          "line": "You write {name}'s name beside {place} in the diary, so you remember who pointed the way."
+        },
+        "look": {
+          "label": "Look around first",
+          "line": "You put the diary away and look around. There is time to write it down later."
         }
       }
     }

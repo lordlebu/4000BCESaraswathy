@@ -50,9 +50,59 @@ Two things the browser suite found, and what was done:
   landscape phone (25% to 21%, against a floor of 21). Moving who is here to the top of the panel and
   folding the away news into one line under it costs nothing when everybody is in.
 
+## Phase 2: standing, small talk and rumours — built on `ci/nightly-minutes`
+
+The owner asked for Phase 2 on the same branch as the morning play-time workflow.
+
+**Standing** (`content/standing.ts`) is four words -- a stranger here, heard of, known, trusted --
+read off the save and never stored. Helping somebody on the map is what moves it; understanding four
+things there counts too. The Overworld says it for the map you are on and each you have been to.
+Some people do not care until you affect their lives: a stranger is warm once the map knows you, or
+once you have helped somebody of their own people anywhere (`warmTo`).
+
+**Small talk.** The first walk with a stranger is still the company card, which is where you learn
+their name. After that, walking with them opens `small-talk`: a greeting by your standing, and from a
+warm stranger, a rumour. A cold stranger is civil and brief.
+
+**Rumours** (`content/rumours.ts`) are always true of the world and never knowledge: a place you have
+not reached, a named person with news and where they are, a question somebody on this map is asking.
+Asking the way leaves `heard:` and `told:` flags, and reaching the place a rumour named opens
+`rumour-kept`, once, before anything else on that arrival. That is the owner's "conversation that
+generates events"; Phase 3's camps become rumours of the same kind.
+
+**Left for the lore repo:** named people noticing your standing, which is a line or two each and
+canon's to write.
+
+**The Aravali is not settled, by the owner's ruling of 27 September: "it is all about crossing the
+sea."** No discovery there helps anybody there, which testing found and which is now the point
+rather than a gap: its people are passing through, it can know you but not trust you, and the
+settlement loop is for Lothal, Dwarka and the Narmada. Its cart points are the First Pier and the
+Far Landing, and its story is the strait.
+
+## Found and fixed: the Narmada was drawn above the Aravali
+
+The owner: the Aravali is the topmost part of insular India, joined to Asia by the floating islands
+and the line. The travel screen drew the Narmada Plateau above it. Nothing had moved: the Narmada's
+pin was placed at (58, 20) on 19 August, before the regions were traced off the drawn map, and never
+brought into its own region. Canon 2.33.0 moves it to (52, 42) and pins the Aravali at (51, 30) as
+the topmost anchor. With both on the east, the travel screen then cut their names off; the drawing
+now fits every name, measured in the browser.
+
+## Somebody speaking first
+
+The owner asked for chats that start without the player -- named people especially, on a first
+meeting or when they want something. `content/bumping.ts` and `reasonToSpeak`: a first meeting
+(chance 0.6, once ever), wanting something (0.5: a question they cannot settle, or a thing of theirs
+you are carrying), a stranger passing (0.2); once a day per person, never over something else on
+screen. It happens on coming alongside somebody on the road and a moment after walking into a place.
+
+
+
 ## How long a map takes
 
-`test/minutes.test.ts`, printed by `npm run simulate`. A floor, not a forecast: a nearest-first tour
+`test/minutes.test.ts`, printed by `npm run simulate`, and run every morning at 06:00 IST by
+`.github/workflows/playtime.yml`, which puts the report on the run's summary page and keeps it for
+90 days. A floor, not a forecast: a nearest-first tour
 of every place at the scene's step time and each tile's cost, every word read at 200 a minute, 1.5
 seconds a press, each discovery counted once however many places offer it. Measured on 27
 September over eight seeds, after the fix below:

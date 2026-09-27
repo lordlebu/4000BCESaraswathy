@@ -58,7 +58,9 @@ import {
   WOVEN_ONE_IN
 } from './tiers';
 import { rendezvousPick } from '../world/rng';
-import { travellersOn } from './travellers';
+import { givenNameFor, travellersOn } from './travellers';
+import type { Standing } from './standing';
+import { rumourAt, type Rumour } from './rumours';
 
 /** A seeded roll, as `eventNow` takes it: the same salt always gives the same number. */
 export type Roll = (salt: string) => number;
@@ -85,6 +87,19 @@ export interface Surroundings {
   stranger: EventStranger | null;
   /** Material ids just taken, so `working` does not turn up the same thing twice. */
   taken: readonly string[];
+  /**
+   * What a stranger the player walked up to makes of them: how the map knows you, whether their
+   * people have reason to care, and what they have heard. Null except when the player chose to walk
+   * with somebody -- small talk is asked for, never rationed onto the road.
+   */
+  talk: Talk | null;
+}
+
+/** See `Surroundings.talk`. Built by the caller from `standing.ts` and `rumours.ts`. */
+export interface Talk {
+  standing: Standing;
+  warm: boolean;
+  rumour: Rumour | null;
 }
 
 /**
@@ -100,7 +115,12 @@ export function surroundingsAt(
   fieldMapId: string,
   moment: { timeOfDay: string; weather: string } | null,
   roll: Roll,
-  extra: { poiId?: string | null; taken?: readonly string[]; strangerId?: string | null } = {}
+  extra: {
+    poiId?: string | null;
+    taken?: readonly string[];
+    strangerId?: string | null;
+    talk?: Talk | null;
+  } = {}
 ): Surroundings | null {
   const tile = world.tiles[at.y]?.[at.x];
   if (!tile) return null;
@@ -132,7 +152,8 @@ export function surroundingsAt(
           givenName: who.givenName
         }
       : null,
-    taken: extra.taken ?? []
+    taken: extra.taken ?? [],
+    talk: extra.talk ?? null
   };
 }
 
@@ -215,6 +236,8 @@ interface TemplateText {
   /** What a stranger of each people gives, by canon material id. */
   gifts?: Readonly<Record<string, string>>;
   slots: readonly string[];
+  /** Further sentences a template adds to its prose by name: a rumour, one kind to a line. */
+  lines?: Readonly<Record<string, Text>>;
   title: Text;
   prose: Text;
   choices: Readonly<Record<string, { label: Text; line: Text }>>;
@@ -273,7 +296,7 @@ function woven(
   subject: string,
   slots: Readonly<Record<string, string | number>>,
   choices: readonly ChoiceSpec[],
-  options: { variant?: string; stranger?: EventStranger } = {}
+  options: { variant?: string; stranger?: EventStranger; flags?: Readonly<Record<string, string>> } = {}
 ): GameEvent {
   const words = TEXT[kind];
   if (!words) throw new Error(`data/happenings.json has no template '${kind}'`);
@@ -291,7 +314,9 @@ function woven(
       if (!text) throw new Error(`data/happenings.json: '${kind}' has no choice '${spec.id}'`);
       used.add(`${kind}.${spec.id}`);
       const variant = spec.variant ?? options.variant;
-      const sets = (words.sets?.[spec.id] ?? []).map((flag) => flagFor(flag, options.stranger));
+      const sets = (words.sets?.[spec.id] ?? []).map((flag) =>
+        flagFor(flag, options.stranger, options.flags)
+      );
       return {
         id: spec.id,
         label: fill(pick(text.label, variant), slots),
@@ -312,8 +337,14 @@ function woven(
 type Template = (around: Surroundings, roll: Roll, now: Circumstance) => GameEvent | null;
 
 /** A flag written in the words file, with `{stranger}` made into the stranger it is about. */
-function flagFor(flag: string, stranger: EventStranger | undefined | null): string {
-  return flag.replace('{stranger}', stranger?.id ?? '');
+function flagFor(
+  flag: string,
+  stranger: EventStranger | undefined | null,
+  more: Readonly<Record<string, string>> = {}
+): string {
+  let out = flag.replace('{stranger}', stranger?.id ?? '');
+  for (const [slot, value] of Object.entries(more)) out = out.replace(`{${slot}}`, value);
+  return out;
 }
 
 /** Whether you would know this stranger's name, which decides the variant a line is told in. */
@@ -382,6 +413,64 @@ const companyAgain: Template = ({ stranger, moment }, _roll, now) => {
     [{ id: 'catch-up', eases: COMPANY_EASES }, { id: 'wave' }],
     { variant: named(stranger), stranger }
   );
+};
+
+/**
+ * Small talk with a stranger the player walked up to and has met before.
+ *
+ * **Asked for, never rationed**: it exists only when `talk` is filled, which only the action rail's
+ * "Walk with" does. The greeting follows how the map knows you (`standing.ts`); a stranger whose
+ * people have no reason to care keeps it short, and one who does may pass on a rumour
+ * (`rumours.ts`). Asking about it leaves `heard:` and `told:` flags, and arriving where it points
+ * is `rumourKept`.
+ */
+const smallTalk: Template = ({ stranger, talk, biome }, _roll, now) => {
+  if (!stranger || !talk || !now.met?.includes(stranger.id)) return null;
+  const words = TEXT['small-talk']!;
+  const rumour = talk.warm ? talk.rumour : null;
+  const slots = {
+    name: stranger.givenName ?? `the ${stranger.role.split(',')[0]}`,
+    trade: stranger.role.split(',')[0]!,
+    ground: ground(biome),
+    place: rumour?.place ?? '',
+    person: rumour?.person ?? ''
+  };
+  const event = woven(
+    'road',
+    'small-talk',
+    `${stranger.id}:${now.day}`,
+    slots,
+    rumour ? [{ id: 'ask', eases: COMPANY_EASES }, { id: 'thank' }] : [{ id: 'walk', eases: COMPANY_EASES }, { id: 'part' }],
+    {
+      variant: talk.warm ? talk.standing : 'cold',
+      stranger,
+      flags: rumour ? { rumour: rumour.id, rumour_at: rumour.poiId } : {}
+    }
+  );
+  if (!rumour) return event;
+  const said = fill(pick(words.lines?.[rumour.kind] ?? '', rumour.person ? 'someone' : 'nobody'), slots);
+  return { ...event, prose: `${event.prose} ${said}` };
+};
+
+/**
+ * Arriving where a rumour sent you.
+ *
+ * **What makes talk on the road generate events.** A rumour asked about leaves a `told:` flag naming
+ * the place and the teller; reaching that place for the first time opens this, once. Asked for by the
+ * arrival itself rather than rationed, because a promise made on the road should be kept.
+ */
+const rumourKept: Template = ({ place }, _roll, now) => {
+  if (!place) return null;
+  const told = rumourAt(place.id, now.flags ?? []);
+  if (!told) return null;
+  const id = `woven:rumour-kept:${told.rumourId}`;
+  if (now.seen.includes(id)) return null;
+  const kind = told.rumourId.split(':')[1] ?? 'place';
+  const trade = told.teller.split(':').pop()?.replace('company_', '') ?? 'traveller';
+  const name = givenNameFor(told.teller) ?? `the ${trade}`;
+  return woven('arriving', 'rumour-kept', told.rumourId, { name, place: placeName(place) }, [{ id: 'note' }, { id: 'look' }], {
+    variant: kind
+  });
 };
 
 const weather: Template = ({ moment, biome, flora }) => {
@@ -512,6 +601,7 @@ export const TEMPLATES: Readonly<Record<Occasion, readonly { kind: string; make:
     { kind: 'company', make: company },
     { kind: 'company-again', make: companyAgain },
     { kind: 'kindness-returned', make: kindnessReturned },
+    { kind: 'small-talk', make: smallTalk },
     { kind: 'weather', make: weather }
   ],
   night: [
@@ -520,6 +610,7 @@ export const TEMPLATES: Readonly<Record<Occasion, readonly { kind: string; make:
     { kind: 'knock', make: knock }
   ],
   arriving: [
+    { kind: 'rumour-kept', make: rumourKept },
     { kind: 'cairn', make: cairn },
     { kind: 'cookfire', make: cookfire }
   ],

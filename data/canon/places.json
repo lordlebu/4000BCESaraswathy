@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.32.0",
+  "canon_version": "2.33.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -486,8 +486,8 @@
         "storm": 3
       },
       "coordinates": {
-        "x": 58,
-        "y": 20
+        "x": 52,
+        "y": 42
       },
       "relief": "plateau"
     }
