@@ -21,7 +21,8 @@ import {
   rungOf
 } from '../journey';
 import { discovery } from '../content/knowledge';
-import { npcsAt, poi } from '../content/places';
+import { poi } from '../content/places';
+import { companyLine, type Presence } from '../content/presence';
 import { PersonPortrait } from './PersonPortrait';
 import { placeArt } from './places';
 import { StationBoard } from './StationBoard';
@@ -55,6 +56,12 @@ function why(progress: Progress, id: string, moment: WorldMoment | null): string
 
 export interface PlacePanelProps {
   poiId: string | null;
+  /**
+   * Who is here now and where the place's other people have gone -- `whoIsHere` in
+   * `content/presence.ts`, asked by App because App holds what the scene reported. Null lists
+   * nobody, which is only right while there is no place.
+   */
+  presence: Presence | null;
   progress: Progress;
   moment: WorldMoment | null;
   /** True the first time this place is entered in a session — the long prose goes up once. */
@@ -77,6 +84,7 @@ export interface PlacePanelProps {
 
 export function PlacePanel({
   poiId,
+  presence,
   progress,
   moment,
   firstVisit,
@@ -89,7 +97,9 @@ export function PlacePanel({
   const place = poiId ? poi(poiId) : null;
   if (!place) return null;
 
-  const people = npcsAt(place.id);
+  const people = presence?.here ?? [];
+  const elsewhere = presence?.away ?? [];
+  const company = presence ? companyLine(presence) : null;
   const sub = openSub ? place.subLocations.find((s) => s.id === openSub) : null;
 
   // **No veil.** This used to draw its own full-screen wrapper and position itself above the field
@@ -118,6 +128,10 @@ export function PlacePanel({
             Leave
           </button>
         </header>
+
+        {/* **Who is here, first.** The map hides anybody who has stopped at a place, so this line is
+            how walking in tells you who to talk to -- and where to find whoever is not here. */}
+        {company && <p className="place-company">{company}</p>}
 
         {/* What this place can work, before the prose rather than after it: a player who has
             walked in to use a bench should not have to read a paragraph to find out there is one.
@@ -186,6 +200,25 @@ export function PlacePanel({
                           <span className="who-role">{n.role}</span>
                         </span>
                       </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {elsewhere.length > 0 && (
+              <section className="place-section">
+                <h3>Elsewhere</h3>
+                {/* Not buttons: you cannot listen to somebody who is not here. Named with where they
+                    went, so the list is a direction rather than a disappointment. */}
+                <ul className="who-list">
+                  {elsewhere.map(({ npc: n, where }) => (
+                    <li key={n.id} className="who-away">
+                      <PersonPortrait person={n} size={FACE_SIZE} />
+                      <span className="who-words">
+                        <span className="who-name">{n.name}</span>
+                        <span className="who-role">{where}</span>
+                      </span>
                     </li>
                   ))}
                 </ul>

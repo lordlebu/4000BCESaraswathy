@@ -64,6 +64,7 @@ import { EventCard } from './EventCard';
 import { type Choice, type GameEvent, type Occasion } from '../content/events';
 import { happeningNow, surroundingsAt } from '../content/happenings';
 import { APPROACHES, approachAt, approachId } from '../content/visitors';
+import { whoIsHere } from '../content/presence';
 import type { Station } from '../content/stations';
 
 /**
@@ -598,6 +599,18 @@ export function App() {
     const traits = travellerAttributes(traveller, reported?.state ?? null);
     return traits.length > 0 ? traits : null;
   }, [talkingTo, fieldMapId, travellerStates]);
+
+  /**
+   * Who is at the place being stood in, and where its other people have gone.
+   *
+   * Asked of `content/presence.ts` rather than read off canon's `found_at`, which lists everybody
+   * who ever visits a place as if they were all there at once. Travellers are placed by what the
+   * scene last reported, so this moves when they do.
+   */
+  const presence = useMemo(
+    () => (standingOn ? whoIsHere(standingOn, fieldMapId, arrival?.day ?? 0, travellerStates) : null),
+    [standingOn, fieldMapId, arrival?.day, travellerStates]
+  );
 
   const currentCreature = useMemo(() => {
     if (!world || !arrival) return null;
@@ -1584,6 +1597,7 @@ export function App() {
         }}
         place={{
           poiId: placeOpen ? standingOn : null,
+          presence,
           progress,
           moment,
           firstVisit: Boolean(standingOn) && !visited.current.has(standingOn!),

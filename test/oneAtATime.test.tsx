@@ -21,6 +21,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { PlacePanel } from '../src/ui/PlacePanel';
 import { Conversation } from '../src/ui/Conversation';
 import { npcsAt } from '../src/content/places';
+import { whoIsHere } from '../src/content/presence';
 import { emptyProgress } from '../src/journey';
 import { emptySatchel } from '../src/content/satchel';
 
@@ -33,6 +34,8 @@ const CROWDED = 'poi_lothal_camp';
 
 const place = (over: Record<string, unknown> = {}) => ({
   poiId: CROWDED,
+  // Nothing reported yet, so every traveller counts as here -- the busiest the place can be.
+  presence: whoIsHere(CROWDED, 'field_map_lothal', 0, []),
   progress: emptyProgress(),
   moment: null,
   firstVisit: false,

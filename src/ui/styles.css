@@ -1938,6 +1938,12 @@ button.ghost:hover:not(:disabled) {
   color: var(--accent);
 }
 .place-arrival { margin: 0.8rem 0 0; }
+/* Who is here, said before anything else, because the map does not draw people at a place. */
+.place-company {
+  margin: 0.6rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
 
 .place-section { margin-top: 1.3rem; }
 .place-section > h3 {
@@ -2262,6 +2268,19 @@ button.ghost:hover:not(:disabled) {
 .who-name {
   font-weight: 600;
   font-size: 0.95rem;
+}
+
+/* Somebody who belongs here and is elsewhere: the same row as `.who`, without the button, and
+   quieter -- a direction, not somebody to press. */
+.who-away {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 44px;
+  padding: 6px 10px;
+  color: var(--ink-faint);
+  border: 1px dashed var(--edge);
+  border-radius: 8px;
 }
 
 /* Canon's own word for what they do, which is the useful thing to know before choosing who to

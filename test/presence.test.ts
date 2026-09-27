@@ -1,0 +1,154 @@
+// Who is at a place right now.
+//
+// Reported from play: "if I walk into a town or POI, I am not aware who is there." The place panel
+// listed everybody canon ever put at a place, so Kunch was at three Lothal places at once. These
+// tests hold the rule; the panel's own rendering is `test/oneAtATime.test.tsx` and the browser half
+// is `e2e/talking.spec.ts`, which walks to Thrali and finds him.
+
+import { describe, expect, it } from 'vitest';
+import { buildFieldMap } from '../src/world/fieldMap';
+import { fieldMap, fieldMaps, npc, npcsAt } from '../src/content/places';
+import { companyLine, whoIsHere, type Reported } from '../src/content/presence';
+import {
+  hoursFor,
+  placedCircuit,
+  travellerState,
+  travellersOn,
+  whereabouts
+} from '../src/content/travellers';
+import { hoursToPhase } from '../src/game/dayNight';
+
+/** What the scene would report for a map at one moment: the same calls `reportTravellers` makes. */
+function reportFor(fieldMapId: string, seed: string, day: number, hour: number): Reported[] {
+  const built = buildFieldMap(fieldMap(fieldMapId)!, { seed });
+  const out: Reported[] = [];
+  for (const t of travellersOn(fieldMapId)) {
+    const circuit = placedCircuit(t, built.placed);
+    if (circuit.length < 2) continue;
+    const where = whereabouts(built.world, circuit.map((s) => s.at), day, hoursToPhase(hour), hoursFor(t.id));
+    const state = travellerState(circuit, where);
+    if (state) out.push({ npcId: t.npcId, state });
+  }
+  return out;
+}
+
+const names = (list: readonly { name: string }[]) => list.map((n) => n.name);
+
+describe('a place lists who is there now', () => {
+  it('always has somebody authored in one place', () => {
+    const uma = npc('npc_uma')!;
+    expect(uma.foundAt, 'Uma is no longer authored in one place').toEqual(['poi_lothal_camp']);
+    for (const hour of [0, 9, 12, 20]) {
+      const here = whoIsHere('poi_lothal_camp', 'field_map_lothal', 0, reportFor('field_map_lothal', 'presence', 0, hour));
+      expect(names(here.here), `Uma is missing at ${hour}:00`).toContain('Uma');
+    }
+  });
+
+  it('counts a traveller as here until the scene has said otherwise', () => {
+    const here = whoIsHere('poi_lothal_camp', 'field_map_lothal', 0, []);
+    expect(names(here.here).sort()).toEqual(names(npcsAt('poi_lothal_camp')).sort());
+    expect(here.away).toEqual([]);
+  });
+
+  it('says where a traveller went, in a sentence', () => {
+    const resting: Reported = { npcId: 'npc_thrali', state: { resting: true, atPoi: 'poi_drowned_dockyard', boundFor: null } };
+    const walkingAway: Reported = { npcId: 'npc_thrali', state: { resting: false, atPoi: null, boundFor: 'poi_drowned_dockyard' } };
+    const walkingHere: Reported = { npcId: 'npc_thrali', state: { resting: false, atPoi: null, boundFor: 'poi_lothal_camp' } };
+
+    const stopped = whoIsHere('poi_lothal_camp', 'field_map_lothal', 0, [resting]);
+    expect(names(stopped.here)).not.toContain('Thrali');
+    expect(stopped.away.find((a) => a.npc.id === 'npc_thrali')?.says).toBe('Thrali has stopped at the Drowned Dockyard.');
+
+    const road = whoIsHere('poi_lothal_camp', 'field_map_lothal', 0, [walkingAway]);
+    expect(road.away.find((a) => a.npc.id === 'npc_thrali')?.where).toBe('On the road to the Drowned Dockyard');
+
+    const coming = whoIsHere('poi_lothal_camp', 'field_map_lothal', 0, [walkingHere]);
+    expect(coming.away.find((a) => a.npc.id === 'npc_thrali')?.says).toBe('Thrali is on the way here.');
+
+    // And at the dockyard he is simply here.
+    const there = whoIsHere('poi_drowned_dockyard', 'field_map_lothal', 0, [resting]);
+    expect(names(there.here)).toContain('Thrali');
+  });
+
+  it('lists nobody at two places at once, on any map, at any hour', () => {
+    // **The fault itself.** Every named person, every place of theirs on the map, at dawn, noon,
+    // dusk and midnight over a week: here in at most one of them.
+    for (const map of fieldMaps) {
+      for (let day = 0; day < 7; day += 1) {
+        for (const hour of [5, 12, 19, 23]) {
+          const reported = reportFor(map.id, 'presence', day, hour);
+          const seenAt = new Map<string, string[]>();
+          for (const poiId of map.pointsOfInterest) {
+            for (const person of whoIsHere(poiId, map.id, day, reported).here) {
+              seenAt.set(person.id, [...(seenAt.get(person.id) ?? []), poiId]);
+            }
+          }
+          for (const [who, at] of seenAt) {
+            expect(at.length, `${map.id} day ${day} ${hour}:00: ${who} is at ${at.join(' and ')}`).toBe(1);
+          }
+        }
+      }
+    }
+  });
+
+  it('lets everybody be found somewhere, so no line goes out of reach', () => {
+    // Canon's playability check assumes a person at a place can be heard. Somebody who is never
+    // here anywhere would make their lines unreachable, which is a worse fault than the one fixed.
+    for (const map of fieldMaps) {
+      const belongs = new Set(map.pointsOfInterest.flatMap((p) => npcsAt(p).map((n) => n.id)));
+      const found = new Set<string>();
+      for (let day = 0; day < 6; day += 1) {
+        const reported = reportFor(map.id, 'presence', day, 23);
+        for (const poiId of map.pointsOfInterest) {
+          for (const person of whoIsHere(poiId, map.id, day, reported).here) found.add(person.id);
+        }
+      }
+      for (const who of belongs) expect(found.has(who), `${map.id}: ${who} is never anywhere`).toBe(true);
+    }
+  });
+
+  it('keeps a circuit person who is not drawn in one place a day, moving on the next', () => {
+    // The Aravali has more people with circuits than `TRAVELLERS_PER_MAP` draws. Those left over
+    // used to stand at every place of theirs at once.
+    const map = fieldMap('field_map_aravali')!;
+    const drawn = new Set(travellersOn(map.id).map((t) => t.npcId));
+    const onMap = new Set(map.pointsOfInterest);
+    const leftOver = map.pointsOfInterest
+      .flatMap((p) => npcsAt(p))
+      .filter((n, i, all) => all.findIndex((m) => m.id === n.id) === i)
+      .filter((n) => !drawn.has(n.id) && n.foundAt.filter((p) => onMap.has(p)).length >= 2);
+    expect(leftOver.length, 'nobody on the Aravali is left over -- the roster cap no longer bites').toBeGreaterThan(0);
+
+    for (const person of leftOver) {
+      const whereOn = (day: number) =>
+        person.foundAt.filter((p) => onMap.has(p) && names(whoIsHere(p, map.id, day, []).here).includes(person.name));
+      expect(whereOn(0).length, `${person.id} is in more than one place`).toBe(1);
+      expect(whereOn(0), `${person.id} never moves`).not.toEqual(whereOn(1));
+    }
+  });
+});
+
+describe('the line a place opens with', () => {
+  it('names who is here and where the others went', () => {
+    const presence = whoIsHere('poi_lothal_camp', 'field_map_lothal', 0, [
+      { npcId: 'npc_thrali', state: { resting: false, atPoi: null, boundFor: 'poi_drowned_dockyard' } }
+    ]);
+    const line = companyLine(presence)!;
+    expect(line).toMatch(/^[A-Z].* (is|are) here\./);
+    expect(line).toContain('Uma');
+    expect(line).toContain('Thrali is on the road to the Drowned Dockyard.');
+  });
+
+  it('says so when nobody is in, and says nothing where nobody belongs', () => {
+    const empty = whoIsHere('poi_drowned_dockyard', 'field_map_lothal', 0, [
+      { npcId: 'npc_thrali', state: { resting: true, atPoi: 'poi_lothal_camp', boundFor: null } }
+    ]);
+    expect(companyLine(empty)).toBe('Nobody is here just now. Thrali has stopped at the Camp in the Kilns.');
+
+    const nobody = fieldMaps
+      .flatMap((m) => m.pointsOfInterest.map((p) => ({ p, m: m.id })))
+      .find(({ p }) => npcsAt(p).length === 0);
+    expect(nobody, 'every place has somebody -- pick another fixture').toBeTruthy();
+    expect(companyLine(whoIsHere(nobody!.p, nobody!.m, 0, []))).toBeNull();
+  });
+});

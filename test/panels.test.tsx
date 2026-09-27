@@ -467,6 +467,7 @@ describe('here', () => {
 
   const place = {
     poiId: null as string | null,
+    presence: null,
     progress: emptyProgress(),
     moment: null,
     firstVisit: false,
