@@ -15,14 +15,20 @@ export interface PhaserGameProps {
   fieldMapId: string;
   /** Who is walking. Read once, like the seed: changing it must not rebuild the game. */
   characterId: string;
+  /**
+   * How far the journey has walked, from the save. **Handed back so a reload is the same day.**
+   * The save kept it for exactly this and nothing passed it on, so every reload was day nought again:
+   * the day count, the travellers' legs, the camps and the rumours all started over.
+   */
+  travelled?: number;
 }
 
-export function PhaserGame({ seed, discovered, fieldMapId, characterId }: PhaserGameProps) {
+export function PhaserGame({ seed, discovered, fieldMapId, characterId, travelled = 0 }: PhaserGameProps) {
   const container = useRef<HTMLDivElement>(null);
   // Held in a ref, not state: changing it must never trigger a render.
   const game = useRef<Phaser.Game | null>(null);
   // The first journey's data has to reach `create()`, but must not restart the scene afterwards.
-  const initial = useRef({ seed, discovered, fieldMapId, characterId });
+  const initial = useRef({ seed, discovered, fieldMapId, characterId, travelled });
 
   useEffect(() => {
     const node = container.current;
