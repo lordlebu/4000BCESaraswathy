@@ -20,7 +20,7 @@ import {
   isComplete,
   rungOf
 } from '../journey';
-import { discovery } from '../content/knowledge';
+import { discovery, offeredAt } from '../content/knowledge';
 import { poi } from '../content/places';
 import { awayLine, type Presence } from '../content/presence';
 import { PersonPortrait } from './PersonPortrait';
@@ -97,6 +97,8 @@ export function PlacePanel({
   const place = poiId ? poi(poiId) : null;
   if (!place) return null;
 
+  // Asked of canon's two lists together -- see `offeredAt` for the eighteen the place's own missed.
+  const offered = offeredAt(place.id, place.discoveries);
   const people = presence?.here ?? [];
   const away = presence ? awayLine(presence) : null;
   const sub = openSub ? place.subLocations.find((s) => s.id === openSub) : null;
@@ -182,10 +184,10 @@ export function PlacePanel({
           </div>
         ) : (
           <>
-            {place.discoveries.length > 0 && (
+            {offered.length > 0 && (
               <section className="place-section">
                 <h3>Here</h3>
-                {place.discoveries.map((id) => {
+                {offered.map((id) => {
                   const d = discovery(id);
                   if (!d) return null;
                   const seen = rungOf(progress, id) >= 0;

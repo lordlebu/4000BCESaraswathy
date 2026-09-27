@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import type { Point, World } from '../src/world/types';
 import { fieldMaps, npcsAt, poi } from '../src/content/places';
-import { discovery } from '../src/content/knowledge';
+import { discovery, offeredAt } from '../src/content/knowledge';
 import { travelCost } from '../src/content/species';
 import { wayBetween } from '../src/content/travellers';
 import { beats } from '../src/content/conversation';
@@ -85,11 +85,15 @@ function estimate(mapId: string, seed: string): Estimate {
   let presses = 0;
   let rungs = 0;
   const people = new Set<string>();
+  // A discovery found at two places is climbed once.
+  const looked = new Set<string>();
   for (const poiId of map.pointsOfInterest) {
     const place = poi(poiId);
     if (!place) continue;
     text += words(place.arrival);
-    for (const id of place.discoveries) {
+    for (const id of offeredAt(place.id, place.discoveries)) {
+      if (looked.has(id)) continue;
+      looked.add(id);
       for (const rung of discovery(id)?.rungs ?? []) {
         rungs += 1;
         presses += 1;

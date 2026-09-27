@@ -54,21 +54,22 @@ Two things the browser suite found, and what was done:
 
 `test/minutes.test.ts`, printed by `npm run simulate`. A floor, not a forecast: a nearest-first tour
 of every place at the scene's step time and each tile's cost, every word read at 200 a minute, 1.5
-seconds a press. Measured on 27 September over three seeds:
+seconds a press, each discovery counted once however many places offer it. Measured on 27
+September over eight seeds, after the fix below:
 
 | map | places | people | rungs | words | walk | read | press | total |
 |---|---|---|---|---|---|---|---|---|
-| Aravali | 12 | 6 | 0 | 1,264 | 1.9 | 6.3 | 1.8 | 10.0 |
-| Dwarka | 12 | 3 | 52 | 2,194 | 2.9 | 11.0 | 2.3 | 16.1 |
-| Lothal | 6 | 4 | 85 | 3,384 | 1.3 | 16.9 | 4.0 | 22.2 |
-| Narmada | 7 | 5 | 50 | 2,492 | 1.7 | 12.5 | 3.1 | 17.3 |
+| Aravali | 12 | 6 | 53 | 2,480 | 2.2 | 12.4 | 3.1 | 17.7 |
+| Dwarka | 12 | 3 | 55 | 2,301 | 2.4 | 11.5 | 2.4 | 16.3 |
+| Lothal | 6 | 4 | 78 | 3,198 | 1.4 | 16.0 | 3.9 | 21.3 |
+| Narmada | 7 | 5 | 55 | 2,708 | 1.8 | 13.5 | 3.2 | 18.5 |
 
-**Lothal is already past fifteen minutes before any settling is added**, almost all of it reading.
-The target in the plan assumed the maps were short; they are not. Either the target moves to about
-twenty-five minutes a map, or Lothal's diary is trimmed. That is the owner's call, and it is on the
-plan page.
+**Every map is already past fifteen minutes before any settling is added**, almost all of it
+reading. The target in the plan assumed the maps were short; they are not. Settling adds about six
+minutes, which puts the four at roughly 22 to 27. Either the target moves, or the diaries are
+trimmed. That is the owner's call, on the plan page as Q10.
 
-The Aravali's zero is a bug, found by this measurement: see below.
+Before the fix below, the same measurement gave the Aravali zero rungs and ten minutes.
 
 ## Found on the way: discoveries the place panel never offered
 
@@ -76,6 +77,8 @@ Canon attaches a discovery to a place from two sides: the place's `discoveries` 
 discovery's own `found_at`. The panel read only the first. **Eighteen discoveries, at 26 places, are
 named only in `found_at`** -- every discovery on the Aravali among them -- so they could never be
 looked at, while the Overworld, which reads `found_at`, counted them toward the map's progress.
+`offeredAt` in `content/knowledge.ts` now reads both, the place's own list first, and
+`test/offered.test.ts` fails by name if a discovery's place does not offer it.
 Canon's playability check treats `found_at` as the authority and only checks the other direction, so
 it passed. This is the cross-repo blind spot the session notes describe: both halves green, and the
 two repositories disagreeing about what a place holds.
