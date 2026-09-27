@@ -250,9 +250,14 @@ describe('two people are never one figure', () => {
     expect(outs.size, 'everybody still keeps the same hours').toBeGreaterThan(everybody.length / 2);
   });
 
-  it('never draws two walkers on one tile, on any map', () => {
+  // Twelve seeds, not the 25 this first walked: under the full suite's load 25 took 29.7 seconds
+  // against a 20-second budget. Without `untangle` the same sweep shares a tile in about one moment
+  // in seventeen, so twelve seeds still give it thousands of chances to catch the rule going.
+  const SEEDS = 12;
+
+  it('never draws two walkers on one tile, on any map', { timeout: 60_000 }, () => {
     let moments = 0;
-    for (let s = 0; s < 25; s += 1) {
+    for (let s = 0; s < SEEDS; s += 1) {
       for (const map of fieldMaps) {
         const world = built(map.id, `untangle-${s}`);
         const roster = travellersOn(map.id)
@@ -274,7 +279,7 @@ describe('two people are never one figure', () => {
         }
       }
     }
-    expect(moments).toBe(25 * fieldMaps.length * 30 * 100);
+    expect(moments).toBe(SEEDS * fieldMaps.length * 30 * 100);
   });
 
   it('steps aside onto walkable ground next to the path, and never onto the player', () => {

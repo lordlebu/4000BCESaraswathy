@@ -25,7 +25,9 @@ import {
   type Surroundings
 } from '../src/content/happenings';
 import { material } from '../src/content/making';
-import { fieldMap, fieldMaps } from '../src/content/places';
+import { fieldMap, fieldMaps, npcsAt } from '../src/content/places';
+import { rumoursOn, type Rumour } from '../src/content/rumours';
+import type { Standing } from '../src/content/standing';
 import { WOVEN_ONE_IN } from '../src/content/tiers';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
@@ -50,6 +52,23 @@ const now = (occasion: Occasion, over: Partial<Circumstance> = {}): Circumstance
 
 const rollAt = (seed: string, at: Point, salt: string): Roll => (s) => tileHash(seed, at.x, at.y, `${salt}:${s}`);
 
+const STANDING_SAMPLE: readonly Standing[] = ['stranger', 'heard-of', 'known', 'trusted'];
+
+/** One rumour of each kind per map, as `rumoursOn` would find them with nothing done yet. */
+const RUMOUR_SAMPLE: Record<string, Rumour[]> = Object.fromEntries(
+  fieldMaps.map((m) => {
+    const all = rumoursOn(m.id, {
+      reached: () => false,
+      knowsQuestion: () => false,
+      hasNews: () => true,
+      whereIs: (id) => npcsAt(m.pointsOfInterest[0]!).some((n) => n.id === id) ? m.pointsOfInterest[0]! : null,
+      flags: []
+    });
+    const kinds: Rumour['kind'][] = ['place', 'person', 'question'];
+    return [m.id, kinds.map((kind) => all.find((r) => r.kind === kind)).filter((r): r is Rumour => Boolean(r))];
+  })
+);
+
 /**
  * Every woven event the four maps can make, sampled over a spread of tiles, hours, skies and
  * shelters. Built once: it walks every map and the assertions below all read it.
@@ -67,13 +86,27 @@ const sampled: { event: GameEvent; around: Surroundings }[] = (() => {
           for (const occasion of OCCASIONS) {
             const roll = rollAt(world.seed, at, `${occasion}:${k}`);
             const poiId = occasion === 'arriving' ? built.placed[(x + y) % built.placed.length]?.poi.id : null;
-            const around = surroundingsAt(world, at, map.id, moment, roll, { poiId });
+            // Small talk only exists when the player walked up to somebody, so a spread of samples
+            // carry what the caller would compute: a standing, warm or cold, with a rumour or none.
+            const talk =
+              occasion === 'road'
+                ? {
+                    standing: STANDING_SAMPLE[(x + y + k) % STANDING_SAMPLE.length]!,
+                    warm: (x + k) % 3 !== 0,
+                    rumour: (x + y) % 2 === 0 ? (RUMOUR_SAMPLE[map.id]?.[(x + k) % 3] ?? null) : null
+                  }
+                : null;
+            const around = surroundingsAt(world, at, map.id, moment, roll, { poiId, talk });
             if (!around) continue;
             // Half the samples have already met this map's stranger, so the second meeting is
             // reachable too -- it needs one fact from the save and nothing else.
             const met = k % 2 && around.stranger ? [around.stranger.id] : [];
             // And the morning samples have sheltered them, so the chain that needs it is reached too.
             const flags = k === 0 && around.stranger ? [`sheltered:${around.stranger.id}`] : [];
+            // And some arrivals are somewhere a stranger sent them, so the rumour kept is reached.
+            if (occasion === 'arriving' && poiId && k % 2 === 0) {
+              flags.push(`told:rumour:place:${poiId}@${poiId}@${map.id}:company_carrier`);
+            }
             const c = now(occasion, {
               fieldMapId: map.id,
               shelter: occasion === 'night' ? SHELTERS[k + 1]! : null,
@@ -253,7 +286,7 @@ describe('the words live in data, and the data matches the code', () => {
   it('uses only the slots each template declares', () => {
     const bad: string[] = [];
     for (const [kind, words] of Object.entries(TEXT)) {
-      for (const text of strings([words.title, words.prose, words.choices])) {
+      for (const text of strings([words.title, words.prose, words.choices, words.lines])) {
         for (const slot of slotsIn(text)) if (!words.slots.includes(slot)) bad.push(`${kind}: {${slot}}`);
       }
     }

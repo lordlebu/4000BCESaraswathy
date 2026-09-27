@@ -1,6 +1,6 @@
 # Event painting prompts — ready to paste
 
-Thirteen paintings, one for each kind of woven event in `data/happenings.json`. **Each block below is
+Fifteen paintings, one for each kind of woven event in `data/happenings.json`. **Each block below is
 the whole prompt**: copy one, paste it into an image tool, done. The first paragraph is the shared
 style block from `docs/art-handover.md`, unchanged, so these sit beside the activity scenes; the
 second says what every event painting has to be.
@@ -63,7 +63,7 @@ shape: `size` is the width and the height follows the aspect.
 
 ## The prompts
 
-### On the road (6)
+### On the road (7)
 
 #### `woven-tracks` — Tracks across the path
 
@@ -137,6 +137,18 @@ Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - see
 Subject: Weather coming across open grassland in grey sheets, the traveller small in the middle distance with a cloak pulled up over the head, one bent tree nearby offering a little shelter.
 ```
 
+#### `woven-small-talk` — Small talk on the road
+
+Save as `assets/source/events/woven-small-talk.png`. Added 27 September 2026 with Phase 2 of the Settling In plan: walking with a stranger you have met.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: Two figures walking side by side along a dusty road in easy conversation, seen from a little behind: the traveller and a local walker with a bundle on one shoulder, who is pointing off the road across open country towards something out of frame. Late morning light, fields and a far line of trees.
+```
+
 ### At night (3)
 
 #### `woven-night-sounds` — Something beyond the lamp
@@ -175,7 +187,7 @@ Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - see
 Subject: Seen from inside a lamp-lit shelter at night: the low doorway, and outside it in the dark a woman traveller with a load set down at her feet, asking to come in. Warm light inside, blue night outside.
 ```
 
-### Arriving (2)
+### Arriving (3)
 
 #### `woven-cairn` — Stones at the edge
 
@@ -199,6 +211,18 @@ Watercolour illustration from a field naturalist's notebook, ancient South Asia,
 Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
 
 Subject: A cooking pot on three stones over a small fire at the edge of a mud-brick settlement, smoke rising straight up in still air, and a woman tending it lifting one hand to wave somebody over.
+```
+
+#### `woven-rumour-kept` — As you were told
+
+Save as `assets/source/events/woven-rumour-kept.png`. Added 27 September 2026: arriving where a stranger's rumour sent you.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: The traveller's hands holding an open field notebook with a small ink sketch of a route and a place, and beyond the page, at the end of the path, the real place just coming into view - a low ruin or a cluster of shelters - matching the sketch. Soft morning light.
 ```
 
 ### While working (2)

@@ -14,11 +14,14 @@ import { fieldMap, fieldMaps, neighboursOf, poisOn } from '../content/places';
 import { labelAnchor, nodeFor, overworldShape, viewBoxFor } from '../content/overworldMap';
 import { discoveriesAt } from '../content/knowledge';
 import { isComplete, rungOf, type Progress } from '../journey';
+import { STANDING_WORDS, standingOn } from '../content/standing';
 import { Modal } from './Modal';
 
 export interface OverworldProps {
   current: string;
   progress: Progress;
+  /** Strangers met, as the save keeps them -- one of the things a map knows you by. */
+  met: readonly string[];
   open: boolean;
   onTravel: (fieldMapId: string) => void;
   onClose: () => void;
@@ -97,7 +100,7 @@ function OverworldSketch({ current, reachable }: { current: string; reachable: s
   );
 }
 
-export function Overworld({ current, progress, open, onTravel, onClose }: OverworldProps) {
+export function Overworld({ current, progress, met, open, onTravel, onClose }: OverworldProps) {
   if (!open) return null;
 
   const here = fieldMap(current);
@@ -109,7 +112,11 @@ export function Overworld({ current, progress, open, onTravel, onClose }: Overwo
         <header className="diary-head">
           <div>
             <h2>Where to go</h2>
-            <p className="diary-sub">{here ? `You are on ${here.name}.` : 'Nowhere in particular.'}</p>
+            <p className="diary-sub">
+              {here
+                ? `You are on ${here.name}. ${STANDING_WORDS[standingOn(here.id, { finished: (id) => isComplete(progress, id), met }).standing]}.`
+                : 'Nowhere in particular.'}
+            </p>
           </div>
           <button type="button" className="diary-close" onClick={onClose}>
             Close
@@ -137,6 +144,10 @@ export function Overworld({ current, progress, open, onTravel, onClose }: Overwo
                       {s.seen === 0
                         ? 'you have not been'
                         : `${s.done} of ${s.of} understood`}
+                      {/* How the map knows you, in words and never a number -- `standing.ts`. Only
+                          once you have been: "a stranger here" says nothing about a map not seen. */}
+                      {s.seen > 0 &&
+                        ` · ${STANDING_WORDS[standingOn(m.id, { finished: (id) => isComplete(progress, id), met }).standing]}`}
                     </p>
                   </div>
                   <button type="button" onClick={() => onTravel(m.id)}>
