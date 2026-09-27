@@ -26,6 +26,7 @@ import { art } from './art';
 import { sceneFor } from './scenes';
 import { Modal } from './Modal';
 import { StrangerFace } from './StrangerFace';
+import { ProfileButton } from './Profile';
 
 export interface EventCardProps {
   event: GameEvent;
@@ -41,12 +42,17 @@ export interface EventCardProps {
   shelter?: string | null;
   /** Which painting, when there is more than one. Seeded by the caller — see `art.ts`. */
   pick?: number;
+  /**
+   * Strangers met, as the save keeps them. A face opens its portrait card by name only once the
+   * name has been learned; until then it says what they are. Empty means nobody has been met.
+   */
+  met?: readonly string[];
   /** Called once, with the choice taken and the line it writes. */
   onChoose: (choice: Choice) => void;
   onClose: () => void;
 }
 
-export function EventCard({ event, holds, shelter, pick = 0, onChoose, onClose }: EventCardProps) {
+export function EventCard({ event, holds, shelter, pick = 0, met = [], onChoose, onClose }: EventCardProps) {
   /**
    * The line the chosen option wrote, once one has been taken.
    *
@@ -85,7 +91,13 @@ export function EventCard({ event, holds, shelter, pick = 0, onChoose, onClose }
               the figure walking the map. */}
           {event.stranger ? (
             <div className="event-heading">
-              <StrangerFace stranger={event.stranger} size={40} />
+              {/* Pressed, the face opens at the size it was painted. By name only once you know it. */}
+              <ProfileButton
+                who={{ kind: 'stranger', key: event.stranger.id, known: met.includes(event.stranger.id) }}
+                name={met.includes(event.stranger.id) && event.stranger.givenName ? event.stranger.givenName : event.stranger.role}
+              >
+                <StrangerFace stranger={event.stranger} size={40} />
+              </ProfileButton>
               <h2 className="activity-title">{event.title}</h2>
             </div>
           ) : (

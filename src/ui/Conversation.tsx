@@ -27,6 +27,7 @@ import type { Satchel } from '../content/satchel';
 import { nameOf } from '../content/making';
 import { Dialogue } from './Dialogue';
 import { PersonPortrait } from './PersonPortrait';
+import { ProfileButton } from './Profile';
 
 /**
  * How large a person is drawn while they are talking.
@@ -137,7 +138,10 @@ function Person({
           not need expressions, it needs to be large, next to the words, and to move a little while
           its owner talks. */}
       <div className="person-speaking">
-        <PersonPortrait person={person} size={PORTRAIT_SIZE} speaking={talking} />
+        {/* Pressed, it opens their portrait at the size it was painted -- see `Profile.tsx`. */}
+        <ProfileButton who={{ kind: 'named', npc: person }} name={person.name}>
+          <PersonPortrait person={person} size={PORTRAIT_SIZE} speaking={talking} />
+        </ProfileButton>
         <div className="person-words">
           <h4>
             {person.name} <span className="muted">· {person.role}</span>

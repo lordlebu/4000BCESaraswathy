@@ -2498,6 +2498,40 @@ button.ghost:hover:not(:disabled) {
   font-size: 0.85rem;
 }
 
+/* A person's portrait card: the plate card, with the picture at the size portraits are painted.
+ *
+ * **256, not the plate's 384, and never more.** Portraits and stranger faces are built to 256 square
+ * by `tools/build-plates.js`; drawn larger a watercolour goes soft, which is the fading the owner
+ * asked this card to avoid. Narrower screens shrink it, never the other way. See `Profile.tsx`. */
+.profile-card-image {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 1rem 0;
+  flex-shrink: 0;
+}
+
+.profile-card-image .person-portrait {
+  width: min(256px, 100%);
+  height: auto;
+  aspect-ratio: 1 / 1;
+}
+
+/* A small portrait that opens the card: the portrait itself, with nothing drawn around it but a
+ * focus ring, so the rows it sits in look as they did. */
+.profile-open {
+  display: inline-flex;
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 4px;
+  cursor: zoom-in;
+}
+
+.profile-open:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
 /* ── Reachable without a mouse ──────────────────────────────────────────────────────────────
  *
  * There was no focus state anywhere in this file, which means a keyboard user could tab

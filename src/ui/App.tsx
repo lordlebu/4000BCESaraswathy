@@ -1667,6 +1667,7 @@ export function App() {
           />
         }
         progress={progress}
+        strangers={metStrangers.current}
         open={surface === 'people'}
         onClose={() => dispatch({ type: 'close' })}
       />
@@ -1790,6 +1791,7 @@ export function App() {
         <EventCard
           event={happening.event}
           shelter={happening.shelter}
+          met={metStrangers.current}
           holds={[...progress.words, ...Object.keys(progress.rungs), ...progress.recipes]}
           onChoose={(choice: Choice) => {
             // Through the same door a conversation uses. An event grants the same kinds of thing a
