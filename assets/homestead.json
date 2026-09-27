@@ -1,0 +1,27 @@
+{
+  "stage": {
+    "width": 128,
+    "height": 256
+  },
+  "stages": [
+    {
+      "name": "windmill-stage-1",
+      "width": 128,
+      "height": 121
+    },
+    {
+      "name": "windmill-stage-2",
+      "width": 114,
+      "height": 193
+    }
+  ],
+  "greenhouse": {
+    "width": 256,
+    "height": 192,
+    "drawn": {
+      "width": 256,
+      "height": 110
+    }
+  },
+  "note": "Written by tools/build-homestead.js. Do not hand-edit -- rerun the builder."
+}

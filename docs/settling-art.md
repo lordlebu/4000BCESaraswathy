@@ -139,6 +139,27 @@ Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - see
 Subject: Evening in a new small settlement among trees: a pale ceramic windmill tower with turning sails rising above the forest canopy, a glasshouse glowing warm from inside beside it, and a few people carrying bundles and a rolled mat along a path towards them, seen from behind and at a distance. Lamps being lit. Warm and quiet, a sense of arriving home.
 ```
 
+## What arrived — 27 September 2026
+
+**All six.** None had a fault that needed more than a crop, so none was sent back.
+
+- **The windmill stages** arrived on real transparency rather than magenta, which the builder keys
+  the same way. `tools/build-homestead.js` gives both one scale -- the one that fits the taller
+  stage -- so the foundation comes out 121 pixels tall, the half-built tower 193, and the finished
+  tower after them the full 256. Fitted each on its own, the mill would have shrunk as it was built.
+- **The greenhouse** arrived on an uneven magenta (234,13,238 to 241,18,240), keyed on hue; 256 × 110
+  in its 256 × 192 cell.
+- **`settle-negotiation`** carried a painter's signature in the bottom-left corner, which counts as
+  text; cropped above it. **`settle-home`** arrived at 1520 × 1150 and the builder dropped ten
+  pixels to make 4:3. **`settle-ground`** built as it came.
+
+```bash
+node tools/build-homestead.js
+node tools/build-plates.js --events --force --only=settle-ground
+node tools/build-plates.js --events --force --only=settle-negotiation --crop=64,0,640
+node tools/build-plates.js --events --force --only=settle-home
+```
+
 ## After the art arrives
 
 Drop the files in `assets/source/dump/`. The windmill stages build with the same keying and scaling
