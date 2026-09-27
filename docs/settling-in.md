@@ -50,6 +50,30 @@ Two things the browser suite found, and what was done:
   landscape phone (25% to 21%, against a floor of 21). Moving who is here to the top of the panel and
   folding the away news into one line under it costs nothing when everybody is in.
 
+## Phase 2: standing, small talk and rumours — built on `ci/nightly-minutes`
+
+The owner asked for Phase 2 on the same branch as the morning play-time workflow.
+
+**Standing** (`content/standing.ts`) is four words -- a stranger here, heard of, known, trusted --
+read off the save and never stored. Helping somebody on the map is what moves it; understanding four
+things there counts too. The Overworld says it for the map you are on and each you have been to.
+Some people do not care until you affect their lives: a stranger is warm once the map knows you, or
+once you have helped somebody of their own people anywhere (`warmTo`).
+
+**Small talk.** The first walk with a stranger is still the company card, which is where you learn
+their name. After that, walking with them opens `small-talk`: a greeting by your standing, and from a
+warm stranger, a rumour. A cold stranger is civil and brief.
+
+**Rumours** (`content/rumours.ts`) are always true of the world and never knowledge: a place you have
+not reached, a named person with news and where they are, a question somebody on this map is asking.
+Asking the way leaves `heard:` and `told:` flags, and reaching the place a rumour named opens
+`rumour-kept`, once, before anything else on that arrival. That is the owner's "conversation that
+generates events"; Phase 3's camps become rumours of the same kind.
+
+**Left for the lore repo:** named people noticing your standing, which is a line or two each and
+canon's to write. And a gap found while testing: **no Aravali discovery helps anybody on the
+Aravali**, so it can be "known" but never "trusted", and its ending gathers nobody.
+
 ## How long a map takes
 
 `test/minutes.test.ts`, printed by `npm run simulate`, and run every morning at 06:00 IST by
