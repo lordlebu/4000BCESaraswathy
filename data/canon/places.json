@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.33.0",
+  "canon_version": "2.34.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -707,7 +707,8 @@
       "description": "Good flat ground, well watered, and nothing on it.",
       "arrival": "Eight acres of level silt beside a channel that never runs dry, and not a stem on any of it. The camp plants here every spring out of stubbornness and takes nothing off it. Something came up out of the ground during the Shattering and has not gone back down.",
       "npcs": [
-        "npc_kunch"
+        "npc_kunch",
+        "npc_hasme"
       ]
     },
     {
@@ -1272,7 +1273,10 @@
         "settlement_lothal"
       ],
       "description": "A grid of brick chambers filled to the brim with silt, and something growing out of them.",
-      "arrival": "The granary held the city's grain on raised platforms so the flood could not reach it. The flood has since reached it. What is remarkable is not that the chambers filled but that the crop came back on its own, red and thin, growing out of the tops of the walls."
+      "arrival": "The granary held the city's grain on raised platforms so the flood could not reach it. The flood has since reached it. What is remarkable is not that the chambers filled but that the crop came back on its own, red and thin, growing out of the tops of the walls.",
+      "npcs": [
+        "npc_drel"
+      ]
     },
     {
       "id": "poi_sunk_cutting",
@@ -1603,6 +1607,76 @@
         "epoch_post_cataclysm"
       ],
       "sex": "male"
+    },
+    {
+      "id": "npc_drel",
+      "type": "npc",
+      "name": "Drel",
+      "role": "rice-cutter, dada of the granary",
+      "found_at": [
+        "poi_silted_granary"
+      ],
+      "language": "kia",
+      "would_settle": false,
+      "knows": [
+        "discovery_red_rice_survival"
+      ],
+      "lines": [
+        {
+          "text": "Mind the walls. -- Not for your sake. For the rice. It grows in the ossu, the thin layer the flood left on top, and if you knock that off it there is nothing under it but brick.",
+          "gives": [
+            "word_kia_ossu"
+          ]
+        },
+        {
+          "text": "Every autumn I cut it and every autumn it comes back. Nobody planted it. I have stopped asking who did."
+        },
+        {
+          "text": "You have been down the channel. I can see it on your feet. -- Six feet of fall, and I have been cutting rice off the top of it for twenty years like a goat.",
+          "requires": [
+            "discovery_granary_fall"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "sex": "male"
+    },
+    {
+      "id": "npc_hasme",
+      "type": "npc",
+      "name": "Hasme",
+      "role": "morol of the camp, keeper of the eastern field",
+      "found_at": [
+        "poi_eastern_field"
+      ],
+      "language": "kia",
+      "would_settle": true,
+      "knows": [
+        "discovery_poisoned_ground"
+      ],
+      "lines": [
+        {
+          "text": "You are looking at the crust. Everybody looks at the crust. My mother said it was the Shattering's, and that the ground would come back when it chose. -- Eight acres, and it has not chosen. Ask anybody why and they will say poisoned, and not one of them could tell you what by.",
+          "gives": [
+            "question_eastern_field"
+          ]
+        },
+        {
+          "text": "I am the one they ask when a thing has to be decided about ground. Nobody has asked me about this field in a long time. Nobody wants it."
+        },
+        {
+          "text": "Rice? On the granary walls? -- I have walked past those walls every day of my life. Show me.",
+          "requires": [
+            "discovery_red_rice_survival"
+          ]
+        }
+      ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ],
+      "sex": "female"
     },
     {
       "id": "npc_hesh",
@@ -2414,6 +2488,178 @@
           ]
         }
       ],
+      "epochs": [
+        "epoch_post_cataclysm"
+      ]
+    }
+  ],
+  "homesteads": [
+    {
+      "id": "homestead_lothal",
+      "type": "homestead",
+      "name": "The mill among the trees",
+      "field_map": "field_map_lothal",
+      "grounds": [
+        {
+          "id": "ground_eastern_field",
+          "at": "poi_eastern_field",
+          "name": "The Eastern Field",
+          "held_by": "npc_hasme",
+          "prose": "Eight acres of good silt beside permanent water, trees standing close around three sides, and nothing growing on it but a white crust after a dry week. Hasme keeps it. Nobody has asked her for it in a generation, because nobody has wanted it.",
+          "worries": [
+            {
+              "id": "poisoned",
+              "says": "It is poisoned. My mother sowed it and my aunts sowed it, and it took every seed and gave back salt. You want to build on ground that eats what you put in it.",
+              "hint": "She is not frightened of the field. She is frightened of being told again that it will grow, by somebody who has not looked at why it did not.",
+              "not_that": "That is a fine thing, and it is not the field. Tell me about the field.",
+              "eased": "Salt. Coming up from underneath. -- And the red rice on the granary walls does not mind it. Nobody told me that in forty years. Go on.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_poisoned_ground"
+                },
+                {
+                  "approach": "show",
+                  "discovery": "discovery_red_rice_survival"
+                }
+              ]
+            },
+            {
+              "id": "moving",
+              "says": "And then the camp moves. Every third winter we move, because the stores run out before the spring does. Nobody builds for a camp that leaves.",
+              "hint": "She is counting winters the way Bekh counts stores. Somebody who knew why the camp moves could tell her whether it still has to.",
+              "not_that": "That does not keep anybody fed in the fourth month.",
+              "eased": "Not moving in the spring. Bekh said so, and I did not believe her, and now you have it written down.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_winter_line"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_bekh"
+                }
+              ]
+            },
+            {
+              "id": "stranger",
+              "says": "And you are not of the delta. I do not say that against you. I say it because the field will still be here when you have gone on.",
+              "hint": "She wants to know you will be spoken for when you are not standing here: by the delta's own words, or by one of the delta's own people.",
+              "not_that": "That is yours. I asked what is ours.",
+              "eased": "Well. Somebody here will answer for you, then. That is all I wanted.",
+              "met_by": [
+                {
+                  "approach": "tongue"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_thrali"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_uma"
+                }
+              ]
+            }
+          ],
+          "agrees": "Build it, then. Put the mill where the trees are, so the wind comes over them clean, and sow the red rice first. If it does nothing for three years I shall say I told you so, and I shall help you cut it anyway."
+        },
+        {
+          "id": "ground_granary_edge",
+          "at": "poi_silted_granary",
+          "name": "The granary's edge",
+          "held_by": "npc_drel",
+          "prose": "Dry ground along the granary's north wall, above the silt, where the stone channel comes in. Drel cuts the red rice off the walls every autumn and has come to think of the whole building as his.",
+          "worries": [
+            {
+              "id": "rice",
+              "says": "This rice is mine to cut. I cut it every autumn. You build here and every fool in the camp comes to help themselves.",
+              "hint": "He is not greedy so much as afraid of there being too little. Somebody who knew where else it would grow would take the fear out of it.",
+              "not_that": "That does not put rice in my basket.",
+              "eased": "It will grow in the eastern field? In salt? -- Then there is enough for the fools as well. Fine.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_red_rice_survival"
+                },
+                {
+                  "approach": "vouch",
+                  "person": "npc_bekh"
+                }
+              ]
+            },
+            {
+              "id": "walls",
+              "says": "And the walls. The granary came down once. Put a mill against it and it comes down again, on top of my rice.",
+              "hint": "He thinks the granary fell. Somebody who had followed the old channel through it would know what actually stopped.",
+              "not_that": "Walls do not care about that.",
+              "eased": "It did not fall. It silted. -- The channel still runs. I have heard it and thought it was the marsh. Build your mill, then, and clear the north chamber while you are about it.",
+              "met_by": [
+                {
+                  "approach": "show",
+                  "discovery": "discovery_granary_fall"
+                }
+              ]
+            }
+          ],
+          "agrees": "Go on, then. Where the channel comes in. And the first sack off the new mill is mine."
+        }
+      ],
+      "stages": [
+        {
+          "id": "foundation",
+          "name": "Lay the foundation",
+          "needs": [
+            {
+              "id": "material_river_clay",
+              "count": 4
+            },
+            {
+              "id": "material_reed_fibre",
+              "count": 3
+            }
+          ],
+          "backers": 1,
+          "prose": "A ring of fired clay blocks, knee-high, with the first course of the wall begun on it, and a scaffold of poles lashed round it. Somebody you helped carried half the clay and would not hear of being thanked."
+        },
+        {
+          "id": "tower",
+          "name": "Raise the tower",
+          "needs": [
+            {
+              "id": "material_mangrove_pole",
+              "count": 3
+            },
+            {
+              "id": "item_reed_rope",
+              "count": 1
+            }
+          ],
+          "backers": 2,
+          "prose": "The tower is above the trees now, still in its scaffolding, a hoist at the top lifting one block at a time. From the top course you can see the camp's smoke and the line of the channel, and which way the wind comes over the canopy."
+        },
+        {
+          "id": "sails",
+          "name": "Hang the sails, and sow the rice",
+          "needs": [
+            {
+              "id": "material_river_clay",
+              "count": 3
+            },
+            {
+              "id": "material_bamboo_cane",
+              "count": 3
+            },
+            {
+              "id": "material_delta_rice",
+              "count": 3
+            }
+          ],
+          "backers": 2,
+          "prose": "Four sails of fired clay on bamboo spars, and they turned the first afternoon. Beside the mill, a glasshouse of salt-glass panes over the seedlings, and the first red rice from the granary walls in the ground below it."
+        }
+      ],
+      "settled": "They came along the path at evening with bundles and a rolled mat, and lit the lamps. Nobody made a speech. The mill turned over the trees, and the glasshouse was warm inside, and it was, without anybody deciding it, a place people lived.",
       "epochs": [
         "epoch_post_cataclysm"
       ]

@@ -82,6 +82,8 @@ const TOOLS: [string[], string][] = [
   [['well-keeper'], 'M20 8v3M17 14a3.5 3.5 0 1 0 7 0 3.5 3.5 0 1 0-7 0M18.5 14a2 2 0 1 0 4 0 2 2 0 1 0-4 0'],
   // A bone-picker's sieve, seen face on.
   [['bone-picker'], 'M16 8h8v9h-8zM19 8v9M22 8v9M16 11h8M16 14h8'],
+  // A rice-cutter's sickle: the curved blade and its short handle.
+  [['rice-cutter', 'cutter'], 'M16 9a6 6 0 0 1 8 5M21 12l-4 9'],
   // A tally of four generations, which is what a custodian with nothing to guard actually keeps.
   [['keeper', 'customs'], 'M17 7v13M20 7v13M23 7v13M15 13h10'],
   // A scavenger's pry bar, bent at the working end. Odri lifts rail chairs out of a forest floor

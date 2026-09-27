@@ -107,6 +107,12 @@ const COVERAGE: Record<string, Coverage> = {
     adapted: ['id', 'title', 'occasion', 'field_maps', 'at', 'requires', 'prose', 'choices'],
     skipped: [...EDITORIAL]
   },
+  'places.homesteads': {
+    // What the player may build on a map, adapted by `homesteads` in `src/content/homestead.ts`.
+    // Grounds, worries and stages are read whole; their fields are the settling loop's.
+    adapted: ['id', 'name', 'field_map', 'grounds', 'stages', 'settled'],
+    skipped: [...EDITORIAL]
+  },
   'places.regions': {
     // Only `bestiary_region` is read, to recover a species' region from its habitats.
     adapted: ['id', 'bestiary_region'],
