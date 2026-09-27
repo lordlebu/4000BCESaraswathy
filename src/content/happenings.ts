@@ -61,6 +61,7 @@ import { rendezvousPick } from '../world/rng';
 import { givenNameFor, travellersOn } from './travellers';
 import type { Standing } from './standing';
 import { rumourAt, type Rumour } from './rumours';
+import type { Encampment } from './encampments';
 
 /** A seeded roll, as `eventNow` takes it: the same salt always gives the same number. */
 export type Roll = (salt: string) => number;
@@ -93,6 +94,11 @@ export interface Surroundings {
    * with somebody -- small talk is asked for, never rationed onto the road.
    */
   talk: Talk | null;
+  /**
+   * The camp the player has walked up to, when there is one. Null everywhere else -- a camp's
+   * scene is asked for by walking up to it, never rationed onto an arrival. See `encampments.ts`.
+   */
+  camp: Encampment | null;
 }
 
 /** See `Surroundings.talk`. Built by the caller from `standing.ts` and `rumours.ts`. */
@@ -120,6 +126,7 @@ export function surroundingsAt(
     taken?: readonly string[];
     strangerId?: string | null;
     talk?: Talk | null;
+    camp?: Encampment | null;
   } = {}
 ): Surroundings | null {
   const tile = world.tiles[at.y]?.[at.x];
@@ -153,7 +160,8 @@ export function surroundingsAt(
         }
       : null,
     taken: extra.taken ?? [],
-    talk: extra.talk ?? null
+    talk: extra.talk ?? null,
+    camp: extra.camp ?? null
   };
 }
 
@@ -448,7 +456,8 @@ const smallTalk: Template = ({ stranger, talk, biome }, _roll, now) => {
     }
   );
   if (!rumour) return event;
-  const said = fill(pick(words.lines?.[rumour.kind] ?? '', rumour.person ? 'someone' : 'nobody'), slots);
+  const variant = rumour.kind === 'camp' ? rumour.campKind : rumour.person ? 'someone' : 'nobody';
+  const said = fill(pick(words.lines?.[rumour.kind] ?? '', variant), slots);
   return { ...event, prose: `${event.prose} ${said}` };
 };
 
@@ -471,6 +480,36 @@ const rumourKept: Template = ({ place }, _roll, now) => {
   return woven('arriving', 'rumour-kept', told.rumourId, { name, place: placeName(place) }, [{ id: 'note' }, { id: 'look' }], {
     variant: kind
   });
+};
+
+/**
+ * Walking up to a camp: adventurers, a dacoit band, pilgrims or a drovers' fold.
+ *
+ * Once a camp, and asked for by walking up to it. **Every choice is takeable and none is worse**:
+ * dacoits are people with wants, on the owner's ruling -- they take the salt carriers' toll at the
+ * ford, not the traveller's -- and what a camp hands over is small and freely given.
+ */
+const campScene: Template = ({ camp, biome, taken }, roll, now) => {
+  if (!camp) return null;
+  if (now.seen.includes(`woven:camp:${camp.id}`)) return null;
+  const near = camp.near ? poi(camp.near) : null;
+  const common = droppable(biome, taken);
+  const gift = camp.kind === 'drovers' ? 'material_goat_hair' : (common.length > 0 ? common[roll('camp-gift') % common.length]!.id : null);
+  const giftName = gift ? lower(material(gift)?.name ?? 'goat hair') : '';
+  const choices: ChoiceSpec[] =
+    camp.kind === 'adventurers' || camp.kind === 'pilgrims'
+      ? [{ id: 'sit', eases: COMPANY_EASES }, gift ? { id: 'ask', gives: [{ id: gift, n: 1 }] } : { id: 'ask' }]
+      : camp.kind === 'dacoits'
+        ? [{ id: 'talk' }, { id: 'share', eases: COMPANY_EASES }]
+        : [{ id: 'help', gives: [{ id: 'material_goat_hair', n: 1 }] }, { id: 'rest', eases: COMPANY_EASES }];
+  return woven(
+    'arriving',
+    'camp',
+    camp.id,
+    { place: near ? placeName(near) : 'the last place', ground: ground(biome), material: giftName || 'goat hair' },
+    choices,
+    { variant: camp.kind }
+  );
 };
 
 const weather: Template = ({ moment, biome, flora }) => {
@@ -610,6 +649,7 @@ export const TEMPLATES: Readonly<Record<Occasion, readonly { kind: string; make:
     { kind: 'knock', make: knock }
   ],
   arriving: [
+    { kind: 'camp', make: campScene },
     { kind: 'rumour-kept', make: rumourKept },
     { kind: 'cairn', make: cairn },
     { kind: 'cookfire', make: cookfire }
@@ -744,5 +784,9 @@ export function happeningNow(
   }
   const could = wovenFor(now, around, roll, force?.kind, force?.asked ?? false);
   if (could.length === 0) return null;
+  // **Asked for is chosen, not picked.** The player walked up to this camp or this stranger; there
+  // is nothing to weigh it against, and a kind the road never rations -- a camp's weight is nought --
+  // would otherwise lose a weighted pick against nothing and never open.
+  if (force?.asked) return could[0]!;
   return pickWoven(could, now, roll);
 }

@@ -16,7 +16,7 @@
 import { fieldQuestions } from './knowledge';
 import { fieldMap, npc, npcsAt, poi } from './places';
 
-export type RumourKind = 'place' | 'person' | 'question';
+export type RumourKind = 'place' | 'person' | 'question' | 'camp';
 
 export interface Rumour {
   /** `rumour:<kind>:<subject>`. What the `heard:` and `told:` flags carry. */
@@ -27,6 +27,8 @@ export interface Rumour {
   /** The place's name mid-sentence, and the person it is about when it is about somebody. */
   place: string;
   person: string | null;
+  /** For a camp, which kind of people are camped: the variant the line is told in. */
+  campKind?: string;
 }
 
 export interface RumourFacts {
@@ -40,6 +42,11 @@ export interface RumourFacts {
   whereIs: (npcId: string) => string | null;
   /** Flags the journey carries, for the rumours already heard. */
   flags: readonly string[];
+  /**
+   * The camp standing on this map today, if any (`encampments.ts`). While it stands the road talks
+   * about it, and the rumour points at the nearest place, which is where you would start looking.
+   */
+  camp?: { id: string; kind: string; near: string | null } | null;
 }
 
 const placeName = (poiId: string): string => (poi(poiId)?.name ?? 'somewhere').replace(/^The /, 'the ');
@@ -88,6 +95,17 @@ export function rumoursOn(fieldMapId: string, facts: RumourFacts): Rumour[] {
       poiId: q.raisedAt,
       place: placeName(q.raisedAt),
       person: q.raisedBy ? (npc(q.raisedBy)?.name ?? null) : null
+    });
+  }
+
+  if (facts.camp?.near && here.has(facts.camp.near)) {
+    out.push({
+      id: `rumour:camp:${facts.camp.id}`,
+      kind: 'camp',
+      poiId: facts.camp.near,
+      place: placeName(facts.camp.near),
+      person: null,
+      campKind: facts.camp.kind
     });
   }
 

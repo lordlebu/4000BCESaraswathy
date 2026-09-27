@@ -83,8 +83,9 @@ import {
   wandererMarkerKey
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
-import { BLADE_PERIOD, DUGOUT_VIEWS, ROW_SLOT, depthFor, dugoutFor, rowAtFoot, type DugoutView, type Edge } from '../frames';
+import { BLADE_PERIOD, DUGOUT_VIEWS, FIRST_YURT, ROW_SLOT, depthFor, dugoutFor, placeFrame, rowAtFoot, type DugoutView, type Edge } from '../frames';
 import { buildingTiles } from '../../content/homestead';
+import { encampmentOn } from '../../content/encampments';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 
 /**
@@ -467,6 +468,8 @@ export class WorldScene extends Phaser.Scene {
   /** What the homestead draws, and what React last asked for. See `drawHomestead`. */
   private homesteadSprites: Phaser.GameObjects.Image[] = [];
   private homesteadWanted: UiToGame['homestead-changed'] = { poiId: null, stage: 0 };
+  /** Today's camp, as drawn: which one, where, and its two sprites. See `drawCamp`. */
+  private camp: { id: string; key: string; sprites: Phaser.GameObjects.Image[] } | null = null;
   /** The mill's wheel, and anything else that turns on an index rather than a toggle. */
   private spinning: {
     sprite: Phaser.GameObjects.Image;
@@ -634,6 +637,7 @@ export class WorldScene extends Phaser.Scene {
     this.spinning = [];
     this.homesteadSprites = [];
     this.homesteadWanted = { poiId: null, stage: 0 };
+    this.camp = null;
     this.falls = [];
     this.queuedPath = [];
     this.moving = false;
@@ -1732,6 +1736,45 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Today's camp, if one stands: a felt tent and a fire ring on its tile, hidden until the fog lifts.
+   *
+   * Asked of `encampments.ts` with the scene's own day, so nothing crosses the seam: where a camp is
+   * belongs to the world, like a traveller's position. Drawn from the hut sheet's yurt and the travel
+   * node's cold fire circle until camp art exists -- see `docs/event-prompts.md`, `woven-camp`.
+   */
+  private drawCamp(): void {
+    if (!this.built) return;
+    const places = this.built.placed.map((p) => ({ poiId: p.poi.id, at: p.at }));
+    const today = encampmentOn(this.world, this.built.fieldMap.id, places, this.dayOfJourney());
+    if (this.camp && this.camp.id !== today?.id) {
+      for (const s of this.camp.sprites) s.destroy();
+      this.camp = null;
+    }
+    if (today && !this.camp) {
+      const x = today.at.x * TILE_SIZE + TILE_SIZE / 2;
+      const y = today.at.y * TILE_SIZE + TILE_SIZE;
+      const ring = placeFrame('', 'travel_node');
+      const sprites: Phaser.GameObjects.Image[] = [];
+      if (ring !== null) {
+        sprites.push(
+          this.add.image(x + TILE_SIZE * 0.2, y, SHEET_KEY.places, ring).setOrigin(0.5, 1).setScale(0.6)
+            .setDepth(depthFor(today.at.y, ROW_SLOT.marker))
+        );
+      }
+      sprites.push(
+        this.add.image(x - TILE_SIZE * 0.15, y, SHEET_KEY.huts, FIRST_YURT).setOrigin(0.5, 1)
+          .setDepth(depthFor(today.at.y, ROW_SLOT.marker) + 1)
+      );
+      sprites.forEach((s) => s.setName(`camp:${today.kind}`));
+      this.camp = { id: today.id, key: `${today.at.x},${today.at.y}`, sprites };
+    }
+    if (this.camp) {
+      const seen = this.discovered.has(this.camp.key);
+      for (const s of this.camp.sprites) s.setVisible(seen);
+    }
+  }
+
   /** Who is at each place, from React. Drawn at once and kept for the next redraw. */
   private onPeopleAtPlaces = ({ places }: UiToGame['people-at-places']): void => {
     this.pipsWanted = places;
@@ -2239,6 +2282,14 @@ export class WorldScene extends Phaser.Scene {
     // five recorded instances -- and a Node test can prove every rule in `travellers.ts` while the
     // scene never calls any of them. `e2e/road-company.spec.ts` reads this and would fail the day
     // `createTravellers` stopped being called, which no other check could notice.
+    // Today's camp, for `e2e/camps.spec.ts`: its kind and tile, whether it shows, and -- for a spec
+    // that has to find a day with one -- the camp any day would have.
+    (window as unknown as { __camp?: (day?: number) => unknown }).__camp = (day?: number) => {
+      const places = this.built.placed.map((p) => ({ poiId: p.poi.id, at: p.at }));
+      const c = encampmentOn(this.world, this.built.fieldMap.id, places, day ?? this.dayOfJourney());
+      return c ? { ...c, visible: day === undefined ? (this.camp?.sprites[0]?.visible ?? false) : null } : null;
+    };
+
     // What the homestead is drawing, for `e2e/homestead.spec.ts`: the sprites by name.
     (window as unknown as { __homestead?: () => string[] }).__homestead = () =>
       this.homesteadSprites.map((s) => s.name);
@@ -2782,6 +2833,9 @@ export class WorldScene extends Phaser.Scene {
       this.setFog(x!, y!, FOG_REMEMBERED, true);
     }
     this.visible = nowVisible;
+
+    // A camp is drawn for the day it is, and shown once its tile is known.
+    this.drawCamp();
 
     // A lamp is lit once its tile is known.
     for (const g of this.glows) if (!g.sprite.visible && this.discovered.has(g.key)) g.sprite.setVisible(true);

@@ -28,6 +28,7 @@ import { material } from '../src/content/making';
 import { fieldMap, fieldMaps, npcsAt } from '../src/content/places';
 import { rumoursOn, type Rumour } from '../src/content/rumours';
 import type { Standing } from '../src/content/standing';
+import { CAMP_KINDS } from '../src/content/encampments';
 import { WOVEN_ONE_IN } from '../src/content/tiers';
 import { DEFAULT_SEED } from '../src/ui/seed';
 
@@ -96,7 +97,19 @@ const sampled: { event: GameEvent; around: Surroundings }[] = (() => {
                     rumour: (x + y) % 2 === 0 ? (RUMOUR_SAMPLE[map.id]?.[(x + k) % 3] ?? null) : null
                   }
                 : null;
-            const around = surroundingsAt(world, at, map.id, moment, roll, { poiId, talk });
+            // And some arrivals are walking up to a camp, one of each kind across the samples.
+            const camp =
+              occasion === 'arriving' && (x + y) % 3 === 0
+                ? {
+                    id: `${map.id}:sample-${x}-${y}`,
+                    kind: CAMP_KINDS[(x + y + k) % CAMP_KINDS.length]!,
+                    at,
+                    from: 1,
+                    to: 4,
+                    near: built.placed[0]?.poi.id ?? null
+                  }
+                : null;
+            const around = surroundingsAt(world, at, map.id, moment, roll, { poiId, talk, camp });
             if (!around) continue;
             // Half the samples have already met this map's stranger, so the second meeting is
             // reachable too -- it needs one fact from the save and nothing else.

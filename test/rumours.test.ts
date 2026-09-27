@@ -128,3 +128,21 @@ describe('small talk and the rumour it passes on', () => {
     expect(wovenFor(arriving(), arriveAt(elsewhere), roll, 'rumour-kept', true)).toEqual([]);
   });
 });
+
+describe('a camp is talked about while it stands', () => {
+  it('points at the nearest place, in the words for its kind', () => {
+    const camp = { id: 'field_map_lothal:3', kind: 'drovers', near: 'poi_marsh_shrine' };
+    const all = rumoursOn('field_map_lothal', fresh({ camp }));
+    const r = all.find((x) => x.kind === 'camp')!;
+    expect(r).toEqual({
+      id: 'rumour:camp:field_map_lothal:3',
+      kind: 'camp',
+      poiId: 'poi_marsh_shrine',
+      place: 'the Marsh Shrine',
+      person: null,
+      campKind: 'drovers'
+    });
+    expect(rumoursOn('field_map_lothal', fresh({ camp: null })).some((x) => x.kind === 'camp')).toBe(false);
+    expect(rumoursOn('field_map_lothal', fresh({ camp, flags: [heardFlag(r.id)] })).some((x) => x.kind === 'camp')).toBe(false);
+  });
+});
