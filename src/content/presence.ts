@@ -112,30 +112,15 @@ export function whoIsHere(
   return { here, away };
 }
 
-/** "Uma", "Uma and Bekh", "Uma, Bekh and Kunch". */
-function listed(names: readonly string[]): string {
-  if (names.length <= 1) return names[0] ?? '';
-  return `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
-}
-
 /**
- * The line a place opens with: who is here, and where the others went.
+ * Where the people who belong here have gone, as one line under the list of who is here.
  *
- * One sentence for the people present and one for each who is away, so walking in tells you who to
- * talk to and where to find the rest. Null when nobody belongs to this place at all -- a place
- * with no people is described by its prose, and "Nobody is here" would suggest somebody should be.
+ * "Thrali is on the road to the Drowned Dockyard." Null when everybody is in. One line rather than
+ * a second list, because the place panel is read in a dock that does not grow: measured on a
+ * landscape phone, a separate line and list took the share of the place on screen from 25% to 21%.
  */
-export function companyLine(presence: Presence): string | null {
-  const { here, away } = presence;
-  if (here.length === 0 && away.length === 0) return null;
-  const parts: string[] = [];
-  if (here.length > 0) {
-    parts.push(`${listed(here.map((n) => n.name))} ${here.length === 1 ? 'is' : 'are'} here.`);
-  } else {
-    parts.push('Nobody is here just now.');
-  }
-  for (const a of away) parts.push(a.says);
-  return parts.join(' ');
+export function awayLine(presence: Presence): string | null {
+  return presence.away.length > 0 ? presence.away.map((a) => a.says).join(' ') : null;
 }
 
 /** Somebody on the road the player can walk up to, as the action rail offers them. */
@@ -178,4 +163,33 @@ export function roadTalk(
     label: traveller.npcId ? `Talk to ${who}` : `Walk with ${who}`,
     blocked: first.beside ? null : `${Who} is on the road nearby. Walk up beside them.`
   };
+}
+
+/** Who is at one place, as the map marks it: a pip each, brighter for somebody with news. */
+export interface PlaceMark {
+  poiId: string;
+  people: { npcId: string; fresh: boolean }[];
+}
+
+/**
+ * Who is at every place on the map, for the marks drawn over them.
+ *
+ * **So a player can see from the road where people are.** The map draws nobody standing at a place
+ * -- they would stand on the roof -- so without these the only way to find somebody was to walk into
+ * every place in turn. `fresh` is the caller's answer to "has this person something new to say",
+ * which is `hasSomethingNew` in `journey.ts`; passed in so this module need not hold a diary.
+ * Places with nobody in are left out.
+ */
+export function peopleAtPlaces(
+  fieldMapId: string,
+  day: number,
+  reported: readonly Reported[],
+  fresh: (npcId: string) => boolean
+): PlaceMark[] {
+  const out: PlaceMark[] = [];
+  for (const poiId of fieldMap(fieldMapId)?.pointsOfInterest ?? []) {
+    const here = whoIsHere(poiId, fieldMapId, day, reported).here;
+    if (here.length > 0) out.push({ poiId, people: here.map((n) => ({ npcId: n.id, fresh: fresh(n.id) })) });
+  }
+  return out;
 }

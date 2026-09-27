@@ -4,9 +4,9 @@
 // look closer at something, listen to whoever is here, go deeper into the place — happens on
 // this panel, and every one of those is a call into `journey.ts` rather than a rule restated.
 //
-// The three things it shows are deliberately in this order: what is here to look at, who is
-// here to talk to, and what is further in. That is the order a person arriving somewhere
-// actually works through it.
+// The things it shows are deliberately in this order: who is here, what is here to look at, and
+// what is further in. People came second until play showed a player walking in could not tell who
+// was there -- the map draws nobody at a place, so this panel is the only place they are.
 
 import { useState } from 'react';
 import {
@@ -22,7 +22,7 @@ import {
 } from '../journey';
 import { discovery } from '../content/knowledge';
 import { poi } from '../content/places';
-import { companyLine, type Presence } from '../content/presence';
+import { awayLine, type Presence } from '../content/presence';
 import { PersonPortrait } from './PersonPortrait';
 import { placeArt } from './places';
 import { StationBoard } from './StationBoard';
@@ -98,8 +98,7 @@ export function PlacePanel({
   if (!place) return null;
 
   const people = presence?.here ?? [];
-  const elsewhere = presence?.away ?? [];
-  const company = presence ? companyLine(presence) : null;
+  const away = presence ? awayLine(presence) : null;
   const sub = openSub ? place.subLocations.find((s) => s.id === openSub) : null;
 
   // **No veil.** This used to draw its own full-screen wrapper and position itself above the field
@@ -129,9 +128,35 @@ export function PlacePanel({
           </button>
         </header>
 
-        {/* **Who is here, first.** The map hides anybody who has stopped at a place, so this line is
-            how walking in tells you who to talk to -- and where to find whoever is not here. */}
-        {company && <p className="place-company">{company}</p>}
+        {/* **Who is here, first.** Reported from play: walking into a place, a player could not tell
+            who was in it. The map draws nobody standing at a place, so this is where they are, with
+            their faces, before the prose -- and one line under them says where anybody else who
+            belongs here has gone. Not inside a sub-location, which has its own description. */}
+        {!sub && (people.length > 0 || away) && (
+          <section className="place-section place-people">
+            <h3>Who is here</h3>
+            {/* **Names and faces, not three people talking at once.** Choosing somebody opens them
+                in the dock at full height -- see `Conversation.tsx` for what that fixed. */}
+            {people.length > 0 ? (
+              <ul className="who-list">
+                {people.map((n) => (
+                  <li key={n.id}>
+                    <button type="button" className="who" onClick={() => onTalkTo(n.id)}>
+                      <PersonPortrait person={n} size={FACE_SIZE} />
+                      <span className="who-words">
+                        <span className="who-name">{n.name}</span>
+                        <span className="who-role">{n.role}</span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="who-away">Nobody is here just now.</p>
+            )}
+            {away && <p className="who-away">{away}</p>}
+          </section>
+        )}
 
         {/* What this place can work, before the prose rather than after it: a player who has
             walked in to use a bench should not have to read a paragraph to find out there is one.
@@ -179,49 +204,6 @@ export function PlacePanel({
                     </div>
                   );
                 })}
-              </section>
-            )}
-
-            {people.length > 0 && (
-              <section className="place-section">
-                <h3>Who is here</h3>
-                {/* **Names and faces, not three people talking at once.** Choosing somebody opens
-                    them in the dock at full height -- see `Conversation.tsx` for what that fixed.
-                    A list is also the honest shape for this: you can see who is here before
-                    deciding who to listen to, which standing in a room of simultaneous typewriters
-                    never let you do. */}
-                <ul className="who-list">
-                  {people.map((n) => (
-                    <li key={n.id}>
-                      <button type="button" className="who" onClick={() => onTalkTo(n.id)}>
-                        <PersonPortrait person={n} size={FACE_SIZE} />
-                        <span className="who-words">
-                          <span className="who-name">{n.name}</span>
-                          <span className="who-role">{n.role}</span>
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {elsewhere.length > 0 && (
-              <section className="place-section">
-                <h3>Elsewhere</h3>
-                {/* Not buttons: you cannot listen to somebody who is not here. Named with where they
-                    went, so the list is a direction rather than a disappointment. */}
-                <ul className="who-list">
-                  {elsewhere.map(({ npc: n, where }) => (
-                    <li key={n.id} className="who-away">
-                      <PersonPortrait person={n} size={FACE_SIZE} />
-                      <span className="who-words">
-                        <span className="who-name">{n.name}</span>
-                        <span className="who-role">{where}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
               </section>
             )}
 

@@ -43,7 +43,16 @@ import { type Collection, emptyCollection, metOnTile, size } from '../content/co
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
 import { hasBegun, loadJourney, saveJourney } from '../save';
-import { advance, answer, craft, hear, knowsRecipe, receiveAll, type WorldMoment } from '../journey';
+import {
+  advance,
+  answer,
+  craft,
+  hasSomethingNew,
+  hear,
+  knowsRecipe,
+  receiveAll,
+  type WorldMoment
+} from '../journey';
 import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import { characterFor } from '../game/player';
 import type { World } from '../world/types';
@@ -64,7 +73,7 @@ import { EventCard } from './EventCard';
 import { type Choice, type GameEvent, type Occasion } from '../content/events';
 import { happeningNow, surroundingsAt } from '../content/happenings';
 import { APPROACHES, approachAt, approachId } from '../content/visitors';
-import { roadTalk, whoIsHere } from '../content/presence';
+import { peopleAtPlaces, roadTalk, whoIsHere } from '../content/presence';
 import type { Station } from '../content/stations';
 
 /**
@@ -968,6 +977,22 @@ export function App() {
   }, [satchel]);
 
   /**
+   * Tell the scene who is at each place, for the pips at their doors.
+   *
+   * Pushed from here because whether somebody has something new to say is a question about the
+   * diary, and the diary is React's. `world` is in the list so the first answer goes out once the
+   * scene is listening, and again after every map change.
+   */
+  useEffect(() => {
+    if (!world) return;
+    EventBus.emitEvent('people-at-places', {
+      places: peopleAtPlaces(fieldMapId, arrival?.day ?? 0, travellerStates, (id) =>
+        hasSomethingNew(progress, id)
+      )
+    });
+  }, [world, fieldMapId, arrival?.day, travellerStates, progress]);
+
+  /**
    * Everything that can be done on the tile under foot, in one list.
    *
    * Assembled here because this is the only place that already holds all three answers -- what
@@ -1035,6 +1060,13 @@ export function App() {
         key: 'E',
         onDo: pickUp
       },
+      // **The talk row stands in the rest row's place while resting is refused for the daylight.**
+      // People walk only by day, and by day this row can only ever say "there is daylight left" --
+      // both rows are about what the hour is for. Measured on a 360-pixel phone with a busy tile,
+      // the rail has room for two chips, and a fourth row ran off the bottom of the screen.
+      ...(talk && !arrival?.canCamp
+        ? []
+        : [
       {
         id: 'rest',
         label: SHELTER_LABEL[shelter] ?? 'Stop for the night',
@@ -1048,7 +1080,8 @@ export function App() {
         // it settles on its own -- but it is the same shape of act, and the night should look like
         // one rather than happening between two frames.
         onDo: () => setActivity({ taking: [], day: arrival?.day ?? 0, resting: shelter })
-      },
+      } satisfies TileAction
+          ]),
       // The line is one map's furniture, so the row only exists where there is a line. Every other
       // row here is about ground that exists everywhere; this one would be a permanent "there is no
       // railway" on three maps out of four, which teaches nothing.

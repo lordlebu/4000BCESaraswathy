@@ -254,6 +254,14 @@ export interface UiToGame {
    */
   'shelter-built': { built: 'tent' | null };
   /**
+   * Who is at each place on this map, for the pips drawn at its door.
+   *
+   * **Pushed from React because "has something new to say" is a question about the diary**, and the
+   * diary lives in React. `peopleAtPlaces` in `content/presence.ts` builds it; the scene draws a pip
+   * per person and holds no opinion about who. The whole state each time, so nothing stale survives.
+   */
+  'people-at-places': { places: { poiId: string; people: { npcId: string; fresh: boolean }[] }[] };
+  /**
    * Take some of the walking back out of the traveller's legs.
    *
    * Sent when a remedy or a meal is used. A fraction of the tiredness currently carried rather

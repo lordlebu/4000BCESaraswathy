@@ -8,7 +8,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps, npc, npcsAt } from '../src/content/places';
-import { companyLine, roadTalk, whoIsHere, type Reported } from '../src/content/presence';
+import { awayLine, peopleAtPlaces, roadTalk, whoIsHere, type Reported } from '../src/content/presence';
 import {
   NEARBY_TILES,
   hoursFor,
@@ -130,28 +130,19 @@ describe('a place lists who is there now', () => {
   });
 });
 
-describe('the line a place opens with', () => {
-  it('names who is here and where the others went', () => {
+describe('the line under who is here', () => {
+  it('says where the others went, in their own sentences', () => {
     const presence = whoIsHere('poi_lothal_camp', 'field_map_lothal', 0, [
-      { npcId: 'npc_thrali', state: { resting: false, atPoi: null, boundFor: 'poi_drowned_dockyard' } }
+      { npcId: 'npc_thrali', state: { resting: false, atPoi: null, boundFor: 'poi_drowned_dockyard' } },
+      { npcId: 'npc_kunch', state: { resting: true, atPoi: 'poi_marsh_shrine', boundFor: null } }
     ]);
-    const line = companyLine(presence)!;
-    expect(line).toMatch(/^[A-Z].* (is|are) here\./);
-    expect(line).toContain('Uma');
-    expect(line).toContain('Thrali is on the road to the Drowned Dockyard.');
+    expect(awayLine(presence)).toBe(
+      'Kunch has stopped at the Marsh Shrine. Thrali is on the road to the Drowned Dockyard.'
+    );
   });
 
-  it('says so when nobody is in, and says nothing where nobody belongs', () => {
-    const empty = whoIsHere('poi_drowned_dockyard', 'field_map_lothal', 0, [
-      { npcId: 'npc_thrali', state: { resting: true, atPoi: 'poi_lothal_camp', boundFor: null } }
-    ]);
-    expect(companyLine(empty)).toBe('Nobody is here just now. Thrali has stopped at the Camp in the Kilns.');
-
-    const nobody = fieldMaps
-      .flatMap((m) => m.pointsOfInterest.map((p) => ({ p, m: m.id })))
-      .find(({ p }) => npcsAt(p).length === 0);
-    expect(nobody, 'every place has somebody -- pick another fixture').toBeTruthy();
-    expect(companyLine(whoIsHere(nobody!.p, nobody!.m, 0, []))).toBeNull();
+  it('says nothing when everybody is in', () => {
+    expect(awayLine(whoIsHere('poi_lothal_camp', 'field_map_lothal', 0, []))).toBeNull();
   });
 });
 
@@ -194,5 +185,29 @@ describe('meeting people on the road', () => {
     const far = roadTalk([{ id: named.id, npcId: named.npcId, beside: false }], 'field_map_lothal', []);
     expect(far?.blocked).toBe(`${named.name} is on the road nearby. Walk up beside them.`);
     expect(roadTalk([], 'field_map_lothal', [])).toBeNull();
+  });
+});
+
+describe('the marks over places on the map', () => {
+  it('marks every place somebody is at, once each, and nowhere empty', () => {
+    const reported = reportFor('field_map_lothal', 'presence', 0, 12);
+    const marks = peopleAtPlaces('field_map_lothal', 0, reported, () => false);
+    for (const mark of marks) {
+      expect(mark.people.length, `${mark.poiId} is marked with nobody`).toBeGreaterThan(0);
+      expect(mark.people.map((p) => p.npcId).sort()).toEqual(
+        whoIsHere(mark.poiId, 'field_map_lothal', 0, reported).here.map((n) => n.id).sort()
+      );
+    }
+    const everyone = marks.flatMap((m) => m.people.map((p) => p.npcId));
+    expect(new Set(everyone).size, 'somebody is marked at two places').toBe(everyone.length);
+    // Uma never leaves the roof.
+    expect(marks.find((m) => m.poiId === 'poi_lothal_camp')?.people.map((p) => p.npcId)).toContain('npc_uma');
+  });
+
+  it('carries whether somebody has news, from the caller', () => {
+    const marks = peopleAtPlaces('field_map_lothal', 0, [], (id) => id === 'npc_uma');
+    const camp = marks.find((m) => m.poiId === 'poi_lothal_camp')!;
+    expect(camp.people.find((p) => p.npcId === 'npc_uma')?.fresh).toBe(true);
+    expect(camp.people.filter((p) => p.npcId !== 'npc_uma').every((p) => !p.fresh)).toBe(true);
   });
 });
