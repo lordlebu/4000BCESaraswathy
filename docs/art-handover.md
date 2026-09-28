@@ -32,7 +32,7 @@ scenes/rest-camp.2.png a second of those
 ```
 
 A trailing `.<number>` before the extension is a take number and is not part of the name. Everything
-else in the filename still means what it meant: `rest-camp` is the shelter variant, `stoop-mountains`
+else in the filename still means what it meant: `rest-camp` is the shelter variant, `stoop-high`
 is the ground.
 
 **Which take is shown is seeded, never random.** `App` passes a `tileHash` on the tile and the day,
@@ -183,7 +183,9 @@ Keep it varied across the set rather than inside any one picture. So far:
 
 | File | Who |
 |---|---|
-| `stoop-mountains.png` | young man, long hair, bare-chested |
+| `stoop-high.png` | young man, long hair, bare-chested |
+| `stoop-plains.png` | **older man, turbaned and grey-bearded, with a woman in her thirties** — two faces in full view, against the no-fixed-face rule; kept because it was already in the game as `work.png` |
+| `work.png` | hands and forearms only, wrists bound in cloth — the rule kept |
 | `fish.png` | young man, long hair, bare-chested |
 | `rest-tent.png` | **older woman, grey, clothed against the cold** |
 | `rest-settlement.png` | **man in his forties, grey-flecked beard, clothed for a day's work** |
@@ -329,7 +331,7 @@ reason.
 
 **Never drop a raw straight into `src/ui/`.** It is the right picture at ten times the weight and
 the wrong encoding, and the game renders it perfectly — the download just grows.
-`stoop-mountains.png` arrived at 1200×896 and 1.7 MB and came out of the builder at 129 KB.
+`stoop-high.png` (then `stoop-mountains.png`) arrived at 1200×896 and 1.7 MB and came out of the builder at 129 KB.
 
 **`test/scenesFolder.test.ts` now catches that**, which matters most when art is being added by hand
 rather than through one pipeline. It checks four things per file — the name is a gesture or a real

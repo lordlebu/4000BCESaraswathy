@@ -35,8 +35,32 @@ import { artCount, firstArt } from './art';
  * See `docs/art-placement.md` for the full list of filenames this folder will answer to.
  */
 export function sceneFor(gesture: string, variant?: string | null, pick = 0): string | null {
-  return firstArt('scenes', [variant ? `${gesture}-${variant}` : null, gesture], pick);
+  const group = variant ? GROUND_GROUP[variant] : undefined;
+  return firstArt(
+    'scenes',
+    [variant ? `${gesture}-${variant}` : null, group ? `${gesture}-${group}` : null, gesture],
+    pick
+  );
 }
+
+/**
+ * Kinds of ground that look alike enough to share a painting, keyed by biome.
+ *
+ * **One painting per biome was too narrow to be seen.** The cliff scene was `stoop-mountains`, and
+ * mountain tiles almost always offer stone rather than a plant: across the four maps it could show
+ * on 5 tiles, where a stoop on high ground happens 92 times. So a ground variant now tries its own
+ * biome first, then its group, then the plain gesture -- `stoop-hills`, `stoop-high`, `stoop`. The
+ * most specific painting that exists wins, and a biome can still have its own the day one is made.
+ *
+ * `high` is climbing ground. **The sky islands are left out on purpose**: they are high but not
+ * climbed, and are owed a painting of their own (`stoop-sky_island`). Add a group only when a
+ * painting needs one.
+ */
+export const GROUND_GROUP: Readonly<Record<string, string>> = {
+  hills: 'high',
+  mountains: 'high',
+  snow: 'high'
+};
 
 /** How many exist. Used by a test, to keep the loader honest about an empty folder. */
 export function sceneCount(): number {

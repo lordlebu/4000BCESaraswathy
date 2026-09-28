@@ -6,7 +6,7 @@
 //
 //   * A **raw** straight from an image model is 1–2 MB rather than ~130 KB, and truecolour rather
 //     than palettised. It renders perfectly. Nothing tells you. The download just grows.
-//     `stoop-mountains.png` arrived that way at 1.7 MB and came out of the builder at 129 KB.
+//     `stoop-high.png` (then `stoop-mountains.png`) arrived that way at 1.7 MB and came out of the builder at 129 KB.
 //   * A file named after something no gesture asks for matches nothing, throws nothing, and quietly
 //     keeps drawing the fallback. That has happened three times across the art folders.
 //
@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 import { readdirSync, statSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import biomes from '../data/biomes.json';
+import { GROUND_GROUP } from '../src/ui/scenes';
 
 const SCENES = join(__dirname, '..', 'src', 'ui', 'scenes');
 
@@ -48,6 +49,8 @@ const PROCESSES = [
   'gathering'
 ];
 const BIOMES = (biomes as { id: string }[]).map((b) => b.id);
+/** Groups of ground that share a painting -- `stoop-high` for every climbing biome. */
+const GROUPS = [...new Set(Object.values(GROUND_GROUP))];
 
 const files = readdirSync(SCENES).filter((f) => /\.(png|webp|jpe?g)$/i.test(f));
 
@@ -84,8 +87,8 @@ describe('src/ui/scenes holds built scenes and nothing else', () => {
     ).toBe(true);
     if (variant) {
       expect(
-        [...SHELTERS, ...PROCESSES, ...BIOMES].includes(variant),
-        `\`${variant}\` is not a shelter kind, a canon process or a biome, so ` +
+        [...SHELTERS, ...PROCESSES, ...BIOMES, ...GROUPS].includes(variant),
+        `\`${variant}\` is not a shelter kind, a canon process, a biome or a ground group, so ` +
           `sceneFor('${gesture}', …) will never ask for it and this file will never draw.`
       ).toBe(true);
     }

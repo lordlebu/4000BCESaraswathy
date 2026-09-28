@@ -49,16 +49,19 @@ a second naming would be a second thing to get wrong.
 
 ## The queue
 
-### `scenes/` — activity cards · 5 of ~24
+### `scenes/` — activity cards · 12 of ~24
 
 A pair of hands at work, with the traveller in it — as distinct from a plate, which is one animal
 against a suggestion of habitat. That difference is what makes the card read as an act rather than
 as a bestiary entry with a button.
 
-**Have:** `stoop`, `stalk`, `work`, `rest`, `rest-camp`.
+**Have:** `stoop`, `stalk`, `work` (knapping), `fish`, `stoop-high`, `stoop-plains`, `rest`,
+`rest-camp`, `rest-palace`, `rest-roof` (two takes), `rest-settlement`, `rest-tent`. The two rows
+below for `fish` and `rest-roof` are done and kept for the brief.
 
 | Wanted | The moment |
 |---|---|
+| `stoop-sky_island.png` | moss cut from a boulder at the rim of a floating island, cloud below — prompt in `docs/activity-scene-prompts.md` |
 | `fish.png` | knee-deep, a spear held still, the water doing the waiting |
 | `rest-roof.png` | a real room, a lamp, the diary open and being written properly |
 | `rest-bedroll.png` | oiled cloth on open ground, no fire, rain having happened |

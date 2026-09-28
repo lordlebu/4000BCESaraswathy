@@ -48,6 +48,25 @@ Copy this once, then append one **subject line**.
 > Two hands striking a river cobble with a hammerstone on a stone anvil, pale chips and dust in
 > the air, a scatter of struck flakes and a half-worked nodule on the bare ground beside it.
 
+Taken from Grok, which came back portrait (784×1168) with its name in the bottom corner. The 4:3
+band below keeps the hammer hand, the strike and the anvil, and leaves the watermark outside it. The
+raw is gitignored, so this is the only record of the framing:
+
+```
+node tools/build-plates.js --scenes --force --only=work --crop=0,220,784
+```
+
+**`stoop-sky_island.png`** — wanted. The sky islands are high ground but not climbing ground, so
+they are kept out of `stoop-high` and owed their own. What is taken there is lodestone moss, prana
+pollen and the bark of the aero mangrove.
+> Seen from behind and close: a traveller kneeling at the grassy rim of a floating island, one hand
+> steadying a pale boulder furred with silver-green moss, the other cutting a strip of it free with
+> a small blade. Beyond the rim the ground simply ends — open cloud below, and other islands hanging
+> small and blue in the far haze, trailing roots.
+
+Raw into `assets/source/scenes/` as `<tool>_scene-stoop-sky_island.png`, then
+`node tools/build-plates.js --scenes`.
+
 **`rest.png`**
 > Hands unrolling a woven reed sleeping mat on flat ground at dusk, a satchel and an unlit oil lamp
 > set down beside it, long blue evening shadows and the last warm light low across the grass.
