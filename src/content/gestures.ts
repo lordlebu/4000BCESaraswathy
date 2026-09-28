@@ -206,3 +206,28 @@ export function gestureLine(gesture: Gesture, materialName: string): string {
       return `${materialName} comes out of the ground or it does not come at all. Strike where the stone wants to part, and let the tool do it.`;
   }
 }
+
+/**
+ * The gestures whose subject can be an animal.
+ *
+ * A set rather than an `=== 'stalk'` check, because fishing joined it and the comparison was in
+ * four places. Getting this wrong is visible and was: passing the creature regardless put
+ * "Painted Deer comes out of the ground" on a flint quarry.
+ */
+const ABOUT_AN_ANIMAL = new Set<Gesture>(['stalk', 'fish']);
+
+/**
+ * Whether this act is about the animal on the tile, so the card shows its plate and names it.
+ *
+ * **A bench is never about the animal, whatever gesture it plays as.** Firing, cooking, brewing and
+ * drying are stalks -- waiting on something that will not wait -- so the set alone handed a kiln
+ * the plate of whatever stood on the tile, and a painted `stalk-firing.png` could never be seen
+ * where a painted animal lived. The making is the subject there, never the creature.
+ */
+export function isAboutAnAnimal(
+  gesture: Gesture | null,
+  activity: { making?: string | null } | null
+): boolean {
+  if (!gesture || activity?.making) return false;
+  return ABOUT_AN_ANIMAL.has(gesture);
+}

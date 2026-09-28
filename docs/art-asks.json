@@ -1,0 +1,1169 @@
+{
+  "note": "The art plan: plates and scenes to paint, and species canon cannot yet describe. Rendered to docs/art-asks.md and the published plan page by tools/render-art-asks.js.",
+  "measured": {
+    "fauna_tiles": 12760,
+    "painted_share": 38.8,
+    "asked_share": 37.3,
+    "after_share": 76.1,
+    "how": "Every tile of the four field maps, asking the game's creatureFor which animal stands there."
+  },
+  "plates": [
+    {
+      "file": "drovers-dog",
+      "name": "Dhol",
+      "canon": "fauna_drovers_dog",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 676,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 676 tiles across all four maps.",
+      "subject": "A dhole, the rust-red wild dog of the drove roads: lean, low, with a dark bushy tail, trotting at an even distance beside a dusty track with its ears up, not looking back. A thin string of pack animals is suggested far off in dry plains grass."
+    },
+    {
+      "file": "shringasaurus",
+      "name": "Shringasaurus",
+      "canon": "fauna_shringasaurus",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 582,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 582 tiles across all four maps.",
+      "subject": "Shringasaurus, a heavy-bodied, long-necked horned reptile, older than any dinosaur, with a pair of horns curving forward above the eyes like a bull's. It is reared up on its hind legs against a tree, calmly browsing the high leaves, with dry scrub forest below."
+    },
+    {
+      "file": "tethyan-mud-snipe",
+      "name": "Tethyan Mud-Snipe",
+      "canon": "fauna_tethyan_mud_snipe",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 221,
+      "maps": [
+        "Lothal",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 221 tiles in Lothal, Dwarka and Aravali.",
+      "subject": "A mud-snipe, a small mottled brown wading bird with a very long straight bill, probing wet estuary mud at the tide line, a thin sheet of moving water around its feet."
+    },
+    {
+      "file": "narmada-straight-tusk",
+      "name": "Narmada Straight-Tusk",
+      "canon": "fauna_narmada_straight_tusk",
+      "rarity": "rare",
+      "group": "often",
+      "tiles": 198,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 198 tiles across all four maps.",
+      "subject": "A straight-tusked elephant (Palaeoloxodon), taller than a house roof, with two long pale tusks that run almost straight forward rather than curving out. It is browsing high branches beside a river and has not noticed anyone."
+    },
+    {
+      "file": "tethyan-reef-lurker",
+      "name": "Tethyan Reef-Lurker",
+      "canon": "fauna_tethyan_reef_lurker",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 139,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 139 tiles in Lothal and Aravali.",
+      "subject": "A murex sea snail with a heavy, spiny, frilled shell in cream and rose, resting in a crevice of a coral reef in clear, sunlit, moving shallow water."
+    },
+    {
+      "file": "tethyan-blue-fin-tuna",
+      "name": "Tethyan Blue-Fin Tuna",
+      "canon": "fauna_tethyan_blue_fin_tuna",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 134,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 134 tiles in Lothal and Aravali.",
+      "subject": "A bluefin tuna, torpedo-shaped, with a deep blue back and silver flanks, swimming in open sea with two or three of its school behind, sunlight broken through the moving surface above."
+    },
+    {
+      "file": "tethys-leviathan-calf",
+      "name": "Tethys Leviathan Calf",
+      "canon": "fauna_tethys_leviathan_calf",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 134,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 134 tiles in Lothal and Aravali.",
+      "subject": "A young whale calf, sleek and small, rolling playfully in warm, clear coastal shallows, with just the edge of an adult's great bone-plated flank at the side of the frame."
+    },
+    {
+      "file": "hammerhead-reef-shark",
+      "name": "Hammerhead Reef-Shark",
+      "canon": "fauna_hammerhead_reef_shark",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 133,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 133 tiles in Lothal and Aravali.",
+      "subject": "A hammerhead shark with its broad, flattened head, gliding low and slow over a pale sandy reef floor, rippling sunlight across the sand."
+    },
+    {
+      "file": "flying-fish-of-the-tethys",
+      "name": "Flying-Fish of the Tethys",
+      "canon": "fauna_flying_fish_of_the_tethys",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 130,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 130 tiles in Lothal and Aravali.",
+      "subject": "A flying fish gliding just above the waves on large, clear, wing-like fins, spray trailing from its tail where it has left a wave crest."
+    },
+    {
+      "file": "black-barked-canopy-tendua",
+      "name": "Black-Barked Canopy Tendua",
+      "canon": "fauna_black_barked_canopy_tendua",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 124,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 124 tiles across all four maps.",
+      "subject": "A black tendua: a leopard-like cat with a dark coat whose rosettes show only where the light catches, and eyes set forward like a person's. It is lying along a mangrove branch high in the canopy, looking down."
+    },
+    {
+      "file": "southern-sea-turtle",
+      "name": "Southern Sea-Turtle",
+      "canon": "fauna_southern_sea_turtle",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 124,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 124 tiles in Lothal and Aravali.",
+      "subject": "A large sea turtle swimming over clear shallows close to a black volcanic beach, flippers mid-stroke, water in motion around it."
+    },
+    {
+      "file": "tethyan-flying-squid",
+      "name": "Tethyan Flying-Squid",
+      "canon": "fauna_tethyan_flying_squid",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 123,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 123 tiles in Lothal and Aravali.",
+      "subject": "A squid that has launched itself out of the sea, gliding over a wave on its spread side-fins with its arms streamlined behind, droplets flying."
+    },
+    {
+      "file": "reef-dwelling-octopus",
+      "name": "Reef-dwelling Octopus",
+      "canon": "fauna_reef_dwelling_octopus",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 122,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 122 tiles in Lothal and Aravali.",
+      "subject": "An octopus with bumpy, textured skin in the colours of the coral around it, half-hidden among coral heads in shallow, sunlit water, one arm reaching toward a small crab."
+    },
+    {
+      "file": "coral-dwelling-moray",
+      "name": "Coral-dwelling Moray",
+      "canon": "fauna_coral_dwelling_moray",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 120,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 120 tiles in Lothal and Aravali.",
+      "subject": "A moray eel with a long serpentine body patterned in the red of blood-coral, its head out of a coral crevice, mouth slightly open, in clear moving water."
+    },
+    {
+      "file": "shattered-sea-barracuda",
+      "name": "Shattered Sea Barracuda",
+      "canon": "fauna_shattered_sea_barracuda",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 119,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 119 tiles in Lothal and Aravali.",
+      "subject": "A barracuda, long, silver and sleek with a jutting lower jaw, holding still in blue water above a coral reef."
+    },
+    {
+      "file": "southern-sea-eagle",
+      "name": "Southern Sea-Eagle",
+      "canon": "fauna_southern_sea_eagle",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 117,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 117 tiles in Lothal and Aravali.",
+      "subject": "A large sea eagle with a white head and chest and dark wings, perched on a high cliff edge above the sea, spray rising from the waves below."
+    },
+    {
+      "file": "southern-reef-stingray",
+      "name": "Southern Reef-Stingray",
+      "canon": "fauna_southern_reef_stingray",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 115,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 115 tiles in Lothal and Aravali.",
+      "subject": "A sand-coloured stingray lying half-buried in the reef floor, only its eyes, the edge of its disc and its long spined tail showing, ripples of light moving across it."
+    },
+    {
+      "file": "bone-plated-orca",
+      "name": "Bone-Plated Orca",
+      "canon": "fauna_bone_plated_orca",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 110,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 110 tiles in Lothal and Aravali.",
+      "subject": "An orca in black and white with thick, pale bony armour plates over its skull and along the ridge of its back, surfacing calmly in open sea with a plume of breath above it."
+    },
+    {
+      "file": "jungle-hornbill",
+      "name": "Jungle Hornbill",
+      "canon": "fauna_jungle_hornbill",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 54,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Aravali"
+      ],
+      "why": "Met on 54 tiles in Lothal, Narmada and Aravali.",
+      "subject": "A large hornbill with a double-pointed casque on its bill, perched in the fork of an old hollow tree with a wild fig held in its bill."
+    },
+    {
+      "file": "gargoyle-bat",
+      "name": "Gargoyle-Bat",
+      "canon": "fauna_gargoyle_bat",
+      "rarity": "rare",
+      "group": "often",
+      "tiles": 104,
+      "maps": [
+        "Aravali"
+      ],
+      "why": "Met on 104 tiles only in Aravali.",
+      "subject": "A bat whose skin is dark and textured like weathered stone, hanging folded from the rocky underside of a floating island among dangling roots, open sky below."
+    },
+    {
+      "file": "cloud-lurking-gecko",
+      "name": "Cloud-Lurking Gecko",
+      "canon": "fauna_cloud_lurking_gecko",
+      "rarity": "rare",
+      "group": "often",
+      "tiles": 92,
+      "maps": [
+        "Aravali"
+      ],
+      "why": "Met on 92 tiles only in Aravali.",
+      "subject": "A pale green gecko with large sticky toe pads, clinging upside down to the underside of a floating rock with a moth nearby, drifting cloud and open sky beneath it."
+    },
+    {
+      "file": "mangrove-snapping-turtle",
+      "name": "Mangrove Snapping-Turtle",
+      "canon": "fauna_mangrove_snapping_turtle",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 80,
+      "maps": [
+        "Lothal",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 80 tiles in Lothal, Dwarka and Aravali.",
+      "subject": "A snapping turtle with a hooked, sharp beak, half-buried in brackish mud among mangrove roots, only its head and the front of its ridged shell showing."
+    },
+    {
+      "file": "saraswati-delta-heron",
+      "name": "Saraswati Delta Heron",
+      "canon": "fauna_saraswati_delta_heron",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 79,
+      "maps": [
+        "Lothal",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 79 tiles in Lothal, Dwarka and Aravali.",
+      "subject": "A tall heron with pale silver-grey feathers standing in estuary shallows with a small bronze-coloured fish in its bill, water rippling around its legs."
+    },
+    {
+      "file": "lothal-shell-cracker",
+      "name": "Lothal Shell-Cracker",
+      "canon": "fauna_lothal_shell_cracker",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 77,
+      "maps": [
+        "Lothal",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 77 tiles in Lothal, Dwarka and Aravali.",
+      "subject": "A crab with one hugely oversized, stone-grey crushing claw and one small one, on estuary mud beside a cracked-open mussel shell."
+    },
+    {
+      "file": "estuary-archer-fish",
+      "name": "Estuary Archer-Fish",
+      "canon": "fauna_estuary_archer_fish",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 72,
+      "maps": [
+        "Lothal",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 72 tiles in Lothal, Dwarka and Aravali.",
+      "subject": "An archer fish at the surface under overhanging mangrove leaves, shooting a thin jet of water up at an insect on a leaf, the jet caught in mid-air."
+    },
+    {
+      "file": "tethys-pelican",
+      "name": "Tethys Pelican",
+      "canon": "fauna_tethys_pelican",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 62,
+      "maps": [
+        "Lothal",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 62 tiles in Lothal, Dwarka and Aravali.",
+      "subject": "A pelican with a large bill and a full throat pouch, scooping fish in coastal shallows, water pouring from the pouch."
+    },
+    {
+      "file": "narmada-cave-crab",
+      "name": "Narmada Cave-Crab",
+      "canon": "fauna_narmada_cave_crab",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 61,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 61 tiles across all four maps.",
+      "subject": "A small, pale, eyeless freshwater crab, almost translucent, on a wet stone in a dark underground stream, lit by one thin shaft of light from above."
+    },
+    {
+      "file": "plateau-ibex",
+      "name": "Plateau Ibex",
+      "canon": "fauna_plateau_ibex",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 61,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 61 tiles across all four maps.",
+      "subject": "An ibex with long, ridged horns sweeping back over its shoulders, standing on a rock ledge no wider than a hand on a cliff face, looking down without concern."
+    },
+    {
+      "file": "mappa-mundi-forest-cat",
+      "name": "Mappa Mundi Forest-Cat",
+      "canon": "fauna_mappa_mundi_forest_cat",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 59,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Aravali"
+      ],
+      "why": "Met on 59 tiles in Lothal, Narmada and Aravali.",
+      "subject": "A spotted wildcat with a long balancing tail, walking along a high branch in dense jungle canopy."
+    },
+    {
+      "file": "narmada-honey-guide",
+      "name": "Narmada Honey-Guide",
+      "canon": "fauna_narmada_honey_guide",
+      "rarity": "common",
+      "group": "often",
+      "tiles": 58,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 58 tiles across all four maps.",
+      "subject": "A small brownish bird with a pale throat on a branch near a cliff, calling and looking back over its shoulder as if to lead, a great golden honeycomb glimpsed on the rock beyond."
+    },
+    {
+      "file": "banded-scavenger-voay",
+      "name": "Banded Scavenger Voay",
+      "canon": "fauna_banded_scavenger_voay",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 62,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Aravali"
+      ],
+      "why": "Met on 62 tiles in Lothal, Narmada and Aravali.",
+      "subject": "A voay: a smaller, land-living crocodile standing high on its legs rather than sprawling, with bold dark bands across its back, walking along a forest edge near the sea."
+    },
+    {
+      "file": "giant-blue-ringed-octopus",
+      "name": "Giant Blue-Ringed Octopus",
+      "canon": "fauna_giant_blue_ringed_octopus",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 45,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 45 tiles in Lothal and Aravali.",
+      "subject": "A large octopus, sand-yellow with vivid blue rings across its skin, in a clear rock pool on the reef."
+    },
+    {
+      "file": "lothal-marsh-lurker",
+      "name": "Lothal Marsh-Lurker",
+      "canon": "fauna_lothal_marsh_lurker",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 11,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka"
+      ],
+      "why": "Met on 11 tiles in Lothal, Narmada and Dwarka.",
+      "subject": "A giant river salamander, eight feet long, flat-headed, with wrinkled brown skin and small eyes, lying still in a murky delta pool among reeds with only its head and back above the water."
+    },
+    {
+      "file": "shattered-sea-oyster",
+      "name": "Shattered Sea Oyster",
+      "canon": "fauna_shattered_sea_oyster",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 40,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 40 tiles in Lothal and Aravali.",
+      "subject": "A massive oyster, its rough grey shell open just enough to show an iridescent black pearl, resting on the sea floor in sunlit water."
+    },
+    {
+      "file": "floating-island-chameleon",
+      "name": "Floating-Island Chameleon",
+      "canon": "fauna_floating_island_chameleon",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 35,
+      "maps": [
+        "Aravali"
+      ],
+      "why": "Met on 35 tiles only in Aravali.",
+      "subject": "A chameleon whose skin matches the pale green moss around it, hanging by its curled tail from the roots of a mangrove growing off the edge of a floating island, open sky below."
+    },
+    {
+      "file": "aero-moth",
+      "name": "Aero-Moth",
+      "canon": "fauna_aero_moth",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 32,
+      "maps": [
+        "Aravali"
+      ],
+      "why": "Met on 32 tiles only in Aravali.",
+      "subject": "A large moth with soft, dusty wings patterned like grey clouds, resting on a thorny bramble at the edge of a floating island, sky and far islands behind."
+    },
+    {
+      "file": "sky-faring-crab",
+      "name": "Sky-Faring Crab",
+      "canon": "fauna_sky_faring_crab",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 32,
+      "maps": [
+        "Aravali"
+      ],
+      "why": "Met on 32 tiles only in Aravali.",
+      "subject": "A pale, light-shelled crab climbing one of the aerial roots that hang from a floating island's mangroves, open sky and cloud below."
+    },
+    {
+      "file": "cloud-squirrel",
+      "name": "Cloud-Squirrel",
+      "canon": "fauna_cloud_squirrel",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 29,
+      "maps": [
+        "Aravali"
+      ],
+      "why": "Met on 29 tiles only in Aravali.",
+      "subject": "A squirrel mid-leap between two floating rocks, its exceptionally long bushy tail stretched out behind like a rudder, clouds below."
+    },
+    {
+      "file": "upfalling-elver",
+      "name": "Upfalling Elver",
+      "canon": "fauna_upfalling_elver",
+      "rarity": "mythic",
+      "group": "rare",
+      "tiles": 29,
+      "maps": [
+        "Aravali"
+      ],
+      "why": "Met on 29 tiles only in Aravali.",
+      "subject": "A young eel, hand-long and glass-clear, climbing the wet underside of a floating island through rain that is falling upward, droplets rising past it."
+    },
+    {
+      "file": "lothal-mud-skipper",
+      "name": "Lothal Mud-Skipper",
+      "canon": "fauna_lothal_mud_skipper",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 28,
+      "maps": [
+        "Lothal",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 28 tiles in Lothal, Dwarka and Aravali.",
+      "subject": "A giant mudskipper, a goggle-eyed fish with a raised back fin, propped on its front fins on a mangrove root above the mud."
+    },
+    {
+      "file": "lodestone-beetle",
+      "name": "Lodestone Beetle",
+      "canon": "fauna_lodestone_beetle",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 27,
+      "maps": [
+        "Aravali"
+      ],
+      "why": "Met on 27 tiles only in Aravali.",
+      "subject": "A beetle with an iron-dark metallic shell, a few iron filings standing on end against it as if drawn there, on a mineral-streaked stone at the core of a floating island."
+    },
+    {
+      "file": "estuary-sawfish",
+      "name": "Estuary Sawfish",
+      "canon": "fauna_estuary_sawfish",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 25,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 25 tiles across all four maps.",
+      "subject": "A sawfish, a large ray whose snout is a long, flat, toothed saw, gliding low over the brown bed of an estuary, the tip of the saw just breaking the surface."
+    },
+    {
+      "file": "tendua",
+      "name": "Tendua",
+      "canon": "fauna_tendua",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 21,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Aravali"
+      ],
+      "why": "Met on 21 tiles in Lothal, Narmada and Aravali.",
+      "subject": "A tendua: a spotted, leopard-like cat with eyes set forward like a person's, watching calmly from a reed line at the edge of a wetland."
+    },
+    {
+      "file": "vindhya-rock-squirrel",
+      "name": "Vindhya Rock-Squirrel",
+      "canon": "fauna_vindhya_rock_squirrel",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 20,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 20 tiles across all four maps.",
+      "subject": "A giant squirrel in rich maroon, cream and orange, sitting at the mouth of its nest hole in a cliff with a pine nut in its paws.",
+      "guess": "Canon says colourful. The maroon, cream and orange are the real Indian giant squirrel's."
+    },
+    {
+      "file": "narmada-cave-bear",
+      "name": "Narmada Cave Bear",
+      "canon": "fauna_narmada_cave_bear",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 15,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 15 tiles across all four maps.",
+      "subject": "A massive, thick-furred cave bear climbing a cliff face toward a hanging honeycomb near the mouth of a high cave, absorbed and unhurried."
+    },
+    {
+      "file": "golden-honey-goliath",
+      "name": "Golden Honey-Goliath",
+      "canon": "fauna_golden_honey_goliath",
+      "rarity": "mythic",
+      "group": "rare",
+      "tiles": 3,
+      "maps": [
+        "Aravali"
+      ],
+      "why": "Met on 3 tiles only in Aravali.",
+      "subject": "A colossal golden bee, hand-sized, resting on the face of its huge comb hanging from a Narmada cliff, honey glistening in the cells.",
+      "guess": "Canon says colossal and never says how big. Hand-sized is my guess; paint it bigger if you picture it that way."
+    },
+    {
+      "file": "glacial-snow-hare",
+      "name": "Glacial Snow-Hare",
+      "canon": "fauna_glacial_snow_hare",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 10,
+      "maps": [
+        "Narmada"
+      ],
+      "why": "Met on 10 tiles only in Narmada.",
+      "subject": "A pure white, thick-furred hare with broad padded feet like snowshoes, sitting on snow at the foot of an ice wall."
+    },
+    {
+      "file": "indus-unicorn",
+      "name": "Indus Unicorn",
+      "canon": "fauna_indus_unicorn",
+      "rarity": "mythic",
+      "group": "rare",
+      "tiles": 1,
+      "maps": [
+        "Narmada"
+      ],
+      "why": "Met on 1 tiles only in Narmada.",
+      "subject": "A slender, swift, single-horned animal, bull-like in body, with one long horn rising from its brow as on the Harappan seals, standing at a river's edge.",
+      "guess": "Canon gives it one horn and swift feet. The body follows the Harappan seal animal, which is my inference."
+    },
+    {
+      "file": "garudasaur-eagle",
+      "name": "Garudasaur Eagle",
+      "canon": "fauna_garudasaur_eagle",
+      "rarity": "mythic",
+      "group": "rare",
+      "tiles": 4,
+      "maps": [
+        "Narmada",
+        "Aravali"
+      ],
+      "why": "Met on 4 tiles in Narmada and Aravali.",
+      "subject": "A colossal eagle with obsidian-black-tipped feathers, standing on its nest on a high volcanic ledge with its wings half open."
+    },
+    {
+      "file": "black-striped-siege-bee",
+      "name": "Black-Striped Siege Bee",
+      "canon": "fauna_black_striped_siege_bee",
+      "rarity": "rare",
+      "group": "rare",
+      "tiles": 15,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Aravali"
+      ],
+      "why": "Met on 15 tiles in Lothal, Narmada and Aravali.",
+      "subject": "A giant bee with bold black stripes and ash-grey fuzz, resting on the rim of a honeycomb on a cliff with its wings folded."
+    }
+  ],
+  "scenes": [
+    {
+      "file": "work-high",
+      "group": "ground",
+      "why": "The most common take on high ground: stone, tin and copper off hills and mountains, about 850 times across the maps. It shows knapping today.",
+      "subject": "Two hands breaking a block of dark basalt from a rocky hillside outcrop with a heavy hammerstone, fragments on the ground at the knees and a basket for the pieces, the land falling away to a valley behind."
+    },
+    {
+      "file": "work-coast",
+      "group": "ground",
+      "why": "Flint, clay and scar glass taken at the shore, 560 times. It shows knapping today.",
+      "subject": "Two hands prising a nodule of flint out of pale beach shingle with a pointed stick, the tide line and moving surf just behind."
+    },
+    {
+      "file": "stoop-coast",
+      "group": "ground",
+      "why": "Cutting on the shore, 240 times: salt reed and mangrove poles. It shows reeds in a marsh today.",
+      "subject": "Two hands cutting shoulder-high salt reeds at a brackish shore with a small blade, the sea's edge behind and a bundle already tied with twine."
+    },
+    {
+      "file": "stoop-forest",
+      "group": "ground",
+      "why": "Gathering under trees, 199 times: cardamom, ginger, long pepper. It shows reeds in a marsh today.",
+      "subject": "Two hands picking green cardamom pods from low stems in forest shade, a small basket on the leaf litter, dappled light through the canopy."
+    },
+    {
+      "file": "work-river",
+      "group": "ground",
+      "why": "River clay, 117 times.",
+      "subject": "Two hands scooping slick grey clay from a cut bank at the river's edge into a woven basket, the river moving past."
+    },
+    {
+      "file": "stoop-sky_island",
+      "group": "ground",
+      "why": "The sky islands are high but not climbed, so they are kept out of stoop-high: lodestone moss, prana pollen, aero bark.",
+      "subject": "Seen from behind and close: a traveller kneeling at the grassy rim of a floating island, one hand steadying a pale boulder furred with silver-green moss, the other cutting a strip of it free with a small blade. Beyond the rim the ground simply ends: open cloud below, and other islands hanging small and blue in the far haze, trailing roots."
+    },
+    {
+      "file": "stoop-carving",
+      "group": "bench",
+      "why": "The most common bench work: 27 recipes carve something.",
+      "subject": "Two hands carving a wooden bowl with a small bronze blade, the half-shaped bowl braced against a knee, pale curls of shavings falling onto a mat."
+    },
+    {
+      "file": "stalk-cooking",
+      "group": "bench",
+      "why": "14 recipes. Cooking plays as waiting for the right moment.",
+      "subject": "Two hands lifting the lid of a clay pot on a small fire of three stones to look inside, steam rising, judging whether it is ready."
+    },
+    {
+      "file": "stoop-weaving",
+      "group": "bench",
+      "why": "8 recipes.",
+      "subject": "Two hands weaving a reed mat on the ground, the finished part flat under one knee, loose reeds fanned out ready."
+    },
+    {
+      "file": "stalk-firing",
+      "group": "bench",
+      "why": "8 recipes. Firing plays as waiting for the right moment.",
+      "subject": "Two hands lifting one turf from a small pit kiln of stacked pots banked with turf and dung, a warm glow inside, judging the moment to open it."
+    },
+    {
+      "file": "work-grinding",
+      "group": "bench",
+      "why": "6 recipes.",
+      "subject": "Two hands pushing a stone rubber across a saddle quern, grain turning to flour, a line of flour dust at the edge of the stone."
+    },
+    {
+      "file": "stalk-drying",
+      "group": "bench",
+      "why": "5 recipes.",
+      "subject": "Two hands turning split fish on a drying rack in strong sun, one hand held flat above them to feel the heat."
+    },
+    {
+      "file": "work-casting",
+      "group": "bench",
+      "why": "4 recipes.",
+      "subject": "Two hands with green-wood tongs pouring bright orange molten bronze from a small clay crucible into a stone mould set in sand."
+    },
+    {
+      "file": "work-pressing",
+      "group": "bench",
+      "why": "4 recipes.",
+      "subject": "Two hands leaning on a wooden lever press over a stack of crushed seed, oil running down a groove into a pot beneath."
+    },
+    {
+      "file": "stoop-spinning",
+      "group": "bench",
+      "why": "3 recipes.",
+      "subject": "Two hands spinning thread with a drop spindle, a hank of goat-hair fibre on one wrist, the spindle turning below."
+    },
+    {
+      "file": "stoop-tanning",
+      "group": "bench",
+      "why": "2 recipes.",
+      "subject": "Two hands working a stone scraper over a hide pegged out on the ground, a pot of dark bark liquor beside it."
+    },
+    {
+      "file": "stalk-brewing",
+      "group": "bench",
+      "why": "2 recipes.",
+      "subject": "Two hands stirring a wide-mouthed clay jar of fermenting mahua flowers with a stick, small bubbles on the surface, waiting for it to turn."
+    },
+    {
+      "file": "stoop-purifying",
+      "group": "bench",
+      "why": "2 recipes.",
+      "subject": "Two hands pouring a dark liquid slowly through layered cloth and charcoal into a clean pot, drop by drop."
+    },
+    {
+      "file": "stoop-retting",
+      "group": "bench",
+      "why": "1 recipe.",
+      "subject": "Two hands lifting a soaked bundle of stems out of a shallow pool, fibre loosening from the rotting pith."
+    },
+    {
+      "file": "stoop-boatbuilding",
+      "group": "bench",
+      "why": "1 recipe.",
+      "subject": "Two hands lashing a plank to the side of a half-built boat with fibre cord on a riverbank, a pot of pitch beside it."
+    },
+    {
+      "file": "work-smelting",
+      "group": "bench",
+      "why": "1 recipe.",
+      "subject": "Two hands working a skin bellows at the foot of a small clay furnace, thin smoke from its top, baskets of ore and charcoal beside it."
+    },
+    {
+      "file": "rest-bedroll",
+      "group": "night",
+      "why": "The night on open ground with only the bedroll. It shows the generic night today.",
+      "subject": "Two hands spreading an oiled cloth bedroll on open ground at dusk, no fire, the grass still wet from rain, a notebook set on the pack."
+    },
+    {
+      "file": "rest-none",
+      "group": "night",
+      "why": "Sitting the night out with nothing at all.",
+      "subject": "Seen from behind: a traveller sitting up against a pack in the dark, knees drawn up, nothing to write by, a faint band of stars above."
+    }
+  ],
+  "lore": [
+    {
+      "id": "fauna_vrkshasmara",
+      "name": "Vṛkṣaśmara",
+      "kind": "animal",
+      "tiles": 40,
+      "group": "lore",
+      "note": "Canon says it is grey, lives high in the canopy, is too large for a monkey, and files it as a mollusc. Nothing says what shape a tree-living mollusc that size is."
+    },
+    {
+      "id": "fauna_cognitavi",
+      "name": "Cognitavi",
+      "kind": "animal",
+      "tiles": 19,
+      "group": "lore",
+      "note": "The navigator birds are clever and read water and weather, but canon never says their size, shape or plumage. The Vanga Pearl-Guide (42 tiles) and Abyssal Storm-Watcher (105 tiles) are both Cognitavi, so painting any one of them fixes the look of all three."
+    },
+    {
+      "id": "fauna_cloud_cricket",
+      "name": "Cloud-Cricket",
+      "kind": "animal",
+      "tiles": 35,
+      "group": "lore",
+      "note": "Canon describes only its song in the thin air. Body and colour are missing."
+    },
+    {
+      "id": "fauna_mist_valley_thrush",
+      "name": "Mist-Valley Thrush",
+      "kind": "animal",
+      "tiles": 22,
+      "group": "lore",
+      "note": "Canon gives its song and its food, not its plumage."
+    },
+    {
+      "id": "fauna_woolly_bactrian_croc",
+      "name": "Woolly Bactrian-Croc",
+      "kind": "animal",
+      "tiles": 3,
+      "group": "lore",
+      "note": "A crocodile-mammal hybrid with two water-retention humps. How the humps sit on a crocodile's body, and whether it has fur or scales, are both open. The Sleek Dromedary-Croc and the Camelosuchus calf share the question."
+    },
+    {
+      "id": "flora_asura_thorn",
+      "name": "Asura Thorn",
+      "kind": "plant",
+      "tiles": 567,
+      "group": "lore",
+      "note": "One of the most common plants in the game (567 tiles). Canon says hooked scrub planted as a living fence, and nothing about leaf, flower or colour."
+    },
+    {
+      "id": "flora_red_blood_coral",
+      "name": "Red Blood-Coral",
+      "kind": "plant",
+      "tiles": 631,
+      "group": "lore",
+      "note": "631 tiles. The name gives the colour. Canon says it builds ridges and reclaims old aqueducts, but not what shape it grows in."
+    },
+    {
+      "id": "flora_healing_silver_root",
+      "name": "Healing Silver-root",
+      "kind": "plant",
+      "tiles": 150,
+      "group": "lore",
+      "note": "A medicinal tuber. Nothing says what the plant looks like above ground."
+    },
+    {
+      "id": "flora_bitter_marsh_root",
+      "name": "Bitter Marsh-root",
+      "kind": "plant",
+      "tiles": 47,
+      "group": "lore",
+      "note": "A root. Nothing says what the plant looks like above ground."
+    },
+    {
+      "id": "flora_lesser_whisper_fig",
+      "name": "Lesser Whisper-Fig",
+      "kind": "plant",
+      "tiles": 131,
+      "group": "lore",
+      "note": "Canon says it whispers. Nothing visual beyond being a shrub-like fig on cliffs."
+    },
+    {
+      "id": "flora_blue_scholar_s_moss",
+      "name": "Blue Scholar's Moss",
+      "kind": "plant",
+      "tiles": 181,
+      "group": "lore",
+      "note": "It glows, which the art direction avoids. How bright, and what it looks like unlit, are open."
+    }
+  ],
+  "rulings": [
+    {
+      "id": "fauna_scutosaurus_shield_beast",
+      "name": "Scutosaurus Shield-Beast",
+      "kind": "animal",
+      "tiles": 52,
+      "group": "war",
+      "note": "Bred by the Asura as living shields."
+    },
+    {
+      "id": "fauna_gorgonopsid_pack_leader",
+      "name": "Gorgonopsid Pack-Leader",
+      "kind": "animal",
+      "tiles": 48,
+      "group": "war",
+      "note": "Bred by Asura generals to lead war-packs."
+    },
+    {
+      "id": "fauna_gorgonopsid_war_beast",
+      "name": "Gorgonopsid War-Beast",
+      "kind": "animal",
+      "tiles": 43,
+      "group": "war",
+      "note": "Asura shock cavalry."
+    },
+    {
+      "id": "fauna_scutosaurus_battering_ram",
+      "name": "Scutosaurus Battering-Ram",
+      "kind": "animal",
+      "tiles": 37,
+      "group": "war",
+      "note": "Bred to break palisades."
+    },
+    {
+      "id": "fauna_dimetrodon_war_mount",
+      "name": "Dimetrodon War-Mount",
+      "kind": "animal",
+      "tiles": 34,
+      "group": "war",
+      "note": "An Asura commander's mount."
+    },
+    {
+      "id": "fauna_rajasaurus_ambush_drake",
+      "name": "Rajasaurus Ambush-Drake",
+      "kind": "animal",
+      "tiles": 5,
+      "group": "war",
+      "note": "A fortress guardian altered with Asura venom."
+    },
+    {
+      "id": "fauna_colossal_void_devourer",
+      "name": "Colossal Void-Devourer",
+      "kind": "animal",
+      "tiles": 1,
+      "group": "war",
+      "note": "Resurrected from bones by Asura magic."
+    },
+    {
+      "id": "fauna_sea_scorpion_queen",
+      "name": "Sea Scorpion Queen",
+      "kind": "animal",
+      "tiles": 140,
+      "group": "mimic",
+      "note": "A eurypterid that has come to resemble human women to lure prey. How human is the question, and it is the fifth most-met unpainted animal (140 tiles)."
+    },
+    {
+      "id": "fauna_shrima",
+      "name": "Shrīmā",
+      "kind": "animal",
+      "tiles": 17,
+      "group": "mimic",
+      "note": "Stands in a lagoon at dusk in seaweed-silk and cowrie shells, swaying. Its entry is a reading, not a body."
+    },
+    {
+      "id": "fauna_lunar_reflection_wraith",
+      "name": "Lunar-Reflection Wraith",
+      "kind": "animal",
+      "tiles": 5,
+      "group": "mimic",
+      "note": "An illusion made of moonlight on water."
+    },
+    {
+      "id": "fauna_quarry_spawned_tendua",
+      "name": "Quarry-Spawned Tendua",
+      "kind": "animal",
+      "tiles": 4,
+      "group": "mimic",
+      "note": "A stone-furred manticore haunting quarries."
+    },
+    {
+      "id": "fauna_ash_skinned_courtesan",
+      "name": "Ash-Skinned Courtesan",
+      "kind": "animal",
+      "tiles": 3,
+      "group": "mimic",
+      "note": "A mud-and-pollen humanoid that became a night-stalker."
+    },
+    {
+      "id": "fauna_winged_behemoth_manticore",
+      "name": "Winged Behemoth Manticore",
+      "kind": "animal",
+      "tiles": 3,
+      "group": "mimic",
+      "note": "A winged leopard with a human face, made of brick-dust and shadow."
+    },
+    {
+      "id": "fauna_clay_born_watcher",
+      "name": "Clay-Born Watcher",
+      "kind": "animal",
+      "tiles": 2,
+      "group": "mimic",
+      "note": "An animated clay eye."
+    },
+    {
+      "id": "fauna_ember_scattering_sprite",
+      "name": "Ember-Scattering Sprite",
+      "kind": "animal",
+      "tiles": 2,
+      "group": "mimic",
+      "note": "A spirit born from ritual embers."
+    },
+    {
+      "id": "fauna_ember_born_dancer",
+      "name": "Ember-Born Dancer",
+      "kind": "animal",
+      "tiles": 1,
+      "group": "mimic",
+      "note": "A fire-bride dancing in bonfires."
+    },
+    {
+      "id": "fauna_nagaraptor",
+      "name": "Nagaraptor",
+      "kind": "animal",
+      "tiles": 47,
+      "group": "people",
+      "note": "Feathered raptor clans with earthworks and moats: a civilisation. People to meet, or animals to paint?"
+    },
+    {
+      "id": "fauna_vajraptor",
+      "name": "Vajraptor",
+      "kind": "animal",
+      "tiles": 43,
+      "group": "people",
+      "note": "Social, territorial, problem-solving raptors. The same question."
+    },
+    {
+      "id": "fauna_naga_infiltrator",
+      "name": "Naga Infiltrator",
+      "kind": "animal",
+      "tiles": 2,
+      "group": "people",
+      "note": "A shape-shifting serpent-human in royal courts."
+    },
+    {
+      "id": "fauna_naga_kin_sentry",
+      "name": "Naga-Kin Sentry",
+      "kind": "animal",
+      "tiles": 1,
+      "group": "people",
+      "note": "A serpent warrior with bronze and stone spears."
+    },
+    {
+      "id": "flora_plunging_fire_siege_tree",
+      "name": "Plunging-Fire Siege Tree",
+      "kind": "plant",
+      "tiles": 12,
+      "group": "plant",
+      "note": "A tree tortured into a siege engine and bound in bronze."
+    },
+    {
+      "id": "flora_root_anchored_artillery_tree",
+      "name": "Root-Anchored Artillery Tree",
+      "kind": "plant",
+      "tiles": 7,
+      "group": "plant",
+      "note": "A tree that flings burning pitch from fortress walls."
+    },
+    {
+      "id": "flora_asura_tainted_flesh_vine",
+      "name": "Asura-Tainted Flesh-Vine",
+      "kind": "plant",
+      "tiles": 11,
+      "group": "plant",
+      "note": "A climber with muscle fibres that constricts small animals."
+    },
+    {
+      "id": "flora_crimson_blood_weed",
+      "name": "Crimson Blood-Weed",
+      "kind": "plant",
+      "tiles": 5,
+      "group": "plant",
+      "note": "A predatory vine with pulsing veins."
+    },
+    {
+      "id": "flora_whispering_blood_orchid",
+      "name": "Whispering Blood-Orchid",
+      "kind": "plant",
+      "tiles": 11,
+      "group": "plant",
+      "note": "An orchid with lip-like petals that whisper."
+    }
+  ]
+}

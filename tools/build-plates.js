@@ -114,7 +114,11 @@ const KINDS = {
     size: 512,
     aspect: 4 / 3,
     word: 'scene',
-    label: 'activity scene'
+    label: 'activity scene',
+    // A scene's variant is a canon word kept whole -- a biome, a shelter kind, a process -- and
+    // three biomes carry an underscore. Hyphenating built `stoop-sky_island` as `stoop-sky-island`,
+    // which `sceneFor` never asks for.
+    keepUnderscores: true
   },
   /**
    * A place view: the band across the top of `PlacePanel`.
