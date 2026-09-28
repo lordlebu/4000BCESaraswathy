@@ -72,9 +72,7 @@ describe('the art plan asks for files the game will draw', () => {
 
   it('keeps the brief in step with the renderer', () => {
     // Line endings normalised: a Windows checkout turns the file CRLF and the renderer writes LF.
-    const read = () => readFileSync(join(ROOT, 'docs', 'art-asks.md'), 'utf8').replace(/
-/g, '
-');
+    const read = () => readFileSync(join(ROOT, 'docs', 'art-asks.md'), 'utf8').replace(/\r\n/g, '\n');
     const before = read();
     execFileSync(process.execPath, [join(ROOT, 'tools', 'render-art-asks.js')], { cwd: ROOT });
     const after = read();
