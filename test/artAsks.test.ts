@@ -71,9 +71,13 @@ describe('the art plan asks for files the game will draw', () => {
   });
 
   it('keeps the brief in step with the renderer', () => {
-    const before = readFileSync(join(ROOT, 'docs', 'art-asks.md'), 'utf8');
+    // Line endings normalised: a Windows checkout turns the file CRLF and the renderer writes LF.
+    const read = () => readFileSync(join(ROOT, 'docs', 'art-asks.md'), 'utf8').replace(/
+/g, '
+');
+    const before = read();
     execFileSync(process.execPath, [join(ROOT, 'tools', 'render-art-asks.js')], { cwd: ROOT });
-    const after = readFileSync(join(ROOT, 'docs', 'art-asks.md'), 'utf8');
+    const after = read();
     expect(after, 'docs/art-asks.md was edited by hand or not re-rendered: run node tools/render-art-asks.js').toBe(before);
   });
 });
