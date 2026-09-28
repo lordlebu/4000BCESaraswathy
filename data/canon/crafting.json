@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.36.0",
+  "canon_version": "2.37.0",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -50,7 +50,8 @@
         "fibre"
       ],
       "won_from": [
-        "fauna_vindhya_cliff_goat"
+        "fauna_vindhya_cliff_goat",
+        "fauna_plateau_ibex"
       ],
       "found_in": [
         "hills",
@@ -248,7 +249,8 @@
         "hide"
       ],
       "won_from": [
-        "fauna_vindhya_cliff_goat"
+        "fauna_vindhya_cliff_goat",
+        "fauna_plateau_ibex"
       ],
       "found_in": [
         "hills",
@@ -289,7 +291,8 @@
       ],
       "won_from": [
         "fauna_painted_deer",
-        "fauna_mountain_forest_boar"
+        "fauna_mountain_forest_boar",
+        "fauna_plateau_ibex"
       ],
       "found_in": [
         "forest",
@@ -760,12 +763,14 @@
       ],
       "won_from": [
         "flora_mahua",
-        "flora_sweet_nectar_mahua"
+        "flora_sweet_nectar_mahua",
+        "flora_highland_bitter_mahua"
       ],
       "found_in": [
         "forest",
         "plains",
-        "hills"
+        "hills",
+        "mountains"
       ],
       "rarity": "common",
       "renews": "seasonal",
@@ -1339,6 +1344,106 @@
       "renews": "slow",
       "notes": "Taken from a desert viper held behind the head over the rim of a cup, a few drops at a time, and the animal is let go where it was found. Clear, faintly yellow, and it dries to a varnish. Four serpents of the dry country give it and the caravan people do not much distinguish between them -- what matters is the milking, and a milked viper needs weeks before it is worth milking again.\n\nThe only thing it can become is medicine: canon's affordance vocabulary has no word for harm, so the recipes that consume a poison are the ones that purify it -- which is what the tradition it comes from does with a venom.",
       "source_index": 70
+    },
+    {
+      "id": "material_pine_resin",
+      "type": "material",
+      "name": "Pine resin",
+      "classes": [
+        "resin",
+        "fuel"
+      ],
+      "won_from": [
+        "flora_vindhya_pine"
+      ],
+      "found_in": [
+        "hills",
+        "mountains"
+      ],
+      "rarity": "common",
+      "renews": "seasonal",
+      "notes": "Run from a slash in the bark of the Vindhya pine and scraped off once it has skinned over. Raw, not pitch: pitch is boiled from heartwood in a covered pit, and this is what a traveller can take with a blade and no pot. It lights, and it seals a seam until the sun softens it.",
+      "source_index": 71
+    },
+    {
+      "id": "material_wild_honey",
+      "type": "material",
+      "name": "Wild honey",
+      "classes": [
+        "produce",
+        "physic"
+      ],
+      "won_from": [
+        "fauna_golden_honey_goliath",
+        "fauna_black_striped_siege_bee"
+      ],
+      "found_in": [
+        "hills",
+        "mountains"
+      ],
+      "rarity": "rare",
+      "renews": "seasonal",
+      "notes": "Cut from comb hung on the Narmada cliffs, where the honey-goliath and the siege bee both build and where the cave bear climbs for the same thing. Canon names it medicinal and rich in essential oil; it is also food. The Maru trade it to the asura-blooded for lanterns and saplings, and the upriver expedition logged the cliffside honey-gatherers' pacts without writing down their terms.",
+      "source_index": 72
+    },
+    {
+      "id": "material_mountain_tea",
+      "type": "material",
+      "name": "Mountain tea",
+      "classes": [
+        "produce",
+        "physic"
+      ],
+      "won_from": [
+        "flora_black_ash_tea",
+        "flora_golden_ember_leaf"
+      ],
+      "found_in": [
+        "hills",
+        "mountains"
+      ],
+      "rarity": "common",
+      "renews": "fast",
+      "notes": "The young leaves of the wild tea bushes on sulphurous volcanic ground: the dark, sharp black-ash leaf that anyone may pick, and the amber-veined ember leaf the Narmada scholars prize. Plucked at the tip, and the bush flushes again within the season.",
+      "source_index": 73
+    },
+    {
+      "id": "material_snow_moss",
+      "type": "material",
+      "name": "Snow moss",
+      "classes": [
+        "fibre"
+      ],
+      "won_from": [
+        "flora_snow_looming_moss"
+      ],
+      "found_in": [
+        "snow",
+        "mountains"
+      ],
+      "rarity": "common",
+      "renews": "slow",
+      "notes": "Torn in dense mats off glacier-bound stone. The snow hares line their nests with it, and it does the same for a bedroll or a boot. Slow to come back, which is why a careful hand takes the edge of a mat and not the middle.",
+      "source_index": 74
+    },
+    {
+      "id": "material_hare_pelt",
+      "type": "material",
+      "name": "Snow hare pelt",
+      "classes": [
+        "hide"
+      ],
+      "won_from": [
+        "fauna_glacial_snow_hare"
+      ],
+      "found_in": [
+        "snow",
+        "mountains"
+      ],
+      "rarity": "rare",
+      "renews": "seasonal",
+      "notes": "Thick white winter fur off the glacial snow hare. Too small and too thin-skinned to make a garment alone; stitched as a lining, and the warmest thing a traveller on the ice can carry.",
+      "source_index": 75
     }
   ],
   "items": [

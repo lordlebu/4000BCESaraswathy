@@ -1,6 +1,14 @@
 # Activity scenes
 
-Five paintings so far: `stoop.png`, `stalk.png`, `work.png`, `rest.png`, `rest-camp.png`.
+Twelve paintings so far: the four gestures `stoop`, `stalk`, `work` and `fish`; two grounds,
+`stoop-high` and `stoop-plains`; and six nights, `rest`, `rest-camp`, `rest-palace`,
+`rest-roof` (two takes), `rest-settlement` and `rest-tent`.
+
+**`work.png` is knapping, and was a grain harvest until 2026-09-28.** The harvest was taken in as the
+`work` scene when the knapping take was sitting in Downloads beside it, so every quarry and every
+flint bench showed winnowing. It moved to `stoop-plains.png`, which is what it is of — a take on open
+ground — and the hammerstone went where the brief always said it would. A knapping bench asks for
+`work-knapping.png` and falls back to this one, so both acts now show the same striking hands.
 
 **The set grew from three to about twenty-four**, and none of the new ones is a blocker. A fourth
 gesture arrived (`fish`), the night wants one painting per shelter kind, and a making activity can
@@ -37,8 +45,20 @@ be both.
 Biome ids come from `data/biomes.json`: `mountains`, `hills`, `forest`, `wetland`, `river`, `coast`,
 `plains`, `desert`, and the stamped ones — `snow`, `lava_field`, `sky_island`, `sky_underside`.
 
-Entirely optional. An unpainted biome falls back to the plain gesture, which is what every take
-shows today.
+**Or one per group of ground**, `<gesture>-<group>.png`, for biomes that look alike. The lookup
+runs most specific first — `stoop-hills`, then `stoop-high`, then `stoop` — so a group painting
+covers every biome in it until one of them is given its own. The groups are one table,
+`GROUND_GROUP` in `src/ui/scenes.ts`:
+
+| Group | Biomes | Painted |
+|---|---|---|
+| `high` | `hills`, `mountains`, `snow` | `stoop-high.png` — herbs cut off a cliff face on a rope |
+
+The group exists because one biome was too narrow to be seen: as `stoop-mountains` the cliff could
+show on 5 tiles across the four maps, and as `stoop-high` it shows on 92. **The sky islands are not
+`high`.** They are high but not climbed, and are owed their own painting, `stoop-sky_island.png`.
+
+Entirely optional. An unpainted biome or group falls back to the plain gesture.
 
 Drop a built PNG in here and it appears — `src/ui/scenes.ts` globs this folder, exactly the way
 `plates.ts` globs the species plates. No list to update, no code to change.

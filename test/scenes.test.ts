@@ -59,6 +59,22 @@ describe('the painting an activity shows', () => {
     expect(sceneFor('rest', 'not-a-shelter-kind')).toBe(sceneFor('rest'));
   });
 
+  /**
+   * **A knapping bench and a quarry both show the striking hands.**
+   *
+   * `work.png` was a grain harvest for three weeks while the hammerstone take sat unused beside it,
+   * so every flint bench in the game showed winnowing and nothing failed. The harvest is now the
+   * plains take it is a picture of. This pins the pair apart, and pins that the bench -- which
+   * asks for `work-knapping` -- reaches the knapping plate by falling back rather than by a file.
+   */
+  it('shows knapping for work, and keeps the harvest for a take on the plains', () => {
+    const work = sceneFor('work');
+    expect(work).toContain('/work.png');
+    expect(sceneFor('work', 'knapping')).toBe(work);
+    expect(sceneFor('stoop', 'plains')).toContain('stoop-plains');
+    expect(sceneFor('stoop', 'mountains')).toContain('stoop-high');
+  });
+
   it('answers null for a gesture nobody has painted', () => {
     expect(sceneFor('dance')).toBeNull();
     expect(sceneFor('dance', 'quickly')).toBeNull();

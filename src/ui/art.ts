@@ -85,7 +85,7 @@ for (const [path, url] of Object.entries(files)) {
  * **The naming is `<name>.png`, then `<name>.2.png`, `<name>.3.png`.** A take number is a trailing
  * `.<digits>` before the extension and is not part of the name, so `rest.2.png` is a second night
  * and `rest-camp.2.png` is a second night at a camp. Everything else in the filename still means
- * what it meant: `rest-camp` is the shelter variant, `stoop-mountains` the ground.
+ * what it meant: `rest-camp` is the shelter variant, `stoop-high` the ground.
  *
  * Meaningful in `scenes/` and `events/` only — see above. A `.2` in any other folder is parsed the
  * same way and then never chosen, which is a file that will not draw; `test/artKept.test.ts` fails
