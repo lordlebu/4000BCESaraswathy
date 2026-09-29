@@ -70,8 +70,12 @@ const scenePrompt = (c) => `${SCENE_STYLE}\n\n${SCENE_FRAME}\n\nSubject: ${c.sub
 
 const PLATE_GROUPS = [
   ['often', 'Met most often', 'The thirty unpainted animals a player meets most, by tiles across the four maps.'],
-  ['rare', 'Rare finds', 'Twenty rare and mythic animals that can be met. Seldom seen, and remembered when they are.']
+  ['rare', 'Rare finds', 'Twenty rare and mythic animals that can be met. Seldom seen, and remembered when they are.'],
+  ['described', 'Newly described', 'Species your lore notes of 29 September made paintable: the ones canon could not describe, and the war beasts in the calm poses you ruled. Each subject is its canon `appearance` plus a pose.']
 ];
+/** A settled ask shows what was decided in place of what was missing. */
+const settledCell = (x) =>
+  x.settled ? `<span class="chip arrived">Settled</span> ${esc(x.settled)}` : esc(x.note);
 const SCENE_GROUPS = [
   ['ground', 'On the ground', 'A take narrows its painting by the ground it happens on. Each of these falls back to the plain gesture until it arrives.'],
   ['bench', 'At the bench', 'A making narrows by canon’s process word. Ordered by how many recipes use it.'],
@@ -142,7 +146,7 @@ function brief() {
   out.push('');
   out.push('| Species | Kind | Tiles | What canon is missing |');
   out.push('|---|---|--:|---|');
-  for (const l of asks.lore) out.push(`| ${l.name} (\`${l.id}\`) | ${l.kind} | ${l.tiles} | ${l.note} |`);
+  for (const l of asks.lore) out.push(`| ${l.name} (\`${l.id}\`) | ${l.kind} | ${l.tiles} | ${l.settled ? `**Settled.** ${l.settled}` : l.note} |`);
   out.push('');
   out.push('## Needs a ruling before it can be painted');
   out.push('');
@@ -153,7 +157,7 @@ function brief() {
     out.push('');
     out.push('| Species | Tiles | Canon says |');
     out.push('|---|--:|---|');
-    for (const r of asks.rulings.filter((x) => x.group === key)) out.push(`| ${r.name} (\`${r.id}\`) | ${r.tiles} | ${r.note} |`);
+    for (const r of asks.rulings.filter((x) => x.group === key)) out.push(`| ${r.name} (\`${r.id}\`) | ${r.tiles} | ${r.settled ? `**Settled.** ${r.settled}` : r.note} |`);
     out.push('');
   }
   if (asks.held && asks.held.length) {
@@ -223,7 +227,7 @@ function page() {
   const loreRows = asks.lore
     .map(
       (l) =>
-        `<tr><td><b>${esc(l.name)}</b><br><code>${esc(l.id)}</code></td><td>${esc(l.kind)}</td><td class="num">${l.tiles}</td><td>${esc(l.note)}</td></tr>`
+        `<tr><td><b>${esc(l.name)}</b><br><code>${esc(l.id)}</code></td><td>${esc(l.kind)}</td><td class="num">${l.tiles}</td><td>${settledCell(l)}</td></tr>`
     )
     .join('\n');
   const rulings = RULING_GROUPS.map(([key, title, blurb]) => {
@@ -231,7 +235,7 @@ function page() {
       .filter((r) => r.group === key)
       .map(
         (r) =>
-          `<tr><td><b>${esc(r.name)}</b><br><code>${esc(r.id)}</code></td><td class="num">${r.tiles}</td><td>${esc(r.note)}</td></tr>`
+          `<tr><td><b>${esc(r.name)}</b><br><code>${esc(r.id)}</code></td><td class="num">${r.tiles}</td><td>${settledCell(r)}</td></tr>`
       )
       .join('\n');
     return `

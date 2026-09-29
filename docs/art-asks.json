@@ -5,7 +5,8 @@
     "painted_share": 38.8,
     "asked_share": 37.3,
     "after_share": 76.1,
-    "how": "Every tile of the four field maps, asking the game's creatureFor which animal stands there."
+    "how": "Every tile of the four field maps, asking the game's creatureFor which animal stands there.",
+    "note_round2": "Plates added on 29 September 2026 for species the owner's lore notes made describable."
   },
   "plates": [
     {
@@ -732,6 +733,311 @@
       ],
       "why": "Met on 15 tiles in Lothal, Narmada and Aravali.",
       "subject": "A giant bee with bold black stripes and ash-grey fuzz, resting on the rim of a honeycomb on a cliff with its wings folded."
+    },
+    {
+      "file": "sea-scorpion-queen",
+      "name": "Sea Scorpion Queen",
+      "canon": "fauna_sea_scorpion_queen",
+      "rarity": "common",
+      "group": "described",
+      "tiles": 140,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 140 tiles in Lothal and Aravali.",
+      "subject": "An unsettlingly tall aquatic mimic. Its upper body resembles a serene, pale-skinned woman in a cowl of wet kelp, and below the waist it becomes an armoured, segmented dark-teal eurypterid tail flanked by jointed swimming paddles. It stands waist-deep and still in a southern lagoon at dusk, kelp moving around it."
+    },
+    {
+      "file": "vrkshasmara",
+      "name": "Vṛkṣaśmara",
+      "canon": "fauna_vrkshasmara",
+      "rarity": "rare",
+      "group": "described",
+      "tiles": 40,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 40 tiles across all four maps.",
+      "subject": "A massive, grey-mottled tree-mollusc descended from octopus after the extinction at the end of the Cretaceous. Its mantle is bulbous and weathered, like rough oak galls. It grips high branches with eight thick, muscular tentacles rimmed with keratinous suction discs, which fold flat against the bark when it rests. It rests high in a forest canopy, tentacles folded along a branch, half-hidden by leaves."
+    },
+    {
+      "file": "abyssal-storm-watcher",
+      "name": "Abyssal Storm-Watcher",
+      "canon": "fauna_abyssal_storm_watcher",
+      "rarity": "common",
+      "group": "described",
+      "tiles": 105,
+      "maps": [
+        "Lothal",
+        "Aravali"
+      ],
+      "why": "Met on 105 tiles in Lothal and Aravali.",
+      "subject": "A Cognitavi storm-watcher: an elegant, raven-sized bird with sleek, iridescent slate-grey plumage, a pronounced ivory casque above a sharp hooked beak, and luminous amber eyes marked with star-like pale flecks. It circles high over the open sea ahead of a monsoon squall, dark clouds building behind it."
+    },
+    {
+      "file": "vanga-pearl-guide",
+      "name": "Vanga Pearl-Guide",
+      "canon": "fauna_vanga_pearl_guide",
+      "rarity": "rare",
+      "group": "described",
+      "tiles": 42,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Aravali"
+      ],
+      "why": "Met on 42 tiles in Lothal, Narmada and Aravali.",
+      "subject": "A Cognitavi pearl-guide: an elegant, raven-sized bird with sleek, iridescent slate-grey plumage, a pronounced ivory casque above a sharp hooked beak, and luminous amber eyes marked with star-like pale flecks. It flies low in a patterned loop over calm sea above a pearl-oyster bank."
+    },
+    {
+      "file": "cognitavi",
+      "name": "Cognitavi",
+      "canon": "fauna_cognitavi",
+      "rarity": "rare",
+      "group": "described",
+      "tiles": 19,
+      "maps": [
+        "Lothal",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 19 tiles in Lothal, Dwarka and Aravali.",
+      "subject": "An elegant, raven-sized bird with sleek, iridescent slate-grey plumage, a pronounced ivory casque above a sharp hooked beak, and luminous amber eyes marked with star-like pale flecks. It perches on a mooring post, head tilted, reading the water below."
+    },
+    {
+      "file": "cloud-cricket",
+      "name": "Cloud-Cricket",
+      "canon": "fauna_cloud_cricket",
+      "rarity": "rare",
+      "group": "described",
+      "tiles": 35,
+      "maps": [
+        "Aravali"
+      ],
+      "why": "Met on 35 tiles only in Aravali.",
+      "subject": "A lightweight orthopteran of the low-gravity heights, with a translucent pale-cyan exoskeleton, glass-like antennae and a slender, silver-veined abdomen that catches the light of the thin air. It sits on a tuft of moss at the rim of a floating island, open sky below."
+    },
+    {
+      "file": "mist-valley-thrush",
+      "name": "Mist-Valley Thrush",
+      "canon": "fauna_mist_valley_thrush",
+      "rarity": "rare",
+      "group": "described",
+      "tiles": 22,
+      "maps": [
+        "Aravali"
+      ],
+      "why": "Met on 22 tiles only in Aravali.",
+      "subject": "A plump songbird with soft ash-grey back feathers fading into a pale lavender-white breast speckled with tiny indigo chevrons. It sings from a bramble in a high, misty valley."
+    },
+    {
+      "file": "woolly-bactrian-croc",
+      "name": "Woolly Bactrian-Croc",
+      "canon": "fauna_woolly_bactrian_croc",
+      "rarity": "common",
+      "group": "described",
+      "tiles": 3,
+      "maps": [
+        "Narmada"
+      ],
+      "why": "Met on 3 tiles only in Narmada.",
+      "subject": "A heavy, sprawling crocodyliform that survived in Asia into the age of mammals. Armoured moss-grey scales give way along the spine to a coat of thick, matted tawny fur, which frames two prominent fatty humps set just behind the heavy shoulder girdle. It walks a cold highland track, unhurried."
+    },
+    {
+      "file": "shrima",
+      "name": "Shrīmā",
+      "canon": "fauna_shrima",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 17,
+      "maps": [
+        "Lothal",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 17 tiles in Lothal, Dwarka and Aravali.",
+      "subject": "An amphibious, shrimp-like humanoid with a slender, translucent pale-amber shell of a body, draped in seaweed-silk and chains of cowrie shells, with two long, sweeping glass-like antennae that curve above its head like a living tiara. It stands in a shallow lagoon at dusk, swaying as though dancing."
+    },
+    {
+      "file": "quarry-spawned-tendua",
+      "name": "Quarry-Spawned Tendua",
+      "canon": "fauna_quarry_spawned_tendua",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 4,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Aravali"
+      ],
+      "why": "Met on 4 tiles in Lothal, Narmada and Aravali.",
+      "subject": "A heavy, wingless manticore of the ancient Permian simian-felid line, its stone-furred frame made of rough sandstone and river gravel. It has dexterous, ape-like forepaws, a segmented basalt scorpion tail, and a hauntingly expressive human face capable of subtle feeling and of mocking speech. It lies at rest against the wall of an old stone quarry, blending into the rock."
+    },
+    {
+      "file": "winged-behemoth-manticore",
+      "name": "Winged Behemoth Manticore",
+      "canon": "fauna_winged_behemoth_manticore",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 3,
+      "maps": [
+        "Narmada",
+        "Aravali"
+      ],
+      "why": "Met on 3 tiles in Narmada and Aravali.",
+      "subject": "A colossal, shadowy manticore descended from corrupted sphinx-felids: the muscular body of a black leopard, flexible ape-like forelimbs, and broad membranous wings woven from brick-dust and shadow. Its strikingly expressive human face is crowned with scorpion-spine horns, and it can speak, in archaic dialects. It is perched on a ruined brick tower at dusk with its wings folded."
+    },
+    {
+      "file": "lunar-reflection-wraith",
+      "name": "Lunar-Reflection Wraith",
+      "canon": "fauna_lunar_reflection_wraith",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 5,
+      "maps": [
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 5 tiles in Dwarka and Aravali.",
+      "subject": "An ethereal, faceless apparition made entirely of rippling silver light and the caustic patterns of moonlit water. It hovers a hand's breadth above the surface and mirrors, distorted, the silhouette of whoever looks into it. It hangs over the still water of a great stepped bath under a full moon."
+    },
+    {
+      "file": "clay-born-watcher",
+      "name": "Clay-Born Watcher",
+      "canon": "fauna_clay_born_watcher",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 2,
+      "maps": [
+        "Lothal",
+        "Narmada"
+      ],
+      "why": "Met on 2 tiles in Lothal and Narmada.",
+      "subject": "A floating, palm-sized sphere of sun-baked Harappan terracotta around a single oversized, human-like eye of glazed obsidian that pulses with a faint golden light. It floats in the corner of a ruined Harappan courtyard."
+    },
+    {
+      "file": "ember-scattering-sprite",
+      "name": "Ember-Scattering Sprite",
+      "canon": "fauna_ember_scattering_sprite",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 2,
+      "maps": [
+        "Lothal",
+        "Dwarka"
+      ],
+      "why": "Met on 2 tiles in Lothal and Dwarka.",
+      "subject": "A tiny, crackling wisp of floating soot and bright orange sparks that darts through the air like a fiery dragonfly, leaving a short-lived trail of glowing ash. It darts above a campfire that has burned down to embers."
+    },
+    {
+      "file": "ember-born-dancer",
+      "name": "Ember-Born Dancer",
+      "canon": "fauna_ember_born_dancer",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 1,
+      "maps": [
+        "Narmada"
+      ],
+      "why": "Met on 1 tiles only in Narmada.",
+      "subject": "A tall, luminous figure woven from twisting golden flames and dark charcoal smoke, moving with fluid, hypnotic grace, as if performing a temple dance inside a bonfire. It dances in the heart of a tall bonfire at night."
+    },
+    {
+      "file": "scutosaurus-shield-beast",
+      "name": "Scutosaurus Shield-Beast",
+      "canon": "fauna_scutosaurus_shield_beast",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 52,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 52 tiles across all four maps.",
+      "subject": "A Permian pareiasaur: a massive, low, barrel-bodied herbivore covered in bony plates, often wearing weathered leather and brass harness from the work it is put to now. It stands placidly beside an old mossy earthwork, grazing, at peace."
+    },
+    {
+      "file": "scutosaurus-battering-ram",
+      "name": "Scutosaurus Battering-Ram",
+      "canon": "fauna_scutosaurus_battering_ram",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 37,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 37 tiles across all four maps.",
+      "subject": "A pareiasaur like the shield-beast, heavier in the head, with a broad bone-hard plate across its forehead, and a leather harness for hauling. It hauls a stone sledge along a terrace path, calm and steady."
+    },
+    {
+      "file": "gorgonopsid-pack-leader",
+      "name": "Gorgonopsid Pack-Leader",
+      "canon": "fauna_gorgonopsid_pack_leader",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 48,
+      "maps": [
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 48 tiles in Narmada, Dwarka and Aravali.",
+      "subject": "A large gorgonopsid: a sabre-toothed Permian synapsid, long-skulled and heavy-shouldered, larger than the rest of its line. It lies sphinx-like beside a basalt dolmen arch at twilight, eyes half closed, tail curled."
+    },
+    {
+      "file": "gorgonopsid-war-beast",
+      "name": "Gorgonopsid War-Beast",
+      "canon": "fauna_gorgonopsid_war_beast",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 43,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 43 tiles across all four maps.",
+      "subject": "A shaggy-haired, sabre-toothed gorgonopsid, heavy in the shoulder, often still wearing a harness from an older use. It rests tethered at the edge of a quiet campsite at twilight, dozing."
+    },
+    {
+      "file": "dimetrodon-war-mount",
+      "name": "Dimetrodon War-Mount",
+      "canon": "fauna_dimetrodon_war_mount",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 34,
+      "maps": [
+        "Lothal",
+        "Narmada",
+        "Dwarka",
+        "Aravali"
+      ],
+      "why": "Met on 34 tiles across all four maps.",
+      "subject": "A sail-backed synapsid whose sail is banded in the bright colours the Asura bred into its line, often saddled. Saddled and tethered near a peaceful camp, it basks with its sail turned to the sun."
+    },
+    {
+      "file": "rajasaurus-ambush-drake",
+      "name": "Rajasaurus Ambush-Drake",
+      "canon": "fauna_rajasaurus_ambush_drake",
+      "rarity": "mythic",
+      "group": "described",
+      "tiles": 5,
+      "maps": [
+        "Lothal",
+        "Narmada"
+      ],
+      "why": "Met on 5 tiles in Lothal and Narmada.",
+      "subject": "A colossal feathered abelisaurid with faint violet veins of Asura venom running through its scales. It sleeps coiled over a vine-draped temple archway, eyes closed, like a living stone gargoyle."
     }
   ],
   "scenes": [
@@ -881,7 +1187,8 @@
       "kind": "animal",
       "tiles": 40,
       "group": "lore",
-      "note": "Canon says it is grey, lives high in the canopy, is too large for a monkey, and files it as a mollusc. Nothing says what shape a tree-living mollusc that size is."
+      "note": "Canon says it is grey, lives high in the canopy, is too large for a monkey, and files it as a mollusc. Nothing says what shape a tree-living mollusc that size is.",
+      "settled": "Described in canon's new `appearance` field, from the owner's notes of 29 September 2026."
     },
     {
       "id": "fauna_cognitavi",
@@ -889,7 +1196,8 @@
       "kind": "animal",
       "tiles": 19,
       "group": "lore",
-      "note": "The navigator birds are clever and read water and weather, but canon never says their size, shape or plumage. The Vanga Pearl-Guide (42 tiles) and Abyssal Storm-Watcher (105 tiles) are both Cognitavi, so painting any one of them fixes the look of all three."
+      "note": "The navigator birds are clever and read water and weather, but canon never says their size, shape or plumage. The Vanga Pearl-Guide (42 tiles) and Abyssal Storm-Watcher (105 tiles) are both Cognitavi, so painting any one of them fixes the look of all three.",
+      "settled": "Described in canon's new `appearance` field, from the owner's notes of 29 September 2026."
     },
     {
       "id": "fauna_cloud_cricket",
@@ -897,7 +1205,8 @@
       "kind": "animal",
       "tiles": 35,
       "group": "lore",
-      "note": "Canon describes only its song in the thin air. Body and colour are missing."
+      "note": "Canon describes only its song in the thin air. Body and colour are missing.",
+      "settled": "Described in canon's new `appearance` field, from the owner's notes of 29 September 2026."
     },
     {
       "id": "fauna_mist_valley_thrush",
@@ -905,7 +1214,8 @@
       "kind": "animal",
       "tiles": 22,
       "group": "lore",
-      "note": "Canon gives its song and its food, not its plumage."
+      "note": "Canon gives its song and its food, not its plumage.",
+      "settled": "Described in canon's new `appearance` field, from the owner's notes of 29 September 2026."
     },
     {
       "id": "fauna_woolly_bactrian_croc",
@@ -913,7 +1223,8 @@
       "kind": "animal",
       "tiles": 3,
       "group": "lore",
-      "note": "A crocodile-mammal hybrid with two water-retention humps. How the humps sit on a crocodile's body, and whether it has fur or scales, are both open. The Sleek Dromedary-Croc and the Camelosuchus calf share the question."
+      "note": "A crocodile-mammal hybrid with two water-retention humps. How the humps sit on a crocodile's body, and whether it has fur or scales, are both open. The Sleek Dromedary-Croc and the Camelosuchus calf share the question.",
+      "settled": "Described in canon's new `appearance` field, from the owner's notes of 29 September 2026."
     },
     {
       "id": "flora_asura_thorn",
@@ -921,7 +1232,8 @@
       "kind": "plant",
       "tiles": 567,
       "group": "lore",
-      "note": "One of the most common plants in the game (567 tiles). Canon says hooked scrub planted as a living fence, and nothing about leaf, flower or colour."
+      "note": "One of the most common plants in the game (567 tiles). Canon says hooked scrub planted as a living fence, and nothing about leaf, flower or colour.",
+      "settled": "Described in canon's new `appearance` field, from the owner's notes of 29 September 2026."
     },
     {
       "id": "flora_red_blood_coral",
@@ -929,7 +1241,8 @@
       "kind": "plant",
       "tiles": 631,
       "group": "lore",
-      "note": "631 tiles. The name gives the colour. Canon says it builds ridges and reclaims old aqueducts, but not what shape it grows in."
+      "note": "631 tiles. The name gives the colour. Canon says it builds ridges and reclaims old aqueducts, but not what shape it grows in.",
+      "settled": "Described in canon's new `appearance` field, from the owner's notes of 29 September 2026."
     },
     {
       "id": "flora_healing_silver_root",
@@ -937,7 +1250,8 @@
       "kind": "plant",
       "tiles": 150,
       "group": "lore",
-      "note": "A medicinal tuber. Nothing says what the plant looks like above ground."
+      "note": "A medicinal tuber. Nothing says what the plant looks like above ground.",
+      "settled": "Described in canon's new `appearance` field, from the owner's notes of 29 September 2026."
     },
     {
       "id": "flora_bitter_marsh_root",
@@ -945,7 +1259,8 @@
       "kind": "plant",
       "tiles": 47,
       "group": "lore",
-      "note": "A root. Nothing says what the plant looks like above ground."
+      "note": "A root. Nothing says what the plant looks like above ground.",
+      "settled": "Described in canon's new `appearance` field, from the owner's notes of 29 September 2026."
     },
     {
       "id": "flora_lesser_whisper_fig",
@@ -953,7 +1268,8 @@
       "kind": "plant",
       "tiles": 131,
       "group": "lore",
-      "note": "Canon says it whispers. Nothing visual beyond being a shrub-like fig on cliffs."
+      "note": "Canon says it whispers. Nothing visual beyond being a shrub-like fig on cliffs.",
+      "settled": "Described in canon's new `appearance` field, from the owner's notes of 29 September 2026."
     },
     {
       "id": "flora_blue_scholar_s_moss",
@@ -961,7 +1277,8 @@
       "kind": "plant",
       "tiles": 181,
       "group": "lore",
-      "note": "It glows, which the art direction avoids. How bright, and what it looks like unlit, are open."
+      "note": "It glows, which the art direction avoids. How bright, and what it looks like unlit, are open.",
+      "settled": "Described in canon's new `appearance` field, from the owner's notes of 29 September 2026."
     }
   ],
   "rulings": [
@@ -971,7 +1288,8 @@
       "kind": "animal",
       "tiles": 52,
       "group": "war",
-      "note": "Bred by the Asura as living shields."
+      "note": "Bred by the Asura as living shields.",
+      "settled": "Paint calm. Bred by the Asura tens of millions of years ago; now rare, tamed or feral, and no longer tied to them. Cards in the new batch."
     },
     {
       "id": "fauna_gorgonopsid_pack_leader",
@@ -979,7 +1297,8 @@
       "kind": "animal",
       "tiles": 48,
       "group": "war",
-      "note": "Bred by Asura generals to lead war-packs."
+      "note": "Bred by Asura generals to lead war-packs.",
+      "settled": "Paint calm. Bred by the Asura tens of millions of years ago; now rare, tamed or feral, and no longer tied to them. Cards in the new batch."
     },
     {
       "id": "fauna_gorgonopsid_war_beast",
@@ -987,7 +1306,8 @@
       "kind": "animal",
       "tiles": 43,
       "group": "war",
-      "note": "Asura shock cavalry."
+      "note": "Asura shock cavalry.",
+      "settled": "Paint calm. Bred by the Asura tens of millions of years ago; now rare, tamed or feral, and no longer tied to them. Cards in the new batch."
     },
     {
       "id": "fauna_scutosaurus_battering_ram",
@@ -995,7 +1315,8 @@
       "kind": "animal",
       "tiles": 37,
       "group": "war",
-      "note": "Bred to break palisades."
+      "note": "Bred to break palisades.",
+      "settled": "Paint calm. Bred by the Asura tens of millions of years ago; now rare, tamed or feral, and no longer tied to them. Cards in the new batch."
     },
     {
       "id": "fauna_dimetrodon_war_mount",
@@ -1003,7 +1324,8 @@
       "kind": "animal",
       "tiles": 34,
       "group": "war",
-      "note": "An Asura commander's mount."
+      "note": "An Asura commander's mount.",
+      "settled": "Paint calm. Bred by the Asura tens of millions of years ago; now rare, tamed or feral, and no longer tied to them. Cards in the new batch."
     },
     {
       "id": "fauna_rajasaurus_ambush_drake",
@@ -1011,7 +1333,8 @@
       "kind": "animal",
       "tiles": 5,
       "group": "war",
-      "note": "A fortress guardian altered with Asura venom."
+      "note": "A fortress guardian altered with Asura venom.",
+      "settled": "Paint calm. Bred by the Asura tens of millions of years ago; now rare, tamed or feral, and no longer tied to them. Cards in the new batch."
     },
     {
       "id": "fauna_colossal_void_devourer",
@@ -1019,7 +1342,8 @@
       "kind": "animal",
       "tiles": 1,
       "group": "war",
-      "note": "Resurrected from bones by Asura magic."
+      "note": "Resurrected from bones by Asura magic.",
+      "settled": "Not an animal: moved to artifacts as a relic -- an overgrown bone skeleton set in basalt under violet moss."
     },
     {
       "id": "fauna_sea_scorpion_queen",
@@ -1027,7 +1351,8 @@
       "kind": "animal",
       "tiles": 140,
       "group": "mimic",
-      "note": "A eurypterid that has come to resemble human women to lure prey. How human is the question, and it is the fifth most-met unpainted animal (140 tiles)."
+      "note": "A eurypterid that has come to resemble human women to lure prey. How human is the question, and it is the fifth most-met unpainted animal (140 tiles).",
+      "settled": "Paint as described: each now has an `appearance` in canon. Cards in the new batch."
     },
     {
       "id": "fauna_shrima",
@@ -1035,7 +1360,8 @@
       "kind": "animal",
       "tiles": 17,
       "group": "mimic",
-      "note": "Stands in a lagoon at dusk in seaweed-silk and cowrie shells, swaying. Its entry is a reading, not a body."
+      "note": "Stands in a lagoon at dusk in seaweed-silk and cowrie shells, swaying. Its entry is a reading, not a body.",
+      "settled": "Paint as described: each now has an `appearance` in canon. Cards in the new batch."
     },
     {
       "id": "fauna_lunar_reflection_wraith",
@@ -1043,7 +1369,8 @@
       "kind": "animal",
       "tiles": 5,
       "group": "mimic",
-      "note": "An illusion made of moonlight on water."
+      "note": "An illusion made of moonlight on water.",
+      "settled": "Paint as described: each now has an `appearance` in canon. Cards in the new batch."
     },
     {
       "id": "fauna_quarry_spawned_tendua",
@@ -1051,7 +1378,8 @@
       "kind": "animal",
       "tiles": 4,
       "group": "mimic",
-      "note": "A stone-furred manticore haunting quarries."
+      "note": "A stone-furred manticore haunting quarries.",
+      "settled": "Paint as described: each now has an `appearance` in canon. Cards in the new batch."
     },
     {
       "id": "fauna_ash_skinned_courtesan",
@@ -1059,7 +1387,8 @@
       "kind": "animal",
       "tiles": 3,
       "group": "mimic",
-      "note": "A mud-and-pollen humanoid that became a night-stalker."
+      "note": "A mud-and-pollen humanoid that became a night-stalker.",
+      "settled": "Paint as described: each now has an `appearance` in canon. Cards in the new batch."
     },
     {
       "id": "fauna_winged_behemoth_manticore",
@@ -1067,7 +1396,8 @@
       "kind": "animal",
       "tiles": 3,
       "group": "mimic",
-      "note": "A winged leopard with a human face, made of brick-dust and shadow."
+      "note": "A winged leopard with a human face, made of brick-dust and shadow.",
+      "settled": "Paint as described: each now has an `appearance` in canon. Cards in the new batch."
     },
     {
       "id": "fauna_clay_born_watcher",
@@ -1075,7 +1405,8 @@
       "kind": "animal",
       "tiles": 2,
       "group": "mimic",
-      "note": "An animated clay eye."
+      "note": "An animated clay eye.",
+      "settled": "Paint as described: each now has an `appearance` in canon. Cards in the new batch."
     },
     {
       "id": "fauna_ember_scattering_sprite",
@@ -1083,7 +1414,8 @@
       "kind": "animal",
       "tiles": 2,
       "group": "mimic",
-      "note": "A spirit born from ritual embers."
+      "note": "A spirit born from ritual embers.",
+      "settled": "Paint as described: each now has an `appearance` in canon. Cards in the new batch."
     },
     {
       "id": "fauna_ember_born_dancer",
@@ -1091,7 +1423,8 @@
       "kind": "animal",
       "tiles": 1,
       "group": "mimic",
-      "note": "A fire-bride dancing in bonfires."
+      "note": "A fire-bride dancing in bonfires.",
+      "settled": "Paint as described: each now has an `appearance` in canon. Cards in the new batch."
     },
     {
       "id": "fauna_nagaraptor",
@@ -1099,7 +1432,8 @@
       "kind": "animal",
       "tiles": 47,
       "group": "people",
-      "note": "Feathered raptor clans with earthworks and moats: a civilisation. People to meet, or animals to paint?"
+      "note": "Feathered raptor clans with earthworks and moats: a civilisation. People to meet, or animals to paint?",
+      "settled": "People, not animals. Moved out of the bestiary into factions: the Taj Nagaraptors, the Vajraptor Canopy Sentinels and the Naga Clan. They want portraits and lines, not plates."
     },
     {
       "id": "fauna_vajraptor",
@@ -1107,7 +1441,8 @@
       "kind": "animal",
       "tiles": 43,
       "group": "people",
-      "note": "Social, territorial, problem-solving raptors. The same question."
+      "note": "Social, territorial, problem-solving raptors. The same question.",
+      "settled": "People, not animals. Moved out of the bestiary into factions: the Taj Nagaraptors, the Vajraptor Canopy Sentinels and the Naga Clan. They want portraits and lines, not plates."
     },
     {
       "id": "fauna_naga_infiltrator",
@@ -1115,7 +1450,8 @@
       "kind": "animal",
       "tiles": 2,
       "group": "people",
-      "note": "A shape-shifting serpent-human in royal courts."
+      "note": "A shape-shifting serpent-human in royal courts.",
+      "settled": "People, not animals. Moved out of the bestiary into factions: the Taj Nagaraptors, the Vajraptor Canopy Sentinels and the Naga Clan. They want portraits and lines, not plates."
     },
     {
       "id": "fauna_naga_kin_sentry",
@@ -1123,7 +1459,8 @@
       "kind": "animal",
       "tiles": 1,
       "group": "people",
-      "note": "A serpent warrior with bronze and stone spears."
+      "note": "A serpent warrior with bronze and stone spears.",
+      "settled": "People, not animals. Moved out of the bestiary into factions: the Taj Nagaraptors, the Vajraptor Canopy Sentinels and the Naga Clan. They want portraits and lines, not plates."
     },
     {
       "id": "flora_plunging_fire_siege_tree",

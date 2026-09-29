@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.37.0",
+  "canon_version": "2.38.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -252,38 +252,6 @@
       "source_index": 11
     },
     {
-      "id": "fauna_nagaraptor",
-      "type": "fauna",
-      "name": "Nagaraptor",
-      "scientific": "Nagaraptor vallatus",
-      "clade": "dinosaur",
-      "subclade": "dromaeosaurid",
-      "diet": "Carnivore",
-      "habitats": [
-        "region_saraswati_delta"
-      ],
-      "behaviour": [
-        "social",
-        "nest_defense",
-        "earthworks"
-      ],
-      "notes": "Feathered velociraptor clans forming complex diapsid scale-based civilization. Use earthworks and moats to defend nests. Symbiotic with Burrowing Tortoise.",
-      "region": "saraswati-godavari-deltas",
-      "biomes": [
-        "wetland",
-        "river"
-      ],
-      "placement": "encounter",
-      "rarity": "common",
-      "journal_prompt": "Feathered velociraptor clans that have formed a complex diapsid scale-based civilization, using earthworks and moats to defend their nests.",
-      "mood": "clever",
-      "sentient": true,
-      "source_index": 12,
-      "taxonomy": {
-        "note": "Was `Proto-Jambhu Dromaeosaur` -- a descriptor, not a binomial. `vallatus`, entrenched, for the earthworks and moats they raise around their nests; adjectival to match the genus's siblings, Vajraptor territorialis and Sylvianus occultus."
-      }
-    },
-    {
       "id": "fauna_burrowing_tortoise",
       "type": "fauna",
       "name": "Burrowing Tortoise",
@@ -297,10 +265,7 @@
         "fossorial",
         "symbiotic"
       ],
-      "related_species": [
-        "fauna_nagaraptor"
-      ],
-      "notes": "Heavy delta tortoise that digs deep tunnels. Nagaraptor clans use the burrows as nest foundations; the tortoise gains predator warning in return.",
+      "notes": "Heavy delta tortoise that digs deep tunnels. The Taj Nagaraptors (faction_taj_nagaraptors) use the burrows as nest foundations; the tortoise gains predator warning in return.",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland",
@@ -311,35 +276,6 @@
       "journal_prompt": "A large, long-lived tortoise (living 80-120 years) that digs spiral tunnels in a symbiotic relationship with the Nagaraptors, forming the underground foundations of the Taj Nest-Homes.",
       "mood": "patient",
       "source_index": 13
-    },
-    {
-      "id": "fauna_vajraptor",
-      "type": "fauna",
-      "name": "Vajraptor",
-      "scientific": "Vajraptor territorialis",
-      "clade": "dinosaur",
-      "subclade": "dromaeosaurid",
-      "diet": "Carnivore",
-      "habitats": [
-        "canopy",
-        "region_saraswati_delta"
-      ],
-      "behaviour": [
-        "social",
-        "territorial",
-        "problem_solving"
-      ],
-      "notes": "Intelligent feathered dromaeosaur with colorful plumage. Builds hidden canopy nests.",
-      "region": "saraswati-godavari-deltas",
-      "biomes": [
-        "forest"
-      ],
-      "placement": "encounter",
-      "rarity": "common",
-      "journal_prompt": "An intelligent, social and territorial feathered dromaeosaur with colorful plumage and excellent problem-solving skills, building hidden canopy nests. Flightless: the plumage is for display and for warmth.",
-      "mood": "clever",
-      "sentient": true,
-      "source_index": 14
     },
     {
       "id": "fauna_vanga_pearl_guide",
@@ -3319,24 +3255,6 @@
       "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
-      "id": "fauna_colossal_void_devourer",
-      "type": "fauna",
-      "name": "Colossal Void-Devourer",
-      "scientific": "Sauropodoligator titan",
-      "clade": "dinosaur",
-      "subclade": "sauropodomorph",
-      "region": "asura-conjurations",
-      "biomes": [
-        "wetland",
-        "river"
-      ],
-      "placement": "encounter",
-      "rarity": "mythic",
-      "journal_prompt": "An extinct sauropod-crocodile hybrid resurrected from buried bones via dark Asura magic, crowned with a cursed human visage.",
-      "mood": "uncanny",
-      "source_index": 206
-    },
-    {
       "id": "fauna_sand_resurrected_behemoth",
       "type": "fauna",
       "name": "Sand-Resurrected Behemoth",
@@ -3527,25 +3445,6 @@
       "source_index": 218
     },
     {
-      "id": "fauna_naga_infiltrator",
-      "type": "fauna",
-      "name": "Naga Infiltrator",
-      "scientific": "Serpens simulans",
-      "clade": "reptile",
-      "region": "asura-conjurations",
-      "biomes": [
-        "settlement"
-      ],
-      "placement": "encounter",
-      "rarity": "mythic",
-      "journal_prompt": "A secretive, shape-shifting serpent-human hybrid that slips into royal courts, carrying out the will of Takshak.",
-      "mood": "watchful",
-      "source_index": 219,
-      "taxonomy": {
-        "note": "Was `Serpens anthropomorphic`, English again. `simulans`, one who imitates, for a shape-shifter that passes as human."
-      }
-    },
-    {
       "id": "fauna_gorgonopsid_war_beast",
       "type": "fauna",
       "name": "Gorgonopsid War-Beast",
@@ -3558,7 +3457,7 @@
       ],
       "placement": "encounter",
       "rarity": "mythic",
-      "journal_prompt": "A shaggy-haired Permian predator selectively bred and genetically corrupted by Asuras to serve as heavy shock cavalry.",
+      "journal_prompt": "A shaggy sabre-toothed Permian predator, bred by the Asura long ago as shock cavalry. This one wears an old harness and a new owner's knots, and dozes at the edge of camp.",
       "mood": "uncanny",
       "source_index": 220
     },
@@ -3575,7 +3474,7 @@
       ],
       "placement": "encounter",
       "rarity": "mythic",
-      "journal_prompt": "A sail-backed synapsid war predator mutated with bio-reactive colors and enhanced aggression for Asura commanders.",
+      "journal_prompt": "A sail-backed synapsid, its sail still banded in colours the Asura bred into it for their commanders. Saddled and tethered now, it basks with its sail turned to the sun.",
       "mood": "uncanny",
       "source_index": 221
     },
@@ -3592,7 +3491,7 @@
       ],
       "placement": "encounter",
       "rarity": "mythic",
-      "journal_prompt": "A massive armored herbivore genetically engineered with iron-hard skin plates, utilized as mobile shield barriers in battles.",
+      "journal_prompt": "A massive, bone-plated pareiasaur. The Asura bred its line as living shield-walls tens of millions of years ago; now it grazes feral by old earthworks, or hauls stone for whoever has tamed it.",
       "mood": "watchful",
       "source_index": 223
     },
@@ -3608,7 +3507,7 @@
       ],
       "placement": "encounter",
       "rarity": "mythic",
-      "journal_prompt": "A colossal, feathered theropod predator genetically altered with Asura venom, serving as the ultimate fortress guardian.",
+      "journal_prompt": "A colossal feathered abelisaur, its scales veined faint violet with the venom the Asura put in its line. It sleeps coiled over a vine-hung temple arch and has not woken for anyone in living memory.",
       "mood": "uncanny",
       "source_index": 224
     },
@@ -3666,25 +3565,6 @@
       "subclade": "ember_born"
     },
     {
-      "id": "fauna_naga_kin_sentry",
-      "type": "fauna",
-      "name": "Naga-Kin Sentry",
-      "scientific": "Serpens custos",
-      "clade": "reptile",
-      "region": "asura-conjurations",
-      "biomes": [
-        "settlement"
-      ],
-      "placement": "encounter",
-      "rarity": "mythic",
-      "journal_prompt": "A semi-anthropomorphic serpent warrior that guards the sacred temples of Takshak, wielding bronze and stone spears.",
-      "mood": "watchful",
-      "source_index": 230,
-      "taxonomy": {
-        "note": "Was `Serpens guard` -- an English word where the genus's siblings carry Latin: Serpens obsidianus, Serpens asuricus. `custos`, guardian, in apposition."
-      }
-    },
-    {
       "id": "fauna_gorgonopsid_pack_leader",
       "type": "fauna",
       "name": "Gorgonopsid Pack-Leader",
@@ -3697,7 +3577,7 @@
       ],
       "placement": "encounter",
       "rarity": "mythic",
-      "journal_prompt": "A larger, hyper-aggressive gorgonopsid bred by Asura generals to lead war-packs in battle.",
+      "journal_prompt": "A big sabre-toothed gorgonopsid of a line the Asura once bred to lead war-packs. The packs are long gone; this one lies sphinx-still by a basalt gate and lets the road go by.",
       "mood": "uncanny",
       "source_index": 231
     },
@@ -3729,7 +3609,7 @@
       ],
       "placement": "encounter",
       "rarity": "mythic",
-      "journal_prompt": "A massive scutosaur mutated with an bone-hard forehead plate, used to break down defensive palisades.",
+      "journal_prompt": "A heavy pareiasaur with a bone-hard forehead plate, bred long ago to break palisades. The ones left drag terrace stone in leather harness and push at nothing harder than a stuck sledge.",
       "mood": "uncanny",
       "source_index": 233
     },
