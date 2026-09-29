@@ -75,6 +75,23 @@ describe('the painting an activity shows', () => {
     expect(sceneFor('stoop', 'mountains')).toContain('stoop-high');
   });
 
+  /** The cliff painting is for climbing ground, and a floating island's underside is climbed. */
+  it('shows the cliff on the underside of a floating island, and not on its top', () => {
+    expect(sceneFor('stoop', 'sky_underside')).toContain('stoop-high');
+    expect(sceneFor('stoop', 'sky_island')).toContain('stoop-sky_island');
+  });
+
+  /**
+   * A night is two pictures: the dark while you choose it, the light once it is over. A shelter
+   * with neither painted falls back to its own night, then to the plain one.
+   */
+  it('paints a night at midnight and at dawn, and falls back when a moment is unpainted', () => {
+    expect(sceneFor('rest', 'none', 0, 'midnight')).toContain('rest-none-midnight');
+    expect(sceneFor('rest', 'none', 0, 'dawn')).toContain('rest-none-dawn');
+    expect(sceneFor('rest', 'camp', 0, 'dawn')).toBe(sceneFor('rest', 'camp'));
+    expect(sceneFor('rest', 'not-a-shelter-kind', 0, 'dawn')).toBe(sceneFor('rest'));
+  });
+
   it('answers null for a gesture nobody has painted', () => {
     expect(sceneFor('dance')).toBeNull();
     expect(sceneFor('dance', 'quickly')).toBeNull();

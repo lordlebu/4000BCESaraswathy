@@ -1165,5 +1165,27 @@
       "group": "plant",
       "note": "An orchid with lip-like petals that whisper."
     }
+  ],
+  "held": [
+    {
+      "file": "plate-zebu-cattle.png",
+      "what": "A humped zebu at a river, in the plate style.",
+      "question": "Canon has no zebu. Add one (Bos indicus, the Harappan seal animal and draught ox), or was this for another species?"
+    },
+    {
+      "file": "plate-southern-seagul.png",
+      "what": "A large gull on a sea rock.",
+      "question": "Canon has no sea gull that the game places (sky_gull is sky-only lore). A new coastal species, or a second take of something?"
+    },
+    {
+      "file": "plate-tethyan-reef-lurker_temnospondil_amphibian.png",
+      "what": "A large temnospondyl amphibian at a riverbank.",
+      "question": "The reef-lurker is a sea snail and took the mollusc painting. Is this a new Jambhudweep temnospondyl species? It fits the large-amphibian direction."
+    },
+    {
+      "file": "scene-bath-purifying.png",
+      "what": "A horned woman, Violet-Horned Clan by the look, bathing among lotuses.",
+      "question": "Not hands at work, so not a bench scene. A happening or the asura princess's own page, or a purifying rite take?"
+    }
   ]
 }

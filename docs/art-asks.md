@@ -332,3 +332,14 @@ The same register question as the war beasts, for plants.
 | Crimson Blood-Weed (`flora_crimson_blood_weed`) | 5 | A predatory vine with pulsing veins. |
 | Whispering Blood-Orchid (`flora_whispering_blood_orchid`) | 11 | An orchid with lip-like petals that whisper. |
 
+## Held for a decision
+
+Paintings that arrived with no slot to go in. Kept in `assets/source/dump/`, not rejected.
+
+| File | What it is | The question |
+|---|---|---|
+| `plate-zebu-cattle.png` | A humped zebu at a river, in the plate style. | Canon has no zebu. Add one (Bos indicus, the Harappan seal animal and draught ox), or was this for another species? |
+| `plate-southern-seagul.png` | A large gull on a sea rock. | Canon has no sea gull that the game places (sky_gull is sky-only lore). A new coastal species, or a second take of something? |
+| `plate-tethyan-reef-lurker_temnospondil_amphibian.png` | A large temnospondyl amphibian at a riverbank. | The reef-lurker is a sea snail and took the mollusc painting. Is this a new Jambhudweep temnospondyl species? It fits the large-amphibian direction. |
+| `scene-bath-purifying.png` | A horned woman, Violet-Horned Clan by the look, bathing among lotuses. | Not hands at work, so not a bench scene. A happening or the asura princess's own page, or a purifying rite take? |
+

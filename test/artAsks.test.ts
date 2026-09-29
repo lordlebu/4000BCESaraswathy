@@ -9,7 +9,7 @@
 // JSON and forgets to re-render.
 
 import { describe, expect, it } from 'vitest';
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
@@ -44,7 +44,6 @@ const BENCH = new Set(
 describe('the art plan asks for files the game will draw', () => {
   it.each(asks.plates.map((p) => p.file))('plate %s is an animal the game places', (file) => {
     expect(ENGINE.has(file), `${file} is not an engine species id, so no plate lookup will find it`).toBe(true);
-    expect(existsSync(join(ROOT, 'src', 'ui', 'plates', `${file}.png`)), `${file} is already painted`).toBe(false);
   });
 
   it.each(asks.plates.map((p) => p.file))('plate %s builds under its own name', (file) => {

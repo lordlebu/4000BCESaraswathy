@@ -102,3 +102,15 @@ fauna plates does more for the stalk modal than painting `stalk.png` does.
 From the plate round, unchanged: **Grok** fixed everything it was asked to. **Gemini** adds painted
 frames and ink outlines and needs the no-border clause repeated. **ChatGPT** is closest to correct
 out of the box but sizes oddly. All three need the no-text clause.
+
+## Crops recorded, 2026-09-29
+
+```
+node tools/build-plates.js --scenes --force --only=stoop-weaving --crop=35,35,860
+node tools/build-plates.js --scenes --force --only=work-high --crop=9,0,850
+node tools/build-plates.js --scenes --force --only=rest-roof.3 --crop=0,0,1480
+```
+
+`rest-roof.3` arrived as a Grok JPEG and was re-saved as PNG before building; the JPEG is kept in
+`assets/source/dump/`. `rest-none` arrived as two moments, `rest-none-midnight` and
+`rest-none-dawn`: the card shows the first while the night is chosen and the second once it is over.

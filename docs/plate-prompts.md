@@ -363,3 +363,16 @@ exist. Send whatever comes out well and keep going down the list.
 
 If a subject comes back wrong twice, skip it and move on — it keeps its silhouette, and that is
 exactly what the fallback is for.
+
+## Crops recorded, 2026-09-29
+
+The raws are gitignored, so these are the only record of the framing. Each takes a signature out
+of a corner — Grok's name, or Gemini's sparkle — while staying inside any painted border.
+
+```
+node tools/build-plates.js --force --only=tendua --crop=64,0,1280
+node tools/build-plates.js --force --only=garudasaur-eagle --crop=0,0,1280
+node tools/build-plates.js --force --only=estuary-sawfish --crop=38,38,840
+node tools/build-plates.js --force --only=sky-faring-crab --crop=48,48,830
+node tools/build-plates.js --force --only=upfalling-elver --crop=46,46,830
+```

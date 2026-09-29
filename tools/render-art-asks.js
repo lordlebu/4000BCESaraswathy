@@ -52,6 +52,17 @@ const SCENE_FRAME =
   'the travellers a player might be. Sleeves and wraps in dyed cloth — madder red, indigo, ' +
   'turmeric, ochre — never plain white costume.';
 
+/**
+ * Whether the built painting is in the game yet, so the page can mark the card Arrived.
+ *
+ * A night asked for as one scene can arrive as its two moments (`rest-none-midnight`,
+ * `rest-none-dawn`) rather than under its own name, and that counts.
+ */
+function arrived(folder, file) {
+  const built = fs.readdirSync(path.join(ROOT, 'src', 'ui', folder));
+  if (built.includes(`${file}.png`)) return true;
+  return folder === 'scenes' && built.some((f) => /^(.*)-(midnight|dawn)\.png$/.test(f) && f.startsWith(`${file}-`));
+}
 const plateSave = (c) => `assets/source/plates/plate-${c.file}.png`;
 const sceneSave = (c) => `assets/source/scenes/scene-${c.file}.png`;
 const platePrompt = (c) => `${PLATE_STYLE}\n\nSubject: ${c.subject}`;
@@ -145,6 +156,16 @@ function brief() {
     for (const r of asks.rulings.filter((x) => x.group === key)) out.push(`| ${r.name} (\`${r.id}\`) | ${r.tiles} | ${r.note} |`);
     out.push('');
   }
+  if (asks.held && asks.held.length) {
+    out.push('## Held for a decision');
+    out.push('');
+    out.push('Paintings that arrived with no slot to go in. Kept in `assets/source/dump/`, not rejected.');
+    out.push('');
+    out.push('| File | What it is | The question |');
+    out.push('|---|---|---|');
+    for (const h of asks.held) out.push(`| \`${h.file}\` | ${h.what} | ${h.question} |`);
+    out.push('');
+  }
   return out.join('\n');
 }
 
@@ -162,11 +183,14 @@ function card(c, kind) {
     kind === 'plate'
       ? `<p class="card-subject"><b>${esc(c.name)}.</b> ${esc(c.why)}</p>`
       : `<p class="card-subject">${esc(c.why)}</p>`;
-  const chip = kind === 'plate' ? `<span class="chip ${esc(c.rarity)}">${esc(c.rarity)}</span>` : '';
+  const here = arrived(kind === 'plate' ? 'plates' : 'scenes', c.file);
+  const chip =
+    (here ? '<span class="chip arrived">Arrived</span>' : '') +
+    (kind === 'plate' ? `<span class="chip ${esc(c.rarity)}">${esc(c.rarity)}</span>` : '');
   const guess = c.guess ? `<p class="card-guess">${esc(c.guess)}</p>` : '';
   return `
-        <article class="card" data-card="${esc(id)}">
-          <div class="card-top"><span class="card-file">${esc(c.file)}</span>${chip}</div>
+        <article class="card${here ? ' is-arrived' : ''}" data-card="${esc(id)}">
+          <div class="card-top"><span class="card-file">${esc(c.file)}</span><span class="chips">${chip}</span></div>
           ${head}
           ${guess}
           <p class="card-save">Save as <code>${esc(save)}</code></p>
@@ -286,7 +310,7 @@ ${rows}
   .group-head span { color: var(--muted); font-size: 0.86rem; max-width: 80ch; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
   .card { background: var(--panel); border: 1px solid var(--rule); border-radius: 4px; padding: 14px 16px; display: grid; gap: 9px; align-content: start; min-width: 0; }
-  .card.is-done { border-color: var(--leaf); }
+  .card.is-done, .card.is-arrived { border-color: var(--leaf); }
   .card-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .card-file { font: 500 0.9rem/1.2 var(--mono); overflow-wrap: anywhere; }
   .card-subject { font-size: 0.9rem; }
@@ -302,6 +326,8 @@ ${rows}
   .chip.common { background: var(--leaf-bg); color: var(--leaf); }
   .chip.rare { background: var(--indigo-bg); color: var(--indigo); }
   .chip.mythic { background: var(--turmeric-bg); color: var(--turmeric); }
+  .chip.arrived { background: var(--leaf); color: var(--paper); }
+  .chips { display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
   .table-wrap { overflow-x: auto; border-top: 1px solid var(--rule); }
   table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 0.9rem; }
   th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
@@ -336,7 +362,7 @@ ${rows}
       <p class="legend">Share of the ${m.fauna_tiles.toLocaleString('en')} animal encounters across the four maps. Measured by walking every tile and asking the game which animal stands there.</p>
     </div>
     <nav class="jump" aria-label="Sections">
-      <a href="#how">How to hand them over</a><a href="#plates">Animal plates</a><a href="#scenes">Activity scenes</a><a href="#lore">Needs your lore</a><a href="#rulings">Needs your ruling</a>
+      <a href="#how">How to hand them over</a><a href="#plates">Animal plates</a><a href="#scenes">Activity scenes</a><a href="#lore">Needs your lore</a><a href="#rulings">Needs your ruling</a><a href="#held">Held</a>
     </nav>
   </header>
 
@@ -386,6 +412,13 @@ ${loreRows}
     </div>
     ${rulings}
   </section>
+
+  ${asks.held && asks.held.length ? `<section id="held">
+    <div class="section-head"><h2>Held for your decision</h2><p>Paintings that arrived with no slot to go in. Kept on disk, not rejected; each needs one answer from you.</p></div>
+    <div class="table-wrap"><table><thead><tr><th>File</th><th>What it is</th><th>The question</th></tr></thead><tbody>
+${asks.held.map((h) => `<tr><td><code>${esc(h.file)}</code></td><td>${esc(h.what)}</td><td>${esc(h.question)}</td></tr>`).join('')}
+    </tbody></table></div>
+  </section>` : ''}
 
   <section id="fixes">
     <div class="section-head"><h2>Two fixes in the same pull request</h2><p>Both would have made paintings from this plan fail to show.</p></div>
