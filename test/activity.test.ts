@@ -22,6 +22,7 @@ import {
   GESTURE_WANTS,
   blockedReason,
   gestureFor,
+  isAboutAnAnimal,
   gestureLine,
   momentFavours
 } from '../src/content/gestures';
@@ -274,5 +275,25 @@ describe('what the journal is told', () => {
     for (const gesture of ALL_GESTURES) {
       expect(gestureLine(gesture, 'Reed fibre')).not.toMatch(/\brhythm|beat|time it|press\b/i);
     }
+  });
+});
+
+describe('whether an act is about the animal on the tile', () => {
+  it('is, for a stalk or a cast on the ground', () => {
+    expect(isAboutAnAnimal('stalk', { making: null })).toBe(true);
+    expect(isAboutAnAnimal('fish', null)).toBe(true);
+  });
+
+  it('is not, for a plant, the ground or a night', () => {
+    expect(isAboutAnAnimal('stoop', null)).toBe(false);
+    expect(isAboutAnAnimal('work', null)).toBe(false);
+    expect(isAboutAnAnimal('rest', null)).toBe(false);
+    expect(isAboutAnAnimal(null, null)).toBe(false);
+  });
+
+  // Firing plays as a stalk. Before this, a kiln showed the plate of whatever stood on the tile,
+  // and a painted `stalk-firing.png` could never be seen where a painted animal lived.
+  it('is never, at a bench, even when the making plays as a stalk', () => {
+    expect(isAboutAnAnimal('stalk', { making: 'recipe_fired_pot' })).toBe(false);
   });
 });

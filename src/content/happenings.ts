@@ -31,7 +31,8 @@
 //
 // Pure: no React, no Phaser, no clock. The caller passes the moment and the roll.
 
-import type { BiomeId, Creature, Flora, Point, World } from '../world/types';
+import type { BiomeId, Creature, Flora, Landmass, Point, World } from '../world/types';
+import { landmassAt, livesOn } from '../world/landmass';
 import {
   type Choice,
   type Circumstance,
@@ -74,6 +75,11 @@ export type Roll = (salt: string) => number;
  */
 export interface Surroundings {
   biome: BiomeId;
+  /**
+   * Which landmass the tile is on, so a night on Jambhudweep does not hear a bear that lives only
+   * across the strait. Optional, and null off a field map: absent admits every species.
+   */
+  landmass?: Landmass | null;
   /** Whether the tile is road, which decides whether anything can have been dropped on it. */
   onRoad: boolean;
   creature: Creature | null;
@@ -142,6 +148,7 @@ export function surroundingsAt(
   const who = chosen ?? (company.length > 0 ? company[roll('stranger') % company.length]! : null);
   return {
     biome: tile.biome,
+    landmass: landmassAt(world.seed, at),
     onRoad: Boolean(tile.road),
     creature: creatureFor(tile, world.seed),
     flora: floraFor(tile, world.seed),
@@ -531,10 +538,12 @@ const weather: Template = ({ moment, biome, flora }) => {
 // ---------------------------------------------------------------------------------------------
 // The night. Asked every time somebody sleeps.
 
-const nightSounds: Template = ({ biome }, roll) => {
+const nightSounds: Template = ({ biome, landmass }, roll) => {
   // Something awake at night in this country -- not necessarily the creature on this tile, which
   // `species.ts` picks for the day and may well be asleep.
-  const out = creaturesIn(biome).filter((c) => isAnimal(c.id) && rhythmOf(c) === 'nocturnal');
+  const out = creaturesIn(biome).filter(
+    (c) => isAnimal(c.id) && rhythmOf(c) === 'nocturnal' && livesOn(c.landmasses, landmass ?? null)
+  );
   if (out.length === 0) return null;
   const c = out[roll('night-sounds') % out.length]!;
   return woven('night', 'night-sounds', c.id, { a_animal: a(lower(c.name)) }, [{ id: 'listen' }, { id: 'lamp' }]);

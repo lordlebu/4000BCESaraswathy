@@ -15,10 +15,11 @@
 // through one pipeline, because a person dropping a file straight in is exactly the case it catches.
 
 import { describe, expect, it } from 'vitest';
+import { createRequire } from 'node:module';
 import { readdirSync, statSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import biomes from '../data/biomes.json';
-import { GROUND_GROUP } from '../src/ui/scenes';
+import { GROUND_GROUP, NIGHT_MOMENTS } from '../src/ui/scenes';
 
 const SCENES = join(__dirname, '..', 'src', 'ui', 'scenes');
 
@@ -51,6 +52,8 @@ const PROCESSES = [
 const BIOMES = (biomes as { id: string }[]).map((b) => b.id);
 /** Groups of ground that share a painting -- `stoop-high` for every climbing biome. */
 const GROUPS = [...new Set(Object.values(GROUND_GROUP))];
+/** A night at a moment: `none-midnight`, `camp-dawn`. Only `rest` asks for these. */
+const NIGHTS = SHELTERS.flatMap((s) => NIGHT_MOMENTS.map((m) => `${s}-${m}`));
 
 const files = readdirSync(SCENES).filter((f) => /\.(png|webp|jpe?g)$/i.test(f));
 
@@ -87,7 +90,7 @@ describe('src/ui/scenes holds built scenes and nothing else', () => {
     ).toBe(true);
     if (variant) {
       expect(
-        [...SHELTERS, ...PROCESSES, ...BIOMES, ...GROUPS].includes(variant),
+        [...SHELTERS, ...NIGHTS, ...PROCESSES, ...BIOMES, ...GROUPS].includes(variant),
         `\`${variant}\` is not a shelter kind, a canon process, a biome or a ground group, so ` +
           `sceneFor('${gesture}', …) will never ask for it and this file will never draw.`
       ).toBe(true);
@@ -116,5 +119,31 @@ describe('src/ui/scenes holds built scenes and nothing else', () => {
       colourType,
       `colour type ${colourType}. The builder palettises to 3; a raw is 2 or 6.`
     ).toBe(3);
+  });
+});
+
+/**
+ * **A raw named for an underscored biome must build under that name.**
+ *
+ * Three biomes carry an underscore -- `sky_island`, `sky_underside`, `lava_field` -- and the scene
+ * kind used to hyphenate, so a raw saved as `Gemini_scene-stoop-sky_island.png` built as
+ * `stoop-sky-island.png`: not a biome, no painting drawn, and the folder guard above failing on a
+ * file somebody had named correctly.
+ */
+describe('the builder names a scene the way sceneFor asks for it', () => {
+  const { idFor, KINDS } = createRequire(import.meta.url)('../tools/build-plates.js') as {
+    idFor: (file: string, word?: string, keepUnderscores?: boolean) => string;
+    KINDS: Record<string, { word: string; keepUnderscores?: boolean }>;
+  };
+  const built = (file: string) => idFor(file, KINDS.scene!.word, KINDS.scene!.keepUnderscores);
+
+  it.each([
+    ['Gemini_scene-stoop-sky_island.png', 'stoop-sky_island'],
+    ['ChatGPT_scene-work-lava_field.png', 'work-lava_field'],
+    ['scene-stalk-firing.png', 'stalk-firing'],
+    ['Grok_scene-work.png', 'work'],
+    ['Gemini_scene-rest-roof.2.png', 'rest-roof.2']
+  ])('%s builds as %s', (raw, id) => {
+    expect(built(raw)).toBe(id);
   });
 });

@@ -19,7 +19,7 @@
 import placesBundle from '../../data/canon/places.json';
 import speciesBundle from '../../data/canon/species.json';
 import type {
-  Biome, BiomeId, Clade, Creature, Flora, GrowthForm, Placement, Rarity
+  Biome, BiomeId, Clade, Creature, Flora, GrowthForm, Landmass, Placement, Rarity
 } from '../world/types';
 
 /** A species as canon holds it: more fields than the engine uses, and different names. */
@@ -39,6 +39,7 @@ interface CanonSpecies {
   notes?: string;
   habitats?: string[];
   source_index?: number;
+  landmasses?: string[];
 }
 
 interface CanonBiome {
@@ -116,7 +117,8 @@ function toSpecies(entity: CanonSpecies, kind: 'fauna' | 'flora'): Creature | Fl
     // `notes` is canon's reference fact and `journal_prompt` is the sentence the player
     // reads. They are deliberately separate; entities authored in canon rather than
     // imported from the bestiary have only the former, and are all `lore` anyway.
-    journalPrompt: entity.journal_prompt ?? entity.notes ?? ''
+    journalPrompt: entity.journal_prompt ?? entity.notes ?? '',
+    landmasses: (entity.landmasses as Landmass[] | undefined) ?? null
   };
   // Canon requires both of these on every species, so a missing one means the bundle is older
   // than this adapter rather than that a default is wanted. Falling back would hide that: the

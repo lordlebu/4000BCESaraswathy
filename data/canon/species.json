@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.37.0",
+  "canon_version": "2.38.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -143,7 +143,11 @@
       "rarity": "rare",
       "journal_prompt": "An 8-foot giant river salamander that has survived since the Pleistocene. It waits in the murky delta pools of Lothal to ambush passing prey. The skull is flatter and broader than a salamander's has any right to be, and the legs sprawl where they should tuck.",
       "mood": "fearsome",
-      "source_index": 6
+      "source_index": 6,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_venomous_vengi_mud_salamander",
@@ -159,7 +163,11 @@
       "rarity": "rare",
       "journal_prompt": "A swamp-dwelling giant salamander variant whose skin exudes a paralyzing neurotoxin when threatened.",
       "mood": "fearsome",
-      "source_index": 7
+      "source_index": 7,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_sacred_stepwell_koi",
@@ -252,38 +260,6 @@
       "source_index": 11
     },
     {
-      "id": "fauna_nagaraptor",
-      "type": "fauna",
-      "name": "Nagaraptor",
-      "scientific": "Nagaraptor vallatus",
-      "clade": "dinosaur",
-      "subclade": "dromaeosaurid",
-      "diet": "Carnivore",
-      "habitats": [
-        "region_saraswati_delta"
-      ],
-      "behaviour": [
-        "social",
-        "nest_defense",
-        "earthworks"
-      ],
-      "notes": "Feathered velociraptor clans forming complex diapsid scale-based civilization. Use earthworks and moats to defend nests. Symbiotic with Burrowing Tortoise.",
-      "region": "saraswati-godavari-deltas",
-      "biomes": [
-        "wetland",
-        "river"
-      ],
-      "placement": "encounter",
-      "rarity": "common",
-      "journal_prompt": "Feathered velociraptor clans that have formed a complex diapsid scale-based civilization, using earthworks and moats to defend their nests.",
-      "mood": "clever",
-      "sentient": true,
-      "source_index": 12,
-      "taxonomy": {
-        "note": "Was `Proto-Jambhu Dromaeosaur` -- a descriptor, not a binomial. `vallatus`, entrenched, for the earthworks and moats they raise around their nests; adjectival to match the genus's siblings, Vajraptor territorialis and Sylvianus occultus."
-      }
-    },
-    {
       "id": "fauna_burrowing_tortoise",
       "type": "fauna",
       "name": "Burrowing Tortoise",
@@ -297,10 +273,7 @@
         "fossorial",
         "symbiotic"
       ],
-      "related_species": [
-        "fauna_nagaraptor"
-      ],
-      "notes": "Heavy delta tortoise that digs deep tunnels. Nagaraptor clans use the burrows as nest foundations; the tortoise gains predator warning in return.",
+      "notes": "Heavy delta tortoise that digs deep tunnels. The Taj Nagaraptors (faction_taj_nagaraptors) use the burrows as nest foundations; the tortoise gains predator warning in return.",
       "region": "saraswati-godavari-deltas",
       "biomes": [
         "wetland",
@@ -311,35 +284,6 @@
       "journal_prompt": "A large, long-lived tortoise (living 80-120 years) that digs spiral tunnels in a symbiotic relationship with the Nagaraptors, forming the underground foundations of the Taj Nest-Homes.",
       "mood": "patient",
       "source_index": 13
-    },
-    {
-      "id": "fauna_vajraptor",
-      "type": "fauna",
-      "name": "Vajraptor",
-      "scientific": "Vajraptor territorialis",
-      "clade": "dinosaur",
-      "subclade": "dromaeosaurid",
-      "diet": "Carnivore",
-      "habitats": [
-        "canopy",
-        "region_saraswati_delta"
-      ],
-      "behaviour": [
-        "social",
-        "territorial",
-        "problem_solving"
-      ],
-      "notes": "Intelligent feathered dromaeosaur with colorful plumage. Builds hidden canopy nests.",
-      "region": "saraswati-godavari-deltas",
-      "biomes": [
-        "forest"
-      ],
-      "placement": "encounter",
-      "rarity": "common",
-      "journal_prompt": "An intelligent, social and territorial feathered dromaeosaur with colorful plumage and excellent problem-solving skills, building hidden canopy nests. Flightless: the plumage is for display and for warmth.",
-      "mood": "clever",
-      "sentient": true,
-      "source_index": 14
     },
     {
       "id": "fauna_vanga_pearl_guide",
@@ -443,7 +387,11 @@
       "rarity": "common",
       "journal_prompt": "A heavy, quadrupedal land crocodile that prowls the delta, specializing in ambush techniques in shallow reed marshes.",
       "mood": "fearsome",
-      "source_index": 18
+      "source_index": 18,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_striped_reed_stalker",
@@ -471,7 +419,11 @@
       "rarity": "common",
       "journal_prompt": "A camouflaged subspecies of Baurusuchus with vertical stripes, blending into the marsh grass of the Saraswati delta.",
       "mood": "patient",
-      "source_index": 19
+      "source_index": 19,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_mud_armored_ambusher",
@@ -499,7 +451,11 @@
       "rarity": "common",
       "journal_prompt": "A baurusuchid that cakes itself in river mud, keeping its body temperature low and hiding from terrestrial prey.",
       "mood": "fearsome",
-      "source_index": 20
+      "source_index": 20,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_indus_unicorn",
@@ -696,7 +652,11 @@
       "rarity": "common",
       "journal_prompt": "A pale, blind cetacean that navigates the muddy delta waters using sophisticated acoustic clicks, hunted by Kias for meat and skin.",
       "mood": "watchful",
-      "source_index": 31
+      "source_index": 31,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_mangrove_crab_eater",
@@ -1256,19 +1216,28 @@
     {
       "id": "fauna_narmada_cave_bear",
       "type": "fauna",
-      "name": "Narmada Cave Bear",
-      "scientific": "Ursus spelaeus narmadensis",
+      "name": "Laurasian Cave Bear",
+      "scientific": "Ursus spelaeus laurasiae",
       "clade": "mammal",
-      "region": "narmada-vindhya",
+      "region": "aravali",
       "biomes": [
         "hills",
         "mountains"
       ],
       "placement": "encounter",
       "rarity": "rare",
-      "journal_prompt": "A massive, thick-furred predator of the high caves that climbs cliffs to raid honey-goliath nests, frequently clashing with human gatherers.",
+      "journal_prompt": "A massive, thick-furred bear of the high caves north of the strait, climbing a cliff for a wild bees' nest with more patience than you would think a thing that size could have.",
       "mood": "fearsome",
-      "source_index": 65
+      "source_index": 65,
+      "aliases": [
+        "Narmada Cave Bear"
+      ],
+      "taxonomy": {
+        "note": "Was `Ursus spelaeus narmadensis`, for a valley it does not live in. It is a bear of Mainland Asia, and none cross to Jambhudweep."
+      },
+      "landmasses": [
+        "mainland_asia"
+      ]
     },
     {
       "id": "fauna_vindhya_leopard",
@@ -1676,7 +1645,10 @@
       "rarity": "common",
       "journal_prompt": "A heavy, rugged crocodile-mammal hybrid with two water-retention humps, used by northern nomads to cross the highland deserts.",
       "mood": "watchful",
-      "source_index": 88
+      "source_index": 88,
+      "landmasses": [
+        "mainland_asia"
+      ]
     },
     {
       "id": "fauna_sleek_dromedary_croc",
@@ -1692,7 +1664,11 @@
       "rarity": "common",
       "journal_prompt": "A faster, single-humped variant of Camelosuchus adapted to sandy dunes, capable of sustaining high speeds across the wastes.",
       "mood": "watchful",
-      "source_index": 89
+      "source_index": 89,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_giant_riding_ostrich",
@@ -1752,7 +1728,11 @@
       "rarity": "common",
       "journal_prompt": "A predatory, bipedal crocodyliform that re-evolved an upright, bipedal sprinting gait to chase down prey on sandy shores.",
       "mood": "fearsome",
-      "source_index": 92
+      "source_index": 92,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_highland_rock_runner",
@@ -1768,7 +1748,11 @@
       "rarity": "common",
       "journal_prompt": "A sturdier, darker subspecies of bipedal Postosuchus that hunts along the rocky desert ravines of Bahila Kush.",
       "mood": "fearsome",
-      "source_index": 93
+      "source_index": 93,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_glass_scaled_viper",
@@ -2038,7 +2022,11 @@
       "rarity": "common",
       "journal_prompt": "A young, playful camelosuchus that stays close to its mother, learning to forage on desert saltbush.",
       "mood": "playful",
-      "source_index": 109
+      "source_index": 109,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_desert_horned_owl",
@@ -2205,7 +2193,11 @@
       "rarity": "mythic",
       "journal_prompt": "A colossal, fully terrestrial galloping crocodile with thick hide and brow-horns, serving as the apex predator of the dry scrub.",
       "mood": "fearsome",
-      "source_index": 119
+      "source_index": 119,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_banded_scavenger_voay",
@@ -2222,7 +2214,11 @@
       "rarity": "rare",
       "journal_prompt": "A smaller, striped terrestrial crocodile that follows larger predators to feed on the remains of giant avian prey.",
       "mood": "fearsome",
-      "source_index": 120
+      "source_index": 120,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_abyssal_blue_leviathan",
@@ -2272,7 +2268,11 @@
       "rarity": "rare",
       "journal_prompt": "A massive, shaggy-feathered ratite tamed by traveling merchants to serve as heavy beasts of burden on coastal routes.",
       "mood": "watchful",
-      "source_index": 123
+      "source_index": 123,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_jungle_crested_mount",
@@ -2289,7 +2289,11 @@
       "rarity": "common",
       "journal_prompt": "A vibrantly colored elephantbird subspecies adapted to humid rainforest floors, capable of breaking through dense thickets.",
       "mood": "watchful",
-      "source_index": 124
+      "source_index": 124,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_sea_scorpion_queen",
@@ -3319,24 +3323,6 @@
       "placement_note": "Placeable since the sky tiles were painted. The earlier note held this as lore \"until a sky mode exists\" -- `sky_island` and `sky_underside` are renderable now, so the condition it named is met."
     },
     {
-      "id": "fauna_colossal_void_devourer",
-      "type": "fauna",
-      "name": "Colossal Void-Devourer",
-      "scientific": "Sauropodoligator titan",
-      "clade": "dinosaur",
-      "subclade": "sauropodomorph",
-      "region": "asura-conjurations",
-      "biomes": [
-        "wetland",
-        "river"
-      ],
-      "placement": "encounter",
-      "rarity": "mythic",
-      "journal_prompt": "An extinct sauropod-crocodile hybrid resurrected from buried bones via dark Asura magic, crowned with a cursed human visage.",
-      "mood": "uncanny",
-      "source_index": 206
-    },
-    {
       "id": "fauna_sand_resurrected_behemoth",
       "type": "fauna",
       "name": "Sand-Resurrected Behemoth",
@@ -3527,25 +3513,6 @@
       "source_index": 218
     },
     {
-      "id": "fauna_naga_infiltrator",
-      "type": "fauna",
-      "name": "Naga Infiltrator",
-      "scientific": "Serpens simulans",
-      "clade": "reptile",
-      "region": "asura-conjurations",
-      "biomes": [
-        "settlement"
-      ],
-      "placement": "encounter",
-      "rarity": "mythic",
-      "journal_prompt": "A secretive, shape-shifting serpent-human hybrid that slips into royal courts, carrying out the will of Takshak.",
-      "mood": "watchful",
-      "source_index": 219,
-      "taxonomy": {
-        "note": "Was `Serpens anthropomorphic`, English again. `simulans`, one who imitates, for a shape-shifter that passes as human."
-      }
-    },
-    {
       "id": "fauna_gorgonopsid_war_beast",
       "type": "fauna",
       "name": "Gorgonopsid War-Beast",
@@ -3558,9 +3525,13 @@
       ],
       "placement": "encounter",
       "rarity": "mythic",
-      "journal_prompt": "A shaggy-haired Permian predator selectively bred and genetically corrupted by Asuras to serve as heavy shock cavalry.",
+      "journal_prompt": "A shaggy sabre-toothed Permian predator, bred by the Asura long ago as shock cavalry. This one wears an old harness and a new owner's knots, and dozes at the edge of camp.",
       "mood": "uncanny",
-      "source_index": 220
+      "source_index": 220,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_dimetrodon_war_mount",
@@ -3575,9 +3546,13 @@
       ],
       "placement": "encounter",
       "rarity": "mythic",
-      "journal_prompt": "A sail-backed synapsid war predator mutated with bio-reactive colors and enhanced aggression for Asura commanders.",
+      "journal_prompt": "A sail-backed synapsid, its sail still banded in colours the Asura bred into it for their commanders. Saddled and tethered now, it basks with its sail turned to the sun.",
       "mood": "uncanny",
-      "source_index": 221
+      "source_index": 221,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_scutosaurus_shield_beast",
@@ -3592,9 +3567,13 @@
       ],
       "placement": "encounter",
       "rarity": "mythic",
-      "journal_prompt": "A massive armored herbivore genetically engineered with iron-hard skin plates, utilized as mobile shield barriers in battles.",
+      "journal_prompt": "A massive, bone-plated pareiasaur. The Asura bred its line as living shield-walls tens of millions of years ago; now it grazes feral by old earthworks, or hauls stone for whoever has tamed it.",
       "mood": "watchful",
-      "source_index": 223
+      "source_index": 223,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_rajasaurus_ambush_drake",
@@ -3608,7 +3587,7 @@
       ],
       "placement": "encounter",
       "rarity": "mythic",
-      "journal_prompt": "A colossal, feathered theropod predator genetically altered with Asura venom, serving as the ultimate fortress guardian.",
+      "journal_prompt": "A colossal feathered abelisaur, its scales veined faint violet with the venom the Asura put in its line. It sleeps coiled over a vine-hung temple arch and has not woken for anyone in living memory.",
       "mood": "uncanny",
       "source_index": 224
     },
@@ -3666,25 +3645,6 @@
       "subclade": "ember_born"
     },
     {
-      "id": "fauna_naga_kin_sentry",
-      "type": "fauna",
-      "name": "Naga-Kin Sentry",
-      "scientific": "Serpens custos",
-      "clade": "reptile",
-      "region": "asura-conjurations",
-      "biomes": [
-        "settlement"
-      ],
-      "placement": "encounter",
-      "rarity": "mythic",
-      "journal_prompt": "A semi-anthropomorphic serpent warrior that guards the sacred temples of Takshak, wielding bronze and stone spears.",
-      "mood": "watchful",
-      "source_index": 230,
-      "taxonomy": {
-        "note": "Was `Serpens guard` -- an English word where the genus's siblings carry Latin: Serpens obsidianus, Serpens asuricus. `custos`, guardian, in apposition."
-      }
-    },
-    {
       "id": "fauna_gorgonopsid_pack_leader",
       "type": "fauna",
       "name": "Gorgonopsid Pack-Leader",
@@ -3697,9 +3657,13 @@
       ],
       "placement": "encounter",
       "rarity": "mythic",
-      "journal_prompt": "A larger, hyper-aggressive gorgonopsid bred by Asura generals to lead war-packs in battle.",
+      "journal_prompt": "A big sabre-toothed gorgonopsid of a line the Asura once bred to lead war-packs. The packs are long gone; this one lies sphinx-still by a basalt gate and lets the road go by.",
       "mood": "uncanny",
-      "source_index": 231
+      "source_index": 231,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_dimetrodon_scout_mount",
@@ -3715,7 +3679,11 @@
       "rarity": "mythic",
       "journal_prompt": "A faster, sleek sail-backed synapsid used by Asura scouts to navigate the rugged, volcanic frontiers.",
       "mood": "uncanny",
-      "source_index": 232
+      "source_index": 232,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_scutosaurus_battering_ram",
@@ -3729,9 +3697,13 @@
       ],
       "placement": "encounter",
       "rarity": "mythic",
-      "journal_prompt": "A massive scutosaur mutated with an bone-hard forehead plate, used to break down defensive palisades.",
+      "journal_prompt": "A heavy pareiasaur with a bone-hard forehead plate, bred long ago to break palisades. The ones left drag terrace stone in leather harness and push at nothing harder than a stuck sledge.",
       "mood": "uncanny",
-      "source_index": 233
+      "source_index": 233,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_asura_tainted_owl",
@@ -4023,7 +3995,11 @@
       "journal_prompt": "It does not move aside. The frill turns first, edge-on and then full, thin enough that the low sun comes through it in red, and the horns beneath it are the same shape as the smaller kind's and twice the size.",
       "mood": "fearsome",
       "region": "narmada-vindhya",
-      "source_index": 245
+      "source_index": 245,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_honey_guide_bird",
@@ -4209,7 +4185,11 @@
       "journal_prompt": "Two horns come up out of the scrub before the head does, curved forward like a bull's and set above the eyes rather than on the nose. The animal rears slowly against a tree, takes what it came for, and drops back down.",
       "mood": "patient",
       "region": "narmada-vindhya",
-      "source_index": 254
+      "source_index": 254,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_tendua",
@@ -4337,23 +4317,25 @@
     {
       "id": "fauna_narmada_straight_tusk",
       "type": "fauna",
-      "name": "Narmada Straight-Tusk",
+      "name": "Straight-Tusked Elephant",
       "aliases": [
+        "Narmada Straight-Tusk",
         "Straight-tusk",
         "Valley elephant"
       ],
       "scientific": "Palaeoloxodon namadicus",
       "clade": "mammal",
+      "region": "aravali",
       "diet": "Herbivore",
       "habitats": [
-        "region_narmada_plateau"
+        "region_aravali"
       ],
       "behaviour": [
         "herd",
         "cargo",
         "browsing"
       ],
-      "notes": "The valley's own elephant, and the largest thing that walks on it. The tusks come out almost straight rather than curving, which is why a pair of them makes a doorway and why the archive has two propped either side of its own.\n\nWorked rather than tamed, and the distinction is one the drivers insist on: an animal that can put a shoulder to a cut block of basalt cannot be made to do anything it has decided against. What a driver has is forty years of being agreed with.",
+      "notes": "The largest thing that walks north of the Tethys. The tusks come out almost straight rather than curving, which is why a pair of them makes a doorway -- and why the Narmada archive, far to the south, has two propped either side of its own, carried down in trade. It lives in Mainland Asia and does not breed on Jambhudweep. The Narmada's straight-tusks are working animals, walked south across the Aravali crossing by their drivers, and the species keeps the valley's name only because that is where its bones and its worked kin were first set down.\n\nWorked rather than tamed, and the distinction is one the drivers insist on: an animal that can put a shoulder to a cut block of basalt cannot be made to do anything it has decided against. What a driver has is forty years of being agreed with.",
       "biomes": [
         "plains",
         "forest",
@@ -4364,7 +4346,10 @@
       "rarity": "rare",
       "mood": "patient",
       "journal_prompt": "It is browsing at the height of a roof and has not registered you at all. The tusks are wrong -- they go forward rather than out, two pale shafts a shade longer than the animal is tall.",
-      "source_index": 261
+      "source_index": 261,
+      "landmasses": [
+        "mainland_asia"
+      ]
     },
     {
       "id": "fauna_narmada_walking_whale",
@@ -4393,7 +4378,11 @@
       "journal_prompt": "It came out of the water on legs. Not flippers used as legs -- legs, with feet, and it put its weight on them one at a time the way a heavy animal does, and then it turned its head and the head was a whale's.",
       "mood": "patient",
       "region": "narmada-vindhya",
-      "source_index": 263
+      "source_index": 263,
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ]
     },
     {
       "id": "fauna_sivatherium",
@@ -4456,6 +4445,33 @@
       "mood": "uncanny",
       "region": "gedrosian-taklamakan",
       "source_index": 265
+    },
+    {
+      "id": "fauna_laurasian_wolf",
+      "type": "fauna",
+      "name": "Laurasian Wolf",
+      "scientific": "Canis lupus laurasiae",
+      "clade": "mammal",
+      "region": "aravali",
+      "diet": "Carnivore",
+      "behaviour": [
+        "pack",
+        "steppe"
+      ],
+      "biomes": [
+        "plains",
+        "hills",
+        "forest"
+      ],
+      "landmasses": [
+        "mainland_asia"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "mood": "watchful",
+      "journal_prompt": "A grey wolf of the northern steppe crosses the dry grass at a steady trot, head low, going somewhere it has been before.",
+      "notes": "The wolf of Mainland Asia, met only on the Aravali's northern shore. Jambhudweep's own wolf is the plateau wolf; the strait keeps them apart.",
+      "source_index": 266
     }
   ],
   "flora": [

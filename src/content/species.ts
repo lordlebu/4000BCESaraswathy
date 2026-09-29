@@ -13,7 +13,8 @@
 import biomesData from '../../data/biomes.json';
 import { creatures as canonCreatures, flora as canonFlora } from './canon';
 import { weightedPickFor } from '../world/rng';
-import type { Biome, BiomeId, Creature, Flora, Placement, Point, Rarity, Tile } from '../world/types';
+import { landmassAt, livesOn } from '../world/landmass';
+import type { Biome, BiomeId, Creature, Flora, Landmass, Placement, Point, Rarity, Tile } from '../world/types';
 
 // Biome presentation -- colour, symbol, walkability, travel cost, journal description --
 // is authored here. Canon says which biomes exist; it has no opinion on what they look like.
@@ -150,7 +151,7 @@ export function floraIn(biome: BiomeId): Flora[] {
  */
 export function creatureFor(tile: Point & { biome: BiomeId }, seed: string): Creature | null {
   return weightedPickFor(
-    creaturesByBiome[tile.biome] ?? [],
+    onLandmass(creaturesByBiome, tile.biome, landmassAt(seed, tile)),
     seed,
     tile,
     'creature',
@@ -161,13 +162,40 @@ export function creatureFor(tile: Point & { biome: BiomeId }, seed: string): Cre
 
 export function floraFor(tile: Point & { biome: BiomeId }, seed: string): Flora | null {
   return weightedPickFor(
-    floraByBiome[tile.biome] ?? [],
+    onLandmass(floraByBiome, tile.biome, landmassAt(seed, tile)),
     seed,
     tile,
     'flora',
     (f) => f.id,
     rarityWeight
   );
+}
+
+/**
+ * The species of this biome that live on this landmass.
+ *
+ * **A filter before the pick, so the pick itself is unchanged.** Rendezvous hashing scores each
+ * candidate on its own, so taking the elephant out of Jambhudweep's plains moves only the tiles it
+ * had won, and those go to whatever scored second -- the same bargain adding a species makes. A
+ * species with no `landmasses` stands anywhere its biomes are, which is still most of them.
+ *
+ * Cached per biome and landmass: four landmasses by a dozen biomes, filtered once.
+ */
+const landPools = new Map<string, readonly (Creature | Flora)[]>();
+function onLandmass<T extends Creature | Flora>(
+  byBiome: Partial<Record<BiomeId, T[]>>,
+  biome: BiomeId,
+  here: Landmass | null
+): T[] {
+  const all = byBiome[biome] ?? [];
+  if (!here) return all;
+  const key = `${byBiome === (creaturesByBiome as unknown) ? 'c' : 'f'}:${biome}:${here}`;
+  let pool = landPools.get(key);
+  if (!pool) {
+    pool = all.filter((s) => livesOn(s.landmasses, here));
+    landPools.set(key, pool);
+  }
+  return pool as T[];
 }
 
 /** Travel cost in "beats". `null` means impassable. Used by the scene to pace movement. */

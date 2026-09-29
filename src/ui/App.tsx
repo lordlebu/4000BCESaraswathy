@@ -67,6 +67,7 @@ import {
   GESTURE_WANTS,
   blockedReason,
   gestureFor,
+  isAboutAnAnimal,
   momentFavours,
   type Gesture
 } from '../content/gestures';
@@ -108,14 +109,6 @@ import type { Station } from '../content/stations';
  */
 const SPEAK_FIRST_AFTER_MS = 1500;
 
-/**
- * The gestures whose subject is an animal, so the card shows its plate rather than a scene.
- *
- * A set rather than an `=== 'stalk'` check, because fishing joined it and the comparison was in
- * four places. Getting this wrong is visible and was: passing the creature regardless put
- * "Painted Deer comes out of the ground" on a flint quarry.
- */
-const ABOUT_AN_ANIMAL = new Set<Gesture>(['stalk', 'fish']);
 
 /**
  * The bare process word for a recipe -- `firing`, not `process_firing`.
@@ -1954,8 +1947,8 @@ export function App() {
           promised={activity.taking}
           preparation={preparation}
           toolName={preparationTool}
-          creatureId={ABOUT_AN_ANIMAL.has(activityGesture) ? currentCreature?.id ?? null : null}
-          creatureName={ABOUT_AN_ANIMAL.has(activityGesture) ? currentCreature?.name ?? null : null}
+          creatureId={isAboutAnAnimal(activityGesture, activity) ? currentCreature?.id ?? null : null}
+          creatureName={isAboutAnAnimal(activityGesture, activity) ? currentCreature?.name ?? null : null}
           /* Which painting to prefer. A night takes the shelter kind, a making takes the process
              word -- so `make-firing.png` can land later and be picked up with no code, and until
              it does the plain gesture scene draws. Nothing here is ever blocked on art. */

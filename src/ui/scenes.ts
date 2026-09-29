@@ -34,14 +34,35 @@ import { artCount, firstArt } from './art';
  *
  * See `docs/art-placement.md` for the full list of filenames this folder will answer to.
  */
-export function sceneFor(gesture: string, variant?: string | null, pick = 0): string | null {
+export function sceneFor(
+  gesture: string,
+  variant?: string | null,
+  pick = 0,
+  moment?: NightMoment | null
+): string | null {
   const group = variant ? GROUND_GROUP[variant] : undefined;
   return firstArt(
     'scenes',
-    [variant ? `${gesture}-${variant}` : null, group ? `${gesture}-${group}` : null, gesture],
+    [
+      variant && moment ? `${gesture}-${variant}-${moment}` : null,
+      variant ? `${gesture}-${variant}` : null,
+      group ? `${gesture}-${group}` : null,
+      gesture
+    ],
     pick
   );
 }
+
+/**
+ * The two moments a night can be painted at: the dark while you settle, and the light you wake to.
+ *
+ * **One night, two pictures, and the card already has both states.** The activity card opens before
+ * the night and settles after it, so `rest-none-midnight.png` draws while the player decides and
+ * `rest-none-dawn.png` once the night is over. Either falls back to the plain shelter painting and
+ * then to `rest.png`, so a shelter can have one of the pair, both or neither.
+ */
+export type NightMoment = 'midnight' | 'dawn';
+export const NIGHT_MOMENTS: readonly NightMoment[] = ['midnight', 'dawn'];
 
 /**
  * Kinds of ground that look alike enough to share a painting, keyed by biome.
@@ -52,14 +73,17 @@ export function sceneFor(gesture: string, variant?: string | null, pick = 0): st
  * biome first, then its group, then the plain gesture -- `stoop-hills`, `stoop-high`, `stoop`. The
  * most specific painting that exists wins, and a biome can still have its own the day one is made.
  *
- * `high` is climbing ground. **The sky islands are left out on purpose**: they are high but not
- * climbed, and are owed a painting of their own (`stoop-sky_island`). Add a group only when a
- * painting needs one.
+ * `high` is climbing ground: hills, mountains, snow, and the underside of a floating island. **The
+ * top of a sky island is left out on purpose** -- high, but not climbed -- and has its own painting,
+ * `stoop-sky_island`. Add a group only when a painting needs one.
  */
 export const GROUND_GROUP: Readonly<Record<string, string>> = {
   hills: 'high',
   mountains: 'high',
-  snow: 'high'
+  snow: 'high',
+  // The underside of a floating island is a rock face with roots hanging off it: climbed, not
+  // walked. The top of one is not, and has its own painting.
+  sky_underside: 'high'
 };
 
 /** How many exist. Used by a test, to keep the loader honest about an empty folder. */

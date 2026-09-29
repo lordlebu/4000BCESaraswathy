@@ -234,7 +234,8 @@ export function ActivityModal({
   // the gesture scene is the fallback rather than the other way round.
   const picture =
     ((gesture === 'stalk' || gesture === 'fish') && creatureId ? plateFor(creatureId) : null) ??
-    sceneFor(gesture, variant, pick);
+    // A night is painted at midnight while it is being chosen and at dawn once it is over.
+    sceneFor(gesture, variant, pick, gesture === 'rest' ? (done ? 'dawn' : 'midnight') : null);
   const what = subject ?? promised[0]?.material.name ?? 'it';
 
   return (

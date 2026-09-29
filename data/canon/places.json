@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.37.0",
+  "canon_version": "2.38.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -42,7 +42,8 @@
           37,
           39
         ]
-      ]
+      ],
+      "bestiary_region": "aravali"
     },
     {
       "id": "region_ganges_lava_sea",
@@ -347,7 +348,10 @@
       "departs_from": [
         "poi_first_pier",
         "poi_far_landing"
-      ]
+      ],
+      "landmass_edges": {
+        "north": "mainland_asia"
+      }
     },
     {
       "id": "field_map_dwarka",
