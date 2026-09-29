@@ -240,7 +240,18 @@ interface SpeciesBase {
   placement: Placement;
   rarity: Rarity;
   journalPrompt: string;
+  /**
+   * The landmasses it lives on, or null for anywhere its biomes are -- which is most species.
+   *
+   * Canon's, and a restriction when present: the elephants and bears of Mainland Asia are placed
+   * only on the Aravali's northern shore, and Jambhudweep's relicts never on it. See
+   * `world/landmass.ts` for how a tile knows which landmass it is.
+   */
+  landmasses: readonly Landmass[] | null;
 }
+
+/** Canon's landmasses. `tethys` is the sky routes', which no field map reaches yet. */
+export type Landmass = 'jambhudweepa' | 'mainland_asia' | 'gondwana' | 'tethys';
 
 /**
  * What kind of animal this is, straight from canon.

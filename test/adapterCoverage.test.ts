@@ -48,7 +48,10 @@ const COVERAGE: Record<string, Coverage> = {
       // through the tile they are standing on, never through a search box". The album now has a
       // search box, so it does not. 28 species carry aliases and the runtime type dropped every
       // one of them.
-      'aliases'],
+      'aliases',
+      // Where it lives by landmass: read by `species.ts` so the elephants and bears of Mainland
+      // Asia stand only on the Aravali's northern shore. See `world/landmass.ts`.
+      'landmasses'],
     skipped: [...EDITORIAL,
       // Reference facts for the canon book and the retrieval service. The game shows
       // `journal_prompt`, which is the player-facing prose written separately from `notes`.
@@ -70,12 +73,17 @@ const COVERAGE: Record<string, Coverage> = {
       // nux-vomica could find the page filed under Kuchla. It was skipped because that was a
       // problem the book had and the game did not -- see the note on fauna above. The album's
       // search box is what changed that.
+      // `landmasses` is read for plants as for animals, but no plant carries one yet, so it is
+      // not listed: this test refuses a claim on a field canon does not export. Add it here the
+      // day the first plant is given a landmass.
       'aliases'],
     skipped: [...EDITORIAL, 'uses', 'placement_note', 'crosses_at']
   },
   'places.field_maps': {
     adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'proportion', 'points_of_interest',
-      'neighbours', 'arrival', 'climate', 'coordinates', 'relief', 'vehicles', 'departs_from'],
+      'neighbours', 'arrival', 'climate', 'coordinates', 'relief', 'vehicles', 'departs_from',
+      // Which edge is another landmass. `world/landmass.ts` floods from it to find the ground.
+      'landmass_edges'],
     skipped: [...EDITORIAL,
       // The name canon used before. There are around four Dwarkas in Jambhudweepa, so the one
       // this game walks became North Dwarka and the bare name was kept as an alias so canon's

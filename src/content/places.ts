@@ -10,7 +10,7 @@
 // is what lets Lothal be a real authored place without anyone hand-drawing a tilemap.
 
 import placesBundle from '../../data/canon/places.json';
-import type { BiomeId } from '../world/types';
+import type { BiomeId, Landmass } from '../world/types';
 import { type Climate, DELTA_CLIMATE } from '../world/weather';
 
 export interface FieldMap {
@@ -76,7 +76,17 @@ export interface FieldMap {
   vehicles: string[];
   /** What the player reads on first arriving. */
   arrival: string;
+  /** The landmass this map is on, from its region. Every map so far is on Jambhudweep. */
+  continent: Landmass;
+  /**
+   * An edge of the map that belongs to another landmass: the land joined to that edge, as far
+   * as the sea, is that landmass. Empty for every map but the Aravali, whose northern shore is
+   * Mainland Asia. Canon says which edge; `world/landmass.ts` finds the ground.
+   */
+  landmassEdges: Partial<Record<MapEdge, Landmass>>;
 }
+
+export type MapEdge = 'north' | 'south' | 'east' | 'west';
 
 export type PoiKind =
   | 'settlement'
@@ -179,7 +189,7 @@ interface RawFieldMap {
   id: string; name: string; region: string; seed_biomes: string[];
   scale?: string; proportion?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
   climate?: Climate; coordinates?: { x: number; y: number }; relief?: string; vehicles?: string[];
-  departs_from?: string[];
+  departs_from?: string[]; landmass_edges?: Record<string, string>;
 }
 interface RawPoi {
   id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string; shore?: string;
@@ -194,6 +204,7 @@ interface RawNpc {
 }
 
 const raw = placesBundle as {
+  regions: { id: string; continent?: string }[];
   field_maps: RawFieldMap[];
   points_of_interest: RawPoi[];
   npcs: RawNpc[];
@@ -213,6 +224,9 @@ export const givenNames: Readonly<Record<string, readonly string[]>> = Object.fr
   (raw.peoples ?? []).map((p) => [p.id, Object.freeze([...p.given_names])])
 );
 
+/** Region id to the landmass it is on. */
+const continentOf = new Map(raw.regions.map((r) => [r.id, r.continent ?? 'jambhudweepa']));
+
 export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   id: m.id,
   name: m.name,
@@ -227,7 +241,9 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   relief: m.relief ?? null,
   vehicles: m.vehicles ?? [],
   departsFrom: m.departs_from ?? [],
-  arrival: m.arrival ?? ''
+  arrival: m.arrival ?? '',
+  continent: (continentOf.get(m.region) ?? 'jambhudweepa') as Landmass,
+  landmassEdges: (m.landmass_edges ?? {}) as Partial<Record<MapEdge, Landmass>>
 }));
 
 export const pointsOfInterest: PointOfInterest[] = raw.points_of_interest.map((p) => ({
