@@ -10,6 +10,8 @@ with every platform compared is a published page, kept current:
 |---|---|---|
 | itch.io | <https://lordlebu.itch.io/south-of-tethys> | `release.yml`, on a `v*` tag or by hand |
 | GitHub Pages | the repository's Pages URL | `pages.yml`, on every push to `main` |
+| GitHub Releases | the repository's Releases page | `release.yml`, on a `v*` tag: the same zip itch.io was sent |
+| Lore portal | <https://south-of-tethys-canon.vercel.app/> | the canon repo's `deploy-canon-service.yml`, on every canon change |
 
 **v0.1.0 went to itch.io on 30 September 2026**, from the merge of #224, and the page was made
 public the same day. **v0.1.1** followed that evening from #226: the lighter first load, the store
