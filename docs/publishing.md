@@ -15,6 +15,10 @@ with every platform compared is a published page, kept current:
 public the same day. **v0.1.1** followed that evening from #226: the lighter first load, the store
 kit, the installable build and the princess icon. Pages is the build that is always current; itch.io is a release somebody chose.
 
+The lore the game does not ship is read at <https://south-of-tethys-canon.vercel.app/>, the canon
+service's own page, published from the canon repository with every canon change. The in-game canon
+panel links each entry it names to it.
+
 Players reach the owner at <https://x.com/landofmyst>. It is in the listing's description, and
 belongs in every new listing.
 

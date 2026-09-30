@@ -36,6 +36,18 @@ function baseUrl(): string | null {
   return raw ? raw.replace(/\/$/, '') : null;
 }
 
+/**
+ * Where a person can read one canon entry whole, or null when there is no service.
+ *
+ * The service's root is the lore portal, and it opens the entry named after the `#`. This is how
+ * lore the game does not ship is read: the panel names what canon holds, and the portal has the
+ * rest, at no cost to the game's own weight.
+ */
+export function portalLink(entityId: string): string | null {
+  const base = baseUrl();
+  return base ? `${base}/#${encodeURIComponent(entityId)}` : null;
+}
+
 // Three different waits, because they answer three different questions.
 //
 // The health check must fail fast: almost nobody running `npm run dev` has a canon service,

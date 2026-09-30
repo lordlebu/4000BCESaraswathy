@@ -129,7 +129,9 @@ npm run test:e2e
 [docs/publishing.md](docs/publishing.md) records who it is published for, how the listing was set,
 and what stopped the first release.
 
-Questions, bugs and thoughts reach the author at <https://x.com/landofmyst>.
+Questions, bugs and thoughts reach the author at <https://x.com/landofmyst>. The rest of the world
+the game is set in -- peoples, events, eras -- is readable in the lore portal at
+<https://south-of-tethys-canon.vercel.app/>, which the canon repository publishes.
 
 `.github/workflows/release.yml` builds a portable copy of the game and publishes it to itch.io. It
 runs when a `v*` tag is pushed, or by hand from the Actions tab, and not on every merge: a jam
