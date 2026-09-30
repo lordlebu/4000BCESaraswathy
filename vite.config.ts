@@ -5,6 +5,10 @@ import react from '@vitejs/plugin-react';
 // GitHub Pages serves this repo from /<repo>/, so assets must resolve against that subpath.
 // Local dev and any plain static host (Hostinger) want '/', so the subpath is opt-in via env.
 // CI sets DEPLOY_BASE=/4000BCESaraswathy/ for the Pages build.
+//
+// The release build sets DEPLOY_BASE=./ instead. itch.io serves a game from inside an iframe at a
+// path nobody chooses, so every asset has to resolve against the page rather than the site root;
+// a relative base is the one value that works there, in a zip opened anywhere, and on Pages too.
 const base = process.env.DEPLOY_BASE ?? '/';
 
 export default defineConfig({
@@ -50,6 +54,11 @@ export default defineConfig({
         // returning player should not re-download 1 MB of Phaser because a journal string moved.
         manualChunks(id: string) {
           if (id.includes('node_modules/phaser')) return 'phaser';
+          // Canon's data on the same footing, and for the same reason turned round: content
+          // changes on its own schedule, so a canon release should not re-download the app and an
+          // app fix should not re-download canon. It also gives the data a file of its own to
+          // weigh -- `tools/check-bundle-size.js` budgets it as what the player downloads.
+          if (id.replace(/\\/g, '/').includes('/data/canon/')) return 'canon';
           return undefined;
         }
       }

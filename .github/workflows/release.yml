@@ -1,0 +1,101 @@
+# Builds the game as a portable folder and publishes it to itch.io.
+#
+# `pages.yml` deploys every push to `main`, which makes Pages the build that is always current. This
+# is the other thing: a release somebody chose. itch.io is where game jams are held and where a
+# player looks for a game, and a jam entry must not change under its judges because a pull request
+# merged -- so this runs on a version tag, or by hand from the Actions tab, and never on a push.
+#
+# **One build, every destination.** `DEPLOY_BASE=./` makes every asset resolve against the page
+# rather than the site root, so the same `dist/` plays inside itch.io's iframe, unzipped on any
+# static host, and on the portals that take a zip by hand (Newgrounds, a jam's own upload form).
+# The zip is kept as an artifact on the run for exactly that.
+#
+# **Setting it up, once.** Nothing here fails before this is done -- the publish step is skipped
+# until `ITCH_TARGET` exists, and the zip is still built.
+#
+#   1. Create the project on itch.io: Kind of project "HTML", and leave it as a draft.
+#   2. Settings -> Secrets and variables -> Actions:
+#        Variables -> ITCH_TARGET      `<itch-user>/<project-slug>`, as in the project's URL
+#        Secrets   -> BUTLER_API_KEY   from https://itch.io/user/settings/api-keys
+#   3. Run this workflow. Then, on the itch.io project's edit page, tick "This file will be played
+#      in the browser" on the `html5` upload. That tick is per channel and is remembered -- butler
+#      cannot set it, and until it is set the page offers a download instead of the game.
+#
+# The key is a secret and the target is a variable, deliberately: the target is printed in the log
+# and appears in a public URL, and the key can publish to every project the account owns.
+
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Two releases racing would leave itch.io holding whichever finished last, not whichever is newer.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Build
+        # VITE_CANON_API is a variable and never a secret, for the reason `pages.yml` gives: Vite
+        # inlines every VITE_* value into the bundle.
+        run: npm run build
+        env:
+          DEPLOY_BASE: ./
+          VITE_CANON_API: ${{ vars.VITE_CANON_API }}
+      - run: npm run check:size
+      - name: Inside itch.io's limits
+        # An HTML5 upload over these is accepted and then does not play, which reads as a broken
+        # build rather than as a limit. 1,000 files and 500 MB extracted are itch.io's; the game is
+        # a quarter of the first and a sixteenth of the second, and the paintings are what grows.
+        run: |
+          files=$(find dist -type f | wc -l)
+          mb=$(du -sm dist | cut -f1)
+          echo "dist: $files files, $mb MB"
+          test -f dist/index.html || { echo "dist/index.html is missing"; exit 1; }
+          [ "$files" -le 1000 ] || { echo "over itch.io's 1,000-file limit"; exit 1; }
+          [ "$mb" -le 500 ] || { echo "over itch.io's 500 MB limit"; exit 1; }
+      - name: Name the version
+        id: version
+        # A tag is the version. A run by hand is the package version and the commit it was cut from.
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "name=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=$(node -p "require('./package.json').version")+${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Zip
+        # index.html at the root of the archive, which is what every portal expects.
+        run: cd dist && zip -qr "../south-of-tethys-${{ steps.version.outputs.name }}.zip" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: south-of-tethys-${{ steps.version.outputs.name }}
+          path: south-of-tethys-*.zip
+          if-no-files-found: error
+      - name: Publish to itch.io
+        if: ${{ vars.ITCH_TARGET != '' }}
+        # butler is itch.io's own uploader, fetched from itch.io rather than through a third-party
+        # action: this step holds a key that can publish to the whole account. It uploads only what
+        # changed since the last push, so a release that moves one painting sends one painting.
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          curl -fsSL -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip -d butler
+          chmod +x butler/butler
+          ./butler/butler push dist "${{ vars.ITCH_TARGET }}:html5" --userversion "${{ steps.version.outputs.name }}"
