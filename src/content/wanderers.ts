@@ -188,6 +188,17 @@ export function circuitFor(world: World, species: Creature): Point[] {
 }
 
 /**
+ * The animals authored to walk one map, as engine ids, before anything is known about its ground.
+ *
+ * For `preload`, which has the map's id and not yet its world. `wanderersOn` may go on to drop one
+ * whose habitat the generated map lacks; loading the painting of an animal that then does not
+ * appear costs one file, where loading every map's animals cost 4 MB on a map that has none.
+ */
+export function wandererIdsOn(fieldMapId: string): string[] {
+  return (WANDERS[fieldMapId] ?? []).map(engineId);
+}
+
+/**
  * The wanderers on one map, with their ground resolved.
  *
  * Takes the world because a circuit is a fact about one generated map rather than about canon, the

@@ -236,13 +236,12 @@ import {
   type Traveller,
   type TravellerState
 } from '../../content/travellers';
-import { wanderersOn, wandererAt, type Wanderer } from '../../content/wanderers';
+import { wandererIdsOn, wanderersOn, wandererAt, type Wanderer } from '../../content/wanderers';
 import {
   facingArt,
   hasPaintedArt,
   loadWandererArt,
-  paintedKey,
-  paintedWandererIds
+  paintedKey
 } from '../wandererArt';
 import { isCamp, isGrand } from '../../content/camps';
 import { findPath, nearestReachable } from '../../world/pathfind';
@@ -446,6 +445,8 @@ export class WorldScene extends Phaser.Scene {
   private world!: World;
   /** The field map and its placed points of interest. `world` is this one's ground. */
   private built!: FieldMapWorld;
+  /** Which map this scene was started for. Known from `init`, before `built` exists. */
+  private fieldMapId = DEFAULT_FIELD_MAP;
 
   /**
    * The other people on the road, and the sprites drawing them.
@@ -670,6 +671,7 @@ export class WorldScene extends Phaser.Scene {
 
   init(data: WorldSceneData): void {
     this.character = characterFor(data.characterId);
+    this.fieldMapId = data.fieldMapId ?? DEFAULT_FIELD_MAP;
     // A restart re-enters init, so every piece of per-journey state is reset here rather than in
     // a field initialiser — otherwise "generate a new map" would inherit the old fog.
     this.discovered = new Set(data.discovered ?? []);
@@ -729,10 +731,13 @@ export class WorldScene extends Phaser.Scene {
     // loading them all costs less than the machinery to load one lazily and swap textures later --
     // and it means a character can be changed without a scene restart.
     for (const art of everySheet()) loadCharacterSheet(this, art.key, art.url, frameOf(art.key));
-    // Every painted animal, not just this map's, for the same reason the character sheets are all
-    // loaded: `built` is not assigned until `create`, so `preload` cannot know which map it is
-    // about to draw. There are none today and one per quest thereafter, at a few KB each.
-    loadWandererArt(this, paintedWandererIds());
+    // This map's painted animals and no other's. It used to be every map's, on the reasoning that
+    // `built` is not assigned until `create` and the files would be a few KB each. They are not:
+    // twelve paintings came to 4.05 MB, which was 47% of everything downloaded before the first
+    // frame, on a first map -- Lothal -- that has no wanderer at all. `init` is handed the map's
+    // id even though it has not built the world, and the id is all this needs. A change of map
+    // restarts the scene, so the next map's animals are loaded when it is.
+    loadWandererArt(this, wandererIdsOn(this.fieldMapId));
     // The homestead's unfinished mill and its greenhouse: single images, drawn only once built.
     this.load.image('homestead-stage-1', stageOneUrl);
     this.load.image('homestead-stage-2', stageTwoUrl);

@@ -11,8 +11,11 @@ with every platform compared is a published page, kept current:
 | itch.io | <https://lordlebu.itch.io/south-of-tethys> | `release.yml`, on a `v*` tag or by hand |
 | GitHub Pages | the repository's Pages URL | `pages.yml`, on every push to `main` |
 
-**v0.1.0 went to itch.io on 30 September 2026**, from the merge of #224. Pages is the build that is
-always current; itch.io is a release somebody chose.
+**v0.1.0 went to itch.io on 30 September 2026**, from the merge of #224, and the page was made
+public the same day. Pages is the build that is always current; itch.io is a release somebody chose.
+
+Players reach the owner at <https://x.com/landofmyst>. It is in the listing's description, and
+belongs in every new listing.
 
 ## Who it is for
 
@@ -97,20 +100,47 @@ A journey is saved in the browser, under the address the game is played at. One 
 does not appear on itch.io. That is acceptable while the two have separate audiences; if it stops
 being, the answer is exporting and importing a save as text.
 
+## What a player downloads first
+
+`dist/` is 30 MB, and for a day that was taken to be the cost of opening the game. It is not.
+Plates, scenes, portraits and faces are fetched when a panel first shows them. Measured by
+`npm run measure:load`, 30 September 2026, in MB on the wire:
+
+| Map | Before | After |
+|---|---|---|
+| Lothal, where a journey starts | 8.56 | **4.50** |
+| Narmada | 8.56 | 7.24 |
+| Dwarka | 8.56 | 5.82 |
+| Aravali | 8.56 | 4.50 |
+
+The difference is the painted animals. `preload` loaded every map's — twelve files, 4.05 MB — on
+the reasoning that they would be "a few KB each", and the first map has none. It now loads the
+ones that walk the map being drawn.
+
+What is left is 0.62 MB of code and data and 3.88 MB of ground: `terrain` alone is 1.6 MB and
+`places` 0.7. The animals that remain are 0.3–0.6 MB a view, at up to 740 pixels across for a
+figure drawn at about 100. Both are a question for the art pipeline rather than the loader, and
+neither has been touched.
+
+## The store kit
+
+[`docs/store-kit/listing.md`](store-kit/listing.md) holds the name, the one-line pitch, the
+description, the controls, the tags and the rating answer, and beside it the five screenshots
+`npm run store:shots` takes from the built game. Paste from it; do not write a listing afresh.
+
 ## What is next
 
 In order. The published plan carries the reasoning and the full table.
 
-1. **Make the page public**, once the listing has a cover image and a description.
-2. **A store kit** in `docs/store-kit/`: cover, screenshots, one-line pitch, description, controls,
-   tags and the rating answer, written once and pasted into every listing.
-3. **Measure the first load.** Nobody has measured how much of the 30 MB arrives before the first
-   frame. If it is all of it, plates and scenes should load when first shown.
-4. **Newgrounds and IndieDB**, by hand, from the release zip and the store kit. Newgrounds rated Teen.
+1. **The cover image.** The prompt card is in the store kit; the picture is the owner's to make.
+2. **Put the kit on the itch.io page**: the description, the five screenshots, and the cover.
+3. **Newgrounds and IndieDB**, by hand, from the release zip and the store kit. Newgrounds rated Teen.
+4. **The weight of the ground and the animals**, above: 1.6 MB of terrain, and paintings several
+   times the size they are drawn at.
 5. **Installable and offline** — a web manifest and a service worker — and then the Microsoft Store,
    which is free for individuals and takes a web app by its address.
 6. **Devlogs on itch.io**, drafted from canon's atlas, timeline and memory map.
 7. **Jams that accept an existing game**: narrative, worldbuilding and slow-game jams only.
 
 Open, and the owner's: whether the listing is Teen or Mature, given what canon holds; free or pay
-what you want; the cover image.
+what you want.

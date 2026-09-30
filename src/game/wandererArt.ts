@@ -98,17 +98,3 @@ export function loadWandererArt(scene: Phaser.Scene, speciesIds: readonly string
     }
   }
 }
-
-/**
- * Every species that has a painting today. Used by `preload`, which runs before the map is known.
- *
- * Derived from the filenames rather than from a list, so a species is loadable the moment its art
- * is on disk -- which is the whole point of the folder being the interface.
- */
-export function paintedWandererIds(): string[] {
-  const ids = new Set<string>();
-  for (const name of byName.keys()) {
-    ids.add(name.replace(/-(right|left|down|up)$/, ''));
-  }
-  return [...ids];
-}
