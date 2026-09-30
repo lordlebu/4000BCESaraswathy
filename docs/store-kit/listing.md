@@ -103,10 +103,18 @@ Order them as numbered. The first is the one most listings show beside the title
 
 ## Cover image
 
-**Not made yet.** itch.io asks for 630 × 500 and shows it wherever the game is listed; the same
-picture, cropped, serves as the thumbnail everywhere else.
+**Made 30 September 2026, and on the itch.io page.** `cover.jpg` is 630 x 500, the size itch.io
+asks for and shows wherever the game is listed; `cover@2x.jpg` is 1260 x 1000 for anywhere that
+wants a larger one. The same picture, cropped, serves as the thumbnail everywhere else.
 
-Prompt card, in the direction `docs/art-direction.md` sets for new art:
+The raw is 1408 x 1117 and 2.6 MB, kept untracked at `assets/source/dump/cover.png`. Its shape is
+already 630:500, so the two here are a plain resize with nothing cropped:
+
+```bash
+python -c "from PIL import Image; im=Image.open('assets/source/dump/cover.png').convert('RGB'); im.resize((630,500),Image.LANCZOS).save('docs/store-kit/cover.jpg',quality=92,optimize=True); im.resize((1260,1000),Image.LANCZOS).save('docs/store-kit/cover@2x.jpg',quality=90,optimize=True)"
+```
+
+The prompt card it was made from, in the direction `docs/art-direction.md` sets for new art:
 
 ```text
 Cover illustration for a slow exploration game, 16-bit SNES-era painterly pixel art with soft
@@ -119,5 +127,4 @@ reed green, river blue, no neon. Quiet and spacious, nothing threatening. No tex
 no border. Landscape, 630x500 composition with the upper-left third kept plain for a title.
 ```
 
-Save the raw as `assets/source/cover/cover.png`. The title is set in type afterwards; do not ask
-the image model for lettering.
+The title is set in type afterwards; do not ask the image model for lettering.
