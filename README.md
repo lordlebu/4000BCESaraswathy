@@ -125,6 +125,10 @@ npm run test:e2e
 
 ### itch.io, jams and other portals
 
+**The game is live at <https://lordlebu.itch.io/south-of-tethys>** (v0.1.0, 30 September 2026).
+[docs/publishing.md](docs/publishing.md) records who it is published for, how the listing was set,
+and what stopped the first release.
+
 `.github/workflows/release.yml` builds a portable copy of the game and publishes it to itch.io. It
 runs when a `v*` tag is pushed, or by hand from the Actions tab, and not on every merge: a jam
 entry should not change while it is being judged.
@@ -163,6 +167,7 @@ npx vite build          # dist/ now plays from any folder on any static host
 - [Bestiary and herbarium](docs/bestiary.md) — where the species came from, kept for provenance
 - [The ground that gives](docs/the-ground-that-gives.md) — gathering, resource nodes, and the two design rulings behind them
 - [Handover: the crossing and the basalt](docs/handover-crossing-and-basalt.md) — both plans closed, the stamp rule they leave behind, and what is still open
+- [Publishing](docs/publishing.md) — where the game is live, the audience it is listed for, and how to release
 - [Testing notes](docs/testing.md) — what the failures here have cost, and the rules that came out of them
 - [Art brief](docs/art-brief.md) — how the character art is specified, and what went wrong twice
 - [Source layout](src/README.md) — the four layers and the rules between them
