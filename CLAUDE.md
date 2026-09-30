@@ -36,6 +36,7 @@ npm run test:watch # vitest in watch mode
 npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
 npm run check:data # verify data/canon/ matches the canon release it came from
+npm run check:size # after a build: each chunk against its budget, gzipped -- app 200 KB, canon 350 KB
 npm run perf       # frame cost on the renderer CI has -- see docs/rendering.md
 npm run simulate   # walk hundreds of seeded journeys through the event layer and print the rhythm,
                    # then how many minutes each map takes to play, as a floor (test/minutes.test.ts)
@@ -322,6 +323,19 @@ Navigation in the specs is relative (`?seed=x`, never `/?seed=x`) so a baseURL s
 
 `npm run build` respects `DEPLOY_BASE`, which the Pages workflow sets to `/<repo>/`. Locally and on
 any plain static host it defaults to `/`.
+
+**`release.yml` publishes to itch.io, and only when asked.** It runs on a `v*` tag or by hand, never
+on a push: Pages is the build that is always current, and itch.io is where a jam entry sits and
+must not change under its judges. It builds with `DEPLOY_BASE=./` -- a relative base, the one value
+that works inside itch.io's iframe at a path nobody chooses -- and keeps the zip as an artifact for
+the portals that take an upload by hand. The publish step is skipped until the `ITCH_TARGET`
+variable and `BUTLER_API_KEY` secret exist; the workflow's header carries the one-time setup.
+
+**Canon's data is its own chunk.** `vite.config.ts` splits `data/canon/` into `canon-*.js` beside
+`phaser-*.js`, so a canon release does not re-download the app, and `check:size` budgets it **gzipped**
+at 350 KB -- the rule is that the data may not outweigh the engine that draws it. It measured 105 KB
+when that was set. The old limit was 560 KB of *raw* JSON, which is a number no player downloads, and
+it had been forcing content out of a game whose paintings come to 30 MB.
 
 **`pages.yml` is the only workflow that may deploy Pages.** Enabling Pages makes GitHub offer to
 commit a `jekyll-gh-pages.yml` too — decline it. This is a Vite application, not a Jekyll site, so

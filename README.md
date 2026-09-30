@@ -123,6 +123,33 @@ $env:PLAYWRIGHT_BASE_URL = 'http://localhost:4180/4000BCESaraswathy/'
 npm run test:e2e
 ```
 
+### itch.io, jams and other portals
+
+`.github/workflows/release.yml` builds a portable copy of the game and publishes it to itch.io. It
+runs when a `v*` tag is pushed, or by hand from the Actions tab, and not on every merge: a jam
+entry should not change while it is being judged.
+
+One-time setup:
+
+1. Create the project on itch.io with *Kind of project* set to **HTML**.
+2. In this repository's *Settings → Secrets and variables → Actions*, add the variable
+   `ITCH_TARGET` (`<itch-user>/<project-slug>`) and the secret `BUTLER_API_KEY` (from
+   <https://itch.io/user/settings/api-keys>).
+3. Run the workflow, then on the itch.io project's edit page tick **This file will be played in
+   the browser** on the `html5` upload. Set the embed to 960 × 600 or larger, with the fullscreen
+   button and mobile-friendly options on.
+
+Until step 2 is done the workflow still builds and simply skips publishing. Every run also keeps
+`south-of-tethys-<version>.zip` as an artifact, with `index.html` at its root — that is the file to
+upload by hand to Newgrounds or to a jam that is not hosted on itch.io.
+
+To make the same build locally:
+
+```powershell
+$env:DEPLOY_BASE = './'
+npx vite build          # dist/ now plays from any folder on any static host
+```
+
 ## Documentation
 
 - [CLAUDE.md](CLAUDE.md) — architecture, commands and known issues, for anyone (or any agent)
