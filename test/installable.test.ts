@@ -71,6 +71,15 @@ describe('the page and the worker', () => {
     expect(read('index.html')).toContain('rel="manifest"');
   });
 
+  it('links icons for the tab that exist', () => {
+    // A tab icon that 404s is a blank square and no error anywhere.
+    const linked = [...read('index.html').matchAll(/rel="(?:icon|apple-touch-icon)"[^>]*href="\/([^"]+)"/g)];
+    expect(linked.length).toBeGreaterThanOrEqual(3);
+    for (const [, file] of linked) {
+      expect(existsSync(join(ROOT, 'public', file!)), `${file} is missing`).toBe(true);
+    }
+  });
+
   it('leaves the build a stamp to fill in', () => {
     // `vite.config.ts` replaces this once. Without it every release would share one cache name and
     // the old release's files would never be thrown away.

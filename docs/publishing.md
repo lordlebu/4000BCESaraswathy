@@ -135,7 +135,8 @@ Store, and `devlog-01.md` is a first devlog, drafted for the owner to put into t
 
 From the release after v0.1.0 the game can be installed from the browser and opened again with no
 connection. Four files agree to make that so: `public/manifest.webmanifest`, the two icons it names
-(`python tools/build-icons.py` cuts them from Varuna's own sprite), the link in `index.html`, and
+(`python tools/build-icons.py` cuts them, the tab's `favicon.ico` and the rest from the owner's
+painting of the Asura-Tainted Princess, kept at 512 pixels as `assets/icon.png`), the link in `index.html`, and
 `tools/service-worker.js`, which the build stamps and writes to `dist/sw.js`.
 
 **It keeps what the player has been sent, and nothing else.** Fetching all 30 MB up front to be
