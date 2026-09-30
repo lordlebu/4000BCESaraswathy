@@ -26,11 +26,19 @@ const { squeeze, decode, rgbaOf } = createRequire(import.meta.url)('../tools/squ
 // The ground every journey opens on, a painted animal with a transparent edge, and a small sheet.
 const SAMPLES = ['assets/terrain.png', 'assets/wanderers/vasuki-indicus-down.png', 'assets/varuna-overworld.png'];
 
+// The ground sheet takes a few seconds to squeeze; the suite runs thirty files at once and a test
+// that holds a core that long is how an unrelated generation test on the same machine times out.
+const cache = new Map<string, Buffer>();
+function squeezedOnce(file: string): Buffer {
+  if (!cache.has(file)) cache.set(file, squeeze(readFileSync(join(ROOT, file))));
+  return cache.get(file)!;
+}
+
 describe('squeezing a painting', () => {
   for (const file of SAMPLES) {
     it(`leaves every pixel of ${file} as it was`, () => {
       const original = readFileSync(join(ROOT, file));
-      const squeezed = squeeze(original);
+      const squeezed = squeezedOnce(file);
       expect(squeezed.length).toBeLessThanOrEqual(original.length);
       const before = decode(original)!;
       const after = decode(squeezed)!;
@@ -43,7 +51,7 @@ describe('squeezing a painting', () => {
     // Measured at 1,610 KB to 1,316 KB. A guard that rejected every result would pass the test
     // above and save nothing; this is the one that notices.
     const original = readFileSync(join(ROOT, 'assets/terrain.png'));
-    expect(squeeze(original).length).toBeLessThan(original.length * 0.9);
+    expect(squeezedOnce('assets/terrain.png').length).toBeLessThan(original.length * 0.9);
   });
 
   it('hands back anything that is not a PNG it understands, unchanged', () => {
