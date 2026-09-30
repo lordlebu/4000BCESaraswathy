@@ -1,5 +1,7 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 
 // GitHub Pages serves this repo from /<repo>/, so assets must resolve against that subpath.
@@ -11,9 +13,30 @@ import react from '@vitejs/plugin-react';
 // a relative base is the one value that works there, in a zip opened anywhere, and on Pages too.
 const base = process.env.DEPLOY_BASE ?? '/';
 
+/**
+ * Writes `dist/sw.js` from `tools/service-worker.js`, stamped with this build.
+ *
+ * The stamp is a hash of every file name in the bundle. Those names carry content hashes already,
+ * so it changes exactly when something the player downloads has changed -- and a service worker
+ * whose bytes change is what tells a browser there is a new release and the old cache can go.
+ * Build only: in development there is no `sw.js`, and `src/main.tsx` does not ask for one.
+ */
+function serviceWorker(): Plugin {
+  return {
+    name: 'south-of-tethys:service-worker',
+    apply: 'build',
+    generateBundle(_options, bundle) {
+      const names = Object.keys(bundle).sort().join(' ');
+      const build = createHash('sha256').update(names).digest('hex').slice(0, 12);
+      const template = readFileSync(new URL('./tools/service-worker.js', import.meta.url), 'utf8');
+      this.emitFile({ type: 'asset', fileName: 'sw.js', source: template.replace('__BUILD__', build) });
+    }
+  };
+}
+
 export default defineConfig({
   base,
-  plugins: [react()],
+  plugins: [react(), serviceWorker()],
   test: {
     // Vitest owns test/ only. Without this it would also collect e2e/*.spec.ts and try to run
     // Playwright's browser tests in Node, where they cannot work.

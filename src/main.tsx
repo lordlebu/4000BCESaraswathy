@@ -19,3 +19,14 @@ createRoot(root).render(
     </StrictMode>
   </Fallback>
 );
+
+// Installable, and playable again without a connection -- see `tools/service-worker.js` for what it
+// keeps and why. Production only: in development there is no `sw.js` to find, and a worker caching
+// a dev server's modules is a well-known way to spend an afternoon. `BASE_URL` rather than `/`,
+// because the game is served from a subpath on Pages and from a path nobody chooses on itch.io.
+// A refusal is not an error worth showing: the game plays exactly as it did before there was one.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => undefined);
+  });
+}

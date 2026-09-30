@@ -37,6 +37,8 @@ npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
 npm run check:data # verify data/canon/ matches the canon release it came from
 npm run check:size # after a build: each chunk against its budget, gzipped -- app 200 KB, canon 350 KB
+npm run measure:load # after a build: what a player downloads before the first frame, per map
+npm run store:shots  # after a build: retake the listing screenshots in docs/store-kit/
 npm run perf       # frame cost on the renderer CI has -- see docs/rendering.md
 npm run simulate   # walk hundreds of seeded journeys through the event layer and print the rhythm,
                    # then how many minutes each map takes to play, as a floor (test/minutes.test.ts)
@@ -337,6 +339,13 @@ layered world and not a children's action game**, which rules out the ad-funded 
 three things that stopped the first release and looked like something else: an unverified itch.io
 email fails butler in one second like a bad key would, butler cannot tick *played in the browser*,
 and a step's log cannot be read without a GitHub login, so the error has to be pasted in.
+
+**The game is installable, and the worker is a build product.** `tools/service-worker.js` is a
+template: `vite.config.ts` stamps it with a hash of the bundle's file names and writes `dist/sw.js`.
+It caches what has been fetched rather than everything, fetches the page network-first so a release
+is never hidden behind its own cache, and deletes every cache but its own build's. `src/main.tsx`
+registers it in production only, so neither `npm run dev` nor the browser suite ever runs one.
+`docs/publishing.md` > *Installable* has the by-hand offline check to repeat after changing it.
 
 **Canon's data is its own chunk.** `vite.config.ts` splits `data/canon/` into `canon-*.js` beside
 `phaser-*.js`, so a canon release does not re-download the app, and `check:size` budgets it **gzipped**

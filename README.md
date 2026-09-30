@@ -129,6 +129,8 @@ npm run test:e2e
 [docs/publishing.md](docs/publishing.md) records who it is published for, how the listing was set,
 and what stopped the first release.
 
+Questions, bugs and thoughts reach the author at <https://x.com/landofmyst>.
+
 `.github/workflows/release.yml` builds a portable copy of the game and publishes it to itch.io. It
 runs when a `v*` tag is pushed, or by hand from the Actions tab, and not on every merge: a jam
 entry should not change while it is being judged.

@@ -11,8 +11,11 @@ with every platform compared is a published page, kept current:
 | itch.io | <https://lordlebu.itch.io/south-of-tethys> | `release.yml`, on a `v*` tag or by hand |
 | GitHub Pages | the repository's Pages URL | `pages.yml`, on every push to `main` |
 
-**v0.1.0 went to itch.io on 30 September 2026**, from the merge of #224. Pages is the build that is
-always current; itch.io is a release somebody chose.
+**v0.1.0 went to itch.io on 30 September 2026**, from the merge of #224, and the page was made
+public the same day. Pages is the build that is always current; itch.io is a release somebody chose.
+
+Players reach the owner at <https://x.com/landofmyst>. It is in the listing's description, and
+belongs in every new listing.
 
 ## Who it is for
 
@@ -97,20 +100,75 @@ A journey is saved in the browser, under the address the game is played at. One 
 does not appear on itch.io. That is acceptable while the two have separate audiences; if it stops
 being, the answer is exporting and importing a save as text.
 
+## What a player downloads first
+
+`dist/` is 30 MB, and for a day that was taken to be the cost of opening the game. It is not.
+Plates, scenes, portraits and faces are fetched when a panel first shows them. Measured by
+`npm run measure:load`, 30 September 2026, in MB on the wire:
+
+| Map | Before | After |
+|---|---|---|
+| Lothal, where a journey starts | 8.56 | **4.50** |
+| Narmada | 8.56 | 7.24 |
+| Dwarka | 8.56 | 5.82 |
+| Aravali | 8.56 | 4.50 |
+
+The difference is the painted animals. `preload` loaded every map's — twelve files, 4.05 MB — on
+the reasoning that they would be "a few KB each", and the first map has none. It now loads the
+ones that walk the map being drawn.
+
+What is left is 0.62 MB of code and data and 3.88 MB of ground: `terrain` alone is 1.6 MB and
+`places` 0.7. The animals that remain are 0.3–0.6 MB a view, at up to 740 pixels across for a
+figure drawn at about 100. Both are a question for the art pipeline rather than the loader, and
+neither has been touched.
+
+## The store kit
+
+[`docs/store-kit/listing.md`](store-kit/listing.md) holds the name, the one-line pitch, the
+description, the controls, the tags and the rating answer, and beside it the five screenshots
+`npm run store:shots` takes from the built game. Paste from it; do not write a listing afresh.
+
+`other-listings.md` says which field takes which piece on Newgrounds, IndieDB and the Microsoft
+Store, and `devlog-01.md` is a first devlog, drafted for the owner to put into their own words.
+
+## Installable
+
+From the release after v0.1.0 the game can be installed from the browser and opened again with no
+connection. Four files agree to make that so: `public/manifest.webmanifest`, the two icons it names
+(`python tools/build-icons.py` cuts them, the tab's `favicon.ico` and the rest from the owner's
+painting of the Asura-Tainted Princess, kept at 512 pixels as `assets/icon.png`), the link in `index.html`, and
+`tools/service-worker.js`, which the build stamps and writes to `dist/sw.js`.
+
+**It keeps what the player has been sent, and nothing else.** Fetching all 30 MB up front to be
+"fully offline" would multiply the first visit by seven. Offline, the game opens and plays on any
+ground already walked; a plate never seen waits for a connection.
+
+**The page is fetched from the network first**, and from the cache only when there is none.
+Answered cache-first, a returning player is handed last release's page for ever. **The cache is
+named for the build**, and a new build deletes the old one — which matters most on itch.io, where
+every release is served from a new path on the same origin and would otherwise leave its whole
+cache behind.
+
+`test/installable.test.ts` holds the four files to each other. What it cannot see is a browser, so
+this was checked by hand on 30 September 2026: served from a nested path, the worker took control,
+kept 43 files, and with the server stopped and the browser offline the game reopened and drew. Do
+that again after changing the worker.
+
+The worker runs in production builds only. The browser suite runs against the dev server and never
+meets it.
+
 ## What is next
 
 In order. The published plan carries the reasoning and the full table.
 
-1. **Make the page public**, once the listing has a cover image and a description.
-2. **A store kit** in `docs/store-kit/`: cover, screenshots, one-line pitch, description, controls,
-   tags and the rating answer, written once and pasted into every listing.
-3. **Measure the first load.** Nobody has measured how much of the 30 MB arrives before the first
-   frame. If it is all of it, plates and scenes should load when first shown.
-4. **Newgrounds and IndieDB**, by hand, from the release zip and the store kit. Newgrounds rated Teen.
-5. **Installable and offline** — a web manifest and a service worker — and then the Microsoft Store,
-   which is free for individuals and takes a web app by its address.
-6. **Devlogs on itch.io**, drafted from canon's atlas, timeline and memory map.
-7. **Jams that accept an existing game**: narrative, worldbuilding and slow-game jams only.
+1. **Release v0.1.1**, which carries the lighter first load and the installable build to itch.io.
+2. **Post the first devlog**, from `store-kit/devlog-01.md`.
+3. **IndieDB and Newgrounds**, by hand, from `store-kit/other-listings.md`. Read Newgrounds' rule on
+   AI-made art in games before submitting there.
+4. **The Microsoft Store**, from the same file, once Pages is serving the installable build.
+5. **The weight of the ground and the animals**, above: 1.6 MB of terrain, and paintings several
+   times the size they are drawn at.
+6. **Jams that accept an existing game**: narrative, worldbuilding and slow-game jams only.
 
 Open, and the owner's: whether the listing is Teen or Mature, given what canon holds; free or pay
-what you want; the cover image.
+what you want.

@@ -21,6 +21,7 @@ import {
   circuitFor,
   isAlongside,
   wandererAt,
+  wandererIdsOn,
   wanderersOn
 } from '../src/content/wanderers';
 import { hoursToPhase } from '../src/game/dayNight';
@@ -324,6 +325,23 @@ describe("every animal fits the walking whale's box", () => {
 describe('a map with nothing authored to wander', () => {
   it('is empty rather than inventing an animal', () => {
     expect(wanderersOn('field_map_lothal', built('field_map_lothal'))).toEqual([]);
+  });
+});
+
+describe("what a map loads before it is drawn", () => {
+  // `preload` has the map's id and not its world, and loads the paintings `wandererIdsOn` names.
+  // Every map's animals used to be loaded on every map: 4.05 MB of a first load of 8.56, on a
+  // first map that has none. These hold the two halves of the replacement -- nothing that walks a
+  // map is left unloaded, and a map with no animal asks for no painting.
+  for (const id of ['field_map_lothal', 'field_map_narmada', 'field_map_dwarka', 'field_map_aravali']) {
+    it(`names every animal that walks ${id}`, () => {
+      const walking = wanderersOn(id, built(id)).map((w) => w.id);
+      expect(wandererIdsOn(id)).toEqual(expect.arrayContaining(walking));
+    });
+  }
+
+  it('asks for nothing on a map with no wanderer', () => {
+    expect(wandererIdsOn('field_map_lothal')).toEqual([]);
   });
 });
 
