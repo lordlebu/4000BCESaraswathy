@@ -331,6 +331,13 @@ that works inside itch.io's iframe at a path nobody chooses -- and keeps the zip
 the portals that take an upload by hand. The publish step is skipped until the `ITCH_TARGET`
 variable and `BUTLER_API_KEY` secret exist; the workflow's header carries the one-time setup.
 
+**It is live: <https://lordlebu.itch.io/south-of-tethys>, v0.1.0.** `docs/publishing.md` is the one to
+read before a release or a new listing. It carries the audience ruling -- **teens and adults, a
+layered world and not a children's action game**, which rules out the ad-funded portals -- and the
+three things that stopped the first release and looked like something else: an unverified itch.io
+email fails butler in one second like a bad key would, butler cannot tick *played in the browser*,
+and a step's log cannot be read without a GitHub login, so the error has to be pasted in.
+
 **Canon's data is its own chunk.** `vite.config.ts` splits `data/canon/` into `canon-*.js` beside
 `phaser-*.js`, so a canon release does not re-download the app, and `check:size` budgets it **gzipped**
 at 350 KB -- the rule is that the data may not outweigh the engine that draws it. It measured 105 KB
