@@ -340,6 +340,13 @@ three things that stopped the first release and looked like something else: an u
 email fails butler in one second like a bad key would, butler cannot tick *played in the browser*,
 and a step's log cannot be read without a GitHub login, so the error has to be pasted in.
 
+**The game is installable, and the worker is a build product.** `tools/service-worker.js` is a
+template: `vite.config.ts` stamps it with a hash of the bundle's file names and writes `dist/sw.js`.
+It caches what has been fetched rather than everything, fetches the page network-first so a release
+is never hidden behind its own cache, and deletes every cache but its own build's. `src/main.tsx`
+registers it in production only, so neither `npm run dev` nor the browser suite ever runs one.
+`docs/publishing.md` > *Installable* has the by-hand offline check to repeat after changing it.
+
 **Canon's data is its own chunk.** `vite.config.ts` splits `data/canon/` into `canon-*.js` beside
 `phaser-*.js`, so a canon release does not re-download the app, and `check:size` budgets it **gzipped**
 at 350 KB -- the rule is that the data may not outweigh the engine that draws it. It measured 105 KB

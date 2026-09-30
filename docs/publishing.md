@@ -128,19 +128,46 @@ neither has been touched.
 description, the controls, the tags and the rating answer, and beside it the five screenshots
 `npm run store:shots` takes from the built game. Paste from it; do not write a listing afresh.
 
+`other-listings.md` says which field takes which piece on Newgrounds, IndieDB and the Microsoft
+Store, and `devlog-01.md` is a first devlog, drafted for the owner to put into their own words.
+
+## Installable
+
+From the release after v0.1.0 the game can be installed from the browser and opened again with no
+connection. Four files agree to make that so: `public/manifest.webmanifest`, the two icons it names
+(`python tools/build-icons.py` cuts them from Varuna's own sprite), the link in `index.html`, and
+`tools/service-worker.js`, which the build stamps and writes to `dist/sw.js`.
+
+**It keeps what the player has been sent, and nothing else.** Fetching all 30 MB up front to be
+"fully offline" would multiply the first visit by seven. Offline, the game opens and plays on any
+ground already walked; a plate never seen waits for a connection.
+
+**The page is fetched from the network first**, and from the cache only when there is none.
+Answered cache-first, a returning player is handed last release's page for ever. **The cache is
+named for the build**, and a new build deletes the old one — which matters most on itch.io, where
+every release is served from a new path on the same origin and would otherwise leave its whole
+cache behind.
+
+`test/installable.test.ts` holds the four files to each other. What it cannot see is a browser, so
+this was checked by hand on 30 September 2026: served from a nested path, the worker took control,
+kept 43 files, and with the server stopped and the browser offline the game reopened and drew. Do
+that again after changing the worker.
+
+The worker runs in production builds only. The browser suite runs against the dev server and never
+meets it.
+
 ## What is next
 
 In order. The published plan carries the reasoning and the full table.
 
-1. **The cover image.** The prompt card is in the store kit; the picture is the owner's to make.
-2. **Put the kit on the itch.io page**: the description, the five screenshots, and the cover.
-3. **Newgrounds and IndieDB**, by hand, from the release zip and the store kit. Newgrounds rated Teen.
-4. **The weight of the ground and the animals**, above: 1.6 MB of terrain, and paintings several
+1. **Release v0.1.1**, which carries the lighter first load and the installable build to itch.io.
+2. **Post the first devlog**, from `store-kit/devlog-01.md`.
+3. **IndieDB and Newgrounds**, by hand, from `store-kit/other-listings.md`. Read Newgrounds' rule on
+   AI-made art in games before submitting there.
+4. **The Microsoft Store**, from the same file, once Pages is serving the installable build.
+5. **The weight of the ground and the animals**, above: 1.6 MB of terrain, and paintings several
    times the size they are drawn at.
-5. **Installable and offline** — a web manifest and a service worker — and then the Microsoft Store,
-   which is free for individuals and takes a web app by its address.
-6. **Devlogs on itch.io**, drafted from canon's atlas, timeline and memory map.
-7. **Jams that accept an existing game**: narrative, worldbuilding and slow-game jams only.
+6. **Jams that accept an existing game**: narrative, worldbuilding and slow-game jams only.
 
 Open, and the owner's: whether the listing is Teen or Mature, given what canon holds; free or pay
 what you want.
