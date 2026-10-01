@@ -36,7 +36,8 @@ async function bootAs(page: Page, as: string): Promise<string[]> {
 
 // Every one of them, because the failure this guards against is per-character: a sheet that is
 // short, misnamed, or never imported shows up for that traveller alone.
-for (const who of ['varuna', 'guyuk', 'mithra', 'malacite', 'mehtar']) {
+// The menu, not the cast: Malacite and Mehtar are out of it for now (`PLAYABLE` in characters.ts).
+for (const who of ['varuna', 'guyuk', 'mithra']) {
   test(`${who} can be walked`, async ({ page }) => {
     const problems = await bootAs(page, who);
 

@@ -149,6 +149,11 @@ export interface GameEvent {
    * `docs/art-placement.md`.
    */
   art: string;
+  /**
+   * A narrower painting to try first, when the owner has painted one: `woven-camp-dacoits` before
+   * `woven-camp`. Absent means the event's own `art` is the only one.
+   */
+  artVariant?: string;
   choices: Choice[];
   /**
    * Whether it can happen more than once.

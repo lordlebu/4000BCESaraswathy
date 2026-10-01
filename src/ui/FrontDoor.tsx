@@ -16,7 +16,7 @@
 // So: keep the diary, and give it a cover.
 
 import { useState } from 'react';
-import { everyCharacter } from '../game/characters';
+import { playableCharacters } from '../game/characters';
 import { Modal } from './Modal';
 
 export interface FrontDoorProps {
@@ -72,7 +72,7 @@ export function FrontDoor({
         {/* The picker's proper home. On the map sheet it was a setting; here it is the question
             the screen exists to ask. */}
         <div className="front-door-who" role="radiogroup" aria-label="Who you are walking as">
-          {everyCharacter().map((who) => {
+          {playableCharacters().map((who) => {
             const current = who.key === characterId;
             return (
               <button

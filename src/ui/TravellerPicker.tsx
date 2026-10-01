@@ -9,7 +9,7 @@
 // all five without starting five journeys.** A first-run screen would make it a decision you live
 // with, which is a better feeling and a worse fit for something purely cosmetic.
 
-import { everyCharacter } from '../game/characters';
+import { playableCharacters } from '../game/characters';
 
 export interface TravellerPickerProps {
   /** Who is walking now. */
@@ -20,7 +20,7 @@ export interface TravellerPickerProps {
 export function TravellerPicker({ characterId, onChoose }: TravellerPickerProps) {
   return (
     <div className="travellers" role="radiogroup" aria-label="Who you are walking as">
-      {everyCharacter().map((who) => {
+      {playableCharacters().map((who) => {
         const current = who.key === characterId;
         return (
           <button

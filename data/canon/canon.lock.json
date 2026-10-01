@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.43.0",
+  "canon_version": "2.44.0",
   "counts": {
     "fauna": 232,
     "flora": 113,
@@ -17,12 +17,12 @@
     "items": 83,
     "processes": 18,
     "recipes": 93,
-    "vehicles": 14
+    "vehicles": 15
   },
   "sha256": {
-    "species.json": "85ba0e811301ef8d80d013e86787e47672da92899e1b8a22744487709549b008",
-    "places.json": "c19acfb8a63f006626bb10697edf05c461478fda79dd3bb708eb0241a1d42218",
-    "knowledge.json": "cb4a1d06b869819008a805bfd9de3e324bd0067dc6e2c985fcaf563452b6ee90",
-    "crafting.json": "94440c8f596bf1304affab13a941d09e8f9decc00be34b6d5a49df1676be5f97"
+    "species.json": "db9bf9ff07fe339f59e4707ec669203d4c86b3a49bb2494fb82a1ff0d4a028e6",
+    "places.json": "83919b51cb3e58f711458c1a2169c1957a2d1691edf48a579d6e59c2555cc19d",
+    "knowledge.json": "fa2b49c7236df611e5ae27ce7e9c52132fa16ba77a6303b1700c9dd0f0e32a99",
+    "crafting.json": "bea5c28ae061e57ea4fab109198f7baf866a189b2f31efaf26cb5f32bce70782"
   }
 }

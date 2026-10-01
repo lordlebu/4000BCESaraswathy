@@ -229,6 +229,7 @@ test('the overworld joins the two field maps, from where the cart leaves', async
   await expect(road).toContainText('Up the scarp');
   await road.getByRole('button', { name: 'Continue' }).click();
   await expect(road).toContainText('The road up the scarp is the only part of the plateau anyone built');
+  await expect(road.locator('img.opening-plate')).toHaveAttribute('src', /journey-lothal-narmada/);
   await road.getByRole('button', { name: 'Continue' }).click();
   await expect(road).toContainText('Narmada');
   await road.getByRole('button', { name: 'Step down' }).click();

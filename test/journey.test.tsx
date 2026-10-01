@@ -24,9 +24,9 @@ describe('the roads', () => {
     }
   });
 
-  it('goes to the Aravali by sea and everywhere else by cart', () => {
+  it('goes to the Aravali by sea and everywhere else by elephantbird cart, as the paintings show', () => {
     expect(roadBetween('field_map_lothal', 'field_map_aravali')?.by).toBe('vehicle_coastal_dhow');
-    expect(roadBetween('field_map_lothal', 'field_map_dwarka')?.by).toBe('vehicle_ox_cart');
+    expect(roadBetween('field_map_lothal', 'field_map_dwarka')?.by).toBe('vehicle_elephantbird_cart');
   });
 });
 

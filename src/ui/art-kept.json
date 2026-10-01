@@ -195,6 +195,21 @@
     "scenes/work-pressing.png",
     "scenes/work-river.png",
     "scenes/work-smelting.png",
-    "scenes/work.png"
+    "scenes/work.png",
+    "prologue/prologue-1-road.png",
+    "prologue/prologue-2-kit.png",
+    "prologue/prologue-3-lothal.png",
+    "prologue/prologue-4-kilns.png",
+    "events/journey-aravali-lothal.png",
+    "events/journey-aravali-narmada.png",
+    "events/journey-dwarka-lothal.png",
+    "events/journey-lothal-narmada.png",
+    "events/woven-camp-adventurers.png",
+    "events/woven-camp-dacoits.png",
+    "events/woven-camp-drovers.png",
+    "events/woven-camp-pilgrims.png",
+    "events/camp-night-fireside.png",
+    "events/camp-night-visitor.png",
+    "events/camp-night-visitor.2.png"
   ]
 }

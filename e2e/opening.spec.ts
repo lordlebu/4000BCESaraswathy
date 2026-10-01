@@ -13,7 +13,10 @@ test('setting out plays the opening, then stands you at the kilns with a first h
   const opening = page.getByRole('dialog', { name: 'Opening' });
   await expect(opening).toBeVisible({ timeout: 20_000 });
   await expect(opening).toContainText('Do not ask where the road ends.');
-  for (let i = 0; i < 4; i++) await opening.getByRole('button', { name: 'Continue' }).click();
+  await opening.getByRole('button', { name: 'Continue' }).click();
+  // The owner's painting, not the drawn stand-in.
+  await expect(opening.locator('img.opening-plate')).toHaveAttribute('src', /prologue-1-road/);
+  for (let i = 0; i < 3; i++) await opening.getByRole('button', { name: 'Continue' }).click();
   await expect(opening).toContainText('kilns');
   await opening.getByRole('button', { name: 'Begin' }).click();
   await expect(opening).toHaveCount(0);

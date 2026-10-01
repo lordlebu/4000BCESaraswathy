@@ -332,6 +332,9 @@ function woven(
     // Named for the template rather than the subject, so one painting of tracks serves every animal.
     // Missing today, like every event painting, and the card borrows the night's scene or a blank.
     art: `woven-${kind}`,
+    // Per-variant paintings first where they exist: a camp card is the dacoits' own, not one picture
+    // of every camp (the owner's camp art, 1 October 2026). The card falls back to `art`.
+    ...(options.variant ? { artVariant: `woven-${kind}-${options.variant}` } : {}),
     choices: choices.map((spec) => {
       const text = words.choices[spec.id];
       if (!text) throw new Error(`data/happenings.json: '${kind}' has no choice '${spec.id}'`);

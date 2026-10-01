@@ -136,6 +136,23 @@ export function everyCharacter(): CharacterArt[] {
 }
 
 /**
+ * Who the player may walk as: the menu, as distinct from the cast.
+ *
+ * **Malacite and Mehtar are out of it, by the owner's word of 2 October 2026 -- "for now".** Their
+ * sheets stay built and loaded: `content/travellers.ts` still dresses strangers in the playable
+ * sheets until there are traveller sheets enough for a map, and taking the art away would take
+ * those strangers' figures with it. Putting either back is one word in this list.
+ *
+ * Guyuk is here until her requests at the Quiet Atelier exist; then she is offered only once they
+ * are met, and only from the Aravali (the owner's storyline of the same day).
+ */
+export const PLAYABLE: readonly CharacterId[] = ['varuna', 'mithra', 'guyuk'];
+
+export function playableCharacters(): CharacterArt[] {
+  return PLAYABLE.map((id) => CHARACTERS[id]);
+}
+
+/**
  * The character an id names, or Varuna.
  *
  * **Never throws.** The id arrives from `?as=` or from a save, so it can be stale, mistyped, or
@@ -147,7 +164,9 @@ export function everyCharacter(): CharacterArt[] {
  * return a function where a character is expected.
  */
 export function characterFor(id: string | null | undefined): CharacterArt {
-  if (id && Object.hasOwn(CHARACTERS, id)) {
+  // Only somebody on the menu: a save or a `?as=` naming Malacite now walks as Varuna, as an id
+  // the build no longer knows always has.
+  if (id && (PLAYABLE as readonly string[]).includes(id) && Object.hasOwn(CHARACTERS, id)) {
     return (CHARACTERS as Record<string, CharacterArt>)[id]!;
   }
   return CHARACTERS.varuna;

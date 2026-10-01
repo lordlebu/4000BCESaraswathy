@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.43.0",
+  "canon_version": "2.44.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -369,7 +369,7 @@
         },
         {
           "to": "field_map_narmada",
-          "by": "vehicle_ox_cart",
+          "by": "vehicle_elephantbird_cart",
           "art": "journey-aravali-narmada",
           "prose": [
             "North off the plateau by the herders' track, down through grass that gets shorter every hour.",
@@ -435,7 +435,7 @@
       "roads": [
         {
           "to": "field_map_lothal",
-          "by": "vehicle_ox_cart",
+          "by": "vehicle_elephantbird_cart",
           "art": "journey-dwarka-lothal",
           "prose": [
             "The cart road west follows a river that is no longer there.",
@@ -511,7 +511,7 @@
         },
         {
           "to": "field_map_dwarka",
-          "by": "vehicle_ox_cart",
+          "by": "vehicle_elephantbird_cart",
           "art": "journey-dwarka-lothal",
           "prose": [
             "The cart road west follows a river that is no longer there.",
@@ -524,7 +524,7 @@
         },
         {
           "to": "field_map_narmada",
-          "by": "vehicle_ox_cart",
+          "by": "vehicle_elephantbird_cart",
           "art": "journey-lothal-narmada",
           "prose": [
             "Past the last of the delta the ground starts to rise, and keeps rising.",
@@ -532,7 +532,7 @@
           ],
           "keeper": {
             "npc": "npc_kunch",
-            "line": "Up the scarp, then. Sing on the steep part. The ox likes it, and so will you."
+            "line": "Up the scarp, then. Sing on the steep part. The bird likes it, and so will you."
           }
         }
       ],
@@ -542,7 +542,7 @@
           {
             "art": "prologue-1-road",
             "lines": [
-              "First light on the delta road. The cart keeps the pace of the ox, and you walk beside it.",
+              "First light on the delta road. The cart keeps the pace of the bird in its shafts, and you walk beside it.",
               "Ahead, smoke rises from somewhere you cannot see yet."
             ],
             "saying": "saying_dawn_belongs_to_the_traveller"
@@ -620,7 +620,7 @@
       "roads": [
         {
           "to": "field_map_aravali",
-          "by": "vehicle_ox_cart",
+          "by": "vehicle_elephantbird_cart",
           "art": "journey-aravali-narmada",
           "prose": [
             "North off the plateau by the herders' track, down through grass that gets shorter every hour.",
@@ -633,7 +633,7 @@
         },
         {
           "to": "field_map_lothal",
-          "by": "vehicle_ox_cart",
+          "by": "vehicle_elephantbird_cart",
           "art": "journey-lothal-narmada",
           "prose": [
             "Past the last of the delta the ground starts to rise, and keeps rising.",
@@ -2591,7 +2591,7 @@
       "choices": [
         {
           "label": "Ask how far it has gone",
-          "line": "He does not know how far. Far enough that the harbour at Dwarka sits on sand, he says, and the boats in it are houses now. He gets back up and the ox goes on without being asked."
+          "line": "He does not know how far. Far enough that the harbour at Dwarka sits on sand, he says, and the boats in it are houses now. He gets back up and the bird goes on without being asked."
         },
         {
           "label": "Draw the line in the diary",

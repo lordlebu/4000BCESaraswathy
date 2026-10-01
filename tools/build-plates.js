@@ -110,7 +110,9 @@ const KINDS = {
     out: path.join(ROOT, 'src', 'ui', 'prologue'),
     size: 512,
     aspect: 4 / 3,
-    word: 'prologue',
+    // Not 'prologue': `idFor` strips the kind's word from the front of a name, and canon's art
+    // names *begin* with it -- `prologue-1-road` built as `1-road`, which nothing looks up.
+    word: 'opening-plate',
     label: 'opening plate'
   },
   /**

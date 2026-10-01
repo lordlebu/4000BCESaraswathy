@@ -196,3 +196,15 @@ describe('the cells a sheet was built at', () => {
     }
   });
 });
+
+describe('who may be walked as', () => {
+  it('is Varuna, Mithra and Guyuk: Malacite and Mehtar are out of the menu for now', async () => {
+    const { playableCharacters, characterFor, everyCharacter } = await import('../src/game/characters');
+    expect(playableCharacters().map((c) => c.key)).toEqual(['varuna', 'mithra', 'guyuk']);
+    // Their art stays in the cast, because strangers can still wear it.
+    expect(everyCharacter().map((c) => c.key)).toContain('malacite');
+    // And a save that walked as one of them walks as Varuna.
+    expect(characterFor('malacite').key).toBe('varuna');
+    expect(characterFor('mehtar').key).toBe('varuna');
+  });
+});
