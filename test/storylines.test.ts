@@ -12,6 +12,7 @@ function walker(fieldMapId: string, held: string[] = [], carried: Record<string,
   const flags: string[] = [];
   const facts = (poiId: string | null): StoryFacts => ({
     fieldMapId,
+    day: 3,
     poiId,
     flags,
     holds: (id) => held.includes(id),
@@ -102,5 +103,15 @@ describe("the princess's arc", () => {
     // She forms the bond and does not join: she has her people.
     expect(princess.joins).toBe(false);
     expect(walkers(w.flags)).toEqual(['varuna', 'mithra']);
+  });
+});
+
+describe('the first day', () => {
+  it('belongs to the place: a road or night beat waits for the second, an arrival does not', () => {
+    const facts = (day: number, poiId: string | null = null): StoryFacts => ({
+      fieldMapId: 'field_map_aravali', day, poiId, flags: [], holds: () => false, carried: () => 0
+    });
+    expect(beatNow('road', facts(0))).toBeNull();
+    expect(beatNow('road', facts(1))?.title).toBe('The herbalist at the Atelier');
   });
 });

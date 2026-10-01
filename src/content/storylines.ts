@@ -15,6 +15,7 @@
 
 import placesBundle from '../../data/canon/places.json';
 import { type Choice, type GameEvent, anyConditions } from './events';
+import { WOVEN_FROM_DAY } from './tiers';
 
 export type BeatWhen = 'arriving' | 'night' | 'road';
 
@@ -100,6 +101,8 @@ export function arcProgress(arc: Storyline, flags: readonly string[]): { done: n
 
 export interface StoryFacts {
   fieldMapId: string;
+  /** The day of the journey. A road or night beat keeps the first day quiet, as woven events do. */
+  day: number;
   /** The place just reached, for `arriving`. */
   poiId: string | null;
   flags: readonly string[];
@@ -121,6 +124,10 @@ export function beatNow(when: BeatWhen, facts: StoryFacts): GameEvent | null {
     if (arc.fieldMapId !== facts.fieldMapId) continue;
     const beat = nextBeat(arc, facts.flags);
     if (!beat || beat.when !== when) continue;
+    // **The first day belongs to the place** (`WOVEN_FROM_DAY`): a road or a night beat waits for
+    // the second, as every woven event does. Arriving somewhere is asked for by walking there, so an
+    // arrival beat does not wait. Found when Guyuk's rumour landed on the first step on the Aravali.
+    if (when !== 'arriving' && facts.day < WOVEN_FROM_DAY) continue;
     if (beat.at && beat.at !== facts.poiId) continue;
     if (!beat.requires.every((id) => facts.holds(id))) continue;
     if (!beat.asks.every((a) => facts.carried(a.id) >= a.count)) continue;

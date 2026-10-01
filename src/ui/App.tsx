@@ -651,6 +651,7 @@ export function App() {
       const carried = latest.current.satchel;
       const event = beatNow(when, {
         fieldMapId: latest.current.fieldMapId,
+        day: latest.current.day,
         poiId,
         flags: journeyFlags.current,
         // A discovery must be understood; a word, a recipe or a question held.
