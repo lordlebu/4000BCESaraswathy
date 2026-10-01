@@ -333,7 +333,7 @@ that works inside itch.io's iframe at a path nobody chooses -- and keeps the zip
 the portals that take an upload by hand. The publish step is skipped until the `ITCH_TARGET`
 variable and `BUTLER_API_KEY` secret exist; the workflow's header carries the one-time setup.
 
-**It is live: <https://lordlebu.itch.io/south-of-tethys>, v0.1.0.** `docs/publishing.md` is the one to
+**It is live: <https://lordlebu.itch.io/south-of-tethys>, since v0.1.0; v0.1.2 is current.** `docs/publishing.md` is the one to
 read before a release or a new listing. It carries the audience ruling -- **teens and adults, a
 layered world and not a children's action game**, which rules out the ad-funded portals -- and the
 three things that stopped the first release and looked like something else: an unverified itch.io
