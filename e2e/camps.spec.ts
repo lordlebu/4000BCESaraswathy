@@ -81,6 +81,8 @@ test('a camp stands on its day, and walking up to it opens its scene', async ({ 
 
   // The camp's own card, in the words for its kind, and drawn on the map beside the traveller.
   await expect(card.locator('h2')).toHaveText(TITLES[camp!.kind]!);
+  // **The kind's own painting, not the shared fallback** -- the owner painted one per kind.
+  await expect(card.locator('img').first()).toHaveAttribute('src', new RegExp(`woven-camp-${camp!.kind}`));
   const now = await campOn(page);
   expect(now?.id).toBe(camp!.id);
   expect(now?.visible, 'the camp is not drawn').toBe(true);

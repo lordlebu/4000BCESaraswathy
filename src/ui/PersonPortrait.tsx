@@ -102,6 +102,8 @@ const TOOLS: [string[], string][] = [
   // glasshouse, and the mortar is the one tool that says medicine rather than cooking -- a bowl
   // this heavy is for breaking bark and seed, not for stirring.
   [['apothecary'], 'M22 6l-3 6M16 13h8v2a4 4 0 0 1-8 0zM17 21h6'],
+  // A herbalist's sprig: a stem with three leaves. Guyuk the Seed-Gleaner, who keeps the Atelier.
+  [['herbalist'], 'M20 21V8M20 11l-4-3M20 14l4-3M20 17l-4-2'],
   // A stonewaller's block, held against the hip the way a heavy thing is carried rather than
   // lifted. Dala used to share Pell's broom by sharing the words "wall-keeper", and they are not
   // the same job: Pell sweeps a gate, Dala puts stones back on a wall around nothing.

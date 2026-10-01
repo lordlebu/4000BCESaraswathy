@@ -1659,7 +1659,7 @@ export class WorldScene extends Phaser.Scene {
    * knowing where the Lothal mangroves are would be a lie. What does carry over is the diary,
    * which lives in React and never passes through here.
    */
-  private onTravelTo = (payload: { fieldMapId: string; seed: string }): void => {
+  private onTravelTo = (payload: { fieldMapId: string; seed: string; ride?: number }): void => {
     // **The clock crosses with you.** It was left out, so `init` read `travelled ?? 0` and every
     // crossing woke the traveller at dawn of day one: the sky, the camps, the strangers' circuits
     // and every node's regrowth all went back to the first morning, and the save wrote that down.
@@ -1667,7 +1667,8 @@ export class WorldScene extends Phaser.Scene {
       seed: payload.seed,
       discovered: [],
       fieldMapId: payload.fieldMapId,
-      travelled: this.travelled
+      // And the ride itself takes time: a day's travel between two countries (`CROSSING_MS`).
+      travelled: this.travelled + (payload.ride ?? 0)
     });
   };
 

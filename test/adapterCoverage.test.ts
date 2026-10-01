@@ -81,7 +81,7 @@ const COVERAGE: Record<string, Coverage> = {
   },
   'places.field_maps': {
     adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'proportion', 'points_of_interest',
-      'neighbours', 'arrival', 'climate', 'coordinates', 'relief', 'vehicles', 'departs_from', 'arrives_at', 'prologue',
+      'neighbours', 'arrival', 'climate', 'coordinates', 'relief', 'vehicles', 'departs_from', 'arrives_at', 'prologue', 'roads',
       // Which edge is another landmass. `world/landmass.ts` floods from it to find the ground.
       'landmass_edges'],
     skipped: [...EDITORIAL,
@@ -119,6 +119,12 @@ const COVERAGE: Record<string, Coverage> = {
     // What the Vedda say on the road, adapted by `sayings` in `src/content/sayings.ts` for the
     // opening, the rides and the fire. `type` is canon's own tag and says nothing the folder does not.
     adapted: ['id', 'name', 'text', 'attribution', 'carried_by', 'occasions', 'field_maps'],
+    skipped: [...EDITORIAL, 'type']
+  },
+  'places.storylines': {
+    // A person's arc, beat by beat, adapted by `storylines` in `src/content/storylines.ts`. The beats
+    // are read whole; their fields are the story card's.
+    adapted: ['id', 'name', 'person', 'field_map', 'joins', 'beats'],
     skipped: [...EDITORIAL, 'type']
   },
   'places.homesteads': {

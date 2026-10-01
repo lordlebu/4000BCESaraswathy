@@ -221,7 +221,7 @@ export interface UiToGame {
   /** Bed down for the night. Ignored unless standing at a camp after dark. */
   'camp': Record<string, never>;
   /** Lay down a different field map. The overworld sends this. */
-  'travel-to': { fieldMapId: string; seed: string };
+  'travel-to': { fieldMapId: string; seed: string; ride?: number };
   'resume-journey': { seed: string; discovered: string[] };
   /**
    * How much of the canvas the overlays are covering, in CSS pixels.

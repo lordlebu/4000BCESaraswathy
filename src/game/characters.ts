@@ -136,6 +136,42 @@ export function everyCharacter(): CharacterArt[] {
 }
 
 /**
+ * Who the player may walk as: the menu, as distinct from the cast.
+ *
+ * **Malacite and Mehtar are out of it, by the owner's word of 2 October 2026 -- "for now".** Their
+ * sheets stay built and loaded: `content/travellers.ts` still dresses strangers in the playable
+ * sheets until there are traveller sheets enough for a map, and taking the art away would take
+ * those strangers' figures with it. Putting either back is one word in this list.
+ *
+ * Guyuk is here until her requests at the Quiet Atelier exist; then she is offered only once they
+ * are met, and only from the Aravali (the owner's storyline of the same day).
+ */
+export const PLAYABLE: readonly CharacterId[] = ['varuna', 'mithra', 'guyuk'];
+
+/**
+ * Who is walking: the roster. **Varuna and Mithra from the first morning**, and anybody whose arc
+ * ended with them joining -- `walker:<person>` in the save's flags (`content/storylines.ts`). The
+ * owner, 2 October 2026: "two walkers become three". They walk together in the story, and the
+ * player may lead as any of them at will. **Only the leader is drawn on the map** -- the owner's
+ * word: there is no need to show the others.
+ */
+const FIRST_WALKERS: readonly CharacterId[] = ['varuna', 'mithra'];
+const WALKER_OF: Readonly<Record<string, CharacterId>> = { npc_guyuk_seed_gleaner: 'guyuk' };
+
+export function walkers(flags: readonly string[]): CharacterId[] {
+  const joined = flags
+    .filter((f) => f.startsWith('walker:'))
+    .map((f) => WALKER_OF[f.slice('walker:'.length)])
+    .filter((id): id is CharacterId => id !== undefined);
+  return [...FIRST_WALKERS, ...joined.filter((id) => !FIRST_WALKERS.includes(id))];
+}
+
+/** The menu: everybody playable, or only those walking when a roster is given. */
+export function playableCharacters(roster?: readonly string[]): CharacterArt[] {
+  return PLAYABLE.filter((id) => !roster || roster.includes(id)).map((id) => CHARACTERS[id]);
+}
+
+/**
  * The character an id names, or Varuna.
  *
  * **Never throws.** The id arrives from `?as=` or from a save, so it can be stale, mistyped, or
@@ -147,7 +183,9 @@ export function everyCharacter(): CharacterArt[] {
  * return a function where a character is expected.
  */
 export function characterFor(id: string | null | undefined): CharacterArt {
-  if (id && Object.hasOwn(CHARACTERS, id)) {
+  // Only somebody on the menu: a save or a `?as=` naming Malacite now walks as Varuna, as an id
+  // the build no longer knows always has.
+  if (id && (PLAYABLE as readonly string[]).includes(id) && Object.hasOwn(CHARACTERS, id)) {
     return (CHARACTERS as Record<string, CharacterArt>)[id]!;
   }
   return CHARACTERS.varuna;

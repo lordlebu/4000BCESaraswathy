@@ -36,7 +36,8 @@ async function bootAs(page: Page, as: string): Promise<string[]> {
 
 // Every one of them, because the failure this guards against is per-character: a sheet that is
 // short, misnamed, or never imported shows up for that traveller alone.
-for (const who of ['varuna', 'guyuk', 'mithra', 'malacite', 'mehtar']) {
+// The menu, not the cast: Malacite and Mehtar are out of it for now (`PLAYABLE` in characters.ts).
+for (const who of ['varuna', 'guyuk', 'mithra']) {
   test(`${who} can be walked`, async ({ page }) => {
     const problems = await bootAs(page, who);
 
@@ -87,15 +88,18 @@ test('the picker changes who is walking, without restarting the journey', async 
   const stage = page.locator('.stage');
   await expect(stage).toHaveAttribute('data-traveller', 'varuna');
 
-  await picker.getByRole('radio', { name: /Guyuk/ }).click();
-  await expect(picker.getByRole('radio', { name: /Guyuk/ })).toHaveAttribute('aria-checked', 'true');
+  // Mithra, who walks from the first morning. Guyuk is not on the menu until her arc ends with her
+  // joining (`walkers` in characters.ts) -- the owner's storyline of 2 October 2026.
+  await expect(picker.getByRole('radio', { name: /Guyuk/ })).toHaveCount(0);
+  await picker.getByRole('radio', { name: /Mithra/ }).click();
+  await expect(picker.getByRole('radio', { name: /Mithra/ })).toHaveAttribute('aria-checked', 'true');
   await expect(stage, 'the scene is still drawing somebody else').toHaveAttribute(
     'data-traveller',
-    'guyuk'
+    'mithra'
   );
 
   // The URL says who, so the link keeps describing what is on screen.
-  await expect(page).toHaveURL(/as=guyuk/);
+  await expect(page).toHaveURL(/as=mithra/);
 
   // And the journey is still where it was -- a swap, not a restart.
   expect(await page.locator('.journal h2').textContent()).toBe(walked);

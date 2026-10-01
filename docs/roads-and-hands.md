@@ -101,3 +101,39 @@ reading height.
   so. Uma's mat is not the first craft: it needs a loom frame and a working tool. So the morning
   ends at the knife and pins the mat. Hints can be turned off in the map sheet.
 - `?opening=skip` passes over it for a test that sets out through the door.
+
+## The owner's art, 1 October 2026
+
+All eighteen pieces asked for arrived: the four opening plates, the four road paintings, a camp card
+for each kind, the two night cards and the four camp prop sheets (the sheets are wired in Phase 5).
+`tools/intake-roads-and-hands.py` records every repair, and only technical faults were repaired:
+painted paper frames trimmed on four, and a "Grok" logo painted out of both Aravali roads from the
+same rows to its left. The unnamed Gemini image is a second take of the night visitor
+(`camp-night-visitor.2.png`). Browser specs assert the opening, the scarp road and a camp card draw
+the owner's painting rather than a fallback.
+
+- **A woven event can carry a per-variant painting** (`artVariant`), tried before its own: the camp
+  card is the dacoits' own, not one picture of every camp.
+- **The carts are drawn by elephantbirds**, because the paintings say so (canon 2.44.0).
+- **Malacite and Mehtar are out of the traveller menu for now** (`PLAYABLE`), by the owner's word.
+  Their sheets stay loaded, because strangers can still wear them.
+
+## Phase 6: companions -- Guyuk's and the princess's arcs (canon 2.45.0)
+
+The owner's arcs of 2 October 2026, with the owner's thirteen story paintings.
+
+- **`content/storylines.ts`** plays canon's `storylines`: ordered beats, each a story card that comes
+  when its moment does (arriving at a place, a night, a day's road), only once what it requires is
+  held and what it asks is carried. A beat done is a flag, `story:<arc>:<beat>`; there is no quest
+  system. A beat's choice can hand things over (`Choice.takes`).
+- **Guyuk** (Aravali): a rumour of a herbalist, an empty Atelier, the ruins, rice at the Vedda Ford,
+  mustard and dates at the Atelier where she teaches the seed ball, a supper, and the bond -- after
+  which she is a walker.
+- **The princess** (Narmada): opened by the Fourteen, the quarry tank, the terraces read, the
+  University tank, the tablets, a supper, the bond, and her staying back for her people. The farewell
+  painting (`asura-farewell`) is asked for on the plan page.
+- **Walkers.** Varuna and Mithra walk from the first morning, Guyuk makes three when she joins; the
+  menu is the roster and the player leads as any of them at will. Only the leader is drawn on the
+  map, by the owner's word.
+- **Shaka** is a barbarian from a distant land, asleep on the Aravali: a written happening.
+- Story beats are asked before anything rationed or woven, at each moment.

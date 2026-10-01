@@ -215,11 +215,13 @@ export const NIGHT_RESTORES: Record<string, number> = {
  * Tune here and nowhere else. `test/happenings.test.ts` measures the realised rate over many rolls
  * and fails if it drifts far from what this table says.
  */
-export const WOVEN_ONE_IN: Record<'night' | 'arriving' | 'road' | 'working', number> = {
+export const WOVEN_ONE_IN: Record<'night' | 'arriving' | 'road' | 'working' | 'journey', number> = {
   night: 3,
   arriving: 3,
   road: 3,
-  working: 9
+  working: 9,
+  // Never rationed: a crossing asks for its happening (`ui/Journey.tsx`), the first time on a road.
+  journey: 1
 };
 
 /** How much a woven event eases, when it eases at all. Company on the road is worth less than a meal. */
@@ -267,3 +269,12 @@ export const VARIETY_DAMP = 0.35;
  * it for the first night -- and the inspector (`window.__happen`) is not either.
  */
 export const WOVEN_FROM_DAY = 1;
+
+/**
+ * How long a crossing between two maps takes, of the journey's clock.
+ *
+ * **Half a day: set out in the morning, arrive by evening** -- the owner's answer to Q7 of the
+ * Roads and Hands plan, so a map feels far away and you arrive with light left to find a roof.
+ * Canon says what a road is and never how long; this is the game's number, as every duration is.
+ */
+export const CROSSING_MS = 30 * 60 * 1000;

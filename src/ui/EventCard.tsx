@@ -22,7 +22,7 @@
 
 import { useCallback, useState } from 'react';
 import { type Choice, type GameEvent, choicesFor } from '../content/events';
-import { art } from './art';
+import { firstArt } from './art';
 import { sceneFor } from './scenes';
 import { Modal } from './Modal';
 import { StrangerFace } from './StrangerFace';
@@ -73,7 +73,8 @@ export function EventCard({ event, holds, shelter, pick = 0, met = [], onChoose,
 
   // The event's own painting, then the night's, then nothing. Every step is optional and the card
   // keeps its shape at each one, so it does not jump when art lands.
-  const picture = art('events', event.art, pick) ?? (shelter ? sceneFor('rest', shelter, pick) : null);
+  const picture =
+    firstArt('events', [event.artVariant, event.art], pick) ?? (shelter ? sceneFor('rest', shelter, pick) : null);
   const choices = choicesFor(event, holds);
 
   return (

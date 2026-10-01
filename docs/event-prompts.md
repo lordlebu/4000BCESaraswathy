@@ -336,3 +336,121 @@ Landscape, 4:3. One particular moment in one particular place, so the place and 
 
 Subject: Dusk at a caravan camp on bare cold-desert ground, on the exposed side of a low ridge. Donkeys hobbled, water skins stacked, a small fire in a ring of stones blackened by a great many fires before it. A Kia woman drover in dyed cloth, flowers in her ornately dressed hair, sets down a load and gestures at the ground as if the answer were obvious. The road curves into camp along a faint old shoreline, with no water anywhere near.
 ```
+
+## The opening and the roads (Roads and Hands, 2 October 2026)
+
+Mirrored from the plan page's prompt cards, built from the same list so the two cannot differ.
+The opening's plates build with `node tools/build-plates.js --prologue`; the roads are event
+paintings (`--events`), one per road whichever way it is travelled.
+
+#### `prologue-1-road`
+
+Save as `assets/source/prologue/prologue-1-road.png`. The first thing a new player sees. A cart on the delta road at first light, so the game opens on a journey and not on a menu.
+
+Where it shows: Plate 1 of the opening, under two lines of text. Shape: 4:3, built to 512 × 384.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: First light on a raised earth road through reed beds and standing water. A two-wheeled ox cart seen from behind, a traveller with a satchel and a staff walking beside it, a rolled bedroll on the cart. Far ahead, low smoke rising from somewhere not yet visible. Egrets in the shallows.
+```
+
+#### `prologue-2-kit`
+
+Save as `assets/source/prologue/prologue-2-kit.png`. The kit, introduced without a tutorial box: bedroll, lamp, notebook, staff.
+
+Where it shows: Plate 2, when the text says what you carry and that you carry nothing else. Shape: 4:3, built to 512 × 384.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: Seen from above, the traveller's hands laying out their kit on a cloth on the cart bed: a rolled bedroll, a small clay oil lamp, a cloth-bound notebook about a third full with ink sketches of plants, a worn staff. Morning light, reed shadows across the cloth.
+```
+
+#### `prologue-3-lothal`
+
+Save as `assets/source/prologue/prologue-3-lothal.png`. Lothal emerging from the delta, from canon's own arrival prose: reeds, then reed-and-mud, then brick, washing on the third storey.
+
+Where it shows: Plate 3, under the first lines of Lothal's arrival prose. Shape: 4:3, built to 512 × 384.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: A delta town rising slowly out of reed country: reed huts at the edge, then reed-and-mud houses, then brick, and behind them an old many-storeyed brick tower half sunk and leaning, with washing hung across its third storey. Kilns with smoke. The cart road leading in. Seen from a little way off, morning.
+```
+
+#### `prologue-4-kilns`
+
+Save as `assets/source/prologue/prologue-4-kilns.png`. Arriving at the Camp in the Kilns, where Uma's first line is waiting.
+
+Where it shows: Plate 4, the last before you take control, standing on the Camp in the Kilns. Shape: 4:3, built to 512 × 384.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A camp of people of this world, seen from a little distance as the traveller walks up. At its heart a beautiful woman of this world, graceful and dignified, face in profile or three-quarter, absorbed in what she is doing, in dyed cloth - madder, indigo, turmeric, ochre - with a little gold, shell or bead. The traveller is not in the picture. Nobody looks at the viewer and nobody is threatening.
+
+Subject: The kiln quarter of an old town: round brick kilns, warm, people living in and around them. A woman weaving a reed mat on the ground looks up and gestures, inviting someone to sit; a child watches from a doorway that used to be a flue. A pot on embers, mats drying.
+```
+
+#### `journey-dwarka-lothal`
+
+Save as `assets/source/events/journey-dwarka-lothal.png`. The road to North Dwarka, which still follows a river that is no longer there.
+
+Where it shows: The middle card of the ride between Lothal and Dwarka, either way. Shape: 4:3, built to 512 × 384.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: An ox cart on a pale dusty road that curves exactly like a river would, between banks of old dry silt. Cold desert light, thin scrub, a faint line of old shore far off. A traveller walking beside the cart, seen from behind, a scarf against the dust.
+```
+
+#### `journey-lothal-narmada`
+
+Save as `assets/source/events/journey-lothal-narmada.png`. Up the scarp to the Narmada plateau: the road is the only part of the plateau anyone built.
+
+Where it shows: The ride between Lothal and the Narmada. Shape: 4:3, built to 512 × 384.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: A built stone road switchbacking up a dark basalt escarpment, green jungle below, a waterfall in a cleft. A cart and a traveller small on the road near the top, seen from behind, wind in the cloth. Clouds at the scarp's rim.
+```
+
+#### `journey-aravali-lothal`
+
+Save as `assets/source/events/journey-aravali-lothal.png`. By sea from the delta to the Aravali shore: the crossing begins on water.
+
+Where it shows: The voyage between Lothal and the Aravali. Shape: 4:3, built to 512 × 384.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: A small sewn-plank boat with a square sail on a calm grey-green sea, the delta shore falling behind. A traveller sits in the bow with a satchel, seen from behind. Far ahead, impossibly, two islands hang in the air above the horizon.
+```
+
+#### `journey-aravali-narmada`
+
+Save as `assets/source/events/journey-aravali-narmada.png`. Down from the plateau to the crossing shore.
+
+Where it shows: The ride between the Narmada and the Aravali. Shape: 4:3, built to 512 × 384.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: A cart track descending from high grassland toward a shingle shore and a strait, felt tents of a nomad camp on the shingle, a line of trestles striding out over the water. A traveller walking down beside the cart, seen from behind. Evening.
+```

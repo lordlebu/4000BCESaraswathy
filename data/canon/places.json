@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.42.0",
+  "canon_version": "2.45.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -352,7 +352,35 @@
       "arrives_at": "poi_rail_head",
       "landmass_edges": {
         "north": "mainland_asia"
-      }
+      },
+      "roads": [
+        {
+          "to": "field_map_lothal",
+          "by": "vehicle_coastal_dhow",
+          "art": "journey-aravali-lothal",
+          "prose": [
+            "Out of the delta on a sewn-plank boat, the shore going grey behind you.",
+            "By afternoon two islands hang above the sea ahead, and nobody on board remarks on it."
+          ],
+          "keeper": {
+            "npc": "npc_hesh",
+            "line": "It runs when it runs. Sit down."
+          }
+        },
+        {
+          "to": "field_map_narmada",
+          "by": "vehicle_elephantbird_cart",
+          "art": "journey-aravali-narmada",
+          "prose": [
+            "North off the plateau by the herders' track, down through grass that gets shorter every hour.",
+            "Then shingle, a strait, and a line of trestles striding out over the water."
+          ],
+          "keeper": {
+            "npc": "npc_hesh",
+            "line": "The cart for the plateau waits at the far end. It waits longer than the line does."
+          }
+        }
+      ]
     },
     {
       "id": "field_map_dwarka",
@@ -403,6 +431,21 @@
       "relief": "basin",
       "departs_from": [
         "poi_caravan_camp"
+      ],
+      "roads": [
+        {
+          "to": "field_map_lothal",
+          "by": "vehicle_elephantbird_cart",
+          "art": "journey-dwarka-lothal",
+          "prose": [
+            "The cart road west follows a river that is no longer there.",
+            "The banks are still where they were. There is only dust between them, and the road keeps faithfully to every bend."
+          ],
+          "keeper": {
+            "npc": "npc_jarro",
+            "line": "The road goes the long way. It always did. Sit on the left, out of the wind."
+          }
+        }
       ]
     },
     {
@@ -452,13 +495,54 @@
       "departs_from": [
         "poi_lothal_camp"
       ],
+      "roads": [
+        {
+          "to": "field_map_aravali",
+          "by": "vehicle_coastal_dhow",
+          "art": "journey-aravali-lothal",
+          "prose": [
+            "Out of the delta on a sewn-plank boat, the shore going grey behind you.",
+            "By afternoon two islands hang above the sea ahead, and nobody on board remarks on it."
+          ],
+          "keeper": {
+            "npc": "npc_thrali",
+            "line": "The boat goes on the tide, not on you. Get in while it's floating."
+          }
+        },
+        {
+          "to": "field_map_dwarka",
+          "by": "vehicle_elephantbird_cart",
+          "art": "journey-dwarka-lothal",
+          "prose": [
+            "The cart road west follows a river that is no longer there.",
+            "The banks are still where they were. There is only dust between them, and the road keeps faithfully to every bend."
+          ],
+          "keeper": {
+            "npc": "npc_kunch",
+            "line": "West? Follow the river that isn't there. The cart knows the way better than I do."
+          }
+        },
+        {
+          "to": "field_map_narmada",
+          "by": "vehicle_elephantbird_cart",
+          "art": "journey-lothal-narmada",
+          "prose": [
+            "Past the last of the delta the ground starts to rise, and keeps rising.",
+            "The road up the scarp is the only part of the plateau anyone built, and it was built well."
+          ],
+          "keeper": {
+            "npc": "npc_kunch",
+            "line": "Up the scarp, then. Sing on the steep part. The bird likes it, and so will you."
+          }
+        }
+      ],
       "prologue": {
         "opening": "saying_the_walking_song",
         "plates": [
           {
             "art": "prologue-1-road",
             "lines": [
-              "First light on the delta road. The cart keeps the pace of the ox, and you walk beside it.",
+              "First light on the delta road. The cart keeps the pace of the bird in its shafts, and you walk beside it.",
               "Ahead, smoke rises from somewhere you cannot see yet."
             ],
             "saying": "saying_dawn_belongs_to_the_traveller"
@@ -532,6 +616,34 @@
       "relief": "plateau",
       "departs_from": [
         "poi_high_camp"
+      ],
+      "roads": [
+        {
+          "to": "field_map_aravali",
+          "by": "vehicle_elephantbird_cart",
+          "art": "journey-aravali-narmada",
+          "prose": [
+            "North off the plateau by the herders' track, down through grass that gets shorter every hour.",
+            "Then shingle, a strait, and a line of trestles striding out over the water."
+          ],
+          "keeper": {
+            "npc": "npc_marn",
+            "line": "North to the shingle. Tell the line-keeper the herders sent you. He'll pretend not to care."
+          }
+        },
+        {
+          "to": "field_map_lothal",
+          "by": "vehicle_elephantbird_cart",
+          "art": "journey-lothal-narmada",
+          "prose": [
+            "Past the last of the delta the ground starts to rise, and keeps rising.",
+            "The road up the scarp is the only part of the plateau anyone built, and it was built well."
+          ],
+          "keeper": {
+            "npc": "npc_marn",
+            "line": "Down is quicker than up and harder on the knees. Mind the third turn."
+          }
+        }
       ]
     }
   ],
@@ -1598,6 +1710,16 @@
       "sex": "male"
     },
     {
+      "id": "npc_guyuk_seed_gleaner",
+      "type": "npc",
+      "name": "Guyuk",
+      "character": "character_guyuk_reborn",
+      "found_at": [],
+      "role": "herbalist, the Seed-Gleaner",
+      "sex": "female",
+      "lines": []
+    },
+    {
       "id": "npc_hasme",
       "type": "npc",
       "name": "Hasme",
@@ -2417,6 +2539,47 @@
   ],
   "happenings": [
     {
+      "id": "happening_the_ferry_song",
+      "type": "happening",
+      "title": "The ferry song",
+      "occasion": "journey",
+      "field_maps": [
+        "field_map_lothal",
+        "field_map_aravali"
+      ],
+      "prose": "Halfway across, with neither shore much more than a line, the woman at the steering oar starts to sing. It is a counting song: one verse for each island, one for each river behind you, one for each of the people who taught it to her. The two hanging islands get a verse each, as if they were ordinary.",
+      "choices": [
+        {
+          "label": "Ask her to sing it again",
+          "line": "She sings it again, slower, so you can write the verses down. There is a verse for a river you have never heard of, between two you have. She shrugs. It was in the song when she learned it."
+        },
+        {
+          "label": "Listen, and watch the islands",
+          "line": "You listen to the song and watch the islands come up out of the haze, and the boat keeps time with neither."
+        }
+      ]
+    },
+    {
+      "id": "happening_the_sleeping_stranger",
+      "type": "happening",
+      "title": "A stranger asleep",
+      "occasion": "road",
+      "field_maps": [
+        "field_map_aravali"
+      ],
+      "prose": "Off the track, in the lee of a boulder, a man is asleep in the sun: furs in the wrong season, a broad face burned by some other sky, an unstrung bow under his head for a pillow. Everything about him says he has walked from much further north than the strait. He does not wake, and his breathing does not change as you pass.",
+      "choices": [
+        {
+          "label": "Leave him to sleep",
+          "line": "You leave him to sleep. Whoever he is, he has come a long way to do it."
+        },
+        {
+          "label": "Leave a little food by his hand",
+          "line": "You leave a flatbread on the stone by his hand. When you look back from the next rise, it is gone, and he has not moved."
+        }
+      ]
+    },
+    {
       "id": "happening_tower_standing",
       "type": "happening",
       "title": "The tower, standing",
@@ -2442,6 +2605,27 @@
           "grants": [
             "discovery_mask_niche"
           ]
+        }
+      ]
+    },
+    {
+      "id": "happening_where_the_sea_was",
+      "type": "happening",
+      "title": "Where the sea was",
+      "occasion": "journey",
+      "field_maps": [
+        "field_map_lothal",
+        "field_map_dwarka"
+      ],
+      "prose": "The cart stops on a low rise for no reason you can see, and the driver gets down to stretch. Below, the dry ground runs out flat and pale to the west, with a darker line drawn across it like the mark a pot leaves on a table. The driver nods at it. That is where the sea came to, he says, when his mother was a girl.",
+      "choices": [
+        {
+          "label": "Ask how far it has gone",
+          "line": "He does not know how far. Far enough that the harbour at Dwarka sits on sand, he says, and the boats in it are houses now. He gets back up and the bird goes on without being asked."
+        },
+        {
+          "label": "Draw the line in the diary",
+          "line": "You draw the dark line and the flat ground past it. It is the first thing in the diary about Dwarka, and it is about water that is not there."
         }
       ]
     },
@@ -3434,6 +3618,237 @@
       "occasions": [
         "opening",
         "settling"
+      ]
+    }
+  ],
+  "storylines": [
+    {
+      "id": "storyline_asura_princess",
+      "type": "storyline",
+      "name": "The Princess of the Cloud Stair",
+      "person": "npc_asura_princess",
+      "field_map": "field_map_narmada",
+      "joins": false,
+      "beats": [
+        {
+          "id": "ruins",
+          "title": "In the quarry tank",
+          "when": "arriving",
+          "at": "poi_basalt_quarry",
+          "art": "asura-bathe-ruins",
+          "requires": [
+            "recipe_root_tea"
+          ],
+          "prose": "Rain has filled the lowest course of the quarry, and the princess is in it, horns and all, as untroubled as a heron. You cooked the Fourteen, she says. Nobody has cooked for me in four hundred years. Sit. -- My people are hungry. The terraces up the hill could feed them, if anybody read them the way they were cut. The archive says ornamental. Find out what they are for.",
+          "choices": [
+            {
+              "label": "Promise to read the terraces",
+              "line": "You promise. She says she has been promised things before, and then that you are the first one to write it down."
+            }
+          ]
+        },
+        {
+          "id": "settlement",
+          "title": "The University tank",
+          "when": "arriving",
+          "at": "poi_narmada_university",
+          "art": "asura-bathe-settlement",
+          "requires": [
+            "discovery_terrace_water"
+          ],
+          "prose": "The princess has talked the University out of its lotus tank for an afternoon, and nobody in the nine halls quite knows how. You read them, she says, before you have said anything. Water. A finger in a pace, along the hill. The archive will have to write that down, and it will hate it. She laughs, and the lotus pads rock.",
+          "choices": [
+            {
+              "label": "Tell her what the courses carry",
+              "line": "You tell her, course by course. She repeats it back to you in a language that is not hers, for her people, until she has it word for word."
+            }
+          ]
+        },
+        {
+          "id": "teaching",
+          "title": "The old tablets",
+          "when": "arriving",
+          "at": "poi_cloud_stair",
+          "art": "asura-teaching",
+          "prose": "At the top of the stair, where it goes on after the scarp stops, she has laid out tablets of fired clay that her people carried up from somewhere older. She shows you how the marks run -- not left to right, but the way water would run across them -- and reads one aloud. It is a list of springs, and two of them are on the plateau.",
+          "choices": [
+            {
+              "label": "Learn to read the marks",
+              "line": "By the end you can read a spring when you see one. She says that is the first word of a long language, and the most useful."
+            }
+          ]
+        },
+        {
+          "id": "supper",
+          "title": "Supper on the plateau",
+          "when": "night",
+          "art": "scene-rest-asura",
+          "prose": "She cooks this time: root tea, and something with the bitter greens you brought her, which she says is the Fourteen done properly. The wind off the scarp does not stop and she does not seem to feel it. She tells you about the courts she was cast out of, briefly, the way you would mention a town you once passed through.",
+          "choices": [
+            {
+              "label": "Eat, and listen",
+              "line": "It is better than your Fourteen, and she knows it."
+            }
+          ]
+        },
+        {
+          "id": "bond",
+          "title": "Under the same stars",
+          "when": "night",
+          "art": "scene-rest-asura2",
+          "prose": "You sleep near the fire, and so does she, close enough to share its warmth and the blanket. Before sleep she points out the constellations a god once marked on her in a dream, and you find that you can see them.",
+          "choices": [
+            {
+              "label": "Watch the stars with her",
+              "line": "You fall asleep counting them, and wake knowing her name for every one."
+            }
+          ]
+        },
+        {
+          "id": "farewell",
+          "title": "She stays",
+          "when": "arriving",
+          "at": "poi_high_camp",
+          "art": "asura-farewell",
+          "prose": "She walks with you as far as the High Camp and stops at the edge of the felt tents, where the road goes down. My people, she says. You understand. There is a terrace to dig and a spring to find, and somebody has to read them the tablets. She does not say goodbye. She stands on the scarp with the wind in her hair until the road turns, and when you look back she is still there.",
+          "choices": [
+            {
+              "label": "Go on",
+              "line": "You go on. The plateau keeps her, and she keeps the plateau, and you write both down."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "storyline_guyuk",
+      "type": "storyline",
+      "name": "The Seed-Gleaner",
+      "person": "npc_guyuk_seed_gleaner",
+      "field_map": "field_map_aravali",
+      "joins": true,
+      "beats": [
+        {
+          "id": "rumour",
+          "title": "The herbalist at the Atelier",
+          "when": "road",
+          "prose": "A woman sharing the shade with you on the way up from the shingle says there is a herbalist on this side of the strait who can tell a fever from a bad well by the colour of a fingernail. She keeps a workshop of glass at the Quiet Atelier, the woman says, when she keeps it at all.",
+          "choices": [
+            {
+              "label": "Ask about the Atelier",
+              "line": "Glass and benches, past the Kept Stones. You write it down beside the herbalist, with a question mark."
+            },
+            {
+              "label": "Thank her",
+              "line": "You thank her for the shade and the news, and the road goes on."
+            }
+          ]
+        },
+        {
+          "id": "absent",
+          "title": "Not here",
+          "when": "arriving",
+          "at": "poi_quiet_atelier",
+          "prose": "The benches are swept and the glass is clean, and the seedlings in their trays were watered this morning. The one minding them looks up. She is not here, they say. She walks the old places when the plants do not need her, and she does not say which.",
+          "choices": [
+            {
+              "label": "Ask when she will be back",
+              "line": "When the plants need her, they say, which is never the day you hope."
+            },
+            {
+              "label": "Look at the seedlings",
+              "line": "Every tray is labelled in a hand you cannot read, and every seedling is something you have only ever seen as a seed."
+            }
+          ]
+        },
+        {
+          "id": "ruins",
+          "title": "Water at the Alms Step",
+          "when": "arriving",
+          "at": "poi_alms_step",
+          "art": "guyuk-bathe-ruins",
+          "prose": "Somebody has cleared the old tank below the step, and is in it: a woman with hair gone white early, bathing in the cold the way some people pray. She sees you and does not hurry. You are the one who asked at my Atelier, she says. Good. Then bring me rice from the delta, the old red kind that was never grown in salt. Bring it, and I will know you mean it.",
+          "choices": [
+            {
+              "label": "Promise to bring it",
+              "line": "Rice from the delta, then. She sinks back into the water as if the matter is closed, which it is."
+            }
+          ]
+        },
+        {
+          "id": "forest",
+          "title": "At the Vedda Ford",
+          "when": "arriving",
+          "at": "poi_vedda_ford",
+          "art": "guyuk-bathe-forest",
+          "asks": [
+            {
+              "id": "material_delta_rice",
+              "count": 3
+            }
+          ],
+          "prose": "Downstream of everything, where the ford is shallowest, she is in the water again, a short blade on a stone beside her -- for reeds, she says, before you can ask. She takes the rice in both hands, smells it, and almost smiles. This is it. Now the harder part: mustard seed from the plateau, and dates from Dwarka, from palms that remember water. Bring them to the Atelier. I will be there this time.",
+          "choices": [
+            {
+              "label": "Give her the rice",
+              "line": "You give her the rice. She ties it in a cloth and tucks it into her belt, and tells you which way the plateau road goes, as if you might not know."
+            }
+          ]
+        },
+        {
+          "id": "teaching",
+          "title": "What the seeds are for",
+          "when": "arriving",
+          "at": "poi_quiet_atelier",
+          "art": "guyuk-teaching",
+          "asks": [
+            {
+              "id": "material_mustard_seed",
+              "count": 3
+            },
+            {
+              "id": "material_date_fruit",
+              "count": 3
+            }
+          ],
+          "prose": "She is at the benches when you come in, and the one minding the trays has been sent for water. She lays the seeds out side by side -- rice, mustard, date -- and shows you how she wakes them: wrapped in clay and dung, pressed in the palm, and thrown where the ground has given up. A seed ball, she says. It waits for rain. So do I.",
+          "choices": [
+            {
+              "label": "Learn to make them",
+              "line": "Your first three come apart in your hands. The fourth holds. She nods at it as if it were a person she had been introduced to.",
+              "grants": [
+                "recipe_seed_ball"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "supper",
+          "title": "Supper with the Seed-Gleaner",
+          "when": "night",
+          "art": "scene-rest-guyuk",
+          "prose": "She eats with you that evening, out of the same pot, and asks nothing about where you came from. She talks about soil instead: which ground is tired and which is only sulking, and how you can tell. When the fire is low she says she used to dream of a steppe she has never seen, and then that she has stopped.",
+          "choices": [
+            {
+              "label": "Listen",
+              "line": "You listen until the fire is embers. She does not mention the steppe again."
+            }
+          ]
+        },
+        {
+          "id": "bond",
+          "title": "Two walkers become three",
+          "when": "night",
+          "art": "scene-rest-guyuk2",
+          "joins": true,
+          "prose": "You wake before dawn and she is already awake, filling a satchel with seed balls. I am coming with you, she says, as if that had been decided a long time ago. The Atelier will keep. The ground will not.",
+          "choices": [
+            {
+              "label": "Walk on together",
+              "line": "From this morning there are three of you on the road, and one of you throws seed balls into every patch of dead ground you pass."
+            }
+          ]
+        }
       ]
     }
   ],

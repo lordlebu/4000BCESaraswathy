@@ -13,6 +13,18 @@ import placesBundle from '../../data/canon/places.json';
 import type { BiomeId, Landmass } from '../world/types';
 import { type Climate, DELTA_CLIMATE } from '../world/weather';
 
+/**
+ * A road off a map: what carries you, the painting, the way, and who sees you off. Canon's
+ * `field_map.roads`, stated from both ends. The game owns how long it takes (`CROSSING_MS`).
+ */
+export interface Road {
+  to: string;
+  by: string;
+  art: string;
+  prose: string[];
+  keeper: { npc: string; line: string };
+}
+
 /** A journey's opening: a saying alone, then painted plates. See canon's `field_map.prologue`. */
 export interface Prologue {
   opening: string;
@@ -89,6 +101,8 @@ export interface FieldMap {
    * pacing. Only Lothal has one. See `ui/Opening.tsx`.
    */
   prologue: Prologue | null;
+  /** The roads off this map, one per neighbour. See `Road` and `ui/Journey.tsx`. */
+  roads: Road[];
   /** The landmass this map is on, from its region. Every map so far is on Jambhudweep. */
   continent: Landmass;
   /**
@@ -202,7 +216,7 @@ interface RawFieldMap {
   id: string; name: string; region: string; seed_biomes: string[];
   scale?: string; proportion?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
   climate?: Climate; coordinates?: { x: number; y: number }; relief?: string; vehicles?: string[];
-  departs_from?: string[]; arrives_at?: string; prologue?: { opening: string; plates: { art: string; lines: string[]; saying?: string }[] }; landmass_edges?: Record<string, string>;
+  departs_from?: string[]; arrives_at?: string; prologue?: { opening: string; plates: { art: string; lines: string[]; saying?: string }[] }; roads?: Road[]; landmass_edges?: Record<string, string>;
 }
 interface RawPoi {
   id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string; shore?: string;
@@ -257,6 +271,7 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   arrivesAt: m.arrives_at ?? null,
   arrival: m.arrival ?? '',
   prologue: m.prologue ? { opening: m.prologue.opening, plates: m.prologue.plates.map((p) => ({ art: p.art, lines: p.lines, saying: p.saying ?? null })) } : null,
+  roads: (m.roads ?? []).map((r) => ({ to: r.to, by: r.by, art: r.art, prose: r.prose, keeper: { npc: r.keeper.npc, line: r.keeper.line } })),
   continent: (continentOf.get(m.region) ?? 'jambhudweepa') as Landmass,
   landmassEdges: (m.landmass_edges ?? {}) as Partial<Record<MapEdge, Landmass>>
 }));
@@ -371,6 +386,15 @@ export function mayLeaveFrom(fieldMapId: string, standingOn: string | null): { o
  * island in the middle of the strait.
  */
 export function arrivalPoint(fieldMapId: string): string | null {
+  return arrivalOf(fieldMapId);
+}
+
+/** The road from one map to another, or null when there is none. */
+export function roadBetween(from: string, to: string): Road | null {
+  return fieldMap(from)?.roads.find((r) => r.to === to) ?? null;
+}
+
+function arrivalOf(fieldMapId: string): string | null {
   const map = fieldMap(fieldMapId);
   return map?.arrivesAt ?? map?.departsFrom[0] ?? null;
 }

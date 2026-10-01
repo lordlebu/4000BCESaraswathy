@@ -38,7 +38,7 @@ import type { StrangerCulture } from './travellers';
  * up under the first. Taking was the one act with no chance of anything happening around it, which
  * made the busiest verb in the game the least eventful.
  */
-export type Occasion = 'night' | 'arriving' | 'road' | 'working';
+export type Occasion = 'night' | 'arriving' | 'road' | 'working' | 'journey';
 
 /** What an event needs to be true before it can happen. All of them, or it does not fire. */
 export interface Conditions {
@@ -99,6 +99,11 @@ export interface Choice {
    */
   gives?: { id: string; n: number }[];
   /**
+   * Materials or things handed over, out of the satchel: a story beat's request, given. The beat comes
+   * only when it is all carried (`storylines.beatNow`), so taking it can never leave a debt.
+   */
+  takes?: { id: string; n: number }[];
+  /**
    * How much tiredness it takes off, on the same scale as `REMEDY_EASES` and `MEAL_EASES`.
    *
    * Through the scene's existing `ease` door, which is what a remedy already uses -- a bowl by
@@ -149,6 +154,11 @@ export interface GameEvent {
    * `docs/art-placement.md`.
    */
   art: string;
+  /**
+   * A narrower painting to try first, when the owner has painted one: `woven-camp-dacoits` before
+   * `woven-camp`. Absent means the event's own `art` is the only one.
+   */
+  artVariant?: string;
   choices: Choice[];
   /**
    * Whether it can happen more than once.
@@ -248,6 +258,12 @@ export interface Circumstance {
   flags?: readonly string[];
   /** The point of interest just reached, for an arrival. Absent or null anywhere else. */
   poiId?: string | null;
+  /**
+   * The map just left, on a `journey`. A road happening names both ends of its road, so it must
+   * match the map arrived on *and* the one left -- or the ferry song would play on the road down
+   * from the plateau, which also ends at Lothal.
+   */
+  cameFrom?: string | null;
 }
 
 /** Whether this event can happen, given where and when the player is. */
@@ -259,6 +275,7 @@ export function canHappen(event: GameEvent, now: Circumstance): boolean {
   if (pois.length > 0 && (!now.poiId || !pois.includes(now.poiId))) return false;
   if (shelter.length > 0 && (now.shelter === null || !shelter.includes(now.shelter))) return false;
   if (fieldMaps.length > 0 && !fieldMaps.includes(now.fieldMapId)) return false;
+  if (event.occasion === 'journey' && fieldMaps.length > 0 && !(now.cameFrom && fieldMaps.includes(now.cameFrom))) return false;
   return requires.every((id) => now.holds.includes(id));
 }
 

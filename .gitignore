@@ -80,3 +80,5 @@ assets/source/places/
 # writes into src/ui/ and ships. Keep them on disk; the built file is what the game reads.
 assets/source/faces/
 assets/source/events/
+# The opening's plates, raw: built to src/ui/prologue/ by build-plates --prologue, like the events.
+assets/source/prologue/

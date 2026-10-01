@@ -42,7 +42,7 @@ interface Tally {
 function simulate(): Tally {
   const tally: Tally = {
     days: 0,
-    byOccasion: { road: 0, night: 0, arriving: 0, working: 0 },
+    byOccasion: { road: 0, night: 0, arriving: 0, working: 0, journey: 0 },
     byKind: {},
     eventDays: 0,
     quietestRun: 0,
