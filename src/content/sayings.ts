@@ -2,8 +2,10 @@
 //
 // **Canon's, read whole.** Each saying is a lore entity (`database/sayings/`): the words, the
 // in-world credit the card prints, and the moments it suits -- the opening, dawn, leaving, the road,
-// a crossing, arriving, night, the fire, settling. The owner's rulings of 1 October 2026: every
-// saying so far is the Vedda's, and the game credits it in the world only ("Vedda saying"). Where a
+// a crossing, arriving, night, the fire, settling. The owner's rulings: the sayings belong to the
+// lore's various peoples (2 October 2026) -- the Vedda keep the migration lines, the rest are the
+// Tushara's, the Maru's, the Kia's and others' -- and the game credits each in the world only
+// ("Tushara saying", "The Walking Song, attributed to the first Vedda"). Where a
 // line was written after a Rigvedic hymn, canon keeps that as `inspired_by` for the lore portal and
 // does not export it, so nothing here can print an original line as though it were a quotation.
 //
