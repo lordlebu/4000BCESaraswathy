@@ -83,6 +83,8 @@ export interface HereProps {
   standing: StandingRowProps;
   /** The recipe the traveller pinned in the workshop, and what it still wants. See `PinnedRecipe`. */
   pinned?: PinnedRecipeProps;
+  /** The first morning's hint, which takes the pinned recipe's line while it lasts. See `content/coach.ts`. */
+  coach?: string | null;
   /**
    * Everything that can be done on this tile.
    *
@@ -119,6 +121,7 @@ export function Here({
   canon,
   standing,
   pinned,
+  coach = null,
   sky,
   actions,
   height,
@@ -180,7 +183,13 @@ export function Here({
       <StandingRow {...standing} />
 
       {/* The pinned recipe, at every height: it is the reason the player is out gathering. */}
-      {pinned && <PinnedRecipe {...pinned} />}
+      {coach ? (
+        <p className="coach-line" role="status">
+          {coach}
+        </p>
+      ) : (
+        pinned && <PinnedRecipe {...pinned} />
+      )}
 
       {/* **Every action, at every height, pinned below whatever is showing.**
           Splitting this -- the verbs you can use in the rail, the ones you cannot in the part that

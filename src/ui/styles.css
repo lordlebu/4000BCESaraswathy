@@ -3528,3 +3528,50 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 .settling-step[data-state='now'] .settling-mark { color: var(--accent); font-weight: 700; }
 /* The map's goal in the notes, above the landmark line it outranks. */
 .status-goal { font-weight: 600; }
+
+/* --- The opening (`Opening.tsx`) -------------------------------------------------------------
+ * Stills and short text, centred on the page like a book's first spread. The plate keeps 4:3, the
+ * shape the paintings are asked for in, and never grows past its 512-pixel build. */
+.opening {
+  /* A page of its own, over everything: the map is booting behind it, and the first look at this
+     without a ground had the Walking Song printed across the control bar and the dock. */
+  position: fixed;
+  inset: 0;
+  /* The door's level: the opening is what the door opens onto, and the door is gone by then. */
+  z-index: var(--z-door);
+  background: var(--paper);
+  overflow-y: auto;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 1rem;
+  text-align: center;
+  padding: max(1.25rem, env(safe-area-inset-top, 0px)) 1rem max(1.25rem, env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+}
+.opening > * { width: min(100%, 34rem); box-sizing: border-box; }
+.opening-plate { width: 100%; max-width: 512px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 4px; }
+.opening-standin {
+  /* Until the painting lands: wash, horizon and paper, in the parchment's own colours. */
+  background:
+    linear-gradient(to bottom, transparent 58%, color-mix(in srgb, var(--muted) 18%, transparent) 58% 60%, transparent 60%),
+    radial-gradient(ellipse at 70% 30%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%),
+    linear-gradient(to bottom, color-mix(in srgb, var(--paper) 70%, #c9d4d8), var(--paper));
+  border: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
+}
+.opening-lines p { margin: 0.35rem 0; font-size: 1.05rem; line-height: 1.5; }
+.opening-saying { margin: 0; display: grid; gap: 0.4rem; }
+.opening-saying blockquote { margin: 0; font-style: italic; display: grid; gap: 0.15rem; line-height: 1.5; }
+.opening[data-card='saying'] .opening-saying blockquote { font-size: 1.1rem; }
+.opening-saying .verse-gap { height: 0.6rem; }
+.opening-saying figcaption { font-size: 0.8rem; color: var(--muted); }
+.opening-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; width: 100%; }
+.opening-count { display: flex; gap: 0.35rem; }
+.opening-count i { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: color-mix(in srgb, var(--muted) 35%, transparent); }
+.opening-count i[data-on='true'] { background: var(--accent); }
+.opening-skip { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; min-height: 44px; }
+.opening-next { min-height: 44px; min-width: 7rem; }
+
+/* The first morning's hint, in the pinned recipe's slot at every height. `content/coach.ts`. */
+.coach-line { flex: none; margin: 0; padding: 0.25rem 0.75rem; font-size: 0.85rem; font-style: italic; }
+.coach-line::before { content: '✦ '; color: var(--accent); font-style: normal; }

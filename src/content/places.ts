@@ -13,6 +13,12 @@ import placesBundle from '../../data/canon/places.json';
 import type { BiomeId, Landmass } from '../world/types';
 import { type Climate, DELTA_CLIMATE } from '../world/weather';
 
+/** A journey's opening: a saying alone, then painted plates. See canon's `field_map.prologue`. */
+export interface Prologue {
+  opening: string;
+  plates: { art: string; lines: string[]; saying: string | null }[];
+}
+
 export interface FieldMap {
   id: string;
   name: string;
@@ -78,6 +84,11 @@ export interface FieldMap {
   vehicles: string[];
   /** What the player reads on first arriving. */
   arrival: string;
+  /**
+   * How a journey that begins here opens, or null. Canon's prose and sayings; the game owns the
+   * pacing. Only Lothal has one. See `ui/Opening.tsx`.
+   */
+  prologue: Prologue | null;
   /** The landmass this map is on, from its region. Every map so far is on Jambhudweep. */
   continent: Landmass;
   /**
@@ -191,7 +202,7 @@ interface RawFieldMap {
   id: string; name: string; region: string; seed_biomes: string[];
   scale?: string; proportion?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
   climate?: Climate; coordinates?: { x: number; y: number }; relief?: string; vehicles?: string[];
-  departs_from?: string[]; arrives_at?: string; landmass_edges?: Record<string, string>;
+  departs_from?: string[]; arrives_at?: string; prologue?: { opening: string; plates: { art: string; lines: string[]; saying?: string }[] }; landmass_edges?: Record<string, string>;
 }
 interface RawPoi {
   id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string; shore?: string;
@@ -245,6 +256,7 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   departsFrom: m.departs_from ?? [],
   arrivesAt: m.arrives_at ?? null,
   arrival: m.arrival ?? '',
+  prologue: m.prologue ? { opening: m.prologue.opening, plates: m.prologue.plates.map((p) => ({ art: p.art, lines: p.lines, saying: p.saying ?? null })) } : null,
   continent: (continentOf.get(m.region) ?? 'jambhudweepa') as Landmass,
   landmassEdges: (m.landmass_edges ?? {}) as Partial<Record<MapEdge, Landmass>>
 }));

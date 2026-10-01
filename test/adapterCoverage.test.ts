@@ -81,7 +81,7 @@ const COVERAGE: Record<string, Coverage> = {
   },
   'places.field_maps': {
     adapted: ['id', 'name', 'region', 'seed_biomes', 'scale', 'proportion', 'points_of_interest',
-      'neighbours', 'arrival', 'climate', 'coordinates', 'relief', 'vehicles', 'departs_from', 'arrives_at',
+      'neighbours', 'arrival', 'climate', 'coordinates', 'relief', 'vehicles', 'departs_from', 'arrives_at', 'prologue',
       // Which edge is another landmass. `world/landmass.ts` floods from it to find the ground.
       'landmass_edges'],
     skipped: [...EDITORIAL,

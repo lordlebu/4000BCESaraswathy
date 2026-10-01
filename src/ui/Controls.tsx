@@ -45,6 +45,9 @@ export interface ControlsProps {
   /** Whether the satchel ribbon is showing. */
   satchelRibbon: boolean;
   onToggleSatchelRibbon: () => void;
+  /** The first morning's hints, and turning them off. Optional so older callers need not pass it. */
+  hints?: boolean;
+  onToggleHints?: () => void;
   /** The authored place under foot, if any — the button is only useful when standing on one. */
   placeName: string | null;
   placeOpen: boolean;
@@ -69,6 +72,8 @@ export function Controls({
   onToggleNotes,
   satchelRibbon,
   onToggleSatchelRibbon,
+  hints,
+  onToggleHints,
   placeName,
   placeOpen,
   onTogglePlace
@@ -270,6 +275,19 @@ export function Controls({
                 What you are carrying
               </button>
             </li>
+            {onToggleHints && (
+              <li>
+                <button
+                  type="button"
+                  className={hints ? 'showing is-on' : 'showing'}
+                  aria-pressed={Boolean(hints)}
+                  onClick={onToggleHints}
+                >
+                  <span aria-hidden="true">✦</span>
+                  Hints for the first morning
+                </button>
+              </li>
+            )}
           </ul>
 
           <h3>Who you are walking as</h3>

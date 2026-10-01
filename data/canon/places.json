@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.41.0",
+  "canon_version": "2.42.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -451,7 +451,44 @@
       "relief": "delta",
       "departs_from": [
         "poi_lothal_camp"
-      ]
+      ],
+      "prologue": {
+        "opening": "saying_the_walking_song",
+        "plates": [
+          {
+            "art": "prologue-1-road",
+            "lines": [
+              "First light on the delta road. The cart keeps the pace of the ox, and you walk beside it.",
+              "Ahead, smoke rises from somewhere you cannot see yet."
+            ],
+            "saying": "saying_dawn_belongs_to_the_traveller"
+          },
+          {
+            "art": "prologue-2-kit",
+            "lines": [
+              "A bedroll, a lamp, a staff, and a notebook a third full. You carry nothing else.",
+              "The rest of the notebook is the reason for the walk."
+            ],
+            "saying": "saying_they_carried_memory"
+          },
+          {
+            "art": "prologue-3-lothal",
+            "lines": [
+              "The delta takes a long time to become a city.",
+              "Reeds, then reed-and-mud, then mud with brick in it. Somebody has hung washing across the third storey."
+            ],
+            "saying": "saying_river_leaves_its_birthplace"
+          },
+          {
+            "art": "prologue-4-kilns",
+            "lines": [
+              "The cart stops at the kilns, where people live because the kilns still hold heat.",
+              "Someone weaving a mat on the ground looks up, and moves over to make room."
+            ],
+            "saying": "saying_count_the_fires"
+          }
+        ]
+      }
     },
     {
       "id": "field_map_narmada",

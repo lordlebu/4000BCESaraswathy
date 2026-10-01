@@ -15,6 +15,7 @@
 //   node tools/build-plates.js --portraits
 //   node tools/build-plates.js --faces
 //   node tools/build-plates.js --events   # event paintings, 4:3 like the activity scenes
+//   node tools/build-plates.js --prologue # the opening's plates, 4:3 like the events
 //   node tools/build-plates.js --scenes   # the activity scenes, which are 4:3 rather than square
 //   node tools/build-plates.js --places   # the place views, 16:7 -- the band above a place's prose
 //
@@ -96,6 +97,21 @@ const KINDS = {
     // up by the event's id. Hyphenating it would build a picture no event ever draws -- the trap the
     // face pool fell into first. Woven names are hyphenated already and are unaffected.
     keepUnderscores: true
+  },
+  /**
+   * A plate of the opening: the four paintings a new walk opens on (`Opening.tsx`).
+   *
+   * The event painting's shape and size, because it is the same kind of picture -- a moment with the
+   * traveller seen from behind -- shown on a page of its own. Named as canon's prologue names it,
+   * `prologue-1-road`, and looked up by that name; hyphens throughout, so nothing is rewritten.
+   */
+  prologue: {
+    raw: path.join(ROOT, 'assets', 'source', 'prologue'),
+    out: path.join(ROOT, 'src', 'ui', 'prologue'),
+    size: 512,
+    aspect: 4 / 3,
+    word: 'prologue',
+    label: 'opening plate'
   },
   /**
    * An activity scene: the painting at the top of the activity modal.
@@ -774,6 +790,8 @@ function main() {
       ? KINDS.face
       : process.argv.includes('--events')
         ? KINDS.event
+      : process.argv.includes('--prologue')
+        ? KINDS.prologue
       : process.argv.includes('--scenes')
       ? KINDS.scene
       : process.argv.includes('--places')
