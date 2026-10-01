@@ -112,7 +112,7 @@ const COVERAGE: Record<string, Coverage> = {
   'places.happenings': {
     // Canon's written happenings, adapted by `fromCanon` in `src/content/events.ts`. `at` becomes
     // `conditions.pois`, `field_maps` `conditions.fieldMaps`.
-    adapted: ['id', 'title', 'occasion', 'field_maps', 'at', 'requires', 'prose', 'choices'],
+    adapted: ['id', 'title', 'occasion', 'field_maps', 'at', 'requires', 'prose', 'choices', 'camps'],
     skipped: [...EDITORIAL]
   },
   'places.sayings': {

@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.45.0",
+  "canon_version": "2.46.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -2539,6 +2539,86 @@
   ],
   "happenings": [
     {
+      "id": "happening_a_song_about_a_ford",
+      "type": "happening",
+      "title": "A song about a ford",
+      "occasion": "night",
+      "camps": [
+        "dacoits"
+      ],
+      "prose": "Late, when the jar has gone round twice, one of the band sings about a ford where the water ran backwards for a day and a whole caravan crossed dry. Everybody joins in on the part where the salt carriers fall in. They have clearly sung it a hundred times, and they are still delighted by it.",
+      "choices": [
+        {
+          "label": "Join in on the chorus",
+          "line": "You get the words wrong and nobody minds. By the third time you have them."
+        },
+        {
+          "label": "Listen",
+          "line": "You listen, and laugh where they laugh. It is not a kind song, and it is a very good one."
+        }
+      ]
+    },
+    {
+      "id": "happening_counting_the_goats",
+      "type": "happening",
+      "title": "Counting the goats",
+      "occasion": "night",
+      "camps": [
+        "drovers"
+      ],
+      "prose": "Before sleep the drovers count the goats in the fold, not by number but by name, and every goat has one. Twice the count goes wrong and they start again from the beginning. The third time it comes right, and everybody lies down at once, as if a door had shut.",
+      "choices": [
+        {
+          "label": "Ask the names",
+          "line": "You learn eleven names and forget nine. The goat called Uncle looks at you as if it knows."
+        },
+        {
+          "label": "Help them count",
+          "line": "You count with them and get it wrong, and the count starts again, and nobody seems to mind."
+        }
+      ]
+    },
+    {
+      "id": "happening_further_than_anyone_has_been",
+      "type": "happening",
+      "title": "Further than anyone has been",
+      "occasion": "night",
+      "camps": [
+        "pilgrims"
+      ],
+      "prose": "The pilgrims are walking to a shrine further than any of them has been. None of them can say exactly where it is; the oldest of them walked part of the way as a girl and turned back. They will know it when they see it, she says. That is how a shrine works.",
+      "choices": [
+        {
+          "label": "Ask what the shrine is for",
+          "line": "For arriving at, she says, and laughs at your face. Then she tells you, properly, and it takes until the fire is embers."
+        },
+        {
+          "label": "Wish them a good road",
+          "line": "They take the wish seriously, all of them, and say it back to you one by one."
+        }
+      ]
+    },
+    {
+      "id": "happening_nobody_s_bow",
+      "type": "happening",
+      "title": "Nobody's bow",
+      "occasion": "night",
+      "camps": [
+        "adventurers"
+      ],
+      "prose": "There is a bow leaning against the lean-to that none of them claims. It was there when they made camp, they say, and the time before, in a different place. One of them thinks it follows them. Another says that is a story for children, and moves it further from the fire.",
+      "choices": [
+        {
+          "label": "Look at the bow",
+          "line": "It is good work and old work, the string new. By morning it is back by the fire, and nobody admits to moving it."
+        },
+        {
+          "label": "Leave it be",
+          "line": "You leave it where it leans. You sleep well, and dream of nothing in particular."
+        }
+      ]
+    },
+    {
       "id": "happening_the_ferry_song",
       "type": "happening",
       "title": "The ferry song",
@@ -2560,6 +2640,66 @@
       ]
     },
     {
+      "id": "happening_the_goat_that_walked_home",
+      "type": "happening",
+      "title": "The goat that walked home",
+      "occasion": "night",
+      "camps": [
+        "drovers"
+      ],
+      "prose": "One of the drovers tells about a goat sold at a market three days' walk away, that turned up at the fold a week later with the buyer's rope still on it. They kept the rope, she says, and the goat, and gave the buyer a better one. He came to visit it after.",
+      "choices": [
+        {
+          "label": "Ask if it still walks home",
+          "line": "Every time, she says, which is why nobody buys from them twice. She does not seem to think this is a problem."
+        },
+        {
+          "label": "Laugh",
+          "line": "You laugh, and she looks pleased, as if the story has done what it is for."
+        }
+      ]
+    },
+    {
+      "id": "happening_the_lamp_kept_lit",
+      "type": "happening",
+      "title": "The lamp kept lit",
+      "occasion": "night",
+      "camps": [
+        "pilgrims"
+      ],
+      "prose": "There is a clay lamp at the cairn that one of the pilgrims tends all night, a turn each, so it never goes out. It has not gone out since they left home, they say. When you ask how long ago that was, they have to count, and argue about the count.",
+      "choices": [
+        {
+          "label": "Take a turn at the lamp",
+          "line": "They let you take a turn. You sit with it in the quiet for an hour, and hand it on lit."
+        },
+        {
+          "label": "Ask what happens if it goes out",
+          "line": "Nothing, they say. That is not the point. The point is that it has not."
+        }
+      ]
+    },
+    {
+      "id": "happening_the_map_with_a_hole",
+      "type": "happening",
+      "title": "The map with a hole in it",
+      "occasion": "night",
+      "camps": [
+        "adventurers"
+      ],
+      "prose": "When the fire is low they unroll a map drawn on bark, and one of them traces your road on it for you with a stick. The middle of it is burned through, a hole the size of a hand. Somebody dropped it in a fire, she says. We have been walking round the edge of it for two seasons, filling it in.",
+      "choices": [
+        {
+          "label": "Ask what was in the middle",
+          "line": "Nobody knows, she says. That is why we are walking. She rolls the map up and says it is a better reason than most."
+        },
+        {
+          "label": "Tell them what you have seen",
+          "line": "You tell them what you have walked through, and she draws a stream into the hole, small and careful, in the right place."
+        }
+      ]
+    },
+    {
       "id": "happening_the_sleeping_stranger",
       "type": "happening",
       "title": "A stranger asleep",
@@ -2576,6 +2716,26 @@
         {
           "label": "Leave a little food by his hand",
           "line": "You leave a flatbread on the stone by his hand. When you look back from the next rise, it is gone, and he has not moved."
+        }
+      ]
+    },
+    {
+      "id": "happening_the_toll_explained",
+      "type": "happening",
+      "title": "The toll, explained",
+      "occasion": "night",
+      "camps": [
+        "dacoits"
+      ],
+      "prose": "The band's chief pours you something sour and explains the toll as if you had asked about the weather. The salt road crosses their grandmothers' ford, she says. The carriers pay to cross it. You are not carrying salt, so you are a guest, and a guest is fed. Somebody passes you bread to prove it.",
+      "choices": [
+        {
+          "label": "Ask whose ford it was before",
+          "line": "Before the grandmothers? She shrugs. Somebody's. Everything is somebody's, until it is ours."
+        },
+        {
+          "label": "Thank her for the bread",
+          "line": "You thank her, and she seems pleased that you understood the difference."
         }
       ]
     },

@@ -544,6 +544,55 @@
           "line": "You sit against the hurdles and listen to the goats settle. It is the quietest place you have been in days."
         }
       }
+    },
+    "fireside": {
+      "weight": 12,
+      "tags": [
+        "fire",
+        "stranger"
+      ],
+      "cooldown": 0,
+      "again_after": null,
+      "slots": [
+        "kind",
+        "saying"
+      ],
+      "title": "At their fire",
+      "prose": "You sleep beside the camp, and before sleep {kind} make room for you at the fire. Somebody tells the old saying, the way it is always told: \"{saying}\" Nobody explains it, and nobody needs to.",
+      "choices": {
+        "listen": {
+          "label": "Listen",
+          "line": "You listen to the fire and the talk until both are low, and sleep better than you have on bare ground."
+        },
+        "tell": {
+          "label": "Tell them where you have been",
+          "line": "You tell them about the road behind you. They listen as if it were news, which to them it is."
+        }
+      }
+    },
+    "fireside-visitor": {
+      "weight": 6,
+      "tags": [
+        "animal",
+        "fire"
+      ],
+      "cooldown": 0,
+      "again_after": null,
+      "slots": [
+        "a_animal"
+      ],
+      "title": "At the edge of the firelight",
+      "prose": "Late, when the camp is asleep, two eyes shine at the edge of the firelight, low in the grass. By the shape of it, {a_animal}, drawn by the warmth and the smell of the pot, and not yet decided about any of you.",
+      "choices": {
+        "still": {
+          "label": "Keep still",
+          "line": "You keep still. After a while it decides you are part of the camp, and goes about its business."
+        },
+        "stick": {
+          "label": "Lay a stick on the fire",
+          "line": "You lay a stick on the fire. The light jumps, the eyes go, and the camp sleeps on."
+        }
+      }
     }
   }
 }

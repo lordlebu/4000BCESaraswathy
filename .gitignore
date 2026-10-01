@@ -82,3 +82,6 @@ assets/source/faces/
 assets/source/events/
 # The opening's plates, raw: built to src/ui/prologue/ by build-plates --prologue, like the events.
 assets/source/prologue/
+
+# The camp prop sheets, raw: cut by tools/build-camps.py into assets/camps/, which is tracked.
+assets/source/camps/

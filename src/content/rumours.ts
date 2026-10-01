@@ -115,6 +115,11 @@ export function rumoursOn(fieldMapId: string, facts: RumourFacts): Rumour[] {
 /** One rumour for this stranger today, or null when the road has nothing new. A seeded pick. */
 export function rumourFor(rumours: readonly Rumour[], roll: (salt: string) => number): Rumour | null {
   if (rumours.length === 0) return null;
+  // **A camp is what people talk about.** One pitched in the last three days is news, and the first
+  // stranger who passes a rumour on passes on that one -- the plan's "the next person you meet
+  // mentions it". A heard rumour is no longer offered, so this asks once per camp.
+  const camp = rumours.find((r) => r.kind === 'camp');
+  if (camp) return camp;
   return rumours[roll('rumour') % rumours.length]!;
 }
 

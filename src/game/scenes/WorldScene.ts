@@ -92,7 +92,8 @@ import {
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
 import { BLADE_PERIOD, DUGOUT_VIEWS, FIRST_YURT, ROW_SLOT, depthFor, dugoutFor, placeFrame, rowAtFoot, type DugoutView, type Edge } from '../frames';
 import { buildable, buildingTiles } from '../../content/homestead';
-import { encampmentOn } from '../../content/encampments';
+import { atCamp, encampmentOn, type Encampment } from '../../content/encampments';
+import { ASHES_DAYS, CAMP_LAYOUT, YURT_ONE_IN, campKey, campPieces } from '../campArt';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 
 /**
@@ -516,7 +517,16 @@ export class WorldScene extends Phaser.Scene {
   private homesteadSprites: Phaser.GameObjects.Image[] = [];
   private homesteadWanted: UiToGame['homestead-changed'] = { poiId: null, stage: 0 };
   /** Today's camp, as drawn: which one, where, and its two sprites. See `drawCamp`. */
-  private camp: { id: string; key: string; sprites: Phaser.GameObjects.Image[] } | null = null;
+  private camp: {
+    id: string;
+    key: string;
+    sprites: Phaser.GameObjects.Image[];
+    /** Which tile each sprite stands on, so each shows once its own tile is known. */
+    tiles: string[];
+    smoke: Phaser.GameObjects.Particles.ParticleEmitter | null;
+  } | null = null;
+  /** Cold fire rings where camps struck in the last few days, by camp id. See `campArt.ts`. */
+  private ashes = new Map<string, { key: string; sprite: Phaser.GameObjects.Image }>();
   /** The mill's wheel, and anything else that turns on an index rather than a toggle. */
   private spinning: {
     sprite: Phaser.GameObjects.Image;
@@ -731,6 +741,8 @@ export class WorldScene extends Phaser.Scene {
     // loading them all costs less than the machinery to load one lazily and swap textures later --
     // and it means a character can be changed without a scene restart.
     for (const art of everySheet()) loadCharacterSheet(this, art.key, art.url, frameOf(art.key));
+    // Each kind of camp's own props, cut from the owner's sheets. Twelve small images.
+    for (const piece of campPieces()) this.load.image(piece.key, piece.url);
     // This map's painted animals and no other's. It used to be every map's, on the reasoning that
     // `built` is not assigned until `create` and the files would be a few KB each. They are not:
     // twelve paintings came to 4.05 MB, which was 47% of everything downloaded before the first
@@ -1828,33 +1840,156 @@ export class WorldScene extends Phaser.Scene {
   private drawCamp(): void {
     if (!this.built) return;
     const places = this.built.placed.map((p) => ({ poiId: p.poi.id, at: p.at }));
-    const today = encampmentOn(this.world, this.built.fieldMap.id, places, this.dayOfJourney());
+    const day = this.dayOfJourney();
+    const today = encampmentOn(this.world, this.built.fieldMap.id, places, day);
     if (this.camp && this.camp.id !== today?.id) {
       for (const s of this.camp.sprites) s.destroy();
+      this.camp.smoke?.destroy();
       this.camp = null;
     }
-    if (today && !this.camp) {
-      const x = today.at.x * TILE_SIZE + TILE_SIZE / 2;
-      const y = today.at.y * TILE_SIZE + TILE_SIZE;
-      const ring = placeFrame('', 'travel_node');
-      const sprites: Phaser.GameObjects.Image[] = [];
-      if (ring !== null) {
-        sprites.push(
-          this.add.image(x + TILE_SIZE * 0.2, y, SHEET_KEY.places, ring).setOrigin(0.5, 1).setScale(0.6)
-            .setDepth(depthFor(today.at.y, ROW_SLOT.marker))
-        );
-      }
-      sprites.push(
-        this.add.image(x - TILE_SIZE * 0.15, y, SHEET_KEY.huts, FIRST_YURT).setOrigin(0.5, 1)
-          .setDepth(depthFor(today.at.y, ROW_SLOT.marker) + 1)
-      );
-      sprites.forEach((s) => s.setName(`camp:${today.kind}`));
-      this.camp = { id: today.id, key: `${today.at.x},${today.at.y}`, sprites };
-    }
+    if (today && !this.camp) this.camp = this.pitchCamp(today);
     if (this.camp) {
-      const seen = this.discovered.has(this.camp.key);
-      for (const s of this.camp.sprites) s.setVisible(seen);
+      const camp = this.camp;
+      camp.sprites.forEach((s, i) => s.setVisible(this.discovered.has(camp.tiles[i]!) || this.discovered.has(camp.key)));
     }
+    this.drawAshes(places, day, today);
+  }
+
+  /**
+   * A camp, drawn from its kind's own props round the old fire ring.
+   *
+   * **Every camp of a kind is not the same picture.** The seed for this camp chooses whether the
+   * kind's own shelter stands or the old yurt does (`YURT_ONE_IN`), and which way round the things
+   * about the fire are set. The ring is the one the camp was always drawn with; the owner asked for
+   * the generic camp art to be kept, and this is where it lives now.
+   *
+   * **The smoke is what tells you it is there.** A thin column over the fire, drawn above the fog,
+   * so a camp nobody has walked to yet can still be seen from across the map -- the way open games
+   * telegraph a campfire. Nothing pops up to announce it.
+   */
+  private pitchCamp(camp: Encampment): NonNullable<WorldScene['camp']> {
+    const roll = tileHash(this.world.seed, camp.at.x, camp.at.y, `camp:${camp.id}`);
+    const layout = CAMP_LAYOUT[camp.kind];
+    const foot = (at: Point) => ({ x: at.x * TILE_SIZE + TILE_SIZE / 2, y: at.y * TILE_SIZE + TILE_SIZE - 6 });
+    const sprites: { img: Phaser.GameObjects.Image; at: Point }[] = [];
+    const piece = (key: string, frame: number | undefined, at: Point, slot: number, scale = 1, shadow = true) => {
+      const { x, y } = foot(at);
+      const depth = depthFor(at.y, ROW_SLOT.marker) + slot;
+      const img = (frame === undefined ? this.add.image(x, y, key) : this.add.image(x, y, key, frame))
+        .setOrigin(0.5, 1)
+        .setScale(scale)
+        .setDepth(depth);
+      // **A slight shadow under anything that stands** -- the owner's ask, the same soft ellipse the
+      // traveller casts, as wide as most of the piece and a fifth as deep. A fold or a fire ring lies
+      // flat on the ground and casts none.
+      if (shadow) {
+        const w = img.displayWidth * 0.85;
+        sprites.push({ img: this.add.image(x, y - 2, SHADOW_TEXTURE).setDisplaySize(w, w * 0.22).setAlpha(0.45).setDepth(depth - 0.5), at });
+      }
+      sprites.push({ img, at });
+      return img;
+    };
+
+    // **Spread over the tiles round the fire, not stacked on one.** The first cut put every piece
+    // on the camp's own tile and the owner read it at once: everything bundled together, cramped.
+    // The fire (and the drovers' fold round it) keeps the camp's tile; the shelter and the things
+    // about the fire each take a neighbouring tile of their own, walkable and off the road, chosen
+    // in a seeded order so two camps are not laid out alike. The shelter stands behind the fire, as a
+    // shelter would, and the other things about it to either side -- not in a row behind it.
+    const open = (d: Point): boolean => {
+      const tile = this.world.tiles[camp.at.y + d.y]?.[camp.at.x + d.x];
+      return tile !== undefined && isWalkable(tile) && !tile.road;
+    };
+    const shuffled = (ds: Point[], salt: string) =>
+      ds
+        .map((d) => ({ d, r: tileHash(this.world.seed, camp.at.x + d.x, camp.at.y + d.y, `${salt}:${camp.id}`) }))
+        .sort((a, b) => a.r - b.r)
+        .map(({ d }) => d);
+    const back = shuffled([{ x: 0, y: -1 }, { x: -1, y: -1 }, { x: 1, y: -1 }], 'camp-back').filter(open);
+    const sides = shuffled([{ x: -1, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 1, y: 1 }], 'camp-side').filter(open);
+    // The shelter at the back, the rest to the sides; whatever is left over if the ground is tight.
+    const shelterAt = back[0] ?? sides[0];
+    const rest = [...sides, ...back].filter((d) => d !== shelterAt);
+    const around: Point[] = [shelterAt, ...rest]
+      .filter((d): d is Point => d !== undefined)
+      .map((d) => ({ x: camp.at.x + d.x, y: camp.at.y + d.y }));
+    const spot = (n: number): Point => around[n] ?? camp.at;
+
+    if (layout.ground !== null) piece(campKey(camp.kind, layout.ground), undefined, camp.at, -1, 1, false);
+    const ring = placeFrame('', 'travel_node');
+    if (ring !== null) piece(SHEET_KEY.places, ring, camp.at, 1, 0.6, false);
+    // About one camp in three is pitched round the old yurt instead of the kind's own shelter.
+    const yurt = Math.floor(roll / 7) % YURT_ONE_IN === 0;
+    if (yurt) piece(SHEET_KEY.huts, FIRST_YURT, spot(0), 2);
+    else piece(campKey(camp.kind, layout.shelter), undefined, spot(0), 2);
+    layout.extras.forEach((n, i) => piece(campKey(camp.kind, n), undefined, spot(i + 1), 2));
+
+    for (const s of sprites) s.img.setName(`camp:${camp.kind}`);
+    const fire = foot(camp.at);
+    return {
+      id: camp.id,
+      key: `${camp.at.x},${camp.at.y}`,
+      sprites: sprites.map((s) => s.img),
+      tiles: sprites.map((s) => `${s.at.x},${s.at.y}`),
+      smoke: this.campSmoke(fire.x, fire.y - 30)
+    };
+  }
+
+  /** A soft grey puff, made once, and a slow column of them over the fire. */
+  private campSmoke(x: number, y: number): Phaser.GameObjects.Particles.ParticleEmitter | null {
+    if (!this.textures.exists('camp-smoke')) {
+      const g = this.make.graphics({ x: 0, y: 0 }, false);
+      for (let r = 16; r > 0; r -= 2) {
+        g.fillStyle(0x8f8a84, 0.12);
+        g.fillCircle(16, 16, r);
+      }
+      g.generateTexture('camp-smoke', 32, 32);
+      g.destroy();
+    }
+    return this.add
+      .particles(x, y, 'camp-smoke', {
+        speedY: { min: -60, max: -42 },
+        speedX: { min: -5, max: 9 },
+        lifespan: 7600,
+        scale: { start: 1.2, end: 4.2 },
+        alpha: { start: 0.9, end: 0.05 },
+        frequency: 260,
+        quantity: 1
+      })
+      .setDepth(DEPTH_FOG + 1)
+      .setName('camp-smoke');
+  }
+
+  /**
+   * Where a camp stood in the last `ASHES_DAYS` days and has struck: its ring, cold and grey, once
+   * that tile is known. What a camp leaves behind when it moves on.
+   */
+  private drawAshes(places: { poiId: string; at: Point }[], day: number, today: Encampment | null): void {
+    const want = new Map<string, Encampment>();
+    for (let k = 1; k <= ASHES_DAYS; k++) {
+      const was = encampmentOn(this.world, this.built!.fieldMap.id, places, day - k);
+      if (was && was.id !== today?.id && was.to <= day) want.set(was.id, was);
+    }
+    for (const [id, a] of this.ashes) {
+      if (!want.has(id)) {
+        a.sprite.destroy();
+        this.ashes.delete(id);
+      }
+    }
+    const ring = placeFrame('', 'travel_node');
+    for (const [id, was] of want) {
+      if (this.ashes.has(id) || ring === null) continue;
+      const sprite = this.add
+        .image(was.at.x * TILE_SIZE + TILE_SIZE / 2, was.at.y * TILE_SIZE + TILE_SIZE, SHEET_KEY.places, ring)
+        .setOrigin(0.5, 1)
+        .setScale(0.6)
+        .setTint(0x8a8580)
+        .setAlpha(0.6)
+        .setDepth(depthFor(was.at.y, ROW_SLOT.marker))
+        .setName('camp-ashes');
+      this.ashes.set(id, { key: `${was.at.x},${was.at.y}`, sprite });
+    }
+    for (const a of this.ashes.values()) a.sprite.setVisible(this.discovered.has(a.key));
   }
 
   /** Who is at each place, from React. Drawn at once and kept for the next redraw. */
@@ -2134,9 +2269,19 @@ export class WorldScene extends Phaser.Scene {
       inPalace: here !== null && isGrand(here.poi),
       inSettlement: here?.poi.kind === 'settlement',
       underRoof: (here?.poi.subLocations ?? []).length > 0,
-      atCamp: here !== null && isCamp(here.poi),
+      // Or beside a camp that is standing today: somebody else's fire, shared. Better than the
+      // bedroll and below a roof -- the plan's Q11, and the camp rung `night.ts` already has.
+      atCamp: (here !== null && isCamp(here.poi)) || this.besideCamp(),
       built: this.builtShelter
     });
+  }
+
+  /** Whether a camp stands within a tile of the traveller today. */
+  private besideCamp(): boolean {
+    if (!this.built) return false;
+    const places = this.built.placed.map((p) => ({ poiId: p.poi.id, at: p.at }));
+    const camp = encampmentOn(this.world, this.built.fieldMap.id, places, this.dayOfJourney());
+    return camp !== null && atCamp(camp, this.at);
   }
 
   /**
@@ -2371,7 +2516,15 @@ export class WorldScene extends Phaser.Scene {
     (window as unknown as { __camp?: (day?: number) => unknown }).__camp = (day?: number) => {
       const places = this.built.placed.map((p) => ({ poiId: p.poi.id, at: p.at }));
       const c = encampmentOn(this.world, this.built.fieldMap.id, places, day ?? this.dayOfJourney());
-      return c ? { ...c, visible: day === undefined ? (this.camp?.sprites[0]?.visible ?? false) : null } : null;
+      return c
+        ? {
+            ...c,
+            visible: day === undefined ? (this.camp?.sprites[0]?.visible ?? false) : null,
+            // What it is drawn from, and whether its smoke is rising: `e2e/camps.spec.ts`.
+            pieces: day === undefined ? (this.camp?.sprites.map((s) => s.texture.key) ?? []) : [],
+            smoke: day === undefined ? (this.camp?.smoke?.getAliveParticleCount() ?? 0) : 0
+          }
+        : null;
     };
 
     // What the homestead is drawing, for `e2e/homestead.spec.ts`: the sprites by name.

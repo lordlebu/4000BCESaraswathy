@@ -454,3 +454,19 @@ Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - see
 
 Subject: A cart track descending from high grassland toward a shingle shore and a strait, felt tents of a nomad camp on the shingle, a line of trestles striding out over the water. A traveller walking down beside the cart, seen from behind. Evening.
 ```
+
+## The fire, at a camp (Roads and Hands, phase 5)
+
+Both painted by the owner on 1 October 2026 and in the game. The woven kinds name their paintings
+directly, so the files keep the names the owner gave them.
+
+#### `woven-fireside` -- a night at somebody else's fire
+
+Painted as `camp-night-fireside`: a storyteller at a camp fire under the stars, listeners wrapped in
+blankets. Drawn on the card when the first night beside a camp is told at its fire.
+
+#### `woven-fireside-visitor` -- something at the edge of the firelight
+
+Painted as `camp-night-visitor`, with a second take: a woman sitting up from her bedding, two
+eyeshines low in the grass beyond the fire. Drawn when a nocturnal animal comes to a camp's light.
+
