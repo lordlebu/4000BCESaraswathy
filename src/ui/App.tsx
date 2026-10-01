@@ -1920,6 +1920,7 @@ export function App() {
         onMake={makeHere}
         lastMade={lastMade}
         station={atStation}
+        fieldMapId={fieldMapId}
         open={interrupts.workshop}
         onClose={() => {
           setAtStation(null);

@@ -3049,6 +3049,10 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 .recipe-why { list-style: none; margin: 0.3rem 0 0; padding: 0; }
 .recipe-why li { font-size: 0.8rem; color: var(--muted); font-style: italic; }
 .recipe-first { margin: 0.3rem 0 0; font-size: 0.8rem; font-style: italic; }
+/* Where a missing thing comes from, under the reason. Not italic, so the pointer reads apart from the shortfall. */
+.recipe-from { display: block; font-style: normal; margin-top: 0.1rem; }
+.workshop-teachers > summary { cursor: pointer; font-weight: 600; padding-block: 0.4rem; }
+.recipe-taught .recipe-name { font-weight: 500; }
 
 /* The mark beside a material, an item or a craft. Decoration: every panel that draws one has
  * the name beside it, which is why the glyph is labelled with its category and not its name. */

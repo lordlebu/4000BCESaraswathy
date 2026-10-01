@@ -26,11 +26,12 @@ import { type Step, plan } from '../content/making-chain';
 import {
   type Bench,
   type Knows,
-  blockedBy,
   makeableNow,
   offeredHere,
+  shortfalls,
   withinReach
 } from '../content/crafting';
+import { sourceOf, taughtOn, taughtWhere } from '../content/sources';
 import { cookableNow } from '../content/cooking';
 import { type Station } from '../content/stations';
 import type { Satchel } from '../content/satchel';
@@ -64,6 +65,11 @@ export interface WorkshopPanelProps {
    * makeable — see `content/stations.ts` for why that direction is load-bearing.
    */
   station: Station | null;
+  /**
+   * The map underfoot, so a recipe somebody teaches names the teacher here first, and leaves the
+   * country off when it is this one. Optional: without it every teacher carries their country.
+   */
+  fieldMapId?: string | null;
   open: boolean;
   onClose: () => void;
 }
@@ -75,6 +81,7 @@ export function WorkshopPanel({
   onMake,
   lastMade,
   station,
+  fieldMapId = null,
   open,
   onClose
 }: WorkshopPanelProps) {
@@ -109,6 +116,18 @@ export function WorkshopPanel({
   }
   const chained = recipes.filter((r) => firstMakes.has(r.id));
   const near = reachable.filter((r) => !firstMakes.has(r.id));
+
+  /**
+   * **Recipes somebody could show you, and who.** A taught recipe used to be invisible until it was
+   * learned, so a player could not know that Pell's hawser or Okhi's ink existed, let alone that
+   * the person who knows it stands on another map. Collapsed, because it is a directory and not a
+   * to-do list; the teachers on this map come first.
+   */
+  const unknown = recipes
+    .filter((r) => !knows(r.id) && atStation(r))
+    .map((r) => ({ r, line: taughtWhere(r.id, fieldMapId) }))
+    .filter((x): x is { r: Recipe; line: string } => x.line !== null)
+    .sort((a, b) => Number(taughtOn(b.r.id, fieldMapId)) - Number(taughtOn(a.r.id, fieldMapId)));
   const here = offeredHere(bench, knows).filter(atStation);
 
   /**
@@ -200,12 +219,26 @@ export function WorkshopPanel({
                   key={r.id}
                   recipe={r}
                   ready={false}
-                  why={blockedBy(satchel, r.id, bench)}
+                  why={shortfalls(satchel, r.id, bench).map((s) => ({ text: s.why, from: sourceOf(s) }))}
                   onMake={onMake}
                 />
               ))}
             </ul>
           </section>
+        )}
+
+        {unknown.length > 0 && (
+          <details className="diary-section workshop-teachers">
+            <summary>Somebody could show you ({unknown.length})</summary>
+            <ul className="recipes">
+              {unknown.map(({ r, line }) => (
+                <li key={r.id} className="recipe recipe-taught">
+                  <span className="recipe-name">{r.name}</span>
+                  <p className="recipe-first muted">{line}.</p>
+                </li>
+              ))}
+            </ul>
+          </details>
         )}
 
         {ready.length === 0 && chained.length === 0 && near.length === 0 && food.length === 0 && (
@@ -260,7 +293,8 @@ function Makeable({
 }: {
   recipe: Recipe;
   ready: boolean;
-  why: string[];
+  /** What stands in the way, each with where the missing thing comes from when canon can say. */
+  why: { text: string; from: string | null }[];
   /** What a chain makes before this, in order, when the parts are made too. */
   first?: string[];
   onMake: (id: string) => void;
@@ -315,7 +349,10 @@ function Makeable({
       {!ready && why.length > 0 && (
         <ul className="recipe-why">
           {why.slice(0, 3).map((w) => (
-            <li key={w}>{w}</li>
+            <li key={w.text}>
+              {w.text}
+              {w.from && <span className="recipe-from">{w.from}</span>}
+            </li>
           ))}
           {why.length > 3 && <li className="muted">…and {why.length - 3} more</li>}
         </ul>
