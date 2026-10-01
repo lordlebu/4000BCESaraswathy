@@ -28,6 +28,8 @@ export interface FrontDoorProps {
   seed: string;
   /** Who would be walking. */
   characterId: string;
+  /** Who is in the roster, for the menu. Absent: everybody playable. */
+  roster?: readonly string[];
   onChoose: (characterId: string) => void;
   /** Pick up where the traveller left off. Only offered when `canContinue`. */
   onContinue: () => void;
@@ -40,6 +42,7 @@ export function FrontDoor({
   canContinue,
   seed,
   characterId,
+  roster,
   onChoose,
   onContinue,
   onBegin
@@ -72,7 +75,7 @@ export function FrontDoor({
         {/* The picker's proper home. On the map sheet it was a setting; here it is the question
             the screen exists to ask. */}
         <div className="front-door-who" role="radiogroup" aria-label="Who you are walking as">
-          {playableCharacters().map((who) => {
+          {playableCharacters(roster).map((who) => {
             const current = who.key === characterId;
             return (
               <button

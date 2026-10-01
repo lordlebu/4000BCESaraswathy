@@ -1,4 +1,5 @@
-"""The owner's art for the Roads and Hands plan, 1 October 2026, made ready for the builder.
+"""The owner's art for the Roads and Hands plan (1 October 2026) and the storylines (2 October),
+made ready for the builder.
 
 Only technical faults are repaired -- never a style choice (docs/art-handover.md). Two kinds:
 
@@ -46,6 +47,23 @@ WORK = {
     "camp-night-visitor.png": (EVENTS, "camp-night-visitor.png", (48, 53, 977, 717)),
     # A second take of the visitor, the eyeshine plainer; a take, never a replacement.
     "Gemini_Generated_Image_ug3nd9ug3nd9ug3n (1).png": (EVENTS, "camp-night-visitor.2.png", (140, 124, 2282, 1670)),
+    # The storylines, 2 October 2026: Guyuk's and the princess's story cards, and Shaka asleep.
+    # Frames measured the same way: ~65 px of white paper on the two ruins, ~30-37 px of cream with a
+    # torn edge on the rest scenes; trimmed with 50 and 40 px past them. The forest, the teachings and
+    # the settlement have no frame; the princess's teaching is a vignette on paper by design and is
+    # left as painted. The owner's `asura-bathe-forest` shows Guyuk, so it is built under her name.
+    "guyuk-bathe-ruins.png": (EVENTS, "guyuk-bathe-ruins.png", (118, 115, 2283, 1688)),
+    "asura-bathe-forest.png": (EVENTS, "guyuk-bathe-forest.png", None),
+    "guyuk-teaching.png": (EVENTS, "guyuk-teaching.png", None),
+    "scene-rest-guyuk.png": (EVENTS, "scene-rest-guyuk.png", (74, 72, 2325, 1726)),
+    "scene-rest-guyuk2.png": (EVENTS, "scene-rest-guyuk2.png", (77, 70, 2324, 1721)),
+    "asura-bathe-ruins.png": (EVENTS, "asura-bathe-ruins.png", (118, 115, 2283, 1687)),
+    "asura-bathe-settlement.png": (EVENTS, "asura-bathe-settlement.png", None),
+    "asura-teaching.png": (EVENTS, "asura-teaching.png", None),
+    "scene-rest-asura.png": (EVENTS, "scene-rest-asura.png", (73, 72, 2325, 1723)),
+    "scene-rest-asura2.png": (EVENTS, "scene-rest-asura2.png", (77, 70, 2324, 1721)),
+    # Shaka is a happening, and a happening's card draws the painting named after its id.
+    "scene-rest-shaka.png": (EVENTS, "happening_the_sleeping_stranger.png", (76, 71, 2324, 1721)),
 }
 
 # The logo's corner on each Aravali road: paint out the bright marks in the bottom-right 420 x 200.

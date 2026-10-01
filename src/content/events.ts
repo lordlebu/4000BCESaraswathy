@@ -99,6 +99,11 @@ export interface Choice {
    */
   gives?: { id: string; n: number }[];
   /**
+   * Materials or things handed over, out of the satchel: a story beat's request, given. The beat comes
+   * only when it is all carried (`storylines.beatNow`), so taking it can never leave a debt.
+   */
+  takes?: { id: string; n: number }[];
+  /**
    * How much tiredness it takes off, on the same scale as `REMEDY_EASES` and `MEAL_EASES`.
    *
    * Through the scene's existing `ease` door, which is what a remedy already uses -- a bowl by

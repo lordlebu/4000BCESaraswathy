@@ -48,6 +48,8 @@ export interface ControlsProps {
   /** The first morning's hints, and turning them off. Optional so older callers need not pass it. */
   hints?: boolean;
   onToggleHints?: () => void;
+  /** Who is walking, for the traveller menu. */
+  roster?: readonly string[];
   /** The authored place under foot, if any — the button is only useful when standing on one. */
   placeName: string | null;
   placeOpen: boolean;
@@ -74,6 +76,7 @@ export function Controls({
   onToggleSatchelRibbon,
   hints,
   onToggleHints,
+  roster,
   placeName,
   placeOpen,
   onTogglePlace
@@ -291,7 +294,7 @@ export function Controls({
           </ul>
 
           <h3>Who you are walking as</h3>
-          <TravellerPicker characterId={characterId} onChoose={onCharacter} />
+          <TravellerPicker characterId={characterId} onChoose={onCharacter} roster={roster} />
 
           <h3>Journey seed</h3>
           <SeedBar

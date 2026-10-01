@@ -8,6 +8,7 @@
 // against the shipped text and a paraphrase would stop testing the thing that broke.
 
 import { describe, expect, it } from 'vitest';
+import { broughtByStory } from '../src/content/storylines';
 import { beats, meeting, moreAfter, offerIn, saysNow } from '../src/content/conversation';
 import type { Line } from '../src/content/places';
 import { allNpcs } from '../src/content/places';
@@ -157,7 +158,7 @@ describe('against the writing as shipped', () => {
     // The measurement that changed the plan. The old comment claimed almost everybody had exactly
     // one line on arrival; nobody does. If canon is ever rewritten so that somebody opens with a
     // single line, this fails and the introduction behaviour should be reconsidered, not patched.
-    for (const person of allNpcs()) {
+    for (const person of allNpcs().filter((n) => !broughtByStory(n.id))) { // met through an arc: no opening to make
       const free = person.lines.filter((l) => l.requires.length === 0);
       expect(free.length, `${person.name} opens with ${free.length}`).toBeGreaterThan(1);
     }
@@ -186,7 +187,7 @@ describe('against the writing as shipped', () => {
   });
 
   it('still says one thing per visit after the introduction', () => {
-    for (const person of allNpcs()) {
+    for (const person of allNpcs().filter((n) => !broughtByStory(n.id))) { // met through an arc: no opening to make
       const said = saysNow(person.lines, nothingSpent);
       expect(said.line).not.toBeNull();
     }

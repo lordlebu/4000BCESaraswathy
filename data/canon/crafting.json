@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.44.0",
+  "canon_version": "2.45.0",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -2755,6 +2755,20 @@
       ],
       "notes": "Two plies of bast or reed rolled on the thigh until they lock. The first lashing anybody makes, and enough to haft an adze or string a bow drill -- it holds, and it has to be retied. Sinew dries tight and does not; that is why a spear or a harpoon still wants sinew, and an adze can start with this.",
       "source_index": 82
+    },
+    {
+      "id": "item_seed_ball",
+      "type": "item",
+      "name": "Seed ball",
+      "kind": "food",
+      "affords": [
+        "trade"
+      ],
+      "materials": [
+        "material_river_clay",
+        "material_dung_cake"
+      ],
+      "notes": "Seed wrapped in clay and dung and pressed in the palm, to be thrown where the ground has given up. It waits for rain. A gleaner's way of sowing blasted ground, and the first thing the Seed-Gleaner teaches."
     }
   ],
   "processes": [
@@ -5176,6 +5190,35 @@
         }
       ],
       "source_index": 92
+    },
+    {
+      "id": "recipe_seed_ball",
+      "type": "recipe",
+      "name": "Pressing seed balls",
+      "process": "process_drying",
+      "ingredients": [
+        {
+          "tag": "#grain",
+          "count": 1
+        },
+        {
+          "material": "material_river_clay",
+          "count": 2
+        },
+        {
+          "material": "material_dung_cake",
+          "count": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_seed_ball",
+          "count": 3
+        }
+      ],
+      "taught_by": [
+        "npc_guyuk_seed_gleaner"
+      ]
     }
   ],
   "vehicles": [
@@ -5760,6 +5803,9 @@
       ],
       "item_fibre_cord": [
         "bind"
+      ],
+      "item_seed_ball": [
+        "trade"
       ]
     }
   }

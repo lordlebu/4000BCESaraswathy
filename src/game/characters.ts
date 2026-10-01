@@ -148,8 +148,27 @@ export function everyCharacter(): CharacterArt[] {
  */
 export const PLAYABLE: readonly CharacterId[] = ['varuna', 'mithra', 'guyuk'];
 
-export function playableCharacters(): CharacterArt[] {
-  return PLAYABLE.map((id) => CHARACTERS[id]);
+/**
+ * Who is walking: the roster. **Varuna and Mithra from the first morning**, and anybody whose arc
+ * ended with them joining -- `walker:<person>` in the save's flags (`content/storylines.ts`). The
+ * owner, 2 October 2026: "two walkers become three". They walk together in the story, and the
+ * player may lead as any of them at will. **Only the leader is drawn on the map** -- the owner's
+ * word: there is no need to show the others.
+ */
+const FIRST_WALKERS: readonly CharacterId[] = ['varuna', 'mithra'];
+const WALKER_OF: Readonly<Record<string, CharacterId>> = { npc_guyuk_seed_gleaner: 'guyuk' };
+
+export function walkers(flags: readonly string[]): CharacterId[] {
+  const joined = flags
+    .filter((f) => f.startsWith('walker:'))
+    .map((f) => WALKER_OF[f.slice('walker:'.length)])
+    .filter((id): id is CharacterId => id !== undefined);
+  return [...FIRST_WALKERS, ...joined.filter((id) => !FIRST_WALKERS.includes(id))];
+}
+
+/** The menu: everybody playable, or only those walking when a roster is given. */
+export function playableCharacters(roster?: readonly string[]): CharacterArt[] {
+  return PLAYABLE.filter((id) => !roster || roster.includes(id)).map((id) => CHARACTERS[id]);
 }
 
 /**

@@ -9,6 +9,7 @@
 // makes, and it hands somebody a thing they asked for. Nothing in it seeds a satchel or calls
 // `learnRecipe` directly.
 
+import { storyGrants } from '../src/content/storylines';
 import { describe, expect, it } from 'vitest';
 import {
   advance,
@@ -125,8 +126,9 @@ describe('a recipe can have to be taught', () => {
       for (const who of r.taughtBy) {
         const person = npc(who);
         expect(person, `${r.id} taught by ${who}, who does not exist`).not.toBeNull();
+        // Or through their arc: Guyuk shows you the seed ball in a beat, not a line.
         expect(
-          person!.lines.some((l) => l.gives.includes(r.id)),
+          person!.lines.some((l) => l.gives.includes(r.id)) || storyGrants(who).includes(r.id),
           `${r.id} says ${who} teaches it, and no line of theirs gives it`
         ).toBe(true);
       }

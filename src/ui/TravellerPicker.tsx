@@ -15,12 +15,14 @@ export interface TravellerPickerProps {
   /** Who is walking now. */
   characterId: string;
   onChoose: (characterId: string) => void;
+  /** Who is walking; the menu is them. Absent: everybody playable. */
+  roster?: readonly string[];
 }
 
-export function TravellerPicker({ characterId, onChoose }: TravellerPickerProps) {
+export function TravellerPicker({ characterId, onChoose, roster }: TravellerPickerProps) {
   return (
     <div className="travellers" role="radiogroup" aria-label="Who you are walking as">
-      {playableCharacters().map((who) => {
+      {playableCharacters(roster).map((who) => {
         const current = who.key === characterId;
         return (
           <button

@@ -210,6 +210,17 @@
     "events/woven-camp-pilgrims.png",
     "events/camp-night-fireside.png",
     "events/camp-night-visitor.png",
-    "events/camp-night-visitor.2.png"
+    "events/camp-night-visitor.2.png",
+    "events/guyuk-bathe-ruins.png",
+    "events/guyuk-bathe-forest.png",
+    "events/guyuk-teaching.png",
+    "events/scene-rest-guyuk.png",
+    "events/scene-rest-guyuk2.png",
+    "events/asura-bathe-ruins.png",
+    "events/asura-bathe-settlement.png",
+    "events/asura-teaching.png",
+    "events/scene-rest-asura.png",
+    "events/scene-rest-asura2.png",
+    "events/happening_the_sleeping_stranger.png"
   ]
 }

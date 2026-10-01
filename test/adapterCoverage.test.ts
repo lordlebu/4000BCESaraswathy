@@ -121,6 +121,12 @@ const COVERAGE: Record<string, Coverage> = {
     adapted: ['id', 'name', 'text', 'attribution', 'carried_by', 'occasions', 'field_maps'],
     skipped: [...EDITORIAL, 'type']
   },
+  'places.storylines': {
+    // A person's arc, beat by beat, adapted by `storylines` in `src/content/storylines.ts`. The beats
+    // are read whole; their fields are the story card's.
+    adapted: ['id', 'name', 'person', 'field_map', 'joins', 'beats'],
+    skipped: [...EDITORIAL, 'type']
+  },
   'places.homesteads': {
     // What the player may build on a map, adapted by `homesteads` in `src/content/homestead.ts`.
     // Grounds, worries and stages are read whole; their fields are the settling loop's.

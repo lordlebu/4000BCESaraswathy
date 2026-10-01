@@ -35,15 +35,17 @@ test('who you walk as is chosen here, and it is who walks', async ({ page }) => 
   await knock(page);
 
   const who = page.getByRole('radiogroup', { name: /walking as/i });
-  await who.getByRole('radio', { name: /Guyuk/ }).click();
-  await expect(who.getByRole('radio', { name: /Guyuk/ })).toHaveAttribute('aria-checked', 'true');
+  // Varuna and Mithra walk from the first morning; Guyuk joins only at the end of her arc.
+  await expect(who.getByRole('radio', { name: /Guyuk/ })).toHaveCount(0);
+  await who.getByRole('radio', { name: /Mithra/ }).click();
+  await expect(who.getByRole('radio', { name: /Mithra/ })).toHaveAttribute('aria-checked', 'true');
 
   await page.getByRole('button', { name: /set out|go on walking/i }).first().click();
 
   // `data-traveller` is what the *scene* reports after the swap, not what was asked for — the
   // same seam `e2e/travellers.spec.ts` uses, and for the same reason: the button's own state
   // passed with the texture swap deliberately removed.
-  await expect(page.locator('.stage')).toHaveAttribute('data-traveller', 'guyuk', {
+  await expect(page.locator('.stage')).toHaveAttribute('data-traveller', 'mithra', {
     timeout: 20_000
   });
 });

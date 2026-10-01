@@ -20,6 +20,7 @@ import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { readShowing, writeShowing } from './preferences';
 import { arrivalPoint, fieldMap, npc, poi, roadBetween, type Road } from '../content/places';
+import { walkers } from '../game/characters';
 import { travellerAttributes, travellersOn } from '../content/travellers';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
@@ -47,6 +48,7 @@ import { downloadImage, downloadText } from './exportJournal';
 import { clearJourney, hasBegun, loadJourney, saveJourney } from '../save';
 import { Opening } from './Opening';
 import { Journey } from './Journey';
+import { beatNow, type BeatWhen } from '../content/storylines';
 import { CROSSING_MS } from '../content/tiers';
 import { coachLine, MORNING_GOAL } from '../content/coach';
 import {
@@ -357,6 +359,8 @@ export function App() {
   }, [world, fieldMapId, arrival?.day, arrival?.at]);
   const visited = useRef(new Set<string>());
   /** `maybeHappens`, once the bus effect has made it. Null for the first render only. */
+  // The story check, handed out of the effect like `happens`; see `storyNow`.
+  const storyRef = useRef<((when: BeatWhen, poiId: string | null) => boolean) | null>(null);
   const happens = useRef<
     | ((
         occasion: Occasion,
@@ -561,8 +565,10 @@ export function App() {
      * **`night-passed` had no listener at all** before events: emitted every time somebody slept,
      * carrying where they were and what shelter they had, and read by nothing.
      */
-    const onNight = ({ at, shelter }: GameToUi['night-passed']) =>
+    const onNight = ({ at, shelter }: GameToUi['night-passed']) => {
+      if (storyNow('night', null)) return;
       maybeHappens('night', at, shelter, `night:${latest.current.day}`);
+    };
 
     /**
      * Reached an authored place for the first time this journey.
@@ -577,6 +583,7 @@ export function App() {
         heldArrival.current = poiId;
         return;
       }
+      if (storyNow('arriving', poiId)) return;
       // Somebody who comes over, the first time you arrive where they are. They take the arrival:
       // a card and a person walking up at once would be two things asking for the same moment.
       const approach = approachAt(poiId, seenEvents.current);
@@ -616,6 +623,7 @@ export function App() {
     const onRoad = ({ at, day }: GameToUi['tile-entered']) => {
       if (day === lastRoadDay.current) return;
       lastRoadDay.current = day;
+      if (storyNow('road', null)) return;
       maybeHappens('road', at, null, `road:${day}`);
     };
 
@@ -633,6 +641,29 @@ export function App() {
 
     // Handed out of the effect so the activity card can ask too: a take is not a bus event, it is a
     // modal React owns, and closing it is where the `working` question belongs.
+    /**
+     * **A story beat first.** Guyuk's and the princess's arcs (`content/storylines.ts`) are asked
+     * before anything rationed or woven, at the same three moments: arriving somewhere, a night, a
+     * day's road. A beat waits until it can be taken whole, so this either opens its card or is quiet.
+     */
+    const storyNow = (when: BeatWhen, poiId: string | null): boolean => {
+      const p = latest.current.progress;
+      const carried = latest.current.satchel;
+      const event = beatNow(when, {
+        fieldMapId: latest.current.fieldMapId,
+        poiId,
+        flags: journeyFlags.current,
+        // A discovery must be understood; a word, a recipe or a question held.
+        holds: (id) =>
+          id.startsWith('discovery_') ? isComplete(p, id) : p.words.includes(id) || p.recipes.includes(id),
+        carried: (id) => carried[id] ?? 0
+      });
+      if (!event) return false;
+      setHappening({ event, shelter: null });
+      return true;
+    };
+    storyRef.current = storyNow;
+
     happens.current = maybeHappens;
     arrivedRef.current = (e) => onArrived(e as GameToUi['poi-reached']);
 
@@ -1529,6 +1560,9 @@ export function App() {
   /** When each event last happened, and the flags choices have left. See `Journey`. */
   const eventDays = useRef<Record<string, number>>(initialJourney.current.eventDays ?? {});
   const journeyFlags = useRef<string[]>(initialJourney.current.flags ?? []);
+  // Who is walking: Varuna and Mithra, and whoever has joined since. Read from the flags each render,
+  // because a joining is a flag a story card's choice sets. See `walkers` in characters.ts.
+  const roster = walkers(journeyFlags.current);
 
   /**
    * The homestead as the place you stand in sees it: what it says, and the one thing to do next.
@@ -1906,6 +1940,7 @@ export function App() {
         canContinue={hasBegun(initialJourney.current)}
         seed={seed}
         characterId={characterId}
+        roster={roster}
         onChoose={chooseCharacter}
         onContinue={() => setAtTheDoor(false)}
         onBegin={() => {
@@ -1970,6 +2005,7 @@ export function App() {
         onToggleSatchelRibbon={() => dispatch({ type: 'toggle-satchel-ribbon' })}
         hints={hints}
         onToggleHints={() => setHints((h) => !h)}
+        roster={roster}
         placeName={standingOn ? poi(standingOn)?.name ?? null : null}
         placeOpen={placeOpen}
         onTogglePlace={() => dispatch({ type: 'toggle-place' })}
@@ -2200,6 +2236,12 @@ export function App() {
             if (choice.grants.length > 0) setProgress((p) => receiveAll(p, choice.grants));
             // Something found or given goes in the satchel, and something eased goes to the scene
             // through the door a remedy already uses -- see `Choice.gives` and `Choice.eases`.
+            // And what a story beat asked to be handed over leaves the satchel: rice to Guyuk, the
+            // seeds to the Atelier. The beat only came because it was all carried.
+            if (choice.takes && choice.takes.length > 0) {
+              const taken = choice.takes;
+              setSatchel((s) => taken.reduce((held, t) => takeFromSatchel(held, t.id, t.n), s));
+            }
             if (choice.gives && choice.gives.length > 0) {
               const given = choice.gives;
               setSatchel((s) => given.reduce((held, g) => addToSatchel(held, g.id, g.n), s));
