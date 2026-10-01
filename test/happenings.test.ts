@@ -97,9 +97,10 @@ const sampled: { event: GameEvent; around: Surroundings }[] = (() => {
                     rumour: (x + y) % 2 === 0 ? (RUMOUR_SAMPLE[map.id]?.[(x + k) % 3] ?? null) : null
                   }
                 : null;
-            // And some arrivals are walking up to a camp, one of each kind across the samples.
+            // And some arrivals are walking up to a camp, one of each kind across the samples -- and
+            // some nights are slept beside one, which is where the fireside templates live.
             const camp =
-              occasion === 'arriving' && (x + y) % 3 === 0
+              (occasion === 'arriving' || occasion === 'night') && (x + y) % 3 === 0
                 ? {
                     id: `${map.id}:sample-${x}-${y}`,
                     kind: CAMP_KINDS[(x + y + k) % CAMP_KINDS.length]!,

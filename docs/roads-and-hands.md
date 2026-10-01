@@ -137,3 +137,22 @@ The owner's arcs of 2 October 2026, with the owner's thirteen story paintings.
   map, by the owner's word.
 - **Shaka** is a barbarian from a distant land, asleep on the Aravali: a written happening.
 - Story beats are asked before anything rationed or woven, at each moment.
+
+## Phase 5: camps you notice, each one different (canon 2.46.0)
+
+- **Drawn from each kind's own props** (`tools/build-camps.py` cuts the owner's four prop sheets into
+  `assets/camps/`; `game/campArt.ts` lays them out). Spread over the tiles round the fire -- the
+  shelter behind it, the rest to the sides -- after the owner saw the first cut and called it
+  cramped; each standing piece casts a slight shadow, at the owner's ask. The drovers' felt tent is
+  the smallest piece, as painted, and their thorn fold lies under the fire.
+- **The generic camp art is kept and used**, as the owner asked: the old fire ring is at the heart
+  of every camp, the old yurt stands in for a kind's shelter in about one camp in three, and a struck
+  camp leaves its ring cold on the ground for three days.
+- **You see it coming.** A column of smoke above the fog while it stands; the notes say "Smoke to the
+  north-east this morning, out past ..." the day it pitches; and the next stranger who passes on a
+  rumour passes on the camp's.
+- **A night beside a camp is a camp night** (better than the bedroll), and the first one is told at
+  their fire: canon's fireside story for that kind if one is untold (eight, two a kind), else the
+  woven fireside with a Vedda saying, or eyes at the edge of the firelight -- the owner's two night
+  paintings.
+- The dacoits' toll was already a talk on their card; their fireside story explains it.

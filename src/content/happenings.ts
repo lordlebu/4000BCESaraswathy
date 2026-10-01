@@ -62,6 +62,7 @@ import { rendezvousPick } from '../world/rng';
 import { givenNameFor, travellersOn } from './travellers';
 import type { Standing } from './standing';
 import { rumourAt, type Rumour } from './rumours';
+import { sayingFor } from './sayings';
 import type { Encampment } from './encampments';
 
 /** A seeded roll, as `eventNow` takes it: the same salt always gives the same number. */
@@ -319,7 +320,7 @@ function woven(
   subject: string,
   slots: Readonly<Record<string, string | number>>,
   choices: readonly ChoiceSpec[],
-  options: { variant?: string; stranger?: EventStranger; flags?: Readonly<Record<string, string>> } = {}
+  options: { variant?: string; stranger?: EventStranger; flags?: Readonly<Record<string, string>>; art?: string } = {}
 ): GameEvent {
   const words = TEXT[kind];
   if (!words) throw new Error(`data/happenings.json has no template '${kind}'`);
@@ -331,7 +332,8 @@ function woven(
     prose: fill(pick(words.prose, options.variant), slots),
     // Named for the template rather than the subject, so one painting of tracks serves every animal.
     // Missing today, like every event painting, and the card borrows the night's scene or a blank.
-    art: `woven-${kind}`,
+    // Or a painting named for itself, when the owner painted one for this kind of moment.
+    art: options.art ?? `woven-${kind}`,
     // Per-variant paintings first where they exist: a camp card is the dacoits' own, not one picture
     // of every camp (the owner's camp art, 1 October 2026). The card falls back to `art`.
     ...(options.variant ? { artVariant: `woven-${kind}-${options.variant}` } : {}),
@@ -563,6 +565,42 @@ const nightSounds: Template = ({ biome, landmass }, roll) => {
   return woven('night', 'night-sounds', c.id, { a_animal: a(lower(c.name)) }, [{ id: 'listen' }, { id: 'lamp' }]);
 };
 
+/**
+ * A night beside somebody else's camp: a story at their fire, in the words the Vedda keep for one.
+ *
+ * Only beside a camp (`camp` is filled on a night only when one stands within a tile), and only when
+ * canon has no fireside story of this camp's kind left untold -- a written one wins, as always.
+ */
+const fireside: Template = ({ camp }, roll, now) => {
+  if (!camp || now.occasion !== 'night') return null;
+  const said = sayingFor('fireside', now.fieldMapId, roll);
+  return woven('night', 'fireside', camp.id, { kind: CAMP_PEOPLE[camp.kind] ?? 'the people at the fire', saying: said?.text.replace(/\n/g, ' ') ?? 'The fire travels with us.' }, [{ id: 'listen' }, { id: 'tell' }], {
+    variant: camp.kind,
+    art: 'camp-night-fireside'
+  });
+};
+
+/** Something awake at the edge of the camp's firelight: the owner's night-visitor painting. */
+const firesideVisitor: Template = ({ camp, biome, landmass }, roll, now) => {
+  if (!camp || now.occasion !== 'night') return null;
+  const out = creaturesIn(biome).filter(
+    (c) => isAnimal(c.id) && rhythmOf(c) === 'nocturnal' && livesOn(c.landmasses, landmass ?? null)
+  );
+  if (out.length === 0) return null;
+  const c = out[roll('fireside-visitor') % out.length]!;
+  return woven('night', 'fireside-visitor', `${camp.id}:${c.id}`, { a_animal: a(lower(c.name)) }, [{ id: 'still' }, { id: 'stick' }], {
+    art: 'camp-night-visitor'
+  });
+};
+
+/** Who is at the fire, in a few words, by the kind of camp. */
+const CAMP_PEOPLE: Readonly<Record<string, string>> = {
+  adventurers: 'the adventurers',
+  dacoits: 'the band',
+  pilgrims: 'the pilgrims',
+  drovers: 'the drovers'
+};
+
 const dream: Template = ({ biome }) =>
   woven('night', 'dream', biome, { ground: ground(biome) }, [{ id: 'write' }, { id: 'let' }]);
 
@@ -670,6 +708,8 @@ export const TEMPLATES: Readonly<Record<Occasion, readonly { kind: string; make:
     { kind: 'weather', make: weather }
   ],
   night: [
+    { kind: 'fireside', make: fireside },
+    { kind: 'fireside-visitor', make: firesideVisitor },
     { kind: 'night-sounds', make: nightSounds },
     { kind: 'dream', make: dream },
     { kind: 'knock', make: knock }

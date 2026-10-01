@@ -86,6 +86,12 @@ test('a camp stands on its day, and walking up to it opens its scene', async ({ 
   const now = await campOn(page);
   expect(now?.id).toBe(camp!.id);
   expect(now?.visible, 'the camp is not drawn').toBe(true);
+  // Drawn from its own kind's props round the old fire ring, and smoking: the owner's camp art,
+  // kept generic art and all (Roads and Hands phase 5).
+  const drawn = (await campOn(page)) as unknown as { pieces: string[]; smoke: number };
+  expect(drawn.pieces.some((k) => k.startsWith(`camp-${camp!.kind}-`) || k === 'huts'), `pieces: ${drawn.pieces}`).toBe(true);
+  expect(drawn.pieces).toContain('places');
+  await expect.poll(async () => ((await campOn(page)) as unknown as { smoke: number }).smoke).toBeGreaterThan(0);
 
   // Every choice at a camp is takeable, and the first leads on.
   await card.locator('.activity-choice').first().click();

@@ -57,6 +57,11 @@ export interface Conditions {
    * point of North Dwarka. Only an arrival has a point, so only an arrival is narrowed by it.
    */
   pois: string[];
+  /**
+   * Kinds of camp a night belongs to: a fireside story happens only on a night slept beside a camp
+   * of one of these. Canon's `camps`. Empty means any night.
+   */
+  camps: string[];
 }
 
 /**
@@ -179,6 +184,7 @@ interface RawHappening {
   field_maps?: string[];
   at?: string[];
   requires?: string[];
+  camps?: string[];
   prose: string;
   choices: { label: string; line: string; needs?: string[]; grants?: string[] }[];
 }
@@ -202,7 +208,8 @@ export function fromCanon(h: RawHappening): GameEvent {
     conditions: anyConditions({
       fieldMaps: h.field_maps ?? [],
       pois: h.at ?? [],
-      requires: h.requires ?? []
+      requires: h.requires ?? [],
+      camps: h.camps ?? []
     }),
     prose: h.prose,
     art: h.id,
@@ -236,7 +243,7 @@ export const events: readonly GameEvent[] = (
 
 /** Sensible blanks, so an author writes only what is unusual about their event. */
 export function anyConditions(over: Partial<Conditions> = {}): Conditions {
-  return { shelter: [], fieldMaps: [], fromDay: 0, requires: [], pois: [], ...over };
+  return { shelter: [], fieldMaps: [], fromDay: 0, requires: [], pois: [], camps: [], ...over };
 }
 
 /** What the caller knows when it asks whether anything is happening. */
@@ -264,17 +271,20 @@ export interface Circumstance {
    * from the plateau, which also ends at Lothal.
    */
   cameFrom?: string | null;
+  /** The kind of camp slept beside, on a night beside one. Absent or null on any other. */
+  campKind?: string | null;
 }
 
 /** Whether this event can happen, given where and when the player is. */
 export function canHappen(event: GameEvent, now: Circumstance): boolean {
   if (event.occasion !== now.occasion) return false;
   if (event.once && now.seen.includes(event.id)) return false;
-  const { shelter, fieldMaps, fromDay, requires, pois } = event.conditions;
+  const { shelter, fieldMaps, fromDay, requires, pois, camps } = event.conditions;
   if (now.day < fromDay) return false;
   if (pois.length > 0 && (!now.poiId || !pois.includes(now.poiId))) return false;
   if (shelter.length > 0 && (now.shelter === null || !shelter.includes(now.shelter))) return false;
   if (fieldMaps.length > 0 && !fieldMaps.includes(now.fieldMapId)) return false;
+  if (camps.length > 0 && !(now.campKind && camps.includes(now.campKind))) return false;
   if (event.occasion === 'journey' && fieldMaps.length > 0 && !(now.cameFrom && fieldMaps.includes(now.cameFrom))) return false;
   return requires.every((id) => now.holds.includes(id));
 }
@@ -300,7 +310,11 @@ export function eventNow(
   roll: (salt: string) => number,
   from: readonly GameEvent[] = events
 ): GameEvent | null {
-  const could = eventsFor(now, from);
+  const all = eventsFor(now, from);
+  // **Beside a camp, its own fire's stories first**: a night that could be a fireside story is one,
+  // rather than a dream that would have come anywhere.
+  const fireside = all.filter((e) => e.conditions.camps.length > 0);
+  const could = fireside.length > 0 ? fireside : all;
   if (could.length === 0) return null;
   return could[roll(`event:${now.occasion}:${now.day}`) % could.length] ?? null;
 }

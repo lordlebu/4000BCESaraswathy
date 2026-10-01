@@ -115,3 +115,11 @@ describe('the first day', () => {
     expect(beatNow('road', facts(1))?.title).toBe('The herbalist at the Atelier');
   });
 });
+
+describe('every story beat has its painting', () => {
+  it('draws the owner’s art for every beat that names one, not a fallback', async () => {
+    const { existsSync } = await import('node:fs');
+    const missing = storylines.flatMap((s) => s.beats.filter((b) => b.art && !existsSync(`src/ui/events/${b.art}.png`)).map((b) => `${s.id}:${b.id} (${b.art})`));
+    expect(missing).toEqual([]);
+  });
+});

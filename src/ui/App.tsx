@@ -47,6 +47,7 @@ import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/t
 import { downloadImage, downloadText } from './exportJournal';
 import { clearJourney, hasBegun, loadJourney, saveJourney } from '../save';
 import { Opening } from './Opening';
+import { bearingTo } from '../content/journal';
 import { Journey } from './Journey';
 import { beatNow, type BeatWhen } from '../content/storylines';
 import { CROSSING_MS } from '../content/tiers';
@@ -516,7 +517,8 @@ export function App() {
           last: eventDays.current,
           flags: journeyFlags.current,
           poiId: extra.poiId ?? null,
-          cameFrom: extra.cameFrom ?? null
+          cameFrom: extra.cameFrom ?? null,
+          campKind: extra.camp?.kind ?? null
         },
         roll,
         // What is here to make an event out of, when nothing authored can happen -- see
@@ -567,6 +569,16 @@ export function App() {
      */
     const onNight = ({ at, shelter }: GameToUi['night-passed']) => {
       if (storyNow('night', null)) return;
+      // **Beside a camp, the night is at their fire.** The first night slept beside each camp is
+      // asked for rather than rationed: its own kind's untold story if canon has one, else the fire
+      // or what comes to the edge of its light. Every night after is an ordinary one.
+      const world = latest.current.world;
+      const camp = world ? encampmentOn(world, latest.current.fieldMapId, fieldPlaced.current, latest.current.day) : null;
+      if (camp && atCamp(camp, at)) {
+        const first = !journeyFlags.current.includes(`fireside:${camp.id}`);
+        if (first) journeyFlags.current = [...journeyFlags.current, `fireside:${camp.id}`];
+        if (maybeHappens('night', at, shelter, `fireside:${camp.id}`, { camp, ...(first ? { force: { asked: true } } : {}) })) return;
+      }
       maybeHappens('night', at, shelter, `night:${latest.current.day}`);
     };
 
@@ -1564,6 +1576,24 @@ export function App() {
   // Who is walking: Varuna and Mithra, and whoever has joined since. Read from the flags each render,
   // because a joining is a flag a story card's choice sets. See `walkers` in characters.ts.
   const roster = walkers(journeyFlags.current);
+
+  /**
+   * **The morning a camp pitches, the notes say so.** "Smoke to the north-east this morning, out past
+   * the Eastern Field." One line, once per camp, where every other outcome in this game is told --
+   * never a pop-up, and never a claim that something was generated. The smoke itself is on the map.
+   */
+  useEffect(() => {
+    if (!world || !arrival) return;
+    const camp = encampmentOn(world, fieldMapId, fieldPlaced.current, arrival.day);
+    if (!camp || camp.from !== arrival.day) return;
+    const flag = `smoke:${camp.id}`;
+    if (journeyFlags.current.includes(flag)) return;
+    journeyFlags.current = [...journeyFlags.current, flag];
+    const near = camp.near ? poi(camp.near)?.name.replace(/^The /, 'the ') : null;
+    setMemory(`Smoke to the ${bearingTo(arrival.at, camp.at)} this morning${near ? `, out past ${near}` : ''}, where nobody lives.`);
+    // Once a day is enough to ask: the camp pitches at a day's turn.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [arrival?.day, world, fieldMapId]);
 
   /**
    * The homestead as the place you stand in sees it: what it says, and the one thing to do next.
