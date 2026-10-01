@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.40.0",
+  "canon_version": "2.41.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -1928,6 +1928,14 @@
           ]
         },
         {
+          "text": "Nothing here was ever on a shelf first. The oldest volumes came up out of the ground in jars, sealed, and the jars are the only reason there is anything to copy -- so a copyist learns to fire one before she learns to cut a letter. And an awl: you prick the leaf, you thread the cord through, and the book is a book. Bone, a deer's shin for choice. Mine is older than Vessa.",
+          "requires": [],
+          "gives": [
+            "recipe_storage_jar",
+            "recipe_bone_awl"
+          ]
+        },
+        {
           "text": "There is a shelf I dust and cannot read. Thirty years. If you learn what is on it I would like to be told, and I would like it told to me before it is told to the halls.",
           "requires": [
             "discovery_quarry_sequence"
@@ -2630,16 +2638,16 @@
           "name": "Hang the vanes, and fill the still",
           "needs": [
             {
-              "id": "material_bamboo_cane",
+              "id": "material_palm_husk",
               "count": 3
             },
             {
-              "id": "material_date_fruit",
+              "id": "material_sandstone",
               "count": 3
             }
           ],
           "backers": 2,
-          "prose": "Bamboo vanes that turned the first morning and lifted water the first afternoon. Beside the pump a glasshouse of salt-glass over shallow trays, where the sun takes the brine and leaves the water, and date palms set in the first beds of it."
+          "prose": "Vanes of husk matting on a ring of spokes, plaited the way the harbour once plaited its sails, that turned the first morning and lifted water the first afternoon. Beside the pump a still-house on a sandstone footing, salt-glass over shallow trays, where the sun takes the brine and leaves the water, and date palms set in the first beds of it -- offsets, carried up from the last grove by the market, because a date palm is grown from its mother and not from its stone."
         }
       ],
       "settled": "They came up from the market at evening -- growers, a driver or two, somebody's grandmother -- and nobody said it was a place yet. The vanes turned. The still dripped. By dark there was a lamp in the glasshouse and a queue at the well, and Jarro was taking nothing from anybody, and pretending he was."
@@ -2969,12 +2977,12 @@
               "count": 3
             },
             {
-              "id": "item_sinew_lashing",
+              "id": "item_fibre_cord",
               "count": 1
             }
           ],
           "backers": 2,
-          "prose": "A tower of cane lashed with sinew, light enough that the lift nearly takes it off the scaffold. From the top course you can see the terraces all the way down, and see that they are a farm."
+          "prose": "A tower of cane lashed with goat-hair cord, twisted by hand on the terraces the way Marn twists it, light enough that the lift nearly takes it off the scaffold. From the top course you can see the terraces all the way down, and see that they are a farm."
         },
         {
           "id": "sails",

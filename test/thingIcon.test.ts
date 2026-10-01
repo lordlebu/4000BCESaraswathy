@@ -38,7 +38,8 @@ describe('every made thing has a mark', () => {
     // the mark of its output and the verb that produced it had none at all.
     const used = processes.map((p) => p.id.replace('process_', ''));
     for (const p of used) expect(PROCESS_MARK[p], `no mark for process '${p}'`).toBeTruthy();
-    expect(used.length).toBe(17);
+    // 18 since canon 2.41.0 added twisting: cord and reed rope by hand, with no whorl.
+    expect(used.length).toBe(18);
   });
 
   it('is honest about which process marks are stand-ins', () => {

@@ -13,10 +13,10 @@ afterEach(cleanup);
 
 describe('the pinned recipe', () => {
   it('says what is still wanted, and how many more', () => {
-    const s = add(emptySatchel(), 'material_reed_fibre', 1);
-    const { container } = render(<PinnedRecipe recipeId="recipe_reed_rope" satchel={s} bench={openGround()} />);
+    const s = add(emptySatchel(), 'material_palm_husk', 1);
+    const { container } = render(<PinnedRecipe recipeId="recipe_husk_hawser" satchel={s} bench={openGround()} />);
     const text = container.textContent ?? '';
-    expect(text).toMatch(/more reed fibre/i);
+    expect(text).toMatch(/more palm husk/i);
     expect(text).toMatch(/something that can work/);
   });
 

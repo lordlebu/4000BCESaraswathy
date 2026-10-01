@@ -42,30 +42,11 @@ const PLENTY = 99;
  * on a stale entry exactly as it fails on a new one.
  */
 const KNOWN_GAPS: Record<string, string[]> = {
-  // Measured 1 October 2026, after the 27 "can be met" plants were placed. Tiles are per map, per seed.
-  field_map_lothal: [
-    'recipe_bedroll', // Uma's: tree pitch grows nowhere on Lothal (0 of 12 seeds)
-    'recipe_bone_harpoon', // fish bone is on 1-5 tiles, under 3 on four seeds
-    'recipe_dried_fish', // Thrali's own: Lothal has no #salt at all
-    'recipe_salt_box' // sandalwood on 6 of 12 seeds, one tile each
-  ],
-  field_map_dwarka: [
-    'recipe_ammonite_pendant', // ammonite on 1-4 tiles
-    'recipe_husk_hawser', // palm husk on 1-6 tiles
-    'recipe_rope_span', // needs the hawser
-    'recipe_shell_bead', // no #shell reliably on Dwarka
-    // The homestead cannot be finished from Dwarka's own ground:
-    'stage:foundation:material_palm_husk',
-    'stage:sails:material_bamboo_cane', // 1-2 tiles a map
-    'stage:sails:material_date_fruit', // on 8 of 12 seeds
-    'stage:tower:item_husk_hawser'
-  ],
-  field_map_narmada: [
-    'recipe_field_diary', // needs a bone awl, which only Sura on Dwarka teaches
-    'recipe_ink_cake', // lamp black grows nowhere (0 of 12 seeds)
-    'recipe_palm_leaf_sheet', // palm husk on 6 of 12 seeds, one tile each
-    'recipe_tally_stick' // the bone awl again
-  ]
+  // Empty since canon 2.41.0 (Roads and Hands, Phase 1), which closed every gap measured on 1 October
+  // 2026: fibre cord as the first lashing and reed rope twisted by hand; sea salt on the coast; deer
+  // hide for Uma's bedroll; fish bone from the river fish; Bekh's salt box in any timber; the palmyra
+  // palm and fossil ammonite on Dwarka, whose sails now take husk and sandstone; Okhi teaching the
+  // bone awl and the storage jar on the Narmada. A new entry here is a regression.
 };
 
 /** Which materials this map's ground offers on enough seeds to ask a player to find them. */

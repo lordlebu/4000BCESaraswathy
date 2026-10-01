@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.40.0",
+  "canon_version": "2.41.0",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -31,15 +31,17 @@
       ],
       "won_from": [
         "flora_date_palm",
-        "flora_oasis_date_palm"
+        "flora_oasis_date_palm",
+        "flora_palmyra_palm"
       ],
       "found_in": [
         "desert",
-        "settlement"
+        "settlement",
+        "plains"
       ],
       "rarity": "common",
       "renews": "fast",
-      "notes": "The coarse mat of fibre at the base of a frond. Harsher than reed and far more patient of salt water, which is why the harbour rope is husk and the house rope is reed.",
+      "notes": "The coarse mat of fibre at the base of a frond. Harsher than reed and far more patient of salt water, which is why the harbour rope is husk and the house rope is reed. The date palms give it in the desert and the palmyra on the dry plains, which is where Dwarka's and the Narmada's comes from.",
       "source_index": 1
     },
     {
@@ -225,12 +227,15 @@
     {
       "id": "material_fish_bone",
       "type": "material",
-      "name": "Sawfish bone",
+      "name": "Fish bone",
       "classes": [
         "bone"
       ],
       "won_from": [
-        "fauna_estuary_sawfish"
+        "fauna_estuary_sawfish",
+        "fauna_deep_river_bronze",
+        "fauna_narmada_mud_eel",
+        "fauna_estuary_archer_fish"
       ],
       "found_in": [
         "river",
@@ -238,7 +243,7 @@
       ],
       "rarity": "common",
       "renews": "seasonal",
-      "notes": "The rostral teeth of the sawfish come out of the estuary already barbed, and a harpoon made from one is a harpoon somebody did very little to.",
+      "notes": "Every fish has bones, and a fisher keeps the big ones. The best are the rostral teeth of the sawfish, which come out of the estuary already barbed -- a harpoon made from one is a harpoon somebody did very little to -- but a river bronze's spine points a harpoon too. Was sawfish bone alone, which made it a rare animal's leavings on a coast full of fish.",
       "source_index": 11
     },
     {
@@ -331,17 +336,13 @@
       "classes": [
         "shell"
       ],
-      "won_from": [
-        "fauna_serene_brown_ammonite",
-        "fauna_asura_marked_black_ammonite"
-      ],
       "found_in": [
         "lava_field",
         "mountains"
       ],
       "rarity": "rare",
       "renews": "never",
-      "notes": "Canon inlays the Board of the Chess of Fate with fossilised ammonites, so this is a material with a reputation before it is a material with a use. The black ones are not worked by anybody sensible.",
+      "notes": "A fossil, weathered out of the rock: canon inlays the Board of the Chess of Fate with fossilised ammonites, so this is a material with a reputation before it is a material with a use. The black ones are not worked by anybody sensible. Taken from the ground, not from the living ammonites of the lava fields -- it was won from them until 1 October 2026, which made a fossil that never renews into something you took off an animal, and left Sura teaching a pendant on Dwarka from a shell almost nobody ever saw.",
       "source_index": 16
     },
     {
@@ -1444,6 +1445,40 @@
       "renews": "seasonal",
       "notes": "Thick white winter fur off the glacial snow hare. Too small and too thin-skinned to make a garment alone; stitched as a lining, and the warmest thing a traveller on the ice can carry.",
       "source_index": 75
+    },
+    {
+      "id": "material_sea_salt",
+      "type": "material",
+      "name": "Sea salt",
+      "classes": [
+        "salt"
+      ],
+      "found_in": [
+        "coast"
+      ],
+      "rarity": "common",
+      "renews": "fast",
+      "notes": "Scraped from the pans the tide fills and the sun empties. Lothal is a harbour on a gulf known for its salt pans, and a fisher there who teaches drying fish is teaching something the shore makes possible. From the ground, not from anything living, so it lies on any coast. Distinct from salt crust, which is the desert's and Dwarka's: that grows on a saltbush and this is left by the sea.",
+      "source_index": 76
+    },
+    {
+      "id": "material_deer_hide",
+      "type": "material",
+      "name": "Deer hide",
+      "classes": [
+        "hide"
+      ],
+      "won_from": [
+        "fauna_painted_deer"
+      ],
+      "found_in": [
+        "forest",
+        "plains"
+      ],
+      "rarity": "common",
+      "renews": "seasonal",
+      "notes": "The painted deer already gave canon its antler and its sinew, and an animal that gives both gives its skin. Lighter than goat hide and the delta's ordinary leather, which is why a bedroll on Lothal is backed with it.",
+      "source_index": 77
     }
   ],
   "items": [
@@ -1555,7 +1590,7 @@
       "materials": [
         "material_sinew"
       ],
-      "notes": "Dries tight rather than merely holding, which is why every hafted tool wants it and no plant fibre will substitute.",
+      "notes": "Dries tight rather than merely holding, which is why every hafted thing that must not loosen -- a spear, a harpoon, a bow -- wants it. A twisted fibre cord will haft an adze or string a bow drill well enough to start with, and has to be retied; this does not.",
       "source_index": 8
     },
     {
@@ -1967,7 +2002,7 @@
         "contain"
       ],
       "materials": [
-        "material_sandalwood_billet"
+        "material_mangrove_pole"
       ],
       "notes": "Wood rather than clay, because salt draws water and a fired jar sweats.",
       "source_index": 34
@@ -2341,7 +2376,7 @@
       ],
       "materials": [
         "material_reed_fibre",
-        "material_goat_hide",
+        "material_deer_hide",
         "material_tree_pitch"
       ],
       "notes": "Oiled cloth over a reed mat, rolled and strapped under the satchel. It has been rained on. **The game has carried this from its first step.** Affords shelter and nothing else: a bedroll strapped under a satchel is a thing being carried, not a thing that carries.",
@@ -2704,6 +2739,22 @@
       ],
       "notes": "Ginger and ashwagandha root cooked slow, never boiled hard. The Violet-Horned Clan brew it in copper pots on their basalt terraces, with turmeric and a root the plateau does not grow; this is the traveller's version, from what can be gathered. For tiredness, which canon distinguishes from illness.",
       "source_index": 81
+    },
+    {
+      "id": "item_fibre_cord",
+      "type": "item",
+      "name": "Fibre cord",
+      "base_item": "item_cordage",
+      "kind": "tool",
+      "affords": [
+        "bind"
+      ],
+      "materials": [
+        "material_bark_bast",
+        "material_reed_fibre"
+      ],
+      "notes": "Two plies of bast or reed rolled on the thigh until they lock. The first lashing anybody makes, and enough to haft an adze or string a bow drill -- it holds, and it has to be retied. Sinew dries tight and does not; that is why a spear or a harpoon still wants sinew, and an adze can start with this.",
+      "source_index": 82
     }
   ],
   "processes": [
@@ -2731,11 +2782,11 @@
     {
       "id": "process_spinning",
       "type": "process",
-      "name": "Spinning and twisting",
+      "name": "Spinning",
       "needs": [
         "work"
       ],
-      "notes": "Drawing fibre into thread, and thread into rope. The whorl is the tool and the tool is almost always somebody's spare moment.",
+      "notes": "Drawing fibre into thread on a whorl, and thread into yarn and hawser. The whorl is the tool and the tool is almost always somebody's spare moment. Cord rolled between the palms wants no whorl, and is twisting rather than spinning.",
       "source_index": 3
     },
     {
@@ -2891,6 +2942,13 @@
       ],
       "notes": "Days of soaking, the liquor thrown away and replaced, and then drying. It is the one process here that adds nothing and removes something -- every other way of making turns a thing into more of a thing, and this turns a poison into a medicine by taking part of it away.\n\nSlow on purpose and impossible to hurry, which is the whole safeguard: a preparation that could be rushed would be rushed.",
       "source_index": 16
+    },
+    {
+      "id": "process_twisting",
+      "type": "process",
+      "name": "Twisting by hand",
+      "notes": "Rolling fibre into cord between the palms, or down the thigh, with nothing in the hands but the fibre. The oldest making there is, and it needs no tool and no place: it is what a person does with a handful of bast while they wait. Held apart from spinning, which draws thread on a whorl and so wants something that works; a working length of cord does not, and never did.",
+      "source_index": 17
     }
   ],
   "recipes": [
@@ -2916,7 +2974,7 @@
       "id": "recipe_reed_rope",
       "type": "recipe",
       "name": "Twisting reed rope",
-      "process": "process_spinning",
+      "process": "process_twisting",
       "ingredients": [
         {
           "material": "material_reed_fibre",
@@ -3222,7 +3280,8 @@
       ],
       "source_index": 14,
       "taught_by": [
-        "npc_sura"
+        "npc_sura",
+        "npc_okhi"
       ]
     },
     {
@@ -3597,7 +3656,8 @@
       ],
       "source_index": 30,
       "taught_by": [
-        "npc_bekh"
+        "npc_bekh",
+        "npc_okhi"
       ]
     },
     {
@@ -3895,7 +3955,7 @@
           "item": "item_reed_mat"
         },
         {
-          "material": "material_goat_hide"
+          "tag": "#hide"
         },
         {
           "material": "material_tree_pitch"
@@ -3971,7 +4031,7 @@
       "process": "process_carving",
       "ingredients": [
         {
-          "material": "material_sandalwood_billet"
+          "tag": "#timber"
         },
         {
           "item": "item_flint_knife",
@@ -5051,6 +5111,71 @@
         "npc_asura_princess"
       ],
       "source_index": 89
+    },
+    {
+      "id": "recipe_fibre_cord",
+      "type": "recipe",
+      "name": "Twisting fibre cord",
+      "process": "process_twisting",
+      "ingredients": [
+        {
+          "tag": "#fibre",
+          "count": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_fibre_cord"
+        }
+      ],
+      "source_index": 90
+    },
+    {
+      "id": "recipe_stone_adze_corded",
+      "type": "recipe",
+      "name": "Hafting a stone adze with cord",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "material": "material_basalt"
+        },
+        {
+          "item": "item_fibre_cord"
+        },
+        {
+          "tag": "#timber"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_stone_adze"
+        }
+      ],
+      "source_index": 91
+    },
+    {
+      "id": "recipe_bow_drill_corded",
+      "type": "recipe",
+      "name": "Stringing a bow drill with cord",
+      "process": "process_carving",
+      "ingredients": [
+        {
+          "tag": "#timber"
+        },
+        {
+          "item": "item_fibre_cord"
+        },
+        {
+          "item": "item_flint_knife",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_bow_drill"
+        }
+      ],
+      "source_index": 92
     }
   ],
   "vehicles": [
@@ -5612,6 +5737,9 @@
       "item_root_tea": [
         "heal",
         "eat"
+      ],
+      "item_fibre_cord": [
+        "bind"
       ]
     }
   }

@@ -46,6 +46,8 @@ export const PROCESS_GESTURE: Record<string, Gesture> = {
   process_carving: 'stoop',
   process_weaving: 'stoop',
   process_spinning: 'stoop',
+  // Canon 2.41.0: cord and reed rope are twisted in the hands, with no whorl -- see process_twisting.
+  process_twisting: 'stoop',
   process_retting: 'stoop',
   process_tanning: 'stoop',
   process_boatbuilding: 'stoop',
@@ -100,6 +102,7 @@ export const PROCESS_VERB: Record<string, string> = {
   process_carving: 'Carve it',
   process_weaving: 'Weave it',
   process_spinning: 'Spin it',
+  process_twisting: 'Twist it',
   process_retting: 'Ret it',
   process_tanning: 'Tan it',
   process_boatbuilding: 'Build it',

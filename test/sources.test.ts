@@ -33,7 +33,9 @@ describe('where a thing comes from', () => {
 
 describe('a missing tool', () => {
   it('names something that would do, and how it is made', () => {
-    const tool = shortfalls(emptySatchel(), 'recipe_reed_rope').find((s) => s.kind === 'tool')!;
+    // Spinning a husk hawser wants a whorl: something that can work. (Reed rope no longer does --
+    // canon 2.41.0 twists it by hand.)
+    const tool = shortfalls(emptySatchel(), 'recipe_husk_hawser').find((s) => s.kind === 'tool')!;
     expect(tool.why).toBe('needs something that can work');
     const line = sourceOf(tool)!;
     expect(line).toMatch(/stone adze/);

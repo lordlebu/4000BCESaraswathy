@@ -121,6 +121,7 @@ export const PROCESS_MARK: Record<string, string> = {
   purifying: '💧',
   smelting: '🔥',
   spinning: '🧵',
+  twisting: '🪢',
   tanning: '🐄',
   weaving: '🧶',
   // The four with no true emoji. A quern is not a gear and a press is not an olive, so these are
