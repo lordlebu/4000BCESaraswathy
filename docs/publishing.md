@@ -162,6 +162,9 @@ blur the animals exactly when a player leans in to look.
 Quantising is the large one -- roughly a sixth of the weight -- and it is a change to how the ground
 looks, which is not a thing to do to somebody's art on the grounds of a number.
 
+**Ruled on 1 October 2026: no quantising.** The ground keeps its colours. Do not propose it again on
+the grounds of weight; the lossless squeeze is where this stops.
+
 ## The store kit
 
 [`docs/store-kit/listing.md`](store-kit/listing.md) holds the name, the one-line pitch, the
@@ -217,15 +220,24 @@ rules page, not the jam's summary, every time; they change between years.
 
 ## What is next
 
-In order. The published plan carries the reasoning and the full table.
+**Done:** the itch.io description carries the READ THE WORLD section and links the lore portal
+(1 October 2026).
 
-1. **Paste the READ THE WORLD section** of `store-kit/listing.md` into the itch.io description, so
-   the page links the lore portal.
-2. **IndieDB and Newgrounds**, by hand, from `store-kit/other-listings.md`. Read Newgrounds' rule on
-   AI-made art in games before submitting there.
-3. **The Microsoft Store**, from the same file. Pages is serving the installable build.
-4. **Quantising the ground**, if the owner wants it: `terrain.png` from 1.3 MB to about 200 KB, at
-   the cost of its colours. See *What is left, and why it was not taken*, above.
+**Waiting on the owner, by hand, because none of them can be published from git:**
+
+- **IndieDB and Newgrounds**, from `store-kit/other-listings.md`. Neither has an upload API. Read
+  Newgrounds' rule on AI-made art in games before submitting there.
+- **The Microsoft Store**, from the same file. It needs a developer account and a name reserved in
+  Partner Center before anything can be automated, and the first submission is by hand in any case.
+  Once it is listed, an update could be pushed from `release.yml`; that is worth doing then and not
+  before.
+
+Everything that *can* go from git already does: Pages on every merge, itch.io and GitHub Releases
+on every `v*` tag, and the lore portal on every canon change.
+
+**Ruled, 1 October 2026:** no quantising of the ground art; and the lore portal shows every field of
+every entity, `notes` included, guarded so that nobody can use up its free plan -- see *The lore
+reader is the portal on Vercel* in the canon repository's `docs/decisions.md`.
 
 Open, and the owner's: whether the listing is Teen or Mature, given what canon holds; free or pay
-what you want; whether the lore portal should show canon's authoring notes.
+what you want.
