@@ -239,6 +239,11 @@ export interface Journey {
   eventDays?: Record<string, number>;
   /** Flags earlier choices left behind, for a later event to find -- `sheltered:<stranger>`. */
   flags?: string[];
+  /**
+   * The recipe pinned in the workshop, whose needs the dock keeps on screen. Optional on `flags`'
+   * precedent: absent is "nothing pinned", which is true of every older save.
+   */
+  pinned?: string;
 }
 
 const empty = (): Journey => ({
@@ -389,7 +394,8 @@ export function loadJourney(seed: string): Journey {
           seenEvents: readIds(parsed.seenEvents),
           met: readIds(parsed.met),
           eventDays: readDays(parsed.eventDays),
-          flags: readIds(parsed.flags)
+          flags: readIds(parsed.flags),
+          pinned: typeof parsed.pinned === 'string' ? parsed.pinned : undefined
         }
       : {
           characterId: undefined,
@@ -400,7 +406,8 @@ export function loadJourney(seed: string): Journey {
           seenEvents: [],
           met: [],
           eventDays: {},
-          flags: []
+          flags: [],
+          pinned: undefined
         };
     const ground = groundOk
       ? {

@@ -210,6 +210,8 @@ export function App() {
   // and `content/crafting.ts`; this only holds it and hands it to the save, exactly as
   // `progress` does.
   const [satchel, setSatchel] = useState(initialJourney.current.satchel ?? emptySatchel());
+  // The recipe pinned in the workshop, kept on screen in the dock -- see `PinnedRecipe`.
+  const [pinned, setPinned] = useState<string | null>(initialJourney.current.pinned ?? null);
   // What the traveller has drawn down. The one piece of world state a save has to hold, because
   // it is the only thing about a tile that cannot be recomputed from the seed.
   // Kept per field map -- see `nodesByMap` in `save.ts` for the bug a single record was.
@@ -677,7 +679,8 @@ export function App() {
         met: metStrangers.current,
         // When each event last happened, and what earlier choices left behind.
         eventDays: eventDays.current,
-        flags: journeyFlags.current
+        flags: journeyFlags.current,
+        pinned: pinned ?? undefined
       });
     const timer = window.setInterval(flush, 3000);
     window.addEventListener('pagehide', flush);
@@ -686,7 +689,7 @@ export function App() {
       window.removeEventListener('pagehide', flush);
       flush();
     };
-  }, [seed, collection, reached, progress, satchel, nodesByMap, fieldMapId]);
+  }, [seed, collection, reached, progress, satchel, nodesByMap, fieldMapId, pinned]);
 
   /**
    * What the person being talked to is, if they are also somebody who walks a circuit.
@@ -787,6 +790,7 @@ export function App() {
     // And what it had drawn down. This was never reloaded either, so a new seed's reed beds stood
     // picked over wherever the old seed's had been.
     setNodesByMap(loaded.nodesByMap);
+    setPinned(loaded.pinned ?? null);
     // And so did the events and the people in them. These were never reloaded here, so a new seed
     // inherited the old one's `seen` list and saved it as its own.
     seenEvents.current = loaded.seenEvents ?? [];
@@ -1921,6 +1925,8 @@ export function App() {
         lastMade={lastMade}
         station={atStation}
         fieldMapId={fieldMapId}
+        pinned={pinned}
+        onPin={setPinned}
         open={interrupts.workshop}
         onClose={() => {
           setAtStation(null);
@@ -2104,6 +2110,7 @@ export function App() {
           memory,
         }}
         sky={skyPhase === null ? null : { phase: skyPhase, weather: moment?.weather }}
+        pinned={{ recipeId: pinned, satchel, bench }}
         standing={{
           creature: arrival?.entry?.creature ?? { name: null, note: '', species: null },
           doing: arrival?.entry?.doing ?? '',

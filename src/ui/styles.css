@@ -3053,6 +3053,13 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 .recipe-from { display: block; font-style: normal; margin-top: 0.1rem; }
 .workshop-teachers > summary { cursor: pointer; font-weight: 600; padding-block: 0.4rem; }
 .recipe-taught .recipe-name { font-weight: 500; }
+.recipe-pin[aria-pressed='true'] { background: var(--accent, currentColor); color: var(--paper, #fff); }
+/* The pinned recipe in the dock: one line, never a control. See `PinnedRecipe`. */
+.pinned-recipe { flex: none; margin: 0; padding: 0.2rem 0.75rem; font-size: 0.8rem; display: flex; gap: 0.5rem; align-items: baseline; min-width: 0; white-space: nowrap; overflow: hidden; }
+.pinned-recipe .pinned-name { font-weight: 600; flex: none; }
+.pinned-recipe .pinned-name::before { content: '📌 '; }
+.pinned-recipe .pinned-needs { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+.pinned-recipe[data-ready='true'] .pinned-needs { color: inherit; font-style: italic; }
 
 /* The mark beside a material, an item or a craft. Decoration: every panel that draws one has
  * the name beside it, which is why the glyph is labelled with its category and not its name. */

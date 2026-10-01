@@ -70,6 +70,9 @@ export interface WorkshopPanelProps {
    * country off when it is this one. Optional: without it every teacher carries their country.
    */
   fieldMapId?: string | null;
+  /** The recipe pinned to the dock, and how to change it. Both optional: without them no Pin buttons. */
+  pinned?: string | null;
+  onPin?: (recipeId: string | null) => void;
   open: boolean;
   onClose: () => void;
 }
@@ -82,6 +85,8 @@ export function WorkshopPanel({
   lastMade,
   station,
   fieldMapId = null,
+  pinned = null,
+  onPin,
   open,
   onClose
 }: WorkshopPanelProps) {
@@ -128,6 +133,14 @@ export function WorkshopPanel({
     .map((r) => ({ r, line: taughtWhere(r.id, fieldMapId) }))
     .filter((x): x is { r: Recipe; line: string } => x.line !== null)
     .sort((a, b) => Number(taughtOn(b.r.id, fieldMapId)) - Number(taughtOn(a.r.id, fieldMapId)));
+
+  /**
+   * Everything known and not listed above, so anything can be pinned -- including the stone adze a
+   * player carrying nothing yet needs most. "Within reach" only lists a recipe once one of its own
+   * ingredients is carried, which is exactly the recipe a player starting out cannot see.
+   */
+  const listed = new Set([...everythingReady, ...chained, ...near].map((r) => r.id));
+  const known = recipes.filter((r) => knows(r.id) && atStation(r) && !listed.has(r.id));
   const here = offeredHere(bench, knows).filter(atStation);
 
   /**
@@ -220,11 +233,30 @@ export function WorkshopPanel({
                   recipe={r}
                   ready={false}
                   why={shortfalls(satchel, r.id, bench).map((s) => ({ text: s.why, from: sourceOf(s) }))}
+                  pin={onPin ? { on: pinned === r.id, toggle: () => onPin(pinned === r.id ? null : r.id) } : undefined}
                   onMake={onMake}
                 />
               ))}
             </ul>
           </section>
+        )}
+
+        {onPin && known.length > 0 && (
+          <details className="diary-section workshop-teachers">
+            <summary>Everything you know how to make ({known.length})</summary>
+            <ul className="recipes">
+              {known.map((r) => (
+                <Makeable
+                  key={r.id}
+                  recipe={r}
+                  ready={false}
+                  why={shortfalls(satchel, r.id, bench).map((s) => ({ text: s.why, from: sourceOf(s) }))}
+                  pin={{ on: pinned === r.id, toggle: () => onPin(pinned === r.id ? null : r.id) }}
+                  onMake={onMake}
+                />
+              ))}
+            </ul>
+          </details>
         )}
 
         {unknown.length > 0 && (
@@ -289,6 +321,7 @@ function Makeable({
   ready,
   why,
   first = [],
+  pin,
   onMake
 }: {
   recipe: Recipe;
@@ -297,6 +330,8 @@ function Makeable({
   why: { text: string; from: string | null }[];
   /** What a chain makes before this, in order, when the parts are made too. */
   first?: string[];
+  /** Whether this is the pinned recipe, and how to pin or unpin it. Absent: no button. */
+  pin?: { on: boolean; toggle: () => void };
   onMake: (id: string) => void;
 }) {
   // The bare word -- `grinding`, not `process_grinding` -- which is what `PROCESS_MARK` keys on.
@@ -314,6 +349,11 @@ function Makeable({
           id={recipe.outputs[0]?.item ?? recipe.outputs[0]?.material ?? undefined}
         />
         <span className="recipe-name">{recipe.name}</span>
+        {pin && (
+          <button type="button" className="recipe-pin" aria-pressed={pin.on} onClick={pin.toggle}>
+            {pin.on ? 'Pinned' : 'Pin'}
+          </button>
+        )}
         <button type="button" disabled={!ready} onClick={() => onMake(recipe.id)}>
           {ready ? 'Make' : 'Not yet'}
         </button>

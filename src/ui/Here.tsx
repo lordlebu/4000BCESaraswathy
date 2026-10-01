@@ -32,6 +32,7 @@ import { JournalPanel, type JournalPanelProps } from './JournalPanel';
 import { PlacePanel, type PlacePanelProps } from './PlacePanel';
 import { SkyDial } from './SkyDial';
 import { StandingRow, type StandingRowProps } from './StandingRow';
+import { PinnedRecipe, type PinnedRecipeProps } from './PinnedRecipe';
 import { TileActions, type TileAction } from './TileActions';
 import type { DockHeight } from './surface';
 
@@ -80,6 +81,8 @@ export interface HereProps {
    * scrolled out of reach.
    */
   standing: StandingRowProps;
+  /** The recipe the traveller pinned in the workshop, and what it still wants. See `PinnedRecipe`. */
+  pinned?: PinnedRecipeProps;
   /**
    * Everything that can be done on this tile.
    *
@@ -115,6 +118,7 @@ export function Here({
   conversation,
   canon,
   standing,
+  pinned,
   sky,
   actions,
   height,
@@ -174,6 +178,9 @@ export function Here({
           which of the two a height wants is a fact about the layout and `surface.ts` already owns
           how tall the dock is. */}
       <StandingRow {...standing} />
+
+      {/* The pinned recipe, at every height: it is the reason the player is out gathering. */}
+      {pinned && <PinnedRecipe {...pinned} />}
 
       {/* **Every action, at every height, pinned below whatever is showing.**
           Splitting this -- the verbs you can use in the rail, the ones you cannot in the part that
