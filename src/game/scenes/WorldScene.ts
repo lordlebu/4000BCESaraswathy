@@ -1660,7 +1660,15 @@ export class WorldScene extends Phaser.Scene {
    * which lives in React and never passes through here.
    */
   private onTravelTo = (payload: { fieldMapId: string; seed: string }): void => {
-    this.scene.restart({ seed: payload.seed, discovered: [], fieldMapId: payload.fieldMapId });
+    // **The clock crosses with you.** It was left out, so `init` read `travelled ?? 0` and every
+    // crossing woke the traveller at dawn of day one: the sky, the camps, the strangers' circuits
+    // and every node's regrowth all went back to the first morning, and the save wrote that down.
+    this.scene.restart({
+      seed: payload.seed,
+      discovered: [],
+      fieldMapId: payload.fieldMapId,
+      travelled: this.travelled
+    });
   };
 
   /**
@@ -2327,6 +2335,8 @@ export class WorldScene extends Phaser.Scene {
       depth: this.player.depth,
       sortedRow: this.sortedRow,
       queued: this.queuedPath.length,
+      // The journey's clock, for `e2e/fielddiary.spec.ts`: a crossing once set it back to nought.
+      travelled: this.travelled,
       // Where he is on the canvas, and how big a tile is there, so a spec can click a *particular*
       // tile rather than a guessed pixel. A guess is a searched seed by another name: the first
       // version of `e2e/release-off-map.spec.ts` clicked "far left", landed on walkable ground,

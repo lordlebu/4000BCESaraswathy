@@ -37,7 +37,14 @@ describe('where the cart leaves from', () => {
     expect(mayLeaveFrom('field_map_aravali', 'poi_far_landing').ok).toBe(true);
   });
 
-  it('sets a traveller arriving down at the first cart point', () => {
-    for (const map of fieldMaps) expect(arrivalPoint(map.id)).toBe(map.departsFrom[0] ?? null);
+  it('sets a traveller arriving down where canon says arrivals come in, else the first cart point', () => {
+    for (const map of fieldMaps) expect(arrivalPoint(map.id)).toBe(map.arrivesAt ?? map.departsFrom[0] ?? null);
+  });
+
+  it('brings the Aravali in at the Rail-Head, not on a floating island', () => {
+    // Left from the First Pier and the Far Landing; arrived at by the Rail-Head, which is what the
+    // map's arrival prose describes. Reading the first cart point put arrivals mid-strait.
+    expect(arrivalPoint('field_map_aravali')).toBe('poi_rail_head');
+    expect(mayLeaveFrom('field_map_aravali', 'poi_rail_head').ok).toBe(false);
   });
 });

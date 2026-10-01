@@ -468,7 +468,8 @@
         "place": "This is {place}, where {name} sent you. It is as they said, and you are glad you came.",
         "person": "{name} said somebody at {place} was asking after you, and somebody is.",
         "question": "{name} said there was a question at {place} nobody could settle. You can hear it being argued before you are properly there.",
-        "camp": "{name} said there were people camped out past {place}. From here you can see their smoke."
+        "camp": "{name} said there were people camped out past {place}. From here you can see their smoke.",
+        "camp-gone": "{name} said there were people camped out past {place}. You look for their smoke and there is none: a few days is long enough to move on."
       },
       "choices": {
         "note": {

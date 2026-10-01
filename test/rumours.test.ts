@@ -146,3 +146,31 @@ describe('a camp is talked about while it stands', () => {
     expect(rumoursOn('field_map_lothal', fresh({ camp, flags: [heardFlag(r.id)] })).some((x) => x.kind === 'camp')).toBe(false);
   });
 });
+
+describe('a camp rumour after the camp has gone', () => {
+  // "From here you can see their smoke" used to be said whether or not the camp still stood, and a
+  // camp strikes after three days whoever came. The card now looks for the camp it was told of.
+  const built = buildFieldMap(fieldMap('field_map_lothal')!, { seed: DEFAULT_SEED });
+  const at = built.placed[0]!.at;
+  const poiId = built.placed[0]!.poi.id;
+  const roll: Roll = (s) => tileHash(built.world.seed, at.x, at.y, `camp:${s}`);
+  const morning = { timeOfDay: 'morning', weather: 'clear' };
+  const who = 'field_map_lothal:company_drover';
+  const told = 'rumour:camp:field_map_lothal:3';
+  const flags = [heardFlag(told), `told:${told}@${poiId}@${who}`];
+  const now: Circumstance = { occasion: 'arriving', shelter: null, fieldMapId: 'field_map_lothal', day: 9, holds: [], seen: [], met: [who], flags };
+  const arrive = (campStanding: string | null) =>
+    wovenFor(now, surroundingsAt(built.world, at, 'field_map_lothal', morning, roll, { poiId, campStanding })!, roll, 'rumour-kept', true)[0]!;
+
+  it('points at the smoke while the camp stands', () => {
+    expect(arrive('field_map_lothal:3').prose).toContain('see their smoke');
+  });
+
+  it('says they have moved on once it has struck, or another has pitched', () => {
+    for (const standing of [null, 'field_map_lothal:4']) {
+      const card = arrive(standing);
+      expect(card.prose).not.toContain('see their smoke');
+      expect(card.prose).toContain('move on');
+    }
+  });
+});

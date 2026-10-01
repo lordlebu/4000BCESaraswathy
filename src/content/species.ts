@@ -27,11 +27,11 @@ export const flora: Flora[] = canonFlora;
 
 function indexByBiome<T extends { biomes: BiomeId[]; placement: Placement }>(
   entries: T[],
-  placement: Placement
+  placements: readonly Placement[]
 ): Partial<Record<BiomeId, T[]>> {
   const index: Partial<Record<BiomeId, T[]>> = {};
   for (const entry of entries) {
-    if (entry.placement !== placement) continue;
+    if (!placements.includes(entry.placement)) continue;
     for (const biome of entry.biomes) {
       (index[biome] ??= []).push(entry);
     }
@@ -63,8 +63,14 @@ function rarityWeight(species: { rarity: Rarity }): number {
 
 const biomesById = new Map<BiomeId, Biome>(biomes.map((biome) => [biome.id, biome]));
 // `lore` species — sky beings held for a future sky mode — are authored but never placed in play.
-const creaturesByBiome = indexByBiome(creatures, 'encounter');
-const floraByBiome = indexByBiome(flora, 'flavour');
+const creaturesByBiome = indexByBiome(creatures, ['encounter']);
+// **A plant grows if canon says it can be met at all**: `flavour` and `encounter` both. Only
+// `flavour` was read here, which is backwards against canon's own schema -- `encounter` is "can be
+// met" -- and it left 27 plants growing nowhere: ginger, mustard, mango, jackfruit, kuchla,
+// ashwagandha, guggul and the rest of the spice and medicine plants, with 13 materials and 10
+// recipes that no seed could ever offer. Rendezvous hashing means adding them takes only the
+// tiles they win; nothing already growing moves anywhere else.
+const floraByBiome = indexByBiome(flora, ['flavour', 'encounter']);
 // Picking weights by rarity as it goes; `creaturesIn`/`floraIn` return the plain per-biome
 // lists, which is what callers asking "what lives here?" mean.
 

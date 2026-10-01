@@ -221,7 +221,7 @@ describe('the ground moving keeps what you know', () => {
     // And forgets exactly the tiles, which name ground that is not there any more.
     expect(back.discovered).toEqual([]);
     expect(back.reached).toBe(false);
-    expect(back.nodes).toEqual({});
+    expect(back.nodesByMap).toEqual({});
     // A journey whose fog was reset but whose clock ran is still one somebody is on.
     expect(hasBegun(back)).toBe(true);
   });
@@ -248,5 +248,62 @@ describe('the ground moving keeps what you know', () => {
     expect(raw.version).toBe(SAVE_VERSION);
     expect(raw.knowledgeVersion).toBe(KNOWLEDGE_VERSION);
     expect(loadJourney(SEED).met).toEqual(['a:b']);
+  });
+});
+
+describe('what was drawn down belongs to its map', () => {
+  const drawn = { '12,30,material_reed': { left: 0, day: 2 } };
+
+  it("keeps each map's nodes apart through a round trip", () => {
+    saveJourney(SEED, {
+      discovered: [],
+      collection: emptyCollection(),
+      reached: false,
+      nodesByMap: { field_map_lothal: drawn, field_map_narmada: {} }
+    });
+    const back = loadJourney(SEED);
+    expect(back.nodesByMap.field_map_lothal).toEqual(drawn);
+    // An untouched map is not stored at all, so it cannot carry anything across.
+    expect(back.nodesByMap.field_map_narmada).toBeUndefined();
+  });
+
+  it("reads an older flat `nodes` as Lothal's, where those journeys were", () => {
+    writeRaw({
+      version: SAVE_VERSION,
+      knowledgeVersion: KNOWLEDGE_VERSION,
+      discovered: ['3,4'],
+      reached: false,
+      collection: {},
+      progress: emptyProgress(),
+      satchel: {},
+      travelled: 0,
+      nodes: drawn
+    });
+    const back = loadJourney(SEED);
+    expect(back.nodesByMap).toEqual({ field_map_lothal: drawn });
+    // And the fog is untouched: this is a reading, not a version bump.
+    expect(back.discovered).toEqual(['3,4']);
+  });
+});
+
+describe('which map the traveller is on', () => {
+  it('survives a round trip', () => {
+    saveJourney(SEED, {
+      discovered: [],
+      collection: emptyCollection(),
+      reached: false,
+      fieldMapId: 'field_map_narmada'
+    });
+    expect(loadJourney(SEED).fieldMapId).toBe('field_map_narmada');
+  });
+
+  it('is absent for a save from before it was kept, which boots on Lothal', () => {
+    writeRaw({ version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, discovered: [], reached: false });
+    expect(loadJourney(SEED).fieldMapId).toBeUndefined();
+  });
+
+  it('survives the ground moving, like the character', () => {
+    writeRaw({ version: SAVE_VERSION - 1, knowledgeVersion: KNOWLEDGE_VERSION, discovered: [], reached: false, fieldMapId: 'field_map_dwarka' });
+    expect(loadJourney(SEED).fieldMapId).toBe('field_map_dwarka');
   });
 });

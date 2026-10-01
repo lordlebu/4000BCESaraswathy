@@ -105,6 +105,12 @@ export interface Surroundings {
    * scene is asked for by walking up to it, never rationed onto an arrival. See `encampments.ts`.
    */
   camp: Encampment | null;
+  /**
+   * The id of the camp standing on this map today, whether or not the player is beside it. Only a
+   * rumour about a camp reads it: the smoke a stranger spoke of is there to see only while the camp
+   * is, and a camp strikes after three days whether or not anybody came.
+   */
+  campStanding: string | null;
 }
 
 /** See `Surroundings.talk`. Built by the caller from `standing.ts` and `rumours.ts`. */
@@ -133,6 +139,7 @@ export function surroundingsAt(
     strangerId?: string | null;
     talk?: Talk | null;
     camp?: Encampment | null;
+    campStanding?: string | null;
   } = {}
 ): Surroundings | null {
   const tile = world.tiles[at.y]?.[at.x];
@@ -168,7 +175,8 @@ export function surroundingsAt(
       : null,
     taken: extra.taken ?? [],
     talk: extra.talk ?? null,
-    camp: extra.camp ?? null
+    camp: extra.camp ?? null,
+    campStanding: extra.campStanding ?? null
   };
 }
 
@@ -475,17 +483,20 @@ const smallTalk: Template = ({ stranger, talk, biome }, _roll, now) => {
  * the place and the teller; reaching that place for the first time opens this, once. Asked for by the
  * arrival itself rather than rationed, because a promise made on the road should be kept.
  */
-const rumourKept: Template = ({ place }, _roll, now) => {
+const rumourKept: Template = ({ place, campStanding }, _roll, now) => {
   if (!place) return null;
   const told = rumourAt(place.id, now.flags ?? []);
   if (!told) return null;
   const id = `woven:rumour-kept:${told.rumourId}`;
   if (now.seen.includes(id)) return null;
   const kind = told.rumourId.split(':')[1] ?? 'place';
+  // A camp is told of by its id, `rumour:camp:<camp id>`. Gone by the time you get there -- three
+  // days is not long on foot -- and the card says so rather than pointing at smoke that is not there.
+  const gone = kind === 'camp' && told.rumourId !== `rumour:camp:${campStanding ?? ''}`;
   const trade = told.teller.split(':').pop()?.replace('company_', '') ?? 'traveller';
   const name = givenNameFor(told.teller) ?? `the ${trade}`;
   return woven('arriving', 'rumour-kept', told.rumourId, { name, place: placeName(place) }, [{ id: 'note' }, { id: 'look' }], {
-    variant: kind
+    variant: gone ? 'camp-gone' : kind
   });
 };
 
