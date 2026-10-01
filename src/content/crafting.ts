@@ -105,27 +105,43 @@ export function blockedBy(
   recipeId: string,
   bench: Bench = openGround()
 ): string[] {
+  return shortfalls(satchel, recipeId, bench).map((s) => s.why);
+}
+
+/**
+ * What stands between the satchel and this recipe, one entry per thing, in `blockedBy`'s order.
+ *
+ * The same facts `blockedBy` words, kept structured so a panel can go on to say where each one
+ * comes from (`sources.ts`) without parsing the sentence back apart. `blockedBy` is this, worded --
+ * so the reason and the pointer beside it cannot come to disagree about what is missing.
+ */
+export type Shortfall =
+  | { kind: 'place'; why: string; places: string[] }
+  | { kind: 'tool'; why: string; affordance: string }
+  | { kind: 'ingredient'; why: string; id: string | null; tag: string | null };
+
+export function shortfalls(satchel: Satchel, recipeId: string, bench: Bench = openGround()): Shortfall[] {
   const r = recipe(recipeId);
   if (!r) return [];
-  const why: string[] = [];
+  const out: Shortfall[] = [];
 
   if (!placeAllows(recipeId, bench)) {
     const where = process(r.process)?.performedAt ?? [];
-    why.push(`needs to be done at a ${where.join(' or ')}`);
+    out.push({ kind: 'place', why: `needs to be done at a ${where.join(' or ')}`, places: where });
   }
   for (const tool of missingTools(satchel, recipeId)) {
-    why.push(`needs something that can ${tool}`);
+    out.push({ kind: 'tool', why: `needs something that can ${tool}`, affordance: tool });
   }
   for (const need of r.ingredients) {
     if (haveIngredient(satchel, need)) continue;
     if (need.tag) {
-      why.push(`needs ${need.count} ${need.tag}, has ${tagCount(satchel, need.tag)}`);
+      out.push({ kind: 'ingredient', why: `needs ${need.count} ${need.tag}, has ${tagCount(satchel, need.tag)}`, id: null, tag: need.tag });
     } else {
       const id = need.material ?? need.item ?? '';
-      why.push(`needs ${need.count} ${nameOf(id)}, has ${count(satchel, id)}`);
+      out.push({ kind: 'ingredient', why: `needs ${need.count} ${nameOf(id)}, has ${count(satchel, id)}`, id, tag: null });
     }
   }
-  return why;
+  return out;
 }
 
 /**

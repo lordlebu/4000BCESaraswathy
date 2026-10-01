@@ -118,3 +118,30 @@ test('the row steps aside once the dock is opened, rather than saying it all twi
   // away, not something that was deleted.
   await expect(page.locator('.surroundings')).toBeVisible();
 });
+
+// **A pinned recipe adds a line to the dock, and the dock is measured to the pixel.** The row above
+// was once pushed out of the dock at peek by a single taller chip; a pinned recipe must not do the
+// same, at any size, and must itself be readable.
+for (const { name, w, h } of SIZES) {
+  test(`a pinned recipe leaves the standing row on screen — ${name}`, async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('south-of-tethys:dock-8', JSON.stringify({ knowledgeVersion: 1, pinned: 'recipe_reed_rope' }));
+    });
+    await boot(page, w, h);
+    await expect(page.locator('.pinned-recipe')).toContainText('rope', { ignoreCase: true });
+    const unseen = await page.evaluate(() => {
+      const out: string[] = [];
+      for (const el of document.querySelectorAll('.standing, .pinned-recipe')) {
+        const b = el.getBoundingClientRect();
+        if (b.width === 0 || b.height === 0) {
+          out.push(`${el.className} (no box)`);
+          continue;
+        }
+        const hit = document.elementFromPoint(b.x + Math.min(20, b.width / 2), b.y + b.height / 2);
+        if (!hit || !(el.contains(hit) || hit.contains(el))) out.push(el.className);
+      }
+      return out;
+    });
+    expect(unseen, `not actually visible at ${w}x${h}: ${unseen.join('; ')}`).toEqual([]);
+  });
+}

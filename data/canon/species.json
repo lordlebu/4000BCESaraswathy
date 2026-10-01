@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.39.0",
+  "canon_version": "2.41.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -6778,6 +6778,27 @@
       "rarity": "common",
       "journal_prompt": "Hooked green cases at the height of a knee, and three of them already on your hem. You did not notice picking them up and you will not notice putting them down.",
       "source_index": 117
+    },
+    {
+      "id": "flora_palmyra_palm",
+      "type": "flora",
+      "name": "Palmyra Palm",
+      "scientific": "Borassus flabellifer",
+      "growth_form": "palm",
+      "uses": [
+        "fibre",
+        "food",
+        "shade"
+      ],
+      "notes": "The tala, the fan palm of the dry plains, standing alone or in lines along a field's edge. Its leaves are the leaves the old books are written on: cut, boiled, dried and scored. Its leaf-stalks give a coarse fibre that twists into rope, and it yields the same husk the date palm does. Added so that the Narmada's archive grows its own pages and Dwarka's harbour rope has a palm on the plains to come from.",
+      "biomes": [
+        "plains",
+        "settlement"
+      ],
+      "placement": "flavour",
+      "rarity": "common",
+      "journal_prompt": "A fan of leaves on a straight black trunk. Somebody has cut the lowest fronds, neatly, and taken them away to write on.",
+      "source_index": 118
     }
   ]
 }

@@ -149,3 +149,25 @@ describe('a chain from the workshop', () => {
     expect(onMake).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('where the missing thing comes from', () => {
+  it('puts a pointer under a reason, and lists who could teach what you do not know', () => {
+    // Carrying reed fibre but nothing that can work: reed rope is within reach and blocked on a
+    // tool. Knowing only what nobody has to teach, so the taught recipes are the directory.
+    const s = add(emptySatchel(), 'material_reed_fibre', 4);
+    const { baseElement } = render(
+      <WorkshopPanel
+        station={null}
+        {...base}
+        knows={(id) => !['recipe_husk_hawser', 'recipe_shell_bead'].includes(id)}
+        fieldMapId="field_map_lothal"
+        satchel={s}
+      />
+    );
+    const from = Array.from(baseElement.querySelectorAll('.recipe-from')).map((e) => e.textContent ?? '');
+    expect(from.some((t) => /stone adze/.test(t)), `no tool pointer among: ${from.join(' | ')}`).toBe(true);
+
+    expect(screen.getByText(/Somebody could show you/)).toBeTruthy();
+    expect(baseElement.textContent).toContain('Pell teaches this at the Gate Court, North Dwarka.');
+  });
+});

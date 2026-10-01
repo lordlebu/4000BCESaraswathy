@@ -97,6 +97,11 @@ export interface JournalPanelProps {
   hint: string;
   /** Where there is still something to see, and where to sleep. Empty when there is nothing. */
   whereNext: string;
+  /**
+   * The one thing to do next on this map's road to settling, or empty. The map's goal, said where
+   * the player already looks for what to do -- see `content/settlingRoad.ts`.
+   */
+  goal?: string;
   /** How tired the traveller is, or null when there is nothing to say. */
   fatigue: string | null;
   /** A word about the fading light, or null while there is plenty. */
@@ -120,6 +125,7 @@ export function JournalPanel({
   surroundings,
   hint,
   whereNext,
+  goal = '',
   fatigue,
   dusk,
   discovered,
@@ -175,6 +181,7 @@ export function JournalPanel({
       {children}
 
       <footer className="journal-foot">
+        {goal && <p className="status-goal">{goal}</p>}
         <p className={atLandmark ? 'status status-arrived' : 'status'}>{hint}</p>
         {/* Rendered only when it has something to say. An empty paragraph still takes vertical
             space in a panel that is deliberately tight on a phone. */}

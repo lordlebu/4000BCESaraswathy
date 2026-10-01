@@ -100,7 +100,7 @@ export const STATIONS: readonly Station[] = [
     id: 'loom',
     name: 'Loom',
     description: 'A frame and tension. Spinning first, then weaving.',
-    processes: ['process_weaving', 'process_spinning']
+    processes: ['process_weaving', 'process_spinning', 'process_twisting']
   },
   {
     id: 'tannery',

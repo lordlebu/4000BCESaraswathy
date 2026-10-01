@@ -26,11 +26,12 @@ import { type Step, plan } from '../content/making-chain';
 import {
   type Bench,
   type Knows,
-  blockedBy,
   makeableNow,
   offeredHere,
+  shortfalls,
   withinReach
 } from '../content/crafting';
+import { sourceOf, taughtOn, taughtWhere } from '../content/sources';
 import { cookableNow } from '../content/cooking';
 import { type Station } from '../content/stations';
 import type { Satchel } from '../content/satchel';
@@ -64,6 +65,14 @@ export interface WorkshopPanelProps {
    * makeable — see `content/stations.ts` for why that direction is load-bearing.
    */
   station: Station | null;
+  /**
+   * The map underfoot, so a recipe somebody teaches names the teacher here first, and leaves the
+   * country off when it is this one. Optional: without it every teacher carries their country.
+   */
+  fieldMapId?: string | null;
+  /** The recipe pinned to the dock, and how to change it. Both optional: without them no Pin buttons. */
+  pinned?: string | null;
+  onPin?: (recipeId: string | null) => void;
   open: boolean;
   onClose: () => void;
 }
@@ -75,6 +84,9 @@ export function WorkshopPanel({
   onMake,
   lastMade,
   station,
+  fieldMapId = null,
+  pinned = null,
+  onPin,
   open,
   onClose
 }: WorkshopPanelProps) {
@@ -109,6 +121,26 @@ export function WorkshopPanel({
   }
   const chained = recipes.filter((r) => firstMakes.has(r.id));
   const near = reachable.filter((r) => !firstMakes.has(r.id));
+
+  /**
+   * **Recipes somebody could show you, and who.** A taught recipe used to be invisible until it was
+   * learned, so a player could not know that Pell's hawser or Okhi's ink existed, let alone that
+   * the person who knows it stands on another map. Collapsed, because it is a directory and not a
+   * to-do list; the teachers on this map come first.
+   */
+  const unknown = recipes
+    .filter((r) => !knows(r.id) && atStation(r))
+    .map((r) => ({ r, line: taughtWhere(r.id, fieldMapId) }))
+    .filter((x): x is { r: Recipe; line: string } => x.line !== null)
+    .sort((a, b) => Number(taughtOn(b.r.id, fieldMapId)) - Number(taughtOn(a.r.id, fieldMapId)));
+
+  /**
+   * Everything known and not listed above, so anything can be pinned -- including the stone adze a
+   * player carrying nothing yet needs most. "Within reach" only lists a recipe once one of its own
+   * ingredients is carried, which is exactly the recipe a player starting out cannot see.
+   */
+  const listed = new Set([...everythingReady, ...chained, ...near].map((r) => r.id));
+  const known = recipes.filter((r) => knows(r.id) && atStation(r) && !listed.has(r.id));
   const here = offeredHere(bench, knows).filter(atStation);
 
   /**
@@ -200,12 +232,45 @@ export function WorkshopPanel({
                   key={r.id}
                   recipe={r}
                   ready={false}
-                  why={blockedBy(satchel, r.id, bench)}
+                  why={shortfalls(satchel, r.id, bench).map((s) => ({ text: s.why, from: sourceOf(s) }))}
+                  pin={onPin ? { on: pinned === r.id, toggle: () => onPin(pinned === r.id ? null : r.id) } : undefined}
                   onMake={onMake}
                 />
               ))}
             </ul>
           </section>
+        )}
+
+        {onPin && known.length > 0 && (
+          <details className="diary-section workshop-teachers">
+            <summary>Everything you know how to make ({known.length})</summary>
+            <ul className="recipes">
+              {known.map((r) => (
+                <Makeable
+                  key={r.id}
+                  recipe={r}
+                  ready={false}
+                  why={shortfalls(satchel, r.id, bench).map((s) => ({ text: s.why, from: sourceOf(s) }))}
+                  pin={{ on: pinned === r.id, toggle: () => onPin(pinned === r.id ? null : r.id) }}
+                  onMake={onMake}
+                />
+              ))}
+            </ul>
+          </details>
+        )}
+
+        {unknown.length > 0 && (
+          <details className="diary-section workshop-teachers">
+            <summary>Somebody could show you ({unknown.length})</summary>
+            <ul className="recipes">
+              {unknown.map(({ r, line }) => (
+                <li key={r.id} className="recipe recipe-taught">
+                  <span className="recipe-name">{r.name}</span>
+                  <p className="recipe-first muted">{line}.</p>
+                </li>
+              ))}
+            </ul>
+          </details>
         )}
 
         {ready.length === 0 && chained.length === 0 && near.length === 0 && food.length === 0 && (
@@ -256,13 +321,17 @@ function Makeable({
   ready,
   why,
   first = [],
+  pin,
   onMake
 }: {
   recipe: Recipe;
   ready: boolean;
-  why: string[];
+  /** What stands in the way, each with where the missing thing comes from when canon can say. */
+  why: { text: string; from: string | null }[];
   /** What a chain makes before this, in order, when the parts are made too. */
   first?: string[];
+  /** Whether this is the pinned recipe, and how to pin or unpin it. Absent: no button. */
+  pin?: { on: boolean; toggle: () => void };
   onMake: (id: string) => void;
 }) {
   // The bare word -- `grinding`, not `process_grinding` -- which is what `PROCESS_MARK` keys on.
@@ -280,6 +349,11 @@ function Makeable({
           id={recipe.outputs[0]?.item ?? recipe.outputs[0]?.material ?? undefined}
         />
         <span className="recipe-name">{recipe.name}</span>
+        {pin && (
+          <button type="button" className="recipe-pin" aria-pressed={pin.on} onClick={pin.toggle}>
+            {pin.on ? 'Pinned' : 'Pin'}
+          </button>
+        )}
         <button type="button" disabled={!ready} onClick={() => onMake(recipe.id)}>
           {ready ? 'Make' : 'Not yet'}
         </button>
@@ -315,7 +389,10 @@ function Makeable({
       {!ready && why.length > 0 && (
         <ul className="recipe-why">
           {why.slice(0, 3).map((w) => (
-            <li key={w}>{w}</li>
+            <li key={w.text}>
+              {w.text}
+              {w.from && <span className="recipe-from">{w.from}</span>}
+            </li>
           ))}
           {why.length > 3 && <li className="muted">…and {why.length - 3} more</li>}
         </ul>

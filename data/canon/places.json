@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.39.0",
+  "canon_version": "2.41.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -1928,6 +1928,14 @@
           ]
         },
         {
+          "text": "Nothing here was ever on a shelf first. The oldest volumes came up out of the ground in jars, sealed, and the jars are the only reason there is anything to copy -- so a copyist learns to fire one before she learns to cut a letter. And an awl: you prick the leaf, you thread the cord through, and the book is a book. Bone, a deer's shin for choice. Mine is older than Vessa.",
+          "requires": [],
+          "gives": [
+            "recipe_storage_jar",
+            "recipe_bone_awl"
+          ]
+        },
+        {
           "text": "There is a shelf I dust and cannot read. Thirty years. If you learn what is on it I would like to be told, and I would like it told to me before it is told to the halls.",
           "requires": [
             "discovery_quarry_sequence"
@@ -2630,16 +2638,16 @@
           "name": "Hang the vanes, and fill the still",
           "needs": [
             {
-              "id": "material_bamboo_cane",
+              "id": "material_palm_husk",
               "count": 3
             },
             {
-              "id": "material_date_fruit",
+              "id": "material_sandstone",
               "count": 3
             }
           ],
           "backers": 2,
-          "prose": "Bamboo vanes that turned the first morning and lifted water the first afternoon. Beside the pump a glasshouse of salt-glass over shallow trays, where the sun takes the brine and leaves the water, and date palms set in the first beds of it."
+          "prose": "Vanes of husk matting on a ring of spokes, plaited the way the harbour once plaited its sails, that turned the first morning and lifted water the first afternoon. Beside the pump a still-house on a sandstone footing, salt-glass over shallow trays, where the sun takes the brine and leaves the water, and date palms set in the first beds of it -- offsets, carried up from the last grove by the market, because a date palm is grown from its mother and not from its stone."
         }
       ],
       "settled": "They came up from the market at evening -- growers, a driver or two, somebody's grandmother -- and nobody said it was a place yet. The vanes turned. The still dripped. By dark there was a lamp in the glasshouse and a queue at the well, and Jarro was taking nothing from anybody, and pretending he was."
@@ -2969,12 +2977,12 @@
               "count": 3
             },
             {
-              "id": "item_sinew_lashing",
+              "id": "item_fibre_cord",
               "count": 1
             }
           ],
           "backers": 2,
-          "prose": "A tower of cane lashed with sinew, light enough that the lift nearly takes it off the scaffold. From the top course you can see the terraces all the way down, and see that they are a farm."
+          "prose": "A tower of cane lashed with goat-hair cord, twisted by hand on the terraces the way Marn twists it, light enough that the lift nearly takes it off the scaffold. From the top course you can see the terraces all the way down, and see that they are a farm."
         },
         {
           "id": "sails",
@@ -2994,6 +3002,402 @@
         }
       ],
       "settled": "They came up from the halls and down from the grazing at the same hour, which has not happened on the plateau in living memory, and stood about in the lamplight not quite knowing who should speak first. Nobody did. The mill turned on the lift. Somebody wrote it down."
+    }
+  ],
+  "sayings": [
+    {
+      "id": "saying_a_camp_is_a_pause",
+      "type": "saying",
+      "name": "A pause between two horizons",
+      "text": "A camp is only a pause between two horizons.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "fireside"
+      ]
+    },
+    {
+      "id": "saying_ancestors_go_with_you",
+      "type": "saying",
+      "name": "Nobody leaves their ancestors",
+      "text": "A traveller may leave a house. No one leaves their ancestors.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "departure"
+      ]
+    },
+    {
+      "id": "saying_before_kingdoms",
+      "type": "saying",
+      "name": "Before there were kingdoms",
+      "text": "Before there were kingdoms, there were fires. Before there were roads, there were feet.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "opening",
+        "fireside"
+      ]
+    },
+    {
+      "id": "saying_carry_the_names",
+      "type": "saying",
+      "name": "Carry the names",
+      "text": "Leave the stones behind. Carry the names.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "departure"
+      ]
+    },
+    {
+      "id": "saying_count_the_fires",
+      "type": "saying",
+      "name": "Count the fires",
+      "text": "Count not the miles beneath your feet. Count the fires that welcomed you.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "arrival",
+        "settling"
+      ]
+    },
+    {
+      "id": "saying_dawn_belongs_to_the_traveller",
+      "type": "saying",
+      "name": "The dawn belongs to the traveller",
+      "text": "The dawn belongs neither to the city nor the wilderness. It belongs to the traveller.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "opening",
+        "dawn"
+      ]
+    },
+    {
+      "id": "saying_dawn_has_opened_the_road",
+      "type": "saying",
+      "name": "Dawn has opened the road",
+      "text": "Dawn has opened the road.\nRise.\nWake the oxen.\nGather the water.\nFold the tents.\nThe night has carried us this far.\nThe light will carry us farther.",
+      "attribution": "Vedda waking-call",
+      "carried_by": "vedda",
+      "occasions": [
+        "dawn",
+        "departure"
+      ]
+    },
+    {
+      "id": "saying_fire_travels_with_us",
+      "type": "saying",
+      "name": "The fire travels with us",
+      "text": "The road is long, but the fire travels with us.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "road",
+        "fireside"
+      ]
+    },
+    {
+      "id": "saying_four_givers",
+      "type": "saying",
+      "name": "What each thing gives",
+      "text": "Dawn gives the road.\nThe river gives direction.\nThe ancestors give memory.\nṚta gives meaning.",
+      "attribution": "Vedda formula",
+      "carried_by": "vedda",
+      "occasions": [
+        "opening",
+        "fireside"
+      ]
+    },
+    {
+      "id": "saying_four_things_we_carry",
+      "type": "saying",
+      "name": "Four things we carry",
+      "text": "When we leave, we carry four things.\nFire,\nwater,\nthe seed,\nand the names of the dead.\nThe road may take the first three from us.\nIt cannot take the fourth.\nFor the ancestors have already walked ahead.\nWe are only following their footprints.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "departure",
+        "opening"
+      ]
+    },
+    {
+      "id": "saying_knows_the_stars",
+      "type": "saying",
+      "name": "Whoever knows the stars",
+      "text": "Whoever knows the stars need not fear the empty plain.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "night",
+        "road"
+      ]
+    },
+    {
+      "id": "saying_mountains_do_not_move",
+      "type": "saying",
+      "name": "The mountains do not move",
+      "text": "We cross the mountains because the mountains do not move.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "road"
+      ],
+      "field_maps": [
+        "field_map_narmada"
+      ]
+    },
+    {
+      "id": "saying_our_road_was_written",
+      "type": "saying",
+      "name": "Our road was written",
+      "text": "Our road was written before our mothers and fathers were born.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "road"
+      ]
+    },
+    {
+      "id": "saying_remember_the_rivers",
+      "type": "saying",
+      "name": "Remember the rivers",
+      "text": "Remember the rivers.\nRemember the river behind us,\nand the river before us.\nRemember where the oxen drank.\nRemember where the mothers rested.\nRemember where the dead were given to the earth.\nA people may forget a king.\nA people must never forget a river.",
+      "attribution": "Vedda river-litany",
+      "carried_by": "vedda",
+      "occasions": [
+        "road",
+        "crossing"
+      ]
+    },
+    {
+      "id": "saying_river_leaves_its_birthplace",
+      "type": "saying",
+      "name": "The river leaves its birthplace",
+      "text": "The river leaves its birthplace, yet it does not cease to be a river.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "departure",
+        "crossing"
+      ]
+    },
+    {
+      "id": "saying_rivers_are_another_road",
+      "type": "saying",
+      "name": "Another road",
+      "text": "The rivers are not the road's end. They are another road.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "crossing"
+      ]
+    },
+    {
+      "id": "saying_road_of_the_ancestors",
+      "type": "saying",
+      "name": "Who remembered the road",
+      "text": "The road was here before us.\nOur mothers and fathers walked it.\nTheirs walked it before them.\nWe walk it now.\nDo not ask who made the road.\nAsk who remembered it.\nFor when the stones disappear\nand the grass covers the footprints,\nthe road remains\ninside the memory of the people.",
+      "attribution": "Vedda elder's saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "road"
+      ]
+    },
+    {
+      "id": "saying_rta_is_the_road",
+      "type": "saying",
+      "name": "Ṛta is the road",
+      "text": "Ṛta has no road. It is the road.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "road",
+        "fireside"
+      ]
+    },
+    {
+      "id": "saying_the_bones_are_listening",
+      "type": "saying",
+      "name": "The bones are listening",
+      "text": "Walk lightly. The bones beneath the earth are listening.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "road",
+        "arrival"
+      ],
+      "field_maps": [
+        "field_map_dwarka",
+        "field_map_narmada"
+      ]
+    },
+    {
+      "id": "saying_the_land_remembers",
+      "type": "saying",
+      "name": "The land remembers",
+      "text": "The land does not belong to those who stay. It remembers those who pass.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "crossing"
+      ],
+      "field_maps": [
+        "field_map_aravali"
+      ]
+    },
+    {
+      "id": "saying_the_next_fire",
+      "type": "saying",
+      "name": "The next fire",
+      "text": "Where the old fire burned, we shall make the next fire.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "settling"
+      ]
+    },
+    {
+      "id": "saying_the_sea_remembers_their_names",
+      "type": "saying",
+      "name": "The sea remembers their names",
+      "text": "The mountains remember our ancestors. The sea remembers their names.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "crossing"
+      ]
+    },
+    {
+      "id": "saying_the_stars_remember_the_way",
+      "type": "saying",
+      "name": "The stars remember the way",
+      "text": "We follow the stars because the stars remember the way home.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "night"
+      ]
+    },
+    {
+      "id": "saying_the_tent_has_no_roots",
+      "type": "saying",
+      "name": "The tent has no roots",
+      "text": "The tent has no roots, but the people do.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "fireside",
+        "settling"
+      ]
+    },
+    {
+      "id": "saying_the_walking_song",
+      "type": "saying",
+      "name": "The Walking Song",
+      "text": "Do not ask where the road ends.\nAsk what it has taught your feet.\n\nOur mothers and fathers crossed the salt plains.\nTheirs crossed the mountains.\nBefore them, others followed the rivers south.\n\nWe carry no kingdom upon our backs.\nOnly fire, water, seed, and memory.\n\nWhen the grass calls, we rise.\nWhen the sky changes, we turn.\nWhen the old road disappears,\nwe become the road.",
+      "attribution": "The Walking Song, attributed to the first Vedda",
+      "carried_by": "vedda",
+      "occasions": [
+        "opening"
+      ]
+    },
+    {
+      "id": "saying_the_wind_has_no_house",
+      "type": "saying",
+      "name": "The wind has no house",
+      "text": "The wind has no house. Neither should the memory of a people.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "road",
+        "night"
+      ]
+    },
+    {
+      "id": "saying_the_world_remembers_footsteps",
+      "type": "saying",
+      "name": "The world remembers every footstep",
+      "text": "The world remembers every footstep, even when the sand forgets.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "road"
+      ],
+      "field_maps": [
+        "field_map_dwarka"
+      ]
+    },
+    {
+      "id": "saying_they_carried_memory",
+      "type": "saying",
+      "name": "They carried memory",
+      "text": "The first people carried no maps. They carried memory.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "opening",
+        "fireside"
+      ]
+    },
+    {
+      "id": "saying_we_follow_the_world",
+      "type": "saying",
+      "name": "We follow the world",
+      "text": "We do not wander. We follow the world as it moves.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "road",
+        "departure"
+      ]
+    },
+    {
+      "id": "saying_when_the_grass_dies",
+      "type": "saying",
+      "name": "When the grass dies",
+      "text": "When the grass dies, we rise. When the rivers turn, we follow.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "departure"
+      ]
+    },
+    {
+      "id": "saying_where_footprints_vanished",
+      "type": "saying",
+      "name": "Where the footprints vanished",
+      "text": "The old ones walked beneath these stars. We walk where their footprints have vanished.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "night"
+      ]
+    },
+    {
+      "id": "saying_where_the_herds_find_grass",
+      "type": "saying",
+      "name": "Where the herds find grass",
+      "text": "Where the herds find grass, there our tents shall stand.",
+      "attribution": "Vedda saying",
+      "carried_by": "vedda",
+      "occasions": [
+        "fireside",
+        "arrival"
+      ]
+    },
+    {
+      "id": "saying_whole_earth_home",
+      "type": "saying",
+      "name": "The whole earth is home",
+      "text": "Once, we wandered because we had nowhere to stay. Now we wander because the whole earth is home.",
+      "attribution": "Vedda saying, as it is said now",
+      "carried_by": "vedda",
+      "occasions": [
+        "opening",
+        "settling"
+      ]
     }
   ],
   "biomes": [

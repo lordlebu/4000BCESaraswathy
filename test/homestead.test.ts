@@ -284,3 +284,19 @@ describe('where it stands', () => {
     if (forest) expect(buildable(built.world, forest)).toBe(false);
   });
 });
+
+describe('a stage that is short says where the shortfall comes from', () => {
+  it('names reed rope as made from reed fibre, beside "you carry 0"', async () => {
+    const { homesteadOn, mayBuild } = await import('../src/content/homestead');
+    const lothal = homesteadOn('field_map_lothal')!;
+    const tower = lothal.stages.find((s) => s.needs.some((n) => n.id === 'item_reed_rope'))!;
+    const ground = lothal.grounds[0]!;
+    const built = lothal.stages.slice(0, lothal.stages.indexOf(tower)).map((s) => s.id);
+    // Agreed and the stages before built, carrying everything but the rope.
+    const state = { ground: ground.id, eased: ground.worries.map((w) => w.id), built, settled: false };
+    const carried = Object.fromEntries(tower.needs.filter((n) => n.id !== 'item_reed_rope').map((n) => [n.id, n.count]));
+    const may = mayBuild(lothal, state, carried, 9);
+    expect(may.ok).toBe(false);
+    expect(!may.ok && may.why).toMatch(/Needs 1 Reed rope \(you carry 0\)\. Reed rope: made from reed fibre\./i);
+  });
+});

@@ -23,6 +23,7 @@ import { isWalkable } from '../world/generate';
 import { band } from '../world/classify';
 import { discovery, offeredAt, vocabulary } from './knowledge';
 import { fieldMap, npc, poi } from './places';
+import { whereFrom } from './sources';
 import { STANDINGS, type Standing } from './standing';
 
 export type ApproachKind = 'listen' | 'tongue' | 'show' | 'vouch' | 'offer';
@@ -362,7 +363,14 @@ export function mayBuild(
   if (!stage) return { ok: false, why: 'It is built.' };
   const short = stage.needs.filter((n) => (carried[n.id] ?? 0) < n.count);
   if (short.length > 0) {
-    return { ok: false, why: `Needs ${short.map((n) => `${n.count} ${nameOf(n.id)} (you carry ${carried[n.id] ?? 0})`).join(', ')}.` };
+    // **And where each comes from.** "Needs 1 reed rope (you carry 0)" was the whole of it, and it
+    // is where the owner's first play-through stopped: nothing said rope is made, or from what.
+    const from = short
+      .map((n) => ({ n, where: whereFrom(n.id) }))
+      .filter((x) => x.where !== null)
+      .map(({ n, where }) => `${nameOf(n.id)}: ${where}.`);
+    const needs = `Needs ${short.map((n) => `${n.count} ${nameOf(n.id)} (you carry ${carried[n.id] ?? 0})`).join(', ')}.`;
+    return { ok: false, why: [needs, ...from].join(' ') };
   }
   if (helpedHere < stage.backers) {
     const more = stage.backers - helpedHere;
