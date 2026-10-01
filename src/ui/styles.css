@@ -3575,3 +3575,11 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 /* The first morning's hint, in the pinned recipe's slot at every height. `content/coach.ts`. */
 .coach-line { flex: none; margin: 0; padding: 0.25rem 0.75rem; font-size: 0.85rem; font-style: italic; }
 .coach-line::before { content: '✦ '; color: var(--accent); font-style: normal; }
+
+/* The road between maps (`Journey.tsx`), on the opening's page. */
+.journey-where { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.journey-keeper { margin: 0; display: grid; gap: 0.35rem; }
+.journey-keeper p { margin: 0; font-size: 1.15rem; line-height: 1.5; }
+.journey-keeper footer { font-size: 0.85rem; color: var(--muted); }
+.journey-arrive { margin: 0; font-size: 1.6rem; }
+.journey-arrival { margin: 0; line-height: 1.6; text-align: left; }

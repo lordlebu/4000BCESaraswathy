@@ -113,7 +113,10 @@ function gapsOn(mapId: string): string[] {
 
 describe('every map can be finished from its own ground', () => {
   for (const map of fieldMaps) {
-    it(`${map.id}: what its people teach and what its homestead needs`, () => {
+    // **Its own timeout, because it builds twelve whole maps.** Measured on 2 October 2026: 4 to 9
+    // seconds a map alone, and 21 for the Narmada with the rest of the suite running beside it --
+    // past the 20-second default, so it failed for load while every gap was closed.
+    it(`${map.id}: what its people teach and what its homestead needs`, { timeout: 120_000 }, () => {
       expect(gapsOn(map.id)).toEqual(KNOWN_GAPS[map.id] ?? []);
     });
   }

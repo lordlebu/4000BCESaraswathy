@@ -19,7 +19,7 @@ import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { readShowing, writeShowing } from './preferences';
-import { arrivalPoint, fieldMap, npc, poi } from '../content/places';
+import { arrivalPoint, fieldMap, npc, poi, roadBetween, type Road } from '../content/places';
 import { travellerAttributes, travellersOn } from '../content/travellers';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
@@ -46,6 +46,8 @@ import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/t
 import { downloadImage, downloadText } from './exportJournal';
 import { clearJourney, hasBegun, loadJourney, saveJourney } from '../save';
 import { Opening } from './Opening';
+import { Journey } from './Journey';
+import { CROSSING_MS } from '../content/tiers';
 import { coachLine, MORNING_GOAL } from '../content/coach';
 import {
   advance,
@@ -216,6 +218,13 @@ export function App() {
   const [satchel, setSatchel] = useState(initialJourney.current.satchel ?? emptySatchel());
   // The recipe pinned in the workshop, kept on screen in the dock -- see `PinnedRecipe`.
   const [pinned, setPinned] = useState<string | null>(initialJourney.current.pinned ?? null);
+  // The crossing being told, while the next map builds behind it. See `Journey.tsx`.
+  // While it is, an arrival the new map reports is held rather than shown over the cards, and
+  // `stepDown` decides what comes first once the traveller is off the cart.
+  const crossing = useRef(false);
+  const heldArrival = useRef<string | null>(null);
+  const arrivedRef = useRef<((e: { poiId: string }) => void) | null>(null);
+  const [journey, setJourney] = useState<{ from: string; to: string; road: Road; first: boolean } | null>(null);
   // The opening, while it plays over the map booting behind it. See `Opening.tsx`.
   const [opening, setOpening] = useState(false);
   // The first morning's hints, on unless the player turned them off. See `content/coach.ts`.
@@ -360,6 +369,7 @@ export function App() {
           strangerId?: string | null;
           talk?: Talk | null;
           camp?: Encampment | null;
+          cameFrom?: string | null;
           force?: { kind?: string; asked?: boolean };
         }
       ) => boolean)
@@ -475,6 +485,7 @@ export function App() {
         talk?: Talk | null;
         camp?: Encampment | null;
         campStanding?: string | null;
+        cameFrom?: string | null;
         force?: { kind?: string; asked?: boolean };
       } = {}
     ): boolean => {
@@ -500,7 +511,8 @@ export function App() {
           met: metStrangers.current,
           last: eventDays.current,
           flags: journeyFlags.current,
-          poiId: extra.poiId ?? null
+          poiId: extra.poiId ?? null,
+          cameFrom: extra.cameFrom ?? null
         },
         roll,
         // What is here to make an event out of, when nothing authored can happen -- see
@@ -560,6 +572,11 @@ export function App() {
      * This one means what its name says.
      */
     const onArrived = ({ poiId }: GameToUi['poi-reached']) => {
+      // On the cart, the arrival waits: the cards are still telling the road. See `stepDown`.
+      if (crossing.current) {
+        heldArrival.current = poiId;
+        return;
+      }
       // Somebody who comes over, the first time you arrive where they are. They take the arrival:
       // a card and a person walking up at once would be two things asking for the same moment.
       const approach = approachAt(poiId, seenEvents.current);
@@ -617,6 +634,7 @@ export function App() {
     // Handed out of the effect so the activity card can ask too: a take is not a bus event, it is a
     // modal React owns, and closing it is where the `working` question belongs.
     happens.current = maybeHappens;
+    arrivedRef.current = (e) => onArrived(e as GameToUi['poi-reached']);
 
     /** They have walked up and are standing beside you: open what they have to say. */
     const onApproached = ({ npcId }: GameToUi['approached']) => dispatch({ type: 'talk-to', npcId });
@@ -1718,6 +1736,17 @@ export function App() {
 
   const travel = useCallback(
     (next: string) => {
+      // **The road, told.** The crossing opens its cards first and the next map builds behind them;
+      // see `Journey.tsx`. A map with no road to `next` (none in canon today) still crosses, quietly.
+      const road = roadBetween(fieldMapId, next);
+      if (road) {
+        const seenFlag = `road:${road.art}`;
+        const first = !journeyFlags.current.includes(seenFlag);
+        if (first) journeyFlags.current = [...journeyFlags.current, seenFlag];
+        crossing.current = true;
+        heldArrival.current = null;
+        setJourney({ from: fieldMapId, to: next, road, first });
+      }
       setFieldMapId(next);
       // Arriving in another country is leaving wherever you were standing, and the map that
       // sent you there has done its job.
@@ -1742,10 +1771,34 @@ export function App() {
       if (arrive) url.searchParams.set('at', arrive);
       else url.searchParams.delete('at');
       window.history.replaceState(null, '', url);
-      EventBus.emitEvent('travel-to', { fieldMapId: next, seed });
+      // Half a day of the journey's clock: out in the morning, in by evening. See `CROSSING_MS`.
+      EventBus.emitEvent('travel-to', { fieldMapId: next, seed, ride: road ? CROSSING_MS : 0 });
     },
-    [seed]
+    [seed, fieldMapId]
   );
+
+  /**
+   * The ride is over. **The first time on a road, something happens on it**: the road's own written
+   * happening when canon has one -- the ferry song, the line where the sea was -- else one of the
+   * road's woven events. Asked for, never rationed, and only once per road.
+   */
+  const stepDown = useCallback(() => {
+    const done = journey;
+    setJourney(null);
+    crossing.current = false;
+    const held = heldArrival.current;
+    heldArrival.current = null;
+    const here = latest.current.at;
+    // **One thing, in this order.** The road's own written happening, the first time on it; else
+    // whatever the arrival was holding -- somebody coming over, a rumour kept, an arrival card --
+    // which the cards had kept waiting; else, the first time, one of the road's woven events.
+    if (done?.first && here && happens.current?.('journey', here, null, `journey:${done.road.art}`, { cameFrom: done.from, force: { asked: true } })) return;
+    if (held) {
+      arrivedRef.current?.({ poiId: held });
+      return;
+    }
+    if (done?.first && here) happens.current?.('road', here, null, `journey-road:${done.road.art}`, { force: { asked: true } });
+  }, [journey]);
 
   const travelLog = useMemo(() => {
     if (!world) return null;
@@ -1830,6 +1883,17 @@ export function App() {
           travelled={initialJourney.current.travelled}
           fieldMapId={bootFieldMap.current}
           characterId={characterId}
+        />
+      )}
+
+      {journey && fieldMap(journey.from) && fieldMap(journey.to) && (
+        <Journey
+          from={fieldMap(journey.from)!}
+          to={fieldMap(journey.to)!}
+          road={journey.road}
+          first={journey.first}
+          roll={(salt) => tileHash(seed, 0, 0, `${journey.road.art}:${salt}`)}
+          onDone={stepDown}
         />
       )}
 

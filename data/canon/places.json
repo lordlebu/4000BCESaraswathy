@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.42.0",
+  "canon_version": "2.43.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -352,7 +352,35 @@
       "arrives_at": "poi_rail_head",
       "landmass_edges": {
         "north": "mainland_asia"
-      }
+      },
+      "roads": [
+        {
+          "to": "field_map_lothal",
+          "by": "vehicle_coastal_dhow",
+          "art": "journey-aravali-lothal",
+          "prose": [
+            "Out of the delta on a sewn-plank boat, the shore going grey behind you.",
+            "By afternoon two islands hang above the sea ahead, and nobody on board remarks on it."
+          ],
+          "keeper": {
+            "npc": "npc_hesh",
+            "line": "It runs when it runs. Sit down."
+          }
+        },
+        {
+          "to": "field_map_narmada",
+          "by": "vehicle_ox_cart",
+          "art": "journey-aravali-narmada",
+          "prose": [
+            "North off the plateau by the herders' track, down through grass that gets shorter every hour.",
+            "Then shingle, a strait, and a line of trestles striding out over the water."
+          ],
+          "keeper": {
+            "npc": "npc_hesh",
+            "line": "The cart for the plateau waits at the far end. It waits longer than the line does."
+          }
+        }
+      ]
     },
     {
       "id": "field_map_dwarka",
@@ -403,6 +431,21 @@
       "relief": "basin",
       "departs_from": [
         "poi_caravan_camp"
+      ],
+      "roads": [
+        {
+          "to": "field_map_lothal",
+          "by": "vehicle_ox_cart",
+          "art": "journey-dwarka-lothal",
+          "prose": [
+            "The cart road west follows a river that is no longer there.",
+            "The banks are still where they were. There is only dust between them, and the road keeps faithfully to every bend."
+          ],
+          "keeper": {
+            "npc": "npc_jarro",
+            "line": "The road goes the long way. It always did. Sit on the left, out of the wind."
+          }
+        }
       ]
     },
     {
@@ -451,6 +494,47 @@
       "relief": "delta",
       "departs_from": [
         "poi_lothal_camp"
+      ],
+      "roads": [
+        {
+          "to": "field_map_aravali",
+          "by": "vehicle_coastal_dhow",
+          "art": "journey-aravali-lothal",
+          "prose": [
+            "Out of the delta on a sewn-plank boat, the shore going grey behind you.",
+            "By afternoon two islands hang above the sea ahead, and nobody on board remarks on it."
+          ],
+          "keeper": {
+            "npc": "npc_thrali",
+            "line": "The boat goes on the tide, not on you. Get in while it's floating."
+          }
+        },
+        {
+          "to": "field_map_dwarka",
+          "by": "vehicle_ox_cart",
+          "art": "journey-dwarka-lothal",
+          "prose": [
+            "The cart road west follows a river that is no longer there.",
+            "The banks are still where they were. There is only dust between them, and the road keeps faithfully to every bend."
+          ],
+          "keeper": {
+            "npc": "npc_kunch",
+            "line": "West? Follow the river that isn't there. The cart knows the way better than I do."
+          }
+        },
+        {
+          "to": "field_map_narmada",
+          "by": "vehicle_ox_cart",
+          "art": "journey-lothal-narmada",
+          "prose": [
+            "Past the last of the delta the ground starts to rise, and keeps rising.",
+            "The road up the scarp is the only part of the plateau anyone built, and it was built well."
+          ],
+          "keeper": {
+            "npc": "npc_kunch",
+            "line": "Up the scarp, then. Sing on the steep part. The ox likes it, and so will you."
+          }
+        }
       ],
       "prologue": {
         "opening": "saying_the_walking_song",
@@ -532,6 +616,34 @@
       "relief": "plateau",
       "departs_from": [
         "poi_high_camp"
+      ],
+      "roads": [
+        {
+          "to": "field_map_aravali",
+          "by": "vehicle_ox_cart",
+          "art": "journey-aravali-narmada",
+          "prose": [
+            "North off the plateau by the herders' track, down through grass that gets shorter every hour.",
+            "Then shingle, a strait, and a line of trestles striding out over the water."
+          ],
+          "keeper": {
+            "npc": "npc_marn",
+            "line": "North to the shingle. Tell the line-keeper the herders sent you. He'll pretend not to care."
+          }
+        },
+        {
+          "to": "field_map_lothal",
+          "by": "vehicle_ox_cart",
+          "art": "journey-lothal-narmada",
+          "prose": [
+            "Past the last of the delta the ground starts to rise, and keeps rising.",
+            "The road up the scarp is the only part of the plateau anyone built, and it was built well."
+          ],
+          "keeper": {
+            "npc": "npc_marn",
+            "line": "Down is quicker than up and harder on the knees. Mind the third turn."
+          }
+        }
       ]
     }
   ],
@@ -2417,6 +2529,27 @@
   ],
   "happenings": [
     {
+      "id": "happening_the_ferry_song",
+      "type": "happening",
+      "title": "The ferry song",
+      "occasion": "journey",
+      "field_maps": [
+        "field_map_lothal",
+        "field_map_aravali"
+      ],
+      "prose": "Halfway across, with neither shore much more than a line, the woman at the steering oar starts to sing. It is a counting song: one verse for each island, one for each river behind you, one for each of the people who taught it to her. The two hanging islands get a verse each, as if they were ordinary.",
+      "choices": [
+        {
+          "label": "Ask her to sing it again",
+          "line": "She sings it again, slower, so you can write the verses down. There is a verse for a river you have never heard of, between two you have. She shrugs. It was in the song when she learned it."
+        },
+        {
+          "label": "Listen, and watch the islands",
+          "line": "You listen to the song and watch the islands come up out of the haze, and the boat keeps time with neither."
+        }
+      ]
+    },
+    {
       "id": "happening_tower_standing",
       "type": "happening",
       "title": "The tower, standing",
@@ -2442,6 +2575,27 @@
           "grants": [
             "discovery_mask_niche"
           ]
+        }
+      ]
+    },
+    {
+      "id": "happening_where_the_sea_was",
+      "type": "happening",
+      "title": "Where the sea was",
+      "occasion": "journey",
+      "field_maps": [
+        "field_map_lothal",
+        "field_map_dwarka"
+      ],
+      "prose": "The cart stops on a low rise for no reason you can see, and the driver gets down to stretch. Below, the dry ground runs out flat and pale to the west, with a darker line drawn across it like the mark a pot leaves on a table. The driver nods at it. That is where the sea came to, he says, when his mother was a girl.",
+      "choices": [
+        {
+          "label": "Ask how far it has gone",
+          "line": "He does not know how far. Far enough that the harbour at Dwarka sits on sand, he says, and the boats in it are houses now. He gets back up and the ox goes on without being asked."
+        },
+        {
+          "label": "Draw the line in the diary",
+          "line": "You draw the dark line and the flat ground past it. It is the first thing in the diary about Dwarka, and it is about water that is not there."
         }
       ]
     },

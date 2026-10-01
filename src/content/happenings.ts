@@ -654,6 +654,9 @@ const kindnessReturned: Template = ({ stranger, moment }, _roll, now) => {
  * not the first that can.
  */
 export const TEMPLATES: Readonly<Record<Occasion, readonly { kind: string; make: Template }[]>> = {
+  // Nothing woven for a crossing: a road's own happening is canon's, and where a road has none the
+  // crossing asks the `road` templates instead (`App.tsx`, after the journey).
+  journey: [],
   road: [
     { kind: 'tracks', make: tracks },
     { kind: 'dropped', make: dropped },

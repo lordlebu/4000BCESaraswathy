@@ -222,6 +222,18 @@ test('the overworld joins the two field maps, from where the cart leaves', async
   await sheet.locator('.look', { hasText: 'Narmada' }).getByRole('button', { name: 'Travel' }).click();
   await expect(sheet).toBeHidden();
 
+  // **The road, told** (Roads and Hands, phase 4): seen off at the cart point by its keeper, the
+  // road up the scarp, then arriving. The first time on a road is three cards.
+  const road = page.getByRole('dialog', { name: 'The road' });
+  await expect(road).toBeVisible();
+  await expect(road).toContainText('Up the scarp');
+  await road.getByRole('button', { name: 'Continue' }).click();
+  await expect(road).toContainText('The road up the scarp is the only part of the plateau anyone built');
+  await road.getByRole('button', { name: 'Continue' }).click();
+  await expect(road).toContainText('Narmada');
+  await road.getByRole('button', { name: 'Step down' }).click();
+  await expect(road).toHaveCount(0);
+
   // A different country: the plateau is large where Lothal is small, so the map is rebuilt, and
   // the cart sets the traveller down at the new map's own cart point -- standing in the High Camp.
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
