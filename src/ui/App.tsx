@@ -27,6 +27,8 @@ import { RecordTabs, type RecordTab } from './Records';
 import { PeoplePanel } from './PeoplePanel';
 import { met } from '../content/people';
 import { seedFromUrl } from './seed';
+import { SettlingSection } from './SettlingSection';
+import { settlingRoad } from '../content/settlingRoad';
 import { WorkshopPanel } from './WorkshopPanel';
 import { add as addToSatchel, canDo, distinct, emptySatchel, itemsHeld, remove as takeFromSatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
@@ -1508,6 +1510,21 @@ export function App() {
    * two chips on a small phone. Every refusal is a sentence, as the rail's are: why a holder will
    * not hear you yet, what a stage is short of. Asked of `content/homestead.ts` throughout.
    */
+  /**
+   * This map's road to settling, for the diary's lead section and the one "next" line in the notes.
+   * Read off the save like the place panel's view below; see `content/settlingRoad.ts`.
+   */
+  const road = useMemo(() => {
+    void homeTick;
+    const facts = { finished: (id: string) => isComplete(progress, id), met: metStrangers.current };
+    return settlingRoad(fieldMapId, homesteadOn(fieldMapId), {
+      standing: howKnownOn(fieldMapId, facts),
+      state: homesteadState(fieldMapId, journeyFlags.current),
+      helpedHere: peopleOfMap.filter((id) => holdings.helped.includes(id)).length,
+      carried: satchel
+    });
+  }, [homeTick, progress, fieldMapId, peopleOfMap, holdings, satchel]);
+
   const settling = useMemo<SettlingView | null>(() => {
     void homeTick;
     const here = standingOn ? groundAt(standingOn) : null;
@@ -1859,6 +1876,7 @@ export function App() {
             peopleCount={met(progress).length}
           />
         }
+        lead={<SettlingSection road={road} />}
         progress={progress}
         moment={moment}
         open={surface === 'progress'}
@@ -2103,6 +2121,7 @@ export function App() {
           surroundings: arrival?.surroundings ?? '',
           hint: arrival?.hint ?? '',
           whereNext: arrival?.whereNext ?? '',
+          goal: road?.next ?? '',
           fatigue: arrival?.fatigue ?? null,
           dusk: arrival?.dusk ?? null,
           discovered: arrival?.discovered ?? 0,

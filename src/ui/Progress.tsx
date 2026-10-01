@@ -30,6 +30,8 @@ export interface ProgressProps {
   onExportImage: () => void;
   onExportText: () => void;
   /** Tabs, when this panel is one of two records behind one door. See `Records.tsx`. */
+  /** What leads the diary: the map's road to settling. */
+  lead?: ReactNode;
   tabs?: ReactNode;
 }
 
@@ -44,13 +46,15 @@ export function Progress({
   replayUrl,
   onExportImage,
   onExportText,
-  tabs
+  tabs,
+  lead
 }: ProgressProps) {
   if (!open) return null;
 
   return (
     <Diary
       tabs={tabs}
+      lead={lead}
       progress={progress}
       moment={moment}
       open

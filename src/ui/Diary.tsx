@@ -140,6 +140,8 @@ export interface DiaryProps {
   footer?: ReactNode;
   /** Tabs, when this panel is one of two records behind one door. See `Records.tsx`. */
   tabs?: ReactNode;
+  /** What leads the page, under the heading: this map's road to settling. See `SettlingSection`. */
+  lead?: ReactNode;
 }
 
 export function Diary({
@@ -151,7 +153,8 @@ export function Diary({
   onOpenEnding,
   onOpenKit,
   footer,
-  tabs
+  tabs,
+  lead
 }: DiaryProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -194,6 +197,8 @@ export function Diary({
             Close
           </button>
         </header>
+
+        {lead}
 
         {!written ? (
           <p className="diary-empty">

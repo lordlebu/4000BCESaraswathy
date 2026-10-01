@@ -727,6 +727,7 @@ button.ghost:hover:not(:disabled) {
  * has a warning and not otherwise. */
 .dock[data-height='peek'] .journal-foot > .status,
 .dock[data-height='peek'] .journal-foot > .status-next,
+.dock[data-height='peek'] .journal-foot > .status-goal,
 .dock[data-height='peek'] .journal-foot > .muted {
   display: none;
 }
@@ -3518,3 +3519,12 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 .zoom-help-touch {
   display: none;
 }
+
+/* A map's road to settling, leading the diary. `content/settlingRoad.ts`. */
+.settling-steps { list-style: none; margin: 0.4rem 0 0; padding: 0; display: grid; gap: 0.5rem; }
+.settling-step { display: grid; grid-template-columns: 1.2rem 1fr; gap: 0.4rem; align-items: start; }
+.settling-step p { margin: 0.15rem 0 0; font-size: 0.85rem; color: var(--muted); }
+.settling-step[data-state='later'] { opacity: 0.6; }
+.settling-step[data-state='now'] .settling-mark { color: var(--accent); font-weight: 700; }
+/* The map's goal in the notes, above the landmark line it outranks. */
+.status-goal { font-weight: 600; }
