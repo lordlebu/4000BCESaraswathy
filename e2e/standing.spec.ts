@@ -16,7 +16,13 @@
 
 import { expect, test, type Page } from '@playwright/test';
 
-/** Plains at 9, 40: a cliff swift, a poison oleander, and dung cake on the ground. */
+/**
+ * Plains at 9, 40: a cliff swift, dhatura, and dung cake on the ground.
+ *
+ * It was a poison oleander until the 27 plants canon marks "can be met" began to grow (Roads and
+ * Hands, Phase 0): dhatura is one of them and won this tile, which is the one thing placing new
+ * species is allowed to do.
+ */
 const START = '/?seed=dock-8&hour=12&at=9,40';
 
 const SIZES = [
@@ -85,7 +91,7 @@ test('the animal, the plant and the material are all named, and so is what the a
   // assertion above.
   const row = page.locator('.standing-row');
   await expect(row).toContainText('Cliff Swift');
-  await expect(row).toContainText('Poison Oleander');
+  await expect(row).toContainText('Dhatura');
   await expect(row).toContainText('Dung cake');
 
   // **The one that matters most.** `routineFor` decides whether an animal can be approached and

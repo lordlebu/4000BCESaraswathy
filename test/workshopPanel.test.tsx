@@ -16,6 +16,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { WorkshopPanel } from '../src/ui/WorkshopPanel';
 import { openGround } from '../src/content/crafting';
 import { add, emptySatchel } from '../src/content/satchel';
+import { materials } from '../src/content/making';
 
 afterEach(cleanup);
 
@@ -124,5 +125,27 @@ describe('the workshop', () => {
     render(<WorkshopPanel station={null} {...base} satchel={emptySatchel()} onClose={onClose} />);
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('a chain from the workshop', () => {
+  it('offers a recipe whose parts can be made first, says so, and hands its id back', () => {
+    // A fish weir needs reed rope. Carrying plenty of everything raw and the tools -- but no rope --
+    // the weir is not
+    // makeable directly, and before this the button sat greyed while `craft` could have run the
+    // whole chain. It must be Ready now, with a line saying what it will make on the way.
+    const onMake = vi.fn();
+    let s = emptySatchel();
+    for (const m of materials) s = add(s, m.id, 30);
+    for (const tool of ['item_flint_knife', 'item_stone_adze', 'item_bow_drill', 'item_carry_basket']) s = add(s, tool, 1);
+    const { baseElement } = render(<WorkshopPanel station={null} {...base} satchel={s} onMake={onMake} />);
+
+    const first = Array.from(baseElement.querySelectorAll('.recipe-first'));
+    expect(first.length, 'some recipe should be offered by making its parts first').toBeGreaterThan(0);
+    const row = first[0]!.closest('li')!;
+    const make = row.querySelector('button')!;
+    expect(make.disabled).toBe(false);
+    fireEvent.click(make);
+    expect(onMake).toHaveBeenCalledTimes(1);
   });
 });

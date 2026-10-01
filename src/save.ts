@@ -152,6 +152,14 @@ export interface Journey {
    * record something that was already true of all of them.
    */
   characterId?: string;
+  /**
+   * Which field map the traveller is on.
+   *
+   * Optional on `characterId`'s precedent: absent means Lothal, which is where every journey written
+   * before this was kept began -- and, since nothing remembered otherwise, where a reload put them
+   * back. A `?map=` in the address still wins, so a link to the crossing opens the crossing.
+   */
+  fieldMapId?: string;
   discovered: string[];
   /**
    * The flora and fauna met, keyed by species id.
@@ -187,8 +195,13 @@ export interface Journey {
    *
    * Only the tiles somebody actually drew from are stored, and a node that has grown back to
    * full is deleted rather than kept, so an untouched world costs nothing here.
+   *
+   * **Kept per field map.** It was one flat record keyed `x,y,material`, with no map in the key --
+   * so reeds stripped at 12,30 on Lothal left 12,30 picked over on the Narmada as well, on ground
+   * the traveller had never stood on. An older save's flat `nodes` is read as Lothal's: nothing
+   * remembered which map it was, and Lothal is where those journeys were.
    */
-  nodes: Nodes;
+  nodesByMap: NodesByMap;
   /**
    * How much of the journey's time has been spent, in milliseconds.
    *
@@ -236,7 +249,7 @@ const empty = (): Journey => ({
   reached: false,
   progress: emptyProgress(),
   satchel: emptySatchel(),
-  nodes: noNodes(),
+  nodesByMap: {},
   travelled: 0,
   seenEvents: [],
   met: [],
@@ -292,6 +305,30 @@ function readSatchel(value: unknown): Satchel {
  * again -- which is the safe direction to be wrong in. The other way round would take something
  * from a player on the strength of a corrupted number.
  */
+/** What a journey has drawn down, by field map. */
+export type NodesByMap = Record<string, Nodes>;
+
+/** The map every save from before `nodesByMap` was walking on. */
+const NODES_BEFORE_MAPS = 'field_map_lothal';
+
+/**
+ * `nodesByMap` if the save has one, else the older flat `nodes` read as Lothal's. Each map's record
+ * goes through `readNodes`, so a malformed one is an untouched map rather than a thrown save.
+ */
+function readNodesByMap(parsed: { nodesByMap?: unknown; nodes?: unknown }): NodesByMap {
+  const byMap = parsed.nodesByMap;
+  if (byMap && typeof byMap === 'object' && !Array.isArray(byMap)) {
+    const out: NodesByMap = {};
+    for (const [mapId, nodes] of Object.entries(byMap as Record<string, unknown>)) {
+      const read = readNodes(nodes);
+      if (Object.keys(read).length > 0) out[mapId] = read;
+    }
+    return out;
+  }
+  const legacy = readNodes(parsed.nodes);
+  return Object.keys(legacy).length > 0 ? { [NODES_BEFORE_MAPS]: legacy } : {};
+}
+
 function readNodes(value: unknown): Nodes {
   if (!value || typeof value !== 'object') return noNodes();
   const out: Nodes = {};
@@ -369,12 +406,14 @@ export function loadJourney(seed: string): Journey {
       ? {
           discovered: Array.isArray(parsed.discovered) ? parsed.discovered : [],
           reached: parsed.reached === true,
-          nodes: readNodes(parsed.nodes)
+          nodesByMap: readNodesByMap(parsed)
         }
       : // The ground moved under this journey. What was known stands; the fog, the landmark and
         // what was drawn from each tile named ground that is not there any more.
-        { discovered: [], reached: false, nodes: fresh.nodes };
-    return { version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, ...knowledge, ...ground };
+        { discovered: [], reached: false, nodesByMap: fresh.nodesByMap };
+    // Outside both halves, like `characterId`: which country you are in survives either half moving.
+    const fieldMapId = typeof parsed.fieldMapId === 'string' ? parsed.fieldMapId : undefined;
+    return { version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, ...knowledge, ...ground, fieldMapId };
   } catch {
     localStorage.removeItem(key(seed));
     return empty();
@@ -390,10 +429,10 @@ export function loadJourney(seed: string): Journey {
  */
 export function saveJourney(
   seed: string,
-  journey: Omit<Journey, 'version' | 'knowledgeVersion' | 'progress' | 'satchel' | 'nodes' | 'travelled'> & {
+  journey: Omit<Journey, 'version' | 'knowledgeVersion' | 'progress' | 'satchel' | 'nodesByMap' | 'travelled'> & {
     progress?: Progress;
     satchel?: Satchel;
-    nodes?: Nodes;
+    nodesByMap?: NodesByMap;
     travelled?: number;
   }
 ): void {
@@ -404,7 +443,7 @@ export function saveJourney(
     const stored =
       journey.progress === undefined ||
       journey.satchel === undefined ||
-      journey.nodes === undefined ||
+      journey.nodesByMap === undefined ||
       journey.travelled === undefined
         ? loadJourney(seed)
         : null;
@@ -414,7 +453,7 @@ export function saveJourney(
       ...journey,
       progress: journey.progress ?? stored!.progress,
       satchel: journey.satchel ?? stored!.satchel,
-      nodes: journey.nodes ?? stored!.nodes,
+      nodesByMap: journey.nodesByMap ?? stored!.nodesByMap,
       travelled: journey.travelled ?? stored!.travelled
     };
     localStorage.setItem(key(seed), JSON.stringify(payload));

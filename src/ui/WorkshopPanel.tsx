@@ -21,8 +21,8 @@
 // row and says `needs to be done at a settlement`, which is the whole of how anyone learns that
 // places have capabilities at all.
 
-import { type Recipe, item, nameOf, process } from '../content/making';
-import type { Step } from '../content/making-chain';
+import { type Recipe, item, nameOf, process, recipes } from '../content/making';
+import { type Step, plan } from '../content/making-chain';
 import {
   type Bench,
   type Knows,
@@ -85,7 +85,30 @@ export function WorkshopPanel({
   const atStation = (r: Recipe) => station === null || station.processes.includes(r.process);
 
   const everythingReady = makeableNow(satchel, bench, knows).filter(atStation);
-  const near = withinReach(satchel, bench, knows).filter(atStation);
+  const reachable = withinReach(satchel, bench, knows).filter(atStation);
+
+  /**
+   * **What can be made by making its parts first.** `craft` has always run the whole chain --
+   * smelt, pour, cast, haft -- but the button only lit for a recipe makeable *directly*, so a chain
+   * could never be started from here and the work `making-chain.ts` does was unreachable. A recipe
+   * whose plan runs whole moves up to Ready, saying what it will make on the way; one that cannot
+   * stays Within reach with its reasons.
+   *
+   * Every known recipe is asked, not only the ones within reach: "within reach" means one of its
+   * own ingredients is carried, and a fish weir's ingredient is the rope that has not been made
+   * yet -- so the recipes a chain exists for are exactly the ones that list would never show.
+   */
+  const firstMakes = new Map<string, string[]>();
+  const directly = new Set(everythingReady.map((r) => r.id));
+  for (const r of recipes) {
+    if (directly.has(r.id) || !knows(r.id) || !atStation(r)) continue;
+    const run = plan(satchel, r.id, bench, knows);
+    if (run.blocked === null && run.steps.length > 1) {
+      firstMakes.set(r.id, run.steps.slice(0, -1).map((step) => step.made));
+    }
+  }
+  const chained = recipes.filter((r) => firstMakes.has(r.id));
+  const near = reachable.filter((r) => !firstMakes.has(r.id));
   const here = offeredHere(bench, knows).filter(atStation);
 
   /**
@@ -152,12 +175,15 @@ export function WorkshopPanel({
           </section>
         )}
 
-        {ready.length > 0 && (
+        {ready.length + chained.length > 0 && (
           <section className="diary-section">
             <h3>Ready</h3>
             <ul className="recipes">
               {ready.map((r) => (
                 <Makeable key={r.id} recipe={r} ready why={[]} onMake={onMake} />
+              ))}
+              {chained.map((r) => (
+                <Makeable key={r.id} recipe={r} ready why={[]} first={firstMakes.get(r.id)} onMake={onMake} />
               ))}
             </ul>
           </section>
@@ -182,7 +208,7 @@ export function WorkshopPanel({
           </section>
         )}
 
-        {ready.length === 0 && near.length === 0 && food.length === 0 && (
+        {ready.length === 0 && chained.length === 0 && near.length === 0 && food.length === 0 && (
           <p className="muted">
             {station
               ? `Nothing for the ${station.name.toLowerCase()} yet. Gather something it can work.`
@@ -229,11 +255,14 @@ function Makeable({
   recipe,
   ready,
   why,
+  first = [],
   onMake
 }: {
   recipe: Recipe;
   ready: boolean;
   why: string[];
+  /** What a chain makes before this, in order, when the parts are made too. */
+  first?: string[];
   onMake: (id: string) => void;
 }) {
   // The bare word -- `grinding`, not `process_grinding` -- which is what `PROCESS_MARK` keys on.
@@ -280,6 +309,9 @@ function Makeable({
           every one of them wanting four lines of "has 0" is a wall rather than a hint -- the
           player already knows they are empty-handed. The first reasons are the ones `blockedBy`
           puts first, which are the place and the tools. */}
+      {ready && first.length > 0 && (
+        <p className="recipe-first muted">Makes {first.join(', then ')} first.</p>
+      )}
       {!ready && why.length > 0 && (
         <ul className="recipe-why">
           {why.slice(0, 3).map((w) => (

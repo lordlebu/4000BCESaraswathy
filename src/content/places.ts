@@ -36,10 +36,12 @@ export interface FieldMap {
   neighbours: string[];
   /**
    * Where the cart, the boat or the line leaves this map from: the only places a traveller can go on
-   * to a neighbour. The first is where somebody arriving is set down. The owner's ruling of 27
+   * to a neighbour. The first is where somebody arriving is set down, unless `arrivesAt` says. The owner's ruling of 27
    * September -- maps are left from designated places, as a cart leaves a yard and not a field.
    */
   departsFrom: string[];
+  /** Where a traveller arriving is set down, when canon names somewhere other than the first cart point. */
+  arrivesAt: string | null;
   /**
    * The sky this place gets, as relative weights per weather.
    *
@@ -189,7 +191,7 @@ interface RawFieldMap {
   id: string; name: string; region: string; seed_biomes: string[];
   scale?: string; proportion?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
   climate?: Climate; coordinates?: { x: number; y: number }; relief?: string; vehicles?: string[];
-  departs_from?: string[]; landmass_edges?: Record<string, string>;
+  departs_from?: string[]; arrives_at?: string; landmass_edges?: Record<string, string>;
 }
 interface RawPoi {
   id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string; shore?: string;
@@ -241,6 +243,7 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   relief: m.relief ?? null,
   vehicles: m.vehicles ?? [],
   departsFrom: m.departs_from ?? [],
+  arrivesAt: m.arrives_at ?? null,
   arrival: m.arrival ?? '',
   continent: (continentOf.get(m.region) ?? 'jambhudweepa') as Landmass,
   landmassEdges: (m.landmass_edges ?? {}) as Partial<Record<MapEdge, Landmass>>
@@ -346,9 +349,18 @@ export function mayLeaveFrom(fieldMapId: string, standingOn: string | null): { o
   return { ok: false, why: `The cart leaves from ${where}.` };
 }
 
-/** Where somebody arriving on this map is set down: its first cart point, or null for its start. */
+/**
+ * Where somebody arriving on this map is set down: where canon says arrivals come in, else its first
+ * cart point, else null for its start.
+ *
+ * The two differ on the Aravali, which is left from the First Pier and the Far Landing but arrived
+ * at by the Rail-Head -- "the arrival, and the map's one ordinary place", which is what its arrival
+ * prose describes. Reading only the cart points set every arriving traveller down on a floating
+ * island in the middle of the strait.
+ */
 export function arrivalPoint(fieldMapId: string): string | null {
-  return fieldMap(fieldMapId)?.departsFrom[0] ?? null;
+  const map = fieldMap(fieldMapId);
+  return map?.arrivesAt ?? map?.departsFrom[0] ?? null;
 }
 
 export function neighboursOf(fieldMapId: string): FieldMap[] {

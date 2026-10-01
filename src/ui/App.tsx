@@ -34,7 +34,7 @@ import { carry, gatheredLine, standingLine } from '../content/gathering';
 import { rideFrom } from '../content/vehicles';
 import { canBoardAt, trackRoute } from '../world/crossing';
 import { tileHash } from '../world/rng';
-import { conditionOf, draw, noNodes, takeableAt, type Taking } from '../content/nodes';
+import { conditionOf, draw, noNodes, takeableAt, type Nodes, type Taking } from '../content/nodes';
 import { item, recipe } from '../content/making';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
@@ -131,9 +131,12 @@ import { Modal } from './Modal';
  * rather than throwing — this is a convenience, and must never break the game for someone who
  * mistypes one.
  */
-function fieldMapFromUrl(): string {
+function fieldMapFromUrl(saved?: string): string {
   const asked = new URLSearchParams(window.location.search).get('map')?.trim();
-  return asked && fieldMap(asked) ? asked : DEFAULT_FIELD_MAP;
+  if (asked && fieldMap(asked)) return asked;
+  // **Then the map the save was on**, so a reload without `?map=` no longer puts a traveller who
+  // crossed to the Narmada back on Lothal. The address still wins: a link is a deliberate ask.
+  return saved && fieldMap(saved) ? saved : DEFAULT_FIELD_MAP;
 }
 
 /**
@@ -209,7 +212,8 @@ export function App() {
   const [satchel, setSatchel] = useState(initialJourney.current.satchel ?? emptySatchel());
   // What the traveller has drawn down. The one piece of world state a save has to hold, because
   // it is the only thing about a tile that cannot be recomputed from the seed.
-  const [nodes, setNodes] = useState(initialJourney.current.nodes ?? noNodes());
+  // Kept per field map -- see `nodesByMap` in `save.ts` for the bug a single record was.
+  const [nodesByMap, setNodesByMap] = useState(initialJourney.current.nodesByMap ?? {});
 
   /**
    * The activity being played, or null when none is.
@@ -310,7 +314,17 @@ export function App() {
   // The three scales. `fieldMapId` is the country under foot; `poiId` is the authored place
   // being stood in, if any; a sub-location opens inside the place panel rather than here,
   // because going deeper into a ruin is not leaving it.
-  const [fieldMapId, setFieldMapId] = useState(fieldMapFromUrl);
+  // Read once, so the scene and React boot on the same map even if the address changes later.
+  const bootFieldMap = useRef(fieldMapFromUrl(initialJourney.current.fieldMapId));
+  const [fieldMapId, setFieldMapId] = useState(bootFieldMap.current);
+  // What this map has had drawn from it. Everything below reads `nodes` as before and never sees
+  // another map's; `setNodes` writes back under the map that is under foot.
+  const nodes = useMemo(() => nodesByMap[fieldMapId] ?? noNodes(), [nodesByMap, fieldMapId]);
+  const setNodes = useCallback(
+    (change: (n: Nodes) => Nodes) =>
+      setNodesByMap((all) => ({ ...all, [fieldMapId]: change(all[fieldMapId] ?? noNodes()) })),
+    [fieldMapId]
+  );
   // The same arrangement for what the night handler reads. Separate effect because these change on
   // a different rhythm -- the world once per map, the day once per night -- and bundling them would
   // make the comment above untrue of half its own dependency list.
@@ -447,6 +461,7 @@ export function App() {
         strangerId?: string | null;
         talk?: Talk | null;
         camp?: Encampment | null;
+        campStanding?: string | null;
         force?: { kind?: string; asked?: boolean };
       } = {}
     ): boolean => {
@@ -547,6 +562,9 @@ export function App() {
         rumourAt(poiId, journeyFlags.current) &&
         maybeHappens('arriving', here, null, `rumour:${poiId}`, {
           poiId,
+          campStanding: latest.current.world
+            ? (encampmentOn(latest.current.world, latest.current.fieldMapId, fieldPlaced.current, latest.current.day)?.id ?? null)
+            : null,
           force: { kind: 'rumour-kept', asked: true }
         })
       ) {
@@ -646,7 +664,8 @@ export function App() {
         reached,
         progress,
         satchel,
-        nodes,
+        nodesByMap,
+        fieldMapId,
         // The scene owns the clock and reports it with each step; this is only where it is kept
         // so the next boot can hand it back. Nought until the first tile is entered.
         travelled: travelledRef.current,
@@ -667,7 +686,7 @@ export function App() {
       window.removeEventListener('pagehide', flush);
       flush();
     };
-  }, [seed, collection, reached, progress, satchel]);
+  }, [seed, collection, reached, progress, satchel, nodesByMap, fieldMapId]);
 
   /**
    * What the person being talked to is, if they are also somebody who walks a circuit.
@@ -765,6 +784,9 @@ export function App() {
     setProgress(loaded.progress);
     // A new world is a new walk. What was in the satchel belonged to the old one.
     setSatchel(loaded.satchel);
+    // And what it had drawn down. This was never reloaded either, so a new seed's reed beds stood
+    // picked over wherever the old seed's had been.
+    setNodesByMap(loaded.nodesByMap);
     // And so did the events and the people in them. These were never reloaded here, so a new seed
     // inherited the old one's `seen` list and saved it as its own.
     seenEvents.current = loaded.seenEvents ?? [];
@@ -951,7 +973,7 @@ export function App() {
       // own line wins when it has one, because it says how the hands went as well as what was cut.
       setMemory(line || gatheredLine(underfoot.seed, underfoot.at, underfoot.biome, taken) || '');
     },
-    [underfoot, arrival?.day]
+    [underfoot, arrival?.day, setNodes]
   );
 
   /**
@@ -1751,7 +1773,7 @@ export function App() {
           seed={seed}
           discovered={initialJourney.current.discovered}
           travelled={initialJourney.current.travelled}
-          fieldMapId={fieldMapFromUrl()}
+          fieldMapId={bootFieldMap.current}
           characterId={characterId}
         />
       )}

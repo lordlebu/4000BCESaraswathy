@@ -3048,6 +3048,7 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
  * cannot make yet, so they are set as text rather than hidden behind a tooltip. */
 .recipe-why { list-style: none; margin: 0.3rem 0 0; padding: 0; }
 .recipe-why li { font-size: 0.8rem; color: var(--muted); font-style: italic; }
+.recipe-first { margin: 0.3rem 0 0; font-size: 0.8rem; font-style: italic; }
 
 /* The mark beside a material, an item or a craft. Decoration: every panel that draws one has
  * the name beside it, which is why the glyph is labelled with its category and not its name. */

@@ -199,7 +199,16 @@ test('the overworld joins the two field maps, from where the cart leaves', async
   await expect(sheet).toContainText('The cart leaves from the Camp in the Kilns.');
   await expect(sheet.getByRole('button', { name: 'Travel' }).first()).toBeDisabled();
 
-  // At the Camp in the Kilns, Lothal's cart point, it runs.
+  // At the Camp in the Kilns, Lothal's cart point, it runs -- on the fourth day of a journey, so a
+  // crossing that resets the clock shows. Written as the save would hold it: `travelled` is in the
+  // what-you-know half, which knowledge version 1 reads whatever the ground's version.
+  const FOURTH_DAY = 3.5 * 60 * 60 * 1000;
+  await page.addInitScript(
+    ([seed, travelled]) => {
+      localStorage.setItem(`south-of-tethys:${seed}`, JSON.stringify({ knowledgeVersion: 1, travelled }));
+    },
+    [SEED, FOURTH_DAY] as const
+  );
   await page.goto(`/?seed=${SEED}&map=field_map_lothal&at=poi_lothal_camp`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
@@ -219,4 +228,11 @@ test('the overworld joins the two field maps, from where the cart leaves', async
   await expect(page).toHaveURL(/map=field_map_narmada/);
   await expect(page).toHaveURL(/at=poi_high_camp/);
   await expect(page.locator('.place h2')).toHaveText(/High Camp/, { timeout: 20_000 });
+
+  // **The clock crossed too.** It used to restart at nought, so every crossing woke the traveller on
+  // the first morning, with the camps, the sky and every node's regrowth gone back with it.
+  const travelled = await page.evaluate(
+    () => (window as unknown as { __walker: () => { travelled: number } }).__walker().travelled
+  );
+  expect(travelled).toBeGreaterThanOrEqual(FOURTH_DAY);
 });

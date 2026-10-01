@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.38.0",
+  "canon_version": "2.39.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -349,6 +349,7 @@
         "poi_first_pier",
         "poi_far_landing"
       ],
+      "arrives_at": "poi_rail_head",
       "landmass_edges": {
         "north": "mainland_asia"
       }
