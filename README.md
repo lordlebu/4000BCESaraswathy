@@ -86,7 +86,7 @@ The browser suite needs `npx playwright install chromium` once.
 ## World content
 
 The flora and fauna canon lives in the **SouthOfTethys** repository, not here — 232 fauna and 112
-flora among 765 entities, alongside the field maps, discoveries, questions, people, happenings, homesteads and vocabulary
+flora among 798 entities, alongside the field maps, discoveries, questions, people, happenings, homesteads, sayings and vocabulary
 the game is made of. [docs/bestiary.md](docs/bestiary.md) is the prose document those species were
 originally extracted from, kept for provenance; it is no longer upstream of anything. 344 species across seven
 regions, from the Saraswati deltas to the Asura-tainted horrors.
