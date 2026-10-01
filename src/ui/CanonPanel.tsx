@@ -9,7 +9,7 @@
 // for anyone who just cloned the repo and ran `npm run dev`.
 
 import { useCallback, useState } from 'react';
-import { askAbout, loreFor, type CanonLore, type CanonStatus, type Place } from './canonClient';
+import { askAbout, loreFor, portalLink, type CanonLore, type CanonStatus, type Place } from './canonClient';
 
 export interface CanonPanelProps {
   place: Place | null;
@@ -59,7 +59,15 @@ export function CanonPanel({ place, status }: CanonPanelProps) {
             <ul className="canon-sources">
               {lore.sources.map((s) => (
                 <li key={s.entity_id}>
-                  <span className="canon-name">{s.name ?? s.entity_id}</span>
+                  {/* The whole entry is in the lore portal, which opens beside the game. */}
+                  <a
+                    className="canon-name"
+                    href={portalLink(s.entity_id) ?? undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {s.name ?? s.entity_id}
+                  </a>
                   <span className="canon-type">{s.type}</span>
                   <span className="canon-distance">{s.distance.toFixed(2)}</span>
                 </li>

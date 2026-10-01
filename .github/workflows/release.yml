@@ -32,7 +32,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  # Write, for one thing only: attaching the zip to a GitHub release when the run is for a tag.
+  contents: write
 
 # Two releases racing would leave itch.io holding whichever finished last, not whichever is newer.
 concurrency:
@@ -99,3 +100,21 @@ jobs:
           unzip -q butler.zip -d butler
           chmod +x butler/butler
           ./butler/butler push dist "${{ vars.ITCH_TARGET }}:html5" --userversion "${{ steps.version.outputs.name }}"
+      - name: Attach the zip to a GitHub release
+        # The second place a release goes, and the one that needs no account anywhere: the
+        # repository's Releases page, with the same zip itch.io was sent, for anyone who wants to
+        # keep a copy or play it from a folder. Tags only -- a run by hand has no version worth a
+        # release page. `gh` is on every GitHub runner and uses the run's own token.
+        if: ${{ github.ref_type == 'tag' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          zip="south-of-tethys-${{ steps.version.outputs.name }}.zip"
+          if gh release view "${{ github.ref_name }}" >/dev/null 2>&1; then
+            gh release upload "${{ github.ref_name }}" "$zip" --clobber
+          else
+            notes="Play in the browser: https://lordlebu.itch.io/south-of-tethys"
+            notes="$notes -- or unzip this and serve the folder from any local web server."
+            notes="$notes The world it is set in: https://south-of-tethys-canon.vercel.app/"
+            gh release create "${{ github.ref_name }}" "$zip" --title "South of Tethys ${{ github.ref_name }}" --notes "$notes"
+          fi

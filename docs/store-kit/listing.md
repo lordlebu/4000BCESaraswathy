@@ -59,6 +59,11 @@ Walk with WASD or the arrow keys, or tap where you want to go. Zoom with the + a
 mouse wheel or a pinch. Press E to take what the ground offers and R to unroll your bedding.
 It plays in the browser on a computer, tablet or phone. Your journey is saved in this browser.
 
+READ THE WORLD
+
+Everything the game does not show -- the peoples, the events, the eras -- is in the canon:
+https://south-of-tethys-canon.vercel.app/
+
 CONTACT
 
 Questions, bugs and thoughts: https://x.com/landofmyst
@@ -85,6 +90,7 @@ Questions, bugs and thoughts: https://x.com/landofmyst
 | Generative AI | Yes: graphics, text and dialogue, code. No audio. |
 | Price | Free |
 | Contact | <https://x.com/landofmyst> |
+| Lore portal | <https://south-of-tethys-canon.vercel.app/> |
 
 ## Screenshots
 

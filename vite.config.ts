@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -34,9 +35,45 @@ function serviceWorker(): Plugin {
   };
 }
 
+// `tools/` is CommonJS and outside the type checker's reach, so it is required and typed here.
+const { squeeze } = createRequire(import.meta.url)('./tools/squeeze-png.js') as {
+  squeeze: (png: Buffer) => Buffer;
+};
+
+/**
+ * Passes every PNG through `tools/squeeze-png.js` on its way into `dist/`.
+ *
+ * Lossless, and only in the build: the files in the repository are not touched, so no art changes
+ * and git keeps no second copy of 240 binaries. See the tool for what it does and why it is safe.
+ * A file keeps the name Vite gave it, which was hashed from the original bytes -- still one name
+ * per painting, which is all a cache needs.
+ */
+function squeezePngs(): Plugin {
+  return {
+    name: 'south-of-tethys:squeeze-pngs',
+    apply: 'build',
+    generateBundle(_options, bundle) {
+      let before = 0;
+      let after = 0;
+      for (const [name, file] of Object.entries(bundle)) {
+        if (file.type !== 'asset' || !name.endsWith('.png') || typeof file.source === 'string') continue;
+        const original = Buffer.from(file.source);
+        const squeezed = squeeze(original);
+        before += original.length;
+        after += squeezed.length;
+        file.source = squeezed;
+      }
+      const mb = (bytes: number) => (bytes / 1024 / 1024).toFixed(1);
+      this.info(`paintings: ${mb(before)} MB squeezed to ${mb(after)} MB, no pixel changed`);
+    }
+  };
+}
+
 export default defineConfig({
   base,
-  plugins: [react(), serviceWorker()],
+  // The worker is stamped after the paintings are squeezed, though its stamp is made of file names
+  // and those do not move.
+  plugins: [react(), squeezePngs(), serviceWorker()],
   test: {
     // Vitest owns test/ only. Without this it would also collect e2e/*.spec.ts and try to run
     // Playwright's browser tests in Node, where they cannot work.

@@ -10,9 +10,16 @@ with every platform compared is a published page, kept current:
 |---|---|---|
 | itch.io | <https://lordlebu.itch.io/south-of-tethys> | `release.yml`, on a `v*` tag or by hand |
 | GitHub Pages | the repository's Pages URL | `pages.yml`, on every push to `main` |
+| GitHub Releases | the repository's Releases page | `release.yml`, on a `v*` tag: the same zip itch.io was sent |
+| Lore portal | <https://south-of-tethys-canon.vercel.app/> | the canon repo's `deploy-canon-service.yml`, on every canon change |
 
 **v0.1.0 went to itch.io on 30 September 2026**, from the merge of #224, and the page was made
-public the same day. Pages is the build that is always current; itch.io is a release somebody chose.
+public the same day. **v0.1.1** followed that evening from #226: the lighter first load, the store
+kit, the installable build and the princess icon. Pages is the build that is always current; itch.io is a release somebody chose.
+
+The lore the game does not ship is read at <https://south-of-tethys-canon.vercel.app/>, the canon
+service's own page, published from the canon repository with every canon change. The in-game canon
+panel links each entry it names to it.
 
 Players reach the owner at <https://x.com/landofmyst>. It is in the listing's description, and
 belongs in every new listing.
@@ -117,10 +124,40 @@ The difference is the painted animals. `preload` loaded every map's — twelve f
 the reasoning that they would be "a few KB each", and the first map has none. It now loads the
 ones that walk the map being drawn.
 
-What is left is 0.62 MB of code and data and 3.88 MB of ground: `terrain` alone is 1.6 MB and
-`places` 0.7. The animals that remain are 0.3–0.6 MB a view, at up to 740 pixels across for a
-figure drawn at about 100. Both are a question for the art pipeline rather than the loader, and
-neither has been touched.
+### Squeezed in the build, losslessly
+
+The paintings are written by nine builders, each with a small PNG encoder of its own that neither
+chooses a filter per row nor asks zlib for its best. `tools/squeeze-png.js` re-encodes every PNG on
+its way into `dist/` -- adaptive filters, an opaque alpha channel dropped, the highest deflate level
+-- then decodes its own output and ships the original if a single pixel differs. The files in the
+repository are not touched, so no art changes and git keeps no second copy of 240 binaries.
+
+| Map | Before | After |
+|---|---|---|
+| Lothal | 4.50 | **3.89** |
+| Narmada | 7.24 | 5.70 |
+| Dwarka | 5.82 | 4.72 |
+
+The whole build went from 26.6 MB of paintings to 23.6. The cost is build time: about 35 seconds
+more, on every build CI makes.
+
+### What is left, and why it was not taken
+
+**The animal paintings are not oversized.** An earlier note here said they were several times the
+size they are drawn at. That is true at the default zoom and false at the closest: four zoom steps
+take a sivatherium drawn 193 pixels tall to 772, from a painting 694 tall. Shrinking them would
+blur the animals exactly when a player leans in to look.
+
+**The two further savings both change the art, so they are the owner's call:**
+
+| Option | `terrain.png` | What it costs |
+|---|---|---|
+| Today, squeezed | 1,316 KB | nothing |
+| WebP, lossless | about 880 KB | a new image encoder in the build, a dependency |
+| Quantised to 256 colours | about 200 KB | the painting: fifty thousand colours become 256 |
+
+Quantising is the large one -- roughly a sixth of the weight -- and it is a change to how the ground
+looks, which is not a thing to do to somebody's art on the grounds of a number.
 
 ## The store kit
 
