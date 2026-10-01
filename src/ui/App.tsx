@@ -44,7 +44,9 @@ import { creatureFor, floraFor } from '../content/species';
 import { type Collection, emptyCollection, metOnTile, size } from '../content/collection';
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
-import { hasBegun, loadJourney, saveJourney } from '../save';
+import { clearJourney, hasBegun, loadJourney, saveJourney } from '../save';
+import { Opening } from './Opening';
+import { coachLine, MORNING_GOAL } from '../content/coach';
 import {
   advance,
   answer,
@@ -214,6 +216,12 @@ export function App() {
   const [satchel, setSatchel] = useState(initialJourney.current.satchel ?? emptySatchel());
   // The recipe pinned in the workshop, kept on screen in the dock -- see `PinnedRecipe`.
   const [pinned, setPinned] = useState<string | null>(initialJourney.current.pinned ?? null);
+  // The opening, while it plays over the map booting behind it. See `Opening.tsx`.
+  const [opening, setOpening] = useState(false);
+  // The first morning's hints, on unless the player turned them off. See `content/coach.ts`.
+  const [hints, setHints] = useState(() => readShowing().hints ?? true);
+  // Where the traveller first stood this session, so the coach knows they have walked.
+  const firstAt = useRef<string | null>(null);
   // What the traveller has drawn down. The one piece of world state a save has to hold, because
   // it is the only thing about a tile that cannot be recomputed from the seed.
   // Kept per field map -- see `nodesByMap` in `save.ts` for the bug a single record was.
@@ -378,10 +386,11 @@ export function App() {
   // flag lives in the reducer, and the reducer is pure. An option to stop looking at something that
   // comes back whenever the game is opened is not really an option, which is what was reported.
   // `preferences.ts` says why this is not in the save.
-  const [ui, dispatch] = useReducer(surfaceReducer, initialSurface, (base) => ({
-    ...base,
-    ...readShowing()
-  }));
+  const [ui, dispatch] = useReducer(surfaceReducer, initialSurface, (base) => {
+    // Only the ribbon is the reducer's; `hints` is App's own state (see `coach`).
+    const { satchelRibbon } = readShowing();
+    return satchelRibbon === undefined ? base : { ...base, satchelRibbon };
+  });
   const { surface, interrupts, standingOn, placeOpen, satchelRibbon, dockHeight, talkingTo } = ui;
   useEffect(() => {
     latest.current.poiId = standingOn;
@@ -391,8 +400,8 @@ export function App() {
   // under Node, and a `localStorage` write in it would be both a side effect and a browser global
   // in the one file most carefully kept free of them.
   useEffect(() => {
-    writeShowing({ satchelRibbon });
-  }, [satchelRibbon]);
+    writeShowing({ satchelRibbon, hints });
+  }, [satchelRibbon, hints]);
 
   // The scene owns the clock and says when it turns. React used to run its own timer off the
   // same formulas, which is two clocks agreeing by luck -- and they would have drifted the
@@ -1525,6 +1534,31 @@ export function App() {
     });
   }, [homeTick, progress, fieldMapId, peopleOfMap, holdings, satchel]);
 
+  /**
+   * The first morning's one line, or null: after the opening, until the knife is made. Read off the
+   * save each time, like everything the coach knows; see `content/coach.ts`.
+   */
+  const coach = useMemo(() => {
+    if (!hints || !journeyFlags.current.includes('coach:on') || journeyFlags.current.includes('coach:done')) return null;
+    const here = arrival ? `${arrival.at.x},${arrival.at.y}` : null;
+    if (here && firstAt.current === null) firstAt.current = here;
+    return coachLine({
+      moved: here !== null && firstAt.current !== null && here !== firstAt.current,
+      knows: (id) => progress.recipes.includes(id),
+      made: (id) => progress.made.includes(id),
+      carried: (id) => satchel[id] ?? 0
+    });
+  }, [hints, arrival, progress, satchel, opening]);
+
+  // The morning is over when the knife is made: the coach stands down and Uma's mat is pinned, so
+  // the dock carries on where the hints stop.
+  useEffect(() => {
+    if (coach !== null || !journeyFlags.current.includes('coach:on') || journeyFlags.current.includes('coach:done')) return;
+    if (!progress.made.includes('recipe_flint_knife')) return;
+    journeyFlags.current = [...journeyFlags.current, 'coach:done'];
+    setPinned((p) => p ?? MORNING_GOAL);
+  }, [coach, progress]);
+
   const settling = useMemo<SettlingView | null>(() => {
     void homeTick;
     const here = standingOn ? groundAt(standingOn) : null;
@@ -1799,6 +1833,10 @@ export function App() {
         />
       )}
 
+      {opening && fieldMap(fieldMapId)?.prologue && (
+        <Opening prologue={fieldMap(fieldMapId)!.prologue!} onDone={() => setOpening(false)} />
+      )}
+
       <FrontDoor
         open={atTheDoor}
         canContinue={hasBegun(initialJourney.current)}
@@ -1807,9 +1845,27 @@ export function App() {
         onChoose={chooseCharacter}
         onContinue={() => setAtTheDoor(false)}
         onBegin={() => {
-          // `generate` with the same seed is exactly "this world again, from nothing" -- it
-          // clears fog, collection, satchel and progress, which is what starting over means.
+          // **Starting over clears the save first.** `generate` reloads whatever the seed has
+          // stored, so on a seed already walked "start a new walk" kept the old progress, satchel
+          // and flags -- the opposite of what the door's second press promises.
+          clearJourney(seed);
           generate(seed);
+          // A new walk starts where the address asks, else on the opening map -- never on the map
+          // the old walk ended on.
+          const map = fieldMapFromUrl();
+          bootFieldMap.current = map;
+          setFieldMapId(map);
+          const prologue = fieldMap(map)?.prologue ?? null;
+          if (prologue) {
+            // **Among the people, not on a tile the generator picked**: the opening ends at the
+            // kilns, so the walk begins there. Written as `?at=`, which the scene reads as it boots.
+            const url = new URL(window.location.href);
+            const start = arrivalPoint(map);
+            if (start && !url.searchParams.has('at')) url.searchParams.set('at', start);
+            window.history.replaceState(null, '', url);
+            journeyFlags.current = ['opening:seen', 'coach:on'];
+            if (url.searchParams.get('opening') !== 'skip') setOpening(true);
+          }
           setAtTheDoor(false);
         }}
       />
@@ -1848,6 +1904,8 @@ export function App() {
         onToggleNotes={() => dispatch({ type: 'toggle', surface: 'here' })}
         satchelRibbon={satchelRibbon}
         onToggleSatchelRibbon={() => dispatch({ type: 'toggle-satchel-ribbon' })}
+        hints={hints}
+        onToggleHints={() => setHints((h) => !h)}
         placeName={standingOn ? poi(standingOn)?.name ?? null : null}
         placeOpen={placeOpen}
         onTogglePlace={() => dispatch({ type: 'toggle-place' })}
@@ -2129,6 +2187,7 @@ export function App() {
           memory,
         }}
         sky={skyPhase === null ? null : { phase: skyPhase, weather: moment?.weather }}
+        coach={coach?.line ?? null}
         pinned={{ recipeId: pinned, satchel, bench }}
         standing={{
           creature: arrival?.entry?.creature ?? { name: null, note: '', species: null },

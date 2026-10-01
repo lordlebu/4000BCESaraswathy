@@ -25,6 +25,11 @@ const KEY = 'varuna:showing';
 export interface Showing {
   /** Whether the satchel strip is on screen. */
   satchelRibbon: boolean;
+  /**
+   * Whether the first morning's one-line hints show (`content/coach.ts`). On unless turned off: a
+   * player who knows the verbs can say so once, in the map sheet, and never see them again.
+   */
+  hints?: boolean;
 }
 
 // **The field notes' own toggle is not here, and that is a decision rather than an omission.**
@@ -41,10 +46,13 @@ export function readShowing(): Partial<Showing> {
     if (!raw) return {};
     const parsed: unknown = JSON.parse(raw);
     if (typeof parsed !== 'object' || parsed === null) return {};
-    const { satchelRibbon } = parsed as Partial<Showing>;
+    const { satchelRibbon, hints } = parsed as Partial<Showing>;
     // Only a real boolean. A stored `"false"` or a `0` from some future version must not be read as
     // a choice -- an unreadable preference is no preference, and the default is a good one.
-    return typeof satchelRibbon === 'boolean' ? { satchelRibbon } : {};
+    return {
+      ...(typeof satchelRibbon === 'boolean' ? { satchelRibbon } : {}),
+      ...(typeof hints === 'boolean' ? { hints } : {})
+    };
   } catch {
     return {};
   }

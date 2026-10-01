@@ -40,6 +40,7 @@ nothing, throws nothing, and quietly keeps drawing the fallback. That has happen
 | `scenes/` | the gesture, or gesture-variant | `rest-camp.png` | `resting.png` |
 | `places/` | canon's **poi id, whole** | `poi_glass_scar.png` | `glass-scar.png` |
 | `things/` | canon's **item id, whole** | `item_bronze_knife.png` | `bronze-knife.png` |
+| `prologue/` | canon's prologue `art`, whole | `prologue-1-road.png` | `road.png`, `prologue_1_road.png` |
 
 Species ids are rewritten on the way in and everything else is kept whole. `making.ts` states why
 at the top of its own file: the making layer cross-references far harder than the species layer, so

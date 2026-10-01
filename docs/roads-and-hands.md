@@ -67,3 +67,37 @@ It corrected the first audit in one place and found worse in two:
 Canon's `check_playability.py` now prints the same per map (report-only until Phase 1 flips
 `MAKING_PER_MAP_GATES`). The two measure differently on purpose: canon's cannot see rarity, and
 this test can.
+
+## Phase 1: crafting you can follow (canon 2.40.0-2.41.0)
+
+- `content/sources.ts` says where every missing thing comes from: the animal or plant and the
+  ground for a material, what goes into a made thing, which carried things would do a tool's job
+  and how one is made, and who teaches a recipe and where they stand. The workshop puts that line
+  under each reason and lists every recipe somebody could show you; the settling panel names a
+  source for each need ("Reed rope: made from reed fibre").
+- Pin one recipe (`PinnedRecipe`), and its needs stay in the dock while you gather. A readout,
+  never a control: the dock cannot spare a 44-pixel chip at peek.
+- Canon closed every gap the Phase 0 test measured: fibre cord and `process_twisting` (reed rope
+  by hand), sea salt, deer hide, fish bone from river fish, a timber salt box, the palmyra palm and
+  fossil ammonite on Dwarka, Okhi teaching the bone awl and the storage jar. `KNOWN_GAPS` is empty.
+- The Vedda's sayings (`content/sayings.ts`), credited in the world only.
+
+## Phase 2: settling you can see coming
+
+`content/settlingRoad.ts` reads four steps off the save -- be known here, ask for ground, raise it,
+settle -- and the diary leads with them (`SettlingSection`). The notes carry the next step at
+reading height.
+
+## Phase 3: the opening
+
+- Canon 2.42.0 gives Lothal a `prologue`: the Walking Song alone, then four plates with two lines
+  and a saying each. `Opening.tsx` plays it as a page of its own over the map booting behind it,
+  with Skip and Continue on every card, and draws a stand-in until each painting lands
+  (`node tools/build-plates.js --prologue` builds them from `assets/source/prologue/`).
+- A new walk starts at the Camp in the Kilns, and **starting over now clears the save**: on a seed
+  already walked, the door's "start a new walk" used to reload the old progress, satchel and flags.
+- The first morning (`content/coach.ts`): one line at a time in the dock -- walk, talk to the
+  weaver, cut four reeds, twist them into rope, knap a flint knife -- each done when the save says
+  so. Uma's mat is not the first craft: it needs a loom frame and a working tool. So the morning
+  ends at the knife and pins the mat. Hints can be turned off in the map sheet.
+- `?opening=skip` passes over it for a test that sets out through the door.
