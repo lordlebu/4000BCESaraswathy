@@ -115,6 +115,12 @@ const COVERAGE: Record<string, Coverage> = {
     adapted: ['id', 'title', 'occasion', 'field_maps', 'at', 'requires', 'prose', 'choices'],
     skipped: [...EDITORIAL]
   },
+  'places.sayings': {
+    // What the Vedda say on the road, adapted by `sayings` in `src/content/sayings.ts` for the
+    // opening, the rides and the fire. `type` is canon's own tag and says nothing the folder does not.
+    adapted: ['id', 'name', 'text', 'attribution', 'carried_by', 'occasions', 'field_maps'],
+    skipped: [...EDITORIAL, 'type']
+  },
   'places.homesteads': {
     // What the player may build on a map, adapted by `homesteads` in `src/content/homestead.ts`.
     // Grounds, worries and stages are read whole; their fields are the settling loop's.
