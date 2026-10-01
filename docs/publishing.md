@@ -15,7 +15,10 @@ with every platform compared is a published page, kept current:
 
 **v0.1.0 went to itch.io on 30 September 2026**, from the merge of #224, and the page was made
 public the same day. **v0.1.1** followed that evening from #226: the lighter first load, the store
-kit, the installable build and the princess icon. Pages is the build that is always current; itch.io is a release somebody chose.
+kit, the installable build and the princess icon. **v0.1.2**, on 1 October from #227, squeezes every
+painting losslessly, links the canon panel into the lore portal, and is the first release also
+published on the repository's Releases page. Pages is the build that is always current; itch.io is
+a release somebody chose.
 
 The lore the game does not ship is read at <https://south-of-tethys-canon.vercel.app/>, the canon
 service's own page, published from the canon repository with every canon change. The in-game canon
@@ -159,6 +162,9 @@ blur the animals exactly when a player leans in to look.
 Quantising is the large one -- roughly a sixth of the weight -- and it is a change to how the ground
 looks, which is not a thing to do to somebody's art on the grounds of a number.
 
+**Ruled on 1 October 2026: no quantising.** The ground keeps its colours. Do not propose it again on
+the grounds of weight; the lossless squeeze is where this stops.
+
 ## The store kit
 
 [`docs/store-kit/listing.md`](store-kit/listing.md) holds the name, the one-line pitch, the
@@ -194,18 +200,44 @@ that again after changing the worker.
 The worker runs in production builds only. The browser suite runs against the dev server and never
 meets it.
 
+## Jams
+
+Looked for on 1 October 2026, and **the honest answer is that jams are a poor fit for this game.**
+Two rules, common to most of them, each rule it out:
+
+- **Most want work made during the jam.** The Hallo-Horror and Cozy Fall jams allow old code and
+  assets but not a finished game; an existing project is a submission only to the few jams that say
+  so outright.
+- **Many refuse generative AI, and say so in the rules.** The paintings here came from image models.
+  The *Finish Your Game* jam -- run every November by Portland Indie Game Squad, unjudged, and the
+  one jam whose whole point is an existing project -- states that games "made with or featuring
+  Generative AI ... will not be accepted". That rule is the jam's to make, and the answer is not to
+  enter rather than to argue the disclosure.
+
+So a jam is entered only when its page says both that an existing project is welcome and nothing
+against AI-made art, and the theme is one this game already answers. None open now does. Check the
+rules page, not the jam's summary, every time; they change between years.
+
 ## What is next
 
-In order. The published plan carries the reasoning and the full table.
+**Done:** the itch.io description carries the READ THE WORLD section and links the lore portal
+(1 October 2026).
 
-1. **Release v0.1.1**, which carries the lighter first load and the installable build to itch.io.
-2. **Post the first devlog**, from `store-kit/devlog-01.md`.
-3. **IndieDB and Newgrounds**, by hand, from `store-kit/other-listings.md`. Read Newgrounds' rule on
-   AI-made art in games before submitting there.
-4. **The Microsoft Store**, from the same file, once Pages is serving the installable build.
-5. **The weight of the ground and the animals**, above: 1.6 MB of terrain, and paintings several
-   times the size they are drawn at.
-6. **Jams that accept an existing game**: narrative, worldbuilding and slow-game jams only.
+**Waiting on the owner, by hand, because none of them can be published from git:**
+
+- **IndieDB and Newgrounds**, from `store-kit/other-listings.md`. Neither has an upload API. Read
+  Newgrounds' rule on AI-made art in games before submitting there.
+- **The Microsoft Store**, from the same file. It needs a developer account and a name reserved in
+  Partner Center before anything can be automated, and the first submission is by hand in any case.
+  Once it is listed, an update could be pushed from `release.yml`; that is worth doing then and not
+  before.
+
+Everything that *can* go from git already does: Pages on every merge, itch.io and GitHub Releases
+on every `v*` tag, and the lore portal on every canon change.
+
+**Ruled, 1 October 2026:** no quantising of the ground art; and the lore portal shows every field of
+every entity, `notes` included, guarded so that nobody can use up its free plan -- see *The lore
+reader is the portal on Vercel* in the canon repository's `docs/decisions.md`.
 
 Open, and the owner's: whether the listing is Teen or Mature, given what canon holds; free or pay
 what you want.

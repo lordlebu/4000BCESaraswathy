@@ -125,7 +125,8 @@ npm run test:e2e
 
 ### itch.io, jams and other portals
 
-**The game is live at <https://lordlebu.itch.io/south-of-tethys>** (v0.1.0, 30 September 2026).
+**The game is live at <https://lordlebu.itch.io/south-of-tethys>** (since 30 September 2026; each
+release is also on this repository's Releases page with its zip).
 [docs/publishing.md](docs/publishing.md) records who it is published for, how the listing was set,
 and what stopped the first release.
 
