@@ -85,10 +85,10 @@ Questions, bugs and thoughts: https://x.com/landofmyst
 | Genre | Adventure |
 | Tags | exploration, worldbuilding, story-rich, atmospheric, relaxing, cozy, crafting, procedural-generation, 2d, singleplayer |
 | Audience | Teens and adults |
-| Rating | Teen, until the owner rules otherwise |
+| Rating | Teen (owner's ruling, 1 October 2026) |
 | Content notes | No combat, no violence shown. The wider canon holds wars and a massacre; say so if a release brings any of it into play. |
 | Generative AI | Yes: graphics, text and dialogue, code. No audio. |
-| Price | Free |
+| Price | Free (owner's ruling, 1 October 2026) |
 | Contact | <https://x.com/landofmyst> |
 | Lore portal | <https://south-of-tethys-canon.vercel.app/> |
 

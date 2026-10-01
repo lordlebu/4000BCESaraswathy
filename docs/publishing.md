@@ -39,7 +39,9 @@ had recommended the ad-funded portals:
   the Microsoft Store, and Steam once the game is sold. Never Poki, CrazyGames, Y8, Coolmath Games
   or the ad networks that syndicate a game to sites nobody chose — their catalogues are built
   around quick action games for a young audience.
-- **Rating.** Teen or above wherever a platform asks. Never "everyone".
+- **Rating.** **Teen**, on the owner's ruling of 1 October 2026, wherever a platform asks. Never
+  "everyone".
+- **Price.** **Free**, on the same ruling. No payments and no donation prompt on itch.io.
 - **Words.** The pitch leads with the world and its history. Tags say worldbuilding, exploration,
   story-rich and slow, and do not say action or casual.
 
@@ -239,5 +241,5 @@ on every `v*` tag, and the lore portal on every canon change.
 every entity, `notes` included, guarded so that nobody can use up its free plan -- see *The lore
 reader is the portal on Vercel* in the canon repository's `docs/decisions.md`.
 
-Open, and the owner's: whether the listing is Teen or Mature, given what canon holds; free or pay
-what you want.
+**Ruled, 1 October 2026:** rated **Teen**, and **free**. Nothing in publishing is waiting on a
+decision now; the Microsoft Store waits on the owner's time, by choice.
