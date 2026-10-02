@@ -708,6 +708,10 @@ retrospective. The rules, because they are rules rather than history:
   own pixels (`groundColourAt`), not `biomes.json`, whose colours are the placeholders the paintings
   replaced -- prints on swamp, snow and sand, a faint line on dry ground and over the rails, barely
   anything over river and mountain (`game/campArt.ts`).
+- **A camp stands on the grass, never on the edge.** Every tile it touches is `campable` -- camp
+  ground, no road, rail, rope, plank, bridge or ford, and no rim over sea or open sky -- and a site
+  counts only if the whole camp fits; otherwise no camp. The alms step's temple, which draws two tiles
+  wide, likewise needs island grass on all eight sides (`NEEDS_GRASS_ROUND`); the mill does not.
 - **Nobody is drawn standing in the sea.** `untangle` steps only onto walkable ground, and the scene
   hides anybody whose tile is not walkable. `test/campLife.test.ts` replays every placement on every
   map to hold it.

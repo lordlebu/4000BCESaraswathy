@@ -22,12 +22,11 @@
 
 import campLifeData from '../../data/camp-life.json';
 import type { Point, World } from '../world/types';
-import { isWalkable } from '../world/generate';
 import { tileHash, weightedPickFor } from '../world/rng';
 import { givenNames } from './places';
 import { lookFor } from './looks';
 import { CAMP_DAY, MEET_HOURS, RUNNER_PACE, VISIT_HOURS, VISIT_PACE_CAP } from './tiers';
-import { FIRST_DAY, PROPS_AROUND, campSpots, type CampKind, type Encampment, type WayIn } from './encampments';
+import { FIRST_DAY, PROPS_AROUND, campSpots, campable, type CampKind, type Encampment, type WayIn } from './encampments';
 import {
   STRANGER_CULTURES,
   alongAt,
@@ -216,9 +215,8 @@ export function doingLine(kind: CampKind, slot: CampSlot, activity: CampActivity
 
 
 /**
- * Where people can stand at a camp: walkable ground round the fire that no prop stands on and no
- * road, ford or rail runs over -- the near ring first, then the one beyond, each in the camp's own
- * seeded order.
+ * Where people can stand at a camp: `campable` ground round the fire that no prop stands on -- the
+ * near ring first, then the one beyond, each in the camp's own seeded order.
  */
 export function standingRoom(world: World, camp: Encampment): Point[] {
   const { around } = campSpots(world, camp);
@@ -229,8 +227,8 @@ export function standingRoom(world: World, camp: Encampment): Point[] {
     for (let dx = -2; dx <= 2; dx++) {
       const p = { x: camp.at.x + dx, y: camp.at.y + dy };
       if (props.has(`${p.x},${p.y}`)) continue;
-      const t = world.tiles[p.y]?.[p.x];
-      if (!t || !isWalkable(t) || t.road || t.ford || t.bridge || t.track) continue;
+      // On the grass, never the edge: the same rule as the fire and the tent (`campable`).
+      if (!campable(world, p)) continue;
       out.push({ p, ring: Math.max(Math.abs(dx), Math.abs(dy)), r: tileHash(world.seed, p.x, p.y, `camp-room:${camp.id}`) });
     }
   }

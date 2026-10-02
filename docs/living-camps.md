@@ -149,6 +149,22 @@ Cheap: both searches run once and are cached, and the way's sprites are small im
 tile as the fog lifts. The Aravali gained the most: its ways are a third the length they were when the
 line was refused, and it now has runners and visitors.
 
+**On the grass, never the edge** (the owner's note, from a screenshot of the first island camps: a
+tent on the rim and a sack on the plank bridge). Everything a camp puts down -- fire, shelter, things,
+people, a visitor -- stands only on `campable` ground: ground a camp pitches on, with no road, rail,
+rope, plank, bridge or ford, and nothing beside it that nobody can stand on, so no rim over the sea or
+the open sky; on a sky island every neighbour is the island's own grass. A site counts only if the
+whole camp fits (`campFits`); where it does not, there is no camp. Measured over eight seeds there are
+still 536-2,737 sites a map, camps stand on half the days as before, and 27 of 56 Aravali camps are on
+an island.
+
+**The temple at the alms step stands in the grass too.** It draws two tiles wide and three tall, and on
+the island's rim it hung over the open sky. Its tile and all eight round it must now be island grass
+(`NEEDS_GRASS_ROUND` in `world/fieldMap.ts`). It moved on 9 of 10 seeds measured and nothing else did
+-- the Grit Mill stands on a single tile and stays where it is, on the owner's word. **A journey
+already under way keeps its temple where it was**: the world is baked on first visit (`world/bake.ts`)
+and a placement change reaches only new journeys, which is that file's whole purpose.
+
 **A landmass with no road.** On seed `h` the Aravali's northern landmass has a place (the Kept Stones)
 and not one road. A camp there leaves from the nearest place instead (`wayIn`'s last fallback).
 

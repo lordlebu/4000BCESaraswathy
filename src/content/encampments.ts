@@ -64,6 +64,68 @@ export const SKY_TURN_ONE_IN = 2;
 
 const candidates = new WeakMap<World, Map<string, Point[]>>();
 
+const NEIGHBOURS: readonly Point[] = [
+  { x: -1, y: -1 },
+  { x: 0, y: -1 },
+  { x: 1, y: -1 },
+  { x: -1, y: 0 },
+  { x: 1, y: 0 },
+  { x: -1, y: 1 },
+  { x: 0, y: 1 },
+  { x: 1, y: 1 }
+];
+
+/**
+ * Whether anything of a camp may stand here: its fire, its shelter and things, its people, a
+ * visitor. **On the grass, never on the edge** -- the owner's ruling of 2 October 2026, after the
+ * first camps on a sky island put a tent on the rim and a sack of salt on the plank bridge.
+ *
+ * Ground a camp pitches on (`CAMP_GROUND`), with no road, rail, rope, plank, bridge or ford on it,
+ * and no rim: nothing beside it is ground nobody can stand on, so nothing is pitched on a cliff over
+ * the sea or the open sky. On a sky island every neighbour must be the island's own grass, so the
+ * planks across its notches and the ropes down from its edge are kept clear as well.
+ */
+export function campable(world: World, p: Point): boolean {
+  const t = world.tiles[p.y]?.[p.x];
+  if (!t || !CAMP_GROUND.has(t.biome) || !isWalkable(t)) return false;
+  if (t.road || t.ford || t.bridge || t.track || t.plank) return false;
+  for (const d of NEIGHBOURS) {
+    const n = world.tiles[p.y + d.y]?.[p.x + d.x];
+    if (!n) return false;
+    // Something to stand on, the railway and planks aside: the sea and the open sky are the rim.
+    if (!isWalkable({ biome: n.biome })) return false;
+    if (t.biome === 'sky_island' && (n.biome !== 'sky_island' || n.plank || n.track)) return false;
+  }
+  return true;
+}
+
+/**
+ * Whether a whole camp fits here: the fire's own tile, three of the seven tiles a shelter and its
+ * things can take (`campSpots`), and room within two tiles for its three people and a visitor.
+ * Where it does not, there is no camp here -- never a camp squeezed onto the edge.
+ */
+function campFits(world: World, at: Point): boolean {
+  if (!campable(world, at)) return false;
+  const forProps = [
+    { x: 0, y: -1 },
+    { x: -1, y: -1 },
+    { x: 1, y: -1 },
+    { x: -1, y: 0 },
+    { x: 1, y: 0 },
+    { x: -1, y: 1 },
+    { x: 1, y: 1 }
+  ].filter((d) => campable(world, { x: at.x + d.x, y: at.y + d.y })).length;
+  if (forProps < 3) return false;
+  let room = 0;
+  for (let dy = -2; dy <= 2; dy++) {
+    for (let dx = -2; dx <= 2; dx++) {
+      if ((dx !== 0 || dy !== 0) && campable(world, { x: at.x + dx, y: at.y + dy })) room++;
+    }
+  }
+  // Three things, three people and a visitor.
+  return room >= 7;
+}
+
 /**
  * Where a camp could pitch on this map: dry ground, off every way, away from places and roads.
  *
@@ -87,8 +149,8 @@ export function campGround(world: World, places: readonly Point[]): Point[] {
   const out: { p: Point; d: number }[] = [];
   for (const row of world.tiles) {
     for (const t of row) {
-      if (!CAMP_GROUND.has(t.biome) || !isWalkable(t) || t.road || t.ford || t.bridge || t.track || t.plank) continue;
       const p = { x: t.x, y: t.y };
+      if (!campFits(world, p)) continue;
       if (!far(p, places, AWAY_FROM_PLACES)) continue;
       const d = toRoad(p);
       if (d < AWAY_FROM_ROADS) continue;
@@ -194,10 +256,7 @@ export const PROPS_AROUND: Readonly<Record<CampKind, number>> = {
  * alike, and only walkable ground off the road.
  */
 export function campSpots(world: World, camp: Encampment): { fire: Point; around: Point[] } {
-  const open = (d: Point): boolean => {
-    const tile = world.tiles[camp.at.y + d.y]?.[camp.at.x + d.x];
-    return tile !== undefined && isWalkable(tile) && !tile.road;
-  };
+  const open = (d: Point): boolean => campable(world, { x: camp.at.x + d.x, y: camp.at.y + d.y });
   const shuffled = (ds: Point[], salt: string) =>
     ds
       .map((d) => ({ d, r: tileHash(world.seed, camp.at.x + d.x, camp.at.y + d.y, `${salt}:${camp.id}`) }))

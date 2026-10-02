@@ -476,6 +476,24 @@ describe('a point of interest stands on the ground canon gave it', () => {
       ).toBe('sky_island');
     }
   });
+
+  it('stands the alms step within the island\'s grass, never on its rim or beside a plank', () => {
+    // The owner's note: the temple draws two tiles wide, and on the rim it hung over the open sky.
+    // Every tile round it is the island's own grass. The mill, on its single tile, is not held to it.
+    for (const seed of ['varuna', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'lothal', 'x']) {
+      const scene = buildFieldMap(fieldMap('field_map_aravali')!, { seed });
+      const at = scene.placed.find((p) => p.poi.id === 'poi_alms_step')!.at;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const t = scene.world.tiles[at.y + dy]?.[at.x + dx];
+          expect(
+            t && t.biome === 'sky_island' && !t.plank && !t.track,
+            `seed ${seed}: beside the temple at ${at.x + dx},${at.y + dy} is ${t?.biome}${t?.plank ? ' (plank)' : ''}`
+          ).toBe(true);
+        }
+      }
+    }
+  });
 });
 
 describe('nothing is built on the railway', () => {

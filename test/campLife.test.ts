@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { isWalkable } from '../src/world/generate';
 import { fieldMap, fieldMaps } from '../src/content/places';
-import { CAMP_KINDS, PROPS_AROUND, campSpots, encampmentOn, wayIn, type Encampment } from '../src/content/encampments';
+import { CAMP_KINDS, PROPS_AROUND, campSpots, campable, encampmentOn, wayIn, type Encampment } from '../src/content/encampments';
 import {
   CAMP_SLOTS,
   busyLine,
@@ -373,5 +373,53 @@ describe('nobody is drawn standing in the sea', () => {
       }
     }
     expect(checked).toBeGreaterThan(1000);
+  });
+});
+
+describe('a camp stands on the grass, never on the edge', () => {
+  it('puts its fire, its things and its people only on campable ground, with room for all of them', () => {
+    // The owner's ruling, after the first island camps put a tent on the rim and a sack on the
+    // planks: on the grass or not at all. Every camp on every map, every hour.
+    let camps = 0;
+    for (const map of fieldMaps) {
+      for (const seed of SEEDS) {
+        const { world, out } = campsOn(map.id, seed);
+        const seen = new Set<string>();
+        for (const { camp, day } of out) {
+          if (seen.has(camp.id)) continue;
+          seen.add(camp.id);
+          camps++;
+          expect(campable(world, camp.at), `${map.id} ${seed} ${camp.id}: the fire is on the edge`).toBe(true);
+          const props = campSpots(world, camp).around.slice(0, PROPS_AROUND[camp.kind]);
+          expect(props.length, `${camp.id}: no room for its things, which would stack on the fire`).toBe(PROPS_AROUND[camp.kind]);
+          for (const p of props) expect(campable(world, p), `${camp.id}: a prop at ${p.x},${p.y} is on the edge`).toBe(true);
+          for (let h = 0; h < 24; h += 3) {
+            for (const f of campPlacements(world, camp, day, atHour(h + 0.2))) {
+              if (!f.at || f.activity === 'road' || f.activity === 'trade' || f.activity === 'home') continue;
+              expect(campable(world, f.at), `${camp.id} ${f.slot} at ${f.at.x},${f.at.y} at ${h}:00`).toBe(true);
+            }
+          }
+        }
+      }
+    }
+    expect(camps).toBeGreaterThan(50);
+  });
+
+  it('keeps off the rim of a sky island and off its planks', () => {
+    const island = (biome: string, extra: object = {}) => ({ biome, ...extra });
+    // A 5x5 island with sky all round, and a plank in the middle of one side.
+    const tiles = [0, 1, 2, 3, 4, 5, 6].map((y) =>
+      [0, 1, 2, 3, 4, 5, 6].map((x) => ({
+        x,
+        y,
+        ...(x === 0 || y === 0 || x === 6 || y === 6 ? island('open_sky') : island('sky_island'))
+      }))
+    );
+    tiles[3]![5] = { x: 5, y: 3, ...island('sky_island', { plank: true }) };
+    const world = { width: 7, height: 7, tiles } as never;
+    expect(campable(world, { x: 3, y: 3 }), 'the middle of the island').toBe(true);
+    expect(campable(world, { x: 1, y: 3 }), 'the rim, beside open sky').toBe(false);
+    expect(campable(world, { x: 4, y: 3 }), 'beside the plank').toBe(false);
+    expect(campable(world, { x: 5, y: 3 }), 'the plank itself').toBe(false);
   });
 });
