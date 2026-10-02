@@ -331,6 +331,27 @@ node tools/build-plates.js --events --force --only=settle-negotiation --crop=64,
 node tools/build-plates.js --events --force --only=settle-home
 ```
 
+## What arrived — 2 October 2026
+
+**Both settlement pages**, sent from a phone, each 1200 × 896 PNG, re-encoded to RGBA through the
+browser suite's Chromium like the camp paintings in `docs/event-prompts.md`.
+
+- **`settle-home-dwarka`** -- painted on a paper sheet with a torn edge all round; cropped inside it
+  with ten pixels or more to spare. The wind-pump, the well and trough, the glasshouse with its lamp,
+  people coming up from the town and the old walls where the sea was: everything the prompt asked.
+- **`settle-home-narmada`** -- full-bleed, with a four-pointed sparkle mark in the bottom right; cut
+  at x 1040, left of the mark, and 30 pixels down so the traveller's feet stay in. The windmill keeps
+  most of its top sail, and the university halls stand on the right.
+
+`Ending.tsx` already looked for `settle-home-<map>` first, so neither needed code; a panel test now
+asserts each map reaches its own file, because a mistyped map id would fall back to Lothal's
+painting without a sound.
+
+```bash
+node tools/build-plates.js --events --force --only=settle-home-dwarka --crop=62,40,1080
+node tools/build-plates.js --events --force --only=settle-home-narmada --crop=0,30,1040
+```
+
 ## After the art arrives
 
 Drop the files in `assets/source/dump/`. The windmill stages build with the same keying and scaling

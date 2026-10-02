@@ -91,6 +91,15 @@ node tools/build-plates.js --events --force --only=woven-camp-meal-adventurers -
 node tools/build-plates.js --events --force --only=woven-camp-meal-dacoits --crop=100,84,950
 ```
 
+**And `woven-camp`**, the general camp card, 1260 × 848 JPEG: no border or mark, so a centred 4:3
+cut takes 65 pixels off each side, keeping the figure in ochre standing at the right. It is the last
+fallback on the camp cards -- arriving, and talking to a camp's people -- behind each kind's own
+painting, and all four kinds have one, so today nothing reaches it.
+
+```bash
+node tools/build-plates.js --events --force --only=woven-camp --crop=65,0,1130
+```
+
 ## What arrived — 27 September 2026
 
 **`woven-small-talk` and `woven-rumour-kept`**, the two Phase 2 paintings, both 768 × 512 and both

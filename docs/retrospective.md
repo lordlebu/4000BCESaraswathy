@@ -211,8 +211,8 @@ discipline applied to its two largest files, and that debt is now the main struc
    both-sides-green fault above would have been caught by one.
 5. **Plan the bundle before the next content batch.** Loading each map's data only when that map
    is entered is the next step beyond withholding fields.
-6. **The three paintings still asked:** `woven-camp`, `settle-home-dwarka` and
-   `settle-home-narmada`.
+6. **The three paintings asked last all arrived on 2 October 2026:** `woven-camp`,
+   `settle-home-dwarka` and `settle-home-narmada`. No painting is outstanding.
 
 ## How the numbers were taken
 
