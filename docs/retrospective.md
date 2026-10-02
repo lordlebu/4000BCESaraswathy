@@ -221,11 +221,16 @@ discipline applied to its two largest files, and that debt is now the main struc
    half is done:** the game has `.claude/hooks/push-gate.sh` too. The Settings check is the owner's.
 4. **A cross-repository contract test** that loads canon and the game's adapters together and
    fails when they disagree about what an entity is called or where it is offered. Every
-   both-sides-green fault above would have been caught by one.
+   both-sides-green fault above would have been caught by one. **Made unnecessary on 2 October
+   2026:** the making layer, where every such fault lived, moved to the game, and
+   `test/gameOwned.test.ts` resolves the ids that still cross in both directions.
 5. **Plan the bundle before the next content batch.** Loading each map's data only when that map
    is entered is the next step beyond withholding fields.
 6. **The three paintings asked last all arrived on 2 October 2026:** `woven-camp`,
    `settle-home-dwarka` and `settle-home-narmada`. No painting is outstanding.
+7. **A lighter game** (`docs/a-lighter-game.md`), after making moved to the game on 2 October 2026:
+   rungs that need only understanding, and regrowth tiers sorted by how much the game uses a material
+   rather than by real-world lore. Not started.
 
 ## How the numbers were taken
 
