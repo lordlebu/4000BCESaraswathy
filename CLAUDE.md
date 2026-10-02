@@ -522,10 +522,28 @@ others went, and the map draws a pip per person at each place's door. Nobody is 
 place; the pips and the panel are how a player knows. See `docs/settling-in.md`.
 
 **Anybody walking near can be talked to, and the row shares the rest row's slot.** The scene reports
-who is within six tiles (`travellers-nearby`) and the rail names the nearest, greyed until you are
-beside them. While somebody is near and resting is refused for the daylight, the talk row stands
-where the rest row would be: people walk only by day, and on a 360-pixel phone a fourth chip ran off
-the screen. `e2e/road-talk.spec.ts` asserts the rail is no longer than it was.
+who is within six tiles (`travellers-nearby`) and the rail names one of them. While somebody is near
+and resting is refused for the daylight, the talk row stands where the rest row would be: people
+walk only by day, and on a 360-pixel phone a fourth chip ran off the screen. `e2e/road-talk.spec.ts`
+asserts the rail is no longer than it was.
+
+**Pressing it from a distance calls out, and they wait.** The row used to be greyed until you were
+beside them, and a leg is walked in a fixed share of the day whatever its length, so a traveller on a
+long one out-walks the player: the row named people nobody could catch. Now `hail` holds them on
+their tile, the scene walks the player up by the tap-to-walk path, and React opens the conversation
+when `travellers-nearby` reports them beside -- the same signal walking up unasked gives. The rules
+are `stillWaiting` and `delayAfter` in `content/travellers.ts`. **Patience is measured on the
+clock only standing still advances**, because walking spends the day's clock and six steps of
+mountain would outlast any wait measured there; and a traveller let go is walked by the day's
+clock *less the time they stood*, so they go on from where they stopped instead of jumping down the
+road. Neither is saved.
+
+**Which person the row means is chosen, sticky, and marked.** `talkTarget` in `content/presence.ts`:
+somebody the player tapped on the map stays chosen while in view; otherwise the nearest, and a tie
+stays with whoever it already meant rather than flicking on the id. React pushes the answer as
+`talk-target` and the scene draws a small turmeric marker over that person's head, because two
+strangers equally near have names the player has not learned yet. A tap on a traveller is
+`traveller-tapped` and does exactly what pressing their row would.
 
 **A traveller's state is said, not drawn.** Somebody who walks a circuit carries three chips above
 the words — where they are going, what they are, what they speak — and no mount is drawn under

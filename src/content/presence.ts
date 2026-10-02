@@ -19,7 +19,7 @@
 // Pure: no React, no Phaser and no clock. The caller brings the day and what the scene reported.
 
 import { fieldMap, npcsAt, poi, type Npc } from './places';
-import { travellersOn, type TravellerState } from './travellers';
+import { travellersOn, type Traveller, type TravellerState } from './travellers';
 
 /** What the scene said about one traveller, as `travellers-changed` carries it. */
 export interface Reported {
@@ -129,39 +129,95 @@ export interface RoadTalk {
   /** The canon person, whose conversation opens. Null for a stranger, who walks with you instead. */
   npcId: string | null;
   label: string;
-  /** Why not yet, or null when they are beside you. */
-  blocked: string | null;
+  /** Whether they are beside you, so pressing opens at once rather than calling them to stop. */
+  beside: boolean;
+  /** What else the row has to say: that they will wait, and who else could be meant. */
+  detail: string | null;
+}
+
+/** Somebody the scene reports near the player, as `travellers-nearby` carries them. */
+export interface NearbyTraveller {
+  id: string;
+  npcId: string | null;
+  steps: number;
+  beside: boolean;
+}
+
+/** What a player calls somebody on the road: a name if canon gave one or they told you theirs. */
+function roadName(traveller: Traveller, fieldMapId: string, met: readonly string[]): string {
+  if (traveller.npcId) return traveller.name;
+  const known = met.includes(`${fieldMapId}:${traveller.id}`) && traveller.givenName !== null;
+  return known ? traveller.givenName! : `the ${traveller.role.split(',')[0]}`;
+}
+
+const capital = (s: string) => s[0]!.toUpperCase() + s.slice(1);
+
+/**
+ * Which of the people near the player the row is about.
+ *
+ * **Reported from play: with two people the same distance away, nobody could tell who the row
+ * meant.** Somebody the player chose by tapping them stays chosen for as long as they are in view.
+ * Otherwise it is the nearest, and between two equally near it stays with whoever it already meant,
+ * so the row does not flick from one name to the other as they walk. The id breaks a tie only when
+ * nothing else can, which is the order `nearby` already sorts by.
+ */
+export function talkTarget(
+  near: readonly NearbyTraveller[],
+  chosen: string | null,
+  previous: string | null
+): NearbyTraveller | null {
+  if (near.length === 0) return null;
+  const picked = chosen ? near.find((t) => t.id === chosen) : undefined;
+  if (picked) return picked;
+  const closest = Math.min(...near.map((t) => t.steps));
+  const tied = near.filter((t) => t.steps === closest);
+  return tied.find((t) => t.id === previous) ?? tied[0]!;
 }
 
 /**
- * The action-rail row for the nearest person on the road, or null when nobody is near.
+ * The action-rail row for one person on the road, or null when nobody is near.
  *
- * **Greyed until you are beside them, and that is the teaching.** Reported from play: nobody on the
- * road could be spoken to. A row that appears as somebody comes into view, saying who they are and
- * to walk up beside them, is how a player learns the road has people to meet. `near` is the scene's
- * `travellers-nearby`, closest first; `met` is the save's list of strangers met, keyed by map.
+ * **Anybody in view can be talked to, and pressing from a distance calls out.** It used to be
+ * greyed until you were beside them, and a traveller on a long leg out-walks the player, so the
+ * row named people who could never be reached. Now they stop and wait (`Waiting` in
+ * `travellers.ts`), the player walks up, and the conversation opens on arrival. `near` is the
+ * scene's `travellers-nearby`, closest first; `met` is the save's list of strangers met, keyed by
+ * map; `chosen` and `previous` are `talkTarget`'s.
  */
 export function roadTalk(
-  near: readonly { id: string; npcId: string | null; beside: boolean }[],
+  near: readonly NearbyTraveller[],
   fieldMapId: string,
-  met: readonly string[]
+  met: readonly string[],
+  chosen: string | null = null,
+  previous: string | null = null
 ): RoadTalk | null {
-  const first = near[0];
-  if (!first) return null;
-  const traveller = travellersOn(fieldMapId).find((t) => t.id === first.id);
-  if (!traveller) return null;
-  const known = met.includes(`${fieldMapId}:${traveller.id}`) && traveller.givenName !== null;
-  const who = traveller.npcId
-    ? traveller.name
-    : known
-      ? traveller.givenName!
-      : `the ${traveller.role.split(',')[0]}`;
-  const Who = who[0]!.toUpperCase() + who.slice(1);
+  const roster = travellersOn(fieldMapId);
+  const target = talkTarget(
+    near.filter((t) => roster.some((r) => r.id === t.id)),
+    chosen,
+    previous
+  );
+  if (!target) return null;
+  const traveller = roster.find((t) => t.id === target.id)!;
+  const who = roadName(traveller, fieldMapId, met);
+  const others = near
+    .filter((t) => t.id !== target.id)
+    .flatMap((t) => {
+      const other = roster.find((r) => r.id === t.id);
+      return other ? [roadName(other, fieldMapId, met)] : [];
+    });
+  const parts: string[] = [];
+  if (!target.beside) parts.push(`${capital(who)} will stop and wait while you walk up.`);
+  if (others.length > 0) {
+    const list = others.length === 1 ? others[0]! : `${others.slice(0, -1).join(', ')} and ${others.at(-1)}`;
+    parts.push(`${capital(list)} ${others.length === 1 ? 'is' : 'are'} near too: tap somebody on the map to choose.`);
+  }
   return {
     travellerId: traveller.id,
     npcId: traveller.npcId,
     label: traveller.npcId ? `Talk to ${who}` : `Walk with ${who}`,
-    blocked: first.beside ? null : `${Who} is on the road nearby. Walk up beside them.`
+    beside: target.beside,
+    detail: parts.length > 0 ? parts.join(' ') : null
   };
 }
 

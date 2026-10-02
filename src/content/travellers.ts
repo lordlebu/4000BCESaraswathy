@@ -672,6 +672,75 @@ export function nearby(
 }
 
 /**
+ * Somebody the player called to, standing on the road until they are reached.
+ *
+ * **Reported from play: a traveller on the road could not be caught.** A leg is walked in a fixed
+ * share of the day whatever its length, so on a long one a traveller covers more ground per hour
+ * than the player does, and the row that said "walk up beside them" asked for something the clock
+ * made impossible from behind. Calling out is the answer a person on a road would give: they stop,
+ * turn, and wait for you to come up.
+ *
+ * Times are in days, and there are two clocks, because the scene keeps two: `stopped` is on the day's
+ * clock, which walking spends, and `since` is on the clock that only standing still advances. The
+ * caller turns milliseconds into days, because this module owns no clock.
+ */
+export interface Waiting {
+  id: string;
+  /** The tile they stopped on, which they keep while they wait. */
+  at: Point;
+  /** When they stopped, on the day's clock. What they are held back by once they go on. */
+  stopped: number;
+  /** When their patience started, on the standing clock: when they stopped, then when reached. */
+  since: number;
+  /** Whether the player has come up beside them yet. */
+  reached: boolean;
+}
+
+/**
+ * How long somebody waits, on the clock only standing still advances: an hour of the day, which is
+ * two and a half real minutes.
+ *
+ * **Not on the day's clock, because walking up would spend it.** A step of mountain is three
+ * eightieths of a day, so six of them is more than five hours on the dial -- patience measured
+ * there ran out on a player walking straight at them, which is the fault this exists to fix. On
+ * the standing clock the walk costs seconds, and what runs the wait down is a player who has
+ * stopped coming. The same hour again once reached, which is a conversation and a little more.
+ */
+export const WAITS_FOR = 1 / 24;
+
+/**
+ * Whether somebody called to is still waiting, and what has changed about it.
+ *
+ * Null once they go on. They go on when the player walks out of sight of them, when the player
+ * walks away after reaching them -- a conversation is over when one of you leaves -- and when they
+ * have waited long enough. Reaching them restarts the wait, so the time spent walking up is not
+ * taken out of the time spent talking. `standing` is the standing clock, in days.
+ */
+export function stillWaiting(waiting: Waiting, player: Point, standing: number): Waiting | null {
+  const steps = Math.max(Math.abs(waiting.at.x - player.x), Math.abs(waiting.at.y - player.y));
+  if (steps > NEARBY_TILES) return null;
+  if (waiting.reached && steps > 1) return null;
+  if (standing - waiting.since > WAITS_FOR) return null;
+  if (!waiting.reached && steps <= 1) return { ...waiting, since: standing, reached: true };
+  return waiting;
+}
+
+/**
+ * How far behind their own hours somebody is, once they go on from a wait.
+ *
+ * **So they go on from where they stopped, rather than jumping to where they would have been.**
+ * A traveller's position is a pure function of the hour, so one who waited half an hour would
+ * otherwise reappear half an hour down the road the moment they were let go. The scene walks them
+ * by its clock less this delay, which keeps the walk continuous. Nothing is saved: a reload forgets
+ * the delay and puts them back on their own hours, which is the position model's promise, and so
+ * does a night, because a delay only ever matters to somebody on the road.
+ */
+/** `clock` is the day's clock, in days, when they go on. */
+export function delayAfter(delay: number, waiting: Waiting, clock: number): number {
+  return delay + Math.max(0, clock - waiting.stopped);
+}
+
+/**
  * The stops of a circuit, resolved to tiles.
  *
  * Takes the placed points of interest rather than looking them up, because where a place landed is
