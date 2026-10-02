@@ -59,6 +59,35 @@ resampler read a *square* and squashed it into 4:3, and the edge check tested a 
 had cropped a landscape kind before, so it had never shown. The crop now takes the kind's own
 shape: `size` is the width and the height follows the aspect.
 
+## What arrived — 2 October 2026
+
+**The four meal paintings**, `woven-camp-meal-drovers`, `-pilgrims`, `-adventurers` and `-dacoits`,
+sent from a phone through chat in four sizes and two formats (the pilgrims' a 1168 × 784 JPEG, the
+rest PNG). The builder reads PNG only, so each was re-encoded at full size through the Chromium the
+browser suite already has, rather than adding a decoder.
+
+Each was built with an explicit crop, three of them for a reason the hard requirements name:
+
+- **pilgrims** -- a "Grok" mark in the bottom right corner; cropped above and left of it.
+- **drovers** -- a painted paper border all round; cropped inside it.
+- **adventurers** -- nothing to take off: the painting is exactly 4:3 with no border or mark, and is
+  used whole. It carries a spear leaning on the tent, and **the owner kept it** (2 October 2026):
+  an adventurers' camp has its gear lying about. A first cut cropped it away under the plan's
+  *nothing held up, nothing drawn*; that rule is about nothing being held up *at* anybody, and the
+  owner read the picture rightly. Nobody in it holds a weapon.
+- **dacoits** -- a paper border, and a crayon logo with a sparkle in the bottom right; cropped
+  inside the paper and above and left of both.
+
+They show figures with faces, which the event brief asks to avoid. These were accepted as painted:
+the people at a camp are the camp's own, and the card names them.
+
+```bash
+node tools/build-plates.js --events --force --only=woven-camp-meal-pilgrims --crop=150,0,987
+node tools/build-plates.js --events --force --only=woven-camp-meal-drovers --crop=110,90,980
+node tools/build-plates.js --events --force --only=woven-camp-meal-adventurers --crop=0,0,1448
+node tools/build-plates.js --events --force --only=woven-camp-meal-dacoits --crop=100,84,950
+```
+
 ## What arrived — 27 September 2026
 
 **`woven-small-talk` and `woven-rumour-kept`**, the two Phase 2 paintings, both 768 × 512 and both
