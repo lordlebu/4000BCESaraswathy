@@ -27,7 +27,7 @@ import { yieldsAt } from '../src/content/gathering';
 import { canMake } from '../src/content/crafting';
 import { recipes } from '../src/content/making';
 import { add, count, emptySatchel, type Satchel } from '../src/content/satchel';
-import { homesteadOn } from '../src/content/homestead';
+import { carriedFor, homesteadOn } from '../src/content/homestead';
 
 const SEEDS = Array.from({ length: 12 }, (_, i) => `critical-path-${i}`);
 /** A material counts as findable if it is on this many of the twelve seeds... */
@@ -106,7 +106,7 @@ function gapsOn(mapId: string): string[] {
     if (!outputs.every((o) => count(made, o) > 0)) gaps.push(id);
   }
   for (const stage of homesteadOn(mapId)?.stages ?? []) {
-    for (const need of stage.needs) if (count(made, need.id) === 0) gaps.push(`stage:${stage.id}:${need.id}`);
+    for (const need of stage.needs) if (carriedFor(made, need) === 0) gaps.push(`stage:${stage.id}:${need.id ?? `#${need.tag}`}`);
   }
   return gaps.sort();
 }

@@ -37,6 +37,7 @@ import { canMake, make, makeableNow, openGround, withinReach } from '../src/cont
 import { gather } from '../src/content/gathering';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap } from '../src/content/places';
+import { featureNameAt } from '../src/world/features';
 
 describe('a rung can need a tool', () => {
   const tooled = discoveries.flatMap((d) =>
@@ -545,6 +546,11 @@ describe('the ground gives what is standing on it', () => {
           checked += 1;
           if (m.wonFrom.length === 0) continue;          // the ground itself
           if (m.wonFrom.some((id) => standing.has(id))) continue;
+          // A fallen log, driftwood or bamboo drawn on the tile is a source you can see: the log
+          // you see is the log you take (`world/features.ts`).
+          const drawn = featureNameAt(seed, tile.x, tile.y, tile.biome);
+          if ((drawn === 'log' || drawn === 'driftwood') && m.id === 'material_windfall_wood') continue;
+          if (drawn === 'bamboo' && m.id === 'material_bamboo_cane') continue;
           wrong.push(`${tile.x},${tile.y} offers ${m.id}, won from ${m.wonFrom.join('/')}, but ${
             [...standing].join('/') || 'nothing'
           } is standing there`);

@@ -57,6 +57,8 @@ describe('what a building stage still wants', () => {
       ['homestead:field_map_narmada:built:foundation']
     )!;
     expect(second.name).toBe('Raise the tower');
-    expect(wantedMaterials(second)).toContain('material_bamboo_cane');
+    // Any straight timber, since the owner's ruling of 2 October 2026 -- not bamboo alone.
+    expect(wantedKinds(second)).toContain('timber');
+    expect(wantedMaterials(second)).not.toContain('material_bamboo_cane');
   });
 });

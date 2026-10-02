@@ -4,6 +4,7 @@
 // talked round worry by worry, built in three stages from what is carried and who has been helped,
 // and settled. Nothing here can be lost by a wrong answer, and one test says so.
 
+import { materialsWithClass } from '../src/content/making';
 import { describe, expect, it } from 'vitest';
 import {
   agreed,
@@ -96,7 +97,10 @@ describe('every homestead', () => {
           flags = reply.flags;
         }
         expect(agreed(g, stateOf(h.fieldMapId, flags))).toBe(true);
-        const plenty = Object.fromEntries(h.stages.flatMap((s) => s.needs.map((n) => [n.id, 99])));
+        // A need by kind (`#timber`) is met by any material of it, so plenty of the first one.
+        const plenty = Object.fromEntries(
+          h.stages.flatMap((s) => s.needs.map((n) => [n.id ?? materialsWithClass(n.tag!)[0]!.id, 99]))
+        );
         for (const _ of h.stages) {
           const may = mayBuild(h, stateOf(h.fieldMapId, flags), plenty, 9);
           expect(may.ok).toBe(true);

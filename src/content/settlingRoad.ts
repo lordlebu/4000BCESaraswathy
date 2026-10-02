@@ -9,11 +9,10 @@
 // Pure, and free of React and Phaser. `content/homestead.ts` holds every rule; this only arranges
 // them in the order a player meets them.
 
-import { type Homestead, type HomesteadState, agreed, nextStage, stagesBuilt, ASK_FROM } from './homestead';
+import { type Homestead, type HomesteadState, agreed, carriedFor, needName, nextStage, stagesBuilt, ASK_FROM } from './homestead';
 import { STANDINGS, STANDING_WORDS, KNOWN_BY_UNDERSTANDING, type StandingOn } from './standing';
 import { fieldMap, npc, poi } from './places';
 import { whereFrom } from './sources';
-import { nameOf } from './making';
 
 export type StepState = 'done' | 'now' | 'later';
 
@@ -92,11 +91,11 @@ export function settlingRoad(fieldMapId: string, homestead: Homestead | null, fa
 
   const stageLines: string[] = [];
   if (stage) {
-    const short = stage.needs.filter((n) => (carried[n.id] ?? 0) < n.count);
+    const short = stage.needs.filter((n) => carriedFor(carried, n) < n.count);
     stageLines.push(`${built} of ${homestead.stages.length} raised. Next, ${stage.name.toLowerCase()}.`);
     for (const n of short) {
-      const where = whereFrom(n.id);
-      stageLines.push(`${n.count} ${nameOf(n.id)}, you carry ${carried[n.id] ?? 0}${where ? `: ${where}` : ''}.`);
+      const where = n.id ? whereFrom(n.id) : null;
+      stageLines.push(`${n.count} ${needName(n)}, you carry ${carriedFor(carried, n)}${where ? `: ${where}` : ''}.`);
     }
     if (helpedHere < stage.backers) stageLines.push(`Hands to raise it: ${helpedHere} of ${stage.backers} people here you have helped.`);
   } else {

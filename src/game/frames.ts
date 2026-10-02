@@ -10,6 +10,7 @@
 // repaints the world.
 
 import type { BiomeId } from '../world/types';
+import { FEATURE_RARITY } from '../world/features';
 import windmill from '../../assets/windmill.json';
 
 /**
@@ -876,14 +877,8 @@ export const FEATURES: Record<string, FeatureArt> = {
   rootCurtain: { biome: 'sky_underside', sheet: 'flora', frames: [4, 5], contact: false }
 };
 
-/**
- * How rare a feature is: one tile in this many, before the per-biome choice.
- *
- * Twelve is what makes the trade safe. Features may reach row 4 of the cell where common overdraw
- * stops at 16, which is only acceptable because you meet one occasionally rather than walking
- * through a wood of them. Lowering this number is the thing that would make the map obstructive.
- */
-export const FEATURE_RARITY = 12;
+/** How rare a feature is -- decided in `world/features.ts`, where the rules read it too. */
+export { FEATURE_RARITY };
 
 /** Every frame available on a given ground, flattened. */
 /** One drawable feature: which sheet, which frame in it. */

@@ -99,6 +99,7 @@ import {
   mayBuild,
   readyToSettle,
   settle as settleHome,
+  spendStage,
   stagesBuilt,
   stateOf as homesteadState,
   type Holdings
@@ -1544,7 +1545,7 @@ export function App() {
           onDo: () => {
             if (!may.ok) return;
             const done = buildStage(homestead, journeyFlags.current, may.stage);
-            setSatchel((bag) => done.spends.reduce((b, need) => takeFromSatchel(b, need.id, need.count), bag));
+            setSatchel((bag) => spendStage(bag, done.spends));
             setHomeFlags(done.flags);
             // The stage is a moment, so it gets a card: the painting of the ground, what the diary
             // says of the stage, and one way on.

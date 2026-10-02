@@ -13,7 +13,7 @@
 // Pure, and free of React and Phaser.
 
 import { type Bench, shortfalls, tagCount } from './crafting';
-import { homesteadOn, nextStage, stateOf } from './homestead';
+import { carriedFor, homesteadOn, nextStage, stateOf } from './homestead';
 import { type MaterialClass, material, nameOf, recipe } from './making';
 import { count, type Satchel } from './satchel';
 
@@ -102,10 +102,10 @@ export function wanting(
   const stage = nextStage(homestead, stateOf(goal.fieldMapId, flags));
   if (!stage) return { name: homestead.name, wants: [], other: ['It is built'], ready: true };
   const wants = stage.needs
-    .filter((n) => count(satchel, n.id) < n.count)
+    .filter((n) => carriedFor(satchel, n) < n.count)
     .map((n) => {
-      const more = n.count - count(satchel, n.id);
-      return { id: n.id, tag: null, more, label: labelOf(n.id, null, more) };
+      const more = n.count - carriedFor(satchel, n);
+      return { id: n.id, tag: n.tag, more, label: labelOf(n.id, n.tag, more) };
     });
   return { name: stage.name, wants, other: [], ready: wants.length === 0 };
 }

@@ -24,6 +24,9 @@ import { band } from '../world/classify';
 import { discovery, offeredAt, vocabulary } from './knowledge';
 import { fieldMap, npc, poi } from './places';
 import { whereFrom } from './sources';
+import { satisfying, tagCount } from './crafting';
+import { type MaterialClass, materialsWithClass } from './making';
+import { count, remove, type Satchel } from './satchel';
 import { STANDINGS, type Standing } from './standing';
 
 export type ApproachKind = 'listen' | 'tongue' | 'show' | 'vouch' | 'offer';
@@ -55,10 +58,23 @@ export interface Ground {
   agrees: string;
 }
 
+/**
+ * One thing a stage spends: a material or item by `id`, or any material of a class by `tag`.
+ *
+ * A tag since 2 October 2026, on the owner's ruling that the Narmada's tower and sails take any
+ * straight timber rather than bamboo alone -- canon's stage needs gained the `#tag` a recipe's
+ * ingredient already had (`docs/satchel-and-hearth.md`, phase 4).
+ */
+export interface StageNeed {
+  id: string | null;
+  tag: MaterialClass | null;
+  count: number;
+}
+
 export interface Stage {
   id: string;
   name: string;
-  needs: { id: string; count: number }[];
+  needs: StageNeed[];
   backers: number;
   prose: string;
 }
@@ -92,7 +108,7 @@ interface RawHomestead {
     worries: { id: string; says: string; hint: string; not_that: string; eased: string; met_by: RawAnswer[] }[];
     agrees: string;
   }[];
-  stages: { id: string; name: string; needs: { id: string; count: number }[]; backers: number; prose: string }[];
+  stages: { id: string; name: string; needs: { id?: string; tag?: string; count: number }[]; backers: number; prose: string }[];
   settled: string;
 }
 
@@ -124,7 +140,10 @@ export const homesteads: readonly Homestead[] = (
     })),
     agrees: g.agrees
   })),
-  stages: h.stages.map((s) => ({ ...s })),
+  stages: h.stages.map((s) => ({
+    ...s,
+    needs: s.needs.map((n) => ({ id: n.id ?? null, tag: n.tag ? (n.tag.replace(/^#/, '') as MaterialClass) : null, count: n.count }))
+  })),
   settled: h.settled
 }));
 
@@ -361,15 +380,15 @@ export function mayBuild(
   if (!ground || !agreed(ground, state)) return { ok: false, why: 'Nobody has agreed to it yet.' };
   const stage = nextStage(homestead, state);
   if (!stage) return { ok: false, why: 'It is built.' };
-  const short = stage.needs.filter((n) => (carried[n.id] ?? 0) < n.count);
+  const short = stage.needs.filter((n) => carriedFor(carried, n) < n.count);
   if (short.length > 0) {
     // **And where each comes from.** "Needs 1 reed rope (you carry 0)" was the whole of it, and it
     // is where the owner's first play-through stopped: nothing said rope is made, or from what.
     const from = short
-      .map((n) => ({ n, where: whereFrom(n.id) }))
+      .map((n) => ({ n, where: n.id ? whereFrom(n.id) : kindFrom(n.tag) }))
       .filter((x) => x.where !== null)
-      .map(({ n, where }) => `${nameOf(n.id)}: ${where}.`);
-    const needs = `Needs ${short.map((n) => `${n.count} ${nameOf(n.id)} (you carry ${carried[n.id] ?? 0})`).join(', ')}.`;
+      .map(({ n, where }) => `${needName(n)}: ${where}.`);
+    const needs = `Needs ${short.map((n) => `${n.count} ${needName(n)} (you carry ${carriedFor(carried, n)})`).join(', ')}.`;
     return { ok: false, why: [needs, ...from].join(' ') };
   }
   if (helpedHere < stage.backers) {
@@ -379,8 +398,48 @@ export function mayBuild(
   return { ok: true, stage };
 }
 
+/** How much of what a stage needs is carried: by id, or every material of the class. */
+export function carriedFor(carried: Readonly<Record<string, number>>, n: StageNeed): number {
+  return n.tag ? tagCount(carried as Satchel, n.tag) : carried[n.id ?? ''] ?? 0;
+}
+
+/** What a stage need is called: a thing's name, or "any timber". */
+export function needName(n: StageNeed): string {
+  return n.tag ? `any ${n.tag}` : nameOf(n.id ?? '');
+}
+
+/** Where any material of a class comes from, named: "any timber: windfall wood, bamboo cane or teak". */
+function kindFrom(tag: MaterialClass | null): string | null {
+  if (!tag) return null;
+  const would = materialsWithClass(tag).map((m) => m.name.toLowerCase());
+  return would.length > 0 ? `${would.slice(0, 3).join(', ')}${would.length > 3 ? ' or another' : ''}` : null;
+}
+
+/**
+ * Spend what a stage needs from the satchel. A tag spends the carried materials of its class in
+ * `satisfying` order, the way a recipe's tag ingredient does, so four timber may be two cane and
+ * two windfall.
+ */
+export function spendStage(satchel: Satchel, needs: readonly StageNeed[]): Satchel {
+  let next = satchel;
+  for (const n of needs) {
+    if (!n.tag) {
+      next = remove(next, n.id ?? '', n.count);
+      continue;
+    }
+    let owed = n.count;
+    for (const id of satisfying(next, n.tag)) {
+      if (owed <= 0) break;
+      const take = Math.min(owed, count(next, id));
+      next = remove(next, id, take);
+      owed -= take;
+    }
+  }
+  return next;
+}
+
 /** Raise the next stage: the flags with it built, and what it spent. */
-export function build(homestead: Homestead, flags: readonly string[], stage: Stage): { flags: string[]; spends: { id: string; count: number }[] } {
+export function build(homestead: Homestead, flags: readonly string[], stage: Stage): { flags: string[]; spends: StageNeed[] } {
   return { flags: withFlag(flags, `${prefix(homestead.fieldMapId)}built:${stage.id}`), spends: stage.needs };
 }
 
