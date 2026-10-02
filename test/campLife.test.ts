@@ -16,6 +16,7 @@ import {
   CAMP_SLOTS,
   busyLine,
   campActivity,
+  campCallers,
   campPeople,
   campPlacements,
   campStage,
@@ -28,6 +29,7 @@ import {
 } from '../src/content/campLife';
 import { atHour, hoursFor, placedCircuit, travellersOn, untangle, walkedRoad, whereabouts } from '../src/content/travellers';
 import { CAMP_DAY, VISIT_PACE_CAP } from '../src/content/tiers';
+import { whoSpeaksFirst } from '../src/content/bumping';
 import { CAMP_FLAMES, CAMP_LAYOUT, CROSSED_GROUND, PRINTED_GROUND, carriesTint, troddenColour } from '../src/game/campArt';
 import { spendNight } from '../src/game/night';
 import type { Point } from '../src/world/types';
@@ -467,5 +469,32 @@ describe('the small lights a camp carries', () => {
       }
       expect(warm, `${key}: no flame-coloured pixels at ${at.x},${at.y}`).toBeGreaterThan(2);
     }
+  });
+});
+
+describe('who at a camp may call you over', () => {
+  // The plan's rule: only the leader, only once a day, on the speak-first rules everybody keeps.
+  const { out } = camps('field_map_lothal', 'a');
+  const camp = out[0]!.camp;
+  const folk = campPeople(camp, 'field_map_lothal');
+  const leader = folk.find((p) => p.slot === 'leader')!;
+  const others = folk.filter((p) => p.slot !== 'leader').map((p) => p.id);
+
+  it('is the leader alone, as a first meeting, and only until the camp has given its welcome', () => {
+    expect(campCallers([leader.id, ...others], folk, 'field_map_lothal', false)).toEqual([
+      { key: `field_map_lothal:${leader.id}`, npcId: null, travellerId: leader.id, reason: 'first' }
+    ]);
+    expect(campCallers(others, folk, 'field_map_lothal', false), 'the runner and the watch never call out').toEqual([]);
+    expect(campCallers([leader.id], folk, 'field_map_lothal', true), 'after the welcome they wait to be spoken to').toEqual([]);
+    expect(campCallers([], folk, 'field_map_lothal', false), 'not from across the camp').toEqual([]);
+  });
+
+  it('calls out at most once a day, and only on the seeded chance', () => {
+    const callers = campCallers([leader.id], folk, 'field_map_lothal', false);
+    const yes = () => 0;
+    const no = () => 0.99;
+    expect(whoSpeaksFirst(callers, 3, new Set(), no), 'a chance, not a certainty').toBeNull();
+    expect(whoSpeaksFirst(callers, 3, new Set(), yes)?.travellerId).toBe(leader.id);
+    expect(whoSpeaksFirst(callers, 3, new Set([`field_map_lothal:${leader.id}@3`]), yes), 'not twice in a day').toBeNull();
   });
 });

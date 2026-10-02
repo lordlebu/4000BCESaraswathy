@@ -22,7 +22,7 @@ import { readShowing, writeShowing } from './preferences';
 import { arrivalPoint, fieldMap, npc, poi, roadBetween, type Road } from '../content/places';
 import { walkers } from '../game/characters';
 import { travellerAttributes, travellersOn } from '../content/travellers';
-import { campPeople, doingLine, type CampActivity, type CampPerson } from '../content/campLife';
+import { campCallers, campPeople, doingLine, type CampActivity, type CampPerson } from '../content/campLife';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
 import { RecordTabs, type RecordTab } from './Records';
@@ -1283,6 +1283,11 @@ export function App() {
       return;
     }
     if (!who.travellerId) return;
+    // A camp's leader calling you over opens what pressing their row would: the camp's welcome.
+    if (campFolk.some((p) => p.id === who.travellerId)) {
+      talkWith.current(who.travellerId, null);
+      return;
+    }
     const met = metStrangers.current.includes(who.key);
     happens.current?.('road', arrival.at, null, `spoke-first:${day}:${who.travellerId}`, {
       strangerId: who.travellerId,
@@ -1432,12 +1437,21 @@ export function App() {
       beside.flatMap((t) => (t.npcId ? [t.npcId] : [])),
       (npcId) => beside.find((t) => t.npcId === npcId)?.id ?? null
     );
-    // Camp people keep to their camp; they never fall in beside you the way road company do.
+    // Camp people keep to their camp; they never fall in beside you the way road company do. Only
+    // the leader may call you over, and only to give the camp's own welcome (`campCallers`).
     const strangers: Bumped[] = beside
       .filter((t) => t.npcId === null && !campFolk.some((p) => p.id === t.id))
       .map((t) => ({ key: `${fieldMapId}:${t.id}`, npcId: null, travellerId: t.id, reason: 'passing' }));
-    speakFirst.current([...named, ...strangers]);
-  }, [nearbyTravellers, bumpedNamed, fieldMapId, campFolk, cardOpen]);
+    const callers = campToday
+      ? campCallers(
+          beside.map((t) => t.id),
+          campFolk,
+          fieldMapId,
+          seenEvents.current.includes(`woven:camp:${campToday.id}`)
+        )
+      : [];
+    speakFirst.current([...named, ...callers, ...strangers]);
+  }, [nearbyTravellers, bumpedNamed, fieldMapId, campFolk, campToday, cardOpen]);
 
   // In a place: whoever is here, a moment after walking in, once the arrival has had its turn --
   // the princess walking up, a rumour kept, a card. The timer reads the state it finds then.

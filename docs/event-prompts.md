@@ -473,10 +473,69 @@ eyeshines low in the grass beyond the fire. Drawn when a nocturnal animal comes 
 
 ## The people at a camp (Living Camps, 2 October 2026)
 
-No new painting is asked for, on the owner's ruling for this plan. The card borrows its camp's own.
+No new painting was needed for any phase, on the owner's ruling for this plan, and the card borrows
+its camp's own. The four meal paintings below are the plan's one optional extra, asked for once the
+plan was finished: nothing waits for them.
 
 #### `woven-camp-talk` -- talking to somebody who keeps a camp
 
 Draws the painting of the camp it is at -- `woven-camp-drovers`, `woven-camp-pilgrims`,
 `woven-camp-adventurers` or `woven-camp-dacoits`, the owner's camp art of 1 October 2026 -- and
 falls back to `woven-camp`. The people at a camp live there, so their card is the camp's picture.
+
+#### `woven-camp-meal-drovers` -- The meal at a drovers' fold
+
+Save as `assets/source/events/woven-camp-meal-drovers.png`. Drawn on the card when you sit with
+somebody at a drovers camp at the meal (17:00 to 19:00), tried before `woven-camp-drovers` and falling
+back to it until it exists (`artMoment` in `content/events.ts`).
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: Dusk at a drovers' camp in open grassland: a felt tent, a fold of woven hurdles behind with goats settling inside it, a low fire on three stones. Three herders sit round the fire with bowls held in both hands; one pours warm milk from a pail into a bowl held out toward a traveller who sits with them, seen from behind. Millet cakes on a flat hot stone at the fire's edge. Warm firelight on faces too small to make out, the sky going violet over low hills.
+```
+
+#### `woven-camp-meal-pilgrims` -- The meal with pilgrims
+
+Save as `assets/source/events/woven-camp-meal-pilgrims.png`. Drawn on the card when you sit with
+somebody at a pilgrims camp at the meal (17:00 to 19:00), tried before `woven-camp-pilgrims` and falling
+back to it until it exists (`artMoment` in `content/events.ts`).
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: Dusk at a pilgrims' camp: a cloth shelter, a pole hung with coloured cloth strips, and a small cairn of stacked stones with an oil lamp burning on it. Three pilgrims sit round a low fire sharing rice from one clay pot, eating slowly, one with eyes closed as if humming. A traveller sits with them, seen from behind, a leaf plate on the knee. Quiet and devotional, the lamp a small warm point against a blue evening.
+```
+
+#### `woven-camp-meal-adventurers` -- The meal at the adventurers' fire
+
+Save as `assets/source/events/woven-camp-meal-adventurers.png`. Drawn on the card when you sit with
+somebody at a adventurers camp at the meal (17:00 to 19:00), tried before `woven-camp-adventurers` and falling
+back to it until it exists (`artMoment` in `content/events.ts`).
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: Dusk at an adventurers' camp: a lean-to of poles and hide, coils of rope, a hide stretched on a rack. Three young people sit round a fire, one pointing at a scratched map spread on the ground with a piece of flatbread, another laughing, a pot of stew on three stones. A traveller sits with them, seen from behind, being handed the flatbread. Cheerful and untidy, firelight on the map, a line of hills behind going dark.
+```
+
+#### `woven-camp-meal-dacoits` -- The meal with a dacoit band
+
+Save as `assets/source/events/woven-camp-meal-dacoits.png`. Drawn on the card when you sit with
+somebody at a dacoits camp at the meal (17:00 to 19:00), tried before `woven-camp-dacoits` and falling
+back to it until it exists (`artMoment` in `content/events.ts`).
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. No particular animal species and no particular face: the same picture serves every event of its kind. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: Dusk at a dacoit band's camp in a dry hollow: a hide shelter, sacks of salt stacked by a tethering post, a low fire. Four rough-looking but friendly people sit round it passing a pot of salted fish from hand to hand; one offers the pot across the fire to a traveller seen from behind. Nobody holds a weapon and none is shown. They look poorer than they would like and are sharing anyway. Warm, wry, easy company.
+```
+

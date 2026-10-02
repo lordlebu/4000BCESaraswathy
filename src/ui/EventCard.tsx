@@ -71,10 +71,11 @@ export function EventCard({ event, holds, shelter, pick = 0, met = [], onChoose,
     [taken, onChoose]
   );
 
-  // The event's own painting, then the night's, then nothing. Every step is optional and the card
-  // keeps its shape at each one, so it does not jump when art lands.
+  // The painting of this moment, then the event's own, then the night's, then nothing. Every step
+  // is optional and the card keeps its shape at each one, so it does not jump when art lands.
   const picture =
-    firstArt('events', [event.artVariant, event.art], pick) ?? (shelter ? sceneFor('rest', shelter, pick) : null);
+    firstArt('events', [event.artMoment, event.artVariant, event.art], pick) ??
+    (shelter ? sceneFor('rest', shelter, pick) : null);
   const choices = choicesFor(event, holds);
 
   return (

@@ -164,6 +164,11 @@ export interface GameEvent {
    * `woven-camp`. Absent means the event's own `art` is the only one.
    */
   artVariant?: string;
+  /**
+   * Narrower still, tried before `artVariant`: a painting of this moment at that place -- the meal
+   * at a dacoit camp before the dacoit camp. Absent, or not yet painted, the card falls through.
+   */
+  artMoment?: string;
   choices: Choice[];
   /**
    * Whether it can happen more than once.

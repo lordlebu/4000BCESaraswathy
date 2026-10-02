@@ -709,7 +709,9 @@ retrospective. The rules, because they are rules rather than history:
   hour's answer (`campPlacements`, hours in `tiers.ts` `CAMP_DAY`), never saved. `campSpots` lays out
   the props and `standingRoom` keeps people off them -- one rule, moved out of the scene so nobody
   stands in the tent. **Only these temporary camps**: the permanent camp places (`content/camps.ts`)
-  are untouched.
+  are untouched. **Only the leader may call you over**, and only before the camp's welcome, on the
+  speak-first rules (`campCallers`); the runner and the watch never do. At the meal the card asks
+  for `woven-camp-meal-<kind>` first (`artMoment`), falling back to the camp's own painting.
 - **Road company only come and go, never canon's people** (owner's ruling): a runner meets a road
   traveller whose leg passes the turn-off (`runnerErrand`, held there by `phaseAfterMeeting`), and on
   some days one visits to eat (`campVisitors`, capped at the pace nine in ten travellers keep). Both
