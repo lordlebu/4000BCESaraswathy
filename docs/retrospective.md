@@ -230,7 +230,7 @@ discipline applied to its two largest files, and that debt is now the main struc
    `settle-home-dwarka` and `settle-home-narmada`. No painting is outstanding.
 7. **A lighter game** (`docs/a-lighter-game.md`), after making moved to the game on 2 October 2026:
    rungs that need only understanding, and regrowth tiers sorted by how much the game uses a material
-   rather than by real-world lore. Not started.
+   rather than by real-world lore. **Phases 1 and 2 built on 2 October 2026; the plan is closed.**
 
 ## How the numbers were taken
 
