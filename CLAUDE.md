@@ -254,6 +254,7 @@ The art docs, in the order they are useful:
 | `docs/retrospective.md` | **read first**: the whole project to 28 September 2026, what worked, what did not, what next |
 | `docs/settling-in.md` | the Settling In plan, concluded: camps, cart points, homesteads, and what was measured |
 | `docs/living-camps.md` | camps with people, **closed**: the measurements, the rulings, the way in's look, the rail decided, clearings, shadows, night light, and waiting at the pier |
+| `docs/satchel-and-hearth.md` | making made easier: the pin, cook fires, windfall wood, events that help, the pointer, the next step, and the rest of the `App.tsx` split |
 | `docs/endgame-plan.md` | the programme, closed; what shipped, what is parked, what was declined |
 | `docs/art-direction.md` | the five rules the art follows, and what each one cost to learn |
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |
@@ -475,9 +476,15 @@ it is not, it has already been applied.
   fog, the sky and the camera -- is one system, the player and the map under them. Riding was looked
   at and kept: it moves the player's sprite, holds the camera, hides the shadow, reveals the fog and
   re-sorts the row, so a `RideView` would be a dozen callbacks back into the player.
-- **`src/ui/`** — React chrome. `App.tsx` is being split into hooks the same way the scene was split
-  into systems: `useRoadTalk.ts` is the first -- who the talk row means, calling out, the camp's
-  people and the road's speak-first -- and its parameter list is the seam written down. The dock along the bottom (`Here.tsx`, `JournalPanel.tsx`,
+- **`src/ui/`** — React chrome. `App.tsx` is split into hooks the same way the scene was split into
+  systems, each taking its parameter list as the seam written down: `useRoadTalk.ts` (who the talk
+  row means, calling out, the camp's people, speak-first), `useActivity.ts` (taking, making, a night,
+  using, and the activity card), `useHappenings.ts` (the event card, asking whether anything happens,
+  story beats, the inspectors), `useGuidance.ts` (the pinned line's pointer, the events' lean, the
+  next step, the diary's Goals), `useSettling.ts` (building at a ground, the negotiation, the
+  settlement page) and `useCrossing.ts` (setting out, the road told, stepping down). 2,403 lines to
+  1,747 while the guidance was added. What stays is the layout, the save, and the bus listeners that
+  feed state App itself owns -- the world, the tile, the hour, who is near. `docs/satchel-and-hearth.md`. The dock along the bottom (`Here.tsx`, `JournalPanel.tsx`,
   `PlacePanel.tsx`, `TileActions.tsx`), the records and interrupts behind one `Modal.tsx`, the
   painted plate a species opens into (`Specimen.tsx`), the seed bar, and `styles.css`. What is on
   screen and how large it is are both decided by `surface.ts`, which is pure and tested under Node.
@@ -762,6 +769,28 @@ retrospective. The rules, because they are rules rather than history:
   A map with no entry finishes with the Grit Mill. The unfinished stages are Lothal's scaffold on every map.
 - **The saved clock goes back to the scene** (`travelled` into `PhaserGame`). It did not, and every
   reload was day 0 -- which hid every camp and quietly reset the day's pacing.
+
+### Making, made findable (Satchel and Hearth, 2 October 2026)
+
+The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rules, not history:
+
+- **A pin is a recipe id or `stage:<map>`**, and anything that asks what is wanted asks
+  `content/goals.ts` -- the pinned line, the events, the pointer, the next step. The pinned line is a
+  control that opens the workshop at the recipe, and every recipe row says Pin or Unpin.
+- **A cook fire is fuel, or a hearth** (`crafting.fireFor`): for cooking only, any carried fuel lit
+  from the kit's lamp, spent by the meal; free at a settlement or road stop. Canon's
+  `check_playability.py` mirrors it in `needs_here` -- change one, change both.
+- **The log you see is the log you take.** A standing tree always gives windfall wood, and a fallen
+  log, driftwood or bamboo drawn on a tile always gives what it is. `world/features.ts` names the
+  feature `game/frames.ts` draws, and `test/features.test.ts` fails if the two tables drift.
+- **Events lean towards what is wanted** (`pickFor`; `EVENT_LEANS_PERCENT` and `STONE_ENOUGH` in
+  `tiers.ts`), three in four on their own roll; with nothing wanted every pick is as before.
+- **The pointer never points into fog** (`content/finding.ts`): the nearest *seen* tile that still
+  holds what the pin wants, named in the pinned line and marked with a diamond (`source-mark`).
+- **One next step, only while nothing is pinned and no place is open** (`content/guide.ts`); off
+  with Hints. On a landscape phone a line at a place took 29 of the 101 pixels it reads through.
+- **`test/reach.test.ts` holds the floor:** a container and a cook fire within 20 steps of the start
+  on every map and five seeds.
 
 ### The resource layer, and where its numbers live
 

@@ -80,6 +80,19 @@ step (`content/guide.ts`): the next building stage, as a button that pins it; th
 settling; then somebody with something new to say; then a place not yet seen. The diary leads with
 **Goals**, listing all of them with Pin and Unpin. The Hints switch turns the line off with the coach.
 
+**Phase 9, the rest of the split.** `useSettling` (building at a ground, the negotiation, the
+settlement page) and `useCrossing` (setting out, the road told, stepping down) moved with no change
+in behaviour, and the guidance of phases 6 to 8 went into `useGuidance` rather than the file.
+`App.tsx` went from 2,403 lines to 1,747 across the plan while gaining the guidance. The event bus's
+own listeners moved with the events in phase 5; the ten that stay feed state `App` owns -- the world,
+the tile, the hour, who is near -- and moving them would be a hook per `useState`.
+
+**Canon's half of phase 4 is committed and not pushed.** The session had no write access to
+`SouthOfTethys` (the Claude GitHub app is not installed for it); the commit is
+`Windfall wood, a cook fire from fuel, and kinds over species`, on branch `ccr-090ce916-o8rjj5`
+there, and the game's bundle already carries canon 2.48.0. Until it lands, canon's `main` is a
+version behind the game's bundle -- the blind spot `check:data` cannot see.
+
 ## Rulings, all taken on 2 October 2026
 
 1. Every tree gives wood: windfall wood, in canon.

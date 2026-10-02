@@ -19,7 +19,7 @@ import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { readShowing, writeShowing } from './preferences';
-import { arrivalPoint, fieldMap, npc, poi, roadBetween, type Road } from '../content/places';
+import { arrivalPoint, fieldMap, poi } from '../content/places';
 import { walkers } from '../game/characters';
 import { travellerAttributes, travellersOn } from '../content/travellers';
 import { SatchelPanel } from './SatchelPanel';
@@ -48,14 +48,8 @@ import { clearJourney, hasBegun, loadJourney, saveJourney } from '../save';
 import { Opening } from './Opening';
 import { bearingTo } from '../content/journal';
 import { Journey } from './Journey';
-import { CROSSING_MS } from '../content/tiers';
 import { coachLine, MORNING_GOAL } from '../content/coach';
-import { goalOf, stagePin, wanting, wantedNow } from '../content/goals';
-import { GoalsSection, type GoalRow } from './GoalsSection';
-import { nextStep } from '../content/guide';
-import { nearestSeen, pointerLine } from '../content/finding';
-import { whereFrom } from '../content/sources';
-import { nameOf } from '../content/making';
+import { GoalsSection } from './GoalsSection';
 import {
   advance,
   answer,
@@ -81,9 +75,10 @@ import { shelterBuilt } from '../content/using';
 import { ActivityModal } from './ActivityModal';
 import { useActivity } from './useActivity';
 import { useHappenings } from './useHappenings';
+import { useGuidance } from './useGuidance';
+import { useSettling } from './useSettling';
+import { useCrossing } from './useCrossing';
 import { EventCard } from './EventCard';
-import { anyConditions } from '../content/events';
-import type { SettlingView } from './PlacePanel';
 import { peopleAtPlaces, whoIsHere } from '../content/presence';
 import { useRoadTalk } from './useRoadTalk';
 import { type Bumped, whoSpeaksFirst } from '../content/bumping';
@@ -93,18 +88,9 @@ import { standingOn as howKnownOn, warmTo } from '../content/standing';
 import { discoveries, offeredAt } from '../content/knowledge';
 import {
   agreed as groundAgreed,
-  build as buildStage,
-  buildingTiles,
-  groundAt,
   homesteadOn,
-  mayAsk,
-  mayBuild,
-  readyToSettle,
-  settle as settleHome,
-  spendStage,
   stagesBuilt,
   stateOf as homesteadState,
-  nextStage,
   type Holdings
 } from '../content/homestead';
 import { Negotiation } from './Negotiation';
@@ -231,7 +217,6 @@ export function App() {
   const crossing = useRef(false);
   const heldArrival = useRef<string | null>(null);
   const arrivedRef = useRef<((e: { poiId: string }) => void) | null>(null);
-  const [journey, setJourney] = useState<{ from: string; to: string; road: Road; first: boolean } | null>(null);
   // The opening, while it plays over the map booting behind it. See `Opening.tsx`.
   const [opening, setOpening] = useState(false);
   // The first morning's hints, on unless the player turned them off. See `content/coach.ts`.
@@ -1181,41 +1166,11 @@ export function App() {
    * flags do, so everything reading them renders again. The flags themselves live in
    * `journeyFlags` with the rest of the journey's, and are saved with it.
    */
-  const [negotiatingAt, setNegotiatingAt] = useState<string | null>(null);
   const [homeTick, setHomeTick] = useState(0);
   const setHomeFlags = useCallback((next: string[]) => {
     journeyFlags.current = next;
     setHomeTick((n) => n + 1);
   }, []);
-
-  /**
-   * Where the nearest of what the pin wants lies, among the ground already seen -- or, if none has
-   * been, where to look. Asked each step, because a step is what changes it. `content/finding.ts`.
-   */
-  const finding = useMemo(() => {
-    void homeTick;
-    if (!world || !arrival || !pinned) return null;
-    const want = wantedNow([pinned], satchel, bench, journeyFlags.current);
-    if (want.materials.length + want.kinds.length === 0) return null;
-    const pointer = nearestSeen(world, arrival.at, new Set(discovered.current), want, nodes, arrival.day);
-    if (pointer) return { at: pointer.at, where: pointerLine(pointer) };
-    const first = want.materials[0];
-    const lookIn = first ? whereFrom(first) : `any ${want.kinds[0]}`;
-    return { at: null, where: lookIn ? `${first ? nameOf(first).toLowerCase() : 'it'}: ${lookIn}` : null };
-  }, [world, arrival, pinned, satchel, bench, nodes, homeTick]);
-  const markAt = finding?.at ? `${finding.at.x},${finding.at.y}` : '';
-  useEffect(() => {
-    EventBus.emitEvent('source-mark', { at: finding?.at ?? null });
-    // Keyed on the tile, not the object, so a step that finds the same tile sends nothing.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [markAt]);
-
-  // What the traveller is working towards -- the pin, and this map's next building stage -- for the
-  // events that turn something up to lean towards. See `pickFor` in `happenings.ts`.
-  useEffect(() => {
-    const want = wantedNow([pinned, stagePin(fieldMapId)], satchel, bench, journeyFlags.current);
-    latest.current.wanted = { ...want, carried: satchel };
-  }, [pinned, fieldMapId, satchel, bench, homeTick]);
 
   // Who is walking: Varuna and Mithra, and whoever has joined since. Read from the flags each render,
   // because a joining is a flag a story card's choice sets. See `walkers` in characters.ts.
@@ -1277,61 +1232,29 @@ export function App() {
     });
   }, [hints, arrival, progress, satchel, opening]);
 
-  /**
-   * The next step once the first morning is over and nothing is pinned: the building, somebody with
-   * news, a place not yet seen. Off with the hints, like the coach. See `content/guide.ts`.
-   */
-  const guide = useMemo(() => {
-    void homeTick;
-    if (!hints || coach !== null || pinned || !arrival) return null;
-    const homestead = homesteadOn(fieldMapId);
-    const state = homesteadState(fieldMapId, journeyFlags.current);
-    const ground = homestead?.grounds.find((g) => g.id === state.ground);
-    const stage = homestead && ground && groundAgreed(ground, state) ? nextStage(homestead, state) : null;
-    const newsFrom = peopleOfMap.find((id) => hasSomethingNew(progress, id));
-    const seen = new Set(discovered.current);
-    const step = nextStep({
-      road: road?.next ?? null,
-      stage: stage ? { pin: stagePin(fieldMapId), name: stage.name } : null,
-      news: newsFrom ? { name: npc(newsFrom)?.name ?? 'Somebody' } : null,
-      at: arrival.at,
-      unseen: fieldPlaced.current
-        .filter((p) => !seen.has(`${p.at.x},${p.at.y}`))
-        .map((p) => ({ name: poi(p.poiId)?.name ?? 'a place', at: p.at }))
-    });
-    if (!step) return null;
-    const action = step.action;
-    return {
-      line: step.line,
-      action: action ? { label: action.label, onDo: () => setPinned(action.pin) } : null
-    };
-  }, [hints, coach, pinned, arrival, fieldMapId, homeTick, peopleOfMap, progress, road]);
-
-  /** Everything that could be worked towards, for the diary's Goals. See `GoalsSection`. */
-  const goalRows = useMemo<GoalRow[]>(() => {
-    void homeTick;
-    const rows: GoalRow[] = [];
-    const toggle = (pin: string) => () => setPinned((p) => (p === pin ? null : pin));
-    const pinnedGoal = goalOf(pinned);
-    const pinnedWants = pinnedGoal ? wanting(pinnedGoal, satchel, bench, journeyFlags.current) : null;
-    if (pinned && pinnedWants) {
-      rows.push({ id: 'pinned', line: `Working towards ${pinnedWants.name}.`, pin: { on: true, label: pinnedWants.name, toggle: toggle(pinned) } });
-    }
-    const homestead = homesteadOn(fieldMapId);
-    const state = homesteadState(fieldMapId, journeyFlags.current);
-    const ground = homestead?.grounds.find((g) => g.id === state.ground);
-    const stage = homestead && ground && groundAgreed(ground, state) ? nextStage(homestead, state) : null;
-    const pin = stagePin(fieldMapId);
-    if (stage && pinned !== pin) rows.push({ id: 'stage', line: `${stage.name}, at ${ground!.name}.`, pin: { on: false, label: stage.name, toggle: toggle(pin) } });
-    else if (!stage && road?.next) rows.push({ id: 'road', line: road.next });
-    for (const id of peopleOfMap.filter((who) => hasSomethingNew(progress, who))) {
-      rows.push({ id: `news:${id}`, line: `${npc(id)?.name ?? 'Somebody'} has something new to tell you.` });
-    }
-    const seen = new Set(discovered.current);
-    const unseen = fieldPlaced.current.filter((p) => !seen.has(`${p.at.x},${p.at.y}`)).map((p) => poi(p.poiId)?.name ?? 'a place');
-    if (unseen.length > 0) rows.push({ id: 'unseen', line: `Not yet seen: ${unseen.join(', ')}.` });
-    return rows;
-  }, [pinned, satchel, bench, fieldMapId, homeTick, road, peopleOfMap, progress, surface]);
+  // What to do next, and where: the pointer, the events' lean, the next step and the Goals --
+  // `useGuidance.ts`.
+  const { finding, guide, goalRows } = useGuidance({
+    world,
+    arrival,
+    pinned,
+    setPinned,
+    satchel,
+    bench,
+    nodes,
+    homeTick,
+    journeyFlags,
+    discovered,
+    fieldPlaced,
+    latest,
+    fieldMapId,
+    hints,
+    coach,
+    peopleOfMap,
+    progress,
+    road,
+    surface
+  });
 
   // The morning is over when the knife is made: the coach stands down and Uma's mat is pinned, so
   // the dock carries on where the hints stop.
@@ -1342,117 +1265,26 @@ export function App() {
     setPinned((p) => p ?? MORNING_GOAL);
   }, [coach, progress]);
 
-  const settling = useMemo<SettlingView | null>(() => {
-    void homeTick;
-    const here = standingOn ? groundAt(standingOn) : null;
-    if (!here || here.homestead.fieldMapId !== fieldMapId) return null;
-    const { homestead, ground } = here;
-    const state = homesteadState(fieldMapId, journeyFlags.current);
-    const holder = npc(ground.heldBy)?.name ?? 'The holder';
-    const facts = { finished: (id: string) => isComplete(progress, id), met: metStrangers.current };
-    const standing = howKnownOn(fieldMapId, facts).standing;
-    const helpedHere = peopleOfMap.filter((id) => holdings.helped.includes(id)).length;
-    const chosen = homestead.grounds.find((g) => g.id === state.ground) ?? null;
-    const building = chosen && groundAgreed(chosen, state) ? chosen : null;
-
-    if (state.settled) {
-      return building?.id === ground.id
-        ? {
-            title: homestead.name,
-            lines: ['The people who backed it live here now.'],
-            action: {
-              label: 'Read the settlement page',
-              blocked: null,
-              onDo: () => dispatch({ type: 'open-interrupt', which: 'ending' })
-            }
-          }
-        : { title: homestead.name, lines: [`You settled at ${chosen?.name ?? 'another ground'}.`], action: null };
-    }
-    if (building && building.id !== ground.id) {
-      return { title: ground.name, lines: [`You are building at ${building.name}.`], action: null };
-    }
-    if (building) {
-      const built = stagesBuilt(homestead, state);
-      const lines = [`${built} of ${homestead.stages.length} stages stand.`];
-      if (readyToSettle(homestead, state)) {
-        return {
-          title: homestead.name,
-          lines,
-          action: {
-            label: 'Settle here',
-            blocked: null,
-            onDo: () => {
-              setHomeFlags(settleHome(homestead, journeyFlags.current));
-              dispatch({ type: 'open-interrupt', which: 'ending' });
-            }
-          }
-        };
-      }
-      const may = mayBuild(homestead, state, satchel, helpedHere);
-      const next = homestead.stages[built]!;
-      const pin = stagePin(fieldMapId);
-      return {
-        title: homestead.name,
-        lines,
-        // The next stage can be pinned like a recipe: the dock then counts off what it wants.
-        pin: { on: pinned === pin, toggle: () => setPinned((p) => (p === pin ? null : pin)) },
-        action: {
-          label: next.name,
-          blocked: may.ok ? null : may.why,
-          onDo: () => {
-            if (!may.ok) return;
-            const done = buildStage(homestead, journeyFlags.current, may.stage);
-            setSatchel((bag) => spendStage(bag, done.spends));
-            setHomeFlags(done.flags);
-            // The stage is a moment, so it gets a card: the painting of the ground, what the diary
-            // says of the stage, and one way on.
-            setHappening({
-              event: {
-                id: `homestead:${may.stage.id}`,
-                title: may.stage.name,
-                occasion: 'arriving',
-                conditions: anyConditions(),
-                prose: may.stage.prose,
-                art: 'settle-ground',
-                choices: [
-                  {
-                    id: 'look',
-                    label: 'Stand back and look at it',
-                    needs: [],
-                    line: 'You stand back and look at it for a long while, and somebody beside you does the same.',
-                    grants: []
-                  }
-                ],
-                once: true
-              },
-              shelter: null
-            });
-          }
-        }
-      };
-    }
-    // Dry, level ground near enough to build on, or the ground says it has none. The owner's rule
-    // is not bent to fit a wet seed: no mill in the marsh.
-    const placed = world ? fieldPlaced.current : [];
-    const at = placed.find((p) => p.poiId === ground.at)?.at;
-    if (world && at && !buildingTiles(world, at, placed.map((p) => p.at))) {
-      return {
-        title: ground.name,
-        lines: [ground.prose, "There's no dry, level ground near enough here to build on."],
-        action: null
-      };
-    }
-    const ask = mayAsk(homestead, ground, state, standing);
-    return {
-      title: ground.name,
-      lines: [ground.prose],
-      action: {
-        label: `Ask ${holder} about building here`,
-        blocked: ask.ok ? null : ask.why,
-        onDo: () => setNegotiatingAt(ground.id)
-      }
-    };
-  }, [homeTick, standingOn, fieldMapId, progress, satchel, holdings, peopleOfMap, setHomeFlags, world, pinned]);
+  // Building at a ground, the negotiation and the settlement page -- `useSettling.ts`.
+  const { settling, negotiation, settlement } = useSettling({
+    standingOn,
+    fieldMapId,
+    world,
+    fieldPlaced,
+    journeyFlags,
+    metStrangers,
+    progress,
+    satchel,
+    setSatchel,
+    holdings,
+    peopleOfMap,
+    pinned,
+    setPinned,
+    homeTick,
+    setHomeFlags,
+    setHappening,
+    dispatch
+  });
 
   // Tell the scene what stands, whenever it changes and whenever a map is drawn.
   useEffect(() => {
@@ -1474,71 +1306,20 @@ export function App() {
     []
   );
 
-  const travel = useCallback(
-    (next: string) => {
-      // **The road, told.** The crossing opens its cards first and the next map builds behind them;
-      // see `Journey.tsx`. A map with no road to `next` (none in canon today) still crosses, quietly.
-      const road = roadBetween(fieldMapId, next);
-      if (road) {
-        const seenFlag = `road:${road.art}`;
-        const first = !journeyFlags.current.includes(seenFlag);
-        if (first) journeyFlags.current = [...journeyFlags.current, seenFlag];
-        crossing.current = true;
-        heldArrival.current = null;
-        setJourney({ from: fieldMapId, to: next, road, first });
-      }
-      setFieldMapId(next);
-      // Arriving in another country is leaving wherever you were standing, and the map that
-      // sent you there has done its job.
-      dispatch({ type: 'standing-on', poiId: null });
-      dispatch({ type: 'close-interrupt', which: 'overworld' });
-      discovered.current = [];
-      // **The address bar says which country you are in**, the same way it already says which
-      // seed and which character. `?map=` has been *read* since field maps shipped and never
-      // written, so the URL described the last thing you typed rather than the thing on screen --
-      // and a reload silently put you back on Lothal.
-      //
-      // That is not only a tidiness problem. It made a map impossible to report a bug about: a
-      // screenshot of the Aravali came with a URL that would open Lothal, and the two were
-      // compared as though they were the same map. It also makes every map one link away, which
-      // is what a test wants and what somebody looking for the crossing wants.
-      const url = new URL(window.location.href);
-      url.searchParams.set('map', next);
-      // **Set down at the new map's cart point**, which is where the cart goes. Written as `?at=`,
-      // which the scene already reads, so a reload keeps you there -- and an `?at=` naming a place on
-      // the map just left can no longer follow you across.
-      const arrive = arrivalPoint(next);
-      if (arrive) url.searchParams.set('at', arrive);
-      else url.searchParams.delete('at');
-      window.history.replaceState(null, '', url);
-      // Half a day of the journey's clock: out in the morning, in by evening. See `CROSSING_MS`.
-      EventBus.emitEvent('travel-to', { fieldMapId: next, seed, ride: road ? CROSSING_MS : 0 });
-    },
-    [seed, fieldMapId]
-  );
-
-  /**
-   * The ride is over. **The first time on a road, something happens on it**: the road's own written
-   * happening when canon has one -- the ferry song, the line where the sea was -- else one of the
-   * road's woven events. Asked for, never rationed, and only once per road.
-   */
-  const stepDown = useCallback(() => {
-    const done = journey;
-    setJourney(null);
-    crossing.current = false;
-    const held = heldArrival.current;
-    heldArrival.current = null;
-    const here = latest.current.at;
-    // **One thing, in this order.** The road's own written happening, the first time on it; else
-    // whatever the arrival was holding -- somebody coming over, a rumour kept, an arrival card --
-    // which the cards had kept waiting; else, the first time, one of the road's woven events.
-    if (done?.first && here && happens.current?.('journey', here, null, `journey:${done.road.art}`, { cameFrom: done.from, force: { asked: true } })) return;
-    if (held) {
-      arrivedRef.current?.({ poiId: held });
-      return;
-    }
-    if (done?.first && here) happens.current?.('road', here, null, `journey-road:${done.road.art}`, { force: { asked: true } });
-  }, [journey]);
+  // Setting out for another map, the road told in cards, and stepping down -- `useCrossing.ts`.
+  const { journey, travel, stepDown } = useCrossing({
+    seed,
+    fieldMapId,
+    setFieldMapId,
+    journeyFlags,
+    crossing,
+    heldArrival,
+    arrivedRef,
+    discovered,
+    latest,
+    happens,
+    dispatch
+  });
 
   const travelLog = useMemo(() => {
     if (!world) return null;
@@ -1824,35 +1605,12 @@ export function App() {
         }}
       />
 
-      {(() => {
-        // The negotiation at a ground, mounted only while it is open. `key` so a new ground starts
-        // a new conversation rather than carrying the last one's words.
-        const here = negotiatingAt ? homesteadOn(fieldMapId) : null;
-        const ground = here?.grounds.find((g) => g.id === negotiatingAt) ?? null;
-        if (!here || !ground) return null;
-        return (
-          <Negotiation
-            key={ground.id}
-            open
-            homestead={here}
-            ground={ground}
-            flags={journeyFlags.current}
-            holdings={holdings}
-            peopleHere={peopleOfMap}
-            onFlags={setHomeFlags}
-            onClose={() => setNegotiatingAt(null)}
-          />
-        );
-      })()}
+      {/* The negotiation at a ground, while one is open: a new ground starts a new conversation. */}
+      {negotiation && <Negotiation key={negotiation.ground.id} {...negotiation} />}
 
       <Ending
         progress={progress}
-        settlement={(() => {
-          void homeTick;
-          const homestead = homesteadOn(fieldMapId);
-          if (!homestead || !homesteadState(fieldMapId, journeyFlags.current).settled) return null;
-          return { name: homestead.name, prose: homestead.settled, people: peopleOfMap, fieldMapId };
-        })()}
+        settlement={settlement}
         open={interrupts.ending}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'ending' })}
       />
