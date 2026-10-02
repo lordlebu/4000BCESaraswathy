@@ -395,29 +395,16 @@ describe('what an item lets you do', () => {
   });
 });
 
-describe('what canon says a material is', () => {
+describe('what the game says a material is', () => {
   /**
-   * Canon gained `renews` so the game can decide whether a depleted resource node ever refills.
-   * The adapter-coverage test proves the field is *declared*; this proves the values actually
-   * arrive, which is a different claim and the one a node will rely on.
-   *
-   * A default of `seasonal` would hide a bundle that shipped none of them, so this asserts the
-   * spread rather than mere presence: canon has never-renewing stone and fast-growing greens,
-   * and if everything came back as one value the field would be carrying no information.
+   * Every material carries a regrowth tier, and the tiers are spread: if everything came back as
+   * one value the field would carry no information. Which tier is right is `test/regrowth.test.ts`.
    */
-  it('gives every material a renewal rate, and more than one of them', () => {
-    for (const m of materials) {
-      expect(['fast', 'seasonal', 'slow', 'never'], `${m.id} renews as ${m.renews}`).toContain(
-        m.renews
-      );
-    }
-    const spread = new Set(materials.map((m) => m.renews));
-    expect(spread.size, `every material renews the same way: ${[...spread]}`).toBeGreaterThan(1);
-
-    // The two ends, named, because they are the cases a node behaves differently for.
-    // A material keeps canon's id; only `wonFrom` is converted to the engine's namespace.
-    expect(materials.find((m) => m.id === 'material_basalt')?.renews).toBe('never');
-    expect(materials.find((m) => m.id === 'material_reed_fibre')?.renews).toBe('fast');
+  it('gives every material a regrowth tier, and more than one of them', () => {
+    for (const m of materials) expect(['quick', 'steady', 'slow'], `${m.id} regrows ${m.regrows}`).toContain(m.regrows);
+    expect(new Set(materials.map((m) => m.regrows)).size).toBe(3);
+    // The workhorse comes back fastest: reed fibre is asked for by more recipes than anything.
+    expect(materials.find((m) => m.id === 'material_reed_fibre')?.regrows).toBe('quick');
   });
 
   /**

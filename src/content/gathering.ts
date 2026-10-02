@@ -116,15 +116,7 @@ for (const material of materials) {
 export function yieldsAt(
   seed: string,
   at: Point,
-  biome: BiomeId,
-  /**
-   * Extra chance this tile holds a given material, because the ground nearby has been worked.
-   *
-   * The seam `nodes.revealedNear` uses to make stone *found* rather than regrown. Defaults to
-   * nothing, so every caller that does not know about resource nodes -- the field notes, the
-   * scene, the tests that measure what a fresh map holds -- keeps the world it always had.
-   */
-  moreLikely: (m: Material) => number = () => 0
+  biome: BiomeId
 ): Material[] {
   const here = { x: at.x, y: at.y, biome };
   const plant = floraFor(here, seed);
@@ -160,7 +152,7 @@ export function yieldsAt(
   return offered.filter((m) => {
     if (certain.has(m)) return true;
     const roll = tileHash(seed, at.x, at.y, `gather:${m.id}`) / 4294967296;
-    return roll < (CHANCE[m.rarity] ?? CHANCE.common) + moreLikely(m);
+    return roll < (CHANCE[m.rarity] ?? CHANCE.common);
   });
 }
 

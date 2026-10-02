@@ -14,16 +14,7 @@
 // Pure and free of React and Phaser.
 
 import { type Material } from './making';
-import {
-  DAYS_TO_RETURN,
-  GOOD_CUT_GIVES,
-  GOOD_CUT_IN,
-  REVEAL_CAP,
-  REVEAL_PER_NODE,
-  REVEAL_WITHIN,
-  STOCK,
-  STOCK_VARIANCE
-} from './tiers';
+import { GOOD_CUT_GIVES, GOOD_CUT_IN, REGROW_DAYS, STOCK, STOCK_VARIANCE } from './tiers';
 import { yieldsAt } from './gathering';
 import type { BiomeId, Point } from '../world/types';
 import { tileHash } from '../world/rng';
@@ -72,9 +63,8 @@ export function capacityOf(seed: string, at: Point, m: Material): number {
  * rests on: nothing has to be running for time to pass. A player who closes the tab for a week
  * of in-game days and returns finds the reeds back, and the game did not have to be watching.
  *
- * A `never` material does not come back. That is canon's word and it is honoured literally: a
- * fossil bed you have emptied is empty, and `check_playability.py` reports which of those sit in
- * one kind of ground precisely so this cannot strand somebody quietly.
+ * Every material comes back, at its tier's pace (`REGROW_DAYS`): there is no tier that never does,
+ * since the tiers were sorted by use rather than by lore (`docs/a-lighter-game.md`).
  */
 export function leftAt(
   nodes: Nodes,
@@ -87,9 +77,7 @@ export function leftAt(
   const drawn = nodes[nodeKey(at, m.id)];
   if (!drawn) return full;
 
-  const days = DAYS_TO_RETURN[m.renews];
-  if (days === null) return drawn.left;
-
+  const days = REGROW_DAYS[m.regrows];
   const back = Math.floor((today - drawn.day) / days);
   if (back <= 0) return drawn.left;
   return Math.min(full, drawn.left + back);
@@ -108,78 +96,6 @@ export interface Taking {
 }
 
 /**
- * How much likelier a new seam is here, because the ground nearby has been worked.
- *
- * **Stone does not grow back; it is found.** Canon says flint, ochre and sandstone renew
- * `never`, and that is literally true of a cut nodule — it does not come back, and this never
- * makes one come back. What it says instead is that the *world* does not run out of stone,
- * because working the ground turns up more of it: a quarry face exposes fresh rock behind the
- * block you took, and a flood rolls new cobbles into a bed you have already picked over.
- *
- * That distinction is the whole design. Making stone `slow` was the obvious alternative and is
- * a worse answer twice over — it is untrue of a nodule, and measured against a player who works
- * a district hard, a thirty-day node is emptied thirty times before it returns one, so `slow`
- * is `never` wearing a hat.
- *
- * **Derived, never stored.** This reads the same `nodes` record depletion already keeps and
- * counts what is empty nearby, so no second list of "revealed" tiles enters the save. That is
- * the same discipline `lineIsSpent` follows: state you can recompute is state that cannot drift.
- *
- * Only `never` materials are counted, because only they are the thing being discovered. A
- * stripped reed bed says nothing about where the next reed bed is; a worked-out outcrop says a
- * great deal about where the rock continues.
- */
-export function revealedNear(
-  nodes: Nodes,
-  at: Point,
-  materialId: string
-): number {
-  const empty = emptyIndex(nodes).get(materialId);
-  if (!empty) return 0;
-
-  let workedOut = 0;
-  // Chebyshev rather than Euclidean: a district worked in a square reads the same in every
-  // direction, and a walker does not experience diagonals as further.
-  for (let dy = -REVEAL_WITHIN; dy <= REVEAL_WITHIN; dy += 1) {
-    for (let dx = -REVEAL_WITHIN; dx <= REVEAL_WITHIN; dx += 1) {
-      if (empty.has(`${at.x + dx},${at.y + dy}`)) workedOut += 1;
-    }
-  }
-  return Math.min(REVEAL_CAP, workedOut * REVEAL_PER_NODE);
-}
-
-/**
- * Where each material has been worked out, indexed by material and then by tile.
- *
- * **Cached against the `Nodes` object it was built from**, because `revealedNear` is on the
- * walk's hot path: `takeableAt` asks it for every material on every tile, and scanning the whole
- * record each time is quadratic in the number of nodes a journey has touched. A map-wide sweep
- * took long enough to time a test out, which is how this was found rather than reasoned about.
- *
- * Keyed by identity rather than contents, which is sound because `draw` never mutates -- it
- * returns a new object -- so a changed record is always a different object. One entry is kept:
- * callers walk one journey's nodes, and holding more would be a leak dressed as a cache.
- */
-let indexedFrom: Nodes | null = null;
-let indexed: Map<string, Set<string>> = new Map();
-
-function emptyIndex(nodes: Nodes): Map<string, Set<string>> {
-  if (indexedFrom === nodes) return indexed;
-  const built = new Map<string, Set<string>>();
-  for (const [key, drawn] of Object.entries(nodes)) {
-    if (drawn.left > 0) continue;
-    const cut = key.lastIndexOf(',');
-    const id = key.slice(cut + 1);
-    const where = built.get(id) ?? new Set<string>();
-    where.add(key.slice(0, cut));
-    built.set(id, where);
-  }
-  indexedFrom = nodes;
-  indexed = built;
-  return built;
-}
-
-/**
  * What is actually takeable here, after what has already been taken.
  *
  * The filter `gather` and every prompt should ask, rather than `yieldsAt` directly. The
@@ -194,10 +110,7 @@ export function takeableAt(
   today: number
 ): Taking[] {
   const out: Taking[] = [];
-  // Worked ground is likelier to turn up more of the same stone. See `revealedNear`.
-  for (const material of yieldsAt(seed, at, biome, (m) =>
-    m.renews === 'never' ? revealedNear(nodes, at, m.id) : 0
-  )) {
+  for (const material of yieldsAt(seed, at, biome)) {
     const left = leftAt(nodes, seed, at, material, today);
     if (left <= 0) continue;
     out.push({ material, count: handful(seed, at, material, today, left) });

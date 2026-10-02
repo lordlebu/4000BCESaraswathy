@@ -25,7 +25,7 @@ import crafting from '../data/making/crafting.json';
 import homesteadData from '../data/making/homesteads.json';
 import affordancesFile from '../data/making/affordances.json';
 import classesFile from '../data/making/material_classes.json';
-import ratesFile from '../data/making/renewal_rates.json';
+import { REGROW_DAYS } from '../src/content/tiers';
 
 type Doc = Record<string, unknown> & { id: string };
 
@@ -63,7 +63,7 @@ const vocab = (file: unknown, key: string): Set<string> => {
 };
 const AFFORDANCES = vocab(affordancesFile, 'affordances');
 const CLASSES = vocab(classesFile, 'classes');
-const RATES = vocab(ratesFile, 'rates');
+const RATES = new Set(Object.keys(REGROW_DAYS));
 
 describe('ids across the boundary', () => {
   it('every game-owned id canon names exists in the game', () => {
@@ -87,10 +87,10 @@ describe('ids across the boundary', () => {
 });
 
 describe('the vocabularies are the declared ones', () => {
-  it('materials carry declared classes and renewal rates', () => {
+  it('materials carry declared classes and a regrowth tier', () => {
     for (const m of making.materials) {
       for (const c of (m.classes as string[]) ?? []) expect(CLASSES.has(c), `${m.id}: class ${c}`).toBe(true);
-      if (m.renews) expect(RATES.has(m.renews as string), `${m.id}: renews ${String(m.renews)}`).toBe(true);
+      expect(RATES.has(m.regrows as string), `${m.id}: regrows ${String(m.regrows)}`).toBe(true);
     }
   });
 
