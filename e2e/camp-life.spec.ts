@@ -143,10 +143,46 @@ test('the way in is shown as the walker comes along it, and leads to the camp', 
   await expect.poll(async () => (await campOn(page))?.troddenShown ?? 0, { timeout: 20_000 }).toBeGreaterThan(0);
 });
 
+/** A quarter past the meal's first hour (`CAMP_DAY.meal`), so the hour the card opens at is well inside it. */
+const MEAL = 17.25;
+
 test('at the meal you can eat with them, and at night only the watch is up', async ({ page }) => {
   const { seed, day, camp } = await findDay(page, (c, d) => d > c.from && d < c.to - 1);
-  expect(await standNear(page, seed, day, 17, camp), 'nowhere to stand near the camp').toBe(true);
+  expect(await standNear(page, seed, day, MEAL, camp), 'nowhere to stand near the camp').toBe(true);
   await expect.poll(async () => (await keepers(page, camp)).filter((t) => t.visible).length, { timeout: 20_000 }).toBe(3);
+
+  // **Start beside the watch, not a walk away.** Walking spends the day's clock -- three tiles up to
+  // the fire measured 1.8 hours -- and the meal is two, so a walk from where `standNear` puts you
+  // reached the watch with minutes of it left: green here, and on CI's slower runner past seven
+  // and offering no meal. Where the watch sits is read at the meal, and the journey reopened on a
+  // free tile beside them.
+  const folk = await keepers(page, camp);
+  const watchAt = folk.find((t) => t.slot === 'watch')!.tile!;
+  const taken = new Set(folk.map((t) => `${t.tile?.x},${t.tile?.y}`));
+  let beside = false;
+  for (const d of [{ x: -1, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 1 }, { x: 1, y: 1 }, { x: 0, y: -1 }, { x: -1, y: -1 }, { x: 1, y: -1 }]) {
+    const at = { x: watchAt.x + d.x, y: watchAt.y + d.y };
+    if (taken.has(`${at.x},${at.y}`)) continue;
+    if (await openOn(page, seed, day, MEAL, at)) {
+      beside = true;
+      break;
+    }
+  }
+  expect(beside, 'nowhere to stand beside the watch').toBe(true);
+  await expect.poll(async () => (await keepers(page, camp)).filter((t) => t.visible).length, { timeout: 20_000 }).toBe(3);
+
+  // Standing beside the fire can open the camp's own welcome as the journey opens. Take it first,
+  // so the tap below reaches the map rather than a card.
+  const card = page.locator('.activity-card');
+  const welcome = async () => {
+    await card.locator('.activity-choice').first().click();
+    await card.getByRole('button', { name: 'Go on' }).click();
+  };
+  await page.waitForTimeout(1500);
+  if (await card.isVisible()) {
+    await welcome();
+    await expect(card).toBeHidden();
+  }
 
   // Tap the watch -- not the leader, whose first word is the camp's own card -- and talk to them.
   const settle = async () => {
@@ -172,13 +208,11 @@ test('at the meal you can eat with them, and at night only the watch is up', asy
   const hit = await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.tagName ?? null, tap);
   expect(hit, 'the watch is drawn under the interface').toBe('CANVAS');
   await page.mouse.click(tap.x, tap.y);
-  const card = page.locator('.activity-card');
   await expect(card).toBeVisible({ timeout: 30_000 });
-  // Walking up beside the watch can bring the walker beside the fire, and the camp's own welcome
-  // comes first. The watch's word waits for it to close rather than replacing it.
+  // The camp's own welcome may still come first. The watch's word waits for it to close rather
+  // than replacing it.
   if (!/, the /.test((await card.locator('h2').textContent()) ?? '')) {
-    await card.locator('.activity-choice').first().click();
-    await card.getByRole('button', { name: 'Go on' }).click();
+    await welcome();
     await expect(card.locator('h2')).toHaveText(/, the /, { timeout: 15_000 });
   }
   await expect(card.locator('h2')).toHaveText(/, the /);
