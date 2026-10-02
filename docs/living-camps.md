@@ -129,6 +129,34 @@ Asked by the owner while this was built, and done for every traveller, not only 
 - **They are drawn wading**, by the player's own rule (`wadeFor`): cut at the waist in a river, the
   shins at a ford, the feet in a swamp, faded into a sky pool (`wadeWalker` in the scene).
 
+## Nobody stands in the carriage's way
+
+Asked by the owner on 2 October 2026, after the camps merged: *what happens to people on the track
+when the player rides?* Nothing did. The carriage ran straight through them, because a ride charges
+the clock, moves the player to the far station at once, and then only animates -- and nothing told
+the road a ride had begun. It was not rare: three of the Aravali's five travellers cross the strait
+on the line, since it is the only way across on foot, and measured over five seeds at every quarter
+hour of daylight, **about one person is on the 25-tile line at any moment** (0.6 to 1.4 by seed).
+No camp person or wandering animal ever is.
+
+Three answers were offered: they wait at the pier, they ride along, or the carriage will not leave
+while anybody is on the line. The owner chose the first.
+
+- **They wait at the pier.** When the carriage sets out, anybody on the stretch it crosses
+  (`carriagePath`) is drawn at the nearest island ground off the line (`pierFor` in
+  `content/vehicles.ts`): grass, no rail, rope or plank, by distance then northmost, within
+  `PIER_REACH`. They stand turned to the tile they stepped off, watching it go by, and go back to
+  wherever their own hours put them once it is in.
+- **Placed at once, not on the half-second gate** (`TravellerView.closeLine`), or the car would set
+  out through them before they moved. The line is also reserved ground for `untangle`, so making
+  room never steps somebody back onto the rail.
+- **Nothing is saved and no clock moves.** Where somebody is drawn changes, not where they are.
+
+`test/riding.test.ts` replays every ride on six seeds at every half hour and fails if anybody is
+left on the line or hidden rather than waiting; `e2e/riding.spec.ts` rides at ten on the default
+seed, when the carrier and the pilgrim are both on it, and asks the scene. Both were broken on
+purpose once to see them fail.
+
 ## The rail line and the sky islands: decided
 
 Deferred for a moment, then decided by the owner on 2 October 2026:

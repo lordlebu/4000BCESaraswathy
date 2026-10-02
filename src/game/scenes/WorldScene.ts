@@ -160,7 +160,7 @@ import {
   type Facing
 } from '../player';
 import { DAY_MS, phaseAt, skyAt, startPhaseFor, travelTimeMs } from '../dayNight';
-import { RIDE_SHARE, rideFrom } from '../../content/vehicles';
+import { RIDE_SHARE, carriagePath, rideFrom } from '../../content/vehicles';
 import { trackRoute } from '../../world/crossing';
 import { easedMark, fatigueAt, fatigueEnabled, fatigueNote, paceFor, restUntilMorning } from '../fatigue';
 import { duskNote, isDark, lightLeft, shelterAt, spendNight, type Shelter } from '../night';
@@ -467,7 +467,7 @@ export class WorldScene extends Phaser.Scene {
   /** Whether he is aboard it, which is also why he cannot be seen. */
   private riding = false;
   /** The ride in flight: where from and to in pixels, and when it set out on the loop's clock. */
-  private ride: { from: { x: number; y: number }; to: { x: number; y: number }; at: Point; start: number; ms: number } | null =
+  private ride: { from: { x: number; y: number }; to: { x: number; y: number }; at: Point; start: number; ms: number; line: Point[] } | null =
     null;
   /**
    * Whose sheet the sprite draws from.
@@ -1831,8 +1831,12 @@ export class WorldScene extends Phaser.Scene {
       to: { x: ride.to.x * TILE_SIZE + TILE_SIZE / 2, y: ride.to.y * TILE_SIZE + TILE_SIZE - 2 },
       at: ride.to,
       start: this.game.loop.now,
-      ms: RIDE_TILE_MS * ride.tiles
+      ms: RIDE_TILE_MS * ride.tiles,
+      line: carriagePath(this.world, ride)
     };
+    // Anybody walking the line steps off at the pier to let it by -- the owner's ruling. Placed now,
+    // with the clock already charged, so they are off the rail before the car moves.
+    this.travellers.closeLine(this.ride.line, phaseAt(this.time.now + this.travelled, this.startPhase));
   };
 
   /**
@@ -1870,6 +1874,8 @@ export class WorldScene extends Phaser.Scene {
     this.riding = false;
     this.moveShadow();
     this.moving = false;
+    // And back to the rail, wherever their own hours have them now.
+    this.travellers.closeLine([], phaseAt(this.time.now + this.travelled, this.startPhase));
     this.updateAnimation();
     this.arriveAt(ride.at);
   }
@@ -2058,6 +2064,8 @@ export class WorldScene extends Phaser.Scene {
       // for `e2e/riding.spec.ts`, which is the only thing that can tell the two apart.
       riding: this.riding,
       carriage: this.carriage.visible,
+      // The rail the carriage is crossing on this ride, for the spec that nobody is drawn on it.
+      rideLine: this.ride?.line ?? [],
       moving: this.moving,
       depth: this.player.depth,
       sortedRow: this.sortedRow,

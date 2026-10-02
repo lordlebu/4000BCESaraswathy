@@ -28,7 +28,9 @@
 import { type Vehicle, material, vehicles } from './making';
 import { type Satchel, count } from './satchel';
 import { canBoardAt, trackRoute } from '../world/crossing';
+import { isWalkable } from '../world/generate';
 import type { BiomeId, Point, World } from '../world/types';
+import type { Whereabouts } from './travellers';
 
 export { vehicles };
 
@@ -179,4 +181,81 @@ export function rideFrom(world: World, at: Point): Ride | null {
   if (!vehicle) return null;
 
   return { vehicle, from: at, to, tiles: away(to) };
+}
+
+/**
+ * The rail the carriage runs over on this ride, from the boarding tile to the far station.
+ *
+ * Only the stretch between the two: a station behind the boarding tile on the same island is not
+ * crossed, so somebody standing there is not in the way.
+ */
+export function carriagePath(world: World, ride: Pick<Ride, 'from' | 'to'>): Point[] {
+  const low = Math.min(ride.from.y, ride.to.y);
+  const high = Math.max(ride.from.y, ride.to.y);
+  return trackRoute(world).filter((p) => p.y >= low && p.y <= high);
+}
+
+/**
+ * How far somebody on the line will go to wait for the carriage, in tiles.
+ *
+ * Measured on the Aravali, the longest stretch of the line over open water is 13 tiles, so nobody
+ * is more than seven from island ground. Twice that, and anybody it still cannot place is hidden
+ * for the ride rather than run through.
+ */
+export const PIER_REACH = 14;
+
+/**
+ * Where somebody standing on the carriage's path waits while it runs: at the pier.
+ *
+ * **The owner's ruling, 2 October 2026.** The carriage ran straight through anybody walking the
+ * line -- three of the Aravali's five travellers cross the strait on it, and about one of them is on
+ * it at any hour of daylight -- because nothing told them a ride had begun. Now they step off at the
+ * nearest island and watch it go by: the islands are the piers the line hangs from, and the few who
+ * come here climb rather than ride.
+ *
+ * The nearest island ground off the line: `sky_island`, walkable, no rail, rope or plank on it,
+ * by distance and then northmost, so the same ride always sends the same person to the same tile.
+ * Null when there is none within `PIER_REACH`, and the scene hides them rather than draw them in
+ * the carriage's way. Not on the path at all is null too: nobody else moves.
+ */
+export function pierFor(world: World, at: Point, path: readonly Point[]): Point | null {
+  if (!path.some((p) => p.x === at.x && p.y === at.y)) return null;
+  for (let reach = 1; reach <= PIER_REACH; reach += 1) {
+    const ring: Point[] = [];
+    for (let dy = -reach; dy <= reach; dy += 1) {
+      const dx = reach - Math.abs(dy);
+      ring.push({ x: at.x - dx, y: at.y + dy });
+      if (dx !== 0) ring.push({ x: at.x + dx, y: at.y + dy });
+    }
+    ring.sort((a, b) => a.y - b.y || a.x - b.x);
+    for (const p of ring) {
+      const tile = world.tiles[p.y]?.[p.x];
+      if (tile && tile.biome === 'sky_island' && !tile.track && !tile.plank && isWalkable(tile)) return p;
+    }
+  }
+  return null;
+}
+
+/**
+ * Everybody placed for this moment, with anybody on the carriage's path sent to wait at the pier.
+ *
+ * What `TravellerView.update` does while a ride runs, kept here so `test/` runs the same code: the
+ * position moves to `pierFor`'s tile, or to nowhere (hidden) when there is none, and `faceTo` turns
+ * them to the tile of line they stepped off, so they stand and watch it go by rather than walk on.
+ * Resting people are at a place and untouched. Pass the line to `untangle` as reserved ground too,
+ * or making room can step somebody straight back onto the rail.
+ */
+export function waitAtPiers<T extends { where: Whereabouts | null; faceTo: Point | null }>(
+  world: World,
+  placed: readonly T[],
+  line: readonly Point[]
+): T[] {
+  if (line.length === 0) return [...placed];
+  return placed.map((p) => {
+    if (!p.where || p.where.resting) return p;
+    const at = p.where.at;
+    if (!line.some((t) => t.x === at.x && t.y === at.y)) return p;
+    const pier = pierFor(world, at, line);
+    return { ...p, where: pier ? { ...p.where, at: pier } : null, faceTo: at };
+  });
 }

@@ -13,7 +13,8 @@ import { buildFieldMap, startTileFor } from '../src/world/fieldMap';
 import { fieldMaps } from '../src/content/places';
 import { trackRoute, canBoardAt, railSpan } from '../src/world/crossing';
 import { isWalkable } from '../src/world/generate';
-import { rideFrom, carriageFor, crosses, RIDE_SHARE } from '../src/content/vehicles';
+import { rideFrom, carriageFor, crosses, RIDE_SHARE, carriagePath, pierFor, waitAtPiers, PIER_REACH } from '../src/content/vehicles';
+import { atHour, hoursFor, placedCircuit, travellersOn, untangle, whereabouts } from '../src/content/travellers';
 
 const worlds = fieldMaps.map((map) => ({ id: map.id, built: buildFieldMap(map, {}) }));
 const only = (id: string) => worlds.find((w) => w.id === id)!.built.world;
@@ -169,5 +170,79 @@ describe('the debug anchor the browser suite boards from', () => {
       const built = buildFieldMap(map, {});
       expect(startTileFor(built, '?at=board')).toEqual(built.world.start);
     }
+  });
+});
+
+// The owner's ruling, 2 October 2026: the carriage ran straight through anybody walking the line.
+// Three of the Aravali's five travellers cross the strait on foot, about one of them is on it at any
+// hour of daylight, and nothing told them a ride had begun. Now they wait at the pier.
+describe('nobody is on the line while the carriage runs', () => {
+  const SEEDS = ['a', 'b', 'c', 'd', 'h', 'jambhudweepa-evening'];
+  const id = 'field_map_aravali';
+  const key = (p: { x: number; y: number }) => `${p.x},${p.y}`;
+
+  it('finds island ground to wait on from every tile of every ride', () => {
+    for (const seed of SEEDS) {
+      const world = buildFieldMap(fieldMaps.find((m) => m.id === id)!, { seed }).world;
+      const stations = trackRoute(world).filter((p) => canBoardAt(world, p));
+      for (const from of [stations[0]!, stations[stations.length - 1]!]) {
+        const ride = rideFrom(world, from)!;
+        const line = carriagePath(world, ride);
+        expect(line.length, `${seed}: a ride with no line under it`).toBeGreaterThan(10);
+        for (const at of line) {
+          const pier = pierFor(world, at, line);
+          expect(pier, `${seed}: nowhere to wait from ${key(at)}`).not.toBeNull();
+          const tile = world.tiles[pier!.y]![pier!.x]!;
+          expect(tile.biome).toBe('sky_island');
+          expect(isWalkable(tile) && !tile.track && !tile.plank, `${seed}: ${key(pier!)} is not island ground`).toBe(true);
+          expect(Math.abs(pier!.x - at.x) + Math.abs(pier!.y - at.y)).toBeLessThanOrEqual(PIER_REACH);
+        }
+        // Off the path, nobody moves.
+        expect(pierFor(world, { x: line[0]!.x + 3, y: line[0]!.y }, line)).toBeNull();
+      }
+    }
+  });
+
+  it('leaves nobody drawn on it, at every hour, once room is made', () => {
+    // The scene's own steps: where each traveller's hours put them, `waitAtPiers`, then `untangle`
+    // with the player at the far station and the line reserved -- `TravellerView.update`.
+    let stepped = 0;
+    for (const seed of SEEDS) {
+      const built = buildFieldMap(fieldMaps.find((m) => m.id === id)!, { seed });
+      const world = built.world;
+      const roster = travellersOn(id)
+        .map((t) => ({ id: t.id, stops: placedCircuit(t, built.placed).map((s) => s.at) }))
+        .filter((t) => t.stops.length >= 2);
+      const stations = trackRoute(world).filter((p) => canBoardAt(world, p));
+      for (const from of [stations[0]!, stations[stations.length - 1]!]) {
+        const ride = rideFrom(world, from)!;
+        const line = carriagePath(world, ride);
+        const onLine = new Set(line.map(key));
+        for (let day = 0; day < 12; day++) {
+          for (let h = 6; h <= 20; h += 0.5) {
+            const placed = roster.map((t) => ({
+              id: t.id,
+              where: whereabouts(world, t.stops, day, atHour(h), hoursFor(t.id)),
+              faceTo: null as { x: number; y: number } | null
+            }));
+            const waiting = waitAtPiers(world, placed, line);
+            const room = untangle(world, waiting, [ride.to, ...line]);
+            for (const [i, p] of waiting.entries()) {
+              const before = placed[i]!.where;
+              if (!before || before.resting) continue;
+              if (onLine.has(key(before.at))) {
+                stepped++;
+                expect(p.where, `${seed} day ${day} ${h}: ${p.id} hidden rather than waiting`).not.toBeNull();
+                expect(p.faceTo, 'turned to watch the line').toEqual(before.at);
+              }
+              const at = room.get(p.id);
+              if (at) expect(onLine.has(key(at)), `${seed} day ${day} ${h}: ${p.id} on the line at ${key(at)}`).toBe(false);
+            }
+          }
+        }
+      }
+    }
+    // Measured: somebody steps off on nearly every ride. Zero would mean the check walked nobody.
+    expect(stepped).toBeGreaterThan(100);
   });
 });

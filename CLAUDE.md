@@ -740,6 +740,11 @@ retrospective. The rules, because they are rules rather than history:
 - **Nobody is drawn standing in the sea.** `untangle` steps only onto walkable ground, and the scene
   hides anybody whose tile is not walkable. `test/campLife.test.ts` replays every placement on every
   map to hold it.
+- **Nobody is drawn on the line while the carriage runs** (owner's ruling, 2 October 2026). Anybody on
+  the stretch a ride crosses waits at the nearest island ground off the rail (`pierFor`,
+  `waitAtPiers` in `content/vehicles.ts`), watching it pass, placed the moment it sets out
+  (`TravellerView.closeLine`). It used to run straight through them, and about one person is on
+  the Aravali's line at any hour of daylight. `docs/living-camps.md` has the measurement.
 - **People on the road slow and wade where the player does.** Progress along a path is weighted by
   `stepCostOn` (`indexAlong`), and the scene cuts them at the waterline by the player's own `wadeFor`.
 - **A card never opens over another.** `cardOpenRef` is set the instant a card opens -- an effect

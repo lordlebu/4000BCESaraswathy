@@ -50,3 +50,35 @@ test('the line can be boarded, and it carries you across', async ({ page }) => {
   const rowOf = (text: string) => Number(text.split(',').pop());
   expect(Math.abs(rowOf(after) - rowOf(before))).toBeGreaterThan(10);
 });
+
+// The owner's ruling, 2 October 2026: anybody walking the line waits at the pier while the carriage
+// runs, rather than having it pass through them. At ten on this seed the carrier and the pilgrim
+// are both on the stretch the ride crosses (measured in Node; `test/riding.test.ts` holds the rule
+// on every seed and hour), so this is not a check that passes by finding nobody.
+test('nobody is drawn on the line while the carriage crosses it', async ({ page }) => {
+  await page.goto(START);
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator('.journal h2')).not.toHaveText('Travel Journal', { timeout: 20_000 });
+
+  type Tile = { x: number; y: number };
+  type Walker = { riding: boolean; rideLine: Tile[] };
+  type Person = { id: string; visible: boolean; tile: Tile | null; atPier: boolean };
+  const walker = () => page.evaluate(() => (window as unknown as { __walker: () => Walker }).__walker());
+  const people = () => page.evaluate(() => (window as unknown as { __travellers: () => Person[] }).__travellers());
+
+  await page.keyboard.press('KeyB');
+  await expect.poll(async () => (await walker()).riding, { timeout: 5_000 }).toBe(true);
+
+  const { rideLine } = await walker();
+  expect(rideLine.length, 'riding with no line recorded').toBeGreaterThan(10);
+  const onLine = (t: Tile | null) => t !== null && rideLine.some((p) => p.x === t.x && p.y === t.y);
+  const mid = await people();
+  for (const p of mid) {
+    if (p.visible) expect(onLine(p.tile), `${p.id} drawn on the line at ${JSON.stringify(p.tile)}`).toBe(false);
+  }
+  expect(mid.filter((p) => p.atPier && p.visible).length, 'nobody stepped off to wait').toBeGreaterThan(0);
+
+  // And once the car is in, they go back to the rail.
+  await expect.poll(async () => (await walker()).riding, { timeout: 15_000 }).toBe(false);
+  expect((await people()).filter((p) => p.atPier), 'still waiting after the ride').toEqual([]);
+});
