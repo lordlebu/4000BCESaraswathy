@@ -31,14 +31,13 @@ import { seedFromUrl } from './seed';
 import { SettlingSection } from './SettlingSection';
 import { settlingRoad } from '../content/settlingRoad';
 import { WorkshopPanel } from './WorkshopPanel';
-import { add as addToSatchel, canDo, distinct, emptySatchel, itemsHeld, remove as takeFromSatchel } from '../content/satchel';
+import { add as addToSatchel, distinct, emptySatchel, remove as takeFromSatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
-import { carry, gatheredLine, standingLine } from '../content/gathering';
+import { standingLine } from '../content/gathering';
 import { rideFrom } from '../content/vehicles';
 import { canBoardAt, trackRoute } from '../world/crossing';
 import { tileHash } from '../world/rng';
-import { conditionOf, draw, noNodes, takeableAt, type Nodes, type Taking } from '../content/nodes';
-import { item, recipe } from '../content/making';
+import { conditionOf, noNodes, takeableAt, type Nodes } from '../content/nodes';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
@@ -55,7 +54,6 @@ import { coachLine, MORNING_GOAL } from '../content/coach';
 import {
   advance,
   answer,
-  craft,
   hasSomethingNew,
   hear,
   isComplete,
@@ -70,19 +68,14 @@ import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import { characterFor } from '../game/player';
 import type { World } from '../world/types';
 import { isAnimal, isWaterSpecies } from '../content/species';
-import { gestureForProcess } from '../content/making-gestures';
 import {
   GESTURE_VERB,
-  GESTURE_WANTS,
   blockedReason,
   gestureFor,
-  isAboutAnAnimal,
-  momentFavours,
-  type Gesture
 } from '../content/gestures';
-import type { Preparation } from '../content/activity';
-import { shelterBuilt, use, usedLine, useOf } from '../content/using';
+import { shelterBuilt } from '../content/using';
 import { ActivityModal } from './ActivityModal';
+import { useActivity } from './useActivity';
 import { EventCard } from './EventCard';
 import { anyConditions, type Choice, type GameEvent, type Occasion } from '../content/events';
 import type { SettlingView } from './PlacePanel';
@@ -120,17 +113,6 @@ import type { Station } from '../content/stations';
 const SPEAK_FIRST_AFTER_MS = 1500;
 
 
-/**
- * The bare process word for a recipe -- `firing`, not `process_firing`.
- *
- * The variant the activity card narrows its painting by, matching what `src/ui/scenes/` is named
- * after. `PROCESS_MARK` already keys on the same bare word, so the two art folders read canon's
- * vocabulary the same way.
- */
-function processWord(recipeId: string): string | null {
-  const id = recipe(recipeId)?.process;
-  return id ? id.replace('process_', '') : null;
-}
 import { Modal } from './Modal';
 
 /**
@@ -255,26 +237,6 @@ export function App() {
   const [nodesByMap, setNodesByMap] = useState(initialJourney.current.nodesByMap ?? {});
 
   /**
-   * The activity being played, or null when none is.
-   *
-   * Holds what the tile promised at the moment the player committed, rather than recomputing it
-   * when the run settles. `takeableAt` is a function of the day and the nodes, and both can move
-   * under a modal that is open -- so re-asking would let a player see one offer and receive
-   * another, which is exactly the "promising two reeds and handing over one" fault `Taking`
-   * exists to prevent.
-   */
-  const [activity, setActivity] = useState<{
-    taking: Taking[];
-    day: number;
-    /** Set when this is a night rather than a gathering. Carries the shelter kind for the picture. */
-    resting?: string;
-    /**
-     * Set when this is a bench job. Carries the recipe, because what is being made is not on the
-     * ground and cannot be recovered from `underfoot` the way a gathered material can.
-     */
-    making?: string;
-  } | null>(null);
-  /**
    * Whether the front door is still closed.
    *
    * Opens once and never comes back -- there is no way to walk back out to it, because a door
@@ -378,8 +340,6 @@ export function App() {
   // The story check, handed out of the effect like `happens`; see `storyNow`.
   const storyRef = useRef<((when: BeatWhen, poiId: string | null) => boolean) | null>(null);
   const happens = useRef<Happens | null>(null);
-  /** What the last take carried off, so the `working` question does not turn up the same thing. */
-  const lastTaken = useRef<string[]>([]);
 
   /**
    * One value decides what is on screen; the rules are in `surface.ts` and tested under Node.
@@ -1013,144 +973,27 @@ export function App() {
     [underfoot, nodes, arrival?.day]
   );
 
-  /**
-   * Stoop and pick up whatever this tile offers.
-   *
-   * Done in React straight from the content layer rather than routed through the scene, on
-   * the precedent `EventBus.ts` sets for observing a creature: the content layer is
-   * framework-free and importable here, and going through the scene is what once made the
-   * journal describe a crane while the sketch recorded an otter.
-   */
-  const pickUp = useCallback(() => {
-    if (!underfoot) return;
-    const today = arrival?.day ?? 0;
-    // What is *left* here, not what grows here. `gather` still does the carrying; this decides
-    // what there is to carry, which is the whole of what a resource node changes.
-    const taking = takeableAt(nodes, underfoot.seed, underfoot.at, underfoot.biome, today);
-    if (taking.length === 0) return;
+  /** What the last bench job made, step by step, for the workshop to show. */
+  const [lastMade, setLastMade] = useState<Step[]>([]);
 
-    // **Opening a modal rather than taking.** Everything below this line used to run here, and
-    // that was the whole of the finding: a reed and a beedu manta came off the same click, so a
-    // player looking for the hunting could not find it because there was no gesture to see.
-    // `finishTaking` now holds what this did, and runs when the activity settles.
-    setActivity({ taking, day: today });
-  }, [underfoot, nodes, arrival?.day]);
-
-  /**
-   * What the old single click did, run once the activity is over.
-   *
-   * `taken` comes from `settle` rather than from `takeableAt`, so a clean run's extra is carried
-   * *and* drawn down -- the two must agree or the satchel and the ground disagree about what left
-   * the tile. The floor is `settle`'s: this can never be less than the click gave.
-   */
-  const finishTaking = useCallback(
-    (taken: Taking[], line: string) => {
-      if (!underfoot || taken.length === 0) return;
-      const today = arrival?.day ?? 0;
-      setSatchel((s) => carry(s, taken));
-      setNodes((n) => draw(n, underfoot.seed, underfoot.at, taken, today));
-      lastTaken.current = taken.map((t) => t.material.id);
-      // Noted rather than announced. The whole progression of this game is a written journal, so
-      // a good cut is a sentence in the field notes and not a number in a badge. The activity's
-      // own line wins when it has one, because it says how the hands went as well as what was cut.
-      setMemory(line || gatheredLine(underfoot.seed, underfoot.at, underfoot.biome, taken) || '');
-    },
-    [underfoot, arrival?.day, setNodes]
-  );
-
-  /**
-   * Which gesture the running activity is, from the material it is about.
-   *
-   * Derived rather than stored on the activity, so it cannot drift from the material the modal is
-   * actually settling -- the two would be a pair of facts about the same thing, and pairs like
-   * that disagree eventually.
-   */
-  const activityGesture = useMemo<Gesture | null>(
-    () =>
-      activity
-        ? activity.resting
-          ? 'rest'
-          : activity.making
-            ? gestureForProcess(recipe(activity.making)?.process ?? '')
-            : gestureFor(activity.taking[0]!.material, isAnimal, isWaterSpecies)
-        : null,
-    [activity]
-  );
-
-  /**
-   * What the player brought to the running activity.
-   *
-   * **Composed here because this is the only place holding all three answers** -- what is in the
-   * satchel, what the animal is doing, and how tired the traveller is. That is the same
-   * arrangement `knowsRecipeHere` uses and for the same stated reason; `content/activity.ts`
-   * grades it and the card renders it, and neither works any of it out.
-   *
-   * This memo replaced a seeded `roll` function whose *identity* was load-bearing: the card dealt
-   * fresh timing bands in an effect keyed on it, so an inline arrow re-dealt them on every tick of
-   * the card's own timer and the run never settled. Nine unit tests passed throughout and the
-   * browser found it in one click. There is no timer and no deal any more, so the hazard is gone
-   * rather than guarded -- but it is worth remembering why a plain object is the safer shape.
-   */
-  const preparation = useMemo<Preparation>(() => {
-    const gesture: Gesture | null = activityGesture;
-    if (!gesture) return { wants: null, equipped: false, favourable: true };
-    const wants = GESTURE_WANTS[gesture];
-    return {
-      wants,
-      equipped: wants === null ? false : canDo(satchel, wants),
-      favourable: momentFavours(
-        gesture,
-        currentCreature ? routineFor(currentCreature, moment) : null,
-        {
-          // `fatigueNote` is prose and this needs a fact, so the scene's own word is read rather
-          // than re-derived: it says nothing at all while the traveller is fresh, and says
-          // something only once it is worth saying. That threshold is `fatigue.ts`'s to own.
-          spent: Boolean(arrival?.fatigue),
-          // A night under a roof, at a camp, or in a tent you pitched. The bedroll and the bare
-          // sky are the two that are not -- and `shelterAt` has already decided which this is.
-          sheltered: activity?.resting ? activity.resting !== 'bedroll' && activity.resting !== 'none' : true
-        }
-      )
-    };
-  }, [activityGesture, satchel, currentCreature, moment, arrival?.fatigue, activity?.resting]);
-
-  /**
-   * The name of the thing answering `preparation.wants`, for the card's clause.
-   *
-   * Named rather than counted, because "a flint knife will do the work" teaches which object did
-   * it and "you have 1 cutting tool" teaches nothing. The first carried item that affords it, in
-   * the satchel's own stable order, so the sentence does not change between renders.
-   */
-  const preparationTool = useMemo(() => {
-    const wants = preparation.wants;
-    if (!wants || !preparation.equipped) return null;
-    const id = itemsHeld(satchel).find((held) => item(held)?.affords.includes(wants));
-    return id ? item(id)?.name ?? null : null;
-  }, [preparation.wants, preparation.equipped, satchel]);
-
-  /**
-   * Use something carried: a physic, a meal, or a shelter raised for the night.
-   *
-   * **The one verb that closes the three loops canon had data for and the game had no door to.**
-   * Seven physics, thirteen foods and two shelters could all be crafted and none of them did
-   * anything -- `cooking.ts` had no importer at all for its whole life. `content/using.ts` carries
-   * the reasoning for why this is one verb rather than an apothecary screen, a kitchen and a
-   * camp-builder.
-   *
-   * The satchel is React's and the clock is the scene's, so easing goes over the bus rather than
-   * being applied here. A shelter is not spent, which is why the satchel can come back unchanged
-   * and the `shelter-built` announcement still has to fire.
-   */
-  const useCarried = useCallback(
-    (id: string) => {
-      const what = useOf(id);
-      if (!what) return;
-      setSatchel((s) => use(s, id));
-      if (what.eases > 0) EventBus.emitEvent('ease', { by: what.eases });
-      setMemory(usedLine(id) ?? '');
-    },
-    []
-  );
+  // Taking, making, a night and using what is carried, and the card each opens: `useActivity.ts`.
+  const { activity, card: activityCard, pickUp, startRest, makeHere, useCarried } = useActivity({
+    underfoot,
+    day: arrival?.day ?? 0,
+    fatigued: Boolean(arrival?.fatigue),
+    nodes,
+    setNodes,
+    satchel,
+    setSatchel,
+    progress,
+    setProgress,
+    bench,
+    currentCreature,
+    moment,
+    setMemory,
+    setLastMade,
+    happens
+  });
 
   /**
    * Tell the scene what is pitched, whenever the satchel changes.
@@ -1401,7 +1244,7 @@ export function App() {
         // Through the same modal as everything else. Nothing is won and nothing can go wrong, so
         // it settles on its own -- but it is the same shape of act, and the night should look like
         // one rather than happening between two frames.
-        onDo: () => setActivity({ taking: [], day: arrival?.day ?? 0, resting: shelter })
+        onDo: () => startRest(shelter)
       } satisfies TileAction
           ]),
       // The line is one map's furniture, so the row only exists where there is a line. Every other
@@ -1530,7 +1373,6 @@ export function App() {
    * log that lived in the panel would vanish the moment it closed, which is exactly when a player
    * wants to reread what just happened.
    */
-  const [lastMade, setLastMade] = useState<Step[]>([]);
 
   /**
    * The bench the workshop was opened at, or null for the whole thing.
@@ -1761,34 +1603,6 @@ export function App() {
       stage: standing ? stagesBuilt(homestead!, state) : 0
     });
   }, [world, fieldMapId, homeTick]);
-
-  /**
-   * Open the bench activity. The making itself happens when the run settles.
-   *
-   * **Checked before opening, not after.** `craft` is the rules layer's answer to whether this can
-   * be made at all -- the satchel, the recipe, the bench -- and a modal that plays through three
-   * beats and then refuses would be a worse version of a disabled button. So the answer is taken
-   * here and the work is redone on settle against the state as it stands then.
-   */
-  const makeHere = useCallback(
-    (recipeId: string) => {
-      if (!craft(progress, satchel, recipeId, bench).made) return;
-      setActivity({ taking: [], day: arrival?.day ?? 0, making: recipeId });
-    },
-    [progress, satchel, bench, arrival?.day]
-  );
-
-  /** What the old single click did, run once the bench activity is over. */
-  const finishMaking = useCallback(
-    (recipeId: string) => {
-      const done = craft(progress, satchel, recipeId, bench);
-      if (!done.made) return;
-      setProgress(done.progress);
-      setSatchel(done.satchel);
-      setLastMade(done.steps);
-    },
-    [progress, satchel, bench]
-  );
 
   /** Settle a question. The player may be wrong, and nothing here tells them so. */
   const settle = useCallback(
@@ -2171,82 +1985,8 @@ export function App() {
         onClose={() => dispatch({ type: 'close-interrupt', which: 'ending' })}
       />
 
-      {/* The activity. Mounted only while one is running, so every open deals fresh bands rather
-          than resuming a run the player has forgotten the state of. */}
-      {activity && underfoot && activityGesture && (
-        <ActivityModal
-          open
-          gesture={activityGesture}
-          promised={activity.taking}
-          preparation={preparation}
-          toolName={preparationTool}
-          creatureId={isAboutAnAnimal(activityGesture, activity) ? currentCreature?.id ?? null : null}
-          creatureName={isAboutAnAnimal(activityGesture, activity) ? currentCreature?.name ?? null : null}
-          /* Which painting to prefer. A night takes the shelter kind, a making takes the process
-             word -- so `make-firing.png` can land later and be picked up with no code, and until
-             it does the plain gesture scene draws. Nothing here is ever blocked on art. */
-          /**
-           * Which painting to prefer.
-           *
-           * A night takes the shelter kind, a making takes the process word, and **a take on the
-           * ground takes the biome** — so cutting herbs on a cliff and cutting reeds at a waterline
-           * can be two different pictures of the same gesture. All three fall back to the plain
-           * gesture scene, so every one of them is a file and no code, and a variant nobody has
-           * painted is not an error.
-           */
-          variant={
-            activity.resting ??
-            (activity.making ? processWord(activity.making) : underfoot?.biome ?? null)
-          }
-          /**
-           * Which of this thing's paintings to show.
-           *
-           * Seeded on the tile and the day, like every other choice the game makes — two players
-           * on one seed see the same night. A second painting never replaces a first, so this is
-           * what decides between them; with one painting it changes nothing.
-           */
-          pick={
-            underfoot
-              ? tileHash(underfoot.seed, underfoot.at.x, underfoot.at.y, `take:${activity.day}`)
-              : 0
-          }
-          subject={
-            activity.resting
-              ? SHELTER_LABEL[activity.resting] ?? 'Stop for the night'
-              : activity.making
-                ? recipe(activity.making)?.name ?? 'it'
-                : null
-          }
-          onClose={() => {
-            setActivity(null);
-            // The night is spent on the way out rather than when the run settles, so a player who
-            // changes their mind has not already slept. `camp` is the rules layer's own event and
-            // it still decides whether a night is legal.
-            if (activity.resting) EventBus.emitEvent('camp', {});
-            // Something happening around the work, asked as the card closes rather than when the
-            // take settles so the two cards never stand on each other. Only a take that carried
-            // something off: closing the card without taking is changing your mind, not working.
-            else if (!activity.making && lastTaken.current.length > 0 && underfoot) {
-              const taken = lastTaken.current;
-              lastTaken.current = [];
-              happens.current?.(
-                'working',
-                underfoot.at,
-                null,
-                `working:${activity.day}:${underfoot.at.x},${underfoot.at.y}`,
-                { taken }
-              );
-            }
-          }}
-          onFinish={
-            activity.resting
-              ? () => {}
-              : activity.making
-                ? () => finishMaking(activity.making!)
-                : finishTaking
-          }
-        />
-      )}
+      {/* The activity, while one is running: `useActivity` hands over everything the card needs. */}
+      {activityCard && <ActivityModal {...activityCard} />}
 
       {/* Something that happened to you, as opposed to something you did. There are no events
           authored yet, so this never mounts -- the path is live so the first one needs no wiring.
