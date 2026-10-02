@@ -48,8 +48,19 @@ export const AWAY_FROM_PLACES = 5;
 /** How far from any road, so a camp is somewhere the roads do not reach. */
 export const AWAY_FROM_ROADS = 3;
 
-/** Ground a camp pitches on: dry, and not built on. */
-const CAMP_GROUND = new Set(['plains', 'forest', 'hills', 'desert', 'settlement', 'snow']);
+/**
+ * Ground a camp pitches on: dry, and not built on. The sky islands too, on the owner's word of
+ * 2 October 2026 -- a camp may be anywhere a person can be -- and preferably the northern one, the
+ * Grit Mill's (`skyGround`).
+ */
+const CAMP_GROUND = new Set(['plains', 'forest', 'hills', 'desert', 'settlement', 'snow', 'sky_island']);
+
+/**
+ * How often a camp on a map with a sky island pitches up there rather than anywhere: one turn in
+ * two. "Preferably", not "always": the island is small (5-26 tiles a camp fits on, eight seeds) and
+ * a camp every turn in the same few tiles would stop being news.
+ */
+export const SKY_TURN_ONE_IN = 2;
 
 const candidates = new WeakMap<World, Map<string, Point[]>>();
 
@@ -76,7 +87,7 @@ export function campGround(world: World, places: readonly Point[]): Point[] {
   const out: { p: Point; d: number }[] = [];
   for (const row of world.tiles) {
     for (const t of row) {
-      if (!CAMP_GROUND.has(t.biome) || !isWalkable(t) || t.road || t.ford || t.bridge || t.track) continue;
+      if (!CAMP_GROUND.has(t.biome) || !isWalkable(t) || t.road || t.ford || t.bridge || t.track || t.plank) continue;
       const p = { x: t.x, y: t.y };
       if (!far(p, places, AWAY_FROM_PLACES)) continue;
       const d = toRoad(p);
@@ -111,7 +122,10 @@ export function encampmentOn(
 
   const ground = campGround(world, places.map((p) => p.at));
   if (ground.length === 0) return null;
-  const hidden = ground.slice(0, Math.max(1, Math.ceil(ground.length / 2)));
+  // The northern sky island on a turn that prefers it, when it has room; otherwise the better-hidden
+  // half of everywhere.
+  const sky = hash('sky') % SKY_TURN_ONE_IN === 0 ? skyGround(world, ground) : [];
+  const hidden = sky.length > 0 ? sky : ground.slice(0, Math.max(1, Math.ceil(ground.length / 2)));
   const at = hidden[hash('tile') % hidden.length]!;
   const kind = CAMP_KINDS[hash('kind') % CAMP_KINDS.length]!;
 
@@ -125,6 +139,31 @@ export function encampmentOn(
     }
   }
   return { id: `${fieldMapId}:${cycle}`, kind, at, from, to, near };
+}
+
+/**
+ * The camp ground on the northernmost sky island, in `ground`'s order, or nothing on a map with no
+ * sky island. On the Aravali that island is the Grit Mill's on every seed measured; the mill is a
+ * place, so `AWAY_FROM_PLACES` keeps a camp five tiles from it like from any other.
+ */
+function skyGround(world: World, ground: readonly Point[]): Point[] {
+  const sky = ground.filter((p) => world.tiles[p.y]![p.x]!.biome === 'sky_island');
+  if (sky.length === 0) return [];
+  // The island the northernmost tile is on, by walking its sky ground.
+  const start = sky.reduce((a, b) => (b.y < a.y || (b.y === a.y && b.x < a.x) ? b : a));
+  const key = (p: Point) => `${p.x},${p.y}`;
+  const island = new Set([key(start)]);
+  const queue = [start];
+  while (queue.length) {
+    const p = queue.pop()!;
+    for (const n of orthogonalNeighbours(p, world.width, world.height)) {
+      const t = world.tiles[n.y]![n.x]!;
+      if ((t.biome !== 'sky_island' && !t.plank) || island.has(key(n))) continue;
+      island.add(key(n));
+      queue.push(n);
+    }
+  }
+  return sky.filter((p) => island.has(key(p)));
 }
 
 /** Whether the player is close enough to have walked up to it: beside it or on it. */
@@ -176,7 +215,7 @@ export function campSpots(world: World, camp: Encampment): { fire: Point; around
 
 /** The way in to a camp from the road: where it leaves the road, and every tile to the fire. */
 export interface WayIn {
-  /** The road tile it leaves from. */
+  /** The road tile it leaves from -- or, where no road can be reached, the nearest place. */
   turnOff: Point;
   /** From the turn-off to the camp's own tile, both ends included. */
   tiles: Point[];
@@ -190,7 +229,8 @@ const ways = new WeakMap<World, Map<string, WayIn | null>>();
  * The cheapest walk to a camp from a road somebody walks.
  *
  * **Priced by the ground, so it goes the way a person would.** Woods, shallows and hills cost what
- * they cost the player; mountains and rivers more, and deep water and the railway not at all. `wayBetween` cannot
+ * they cost the player; mountains and rivers more, the rails and ropes over open water most, and
+ * the sea itself not at all. `wayBetween` cannot
  * be used for this: its flat eight-to-one off the road prices a mountain like a meadow, and the way
  * it finds walks straight over the top.
  *
@@ -201,30 +241,44 @@ const ways = new WeakMap<World, Map<string, WayIn | null>>();
  * One search outward from the fire, stopping at the first road tile it reaches -- the cheapest
  * turn-off and the way to it at once. Cached on the world and the camp.
  */
-export function wayIn(world: World, camp: Encampment, walked: ReadonlySet<string>): WayIn | null {
+export function wayIn(
+  world: World,
+  camp: Encampment,
+  walked: ReadonlySet<string>,
+  places: readonly Point[] = []
+): WayIn | null {
   let known = ways.get(world);
   if (!known) ways.set(world, (known = new Map()));
   const cacheKey = `${camp.id}@${camp.at.x},${camp.at.y}`;
   if (known.has(cacheKey)) return known.get(cacheKey)!;
-  // A road somebody walks, on foot, first. Failing that, the nearest road of any kind on foot. And
-  // failing both, no way at all: **never along the railway**. On the Aravali about two camps in five
-  // sit on ground the line is the only link to -- no road, no place and no start reachable on foot --
-  // and the sea under the trestles is not travelled, on the owner's word of 2 October 2026. How the
-  // line and the ropes onto the sky islands should work is deferred to its own rethink
-  // (`docs/living-camps.md`, "Deferred"); until then such a camp has no trodden way, no runner and
-  // no visitor.
-  const way = searchWayIn(world, camp, walked) ?? (walked.size > 0 ? searchWayIn(world, camp, new Set()) : null);
+  // A road somebody walks first; failing that, the nearest road of any kind. **The rails and the
+  // ropes are walked like any ground**, as the player walks them, on the owner's ruling of 2 October
+  // 2026 -- priced as the slowest going there is (`stepCostOn` over open water), so a way takes them
+  // only when nothing on land reaches. The sea itself is never crossed: it is not walkable.
+  //
+  // And where no road can be reached at all -- seed `h`'s northern Aravali is a landmass with a place
+  // and not one road on it -- the nearest place, which is where anybody there would come from.
+  const key = (p: Point) => `${p.x},${p.y}`;
+  const onRoad = (only: ReadonlySet<string>) => (t: { road?: boolean }, p: Point) =>
+    Boolean(t.road) && (only.size === 0 || only.has(key(p)));
+  const atPlace = new Set(places.map(key));
+  const way =
+    searchWayIn(world, camp, onRoad(walked)) ??
+    (walked.size > 0 ? searchWayIn(world, camp, onRoad(new Set())) : null) ??
+    (atPlace.size > 0 ? searchWayIn(world, camp, (_t, p) => atPlace.has(key(p))) : null);
   known.set(cacheKey, way);
   return way;
 }
 
-function searchWayIn(world: World, camp: Encampment, walked: ReadonlySet<string>): WayIn | null {
-
+function searchWayIn(
+  world: World,
+  camp: Encampment,
+  leavesFrom: (tile: { road?: boolean }, at: Point) => boolean
+): WayIn | null {
   const key = (p: Point) => `${p.x},${p.y}`;
   const isTurnOff = (p: Point): boolean => {
     const t = world.tiles[p.y]?.[p.x];
-    if (!t || !t.road) return false;
-    return walked.size === 0 || walked.has(key(p));
+    return t !== undefined && leavesFrom(t, p);
   };
   const best = new Map<string, number>([[key(camp.at), 0]]);
   const toward = new Map<string, Point>();
@@ -248,9 +302,7 @@ function searchWayIn(world: World, camp: Encampment, walked: ReadonlySet<string>
     const step = Math.max(stepCostOn(here), 0.5);
     for (const next of orthogonalNeighbours(at, world.width, world.height)) {
       const tile = world.tiles[next.y]![next.x]!;
-      // Never along the railway: on the Aravali the line's trestles are walkable over open sea, and a
-      // way in that took them ran out across the strait and over the sky islands.
-      if (!isWalkable(tile) || tile.track) continue;
+      if (!isWalkable(tile)) continue;
       const total = cost + step;
       if (total >= (best.get(key(next)) ?? Infinity)) continue;
       best.set(key(next), total);

@@ -21,16 +21,18 @@ import {
   campVisitors,
   phaseAfterMeeting,
   runnerErrand,
+  standingRoom,
   visitorAt,
   type RoadTraveller
 } from '../src/content/campLife';
-import { atHour, hoursFor, placedCircuit, travellersOn, walkedRoad, whereabouts } from '../src/content/travellers';
+import { atHour, hoursFor, placedCircuit, travellersOn, untangle, walkedRoad, whereabouts } from '../src/content/travellers';
 import { CAMP_DAY, VISIT_PACE_CAP } from '../src/content/tiers';
-import { CAMP_LAYOUT, CROSSED_GROUND, PRINTED_GROUND, troddenColour } from '../src/game/campArt';
+import { CAMP_LAYOUT, CROSSED_GROUND, PRINTED_GROUND, carriesTint, troddenColour } from '../src/game/campArt';
 import { spendNight } from '../src/game/night';
 import type { Point } from '../src/world/types';
 
-const SEEDS = ['a', 'b', 'c', 'd'];
+// `h` holds the Aravali's roadless northern landmass, where a camp's way leaves from a place.
+const SEEDS = ['a', 'b', 'c', 'd', 'h'];
 const DAYS = 24;
 
 /** Every camp that stands on one map and seed in the first few weeks, with what the scene would build. */
@@ -43,11 +45,12 @@ function campsOn(mapId: string, seed: string) {
     .map((t) => ({ id: t.id, npcId: t.npcId, stops: placedCircuit(t, built.placed).map((s) => s.at) }))
     .filter((t) => t.stops.length >= 2);
   const out: { camp: Encampment; day: number }[] = [];
+  const placeTiles = places.map((p) => p.at);
   for (let day = 0; day < DAYS; day++) {
     const camp = encampmentOn(world, mapId, places, day);
     if (camp) out.push({ camp, day });
   }
-  return { world, walked, roster, out };
+  return { world, walked, roster, out, places: placeTiles };
 }
 
 const builds = new Map<string, ReturnType<typeof campsOn>>();
@@ -159,21 +162,23 @@ describe('where everybody stands, on the real maps', () => {
 });
 
 describe('the way in', () => {
-  it('reaches every camp it can from a road on foot, one step at a time, never by the railway', () => {
+  it('reaches every camp from a road, one step at a time, never over the open sea', () => {
     for (const map of fieldMaps) {
       for (const seed of SEEDS) {
-        const { world, walked, out } = camps(map.id, seed);
+        const { world, walked, out, places } = camps(map.id, seed);
         for (const { camp } of out) {
-          const way = wayIn(world, camp, walked);
-          // On the Aravali some camps sit where only the line reaches, and the line is not walked
-          // to them (deferred: see docs/living-camps.md). Everywhere else every camp has a way.
-          if (map.id === 'field_map_aravali' && !way) continue;
+          const way = wayIn(world, camp, walked, places);
           expect(way, `${map.id} ${seed} ${camp.id} has no way in`).not.toBeNull();
           const { tiles, turnOff } = way!;
-          expect(tiles.some((p) => world.tiles[p.y]![p.x]!.track), `${camp.id} walks the railway`).toBe(false);
+          // The rails and ropes are walked like ground; the sea under them never is.
+          for (const p of tiles) {
+            const t = world.tiles[p.y]![p.x]!;
+            if (t.biome === 'sea') expect(Boolean(t.track || t.plank), `${camp.id} crosses open sea at ${p.x},${p.y}`).toBe(true);
+          }
           expect(tiles[0]).toEqual(turnOff);
           expect(tiles[tiles.length - 1]).toEqual(camp.at);
-          expect(world.tiles[turnOff.y]![turnOff.x]!.road, 'the turn-off is not on a road').toBe(true);
+          const fromPlace = places.some((p) => p.x === turnOff.x && p.y === turnOff.y);
+          expect(world.tiles[turnOff.y]![turnOff.x]!.road || fromPlace, 'the turn-off is neither a road nor a place').toBe(true);
           // Off the Aravali a road somebody walks is always reachable on foot, so the way leaves from one.
           if (map.id !== 'field_map_aravali') {
             expect(walked.has(`${turnOff.x},${turnOff.y}`), 'the turn-off is not on a road anybody walks').toBe(true);
@@ -195,9 +200,9 @@ describe('the way in', () => {
     let mountains = 0;
     let total = 0;
     for (const map of fieldMaps) {
-      const { world, walked, out } = camps(map.id, 'b');
+      const { world, walked, out, places } = camps(map.id, 'b');
       for (const { camp } of out) {
-        for (const p of wayIn(world, camp, walked)?.tiles.slice(1) ?? []) {
+        for (const p of wayIn(world, camp, walked, places)?.tiles.slice(1) ?? []) {
           total++;
           if (world.tiles[p.y]![p.x]!.biome === 'mountains') mountains++;
         }
@@ -223,10 +228,10 @@ describe('runners and visitors, on the real maps', () => {
     let campDays = 0;
     for (const map of fieldMaps) {
       for (const seed of SEEDS) {
-        const { world, walked, roster, out } = camps(map.id, seed);
+        const { world, walked, roster, out, places } = camps(map.id, seed);
         for (const { camp, day } of out) {
           campDays++;
-          const way = wayIn(world, camp, walked);
+          const way = wayIn(world, camp, walked, places);
           const errand = runnerErrand(world, camp, way, roster, day);
           if (errand) errands.push({ map: map.id, seed, camp, day, errand });
           for (const visit of campVisitors(world, camp, way, roster, day, errand)) {
@@ -310,13 +315,63 @@ describe('the colour a way is worn into the ground', () => {
   });
 
   it('shows the way faintly across water and mountain, never as prints on them', () => {
-    for (const ground of ['river', 'sea', 'mountains', 'lava_field']) {
+    for (const ground of ['river', 'mountains', 'lava_field']) {
       expect(CROSSED_GROUND.has(ground), ground).toBe(true);
       expect(PRINTED_GROUND.has(ground), `${ground} is printed`).toBe(false);
     }
   });
 
+  it('draws the rails, the ropes and the sky pool as the grass line, walked like any ground', () => {
+    expect(carriesTint({ biome: 'sea', track: true })).toBe(true);
+    expect(carriesTint({ biome: 'sky_island', plank: true })).toBe(true);
+    expect(carriesTint({ biome: 'sky_water' })).toBe(true);
+    expect(carriesTint({ biome: 'plains' })).toBe(false);
+    expect(CROSSED_GROUND.has('sky_water')).toBe(false);
+  });
+
   it('takes a hex string as well as a number', () => {
     expect(troddenColour('#9fb86a', false)).toBe(troddenColour(0x9fb86a, false));
+  });
+});
+
+describe('nobody is drawn standing in the sea', () => {
+  it('places everybody on ground a person can stand on, on every map at every hour', () => {
+    // The owner's question: is anybody pushed into the ocean when people make room for each other?
+    // This does what `updateTravellers` does -- every traveller, trader, visitor and camp person,
+    // then `untangle` -- and checks every tile they end up on. The sea is never walkable; the rails
+    // and ropes over it are, as they are for the player.
+    let checked = 0;
+    for (const map of fieldMaps) {
+      const { world, walked, roster, out, places } = camps(map.id, 'a');
+      for (let day = 0; day < DAYS; day++) {
+        const camp = out.find((c) => c.day === day)?.camp ?? null;
+        const way = camp ? wayIn(world, camp, walked, places) : null;
+        const errand = camp ? runnerErrand(world, camp, way, roster, day) : null;
+        const visits = camp ? campVisitors(world, camp, way, roster, day, errand) : [];
+        for (let h = 6; h <= 20; h += 2) {
+          const phase = atHour(h + 0.3);
+          const folk = camp ? campPlacements(world, camp, day, phase, errand) : [];
+          const seats = camp ? standingRoom(world, camp).filter((p) => !folk.some((f) => f.at && cheb(f.at, p) === 0)) : [];
+          const placed = [
+            ...roster.map((t) => {
+              const v = visits.find((x) => x.travellerId === t.id);
+              if (v) return { id: t.id, where: visitorAt(world, v, phase, seats[0] ?? camp!.at) };
+              return { id: t.id, where: whereabouts(world, t.stops, day, phaseAfterMeeting(errand, t.id, phase), hoursFor(t.id)) };
+            }),
+            ...folk
+              .filter((f) => f.at)
+              .map((f) => ({ id: f.id, where: { at: f.at!, heading: null, resting: false, from: f.at!, to: f.at! } }))
+          ];
+          const room = untangle(world, placed);
+          for (const p of placed) {
+            if (!p.where || p.where.resting) continue;
+            const at = room.get(p.id)!;
+            checked++;
+            expect(isWalkable(world.tiles[at.y]![at.x]!), `${map.id} day ${day} ${h}:00 ${p.id} at ${at.x},${at.y}`).toBe(true);
+          }
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(1000);
   });
 });

@@ -552,3 +552,23 @@ describe('people on the road lose speed where the player does', () => {
     expect(indexAlong(world, way, 0)).toBe(0);
   });
 });
+
+describe('making room never puts anybody in the sea', () => {
+  it('steps a second walker onto the one dry tile beside them, never into the water', () => {
+    // A shore tile with sea on every side but one, and two people on it. The second has to step
+    // aside; the only walkable neighbour is the plain to the east, and the sea is never chosen even
+    // though it comes first in the order room is looked for.
+    const tile = (x: number, y: number, biome: string) => ({ x, y, biome }) as never;
+    const rows = [0, 1, 2].map((y) => [0, 1, 2].map((x) => tile(x, y, 'sea')));
+    rows[1]![1] = tile(1, 1, 'coast');
+    rows[1]![2] = tile(2, 1, 'plains');
+    const world = { width: 3, height: 3, tiles: rows } as never;
+    const here = { at: { x: 1, y: 1 }, heading: null, resting: false, from: { x: 1, y: 1 }, to: { x: 1, y: 1 } };
+    const room = untangle(world, [
+      { id: 'a', where: here },
+      { id: 'b', where: here }
+    ]);
+    expect(room.get('a')).toEqual({ x: 1, y: 1 });
+    expect(room.get('b')).toEqual({ x: 2, y: 1 });
+  });
+});

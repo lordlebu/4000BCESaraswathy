@@ -106,7 +106,18 @@ import {
   type RunnerErrand,
   type Visit
 } from '../../content/campLife';
-import { ASHES_DAYS, CAMP_LAYOUT, CROSSED_COLOUR, CROSSED_GROUND, PRINTED_GROUND, YURT_ONE_IN, campKey, campPieces, troddenColour } from '../campArt';
+import {
+  ASHES_DAYS,
+  CAMP_LAYOUT,
+  CROSSED_COLOUR,
+  CROSSED_GROUND,
+  PRINTED_GROUND,
+  YURT_ONE_IN,
+  campKey,
+  campPieces,
+  carriesTint,
+  troddenColour
+} from '../campArt';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 
 /**
@@ -2006,7 +2017,7 @@ export class WorldScene extends Phaser.Scene {
       .setScale(1.6)
       .setAlpha(0)
       .setName('camp-glow');
-    const way = wayIn(this.world, camp, walkedRoad(this.world, this.built!.fieldMap.id, this.placesHere()));
+    const way = wayIn(this.world, camp, walkedRoad(this.world, this.built!.fieldMap.id, this.placesHere()), this.placesHere().map((p) => p.at));
     return {
       id: camp.id,
       key: `${camp.at.x},${camp.at.y}`,
@@ -2071,6 +2082,9 @@ export class WorldScene extends Phaser.Scene {
     }
     const out: { key: string; sprite: Phaser.GameObjects.Image }[] = [];
     const tiles = way.tiles;
+    // The colour the line last had on ordinary ground, carried over the rails, the ropes and the sky
+    // pool (`carriesTint`). Worn earth until the way has crossed any.
+    let carried = 0x8c7a58;
     // Not the road tile it leaves from, and not the fire's own tile.
     for (let i = 1; i < tiles.length - 1; i++) {
       const p = tiles[i]!;
@@ -2079,13 +2093,19 @@ export class WorldScene extends Phaser.Scene {
       const cx = p.x * TILE_SIZE + TILE_SIZE / 2;
       const cy = p.y * TILE_SIZE + TILE_SIZE / 2;
       const depth = depthFor(p.y, ROW_SLOT.underfoot);
-      const biome = this.world.tiles[p.y]![p.x]!.biome;
-      const printed = PRINTED_GROUND.has(biome);
-      // Over water, mountain and the like, one neutral colour and barely there: see `CROSSED_GROUND`.
-      const crossed = CROSSED_GROUND.has(biome);
-      const tint = crossed
-        ? CROSSED_COLOUR
-        : troddenColour(this.groundColourAt(p) ?? biomeFor(biome)?.color ?? '#8a7a5a', printed);
+      const ground = this.world.tiles[p.y]![p.x]!;
+      const biome = ground.biome;
+      // Over the rails, ropes and sky pool, the grass line in the colour it already had.
+      const carries = carriesTint(ground);
+      const printed = !carries && PRINTED_GROUND.has(biome);
+      // Over a river, mountain and the like, one neutral colour and barely there: see `CROSSED_GROUND`.
+      const crossed = !carries && CROSSED_GROUND.has(biome);
+      const tint = carries
+        ? carried
+        : crossed
+          ? CROSSED_COLOUR
+          : troddenColour(this.groundColourAt(p) ?? biomeFor(biome)?.color ?? '#8a7a5a', printed);
+      if (!carries && !crossed && !printed) carried = tint;
       if (printed) {
         const sprite = this.add
           .image(cx, cy, 'camp-prints')
@@ -2297,7 +2317,7 @@ export class WorldScene extends Phaser.Scene {
         .setAlpha(0.6)
         .setDepth(depthFor(was.at.y, ROW_SLOT.marker))
         .setName('camp-ashes');
-      const way = wayIn(this.world, was, walkedRoad(this.world, this.built!.fieldMap.id, places));
+      const way = wayIn(this.world, was, walkedRoad(this.world, this.built!.fieldMap.id, places), places.map((p) => p.at));
       this.ashes.set(id, { key: `${was.at.x},${was.at.y}`, sprite, trodden: this.drawTrodden(was, way, 0.3) });
     }
     for (const a of this.ashes.values()) {
@@ -2840,7 +2860,7 @@ export class WorldScene extends Phaser.Scene {
       // The way in, and that day's runner and visitor, worked out the way the scene does -- so
       // `e2e/camp-life.spec.ts` can find a day with each and set the clock to it.
       const d = day ?? this.dayOfJourney();
-      const way = wayIn(this.world, c, walkedRoad(this.world, this.built.fieldMap.id, places));
+      const way = wayIn(this.world, c, walkedRoad(this.world, this.built.fieldMap.id, places), places.map((p) => p.at));
       const roster = this.travellers
         .filter((t) => !t.person)
         .map(({ traveller, stops }) => ({ id: traveller.id, npcId: traveller.npcId, stops }));
@@ -3139,6 +3159,14 @@ export class WorldScene extends Phaser.Scene {
         return;
       }
       const at = room.get(placed[i]!.id) ?? where.at;
+      // **Never drawn standing in the sea.** Nothing places anybody there -- `test/campLife.test.ts`
+      // simulates every placement on every map and finds none -- but if a future change ever did,
+      // somebody hidden for a moment is a far smaller fault than somebody standing in open water.
+      const ground = this.world.tiles[at.y]?.[at.x];
+      if (!ground || !isWalkable(ground)) {
+        sprite.setVisible(false);
+        return;
+      }
       sprite.setVisible(true);
       sprite.setPosition(at.x * TILE_SIZE + TILE_SIZE / 2, at.y * TILE_SIZE + TILE_SIZE - 2);
       this.wadeWalker(sprite, at);

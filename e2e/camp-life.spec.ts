@@ -244,3 +244,39 @@ test('people on the road wade where the player would, cut at the waterline', asy
   expect(found, 'nobody on the road stood in water at any hour tried').not.toBeNull();
   expect(found!.cut, `${found!.id} in the ${ground} is not drawn wading`).toBeGreaterThan(0);
 });
+
+test('a camp can pitch on the northern sky island, and its people are drawn there', async ({ page }) => {
+  // The owner's ruling: camps may be anywhere a person can be, the northern island preferably.
+  const tileAt = (p: Point) =>
+    page.evaluate(({ x, y }) => (window as unknown as { __tile?: (x: number, y: number) => string | null }).__tile?.(x, y) ?? null, p);
+  let found: { seed: string; day: number; camp: Camp } | null = null;
+  for (const seed of SEEDS) {
+    await page.goto(`/?seed=${seed}&map=field_map_aravali&hour=12`);
+    await expect.poll(() => page.evaluate(() => typeof (window as unknown as { __camp?: unknown }).__camp), { timeout: 20_000 }).toBe('function');
+    for (let d = 1; d < 30 && !found; d += 1) {
+      const c = await campOn(page, d);
+      if (c && d > c.from && d < c.to - 1 && (await tileAt(c.at)) === 'sky_island') found = { seed, day: d, camp: c };
+    }
+    if (found) break;
+  }
+  expect(found, 'no camp on a sky island in a month on any seed tried').not.toBeNull();
+  const { seed, day, camp } = found!;
+  await page.addInitScript(
+    ({ key, travelled }) => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(key) ?? '{"knowledgeVersion":1}');
+        localStorage.setItem(key, JSON.stringify({ ...saved, travelled }));
+      } catch {
+        // Storage refused: the spec fails on what it looks for.
+      }
+    },
+    { key: `south-of-tethys:${seed}`, travelled: day * DAY_MS + 1000 }
+  );
+  await page.goto(`/?seed=${seed}&map=field_map_aravali&hour=13`);
+  await expect.poll(() => walker(page), { timeout: 30_000 }).not.toBeNull();
+  await expect
+    .poll(async () => (await keepers(page, camp)).filter((t) => t.visible && t.tile && cheb(t.tile, camp.at) <= 4).length, { timeout: 20_000 })
+    .toBeGreaterThanOrEqual(2);
+  // And it has a way in, over the island and down the rope if it must.
+  expect((await campOn(page))?.way, 'the island camp has no way in').not.toBeNull();
+});

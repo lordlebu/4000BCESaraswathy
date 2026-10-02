@@ -53,9 +53,8 @@ local who knows the way, unloaded going out. The Aravali's ways are too long at 
 **median of 10-17 tiles an hour**. Capped at the 90th percentile of ordinary walking (7.5), visits
 happen on a few days a month on three maps and never on the Aravali.
 
-The way never runs along the railway (see *Deferred* below). A first cut let it, and on the Aravali
-it ran out over the strait on the trestles and across the sky islands; those rows are measured
-without it.
+These rows were measured with the railway refused, before the owner ruled it walkable; see *The rail
+line and the sky islands* below for the numbers since.
 
 **After building**, the same six seeds give:
 
@@ -101,7 +100,8 @@ ground -- snow, hills, grass, swamp, sand -- to have its own. Three treatments n
 |---|---|---|
 | swamp, shore, snow, sand (`PRINTED_GROUND`) | footprints | the painted tile's own average colour, deepened (`troddenColour`) |
 | grass, hills, forest, the lanes | a thin line of worn ground, joined tile to tile | the painted tile's colour, a little darker, faint |
-| river, sea, mountain, lava, sky (`CROSSED_GROUND`) | the same thin line | one pale neutral, barely there |
+| river, mountain, lava (`CROSSED_GROUND`) | the same thin line | one pale neutral, barely there |
+| the rails, the ropes, the sky pool (`carriesTint`) | the grass line | the colour of the ground the way came from |
 
 **The colour comes from the painted tile, not `data/biomes.json`.** `groundColourAt` averages a five
 by five grid of the tile picture's own pixels. The JSON colour is the flat placeholder the paintings
@@ -118,33 +118,48 @@ Asked by the owner while this was built, and done for every traveller, not only 
 - **They are drawn wading**, by the player's own rule (`wadeFor`): cut at the waist in a river, the
   shins at a ford, the feet in a swamp, faded into a sky pool (`wadeWalker` in the scene).
 
-## Deferred: the rail line and the sky islands
+## The rail line and the sky islands: decided
 
-On the owner's word of 2 October 2026: **the sea is not navigable and is not travelled**, and how the
-Lodestone Line and the ropes onto the sky islands should work is to be rethought. Nothing about either
-is changed here. What was found, measured over eight seeds of the Aravali:
+Deferred for a moment, then decided by the owner on 2 October 2026:
 
-- **The line is walkable on foot end to end.** `isWalkable` returns true for any `track` tile, so the
-  trestles over open sea are ground. 592 track tiles, 124 of them over sea. `content/vehicles.ts`
-  records this as a decision: riding is "a faster way across a span you can already walk".
-- **Travellers walk the trestles.** Of 88 circuit legs, **38 cross the sea on the line**: canon's
-  Ila and Hesh, and the carrier and the pilgrim of the road company. `wayBetween` prices a track tile
-  as off-road ground (eight), not as forbidden.
-- **The player can walk it too**, and tap-to-walk routes over it.
-- **About two camps in five on the Aravali sit where only the line reaches.** On foot, without the
-  track, their ground holds no road, no place and not the journey's start: 23 of 56 camps, on a
-  stretch of 370-420 tiles. Today they have no way in, no runner and no visitor.
-- **Camps never pitch on a sky island**, nor within two tiles of one (224 camps, 8 seeds), because
-  `campGround` takes only plains, forest, hills, desert, settlement and snow.
+- **The rails, the ropes and the sky pool are walkable, for everybody, as for the player.** A way in
+  may use them. They are priced as the slowest going there is (`stepCostOn` over open water), so a
+  way takes them only when nothing on land reaches, and over them it is drawn as the grass line in
+  the colour of the ground it came from (`carriesTint`).
+- **The sea and the ocean are not navigable, for anybody, as for the player.** `isWalkable` refuses
+  them; only a rail, rope or plank over them is ground.
+- **Camps may pitch anywhere a person can be, the sky islands included**, preferably the northern
+  one, the Grit Mill's: one turn in two (`SKY_TURN_ONE_IN`) a camp on the Aravali looks there first.
+  It keeps `AWAY_FROM_PLACES` (five tiles) from the mill like from any place.
 
-The decisions this leaves, for the rethink:
+**Is it too costly?** Measured over eight seeds and forty days:
 
-1. Whether the trestles stay walkable on foot or become ride-only. Ride-only would stop travellers
-   and the player crossing the sea on foot, and would need travellers' circuits re-routed or split by
-   landmass.
-2. Whether camps may pitch on ground the line is the only link to. If not, `campGround` can require
-   a road reachable on foot, which would move about two in five of the Aravali's camps.
-3. How the ropes onto the sky islands carry people, and whether travellers use them.
+| | Aravali | Lothal | Dwarka | Narmada |
+|---|---|---|---|---|
+| Camps on a sky island | 30 of 56 | - | - | - |
+| Nearest a camp comes to the mill | 5 tiles (median 9) | - | - | - |
+| Way in, median (max) | 11 (48) | 12 (34) | 14 (30) | 24 (46) |
+| Runner meets a traveller | 34% of camp days | 32% | 29% | 14% |
+| A visitor comes | 20% | 13% | 12% | 8% |
+| `campGround`, once per map, cached | 2.9 ms (6.1 worst) | 0.6 | 0.9 | 2.7 |
+| `wayIn`, once per camp, cached | 0.14 ms (2.9 worst) | 0.24 | 0.34 | 0.68 |
+| Way sprites drawn, median (max) | 20 (77) | 20 (62) | 26 (46) | 46 (83) |
+
+Cheap: both searches run once and are cached, and the way's sprites are small images shown tile by
+tile as the fog lifts. The Aravali gained the most: its ways are a third the length they were when the
+line was refused, and it now has runners and visitors.
+
+**A landmass with no road.** On seed `h` the Aravali's northern landmass has a place (the Kept Stones)
+and not one road. A camp there leaves from the nearest place instead (`wayIn`'s last fallback).
+
+**Nobody is drawn standing in the sea.** The owner asked whether people making room for each other
+could be pushed into the ocean. `test/campLife.test.ts` repeats the scene's whole placement -- every
+traveller, trader, visitor and camp person, then `untangle` -- on every map through the day, and
+nobody lands on ground nobody can stand on: of 36,935 placements over four seeds, 560 stepped aside and
+every one onto walkable ground, because `untangle` only steps onto a walkable neighbour.
+`test/travellers.test.ts` pins that rule on a shore with sea on three sides, and fails if the check is
+removed. The scene also hides anybody whose tile is not walkable rather than draw them in the water,
+should a future change ever put them there.
 
 ## Rules worth not undoing
 

@@ -702,11 +702,15 @@ retrospective. The rules, because they are rules rather than history:
   traveller whose leg passes the turn-off (`runnerErrand`, held there by `phaseAfterMeeting`), and on
   some days one visits to eat (`campVisitors`, capped at the pace nine in ten travellers keep). Both
   rates were measured before any number was chosen.
-- **The way in is shown, never priced**, and **never runs along the railway**: the sea is not
-  travelled, and the line and the sky-island ropes are deferred to their own rethink. It is coloured
-  from the *painted* tile's own pixels (`groundColourAt`), not `biomes.json`, whose colours are the
-  placeholders the paintings replaced -- prints on swamp, snow and sand, a faint line on dry ground,
-  barely anything over water and mountain (`game/campArt.ts`).
+- **The way in is shown, never priced.** The rails, ropes and sky pool are walked like any ground and
+  the sea never is, for everybody as for the player (owner's ruling); camps may pitch anywhere, the
+  sky islands included, the northern one one turn in two. It is coloured from the *painted* tile's
+  own pixels (`groundColourAt`), not `biomes.json`, whose colours are the placeholders the paintings
+  replaced -- prints on swamp, snow and sand, a faint line on dry ground and over the rails, barely
+  anything over river and mountain (`game/campArt.ts`).
+- **Nobody is drawn standing in the sea.** `untangle` steps only onto walkable ground, and the scene
+  hides anybody whose tile is not walkable. `test/campLife.test.ts` replays every placement on every
+  map to hold it.
 - **People on the road slow and wade where the player does.** Progress along a path is weighted by
   `stepCostOn` (`indexAlong`), and the scene cuts them at the waterline by the player's own `wadeFor`.
 - **A card never opens over another.** `cardOpenRef` is set the instant a card opens -- an effect

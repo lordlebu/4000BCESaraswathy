@@ -54,21 +54,23 @@ export const ASHES_DAYS = 3;
 export const PRINTED_GROUND: ReadonlySet<string> = new Set(['wetland', 'coast', 'snow', 'desert']);
 
 /**
- * Ground a way crosses that would otherwise stop you, or nearly: water, a sea crossing, mountain,
- * lava, open sky. Nobody wears a path into a river. The way is still shown there -- the owner's
- * ruling -- as the same thin line in a neutral pale colour and barely there, so it reads as "the way
- * goes on across" rather than as something drawn on the water.
+ * Ground a way crosses that nobody wears a path into: a river, mountain, lava. The way is still
+ * shown there -- the owner's ruling -- as the same thin line in a neutral pale colour and barely
+ * there, so it reads as "the way goes on across" rather than as something drawn on the water.
+ *
+ * **Not the rails, the ropes or the sky pool.** Those are walked like any ground, on the owner's
+ * ruling of 2 October 2026, and the way over them is the line it is on grass (`carriesTint`).
  */
-export const CROSSED_GROUND: ReadonlySet<string> = new Set([
-  'river',
-  'sea',
-  'mountains',
-  'lava_field',
-  'sky_water',
-  'open_sky',
-  'sky_underside',
-  'underworld'
-]);
+export const CROSSED_GROUND: ReadonlySet<string> = new Set(['river', 'mountains', 'lava_field', 'underworld']);
+
+/**
+ * Whether the way over this tile is drawn as the grass line in the colour of the ground it came
+ * from, rather than coloured from the tile: the rails and ropes, whose painted surface is the line
+ * itself and not the sea or sky under it, and the sky pool, walked like ground.
+ */
+export function carriesTint(tile: { biome: string; track?: boolean; plank?: boolean }): boolean {
+  return Boolean(tile.track || tile.plank) || tile.biome === 'sky_water';
+}
 
 /** The one colour a way is shown in over `CROSSED_GROUND`, whatever the ground is. */
 export const CROSSED_COLOUR = 0xe8e0d0;
