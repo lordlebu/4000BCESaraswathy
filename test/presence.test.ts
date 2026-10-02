@@ -8,7 +8,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps, npc, npcsAt } from '../src/content/places';
-import { awayLine, peopleAtPlaces, roadTalk, whoIsHere, type Reported } from '../src/content/presence';
+import { awayLine, peopleAtPlaces, roadTalk, talkTarget, whoIsHere, type Reported } from '../src/content/presence';
 import {
   NEARBY_TILES,
   hoursFor,
@@ -172,25 +172,72 @@ describe('meeting people on the road', () => {
     const named = lothal.find((t) => t.npcId !== null)!;
     const stranger = lothal.find((t) => t.npcId === null)!;
 
-    const talk = roadTalk([{ id: named.id, npcId: named.npcId, beside: true }], 'field_map_lothal', []);
-    expect(talk).toEqual({ travellerId: named.id, npcId: named.npcId, label: `Talk to ${named.name}`, blocked: null });
+    const talk = roadTalk([{ id: named.id, npcId: named.npcId, steps: 1, beside: true }], 'field_map_lothal', []);
+    expect(talk).toEqual({
+      travellerId: named.id,
+      npcId: named.npcId,
+      label: `Talk to ${named.name}`,
+      beside: true,
+      detail: null
+    });
 
-    const walk = roadTalk([{ id: stranger.id, npcId: null, beside: true }], 'field_map_lothal', []);
+    const walk = roadTalk([{ id: stranger.id, npcId: null, steps: 1, beside: true }], 'field_map_lothal', []);
     expect(walk?.label).toBe(`Walk with the ${stranger.role.split(',')[0]}`);
     expect(walk?.npcId).toBeNull();
 
     // Once met, by the name they gave.
-    const again = roadTalk([{ id: stranger.id, npcId: null, beside: true }], 'field_map_lothal', [
+    const again = roadTalk([{ id: stranger.id, npcId: null, steps: 1, beside: true }], 'field_map_lothal', [
       `field_map_lothal:${stranger.id}`
     ]);
     expect(again?.label).toBe(`Walk with ${stranger.givenName}`);
   });
 
-  it('greys the row until you are beside them, and says how to get there', () => {
+  it('offers somebody further off too, and says they will wait', () => {
+    // Reported from play: a traveller on a long leg out-walks the player, so a row greyed until you
+    // were beside them named people who could never be reached.
     const named = travellersOn('field_map_lothal').find((t) => t.npcId !== null)!;
-    const far = roadTalk([{ id: named.id, npcId: named.npcId, beside: false }], 'field_map_lothal', []);
-    expect(far?.blocked).toBe(`${named.name} is on the road nearby. Walk up beside them.`);
+    const far = roadTalk([{ id: named.id, npcId: named.npcId, steps: 4, beside: false }], 'field_map_lothal', []);
+    expect(far?.beside).toBe(false);
+    expect(far?.label).toBe(`Talk to ${named.name}`);
+    expect(far?.detail).toBe(`${named.name} will stop and wait while you walk up.`);
     expect(roadTalk([], 'field_map_lothal', [])).toBeNull();
+  });
+
+  it('says who else is near, so a player knows there is a choice', () => {
+    const [a, b] = travellersOn('field_map_lothal');
+    const both = roadTalk(
+      [
+        { id: a!.id, npcId: a!.npcId, steps: 1, beside: true },
+        { id: b!.id, npcId: b!.npcId, steps: 3, beside: false }
+      ],
+      'field_map_lothal',
+      []
+    );
+    expect(both?.travellerId).toBe(a!.id);
+    expect(both?.detail).toMatch(/near too: tap somebody on the map to choose\.$/);
+  });
+});
+
+describe('which person the talk row means', () => {
+  const at = (id: string, steps: number) => ({ id, npcId: null, steps, beside: steps <= 1 });
+
+  it('is the nearest, when nothing else decides', () => {
+    expect(talkTarget([at('a', 1), at('b', 3)], null, null)?.id).toBe('a');
+    expect(talkTarget([], null, null)).toBeNull();
+  });
+
+  it('keeps whoever it already meant when two are equally near', () => {
+    // Reported from play: with two people the same distance away, nobody could tell who the row
+    // would talk to -- and an id tie-break flicks between them as they step in and out of the tie.
+    expect(talkTarget([at('a', 2), at('b', 2)], null, 'b')?.id).toBe('b');
+    expect(talkTarget([at('a', 2), at('b', 2)], null, null)?.id).toBe('a');
+    // But not over somebody nearer: a tie is the only thing it breaks.
+    expect(talkTarget([at('a', 1), at('b', 2)], null, 'b')?.id).toBe('a');
+  });
+
+  it('keeps somebody the player chose for as long as they are in view', () => {
+    expect(talkTarget([at('a', 1), at('b', 5)], 'b', null)?.id).toBe('b');
+    expect(talkTarget([at('a', 1)], 'b', null)?.id).toBe('a');
   });
 });
 

@@ -14,8 +14,12 @@ import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap, fieldMaps, allNpcs, poi } from '../src/content/places';
 import {
+  delayAfter,
   hoursFor,
+  NEARBY_TILES,
+  stillWaiting,
   untangle,
+  WAITS_FOR,
   placedCircuit,
   sheetsToUse,
   stopsOf,
@@ -484,5 +488,47 @@ describe('strangers’ names', () => {
     for (const [people, names] of byPeople) {
       expect(new Set(names).size, `${people}: ${names.join(', ')}`).toBe(names.length);
     }
+  });
+});
+
+describe('somebody called to on the road', () => {
+  // `stopped` is on the day's clock; `since` and the third argument on the standing clock.
+  const stopped = { id: 'kunch', at: { x: 10, y: 10 }, stopped: 0.3, since: 2, reached: false };
+
+  it('waits while the player walks up, and counts reaching them as the start of the talk', () => {
+    const walking = stillWaiting(stopped, { x: 14, y: 10 }, 2.01);
+    expect(walking).toEqual(stopped);
+    const reached = stillWaiting(stopped, { x: 11, y: 11 }, 2.03);
+    expect(reached).toEqual({ ...stopped, since: 2.03, reached: true });
+    // Reaching them restarts the wait, so the walk up is not taken out of the talk.
+    expect(stillWaiting(reached!, { x: 11, y: 11 }, 2.03 + WAITS_FOR * 0.9)).not.toBeNull();
+  });
+
+  it('goes on when the player walks out of sight, walks away, or keeps them too long', () => {
+    expect(stillWaiting(stopped, { x: 10 + NEARBY_TILES + 1, y: 10 }, 2)).toBeNull();
+    const reached = { ...stopped, since: 2.1, reached: true };
+    expect(stillWaiting(reached, { x: 12, y: 10 }, 2.1), 'still waiting after the player walked on').toBeNull();
+    expect(stillWaiting(reached, { x: 11, y: 10 }, 2.1 + WAITS_FOR * 1.1)).toBeNull();
+    expect(stillWaiting(stopped, { x: 14, y: 10 }, 2 + WAITS_FOR * 1.1)).toBeNull();
+  });
+
+  it('goes on from where they stopped, rather than jumping ahead', () => {
+    const lothal = buildFieldMap(fieldMap('field_map_lothal')!, { seed: 'waiting' });
+    const t = travellersOn('field_map_lothal').find((x) => placedCircuit(x, lothal.placed).length >= 2)!;
+    const stops = stopsOf(t, lothal.placed);
+    const hours = hoursFor(t.id);
+    const noon = 0.25;
+    const before = whereabouts(lothal.world, stops, 0, noon, hours)!;
+    expect(before.resting, 'the traveller chosen is not on the road at noon').toBe(false);
+    // Kept for an hour and a half, then let go.
+    const waiting = { id: t.id, at: before.at, stopped: noon, since: 0, reached: true };
+    const delay = delayAfter(0, waiting, noon + 1.5 / 24);
+    expect(delay).toBeCloseTo(1.5 / 24);
+    const after = whereabouts(lothal.world, stops, 0, noon + 1.5 / 24 - delay, hours)!;
+    expect(after.at).toEqual(before.at);
+    // Without the delay they would have been somewhere else -- the jump this prevents.
+    expect(whereabouts(lothal.world, stops, 0, noon + 1.5 / 24, hours)!.at).not.toEqual(before.at);
+    // And a second wait adds to the first.
+    expect(delayAfter(delay, { ...waiting, stopped: 0.5 }, 0.5 + 1 / 24)).toBeCloseTo(2.5 / 24);
   });
 });

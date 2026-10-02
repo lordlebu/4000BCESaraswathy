@@ -149,8 +149,17 @@ export interface GameToUi {
    * turns this into a row on the action rail, "Talk to Kunch", and needs to know who, not where.
    */
   'travellers-nearby': {
-    travellers: { id: string; npcId: string | null; beside: boolean }[];
+    travellers: { id: string; npcId: string | null; steps: number; beside: boolean }[];
   };
+
+  /**
+   * The player tapped somebody walking near them.
+   *
+   * **Tapping a person is choosing them**, which is how two people the same distance away are told
+   * apart. The scene answers only *who was under the finger*; React decides what that means, the
+   * same as pressing their row, so a tap and a press can never do two different things.
+   */
+  'traveller-tapped': { travellerId: string };
 
   /**
    * The traveller reached an authored place for the first time this journey.
@@ -287,6 +296,24 @@ export interface UiToGame {
 
   /** Walk this person up to the traveller from a little way off, in this sheet. */
   approach: { npcId: string; sheet: string };
+
+  /**
+   * Call out to somebody on the road: they stop and wait, and the traveller walks up beside them.
+   *
+   * React sends who; the scene owns the rest -- holding them on their tile, walking the player over,
+   * and letting them go on (`stillWaiting` in `content/travellers.ts`). React opens the conversation
+   * when `travellers-nearby` reports them beside, which is the same signal a player walking up on
+   * their own already gives.
+   */
+  hail: { travellerId: string };
+
+  /**
+   * Who the talk row means, so the map can mark them. Null when the row is gone.
+   *
+   * Pushed rather than worked out in the scene, because which person the row is about is
+   * `talkTarget`'s answer and the choice the player made by tapping lives in React.
+   */
+  'talk-target': { travellerId: string | null };
 }
 
 type Events = GameToUi & UiToGame;

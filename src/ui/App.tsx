@@ -1284,10 +1284,101 @@ export function App() {
     [progress, satchel]
   );
 
+  // Who the talk row is about. **Asked of `roadTalk`**, which says who they are, whether they are
+  // beside you, and who else is near; `chosen` is somebody the player tapped, kept while they are
+  // in view, and `previousTarget` keeps a tie between two equally near people from flicking.
+  const [chosenTraveller, setChosenTraveller] = useState<string | null>(null);
+  const previousTarget = useRef<string | null>(null);
+  const talk = useMemo(
+    () => roadTalk(nearbyTravellers, fieldMapId, metStrangers.current, chosenTraveller, previousTarget.current),
+    [nearbyTravellers, fieldMapId, chosenTraveller]
+  );
+  const talkTargetId = talk?.travellerId ?? null;
+  useEffect(() => {
+    previousTarget.current = talkTargetId;
+    // The map marks whoever the row means, so two people the same distance away can be told apart.
+    EventBus.emitEvent('talk-target', { travellerId: talkTargetId });
+  }, [talkTargetId]);
+
+  /**
+   * Somebody the player called to and is walking up to. Their conversation opens when the scene
+   * reports them beside -- see the effect below -- and the call is forgotten once they are out of
+   * view, so a wait that ended never opens anything later.
+   */
+  const pendingTalk = useRef<string | null>(null);
+
+  /** Open the conversation with somebody on the road, who is beside the player now. */
+  const talkWith = useRef<(travellerId: string, npcId: string | null) => void>(() => {});
+  talkWith.current = (travellerId, npcId) => {
+    if (npcId) {
+      dispatch({ type: 'talk-to', npcId });
+      return;
+    }
+    if (!arrival) return;
+    // A stranger has no lines of their own: walking with them is the company card, about this
+    // stranger, opened because the player asked rather than rationed by the road. The first time,
+    // the company card, which is how you learn their name. After that, small talk: how the map
+    // knows you, and what they have heard.
+    const key = `${fieldMapId}:${travellerId}`;
+    const met = metStrangers.current.includes(key);
+    happens.current?.('road', arrival.at, null, `walk-with:${arrival.day}:${travellerId}`, {
+      strangerId: travellerId,
+      talk: met ? talkFor(travellerId, arrival.at) : null,
+      force: { kind: met ? 'small-talk' : 'company', asked: true }
+    });
+  };
+
+  /**
+   * Talk to somebody on the road: at once if they are beside you, otherwise call out so they stop
+   * and wait while the traveller walks up. One press either way, and the same press whether it came
+   * from the row, its key or a tap on them.
+   */
+  const callTo = useRef<(travellerId: string) => void>(() => {});
+  callTo.current = (travellerId) => {
+    const near = nearbyTravellers.find((t) => t.id === travellerId);
+    if (!near) return;
+    // Held either way: beside you, so they do not walk off mid-sentence; further off, so they can
+    // be reached at all.
+    EventBus.emitEvent('hail', { travellerId });
+    if (near.beside) {
+      pendingTalk.current = null;
+      talkWith.current(travellerId, near.npcId);
+      return;
+    }
+    pendingTalk.current = travellerId;
+  };
+
+  // Tapping somebody on the map chooses them and talks to them, exactly as their row would.
+  useEffect(() => {
+    const onTapped = ({ travellerId }: GameToUi['traveller-tapped']) => {
+      setChosenTraveller(travellerId);
+      callTo.current(travellerId);
+    };
+    EventBus.onEvent('traveller-tapped', onTapped);
+    return () => {
+      EventBus.offEvent('traveller-tapped', onTapped);
+    };
+  }, []);
+
+  // Somebody chosen who has walked out of view is no longer chosen, and nobody is still walked up to.
+  useEffect(() => {
+    if (chosenTraveller && !nearbyTravellers.some((t) => t.id === chosenTraveller)) setChosenTraveller(null);
+    if (pendingTalk.current && !nearbyTravellers.some((t) => t.id === pendingTalk.current)) {
+      pendingTalk.current = null;
+    }
+  }, [nearbyTravellers, chosenTraveller]);
+
   // On the road: whoever has just come alongside.
   useEffect(() => {
     const beside = nearbyTravellers.filter((t) => t.beside);
     if (beside.length === 0) return;
+    // Somebody the player called to and has now reached: their conversation, and nobody else's.
+    const called = beside.find((t) => t.id === pendingTalk.current);
+    if (called) {
+      pendingTalk.current = null;
+      talkWith.current(called.id, called.npcId);
+      return;
+    }
     const named = bumpedNamed(
       beside.flatMap((t) => (t.npcId ? [t.npcId] : [])),
       (npcId) => beside.find((t) => t.npcId === npcId)?.id ?? null
@@ -1353,10 +1444,9 @@ export function App() {
       world && arrival && !ride && canBoardAt(world, arrival.at)
     );
 
-    // Somebody on the road near enough to see. **Asked of `roadTalk`**, which says who they are and
-    // whether they are close enough yet; the row only exists while somebody is in view, and comes
-    // last so a chip that wraps on a small screen is this one rather than one of the steady three.
-    const talk = roadTalk(nearbyTravellers, fieldMapId, metStrangers.current);
+    // Somebody on the road near enough to see: `talk`, above. The row only exists while somebody is
+    // in view, and comes last so a chip that wraps on a small screen is this one rather than one of
+    // the steady three.
 
     return [
       {
@@ -1421,27 +1511,12 @@ export function App() {
             {
               id: 'talk',
               label: talk.label,
+              detail: talk.detail ?? undefined,
               mark: talk.npcId ? '💬' : '👣',
-              blocked: talk.blocked,
+              // Never greyed: anybody in view can be called to, and they wait while you walk up.
+              blocked: null,
               key: 'T',
-              onDo: () => {
-                if (talk.npcId) {
-                  dispatch({ type: 'talk-to', npcId: talk.npcId });
-                  return;
-                }
-                if (!arrival) return;
-                // A stranger has no lines of their own: walking with them is the company card, about
-                // this stranger, opened because the player asked rather than rationed by the road.
-                // The first time, the company card, which is how you learn their name. After that, small
-                // talk: how the map knows you, and what they have heard.
-                const key = `${fieldMapId}:${talk.travellerId}`;
-                const met = metStrangers.current.includes(key);
-                happens.current?.('road', arrival.at, null, `walk-with:${arrival.day}:${talk.travellerId}`, {
-                  strangerId: talk.travellerId,
-                  talk: met ? talkFor(talk.travellerId, arrival.at) : null,
-                  force: { kind: met ? 'small-talk' : 'company', asked: true }
-                });
-              }
+              onDo: () => callTo.current(talk.travellerId)
             } satisfies TileAction
           ]
         : [])
@@ -1455,9 +1530,7 @@ export function App() {
     currentCreature,
     moment,
     world,
-    nearbyTravellers,
-    fieldMapId,
-    talkFor
+    talk
   ]);
 
   /**

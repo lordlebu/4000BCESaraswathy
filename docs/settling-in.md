@@ -37,8 +37,10 @@ per person at each place's door, turmeric for somebody with something new to say
 
 **Nobody on the road could be spoken to.** There was no way in. The scene now reports who is walking
 within six tiles (`nearby`), and the action rail names the nearest: "Talk to Kunch", or "Walk with
-the carrier". Greyed with a reason until you are beside them. A stranger opens the company card about
-that stranger, and a card the player asks for skips the storylet pacing.
+the carrier". A stranger opens the company card about that stranger, and a card the player asks for
+skips the storylet pacing. *(Superseded, 2 October 2026: the row was greyed until you were beside
+them, and travellers on long legs out-walk the player. Pressing it now calls out and they wait; see
+CLAUDE.md, "Pressing it from a distance calls out".)*
 
 **Travellers overlapped.** Everybody kept the same hours and the roads pull every leg onto the same
 tiles. Measured over 8 seeds, 4 maps, 30 days and 100 moments a day: 5,775 of 96,000 moments had two

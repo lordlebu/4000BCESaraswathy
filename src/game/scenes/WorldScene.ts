@@ -227,15 +227,19 @@ import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
 import {
+  delayAfter,
   hoursFor,
   nearby,
+  NEARBY_TILES,
   placedCircuit,
+  stillWaiting,
   travellerState,
   travellersOn,
   untangle,
   whereabouts,
   type Traveller,
-  type TravellerState
+  type TravellerState,
+  type Waiting
 } from '../../content/travellers';
 import { wandererIdsOn, wanderersOn, wandererAt, type Wanderer } from '../../content/wanderers';
 import {
@@ -487,6 +491,16 @@ export class WorldScene extends Phaser.Scene {
   private travellerTiles = new Map<string, Point>();
   /** The last `travellers-nearby` sent, so an unchanged answer is not sent again. */
   private nearbySent = '';
+  /** Somebody the player called to, standing on their tile until reached. See `onHail`. */
+  private waiting: Waiting | null = null;
+  /**
+   * How far behind their own hours each traveller is, in days, from waits they have been kept for.
+   * Not saved: see `delayAfter`. Dropped once they are at a place for the night.
+   */
+  private delays = new Map<string, number>();
+  /** Who the talk row means, as React last said, and the mark drawn over their head. */
+  private talkTarget: string | null = null;
+  private targetMark: Phaser.GameObjects.Graphics | null = null;
   /**
    * A pip per person at each place's door, and which tile each set belongs to. See `drawPips`.
    * React's last answer is kept so a map change or a new discovery can redraw without asking again.
@@ -716,6 +730,11 @@ export class WorldScene extends Phaser.Scene {
     this.travellerStatesSent = '';
     this.travellerTiles = new Map();
     this.nearbySent = '';
+    this.waiting = null;
+    this.delays = new Map();
+    this.talkTarget = null;
+    // Went with the old map's display list.
+    this.targetMark = null;
     // The last map's pips went with its display list; the next map's arrive from React.
     this.pips = [];
     this.pipsWanted = [];
@@ -1494,6 +1513,14 @@ export class WorldScene extends Phaser.Scene {
         x: Math.floor(world.x / TILE_SIZE),
         y: Math.floor(world.y / TILE_SIZE)
       };
+      // **A tap on somebody walking near is choosing them, not walking onto their tile.** React
+      // decides what choosing means -- the same as pressing their row -- and sends `hail` back if
+      // there is a walk to make.
+      const tapped = this.travellerUnder(target);
+      if (tapped) {
+        EventBus.emitEvent('traveller-tapped', { travellerId: tapped });
+        return;
+      }
       // Weighted, so a tap across a range walks round it rather than over it. The scene has
       // always paid `travelCost` per step; until now only the *duration* knew about it and the
       // route did not, so tap-to-walk reliably chose the slowest line available to it.
@@ -1560,6 +1587,8 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('homestead-changed', this.onHomestead);
     EventBus.onEvent('ease', this.onEase);
     EventBus.onEvent('approach', this.onApproach);
+    EventBus.onEvent('hail', this.onHail);
+    EventBus.onEvent('talk-target', this.onTalkTarget);
     EventBus.onEvent('set-character', this.onSetCharacter);
 
     // Fires on rotation as well as on a window resize, which is exactly when the zoom and the
@@ -1593,6 +1622,8 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('homestead-changed', this.onHomestead);
       EventBus.offEvent('ease', this.onEase);
       EventBus.offEvent('approach', this.onApproach);
+      EventBus.offEvent('hail', this.onHail);
+      EventBus.offEvent('talk-target', this.onTalkTarget);
       this.input.off(Phaser.Input.Events.POINTER_WHEEL);
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
       this.input.off(Phaser.Input.Events.POINTER_UP);
@@ -2391,6 +2422,7 @@ export class WorldScene extends Phaser.Scene {
       // traveller crosses a tile every few in-game minutes, so asking twice a second is already far
       // more often than the answer changes -- and `whereabouts` walks a cached path, so the cost is
       // an array index rather than a search.
+      this.updateWaiting();
       this.updateTravellers(phase);
       // The animals that are somewhere rather than everywhere, on the same gate and for the same
       // reason -- a wanderer moves no faster than a drover does.
@@ -2547,6 +2579,10 @@ export class WorldScene extends Phaser.Scene {
         // The tile they are drawn on after `untangle`, or null while resting. So a spec can stand
         // somebody beside them without guessing a coordinate -- see `e2e/road-talk.spec.ts`.
         tile: this.travellerTiles.get(traveller.id) ?? null,
+        // Whether they stopped because the player called to them -- see `onHail`.
+        waiting: this.waiting?.id === traveller.id,
+        // Whether the talk row's mark is over them, which is how a player tells two people apart.
+        marked: this.talkTarget === traveller.id && Boolean(this.targetMark?.visible),
         // **How big they are drawn, and the player's own size to compare it against.** A ratio the
         // scene applies is not provable from Node: `travellerScale` can be right while
         // `createTravellers` uses the other one, which is exactly what it did.
@@ -2723,14 +2759,35 @@ export class WorldScene extends Phaser.Scene {
     const day = this.dayOfJourney();
     // Everybody's position first, then room made between them: whether somebody steps aside depends
     // on who else is on the tile, so it cannot be decided one traveller at a time.
-    const placed = this.travellers.map(({ traveller, stops }) => ({
-      id: traveller.id,
-      where: whereabouts(this.world, stops, day, phase, hoursFor(traveller.id))
-    }));
-    const room = untangle(this.world, placed, [this.at]);
+    //
+    // Each by their own clock: somebody who waited for the player is that far behind their hours,
+    // so they go on from where they stopped (`delayAfter`). A delay is forgotten once they are at a
+    // place for the night by both clocks, since nothing about a night depends on it.
+    const placed = this.travellers.map(({ traveller, stops }) => {
+      const hours = hoursFor(traveller.id);
+      const delay = this.delays.get(traveller.id) ?? 0;
+      const where = whereabouts(this.world, stops, day, this.phaseLess(delay), hours);
+      if (delay > 0 && where?.resting && whereabouts(this.world, stops, day, phase, hours)?.resting) {
+        this.delays.delete(traveller.id);
+      }
+      return { id: traveller.id, where };
+    });
+    // Somebody waiting keeps the tile they stopped on, and nobody else may take it from them -- the
+    // player is walking up to that tile's side.
+    const waiting = this.waiting;
+    const room = untangle(
+      this.world,
+      placed.filter((p) => p.id !== waiting?.id),
+      waiting ? [this.at, waiting.at] : [this.at]
+    );
+    if (waiting) room.set(waiting.id, waiting.at);
     this.travellerTiles = room;
     this.travellers.forEach(({ sprite }, i) => {
       const where = placed[i]!.where;
+      if (placed[i]!.id === waiting?.id) {
+        this.standWaiting(sprite, waiting.at);
+        return;
+      }
       if (!where || where.resting) {
         sprite.setVisible(false);
         return;
@@ -2762,15 +2819,159 @@ export class WorldScene extends Phaser.Scene {
    * the player does, since either can bring somebody alongside.
    */
   private reportNearby(): void {
-    const close = nearby(this.travellerTiles, this.at).map(({ id, beside }) => ({
+    const close = nearby(this.travellerTiles, this.at).map(({ id, steps, beside }) => ({
       id,
       npcId: this.travellers.find((t) => t.traveller.id === id)?.traveller.npcId ?? null,
+      steps,
       beside
     }));
     const key = JSON.stringify(close);
     if (key === this.nearbySent) return;
     this.nearbySent = key;
     EventBus.emit('travellers-nearby', { travellers: close });
+  }
+
+  /** The phase of the day for somebody running `delay` days behind it. */
+  private phaseLess(delay: number): number {
+    return phaseAt(this.time.now + this.travelled - delay * DAY_MS, this.startPhase);
+  }
+
+  /** The day's clock in days -- standing and walking both -- which is what a delay is measured on. */
+  private clockDays(): number {
+    return (this.time.now + this.travelled) / DAY_MS;
+  }
+
+  /** The clock only standing still advances, in days, which is what a wait's patience is measured on. */
+  private standingDays(): number {
+    return this.time.now / DAY_MS;
+  }
+
+  /**
+   * Somebody near was called to: stop them where they are drawn and walk the player up beside them.
+   *
+   * **The walk is the tap-to-walk path, stopped one short**, so it goes round water and along the
+   * road exactly as a tap would. Already beside them, there is no walk; React opens the conversation
+   * off `travellers-nearby` the same way in both cases. Out of sight, it is ignored -- React only
+   * sends people the scene reported as near, but a step can land between the two.
+   */
+  private onHail = ({ travellerId }: UiToGame['hail']): void => {
+    const at = this.travellerTiles.get(travellerId);
+    if (!at) return;
+    const steps = Math.max(Math.abs(at.x - this.at.x), Math.abs(at.y - this.at.y));
+    if (steps > NEARBY_TILES) return;
+    // Calling a second person lets the first go on, held back by the time they stood.
+    this.letGo();
+    this.waiting = {
+      id: travellerId,
+      at,
+      stopped: this.clockDays(),
+      since: this.standingDays(),
+      reached: steps <= 1
+    };
+    const sprite = this.travellers.find((t) => t.traveller.id === travellerId)?.sprite;
+    if (sprite) this.standWaiting(sprite, at);
+    if (steps <= 1) return;
+
+    const cost = (tile: Tile) => routeCost(tile, this.boat, this.afloat);
+    const { tiles, width, height } = this.world;
+    const walked = findPath(tiles, width, height, this.at, at, isWalkable, cost);
+    // `findPath` ends on the goal; stop beside it rather than on them. No path at all -- they are
+    // across water -- walks as near as the ground allows, as a tap would.
+    if (walked.length > 0) this.queuedPath = walked.slice(0, -1);
+    else {
+      const near = nearestReachable(tiles, width, height, this.at, at, isWalkable);
+      if (near) this.queuedPath = findPath(tiles, width, height, this.at, near, isWalkable, cost);
+    }
+  };
+
+  /** Draw somebody waiting: still, on their tile, turned to face the player. */
+  private standWaiting(sprite: Phaser.GameObjects.Sprite, at: Point): void {
+    sprite.setVisible(true);
+    sprite.setPosition(at.x * TILE_SIZE + TILE_SIZE / 2, at.y * TILE_SIZE + TILE_SIZE - 2);
+    sprite.setDepth(depthFor(at.y, ROW_SLOT.walker));
+    const facing = facingFromStep(this.at.x - at.x, this.at.y - at.y, 'down');
+    const { key, flipX } = animFor(sprite.texture.key, facing, 'idle');
+    if (sprite.anims.currentAnim?.key !== key) sprite.play(key);
+    sprite.setFlipX(flipX);
+  }
+
+  /** Let whoever is waiting go on, held back by the time they stood. */
+  private letGo(): void {
+    const waiting = this.waiting;
+    if (!waiting) return;
+    this.waiting = null;
+    this.delays.set(waiting.id, delayAfter(this.delays.get(waiting.id) ?? 0, waiting, this.clockDays()));
+    // Back onto their own walk on the next tick rather than the next hundredth of a day, so they do
+    // not stand looking at somebody who has gone.
+    this.travellersMovedAt = -1;
+  }
+
+  /**
+   * Ask whether somebody waiting still is. `stillWaiting` is the whole rule; this keeps them turned
+   * to the player while they wait and lets them go when it says so.
+   */
+  private updateWaiting(): void {
+    const waiting = this.waiting;
+    if (!waiting) return;
+    const next = stillWaiting(waiting, this.at, this.standingDays());
+    if (!next) {
+      this.letGo();
+      return;
+    }
+    this.waiting = next;
+    const sprite = this.travellers.find((t) => t.traveller.id === next.id)?.sprite;
+    if (sprite) this.standWaiting(sprite, next.at);
+  }
+
+  /**
+   * Whoever is drawn under a tap, if they are near enough to talk to.
+   *
+   * A figure stands taller than its tile, so a tap on somebody's head lands on the tile above their
+   * feet; both count.
+   */
+  private travellerUnder(tapped: Point): string | null {
+    for (const [id, at] of this.travellerTiles) {
+      if (at.x !== tapped.x || (at.y !== tapped.y && at.y - 1 !== tapped.y)) continue;
+      const steps = Math.max(Math.abs(at.x - this.at.x), Math.abs(at.y - this.at.y));
+      if (steps <= NEARBY_TILES) return id;
+    }
+    return null;
+  }
+
+  private onTalkTarget = ({ travellerId }: UiToGame['talk-target']): void => {
+    this.talkTarget = travellerId;
+    this.placeTargetMark();
+  };
+
+  /**
+   * A small marker over whoever the talk row means.
+   *
+   * **Reported from play: with two people equally near, nobody could tell who the row would talk
+   * to.** The row says a name, and a name is no help when you have not met either of them. Drawn in
+   * the pips' colours so it reads as the same family of mark -- somebody to talk to -- and moved
+   * every frame because the traveller it rides on is moved on the half-second gate.
+   */
+  private placeTargetMark(): void {
+    const sprite = this.talkTarget
+      ? this.travellers.find((t) => t.traveller.id === this.talkTarget)?.sprite
+      : undefined;
+    if (!sprite || !sprite.visible) {
+      this.targetMark?.setVisible(false);
+      return;
+    }
+    if (!this.targetMark) {
+      const w = Math.max(6, Math.round(TILE_SIZE * 0.12));
+      const g = this.add.graphics();
+      g.fillStyle(PIP_RING, 1).fillTriangle(-w - 2, -w - 3, w + 2, -w - 3, 0, 3);
+      g.fillStyle(PIP_NEWS, 1).fillTriangle(-w, -w - 1.5, w, -w - 1.5, 0, 0);
+      g.setName('talk-target');
+      this.targetMark = g;
+    }
+    const row = Math.floor(sprite.y / TILE_SIZE);
+    this.targetMark
+      .setVisible(true)
+      .setPosition(sprite.x, sprite.y - sprite.displayHeight - 2)
+      .setDepth(depthFor(row, ROW_SLOT.canopy + 1));
   }
 
   /**
@@ -2862,6 +3063,7 @@ export class WorldScene extends Phaser.Scene {
     this.updateSway();
     this.updateRide();
     this.updateVisitors();
+    this.placeTargetMark();
 
     if (this.moving) return;
 

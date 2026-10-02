@@ -11,7 +11,15 @@
 
 import { expect, test, type Page } from '@playwright/test';
 
-type Seen = { id: string; named: boolean; visible: boolean; tile: { x: number; y: number } | null };
+type Seen = {
+  id: string;
+  named: boolean;
+  visible: boolean;
+  tile: { x: number; y: number } | null;
+  waiting: boolean;
+  marked: boolean;
+};
+type Walker = { x: number; y: number; screen: { x: number; y: number }; cell: number };
 
 const SEED = 'road-company';
 
@@ -26,9 +34,7 @@ const travellers = (page: Page) =>
   ) as Promise<Seen[]>;
 
 const walker = (page: Page) =>
-  page.evaluate(
-    () => (window as unknown as { __walker?: () => { x: number; y: number } }).__walker?.() ?? null
-  );
+  page.evaluate(() => (window as unknown as { __walker?: () => Walker }).__walker?.() ?? null);
 
 /** Everybody walking at noon, read off the running scene once they have been placed. */
 async function onTheRoad(page: Page): Promise<Seen[]> {
@@ -49,6 +55,28 @@ async function onTheRoad(page: Page): Promise<Seen[]> {
  * start -- and so a run is one browser page rather than five, which is what a slow runner can bear.
  */
 async function standBeside(page: Page, who: Seen): Promise<boolean> {
+  return standOff(page, who, [{ x: 0, y: 1 }, { x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }]);
+}
+
+/**
+ * Stand a few tiles off this traveller: in view, and well short of beside them. To the side first,
+ * so they are drawn on the open map: the dock covers the bottom of the screen, and the camera keeps
+ * the player in the strip above it, so somebody three tiles north or south can be off the page.
+ */
+async function standAway(page: Page, who: Seen): Promise<boolean> {
+  return standOff(page, who, [
+    { x: -3, y: 0 },
+    { x: 3, y: 0 },
+    { x: -3, y: 1 },
+    { x: 3, y: 1 },
+    { x: -3, y: -1 },
+    { x: 3, y: -1 },
+    { x: 0, y: 3 },
+    { x: 0, y: -3 }
+  ]);
+}
+
+async function standOff(page: Page, who: Seen, offsets: { x: number; y: number }[]): Promise<boolean> {
   await page.addInitScript(() => {
     try {
       localStorage.clear();
@@ -57,7 +85,7 @@ async function standBeside(page: Page, who: Seen): Promise<boolean> {
     }
   });
   const t = who.tile!;
-  for (const d of [{ x: 0, y: 1 }, { x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: -1 }]) {
+  for (const d of offsets) {
     const at = { x: t.x + d.x, y: t.y + d.y };
     await boot(page, at);
     // The walker is placed a beat after the canvas. An unwalkable `?at=` falls back to the map's
@@ -71,14 +99,100 @@ async function standBeside(page: Page, who: Seen): Promise<boolean> {
 
 const talkRow = (page: Page) => page.locator('.tile-action button', { hasText: /Talk to|Walk with/ });
 
-test('a traveller in view is named on the rail, and greyed until you are beside them', async ({ page }) => {
+test('a traveller in view is named on the rail and marked on the map', async ({ page }) => {
   const seen = await onTheRoad(page);
   // Somebody is drawn, so if the player is not within six tiles of anybody the row is absent. Either
   // way, what is on the rail must agree with what the scene drew: never a row for nobody.
   const me = await walker(page);
   const near = seen.some((t) => Math.max(Math.abs(t.tile!.x - me!.x), Math.abs(t.tile!.y - me!.y)) <= 6);
-  if (!near) await expect(talkRow(page)).toHaveCount(0);
-  else await expect(talkRow(page)).toHaveCount(1, { timeout: 10_000 });
+  if (!near) {
+    await expect(talkRow(page)).toHaveCount(0);
+    return;
+  }
+  await expect(talkRow(page)).toHaveCount(1, { timeout: 10_000 });
+  // Anybody in view can be called to, so the row is never greyed for distance any more.
+  await expect(talkRow(page)).toBeEnabled();
+  // Exactly one person carries the mark, so two people equally near can be told apart.
+  await expect.poll(async () => (await travellers(page)).filter((t) => t.marked).length).toBe(1);
+});
+
+/** Where a traveller's tile is on the page, from the walker's own screen position. */
+async function onScreen(page: Page, tile: { x: number; y: number }) {
+  const w = (await walker(page))!;
+  const box = (await page.locator('.map-surface canvas').boundingBox())!;
+  return {
+    x: box.x + w.screen.x + (tile.x - w.x) * w.cell,
+    // The walker's point is at his feet; half a cell up is the middle of the tile.
+    y: box.y + w.screen.y + (tile.y - w.y) * w.cell - w.cell / 2
+  };
+}
+
+test('somebody a few tiles off stops when called to, and the conversation opens once reached', async ({ page }) => {
+  // Reported from play: a traveller on a long leg out-walks the player, so somebody on the road
+  // could be seen and never caught. Calling out stops them; the traveller walks up beside them.
+  const named = (await onTheRoad(page)).find((t) => t.named);
+  expect(named, 'nobody canon wrote is on the road at noon on this seed').toBeTruthy();
+  expect(await standAway(page, named!), `nowhere to stand a few tiles from ${named!.id}`).toBe(true);
+
+  const row = talkRow(page);
+  await expect(row).toBeEnabled({ timeout: 20_000 });
+  // Whoever the row means is the one marked on the map: press it and they are the one who stops.
+  let marked: Seen | undefined;
+  await expect
+    .poll(async () => {
+      marked = (await travellers(page)).find((t) => t.marked);
+      return Boolean(marked);
+    }, { timeout: 10_000 })
+    .toBe(true);
+  await expect(row).toContainText(/will stop and wait|near too/);
+  await row.click();
+
+  await expect
+    .poll(async () => (await travellers(page)).find((t) => t.id === marked!.id)?.waiting, { timeout: 10_000 })
+    .toBe(true);
+  // A named person's conversation, or a stranger's card: either way it opens on arrival, unpressed.
+  const opened = marked!.named ? page.locator('.person') : page.locator('.activity-card');
+  await expect(opened.first()).toBeVisible({ timeout: 30_000 });
+  const me = (await walker(page))!;
+  const them = (await travellers(page)).find((t) => t.id === marked!.id)!;
+  expect(
+    Math.max(Math.abs(them.tile!.x - me.x), Math.abs(them.tile!.y - me.y)),
+    'the conversation opened before the traveller was beside them'
+  ).toBeLessThanOrEqual(1);
+});
+
+test('tapping somebody on the road chooses them, and marks them on the map', async ({ page }) => {
+  // Reported from play: with two people equally near it was not clear who the row would talk to.
+  const named = (await onTheRoad(page)).find((t) => t.named);
+  expect(named, 'nobody canon wrote is on the road at noon on this seed').toBeTruthy();
+  expect(await standAway(page, named!), `nowhere to stand a few tiles from ${named!.id}`).toBe(true);
+  await expect(talkRow(page)).toBeEnabled({ timeout: 20_000 });
+
+  // Wait for the camera to settle, or the tap lands on wherever the tile used to be.
+  let last = '';
+  await expect
+    .poll(async () => {
+      const w = await walker(page);
+      const now = JSON.stringify([Math.round(w!.screen.x), Math.round(w!.screen.y), w!.cell]);
+      const same = now === last;
+      last = now;
+      return same;
+    }, { timeout: 30_000, intervals: [300] })
+    .toBe(true);
+
+  const tile = (await travellers(page)).find((t) => t.id === named!.id)!.tile!;
+  const at = await onScreen(page, tile);
+  // On the map, not under the dock or a button: otherwise this proves nothing about the tap.
+  const hit = await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.tagName ?? null, at);
+  expect(hit, `${named!.id} is drawn under the interface, not on the open map`).toBe('CANVAS');
+  await page.mouse.click(at.x, at.y);
+  await expect
+    .poll(async () => {
+      const them = (await travellers(page)).find((t) => t.id === named!.id);
+      return { marked: them?.marked, waiting: them?.waiting };
+    }, { timeout: 10_000 })
+    .toEqual({ marked: true, waiting: true });
+  await expect(page.locator('.person').first()).toBeVisible({ timeout: 30_000 });
 });
 
 test('beside a named traveller, their conversation opens', async ({ page }) => {
