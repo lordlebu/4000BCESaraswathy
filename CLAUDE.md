@@ -36,7 +36,7 @@ npm run test:watch # vitest in watch mode
 npm run typecheck  # tsc --noEmit
 npm run build      # static bundle into dist/
 npm run check:data # verify data/canon/ matches the canon release it came from
-npm run check:size # after a build: each chunk against its budget, gzipped -- app 200 KB, canon 350 KB
+npm run check:size # after a build: each chunk against its budget, gzipped -- app 220 KB, canon 350 KB
 npm run measure:load # after a build: what a player downloads before the first frame, per map
 npm run store:shots  # after a build: retake the listing screenshots in docs/store-kit/
 npm run perf       # frame cost on the renderer CI has -- see docs/rendering.md

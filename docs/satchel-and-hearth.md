@@ -87,11 +87,8 @@ in behaviour, and the guidance of phases 6 to 8 went into `useGuidance` rather t
 own listeners moved with the events in phase 5; the ten that stay feed state `App` owns -- the world,
 the tile, the hour, who is near -- and moving them would be a hook per `useState`.
 
-**Canon's half of phase 4 is committed and not pushed.** The session had no write access to
-`SouthOfTethys` (the Claude GitHub app is not installed for it); the commit is
-`Windfall wood, a cook fire from fuel, and kinds over species`, on branch `ccr-090ce916-o8rjj5`
-there, and the game's bundle already carries canon 2.48.0. Until it lands, canon's `main` is a
-version behind the game's bundle -- the blind spot `check:data` cannot see.
+**Canon's half of phase 4 is SouthOfTethys#157**, merged as canon 2.48.0 -- the same version this
+repository's bundle carries, so the two agree.
 
 ## Rulings, all taken on 2 October 2026
 
