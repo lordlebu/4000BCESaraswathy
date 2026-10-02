@@ -278,3 +278,54 @@ export const WOVEN_FROM_DAY = 1;
  * Canon says what a road is and never how long; this is the game's number, as every duration is.
  */
 export const CROSSING_MS = 30 * 60 * 1000;
+
+/**
+ * A camp's day, in clock hours. See `content/campLife.ts` and `docs/living-camps.md`.
+ *
+ * **Windows, never timers.** Where somebody at a camp is comes from the hour, the way a traveller's
+ * position does, so nothing about a camp's day is saved and a reload finds everybody where the hour
+ * puts them. Tune these and nothing else when the day reads wrong: the words for each stretch are in
+ * `data/camp-life.json`.
+ *
+ * `wake` is the fire relit; `chores` the morning's work; `shade` the hot middle of the day under the
+ * shelter; `afternoon` work again; `meal` everybody at the fire; `evening` the kind's own evening
+ * (singing, milking, the map, the toll); `sleep` two turn in and one keeps the fire. On a camp's
+ * first day the shelter goes up at `pitched`; on its last it comes down from `strike`.
+ */
+export const CAMP_DAY = {
+  wake: 5,
+  chores: 7,
+  shade: 12,
+  afternoon: 14,
+  meal: 17,
+  evening: 19,
+  sleep: 21,
+  pitched: 10,
+  strike: 15
+} as const;
+
+/**
+ * How fast a camp's runner walks the way in, in tiles an hour of the day.
+ *
+ * **Measured, then chosen.** Ordinary travellers on the four maps walk a median 3.45 tiles an hour
+ * and nine in ten walk 7.6 or slower (`docs/living-camps.md`, six seeds, every leg). A runner is a
+ * local who knows the way and walks it unloaded going out, so five: at the median pace the meeting
+ * happened on 13-21% of camp days, at five it happens on 30-48% on three maps. The Aravali's ways in
+ * are a median 38 tiles and its runners almost never make it, which is the crossing being remote
+ * rather than a number to tune past.
+ */
+export const RUNNER_PACE = 5;
+
+/** How long a runner and a traveller stand at the turn-off trading, in hours. */
+export const MEET_HOURS = 1;
+
+/**
+ * The fastest a visitor's day may be walked, in tiles an hour: the ninetieth percentile of ordinary
+ * travellers, 7.6, rounded down. A visit replaces a traveller's leg with the walk to the camp and on
+ * from it, which is longer, and a day that needs a faster walker than nine in ten is not offered.
+ * Measured, visits then fall on a few days a month on three maps and never on the Aravali.
+ */
+export const VISIT_PACE_CAP = 7.5;
+
+/** How long a visitor sits at a camp, in hours: eats, and does what they came for. */
+export const VISIT_HOURS = 2;

@@ -82,6 +82,28 @@ const MARGIN = 3;
 /** Ground that only exists on a crossing, and that a fallback must never hand out. */
 const SKY: ReadonlySet<BiomeId> = new Set<BiomeId>(['sky_island', 'sky_underside']);
 
+/**
+ * Places whose painted building stands wider than its one tile of ground, and so needs the island's
+ * grass on every side of it rather than its rim.
+ *
+ * **The alms step only.** Its temple draws two tiles wide and three tall, and on the island's rim it
+ * hung over the edge into the open sky -- the owner's note of 2 October 2026: "the temple should be
+ * gracefully within the green grass and not on the edge". The Grit Mill stands on its own single
+ * tile, and on the owner's word stays where it is.
+ */
+const NEEDS_GRASS_ROUND: ReadonlySet<string> = new Set(['poi_alms_step']);
+
+/** Whether every tile round this one is the island's own grass: no rim, no plank, no rope. */
+function inTheGrass(world: World, at: Point): boolean {
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      const t = world.tiles[at.y + dy]?.[at.x + dx];
+      if (!t || t.biome !== 'sky_island' || t.plank || t.track) return false;
+    }
+  }
+  return true;
+}
+
 function suitable(tile: Tile, poi: PointOfInterest, walkable: Set<BiomeId>): boolean {
   if (!walkable.has(tile.biome)) return false;
   // **Never on the line.** The crossing uses the islands as its piers, so the rail runs straight
@@ -421,7 +443,12 @@ function placeOne(
     t.x >= MARGIN && t.y >= MARGIN && t.x < world.width - MARGIN && t.y < world.height - MARGIN;
   const exact = gather(
     world,
-    (t) => suitable(t, poi, walkable) && rightShore(t) && inland(t) && allowed(t)
+    (t) =>
+      suitable(t, poi, walkable) &&
+      rightShore(t) &&
+      inland(t) &&
+      allowed(t) &&
+      (!NEEDS_GRASS_ROUND.has(poi.id) || t.biome !== 'sky_island' || inTheGrass(world, t))
   );
 
   // Best case: the terrain canon asked for, with room around it.

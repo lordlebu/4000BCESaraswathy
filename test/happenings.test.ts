@@ -5,6 +5,7 @@
 // signature fault, and the last describe block exists to catch exactly that.
 
 import { describe, expect, it } from 'vitest';
+import { campPeople, doingLine } from '../src/content/campLife';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { tileHash } from '../src/world/rng';
 import type { Point } from '../src/world/types';
@@ -110,7 +111,20 @@ const sampled: { event: GameEvent; around: Surroundings }[] = (() => {
                     near: built.placed[0]?.poi.id ?? null
                   }
                 : null;
-            const around = surroundingsAt(world, at, map.id, moment, roll, { poiId, talk, camp });
+            // And some days on the road are spent talking to somebody at a camp, at the meal and away
+            // from it, so both of what they offer is reached.
+            const campPerson =
+              occasion === 'road' && (x + y) % 3 === 0
+                ? (() => {
+                    const keepers = campPeople(
+                      { id: `${map.id}:${x}`, kind: CAMP_KINDS[(x + k) % CAMP_KINDS.length]!, at, from: 1, to: 4, near: null },
+                      map.id
+                    );
+                    const person = keepers[(y + k) % keepers.length]!;
+                    return { person, doing: doingLine(person.kind, person.slot, 'chore'), meal: k % 2 === 0 };
+                  })()
+                : null;
+            const around = surroundingsAt(world, at, map.id, moment, roll, { poiId, talk, camp, campPerson });
             if (!around) continue;
             // Half the samples have already met this map's stranger, so the second meeting is
             // reachable too -- it needs one fact from the save and nothing else.

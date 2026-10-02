@@ -470,3 +470,13 @@ blankets. Drawn on the card when the first night beside a camp is told at its fi
 Painted as `camp-night-visitor`, with a second take: a woman sitting up from her bedding, two
 eyeshines low in the grass beyond the fire. Drawn when a nocturnal animal comes to a camp's light.
 
+
+## The people at a camp (Living Camps, 2 October 2026)
+
+No new painting is asked for, on the owner's ruling for this plan. The card borrows its camp's own.
+
+#### `woven-camp-talk` -- talking to somebody who keeps a camp
+
+Draws the painting of the camp it is at -- `woven-camp-drovers`, `woven-camp-pilgrims`,
+`woven-camp-adventurers` or `woven-camp-dacoits`, the owner's camp art of 1 October 2026 -- and
+falls back to `woven-camp`. The people at a camp live there, so their card is the camp's picture.

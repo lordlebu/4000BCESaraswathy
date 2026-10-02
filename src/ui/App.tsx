@@ -22,6 +22,7 @@ import { readShowing, writeShowing } from './preferences';
 import { arrivalPoint, fieldMap, npc, poi, roadBetween, type Road } from '../content/places';
 import { walkers } from '../game/characters';
 import { travellerAttributes, travellersOn } from '../content/travellers';
+import { campPeople, doingLine, type CampActivity, type CampPerson } from '../content/campLife';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
 import { RecordTabs, type RecordTab } from './Records';
@@ -109,7 +110,7 @@ import {
   type Holdings
 } from '../content/homestead';
 import { Negotiation } from './Negotiation';
-import type { Talk } from '../content/happenings';
+import type { CampTalk, Talk } from '../content/happenings';
 import type { Station } from '../content/stations';
 
 /**
@@ -185,6 +186,14 @@ export function App() {
   // Every stranger an event has introduced the player to. Up here rather than with the other event
   // refs below, because the action rail reads it while rendering, to call somebody by name.
   const metStrangers = useRef<string[]>(initialJourney.current.met ?? []);
+  /**
+   * Whether a card is open, for the two things that must not open one over it: walking up to a camp,
+   * and arriving beside somebody the player called to. Both used to call `setHappening` regardless,
+   * and walking up to a camp's watch opened the watch's card and the camp's own in the same step --
+   * one silently replacing the other. A ref for the bus handlers, a state for the effect to wait on.
+   */
+  const cardOpenRef = useRef(false);
+  const [cardOpen, setCardOpen] = useState(false);
 
   const [seed, setSeed] = useState(seedFromUrl);
   // Who is walking. Part of the journey rather than a setting: a save belongs to a traveller, so
@@ -374,6 +383,7 @@ export function App() {
           strangerId?: string | null;
           talk?: Talk | null;
           camp?: Encampment | null;
+          campPerson?: CampTalk | null;
           cameFrom?: string | null;
           force?: { kind?: string; asked?: boolean };
         }
@@ -490,6 +500,7 @@ export function App() {
         talk?: Talk | null;
         camp?: Encampment | null;
         campStanding?: string | null;
+        campPerson?: CampTalk | null;
         cameFrom?: string | null;
         force?: { kind?: string; asked?: boolean };
       } = {}
@@ -531,6 +542,9 @@ export function App() {
       // A storylet can come round again, so `seen` must not grow a copy of it each time.
       if (!seenEvents.current.includes(next.id)) seenEvents.current = [...seenEvents.current, next.id];
       eventDays.current = { ...eventDays.current, [next.id]: latest.current.day };
+      // Said at once, not on the next render: an effect earlier in this component can run in the
+      // same commit and must already see the card it would otherwise open a second one over.
+      cardOpenRef.current = true;
       setHappening({ event: next, shelter });
       return true;
     };
@@ -648,6 +662,8 @@ export function App() {
       if (!world) return;
       const camp = encampmentOn(world, latest.current.fieldMapId, fieldPlaced.current, day);
       if (!camp || !atCamp(camp, at) || seenEvents.current.includes(`woven:camp:${camp.id}`)) return;
+      // Not over another card: the next step beside the fire asks again.
+      if (cardOpenRef.current) return;
       maybeHappens('arriving', at, null, `camp:${camp.id}`, { camp, force: { kind: 'camp', asked: true } });
     };
 
@@ -672,6 +688,7 @@ export function App() {
         carried: (id) => carried[id] ?? 0
       });
       if (!event) return false;
+      cardOpenRef.current = true;
       setHappening({ event, shelter: null });
       return true;
     };
@@ -1289,9 +1306,20 @@ export function App() {
   // in view, and `previousTarget` keeps a tie between two equally near people from flicking.
   const [chosenTraveller, setChosenTraveller] = useState<string | null>(null);
   const previousTarget = useRef<string | null>(null);
+  // Everybody who could be near: the road's travellers and, while a camp stands, the people who
+  // keep it. The scene draws them both and reports them both; this is who they are.
+  const campToday = useMemo(
+    () => (world && arrival ? encampmentOn(world, fieldMapId, fieldPlaced.current, arrival.day) : null),
+    [world, fieldMapId, arrival?.day]
+  );
+  const campFolk = useMemo<CampPerson[]>(() => (campToday ? campPeople(campToday, fieldMapId) : []), [campToday, fieldMapId]);
   const talk = useMemo(
-    () => roadTalk(nearbyTravellers, fieldMapId, metStrangers.current, chosenTraveller, previousTarget.current),
-    [nearbyTravellers, fieldMapId, chosenTraveller]
+    () =>
+      roadTalk(nearbyTravellers, fieldMapId, metStrangers.current, chosenTraveller, previousTarget.current, [
+        ...travellersOn(fieldMapId),
+        ...campFolk
+      ], campToday?.kind ?? null),
+    [nearbyTravellers, fieldMapId, chosenTraveller, campFolk]
   );
   const talkTargetId = talk?.travellerId ?? null;
   useEffect(() => {
@@ -1315,6 +1343,24 @@ export function App() {
       return;
     }
     if (!arrival) return;
+    // Somebody who keeps a camp. The one who leads speaks the camp's own card first, if it has not
+    // been seen -- that is the welcome -- and after that each of them has a word of their own.
+    const person = campFolk.find((p) => p.id === travellerId);
+    if (person && campToday) {
+      if (person.slot === 'leader' && !seenEvents.current.includes(`woven:camp:${campToday.id}`)) {
+        happens.current?.('arriving', arrival.at, null, `camp:${campToday.id}`, {
+          camp: campToday,
+          force: { kind: 'camp', asked: true }
+        });
+        return;
+      }
+      const doing = (nearbyTravellers.find((t) => t.id === travellerId)?.doing ?? 'chore') as CampActivity;
+      happens.current?.('road', arrival.at, null, `camp-talk:${arrival.day}:${travellerId}`, {
+        campPerson: { person, doing: doingLine(person.kind, person.slot, doing), meal: doing === 'meal' },
+        force: { kind: 'camp-talk', asked: true }
+      });
+      return;
+    }
     // A stranger has no lines of their own: walking with them is the company card, about this
     // stranger, opened because the player asked rather than rationed by the road. The first time,
     // the company card, which is how you learn their name. After that, small talk: how the map
@@ -1372,8 +1418,11 @@ export function App() {
   useEffect(() => {
     const beside = nearbyTravellers.filter((t) => t.beside);
     if (beside.length === 0) return;
-    // Somebody the player called to and has now reached: their conversation, and nobody else's.
+    // Somebody the player called to and has now reached: their conversation, and nobody else's --
+    // once any card already open is closed. Until then the call stays pending, and this runs again
+    // when `cardOpen` turns false.
     const called = beside.find((t) => t.id === pendingTalk.current);
+    if (called && (cardOpen || cardOpenRef.current)) return;
     if (called) {
       pendingTalk.current = null;
       talkWith.current(called.id, called.npcId);
@@ -1383,11 +1432,12 @@ export function App() {
       beside.flatMap((t) => (t.npcId ? [t.npcId] : [])),
       (npcId) => beside.find((t) => t.npcId === npcId)?.id ?? null
     );
+    // Camp people keep to their camp; they never fall in beside you the way road company do.
     const strangers: Bumped[] = beside
-      .filter((t) => t.npcId === null)
+      .filter((t) => t.npcId === null && !campFolk.some((p) => p.id === t.id))
       .map((t) => ({ key: `${fieldMapId}:${t.id}`, npcId: null, travellerId: t.id, reason: 'passing' }));
     speakFirst.current([...named, ...strangers]);
-  }, [nearbyTravellers, bumpedNamed, fieldMapId]);
+  }, [nearbyTravellers, bumpedNamed, fieldMapId, campFolk, cardOpen]);
 
   // In a place: whoever is here, a moment after walking in, once the arrival has had its turn --
   // the princess walking up, a rumour kept, a card. The timer reads the state it finds then.
@@ -1512,7 +1562,7 @@ export function App() {
               id: 'talk',
               label: talk.label,
               detail: talk.detail ?? undefined,
-              mark: talk.npcId ? '💬' : '👣',
+              mark: talk.npcId || talk.atCamp ? '💬' : '👣',
               // Never greyed: anybody in view can be called to, and they wait while you walk up.
               blocked: null,
               key: 'T',
@@ -1642,6 +1692,10 @@ export function App() {
   const [happening, setHappening] = useState<{ event: GameEvent; shelter: string | null } | null>(
     null
   );
+  useEffect(() => {
+    cardOpenRef.current = happening !== null;
+    setCardOpen(happening !== null);
+  }, [happening]);
   const seenEvents = useRef<string[]>(initialJourney.current.seenEvents ?? []);
   /** When each event last happened, and the flags choices have left. See `Journey`. */
   const eventDays = useRef<Record<string, number>>(initialJourney.current.eventDays ?? {});

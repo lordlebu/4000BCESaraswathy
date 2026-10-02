@@ -27,6 +27,7 @@ import type { Point, Tile, World } from '../world/types';
 import { allNpcs, fieldMap, fieldMaps, givenNames, npc, poi, type Npc } from './places';
 import { weightedPickFor } from '../world/rng';
 import { vehicles } from './making';
+import { stepCostOn } from './species';
 import { type Look, lookFor } from './looks';
 
 /**
@@ -67,6 +68,13 @@ export const TRAVELLERS_PER_MAP = 3;
  * Seven in the morning until six in the evening, which is a day's walk.
  */
 const AT_HOUR = (hour: number): number => ((hour - 6) / 24 + 1) % 1;
+
+/**
+ * A clock hour as a phase, and back. Exported so the camps keep the same offset rather than a copy
+ * of it: `dayNight.ts` warns what a second copy of "phase 0 is six in the morning" costs.
+ */
+export const atHour = AT_HOUR;
+export const hourOf = (phase: number): number => (((phase * 24 + 6) % 24) + 24) % 24;
 const SETS_OUT = AT_HOUR(7);
 const ARRIVES = AT_HOUR(18);
 
@@ -149,6 +157,11 @@ export interface Traveller {
    * are different people wherever they are met.
    */
   look: Look | null;
+  /**
+   * The camp this person keeps, when they are one of a camp's people rather than somebody on the
+   * road. They walk no circuit; where they stand is `campLife.ts`'s answer for the hour.
+   */
+  campId?: string;
 }
 
 /**
@@ -461,6 +474,40 @@ export function travellersOn(fieldMapId: string): Traveller[] {
   return out;
 }
 
+/**
+ * Every road tile somebody on this map walks, as `x,y` keys: the union of every leg of every
+ * traveller's circuit.
+ *
+ * **What a camp's way in leaves from.** A runner meets travellers where the way leaves the road and
+ * a visitor turns off there, so it has to be road a traveller actually uses -- the nearest road
+ * tile can be a spur nobody walks. Cached on the world, like `wayBetween`.
+ */
+const walkedRoads = new WeakMap<World, Map<string, Set<string>>>();
+
+export function walkedRoad(
+  world: World,
+  fieldMapId: string,
+  placed: readonly { poiId: string; at: Point }[]
+): Set<string> {
+  let known = walkedRoads.get(world);
+  if (!known) walkedRoads.set(world, (known = new Map()));
+  const had = known.get(fieldMapId);
+  if (had) return had;
+  const asPlaced = placed.map((p) => ({ poi: { id: p.poiId }, at: p.at }));
+  const out = new Set<string>();
+  for (const traveller of travellersOn(fieldMapId)) {
+    const stops = stopsOf(traveller, asPlaced);
+    if (stops.length < 2) continue;
+    for (let i = 0; i < stops.length; i++) {
+      for (const p of wayBetween(world, stops[i]!, stops[(i + 1) % stops.length]!)) {
+        if (world.tiles[p.y]?.[p.x]?.road) out.add(`${p.x},${p.y}`);
+      }
+    }
+  }
+  known.set(fieldMapId, out);
+  return out;
+}
+
 /** Where somebody is, and which way they are facing, at one moment. */
 export interface Whereabouts {
   at: Point;
@@ -519,6 +566,57 @@ export function wayBetween(world: World, from: Point, to: Point): Point[] {
 }
 
 /**
+ * How far along a path somebody is, as a tile index, when `along` of the way's time has passed.
+ *
+ * **Weighted by the ground, so people on the road lose speed where the player does.** A tile takes
+ * what it costs to walk -- a river three times a plain, a road three quarters -- the same
+ * `stepCostOn` the scene times the player's own steps by. The day's walk still starts and ends at
+ * the traveller's own hours; they make the time up on the road that they lose in the ford. It was
+ * one index per equal slice of the day, which walked people through a river as fast as a meadow.
+ *
+ * The cumulative costs are cached on the path array itself, which `wayBetween` already caches.
+ */
+const costsAlong = new WeakMap<readonly Point[], number[]>();
+
+function cumulativeCost(world: World, path: readonly Point[]): number[] {
+  const had = costsAlong.get(path);
+  if (had) return had;
+  // `out[i]` is when they reach tile `i`: everything before it, each tile priced by its own ground,
+  // so the time spent standing on a river tile is the river's.
+  const out = [0];
+  for (let i = 1; i < path.length; i++) {
+    const t = world.tiles[path[i - 1]!.y]?.[path[i - 1]!.x];
+    out.push(out[i - 1]! + (t ? Math.max(stepCostOn(t), 0.5) : 1));
+  }
+  costsAlong.set(path, out);
+  return out;
+}
+
+export function indexAlong(world: World, path: readonly Point[], along: number): number {
+  if (path.length < 2) return 0;
+  const cum = cumulativeCost(world, path);
+  const target = Math.max(0, Math.min(1, along)) * cum[cum.length - 1]!;
+  // The last index whose start has been reached: on it until the next one's cost is paid.
+  let lo = 0;
+  let hi = path.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (cum[mid]! <= target) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo;
+}
+
+/** The share of the way's time at which somebody is halfway through standing on tile `i` -- the inverse of `indexAlong`. */
+export function alongAt(world: World, path: readonly Point[], i: number): number {
+  const cum = cumulativeCost(world, path);
+  const total = cum[cum.length - 1]!;
+  if (total === 0) return 0;
+  const end = i + 1 < cum.length ? cum[i + 1]! : total;
+  return (cum[i]! + end) / 2 / total;
+}
+
+/**
  * Where a traveller has got to, given the day and where in it we are.
  *
  * **The whole of the position model, and it stores nothing.** The day picks the leg -- a circuit of
@@ -557,8 +655,8 @@ export function whereabouts(
 
   const along = (phase - hours.out) / (hours.in - hours.out);
   // `way` includes both ends, so the last index is the destination and `along` of 1 would land on
-  // it exactly at the moment `ARRIVES` takes over. Clamped so a rounding error cannot read past it.
-  const index = Math.min(way.length - 1, Math.floor(along * (way.length - 1)));
+  // it exactly at the moment `ARRIVES` takes over. Weighted by the ground, so they slow in water.
+  const index = indexAlong(world, way, along);
   const at = way[index]!;
   const next = way[Math.min(way.length - 1, index + 1)]!;
 

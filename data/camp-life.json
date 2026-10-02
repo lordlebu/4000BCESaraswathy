@@ -1,0 +1,211 @@
+{
+  "$comment": [
+    "Who keeps each kind of camp, and what they are doing at each stretch of the day. Read by",
+    "src/content/campLife.ts; the hours are in src/content/tiers.ts (CAMP_DAY), never here.",
+    "",
+    "Three people a camp: the one who leads, a follower who is also the camp's runner to the road, and",
+    "a follower who keeps the fire at night. Bodies are the strangers' painted sheets, dyed per person",
+    "by looks.ts, so no art is needed. Cultures are canon's own ids; names come from canon's peoples.",
+    "",
+    "Nobody here is a threat to anybody, on the owner's ruling: no weapon is held up in any line, the",
+    "dacoits' toll is an arrangement with the salt carriers, and nobody follows the player.",
+    "",
+    "`doing` finishes the sentence '{name} ...'. A string, or one per slot.",
+    "`says` is one line each, said when you talk to them. `trades` is what the runner carries to or",
+    "from the road, and `eats` is the meal, for the line when you sit and eat with them.",
+    "",
+    "`road` is what the talk row says about somebody on the road who is busy with a camp: a visitor sitting at",
+    "its fire, or a traveller stopped at the turn-off trading with its runner. `{who}` is how the row names",
+    "them; `{trades}` is the camp kind's own `trades`."
+  ],
+  "kinds": {
+    "drovers": {
+      "people": {
+        "leader": {
+          "title": "head drover",
+          "about": "head drover, who keeps the fold",
+          "body": "traveller-nomad",
+          "culture": "maru"
+        },
+        "runner": {
+          "title": "gate-mender",
+          "about": "gate-mender, a coil of withies on one shoulder",
+          "body": "traveller-drover",
+          "culture": "maru"
+        },
+        "watch": {
+          "title": "milker",
+          "about": "milker, with a pail that is never quite empty",
+          "body": "traveller-carrier",
+          "culture": "maru"
+        }
+      },
+      "doing": {
+        "pitch": "is setting the hurdles of the fold upright, one by one",
+        "relight": "is blowing last night's fire back into flame",
+        "chore": {
+          "leader": "is walking the line of the fold, counting under their breath",
+          "runner": "is lashing a gap in the hurdles shut",
+          "watch": "is milking at the fold, cheek against a warm flank"
+        },
+        "shade": "is sitting out the heat in the shade of the tent",
+        "meal": "is eating by the fire, a bowl held in both hands",
+        "evening": "is counting the goats in through the gate as the light goes",
+        "watch": "is keeping the fire while the others sleep",
+        "strike": "is rolling up the felt of the tent",
+        "road": "is walking out toward the road with a bundle of hair",
+        "trade": "is trading goat hair for flour at the road",
+        "home": "is walking back from the road with a sack of flour"
+      },
+      "says": {
+        "leader": "Grass is short this year, so we keep moving. Three days here, and then the next hollow.",
+        "runner": "Every gate we make, the goats find the one weak withy. Every one.",
+        "watch": "Sit down, sit down. There is always milk."
+      },
+      "trades": "goat hair for flour",
+      "eats": "Milk still warm from the fold and millet cakes off the hot stones. You eat until you are told to stop, and you are not told."
+    },
+    "pilgrims": {
+      "people": {
+        "leader": {
+          "title": "elder",
+          "about": "elder, who keeps the song",
+          "body": "traveller-pilgrim",
+          "culture": "kia"
+        },
+        "runner": {
+          "title": "lamp-keeper",
+          "about": "lamp-keeper, with oil on the fingers",
+          "body": "traveller-pilgrim",
+          "culture": "kia"
+        },
+        "watch": {
+          "title": "cook",
+          "about": "cook, sleeves tied back",
+          "body": "traveller-carrier",
+          "culture": "kia"
+        }
+      },
+      "doing": {
+        "pitch": "is stretching the cloth of the shelter between two poles",
+        "relight": "is coaxing the fire alight, singing to it very quietly",
+        "chore": {
+          "leader": "is tying new strips of cloth to the pole, one for each of them",
+          "runner": "is trimming the wick of the lamp on the cairn",
+          "watch": "is picking stones out of the rice"
+        },
+        "shade": "is resting in the shade of the cloth, eyes closed but not asleep",
+        "meal": "is eating by the fire, slowly, and not talking",
+        "evening": "is singing with the others, the lamp lit on the cairn",
+        "watch": "is keeping the fire and the lamp while the others sleep",
+        "strike": "is folding the cloth of the shelter small",
+        "road": "is walking out toward the road with an empty oil jar",
+        "trade": "is buying lamp oil at the road",
+        "home": "is walking back from the road with the oil jar full"
+      },
+      "says": {
+        "leader": "We will not tell you where we are going. It is not a secret. It is only that it does not sound like much, said out loud.",
+        "runner": "The lamp must not go out between here and there. That is the whole of my job, and it is enough.",
+        "watch": "Rice and ghee, every day. Nobody complains, because then they would have to cook."
+      },
+      "trades": "lamp oil",
+      "eats": "Rice and ghee from a shared pot, and somebody hums while you eat. It is the best rice you have had in a month."
+    },
+    "adventurers": {
+      "people": {
+        "leader": {
+          "title": "one with the map",
+          "about": "the one with the map, which is not finished",
+          "body": "traveller-carrier",
+          "culture": "harappan"
+        },
+        "runner": {
+          "title": "rope-hand",
+          "about": "rope-hand, with more rope than sense",
+          "body": "traveller-nomad",
+          "culture": "maru"
+        },
+        "watch": {
+          "title": "cook",
+          "about": "cook, who also argues about the map",
+          "body": "traveller-pilgrim",
+          "culture": "kia"
+        }
+      },
+      "doing": {
+        "pitch": "is propping up the lean-to, and then propping it up again",
+        "relight": "is poking the fire and blaming the wood",
+        "chore": {
+          "leader": "is adding a line to the map, and rubbing it out",
+          "runner": "is coiling rope that does not want to be coiled",
+          "watch": "is stretching a hide on the rack"
+        },
+        "shade": "is lying in the shade of the lean-to, map over their face",
+        "meal": "is eating by the fire and pointing at the map with a flatbread",
+        "evening": "is arguing over the map by firelight, cheerfully",
+        "watch": "is keeping the fire, with the map, while the others sleep",
+        "strike": "is pulling down the lean-to, which comes down more easily than it went up",
+        "road": "is walking out toward the road to buy flour",
+        "trade": "is buying flour at the road and asking about the ground ahead",
+        "home": "is walking back from the road with flour and news"
+      },
+      "says": {
+        "leader": "Three of us, three opinions about this map. You look like somebody with a fourth.",
+        "runner": "Never trust a ford you have only heard about. Never trust a rope you did not coil yourself.",
+        "watch": "It is burnt on one side. That is the side with the flavour."
+      },
+      "trades": "flour, and news of the ground ahead",
+      "eats": "Flatbread, burnt on one side as promised, and something stewed that nobody will name. It is very good."
+    },
+    "dacoits": {
+      "people": {
+        "leader": {
+          "title": "headman",
+          "about": "headman, who only looks and waits",
+          "body": "traveller-nomad",
+          "culture": "maru"
+        },
+        "runner": {
+          "title": "lookout",
+          "about": "lookout, who waves at everybody",
+          "body": "traveller-carrier",
+          "culture": "harappan"
+        },
+        "watch": {
+          "title": "tally-keeper",
+          "about": "tally-keeper, a knotted cord in hand",
+          "body": "traveller-drover",
+          "culture": "harappan"
+        }
+      },
+      "doing": {
+        "pitch": "is hanging the hides of the shelter, quickly, out of long practice",
+        "relight": "is building the fire up from last night's coals",
+        "chore": {
+          "leader": "is sitting where the whole valley can be seen, watching it",
+          "runner": "is stacking the salt sacks, and restacking them",
+          "watch": "is knotting the day's toll into a cord, and losing count"
+        },
+        "shade": "is sitting out the heat under the hides",
+        "meal": "is eating by the fire, and passing the pot along without being asked",
+        "evening": "is counting the day's toll with the others, badly, and laughing about it",
+        "watch": "is keeping the fire while the others sleep, and nods to you",
+        "strike": "is pulling the hides down and rolling them tight",
+        "road": "is walking out toward the road to meet the salt carriers",
+        "trade": "is taking the salt carriers' toll at the road, which is an old arrangement",
+        "home": "is walking back from the road with a sack of salt over one shoulder"
+      },
+      "says": {
+        "leader": "We hold the ford in the dry months. The salt carriers pay, and the ford stays clear for them. You, we do not charge. You have nothing we want, and that is meant kindly.",
+        "runner": "I wave at everybody. It saves a lot of misunderstanding.",
+        "watch": "Twelve sacks. Or eleven. It is never the same number twice, and nobody minds but me."
+      },
+      "trades": "the salt carriers' toll",
+      "eats": "Salted fish, and more of it than you expected. They are poorer than they would like you to think, and they share it anyway."
+    }
+  },
+  "road": {
+    "visit": "{Who} has come out to the camp to eat, and for {trades}.",
+    "trade": "{Who} has stopped at the turn-off to trade with the camp's runner: {trades}."
+  }
+}

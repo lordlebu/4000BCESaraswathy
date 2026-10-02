@@ -64,6 +64,7 @@ import type { Standing } from './standing';
 import { rumourAt, type Rumour } from './rumours';
 import { sayingFor } from './sayings';
 import type { Encampment } from './encampments';
+import { CAMP_WORDS, type CampPerson } from './campLife';
 
 /** A seeded roll, as `eventNow` takes it: the same salt always gives the same number. */
 export type Roll = (salt: string) => number;
@@ -112,6 +113,20 @@ export interface Surroundings {
    * is, and a camp strikes after three days whether or not anybody came.
    */
   campStanding: string | null;
+  /**
+   * One of a camp's people the player walked up to and chose to talk to, and what they are doing.
+   * Null everywhere else: like small talk, a camp's people are asked for, never rationed.
+   */
+  campPerson: CampTalk | null;
+}
+
+/** Somebody at a camp, as the talk row hands them over: who, and what the hour has them doing. */
+export interface CampTalk {
+  person: CampPerson;
+  /** The rest of "{name} ...", from `doingLine`. */
+  doing: string;
+  /** Whether everybody is sitting down to eat, which is when you can eat with them. */
+  meal: boolean;
 }
 
 /** See `Surroundings.talk`. Built by the caller from `standing.ts` and `rumours.ts`. */
@@ -141,6 +156,7 @@ export function surroundingsAt(
     talk?: Talk | null;
     camp?: Encampment | null;
     campStanding?: string | null;
+    campPerson?: CampTalk | null;
   } = {}
 ): Surroundings | null {
   const tile = world.tiles[at.y]?.[at.x];
@@ -177,7 +193,8 @@ export function surroundingsAt(
     taken: extra.taken ?? [],
     talk: extra.talk ?? null,
     camp: extra.camp ?? null,
-    campStanding: extra.campStanding ?? null
+    campStanding: extra.campStanding ?? null,
+    campPerson: extra.campPerson ?? null
   };
 }
 
@@ -320,7 +337,14 @@ function woven(
   subject: string,
   slots: Readonly<Record<string, string | number>>,
   choices: readonly ChoiceSpec[],
-  options: { variant?: string; stranger?: EventStranger; flags?: Readonly<Record<string, string>>; art?: string } = {}
+  options: {
+    variant?: string;
+    stranger?: EventStranger;
+    flags?: Readonly<Record<string, string>>;
+    art?: string;
+    /** A painting for this card other than the template's own variant, when it borrows one. */
+    artVariant?: string;
+  } = {}
 ): GameEvent {
   const words = TEXT[kind];
   if (!words) throw new Error(`data/happenings.json has no template '${kind}'`);
@@ -336,7 +360,11 @@ function woven(
     art: options.art ?? `woven-${kind}`,
     // Per-variant paintings first where they exist: a camp card is the dacoits' own, not one picture
     // of every camp (the owner's camp art, 1 October 2026). The card falls back to `art`.
-    ...(options.variant ? { artVariant: `woven-${kind}-${options.variant}` } : {}),
+    ...(options.artVariant
+      ? { artVariant: options.artVariant }
+      : options.variant
+        ? { artVariant: `woven-${kind}-${options.variant}` }
+        : {}),
     choices: choices.map((spec) => {
       const text = words.choices[spec.id];
       if (!text) throw new Error(`data/happenings.json: '${kind}' has no choice '${spec.id}'`);
@@ -535,6 +563,38 @@ const campScene: Template = ({ camp, biome, taken }, roll, now) => {
   );
 };
 
+/**
+ * Talking to one of a camp's people: what they are doing, and the one thing they say.
+ *
+ * **Asked for, never rationed**: it exists only when the talk row hands somebody over. The first
+ * time, they tell you their name, which is how the row comes to use it; at the meal you can eat with
+ * them, which eases the walking the way a meal you made does (`MEAL_EASES`), and at any other hour
+ * you can sit a while. The card is the camp's own painting -- they live there.
+ */
+const campTalk: Template = ({ campPerson }, _roll, now) => {
+  if (!campPerson) return null;
+  const { person, doing, meal } = campPerson;
+  const words = CAMP_WORDS[person.kind];
+  const id = `${now.fieldMapId}:${person.id}`;
+  const known = Boolean(now.met?.includes(id));
+  const name = person.givenName ?? `the ${person.title}`;
+  return woven(
+    'road',
+    'camp-talk',
+    `${id}:${now.day}`,
+    { name, title: person.title, doing, says: words.says[person.slot], eats: words.eats },
+    meal ? [{ id: 'eat', eases: MEAL_EASES }, { id: 'go' }] : [{ id: 'sit', eases: COMPANY_EASES }, { id: 'go' }],
+    {
+      variant: known ? 'again' : 'first',
+      ...(person.look
+        ? { stranger: { id, role: person.role, look: person.look, culture: person.culture, givenName: person.givenName } }
+        : {}),
+      art: 'woven-camp',
+      artVariant: `woven-camp-${person.kind}`
+    }
+  );
+};
+
 const weather: Template = ({ moment, biome, flora }) => {
   const sky = moment?.weather;
   if (sky !== 'rain' && sky !== 'mist' && sky !== 'storm') return null;
@@ -705,6 +765,7 @@ export const TEMPLATES: Readonly<Record<Occasion, readonly { kind: string; make:
     { kind: 'company-again', make: companyAgain },
     { kind: 'kindness-returned', make: kindnessReturned },
     { kind: 'small-talk', make: smallTalk },
+    { kind: 'camp-talk', make: campTalk },
     { kind: 'weather', make: weather }
   ],
   night: [

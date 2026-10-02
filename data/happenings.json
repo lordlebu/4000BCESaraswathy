@@ -419,10 +419,10 @@
           "nobody": "There is a question at {place} nobody can settle, they say, and they think you might."
         },
         "camp": {
-          "adventurers": "There are adventurers camped out past {place}, they say, arguing over a map, and they would be glad of somebody who can read one.",
-          "dacoits": "There is a dacoit band out past {place}, they say. Not to worry: they take the salt carriers' toll and leave walkers alone.",
-          "pilgrims": "Pilgrims have stopped out past {place}, they say, on their way somewhere, and they sing in the evenings.",
-          "drovers": "Drovers have folded their goats out past {place}, they say, and could use a hand with the gate."
+          "adventurers": "There are adventurers camped out past {place}, they say, arguing over a map, and they would be glad of somebody who can read one. Leave the road where a hide rack stands on its own by the verge.",
+          "dacoits": "There is a dacoit band out past {place}, they say. Not to worry: they take the salt carriers' toll and leave walkers alone. Leave the road at the tethering post; there is only the one.",
+          "pilgrims": "Pilgrims have stopped out past {place}, they say, on their way somewhere, and they sing in the evenings. Leave the road at the little cairn with a lamp on it.",
+          "drovers": "Drovers have folded their goats out past {place}, they say, and could use a hand with the gate. Leave the road where a rack of skins stands by the verge."
         }
       },
       "title": "On the road with {name}",
@@ -591,6 +591,40 @@
         "stick": {
           "label": "Lay a stick on the fire",
           "line": "You lay a stick on the fire. The light jumps, the eyes go, and the camp sleeps on."
+        }
+      }
+    },
+    "camp-talk": {
+      "weight": 0,
+      "tags": [
+        "camp"
+      ],
+      "cooldown": 0,
+      "again_after": 1,
+      "slots": [
+        "name",
+        "title",
+        "doing",
+        "says",
+        "eats"
+      ],
+      "title": "{name}, the {title}",
+      "prose": {
+        "first": "{name} {doing}, and looks up as you come near. They tell you their name before you ask, as if it saves time, and then: “{says}”",
+        "again": "{name} {doing}, and nods as if you had only stepped away. “{says}”"
+      },
+      "choices": {
+        "sit": {
+          "label": "Sit with them a while",
+          "line": "You sit, and {name} goes on with it beside you. Nobody asks you for anything."
+        },
+        "eat": {
+          "label": "Eat with them",
+          "line": "{eats}"
+        },
+        "go": {
+          "label": "Leave them to it",
+          "line": "{name} lifts a hand, and goes back to it."
         }
       }
     }

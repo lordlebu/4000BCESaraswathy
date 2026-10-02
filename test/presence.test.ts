@@ -178,6 +178,7 @@ describe('meeting people on the road', () => {
       npcId: named.npcId,
       label: `Talk to ${named.name}`,
       beside: true,
+      atCamp: false,
       detail: null
     });
 

@@ -149,7 +149,14 @@ export interface GameToUi {
    * turns this into a row on the action rail, "Talk to Kunch", and needs to know who, not where.
    */
   'travellers-nearby': {
-    travellers: { id: string; npcId: string | null; steps: number; beside: boolean }[];
+    travellers: {
+      id: string;
+      npcId: string | null;
+      steps: number;
+      beside: boolean;
+      /** What somebody at a camp is doing this hour (`CampActivity`), so their card can say so. */
+      doing?: string | null;
+    }[];
   };
 
   /**

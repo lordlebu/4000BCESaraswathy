@@ -16,6 +16,7 @@ import { fieldMap, fieldMaps, allNpcs, poi } from '../src/content/places';
 import {
   delayAfter,
   hoursFor,
+  indexAlong,
   NEARBY_TILES,
   stillWaiting,
   untangle,
@@ -530,5 +531,44 @@ describe('somebody called to on the road', () => {
     expect(whereabouts(lothal.world, stops, 0, noon + 1.5 / 24, hours)!.at).not.toEqual(before.at);
     // And a second wait adds to the first.
     expect(delayAfter(delay, { ...waiting, stopped: 0.5 }, 0.5 + 1 / 24)).toBeCloseTo(2.5 / 24);
+  });
+});
+
+describe('people on the road lose speed where the player does', () => {
+  it('spends longer on a river tile than on a road tile of the same way', () => {
+    // A way of road, then river, then road: the same `stepCostOn` the scene times the player by.
+    const tile = (x: number, biome: string, road = false) => ({ x, y: 0, biome, road }) as never;
+    const world = { width: 4, height: 1, tiles: [[tile(0, 'plains', true), tile(1, 'river'), tile(2, 'plains', true), tile(3, 'plains', true)]] } as never;
+    const way = [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }];
+    const share = (i: number) => {
+      let n = 0;
+      for (let k = 0; k < 1000; k++) if (indexAlong(world, way, k / 1000) === i) n++;
+      return n;
+    };
+    expect(share(0), 'standing in the river takes no longer than the road').toBeLessThan(share(1));
+    expect(share(2)).toBeLessThan(share(1));
+    // And the whole way still takes exactly the day: the far end is reached at the very end.
+    expect(indexAlong(world, way, 1)).toBe(3);
+    expect(indexAlong(world, way, 0)).toBe(0);
+  });
+});
+
+describe('making room never puts anybody in the sea', () => {
+  it('steps a second walker onto the one dry tile beside them, never into the water', () => {
+    // A shore tile with sea on every side but one, and two people on it. The second has to step
+    // aside; the only walkable neighbour is the plain to the east, and the sea is never chosen even
+    // though it comes first in the order room is looked for.
+    const tile = (x: number, y: number, biome: string) => ({ x, y, biome }) as never;
+    const rows = [0, 1, 2].map((y) => [0, 1, 2].map((x) => tile(x, y, 'sea')));
+    rows[1]![1] = tile(1, 1, 'coast');
+    rows[1]![2] = tile(2, 1, 'plains');
+    const world = { width: 3, height: 3, tiles: rows } as never;
+    const here = { at: { x: 1, y: 1 }, heading: null, resting: false, from: { x: 1, y: 1 }, to: { x: 1, y: 1 } };
+    const room = untangle(world, [
+      { id: 'a', where: here },
+      { id: 'b', where: here }
+    ]);
+    expect(room.get('a')).toEqual({ x: 1, y: 1 });
+    expect(room.get('b')).toEqual({ x: 2, y: 1 });
   });
 });
