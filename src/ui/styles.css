@@ -3055,8 +3055,15 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 .workshop-teachers > summary { cursor: pointer; font-weight: 600; padding-block: 0.4rem; }
 .recipe-taught .recipe-name { font-weight: 500; }
 .recipe-pin[aria-pressed='true'] { background: var(--accent, currentColor); color: var(--paper, #fff); }
-/* The pinned recipe in the dock: one line, never a control. See `PinnedRecipe`. */
+/* The pinned recipe in the dock: one line. A control since the owner could not find how to unpin
+   one -- tapping it opens the workshop at it -- so it owes the 44-pixel tap floor. See `PinnedRecipe`. */
 .pinned-recipe { flex: none; margin: 0; padding: 0.2rem 0.75rem; font-size: 0.8rem; display: flex; gap: 0.5rem; align-items: baseline; min-width: 0; white-space: nowrap; overflow: hidden; }
+button.pinned-recipe { width: 100%; min-height: 44px; align-items: center; background: none; border: 0; color: inherit; font-family: inherit; text-align: left; cursor: pointer; }
+button.pinned-recipe:hover .pinned-name { text-decoration: underline; }
+button.pinned-recipe:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+/* What is pinned, at the top of the workshop, with the one button that takes it off. */
+.workshop-pinned { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.workshop-pinned p { margin: 0; min-width: 0; }
 .pinned-recipe .pinned-name { font-weight: 600; flex: none; }
 .pinned-recipe .pinned-name::before { content: '📌 '; }
 .pinned-recipe .pinned-needs { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }

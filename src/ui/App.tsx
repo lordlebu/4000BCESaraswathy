@@ -51,6 +51,7 @@ import { Journey } from './Journey';
 import { beatNow, type BeatWhen } from '../content/storylines';
 import { CROSSING_MS } from '../content/tiers';
 import { coachLine, MORNING_GOAL } from '../content/coach';
+import { stagePin } from '../content/goals';
 import {
   advance,
   answer,
@@ -218,6 +219,8 @@ export function App() {
   const [satchel, setSatchel] = useState(initialJourney.current.satchel ?? emptySatchel());
   // The recipe pinned in the workshop, kept on screen in the dock -- see `PinnedRecipe`.
   const [pinned, setPinned] = useState<string | null>(initialJourney.current.pinned ?? null);
+  /** The recipe the workshop opens at, when the pinned line was tapped. */
+  const [workshopAt, setWorkshopAt] = useState<string | null>(null);
   // The crossing being told, while the next map builds behind it. See `Journey.tsx`.
   // While it is, an arrival the new map reports is held rather than shown over the cards, and
   // `stepDown` decides what comes first once the traveller is off the cart.
@@ -1529,9 +1532,12 @@ export function App() {
       }
       const may = mayBuild(homestead, state, satchel, helpedHere);
       const next = homestead.stages[built]!;
+      const pin = stagePin(fieldMapId);
       return {
         title: homestead.name,
         lines,
+        // The next stage can be pinned like a recipe: the dock then counts off what it wants.
+        pin: { on: pinned === pin, toggle: () => setPinned((p) => (p === pin ? null : pin)) },
         action: {
           label: next.name,
           blocked: may.ok ? null : may.why,
@@ -1588,7 +1594,7 @@ export function App() {
         onDo: () => setNegotiatingAt(ground.id)
       }
     };
-  }, [homeTick, standingOn, fieldMapId, progress, satchel, holdings, peopleOfMap, setHomeFlags, world]);
+  }, [homeTick, standingOn, fieldMapId, progress, satchel, holdings, peopleOfMap, setHomeFlags, world, pinned]);
 
   // Tell the scene what stands, whenever it changes and whenever a map is drawn.
   useEffect(() => {
@@ -1945,9 +1951,12 @@ export function App() {
         fieldMapId={fieldMapId}
         pinned={pinned}
         onPin={setPinned}
+        focus={workshopAt}
+        flags={journeyFlags.current}
         open={interrupts.workshop}
         onClose={() => {
           setAtStation(null);
+          setWorkshopAt(null);
           dispatch({ type: 'close-interrupt', which: 'workshop' });
         }}
       />
@@ -2062,7 +2071,17 @@ export function App() {
         }}
         sky={skyPhase === null ? null : { phase: skyPhase, weather: moment?.weather }}
         coach={coach?.line ?? null}
-        pinned={{ recipeId: pinned, satchel, bench }}
+        pinned={{
+          recipeId: pinned,
+          satchel,
+          bench,
+          flags: journeyFlags.current,
+          // Tapping the line opens the workshop at it, where it can be changed or unpinned.
+          onOpen: () => {
+            setWorkshopAt(pinned);
+            dispatch({ type: 'open-interrupt', which: 'workshop' });
+          }
+        }}
         standing={{
           creature: arrival?.entry?.creature ?? { name: null, note: '', species: null },
           doing: arrival?.entry?.doing ?? '',

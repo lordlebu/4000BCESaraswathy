@@ -50,8 +50,63 @@ describe('pinning from the workshop', () => {
       />
     );
     expect(screen.getByText(/Everything you know how to make/)).toBeTruthy();
-    fireEvent.click(screen.getAllByRole('button', { name: 'Pin' })[0]!);
+    fireEvent.click(screen.getAllByRole('button', { name: /^Pin / })[0]!);
     expect(onPin).toHaveBeenCalledTimes(1);
     expect(typeof onPin.mock.calls[0]![0]).toBe('string');
+  });
+});
+
+describe('unpinning, which the owner could not find', () => {
+  it('makes the pinned line a button that opens the workshop, when asked to', () => {
+    const onOpen = vi.fn();
+    render(<PinnedRecipe recipeId="recipe_flint_knife" satchel={emptySatchel()} bench={openGround()} onOpen={onOpen} />);
+    fireEvent.click(screen.getByRole('button', { name: /Working towards/ }));
+    expect(onOpen).toHaveBeenCalledTimes(1);
+  });
+
+  it('says Unpin on the pinned recipe, even once it is ready to make', () => {
+    // A ready recipe moves to the Ready list, which had no pin button at all: once a pinned recipe
+    // could be made, there was nowhere left to unpin it.
+    const onPin = vi.fn();
+    render(
+      <WorkshopPanel
+        station={null}
+        satchel={add(emptySatchel(), 'material_flint', 2)}
+        bench={openGround()}
+        lastMade={[]}
+        knows={() => true}
+        onMake={() => {}}
+        pinned="recipe_flint_knife"
+        onPin={onPin}
+        open
+        onClose={() => {}}
+      />
+    );
+    const unpins = screen.getAllByRole('button', { name: /^Unpin / });
+    // Once at the top, beside "Working towards", and once on the recipe's own row.
+    expect(unpins.length).toBe(2);
+    fireEvent.click(unpins[1]!);
+    expect(onPin).toHaveBeenCalledWith(null);
+  });
+
+  it('names and unpins a building stage at the top of the workshop', () => {
+    const onPin = vi.fn();
+    render(
+      <WorkshopPanel
+        station={null}
+        satchel={emptySatchel()}
+        bench={openGround()}
+        lastMade={[]}
+        knows={() => true}
+        onMake={() => {}}
+        pinned="stage:field_map_narmada"
+        onPin={onPin}
+        open
+        onClose={() => {}}
+      />
+    );
+    expect(screen.getByText('Lay the footing')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Unpin Lay the footing' }));
+    expect(onPin).toHaveBeenCalledWith(null);
   });
 });

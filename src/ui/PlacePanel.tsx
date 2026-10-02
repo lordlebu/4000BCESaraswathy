@@ -59,6 +59,8 @@ export interface SettlingView {
   title: string;
   lines: string[];
   action: { label: string; blocked: string | null; onDo: () => void } | null;
+  /** The next stage as a pin, so the dock counts off what it wants. Absent once nothing is next. */
+  pin?: { on: boolean; toggle: () => void };
 }
 
 export interface PlacePanelProps {
@@ -196,6 +198,17 @@ export function PlacePanel({
                 <button type="button" onClick={settling.action.onDo} disabled={settling.action.blocked !== null}>
                   {settling.action.label}
                 </button>
+                {settling.pin && (
+                  <button
+                    type="button"
+                    className="recipe-pin"
+                    aria-pressed={settling.pin.on}
+                    aria-label={settling.pin.on ? `Unpin ${settling.action.label}` : `Pin ${settling.action.label}`}
+                    onClick={settling.pin.toggle}
+                  >
+                    {settling.pin.on ? 'Unpin' : 'Pin'}
+                  </button>
+                )}
               </div>
             )}
           </section>

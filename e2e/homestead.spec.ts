@@ -61,7 +61,7 @@ const drawn = (page: Page) =>
 
 test('Hasme is talked round, worry by worry, and agrees', async ({ page }) => {
   await seeded(page, {});
-  await building(page).getByRole('button', { name: 'Ask Hasme about building here' }).click();
+  await building(page).getByRole('button', { name: 'Ask Hasme about building here', exact: true }).click();
   const card = page.locator('.negotiation');
   await expect(card).toBeVisible();
   await expect(card).toContainText('It is poisoned.');
@@ -85,7 +85,7 @@ test('Hasme is talked round, worry by worry, and agrees', async ({ page }) => {
 
   // Agreed: the place now offers the first stage, and says what it is short of.
   await expect(building(page)).toContainText('0 of 3 stages stand.');
-  await expect(building(page).getByRole('button', { name: 'Lay the foundation' })).toBeDisabled();
+  await expect(building(page).getByRole('button', { name: 'Lay the foundation', exact: true })).toBeDisabled();
   await expect(building(page)).toContainText('Needs 4 river clay');
 });
 
@@ -95,7 +95,7 @@ test('Hasme is talked round, worry by worry, and agrees', async ({ page }) => {
 test('the reply to the last answer is on screen, even on a phone with a long list', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 740 });
   await seeded(page, { at: 'poi_silted_granary', satchel: { material_sandstone: 2, material_river_clay: 1, material_reed_fibre: 1 } });
-  await building(page).getByRole('button', { name: 'Ask Drel about building here' }).click();
+  await building(page).getByRole('button', { name: 'Ask Drel about building here', exact: true }).click();
   const card = page.locator('.negotiation');
   await expect(card).toBeVisible();
   const last = card.locator('.activity-choice:not(.ghost)').last();
@@ -112,7 +112,7 @@ test('the reply to the last answer is on screen, even on a phone with a long lis
 
 test('the foundation spends what it needs, has its card, and stands on the map', async ({ page }) => {
   await seeded(page, { flags: AGREED, satchel: { material_river_clay: 4, material_reed_fibre: 3 } });
-  const lay = building(page).getByRole('button', { name: 'Lay the foundation' });
+  const lay = building(page).getByRole('button', { name: 'Lay the foundation', exact: true });
   await expect(lay).toBeEnabled();
   await lay.click();
 
@@ -135,7 +135,7 @@ test('settled, the mill turns beside its greenhouse and the page is headed by th
     .poll(() => drawn(page), { timeout: 10_000 })
     .toEqual(['homestead:windmill', 'homestead:blades', 'homestead:homestead-greenhouse']);
 
-  await building(page).getByRole('button', { name: 'Read the settlement page' }).click();
+  await building(page).getByRole('button', { name: 'Read the settlement page', exact: true }).click();
   const ending = page.locator('.ending');
   await expect(ending.locator('h2').first()).toHaveText('The mill among the trees');
   await expect(ending.locator('img.ending-picture')).toHaveAttribute('src', /settle-home/);
