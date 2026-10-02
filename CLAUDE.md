@@ -253,7 +253,7 @@ The art docs, in the order they are useful:
 |---|---|
 | `docs/retrospective.md` | **read first**: the whole project to 28 September 2026, what worked, what did not, what next |
 | `docs/settling-in.md` | the Settling In plan, concluded: camps, cart points, homesteads, and what was measured |
-| `docs/living-camps.md` | camps with people: the measurements, the rulings, the way in's look, the rail decided, clearings, shadows and night light |
+| `docs/living-camps.md` | camps with people, **closed**: the measurements, the rulings, the way in's look, the rail decided, clearings, shadows, night light, and waiting at the pier |
 | `docs/endgame-plan.md` | the programme, closed; what shipped, what is parked, what was declined |
 | `docs/art-direction.md` | the five rules the art follows, and what each one cost to learn |
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |

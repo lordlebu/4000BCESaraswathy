@@ -1,8 +1,15 @@
 # Living Camps
 
-The plan, measured and built on 2 October 2026. The illustrated copy is the artifact
-[Living Camps](https://claude.ai/artifact/HLHRPXUZiuXvLwTdE4jUD7), which is private to the owner;
-this file is the authoritative one.
+The plan, measured, built and **closed** on 2 October 2026, in PRs #237 to #241. The illustrated copy
+is the artifact [Living Camps](https://claude.ai/artifact/HLHRPXUZiuXvLwTdE4jUD7), which is private
+to the owner; this file is the authoritative one.
+
+**Closed: nothing in it is left to build.** All five phases shipped on the owner's six rulings, with
+everything their notes added while it was built -- camps on the sky islands and a way in over the
+rails and ropes, clearings, shadows under the pieces, lamps at night, the leader calling you over,
+the meal paintings, and people on the Lodestone Line waiting at the pier while the carriage runs.
+Every painting it asked for arrived. The one question left for play, two camps on a map at once,
+closed on the owner's answer -- keep one -- and is a new plan if play ever says otherwise.
 
 **The brief, from the owner:** camps in the wild should be visited by people for logistics and food,
 have a leader and followers, all non-threatening, and people should walk the woods, shallows or hills
@@ -281,8 +288,10 @@ had borrowed Lothal's mill. Their prompts and crops are in `docs/event-prompts.m
 `docs/settling-art.md`. `woven-camp` is the last fallback behind the four kinds' own paintings on
 the camp cards, so today nothing reaches it.
 
-**One question stays open, on purpose:** whether a map should ever have two camps at once. The plan
-said to keep one and revisit after Phase 2 is *played*, and that needs a person playing it.
+**Two camps at once: closed on "keep one".** The plan kept one camp a map and left the question for
+play. Nothing built since argues for two, and the plan closed with the owner's answer standing. If
+playing the camps says otherwise, that is a change to `encampmentOn` and a plan of its own, not
+unfinished work here.
 
 ## Rules worth not undoing
 

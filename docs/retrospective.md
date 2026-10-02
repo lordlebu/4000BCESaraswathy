@@ -29,6 +29,13 @@ sheets sit in `assets/`. **None has ever been rejected for style.**
 
 The canon's bundle is 553.1 KB against a 560 KB budget that is never raised.
 
+**Since then, 2 October 2026: Living Camps, closed** (`docs/living-camps.md`, PRs #237 to #241).
+The camps that came and went now have people on the ground -- a leader, a runner and a watch, a day
+from relighting the fire to the night watch, a way worn in from the road, runners who trade with
+travellers and visitors who come to eat -- and anyone walking the Aravali's line waits at the pier
+while the carriage runs. `WorldScene.ts` was split into five views along the way and `App.tsx`
+begun (item 2 below), and every painting asked for has arrived (item 6).
+
 ## How it got here
 
 **July to September 2025: the canon, alone.** `SouthOfTethys` began as a lore database for a world
