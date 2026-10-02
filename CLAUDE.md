@@ -461,12 +461,13 @@ it is not, it has already been applied.
   so a painted animal needs no registration, and the sizes it is drawn at live in `frames.ts` for
   the same reason everything else does: `tileTextures.ts` cannot be imported under Node.
   **`game/systems/` is where the scene is being split**, one system at a time with no change in
-  behaviour (`docs/scaling-study.md` section 2). Four so far, each reading the scene through a
+  behaviour (`docs/scaling-study.md` section 2). Five so far, each reading the scene through a
   small host interface of live getters rather than reaching into its fields: `CampView.ts` (a
   camp's pieces, shadows, trodden way, smoke, lights and ashes), `TravellerView.ts` (everybody on
   the road and at the camp: positions, making room, waiting when called, delays, the camp's day,
   the talk marker, and `travellers-nearby` / `travellers-changed`), `WandererView.ts` (the animals
-  that walk their own ground) and `HomesteadView.ts` (the mill going up, the finished building,
+  that walk their own ground), `VisitorView.ts` (somebody walking up to stand beside you, on the
+  loop's raw clock) and `HomesteadView.ts` (the mill going up, the finished building,
   and the builder's manifest; the wheels it adds turn on the scene's `spinning` list through
   `turn`). **The player's walk stays in the scene**: `TravellerView.hail` stops somebody and
   answers where they stand, and the scene walks up by its own tap-to-walk path. The next system
