@@ -28,6 +28,7 @@ import { type Step, plan } from '../content/making-chain';
 import {
   type Bench,
   type Knows,
+  fireLine,
   makeableNow,
   offeredHere,
   shortfalls,
@@ -251,7 +252,7 @@ export function WorkshopPanel({
             <h3>To cook</h3>
             <ul className="recipes">
               {food.map((r) => (
-                <Makeable key={r.id} recipe={r} ready why={[]} pin={pinFor(r)} onMake={onMake} />
+                <Makeable key={r.id} recipe={r} ready why={[]} fire={fireLine(satchel, r.id, bench)} pin={pinFor(r)} onMake={onMake} />
               ))}
             </ul>
           </section>
@@ -371,6 +372,7 @@ function Makeable({
   ready,
   why,
   first = [],
+  fire = null,
   pin,
   onMake
 }: {
@@ -380,6 +382,8 @@ function Makeable({
   why: { text: string; from: string | null }[];
   /** What a chain makes before this, in order, when the parts are made too. */
   first?: string[];
+  /** What the fire under a dish will be, said before the press: which fuel it burns. */
+  fire?: string | null;
   /** Whether this is the pinned recipe, and how to pin or unpin it. Absent: no button. */
   pin?: { on: boolean; toggle: () => void };
   onMake: (id: string) => void;
@@ -444,6 +448,7 @@ function Makeable({
       {ready && first.length > 0 && (
         <p className="recipe-first muted">Makes {first.join(', then ')} first.</p>
       )}
+      {ready && fire && <p className="recipe-first muted">{fire[0]!.toUpperCase() + fire.slice(1)}.</p>}
       {!ready && why.length > 0 && (
         <ul className="recipe-why">
           {why.slice(0, 3).map((w) => (
