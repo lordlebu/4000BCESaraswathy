@@ -17,6 +17,9 @@
 import type { Point, World } from '../world/types';
 import { isWalkable } from '../world/generate';
 import { tileHash } from '../world/rng';
+import { Heap } from '../world/heap';
+import { orthogonalNeighbours } from '../world/rivers';
+import { stepCostOn } from './species';
 
 export type CampKind = 'adventurers' | 'dacoits' | 'pilgrims' | 'drovers';
 
@@ -127,4 +130,140 @@ export function encampmentOn(
 /** Whether the player is close enough to have walked up to it: beside it or on it. */
 export function atCamp(camp: Encampment, player: Point): boolean {
   return Math.max(Math.abs(camp.at.x - player.x), Math.abs(camp.at.y - player.y)) <= 1;
+}
+
+/**
+ * How many of the tiles round the fire a camp's own things stand on: its shelter and the things set
+ * about the fire. The scene draws them there (`CAMP_LAYOUT` in `game/campArt.ts`, which
+ * `test/campLife.test.ts` holds to this), and nobody at the camp may stand on one.
+ */
+export const PROPS_AROUND: Readonly<Record<CampKind, number>> = {
+  adventurers: 3,
+  dacoits: 3,
+  pilgrims: 3,
+  drovers: 2
+};
+
+/**
+ * Where a camp's things stand and its people can: the fire, then the tiles round it in the order
+ * the camp's own seed lays them out.
+ *
+ * **Moved here from the scene so the people and the props agree.** `pitchCamp` drew the shelter
+ * and the things about the fire on these tiles before anybody lived at a camp; a person placed by a
+ * second copy of the rule would sooner or later stand inside the tent. The shelter takes a tile
+ * behind the fire, the rest to either side, each in a seeded order so two camps are not laid out
+ * alike, and only walkable ground off the road.
+ */
+export function campSpots(world: World, camp: Encampment): { fire: Point; around: Point[] } {
+  const open = (d: Point): boolean => {
+    const tile = world.tiles[camp.at.y + d.y]?.[camp.at.x + d.x];
+    return tile !== undefined && isWalkable(tile) && !tile.road;
+  };
+  const shuffled = (ds: Point[], salt: string) =>
+    ds
+      .map((d) => ({ d, r: tileHash(world.seed, camp.at.x + d.x, camp.at.y + d.y, `${salt}:${camp.id}`) }))
+      .sort((a, b) => a.r - b.r)
+      .map(({ d }) => d);
+  const back = shuffled([{ x: 0, y: -1 }, { x: -1, y: -1 }, { x: 1, y: -1 }], 'camp-back').filter(open);
+  const sides = shuffled([{ x: -1, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 1, y: 1 }], 'camp-side').filter(open);
+  const shelterAt = back[0] ?? sides[0];
+  const rest = [...sides, ...back].filter((d) => d !== shelterAt);
+  const around = [shelterAt, ...rest]
+    .filter((d): d is Point => d !== undefined)
+    .map((d) => ({ x: camp.at.x + d.x, y: camp.at.y + d.y }));
+  return { fire: camp.at, around };
+}
+
+/** The way in to a camp from the road: where it leaves the road, and every tile to the fire. */
+export interface WayIn {
+  /** The road tile it leaves from. */
+  turnOff: Point;
+  /** From the turn-off to the camp's own tile, both ends included. */
+  tiles: Point[];
+  /** What it costs to walk, in the same steps `stepCostOn` prices the walker's own. */
+  cost: number;
+}
+
+const ways = new WeakMap<World, Map<string, WayIn | null>>();
+
+/**
+ * The cheapest walk to a camp from a road somebody walks.
+ *
+ * **Priced by the ground, so it goes the way a person would.** Woods, shallows and hills cost what
+ * they cost the player; mountains and rivers more, and deep water and the railway not at all. `wayBetween` cannot
+ * be used for this: its flat eight-to-one off the road prices a mountain like a meadow, and the way
+ * it finds walks straight over the top.
+ *
+ * **From a road somebody walks, not any road.** A camp's runner meets travellers where it leaves the
+ * road, and its visitors turn off there, so the turn-off has to be on a traveller's way. `walked`
+ * is those road tiles as `x,y` keys; any road at all is the fallback when nobody walks this map.
+ *
+ * One search outward from the fire, stopping at the first road tile it reaches -- the cheapest
+ * turn-off and the way to it at once. Cached on the world and the camp.
+ */
+export function wayIn(world: World, camp: Encampment, walked: ReadonlySet<string>): WayIn | null {
+  let known = ways.get(world);
+  if (!known) ways.set(world, (known = new Map()));
+  const cacheKey = `${camp.id}@${camp.at.x},${camp.at.y}`;
+  if (known.has(cacheKey)) return known.get(cacheKey)!;
+  // A road somebody walks, on foot, first. Failing that, the nearest road of any kind on foot. And
+  // failing both, no way at all: **never along the railway**. On the Aravali about two camps in five
+  // sit on ground the line is the only link to -- no road, no place and no start reachable on foot --
+  // and the sea under the trestles is not travelled, on the owner's word of 2 October 2026. How the
+  // line and the ropes onto the sky islands should work is deferred to its own rethink
+  // (`docs/living-camps.md`, "Deferred"); until then such a camp has no trodden way, no runner and
+  // no visitor.
+  const way = searchWayIn(world, camp, walked) ?? (walked.size > 0 ? searchWayIn(world, camp, new Set()) : null);
+  known.set(cacheKey, way);
+  return way;
+}
+
+function searchWayIn(world: World, camp: Encampment, walked: ReadonlySet<string>): WayIn | null {
+
+  const key = (p: Point) => `${p.x},${p.y}`;
+  const isTurnOff = (p: Point): boolean => {
+    const t = world.tiles[p.y]?.[p.x];
+    if (!t || !t.road) return false;
+    return walked.size === 0 || walked.has(key(p));
+  };
+  const best = new Map<string, number>([[key(camp.at), 0]]);
+  const toward = new Map<string, Point>();
+  // The same total order `findPath` keeps, so the way is the same on every machine.
+  const frontier = new Heap<{ at: Point; cost: number; seq: number }>(
+    (a, b) => a.cost - b.cost || a.at.y - b.at.y || a.at.x - b.at.x || a.seq - b.seq
+  );
+  frontier.push({ at: camp.at, cost: 0, seq: 0 });
+  let seq = 1;
+  let found: { at: Point; cost: number } | null = null;
+  while (frontier.size) {
+    const { at, cost } = frontier.pop()!;
+    if (cost > (best.get(key(at)) ?? Infinity)) continue;
+    if (isTurnOff(at)) {
+      found = { at, cost };
+      break;
+    }
+    // Searching outward, so stepping from here to a neighbour is the walker stepping from that
+    // neighbour onto here: the price is this tile's.
+    const here = world.tiles[at.y]![at.x]!;
+    const step = Math.max(stepCostOn(here), 0.5);
+    for (const next of orthogonalNeighbours(at, world.width, world.height)) {
+      const tile = world.tiles[next.y]![next.x]!;
+      // Never along the railway: on the Aravali the line's trestles are walkable over open sea, and a
+      // way in that took them ran out across the strait and over the sky islands.
+      if (!isWalkable(tile) || tile.track) continue;
+      const total = cost + step;
+      if (total >= (best.get(key(next)) ?? Infinity)) continue;
+      best.set(key(next), total);
+      toward.set(key(next), at);
+      frontier.push({ at: next, cost: total, seq: seq++ });
+    }
+  }
+  if (!found) return null;
+  const tiles: Point[] = [found.at];
+  let step = toward.get(key(found.at));
+  while (step) {
+    tiles.push(step);
+    step = toward.get(key(step));
+  }
+  return { turnOff: found.at, tiles, cost: found.cost };
 }

@@ -20,6 +20,8 @@
 
 import { fieldMap, npcsAt, poi, type Npc } from './places';
 import { travellersOn, type Traveller, type TravellerState } from './travellers';
+import { busyLine } from './campLife';
+import type { CampKind } from './encampments';
 
 /** What the scene said about one traveller, as `travellers-changed` carries it. */
 export interface Reported {
@@ -131,6 +133,8 @@ export interface RoadTalk {
   label: string;
   /** Whether they are beside you, so pressing opens at once rather than calling them to stop. */
   beside: boolean;
+  /** Whether they keep a camp: talked to where they are, rather than walked with. */
+  atCamp: boolean;
   /** What else the row has to say: that they will wait, and who else could be meant. */
   detail: string | null;
 }
@@ -141,13 +145,20 @@ export interface NearbyTraveller {
   npcId: string | null;
   steps: number;
   beside: boolean;
+  /** What they are doing at or for a camp, when they are: `CampActivity`, or `visit` / `trade`. */
+  doing?: string | null;
 }
 
-/** What a player calls somebody on the road: a name if canon gave one or they told you theirs. */
+/**
+ * What a player calls somebody on the road: a name if canon gave one or they told you theirs.
+ * Somebody at a camp is called by what they do there -- "the head drover" -- until then.
+ */
 function roadName(traveller: Traveller, fieldMapId: string, met: readonly string[]): string {
   if (traveller.npcId) return traveller.name;
   const known = met.includes(`${fieldMapId}:${traveller.id}`) && traveller.givenName !== null;
-  return known ? traveller.givenName! : `the ${traveller.role.split(',')[0]}`;
+  if (known) return traveller.givenName!;
+  const title = (traveller as Traveller & { title?: string }).title;
+  return traveller.campId && title ? `the ${title}` : `the ${traveller.role.split(',')[0]}`;
 }
 
 const capital = (s: string) => s[0]!.toUpperCase() + s.slice(1);
@@ -182,16 +193,18 @@ export function talkTarget(
  * row named people who could never be reached. Now they stop and wait (`Waiting` in
  * `travellers.ts`), the player walks up, and the conversation opens on arrival. `near` is the
  * scene's `travellers-nearby`, closest first; `met` is the save's list of strangers met, keyed by
- * map; `chosen` and `previous` are `talkTarget`'s.
+ * map; `chosen` and `previous` are `talkTarget`'s; `roster` is everybody who could be near, which
+ * is the road's travellers and, while a camp stands, its people (`campPeople`).
  */
 export function roadTalk(
   near: readonly NearbyTraveller[],
   fieldMapId: string,
   met: readonly string[],
   chosen: string | null = null,
-  previous: string | null = null
+  previous: string | null = null,
+  roster: readonly Traveller[] = travellersOn(fieldMapId),
+  campKind: CampKind | null = null
 ): RoadTalk | null {
-  const roster = travellersOn(fieldMapId);
   const target = talkTarget(
     near.filter((t) => roster.some((r) => r.id === t.id)),
     chosen,
@@ -207,7 +220,16 @@ export function roadTalk(
       return other ? [roadName(other, fieldMapId, met)] : [];
     });
   const parts: string[] = [];
-  if (!target.beside) parts.push(`${capital(who)} will stop and wait while you walk up.`);
+  // Busy with a camp: sitting at its fire as a visitor, or trading at the turn-off with its runner.
+  const busy = busyLine(target.doing, who, campKind);
+  if (busy) parts.push(busy);
+  if (!target.beside) {
+    parts.push(
+      traveller.campId
+        ? `${capital(who)} will stop what they are doing when you walk up.`
+        : `${capital(who)} will stop and wait while you walk up.`
+    );
+  }
   if (others.length > 0) {
     const list = others.length === 1 ? others[0]! : `${others.slice(0, -1).join(', ')} and ${others.at(-1)}`;
     parts.push(`${capital(list)} ${others.length === 1 ? 'is' : 'are'} near too: tap somebody on the map to choose.`);
@@ -215,8 +237,10 @@ export function roadTalk(
   return {
     travellerId: traveller.id,
     npcId: traveller.npcId,
-    label: traveller.npcId ? `Talk to ${who}` : `Walk with ${who}`,
+    // Somebody at a camp is talked to where they are; somebody on the road is walked with.
+    label: traveller.npcId || traveller.campId ? `Talk to ${who}` : `Walk with ${who}`,
     beside: target.beside,
+    atCamp: Boolean(traveller.campId),
     detail: parts.length > 0 ? parts.join(' ') : null
   };
 }

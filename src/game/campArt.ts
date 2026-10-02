@@ -46,3 +46,51 @@ export const YURT_ONE_IN = 3;
 
 /** How many days a struck camp's cold ring stays on the ground. */
 export const ASHES_DAYS = 3;
+
+/**
+ * Ground a way in crosses as footprints rather than a worn strip: churned mud, prints in snow and sand.
+ * Everything else -- grass, hills, the lanes -- is worn into a thin line. See `drawTrodden`.
+ */
+export const PRINTED_GROUND: ReadonlySet<string> = new Set(['wetland', 'coast', 'snow', 'desert']);
+
+/**
+ * Ground a way crosses that would otherwise stop you, or nearly: water, a sea crossing, mountain,
+ * lava, open sky. Nobody wears a path into a river. The way is still shown there -- the owner's
+ * ruling -- as the same thin line in a neutral pale colour and barely there, so it reads as "the way
+ * goes on across" rather than as something drawn on the water.
+ */
+export const CROSSED_GROUND: ReadonlySet<string> = new Set([
+  'river',
+  'sea',
+  'mountains',
+  'lava_field',
+  'sky_water',
+  'open_sky',
+  'sky_underside',
+  'underworld'
+]);
+
+/** The one colour a way is shown in over `CROSSED_GROUND`, whatever the ground is. */
+export const CROSSED_COLOUR = 0xe8e0d0;
+
+/**
+ * The colour a way is worn into a tile, from the colour of the tile itself.
+ *
+ * **Coloured by the ground, not painted on it** -- the owner's note on the first cut, a brown line
+ * that sat on top of grass and snow alike. The scene passes the painted tile's own average colour
+ * (`groundColourAt`), not `data/biomes.json`'s: that colour is the flat placeholder the art replaced,
+ * and a way tinted from it was green on yellow grass and vanished on the swamp. Worn ground is the same ground, packed down: darker and a
+ * little duller. Prints in mud or snow go deeper than a strip worn through grass, which is meant to
+ * be barely there.
+ */
+export function troddenColour(ground: string | number, printed: boolean): number {
+  const n = typeof ground === 'number' ? ground : Number.parseInt(ground.replace('#', ''), 16);
+  const r = (n >> 16) & 0xff;
+  const g = (n >> 8) & 0xff;
+  const b = n & 0xff;
+  // Darker, and pulled a little toward its own grey so it reads as packed rather than shaded.
+  const keep = printed ? 0.55 : 0.78;
+  const grey = (r + g + b) / 3;
+  const shade = (c: number) => Math.round((c * 0.85 + grey * 0.15) * keep);
+  return (shade(r) << 16) | (shade(g) << 8) | shade(b);
+}

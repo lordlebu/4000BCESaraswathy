@@ -253,6 +253,7 @@ The art docs, in the order they are useful:
 |---|---|
 | `docs/retrospective.md` | **read first**: the whole project to 28 September 2026, what worked, what did not, what next |
 | `docs/settling-in.md` | the Settling In plan, concluded: camps, cart points, homesteads, and what was measured |
+| `docs/living-camps.md` | camps with people: the measurements, the rulings, the way in's look, and the rail questions deferred |
 | `docs/endgame-plan.md` | the programme, closed; what shipped, what is parked, what was declined |
 | `docs/art-direction.md` | the five rules the art follows, and what each one cost to learn |
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |
@@ -690,6 +691,26 @@ retrospective. The rules, because they are rules rather than history:
   three days a turn, on dry ground away from places and roads. Walking up to one asks for its card
   with `force: {kind: 'camp', asked: true}`, which `happeningNow` returns before any weighting --
   a weight-0 template is otherwise never picked. Nothing is saved.
+- **A camp has people, a day and a way in** (`content/campLife.ts`; `docs/living-camps.md` is the
+  record). A leader, a runner and a watch, each a `Traveller` with an empty circuit and a `campId`, so
+  the talk row, its marker, calling out and tapping reach them unchanged; where they stand is the
+  hour's answer (`campPlacements`, hours in `tiers.ts` `CAMP_DAY`), never saved. `campSpots` lays out
+  the props and `standingRoom` keeps people off them -- one rule, moved out of the scene so nobody
+  stands in the tent. **Only these temporary camps**: the permanent camp places (`content/camps.ts`)
+  are untouched.
+- **Road company only come and go, never canon's people** (owner's ruling): a runner meets a road
+  traveller whose leg passes the turn-off (`runnerErrand`, held there by `phaseAfterMeeting`), and on
+  some days one visits to eat (`campVisitors`, capped at the pace nine in ten travellers keep). Both
+  rates were measured before any number was chosen.
+- **The way in is shown, never priced**, and **never runs along the railway**: the sea is not
+  travelled, and the line and the sky-island ropes are deferred to their own rethink. It is coloured
+  from the *painted* tile's own pixels (`groundColourAt`), not `biomes.json`, whose colours are the
+  placeholders the paintings replaced -- prints on swamp, snow and sand, a faint line on dry ground,
+  barely anything over water and mountain (`game/campArt.ts`).
+- **People on the road slow and wade where the player does.** Progress along a path is weighted by
+  `stepCostOn` (`indexAlong`), and the scene cuts them at the waterline by the player's own `wadeFor`.
+- **A card never opens over another.** `cardOpenRef` is set the instant a card opens -- an effect
+  earlier in `App` runs in the same commit -- and a call to somebody waits for the open card to close.
 - **Settling is flags in the save's knowledge half**, `homestead:<map>:ground|eased|built|settled`,
   so it cost no `SAVE_VERSION` bump. `content/homestead.ts` holds every rule; the Negotiation card and
   the place panel only ask. **Nothing is lost by a wrong answer**: listening draws a hint, a miss gets

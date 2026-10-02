@@ -164,7 +164,22 @@ export function nightRestores(shelter: Shelter): number {
  * line implying otherwise would be a lie. The worst outcome available is a wasted night described
  * plainly.
  */
-export function spendNight(shelter: Shelter): NightOutcome {
+/**
+ * A night beside a camp, in the words of whose camp it was. Keyed by `CampKind` (`encampments.ts`);
+ * a camp of a kind not here, or a camp-rung night with no camp named, keeps the plain line below.
+ */
+const CAMP_NIGHTS: Readonly<Record<string, string>> = {
+  drovers: 'Slept by the drovers\u2019 fold. The goats shifted all night, and the milker kept the fire.',
+  pilgrims: 'Slept at the pilgrims\u2019 fire. Somebody sang until the lamp on the cairn was the only light.',
+  adventurers: 'Slept at the adventurers\u2019 fire. They were still arguing about the map when I dropped off.',
+  dacoits:
+    'Slept at the dacoits\u2019 fire, which is a sentence I did not expect to write. The tally-keeper kept the fire and nodded each time I woke.'
+};
+
+export function spendNight(shelter: Shelter, campKind: string | null = null): NightOutcome {
+  if (shelter === 'camp' && campKind && CAMP_NIGHTS[campKind]) {
+    return { shelter, restores: nightRestores(shelter), rested: true, writes: true, entry: CAMP_NIGHTS[campKind]! };
+  }
   const restores = nightRestores(shelter);
   switch (shelter) {
     case 'palace':
