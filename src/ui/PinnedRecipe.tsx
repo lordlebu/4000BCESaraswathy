@@ -28,9 +28,14 @@ export interface PinnedRecipeProps {
   flags?: readonly string[];
   /** Open the workshop at the pinned recipe. Absent: the line is a readout. */
   onOpen?: () => void;
+  /**
+   * Where the nearest thing it wants is: "bamboo cane, 12 steps north-east" among the ground already
+   * seen, or where to look when none has been ("in forest or river"). See `content/finding.ts`.
+   */
+  where?: string | null;
 }
 
-export function PinnedRecipe({ recipeId, satchel, bench, flags = [], onOpen }: PinnedRecipeProps) {
+export function PinnedRecipe({ recipeId, satchel, bench, flags = [], onOpen, where = null }: PinnedRecipeProps) {
   const goal = goalOf(recipeId);
   const w = goal ? wanting(goal, satchel, bench, flags) : null;
   if (!goal || !w) return null;
@@ -47,6 +52,7 @@ export function PinnedRecipe({ recipeId, satchel, bench, flags = [], onOpen }: P
     <>
       <span className="pinned-name">{w.name}</span>
       <span className="pinned-needs">{line}</span>
+      {where && !ready && <span className="pinned-where">{where}</span>}
     </>
   );
   return onOpen ? (
@@ -54,7 +60,7 @@ export function PinnedRecipe({ recipeId, satchel, bench, flags = [], onOpen }: P
       type="button"
       className="pinned-recipe"
       data-ready={ready}
-      aria-label={`Working towards ${w.name}: ${line}. Open it to change or unpin.`}
+      aria-label={`Working towards ${w.name}: ${line}${where && !ready ? `; ${where}` : ''}. Open it to change or unpin.`}
       onClick={onOpen}
     >
       {body}

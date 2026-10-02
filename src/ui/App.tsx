@@ -51,6 +51,9 @@ import { Journey } from './Journey';
 import { CROSSING_MS } from '../content/tiers';
 import { coachLine, MORNING_GOAL } from '../content/coach';
 import { stagePin, wantedNow } from '../content/goals';
+import { nearestSeen, pointerLine } from '../content/finding';
+import { whereFrom } from '../content/sources';
+import { nameOf } from '../content/making';
 import {
   advance,
   answer,
@@ -1182,6 +1185,28 @@ export function App() {
     setHomeTick((n) => n + 1);
   }, []);
 
+  /**
+   * Where the nearest of what the pin wants lies, among the ground already seen -- or, if none has
+   * been, where to look. Asked each step, because a step is what changes it. `content/finding.ts`.
+   */
+  const finding = useMemo(() => {
+    void homeTick;
+    if (!world || !arrival || !pinned) return null;
+    const want = wantedNow([pinned], satchel, bench, journeyFlags.current);
+    if (want.materials.length + want.kinds.length === 0) return null;
+    const pointer = nearestSeen(world, arrival.at, new Set(discovered.current), want, nodes, arrival.day);
+    if (pointer) return { at: pointer.at, where: pointerLine(pointer) };
+    const first = want.materials[0];
+    const lookIn = first ? whereFrom(first) : `any ${want.kinds[0]}`;
+    return { at: null, where: lookIn ? `${first ? nameOf(first).toLowerCase() : 'it'}: ${lookIn}` : null };
+  }, [world, arrival, pinned, satchel, bench, nodes, homeTick]);
+  const markAt = finding?.at ? `${finding.at.x},${finding.at.y}` : '';
+  useEffect(() => {
+    EventBus.emitEvent('source-mark', { at: finding?.at ?? null });
+    // Keyed on the tile, not the object, so a step that finds the same tile sends nothing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [markAt]);
+
   // What the traveller is working towards -- the pin, and this map's next building stage -- for the
   // events that turn something up to lean towards. See `pickFor` in `happenings.ts`.
   useEffect(() => {
@@ -1812,6 +1837,7 @@ export function App() {
           satchel,
           bench,
           flags: journeyFlags.current,
+          where: finding?.where ?? null,
           // Tapping the line opens the workshop at it, where it can be changed or unpinned.
           onOpen: () => {
             setWorkshopAt(pinned);
