@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { PinnedRecipe } from '../src/ui/PinnedRecipe';
 import { WorkshopPanel } from '../src/ui/WorkshopPanel';
+import { GoalsSection } from '../src/ui/GoalsSection';
 import { openGround } from '../src/content/crafting';
 import { add, emptySatchel } from '../src/content/satchel';
 
@@ -108,5 +109,28 @@ describe('unpinning, which the owner could not find', () => {
     expect(screen.getByText('Lay the footing')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Unpin Lay the footing' }));
     expect(onPin).toHaveBeenCalledWith(null);
+  });
+});
+
+describe('the diary’s Goals', () => {
+  it('lists what could be worked towards, and pins or unpins from the row', () => {
+    const toggle = vi.fn();
+    render(
+      <GoalsSection
+        rows={[
+          { id: 'stage', line: 'Raise the tower, at the Eastern Field.', pin: { on: false, label: 'Raise the tower', toggle } },
+          { id: 'news:uma', line: 'Uma has something new to tell you.' }
+        ]}
+      />
+    );
+    expect(screen.getByRole('heading', { name: 'Goals' })).toBeTruthy();
+    expect(screen.getByText('Uma has something new to tell you.')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Pin Raise the tower' }));
+    expect(toggle).toHaveBeenCalledTimes(1);
+  });
+
+  it('says nothing when there is nothing to work towards', () => {
+    const { container } = render(<GoalsSection rows={[]} />);
+    expect(container.firstChild).toBeNull();
   });
 });

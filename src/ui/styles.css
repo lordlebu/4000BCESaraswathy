@@ -3064,6 +3064,10 @@ button.pinned-recipe:focus-visible { outline: 2px solid currentColor; outline-of
 /* What is pinned, at the top of the workshop, with the one button that takes it off. */
 .workshop-pinned { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
 .workshop-pinned p { margin: 0; min-width: 0; }
+/* The diary's Goals: one row each, the line and, where it can be pinned, its button. */
+.goal-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.goal-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.goal-line { min-width: 0; }
 .pinned-recipe .pinned-name { font-weight: 600; flex: none; }
 .pinned-recipe .pinned-name::before { content: '📌 '; }
 .pinned-recipe .pinned-needs { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
@@ -3606,6 +3610,11 @@ button.pinned-recipe:focus-visible { outline: 2px solid currentColor; outline-of
 /* The first morning's hint, in the pinned recipe's slot at every height. `content/coach.ts`. */
 .coach-line { flex: none; margin: 0; padding: 0.25rem 0.75rem; font-size: 0.85rem; font-style: italic; }
 .coach-line::before { content: '✦ '; color: var(--accent); font-style: normal; }
+/* The next step once the first morning is over. A button when pressing it does the thing it says. */
+button.guide-line { width: 100%; min-height: 44px; background: none; border: 0; color: inherit; font-family: inherit; text-align: left; cursor: pointer; }
+button.guide-line:hover { text-decoration: underline; }
+button.guide-line:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+.guide-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* The road between maps (`Journey.tsx`), on the opening's page. */
 .journey-where { margin: 0; color: var(--muted); font-size: 0.9rem; }

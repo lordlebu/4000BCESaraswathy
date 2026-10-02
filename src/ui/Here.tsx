@@ -83,6 +83,11 @@ export interface HereProps {
   standing: StandingRowProps;
   /** The recipe the traveller pinned in the workshop, and what it still wants. See `PinnedRecipe`. */
   pinned?: PinnedRecipeProps;
+  /**
+   * The next step once the first morning is over and nothing is pinned: a line, and what pressing it
+   * does when it can do something. See `content/guide.ts`.
+   */
+  guide?: { line: string; action: { label: string; onDo: () => void } | null } | null;
   /** The first morning's hint, which takes the pinned recipe's line while it lasts. See `content/coach.ts`. */
   coach?: string | null;
   /**
@@ -122,6 +127,7 @@ export function Here({
   standing,
   pinned,
   coach = null,
+  guide = null,
   sky,
   actions,
   height,
@@ -187,9 +193,23 @@ export function Here({
         <p className="coach-line" role="status">
           {coach}
         </p>
-      ) : (
-        pinned && <PinnedRecipe {...pinned} />
-      )}
+      ) : pinned?.recipeId ? (
+        <PinnedRecipe {...pinned} />
+      ) : guide && !reading ? (
+        // Not while a place is open: the place is the next step, and on a landscape phone the line
+        // took 29 of the 101 pixels the place reads through (`e2e/chrome-budget.spec.ts`).
+        // **The next step, when nothing else is saying one.** A button when it can do the thing it
+        // suggests -- pin the next stage -- so it owes the tap floor like the pinned line.
+        guide.action ? (
+          <button type="button" className="coach-line guide-line" aria-label={`${guide.line} ${guide.action.label}.`} onClick={guide.action.onDo}>
+            {guide.line}
+          </button>
+        ) : (
+          <p className="coach-line guide-line" role="status">
+            {guide.line}
+          </p>
+        )
+      ) : null}
 
       {/* **Every action, at every height, pinned below whatever is showing.**
           Splitting this -- the verbs you can use in the rail, the ones you cannot in the part that
