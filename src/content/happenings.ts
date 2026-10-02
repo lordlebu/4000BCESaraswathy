@@ -50,9 +50,11 @@ import { rhythmOf } from './routine';
 import { biomeFor, creatureFor, creaturesIn, floraFor, isAnimal } from './species';
 import {
   COMPANY_EASES,
+  EVENT_LEANS_PERCENT,
   MEAL_EASES,
   PACE,
   PACE_CEILING,
+  STONE_ENOUGH,
   VARIETY_DAMP,
   VARIETY_DAYS,
   WOVEN_FROM_DAY,
@@ -96,6 +98,12 @@ export interface Surroundings {
   stranger: EventStranger | null;
   /** Material ids just taken, so `working` does not turn up the same thing twice. */
   taken: readonly string[];
+  /**
+   * What the traveller is working towards -- the pinned recipe's and the next building stage's
+   * missing materials, by id and by kind -- and what they carry. Read by the events that turn
+   * something up, which lean towards it (`pickFor`). Absent, they pick as they always did.
+   */
+  wanted?: Wanted | null;
   /**
    * What a stranger the player walked up to makes of them: how the map knows you, whether their
    * people have reason to care, and what they have heard. Null except when the player chose to walk
@@ -152,6 +160,7 @@ export function surroundingsAt(
   extra: {
     poiId?: string | null;
     taken?: readonly string[];
+    wanted?: Wanted | null;
     strangerId?: string | null;
     talk?: Talk | null;
     camp?: Encampment | null;
@@ -191,6 +200,7 @@ export function surroundingsAt(
         }
       : null,
     taken: extra.taken ?? [],
+    wanted: extra.wanted ?? null,
     talk: extra.talk ?? null,
     camp: extra.camp ?? null,
     campStanding: extra.campStanding ?? null,
@@ -230,6 +240,46 @@ function ground(biome: BiomeId): string {
  */
 function placeName(place: PointOfInterest): string {
   return place.name.replace(/^The /, 'the ');
+}
+
+/** What the traveller is working towards, and what they already carry. See `Surroundings.wanted`. */
+export interface Wanted {
+  materials: readonly string[];
+  kinds: readonly string[];
+  carried: Readonly<Record<string, number>>;
+}
+
+function wants(w: Wanted | null | undefined, m: Material): boolean {
+  return Boolean(w && (w.materials.includes(m.id) || m.classes.some((c) => w.kinds.includes(c))));
+}
+
+/**
+ * Pick what turns up, leaning towards what the traveller is working towards.
+ *
+ * **The owner's ruling, 2 October 2026** (`docs/satchel-and-hearth.md`, phase 6): events handed out
+ * flint, because flint is common on plains, hills and coast, and the pick was even over whatever
+ * common thing the ground held. Now, when `wanted` names something the ground could give, it is the
+ * pick `EVENT_LEANS_PERCENT` times in a hundred, on its own seeded roll -- the smart loot of Diablo
+ * III, tilted rather than certain, so a find is still a find. And a stone that never renews is not
+ * offered once `STONE_ENOUGH` are carried, unless something wanted needs it.
+ *
+ * `wanted` candidates are whatever this ground holds (`also`), common or rare -- a thing you are
+ * looking for is worth turning up even if it is not the commonest thing here. Deterministic.
+ */
+function pickFor(
+  pool: readonly Material[],
+  also: readonly Material[],
+  w: Wanted | null | undefined,
+  roll: Roll,
+  salt: string
+): Material | null {
+  const enough = (m: Material) => m.renews === 'never' && (w?.carried[m.id] ?? 0) >= STONE_ENOUGH && !wants(w, m);
+  const ordinary = pool.filter((m) => !enough(m));
+  const wanted = [...new Set([...pool, ...also])].filter((m) => wants(w, m));
+  if (wanted.length > 0 && roll(`${salt}:lean`) % 100 < EVENT_LEANS_PERCENT) {
+    return wanted[roll(`${salt}:wanted`) % wanted.length]!;
+  }
+  return ordinary.length > 0 ? ordinary[roll(salt) % ordinary.length]! : null;
 }
 
 /** Something common enough to have been dropped from somebody's load. */
@@ -424,11 +474,12 @@ const tracks: Template = ({ creature, biome }) => {
   ]);
 };
 
-const dropped: Template = ({ onRoad, biome, taken }, roll) => {
+const dropped: Template = ({ onRoad, biome, taken, wanted }, roll) => {
   if (!onRoad) return null;
-  const can = droppable(biome, taken);
-  if (can.length === 0) return null;
-  const m = can[roll('dropped') % can.length]!;
+  // Anything this ground holds, other than a mythic thing, can have fallen off somebody's load.
+  const also = materialsIn(biome).filter((m) => m.rarity !== 'mythic' && !taken.includes(m.id));
+  const m = pickFor(droppable(biome, taken), also, wanted, roll, 'dropped');
+  if (!m) return null;
   return woven('road', 'dropped', m.id, { material: lower(m.name) }, [
     { id: 'take', gives: [{ id: m.id, n: 1 }] },
     { id: 'leave' }
@@ -715,10 +766,11 @@ const watched: Template = ({ creature }) => {
   ]);
 };
 
-const underneath: Template = ({ biome, taken }, roll) => {
-  const can = underfoot(biome, taken);
-  if (can.length === 0) return null;
-  const m = can[roll('underneath') % can.length]!;
+const underneath: Template = ({ biome, taken, wanted }, roll) => {
+  // Only what lies in the ground can be under what you were taking -- see `underfoot`.
+  const also = materialsIn(biome).filter((m) => m.wonFrom.length === 0 && m.rarity !== 'mythic' && !taken.includes(m.id));
+  const m = pickFor(underfoot(biome, taken), also, wanted, roll, 'underneath');
+  if (!m) return null;
   return woven('working', 'underneath', m.id, { material: lower(m.name) }, [
     { id: 'keep', gives: [{ id: m.id, n: 1 }] },
     { id: 'back' }

@@ -130,3 +130,25 @@ export function wantedMaterials(w: Wanting | null): string[] {
 export function wantedKinds(w: Wanting | null): string[] {
   return w ? [...new Set(w.wants.map((x) => x.tag).filter((t): t is string => t !== null))] : [];
 }
+
+/**
+ * Everything the traveller is working towards at once, as the events that turn something up read
+ * it: the pin, and the next building stage on this map whether or not it is pinned -- the owner
+ * asked for events to nudge towards "material I have pinned or missions", and a homestead's stage is
+ * this game's mission.
+ */
+export function wantedNow(
+  pins: readonly (string | null)[],
+  satchel: Satchel,
+  bench: Bench,
+  flags: readonly string[]
+): { materials: string[]; kinds: string[] } {
+  const all = pins
+    .map((p) => goalOf(p))
+    .filter((g): g is Goal => g !== null)
+    .map((g) => wanting(g, satchel, bench, flags));
+  return {
+    materials: [...new Set(all.flatMap((w) => wantedMaterials(w)))],
+    kinds: [...new Set(all.flatMap((w) => wantedKinds(w)))]
+  };
+}

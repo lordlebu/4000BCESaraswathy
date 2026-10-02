@@ -50,7 +50,7 @@ import { bearingTo } from '../content/journal';
 import { Journey } from './Journey';
 import { CROSSING_MS } from '../content/tiers';
 import { coachLine, MORNING_GOAL } from '../content/coach';
-import { stagePin } from '../content/goals';
+import { stagePin, wantedNow } from '../content/goals';
 import {
   advance,
   answer,
@@ -102,7 +102,7 @@ import {
   type Holdings
 } from '../content/homestead';
 import { Negotiation } from './Negotiation';
-import type { Talk } from '../content/happenings';
+import type { Talk, Wanted } from '../content/happenings';
 import type { Station } from '../content/stations';
 
 /**
@@ -302,7 +302,9 @@ export function App() {
     /** The hour and the sky, for a woven event -- rain on the road needs to know it is raining. */
     moment: null as WorldMoment | null,
     /** The authored place being stood in, for the inspector to ask an arrival of. */
-    poiId: null as string | null
+    poiId: null as string | null,
+    /** What the traveller is working towards, for the events that turn something up. */
+    wanted: null as Wanted | null
   });
 
   // Kept in step after every commit, so anything that changes progress or the satchel by another
@@ -1179,6 +1181,13 @@ export function App() {
     journeyFlags.current = next;
     setHomeTick((n) => n + 1);
   }, []);
+
+  // What the traveller is working towards -- the pin, and this map's next building stage -- for the
+  // events that turn something up to lean towards. See `pickFor` in `happenings.ts`.
+  useEffect(() => {
+    const want = wantedNow([pinned, stagePin(fieldMapId)], satchel, bench, journeyFlags.current);
+    latest.current.wanted = { ...want, carried: satchel };
+  }, [pinned, fieldMapId, satchel, bench, homeTick]);
 
   // Who is walking: Varuna and Mithra, and whoever has joined since. Read from the flags each render,
   // because a joining is a flag a story card's choice sets. See `walkers` in characters.ts.

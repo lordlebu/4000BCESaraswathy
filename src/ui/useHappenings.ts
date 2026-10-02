@@ -12,7 +12,7 @@ import { useEffect, useRef, useState, type Dispatch, type MutableRefObject, type
 import { EventBus, type GameToUi } from '../game/EventBus';
 import { isComplete, receiveAll, type Progress, type WorldMoment } from '../journey';
 import { type Choice, type GameEvent, type Occasion } from '../content/events';
-import { happeningNow, surroundingsAt, type CampTalk, type Talk } from '../content/happenings';
+import { happeningNow, surroundingsAt, type CampTalk, type Talk, type Wanted } from '../content/happenings';
 import { atCamp, encampmentOn, type Encampment } from '../content/encampments';
 import { rumourAt } from '../content/rumours';
 import { APPROACHES, approachAt, approachId } from '../content/visitors';
@@ -34,6 +34,8 @@ export interface Latest {
   at: { x: number; y: number } | null;
   moment: WorldMoment | null;
   poiId: string | null;
+  /** What the traveller is working towards, for the events that turn something up. See `wantedNow`. */
+  wanted: Wanted | null;
 }
 
 export function useHappenings({
@@ -143,7 +145,10 @@ export function useHappenings({
         roll,
         // What is here to make an event out of, when nothing authored can happen -- see
         // `happenings.ts`. Read from the same world and tile the roll is seeded on.
-        surroundingsAt(world, at, latest.current.fieldMapId, latest.current.moment, roll, extra),
+        surroundingsAt(world, at, latest.current.fieldMapId, latest.current.moment, roll, {
+          ...extra,
+          wanted: latest.current.wanted
+        }),
         undefined,
         extra.force ?? null
       );
