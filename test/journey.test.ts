@@ -25,41 +25,14 @@ import {
   type Progress
 } from '../src/journey';
 import { discoveries, discovery, fieldQuestion, lastRung, vocabulary } from '../src/content/knowledge';
-import { items } from '../src/content/making';
-import { type Satchel, add, emptySatchel } from '../src/content/satchel';
 
-/**
- * Every moment a patient player could return in.
- *
- * A rung that wants a clear noon and a rung that wants a rainy night sit on the same ladder,
- * so climbing with one fixed moment stops early and says nothing useful. Coming back in
- * different weather is what the player actually does.
- */
-// Every combination, rather than a hand-picked list. A hand-picked list silently stops
-// covering the content the moment canon gates a rung on something not in it -- which is
-// exactly what happened when the Narmada slice introduced a rung that wants mist.
-const MOMENTS = ['dawn', 'morning', 'afternoon', 'evening', 'night'].flatMap((timeOfDay) =>
-  ['clear', 'rain', 'mist', 'storm'].map((weather) => ({ timeOfDay, weather }))
-);
-
-/**
- * A satchel holding one of everything canon can make.
- *
- * The same deliberate cheat as `learn`ing every word below, and for the same reason: this file
- * tests the *shape* of the ladders — that none is authored so it can never be climbed — and
- * not whether the making layer can supply a knife. That second question is real and is
- * answered in `conversation.test.ts`, which gathers and crafts its way to the same place
- * without being handed anything.
- */
-const TOOLED: Satchel = items.reduce((bag, i) => add(bag, i.id, 1), emptySatchel());
 
 /** Climb a discovery as far as the rules allow, revisiting until nothing more opens. */
 function climb(progress: Progress, id: string): Progress {
   let p = progress;
   for (;;) {
-    const moment = MOMENTS.find((m) => canAdvance(p, id, m, TOOLED));
-    if (!moment) return p;
-    p = advance(p, id, moment, TOOLED);
+    if (!canAdvance(p, id)) return p;
+    p = advance(p, id);
   }
 }
 
@@ -115,13 +88,13 @@ describe('the ladder', () => {
     expect(isComplete(p, 'discovery_red_rice_survival')).toBe(true);
   });
 
-  it('holds a rung back when the world is not cooperating', () => {
-    // The bloom shows on a still night. It is not there at noon, and saying so is the point.
-    const noon = { timeOfDay: 'afternoon', weather: 'clear' };
-    let p = advance(emptyProgress(), 'discovery_silver_water', noon);
-    expect(canAdvance(p, 'discovery_silver_water', noon)).toBe(false);
-    expect(blockedBy(p, 'discovery_silver_water', noon)).toContain('conditions');
-    expect(canAdvance(p, 'discovery_silver_water', { timeOfDay: 'night', weather: 'rain' })).toBe(true);
+  it('waits on understanding only, never on the hour or the weather', () => {
+    // The silver water's entry still says it shows on a still night; nothing makes the traveller
+    // wait for one (`docs/a-lighter-game.md`). Noon is as good as midnight.
+    let p = advance(emptyProgress(), 'discovery_silver_water');
+    expect(rungOf(p, 'discovery_silver_water')).toBe(0);
+    expect(canAdvance(p, 'discovery_silver_water')).toBe(true);
+    expect(blockedBy(p, 'discovery_silver_water')).toEqual([]);
   });
 });
 

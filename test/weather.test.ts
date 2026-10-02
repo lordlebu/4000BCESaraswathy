@@ -25,17 +25,7 @@ import {
   restored
 } from '../src/journey';
 import { discoveries, vocabulary } from '../src/content/knowledge';
-import { items } from '../src/content/making';
-import { type Satchel, add, emptySatchel } from '../src/content/satchel';
 
-/**
- * One of everything, handed over.
- *
- * This file asks whether the *sky* ever stops a ladder, so it is given both the words and the
- * tools — the same deliberate cheat, for the same reason. Whether the making layer can supply
- * a knife is `conversation.test.ts`'s question, and it answers it by gathering.
- */
-const TOOLED: Satchel = items.reduce((bag, i) => add(bag, i.id, 1), emptySatchel());
 import { fieldMap, fieldMaps } from '../src/content/places';
 
 /** The full canon weather enum, from `discovery.schema.json`. */
@@ -186,18 +176,17 @@ describe('the moment handed to the ladder', () => {
 const SEEDS = ['lothal', 'narmada', 'dwarka', 'saraswati', 'varuna', 'tethys'];
 
 /** Play a seed for a while, climbing whatever the sky allows as the hours pass. */
-function playThrough(seed: string, days: number, climate: Climate = DELTA_CLIMATE): Progress {
+function playThrough(_seed: string, days: number, _climate: Climate = DELTA_CLIMATE): Progress {
   let p = emptyProgress();
   // Words are taught by people, which is not what this file is testing.
   for (const w of vocabulary) p = learn(p, w.id);
 
   for (let ms = 0; ms <= days * DAY_MS; ms += DAY_MS / 96) {
-    const moment = momentAt(seed, ms, 0, climate);
     for (let settle = 0; settle < discoveries.length; settle += 1) {
       let moved = false;
       for (const d of discoveries) {
-        if (canAdvance(p, d.id, moment, TOOLED)) {
-          p = advance(p, d.id, moment, TOOLED);
+        if (canAdvance(p, d.id)) {
+          p = advance(p, d.id);
           moved = true;
         }
       }
@@ -223,13 +212,13 @@ describe('the ending weather was blocking', () => {
     }
   });
 
-  it('and the gate is real — under a sky that never clears, the field stays dead', () => {
-    // Without this the tests above would pass just as well if conditions were ignored entirely.
+  it('and a sky that never clears holds nothing back, because a rung waits only on understanding', () => {
+    // This used to prove the weather gate was real. The gate is gone (`docs/a-lighter-game.md`), so
+    // the same monsoon now finishes the field: the sky is context, not a lock.
     const monsoon: Climate = { rain: 1 };
     const p = playThrough('lothal', 5, monsoon);
-    expect(isComplete(p, 'discovery_poisoned_ground')).toBe(false);
-    expect(isComplete(p, 'discovery_red_rice_survival')).toBe(false);
-    expect(restored(p)).not.toContain('poi_eastern_field');
+    expect(isComplete(p, 'discovery_poisoned_ground')).toBe(true);
+    expect(isComplete(p, 'discovery_red_rice_survival')).toBe(true);
   });
 
   it('finishes every ladder in the slice within a couple of days, on any seed', () => {

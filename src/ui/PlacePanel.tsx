@@ -11,7 +11,6 @@
 import { useState } from 'react';
 import {
   type Progress,
-  type WorldMoment,
   blockedBy,
   blockedFrom,
   canAdvance,
@@ -35,19 +34,8 @@ const FACE_SIZE = 44;
 // `test/conversation.test.ts` import it from there.
 
 /** Why a rung will not move, in words. Mirrors the diary's phrasing on purpose. */
-function why(progress: Progress, id: string, moment: WorldMoment | null): string {
-  const missing = blockedBy(progress, id, moment);
-  if (missing.includes('conditions')) {
-    const d = discovery(id);
-    const next = d?.rungs[rungOf(progress, id) + 1];
-    const when = [
-      next?.conditions?.timeOfDay.length ? next.conditions.timeOfDay.join(' or ') : null,
-      next?.conditions?.weather.length ? next.conditions.weather.join(' or ') : null
-    ]
-      .filter(Boolean)
-      .join(', in ');
-    return when ? `Come back at ${when}.` : 'Not in this weather.';
-  }
+function why(progress: Progress, id: string): string {
+  const missing = blockedBy(progress, id);
   const first = missing[0];
   if (!first) return '';
   if (first.startsWith('word_')) return 'There is a word for this you do not have yet.';
@@ -77,7 +65,6 @@ export interface PlacePanelProps {
    */
   settling?: SettlingView | null;
   progress: Progress;
-  moment: WorldMoment | null;
   /** True the first time this place is entered in a session — the long prose goes up once. */
   firstVisit: boolean;
   // `satchel` moved to `Conversation` with the lines it gates. The note on why it is needed at all
@@ -101,7 +88,6 @@ export function PlacePanel({
   presence,
   settling = null,
   progress,
-  moment,
   firstVisit,
   onLook,
   onTalkTo,
@@ -242,13 +228,13 @@ export function PlacePanel({
                   if (!d) return null;
                   const seen = rungOf(progress, id) >= 0;
                   const done = isComplete(progress, id);
-                  const can = canAdvance(progress, id, moment);
+                  const can = canAdvance(progress, id);
                   return (
                     <div key={id} className="look">
                       <div className="look-text">
                         <h4>{seen ? d.name : 'Something you have not looked at'}</h4>
                         <p>{seen ? entryFor(progress, id) : 'You have walked past this.'}</p>
-                        {!done && !can && seen && <p className="muted">{why(progress, id, moment)}</p>}
+                        {!done && !can && seen && <p className="muted">{why(progress, id)}</p>}
                       </div>
                       <button type="button" onClick={() => onLook(id)} disabled={!can}>
                         {done ? 'Understood' : can ? 'Look closer' : 'Not yet'}

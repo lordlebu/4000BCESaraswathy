@@ -183,7 +183,8 @@ const NESTED: Record<string, Coverage> = {
     skipped: []
   },
   'discoveries.levels': {
-    adapted: ['entry', 'requires', 'conditions', 'needs_tool'],
+    // `conditions` and `needs_tool` left canon with v3.1.0: a rung waits only on understanding.
+    adapted: ['entry', 'requires'],
     skipped: []
   },
   'field_questions.resolutions': {

@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.0.0",
+  "canon_version": "3.1.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -61,10 +61,7 @@
           "entry": "Marn's household eats it. Has always eaten it. Loses an animal to it about once a year and considers this normal."
         },
         {
-          "entry": "They soak it two days in running water and throw the first water away. Untreated, it is exactly as toxic as the archive says.",
-          "needs_tool": [
-            "contain"
-          ]
+          "entry": "They soak it two days in running water and throw the first water away. Untreated, it is exactly as toxic as the archive says."
         },
         {
           "entry": "The animals they lose are the ones that get into the standing crop. The archive tested the plant; the herders solved the food. Both of them stopped there."
@@ -173,15 +170,7 @@
           ]
         },
         {
-          "entry": "On a clear night you can see how far it goes, and it does not stop where the cloud stops.",
-          "conditions": {
-            "time_of_day": [
-              "night"
-            ],
-            "weather": [
-              "clear"
-            ]
-          }
+          "entry": "On a clear night you can see how far it goes, and it does not stop where the cloud stops."
         },
         {
           "entry": "The lift on the scarp is real and it is nowhere near enough to hold stone. I can describe this exactly and explain none of it, and I have decided that writing it down accurately is the work."
@@ -271,12 +260,7 @@
           "entry": "Warm air off the plain hits the black rock and is turned straight up. The cloud is where it cools, and the scarp holds it there."
         },
         {
-          "entry": "It is strongest in the afternoon and it fails at night, and when it fails the cloud falls down the scarp in one piece.",
-          "conditions": {
-            "time_of_day": [
-              "afternoon"
-            ]
-          }
+          "entry": "It is strongest in the afternoon and it fails at night, and when it fails the cloud falls down the scarp in one piece."
         },
         {
           "entry": "Standing in it, the lift is enough to take a hat and keep it. Not a metaphor -- I lost one and watched it go up."
@@ -376,12 +360,7 @@
           "entry": "It is not always doing anything. Most of the day it is a doorway in a wall."
         },
         {
-          "entry": "In mist it is doing something. The air on the far side is a different air -- warmer, and it smells of stone rather than salt.",
-          "conditions": {
-            "weather": [
-              "mist"
-            ]
-          }
+          "entry": "In mist it is doing something. The air on the far side is a different air -- warmer, and it smells of stone rather than salt."
         },
         {
           "entry": "Not the tide — there has not been a tide here in sixty years — and not the hour. I sat the stair for three days with a slate and the only thing that matches is the mist."
@@ -458,20 +437,12 @@
           "entry": "Fused sand, and only at the surface — a hand down it is ordinary. Whatever did this was fast enough that the heat never travelled."
         },
         {
-          "entry": "It runs true for as far as I walked it, which was most of a morning, and it does not deviate for a dune or a ridge.",
-          "conditions": {
-            "weather": [
-              "clear"
-            ]
-          }
+          "entry": "It runs true for as far as I walked it, which was most of a morning, and it does not deviate for a dune or a ridge."
         },
         {
           "entry": "It crosses the old harbour floor without a break, and the silt underneath it is unfused. So it happened after the water left, and fast.",
           "requires": [
             "discovery_seawall_courses"
-          ],
-          "needs_tool": [
-            "cut"
           ]
         },
         {
@@ -609,13 +580,7 @@
           "entry": "Something large moved in the pool and I did not see it move."
         },
         {
-          "entry": "An enormous salamander, perhaps eight feet, entirely still in the shallow water.",
-          "conditions": {
-            "time_of_day": [
-              "morning",
-              "evening"
-            ]
-          }
+          "entry": "An enormous salamander, perhaps eight feet, entirely still in the shallow water."
         },
         {
           "entry": "The Lothal Marsh-Lurker, which the old bestiaries have surviving here since the Pleistocene and which I had assumed was a flourish."
@@ -671,10 +636,7 @@
           "entry": "There are other layers. Thin ones, of bone I cannot place, and they are not at the top."
         },
         {
-          "entry": "I counted nine. The deepest is under a pottery style Sura says her grandmother's grandmother used.",
-          "needs_tool": [
-            "cut"
-          ]
+          "entry": "I counted nine. The deepest is under a pottery style Sura says her grandmother's grandmother used."
         },
         {
           "entry": "Nine, in four hundred years, and not evenly spaced -- they cluster. Two of them are close enough to be one bad decade."
@@ -706,12 +668,7 @@
           "entry": "There are dry basins downslope of it. Someone built them to catch this water, at three different places, at three different times."
         },
         {
-          "entry": "On a cold morning the whole line of them steams -- all three, faintly, not just the live one. The rock under them is still wet.",
-          "conditions": {
-            "weather": [
-              "mist"
-            ]
-          }
+          "entry": "On a cold morning the whole line of them steams -- all three, faintly, not just the live one. The rock under them is still wet."
         },
         {
           "entry": "The water is not moving because the hill is moving. It is following a crack, and the crack is opening uphill a little at a time."
@@ -755,12 +712,7 @@
           "entry": "Salt, and not sea salt -- there is too much of it and it is coming up rather than blowing in."
         },
         {
-          "entry": "Something opened below this field during the Shattering and has been weeping brine into it since. Not a wound one can close.",
-          "conditions": {
-            "weather": [
-              "clear"
-            ]
-          }
+          "entry": "Something opened below this field during the Shattering and has been weeping brine into it since. Not a wound one can close."
         },
         {
           "entry": "The same white crust is on the stones at the drowned dockyard, at the same height above the waterline. Whatever opened runs under both.",
@@ -783,18 +735,10 @@
           "entry": "A pale band in the quarry face, between two courses of basalt. Full of small shells."
         },
         {
-          "entry": "The shells are not one kind. Going up through the band they change, and they change in one direction.",
-          "conditions": {
-            "weather": [
-              "clear"
-            ]
-          }
+          "entry": "The shells are not one kind. Going up through the band they change, and they change in one direction."
         },
         {
-          "entry": "At the bottom they are round and thin. At the top, over nine inches, they are ridged and heavy. In between they are both, and neither, and the intermediate ones are the commonest.",
-          "needs_tool": [
-            "cut"
-          ]
+          "entry": "At the bottom they are round and thin. At the top, over nine inches, they are ridged and heavy. In between they are both, and neither, and the intermediate ones are the commonest."
         },
         {
           "entry": "Nine inches of ash is not nine inches of time. This is a long slow record laid down between two very fast events."
@@ -922,10 +866,7 @@
           ]
         },
         {
-          "entry": "Fired properly rather than left to a hot week, it would not go cloudy. That is a kiln's work, not a summer's.",
-          "needs_tool": [
-            "contain"
-          ]
+          "entry": "Fired properly rather than left to a hot week, it would not go cloudy. That is a kiln's work, not a summer's."
         },
         {
           "entry": "Thrali sets his nets by feel because he cannot see the channel bed through four feet of silt-water. A pane he could hold under would show him it."
@@ -985,12 +926,7 @@
           "entry": "Each is founded a little higher than the one seaward of it, and each is built of what was cheap that century."
         },
         {
-          "entry": "The outermost stands in dry dust, and it was built to stand in surf. Nothing about it has moved; the sea did.",
-          "conditions": {
-            "time_of_day": [
-              "dawn"
-            ]
-          }
+          "entry": "The outermost stands in dry dust, and it was built to stand in surf. Nothing about it has moved; the sea did."
         },
         {
           "entry": "Roughly a hand of sea in a hundred years, if the walls were built dry-footed. Slow enough that no single person ever saw it happen."
@@ -1022,16 +958,7 @@
           "entry": "Thrali says the water turns silver and that things come up when it does. I have written it down without knowing what I have written."
         },
         {
-          "entry": "It does turn silver, on a still night after rain, and it is not the moon -- it happens under cloud.",
-          "conditions": {
-            "time_of_day": [
-              "night"
-            ],
-            "weather": [
-              "rain",
-              "clear"
-            ]
-          }
+          "entry": "It does turn silver, on a still night after rain, and it is not the moon -- it happens under cloud."
         },
         {
           "entry": "The silver is a bloom, not a light. Something microscopic rising in the closed basin when the rain freshens the top of it."
@@ -1321,12 +1248,7 @@
           "entry": "Under the rim it does not fall. It gathers on the underside and runs upward along it."
         },
         {
-          "entry": "It leaves the underside at the island's lowest point and goes on going up, into cloud, and does not come back down here.",
-          "conditions": {
-            "weather": [
-              "rain"
-            ]
-          }
+          "entry": "It leaves the underside at the island's lowest point and goes on going up, into cloud, and does not come back down here."
         },
         {
           "entry": "Moss grows on the underside in the direction the water climbs, which is the only way I can measure this when it is not raining."
@@ -1410,12 +1332,7 @@
           "entry": "It left the water. Four legs, short and thick, and it carried its weight on them badly but it carried it. The track is a hand across and sunk deep -- this is a heavy animal that has chosen to be in the shallows."
         },
         {
-          "entry": "The head settles it, and I did not want it settled. That is a whale's jaw. The ear is set in bone the way a whale's is. It is a whale and it is walking and it is eight hundred miles from the sea.",
-          "conditions": {
-            "weather": [
-              "clear"
-            ]
-          }
+          "entry": "The head settles it, and I did not want it settled. That is a whale's jaw. The ear is set in bone the way a whale's is. It is a whale and it is walking and it is eight hundred miles from the sea."
         },
         {
           "entry": "Then the sea was here, or it was not and this animal never needed one. The second is the harder thought and I think it is the right one: it is not stranded. It lives here. Whatever it is becoming, or has come from, happened in fresh water.",
@@ -1590,10 +1507,7 @@
           "entry": "The limb bones are paired the wrong way. Whatever this was did not share an ancestor with anything I have drawn on this continent."
         },
         {
-          "entry": "Not deformity, and not two animals mixed: the joints articulate. It worked. Something walked around inside this.",
-          "needs_tool": [
-            "carry"
-          ]
+          "entry": "Not deformity, and not two animals mixed: the joints articulate. It worked. Something walked around inside this."
         },
         {
           "entry": "The teeth are the argument. Replacement runs from the back forward, which nothing here does, and the wear says it lived long enough to be old."

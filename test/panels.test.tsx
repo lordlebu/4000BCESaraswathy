@@ -69,16 +69,11 @@ vi.mock('../src/ui/plates', () => ({
   plateCount: () => 1
 }));
 
-const MOMENTS = ['dawn', 'morning', 'afternoon', 'evening', 'night'].flatMap((timeOfDay) =>
-  ['clear', 'rain', 'mist', 'storm'].map((weather) => ({ timeOfDay, weather }))
-);
-
 function climb(progress: Progress, id: string): Progress {
   let p = progress;
   for (;;) {
-    const m = MOMENTS.find((x) => canAdvance(p, id, x));
-    if (!m) return p;
-    p = advance(p, id, m);
+    if (!canAdvance(p, id)) return p;
+    p = advance(p, id);
   }
 }
 
@@ -113,7 +108,7 @@ afterEach(cleanup);
  */
 describe('the diary decides whether it is empty', () => {
   it('says so when nothing at all has happened', () => {
-    render(<Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
+    render(<Diary progress={emptyProgress()} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
     expect(screen.getByText(/have not written anything down/i)).toBeDefined();
   });
 
@@ -123,20 +118,20 @@ describe('the diary decides whether it is empty', () => {
     const p = talkedToBekh();
     expect(p.questions.length).toBeGreaterThan(0);
 
-    render(<Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
+    render(<Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
     expect(screen.queryByText(/have not written anything down/i)).toBeNull();
     expect(screen.getByRole('heading', { name: /open questions/i })).toBeDefined();
   });
 
   it('does not call itself empty when only a word has been learned', () => {
     const p = learn(emptyProgress(), 'word_kia_thal');
-    render(<Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
+    render(<Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
     expect(screen.queryByText(/have not written anything down/i)).toBeNull();
   });
 
   it('renders nothing at all when closed', () => {
     const { container } = render(
-      <Diary progress={emptyProgress()} moment={null} open={false} onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={emptyProgress()} open={false} onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     expect(container.firstChild).toBeNull();
   });
@@ -148,7 +143,7 @@ describe('the diary keeps the crossings-out', () => {
     p = advance(p, 'discovery_saltreed_thatch');
 
     const { baseElement } = render(
-      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     const readings = baseElement.querySelectorAll('.revisions .reading');
     expect(readings.length).toBe(2);
@@ -159,17 +154,18 @@ describe('the diary keeps the crossings-out', () => {
 
   it('shows no row at all for a discovery never noticed', () => {
     const { baseElement } = render(
-      <Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={emptyProgress()} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     expect(baseElement.querySelectorAll('.entry').length).toBe(0);
   });
 
-  it('explains a rung held back by the weather as a reason, not a lock', () => {
+  it('never sends the traveller away to wait for the weather', () => {
+    // A rung waits only on understanding now (`docs/a-lighter-game.md`); the silver water's entry
+    // still talks about a still night, and the diary no longer says to come back for one.
     const p = advance(emptyProgress(), 'discovery_silver_water');
     render(
       <Diary
         progress={p}
-        moment={{ timeOfDay: 'afternoon', weather: 'clear' }}
         open
         onClose={noop}
         onAnswer={noop}
@@ -177,7 +173,7 @@ describe('the diary keeps the crossings-out', () => {
         onOpenKit={noop}
       />
     );
-    expect(screen.getByText(/come back at night/i)).toBeDefined();
+    expect(screen.queryByText(/come back at/i)).toBeNull();
   });
 });
 
@@ -237,7 +233,7 @@ describe('the knowledge tree', () => {
   it('never claims a discipline the player has not touched', () => {
     const p = climb(emptyProgress(), 'discovery_saltreed_thatch');
     const { baseElement } = render(
-      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     const shown = [...baseElement.querySelectorAll('.disc-name')].map((e) => e.textContent);
     expect(shown.length).toBeGreaterThan(0);
@@ -247,7 +243,7 @@ describe('the knowledge tree', () => {
   it('counts rungs rather than discoveries, so half-understanding shows', () => {
     const one = advance(emptyProgress(), 'discovery_saltreed_thatch');
     const { baseElement } = render(
-      <Diary progress={one} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={one} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     const bar = baseElement.querySelector('.disc-bar i') as HTMLElement | null;
     expect(bar).not.toBeNull();
@@ -263,7 +259,7 @@ describe('the panels stay in step with canon', () => {
     let p = emptyProgress();
     for (const d of discoveries) p = advance(p, d.id);
     const { baseElement } = render(
-      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     const shown = new Set([...baseElement.querySelectorAll('.diary-section > h3')].map((e) => e.textContent));
     const used = new Set(discoveries.map((d) => d.discipline));
@@ -342,7 +338,7 @@ describe('the last page', () => {
 describe('the diary offers the last page', () => {
   it('only once something has been finished', () => {
     const nothing = render(
-      <Diary progress={emptyProgress()} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
+      <Diary progress={emptyProgress()} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     expect(nothing.queryByRole('button', { name: /see who would come/i })).toBeNull();
     cleanup();
@@ -350,7 +346,7 @@ describe('the diary offers the last page', () => {
     const p = climb(emptyProgress(), 'discovery_saltreed_thatch');
     const onOpenEnding = vi.fn();
     render(
-      <Diary progress={p} moment={null} open onClose={noop} onAnswer={noop} onOpenEnding={onOpenEnding} onOpenKit={noop} />
+      <Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={onOpenEnding} onOpenKit={noop} />
     );
     fireEvent.click(screen.getByRole('button', { name: /see who would come/i }));
     expect(onOpenEnding).toHaveBeenCalled();

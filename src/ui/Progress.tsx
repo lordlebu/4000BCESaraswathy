@@ -15,11 +15,10 @@
 
 import type { ReactNode } from 'react';
 import { Diary } from './Diary';
-import type { Progress as Knowledge, WorldMoment } from '../journey';
+import type { Progress as Knowledge } from '../journey';
 
 export interface ProgressProps {
   progress: Knowledge;
-  moment: WorldMoment | null;
   open: boolean;
   onClose: () => void;
   onAnswer: (questionId: string, index: number) => void;
@@ -37,7 +36,6 @@ export interface ProgressProps {
 
 export function Progress({
   progress,
-  moment,
   open,
   onClose,
   onAnswer,
@@ -56,7 +54,6 @@ export function Progress({
       tabs={tabs}
       lead={lead}
       progress={progress}
-      moment={moment}
       open
       onClose={onClose}
       onAnswer={onAnswer}

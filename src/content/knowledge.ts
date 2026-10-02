@@ -21,27 +21,12 @@ export type Discipline =
   | 'evolution'
   | 'anomalies';
 
-export interface Conditions {
-  timeOfDay: string[];
-  weather: string[];
-}
-
 /** One rung of the ladder, and what it takes to stand on it. */
 export interface Rung {
   /** What the diary reads here. Written for the player, and less certain lower down. */
   entry: string;
   /** Discovery or vocabulary ids needed. Empty means it follows from the rung below. */
   requires: string[];
-  /** When the world has to cooperate — a night, a rainfall — for this to be reachable. */
-  conditions: Conditions | null;
-  /**
-   * Affordances the traveller must have to hand to climb this rung.
-   *
-   * An affordance rather than a named item, exactly as a process's needs are: a section
-   * through a midden wants something that cuts, and canon never decides whether that is a
-   * flint knife or an antler pick. Empty for all but six rungs.
-   */
-  needsTool: string[];
 }
 
 export interface Discovery {
@@ -103,8 +88,6 @@ export interface Word {
 interface RawRung {
   entry: string;
   requires?: string[];
-  conditions?: { time_of_day?: string[]; weather?: string[] };
-  needs_tool?: string[];
 }
 interface RawDiscovery {
   id: string; name: string; discipline: string; subject?: string;
@@ -139,11 +122,7 @@ export const discoveries: Discovery[] = raw.discoveries.map((d) => ({
   foundAt: d.found_at ?? [],
   rungs: d.levels.map((l) => ({
     entry: l.entry,
-    requires: l.requires ?? [],
-    conditions: l.conditions
-      ? { timeOfDay: l.conditions.time_of_day ?? [], weather: l.conditions.weather ?? [] }
-      : null,
-    needsTool: l.needs_tool ?? []
+    requires: l.requires ?? []
   })),
   answers: d.answers ?? [],
   helps: d.helps ?? [],

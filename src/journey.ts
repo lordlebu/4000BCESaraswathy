@@ -23,7 +23,7 @@ import {
 } from './content/knowledge';
 import { type Line, npc, npcs, poi } from './content/places';
 import { recipe } from './content/making';
-import { type Satchel, canDo, count, emptySatchel, remove } from './content/satchel';
+import { type Satchel, count, emptySatchel, remove } from './content/satchel';
 import { type Bench, openGround } from './content/crafting';
 import { type Step, plan, runPlan } from './content/making-chain';
 
@@ -201,85 +201,36 @@ function observed(progress: Progress, requirement: string): boolean {
   return Boolean(discovery(requirement)) && rungOf(progress, requirement) >= 1;
 }
 
-function momentAllows(rungConditions: Discovery['rungs'][number]['conditions'], moment: WorldMoment | null): boolean {
-  if (!rungConditions) return true;
-  if (!moment) return false;
-  const { timeOfDay, weather } = rungConditions;
-  if (timeOfDay.length && !timeOfDay.includes(moment.timeOfDay)) return false;
-  if (weather.length && !weather.includes(moment.weather)) return false;
-  return true;
-}
-
 /**
  * Whether the next rung of a discovery is within reach right now.
  *
- * Three things can stop it: the ladder is finished, something it requires is not held, or
- * the world is not cooperating — a bloom that only shows on a still night after rain is not
- * available at noon, and saying so is the point rather than a limitation.
+ * Two things can stop it: the ladder is finished, or something it requires is not yet understood.
+ * **Nothing else, on the owner's ruling of 2 October 2026** (`docs/a-lighter-game.md`): the lore
+ * gives the world its context and does not make the game's calculations. Twelve rungs used to wait
+ * for an hour or a weather and six for a tool in hand; an entry may still say "on a clear night",
+ * and nothing makes the traveller wait for one. The tool gates had also never worked in play -- no
+ * caller passed what was carried, so those six rungs could not be climbed at all.
  */
-export function canAdvance(
-  progress: Progress,
-  id: string,
-  moment: WorldMoment | null = null,
-  carrying: Satchel = emptySatchel()
-): boolean {
+export function canAdvance(progress: Progress, id: string): boolean {
   const d = discovery(id);
   if (!d) return false;
   const next = rungOf(progress, id) + 1;
   if (next > lastRung(d)) return false;
-  const rung = d.rungs[next]!;
-  return (
-    rung.requires.every((r) => holds(progress, r)) &&
-    momentAllows(rung.conditions, moment) &&
-    hasTools(carrying, rung.needsTool)
-  );
-}
-
-/**
- * Whether the traveller has what a rung asks them to be holding.
- *
- * `carrying` defaults to an empty satchel rather than being required, which keeps every
- * existing caller working and is honest for the twenty-five rungs that ask for nothing. The
- * six that do ask are all `cut`, `contain` or `carry` — never one of the four the kit already
- * affords, because a gate the player passes on their first step is not a gate.
- */
-function hasTools(carrying: Satchel, needed: readonly string[]): boolean {
-  // The early return is not decoration: this runs for every discovery on every tick, and all
-  // but six rungs in the game ask for nothing.
-  if (needed.length === 0) return true;
-  return needed.every((n) => canDo(carrying, n));
+  return d.rungs[next]!.requires.every((r) => holds(progress, r));
 }
 
 /** Why the next rung is out of reach, for a UI that wants to say something useful. */
-export function blockedBy(
-  progress: Progress,
-  id: string,
-  moment: WorldMoment | null = null,
-  carrying: Satchel = emptySatchel()
-): string[] {
+export function blockedBy(progress: Progress, id: string): string[] {
   const d = discovery(id);
   if (!d) return [];
   const next = rungOf(progress, id) + 1;
   if (next > lastRung(d)) return [];
-  const rung = d.rungs[next]!;
-  const missing = rung.requires.filter((r) => !holds(progress, r));
-  if (!momentAllows(rung.conditions, moment)) missing.push('conditions');
-  // Reported as `tool:cut` rather than as an id, because unlike everything else in this list
-  // it is not a thing the player can go and look at — it is a thing they have to make.
-  for (const need of rung.needsTool) {
-    if (!canDo(carrying, need)) missing.push(`tool:${need}`);
-  }
-  return missing;
+  return d.rungs[next]!.requires.filter((r) => !holds(progress, r));
 }
 
 /** Advance a discovery by one rung if it can be. Returns a new Progress; never mutates. */
-export function advance(
-  progress: Progress,
-  id: string,
-  moment: WorldMoment | null = null,
-  carrying: Satchel = emptySatchel()
-): Progress {
-  if (!canAdvance(progress, id, moment, carrying)) return progress;
+export function advance(progress: Progress, id: string): Progress {
+  if (!canAdvance(progress, id)) return progress;
   return { ...progress, rungs: { ...progress.rungs, [id]: rungOf(progress, id) + 1 } };
 }
 
@@ -304,9 +255,8 @@ export function openQuestions(progress: Progress): FieldQuestion[] {
  * Take whatever a line hands over: a word, a question, or a discovery.
  *
  * A discovery arrives at rung 0 — noticed, not understood — which is what rung 0 has always
- * meant and why it is distinct from never having seen it. It bypasses that rung's conditions
- * deliberately: somebody told you, and being told is not the same as looking, which is exactly
- * the gap the rest of the ladder exists to close.
+ * meant and why it is distinct from never having seen it. Somebody told you, and being told is
+ * not the same as looking, which is exactly the gap the rest of the ladder exists to close.
  *
  * Idempotent, so a player may re-hear a line without it meaning anything.
  */

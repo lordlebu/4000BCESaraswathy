@@ -679,8 +679,8 @@ export function App() {
 
   /** Look closer at something. The rule for whether that is possible is `journey.ts`'s. */
   const look = useCallback(
-    (discoveryId: string) => setProgress((p) => advance(p, discoveryId, moment)),
-    [moment]
+    (discoveryId: string) => setProgress((p) => advance(p, discoveryId)),
+    []
   );
 
   /**
@@ -1584,7 +1584,6 @@ export function App() {
           </>
         }
         progress={progress}
-        moment={moment}
         open={surface === 'progress'}
         onClose={() => dispatch({ type: 'close' })}
         onAnswer={settle}
@@ -1734,7 +1733,6 @@ export function App() {
           presence,
           settling,
           progress,
-          moment,
           firstVisit: Boolean(standingOn) && !visited.current.has(standingOn!),
           onLook: look,
           onTalkTo: (npcId: string) => dispatch({ type: 'talk-to', npcId }),

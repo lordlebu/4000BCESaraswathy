@@ -94,12 +94,9 @@ describe('the vocabularies are the declared ones', () => {
     }
   });
 
-  it('items afford, processes need and rungs ask for declared affordances', () => {
+  it('items afford and processes need declared affordances', () => {
     for (const i of making.items) for (const a of (i.affords as string[]) ?? []) expect(AFFORDANCES.has(a), `${i.id}: ${a}`).toBe(true);
     for (const p of making.processes) for (const a of (p.needs as string[]) ?? []) expect(AFFORDANCES.has(a), `${p.id}: ${a}`).toBe(true);
-    for (const d of (canon.discoveries as Doc[]) ?? [])
-      for (const level of (d.levels as { needs_tool?: string[] }[]) ?? [])
-        for (const a of level.needs_tool ?? []) expect(AFFORDANCES.has(a), `${d.id} needs_tool ${a}`).toBe(true);
   });
 
   it('a recipe tag is a declared class with a hash', () => {

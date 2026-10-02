@@ -12,17 +12,13 @@
 import { storyGrants } from '../src/content/storylines';
 import { describe, expect, it } from 'vitest';
 import {
-  advance,
-  blockedBy,
-  canAdvance,
   craft,
   emptyProgress,
   hasMade,
   hear,
   knowsRecipe,
   learnRecipe,
-  linesFor,
-  rungOf
+  linesFor
 } from '../src/journey';
 import { describeTile } from '../src/content/journal';
 import { underfootLine, yieldsAt } from '../src/content/gathering';
@@ -39,48 +35,11 @@ import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap } from '../src/content/places';
 import { featureNameAt } from '../src/world/features';
 
-describe('a rung can need a tool', () => {
-  const tooled = discoveries.flatMap((d) =>
-    d.rungs.map((r, i) => ({ d, i, needs: r.needsTool })).filter((x) => x.needs.length > 0)
-  );
-
-  it('is a thing canon actually says, on more than nothing', () => {
-    expect(tooled.length).toBeGreaterThan(0);
-  });
-
-  it('never asks for one of the four the kit already affords', () => {
-    // The kit gives burn, mark, shelter and cross from the first step. A rung gated on one of
-    // those is a gate the player walks through without noticing, which is worse than no gate:
-    // it looks like a mechanic and is not one.
-    for (const { d, i, needs } of tooled) {
-      for (const n of needs) {
-        expect(['burn', 'mark', 'shelter', 'cross'], `${d.id} rung ${i}`).not.toContain(n);
-      }
-    }
-  });
-
-  it('holds the rung back until something is carried', () => {
-    const { d, i, needs } = tooled[0]!;
-    // Climb to just below the gated rung, carrying nothing.
-    let p = emptyProgress();
-    for (let step = 0; step < i; step += 1) p = advance(p, d.id);
-    expect(rungOf(p, d.id)).toBe(i - 1);
-
-    expect(canAdvance(p, d.id, null, emptySatchel())).toBe(false);
-    expect(blockedBy(p, d.id, null, emptySatchel())).toContain(`tool:${needs[0]}`);
-  });
-
-  it('opens once the tool is in hand', () => {
-    const { d, i, needs } = tooled[0]!;
-    let p = emptyProgress();
-    for (let step = 0; step < i; step += 1) p = advance(p, d.id);
-
-    // Anything affording it will do — that is the whole reason canon names an affordance.
-    const knife = add(emptySatchel(), 'item_flint_knife', 1);
-    if (needs.includes('cut')) {
-      expect(canAdvance(p, d.id, null, knife)).toBe(true);
-      expect(advance(p, d.id, null, knife)).not.toBe(p);
-    }
+describe('a rung never needs a tool', () => {
+  it('asks only for what it stands on, because the lore does not gate the ladder', () => {
+    // Six rungs used to ask for something that cuts, contains or carries, and none could be climbed
+    // in play: no caller passed the satchel. The gate went instead (`docs/a-lighter-game.md`).
+    for (const d of discoveries) for (const r of d.rungs) expect(Object.keys(r).sort(), d.id).toEqual(['entry', 'requires']);
   });
 });
 
