@@ -319,6 +319,20 @@ describe('the last page', () => {
     expect(screen.getByText(/none of this is spent/i)).toBeDefined();
   });
 
+  it('heads each settled map with its own painting, and Lothal with the mill among the trees', () => {
+    // Dwarka and the Narmada borrowed Lothal's painting until the owner painted theirs (2 October
+    // 2026). A typo in a map id falls back silently, so the file each map reaches is asserted.
+    const page = (fieldMapId: string) =>
+      render(
+        <Ending progress={emptyProgress()} settlement={{ name: 'Home', prose: '', people: [], fieldMapId }} open onClose={noop} />
+      ).baseElement.querySelector('img.ending-picture')?.getAttribute('src') ?? '';
+    expect(page('field_map_dwarka')).toMatch(/settle-home-dwarka/);
+    cleanup();
+    expect(page('field_map_narmada')).toMatch(/settle-home-narmada/);
+    cleanup();
+    expect(page('field_map_lothal')).toMatch(/settle-home(?!-)/);
+  });
+
   it('renders nothing when closed', () => {
     const { container } = render(<Ending progress={everything()} open={false} onClose={noop} />);
     expect(container.firstChild).toBeNull();

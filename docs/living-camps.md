@@ -242,6 +242,17 @@ camp, are in `docs/event-prompts.md` as `woven-camp-meal-drovers`, `-pilgrims`, 
 painting shows the day its file lands in `src/ui/events/` and the card looks exactly as it does now
 until then. `test/happenings.test.ts` holds the order.
 
+**All four landed the same day**, painted by the owner and sent from a phone; their crops are in
+`docs/event-prompts.md`. The adventurers' has a spear leaning on its tent, and **the owner kept it**:
+the plan's *nothing held up, nothing drawn* means nothing is held up *at* anybody, not that a camp of
+adventurers owns no gear. Nobody in any of the four holds a weapon.
+
+**The last three paintings arrived the same day** (2 October 2026), and nothing is asked for now:
+`woven-camp`, and `settle-home-dwarka` and `settle-home-narmada` for the two settlement pages, which
+had borrowed Lothal's mill. Their prompts and crops are in `docs/event-prompts.md` and
+`docs/settling-art.md`. `woven-camp` is the last fallback behind the four kinds' own paintings on
+the camp cards, so today nothing reaches it.
+
 **One question stays open, on purpose:** whether a map should ever have two camps at once. The plan
 said to keep one and revisit after Phase 2 is *played*, and that needs a person playing it.
 
