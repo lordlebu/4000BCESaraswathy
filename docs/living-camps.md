@@ -247,6 +247,14 @@ until then. `test/happenings.test.ts` holds the order.
 the plan's *nothing held up, nothing drawn* means nothing is held up *at* anybody, not that a camp of
 adventurers owns no gear. Nobody in any of the four holds a weapon.
 
+**The art still asked for is three paintings, and none of it is a camp's.** The prompts are
+where they always were: `woven-camp` under its heading in `docs/event-prompts.md`, and
+`settle-home-dwarka` and `settle-home-narmada` under *The settlement page, per map* in
+`docs/settling-art.md`. The plan page carries all three with a copy button. The two settlement pages
+are the ones a player would notice, since both maps borrow Lothal's mill until they land.
+`woven-camp` is now the last fallback behind the four kinds' own paintings, so it is the lowest of
+the three: nothing draws it today.
+
 **One question stays open, on purpose:** whether a map should ever have two camps at once. The plan
 said to keep one and revisit after Phase 2 is *played*, and that needs a person playing it.
 
