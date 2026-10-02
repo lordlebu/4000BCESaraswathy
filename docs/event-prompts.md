@@ -70,11 +70,14 @@ Each was built with an explicit crop, three of them for a reason the hard requir
 
 - **pilgrims** -- a "Grok" mark in the bottom right corner; cropped above and left of it.
 - **drovers** -- a painted paper border all round; cropped inside it.
-- **adventurers** -- nothing to take off: the painting is exactly 4:3 with no border or mark, and is
-  used whole. It carries a spear leaning on the tent, and **the owner kept it** (2 October 2026):
-  an adventurers' camp has its gear lying about. A first cut cropped it away under the plan's
-  *nothing held up, nothing drawn*; that rule is about nothing being held up *at* anybody, and the
-  owner read the picture rightly. Nobody in it holds a weapon.
+- **adventurers** -- **replaced the same day** by a second painting the owner sent ("use this"):
+  1200 × 896 RGB, full-bleed with no border or mark, so only a 3-pixel sliver comes off each side to
+  make it 4:3. It keeps what the owner liked in the first -- a spear leaning on the tent, kept on
+  their word (2 October 2026): an adventurers' camp has its gear lying about. A first cut of the
+  first painting cropped the spear away under the plan's *nothing held up, nothing drawn*; that rule
+  is about nothing being held up *at* anybody, and the owner read the picture rightly. Nobody in it
+  holds a weapon. The first painting's raw is on disk in the git-ignored
+  `assets/source/dump/woven-camp-meal-adventurers.1.png`, and could come back as a `.2` take.
 - **dacoits** -- a paper border, and a crayon logo with a sparkle in the bottom right; cropped
   inside the paper and above and left of both.
 
@@ -84,7 +87,7 @@ the people at a camp are the camp's own, and the card names them.
 ```bash
 node tools/build-plates.js --events --force --only=woven-camp-meal-pilgrims --crop=150,0,987
 node tools/build-plates.js --events --force --only=woven-camp-meal-drovers --crop=110,90,980
-node tools/build-plates.js --events --force --only=woven-camp-meal-adventurers --crop=0,0,1448
+node tools/build-plates.js --events --force --only=woven-camp-meal-adventurers --crop=3,0,1194
 node tools/build-plates.js --events --force --only=woven-camp-meal-dacoits --crop=100,84,950
 ```
 
