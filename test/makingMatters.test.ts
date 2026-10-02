@@ -31,7 +31,7 @@ import { discoveries } from '../src/content/knowledge';
 import { creatures, creatureFor, flora, floraFor } from '../src/content/species';
 import { npc, npcs } from '../src/content/places';
 import { items, materials, recipes } from '../src/content/making';
-import craftingBundle from '../data/canon/crafting.json';
+import craftingBundle from '../data/making/crafting.json';
 import { add, count, emptySatchel } from '../src/content/satchel';
 import { canMake, make, makeableNow, openGround, withinReach } from '../src/content/crafting';
 import { gather } from '../src/content/gathering';
@@ -407,39 +407,32 @@ describe('gathering does not use a tile up', () => {
 });
 
 // ---------------------------------------------------------------------------------------
-// The one rule written down twice.
+// The affordance chain.
 // ---------------------------------------------------------------------------------------
 
-describe('the two implementations agree', () => {
+describe('what an item lets you do', () => {
   /**
-   * `affordsOf` resolves `base_item` here; `World.affords` resolves it in canon's Python. Both
-   * exist because canon must prove a recipe performable *before* it exports, and both have
-   * carried a comment saying "change one, change both" — which is a convention, not a guard.
-   *
-   * Canon now emits its own answer with the bundle, so this is the guard. If either walk
-   * changes, the two stop agreeing here rather than in somebody's playthrough.
+   * `affordsOf` follows `base_item` up the chain. This used to be checked against canon's own
+   * resolution, exported with the bundle, because the rule was written twice -- here and in canon's
+   * Python. Making moved to the game on 2 October 2026 and the Python went with it, so there is one
+   * implementation and this holds its two cases instead.
    */
-  it('resolves every affordance chain the same way canon does', () => {
-    const canonSays = (craftingBundle as { conformance?: { affords: Record<string, string[]> } })
-      .conformance?.affords;
-    expect(canonSays, 'canon exported no conformance block').toBeTruthy();
-
-    expect(Object.keys(canonSays!).sort()).toEqual(items.map((i) => i.id).sort());
-    for (const i of items) {
-      expect([...i.affords].sort(), `${i.id} resolves differently on the two sides`).toEqual(
-        [...canonSays![i.id]!].sort()
-      );
-    }
+  it('inherits from its base when it says nothing of its own', () => {
+    // `item_reed_rope` states nothing and takes `bind` from `item_cordage`.
+    expect(items.find((i) => i.id === 'item_reed_rope')?.affords).toEqual(['bind']);
+    expect(items.some((i) => i.materials.length === 0 && i.affords.length > 0)).toBe(true);
   });
 
-  it('covers the inherited case, so agreement is not agreement about nothing', () => {
-    // `item_reed_rope` states nothing of its own and takes `bind` from `item_cordage`. If the
-    // chain walk broke on both sides identically this would still pass — but if it broke on
-    // either, it would not, which is what a conformance check is for.
-    const canonSays = (craftingBundle as { conformance: { affords: Record<string, string[]> } })
-      .conformance.affords;
-    expect(canonSays['item_reed_rope']).toEqual(['bind']);
-    expect(items.some((i) => i.materials.length === 0 && i.affords.length > 0)).toBe(true);
+  it('never loops, so every chain ends', () => {
+    const raw = (craftingBundle as { items: { id: string; base_item?: string }[] }).items;
+    const base = new Map(raw.map((i) => [i.id, i.base_item ?? null]));
+    for (const i of raw) {
+      const seen = new Set<string>();
+      for (let at: string | null = i.id; at; at = base.get(at) ?? null) {
+        expect(seen.has(at), `${i.id}: base_item chain loops at ${at}`).toBe(false);
+        seen.add(at);
+      }
+    }
   });
 });
 

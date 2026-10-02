@@ -118,7 +118,11 @@ export default defineConfig({
           // changes on its own schedule, so a canon release should not re-download the app and an
           // app fix should not re-download canon. It also gives the data a file of its own to
           // weigh -- `tools/check-bundle-size.js` budgets it as what the player downloads.
-          if (id.replace(/\\/g, '/').includes('/data/canon/')) return 'canon';
+          // The making layer's data rides with it: it was canon's until 2 October 2026, and it is
+          // data on the same schedule whoever owns it -- in the app chunk it would cost the app
+          // budget 36 KB for the move alone.
+          const path = id.replace(/\\/g, '/');
+          if (path.includes('/data/canon/') || path.includes('/data/making/')) return 'canon';
           return undefined;
         }
       }

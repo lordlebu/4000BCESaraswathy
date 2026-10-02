@@ -369,7 +369,8 @@ the shared `pages` concurrency group.
 SouthOfTethys/database/  →  utils/export_canon_bundle.py  →  data/canon/species.json
 (canonical entity JSON)                                      data/canon/places.json
                                                              data/canon/knowledge.json
-                                                             data/canon/crafting.json
+                                                             ↓
+data/making/ (the game's own: crafting, homesteads)  →  src/content/making.ts, homestead.ts
                                                              ↓
                                                      src/content/canon.ts
                                                         (the adapter)
@@ -378,9 +379,20 @@ SouthOfTethys/database/  →  utils/export_canon_bundle.py  →  data/canon/spec
 ```
 
 **Everything in `data/canon/` is generated. Never hand-edit it.** Canon lives in the sibling
-`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 824 entities
+`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 531 entities
 across species, places, discoveries and world. To change any of it, edit the canon entity there and
 re-run `python utils/export_canon_bundle.py --apply`.
+
+**Making is the game's own data, in `data/making/`, and is hand-edited here** (the owner's ruling,
+2 October 2026): `crafting.json` (materials, items, processes, recipes, vehicles), `homesteads.json`,
+and the three vocabularies they draw on (`affordances.json`, `material_classes.json`,
+`renewal_rates.json`). It was canon's, and every rule over it -- the cook fire, a tag, what a map can
+make -- was written twice, here and in canon's playability check, and kept in step across two
+repositories. **The lore gives the world its context; the game does its own arithmetic.** Canon still
+names game-owned ids -- a line that teaches a recipe, a field map's boat, a custom's dish -- and the
+game owns ids that name canon's -- a material's `won_from` species, a homestead's holders, words and
+places. `test/gameOwned.test.ts` resolves every one of them in both directions, so a rename on either
+side fails here by name. The authored notes that never shipped are kept in `docs/making-notes.md`.
 
 **`src/content/canon.ts` is the adapter, and the only place that knows both shapes.** Canon used to
 be exported in this game's exact field list by a Python script in the other repo, which meant the
@@ -779,8 +791,8 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
   `content/goals.ts` -- the pinned line, the events, the pointer, the next step. The pinned line is a
   control that opens the workshop at the recipe, and every recipe row says Pin or Unpin.
 - **A cook fire is fuel, or a hearth** (`crafting.fireFor`): for cooking only, any carried fuel lit
-  from the kit's lamp, spent by the meal; free at a settlement or road stop. Canon's
-  `check_playability.py` mirrors it in `needs_here` -- change one, change both.
+  from the kit's lamp, spent by the meal; free at a settlement or road stop. One implementation
+  since making moved to the game; canon no longer mirrors it.
 - **The log you see is the log you take.** A standing tree always gives windfall wood, and a fallen
   log, driftwood or bamboo drawn on a tile always gives what it is. `world/features.ts` names the
   feature `game/frames.ts` draws, and `test/features.test.ts` fails if the two tables drift.

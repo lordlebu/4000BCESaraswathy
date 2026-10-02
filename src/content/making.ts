@@ -1,8 +1,13 @@
-// Materials, items, processes, recipes and vehicles, adapted out of the canon bundle.
+// Materials, items, processes, recipes and vehicles: the making layer's definitions.
 //
-// The fourth adapter, after `canon.ts` for species, `places.ts` for ground and
-// `knowledge.ts` for the diary. Same split as all of them: canon says what CAN be made and
-// what it takes; what a particular player is carrying lives in their save and never here.
+// **The game's own data since 2 October 2026** (`data/making/crafting.json`). It was canon's, and
+// came in through the bundle; the owner moved making to the game, because a recipe is a verb and
+// every rule over it -- the cook fire, a tag, what a map can make -- had to be written twice, once
+// here and once in canon's playability check, and kept in step across two repositories. Canon keeps
+// the nouns of the world: species and where they grow, places, people, discoveries, words. A
+// material still names the species it is won from by canon id, and `test/gameOwned.test.ts` holds
+// every id that crosses the boundary in either direction. What a particular player is carrying
+// lives in their save and never here.
 // Everything in this file is a definition. `src/content/satchel.ts` and
 // `src/content/crafting.ts` hold the state and the rules.
 //
@@ -16,7 +21,7 @@
 // follows knowledge. The single exception is `won_from`, which points at species and is
 // therefore converted with `engineId`.
 
-import craftingBundle from '../../data/canon/crafting.json';
+import craftingBundle from '../../data/making/crafting.json';
 import { engineId } from './canon';
 import type { BiomeId, Rarity } from '../world/types';
 

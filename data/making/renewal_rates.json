@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0",
+  "description": "Whether a material comes back, declared once so that canon can say a reed bed regrows and a fossil bed does not. The companion to material_classes.json: that says what a material *is*, this says what happens to a place you have taken it from. Every material carries exactly one `renews` value.",
+  "note": "**This is an ordering, not a duration.** Canon says salt-crust returns faster than sandalwood; it does not say in how many days, because a day is a unit of play and the length of one is the game's to decide. That split is the same one that keeps `found_in` in canon and stock in the save: canon owns what is true of the stuff, the game owns what is true of a particular walk.\n\nThe field exists because the game is gaining depletable resource nodes, and a node needs to know whether it ever refills. Without this the game would have to guess from `rarity`, which answers a different question -- a leviathan is rare because few of them exist, and a quarried block of basalt is not rare at all and is still gone once it is cut.\n\nThe honest test for `never`: **would taking it a second time require the thing to have happened again?** Fossils need another death and another two hundred million years. Quarried stone needs another quarry face. A reed needs a season.",
+  "rates": {
+    "fast": {
+      "label": "Within days",
+      "note": "Grows back inside the span of a stay. Leaves, greens, grasses, and anything a plant makes afresh each season without being killed for it. The default reading for a material taken from a living plant that survives the taking."
+    },
+    "seasonal": {
+      "label": "With the season",
+      "note": "Comes back, but on the year's own schedule rather than the walker's. Fruit, grain, resin, and the animal materials that depend on a herd being there again. The most common value, and the one that makes a place worth returning to rather than worth camping on."
+    },
+    "slow": {
+      "label": "Over years",
+      "note": "Renews, but not inside a journey. Hardwood, a mangrove pole, a shell bank worked out. A player will not see one of these return, which is exactly the point: it is a real cost without being a permanent one, and canon can still say the world repairs itself."
+    },
+    "never": {
+      "label": "Not again",
+      "note": "Does not come back on any timescale a person lives in. Fossils, quarried stone, worked metal from a seam. Taking it is taking it -- and canon is allowed to say so, because a finite thing that a game pretends is infinite is a lie the world tells about itself."
+    }
+  }
+}

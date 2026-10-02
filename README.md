@@ -86,8 +86,10 @@ The browser suite needs `npx playwright install chromium` once.
 ## World content
 
 The flora and fauna canon lives in the **SouthOfTethys** repository, not here — 232 fauna and 113
-flora among 824 entities, alongside the field maps, discoveries, questions, people, happenings, homesteads, sayings, storylines and vocabulary
-the game is made of. [docs/bestiary.md](docs/bestiary.md) is the prose document those species were
+flora among 531 entities, alongside the field maps, discoveries, questions, people, happenings, sayings, storylines and vocabulary
+the game is made of. **Making is the game's own**: materials, items, recipes, vehicles and the
+homesteads live in `data/making/`, edited here, since the owner moved them out of canon on
+2 October 2026 so the lore gives the world its context and the game does its own arithmetic. [docs/bestiary.md](docs/bestiary.md) is the prose document those species were
 originally extracted from, kept for provenance; it is no longer upstream of anything. 345 species across seven
 regions, from the Saraswati deltas to the Asura-tainted horrors.
 
@@ -96,7 +98,7 @@ never be hand-edited; `npm run check:data` fails if it drifts. **No command in t
 rebuilds it** — for a while this paragraph ended by naming one that had never existed as a script
 here, which is worse than saying nothing because it costs the reader the time to find out. To
 change any of it, edit the entity in `SouthOfTethys` and re-export from there.
-`data/biomes.json` and `data/landmarks.json` are hand-written.
+`data/biomes.json`, `data/landmarks.json` and everything in `data/making/` are hand-written.
 
 Character art is generated too: `assets/*-overworld.png` are built from the full-size sheets in
 `assets/source/` by `npm run build:sprite`. See [docs/art-brief.md](docs/art-brief.md) for how the

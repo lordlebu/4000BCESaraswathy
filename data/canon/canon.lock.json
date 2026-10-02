@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.48.0",
+  "canon_version": "3.0.0",
   "counts": {
     "fauna": 232,
     "flora": 113,
@@ -8,22 +8,15 @@
     "points_of_interest": 37,
     "npcs": 25,
     "happenings": 14,
-    "homesteads": 3,
     "sayings": 33,
     "storylines": 2,
     "discoveries": 46,
     "field_questions": 8,
-    "vocabulary": 10,
-    "materials": 79,
-    "items": 84,
-    "processes": 18,
-    "recipes": 94,
-    "vehicles": 15
+    "vocabulary": 10
   },
   "sha256": {
-    "species.json": "99a46f0eaa18c83c57244fff028a224510f20217dd3463a734f612a2d6d94266",
-    "places.json": "1c34016789c3550a9fabb5d69f913b58076ff309a958a60a71242e274292c758",
-    "knowledge.json": "f6f9baf5703694d234deb6d3377249a99ca8897a5e5666b38feafade757fab6c",
-    "crafting.json": "63e8c1535f2e815697bf16695ccdd7de0ebd1482be269f8dc9d36a3f51d249a1"
+    "species.json": "2680e24ade477792e0ff893f5dae7f8375d1c03f12a0dc5af9f6e9d7ecce8af0",
+    "places.json": "71a1995ac3181388548cec4ab221527dbe2c3c8e0d01fe5fa61b0811736ed795",
+    "knowledge.json": "39ab3142cbf5f665954e80fa44126ea031632dd43097d0afd6dae053e2b68914"
   }
 }
