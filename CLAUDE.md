@@ -253,7 +253,7 @@ The art docs, in the order they are useful:
 |---|---|
 | `docs/retrospective.md` | **read first**: the whole project to 28 September 2026, what worked, what did not, what next |
 | `docs/settling-in.md` | the Settling In plan, concluded: camps, cart points, homesteads, and what was measured |
-| `docs/living-camps.md` | camps with people: the measurements, the rulings, the way in's look, the rail decided, clearings, shadows and night light |
+| `docs/living-camps.md` | camps with people, **closed**: the measurements, the rulings, the way in's look, the rail decided, clearings, shadows, night light, and waiting at the pier |
 | `docs/endgame-plan.md` | the programme, closed; what shipped, what is parked, what was declined |
 | `docs/art-direction.md` | the five rules the art follows, and what each one cost to learn |
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |
@@ -740,6 +740,11 @@ retrospective. The rules, because they are rules rather than history:
 - **Nobody is drawn standing in the sea.** `untangle` steps only onto walkable ground, and the scene
   hides anybody whose tile is not walkable. `test/campLife.test.ts` replays every placement on every
   map to hold it.
+- **Nobody is drawn on the line while the carriage runs** (owner's ruling, 2 October 2026). Anybody on
+  the stretch a ride crosses waits at the nearest island ground off the rail (`pierFor`,
+  `waitAtPiers` in `content/vehicles.ts`), watching it pass, placed the moment it sets out
+  (`TravellerView.closeLine`). It used to run straight through them, and about one person is on
+  the Aravali's line at any hour of daylight. `docs/living-camps.md` has the measurement.
 - **People on the road slow and wade where the player does.** Progress along a path is weighted by
   `stepCostOn` (`indexAlong`), and the scene cuts them at the waterline by the player's own `wadeFor`.
 - **A card never opens over another.** `cardOpenRef` is set the instant a card opens -- an effect

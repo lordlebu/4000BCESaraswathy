@@ -47,6 +47,7 @@ import {
   type Waiting
 } from '../../content/travellers';
 import type { Encampment } from '../../content/encampments';
+import { waitAtPiers } from '../../content/vehicles';
 import { isWalkable } from '../../world/generate';
 import type { FieldMapWorld } from '../../world/fieldMap';
 import type { Point, World } from '../../world/types';
@@ -111,11 +112,30 @@ export class TravellerView {
   private campDoing = new Map<string, string>();
   /** Today's errand and visitors for the camp, worked out once a day. See `refreshCampDay`. */
   private campDay: { id: string; day: number; errand: RunnerErrand | null; visits: Visit[] } | null = null;
+  /** The rail the carriage is running over now, or empty. Anybody on it waits at the pier. */
+  private line: Point[] = [];
+  /** Who is waiting at a pier for the carriage to pass, for the browser suite. */
+  private atPier = new Set<string>();
 
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly host: TravellerHost
   ) {}
+
+  /**
+   * The carriage has set out over this stretch of rail, or arrived (`[]`): move everybody now.
+   *
+   * Anybody standing on it waits at the pier for the ride (`pierFor`), turned to watch it go by,
+   * and goes back to where their own hours put them once it is in. **Placed at once rather than on
+   * the half-second gate**, or the carriage would set out through them before they stepped off.
+   * Nothing is saved and no clock moves: where somebody is drawn changes, not where they are.
+   */
+  closeLine(path: readonly Point[], phase: number): void {
+    this.line = [...path];
+    this.movedAt = -1;
+    this.updateWaiting();
+    this.update(phase);
+  }
 
   /** The road company -- not the camp's people -- with their stops: what the camp rules take. */
   roadRoster(): { id: string; npcId: string | null; stops: Point[] }[] {
@@ -195,6 +215,8 @@ export class TravellerView {
         tile: this.tiles.get(traveller.id) ?? null,
         // Whether they stopped because the player called to them -- see `onHail`.
         waiting: this.waiting?.id === traveller.id,
+        // Stepped off the line to let the carriage by -- see `closeLine`.
+        atPier: this.atPier.has(traveller.id),
         // How deep they are drawn in water, the share of the figure cut away: see `wadeWalker`.
         cut: (sprite.getData('cut') as number | undefined) ?? 0,
         // Somebody who keeps today's camp rather than walking a circuit, and their slot there.
@@ -312,7 +334,7 @@ export class TravellerView {
     // so they go on from where they stopped (`delayAfter`). A delay is forgotten once they are at a
     // place for the night by both clocks, since nothing about a night depends on it. A traveller who
     // stops to trade with a camp's runner is held at the turn-off for it, and goes on that much later.
-    const placed = this.list.map(({ traveller, stops, person }) => {
+    const onTheirWay = this.list.map(({ traveller, stops, person }) => {
       if (person) {
         const f = folk.find((x) => x.slot === person.slot);
         const where = f?.at ? { at: f.at, heading: null, resting: false, from: f.at, to: f.at } : null;
@@ -338,13 +360,18 @@ export class TravellerView {
       if (trading) this.campDoing.set(traveller.id, 'trade');
       return { id: traveller.id, where, folk: null, faceTo: trading ? errand.way[errand.way.length - 1]! : null };
     });
+    // While the carriage runs, nobody stands in its way: they wait at the pier, watching the line,
+    // and the line itself is ground nobody may be moved back onto when room is made.
+    const line = this.line;
+    const placed = waitAtPiers(this.host.world, onTheirWay, line);
+    this.atPier = new Set(placed.filter((p, i) => p.where !== onTheirWay[i]!.where).map((p) => p.id));
     // Somebody waiting keeps the tile they stopped on, and nobody else may take it from them -- the
     // player is walking up to that tile's side.
     const waiting = this.waiting;
     const room = untangle(
       this.host.world,
       placed.filter((p) => p.id !== waiting?.id),
-      waiting ? [this.host.at, waiting.at] : [this.host.at]
+      [...(waiting ? [this.host.at, waiting.at] : [this.host.at]), ...line]
     );
     if (waiting) room.set(waiting.id, waiting.at);
     this.tiles = room;
