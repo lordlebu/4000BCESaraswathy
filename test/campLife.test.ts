@@ -338,7 +338,7 @@ describe('the colour a way is worn into the ground', () => {
 describe('nobody is drawn standing in the sea', () => {
   it('places everybody on ground a person can stand on, on every map at every hour', () => {
     // The owner's question: is anybody pushed into the ocean when people make room for each other?
-    // This does what `updateTravellers` does -- every traveller, trader, visitor and camp person,
+    // This does what `TravellerView.update` does -- every traveller, trader, visitor and camp person,
     // then `untangle` -- and checks every tile they end up on. The sea is never walkable; the rails
     // and ropes over it are, as they are for the player.
     let checked = 0;
