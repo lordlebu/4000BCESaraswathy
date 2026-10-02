@@ -326,6 +326,39 @@ describe('the activity card', () => {
     expect(screen.getByRole('button', { name: /Sleep now/ })).toBeTruthy();
   });
 
+  /** A night closes on the day's page, and only once it is over. `docs/a-place-to-stop.md`. */
+  it('tells the day behind you once the night is over, and not before', () => {
+    open({
+      gesture: 'rest',
+      promised: [],
+      subject: 'Make camp for the night',
+      dayPage: { lines: [{ kind: 'word', text: 'You learned the word kunda: a stepped tank.' }], tomorrow: 'Carry basket: 2 more any fibre.' }
+    });
+    expect(screen.queryByRole('region', { name: 'The day behind you' }), 'the page told the day before the night').toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Stop for the night/ }));
+    const page = screen.getByRole('region', { name: 'The day behind you' });
+    expect(page.textContent).toContain('You learned the word kunda');
+    expect(page.textContent).toContain('Tomorrow');
+    expect(page.textContent).toContain('Carry basket: 2 more any fibre.');
+    expect(page.textContent).toContain('A good place to stop');
+    // There is no house in this game: the page never sends anybody home.
+    expect(page.textContent?.toLowerCase()).not.toContain('home');
+  });
+
+  it('says a quiet day plainly rather than inventing one', () => {
+    open({ gesture: 'rest', promised: [], subject: 'Make camp for the night', dayPage: { lines: [], tomorrow: null } });
+    fireEvent.click(screen.getByRole('button', { name: /Stop for the night/ }));
+    const page = screen.getByRole('region', { name: 'The day behind you' });
+    expect(page.textContent).toContain('A quiet day');
+    expect(page.textContent).not.toContain('Tomorrow');
+  });
+
+  it('has no page for anything but a night', () => {
+    open({ dayPage: { lines: [], tomorrow: null } });
+    fireEvent.click(screen.getByRole('button', { name: /Cut and gather/ }));
+    expect(screen.queryByRole('region', { name: 'The day behind you' })).toBeNull();
+  });
+
   it('closes on Escape', () => {
     const { onClose } = open();
     fireEvent.keyDown(window, { key: 'Escape' });

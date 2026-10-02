@@ -170,7 +170,9 @@ come in two rounds, 19 August and 27 September, each finding faults that a thous
 **Content outgrew the session.** The target was 10 to 15 minutes a map. Measured, each map is
 already 18 to 23 minutes as a floor, almost all of it reading. The owner's answer was that there is
 no limit, so a map is two sittings. That is a reasonable call, and it means each sitting needs a
-natural place to stop, which nothing yet checks.
+natural place to stop, which nothing yet checks. **Answered 2 October 2026** (`docs/a-place-to-stop.md`): any night now
+closes on the day's page and says it is a good place to stop, and the front door says where you
+left off.
 
 **The bundle is nearly full.** 553 of 560 KB. Every content batch now needs a lore/play split first,
 and the easy ones (notes, sources, epochs) are spent.
@@ -215,7 +217,8 @@ discipline applied to its two largest files, and that debt is now the main struc
    2,403 lines to 1,747. What stays is the layout, the save and the bus listeners for state App
    owns.
 3. **Give the game repo the canon's push gate,** and confirm in Settings that both repositories
-   require their checks. The anonymous API still shows no required-check rule on either.
+   require their checks. The anonymous API still shows no required-check rule on either. **The gate
+   half is done:** the game has `.claude/hooks/push-gate.sh` too. The Settings check is the owner's.
 4. **A cross-repository contract test** that loads canon and the game's adapters together and
    fails when they disagree about what an entity is called or where it is offered. Every
    both-sides-green fault above would have been caught by one.

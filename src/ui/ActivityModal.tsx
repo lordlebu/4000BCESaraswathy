@@ -40,6 +40,7 @@ import { sceneFor } from './scenes';
 import { firstArt } from './art';
 import { plateFor } from './plates';
 import { Modal } from './Modal';
+import type { DayPage } from '../content/daybook';
 
 /**
  * The way out, before the act and after it.
@@ -144,6 +145,11 @@ export interface ActivityModalProps {
    * every caller did before there were two of anything.
    */
   pick?: number;
+  /**
+   * The page a night closes on -- what the day added and one line for tomorrow
+   * (`docs/a-place-to-stop.md`). Shown once the night is over, under the dawn. Only a night has one.
+   */
+  dayPage?: DayPage | null;
   onClose: () => void;
   /** Called once, with what the player actually leaves with. */
   onFinish: (taken: Taking[], line: string) => void;
@@ -160,6 +166,7 @@ export function ActivityModal({
   variant,
   subject,
   pick = 0,
+  dayPage = null,
   onClose,
   onFinish
 }: ActivityModalProps) {
@@ -257,7 +264,8 @@ export function ActivityModal({
       veilClassName="diary-veil activity-veil"
       initialFocus={closeRef}
     >
-      <section className="activity-card">
+      {/* `data-told` once the day's page is showing, so a short screen can give it the room. */}
+      <section className="activity-card" data-told={done && dayPage && gesture === 'rest' ? 'true' : undefined}>
         {picture ? (
           <div className="activity-picture">
             <img className="activity-scene" src={picture} alt="" aria-hidden="true" />
@@ -300,6 +308,32 @@ export function ActivityModal({
                 </li>
               ))}
             </ul>
+          )}
+
+          {/* **The day behind you, and a place to stop.** A night is where a sitting ends: there is no
+              house to go back to, so wherever the traveller lay down is where the day is told. The
+              rules are `content/daybook.ts`; this only draws them. */}
+          {done && dayPage && gesture === 'rest' && (
+            <section className="day-page" aria-label="The day behind you">
+              <h3 className="day-page-title">The day behind you</h3>
+              {dayPage.lines.length > 0 ? (
+                <ul className="day-page-lines">
+                  {dayPage.lines.map((l) => (
+                    <li key={l.text} data-kind={l.kind}>
+                      {l.text}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="day-page-quiet">A quiet day. The diary is no fuller, and none the worse for it.</p>
+              )}
+              {dayPage.tomorrow && (
+                <p className="day-page-tomorrow">
+                  <span className="day-page-label">Tomorrow</span> {dayPage.tomorrow}
+                </p>
+              )}
+              <p className="day-page-kept">Your diary is kept. A good place to stop, if you want one.</p>
+            </section>
           )}
 
           {/**

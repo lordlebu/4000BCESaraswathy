@@ -255,6 +255,7 @@ The art docs, in the order they are useful:
 | `docs/settling-in.md` | the Settling In plan, concluded: camps, cart points, homesteads, and what was measured |
 | `docs/living-camps.md` | camps with people, **closed**: the measurements, the rulings, the way in's look, the rail decided, clearings, shadows, night light, and waiting at the pier |
 | `docs/satchel-and-hearth.md` | making made easier: the pin, cook fires, windfall wood, events that help, the pointer, the next step, and the rest of the `App.tsx` split |
+| `docs/a-place-to-stop.md` | where a sitting ends: the day's page at any night, and where you left off at the door |
 | `docs/endgame-plan.md` | the programme, closed; what shipped, what is parked, what was declined |
 | `docs/art-direction.md` | the five rules the art follows, and what each one cost to learn |
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |
@@ -791,6 +792,20 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
   with Hints. On a landscape phone a line at a place took 29 of the 101 pixels it reads through.
 - **`test/reach.test.ts` holds the floor:** a container and a cook fire within 20 steps of the start
   on every map and five seeds.
+
+### A place to stop (2 October 2026)
+
+`docs/a-place-to-stop.md` is the record. A map is two sittings, and the night is where one ends.
+
+- **Any night closes on the day's page**, wherever it falls: there is no house in this game, so
+  nothing on it says home. `content/daybook.ts` holds the rules; `ActivityModal` draws the page for
+  a night only, under the dawn.
+- **The morning's reading is in memory, never saved**, so it cost no `KNOWLEDGE_VERSION` bump. It
+  resets whenever a night card closes, pressed or not, because the night is spent either way.
+- **Tomorrow's line asks `goals.wanting` and `guide.nextStep`**, the dock's own answers, so the two
+  cannot disagree.
+- **The front door says where you left off** (`leftOffLines`): the map, the pin or next stage, and
+  what the diary holds.
 
 ### The resource layer, and where its numbers live
 
