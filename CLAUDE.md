@@ -470,9 +470,14 @@ it is not, it has already been applied.
   loop's raw clock) and `HomesteadView.ts` (the mill going up, the finished building,
   and the builder's manifest; the wheels it adds turn on the scene's `spinning` list through
   `turn`). **The player's walk stays in the scene**: `TravellerView.hail` stops somebody and
-  answers where they stand, and the scene walks up by its own tap-to-walk path. The next system
-  follows the same shape.
-- **`src/ui/`** — React chrome. The dock along the bottom (`Here.tsx`, `JournalPanel.tsx`,
+  answers where they stand, and the scene walks up by its own tap-to-walk path. **The scene's split
+  stops there, on purpose:** what is left -- walking, wading, the dugout, riding, the ground, the
+  fog, the sky and the camera -- is one system, the player and the map under them. Riding was looked
+  at and kept: it moves the player's sprite, holds the camera, hides the shadow, reveals the fog and
+  re-sorts the row, so a `RideView` would be a dozen callbacks back into the player.
+- **`src/ui/`** — React chrome. `App.tsx` is being split into hooks the same way the scene was split
+  into systems: `useRoadTalk.ts` is the first -- who the talk row means, calling out, the camp's
+  people and the road's speak-first -- and its parameter list is the seam written down. The dock along the bottom (`Here.tsx`, `JournalPanel.tsx`,
   `PlacePanel.tsx`, `TileActions.tsx`), the records and interrupts behind one `Modal.tsx`, the
   painted plate a species opens into (`Specimen.tsx`), the seed bar, and `styles.css`. What is on
   screen and how large it is are both decided by `surface.ts`, which is pure and tested under Node.

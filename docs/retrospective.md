@@ -199,7 +199,11 @@ discipline applied to its two largest files, and that debt is now the main struc
    moved to `game/systems/` (`CampView.ts`, `TravellerView.ts`, `WandererView.ts`,
    `HomesteadView.ts`, `VisitorView.ts`), taking `WorldScene.ts` from 3,923 lines to 2,529. What is
    left in the scene is the player -- walking, wading, the dugout, riding -- the ground, the fog,
-   the sky and the camera; riding is the next candidate. `App.tsx` has not been started.
+   the sky and the camera, which is one system, and the scene's split stops there on purpose:
+   riding was looked at and kept, because it is the player's own motion. **`App.tsx` was begun the
+   same day:** the road's talk -- the talk row's target, calling out, the camp's people and the
+   road's speak-first -- is `useRoadTalk.ts`, taking it from 2,547 lines to 2,403. The events
+   (`useHappenings`) and the activity card (`useActivity`) are the larger hooks still in it.
 3. **Give the game repo the canon's push gate,** and confirm in Settings that both repositories
    require their checks. The anonymous API still shows no required-check rule on either.
 4. **A cross-repository contract test** that loads canon and the game's adapters together and
