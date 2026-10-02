@@ -3328,6 +3328,27 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   flex-shrink: 0;
 }
 
+.activity-picture {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* The animal being followed, small in the corner of the act: the painting says what you are doing
+   and the plate says what you are doing it to. A paper mount like a pasted-in specimen, so it reads
+   as part of the diary rather than as a badge over the scene. Top right, because the bottom of a
+   stalking painting is where the tracks are -- the first cut sat on the hoofprints. */
+.activity-inset {
+  position: absolute;
+  right: 0.6rem;
+  top: 0.6rem;
+  width: 28%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 3px solid var(--paper);
+  border-radius: 3px;
+  box-shadow: 0 4px 12px rgba(27, 20, 32, 0.35);
+}
+
 .activity-scene-blank {
   background: linear-gradient(160deg, #e8dcc0, #d6c6a4);
 }

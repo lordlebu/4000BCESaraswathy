@@ -37,6 +37,7 @@ import { GESTURE_VERB, gestureLine, type Gesture } from '../content/gestures';
 import type { Taking } from '../content/nodes';
 import { nameOf } from '../content/making';
 import { sceneFor } from './scenes';
+import { firstArt } from './art';
 import { plateFor } from './plates';
 import { Modal } from './Modal';
 
@@ -230,12 +231,22 @@ export function ActivityModal({
 
   if (!open) return null;
 
-  // A stalk shows the animal itself where a plate exists, because the animal *is* the subject --
-  // the gesture scene is the fallback rather than the other way round.
-  const picture =
-    ((gesture === 'stalk' || gesture === 'fish') && creatureId ? plateFor(creatureId) : null) ??
-    // A night is painted at midnight while it is being chosen and at dawn once it is over.
-    sceneFor(gesture, variant, pick, gesture === 'rest' ? (done ? 'dawn' : 'midnight') : null);
+  // **Following an animal: the act fills the card, and the animal sits in its corner** (the owner's
+  // ruling, 2 October 2026). The plate used to fill it, which read as opening the bestiary rather
+  // than following anything -- but the plain `stalk.png` could not take its place, because it
+  // shows a buffalo. So the act is a painting with no animal in it, `stalk-follow.png` (and
+  // `fish.png`, whose water shows no fish), and the plate is what says which animal. A place's own
+  // painting of the act still comes first. With no such painting the plate fills the card as before.
+  const followed = (gesture === 'stalk' || gesture === 'fish') && creatureId ? creatureId : null;
+  const plate = followed ? plateFor(followed) : null;
+  const act = followed
+    ? firstArt('scenes', [variant ? `${gesture}-${variant}` : null, gesture === 'stalk' ? 'stalk-follow' : 'fish'], pick)
+    : null;
+  const inset = act ? plate : null;
+  const picture = followed
+    ? (act ?? plate ?? sceneFor(gesture, variant, pick))
+    : // A night is painted at midnight while it is being chosen and at dawn once it is over.
+      sceneFor(gesture, variant, pick, gesture === 'rest' ? (done ? 'dawn' : 'midnight') : null);
   const what = subject ?? promised[0]?.material.name ?? 'it';
 
   return (
@@ -248,7 +259,10 @@ export function ActivityModal({
     >
       <section className="activity-card">
         {picture ? (
-          <img className="activity-scene" src={picture} alt="" aria-hidden="true" />
+          <div className="activity-picture">
+            <img className="activity-scene" src={picture} alt="" aria-hidden="true" />
+            {inset && <img className="activity-inset" src={inset} alt="" aria-hidden="true" />}
+          </div>
         ) : (
           <div className="activity-scene activity-scene-blank" aria-hidden="true" />
         )}
