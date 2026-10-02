@@ -44,6 +44,23 @@ Copy this once, then append one **subject line**.
 > on one hand, watching a large grazing animal at a distance across open ground in warm afternoon
 > light. The animal is small in the frame and unbothered.
 
+**`stalk-follow.png`** — following an animal, with **no animal in it**. Added 2 October 2026, on
+the owner's ruling that the act should fill the card rather than the animal's plate. The plain
+`stalk.png` shows a buffalo, so it could not be the picture for following a deer; this one shows
+only the tracks, and the card puts the animal's own plate small in its top-right corner.
+> Seen from behind and low: a traveller crouched still in tall dry grass at the edge of a light
+> wood, one hand parting the stems, looking out of frame to the right where something has just
+> moved. Fresh cloven hoofprints pressed into the soft ground in front of them, a bent grass stem
+> still swaying. No animal anywhere in the picture.
+
+Arrived 1260 × 848 with a pencilled border ruled about 32 pixels in from the top and left; cropped
+inside it. The face is half seen in profile, which the brief asks to avoid, and was accepted as
+painted.
+
+```
+node tools/build-plates.js --scenes --force --only=stalk-follow --crop=40,36,1080
+```
+
 **`work.png`**
 > Two hands striking a river cobble with a hammerstone on a stone anvil, pale chips and dust in
 > the air, a scatter of struck flakes and a half-worked nodule on the bare ground beside it.
@@ -93,9 +110,11 @@ gathering, so keep the person's face out of frame — hands, a shoulder, a back.
 subject line above is framed close or from behind. It is a constraint that happens to produce the
 better composition anyway.
 
-**`stalk.png` is the least urgent of the three.** A stalk prefers the animal's *own* plate when one
-exists, because the animal is the subject; the gesture scene is its fallback. So painting more
-fauna plates does more for the stalk modal than painting `stalk.png` does.
+**Following an animal draws `stalk-follow.png`, with the animal's plate inset** (since 2 October
+2026). It used to draw the plate alone, because the animal was judged to be the subject -- and
+because `stalk.png` shows a buffalo, which would be wrong for any other animal. A fishing card does
+the same with `fish.png`, whose water shows no fish. With neither painting, the plate fills the card
+as before.
 
 ## Tool notes
 

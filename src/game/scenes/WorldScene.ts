@@ -466,6 +466,12 @@ export class WorldScene extends Phaser.Scene {
   private carriage!: Phaser.GameObjects.Image;
   /** Whether he is aboard it, which is also why he cannot be seen. */
   private riding = false;
+  /**
+   * The nearest seen tile holding something the pin wants, and the diamond drawn on it. React asks
+   * `content/finding.ts` and pushes `source-mark`; the scene only draws it.
+   */
+  private sourceAt: Point | null = null;
+  private sourceMark: Phaser.GameObjects.Graphics | null = null;
   /** The ride in flight: where from and to in pixels, and when it set out on the loop's clock. */
   private ride: { from: { x: number; y: number }; to: { x: number; y: number }; at: Point; start: number; ms: number; line: Point[] } | null =
     null;
@@ -576,6 +582,9 @@ export class WorldScene extends Phaser.Scene {
     this.hullView = null;
     this.ride = null;
     this.riding = false;
+    // Destroyed with the old scene; a new map asks again.
+    this.sourceMark = null;
+    this.sourceAt = null;
     this.glows = [];
     this.glowAt = -1;
     // The people on the road belong to the map they walk. Never reset before, so every map change
@@ -1474,6 +1483,7 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('approach', this.onApproach);
     EventBus.onEvent('hail', this.onHail);
     EventBus.onEvent('talk-target', this.onTalkTarget);
+    EventBus.onEvent('source-mark', this.onSourceMark);
     EventBus.onEvent('set-character', this.onSetCharacter);
 
     // Fires on rotation as well as on a window resize, which is exactly when the zoom and the
@@ -1509,6 +1519,7 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('approach', this.onApproach);
       EventBus.offEvent('hail', this.onHail);
       EventBus.offEvent('talk-target', this.onTalkTarget);
+      EventBus.offEvent('source-mark', this.onSourceMark);
       this.input.off(Phaser.Input.Events.POINTER_WHEEL);
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
       this.input.off(Phaser.Input.Events.POINTER_UP);
@@ -2066,6 +2077,8 @@ export class WorldScene extends Phaser.Scene {
       carriage: this.carriage.visible,
       // The rail the carriage is crossing on this ride, for the spec that nobody is drawn on it.
       rideLine: this.ride?.line ?? [],
+      // The diamond on the nearest seen source of what the pin wants, for \`e2e/finding.spec.ts\`.
+      sourceMark: this.sourceMark?.visible ? this.sourceAt : null,
       moving: this.moving,
       depth: this.player.depth,
       sortedRow: this.sortedRow,
@@ -2168,6 +2181,37 @@ export class WorldScene extends Phaser.Scene {
 
   private onTalkTarget = ({ travellerId }: UiToGame['talk-target']): void => {
     this.travellers.setTalkTarget(travellerId);
+  };
+
+  /**
+   * Mark where the nearest of what the pin wants lies: a small turmeric diamond, the talk marker's
+   * colours, set into the tile rather than floating above it, so it reads as a place on the ground.
+   */
+  private onSourceMark = ({ at }: UiToGame['source-mark']): void => {
+    this.sourceAt = at;
+    if (!at) {
+      this.sourceMark?.setVisible(false);
+      return;
+    }
+    if (!this.sourceMark) {
+      const r = Math.max(5, Math.round(TILE_SIZE * 0.14));
+      const g = this.add.graphics();
+      // A diamond is two triangles, ring first and the turmeric inside it.
+      const diamond = (size: number) => {
+        g.fillTriangle(-size, 0, size, 0, 0, -size);
+        g.fillTriangle(-size, 0, size, 0, 0, size);
+      };
+      g.fillStyle(PIP_RING, 1);
+      diamond(r + 2);
+      g.fillStyle(PIP_NEWS, 1);
+      diamond(r);
+      g.setName('source-mark');
+      this.sourceMark = g;
+    }
+    this.sourceMark
+      .setVisible(true)
+      .setPosition(at.x * TILE_SIZE + TILE_SIZE / 2, at.y * TILE_SIZE + TILE_SIZE / 2)
+      .setDepth(depthFor(at.y, ROW_SLOT.canopy + 1));
   };
 
   /**

@@ -19,7 +19,7 @@ import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { readShowing, writeShowing } from './preferences';
-import { arrivalPoint, fieldMap, npc, poi, roadBetween, type Road } from '../content/places';
+import { arrivalPoint, fieldMap, poi } from '../content/places';
 import { walkers } from '../game/characters';
 import { travellerAttributes, travellersOn } from '../content/travellers';
 import { SatchelPanel } from './SatchelPanel';
@@ -31,14 +31,13 @@ import { seedFromUrl } from './seed';
 import { SettlingSection } from './SettlingSection';
 import { settlingRoad } from '../content/settlingRoad';
 import { WorkshopPanel } from './WorkshopPanel';
-import { add as addToSatchel, canDo, distinct, emptySatchel, itemsHeld, remove as takeFromSatchel } from '../content/satchel';
+import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
-import { carry, gatheredLine, standingLine } from '../content/gathering';
+import { standingLine } from '../content/gathering';
 import { rideFrom } from '../content/vehicles';
 import { canBoardAt, trackRoute } from '../world/crossing';
 import { tileHash } from '../world/rng';
-import { conditionOf, draw, noNodes, takeableAt, type Nodes, type Taking } from '../content/nodes';
-import { item, recipe } from '../content/making';
+import { conditionOf, noNodes, takeableAt, type Nodes } from '../content/nodes';
 import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
@@ -49,20 +48,17 @@ import { clearJourney, hasBegun, loadJourney, saveJourney } from '../save';
 import { Opening } from './Opening';
 import { bearingTo } from '../content/journal';
 import { Journey } from './Journey';
-import { beatNow, type BeatWhen } from '../content/storylines';
-import { CROSSING_MS } from '../content/tiers';
 import { coachLine, MORNING_GOAL } from '../content/coach';
+import { GoalsSection } from './GoalsSection';
 import {
   advance,
   answer,
-  craft,
   hasSomethingNew,
   hear,
   isComplete,
   knowsQuestion,
   knowsRecipe,
   reasonToSpeak,
-  receiveAll,
   rungOf,
   type WorldMoment
 } from '../journey';
@@ -70,47 +66,35 @@ import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import { characterFor } from '../game/player';
 import type { World } from '../world/types';
 import { isAnimal, isWaterSpecies } from '../content/species';
-import { gestureForProcess } from '../content/making-gestures';
 import {
   GESTURE_VERB,
-  GESTURE_WANTS,
   blockedReason,
   gestureFor,
-  isAboutAnAnimal,
-  momentFavours,
-  type Gesture
 } from '../content/gestures';
-import type { Preparation } from '../content/activity';
-import { shelterBuilt, use, usedLine, useOf } from '../content/using';
+import { shelterBuilt } from '../content/using';
 import { ActivityModal } from './ActivityModal';
+import { useActivity } from './useActivity';
+import { useHappenings } from './useHappenings';
+import { useGuidance } from './useGuidance';
+import { useSettling } from './useSettling';
+import { useCrossing } from './useCrossing';
 import { EventCard } from './EventCard';
-import { anyConditions, type Choice, type GameEvent, type Occasion } from '../content/events';
-import type { SettlingView } from './PlacePanel';
-import { happeningNow, surroundingsAt } from '../content/happenings';
-import { APPROACHES, approachAt, approachId } from '../content/visitors';
 import { peopleAtPlaces, whoIsHere } from '../content/presence';
-import { useRoadTalk, type Happens } from './useRoadTalk';
+import { useRoadTalk } from './useRoadTalk';
 import { type Bumped, whoSpeaksFirst } from '../content/bumping';
-import { atCamp, encampmentOn, type Encampment } from '../content/encampments';
-import { rumourAt, rumourFor, rumoursOn } from '../content/rumours';
+import { encampmentOn } from '../content/encampments';
+import { rumourFor, rumoursOn } from '../content/rumours';
 import { standingOn as howKnownOn, warmTo } from '../content/standing';
 import { discoveries, offeredAt } from '../content/knowledge';
 import {
   agreed as groundAgreed,
-  build as buildStage,
-  buildingTiles,
-  groundAt,
   homesteadOn,
-  mayAsk,
-  mayBuild,
-  readyToSettle,
-  settle as settleHome,
   stagesBuilt,
   stateOf as homesteadState,
   type Holdings
 } from '../content/homestead';
 import { Negotiation } from './Negotiation';
-import type { CampTalk, Talk } from '../content/happenings';
+import type { Talk, Wanted } from '../content/happenings';
 import type { Station } from '../content/stations';
 
 /**
@@ -120,17 +104,6 @@ import type { Station } from '../content/stations';
 const SPEAK_FIRST_AFTER_MS = 1500;
 
 
-/**
- * The bare process word for a recipe -- `firing`, not `process_firing`.
- *
- * The variant the activity card narrows its painting by, matching what `src/ui/scenes/` is named
- * after. `PROCESS_MARK` already keys on the same bare word, so the two art folders read canon's
- * vocabulary the same way.
- */
-function processWord(recipeId: string): string | null {
-  const id = recipe(recipeId)?.process;
-  return id ? id.replace('process_', '') : null;
-}
 import { Modal } from './Modal';
 
 /**
@@ -236,13 +209,14 @@ export function App() {
   const [satchel, setSatchel] = useState(initialJourney.current.satchel ?? emptySatchel());
   // The recipe pinned in the workshop, kept on screen in the dock -- see `PinnedRecipe`.
   const [pinned, setPinned] = useState<string | null>(initialJourney.current.pinned ?? null);
+  /** The recipe the workshop opens at, when the pinned line was tapped. */
+  const [workshopAt, setWorkshopAt] = useState<string | null>(null);
   // The crossing being told, while the next map builds behind it. See `Journey.tsx`.
   // While it is, an arrival the new map reports is held rather than shown over the cards, and
   // `stepDown` decides what comes first once the traveller is off the cart.
   const crossing = useRef(false);
   const heldArrival = useRef<string | null>(null);
   const arrivedRef = useRef<((e: { poiId: string }) => void) | null>(null);
-  const [journey, setJourney] = useState<{ from: string; to: string; road: Road; first: boolean } | null>(null);
   // The opening, while it plays over the map booting behind it. See `Opening.tsx`.
   const [opening, setOpening] = useState(false);
   // The first morning's hints, on unless the player turned them off. See `content/coach.ts`.
@@ -254,26 +228,6 @@ export function App() {
   // Kept per field map -- see `nodesByMap` in `save.ts` for the bug a single record was.
   const [nodesByMap, setNodesByMap] = useState(initialJourney.current.nodesByMap ?? {});
 
-  /**
-   * The activity being played, or null when none is.
-   *
-   * Holds what the tile promised at the moment the player committed, rather than recomputing it
-   * when the run settles. `takeableAt` is a function of the day and the nodes, and both can move
-   * under a modal that is open -- so re-asking would let a player see one offer and receive
-   * another, which is exactly the "promising two reeds and handing over one" fault `Taking`
-   * exists to prevent.
-   */
-  const [activity, setActivity] = useState<{
-    taking: Taking[];
-    day: number;
-    /** Set when this is a night rather than a gathering. Carries the shelter kind for the picture. */
-    resting?: string;
-    /**
-     * Set when this is a bench job. Carries the recipe, because what is being made is not on the
-     * ground and cannot be recovered from `underfoot` the way a gathered material can.
-     */
-    making?: string;
-  } | null>(null);
   /**
    * Whether the front door is still closed.
    *
@@ -339,7 +293,9 @@ export function App() {
     /** The hour and the sky, for a woven event -- rain on the road needs to know it is raining. */
     moment: null as WorldMoment | null,
     /** The authored place being stood in, for the inspector to ask an arrival of. */
-    poiId: null as string | null
+    poiId: null as string | null,
+    /** What the traveller is working towards, for the events that turn something up. */
+    wanted: null as Wanted | null
   });
 
   // Kept in step after every commit, so anything that changes progress or the satchel by another
@@ -374,12 +330,6 @@ export function App() {
     latest.current.at = arrival?.at ?? null;
   }, [world, fieldMapId, arrival?.day, arrival?.at]);
   const visited = useRef(new Set<string>());
-  /** `maybeHappens`, once the bus effect has made it. Null for the first render only. */
-  // The story check, handed out of the effect like `happens`; see `storyNow`.
-  const storyRef = useRef<((when: BeatWhen, poiId: string | null) => boolean) | null>(null);
-  const happens = useRef<Happens | null>(null);
-  /** What the last take carried off, so the `working` question does not turn up the same thing. */
-  const lastTaken = useRef<string[]>([]);
 
   /**
    * One value decides what is on screen; the rules are in `surface.ts` and tested under Node.
@@ -408,6 +358,27 @@ export function App() {
   useEffect(() => {
     latest.current.poiId = standingOn;
   }, [standingOn]);
+
+  // Things that happen: the card, asking whether anything happens on a night, an arrival, the road
+  // or at a camp, story beats first, and what a choice does -- `useHappenings.ts`.
+  const { happening, setHappening, happens, card: eventCard } = useHappenings({
+    latest,
+    seenEvents,
+    eventDays,
+    journeyFlags,
+    metStrangers,
+    fieldPlaced,
+    cardOpenRef,
+    setCardOpen,
+    crossing,
+    heldArrival,
+    arrivedRef,
+    dispatch,
+    progress,
+    setProgress,
+    setSatchel,
+    setMemory
+  });
 
   // Written when it moves, rather than inside the reducer's case: the reducer is pure and tested
   // under Node, and a `localStorage` write in it would be both a side effect and a browser global
@@ -468,238 +439,6 @@ export function App() {
     // own state optimistically; this is what corrects it if the scene ever disagreed.
     const onCharacter = ({ characterId: drawn }: GameToUi['character-changed']) => setDrawn(drawn);
 
-    /**
-     * Ask whether anything happens, and open it if so.
-     *
-     * **One function for all three occasions**, because the only thing that differs between a
-     * night, an arrival and a mile of road is the word and the shelter — everything else is the
-     * same question asked of the same registry with the same seeded roll. Three copies of this
-     * would be three places for the `holds` list to drift out of step.
-     */
-    const maybeHappens = (
-      occasion: Occasion,
-      at: { x: number; y: number },
-      shelter: string | null,
-      salt: string,
-      extra: {
-        poiId?: string | null;
-        taken?: readonly string[];
-        strangerId?: string | null;
-        talk?: Talk | null;
-        camp?: Encampment | null;
-        campStanding?: string | null;
-        campPerson?: CampTalk | null;
-        cameFrom?: string | null;
-        force?: { kind?: string; asked?: boolean };
-      } = {}
-    ): boolean => {
-      const world = latest.current.world;
-      if (!world) return false;
-      const p = latest.current.progress;
-      // Seeded on the tile and the salt, like every other roll in this codebase: the same seed
-      // must produce the same journal text, and `Math.random` here would make a seed
-      // unshareable and this untestable.
-      const roll = (s: string) => tileHash(world.seed, at.x, at.y, `${salt}:${s}`);
-      const next = happeningNow(
-        {
-          occasion,
-          shelter,
-          fieldMapId: latest.current.fieldMapId,
-          day: latest.current.day,
-          // Everything the player holds, in the one flat list `Choice.needs` and
-          // `Conditions.requires` are checked against -- words, discoveries they have at least
-          // noticed, and recipes somebody has shown them. Assembled here because App is the only
-          // thing that holds a Progress.
-          holds: [...p.words, ...Object.keys(p.rungs), ...p.recipes],
-          seen: seenEvents.current,
-          met: metStrangers.current,
-          last: eventDays.current,
-          flags: journeyFlags.current,
-          poiId: extra.poiId ?? null,
-          cameFrom: extra.cameFrom ?? null,
-          campKind: extra.camp?.kind ?? null
-        },
-        roll,
-        // What is here to make an event out of, when nothing authored can happen -- see
-        // `happenings.ts`. Read from the same world and tile the roll is seeded on.
-        surroundingsAt(world, at, latest.current.fieldMapId, latest.current.moment, roll, extra),
-        undefined,
-        extra.force ?? null
-      );
-      if (!next) return false;
-      // A storylet can come round again, so `seen` must not grow a copy of it each time.
-      if (!seenEvents.current.includes(next.id)) seenEvents.current = [...seenEvents.current, next.id];
-      eventDays.current = { ...eventDays.current, [next.id]: latest.current.day };
-      // Said at once, not on the next render: an effect earlier in this component can run in the
-      // same commit and must already see the card it would otherwise open a second one over.
-      cardOpenRef.current = true;
-      setHappening({ event: next, shelter });
-      return true;
-    };
-
-    /**
-     * **The inspector: open an event now, without walking for three days to be rationed one.**
-     *
-     * `__happen('road')` asks the road question with the ration skipped; `__happen('night',
-     * 'knock', 'roof')` asks for one template on one kind of night. It goes through exactly the path
-     * a real step does -- the same surroundings, the same `seen` and `met`, the same card -- so what
-     * it proves is the wiring, which no Node test can see. Exposed the way the scene exposes
-     * `__walker` and `__travellers`, and for the same reason: `e2e/happenings.spec.ts` reads it.
-     * Returns whether a card opened.
-     *
-     * `poiId` says which point an `arriving` is at, for a written happening narrowed to one -- *Where
-     * you stop* belongs to the Caravan Ground. Absent, it is wherever the traveller is standing.
-     */
-    (
-      window as unknown as {
-        __happen?: (o: Occasion, kind?: string, shelter?: string, poiId?: string) => boolean;
-      }
-    ).__happen = (occasion, kind, shelter, poiId) => {
-      const here = latest.current.at;
-      if (!here) return false;
-      return maybeHappens(occasion, here, shelter ?? null, `inspect:${occasion}`, {
-        poiId: poiId ?? latest.current.poiId,
-        force: kind ? { kind } : {}
-      });
-    };
-
-    /**
-     * A night passed. Ask whether anything happened in it.
-     *
-     * **`night-passed` had no listener at all** before events: emitted every time somebody slept,
-     * carrying where they were and what shelter they had, and read by nothing.
-     */
-    const onNight = ({ at, shelter }: GameToUi['night-passed']) => {
-      if (storyNow('night', null)) return;
-      // **Beside a camp, the night is at their fire.** The first night slept beside each camp is
-      // asked for rather than rationed: its own kind's untold story if canon has one, else the fire
-      // or what comes to the edge of its light. Every night after is an ordinary one.
-      const world = latest.current.world;
-      const camp = world ? encampmentOn(world, latest.current.fieldMapId, fieldPlaced.current, latest.current.day) : null;
-      if (camp && atCamp(camp, at)) {
-        const first = !journeyFlags.current.includes(`fireside:${camp.id}`);
-        if (first) journeyFlags.current = [...journeyFlags.current, `fireside:${camp.id}`];
-        if (maybeHappens('night', at, shelter, `fireside:${camp.id}`, { camp, ...(first ? { force: { asked: true } } : {}) })) return;
-      }
-      maybeHappens('night', at, shelter, `night:${latest.current.day}`);
-    };
-
-    /**
-     * Reached an authored place for the first time this journey.
-     *
-     * `poi-reached` rather than `standing-on`, deliberately: that one is a *state* and re-fires
-     * every time you walk back onto the tile, so an arrival event would replay on every visit.
-     * This one means what its name says.
-     */
-    const onArrived = ({ poiId }: GameToUi['poi-reached']) => {
-      // On the cart, the arrival waits: the cards are still telling the road. See `stepDown`.
-      if (crossing.current) {
-        heldArrival.current = poiId;
-        return;
-      }
-      if (storyNow('arriving', poiId)) return;
-      // Somebody who comes over, the first time you arrive where they are. They take the arrival:
-      // a card and a person walking up at once would be two things asking for the same moment.
-      const approach = approachAt(poiId, seenEvents.current);
-      if (approach) {
-        seenEvents.current = [...seenEvents.current, approachId(approach)];
-        EventBus.emitEvent('approach', { npcId: approach.npcId, sheet: approach.sheet });
-        return;
-      }
-      const here = latest.current.at;
-      if (!here) return;
-      // A place a stranger sent you to keeps the promise first, unrationed: see `rumourKept`.
-      if (
-        rumourAt(poiId, journeyFlags.current) &&
-        maybeHappens('arriving', here, null, `rumour:${poiId}`, {
-          poiId,
-          campStanding: latest.current.world
-            ? (encampmentOn(latest.current.world, latest.current.fieldMapId, fieldPlaced.current, latest.current.day)?.id ?? null)
-            : null,
-          force: { kind: 'rumour-kept', asked: true }
-        })
-      ) {
-        return;
-      }
-      maybeHappens('arriving', here, null, `arriving:${poiId}`, { poiId });
-    };
-
-    /**
-     * Something on the road, at most once a day.
-     *
-     * **The rarity is the caller's, not the event's, and that is the design.** `tile-entered` fires
-     * on every step -- eighty or so a day -- and asking on each one would make a road event either
-     * constant or, if each event guarded its own odds, a die rolled eighty times a day in eighty
-     * different authored places. A day is a rhythm the game already has and a player already feels,
-     * so the question is asked once per day of walking and the event's own `conditions` decide the
-     * rest. No new field, and nothing for an author to remember.
-     */
-    const onRoad = ({ at, day }: GameToUi['tile-entered']) => {
-      if (day === lastRoadDay.current) return;
-      lastRoadDay.current = day;
-      if (storyNow('road', null)) return;
-      maybeHappens('road', at, null, `road:${day}`);
-    };
-
-    /**
-     * Walking up to a camp opens its scene, once a camp. Asked for rather than rationed: a camp is
-     * somewhere the player went, and the road's pacing is for what happens to them on the way.
-     */
-    const onCampSeen = ({ at, day }: GameToUi['tile-entered']) => {
-      const world = latest.current.world;
-      if (!world) return;
-      const camp = encampmentOn(world, latest.current.fieldMapId, fieldPlaced.current, day);
-      if (!camp || !atCamp(camp, at) || seenEvents.current.includes(`woven:camp:${camp.id}`)) return;
-      // Not over another card: the next step beside the fire asks again.
-      if (cardOpenRef.current) return;
-      maybeHappens('arriving', at, null, `camp:${camp.id}`, { camp, force: { kind: 'camp', asked: true } });
-    };
-
-    // Handed out of the effect so the activity card can ask too: a take is not a bus event, it is a
-    // modal React owns, and closing it is where the `working` question belongs.
-    /**
-     * **A story beat first.** Guyuk's and the princess's arcs (`content/storylines.ts`) are asked
-     * before anything rationed or woven, at the same three moments: arriving somewhere, a night, a
-     * day's road. A beat waits until it can be taken whole, so this either opens its card or is quiet.
-     */
-    const storyNow = (when: BeatWhen, poiId: string | null): boolean => {
-      const p = latest.current.progress;
-      const carried = latest.current.satchel;
-      const event = beatNow(when, {
-        fieldMapId: latest.current.fieldMapId,
-        day: latest.current.day,
-        poiId,
-        flags: journeyFlags.current,
-        // A discovery must be understood; a word, a recipe or a question held.
-        holds: (id) =>
-          id.startsWith('discovery_') ? isComplete(p, id) : p.words.includes(id) || p.recipes.includes(id),
-        carried: (id) => carried[id] ?? 0
-      });
-      if (!event) return false;
-      cardOpenRef.current = true;
-      setHappening({ event, shelter: null });
-      return true;
-    };
-    storyRef.current = storyNow;
-
-    happens.current = maybeHappens;
-    arrivedRef.current = (e) => onArrived(e as GameToUi['poi-reached']);
-
-    /** They have walked up and are standing beside you: open what they have to say. */
-    const onApproached = ({ npcId }: GameToUi['approached']) => dispatch({ type: 'talk-to', npcId });
-
-    /**
-     * The inspector for approaches, beside `__happen`: bring somebody over now, wherever you are.
-     * The same bus message a first arrival sends, so what it proves is the walk and the wiring.
-     */
-    (window as unknown as { __approach?: (npcId: string) => boolean }).__approach = (npcId) => {
-      const approach = APPROACHES.find((a) => a.npcId === npcId);
-      if (!approach || !latest.current.at) return false;
-      EventBus.emitEvent('approach', { npcId: approach.npcId, sheet: approach.sheet });
-      return true;
-    };
-
-    EventBus.onEvent('approached', onApproached);
     EventBus.onEvent('world-ready', onWorldReady);
     EventBus.onEvent('tile-entered', onTileEntered);
     EventBus.onEvent('journey-changed', onJourneyChanged);
@@ -710,10 +449,6 @@ export function App() {
     EventBus.onEvent('travellers-changed', onTravellers);
     EventBus.onEvent('travellers-nearby', onNearby);
     EventBus.onEvent('character-changed', onCharacter);
-    EventBus.onEvent('night-passed', onNight);
-    EventBus.onEvent('poi-reached', onArrived);
-    EventBus.onEvent('tile-entered', onRoad);
-    EventBus.onEvent('tile-entered', onCampSeen);
     return () => {
       EventBus.offEvent('world-ready', onWorldReady);
       EventBus.offEvent('tile-entered', onTileEntered);
@@ -724,12 +459,7 @@ export function App() {
       EventBus.offEvent('sky-changed', onSky);
       EventBus.offEvent('travellers-changed', onTravellers);
       EventBus.offEvent('travellers-nearby', onNearby);
-      EventBus.offEvent('approached', onApproached);
       EventBus.offEvent('character-changed', onCharacter);
-      EventBus.offEvent('night-passed', onNight);
-      EventBus.offEvent('poi-reached', onArrived);
-      EventBus.offEvent('tile-entered', onRoad);
-      EventBus.offEvent('tile-entered', onCampSeen);
     };
   }, []);
 
@@ -1013,144 +743,27 @@ export function App() {
     [underfoot, nodes, arrival?.day]
   );
 
-  /**
-   * Stoop and pick up whatever this tile offers.
-   *
-   * Done in React straight from the content layer rather than routed through the scene, on
-   * the precedent `EventBus.ts` sets for observing a creature: the content layer is
-   * framework-free and importable here, and going through the scene is what once made the
-   * journal describe a crane while the sketch recorded an otter.
-   */
-  const pickUp = useCallback(() => {
-    if (!underfoot) return;
-    const today = arrival?.day ?? 0;
-    // What is *left* here, not what grows here. `gather` still does the carrying; this decides
-    // what there is to carry, which is the whole of what a resource node changes.
-    const taking = takeableAt(nodes, underfoot.seed, underfoot.at, underfoot.biome, today);
-    if (taking.length === 0) return;
+  /** What the last bench job made, step by step, for the workshop to show. */
+  const [lastMade, setLastMade] = useState<Step[]>([]);
 
-    // **Opening a modal rather than taking.** Everything below this line used to run here, and
-    // that was the whole of the finding: a reed and a beedu manta came off the same click, so a
-    // player looking for the hunting could not find it because there was no gesture to see.
-    // `finishTaking` now holds what this did, and runs when the activity settles.
-    setActivity({ taking, day: today });
-  }, [underfoot, nodes, arrival?.day]);
-
-  /**
-   * What the old single click did, run once the activity is over.
-   *
-   * `taken` comes from `settle` rather than from `takeableAt`, so a clean run's extra is carried
-   * *and* drawn down -- the two must agree or the satchel and the ground disagree about what left
-   * the tile. The floor is `settle`'s: this can never be less than the click gave.
-   */
-  const finishTaking = useCallback(
-    (taken: Taking[], line: string) => {
-      if (!underfoot || taken.length === 0) return;
-      const today = arrival?.day ?? 0;
-      setSatchel((s) => carry(s, taken));
-      setNodes((n) => draw(n, underfoot.seed, underfoot.at, taken, today));
-      lastTaken.current = taken.map((t) => t.material.id);
-      // Noted rather than announced. The whole progression of this game is a written journal, so
-      // a good cut is a sentence in the field notes and not a number in a badge. The activity's
-      // own line wins when it has one, because it says how the hands went as well as what was cut.
-      setMemory(line || gatheredLine(underfoot.seed, underfoot.at, underfoot.biome, taken) || '');
-    },
-    [underfoot, arrival?.day, setNodes]
-  );
-
-  /**
-   * Which gesture the running activity is, from the material it is about.
-   *
-   * Derived rather than stored on the activity, so it cannot drift from the material the modal is
-   * actually settling -- the two would be a pair of facts about the same thing, and pairs like
-   * that disagree eventually.
-   */
-  const activityGesture = useMemo<Gesture | null>(
-    () =>
-      activity
-        ? activity.resting
-          ? 'rest'
-          : activity.making
-            ? gestureForProcess(recipe(activity.making)?.process ?? '')
-            : gestureFor(activity.taking[0]!.material, isAnimal, isWaterSpecies)
-        : null,
-    [activity]
-  );
-
-  /**
-   * What the player brought to the running activity.
-   *
-   * **Composed here because this is the only place holding all three answers** -- what is in the
-   * satchel, what the animal is doing, and how tired the traveller is. That is the same
-   * arrangement `knowsRecipeHere` uses and for the same stated reason; `content/activity.ts`
-   * grades it and the card renders it, and neither works any of it out.
-   *
-   * This memo replaced a seeded `roll` function whose *identity* was load-bearing: the card dealt
-   * fresh timing bands in an effect keyed on it, so an inline arrow re-dealt them on every tick of
-   * the card's own timer and the run never settled. Nine unit tests passed throughout and the
-   * browser found it in one click. There is no timer and no deal any more, so the hazard is gone
-   * rather than guarded -- but it is worth remembering why a plain object is the safer shape.
-   */
-  const preparation = useMemo<Preparation>(() => {
-    const gesture: Gesture | null = activityGesture;
-    if (!gesture) return { wants: null, equipped: false, favourable: true };
-    const wants = GESTURE_WANTS[gesture];
-    return {
-      wants,
-      equipped: wants === null ? false : canDo(satchel, wants),
-      favourable: momentFavours(
-        gesture,
-        currentCreature ? routineFor(currentCreature, moment) : null,
-        {
-          // `fatigueNote` is prose and this needs a fact, so the scene's own word is read rather
-          // than re-derived: it says nothing at all while the traveller is fresh, and says
-          // something only once it is worth saying. That threshold is `fatigue.ts`'s to own.
-          spent: Boolean(arrival?.fatigue),
-          // A night under a roof, at a camp, or in a tent you pitched. The bedroll and the bare
-          // sky are the two that are not -- and `shelterAt` has already decided which this is.
-          sheltered: activity?.resting ? activity.resting !== 'bedroll' && activity.resting !== 'none' : true
-        }
-      )
-    };
-  }, [activityGesture, satchel, currentCreature, moment, arrival?.fatigue, activity?.resting]);
-
-  /**
-   * The name of the thing answering `preparation.wants`, for the card's clause.
-   *
-   * Named rather than counted, because "a flint knife will do the work" teaches which object did
-   * it and "you have 1 cutting tool" teaches nothing. The first carried item that affords it, in
-   * the satchel's own stable order, so the sentence does not change between renders.
-   */
-  const preparationTool = useMemo(() => {
-    const wants = preparation.wants;
-    if (!wants || !preparation.equipped) return null;
-    const id = itemsHeld(satchel).find((held) => item(held)?.affords.includes(wants));
-    return id ? item(id)?.name ?? null : null;
-  }, [preparation.wants, preparation.equipped, satchel]);
-
-  /**
-   * Use something carried: a physic, a meal, or a shelter raised for the night.
-   *
-   * **The one verb that closes the three loops canon had data for and the game had no door to.**
-   * Seven physics, thirteen foods and two shelters could all be crafted and none of them did
-   * anything -- `cooking.ts` had no importer at all for its whole life. `content/using.ts` carries
-   * the reasoning for why this is one verb rather than an apothecary screen, a kitchen and a
-   * camp-builder.
-   *
-   * The satchel is React's and the clock is the scene's, so easing goes over the bus rather than
-   * being applied here. A shelter is not spent, which is why the satchel can come back unchanged
-   * and the `shelter-built` announcement still has to fire.
-   */
-  const useCarried = useCallback(
-    (id: string) => {
-      const what = useOf(id);
-      if (!what) return;
-      setSatchel((s) => use(s, id));
-      if (what.eases > 0) EventBus.emitEvent('ease', { by: what.eases });
-      setMemory(usedLine(id) ?? '');
-    },
-    []
-  );
+  // Taking, making, a night and using what is carried, and the card each opens: `useActivity.ts`.
+  const { activity, card: activityCard, pickUp, startRest, makeHere, useCarried } = useActivity({
+    underfoot,
+    day: arrival?.day ?? 0,
+    fatigued: Boolean(arrival?.fatigue),
+    nodes,
+    setNodes,
+    satchel,
+    setSatchel,
+    progress,
+    setProgress,
+    bench,
+    currentCreature,
+    moment,
+    setMemory,
+    setLastMade,
+    happens
+  });
 
   /**
    * Tell the scene what is pitched, whenever the satchel changes.
@@ -1401,7 +1014,7 @@ export function App() {
         // Through the same modal as everything else. Nothing is won and nothing can go wrong, so
         // it settles on its own -- but it is the same shape of act, and the night should look like
         // one rather than happening between two frames.
-        onDo: () => setActivity({ taking: [], day: arrival?.day ?? 0, resting: shelter })
+        onDo: () => startRest(shelter)
       } satisfies TileAction
           ]),
       // The line is one map's furniture, so the row only exists where there is a line. Every other
@@ -1530,7 +1143,6 @@ export function App() {
    * log that lived in the panel would vanish the moment it closed, which is exactly when a player
    * wants to reread what just happened.
    */
-  const [lastMade, setLastMade] = useState<Step[]>([]);
 
   /**
    * The bench the workshop was opened at, or null for the whole thing.
@@ -1541,8 +1153,6 @@ export function App() {
    */
   const [atStation, setAtStation] = useState<Station | null>(null);
 
-  /** The last day a road event was asked about, so the question is one a day and not one a step. */
-  const lastRoadDay = useRef(-1);
 
   /**
    * The event the player is in the middle of, if any, every one they have already had, and every
@@ -1556,20 +1166,12 @@ export function App() {
    * flags do, so everything reading them renders again. The flags themselves live in
    * `journeyFlags` with the rest of the journey's, and are saved with it.
    */
-  const [negotiatingAt, setNegotiatingAt] = useState<string | null>(null);
   const [homeTick, setHomeTick] = useState(0);
   const setHomeFlags = useCallback((next: string[]) => {
     journeyFlags.current = next;
     setHomeTick((n) => n + 1);
   }, []);
 
-  const [happening, setHappening] = useState<{ event: GameEvent; shelter: string | null } | null>(
-    null
-  );
-  useEffect(() => {
-    cardOpenRef.current = happening !== null;
-    setCardOpen(happening !== null);
-  }, [happening]);
   // Who is walking: Varuna and Mithra, and whoever has joined since. Read from the flags each render,
   // because a joining is a flag a story card's choice sets. See `walkers` in characters.ts.
   const roster = walkers(journeyFlags.current);
@@ -1630,6 +1232,30 @@ export function App() {
     });
   }, [hints, arrival, progress, satchel, opening]);
 
+  // What to do next, and where: the pointer, the events' lean, the next step and the Goals --
+  // `useGuidance.ts`.
+  const { finding, guide, goalRows } = useGuidance({
+    world,
+    arrival,
+    pinned,
+    setPinned,
+    satchel,
+    bench,
+    nodes,
+    homeTick,
+    journeyFlags,
+    discovered,
+    fieldPlaced,
+    latest,
+    fieldMapId,
+    hints,
+    coach,
+    peopleOfMap,
+    progress,
+    road,
+    surface
+  });
+
   // The morning is over when the knife is made: the coach stands down and Uma's mat is pinned, so
   // the dock carries on where the hints stop.
   useEffect(() => {
@@ -1639,114 +1265,26 @@ export function App() {
     setPinned((p) => p ?? MORNING_GOAL);
   }, [coach, progress]);
 
-  const settling = useMemo<SettlingView | null>(() => {
-    void homeTick;
-    const here = standingOn ? groundAt(standingOn) : null;
-    if (!here || here.homestead.fieldMapId !== fieldMapId) return null;
-    const { homestead, ground } = here;
-    const state = homesteadState(fieldMapId, journeyFlags.current);
-    const holder = npc(ground.heldBy)?.name ?? 'The holder';
-    const facts = { finished: (id: string) => isComplete(progress, id), met: metStrangers.current };
-    const standing = howKnownOn(fieldMapId, facts).standing;
-    const helpedHere = peopleOfMap.filter((id) => holdings.helped.includes(id)).length;
-    const chosen = homestead.grounds.find((g) => g.id === state.ground) ?? null;
-    const building = chosen && groundAgreed(chosen, state) ? chosen : null;
-
-    if (state.settled) {
-      return building?.id === ground.id
-        ? {
-            title: homestead.name,
-            lines: ['The people who backed it live here now.'],
-            action: {
-              label: 'Read the settlement page',
-              blocked: null,
-              onDo: () => dispatch({ type: 'open-interrupt', which: 'ending' })
-            }
-          }
-        : { title: homestead.name, lines: [`You settled at ${chosen?.name ?? 'another ground'}.`], action: null };
-    }
-    if (building && building.id !== ground.id) {
-      return { title: ground.name, lines: [`You are building at ${building.name}.`], action: null };
-    }
-    if (building) {
-      const built = stagesBuilt(homestead, state);
-      const lines = [`${built} of ${homestead.stages.length} stages stand.`];
-      if (readyToSettle(homestead, state)) {
-        return {
-          title: homestead.name,
-          lines,
-          action: {
-            label: 'Settle here',
-            blocked: null,
-            onDo: () => {
-              setHomeFlags(settleHome(homestead, journeyFlags.current));
-              dispatch({ type: 'open-interrupt', which: 'ending' });
-            }
-          }
-        };
-      }
-      const may = mayBuild(homestead, state, satchel, helpedHere);
-      const next = homestead.stages[built]!;
-      return {
-        title: homestead.name,
-        lines,
-        action: {
-          label: next.name,
-          blocked: may.ok ? null : may.why,
-          onDo: () => {
-            if (!may.ok) return;
-            const done = buildStage(homestead, journeyFlags.current, may.stage);
-            setSatchel((bag) => done.spends.reduce((b, need) => takeFromSatchel(b, need.id, need.count), bag));
-            setHomeFlags(done.flags);
-            // The stage is a moment, so it gets a card: the painting of the ground, what the diary
-            // says of the stage, and one way on.
-            setHappening({
-              event: {
-                id: `homestead:${may.stage.id}`,
-                title: may.stage.name,
-                occasion: 'arriving',
-                conditions: anyConditions(),
-                prose: may.stage.prose,
-                art: 'settle-ground',
-                choices: [
-                  {
-                    id: 'look',
-                    label: 'Stand back and look at it',
-                    needs: [],
-                    line: 'You stand back and look at it for a long while, and somebody beside you does the same.',
-                    grants: []
-                  }
-                ],
-                once: true
-              },
-              shelter: null
-            });
-          }
-        }
-      };
-    }
-    // Dry, level ground near enough to build on, or the ground says it has none. The owner's rule
-    // is not bent to fit a wet seed: no mill in the marsh.
-    const placed = world ? fieldPlaced.current : [];
-    const at = placed.find((p) => p.poiId === ground.at)?.at;
-    if (world && at && !buildingTiles(world, at, placed.map((p) => p.at))) {
-      return {
-        title: ground.name,
-        lines: [ground.prose, "There's no dry, level ground near enough here to build on."],
-        action: null
-      };
-    }
-    const ask = mayAsk(homestead, ground, state, standing);
-    return {
-      title: ground.name,
-      lines: [ground.prose],
-      action: {
-        label: `Ask ${holder} about building here`,
-        blocked: ask.ok ? null : ask.why,
-        onDo: () => setNegotiatingAt(ground.id)
-      }
-    };
-  }, [homeTick, standingOn, fieldMapId, progress, satchel, holdings, peopleOfMap, setHomeFlags, world]);
+  // Building at a ground, the negotiation and the settlement page -- `useSettling.ts`.
+  const { settling, negotiation, settlement } = useSettling({
+    standingOn,
+    fieldMapId,
+    world,
+    fieldPlaced,
+    journeyFlags,
+    metStrangers,
+    progress,
+    satchel,
+    setSatchel,
+    holdings,
+    peopleOfMap,
+    pinned,
+    setPinned,
+    homeTick,
+    setHomeFlags,
+    setHappening,
+    dispatch
+  });
 
   // Tell the scene what stands, whenever it changes and whenever a map is drawn.
   useEffect(() => {
@@ -1762,105 +1300,26 @@ export function App() {
     });
   }, [world, fieldMapId, homeTick]);
 
-  /**
-   * Open the bench activity. The making itself happens when the run settles.
-   *
-   * **Checked before opening, not after.** `craft` is the rules layer's answer to whether this can
-   * be made at all -- the satchel, the recipe, the bench -- and a modal that plays through three
-   * beats and then refuses would be a worse version of a disabled button. So the answer is taken
-   * here and the work is redone on settle against the state as it stands then.
-   */
-  const makeHere = useCallback(
-    (recipeId: string) => {
-      if (!craft(progress, satchel, recipeId, bench).made) return;
-      setActivity({ taking: [], day: arrival?.day ?? 0, making: recipeId });
-    },
-    [progress, satchel, bench, arrival?.day]
-  );
-
-  /** What the old single click did, run once the bench activity is over. */
-  const finishMaking = useCallback(
-    (recipeId: string) => {
-      const done = craft(progress, satchel, recipeId, bench);
-      if (!done.made) return;
-      setProgress(done.progress);
-      setSatchel(done.satchel);
-      setLastMade(done.steps);
-    },
-    [progress, satchel, bench]
-  );
-
   /** Settle a question. The player may be wrong, and nothing here tells them so. */
   const settle = useCallback(
     (questionId: string, index: number) => setProgress((p) => answer(p, questionId, index)),
     []
   );
 
-  const travel = useCallback(
-    (next: string) => {
-      // **The road, told.** The crossing opens its cards first and the next map builds behind them;
-      // see `Journey.tsx`. A map with no road to `next` (none in canon today) still crosses, quietly.
-      const road = roadBetween(fieldMapId, next);
-      if (road) {
-        const seenFlag = `road:${road.art}`;
-        const first = !journeyFlags.current.includes(seenFlag);
-        if (first) journeyFlags.current = [...journeyFlags.current, seenFlag];
-        crossing.current = true;
-        heldArrival.current = null;
-        setJourney({ from: fieldMapId, to: next, road, first });
-      }
-      setFieldMapId(next);
-      // Arriving in another country is leaving wherever you were standing, and the map that
-      // sent you there has done its job.
-      dispatch({ type: 'standing-on', poiId: null });
-      dispatch({ type: 'close-interrupt', which: 'overworld' });
-      discovered.current = [];
-      // **The address bar says which country you are in**, the same way it already says which
-      // seed and which character. `?map=` has been *read* since field maps shipped and never
-      // written, so the URL described the last thing you typed rather than the thing on screen --
-      // and a reload silently put you back on Lothal.
-      //
-      // That is not only a tidiness problem. It made a map impossible to report a bug about: a
-      // screenshot of the Aravali came with a URL that would open Lothal, and the two were
-      // compared as though they were the same map. It also makes every map one link away, which
-      // is what a test wants and what somebody looking for the crossing wants.
-      const url = new URL(window.location.href);
-      url.searchParams.set('map', next);
-      // **Set down at the new map's cart point**, which is where the cart goes. Written as `?at=`,
-      // which the scene already reads, so a reload keeps you there -- and an `?at=` naming a place on
-      // the map just left can no longer follow you across.
-      const arrive = arrivalPoint(next);
-      if (arrive) url.searchParams.set('at', arrive);
-      else url.searchParams.delete('at');
-      window.history.replaceState(null, '', url);
-      // Half a day of the journey's clock: out in the morning, in by evening. See `CROSSING_MS`.
-      EventBus.emitEvent('travel-to', { fieldMapId: next, seed, ride: road ? CROSSING_MS : 0 });
-    },
-    [seed, fieldMapId]
-  );
-
-  /**
-   * The ride is over. **The first time on a road, something happens on it**: the road's own written
-   * happening when canon has one -- the ferry song, the line where the sea was -- else one of the
-   * road's woven events. Asked for, never rationed, and only once per road.
-   */
-  const stepDown = useCallback(() => {
-    const done = journey;
-    setJourney(null);
-    crossing.current = false;
-    const held = heldArrival.current;
-    heldArrival.current = null;
-    const here = latest.current.at;
-    // **One thing, in this order.** The road's own written happening, the first time on it; else
-    // whatever the arrival was holding -- somebody coming over, a rumour kept, an arrival card --
-    // which the cards had kept waiting; else, the first time, one of the road's woven events.
-    if (done?.first && here && happens.current?.('journey', here, null, `journey:${done.road.art}`, { cameFrom: done.from, force: { asked: true } })) return;
-    if (held) {
-      arrivedRef.current?.({ poiId: held });
-      return;
-    }
-    if (done?.first && here) happens.current?.('road', here, null, `journey-road:${done.road.art}`, { force: { asked: true } });
-  }, [journey]);
+  // Setting out for another map, the road told in cards, and stepping down -- `useCrossing.ts`.
+  const { journey, travel, stepDown } = useCrossing({
+    seed,
+    fieldMapId,
+    setFieldMapId,
+    journeyFlags,
+    crossing,
+    heldArrival,
+    arrivedRef,
+    discovered,
+    latest,
+    happens,
+    dispatch
+  });
 
   const travelLog = useMemo(() => {
     if (!world) return null;
@@ -2062,7 +1521,12 @@ export function App() {
             peopleCount={met(progress).length}
           />
         }
-        lead={<SettlingSection road={road} />}
+        lead={
+          <>
+            <GoalsSection rows={goalRows} />
+            <SettlingSection road={road} />
+          </>
+        }
         progress={progress}
         moment={moment}
         open={surface === 'progress'}
@@ -2131,166 +1595,34 @@ export function App() {
         fieldMapId={fieldMapId}
         pinned={pinned}
         onPin={setPinned}
+        focus={workshopAt}
+        flags={journeyFlags.current}
         open={interrupts.workshop}
         onClose={() => {
           setAtStation(null);
+          setWorkshopAt(null);
           dispatch({ type: 'close-interrupt', which: 'workshop' });
         }}
       />
 
-      {(() => {
-        // The negotiation at a ground, mounted only while it is open. `key` so a new ground starts
-        // a new conversation rather than carrying the last one's words.
-        const here = negotiatingAt ? homesteadOn(fieldMapId) : null;
-        const ground = here?.grounds.find((g) => g.id === negotiatingAt) ?? null;
-        if (!here || !ground) return null;
-        return (
-          <Negotiation
-            key={ground.id}
-            open
-            homestead={here}
-            ground={ground}
-            flags={journeyFlags.current}
-            holdings={holdings}
-            peopleHere={peopleOfMap}
-            onFlags={setHomeFlags}
-            onClose={() => setNegotiatingAt(null)}
-          />
-        );
-      })()}
+      {/* The negotiation at a ground, while one is open: a new ground starts a new conversation. */}
+      {negotiation && <Negotiation key={negotiation.ground.id} {...negotiation} />}
 
       <Ending
         progress={progress}
-        settlement={(() => {
-          void homeTick;
-          const homestead = homesteadOn(fieldMapId);
-          if (!homestead || !homesteadState(fieldMapId, journeyFlags.current).settled) return null;
-          return { name: homestead.name, prose: homestead.settled, people: peopleOfMap, fieldMapId };
-        })()}
+        settlement={settlement}
         open={interrupts.ending}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'ending' })}
       />
 
-      {/* The activity. Mounted only while one is running, so every open deals fresh bands rather
-          than resuming a run the player has forgotten the state of. */}
-      {activity && underfoot && activityGesture && (
-        <ActivityModal
-          open
-          gesture={activityGesture}
-          promised={activity.taking}
-          preparation={preparation}
-          toolName={preparationTool}
-          creatureId={isAboutAnAnimal(activityGesture, activity) ? currentCreature?.id ?? null : null}
-          creatureName={isAboutAnAnimal(activityGesture, activity) ? currentCreature?.name ?? null : null}
-          /* Which painting to prefer. A night takes the shelter kind, a making takes the process
-             word -- so `make-firing.png` can land later and be picked up with no code, and until
-             it does the plain gesture scene draws. Nothing here is ever blocked on art. */
-          /**
-           * Which painting to prefer.
-           *
-           * A night takes the shelter kind, a making takes the process word, and **a take on the
-           * ground takes the biome** — so cutting herbs on a cliff and cutting reeds at a waterline
-           * can be two different pictures of the same gesture. All three fall back to the plain
-           * gesture scene, so every one of them is a file and no code, and a variant nobody has
-           * painted is not an error.
-           */
-          variant={
-            activity.resting ??
-            (activity.making ? processWord(activity.making) : underfoot?.biome ?? null)
-          }
-          /**
-           * Which of this thing's paintings to show.
-           *
-           * Seeded on the tile and the day, like every other choice the game makes — two players
-           * on one seed see the same night. A second painting never replaces a first, so this is
-           * what decides between them; with one painting it changes nothing.
-           */
-          pick={
-            underfoot
-              ? tileHash(underfoot.seed, underfoot.at.x, underfoot.at.y, `take:${activity.day}`)
-              : 0
-          }
-          subject={
-            activity.resting
-              ? SHELTER_LABEL[activity.resting] ?? 'Stop for the night'
-              : activity.making
-                ? recipe(activity.making)?.name ?? 'it'
-                : null
-          }
-          onClose={() => {
-            setActivity(null);
-            // The night is spent on the way out rather than when the run settles, so a player who
-            // changes their mind has not already slept. `camp` is the rules layer's own event and
-            // it still decides whether a night is legal.
-            if (activity.resting) EventBus.emitEvent('camp', {});
-            // Something happening around the work, asked as the card closes rather than when the
-            // take settles so the two cards never stand on each other. Only a take that carried
-            // something off: closing the card without taking is changing your mind, not working.
-            else if (!activity.making && lastTaken.current.length > 0 && underfoot) {
-              const taken = lastTaken.current;
-              lastTaken.current = [];
-              happens.current?.(
-                'working',
-                underfoot.at,
-                null,
-                `working:${activity.day}:${underfoot.at.x},${underfoot.at.y}`,
-                { taken }
-              );
-            }
-          }}
-          onFinish={
-            activity.resting
-              ? () => {}
-              : activity.making
-                ? () => finishMaking(activity.making!)
-                : finishTaking
-          }
-        />
-      )}
+      {/* The activity, while one is running: `useActivity` hands over everything the card needs. */}
+      {activityCard && <ActivityModal {...activityCard} />}
 
       {/* Something that happened to you, as opposed to something you did. There are no events
           authored yet, so this never mounts -- the path is live so the first one needs no wiring.
           It sits beside the activity card because it *is* the activity card's furniture; see
           `EventCard.tsx` for why that reuse is the point rather than a shortcut. */}
-      {happening && (
-        <EventCard
-          event={happening.event}
-          shelter={happening.shelter}
-          met={metStrangers.current}
-          holds={[...progress.words, ...Object.keys(progress.rungs), ...progress.recipes]}
-          onChoose={(choice: Choice) => {
-            // Through the same door a conversation uses. An event grants the same kinds of thing a
-            // person does, so it must not grow a second way to change a Progress.
-            if (choice.grants.length > 0) setProgress((p) => receiveAll(p, choice.grants));
-            // Something found or given goes in the satchel, and something eased goes to the scene
-            // through the door a remedy already uses -- see `Choice.gives` and `Choice.eases`.
-            // And what a story beat asked to be handed over leaves the satchel: rice to Guyuk, the
-            // seeds to the Atelier. The beat only came because it was all carried.
-            if (choice.takes && choice.takes.length > 0) {
-              const taken = choice.takes;
-              setSatchel((s) => taken.reduce((held, t) => takeFromSatchel(held, t.id, t.n), s));
-            }
-            if (choice.gives && choice.gives.length > 0) {
-              const given = choice.gives;
-              setSatchel((s) => given.reduce((held, g) => addToSatchel(held, g.id, g.n), s));
-            }
-            if (choice.eases && choice.eases > 0) EventBus.emitEvent('ease', { by: choice.eases });
-            // What this choice leaves behind, for a later event to find.
-            for (const flag of choice.sets ?? []) {
-              if (!journeyFlags.current.includes(flag)) journeyFlags.current = [...journeyFlags.current, flag];
-            }
-            // Whoever this was about, you have met now.
-            const stranger = happening.event.stranger;
-            if (stranger && !metStrangers.current.includes(stranger.id)) {
-              metStrangers.current = [...metStrangers.current, stranger.id];
-            }
-            // Noted rather than announced, like every other outcome in this game: the progression
-            // is a written journal and a thing that happened to you is a line in it.
-            setMemory(choice.line);
-          }}
-          onClose={() => setHappening(null)}
-        />
-      )}
+      {eventCard && <EventCard {...eventCard} />}
 
       <Overworld
         current={fieldMapId}
@@ -2322,7 +1654,19 @@ export function App() {
         }}
         sky={skyPhase === null ? null : { phase: skyPhase, weather: moment?.weather }}
         coach={coach?.line ?? null}
-        pinned={{ recipeId: pinned, satchel, bench }}
+        guide={guide}
+        pinned={{
+          recipeId: pinned,
+          satchel,
+          bench,
+          flags: journeyFlags.current,
+          where: finding?.where ?? null,
+          // Tapping the line opens the workshop at it, where it can be changed or unpinned.
+          onOpen: () => {
+            setWorkshopAt(pinned);
+            dispatch({ type: 'open-interrupt', which: 'workshop' });
+          }
+        }}
         standing={{
           creature: arrival?.entry?.creature ?? { name: null, note: '', species: null },
           doing: arrival?.entry?.doing ?? '',

@@ -321,6 +321,12 @@ export interface UiToGame {
    * `talkTarget`'s answer and the choice the player made by tapping lives in React.
    */
   'talk-target': { travellerId: string | null };
+
+  /**
+   * The nearest seen tile holding something the pin wants, to mark on the map. Null to clear it.
+   * `content/finding.ts` decides it; the scene only draws (`docs/satchel-and-hearth.md`, phase 7).
+   */
+  'source-mark': { at: { x: number; y: number } | null };
 }
 
 type Events = GameToUi & UiToGame;

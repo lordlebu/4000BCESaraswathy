@@ -52,6 +52,11 @@ const PROCESSES = [
 const BIOMES = (biomes as { id: string }[]).map((b) => b.id);
 /** Groups of ground that share a painting -- `stoop-high` for every climbing biome. */
 const GROUPS = [...new Set(Object.values(GROUND_GROUP))];
+/**
+ * What following an animal asks for: `stalk-follow`, the act with no animal in it, which
+ * `ActivityModal` draws with the animal's plate inset. Asked by name there, not by `sceneFor`.
+ */
+const ACTS = ['follow'];
 /** A night at a moment: `none-midnight`, `camp-dawn`. Only `rest` asks for these. */
 const NIGHTS = SHELTERS.flatMap((s) => NIGHT_MOMENTS.map((m) => `${s}-${m}`));
 
@@ -90,7 +95,7 @@ describe('src/ui/scenes holds built scenes and nothing else', () => {
     ).toBe(true);
     if (variant) {
       expect(
-        [...SHELTERS, ...NIGHTS, ...PROCESSES, ...BIOMES, ...GROUPS].includes(variant),
+        [...SHELTERS, ...NIGHTS, ...PROCESSES, ...BIOMES, ...GROUPS, ...ACTS].includes(variant),
         `\`${variant}\` is not a shelter kind, a canon process, a biome or a ground group, so ` +
           `sceneFor('${gesture}', …) will never ask for it and this file will never draw.`
       ).toBe(true);

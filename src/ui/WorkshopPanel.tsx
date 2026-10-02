@@ -21,11 +21,14 @@
 // row and says `needs to be done at a settlement`, which is the whole of how anyone learns that
 // places have capabilities at all.
 
+import { useEffect } from 'react';
+import { goalOf, wanting } from '../content/goals';
 import { type Recipe, item, nameOf, process, recipes } from '../content/making';
 import { type Step, plan } from '../content/making-chain';
 import {
   type Bench,
   type Knows,
+  fireLine,
   makeableNow,
   offeredHere,
   shortfalls,
@@ -73,6 +76,13 @@ export interface WorkshopPanelProps {
   /** The recipe pinned to the dock, and how to change it. Both optional: without them no Pin buttons. */
   pinned?: string | null;
   onPin?: (recipeId: string | null) => void;
+  /**
+   * A recipe to open at: scrolled to, its section unfolded, and its Pin button focused. Set when the
+   * pinned line in the dock is tapped, which is how a player finds the recipe to change or unpin.
+   */
+  focus?: string | null;
+  /** The journey's flags, so a pinned building stage can be named. */
+  flags?: readonly string[];
   open: boolean;
   onClose: () => void;
 }
@@ -87,10 +97,36 @@ export function WorkshopPanel({
   fieldMapId = null,
   pinned = null,
   onPin,
+  focus = null,
+  flags = [],
   open,
   onClose
 }: WorkshopPanelProps) {
+  // Open at the pinned recipe when asked: unfold the list it is in, bring it into view, and put
+  // focus on its button so Enter unpins it. After the modal's own focus, hence the frame's wait.
+  useEffect(() => {
+    if (!open || !focus) return;
+    const id = requestAnimationFrame(() => {
+      const row = document.querySelector<HTMLElement>(`.workshop [data-recipe="${CSS.escape(focus)}"]`);
+      if (!row) return;
+      const fold = row.closest('details');
+      if (fold) fold.open = true;
+      row.scrollIntoView?.({ block: 'center' });
+      row.querySelector<HTMLButtonElement>('.recipe-pin')?.focus();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [open, focus]);
+
   if (!open) return null;
+
+  const pinnedGoal = (() => {
+    const goal = goalOf(pinned);
+    return goal ? wanting(goal, satchel, bench, flags) : null;
+  })();
+
+  /** The Pin button's state for one recipe, or nothing where pinning is not offered. */
+  const pinFor = (r: Recipe) =>
+    onPin ? { on: pinned === r.id, toggle: () => onPin(pinned === r.id ? null : r.id) } : undefined;
 
   // Shown or not shown. `atStation` is identity when nothing is selected, so the unfiltered
   // workshop is exactly the code path it always was rather than a special case.
@@ -178,6 +214,21 @@ export function WorkshopPanel({
           </button>
         </header>
 
+        {/* **What is pinned, and the way to take it off, first.** Whatever is pinned -- a recipe
+            listed further down, or a building stage that is not a recipe at all -- can be unpinned
+            here without hunting for its row. */}
+        {pinnedGoal && onPin && (
+          <section className="diary-section workshop-pinned">
+            <p>
+              <span className="muted">Working towards </span>
+              <b>{pinnedGoal.name}</b>
+            </p>
+            <button type="button" className="recipe-pin" aria-label={`Unpin ${pinnedGoal.name}`} onClick={() => onPin(null)}>
+              Unpin
+            </button>
+          </section>
+        )}
+
         {lastMade.length > 0 && (
           <section className="diary-section made-log">
             <h3>{lastMade.length > 1 ? 'You worked through' : 'You made'}</h3>
@@ -201,7 +252,7 @@ export function WorkshopPanel({
             <h3>To cook</h3>
             <ul className="recipes">
               {food.map((r) => (
-                <Makeable key={r.id} recipe={r} ready why={[]} onMake={onMake} />
+                <Makeable key={r.id} recipe={r} ready why={[]} fire={fireLine(satchel, r.id, bench)} pin={pinFor(r)} onMake={onMake} />
               ))}
             </ul>
           </section>
@@ -212,10 +263,10 @@ export function WorkshopPanel({
             <h3>Ready</h3>
             <ul className="recipes">
               {ready.map((r) => (
-                <Makeable key={r.id} recipe={r} ready why={[]} onMake={onMake} />
+                <Makeable key={r.id} recipe={r} ready why={[]} pin={pinFor(r)} onMake={onMake} />
               ))}
               {chained.map((r) => (
-                <Makeable key={r.id} recipe={r} ready why={[]} first={firstMakes.get(r.id)} onMake={onMake} />
+                <Makeable key={r.id} recipe={r} ready why={[]} first={firstMakes.get(r.id)} pin={pinFor(r)} onMake={onMake} />
               ))}
             </ul>
           </section>
@@ -233,7 +284,7 @@ export function WorkshopPanel({
                   recipe={r}
                   ready={false}
                   why={shortfalls(satchel, r.id, bench).map((s) => ({ text: s.why, from: sourceOf(s) }))}
-                  pin={onPin ? { on: pinned === r.id, toggle: () => onPin(pinned === r.id ? null : r.id) } : undefined}
+                  pin={pinFor(r)}
                   onMake={onMake}
                 />
               ))}
@@ -251,7 +302,7 @@ export function WorkshopPanel({
                   recipe={r}
                   ready={false}
                   why={shortfalls(satchel, r.id, bench).map((s) => ({ text: s.why, from: sourceOf(s) }))}
-                  pin={{ on: pinned === r.id, toggle: () => onPin(pinned === r.id ? null : r.id) }}
+                  pin={pinFor(r)}
                   onMake={onMake}
                 />
               ))}
@@ -321,6 +372,7 @@ function Makeable({
   ready,
   why,
   first = [],
+  fire = null,
   pin,
   onMake
 }: {
@@ -330,6 +382,8 @@ function Makeable({
   why: { text: string; from: string | null }[];
   /** What a chain makes before this, in order, when the parts are made too. */
   first?: string[];
+  /** What the fire under a dish will be, said before the press: which fuel it burns. */
+  fire?: string | null;
   /** Whether this is the pinned recipe, and how to pin or unpin it. Absent: no button. */
   pin?: { on: boolean; toggle: () => void };
   onMake: (id: string) => void;
@@ -337,7 +391,7 @@ function Makeable({
   // The bare word -- `grinding`, not `process_grinding` -- which is what `PROCESS_MARK` keys on.
   const verb = process(recipe.process)?.id.replace('process_', '') ?? null;
   return (
-    <li className={ready ? 'recipe recipe-ready' : 'recipe'}>
+    <li className={ready ? 'recipe recipe-ready' : 'recipe'} data-recipe={recipe.id}>
       <div className="recipe-head">
         <ThingIcon
           mark={markFor(recipe)}
@@ -350,8 +404,16 @@ function Makeable({
         />
         <span className="recipe-name">{recipe.name}</span>
         {pin && (
-          <button type="button" className="recipe-pin" aria-pressed={pin.on} onClick={pin.toggle}>
-            {pin.on ? 'Pinned' : 'Pin'}
+          // Says what pressing it does. It read "Pinned" while pinned, which is a state and not an
+          // action, and the owner pinned a recipe and could not find how to take it off.
+          <button
+            type="button"
+            className="recipe-pin"
+            aria-pressed={pin.on}
+            aria-label={pin.on ? `Unpin ${recipe.name}` : `Pin ${recipe.name}`}
+            onClick={pin.toggle}
+          >
+            {pin.on ? 'Unpin' : 'Pin'}
           </button>
         )}
         <button type="button" disabled={!ready} onClick={() => onMake(recipe.id)}>
@@ -386,6 +448,7 @@ function Makeable({
       {ready && first.length > 0 && (
         <p className="recipe-first muted">Makes {first.join(', then ')} first.</p>
       )}
+      {ready && fire && <p className="recipe-first muted">{fire[0]!.toUpperCase() + fire.slice(1)}.</p>}
       {!ready && why.length > 0 && (
         <ul className="recipe-why">
           {why.slice(0, 3).map((w) => (

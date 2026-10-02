@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.47.0",
+  "canon_version": "2.48.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -3354,7 +3354,7 @@
           "name": "Raise the tower",
           "needs": [
             {
-              "id": "material_bamboo_cane",
+              "tag": "#timber",
               "count": 3
             },
             {
@@ -3363,7 +3363,7 @@
             }
           ],
           "backers": 2,
-          "prose": "A tower of cane lashed with goat-hair cord, twisted by hand on the terraces the way Marn twists it, light enough that the lift nearly takes it off the scaffold. From the top course you can see the terraces all the way down, and see that they are a farm."
+          "prose": "A tower of cane and whatever straight poles the woods gave up, lashed with goat-hair cord, twisted by hand on the terraces the way Marn twists it, light enough that the lift nearly takes it off the scaffold. From the top course you can see the terraces all the way down, and see that they are a farm."
         },
         {
           "id": "sails",
@@ -3374,12 +3374,12 @@
               "count": 3
             },
             {
-              "id": "material_bamboo_cane",
+              "tag": "#timber",
               "count": 2
             }
           ],
           "backers": 3,
-          "prose": "Four sails of scraped hide on cane spars, set into the lift, turning before they were fully tied. Beside the mill a glasshouse, warm against the plateau's cold nights, with the bitter millet in trays under it, soaking, the way Marn says. And on the mill's far side a hive on a thatched stand, because the terraces flower in the rains and somebody up here should have the good of it."
+          "prose": "Four sails of scraped hide on spars of cane and windfall, set into the lift, turning before they were fully tied. Beside the mill a glasshouse, warm against the plateau's cold nights, with the bitter millet in trays under it, soaking, the way Marn says. And on the mill's far side a hive on a thatched stand, because the terraces flower in the rains and somebody up here should have the good of it."
         }
       ],
       "settled": "They came up from the halls and down from the grazing at the same hour, which has not happened on the plateau in living memory, and stood about in the lamplight not quite knowing who should speak first. Nobody did. The mill turned on the lift. Somebody wrote it down."

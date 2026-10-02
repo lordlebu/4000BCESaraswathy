@@ -112,7 +112,7 @@ export function plan(
   // Tools are deliberately not chased either. Making the knife you need to make the thing you
   // asked for is a decision worth showing a player, not one to take on their behalf inside a
   // chain they did not ask to run.
-  const short = missingTools(satchel, recipeId);
+  const short = missingTools(satchel, recipeId, bench);
   if (short.length > 0) {
     return { steps: [], blocked: `needs something that can ${short[0]}` };
   }

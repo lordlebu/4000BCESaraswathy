@@ -329,3 +329,21 @@ export const VISIT_PACE_CAP = 7.5;
 
 /** How long a visitor sits at a camp, in hours: eats, and does what they came for. */
 export const VISIT_HOURS = 2;
+
+// ---------------------------------------------------------------------------------------------
+// Events that help (`docs/satchel-and-hearth.md`, phase 6; the owner's ruling, 2 October 2026).
+
+/**
+ * How often, in a hundred, something turned up on the road or under what you were taking is a thing
+ * you are working towards -- the pinned recipe's or the next building stage's -- when the ground
+ * could hold one. Three in four: often enough to feel looked after, rarely enough that it is still a
+ * find. The rest is the old random pick. The owner's word for it: "nudge me towards what I pinned".
+ */
+export const EVENT_LEANS_PERCENT = 75;
+
+/**
+ * Carrying this many of a stone that never renews, it stops turning up unless something wanted
+ * needs it. Flint is common on plains, hills and coast, and an event that hands over a fifth flint
+ * to somebody who has never knapped one is the "useless flint" the owner complained of.
+ */
+export const STONE_ENOUGH = 4;

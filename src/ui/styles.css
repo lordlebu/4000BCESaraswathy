@@ -3055,12 +3055,26 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 .workshop-teachers > summary { cursor: pointer; font-weight: 600; padding-block: 0.4rem; }
 .recipe-taught .recipe-name { font-weight: 500; }
 .recipe-pin[aria-pressed='true'] { background: var(--accent, currentColor); color: var(--paper, #fff); }
-/* The pinned recipe in the dock: one line, never a control. See `PinnedRecipe`. */
+/* The pinned recipe in the dock: one line. A control since the owner could not find how to unpin
+   one -- tapping it opens the workshop at it -- so it owes the 44-pixel tap floor. See `PinnedRecipe`. */
 .pinned-recipe { flex: none; margin: 0; padding: 0.2rem 0.75rem; font-size: 0.8rem; display: flex; gap: 0.5rem; align-items: baseline; min-width: 0; white-space: nowrap; overflow: hidden; }
+button.pinned-recipe { width: 100%; min-height: 44px; align-items: center; background: none; border: 0; color: inherit; font-family: inherit; text-align: left; cursor: pointer; }
+button.pinned-recipe:hover .pinned-name { text-decoration: underline; }
+button.pinned-recipe:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+/* What is pinned, at the top of the workshop, with the one button that takes it off. */
+.workshop-pinned { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.workshop-pinned p { margin: 0; min-width: 0; }
+/* The diary's Goals: one row each, the line and, where it can be pinned, its button. */
+.goal-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.goal-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.goal-line { min-width: 0; }
 .pinned-recipe .pinned-name { font-weight: 600; flex: none; }
 .pinned-recipe .pinned-name::before { content: '📌 '; }
 .pinned-recipe .pinned-needs { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
 .pinned-recipe[data-ready='true'] .pinned-needs { color: inherit; font-style: italic; }
+/* Where the nearest of it is: the find, so it reads in the ink rather than the muted needs. */
+.pinned-recipe .pinned-where { flex: none; font-style: italic; }
+.pinned-recipe .pinned-where::before { content: '→ '; }
 
 /* The mark beside a material, an item or a craft. Decoration: every panel that draws one has
  * the name beside it, which is why the glyph is labelled with its category and not its name. */
@@ -3328,6 +3342,27 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
   flex-shrink: 0;
 }
 
+.activity-picture {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* The animal being followed, small in the corner of the act: the painting says what you are doing
+   and the plate says what you are doing it to. A paper mount like a pasted-in specimen, so it reads
+   as part of the diary rather than as a badge over the scene. Top right, because the bottom of a
+   stalking painting is where the tracks are -- the first cut sat on the hoofprints. */
+.activity-inset {
+  position: absolute;
+  right: 0.6rem;
+  top: 0.6rem;
+  width: 28%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 3px solid var(--paper);
+  border-radius: 3px;
+  box-shadow: 0 4px 12px rgba(27, 20, 32, 0.35);
+}
+
 .activity-scene-blank {
   background: linear-gradient(160deg, #e8dcc0, #d6c6a4);
 }
@@ -3575,6 +3610,11 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 /* The first morning's hint, in the pinned recipe's slot at every height. `content/coach.ts`. */
 .coach-line { flex: none; margin: 0; padding: 0.25rem 0.75rem; font-size: 0.85rem; font-style: italic; }
 .coach-line::before { content: '✦ '; color: var(--accent); font-style: normal; }
+/* The next step once the first morning is over. A button when pressing it does the thing it says. */
+button.guide-line { width: 100%; min-height: 44px; background: none; border: 0; color: inherit; font-family: inherit; text-align: left; cursor: pointer; }
+button.guide-line:hover { text-decoration: underline; }
+button.guide-line:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+.guide-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* The road between maps (`Journey.tsx`), on the opening's page. */
 .journey-where { margin: 0; color: var(--muted); font-size: 0.9rem; }

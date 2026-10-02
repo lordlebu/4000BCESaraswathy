@@ -17,9 +17,14 @@
 // **Two chunks, two budgets.**
 //
 //   index-*   the app's own code. A "something is wrong" bound, not a target: about ten per cent
-//             over what was measured when it was set (30 September 2026: 177.0 KB gzipped), so
-//             ordinary growth passes and a sudden doubling does not. When it fails, find what grew
-//             before raising the number.
+//             over what was measured when it was set, so ordinary growth passes and a sudden
+//             doubling does not. When it fails, find what grew before raising the number.
+//
+//             Set at 200 on 30 September 2026, from 177.0 KB. Raised to 220 on 2 October, from
+//             202.0: main stood at 197.4 and Satchel and Hearth added 4.6 KB, all of it the new
+//             goals, finding, guide, features and guidance modules -- no dependency and no data
+//             import. Twenty KB in two days is a pace worth watching: if it fails again soon, the
+//             answer is splitting a panel behind an `import()`, not a third raise.
 //
 //   canon-*   canon's data, split out in `vite.config.ts`. **The rule is that the data may not
 //             outweigh the engine that draws it** -- Phaser is 347.6 KB gzipped -- which is the same
@@ -37,7 +42,7 @@ const path = require('node:path');
 const zlib = require('node:zlib');
 
 /** What each chunk may weigh, in KB gzipped. A chunk not named here is reported and not budgeted. */
-const BUDGETS_GZ_KB = { index: 200, canon: 350 };
+const BUDGETS_GZ_KB = { index: 220, canon: 350 };
 
 const assets = path.join(path.resolve(__dirname, '..'), 'dist', 'assets');
 if (!fs.existsSync(assets)) {

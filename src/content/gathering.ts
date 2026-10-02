@@ -10,11 +10,12 @@
 //
 // Pure and free of React and Phaser.
 
-import { type Material, materials } from './making';
+import { type Material, material, materials } from './making';
 import { creatureFor, floraFor } from './species';
 import { type Satchel, add } from './satchel';
 import type { BiomeId, Point } from '../world/types';
 import { tileHash } from '../world/rng';
+import { featureNameAt } from '../world/features';
 
 /**
  * How likely each rarity is to be standing on a given tile.
@@ -126,7 +127,8 @@ export function yieldsAt(
   moreLikely: (m: Material) => number = () => 0
 ): Material[] {
   const here = { x: at.x, y: at.y, biome };
-  const standing = [floraFor(here, seed), creatureFor(here, seed)];
+  const plant = floraFor(here, seed);
+  const standing = [plant, creatureFor(here, seed)];
 
   const offered: Material[] = [];
   for (const species of standing) {
@@ -141,11 +143,39 @@ export function yieldsAt(
   // And what the ground is made of, which no plant has to be standing on for you to find.
   for (const m of FROM_THE_GROUND.get(biome) ?? EMPTY) offered.push(m);
 
+  // **The log you see is the log you take.** A fallen log, driftwood or a clump of bamboo drawn on
+  // the tile always gives what it is, with no roll -- the owner stood beside drawn bamboo and was
+  // offered none. Everything else still answers to the rarity roll.
+  //
+  // **And a tree always gives wood**, the way Stardew's or Valheim's do: windfall is what falls from
+  // whatever tree stands here, so a tree with nothing else to give is still good for a pole and a
+  // fire. Every other material a tree gives -- teak, sandalwood, fruit -- still rolls.
+  const certain = new Set<Material>();
+  for (const id of [FEATURE_GIVES[featureNameAt(seed, at.x, at.y, biome) ?? ''], TREE_GIVES[plant?.growthForm ?? '']]) {
+    const m = id ? material(id) : null;
+    if (m && m.foundIn.includes(biome)) certain.add(m);
+  }
+  for (const m of certain) if (!offered.includes(m)) offered.push(m);
+
   return offered.filter((m) => {
+    if (certain.has(m)) return true;
     const roll = tileHash(seed, at.x, at.y, `gather:${m.id}`) / 4294967296;
     return roll < (CHANCE[m.rarity] ?? CHANCE.common) + moreLikely(m);
   });
 }
+
+/**
+ * What a feature drawn on a tile always gives (`world/features.ts`). Only the things that *are* the
+ * material lying there to be picked up: a standing tree is a source like any other plant and still
+ * rolls, where a log is already down.
+ */
+const TREE_GIVES: Readonly<Record<string, string>> = { tree: 'material_windfall_wood', palm: 'material_windfall_wood' };
+
+const FEATURE_GIVES: Readonly<Record<string, string>> = {
+  log: 'material_windfall_wood',
+  driftwood: 'material_windfall_wood',
+  bamboo: 'material_bamboo_cane'
+};
 
 /** Whether there is anything to pick up here. What a prompt asks before it appears. */
 export function anythingAt(seed: string, at: Point, biome: BiomeId): boolean {

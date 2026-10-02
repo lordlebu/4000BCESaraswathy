@@ -72,11 +72,74 @@ export function placeAllows(recipeId: string, bench: Bench): boolean {
   return bench.kind !== null && p.performedAt.includes(bench.kind);
 }
 
-/** Affordances the process needs that nothing carried provides. */
-export function missingTools(satchel: Satchel, recipeId: string): string[] {
+/**
+ * What lights a cook fire: any carried material of these kinds.
+ *
+ * **The owner's ruling, 2 October 2026** (`docs/satchel-and-hearth.md`, phase 3). Canon calls dung
+ * cake a fuel, and the owner carried a satchel of it -- but every cooking recipe asked for a carried
+ * *thing* that burns, a bow drill or a torch, and fuel was only ever an ingredient in a kiln. So a
+ * satchel full of fuel could not cook anything. Now any one fuel lights the fire for one meal, from
+ * the kit's own lamp, which is always carried; the meal spends it. The way other games do it --
+ * Valheim's campfire, Don't Starve's fire pit -- is fuel into a fire, and food over the fire.
+ */
+export const FIRE_FOR: readonly MaterialClass[] = ['fuel'];
+
+/**
+ * Where a fire is already lit, so cooking spends nothing on one: a settlement's hearths, and the
+ * fires at a road's stopping place. Point-of-interest kinds, as a `Bench` reports them.
+ */
+export const HEARTH_AT: readonly string[] = ['settlement', 'travel_node'];
+
+/** The process a cook fire answers. Only cooking: a kiln is a kiln, and asks for more than a meal. */
+const COOKING = 'process_cooking';
+
+/**
+ * How a cooking recipe will be fired here, or null if it will not.
+ *
+ * In order: something carried that burns already does it, and nothing is spent; a hearth here does
+ * it, and nothing is spent; otherwise one carried fuel does it and the meal spends it -- the most
+ * plentiful, so the last dung cake is not the one burned while ten pine resins sit beside it.
+ */
+export function fireFor(
+  satchel: Satchel,
+  recipeId: string,
+  bench: Bench = openGround()
+): { by: 'tool' } | { by: 'hearth' } | { by: 'fuel'; fuel: string } | null {
+  const r = recipe(recipeId);
+  if (!r || r.process !== COOKING) return null;
+  if (affording(satchel, 'burn').length > 0) return { by: 'tool' };
+  if (bench.kind !== null && HEARTH_AT.includes(bench.kind)) return { by: 'hearth' };
+  // A fuel the dish is cooked from is not also the fire under it: one is burned only if every
+  // ingredient is still met without it -- beedu oil is an oil and a fuel, and a dish of it must not
+  // lose its oil to the fire.
+  const fuel = FIRE_FOR.flatMap((kind) => satisfying(satchel, kind))
+    .sort((a, b) => count(satchel, b) - count(satchel, a) || (a < b ? -1 : 1))
+    .find((id) => {
+      const left = remove(satchel, id, 1);
+      return r.ingredients.every((need) => haveIngredient(left, need));
+    });
+  return fuel ? { by: 'fuel', fuel } : null;
+}
+
+/**
+ * What the fire under a dish will be, in words, for the workshop to say before the press: "burns
+ * one dung cake, lit from your lamp", "over a hearth here". Null where nothing needs saying -- not
+ * cooking, or something carried already burns.
+ */
+export function fireLine(satchel: Satchel, recipeId: string, bench: Bench = openGround()): string | null {
+  const fire = fireFor(satchel, recipeId, bench);
+  if (!fire || fire.by === 'tool') return null;
+  if (fire.by === 'hearth') return 'over a hearth here, which costs nothing';
+  return `burns one ${nameOf(fire.fuel).toLowerCase()}, lit from your lamp`;
+}
+
+/** Affordances the process needs that nothing carried provides -- a cook fire answering `burn`. */
+export function missingTools(satchel: Satchel, recipeId: string, bench: Bench = openGround()): string[] {
   const p = process(recipe(recipeId)?.process ?? '');
   if (!p) return [];
-  return p.needs.filter((n) => affording(satchel, n).length === 0);
+  return p.needs.filter(
+    (n) => affording(satchel, n).length === 0 && !(n === 'burn' && fireFor(satchel, recipeId, bench) !== null)
+  );
 }
 
 /**
@@ -89,7 +152,7 @@ export function canMake(satchel: Satchel, recipeId: string, bench: Bench = openG
   const r = recipe(recipeId);
   if (!r) return false;
   if (!placeAllows(recipeId, bench)) return false;
-  if (missingTools(satchel, recipeId).length > 0) return false;
+  if (missingTools(satchel, recipeId, bench).length > 0) return false;
   return r.ingredients.every((need) => haveIngredient(satchel, need));
 }
 
@@ -129,8 +192,11 @@ export function shortfalls(satchel: Satchel, recipeId: string, bench: Bench = op
     const where = process(r.process)?.performedAt ?? [];
     out.push({ kind: 'place', why: `needs to be done at a ${where.join(' or ')}`, places: where });
   }
-  for (const tool of missingTools(satchel, recipeId)) {
-    out.push({ kind: 'tool', why: `needs something that can ${tool}`, affordance: tool });
+  for (const tool of missingTools(satchel, recipeId, bench)) {
+    // A cook fire can be fuel as well as a tool, and saying only "something that can burn" sent
+    // the owner looking for a bow drill with a satchel full of dung cakes.
+    const fuel = tool === 'burn' && r.process === COOKING ? ', or any fuel to light a fire' : '';
+    out.push({ kind: 'tool', why: `needs something that can ${tool}${fuel}`, affordance: tool });
   }
   for (const need of r.ingredients) {
     if (haveIngredient(satchel, need)) continue;
@@ -158,7 +224,10 @@ export function shortfalls(satchel: Satchel, recipeId: string, bench: Bench = op
 export function make(satchel: Satchel, recipeId: string, bench: Bench = openGround()): Satchel {
   if (!canMake(satchel, recipeId, bench)) return satchel;
   const r = recipe(recipeId)!;
-  let next = satchel;
+  // The fire first, decided against the satchel as it stands, so the fuel it burns is one the dish
+  // was not about to use. Burned only when no tool or hearth already does the work.
+  const fire = fireFor(satchel, recipeId, bench);
+  let next = fire?.by === 'fuel' ? remove(satchel, fire.fuel, 1) : satchel;
 
   for (const need of r.ingredients) {
     if (need.kept) continue;

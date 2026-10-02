@@ -1,5 +1,5 @@
 {
-  "canon_version": "2.47.0",
+  "canon_version": "2.48.0",
   "materials": [
     {
       "id": "material_reed_fibre",
@@ -1479,6 +1479,62 @@
       "renews": "seasonal",
       "notes": "The painted deer already gave canon its antler and its sinew, and an animal that gives both gives its skin. Lighter than goat hide and the delta's ordinary leather, which is why a bedroll on Lothal is backed with it.",
       "source_index": 77
+    },
+    {
+      "id": "material_windfall_wood",
+      "type": "material",
+      "name": "Windfall wood",
+      "classes": [
+        "timber",
+        "fuel"
+      ],
+      "won_from": [
+        "flora_aero_mangrove_vayu_vriksha",
+        "flora_bonewood_mangrove",
+        "flora_crimson_leaved_ash_banyan",
+        "flora_date_palm",
+        "flora_ghost_mangrove",
+        "flora_giant_mangrove_palm",
+        "flora_haritaki",
+        "flora_highland_bitter_mahua",
+        "flora_iron_root_mangrove",
+        "flora_iron_teak",
+        "flora_ivory_coastal_bonewood",
+        "flora_jackfruit",
+        "flora_mahua",
+        "flora_mango",
+        "flora_mappa_mundi_banyan",
+        "flora_neem",
+        "flora_nux_vomica",
+        "flora_oasis_date_palm",
+        "flora_palmyra_palm",
+        "flora_plunging_fire_siege_tree",
+        "flora_root_anchored_artillery_tree",
+        "flora_sandalwood",
+        "flora_silver_leaved_oracle_fig",
+        "flora_spiny_acacia",
+        "flora_sweet_nectar_mahua",
+        "flora_tamarind",
+        "flora_vindhya_pine",
+        "flora_weeping_charcoal_tree",
+        "flora_whisper_fig"
+      ],
+      "found_in": [
+        "forest",
+        "coast",
+        "hills",
+        "mountains",
+        "plains",
+        "river",
+        "wetland",
+        "settlement",
+        "desert",
+        "sky_island"
+      ],
+      "rarity": "common",
+      "renews": "fast",
+      "notes": "Whatever a tree lets fall: limbs brought down by the monsoon, a trunk the river undercut, the dead lower branches anyone may take. Every tree gives it and none is felled for it, which is why it comes back as fast as weather does. Straight enough for a pole and dry enough for a fire -- the stuff a traveller actually builds and cooks with, where teak and sandalwood are what a city builds with. Added on the owner's ruling of 2 October 2026 that the trunks a traveller walks past should be good for something.",
+      "source_index": 78
     }
   ],
   "items": [
@@ -3073,12 +3129,8 @@
       "process": "process_weaving",
       "ingredients": [
         {
-          "material": "material_bamboo_cane",
-          "count": 2
-        },
-        {
           "tag": "#fibre",
-          "count": 4
+          "count": 6
         }
       ],
       "outputs": [
@@ -3329,7 +3381,7 @@
       "process": "process_carving",
       "ingredients": [
         {
-          "material": "material_bamboo_cane",
+          "tag": "#timber",
           "count": 4
         },
         {
@@ -3397,7 +3449,7 @@
       "process": "process_carving",
       "ingredients": [
         {
-          "material": "material_bamboo_cane",
+          "tag": "#timber",
           "count": 2
         },
         {
@@ -3795,7 +3847,7 @@
       "process": "process_weaving",
       "ingredients": [
         {
-          "material": "material_bamboo_cane",
+          "tag": "#timber",
           "count": 6
         },
         {
@@ -3996,7 +4048,7 @@
           "count": 4
         },
         {
-          "material": "material_bamboo_cane",
+          "tag": "#timber",
           "count": 3
         },
         {

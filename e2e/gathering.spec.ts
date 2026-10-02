@@ -154,3 +154,21 @@ test('E opens the activity, and typing an E does not', async ({ page }) => {
   await expect(modal, 'the hotkey fired while a text field had focus').toBeHidden();
   await expect(page.locator('#typing-probe')).toHaveValue('e');
 });
+
+// **Following an animal shows the act, with the animal in the corner** (owner's ruling, 2 October
+// 2026). 15,3 is forest on this seed where only the painted deer gives anything, so the take row is
+// a stalk -- found by searching the seed in Node, not hoped for. At six in the evening,
+// because a deer sleeps through the middle of the day and this seed's first morning is wet, and
+// either greys the row. The plate used to fill the card;
+// now `stalk-follow.png` does and the deer's plate sits inset.
+test('following an animal shows the act, with its plate in the corner', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto(`/?seed=${SEED}&hour=18&at=15,3`);
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  const follow = page.locator('.tile-actions button').filter({ hasText: /Follow it/ }).first();
+  await expect(follow, 'the deer tile no longer offers a stalk').toBeEnabled({ timeout: 20_000 });
+  await follow.click();
+  const card = page.locator('[role="dialog"] .activity-card');
+  await expect(card.locator('img.activity-scene')).toHaveAttribute('src', /stalk-follow/);
+  await expect(card.locator('img.activity-inset')).toHaveAttribute('src', /painted-deer/);
+});

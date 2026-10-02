@@ -177,6 +177,33 @@ describe('the activity card', () => {
     expect(img?.getAttribute('aria-hidden')).toBe('true');
   });
 
+  /**
+   * **Following an animal shows the act, with the animal in the corner** (owner's ruling, 2 October
+   * 2026). The plate used to fill the card; the plain stalking painting could not replace it because
+   * it shows a buffalo, so `stalk-follow.png` -- no animal in it -- fills the card and the plate sits
+   * inset, saying which animal.
+   */
+  it('follows an animal with the act filling the card and its plate in the corner', () => {
+    open({ gesture: 'stalk', creatureId: 'painted-deer', creatureName: 'Painted Deer', variant: 'forest' });
+    expect(document.querySelector('img.activity-scene')?.getAttribute('src')).toMatch(/stalk-follow/);
+    expect(document.querySelector('img.activity-inset')?.getAttribute('src')).toMatch(/painted-deer/);
+  });
+
+  it('casts with the water filling the card and the fish in the corner', () => {
+    open({ gesture: 'fish', creatureId: 'estuary-sawfish', creatureName: 'Estuary Sawfish', variant: 'river' });
+    expect(document.querySelector('img.activity-scene')?.getAttribute('src')).toMatch(/\/fish/);
+    expect(document.querySelector('img.activity-inset')?.getAttribute('src')).toMatch(/estuary-sawfish/);
+  });
+
+  it('draws no inset for an animal with no plate, and none for a take with no animal', () => {
+    open({ gesture: 'stalk', creatureId: 'no-such-animal', creatureName: 'Nobody', variant: 'forest' });
+    expect(document.querySelector('img.activity-scene')?.getAttribute('src')).toMatch(/stalk-follow/);
+    expect(document.querySelector('img.activity-inset')).toBeNull();
+    cleanup();
+    open({ gesture: 'stoop' });
+    expect(document.querySelector('img.activity-inset')).toBeNull();
+  });
+
   it('hands over the haul once, and only once, on one press', () => {
     const { onFinish } = open();
     fireEvent.click(screen.getByRole('button', { name: /Cut and gather/ }));
