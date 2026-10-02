@@ -177,6 +177,50 @@ every one onto walkable ground, because `untangle` only steps onto a walkable ne
 removed. The scene also hides anybody whose tile is not walkable rather than draw them in the water,
 should a future change ever put them there.
 
+## Where a camp stands, and how it is drawn
+
+Three notes from the owner on screenshots of the finished camps, all on 2 October 2026.
+
+**In a clearing, never in the jungle.** Forest was camp ground, and a lean-to pitched among the
+canopy read as lost in the woods rather than as somewhere people had chosen. Forest is no longer in
+`CAMP_GROUND`, so the fire and every piece stand on open ground, and woods may stand round the edge
+of the clearing. Open ground still carries the odd lone tree, and one on the fire's tile or under the
+tent put the camp back in the woods, so while a camp stands the scene fades out any standing feature
+in the 3×3 round the fire and on every tile a piece uses, along with its contact shade, and puts it
+back when the camp is struck (`clearCampGround`). Measured over eight seeds:
+
+| Map | Sites with forest | Without | Days a camp stands |
+|---|---|---|---|
+| Lothal | 536-954 | 210-550 | 49%, unchanged |
+| Dwarka | 572-932 | 572-932 | 50%, unchanged |
+| Narmada | 2,654-2,891 | 1,817-2,531 | 50%, unchanged |
+| Aravali | 564-675 | 209-450 | 49%, unchanged; 79 of 165 on a sky island, unchanged |
+
+**Shadows under the pieces, tucked under the base.** The first cut gave each piece one ellipse the
+width of the whole image, centred two pixels above the image's bottom edge. That edge is not the
+ground: the props are cut from painted sheets with up to thirteen clear pixels under a tent and none
+under a pack, so on the tents the shadow hung below the canvas as a separate grey disc. A second cut
+measured the ground and centred the shadow just in front of it, and the owner read it at once: *a
+shadow that starts below the art makes the art float*. Now:
+
+- `footprintOf` reads each piece's pixels once: the lowest painted row, and how wide the piece is
+  over the lowest eighth of it, which is the part touching the ground.
+- `castUnder` lays two layers of the world's contact shade, both centred *above* that line: a broad,
+  soft one, and a narrow, darker one along the line itself. The darkest part of each is hidden behind
+  the piece where it meets the ground, and only the fringe shows, a few pixels in front and out at the
+  sides. The soft layer is capped at 34 pixels deep, so a wide tent does not throw a pool.
+- Flat things cast none: the fire ring and the drovers' thorn fold. The turn-off marker casts one.
+- **People cast none.** Walkers, camp folk and visitors are drawn without a shadow, on the owner's
+  standing ruling; only the player has one.
+
+**Light at night.** Every camp's fire has glowed after dark since camps first had a fire, with the
+street lamps' pool of light on their clock (`glowAt`). The pilgrims' cairn is painted with an oil lamp
+alight, and it was dark at night. `CAMP_FLAMES` in `game/campArt.ts` names the flame's pixel, read off
+the art, and the scene lights a smaller pool there on the same clock, both at the camp and on the
+cairn that marks the turn-off, so the way in shows a light by the road after dark.
+`test/campLife.test.ts` checks the named pixel is flame-coloured, so a repainted piece cannot leave
+the light shining on bare ground. A new piece painted with a flame takes one line there.
+
 ## Rules worth not undoing
 
 - **Nobody follows the player.** Camp people keep to their spots and the way. They never fall in
@@ -192,3 +236,5 @@ should a future change ever put them there.
   travellers there and a visitor turns off there.
 - **Nothing is saved.** Who is at a camp, where they stand, the runner's day and the visitor's are
   all pure functions of seed, map, day and hour. No version moved.
+- **A camp is in a clearing.** Forest is not camp ground, and lone trees on a camp's tiles are faded
+  while it stands. A shadow is tucked under its piece, never in front of it.

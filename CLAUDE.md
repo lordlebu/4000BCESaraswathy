@@ -253,7 +253,7 @@ The art docs, in the order they are useful:
 |---|---|
 | `docs/retrospective.md` | **read first**: the whole project to 28 September 2026, what worked, what did not, what next |
 | `docs/settling-in.md` | the Settling In plan, concluded: camps, cart points, homesteads, and what was measured |
-| `docs/living-camps.md` | camps with people: the measurements, the rulings, the way in's look, and the rail questions deferred |
+| `docs/living-camps.md` | camps with people: the measurements, the rulings, the way in's look, the rail decided, clearings, shadows and night light |
 | `docs/endgame-plan.md` | the programme, closed; what shipped, what is parked, what was declined |
 | `docs/art-direction.md` | the five rules the art follows, and what each one cost to learn |
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |
@@ -712,6 +712,12 @@ retrospective. The rules, because they are rules rather than history:
   ground, no road, rail, rope, plank, bridge or ford, and no rim over sea or open sky -- and a site
   counts only if the whole camp fits; otherwise no camp. The alms step's temple, which draws two tiles
   wide, likewise needs island grass on all eight sides (`NEEDS_GRASS_ROUND`); the mill does not.
+- **A camp is pitched in a clearing, never in forest** (owner's ruling). Forest is not in
+  `CAMP_GROUND`, and while a camp stands the scene fades any lone tree round its fire or under its
+  pieces (`clearCampGround`). A piece's shadow is measured from its own pixels (`footprintOf`) and
+  **tucked under the base** (`castUnder`): one centred below the art makes it float, which is what
+  the second cut did. People still cast none. A painted flame on a piece is lit after dark from
+  `CAMP_FLAMES`, on the lamps' clock.
 - **Nobody is drawn standing in the sea.** `untangle` steps only onto walkable ground, and the scene
   hides anybody whose tile is not walkable. `test/campLife.test.ts` replays every placement on every
   map to hold it.

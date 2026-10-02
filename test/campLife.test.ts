@@ -6,6 +6,7 @@
 // camps stayed exactly as empty as they were. That the people reach the screen is
 // `e2e/camp-life.spec.ts`.
 
+import { createRequire } from 'node:module';
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { isWalkable } from '../src/world/generate';
@@ -27,7 +28,7 @@ import {
 } from '../src/content/campLife';
 import { atHour, hoursFor, placedCircuit, travellersOn, untangle, walkedRoad, whereabouts } from '../src/content/travellers';
 import { CAMP_DAY, VISIT_PACE_CAP } from '../src/content/tiers';
-import { CAMP_LAYOUT, CROSSED_GROUND, PRINTED_GROUND, carriesTint, troddenColour } from '../src/game/campArt';
+import { CAMP_FLAMES, CAMP_LAYOUT, CROSSED_GROUND, PRINTED_GROUND, carriesTint, troddenColour } from '../src/game/campArt';
 import { spendNight } from '../src/game/night';
 import type { Point } from '../src/world/types';
 
@@ -405,6 +406,28 @@ describe('a camp stands on the grass, never on the edge', () => {
     expect(camps).toBeGreaterThan(50);
   });
 
+  it('is pitched in a clearing: nothing it puts down stands in the forest', () => {
+    // The owner's note, from a screenshot of a lean-to among the canopy: camps are made in
+    // clearings. Woods may stand round the edge; the fire and every piece are on open ground.
+    let camps = 0;
+    for (const map of fieldMaps) {
+      for (const seed of SEEDS) {
+        const { world, out } = campsOn(map.id, seed);
+        for (const { camp } of out) {
+          camps++;
+          const props = campSpots(world, camp).around.slice(0, PROPS_AROUND[camp.kind]);
+          for (const p of [camp.at, ...props]) {
+            expect(world.tiles[p.y]![p.x]!.biome, `${map.id} ${seed} ${camp.id} at ${p.x},${p.y}`).not.toBe('forest');
+          }
+        }
+      }
+    }
+    expect(camps).toBeGreaterThan(50);
+    const forest = { biome: 'forest' };
+    const tiles = [0, 1, 2].map((y) => [0, 1, 2].map((x) => ({ x, y, ...forest })));
+    expect(campable({ width: 3, height: 3, tiles } as never, { x: 1, y: 1 }), 'the middle of a wood').toBe(false);
+  });
+
   it('keeps off the rim of a sky island and off its planks', () => {
     const island = (biome: string, extra: object = {}) => ({ biome, ...extra });
     // A 5x5 island with sky all round, and a plank in the middle of one side.
@@ -421,5 +444,28 @@ describe('a camp stands on the grass, never on the edge', () => {
     expect(campable(world, { x: 1, y: 3 }), 'the rim, beside open sky').toBe(false);
     expect(campable(world, { x: 4, y: 3 }), 'beside the plank').toBe(false);
     expect(campable(world, { x: 5, y: 3 }), 'the plank itself').toBe(false);
+  });
+});
+
+describe('the small lights a camp carries', () => {
+  it('lights a flame that is painted on the piece, not beside it', () => {
+    // `CAMP_FLAMES` is read off the art by eye and stated, so a repainted piece could move its
+    // flame and leave the light shining on bare ground. The pixel named must be a flame's colour.
+    const { decodePng } = createRequire(import.meta.url)('../tools/sprite-png.js') as {
+      decodePng: (path: string) => { width: number; height: number; data: Uint8Array };
+    };
+    expect(Object.keys(CAMP_FLAMES).length).toBeGreaterThan(0);
+    for (const [key, at] of Object.entries(CAMP_FLAMES)) {
+      const { width, height, data } = decodePng(`assets/camps/${key.replace(/^camp-/, '')}.png`);
+      expect(at.x < width && at.y < height, `${key}: the flame is off the piece`).toBe(true);
+      let warm = 0;
+      for (let dy = -2; dy <= 2; dy++) {
+        for (let dx = -2; dx <= 2; dx++) {
+          const i = ((at.y + dy) * width + (at.x + dx)) * 4;
+          if (data[i + 3]! > 200 && data[i]! > 230 && data[i + 1]! > 150 && data[i + 2]! < 140) warm++;
+        }
+      }
+      expect(warm, `${key}: no flame-coloured pixels at ${at.x},${at.y}`).toBeGreaterThan(2);
+    }
   });
 });

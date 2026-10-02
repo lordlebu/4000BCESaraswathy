@@ -145,7 +145,7 @@ test('the way in is shown as the walker comes along it, and leads to the camp', 
 
 test('at the meal you can eat with them, and at night only the watch is up', async ({ page }) => {
   const { seed, day, camp } = await findDay(page, (c, d) => d > c.from && d < c.to - 1);
-  expect(await standNear(page, seed, day, 18, camp), 'nowhere to stand near the camp').toBe(true);
+  expect(await standNear(page, seed, day, 17, camp), 'nowhere to stand near the camp').toBe(true);
   await expect.poll(async () => (await keepers(page, camp)).filter((t) => t.visible).length, { timeout: 20_000 }).toBe(3);
 
   // Tap the watch -- not the leader, whose first word is the camp's own card -- and talk to them.

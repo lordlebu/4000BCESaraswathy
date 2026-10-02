@@ -49,11 +49,16 @@ export const AWAY_FROM_PLACES = 5;
 export const AWAY_FROM_ROADS = 3;
 
 /**
- * Ground a camp pitches on: dry, and not built on. The sky islands too, on the owner's word of
+ * Ground a camp pitches on: dry, open, and not built on. The sky islands too, on the owner's word of
  * 2 October 2026 -- a camp may be anywhere a person can be -- and preferably the northern one, the
  * Grit Mill's (`skyGround`).
+ *
+ * **Never forest.** A camp is made in a clearing, on the owner's word of the same day: the first
+ * cut allowed forest, and a lean-to pitched among the canopy read as lost in the jungle rather than
+ * as somewhere people had chosen. Woods may stand round the edge of the clearing; nothing the camp
+ * puts down stands in them, because every prop tile is asked `campable` as well.
  */
-const CAMP_GROUND = new Set(['plains', 'forest', 'hills', 'desert', 'settlement', 'snow', 'sky_island']);
+const CAMP_GROUND = new Set(['plains', 'hills', 'desert', 'settlement', 'snow', 'sky_island']);
 
 /**
  * How often a camp on a map with a sky island pitches up there rather than anywhere: one turn in

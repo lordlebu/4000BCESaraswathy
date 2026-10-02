@@ -41,6 +41,19 @@ export const CAMP_LAYOUT: Readonly<Record<CampKind, CampLayout>> = {
   drovers: { shelter: 2, extras: [3], ground: 1 } // felt tent; a rack of skins; the thorn fold underneath
 };
 
+/**
+ * A piece that carries a flame of its own, and where the flame is in the piece's own pixels.
+ *
+ * Lit after dark with the same pool of light and on the same clock as a road's lamps, so a camp
+ * shows its fire and its small lights together. Only the pilgrims' cairn has one: the owner's note
+ * of 2 October 2026, on seeing its oil lamp painted alight and dark at night. Read off the art --
+ * the brightest warm pixels at the cairn's foot -- and stated here rather than searched for, as the
+ * layout above is. A new piece painted with a flame is a line here.
+ */
+export const CAMP_FLAMES: Readonly<Record<string, { x: number; y: number }>> = {
+  [campKey('pilgrims', 3)]: { x: 17, y: 95 }
+};
+
 /** About one camp in three is pitched round the old yurt instead of the kind's own shelter. */
 export const YURT_ONE_IN = 3;
 

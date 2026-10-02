@@ -114,6 +114,7 @@ import {
   PRINTED_GROUND,
   YURT_ONE_IN,
   campKey,
+  CAMP_FLAMES,
   campPieces,
   carriesTint,
   troddenColour
@@ -566,8 +567,12 @@ export class WorldScene extends Phaser.Scene {
     sprites: Phaser.GameObjects.Image[];
     /** The shelter and its shadow, put up on the first morning and struck on the last afternoon. */
     shelter: Phaser.GameObjects.Image[];
+    /** The trees cleared off the camp's own tiles while it stands, and the alpha each had. See `clearCampGround`. */
+    cleared: { sprite: Phaser.GameObjects.Image; alpha: number }[];
     /** Firelight after dark, like a lamp's. */
     glow: Phaser.GameObjects.Image | null;
+    /** The small flames the camp's pieces carry, lit with the fire. See `CAMP_FLAMES`. */
+    lamps: { key: string; sprite: Phaser.GameObjects.Image }[];
     /** The way in from the road, and the trodden tiles drawn along it. See `drawTrodden`. */
     way: WayIn | null;
     trodden: { key: string; sprite: Phaser.GameObjects.Image }[];
@@ -1929,8 +1934,10 @@ export class WorldScene extends Phaser.Scene {
     const today = encampmentOn(this.world, this.built.fieldMap.id, places, day);
     if (this.camp && this.camp.id !== today?.id) {
       for (const s of this.camp.sprites) s.destroy();
+      for (const c of this.camp.cleared) c.sprite.setAlpha(c.alpha);
       this.camp.smoke?.destroy();
       this.camp.glow?.destroy();
+      for (const l of this.camp.lamps) l.sprite.destroy();
       // The way stays on the ground a few days, faded, with the ashes: `drawAshes` keeps it.
       for (const t of this.camp.trodden) t.sprite.destroy();
       this.camp = null;
@@ -1968,6 +1975,7 @@ export class WorldScene extends Phaser.Scene {
     const layout = CAMP_LAYOUT[camp.kind];
     const foot = (at: Point) => ({ x: at.x * TILE_SIZE + TILE_SIZE / 2, y: at.y * TILE_SIZE + TILE_SIZE - 6 });
     const sprites: { img: Phaser.GameObjects.Image; at: Point }[] = [];
+    const lamps: { key: string; sprite: Phaser.GameObjects.Image }[] = [];
     const piece = (key: string, frame: number | undefined, at: Point, slot: number, scale = 1, shadow = true) => {
       const { x, y } = foot(at);
       const depth = depthFor(at.y, ROW_SLOT.marker) + slot;
@@ -1976,16 +1984,17 @@ export class WorldScene extends Phaser.Scene {
         .setScale(scale)
         .setDepth(depth);
       const made = [img];
-      // **A slight shadow under anything that stands** -- the owner's ask, the same soft ellipse the
-      // traveller casts, as wide as most of the piece and a fifth as deep. A fold or a fire ring lies
-      // flat on the ground and casts none.
+      // A shadow under anything that stands, laid before the piece in the list as well as in depth.
+      // A fold or a fire ring lies flat on the ground and casts none. See `castUnder`.
       if (shadow) {
-        const w = img.displayWidth * 0.85;
-        const under = this.add.image(x, y - 2, SHADOW_TEXTURE).setDisplaySize(w, w * 0.22).setAlpha(0.45).setDepth(depth - 0.5);
-        sprites.push({ img: under, at });
-        made.push(under);
+        for (const under of this.castUnder(img, at)) {
+          sprites.push({ img: under, at });
+          made.push(under);
+        }
       }
       sprites.push({ img, at });
+      const flame = this.flameOn(img, at);
+      if (flame) lamps.push(flame);
       return made;
     };
 
@@ -2008,6 +2017,7 @@ export class WorldScene extends Phaser.Scene {
     layout.extras.forEach((n, i) => piece(campKey(camp.kind, n), undefined, spot(i + 1), 2));
 
     for (const s of sprites) s.img.setName(`camp:${camp.kind}`);
+    const cleared = this.clearCampGround(camp, sprites.map((s) => s.at));
     for (const s of shelter) s.setName(`camp-shelter:${camp.kind}`);
     const fire = foot(camp.at);
     const glow = this.add
@@ -2025,9 +2035,11 @@ export class WorldScene extends Phaser.Scene {
       sprites: sprites.map((s) => s.img),
       tiles: sprites.map((s) => `${s.at.x},${s.at.y}`),
       shelter,
+      cleared,
       glow,
+      lamps,
       way,
-      trodden: this.drawTrodden(camp, way, 0.75),
+      trodden: this.drawTrodden(camp, way, 0.75, lamps),
       smokeAt: '',
       smoke: this.campSmoke(fire.x, fire.y - 30)
     };
@@ -2042,7 +2054,12 @@ export class WorldScene extends Phaser.Scene {
    * costs. Drawn under everything that stands, and shown tile by tile as the fog lifts. While the
    * camp stands it is plain; for the few days the ashes lie, faint.
    */
-  private drawTrodden(camp: Encampment, way: WayIn | null, alpha: number): { key: string; sprite: Phaser.GameObjects.Image }[] {
+  private drawTrodden(
+    camp: Encampment,
+    way: WayIn | null,
+    alpha: number,
+    lamps: { key: string; sprite: Phaser.GameObjects.Image }[] = []
+  ): { key: string; sprite: Phaser.GameObjects.Image }[] {
     if (!way) return [];
     // Both drawn white and tinted per tile by `troddenColour`, so the way is the ground's own colour.
     if (!this.textures.exists('camp-prints')) {
@@ -2146,19 +2163,135 @@ export class WorldScene extends Phaser.Scene {
         .setDepth(depthFor(first.y, ROW_SLOT.marker))
         .setVisible(this.discovered.has(`${first.x},${first.y}`))
         .setName('camp-turnoff');
+      for (const under of this.castUnder(sprite, first)) {
+        out.push({ key: `${first.x},${first.y}`, sprite: under.setVisible(sprite.visible).setName('camp-turnoff-shade') });
+      }
       out.push({ key: `${first.x},${first.y}`, sprite });
+      // The pilgrims' cairn keeps its lamp lit at the turn-off too: a light by the road after dark.
+      const flame = this.flameOn(sprite, first);
+      if (flame) lamps.push(flame);
     }
     return out;
   }
 
   /** The painted tiles' average colours, by texture and frame. See `groundColourAt`. */
   private groundColours = new Map<string, number | null>();
+  /** Where each camp piece meets the ground, read from its pixels once. See `footprintOf`. */
+  private footprints = new Map<string, { bottom: number; left: number; right: number }>();
 
   /**
    * The average colour of the painted tile at this point, read from its own pixels: a five by five
    * grid of samples across the frame, ignoring anything transparent. Cached per picture, since the
    * same crop of grass is drawn on many tiles. Null when the texture cannot be read.
    */
+  /**
+   * Where a piece of art actually stands: the bottom of what is painted, and how wide it is there.
+   *
+   * The camp props are cut from painted sheets with uneven margins -- up to thirteen clear pixels
+   * under a tent, none under a pack -- so the image's own bottom edge is not the ground. Read once per
+   * texture from the pixels and kept. Width is taken over the lowest eighth of the figure, the part
+   * that touches the ground, not the widest part: a hide rack's poles splay above its feet.
+   */
+  private footprintOf(img: Phaser.GameObjects.Image): { bottom: number; left: number; right: number } {
+    const id = `${img.texture.key}#${img.frame.name}`;
+    const had = this.footprints.get(id);
+    if (had) return had;
+    const { width, height, cutX, cutY } = img.frame;
+    const whole = { bottom: height - 1, left: 0, right: width - 1 };
+    let found = whole;
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const source = img.frame.source.image as CanvasImageSource;
+      if (ctx) {
+        ctx.drawImage(source, cutX, cutY, width, height, 0, 0, width, height);
+        const data = ctx.getImageData(0, 0, width, height).data;
+        const solid = (x: number, y: number) => data[(y * width + x) * 4 + 3]! > 48;
+        let top = -1;
+        let bottom = -1;
+        for (let y = 0; y < height && top < 0; y++) for (let x = 0; x < width; x++) if (solid(x, y)) { top = y; break; }
+        for (let y = height - 1; y >= 0 && bottom < 0; y--) for (let x = 0; x < width; x++) if (solid(x, y)) { bottom = y; break; }
+        if (top >= 0 && bottom >= top) {
+          const band = Math.max(3, Math.round((bottom - top) / 8));
+          let left = width;
+          let right = -1;
+          for (let y = bottom - band; y <= bottom; y++) {
+            for (let x = 0; x < width; x++) {
+              if (!solid(x, y)) continue;
+              left = Math.min(left, x);
+              right = Math.max(right, x);
+            }
+          }
+          if (right >= left) found = { bottom, left, right };
+        }
+      }
+    } catch {
+      // A texture the canvas cannot read: the whole image is the footprint, as it was before.
+    }
+    this.footprints.set(id, found);
+    return found;
+  }
+
+  /**
+   * The shadow under a camp piece, sized to where the piece meets the ground.
+   *
+   * **Two layers, as a painter shades a thing standing in daylight.** A broad, soft one -- the light
+   * the piece keeps off the ground round it -- and a narrow, darker one along the very line it
+   * touches, which is what stops a tent reading as a sticker. The first cut was one ellipse the
+   * width of the whole image and centred two pixels above an edge that was not the ground: on the
+   * tents it hung below the canvas as a separate grey disc, and on the narrow pieces it was a smear
+   * wider than the thing it belonged to.
+   *
+   * Both are placed from `footprintOf`, so the base sits *in* its shadow rather than above it. The
+   * colour and the texture are the world's contact shade, and the depth is its slot: on the ground,
+   * under the piece and anything else standing on that row.
+   */
+  private castUnder(img: Phaser.GameObjects.Image, at: Point): Phaser.GameObjects.Image[] {
+    const { bottom, left, right } = this.footprintOf(img);
+    const scale = img.scaleX;
+    const ground = img.y - (img.frame.height - 1 - bottom) * scale;
+    const cx = img.x + ((left + right) / 2 - img.frame.width / 2) * scale;
+    const base = Math.max(12, (right - left + 1) * scale);
+    const depth = depthFor(at.y, ROW_SLOT.underfoot) + 0.6;
+    // **Tucked under the base, never in front of it.** The second cut centred the soft layer just in
+    // front of the base line, and the owner read it at once: a shadow that starts below the art makes
+    // the art float above it. Both layers are centred *above* the line, so the darkest part of each is
+    // hidden behind the piece where it meets the ground, and only the soft fringe shows -- a few pixels
+    // in front and out at the sides. Capped in depth, so a wide tent does not throw a pool.
+    const soft = Math.min(34, Math.max(10, base * 0.2));
+    const core = Math.min(12, Math.max(5, base * 0.08));
+    return [
+      this.add.image(cx, ground - soft * 0.3, SHADOW_TEXTURE).setDisplaySize(base * 1.1, soft).setDepth(depth),
+      this.add.image(cx, ground - core * 0.3, SHADOW_TEXTURE).setDisplaySize(base * 0.92, core).setDepth(depth + 0.1)
+    ];
+  }
+
+  /**
+   * A camp is pitched in a clearing, so nothing tall stands on the ground it uses.
+   *
+   * Forest is never camp ground (`campable`), but open ground still carries the odd lone tree, and
+   * one on the fire's tile or under the tent put the camp back in the woods. While the camp stands,
+   * any standing feature round the fire or on a tile the camp uses -- and the contact shade under it --
+   * is faded out, and put back exactly as it was when the camp is struck. Faded rather than hidden,
+   * because the cull owns `visible` and resets it as the camera moves.
+   */
+  private clearCampGround(camp: Encampment, tiles: readonly Point[]): { sprite: Phaser.GameObjects.Image; alpha: number }[] {
+    const used = new Set(tiles.map((p) => `${p.x},${p.y}`));
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) used.add(`${camp.at.x + dx},${camp.at.y + dy}`);
+    const tall = new Set([SHEET_KEY.trees, SHEET_KEY.features, SHADOW_TEXTURE]);
+    const out: { sprite: Phaser.GameObjects.Image; alpha: number }[] = [];
+    for (const owned of this.tileOwned) {
+      if (!used.has(`${owned.x},${owned.y}`)) continue;
+      const sprite = owned.sprite as Phaser.GameObjects.Image;
+      if (!sprite.texture || !tall.has(sprite.texture.key)) continue;
+      out.push({ sprite, alpha: sprite.alpha });
+      sprite.setAlpha(0);
+    }
+    return out;
+  }
+
   private groundColourAt(p: Point): number | null {
     const img = this.tileSprites[p.y]?.[p.x];
     if (!img) return null;
@@ -2231,6 +2364,28 @@ export class WorldScene extends Phaser.Scene {
       camp.smoke?.setFrequency(smoke === 'thick' ? 150 : smoke === 'thread' ? 900 : 260);
     }
     camp.glow?.setVisible(this.discovered.has(camp.key)).setAlpha(Math.max(0, this.glowAt));
+    for (const l of camp.lamps) l.sprite.setVisible(this.discovered.has(l.key)).setAlpha(Math.max(0, this.glowAt));
+  }
+
+  /**
+   * The light of a flame painted on a camp piece, if it has one (`CAMP_FLAMES`): the street lamps'
+   * pool of light, smaller, over the night's tint, and dark by day like theirs.
+   */
+  private flameOn(img: Phaser.GameObjects.Image, at: Point): { key: string; sprite: Phaser.GameObjects.Image } | null {
+    const flame = CAMP_FLAMES[img.texture.key];
+    if (!flame) return null;
+    const scale = img.scaleX;
+    const x = img.x + (flame.x - img.frame.width / 2) * scale;
+    const y = img.y - (img.frame.height - flame.y) * scale;
+    const sprite = this.add
+      .image(x, y, lampGlowKey(this))
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setDepth(DEPTH_SKY + 1)
+      .setScale(0.55 * Math.max(0.6, scale))
+      .setAlpha(Math.max(0, this.glowAt))
+      .setVisible(false)
+      .setName('camp-lamp');
+    return { key: `${at.x},${at.y}`, sprite };
   }
 
   /**
