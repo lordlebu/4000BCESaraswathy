@@ -466,3 +466,19 @@ describe('walking with a stranger you chose', () => {
     expect(asked?.id, 'asking did not open the card').toBe(`woven:company-again:${key}`);
   });
 });
+
+describe('the meal at a camp has a painting of its own to ask for', () => {
+  it('asks for the kind\'s meal painting at the meal, and nothing narrower at any other hour', () => {
+    const talks = sampled.filter(({ event }) => event.id.startsWith('woven:camp-talk:'));
+    const meals = talks.filter(({ event }) => event.choices.some((c) => c.id === 'eat'));
+    expect(meals.length, 'no camp meal was sampled').toBeGreaterThan(0);
+    expect(talks.length - meals.length, 'no camp card away from the meal was sampled').toBeGreaterThan(0);
+    for (const { event } of talks) {
+      const kind = event.artVariant?.replace('woven-camp-', '');
+      const eating = event.choices.some((c) => c.id === 'eat');
+      // The meal painting first, then the kind's camp, then any camp: each falls through until painted.
+      expect(event.artMoment, event.id).toBe(eating ? `woven-camp-meal-${kind}` : undefined);
+      expect(event.art).toBe('woven-camp');
+    }
+  });
+});

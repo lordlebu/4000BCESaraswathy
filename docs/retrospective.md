@@ -195,9 +195,11 @@ discipline applied to its two largest files, and that debt is now the main struc
 2. **Split `App.tsx` and `WorldScene.ts`,** into hooks by mode and renderers by thing (homestead,
    camp, travellers). A plan has promised it three times. Do it as its own branch, with no
    behaviour change, and gate it on the browser suite. **Begun 2 October 2026:** the camp's
-   drawing, the wandering animals and the homestead moved to `game/systems/` (`CampView.ts`,
-   `WandererView.ts`, `HomesteadView.ts`), taking `WorldScene.ts` from 3,923 lines to 3,157. The
-   travellers are next and the hardest: camp people, hails and the talk marker all reach into them.
+   drawing, the road's people, the wandering animals, the homestead and the visitors who walk up
+   moved to `game/systems/` (`CampView.ts`, `TravellerView.ts`, `WandererView.ts`,
+   `HomesteadView.ts`, `VisitorView.ts`), taking `WorldScene.ts` from 3,923 lines to 2,529. What is
+   left in the scene is the player -- walking, wading, the dugout, riding -- the ground, the fog,
+   the sky and the camera; riding is the next candidate. `App.tsx` has not been started.
 3. **Give the game repo the canon's push gate,** and confirm in Settings that both repositories
    require their checks. The anonymous API still shows no required-check rule on either.
 4. **A cross-repository contract test** that loads canon and the game's adapters together and

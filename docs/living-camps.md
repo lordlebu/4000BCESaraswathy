@@ -68,9 +68,20 @@ line and the sky islands* below for the numbers since.
 The Aravali having no comings and goings is the crossing being remote and its camps sitting where the
 line is the only link. It is not a number to tune past, and it waits on the rail rethink.
 
-**Not measured:** frame cost with the extra walkers. Three camp people and at most two more on the
-road are drawn by the same sprite path as the road's travellers, and moved on the same half-second
-gate, so nothing about the frame changed in kind; `npm run perf` is the check if that ever looks wrong.
+**Frame cost with the extra walkers: none measurable.** Taken after the plan was built, on CI's
+renderer (headless Chromium, SwiftShader), as `tools/perf.js` takes it -- the fastest and the middle
+of ninety frames -- but standing beside a camp, which `npm run perf` cannot, since it always stands
+on the map's first tile. Seed `camps`, Lothal, the same tile three to the west of a dacoit camp at
+13:00, on day 3 when it stands and day 1 when there is no camp, alternated three times in one
+sitting:
+
+| | People drawn | Best frame | Median frame |
+|---|---|---|---|
+| Camp standing | 8 | 183.3 ms (199.9 on the first, cold, round) | 233.3 ms |
+| No camp | 5 | 183.3 ms | 233.3 ms |
+
+Three more figures, the camp's pieces, their shadows and the trodden way are inside the noise of a
+frame that is all ground. Compare within one sitting only; `docs/rendering.md` says why.
 
 ## What was built
 
@@ -221,10 +232,27 @@ cairn that marks the turn-off, so the way in shows a light by the road after dar
 `test/campLife.test.ts` checks the named pixel is flame-coloured, so a repainted piece cannot leave
 the light shining on bare ground. A new piece painted with a flame takes one line there.
 
+## The meal, painted -- asked for, not waited on
+
+The plan's one open question about art was whether the meal wanted a painting of its own, to be
+decided after Phase 2. It was asked for once the plan was finished: four prompts, one per kind of
+camp, are in `docs/event-prompts.md` as `woven-camp-meal-drovers`, `-pilgrims`, `-adventurers` and
+`-dacoits`. **Nothing waits for them.** The card at the meal tries the meal painting first
+(`artMoment` on the event, read by `EventCard`), then the kind's camp painting, then any camp, so a
+painting shows the day its file lands in `src/ui/events/` and the card looks exactly as it does now
+until then. `test/happenings.test.ts` holds the order.
+
+**One question stays open, on purpose:** whether a map should ever have two camps at once. The plan
+said to keep one and revisit after Phase 2 is *played*, and that needs a person playing it.
+
 ## Rules worth not undoing
 
-- **Nobody follows the player.** Camp people keep to their spots and the way. They never fall in
-  beside you the way road company may (`App.tsx` excludes them from speak-first).
+- **Nobody follows the player, and only the leader calls you over.** Camp people keep to their
+  spots and the way, and never fall in beside you the way road company may. The leader alone may
+  call out as you come alongside, and only before you have heard the camp's own word: a first
+  meeting, on the seeded once-a-day chance every named person keeps (`campCallers` in
+  `campLife.ts`, read by `App.tsx`'s speak-first). Off under browser automation like all of
+  speak-first; `?chatter=on` asks for it back.
 - **A card never opens over another.** Walking up beside a camp's watch can also bring you beside
   the fire. The camp's welcome and the watch's word used to open in the same step, one silently
   replacing the other. Now the welcome comes first and the watch's word waits for it to close

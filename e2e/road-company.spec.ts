@@ -38,7 +38,7 @@ async function bootAt(page: Page, hour: string): Promise<Seen[]> {
   // The scene moves them on its half-second gate, so they arrive a beat after the canvas.
   await page.waitForTimeout(1500);
   const seen = await read(page);
-  expect(seen, 'the scene exposes no travellers at all -- is createTravellers still called?')
+  expect(seen, 'the scene exposes no travellers at all -- is TravellerView.create still called?')
     .not.toBeNull();
   return seen!;
 }

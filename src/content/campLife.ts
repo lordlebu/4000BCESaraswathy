@@ -27,6 +27,7 @@ import { givenNames } from './places';
 import { lookFor } from './looks';
 import { CAMP_DAY, MEET_HOURS, RUNNER_PACE, VISIT_HOURS, VISIT_PACE_CAP } from './tiers';
 import { FIRST_DAY, PROPS_AROUND, campSpots, campable, type CampKind, type Encampment, type WayIn } from './encampments';
+import type { Bumped } from './bumping';
 import {
   STRANGER_CULTURES,
   alongAt,
@@ -491,4 +492,27 @@ export function visitorAt(
 /** A visitor's reason, in a sentence's middle: "come for goat hair", by the camp's kind. */
 export function visitingFor(kind: CampKind): string {
   return CAMP_WORDS[kind].trades;
+}
+
+/**
+ * Who at a camp may call you over as you come alongside: **only its leader, and only before you have
+ * heard the camp's own word.** The Living Camps plan's rule, kept to the speak-first rules every
+ * named person keeps: a first meeting is the one reason, it is a seeded chance (`SPEAKS_FIRST`), and
+ * nobody calls out twice in a day (`whoSpeaksFirst`). After the welcome the leader has nothing new
+ * and waits to be spoken to, like anybody; the runner and the watch never call out, because people
+ * who keep a camp keep to it.
+ *
+ * `beside` is who the scene reports beside the player; `campCardSeen` is whether the camp's own card
+ * has been read. Keyed by map like a stranger, so the leader of one map's camp is not another's.
+ */
+export function campCallers(
+  beside: readonly string[],
+  folk: readonly CampPerson[],
+  fieldMapId: string,
+  campCardSeen: boolean
+): Bumped[] {
+  if (campCardSeen) return [];
+  const leader = folk.find((p) => p.slot === 'leader');
+  if (!leader || !beside.includes(leader.id)) return [];
+  return [{ key: `${fieldMapId}:${leader.id}`, npcId: null, travellerId: leader.id, reason: 'first' }];
 }

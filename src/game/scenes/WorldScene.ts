@@ -78,22 +78,14 @@ import {
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
 import { DUGOUT_VIEWS, ROW_SLOT, depthFor, dugoutFor, rowAtFoot, type DugoutView, type Edge } from '../frames';
-import { atCamp, encampmentOn, wayIn, type Encampment } from '../../content/encampments';
-import {
-  campPeople,
-  campPlacements,
-  campVisitors,
-  phaseAfterMeeting,
-  runnerErrand,
-  standingRoom,
-  visitorAt,
-  type CampPerson,
-  type RunnerErrand,
-  type Visit
-} from '../../content/campLife';
+import { atCamp, encampmentOn, wayIn } from '../../content/encampments';
+import { campVisitors, runnerErrand } from '../../content/campLife';
 import { campPieces } from '../campArt';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 import { CampView } from '../systems/CampView';
+import { TravellerView } from '../systems/TravellerView';
+import { VisitorView } from '../systems/VisitorView';
+import { PIP_INK, PIP_NEWS, PIP_RING } from '../marks';
 import { WandererView } from '../systems/WandererView';
 import { HomesteadView, loadHomesteadArt } from '../systems/HomesteadView';
 
@@ -105,7 +97,6 @@ import { HomesteadView, loadHomesteadArt } from '../systems/HomesteadView';
  * is baked per edge and variant rather than loaded, so `shoreTextureKey` names its texture
  * instead, and `contact` is the one shadow texture the traveller already uses.
  */
-
 
 const SHEET_KEY: Record<
   Exclude<
@@ -159,13 +150,9 @@ import {
   animFor,
   characterFor,
   createCharacterAnimations,
-  dyeSheet,
-  everyCharacter,
-  forgetSheet,
   everySheet,
   frameOf,
   figureScale,
-  travellerScale,
   type CharacterArt,
   facingFromStep,
   loadCharacterSheet,
@@ -190,29 +177,13 @@ import { isWalkable } from '../../world/generate';
 import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
-import {
-  delayAfter,
-  hourOf,
-  hoursFor,
-  nearby,
-  NEARBY_TILES,
-  placedCircuit,
-  stillWaiting,
-  walkedRoad,
-  travellerState,
-  travellersOn,
-  untangle,
-  whereabouts,
-  type Traveller,
-  type TravellerState,
-  type Waiting
-} from '../../content/travellers';
+import { walkedRoad } from '../../content/travellers';
 import { wandererIdsOn } from '../../content/wanderers';
 import { loadWandererArt } from '../wandererArt';
 import { isCamp, isGrand } from '../../content/camps';
 import { findPath, nearestReachable } from '../../world/pathfind';
 import { NO_GESTURE, lost, pressed, released, type Gesture } from '../gesture';
-import { wadeFor, type Wade } from '../wading';
+import { WADE_ALPHA, wadeFor, type Wade } from '../wading';
 import { afloatAfter, PADDLE_STEP, routeCost } from '../afloat';
 import { glowStrength, roadAhead } from '../roadLight';
 import { boatFor } from '../../content/kit';
@@ -230,14 +201,6 @@ const FOG_UNKNOWN = 0.6;
 const FOG_REMEMBERED = 0.2;
 const FOG_VISIBLE = 0;
 
-/**
- * The pips drawn at a place's door for the people in it: a dark dot each on a pale ring, and a
- * turmeric one for somebody with something new to say. Ink and turmeric are the diary's own colours.
- */
-const PIP_INK = 0x3a2f2a;
-const PIP_NEWS = 0xd9a21b;
-const PIP_RING = 0xf4ecd8;
-
 /** How far the traveller can see. */
 const SIGHT_RADIUS = 2;
 
@@ -253,7 +216,6 @@ const DEPTH_TILE = 0;
 /** Above every row: a field map is 48 rows, so the band tops out far below this. */
 const DEPTH_FOG = 2000;
 const DEPTH_SKY = 3000;
-
 
 /**
  * How long a footprint stays before it is gone.
@@ -319,17 +281,6 @@ const RIDE_TILE_MS = 240;
 /** How much of the way to the traveller the camera closes each frame: a soft trail behind a walk. */
 const FOLLOW_LERP = 0.09;
 
-/**
- * How much of the traveller survives at his feet while he is wading.
- *
- * Phaser interpolates between the corner alphas, so this is the bottom of a ramp that starts at 1
- * at his head. Low enough that the legs plainly go into the water, high enough that he is still a
- * figure rather than a floating torso -- below about a third he stops reading as a person standing
- * in something and starts reading as one cut in half.
- */
-const WADE_ALPHA = 0.42;
-
-
 /** Keys that change the zoom. `0` gives it back to the automatic fit. */
 const ZOOM_KEYS: Record<string, number | 'reset'> = {
   Equal: 1,
@@ -351,16 +302,6 @@ const PINCH_THRESHOLD = 60;
  * sixty times a second.
  */
 const SKY_STEPS = 48;
-
-/**
- * How long somebody coming over takes per tile, in milliseconds. Unhurried: a person walking up to
- * say hello, not a courier. Four tiles at this pace is about a second and a half.
- */
-const VISITOR_STEP_MS = 360;
-
-/** Where a visitor stands on a tile: centred, feet two pixels up from its bottom edge, as travellers do. */
-const visitorX = (p: Point): number => p.x * TILE_SIZE + TILE_SIZE / 2;
-const visitorY = (p: Point): number => p.y * TILE_SIZE + TILE_SIZE - 2;
 
 /** Keys that move the traveller one tile, by KeyboardEvent.code. */
 const STEP_KEYS: Record<string, [number, number]> = {
@@ -414,65 +355,16 @@ export class WorldScene extends Phaser.Scene {
   /** Which map this scene was started for. Known from `init`, before `built` exists. */
   private fieldMapId = DEFAULT_FIELD_MAP;
 
-  /**
-   * The other people on the road, and the sprites drawing them.
-   *
-   * Keyed by traveller id rather than held as an array, so a roster that changes between maps
-   * tears down exactly what it should. Nothing about *where* they are lives here -- that is
-   * `whereabouts`, which derives it from the seed, the day and the hour and stores nothing.
-   */
-  /**
-   * People who walked up to the traveller, standing where they stopped. Reset in `init` with the
-   * travellers, for the same reason: a restart reuses this scene.
-   */
-  private visitors: {
-    npcId: string;
-    sheet: string;
-    sprite: Phaser.GameObjects.Sprite;
-    /** The walk in flight, on the loop's clock: the tiles, and when it set out. Null once arrived. */
-    walk: { route: Point[]; start: number; leg: number } | null;
-  }[] = [];
-
-  private travellers: {
-    traveller: Traveller;
-    /** Set for somebody who keeps today's camp: placed by `campPlacements`, not by a circuit. */
-    person?: CampPerson;
-    /** The circuit's placed stops, ids and all, so a card can name where somebody is headed. */
-    circuit: { poiId: string; at: Point }[];
-    stops: Point[];
-    sprite: Phaser.GameObjects.Sprite;
-  }[] = [];
-
-  /**
-   * The last states sent to React, as one string.
-   *
-   * Compared rather than diffed: three travellers with three short fields is a key cheaper to build
-   * than the render it saves, and `travellers-changed` exists to be rare.
-   */
-  private travellerStatesSent = '';
-  /** Where each walking traveller was last drawn, after `untangle`. Nobody resting is in it. */
-  private travellerTiles = new Map<string, Point>();
-  /** The last `travellers-nearby` sent, so an unchanged answer is not sent again. */
-  private nearbySent = '';
-  /** Somebody the player called to, standing on their tile until reached. See `onHail`. */
-  private waiting: Waiting | null = null;
-  /**
-   * How far behind their own hours each traveller is, in days, from waits they have been kept for.
-   * Not saved: see `delayAfter`. Dropped once they are at a place for the night.
-   */
-  private delays = new Map<string, number>();
-  /** Who the talk row means, as React last said, and the mark drawn over their head. */
-  private talkTarget: string | null = null;
-  private targetMark: Phaser.GameObjects.Graphics | null = null;
+  /** People who walk up to the traveller. See `systems/VisitorView.ts`. */
+  private visitors!: VisitorView;
+  /** The people on the road and at the camp. See `systems/TravellerView.ts`. */
+  private travellers!: TravellerView;
   /**
    * A pip per person at each place's door, and which tile each set belongs to. See `drawPips`.
    * React's last answer is kept so a map change or a new discovery can redraw without asking again.
    */
   private pips: { poiId: string; key: string; count: number; g: Phaser.GameObjects.Graphics }[] = [];
   private pipsWanted: UiToGame['people-at-places']['places'] = [];
-
-  /** The last phase the travellers were moved for, so they are not recomputed every frame. */
-  private travellersMovedAt = -1;
 
   /** The animals walking their own ground. See `systems/WandererView.ts`. */
   private wanderers!: WandererView;
@@ -485,10 +377,6 @@ export class WorldScene extends Phaser.Scene {
   private homestead!: HomesteadView;
   /** Today's camp and the ashes of the last few, as drawn. See `systems/CampView.ts`. */
   private campView!: CampView;
-  /** What each of the camp's people is doing, as last placed, for `travellers-nearby`. */
-  private campDoing = new Map<string, string>();
-  /** Today's errand and visitors for the camp, worked out once a day. See `refreshCampDay`. */
-  private campDay: { id: string; day: number; errand: RunnerErrand | null; visits: Visit[] } | null = null;
   /** The mill's wheel, and anything else that turns on an index rather than a toggle. */
   private spinning: {
     sprite: Phaser.GameObjects.Image;
@@ -678,7 +566,6 @@ export class WorldScene extends Phaser.Scene {
       smokeDepth: DEPTH_FOG + 1,
       glow: () => scene.glowAt
     });
-    this.campDay = null;
     this.falls = [];
     this.queuedPath = [];
     this.moving = false;
@@ -694,16 +581,31 @@ export class WorldScene extends Phaser.Scene {
     // The people on the road belong to the map they walk. Never reset before, so every map change
     // kept the last map's travellers and wanderers in these lists with their sprites destroyed:
     // moved every tick, reported to React, and counted by `__travellers`.
-    this.travellers = [];
-    this.travellersMovedAt = -1;
-    this.travellerStatesSent = '';
-    this.travellerTiles = new Map();
-    this.nearbySent = '';
-    this.waiting = null;
-    this.delays = new Map();
-    this.talkTarget = null;
-    // Went with the old map's display list.
-    this.targetMark = null;
+    this.travellers = new TravellerView(this, {
+      get world() {
+        return scene.world;
+      },
+      get built() {
+        return scene.built;
+      },
+      get fieldMapId() {
+        return scene.built?.fieldMap.id ?? scene.fieldMapId;
+      },
+      get at() {
+        return scene.at;
+      },
+      get playerKey() {
+        return scene.character.key;
+      },
+      clock: () => scene.time.now + scene.travelled,
+      standingClock: () => scene.time.now,
+      get startPhase() {
+        return scene.startPhase;
+      },
+      day: () => scene.dayOfJourney(),
+      camp: () => scene.campView.current,
+      playerHeight: () => scene.player.displayHeight
+    });
     // The last map's pips went with its display list; the next map's arrive from React.
     this.pips = [];
     this.pipsWanted = [];
@@ -729,7 +631,15 @@ export class WorldScene extends Phaser.Scene {
         return scene.built?.fieldMap.id ?? scene.fieldMapId;
       }
     });
-    this.visitors = [];
+    this.visitors = new VisitorView(this, {
+      get world() {
+        return scene.world;
+      },
+      get at() {
+        return scene.at;
+      },
+      loopNow: () => scene.game.loop.now
+    });
     this.travelled = data.travelled ?? 0;
     this.restedAt = this.travelled;
     this.standingOn = null;
@@ -875,7 +785,8 @@ export class WorldScene extends Phaser.Scene {
     this.createGround();
 
     this.createPlayer();
-    this.createTravellers();
+    this.travellers.create();
+    this.exposeForTests();
     this.wanderers.create();
     // The initial answer, so the UI never has to assume one.
     this.reportCharacter();
@@ -887,7 +798,6 @@ export class WorldScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setDepth(DEPTH_SKY);
     this.updateSky();
-
 
     // Bounds are not set here: they depend on the zoom and on what the panels are covering, so
     // `applyCamera` owns them and recomputes them on every resize and every zoom step.
@@ -1491,7 +1401,7 @@ export class WorldScene extends Phaser.Scene {
       // **A tap on somebody walking near is choosing them, not walking onto their tile.** React
       // decides what choosing means -- the same as pressing their row -- and sends `hail` back if
       // there is a walk to make.
-      const tapped = this.travellerUnder(target);
+      const tapped = this.travellers.under(target);
       if (tapped) {
         EventBus.emitEvent('traveller-tapped', { travellerId: tapped });
         return;
@@ -1772,7 +1682,6 @@ export class WorldScene extends Phaser.Scene {
     this.homestead.set(wanted);
   };
 
-
   /** The placed points of interest, in the shape the camp rules take. */
   private placesHere(): { poiId: string; at: Point }[] {
     return this.built ? this.built.placed.map((p) => ({ poiId: p.poi.id, at: p.at })) : [];
@@ -1792,66 +1701,9 @@ export class WorldScene extends Phaser.Scene {
     const day = this.dayOfJourney();
     const today = encampmentOn(this.world, this.built.fieldMap.id, places, day);
     const { struck, pitched } = this.campView.draw(today, places, day, phaseAt(this.time.now + this.travelled, this.startPhase));
-    if (struck) this.dropCampFolk();
-    if (pitched) this.addCampFolk(pitched);
-    if (this.campView.current) this.refreshCampDay(day);
-  }
-
-
-  /**
-   * Today's runner errand and visitors, worked out once for the camp and the day.
-   *
-   * Asked of `campLife.ts` with the road company's own stops, so the runner meets somebody whose leg
-   * today really does pass the turn-off.
-   */
-  private refreshCampDay(day: number): void {
-    const camp = this.campView.current;
-    if (!camp) {
-      this.campDay = null;
-      return;
-    }
-    if (this.campDay && this.campDay.id === camp.id && this.campDay.day === day) return;
-    const roster = this.travellers
-      .filter((t) => !t.person)
-      .map(({ traveller, stops }) => ({ id: traveller.id, npcId: traveller.npcId, stops }));
-    const errand = runnerErrand(this.world, camp.camp, camp.way, roster, day);
-    const visits = campVisitors(this.world, camp.camp, camp.way, roster, day, errand);
-    this.campDay = { id: camp.id, day, errand, visits };
-    this.travellersMovedAt = -1;
-  }
-
-  /** Draw the people who keep this camp: travellers who do not travel. See `campLife.ts`. */
-  private addCampFolk(camp: Encampment): void {
-    const scale = travellerScale(TILE_SIZE);
-    for (const person of campPeople(camp, this.built!.fieldMap.id)) {
-      const body = person.art === this.character.key ? this.otherSheet(person.art) : person.art;
-      const frame = frameOf(body);
-      const key = person.look && person.look.body === body ? dyeSheet(this, body, person.look, frame) : body;
-      const sprite = this.add
-        .sprite(0, 0, key, 0)
-        .setOrigin(0.5, 1)
-        .setDisplaySize(frame.width * scale, frame.height * scale)
-        .setVisible(false);
-      sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-      sprite.setName(`traveller:${person.id}`);
-      this.travellers.push({ traveller: person, person, circuit: [], stops: [], sprite });
-    }
-    this.travellersMovedAt = -1;
-  }
-
-  /** Take the struck camp's people off the map, and let go of anybody among them who was waiting. */
-  private dropCampFolk(): void {
-    const leaving = this.travellers.filter((t) => t.person);
-    if (leaving.length === 0) return;
-    for (const t of leaving) {
-      t.sprite.destroy();
-      this.travellerTiles.delete(t.traveller.id);
-      if (this.waiting?.id === t.traveller.id) this.waiting = null;
-    }
-    this.travellers = this.travellers.filter((t) => !t.person);
-    this.campDay = null;
-    this.travellersMovedAt = -1;
-    this.reportNearby();
+    if (struck) this.travellers.dropCampFolk();
+    if (pitched) this.travellers.addCampFolk(pitched);
+    if (this.campView.current) this.travellers.refreshCampDay(day);
   }
 
   /** Who is at each place, from React. Drawn at once and kept for the next redraw. */
@@ -1912,6 +1764,11 @@ export class WorldScene extends Phaser.Scene {
     this.arriveAt(this.at);
   };
 
+  /** Somebody comes over, from React. See `VisitorView.approach`. */
+  private onApproach = ({ npcId, sheet }: UiToGame['approach']): void => {
+    this.visitors.approach(npcId, sheet);
+  };
+
   /**
    * Take a fraction of the accumulated walking back out of the traveller's legs.
    *
@@ -1921,103 +1778,6 @@ export class WorldScene extends Phaser.Scene {
    * which would read as negative fatigue and is the one way this could produce a number
    * `fatigueAt` does not expect.
    */
-  /**
-   * Somebody comes over: appear a little way off, walk up to stand beside the traveller, then say so.
-   *
-   * **A few tiles away, on ground that joins.** Rings of three to six tiles are searched in a fixed
-   * order for a walkable tile with a path in, so the same arrival looks the same on every machine,
-   * and nobody appears across a river they cannot cross. The walk stops one tile short: they stand
-   * beside you, not on you. If nothing joins -- an island of one tile -- they appear beside you.
-   */
-  private onApproach = ({ npcId, sheet }: UiToGame['approach']): void => {
-    const route = this.approachRoute();
-    const frame = frameOf(sheet);
-    const scale = travellerScale(TILE_SIZE);
-    const start = route[0]!;
-    const sprite = this.add
-      .sprite(visitorX(start), visitorY(start), sheet, 0)
-      .setOrigin(0.5, 1)
-      .setDisplaySize(frame.width * scale, frame.height * scale)
-      .setDepth(depthFor(start.y, ROW_SLOT.walker));
-    sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-    sprite.setName(`visitor:${npcId}`);
-    this.visitors.push({ npcId, sheet, sprite, walk: { route, start: this.game.loop.now, leg: -1 } });
-    // A route of one tile is somebody who appears already beside you; `updateVisitors` lands them on
-    // the next frame like anybody else, so there is one way to arrive.
-  };
-
-  /**
-   * Carry everybody who is coming over one frame further, and land them when their time is up.
-   *
-   * **On the loop's clock, not a tween's -- the carriage's lesson, learned twice.** This was a chain
-   * of tweens first, and a tween advances by Phaser's *smoothed* delta, which credits a stalled
-   * frame with no more than the last sane one. Under load a boot on the Narmada draws about a frame a
-   * second, so a 360 ms step took tens of seconds: measured, 28% of the first step done after two and
-   * a half seconds, and `e2e/happenings.spec.ts` gave up on her at fifteen, on a CI runner and on
-   * this machine with four workers. `updateRide` records the same fault on the Lodestone Line.
-   *
-   * `game.loop.now` is the raw frame time, unclamped, so she arrives after her
-   * `VISITOR_STEP_MS` a tile however few frames are drawn -- a slow machine sees her cover more
-   * ground between frames, not take longer. Her walk animation and row sorting follow the leg she
-   * is on.
-   */
-  private updateVisitors(): void {
-    for (const visitor of this.visitors) {
-      const walk = visitor.walk;
-      if (!walk) continue;
-      const { route } = walk;
-      const elapsed = this.game.loop.now - walk.start;
-      const legs = route.length - 1;
-      const leg = Math.floor(elapsed / VISITOR_STEP_MS);
-      if (leg >= legs) {
-        // Arrived. Stand on the last tile, face the traveller, and tell React to open the conversation.
-        const last = route[legs]!;
-        const before = route[legs - 1] ?? last;
-        visitor.sprite.setPosition(visitorX(last), visitorY(last)).setDepth(depthFor(last.y, ROW_SLOT.walker));
-        const facing = facingFromStep(this.at.x - last.x, this.at.y - last.y, facingFromStep(last.x - before.x, last.y - before.y, 'down'));
-        const { key, flipX } = animFor(visitor.sheet, facing, 'idle');
-        visitor.sprite.play(key, true).setFlipX(flipX);
-        visitor.walk = null;
-        EventBus.emitEvent('approached', { npcId: visitor.npcId });
-        continue;
-      }
-      const from = route[leg]!;
-      const to = route[leg + 1]!;
-      const t = (elapsed - leg * VISITOR_STEP_MS) / VISITOR_STEP_MS;
-      visitor.sprite.setPosition(
-        visitorX(from) + (visitorX(to) - visitorX(from)) * t,
-        visitorY(from) + (visitorY(to) - visitorY(from)) * t
-      );
-      if (leg !== walk.leg) {
-        // A new leg: turn to face it, and sort into the row being walked into.
-        walk.leg = leg;
-        const { key, flipX } = animFor(visitor.sheet, facingFromStep(to.x - from.x, to.y - from.y, 'down'), 'walk');
-        visitor.sprite.play(key, true).setFlipX(flipX);
-        visitor.sprite.setDepth(depthFor(Math.max(from.y, to.y), ROW_SLOT.walker));
-      }
-    }
-  }
-
-  /** The tiles somebody walks to come and stand beside the traveller, starting where they appear. */
-  private approachRoute(): Point[] {
-    const { tiles, width, height } = this.world;
-    for (const r of [4, 3, 5, 6]) {
-      for (let dy = -r; dy <= r; dy += 1) {
-        for (let dx = -r; dx <= r; dx += 1) {
-          if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
-          const from = { x: this.at.x + dx, y: this.at.y + dy };
-          const tile = tiles[from.y]?.[from.x];
-          if (!tile || !isWalkable(tile)) continue;
-          const walked = findPath(tiles, width, height, from, this.at, isWalkable);
-          // `findPath` leaves out where it starts and ends on the goal; stop one tile short of it.
-          if (walked.length < 2 || walked.length > r * 2 + 2) continue;
-          return [from, ...walked.slice(0, -1)];
-        }
-      }
-    }
-    return [this.at];
-  }
-
   private onEase = ({ by }: UiToGame['ease']): void => {
     this.restedAt = easedMark(this.travelled, this.restedAt, by);
     // Same reason as `onShelterBuilt`: the fatigue line is on screen and has just stopped being
@@ -2256,8 +2016,8 @@ export class WorldScene extends Phaser.Scene {
       // traveller crosses a tile every few in-game minutes, so asking twice a second is already far
       // more often than the answer changes -- and `whereabouts` walks a cached path, so the cost is
       // an array index rather than a search.
-      this.updateWaiting();
-      this.updateTravellers(phase);
+      this.travellers.updateWaiting();
+      this.travellers.update(phase);
       // The camp's shelter, smoke and firelight follow its day, on the same gate.
       this.campView.stage(phase, this.dayOfJourney());
       // The animals that are somewhere rather than everywhere, on the same gate and for the same
@@ -2276,58 +2036,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /**
-   * Put a sprite on the map for everybody else walking it.
-   *
-   * **Created once and moved, never created per frame.** Three sprites against the largest map's
-   * ~17,650 objects is 0.02%, and `docs/rendering.md` establishes that frame cost tracks canvas
-   * area rather than object count -- so the cost of this layer is three tiles of fill, which is
-   * nothing. What would *not* be nothing is rebuilding them on a clock.
-   *
-   * The player's own sheet is skipped so the traveller never meets themselves: with five sheets and
-   * a roster of three there is always one to move to.
+   * What the browser suite reads off the scene: the walker, the visitors, today's camp, the ground,
+   * the homestead and the pips. Each says which spec it serves. The road's own hook is
+   * `TravellerView`'s, the animals' is `WandererView`'s.
    */
-  private createTravellers(): void {
-    // **Half the player's size, and the reason is the mount rather than modesty.** Every traveller
-    // on every map carries a `conveyance` -- eight ox and Harappan carts, a reed raft and the
-    // lodestone train, measured across the four maps -- and none of it is drawn yet: `vehicles.png`
-    // is built by `tools/build-terrain.js` from one painted carriage and loaded by nothing. At the
-    // player's 4x there was no room to draw one under the figure even once the art exists, because
-    // 104x160 pixels covers a 128 tile outright. `travellerScale` says why two and not a quarter.
-    const scale = travellerScale(TILE_SIZE);
-    for (const traveller of travellersOn(this.built.fieldMap.id)) {
-      const circuit = placedCircuit(traveller, this.built.placed);
-      const stops = circuit.map((s) => s.at);
-      // A circuit whose stops did not all get placed is not a circuit. Dropping the traveller is
-      // right: inventing a walk for somebody canon only put in one place would put a person on the
-      // road that nothing sent anywhere.
-      if (stops.length < 2) continue;
-
-      const body = traveller.art === this.character.key ? this.otherSheet(traveller.art) : traveller.art;
-      // Re-dyed to this person's look when the body has one, so three painted strangers read as
-      // many. Only when the body is the one the look was chosen for: a look names the colours of
-      // one sheet, and applied to the player-avoidance fallback it would match nothing.
-      // The cell the body was built at: a wide or tall figure has its own, so it is cut and drawn at
-      // that size rather than squeezed into the shared 26x40. Feet stay on the anchor either way.
-      const frame = frameOf(body);
-      const key =
-        traveller.look && traveller.look.body === body ? dyeSheet(this, body, traveller.look, frame) : body;
-      const sprite = this.add
-        .sprite(0, 0, key, 0)
-        .setOrigin(0.5, 1)
-        .setDisplaySize(frame.width * scale, frame.height * scale);
-      sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-      sprite.setName(`traveller:${traveller.id}`);
-      this.travellers.push({ traveller, circuit, stops, sprite });
-    }
-
-    // A dyed sheet is made per look, and the looks belong to one map. Release the ones this roster
-    // does not wear, so a journey across every map holds one map's strangers rather than all of
-    // them. Only dyed keys (`body~skin~cloth~second`): the painted bodies are loaded once and kept.
-    const worn = new Set(this.travellers.map(({ sprite }) => sprite.texture.key));
-    for (const key of this.textures.getTextureKeys()) {
-      if (key.includes('~') && !worn.has(key)) forgetSheet(this, key);
-    }
-
+  private exposeForTests(): void {
     // **Exposed for the browser suite for the same reason `__travellers` is**: a Node test cannot
     // see a Phaser sprite, and the things that go wrong with the walker are all on this side of the
     // line -- which row he is sorted into, whether a step is still in flight, what ground he is
@@ -2364,7 +2077,7 @@ export class WorldScene extends Phaser.Scene {
 
     // Who has walked up, and where they stopped, for `e2e/happenings.spec.ts`.
     (window as unknown as { __visitors?: () => unknown[] }).__visitors = () =>
-      this.visitors.map(({ npcId, sheet, sprite }) => ({
+      this.visitors.list.map(({ npcId, sheet, sprite }) => ({
         npcId,
         sheet,
         visible: sprite.visible,
@@ -2374,11 +2087,6 @@ export class WorldScene extends Phaser.Scene {
         h: Math.round(sprite.displayHeight)
       }));
 
-    // **Exposed for the browser suite, which is the only thing that can see a Phaser sprite.**
-    // This codebase's signature fault is a layer that is built, tested and connected to nothing --
-    // five recorded instances -- and a Node test can prove every rule in `travellers.ts` while the
-    // scene never calls any of them. `e2e/road-company.spec.ts` reads this and would fail the day
-    // `createTravellers` stopped being called, which no other check could notice.
     // Today's camp, for `e2e/camps.spec.ts`: its kind and tile, whether it shows, and -- for a spec
     // that has to find a day with one -- the camp any day would have.
     (window as unknown as { __camp?: (day?: number) => unknown }).__camp = (day?: number) => {
@@ -2389,9 +2097,7 @@ export class WorldScene extends Phaser.Scene {
       // `e2e/camp-life.spec.ts` can find a day with each and set the clock to it.
       const d = day ?? this.dayOfJourney();
       const way = wayIn(this.world, c, walkedRoad(this.world, this.built.fieldMap.id, places), places.map((p) => p.at));
-      const roster = this.travellers
-        .filter((t) => !t.person)
-        .map(({ traveller, stops }) => ({ id: traveller.id, npcId: traveller.npcId, stops }));
+      const roster = this.travellers.roadRoster();
       const errand = runnerErrand(this.world, c, way, roster, d);
       const visits = campVisitors(this.world, c, way, roster, d, errand);
       const now = day === undefined ? this.campView.current : null;
@@ -2426,195 +2132,6 @@ export class WorldScene extends Phaser.Scene {
     // and whether they are showing. Read off the scene because only the scene draws them.
     (window as unknown as { __pips?: () => unknown[] }).__pips = () =>
       this.pips.map(({ poiId, count, g }) => ({ poiId, count, visible: g.visible }));
-
-    (window as unknown as { __travellers?: () => unknown[] }).__travellers = () =>
-      this.travellers.map(({ traveller, sprite }) => ({
-        id: traveller.id,
-        named: traveller.npcId !== null,
-        sheet: sprite.texture.key,
-        visible: sprite.visible,
-        x: Math.round(sprite.x),
-        y: Math.round(sprite.y),
-        // The tile they are drawn on after `untangle`, or null while resting. So a spec can stand
-        // somebody beside them without guessing a coordinate -- see `e2e/road-talk.spec.ts`.
-        tile: this.travellerTiles.get(traveller.id) ?? null,
-        // Whether they stopped because the player called to them -- see `onHail`.
-        waiting: this.waiting?.id === traveller.id,
-        // How deep they are drawn in water, the share of the figure cut away: see `wadeWalker`.
-        cut: (sprite.getData('cut') as number | undefined) ?? 0,
-        // Somebody who keeps today's camp rather than walking a circuit, and their slot there.
-        camp: traveller.campId ?? null,
-        slot: (traveller as Partial<CampPerson>).slot ?? null,
-        // Whether the talk row's mark is over them, which is how a player tells two people apart.
-        marked: this.talkTarget === traveller.id && Boolean(this.targetMark?.visible),
-        // **How big they are drawn, and the player's own size to compare it against.** A ratio the
-        // scene applies is not provable from Node: `travellerScale` can be right while
-        // `createTravellers` uses the other one, which is exactly what it did.
-        w: Math.round(sprite.displayWidth),
-        h: Math.round(sprite.displayHeight),
-        playerH: Math.round(this.player.displayHeight)
-      }));
-  }
-
-  /** Any built sheet but this one, so a traveller is never the player's own figure. */
-  private otherSheet(taken: string): string {
-    const art = everyCharacter().find((c) => c.key !== taken);
-    return art?.key ?? taken;
-  }
-
-  /**
-   * Move everybody to where the hour says they are.
-   *
-   * `whereabouts` is the whole rule and it is asked rather than reimplemented -- the scene owns the
-   * clock and the pixels and nothing else, which is the same split `dayNight.ts` and `fatigue.ts`
-   * already keep.
-   *
-   * **Hidden rather than moved off-screen when they are resting at a place.** A traveller standing
-   * on a point of interest would be drawn over the building, and a player who walks in expects to
-   * find them in the place panel rather than as a figure on the roof. The panel is where a person
-   * at a place lives; the map is where a person between places lives.
-   */
-  private updateTravellers(phase: number): void {
-    if (this.travellers.length === 0) return;
-    // A traveller crosses a tile every few in-game minutes; a hundredth of a day is about fifteen.
-    const step = Math.floor(phase * 100);
-    if (step === this.travellersMovedAt) return;
-    this.travellersMovedAt = step;
-
-    const day = this.dayOfJourney();
-    this.refreshCampDay(day);
-    const camp = this.campView.current;
-    const campDay = this.campDay;
-    const errand = campDay?.errand ?? null;
-    // The camp's people for this hour, and somewhere at the fire for a visitor to sit that none of
-    // them is using.
-    const folk = camp ? campPlacements(this.world, camp.camp, day, phase, errand) : [];
-    this.campDoing = new Map(folk.map((f) => [f.id, f.activity]));
-    const hour = hourOf(phase);
-    const seats = camp
-      ? standingRoom(this.world, camp.camp).filter((p) => !folk.some((f) => f.at && f.at.x === p.x && f.at.y === p.y))
-      : [];
-    // Everybody's position first, then room made between them: whether somebody steps aside depends
-    // on who else is on the tile, so it cannot be decided one traveller at a time.
-    //
-    // Each by their own clock: somebody who waited for the player is that far behind their hours,
-    // so they go on from where they stopped (`delayAfter`). A delay is forgotten once they are at a
-    // place for the night by both clocks, since nothing about a night depends on it. A traveller who
-    // stops to trade with a camp's runner is held at the turn-off for it, and goes on that much later.
-    const placed = this.travellers.map(({ traveller, stops, person }) => {
-      if (person) {
-        const f = folk.find((x) => x.slot === person.slot);
-        const where = f?.at ? { at: f.at, heading: null, resting: false, from: f.at, to: f.at } : null;
-        return { id: traveller.id, where, folk: f ?? null, faceTo: null as Point | null };
-      }
-      const visit = campDay?.visits.find((v) => v.travellerId === traveller.id);
-      if (visit) {
-        // Sitting at the fire for the visit itself, turned to it; walking there and on, otherwise.
-        const sitting = hour >= visit.arrive && hour < visit.leave;
-        if (sitting) this.campDoing.set(traveller.id, 'visit');
-        const where = visitorAt(this.world, visit, phase, seats[0] ?? camp!.camp.at);
-        return { id: traveller.id, where, folk: null, faceTo: sitting ? camp!.camp.at : null };
-      }
-      const hours = hoursFor(traveller.id);
-      const delay = this.delays.get(traveller.id) ?? 0;
-      const own = phaseAfterMeeting(errand, traveller.id, this.phaseLess(delay));
-      const where = whereabouts(this.world, stops, day, own, hours);
-      if (delay > 0 && where?.resting && whereabouts(this.world, stops, day, phase, hours)?.resting) {
-        this.delays.delete(traveller.id);
-      }
-      // Stopped at the turn-off to trade with the camp's runner, turned to them.
-      const trading = errand?.travellerId === traveller.id && hour >= errand.arrive && hour < errand.part;
-      if (trading) this.campDoing.set(traveller.id, 'trade');
-      return { id: traveller.id, where, folk: null, faceTo: trading ? errand.way[errand.way.length - 1]! : null };
-    });
-    // Somebody waiting keeps the tile they stopped on, and nobody else may take it from them -- the
-    // player is walking up to that tile's side.
-    const waiting = this.waiting;
-    const room = untangle(
-      this.world,
-      placed.filter((p) => p.id !== waiting?.id),
-      waiting ? [this.at, waiting.at] : [this.at]
-    );
-    if (waiting) room.set(waiting.id, waiting.at);
-    this.travellerTiles = room;
-    this.travellers.forEach(({ sprite }, i) => {
-      const { where, folk: f, faceTo } = placed[i]!;
-      if (placed[i]!.id === waiting?.id) {
-        this.standWaiting(sprite, waiting.at);
-        return;
-      }
-      if (!where || where.resting) {
-        sprite.setVisible(false);
-        return;
-      }
-      const at = room.get(placed[i]!.id) ?? where.at;
-      // **Never drawn standing in the sea.** Nothing places anybody there -- `test/campLife.test.ts`
-      // simulates every placement on every map and finds none -- but if a future change ever did,
-      // somebody hidden for a moment is a far smaller fault than somebody standing in open water.
-      const ground = this.world.tiles[at.y]?.[at.x];
-      if (!ground || !isWalkable(ground)) {
-        sprite.setVisible(false);
-        return;
-      }
-      sprite.setVisible(true);
-      sprite.setPosition(at.x * TILE_SIZE + TILE_SIZE / 2, at.y * TILE_SIZE + TILE_SIZE - 2);
-      this.wadeWalker(sprite, at);
-      // Sorted by row like everything else that stands on the ground, so a traveller south of the
-      // player passes in front of them and one north of them passes behind.
-      sprite.setDepth(depthFor(at.y, ROW_SLOT.walker));
-      // Somebody at a camp faces what they are doing -- the fire, their work, the way they walk --
-      // and only walks while they are on the way in.
-      const toward = f?.facing ?? faceTo;
-      const facing = toward
-        ? facingFromStep(toward.x - at.x, toward.y - at.y, 'down')
-        : facingFromStep(
-            where.heading === 'east' ? 1 : where.heading === 'west' ? -1 : 0,
-            where.heading === 'south' ? 1 : where.heading === 'north' ? -1 : 0,
-            'down'
-          );
-      const walking = f ? f.activity === 'road' || f.activity === 'home' : !faceTo;
-      const { key, flipX } = animFor(sprite.texture.key, facing, walking ? 'walk' : 'idle');
-      if (sprite.anims.currentAnim?.key !== key) sprite.play(key);
-      sprite.setFlipX(flipX);
-    });
-
-    this.reportTravellers(day, phase);
-    this.reportNearby();
-  }
-
-  /**
-   * Tell React who is walking near the player, when that changes.
-   *
-   * Ids and a step count, never tiles -- React holds no tiles. Asked after travellers move and after
-   * the player does, since either can bring somebody alongside.
-   */
-  private reportNearby(): void {
-    const close = nearby(this.travellerTiles, this.at).map(({ id, steps, beside }) => ({
-      id,
-      npcId: this.travellers.find((t) => t.traveller.id === id)?.traveller.npcId ?? null,
-      steps,
-      beside,
-      doing: this.campDoing.get(id) ?? null
-    }));
-    const key = JSON.stringify(close);
-    if (key === this.nearbySent) return;
-    this.nearbySent = key;
-    EventBus.emit('travellers-nearby', { travellers: close });
-  }
-
-  /** The phase of the day for somebody running `delay` days behind it. */
-  private phaseLess(delay: number): number {
-    return phaseAt(this.time.now + this.travelled - delay * DAY_MS, this.startPhase);
-  }
-
-  /** The day's clock in days -- standing and walking both -- which is what a delay is measured on. */
-  private clockDays(): number {
-    return (this.time.now + this.travelled) / DAY_MS;
-  }
-
-  /** The clock only standing still advances, in days, which is what a wait's patience is measured on. */
-  private standingDays(): number {
-    return this.time.now / DAY_MS;
   }
 
   /**
@@ -2626,23 +2143,9 @@ export class WorldScene extends Phaser.Scene {
    * sends people the scene reported as near, but a step can land between the two.
    */
   private onHail = ({ travellerId }: UiToGame['hail']): void => {
-    const at = this.travellerTiles.get(travellerId);
-    if (!at) return;
-    const steps = Math.max(Math.abs(at.x - this.at.x), Math.abs(at.y - this.at.y));
-    if (steps > NEARBY_TILES) return;
-    // Calling a second person lets the first go on, held back by the time they stood.
-    this.letGo();
-    this.waiting = {
-      id: travellerId,
-      at,
-      stopped: this.clockDays(),
-      since: this.standingDays(),
-      reached: steps <= 1
-    };
-    const sprite = this.travellers.find((t) => t.traveller.id === travellerId)?.sprite;
-    if (sprite) this.standWaiting(sprite, at);
-    if (steps <= 1) return;
-
+    const called = this.travellers.hail(travellerId);
+    if (!called || called.steps <= 1) return;
+    const { at } = called;
     const cost = (tile: Tile) => routeCost(tile, this.boat, this.afloat);
     const { tiles, width, height } = this.world;
     const walked = findPath(tiles, width, height, this.at, at, isWalkable, cost);
@@ -2655,140 +2158,9 @@ export class WorldScene extends Phaser.Scene {
     }
   };
 
-  /**
-   * Draw somebody on the road in the water they are crossing, the way the player is: cut at the
-   * waist in a river, the shins at a ford, the feet in a swamp, and faded into a sky pool. `wadeFor`
-   * is the player's own rule, so nobody wades where the player would not. The cut is a crop on
-   * whichever frame is showing, kept between frames, so it is only set when the depth changes.
-   */
-  private wadeWalker(sprite: Phaser.GameObjects.Sprite, at: Point): void {
-    const wade = wadeFor(this.world.tiles[at.y]?.[at.x]);
-    const depth = wade.kind === 'cut' ? wade.depth : 0;
-    if (depth !== ((sprite.getData('cut') as number | undefined) ?? 0)) {
-      sprite.setData('cut', depth);
-      if (depth > 0) sprite.setCrop(0, 0, sprite.frame.width, Math.round(sprite.frame.height * (1 - depth)));
-      else sprite.setCrop();
-    }
-    const sky = wade.kind === 'sky';
-    sprite.setAlpha(1, 1, sky ? WADE_ALPHA : 1, sky ? WADE_ALPHA : 1);
-  }
-
-  /** Draw somebody waiting: still, on their tile, turned to face the player. */
-  private standWaiting(sprite: Phaser.GameObjects.Sprite, at: Point): void {
-    sprite.setVisible(true);
-    sprite.setPosition(at.x * TILE_SIZE + TILE_SIZE / 2, at.y * TILE_SIZE + TILE_SIZE - 2);
-    this.wadeWalker(sprite, at);
-    sprite.setDepth(depthFor(at.y, ROW_SLOT.walker));
-    const facing = facingFromStep(this.at.x - at.x, this.at.y - at.y, 'down');
-    const { key, flipX } = animFor(sprite.texture.key, facing, 'idle');
-    if (sprite.anims.currentAnim?.key !== key) sprite.play(key);
-    sprite.setFlipX(flipX);
-  }
-
-  /** Let whoever is waiting go on, held back by the time they stood. */
-  private letGo(): void {
-    const waiting = this.waiting;
-    if (!waiting) return;
-    this.waiting = null;
-    this.delays.set(waiting.id, delayAfter(this.delays.get(waiting.id) ?? 0, waiting, this.clockDays()));
-    // Back onto their own walk on the next tick rather than the next hundredth of a day, so they do
-    // not stand looking at somebody who has gone.
-    this.travellersMovedAt = -1;
-  }
-
-  /**
-   * Ask whether somebody waiting still is. `stillWaiting` is the whole rule; this keeps them turned
-   * to the player while they wait and lets them go when it says so.
-   */
-  private updateWaiting(): void {
-    const waiting = this.waiting;
-    if (!waiting) return;
-    const next = stillWaiting(waiting, this.at, this.standingDays());
-    if (!next) {
-      this.letGo();
-      return;
-    }
-    this.waiting = next;
-    const sprite = this.travellers.find((t) => t.traveller.id === next.id)?.sprite;
-    if (sprite) this.standWaiting(sprite, next.at);
-  }
-
-  /**
-   * Whoever is drawn under a tap, if they are near enough to talk to.
-   *
-   * A figure stands taller than its tile, so a tap on somebody's head lands on the tile above their
-   * feet; both count.
-   */
-  private travellerUnder(tapped: Point): string | null {
-    for (const [id, at] of this.travellerTiles) {
-      if (at.x !== tapped.x || (at.y !== tapped.y && at.y - 1 !== tapped.y)) continue;
-      const steps = Math.max(Math.abs(at.x - this.at.x), Math.abs(at.y - this.at.y));
-      if (steps <= NEARBY_TILES) return id;
-    }
-    return null;
-  }
-
   private onTalkTarget = ({ travellerId }: UiToGame['talk-target']): void => {
-    this.talkTarget = travellerId;
-    this.placeTargetMark();
+    this.travellers.setTalkTarget(travellerId);
   };
-
-  /**
-   * A small marker over whoever the talk row means.
-   *
-   * **Reported from play: with two people equally near, nobody could tell who the row would talk
-   * to.** The row says a name, and a name is no help when you have not met either of them. Drawn in
-   * the pips' colours so it reads as the same family of mark -- somebody to talk to -- and moved
-   * every frame because the traveller it rides on is moved on the half-second gate.
-   */
-  private placeTargetMark(): void {
-    const sprite = this.talkTarget
-      ? this.travellers.find((t) => t.traveller.id === this.talkTarget)?.sprite
-      : undefined;
-    if (!sprite || !sprite.visible) {
-      this.targetMark?.setVisible(false);
-      return;
-    }
-    if (!this.targetMark) {
-      const w = Math.max(6, Math.round(TILE_SIZE * 0.12));
-      const g = this.add.graphics();
-      g.fillStyle(PIP_RING, 1).fillTriangle(-w - 2, -w - 3, w + 2, -w - 3, 0, 3);
-      g.fillStyle(PIP_NEWS, 1).fillTriangle(-w, -w - 1.5, w, -w - 1.5, 0, 0);
-      g.setName('talk-target');
-      this.targetMark = g;
-    }
-    const row = Math.floor(sprite.y / TILE_SIZE);
-    this.targetMark
-      .setVisible(true)
-      .setPosition(sprite.x, sprite.y - sprite.displayHeight - 2)
-      .setDepth(depthFor(row, ROW_SLOT.canopy + 1));
-  }
-
-  /**
-   * Tell React what everybody on the road is doing, when it changes.
-   *
-   * **The scene is the only side that can answer this**, because where a place landed belongs to
-   * one generated world and React never sees the placement. What crosses the seam is the answer
-   * rather than the ingredients: `travellerState` turns a position into places here, so React holds
-   * no tiles and the rule about a traveller's hours stays in `content/`.
-   */
-  private reportTravellers(day: number, phase: number): void {
-    const states = this.travellers
-      .filter(({ person }) => !person)
-      .map(({ traveller, circuit, stops }) => ({
-        id: traveller.id,
-        npcId: traveller.npcId,
-        state: travellerState(circuit, whereabouts(this.world, stops, day, phase, hoursFor(traveller.id)))
-      }))
-      .filter((t): t is { id: string; npcId: string | null; state: TravellerState } =>
-        t.state !== null
-      );
-
-    const key = JSON.stringify(states);
-    if (key === this.travellerStatesSent) return;
-    this.travellerStatesSent = key;
-    EventBus.emit('travellers-changed', { travellers: states });
-  }
 
   /**
    * Two fingers moving apart or together change the zoom a step at a time.
@@ -2853,8 +2225,8 @@ export class WorldScene extends Phaser.Scene {
     this.updatePinch();
     this.updateSway();
     this.updateRide();
-    this.updateVisitors();
-    this.placeTargetMark();
+    this.visitors.update();
+    this.travellers.placeTargetMark();
 
     if (this.moving) return;
 
@@ -3095,7 +2467,7 @@ export class WorldScene extends Phaser.Scene {
       atLandmark
     });
     EventBus.emitEvent('journey-changed', { discovered: [...this.discovered] });
-    this.reportNearby();
+    this.travellers.reportNearby();
 
     // What is under foot, every time it changes. The UI decides whether that opens anything;
     // the scene only reports the ground, which is the division everywhere else in this file.

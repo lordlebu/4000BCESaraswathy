@@ -344,6 +344,8 @@ function woven(
     art?: string;
     /** A painting for this card other than the template's own variant, when it borrows one. */
     artVariant?: string;
+    /** A painting of this moment, tried before the variant. See `GameEvent.artMoment`. */
+    artMoment?: string;
   } = {}
 ): GameEvent {
   const words = TEXT[kind];
@@ -365,6 +367,7 @@ function woven(
       : options.variant
         ? { artVariant: `woven-${kind}-${options.variant}` }
         : {}),
+    ...(options.artMoment ? { artMoment: options.artMoment } : {}),
     choices: choices.map((spec) => {
       const text = words.choices[spec.id];
       if (!text) throw new Error(`data/happenings.json: '${kind}' has no choice '${spec.id}'`);
@@ -590,7 +593,10 @@ const campTalk: Template = ({ campPerson }, _roll, now) => {
         ? { stranger: { id, role: person.role, look: person.look, culture: person.culture, givenName: person.givenName } }
         : {}),
       art: 'woven-camp',
-      artVariant: `woven-camp-${person.kind}`
+      artVariant: `woven-camp-${person.kind}`,
+      // At the meal, the kind's own evening at the fire, when it has been painted: the four prompts
+      // are `woven-camp-meal-*` in docs/event-prompts.md. Until then, the camp's painting as before.
+      ...(meal ? { artMoment: `woven-camp-meal-${person.kind}` } : {})
     }
   );
 };

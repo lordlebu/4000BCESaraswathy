@@ -38,3 +38,13 @@ export function wadeFor(tile: Pick<Tile, 'biome' | 'ford' | 'bridge'> | undefine
   if (tile.biome === 'wetland') return { kind: 'cut', depth: SWAMP_DEPTH };
   return { kind: 'dry' };
 }
+
+/**
+ * How much of the traveller survives at his feet while he is wading.
+ *
+ * Phaser interpolates between the corner alphas, so this is the bottom of a ramp that starts at 1
+ * at his head. Low enough that the legs plainly go into the water, high enough that he is still a
+ * figure rather than a floating torso -- below about a third he stops reading as a person standing
+ * in something and starts reading as one cut in half.
+ */
+export const WADE_ALPHA = 0.42;
