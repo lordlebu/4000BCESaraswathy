@@ -460,6 +460,11 @@ it is not, it has already been applied.
   the placement and night rules live outside the scene. `wandererArt.ts` globs `assets/wanderers/`
   so a painted animal needs no registration, and the sizes it is drawn at live in `frames.ts` for
   the same reason everything else does: `tileTextures.ts` cannot be imported under Node.
+  **`game/systems/` is where the scene is being split**, one system at a time with no change in
+  behaviour (`docs/scaling-study.md` section 2). `CampView.ts` is the first: a camp's pieces,
+  shadows, trodden way, smoke, lights and ashes. It reads the scene through a small `CampHost`
+  interface of live getters rather than reaching into its fields, and the scene keeps the camp's
+  *people*, because they are travellers. The next system follows the same shape.
 - **`src/ui/`** — React chrome. The dock along the bottom (`Here.tsx`, `JournalPanel.tsx`,
   `PlacePanel.tsx`, `TileActions.tsx`), the records and interrupts behind one `Modal.tsx`, the
   painted plate a species opens into (`Specimen.tsx`), the seed bar, and `styles.css`. What is on

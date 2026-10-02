@@ -90,13 +90,12 @@ import {
   wandererMarkerKey
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
-import { BLADE_PERIOD, DUGOUT_VIEWS, FIRST_YURT, ROW_SLOT, depthFor, dugoutFor, placeFrame, rowAtFoot, type DugoutView, type Edge } from '../frames';
+import { BLADE_PERIOD, DUGOUT_VIEWS, ROW_SLOT, depthFor, dugoutFor, rowAtFoot, type DugoutView, type Edge } from '../frames';
 import { buildable, buildingTiles } from '../../content/homestead';
-import { atCamp, campSpots, encampmentOn, wayIn, type Encampment, type WayIn } from '../../content/encampments';
+import { atCamp, encampmentOn, wayIn, type Encampment } from '../../content/encampments';
 import {
   campPeople,
   campPlacements,
-  campStage,
   campVisitors,
   phaseAfterMeeting,
   runnerErrand,
@@ -106,20 +105,9 @@ import {
   type RunnerErrand,
   type Visit
 } from '../../content/campLife';
-import {
-  ASHES_DAYS,
-  CAMP_LAYOUT,
-  CROSSED_COLOUR,
-  CROSSED_GROUND,
-  PRINTED_GROUND,
-  YURT_ONE_IN,
-  campKey,
-  CAMP_FLAMES,
-  campPieces,
-  carriesTint,
-  troddenColour
-} from '../campArt';
+import { campPieces } from '../campArt';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
+import { CampView } from '../systems/CampView';
 
 /**
  * Which loaded texture each kind of placement draws from.
@@ -559,34 +547,8 @@ export class WorldScene extends Phaser.Scene {
   /** What the homestead draws, and what React last asked for. See `drawHomestead`. */
   private homesteadSprites: Phaser.GameObjects.Image[] = [];
   private homesteadWanted: UiToGame['homestead-changed'] = { poiId: null, stage: 0 };
-  /** Today's camp, as drawn: which one, where, and its two sprites. See `drawCamp`. */
-  private camp: {
-    id: string;
-    key: string;
-    camp: Encampment;
-    sprites: Phaser.GameObjects.Image[];
-    /** The shelter and its shadow, put up on the first morning and struck on the last afternoon. */
-    shelter: Phaser.GameObjects.Image[];
-    /** The trees cleared off the camp's own tiles while it stands, and the alpha each had. See `clearCampGround`. */
-    cleared: { sprite: Phaser.GameObjects.Image; alpha: number }[];
-    /** Firelight after dark, like a lamp's. */
-    glow: Phaser.GameObjects.Image | null;
-    /** The small flames the camp's pieces carry, lit with the fire. See `CAMP_FLAMES`. */
-    lamps: { key: string; sprite: Phaser.GameObjects.Image }[];
-    /** The way in from the road, and the trodden tiles drawn along it. See `drawTrodden`. */
-    way: WayIn | null;
-    trodden: { key: string; sprite: Phaser.GameObjects.Image }[];
-    /** What the smoke was last set to, so an unchanged hour costs nothing. */
-    smokeAt: string;
-    /** Which tile each sprite stands on, so each shows once its own tile is known. */
-    tiles: string[];
-    smoke: Phaser.GameObjects.Particles.ParticleEmitter | null;
-  } | null = null;
-  /** Cold fire rings where camps struck in the last few days, by camp id. See `campArt.ts`. */
-  private ashes = new Map<
-    string,
-    { key: string; sprite: Phaser.GameObjects.Image; trodden: { key: string; sprite: Phaser.GameObjects.Image }[] }
-  >();
+  /** Today's camp and the ashes of the last few, as drawn. See `systems/CampView.ts`. */
+  private campView!: CampView;
   /** What each of the camp's people is doing, as last placed, for `travellers-nearby`. */
   private campDoing = new Map<string, string>();
   /** Today's errand and visitors for the camp, worked out once a day. See `refreshCampDay`. */
@@ -759,9 +721,29 @@ export class WorldScene extends Phaser.Scene {
     this.spinning = [];
     this.homesteadSprites = [];
     this.homesteadWanted = { poiId: null, stage: 0 };
-    this.camp = null;
-    // The last map's ashes and camp went with its display list.
-    this.ashes = new Map();
+    // The last map's ashes and camp went with its display list. The host reads the scene live, so
+    // it answers for whichever map is drawn.
+    const scene = this;
+    this.campView = new CampView(this, {
+      get world() {
+        return scene.world;
+      },
+      get fieldMapId() {
+        return scene.built?.fieldMap.id ?? scene.fieldMapId;
+      },
+      get discovered() {
+        return scene.discovered;
+      },
+      get tileOwned() {
+        return scene.tileOwned;
+      },
+      get tileSprites() {
+        return scene.tileSprites;
+      },
+      lightDepth: DEPTH_SKY + 1,
+      smokeDepth: DEPTH_FOG + 1,
+      glow: () => scene.glowAt
+    });
     this.campDay = null;
     this.falls = [];
     this.queuedPath = [];
@@ -1932,461 +1914,12 @@ export class WorldScene extends Phaser.Scene {
     const places = this.placesHere();
     const day = this.dayOfJourney();
     const today = encampmentOn(this.world, this.built.fieldMap.id, places, day);
-    if (this.camp && this.camp.id !== today?.id) {
-      for (const s of this.camp.sprites) s.destroy();
-      for (const c of this.camp.cleared) c.sprite.setAlpha(c.alpha);
-      this.camp.smoke?.destroy();
-      this.camp.glow?.destroy();
-      for (const l of this.camp.lamps) l.sprite.destroy();
-      // The way stays on the ground a few days, faded, with the ashes: `drawAshes` keeps it.
-      for (const t of this.camp.trodden) t.sprite.destroy();
-      this.camp = null;
-      this.dropCampFolk();
-    }
-    if (today && !this.camp) {
-      this.camp = this.pitchCamp(today);
-      this.addCampFolk(today);
-    }
-    if (this.camp) {
-      const camp = this.camp;
-      camp.sprites.forEach((s, i) => s.setVisible(this.discovered.has(camp.tiles[i]!) || this.discovered.has(camp.key)));
-      for (const t of camp.trodden) t.sprite.setVisible(this.discovered.has(t.key));
-      this.refreshCampDay(day);
-      this.updateCampStage(phaseAt(this.time.now + this.travelled, this.startPhase));
-    }
-    this.drawAshes(places, day, today);
+    const { struck, pitched } = this.campView.draw(today, places, day, phaseAt(this.time.now + this.travelled, this.startPhase));
+    if (struck) this.dropCampFolk();
+    if (pitched) this.addCampFolk(pitched);
+    if (this.campView.current) this.refreshCampDay(day);
   }
 
-  /**
-   * A camp, drawn from its kind's own props round the old fire ring.
-   *
-   * **Every camp of a kind is not the same picture.** The seed for this camp chooses whether the
-   * kind's own shelter stands or the old yurt does (`YURT_ONE_IN`), and which way round the things
-   * about the fire are set. The ring is the one the camp was always drawn with; the owner asked for
-   * the generic camp art to be kept, and this is where it lives now.
-   *
-   * **The smoke is what tells you it is there.** A thin column over the fire, drawn above the fog,
-   * so a camp nobody has walked to yet can still be seen from across the map -- the way open games
-   * telegraph a campfire. Nothing pops up to announce it. How thick it is follows the camp's day
-   * (`campStage`).
-   */
-  private pitchCamp(camp: Encampment): NonNullable<WorldScene['camp']> {
-    const roll = tileHash(this.world.seed, camp.at.x, camp.at.y, `camp:${camp.id}`);
-    const layout = CAMP_LAYOUT[camp.kind];
-    const foot = (at: Point) => ({ x: at.x * TILE_SIZE + TILE_SIZE / 2, y: at.y * TILE_SIZE + TILE_SIZE - 6 });
-    const sprites: { img: Phaser.GameObjects.Image; at: Point }[] = [];
-    const lamps: { key: string; sprite: Phaser.GameObjects.Image }[] = [];
-    const piece = (key: string, frame: number | undefined, at: Point, slot: number, scale = 1, shadow = true) => {
-      const { x, y } = foot(at);
-      const depth = depthFor(at.y, ROW_SLOT.marker) + slot;
-      const img = (frame === undefined ? this.add.image(x, y, key) : this.add.image(x, y, key, frame))
-        .setOrigin(0.5, 1)
-        .setScale(scale)
-        .setDepth(depth);
-      const made = [img];
-      // A shadow under anything that stands, laid before the piece in the list as well as in depth.
-      // A fold or a fire ring lies flat on the ground and casts none. See `castUnder`.
-      if (shadow) {
-        for (const under of this.castUnder(img, at)) {
-          sprites.push({ img: under, at });
-          made.push(under);
-        }
-      }
-      sprites.push({ img, at });
-      const flame = this.flameOn(img, at);
-      if (flame) lamps.push(flame);
-      return made;
-    };
-
-    // **Spread over the tiles round the fire, not stacked on one.** The first cut put every piece
-    // on the camp's own tile and the owner read it at once: everything bundled together, cramped.
-    // `campSpots` lays them out -- the fire keeps the camp's tile, the shelter stands behind it and
-    // the other things to either side, in a seeded order -- and it is the same rule `campLife.ts`
-    // keeps the camp's people off these tiles with, so nobody stands inside the tent.
-    const { around } = campSpots(this.world, camp);
-    const spot = (n: number): Point => around[n] ?? camp.at;
-
-    if (layout.ground !== null) piece(campKey(camp.kind, layout.ground), undefined, camp.at, -1, 1, false);
-    const ring = placeFrame('', 'travel_node');
-    if (ring !== null) piece(SHEET_KEY.places, ring, camp.at, 1, 0.6, false);
-    // About one camp in three is pitched round the old yurt instead of the kind's own shelter.
-    const yurt = Math.floor(roll / 7) % YURT_ONE_IN === 0;
-    const shelter = yurt
-      ? piece(SHEET_KEY.huts, FIRST_YURT, spot(0), 2)
-      : piece(campKey(camp.kind, layout.shelter), undefined, spot(0), 2);
-    layout.extras.forEach((n, i) => piece(campKey(camp.kind, n), undefined, spot(i + 1), 2));
-
-    for (const s of sprites) s.img.setName(`camp:${camp.kind}`);
-    const cleared = this.clearCampGround(camp, sprites.map((s) => s.at));
-    for (const s of shelter) s.setName(`camp-shelter:${camp.kind}`);
-    const fire = foot(camp.at);
-    const glow = this.add
-      .image(fire.x, fire.y - 10, lampGlowKey(this))
-      .setBlendMode(Phaser.BlendModes.ADD)
-      .setDepth(DEPTH_SKY + 1)
-      .setScale(1.6)
-      .setAlpha(0)
-      .setName('camp-glow');
-    const way = wayIn(this.world, camp, walkedRoad(this.world, this.built!.fieldMap.id, this.placesHere()), this.placesHere().map((p) => p.at));
-    return {
-      id: camp.id,
-      key: `${camp.at.x},${camp.at.y}`,
-      camp,
-      sprites: sprites.map((s) => s.img),
-      tiles: sprites.map((s) => `${s.at.x},${s.at.y}`),
-      shelter,
-      cleared,
-      glow,
-      lamps,
-      way,
-      trodden: this.drawTrodden(camp, way, 0.75, lamps),
-      smokeAt: '',
-      smoke: this.campSmoke(fire.x, fire.y - 30)
-    };
-  }
-
-  /**
-   * The way in, worn into the ground: a few dabs of bare earth on each tile from the road to the
-   * fire, and the camp's own small marker where it leaves the road.
-   *
-   * **It shows the way and changes nothing about walking it.** The owner's ruling (Q3 of the Living
-   * Camps plan): the walk through the wild is the point, so a trodden tile costs what its ground
-   * costs. Drawn under everything that stands, and shown tile by tile as the fog lifts. While the
-   * camp stands it is plain; for the few days the ashes lie, faint.
-   */
-  private drawTrodden(
-    camp: Encampment,
-    way: WayIn | null,
-    alpha: number,
-    lamps: { key: string; sprite: Phaser.GameObjects.Image }[] = []
-  ): { key: string; sprite: Phaser.GameObjects.Image }[] {
-    if (!way) return [];
-    // Both drawn white and tinted per tile by `troddenColour`, so the way is the ground's own colour.
-    if (!this.textures.exists('camp-prints')) {
-      const g = this.make.graphics({ x: 0, y: 0 }, false);
-      const dabs = [
-        [10, 14, 7, 4],
-        [24, 8, 6, 3],
-        [36, 18, 8, 4],
-        [50, 10, 6, 3],
-        [18, 26, 6, 3],
-        [44, 28, 7, 3]
-      ];
-      for (const [x, y, rx, ry] of dabs) {
-        g.fillStyle(0xffffff, 0.85);
-        g.fillEllipse(x!, y!, rx! * 2, ry! * 2);
-      }
-      g.generateTexture('camp-prints', 60, 36);
-      g.destroy();
-    }
-    // **Three treatments, by the ground, each coloured from the tile under it** (`troddenColour`,
-    // `groundColourAt`) -- the owner's notes on the first cut, a brown line that sat on top of grass
-    // and snow alike. Mud, snow and sand take footprints. Dry ground takes what a footpath through
-    // grass actually is: a thin, faint line, drawn as a half-strip from each tile's middle toward each
-    // neighbour on the way, so the halves meet and the line runs unbroken from the road to the fire.
-    // Water, mountain and the like take the same line in one pale colour, barely there.
-    if (!this.textures.exists('camp-worn')) {
-      const g = this.make.graphics({ x: 0, y: 0 }, false);
-      // Soft-edged: three bands, faint outside to firm in the middle, and a round end at the tile's
-      // centre so a bend joins without a notch.
-      for (const [inset, a] of [[0, 0.3], [2, 0.55], [4, 0.8]] as const) {
-        g.fillStyle(0xffffff, a);
-        g.fillRect(6, inset, 58, 12 - inset * 2);
-        g.fillCircle(6, 6, 6 - inset);
-      }
-      g.generateTexture('camp-worn', 64, 12);
-      g.destroy();
-    }
-    const out: { key: string; sprite: Phaser.GameObjects.Image }[] = [];
-    const tiles = way.tiles;
-    // The colour the line last had on ordinary ground, carried over the rails, the ropes and the sky
-    // pool (`carriesTint`). Worn earth until the way has crossed any.
-    let carried = 0x8c7a58;
-    // Not the road tile it leaves from, and not the fire's own tile.
-    for (let i = 1; i < tiles.length - 1; i++) {
-      const p = tiles[i]!;
-      const key = `${p.x},${p.y}`;
-      const shown = this.discovered.has(key);
-      const cx = p.x * TILE_SIZE + TILE_SIZE / 2;
-      const cy = p.y * TILE_SIZE + TILE_SIZE / 2;
-      const depth = depthFor(p.y, ROW_SLOT.underfoot);
-      const ground = this.world.tiles[p.y]![p.x]!;
-      const biome = ground.biome;
-      // Over the rails, ropes and sky pool, the grass line in the colour it already had.
-      const carries = carriesTint(ground);
-      const printed = !carries && PRINTED_GROUND.has(biome);
-      // Over a river, mountain and the like, one neutral colour and barely there: see `CROSSED_GROUND`.
-      const crossed = !carries && CROSSED_GROUND.has(biome);
-      const tint = carries
-        ? carried
-        : crossed
-          ? CROSSED_COLOUR
-          : troddenColour(this.groundColourAt(p) ?? biomeFor(biome)?.color ?? '#8a7a5a', printed);
-      if (!carries && !crossed && !printed) carried = tint;
-      if (printed) {
-        const sprite = this.add
-          .image(cx, cy, 'camp-prints')
-          .setTint(tint)
-          .setDisplaySize(TILE_SIZE * 0.9, TILE_SIZE * 0.54)
-          .setAlpha(alpha)
-          .setDepth(depth)
-          .setVisible(shown)
-          .setName('camp-trodden');
-        out.push({ key, sprite });
-        continue;
-      }
-      for (const n of [tiles[i - 1]!, tiles[i + 1]!]) {
-        const sprite = this.add
-          .image(cx, cy, 'camp-worn')
-          .setOrigin(6 / 64, 0.5)
-          .setDisplaySize(TILE_SIZE / 2 + 6, TILE_SIZE * 0.16)
-          .setRotation(Math.atan2(n.y - p.y, n.x - p.x))
-          .setTint(tint)
-          // Fainter than the prints: worn grass is a change of colour, not a mark on top of it. Fainter
-          // still over ground nobody wears a path into.
-          .setAlpha(alpha * (crossed ? 0.22 : 0.6))
-          .setDepth(depth)
-          .setVisible(shown)
-          .setName('camp-trodden');
-        out.push({ key, sprite });
-      }
-    }
-    // The marker: the kind's own smallest thing, set down on the first tile off the road.
-    const first = way.tiles[1];
-    const layout = CAMP_LAYOUT[camp.kind];
-    const mark = layout.extras[layout.extras.length - 1];
-    if (first && mark !== undefined && alpha >= 0.5) {
-      const sprite = this.add
-        .image(first.x * TILE_SIZE + TILE_SIZE / 2, first.y * TILE_SIZE + TILE_SIZE - 6, campKey(camp.kind, mark))
-        .setOrigin(0.5, 1)
-        .setScale(0.45)
-        .setDepth(depthFor(first.y, ROW_SLOT.marker))
-        .setVisible(this.discovered.has(`${first.x},${first.y}`))
-        .setName('camp-turnoff');
-      for (const under of this.castUnder(sprite, first)) {
-        out.push({ key: `${first.x},${first.y}`, sprite: under.setVisible(sprite.visible).setName('camp-turnoff-shade') });
-      }
-      out.push({ key: `${first.x},${first.y}`, sprite });
-      // The pilgrims' cairn keeps its lamp lit at the turn-off too: a light by the road after dark.
-      const flame = this.flameOn(sprite, first);
-      if (flame) lamps.push(flame);
-    }
-    return out;
-  }
-
-  /** The painted tiles' average colours, by texture and frame. See `groundColourAt`. */
-  private groundColours = new Map<string, number | null>();
-  /** Where each camp piece meets the ground, read from its pixels once. See `footprintOf`. */
-  private footprints = new Map<string, { bottom: number; left: number; right: number }>();
-
-  /**
-   * The average colour of the painted tile at this point, read from its own pixels: a five by five
-   * grid of samples across the frame, ignoring anything transparent. Cached per picture, since the
-   * same crop of grass is drawn on many tiles. Null when the texture cannot be read.
-   */
-  /**
-   * Where a piece of art actually stands: the bottom of what is painted, and how wide it is there.
-   *
-   * The camp props are cut from painted sheets with uneven margins -- up to thirteen clear pixels
-   * under a tent, none under a pack -- so the image's own bottom edge is not the ground. Read once per
-   * texture from the pixels and kept. Width is taken over the lowest eighth of the figure, the part
-   * that touches the ground, not the widest part: a hide rack's poles splay above its feet.
-   */
-  private footprintOf(img: Phaser.GameObjects.Image): { bottom: number; left: number; right: number } {
-    const id = `${img.texture.key}#${img.frame.name}`;
-    const had = this.footprints.get(id);
-    if (had) return had;
-    const { width, height, cutX, cutY } = img.frame;
-    const whole = { bottom: height - 1, left: 0, right: width - 1 };
-    let found = whole;
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      const source = img.frame.source.image as CanvasImageSource;
-      if (ctx) {
-        ctx.drawImage(source, cutX, cutY, width, height, 0, 0, width, height);
-        const data = ctx.getImageData(0, 0, width, height).data;
-        const solid = (x: number, y: number) => data[(y * width + x) * 4 + 3]! > 48;
-        let top = -1;
-        let bottom = -1;
-        for (let y = 0; y < height && top < 0; y++) for (let x = 0; x < width; x++) if (solid(x, y)) { top = y; break; }
-        for (let y = height - 1; y >= 0 && bottom < 0; y--) for (let x = 0; x < width; x++) if (solid(x, y)) { bottom = y; break; }
-        if (top >= 0 && bottom >= top) {
-          const band = Math.max(3, Math.round((bottom - top) / 8));
-          let left = width;
-          let right = -1;
-          for (let y = bottom - band; y <= bottom; y++) {
-            for (let x = 0; x < width; x++) {
-              if (!solid(x, y)) continue;
-              left = Math.min(left, x);
-              right = Math.max(right, x);
-            }
-          }
-          if (right >= left) found = { bottom, left, right };
-        }
-      }
-    } catch {
-      // A texture the canvas cannot read: the whole image is the footprint, as it was before.
-    }
-    this.footprints.set(id, found);
-    return found;
-  }
-
-  /**
-   * The shadow under a camp piece, sized to where the piece meets the ground.
-   *
-   * **Two layers, as a painter shades a thing standing in daylight.** A broad, soft one -- the light
-   * the piece keeps off the ground round it -- and a narrow, darker one along the very line it
-   * touches, which is what stops a tent reading as a sticker. The first cut was one ellipse the
-   * width of the whole image and centred two pixels above an edge that was not the ground: on the
-   * tents it hung below the canvas as a separate grey disc, and on the narrow pieces it was a smear
-   * wider than the thing it belonged to.
-   *
-   * Both are placed from `footprintOf`, so the base sits *in* its shadow rather than above it. The
-   * colour and the texture are the world's contact shade, and the depth is its slot: on the ground,
-   * under the piece and anything else standing on that row.
-   */
-  private castUnder(img: Phaser.GameObjects.Image, at: Point): Phaser.GameObjects.Image[] {
-    const { bottom, left, right } = this.footprintOf(img);
-    const scale = img.scaleX;
-    const ground = img.y - (img.frame.height - 1 - bottom) * scale;
-    const cx = img.x + ((left + right) / 2 - img.frame.width / 2) * scale;
-    const base = Math.max(12, (right - left + 1) * scale);
-    const depth = depthFor(at.y, ROW_SLOT.underfoot) + 0.6;
-    // **Tucked under the base, never in front of it.** The second cut centred the soft layer just in
-    // front of the base line, and the owner read it at once: a shadow that starts below the art makes
-    // the art float above it. Both layers are centred *above* the line, so the darkest part of each is
-    // hidden behind the piece where it meets the ground, and only the soft fringe shows -- a few pixels
-    // in front and out at the sides. Capped in depth, so a wide tent does not throw a pool.
-    const soft = Math.min(34, Math.max(10, base * 0.2));
-    const core = Math.min(12, Math.max(5, base * 0.08));
-    return [
-      this.add.image(cx, ground - soft * 0.3, SHADOW_TEXTURE).setDisplaySize(base * 1.1, soft).setDepth(depth),
-      this.add.image(cx, ground - core * 0.3, SHADOW_TEXTURE).setDisplaySize(base * 0.92, core).setDepth(depth + 0.1)
-    ];
-  }
-
-  /**
-   * A camp is pitched in a clearing, so nothing tall stands on the ground it uses.
-   *
-   * Forest is never camp ground (`campable`), but open ground still carries the odd lone tree, and
-   * one on the fire's tile or under the tent put the camp back in the woods. While the camp stands,
-   * any standing feature round the fire or on a tile the camp uses -- and the contact shade under it --
-   * is faded out, and put back exactly as it was when the camp is struck. Faded rather than hidden,
-   * because the cull owns `visible` and resets it as the camera moves.
-   */
-  private clearCampGround(camp: Encampment, tiles: readonly Point[]): { sprite: Phaser.GameObjects.Image; alpha: number }[] {
-    const used = new Set(tiles.map((p) => `${p.x},${p.y}`));
-    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) used.add(`${camp.at.x + dx},${camp.at.y + dy}`);
-    const tall = new Set([SHEET_KEY.trees, SHEET_KEY.features, SHADOW_TEXTURE]);
-    const out: { sprite: Phaser.GameObjects.Image; alpha: number }[] = [];
-    for (const owned of this.tileOwned) {
-      if (!used.has(`${owned.x},${owned.y}`)) continue;
-      const sprite = owned.sprite as Phaser.GameObjects.Image;
-      if (!sprite.texture || !tall.has(sprite.texture.key)) continue;
-      out.push({ sprite, alpha: sprite.alpha });
-      sprite.setAlpha(0);
-    }
-    return out;
-  }
-
-  private groundColourAt(p: Point): number | null {
-    const img = this.tileSprites[p.y]?.[p.x];
-    if (!img) return null;
-    const key = img.texture.key;
-    const frame = img.frame.name;
-    const id = `${key}#${frame}`;
-    if (this.groundColours.has(id)) return this.groundColours.get(id)!;
-    let r = 0;
-    let g = 0;
-    let b = 0;
-    let n = 0;
-    const { width, height } = img.frame;
-    for (let i = 1; i <= 5; i++) {
-      for (let j = 1; j <= 5; j++) {
-        const c = this.textures.getPixel(Math.floor((width * i) / 6), Math.floor((height * j) / 6), key, frame);
-        if (!c || c.alpha === 0) continue;
-        r += c.red;
-        g += c.green;
-        b += c.blue;
-        n++;
-      }
-    }
-    const colour = n > 0 ? (Math.round(r / n) << 16) | (Math.round(g / n) << 8) | Math.round(b / n) : null;
-    this.groundColours.set(id, colour);
-    return colour;
-  }
-
-  /** A soft grey puff, made once, and a slow column of them over the fire. */
-  private campSmoke(x: number, y: number): Phaser.GameObjects.Particles.ParticleEmitter | null {
-    if (!this.textures.exists('camp-smoke')) {
-      const g = this.make.graphics({ x: 0, y: 0 }, false);
-      for (let r = 16; r > 0; r -= 2) {
-        g.fillStyle(0x8f8a84, 0.12);
-        g.fillCircle(16, 16, r);
-      }
-      g.generateTexture('camp-smoke', 32, 32);
-      g.destroy();
-    }
-    return this.add
-      .particles(x, y, 'camp-smoke', {
-        speedY: { min: -60, max: -42 },
-        speedX: { min: -5, max: 9 },
-        lifespan: 7600,
-        scale: { start: 1.2, end: 4.2 },
-        alpha: { start: 0.9, end: 0.05 },
-        frequency: 260,
-        quantity: 1
-      })
-      .setDepth(DEPTH_FOG + 1)
-      .setName('camp-smoke');
-  }
-
-  /**
-   * The camp's look for the hour: the shelter up or struck, the smoke thick or a thread, the
-   * firelight with the dark. `campStage` decides; this only draws it.
-   */
-  private updateCampStage(phase: number): void {
-    const camp = this.camp;
-    if (!camp) return;
-    const stage = campStage(camp.camp, this.dayOfJourney(), phase);
-    const shelterKnown = camp.shelter.length > 0;
-    for (const s of camp.shelter) {
-      const i = camp.sprites.indexOf(s);
-      const known = i >= 0 && (this.discovered.has(camp.tiles[i]!) || this.discovered.has(camp.key));
-      s.setVisible(stage.shelterUp && known && shelterKnown);
-    }
-    const smoke = stage.smoke;
-    if (smoke !== camp.smokeAt) {
-      camp.smokeAt = smoke;
-      camp.smoke?.setFrequency(smoke === 'thick' ? 150 : smoke === 'thread' ? 900 : 260);
-    }
-    camp.glow?.setVisible(this.discovered.has(camp.key)).setAlpha(Math.max(0, this.glowAt));
-    for (const l of camp.lamps) l.sprite.setVisible(this.discovered.has(l.key)).setAlpha(Math.max(0, this.glowAt));
-  }
-
-  /**
-   * The light of a flame painted on a camp piece, if it has one (`CAMP_FLAMES`): the street lamps'
-   * pool of light, smaller, over the night's tint, and dark by day like theirs.
-   */
-  private flameOn(img: Phaser.GameObjects.Image, at: Point): { key: string; sprite: Phaser.GameObjects.Image } | null {
-    const flame = CAMP_FLAMES[img.texture.key];
-    if (!flame) return null;
-    const scale = img.scaleX;
-    const x = img.x + (flame.x - img.frame.width / 2) * scale;
-    const y = img.y - (img.frame.height - flame.y) * scale;
-    const sprite = this.add
-      .image(x, y, lampGlowKey(this))
-      .setBlendMode(Phaser.BlendModes.ADD)
-      .setDepth(DEPTH_SKY + 1)
-      .setScale(0.55 * Math.max(0.6, scale))
-      .setAlpha(Math.max(0, this.glowAt))
-      .setVisible(false)
-      .setName('camp-lamp');
-    return { key: `${at.x},${at.y}`, sprite };
-  }
 
   /**
    * Today's runner errand and visitors, worked out once for the camp and the day.
@@ -2395,7 +1928,7 @@ export class WorldScene extends Phaser.Scene {
    * today really does pass the turn-off.
    */
   private refreshCampDay(day: number): void {
-    const camp = this.camp;
+    const camp = this.campView.current;
     if (!camp) {
       this.campDay = null;
       return;
@@ -2442,43 +1975,6 @@ export class WorldScene extends Phaser.Scene {
     this.campDay = null;
     this.travellersMovedAt = -1;
     this.reportNearby();
-  }
-
-  /**
-   * Where a camp stood in the last `ASHES_DAYS` days and has struck: its ring, cold and grey, and
-   * the way in, faint, once those tiles are known. What a camp leaves behind when it moves on.
-   */
-  private drawAshes(places: { poiId: string; at: Point }[], day: number, today: Encampment | null): void {
-    const want = new Map<string, Encampment>();
-    for (let k = 1; k <= ASHES_DAYS; k++) {
-      const was = encampmentOn(this.world, this.built!.fieldMap.id, places, day - k);
-      if (was && was.id !== today?.id && was.to <= day) want.set(was.id, was);
-    }
-    for (const [id, a] of this.ashes) {
-      if (!want.has(id)) {
-        a.sprite.destroy();
-        for (const t of a.trodden) t.sprite.destroy();
-        this.ashes.delete(id);
-      }
-    }
-    const ring = placeFrame('', 'travel_node');
-    for (const [id, was] of want) {
-      if (this.ashes.has(id) || ring === null) continue;
-      const sprite = this.add
-        .image(was.at.x * TILE_SIZE + TILE_SIZE / 2, was.at.y * TILE_SIZE + TILE_SIZE, SHEET_KEY.places, ring)
-        .setOrigin(0.5, 1)
-        .setScale(0.6)
-        .setTint(0x8a8580)
-        .setAlpha(0.6)
-        .setDepth(depthFor(was.at.y, ROW_SLOT.marker))
-        .setName('camp-ashes');
-      const way = wayIn(this.world, was, walkedRoad(this.world, this.built!.fieldMap.id, places), places.map((p) => p.at));
-      this.ashes.set(id, { key: `${was.at.x},${was.at.y}`, sprite, trodden: this.drawTrodden(was, way, 0.3) });
-    }
-    for (const a of this.ashes.values()) {
-      a.sprite.setVisible(this.discovered.has(a.key));
-      for (const t of a.trodden) t.sprite.setVisible(this.discovered.has(t.key));
-    }
   }
 
   /** Who is at each place, from React. Drawn at once and kept for the next redraw. */
@@ -2819,7 +2315,7 @@ export class WorldScene extends Phaser.Scene {
 
     // Beside one of the camps that come and go, the night is told as theirs.
     const shelter = this.shelterHere();
-    const campKind = shelter === 'camp' && this.camp && atCamp(this.camp.camp, this.at) ? this.camp.camp.kind : null;
+    const campKind = shelter === 'camp' && this.campView.current && atCamp(this.campView.current.camp, this.at) ? this.campView.current.camp.kind : null;
     const outcome = spendNight(shelter, campKind);
     const morning = restUntilMorning(this.travelled, this.startPhase, this.time.now);
     this.travelled = morning.travelledMs;
@@ -2886,7 +2382,7 @@ export class WorldScene extends Phaser.Scene {
       this.updateWaiting();
       this.updateTravellers(phase);
       // The camp's shelter, smoke and firelight follow its day, on the same gate.
-      this.updateCampStage(phase);
+      this.campView.stage(phase, this.dayOfJourney());
       // The animals that are somewhere rather than everywhere, on the same gate and for the same
       // reason -- a wanderer moves no faster than a drover does.
       this.updateWanderers(phase);
@@ -3021,13 +2517,13 @@ export class WorldScene extends Phaser.Scene {
         .map(({ traveller, stops }) => ({ id: traveller.id, npcId: traveller.npcId, stops }));
       const errand = runnerErrand(this.world, c, way, roster, d);
       const visits = campVisitors(this.world, c, way, roster, d, errand);
-      const now = day === undefined ? this.camp : null;
+      const now = day === undefined ? this.campView.current : null;
       return {
         ...c,
-        visible: day === undefined ? (this.camp?.sprites[0]?.visible ?? false) : null,
+        visible: day === undefined ? (now?.sprites[0]?.visible ?? false) : null,
         // What it is drawn from, and whether its smoke is rising: `e2e/camps.spec.ts`.
-        pieces: day === undefined ? (this.camp?.sprites.map((s) => s.texture.key) ?? []) : [],
-        smoke: day === undefined ? (this.camp?.smoke?.getAliveParticleCount() ?? 0) : 0,
+        pieces: now?.sprites.map((s) => s.texture.key) ?? [],
+        smoke: now?.smoke?.getAliveParticleCount() ?? 0,
         way: way ? { turnOff: way.turnOff, tiles: way.tiles.length, path: way.tiles } : null,
         errand: errand
           ? { travellerId: errand.travellerId, turnOff: errand.turnOff, beside: errand.way[errand.way.length - 1], arrive: errand.arrive, part: errand.part }
@@ -3249,7 +2745,7 @@ export class WorldScene extends Phaser.Scene {
 
     const day = this.dayOfJourney();
     this.refreshCampDay(day);
-    const camp = this.camp;
+    const camp = this.campView.current;
     const campDay = this.campDay;
     const errand = campDay?.errand ?? null;
     // The camp's people for this hour, and somewhere at the fire for a visitor to sit that none of
