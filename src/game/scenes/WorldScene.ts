@@ -12,17 +12,6 @@ import placesUrl from '../../../assets/places.png';
 import monumentsUrl from '../../../assets/monuments.png';
 import windmillUrl from '../../../assets/windmill-tower.png';
 import bladesUrl from '../../../assets/windmill-blades.png';
-import stageOneUrl from '../../../assets/windmill-stage-1.png';
-import stageTwoUrl from '../../../assets/windmill-stage-2.png';
-import greenhouseUrl from '../../../assets/greenhouse.png';
-import windmillManifest from '../../../assets/windmill.json';
-import homesteadManifest from '../../../assets/homestead.json';
-import windpumpTowerUrl from '../../../assets/windpump-tower.png';
-import windpumpVanesUrl from '../../../assets/windpump-vanes.png';
-import stillHouseUrl from '../../../assets/still-house.png';
-import scarpMillTowerUrl from '../../../assets/scarp-mill-tower.png';
-import scarpMillSailsUrl from '../../../assets/scarp-mill-sails.png';
-import apiaryUrl from '../../../assets/apiary.png';
 import bridgeUrl from '../../../assets/bridge.png';
 import riverBridgeUrl from '../../../assets/river-bridge.png';
 import dugoutUrl from '../../../assets/dugout.png';
@@ -86,12 +75,9 @@ import {
   hasTileArt,
   placeholderTileKey,
   traceFrameFor,
-  paintedHeight,
-  wandererMarkerKey
 } from '../tileTextures';
 import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
-import { BLADE_PERIOD, DUGOUT_VIEWS, ROW_SLOT, depthFor, dugoutFor, rowAtFoot, type DugoutView, type Edge } from '../frames';
-import { buildable, buildingTiles } from '../../content/homestead';
+import { DUGOUT_VIEWS, ROW_SLOT, depthFor, dugoutFor, rowAtFoot, type DugoutView, type Edge } from '../frames';
 import { atCamp, encampmentOn, wayIn, type Encampment } from '../../content/encampments';
 import {
   campPeople,
@@ -108,6 +94,8 @@ import {
 import { campPieces } from '../campArt';
 import { beatFor, beatKey, settleZoom, type ArrivalPlace } from '../arrival';
 import { CampView } from '../systems/CampView';
+import { WandererView } from '../systems/WandererView';
+import { HomesteadView, loadHomesteadArt } from '../systems/HomesteadView';
 
 /**
  * Which loaded texture each kind of placement draws from.
@@ -118,43 +106,6 @@ import { CampView } from '../systems/CampView';
  * instead, and `contact` is the one shadow texture the traveller already uses.
  */
 
-/**
- * A map's own finished building, from `tools/build-homestead.js`: a tower, a wheel turned at build
- * time, a house beside it and perhaps one small thing more. Maps without one -- Lothal -- finish with
- * the Grit Mill's tower and wheel and the greenhouse. The names are the builder's; the URLs are here
- * because Vite has to see each import.
- */
-interface FinishedBuilding {
-  tower: string;
-  wheel: string;
-  house: string;
-  extra?: string;
-  blade: number;
-  steps: number;
-  small: number;
-  /** The tower's cell in pixels. Not always a tile wide: Dwarka's pump splays its guy ropes. */
-  cell: { width: number; height: number };
-  boss: { x: number; y: number };
-  /** When the tower carries moving water, it is a sheet of this many frames. Dwarka's pump. */
-  water?: { frames: number };
-}
-/**
- * One loop of the pump's water, in milliseconds: six frames at 120 each. Quicker than the wheel,
- * because water falls faster than a vane turns -- and slow enough that the glint is followed down
- * the spout rather than seen as a flicker.
- */
-const WATER_PERIOD = 720;
-const FINISHED = (homesteadManifest as { finished?: Record<string, FinishedBuilding> }).finished ?? {};
-const HOMESTEAD_ART: Record<string, string> = {
-  'windpump-tower': windpumpTowerUrl,
-  'windpump-vanes': windpumpVanesUrl,
-  'still-house': stillHouseUrl,
-  'scarp-mill-tower': scarpMillTowerUrl,
-  'scarp-mill-sails': scarpMillSailsUrl,
-  apiary: apiaryUrl
-};
-/** The texture a homestead piece is loaded under. The greenhouse is the one every map may share. */
-const homesteadKey = (name: string) => (name === 'greenhouse' ? 'homestead-greenhouse' : `homestead-${name}`);
 
 const SHEET_KEY: Record<
   Exclude<
@@ -256,13 +207,8 @@ import {
   type TravellerState,
   type Waiting
 } from '../../content/travellers';
-import { wandererIdsOn, wanderersOn, wandererAt, type Wanderer } from '../../content/wanderers';
-import {
-  facingArt,
-  hasPaintedArt,
-  loadWandererArt,
-  paintedKey
-} from '../wandererArt';
+import { wandererIdsOn } from '../../content/wanderers';
+import { loadWandererArt } from '../wandererArt';
 import { isCamp, isGrand } from '../../content/camps';
 import { findPath, nearestReachable } from '../../world/pathfind';
 import { NO_GESTURE, lost, pressed, released, type Gesture } from '../gesture';
@@ -528,25 +474,15 @@ export class WorldScene extends Phaser.Scene {
   /** The last phase the travellers were moved for, so they are not recomputed every frame. */
   private travellersMovedAt = -1;
 
-  /**
-   * The animals walking their own ground, and the sprites drawing them.
-   *
-   * Same shape and same bargain as `travellers` above: the circuit is held because it is a fact
-   * about this generated world, and the position is not, because `wandererAt` derives it from the
-   * seed, the day and the hour and stores nothing.
-   */
-  private wanderers: { wanderer: Wanderer; sprite: Phaser.GameObjects.Image }[] = [];
-
-  /** The last phase the wanderers were moved for. Separate from the travellers' so neither gates the other. */
-  private wanderersMovedAt = -1;
+  /** The animals walking their own ground. See `systems/WandererView.ts`. */
+  private wanderers!: WandererView;
   /** The place under foot, so the UI is told when it changes rather than on every step. */
   private standingOn: string | null = null;
   private tileSprites: Phaser.GameObjects.Image[][] = [];
   /** Everything swaying at depth 21, with the two frames it alternates and its own phase. */
   private overdraw: { sprite: Phaser.GameObjects.Image; rest: number; lean: number; phase: number }[] = [];
-  /** What the homestead draws, and what React last asked for. See `drawHomestead`. */
-  private homesteadSprites: Phaser.GameObjects.Image[] = [];
-  private homesteadWanted: UiToGame['homestead-changed'] = { poiId: null, stage: 0 };
+  /** The homestead's mill and buildings. See `systems/HomesteadView.ts`. */
+  private homestead!: HomesteadView;
   /** Today's camp and the ashes of the last few, as drawn. See `systems/CampView.ts`. */
   private campView!: CampView;
   /** What each of the camp's people is doing, as last placed, for `travellers-nearby`. */
@@ -719,8 +655,6 @@ export class WorldScene extends Phaser.Scene {
     this.culled = null;
     this.overdraw = [];
     this.spinning = [];
-    this.homesteadSprites = [];
-    this.homesteadWanted = { poiId: null, stage: 0 };
     // The last map's ashes and camp went with its display list. The host reads the scene live, so
     // it answers for whichever map is drawn.
     const scene = this;
@@ -773,8 +707,28 @@ export class WorldScene extends Phaser.Scene {
     // The last map's pips went with its display list; the next map's arrive from React.
     this.pips = [];
     this.pipsWanted = [];
-    this.wanderers = [];
-    this.wanderersMovedAt = -1;
+    this.homestead = new HomesteadView(this, {
+      get world() {
+        return scene.world;
+      },
+      get built() {
+        return scene.built ?? null;
+      },
+      turn: (item) => {
+        scene.spinning.push(item);
+      },
+      stopTurning: (sprites) => {
+        scene.spinning = scene.spinning.filter((s) => !sprites.includes(s.sprite));
+      }
+    });
+    this.wanderers = new WandererView(this, {
+      get world() {
+        return scene.world;
+      },
+      get fieldMapId() {
+        return scene.built?.fieldMap.id ?? scene.fieldMapId;
+      }
+    });
     this.visitors = [];
     this.travelled = data.travelled ?? 0;
     this.restedAt = this.travelled;
@@ -804,22 +758,8 @@ export class WorldScene extends Phaser.Scene {
     // id even though it has not built the world, and the id is all this needs. A change of map
     // restarts the scene, so the next map's animals are loaded when it is.
     loadWandererArt(this, wandererIdsOn(this.fieldMapId));
-    // The homestead's unfinished mill and its greenhouse: single images, drawn only once built.
-    this.load.image('homestead-stage-1', stageOneUrl);
-    this.load.image('homestead-stage-2', stageTwoUrl);
-    this.load.image('homestead-greenhouse', greenhouseUrl);
-    // And every map's finished building, for the reason the character sheets are all loaded.
-    for (const f of Object.values(FINISHED)) {
-      const towerUrl = HOMESTEAD_ART[f.tower];
-      if (towerUrl && f.water) {
-        this.load.spritesheet(homesteadKey(f.tower), towerUrl, { frameWidth: f.cell.width, frameHeight: f.cell.height });
-      } else if (towerUrl) this.load.image(homesteadKey(f.tower), towerUrl);
-      for (const name of [f.house, f.extra]) {
-        if (name && HOMESTEAD_ART[name]) this.load.image(homesteadKey(name), HOMESTEAD_ART[name]);
-      }
-      const wheel = HOMESTEAD_ART[f.wheel];
-      if (wheel) this.load.spritesheet(homesteadKey(f.wheel), wheel, { frameWidth: f.blade, frameHeight: f.blade });
-    }
+    // The homestead's mill, greenhouse and every map's finished building. See `systems/HomesteadView.ts`.
+    loadHomesteadArt(this);
     loadTileSheets(this, {
       terrain: terrainUrl,
       landmarks: landmarksUrl,
@@ -936,7 +876,7 @@ export class WorldScene extends Phaser.Scene {
 
     this.createPlayer();
     this.createTravellers();
-    this.createWanderers();
+    this.wanderers.create();
     // The initial answer, so the UI never has to assume one.
     this.reportCharacter();
 
@@ -1827,74 +1767,11 @@ export class WorldScene extends Phaser.Scene {
     this.tryStop();
   };
 
-  /** Remember what React says is pitched. The payload is the whole state -- see the event's note. */
   /** The homestead, from React. Drawn at once and kept for a redraw. */
   private onHomestead = (wanted: UiToGame['homestead-changed']): void => {
-    this.homesteadWanted = wanted;
-    this.drawHomestead();
+    this.homestead.set(wanted);
   };
 
-  /**
-   * The mill going up beside its ground, and the greenhouse once it stands.
-   *
-   * **Beside the place, never on it** -- `buildingTiles` picks two walkable tiles in the place's
-   * forecourt, which the scene plan keeps clear, so the trees beyond it frame the mill rising over
-   * the canopy. Stage one and two are the unfinished sprites from `tools/build-homestead.js`; the
-   * third is the Grit Mill's own tower and wheel, turning on the same clock, and the greenhouse.
-   */
-  private drawHomestead(): void {
-    for (const sprite of this.homesteadSprites) sprite.destroy();
-    this.spinning = this.spinning.filter((s) => !this.homesteadSprites.includes(s.sprite));
-    this.homesteadSprites = [];
-    const { poiId, stage } = this.homesteadWanted;
-    if (!this.built || !poiId || stage <= 0) return;
-    const at = this.built.placed.find((p) => p.poi.id === poiId)?.at;
-    if (!at) return;
-    const tiles = buildingTiles(this.world, at, this.built.placed.map((p) => p.at));
-    if (!tiles) return;
-
-    const standing = (key: string, tile: { x: number; y: number }, frame?: number) => {
-      const sprite = this.add
-        .image(tile.x * TILE_SIZE + TILE_SIZE / 2, tile.y * TILE_SIZE + TILE_SIZE, key, frame)
-        .setOrigin(0.5, 1)
-        .setDepth(depthFor(tile.y, ROW_SLOT.marker));
-      sprite.setName(`homestead:${key}`);
-      this.homesteadSprites.push(sprite);
-      return sprite;
-    };
-
-    if (stage === 1) standing('homestead-stage-1', tiles.mill);
-    else if (stage === 2) standing('homestead-stage-2', tiles.mill);
-    else {
-      // This map's own building if the builder made one, otherwise the Grit Mill's.
-      const own = FINISHED[this.built.fieldMap.id];
-      const tower = own ? homesteadKey(own.tower) : SHEET_KEY.windmill;
-      const wheelKey = own ? homesteadKey(own.wheel) : SHEET_KEY.blades;
-      const boss = own?.boss ?? windmillManifest.boss;
-      const cell = own?.cell ?? windmillManifest.tower;
-      const towerSprite = standing(tower, tiles.mill, own && !own.water ? undefined : 0);
-      if (own?.water) this.spinning.push({ sprite: towerSprite, frames: own.water.frames, period: WATER_PERIOD, phase: 0 });
-      // The wheel on the tower's boss. Sprites draw at their own pixel size, bottom-centred on the
-      // tile, so the boss is an offset in the cell's pixels from the tile's bottom centre -- the
-      // same place the scene plan's formula puts the Grit Mill's, for a cell of any width.
-      const cx = tiles.mill.x * TILE_SIZE + TILE_SIZE / 2;
-      const bottom = (tiles.mill.y + 1) * TILE_SIZE;
-      const wheel = this.add
-        .image(cx + (boss.x - 0.5) * cell.width, bottom - (1 - boss.y) * cell.height, wheelKey, 0)
-        .setDepth(depthFor(tiles.mill.y, ROW_SLOT.marker) + 1);
-      wheel.setName(own ? `homestead:${wheelKey}` : 'homestead:blades');
-      this.homesteadSprites.push(wheel);
-      this.spinning.push({ sprite: wheel, frames: own?.steps ?? windmillManifest.steps, period: BLADE_PERIOD, phase: 0 });
-      standing(own ? homesteadKey(own.house) : 'homestead-greenhouse', tiles.greenhouse);
-      // One small thing more -- the Narmada's hive -- on the mill's other side, if that is ground a
-      // thing may stand on. Half a tile, so it reads as smaller than the buildings.
-      if (own?.extra) {
-        const side = tiles.greenhouse.x >= tiles.mill.x ? -1 : 1;
-        const spot = { x: tiles.mill.x + side, y: tiles.mill.y };
-        if (buildable(this.world, spot)) standing(homesteadKey(own.extra), spot);
-      }
-    }
-  }
 
   /** The placed points of interest, in the shape the camp rules take. */
   private placesHere(): { poiId: string; at: Point }[] {
@@ -2385,7 +2262,7 @@ export class WorldScene extends Phaser.Scene {
       this.campView.stage(phase, this.dayOfJourney());
       // The animals that are somewhere rather than everywhere, on the same gate and for the same
       // reason -- a wanderer moves no faster than a drover does.
-      this.updateWanderers(phase);
+      this.wanderers.update(phase, this.dayOfJourney());
 
       // The sky's own announcement, in steps rather than continuously -- see `sky-changed`. It
       // shares the half-second check because it is the same question asked of the same clock, and
@@ -2543,7 +2420,7 @@ export class WorldScene extends Phaser.Scene {
 
     // What the homestead is drawing, for `e2e/homestead.spec.ts`: the sprites by name.
     (window as unknown as { __homestead?: () => string[] }).__homestead = () =>
-      this.homesteadSprites.map((s) => s.name);
+      this.homestead.sprites.map((s) => s.name);
 
     // The pips at each place's door, for `e2e/who-is-here.spec.ts`: which places, how many people,
     // and whether they are showing. Read off the scene because only the scene draws them.
@@ -2577,145 +2454,6 @@ export class WorldScene extends Phaser.Scene {
         h: Math.round(sprite.displayHeight),
         playerH: Math.round(this.player.displayHeight)
       }));
-  }
-
-  /**
-   * Put the map's animals on their ground.
-   *
-   * **Drawn from a built texture rather than a sheet, and that is not a shortcut.** A character
-   * sheet fits each figure to one 26x40 cell, and every frame of a wading whale is wider than it is
-   * tall -- fitted by width it would come out a fifth the height of a person. `wandererMarkerKey`
-   * draws the stand-in until a painting exists; see its own note for the bargain.
-   */
-  private createWanderers(): void {
-    for (const wanderer of wanderersOn(this.built.fieldMap.id, this.world)) {
-      // The animal's own ground gives it its colour, so the marker belongs to the place it stands
-      // in rather than being a colour somebody picked. Canon already carries one per biome.
-      const sprite = this.add
-        .image(0, 0, this.wandererTexture(wanderer, 'right'))
-        .setOrigin(0.5, 1)
-        .setVisible(false);
-      sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-      sprite.setName(`wanderer:${wanderer.id}`);
-      this.sizeWanderer(wanderer, sprite);
-      this.wanderers.push({ wanderer, sprite });
-    }
-
-    // **Exposed for the browser suite for the same reason `__travellers` is, and it is the half
-    // that matters.** Every rule in `wanderers.ts` is proved under Node while this scene calls none
-    // of them -- which is this codebase's signature fault, five times recorded. `e2e/wanderers.spec.ts`
-    // reads this and fails the day `createWanderers` stops being called.
-    (window as unknown as { __wanderers?: () => unknown[] }).__wanderers = () =>
-      this.wanderers.map(({ wanderer, sprite }) => ({
-        id: wanderer.id,
-        name: wanderer.species.name,
-        stops: wanderer.circuit.length,
-        texture: sprite.texture.key,
-        visible: sprite.visible,
-        x: Math.round(sprite.x),
-        y: Math.round(sprite.y),
-        w: Math.round(sprite.displayWidth),
-        h: Math.round(sprite.displayHeight)
-      }));
-  }
-
-  /**
-   * The texture a wanderer is drawn from: the painting if one exists, the stand-in otherwise.
-   *
-   * **The one place that decides, so art arriving is a file and not an edit.** Drop
-   * `assets/wanderers/<species id>-<facing>.png` in and this returns it instead -- see
-   * `wandererArt.ts` for the convention and the fallback chain, and `wandererMarkerKey` for what is
-   * drawn until then.
-   */
-  private wandererTexture(wanderer: Wanderer, facing: Facing): string {
-    const key = paintedKey(wanderer.id, facing);
-    if (facingArt(wanderer.id, facing) && this.textures.exists(key)) return key;
-    const home = biomeFor(wanderer.species.biomes[0] ?? 'river');
-    // The stand-in only draws a side view, so a north or south heading borrows the nearer side --
-    // the same fallback `facingArt` makes, kept here so the two cannot disagree about it.
-    const side = facing === 'left' ? 'left' : 'right';
-    return wandererMarkerKey(this, wanderer.id, home?.color ?? '#5d7f86', side);
-  }
-
-  /**
-   * How big a wanderer is drawn, painting or stand-in.
-   *
-   * **A painting is whatever size it was cut at, so it has to be told.** The stand-in is built at
-   * `markerSize` already; a painted frame arrives at several hundred pixels. Its side view is
-   * measured and scaled to the animal's length in tiles, and whichever facing is showing is drawn at
-   * the height that gives -- `paintedHeight` in `frames.ts` holds the arithmetic, so a test can hold
-   * it to the real art.
-   *
-   * **Scaled by height, not by fitting inside a box.** Fitting by the tighter ratio was the obvious
-   * answer and is visibly wrong: a side view is long, so it hits the width bound and shrinks, while
-   * the front view of the same animal is narrow and does not -- which drew a whale three times
-   * bigger walking towards you than walking across. One animal is one size whichever way it faces.
-   */
-  private sizeWanderer(wanderer: Wanderer, sprite: Phaser.GameObjects.Image): void {
-    if (!hasPaintedArt(wanderer.id)) return;
-    const src = sprite.texture.getSourceImage() as { width: number; height: number };
-    if (!src?.width || !src?.height) return;
-    const sideKey = paintedKey(wanderer.id, 'right');
-    const side = this.textures.exists(sideKey)
-      ? (this.textures.get(sideKey).getSourceImage() as { width: number; height: number })
-      : src;
-    const scale = paintedHeight(wanderer.id, side) / src.height;
-    sprite.setDisplaySize(Math.round(src.width * scale), Math.round(src.height * scale));
-  }
-
-  /**
-   * Move the animals to where the hour says they are.
-   *
-   * **Visible when resting, which is the one place this deliberately differs from a traveller.** A
-   * person who has arrived somewhere is hidden, because they belong in the place panel rather than
-   * standing on the roof of the building. An animal has no panel to be in and no building to stand
-   * on: hiding it at its stop would mean the whale exists only while crossing between pools, and
-   * coming alongside one is the whole of the quest.
-   */
-  private updateWanderers(phase: number): void {
-    if (this.wanderers.length === 0) return;
-    const step = Math.floor(phase * 100);
-    if (step === this.wanderersMovedAt) return;
-    this.wanderersMovedAt = step;
-
-    const day = this.dayOfJourney();
-    for (const { wanderer, sprite } of this.wanderers) {
-      const where = wandererAt(this.world, wanderer, day, phase);
-      if (!where) {
-        sprite.setVisible(false);
-        continue;
-      }
-      sprite.setVisible(true);
-      sprite.setPosition(
-        where.at.x * TILE_SIZE + TILE_SIZE / 2,
-        where.at.y * TILE_SIZE + TILE_SIZE - 2
-      );
-      // Sorted by row like everything else standing on the ground, so an animal south of the player
-      // passes in front and one north of them passes behind.
-      sprite.setDepth(depthFor(where.at.y, ROW_SLOT.walker));
-      // Facing is the marker itself rather than a flip, because the texture is cached per facing --
-      // see `wandererMarkerKey`. Kept as it was while standing still, so a resting animal does not
-      // snap round to face east the moment it stops.
-      // **Four facings now that the art has four.** Kept as it was while standing still, so a
-      // resting animal does not snap round to face east the moment it stops. Never flipped: both
-      // the paintings and the stand-in are drawn per facing, and a flip on top would mirror an
-      // animal that is already facing the right way.
-      if (where.heading) {
-        const facing: Facing =
-          where.heading === 'west'
-            ? 'left'
-            : where.heading === 'east'
-              ? 'right'
-              : where.heading === 'north'
-                ? 'up'
-                : 'down';
-        const next = this.wandererTexture(wanderer, facing);
-        if (sprite.texture.key !== next) {
-          sprite.setTexture(next);
-          this.sizeWanderer(wanderer, sprite);
-        }
-      }
-    }
   }
 
   /** Any built sheet but this one, so a traveller is never the player's own figure. */
