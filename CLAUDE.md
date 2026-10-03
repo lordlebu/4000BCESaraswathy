@@ -844,6 +844,10 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
   taught ones -- `criticalPath.test.ts` asked only about taught recipes, which is how 9 to 29 a map
   went unseen. **Dwarka is a cold desert**: a palette that names desert asks only for dry ground
   (`desertNeedsHeat` in `world/classify.ts`), where the open world still wants heat too.
+  **Open, recorded at the audit's close:** five items afford only `trade` (shell bead, ammonite
+  pendant, sandalwood comb, seed ball, clay seal) and nothing in the game reads `trade`, so they
+  are made and do nothing; and the bench's "a seat and a blade" supplies no `cut`, on purpose.
+  Both are the owner's call, and `docs/crafting-audit.md` has them.
 
 ### The strait and the shallows (3 October 2026)
 
