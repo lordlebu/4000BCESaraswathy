@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.3.0",
+  "canon_version": "3.3.1",
   "regions": [
     {
       "id": "region_aravali",
@@ -3407,7 +3407,7 @@
       "beats": [
         {
           "id": "rumour",
-          "title": "The herbalist at the Atelier",
+          "title": "Word of a herbalist",
           "when": "road",
           "prose": "A woman sharing the shade with you on the way up from the shingle says there is a herbalist on this side of the strait who can tell a fever from a bad well by the colour of a fingernail. She keeps a workshop of glass at the Quiet Atelier, the woman says, when she keeps it at all.",
           "choices": [

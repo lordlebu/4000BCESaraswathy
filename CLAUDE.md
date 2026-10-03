@@ -732,7 +732,9 @@ retrospective. The rules, because they are rules rather than history:
   takes a list of asks, so Thrali has the boat's row and the road's.
 - **The card after a road is never blank.** A road's happening with no painting of its own shows the
   road's (`artFallback`, from `useCrossing`'s `roadArt`); the ferry song and the line where the sea
-  was have none yet.
+  was have none yet. **Nor is a story beat's**: one with no painting borrows a woven one of the same
+  kind of moment (`BEAT_FALLBACK` in `content/storylines.ts`) -- Guyuk's road rumour and the Atelier
+  without her opened blank, and the rumour's canon title now says it is heard, not arrived at.
 - **Camps are a pure function of seed, map and day** (`content/encampments.ts`): one at a time,
   three days a turn, on dry ground away from places and roads. Walking up to one asks for its card
   with `force: {kind: 'camp', asked: true}`, which `happeningNow` returns before any weighting --
@@ -746,6 +748,11 @@ retrospective. The rules, because they are rules rather than history:
   are untouched. **Only the leader may call you over**, and only before the camp's welcome, on the
   speak-first rules (`campCallers`); the runner and the watch never do. At the meal the card asks
   for `woven-camp-meal-<kind>` first (`artMoment`), falling back to the camp's own painting.
+- **Road company are dealt per journey** (the owner, 3 October 2026): their names, dyes and faces
+  take the seed into the hash (`travellersOn(map, seed)`, `givenNameFor(who, seed)`), so a new
+  journey meets new people and one journey keeps its own. Every journey used to meet Saalik, the same
+  Harappan carrier with the same face, on Lothal. Panels that name a met stranger read the seed from
+  the `JourneySeed` context; no seed is the old deal.
 - **Road company only come and go, never canon's people** (owner's ruling): a runner meets a road
   traveller whose leg passes the turn-off (`runnerErrand`, held there by `phaseAfterMeeting`), and on
   some days one visits to eat (`campVisitors`, capped at the pace nine in ten travellers keep). Both

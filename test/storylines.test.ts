@@ -46,7 +46,7 @@ describe("Guyuk's arc", () => {
     const w = walker('field_map_aravali');
     // Nothing at the ruins before the rumour and the empty Atelier: beats come in order.
     expect(w.at('arriving', 'poi_alms_step')).toBeNull();
-    expect(w.at('road')?.title).toBe('The herbalist at the Atelier');
+    expect(w.at('road')?.title).toBe('Word of a herbalist');
     expect(w.at('arriving', 'poi_quiet_atelier')?.title).toBe('Not here');
     const ruins = w.at('arriving', 'poi_alms_step')!;
     expect(ruins.art).toBe('guyuk-bathe-ruins');
@@ -112,7 +112,7 @@ describe('the first day', () => {
       fieldMapId: 'field_map_aravali', day, poiId, flags: [], holds: () => false, carried: () => 0
     });
     expect(beatNow('road', facts(0))).toBeNull();
-    expect(beatNow('road', facts(1))?.title).toBe('The herbalist at the Atelier');
+    expect(beatNow('road', facts(1))?.title).toBe('Word of a herbalist');
   });
 });
 
@@ -121,5 +121,23 @@ describe('every story beat has its painting', () => {
     const { existsSync } = await import('node:fs');
     const missing = storylines.flatMap((s) => s.beats.filter((b) => b.art && !existsSync(`src/ui/events/${b.art}.png`)).map((b) => `${s.id}:${b.id} (${b.art})`));
     expect(missing).toEqual([]);
+  });
+});
+
+describe('every beat on the road or on arriving has a picture', () => {
+  // The owner, 3 October 2026: Guyuk's rumour and the Atelier without her opened blank. A beat with
+  // no painting of its own borrows a woven one of the same kind of moment (`BEAT_FALLBACK`).
+  it('resolves to a painting that exists, its own or the fallback', async () => {
+    const { existsSync } = await import('node:fs');
+    const { beatEvent, BEAT_FALLBACK } = await import('../src/content/storylines');
+    const painted = (name: string | undefined) => Boolean(name) && existsSync(`src/ui/events/${name}.png`);
+    for (const arc of storylines) {
+      for (const beat of arc.beats) {
+        if (beat.when !== 'road' && beat.when !== 'arriving') continue;
+        const e = beatEvent(arc, beat);
+        expect(painted(e.art) || painted(e.artFallback), `${arc.id}/${beat.id} draws nothing`).toBe(true);
+      }
+    }
+    for (const name of Object.values(BEAT_FALLBACK)) expect(painted(name), `${name} is not painted`).toBe(true);
   });
 });
