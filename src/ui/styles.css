@@ -2302,6 +2302,13 @@ button.ghost:hover:not(:disabled) {
   border-top: 1px solid var(--edge);
 }
 
+/* What to do, said plainly under a keeper's answer about the road. A colour, never an alpha. */
+.conversation-hint {
+  margin-top: 0.35rem;
+  font-size: 0.9em;
+  color: var(--ink-faint);
+}
+
 .conversation-head h2 {
   margin: 0;
   font-size: 1.25rem;

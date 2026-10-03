@@ -169,6 +169,12 @@ export interface GameEvent {
    * at a dacoit camp before the dacoit camp. Absent, or not yet painted, the card falls through.
    */
   artMoment?: string;
+  /**
+   * Last of all, after the event's own: a painting that will do when this moment has none. A road's
+   * happening gets the road's own painting -- the ferry song and the line where the sea was had no
+   * picture, and the card after the road's painted one came up blank (the owner, 3 October 2026).
+   */
+  artFallback?: string;
   choices: Choice[];
   /**
    * Whether it can happen more than once.

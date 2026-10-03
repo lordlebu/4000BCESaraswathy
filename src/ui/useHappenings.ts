@@ -120,6 +120,8 @@ export function useHappenings({
         campStanding?: string | null;
         campPerson?: CampTalk | null;
         cameFrom?: string | null;
+        /** The painting of the road just travelled, for a road's happening that has none of its own. */
+        roadArt?: string | null;
         force?: { kind?: string; asked?: boolean };
       } = {}
     ): boolean => {
@@ -166,7 +168,7 @@ export function useHappenings({
       // Said at once, not on the next render: an effect earlier in this component can run in the
       // same commit and must already see the card it would otherwise open a second one over.
       cardOpenRef.current = true;
-      setHappening({ event: next, shelter });
+      setHappening({ event: extra.roadArt ? { ...next, artFallback: next.artFallback ?? extra.roadArt } : next, shelter });
       return true;
     };
 

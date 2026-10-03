@@ -204,11 +204,18 @@ export interface ConversationProps {
   /** Stop listening. The place they are standing in comes back. */
   onClose: () => void;
   /**
-   * Something the traveller can ask this person for, here -- on Lothal, Thrali's boat
-   * (`content/firsts.ts`). Asking is an act, like listening: nothing is offered unasked. `onAsk`
-   * answers with what they say when the time has not come, or null when it opened the loan's card.
+   * What the traveller can ask this person, here, a row each -- on Lothal, Thrali's boat
+   * (`content/firsts.ts`), and any road's keeper about the road (`content/roadTalk.ts`). Asking is an
+   * act, like listening: nothing is offered unasked. `onAsk` answers with what they say, or null when
+   * asking opened a card instead; `hint`, when there is one, is said plainly under the answer.
    */
-  ask?: { label: string; onAsk: () => string | null } | null;
+  asks?: Ask[];
+}
+
+export interface Ask {
+  label: string;
+  onAsk: () => string | null;
+  hint?: string;
 }
 
 export function Conversation({
@@ -218,12 +225,13 @@ export function Conversation({
   traits,
   onListen,
   onClose,
-  ask = null
+  asks = []
 }: ConversationProps) {
   const person = npc(npcId);
   // What they said to being asked, when it was "not yet". Keyed to the person, so it clears on the
   // next conversation rather than following the traveller to somebody else.
-  const [reply, setReply] = useState<{ npcId: string; text: string } | null>(null);
+  const [replies, setReplies] = useState<{ npcId: string; said: Record<string, string> }>({ npcId, said: {} });
+  const said = replies.npcId === npcId ? replies.said : {};
   // Canon and the save can disagree after a bundle changes, and a conversation with nobody is
   // better closed than rendered blank.
   if (!person) return null;
@@ -255,26 +263,29 @@ export function Conversation({
 
       <Person person={person} progress={progress} satchel={satchel} onListen={onListen} />
 
-      {ask && (
-        <div className="conversation-ask">
-          {reply?.npcId === npcId ? (
-            <p>
-              <b>{person.name}:</b> "{reply.text}"
-            </p>
+      {asks.map((ask) => (
+        <div key={ask.label} className="conversation-ask">
+          {said[ask.label] ? (
+            <>
+              <p>
+                <b>{person.name}:</b> "{said[ask.label]}"
+              </p>
+              {ask.hint && <p className="muted conversation-hint">{ask.hint}</p>}
+            </>
           ) : (
             <button
               type="button"
               className="offer"
               onClick={() => {
-                const said = ask.onAsk();
-                if (said) setReply({ npcId, text: said });
+                const answer = ask.onAsk();
+                if (answer) setReplies({ npcId, said: { ...said, [ask.label]: answer } });
               }}
             >
               {ask.label}
             </button>
           )}
         </div>
-      )}
+      ))}
     </section>
   );
 }

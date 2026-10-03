@@ -82,6 +82,7 @@ import { useSettling } from './useSettling';
 import { useCrossing } from './useCrossing';
 import { EventCard } from './EventCard';
 import { askAboutBoat, firstEvent, firstRide, lentFlag, lentVehicles, seenFlag } from '../content/firsts';
+import { aboutTheRoad } from '../content/roadTalk';
 import type { First } from '../content/places';
 import { peopleAtPlaces, whoIsHere } from '../content/presence';
 import { useRoadTalk } from './useRoadTalk';
@@ -1268,6 +1269,14 @@ export function App() {
       }
     : null;
 
+  /**
+   * Asking a road's keeper about the road: how this map is left, said by somebody on it. The owner's
+   * ask of 3 October 2026; the words are composed in `content/roadTalk.ts` from canon's names.
+   */
+  const roadAnswer = talkingTo ? aboutTheRoad(fieldMapId, talkingTo) : null;
+  const askAboutRoad = roadAnswer ? { label: 'Ask about the road', onAsk: () => roadAnswer.line, hint: roadAnswer.hint } : null;
+  const asks = [askForBoat, askAboutRoad].filter((a): a is NonNullable<typeof a> => a !== null);
+
   // Who is walking: Varuna and Mithra, and whoever has joined since. Read from the flags each render,
   // because a joining is a flag a story card's choice sets. See `walkers` in characters.ts.
   const roster = walkers(journeyFlags.current);
@@ -1850,7 +1859,7 @@ export function App() {
                 traits: travellerTraits,
                 onListen: listen,
                 onClose: () => dispatch({ type: 'stop-talking' }),
-                ask: askForBoat
+                asks
               }
             : null
         }

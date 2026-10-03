@@ -726,6 +726,13 @@ retrospective. The rules, because they are rules rather than history:
 
 - **A map is left only from its cart point** (canon's `departs_from`; `mayLeaveFrom` and
   `arrivalPoint` in `content/places.ts`). Arriving sets you down at the next map's first.
+  **Somebody says so** (the owner, 3 October 2026): each road's keeper can be asked *Ask about the
+  road* and answers where the cart leaves from, with a plain hint under it (`content/roadTalk.ts`,
+  the sentence composed from canon's names), and the Travel sheet says to walk there. A conversation
+  takes a list of asks, so Thrali has the boat's row and the road's.
+- **The card after a road is never blank.** A road's happening with no painting of its own shows the
+  road's (`artFallback`, from `useCrossing`'s `roadArt`); the ferry song and the line where the sea
+  was have none yet.
 - **Camps are a pure function of seed, map and day** (`content/encampments.ts`): one at a time,
   three days a turn, on dry ground away from places and roads. Walking up to one asks for its card
   with `force: {kind: 'camp', asked: true}`, which `happeningNow` returns before any weighting --
