@@ -42,6 +42,7 @@ export type Shelter =
   | 'roof'
   | 'camp'
   | 'tent'
+  | 'dugout'
   | 'bedroll'
   | 'none';
 
@@ -52,6 +53,7 @@ export const SHELTER_ORDER: readonly Shelter[] = [
   'roof',
   'camp',
   'tent',
+  'dugout',
   'bedroll',
   'none'
 ];
@@ -120,6 +122,12 @@ export interface Ground {
   atCamp?: boolean;
   /** What the traveller has pitched, from `using.shelterBuilt`. */
   built?: 'tent' | null;
+  /**
+   * In the dugout, on river, swamp or the shallows. Below a camp and above the tent, because a tent
+   * cannot be pitched on water and the hull is all there is: the owner's ask, 3 October 2026, that a
+   * night afloat be its own night with its own painting rather than the bedroll's on open ground.
+   */
+  afloat?: boolean;
 }
 
 /**
@@ -141,6 +149,7 @@ export function shelterAt(ground: Ground = {}): Shelter {
   if (ground.inSettlement) return 'settlement';
   if (ground.underRoof) return 'roof';
   if (ground.atCamp) return 'camp';
+  if (ground.afloat) return 'dugout';
   if (ground.built === 'tent') return 'tent';
   return carries('bedroll') ? 'bedroll' : 'none';
 }
@@ -232,6 +241,17 @@ export function spendNight(shelter: Shelter, campKind: string | null = null): Ni
         entry:
           'Pitched the tent while there was still light, and it held. Not a roof, but the rain '
           + 'stayed outside it and I slept through.'
+      };
+    case 'dugout':
+      return {
+        shelter,
+        restores,
+        rested: false,
+        writes: true,
+        // Not a poor night, and not a good one: the bedroll's sentence would put him on open ground.
+        entry:
+          'Slept in the dugout, tied off where the water was quiet, with the bedroll under me and the '
+          + 'hull moving all night. Woke stiff, and with the light already on the water.'
       };
     case 'bedroll':
       return {

@@ -11,7 +11,7 @@
 // and sitting out the night is none of those.** Each is a different amount of shelter and each
 // looks like a different amount.
 //
-// **Seven now, and the vocabulary is about grandness rather than about rest.** `NIGHT_RESTORES` is
+// **Eight now (the dugout joined on 3 October 2026), and the vocabulary is about grandness rather than about rest.** `NIGHT_RESTORES` is
 // flat -- sleeping in the woods and sleeping in a town are worth the same. What these say is what
 // the night *looked* like, and later which events could happen in it. A `tent` is the only one in
 // the list the player made, so it is drawn as a thing that was put up rather than found:
@@ -103,6 +103,15 @@ export function ShelterMark({ shelter, size = 20 }: ShelterMarkProps) {
           <path d="M3 18h18" />
           <path d="M5 18 12 6l7 12" />
           <path d="M12 18v-5" />
+        </>
+      )}
+
+      {shelter === 'dugout' && (
+        <>
+          {/* The hull on the water: a log hollowed out, sitting low, and a line of water under it. */}
+          <path d="M3 12.5h18" />
+          <path d="M3.5 12.5c1.2 3 4.4 4.5 8.5 4.5s7.3-1.5 8.5-4.5" />
+          <path d="M2 20c2 0 2-1.2 4-1.2s2 1.2 4 1.2 2-1.2 4-1.2 2 1.2 4 1.2 2-1.2 4-1.2" />
         </>
       )}
 

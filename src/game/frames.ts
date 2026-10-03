@@ -1460,8 +1460,10 @@ export function paintedHeight(speciesId: string, side: { width: number; height: 
  *
  * It used to be the side view whichever way he paddled -- a boat going north drawn crossing the
  * screen -- and it was two tiles long, a figure and a half longer than the figure sitting in it.
- * The three images come from `tools/draw-river-art.py`; the numbers below were measured on them,
- * and `test/riverBridges.test.ts` checks each one against the art rather than trusting it.
+ * The three images come from `tools/draw-river-art.py`, shrunk to nine tenths by
+ * `tools/build-river-craft.js` on the owner's word (3 October 2026); the numbers below were measured
+ * on the shrunk images, and `test/dugout.test.ts` checks each one against the art rather than
+ * trusting it.
  *
  * - `rim`: the row, from the top of the image, where the hull is cut into the part behind him and
  *   the part in front. The side view's near gunwale; the end views' widest point, a little below.
@@ -1475,9 +1477,9 @@ export const DUGOUT_VIEWS: Record<
   DugoutView,
   { image: string; rim: number; seat: number; lift: number; wake: { y: number; width: number } }
 > = {
-  side: { image: 'dugout', rim: 30, seat: 22, lift: 16, wake: { y: 60, width: 176 } },
-  north: { image: 'dugout-north', rim: 100, seat: 30, lift: 48, wake: { y: 186, width: 116 } },
-  south: { image: 'dugout-south', rim: 100, seat: 30, lift: 48, wake: { y: 186, width: 116 } }
+  side: { image: 'dugout', rim: 27, seat: 20, lift: 14, wake: { y: 54, width: 158 } },
+  north: { image: 'dugout-north', rim: 90, seat: 27, lift: 43, wake: { y: 167, width: 104 } },
+  south: { image: 'dugout-south', rim: 90, seat: 27, lift: 43, wake: { y: 167, width: 104 } }
 };
 
 /** Which hull to draw for the way he is paddling, and whether to mirror it. */

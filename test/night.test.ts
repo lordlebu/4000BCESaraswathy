@@ -97,6 +97,17 @@ describe('shelterAt', () => {
     expect(shelterAt({})).toBe('bedroll');
   });
 
+  it('puts a night afloat in the dugout: no tent on water, and a camp still beats it', () => {
+    expect(shelterAt({ afloat: true, built: 'tent' })).toBe('dugout');
+    expect(shelterAt({ afloat: true })).toBe('dugout');
+    expect(shelterAt({ atCamp: true, afloat: true })).toBe('camp');
+    expect(SHELTER_ORDER.indexOf('dugout')).toBeLessThan(SHELTER_ORDER.indexOf('bedroll'));
+    const night = spendNight('dugout');
+    expect(night.writes).toBe(true);
+    expect(night.entry, 'the dugout night reads as the bedroll on open ground').toMatch(/dugout/);
+    expect(night.restores).toBe(spendNight('bedroll').restores);
+  });
+
   /**
    * **Sleeping in the woods and sleeping in a town are worth the same rest, and this is the guard.**
    *

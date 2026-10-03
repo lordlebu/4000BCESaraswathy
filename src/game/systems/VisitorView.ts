@@ -61,6 +61,12 @@ export class VisitorView {
    */
   approach(npcId: string, sheet: string): void {
     const route = this.route();
+    // **Out on the water with no shore near, nobody walks up.** The conversation still opens -- React
+    // is waiting for `approached` -- but nobody is drawn standing in the sea to have it.
+    if (!route) {
+      EventBus.emitEvent('approached', { npcId });
+      return;
+    }
     const frame = frameOf(sheet);
     const scale = travellerScale(TILE_SIZE);
     const start = route[0]!;
@@ -128,9 +134,19 @@ export class VisitorView {
     }
   }
 
-  /** The tiles somebody walks to come and stand beside the traveller, starting where they appear. */
-  private route(): Point[] {
+  /**
+   * The tiles somebody walks to come and stand beside the traveller, starting where they appear.
+   *
+   * **The traveller may be on the water now**, in the dugout on the shallows, where nobody can
+   * stand. Then they walk to the nearest shore tile beside the hull and stop *on* it; with no shore
+   * within two tiles there is no route at all, and `approach` opens the conversation unseen. Before
+   * the shallows, the fallback below put the visitor on the traveller's own tile -- harmless on
+   * ground, and somebody standing in the open sea on water.
+   */
+  private route(): Point[] | null {
     const { tiles, width, height } = this.host.world;
+    const here = tiles[this.host.at.y]?.[this.host.at.x];
+    if (!here || !isWalkable(here)) return this.toShore();
     for (const r of [4, 3, 5, 6]) {
       for (let dy = -r; dy <= r; dy += 1) {
         for (let dx = -r; dx <= r; dx += 1) {
@@ -146,5 +162,37 @@ export class VisitorView {
       }
     }
     return [this.host.at];
+  }
+
+  /** The way to the shore beside a traveller out on the water, ending on it; null if none is near. */
+  private toShore(): Point[] | null {
+    const { tiles, width, height } = this.host.world;
+    let shore: Point | null = null;
+    for (const r of [1, 2]) {
+      for (let dy = -r; dy <= r && !shore; dy += 1) {
+        for (let dx = -r; dx <= r && !shore; dx += 1) {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+          const at = { x: this.host.at.x + dx, y: this.host.at.y + dy };
+          const tile = tiles[at.y]?.[at.x];
+          if (tile && isWalkable(tile)) shore = at;
+        }
+      }
+      if (shore) break;
+    }
+    if (!shore) return null;
+    for (const r of [4, 3, 5, 6]) {
+      for (let dy = -r; dy <= r; dy += 1) {
+        for (let dx = -r; dx <= r; dx += 1) {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+          const from = { x: shore.x + dx, y: shore.y + dy };
+          const tile = tiles[from.y]?.[from.x];
+          if (!tile || !isWalkable(tile)) continue;
+          const walked = findPath(tiles, width, height, from, shore, isWalkable);
+          if (walked.length < 1 || walked.length > r * 2 + 2) continue;
+          return [from, ...walked];
+        }
+      }
+    }
+    return [shore];
   }
 }

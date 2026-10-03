@@ -173,7 +173,6 @@ import {
   whereNextHint
 } from '../../content/journal';
 import { biomeFor, stepCostOn } from '../../content/species';
-import { isWalkable } from '../../world/generate';
 import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
@@ -184,7 +183,7 @@ import { isCamp, isGrand } from '../../content/camps';
 import { findPath, nearestReachable } from '../../world/pathfind';
 import { NO_GESTURE, lost, pressed, released, type Gesture } from '../gesture';
 import { WADE_ALPHA, wadeFor, type Wade } from '../wading';
-import { afloatAfter, PADDLE_STEP, routeCost } from '../afloat';
+import { afloatAfter, canStepOnto, PADDLE_STEP, routeCost, shallowsOf } from '../afloat';
 import { glowStrength, roadAhead } from '../roadLight';
 import { boatFor } from '../../content/kit';
 import { tileHash } from '../../world/rng';
@@ -457,6 +456,15 @@ export class WorldScene extends Phaser.Scene {
   private boat = false;
   /** Whether he is in the dugout. See `game/afloat.ts` for when that changes. */
   private afloat = false;
+  /**
+   * The sea he may paddle on: within two tiles of land, and only on a map with the dugout. Empty
+   * everywhere else, so the sea stays out of reach exactly as it was.
+   */
+  private shallows = new Set<Tile>();
+  /** Whether he may step onto a tile, by `canStepOnto`. The step and every route he walks ask this. */
+  private passable = (tile: Tile): boolean => canStepOnto(tile, this.boat, this.shallows.has(tile));
+  /** What a route prices a tile at, by `routeCost`, knowing where the shallows are. */
+  private routePrice = (tile: Tile): number => routeCost(tile, this.boat, this.afloat, this.shallows.has(tile));
   /** The dugout, as two layers: the hollow behind him, and the hull's side in front of him. */
   private hullBack!: Phaser.GameObjects.Image;
   private hullFront!: Phaser.GameObjects.Image;
@@ -748,9 +756,10 @@ export class WorldScene extends Phaser.Scene {
     this.world = this.built.world;
     this.at = startTileFor(this.built, window.location.search);
     this.boat = boatFor(this.built.fieldMap.vehicles) !== null;
+    this.shallows = this.boat ? shallowsOf(this.world) : new Set();
     // Starting on the river with a boat in the kit is starting in it.
     const standing = this.world.tiles[this.at.y]?.[this.at.x];
-    this.afloat = standing ? afloatAfter(false, standing, this.boat) : false;
+    this.afloat = standing ? afloatAfter(false, standing, this.boat, this.shallows.has(standing)) : false;
 
     const { width, height } = this.world;
     const pixelWidth = width * TILE_SIZE;
@@ -1419,9 +1428,8 @@ export class WorldScene extends Phaser.Scene {
       // always paid `travelCost` per step; until now only the *duration* knew about it and the
       // route did not, so tap-to-walk reliably chose the slowest line available to it.
       // By the road as well as the ground, so a click across country walks the path where one runs.
-      const cost = (tile: Tile) => routeCost(tile, this.boat, this.afloat);
       const { tiles, width, height } = this.world;
-      this.queuedPath = findPath(tiles, width, height, this.at, target, isWalkable, cost);
+      this.queuedPath = findPath(tiles, width, height, this.at, target, this.passable, this.routePrice);
 
       // **A click is never ignored.** An empty path used to mean "stand still", with nothing to
       // say the click was heard -- so a tile across the water or over the edge of an island read
@@ -1430,8 +1438,8 @@ export class WorldScene extends Phaser.Scene {
       const inside = target.x >= 0 && target.y >= 0 && target.x < width && target.y < height;
       const already = target.x === this.at.x && target.y === this.at.y;
       if (this.queuedPath.length === 0 && inside && !already) {
-        const near = nearestReachable(tiles, width, height, this.at, target, isWalkable);
-        if (near) this.queuedPath = findPath(tiles, width, height, this.at, near, isWalkable, cost);
+        const near = nearestReachable(tiles, width, height, this.at, target, this.passable);
+        if (near) this.queuedPath = findPath(tiles, width, height, this.at, near, this.passable, this.routePrice);
         this.markNoWayThrough(target);
       }
     });
@@ -1911,6 +1919,8 @@ export class WorldScene extends Phaser.Scene {
       // Or beside a camp that is standing today: somebody else's fire, shared. Better than the
       // bedroll and below a roof -- the plan's Q11, and the camp rung `night.ts` already has.
       atCamp: (here !== null && isCamp(here.poi)) || this.besideCamp(),
+      // In the dugout the hull is the bed, and no tent goes up on water.
+      afloat: this.afloat,
       built: this.builtShelter
     });
   }
@@ -2167,15 +2177,14 @@ export class WorldScene extends Phaser.Scene {
     const called = this.travellers.hail(travellerId);
     if (!called || called.steps <= 1) return;
     const { at } = called;
-    const cost = (tile: Tile) => routeCost(tile, this.boat, this.afloat);
     const { tiles, width, height } = this.world;
-    const walked = findPath(tiles, width, height, this.at, at, isWalkable, cost);
+    const walked = findPath(tiles, width, height, this.at, at, this.passable, this.routePrice);
     // `findPath` ends on the goal; stop beside it rather than on them. No path at all -- they are
     // across water -- walks as near as the ground allows, as a tap would.
     if (walked.length > 0) this.queuedPath = walked.slice(0, -1);
     else {
-      const near = nearestReachable(tiles, width, height, this.at, at, isWalkable);
-      if (near) this.queuedPath = findPath(tiles, width, height, this.at, near, isWalkable, cost);
+      const near = nearestReachable(tiles, width, height, this.at, at, this.passable);
+      if (near) this.queuedPath = findPath(tiles, width, height, this.at, near, this.passable, this.routePrice);
     }
   };
 
@@ -2327,7 +2336,7 @@ export class WorldScene extends Phaser.Scene {
     const { width, height } = this.world;
     if (target.x < 0 || target.y < 0 || target.x >= width || target.y >= height) return;
     const tile = this.world.tiles[target.y]![target.x]!;
-    if (!isWalkable(tile)) return;
+    if (!this.passable(tile)) return;
 
     this.faceTowards(target.x - this.at.x, target.y - this.at.y);
 
@@ -2343,7 +2352,7 @@ export class WorldScene extends Phaser.Scene {
     //
     // And in the dugout the water is the quick going: `afloatAfter` decides whether this step is
     // paddled, which is also the moment he climbs in or steps ashore.
-    this.afloat = afloatAfter(this.afloat, tile, this.boat);
+    this.afloat = afloatAfter(this.afloat, tile, this.boat, this.shallows.has(tile));
     const cost = this.afloat ? PADDLE_STEP : stepCostOn(tile);
     // The same cost buys the step twice: how long the tween takes on the screen, and how much of
     // the day the walking spends. The second is what keeps the sun honest.

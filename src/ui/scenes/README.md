@@ -30,6 +30,7 @@ worth the same rest, and what differs is the picture and (later) what can happen
 | `rest-roof.png` | in out of it, under somebody else's stonework — a ruin, not a home |
 | `rest-camp.png` | a fire ring somebody banked before you got there ✓ *done* |
 | `rest-tent.png` | the hide tent, pitched and pegged — **the only one he built** |
+| `rest-dugout.png` | curled in the dugout on the water, tied off where it is quiet — *wanted*, the owner's ask of 3 October 2026 |
 | `rest-bedroll.png` | oiled cloth on open ground, no fire |
 | `rest.png` | the fallback, when a kind has no painting of its own ✓ *done* |
 

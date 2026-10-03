@@ -241,6 +241,31 @@ describe('it behaves like an event', () => {
     }
   });
 
+  it('leaves no tracks, sends nobody alongside and buries nothing on open water', () => {
+    // The dugout can go out on the sea's shallows (3 October 2026), and could already sit on a river.
+    const landOnly = ['tracks', 'company', 'company-again', 'kindness-returned', 'underneath'];
+    const dry = sampled.filter((s) => landOnly.includes(kindOf(s.event.id) ?? ''));
+    expect(dry.length, 'nothing land-only was sampled, so this proves nothing').toBeGreaterThan(0);
+    for (const { event, around } of dry) {
+      const occasion = kindOf(event.id) === 'underneath' ? 'working' : 'road';
+      const wet = wovenFor(now(occasion, { day: 500 }), { ...around, onWater: true }, () => 0);
+      expect(wet.map((e) => kindOf(e.id)), `${event.id} happened on the water`).not.toContain(kindOf(event.id));
+    }
+  });
+
+  it('knows the sea and the river are water, and a bridge is not', () => {
+    const built = buildFieldMap(fieldMap('field_map_lothal')!, { seed: DEFAULT_SEED });
+    const find = (pick: (t: { biome: string; bridge?: boolean }) => boolean) =>
+      built.world.tiles.flat().find((t) => pick(t as never))!;
+    const around = (t: { x: number; y: number }) =>
+      surroundingsAt(built.world, { x: t.x, y: t.y }, 'field_map_lothal', MOMENTS[1]!, () => 0)!;
+    expect(around(find((t) => t.biome === 'sea')).onWater).toBe(true);
+    expect(around(find((t) => t.biome === 'river' && !t.bridge)).onWater).toBe(true);
+    expect(around(find((t) => t.biome === 'plains')).onWater).toBe(false);
+    const bridge = built.world.tiles.flat().find((t) => t.bridge);
+    if (bridge) expect(around(bridge).onWater).toBe(false);
+  });
+
   it('never brings a once-only event round again', () => {
     const { event, around } = sampled.find((s) => s.event.id.startsWith('woven:company:'))!;
     const noon = { ...around, moment: MOMENTS[0]! };

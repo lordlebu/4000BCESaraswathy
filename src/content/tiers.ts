@@ -167,6 +167,7 @@ export const NIGHT_RESTORES: Record<string, number> = {
   none: 0,
   bedroll: 1,
   tent: 1,
+  dugout: 1,
   camp: 1,
   roof: 1,
   settlement: 1,

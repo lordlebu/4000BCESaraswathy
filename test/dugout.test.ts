@@ -92,10 +92,14 @@ describe('the art the scene cuts', () => {
     for (const view of ['north', 'south'] as const) {
       const hull = art(view);
       const { rim } = DUGOUT_VIEWS[view];
-      const row = [...Array(hull.width).keys()].map((x) => hull.data[(rim * hull.width + x) * 4 + 3]!);
-      const solid = row.filter((a) => a > 0).length;
-      // He is 104 pixels across at the knees; the beam at his seat has to hold him.
-      expect(solid, `${view}: the beam at the cut`).toBeGreaterThanOrEqual(96);
+      const across = (y: number) => [...Array(hull.width).keys()].filter((x) => hull.data[(y * hull.width + x) * 4 + 3]! > 0).length;
+      const widest = Math.max(...[...Array(hull.height).keys()].map(across));
+      // **At the hull's widest, wherever that is.** This was a floor of 96 pixels against his 104 at
+      // the knees; the owner's tenth off (3 October 2026) brought the beam to 86, and he was looked
+      // at sitting in it in the game and reads as in the boat. What still has to hold is the rule
+      // the number stood for: the cut crosses the opening where the hull is broadest, never a
+      // narrower row above or below it.
+      expect(across(rim), `${view}: the cut misses the hull's widest row`).toBe(widest);
     }
   });
 });

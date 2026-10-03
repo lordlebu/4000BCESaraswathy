@@ -215,7 +215,7 @@ export function useActivity({
         spent: fatigued,
         // A night under a roof, at a camp, or in a tent you pitched. The bedroll and the bare
         // sky are the two that are not -- and `shelterAt` has already decided which this is.
-        sheltered: activity?.resting ? activity.resting !== 'bedroll' && activity.resting !== 'none' : true
+        sheltered: activity?.resting ? !['bedroll', 'dugout', 'none'].includes(activity.resting) : true
       })
     };
   }, [gesture, satchel, currentCreature, moment, fatigued, activity?.resting]);
