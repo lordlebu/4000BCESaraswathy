@@ -154,6 +154,27 @@ test('the Asura-Tainted Princess walks up and says hi', async ({ page }) => {
 });
 
 /**
+ * **The strait from the rim**: arriving at the First Pier, the first floating island a player stands
+ * on, opens canon's happening with the owner's painting of a woman watching the ships. Written, so it
+ * wins over anything woven, and once only.
+ */
+test('the First Pier shows the strait from the rim, with its painting, once', async ({ page }) => {
+  await page.goto('?seed=happenings&map=field_map_aravali&door=open&hour=10');
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  const arrive = () =>
+    page.evaluate(() => (window as unknown as { __happen?: Happen }).__happen?.('arriving', undefined, undefined, 'poi_first_pier') ?? false);
+  await expect.poll(arrive, { timeout: 20_000 }).toBe(true);
+  await expect(card(page).locator('h2')).toHaveText('The strait from the rim');
+  await expect(card(page).locator('img.activity-scene')).toHaveAttribute('src', /happening_the_strait_from_the_rim/);
+  await card(page).getByRole('button', { name: 'Kneel beside her and watch' }).click();
+  await expect(card(page)).toContainText('what she comes up for');
+  await card(page).getByRole('button', { name: 'Go on' }).click();
+  await expect(card(page)).toBeHidden();
+  // Asked again on the same arrival: canon's happening has been, so it is not this card.
+  if (await arrive()) await expect(card(page).locator('h2')).not.toHaveText('The strait from the rim');
+});
+
+/**
  * **Nothing opens over the landmark's page.** A camp pitched beside the landmark put its welcome
  * on top of the journey's end, so the player was left facing a dacoit band with the page beneath
  * it -- which is how `playthrough.spec.ts` failed, on the days its walk passed a camp. The page

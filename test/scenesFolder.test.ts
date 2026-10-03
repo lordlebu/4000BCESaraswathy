@@ -19,7 +19,8 @@ import { createRequire } from 'node:module';
 import { readdirSync, statSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import biomes from '../data/biomes.json';
-import { GROUND_GROUP, NIGHT_MOMENTS } from '../src/ui/scenes';
+import { GROUND_GROUP, NIGHT_MOMENTS, sceneNames } from '../src/ui/scenes';
+import { SHELTER_ORDER } from '../src/game/night';
 
 const SCENES = join(__dirname, '..', 'src', 'ui', 'scenes');
 
@@ -40,8 +41,11 @@ const HEIGHT = 384;
 /** The gestures a scene can be of. `rest` is the fourth that no material asks for. */
 const GESTURES = ['stoop', 'stalk', 'work', 'fish', 'rest'];
 
-/** What a `rest-` variant may narrow by: the six kinds of night `night.ts` ranks. */
-const SHELTERS = ['palace', 'settlement', 'roof', 'camp', 'tent', 'bedroll', 'none'];
+/**
+ * What a `rest-` variant may narrow by: the kinds of night `night.ts` ranks, read from it rather
+ * than copied -- the copy here missed `dugout` the day a night afloat was painted.
+ */
+const SHELTERS: readonly string[] = SHELTER_ORDER;
 
 /** What any gesture may narrow by: canon's process words, and the ground under foot. */
 const PROCESSES = [
@@ -59,6 +63,18 @@ const GROUPS = [...new Set(Object.values(GROUND_GROUP))];
 const ACTS = ['follow'];
 /** A night at a moment: `none-midnight`, `camp-dawn`. Only `rest` asks for these. */
 const NIGHTS = SHELTERS.flatMap((s) => NIGHT_MOMENTS.map((m) => `${s}-${m}`));
+/**
+ * A night painted for its ground: `bedroll-snow-midnight`, `bedroll-high-dawn`. Asked of `sceneNames`
+ * itself, over every shelter, moment and biome, so the guard knows exactly the names a night looks
+ * up and no more.
+ */
+const GROUND_NIGHTS = new Set(
+  SHELTERS.flatMap((shelter) =>
+    [undefined, ...NIGHT_MOMENTS].flatMap((moment) =>
+      BIOMES.flatMap((ground) => sceneNames('rest', shelter, moment, ground).map((n) => n.replace(/^rest-/, '')))
+    )
+  )
+);
 
 const files = readdirSync(SCENES).filter((f) => /\.(png|webp|jpe?g)$/i.test(f));
 
@@ -95,7 +111,8 @@ describe('src/ui/scenes holds built scenes and nothing else', () => {
     ).toBe(true);
     if (variant) {
       expect(
-        [...SHELTERS, ...NIGHTS, ...PROCESSES, ...BIOMES, ...GROUPS, ...ACTS].includes(variant),
+        [...SHELTERS, ...NIGHTS, ...PROCESSES, ...BIOMES, ...GROUPS, ...ACTS].includes(variant) ||
+          (gesture === 'rest' && GROUND_NIGHTS.has(variant)),
         `\`${variant}\` is not a shelter kind, a canon process, a biome or a ground group, so ` +
           `sceneFor('${gesture}', …) will never ask for it and this file will never draw.`
       ).toBe(true);

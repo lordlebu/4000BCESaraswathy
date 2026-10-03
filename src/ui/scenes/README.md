@@ -30,7 +30,7 @@ worth the same rest, and what differs is the picture and (later) what can happen
 | `rest-roof.png` | in out of it, under somebody else's stonework — a ruin, not a home |
 | `rest-camp.png` | a fire ring somebody banked before you got there ✓ *done* |
 | `rest-tent.png` | the hide tent, pitched and pegged — **the only one he built** |
-| `rest-dugout.png` | curled in the dugout on the water, tied off where it is quiet — *wanted*, the owner's ask of 3 October 2026 |
+| `rest-dugout.png` | curled in the dugout on the water, tied off where it is quiet — the owner's, 3 October 2026 |
 | `rest-bedroll.png` | oiled cloth on open ground, no fire |
 | `rest.png` | the fallback, when a kind has no painting of its own ✓ *done* |
 
@@ -38,9 +38,9 @@ An unpainted kind falls back to `rest.png`, so these land one at a time and in a
 
 **A night can be painted for its ground too** (3 October 2026): `rest-<shelter>-<biome>` and
 `rest-<shelter>-<group>`, each with `-midnight` or `-dawn`, are tried before the shelter alone
-(`sceneNames` in `src/ui/scenes.ts`). Wanted: `rest-bedroll-high-midnight`, `rest-bedroll-high-dawn`
-(hills, mountains, snow) and `rest-bedroll-snow-midnight`; the prompts are in
-`docs/strait-and-shallows.md`'s plan page.
+(`sceneNames` in `src/ui/scenes.ts`). Have: `rest-bedroll-high-midnight`, `rest-bedroll-high-dawn`
+(hills, mountains, snow, and for a night a sky island's top too -- `NIGHT_GROUND_GROUP`) and
+`rest-bedroll-snow-midnight`, the owner's, 3 October 2026.
 
 ## The ground a gesture happens on
 

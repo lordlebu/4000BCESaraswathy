@@ -117,11 +117,23 @@ until then every night shows what it did.
   page now holds every card back (`pageOpenRef` in `useHappenings`); `e2e/happenings.spec.ts` asks
   for one while it is up and once it closes, and failed by name with the guard taken out.
 
-## Art still wanted
+## The art, arrived
 
-All on the plan page with a Copy button: `first-afloat-lothal` and `first-ride-aravali` (events),
-`rest-dugout`, `rest-bedroll-high-midnight`, `rest-bedroll-high-dawn` and `rest-bedroll-snow-midnight`
-(scenes). The whale is drawn in code (`tools/draw-strait-art.py`); a painted one is optional.
+The owner's seven paintings, the same day, taken in by `tools/intake-strait-paintings.py` (crops
+recorded there; only paper edges trimmed, and the two firsts left as painted vignettes):
+
+- `events/first-afloat-lothal`, `events/first-ride-aravali`: the two firsts' cards.
+- `scenes/rest-dugout`: a night afloat.
+- `scenes/rest-bedroll-high-midnight`, `-high-dawn`, `-snow-midnight`: the ridge by night, a lady on
+  the same ridge at dawn, and snow by night. Snow has no dawn of its own and wakes to the ridge's.
+- **A sky island sleeps as high ground** (`NIGHT_GROUND_GROUP`): the owner put the lady's dawn on the
+  ridge *or* an island. The island's top stays out of `high` for stooping, which has its own painting.
+- `events/happening_the_strait_from_the_rim`: a woman at the rim watching the ships, after walking
+  up. Canon 3.3.0's happening on first arriving at the First Pier -- the first floating island a
+  player stands on -- drafted for the owner. She is somebody already there, never the traveller, so
+  it fits whoever is playing.
+
+The whale is still drawn in code (`tools/draw-strait-art.py`); a painted one is optional.
 
 ## Checks
 
@@ -129,4 +141,5 @@ All on the plan page with a Copy button: `first-afloat-lothal` and `first-ride-a
   `test/oneAtATime.test.tsx`, `test/night.test.ts`, `test/happenings.test.ts`, each new guard broken on
   purpose once and seen to fail by name.
 - Browser: `e2e/dugout.spec.ts` (the shallows, the wade before the loan), `e2e/firsts.spec.ts` (not yet,
-  the loan and its card, the first ride), `e2e/strait.spec.ts` (everything on the map, no frame missing).
+  the loan and its card, the first ride, each drawing its painting), `e2e/happenings.spec.ts` (the
+  strait from the rim, with its painting, once), `e2e/strait.spec.ts` (everything on the map, no frame missing).

@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.2.0",
+  "canon_version": "3.3.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -2747,6 +2747,29 @@
         {
           "label": "Leave a little food by his hand",
           "line": "You leave a flatbread on the stone by his hand. When you look back from the next rise, it is gone, and he has not moved."
+        }
+      ]
+    },
+    {
+      "id": "happening_the_strait_from_the_rim",
+      "type": "happening",
+      "title": "The strait from the rim",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_aravali"
+      ],
+      "at": [
+        "poi_first_pier"
+      ],
+      "prose": "Somebody has come up before you. A woman kneels on a reed mat at the rim, hands flat on the grass, watching the strait below as if it might do something unexpected. It does: an outrigger the size of a house comes up the channel under three painted sails, a hand on one and a crescent on another, and the fishing boats scatter out of its way like ducks. She does not look round. From up here, she says, you can see who is going where, and nobody down there ever thinks to look up.",
+      "choices": [
+        {
+          "label": "Ask whose ship it is",
+          "line": "Vanga's, she says, out of the eastern delta. It goes up the strait in the morning and comes back at evening, and in all the years she has been climbing up here to watch it, not one soul aboard has looked up and seen her."
+        },
+        {
+          "label": "Kneel beside her and watch",
+          "line": "You watch until the outrigger is a stroke of white against the far islands. Far out, something long and grey breathes once, sends up a plume of spray, and goes back under. She lets out the breath she was holding. That, she says, is what she comes up for."
         }
       ]
     },
