@@ -168,7 +168,10 @@ test('on Lothal, the dugout goes out from the beach into the shallows and no fur
       for (const [key, [dx, dy]] of Object.entries(STEPS)) {
         let n = 1;
         while (shallow(x + dx * n, y + dy * n)) n += 1;
-        if (n >= 2 && biome(x + dx * n, y + dy * n) === 'sea') {
+        // Straight out from the beach, the shallows end within `SHALLOW_REACH` (2). A line run along
+        // the coast stays shallow for as long as the coast does -- thirty tiles on the top row of
+        // this seed, sixty steps there and back, which ran out the test's three minutes on CI.
+        if (n >= 2 && n <= 3 && biome(x + dx * n, y + dy * n) === 'sea') {
           const back = key === 'ArrowRight' ? 'ArrowLeft' : key === 'ArrowLeft' ? 'ArrowRight' : key === 'ArrowDown' ? 'ArrowUp' : 'ArrowDown';
           found = { at: `${x},${y}`, out: key, back, reach: n - 1 };
           break;

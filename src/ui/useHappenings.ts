@@ -46,6 +46,7 @@ export function useHappenings({
   metStrangers,
   fieldPlaced,
   cardOpenRef,
+  pageOpenRef,
   setCardOpen,
   crossing,
   heldArrival,
@@ -65,6 +66,12 @@ export function useHappenings({
   fieldPlaced: MutableRefObject<{ poiId: string; at: { x: number; y: number } }[]>;
   /** Set the instant a card opens, so an effect in the same commit sees it. */
   cardOpenRef: MutableRefObject<boolean>;
+  /**
+   * True while the landmark's page is up. Nothing opens over it: a camp beside the landmark put its
+   * welcome on top of the page, and the player was left facing a dacoit band instead of the
+   * journey's end (`e2e/playthrough.spec.ts`, on the days the walk passed a camp).
+   */
+  pageOpenRef: MutableRefObject<boolean>;
   setCardOpen: (open: boolean) => void;
   /** True while the crossing is being told; an arrival then waits in `heldArrival`. */
   crossing: MutableRefObject<boolean>;
@@ -117,7 +124,7 @@ export function useHappenings({
       } = {}
     ): boolean => {
       const world = latest.current.world;
-      if (!world) return false;
+      if (!world || pageOpenRef.current) return false;
       const p = latest.current.progress;
       // Seeded on the tile and the salt, like every other roll in this codebase: the same seed
       // must produce the same journal text, and `Math.random` here would make a seed
@@ -289,6 +296,7 @@ export function useHappenings({
      * day's road. A beat waits until it can be taken whole, so this either opens its card or is quiet.
      */
     const storyNow = (when: BeatWhen, poiId: string | null): boolean => {
+      if (pageOpenRef.current) return false;
       const p = latest.current.progress;
       const carried = latest.current.satchel;
       const event = beatNow(when, {

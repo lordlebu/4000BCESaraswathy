@@ -176,6 +176,8 @@ export function App() {
    * one silently replacing the other. A ref for the bus handlers, a state for the effect to wait on.
    */
   const cardOpenRef = useRef(false);
+  /** The landmark's page is up; see `useHappenings`. Set in the handler too, ahead of the render. */
+  const pageOpenRef = useRef(false);
   const [cardOpen, setCardOpen] = useState(false);
 
   const [seed, setSeed] = useState(seedFromUrl);
@@ -199,6 +201,9 @@ export function App() {
   const [collection, setCollection] = useState<Collection>(initialJourney.current.collection);
   const [memory, setMemory] = useState('');
   const [arrivalPage, setArrivalPage] = useState<GameToUi['landmark-reached'] | null>(null);
+  useEffect(() => {
+    pageOpenRef.current = arrivalPage !== null;
+  }, [arrivalPage]);
   /**
    * A first's card, open: Thrali lending the dugout, or the first ride on the line
    * (`content/firsts.ts`). `then` runs when the card closes, if its choice was taken -- the boat goes
@@ -394,6 +399,7 @@ export function App() {
     metStrangers,
     fieldPlaced,
     cardOpenRef,
+    pageOpenRef,
     setCardOpen,
     crossing,
     heldArrival,
@@ -444,6 +450,7 @@ export function App() {
     };
 
     const onLandmarkReached = (payload: GameToUi['landmark-reached']) => {
+      pageOpenRef.current = true;
       setArrivalPage(payload);
       setReached(true);
     };
