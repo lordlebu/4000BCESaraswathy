@@ -38,19 +38,39 @@ export function sceneFor(
   gesture: string,
   variant?: string | null,
   pick = 0,
-  moment?: NightMoment | null
+  moment?: NightMoment | null,
+  ground?: string | null
 ): string | null {
+  return firstArt('scenes', sceneNames(gesture, variant, moment, ground), pick);
+}
+
+/**
+ * The names `sceneFor` tries, most specific first. Exported so the order can be tested before any
+ * of the paintings it names exists.
+ *
+ * **A night can be painted for its ground as well as its shelter** -- the owner's ask of 3 October
+ * 2026, a bedroll on high ground. The biome first, then its group (`rest-bedroll-snow`, then
+ * `rest-bedroll-high` on hills, mountains or snow), each at the moment before without it, and only
+ * then the shelter alone. With no ground the chain is exactly what it was.
+ */
+export function sceneNames(
+  gesture: string,
+  variant?: string | null,
+  moment?: NightMoment | null,
+  ground?: string | null
+): string[] {
   const group = variant ? GROUND_GROUP[variant] : undefined;
-  return firstArt(
-    'scenes',
-    [
-      variant && moment ? `${gesture}-${variant}-${moment}` : null,
-      variant ? `${gesture}-${variant}` : null,
-      group ? `${gesture}-${group}` : null,
-      gesture
-    ],
-    pick
-  );
+  const groundGroup = ground ? GROUND_GROUP[ground] : undefined;
+  const onGround = variant
+    ? [ground, groundGroup].flatMap((g) => (g ? [moment ? `${gesture}-${variant}-${g}-${moment}` : null, `${gesture}-${variant}-${g}`] : []))
+    : [];
+  return [
+    ...onGround,
+    variant && moment ? `${gesture}-${variant}-${moment}` : null,
+    variant ? `${gesture}-${variant}` : null,
+    group ? `${gesture}-${group}` : null,
+    gesture
+  ].filter((n): n is string => n !== null);
 }
 
 /**

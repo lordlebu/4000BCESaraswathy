@@ -36,6 +36,12 @@ worth the same rest, and what differs is the picture and (later) what can happen
 
 An unpainted kind falls back to `rest.png`, so these land one at a time and in any order.
 
+**A night can be painted for its ground too** (3 October 2026): `rest-<shelter>-<biome>` and
+`rest-<shelter>-<group>`, each with `-midnight` or `-dawn`, are tried before the shelter alone
+(`sceneNames` in `src/ui/scenes.ts`). Wanted: `rest-bedroll-high-midnight`, `rest-bedroll-high-dawn`
+(hills, mountains, snow) and `rest-bedroll-snow-midnight`; the prompts are in
+`docs/strait-and-shallows.md`'s plan page.
+
 ## The ground a gesture happens on
 
 `stoop-<biome>.png`, `work-<biome>.png`, `stalk-<biome>.png`, `fish-<biome>.png` — one per kind of

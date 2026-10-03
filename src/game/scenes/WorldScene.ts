@@ -87,6 +87,9 @@ import { TravellerView } from '../systems/TravellerView';
 import { VisitorView } from '../systems/VisitorView';
 import { PIP_INK, PIP_NEWS, PIP_RING } from '../marks';
 import { WandererView } from '../systems/WandererView';
+import { StraitView } from '../systems/StraitView';
+import { loadStraitArt } from '../straitArt';
+import { seaSeenFrom } from '../../content/strait';
 import { HomesteadView, loadHomesteadArt } from '../systems/HomesteadView';
 
 /**
@@ -373,6 +376,8 @@ export class WorldScene extends Phaser.Scene {
 
   /** The animals walking their own ground. See `systems/WandererView.ts`. */
   private wanderers!: WandererView;
+  /** The strait's ships, kites and whale, and Dwarka's kites. See `systems/StraitView.ts`. */
+  private strait!: StraitView;
   /** The place under foot, so the UI is told when it changes rather than on every step. */
   private standingOn: string | null = null;
   private tileSprites: Phaser.GameObjects.Image[][] = [];
@@ -656,6 +661,17 @@ export class WorldScene extends Phaser.Scene {
         return scene.built?.fieldMap.id ?? scene.fieldMapId;
       }
     });
+    this.strait = new StraitView(this, {
+      get world() {
+        return scene.world;
+      },
+      get fieldMapId() {
+        return scene.built?.fieldMap.id ?? scene.fieldMapId;
+      },
+      get placed() {
+        return (scene.built?.placed ?? []).map((p) => ({ poiId: p.poi.id, at: p.at }));
+      }
+    });
     this.visitors = new VisitorView(this, {
       get world() {
         return scene.world;
@@ -694,6 +710,8 @@ export class WorldScene extends Phaser.Scene {
     // id even though it has not built the world, and the id is all this needs. A change of map
     // restarts the scene, so the next map's animals are loaded when it is.
     loadWandererArt(this, wandererIdsOn(this.fieldMapId));
+    // The strait's ships, kites and whale on the Aravali, the kites alone at Dwarka, nothing elsewhere.
+    loadStraitArt(this, this.fieldMapId);
     // The homestead's mill, greenhouse and every map's finished building. See `systems/HomesteadView.ts`.
     loadHomesteadArt(this);
     loadTileSheets(this, {
@@ -815,6 +833,7 @@ export class WorldScene extends Phaser.Scene {
     this.travellers.create();
     this.exposeForTests();
     this.wanderers.create();
+    this.strait.create();
     // The initial answer, so the UI never has to assume one.
     this.reportCharacter();
 
@@ -2098,6 +2117,8 @@ export class WorldScene extends Phaser.Scene {
     // line -- which row he is sorted into, whether a step is still in flight, what ground he is
     // standing on. A freeze reported from play as "the whole game is stuck when I move to a
     // different tile" could not be reproduced at all until a spec could ask where he actually was.
+    // What the strait has on the map, for `e2e/strait.spec.ts`.
+    (window as unknown as { __strait?: () => unknown }).__strait = () => this.strait.report();
     (window as unknown as { __walker?: () => unknown }).__walker = () => ({
       x: this.at.x,
       y: this.at.y,
@@ -2315,6 +2336,9 @@ export class WorldScene extends Phaser.Scene {
     this.updateRide();
     this.visitors.update();
     this.travellers.placeTargetMark();
+    // Every frame, not on the half-second gate: a boat that moved twice a second would be seen to
+    // jump. The timetable reads the journey's clock in days, the swell and the wind the loop's own.
+    this.strait.update(this.startPhase + (this.time.now + this.travelled) / DAY_MS, this.time.now);
 
     if (this.moving) return;
 
@@ -2511,6 +2535,15 @@ export class WorldScene extends Phaser.Scene {
     // `ROAD_SIGHT` tiles each way, to the remembered shade -- the owner's ruling: revealed as you walk
     // it, never the whole network at once. See `game/roadLight.ts`.
     for (const key of roadAhead(this.world, at)) {
+      this.discovered.add(key);
+      if (nowVisible.has(key)) continue;
+      const [x, y] = key.split(',').map(Number);
+      this.setFog(x!, y!, FOG_REMEMBERED, true);
+    }
+    // **And the sea is seen from above**: from an island or the line on the Aravali, the open water
+    // round about, to the same remembered shade -- or the strait's boats would sail under the dark.
+    // See `seaSeenFrom` in `content/strait.ts`.
+    for (const key of seaSeenFrom(this.world, this.built?.fieldMap.id ?? this.fieldMapId, at)) {
       this.discovered.add(key);
       if (nowVisible.has(key)) continue;
       const [x, y] = key.split(',').map(Number);

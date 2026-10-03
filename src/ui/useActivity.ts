@@ -312,6 +312,8 @@ export function useActivity({
            * painted is not an error.
            */
           variant: activity.resting ?? (activity.making ? processWord(activity.making) : underfoot.biome ?? null),
+          // A night's ground, so a bedroll on a ridge can have its own painting (`sceneFor`).
+          ground: activity.resting ? (underfoot.biome ?? null) : null,
           /**
            * Which of this thing's paintings to show.
            *

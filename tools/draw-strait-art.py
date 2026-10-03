@@ -335,7 +335,7 @@ def save(name: str, im: Image.Image) -> None:
     keyed = Image.new("RGBA", big.size, MAGENTA)
     keyed.alpha_composite(big)
     OUT.mkdir(parents=True, exist_ok=True)
-    keyed.convert("RGB").save(OUT / f"{name}.png")
+    keyed.save(OUT / f"{name}.png")  # RGBA: `tools/sprite-png.js` reads nothing else
     print(f"wrote assets/source/strait/{name}.png  {big.width}x{big.height}")
 
 

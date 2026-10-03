@@ -257,6 +257,7 @@ The art docs, in the order they are useful:
 | `docs/satchel-and-hearth.md` | making made easier: the pin, cook fires, windfall wood, events that help, the pointer, the next step, and the rest of the `App.tsx` split |
 | `docs/a-place-to-stop.md` | where a sitting ends: the day's page at any night, and where you left off at the door |
 | `docs/a-lighter-game.md` | **phases 1 and 2 built**: rungs need only understanding, regrowth tiers set by use; the rest is the owner's call |
+| `docs/strait-and-shallows.md` | the dugout lent by Thrali and afloat in the shallows, first-time cards, the strait's ships, kites and whale, nights afloat and up high |
 | `docs/endgame-plan.md` | the programme, closed; what shipped, what is parked, what was declined |
 | `docs/art-direction.md` | the five rules the art follows, and what each one cost to learn |
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |
@@ -475,7 +476,8 @@ it is not, it has already been applied.
   so a painted animal needs no registration, and the sizes it is drawn at live in `frames.ts` for
   the same reason everything else does: `tileTextures.ts` cannot be imported under Node.
   **`game/systems/` is where the scene is being split**, one system at a time with no change in
-  behaviour (`docs/scaling-study.md` section 2). Five so far, each reading the scene through a
+  behaviour (`docs/scaling-study.md` section 2). Five were moved out, and a sixth, `StraitView.ts`
+  (the Aravali's ships, kites and whale, and Dwarka's kites), was written there from the start. The five, each reading the scene through a
   small host interface of live getters rather than reaching into its fields: `CampView.ts` (a
   camp's pieces, shadows, trodden way, smoke, lights and ashes), `TravellerView.ts` (everybody on
   the road and at the camp: positions, making room, waiting when called, delays, the camp's day,
@@ -804,6 +806,28 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
   with Hints. On a landscape phone a line at a place took 29 of the 101 pixels it reads through.
 - **`test/reach.test.ts` holds the floor:** a container and a cook fire within 20 steps of the start
   on every map and five seeds.
+
+### The strait and the shallows (3 October 2026)
+
+`docs/strait-and-shallows.md` is the record. Rules, not history:
+
+- **The dugout is lent, not carried.** Thrali lends it on Lothal from the third day (`LEND_FROM_DAY`),
+  at the Camp in the Kilns or the Drowned Dockyard; canon's `field_map.firsts` says who, where and in
+  what words, `content/firsts.ts` says when. The loan is a knowledge flag (`lent:<vehicle>`), carried
+  into the scene as `WorldSceneData.lent` and across restarts. `?lent=dugout` stands in for it in specs.
+- **The shallows are swamp and the sea within two tiles of land** (`shallowsOf` in `game/afloat.ts`).
+  Only the traveller's step and routes ask (`canStepOnto`); **`isWalkable` never learns the sea**, so
+  nobody else can stand on it. A visitor walks to the shore beside the hull, and `onWater` keeps
+  ground-only woven events off open water.
+- **A night afloat is `dugout`**, its own shelter and painting slot. A night also asks its ground
+  (`sceneNames` in `ui/scenes.ts`): `rest-bedroll-snow`, then `rest-bedroll-high`, then the shelter.
+- **Firsts show a card once** (the event card), off under automation like the front door; `?firsts=on`.
+- **The strait's traffic is for looking at.** Positions are pure functions of the seed and the clock
+  (`content/strait.ts`), so nothing is saved. Boats draw at `STRAIT_DEPTH.water` (99, under the rail),
+  kites at `.air` (1990, under the fog); frames and anchors come from `tools/build-strait.js`
+  (`assets/strait/`, `assets/strait.json`). **The sea is seen from above** (`seaSeenFrom`): from an
+  island or the line on the Aravali, sea within eight tiles lifts to the remembered shade, or the
+  traffic would sail under unexplored dark.
 
 ### A place to stop (2 October 2026)
 

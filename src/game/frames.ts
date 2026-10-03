@@ -971,6 +971,17 @@ export const ROW_DEPTH = 10;
  */
 export const ROW_SLOT = { underfoot: 0, undergrowth: 1, marker: 3, walker: 5, canopy: 8 } as const;
 
+/**
+ * Where the strait's traffic is drawn (`systems/StraitView.ts`), out here so a test can hold it.
+ *
+ * - `water`: ships, boats and the whale. Above the sea tiles (0) and **below every row-sorted thing**
+ *   (`GROUND_DEPTH_BASE` and up), the rail included -- so the rail is drawn over a ship wherever the
+ *   two cross and it passes beneath, as canon says boats do.
+ * - `air`: the kites and their ropes. Above everything on the islands, and below the fog, which
+ *   `WorldScene` draws at 2000 -- ground not yet seen still hides them.
+ */
+export const STRAIT_DEPTH = { water: 99, air: 1990 } as const;
+
 export function depthFor(row: number, slot: number): number {
   return GROUND_DEPTH_BASE + row * ROW_DEPTH + slot;
 }
