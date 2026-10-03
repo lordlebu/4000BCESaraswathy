@@ -109,12 +109,12 @@ const isCulture = (c: string): c is StrangerCulture => (STRANGER_CULTURES as rea
  * the next. Names come from canon's peoples, never one a stranger on this map's road already has,
  * and never two alike in one camp.
  */
-export function campPeople(camp: Encampment, fieldMapId: string): CampPerson[] {
+export function campPeople(camp: Encampment, fieldMapId: string, seed = ''): CampPerson[] {
   const words = CAMP_WORDS[camp.kind];
   const turn = camp.id.split(':').pop() ?? '0';
   const taken = new Set(
-    travellersOn(fieldMapId)
-      .map((t) => t.givenName ?? (t.npcId === null ? givenNameFor(`${fieldMapId}:${t.id}`) : null))
+    travellersOn(fieldMapId, seed)
+      .map((t) => t.givenName ?? (t.npcId === null ? givenNameFor(`${fieldMapId}:${t.id}`, seed) : null))
       .filter((n): n is string => Boolean(n))
   );
   return CAMP_SLOTS.map((slot) => {

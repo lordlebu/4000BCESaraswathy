@@ -12,7 +12,8 @@
 // preference: the album holds 145-193 species per map and this holds eight people, so tabs and
 // search would be furniture around a list that fits on one screen.
 
-import { type ReactNode, useRef } from 'react';
+import { type ReactNode, useContext, useRef } from 'react';
+import { JourneySeed } from './journeySeed';
 import { type Acquaintance, met, strangersMet, threadWith } from '../content/people';
 import { discovery, fieldQuestion, word } from '../content/knowledge';
 import { recipe } from '../content/making';
@@ -56,6 +57,7 @@ export interface PeoplePanelProps {
 
 export function PeoplePanel({ progress, strangers = [], open, onClose, tabs }: PeoplePanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const seed = useContext(JourneySeed);
 
   // Escape closes it and focus starts on the way out, matching the diary and the album. The map
   // keeps running underneath: a book you opened, not a stopped world.
@@ -65,7 +67,7 @@ export function PeoplePanel({ progress, strangers = [], open, onClose, tabs }: P
   if (!open) return null;
 
   const people = met(progress);
-  const road = strangersMet(strangers);
+  const road = strangersMet(strangers, seed);
 
   return (
     <Modal open label="People" onClose={onClose} initialFocus={closeRef}>

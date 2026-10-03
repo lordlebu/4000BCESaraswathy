@@ -111,12 +111,12 @@ export interface StrangerMet {
  * Read off the save's `met` list, which the company card writes when you learn a name. A key
  * naming a map or a stranger the roster no longer has is dropped rather than shown half-drawn.
  */
-export function strangersMet(keys: readonly string[]): StrangerMet[] {
+export function strangersMet(keys: readonly string[], seed = ''): StrangerMet[] {
   const out: StrangerMet[] = [];
   for (const key of keys) {
     const [fieldMapId, travellerId] = key.split(':');
     if (!fieldMapId || !travellerId) continue;
-    const traveller = travellersOn(fieldMapId).find((t) => t.id === travellerId && t.npcId === null);
+    const traveller = travellersOn(fieldMapId, seed).find((t) => t.id === travellerId && t.npcId === null);
     if (!traveller) continue;
     out.push({
       key,

@@ -64,7 +64,9 @@ export interface StrangerFaceProps {
 
 /** Presentational, like `PersonPortrait`: the title beside it already says who this is. */
 export function StrangerFace({ stranger, size = 40 }: StrangerFaceProps) {
-  const painted = paintedFaceFor(stranger.id, stranger.culture);
+  // Keyed on the name as well as who they are, because the name is dealt per journey: a new journey's
+  // carrier is a new face, and one journey's carrier keeps theirs.
+  const painted = paintedFaceFor(stranger.givenName ? `${stranger.id}:${stranger.givenName}` : stranger.id, stranger.culture);
   if (painted) {
     return (
       <img

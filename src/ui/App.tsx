@@ -28,6 +28,7 @@ import { RecordTabs, type RecordTab } from './Records';
 import { PeoplePanel } from './PeoplePanel';
 import { met } from '../content/people';
 import { seedFromUrl } from './seed';
+import { JourneySeed } from './journeySeed';
 import { SettlingSection } from './SettlingSection';
 import { settlingRoad } from '../content/settlingRoad';
 import { WorkshopPanel } from './WorkshopPanel';
@@ -542,12 +543,12 @@ export function App() {
    */
   const travellerTraits = useMemo(() => {
     if (!talkingTo) return null;
-    const traveller = travellersOn(fieldMapId).find((t) => t.npcId === talkingTo);
+    const traveller = travellersOn(fieldMapId, seed).find((t) => t.npcId === talkingTo);
     if (!traveller) return null;
     const reported = travellerStates.find((t) => t.id === traveller.id);
     const traits = travellerAttributes(traveller, reported?.state ?? null);
     return traits.length > 0 ? traits : null;
-  }, [talkingTo, fieldMapId, travellerStates]);
+  }, [talkingTo, fieldMapId, travellerStates, seed]);
 
   /**
    * Who is at the place being stood in, and where its other people have gone.
@@ -873,7 +874,7 @@ export function App() {
     (travellerId: string, at: { x: number; y: number }): Talk => {
       const facts = { finished: (id: string) => isComplete(progress, id), met: metStrangers.current };
       const { standing: known } = howKnownOn(fieldMapId, facts);
-      const traveller = travellersOn(fieldMapId).find((t) => t.id === travellerId);
+      const traveller = travellersOn(fieldMapId, world?.seed ?? '').find((t) => t.id === travellerId);
       const day = arrival?.day ?? 0;
       const places = fieldMap(fieldMapId)?.pointsOfInterest ?? [];
       const rumours = rumoursOn(fieldMapId, {
@@ -1515,6 +1516,7 @@ export function App() {
     // `data-traveller` is who the *scene* says it is drawing, not who was asked for. It is a
     // readout rather than a control, and it exists because a browser test otherwise cannot tell a
     // working picker from a highlighted button -- see `e2e/travellers.spec.ts`.
+    <JourneySeed.Provider value={seed}>
     <div className="stage" data-traveller={drawn}>
       {/* The scene mounts only once the door is open. Booting it behind the door and hiding it
           would spend a second of loading nobody asked for, and would make "start a new walk" a
@@ -1896,5 +1898,6 @@ export function App() {
         )}
       </Modal>
     </div>
+    </JourneySeed.Provider>
   );
 }
