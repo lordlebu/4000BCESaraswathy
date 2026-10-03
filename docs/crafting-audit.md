@@ -133,8 +133,53 @@ player to carry in: guggul and shilajit (Narmada), taro and dried fish (Lothal),
 (Dwarka). (The Narmada's 13 counts tag and part shortfalls that the first closure script did not, so
 it is not comparable to that script's 9.)
 
-**Still open, not ruled on.** The bench's board description says "a seat and a blade", but the bench
-supplies no `cut`, on purpose.
+## Closed (3 October 2026): the three scarce recipes, and what is left open
+
+Game #247 and #248 and canon #161 are merged, and CI is green on `main`.
+
+**Why the comb, the boar spear and the serpent mantle stay scarce.** A material reaches a tile in
+two steps:
+1. **Its source has to be standing there.** Boar tusk comes only from a tile where a boar is
+   placed, sandalwood from a sandalwood tree, and shed snakeskin from the Vasuki. Placement is
+   canon's: the species' rarity and biomes.
+2. **The material then rolls its own chance** (`CHANCE` in `content/gathering.ts`): 34% for a common
+   material and 8% for a rare one.
+
+The audit raised step 2, making boar tusk and sandalwood common. That multiplied almost nothing by
+four: sandalwood was on 0–1 tiles of a whole Aravali map, and boar tusk on 0–2. `criticalPath`
+asks for three tiles on ten of twelve seeds, and it still failed, so the rarity went back.
+Snakeskin was already common; its scarcity is the Vasuki's own. **The real lever is step 1**:
+make the species commoner, or give it more biomes. That is a canon edit to what lives where, and
+it was left alone.
+
+**None of the three is tied to a quest.** Nothing in canon or the game asks for the recipes, their
+items or their materials: no field question, story beat, event, homestead stage or other recipe.
+Their only references are the recipe and the teaching line. What the items do in play:
+
+| Item | Taught by | What it does |
+|---|---|---|
+| Boar spear | Anu, the Aravali | Affords `cut` and `deter`: a cutting tool, as a flint knife is |
+| Serpent mantle | Tolla, the Narmada | Affords `shelter`: upgrades the night and is never spent (`using.ts`) |
+| Sandalwood comb | Ila, the Aravali | Affords `trade` only. See below |
+
+So their scarcity costs a player nothing they need. They are optional, specialist work, as the
+owner ruled.
+
+**Open: five items afford only `trade`, and nothing reads `trade`.** The shell bead, ammonite
+pendant, sandalwood comb, seed ball and clay seal (the seal also affords `mark`) can be made, and
+then nothing in the game uses them. No recipe takes them, no system reads the affordance, and no
+homestead, event or person asks for them. (The camps' `'trade'` in `campLife.ts` is something a
+runner does, not an item's affordance.) This predates the audit and is a design question, not a
+fault: what trade means in a game with no money. Recorded here so the next look at making starts
+from it.
+
+**Open: the bench's blade.** The bench's board description says "a seat and a blade", but on
+purpose the bench supplies no `cut`, so making a first knife stays a step. Reword the description,
+or let the bench cut. The owner's call.
+
+**Open, outside crafting: the map-crossing walk's time on CI.** On hosted runners
+`e2e/playthrough.spec.ts` took between about three and eleven minutes on identical code. Its budget
+is fifteen and the shard cap is 40 (`docs/testing.md`), but the cause of the swing is not known.
 
 The audit scripts imported the game's own rules (`canMake`, `shortfalls`, `stationsAt`, `yieldsAt`,
 `plan`). Their logic is folded into the test files above, so nothing depends on the scratchpad.
