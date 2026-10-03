@@ -254,6 +254,7 @@ The art docs, in the order they are useful:
 | `docs/retrospective.md` | **read first**: the whole project to 28 September 2026, what worked, what did not, what next |
 | `docs/settling-in.md` | the Settling In plan, concluded: camps, cart points, homesteads, and what was measured |
 | `docs/living-camps.md` | camps with people, **closed**: the measurements, the rulings, the way in's look, the rail decided, clearings, shadows, night light, and waiting at the pier |
+| `docs/crafting-audit.md` | **crafting audited**: the seven faults, benches that count, the tool to make, and phases 3–4 with the owner's rulings |
 | `docs/satchel-and-hearth.md` | making made easier: the pin, cook fires, windfall wood, events that help, the pointer, the next step, and the rest of the `App.tsx` split |
 | `docs/a-place-to-stop.md` | where a sitting ends: the day's page at any night, and where you left off at the door |
 | `docs/a-lighter-game.md` | **phases 1 and 2 built**: rungs need only understanding, regrowth tiers set by use; the rest is the owner's call |
@@ -732,7 +733,9 @@ retrospective. The rules, because they are rules rather than history:
   takes a list of asks, so Thrali has the boat's row and the road's.
 - **The card after a road is never blank.** A road's happening with no painting of its own shows the
   road's (`artFallback`, from `useCrossing`'s `roadArt`); the ferry song and the line where the sea
-  was have none yet.
+  was have none yet. **Nor is a story beat's**: one with no painting borrows a woven one of the same
+  kind of moment (`BEAT_FALLBACK` in `content/storylines.ts`) -- Guyuk's road rumour and the Atelier
+  without her opened blank, and the rumour's canon title now says it is heard, not arrived at.
 - **Camps are a pure function of seed, map and day** (`content/encampments.ts`): one at a time,
   three days a turn, on dry ground away from places and roads. Walking up to one asks for its card
   with `force: {kind: 'camp', asked: true}`, which `happeningNow` returns before any weighting --
@@ -746,6 +749,11 @@ retrospective. The rules, because they are rules rather than history:
   are untouched. **Only the leader may call you over**, and only before the camp's welcome, on the
   speak-first rules (`campCallers`); the runner and the watch never do. At the meal the card asks
   for `woven-camp-meal-<kind>` first (`artMoment`), falling back to the camp's own painting.
+- **Road company are dealt per journey** (the owner, 3 October 2026): their names, dyes and faces
+  take the seed into the hash (`travellersOn(map, seed)`, `givenNameFor(who, seed)`), so a new
+  journey meets new people and one journey keeps its own. Every journey used to meet Saalik, the same
+  Harappan carrier with the same face, on Lothal. Panels that name a met stranger read the seed from
+  the `JourneySeed` context; no seed is the old deal.
 - **Road company only come and go, never canon's people** (owner's ruling): a runner meets a road
   traveller whose leg passes the turn-off (`runnerErrand`, held there by `phaseAfterMeeting`), and on
   some days one visits to eat (`campVisitors`, capped at the pace nine in ten travellers keep). Both
@@ -817,6 +825,18 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
   with Hints. On a landscape phone a line at a place took 29 of the 101 pixels it reads through.
 - **`test/reach.test.ts` holds the floor:** a container and a cook fire within 20 steps of the start
   on every map and five seeds.
+- **A bench on the board is a bench in the rule** (the crafting audit, 3 October 2026;
+  `docs/crafting-audit.md`). `benchAt(poi)` is the only way a `Bench` is built from a place. A bench
+  opens its processes where `performed_at` would not (`benchOpens`), stands in for its carried form
+  (`stands_in_for`: loom frame, quern, brazier) and supplies what its processes need
+  (`Station.supplies`). The hearth supplies nothing, so the cook-fire ruling stands.
+  `test/benches.test.ts` asserts through `canMake` and `shortfalls`, never through a parallel answer:
+  `worksProcess` was right, tested, and called by nothing, while the loom asked for a loom frame.
+- **A missing tool names the tool to make** (`content/toolStep.ts`): the one this satchel can make
+  here and now, with a Make or Pin button on the reason row. `test/toolStep.test.ts` walks a new
+  traveller on every map, pressing only that button. **`plan` returns a reason, never `null`, at the
+  wrong place**; `blocked: null` means a run exists. Phases 3 and 4 of the audit, with the owner's
+  rulings, are in `docs/crafting-audit.md`.
 
 ### The strait and the shallows (3 October 2026)
 

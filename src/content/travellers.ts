@@ -312,14 +312,21 @@ const COMPANY: readonly {
  * A name added to canon still only takes the strangers it wins; a people with more strangers than
  * names starts again from the full list rather than leaving anybody nameless.
  */
-export function givenNameFor(who: string): string | null {
-  return dealtNames().get(who) ?? null;
+export function givenNameFor(who: string, seed = ''): string | null {
+  return dealtNames(seed).get(who) ?? null;
 }
 
-let dealt: Map<string, string> | null = null;
+/**
+ * **Dealt per journey** (the owner, 3 October 2026): every journey met the same Harappan carrier,
+ * Saalik on Lothal, with the same face, because the deal was keyed on the map and the trade alone.
+ * The seed is in the hash now, so a new journey meets new people while one journey keeps its own --
+ * the carrier you met yesterday is the carrier you meet again. No seed is the old deal, unchanged.
+ */
+const dealt = new Map<string, Map<string, string>>();
 
-function dealtNames(): Map<string, string> {
-  if (dealt) return dealt;
+function dealtNames(seed: string): Map<string, string> {
+  const cached = dealt.get(seed);
+  if (cached) return cached;
   const byCulture = new Map<string, string[]>();
   for (const map of fieldMaps) {
     for (const who of companyOn(map.id)) {
@@ -334,13 +341,13 @@ function dealtNames(): Map<string, string> {
     const taken = new Set<string>();
     for (const key of [...strangers].sort()) {
       const free = names.filter((n) => !taken.has(n));
-      const name = weightedPickFor(free.length > 0 ? free : names, 'given-name', { x: 0, y: 0 }, key, (n) => n, () => 1);
+      const name = weightedPickFor(free.length > 0 ? free : names, 'given-name', { x: 0, y: 0 }, seed ? `${seed}|${key}` : key, (n) => n, () => 1);
       if (!name) continue;
       taken.add(name);
       out.set(key, name);
     }
   }
-  dealt = out;
+  dealt.set(seed, out);
   return out;
 }
 
@@ -422,7 +429,7 @@ function circuitPeople(fieldMapId: string): Npc[] {
  * people who travel is what filled Lothal outright. The number is worth re-measuring rather than
  * trusting after any canon pass that adds somebody with more than one `found_at`.
  */
-export function travellersOn(fieldMapId: string): Traveller[] {
+export function travellersOn(fieldMapId: string, seed = ''): Traveller[] {
   const places = fieldMap(fieldMapId)?.pointsOfInterest ?? [];
   const here = new Set(places);
   const out: Traveller[] = [];
@@ -464,9 +471,10 @@ export function travellersOn(fieldMapId: string): Traveller[] {
         circuit,
         conveyance: conveyanceFor(grounds),
         art: who.body,
-        look: lookFor(`${fieldMapId}:${who.id}`, who.body),
+        // Dyed and named per journey, like the name (`dealtNames`); the circuit stays the map's.
+        look: lookFor(seed ? `${seed}|${fieldMapId}:${who.id}` : `${fieldMapId}:${who.id}`, who.body),
         culture: who.culture,
-        givenName: givenNameFor(`${fieldMapId}:${who.id}`)
+        givenName: givenNameFor(`${fieldMapId}:${who.id}`, seed)
       });
     }
   }

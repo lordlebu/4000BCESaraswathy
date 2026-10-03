@@ -13,7 +13,8 @@
 // Presentation only. Who somebody is, where they walk and whether you helped them are all asked of
 // `content/`: `places.ts`, `people.ts` and `travellers.ts`.
 
-import { useState, type ReactNode } from 'react';
+import { useContext, useState, type ReactNode } from 'react';
+import { JourneySeed } from './journeySeed';
 import type { Npc } from '../content/places';
 import { poi } from '../content/places';
 import { PEOPLE_NAMES, strangersMet, type StrangerMet } from '../content/people';
@@ -41,8 +42,9 @@ export interface ProfileCardProps {
 }
 
 export function ProfileCard({ who, open, onClose }: ProfileCardProps) {
+  const seed = useContext(JourneySeed);
   if (who.kind === 'named') return <NamedCard npc={who.npc} helped={who.helped ?? false} open={open} onClose={onClose} />;
-  const met = strangersMet([who.key])[0];
+  const met = strangersMet([who.key], seed)[0];
   if (!met) return null;
   return <StrangerCard met={met} known={who.known} open={open} onClose={onClose} />;
 }

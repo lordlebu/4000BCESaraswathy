@@ -23,7 +23,7 @@
 
 import { type Ingredient, type Recipe, nameOf, recipe, recipes } from './making';
 import { type Satchel, count, remove } from './satchel';
-import { type Bench, type Knows, canMake, make, missingTools, placeAllows, satisfying, tagCount } from './crafting';
+import { type Bench, type Knows, canMake, make, missingTools, placeAllows, satisfying, shortfalls, tagCount } from './crafting';
 
 /** One rung of a chain, in the order it happens. */
 export interface Step {
@@ -100,7 +100,11 @@ export function plan(
   if (!r) return { steps: [], blocked: 'no such recipe' };
   if (!knows(recipeId)) return { steps: [], blocked: 'somebody would have to show you' };
   if (!placeAllows(recipeId, bench)) {
-    return { steps: [], blocked: null }; // `blockedBy` says where; this is not the place to repeat it
+    // A reason, never null. This said `blocked: null` with no steps -- "nothing stands in the way"
+    // -- and every caller had to remember to also check for an empty run; `toolStep` did not, and
+    // told a traveller holding nothing that a bronze knife could be made "here and now".
+    const where = shortfalls(satchel, recipeId, bench).find((s) => s.kind === 'place');
+    return { steps: [], blocked: where?.why ?? 'not at this place' };
   }
 
   // **A missing tool is not a missing ingredient, and confusing them cost an afternoon.** A

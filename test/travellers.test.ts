@@ -27,6 +27,7 @@ import {
   travellerAttributes,
   travellerState,
   travellersOn,
+  givenNameFor,
   wayBetween,
   whereabouts,
   ROAD_COMPANY_PER_MAP,
@@ -570,5 +571,40 @@ describe('making room never puts anybody in the sea', () => {
     ]);
     expect(room.get('a')).toEqual({ x: 1, y: 1 });
     expect(room.get('b')).toEqual({ x: 2, y: 1 });
+  });
+});
+
+describe('road company, dealt per journey', () => {
+  // The owner, 3 October 2026: every journey met the same Harappan carrier, Saalik on Lothal, with
+  // the same face. Names and dyes are dealt with the seed in the hash now.
+  const carrier = (seed: string) => travellersOn('field_map_lothal', seed).find((t) => t.id === 'company_carrier')!;
+
+  it('meets somebody new on a new journey', () => {
+    const seeds = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    const names = new Set(seeds.map((s) => carrier(s).givenName));
+    expect(names.size, `eight journeys, ${names.size} carrier names`).toBeGreaterThanOrEqual(3);
+    const dyes = new Set(seeds.map((s) => JSON.stringify(carrier(s).look)));
+    expect(dyes.size, 'every journey dyes the carrier alike').toBeGreaterThanOrEqual(3);
+  });
+
+  it('keeps the same people for one journey, wherever they are asked for', () => {
+    expect(carrier('varuna-0')).toEqual(carrier('varuna-0'));
+    expect(givenNameFor('field_map_lothal:company_carrier', 'varuna-0')).toBe(carrier('varuna-0').givenName);
+  });
+
+  it('never gives two strangers of one people the same name in a journey', () => {
+    for (const seed of ['a', 'b', 'varuna-0']) {
+      const byCulture = new Map<string, string[]>();
+      for (const map of fieldMaps) {
+        for (const t of travellersOn(map.id, seed).filter((x) => x.npcId === null)) {
+          byCulture.set(t.culture!, [...(byCulture.get(t.culture!) ?? []), t.givenName!]);
+        }
+      }
+      for (const [culture, names] of byCulture) expect(new Set(names).size, `${seed}: two ${culture} strangers share a name`).toBe(names.length);
+    }
+  });
+
+  it('is the old deal with no seed', () => {
+    expect(carrier('').givenName).toBe('Saalik');
   });
 });

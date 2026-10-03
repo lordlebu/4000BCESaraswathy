@@ -1867,7 +1867,8 @@
         "material_basalt"
       ],
       "notes": "Grain to flour, ochre to pigment, bark to powder. The first object written here that had nothing honest to say for itself under the old vocabulary -- which is how `work` came to exist.",
-      "source_index": 22
+      "source_index": 22,
+      "stands_in_for": "quern"
     },
     {
       "id": "item_bow_drill",
@@ -1898,7 +1899,8 @@
         "material_reed_fibre"
       ],
       "notes": "Upright, weighted, and taken apart to travel. Weaving needs a thing that works rather than a place that does, and this is that thing.",
-      "source_index": 24
+      "source_index": 24,
+      "stands_in_for": "loom"
     },
     {
       "id": "item_bone_harpoon",
@@ -2153,7 +2155,8 @@
         "material_charcoal"
       ],
       "notes": "Portable fire. Lets a process that needs heat happen somewhere that has none.",
-      "source_index": 40
+      "source_index": 40,
+      "stands_in_for": "kiln"
     },
     {
       "id": "item_reed_stylus",

@@ -103,6 +103,11 @@ export interface Item {
    * prototype is never offered to the player as something to make.
    */
   isPrototype: boolean;
+  /**
+   * The bench this tool is the carried form of, if any: a loom frame is a loom, a quern a quern, a
+   * brazier a kiln's fire. Standing at that bench counts as having it (`crafting.haveIngredient`).
+   */
+  standsInFor: string | null;
 }
 
 export interface Process {
@@ -166,7 +171,7 @@ interface RawMaterial {
 }
 interface RawItem {
   id: string; name: string; kind: string; affords: string[]; base_item?: string;
-  materials?: string[]; notes?: string;
+  materials?: string[]; notes?: string; stands_in_for?: string;
 }
 interface RawProcess {
   id: string; name: string; performed_at?: string[]; needs?: string[]; notes?: string;
@@ -246,7 +251,8 @@ export const items: Item[] = raw.items.map((i) => ({
   affords: affordsOf(i.id),
   materials: i.materials ?? [],
   description: i.notes ?? '',
-  isPrototype: PROTOTYPES.has(i.id)
+  isPrototype: PROTOTYPES.has(i.id),
+  standsInFor: i.stands_in_for ?? null
 }));
 
 export const processes: Process[] = raw.processes.map((p) => ({

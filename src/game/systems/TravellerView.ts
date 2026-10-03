@@ -163,7 +163,7 @@ export class TravellerView {
     // player's 4x there was no room to draw one under the figure even once the art exists, because
     // 104x160 pixels covers a 128 tile outright. `travellerScale` says why two and not a quarter.
     const scale = travellerScale(TILE_SIZE);
-    for (const traveller of travellersOn(this.host.fieldMapId)) {
+    for (const traveller of travellersOn(this.host.fieldMapId, this.host.world.seed)) {
       const circuit = placedCircuit(traveller, this.host.built.placed);
       const stops = circuit.map((s) => s.at);
       // A circuit whose stops did not all get placed is not a circuit. Dropping the traveller is
@@ -264,7 +264,7 @@ export class TravellerView {
   /** Draw the people who keep this camp: travellers who do not travel. See `campLife.ts`. */
   addCampFolk(camp: Encampment): void {
     const scale = travellerScale(TILE_SIZE);
-    for (const person of campPeople(camp, this.host.fieldMapId)) {
+    for (const person of campPeople(camp, this.host.fieldMapId, this.host.world.seed)) {
       const body = person.art === this.host.playerKey ? this.otherSheet(person.art) : person.art;
       const frame = frameOf(body);
       const key = person.look && person.look.body === body ? dyeSheet(this.scene, body, person.look, frame) : body;

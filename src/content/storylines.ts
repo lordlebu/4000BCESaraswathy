@@ -136,6 +136,17 @@ export function beatNow(when: BeatWhen, facts: StoryFacts): GameEvent | null {
   return null;
 }
 
+/**
+ * What a beat with no painting of its own shows, by when it happens. A road beat is somebody met on
+ * the way telling you something -- the small-talk painting, a stranger pointing up the road; an
+ * arrival is reaching where you were sent -- the notebook open at the place a rumour named. A night
+ * already falls back to the night's own scene.
+ */
+export const BEAT_FALLBACK: Partial<Record<string, string>> = {
+  road: 'woven-small-talk',
+  arriving: 'woven-rumour-kept'
+};
+
 /** A beat as the card the game draws for any event: its painting, its prose, its choices. */
 export function beatEvent(arc: Storyline, beat: Beat): GameEvent {
   const sets = [beatFlag(arc, beat), ...(beat.joins ? [walkerFlag(arc.person)] : [])];
@@ -149,6 +160,9 @@ export function beatEvent(arc: Storyline, beat: Beat): GameEvent {
     // A beat with no painting of its own borrows the arc's person's face nowhere: the card keeps its
     // shape and shows the night's scene or nothing, as every event without art does.
     art: beat.art ?? `story-${arc.id}`,
+    // ...or, on the road or on arriving, a woven painting of the same kind of moment (`BEAT_FALLBACK`):
+    // the card was blank for Guyuk's rumour and for the Atelier without her (the owner, 3 October 2026).
+    ...(BEAT_FALLBACK[beat.when] ? { artFallback: BEAT_FALLBACK[beat.when] } : {}),
     choices: beat.choices.map(
       (c, i): Choice => ({
         id: `c${i}`,

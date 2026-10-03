@@ -87,11 +87,12 @@ export function useRoadTalk({
     () => (world && arrival ? encampmentOn(world, fieldMapId, fieldPlaced.current, arrival.day) : null),
     [world, fieldMapId, arrival?.day]
   );
-  const campFolk = useMemo<CampPerson[]>(() => (campToday ? campPeople(campToday, fieldMapId) : []), [campToday, fieldMapId]);
+  const seed = world?.seed ?? '';
+  const campFolk = useMemo<CampPerson[]>(() => (campToday ? campPeople(campToday, fieldMapId, seed) : []), [campToday, fieldMapId, seed]);
   const talk = useMemo(
     () =>
       roadTalk(nearbyTravellers, fieldMapId, metStrangers.current, chosenTraveller, previousTarget.current, [
-        ...travellersOn(fieldMapId),
+        ...travellersOn(fieldMapId, seed),
         ...campFolk
       ], campToday?.kind ?? null),
     [nearbyTravellers, fieldMapId, chosenTraveller, campFolk]

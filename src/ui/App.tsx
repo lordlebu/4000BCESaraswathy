@@ -28,6 +28,7 @@ import { RecordTabs, type RecordTab } from './Records';
 import { PeoplePanel } from './PeoplePanel';
 import { met } from '../content/people';
 import { seedFromUrl } from './seed';
+import { JourneySeed } from './journeySeed';
 import { SettlingSection } from './SettlingSection';
 import { settlingRoad } from '../content/settlingRoad';
 import { WorkshopPanel } from './WorkshopPanel';
@@ -100,7 +101,7 @@ import {
 } from '../content/homestead';
 import { Negotiation } from './Negotiation';
 import type { Talk, Wanted } from '../content/happenings';
-import type { Station } from '../content/stations';
+import { benchAt, type Station } from '../content/stations';
 
 /**
  * How long after walking into a place somebody there may call out. Long enough for the arrival's own
@@ -542,12 +543,12 @@ export function App() {
    */
   const travellerTraits = useMemo(() => {
     if (!talkingTo) return null;
-    const traveller = travellersOn(fieldMapId).find((t) => t.npcId === talkingTo);
+    const traveller = travellersOn(fieldMapId, seed).find((t) => t.npcId === talkingTo);
     if (!traveller) return null;
     const reported = travellerStates.find((t) => t.id === traveller.id);
     const traits = travellerAttributes(traveller, reported?.state ?? null);
     return traits.length > 0 ? traits : null;
-  }, [talkingTo, fieldMapId, travellerStates]);
+  }, [talkingTo, fieldMapId, travellerStates, seed]);
 
   /**
    * Who is at the place being stood in, and where its other people have gone.
@@ -755,10 +756,11 @@ export function App() {
    * kind on the point of interest. Off an authored place this is null, which `crafting.ts`
    * reads as open ground.
    */
-  const bench = useMemo(
-    () => ({ kind: standingOn ? poi(standingOn)?.kind ?? null : null }),
-    [standingOn]
-  );
+  const bench = useMemo(() => {
+    const here = standingOn ? poi(standingOn) : null;
+    // And the benches standing there, so a loom stands in for a loom frame (`benchStandsIn`).
+    return benchAt(here);
+  }, [standingOn]);
 
   /** The tile under foot, for gathering. Null before the world has been built. */
   const underfoot = useMemo(() => {
@@ -873,7 +875,7 @@ export function App() {
     (travellerId: string, at: { x: number; y: number }): Talk => {
       const facts = { finished: (id: string) => isComplete(progress, id), met: metStrangers.current };
       const { standing: known } = howKnownOn(fieldMapId, facts);
-      const traveller = travellersOn(fieldMapId).find((t) => t.id === travellerId);
+      const traveller = travellersOn(fieldMapId, world?.seed ?? '').find((t) => t.id === travellerId);
       const day = arrival?.day ?? 0;
       const places = fieldMap(fieldMapId)?.pointsOfInterest ?? [];
       const rumours = rumoursOn(fieldMapId, {
@@ -1515,6 +1517,7 @@ export function App() {
     // `data-traveller` is who the *scene* says it is drawing, not who was asked for. It is a
     // readout rather than a control, and it exists because a browser test otherwise cannot tell a
     // working picker from a highlighted button -- see `e2e/travellers.spec.ts`.
+    <JourneySeed.Provider value={seed}>
     <div className="stage" data-traveller={drawn}>
       {/* The scene mounts only once the door is open. Booting it behind the door and hiding it
           would spend a second of loading nobody asked for, and would make "start a new walk" a
@@ -1896,5 +1899,6 @@ export function App() {
         )}
       </Modal>
     </div>
+    </JourneySeed.Provider>
   );
 }
