@@ -85,6 +85,9 @@ describe('an older save is discarded rather than misread', () => {
   it('repairs a current-version save whose collection is malformed', () => {
     writeRaw({
       version: SAVE_VERSION,
+      // Stamped, as every save since the split is: these passed unstamped only while SAVE_VERSION
+      // happened to be the 18 an unstamped save is read as.
+      knowledgeVersion: KNOWLEDGE_VERSION,
       discovered: [],
       collection: { 'river-otter': { kind: 'not-a-kind' }, saltreed: { kind: 'flora' } },
       reached: false,
@@ -167,6 +170,7 @@ describe('seenEvents', () => {
       'south-of-tethys:junk',
       JSON.stringify({
         version: SAVE_VERSION,
+        knowledgeVersion: KNOWLEDGE_VERSION,
         discovered: [],
         collection: {},
         reached: false,
@@ -239,7 +243,9 @@ describe('the ground moving keeps what you know', () => {
     writeRaw({ version: 18, discovered: ['1,1'], reached: false, ...known });
     const back = loadJourney(SEED);
     expect(back.progress.words).toEqual(['word_kia_tide']);
-    expect(back.discovered).toEqual(SAVE_VERSION === 18 ? ['1,1'] : []);
+    // Its ground is 18's and the code's is 19's (Dwarka's cold desert), so the fog goes and the
+    // diary stays: exactly the split's promise.
+    expect(back.discovered).toEqual([]);
   });
 
   it('stamps both versions on every save it writes', () => {

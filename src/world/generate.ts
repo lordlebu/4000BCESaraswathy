@@ -207,7 +207,8 @@ export function generateWorld({
   const random = createRandom(seed);
   // Built once. Undefined means every biome is permitted, which is what a standalone caller and
   // every test predating field maps expect.
-  const terrainPalette = palette ? terrainPaletteFor(palette) : undefined;
+  // A canon palette that names desert means it whether or not the ground is hot: Dwarka is cold.
+  const terrainPalette = palette ? terrainPaletteFor(palette, { desertNeedsHeat: false }) : undefined;
 
   // Field order is part of the seed contract: reordering these calls changes every existing map.
   const elevationBase = fractalField(width, height, random, { octaves: 4, baseCell: 11 });

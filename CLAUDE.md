@@ -1172,10 +1172,10 @@ Two habits that go with it, both learned by getting them wrong:
   `src/save.ts` when the payload shape changes so old saves are discarded rather than misread.
   **Two things move it and only one of them is a payload change**: the other is the ground moving
   under a saved journey, because a remembered position, node and fog mask all name tiles that a new
-  generator no longer produces. It is at 18 — the collection replacing the old sketch list moved it
+  generator no longer produces. It is at 19 — the collection replacing the old sketch list moved it
   to 6, resource nodes to 12, the Aravali growing to 52 × 78 moved it again, stamping the sky pool
-  moved it to 15, making that pool walkable moved it to 16, a tile's `road` flag to 17 and placing
-  the painted buildings to 18 — and `Progress` (rungs, words,
+  moved it to 15, making that pool walkable moved it to 16, a tile's `road` flag to 17, placing
+  the painted buildings to 18 and Dwarka's cold desert to 19 — and `Progress` (rungs, words,
   answered, questions) plus `collection` are the parts that matter. **The last two are the same
   ground twice**, which is the clearest case this rule has: neither changed the payload's shape, and
   both changed what a remembered tile means.
