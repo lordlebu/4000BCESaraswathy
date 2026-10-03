@@ -254,7 +254,7 @@ The art docs, in the order they are useful:
 | `docs/retrospective.md` | **read first**: the whole project to 28 September 2026, what worked, what did not, what next |
 | `docs/settling-in.md` | the Settling In plan, concluded: camps, cart points, homesteads, and what was measured |
 | `docs/living-camps.md` | camps with people, **closed**: the measurements, the rulings, the way in's look, the rail decided, clearings, shadows, night light, and waiting at the pier |
-| `docs/crafting-audit.md` | **crafting audited**: the seven faults, benches that count, the tool to make, and phases 3–4 with the owner's rulings |
+| `docs/crafting-audit.md` | **closed**: crafting audited -- the seven faults, benches that count, the tool to make, "Not on this ground", the data the owner ruled on, and Dwarka's cold desert |
 | `docs/satchel-and-hearth.md` | making made easier: the pin, cook fires, windfall wood, events that help, the pointer, the next step, and the rest of the `App.tsx` split |
 | `docs/a-place-to-stop.md` | where a sitting ends: the day's page at any night, and where you left off at the door |
 | `docs/a-lighter-game.md` | **phases 1 and 2 built**: rungs need only understanding, regrowth tiers set by use; the rest is the owner's call |
@@ -835,8 +835,13 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
 - **A missing tool names the tool to make** (`content/toolStep.ts`): the one this satchel can make
   here and now, with a Make or Pin button on the reason row. `test/toolStep.test.ts` walks a new
   traveller on every map, pressing only that button. **`plan` returns a reason, never `null`, at the
-  wrong place**; `blocked: null` means a run exists. Phases 3 and 4 of the audit, with the owner's
-  rulings, are in `docs/crafting-audit.md`.
+  wrong place**; `blocked: null` means a run exists.
+- **What this ground cannot supply is set apart, never hidden** (`content/suppliable.ts`): the
+  workshop's collapsed "Not on this ground" names what nothing here gives, and a carried thing moves
+  the recipe back up. `test/suppliable.test.ts` ratchets every known recipe on every map, not only
+  taught ones -- `criticalPath.test.ts` asked only about taught recipes, which is how 9 to 29 a map
+  went unseen. **Dwarka is a cold desert**: a palette that names desert asks only for dry ground
+  (`desertNeedsHeat` in `world/classify.ts`), where the open world still wants heat too.
 
 ### The strait and the shallows (3 October 2026)
 
