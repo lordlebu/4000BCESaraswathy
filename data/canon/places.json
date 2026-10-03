@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.3.1",
+  "canon_version": "3.4.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -1518,6 +1518,15 @@
           "requires": [
             "recipe_sinew_bow"
           ]
+        },
+        {
+          "text": "A boar does not go elsewhere. It is the one animal that comes to see what you are. So the spear is heavy, and the tusk on it is a boar's own -- teak for the shaft, sinew for the binding, and you carry it hoping to bring it home dry.",
+          "requires": [
+            "discovery_what_a_hunter_leaves"
+          ],
+          "gives": [
+            "recipe_boar_spear"
+          ]
         }
       ],
       "sex": "male"
@@ -1872,6 +1881,24 @@
           "text": "The lotus in the falling-up water keeps its warmth after it is picked. I have not worked out what that is for. She will know, or she will write to somebody who does.",
           "requires": [
             "discovery_the_kept_bench"
+          ]
+        },
+        {
+          "text": "Seed keeps in a jar or it does not keep. She had me fire my own the first winter, from the river clay below the cutting -- one for every tray, the lid ground down until it sits. Make one before you make anything else of mine.",
+          "requires": [
+            "discovery_the_kept_bench"
+          ],
+          "gives": [
+            "recipe_storage_jar"
+          ]
+        },
+        {
+          "text": "Sandalwood for a comb, and not for the smell. Nothing that lives in hair will stay in it. A billet is worth more than the comb, so the comb is cut from what is left when the billet is sold.",
+          "requires": [
+            "discovery_the_kept_bench"
+          ],
+          "gives": [
+            "recipe_sandalwood_comb"
           ]
         }
       ],
@@ -2428,6 +2455,15 @@
           "requires": [
             "discovery_escarpment_wind"
           ]
+        },
+        {
+          "text": "A snake leaves its skin on the top step every summer and the goats walk round it. Oil it twice and it turns that wind better than any wool. My father had a mantle of them. The wind took the tent and left him the mantle.",
+          "requires": [
+            "discovery_escarpment_wind"
+          ],
+          "gives": [
+            "recipe_serpent_mantle"
+          ]
         }
       ],
       "sex": "male"
@@ -2515,6 +2551,13 @@
           "text": "Fever-root. -- I have been pulling it up for ten years and calling it a weed. It is not a weed. It is winning.",
           "requires": [
             "discovery_fever_root_spread"
+          ]
+        },
+        {
+          "text": "Every grower fires her own jars at the landward end of the orchard. It is not a trade here, it is a chore, like the water. Seed in clay, and nobody's seed in anybody else's jar. Come and do one with us before the market.",
+          "requires": [],
+          "gives": [
+            "recipe_storage_jar"
           ]
         }
       ],
