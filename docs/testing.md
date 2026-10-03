@@ -290,9 +290,13 @@ Three lessons, and the third is the one this file exists for:
   35354275483 — a 480-second timeout nobody would have seen, and ten minutes of a shard nobody
   could have explained. `if: failure()` on the report upload then threw the trace away, so the
   artifact step existed and preserved nothing; it uploads on any completed run now, about 230 KB
-  a shard. **An open item:** the walk's 480-second budget is not reliably enough on a hosted
-  runner. It passed cleanly on the very next run, so one occurrence in two is not yet a signal —
-  and the artifact change is what will make the next one readable rather than inferred.
+  a shard. **The open item this left, closed on 3 October 2026:** the walk's 480-second budget
+  was not reliably enough on a hosted runner. The signal came: PR #248's run 37122637816 timed it
+  out four times in a row on a tree whose merge with `main` passed elsewhere. The cause was the
+  budget's own measurement -- 4.3 minutes was the walk *alone*, and the shard runs two workers.
+  Measured on a 4-CPU box, the walk is 1.3-1.5 minutes alone and 2.5-2.7 beside
+  `reachable.spec.ts`, on `main` and on the branch alike, so about twice: ~8.6 minutes on CI. The
+  budget is eleven and the shard's cap 35, each with the arithmetic beside it.
 - **A check whose result depends on how busy the runner was is not a check.** Which is the same
   finding as the `@slow` split below, arrived at from the other direction.
 

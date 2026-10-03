@@ -115,8 +115,10 @@ runner's size.**
 tests in `hours.spec.ts` — tests CI passes every time. A reproduction harsher than the thing it
 reproduces invents failures nobody has. Calibrate by running a spec CI passes and tightening until
 it stops: four is where local behaviour matches CI's. At four, the playthrough walk takes
-**4.3 minutes**, which is exactly why it was failing against a four-minute budget and why that
-budget is now eight.
+**4.3 minutes**, which is exactly why it was failing against a four-minute budget. That was the
+walk *alone*, though, and the shard runs two workers: beside another spec it takes about twice as
+long, so its budget is now **eleven** minutes and the shard cap 35 (`docs/testing.md` has the
+measurement).
 
 ```bash
 npm run test:ci                              # whole suite

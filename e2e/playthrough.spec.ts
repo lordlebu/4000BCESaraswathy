@@ -159,8 +159,17 @@ test('walk from the settlement to the landmark and get a page for it', { tag: '@
   // sooner -- and CI walks the same route through a software renderer. Locally the walk is around
   // forty seconds; the margin at four minutes was small enough that ordinary variance decided the
   // run, which is not a threshold doing any work. Eight costs nothing on a green run: a timeout
-  // bounds a failure, it does not pace a success. The job it sits in allows thirty.
-  test.setTimeout(480_000);
+  // bounds a failure, it does not pace a success.
+  //
+  // **Eight was sized without the second worker, and eleven is sized with it** (3 October 2026).
+  // The 4.3 minutes behind eight was the walk measured alone at CI's size; CI's shard runs two
+  // workers, and the walk shares the machine with whatever else is in the shard. Measured on a
+  // 4-CPU box: 1.3-1.5 minutes alone, 2.5-2.7 beside `reachable.spec.ts` -- on `main` and on the
+  // branch alike -- so about twice. Twice 4.3 is ~8.6, over eight, and PR #248's run 37122637816
+  // timed the walk out four times in a row (two attempts, each with its retry) on a tree whose
+  // merge with `main` passed on another runner. Eleven is that ~8.6 with a quarter to spare; the
+  // shard's cap in `ci.yml` went from 30 to 35 so a failing try and its retry still fit under it.
+  test.setTimeout(660_000);
   const problems: string[] = [];
   page.on('pageerror', (error) => problems.push(`uncaught: ${error.message}`));
 
