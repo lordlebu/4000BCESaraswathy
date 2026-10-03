@@ -167,9 +167,14 @@ test('walk from the settlement to the landmark and get a page for it', { tag: '@
   // 4-CPU box: 1.3-1.5 minutes alone, 2.5-2.7 beside `reachable.spec.ts` -- on `main` and on the
   // branch alike -- so about twice. Twice 4.3 is ~8.6, over eight, and PR #248's run 37122637816
   // timed the walk out four times in a row (two attempts, each with its retry) on a tree whose
-  // merge with `main` passed on another runner. Eleven is that ~8.6 with a quarter to spare; the
-  // shard's cap in `ci.yml` went from 30 to 35 so a failing try and its retry still fit under it.
-  test.setTimeout(660_000);
+  // merge with `main` passed on another runner. Eleven was that ~8.6 with a quarter to spare.
+  //
+  // **And fifteen, because the first green run at eleven measured 10.7** (run 37127615173,
+  // shard 3, no retry) while the other run of the same commit finished the whole shard in nine
+  // minutes: the walk on a hosted runner swings between about three and eleven, far wider than
+  // any local measurement. A budget three percent above the worst seen is a coin flip, so this is
+  // the worst measured with about forty percent to spare. The shard's cap went to 40 with it.
+  test.setTimeout(900_000);
   const problems: string[] = [];
   page.on('pageerror', (error) => problems.push(`uncaught: ${error.message}`));
 

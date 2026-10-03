@@ -296,7 +296,11 @@ Three lessons, and the third is the one this file exists for:
   budget's own measurement -- 4.3 minutes was the walk *alone*, and the shard runs two workers.
   Measured on a 4-CPU box, the walk is 1.3-1.5 minutes alone and 2.5-2.7 beside
   `reachable.spec.ts`, on `main` and on the branch alike, so about twice: ~8.6 minutes on CI. The
-  budget is eleven and the shard's cap 35, each with the arithmetic beside it.
+  budget went to eleven -- and the first green run at eleven measured the walk at **10.7**, while
+  the other run of the same commit finished its whole shard in nine. On hosted runners this walk
+  swings between about three and eleven minutes, wider than any local measurement predicts, so
+  the budget is fifteen (the worst measured, with about forty percent to spare) and the shard's
+  cap 40, each with the arithmetic beside it.
 - **A check whose result depends on how busy the runner was is not a check.** Which is the same
   finding as the `@slow` split below, arrived at from the other direction.
 

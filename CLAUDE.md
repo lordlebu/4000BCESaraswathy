@@ -117,8 +117,8 @@ reproduces invents failures nobody has. Calibrate by running a spec CI passes an
 it stops: four is where local behaviour matches CI's. At four, the playthrough walk takes
 **4.3 minutes**, which is exactly why it was failing against a four-minute budget. That was the
 walk *alone*, though, and the shard runs two workers: beside another spec it takes about twice as
-long, so its budget is now **eleven** minutes and the shard cap 35 (`docs/testing.md` has the
-measurement).
+long, and on hosted runners it swings between about three and eleven minutes (10.7 measured), so
+its budget is now **fifteen** and the shard cap 40 (`docs/testing.md` has the measurements).
 
 ```bash
 npm run test:ci                              # whole suite
