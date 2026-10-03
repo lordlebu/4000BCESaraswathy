@@ -50,7 +50,12 @@ a second naming would be a second thing to get wrong.
 
 ## The queue
 
-### `scenes/` — activity cards · 12 of ~24
+### `scenes/` — activity cards · 41 painted (3 October 2026)
+
+> The counts and the *Have* list below were taken when the queue was first written and have not
+> been kept in step; the folder is the truth. On 3 October 2026 it held 41 distinct scenes (44 files
+> with second takes), among them the night afloat and the three bedroll nights up high from
+> `docs/strait-and-shallows.md`.
 
 A pair of hands at work, with the traveller in it — as distinct from a plate, which is one animal
 against a suggestion of habitat. That difference is what makes the card read as an act rather than
@@ -83,7 +88,11 @@ differs is the picture and, later, what can happen in it. An unpainted kind fall
 **Worth doing first:** `fish.png`, then `rest-tent.png` — the tent is the only night the player
 built, and the one the crafting tree pays for.
 
-### `events/` — something happening to you · 0 of ? · **new**
+### `events/` — something happening to you · 53 painted (3 October 2026)
+
+> Written before any event existed; the folder now holds 53 distinct paintings (55 files): the
+> woven kinds, the camps, the story beats, the journeys, the settling pages, canon's happenings and
+> the two firsts. The paragraph below is kept as the record of where it started.
 
 A dream, an animal at the edge of the firelight, somebody arriving in the dark. **No events are
 authored yet either** — the framework ships before the content on purpose, and

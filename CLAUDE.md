@@ -257,7 +257,7 @@ The art docs, in the order they are useful:
 | `docs/satchel-and-hearth.md` | making made easier: the pin, cook fires, windfall wood, events that help, the pointer, the next step, and the rest of the `App.tsx` split |
 | `docs/a-place-to-stop.md` | where a sitting ends: the day's page at any night, and where you left off at the door |
 | `docs/a-lighter-game.md` | **phases 1 and 2 built**: rungs need only understanding, regrowth tiers set by use; the rest is the owner's call |
-| `docs/strait-and-shallows.md` | the dugout lent by Thrali and afloat in the shallows, first-time cards, the strait's ships, kites and whale, nights afloat and up high |
+| `docs/strait-and-shallows.md` | **closed**: the dugout lent by Thrali and afloat in the shallows, first-time cards, the strait's ships, kites and whale, nights afloat and up high, and the owner's paintings for all of it |
 | `docs/endgame-plan.md` | the programme, closed; what shipped, what is parked, what was declined |
 | `docs/art-direction.md` | the five rules the art follows, and what each one cost to learn |
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |

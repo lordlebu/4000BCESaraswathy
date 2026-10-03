@@ -81,11 +81,11 @@ replaced — so **a new folder of art needs no code either.**
 
 | Folder | Have | Wanted | Fallback while missing | Finishable? |
 |---|---:|---:|---|---|
-| `src/ui/scenes/` | 10 | ~24 | the plain gesture, then a blank panel | **yes** |
+| `src/ui/scenes/` | 41 | the making and ground variants, open-ended | the plain gesture, then a blank panel | **yes** |
 | `src/ui/marks/` | 4 | 47 | an emoji in `ThingIcon` | **yes** |
 | `src/ui/places/` | 0 | 6 kinds, then 37 | prose alone | **yes**, at the kind tier |
 | `src/ui/things/` | 0 | 10 kinds, then 143 | the category mark, then an emoji | **yes**, at the kind tier |
-| `src/ui/events/` | 0 | one per kind, 13 | the night's scene, then a blank panel | `docs/event-prompts.md` |
+| `src/ui/events/` | 53 | one per kind, plus each story beat, first and happening | the night's scene, then a blank panel | `docs/event-prompts.md` |
 | `src/ui/plates/` | 20 | 341 | a derived silhouette | **no, by design** |
 | `src/ui/portraits/` | 17 | 17 | a trade-derived silhouette | **done** — everybody in canon has a face |
 | `assets/traveller-*.png` | 3 | 3 | a playable character's sheet, which was the bug | **done** — see `art-brief.md` Asset 7 |

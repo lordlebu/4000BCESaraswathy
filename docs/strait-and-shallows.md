@@ -4,6 +4,9 @@ The owner's art-focused plan of 3 October 2026, built the same day. The illustra
 artifact [The Strait and the Shallows](https://claude.ai/artifact/J7dvdn7uB8p65dLx1TFwEc), private to
 the owner; this file is the authoritative one.
 
+**Closed, 3 October 2026.** Every ask is built and painted; game #244 and #245, canon #159 and #160.
+The one thing open is optional: a painted whale, to replace the one drawn in code.
+
 Six asks, each with the owner's rulings as they were given, and what shipped.
 
 ## 1. The dugout is lent, not carried
