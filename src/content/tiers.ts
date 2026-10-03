@@ -206,6 +206,16 @@ export const WOVEN_ONE_IN: Record<'night' | 'arriving' | 'road' | 'working' | 'j
   journey: 1
 };
 
+/**
+ * The first day of the journey a boat is lent, counting from nought -- so 2 is the third day.
+ *
+ * **The owner's ruling, 3 October 2026**: the dugout is Thrali's to lend, and not straight away. A
+ * player given it on the first morning never wades, so never sees the water take them to the knee;
+ * two days on foot first is the delta as it is meant to be met. Canon says who lends it, where, and
+ * what they say if asked too soon (`field_map.firsts`); this says when.
+ */
+export const LEND_FROM_DAY = 2;
+
 /** How much a woven event eases, when it eases at all. Company on the road is worth less than a meal. */
 export const COMPANY_EASES = 0.15;
 

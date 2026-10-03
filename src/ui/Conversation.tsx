@@ -203,6 +203,12 @@ export interface ConversationProps {
   onListen: (npcId: string, lineIndex: number) => void;
   /** Stop listening. The place they are standing in comes back. */
   onClose: () => void;
+  /**
+   * Something the traveller can ask this person for, here -- on Lothal, Thrali's boat
+   * (`content/firsts.ts`). Asking is an act, like listening: nothing is offered unasked. `onAsk`
+   * answers with what they say when the time has not come, or null when it opened the loan's card.
+   */
+  ask?: { label: string; onAsk: () => string | null } | null;
 }
 
 export function Conversation({
@@ -211,9 +217,13 @@ export function Conversation({
   satchel,
   traits,
   onListen,
-  onClose
+  onClose,
+  ask = null
 }: ConversationProps) {
   const person = npc(npcId);
+  // What they said to being asked, when it was "not yet". Keyed to the person, so it clears on the
+  // next conversation rather than following the traveller to somebody else.
+  const [reply, setReply] = useState<{ npcId: string; text: string } | null>(null);
   // Canon and the save can disagree after a bundle changes, and a conversation with nobody is
   // better closed than rendered blank.
   if (!person) return null;
@@ -244,6 +254,27 @@ export function Conversation({
       )}
 
       <Person person={person} progress={progress} satchel={satchel} onListen={onListen} />
+
+      {ask && (
+        <div className="conversation-ask">
+          {reply?.npcId === npcId ? (
+            <p>
+              <b>{person.name}:</b> "{reply.text}"
+            </p>
+          ) : (
+            <button
+              type="button"
+              className="offer"
+              onClick={() => {
+                const said = ask.onAsk();
+                if (said) setReply({ npcId, text: said });
+              }}
+            >
+              {ask.label}
+            </button>
+          )}
+        </div>
+      )}
     </section>
   );
 }

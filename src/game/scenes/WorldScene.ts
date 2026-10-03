@@ -185,7 +185,7 @@ import { NO_GESTURE, lost, pressed, released, type Gesture } from '../gesture';
 import { WADE_ALPHA, wadeFor, type Wade } from '../wading';
 import { afloatAfter, canStepOnto, PADDLE_STEP, routeCost, shallowsOf } from '../afloat';
 import { glowStrength, roadAhead } from '../roadLight';
-import { boatFor } from '../../content/kit';
+import { boatOn, lentFromSearch } from '../../content/firsts';
 import { tileHash } from '../../world/rng';
 import type { BiomeId, Point, Tile, World } from '../../world/types';
 
@@ -342,6 +342,12 @@ export interface WorldSceneData {
    * save, and both can be stale. Same rule `fieldMapFromUrl` follows for `?map=`.
    */
   characterId?: string;
+  /**
+   * The vehicles the journey has been lent, from the save's flags (`content/firsts.ts`). On Lothal
+   * the dugout is Thrali's to lend from the third day, so the boat is no longer read off the map
+   * alone. Carried across a restart like the clock, or a crossing would hand it back.
+   */
+  lent?: string[];
 }
 
 /** Where a journey starts when nothing says otherwise. */
@@ -452,10 +458,12 @@ export class WorldScene extends Phaser.Scene {
   private glows: { key: string; sprite: Phaser.GameObjects.Image }[] = [];
   /** The strength the glows were last set to, so an unchanged sky costs nothing. */
   private glowAt = -1;
-  /** Whether this map puts a boat in the kit -- canon's `vehicles`, read through `boatFor`. */
+  /** Whether the traveller has a boat on this map: canon's `vehicles`, and on Lothal only once lent (`boatOn`). */
   private boat = false;
   /** Whether he is in the dugout. See `game/afloat.ts` for when that changes. */
   private afloat = false;
+  /** The vehicles lent to this journey; see `WorldSceneData.lent`. */
+  private lent: string[] = [];
   /**
    * The sea he may paddle on: within two tiles of land, and only on a map with the dugout. Empty
    * everywhere else, so the sea stays out of reach exactly as it was.
@@ -658,6 +666,7 @@ export class WorldScene extends Phaser.Scene {
       loopNow: () => scene.game.loop.now
     });
     this.travelled = data.travelled ?? 0;
+    this.lent = [...(data.lent ?? []), ...lentFromSearch(window.location.search)];
     this.restedAt = this.travelled;
     this.standingOn = null;
     this.lastMoment = '';
@@ -755,7 +764,7 @@ export class WorldScene extends Phaser.Scene {
     this.built = worldFor(map, data.seed);
     this.world = this.built.world;
     this.at = startTileFor(this.built, window.location.search);
-    this.boat = boatFor(this.built.fieldMap.vehicles) !== null;
+    this.boat = boatOn(this.built.fieldMap.id, this.lent) !== null;
     this.shallows = this.boat ? shallowsOf(this.world) : new Set();
     // Starting on the river with a boat in the kit is starting in it.
     const standing = this.world.tiles[this.at.y]?.[this.at.x];
@@ -1485,6 +1494,7 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('camp', this.onCamp);
     EventBus.onEvent('ride', this.onRide);
     EventBus.onEvent('shelter-built', this.onShelterBuilt);
+    EventBus.onEvent('boat-lent', this.onBoatLent);
     EventBus.onEvent('people-at-places', this.onPeopleAtPlaces);
     EventBus.onEvent('homestead-changed', this.onHomestead);
     EventBus.onEvent('ease', this.onEase);
@@ -1521,6 +1531,7 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('camp', this.onCamp);
       EventBus.offEvent('ride', this.onRide);
       EventBus.offEvent('shelter-built', this.onShelterBuilt);
+      EventBus.offEvent('boat-lent', this.onBoatLent);
       EventBus.offEvent('people-at-places', this.onPeopleAtPlaces);
       EventBus.offEvent('homestead-changed', this.onHomestead);
       EventBus.offEvent('ease', this.onEase);
@@ -1595,7 +1606,8 @@ export class WorldScene extends Phaser.Scene {
       seed: payload.seed,
       discovered: payload.discovered ?? [],
       // A new seed re-rolls the ground under the same place, rather than moving you.
-      fieldMapId: this.built?.fieldMap.id
+      fieldMapId: this.built?.fieldMap.id,
+      lent: this.lent
     });
   };
 
@@ -1615,7 +1627,9 @@ export class WorldScene extends Phaser.Scene {
       discovered: [],
       fieldMapId: payload.fieldMapId,
       // And the ride itself takes time: a day's travel between two countries (`CROSSING_MS`).
-      travelled: this.travelled + (payload.ride ?? 0)
+      travelled: this.travelled + (payload.ride ?? 0),
+      // A boat lent on Lothal is still lent when you come back to it.
+      lent: this.lent
     });
   };
 
@@ -1781,6 +1795,17 @@ export class WorldScene extends Phaser.Scene {
     // `arriveAt` on the tile already stood on is the scene's own way of saying "describe here
     // again" -- `tryStop` ends with exactly this call for the same reason.
     this.arriveAt(this.at);
+  };
+
+  /**
+   * Thrali has lent the boat. From this step on the river and the shallows can be paddled; nothing
+   * moves under him now, because he is standing on the ground he asked from.
+   */
+  private onBoatLent = ({ vehicle }: UiToGame['boat-lent']): void => {
+    if (!this.lent.includes(vehicle)) this.lent = [...this.lent, vehicle];
+    if (!this.built) return;
+    this.boat = boatOn(this.built.fieldMap.id, this.lent) !== null;
+    this.shallows = this.boat ? shallowsOf(this.world) : new Set();
   };
 
   /** Somebody comes over, from React. See `VisitorView.approach`. */
@@ -2081,6 +2106,8 @@ export class WorldScene extends Phaser.Scene {
       wade: this.wade,
       // Whether he is in the dugout, for `e2e/dugout.spec.ts`.
       afloat: this.afloat,
+      // Whether he has one at all -- on Lothal, only once Thrali lends it (`e2e/firsts.spec.ts`).
+      boat: this.boat,
       // Whether the carriage is carrying him, and whether it is on the screen while it does --
       // for `e2e/riding.spec.ts`, which is the only thing that can tell the two apart.
       riding: this.riding,

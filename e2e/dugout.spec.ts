@@ -7,7 +7,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
-type Walker = { x: number; y: number; afloat: boolean; moving: boolean; wade: { kind: string } };
+type Walker = { x: number; y: number; afloat: boolean; boat: boolean; moving: boolean; wade: { kind: string } };
 
 const BIOME_CODES = [...readFileSync('src/world/bake.ts', 'utf8')
   .split('export const BIOME_CODES')[1]!
@@ -89,7 +89,8 @@ test('on Lothal, stepping into the river puts you in the dugout, and stepping ou
   const seed = 'dugout-e2e';
   const map = 'field_map_lothal';
   const bank = await bankOf(page, seed, map);
-  await boot(page, `/?seed=${seed}&map=${map}&door=open&at=${bank.at}`);
+  // Lent, as Thrali would from the third day: `?lent=dugout` stands in for the walk to the camp.
+  await boot(page, `/?seed=${seed}&map=${map}&door=open&lent=dugout&at=${bank.at}`);
   expect((await walker(page)).afloat, 'afloat before reaching the water').toBe(false);
 
   await step(page, bank.into);
@@ -99,6 +100,22 @@ test('on Lothal, stepping into the river puts you in the dugout, and stepping ou
   const ashore = await walker(page);
   expect(ashore.afloat, 'stepped onto the bank and stayed in the boat').toBe(false);
   expect(`${ashore.x},${ashore.y}`).toBe(bank.at);
+});
+
+/**
+ * **Before Thrali lends it, Lothal's river is waded** -- the owner's ruling of 3 October 2026, so the
+ * first days on the delta show the water taking you to the knee instead of a boat from the first step.
+ */
+test('on Lothal before the boat is lent, stepping into the river is a wade', async ({ page }) => {
+  const seed = 'dugout-e2e';
+  const map = 'field_map_lothal';
+  const bank = await bankOf(page, seed, map);
+  await boot(page, `/?seed=${seed}&map=${map}&door=open&at=${bank.at}`);
+  expect((await walker(page)).boat, 'a boat in the kit before anybody lent one').toBe(false);
+  await step(page, bank.into);
+  const w = await walker(page);
+  expect(w.afloat, 'boarded a boat nobody has lent yet').toBe(false);
+  expect(w.wade.kind).toBe('cut');
 });
 
 test('on a map without a boat, the same step is a wade', async ({ page }) => {
@@ -161,7 +178,7 @@ test('on Lothal, the dugout goes out from the beach into the shallows and no fur
   }
   expect(found, 'no beach with shallows and deep water beyond on this seed').not.toBeNull();
   const beach = found!;
-  await boot(page, `/?seed=${seed}&map=${map}&door=open&at=${beach.at}`);
+  await boot(page, `/?seed=${seed}&map=${map}&door=open&lent=dugout&at=${beach.at}`);
 
   await step(page, beach.out);
   expect((await walker(page)).afloat, 'stepped off the beach and did not launch').toBe(true);

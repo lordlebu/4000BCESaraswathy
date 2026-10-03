@@ -1,8 +1,9 @@
 // Paddling: when the traveller is in the dugout, and what the water costs then.
 //
-// The owner's rulings, which this file is the whole of: the dugout is in the kit from the start on
-// Lothal; stepping from a bank into the river puts you in it, with no button; stepping onto dry land
-// puts you back on foot. It is Pokemon's Surf -- a mounted state entered at the water's edge and left
+// The owner's rulings, which this file is the whole of: on Lothal, once Thrali has lent the dugout
+// (from the third day, `content/firsts.ts` -- it was in the kit from the start until 3 October 2026),
+// stepping from a bank into the river or off the beach into the shallows puts you in it, with no
+// button; stepping onto dry land puts you back on foot. It is Pokemon's Surf -- a mounted state entered at the water's edge and left
 // on land -- rather than the lodestone train, which carries you along a fixed line.
 //
 // Free of Phaser, so `test/afloat.test.ts` holds the rules without a browser.

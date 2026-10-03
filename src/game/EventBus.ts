@@ -273,6 +273,8 @@ export interface UiToGame {
    * `content/using.ts` decides what counts. This carries its answer and holds no opinion.
    */
   'shelter-built': { built: 'tent' | null };
+  /** Thrali has lent the boat (`content/firsts.ts`): it is in the kit from this step on. */
+  'boat-lent': { vehicle: string };
   /**
    * Who is at each place on this map, for the pips drawn at its door.
    *

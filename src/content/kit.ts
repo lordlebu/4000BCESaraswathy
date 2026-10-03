@@ -74,10 +74,11 @@ export function useful(): readonly KitItem[] {
 /**
  * The boat a map puts in the kit, or null.
  *
- * **Carried from the first morning, and only where canon lays one ready.** Canon's `vehicles` on a
- * field map says which craft are simply *there* -- today the dugout at Lothal, and nowhere else. The
- * owner's ruling is that it is in the kit from the start on that map, rather than found: step from a
- * bank into the river and you are paddling. It belongs to the map, so leaving Lothal leaves it.
+ * **Only where canon lays one ready.** Canon's `vehicles` on a field map says which craft are there --
+ * today the dugout at Lothal, and nowhere else. It was in the kit from the first morning; **since 3
+ * October 2026 it is Thrali's to lend, from the third day** (`content/firsts.ts`, `boatOn`), so the
+ * delta is waded before it is paddled. Once lent, step from a bank into the river and you are
+ * paddling. It belongs to the map, so leaving Lothal leaves it, and coming back finds it lent.
  *
  * A kit item rather than a satchel entry for the kit's own reason: fixed, never dropped, never
  * managed. See canon's `docs/decisions.md`, *A dugout at Lothal*.
@@ -87,7 +88,7 @@ export const DUGOUT: KitItem = {
   name: 'Dugout',
   description:
     'One trunk, burnt and adzed hollow, lighter than it looks. The river is slow going on foot and quick in this.',
-  affords: 'Paddle the channels and the swamp: step from any bank into the river.'
+  affords: 'Paddle the channels, the swamp and the shallows: step from any bank into the river, or off the beach.'
 };
 
 export function boatFor(vehicles: readonly string[]): KitItem | null {

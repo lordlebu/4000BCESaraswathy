@@ -2296,6 +2296,12 @@ button.ghost:hover:not(:disabled) {
   margin-bottom: 0.9rem;
 }
 
+.conversation-ask {
+  margin-top: 0.9rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--edge);
+}
+
 .conversation-head h2 {
   margin: 0;
   font-size: 1.25rem;
