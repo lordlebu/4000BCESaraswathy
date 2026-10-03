@@ -83,6 +83,12 @@ the line and never under an island. The whale disappears and emerges slowly.
   under the fog; a sagging rope from the island's edge to the kite's nose; the kite's shadow, its own
   silhouette darkened and flattened, two tiles below on the water; the whale rising out of the surface
   over five seconds, spouting while up, and sinking over five.
+- **Dwarka's kites are flown up, not out** (the owner, the same day): flown sideways over the ground
+  the side-on frame read as a kite lying flat. They fly above the camp on the screen, fanned a little
+  apart, always on the upright frame -- nose to the sky, streamers hanging towards the flyer -- with
+  the line taken at the bridle under the body, and drawn above the fog (`STRAIT_DEPTH.aloft`, 2002):
+  a kite high over the camp is seen from it whether or not the ground beneath has been walked. The
+  Aravali's stay as they were, flown out over the water from an island's edge.
 - **The sea is seen from above** (`seaSeenFrom`). A traveller's own sight is two tiles and nobody walks
   the open sea, so the traffic would have sailed under unexplored dark for a whole crossing. From an
   island or the line, the sea within eight tiles lifts to the remembered shade -- the twin of "the road
@@ -99,6 +105,17 @@ screen at once the cost is the fill estimate, about an eighth more pixels than a
 group, each at the moment first, before the shelter alone. `rest-bedroll-snow-midnight`,
 `rest-bedroll-high-midnight` and `rest-bedroll-high-dawn` land where they should the day they are painted;
 until then every night shows what it did.
+
+## What CI found
+
+- **The shallows spec walked sixty steps.** Its beach search accepted a line run *along* the coast,
+  which stays shallow for as long as the coast does -- thirty tiles on the top row of its seed -- so
+  the test took 1.5 minutes locally and ran out its three on CI. Straight out from a beach the
+  shallows end within two tiles, and the search now asks for exactly that.
+- **A camp's welcome opened over the landmark's page.** `playthrough.spec.ts` reached the landmark
+  on a day its walk passed a camp, and was left facing *A dacoit band* with the page beneath it. The
+  page now holds every card back (`pageOpenRef` in `useHappenings`); `e2e/happenings.spec.ts` asks
+  for one while it is up and once it closes, and failed by name with the guard taken out.
 
 ## Art still wanted
 

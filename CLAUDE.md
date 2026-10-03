@@ -771,6 +771,8 @@ retrospective. The rules, because they are rules rather than history:
   `stepCostOn` (`indexAlong`), and the scene cuts them at the waterline by the player's own `wadeFor`.
 - **A card never opens over another.** `cardOpenRef` is set the instant a card opens -- an effect
   earlier in `App` runs in the same commit -- and a call to somebody waits for the open card to close.
+  **Nor over the landmark's page** (`pageOpenRef`): a camp beside the landmark once put its welcome on
+  top of the journey's end.
 - **Settling is flags in the save's knowledge half**, `homestead:<map>:ground|eased|built|settled`,
   so it cost no `SAVE_VERSION` bump. `content/homestead.ts` holds every rule; the Negotiation card and
   the place panel only ask. **Nothing is lost by a wrong answer**: listening draws a hint, a miss gets
@@ -824,7 +826,8 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
 - **Firsts show a card once** (the event card), off under automation like the front door; `?firsts=on`.
 - **The strait's traffic is for looking at.** Positions are pure functions of the seed and the clock
   (`content/strait.ts`), so nothing is saved. Boats draw at `STRAIT_DEPTH.water` (99, under the rail),
-  kites at `.air` (1990, under the fog); frames and anchors come from `tools/build-strait.js`
+  kites at `.air` (1990, under the fog) -- except Dwarka's, flown up from the caravan camp on the
+  upright frame and drawn at `.aloft` (2002, over the fog, under the sky's tint); frames and anchors come from `tools/build-strait.js`
   (`assets/strait/`, `assets/strait.json`). **The sea is seen from above** (`seaSeenFrom`): from an
   island or the line on the Aravali, sea within eight tiles lifts to the remembered shade, or the
   traffic would sail under unexplored dark.

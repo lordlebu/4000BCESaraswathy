@@ -61,6 +61,12 @@ export interface Kite {
   anchor: Point;
   /** Which way it flies out, a unit step. */
   out: Point;
+  /**
+   * Flown up into the sky rather than out over the water, and drawn so: nose up, streamers hanging
+   * towards the flyer. Dwarka's, from the caravan camp -- flown out sideways over the ground, the
+   * side-on frame read as a kite lying flat (the owner, 3 October 2026).
+   */
+  aloft?: true;
 }
 
 export interface Strait {
@@ -230,18 +236,21 @@ function islandKites(world: World): Kite[] {
   return out;
 }
 
-/** Dwarka's two kites, tied at the caravan camp and flying out over the ground in two directions. */
+/**
+ * Dwarka's two kites, tied at the caravan camp and flown up: above the camp on the screen, fanned a
+ * little apart so the two ropes do not lie on one line. Below it instead when the camp is too near
+ * the top of the map for a rope's length of sky.
+ */
 function caravanKites(world: World, at: Point): Kite[] {
-  const room = STEPS.filter((d) => {
-    const x = at.x + d.x * 5, y = at.y + d.y * 5;
-    return x >= 0 && y >= 0 && x < world.width && y + KITE_HEIGHT < world.height;
-  });
-  const ranked = [...room].sort(
-    (a, b) => tileHash(world.seed, a.x, a.y, 'caravan-kite') - tileHash(world.seed, b.x, b.y, 'caravan-kite')
-  );
-  return (['kite-turmeric', 'kite-striped'] as const)
-    .map((id, i) => (ranked[i] ? { id, anchor: { ...at }, out: ranked[i]! } : null))
-    .filter((k): k is Kite => k !== null);
+  const up = at.y - (KITE_REACH + 1) >= 0 ? -1 : 1;
+  const fan = [{ x: -0.4, y: up * 0.92 }, { x: 0.4, y: up * 0.92 }];
+  const first = tileHash(world.seed, at.x, at.y, 'caravan-kite') % 2;
+  return (['kite-turmeric', 'kite-striped'] as const).map((id, i) => ({
+    id,
+    anchor: { ...at },
+    out: fan[(i + first) % 2]!,
+    aloft: true as const
+  }));
 }
 
 /** Where the whale may come up: deep water, two tiles from anything, away from the boats' work. */
@@ -335,7 +344,7 @@ export function fishingAt(loop: FishingLoop, days: number): Placed {
  * share a beat. **It faces its anchor**, nose into the wind with the streamers trailing away, as a
  * kite does -- so a kite flown east of its island points west.
  */
-export function kiteAt(kite: Kite, seconds: number): Placed & { tieX: number; tieY: number } {
+export function kiteAt(kite: Kite, seconds: number): Placed & { tieX: number; tieY: number; aloft: boolean } {
   const phase = (tileHash('kite', kite.anchor.x, kite.anchor.y, kite.id) % 1000) / 160;
   const base = Math.atan2(kite.out.y, kite.out.x);
   const angle = base + SWING * Math.sin((2 * Math.PI * seconds) / 9 + phase);
@@ -347,8 +356,13 @@ export function kiteAt(kite: Kite, seconds: number): Placed & { tieX: number; ti
   const y = tieY + Math.sin(angle) * reach;
   const dx = tieX - x;
   const dy = tieY - y;
-  const facing: StraitFacing = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
-  return { x, y, facing, tieX, tieY };
+  // Aloft, a kite is seen from below its line: nose to the sky whichever way the wind has it.
+  const facing: StraitFacing = kite.aloft
+    ? 'up'
+    : Math.abs(dx) >= Math.abs(dy)
+      ? dx > 0 ? 'right' : 'left'
+      : dy > 0 ? 'down' : 'up';
+  return { x, y, facing, tieX, tieY, aloft: Boolean(kite.aloft) };
 }
 
 /** How long one surfacing takes, start to gone, in seconds of the scene's clock. */

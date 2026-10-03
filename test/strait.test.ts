@@ -171,6 +171,24 @@ describe('the kites', () => {
     for (const kite of s.kites) expect(kite.anchor).toEqual(camp.at);
     expect(new Set(s.kites.map((k) => `${k.out.x},${k.out.y}`)).size, 'both kites fly the same way').toBe(2);
   });
+
+  it('at Dwarka, are flown up into the sky, nose up, above the camp, on every seed', () => {
+    for (const seed of SEEDS) {
+      const built = buildFieldMap(fieldMap(CARAVAN_MAP)!, { seed });
+      const placed = built.placed.map((p) => ({ poiId: p.poi.id, at: p.at }));
+      const camp = placed.find((p) => p.poiId === CARAVAN_POI)!;
+      for (const kite of straitOn(built.world, CARAVAN_MAP, placed)!.kites) {
+        for (let s = 0; s < 30; s += 0.5) {
+          const k = kiteAt(kite, s);
+          expect(k.facing, `${seed} ${kite.id}: flown sideways`).toBe('up');
+          expect(k.aloft).toBe(true);
+          // Above the camp on the screen, unless the camp is too near the top for the rope.
+          if (camp.at.y >= KITE_REACH + 1) expect(k.y, `${seed} ${kite.id}: not above the camp`).toBeLessThan(camp.at.y);
+          expect(k.y).toBeGreaterThanOrEqual(0);
+        }
+      }
+    }
+  });
 });
 
 describe('the whale', () => {
@@ -237,5 +255,8 @@ describe('where it is drawn', () => {
     // Above every row a map can have (the tallest is 78), below the fog at 2000.
     expect(STRAIT_DEPTH.air).toBeGreaterThan(depthFor(78, ROW_SLOT.canopy + 1));
     expect(STRAIT_DEPTH.air).toBeLessThan(2000);
+    // A kite flown aloft is seen over the fog, and still tinted by the sky at 3000.
+    expect(STRAIT_DEPTH.aloft).toBeGreaterThan(2000);
+    expect(STRAIT_DEPTH.aloft).toBeLessThan(3000);
   });
 });

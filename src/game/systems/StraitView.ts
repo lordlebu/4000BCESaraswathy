@@ -49,6 +49,8 @@ const SWELL_PX = 2;
 const SWELL_MS = 3200;
 /** How many pixels of each hull are under the surface. */
 const SINK = { ship: 10, boat: 6, whale: 0 };
+/** Where a kite flown aloft takes its line: this far down its upright frame, the collar under the body. */
+const BRIDLE = 0.5;
 
 /** What the strait reads of the scene. Live: the getters answer for the map shown now. */
 export interface StraitHost {
@@ -194,6 +196,11 @@ export class StraitView {
       f.sprite.setTexture(key);
       f.shadow.setTexture(key);
     }
+    const depth = k.aloft ? STRAIT_DEPTH.aloft : IN_THE_AIR;
+    if (f.sprite.depth !== depth) {
+      f.sprite.setDepth(depth);
+      f.rope.setDepth(depth - 0.1);
+    }
     const cx = Math.round(k.x * TILE_SIZE);
     const cy = Math.round(k.y * TILE_SIZE);
     f.sprite.setVisible(true).setOrigin(frame.x / frame.width, frame.y / frame.height).setPosition(cx, cy);
@@ -205,8 +212,10 @@ export class StraitView {
     // The rope: from where it is tied to the kite's nose, sagging a little under its own weight.
     const fromX = k.tieX * TILE_SIZE;
     const fromY = k.tieY * TILE_SIZE;
-    const toX = cx + (frame.nose.x - frame.x);
-    const toY = cy + (frame.nose.y - frame.y);
+    // Aloft the nose points at the sky, so the line goes to the bridle under the body instead: the
+    // foot of the frame's body, where the streamers start, a little over half way down.
+    const toX = k.aloft ? cx : cx + (frame.nose.x - frame.x);
+    const toY = k.aloft ? cy + Math.round(frame.height * BRIDLE) - frame.y : cy + (frame.nose.y - frame.y);
     const sag = TILE_SIZE * 0.35;
     const midX = (fromX + toX) / 2;
     const midY = (fromY + toY) / 2 + sag;

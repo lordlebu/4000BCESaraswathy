@@ -979,8 +979,12 @@ export const ROW_SLOT = { underfoot: 0, undergrowth: 1, marker: 3, walker: 5, ca
  *   two cross and it passes beneath, as canon says boats do.
  * - `air`: the kites and their ropes. Above everything on the islands, and below the fog, which
  *   `WorldScene` draws at 2000 -- ground not yet seen still hides them.
+ * - `aloft`: a kite flown up into the sky (Dwarka's) and its line. **Above the fog**, beside the camp
+ *   smoke (2001): a kite high over the caravan camp is seen from it whether or not the ground under
+ *   it has been walked, which under the fog it was not -- it hung there dimmed. Below the sky's tint
+ *   (3000), so it darkens with the evening like everything else.
  */
-export const STRAIT_DEPTH = { water: 99, air: 1990 } as const;
+export const STRAIT_DEPTH = { water: 99, air: 1990, aloft: 2002 } as const;
 
 export function depthFor(row: number, slot: number): number {
   return GROUND_DEPTH_BASE + row * ROW_DEPTH + slot;
