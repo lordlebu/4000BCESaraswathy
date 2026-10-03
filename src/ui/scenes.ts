@@ -60,7 +60,7 @@ export function sceneNames(
   ground?: string | null
 ): string[] {
   const group = variant ? GROUND_GROUP[variant] : undefined;
-  const groundGroup = ground ? GROUND_GROUP[ground] : undefined;
+  const groundGroup = ground ? (gesture === 'rest' ? NIGHT_GROUND_GROUP : GROUND_GROUP)[ground] : undefined;
   const onGround = variant
     ? [ground, groundGroup].flatMap((g) => (g ? [moment ? `${gesture}-${variant}-${g}-${moment}` : null, `${gesture}-${variant}-${g}`] : []))
     : [];
@@ -105,6 +105,15 @@ export const GROUND_GROUP: Readonly<Record<string, string>> = {
   // walked. The top of one is not, and has its own painting.
   sky_underside: 'high'
 };
+
+/**
+ * The same, for a night: **a sky island's top sleeps as high ground.** Kept out of `high` above
+ * because stooping there has its own painting; a night up there has none of its own, and the owner's
+ * ruling of 3 October 2026 put the bedroll on the ridge and on the island in one painting -- the lady
+ * on the ridge at dawn, `rest-bedroll-high-dawn`. So an island's night asks `high` too, and nothing
+ * the stooping cards look up changes.
+ */
+export const NIGHT_GROUND_GROUP: Readonly<Record<string, string>> = { ...GROUND_GROUP, sky_island: 'high' };
 
 /** How many exist. Used by a test, to keep the loader honest about an empty folder. */
 export function sceneCount(): number {

@@ -121,7 +121,26 @@ describe('a night painted for its ground', () => {
     const { sceneNames } = await import('../src/ui/scenes');
     expect(sceneNames('rest', 'camp', 'dawn')).toEqual(['rest-camp-dawn', 'rest-camp', 'rest']);
     expect(sceneNames('rest', 'camp', 'dawn', 'plains').slice(2)).toEqual(['rest-camp-dawn', 'rest-camp', 'rest']);
-    // Until the paintings land, a ridge night shows what it showed before.
-    expect(sceneFor('rest', 'bedroll', 0, 'midnight', 'mountains')).toBe(sceneFor('rest', 'bedroll', 0, 'midnight'));
+  });
+
+  it('draws the owner\'s paintings: the ridge, the lady at dawn, snow, and a night afloat', () => {
+    const night = (variant: string, moment: 'midnight' | 'dawn', ground: string) =>
+      sceneFor('rest', variant, 0, moment, ground);
+    expect(night('bedroll', 'midnight', 'mountains')).toMatch(/rest-bedroll-high-midnight/);
+    expect(night('bedroll', 'dawn', 'hills')).toMatch(/rest-bedroll-high-dawn/);
+    expect(night('bedroll', 'midnight', 'snow')).toMatch(/rest-bedroll-snow-midnight/);
+    // Snow has no dawn of its own, so it wakes to the ridge's.
+    expect(night('bedroll', 'dawn', 'snow')).toMatch(/rest-bedroll-high-dawn/);
+    expect(night('dugout', 'midnight', 'river')).toMatch(/rest-dugout/);
+    // Off high ground a bedroll night is what it always was.
+    expect(night('bedroll', 'dawn', 'plains')).toBe(sceneFor('rest', 'bedroll', 0, 'dawn'));
+  });
+
+  it('sleeps a sky island as high ground, and leaves the island\'s stooping painting alone', async () => {
+    const { sceneNames } = await import('../src/ui/scenes');
+    expect(sceneNames('rest', 'bedroll', 'dawn', 'sky_island')).toContain('rest-bedroll-high-dawn');
+    expect(sceneFor('rest', 'bedroll', 0, 'dawn', 'sky_island')).toMatch(/rest-bedroll-high-dawn/);
+    // Stooping on an island still asks for its own painting first and never for `high`.
+    expect(sceneNames('stoop', 'sky_island')).toEqual(['stoop-sky_island', 'stoop']);
   });
 });

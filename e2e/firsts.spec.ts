@@ -60,6 +60,8 @@ test('from the third day, Thrali lends the dugout with a card, and it stays lent
   const card = page.getByRole('dialog', { name: 'A boat lent' });
   await expect(card).toBeVisible({ timeout: 10_000 });
   await expect(card).toContainText(/a boat is lent the way a lamp is/);
+  // The owner's painting of the moment, not a fallback.
+  await expect(card.locator('img.activity-scene')).toHaveAttribute('src', /first-afloat-lothal/);
   await card.getByRole('button', { name: 'Take the dugout', exact: true }).click();
   await expect(card).toContainText(/Sit low and let it/);
   await card.getByRole('button', { name: 'Go on', exact: true }).click();
@@ -84,6 +86,7 @@ test('the first ride on the line has its card, and the carriage runs once it is 
   const card = page.getByRole('dialog', { name: 'The line' });
   await expect(card).toBeVisible({ timeout: 10_000 });
   await expect(card).toContainText(/rests on nothing/);
+  await expect(card.locator('img.activity-scene')).toHaveAttribute('src', /first-ride-aravali/);
   await card.getByRole('button', { name: 'Board', exact: true }).click();
   await card.getByRole('button', { name: 'Go on', exact: true }).click();
   type Riding = { riding: boolean };

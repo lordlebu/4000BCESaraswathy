@@ -381,7 +381,7 @@ data/making/ (the game's own: crafting, homesteads)  →  src/content/making.ts,
 ```
 
 **Everything in `data/canon/` is generated. Never hand-edit it.** Canon lives in the sibling
-`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 531 entities
+`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 532 entities
 across species, places, discoveries and world. To change any of it, edit the canon entity there and
 re-run `python utils/export_canon_bundle.py --apply`.
 
@@ -823,6 +823,8 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
   ground-only woven events off open water.
 - **A night afloat is `dugout`**, its own shelter and painting slot. A night also asks its ground
   (`sceneNames` in `ui/scenes.ts`): `rest-bedroll-snow`, then `rest-bedroll-high`, then the shelter.
+  A sky island's top sleeps as `high` (`NIGHT_GROUND_GROUP`) and stoops as itself; the owner's
+  paintings for all of it arrived the same day (`tools/intake-strait-paintings.py`).
 - **Firsts show a card once** (the event card), off under automation like the front door; `?firsts=on`.
 - **The strait's traffic is for looking at.** Positions are pure functions of the seed and the clock
   (`content/strait.ts`), so nothing is saved. Boats draw at `STRAIT_DEPTH.water` (99, under the rail),
