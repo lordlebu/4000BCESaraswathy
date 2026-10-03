@@ -102,6 +102,7 @@ import {
 import { Negotiation } from './Negotiation';
 import type { Talk, Wanted } from '../content/happenings';
 import { benchAt, type Station } from '../content/stations';
+import { groundOf } from '../content/suppliable';
 
 /**
  * How long after walking into a place somebody there may call out. Long enough for the arrival's own
@@ -1731,6 +1732,8 @@ export function App() {
         lastMade={lastMade}
         station={atStation}
         fieldMapId={fieldMapId}
+        // What this ground gives, walked once per world and only when the workshop opens.
+        ground={interrupts.workshop && world ? groundOf(world) : null}
         pinned={pinned}
         onPin={setPinned}
         focus={workshopAt}

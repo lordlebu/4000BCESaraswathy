@@ -179,3 +179,34 @@ describe('where the missing thing comes from', () => {
     expect(baseElement.textContent).toContain('Pell teaches this at the Gate Court, North Dwarka.');
   });
 });
+
+describe('not on this ground', () => {
+  it('sets apart what the ground cannot supply, saying what is missing, and keeps it pinnable', () => {
+    // A ground with reeds and nothing else: no dates anywhere, so the date block is set apart.
+    const { baseElement } = render(
+      <WorkshopPanel
+        station={null}
+        {...base}
+        knows={() => true}
+        fieldMapId="field_map_narmada"
+        satchel={emptySatchel()}
+        ground={new Set(['material_reed_fibre'])}
+        onPin={() => {}}
+      />
+    );
+    const section = baseElement.querySelector('.workshop-elsewhere');
+    expect(section, 'no "Not on this ground" section').not.toBeNull();
+    expect(section!.textContent).toMatch(/Not on this ground/);
+    const row = section!.querySelector('[data-recipe="recipe_date_block"]');
+    expect(row, 'the date block is not set apart').not.toBeNull();
+    expect(row!.textContent).toMatch(/nothing here gives dates/);
+    expect(row!.querySelector('.recipe-pin')).not.toBeNull();
+  });
+
+  it('sets nothing apart when the ground is not known', () => {
+    const { baseElement } = render(
+      <WorkshopPanel station={null} {...base} knows={() => true} fieldMapId="field_map_narmada" satchel={emptySatchel()} />
+    );
+    expect(baseElement.querySelector('.workshop-elsewhere')).toBeNull();
+  });
+});

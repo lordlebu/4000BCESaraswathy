@@ -36,6 +36,7 @@ import {
 } from '../content/crafting';
 import { sourceOf, taughtOn, taughtWhere } from '../content/sources';
 import { type ToolStep, toolAction, toolLine, toolStep } from '../content/toolStep';
+import { outOfReach } from '../content/suppliable';
 import { cookableNow } from '../content/cooking';
 import { type Station } from '../content/stations';
 import type { Satchel } from '../content/satchel';
@@ -74,6 +75,11 @@ export interface WorkshopPanelProps {
    * country off when it is this one. Optional: without it every teacher carries their country.
    */
   fieldMapId?: string | null;
+  /**
+   * What this world's ground gives (`suppliable.groundOf`), so recipes it can never supply are set
+   * apart under "Not on this ground". Absent: nothing is set apart.
+   */
+  ground?: ReadonlySet<string> | null;
   /** The recipe pinned to the dock, and how to change it. Both optional: without them no Pin buttons. */
   pinned?: string | null;
   onPin?: (recipeId: string | null) => void;
@@ -99,6 +105,7 @@ export function WorkshopPanel({
   pinned = null,
   onPin,
   focus = null,
+  ground = null,
   flags = [],
   open,
   onClose
@@ -174,7 +181,7 @@ export function WorkshopPanel({
     }
   }
   const chained = recipes.filter((r) => firstMakes.has(r.id));
-  const near = reachable.filter((r) => !firstMakes.has(r.id));
+  const nearAll = reachable.filter((r) => !firstMakes.has(r.id));
 
   /**
    * **Recipes somebody could show you, and who.** A taught recipe used to be invisible until it was
@@ -193,7 +200,16 @@ export function WorkshopPanel({
    * player carrying nothing yet needs most. "Within reach" only lists a recipe once one of its own
    * ingredients is carried, which is exactly the recipe a player starting out cannot see.
    */
-  const listed = new Set([...everythingReady, ...chained, ...near].map((r) => r.id));
+  /**
+   * **What this ground can never supply**, set apart rather than hidden (the crafting audit, 3
+   * October 2026). Greyed like everything else, a recipe wanting dates on a map with no date palm
+   * read exactly like one wanting reeds from the next tile. Carrying the missing thing in from
+   * another map moves it straight back up, because the satchel is part of the reckoning.
+   */
+  const away = ground ? outOfReach(ground, satchel, fieldMapId, knows) : new Map<string, string[]>();
+  const elsewhere = recipes.filter((r) => away.has(r.id) && atStation(r));
+  const near = nearAll.filter((r) => !away.has(r.id));
+  const listed = new Set([...everythingReady, ...chained, ...near, ...elsewhere].map((r) => r.id));
   const known = recipes.filter((r) => knows(r.id) && atStation(r) && !listed.has(r.id));
   const here = offeredHere(bench, knows).filter(atStation);
 
@@ -322,6 +338,29 @@ export function WorkshopPanel({
                   ready={false}
                   why={reasonsFor(r)}
                   onPinStep={onPin}
+                  pin={pinFor(r)}
+                  onMake={onMake}
+                />
+              ))}
+            </ul>
+          </details>
+        )}
+
+        {elsewhere.length > 0 && (
+          <details className="diary-section workshop-teachers workshop-elsewhere">
+            <summary>Not on this ground ({elsewhere.length})</summary>
+            <ul className="recipes">
+              {elsewhere.map((r) => (
+                <Makeable
+                  key={r.id}
+                  recipe={r}
+                  ready={false}
+                  why={[
+                    {
+                      text: `nothing here gives ${away.get(r.id)!.join(', ')}`,
+                      from: 'another map may: carry it in and this moves back up'
+                    }
+                  ]}
                   pin={pinFor(r)}
                   onMake={onMake}
                 />
