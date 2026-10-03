@@ -41,7 +41,8 @@ async function walkToThrali(page: Page, url = AT_THE_DOCK) {
 test('asked on the first day, Thrali says not yet, and there is no boat', async ({ page }) => {
   await walkToThrali(page);
   await page.getByRole('button', { name: 'Ask about a boat', exact: true }).click();
-  await expect(page.locator('.conversation-ask')).toContainText(/Not yet/);
+  // Thrali keeps the dhow's road too, so there are two rows to ask; this is the boat's answer.
+  await expect(page.locator('.conversation-ask', { hasText: /Not yet/ })).toBeVisible();
   expect((await walker(page)).boat).toBe(false);
 });
 

@@ -2338,7 +2338,7 @@ export class WorldScene extends Phaser.Scene {
     this.travellers.placeTargetMark();
     // Every frame, not on the half-second gate: a boat that moved twice a second would be seen to
     // jump. The timetable reads the journey's clock in days, the swell and the wind the loop's own.
-    this.strait.update(this.startPhase + (this.time.now + this.travelled) / DAY_MS, this.time.now);
+    this.strait.update(this.time.now);
 
     if (this.moving) return;
 

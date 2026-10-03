@@ -110,23 +110,23 @@ export class StraitView {
   }
 
   /**
-   * Move everything for this instant: `days` is the journey's clock (the ship and the boats keep the
-   * day's timetable, like the travellers), `nowMs` the scene's own (the swell, the wind and the
-   * whale are presentation, like the sky).
+   * Move everything for this instant, on the scene's own clock. All of it is presentation, like the
+   * sky: the ship and the boats once kept the journey's clock, and raced whenever the traveller
+   * walked, because a step spends most of a minute of the day (`content/strait.ts`, `SHIP_PACE`).
    */
-  update(days: number, nowMs: number): void {
+  update(nowMs: number): void {
     if (!this.plan) return;
     const swell = (offset: number) => Math.round(SWELL_PX * Math.sin(((nowMs + offset) / SWELL_MS) * Math.PI * 2));
 
     if (this.ship) {
-      const at = shipAt(this.host.world, this.plan, days);
+      const at = shipAt(this.host.world, this.plan, nowMs / 1000);
       if (!at) this.hide(this.ship);
       else this.float(this.ship, 'ship-kelpfang', at.x, at.y, at.facing === 'left', SINK.ship, swell(0), 0.95);
     }
 
     this.plan.loops.forEach((loop, i) => {
       const boat = this.boats[i]!;
-      const at = fishingAt(loop, days);
+      const at = fishingAt(loop, nowMs / 1000);
       const name = boatFrame(loop.id, at.facing, nowMs + i * 450);
       // The side views are wide and the ends narrow; the ring follows the hull it is under.
       const across = at.facing === 'left' || at.facing === 'right' ? 0.8 : 0.95;
@@ -146,9 +146,12 @@ export class StraitView {
   }
 
   /** What is on the map, for `e2e/strait.spec.ts`: never a picture, only that things are there. */
-  report(): { ship: boolean; boats: number; kites: number; ropes: number; whale: boolean } {
+  report(): { ship: boolean; shipX: number | null; boats: number; kites: number; ropes: number; whale: boolean } {
+    const ship = Boolean(this.ship?.sprite.visible);
     return {
-      ship: Boolean(this.ship?.sprite.visible),
+      ship,
+      // In tiles, so a spec can see how far it went: the outrigger once raced whenever anybody walked.
+      shipX: ship ? this.ship!.sprite.x / TILE_SIZE : null,
       boats: this.boats.filter((b) => b.sprite.visible).length,
       kites: this.kites.filter((k) => k.sprite.visible).length,
       ropes: this.kites.filter((k) => k.rope.visible).length,

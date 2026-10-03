@@ -101,12 +101,12 @@ export function useCrossing({
     // **One thing, in this order.** The road's own written happening, the first time on it; else
     // whatever the arrival was holding -- somebody coming over, a rumour kept, an arrival card --
     // which the cards had kept waiting; else, the first time, one of the road's woven events.
-    if (done?.first && here && happens.current?.('journey', here, null, `journey:${done.road.art}`, { cameFrom: done.from, force: { asked: true } })) return;
+    if (done?.first && here && happens.current?.('journey', here, null, `journey:${done.road.art}`, { cameFrom: done.from, roadArt: done.road.art, force: { asked: true } })) return;
     if (held) {
       arrivedRef.current?.({ poiId: held });
       return;
     }
-    if (done?.first && here) happens.current?.('road', here, null, `journey-road:${done.road.art}`, { force: { asked: true } });
+    if (done?.first && here) happens.current?.('road', here, null, `journey-road:${done.road.art}`, { roadArt: done.road.art, force: { asked: true } });
   }, [journey]);
 
   return { journey, travel, stepDown };

@@ -11,7 +11,11 @@ import { fieldMap, fieldMaps } from '../src/content/places';
 import {
   CARAVAN_MAP,
   CARAVAN_POI,
-  CROSSING_DAYS,
+  FISHING_PACE,
+  SHIP_PACE,
+  SHIP_REST_S,
+  SHIP_SLOW_REACH,
+  crossingSeconds,
   KITE_HEIGHT,
   KITE_REACH,
   STRAIT_MAP,
@@ -64,24 +68,88 @@ describe('the ship', () => {
     }
   });
 
-  it('comes in from beyond one edge and leaves beyond the other, twice a day', () => {
+  it('comes in from beyond one edge and leaves beyond the other: east, a rest, west, a rest', () => {
     const { world, strait } = aravali('varuna-0');
-    const seen: { day: number; facing: string; xs: number[] }[] = [];
-    for (let i = 0; i < 2000; i += 1) {
-      const days = 3 + i / 1000;
-      const ship = shipAt(world, strait, days);
-      if (!ship) continue;
-      const last = seen.at(-1);
-      if (last && last.facing === ship.facing && last.day === Math.floor(days)) last.xs.push(ship.x);
-      else seen.push({ day: Math.floor(days), facing: ship.facing, xs: [ship.x] });
+    const cycle = 2 * (crossingSeconds(world, strait) + SHIP_REST_S);
+    // Two whole cycles, starting once the opening crossing is done so every run is seen whole.
+    const from = cycle;
+    const seen: { facing: string; xs: number[] }[] = [];
+    let gap = true;
+    for (let s = from; s < from + 2 * cycle; s += 0.5) {
+      const ship = shipAt(world, strait, s);
+      if (!ship) {
+        gap = true;
+        continue;
+      }
+      if (gap || seen.at(-1)!.facing !== ship.facing) seen.push({ facing: ship.facing, xs: [] });
+      gap = false;
+      seen.at(-1)!.xs.push(ship.x);
     }
-    expect(seen.map((s) => s.facing)).toEqual(['right', 'left', 'right', 'left']);
-    for (const s of seen) {
-      const first = s.xs[0]!, last = s.xs.at(-1)!;
-      if (s.facing === 'right') expect(first).toBeLessThan(-2), expect(last).toBeGreaterThan(world.width + 2);
-      else expect(first).toBeGreaterThan(world.width + 2), expect(last).toBeLessThan(-2);
+    // The cut at `from` may fall mid-crossing; the whole runs inside are what is checked.
+    const whole = seen.filter((r) => Math.min(...r.xs) < -2 && Math.max(...r.xs) > world.width + 2);
+    expect(whole.length).toBeGreaterThanOrEqual(3);
+    for (let i = 1; i < whole.length; i += 1) expect(whole[i]!.facing).not.toBe(whole[i - 1]!.facing);
+    for (const r of whole) {
+      const first = r.xs[0]!, last = r.xs.at(-1)!;
+      if (r.facing === 'right') expect(first).toBeLessThan(last);
+      else expect(first).toBeGreaterThan(last);
     }
-    expect(CROSSING_DAYS).toBeLessThan(0.25);
+  });
+
+  it('is already under way when the scene opens, on every seed', () => {
+    for (const seed of SEEDS) {
+      const { world, strait } = aravali(seed);
+      const ship = shipAt(world, strait, 0);
+      expect(ship, `${seed}: an empty channel on arriving`).not.toBeNull();
+      expect(ship!.x).toBeGreaterThan(0);
+      expect(ship!.x).toBeLessThan(world.width);
+    }
+  });
+});
+
+describe('how fast it all goes', () => {
+  // The owner saw the outrigger race. It kept the journey's clock, and a step spends 45 seconds of
+  // it. On the scene's clock nothing moves faster than its pace, whatever the traveller does, and
+  // everything is slower than the traveller walks (STEP_MS 425 a tile on plains in WorldScene).
+  const WALK = 1000 / 425;
+
+  it('slows the ship under the line, both ways, and nowhere near it is it slow', () => {
+    for (const seed of SEEDS) {
+      const { world, strait } = aravali(seed);
+      expect(strait.rails.length, `${seed}: the line never crosses the lane`).toBeGreaterThan(0);
+      const rail = strait.rails[0]! + 0.5;
+      const speedAt = (facing: 'right' | 'left', near: (x: number) => boolean): number[] => {
+        const out: number[] = [];
+        for (let s = 0; s < 2 * (crossingSeconds(world, strait) + SHIP_REST_S) * 2; s += 0.5) {
+          const a = shipAt(world, strait, s), b = shipAt(world, strait, s + 0.5);
+          if (a && b && a.facing === facing && b.facing === facing && near(a.x)) out.push(Math.abs(b.x - a.x) / 0.5);
+        }
+        return out;
+      };
+      for (const facing of ['right', 'left'] as const) {
+        const under = speedAt(facing, (x) => Math.abs(x - rail) < 0.5);
+        const open = speedAt(facing, (x) => strait.rails.every((r) => Math.abs(x - (r + 0.5)) > SHIP_SLOW_REACH + 1));
+        expect(under.length, `${seed} ${facing}: never seen under the line`).toBeGreaterThan(0);
+        // Measured against open water, not against `SHIP_SLOW`: a bound computed from the setting
+        // passed with the slowing switched off.
+        expect(Math.max(...under), `${seed} ${facing}: not slowed under the line`).toBeLessThan(Math.min(...open) / 2);
+        expect(Math.min(...open), `${seed} ${facing}: slow in open water`).toBeGreaterThan(SHIP_PACE * 0.95);
+      }
+    }
+  });
+
+  it('never moves a craft faster than its pace, and both are slower than walking', () => {
+    const { world, strait } = aravali('varuna-0');
+    expect(SHIP_PACE).toBeLessThan(WALK / 3);
+    expect(FISHING_PACE).toBeLessThan(SHIP_PACE);
+    for (let s = 0; s < 600; s += 0.25) {
+      const a = shipAt(world, strait, s), b = shipAt(world, strait, s + 0.25);
+      if (a && b && a.facing === b.facing) expect(Math.abs(b.x - a.x) / 0.25).toBeLessThanOrEqual(SHIP_PACE + 1e-9);
+      for (const loop of strait.loops) {
+        const p = fishingAt(loop, s), q = fishingAt(loop, s + 0.25);
+        expect(Math.hypot(q.x - p.x, q.y - p.y) / 0.25).toBeLessThanOrEqual(FISHING_PACE + 1e-9);
+      }
+    }
   });
 });
 
@@ -92,7 +160,7 @@ describe('the fishing boats', () => {
       expect(strait.loops.map((l) => l.id), seed).toEqual(['fishing-white', 'fishing-madder']);
       for (const loop of strait.loops) {
         for (let i = 0; i < 200; i += 1) {
-          const at = fishingAt(loop, i / 200 * 0.08);
+          const at = fishingAt(loop, (i / 200) * 400);
           for (let dy = -2; dy <= 1; dy += 1) {
             for (let dx = -1; dx <= 1; dx += 1) {
               expect(biome(world, at.x + dx, at.y + dy), `${seed} ${loop.id} near land at ${at.x},${at.y}`).toBe('sea');
@@ -110,8 +178,9 @@ describe('the fishing boats', () => {
     const loop = strait.loops[0]!;
     const faces = new Set<string>();
     let prev = fishingAt(loop, 0);
+    const lap = (2 * (loop.x1 - loop.x0 + loop.y1 - loop.y0)) / FISHING_PACE;
     for (let i = 1; i <= 400; i += 1) {
-      const at = fishingAt(loop, (i / 400) * 0.08);
+      const at = fishingAt(loop, (i / 400) * lap);
       const dx = at.x - prev.x, dy = at.y - prev.y;
       if (Math.abs(dx) + Math.abs(dy) > 0 && Math.abs(dx) + Math.abs(dy) < 1) {
         const moved = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';

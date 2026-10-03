@@ -30,10 +30,28 @@ export const STRAIT_MAP = 'field_map_aravali';
 export const CARAVAN_MAP = 'field_map_dwarka';
 export const CARAVAN_POI = 'poi_caravan_camp';
 
-/** How long the ship takes to cross, as a share of a day, and how many times a day it does. */
-export const CROSSING_DAYS = 0.12;
-/** How long a fishing boat takes to go once round its loop, as a share of a day. */
-export const LAP_DAYS = 0.08;
+/**
+ * How fast the traffic sails, in tiles a second of the scene's own clock -- **never the journey's**.
+ *
+ * It first kept the day's timetable, which reads well standing still (a day is an hour) and is
+ * wrong the moment the traveller moves: every step spends about 45 seconds of the day's clock, so
+ * the outrigger jumped six tiles a step, fifteen a second -- the owner saw it race. The traffic is
+ * presentation, like the swell, the wind and the whale, and runs on the loop's clock like them.
+ *
+ * The traveller walks about 2.4 tiles a second on plains. The outrigger goes a fifth of that, a
+ * fishing boat less again -- stately, never a blur, and slower than anybody on foot.
+ */
+export const SHIP_PACE = 0.5;
+export const FISHING_PACE = 0.1;
+/** How long the ship stays out of sight between crossings, in seconds: east, rest, west, rest. */
+export const SHIP_REST_S = 90;
+/**
+ * **The ship slows under the line**, the owner's ask of 3 October 2026, so somebody on the rail or
+ * at a pier gets a long look at it passing beneath. Within `SHIP_SLOW_REACH` tiles of a rail column
+ * its pace eases down to `SHIP_SLOW` of itself at the rail, on a cosine, and back up beyond.
+ */
+export const SHIP_SLOW = 0.3;
+export const SHIP_SLOW_REACH = 4;
 /** A kite's rope, in tiles, at rest. It breathes half a tile either side as the wind moves. */
 export const KITE_REACH = 3.5;
 /** How far below its kite a shadow falls, in tiles: the height it flies at, read as a drop. */
@@ -72,6 +90,8 @@ export interface Kite {
 export interface Strait {
   /** The row the ship's hull runs along, or null where there is no ship. */
   lane: number | null;
+  /** The columns where the line crosses the ship's lane, overhead: where it slows to be seen. */
+  rails: number[];
   loops: FishingLoop[];
   kites: Kite[];
   whaleSpots: Point[];
@@ -124,6 +144,16 @@ function laneOf(world: World): number | null {
     if ([y - 2, y - 1, y, y + 1].every((r) => seaRow(world, r))) rows.push(y);
   }
   return rows.length > 0 ? rows[Math.floor(rows.length / 2)]! : null;
+}
+
+/** The columns where the track crosses the lane, anywhere from the sails' top row to the hull's. */
+function railsOver(world: World, lane: number | null): number[] {
+  if (lane === null) return [];
+  const xs: number[] = [];
+  for (let x = 0; x < world.width; x += 1) {
+    if ([lane - 2, lane - 1, lane, lane + 1].some((y) => world.tiles[y]?.[x]?.track)) xs.push(x);
+  }
+  return xs;
 }
 
 /** The fishing loops: rectangles of open water, a tile clear all round, away from the lane. */
@@ -280,40 +310,91 @@ export function straitOn(
   if (fieldMapId === STRAIT_MAP) {
     const lane = laneOf(world);
     const loops = loopsOf(world, lane);
-    return { lane, loops, kites: islandKites(world), whaleSpots: whaleSpotsOf(world, lane, loops) };
+    return { lane, rails: railsOver(world, lane), loops, kites: islandKites(world), whaleSpots: whaleSpotsOf(world, lane, loops) };
   }
   if (fieldMapId === CARAVAN_MAP) {
     const camp = placed.find((p) => p.poiId === CARAVAN_POI);
-    return camp ? { lane: null, loops: [], kites: caravanKites(world, camp.at), whaleSpots: [] } : null;
+    return camp ? { lane: null, rails: [], loops: [], kites: caravanKites(world, camp.at), whaleSpots: [] } : null;
   }
   return null;
 }
 
-/** A fraction of a 0..1 hash, for a day's timetable. */
-const fraction = (seed: string, day: number, salt: string): number => (tileHash(seed, day, 0, salt) % 10_000) / 10_000;
+/** A fraction of a 0..1 hash, seeded on the world. */
+const fraction = (seed: string, salt: string): number => (tileHash(seed, 0, 0, salt) % 10_000) / 10_000;
+
+/** The ship's pace at `x` along the lane, in tiles a second: full, easing down under the line. */
+export function shipPaceAt(strait: Strait, x: number): number {
+  let ease = 0;
+  for (const rail of strait.rails) {
+    const d = Math.abs(x - (rail + 0.5));
+    if (d < SHIP_SLOW_REACH) ease = Math.max(ease, 0.5 + 0.5 * Math.cos((Math.PI * d) / SHIP_SLOW_REACH));
+  }
+  return SHIP_PACE * (1 - (1 - SHIP_SLOW) * ease);
+}
+
+/** The step the crossing's timetable is laid out in, in tiles. */
+const TABLE_STEP = 0.05;
 
 /**
- * Where the ship is, `days` into the journey (fractional), or null while it is off the map.
- *
- * Twice a day: east in the morning window, west in the afternoon one, each starting at a seeded
- * moment, so the ship is an event to look up and see rather than wallpaper. It enters and leaves
- * four tiles beyond the edges, so it is never seen to appear.
+ * How long the ship takes to reach each point of its crossing from the west, in seconds, at
+ * `TABLE_STEP` intervals from four tiles beyond the west edge to four beyond the east. Laid out once
+ * per strait and kept: a pure function of the map, so where the ship is stays one of the seed and the
+ * scene's clock, slowing under the line included.
  */
-export function shipAt(world: World, strait: Strait, days: number): Placed | null {
-  if (strait.lane === null) return null;
-  const day = Math.floor(days);
-  const u = days - day;
-  const windows = [
-    { from: 0.08 + 0.22 * fraction(world.seed, day, 'ship-am'), facing: 'right' as const },
-    { from: 0.55 + 0.22 * fraction(world.seed, day, 'ship-pm'), facing: 'left' as const }
-  ];
-  for (const w of windows) {
-    if (u < w.from || u >= w.from + CROSSING_DAYS) continue;
-    const t = (u - w.from) / CROSSING_DAYS;
-    const span = world.width + 8;
-    const x = w.facing === 'right' ? -4 + t * span : world.width + 4 - t * span;
-    return { x, y: strait.lane, facing: w.facing };
+const tables = new WeakMap<Strait, Float64Array>();
+function timetable(world: World, strait: Strait): Float64Array {
+  let t = tables.get(strait);
+  if (t) return t;
+  const n = Math.round((world.width + 8) / TABLE_STEP);
+  t = new Float64Array(n + 1);
+  for (let i = 1; i <= n; i += 1) {
+    const mid = -4 + (i - 0.5) * TABLE_STEP;
+    t[i] = t[i - 1]! + TABLE_STEP / shipPaceAt(strait, mid);
   }
+  tables.set(strait, t);
+  return t;
+}
+
+/** Where along the lane the ship is `s` seconds after entering from the west. */
+function xAfter(table: Float64Array, s: number): number {
+  let lo = 0, hi = table.length - 1;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if (table[mid]! <= s) lo = mid;
+    else hi = mid;
+  }
+  const span = table[hi]! - table[lo]!;
+  const f = span > 0 ? (s - table[lo]!) / span : 0;
+  return -4 + (lo + Math.min(1, Math.max(0, f))) * TABLE_STEP;
+}
+
+/** How long one crossing takes, edge to edge and four tiles beyond each, in seconds. */
+export function crossingSeconds(world: World, strait: Strait): number {
+  const table = timetable(world, strait);
+  return table[table.length - 1]!;
+}
+
+/**
+ * Where the ship is, `seconds` into the scene's own clock, or null while it is out of sight.
+ *
+ * East, a rest, west, a rest, round again. It enters and leaves four tiles beyond the edges, so it
+ * is never seen to appear, and slows under the line both ways (`shipPaceAt`). **The scene opens with
+ * it already under way** -- a seeded point between a fifth and three fifths of the way across the
+ * first crossing -- so whoever arrives on the Aravali sees it, rather than waiting minutes for an
+ * empty channel to fill.
+ */
+export function shipAt(world: World, strait: Strait, seconds: number): Placed | null {
+  if (strait.lane === null) return null;
+  const table = timetable(world, strait);
+  const cross = table[table.length - 1]!;
+  const cycle = 2 * (cross + SHIP_REST_S);
+  const start = (0.2 + 0.4 * fraction(world.seed, 'ship')) * cross;
+  const t = (((seconds + start) % cycle) + cycle) % cycle;
+  if (t < cross) return { x: xAfter(table, t), y: strait.lane, facing: 'right' };
+  const back = t - cross - SHIP_REST_S;
+  // Westward is the same water read from the other end: the time from the east edge to x is the
+  // whole crossing less the time from the west to x.
+  if (back >= 0 && back < cross) return { x: xAfter(table, cross - back), y: strait.lane, facing: 'left' };
   return null;
 }
 
@@ -321,11 +402,11 @@ export function shipAt(world: World, strait: Strait, days: number): Placed | nul
  * Where a fishing boat is on its loop: east along the top, south down the right (the bow coming
  * towards you), west along the bottom, north up the left (the stern going away).
  */
-export function fishingAt(loop: FishingLoop, days: number): Placed {
+export function fishingAt(loop: FishingLoop, seconds: number): Placed {
   const w = loop.x1 - loop.x0;
   const h = loop.y1 - loop.y0;
   const lap = 2 * (w + h);
-  const f = (((days / LAP_DAYS + loop.offset) % 1) + 1) % 1;
+  const f = ((((seconds * FISHING_PACE) / lap + loop.offset) % 1) + 1) % 1;
   let d = f * lap;
   if (d < w) return { x: loop.x0 + d, y: loop.y0, facing: 'right' };
   d -= w;

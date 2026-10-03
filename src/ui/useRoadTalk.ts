@@ -35,6 +35,8 @@ export type Happens = (
       camp?: Encampment | null;
       campPerson?: CampTalk | null;
       cameFrom?: string | null;
+      /** The painting of the road just travelled, for a road's happening that has none of its own. */
+      roadArt?: string | null;
       force?: { kind?: string; asked?: boolean };
     }
   ) => boolean;

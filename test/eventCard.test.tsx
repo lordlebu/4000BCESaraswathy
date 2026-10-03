@@ -102,3 +102,33 @@ describe('the card with a stranger on it', () => {
     expect(screen.getByText('They point you on.')).toBeTruthy();
   });
 });
+
+describe('a road happening with no painting of its own', () => {
+  // The owner, 3 October 2026: crossing from Lothal, the road's card showed its painting and the
+  // ferry song after it came up blank. The road's own painting is the last thing tried, so the card
+  // keeps a picture -- and the happening's own painting still wins the day one is made.
+  const ferry = (over: Partial<GameEvent> = {}): GameEvent => {
+    const { stranger: _none, ...plain } = event({ id: 'happening_the_ferry_song', title: 'The ferry song', occasion: 'journey', art: 'happening_the_ferry_song', ...over });
+    return plain;
+  };
+
+  it('is blank with nothing to fall back on, which was the fault', () => {
+    const { baseElement } = render(<EventCard event={ferry()} holds={[]} onChoose={() => {}} onClose={() => {}} />);
+    expect(baseElement.querySelector('img.activity-scene')).toBeNull();
+    expect(baseElement.querySelector('.activity-scene-blank')).not.toBeNull();
+  });
+
+  it('shows the road it came by', () => {
+    const { baseElement } = render(
+      <EventCard event={ferry({ artFallback: 'journey-aravali-lothal' })} holds={[]} onChoose={() => {}} onClose={() => {}} />
+    );
+    expect(baseElement.querySelector('img.activity-scene')?.getAttribute('src')).toMatch(/journey-aravali-lothal/);
+  });
+
+  it('still prefers a painting of its own', () => {
+    const { baseElement } = render(
+      <EventCard event={ferry({ art: 'woven-company', artFallback: 'journey-aravali-lothal' })} holds={[]} onChoose={() => {}} onClose={() => {}} />
+    );
+    expect(baseElement.querySelector('img.activity-scene')?.getAttribute('src')).toMatch(/woven-company/);
+  });
+});

@@ -4,6 +4,9 @@ The owner's art-focused plan of 3 October 2026, built the same day. The illustra
 artifact [The Strait and the Shallows](https://claude.ai/artifact/J7dvdn7uB8p65dLx1TFwEc), private to
 the owner; this file is the authoritative one.
 
+**Closed, 3 October 2026.** Every ask is built and painted; game #244 and #245, canon #159 and #160.
+The one thing open is optional: a painted whale, to replace the one drawn in code.
+
 Six asks, each with the owner's rulings as they were given, and what shipped.
 
 ## 1. The dugout is lent, not carried
@@ -76,7 +79,8 @@ the line and never under an island. The whale disappears and emerges slowly.
   on the Aravali), two fishing loops (rectangles of open water a tile clear of land and the line, away
   from the lane), two kites (an island edge with open air for the rope's length, the whole swing over
   open sea, kite and rope clear of the track), and six places for the whale (two tiles from anything).
-  The ship crosses twice a day; the boats go round their loops, so they are seen from all four sides.
+  The ship crosses east, rests, crosses west; the boats go round their loops, so they are seen from
+  all four sides.
 - `game/systems/StraitView.ts`, the sixth system: a two-pixel swell on a three-second period, rounded to
   whole pixels; the bottom of each hull cropped at the surface with the wading's own ring on the
   waterline; boats at depth 99, under every row-sorted thing including the rail; kites at 1990, just
@@ -116,6 +120,25 @@ until then every night shows what it did.
   on a day its walk passed a camp, and was left facing *A dacoit band* with the page beneath it. The
   page now holds every card back (`pageOpenRef` in `useHappenings`); `e2e/happenings.spec.ts` asks
   for one while it is up and once it closes, and failed by name with the guard taken out.
+
+## Pace, after a look in play
+
+- **The outrigger raced, and it was the clock.** The ship and the boats first kept the journey's
+  clock -- twice a day, a lap in a share of one -- which reads well standing still, where a day is an
+  hour. But a step spends about 45 seconds of that clock, so while the traveller walked the
+  outrigger jumped six tiles a step, fifteen a second. They now run on the scene's own clock, as the
+  swell, the wind and the whale always did: `SHIP_PACE` half a tile a second (a fifth of walking),
+  `FISHING_PACE` a tenth, a rest of `SHIP_REST_S` between crossings, and the scene opens with the
+  ship already part-way across so an arrival is not met by an empty channel.
+- **It slows under the line** (the owner's ask, the same day), so somebody on the rail or at a pier
+  gets a long look at it passing beneath: within `SHIP_SLOW_REACH` (4) tiles of a rail column over
+  the lane its pace eases to `SHIP_SLOW` (0.3) of itself, on a cosine, both ways. The crossing's
+  timetable is laid out once per map (`timetable`), so where the ship is stays a pure function of the
+  seed and the scene's clock. A crossing is about 133 seconds on `varuna-0`.
+- `e2e/strait.spec.ts` walks the traveller and checks the outrigger moved no more than its pace;
+  with the walking clock fed back in, it raced off the map and the spec failed by name. The unit
+  test that it slows under the line first compared against `SHIP_SLOW` itself and passed with the
+  slowing switched off; it now compares against the ship's speed in open water.
 
 ## The art, arrived
 

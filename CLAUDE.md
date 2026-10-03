@@ -257,7 +257,7 @@ The art docs, in the order they are useful:
 | `docs/satchel-and-hearth.md` | making made easier: the pin, cook fires, windfall wood, events that help, the pointer, the next step, and the rest of the `App.tsx` split |
 | `docs/a-place-to-stop.md` | where a sitting ends: the day's page at any night, and where you left off at the door |
 | `docs/a-lighter-game.md` | **phases 1 and 2 built**: rungs need only understanding, regrowth tiers set by use; the rest is the owner's call |
-| `docs/strait-and-shallows.md` | the dugout lent by Thrali and afloat in the shallows, first-time cards, the strait's ships, kites and whale, nights afloat and up high |
+| `docs/strait-and-shallows.md` | **closed**: the dugout lent by Thrali and afloat in the shallows, first-time cards, the strait's ships, kites and whale, nights afloat and up high, and the owner's paintings for all of it |
 | `docs/endgame-plan.md` | the programme, closed; what shipped, what is parked, what was declined |
 | `docs/art-direction.md` | the five rules the art follows, and what each one cost to learn |
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |
@@ -726,6 +726,13 @@ retrospective. The rules, because they are rules rather than history:
 
 - **A map is left only from its cart point** (canon's `departs_from`; `mayLeaveFrom` and
   `arrivalPoint` in `content/places.ts`). Arriving sets you down at the next map's first.
+  **Somebody says so** (the owner, 3 October 2026): each road's keeper can be asked *Ask about the
+  road* and answers where the cart leaves from, with a plain hint under it (`content/roadTalk.ts`,
+  the sentence composed from canon's names), and the Travel sheet says to walk there. A conversation
+  takes a list of asks, so Thrali has the boat's row and the road's.
+- **The card after a road is never blank.** A road's happening with no painting of its own shows the
+  road's (`artFallback`, from `useCrossing`'s `roadArt`); the ferry song and the line where the sea
+  was have none yet.
 - **Camps are a pure function of seed, map and day** (`content/encampments.ts`): one at a time,
   three days a turn, on dry ground away from places and roads. Walking up to one asks for its card
   with `force: {kind: 'camp', asked: true}`, which `happeningNow` returns before any weighting --
@@ -772,7 +779,9 @@ retrospective. The rules, because they are rules rather than history:
 - **A card never opens over another.** `cardOpenRef` is set the instant a card opens -- an effect
   earlier in `App` runs in the same commit -- and a call to somebody waits for the open card to close.
   **Nor over the landmark's page** (`pageOpenRef`): a camp beside the landmark once put its welcome on
-  top of the journey's end.
+  top of the journey's end. And a card opened on the very step that reaches it -- the scene says where
+  you stand before it says you have arrived -- **waits behind the page** and comes back when it closes
+  (`App` renders no card while `arrivalPage` is up).
 - **Settling is flags in the save's knowledge half**, `homestead:<map>:ground|eased|built|settled`,
   so it cost no `SAVE_VERSION` bump. `content/homestead.ts` holds every rule; the Negotiation card and
   the place panel only ask. **Nothing is lost by a wrong answer**: listening draws a hint, a miss gets
@@ -826,8 +835,10 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
   A sky island's top sleeps as `high` (`NIGHT_GROUND_GROUP`) and stoops as itself; the owner's
   paintings for all of it arrived the same day (`tools/intake-strait-paintings.py`).
 - **Firsts show a card once** (the event card), off under automation like the front door; `?firsts=on`.
-- **The strait's traffic is for looking at.** Positions are pure functions of the seed and the clock
-  (`content/strait.ts`), so nothing is saved. Boats draw at `STRAIT_DEPTH.water` (99, under the rail),
+- **The strait's traffic is for looking at.** Positions are pure functions of the seed and **the
+  scene's own clock, never the journey's** (`content/strait.ts`), so nothing is saved: a step spends
+  45 seconds of the day, and on that clock the outrigger raced. It slows under the line
+  (`SHIP_SLOW`) so it can be watched from the rail. Boats draw at `STRAIT_DEPTH.water` (99, under the rail),
   kites at `.air` (1990, under the fog) -- except Dwarka's, flown up from the caravan camp on the
   upright frame and drawn at `.aloft` (2002, over the fog, under the sky's tint); frames and anchors come from `tools/build-strait.js`
   (`assets/strait/`, `assets/strait.json`). **The sea is seen from above** (`seaSeenFrom`): from an

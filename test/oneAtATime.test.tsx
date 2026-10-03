@@ -136,7 +136,7 @@ describe('one of them, talking', () => {
 });
 
 describe('asking for something, in a conversation', () => {
-  const talk = (ask: { label: string; onAsk: () => string | null } | null) =>
+  const talk = (ask: { label: string; onAsk: () => string | null; hint?: string } | null, more: { label: string; onAsk: () => string | null; hint?: string }[] = []) =>
     render(
       <Conversation
         npcId="npc_thrali"
@@ -145,7 +145,7 @@ describe('asking for something, in a conversation', () => {
         traits={null}
         onListen={noop}
         onClose={noop}
-        ask={ask}
+        asks={[...(ask ? [ask] : []), ...more]}
       />
     );
 
@@ -161,6 +161,20 @@ describe('asking for something, in a conversation', () => {
     expect(onAsk).toHaveBeenCalledTimes(1);
     expect(screen.getByText(/A boat\? Not yet\./)).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Ask about a boat' })).toBeNull();
+  });
+
+  it('asks about the road beside the boat, each answered on its own, the hint under the answer', () => {
+    talk({ label: 'Ask about a boat', onAsk: () => 'A boat? Not yet.' }, [
+      { label: 'Ask about the road', onAsk: () => 'The coastal dhow goes from the Camp in the Kilns.', hint: 'Stand at the Camp in the Kilns and press Travel.' }
+    ]);
+    expect(screen.queryByText(/press Travel/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Ask about the road' }));
+    expect(screen.getByText(/coastal dhow goes from/)).toBeTruthy();
+    expect(screen.getByText(/press Travel/)).toBeTruthy();
+    // The boat row is still there to ask, and answering it leaves the road's answer standing.
+    fireEvent.click(screen.getByRole('button', { name: 'Ask about a boat' }));
+    expect(screen.getByText(/A boat\? Not yet\./)).toBeTruthy();
+    expect(screen.getByText(/coastal dhow goes from/)).toBeTruthy();
   });
 
   it('leaves the row alone when asking opened the loan instead', () => {

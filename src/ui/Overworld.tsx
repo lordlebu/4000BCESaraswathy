@@ -131,7 +131,14 @@ export function Overworld({ current, progress, met, standingOn: at = null, open,
 
         <section className="diary-section">
           <h3>From here</h3>
-          {!leave.ok && reachable.length > 0 && <p className="muted overworld-cart">{leave.why}</p>}
+          {!leave.ok && reachable.length > 0 && (
+            <p className="muted overworld-cart">
+              {/* Where, then what to do: the sheet was the only place either was said, and a player
+                  who read "the cart leaves from" was left to guess that the Travel buttons wake up
+                  there. Its keeper says so in person too -- "Ask about the road". */}
+              {leave.why} Walk there and open this again to set out.
+            </p>
+          )}
           {reachable.length === 0 ? (
             <p className="muted">
               Nothing is authored beyond this place yet. The road exists; the country at the end
