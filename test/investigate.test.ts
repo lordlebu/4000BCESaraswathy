@@ -24,16 +24,11 @@ import {
 } from '../src/journey';
 import { discoveries } from '../src/content/knowledge';
 
-const MOMENTS = ['dawn', 'morning', 'afternoon', 'evening', 'night'].flatMap((timeOfDay) =>
-  ['clear', 'rain', 'mist', 'storm'].map((weather) => ({ timeOfDay, weather }))
-);
-
 function climb(progress: Progress, id: string): Progress {
   let p = progress;
   for (;;) {
-    const m = MOMENTS.find((x) => canAdvance(p, id, x));
-    if (!m) return p;
-    p = advance(p, id, m);
+    if (!canAdvance(p, id)) return p;
+    p = advance(p, id);
   }
 }
 

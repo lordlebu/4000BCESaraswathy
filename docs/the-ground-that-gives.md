@@ -32,8 +32,8 @@ tile). What follows is the layer that grew out of it.
 
 | File | Answers |
 |---|---|
-| canon `material.won_from` | which species a material comes from |
-| canon `material.renews` | whether a place gives it again — an **ordering**, never a duration |
+| `material.won_from` (game data) | which species a material comes from |
+| `material.regrows` (game data) | how soon a worked place gives it again: `quick`, `steady` or `slow`, sorted by use |
 | `content/gathering.ts` | what a tile *offers*, from what is standing on it |
 | `content/nodes.ts` | what is *left* of it, and how worked it looks |
 | `content/tiers.ts` | every number the layer is tuned by |
@@ -62,22 +62,22 @@ Kept as small as an exception can be: only tiles somebody drew from are stored, 
 rather than per tile — stripping the reeds should not strip the clay under them — and a node grown
 back to full is deleted rather than kept.
 
-**Stone does not regrow; it is found.** `renews: never` is literally true and no emptied node ever
-refills. What working the ground does instead is *reveal* more of it nearby: a quarry face exposes
-fresh rock behind the block taken. Measured, a district that started with 91 stone nodes gave up
-635 stone over five days and still offered 60.
-
-`revealedNear` is on the walk's hot path and is indexed for it. It was quadratic first, and a
-**test timing out** is what found that.
+**Every material comes back, stone included** (2 October 2026, `docs/a-lighter-game.md`). Stone
+used to be canon's `never`: an emptied node stayed empty and working the ground *revealed* more
+nearby instead. Both went when the tiers stopped being chosen by lore — stone now sorts by use like
+everything else, and `revealedNear` is gone.
 
 ### `tiers.ts` — the numbers
 
 **The file to edit when the walk feels wrong.** Regrowth in days, stock by rarity, the odds of a
-good cut, the discovery constants — all in one place, because they were spread across two modules
-and tuning meant finding three tables and hoping there was not a fourth.
+good cut — all in one place, because they were spread across two modules and tuning meant finding
+three tables and hoping there was not a fourth.
 
-None of it is a fact about the world and none needs a canon edit. Canon owns the *ordering*
-(`renewal_rates.json` says so in its own note); this owns what the ordering means in days.
+**Regrowth is three tiers, sorted by use** (`REGROW_DAYS`: quick 3 days, steady 7, slow 14). A
+material three or more recipes or building stages ask for is quick, one or two steady, none slow;
+`content/regrowth.ts` counts and `test/regrowth.test.ts` fails if a stored tier drifts from the rule.
+A material moved by hand goes in `REGROWTH_EXCEPTIONS` with its reason. None of it is a fact about
+the world, and since 2 October 2026 none of it is canon's at all.
 
 ---
 
@@ -117,20 +117,12 @@ The split that settles every question here:
 Canon **cannot** count stock and does not try: `found_in` says which biomes hold a material and
 nothing says how much, because stock depends on a seed canon has never seen.
 
-## The bargain with `check_playability.py`
+## Waiting is never running out
 
-That script decides a recipe is reachable without looking at any `count`, and says in its own
-comment that this is sound only because a patient walker can reach any quantity.
-
-Depletion does not break that for anything that renews — **waiting is not running out** — so
-`fast`, `seasonal` and `slow` keep the old bargain exactly. Only `never` can strand somebody, and
-`nothing_runs_out` in that script reports which never-renewing materials sit in one kind of ground.
-
-The report is only worth having because the game keeps the other half of the promise. If a
-`never` node ever regrows, that check silently becomes a list of nothing.
-
-
----
+A patient walker can reach any quantity of anything, because every material comes back at its
+tier's pace. That used to be a bargain with canon's `check_playability.py`, which decided a recipe
+was reachable without counting; making moved to the game and the bargain with it, so the game's own
+`test/criticalPath.test.ts` and `test/reach.test.ts` hold it now.
 
 ## What acting on it costs the player
 

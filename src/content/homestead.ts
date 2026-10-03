@@ -1,9 +1,11 @@
 // Settling: the ground, the person who holds it, and the building that goes up on it.
 //
 // **The endgame of the Settling In plan.** Arrive at a map, help its people, and build a homestead
-// with their backing. Canon's `homestead_` says what is true of the world -- which grounds a map
-// has, whose each one is, what worries the holder and what would answer it, what the building is
-// made of. This module is the rules over that: what can be offered as an answer, whether it answers,
+// with their backing. `data/making/homesteads.json` says what is true of each map's building -- which
+// grounds a map has, whose each one is, what worries the holder and what would answer it, what the
+// building is made of. It was canon's until 2 October 2026 and moved to the game with the making
+// layer, because a stage is a list of made things; its holders, words and places are still canon's
+// ids, held by `test/gameOwned.test.ts`. This module is the rules over that: what can be offered as an answer, whether it answers,
 // what building a stage needs and whether it can be raised.
 //
 // **Talked, never fought.** An answer is one of four approaches -- a word of the holder's tongue, a
@@ -17,7 +19,7 @@
 //
 // Pure: the caller says what the player holds.
 
-import placesBundle from '../../data/canon/places.json';
+import homesteadData from '../../data/making/homesteads.json';
 import type { Point, World } from '../world/types';
 import { isWalkable } from '../world/generate';
 import { band } from '../world/classify';
@@ -113,7 +115,7 @@ interface RawHomestead {
 }
 
 export const homesteads: readonly Homestead[] = (
-  ((placesBundle as { homesteads?: RawHomestead[] }).homesteads ?? []) as RawHomestead[]
+  ((homesteadData as { homesteads?: RawHomestead[] }).homesteads ?? []) as RawHomestead[]
 ).map((h) => ({
   id: h.id,
   name: h.name,

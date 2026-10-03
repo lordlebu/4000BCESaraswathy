@@ -1,0 +1,63 @@
+{
+  "version": "1.0.0",
+  "description": "What an object lets a person *do*, declared once so that an item is described by its use rather than by a stat line. An item carries `affords`, drawn only from this list. It is the vocabulary in which canon is allowed to say what a thing is for.",
+  "note": "**There is no word here for damage, and that is the point.** The game this canon feeds states at the top of its own guidance that combat is absent by design, and the ruling holds on this side too: canon may say a harpoon cuts, deters and is worth trading for, and canon has no way of saying it deals four. Enforcing that structurally rather than by memory is what a declared vocabulary is for -- the thirteenth value typed by accident is exactly what the lint catches, and `strike` typed by a well-meaning author six months from now is that value. If combat is ever wanted, it arrives by a deliberate edit to this file and a decision recorded in docs/decisions.md, not by an item quietly claiming it.",
+  "affordances": {
+    "cut": {
+      "label": "Cuts",
+      "note": "Severs, scrapes or bores. A blade, an awl, a saw. The harpoons and spears live here, alongside the reed-knives."
+    },
+    "bind": {
+      "label": "Binds",
+      "note": "Holds two things together. Cordage, lashing, resin glue, a pin."
+    },
+    "carry": {
+      "label": "Carries",
+      "note": "Moves a load that hands alone could not. A basket, a yoke, a sled. Distinct from `contain`, which is about keeping rather than moving."
+    },
+    "contain": {
+      "label": "Contains",
+      "note": "Keeps something in, and usually keeps the weather out. A jar, a skin, a lidded pot. Storage is the whole reason a grain surplus is possible, so this is a load-bearing affordance rather than a flavour one."
+    },
+    "burn": {
+      "label": "Burns",
+      "note": "Gives heat or light. A lamp, a torch, a hearth. Varuna's oil lamp already affords exactly this in the game's kit and has since before this file existed."
+    },
+    "deter": {
+      "label": "Deters",
+      "note": "Persuades an animal or a person to be elsewhere. A spear held level, a fire kept up, a rattle on a line. **This is the whole of what canon says about weapons in use** -- the herd moves off, and nothing was touched."
+    },
+    "cross": {
+      "label": "Crosses",
+      "note": "Gets a person over ground they could not otherwise walk. A raft, a plank, a rope span, a pair of mud-shoes. The affordance vehicles are built out of."
+    },
+    "work": {
+      "label": "Works",
+      "note": "Shapes, grinds or presses other material without cutting it. A quern, a loom, a press, an anvil, a bow-drill. Added when the first quern was written and had nothing honest to say for itself -- `cut` was the nearest word and it was wrong, and the point of a declared vocabulary is that the near-miss fails rather than quietly becoming the record."
+    },
+    "mark": {
+      "label": "Marks",
+      "note": "Leaves a record. A stylus, a tally, ochre on a wall, a seal. In a game whose progression system is a diary, this is not a minor category."
+    },
+    "trade": {
+      "label": "Trades",
+      "note": "Is wanted by somebody else. Says a thing has worth without canon committing to a price, which it should not -- there is no currency in this world and inventing one is a design decision, not a data entry."
+    },
+    "eat": {
+      "label": "Eaten",
+      "note": "Is food. Carried on the item rather than on the material, because a raw tuber and a baked one are different objects and only one of them is dinner."
+    },
+    "heal": {
+      "label": "Heals",
+      "note": "Treats a hurt. Salve, poultice, bitter tonic. Canon-side only: the game has no health to restore and reads this as description, not as a mechanic."
+    },
+    "shelter": {
+      "label": "Shelters",
+      "note": "Keeps weather off a sleeping person. Matting, a hide tent, a bedroll -- which the game's kit has carried from its first step."
+    },
+    "play": {
+      "label": "Played",
+      "note": "Makes a note on purpose. A flute, a struck cane, a plucked string.\n\n**Added deliberately, which is what this file asks for.** The note above says a thirteenth value typed by accident is exactly what the lint catches, and that a new word arrives by an edit here and a line in docs/decisions.md rather than by an item quietly claiming it. This is that edit. It exists because canon had three instruments' worth of prose -- Kunch's cut canes, the delta's habit of counting intervals in cane rather than in numbers -- and no way to say what an instrument is for.\n\nPassive, like `eat`, because that is the honest voice: a thing is played, it does not play. The active forms in this list are things an object does to something else -- a blade cuts, a rope binds -- and an instrument does nothing until somebody picks it up."
+    }
+  }
+}

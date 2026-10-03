@@ -73,7 +73,9 @@ import {
 } from '../content/gestures';
 import { shelterBuilt } from '../content/using';
 import { ActivityModal } from './ActivityModal';
-import { useActivity } from './useActivity';
+import { useActivity, type Daybook } from './useActivity';
+import { goalOf, wanting } from '../content/goals';
+import { dayLines, leftOffLines, readingOf, tomorrowLine, type DayReading } from '../content/daybook';
 import { useHappenings } from './useHappenings';
 import { useGuidance } from './useGuidance';
 import { useSettling } from './useSettling';
@@ -605,6 +607,13 @@ export function App() {
     metStrangers.current = loaded.met ?? [];
     eventDays.current = loaded.eventDays ?? {};
     journeyFlags.current = loaded.flags ?? [];
+    // A new walk's day starts now, so its first night does not recount the old walk.
+    morning.current = readingOf({
+      progress: loaded.progress,
+      collection: emptyCollection(),
+      flags: journeyFlags.current,
+      met: metStrangers.current
+    });
     setMemory('');
     setArrivalPage(null);
     setReached(false);
@@ -670,8 +679,8 @@ export function App() {
 
   /** Look closer at something. The rule for whether that is possible is `journey.ts`'s. */
   const look = useCallback(
-    (discoveryId: string) => setProgress((p) => advance(p, discoveryId, moment)),
-    [moment]
+    (discoveryId: string) => setProgress((p) => advance(p, discoveryId)),
+    []
   );
 
   /**
@@ -746,6 +755,22 @@ export function App() {
   /** What the last bench job made, step by step, for the workshop to show. */
   const [lastMade, setLastMade] = useState<Step[]>([]);
 
+  /**
+   * What the traveller knew when this day began, for the page a night closes on
+   * (`content/daybook.ts`). In memory only: a reload starts the day's page from the reload, which
+   * costs no save bump and loses only a recap the diary already holds.
+   */
+  const morning = useRef<DayReading>(
+    readingOf({
+      progress: initialJourney.current.progress,
+      collection: initialJourney.current.collection,
+      flags: initialJourney.current.flags ?? [],
+      met: initialJourney.current.met ?? []
+    })
+  );
+  /** What the night's card asks of the day. Filled in below, once the guidance is known. */
+  const daybook = useRef<Daybook | null>(null);
+
   // Taking, making, a night and using what is carried, and the card each opens: `useActivity.ts`.
   const { activity, card: activityCard, pickUp, startRest, makeHere, useCarried } = useActivity({
     underfoot,
@@ -762,7 +787,8 @@ export function App() {
     moment,
     setMemory,
     setLastMade,
-    happens
+    happens,
+    daybook
   });
 
   /**
@@ -1256,6 +1282,23 @@ export function App() {
     surface
   });
 
+  // The page a night closes on, and the morning after it. Read when asked rather than kept as state:
+  // the night's card asks once as it settles. `tomorrowLine` reads the same two answers the dock does.
+  const knowledgeNow = () => ({ progress, collection, flags: journeyFlags.current, met: metStrangers.current });
+  daybook.current = {
+    page: () => {
+      const goal = goalOf(pinned);
+      const pinnedWants = goal ? wanting(goal, satchel, bench, journeyFlags.current) : null;
+      return {
+        lines: dayLines(morning.current, knowledgeNow()),
+        tomorrow: tomorrowLine(pinnedWants, guide ? { line: guide.line, action: null } : null)
+      };
+    },
+    nightOver: () => {
+      morning.current = readingOf(knowledgeNow());
+    }
+  };
+
   // The morning is over when the knife is made: the coach stands down and Uma's mat is pinned, so
   // the dock carries on where the hints stop.
   useEffect(() => {
@@ -1430,6 +1473,19 @@ export function App() {
         roster={roster}
         onChoose={chooseCharacter}
         onContinue={() => setAtTheDoor(false)}
+        leftOff={
+          atTheDoor && hasBegun(initialJourney.current)
+            ? leftOffLines({
+                fieldMapId,
+                pinned: (() => {
+                  const goal = goalOf(initialJourney.current.pinned);
+                  return goal ? wanting(goal, initialJourney.current.satchel, bench, initialJourney.current.flags ?? []) : null;
+                })(),
+                flags: initialJourney.current.flags ?? [],
+                progress: initialJourney.current.progress
+              })
+            : []
+        }
         onBegin={() => {
           // **Starting over clears the save first.** `generate` reloads whatever the seed has
           // stored, so on a seed already walked "start a new walk" kept the old progress, satchel
@@ -1528,7 +1584,6 @@ export function App() {
           </>
         }
         progress={progress}
-        moment={moment}
         open={surface === 'progress'}
         onClose={() => dispatch({ type: 'close' })}
         onAnswer={settle}
@@ -1678,7 +1733,6 @@ export function App() {
           presence,
           settling,
           progress,
-          moment,
           firstVisit: Boolean(standingOn) && !visited.current.has(standingOn!),
           onLook: look,
           onTalkTo: (npcId: string) => dispatch({ type: 'talk-to', npcId }),

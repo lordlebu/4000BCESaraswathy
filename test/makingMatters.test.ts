@@ -12,17 +12,13 @@
 import { storyGrants } from '../src/content/storylines';
 import { describe, expect, it } from 'vitest';
 import {
-  advance,
-  blockedBy,
-  canAdvance,
   craft,
   emptyProgress,
   hasMade,
   hear,
   knowsRecipe,
   learnRecipe,
-  linesFor,
-  rungOf
+  linesFor
 } from '../src/journey';
 import { describeTile } from '../src/content/journal';
 import { underfootLine, yieldsAt } from '../src/content/gathering';
@@ -31,7 +27,7 @@ import { discoveries } from '../src/content/knowledge';
 import { creatures, creatureFor, flora, floraFor } from '../src/content/species';
 import { npc, npcs } from '../src/content/places';
 import { items, materials, recipes } from '../src/content/making';
-import craftingBundle from '../data/canon/crafting.json';
+import craftingBundle from '../data/making/crafting.json';
 import { add, count, emptySatchel } from '../src/content/satchel';
 import { canMake, make, makeableNow, openGround, withinReach } from '../src/content/crafting';
 import { gather } from '../src/content/gathering';
@@ -39,48 +35,11 @@ import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap } from '../src/content/places';
 import { featureNameAt } from '../src/world/features';
 
-describe('a rung can need a tool', () => {
-  const tooled = discoveries.flatMap((d) =>
-    d.rungs.map((r, i) => ({ d, i, needs: r.needsTool })).filter((x) => x.needs.length > 0)
-  );
-
-  it('is a thing canon actually says, on more than nothing', () => {
-    expect(tooled.length).toBeGreaterThan(0);
-  });
-
-  it('never asks for one of the four the kit already affords', () => {
-    // The kit gives burn, mark, shelter and cross from the first step. A rung gated on one of
-    // those is a gate the player walks through without noticing, which is worse than no gate:
-    // it looks like a mechanic and is not one.
-    for (const { d, i, needs } of tooled) {
-      for (const n of needs) {
-        expect(['burn', 'mark', 'shelter', 'cross'], `${d.id} rung ${i}`).not.toContain(n);
-      }
-    }
-  });
-
-  it('holds the rung back until something is carried', () => {
-    const { d, i, needs } = tooled[0]!;
-    // Climb to just below the gated rung, carrying nothing.
-    let p = emptyProgress();
-    for (let step = 0; step < i; step += 1) p = advance(p, d.id);
-    expect(rungOf(p, d.id)).toBe(i - 1);
-
-    expect(canAdvance(p, d.id, null, emptySatchel())).toBe(false);
-    expect(blockedBy(p, d.id, null, emptySatchel())).toContain(`tool:${needs[0]}`);
-  });
-
-  it('opens once the tool is in hand', () => {
-    const { d, i, needs } = tooled[0]!;
-    let p = emptyProgress();
-    for (let step = 0; step < i; step += 1) p = advance(p, d.id);
-
-    // Anything affording it will do — that is the whole reason canon names an affordance.
-    const knife = add(emptySatchel(), 'item_flint_knife', 1);
-    if (needs.includes('cut')) {
-      expect(canAdvance(p, d.id, null, knife)).toBe(true);
-      expect(advance(p, d.id, null, knife)).not.toBe(p);
-    }
+describe('a rung never needs a tool', () => {
+  it('asks only for what it stands on, because the lore does not gate the ladder', () => {
+    // Six rungs used to ask for something that cuts, contains or carries, and none could be climbed
+    // in play: no caller passed the satchel. The gate went instead (`docs/a-lighter-game.md`).
+    for (const d of discoveries) for (const r of d.rungs) expect(Object.keys(r).sort(), d.id).toEqual(['entry', 'requires']);
   });
 });
 
@@ -407,65 +366,45 @@ describe('gathering does not use a tile up', () => {
 });
 
 // ---------------------------------------------------------------------------------------
-// The one rule written down twice.
+// The affordance chain.
 // ---------------------------------------------------------------------------------------
 
-describe('the two implementations agree', () => {
+describe('what an item lets you do', () => {
   /**
-   * `affordsOf` resolves `base_item` here; `World.affords` resolves it in canon's Python. Both
-   * exist because canon must prove a recipe performable *before* it exports, and both have
-   * carried a comment saying "change one, change both" — which is a convention, not a guard.
-   *
-   * Canon now emits its own answer with the bundle, so this is the guard. If either walk
-   * changes, the two stop agreeing here rather than in somebody's playthrough.
+   * `affordsOf` follows `base_item` up the chain. This used to be checked against canon's own
+   * resolution, exported with the bundle, because the rule was written twice -- here and in canon's
+   * Python. Making moved to the game on 2 October 2026 and the Python went with it, so there is one
+   * implementation and this holds its two cases instead.
    */
-  it('resolves every affordance chain the same way canon does', () => {
-    const canonSays = (craftingBundle as { conformance?: { affords: Record<string, string[]> } })
-      .conformance?.affords;
-    expect(canonSays, 'canon exported no conformance block').toBeTruthy();
-
-    expect(Object.keys(canonSays!).sort()).toEqual(items.map((i) => i.id).sort());
-    for (const i of items) {
-      expect([...i.affords].sort(), `${i.id} resolves differently on the two sides`).toEqual(
-        [...canonSays![i.id]!].sort()
-      );
-    }
+  it('inherits from its base when it says nothing of its own', () => {
+    // `item_reed_rope` states nothing and takes `bind` from `item_cordage`.
+    expect(items.find((i) => i.id === 'item_reed_rope')?.affords).toEqual(['bind']);
+    expect(items.some((i) => i.materials.length === 0 && i.affords.length > 0)).toBe(true);
   });
 
-  it('covers the inherited case, so agreement is not agreement about nothing', () => {
-    // `item_reed_rope` states nothing of its own and takes `bind` from `item_cordage`. If the
-    // chain walk broke on both sides identically this would still pass — but if it broke on
-    // either, it would not, which is what a conformance check is for.
-    const canonSays = (craftingBundle as { conformance: { affords: Record<string, string[]> } })
-      .conformance.affords;
-    expect(canonSays['item_reed_rope']).toEqual(['bind']);
-    expect(items.some((i) => i.materials.length === 0 && i.affords.length > 0)).toBe(true);
+  it('never loops, so every chain ends', () => {
+    const raw = (craftingBundle as { items: { id: string; base_item?: string }[] }).items;
+    const base = new Map(raw.map((i) => [i.id, i.base_item ?? null]));
+    for (const i of raw) {
+      const seen = new Set<string>();
+      for (let at: string | null = i.id; at; at = base.get(at) ?? null) {
+        expect(seen.has(at), `${i.id}: base_item chain loops at ${at}`).toBe(false);
+        seen.add(at);
+      }
+    }
   });
 });
 
-describe('what canon says a material is', () => {
+describe('what the game says a material is', () => {
   /**
-   * Canon gained `renews` so the game can decide whether a depleted resource node ever refills.
-   * The adapter-coverage test proves the field is *declared*; this proves the values actually
-   * arrive, which is a different claim and the one a node will rely on.
-   *
-   * A default of `seasonal` would hide a bundle that shipped none of them, so this asserts the
-   * spread rather than mere presence: canon has never-renewing stone and fast-growing greens,
-   * and if everything came back as one value the field would be carrying no information.
+   * Every material carries a regrowth tier, and the tiers are spread: if everything came back as
+   * one value the field would carry no information. Which tier is right is `test/regrowth.test.ts`.
    */
-  it('gives every material a renewal rate, and more than one of them', () => {
-    for (const m of materials) {
-      expect(['fast', 'seasonal', 'slow', 'never'], `${m.id} renews as ${m.renews}`).toContain(
-        m.renews
-      );
-    }
-    const spread = new Set(materials.map((m) => m.renews));
-    expect(spread.size, `every material renews the same way: ${[...spread]}`).toBeGreaterThan(1);
-
-    // The two ends, named, because they are the cases a node behaves differently for.
-    // A material keeps canon's id; only `wonFrom` is converted to the engine's namespace.
-    expect(materials.find((m) => m.id === 'material_basalt')?.renews).toBe('never');
-    expect(materials.find((m) => m.id === 'material_reed_fibre')?.renews).toBe('fast');
+  it('gives every material a regrowth tier, and more than one of them', () => {
+    for (const m of materials) expect(['quick', 'steady', 'slow'], `${m.id} regrows ${m.regrows}`).toContain(m.regrows);
+    expect(new Set(materials.map((m) => m.regrows)).size).toBe(3);
+    // The workhorse comes back fastest: reed fibre is asked for by more recipes than anything.
+    expect(materials.find((m) => m.id === 'material_reed_fibre')?.regrows).toBe('quick');
   });
 
   /**

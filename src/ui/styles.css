@@ -3252,6 +3252,29 @@ button.pinned-recipe:focus-visible { outline: 2px solid currentColor; outline-of
 
 .front-door-name { letter-spacing: 0.02em; }
 
+.front-door-left-off {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  border-left: 3px solid var(--accent);
+  background: rgba(255, 246, 223, 0.5);
+  border-radius: 0 4px 4px 0;
+}
+.front-door-left-off-title {
+  margin: 0 0 0.3rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.front-door-left-off p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
 .front-door-ways {
   display: flex;
   flex-wrap: wrap;
@@ -3451,6 +3474,60 @@ button.pinned-recipe:focus-visible { outline: 2px solid currentColor; outline-of
 }
 
 .activity-haul-count { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* The day behind you, under the dawn a night ends on (`docs/a-place-to-stop.md`). A page in the
+   diary's own voice rather than a tally: a short list, one line for tomorrow, and a quiet word that
+   this is a place to stop. Quietened with colour, never alpha -- see `--ink-faint`. */
+.day-page {
+  margin: 0 0 0.9rem;
+  padding: 0.6rem 0.75rem 0.7rem;
+  border-top: 1px solid var(--edge);
+  border-bottom: 1px solid var(--edge);
+}
+.day-page-title {
+  margin: 0 0 0.4rem;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+.day-page-lines {
+  margin: 0 0 0.5rem;
+  padding-left: 1.1rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.day-page-lines li + li { margin-top: 0.15rem; }
+.day-page-quiet,
+.day-page-tomorrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.day-page-label {
+  margin-right: 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.day-page-kept {
+  margin: 0;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--ink-faint);
+}
+
+/* On a landscape phone the dawn painting filled the card and the day's page sat below the fold,
+   so the one card that says "a good place to stop" said it out of sight. Once the page is
+   showing, the painting gives up height to a band -- the precedent `.negotiation .activity-scene`
+   set for the same squeeze. */
+@media (max-height: 520px) {
+  .activity-card[data-told='true'] .activity-scene {
+    max-height: 24vh;
+  }
+}
 
 /* The key that commits, on the button itself --- the convention `TileActions` sets and states:
    a thing not written on screen does not exist, and that holds for keys as much as for actions.

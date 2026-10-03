@@ -35,6 +35,12 @@ export interface FrontDoorProps {
   onContinue: () => void;
   /** Start a fresh walk under this seed, forgetting whatever was here. */
   onBegin: () => void;
+  /**
+   * Where the traveller left off, a line at a time (`leftOffLines` in `content/daybook.ts`). Shown
+   * above "Go on walking", because there is no house to come back to: a returning player is told
+   * where they are rather than shown it.
+   */
+  leftOff?: readonly string[];
 }
 
 export function FrontDoor({
@@ -45,7 +51,8 @@ export function FrontDoor({
   roster,
   onChoose,
   onContinue,
-  onBegin
+  onBegin,
+  leftOff = []
 }: FrontDoorProps) {
   /**
    * Starting over asks twice, and only starting over.
@@ -96,6 +103,15 @@ export function FrontDoor({
             );
           })}
         </div>
+
+        {canContinue && leftOff.length > 0 && (
+          <section className="front-door-left-off" aria-label="Where you left off">
+            <h2 className="front-door-left-off-title">Where you left off</h2>
+            {leftOff.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </section>
+        )}
 
         <div className="front-door-ways">
           {canContinue && (

@@ -255,6 +255,8 @@ The art docs, in the order they are useful:
 | `docs/settling-in.md` | the Settling In plan, concluded: camps, cart points, homesteads, and what was measured |
 | `docs/living-camps.md` | camps with people, **closed**: the measurements, the rulings, the way in's look, the rail decided, clearings, shadows, night light, and waiting at the pier |
 | `docs/satchel-and-hearth.md` | making made easier: the pin, cook fires, windfall wood, events that help, the pointer, the next step, and the rest of the `App.tsx` split |
+| `docs/a-place-to-stop.md` | where a sitting ends: the day's page at any night, and where you left off at the door |
+| `docs/a-lighter-game.md` | **phases 1 and 2 built**: rungs need only understanding, regrowth tiers set by use; the rest is the owner's call |
 | `docs/endgame-plan.md` | the programme, closed; what shipped, what is parked, what was declined |
 | `docs/art-direction.md` | the five rules the art follows, and what each one cost to learn |
 | `docs/art-brief.md` | prompt blocks for terrain, objects and figures |
@@ -368,7 +370,8 @@ the shared `pages` concurrency group.
 SouthOfTethys/database/  →  utils/export_canon_bundle.py  →  data/canon/species.json
 (canonical entity JSON)                                      data/canon/places.json
                                                              data/canon/knowledge.json
-                                                             data/canon/crafting.json
+                                                             ↓
+data/making/ (the game's own: crafting, homesteads)  →  src/content/making.ts, homestead.ts
                                                              ↓
                                                      src/content/canon.ts
                                                         (the adapter)
@@ -377,9 +380,19 @@ SouthOfTethys/database/  →  utils/export_canon_bundle.py  →  data/canon/spec
 ```
 
 **Everything in `data/canon/` is generated. Never hand-edit it.** Canon lives in the sibling
-`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 824 entities
+`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 531 entities
 across species, places, discoveries and world. To change any of it, edit the canon entity there and
 re-run `python utils/export_canon_bundle.py --apply`.
+
+**Making is the game's own data, in `data/making/`, and is hand-edited here** (the owner's ruling,
+2 October 2026): `crafting.json` (materials, items, processes, recipes, vehicles), `homesteads.json`,
+and the two vocabularies they draw on (`affordances.json`, `material_classes.json`). It was canon's, and every rule over it -- the cook fire, a tag, what a map can
+make -- was written twice, here and in canon's playability check, and kept in step across two
+repositories. **The lore gives the world its context; the game does its own arithmetic.** Canon still
+names game-owned ids -- a line that teaches a recipe, a field map's boat, a custom's dish -- and the
+game owns ids that name canon's -- a material's `won_from` species, a homestead's holders, words and
+places. `test/gameOwned.test.ts` resolves every one of them in both directions, so a rename on either
+side fails here by name. The authored notes that never shipped are kept in `docs/making-notes.md`.
 
 **`src/content/canon.ts` is the adapter, and the only place that knows both shapes.** Canon used to
 be exported in this game's exact field list by a Python script in the other repo, which meant the
@@ -778,8 +791,8 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
   `content/goals.ts` -- the pinned line, the events, the pointer, the next step. The pinned line is a
   control that opens the workshop at the recipe, and every recipe row says Pin or Unpin.
 - **A cook fire is fuel, or a hearth** (`crafting.fireFor`): for cooking only, any carried fuel lit
-  from the kit's lamp, spent by the meal; free at a settlement or road stop. Canon's
-  `check_playability.py` mirrors it in `needs_here` -- change one, change both.
+  from the kit's lamp, spent by the meal; free at a settlement or road stop. One implementation
+  since making moved to the game; canon no longer mirrors it.
 - **The log you see is the log you take.** A standing tree always gives windfall wood, and a fallen
   log, driftwood or bamboo drawn on a tile always gives what it is. `world/features.ts` names the
   feature `game/frames.ts` draws, and `test/features.test.ts` fails if the two tables drift.
@@ -792,35 +805,52 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
 - **`test/reach.test.ts` holds the floor:** a container and a cook fire within 20 steps of the start
   on every map and five seeds.
 
+### A place to stop (2 October 2026)
+
+`docs/a-place-to-stop.md` is the record. A map is two sittings, and the night is where one ends.
+
+- **Any night closes on the day's page**, wherever it falls: there is no house in this game, so
+  nothing on it says home. `content/daybook.ts` holds the rules; `ActivityModal` draws the page for
+  a night only, under the dawn.
+- **The morning's reading is in memory, never saved**, so it cost no `KNOWLEDGE_VERSION` bump. It
+  resets whenever a night card closes, pressed or not, because the night is spent either way.
+- **Tomorrow's line asks `goals.wanting` and `guide.nextStep`**, the dock's own answers, so the two
+  cannot disagree.
+- **The front door says where you left off** (`leftOffLines`): the map, the pin or next stage, and
+  what the diary holds.
+
 ### The resource layer, and where its numbers live
 
 Four modules, and the split between them is the same canon/game split as everywhere else:
 
 | Where | What it answers |
 |---|---|
-| canon's `material.won_from` | which species a material comes from |
-| canon's `material.renews` | whether a place gives it again — an *ordering*, never a duration |
+| `material.won_from` (game data) | which species a material comes from |
+| `material.regrows` (game data) | how soon a worked place gives it again — `quick`, `steady`, `slow`, sorted by use |
 | `content/gathering.ts` | what a tile offers, from the species standing on it |
 | `content/nodes.ts` | what is *left* of it, and what a worked node looks like |
 | `content/tiers.ts` | every number the layer is tuned by |
 
 **`tiers.ts` is the file to edit when the walk feels wrong.** Regrowth in days, stock by rarity,
-the odds of a good cut, the stone-discovery constants — all of it, in one place, because they were
+the odds of a good cut — all of it, in one place, because they were
 spread across two modules and tuning meant finding three tables and hoping there was not a fourth.
 None of it is a fact about the world and none needs a canon edit.
 
-Two rules in there are design rulings rather than numbers to tune past:
+Three rules in there are design rulings rather than numbers to tune past:
 
 **Gathering never gives nothing.** Cozy games vary *how much*, not *whether*, and gathering is the
 only thing that puts a material in a satchel — a failure roll would put a die in front of every
 recipe and stack with depletion. `test/nodes.test.ts` fails by name if a material ever gives
 nothing on an untouched node.
 
-**Stone does not regrow; it is found.** `renews: never` is literally true — no emptied node ever
-refills — but working the ground reveals more of it nearby, so the world does not run out. Making
-common stone `slow` was the obvious alternative and is worse twice: untrue of a cut nodule, and
-against a player working a district hard a thirty-day node is emptied thirty times before it
-returns one.
+**Regrowth tiers are sorted by use, never by lore** (`docs/a-lighter-game.md`). `REGROW_DAYS` is
+quick 3 days, steady 7, slow 14: a material three or more recipes or building stages ask for is
+quick, one or two steady, none slow. Each material stores its tier as `regrows`;
+`content/regrowth.ts` counts and `test/regrowth.test.ts` fails on a drift, and a hand-move goes in
+`REGROWTH_EXCEPTIONS` with its reason. There is no `never`: stone comes back like everything else.
+
+**A rung waits only on understanding.** No hour, no weather, no tool in hand (`canAdvance` takes
+the progress and the discovery, nothing else); canon 3.1.0 dropped `conditions` and `needs_tool`.
 
 ### Acting on it: one press, and preparation decides how well
 

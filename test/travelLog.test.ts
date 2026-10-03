@@ -131,15 +131,11 @@ describe('the keepsake records the diary, not just the walk', () => {
   function full(): Progress {
     let p = emptyProgress();
     for (const w of vocabulary) p = learn(p, w.id);
-    const moments = ['dawn', 'morning', 'afternoon', 'evening', 'night'].flatMap((timeOfDay) =>
-      ['clear', 'rain', 'mist', 'storm'].map((weather) => ({ timeOfDay, weather }))
-    );
     for (let pass = 0; pass < discoveries.length; pass += 1) {
       for (const d of discoveries) {
         for (;;) {
-          const m = moments.find((x) => canAdvance(p, d.id, x));
-          if (!m) break;
-          p = advance(p, d.id, m);
+          if (!canAdvance(p, d.id)) break;
+          p = advance(p, d.id);
         }
       }
     }
@@ -190,7 +186,7 @@ describe('the screen and the keepsake are built from one thing', () => {
     let p = emptyProgress();
     for (const w of vocabulary) p = learn(p, w.id);
     for (const d of discoveries) {
-      for (let i = 0; i < d.rungs.length; i += 1) p = advance(p, d.id, null);
+      for (let i = 0; i < d.rungs.length; i += 1) p = advance(p, d.id);
     }
 
     const sections = diarySections(p);

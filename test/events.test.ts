@@ -23,7 +23,7 @@ import {
 } from '../src/content/events';
 import { fieldMap, poi } from '../src/content/places';
 import knowledgeBundle from '../data/canon/knowledge.json';
-import craftingBundle from '../data/canon/crafting.json';
+import craftingBundle from '../data/making/crafting.json';
 
 const { idFor, KINDS } = createRequire(import.meta.url)('../tools/build-plates.js') as {
   idFor: (file: string, word?: string, keepUnderscores?: boolean) => string;

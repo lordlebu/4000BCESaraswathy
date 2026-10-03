@@ -29,7 +29,6 @@ import { emptySatchel } from '../src/content/satchel';
 import { make, makeableNow, openGround } from '../src/content/crafting';
 import { gather } from '../src/content/gathering';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { momentAt } from '../src/game/moment';
 import { DAY_MS } from '../src/game/dayNight';
 
 describe('people say things', () => {
@@ -58,7 +57,7 @@ describe('people say things', () => {
     expect(cold.some((l) => l.gives.includes('word_kia_thal'))).toBe(false);
 
     let p = advance(emptyProgress(), 'discovery_silver_water');
-    p = advance(p, 'discovery_silver_water', { timeOfDay: 'night', weather: 'rain' });
+    p = advance(p, 'discovery_silver_water');
     expect(rungOf(p, 'discovery_silver_water')).toBe(1);
     expect(linesFor(p, 'npc_thrali').some((l) => l.gives.includes('word_kia_thal'))).toBe(true);
   });
@@ -201,7 +200,7 @@ function liveIt(seed: string, days: number): Progress {
   return lived;
 }
 
-function walkIt(seed: string, days: number): Progress {
+function walkIt(_seed: string, days: number): Progress {
   let p = emptyProgress();
   // **It gathers and crafts too, and that is not decoration.** Six rungs need a tool, and a
   // tool has to be picked up off the ground and made. Handing this function a satchel of tools
@@ -255,8 +254,6 @@ function walkIt(seed: string, days: number): Progress {
       let moved = false;
 
       for (const place of places) {
-        const moment = momentAt(seed, ms, 0, place.climate);
-
         for (const id of place.people) {
           const before = p;
           const beforeBag = bag;
@@ -279,8 +276,8 @@ function walkIt(seed: string, days: number): Progress {
         if (bag !== bagBefore) moved = true;
 
         for (const d of place.findable) {
-          if (canAdvance(p, d.id, moment, bag)) {
-            p = advance(p, d.id, moment, bag);
+          if (canAdvance(p, d.id)) {
+            p = advance(p, d.id);
             moved = true;
           }
         }

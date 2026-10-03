@@ -1,8 +1,13 @@
-// Materials, items, processes, recipes and vehicles, adapted out of the canon bundle.
+// Materials, items, processes, recipes and vehicles: the making layer's definitions.
 //
-// The fourth adapter, after `canon.ts` for species, `places.ts` for ground and
-// `knowledge.ts` for the diary. Same split as all of them: canon says what CAN be made and
-// what it takes; what a particular player is carrying lives in their save and never here.
+// **The game's own data since 2 October 2026** (`data/making/crafting.json`). It was canon's, and
+// came in through the bundle; the owner moved making to the game, because a recipe is a verb and
+// every rule over it -- the cook fire, a tag, what a map can make -- had to be written twice, once
+// here and once in canon's playability check, and kept in step across two repositories. Canon keeps
+// the nouns of the world: species and where they grow, places, people, discoveries, words. A
+// material still names the species it is won from by canon id, and `test/gameOwned.test.ts` holds
+// every id that crosses the boundary in either direction. What a particular player is carrying
+// lives in their save and never here.
 // Everything in this file is a definition. `src/content/satchel.ts` and
 // `src/content/crafting.ts` hold the state and the rules.
 //
@@ -16,7 +21,7 @@
 // follows knowledge. The single exception is `won_from`, which points at species and is
 // therefore converted with `engineId`.
 
-import craftingBundle from '../../data/canon/crafting.json';
+import craftingBundle from '../../data/making/crafting.json';
 import { engineId } from './canon';
 import type { BiomeId, Rarity } from '../world/types';
 
@@ -53,8 +58,12 @@ export type ItemKind =
   | 'tool' | 'weapon' | 'container' | 'textile' | 'food' | 'physic'
   | 'light' | 'record' | 'ornament' | 'shelter' | 'instrument';
 
-/** Canon's `renewal_rates.json`, in canon's own order: fastest back first. */
-export type Renewal = 'fast' | 'seasonal' | 'slow' | 'never';
+/**
+ * How soon a worked place gives a material again: the game's three tiers, fastest first. How many
+ * days each is lives in `tiers.ts` (`REGROW_DAYS`); which tier a material is in is set by how much
+ * the game uses it (`content/regrowth.ts`, `docs/a-lighter-game.md`).
+ */
+export type Regrowth = 'quick' | 'steady' | 'slow';
 
 export interface Material {
   id: string;
@@ -64,17 +73,15 @@ export interface Material {
   foundIn: BiomeId[];
   rarity: Rarity;
   /**
-   * Whether a place you have taken this from gives it again.
+   * How soon a worked place gives this again: `quick`, `steady` or `slow`.
    *
-   * Canon's ordering, not a duration — it says salt-crust returns faster than sandalwood and
-   * never says in how many days, because the length of a day is a question about play. Turning
-   * this into a number of days is the game's job and belongs with the resource nodes.
-   *
-   * Deliberately not derived from `rarity`, which answers a different question: a leviathan is
-   * rare because few of them exist, and a quarried block of basalt is not rare at all and is
-   * still gone once it is cut.
+   * **Set by how much the game uses it, not by real-world lore** (the owner's ruling, 2 October
+   * 2026). It used to be canon's `renews` -- `fast`, `seasonal`, `slow`, `never` -- chosen by what a
+   * fossil or a sandalwood tree is like in the world, which made bamboo slow on the map that needed
+   * it most. Now the material most recipes and building stages ask for comes back soonest.
+   * `test/regrowth.test.ts` re-sorts every material by the rule and fails on a drift.
    */
-  renews: Renewal;
+  regrows: Regrowth;
   /** Engine species ids this is taken from. Empty is legal and common. */
   wonFrom: string[];
   /** Canon's `notes`. On a material this is the player-facing prose; there is no other. */
@@ -155,7 +162,7 @@ export interface Vehicle {
 
 interface RawMaterial {
   id: string; name: string; classes: string[]; found_in?: string[];
-  rarity?: string; renews?: string; won_from?: string[]; notes?: string;
+  rarity?: string; regrows?: string; won_from?: string[]; notes?: string;
 }
 interface RawItem {
   id: string; name: string; kind: string; affords: string[]; base_item?: string;
@@ -226,9 +233,8 @@ export const materials: Material[] = raw.materials.map((m) => ({
   classes: m.classes as MaterialClass[],
   foundIn: (m.found_in ?? []).filter((b) => RENDERABLE.has(b)) as BiomeId[],
   rarity: (m.rarity ?? 'common') as Rarity,
-  // `seasonal` rather than `fast` when canon is silent: the safer wrong answer is the one that
-  // makes a place worth returning to, not one that makes it inexhaustible.
-  renews: (m.renews ?? 'seasonal') as Renewal,
+  // `steady` when the data is silent: a place worth returning to, never an inexhaustible one.
+  regrows: (m.regrows ?? 'steady') as Regrowth,
   wonFrom: (m.won_from ?? []).map(engineId),
   description: m.notes ?? ''
 }));

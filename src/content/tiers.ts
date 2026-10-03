@@ -1,14 +1,13 @@
 // How generous the ground is: every number the resource layer is tuned by, in one file.
 //
-// **These are the game's numbers, not canon's, and that split is the whole reason this file
-// exists separately.** Canon says a material renews `fast`, `seasonal`, `slow` or `never` — an
-// *ordering*, stated in `database/renewal_rates.json`, which says in its own note that it "does
-// not say in how many days, because a day is a unit of play and the length of one is the game's
-// to decide". This is where that decision is made.
+// **These are the game's numbers, and since 2 October 2026 so is the data they are applied to.**
+// Materials are the game's own (`data/making/crafting.json`), and which regrowth tier a material
+// sits in is set by how much the game uses it rather than by what the lore says the thing is like
+// (`docs/a-lighter-game.md`). This file holds how many days each tier takes.
 //
-// Everything here is pacing. None of it is a fact about the world, none of it needs a canon edit
-// to change, and none of it should be read as one — a number here is a judgement about how a walk
-// should feel, and the right way to settle it is to play and adjust rather than to argue.
+// Everything here is pacing. None of it is a fact about the world, and none of it should be read
+// as one -- a number here is a judgement about how a walk should feel, and the right way to settle
+// it is to play and adjust rather than to argue.
 //
 // It is one file so that tuning is one edit. The numbers were previously split between
 // `nodes.ts` (regrowth, stock) and `gathering.ts` (the odds of a good cut), which meant changing
@@ -17,38 +16,50 @@
 //
 // Pure and free of React and Phaser.
 
-import type { Renewal } from './making';
+import type { Regrowth } from './making';
 import type { Rarity } from '../world/types';
 
 /**
- * How long each of canon's four renewal tiers takes, in days.
+ * How many in-game days a worked place takes to give one more of a material, by its tier.
  *
- * Sized against the day the game actually has. `dayNight.ts` spends `DAY_MS` over about eighty
- * steps of ordinary walking, so:
+ * A day passes by walking about eighty steps or by sleeping; nothing reads the real clock.
  *
- *   `fast`      3 days   — a there-and-back across a field map. Long enough that a stripped
- *                          reed bed is something you notice; short enough that noticing it is
- *                          not a punishment.
- *   `seasonal`  7 days   — a season's errand. You go somewhere else and come back.
- *   `slow`     30 days   — "not on this journey", which is what canon's own gloss says `slow`
- *                          means. A player will not usually see one of these return.
- *   `never`    null      — canon's word, honoured literally. A fossil bed you have emptied is
- *                          empty. `check_playability.py` reports which of these sit in one kind
- *                          of ground precisely so this cannot strand somebody quietly.
+ *   `quick`    3 days  -- the materials three or more recipes or building stages ask for. A
+ *                         there-and-back across a field map, so the ground a player leans on is
+ *                         never a dead end.
+ *   `steady`   7 days  -- used by one or two. Go somewhere else and come back.
+ *   `slow`    14 days  -- used by nothing a player has to make. For collecting, not for progress.
+ *                         A fortnight on the owner's word: thirty was too long to ever see one return.
  *
- * **What `slow` actually means in play is worth knowing before tuning it.** Measured on Lothal
- * against a player who strips every tile on the map every day, a 30-day node is emptied thirty
- * times before it returns one — so to that player `slow` is indistinguishable from `never`.
- * Against a player who walks a route rather than carpet-sweeping, which is what the game is
- * actually shaped for, 1,923 of 1,942 nodes are still giving after ninety days. The tier is
- * doing its job; the exhaustive case is a player outrunning it on purpose.
+ * Which tier each material is in is `REGROWTH_RULE` below, applied once and stored in the data.
+ * There is no tier that never comes back: stone sorts by use like everything else, and the rule
+ * that worked ground revealed new stone nearby went with the old `never`.
  */
-export const DAYS_TO_RETURN: Record<Renewal, number | null> = {
-  fast: 3,
-  seasonal: 7,
-  slow: 30,
-  never: null
+export const REGROW_DAYS: Record<Regrowth, number> = {
+  quick: 3,
+  steady: 7,
+  slow: 14
 };
+
+/**
+ * Which tier a material belongs in, by how much the game uses it (`content/regrowth.ts` counts).
+ *
+ * A recipe ingredient or a building-stage need that names the material counts one; a tagged need
+ * it could fill (`#timber`, `#fibre`) counts `tagged`, because any of several materials answers it.
+ * At `quickFrom` uses or more it is `quick`, at `steadyFrom` or more `steady`, otherwise `slow`.
+ */
+export const REGROWTH_RULE = {
+  tagged: 0.25,
+  quickFrom: 3,
+  steadyFrom: 1
+};
+
+/**
+ * Materials whose tier is set by hand rather than by the rule, each with its reason. Empty on
+ * purpose: `test/regrowth.test.ts` fails on any material the rule would sort differently unless it
+ * is named here, so a hand-move is always written down.
+ */
+export const REGROWTH_EXCEPTIONS: Record<string, { tier: Regrowth; why: string }> = {};
 
 /**
  * How much a place holds before it is drawn down, by how common the material is.
@@ -91,36 +102,6 @@ export const GOOD_CUT_IN = 4;
 
 /** How many a good cut gives. Two, because the diary says "two of reed fibre" and not a number. */
 export const GOOD_CUT_GIVES = 2;
-
-/**
- * How far away a worked-out stone node makes a new one likelier, in tiles.
- *
- * **Stone does not grow back; it is found.** A cut nodule is gone for ever — that is canon's
- * `never` and it stays literally true — but the *world* does not run out of stone, because
- * working the ground turns up more of it. A quarry face exposes fresh rock behind the block you
- * took; a flood rolls new cobbles into a bed you have already picked over.
- *
- * So the answer to "will the map be stripped bare" is not that stone regrows. It is that a
- * player who works one outcrop **reveals another nearby**, and the ground stays worth walking
- * without anything having to un-happen.
- *
- * Six tiles is a little over two kilometres at `KM_PER_TILE`, and a few minutes' walking: near
- * enough that the new seam reads as *this* place still giving, far enough that it is a walk
- * rather than a respawn under your feet.
- */
-export const REVEAL_WITHIN = 6;
-
-/**
- * How much likelier a new stone node is, per worked-out node nearby.
- *
- * Additive on the base chance rather than multiplicative, so the effect is legible: work out
- * four outcrops around a spot and the chance of finding another there roughly doubles. Capped
- * by `REVEAL_CAP` so a heavily worked district becomes *rich* rather than paved with stone.
- */
-export const REVEAL_PER_NODE = 0.06;
-
-/** The most the base chance can be raised by working the ground. */
-export const REVEAL_CAP = 0.30;
 
 /**
  * How much of the walking a remedy takes back, as a fraction of the tiredness carried.
@@ -342,7 +323,7 @@ export const VISIT_HOURS = 2;
 export const EVENT_LEANS_PERCENT = 75;
 
 /**
- * Carrying this many of a stone that never renews, it stops turning up unless something wanted
+ * Carrying this many of a stone, it stops turning up unless something wanted
  * needs it. Flint is common on plains, hills and coast, and an event that hands over a fifth flint
  * to somebody who has never knapped one is the "useless flint" the owner complained of.
  */

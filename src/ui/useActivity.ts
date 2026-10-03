@@ -28,6 +28,13 @@ import type { BiomeId, Creature, Point } from '../world/types';
 import type { ActivityModalProps } from './ActivityModal';
 import { SHELTER_LABEL } from './JournalPanel';
 import type { Happens } from './useRoadTalk';
+import type { DayPage } from '../content/daybook';
+
+/** What the night's card asks of the day: its page, and that it is over. */
+export interface Daybook {
+  page: () => DayPage;
+  nightOver: () => void;
+}
 
 /**
  * The activity being played.
@@ -84,7 +91,8 @@ export function useActivity({
   moment,
   setMemory,
   setLastMade,
-  happens
+  happens,
+  daybook
 }: {
   underfoot: Underfoot | null;
   /** The day of the journey, from the scene's last arrival. */
@@ -103,8 +111,16 @@ export function useActivity({
   setMemory: (line: string) => void;
   setLastMade: (steps: Step[]) => void;
   happens: MutableRefObject<Happens | null>;
+  /**
+   * The day's page, asked as a night settles, and told when the night is over so the next day is
+   * read from the morning. Set by `App` once the guidance is known -- the same ref arrangement as
+   * `happens`, because that is declared after this. See `content/daybook.ts`.
+   */
+  daybook?: MutableRefObject<Daybook | null>;
 }) {
   const [activity, setActivity] = useState<Activity | null>(null);
+  /** The page the night settled on, held while its card is open. */
+  const [nightPage, setNightPage] = useState<DayPage | null>(null);
   /** What the last take carried off, so the `working` question does not turn up the same thing. */
   const lastTaken = useRef<string[]>([]);
 
@@ -309,12 +325,19 @@ export function useActivity({
             : activity.making
               ? recipe(activity.making)?.name ?? 'it'
               : null,
+          dayPage: activity.resting ? nightPage : null,
           onClose: () => {
             setActivity(null);
+            setNightPage(null);
             // The night is spent on the way out rather than when the run settles, so a player who
             // changes their mind has not already slept. `camp` is the rules layer's own event and
             // it still decides whether a night is legal.
-            if (activity.resting) EventBus.emitEvent('camp', {});
+            if (activity.resting) {
+              EventBus.emitEvent('camp', {});
+              // The night is spent on the way out whether or not it was pressed ("Sleep now"), so the
+              // next day is read from here either way -- or the next night would tell two days.
+              daybook?.current?.nightOver();
+            }
             // Something happening around the work, asked as the card closes rather than when the
             // take settles so the two cards never stand on each other. Only a take that carried
             // something off: closing the card without taking is changing your mind, not working.
@@ -331,7 +354,7 @@ export function useActivity({
             }
           },
           onFinish: activity.resting
-            ? () => {}
+            ? () => setNightPage(daybook?.current?.page() ?? null)
             : activity.making
               ? () => finishMaking(activity.making!)
               : finishTaking

@@ -260,8 +260,8 @@ function wants(w: Wanted | null | undefined, m: Material): boolean {
  * flint, because flint is common on plains, hills and coast, and the pick was even over whatever
  * common thing the ground held. Now, when `wanted` names something the ground could give, it is the
  * pick `EVENT_LEANS_PERCENT` times in a hundred, on its own seeded roll -- the smart loot of Diablo
- * III, tilted rather than certain, so a find is still a find. And a stone that never renews is not
- * offered once `STONE_ENOUGH` are carried, unless something wanted needs it.
+ * III, tilted rather than certain, so a find is still a find. And a stone is not offered once
+ * `STONE_ENOUGH` are carried, unless something wanted needs it.
  *
  * `wanted` candidates are whatever this ground holds (`also`), common or rare -- a thing you are
  * looking for is worth turning up even if it is not the commonest thing here. Deterministic.
@@ -273,7 +273,7 @@ function pickFor(
   roll: Roll,
   salt: string
 ): Material | null {
-  const enough = (m: Material) => m.renews === 'never' && (w?.carried[m.id] ?? 0) >= STONE_ENOUGH && !wants(w, m);
+  const enough = (m: Material) => m.classes.includes('stone') && (w?.carried[m.id] ?? 0) >= STONE_ENOUGH && !wants(w, m);
   const ordinary = pool.filter((m) => !enough(m));
   const wanted = [...new Set([...pool, ...also])].filter((m) => wants(w, m));
   if (wanted.length > 0 && roll(`${salt}:lean`) % 100 < EVENT_LEANS_PERCENT) {

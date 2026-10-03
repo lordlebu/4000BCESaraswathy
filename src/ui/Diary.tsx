@@ -13,7 +13,6 @@
 import { useRef, type ReactNode } from 'react';
 import {
   type Progress,
-  type WorldMoment,
   blockedBy,
   disciplineProgress,
   entriesSoFar,
@@ -54,26 +53,16 @@ const LANGUAGE_NAME: Record<string, string> = { kia: 'Kia', maru: 'Maru' };
  * Why the next rung is out of reach, in words rather than ids.
  *
  * `blockedBy` returns what is missing; turning that into a sentence is presentation, so it
- * lives here. The tone matters: a rung waiting on weather is the world being itself, not an
- * error, and it should read as a reason to come back rather than as a lock.
+ * lives here. A rung waits only on understanding now (`docs/a-lighter-game.md`), so the reason is
+ * always a word or another discovery.
  */
-function whyBlocked(progress: Progress, id: string, moment: WorldMoment | null): string | null {
-  const missing = blockedBy(progress, id, moment);
+function whyBlocked(progress: Progress, id: string): string | null {
+  const missing = blockedBy(progress, id);
   if (missing.length === 0) return null;
 
   const said: string[] = [];
   for (const req of missing) {
-    if (req === 'conditions') {
-      const d = discovery(id);
-      const next = d?.rungs[rungOf(progress, id) + 1];
-      const when = [
-        next?.conditions?.timeOfDay.length ? next.conditions.timeOfDay.join(' or ') : null,
-        next?.conditions?.weather.length ? next.conditions.weather.join(' or ') : null
-      ]
-        .filter(Boolean)
-        .join(', in ');
-      said.push(when ? `come back at ${when}` : 'the weather is not right yet');
-    } else if (req.startsWith('word_')) {
+    if (req.startsWith('word_')) {
       said.push(`a word you do not have`);
     } else {
       said.push(`you must first understand ${discovery(req)?.name ?? 'something else'}`);
@@ -83,21 +72,13 @@ function whyBlocked(progress: Progress, id: string, moment: WorldMoment | null):
   return said.join('; ') + '.';
 }
 
-function Entry({
-  id,
-  progress,
-  moment
-}: {
-  id: string;
-  progress: Progress;
-  moment: WorldMoment | null;
-}) {
+function Entry({ id, progress }: { id: string; progress: Progress }) {
   const d = discovery(id);
   const written = entriesSoFar(progress, id);
   if (!d || written.length === 0) return null;
 
   const done = isComplete(progress, id);
-  const blocked = done ? null : whyBlocked(progress, id, moment);
+  const blocked = done ? null : whyBlocked(progress, id);
 
   return (
     <article className={done ? 'entry entry-done' : 'entry'}>
@@ -125,7 +106,6 @@ function Entry({
 
 export interface DiaryProps {
   progress: Progress;
-  moment: WorldMoment | null;
   open: boolean;
   onClose: () => void;
   onAnswer: (questionId: string, index: number) => void;
@@ -146,7 +126,6 @@ export interface DiaryProps {
 
 export function Diary({
   progress,
-  moment,
   open,
   onClose,
   onAnswer,
@@ -233,7 +212,7 @@ export function Diary({
                 <section key={k} className="diary-section">
                   <h3>{DISCIPLINE_NAME[k] ?? k}</h3>
                   {here.map((d) => (
-                    <Entry key={d.id} id={d.id} progress={progress} moment={moment} />
+                    <Entry key={d.id} id={d.id} progress={progress} />
                   ))}
                 </section>
               );

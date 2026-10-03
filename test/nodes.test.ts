@@ -6,10 +6,8 @@
 //
 // What these tests are for, in order of how expensive the fault would be:
 //
-//   * a `never` material really never returns -- canon says so and the whole `nothing_runs_out`
-//     check in `check_playability.py` assumes the game honours it;
-//   * a renewing one really does return, which is the half of the bargain that keeps canon
-//     allowed to ignore counts;
+//   * every material really does return, at its tier's pace -- there is no tier that never does,
+//     since the tiers were sorted by use (`docs/a-lighter-game.md`);
 //   * an untouched world costs nothing in the save, which is what makes this affordable at all.
 
 import { describe, expect, it } from 'vitest';
@@ -19,12 +17,10 @@ import {
   draw,
   leftAt,
   noNodes,
-  revealedNear,
   takeableAt
 } from '../src/content/nodes';
-import { DAYS_TO_RETURN } from '../src/content/tiers';
+import { REGROW_DAYS } from '../src/content/tiers';
 import { gatheredLine, standingLine, yieldsAt } from '../src/content/gathering';
-import { REVEAL_CAP } from '../src/content/tiers';
 import { materials } from '../src/content/making';
 import { buildFieldMap } from '../src/world/fieldMap';
 import type { BiomeId } from '../src/world/types';
@@ -63,19 +59,14 @@ describe('a place that has been drawn from', () => {
   });
 
   /**
-   * **The half of the bargain that keeps canon allowed to ignore counts.**
-   *
-   * `check_playability.py` decides a recipe is reachable without looking at any `count`, and
-   * says in its own comment that this is sound only because a patient walker can reach any
-   * quantity. Depletion does not break that for anything that renews -- waiting is not running
-   * out -- and this is the game's half of that claim.
+   * **Waiting is never running out.** A patient walker can reach any quantity, because every
+   * material comes back at its tier's pace.
    */
-  it('comes back, given the days canon asks for', () => {
+  it('comes back, given the days its tier asks for', () => {
     const { at, biome } = tileWithSomething();
-    const m = yieldsAt(seed, at, biome).find((x) => x.renews !== 'never');
-    if (!m) return; // nothing renewing on this tile; the never case is covered below
+    const m = yieldsAt(seed, at, biome)[0]!;
     const full = capacityOf(seed, at, m);
-    const days = DAYS_TO_RETURN[m.renews]!;
+    const days = REGROW_DAYS[m.regrows];
 
     let nodes = noNodes();
     for (let i = 0; i < full; i += 1) nodes = draw(nodes, seed, at, [{ material: m, count: 1 }], 0);
@@ -88,26 +79,15 @@ describe('a place that has been drawn from', () => {
     expect(leftAt(nodes, seed, at, m, days * full * 10), 'grew past full').toBe(full);
   });
 
-  /**
-   * **Canon's word, honoured literally.**
-   *
-   * `renews: never` is not slow, it is never: a fossil bed needs another death and an age of
-   * rock. `check_playability.py` reports which never-renewing materials sit in one kind of
-   * ground precisely so this cannot strand somebody quietly -- and that report is worthless if
-   * the game quietly regrows them anyway.
-   */
-  it('never gives back what canon says never returns', () => {
-    const m = materials.find((x) => x.renews === 'never' && x.foundIn.length > 0)!;
-    expect(m, 'canon has no never-renewing material -- the fixture is wrong').toBeTruthy();
-    const at = { x: 3, y: 4 };
-    const full = capacityOf(seed, at, m);
-
-    let nodes = noNodes();
-    for (let i = 0; i < full; i += 1) nodes = draw(nodes, seed, at, [{ material: m, count: 1 }], 0);
-
-    expect(leftAt(nodes, seed, at, m, 0)).toBe(0);
-    // A century of in-game days. Nothing.
-    expect(leftAt(nodes, seed, at, m, 36_500), `${m.id} grew back`).toBe(0);
+  /** No tier never comes back: the old `never` went with the lore-chosen tiers. */
+  it('brings back every material, stone included', () => {
+    for (const m of materials.filter((x) => x.foundIn.length > 0)) {
+      const at = { x: 3, y: 4 };
+      const full = capacityOf(seed, at, m);
+      let nodes = noNodes();
+      for (let i = 0; i < full; i += 1) nodes = draw(nodes, seed, at, [{ material: m, count: 1 }], 0);
+      expect(leftAt(nodes, seed, at, m, REGROW_DAYS[m.regrows]), `${m.id} never came back`).toBe(1);
+    }
   });
 });
 
@@ -123,9 +103,8 @@ describe('what the save has to hold', () => {
 
   it('forgets a node once it has grown back', () => {
     const { at, biome } = tileWithSomething();
-    const m = yieldsAt(seed, at, biome).find((x) => x.renews !== 'never');
-    if (!m) return;
-    const days = DAYS_TO_RETURN[m.renews]!;
+    const m = yieldsAt(seed, at, biome)[0]!;
+    const days = REGROW_DAYS[m.regrows];
     const full = capacityOf(seed, at, m);
 
     let nodes = draw(noNodes(), seed, at, [{ material: m, count: 1 }], 0);
@@ -309,113 +288,5 @@ describe('what the row says before you stoop', () => {
     const line = gatheredLine('seed', { x: 0, y: 0 }, 'wetland', [{ material: reed, count: 2 }]);
     expect(line).toBe('Picked up two of reed fibre.');
     expect(line, 'a bare digit belongs in a spreadsheet').not.toMatch(/\d/);
-  });
-});
-
-describe('stone is found, not regrown', () => {
-  /**
-   * **The model, in one sentence: a cut nodule never comes back, and the world never runs out.**
-   *
-   * Canon says flint, ochre and sandstone renew `never`, and that stays literally true -- no
-   * emptied node ever refills. What working the ground does instead is *reveal* more of it: a
-   * quarry face exposes fresh rock behind the block you took, a flood rolls new cobbles into a
-   * bed already picked over.
-   *
-   * The alternative was making stone `slow`, and it is worse twice: untrue of a nodule, and
-   * measured against a player working a district hard, a thirty-day node is emptied thirty times
-   * before it returns one -- so `slow` is `never` wearing a hat.
-   */
-  it('leaves a worked district still giving, without refilling anything', () => {
-    const X0 = 10, Y0 = 10, N = 14;
-    const stoneHere = (nodes: ReturnType<typeof noNodes>, day: number) => {
-      let n = 0;
-      for (let y = Y0; y < Y0 + N; y += 1) {
-        for (let x = X0; x < X0 + N; x += 1) {
-          for (const h of takeableAt(nodes, seed, { x, y }, built.world.tiles[y]![x]!.biome, day)) {
-            if (h.material.renews === 'never') n += 1;
-          }
-        }
-      }
-      return n;
-    };
-
-    let nodes = noNodes();
-    const before = stoneHere(nodes, 0);
-    expect(before, 'no stone in the district -- the fixture is wrong').toBeGreaterThan(0);
-
-    let taken = 0;
-    for (let day = 0; day < 5; day += 1) {
-      for (let y = Y0; y < Y0 + N; y += 1) {
-        for (let x = X0; x < X0 + N; x += 1) {
-          const at = { x, y };
-          const take = takeableAt(nodes, seed, at, built.world.tiles[y]![x]!.biome, day);
-          taken += take.filter((h) => h.material.renews === 'never').reduce((a, c) => a + c.count, 0);
-          nodes = draw(nodes, seed, at, take, day);
-        }
-      }
-    }
-
-    // Far more stone came out than the district originally held, and it is still worth working.
-    expect(taken, 'nothing was taken').toBeGreaterThan(before);
-
-    // **A third of what it started with, not "more than nothing".** Removing discovery leaves
-    // exactly 1 node standing out of 91 -- a straggler on a tile the sweep happened to reach
-    // late -- and `toBeGreaterThan(0)` passed on it. A guard that a broken build satisfies by
-    // one is not a guard, which is the third time this sprint an assertion needed watching fail
-    // before it meant anything.
-    expect(
-      stoneHere(nodes, 5),
-      'the district is worked out -- discovery is not revealing new seams'
-    ).toBeGreaterThan(before / 3);
-  });
-
-  /**
-   * Discovery must not become regrowth by the back door. **No individual node ever refills**,
-   * which is what keeps `check_playability.py`'s lock-out report honest.
-   */
-  it('never refills a node that has been emptied', () => {
-    const m = materials.find((x) => x.renews === 'never' && x.foundIn.length > 0)!;
-    const at = { x: 3, y: 4 };
-    const full = capacityOf(seed, at, m);
-
-    let nodes = noNodes();
-    for (let i = 0; i < full; i += 1) nodes = draw(nodes, seed, at, [{ material: m, count: 1 }], 0);
-    expect(leftAt(nodes, seed, at, m, 0)).toBe(0);
-
-    // Work out a whole district around it, so the reveal bonus is at its cap.
-    for (let y = 0; y <= 8; y += 1) {
-      for (let x = 0; x <= 8; x += 1) {
-        const near = { x, y };
-        for (let i = 0; i < capacityOf(seed, near, m); i += 1) {
-          nodes = draw(nodes, seed, near, [{ material: m, count: 1 }], 0);
-        }
-      }
-    }
-    expect(revealedNear(nodes, at, m.id), 'the bonus did not build').toBeGreaterThan(0);
-    expect(leftAt(nodes, seed, at, m, 36_500), `${m.id} refilled`).toBe(0);
-  });
-
-  /**
-   * Only stone is discovered. A stripped reed bed says nothing about where the next one is; a
-   * worked-out outcrop says a great deal about where the rock continues.
-   */
-  it('does not reveal anything that renews', () => {
-    // A renewing material must gain nothing from worked ground: it comes back on a clock, and
-    // giving it a discovery bonus too would be paying it twice.
-    const reed = materials.find((m) => m.id === 'material_reed_fibre')!;
-    expect(reed.renews, 'reed should renew, or this test proves nothing').not.toBe('never');
-
-    const at = { x: 4, y: 4 };
-    const fresh = yieldsAt(seed, at, 'wetland').map((m) => m.id).sort();
-    // The strongest bonus the system can produce, offered to *everything*.
-    const bribed = yieldsAt(seed, at, 'wetland', (m) => (m.renews === 'never' ? REVEAL_CAP : 0))
-      .map((m) => m.id)
-      .sort();
-
-    const gained = bribed.filter((id) => !fresh.includes(id));
-    for (const id of gained) {
-      const m = materials.find((x) => x.id === id)!;
-      expect(m.renews, `${id} was revealed and it renews on a clock`).toBe('never');
-    }
   });
 });
