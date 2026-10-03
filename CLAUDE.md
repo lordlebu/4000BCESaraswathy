@@ -115,8 +115,10 @@ runner's size.**
 tests in `hours.spec.ts` — tests CI passes every time. A reproduction harsher than the thing it
 reproduces invents failures nobody has. Calibrate by running a spec CI passes and tightening until
 it stops: four is where local behaviour matches CI's. At four, the playthrough walk takes
-**4.3 minutes**, which is exactly why it was failing against a four-minute budget and why that
-budget is now eight.
+**4.3 minutes**, which is exactly why it was failing against a four-minute budget. That was the
+walk *alone*, though, and the shard runs two workers: beside another spec it takes about twice as
+long, and on hosted runners it swings between about three and eleven minutes (10.7 measured), so
+its budget is now **fifteen** and the shard cap 40 (`docs/testing.md` has the measurements).
 
 ```bash
 npm run test:ci                              # whole suite
@@ -254,7 +256,7 @@ The art docs, in the order they are useful:
 | `docs/retrospective.md` | **read first**: the whole project to 28 September 2026, what worked, what did not, what next |
 | `docs/settling-in.md` | the Settling In plan, concluded: camps, cart points, homesteads, and what was measured |
 | `docs/living-camps.md` | camps with people, **closed**: the measurements, the rulings, the way in's look, the rail decided, clearings, shadows, night light, and waiting at the pier |
-| `docs/crafting-audit.md` | **crafting audited**: the seven faults, benches that count, the tool to make, and phases 3–4 with the owner's rulings |
+| `docs/crafting-audit.md` | **closed**: crafting audited -- the seven faults, benches that count, the tool to make, "Not on this ground", the data the owner ruled on, and Dwarka's cold desert |
 | `docs/satchel-and-hearth.md` | making made easier: the pin, cook fires, windfall wood, events that help, the pointer, the next step, and the rest of the `App.tsx` split |
 | `docs/a-place-to-stop.md` | where a sitting ends: the day's page at any night, and where you left off at the door |
 | `docs/a-lighter-game.md` | **phases 1 and 2 built**: rungs need only understanding, regrowth tiers set by use; the rest is the owner's call |
@@ -835,8 +837,13 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
 - **A missing tool names the tool to make** (`content/toolStep.ts`): the one this satchel can make
   here and now, with a Make or Pin button on the reason row. `test/toolStep.test.ts` walks a new
   traveller on every map, pressing only that button. **`plan` returns a reason, never `null`, at the
-  wrong place**; `blocked: null` means a run exists. Phases 3 and 4 of the audit, with the owner's
-  rulings, are in `docs/crafting-audit.md`.
+  wrong place**; `blocked: null` means a run exists.
+- **What this ground cannot supply is set apart, never hidden** (`content/suppliable.ts`): the
+  workshop's collapsed "Not on this ground" names what nothing here gives, and a carried thing moves
+  the recipe back up. `test/suppliable.test.ts` ratchets every known recipe on every map, not only
+  taught ones -- `criticalPath.test.ts` asked only about taught recipes, which is how 9 to 29 a map
+  went unseen. **Dwarka is a cold desert**: a palette that names desert asks only for dry ground
+  (`desertNeedsHeat` in `world/classify.ts`), where the open world still wants heat too.
 
 ### The strait and the shallows (3 October 2026)
 
@@ -1172,10 +1179,10 @@ Two habits that go with it, both learned by getting them wrong:
   `src/save.ts` when the payload shape changes so old saves are discarded rather than misread.
   **Two things move it and only one of them is a payload change**: the other is the ground moving
   under a saved journey, because a remembered position, node and fog mask all name tiles that a new
-  generator no longer produces. It is at 18 — the collection replacing the old sketch list moved it
+  generator no longer produces. It is at 19 — the collection replacing the old sketch list moved it
   to 6, resource nodes to 12, the Aravali growing to 52 × 78 moved it again, stamping the sky pool
-  moved it to 15, making that pool walkable moved it to 16, a tile's `road` flag to 17 and placing
-  the painted buildings to 18 — and `Progress` (rungs, words,
+  moved it to 15, making that pool walkable moved it to 16, a tile's `road` flag to 17, placing
+  the painted buildings to 18 and Dwarka's cold desert to 19 — and `Progress` (rungs, words,
   answered, questions) plus `collection` are the parts that matter. **The last two are the same
   ground twice**, which is the clearest case this rule has: neither changed the payload's shape, and
   both changed what a remembered tile means.

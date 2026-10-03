@@ -78,8 +78,17 @@ export interface TerrainPalette {
   readonly damp: readonly MoistureStep[];
   /** What lowland ground is when no moisture step claims it. */
   readonly ground: TerrainBiomeId;
-  /** Whether hot, dry lowland may become desert. */
+  /** Whether dry lowland may become desert. */
   readonly desert: boolean;
+  /**
+   * Whether desert also needs heat. True for the unconstrained world, where desert is the hot
+   * south of the grid. **False for a field map whose canon palette names desert**: that map chose
+   * desert as part of its climate, and the only one that does is Dwarka, which canon calls a *cold*
+   * desert around a harbour whose sea left. Under the hot-desert rule its dry ground came out as
+   * plains -- 11 to 48 tiles of desert in 2,304 -- so its date palms and myrrh thorns, which grow on
+   * nothing else, stood on a handful of tiles (the crafting audit, 3 October 2026).
+   */
+  readonly desertNeedsHeat: boolean;
   /**
    * The bottom of the lowest band this palette keeps, which the map's elevation is rescaled into.
    *
@@ -147,7 +156,7 @@ const ALL_TERRAIN: readonly TerrainBiomeId[] = [
  * `river`, `settlement` and `landmark` are stamped onto the finished ground rather than
  * classified, so they have no span on either axis.
  */
-export function terrainPaletteFor(allowed: Iterable<BiomeId>): TerrainPalette {
+export function terrainPaletteFor(allowed: Iterable<BiomeId>, { desertNeedsHeat = true } = {}): TerrainPalette {
   const set = new Set<string>(allowed);
   const groundOptions = GROUND_PREFERENCE.filter((biome) => set.has(biome));
 
@@ -192,6 +201,7 @@ export function terrainPaletteFor(allowed: Iterable<BiomeId>): TerrainPalette {
     // A palette naming no lowland at all leaves nothing to stand on; plains is the honest default.
     ground: groundOptions[0] ?? 'plains',
     desert: set.has('desert'),
+    desertNeedsHeat,
     floor: Number.isFinite(floor) ? floor : 0
   };
 }
@@ -234,10 +244,11 @@ function lowland(moisture: number, temperature: number, palette: TerrainPalette)
   for (const step of palette.damp) {
     if (moisture <= step.above) continue;
     if (step.owner !== 'dry') return step.owner;
-    // Desert is the one biome that needs two axes: hot *and* dry, or it is ordinary ground.
+    // Desert needs two axes in the open world, hot *and* dry, or it is ordinary ground. A map that
+    // names desert in its palette asks only that it be dry (`desertNeedsHeat`).
     if (
       palette.desert &&
-      temperature > THRESHOLDS.DESERT_TEMPERATURE &&
+      (!palette.desertNeedsHeat || temperature > THRESHOLDS.DESERT_TEMPERATURE) &&
       moisture < THRESHOLDS.DESERT_MOISTURE
     ) {
       return 'desert';

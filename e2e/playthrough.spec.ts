@@ -159,8 +159,22 @@ test('walk from the settlement to the landmark and get a page for it', { tag: '@
   // sooner -- and CI walks the same route through a software renderer. Locally the walk is around
   // forty seconds; the margin at four minutes was small enough that ordinary variance decided the
   // run, which is not a threshold doing any work. Eight costs nothing on a green run: a timeout
-  // bounds a failure, it does not pace a success. The job it sits in allows thirty.
-  test.setTimeout(480_000);
+  // bounds a failure, it does not pace a success.
+  //
+  // **Eight was sized without the second worker, and eleven is sized with it** (3 October 2026).
+  // The 4.3 minutes behind eight was the walk measured alone at CI's size; CI's shard runs two
+  // workers, and the walk shares the machine with whatever else is in the shard. Measured on a
+  // 4-CPU box: 1.3-1.5 minutes alone, 2.5-2.7 beside `reachable.spec.ts` -- on `main` and on the
+  // branch alike -- so about twice. Twice 4.3 is ~8.6, over eight, and PR #248's run 37122637816
+  // timed the walk out four times in a row (two attempts, each with its retry) on a tree whose
+  // merge with `main` passed on another runner. Eleven was that ~8.6 with a quarter to spare.
+  //
+  // **And fifteen, because the first green run at eleven measured 10.7** (run 37127615173,
+  // shard 3, no retry) while the other run of the same commit finished the whole shard in nine
+  // minutes: the walk on a hosted runner swings between about three and eleven, far wider than
+  // any local measurement. A budget three percent above the worst seen is a coin flip, so this is
+  // the worst measured with about forty percent to spare. The shard's cap went to 40 with it.
+  test.setTimeout(900_000);
   const problems: string[] = [];
   page.on('pageerror', (error) => problems.push(`uncaught: ${error.message}`));
 

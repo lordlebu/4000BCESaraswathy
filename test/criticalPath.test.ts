@@ -47,6 +47,15 @@ const KNOWN_GAPS: Record<string, string[]> = {
   // hide for Uma's bedroll; fish bone from the river fish; Bekh's salt box in any timber; the palmyra
   // palm and fossil ammonite on Dwarka, whose sails now take husk and sandstone; Okhi teaching the
   // bone awl and the storage jar on the Narmada. A new entry here is a regression.
+  //
+  // **Except these, which are rulings rather than regressions** (the crafting audit, 3 October
+  // 2026; `docs/crafting-audit.md`). Three recipes for scarce things were made taught, so they stop
+  // being "known from the first step" on every map: the owner's call, because they read as
+  // specialist work. Their teachers stand where the thing is scarce, not absent -- a boar, a
+  // sandalwood tree and a shedding Vasuki are rare species on these maps, and making the material
+  // common was measured and did not make them findable. The workshop names what is scarce.
+  field_map_aravali: ['recipe_boar_spear', 'recipe_sandalwood_comb'],
+  field_map_narmada: ['recipe_serpent_mantle']
 };
 
 /** Which materials this map's ground offers on enough seeds to ask a player to find them. */

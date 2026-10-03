@@ -86,30 +86,55 @@ out of every one of those.
   traveller presses only the reason row's Make button and must come to cut, contain, work and cook.
   It is a ratchet (`STILL_OUT_OF_REACH`), and it is empty today.
 
-## What is left, with the owner's rulings (3 October: "I will go with your suggestions")
+## Phases 3 to 5, closed (3 October 2026, the owner's rulings: "I will go with your suggestions")
 
-1. **Phase 3, "not on this ground."** Recipes whose materials this map's ground cannot supply go
-   under a collapsed heading in the workshop, naming what is missing ("no dates grow here").
-   - A recipe moves back up when the satchel carries the missing material from another map.
-   - **Ruling: label them; do not hide them.**
-   - Needs a pure `suppliableOn(mapId)` in `content/`. The reliable-material walk in
-     `criticalPath.test.ts` is the shape, but it is too slow to run at render time, so precompute
-     per map at build time or cache it per seed.
-2. **Phase 4, data, all game-owned in `data/making/` except species placement:**
-   - **No starter tool (ruling).** The workshop's tool step replaces it, and the kit stays as it is.
-   - **Storage jar on the Aravali and Dwarka:** have someone there teach it, or add a pot-sherd
-     material to their ruins that grinds to grog.
-   - **Salt on the Narmada (ruling):** salt crust on the plateau's dry flats.
-   - **Rare materials (ruling):**
-     - Place dates and myrrh on Dwarka and milk on the Narmada, on enough tiles to find. That is
-       species placement, which is canon's job.
-     - Make the sandalwood, shed-snakeskin and boar-tusk recipes taught by somebody.
-3. **Phase 5, tests:**
-   - Extend `criticalPath.test.ts`, or add a sibling, to a ratchet over **every known** recipe, not
-     only taught ones, starting from today's never-makeable lists above. A new entry fails; one that
-     closes fails until it is struck off.
-4. **Open question, not ruled on yet.** The bench's board description says "a seat and a blade", but
-   the bench supplies no `cut`, on purpose. Either reword it or decide otherwise.
+**Phase 3, "Not on this ground"** (`content/suppliable.ts`). `groundOf(world)` lists the materials
+found on three tiles or more, walking the map once per world and only when the workshop opens.
+`outOfReach` runs criticalPath's closure from plenty of that ground plus the satchel, at every bench
+on the map. The workshop puts what is left under a collapsed heading, saying what nothing on the map
+gives, still pinnable.
+- **Labelled, never hidden** (ruling).
+- Carrying the missing thing in from another map moves the recipe back up.
+- A recipe short only of a tool is never set apart, because the tool step answers that.
+
+**Phase 4, data:**
+- **No starter tool** (ruling). The tool step replaces it.
+- **The storage jar** is taught by Ila on the Aravali and Ushi on Dwarka (canon 3.4.0), so both maps
+  can fire a cooking pot.
+- **Salt on the Narmada** is **rock salt from bare mountain**, not salt crust on the dry flats. A
+  material from the ground lies on every tile of its biome on every map, and salt on plains would
+  have salted the whole game.
+- **Milk on the Narmada** is **goat milk from the Vindhya cliff-goat**, game data only. The herders'
+  plateau did not need a canon change.
+- **Dates and myrrh on Dwarka** came from Dwarka becoming the cold desert canon says it is.
+  - The classifier made desert only where it was hot. A palette that names desert now asks only that
+    the ground be dry (`desertNeedsHeat`).
+  - Dwarka now has 147–299 desert tiles, up from 11–48. `SAVE_VERSION` went to 19, and the diary
+    survives the change.
+  - Myrrh gum and indigo became common materials. Indigo had dropped below the findable line as
+    desert took some of Dwarka's plains.
+- **The comb, the boar spear and the serpent mantle are taught**, by Ila, Anu and Tolla.
+  - Their materials are scarce where they are taught, not absent.
+  - Making the materials common was measured and did not make them findable.
+  - `criticalPath.test.ts` lists the three as rulings, not regressions.
+
+**Phase 5, the ratchet** (`test/suppliable.test.ts`). It covers every known recipe on every map, not
+only taught ones, measured the audit's way: six seeds, findable on five.
+
+| Map | Never suppliable at the audit | Now |
+|---|---|---|
+| Aravali | 24 | 14 |
+| Dwarka | 29 | 12 |
+| Lothal | 17 | 12 |
+| Narmada | 17 | 13 |
+
+What is left is mostly one map's things wanted on another, which "Not on this ground" tells the
+player to carry in: guggul and shilajit (Narmada), taro and dried fish (Lothal), dates and myrrh
+(Dwarka). (The Narmada's 13 counts tag and part shortfalls that the first closure script did not, so
+it is not comparable to that script's 9.)
+
+**Still open, not ruled on.** The bench's board description says "a seat and a blade", but the bench
+supplies no `cut`, on purpose.
 
 The audit scripts imported the game's own rules (`canMake`, `shortfalls`, `stationsAt`, `yieldsAt`,
-`plan`). Their logic is folded into the two test files above, so nothing depends on the scratchpad.
+`plan`). Their logic is folded into the test files above, so nothing depends on the scratchpad.

@@ -168,7 +168,13 @@ jobs:
     # only a backstop here -- Playwright's own 180-second per-test timeout is what actually
     # bounds a hung test -- so it should be comfortably above the worst honest run rather than
     # near it.
-    timeout-minutes: 30
+    #
+    # **40 since the walk's own budget went from eight minutes to fifteen** (3 October 2026; the
+    # measurements are beside `test.setTimeout` in `e2e/playthrough.spec.ts`). A shard where the
+    # walk fails spends it twice -- the try and its retry -- plus about seven minutes for everything
+    # else: 2 x 15 + 7 is 37, and a lower cap would let a failing walk be killed by the cap instead
+    # of reported by Playwright, which is the failure that left 49 tests unreported once already.
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v7
 

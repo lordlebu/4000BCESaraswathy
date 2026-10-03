@@ -103,11 +103,16 @@ const PREFIX = 'south-of-tethys';
  * invisible. That is not a broken save; it is a save that quietly looks like the bug this change
  * exists to fix, which is worse to leave than to drop.
  *
+ * **19 is the ground moving again, on one map.** Dwarka's dry ground is desert now rather than
+ * plains (`desertNeedsHeat` in `world/classify.ts`): canon calls it a cold desert, and the hot-desert
+ * rule had left it 11 to 48 tiles of desert. A remembered position, fog and node on Dwarka name tiles
+ * whose biome changed. The diary is in the knowledge half and survives.
+ *
  * Read strictly rather than migrated: a version mismatch drops what it versions. That is the
  * existing behaviour and it stays, because a half-understood journey is worse than a fresh one --
  * but since `KNOWLEDGE_VERSION` it drops only the half that moved. See there.
  */
-export const SAVE_VERSION = 18;
+export const SAVE_VERSION = 19;
 
 /**
  * The version of **what the player knows**, counted separately from `SAVE_VERSION` above.

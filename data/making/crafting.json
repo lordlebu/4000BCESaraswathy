@@ -394,7 +394,7 @@
       "found_in": [
         "desert"
       ],
-      "rarity": "rare",
+      "rarity": "common",
       "regrows": "steady",
       "notes": "The wound salve canon names on the myrrh-thorn is this, softened in oil. It is also the best glue in the desert, which is the same property read two ways.",
       "source_index": 19
@@ -620,7 +620,7 @@
         "plains",
         "settlement"
       ],
-      "rarity": "rare",
+      "rarity": "common",
       "regrows": "steady",
       "notes": "Fermented in a vat until it stinks, then oxidised in the air. The cloth comes out green and turns blue while you watch, which is why it is worth what it is worth.",
       "source_index": 33
@@ -1534,6 +1534,40 @@
       "regrows": "quick",
       "notes": "Whatever a tree lets fall: limbs brought down by the monsoon, a trunk the river undercut, the dead lower branches anyone may take. Every tree gives it and none is felled for it, which is why it comes back as fast as weather does. Straight enough for a pole and dry enough for a fire -- the stuff a traveller actually builds and cooks with, where teak and sandalwood are what a city builds with. Added on the owner's ruling of 2 October 2026 that the trunks a traveller walks past should be good for something.",
       "source_index": 78
+    },
+    {
+      "id": "material_goat_milk",
+      "type": "material",
+      "name": "Goat milk",
+      "classes": [
+        "milk"
+      ],
+      "won_from": [
+        "fauna_vindhya_cliff_goat"
+      ],
+      "found_in": [
+        "hills",
+        "mountains"
+      ],
+      "rarity": "common",
+      "regrows": "slow",
+      "notes": "From a nanny on the terraces, morning and evening, into whatever the herder is carrying. Thin beside a sivatherium's, and there is a great deal more of it: a herd is in milk all through the green months. The crafting audit of 3 October 2026 found nothing on the Narmada a herder could make curd from, on a plateau whose herders are the point of it.",
+      "source_index": 79
+    },
+    {
+      "id": "material_rock_salt",
+      "type": "material",
+      "name": "Rock salt",
+      "classes": [
+        "salt"
+      ],
+      "found_in": [
+        "mountains"
+      ],
+      "rarity": "common",
+      "regrows": "steady",
+      "notes": "Pink, in seams where the rock has been split open, and chipped out with whatever is to hand. From the ground, not from anything living, so it lies wherever bare mountain does. The Narmada had no salt at all -- no coast and no desert -- and five of its dishes asked for some.",
+      "source_index": 80
     }
   ],
   "items": [
@@ -3508,7 +3542,10 @@
           "item": "item_sandalwood_comb"
         }
       ],
-      "source_index": 21
+      "source_index": 21,
+      "taught_by": [
+        "npc_ila"
+      ]
     },
     {
       "id": "recipe_shell_bead",
@@ -3633,7 +3670,10 @@
           "item": "item_boar_spear"
         }
       ],
-      "source_index": 26
+      "source_index": 26,
+      "taught_by": [
+        "npc_anu"
+      ]
     },
     {
       "id": "recipe_hunting_sling",
@@ -3725,7 +3765,9 @@
       "source_index": 30,
       "taught_by": [
         "npc_bekh",
-        "npc_okhi"
+        "npc_okhi",
+        "npc_ila",
+        "npc_ushi"
       ]
     },
     {
@@ -5152,7 +5194,10 @@
       "known_by": [
         "harappan"
       ],
-      "source_index": 88
+      "source_index": 88,
+      "taught_by": [
+        "npc_tolla"
+      ]
     },
     {
       "id": "recipe_root_tea",
