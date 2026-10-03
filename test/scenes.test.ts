@@ -97,3 +97,31 @@ describe('the painting an activity shows', () => {
     expect(sceneFor('dance', 'quickly')).toBeNull();
   });
 });
+
+describe('a night painted for its ground', () => {
+  it('tries the shelter on the biome, then on its group, each at the moment first, then the shelter alone', async () => {
+    const { sceneNames } = await import('../src/ui/scenes');
+    expect(sceneNames('rest', 'bedroll', 'dawn', 'snow')).toEqual([
+      'rest-bedroll-snow-dawn',
+      'rest-bedroll-snow',
+      'rest-bedroll-high-dawn',
+      'rest-bedroll-high',
+      'rest-bedroll-dawn',
+      'rest-bedroll',
+      'rest'
+    ]);
+    expect(sceneNames('rest', 'bedroll', 'midnight', 'hills').slice(0, 3)).toEqual([
+      'rest-bedroll-hills-midnight',
+      'rest-bedroll-hills',
+      'rest-bedroll-high-midnight'
+    ]);
+  });
+
+  it('is exactly the old chain with no ground, or on ground no group names', async () => {
+    const { sceneNames } = await import('../src/ui/scenes');
+    expect(sceneNames('rest', 'camp', 'dawn')).toEqual(['rest-camp-dawn', 'rest-camp', 'rest']);
+    expect(sceneNames('rest', 'camp', 'dawn', 'plains').slice(2)).toEqual(['rest-camp-dawn', 'rest-camp', 'rest']);
+    // Until the paintings land, a ridge night shows what it showed before.
+    expect(sceneFor('rest', 'bedroll', 0, 'midnight', 'mountains')).toBe(sceneFor('rest', 'bedroll', 0, 'midnight'));
+  });
+});

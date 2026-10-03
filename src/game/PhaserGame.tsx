@@ -21,14 +21,16 @@ export interface PhaserGameProps {
    * the day count, the travellers' legs, the camps and the rumours all started over.
    */
   travelled?: number;
+  /** The vehicles this journey has been lent, from the save's flags -- see `content/firsts.ts`. */
+  lent?: string[];
 }
 
-export function PhaserGame({ seed, discovered, fieldMapId, characterId, travelled = 0 }: PhaserGameProps) {
+export function PhaserGame({ seed, discovered, fieldMapId, characterId, travelled = 0, lent = [] }: PhaserGameProps) {
   const container = useRef<HTMLDivElement>(null);
   // Held in a ref, not state: changing it must never trigger a render.
   const game = useRef<Phaser.Game | null>(null);
   // The first journey's data has to reach `create()`, but must not restart the scene afterwards.
-  const initial = useRef({ seed, discovered, fieldMapId, characterId, travelled });
+  const initial = useRef({ seed, discovered, fieldMapId, characterId, travelled, lent });
 
   useEffect(() => {
     const node = container.current;

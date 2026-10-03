@@ -128,6 +128,11 @@ export interface ActivityModalProps {
    */
   variant?: string | null;
   /**
+   * The ground underfoot, for a night: a bedroll on a ridge is not a bedroll on a marsh, and
+   * `sceneFor` tries the shelter on this ground before the shelter alone.
+   */
+  ground?: string | null;
+  /**
    * What this act is *about*, when there is no material to name it.
    *
    * A rest has an empty `promised` — nothing is won — so without this the prose reads "It. The
@@ -164,6 +169,7 @@ export function ActivityModal({
   creatureId,
   creatureName,
   variant,
+  ground = null,
   subject,
   pick = 0,
   dayPage = null,
@@ -253,7 +259,7 @@ export function ActivityModal({
   const picture = followed
     ? (act ?? plate ?? sceneFor(gesture, variant, pick))
     : // A night is painted at midnight while it is being chosen and at dawn once it is over.
-      sceneFor(gesture, variant, pick, gesture === 'rest' ? (done ? 'dawn' : 'midnight') : null);
+      sceneFor(gesture, variant, pick, gesture === 'rest' ? (done ? 'dawn' : 'midnight') : null, gesture === 'rest' ? ground : null);
   const what = subject ?? promised[0]?.material.name ?? 'it';
 
   return (

@@ -81,6 +81,8 @@ import { useGuidance } from './useGuidance';
 import { useSettling } from './useSettling';
 import { useCrossing } from './useCrossing';
 import { EventCard } from './EventCard';
+import { askAboutBoat, firstEvent, firstRide, lentFlag, lentVehicles, seenFlag } from '../content/firsts';
+import type { First } from '../content/places';
 import { peopleAtPlaces, whoIsHere } from '../content/presence';
 import { useRoadTalk } from './useRoadTalk';
 import { type Bumped, whoSpeaksFirst } from '../content/bumping';
@@ -174,6 +176,8 @@ export function App() {
    * one silently replacing the other. A ref for the bus handlers, a state for the effect to wait on.
    */
   const cardOpenRef = useRef(false);
+  /** The landmark's page is up; see `useHappenings`. Set in the handler too, ahead of the render. */
+  const pageOpenRef = useRef(false);
   const [cardOpen, setCardOpen] = useState(false);
 
   const [seed, setSeed] = useState(seedFromUrl);
@@ -197,6 +201,30 @@ export function App() {
   const [collection, setCollection] = useState<Collection>(initialJourney.current.collection);
   const [memory, setMemory] = useState('');
   const [arrivalPage, setArrivalPage] = useState<GameToUi['landmark-reached'] | null>(null);
+  useEffect(() => {
+    pageOpenRef.current = arrivalPage !== null;
+  }, [arrivalPage]);
+  /**
+   * A first's card, open: Thrali lending the dugout, or the first ride on the line
+   * (`content/firsts.ts`). `then` runs when the card closes, if its choice was taken -- the boat goes
+   * into the kit, or the carriage sets off -- so closing it unanswered changes nothing.
+   */
+  const [firstCard, setFirstCard] = useState<{ first: First; title: string; verb: string; then: () => void } | null>(null);
+  const firstTaken = useRef(false);
+  /** Open a first's card, or with cards off, simply let it happen. Assigned below `setHomeFlags`. */
+  const openFirst = useRef<(first: First, title: string, verb: string, then: () => void) => void>(() => {});
+  /**
+   * Whether a first shows its card. **Off under browser automation**, like the front door: every spec
+   * that rides the line would otherwise meet a card it did not expect. `?firsts=on` asks for it back.
+   * Off, a first still happens -- the boat is still lent, the carriage still runs -- just without
+   * the card in between.
+   */
+  const [firstsShown] = useState(() => {
+    const asked = new URLSearchParams(window.location.search).get('firsts');
+    if (asked === 'on') return true;
+    if (asked === 'off') return false;
+    return !navigator.webdriver;
+  });
   // Separate from `arrivalPage`, which the player can dismiss. Reaching the landmark is a fact
   // about the journey and belongs in the travel log even after the page is closed.
   const [reached, setReached] = useState(initialJourney.current.reached);
@@ -371,6 +399,7 @@ export function App() {
     metStrangers,
     fieldPlaced,
     cardOpenRef,
+    pageOpenRef,
     setCardOpen,
     crossing,
     heldArrival,
@@ -421,6 +450,7 @@ export function App() {
     };
 
     const onLandmarkReached = (payload: GameToUi['landmark-reached']) => {
+      pageOpenRef.current = true;
       setArrivalPage(payload);
       setReached(true);
     };
@@ -1064,7 +1094,11 @@ export function App() {
                     : 'Not on the line.',
               key: 'B',
               onDo: () => {
-                if (ride) EventBus.emitEvent('ride', { to: ride.to });
+                if (!ride) return;
+                const go = () => EventBus.emitEvent('ride', { to: ride.to });
+                const first = firstRide(fieldMapId, ride.vehicle.id, journeyFlags.current);
+                if (first) openFirst.current(first, 'The line', 'Board', go);
+                else go();
               }
             } satisfies TileAction
           ]
@@ -1197,6 +1231,42 @@ export function App() {
     journeyFlags.current = next;
     setHomeTick((n) => n + 1);
   }, []);
+
+  openFirst.current = (first, title, verb, then) => {
+    const happen = () => {
+      if (!journeyFlags.current.includes(seenFlag(first))) setHomeFlags([...journeyFlags.current, seenFlag(first)]);
+      then();
+    };
+    if (!firstsShown) {
+      happen();
+      return;
+    }
+    firstTaken.current = false;
+    setFirstCard({ first, title, verb, then: happen });
+  };
+
+  /**
+   * Asking Thrali for the boat, when there is anything to ask: here, today, and not lent yet. The
+   * rule is `askAboutBoat`; this only turns its answer into a row in the conversation.
+   */
+  const boatAsk =
+    talkingTo && arrival
+      ? askAboutBoat({ fieldMapId, npcId: talkingTo, poiId: standingOn, day: arrival.day, flags: journeyFlags.current })
+      : null;
+  const askForBoat = boatAsk
+    ? {
+        label: 'Ask about a boat',
+        onAsk: (): string | null => {
+          if (boatAsk.kind === 'not-yet') return boatAsk.line;
+          const { vehicle } = boatAsk.first;
+          openFirst.current(boatAsk.first, 'A boat lent', 'Take the dugout', () => {
+            if (!journeyFlags.current.includes(lentFlag(vehicle))) setHomeFlags([...journeyFlags.current, lentFlag(vehicle)]);
+            EventBus.emitEvent('boat-lent', { vehicle });
+          });
+          return null;
+        }
+      }
+    : null;
 
   // Who is walking: Varuna and Mithra, and whoever has joined since. Read from the flags each render,
   // because a joining is a flag a story card's choice sets. See `walkers` in characters.ts.
@@ -1445,6 +1515,7 @@ export function App() {
           seed={seed}
           discovered={initialJourney.current.discovered}
           travelled={initialJourney.current.travelled}
+          lent={lentVehicles(initialJourney.current.flags ?? [])}
           fieldMapId={bootFieldMap.current}
           characterId={characterId}
         />
@@ -1678,6 +1749,20 @@ export function App() {
           It sits beside the activity card because it *is* the activity card's furniture; see
           `EventCard.tsx` for why that reuse is the point rather than a shortcut. */}
       {eventCard && <EventCard {...eventCard} />}
+      {firstCard && (
+        <EventCard
+          event={firstEvent(firstCard.first, firstCard.title, firstCard.verb)}
+          holds={[]}
+          onChoose={() => {
+            firstTaken.current = true;
+          }}
+          onClose={() => {
+            const card = firstCard;
+            setFirstCard(null);
+            if (firstTaken.current) card.then();
+          }}
+        />
+      )}
 
       <Overworld
         current={fieldMapId}
@@ -1764,7 +1849,8 @@ export function App() {
                 satchel,
                 traits: travellerTraits,
                 onListen: listen,
-                onClose: () => dispatch({ type: 'stop-talking' })
+                onClose: () => dispatch({ type: 'stop-talking' }),
+                ask: askForBoat
               }
             : null
         }

@@ -35,13 +35,13 @@ off while any text field has focus, and every key is released on each focus chan
 | Bridges | A straight river crossing of one to three tiles that the road passes straight through is a bridge; anything else is a ford. Sky pools and the Nomad Ground's crossing stay fords. | `world/bridges.ts` |
 | Wading | River to the waist, ford to the shins, swamp to the feet, dry on a bridge; the figure is cropped at the surface with a ring. The sky pools keep their own fade. | `game/wading.ts` |
 | Wet relief | Swamp draws a half-strength bank shadow against dry land, none against water, and blends into the river both ways. | `sunkAt`, `shoreAt`, `blends` in `game/frames.ts` |
-| Dugout | On Lothal the dugout is in the kit from the first morning: step from a bank into the river and you are paddling (0.5 a step), seated in the hull; step onto land or a bridge and you walk. | `game/afloat.ts`, `boatFor` in `content/kit.ts`, canon's `vehicles` |
+| Dugout | On Lothal the dugout was in the kit from the first morning, and **since 3 October 2026 is Thrali's to lend from the third day** (`content/firsts.ts`). Once lent: step from a bank into the river and you are paddling (0.5 a step), seated in the hull; step onto land or a bridge and you walk. **Since 3 October 2026** it also goes out from the beach onto the sea within two tiles of land (`shallowsOf`), the sea staying unwalkable for everybody else; the hull is nine tenths the size; and a night afloat is its own night, `dugout`. | `game/afloat.ts`, `boatFor` in `content/kit.ts`, canon's `vehicles` |
 | Road light | The road is revealed six tiles ahead as you walk it, never the whole network. Lamps at bridge ends, junctions and every few tiles glow at night, shown once their tile is known. | `game/roadLight.ts` |
 | Places | Candidates are weighted by spread against an even layout, and an empty quarter counts 1.6x; roads are a spanning tree plus up to two loops; towns build along the road, never on it; a forecourt round each place stays clear, except at a camp. | `world/fieldMap.ts`, `networkLegs` in `world/routes.ts`, `planHuts` |
 
 The owner's rulings, which are the reasons behind several of those rows: the road is revealed as you
 walk it rather than all at once, because every road shows roughly where every place is; the dugout
-is in the kit from the start and boards without a button; river bridges get their own art and the
+was in the kit from the start (now lent, see above) and boards without a button; river bridges get their own art and the
 sky-island art stays separate; yurts only in camps and huts only in towns, and camps away from
 cities.
 

@@ -134,3 +134,40 @@ describe('one of them, talking', () => {
     expect(container.textContent).toBe('');
   });
 });
+
+describe('asking for something, in a conversation', () => {
+  const talk = (ask: { label: string; onAsk: () => string | null } | null) =>
+    render(
+      <Conversation
+        npcId="npc_thrali"
+        progress={emptyProgress()}
+        satchel={emptySatchel()}
+        traits={null}
+        onListen={noop}
+        onClose={noop}
+        ask={ask}
+      />
+    );
+
+  it('offers nothing to ask when there is nothing to ask for', () => {
+    talk(null);
+    expect(screen.queryByRole('button', { name: 'Ask about a boat' })).toBeNull();
+  });
+
+  it('says "not yet" in the person\'s own words, and the row gives way to the answer', () => {
+    const onAsk = vi.fn(() => 'A boat? Not yet.');
+    talk({ label: 'Ask about a boat', onAsk });
+    fireEvent.click(screen.getByRole('button', { name: 'Ask about a boat' }));
+    expect(onAsk).toHaveBeenCalledTimes(1);
+    expect(screen.getByText(/A boat\? Not yet\./)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Ask about a boat' })).toBeNull();
+  });
+
+  it('leaves the row alone when asking opened the loan instead', () => {
+    const onAsk = vi.fn(() => null);
+    talk({ label: 'Ask about a boat', onAsk });
+    fireEvent.click(screen.getByRole('button', { name: 'Ask about a boat' }));
+    expect(onAsk).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText(/Not yet/)).toBeNull();
+  });
+});

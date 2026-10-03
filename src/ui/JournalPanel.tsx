@@ -87,6 +87,7 @@ export const SHELTER_LABEL: Record<string, string> = {
   roof: 'Sleep under the roof',
   camp: 'Make camp for the night',
   tent: 'Pitch the tent here',
+  dugout: 'Sleep in the dugout',
   bedroll: 'Unroll the bedding here',
   none: 'Sit out the night'
 };

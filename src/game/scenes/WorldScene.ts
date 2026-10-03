@@ -87,6 +87,9 @@ import { TravellerView } from '../systems/TravellerView';
 import { VisitorView } from '../systems/VisitorView';
 import { PIP_INK, PIP_NEWS, PIP_RING } from '../marks';
 import { WandererView } from '../systems/WandererView';
+import { StraitView } from '../systems/StraitView';
+import { loadStraitArt } from '../straitArt';
+import { seaSeenFrom } from '../../content/strait';
 import { HomesteadView, loadHomesteadArt } from '../systems/HomesteadView';
 
 /**
@@ -173,7 +176,6 @@ import {
   whereNextHint
 } from '../../content/journal';
 import { biomeFor, stepCostOn } from '../../content/species';
-import { isWalkable } from '../../world/generate';
 import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
 import { fieldMap } from '../../content/places';
@@ -184,9 +186,9 @@ import { isCamp, isGrand } from '../../content/camps';
 import { findPath, nearestReachable } from '../../world/pathfind';
 import { NO_GESTURE, lost, pressed, released, type Gesture } from '../gesture';
 import { WADE_ALPHA, wadeFor, type Wade } from '../wading';
-import { afloatAfter, PADDLE_STEP, routeCost } from '../afloat';
+import { afloatAfter, canStepOnto, PADDLE_STEP, routeCost, shallowsOf } from '../afloat';
 import { glowStrength, roadAhead } from '../roadLight';
-import { boatFor } from '../../content/kit';
+import { boatOn, lentFromSearch } from '../../content/firsts';
 import { tileHash } from '../../world/rng';
 import type { BiomeId, Point, Tile, World } from '../../world/types';
 
@@ -343,6 +345,12 @@ export interface WorldSceneData {
    * save, and both can be stale. Same rule `fieldMapFromUrl` follows for `?map=`.
    */
   characterId?: string;
+  /**
+   * The vehicles the journey has been lent, from the save's flags (`content/firsts.ts`). On Lothal
+   * the dugout is Thrali's to lend from the third day, so the boat is no longer read off the map
+   * alone. Carried across a restart like the clock, or a crossing would hand it back.
+   */
+  lent?: string[];
 }
 
 /** Where a journey starts when nothing says otherwise. */
@@ -368,6 +376,8 @@ export class WorldScene extends Phaser.Scene {
 
   /** The animals walking their own ground. See `systems/WandererView.ts`. */
   private wanderers!: WandererView;
+  /** The strait's ships, kites and whale, and Dwarka's kites. See `systems/StraitView.ts`. */
+  private strait!: StraitView;
   /** The place under foot, so the UI is told when it changes rather than on every step. */
   private standingOn: string | null = null;
   private tileSprites: Phaser.GameObjects.Image[][] = [];
@@ -453,10 +463,21 @@ export class WorldScene extends Phaser.Scene {
   private glows: { key: string; sprite: Phaser.GameObjects.Image }[] = [];
   /** The strength the glows were last set to, so an unchanged sky costs nothing. */
   private glowAt = -1;
-  /** Whether this map puts a boat in the kit -- canon's `vehicles`, read through `boatFor`. */
+  /** Whether the traveller has a boat on this map: canon's `vehicles`, and on Lothal only once lent (`boatOn`). */
   private boat = false;
   /** Whether he is in the dugout. See `game/afloat.ts` for when that changes. */
   private afloat = false;
+  /** The vehicles lent to this journey; see `WorldSceneData.lent`. */
+  private lent: string[] = [];
+  /**
+   * The sea he may paddle on: within two tiles of land, and only on a map with the dugout. Empty
+   * everywhere else, so the sea stays out of reach exactly as it was.
+   */
+  private shallows = new Set<Tile>();
+  /** Whether he may step onto a tile, by `canStepOnto`. The step and every route he walks ask this. */
+  private passable = (tile: Tile): boolean => canStepOnto(tile, this.boat, this.shallows.has(tile));
+  /** What a route prices a tile at, by `routeCost`, knowing where the shallows are. */
+  private routePrice = (tile: Tile): number => routeCost(tile, this.boat, this.afloat, this.shallows.has(tile));
   /** The dugout, as two layers: the hollow behind him, and the hull's side in front of him. */
   private hullBack!: Phaser.GameObjects.Image;
   private hullFront!: Phaser.GameObjects.Image;
@@ -640,6 +661,17 @@ export class WorldScene extends Phaser.Scene {
         return scene.built?.fieldMap.id ?? scene.fieldMapId;
       }
     });
+    this.strait = new StraitView(this, {
+      get world() {
+        return scene.world;
+      },
+      get fieldMapId() {
+        return scene.built?.fieldMap.id ?? scene.fieldMapId;
+      },
+      get placed() {
+        return (scene.built?.placed ?? []).map((p) => ({ poiId: p.poi.id, at: p.at }));
+      }
+    });
     this.visitors = new VisitorView(this, {
       get world() {
         return scene.world;
@@ -650,6 +682,7 @@ export class WorldScene extends Phaser.Scene {
       loopNow: () => scene.game.loop.now
     });
     this.travelled = data.travelled ?? 0;
+    this.lent = [...(data.lent ?? []), ...lentFromSearch(window.location.search)];
     this.restedAt = this.travelled;
     this.standingOn = null;
     this.lastMoment = '';
@@ -677,6 +710,8 @@ export class WorldScene extends Phaser.Scene {
     // id even though it has not built the world, and the id is all this needs. A change of map
     // restarts the scene, so the next map's animals are loaded when it is.
     loadWandererArt(this, wandererIdsOn(this.fieldMapId));
+    // The strait's ships, kites and whale on the Aravali, the kites alone at Dwarka, nothing elsewhere.
+    loadStraitArt(this, this.fieldMapId);
     // The homestead's mill, greenhouse and every map's finished building. See `systems/HomesteadView.ts`.
     loadHomesteadArt(this);
     loadTileSheets(this, {
@@ -747,10 +782,11 @@ export class WorldScene extends Phaser.Scene {
     this.built = worldFor(map, data.seed);
     this.world = this.built.world;
     this.at = startTileFor(this.built, window.location.search);
-    this.boat = boatFor(this.built.fieldMap.vehicles) !== null;
+    this.boat = boatOn(this.built.fieldMap.id, this.lent) !== null;
+    this.shallows = this.boat ? shallowsOf(this.world) : new Set();
     // Starting on the river with a boat in the kit is starting in it.
     const standing = this.world.tiles[this.at.y]?.[this.at.x];
-    this.afloat = standing ? afloatAfter(false, standing, this.boat) : false;
+    this.afloat = standing ? afloatAfter(false, standing, this.boat, this.shallows.has(standing)) : false;
 
     const { width, height } = this.world;
     const pixelWidth = width * TILE_SIZE;
@@ -797,6 +833,7 @@ export class WorldScene extends Phaser.Scene {
     this.travellers.create();
     this.exposeForTests();
     this.wanderers.create();
+    this.strait.create();
     // The initial answer, so the UI never has to assume one.
     this.reportCharacter();
 
@@ -1419,9 +1456,8 @@ export class WorldScene extends Phaser.Scene {
       // always paid `travelCost` per step; until now only the *duration* knew about it and the
       // route did not, so tap-to-walk reliably chose the slowest line available to it.
       // By the road as well as the ground, so a click across country walks the path where one runs.
-      const cost = (tile: Tile) => routeCost(tile, this.boat, this.afloat);
       const { tiles, width, height } = this.world;
-      this.queuedPath = findPath(tiles, width, height, this.at, target, isWalkable, cost);
+      this.queuedPath = findPath(tiles, width, height, this.at, target, this.passable, this.routePrice);
 
       // **A click is never ignored.** An empty path used to mean "stand still", with nothing to
       // say the click was heard -- so a tile across the water or over the edge of an island read
@@ -1430,8 +1466,8 @@ export class WorldScene extends Phaser.Scene {
       const inside = target.x >= 0 && target.y >= 0 && target.x < width && target.y < height;
       const already = target.x === this.at.x && target.y === this.at.y;
       if (this.queuedPath.length === 0 && inside && !already) {
-        const near = nearestReachable(tiles, width, height, this.at, target, isWalkable);
-        if (near) this.queuedPath = findPath(tiles, width, height, this.at, near, isWalkable, cost);
+        const near = nearestReachable(tiles, width, height, this.at, target, this.passable);
+        if (near) this.queuedPath = findPath(tiles, width, height, this.at, near, this.passable, this.routePrice);
         this.markNoWayThrough(target);
       }
     });
@@ -1477,6 +1513,7 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('camp', this.onCamp);
     EventBus.onEvent('ride', this.onRide);
     EventBus.onEvent('shelter-built', this.onShelterBuilt);
+    EventBus.onEvent('boat-lent', this.onBoatLent);
     EventBus.onEvent('people-at-places', this.onPeopleAtPlaces);
     EventBus.onEvent('homestead-changed', this.onHomestead);
     EventBus.onEvent('ease', this.onEase);
@@ -1513,6 +1550,7 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('camp', this.onCamp);
       EventBus.offEvent('ride', this.onRide);
       EventBus.offEvent('shelter-built', this.onShelterBuilt);
+      EventBus.offEvent('boat-lent', this.onBoatLent);
       EventBus.offEvent('people-at-places', this.onPeopleAtPlaces);
       EventBus.offEvent('homestead-changed', this.onHomestead);
       EventBus.offEvent('ease', this.onEase);
@@ -1587,7 +1625,8 @@ export class WorldScene extends Phaser.Scene {
       seed: payload.seed,
       discovered: payload.discovered ?? [],
       // A new seed re-rolls the ground under the same place, rather than moving you.
-      fieldMapId: this.built?.fieldMap.id
+      fieldMapId: this.built?.fieldMap.id,
+      lent: this.lent
     });
   };
 
@@ -1607,7 +1646,9 @@ export class WorldScene extends Phaser.Scene {
       discovered: [],
       fieldMapId: payload.fieldMapId,
       // And the ride itself takes time: a day's travel between two countries (`CROSSING_MS`).
-      travelled: this.travelled + (payload.ride ?? 0)
+      travelled: this.travelled + (payload.ride ?? 0),
+      // A boat lent on Lothal is still lent when you come back to it.
+      lent: this.lent
     });
   };
 
@@ -1775,6 +1816,17 @@ export class WorldScene extends Phaser.Scene {
     this.arriveAt(this.at);
   };
 
+  /**
+   * Thrali has lent the boat. From this step on the river and the shallows can be paddled; nothing
+   * moves under him now, because he is standing on the ground he asked from.
+   */
+  private onBoatLent = ({ vehicle }: UiToGame['boat-lent']): void => {
+    if (!this.lent.includes(vehicle)) this.lent = [...this.lent, vehicle];
+    if (!this.built) return;
+    this.boat = boatOn(this.built.fieldMap.id, this.lent) !== null;
+    this.shallows = this.boat ? shallowsOf(this.world) : new Set();
+  };
+
   /** Somebody comes over, from React. See `VisitorView.approach`. */
   private onApproach = ({ npcId, sheet }: UiToGame['approach']): void => {
     this.visitors.approach(npcId, sheet);
@@ -1911,6 +1963,8 @@ export class WorldScene extends Phaser.Scene {
       // Or beside a camp that is standing today: somebody else's fire, shared. Better than the
       // bedroll and below a roof -- the plan's Q11, and the camp rung `night.ts` already has.
       atCamp: (here !== null && isCamp(here.poi)) || this.besideCamp(),
+      // In the dugout the hull is the bed, and no tent goes up on water.
+      afloat: this.afloat,
       built: this.builtShelter
     });
   }
@@ -2063,6 +2117,8 @@ export class WorldScene extends Phaser.Scene {
     // line -- which row he is sorted into, whether a step is still in flight, what ground he is
     // standing on. A freeze reported from play as "the whole game is stuck when I move to a
     // different tile" could not be reproduced at all until a spec could ask where he actually was.
+    // What the strait has on the map, for `e2e/strait.spec.ts`.
+    (window as unknown as { __strait?: () => unknown }).__strait = () => this.strait.report();
     (window as unknown as { __walker?: () => unknown }).__walker = () => ({
       x: this.at.x,
       y: this.at.y,
@@ -2071,6 +2127,8 @@ export class WorldScene extends Phaser.Scene {
       wade: this.wade,
       // Whether he is in the dugout, for `e2e/dugout.spec.ts`.
       afloat: this.afloat,
+      // Whether he has one at all -- on Lothal, only once Thrali lends it (`e2e/firsts.spec.ts`).
+      boat: this.boat,
       // Whether the carriage is carrying him, and whether it is on the screen while it does --
       // for `e2e/riding.spec.ts`, which is the only thing that can tell the two apart.
       riding: this.riding,
@@ -2167,15 +2225,14 @@ export class WorldScene extends Phaser.Scene {
     const called = this.travellers.hail(travellerId);
     if (!called || called.steps <= 1) return;
     const { at } = called;
-    const cost = (tile: Tile) => routeCost(tile, this.boat, this.afloat);
     const { tiles, width, height } = this.world;
-    const walked = findPath(tiles, width, height, this.at, at, isWalkable, cost);
+    const walked = findPath(tiles, width, height, this.at, at, this.passable, this.routePrice);
     // `findPath` ends on the goal; stop beside it rather than on them. No path at all -- they are
     // across water -- walks as near as the ground allows, as a tap would.
     if (walked.length > 0) this.queuedPath = walked.slice(0, -1);
     else {
-      const near = nearestReachable(tiles, width, height, this.at, at, isWalkable);
-      if (near) this.queuedPath = findPath(tiles, width, height, this.at, near, isWalkable, cost);
+      const near = nearestReachable(tiles, width, height, this.at, at, this.passable);
+      if (near) this.queuedPath = findPath(tiles, width, height, this.at, near, this.passable, this.routePrice);
     }
   };
 
@@ -2279,6 +2336,9 @@ export class WorldScene extends Phaser.Scene {
     this.updateRide();
     this.visitors.update();
     this.travellers.placeTargetMark();
+    // Every frame, not on the half-second gate: a boat that moved twice a second would be seen to
+    // jump. The timetable reads the journey's clock in days, the swell and the wind the loop's own.
+    this.strait.update(this.startPhase + (this.time.now + this.travelled) / DAY_MS, this.time.now);
 
     if (this.moving) return;
 
@@ -2327,7 +2387,7 @@ export class WorldScene extends Phaser.Scene {
     const { width, height } = this.world;
     if (target.x < 0 || target.y < 0 || target.x >= width || target.y >= height) return;
     const tile = this.world.tiles[target.y]![target.x]!;
-    if (!isWalkable(tile)) return;
+    if (!this.passable(tile)) return;
 
     this.faceTowards(target.x - this.at.x, target.y - this.at.y);
 
@@ -2343,7 +2403,7 @@ export class WorldScene extends Phaser.Scene {
     //
     // And in the dugout the water is the quick going: `afloatAfter` decides whether this step is
     // paddled, which is also the moment he climbs in or steps ashore.
-    this.afloat = afloatAfter(this.afloat, tile, this.boat);
+    this.afloat = afloatAfter(this.afloat, tile, this.boat, this.shallows.has(tile));
     const cost = this.afloat ? PADDLE_STEP : stepCostOn(tile);
     // The same cost buys the step twice: how long the tween takes on the screen, and how much of
     // the day the walking spends. The second is what keeps the sun honest.
@@ -2475,6 +2535,15 @@ export class WorldScene extends Phaser.Scene {
     // `ROAD_SIGHT` tiles each way, to the remembered shade -- the owner's ruling: revealed as you walk
     // it, never the whole network at once. See `game/roadLight.ts`.
     for (const key of roadAhead(this.world, at)) {
+      this.discovered.add(key);
+      if (nowVisible.has(key)) continue;
+      const [x, y] = key.split(',').map(Number);
+      this.setFog(x!, y!, FOG_REMEMBERED, true);
+    }
+    // **And the sea is seen from above**: from an island or the line on the Aravali, the open water
+    // round about, to the same remembered shade -- or the strait's boats would sail under the dark.
+    // See `seaSeenFrom` in `content/strait.ts`.
+    for (const key of seaSeenFrom(this.world, this.built?.fieldMap.id ?? this.fieldMapId, at)) {
       this.discovered.add(key);
       if (nowVisible.has(key)) continue;
       const [x, y] = key.split(',').map(Number);

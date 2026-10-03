@@ -20,8 +20,8 @@
  * Both are computed on the whole three-tile run before it is cut, so the shadow continues from one
  * piece into the next instead of stopping at every cell edge.
  *
- * **The dugout** is copied through with its magenta keyed out. It is three-quarter art that the game
- * flips rather than turns, so it keeps the shading it was drawn with.
+ * **The dugout** is keyed and shrunk to nine tenths (`DUGOUT_SCALE`). It is three-quarter art that
+ * the game flips rather than turns, so it keeps the shading it was drawn with.
  */
 
 const fs = require('node:fs');
@@ -219,10 +219,51 @@ function buildBridge() {
   console.log(`river-bridge: ${frames.length} frames of ${T}x${T}, ${(fs.statSync(file).size / 1024).toFixed(1)} KB`);
 }
 
+/**
+ * How large the hull is drawn against the art it was drawn at. **The owner's ruling, 3 October
+ * 2026: ten per cent smaller.** Done here rather than as a sprite scale in the scene, because a
+ * fractional scale at draw time resamples every frame; this resamples once, keeping the colours the
+ * art was drawn in. `DUGOUT_VIEWS` in `src/game/frames.ts` holds the numbers measured on the result.
+ */
+const DUGOUT_SCALE = 0.9;
+
+/**
+ * Shrink an image by taking, for each new pixel, the commonest opaque colour in the patch of old
+ * pixels it covers -- `build-sprite-sheet.js`'s rule, because a mean blurs a two-pixel ink line into
+ * a third colour the art never had. Transparent where most of the patch was.
+ */
+function shrink(img, factor) {
+  const width = Math.round(img.width * factor);
+  const height = Math.round(img.height * factor);
+  const out = blank(width, height);
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const x0 = Math.floor(x / factor), x1 = Math.max(x0 + 1, Math.floor((x + 1) / factor));
+      const y0 = Math.floor(y / factor), y1 = Math.max(y0 + 1, Math.floor((y + 1) / factor));
+      const counts = new Map();
+      let clear = 0;
+      for (let sy = y0; sy < y1; sy += 1) {
+        for (let sx = x0; sx < x1; sx += 1) {
+          const i = (sy * img.width + sx) * 4;
+          if (img.data[i + 3] < 128) { clear += 1; continue; }
+          const key = (img.data[i] << 16) | (img.data[i + 1] << 8) | img.data[i + 2];
+          counts.set(key, (counts.get(key) ?? 0) + 1);
+        }
+      }
+      let best = -1, most = 0, solid = 0;
+      for (const [key, n] of counts) { solid += n; if (n > most) { most = n; best = key; } }
+      if (solid <= clear) continue;
+      const o = (y * width + x) * 4;
+      out.data[o] = best >> 16; out.data[o + 1] = (best >> 8) & 255; out.data[o + 2] = best & 255; out.data[o + 3] = 255;
+    }
+  }
+  return out;
+}
+
 /** The side view, flipped by the game for west, and the two end-on views for north and south. */
 function buildDugout() {
   for (const name of ['dugout', 'dugout-north', 'dugout-south']) {
-    const hull = keyed(decodePng(path.join(SRC, `${name}.png`)));
+    const hull = shrink(keyed(decodePng(path.join(SRC, `${name}.png`))), DUGOUT_SCALE);
     const file = path.join(OUT, `${name}.png`);
     fs.writeFileSync(file, encodePng(hull.width, hull.height, Buffer.from(hull.data.buffer)));
     console.log(`${name}: ${hull.width}x${hull.height}, ${(fs.statSync(file).size / 1024).toFixed(1)} KB`);

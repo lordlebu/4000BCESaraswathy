@@ -86,6 +86,14 @@ export interface Surroundings {
   landmass?: Landmass | null;
   /** Whether the tile is road, which decides whether anything can have been dropped on it. */
   onRoad: boolean;
+  /**
+   * Whether this is open water -- a river, the sea's shallows, a sky pool -- with no ground under it.
+   * Nothing leaves tracks on it, nobody falls in to walk alongside, and nothing is buried under it.
+   * It mattered once the dugout could go out onto the sea (3 October 2026), and it was already true
+   * of a river: the tracks of a mahseer across the path was a sentence this file could write.
+   * Optional so a test fixture can leave it out; absent is dry ground.
+   */
+  onWater?: boolean;
   creature: Creature | null;
   flora: Flora | null;
   /** Canon's five words for the hour, and the sky. Null before the scene has said. */
@@ -183,6 +191,7 @@ export function surroundingsAt(
     biome: tile.biome,
     landmass: landmassAt(world.seed, at),
     onRoad: Boolean(tile.road),
+    onWater: !tile.bridge && (tile.biome === 'river' || tile.biome === 'sea' || tile.biome === 'sky_water'),
     creature: creatureFor(tile, world.seed),
     flora: floraFor(tile, world.seed),
     moment,
@@ -465,8 +474,8 @@ const byDay = (moment: Surroundings['moment']) => !moment || ['morning', 'aftern
 // ---------------------------------------------------------------------------------------------
 // The road. Asked once per day of walking.
 
-const tracks: Template = ({ creature, biome }) => {
-  if (!creature || !isAnimal(creature.id)) return null;
+const tracks: Template = ({ creature, biome, onWater }) => {
+  if (onWater || !creature || !isAnimal(creature.id)) return null;
   const animal = lower(creature.name);
   return woven('road', 'tracks', creature.id, { animal, a_animal: a(animal), ground: ground(biome) }, [
     { id: 'follow' },
@@ -486,8 +495,8 @@ const dropped: Template = ({ onRoad, biome, taken, wanted }, roll) => {
   ]);
 };
 
-const company: Template = ({ stranger, elsewhere, moment }, _roll, now) => {
-  if (!stranger || !elsewhere || !byDay(moment)) return null;
+const company: Template = ({ stranger, elsewhere, moment, onWater }, _roll, now) => {
+  if (onWater || !stranger || !elsewhere || !byDay(moment)) return null;
   // Somebody you have met is met differently -- see `companyAgain`.
   if (now.met?.includes(stranger.id)) return null;
   return woven(
@@ -513,8 +522,8 @@ const company: Template = ({ stranger, elsewhere, moment }, _roll, now) => {
  * that makes a road feel lived on, and it needs exactly one fact kept between days. By now you
  * know their name, because every first meeting ends with it.
  */
-const companyAgain: Template = ({ stranger, moment }, _roll, now) => {
-  if (!stranger || !now.met?.includes(stranger.id) || !byDay(moment)) return null;
+const companyAgain: Template = ({ stranger, moment, onWater }, _roll, now) => {
+  if (onWater || !stranger || !now.met?.includes(stranger.id) || !byDay(moment)) return null;
   return woven(
     'road',
     'company-again',
@@ -766,7 +775,8 @@ const watched: Template = ({ creature }) => {
   ]);
 };
 
-const underneath: Template = ({ biome, taken, wanted }, roll) => {
+const underneath: Template = ({ biome, taken, wanted, onWater }, roll) => {
+  if (onWater) return null;
   // Only what lies in the ground can be under what you were taking -- see `underfoot`.
   const also = materialsIn(biome).filter((m) => m.wonFrom.length === 0 && m.rarity !== 'mythic' && !taken.includes(m.id));
   const m = pickFor(underfoot(biome, taken), also, wanted, roll, 'underneath');
@@ -788,8 +798,8 @@ const underneath: Template = ({ biome, taken, wanted }, roll) => {
  * pilgrim, goat hair from a Maru drover -- so the gift says who they are. Both choices are real:
  * turning it down is a kindness too, and costs nothing.
  */
-const kindnessReturned: Template = ({ stranger, moment }, _roll, now) => {
-  if (!stranger || !byDay(moment)) return null;
+const kindnessReturned: Template = ({ stranger, moment, onWater }, _roll, now) => {
+  if (onWater || !stranger || !byDay(moment)) return null;
   const words = TEXT['kindness-returned']!;
   if (!(words.requires ?? []).every((flag) => now.flags?.includes(flagFor(flag, stranger)))) return null;
   const giftId = stranger.culture ? words.gifts?.[stranger.culture] : undefined;

@@ -971,6 +971,21 @@ export const ROW_DEPTH = 10;
  */
 export const ROW_SLOT = { underfoot: 0, undergrowth: 1, marker: 3, walker: 5, canopy: 8 } as const;
 
+/**
+ * Where the strait's traffic is drawn (`systems/StraitView.ts`), out here so a test can hold it.
+ *
+ * - `water`: ships, boats and the whale. Above the sea tiles (0) and **below every row-sorted thing**
+ *   (`GROUND_DEPTH_BASE` and up), the rail included -- so the rail is drawn over a ship wherever the
+ *   two cross and it passes beneath, as canon says boats do.
+ * - `air`: the kites and their ropes. Above everything on the islands, and below the fog, which
+ *   `WorldScene` draws at 2000 -- ground not yet seen still hides them.
+ * - `aloft`: a kite flown up into the sky (Dwarka's) and its line. **Above the fog**, beside the camp
+ *   smoke (2001): a kite high over the caravan camp is seen from it whether or not the ground under
+ *   it has been walked, which under the fog it was not -- it hung there dimmed. Below the sky's tint
+ *   (3000), so it darkens with the evening like everything else.
+ */
+export const STRAIT_DEPTH = { water: 99, air: 1990, aloft: 2002 } as const;
+
 export function depthFor(row: number, slot: number): number {
   return GROUND_DEPTH_BASE + row * ROW_DEPTH + slot;
 }
@@ -1460,8 +1475,10 @@ export function paintedHeight(speciesId: string, side: { width: number; height: 
  *
  * It used to be the side view whichever way he paddled -- a boat going north drawn crossing the
  * screen -- and it was two tiles long, a figure and a half longer than the figure sitting in it.
- * The three images come from `tools/draw-river-art.py`; the numbers below were measured on them,
- * and `test/riverBridges.test.ts` checks each one against the art rather than trusting it.
+ * The three images come from `tools/draw-river-art.py`, shrunk to nine tenths by
+ * `tools/build-river-craft.js` on the owner's word (3 October 2026); the numbers below were measured
+ * on the shrunk images, and `test/dugout.test.ts` checks each one against the art rather than
+ * trusting it.
  *
  * - `rim`: the row, from the top of the image, where the hull is cut into the part behind him and
  *   the part in front. The side view's near gunwale; the end views' widest point, a little below.
@@ -1475,9 +1492,9 @@ export const DUGOUT_VIEWS: Record<
   DugoutView,
   { image: string; rim: number; seat: number; lift: number; wake: { y: number; width: number } }
 > = {
-  side: { image: 'dugout', rim: 30, seat: 22, lift: 16, wake: { y: 60, width: 176 } },
-  north: { image: 'dugout-north', rim: 100, seat: 30, lift: 48, wake: { y: 186, width: 116 } },
-  south: { image: 'dugout-south', rim: 100, seat: 30, lift: 48, wake: { y: 186, width: 116 } }
+  side: { image: 'dugout', rim: 27, seat: 20, lift: 14, wake: { y: 54, width: 158 } },
+  north: { image: 'dugout-north', rim: 90, seat: 27, lift: 43, wake: { y: 167, width: 104 } },
+  south: { image: 'dugout-south', rim: 90, seat: 27, lift: 43, wake: { y: 167, width: 104 } }
 };
 
 /** Which hull to draw for the way he is paddling, and whether to mirror it. */

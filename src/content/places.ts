@@ -103,6 +103,8 @@ export interface FieldMap {
   prologue: Prologue | null;
   /** The roads off this map, one per neighbour. See `Road` and `ui/Journey.tsx`. */
   roads: Road[];
+  /** The firsts this map marks with a card: a boat lent, a line first ridden. See `content/firsts.ts`. */
+  firsts: First[];
   /** The landmass this map is on, from its region. Every map so far is on Jambhudweep. */
   continent: Landmass;
   /**
@@ -114,6 +116,25 @@ export interface FieldMap {
 }
 
 export type MapEdge = 'north' | 'south' | 'east' | 'west';
+
+/**
+ * Canon's `field_map.firsts`: the first time a vehicle is lent or ridden here, said once with a card.
+ * Canon says who and where and in what words; the game owns when -- `LEND_FROM_DAY` in `tiers.ts` --
+ * and what the card does (`content/firsts.ts`).
+ */
+export interface First {
+  id: string;
+  /** A game-owned vehicle id, resolved by `test/gameOwned.test.ts`. */
+  vehicle: string;
+  npc: string;
+  /** Where the person will do it. Empty means wherever the vehicle is boarded. */
+  at: string[];
+  art: string;
+  prose: string[];
+  line: string;
+  /** What they say when asked before the game's time for it has come; null when there is no wait. */
+  notYet: string | null;
+}
 
 export type PoiKind =
   | 'settlement'
@@ -217,6 +238,7 @@ interface RawFieldMap {
   scale?: string; proportion?: string; points_of_interest?: string[]; neighbours?: string[]; arrival?: string;
   climate?: Climate; coordinates?: { x: number; y: number }; relief?: string; vehicles?: string[];
   departs_from?: string[]; arrives_at?: string; prologue?: { opening: string; plates: { art: string; lines: string[]; saying?: string }[] }; roads?: Road[]; landmass_edges?: Record<string, string>;
+  firsts?: { id: string; vehicle: string; npc: string; at?: string[]; art: string; prose: string[]; line: string; not_yet?: string }[];
 }
 interface RawPoi {
   id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string; shore?: string;
@@ -272,6 +294,16 @@ export const fieldMaps: FieldMap[] = raw.field_maps.map((m) => ({
   arrival: m.arrival ?? '',
   prologue: m.prologue ? { opening: m.prologue.opening, plates: m.prologue.plates.map((p) => ({ art: p.art, lines: p.lines, saying: p.saying ?? null })) } : null,
   roads: (m.roads ?? []).map((r) => ({ to: r.to, by: r.by, art: r.art, prose: r.prose, keeper: { npc: r.keeper.npc, line: r.keeper.line } })),
+  firsts: (m.firsts ?? []).map((f) => ({
+    id: f.id,
+    vehicle: f.vehicle,
+    npc: f.npc,
+    at: f.at ?? [],
+    art: f.art,
+    prose: f.prose,
+    line: f.line,
+    notYet: f.not_yet ?? null
+  })),
   continent: (continentOf.get(m.region) ?? 'jambhudweepa') as Landmass,
   landmassEdges: (m.landmass_edges ?? {}) as Partial<Record<MapEdge, Landmass>>
 }));

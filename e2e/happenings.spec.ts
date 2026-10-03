@@ -152,3 +152,42 @@ test('the Asura-Tainted Princess walks up and says hi', async ({ page }) => {
   expect(Math.max(Math.abs(her!.x - her!.player.x), Math.abs(her!.y - her!.player.y)), 'not beside the traveller').toBeLessThanOrEqual(1);
   expect(her!.h, 'drawn at her own taller cell').toBe(88);
 });
+
+/**
+ * **Nothing opens over the landmark's page.** A camp pitched beside the landmark put its welcome
+ * on top of the journey's end, so the player was left facing a dacoit band with the page beneath
+ * it -- which is how `playthrough.spec.ts` failed, on the days its walk passed a camp. The page
+ * holds every card back (`pageOpenRef`), and the same question asked once it closes is answered.
+ */
+test('no card opens over the landmark page, and asking again once it closes is answered', async ({ page }) => {
+  await page.goto('?seed=happenings&door=open&hour=10');
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await page.waitForFunction(() => Object.keys(localStorage).some((k) => k.startsWith('south-of-tethys:world:happenings')), null, { timeout: 60_000 });
+  const spot = await page.evaluate(() => {
+    const key = Object.keys(localStorage).find((k) => k.startsWith('south-of-tethys:world:happenings'))!;
+    const baked = JSON.parse(localStorage.getItem(key)!) as { landmark: { x: number; y: number }; biomes: string[] };
+    const { x, y } = baked.landmark;
+    return { x, y, width: baked.biomes[0]!.length, height: baked.biomes.length };
+  });
+  // Stand beside it and step on. Whichever side the ground allows: a refused step is no step.
+  const sides: [number, number, string][] = [[-1, 0, 'ArrowRight'], [1, 0, 'ArrowLeft'], [0, -1, 'ArrowDown'], [0, 1, 'ArrowUp']];
+  const arrival = page.locator('.arrival');
+  for (const [dx, dy, key] of sides) {
+    const x = spot.x + dx, y = spot.y + dy;
+    if (x < 0 || y < 0 || x >= spot.width || y >= spot.height) continue;
+    await page.goto(`?seed=happenings&door=open&hour=10&at=${x},${y}`);
+    await page.waitForFunction(() => Boolean((window as unknown as { __walker?: unknown }).__walker), null, { timeout: 60_000 });
+    await page.waitForTimeout(1000);
+    await page.keyboard.press(key);
+    if (await arrival.waitFor({ timeout: 20_000 }).then(() => true, () => false)) break;
+  }
+  await expect(arrival, 'never stood on the landmark').toBeVisible();
+
+  const ask = () => page.evaluate(() => (window as unknown as { __happen?: Happen }).__happen?.('road', 'tracks') ?? false);
+  expect(await ask(), 'a card opened over the landmark page').toBe(false);
+  await expect(card(page)).toHaveCount(0);
+
+  await page.keyboard.press('Escape');
+  await expect(arrival).toBeHidden();
+  await expect.poll(ask, { timeout: 20_000 }).toBe(true);
+});

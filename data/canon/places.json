@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.1.0",
+  "canon_version": "3.2.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -380,6 +380,19 @@
             "line": "The cart for the plateau waits at the far end. It waits longer than the line does."
           }
         }
+      ],
+      "firsts": [
+        {
+          "id": "first_aravali_line",
+          "vehicle": "vehicle_lodestone_train",
+          "npc": "npc_hesh",
+          "art": "first-ride-aravali",
+          "prose": [
+            "The carriage comes in on a rail that rests on nothing and stops a hand's width above it, where the ore under the rail wants it to stop.",
+            "Hesh holds a lamp up, though it is daylight, and waits for you to step over the gap."
+          ],
+          "line": "Don't look down the first time. Everybody does, so look if you like."
+        }
       ]
     },
     {
@@ -572,7 +585,25 @@
             "saying": "saying_count_the_fires"
           }
         ]
-      }
+      },
+      "firsts": [
+        {
+          "id": "first_lothal_dugout",
+          "vehicle": "vehicle_log_dugout",
+          "npc": "npc_thrali",
+          "at": [
+            "poi_lothal_camp",
+            "poi_drowned_dockyard"
+          ],
+          "art": "first-afloat-lothal",
+          "prose": [
+            "Thrali has a dugout pulled up at the edge of the old dockyard, its strake scored with a line of signs nobody here can read.",
+            "In the delta a boat is lent the way a lamp is. The channels move in the night, and a stranger on foot is a stranger in the mud by noon. Bring it back when you go. Everybody does."
+          ],
+          "line": "It knows this water better than you do. Sit low and let it.",
+          "not_yet": "A boat? Not yet. You have not seen the channels move. Walk the delta a few days, wet to the knee, and then ask me again."
+        }
+      ]
     },
     {
       "id": "field_map_narmada",
