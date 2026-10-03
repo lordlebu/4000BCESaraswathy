@@ -175,6 +175,56 @@ test('the First Pier shows the strait from the rim, with its painting, once', as
 });
 
 /**
+ * **A card opened on the step that reaches the landmark waits behind its page.** The scene says where
+ * you stand before it says you have arrived, so a camp beside the landmark opened its welcome first
+ * and the page came up under it -- `playthrough.spec.ts` failed that way twice. Asked for mid-step
+ * here, so the card is open before the page; the page must be the one on top, and the card must come
+ * back once it is closed.
+ */
+test('a card opened as the landmark is reached waits behind the page, and returns after it', async ({ page }) => {
+  await page.goto('?seed=happenings&door=open&hour=10');
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await page.waitForFunction(() => Object.keys(localStorage).some((k) => k.startsWith('south-of-tethys:world:happenings')), null, { timeout: 60_000 });
+  const spot = await page.evaluate(() => {
+    const key = Object.keys(localStorage).find((k) => k.startsWith('south-of-tethys:world:happenings'))!;
+    const baked = JSON.parse(localStorage.getItem(key)!) as { landmark: { x: number; y: number }; biomes: string[] };
+    return { ...baked.landmark, width: baked.biomes[0]!.length, height: baked.biomes.length };
+  });
+  const sides: [number, number, string][] = [[-1, 0, 'ArrowRight'], [1, 0, 'ArrowLeft'], [0, -1, 'ArrowDown'], [0, 1, 'ArrowUp']];
+  const arrival = page.locator('.arrival');
+  let reached = false;
+  for (const [dx, dy, key] of sides) {
+    const x = spot.x + dx, y = spot.y + dy;
+    if (x < 0 || y < 0 || x >= spot.width || y >= spot.height) continue;
+    await page.goto(`?seed=happenings&door=open&hour=10&at=${x},${y}`);
+    await page.waitForFunction(() => Boolean((window as unknown as { __walker?: unknown }).__walker), null, { timeout: 60_000 });
+    await page.waitForTimeout(1000);
+    await page.keyboard.press(key);
+    // Mid-step: the card opens before the step lands and the page arrives.
+    const opened = await page.evaluate(() => (window as unknown as { __happen?: Happen }).__happen?.('road', 'tracks') ?? false);
+    if (await arrival.waitFor({ timeout: 20_000 }).then(() => true, () => false)) {
+      reached = opened;
+      break;
+    }
+  }
+  expect(reached, 'never had a card open as the landmark was reached').toBe(true);
+  // The page is what a press lands on, not a card's veil over it.
+  const keep = page.getByRole('button', { name: 'Keep this page' });
+  await expect(keep).toBeVisible();
+  const onTop = await keep.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return hit === el || el.contains(hit);
+  });
+  expect(onTop, 'a card sits over the landmark page').toBe(true);
+  await expect(card(page)).toHaveCount(0);
+  // Closed, the card that was waiting comes back.
+  await page.keyboard.press('Escape');
+  await expect(arrival).toBeHidden();
+  await expect(card(page)).toBeVisible({ timeout: 10_000 });
+});
+
+/**
  * **Nothing opens over the landmark's page.** A camp pitched beside the landmark put its welcome
  * on top of the journey's end, so the player was left facing a dacoit band with the page beneath
  * it -- which is how `playthrough.spec.ts` failed, on the days its walk passed a camp. The page

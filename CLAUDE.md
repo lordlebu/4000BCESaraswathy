@@ -779,7 +779,9 @@ retrospective. The rules, because they are rules rather than history:
 - **A card never opens over another.** `cardOpenRef` is set the instant a card opens -- an effect
   earlier in `App` runs in the same commit -- and a call to somebody waits for the open card to close.
   **Nor over the landmark's page** (`pageOpenRef`): a camp beside the landmark once put its welcome on
-  top of the journey's end.
+  top of the journey's end. And a card opened on the very step that reaches it -- the scene says where
+  you stand before it says you have arrived -- **waits behind the page** and comes back when it closes
+  (`App` renders no card while `arrivalPage` is up).
 - **Settling is flags in the save's knowledge half**, `homestead:<map>:ground|eased|built|settled`,
   so it cost no `SAVE_VERSION` bump. `content/homestead.ts` holds every rule; the Negotiation card and
   the place panel only ask. **Nothing is lost by a wrong answer**: listening draws a hint, a miss gets

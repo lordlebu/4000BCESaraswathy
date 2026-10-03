@@ -1757,7 +1757,11 @@ export function App() {
           authored yet, so this never mounts -- the path is live so the first one needs no wiring.
           It sits beside the activity card because it *is* the activity card's furniture; see
           `EventCard.tsx` for why that reuse is the point rather than a shortcut. */}
-      {eventCard && <EventCard {...eventCard} />}
+      {/* **The landmark's page comes first.** A card can open on the very step that reaches the
+          landmark -- the scene says where you stand, a camp beside it asks for its welcome, and
+          only then says you have arrived -- and it sat on top of the journey's end. So a card waits
+          while the page is up, and comes back when it is closed; `pageOpenRef` stops a new one. */}
+      {eventCard && !arrivalPage && <EventCard {...eventCard} />}
       {firstCard && (
         <EventCard
           event={firstEvent(firstCard.first, firstCard.title, firstCard.verb)}
