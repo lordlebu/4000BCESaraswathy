@@ -23,7 +23,7 @@
 
 import { useEffect } from 'react';
 import { goalOf, wanting } from '../content/goals';
-import { type Recipe, item, nameOf, process, recipes } from '../content/making';
+import { type Recipe, item, nameOf, process, recipe as recipeById, recipes } from '../content/making';
 import { type Step, plan } from '../content/making-chain';
 import {
   type Bench,
@@ -35,6 +35,7 @@ import {
   withinReach
 } from '../content/crafting';
 import { sourceOf, taughtOn, taughtWhere } from '../content/sources';
+import { type ToolStep, toolAction, toolLine, toolStep } from '../content/toolStep';
 import { cookableNow } from '../content/cooking';
 import { type Station } from '../content/stations';
 import type { Satchel } from '../content/satchel';
@@ -123,6 +124,23 @@ export function WorkshopPanel({
     const goal = goalOf(pinned);
     return goal ? wanting(goal, satchel, bench, flags) : null;
   })();
+
+  /**
+   * Why a recipe cannot be made, each reason with where the missing thing comes from. **A missing
+   * tool names the tool to make next** (`toolStep`) -- the one this satchel can make here, now, if
+   * there is one -- with a button to make it or pin it. It used to name every tool that would do,
+   * whatever was carried, and stop there. Worked out once per affordance per render.
+   */
+  const steps = new Map<string, ToolStep | null>();
+  const stepFor = (affordance: string) => {
+    if (!steps.has(affordance)) steps.set(affordance, toolStep(affordance, satchel, bench, knows));
+    return steps.get(affordance) ?? null;
+  };
+  const reasonsFor = (r: Recipe): Reason[] =>
+    shortfalls(satchel, r.id, bench).map((s) => {
+      const step = s.kind === 'tool' ? stepFor(s.affordance) : null;
+      return step ? { text: s.why, from: toolLine(step), act: toolAction(step) } : { text: s.why, from: sourceOf(s) };
+    });
 
   /** The Pin button's state for one recipe, or nothing where pinning is not offered. */
   const pinFor = (r: Recipe) =>
@@ -283,7 +301,8 @@ export function WorkshopPanel({
                   key={r.id}
                   recipe={r}
                   ready={false}
-                  why={shortfalls(satchel, r.id, bench).map((s) => ({ text: s.why, from: sourceOf(s) }))}
+                  why={reasonsFor(r)}
+                  onPinStep={onPin}
                   pin={pinFor(r)}
                   onMake={onMake}
                 />
@@ -301,7 +320,8 @@ export function WorkshopPanel({
                   key={r.id}
                   recipe={r}
                   ready={false}
-                  why={shortfalls(satchel, r.id, bench).map((s) => ({ text: s.why, from: sourceOf(s) }))}
+                  why={reasonsFor(r)}
+                  onPinStep={onPin}
                   pin={pinFor(r)}
                   onMake={onMake}
                 />
@@ -374,12 +394,15 @@ function Makeable({
   first = [],
   fire = null,
   pin,
+  onPinStep,
   onMake
 }: {
   recipe: Recipe;
   ready: boolean;
   /** What stands in the way, each with where the missing thing comes from when canon can say. */
-  why: { text: string; from: string | null }[];
+  why: Reason[];
+  /** Pins the tool a reason names, when it cannot be made yet. Absent: no pin on the reason. */
+  onPinStep?: (recipeId: string) => void;
   /** What a chain makes before this, in order, when the parts are made too. */
   first?: string[];
   /** What the fire under a dish will be, said before the press: which fuel it burns. */
@@ -455,6 +478,15 @@ function Makeable({
             <li key={w.text}>
               {w.text}
               {w.from && <span className="recipe-from">{w.from}</span>}
+              {w.act && (w.act.ready || onPinStep) && (
+                <button
+                  type="button"
+                  className="recipe-step"
+                  onClick={() => (w.act!.ready ? onMake(w.act!.recipeId) : onPinStep?.(w.act!.recipeId))}
+                >
+                  {w.act.ready ? 'Make' : 'Pin'} {stepName(w.act.recipeId)}
+                </button>
+              )}
             </li>
           ))}
           {why.length > 3 && <li className="muted">…and {why.length - 3} more</li>}
@@ -462,6 +494,20 @@ function Makeable({
       )}
     </li>
   );
+}
+
+/** One reason a recipe cannot be made, where the missing thing comes from, and a step to take. */
+interface Reason {
+  text: string;
+  from: string | null;
+  /** The recipe a button on this reason acts on: made when ready, pinned when not. */
+  act?: { recipeId: string; ready: boolean };
+}
+
+/** What the step's recipe makes, lower-cased for the button: "Make flint knife". */
+function stepName(recipeId: string): string {
+  const out = recipeById(recipeId)?.outputs[0];
+  return nameOf(out?.item ?? out?.material ?? '').toLowerCase();
 }
 
 /**

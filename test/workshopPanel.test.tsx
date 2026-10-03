@@ -162,10 +162,18 @@ describe('where the missing thing comes from', () => {
         knows={(id) => !['recipe_husk_hawser', 'recipe_shell_bead'].includes(id)}
         fieldMapId="field_map_lothal"
         satchel={s}
+        onPin={() => {}}
       />
     );
     const from = Array.from(baseElement.querySelectorAll('.recipe-from')).map((e) => e.textContent ?? '');
-    expect(from.some((t) => /stone adze/.test(t)), `no tool pointer among: ${from.join(' | ')}`).toBe(true);
+    // The tool to make next (`toolStep`): the antler pick, and the flint knife it needs first. It
+    // named the stone adze whatever was carried before the crafting audit of 3 October 2026.
+    expect(
+      from.some((t) => /first needs something that can cut: a flint knife/.test(t)),
+      `no tool pointer among: ${from.join(' | ')}`
+    ).toBe(true);
+    // And the reason row offers the step: nothing here is makeable yet, so it pins.
+    expect(Array.from(baseElement.querySelectorAll('.recipe-step')).some((b) => /^Pin /.test(b.textContent ?? ''))).toBe(true);
 
     expect(screen.getByText(/Somebody could show you/)).toBeTruthy();
     expect(baseElement.textContent).toContain('Pell teaches this at the Gate Court, North Dwarka.');

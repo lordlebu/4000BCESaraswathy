@@ -3068,6 +3068,9 @@ table.compare tr.differs th[scope='row'] { color: var(--accent); }
 .workshop-teachers > summary { cursor: pointer; font-weight: 600; padding-block: 0.4rem; }
 .recipe-taught .recipe-name { font-weight: 500; }
 .recipe-pin[aria-pressed='true'] { background: var(--accent, currentColor); color: var(--paper, #fff); }
+/* The tool a reason names, as a step: "Make flint knife" when it can be made here and now, "Pin
+   stone adze" when not. A control, so it keeps the 44-pixel tap floor. See `toolStep`. */
+.recipe-step { display: inline-flex; align-items: center; min-height: 44px; margin-top: 0.2rem; padding: 0 0.75rem; font: inherit; font-size: 0.85rem; cursor: pointer; }
 /* The pinned recipe in the dock: one line. A control since the owner could not find how to unpin
    one -- tapping it opens the workshop at it -- so it owes the 44-pixel tap floor. See `PinnedRecipe`. */
 .pinned-recipe { flex: none; margin: 0; padding: 0.2rem 0.75rem; font-size: 0.8rem; display: flex; gap: 0.5rem; align-items: baseline; min-width: 0; white-space: nowrap; overflow: hidden; }
