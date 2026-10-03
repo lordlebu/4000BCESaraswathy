@@ -7,7 +7,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 
-type Strait = { ship: boolean; boats: number; kites: number; ropes: number; whale: boolean };
+type Strait = { ship: boolean; shipX: number | null; boats: number; kites: number; ropes: number; whale: boolean };
 
 async function boot(page: Page, url: string): Promise<string[]> {
   const warnings: string[] = [];
@@ -37,5 +37,33 @@ test("Dwarka's caravan camp flies two kites, and nothing sails there", async ({ 
 
 test('Lothal has none of it', async ({ page }) => {
   await boot(page, '?seed=varuna-0&map=field_map_lothal&hour=13&door=open');
-  expect(await strait(page)).toEqual({ ship: false, boats: 0, kites: 0, ropes: 0, whale: false });
+  expect(await strait(page)).toEqual({ ship: false, shipX: null, boats: 0, kites: 0, ropes: 0, whale: false });
+});
+
+/**
+ * **The outrigger keeps its own pace while you walk.** It once kept the journey's clock, which a step
+ * spends 45 seconds of, so it jumped six tiles a step -- the owner saw it race. On the scene's clock
+ * it goes no faster than `SHIP_PACE` (half a tile a second) however much anybody walks.
+ */
+test('the outrigger does not race while the traveller walks', async ({ page }) => {
+  await boot(page, '?seed=varuna-0&map=field_map_aravali&hour=13&door=open&at=37,26');
+  await expect.poll(async () => (await strait(page)).ship, { timeout: 10_000 }).toBe(true);
+  type Walker = { x: number; y: number; moving: boolean };
+  const walker = () => page.evaluate(() => (window as unknown as { __walker: () => Walker }).__walker());
+  const before = await strait(page);
+  const t0 = Date.now();
+  const start = await walker();
+  // Walk back and forth: whatever the ground, some of these are steps, and each spends the day.
+  for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']) {
+    await page.keyboard.press(key);
+    await page.waitForTimeout(250);
+    await page.waitForFunction(() => !(window as unknown as { __walker: () => Walker }).__walker().moving, null, { timeout: 30_000 });
+  }
+  const after = await strait(page);
+  const seconds = (Date.now() - t0) / 1000;
+  const moved = await walker();
+  expect(`${moved.x},${moved.y}` !== `${start.x},${start.y}` || seconds > 0, 'never walked').toBe(true);
+  expect(after.ship, 'the outrigger left the map mid-test').toBe(true);
+  // Half a tile a second, with a tile of slack for the frame it was read on.
+  expect(Math.abs(after.shipX! - before.shipX!), `the outrigger went ${(after.shipX! - before.shipX!).toFixed(1)} tiles in ${seconds.toFixed(1)}s`).toBeLessThanOrEqual(0.5 * seconds + 1);
 });

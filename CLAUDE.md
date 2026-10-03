@@ -826,8 +826,10 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
   A sky island's top sleeps as `high` (`NIGHT_GROUND_GROUP`) and stoops as itself; the owner's
   paintings for all of it arrived the same day (`tools/intake-strait-paintings.py`).
 - **Firsts show a card once** (the event card), off under automation like the front door; `?firsts=on`.
-- **The strait's traffic is for looking at.** Positions are pure functions of the seed and the clock
-  (`content/strait.ts`), so nothing is saved. Boats draw at `STRAIT_DEPTH.water` (99, under the rail),
+- **The strait's traffic is for looking at.** Positions are pure functions of the seed and **the
+  scene's own clock, never the journey's** (`content/strait.ts`), so nothing is saved: a step spends
+  45 seconds of the day, and on that clock the outrigger raced. It slows under the line
+  (`SHIP_SLOW`) so it can be watched from the rail. Boats draw at `STRAIT_DEPTH.water` (99, under the rail),
   kites at `.air` (1990, under the fog) -- except Dwarka's, flown up from the caravan camp on the
   upright frame and drawn at `.aloft` (2002, over the fog, under the sky's tint); frames and anchors come from `tools/build-strait.js`
   (`assets/strait/`, `assets/strait.json`). **The sea is seen from above** (`seaSeenFrom`): from an
