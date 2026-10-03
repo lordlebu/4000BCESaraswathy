@@ -101,7 +101,7 @@ import {
 } from '../content/homestead';
 import { Negotiation } from './Negotiation';
 import type { Talk, Wanted } from '../content/happenings';
-import type { Station } from '../content/stations';
+import { benchAt, type Station } from '../content/stations';
 
 /**
  * How long after walking into a place somebody there may call out. Long enough for the arrival's own
@@ -756,10 +756,11 @@ export function App() {
    * kind on the point of interest. Off an authored place this is null, which `crafting.ts`
    * reads as open ground.
    */
-  const bench = useMemo(
-    () => ({ kind: standingOn ? poi(standingOn)?.kind ?? null : null }),
-    [standingOn]
-  );
+  const bench = useMemo(() => {
+    const here = standingOn ? poi(standingOn) : null;
+    // And the benches standing there, so a loom stands in for a loom frame (`benchStandsIn`).
+    return benchAt(here);
+  }, [standingOn]);
 
   /** The tile under foot, for gathering. Null before the world has been built. */
   const underfoot = useMemo(() => {

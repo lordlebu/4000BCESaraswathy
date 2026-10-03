@@ -34,7 +34,7 @@
 //
 // Pure and free of React and Phaser, like the rest of `content/`.
 
-import { type Process, process as processById, processes } from './making';
+import { type Affordance, type Process, process as processById, processes } from './making';
 import { type PointOfInterest, npcsAt } from './places';
 
 /**
@@ -67,6 +67,18 @@ export interface Station {
   description: string;
   /** Canon process ids this bench works. */
   processes: string[];
+  /**
+   * What the bench itself does for the processes it works, so nobody standing at it is asked to
+   * carry one: a loom works the weft, a quern works the grain, a kiln is the fire, a tannery's vat
+   * and an apothecary's jars hold what soaks. **The owner, 3 October 2026**: at the loom in the Camp
+   * in the Kilns, weaving still asked for a loom frame and for "something that can work".
+   *
+   * Empty on three on purpose. The hearth's fire is `crafting.fireFor`'s, on the owner's ruling that
+   * a cook fire is free at a settlement or road stop and nowhere else -- every place has a hearth on
+   * its board, so supplying `burn` here would quietly overrule that. The bench's blade and the slip's
+   * tools would put a knife at every place, and making the first knife is a step worth keeping.
+   */
+  supplies: readonly Affordance[];
 }
 
 /**
@@ -82,49 +94,57 @@ export const STATIONS: readonly Station[] = [
     id: 'bench',
     name: 'Bench',
     description: 'A seat and a blade. Carving and knapping, which want nothing but hands.',
-    processes: ['process_carving', 'process_knapping']
+    processes: ['process_carving', 'process_knapping'],
+    supplies: []
   },
   {
     id: 'hearth',
     name: 'Hearth',
     description: 'A fire and a pot. Anywhere somebody stops long enough to build one.',
-    processes: ['process_cooking', 'process_brewing']
+    processes: ['process_cooking', 'process_brewing'],
+    supplies: []
   },
   {
     id: 'apothecary',
     name: 'Apothecary',
     description: 'Sorting, drying and keeping. A bench, a shelf, and somebody who knows the leaf.',
-    processes: ['process_purifying', 'process_drying']
+    processes: ['process_purifying', 'process_drying'],
+    supplies: ['contain']
   },
   {
     id: 'loom',
     name: 'Loom',
     description: 'A frame and tension. Spinning first, then weaving.',
-    processes: ['process_weaving', 'process_spinning', 'process_twisting']
+    processes: ['process_weaving', 'process_spinning', 'process_twisting'],
+    supplies: ['work']
   },
   {
     id: 'tannery',
     name: 'Tannery',
     description: 'Soaking, and the smell. Retting reed and tanning hide are the same patience.',
-    processes: ['process_tanning', 'process_retting']
+    processes: ['process_tanning', 'process_retting'],
+    supplies: ['contain']
   },
   {
     id: 'quern',
     name: 'Quern',
     description: 'Stone on stone. Grinding and pressing, and a back that knows it.',
-    processes: ['process_grinding', 'process_pressing']
+    processes: ['process_grinding', 'process_pressing'],
+    supplies: ['work']
   },
   {
     id: 'kiln',
     name: 'Kiln',
     description: 'One fire, hot enough. Firing, smelting and casting are heats of the same thing.',
-    processes: ['process_firing', 'process_smelting', 'process_casting']
+    processes: ['process_firing', 'process_smelting', 'process_casting'],
+    supplies: ['burn']
   },
   {
     id: 'slip',
     name: 'Slip',
     description: 'Water, and room to lay a hull down beside it.',
-    processes: ['process_boatbuilding']
+    processes: ['process_boatbuilding'],
+    supplies: []
   }
 ];
 
@@ -225,6 +245,41 @@ export function stationsAt(poi: PointOfInterest): Station[] {
     }
   }
   return STATIONS.filter((s) => here.has(s.id));
+}
+
+/**
+ * Whether a bench standing here does `need` for this process, so nothing carried has to.
+ *
+ * Only for the processes that bench works: a kiln is a fire for firing and smelting, not for a stew.
+ */
+export function benchSupplies(stations: readonly string[] | undefined, processId: string, need: Affordance): boolean {
+  if (!stations?.length) return false;
+  const s = stationForProcess(processId);
+  return Boolean(s && stations.includes(s.id) && s.supplies.includes(need));
+}
+
+/**
+ * Whether a bench standing here opens this process where canon's `performed_at` would not.
+ *
+ * **Additive only** -- see the header. `crafting.placeAllows` asks this after canon has said no.
+ */
+export function benchOpens(stations: readonly string[] | undefined, processId: string): boolean {
+  if (!stations?.length) return false;
+  const s = stationForProcess(processId);
+  return Boolean(s && stations.includes(s.id));
+}
+
+/**
+ * What a traveller standing at this place has to work with: its kind, and the benches here.
+ *
+ * **The one way to build a `crafting.Bench` from a place**, so the workshop, the goals and the tests
+ * all ask with the same benches. The crafting rules ignored the benches for as long as this board
+ * showed them -- a loom at the Camp in the Kilns, and weaving there still asked for a loom frame --
+ * because `App` built its bench from the kind alone. Null is out in the open.
+ */
+export function benchAt(poi: PointOfInterest | null): { kind: string | null; stations: StationId[] } {
+  if (!poi) return { kind: null, stations: [] };
+  return { kind: poi.kind, stations: stationsAt(poi).map((s) => s.id) };
 }
 
 /**

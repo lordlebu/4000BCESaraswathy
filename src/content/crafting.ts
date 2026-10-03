@@ -19,17 +19,24 @@ import {
   type MaterialClass,
   type Recipe,
   hasClass,
+  item as itemById,
   nameOf,
   process,
   recipe,
   recipes
 } from './making';
 import { type Satchel, add, affording, count, remove } from './satchel';
+import { benchOpens, benchSupplies } from './stations';
 
 /** Where the traveller is standing, as far as making is concerned. */
 export interface Bench {
   /** The `poi.kind` under foot, or null out in the open. */
   kind: string | null;
+  /**
+   * The benches standing here (`stations.stationsAt`): a loom, a quern, a kiln. Absent out in the
+   * open, and for a caller that only knows the kind.
+   */
+  stations?: readonly string[];
 }
 
 /** Standing in a field, which is where most of this happens. */
@@ -54,7 +61,23 @@ export function tagCount(satchel: Satchel, tag: MaterialClass): number {
   return satisfying(satchel, tag).reduce((n, id) => n + count(satchel, id), 0);
 }
 
-function haveIngredient(satchel: Satchel, need: Ingredient): boolean {
+/**
+ * Whether a kept tool is here as a bench rather than in the satchel.
+ *
+ * **The owner, 3 October 2026**: at the loom in the Camp in the Kilns, weaving a reed mat still asked
+ * for a loom frame. The frame is a loom you carry; standing at a loom is having one. Only the tools
+ * the data says are a bench's carried form (`stands_in_for`) -- a cooking pot or a knife is still
+ * yours to bring, and a tool that is spent is never stood in for. The same move as a hearth lighting
+ * a cook fire (`fireFor`).
+ */
+export function benchStandsIn(need: Ingredient, bench: Bench = openGround()): boolean {
+  if (!need.kept || !need.item) return false;
+  const tool = itemById(need.item);
+  return Boolean(tool?.standsInFor && bench.stations?.includes(tool.standsInFor));
+}
+
+function haveIngredient(satchel: Satchel, need: Ingredient, bench: Bench = openGround()): boolean {
+  if (benchStandsIn(need, bench)) return true;
   if (need.tag) return tagCount(satchel, need.tag) >= need.count;
   const id = need.material ?? need.item;
   return id ? count(satchel, id) >= need.count : false;
@@ -69,7 +92,10 @@ function haveIngredient(satchel: Satchel, need: Ingredient): boolean {
 export function placeAllows(recipeId: string, bench: Bench): boolean {
   const p = process(recipe(recipeId)?.process ?? '');
   if (!p || p.performedAt.length === 0) return true;
-  return bench.kind !== null && p.performedAt.includes(bench.kind);
+  if (bench.kind !== null && p.performedAt.includes(bench.kind)) return true;
+  // A bench on this place's board opens its processes here (`stations.benchOpens`). The board
+  // showed a kiln at the Sunk Cutting for as long as this said "settlements only" and refused it.
+  return benchOpens(bench.stations, p.id);
 }
 
 /**
@@ -138,7 +164,11 @@ export function missingTools(satchel: Satchel, recipeId: string, bench: Bench = 
   const p = process(recipe(recipeId)?.process ?? '');
   if (!p) return [];
   return p.needs.filter(
-    (n) => affording(satchel, n).length === 0 && !(n === 'burn' && fireFor(satchel, recipeId, bench) !== null)
+    (n) =>
+      affording(satchel, n).length === 0 &&
+      !(n === 'burn' && fireFor(satchel, recipeId, bench) !== null) &&
+      // The loom works the weft; nobody at it is asked to carry something that can work.
+      !benchSupplies(bench.stations, p.id, n)
   );
 }
 
@@ -153,7 +183,7 @@ export function canMake(satchel: Satchel, recipeId: string, bench: Bench = openG
   if (!r) return false;
   if (!placeAllows(recipeId, bench)) return false;
   if (missingTools(satchel, recipeId, bench).length > 0) return false;
-  return r.ingredients.every((need) => haveIngredient(satchel, need));
+  return r.ingredients.every((need) => haveIngredient(satchel, need, bench));
 }
 
 /**
@@ -199,7 +229,7 @@ export function shortfalls(satchel: Satchel, recipeId: string, bench: Bench = op
     out.push({ kind: 'tool', why: `needs something that can ${tool}${fuel}`, affordance: tool });
   }
   for (const need of r.ingredients) {
-    if (haveIngredient(satchel, need)) continue;
+    if (haveIngredient(satchel, need, bench)) continue;
     if (need.tag) {
       out.push({ kind: 'ingredient', why: `needs ${need.count} ${need.tag}, has ${tagCount(satchel, need.tag)}`, id: null, tag: need.tag });
     } else {
