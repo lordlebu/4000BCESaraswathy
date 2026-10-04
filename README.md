@@ -40,6 +40,9 @@ clock.
 - **A generator that produces real geography.** Terrain is built from octaves of value noise over a
   seeded highland spine, so every seed has hills, mountains and rivers running off them to the
   water. `test/generator.test.ts` asserts this on twenty seeds.
+- **An opening, and a world of your own.** Every visit opens on the title, *South of Tethys* and
+  its name in Brahmi, and a first walk goes on into a short painted opening. Each new walk starts on
+  a random seed, written into the address so the world can be passed on.
 - **235 creatures and 113 plants**, placed by biome, each with authored journal prose.
 - **Invented place names.** Settlements, rivers and landmarks are named from seeded syllables —
   Thenavati, Hudhukoli, the Shanesarin — so a map reads as a country rather than a grid.

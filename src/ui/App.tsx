@@ -19,7 +19,7 @@ import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { readShowing, writeShowing } from './preferences';
-import { arrivalPoint, fieldMap, poi } from '../content/places';
+import { arrivalPoint, fieldMap, fieldMaps, poi } from '../content/places';
 import { walkers } from '../game/characters';
 import { travellerAttributes, travellersOn } from '../content/travellers';
 import { SatchelPanel } from './SatchelPanel';
@@ -27,7 +27,7 @@ import { SatchelStrip } from './SatchelStrip';
 import { RecordTabs, type RecordTab } from './Records';
 import { PeoplePanel } from './PeoplePanel';
 import { met } from '../content/people';
-import { seedFromUrl } from './seed';
+import { freshSeed, rememberSeed, seedFromUrl } from './seed';
 import { JourneySeed } from './journeySeed';
 import { SettlingSection } from './SettlingSection';
 import { settlingRoad } from '../content/settlingRoad';
@@ -121,6 +121,12 @@ import { Modal } from './Modal';
  * rather than throwing — this is a convenience, and must never break the game for someone who
  * mistypes one.
  */
+/**
+ * The opening's prologue, for the title card: the map a journey begins on carries it (Lothal). The
+ * title is the game's rather than a map's, so it is shown whatever map a returning player is on.
+ */
+const OPENING_PROLOGUE = fieldMaps.find((m) => m.prologue)?.prologue ?? null;
+
 function fieldMapFromUrl(saved?: string): string {
   const asked = new URLSearchParams(window.location.search).get('map')?.trim();
   if (asked && fieldMap(asked)) return asked;
@@ -290,6 +296,25 @@ export function App() {
     if (asked === 'shut') return true;
     return !navigator.webdriver;
   });
+
+  /**
+   * The title card, which comes before the door (the owner, 4 October 2026): *South of Tethys*, and
+   * the name in Brahmi. A visit that has never walked goes on from it into the whole opening -- the
+   * saying and the plates -- and reaches the door to choose who sets out; a returning one sees the
+   * title alone and then the door. Wherever the door is skipped, so is this; `?title=skip` skips the
+   * title alone, for the specs that are about the door.
+   */
+  const [titleUp, setTitleUp] = useState<'first' | 'only' | null>(() => {
+    if (!atTheDoor) return null;
+    const query = new URLSearchParams(window.location.search);
+    if (query.get('title') === 'skip') return null;
+    // The whole opening only where setting out would play it: the map a new walk starts on has one.
+    const startsOn = fieldMapFromUrl(initialJourney.current.fieldMapId);
+    const whole = !hasBegun(initialJourney.current) && query.get('opening') !== 'skip' && Boolean(fieldMap(startsOn)?.prologue);
+    return whole ? 'first' : 'only';
+  });
+  /** Whether the whole opening has played this visit, so setting out does not play it twice. */
+  const openingPlayed = useRef(false);
 
   // The scene owns the clock; this is only where the last reading is kept so the save can hand
   // it back on the next boot. A ref rather than state because nothing renders from it.
@@ -651,6 +676,7 @@ export function App() {
     setArrivalPage(null);
     setReached(false);
     setSeed(next);
+    rememberSeed(next);
     const url = new URL(window.location.href);
     url.searchParams.set('seed', next);
     window.history.replaceState(null, '', url);
@@ -1550,8 +1576,19 @@ export function App() {
         <Opening prologue={fieldMap(fieldMapId)!.prologue!} onDone={() => setOpening(false)} />
       )}
 
+      {titleUp && OPENING_PROLOGUE && (
+        <Opening
+          prologue={titleUp === 'first' ? (fieldMap(bootFieldMap.current)?.prologue ?? OPENING_PROLOGUE) : OPENING_PROLOGUE}
+          title={titleUp}
+          onDone={() => {
+            if (titleUp === 'first') openingPlayed.current = true;
+            setTitleUp(null);
+          }}
+        />
+      )}
+
       <FrontDoor
-        open={atTheDoor}
+        open={atTheDoor && !(titleUp && OPENING_PROLOGUE)}
         canContinue={hasBegun(initialJourney.current)}
         seed={seed}
         characterId={characterId}
@@ -1575,8 +1612,12 @@ export function App() {
           // **Starting over clears the save first.** `generate` reloads whatever the seed has
           // stored, so on a seed already walked "start a new walk" kept the old progress, satchel
           // and flags -- the opposite of what the door's second press promises.
-          clearJourney(seed);
-          generate(seed);
+          // **A new walk is a new world** (the owner, 4 October 2026): starting over rolls a fresh
+          // seed rather than wiping this one. Setting out for the first time keeps the seed the visit
+          // arrived on -- a random one, or the one a shared link carried.
+          const next = hasBegun(initialJourney.current) ? freshSeed() : seed;
+          clearJourney(next);
+          generate(next);
           // A new walk starts where the address asks, else on the opening map -- never on the map
           // the old walk ended on.
           const map = fieldMapFromUrl();
@@ -1591,7 +1632,8 @@ export function App() {
             if (start && !url.searchParams.has('at')) url.searchParams.set('at', start);
             window.history.replaceState(null, '', url);
             journeyFlags.current = ['opening:seen', 'coach:on'];
-            if (url.searchParams.get('opening') !== 'skip') setOpening(true);
+            // Not twice in one visit: a first walk has just watched it, before the door.
+            if (url.searchParams.get('opening') !== 'skip' && !openingPlayed.current) setOpening(true);
           }
           setAtTheDoor(false);
         }}
