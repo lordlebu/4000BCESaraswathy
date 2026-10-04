@@ -221,7 +221,10 @@ describe('what the animals give is actually findable', () => {
   const SEEDS = 12;
   const FLOOR = 4;
 
-  it('offers each animal material on most seeds, not in theory', () => {
+  // Builds 24 maps and reads every tile: about four seconds alone, and past the default twenty under a
+  // full parallel run on a small machine, where it timed out repeatedly while passing. The same budget
+  // the other whole-map walks carry (`suppliable.test.ts`).
+  it('offers each animal material on most seeds, not in theory', { timeout: 60_000 }, () => {
     const want = ['material_shed_snakeskin', 'material_viper_venom', 'material_sivatherium_milk'];
     const seen: Record<string, Set<string>> = {};
     for (const w of want) seen[w] = new Set();

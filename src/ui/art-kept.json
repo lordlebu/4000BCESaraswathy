@@ -1,6 +1,7 @@
 {
   "note": "Every piece of art this game has ever accepted. Nothing is ever removed from this list, and nothing named here may be deleted from src/ui/ -- test/artKept.test.ts fails if one goes missing. A better painting of the same thing is ADDED as a second take (rest.png, then rest.2.png); it never replaces what is there. See docs/art-handover.md.",
   "kept": [
+    "events/happening_alms_on_the_step.png",
     "events/happening_tower_standing.png",
     "events/happening_where_you_stop.png",
     "events/happening_year_names.png",

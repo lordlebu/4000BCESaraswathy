@@ -9,7 +9,7 @@
 import { describe, expect, it } from 'vitest';
 import { canMake, mapAllows, placeAllows, shortfalls } from '../src/content/crafting';
 import { benchAt } from '../src/content/stations';
-import { fieldMaps, poi } from '../src/content/places';
+import { fieldMap, fieldMaps, npc, poi } from '../src/content/places';
 import { material, recipe } from '../src/content/making';
 import { add, emptySatchel } from '../src/content/satchel';
 
@@ -29,6 +29,16 @@ describe('kulfi', () => {
     expect(r.ingredients.some((n) => n.tag === 'milk')).toBe(true);
     expect(r.ingredients.some((n) => n.material === 'material_glacier_ice')).toBe(true);
     expect(r.madeOn).toEqual(['field_map_narmada']);
+  });
+
+  it('is shown by Tolla on the herders’ terraces, and by nobody else', () => {
+    // The owner, 4 October 2026: taught, not known from the start. Canon's line gives it.
+    const r = recipe('recipe_kulfi')!;
+    expect(r.taughtBy).toEqual(['npc_tolla']);
+    expect(r.knownBy).toEqual([]);
+    const teaching = npc('npc_tolla')!.lines.filter((l) => l.gives.includes('recipe_kulfi'));
+    expect(teaching.length).toBe(1);
+    expect(npc('npc_tolla')!.foundAt.every((at) => fieldMap('field_map_narmada')!.pointsOfInterest.includes(at))).toBe(true);
   });
 
   it('can be made on the Narmada', () => {

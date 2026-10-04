@@ -5393,13 +5393,13 @@
           "item": "item_kulfi"
         }
       ],
-      "known_by": [
-        "maru"
+      "taught_by": [
+        "npc_tolla"
       ],
       "made_on": [
         "field_map_narmada"
       ],
-      "notes": "The owner's ask of 4 October 2026: kulfi from milk and ice, and only on the Narmada. `made_on` holds it there, because nothing in the satchel spoils and carried ice would otherwise set a kulfi on the delta.",
+      "notes": "The owner's ask of 4 October 2026: kulfi from milk and ice, and only on the Narmada. `made_on` holds it there, because nothing in the satchel spoils and carried ice would otherwise set a kulfi on the delta. Taught by Tolla on the herders' terraces (the owner, 4 October 2026), rather than known to every Maru from the start.",
       "source_index": 93
     }
   ],

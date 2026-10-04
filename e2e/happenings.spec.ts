@@ -154,15 +154,16 @@ test('the Asura-Tainted Princess walks up and says hi', async ({ page }) => {
 });
 
 /**
- * **The strait from the rim**: arriving at the First Pier, the first floating island a player stands
- * on, opens canon's happening with the owner's painting of a woman watching the ships. Written, so it
- * wins over anything woven, and once only.
+ * **The strait from the rim**: arriving at the Far Landing, the second floating island, opens canon's
+ * happening with the owner's painting of a woman watching the ships. Written, so it wins over anything
+ * woven, and once only. It was the First Pier's until 4 October 2026, when the owner asked for the
+ * Aravali's cards to be spread out: the first island has the Alms Step's card now.
  */
-test('the First Pier shows the strait from the rim, with its painting, once', async ({ page }) => {
+test('the Far Landing shows the strait from the rim, with its painting, once', async ({ page }) => {
   await page.goto('?seed=happenings&map=field_map_aravali&door=open&hour=10');
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   const arrive = () =>
-    page.evaluate(() => (window as unknown as { __happen?: Happen }).__happen?.('arriving', undefined, undefined, 'poi_first_pier') ?? false);
+    page.evaluate(() => (window as unknown as { __happen?: Happen }).__happen?.('arriving', undefined, undefined, 'poi_far_landing') ?? false);
   await expect.poll(arrive, { timeout: 20_000 }).toBe(true);
   await expect(card(page).locator('h2')).toHaveText('The strait from the rim');
   await expect(card(page).locator('img.activity-scene')).toHaveAttribute('src', /happening_the_strait_from_the_rim/);
@@ -172,6 +173,40 @@ test('the First Pier shows the strait from the rim, with its painting, once', as
   await expect(card(page)).toBeHidden();
   // Asked again on the same arrival: canon's happening has been, so it is not this card.
   if (await arrive()) await expect(card(page).locator('h2')).not.toHaveText('The strait from the rim');
+});
+
+/**
+ * **The Aravali's written cards, spread across the crossing** (the owner, 4 October 2026). They used
+ * to land together in the first hour. Now each belongs to its own place, north across the map: the
+ * Alms Step on the first island, the strait at the Far Landing, the sleeping stranger at the Kept
+ * Stones on the north bank. The First Pier, where they used to start, holds none of them.
+ */
+test("the Aravali's cards each wait for their own place", async ({ page }) => {
+  await page.goto('?seed=happenings-spread&map=field_map_aravali&door=open&hour=10');
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  const arrive = (poiId: string) =>
+    page.evaluate((id) => (window as unknown as { __happen?: Happen }).__happen?.('arriving', undefined, undefined, id) ?? false, poiId);
+  const close = async () => {
+    await card(page).getByRole('button').first().click();
+    await card(page).getByRole('button', { name: 'Go on' }).click();
+    await expect(card(page)).toBeHidden();
+  };
+
+  // The First Pier opens none of the written three.
+  if (await arrive('poi_first_pier')) {
+    await expect(card(page).locator('h2')).not.toHaveText(/The strait from the rim|Alms on the step|A stranger asleep/);
+    await close();
+  }
+  for (const [poiId, title] of [
+    ['poi_alms_step', 'Alms on the step'],
+    ['poi_kept_stones', 'A stranger asleep']
+  ] as const) {
+    await expect.poll(() => arrive(poiId), { timeout: 20_000 }).toBe(true);
+    await expect(card(page).locator('h2')).toHaveText(title);
+    // The Alms Step's card draws the owner's painting of 4 October 2026.
+    if (poiId === 'poi_alms_step') await expect(card(page).locator('img.activity-scene')).toHaveAttribute('src', /happening_alms_on_the_step/);
+    await close();
+  }
 });
 
 /**
