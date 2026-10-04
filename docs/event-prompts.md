@@ -611,7 +611,11 @@ The owner's ask: a card on reaching the Alms Step, the temple on the Aravali's f
 the owner's painting. Canon's `happening_alms_on_the_step`, drafted for the owner to rewrite. The card
 draws it by id; until it arrives the card shows the scene it borrows.
 
-#### `happening_alms_on_the_step` -- Alms on the step
+#### `happening_alms_on_the_step` -- Alms on the step ✅ arrived 4 October 2026
+
+The owner's painting is a woman carrying flowers up a cobbled path to a terracotta temple on a cliff
+edge between waterfalls; canon's prose was rewritten to follow it. 2752 x 1536, built by the usual
+centred 4:3 crop, which keeps the woman and the whole temple.
 
 Save as `assets/source/events/happening_alms_on_the_step.png`, then `node tools/build-plates.js --events`.
 

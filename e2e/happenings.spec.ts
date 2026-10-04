@@ -203,6 +203,8 @@ test("the Aravali's cards each wait for their own place", async ({ page }) => {
   ] as const) {
     await expect.poll(() => arrive(poiId), { timeout: 20_000 }).toBe(true);
     await expect(card(page).locator('h2')).toHaveText(title);
+    // The Alms Step's card draws the owner's painting of 4 October 2026.
+    if (poiId === 'poi_alms_step') await expect(card(page).locator('img.activity-scene')).toHaveAttribute('src', /happening_alms_on_the_step/);
     await close();
   }
 });

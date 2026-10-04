@@ -2664,11 +2664,11 @@
       "at": [
         "poi_alms_step"
       ],
-      "prose": "On the worn middle of the bottom step, where feet have dished the stone, somebody has set a leaf of cooked rice and a clay lamp, still warm. Nobody is in sight. The names cut along the riser above it are too worn to read with the eyes; you find them with your fingers, a few at a time. Whoever left the rice left it for whoever came next.",
+      "prose": "The path up to the Alms Step is cobbled, and somebody keeps it: the moss has been pulled from between the stones. A woman is ahead of you on it, barefoot, a basket of flowers on her hip, in no hurry. The falls are loud on both sides and their spray hangs in the light. At the step she sets a handful of flowers on the worn stone, where feet have dished it, and stands back as if it were somebody else's turn.",
       "choices": [
         {
           "label": "Leave something of your own",
-          "line": "You leave a pinch of what you carry beside the lamp. It is not the rice that matters, you think, but that the step is never bare."
+          "line": "You leave a pinch of what you carry beside her flowers. She nods once, as if the step were owed it, and goes back down the path the way she came."
         },
         {
           "label": "Find the names with your fingers",
