@@ -3700,6 +3700,36 @@ button.pinned-recipe:focus-visible { outline: 2px solid currentColor; outline-of
 .opening-skip { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; min-height: 44px; }
 .opening-next { min-height: 44px; min-width: 7rem; }
 
+/* The title card, first of all (the owner, 4 October 2026): the name, and under it the name in
+ * Brahmi, bold. Brahmi is in few system fonts -- Windows has Segoe UI Historic, most phones have
+ * nothing -- so Noto Sans Brahmi ships with the game (27 KB, SIL OFL, `fonts/`), limited to the
+ * Brahmi block so nothing else is ever drawn in it. It has one weight; bold is the browser's. */
+@font-face {
+  font-family: 'Noto Sans Brahmi';
+  src: url('./fonts/noto-sans-brahmi.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+11000-1107F;
+}
+.opening-title { display: grid; gap: 0.75rem; justify-items: center; padding-block: 2.5rem 1.5rem; }
+.opening-title-name {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.2rem, 7vw, 3.4rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.opening-title-brahmi {
+  margin: 0;
+  font-family: 'Noto Sans Brahmi', 'Segoe UI Historic', sans-serif;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  line-height: 1.4;
+  color: var(--accent);
+}
+.opening-title-brahmi b { font-weight: 700; }
+
 /* The first morning's hint, in the pinned recipe's slot at every height. `content/coach.ts`. */
 .coach-line { flex: none; margin: 0; padding: 0.25rem 0.75rem; font-size: 0.85rem; font-style: italic; }
 .coach-line::before { content: '✦ '; color: var(--accent); font-style: normal; }

@@ -14,7 +14,7 @@ import { expect, test, type Page } from '@playwright/test';
 const SEED = 'front-door';
 
 async function knock(page: Page, query = ''): Promise<void> {
-  await page.goto(`/?seed=${SEED}&door=shut${query}`);
+  await page.goto(`/?seed=${SEED}&door=shut&title=skip${query}`);
   await expect(page.getByRole('dialog', { name: /begin/i })).toBeVisible({ timeout: 20_000 });
 }
 
@@ -53,7 +53,7 @@ test('who you walk as is chosen here, and it is who walks', async ({ page }) => 
 test('a fresh seed offers only setting out', async ({ page }) => {
   // Nothing has been walked under this seed, so there is nothing to continue and the screen
   // should not pretend otherwise.
-  await page.goto(`/?seed=nobody-walked-here-${Date.now()}&door=shut`);
+  await page.goto(`/?seed=nobody-walked-here-${Date.now()}&door=shut&title=skip`);
   await expect(page.getByRole('dialog', { name: /begin/i })).toBeVisible({ timeout: 20_000 });
 
   await expect(page.getByRole('button', { name: /set out/i })).toBeVisible();

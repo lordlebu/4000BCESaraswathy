@@ -86,6 +86,10 @@
     "poison": {
       "label": "Poison",
       "note": "A substance known to harm, and gathered on purpose. Its own class rather than a bitter `physic`, because a household that keeps kuchla in a sealed jar is not keeping medicine and knows it.\n\n**Nothing can be made of it except medicine, and that is the vocabulary working rather than a gap.** `affordances.json` has no word for harm -- it was written that way so the cozy ruling could not be quietly undone -- so an object made to poison somebody could not say what it was for. Canon therefore records the stuff and stops: the only recipes that consume a poison are the ones that purify it. That is also, as it happens, what the tradition these plants come from actually does."
+    },
+    "ice": {
+      "label": "Ice",
+      "note": "Frozen water, packed hard enough to carry. Its own class rather than `stone` or `salt`, because what a recipe wants of it is the cold: kulfi sets in it. Found only where there is snow."
     }
   }
 }

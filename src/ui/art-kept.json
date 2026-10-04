@@ -19,6 +19,7 @@
     "events/woven-kindness-returned.png",
     "events/woven-knock.png",
     "events/woven-night-sounds.png",
+    "events/woven-passing.png",
     "events/woven-rumour-kept.png",
     "events/woven-small-talk.png",
     "events/woven-tracks.png",
@@ -237,6 +238,9 @@
     "scenes/rest-dugout.png",
     "scenes/rest-bedroll-high-midnight.png",
     "scenes/rest-bedroll-high-dawn.png",
-    "scenes/rest-bedroll-snow-midnight.png"
+    "scenes/rest-bedroll-snow-midnight.png",
+    "plates/zebu.png",
+    "plates/panchet-broad-head.png",
+    "plates/southern-sea-gull.png"
   ]
 }

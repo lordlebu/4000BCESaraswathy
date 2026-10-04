@@ -1568,6 +1568,41 @@
       "regrows": "steady",
       "notes": "Pink, in seams where the rock has been split open, and chipped out with whatever is to hand. From the ground, not from anything living, so it lies wherever bare mountain does. The Narmada had no salt at all -- no coast and no desert -- and five of its dishes asked for some.",
       "source_index": 80
+    },
+    {
+      "id": "material_glacier_ice",
+      "type": "material",
+      "name": "Glacier ice",
+      "classes": [
+        "ice"
+      ],
+      "found_in": [
+        "snow"
+      ],
+      "rarity": "common",
+      "regrows": "steady",
+      "notes": "Chipped from the blue underside of the snowfield where it has packed hard, and carried wrapped in snow moss. The only map with snow on it is the Narmada's high ground, and that is the only place anybody has ever had ice to make anything with -- which is why the kulfi is made there and nowhere else.",
+      "source_index": 81
+    },
+    {
+      "id": "material_zebu_milk",
+      "type": "material",
+      "name": "Zebu milk",
+      "classes": [
+        "milk"
+      ],
+      "won_from": [
+        "fauna_zebu"
+      ],
+      "found_in": [
+        "plains",
+        "settlement",
+        "hills"
+      ],
+      "rarity": "common",
+      "regrows": "slow",
+      "notes": "From a humped ox's cow at the tether, morning and evening, with her calf let in first. Richer than goat milk and less than a sivatherium's, and the only milk on the delta and in the basin -- everywhere the zebu was led to, there is milk.",
+      "source_index": 82
     }
   ],
   "items": [
@@ -2861,6 +2896,21 @@
         "material_dung_cake"
       ],
       "notes": "Seed wrapped in clay and dung and pressed in the palm, to be thrown where the ground has given up. It waits for rain. A gleaner's way of sowing blasted ground, and the first thing the Seed-Gleaner teaches."
+    },
+    {
+      "id": "item_kulfi",
+      "type": "item",
+      "name": "Kulfi",
+      "kind": "food",
+      "affords": [
+        "eat"
+      ],
+      "materials": [
+        "material_goat_milk",
+        "material_glacier_ice"
+      ],
+      "notes": "Milk boiled down over a low fire for half a day until it is a third of itself and the colour of sand, poured into little clay cones, and the cones packed into a pot of chipped ice with a handful of salt over it to make the ice colder than ice. By evening it is set: dense, not airy, slow to melt and slower to eat.\n\nA high-ground sweet. The herders make it on the one week of the year somebody has gone up to the snowfield, and it is gone the same night.",
+      "source_index": 83
     }
   ],
   "processes": [
@@ -5318,6 +5368,39 @@
       "taught_by": [
         "npc_guyuk_seed_gleaner"
       ]
+    },
+    {
+      "id": "recipe_kulfi",
+      "type": "recipe",
+      "name": "Setting kulfi in the ice",
+      "process": "process_cooking",
+      "ingredients": [
+        {
+          "tag": "#milk",
+          "count": 2
+        },
+        {
+          "material": "material_glacier_ice",
+          "count": 1
+        },
+        {
+          "item": "item_cooking_pot",
+          "kept": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "item_kulfi"
+        }
+      ],
+      "known_by": [
+        "maru"
+      ],
+      "made_on": [
+        "field_map_narmada"
+      ],
+      "notes": "The owner's ask of 4 October 2026: kulfi from milk and ice, and only on the Narmada. `made_on` holds it there, because nothing in the satchel spoils and carried ice would otherwise set a kulfi on the delta.",
+      "source_index": 93
     }
   ],
   "vehicles": [
@@ -5573,7 +5656,7 @@
         "material_native_copper",
         "material_croc_hide"
       ],
-      "notes": "Copper-sheathed along every edge a hand would touch, with triangular figures worked into the wheel faces. Found only in graves, and only ever with a body in it.\n\n**Canon files it as a cart, and the argument is the point.** Its wheels are solid -- three planks and a copper rim, the same construction as the household cart above -- and a spoked wheel is what would make it a chariot. So the people who bury one are burying something that looks like a war machine and is built like a farm vehicle, and canon does not know which of those they meant. Recording the dispute rather than settling it is the same call made about the Shattering: the question is better than any answer available.",
+      "notes": "Copper-sheathed along every edge a hand would touch, with triangular figures worked into the wheel faces. Found in graves, and only ever with a body in it -- and, on North Dwarka, still driven.\n\n**Canon files it as a cart, and the argument is the point.** Its wheels are solid -- three planks and a copper rim, the same construction as the household cart above -- and a spoked wheel is what would make it a chariot. So the people who bury one are burying something that looks like a war machine and is built like a farm vehicle, and canon does not know which of those they meant. Recording the dispute rather than settling it is the same call made about the Shattering: the question is better than any answer available.\n\n**And one is still driven.** On North Dwarka a Sinauli wagon keeps a round of the dry ground near the Caravan Ground, a humped zebu bull in the traces -- there is no horse on Jambhudweep -- and Sudama standing in it with a spear: Jarro's charioteer. It stands still most of the day. Jarro keeps the Caravan Ground's well, and the round is how it is kept. Which answers the dispute no better than the graves do: a war car is what it looks like, and a cart is still what it is built as. The owner's, 4 October 2026; it walks as a wanderer in `content/wanderers.ts` (`PATROLS`).",
       "source_index": 12
     },
     {

@@ -101,7 +101,9 @@ const COVERAGE: Record<string, Coverage> = {
       'related_entities']
   },
   'places.npcs': {
-    adapted: ['id', 'name', 'role', 'sex', 'found_at', 'would_settle', 'language', 'knows', 'lines'],
+    // `drives`: the craft somebody drives on its round -- Sudama and the Sinauli wagon -- read by
+    // `places.driverOf` to name the driver on the card that meets it.
+    adapted: ['id', 'name', 'role', 'sex', 'found_at', 'would_settle', 'language', 'knows', 'lines', 'drives'],
     skipped: [...EDITORIAL,
       // Which canon character this person descends from. Lineage is book material.
       'descended_from',

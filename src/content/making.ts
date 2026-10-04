@@ -38,7 +38,9 @@ export type MaterialClass =
   // Milk and what sets from it, taken from a living animal. Its own class rather than a `flesh`
   // or an `oil` because those both end an animal and this one leaves it standing -- which is the
   // distinction that lets a wandering animal give something.
-  | 'milk';
+  | 'milk'
+  // Packed snow, for what a recipe wants of it: the cold. Only the Narmada has snow.
+  | 'ice';
 
 /**
  * What an object lets a person do, from `database/affordances.json`.
@@ -152,6 +154,14 @@ export interface Recipe {
    * to re-author 72 files to opt out of it.
    */
   taughtBy: string[];
+  /**
+   * Field map ids this can be made on. **Empty means anywhere.**
+   *
+   * A rule the satchel cannot hold for itself: nothing in it spoils, so ice carried off the
+   * Narmada's snow would set a kulfi on the delta. Kulfi is the owner's, 4 October 2026 -- made on
+   * the Narmada and nowhere else. Checked in `crafting.placeAllows`, beside the kind of place.
+   */
+  madeOn: string[];
   description: string;
 }
 
@@ -180,7 +190,7 @@ interface RawRecipe {
   id: string; name: string; process: string;
   ingredients: { tag?: string; material?: string; item?: string; count?: number; kept?: boolean }[];
   outputs: { item?: string; material?: string; count?: number }[];
-  known_by?: string[]; taught_by?: string[]; notes?: string;
+  known_by?: string[]; taught_by?: string[]; made_on?: string[]; notes?: string;
 }
 interface RawVehicle {
   id: string; name: string; kind: string; crosses: string[]; capacity?: number;
@@ -281,6 +291,7 @@ export const recipes: Recipe[] = raw.recipes.map((r) => ({
   })),
   knownBy: r.known_by ?? [],
   taughtBy: r.taught_by ?? [],
+  madeOn: r.made_on ?? [],
   description: r.notes ?? ''
 }));
 

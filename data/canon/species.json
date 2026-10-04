@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.4.0",
+  "canon_version": "3.5.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -4472,6 +4472,95 @@
       "journal_prompt": "A grey wolf of the northern steppe crosses the dry grass at a steady trot, head low, going somewhere it has been before.",
       "notes": "The wolf of Mainland Asia, met only on the Aravali's northern shore. Jambhudweep's own wolf is the plateau wolf; the strait keeps them apart.",
       "source_index": 266
+    },
+    {
+      "id": "fauna_zebu",
+      "type": "fauna",
+      "name": "Zebu",
+      "aliases": [
+        "Humped ox",
+        "Seal bull"
+      ],
+      "scientific": "Bos indicus",
+      "clade": "mammal",
+      "diet": "Herbivore",
+      "behaviour": [
+        "domestic",
+        "herd",
+        "draught"
+      ],
+      "notes": "Brought across the strait from Mainland Asia by people, and nowhere on Jambhudweep without them. Every zebu south of the Aravali is somebody's: it draws the ox cart, threshes by walking the floor in circles, gives milk morning and evening, and its dung is the fuel and the floor-plaster of every camp that has no wood. A loose one is a stray, and a stray is walked back.\n\nThe bull on the Harappan seals is this animal -- the hump, the dewlap, the heavy horns -- and the seals were cut by people who had been driving it for a thousand years. The cow is lighter and her hump is barely a rise; the bull's stands up over his shoulders, and the bull is what pulls a cart. It is the one large mammal of the north that crossed, and it crossed because it was led. The wild things of Mainland Asia stayed on their shore; the ox came over on a rope.",
+      "biomes": [
+        "plains",
+        "settlement",
+        "hills"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "mood": "patient",
+      "journal_prompt": "A tawny cow tethered by a camp, chewing, her calf folded in the dust beside her. Somebody's: there is a cord through her nose and a blue bead on her horn.",
+      "source_index": 270
+    },
+    {
+      "id": "fauna_panchet_broad_head",
+      "type": "fauna",
+      "name": "Panchet Broad-Head",
+      "aliases": [
+        "Mud-mouth",
+        "River lid"
+      ],
+      "scientific": "Pachygonia relicta",
+      "clade": "amphibian",
+      "diet": "Carnivore",
+      "behaviour": [
+        "ambush",
+        "basking",
+        "unhurried"
+      ],
+      "notes": "A temnospondyl, the old kind of amphibian that held the rivers before the crocodiles came: two metres of flat body and a head like a shovel blade, the eyes on top so it can lie under a hand's depth of water and watch. It eats fish and whatever drowns, and it does not chase anything. It opens its mouth and lets the current bring the meal.\n\nOne of Jambhudweep's relicts, shared with Gondwana and never across the strait. Rare rather than lost: the deltas still have the slow, warm, muddy water it needs, and the people who fish them know where one lies and fish somewhere else. Nobody eats one. The meat is said to taste of the bottom of the river, which is fair.",
+      "region": "saraswati-godavari-deltas",
+      "biomes": [
+        "river",
+        "wetland"
+      ],
+      "landmasses": [
+        "jambhudweepa",
+        "gondwana"
+      ],
+      "placement": "encounter",
+      "rarity": "rare",
+      "mood": "patient",
+      "journal_prompt": "What I took for a log on the mud bank had eyes on top of it. The head is wider than my shoulders and flat as a board, and it did not move the whole while I drew it -- only the throat, pumping, slow as breathing.",
+      "source_index": 271
+    },
+    {
+      "id": "fauna_southern_sea_gull",
+      "type": "fauna",
+      "name": "Southern Sea-Gull",
+      "aliases": [
+        "Harbour gull"
+      ],
+      "scientific": "Larus tethyanus",
+      "clade": "bird",
+      "diet": "Omnivore",
+      "behaviour": [
+        "colonial",
+        "scavenger",
+        "coastal"
+      ],
+      "related_species": [
+        "fauna_sky_gull"
+      ],
+      "notes": "The big dark-backed gull of the southern coasts, on every rock where a boat comes in. It follows the trawlers out and the fish-gutters home, and a harbour with no gulls over it is a harbour where nobody is landing anything. Not the Sky-Gull of the floating islands, which is a smaller white bird that has never seen a fishing boat.\n\nSlate on the back and wings, white everywhere else, and a heavy yellow bill that will open a shellfish the gull has dropped on a rock twice. The fishers say a gull standing still on a rock means the weather will hold, and a gull walking means it will not.",
+      "biomes": [
+        "coast",
+        "sea"
+      ],
+      "placement": "encounter",
+      "rarity": "common",
+      "mood": "watchful",
+      "journal_prompt": "A big gull on the landing rock, slate-backed, yellow-billed, standing on one spot with the patience of something that knows the boats come back.",
+      "source_index": 272
     }
   ],
   "flora": [

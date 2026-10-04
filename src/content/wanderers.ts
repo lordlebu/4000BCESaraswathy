@@ -21,15 +21,21 @@
 // `SAVE_VERSION`, which discards every journey in existence. Deriving it also means the same seed
 // puts the same whale in the same bend on every machine.
 //
+// **And a craft with somebody aboard is the same thing.** The Sinauli wagon on North Dwarka keeps a
+// round of dry ground near the Caravan Ground the way the whale keeps its bend, so it is a wanderer
+// too -- one with a vehicle where an animal has a species, its own hours, and its stops chosen near a
+// place rather than anywhere its ground is. See `PATROLS`.
+//
 // Pure: no React, no Phaser, no clock. The caller owns the hour.
 
-import type { Point, Tile, World } from '../world/types';
+import type { BiomeId, Point, Tile, World } from '../world/types';
 import type { Creature } from '../world/types';
 import { isWalkable } from '../world/generate';
 import { tileHash } from '../world/rng';
 import { engineId } from './canon';
+import { vehicles } from './making';
 import { metSpecies } from './species';
-import { whereabouts, type Whereabouts } from './travellers';
+import { COMMON_HOURS, type Hours, phaseAtHour, wayBetween, whereabouts, type Whereabouts } from './travellers';
 
 /**
  * How many tiles a wanderer's round takes in.
@@ -75,7 +81,8 @@ export const RANGE = 12;
  */
 export interface Wanderer {
   /**
-   * The **engine** species id -- `narmada-walking-whale`, not `fauna_narmada_walking_whale`.
+   * The **engine** id -- `narmada-walking-whale`, not `fauna_narmada_walking_whale`; for a craft,
+   * the vehicle's, `sinauli-wagon`.
    *
    * The engine's id space rather than canon's, because everything that will be handed this -- the
    * collection, the plate lookup, the scene's texture key -- is keyed that way, and a wanderer
@@ -83,9 +90,18 @@ export interface Wanderer {
    * waiting to be forgotten at one of four call sites.
    */
   id: string;
-  species: Creature;
+  /** What it is called: the species' name, or the craft's. */
+  name: string;
+  /** The animal. Null for a craft somebody drives -- see `PATROLS`. */
+  species: Creature | null;
+  /** The game's vehicle id, for a craft. Null for an animal. */
+  vehicle: string | null;
+  /** The ground it keeps to, first one first. What the stand-in takes its colour from. */
+  ground: BiomeId[];
   /** The tiles it moves between, in order. Between two and `CIRCUIT_TILES` of them. */
   circuit: Point[];
+  /** When it is on the move. An animal keeps everybody's hours; a patrol stands most of the day. */
+  hours: Hours;
 }
 
 /**
@@ -121,7 +137,12 @@ const WANDERS: Record<string, string[]> = {
  * rather than a whale standing on a hill.
  */
 function habitatTiles(world: World, species: Creature): Point[] {
-  const wants = new Set<string>(species.biomes);
+  return groundTiles(world, species.biomes);
+}
+
+/** Every walkable tile of these kinds of ground. */
+function groundTiles(world: World, biomes: readonly string[]): Point[] {
+  const wants = new Set<string>(biomes);
   const out: Point[] = [];
   for (let y = 0; y < world.height; y += 1) {
     const row: Tile[] | undefined = world.tiles[y];
@@ -150,10 +171,25 @@ function habitatTiles(world: World, species: Creature): Point[] {
  * length of the map.
  */
 export function circuitFor(world: World, species: Creature): Point[] {
-  const tiles = habitatTiles(world, species);
+  return circuitAmong(world, habitatTiles(world, species), species.id);
+}
+
+/**
+ * A circuit picked from these tiles, seeded on `salt`. `circuitFor` for an animal, `patrolCircuit`
+ * for a craft.
+ *
+ * `joins` may refuse a stop: one is taken only if the way to it from the stop before, and the way
+ * from it home to the first, are both acceptable. Absent, every stop is.
+ */
+function circuitAmong(
+  world: World,
+  tiles: readonly Point[],
+  salt: string,
+  joins: (from: Point, to: Point) => boolean = () => true
+): Point[] {
   if (tiles.length === 0) return [];
 
-  const anchor = tiles[tileHash(world.seed, 0, 0, `wander:${species.id}`) % tiles.length]!;
+  const anchor = tiles[tileHash(world.seed, 0, 0, `wander:${salt}`) % tiles.length]!;
   const near = tiles.filter(
     (t) => Math.abs(t.x - anchor.x) <= RANGE && Math.abs(t.y - anchor.y) <= RANGE
   );
@@ -165,8 +201,8 @@ export function circuitFor(world: World, species: Creature): Point[] {
   // twice, and a retry loop on a seeded hash is how a "deterministic" pick stops being one.
   const ordered = [...near].sort(
     (a, b) =>
-      tileHash(world.seed, a.x, a.y, `wander-step:${species.id}`) -
-      tileHash(world.seed, b.x, b.y, `wander-step:${species.id}`)
+      tileHash(world.seed, a.x, a.y, `wander-step:${salt}`) -
+      tileHash(world.seed, b.x, b.y, `wander-step:${salt}`)
   );
   // The `taken` check is defensive rather than load-bearing: `ordered` is drawn from a tile list
   // that is distinct by construction, so only the anchor can repeat. Deliberately kept anyway --
@@ -177,6 +213,7 @@ export function circuitFor(world: World, species: Creature): Point[] {
     if (circuit.length >= CIRCUIT_TILES) break;
     const key = `${tile.x},${tile.y}`;
     if (taken.has(key)) continue;
+    if (!joins(circuit[circuit.length - 1]!, tile) || !joins(tile, anchor)) continue;
     taken.add(key);
     circuit.push(tile);
   }
@@ -195,7 +232,75 @@ export function circuitFor(world: World, species: Creature): Point[] {
  * appear costs one file, where loading every map's animals cost 4 MB on a map that has none.
  */
 export function wandererIdsOn(fieldMapId: string): string[] {
-  return (WANDERS[fieldMapId] ?? []).map(engineId);
+  return [...(WANDERS[fieldMapId] ?? []), ...(PATROLS[fieldMapId] ?? []).map((p) => p.vehicle)].map(engineId);
+}
+
+/**
+ * A craft somebody drives in a round near one place: a patrol.
+ *
+ * **The owner's ask of 4 October 2026**: the Sinauli wagon -- canon's grave-goods car, still driven
+ * on North Dwarka -- rolls around the Caravan Ground on open dry country, desert, grass or hill, and
+ * never through marsh or water, and stands still most of the day. No errand hangs on it; meeting it
+ * is a card (`happenings.ts`, `passing`).
+ */
+export interface Patrol {
+  /** The game's vehicle id. */
+  vehicle: string;
+  /** The point of interest its round is kept near. */
+  near: string;
+  /** The ground it stops on. */
+  ground: BiomeId[];
+  /** Clock hours it rolls between, setting out and pulling up. Stood still the rest of the day. */
+  rolls: { from: number; to: number };
+}
+
+/**
+ * Who patrols where. Keyed by field map, like `WANDERS`, and as short on purpose.
+ *
+ * Two and a half hours on the move out of twenty-four, so the wagon is nearly always found standing
+ * -- the owner's "mostly will remain in stopped position" -- and rolling only through late morning.
+ */
+const PATROLS: Record<string, Patrol[]> = {
+  field_map_dwarka: [
+    {
+      vehicle: 'vehicle_sinauli_wagon',
+      near: 'poi_caravan_camp',
+      ground: ['desert', 'plains', 'hills'],
+      rolls: { from: 10, to: 12.5 }
+    }
+  ]
+};
+
+/**
+ * How far from the place it is kept near a patrol may stop, in tiles. Within sight of the Caravan
+ * Ground rather than anywhere in the basin: a patrol of somewhere is near it.
+ */
+export const PATROL_RANGE = 8;
+
+/** Ground a wheel will not cross, unless there is a bridge. Marsh and water. */
+const WET: ReadonlySet<string> = new Set(['wetland', 'river', 'sea', 'coast', 'sky_water']);
+
+/** Whether the way between two stops stays out of marsh and water the whole way. */
+function dryWay(world: World, from: Point, to: Point): boolean {
+  return wayBetween(world, from, to).every((at) => {
+    const tile = world.tiles[at.y]?.[at.x];
+    return Boolean(tile && (tile.bridge || !WET.has(tile.biome)));
+  });
+}
+
+/**
+ * The round one patrol keeps, on one world: dry stops near its place, joined by dry ways.
+ *
+ * Empty when the place did not get placed or no dry ground lies near it -- the honest answer, as for
+ * an animal whose habitat the map lacks.
+ */
+export function patrolCircuit(world: World, patrol: Patrol, places: readonly { poiId: string; at: Point }[]): Point[] {
+  const home = places.find((p) => p.poiId === patrol.near)?.at;
+  if (!home) return [];
+  const near = groundTiles(world, patrol.ground).filter(
+    (t) => Math.abs(t.x - home.x) <= PATROL_RANGE && Math.abs(t.y - home.y) <= PATROL_RANGE
+  );
+  return circuitAmong(world, near, patrol.vehicle, (a, b) => dryWay(world, a, b));
 }
 
 /**
@@ -204,7 +309,11 @@ export function wandererIdsOn(fieldMapId: string): string[] {
  * Takes the world because a circuit is a fact about one generated map rather than about canon, the
  * same reason `stopsOf` takes the placed points of interest instead of looking them up.
  */
-export function wanderersOn(fieldMapId: string, world: World): Wanderer[] {
+export function wanderersOn(
+  fieldMapId: string,
+  world: World,
+  places: readonly { poiId: string; at: Point }[] = []
+): Wanderer[] {
   const out: Wanderer[] = [];
   for (const canonId of WANDERS[fieldMapId] ?? []) {
     const id = engineId(canonId);
@@ -214,7 +323,33 @@ export function wanderersOn(fieldMapId: string, world: World): Wanderer[] {
     if (!species || !('mood' in species)) continue;
     const circuit = circuitFor(world, species as Creature);
     if (circuit.length === 0) continue;
-    out.push({ id, species: species as Creature, circuit });
+    const creature = species as Creature;
+    out.push({
+      id,
+      name: creature.name,
+      species: creature,
+      vehicle: null,
+      ground: [...creature.biomes],
+      circuit,
+      hours: COMMON_HOURS
+    });
+  }
+  // The patrols, after the animals. A vehicle the making data does not carry is dropped, as an
+  // animal canon does not carry is.
+  for (const patrol of PATROLS[fieldMapId] ?? []) {
+    const craft = vehicles.find((v) => v.id === patrol.vehicle);
+    if (!craft) continue;
+    const circuit = patrolCircuit(world, patrol, places);
+    if (circuit.length === 0) continue;
+    out.push({
+      id: engineId(patrol.vehicle),
+      name: craft.name,
+      species: null,
+      vehicle: craft.id,
+      ground: [...patrol.ground],
+      circuit,
+      hours: { out: phaseAtHour(patrol.rolls.from), in: phaseAtHour(patrol.rolls.to) }
+    });
   }
   return out;
 }
@@ -234,7 +369,7 @@ export function wandererAt(
   day: number,
   phase: number
 ): Whereabouts | null {
-  return whereabouts(world, wanderer.circuit, day, phase);
+  return whereabouts(world, wanderer.circuit, day, phase, wanderer.hours);
 }
 
 /**

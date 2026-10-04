@@ -23,7 +23,7 @@
 
 import { type Ingredient, type Recipe, nameOf, recipe, recipes } from './making';
 import { type Satchel, count, remove } from './satchel';
-import { type Bench, type Knows, canMake, make, missingTools, placeAllows, satisfying, shortfalls, tagCount } from './crafting';
+import { type Bench, type Knows, canMake, make, missingTools, placeAllows, mapAllows, satisfying, shortfalls, tagCount } from './crafting';
 
 /** One rung of a chain, in the order it happens. */
 export interface Step {
@@ -99,7 +99,7 @@ export function plan(
   const r = recipe(recipeId);
   if (!r) return { steps: [], blocked: 'no such recipe' };
   if (!knows(recipeId)) return { steps: [], blocked: 'somebody would have to show you' };
-  if (!placeAllows(recipeId, bench)) {
+  if (!placeAllows(recipeId, bench) || !mapAllows(recipeId, bench)) {
     // A reason, never null. This said `blocked: null` with no steps -- "nothing stands in the way"
     // -- and every caller had to remember to also check for an empty run; `toolStep` did not, and
     // told a traveller holding nothing that a bronze knife could be made "here and now".

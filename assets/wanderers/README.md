@@ -37,6 +37,16 @@ painter for a *sequence* is a mistake this repository has already made and writt
 sheet came back pixel-identical in every cell). Four distinct viewpoints of a standing animal is a
 different ask and it works.
 
+**A walk sheet works too, when it is a clean grid.** The Sinauli wagon arrived on 4 October 2026 as
+four rows of four -- right, left, front, back, each four steps of a walk -- and the builder takes a
+sheet of sixteen as that: the first step of each row is the still, `sinauli-wagon-right.png`, and the
+other three are `sinauli-wagon-right-walk1..3.png`. The scene steps through them while it moves
+(`WandererView.animate`, `STEP_MS`) and holds the still while it stands, each step scaled as the
+still is so it does not pulse. An animal painted as four stills is unchanged.
+
+**`--force` re-cuts every sheet still in the dump**, including art already accepted. Re-cut only the
+one you mean, and put the others back with `git checkout -- assets/wanderers/<id>-*.png`.
+
 **Side on, standing on the ground.** The sprite is anchored at the bottom centre
 (`setOrigin(0.5, 1)`), so the animal's feet belong at the very bottom edge of the image. A gap
 there draws the animal floating above the grass, which is a fault that has shipped here before.

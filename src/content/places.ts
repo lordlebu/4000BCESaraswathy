@@ -231,6 +231,11 @@ export interface Npc {
   knows: string[];
   /** In canon order. This is the only route by which a word can be learned. */
   lines: Line[];
+  /**
+   * The craft they drive on its round, a vehicle id, or null. Canon's `drives`: Sudama drives the
+   * Sinauli wagon for Jarro, and is met on it rather than standing anywhere (`foundAt` is empty).
+   */
+  drives: string | null;
 }
 
 interface RawFieldMap {
@@ -248,7 +253,7 @@ interface RawPoi {
 }
 interface RawNpc {
   id: string; name: string; role?: string; sex?: string; found_at?: string[]; would_settle?: boolean;
-  language?: string; knows?: string[];
+  language?: string; knows?: string[]; drives?: string;
   lines?: { text: string; requires?: string[]; gives?: string[]; costs?: string }[];
 }
 
@@ -343,7 +348,8 @@ export const npcs: Npc[] = raw.npcs.map((n) => ({
     requires: l.requires ?? [],
     gives: l.gives ?? [],
     costs: l.costs ?? null
-  }))
+  })),
+  drives: n.drives ?? null
 }));
 
 const mapsById = new Map(fieldMaps.map((m) => [m.id, m]));
@@ -372,6 +378,20 @@ export function poisOn(fieldMapId: string): PointOfInterest[] {
 
 export function npc(id: string): Npc | null {
   return npcsById.get(id) ?? null;
+}
+
+/**
+ * Whether somebody is met on the craft they drive rather than by walking up to them at a place --
+ * Sudama on the Sinauli wagon. Like somebody a storyline brings (`storylines.broughtByStory`), they
+ * stand nowhere and have no lines to open with; the card that meets the craft is their meeting.
+ */
+export function metOnTheirCraft(npcId: string): boolean {
+  return Boolean(npc(npcId)?.drives);
+}
+
+/** Who drives this craft on its round, from canon's `drives`, or null when canon names nobody. */
+export function driverOf(vehicleId: string): Npc | null {
+  return npcs.find((n) => n.drives === vehicleId) ?? null;
 }
 
 export function npcsAt(poiId: string): Npc[] {

@@ -18,6 +18,7 @@ import { rumourAt } from '../content/rumours';
 import { APPROACHES, approachAt, approachId } from '../content/visitors';
 import { beatNow, type BeatWhen } from '../content/storylines';
 import { add as addToSatchel, remove as takeFromSatchel, type Satchel } from '../content/satchel';
+import { PASSING_AFTER_STEPS } from '../content/tiers';
 import { tileHash } from '../world/rng';
 import type { World } from '../world/types';
 import type { SurfaceAction } from './surface';
@@ -96,6 +97,8 @@ export function useHappenings({
   const storyRef = useRef<((when: BeatWhen, poiId: string | null) => boolean) | null>(null);
   /** The last day a road event was asked about, so the question is one a day and not one a step. */
   const lastRoadDay = useRef(-1);
+  /** Steps walked on the map in hand, and which map that is: see `PASSING_AFTER_STEPS`. */
+  const stepsOnMap = useRef({ fieldMapId: '', steps: 0 });
 
   useEffect(() => {
     /**
@@ -120,6 +123,8 @@ export function useHappenings({
         campStanding?: string | null;
         campPerson?: CampTalk | null;
         cameFrom?: string | null;
+        /** A craft on its patrol, just come alongside: the Sinauli wagon. */
+        passing?: { id: string; vehicle: string } | null;
         /** The painting of the road just travelled, for a road's happening that has none of its own. */
         roadArt?: string | null;
         force?: { kind?: string; asked?: boolean };
@@ -290,6 +295,26 @@ export function useHappenings({
       maybeHappens('arriving', at, null, `camp:${camp.id}`, { camp, force: { kind: 'camp', asked: true } });
     };
 
+    /** Count the steps on this map, from nought again whenever the map changes. */
+    const onStep = () => {
+      const here = latest.current.fieldMapId;
+      if (stepsOnMap.current.fieldMapId !== here) stepsOnMap.current = { fieldMapId: here, steps: 0 };
+      stepsOnMap.current.steps += 1;
+    };
+
+    /**
+     * Coming alongside the Sinauli wagon on its round opens its card: once a journey, and not in the
+     * first steps on the map (`PASSING_AFTER_STEPS`) -- the owner's "not immediately after reaching
+     * the map". Asked for rather than rationed, like a camp. An animal's meeting opens nothing here.
+     */
+    const onAlongside = ({ id, vehicle, at }: GameToUi['wanderer-alongside']) => {
+      if (!vehicle || crossing.current || cardOpenRef.current) return;
+      const walked = stepsOnMap.current.fieldMapId === latest.current.fieldMapId ? stepsOnMap.current.steps : 0;
+      if (walked < PASSING_AFTER_STEPS) return;
+      if (seenEvents.current.includes(`woven:passing:${id}`)) return;
+      maybeHappens('road', at, null, `passing:${id}`, { passing: { id, vehicle }, force: { kind: 'passing', asked: true } });
+    };
+
     // Handed out of the effect so the activity card can ask too: a take is not a bus event, it is a
     // modal React owns, and closing it is where the `working` question belongs.
     /**
@@ -340,12 +365,16 @@ export function useHappenings({
     EventBus.onEvent('poi-reached', onArrived);
     EventBus.onEvent('tile-entered', onRoad);
     EventBus.onEvent('tile-entered', onCampSeen);
+    EventBus.onEvent('tile-entered', onStep);
+    EventBus.onEvent('wanderer-alongside', onAlongside);
     return () => {
       EventBus.offEvent('approached', onApproached);
       EventBus.offEvent('night-passed', onNight);
       EventBus.offEvent('poi-reached', onArrived);
       EventBus.offEvent('tile-entered', onRoad);
       EventBus.offEvent('tile-entered', onCampSeen);
+      EventBus.offEvent('tile-entered', onStep);
+      EventBus.offEvent('wanderer-alongside', onAlongside);
     };
     // Registered once, like the rest of the bus: every handler reads the refs, never the closure.
   }, []);

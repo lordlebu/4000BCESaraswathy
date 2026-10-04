@@ -580,3 +580,27 @@ Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - see
 Subject: Dusk at a dacoit band's camp in a dry hollow: a hide shelter, sacks of salt stacked by a tethering post, a low fire. Four rough-looking but friendly people sit round it passing a pot of salted fish from hand to hand; one offers the pot across the fire to a traveller seen from behind. Nobody holds a weapon and none is shown. They look poorer than they would like and are sharing anyway. Warm, wry, easy company.
 ```
 
+
+## The wagon on its round (4 October 2026)
+
+The owner's ask: the Sinauli wagon -- canon's grave-goods car, solid-wheeled and copper-sheathed --
+still driven on North Dwarka, keeping a round of dry ground near the Caravan Ground. Meeting it is a
+card, once a journey, and never in the first steps on the map. There is no horse on Jambhudweep, so
+a humped zebu is in the traces.
+
+#### `woven-passing` -- the Sinauli wagon, met ✅ arrived 4 October 2026
+
+Painted by the owner on a sketchbook page and cropped to the painted area before building:
+`crop (128, 102, 2320, 1746)` of the 2400 x 1792 raw, which is 4:3; the raw stays in the dump.
+
+Save as `assets/source/events/woven-passing.png`. The card tries `woven-passing-sinauli-wagon` first
+and falls back to this, so one painting serves until another patrol is ever written.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: Open cold-desert scrub and dry grass on a flat basin under a pale sky, a caravan camp's tents small in the distance. In the middle ground a two-wheeled war car stands still on the dry ground: a small open box of dark teak with copper sheathing along every edge and rail, and two SOLID wheels each made of three planks with a copper rim and small triangular copper figures worked into the wheel face - no spokes. A single zebu BULL stands in the traces at the pole: tawny, with a tall fatty hump standing up over the shoulders, a deep dewlap and long upright horns, chewing. A warrior stands upright in the car, a woman or a man, in dyed cloth and a copper-studded leather cuirass, a long spear held upright, looking calmly toward the viewer. A traveller seen from behind in the foreground, one hand half raised. Still and watchful, not threatening.
+```
+

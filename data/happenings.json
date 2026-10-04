@@ -627,6 +627,34 @@
           "line": "{name} lifts a hand, and goes back to it."
         }
       }
+    },
+    "passing": {
+      "weight": 0,
+      "tags": [
+        "passing"
+      ],
+      "cooldown": 0,
+      "again_after": null,
+      "slots": [
+        "ground",
+        "driver"
+      ],
+      "title": {
+        "sinauli-wagon": "The wagon on the dry ground"
+      },
+      "prose": {
+        "sinauli-wagon": "Out on {ground} past the Caravan Ground, a car with copper along every edge a hand would touch, and wheels of three solid planks. A humped zebu bull stands in the traces, chewing. The driver stands in the car as if it were moving -- a spear upright, eyes on the road and then on you. It is the wagon they bury at Sinauli with a body in it. Here somebody is driving one."
+      },
+      "choices": {
+        "watch": {
+          "label": "Stand and watch it",
+          "line": "A word to the bull, and it rolls: slow, creaking, round the edge of the flat until it is a glint of copper on the far side. At the Caravan Ground they tell you the name: {driver}, who drives for Jarro. It goes round so that nobody tries the well."
+        },
+        "raise": {
+          "label": "Raise a hand to the driver",
+          "line": "The driver lifts the spear an inch, which may be a greeting. The bull does not stop chewing. You have been looked at by somebody whose work is looking, and let pass. {driver}, they call the driver at the Caravan Ground: Jarro's charioteer."
+        }
+      }
     }
   }
 }

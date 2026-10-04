@@ -26,6 +26,7 @@ import {
   recipes
 } from './making';
 import { type Satchel, add, affording, count, remove } from './satchel';
+import { fieldMap } from './places';
 import { benchOpens, benchSupplies } from './stations';
 
 /** Where the traveller is standing, as far as making is concerned. */
@@ -37,6 +38,12 @@ export interface Bench {
    * open, and for a caller that only knows the kind.
    */
   stations?: readonly string[];
+  /**
+   * The field map the traveller is on, for a recipe that can only be made on some (`Recipe.madeOn`).
+   * Absent means a caller that does not know, and such a recipe is then refused rather than
+   * offered everywhere -- a rule nobody wired is this codebase's signature fault.
+   */
+  fieldMapId?: string | null;
 }
 
 /** Standing in a field, which is where most of this happens. */
@@ -96,6 +103,19 @@ export function placeAllows(recipeId: string, bench: Bench): boolean {
   // A bench on this place's board opens its processes here (`stations.benchOpens`). The board
   // showed a kiln at the Sunk Cutting for as long as this said "settlements only" and refused it.
   return benchOpens(bench.stations, p.id);
+}
+
+/**
+ * Whether this map allows the recipe: `Recipe.madeOn`, the owner's kulfi on the Narmada.
+ *
+ * **Beside `placeAllows` rather than inside it.** That one answers what a kind of place and its
+ * benches can work, and agrees with the board everywhere (`test/benches.test.ts`); which country you
+ * are in is a different question, and folding it in would make the board wrong on every map but one.
+ */
+export function mapAllows(recipeId: string, bench: Bench): boolean {
+  const r = recipe(recipeId);
+  if (!r || r.madeOn.length === 0) return true;
+  return Boolean(bench.fieldMapId && r.madeOn.includes(bench.fieldMapId));
 }
 
 /**
@@ -181,7 +201,7 @@ export function missingTools(satchel: Satchel, recipeId: string, bench: Bench = 
 export function canMake(satchel: Satchel, recipeId: string, bench: Bench = openGround()): boolean {
   const r = recipe(recipeId);
   if (!r) return false;
-  if (!placeAllows(recipeId, bench)) return false;
+  if (!placeAllows(recipeId, bench) || !mapAllows(recipeId, bench)) return false;
   if (missingTools(satchel, recipeId, bench).length > 0) return false;
   return r.ingredients.every((need) => haveIngredient(satchel, need, bench));
 }
@@ -218,7 +238,11 @@ export function shortfalls(satchel: Satchel, recipeId: string, bench: Bench = op
   if (!r) return [];
   const out: Shortfall[] = [];
 
-  if (!placeAllows(recipeId, bench)) {
+  if (!mapAllows(recipeId, bench)) {
+    // The map is the reason, not the kind of place: say where, by the map's own name.
+    const names = r.madeOn.map((id) => (fieldMap(id)?.name ?? id).replace(/^The /, 'the '));
+    out.push({ kind: 'place', why: `is only made on ${names.join(' or ')}`, places: [] });
+  } else if (!placeAllows(recipeId, bench)) {
     const where = process(r.process)?.performedAt ?? [];
     out.push({ kind: 'place', why: `needs to be done at a ${where.join(' or ')}`, places: where });
   }

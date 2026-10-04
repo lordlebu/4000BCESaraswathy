@@ -9,16 +9,21 @@
 import Phaser from 'phaser';
 import { TILE_SIZE, paintedHeight, wandererMarkerKey } from '../tileTextures';
 import { ROW_SLOT, depthFor } from '../frames';
-import { wanderersOn, wandererAt, type Wanderer } from '../../content/wanderers';
-import { facingArt, hasPaintedArt, paintedKey } from '../wandererArt';
+import { isAlongside, wanderersOn, wandererAt, type Wanderer } from '../../content/wanderers';
+import { EventBus } from '../EventBus';
+import { facingArt, hasPaintedArt, paintedKey, walkArt, walkKey } from '../wandererArt';
 import { biomeFor } from '../../content/species';
 import type { Facing } from '../player';
-import type { World } from '../../world/types';
+import type { Point, World } from '../../world/types';
 
 /** What the animals read of the scene. Live: a getter answers for the map shown now. */
 export interface WandererHost {
   readonly world: World;
   readonly fieldMapId: string;
+  /** Where the map's places landed, for a patrol kept near one (`content/wanderers.ts`). */
+  readonly placed: readonly { poiId: string; at: Point }[];
+  /** The player's tile, for coming alongside. */
+  readonly at: Point;
 }
 
 export class WandererView {
@@ -34,6 +39,21 @@ export class WandererView {
   /** The last phase the animals were moved for. Separate from the travellers' so neither gates the other. */
   private movedAt = -1;
 
+  /** Where each one was last put, by id. Only those drawn this hour; a hidden one is not here. */
+  private standing = new Map<string, Point>();
+
+  /** Who the player is alongside now, so coming alongside is said once and not every tick. */
+  private beside = new Set<string>();
+
+  /** Which way each one faces and whether it is on the move, by id: what `animate` steps through. */
+  private going = new Map<string, { facing: Facing; moving: boolean }>();
+
+  /**
+   * How long one step of a painted walk is shown, in milliseconds. Four steps make a stride of about
+   * three quarters of a second: an ox's unhurried pace, which is the only walk painted so far.
+   */
+  static readonly STEP_MS = 190;
+
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly host: WandererHost
@@ -48,7 +68,7 @@ export class WandererView {
    * draws the stand-in until a painting exists; see its own note for the bargain.
    */
   create(): void {
-    for (const wanderer of wanderersOn(this.host.fieldMapId, this.host.world)) {
+    for (const wanderer of wanderersOn(this.host.fieldMapId, this.host.world, this.host.placed)) {
       // The animal's own ground gives it its colour, so the marker belongs to the place it stands
       // in rather than being a colour somebody picked. Canon already carries one per biome.
       const sprite = this.scene.add
@@ -68,7 +88,8 @@ export class WandererView {
     (window as unknown as { __wanderers?: () => unknown[] }).__wanderers = () =>
       this.list.map(({ wanderer, sprite }) => ({
         id: wanderer.id,
-        name: wanderer.species.name,
+        name: wanderer.name,
+        vehicle: wanderer.vehicle,
         stops: wanderer.circuit.length,
         texture: sprite.texture.key,
         visible: sprite.visible,
@@ -90,7 +111,7 @@ export class WandererView {
   private texture(wanderer: Wanderer, facing: Facing): string {
     const key = paintedKey(wanderer.id, facing);
     if (facingArt(wanderer.id, facing) && this.scene.textures.exists(key)) return key;
-    const home = biomeFor(wanderer.species.biomes[0] ?? 'river');
+    const home = biomeFor(wanderer.ground[0] ?? 'river');
     // The stand-in only draws a side view, so a north or south heading borrows the nearer side --
     // the same fallback `facingArt` makes, kept here so the two cannot disagree about it.
     const side = facing === 'left' ? 'left' : 'right';
@@ -119,7 +140,13 @@ export class WandererView {
     const side = this.scene.textures.exists(sideKey)
       ? (this.scene.textures.get(sideKey).getSourceImage() as { width: number; height: number })
       : src;
-    const scale = paintedHeight(wanderer.id, side) / src.height;
+    // A step of a painted walk is scaled as its facing's still is, not to the box on its own: the
+    // steps differ by a spear-tip in height, and fitting each would make the wagon pulse as it rolls.
+    const stillKey = sprite.texture.key.replace(/:\d+$/, '');
+    const still = this.scene.textures.exists(stillKey)
+      ? (this.scene.textures.get(stillKey).getSourceImage() as { width: number; height: number })
+      : src;
+    const scale = paintedHeight(wanderer.id, side) / still.height;
     sprite.setDisplaySize(Math.round(src.width * scale), Math.round(src.height * scale));
   }
 
@@ -142,9 +169,12 @@ export class WandererView {
       const where = wandererAt(this.host.world, wanderer, day, phase);
       if (!where) {
         sprite.setVisible(false);
+        this.standing.delete(wanderer.id);
+        this.going.delete(wanderer.id);
         continue;
       }
       sprite.setVisible(true);
+      this.standing.set(wanderer.id, where.at);
       sprite.setPosition(
         where.at.x * TILE_SIZE + TILE_SIZE / 2,
         where.at.y * TILE_SIZE + TILE_SIZE - 2
@@ -173,7 +203,60 @@ export class WandererView {
           sprite.setTexture(next);
           this.size(wanderer, sprite);
         }
+        this.going.set(wanderer.id, { facing, moving: true });
+      } else {
+        // Standing: back to the still of whichever way it was facing, so a walk stopped mid-stride
+        // does not freeze on a lifted hoof.
+        const was = this.going.get(wanderer.id);
+        if (was?.moving) {
+          this.going.set(wanderer.id, { facing: was.facing, moving: false });
+          const still = this.texture(wanderer, was.facing);
+          if (sprite.texture.key !== still) {
+            sprite.setTexture(still);
+            this.size(wanderer, sprite);
+          }
+        }
       }
+    }
+    this.reportBeside();
+  }
+
+  /**
+   * Tell React when the player comes alongside one, once per meeting.
+   *
+   * Asked after the animals move and after the player does, since either can bring them together --
+   * the same two moments `TravellerView.reportNearby` is asked at. A meeting ends when they part, so
+   * walking away and back is a second one; what React makes of it is React's (the Sinauli wagon's
+   * card comes once a journey).
+   */
+  reportBeside(): void {
+    const now = new Set<string>();
+    for (const { wanderer } of this.list) {
+      const at = this.standing.get(wanderer.id);
+      if (!at || !isAlongside(at, this.host.at)) continue;
+      now.add(wanderer.id);
+      if (this.beside.has(wanderer.id)) continue;
+      EventBus.emitEvent('wanderer-alongside', { id: wanderer.id, vehicle: wanderer.vehicle, at: this.host.at });
+    }
+    this.beside = now;
+  }
+
+  /**
+   * Step a painted walk along while it moves. Every frame, from the scene's `update`, because a stride
+   * on the half-second gate would read as a slide-show; only a wanderer painted walking and on the
+   * move is touched, so the cost is a texture swap every `STEP_MS` for the one wagon.
+   */
+  animate(now: number): void {
+    for (const { wanderer, sprite } of this.list) {
+      const go = this.going.get(wanderer.id);
+      if (!go?.moving || !sprite.visible) continue;
+      const steps = walkArt(wanderer.id, go.facing);
+      if (steps.length === 0) continue;
+      const step = Math.floor(now / WandererView.STEP_MS) % steps.length;
+      const key = walkKey(wanderer.id, go.facing, step);
+      if (sprite.texture.key === key || !this.scene.textures.exists(key)) continue;
+      sprite.setTexture(key);
+      this.size(wanderer, sprite);
     }
   }
 }

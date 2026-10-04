@@ -169,6 +169,14 @@ export interface GameToUi {
   'traveller-tapped': { travellerId: string };
 
   /**
+   * The player came alongside a wanderer: one tile off, diagonals included (`isAlongside`).
+   *
+   * Once per meeting, from `WandererView.reportBeside`. `vehicle` is set for a craft on its patrol --
+   * the Sinauli wagon -- and null for an animal. React decides whether anything comes of it.
+   */
+  'wanderer-alongside': { id: string; vehicle: string | null; at: Point };
+
+  /**
    * The traveller reached an authored place for the first time this journey.
    *
    * Separate from `standing-on` on purpose. That one is a *state* the UI depends on — it fires

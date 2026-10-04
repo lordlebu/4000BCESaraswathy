@@ -61,7 +61,9 @@ export const CLASS_MARK: Record<MaterialClass, string> = {
   // Added when canon did. Its own class rather than a `flesh` or an `oil`, because every other
   // animal material in the bundle ends an animal and this one leaves it standing -- which is the
   // distinction a game with no combat is built on.
-  milk: '🥛'
+  milk: '🥛',
+  // Chipped from the snowfield, for the cold it carries. Only the Narmada has any.
+  ice: '🧊'
 };
 
 /**

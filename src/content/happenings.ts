@@ -45,7 +45,7 @@ import {
 } from './events';
 import happeningsText from '../../data/happenings.json';
 import { type Material, material, materialsIn } from './making';
-import { fieldMap, poi, type PointOfInterest } from './places';
+import { driverOf, fieldMap, poi, type PointOfInterest } from './places';
 import { rhythmOf } from './routine';
 import { biomeFor, creatureFor, creaturesIn, floraFor, isAnimal } from './species';
 import {
@@ -136,6 +136,12 @@ export interface Surroundings {
    * Null everywhere else: like small talk, a camp's people are asked for, never rationed.
    */
   campPerson: CampTalk | null;
+  /**
+   * A craft on its patrol that the player has just come alongside -- the Sinauli wagon on North
+   * Dwarka (`wanderers.ts`, `PATROLS`). Null everywhere else: like a camp, it is asked for by
+   * meeting it, never rationed onto the road.
+   */
+  passing: { id: string; vehicle: string } | null;
 }
 
 /** Somebody at a camp, as the talk row hands them over: who, and what the hour has them doing. */
@@ -176,6 +182,7 @@ export function surroundingsAt(
     camp?: Encampment | null;
     campStanding?: string | null;
     campPerson?: CampTalk | null;
+    passing?: { id: string; vehicle: string } | null;
   } = {}
 ): Surroundings | null {
   const tile = world.tiles[at.y]?.[at.x];
@@ -216,7 +223,8 @@ export function surroundingsAt(
     talk: extra.talk ?? null,
     camp: extra.camp ?? null,
     campStanding: extra.campStanding ?? null,
-    campPerson: extra.campPerson ?? null
+    campPerson: extra.campPerson ?? null,
+    passing: extra.passing ?? null
   };
 }
 
@@ -664,6 +672,30 @@ const campTalk: Template = ({ campPerson }, _roll, now) => {
   );
 };
 
+/**
+ * The Sinauli wagon on its round, met: it stood, or it rolled across your way.
+ *
+ * **No errand hangs on it**, on the owner's word of 4 October 2026 -- a card that you saw it, once a
+ * journey, and nothing to take or give. Asked for by coming alongside (`WandererView.reportBeside`),
+ * and not in the first steps on the map (`PASSING_AFTER_STEPS`): the Caravan Ground is where a
+ * traveller is set down and where the wagon keeps its round, and meeting it the moment you arrive
+ * would make it scenery rather than a sight.
+ */
+const passing: Template = ({ passing: craft, biome }, _roll, now) => {
+  if (!craft) return null;
+  if (now.seen.includes(`woven:passing:${craft.id}`)) return null;
+  // Who drives it is canon's (`drives` on an npc): Sudama, Jarro's charioteer, on the owner's word.
+  const driver = driverOf(craft.vehicle);
+  return woven(
+    'road',
+    'passing',
+    craft.id,
+    { ground: ground(biome), driver: driver?.name ?? 'the driver' },
+    [{ id: 'watch' }, { id: 'raise' }],
+    { variant: craft.id }
+  );
+};
+
 const weather: Template = ({ moment, biome, flora }) => {
   const sky = moment?.weather;
   if (sky !== 'rain' && sky !== 'mist' && sky !== 'storm') return null;
@@ -837,6 +869,7 @@ export const TEMPLATES: Readonly<Record<Occasion, readonly { kind: string; make:
     { kind: 'kindness-returned', make: kindnessReturned },
     { kind: 'small-talk', make: smallTalk },
     { kind: 'camp-talk', make: campTalk },
+    { kind: 'passing', make: passing },
     { kind: 'weather', make: weather }
   ],
   night: [

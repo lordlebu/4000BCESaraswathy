@@ -384,7 +384,7 @@ data/making/ (the game's own: crafting, homesteads)  →  src/content/making.ts,
 ```
 
 **Everything in `data/canon/` is generated. Never hand-edit it.** Canon lives in the sibling
-`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 532 entities
+`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 536 entities
 across species, places, discoveries and world. To change any of it, edit the canon entity there and
 re-run `python utils/export_canon_bundle.py --apply`.
 
@@ -889,6 +889,22 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
   cannot disagree.
 - **The front door says where you left off** (`leftOffLines`): the map, the pin or next stage, and
   what the diary holds.
+
+### The title, a random seed, and the wagon (4 October 2026)
+
+`docs/zebu-soma-chariot.md` is the record.
+
+- **Every visit opens on the title**, *South of Tethys* with the name in Brahmi, bold (`Opening`'s
+  `title`). A first visit goes on into the opening and then the door; a returning one sees the title
+  alone, then the door. Off wherever the door is off; `?title=skip` skips the title alone. Noto Sans
+  Brahmi ships in `src/ui/fonts/` (OFL), limited to the Brahmi block.
+- **A new visit starts on a random seed** (`seed.chooseSeed`): a link's first, `DEFAULT_SEED` under
+  automation, then the browser's last walked, then a fresh one. Starting over rolls a new seed.
+- **A wanderer can be a vehicle** (`PATROLS`): the Sinauli wagon near Dwarka's Caravan Ground, on dry
+  ground only, driven by canon's Sudama (`drives`). Its card waits for `PASSING_AFTER_STEPS`.
+- **A painted walk animates** (`WandererView.animate`): a 4x4 sheet becomes a still and `-walk1..3`
+  per facing. `--force` on the art builders re-cuts accepted art; put the others back from git.
+- **A recipe may be `made_on` some maps** (`crafting.mapAllows`): kulfi on the Narmada.
 
 ### The resource layer, and where its numbers live
 

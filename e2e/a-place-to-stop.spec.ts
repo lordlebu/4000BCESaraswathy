@@ -51,7 +51,7 @@ test('the front door says where you left off', async ({ page }) => {
   await page.keyboard.press('KeyD');
   await expect(page.locator('.journal h2')).toBeVisible();
 
-  await page.goto(`?seed=${seed}&door=shut`);
+  await page.goto(`?seed=${seed}&door=shut&title=skip`);
   await expect(page.getByRole('dialog', { name: /begin/i })).toBeVisible({ timeout: 20_000 });
   const left = page.getByRole('region', { name: 'Where you left off' });
   await expect(left).toBeVisible();

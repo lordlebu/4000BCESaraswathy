@@ -18,7 +18,7 @@ import { broughtByStory } from '../src/content/storylines';
 import { cleanup, render, screen } from '@testing-library/react';
 import { met, threadWith } from '../src/content/people';
 import { PeoplePanel, nameOfGift } from '../src/ui/PeoplePanel';
-import { allNpcs, npc } from '../src/content/places';
+import { allNpcs, metOnTheirCraft, npc } from '../src/content/places';
 import { emptyProgress, gatherable, hear, staying } from '../src/journey';
 import type { Progress } from '../src/journey';
 
@@ -40,7 +40,7 @@ describe('every introduction leaves a trace', () => {
     // over, this fails here rather than showing an empty People tab to a player who has talked to
     // them.
     // Somebody met through their arc has no introduction to make: the arc is the meeting.
-    for (const person of allNpcs().filter((n) => !broughtByStory(n.id))) {
+    for (const person of allNpcs().filter((n) => !broughtByStory(n.id) && !metOnTheirCraft(n.id))) {
       const opening = person.lines.filter(
         (l) => l.requires.length === 0 && l.costs === null && l.gives.length > 0
       );
