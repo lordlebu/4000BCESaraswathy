@@ -2341,6 +2341,8 @@ export class WorldScene extends Phaser.Scene {
     this.updateSway();
     this.updateRide();
     this.visitors.update();
+    // A painted walk steps every frame; where the wanderers are is still the half-second gate's.
+    this.wanderers.animate(this.time.now);
     this.travellers.placeTargetMark();
     // Every frame, not on the half-second gate: a boat that moved twice a second would be seen to
     // jump. The timetable reads the journey's clock in days, the swell and the wind the loop's own.

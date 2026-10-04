@@ -1426,14 +1426,20 @@ export type WandererShape = 'wader' | 'browser' | 'serpent' | 'chariot';
  */
 const TALLER: Record<string, number> = {
   sivatherium: 1.51,
-  // A car with somebody standing in it, and an ox at the pole: the driver's head is above the
-  // traveller's, as a man standing on a platform's would be. The owner's, 4 October 2026.
+  // A car with somebody standing in it, and an ox at the pole. Its length binds first (`SHORTER`),
+  // so this is room rather than a size: a tile and a quarter long stands 1.11 high.
   'sinauli-wagon': 1.5
 };
 
 /** The box an animal's side view is fitted to, in tiles. */
+/**
+ * The one wanderer kept shorter than the whale's two tiles: the Sinauli wagon, a tile and a quarter
+ * from the ox's nose to the back of the car, side-on -- the owner's size, 4 October 2026.
+ */
+const SHORTER: Record<string, number> = { 'sinauli-wagon': 1.25 };
+
 export function boxFor(speciesId: string): { long: number; tall: number } {
-  return { long: WANDERER_BOX.long, tall: TALLER[speciesId] ?? WANDERER_BOX.tall };
+  return { long: SHORTER[speciesId] ?? WANDERER_BOX.long, tall: TALLER[speciesId] ?? WANDERER_BOX.tall };
 }
 
 const BUILDS: Record<string, { long: number; tall: number; shape: WandererShape }> = {
@@ -1445,7 +1451,9 @@ const BUILDS: Record<string, { long: number; tall: number; shape: WandererShape 
   'vasuki-indicus': { long: 2, tall: 0.76, shape: 'serpent' },
   // Not an animal: the Sinauli wagon on its patrol, a humped ox at the pole and a driver standing.
   // The stand-in until the owner's painting arrives -- see `PATROLS` in `content/wanderers.ts`.
-  'sinauli-wagon': { long: 2, tall: 1.5, shape: 'chariot' },
+  // Painted 4 October 2026 as a walk sheet, side view 305 x 270: a tile and a quarter long on the
+  // owner's word, so 1.11 high -- the driver's head a little under the traveller's (see `SHORTER`).
+  'sinauli-wagon': { long: 1.25, tall: 1.11, shape: 'chariot' },
   default: { long: 1.5, tall: 0.94, shape: 'wader' }
 };
 

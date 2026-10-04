@@ -11,7 +11,7 @@ import { TILE_SIZE, paintedHeight, wandererMarkerKey } from '../tileTextures';
 import { ROW_SLOT, depthFor } from '../frames';
 import { isAlongside, wanderersOn, wandererAt, type Wanderer } from '../../content/wanderers';
 import { EventBus } from '../EventBus';
-import { facingArt, hasPaintedArt, paintedKey } from '../wandererArt';
+import { facingArt, hasPaintedArt, paintedKey, walkArt, walkKey } from '../wandererArt';
 import { biomeFor } from '../../content/species';
 import type { Facing } from '../player';
 import type { Point, World } from '../../world/types';
@@ -44,6 +44,15 @@ export class WandererView {
 
   /** Who the player is alongside now, so coming alongside is said once and not every tick. */
   private beside = new Set<string>();
+
+  /** Which way each one faces and whether it is on the move, by id: what `animate` steps through. */
+  private going = new Map<string, { facing: Facing; moving: boolean }>();
+
+  /**
+   * How long one step of a painted walk is shown, in milliseconds. Four steps make a stride of about
+   * three quarters of a second: an ox's unhurried pace, which is the only walk painted so far.
+   */
+  static readonly STEP_MS = 190;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -131,7 +140,13 @@ export class WandererView {
     const side = this.scene.textures.exists(sideKey)
       ? (this.scene.textures.get(sideKey).getSourceImage() as { width: number; height: number })
       : src;
-    const scale = paintedHeight(wanderer.id, side) / src.height;
+    // A step of a painted walk is scaled as its facing's still is, not to the box on its own: the
+    // steps differ by a spear-tip in height, and fitting each would make the wagon pulse as it rolls.
+    const stillKey = sprite.texture.key.replace(/:\d+$/, '');
+    const still = this.scene.textures.exists(stillKey)
+      ? (this.scene.textures.get(stillKey).getSourceImage() as { width: number; height: number })
+      : src;
+    const scale = paintedHeight(wanderer.id, side) / still.height;
     sprite.setDisplaySize(Math.round(src.width * scale), Math.round(src.height * scale));
   }
 
@@ -155,6 +170,7 @@ export class WandererView {
       if (!where) {
         sprite.setVisible(false);
         this.standing.delete(wanderer.id);
+        this.going.delete(wanderer.id);
         continue;
       }
       sprite.setVisible(true);
@@ -187,6 +203,19 @@ export class WandererView {
           sprite.setTexture(next);
           this.size(wanderer, sprite);
         }
+        this.going.set(wanderer.id, { facing, moving: true });
+      } else {
+        // Standing: back to the still of whichever way it was facing, so a walk stopped mid-stride
+        // does not freeze on a lifted hoof.
+        const was = this.going.get(wanderer.id);
+        if (was?.moving) {
+          this.going.set(wanderer.id, { facing: was.facing, moving: false });
+          const still = this.texture(wanderer, was.facing);
+          if (sprite.texture.key !== still) {
+            sprite.setTexture(still);
+            this.size(wanderer, sprite);
+          }
+        }
       }
     }
     this.reportBeside();
@@ -210,5 +239,24 @@ export class WandererView {
       EventBus.emitEvent('wanderer-alongside', { id: wanderer.id, vehicle: wanderer.vehicle, at: this.host.at });
     }
     this.beside = now;
+  }
+
+  /**
+   * Step a painted walk along while it moves. Every frame, from the scene's `update`, because a stride
+   * on the half-second gate would read as a slide-show; only a wanderer painted walking and on the
+   * move is touched, so the cost is a texture swap every `STEP_MS` for the one wagon.
+   */
+  animate(now: number): void {
+    for (const { wanderer, sprite } of this.list) {
+      const go = this.going.get(wanderer.id);
+      if (!go?.moving || !sprite.visible) continue;
+      const steps = walkArt(wanderer.id, go.facing);
+      if (steps.length === 0) continue;
+      const step = Math.floor(now / WandererView.STEP_MS) % steps.length;
+      const key = walkKey(wanderer.id, go.facing, step);
+      if (sprite.texture.key === key || !this.scene.textures.exists(key)) continue;
+      sprite.setTexture(key);
+      this.size(wanderer, sprite);
+    }
   }
 }

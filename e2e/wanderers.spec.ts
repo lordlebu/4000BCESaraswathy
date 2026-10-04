@@ -104,3 +104,26 @@ test('North Dwarka carries the Sinauli wagon on its round, and it is drawn', asy
   expect(wagon!.visible, 'the wagon exists but is not being drawn').toBe(true);
   expect(wagon!.h, 'the wagon is drawn at no height').toBeGreaterThan(0);
 });
+
+test('the wagon walks its painted steps while it rolls, and stands on its still', async ({ page }) => {
+  // Painted as a walk sheet (4 October 2026). `WandererView.animate` steps it every frame while it
+  // moves; a Node test cannot see a texture change, so this reads two moments a few steps apart.
+  await page.goto('/?seed=patrol-0&map=field_map_dwarka&hour=11');
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await page.waitForTimeout(1500);
+  const textures = new Set<string>();
+  for (let i = 0; i < 6; i += 1) {
+    const wagon = (await read(page))?.find((w) => w.id === 'sinauli-wagon');
+    if (wagon) textures.add(wagon.texture);
+    await page.waitForTimeout(130);
+  }
+  expect([...textures].every((t) => t.startsWith('wanderer-art:sinauli-wagon')), `drawn from ${[...textures].join(', ')}`).toBe(true);
+  expect(textures.size, 'the rolling wagon never changed step').toBeGreaterThan(1);
+
+  // At first light it stands, on the still of its facing.
+  await page.goto('/?seed=patrol-0&map=field_map_dwarka&hour=7');
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await page.waitForTimeout(1500);
+  const standing = (await read(page))?.find((w) => w.id === 'sinauli-wagon');
+  expect(standing?.texture).toMatch(/^wanderer-art:sinauli-wagon:(right|left|down|up)$/);
+});

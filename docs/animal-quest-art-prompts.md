@@ -135,7 +135,9 @@ box of its own. It got there in three steps, each set by looking at it in the ga
 
 ---
 
-## B2. The Sinauli wagon on its round · open (4 October 2026)
+## B2. The Sinauli wagon on its round ✅ done (4 October 2026)
+
+Arrived as a walk sheet, four rows of four, and walks: see `assets/wanderers/README.md`.
 
 Not an animal, and it walks the same way: `PATROLS` in `src/content/wanderers.ts` puts it on North
 Dwarka, near the Caravan Ground, on desert, grass and hill, standing still most of the day. Until
@@ -145,8 +147,8 @@ driver with a spear, and a humped ox at the pole. The driver is Sudama, Jarro's 
 
 Engine id **`sinauli-wagon`**. Drop one sheet of four views as `assets/source/dump/sinauli-wagon.png`
 (it is already in `SHEETS` in `tools/build-wanderers.js`) and run `node tools/build-wanderers.js`.
-It is sized to a box two tiles long and 1.5 high (`TALLER` in `src/game/frames.ts`), so the driver's
-head is a little above the traveller's.
+It is drawn a tile and a quarter long side-on, on the owner's word (`SHORTER` in
+`src/game/frames.ts`), which stands it 1.11 tiles high.
 
 > **Style:** Small pixel-art sprite for a top-down 2D game, side view. Painterly pixel art with
 > soft dithering, not hard-edged 8-bit. Warm naturalistic colour, readable as a silhouette at a

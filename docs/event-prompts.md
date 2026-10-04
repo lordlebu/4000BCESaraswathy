@@ -588,7 +588,10 @@ still driven on North Dwarka, keeping a round of dry ground near the Caravan Gro
 card, once a journey, and never in the first steps on the map. There is no horse on Jambhudweep, so
 a humped zebu is in the traces.
 
-#### `woven-passing` -- the Sinauli wagon, met
+#### `woven-passing` -- the Sinauli wagon, met ✅ arrived 4 October 2026
+
+Painted by the owner on a sketchbook page and cropped to the painted area before building:
+`crop (128, 102, 2320, 1746)` of the 2400 x 1792 raw, which is 4:3; the raw stays in the dump.
 
 Save as `assets/source/events/woven-passing.png`. The card tries `woven-passing-sinauli-wagon` first
 and falls back to this, so one painting serves until another patrol is ever written.

@@ -221,7 +221,17 @@ for (const sheet of sheets) {
     continue;
   }
   const biggest = Math.max(...all.map((b) => b.count));
-  const kept = inReadingOrder(all.filter((b) => b.count >= biggest * SPECK));
+  let kept = inReadingOrder(all.filter((b) => b.count >= biggest * SPECK));
+
+  // **A walk sheet: four rows of four, one row per facing.** The Sinauli wagon arrived that way on
+  // 4 October 2026 -- right, left, front, back, each as four steps of a walk. The first step of each
+  // row is the still view, `<id>-<facing>.png`, drawn while it stands; the other three are written as
+  // `<id>-<facing>-walk1..3.png` and stepped through while it rolls (`wandererArt.walkArt`).
+  let walk = null;
+  if (kept.length === 16) {
+    walk = kept;
+    kept = [0, 4, 8, 12].map((i) => walk[i]);
+  }
 
   if (kept.length !== 4) {
     // Four views or nothing. A sheet that does not split cleanly is one to open and look at rather
@@ -235,6 +245,13 @@ for (const sheet of sheets) {
     const file = path.join(OUT, `${id}-${FACINGS[i]}.png`);
     fs.writeFileSync(file, encodePng(out.width, out.height, out.data));
     console.log(`  ok ${id}-${FACINGS[i]}.png  ${out.width}x${out.height}`);
+    for (let step = 1; walk && step < 4; step += 1) {
+      const frame = walk[i * 4 + step];
+      const cutStep = cut(png, frame, reach(png, all.labels, frame.label));
+      const stepFile = path.join(OUT, `${id}-${FACINGS[i]}-walk${step}.png`);
+      fs.writeFileSync(stepFile, encodePng(cutStep.width, cutStep.height, cutStep.data));
+      console.log(`  ok ${id}-${FACINGS[i]}-walk${step}.png  ${cutStep.width}x${cutStep.height}`);
+    }
   });
   built += 1;
 }

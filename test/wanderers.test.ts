@@ -261,7 +261,8 @@ describe("every animal fits the walking whale's box", () => {
     const h = paintedHeight(id, art);
     return { w: (h * art.width) / art.height, h };
   };
-  const ANIMALS = ['narmada-walking-whale', 'sivatherium', 'vasuki-indicus'];
+  // And the Sinauli wagon, which is not an animal and is sized by the same rule.
+  const ANIMALS = ['narmada-walking-whale', 'sivatherium', 'vasuki-indicus', 'sinauli-wagon'];
   const boxW = WANDERER_BOX.long * GRID;
   const boxH = WANDERER_BOX.tall * GRID;
 
