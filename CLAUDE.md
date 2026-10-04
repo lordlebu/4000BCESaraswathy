@@ -901,7 +901,11 @@ The owner's play of the Narmada; `docs/satchel-and-hearth.md` is the record. Rul
 - **A new visit starts on a random seed** (`seed.chooseSeed`): a link's first, `DEFAULT_SEED` under
   automation, then the browser's last walked, then a fresh one. Starting over rolls a new seed.
 - **A wanderer can be a vehicle** (`PATROLS`): the Sinauli wagon near Dwarka's Caravan Ground, on dry
-  ground only, driven by canon's Sudama (`drives`). Its card waits for `PASSING_AFTER_STEPS`.
+  ground only, driven by canon's Sudama (`drives`). Its card waits for `PASSING_AFTER_STEPS`. **It
+  keeps the scene's clock, not the day's** (`patrolAt`, like the strait's ship): the day's clock jumps
+  with every step, and a position read from it lurched. It glides at `PATROL_PACE` and halts at stops.
+- **Vasuki keeps far from people** (`KEEPS_AWAY`): stops ten tiles from settlements and cart stops,
+  four from any camp ground; ways eight and three. Its round needs the placed places.
 - **A painted walk animates** (`WandererView.animate`): a 4x4 sheet becomes a still and `-walk1..3`
   per facing. `--force` on the art builders re-cuts accepted art; put the others back from git.
 - **A recipe may be `made_on` some maps** (`crafting.mapAllows`): kulfi on the Narmada.

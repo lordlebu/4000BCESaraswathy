@@ -187,9 +187,13 @@ describe('every authored wanderer actually resolves', () => {
     expect(on).toContain('sivatherium');
   });
 
-  it('puts Vasuki in the Dwarka desert', () => {
-    const on = wanderersOn('field_map_dwarka', built('field_map_dwarka')).map((w) => w.id);
-    expect(on).toContain('vasuki-indicus');
+  it('puts Vasuki in the Dwarka desert, once it knows where people are', () => {
+    // Vasuki keeps far from settlements and camps (`KEEPS_AWAY`), so its round needs the placed
+    // places; without them there is no round rather than one that walks into the market.
+    const whole = buildFieldMap(fieldMap('field_map_dwarka')!, { seed: DEFAULT_SEED });
+    const places = whole.placed.map((p) => ({ poiId: p.poi.id, at: p.at }));
+    expect(wanderersOn('field_map_dwarka', whole.world, places).map((w) => w.id)).toContain('vasuki-indicus');
+    expect(wanderersOn('field_map_dwarka', whole.world).map((w) => w.id)).not.toContain('vasuki-indicus');
   });
 
   it('gives every one of them a circuit it can walk', () => {

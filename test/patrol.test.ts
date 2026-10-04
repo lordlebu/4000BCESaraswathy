@@ -9,7 +9,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
 import { fieldMap } from '../src/content/places';
-import { PATROL_RANGE, isAlongside, wandererAt, wandererIdsOn, wanderersOn, type Wanderer } from '../src/content/wanderers';
+import { PATROL_PACE, PATROL_RANGE, isAlongside, patrolAt, wandererIdsOn, wanderersOn, type Wanderer } from '../src/content/wanderers';
 import { wayBetween } from '../src/content/travellers';
 import { happeningNow, surroundingsAt } from '../src/content/happenings';
 import { PASSING_AFTER_STEPS } from '../src/content/tiers';
@@ -84,16 +84,54 @@ describe('the Sinauli wagon keeps a round near the Caravan Ground', () => {
     expect(legs, 'no leg was checked').toBeGreaterThan(0);
   });
 
-  it('stands still most of the day', () => {
+  it('glides at an ox’s pace, never jumping a tile', () => {
+    // The scene's clock, not the day's: the owner saw it lurch while it kept the day's hours.
     const { world, places } = dwarka(SEEDS[0]!);
     const wagon = wagonOn(world, places)!;
-    let still = 0;
-    const samples = 96;
-    for (let i = 0; i < samples; i += 1) {
-      if (wandererAt(world, wagon, 3, i / samples)?.resting) still += 1;
+    const dt = 0.1;
+    let prev = patrolAt(world, wagon, 0)!;
+    let between = 0;
+    for (let t = dt; t < 400; t += dt) {
+      const now = patrolAt(world, wagon, t)!;
+      const step = Math.hypot(now.exact.x - prev.exact.x, now.exact.y - prev.exact.y);
+      // A stop is a corner of two legs, so allow the diagonal of a pace at most.
+      expect(step, `jumped ${step.toFixed(2)} tiles at ${t.toFixed(1)}s`).toBeLessThanOrEqual(PATROL_PACE * dt * 1.5 + 1e-6);
+      if (now.exact.x % 1 !== 0 || now.exact.y % 1 !== 0) between += 1;
+      prev = now;
     }
-    expect(still / samples, 'standing for less than five-sixths of the day').toBeGreaterThanOrEqual(5 / 6);
-    expect(still, 'it never moves at all').toBeLessThan(samples);
+    expect(between, 'never drawn between two tiles').toBeGreaterThan(0);
+  });
+
+  it('halts from time to time, and rolls most of the rest', () => {
+    const { world, places } = dwarka(SEEDS[0]!);
+    const wagon = wagonOn(world, places)!;
+    let halted = 0;
+    let halts = 0;
+    let wasHalted = false;
+    const samples = 2000;
+    for (let i = 0; i < samples; i += 1) {
+      const now = patrolAt(world, wagon, i * 0.5)!;
+      const still = now.heading === null;
+      if (still) halted += 1;
+      if (still && !wasHalted) halts += 1;
+      wasHalted = still;
+    }
+    expect(halts, 'it never stops').toBeGreaterThan(3);
+    expect(halted / samples, 'it hardly moves').toBeLessThan(0.75);
+    expect(halted / samples, 'it never rests').toBeGreaterThan(0.15);
+  });
+
+  it('is never over marsh or water at any moment of its loop', () => {
+    for (const seed of SEEDS.slice(0, 4)) {
+      const { world, places } = dwarka(seed);
+      const wagon = wagonOn(world, places);
+      if (!wagon) continue;
+      for (let t = 0; t < 600; t += 0.5) {
+        const at = patrolAt(world, wagon, t)!.at;
+        const tile = world.tiles[at.y]![at.x]!;
+        if (!tile.bridge) expect(WET, `${seed}: on ${tile.biome} at ${t}s`).not.toContain(tile.biome);
+      }
+    }
   });
 
   it('has a stand-in of its own until its painting arrives', () => {

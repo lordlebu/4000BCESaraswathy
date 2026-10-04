@@ -105,25 +105,36 @@ test('North Dwarka carries the Sinauli wagon on its round, and it is drawn', asy
   expect(wagon!.h, 'the wagon is drawn at no height').toBeGreaterThan(0);
 });
 
-test('the wagon walks its painted steps while it rolls, and stands on its still', async ({ page }) => {
-  // Painted as a walk sheet (4 October 2026). `WandererView.animate` steps it every frame while it
-  // moves; a Node test cannot see a texture change, so this reads two moments a few steps apart.
+test('the wagon glides at an ox’s pace, walking its painted steps, and halts from time to time', async ({ page }) => {
+  // The owner, 4 October 2026: it should move like the strait's ship moving slowly, legs walking, and
+  // stop from time to time. It keeps the scene's clock (`patrolAt`), so a minute shows a halt and a
+  // roll whatever the hour. A Node test cannot see a texture change or a sprite glide; this reads both.
   await page.goto('/?seed=patrol-0&map=field_map_dwarka&hour=11');
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await page.waitForTimeout(1500);
-  const textures = new Set<string>();
-  for (let i = 0; i < 6; i += 1) {
-    const wagon = (await read(page))?.find((w) => w.id === 'sinauli-wagon');
-    if (wagon) textures.add(wagon.texture);
-    await page.waitForTimeout(130);
+  const seen = { stepped: false, halted: false, moved: false };
+  let last: { w: Seen; at: number } | null = null;
+  let fastest = 0;
+  const until = Date.now() + 75_000;
+  while (Date.now() < until && !(seen.stepped && seen.halted && seen.moved)) {
+    const wagon = (await read(page))?.find((w) => w.id === 'sinauli-wagon') ?? null;
+    if (wagon) {
+      expect(wagon.texture).toMatch(/^wanderer-art:sinauli-wagon:/);
+      if (/:(right|left|down|up):\d$/.test(wagon.texture)) seen.stepped = true;
+      if (/:(right|left|down|up)$/.test(wagon.texture)) seen.halted = true;
+      const at = Date.now();
+      if (last && (wagon.x !== last.w.x || wagon.y !== last.w.y)) {
+        seen.moved = true;
+        // Pixels a second, over the time between the two readings: a stalled frame lets the clock
+        // run on and the wagon catch up, which is time passing, not a lurch.
+        fastest = Math.max(fastest, Math.hypot(wagon.x - last.w.x, wagon.y - last.w.y) / ((at - last.at) / 1000));
+      }
+      last = { w: wagon, at };
+    }
+    await page.waitForTimeout(250);
   }
-  expect([...textures].every((t) => t.startsWith('wanderer-art:sinauli-wagon')), `drawn from ${[...textures].join(', ')}`).toBe(true);
-  expect(textures.size, 'the rolling wagon never changed step').toBeGreaterThan(1);
-
-  // At first light it stands, on the still of its facing.
-  await page.goto('/?seed=patrol-0&map=field_map_dwarka&hour=7');
-  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
-  await page.waitForTimeout(1500);
-  const standing = (await read(page))?.find((w) => w.id === 'sinauli-wagon');
-  expect(standing?.texture).toMatch(/^wanderer-art:sinauli-wagon:(right|left|down|up)$/);
+  expect(seen).toEqual({ stepped: true, halted: true, moved: true });
+  // Gliding at an ox's pace, not lurching: 0.4 tiles a second is 51 pixels a second on a 128 tile.
+  // Twice that allows for the reading's own timing; the old wagon jumped a tile or more at a step.
+  expect(fastest, `the wagon ran at ${Math.round(fastest)} px/s`).toBeLessThan(102);
 });

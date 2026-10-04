@@ -9,7 +9,7 @@
 import Phaser from 'phaser';
 import { TILE_SIZE, paintedHeight, wandererMarkerKey } from '../tileTextures';
 import { ROW_SLOT, depthFor } from '../frames';
-import { isAlongside, wanderersOn, wandererAt, type Wanderer } from '../../content/wanderers';
+import { isAlongside, patrolAt, wanderersOn, wandererAt, type Wanderer } from '../../content/wanderers';
 import { EventBus } from '../EventBus';
 import { facingArt, hasPaintedArt, paintedKey, walkArt, walkKey } from '../wandererArt';
 import { biomeFor } from '../../content/species';
@@ -166,6 +166,8 @@ export class WandererView {
     this.movedAt = step;
 
     for (const { wanderer, sprite } of this.list) {
+      // A patrol keeps the scene's clock and is placed every frame, in `animate`.
+      if (wanderer.vehicle) continue;
       const where = wandererAt(this.host.world, wanderer, day, phase);
       if (!where) {
         sprite.setVisible(false);
@@ -247,6 +249,7 @@ export class WandererView {
    * move is touched, so the cost is a texture swap every `STEP_MS` for the one wagon.
    */
   animate(now: number): void {
+    this.drive(now);
     for (const { wanderer, sprite } of this.list) {
       const go = this.going.get(wanderer.id);
       if (!go?.moving || !sprite.visible) continue;
@@ -258,5 +261,49 @@ export class WandererView {
       sprite.setTexture(key);
       this.size(wanderer, sprite);
     }
+  }
+
+  /**
+   * Put each patrol where the scene's clock says, every frame: between two tiles while it rolls, so
+   * it glides as the strait's ship does rather than jumping a tile at a time (`patrolAt`). Facing
+   * and the walk follow its heading; a halt drops back to the still of the way it last faced.
+   */
+  private drive(now: number): void {
+    let moved = false;
+    for (const { wanderer, sprite } of this.list) {
+      if (!wanderer.vehicle) continue;
+      const where = patrolAt(this.host.world, wanderer, now / 1000);
+      if (!where) {
+        sprite.setVisible(false);
+        this.standing.delete(wanderer.id);
+        this.going.delete(wanderer.id);
+        continue;
+      }
+      sprite.setVisible(true);
+      sprite.setPosition(where.exact.x * TILE_SIZE + TILE_SIZE / 2, where.exact.y * TILE_SIZE + TILE_SIZE - 2);
+      sprite.setDepth(depthFor(Math.round(where.exact.y), ROW_SLOT.walker));
+      const was = this.standing.get(wanderer.id);
+      if (!was || was.x !== where.at.x || was.y !== where.at.y) moved = true;
+      this.standing.set(wanderer.id, where.at);
+      const before = this.going.get(wanderer.id);
+      if (where.heading) {
+        const facing: Facing =
+          where.heading === 'west' ? 'left' : where.heading === 'east' ? 'right' : where.heading === 'north' ? 'up' : 'down';
+        this.going.set(wanderer.id, { facing, moving: true });
+        if (!before?.moving || before.facing !== facing) {
+          sprite.setTexture(this.texture(wanderer, facing));
+          this.size(wanderer, sprite);
+        }
+      } else if (before?.moving || !before) {
+        const facing = before?.facing ?? 'right';
+        this.going.set(wanderer.id, { facing, moving: false });
+        const still = this.texture(wanderer, facing);
+        if (sprite.texture.key !== still) {
+          sprite.setTexture(still);
+          this.size(wanderer, sprite);
+        }
+      }
+    }
+    if (moved) this.reportBeside();
   }
 }
