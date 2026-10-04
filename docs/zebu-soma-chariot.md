@@ -22,8 +22,11 @@ plateau the workshop says it "is only made on the Narmada Plateau". `test/kulfi.
 
 **The Sinauli wagon patrols North Dwarka.** A wanderer can be a vehicle (`PATROLS` in
 `content/wanderers.ts`): it keeps a round of desert, grass and hill within eight tiles of the
-Caravan Ground, joined by ways that never cross marsh or water, rolls from ten until half past
-twelve and stands the rest of the day. Sudama drives it for Jarro (canon's `npc_sudama`, read
+Caravan Ground, joined by ways that never cross marsh or water. It first rolled from ten until half
+past twelve on the day's clock and lurched: that clock jumps about 45 seconds with every step the
+traveller takes. It now keeps the scene's own clock, as the strait's ship does (`patrolAt`): it glides
+between tiles at `PATROL_PACE` (0.4 tiles a second, a little under the ship) with its legs walking,
+and halts `PATROL_HALT_S` (20 seconds) at each stop. Sudama drives it for Jarro (canon's `npc_sudama`, read
 through `drives`), with a zebu bull in the traces. Coming alongside opens one card a journey
 (`passing`), and never before `PASSING_AFTER_STEPS` steps on the map. No errand hangs on it.
 `test/patrol.test.ts`.
@@ -59,6 +62,18 @@ rolls a new world** rather than wiping this one. `DEFAULT_SEED` stays as the wor
 Wherever the door is skipped, so is the title; `?title=skip` skips the title alone, for the specs
 that are about the door. `e2e/opening.spec.ts` holds the order, `test/opening.test.tsx` the cards and
 `test/seedChoice.test.ts` the seed.
+
+## Vasuki keeps far from people
+
+The owner's ask, the same day: Vasuki indicus keeps far from every settlement and every temporary
+camp, and may cross a road. `KEEPS_AWAY` in `content/wanderers.ts`: its stops are ten tiles from any
+settlement or cart stop (`camps.isCamp`) and the settlement ground, and four from every tile a
+temporary camp could pitch on (`encampments.campGround`, the half camps choose from); every tile of
+the ways between stops keeps eight and three. Measured first over twelve seeds of North Dwarka, where
+camp ground is 117 to 370 tiles of a 48 by 48 map: those numbers leave a full round of four on every
+seed, and five from camp ground left one seed a single stop. Its round now needs the placed points of
+interest, and without them it has none rather than one that walks into the market.
+`test/vasukiKeepsAway.test.ts`.
 
 ## Open
 

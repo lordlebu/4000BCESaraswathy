@@ -34,8 +34,11 @@ import { isWalkable } from '../world/generate';
 import { tileHash } from '../world/rng';
 import { engineId } from './canon';
 import { vehicles } from './making';
+import { campGround } from './encampments';
+import { isCamp } from './camps';
+import { poi } from './places';
 import { metSpecies } from './species';
-import { COMMON_HOURS, type Hours, phaseAtHour, wayBetween, whereabouts, type Whereabouts } from './travellers';
+import { COMMON_HOURS, type Hours, wayBetween, whereabouts, type Whereabouts } from './travellers';
 
 /**
  * How many tiles a wanderer's round takes in.
@@ -240,8 +243,14 @@ export function wandererIdsOn(fieldMapId: string): string[] {
  *
  * **The owner's ask of 4 October 2026**: the Sinauli wagon -- canon's grave-goods car, still driven
  * on North Dwarka -- rolls around the Caravan Ground on open dry country, desert, grass or hill, and
- * never through marsh or water, and stands still most of the day. No errand hangs on it; meeting it
- * is a card (`happenings.ts`, `passing`).
+ * never through marsh or water. No errand hangs on it; meeting it is a card (`happenings.ts`,
+ * `passing`).
+ *
+ * **It moves on the scene's own clock, as the strait's ship does, not on the day's** (`patrolAt`).
+ * It first kept the day's hours, rolling from ten until half past twelve, and the owner saw it move
+ * badly: the day's clock jumps about 45 seconds with every step the traveller takes, so a position
+ * read from it lurched a tile or more at a time while its legs walked on the spot. Now it rolls at an
+ * ox's pace, glides between tiles, and halts at each stop -- "stop from time to time".
  */
 export interface Patrol {
   /** The game's vehicle id. */
@@ -250,26 +259,28 @@ export interface Patrol {
   near: string;
   /** The ground it stops on. */
   ground: BiomeId[];
-  /** Clock hours it rolls between, setting out and pulling up. Stood still the rest of the day. */
-  rolls: { from: number; to: number };
 }
 
-/**
- * Who patrols where. Keyed by field map, like `WANDERS`, and as short on purpose.
- *
- * Two and a half hours on the move out of twenty-four, so the wagon is nearly always found standing
- * -- the owner's "mostly will remain in stopped position" -- and rolling only through late morning.
- */
+/** Who patrols where. Keyed by field map, like `WANDERS`, and as short on purpose. */
 const PATROLS: Record<string, Patrol[]> = {
   field_map_dwarka: [
     {
       vehicle: 'vehicle_sinauli_wagon',
       near: 'poi_caravan_camp',
-      ground: ['desert', 'plains', 'hills'],
-      rolls: { from: 10, to: 12.5 }
+      ground: ['desert', 'plains', 'hills']
     }
   ]
 };
+
+/**
+ * How fast a patrol rolls, in tiles a second of the scene's clock: an ox's walk. The traveller walks
+ * about 2.4 on plains and the strait's ship goes 0.5 (`strait.SHIP_PACE`); a cart behind an ox is a
+ * little slower than the ship -- stately, and slower than anybody on foot.
+ */
+export const PATROL_PACE = 0.4;
+
+/** How long a patrol halts at each stop of its round, in seconds, before it rolls on. */
+export const PATROL_HALT_S = 20;
 
 /**
  * How far from the place it is kept near a patrol may stop, in tiles. Within sight of the Caravan
@@ -321,7 +332,8 @@ export function wanderersOn(
     // Not in canon, or not an animal: dropped rather than guessed at. A bundle can be older than
     // the code that names a species, and a missing whale is better than a crash on load.
     if (!species || !('mood' in species)) continue;
-    const circuit = circuitFor(world, species as Creature);
+    const away = KEEPS_AWAY[canonId];
+    const circuit = away ? circuitAwayFor(world, species as Creature, places, away) : circuitFor(world, species as Creature);
     if (circuit.length === 0) continue;
     const creature = species as Creature;
     out.push({
@@ -348,10 +360,127 @@ export function wanderersOn(
       vehicle: craft.id,
       ground: [...patrol.ground],
       circuit,
-      hours: { out: phaseAtHour(patrol.rolls.from), in: phaseAtHour(patrol.rolls.to) }
+      // Unused: a patrol keeps the scene's clock, not the day's (`patrolAt`).
+      hours: COMMON_HOURS
     });
   }
   return out;
+}
+
+/**
+ * How far an animal keeps from people, in tiles: from the places people live or stop (`camps.isCamp`
+ * -- settlements and cart stops -- and the settlement ground itself), and from every tile a
+ * temporary camp could pitch on (`encampments.campGround`). `stops` holds for the four tiles it
+ * rests on; `way` for every tile walked between them, a little closer, so it may cross a road but
+ * never walk one into a town.
+ */
+export interface KeepsAway {
+  settlements: number;
+  camps: number;
+  waySettlements: number;
+  wayCamps: number;
+}
+
+/**
+ * **Vasuki keeps far from people** (the owner, 4 October 2026): far from any settlement and any
+ * temporary camp, crossing a road where it must. Measured over twelve seeds of North Dwarka (48 x 48,
+ * with 117 to 370 tiles a camp could pitch on): stops ten tiles from settlements and four from camp
+ * ground, ways eight and three, leave a full round of four stops on every seed. Five from camp
+ * ground left one seed a single stop.
+ */
+const KEEPS_AWAY: Record<string, KeepsAway> = {
+  fauna_vasuki_indicus: { settlements: 10, camps: 4, waySettlements: 8, wayCamps: 3 }
+};
+
+/** The tiles people live on or stop at, and the tiles a temporary camp could pitch on. */
+function peopleOn(world: World, places: readonly { poiId: string; at: Point }[]): { lived: Point[]; camps: Point[] } {
+  const lived = places.filter((p) => {
+    const place = poi(p.poiId);
+    return place ? isCamp(place) : false;
+  }).map((p) => p.at);
+  for (const row of world.tiles) for (const t of row) if (t.biome === 'settlement') lived.push({ x: t.x, y: t.y });
+  // The same ground a camp chooses from, and the same half of it (`encampmentOn`): the better-hidden
+  // half, furthest from the roads. A round is one world's and a camp moves each turn, so the round
+  // keeps from every tile a camp could ever stand on.
+  const ground = campGround(world, places.map((p) => p.at));
+  return { lived, camps: ground.slice(0, Math.max(1, Math.ceil(ground.length / 2))) };
+}
+
+const chebyshev = (a: Point, b: Point): number => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+
+/**
+ * An animal's round, kept away from people (`KEEPS_AWAY`). Its stops are habitat far enough from
+ * every settlement and camp site; its ways stay a little less far, all the way along.
+ *
+ * Needs the placed points of interest: without them nothing is known of where people are, and the
+ * honest answer is no round at all rather than one that walks into the market.
+ */
+export function circuitAwayFor(
+  world: World,
+  species: Creature,
+  places: readonly { poiId: string; at: Point }[],
+  away: KeepsAway
+): Point[] {
+  if (places.length === 0) return [];
+  const { lived, camps } = peopleOn(world, places);
+  const far = (p: Point, fromLived: number, fromCamps: number) =>
+    lived.every((q) => chebyshev(p, q) >= fromLived) && camps.every((q) => chebyshev(p, q) >= fromCamps);
+  const tiles = habitatTiles(world, species).filter((p) => far(p, away.settlements, away.camps));
+  return circuitAmong(world, tiles, species.id, (a, b) =>
+    wayBetween(world, a, b).every((p) => far(p, away.waySettlements, away.wayCamps))
+  );
+}
+
+/** Where a patrol is, to the fraction of a tile, and whether it is rolling. */
+export interface PatrolPlace {
+  /** The tile it is over, for coming alongside and for depth. */
+  at: Point;
+  /** Where it is drawn, in tiles, between the tile it left and the next. */
+  exact: { x: number; y: number };
+  /** Which way it is rolling; null while it halts. */
+  heading: Whereabouts['heading'];
+}
+
+/**
+ * Where a patrol is at this moment of the scene's clock, in seconds.
+ *
+ * **The whole round as one loop**: halt at a stop for `PATROL_HALT_S`, roll the way to the next at
+ * `PATROL_PACE`, halt, and on round. Pure, and stores nothing, like the strait's traffic: the start
+ * of the loop is seeded on the world and the craft, so two sessions are not in step but one session
+ * never jumps. Null for a round of fewer than two stops.
+ */
+export function patrolAt(world: World, wanderer: Wanderer, seconds: number): PatrolPlace | null {
+  const stops = wanderer.circuit;
+  if (stops.length < 2) return null;
+  const legs = stops.map((from, i) => wayBetween(world, from, stops[(i + 1) % stops.length]!));
+  const lengths = legs.map((way) => PATROL_HALT_S + Math.max(0, way.length - 1) / PATROL_PACE);
+  const loop = lengths.reduce((a, b) => a + b, 0);
+  const offset = tileHash(world.seed, 0, 0, `patrol:${wanderer.id}`) % Math.max(1, Math.floor(loop));
+  let t = (((seconds + offset) % loop) + loop) % loop;
+  for (let i = 0; i < legs.length; i += 1) {
+    const way = legs[i]!;
+    if (t >= lengths[i]!) {
+      t -= lengths[i]!;
+      continue;
+    }
+    if (t < PATROL_HALT_S || way.length < 2) {
+      const at = way[0] ?? stops[i]!;
+      return { at, exact: { x: at.x, y: at.y }, heading: null };
+    }
+    const along = Math.min(way.length - 1, (t - PATROL_HALT_S) * PATROL_PACE);
+    const index = Math.min(way.length - 2, Math.floor(along));
+    const from = way[index]!;
+    const to = way[index + 1]!;
+    const frac = along - index;
+    const exact = { x: from.x + (to.x - from.x) * frac, y: from.y + (to.y - from.y) * frac };
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const heading =
+      Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'east' : 'west') : dy > 0 ? 'south' : 'north';
+    return { at: frac < 0.5 ? from : to, exact, heading };
+  }
+  const at = stops[0]!;
+  return { at, exact: { x: at.x, y: at.y }, heading: null };
 }
 
 /**
