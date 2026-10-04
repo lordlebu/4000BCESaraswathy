@@ -275,6 +275,12 @@ export function useHappenings({
      * rest. No new field, and nothing for an author to remember.
      */
     const onRoad = ({ at, day }: GameToUi['tile-entered']) => {
+      // **Not while the cart is still on the road.** A crossing switches the map at once and builds the
+      // next one behind its cards, and the scene reports the traveller set down at the cart point --
+      // on a new day, since the ride spends half of one. Asked then, Guyuk's "Word of a herbalist"
+      // opened over the road's cards, before the traveller had arrived (the owner, 4 October 2026).
+      // The day is not spent either: the first step after stepping down asks it instead.
+      if (crossing.current) return;
       if (day === lastRoadDay.current) return;
       lastRoadDay.current = day;
       if (storyNow('road', null)) return;
@@ -323,7 +329,8 @@ export function useHappenings({
      * day's road. A beat waits until it can be taken whole, so this either opens its card or is quiet.
      */
     const storyNow = (when: BeatWhen, poiId: string | null): boolean => {
-      if (pageOpenRef.current) return false;
+      // Nothing of a story over the crossing's cards; an arrival is held until stepping down anyway.
+      if (pageOpenRef.current || crossing.current) return false;
       const p = latest.current.progress;
       const carried = latest.current.satchel;
       const event = beatNow(when, {

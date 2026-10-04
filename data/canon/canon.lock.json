@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.5.0",
+  "canon_version": "3.5.1",
   "counts": {
     "fauna": 235,
     "flora": 113,
@@ -15,8 +15,8 @@
     "vocabulary": 10
   },
   "sha256": {
-    "species.json": "790b46b0422c0041f191026e9d135c65a16091a42e24ace09d5979a1d2adde5b",
-    "places.json": "48e86ab47f11df82914c40f7c11ee39174b7107af715ad38a745619f0c9e722c",
-    "knowledge.json": "2e73e9817127fdacc4a0ab0a47ee5fa56c583a7ee09edd41a9e5c4a6af3eebcc"
+    "species.json": "31aac3386f4b7b369beca63c5a81ae44e37c3b4dce30b8268b47803df89a83c1",
+    "places.json": "b302482fbe467a26ec64ec998739eb66c8e22e4b817ee2ab0dc541ae4ca53734",
+    "knowledge.json": "cea3c102135e13a728c28cfab863c3d77dbe6f452824f07e4c291fdaab08f2a5"
   }
 }
