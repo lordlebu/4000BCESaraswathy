@@ -2654,6 +2654,29 @@
       ]
     },
     {
+      "id": "happening_alms_on_the_step",
+      "type": "happening",
+      "title": "Alms on the step",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_aravali"
+      ],
+      "at": [
+        "poi_alms_step"
+      ],
+      "prose": "On the worn middle of the bottom step, where feet have dished the stone, somebody has set a leaf of cooked rice and a clay lamp, still warm. Nobody is in sight. The names cut along the riser above it are too worn to read with the eyes; you find them with your fingers, a few at a time. Whoever left the rice left it for whoever came next.",
+      "choices": [
+        {
+          "label": "Leave something of your own",
+          "line": "You leave a pinch of what you carry beside the lamp. It is not the rice that matters, you think, but that the step is never bare."
+        },
+        {
+          "label": "Find the names with your fingers",
+          "line": "Seven names you can make out, and a gap where an eighth was cut away on purpose. You copy the seven into the diary, and the gap."
+        }
+      ]
+    },
+    {
       "id": "happening_counting_the_goats",
       "type": "happening",
       "title": "Counting the goats",
@@ -2798,9 +2821,12 @@
       "id": "happening_the_sleeping_stranger",
       "type": "happening",
       "title": "A stranger asleep",
-      "occasion": "road",
+      "occasion": "arriving",
       "field_maps": [
         "field_map_aravali"
+      ],
+      "at": [
+        "poi_kept_stones"
       ],
       "prose": "Off the track, in the lee of a boulder, a man is asleep in the sun: furs in the wrong season, a broad face burned by some other sky, an unstrung bow under his head for a pillow. Everything about him says he has walked from much further north than the strait. He does not wake, and his breathing does not change as you pass.",
       "choices": [
@@ -2823,7 +2849,7 @@
         "field_map_aravali"
       ],
       "at": [
-        "poi_first_pier"
+        "poi_far_landing"
       ],
       "prose": "Somebody has come up before you. A woman kneels on a reed mat at the rim, hands flat on the grass, watching the strait below as if it might do something unexpected. It does: an outrigger the size of a house comes up the channel under three painted sails, a hand on one and a crescent on another, and the fishing boats scatter out of its way like ducks. She does not look round. From up here, she says, you can see who is going where, and nobody down there ever thinks to look up.",
       "choices": [

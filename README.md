@@ -89,7 +89,7 @@ The browser suite needs `npx playwright install chromium` once.
 ## World content
 
 The flora and fauna canon lives in the **SouthOfTethys** repository, not here — 235 fauna and 113
-flora among 536 entities, alongside the field maps, discoveries, questions, people, happenings, sayings, storylines and vocabulary
+flora among 537 entities, alongside the field maps, discoveries, questions, people, happenings, sayings, storylines and vocabulary
 the game is made of. **Making is the game's own**: materials, items, recipes, vehicles and the
 homesteads live in `data/making/`, edited here, since the owner moved them out of canon on
 2 October 2026 so the lore gives the world its context and the game does its own arithmetic. [docs/bestiary.md](docs/bestiary.md) is the prose document those species were

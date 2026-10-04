@@ -604,3 +604,22 @@ Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - see
 Subject: Open cold-desert scrub and dry grass on a flat basin under a pale sky, a caravan camp's tents small in the distance. In the middle ground a two-wheeled war car stands still on the dry ground: a small open box of dark teak with copper sheathing along every edge and rail, and two SOLID wheels each made of three planks with a copper rim and small triangular copper figures worked into the wheel face - no spokes. A single zebu BULL stands in the traces at the pole: tawny, with a tall fatty hump standing up over the shoulders, a deep dewlap and long upright horns, chewing. A warrior stands upright in the car, a woman or a man, in dyed cloth and a copper-studded leather cuirass, a long spear held upright, looking calmly toward the viewer. A traveller seen from behind in the foreground, one hand half raised. Still and watchful, not threatening.
 ```
 
+
+## Alms on the step (4 October 2026)
+
+The owner's ask: a card on reaching the Alms Step, the temple on the Aravali's first sky island, with
+the owner's painting. Canon's `happening_alms_on_the_step`, drafted for the owner to rewrite. The card
+draws it by id; until it arrives the card shows the scene it borrows.
+
+#### `happening_alms_on_the_step` -- Alms on the step
+
+Save as `assets/source/events/happening_alms_on_the_step.png`, then `node tools/build-plates.js --events`.
+
+```text
+Watercolour illustration from a field naturalist's notebook, ancient South Asia, 4000 BCE. Painted with visible brush and pigment granulation on off-cream paper. Muted, low-saturation colour - nothing neon, nothing that glows. Soft gradients within each shape and gentle ambient shading. Warm near-black for the darks, never pure black. Unhurried and calm; there is no threat in this world and nothing is in danger. Not photographic: no lens blur, no specular highlights, no 3D render. No text, no caption, no label, no border, no frame, no watermark, no signature.
+
+Landscape, 4:3. A moment with a lone traveller in it, or just out of frame - seen from behind, at a distance, or only as hands - so that it could be any of the travellers a player might be. Anybody seen wears dyed cloth - madder red, indigo, turmeric, ochre - as the peoples of this world do, never plain white costume.
+
+Subject: An old domed temple on a high stepped plinth of pale stone, on a floating island in the sky: seven small spires around a dome that has split, a pointed doorway with dark behind it, lichen on the lower stones, dressed blocks lying scattered on the grass. On the worn middle of the bottom step, where feet have dished the stone, sits a leaf of cooked rice and a small clay lamp with a thin thread of smoke. A traveller's hand reaches toward the step. Worn names cut along the riser, too faint to read. Calm, quiet, morning light.
+```
+

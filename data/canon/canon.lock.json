@@ -7,7 +7,7 @@
     "field_maps": 4,
     "points_of_interest": 37,
     "npcs": 26,
-    "happenings": 15,
+    "happenings": 16,
     "sayings": 33,
     "storylines": 2,
     "discoveries": 46,
@@ -16,7 +16,7 @@
   },
   "sha256": {
     "species.json": "56cafa7351863184bf9f53c3097188b1ffb622499bbdad3d5bacaec3d1d7877a",
-    "places.json": "470a16900201c67503bd7f390f14ae61475eed84ad85aa70e3bbdce638dfef6b",
+    "places.json": "ea75348856c7d4b12c2ea2ec47139402a88ec8e738fe16c40ddcfc22dec21550",
     "knowledge.json": "2f1be424cfd1007338a9e553196b518915c482f113b9c275a08caedc3de91ace"
   }
 }

@@ -385,7 +385,7 @@ data/making/ (the game's own: crafting, homesteads)  →  src/content/making.ts,
 ```
 
 **Everything in `data/canon/` is generated. Never hand-edit it.** Canon lives in the sibling
-`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 536 entities
+`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 537 entities
 across species, places, discoveries and world. To change any of it, edit the canon entity there and
 re-run `python utils/export_canon_bundle.py --apply`.
 
