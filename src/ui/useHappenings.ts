@@ -124,7 +124,7 @@ export function useHappenings({
         campPerson?: CampTalk | null;
         cameFrom?: string | null;
         /** A craft on its patrol, just come alongside: the Sinauli wagon. */
-        passing?: { id: string } | null;
+        passing?: { id: string; vehicle: string } | null;
         /** The painting of the road just travelled, for a road's happening that has none of its own. */
         roadArt?: string | null;
         force?: { kind?: string; asked?: boolean };
@@ -312,7 +312,7 @@ export function useHappenings({
       const walked = stepsOnMap.current.fieldMapId === latest.current.fieldMapId ? stepsOnMap.current.steps : 0;
       if (walked < PASSING_AFTER_STEPS) return;
       if (seenEvents.current.includes(`woven:passing:${id}`)) return;
-      maybeHappens('road', at, null, `passing:${id}`, { passing: { id }, force: { kind: 'passing', asked: true } });
+      maybeHappens('road', at, null, `passing:${id}`, { passing: { id, vehicle }, force: { kind: 'passing', asked: true } });
     };
 
     // Handed out of the effect so the activity card can ask too: a take is not a bus event, it is a

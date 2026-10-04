@@ -111,6 +111,9 @@ const TOOLS: [string[], string][] = [
   // A drover's goad and a coil of rope. Terke moves animals across a ford, which is a trade
   // rather than the way of life "nomad" named -- and a goad is what the job looks like in a hand.
   [['drover'], 'M17 21L23 7M15 12a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0M16.5 12h3'],
+  // A charioteer's spear, held upright the way Sudama stands it in the Sinauli wagon: a long shaft
+  // and a leaf blade. Jarro's charioteer, on the owner's word of 4 October 2026.
+  [['charioteer'], 'M20 21V9M20 9l-2 -2 2 -4 2 4z'],
   // A hunter's short bow, strung and carried rather than drawn: one curved limb and the string as
   // a chord across it. Anu walks ahead of a herd and mostly comes back with nothing, so a bow at
   // full draw would be the wrong picture -- and canon agrees, since every weapon in it affords

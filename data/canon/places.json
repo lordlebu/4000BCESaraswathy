@@ -1931,6 +1931,9 @@
           "text": "Every stall on this rise pays the well a skin of water a season. I keep the well. So they pay me, and I keep the well. It is not complicated."
         },
         {
+          "text": "The wagon? That is Sudama. Sudama drives for me -- round the ground in the morning, and the rest of the day stood where the road can be seen. Nobody has tried the well since the wagon started going round. That is what it is for."
+        },
+        {
           "text": "University people draw me a straight line across the basin every year and tell me I am losing a day. I give them a skin of water for the walk and they come back the long way."
         },
         {
@@ -2270,6 +2273,15 @@
         }
       ],
       "sex": "male"
+    },
+    {
+      "id": "npc_sudama",
+      "type": "npc",
+      "name": "Sudama",
+      "role": "charioteer to Jarro",
+      "found_at": [],
+      "drives": "vehicle_sinauli_wagon",
+      "lines": []
     },
     {
       "id": "npc_sura",

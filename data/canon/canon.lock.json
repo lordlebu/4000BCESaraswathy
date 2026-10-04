@@ -6,7 +6,7 @@
     "regions": 7,
     "field_maps": 4,
     "points_of_interest": 37,
-    "npcs": 25,
+    "npcs": 26,
     "happenings": 15,
     "sayings": 33,
     "storylines": 2,
@@ -15,8 +15,8 @@
     "vocabulary": 10
   },
   "sha256": {
-    "species.json": "c5a970636fc1e88f7e08c574c9b1b592e43747af6752ac2f15832dd8dc0746d9",
-    "places.json": "533a8d03f647b7c5770452e67f0a734480e59b12a5786f13f856f31bb22ffe1d",
+    "species.json": "790b46b0422c0041f191026e9d135c65a16091a42e24ace09d5979a1d2adde5b",
+    "places.json": "48e86ab47f11df82914c40f7c11ee39174b7107af715ad38a745619f0c9e722c",
     "knowledge.json": "2e73e9817127fdacc4a0ab0a47ee5fa56c583a7ee09edd41a9e5c4a6af3eebcc"
   }
 }

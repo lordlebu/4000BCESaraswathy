@@ -125,7 +125,7 @@ const sampled: { event: GameEvent; around: Surroundings }[] = (() => {
                   })()
                 : null;
             // And on North Dwarka some days on the road meet the Sinauli wagon on its round.
-            const passing = occasion === 'road' && map.id === 'field_map_dwarka' && (x + y) % 3 === 1 ? { id: 'sinauli-wagon' } : null;
+            const passing = occasion === 'road' && map.id === 'field_map_dwarka' && (x + y) % 3 === 1 ? { id: 'sinauli-wagon', vehicle: 'vehicle_sinauli_wagon' } : null;
             const around = surroundingsAt(world, at, map.id, moment, roll, { poiId, talk, camp, campPerson, passing });
             if (!around) continue;
             // Half the samples have already met this map's stranger, so the second meeting is

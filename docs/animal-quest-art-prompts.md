@@ -140,7 +140,8 @@ box of its own. It got there in three steps, each set by looking at it in the ga
 Not an animal, and it walks the same way: `PATROLS` in `src/content/wanderers.ts` puts it on North
 Dwarka, near the Caravan Ground, on desert, grass and hill, standing still most of the day. Until
 it is painted the game draws a stand-in (`chariot` in `wandererMarkerKey`): a solid-wheeled car, a
-driver with a spear, and a humped ox at the pole.
+driver with a spear, and a humped ox at the pole. The driver is Sudama, Jarro's charioteer (canon's
+`npc_sudama`), and the ox is a zebu bull: the zebu plate is a cow, whose hump is barely a rise.
 
 Engine id **`sinauli-wagon`**. Drop one sheet of four views as `assets/source/dump/sinauli-wagon.png`
 (it is already in `SHEETS` in `tools/build-wanderers.js`) and run `node tools/build-wanderers.js`.
@@ -155,8 +156,8 @@ head is a little above the traveller's.
 > **Subject:** Four views of the same ox-drawn war car in one image, evenly spaced and not
 > overlapping: facing right, facing left, seen from the front, seen from behind. A small open
 > two-wheeled car of dark teak with copper sheathing along every edge, and two SOLID wheels of three
-> planks with a copper rim - no spokes. One humped zebu ox, tawny with long upright horns, in the
-> traces at the pole. A warrior standing upright in the car, in dyed cloth (madder red or indigo)
+> planks with a copper rim - no spokes. One zebu BULL in the traces at the pole: tawny, with a tall
+> fatty hump standing up over the shoulders, a deep dewlap and long upright horns. A warrior standing upright in the car, in dyed cloth (madder red or indigo)
 > and a copper-studded leather cuirass, holding a long spear upright. The wheels and the ox's feet
 > touch the very bottom edge of each view.
 

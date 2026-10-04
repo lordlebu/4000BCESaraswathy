@@ -117,14 +117,16 @@ describe('meeting it is a card, once, with nothing to take', () => {
     seen: [],
     ...over
   });
-  const around = (passing: { id: string } | null) =>
+  const around = (passing: { id: string; vehicle: string } | null) =>
     surroundingsAt(world, at, 'field_map_dwarka', { timeOfDay: 'morning', weather: 'clear' }, () => 0, { passing });
   const asked = { kind: 'passing', asked: true };
 
   it('opens when asked for by coming alongside', () => {
-    const card = happeningNow(now(), () => 0, around({ id: wagon.id }), [], asked);
+    const card = happeningNow(now(), () => 0, around({ id: wagon.id, vehicle: wagon.vehicle! }), [], asked);
     expect(card?.id).toBe('woven:passing:sinauli-wagon');
     expect(card?.prose).toMatch(/Sinauli/);
+    // Who drives it is canon's: Sudama, Jarro's charioteer (`drives` on the npc).
+    expect(card?.choices.map((c) => c.line).join(' ')).toMatch(/Sudama/);
     expect(card?.choices.length).toBe(2);
     // No errand: nothing granted, nothing given, nothing taken.
     for (const c of card?.choices ?? []) {
@@ -136,13 +138,15 @@ describe('meeting it is a card, once, with nothing to take', () => {
 
   it('does not open without the wagon, and does not open twice', () => {
     expect(happeningNow(now(), () => 0, around(null), [], asked)).toBeNull();
-    expect(happeningNow(now({ seen: ['woven:passing:sinauli-wagon'] }), () => 0, around({ id: wagon.id }), [], asked)).toBeNull();
+    expect(
+      happeningNow(now({ seen: ['woven:passing:sinauli-wagon'] }), () => 0, around({ id: wagon.id, vehicle: wagon.vehicle! }), [], asked)
+    ).toBeNull();
   });
 
   it('is never rationed onto an ordinary day on the road', () => {
     // Weight nought, like a camp: only coming alongside opens it.
     for (let day = 0; day < 40; day += 1) {
-      const card = happeningNow(now({ day }), () => 0, around({ id: wagon.id }), []);
+      const card = happeningNow(now({ day }), () => 0, around({ id: wagon.id, vehicle: wagon.vehicle! }), []);
       expect(card?.id ?? '').not.toMatch(/^woven:passing:/);
     }
   });

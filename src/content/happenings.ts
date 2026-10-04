@@ -45,7 +45,7 @@ import {
 } from './events';
 import happeningsText from '../../data/happenings.json';
 import { type Material, material, materialsIn } from './making';
-import { fieldMap, poi, type PointOfInterest } from './places';
+import { driverOf, fieldMap, poi, type PointOfInterest } from './places';
 import { rhythmOf } from './routine';
 import { biomeFor, creatureFor, creaturesIn, floraFor, isAnimal } from './species';
 import {
@@ -141,7 +141,7 @@ export interface Surroundings {
    * Dwarka (`wanderers.ts`, `PATROLS`). Null everywhere else: like a camp, it is asked for by
    * meeting it, never rationed onto the road.
    */
-  passing: { id: string } | null;
+  passing: { id: string; vehicle: string } | null;
 }
 
 /** Somebody at a camp, as the talk row hands them over: who, and what the hour has them doing. */
@@ -182,7 +182,7 @@ export function surroundingsAt(
     camp?: Encampment | null;
     campStanding?: string | null;
     campPerson?: CampTalk | null;
-    passing?: { id: string } | null;
+    passing?: { id: string; vehicle: string } | null;
   } = {}
 ): Surroundings | null {
   const tile = world.tiles[at.y]?.[at.x];
@@ -684,9 +684,16 @@ const campTalk: Template = ({ campPerson }, _roll, now) => {
 const passing: Template = ({ passing: craft, biome }, _roll, now) => {
   if (!craft) return null;
   if (now.seen.includes(`woven:passing:${craft.id}`)) return null;
-  return woven('road', 'passing', craft.id, { ground: ground(biome) }, [{ id: 'watch' }, { id: 'raise' }], {
-    variant: craft.id
-  });
+  // Who drives it is canon's (`drives` on an npc): Sudama, Jarro's charioteer, on the owner's word.
+  const driver = driverOf(craft.vehicle);
+  return woven(
+    'road',
+    'passing',
+    craft.id,
+    { ground: ground(biome), driver: driver?.name ?? 'the driver' },
+    [{ id: 'watch' }, { id: 'raise' }],
+    { variant: craft.id }
+  );
 };
 
 const weather: Template = ({ moment, biome, flora }) => {
