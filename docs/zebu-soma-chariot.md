@@ -75,10 +75,19 @@ seed, and five from camp ground left one seed a single stop. Its round now needs
 interest, and without them it has none rather than one that walks into the market.
 `test/vasukiKeepsAway.test.ts`.
 
+## Afterwards, the same day
+
+- **Tolla teaches kulfi**, on the owner's word: a line on the herders' terraces gives it (canon 3.5.2),
+  and the recipe is `taught_by` Tolla rather than known to every Maru. `test/criticalPath.test.ts`
+  now asks its closure on the map's own benches (`fieldMapId`), or the Narmada-only rule refused kulfi
+  everywhere and read as a scarcity it is not.
+- **The Dhol has a new plate.** The first painting's square crop had taken its nose and the tip of its
+  tail. The new one is 1024 x 765 and was cropped by hand to `(160, 0, 925, 765)` before building, so
+  the whole animal and the caravan string behind it stay in; both raws are kept in the dump.
+
 ## Open
 
 - The gull plate is 512 by 482 and was stretched about six percent to square, with a small mark in a
   corner. Kept unless the owner sends a square take.
-- Kulfi is known to the Maru. A Narmada herder could teach it with a line instead.
 - `build-wanderers.js --force` and `build-plates.js --force` re-cut every accepted piece of art from
   the dump, not only the new one; this round put the others back from git both times.

@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.5.1",
+  "canon_version": "3.5.2",
   "regions": [
     {
       "id": "region_aravali",
@@ -2472,6 +2472,12 @@
           ],
           "gives": [
             "recipe_serpent_mantle"
+          ]
+        },
+        {
+          "text": "When somebody has been up to the snowfield, we boil the milk down half a day until it is the colour of sand, and set it in little clay cones packed in the ice with a fist of salt over them. Kulfi. Bring me milk and a lump of that ice and I will show you. It does not keep and the ice does not either, so it is made up here or not at all.",
+          "gives": [
+            "recipe_kulfi"
           ]
         },
         {

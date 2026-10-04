@@ -95,7 +95,8 @@ function closure(mapId: string, raw: Set<string>, known: (id: string) => boolean
       if (!known(r.id)) continue;
       const outputs = r.outputs.map((o) => o.item ?? o.material ?? '').filter(Boolean);
       if (outputs.every((id) => count(satchel, id) > 0)) continue;
-      if (!kinds.some((kind) => canMake(satchel, r.id, { kind }))) continue;
+      // The map as well as the kind of place: a recipe may be made on only some maps (`Recipe.madeOn`).
+      if (!kinds.some((kind) => canMake(satchel, r.id, { kind, fieldMapId: mapId }))) continue;
       for (const id of outputs) satchel = add(satchel, id, PLENTY);
       grew = true;
     }
