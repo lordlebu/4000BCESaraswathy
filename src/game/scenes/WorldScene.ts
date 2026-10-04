@@ -659,6 +659,12 @@ export class WorldScene extends Phaser.Scene {
       },
       get fieldMapId() {
         return scene.built?.fieldMap.id ?? scene.fieldMapId;
+      },
+      get placed() {
+        return (scene.built?.placed ?? []).map((p) => ({ poiId: p.poi.id, at: p.at }));
+      },
+      get at() {
+        return scene.at;
       }
     });
     this.strait = new StraitView(this, {
@@ -2589,6 +2595,7 @@ export class WorldScene extends Phaser.Scene {
     });
     EventBus.emitEvent('journey-changed', { discovered: [...this.discovered] });
     this.travellers.reportNearby();
+    this.wanderers.reportBeside();
 
     // What is under foot, every time it changes. The UI decides whether that opens anything;
     // the scene only reports the ground, which is the division everywhere else in this file.

@@ -956,7 +956,69 @@ export function wandererMarkerKey(
   context.fill();
   context.globalAlpha = 1;
 
-  if (build.shape === 'serpent') {
+  if (build.shape === 'chariot') {
+    // **A car, an ox and a driver, in that order**, so each is drawn over what is behind it. The
+    // wheel is solid -- three planks and a copper rim -- because that is the dispute canon records:
+    // built like a farm cart, driven like a war car. No horse: Jambhudweep has none, and the zebu
+    // pulls it.
+    const wood = shade(parseHex('#8a5a32'), 0);
+    const copper = shade(parseHex('#c07a3a'), 0.05);
+    // The ox at the pole, low and forward: four legs, a body, the hump, a head carried down.
+    context.fillStyle = shade(parseHex('#b8874f'), -0.30);
+    for (const at of [0.70, 0.80, 0.88, 0.95]) context.fillRect(w * at, h * 0.66, w * 0.022, h * 0.24);
+    context.fillStyle = shade(parseHex('#b8874f'), 0);
+    context.beginPath();
+    context.ellipse(w * 0.83, h * 0.62, w * 0.13, h * 0.09, 0, 0, Math.PI * 2);
+    context.fill();
+    context.beginPath();
+    context.ellipse(w * 0.76, h * 0.53, w * 0.04, h * 0.05, 0, 0, Math.PI * 2);
+    context.fill();
+    context.beginPath();
+    context.ellipse(w * 0.965, h * 0.66, w * 0.035, h * 0.05, 0.5, 0, Math.PI * 2);
+    context.fill();
+    // The pole, from the car's floor to the ox's withers.
+    context.strokeStyle = wood;
+    context.lineWidth = Math.max(2, h * 0.025);
+    context.beginPath();
+    context.moveTo(w * 0.48, h * 0.66);
+    context.lineTo(w * 0.76, h * 0.58);
+    context.stroke();
+    // The car: a box with a copper rail along the top edge.
+    context.fillStyle = wood;
+    context.fillRect(w * 0.12, h * 0.48, w * 0.38, h * 0.22);
+    context.fillStyle = copper;
+    context.fillRect(w * 0.12, h * 0.46, w * 0.38, h * 0.035);
+    // The driver standing in it, a spear upright beside them.
+    context.fillStyle = shade(base, -0.45);
+    context.fillRect(w * 0.27, h * 0.20, w * 0.07, h * 0.28);
+    context.beginPath();
+    context.arc(w * 0.305, h * 0.15, Math.max(2, h * 0.055), 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = shade(base, -0.55);
+    context.lineWidth = Math.max(1, h * 0.012);
+    context.beginPath();
+    context.moveTo(w * 0.38, h * 0.48);
+    context.lineTo(w * 0.40, h * 0.02);
+    context.stroke();
+    // The solid wheel, three planks and a rim, over the car's lower edge.
+    const r = h * 0.17;
+    context.fillStyle = copper;
+    context.beginPath();
+    context.arc(w * 0.30, h * 0.78, r, 0, Math.PI * 2);
+    context.fill();
+    context.fillStyle = wood;
+    context.beginPath();
+    context.arc(w * 0.30, h * 0.78, r * 0.82, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = shade(parseHex('#8a5a32'), -0.35);
+    context.lineWidth = Math.max(1, h * 0.01);
+    for (const dx of [-0.3, 0.3]) {
+      context.beginPath();
+      context.moveTo(w * 0.30 + r * dx, h * 0.78 - r * 0.78);
+      context.lineTo(w * 0.30 + r * dx, h * 0.78 + r * 0.78);
+      context.stroke();
+    }
+  } else if (build.shape === 'serpent') {
     // No legs, and that is the point of the build existing: a madtsoiid kills by holding. Drawn
     // as a tapering band along a shallow S so it reads as length rather than as a log -- a
     // straight bar at this size looks like a fallen branch.

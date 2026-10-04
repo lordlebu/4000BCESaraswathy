@@ -124,7 +124,9 @@ const sampled: { event: GameEvent; around: Surroundings }[] = (() => {
                     return { person, doing: doingLine(person.kind, person.slot, 'chore'), meal: k % 2 === 0 };
                   })()
                 : null;
-            const around = surroundingsAt(world, at, map.id, moment, roll, { poiId, talk, camp, campPerson });
+            // And on North Dwarka some days on the road meet the Sinauli wagon on its round.
+            const passing = occasion === 'road' && map.id === 'field_map_dwarka' && (x + y) % 3 === 1 ? { id: 'sinauli-wagon' } : null;
+            const around = surroundingsAt(world, at, map.id, moment, roll, { poiId, talk, camp, campPerson, passing });
             if (!around) continue;
             // Half the samples have already met this map's stranger, so the second meeting is
             // reachable too -- it needs one fact from the save and nothing else.

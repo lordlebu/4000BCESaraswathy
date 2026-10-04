@@ -196,7 +196,7 @@ if (process.argv.includes('--tidy')) {
 // this project -- plates, terrain, portraits, whatever somebody generated last -- so a glob here
 // picks up an RGB landscape and dies in the decoder, which is exactly what it did. A sheet joins
 // this list when somebody has looked at it and knows it is four views of one animal.
-const SHEETS = ['narmada-walking-whale', 'sivatherium', 'vasuki-indicus'];
+const SHEETS = ['narmada-walking-whale', 'sivatherium', 'vasuki-indicus', 'sinauli-wagon'];
 
 const sheets = SHEETS.map((id) => `${id}.png`).filter((f) => {
   const there = fs.existsSync(path.join(SRC, f));

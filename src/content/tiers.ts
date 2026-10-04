@@ -339,3 +339,14 @@ export const EVENT_LEANS_PERCENT = 75;
  * to somebody who has never knapped one is the "useless flint" the owner complained of.
  */
 export const STONE_ENOUGH = 4;
+
+/**
+ * Steps walked on a map before the Sinauli wagon's card can open (`happenings.ts`, `passing`).
+ *
+ * **The owner's ask of 4 October 2026: not the moment the traveller reaches the map.** Its round is
+ * kept near the Caravan Ground, which is where Dwarka sets a traveller down, so without this the card
+ * would open on the first step. Sixty is most of a morning's walking -- `tile-entered` fires about
+ * eighty times a day -- so it comes once the traveller has been somewhere and come back. Counted per
+ * visit and not saved: a reload starts the count again, which only ever makes the card later.
+ */
+export const PASSING_AFTER_STEPS = 60;

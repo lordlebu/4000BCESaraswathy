@@ -135,6 +135,35 @@ box of its own. It got there in three steps, each set by looking at it in the ga
 
 ---
 
+## B2. The Sinauli wagon on its round · open (4 October 2026)
+
+Not an animal, and it walks the same way: `PATROLS` in `src/content/wanderers.ts` puts it on North
+Dwarka, near the Caravan Ground, on desert, grass and hill, standing still most of the day. Until
+it is painted the game draws a stand-in (`chariot` in `wandererMarkerKey`): a solid-wheeled car, a
+driver with a spear, and a humped ox at the pole.
+
+Engine id **`sinauli-wagon`**. Drop one sheet of four views as `assets/source/dump/sinauli-wagon.png`
+(it is already in `SHEETS` in `tools/build-wanderers.js`) and run `node tools/build-wanderers.js`.
+It is sized to a box two tiles long and 1.5 high (`TALLER` in `src/game/frames.ts`), so the driver's
+head is a little above the traveller's.
+
+> **Style:** Small pixel-art sprite for a top-down 2D game, side view. Painterly pixel art with
+> soft dithering, not hard-edged 8-bit. Warm naturalistic colour, readable as a silhouette at a
+> glance. Fully transparent background - no ground, no scenery, no border, no shadow. No text, no
+> watermark, no signature.
+>
+> **Subject:** Four views of the same ox-drawn war car in one image, evenly spaced and not
+> overlapping: facing right, facing left, seen from the front, seen from behind. A small open
+> two-wheeled car of dark teak with copper sheathing along every edge, and two SOLID wheels of three
+> planks with a copper rim - no spokes. One humped zebu ox, tawny with long upright horns, in the
+> traces at the pole. A warrior standing upright in the car, in dyed cloth (madder red or indigo)
+> and a copper-studded leather cuirass, holding a long spear upright. The wheels and the ox's feet
+> touch the very bottom edge of each view.
+
+The card that meets it wants a painting too: `woven-passing` in `docs/event-prompts.md`.
+
+---
+
 ## C. Activity scenes — the moment of doing it · open
 
 Goes in `src/ui/scenes/`. Named `<gesture>-<something>.png`; the gestures are `stoop`, `work`,

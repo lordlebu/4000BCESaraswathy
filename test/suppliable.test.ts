@@ -75,6 +75,7 @@ describe('not on this ground', () => {
  * **Strike a line when it closes; never add one without a reason beside it.** What is left is mostly
  * one map's things wanted on another -- dates and myrrh are Dwarka's now that it is a cold desert,
  * guggul and shilajit the Narmada's, taro Lothal's -- which "Not on this ground" says to carry in.
+ * Hill curd closed on Dwarka and Lothal on 4 October 2026, when the zebu brought milk to the plains.
  */
 const NEVER_ON: Record<string, string[]> = {
   field_map_aravali: [
@@ -85,6 +86,7 @@ const NEVER_ON: Record<string, string[]> = {
     'recipe_guggul_pill', // guggul
     'recipe_hide_tent', // husk hawser
     'recipe_kuchla_grain', // purified kuchla
+    'recipe_kulfi', // glacier ice: snow is the Narmada's alone, and kulfi is made there only
     'recipe_myrrh_poultice', // myrrh gum
     'recipe_purify_kuchla', // kuchla seed
     'recipe_salt_fish_stew', // dried fish, lotus-root taro
@@ -97,9 +99,9 @@ const NEVER_ON: Record<string, string[]> = {
     'recipe_bow_drill', // bamboo cane
     'recipe_flood_bread', // lotus-root taro
     'recipe_guggul_pill', // guggul, pippali
-    'recipe_hill_curd', // anything milk
     'recipe_jackfruit_curry', // jackfruit, ginger
     'recipe_kuchla_grain', // purified kuchla
+    'recipe_kulfi', // glacier ice: snow is the Narmada's alone, and kulfi is made there only
     'recipe_purify_kuchla', // kuchla seed
     'recipe_reed_flute', // bamboo cane
     'recipe_reed_spear', // bamboo cane
@@ -112,8 +114,8 @@ const NEVER_ON: Record<string, string[]> = {
     'recipe_date_block', // dates
     'recipe_guggul_pill', // guggul
     'recipe_hide_tent', // husk hawser
-    'recipe_hill_curd', // anything milk
     'recipe_kuchla_grain', // purified kuchla
+    'recipe_kulfi', // glacier ice: snow is the Narmada's alone, and kulfi is made there only
     'recipe_myrrh_poultice', // myrrh gum
     'recipe_purify_kuchla', // kuchla seed
     'recipe_shilajit_tonic', // shilajit

@@ -277,9 +277,12 @@ export function benchOpens(stations: readonly string[] | undefined, processId: s
  * showed them -- a loom at the Camp in the Kilns, and weaving there still asked for a loom frame --
  * because `App` built its bench from the kind alone. Null is out in the open.
  */
-export function benchAt(poi: PointOfInterest | null): { kind: string | null; stations: StationId[] } {
-  if (!poi) return { kind: null, stations: [] };
-  return { kind: poi.kind, stations: stationsAt(poi).map((s) => s.id) };
+export function benchAt(
+  poi: PointOfInterest | null,
+  fieldMapId: string | null = null
+): { kind: string | null; stations: StationId[]; fieldMapId: string | null } {
+  if (!poi) return { kind: null, stations: [], fieldMapId };
+  return { kind: poi.kind, stations: stationsAt(poi).map((s) => s.id), fieldMapId };
 }
 
 /**

@@ -47,7 +47,7 @@ export function groundOf(world: World): ReadonlySet<string> {
 /** Every bench on this map, and open ground. */
 function benchesOf(fieldMapId: string | null): Bench[] {
   const pois = fieldMapId ? (fieldMap(fieldMapId)?.pointsOfInterest ?? []) : [];
-  return [benchAt(null), ...pois.map((id) => benchAt(poi(id)))];
+  return [benchAt(null, fieldMapId), ...pois.map((id) => benchAt(poi(id), fieldMapId))];
 }
 
 /** What a recipe's ingredient is short of, in the closure, as the name a player knows it by. */

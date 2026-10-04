@@ -1409,8 +1409,12 @@ export const FALL_FRAMES = 2;
  *   `wader`   a long low body on four short legs, head raised -- the walking whale
  *   `browser` a deep body on four long legs with a raised neck and head -- the giraffid
  *   `serpent` a thick tapering S-curve, no legs at all
+ *   `chariot` a solid-wheeled car with a driver standing in it and a humped ox at the pole
  */
 export const WANDERER_BOX = { long: 2, tall: 1.09 } as const;
+
+/** The stand-in bodies. `chariot` is a car and its driver rather than an animal. */
+export type WandererShape = 'wader' | 'browser' | 'serpent' | 'chariot';
 
 /**
  * The one animal allowed out of the whale's box, and how far.
@@ -1420,25 +1424,33 @@ export const WANDERER_BOX = { long: 2, tall: 1.09 } as const;
  * "slightly taller, maybe half" the three tiles it had stood at two tiles long. Half is 193px on a
  * 128 tile -- a fifth over Varuna's 160 -- and exactly one tile long side-on.
  */
-const TALLER: Record<string, number> = { sivatherium: 1.51 };
+const TALLER: Record<string, number> = {
+  sivatherium: 1.51,
+  // A car with somebody standing in it, and an ox at the pole: the driver's head is above the
+  // traveller's, as a man standing on a platform's would be. The owner's, 4 October 2026.
+  'sinauli-wagon': 1.5
+};
 
 /** The box an animal's side view is fitted to, in tiles. */
 export function boxFor(speciesId: string): { long: number; tall: number } {
   return { long: WANDERER_BOX.long, tall: TALLER[speciesId] ?? WANDERER_BOX.tall };
 }
 
-const BUILDS: Record<string, { long: number; tall: number; shape: 'wader' | 'browser' | 'serpent' }> = {
+const BUILDS: Record<string, { long: number; tall: number; shape: WandererShape }> = {
   // Three metres and low to the ground. Side-on 586 x 319: it fills the box, and defines it.
   'narmada-walking-whale': { long: 2, tall: 1.09, shape: 'wader' },
   // Taller than it is long, 463 x 698 side-on, so it touches the top of its own box: see `TALLER`.
   sivatherium: { long: 1.0, tall: 1.51, shape: 'browser' },
   // Eleven to fifteen metres, coiled and flat. 740 x 280 touches the ends: two tiles, 0.76 high.
   'vasuki-indicus': { long: 2, tall: 0.76, shape: 'serpent' },
+  // Not an animal: the Sinauli wagon on its patrol, a humped ox at the pole and a driver standing.
+  // The stand-in until the owner's painting arrives -- see `PATROLS` in `content/wanderers.ts`.
+  'sinauli-wagon': { long: 2, tall: 1.5, shape: 'chariot' },
   default: { long: 1.5, tall: 0.94, shape: 'wader' }
 };
 
 /** The build for one wanderer, or the fallback. */
-export function wandererBuild(speciesId: string): { long: number; tall: number; shape: 'wader' | 'browser' | 'serpent' } {
+export function wandererBuild(speciesId: string): { long: number; tall: number; shape: WandererShape } {
   return BUILDS[speciesId] ?? BUILDS.default!;
 }
 

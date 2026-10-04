@@ -760,8 +760,9 @@ export function App() {
   const bench = useMemo(() => {
     const here = standingOn ? poi(standingOn) : null;
     // And the benches standing there, so a loom stands in for a loom frame (`benchStandsIn`).
-    return benchAt(here);
-  }, [standingOn]);
+    // And the map, for a recipe made on only some (`Recipe.madeOn`): kulfi sets on the Narmada.
+    return benchAt(here, fieldMapId);
+  }, [standingOn, fieldMapId]);
 
   /** The tile under foot, for gathering. Null before the world has been built. */
   const underfoot = useMemo(() => {

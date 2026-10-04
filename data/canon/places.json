@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.4.0",
+  "canon_version": "3.5.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -1900,6 +1900,9 @@
           "requires": [
             "discovery_the_kept_bench"
           ]
+        },
+        {
+          "text": "Soma? Guyuk says it grew on Meru once, and now only in the stony ground below it. One cup and a carrier walks three days without bread or sleep. She says it is not a gift, it is a loan -- and the fourth day collects."
         }
       ],
       "sex": "female"

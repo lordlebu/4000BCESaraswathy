@@ -69,6 +69,9 @@ export const TRAVELLERS_PER_MAP = 3;
  */
 const AT_HOUR = (hour: number): number => ((hour - 6) / 24 + 1) % 1;
 
+/** A clock hour as a phase of the day, for anybody else who keeps hours: see `AT_HOUR`. */
+export const phaseAtHour = AT_HOUR;
+
 /**
  * A clock hour as a phase, and back. Exported so the camps keep the same offset rather than a copy
  * of it: `dayNight.ts` warns what a second copy of "phase 0 is six in the morning" costs.

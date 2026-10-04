@@ -87,3 +87,20 @@ test('it is somewhere different at noon than at first light', async ({ page }) =
 
   expect(at(dawn), 'the whale stands on one tile all day').not.toBe(at(noon));
 });
+
+test('North Dwarka carries the Sinauli wagon on its round, and it is drawn', async ({ page }) => {
+  // The owner's ask of 4 October 2026: a craft that wanders, kept near the Caravan Ground. Every rule
+  // is `test/patrol.test.ts`'s; this is the half that says the scene draws it. `patrol-0` is a seed
+  // that test already relies on having a round.
+  await page.goto('/?seed=patrol-0&map=field_map_dwarka&hour=8');
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  await page.waitForTimeout(1500);
+  const seen = await read(page);
+  expect(seen, 'the scene exposes no wanderers at all -- is createWanderers still called?').not.toBeNull();
+  const wagon = seen!.find((w) => w.id === 'sinauli-wagon');
+  expect(wagon, 'the Sinauli wagon is not among the wanderers').toBeTruthy();
+  expect(wagon!.stops, 'the wagon has no round to keep').toBeGreaterThanOrEqual(2);
+  expect(wagon!.texture).toMatch(/^wanderer(-art)?:sinauli-wagon/);
+  expect(wagon!.visible, 'the wagon exists but is not being drawn').toBe(true);
+  expect(wagon!.h, 'the wagon is drawn at no height').toBeGreaterThan(0);
+});
