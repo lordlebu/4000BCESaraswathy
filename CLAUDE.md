@@ -41,6 +41,7 @@ npm run measure:load # after a build: what a player downloads before the first f
 npm run store:shots  # after a build: retake the listing screenshots in docs/store-kit/
 npm run perf       # frame cost on the renderer CI has -- see docs/rendering.md
 npm run simulate   # walk hundreds of seeded journeys through the event layer and print the rhythm,
+                   # the asked-for events (camps, talk, rumours, the wagon) in a table of their own,
                    # then how many minutes each map takes to play, as a floor (test/minutes.test.ts)
 npm run build:sprite # rebuild every traveller's sheet; add an id to do just one
 ```
