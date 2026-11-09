@@ -24,11 +24,17 @@ export interface SettlingStep {
   detail: string[];
 }
 
+export type SettlingNext =
+  | { kind: 'help'; people: string[] }
+  | { kind: 'holder'; npcId: string; poiId: string }
+  | { kind: 'build' | 'settle'; poiId: string };
+
 export interface SettlingRoad {
   title: string;
   steps: SettlingStep[];
   /** The one thing to do next, as a sentence for the notes. Null once settled. */
   next: string | null;
+  target?: SettlingNext | null;
 }
 
 export interface SettlingFacts {
@@ -57,9 +63,10 @@ export function settlingRoad(fieldMapId: string, homestead: Homestead | null, fa
     };
   }
   const { standing, state, helpedHere, carried } = facts;
-  const known = STANDINGS.indexOf(standing.standing) >= STANDINGS.indexOf(ASK_FROM);
   const chosen = homestead.grounds.find((g) => g.id === state.ground) ?? null;
   const agreedGround = chosen && agreed(chosen, state) ? chosen : null;
+  // A saved agreement already passed the standing gate; do not send that traveller backwards.
+  const known = Boolean(agreedGround) || STANDINGS.indexOf(standing.standing) >= STANDINGS.indexOf(ASK_FROM);
   const built = stagesBuilt(homestead, state);
   const stage = nextStage(homestead, state);
   const holders = homestead.grounds.map((g) => `${npc(g.heldBy)?.name ?? 'somebody'} at ${the(poi(g.at)?.name ?? g.name)}`);
@@ -128,5 +135,21 @@ export function settlingRoad(fieldMapId: string, homestead: Homestead | null, fa
           ? `Raise the ${stage?.name.toLowerCase() ?? 'next stage'} at ${the(agreedGround?.name ?? 'your ground')}.`
           : `Go to ${the(agreedGround?.name ?? 'your ground')} and settle.`;
 
-  return { title: homestead.name, steps, next };
+  const people = standing.helpable.filter((id) => !standing.helped.includes(id));
+  let target: SettlingNext | null = null;
+  if (now?.id === 'known') target = { kind: 'help', people };
+  if (now?.id === 'ground') {
+    const ground = chosen ?? homestead.grounds[0];
+    if (ground) target = { kind: 'holder', npcId: ground.heldBy, poiId: ground.at };
+  }
+  if (now?.id === 'build' && agreedGround && stage) {
+    target = !stage.needs.some((n) => carriedFor(carried, n) < n.count) && helpedHere < stage.backers
+      ? { kind: 'help', people }
+      : { kind: 'build', poiId: agreedGround.at };
+  }
+  if (now?.id === 'settle' && agreedGround) target = { kind: 'settle', poiId: agreedGround.at };
+  const actionableNext = now?.id === 'build' && stage && target?.kind === 'help'
+    ? `Help ${stage.backers - helpedHere} more ${stage.backers - helpedHere === 1 ? 'person' : 'people'} here to raise ${stage.name.toLowerCase()}.`
+    : next;
+  return { title: homestead.name, steps, next: actionableNext, target };
 }

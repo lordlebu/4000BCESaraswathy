@@ -1,24 +1,19 @@
-// What to do next, and where: the pinned line's pointer, what the events lean towards, the next
-// step when nothing is pinned, and the diary's Goals (`docs/satchel-and-hearth.md`, phases 6 to 8).
-//
-// **The fourth hook out of `App.tsx`**, and the first written for new rules rather than moved: the
-// plan put each split just before the features that would land in it, so the guidance went in here
-// rather than growing the file. Every rule is in `content/` -- `goals.ts`, `finding.ts`, `guide.ts`
-// -- and this only gathers the facts they need from what App holds.
-
-import { useEffect, useMemo, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
+// Gather live facts once; all gameplay decisions live in content/actionable.ts.
+import { useEffect, useMemo, useState, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import { EventBus } from '../game/EventBus';
+import { canStepOnto, routeCost, shallowsOf } from '../game/afloat';
+import { routeDistances, pointKey } from '../world/pathfind';
 import { hasSomethingNew, type Progress } from '../journey';
-import type { Bench } from '../content/crafting';
-import { nearestSeen, pointerLine } from '../content/finding';
-import { goalOf, stagePin, wanting, wantedNow } from '../content/goals';
-import { nextStep } from '../content/guide';
-import { agreed as groundAgreed, homesteadOn, nextStage, stateOf as homesteadState } from '../content/homestead';
-import { nameOf } from '../content/making';
+import type { Bench, Knows } from '../content/crafting';
+import type { CoachStep } from '../content/coach';
+import { goalOf, stagePin, wantedNow } from '../content/goals';
 import type { Nodes } from '../content/nodes';
-import { npc, poi } from '../content/places';
 import type { Satchel } from '../content/satchel';
-import { whereFrom } from '../content/sources';
+import type { SettlingRoad } from '../content/settlingRoad';
+import type { NearbyTraveller, Reported } from '../content/presence';
+import { nextStep } from '../content/guide';
+import { markerFor } from '../content/directions';
+import { recipeSuggestion, coachSuggestion, newsSuggestion, settlementSuggestion, explorationSuggestions, type Suggestion, type GuidanceFacts } from '../content/actionable';
 import type { World } from '../world/types';
 import type { GoalRow } from './GoalsSection';
 import type { Latest } from './useHappenings';
@@ -42,7 +37,14 @@ export function useGuidance({
   peopleOfMap,
   progress,
   road,
-  surface
+  navigation,
+  seenRevision,
+  reported,
+  nearby,
+  knows,
+  onWorkshop,
+  onPlace,
+  onReveal
 }: {
   world: World | null;
   arrival: { at: { x: number; y: number }; day: number } | null;
@@ -61,98 +63,86 @@ export function useGuidance({
   fieldMapId: string;
   hints: boolean;
   /** The first morning's line while it lasts: the guide waits until it is gone. */
-  coach: unknown;
+  coach: CoachStep | null;
   peopleOfMap: readonly string[];
   progress: Progress;
-  road: { next: string | null } | null;
-  /** Which surface is showing, so the Goals are fresh when the diary opens. */
-  surface: string | null;
+  road: SettlingRoad | null;
+  navigation: { boat: boolean; afloat: boolean };
+  seenRevision: number;
+  reported: readonly Reported[];
+  nearby: readonly NearbyTraveller[];
+  knows: Knows;
+  onWorkshop: (recipeId: string) => void;
+  onPlace: (poiId: string) => void;
+  onReveal: () => void;
 }) {
-  /**
-   * Where the nearest of what the pin wants lies, among the ground already seen -- or, if none has
-   * been, where to look. Asked each step, because a step is what changes it. `content/finding.ts`.
-   */
-  const finding = useMemo(() => {
-    void homeTick;
-    if (!world || !arrival || !pinned) return null;
-    const want = wantedNow([pinned], satchel, bench, journeyFlags.current);
-    if (want.materials.length + want.kinds.length === 0) return null;
-    const pointer = nearestSeen(world, arrival.at, new Set(discovered.current), want, nodes, arrival.day);
-    if (pointer) return { at: pointer.at, where: pointerLine(pointer) };
-    const first = want.materials[0];
-    const lookIn = first ? whereFrom(first) : `any ${want.kinds[0]}`;
-    return { at: null, where: lookIn ? `${first ? nameOf(first).toLowerCase() : 'it'}: ${lookIn}` : null };
-  }, [world, arrival, pinned, satchel, bench, nodes, homeTick]);
-  const markAt = finding?.at ? `${finding.at.x},${finding.at.y}` : '';
+  const [selection, setSelection] = useState<{ world: World; pin: string | null; id: string | null } | null>(null);
+  const seen = useMemo(() => new Set(discovered.current), [world, seenRevision]);
+  const shallow = useMemo(() => world ? shallowsOf(world) : new Set(), [world]);
+  const x = arrival?.at.x, y = arrival?.at.y;
+  const routes = useMemo(() => world && x !== undefined && y !== undefined
+    ? routeDistances(world.tiles, world.width, world.height, { x, y },
+      (tile) => seen.has(pointKey(tile)) && canStepOnto(tile, navigation.boat, shallow.has(tile)),
+      (tile) => routeCost(tile, navigation.boat, navigation.afloat, shallow.has(tile))) : new Map(),
+    [world, x, y, seen, shallow, navigation.boat, navigation.afloat]);
+  const facts: GuidanceFacts | null = world && arrival ? {
+    world, mapId: fieldMapId, from: arrival.at, day: arrival.day, seen, routes,
+    places: fieldPlaced.current, satchel, bench, nodes, flags: journeyFlags.current,
+    progress, knows, reported, nearby, people: peopleOfMap, road
+  } : null;
+  // The expensive grid search above is shared; these only inspect candidate indexes and rules.
+  const pinnedSuggestion = facts && pinned ? recipeSuggestion(pinned, facts) : null;
+  const coaching = facts && coach ? coachSuggestion(coach, facts) : null;
+  const settling = facts ? settlementSuggestion(facts) : null;
+  const news = facts ? peopleOfMap.filter((id) => hasSomethingNew(progress, id)).map((id) => newsSuggestion(id, facts)) : [];
+  const exploration = facts ? explorationSuggestions(facts) : [];
+  const automatic = settling ?? news[0] ?? exploration[0] ?? null;
+  const visibleCoach = hints ? coaching : null;
+  const active = nextStep({ coach: visibleCoach, pinned: pinnedSuggestion, automatic: hints ? automatic : null });
+  const suggestions = [coaching, pinnedSuggestion, settling, ...news, ...exploration].filter((s): s is Suggestion => s !== null);
+  const selected = selection?.world === world && selection.pin === pinned ? selection.id : null;
+  const automaticMarker = !visibleCoach && pinnedSuggestion?.target?.id.startsWith('source:') ? pinnedSuggestion.target : null;
+  const marker = markerFor(selected, suggestions, automaticMarker);
+  const markKey = marker ? `${marker.id}:${pointKey(marker.at)}` : '';
   useEffect(() => {
-    EventBus.emitEvent('source-mark', { at: finding?.at ?? null });
-    // Keyed on the tile, not the object, so a step that finds the same tile sends nothing.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [markAt]);
+    EventBus.emitEvent('source-mark', { at: marker?.at ?? null, id: marker?.id, label: marker?.label });
+  }, [world, markKey]);
+  // Once invalidated, a deliberate choice cannot spring back on a later day as a phantom marker.
+  useEffect(() => {
+    if (selected && selected !== 'hidden' && !marker) setSelection(world ? { world, pin: pinned, id: 'hidden' } : null);
+  }, [world, pinned, selected, markKey]);
 
-  // What the traveller is working towards -- the pin, and this map's next building stage -- for the
-  // events that turn something up to lean towards. See `pickFor` in `happenings.ts`.
   useEffect(() => {
     const want = wantedNow([pinned, stagePin(fieldMapId)], satchel, bench, journeyFlags.current);
     latest.current.wanted = { ...want, carried: satchel };
   }, [pinned, fieldMapId, satchel, bench, homeTick]);
 
-  /**
-   * The next step once the first morning is over and nothing is pinned: the building, somebody with
-   * news, a place not yet seen. Off with the hints, like the coach. See `content/guide.ts`.
-   */
-  const guide = useMemo(() => {
-    void homeTick;
-    if (!hints || coach !== null || pinned || !arrival) return null;
-    const homestead = homesteadOn(fieldMapId);
-    const state = homesteadState(fieldMapId, journeyFlags.current);
-    const ground = homestead?.grounds.find((g) => g.id === state.ground);
-    const stage = homestead && ground && groundAgreed(ground, state) ? nextStage(homestead, state) : null;
-    const newsFrom = peopleOfMap.find((id) => hasSomethingNew(progress, id));
-    const seen = new Set(discovered.current);
-    const step = nextStep({
-      road: road?.next ?? null,
-      stage: stage ? { pin: stagePin(fieldMapId), name: stage.name } : null,
-      news: newsFrom ? { name: npc(newsFrom)?.name ?? 'Somebody' } : null,
-      at: arrival.at,
-      unseen: fieldPlaced.current
-        .filter((p) => !seen.has(`${p.at.x},${p.at.y}`))
-        .map((p) => ({ name: poi(p.poiId)?.name ?? 'a place', at: p.at }))
-    });
-    if (!step) return null;
-    const action = step.action;
-    return {
-      line: step.line,
-      action: action ? { label: action.label, onDo: () => setPinned(action.pin) } : null
-    };
-  }, [hints, coach, pinned, arrival, fieldMapId, homeTick, peopleOfMap, progress, road]);
-
-  /** Everything that could be worked towards, for the diary's Goals. See `GoalsSection`. */
-  const goalRows = useMemo<GoalRow[]>(() => {
-    void homeTick;
-    const rows: GoalRow[] = [];
-    const toggle = (pin: string) => () => setPinned((p) => (p === pin ? null : pin));
-    const pinnedGoal = goalOf(pinned);
-    const pinnedWants = pinnedGoal ? wanting(pinnedGoal, satchel, bench, journeyFlags.current) : null;
-    if (pinned && pinnedWants) {
-      rows.push({ id: 'pinned', line: `Working towards ${pinnedWants.name}.`, pin: { on: true, label: pinnedWants.name, toggle: toggle(pinned) } });
+  const markerAction = (s: Suggestion) => {
+    if (!world || !s.target || s.target.knowledge !== 'known' || s.target.route !== 'reachable') return null;
+    const marked = marker?.id === s.target.id;
+    return { label: marked ? 'Hide marker' : 'Show me', onDo: () => {
+      setSelection({ world, pin: pinned, id: marked ? 'hidden' : s.id });
+      if (!marked) onReveal();
+    } };
+  };
+  const directAction = (s: Suggestion) => !s.action ? null : {
+    label: s.actionLabel ?? 'Open',
+    onDo: () => {
+      const a = s.action!;
+      if (a.kind === 'pin') setPinned(a.pin);
+      else if (a.kind === 'workshop') onWorkshop(a.recipeId);
+      else onPlace(a.poiId);
     }
-    const homestead = homesteadOn(fieldMapId);
-    const state = homesteadState(fieldMapId, journeyFlags.current);
-    const ground = homestead?.grounds.find((g) => g.id === state.ground);
-    const stage = homestead && ground && groundAgreed(ground, state) ? nextStage(homestead, state) : null;
-    const pin = stagePin(fieldMapId);
-    if (stage && pinned !== pin) rows.push({ id: 'stage', line: `${stage.name}, at ${ground!.name}.`, pin: { on: false, label: stage.name, toggle: toggle(pin) } });
-    else if (!stage && road?.next) rows.push({ id: 'road', line: road.next });
-    for (const id of peopleOfMap.filter((who) => hasSomethingNew(progress, who))) {
-      rows.push({ id: `news:${id}`, line: `${npc(id)?.name ?? 'Somebody'} has something new to tell you.` });
-    }
-    const seen = new Set(discovered.current);
-    const unseen = fieldPlaced.current.filter((p) => !seen.has(`${p.at.x},${p.at.y}`)).map((p) => poi(p.poiId)?.name ?? 'a place');
-    if (unseen.length > 0) rows.push({ id: 'unseen', line: `Not yet seen: ${unseen.join(', ')}.` });
-    return rows;
-  }, [pinned, satchel, bench, fieldMapId, homeTick, road, peopleOfMap, progress, surface]);
-
-
-  return { finding, guide, goalRows };
+  };
+  const present = (s: Suggestion | null) => s ? { line: s.line, action: markerAction(s) ?? directAction(s) } : null;
+  const guide = !visibleCoach && !pinnedSuggestion && hints ? present(automatic) : null;
+  const goalRows: GoalRow[] = suggestions.map((s) => ({
+    id: s.id, line: s.line, action: markerAction(s) ?? directAction(s),
+    ...(s.reason === 'pin' && pinned ? { pin: { on: true, label: goalOf(pinned)?.kind === 'stage' ? 'building stage' : 'recipe', toggle: () => setPinned(null) } } : {})
+  }));
+  return {
+    finding: pinnedSuggestion ? { at: pinnedSuggestion.target?.at ?? null, where: pinnedSuggestion.where ?? pinnedSuggestion.line } : null,
+    guide, goalRows, coachGuide: present(visibleCoach), pinAction: pinnedSuggestion ? markerAction(pinnedSuggestion) : null,
+    nextLine: active?.line ?? null
+  };
 }

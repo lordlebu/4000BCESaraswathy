@@ -35,62 +35,61 @@ export function findPath(
   costOf: (tile: Tile) => number = () => 1
 ): Point[] {
   if (from.x === to.x && from.y === to.y) return [];
-  if (to.x < 0 || to.y < 0 || to.x >= width || to.y >= height) return [];
-  if (!isWalkable(tiles[to.y]![to.x]!)) return [];
+  const result = searchRoutes(tiles, width, height, from, isWalkable, costOf, to);
+  if (!result.has(pointKey(to))) return [];
+  const path: Point[] = [];
+  let step: Point | null = { x: to.x, y: to.y };
+  while (step && pointKey(step) !== pointKey(from)) {
+    path.push(step);
+    step = result.get(pointKey(step))?.previous ?? null;
+  }
+  return path.reverse();
+}
 
-  const key = (p: Point) => `${p.x},${p.y}`;
-  const cameFrom = new Map<string, Point | null>([[key(from), null]]);
-  const best = new Map<string, number>([[key(from), 0]]);
+export const pointKey = (p: Point): string => `${p.x},${p.y}`;
+export interface RouteDistance { cost: number; steps: number; previous: Point | null }
+export type DistanceMap = ReadonlyMap<string, RouteDistance>;
 
-  // **A heap, not a sorted array.** This re-sorted the whole frontier on every step, on the
-  // reasoning that a 64x64 map keeps it small. That held for one path; travellers, wanderers and
-  // every tap all call this now, and a sort per pop is O(n log n) where a heap is O(log n). The
-  // order below is total, so the heap pops exactly the sequence the sort did and no path changed.
-  //
-  // **The tie-break is load-bearing.** Ordering only by cost leaves equal-cost routes to be
-  // resolved by whatever order the map happens to iterate in, which makes the same tap produce
-  // different paths on different runs and would turn `e2e/playthrough.spec.ts` intermittent. So
-  // ties fall to insertion order, then y, then x — total, and derived only from the grid.
-  const frontier = new Heap<{ at: Point; cost: number; seq: number }>(
-    (a, b) => a.cost - b.cost || a.at.y - b.at.y || a.at.x - b.at.x || a.seq - b.seq
+/** One search shared by all guidance candidates. Callers restrict passability to known ground. */
+export function routeDistances(
+  tiles: Tile[][], width: number, height: number, from: Point,
+  passable: (tile: Tile) => boolean, costOf: (tile: Tile) => number = () => 1
+): DistanceMap {
+  return searchRoutes(tiles, width, height, from, passable, costOf);
+}
+
+function searchRoutes(
+  tiles: Tile[][], width: number, height: number, from: Point,
+  passable: (tile: Tile) => boolean, costOf: (tile: Tile) => number, to?: Point
+): Map<string, RouteDistance> {
+  const result = new Map<string, RouteDistance>();
+  if (!tiles[from.y]?.[from.x]) return result;
+  if (to && (!tiles[to.y]?.[to.x] || !passable(tiles[to.y]![to.x]!))) return result;
+  result.set(pointKey(from), { cost: 0, steps: 0, previous: null });
+  // Preserve tap-to-walk's established tie order. Guidance breaks equal costs by fewer steps.
+  const frontier = new Heap<{ at: Point; cost: number; steps: number; seq: number }>(
+    (a, b) => a.cost - b.cost || (!to ? a.steps - b.steps : 0) || a.at.y - b.at.y || a.at.x - b.at.x || a.seq - b.seq
   );
-  frontier.push({ at: from, cost: 0, seq: 0 });
+  frontier.push({ at: from, cost: 0, steps: 0, seq: 0 });
   let seq = 1;
-
   while (frontier.size) {
-    const { at: tile, cost } = frontier.pop()!;
-
-    if (tile.x === to.x && tile.y === to.y) {
-      const path: Point[] = [];
-      let step: Point | null | undefined = tile;
-      while (step && !(step.x === from.x && step.y === from.y)) {
-        path.push(step);
-        step = cameFrom.get(key(step));
-      }
-      return path.reverse();
-    }
-
-    // Reached again more cheaply since being queued; that better entry is still to come.
-    if (cost > (best.get(key(tile)) ?? Infinity)) continue;
-
-    for (const next of orthogonalNeighbours(tile, width, height)) {
-      const at = tiles[next.y]![next.x]!;
-      if (!isWalkable(at)) continue;
-      // A non-positive cost would let a cycle be walked for free and never terminate. Only that is
-      // refused: this was `Math.max(cost, 1)`, which also flattened a road's 0.75 to the plains
-      // rate, so a click across country never preferred the path.
-      const raw = costOf(at);
-      const stepCost = raw > 0 ? raw : 1;
-      const total = cost + stepCost;
-      const nextKey = key(next);
-      if (total >= (best.get(nextKey) ?? Infinity)) continue;
-      best.set(nextKey, total);
-      cameFrom.set(nextKey, tile);
-      frontier.push({ at: next, cost: total, seq: seq++ });
+    const current = frontier.pop()!;
+    const best = result.get(pointKey(current.at))!;
+    if (current.cost > best.cost || (!to && current.steps > best.steps)) continue;
+    if (to && pointKey(current.at) === pointKey(to)) break;
+    for (const at of orthogonalNeighbours(current.at, width, height)) {
+      const tile = tiles[at.y]![at.x]!;
+      if (!passable(tile)) continue;
+      const raw = costOf(tile);
+      const cost = current.cost + (raw > 0 ? raw : 1);
+      const steps = current.steps + 1;
+      const old = result.get(pointKey(at));
+      if (old && (cost > old.cost || (cost === old.cost && (to || steps >= old.steps)))) continue;
+      result.set(pointKey(at), { cost, steps, previous: current.at });
+      frontier.push({ at, cost, steps, seq: seq++ });
     }
   }
-
-  return [];
+  return result;
 }
 
 /**

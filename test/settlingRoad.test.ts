@@ -49,3 +49,19 @@ describe('the road to settling', () => {
     expect(road.next).toBeNull();
   });
 });
+
+it('continues an existing ground agreement even if the standing record is incomplete', () => {
+  const ground = lothal.grounds[0]!;
+  const state = { ground: ground.id, eased: ground.worries.map(w => w.id), built: [], settled: false };
+  const road = settlingRoad('field_map_lothal', lothal, { standing: stranger, state, helpedHere: 0, carried: {} })!;
+  expect(road.target?.kind).toBe('build');
+  expect(road.next).toMatch(/^Raise/);
+});
+it('asks for a remaining backer when the building materials are already carried', () => {
+  const ground = lothal.grounds[0]!;
+  const state = { ground: ground.id, eased: ground.worries.map(w => w.id), built: [], settled: false };
+  const carried = Object.fromEntries(lothal.stages[0]!.needs.filter(n => n.id).map(n => [n.id!, n.count]));
+  const road = settlingRoad('field_map_lothal', lothal, { standing: known, state, helpedHere: 0, carried })!;
+  expect(road.target).toMatchObject({ kind: 'help', people: ['npc_hasme'] });
+  expect(road.next).toMatch(/^Help 1 more person/);
+});

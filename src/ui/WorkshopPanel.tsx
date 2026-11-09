@@ -58,6 +58,7 @@ export interface WorkshopPanelProps {
    * player -- which is the whole bargain of doing the chain for them.
    */
   lastMade: readonly Step[];
+  made?: readonly string[];
   /**
    * The bench the player walked up to, or null for the whole workshop.
    *
@@ -100,6 +101,7 @@ export function WorkshopPanel({
   knows,
   onMake,
   lastMade,
+  made = [],
   station,
   fieldMapId = null,
   pinned = null,
@@ -258,7 +260,7 @@ export function WorkshopPanel({
               <b>{pinnedGoal.name}</b>
             </p>
             <button type="button" className="recipe-pin" aria-label={`Unpin ${pinnedGoal.name}`} onClick={() => onPin(null)}>
-              Unpin
+              {(pinned && made.includes(pinned)) || pinnedGoal.other.includes('It is built') ? 'Done — unpin' : 'Unpin'}
             </button>
           </section>
         )}

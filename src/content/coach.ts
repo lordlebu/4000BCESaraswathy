@@ -10,7 +10,7 @@
 // knife, an adze, a frame, then the mat. That is a long way from the first minute. So the morning
 // ends at a knife, and the mat is pinned as what comes next -- the dock carries it from there.
 //
-// No arrows, no locks: the player can walk off on the first frame and the line simply waits. Pure,
+// Optional markers, no locks: the player can walk off on the first frame and the line simply waits. Pure,
 // and free of React and Phaser; the hints preference turns it off.
 
 export interface CoachFacts {

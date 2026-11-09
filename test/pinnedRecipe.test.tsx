@@ -134,3 +134,20 @@ describe('the diary’s Goals', () => {
     expect(container.firstChild).toBeNull();
   });
 });
+
+it('keeps marker and workshop controls separate and shows the ready destination', () => {
+  const open = vi.fn(), mark = vi.fn();
+  render(<PinnedRecipe recipeId="recipe_flint_knife" satchel={{ material_flint: 2 }} bench={openGround()} onOpen={open} where="Ready to make here." markerAction={{ label: 'Show me', onDo: mark }} />);
+  fireEvent.click(screen.getByRole('button', { name: /^Show me:/ }));
+  expect(mark).toHaveBeenCalledOnce();
+  expect(open).not.toHaveBeenCalled();
+  expect(screen.getByText('Ready to make here.')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: /^Working towards/ }));
+  expect(open).toHaveBeenCalledOnce();
+});
+it('offers explicit Done — unpin for a recipe already made', () => {
+  const onPin = vi.fn();
+  render(<WorkshopPanel station={null} satchel={{}} bench={openGround()} lastMade={[]} made={['recipe_reed_rope']} knows={() => true} onMake={() => {}} pinned="recipe_reed_rope" onPin={onPin} open onClose={() => {}} />);
+  fireEvent.click(screen.getByText('Done — unpin'));
+  expect(onPin).toHaveBeenCalledWith(null);
+});

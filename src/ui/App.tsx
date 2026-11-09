@@ -461,6 +461,8 @@ export function App() {
 
   // The fog set changes on every step, which is far too often to keep in React state — it would
   // re-render the whole panel each tile. The scene owns it; this ref only carries it to the save.
+  const [seenRevision, setSeenRevision] = useState(0);
+  const [navigation, setNavigation] = useState({ boat: false, afloat: false });
   const discovered = useRef<string[]>(initialJourney.current.discovered);
 
   useEffect(() => {
@@ -475,6 +477,7 @@ export function App() {
     };
     const onJourneyChanged = ({ discovered: tiles }: GameToUi['journey-changed']) => {
       discovered.current = tiles;
+      setSeenRevision((v) => v + 1);
     };
 
     const onLandmarkReached = (payload: GameToUi['landmark-reached']) => {
@@ -499,6 +502,7 @@ export function App() {
     // own state optimistically; this is what corrects it if the scene ever disagreed.
     const onCharacter = ({ characterId: drawn }: GameToUi['character-changed']) => setDrawn(drawn);
 
+    EventBus.onEvent('navigation-changed', setNavigation);
     EventBus.onEvent('world-ready', onWorldReady);
     EventBus.onEvent('tile-entered', onTileEntered);
     EventBus.onEvent('journey-changed', onJourneyChanged);
@@ -510,6 +514,7 @@ export function App() {
     EventBus.onEvent('travellers-nearby', onNearby);
     EventBus.onEvent('character-changed', onCharacter);
     return () => {
+      EventBus.offEvent('navigation-changed', setNavigation);
       EventBus.offEvent('world-ready', onWorldReady);
       EventBus.offEvent('tile-entered', onTileEntered);
       EventBus.offEvent('journey-changed', onJourneyChanged);
@@ -1356,7 +1361,7 @@ export function App() {
    * save each time, like everything the coach knows; see `content/coach.ts`.
    */
   const coach = useMemo(() => {
-    if (!hints || !journeyFlags.current.includes('coach:on') || journeyFlags.current.includes('coach:done')) return null;
+    if (!journeyFlags.current.includes('coach:on') || journeyFlags.current.includes('coach:done')) return null;
     const here = arrival ? `${arrival.at.x},${arrival.at.y}` : null;
     if (here && firstAt.current === null) firstAt.current = here;
     return coachLine({
@@ -1365,11 +1370,11 @@ export function App() {
       made: (id) => progress.made.includes(id),
       carried: (id) => satchel[id] ?? 0
     });
-  }, [hints, arrival, progress, satchel, opening]);
+  }, [arrival, progress, satchel, opening]);
 
   // What to do next, and where: the pointer, the events' lean, the next step and the Goals --
   // `useGuidance.ts`.
-  const { finding, guide, goalRows } = useGuidance({
+  const { finding, guide, goalRows, coachGuide, pinAction, nextLine } = useGuidance({
     world,
     arrival,
     pinned,
@@ -1388,7 +1393,22 @@ export function App() {
     peopleOfMap,
     progress,
     road,
-    surface
+    navigation,
+    seenRevision,
+    reported: travellerStates,
+    nearby: nearbyTravellers,
+    knows: knowsRecipeHere,
+    onWorkshop: (recipeId) => {
+      setWorkshopAt(recipeId);
+      dispatch({ type: 'open-interrupt', which: 'workshop' });
+    },
+    onPlace: () => {
+      dispatch({ type: 'show', surface: 'here' });
+      if (!placeOpen) dispatch({ type: 'toggle-place' });
+    },
+    onReveal: () => {
+      if (surface === 'progress') dispatch({ type: 'show', surface: 'here' });
+    }
   });
 
   // The page a night closes on, and the morning after it. Read when asked rather than kept as state:
@@ -1400,7 +1420,7 @@ export function App() {
       const pinnedWants = goal ? wanting(goal, satchel, bench, journeyFlags.current) : null;
       return {
         lines: dayLines(morning.current, knowledgeNow()),
-        tomorrow: tomorrowLine(pinnedWants, guide ? { line: guide.line, action: null } : null)
+        tomorrow: nextLine ?? tomorrowLine(pinnedWants, null)
       };
     },
     nightOver: () => {
@@ -1773,6 +1793,7 @@ export function App() {
         knows={knowsRecipeHere}
         onMake={makeHere}
         lastMade={lastMade}
+        made={progress.made}
         station={atStation}
         fieldMapId={fieldMapId}
         // What this ground gives, walked once per world and only when the workshop opens.
@@ -1847,7 +1868,7 @@ export function App() {
           surroundings: arrival?.surroundings ?? '',
           hint: arrival?.hint ?? '',
           whereNext: arrival?.whereNext ?? '',
-          goal: road?.next ?? '',
+          goal: nextLine ?? road?.next ?? '',
           fatigue: arrival?.fatigue ?? null,
           dusk: arrival?.dusk ?? null,
           discovered: arrival?.discovered ?? 0,
@@ -1855,7 +1876,8 @@ export function App() {
           memory,
         }}
         sky={skyPhase === null ? null : { phase: skyPhase, weather: moment?.weather }}
-        coach={coach?.line ?? null}
+        coach={hints ? coachGuide?.line ?? coach?.line ?? null : null}
+        coachAction={coachGuide?.action ?? null}
         guide={guide}
         pinned={{
           recipeId: pinned,
@@ -1863,6 +1885,7 @@ export function App() {
           bench,
           flags: journeyFlags.current,
           where: finding?.where ?? null,
+          markerAction: pinAction,
           // Tapping the line opens the workshop at it, where it can be changed or unpinned.
           onOpen: () => {
             setWorkshopAt(pinned);

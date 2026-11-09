@@ -3734,7 +3734,7 @@ button.pinned-recipe:focus-visible { outline: 2px solid currentColor; outline-of
 .coach-line { flex: none; margin: 0; padding: 0.25rem 0.75rem; font-size: 0.85rem; font-style: italic; }
 .coach-line::before { content: '✦ '; color: var(--accent); font-style: normal; }
 /* The next step once the first morning is over. A button when pressing it does the thing it says. */
-button.guide-line { width: 100%; min-height: 44px; background: none; border: 0; color: inherit; font-family: inherit; text-align: left; cursor: pointer; }
+button.guide-line { display: flex; flex-direction: row; align-items: center; gap: 0.35rem; width: 100%; min-height: 44px; background: none; border: 0; color: inherit; font-family: inherit; text-align: left; cursor: pointer; }
 button.guide-line:hover { text-decoration: underline; }
 button.guide-line:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
 .guide-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -3746,3 +3746,11 @@ button.guide-line:focus-visible { outline: 2px solid currentColor; outline-offse
 .journey-keeper footer { font-size: 0.85rem; color: var(--muted); }
 .journey-arrive { margin: 0; font-size: 1.6rem; }
 .journey-arrival { margin: 0; line-height: 1.6; text-align: left; }
+
+/* Guidance uses the existing fixed dock slot. The summary and action are sibling buttons. */
+.pinned-guidance { display: flex; flex-direction: row; flex: none; min-width: 0; align-items: center; }
+.pinned-guidance > .pinned-recipe { flex: 1; min-width: 0; }
+.guidance-mark-button { flex: none; min-height: 44px; min-width: 44px; padding: 0.25rem 0.5rem; font: inherit; font-size: 0.8rem; }
+.guidance-verb { flex: none; font-style: normal; text-decoration: underline; white-space: nowrap; }
+
+.guidance-copy { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
