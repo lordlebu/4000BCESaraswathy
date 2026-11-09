@@ -108,3 +108,26 @@ repository's bundle carries, so the two agree.
 - **`world/features.ts` must match `game/frames.ts`.** A feature added to the art and not there shifts
   what every later tile is said to hold; the test fails by name.
 - **The pointer never points into fog.** Walking is how a map is known.
+
+### Actionable guidance (November 2026)
+
+The first morning, pinned goal, settlement road, people with news and unexplored places now
+share structured suggestions. The dock presents one next step; Goals keeps the other choices;
+the nightly page repeats the same next step. Turning Hints off hides automatic guidance without
+completing the morning or cancelling a deliberate marker.
+
+**Show me** selects one destination. It never walks, pans the camera, advances time or uncovers
+fog. A selected destination takes precedence over the automatic resource diamond; Hide marker
+suppresses that fallback. Arrival, changed needs, depleted resources, missing reports and a map
+change invalidate stale destinations. Offscreen destinations get an arrow inside the map's
+uncovered area. Markers are session state, not a new save field.
+
+Only discovered, reachable ground gets an exact marker and walking distance. One shared route
+search uses the movement rules, including terrain, bridges and boat access; its displayed steps
+count actual tiles along the cheapest route. Resource searches stop at 40 path steps. An unseen
+named place gets a bearing; an unseen resource gets its habitat clue. A travelling person's
+reported destination is described as a meeting place, not their current position.
+
+Making a pinned recipe keeps it pinned for repeated crafting. The workshop offers **Done —
+unpin** after it has been made. Building pins continue to follow the next stage. Existing
+workshop, place and talk controls do the actual work; guidance does not duplicate those rules.

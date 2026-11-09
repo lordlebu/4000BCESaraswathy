@@ -16,6 +16,8 @@ import type { TravellerState } from '../content/travellers';
 
 /** Scene → React. */
 export interface GameToUi {
+  /** The scene's actual movement capabilities, for route-aware guidance. */
+  'navigation-changed': { boat: boolean; afloat: boolean };
   /** A world was generated and the scene is drawing it. */
   /**
    * The map is drawn. `places` is where its points of interest landed, which only the scene knows;
@@ -336,7 +338,7 @@ export interface UiToGame {
    * The nearest seen tile holding something the pin wants, to mark on the map. Null to clear it.
    * `content/finding.ts` decides it; the scene only draws (`docs/satchel-and-hearth.md`, phase 7).
    */
-  'source-mark': { at: { x: number; y: number } | null };
+  'source-mark': { at: { x: number; y: number } | null; id?: string; label?: string };
 }
 
 type Events = GameToUi & UiToGame;

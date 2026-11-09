@@ -263,3 +263,13 @@ describe('a click on somewhere unreachable', () => {
     expect(nearestReachable(tiles, width, height, { x: 0, y: 0 }, { x: 1, y: 1 }, walkable)).toEqual(a);
   });
 });
+
+it('shares terrain-aware route costs while counting actual steps and excluding unknown ground', async () => {
+  const { routeDistances } = await import('../src/world/pathfind');
+  const g = grid(['.^^.', '....']);
+  const routes = routeDistances(g.tiles, g.width, g.height, { x: 0, y: 0 }, walkable, cost);
+  expect(routes.get('3,0')).toMatchObject({ cost: 5, steps: 5 });
+  const known = routeDistances(g.tiles, g.width, g.height, { x: 0, y: 0 }, t => t.x !== 1, cost);
+  expect(known.has('3,0')).toBe(false);
+  expect(known.get('0,0')).toEqual({ cost: 0, steps: 0, previous: null });
+});

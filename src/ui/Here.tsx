@@ -90,6 +90,7 @@ export interface HereProps {
   guide?: { line: string; action: { label: string; onDo: () => void } | null } | null;
   /** The first morning's hint, which takes the pinned recipe's line while it lasts. See `content/coach.ts`. */
   coach?: string | null;
+  coachAction?: { label: string; onDo: () => void } | null;
   /**
    * Everything that can be done on this tile.
    *
@@ -127,6 +128,7 @@ export function Here({
   standing,
   pinned,
   coach = null,
+  coachAction = null,
   guide = null,
   sky,
   actions,
@@ -190,9 +192,9 @@ export function Here({
 
       {/* The pinned recipe, at every height: it is the reason the player is out gathering. */}
       {coach ? (
-        <p className="coach-line" role="status">
-          {coach}
-        </p>
+        coachAction ? <button type="button" className="coach-line guide-line" aria-label={`${coach} ${coachAction.label}`} onClick={coachAction.onDo}>
+          <span className="guidance-copy">{coach}</span> <span className="guidance-verb">{coachAction.label}</span>
+        </button> : <p className="coach-line" role="status">{coach}</p>
       ) : pinned?.recipeId ? (
         <PinnedRecipe {...pinned} />
       ) : guide && !reading ? (
@@ -202,7 +204,7 @@ export function Here({
         // suggests -- pin the next stage -- so it owes the tap floor like the pinned line.
         guide.action ? (
           <button type="button" className="coach-line guide-line" aria-label={`${guide.line} ${guide.action.label}.`} onClick={guide.action.onDo}>
-            {guide.line}
+            <span className="guidance-copy">{guide.line}</span> <span className="guidance-verb">{guide.action.label}</span>
           </button>
         ) : (
           <p className="coach-line guide-line" role="status">

@@ -12,6 +12,7 @@ export interface GoalRow {
   id: string;
   line: string;
   /** Present when the row can be pinned or unpinned from here. */
+  action?: { label: string; onDo: () => void } | null;
   pin?: { on: boolean; label: string; toggle: () => void };
 }
 
@@ -24,6 +25,7 @@ export function GoalsSection({ rows }: { rows: readonly GoalRow[] }) {
         {rows.map((row) => (
           <li key={row.id} className="goal-row">
             <span className="goal-line">{row.line}</span>
+            {row.action && <button type="button" className="recipe-pin" aria-label={`${row.action.label}: ${row.line}`} onClick={row.action.onDo}>{row.action.label}</button>}
             {row.pin && (
               <button
                 type="button"

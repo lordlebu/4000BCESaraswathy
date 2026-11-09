@@ -10,6 +10,9 @@
 // Pure, and free of React and Phaser. React asks it each step and draws the line; the scene draws
 // the mark.
 
+import { routeDistances, pointKey, type DistanceMap } from '../world/pathfind';
+import { isWalkable } from '../world/generate';
+import { stepCostOn } from './species';
 import { yieldsAt } from './gathering';
 import { type Material, material, materials } from './making';
 import { leftAt, type Nodes } from './nodes';
@@ -46,6 +49,7 @@ export interface Pointer {
   name: string;
   at: Point;
   steps: number;
+  cost: number;
   /** "north-east", or "here". */
   bearing: string;
 }
@@ -54,7 +58,7 @@ export interface Pointer {
  * The nearest tile you have seen that still holds something you want, or null.
  *
  * `want` is `goals.wantedNow`'s answer: materials by id, and kinds (`timber`) meaning any material of
- * the class. Steps are counted on the grid, as the landmark's bearing is. A tile somebody has
+ * the class. Steps count the cheapest route through known, passable ground. A tile somebody has
  * emptied does not count until it has grown back -- `leftAt` decides -- because pointing at bare
  * ground is worse than pointing at nothing.
  */
@@ -65,21 +69,27 @@ export function nearestSeen(
   want: { materials: readonly string[]; kinds: readonly string[] },
   nodes: Nodes,
   today: number,
-  reach = FIND_REACH
+  reach = FIND_REACH,
+  routes: DistanceMap = routeDistances(world.tiles, world.width, world.height, from,
+    (t) => seen.has(pointKey(t)) && isWalkable(t), stepCostOn)
 ): Pointer | null {
   const ids = new Set(want.materials);
   for (const kind of want.kinds) for (const m of materials) if (m.classes.includes(kind as never)) ids.add(m.id);
   const index = sourcesIn(world);
   let best: Pointer | null = null;
-  for (const id of ids) {
+  for (const id of [...ids].sort()) {
     const m: Material | null = material(id);
     if (!m) continue;
     for (const at of index.get(id) ?? []) {
-      const steps = Math.abs(at.x - from.x) + Math.abs(at.y - from.y);
-      if (steps > reach || (best && steps >= best.steps)) continue;
+      const route = routes.get(pointKey(at));
+      if (!route || route.steps > reach) continue;
+      const { steps, cost } = route;
+      if (best && (cost > best.cost || (cost === best.cost &&
+        (steps > best.steps || (steps === best.steps &&
+          (at.y > best.at.y || (at.y === best.at.y && at.x >= best.at.x))))))) continue;
       if (!seen.has(`${at.x},${at.y}`)) continue;
       if (leftAt(nodes, world.seed, at, m, today) <= 0) continue;
-      best = { id, name: m.name, at, steps, bearing: bearingTo(from, at) };
+      best = { id, name: m.name, at, steps, cost, bearing: bearingTo(from, at) };
     }
   }
   return best;

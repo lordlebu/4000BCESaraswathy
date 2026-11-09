@@ -493,6 +493,9 @@ export class WorldScene extends Phaser.Scene {
    */
   private sourceAt: Point | null = null;
   private sourceMark: Phaser.GameObjects.Graphics | null = null;
+  private guidanceEdge: Phaser.GameObjects.Text | null = null;
+  private sourceLabel = '';
+  private sourceId = '';
   /** The ride in flight: where from and to in pixels, and when it set out on the loop's clock. */
   private ride: { from: { x: number; y: number }; to: { x: number; y: number }; at: Point; start: number; ms: number; line: Point[] } | null =
     null;
@@ -605,6 +608,9 @@ export class WorldScene extends Phaser.Scene {
     this.riding = false;
     // Destroyed with the old scene; a new map asks again.
     this.sourceMark = null;
+    this.guidanceEdge = null;
+    this.sourceLabel = '';
+    this.sourceId = '';
     this.sourceAt = null;
     this.glows = [];
     this.glowAt = -1;
@@ -1831,6 +1837,7 @@ export class WorldScene extends Phaser.Scene {
     if (!this.built) return;
     this.boat = boatOn(this.built.fieldMap.id, this.lent) !== null;
     this.shallows = this.boat ? shallowsOf(this.world) : new Set();
+    EventBus.emitEvent('navigation-changed', { boat: this.boat, afloat: this.afloat });
   };
 
   /** Somebody comes over, from React. See `VisitorView.approach`. */
@@ -2143,6 +2150,9 @@ export class WorldScene extends Phaser.Scene {
       rideLine: this.ride?.line ?? [],
       // The diamond on the nearest seen source of what the pin wants, for \`e2e/finding.spec.ts\`.
       sourceMark: this.sourceMark?.visible ? this.sourceAt : null,
+      guidanceId: this.sourceId,
+      discovered: this.discovered.size,
+      guidanceEdge: this.guidanceEdge?.visible ?? false,
       moving: this.moving,
       depth: this.player.depth,
       sortedRow: this.sortedRow,
@@ -2250,10 +2260,14 @@ export class WorldScene extends Phaser.Scene {
    * Mark where the nearest of what the pin wants lies: a small turmeric diamond, the talk marker's
    * colours, set into the tile rather than floating above it, so it reads as a place on the ground.
    */
-  private onSourceMark = ({ at }: UiToGame['source-mark']): void => {
+  private onSourceMark = ({ at, id, label }: UiToGame['source-mark']): void => {
+    if (at && !this.discovered.has(`${at.x},${at.y}`)) at = null;
     this.sourceAt = at;
+    this.sourceLabel = label ?? '';
+    this.sourceId = id ?? '';
     if (!at) {
       this.sourceMark?.setVisible(false);
+      this.guidanceEdge?.setVisible(false);
       return;
     }
     if (!this.sourceMark) {
@@ -2276,6 +2290,34 @@ export class WorldScene extends Phaser.Scene {
       .setPosition(at.x * TILE_SIZE + TILE_SIZE / 2, at.y * TILE_SIZE + TILE_SIZE / 2)
       .setDepth(depthFor(at.y, ROW_SLOT.canopy + 1));
   };
+
+  /** Keep the optional destination visible inside the map area without moving the camera. */
+  private updateGuidanceEdge(): void {
+    if (!this.sourceAt || !this.sourceMark?.visible) {
+      this.guidanceEdge?.setVisible(false);
+      return;
+    }
+    const camera = this.cameras.main;
+    const view = camera.worldView;
+    const x = (this.sourceMark.x - view.x) * camera.zoom;
+    const y = (this.sourceMark.y - view.y) * camera.zoom;
+    const left = 20, top = 110;
+    const right = Math.max(left, camera.width - this.insets.right - 20);
+    const bottom = Math.max(top, camera.height - this.insets.bottom - 20);
+    const off = x < left || x > right || y < top || y > bottom;
+    if (!off) { this.guidanceEdge?.setVisible(false); return; }
+    if (!this.guidanceEdge) this.guidanceEdge = this.add.text(0, 0, '◆', {
+      fontSize: '20px', color: '#ffd166', stroke: '#352b20', strokeThickness: 3
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(10000).setName('guidance-edge');
+    // Screen-space offsets converted to this camera's zoom; never pan or reveal fog.
+    const dx = x - (left + right) / 2, dy = y - (top + bottom) / 2;
+    const arrow = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? '→' : '←') : (dy > 0 ? '↓' : '↑');
+    this.guidanceEdge.setText(arrow).setScale(1 / camera.zoom)
+      .setPosition((Math.max(left, Math.min(right, x)) - camera.width / 2) / camera.zoom + camera.width / 2,
+        (Math.max(top, Math.min(bottom, y)) - camera.height / 2) / camera.zoom + camera.height / 2)
+      .setVisible(true);
+    this.guidanceEdge.setData('label', this.sourceLabel);
+  }
 
   /**
    * Two fingers moving apart or together change the zoom a step at a time.
@@ -2338,6 +2380,7 @@ export class WorldScene extends Phaser.Scene {
     // keeps changing mid-step too.
     this.updateSky();
     this.updatePinch();
+    this.updateGuidanceEdge();
     this.updateSway();
     this.updateRide();
     this.visitors.update();
@@ -2580,6 +2623,7 @@ export class WorldScene extends Phaser.Scene {
     const tile: Tile = this.world.tiles[at.y]![at.x]!;
     const atLandmark = at.x === this.world.landmark.x && at.y === this.world.landmark.y;
 
+    EventBus.emitEvent('navigation-changed', { boat: this.boat, afloat: this.afloat });
     EventBus.emitEvent('tile-entered', {
       at,
       entry: describeTile(tile, this.world, this.momentNow()),

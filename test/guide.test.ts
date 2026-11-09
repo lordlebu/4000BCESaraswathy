@@ -1,26 +1,12 @@
-// The next step, once the first morning is over (`docs/satchel-and-hearth.md`, phase 8).
-
-import { describe, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
 import { nextStep } from '../src/content/guide';
-
-const none = { road: null, stage: null, news: null, at: { x: 0, y: 0 }, unseen: [] };
-
-describe('the next step', () => {
-  it('offers the next building stage first, with a pin', () => {
-    const g = nextStep({ ...none, stage: { pin: 'stage:field_map_lothal', name: 'Raise the tower' }, road: 'Something else.' })!;
-    expect(g.line).toMatch(/raise the tower/);
-    expect(g.action).toEqual({ kind: 'pin', pin: 'stage:field_map_lothal', label: 'Pin Raise the tower' });
-  });
-
-  it('then the map’s road to settling, then somebody with news, then a place not yet seen', () => {
-    expect(nextStep({ ...none, road: 'Ask Hasme about building here.', news: { name: 'Uma' } })!.line).toBe('Ask Hasme about building here.');
-    expect(nextStep({ ...none, news: { name: 'Uma' }, unseen: [{ name: 'the Kilns', at: { x: 5, y: 0 } }] })!.line).toBe('Uma has something new to tell you.');
-    expect(nextStep({ ...none, unseen: [{ name: 'the Kilns', at: { x: 9, y: 0 } }, { name: 'the Well', at: { x: 0, y: 3 } }] })!.line).toBe(
-      'You have not seen the Well yet. It lies south.'
-    );
-  });
-
-  it('says nothing when there is nothing worth saying', () => {
-    expect(nextStep(none)).toBeNull();
-  });
+import type { Suggestion } from '../src/content/actionable';
+const coach: Suggestion = { id: 'coach', reason: 'coach', line: 'Gather reeds.' };
+const pinned: Suggestion = { id: 'pin', reason: 'pin', line: 'Make rope.' };
+const automatic: Suggestion = { id: 'news', reason: 'news', line: 'Talk to Uma.' };
+it('keeps the first morning, explicit pin and automatic guidance in priority order', () => {
+  expect(nextStep({ coach, pinned, automatic })).toBe(coach);
+  expect(nextStep({ coach: null, pinned, automatic })).toBe(pinned);
+  expect(nextStep({ coach: null, pinned: null, automatic })).toBe(automatic);
+  expect(nextStep({ coach: null, pinned: null, automatic: null })).toBeNull();
 });

@@ -33,9 +33,10 @@ export interface PinnedRecipeProps {
    * seen, or where to look when none has been ("in forest or river"). See `content/finding.ts`.
    */
   where?: string | null;
+  markerAction?: { label: string; onDo: () => void } | null;
 }
 
-export function PinnedRecipe({ recipeId, satchel, bench, flags = [], onOpen, where = null }: PinnedRecipeProps) {
+export function PinnedRecipe({ recipeId, satchel, bench, flags = [], onOpen, where = null, markerAction = null }: PinnedRecipeProps) {
   const goal = goalOf(recipeId);
   const w = goal ? wanting(goal, satchel, bench, flags) : null;
   if (!goal || !w) return null;
@@ -52,15 +53,15 @@ export function PinnedRecipe({ recipeId, satchel, bench, flags = [], onOpen, whe
     <>
       <span className="pinned-name">{w.name}</span>
       <span className="pinned-needs">{line}</span>
-      {where && !ready && <span className="pinned-where">{where}</span>}
+      {where && <span className="pinned-where">{where}</span>}
     </>
   );
-  return onOpen ? (
+  const summary = onOpen ? (
     <button
       type="button"
       className="pinned-recipe"
       data-ready={ready}
-      aria-label={`Working towards ${w.name}: ${line}${where && !ready ? `; ${where}` : ''}. Open it to change or unpin.`}
+      aria-label={`Working towards ${w.name}: ${line}${where ? `; ${where}` : ''}. Open it to change or unpin.`}
       onClick={onOpen}
     >
       {body}
@@ -70,4 +71,5 @@ export function PinnedRecipe({ recipeId, satchel, bench, flags = [], onOpen, whe
       {body}
     </p>
   );
+  return markerAction ? <div className="pinned-guidance">{summary}<button type="button" className="guidance-mark-button" aria-label={`${markerAction.label}: ${w.name}`} onClick={markerAction.onDo}>{markerAction.label}</button></div> : summary;
 }
