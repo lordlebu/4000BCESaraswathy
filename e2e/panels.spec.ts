@@ -79,16 +79,31 @@ test('a place can be closed, read around, and opened again without moving', asyn
   // What it was covering is readable now.
   await expect(page.locator('.journal')).toBeVisible();
 
-  // And it comes back without stepping off the tile, which was the reported dead end.
-  await page.getByRole('button', { name: /Eastern Field/ }).click();
+  // Match the Here toggle's full name: guidance also names the Eastern Field now.
+  const here = page.getByRole('button', { name: /^The Eastern Field, (showing|hidden)$/ });
+  await expect(here).toHaveAttribute('aria-pressed', 'false');
+  await here.click();
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
+  await expect(here).toHaveAttribute('aria-pressed', 'true');
+
+  // The guidance action is a second, intentional way back into the place. Neither action walks.
+  await page.getByRole('button', { name: 'Leave' }).click();
+  const position = () => page.evaluate(() => {
+    const w = (window as unknown as { __walker: () => { x: number; y: number; travelled: number } }).__walker();
+    return { x: w.x, y: w.y, travelled: w.travelled };
+  });
+  const before = await position();
+  await page.getByRole('button', { name: /You are here\. Open this place\.$/ }).click();
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
+  await expect(here).toHaveAttribute('aria-pressed', 'true');
+  expect(await position()).toEqual(before);
 });
 
 test('the Here button only exists where there is a here', async ({ page }) => {
   await boot(page);
-  await expect(page.getByRole('button', { name: /Eastern Field/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^The Eastern Field, (showing|hidden)$/ })).toHaveCount(0);
   await walkToPlace(page);
-  await expect(page.getByRole('button', { name: /Eastern Field/ })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: /^The Eastern Field, (showing|hidden)$/ })).toHaveCount(1);
 });
 
 test('the dock holds one occupant, and the map keeps the rest of the screen', async ({ page }) => {
