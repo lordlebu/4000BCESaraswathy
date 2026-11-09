@@ -33,3 +33,8 @@ export function queueDiscoveryChanges(
     return change ? [change] : [];
   });
 }
+
+/** Count only authored discoveries that have actually been noticed. */
+export function diaryCount(progress: Progress): number {
+  return discoveries.filter(d => rungOf(progress, d.id) >= 0).length;
+}

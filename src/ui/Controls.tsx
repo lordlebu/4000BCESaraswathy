@@ -11,7 +11,7 @@
 // rather than what the traveller *does*: they are in the sheet now, under "What is on screen",
 // beside the seed and the legend. Nothing was taken away.
 
-import { useState } from 'react';
+import { useState, type RefObject } from 'react';
 import { EventBus } from '../game/EventBus';
 import { biomes } from '../content/species';
 import { SeedBar } from './SeedBar';
@@ -29,6 +29,7 @@ export interface ControlsProps {
   /** Whether either record is showing, so the button can read as a toggle. */
   recordsOpen: boolean;
   onOpenRecords: () => void;
+  recordsRef?: RefObject<HTMLButtonElement | null>;
   /** How many discoveries are under way, so the button can say the diary has something in it. */
   diaryCount: number;
 
@@ -64,6 +65,7 @@ export function Controls({
   metCount,
   recordsOpen,
   onOpenRecords,
+  recordsRef,
   diaryCount,
 
   carryCount,
@@ -132,6 +134,7 @@ export function Controls({
               ? `Records, ${diaryCount} under way, ${metCount} met`
               : 'Records'
           }
+          ref={recordsRef}
           onClick={onOpenRecords}
         >
           <span aria-hidden="true">✎</span>

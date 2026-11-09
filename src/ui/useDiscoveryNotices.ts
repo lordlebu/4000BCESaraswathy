@@ -1,4 +1,4 @@
-// Session feedback shared by all Progress producers. Wire to App in sprint work package 2.
+// Session feedback shared by all Progress producers. App supplies shared progress and interruption state.
 import { useEffect, useRef, useState } from 'react';
 import type { Progress } from '../journey';
 import { discoveryChanges, queueDiscoveryChanges, type DiscoveryChange } from '../content/discoveryChanges';

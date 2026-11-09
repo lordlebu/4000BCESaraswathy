@@ -67,6 +67,7 @@ export interface PlacePanelProps {
   progress: Progress;
   /** True the first time this place is entered in a session — the long prose goes up once. */
   firstVisit: boolean;
+  updatedDiscoveries?: readonly string[];
   // `satchel` moved to `Conversation` with the lines it gates. The note on why it is needed at all
   // is there: canon prices two lines, and without it the panel asked what somebody says to a
   // traveller carrying nothing, which made two gift lines invisible.
@@ -89,6 +90,7 @@ export function PlacePanel({
   settling = null,
   progress,
   firstVisit,
+  updatedDiscoveries = [],
   onLook,
   onTalkTo,
   onOpenStation,
@@ -230,7 +232,7 @@ export function PlacePanel({
                   const done = isComplete(progress, id);
                   const can = canAdvance(progress, id);
                   return (
-                    <div key={id} className="look">
+                    <div key={id} className={updatedDiscoveries.includes(id) ? "look discovery-updated" : "look"}>
                       <div className="look-text">
                         <h4>{seen ? d.name : 'Something you have not looked at'}</h4>
                         <p>{seen ? entryFor(progress, id) : 'You have walked past this.'}</p>

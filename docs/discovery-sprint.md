@@ -1,6 +1,6 @@
 # Sprint 2: Make discoveries feel more noticeable
 
-Status: work package 1 complete; player-facing integration and final verification pending.
+Status: work packages 1 and 2 complete; final verification pending.
 Baseline: PR #255 merged as 1cd13b9c9e3f507f94d21cc185387a7ef043fdba. Verify remote state again before implementation.
 
 ## Outcome and boundaries

@@ -18,6 +18,7 @@ import { Diary } from './Diary';
 import type { Progress as Knowledge } from '../journey';
 
 export interface ProgressProps {
+  targetDiscoveryId?: string | null;
   progress: Knowledge;
   open: boolean;
   onClose: () => void;
@@ -35,6 +36,7 @@ export interface ProgressProps {
 }
 
 export function Progress({
+  targetDiscoveryId = null,
   progress,
   open,
   onClose,
@@ -51,6 +53,7 @@ export function Progress({
 
   return (
     <Diary
+      targetDiscoveryId={targetDiscoveryId}
       tabs={tabs}
       lead={lead}
       progress={progress}
