@@ -1,47 +1,25 @@
-# Discovery sprint checkpoint
+# Discovery sprint completion record
 
-## Checkpoint 1 — transition rules and session queue
+Branch: `feat/noticeable-discoveries`; PR: https://github.com/lordlebu/4000BCESaraswathy/pull/256.
+Baseline: #255 merged as `1cd13b9c9e3f507f94d21cc185387a7ef043fdba`.
+Checkpoints: transition layer `58b0342`, player-facing integration `30957d2`.
 
-- Branch: `feat/noticeable-discoveries`.
-- Start head and refreshed main: `1cd13b9c9e3f507f94d21cc185387a7ef043fdba`.
-- Previous PR #255 verified merged on 2026-11-09 at 14:03:04 UTC, head `acd838391eec6975ebadd0a6bc77a535315f0552`. Its head is an ancestor of main; no unmerged work carried forward.
-- Checkpoint commit is titled `feat: detect discovery changes and queue session notices`; resolve its SHA with `git log -1` on this branch. A draft PR will preserve this checkpoint remotely; verify its latest head and merge state before continuing.
-- Plan: [discovery-sprint.md](discovery-sprint.md).
+## Delivered
 
-### Implemented
+Shared discovery transitions distinguish noticed, deepened and understood readings using authored current entries. Session feedback coalesces newer readings and defers during interruptions. Mount, reload and journey replacement establish baselines without replaying historical achievements. A journey-instance epoch also handles same-seed replacement.
 
-Pure `discoveryChanges(before, after)` returns typed noticed/deepened/understood changes, current authored entries and rung IDs, in authored order. `queueDiscoveryChanges` coalesces obsolete pending readings. Neither advances knowledge.
+The dock notice offers Read diary and Dismiss in the existing guidance slot. Place entries are highlighted while pending. Read targets and focuses the matching diary heading; Records provides the lasting modal return target. Normal Records opening clears targeting. Progress/Diary loads on demand behind an accessible loading modal; the count helper is pure and remains re-exported for compatibility. Save formats, progression rules, canon and art are unchanged.
 
-`useDiscoveryNotices(progress, journeyKey, blocked)` observes Progress changes and owns session-only pending state. It suppresses baseline saves, defers presentation behind overlays, clears on journey replacement and protects newer rungs from stale acknowledgement callbacks. `journeyKey` must identify the journey instance, including replacing a journey with the same seed; it must not change merely on field-map travel.
+## Verification
 
-### Evidence and limits
+- CI run 42675569904 on implementation head `30957d2535c090cf4f53851649886fa87442abb0`: full check job, all four browser shards and overall browser gate passed. This includes existing layout/browser suites.
+- Local typecheck, production build, canon lock and size checks passed. App 219.4 KB gzip against 220 KB; separate Progress panel 2.3 KB. No budget changes.
+- 96 targeted rule/hook/rendering/modal tests passed. Production Look-to-diary tests passed at desktop, touch portrait and touch landscape; conversation grant/deferral/dismissal and existing text/image exports passed. Screenshots at all three sizes inspected.
+- Disabling transition observation made all three hook tests fail; restoration passed.
+- Disabling notice publication in actual App made the browser test fail at the missing Discovery noticed assertion. Source restored exactly. A restored dev run caught the lazy panel still showing Opening diary after the default five-second assertion window; added an explicit diary-readiness wait, consistent with existing loading waits. The exact entry/focus checks remain unchanged, and the restored browser case passes.
 
-- `npm run typecheck`: passed.
-- `npm test -- test/discoveryChanges.test.ts test/useDiscoveryNotices.test.tsx`: 6 passed.
-- Tests cover actual receiveAll/advance rules, blocked/completed/no-op actions, saved baselines, authored ordering, coalescing, StrictMode, overlay deferral, acknowledgement and replacement.
-- Disabling the observer's before/after comparison made all three hook regression tests fail. Restored implementation and reran both files successfully. An overlapping pre-restoration test run also saw that intentional mutation; the final clean run above is authoritative.
-- `git diff --check`: passed.
-- Observer is intentionally not wired to App yet. No visible-gameplay, browser, screenshot, build-size or complete-sprint claims at this checkpoint. Full required checks and CI completion belong to package 3.
+## Delivery gate
 
-### Exact next work
+The final follow-up changes the readiness wait and completion documentation only. Check CI on the latest PR head, not only the implementation head above, before merge. Maintain one branch/PR. Mark ready only after the final CI run passes; do not merge automatically. PR description records the verified final CI URL and state. A full local unit rerun was also started during final review; its result must be reported honestly when available.
 
-1. Verify this branch's PR and fetch remote main/head; preserve any later work.
-2. Read this log and the sprint plan, then inspect `App.tsx` journey replacement (`setProgress(loaded.progress)`), `Here.tsx` feedback/overlay arbitration, `PlacePanel.tsx` discovery entries and `Diary.tsx` entry headings.
-3. Start package 2: wire the observer to App with an explicit journey-instance epoch, render the dock notice, and add targeted diary navigation and place-entry emphasis. Use existing surface reducers and modal focus behavior. Verify real Look and grant paths, not only this hook in isolation.
-4. Update this log at the next checkpoint; continue on the same sprint branch and PR if still open.
-
-## Checkpoint 2 — player-facing integration complete
-
-Branch remains `feat/noticeable-discoveries`; PR #256 verified open and draft at head `58b034258c75b5d618481a0a7d6332bc6faa91bc` before this work. Changes currently in the working tree; verify remote and merge state again before commit/push.
-
-Implemented App observation with a journey-instance epoch, compact dock feedback replacing the guidance slot, place-entry emphasis and explicit diary entry targeting. Read acknowledges the current notice and focuses the matching heading; Records supplies a lasting modal return target. Dismiss acknowledges without changing knowledge. Existing interruption state defers notices. Diary target is cleared on normal Records opening and journey replacement.
-
-The initial bundle exceeded the 220 KB app budget at 220.3 KB. Loading only exports did not free sufficient space; that experiment was reverted. Progress/Diary now loads when opened, behind Suspense with an accessible loading modal. diaryCount moved to the pure discoveryChanges module and remains re-exported from Diary. The production build passes at 219.4 KB, with a separate 2.3 KB Progress chunk; thresholds unchanged.
-
-Evidence so far: typecheck passed; 96 targeted rule/hook/panel/modal tests passed; canon lock and diff whitespace passed. Development Look-to-diary tests passed at desktop, phone portrait and landscape. Production equivalents passed at all three sizes, including heading focus, return focus and reload without replay. Screenshots at all three sizes inspected. The real conversation grant test initially used Leave instead of the conversation's Back button; fixed. The preview process expired between turns, causing connection-refused failures on a rerun; restarting it together with the tests resolves that environment prerequisite.
-
-Current next task: finish the production conversation-grant and existing text/image export tests (the two-case run started after restarting preview). If the process is lost, run preview on port 4180 alongside `PLAYWRIGHT_BASE_URL=http://localhost:4180 npm run test:e2e -- e2e/discovery-feedback.spec.ts e2e/game.spec.ts --grep 'conversation grant|journal can be taken' --workers=1`. Then update this log with actual results, perform mandatory branch/merge checks, commit and push this checkpoint to PR #256. Final work package remains: complete full unit and affected layout/browser checks, regression mutation of actual App wiring, production build at final head, full CI and final readiness review. Do not mark the draft ready or claim the sprint complete yet.
-
-Production conversation-grant and existing text/image export checks completed: 2 passed. The grant is suppressed during conversation, appears after Back, can be dismissed and remains in the diary. All five production cases passed across the two runs. Package 3 remains pending.
-
-Resume with package 3 on this branch/PR: reverify PR #256 and remote head, inspect this checkpoint commit (`feat: surface discovery milestones and target diary entries`), then perform full validation and final readiness checks described above. The earlier in-progress next-task paragraph records the interrupted run and is superseded by the successful results at the end of this log.
+See [the sprint plan](discovery-sprint.md) for acceptance criteria. All three work packages have been implemented; remaining delivery work is verifying final-head CI and updating PR readiness.

@@ -17,6 +17,8 @@ for (const view of [{ width: 1280, height: 800, touch: false }, { width: 390, he
     expect((await read.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await page.screenshot({ path: `test-results/discovery-${view.width}x${view.height}.png` });
     if (view.touch) await read.tap(); else await read.click();
+    // Records loads its panel on demand; wait for readiness before checking its content/focus.
+    await expect(page.locator('.diary')).toBeVisible({ timeout: 20_000 });
     const heading = page.locator('.diary .entry.discovery-updated h4');
     await expect(heading).toHaveText(name);
     await expect(heading).toBeFocused();

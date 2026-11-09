@@ -1,6 +1,6 @@
 # Sprint 2: Make discoveries feel more noticeable
 
-Status: work packages 1 and 2 complete; final verification pending.
+Status: implementation and final local verification complete; verify final PR-head CI before merge.
 Baseline: PR #255 merged as 1cd13b9c9e3f507f94d21cc185387a7ef043fdba. Verify remote state again before implementation.
 
 ## Outcome and boundaries
