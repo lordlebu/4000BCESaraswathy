@@ -23,3 +23,11 @@ The dock notice offers Read diary and Dismiss in the existing guidance slot. Pla
 The final follow-up changes the readiness wait and completion documentation only. Check CI on the latest PR head, not only the implementation head above, before merge. Maintain one branch/PR. Mark ready only after the final CI run passes; do not merge automatically. PR description records the verified final CI URL and state. A full local unit rerun was also started during final review; its result must be reported honestly when available.
 
 See [the sprint plan](discovery-sprint.md) for acceptance criteria. All three work packages have been implemented; remaining delivery work is verifying final-head CI and updating PR readiness.
+
+## CI follow-up — 10 November 2026
+
+The prior all-green review was incomplete: push run 42691597540 failed while parallel PR run 42691606797 passed on the same head. See [the detailed cause/evidence record](testing.md#discovery-sprint-ci-follow-up-10-november-2026). AGENTS.md now explicitly requires checking both event types.
+
+Addressed lazy-diary readiness at the missed Records paths, the landmark test's DOM-stillness inference and swallowed waits, and the pin control's detached-element geometry read. Exposed pending keyboard input alongside existing movement debug state so the browser waiter cannot declare idle before a tap is consumed. Landmark taps now use the whole dock boundary. The exact failed CI navigation trace was inaccessible, so no gameplay root-cause claim is made beyond the verified observation flaws.
+
+Verification: typecheck and two movement predicate regression cases pass; production build and unchanged app budget pass at 219.4 KB. Both diary cases pass locally. Landmark passes with final pending-input handling (3.3 minutes); three consecutive pinning boots pass with browser-side geometry readiness. Failed intermediate pinning experiments and the CI-container/storage limitation are recorded in testing.md. Confirm both new push and PR runs on the final follow-up head before reporting CI green.

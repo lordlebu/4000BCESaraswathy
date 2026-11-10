@@ -738,3 +738,41 @@ reader does not mistake an ugly loop for a hot one.
   with a perceptual diff, never file sizes.
 - **A smoke test that boots with `VITE_CANON_API` unset**, which is the configuration CI
   actually uses and the one that broke once already.
+
+## Discovery sprint CI follow-up (10 November 2026)
+
+Push run `42691597540` failed on head `3bc7dc9` while the parallel PR run
+`42691606797` passed. A PR-only workflow listing hid the failed push run from the initial
+readiness review. **Inspect both push and pull-request runs for the exact head SHA** before
+reporting all checks green; include scheduled runs when investigating a new failure report.
+
+The logs establish two failed paths and two additional flaky observations:
+
+- Conversation-grant and field-diary assertions tried to read `.diary` within the default
+  five-second content assertion window. Records now lazy-loads that panel. The earlier fix
+  covered Read diary but missed normal Records openings. Those paths now wait explicitly for
+  `.diary` readiness with the existing 20-second loading budget, then retain their exact content
+  assertions. No global assertion timeout or gameplay budget was raised.
+- The landmark walk exhausted its navigation loop without the arrival page, twice on the push
+  runner; the unchanged test passed locally in 4.1 minutes. Its synchronizer equated a heading
+  unchanged for 300ms with a stopped route, swallowed per-leg wait failures, and could send new
+  input while the walker was still moving. A stationary DOM string is not movement completion.
+  The test now waits for scene-owned `moving === false`, `pending === false` and `queued === 0`; the existing
+  15-minute test deadline bounds a stuck walk. A regression test covers both a moving walker
+  with stable text, a paused walker with queued steps, and a keyboard tap awaiting the next frame. Tap bounds use the whole dock, not
+  just its scrolling journal child. The inaccessible CI trace means the exact trigger of that
+  particular failed route remains unconfirmed; this fixes an independently verified observation
+  flaw rather than claiming a proven gameplay defect.
+- The pinning test once measured a null bounding box after checking only text. It now checks
+  visibility and observes current DOM geometry in a browser-side wait before enforcing the unchanged 44px touch floor.
+  The null-box race reproduced locally even after adding a visibility check: the resource pointer
+  adds a wrapper and replaces the button between the assertion and measurement. Diagnostics captured an old detached element at height zero while the replacement was
+  connected at 44px; a subsequent cross-process retry returned 44px after the five-second poll
+  deadline. Observing the current control inside the browser removes that stale-handle/round-trip
+  failure without changing pinning gameplay or the 44px requirement.
+
+Reproduction limitation: downloading the CI report was forbidden by the artifact storage
+endpoint. Pulling the pinned Playwright Docker image failed while registering a layer due to
+Docker storage capacity; the failed pull cleaned up and the workspace retained free space.
+Local browser verification uses the installed matching pinned Chromium and its software
+renderer; do not describe it as a successful CI-container reproduction.

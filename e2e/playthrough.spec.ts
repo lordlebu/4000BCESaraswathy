@@ -8,6 +8,7 @@
 // BFS pathfinder and therefore walks *around* the sea instead of pressing hopelessly into it.
 
 import { expect, test, type Page } from '@playwright/test';
+import { walkerIdle } from './walkerIdle';
 
 const SEED = 'play-test';
 
@@ -26,7 +27,7 @@ const SEED = 'play-test';
 async function survey(page: Page) {
   return page.evaluate(() => {
     const canvas = document.querySelector('.map-surface canvas')!.getBoundingClientRect();
-    const notes = document.querySelector('.journal')?.getBoundingClientRect();
+    const notes = document.querySelector('.dock')?.getBoundingClientRect();
     const arrival = document.querySelector('.arrival') as HTMLElement | null;
     const margin = 12;
 
@@ -74,66 +75,15 @@ function bearing(status: string): Heading | null {
   };
 }
 
-/** How long the heading must hold still before a turn counts as finished. */
-const QUIET_MS = 300;
-
 /**
- * How long a turn may take. A tap hands the pathfinder a whole route; a step is one tile.
- *
- * **Both are ceilings, not waits.** `settle` returns the moment the traveller stops, so a short
- * path costs what a short path costs and these only bound the pathological case.
- *
- * The first version of these was five seconds and one and a half, picked from what a path costs on
- * this machine -- and that is the mistake worth naming, because a cap tuned to local speed is a
- * fixed wait wearing a disguise. A tile is `STEP_MS` = 425 ms of tween, so a twelve-tile route is
- * already 5.1 seconds and gets guillotined at five; the walk then taps again mid-route and is back
- * to advancing one tile a leg, which is exactly the failure this was meant to fix. CI, being
- * slower everywhere else, hit it far more often than a local run ever would.
- *
- * Sized from the map instead: 36x24, so a long route is comfortably past twenty tiles, and twenty
- * tiles is 8.5 seconds of walking before any slowness at all.
+ * A stable journal heading is not a stopped walker: between slow rendered steps the heading
+ * can remain unchanged beyond 300ms while the scene still has a route queued. Sending the next
+ * input then interrupts that route. Wait on the scene's actual movement contract instead.
+ * Blocked taps settle immediately. The test's existing 15-minute budget bounds a stuck route;
+ * no separate per-leg deadline silently cuts a walk short, and failures are no longer swallowed.
  */
-const TAP_CAP = 20_000;
-const STEP_CAP = 4_000;
-
-/**
- * Wait for a turn to *finish*, rather than for a fixed span of time.
- *
- * The loop used to spend 1,900 ms after every tap and 780 ms after every step, which is 209 seconds
- * of deliberate waiting across 110 legs inside a 240-second budget. Waiting on the clock was never
- * necessary, because the turn is observable: the journal heading names where the traveller is.
- *
- * **But "changed" is the wrong signal, and getting that wrong is what broke this test.** A tap is
- * not one move -- it hands the pathfinder a whole route, and the traveller walks it tile by tile.
- * Returning the moment the heading first changes cuts that route off after its *first* tile and
- * taps again, so every leg advanced one tile instead of five. Measured: the walk went from needing
- * 110 legs to needing **214**, well past the loop's cap, and only still passed because the fifteen
- * seconds of grace after the loop let one last uninterrupted path run to the landmark. On CI there
- * was no such slack and it timed out.
- *
- * So the signal is *stillness*, not change: the heading must differ from where the turn started and
- * then hold the same value for `QUIET_MS`, which is what "the traveller stopped walking" looks like
- * from outside. Back to **38 legs and 41 seconds**, from 214 and 124.
- *
- * Polled in the page rather than across the wire, for the reason `walk.ts` gives: a round trip per
- * check costs more than the interval being polled for. A turn that genuinely achieves nothing -- a
- * tap into water, a blocked axis -- never satisfies the condition and falls back on `cap`, which
- * the loop already counts as `stuckFor`.
- */
-async function settle(page: Page, before: string, cap: number): Promise<void> {
-  await page
-    .waitForFunction(
-      ({ before: was, quiet }) => {
-        const w = window as unknown as { __settle?: { text: string; since: number } };
-        const text = document.querySelector('.journal h2')?.textContent ?? '';
-        const now = Date.now();
-        if (!w.__settle || w.__settle.text !== text) w.__settle = { text, since: now };
-        return text !== was && now - w.__settle.since >= quiet;
-      },
-      { before, quiet: QUIET_MS },
-      { timeout: cap, polling: 60 }
-    )
-    .catch(() => undefined);
+async function settle(page: Page): Promise<void> {
+  await page.waitForFunction(walkerIdle, undefined, { timeout: 0, polling: 'raf' });
 }
 
 // `@slow` no longer keeps this off any branch. It ran only on `main` once, which is how the loop
@@ -245,7 +195,7 @@ test('walk from the settlement to the landmark and get a page for it', { tag: '@
       if (stuckFor >= 3) {
         await page.keyboard.press(stuckFor % 2 ? 'ArrowUp' : 'ArrowDown');
       }
-      await settle(page, wasAt, STEP_CAP);
+      await settle(page);
     } else {
       // Tap ahead in the bearing direction and let the pathfinder route around the water. Nudging
       // off dead centre on the unused axis keeps a blocked route from retrying the identical tap.
@@ -273,7 +223,7 @@ test('walk from the settlement to the landmark and get a page for it', { tag: '@
       // canvas to hold still, which is the same trade: the coordinates are ours to get right, and
       // nothing waits on a box that never settles.
       await page.mouse.click(usable.originX + x, usable.originY + y);
-      await settle(page, wasAt, TAP_CAP);
+      await settle(page);
     }
 
   }

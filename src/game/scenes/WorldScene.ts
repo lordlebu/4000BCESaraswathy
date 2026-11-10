@@ -2157,6 +2157,7 @@ export class WorldScene extends Phaser.Scene {
       depth: this.player.depth,
       sortedRow: this.sortedRow,
       queued: this.queuedPath.length,
+      pending: this.pendingStep !== null,
       // The journey's clock, for `e2e/fielddiary.spec.ts`: a crossing once set it back to nought.
       travelled: this.travelled,
       // Where he is on the canvas, and how big a tile is there, so a spec can click a *particular*

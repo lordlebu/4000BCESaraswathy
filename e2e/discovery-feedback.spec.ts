@@ -47,5 +47,6 @@ test('a conversation grant waits until the conversation closes and can be dismis
   await notice.getByRole('button', { name: /^Dismiss discovery notice:/ }).click();
   await expect(notice).toHaveCount(0);
   await page.getByRole('button', { name: /^Records/ }).click();
+  await expect(page.locator('.diary')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.diary')).toContainText('The Kept Wall');
 });

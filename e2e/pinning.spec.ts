@@ -18,8 +18,14 @@ test('tapping the pinned line opens the workshop with Unpin under your finger', 
 
   const line = page.getByRole('button', { name: /Working towards/ });
   await expect(line).toContainText(/rope/i);
+  await expect(line).toBeVisible();
   // A control owes the tap floor.
-  expect((await line.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  // The source pointer replaces the wrapper after boot. Observe the attached control inside
+  // the browser so a detached handle or a slow cross-process retry cannot supply the measure.
+  await page.waitForFunction(() => {
+    const button = document.querySelector('button.pinned-recipe');
+    return button !== null && button.getBoundingClientRect().height >= 44;
+  }, undefined, { timeout: 20_000 });
   await line.click();
 
   const unpin = page.locator('.workshop [data-recipe="recipe_reed_rope"] .recipe-pin');

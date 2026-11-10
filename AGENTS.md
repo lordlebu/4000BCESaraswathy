@@ -95,7 +95,8 @@ errors. Never claim a playthrough, screenshot or test that was not performed.
 Use current package.json and CI workflows as the command authority. Typical checks are
 `npm run typecheck`, `npm test`, `npm run build`, `npm run check:data` and
 `npm run check:size` (after building). Run relevant browser tests for gameplay/UI wiring;
-local fast subsets do not replace required CI checks. Documentation-only changes need link,
+local fast subsets do not replace required CI checks. Check both push and pull-request
+runs for the exact head SHA; a passing PR run can coexist with a failed push run. Documentation-only changes need link,
 command and policy consistency checks rather than new gameplay tests.
 
 Measure a failure before changing a threshold. When adding a meaningful regression guard,
