@@ -4,6 +4,7 @@
 // the alternative is a layout that looks right in a screenshot and is unusable in the hand.
 
 import { expect, test, type Page } from '@playwright/test';
+import { openRecords } from './records';
 
 const SEED = 'play-test';
 
@@ -115,7 +116,7 @@ test('progress opens and closes, and reading it does not walk the traveller', as
   // `.journal` is not in the DOM while it is up. That is the surface rule, not a timing quirk.
   const where = await page.locator('.journal h2').textContent();
 
-  await page.getByRole('button', { name: /Records/ }).click();
+  await openRecords(page);
   await expect(diary).toBeVisible({ timeout: 20_000 });
 
   // A tap on the panel is a tap on the panel, not a move order to the map underneath it.

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openRecords } from './records';
 for (const view of [{ width: 1280, height: 800, touch: false }, { width: 390, height: 844, touch: true }, { width: 844, height: 390, touch: true }]) {
   test(`Look feedback reaches the matching diary entry (${view.width}x${view.height})`, async ({ browser }) => {
     const context = await browser.newContext({ viewport: view, hasTouch: view.touch, reducedMotion: 'reduce' });
@@ -46,7 +47,6 @@ test('a conversation grant waits until the conversation closes and can be dismis
   await expect(notice).toContainText('The Kept Wall');
   await notice.getByRole('button', { name: /^Dismiss discovery notice:/ }).click();
   await expect(notice).toHaveCount(0);
-  await page.getByRole('button', { name: /^Records/ }).click();
-  await expect(page.locator('.diary')).toBeVisible({ timeout: 20_000 });
+  await openRecords(page);
   await expect(page.locator('.diary')).toContainText('The Kept Wall');
 });

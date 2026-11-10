@@ -11,7 +11,7 @@ export function SettlingSection({ road }: { road: SettlingRoad | null }) {
   if (!road) return null;
   return (
     <section className="diary-section settling-road" aria-label="Settling">
-      <h3>Settling: {road.title}</h3>
+      <h3 id="notebook-settling" tabIndex={-1}>Settling: {road.title}</h3>
       {road.steps.length === 0 ? (
         <p className="muted">Nobody settles here. This is a crossing, and the people on it are passing through.</p>
       ) : (

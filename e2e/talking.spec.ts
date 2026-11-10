@@ -8,6 +8,7 @@
 // play the game first.
 
 import { expect, test, type Page } from '@playwright/test';
+import { openRecords } from './records';
 import { step } from './walk';
 
 // The same searched seed `questions.spec.ts` uses, and stale for the same reason -- see the note
@@ -90,8 +91,7 @@ test('walking out does not lose what you were told', async ({ page }) => {
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Leave' }).click();
 
-  await page.getByRole('button', { name: /Records/ }).click();
-  await expect(page.locator('.diary')).toBeVisible({ timeout: 20_000 });
+  await openRecords(page);
   await expect(page.locator('.question')).not.toHaveCount(0);
 });
 
@@ -120,7 +120,7 @@ test('the People tab keeps a record of who you have met', async ({ page }) => {
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Leave' }).click();
 
-  await page.getByRole('button', { name: /Records/ }).click();
+  await openRecords(page);
   await page.getByRole('tab', { name: /People/ }).click();
 
   // He is in it, with his trade and what he handed over -- and none of it as a canon id.
@@ -135,7 +135,7 @@ test('the People tab is empty before anybody has been spoken to', async ({ page 
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 
-  await page.getByRole('button', { name: /Records/ }).click();
+  await openRecords(page);
   await page.getByRole('tab', { name: /People/ }).click();
   await expect(page.getByText(/have not talked to anybody/i)).toBeVisible();
 });

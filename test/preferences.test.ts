@@ -83,3 +83,15 @@ describe('remembering what is on screen', () => {
     expect(() => writeShowing({ satchelRibbon: false })).not.toThrow();
   });
 });
+
+describe('notebook reading size', () => {
+  it('remembers a reading choice alongside existing screen preferences', () => {
+    writeShowing({ satchelRibbon: false, hints: true, readingSize: 'large' });
+    expect(readShowing()).toEqual({ satchelRibbon: false, hints: true, readingSize: 'large' });
+  });
+
+  it('ignores an unknown size without discarding other preferences', () => {
+    localStorage.setItem(KEY, JSON.stringify({ satchelRibbon: true, readingSize: 'tiny' }));
+    expect(readShowing()).toEqual({ satchelRibbon: true });
+  });
+});

@@ -17,6 +17,7 @@
 // mechanism a third time.
 
 import { expect, test, type Page } from '@playwright/test';
+import { openRecords } from './records';
 
 const SEED = 'dock-8';
 
@@ -45,7 +46,7 @@ async function tabTrail(page: Page, presses: number): Promise<boolean[]> {
 const PANELS = [
   {
     name: 'Records',
-    open: (page: Page) => page.locator('.controls .control', { hasText: 'Records' }).click(),
+    open: openRecords,
     shows: '.diary',
     dismissible: true
   },
@@ -106,8 +107,7 @@ test('the application behind a panel is inert, and is not afterwards', async ({ 
   const root = page.locator('#root');
   await expect(root).not.toHaveAttribute('inert', /.*/);
 
-  await page.locator('.controls .control', { hasText: 'Records' }).click();
-  await expect(page.locator('.diary')).toBeVisible({ timeout: 10_000 });
+  await openRecords(page);
   await expect(root).toHaveAttribute('inert', /.*/);
 
   await page.keyboard.press('Escape');
@@ -121,9 +121,7 @@ test('focus goes back to the control that opened the panel', async ({ page }) =>
   // on and starting over.
   await boot(page);
 
-  const records = page.locator('.controls .control', { hasText: 'Records' });
-  await records.click();
-  await expect(page.locator('.diary')).toBeVisible({ timeout: 10_000 });
+  await openRecords(page);
 
   await page.keyboard.press('Escape');
   await expect(page.locator('.diary')).toBeHidden({ timeout: 5_000 });

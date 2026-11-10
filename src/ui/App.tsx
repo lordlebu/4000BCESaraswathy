@@ -18,13 +18,15 @@ import { Ending } from './Ending';
 import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
-import { readShowing, writeShowing } from './preferences';
+import { readShowing, writeShowing, type ReadingSize } from './preferences';
 import { arrivalPoint, fieldMap, fieldMaps, poi } from '../content/places';
 import { walkers } from '../game/characters';
 import { travellerAttributes, travellersOn } from '../content/travellers';
 import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
-import { RecordTabs, type RecordTab } from './Records';
+import type { RecordTab } from './Records';
+const RecordTabs = lazy(() => import('./Records'));
+
 import { PeoplePanel } from './PeoplePanel';
 import { met } from '../content/people';
 import { freshSeed, rememberSeed, seedFromUrl } from './seed';
@@ -263,6 +265,8 @@ export function App() {
   const arrivedRef = useRef<((e: { poiId: string }) => void) | null>(null);
   // The opening, while it plays over the map booting behind it. See `Opening.tsx`.
   const [opening, setOpening] = useState(false);
+  // A screen preference shared by live notes and the portalled diary.
+  const [readingSize, setReadingSize] = useState<ReadingSize>(() => readShowing().readingSize ?? 'compact');
   // The first morning's hints, on unless the player turned them off. See `content/coach.ts`.
   const [hints, setHints] = useState(() => readShowing().hints ?? true);
   // Where the traveller first stood this session, so the coach knows they have walked.
@@ -448,8 +452,8 @@ export function App() {
   // under Node, and a `localStorage` write in it would be both a side effect and a browser global
   // in the one file most carefully kept free of them.
   useEffect(() => {
-    writeShowing({ satchelRibbon, hints });
-  }, [satchelRibbon, hints]);
+    writeShowing({ satchelRibbon, hints, readingSize });
+  }, [satchelRibbon, hints, readingSize]);
 
   // The scene owns the clock and says when it turns. React used to run its own timer off the
   // same formulas, which is two clocks agreeing by luck -- and they would have drifted the
@@ -1585,7 +1589,7 @@ export function App() {
     // readout rather than a control, and it exists because a browser test otherwise cannot tell a
     // working picker from a highlighted button -- see `e2e/travellers.spec.ts`.
     <JourneySeed.Provider value={seed}>
-    <div className="stage" data-traveller={drawn}>
+    <div className="stage notebook-settings" data-reading-size={readingSize} data-traveller={drawn}>
       {/* The scene mounts only once the door is open. Booting it behind the door and hiding it
           would spend a second of loading nobody asked for, and would make "start a new walk" a
           restart of something already running rather than a beginning. */}
@@ -1739,15 +1743,19 @@ export function App() {
         <p role="status">Opening diary…</p><button type="button" onClick={() => dispatch({ type: 'close' })}>Close</button>
       </Modal>}>
       <Progress
+        readingSize={readingSize}
+        onReadingSize={setReadingSize}
+        hasGoals={goalRows.length > 0}
+        hasSettling={!!road}
         targetDiscoveryId={targetDiscoveryId}
         tabs={
-          <RecordTabs
+          <Suspense fallback={null}><RecordTabs
             tab="journey"
             onTab={(tab: RecordTab) => dispatch({ type: 'show', surface: recordSurface(tab) })}
             journeyCount={diaryCount(progress)}
             metCount={size(collection)}
             peopleCount={met(progress).length}
-          />
+          /></Suspense>
         }
         lead={
           <>
@@ -1769,13 +1777,13 @@ export function App() {
 
       <CollectionPanel
         tabs={
-          <RecordTabs
+          <Suspense fallback={null}><RecordTabs
             tab="collection"
             onTab={(tab: RecordTab) => dispatch({ type: 'show', surface: recordSurface(tab) })}
             journeyCount={diaryCount(progress)}
             metCount={size(collection)}
             peopleCount={met(progress).length}
-          />
+          /></Suspense>
         }
         collection={collection}
         open={surface === 'collection'}
@@ -1785,13 +1793,13 @@ export function App() {
 
       <PeoplePanel
         tabs={
-          <RecordTabs
+          <Suspense fallback={null}><RecordTabs
             tab="people"
             onTab={(tab: RecordTab) => dispatch({ type: 'show', surface: recordSurface(tab) })}
             journeyCount={diaryCount(progress)}
             metCount={size(collection)}
             peopleCount={met(progress).length}
-          />
+          /></Suspense>
         }
         progress={progress}
         strangers={metStrangers.current}

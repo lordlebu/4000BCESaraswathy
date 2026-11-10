@@ -21,7 +21,9 @@
 
 const KEY = 'varuna:showing';
 
-/** What is kept. Deliberately one flag: see the note on the field notes below. */
+export type ReadingSize = 'compact' | 'comfortable' | 'large';
+
+/** Screen preferences, separate from the versioned journey. */
 export interface Showing {
   /** Whether the satchel strip is on screen. */
   satchelRibbon: boolean;
@@ -30,6 +32,8 @@ export interface Showing {
    * player who knows the verbs can say so once, in the map sheet, and never see them again.
    */
   hints?: boolean;
+  /** Notebook prose size, shared by the diary and live field notes. */
+  readingSize?: ReadingSize;
 }
 
 // **The field notes' own toggle is not here, and that is a decision rather than an omission.**
@@ -46,12 +50,13 @@ export function readShowing(): Partial<Showing> {
     if (!raw) return {};
     const parsed: unknown = JSON.parse(raw);
     if (typeof parsed !== 'object' || parsed === null) return {};
-    const { satchelRibbon, hints } = parsed as Partial<Showing>;
+    const { satchelRibbon, hints, readingSize } = parsed as Partial<Showing>;
     // Only a real boolean. A stored `"false"` or a `0` from some future version must not be read as
     // a choice -- an unreadable preference is no preference, and the default is a good one.
     return {
       ...(typeof satchelRibbon === 'boolean' ? { satchelRibbon } : {}),
-      ...(typeof hints === 'boolean' ? { hints } : {})
+      ...(typeof hints === 'boolean' ? { hints } : {}),
+      ...(['compact', 'comfortable', 'large'].includes(readingSize as string) ? { readingSize } : {})
     };
   } catch {
     return {};

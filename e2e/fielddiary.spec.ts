@@ -35,6 +35,7 @@
 // all of them ones that walk somewhere. Re-run the search rather than widening the timeouts.
 
 import { expect, test, type Page } from '@playwright/test';
+import { openRecords } from './records';
 import { approachPlace, step } from './walk';
 
 /**
@@ -88,7 +89,7 @@ test('looking closer writes the diary, and the diary keeps the crossings-out', a
   await look.first().click().catch(() => {}); // the second rung, if this one has no gate on it
 
   await page.getByRole('button', { name: 'Leave' }).click();
-  await page.getByRole('button', { name: /Records/ }).click();
+  await openRecords(page);
 
   const diary = page.locator('.diary');
   await expect(diary).toBeVisible({ timeout: 20_000 });
@@ -158,7 +159,7 @@ test('the diary survives a reload', async ({ page }) => {
   await page.reload();
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 
-  await page.getByRole('button', { name: /Records/ }).click();
+  await openRecords(page);
   await expect(page.locator('.diary .entry')).toHaveCount(1);
 });
 

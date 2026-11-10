@@ -809,3 +809,57 @@ Operational lesson: prefer the connector's artifact-download capability before c
 CI traces are unavailable. Direct download denial does not establish that every authorized
 artifact route is blocked. Retrieve the returned file reference without sending archive bytes
 into model context; inspect only relevant trace records and images.
+
+### Notebook follow-up: settling-road also opens a lazy diary
+
+On notebook head `ced15cf`, push run `42792058811` passed, while PR run `42792080659`
+failed `settling-road.spec.ts` twice. The recovered shard-4 retry trace shows the
+`Opening diary…` fallback at the settling-region assertion. This caller had missed the
+explicit diary-readiness wait used by the other Records tests, and spent the default
+five-second content window waiting for the module as well as the content.
+
+Wait for `.diary` with the existing 20-second loading budget, then retain the original
+settling-region visibility and exact content assertions. A local eight-second delay on the
+real Progress module reproduced the original missing-region failure; the same fault injection
+passes after the readiness wait. The delay is a temporary network-fault harness, not a fixed
+sleep added to the test or application. No global assertion timeout or gameplay budget changes.
+
+The follow-up head `cbf45c0` passed both full workflows, but the green jobs reported two
+retried cases. Their saved failure contexts identify separate setup mistakes:
+
+- Push run `42798131469`: the landscape notebook's final reload opened Records before initial
+  scene placement. The context shows The Eastern Field open and Records no longer selected:
+  `standing-on` had replaced the early surface. Wait for `.place` after reloading, as on the
+  initial boot, before opening Records. A temporary harness delaying scene PNGs by four seconds
+  and the Progress module by twelve reproduced the missing diary with the old ordering; the
+  corrected ordering passes that same injection at all four viewports.
+- PR run `42798143860`: the plate-size case still showed `Opening diary…` after its ten-second
+  diary wait. The album opener and the keyboard suite's Records opener now use the existing
+  twenty-second diary-loading budget. Other panel budgets, content checks and focus assertions
+  stay as they were.
+
+The normal four-viewport notebook and four plate cases pass, alongside the four delayed-load
+notebook reproductions. Inspect retry notices in green browser jobs as well as failed jobs;
+workflow success alone can hide a setup race.
+
+On head `4aed6b7`, push CI passed without retries, but PR run `42803775407` exposed the same
+missing readiness phase in `fielddiary.spec.ts`'s reload test. Its retry trace has the
+`Opening diary…` snapshot immediately before the five-second entry-count assertion. Saved
+knowledge was present; the count queried a panel that had not mounted yet. An eight-second
+Progress-module delay reproduced the count failure locally, and passes with readiness awaited.
+
+Ordinary Records button openings now go through `e2e/records.ts`'s `openRecords(page)`, which
+owns the existing twenty-second loaded-panel wait. The audit covered every direct Records
+opening, including the previously implicit People-tab openings; targeted Read diary actions
+retain their explicit readiness wait and target-focus assertions. The saved-entry count and
+other content assertions keep their original expectations and budgets. Normal and delayed
+reload checks plus both People-tab cases pass locally; scene placement remains a separate
+setup precondition, as fixed in the notebook reload case above.
+
+Verification closed on implementation head `c65f8e9`: both
+[push run 42807846698](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/42807846698) and
+[PR run 42807855300](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/42807855300)
+completed successfully. Type checking, unit tests, builds, bundle/canon checks and all eight
+browser shards passed; completed browser logs reported no retries. These are commit-specific CI
+results, not a claim that the PR has merged or the live Pages deployment has been verified.
+See [the notebook status](compact-notebook.md#status--10-november-2026) for the remaining release milestone.
