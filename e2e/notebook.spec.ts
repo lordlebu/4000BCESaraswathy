@@ -55,6 +55,8 @@ for (const view of [
     await expect(page.locator('.journal')).toHaveCSS('font-size', '18px');
     expect(await page.locator('.dock').evaluate(el => el.getBoundingClientRect().height)).toBe(dockHeight);
     await page.reload();
+    // Initial placement can open the place and replace a surface opened before the world is ready.
+    await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
     await page.getByRole('button', { name: /^Records/ }).click();
     await expect(diary).toBeVisible({ timeout: 20_000 });
     await expect(page.getByRole('combobox', { name: 'Reading size' })).toHaveValue('large');

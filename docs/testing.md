@@ -823,3 +823,21 @@ settling-region visibility and exact content assertions. A local eight-second de
 real Progress module reproduced the original missing-region failure; the same fault injection
 passes after the readiness wait. The delay is a temporary network-fault harness, not a fixed
 sleep added to the test or application. No global assertion timeout or gameplay budget changes.
+
+The follow-up head `cbf45c0` passed both full workflows, but the green jobs reported two
+retried cases. Their saved failure contexts identify separate setup mistakes:
+
+- Push run `42798131469`: the landscape notebook's final reload opened Records before initial
+  scene placement. The context shows The Eastern Field open and Records no longer selected:
+  `standing-on` had replaced the early surface. Wait for `.place` after reloading, as on the
+  initial boot, before opening Records. A temporary harness delaying scene PNGs by four seconds
+  and the Progress module by twelve reproduced the missing diary with the old ordering; the
+  corrected ordering passes that same injection at all four viewports.
+- PR run `42798143860`: the plate-size case still showed `Opening diary…` after its ten-second
+  diary wait. The album opener and the keyboard suite's Records opener now use the existing
+  twenty-second diary-loading budget. Other panel budgets, content checks and focus assertions
+  stay as they were.
+
+The normal four-viewport notebook and four plate cases pass, alongside the four delayed-load
+notebook reproductions. Inspect retry notices in green browser jobs as well as failed jobs;
+workflow success alone can hide a setup race.

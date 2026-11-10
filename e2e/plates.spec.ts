@@ -83,7 +83,8 @@ async function bootWithCollection(page: Page) {
  */
 async function openTheAlbum(page: Page) {
   await page.locator('.controls .control', { hasText: 'Records' }).click();
-  await expect(page.locator('.diary')).toBeVisible({ timeout: 10_000 });
+  // The initial Journey tab loads on demand, before the album tab can be selected.
+  await expect(page.locator('.diary')).toBeVisible({ timeout: 20_000 });
   await page.locator('.records-tab', { hasText: 'Met' }).first().click();
   await expect(page.locator('.met-entry').first()).toBeVisible({ timeout: 10_000 });
 }
