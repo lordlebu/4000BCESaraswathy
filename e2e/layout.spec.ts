@@ -57,7 +57,7 @@ for (const view of VIEWPORTS) {
       await open(page, view.width, view.height);
       const title = page.locator('.journal h2');
       await expect(title).toContainText(/, a settlement$|at \d+, \d+/);
-      await expect(page.locator('.journal')).toContainText('discovered');
+      await expect(page.locator('.journal')).toContainText('Growing here');
 
       const before = await title.textContent();
       // Not a closed loop: right-down-left-up returns to the starting tile and proves nothing.

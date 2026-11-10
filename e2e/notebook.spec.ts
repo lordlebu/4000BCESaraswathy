@@ -12,7 +12,7 @@ for (const view of [
     const page = await context.newPage();
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.goto('/?seed=notebook-review&hour=12&at=poi_eastern_field');
+    await page.goto('?seed=notebook-review&hour=12&at=poi_eastern_field');
     await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
     await page.getByRole('button', { name: 'Look closer', exact: true }).first().click();
     await openRecords(page);
@@ -27,10 +27,18 @@ for (const view of [
     for (const [size, px] of [['comfortable', 16], ['large', 18], ['compact', 14]] as const) {
       await page.getByRole('combobox', { name: 'Reading size' }).selectOption(size);
       await expect(diary.locator('.reading').last()).toHaveCSS('font-size', `${px}px`);
+      await expect(diary.locator('.road-notes .status')).toHaveCSS('font-size', `${px}px`);
       expect(await diary.locator('.reading').allTextContents()).toEqual(text);
       expect(await diary.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
     }
     const shortcuts = diary.getByRole('navigation', { name: 'Diary sections' });
+    await shortcuts.getByRole('link', { name: 'Road notes', exact: true }).click();
+    await expect(diary.locator('#notebook-road')).toBeFocused();
+    const roadNotes = diary.getByRole('region', { name: 'Road notes' });
+    await expect(roadNotes.locator('.status')).not.toBeEmpty();
+    await expect(roadNotes.locator('.map-coverage')).toContainText(/About \d+% of this map revealed\./);
+    const coverage = await roadNotes.locator('.map-coverage').innerText();
+    await expect(diary).not.toContainText('places discovered');
     const exportLink = shortcuts.getByRole('link', { name: 'Take it with you', exact: true });
     await exportLink.click();
     const heading = diary.locator('#notebook-export');
@@ -47,6 +55,8 @@ for (const view of [
     const handle = page.getByRole('button', { name: 'Open the field notes', exact: true });
     if (await handle.isVisible()) await handle.click();
     await expect(page.locator('.journal')).toBeVisible();
+    await expect(page.locator('.journal')).not.toContainText(/places discovered|elders spoke/);
+    await expect(page.locator('.journal .status-goal')).toHaveCount(0);
     const dockHeight = await page.locator('.dock').evaluate(el => el.getBoundingClientRect().height);
     await openRecords(page);
     await expect(diary).toBeVisible({ timeout: 20_000 });
@@ -61,6 +71,7 @@ for (const view of [
     await openRecords(page);
     await expect(diary).toBeVisible({ timeout: 20_000 });
     await expect(page.getByRole('combobox', { name: 'Reading size' })).toHaveValue('large');
+    await expect(diary.locator('.map-coverage')).toHaveText(coverage);
     await expect(diary.locator('.reading').last()).toHaveCSS('font-size', '18px');
     expect(errors).toEqual([]);
     await context.close();

@@ -60,6 +60,7 @@ export interface GameToUi {
     shelter: Shelter;
     /** Whether stopping for the night would do anything. Only after dark. */
     canCamp: boolean;
+    /** Number of fog-revealed tiles, including nearby ground and road sight. */
     discovered: number;
     atLandmark: boolean;
     /**

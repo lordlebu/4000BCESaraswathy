@@ -716,21 +716,8 @@ button.ghost:hover:not(:disabled) {
   display: none;
 }
 
-/* **The footer splits at peek, and getting that wrong is what the browser suite caught.**
- *
- * The first cut hid the whole of it, which took the dusk and fatigue lines with it -- the two
- * things in this panel that are about *walking* rather than about reading. A player at peek is
- * walking. So the light going and legs giving out stay; the landmark bearing, the where-next and
- * the tally of places discovered wait for the height that is about reading.
- *
- * They render only when they have something to say, so peek grows by a line exactly when the game
- * has a warning and not otherwise. */
-.dock[data-height='peek'] .journal-foot > .status,
-.dock[data-height='peek'] .journal-foot > .status-next,
-.dock[data-height='peek'] .journal-foot > .status-goal,
-.dock[data-height='peek'] .journal-foot > .muted {
-  display: none;
-}
+/* The journal footer now holds only dusk and fatigue, available at every dock height.
+ * Journey-scale bearings and map coverage live in the diary's Road notes section. */
 
 
 
@@ -3655,7 +3642,6 @@ button.pinned-recipe:focus-visible { outline: 2px solid currentColor; outline-of
 .settling-step[data-state='later'] { opacity: 0.6; }
 .settling-step[data-state='now'] .settling-mark { color: var(--accent); font-weight: 700; }
 /* The map's goal in the notes, above the landmark line it outranks. */
-.status-goal { font-weight: 600; }
 
 /* --- The opening (`Opening.tsx`) -------------------------------------------------------------
  * Stills and short text, centred on the page like a book's first spread. The plate keeps 4:3, the

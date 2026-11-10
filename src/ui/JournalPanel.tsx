@@ -95,20 +95,10 @@ export const SHELTER_LABEL: Record<string, string> = {
 export interface JournalPanelProps {
   entry: JournalEntry | null;
   surroundings: string;
-  hint: string;
-  /** Where there is still something to see, and where to sleep. Empty when there is nothing. */
-  whereNext: string;
-  /**
-   * The one thing to do next on this map's road to settling, or empty. The map's goal, said where
-   * the player already looks for what to do -- see `content/settlingRoad.ts`.
-   */
-  goal?: string;
   /** How tired the traveller is, or null when there is nothing to say. */
   fatigue: string | null;
   /** A word about the fading light, or null while there is plenty. */
   dusk: string | null;
-  discovered: number;
-  atLandmark: boolean;
   memory: string;
   /**
    * Canon, when a service is listening.
@@ -124,13 +114,8 @@ export interface JournalPanelProps {
 export function JournalPanel({
   entry,
   surroundings,
-  hint,
-  whereNext,
-  goal = '',
   fatigue,
   dusk,
-  discovered,
-  atLandmark,
   memory,
   children
 }: JournalPanelProps) {
@@ -181,20 +166,16 @@ export function JournalPanel({
 
       {children}
 
-      <footer className="journal-foot">
-        {goal && <p className="status-goal">{goal}</p>}
-        <p className={atLandmark ? 'status status-arrived' : 'status'}>{hint}</p>
-        {/* Rendered only when it has something to say. An empty paragraph still takes vertical
-            space in a panel that is deliberately tight on a phone. */}
-        {whereNext && <p className="status-next">{whereNext}</p>}
+      {/* Immediate walking conditions stay in the dock. Journey bearings and map coverage live
+          in RoadNotes; the existing guidance rail owns the single next action. */}
+      {(dusk || fatigue) && <footer className="journal-foot">
         {dusk && <p className="status-dusk">{dusk}</p>}
         {fatigue && <p className="status-tired">{fatigue}</p>}
         {/* The camp button moved to `TileActions`, and `shelter`, `canCamp` and `onCamp` went
             with it -- nothing here read them but the button. Resting is something you do to the
             tile you are standing on, so it belongs with taking and looking rather than at the
             foot of a page of prose. See the note at the top of that file. */}
-        <p className="muted">{discovered} places discovered.</p>
-      </footer>
+      </footer>}
     </section>
   );
 }

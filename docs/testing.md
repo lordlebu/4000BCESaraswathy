@@ -862,4 +862,14 @@ Verification closed on implementation head `c65f8e9`: both
 completed successfully. Type checking, unit tests, builds, bundle/canon checks and all eight
 browser shards passed; completed browser logs reported no retries. These are commit-specific CI
 results, not a claim that the PR has merged or the live Pages deployment has been verified.
-See [the notebook status](compact-notebook.md#status--10-november-2026) for the remaining release milestone.
+See [the notebook status](compact-notebook.md#status--10-november-2026) for merge and follow-up details.
+
+### Map coverage is not a count of places visited
+
+The old journal footer and export called `discovered` a count of places, or ground walked.
+The scene actually adds every fog-revealed tile, including nearby sight and the road ahead;
+that number can be large without the player visiting many named places. Keep the save and fog
+semantics intact and label the presentation accurately. The diary's Road notes and export share
+one map-coverage formatter; field notes retain local observations and immediate walking conditions.
+The landmark playthrough now opens Records to read its bearings and closes it before walking,
+preserving the full arrival test through the player's navigation controls.

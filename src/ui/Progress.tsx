@@ -16,6 +16,7 @@
 import type { ReactNode } from 'react';
 import type { ReadingSize } from './preferences';
 import { Diary } from './Diary';
+import { RoadNotes, type RoadNotesProps } from './RoadNotes';
 import type { Progress as Knowledge } from '../journey';
 
 export interface ProgressProps {
@@ -23,6 +24,7 @@ export interface ProgressProps {
   onReadingSize?: (size: ReadingSize) => void;
   hasGoals?: boolean;
   hasSettling?: boolean;
+  roadNotes?: RoadNotesProps | null;
   targetDiscoveryId?: string | null;
   progress: Knowledge;
   open: boolean;
@@ -45,6 +47,7 @@ export function Progress({
   onReadingSize,
   hasGoals,
   hasSettling,
+  roadNotes,
   targetDiscoveryId = null,
   progress,
   open,
@@ -66,11 +69,12 @@ export function Progress({
       onReadingSize={onReadingSize}
       leadSections={[
         ...(hasGoals ? [{ id: 'notebook-goals', label: 'Goals' }] : []),
-        ...(hasSettling ? [{ id: 'notebook-settling', label: 'Settling' }] : [])
+        ...(hasSettling ? [{ id: 'notebook-settling', label: 'Settling' }] : []),
+        ...(roadNotes ? [{ id: 'notebook-road', label: 'Road notes' }] : [])
       ]}
       targetDiscoveryId={targetDiscoveryId}
       tabs={tabs}
-      lead={lead}
+      lead={<>{lead}{roadNotes && <RoadNotes {...roadNotes} />}</>}
       progress={progress}
       open
       onClose={onClose}

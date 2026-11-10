@@ -8,17 +8,36 @@ tabs and provide shortcuts to populated diary sections.
 ## Status — 10 November 2026
 
 All four implementation phases are complete. [PR #257](https://github.com/lordlebu/4000BCESaraswathy/pull/257)
-is open and unmerged. Implementation commit `c65f8e9` passed both
+merged on 10 November 2026 as `75f1e95`. Implementation commit `c65f8e9` passed both
 [push CI](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/42807846698) and
 [PR CI](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/42807855300), including type
 checking, unit tests, builds, bundle/canon checks and all eight browser shards without retries.
 These results apply to that implementation commit; subsequent documentation commits have their
 own checks.
 
-The remaining milestone is review and release: explicit merge approval is pending. After approval,
-merge the reviewed PR, let the existing `pages.yml` workflow deploy, and verify the live diary.
-The merge has not occurred and the redesigned diary has not been verified on the live site.
-An itch.io release or version tag is a separate action.
+The original refresh has merged; the CI links above remain evidence for its implementation
+commit. Live-site verification is separate from that CI evidence. An itch.io release or version
+tag is a separate action.
+
+## Follow-up: Road notes and map coverage
+
+Player feedback showed the long-term landmark bearing ("The elders spoke of…"), nearby-place
+and shelter suggestions, and the next goal repeating beneath local observations. The diary now
+has a modular **Road notes** section under Records → Journey, with a section shortcut. It keeps
+the landmark and nearby-place/shelter prose; Goals and Settling remain their own diary sections.
+The dock keeps local observations, immediate dusk/fatigue lines, and its existing single guidance
+row for coaching, a pinned recipe, or the next suggested action.
+
+The old "places discovered" number counted fog-revealed tiles, including nearby ground and road
+sight. It never counted named places visited and could legitimately exceed a thousand early in
+a journey. Road notes and the exported journal now use the same map-coverage wording:
+"About …% of this map revealed." Fog, world generation, progression and save formats are unchanged;
+existing journeys keep their knowledge and map visibility.
+
+Follow-up validation: the full unit suite passes (3,353 tests), as do all 12 targeted browser
+checks, including the complete landmark walk and four device layouts. The final phone reading-size
+and settling checks also pass against the Pages subpath production build. Regression guards were
+verified to fail with the old field-note panel and with the misleading places label restored.
 
 ## Implementation
 

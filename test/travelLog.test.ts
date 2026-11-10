@@ -9,6 +9,7 @@ import { discoveries, vocabulary } from '../src/content/knowledge';
 import { describe, expect, it } from 'vitest';
 import {
   buildTravelLog,
+  mapCoverageLine,
   travelLogFilename,
   travelLogToText,
   type JourneyState
@@ -84,11 +85,18 @@ describe('building the log', () => {
     }
   });
 
-  it('reports a sane percentage of the country walked', () => {
+  it('reports revealed map coverage without claiming places visited or ground walked', () => {
     const text = travelLogToText(buildTravelLog(world, finished));
-    const percent = Number(text.match(/about (\d+) percent/)?.[1]);
-    expect(percent).toBeGreaterThanOrEqual(0);
-    expect(percent).toBeLessThanOrEqual(100);
+    const percent = Math.round(finished.discovered / (world.width * world.height) * 100);
+    expect(text).toContain(`About ${percent}% of this map revealed.`);
+    expect(text).not.toMatch(/Walked \d+|\d+ places/);
+  });
+
+  it('bounds map coverage for empty and restored map states', () => {
+    expect(mapCoverageLine(0, 0)).toBe('About 0% of this map revealed.');
+    expect(mapCoverageLine(0, 100)).toBe('About 0% of this map revealed.');
+    expect(mapCoverageLine(1136, 5000)).toBe('About 23% of this map revealed.');
+    expect(mapCoverageLine(101, 100)).toBe('About 100% of this map revealed.');
   });
 
   it('carries a replay link that round-trips the seed', () => {
