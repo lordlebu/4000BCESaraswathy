@@ -809,3 +809,17 @@ Operational lesson: prefer the connector's artifact-download capability before c
 CI traces are unavailable. Direct download denial does not establish that every authorized
 artifact route is blocked. Retrieve the returned file reference without sending archive bytes
 into model context; inspect only relevant trace records and images.
+
+### Notebook follow-up: settling-road also opens a lazy diary
+
+On notebook head `ced15cf`, push run `42792058811` passed, while PR run `42792080659`
+failed `settling-road.spec.ts` twice. The recovered shard-4 retry trace shows the
+`Opening diary…` fallback at the settling-region assertion. This caller had missed the
+explicit diary-readiness wait used by the other Records tests, and spent the default
+five-second content window waiting for the module as well as the content.
+
+Wait for `.diary` with the existing 20-second loading budget, then retain the original
+settling-region visibility and exact content assertions. A local eight-second delay on the
+real Progress module reproduced the original missing-region failure; the same fault injection
+passes after the readiness wait. The delay is a temporary network-fault harness, not a fixed
+sleep added to the test or application. No global assertion timeout or gameplay budget changes.

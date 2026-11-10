@@ -15,6 +15,8 @@ test('the diary leads with the road to settling, and the notes say what to do ne
   await expect(page.locator('.status-goal')).toContainText('Help someone here');
 
   await page.locator('.controls .control', { hasText: 'Records' }).click();
+  // Records opens a lazy diary. Its loading dialog is not the populated panel.
+  await expect(page.locator('.diary')).toBeVisible({ timeout: 20_000 });
   const road = page.getByRole('region', { name: 'Settling' });
   await expect(road).toBeVisible();
   await expect(road).toContainText('Be known here');
