@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openRecords } from './records';
 
 for (const view of [
   { width: 1280, height: 800, hasTouch: false },
@@ -14,7 +15,7 @@ for (const view of [
     await page.goto('/?seed=notebook-review&hour=12&at=poi_eastern_field');
     await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
     await page.getByRole('button', { name: 'Look closer', exact: true }).first().click();
-    await page.getByRole('button', { name: /^Records/ }).click();
+    await openRecords(page);
     const diary = page.locator('.field-diary');
     await expect(diary).toBeVisible({ timeout: 20_000 });
     await page.evaluate(() => document.fonts.ready);
@@ -47,7 +48,7 @@ for (const view of [
     if (await handle.isVisible()) await handle.click();
     await expect(page.locator('.journal')).toBeVisible();
     const dockHeight = await page.locator('.dock').evaluate(el => el.getBoundingClientRect().height);
-    await page.getByRole('button', { name: /^Records/ }).click();
+    await openRecords(page);
     await expect(diary).toBeVisible({ timeout: 20_000 });
     await page.getByRole('combobox', { name: 'Reading size' }).selectOption('large');
     await diary.locator('.diary-close').click();
@@ -57,7 +58,7 @@ for (const view of [
     await page.reload();
     // Initial placement can open the place and replace a surface opened before the world is ready.
     await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
-    await page.getByRole('button', { name: /^Records/ }).click();
+    await openRecords(page);
     await expect(diary).toBeVisible({ timeout: 20_000 });
     await expect(page.getByRole('combobox', { name: 'Reading size' })).toHaveValue('large');
     await expect(diary.locator('.reading').last()).toHaveCSS('font-size', '18px');

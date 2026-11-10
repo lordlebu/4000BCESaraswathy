@@ -841,3 +841,17 @@ retried cases. Their saved failure contexts identify separate setup mistakes:
 The normal four-viewport notebook and four plate cases pass, alongside the four delayed-load
 notebook reproductions. Inspect retry notices in green browser jobs as well as failed jobs;
 workflow success alone can hide a setup race.
+
+On head `4aed6b7`, push CI passed without retries, but PR run `42803775407` exposed the same
+missing readiness phase in `fielddiary.spec.ts`'s reload test. Its retry trace has the
+`Opening diary…` snapshot immediately before the five-second entry-count assertion. Saved
+knowledge was present; the count queried a panel that had not mounted yet. An eight-second
+Progress-module delay reproduced the count failure locally, and passes with readiness awaited.
+
+Ordinary Records button openings now go through `e2e/records.ts`'s `openRecords(page)`, which
+owns the existing twenty-second loaded-panel wait. The audit covered every direct Records
+opening, including the previously implicit People-tab openings; targeted Read diary actions
+retain their explicit readiness wait and target-focus assertions. The saved-entry count and
+other content assertions keep their original expectations and budgets. Normal and delayed
+reload checks plus both People-tab cases pass locally; scene placement remains a separate
+setup precondition, as fixed in the notebook reload case above.

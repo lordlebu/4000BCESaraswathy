@@ -18,6 +18,7 @@
 // trips the JSON-import problem described below.
 
 import { expect, test, type Page } from '@playwright/test';
+import { openRecords } from './records';
 import { step } from './walk';
 
 const SEED = 'plate-e2e';
@@ -82,9 +83,7 @@ async function bootWithCollection(page: Page) {
  * reaches it is not, which cost this spec its first run.
  */
 async function openTheAlbum(page: Page) {
-  await page.locator('.controls .control', { hasText: 'Records' }).click();
-  // The initial Journey tab loads on demand, before the album tab can be selected.
-  await expect(page.locator('.diary')).toBeVisible({ timeout: 20_000 });
+  await openRecords(page);
   await page.locator('.records-tab', { hasText: 'Met' }).first().click();
   await expect(page.locator('.met-entry').first()).toBeVisible({ timeout: 10_000 });
 }

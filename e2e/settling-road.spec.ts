@@ -4,6 +4,7 @@
 // the ground. `test/settlingRoad.test.ts` holds the steps; this holds that a player can see them.
 
 import { expect, test } from '@playwright/test';
+import { openRecords } from './records';
 
 test('the diary leads with the road to settling, and the notes say what to do next', async ({ page }) => {
   await page.goto('/?seed=settling-road&map=field_map_lothal');
@@ -14,9 +15,7 @@ test('the diary leads with the road to settling, and the notes say what to do ne
   await page.locator('.dock-handle').click();
   await expect(page.locator('.status-goal')).toContainText('Help someone here');
 
-  await page.locator('.controls .control', { hasText: 'Records' }).click();
-  // Records opens a lazy diary. Its loading dialog is not the populated panel.
-  await expect(page.locator('.diary')).toBeVisible({ timeout: 20_000 });
+  await openRecords(page);
   const road = page.getByRole('region', { name: 'Settling' });
   await expect(road).toBeVisible();
   await expect(road).toContainText('Be known here');

@@ -17,6 +17,7 @@
 // mechanism a third time.
 
 import { expect, test, type Page } from '@playwright/test';
+import { openRecords } from './records';
 
 const SEED = 'dock-8';
 
@@ -27,12 +28,6 @@ async function boot(page: Page) {
   // not what is being tested. Same note as the other specs' `boot`.
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
-}
-
-/** Records shares the diary's existing loading budget before keyboard assertions begin. */
-async function openRecords(page: Page) {
-  await page.locator('.controls .control', { hasText: 'Records' }).click();
-  await expect(page.locator('.diary')).toBeVisible({ timeout: 20_000 });
 }
 
 /** Where the keyboard lands over `presses` tabs, and whether each stop is inside the dialog. */

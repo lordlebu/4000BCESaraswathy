@@ -5,6 +5,7 @@
 // This walks it: hear a question from someone, look at the thing it is about, and commit.
 
 import { expect, test, type Page } from '@playwright/test';
+import { openRecords } from './records';
 import { step } from './walk';
 
 /**
@@ -40,8 +41,7 @@ async function boot(page: Page) {
 }
 
 async function openDiary(page: Page) {
-  await page.getByRole('button', { name: /Records/ }).click();
-  await expect(page.locator('.diary')).toBeVisible({ timeout: 20_000 });
+  await openRecords(page);
 }
 
 /**
