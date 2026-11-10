@@ -10,7 +10,7 @@
 // Presentation only. Every rule — whether a rung can advance, why it cannot, which readings
 // of a question are open — is asked of `journey.ts`. Nothing here recomputes a ladder.
 
-import { useRef, type ReactNode } from 'react';
+import { useRef, type ReactNode, type RefObject } from 'react';
 import {
   type Progress,
   blockedBy,
@@ -72,7 +72,7 @@ function whyBlocked(progress: Progress, id: string): string | null {
   return said.join('; ') + '.';
 }
 
-function Entry({ id, progress }: { id: string; progress: Progress }) {
+function Entry({ id, progress, targetRef }: { id: string; progress: Progress; targetRef?: RefObject<HTMLHeadingElement | null> }) {
   const d = discovery(id);
   const written = entriesSoFar(progress, id);
   if (!d || written.length === 0) return null;
@@ -81,9 +81,9 @@ function Entry({ id, progress }: { id: string; progress: Progress }) {
   const blocked = done ? null : whyBlocked(progress, id);
 
   return (
-    <article className={done ? 'entry entry-done' : 'entry'}>
+    <article className={`${done ? 'entry entry-done' : 'entry'}${targetRef ? ' discovery-updated' : ''}`} data-discovery={id}>
       <header className="entry-head">
-        <h4>{d.name}</h4>
+        <h4 ref={targetRef} tabIndex={targetRef ? -1 : undefined}>{d.name}</h4>
         <span className="entry-rungs" aria-label={`${written.length} of ${d.rungs.length} understood`}>
           {written.length}/{d.rungs.length}
         </span>
@@ -105,6 +105,7 @@ function Entry({ id, progress }: { id: string; progress: Progress }) {
 }
 
 export interface DiaryProps {
+  targetDiscoveryId?: string | null;
   progress: Progress;
   open: boolean;
   onClose: () => void;
@@ -125,6 +126,7 @@ export interface DiaryProps {
 }
 
 export function Diary({
+  targetDiscoveryId = null,
   progress,
   open,
   onClose,
@@ -135,6 +137,7 @@ export function Diary({
   tabs,
   lead
 }: DiaryProps) {
+  const targetRef = useRef<HTMLHeadingElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   // Escape, the focus trap and putting focus back all live in `Modal` now. What is left here is
@@ -160,7 +163,7 @@ export function Diary({
     noticed.length > 0 || questions.length > 0 || Object.keys(languages).length > 0;
 
   return (
-    <Modal open label="Field diary" onClose={onClose} initialFocus={closeRef}>
+    <Modal open label="Field diary" onClose={onClose} initialFocus={targetDiscoveryId && noticed.some(d => d.id === targetDiscoveryId) ? targetRef : closeRef}>
       <section className={`diary diary-${density}`}>
         {tabs}
         <header className="diary-head">
@@ -212,7 +215,7 @@ export function Diary({
                 <section key={k} className="diary-section">
                   <h3>{DISCIPLINE_NAME[k] ?? k}</h3>
                   {here.map((d) => (
-                    <Entry key={d.id} id={d.id} progress={progress} />
+                    <Entry key={d.id} id={d.id} progress={progress} targetRef={d.id === targetDiscoveryId ? targetRef : undefined} />
                   ))}
                 </section>
               );
@@ -288,7 +291,5 @@ export function Diary({
   );
 }
 
-/** So a caller can show a count without reaching into `Progress` itself. */
-export function diaryCount(progress: Progress): number {
-  return discoveries.filter((d) => rungOf(progress, d.id) >= 0).length;
-}
+// Kept as an export for callers outside the panel; App uses the pure module directly.
+export { diaryCount } from '../content/discoveryChanges';

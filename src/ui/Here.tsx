@@ -26,6 +26,7 @@
 // the panels below; how tall the dock is belongs to `surface.ts`, which is pure and tested under
 // Node.
 
+import { DiscoveryNotice, type DiscoveryNoticeProps } from './DiscoveryNotice';
 import type { ReactNode } from 'react';
 import { Conversation, type ConversationProps } from './Conversation';
 import { JournalPanel, type JournalPanelProps } from './JournalPanel';
@@ -90,6 +91,7 @@ export interface HereProps {
   guide?: { line: string; action: { label: string; onDo: () => void } | null } | null;
   /** The first morning's hint, which takes the pinned recipe's line while it lasts. See `content/coach.ts`. */
   coach?: string | null;
+  discoveryNotice?: DiscoveryNoticeProps | null;
   coachAction?: { label: string; onDo: () => void } | null;
   /**
    * Everything that can be done on this tile.
@@ -127,6 +129,7 @@ export function Here({
   canon,
   standing,
   pinned,
+  discoveryNotice = null,
   coach = null,
   coachAction = null,
   guide = null,
@@ -191,7 +194,7 @@ export function Here({
       <StandingRow {...standing} />
 
       {/* The pinned recipe, at every height: it is the reason the player is out gathering. */}
-      {coach ? (
+      {discoveryNotice ? <DiscoveryNotice {...discoveryNotice} /> : coach ? (
         coachAction ? <button type="button" className="coach-line guide-line" aria-label={`${coach} ${coachAction.label}`} onClick={coachAction.onDo}>
           <span className="guidance-copy">{coach}</span> <span className="guidance-verb">{coachAction.label}</span>
         </button> : <p className="coach-line" role="status">{coach}</p>

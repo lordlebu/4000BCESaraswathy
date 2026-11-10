@@ -1,6 +1,7 @@
+import { useDiscoveryNotices } from './useDiscoveryNotices';
 // Layout and shared state. The map is a sibling, not a child — React never renders a tile.
 
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState, lazy, Suspense } from 'react';
 import { EventBus, type GameToUi } from '../game/EventBus';
 import { PhaserGame } from '../game/PhaserGame';
 import { Controls } from './Controls';
@@ -12,8 +13,7 @@ import { ShelterMark } from './ShelterMark';
 import type { TileAction } from './TileActions';
 import type { Step } from '../content/making-chain';
 import { CollectionPanel } from './CollectionPanel';
-import { Progress } from './Progress';
-import { diaryCount } from './Diary';
+import { diaryCount } from '../content/discoveryChanges';
 import { Ending } from './Ending';
 import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
@@ -43,8 +43,8 @@ import { canonStatus, type CanonStatus, type Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
 import { type Collection, emptyCollection, metOnTile, size } from '../content/collection';
-import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { downloadImage, downloadText } from './exportJournal';
+import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { clearJourney, hasBegun, loadJourney, saveJourney } from '../save';
 import { Opening } from './Opening';
 import { bearingTo } from '../content/journal';
@@ -163,6 +163,8 @@ function characterFromUrl(): string | null {
 
 type Arrival = GameToUi['tile-entered'];
 
+const Progress = lazy(() => import('./Progress').then(module => ({ default: module.Progress })));
+
 export function App() {
   // Read the save once. Calling loadJourney per state initialiser would parse the same JSON
   // three times and, worse, let the three copies drift.
@@ -240,6 +242,9 @@ export function App() {
 
   // What the player knows. Every rule about changing it lives in `journey.ts`; this only holds
   // it and hands it to the save.
+  const [journeyEpoch, setJourneyEpoch] = useState(0);
+  const [targetDiscoveryId, setTargetDiscoveryId] = useState<string | null>(null);
+  const recordsRef = useRef<HTMLButtonElement>(null);
   const [progress, setProgress] = useState(initialJourney.current.progress);
 
   // What the traveller is carrying. Every rule about changing it lives in `content/satchel.ts`
@@ -657,6 +662,8 @@ export function App() {
     // The collection is trip-scoped: a new world is a new walk, not a continuing album.
     setCollection(emptyCollection());
     const loaded = loadJourney(next);
+    setJourneyEpoch(epoch => epoch + 1);
+    setTargetDiscoveryId(null);
     setProgress(loaded.progress);
     // A new world is a new walk. What was in the satchel belonged to the old one.
     setSatchel(loaded.satchel);
@@ -1502,6 +1509,18 @@ export function App() {
     );
   }, [world, arrival?.discovered, collection, reached, progress]);
 
+  const discoveriesFeedback = useDiscoveryNotices(progress, `${seed}:${journeyEpoch}`,
+    Boolean(talkingTo || happening || activity || atTheDoor || titleUp || opening || arrivalPage || firstCard || Object.values(interrupts).some(Boolean)) || surface !== 'here');
+  const notice = discoveriesFeedback.notice;
+  const readDiscovery = () => {
+    if (!notice) return;
+    // Give the modal a lasting return target: the notice is acknowledged and disappears.
+    recordsRef.current?.focus();
+    setTargetDiscoveryId(notice.id);
+    discoveriesFeedback.acknowledge(notice);
+    dispatch({ type: 'show', surface: 'progress' });
+  };
+
   // Tell the scene how much of the canvas the overlays are covering, so the camera can keep the
   // traveller somewhere they can be seen. React is the only side that knows this — it renders them.
   //
@@ -1671,15 +1690,17 @@ export function App() {
         onCharacter={chooseCharacter}
         metCount={size(collection)}
         diaryCount={diaryCount(progress)}
+        recordsRef={recordsRef}
         recordsOpen={surface === 'progress' || surface === 'collection'}
         // Opens on the journey, which is the one a player is more often coming back to -- the
         // album is browsed and the diary is worked. Toggling closes whichever is showing.
-        onOpenRecords={() =>
+        onOpenRecords={() => {
+          setTargetDiscoveryId(null);
           dispatch({
             type: 'toggle',
             surface: surface === 'collection' ? 'collection' : 'progress'
-          })
-        }
+          });
+        }}
         carryCount={distinct(satchel)}
         offeredHere={offeredHere(bench, knowsRecipeHere).length}
         onOpenWorkshop={() => dispatch({ type: 'open-interrupt', which: 'workshop' })}
@@ -1714,7 +1735,11 @@ export function App() {
           licence to rewrite them. The strip renders into each panel's own `tabs` slot rather than
           floating over it: both draw a full-screen veil, so anything positioned above the page
           sits underneath them. */}
+      {surface === 'progress' && <Suspense fallback={<Modal open label="Field diary" onClose={() => dispatch({ type: 'close' })}>
+        <p role="status">Opening diary…</p><button type="button" onClick={() => dispatch({ type: 'close' })}>Close</button>
+      </Modal>}>
       <Progress
+        targetDiscoveryId={targetDiscoveryId}
         tabs={
           <RecordTabs
             tab="journey"
@@ -1732,7 +1757,7 @@ export function App() {
         }
         progress={progress}
         open={surface === 'progress'}
-        onClose={() => dispatch({ type: 'close' })}
+        onClose={() => { setTargetDiscoveryId(null); dispatch({ type: 'close' }); }}
         onAnswer={settle}
         onOpenEnding={() => dispatch({ type: 'open-interrupt', which: 'ending' })}
         onOpenKit={() => dispatch({ type: 'open-interrupt', which: 'kit' })}
@@ -1740,6 +1765,7 @@ export function App() {
         onExportImage={exportImage}
         onExportText={exportText}
       />
+      </Suspense>}
 
       <CollectionPanel
         tabs={
@@ -1876,6 +1902,8 @@ export function App() {
           memory,
         }}
         sky={skyPhase === null ? null : { phase: skyPhase, weather: moment?.weather }}
+        discoveryNotice={notice ? { change: notice, remaining: discoveriesFeedback.remaining, onRead: readDiscovery,
+          onDismiss: () => { discoveriesFeedback.acknowledge(notice); recordsRef.current?.focus(); } } : null}
         coach={hints ? coachGuide?.line ?? coach?.line ?? null : null}
         coachAction={coachGuide?.action ?? null}
         guide={guide}
@@ -1904,6 +1932,7 @@ export function App() {
           settling,
           progress,
           firstVisit: Boolean(standingOn) && !visited.current.has(standingOn!),
+          updatedDiscoveries: discoveriesFeedback.pending.map(change => change.id),
           onLook: look,
           onTalkTo: (npcId: string) => dispatch({ type: 'talk-to', npcId }),
           /**

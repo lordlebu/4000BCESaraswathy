@@ -105,12 +105,18 @@ sudo docker run --rm --cpus=4 --memory=16g -v "$(pwd):/w" -w /w -e CI=true \
 The container mounts the working tree, so **do not edit specs or source while it runs**. A spec
 Playwright has already listed can be reloaded by a fresh worker partway through the run.
 
-### CI's Playwright report cannot be downloaded
+### CI artifacts: recheck the connector route
 
-`actions_get` › `download_workflow_run_artifact` returns a blob-storage URL, and the proxy refuses it
-(`CONNECT tunnel failed, response 403`). The trace and the failure screenshot are out of reach.
-`get_job_logs` with `failed_only` and a generous `tail_lines` is what there is. Read the timestamps
-and the shard's total time, and then reproduce rather than reason.
+A direct Actions artifact download may be refused by blob storage, while the GitHub connector's
+artifact-download tool still succeeds and returns a reusable file reference. This was verified
+on 10 November 2026: the original failed landmark trace was recovered through the connector after
+the direct `gh` route failed. Do not declare the trace inaccessible based on one download method.
+
+Prefer the available connector, download its file reference into the workspace, and inspect the
+relevant trace records and screenshots. Do not print ZIP bytes or whole traces into chat. A file
+service reference is not a Sediment upload; use its supported download URL rather than guessing
+that a Sediment-only download tool accepts its ID. If all available routes fail, preserve the
+exact limitation and distinguish log-only inference from trace-confirmed findings.
 
 ### Starving the container exposes a timing fault that four CPUs hides
 

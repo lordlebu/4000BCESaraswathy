@@ -91,7 +91,7 @@ test('looking closer writes the diary, and the diary keeps the crossings-out', a
   await page.getByRole('button', { name: /Records/ }).click();
 
   const diary = page.locator('.diary');
-  await expect(diary).toBeVisible();
+  await expect(diary).toBeVisible({ timeout: 20_000 });
   await expect(diary.locator('.entry')).toHaveCount(1);
   // At least one reading is on the page. If two rungs were climbed, the first is struck through
   // rather than replaced -- that is the whole idea of the panel.

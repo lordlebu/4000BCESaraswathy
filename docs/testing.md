@@ -738,3 +738,74 @@ reader does not mistake an ugly loop for a hot one.
   with a perceptual diff, never file sizes.
 - **A smoke test that boots with `VITE_CANON_API` unset**, which is the configuration CI
   actually uses and the one that broke once already.
+
+## Discovery sprint CI follow-up (10 November 2026)
+
+Push run `42691597540` failed on head `3bc7dc9` while the parallel PR run
+`42691606797` passed. A PR-only workflow listing hid the failed push run from the initial
+readiness review. **Inspect both push and pull-request runs for the exact head SHA** before
+reporting all checks green; include scheduled runs when investigating a new failure report.
+
+The logs establish two failed paths and two additional flaky observations:
+
+- Conversation-grant and field-diary assertions tried to read `.diary` within the default
+  five-second content assertion window. Records now lazy-loads that panel. The earlier fix
+  covered Read diary but missed normal Records openings. Those paths now wait explicitly for
+  `.diary` readiness with the existing 20-second loading budget, then retain their exact content
+  assertions. No global assertion timeout or gameplay budget was raised.
+- The landmark walk exhausted its navigation loop without the arrival page, twice on the push
+  runner; the unchanged test passed locally in 4.1 minutes. Its synchronizer equated a heading
+  unchanged for 300ms with a stopped route, swallowed per-leg wait failures, and could send new
+  input while the walker was still moving. A stationary DOM string is not movement completion.
+  The test now waits for scene-owned `moving === false`, `pending === false` and `queued === 0`; the existing
+  15-minute test deadline bounds a stuck walk. A regression test covers both a moving walker
+  with stable text, a paused walker with queued steps, and a keyboard tap awaiting the next frame. Tap bounds use the whole dock, not
+  just its scrolling journal child. The trace was later recovered through the connector (see below): the decisive failure was
+  repeated entry into an authored place replacing the journal, not a gameplay movement defect.
+- The pinning test once measured a null bounding box after checking only text. It now checks
+  visibility and observes current DOM geometry in a browser-side wait before enforcing the unchanged 44px touch floor.
+  The null-box race reproduced locally even after adding a visibility check: the resource pointer
+  adds a wrapper and replaces the button between the assertion and measurement. Diagnostics captured an old detached element at height zero while the replacement was
+  connected at 44px; a subsequent cross-process retry returned 44px after the five-second poll
+  deadline. Observing the current control inside the browser removes that stale-handle/round-trip
+  failure without changing pinning gameplay or the 44px requirement.
+
+Reproduction limitation: the direct report download was forbidden by the artifact storage
+endpoint; the connector subsequently returned a usable file reference (see below). Pulling the pinned Playwright Docker image failed while registering a layer due to
+Docker storage capacity; the failed pull cleaned up and the workspace retained free space.
+Local browser verification uses the installed matching pinned Chromium and its software
+renderer; do not describe it as a successful CI-container reproduction.
+
+The first follow-up head `be60d46` passed PR run `42750116103`, while push run
+`42750110123` exposed a second landmark setup race and an export test with the same missing
+diary readiness wait. In the overlap test, `keyboard.press` can return while the scene still
+has pending input. Calling `__happen` immediately opens a modal before the step starts,
+preventing the very mid-step/arrival overlap the assertion expects. The setup now waits for
+`moving` and opens the card in the same browser callback. It retains the assertions that the
+arrival page is topmost and the deferred card returns afterward. The corrected overlap and
+export paths both pass locally. Remaining ordinary Records tests now use explicit panel
+readiness too; their content assertions are unchanged. This is a test setup fix, not a change
+to modal arbitration in the game.
+
+
+### Trace-confirmed landmark cause and artifact recovery
+
+The GitHub connector's artifact-download route succeeded even though the direct `gh` download
+was forbidden. Its reusable file reference retrieved artifact 13708980571 from the original
+failed push run. Inspecting the retry trace showed repeated surveys alternating between
+`Wetland at 10, 20` with a southward bearing and empty journal/status strings. DOM snapshots
+showed The Silted Granary open with its Leave control. The driver repeatedly walked into the
+place, lost its journal bearings because the place occupies the dock, and stepped back north
+through its stuck fallback. This is the exact trigger that the earlier log-only review could
+not establish; it supersedes the earlier uncertainty recorded in the PR.
+
+The navigation survey now uses the real Leave control whenever an intervening place is open,
+then awaits the journal before reading bearings. A browser regression starts at the Silted
+Granary and proves the next survey has both position and bearing. Disabling the Leave handling
+must fail that regression; this directly covers the failure from the recovered trace. Keep the
+separate scene-state movement wait as well: unchanged prose is still not proof of idle movement.
+
+Operational lesson: prefer the connector's artifact-download capability before concluding that
+CI traces are unavailable. Direct download denial does not establish that every authorized
+artifact route is blocked. Retrieve the returned file reference without sending archive bytes
+into model context; inspect only relevant trace records and images.

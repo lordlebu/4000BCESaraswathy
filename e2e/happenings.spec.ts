@@ -233,10 +233,15 @@ test('a card opened as the landmark is reached waits behind the page, and return
     if (x < 0 || y < 0 || x >= spot.width || y >= spot.height) continue;
     await page.goto(`?seed=happenings&door=open&hour=10&at=${x},${y}`);
     await page.waitForFunction(() => Boolean((window as unknown as { __walker?: unknown }).__walker), null, { timeout: 60_000 });
-    await page.waitForTimeout(1000);
+    await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
     await page.keyboard.press(key);
-    // Mid-step: the card opens before the step lands and the page arrives.
-    const opened = await page.evaluate(() => (window as unknown as { __happen?: Happen }).__happen?.('road', 'tracks') ?? false);
+    // A key can still be pending when the protocol command returns. Opening a modal before
+    // Phaser consumes it pauses the walk and never creates the overlap this test promises.
+    // Detect moving and open the card in one browser turn, before the step can land.
+    const opened = await page.waitForFunction(() => {
+      const w = window as unknown as { __walker?: () => { moving: boolean }; __happen?: Happen };
+      return w.__walker?.().moving && (w.__happen?.('road', 'tracks') ?? false);
+    }, undefined, { timeout: 20_000, polling: 'raf' }).then(() => true, () => false);
     if (await arrival.waitFor({ timeout: 20_000 }).then(() => true, () => false)) {
       reached = opened;
       break;
