@@ -9,6 +9,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { walkerIdle } from './walkerIdle';
+import { openRecords } from './records';
 
 const SEED = 'play-test';
 
@@ -32,7 +33,16 @@ async function survey(page: Page) {
     await place.getByRole('button', { name: 'Leave', exact: true }).click();
     await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
   }
-  return page.evaluate(() => {
+  // Bearings are now read in Records, through the same controls a player uses. Close the diary
+  // before measuring the uncovered map and taking the next step.
+  let status = '';
+  if (!await page.locator('.arrival').isVisible()) {
+    await openRecords(page);
+    status = await page.locator('.road-notes .status').innerText();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.field-diary')).toHaveCount(0);
+  }
+  return page.evaluate((status) => {
     const canvas = document.querySelector('.map-surface canvas')!.getBoundingClientRect();
     const notes = document.querySelector('.dock')?.getBoundingClientRect();
     const arrival = document.querySelector('.arrival') as HTMLElement | null;
@@ -46,7 +56,7 @@ async function survey(page: Page) {
     return {
       // Present *and* laid out. A hidden panel still answers `querySelector`.
       arrived: !!arrival && arrival.getClientRects().length > 0,
-      status: document.querySelector('.status')?.textContent ?? '',
+      status,
       here: document.querySelector('.journal h2')?.textContent ?? '',
       map: {
         left: margin,
@@ -59,13 +69,13 @@ async function survey(page: Page) {
         originY: canvas.top
       }
     };
-  });
+  }, status);
 }
 
 type Heading = { dx: number; dy: number; nearness: 'far' | 'close' | 'here' };
 
 /**
- * Read the compass bearing the journal is currently giving for the landmark.
+ * Read the compass bearing the diary's Road notes are giving for the landmark.
  *
  * The wording carries distance as well as direction, which the walk needs: striding toward the far
  * edge of the view is right when the landmark is a day away and wrong when it is two tiles off,
@@ -141,7 +151,7 @@ test('walk from the settlement to the landmark and get a page for it', { tag: '@
   await expect(page.locator('.journal h2')).not.toHaveText('Travel Journal', { timeout: 20_000 });
 
   // The goal is named from the very first step.
-  const opening = (await page.locator('.status').textContent()) ?? '';
+  const opening = (await survey(page)).status;
   expect(opening).toMatch(/elders spoke of [A-Z]/);
 
   const arrival = page.locator('.arrival');

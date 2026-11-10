@@ -109,7 +109,7 @@ afterEach(cleanup);
 describe('the diary decides whether it is empty', () => {
   it('says so when nothing at all has happened', () => {
     render(<Diary progress={emptyProgress()} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
-    expect(screen.getByText(/have not written anything down/i)).toBeDefined();
+    expect(screen.getByText(/No field observations recorded yet/i)).toBeDefined();
   });
 
   it('does not call itself empty when a question has been written in it', () => {
@@ -119,14 +119,14 @@ describe('the diary decides whether it is empty', () => {
     expect(p.questions.length).toBeGreaterThan(0);
 
     render(<Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
-    expect(screen.queryByText(/have not written anything down/i)).toBeNull();
+    expect(screen.queryByText(/No field observations recorded yet/i)).toBeNull();
     expect(screen.getByRole('heading', { name: /open questions/i })).toBeDefined();
   });
 
   it('does not call itself empty when only a word has been learned', () => {
     const p = learn(emptyProgress(), 'word_kia_thal');
     render(<Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
-    expect(screen.queryByText(/have not written anything down/i)).toBeNull();
+    expect(screen.queryByText(/No field observations recorded yet/i)).toBeNull();
   });
 
   it('renders nothing at all when closed', () => {
@@ -530,20 +530,14 @@ describe('here', () => {
     expect(baseElement.querySelector('.status-tired')).toBeNull();
   });
 
-  it('shows where to go next, and nothing when there is nowhere', () => {
-    // The empty case is the one worth pinning: an always-rendered paragraph still takes vertical
-    // space in a panel that is deliberately tight on a phone.
-    const { unmount } = render(
-      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes, whereNext: 'The Camp would do for the night.' }}
-            place={{ ...place }} actions={[]} />
-    );
-    expect(screen.getByText('The Camp would do for the night.')).toBeTruthy();
-    unmount();
-
+  it('keeps journey bearings and revealed-tile tallies out of the local field notes', () => {
     const { baseElement } = render(
-      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={{ ...notes, whereNext: '' }} place={{ ...place }} actions={[]} />
+      <Here standing={bare} sky={null} conversation={null} height="read" onHeight={() => {}} open notes={notes} place={{ ...place }} actions={[]} />
     );
+    expect(screen.queryByText(notes.hint)).toBeNull();
+    expect(baseElement.textContent).not.toContain('places discovered');
     expect(baseElement.querySelector('.status-next')).toBeNull();
+    expect(baseElement.querySelector('.journal-foot')).toBeNull();
   });
 
   it('shows the field notes with no place to stand in', () => {

@@ -30,6 +30,7 @@ export interface TravelLog {
 }
 
 export interface JourneyState {
+  /** Fog-revealed tiles, including nearby ground and road sight, not places visited. */
   discovered: number;
   /**
    * The flora and fauna met, keyed by species id.
@@ -129,6 +130,12 @@ function plural(n: number, one: string, many: string): string {
   return n === 1 ? one : many;
 }
 
+/** The map remembers visible ground, including ground the traveller has not stepped on. */
+export function mapCoverageLine(revealed: number, total: number): string {
+  const percent = total > 0 ? Math.round(Math.min(1, Math.max(0, revealed / total)) * 100) : 0;
+  return `About ${percent}% of this map revealed.`;
+}
+
 export function buildTravelLog(world: World, journey: JourneyState, origin = ''): TravelLog {
   const kind = landmarkKindFor(world.landmark, world.seed);
   const from = world.settlement?.name ?? 'a camp with no name';
@@ -136,9 +143,7 @@ export function buildTravelLog(world: World, journey: JourneyState, origin = '')
 
   const route: string[] = [
     `Set out from ${from}.`,
-    `Walked ${journey.discovered} of ${total} places — about ${Math.round(
-      (journey.discovered / total) * 100
-    )} percent of the country.`
+    mapCoverageLine(journey.discovered, total)
   ];
   if (world.rivers.length) {
     // Deliberately "runs through" rather than "crossed": this lists every river in the world, and

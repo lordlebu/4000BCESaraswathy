@@ -204,7 +204,7 @@ export function Diary({
             <h2><NotebookMark /> Field Diary</h2>
             <p className="diary-sub">
               {noticed.length === 0
-                ? (written ? 'Notes from the journey.' : 'Nothing written yet.')
+                ? (written ? 'Notes from the journey.' : 'No field observations yet.')
                 : `${noticed.length} under way · ${finished} understood`}
             </p>
           </div>
@@ -234,7 +234,7 @@ export function Diary({
 
         {!written ? (
           <p className="diary-empty">
-            You have not written anything down. Go and look at something.
+            No field observations recorded yet. Look closer at a place to begin.
           </p>
         ) : (
           <>

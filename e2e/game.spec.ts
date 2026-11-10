@@ -76,9 +76,11 @@ test('boots, draws a map, and reports where the player is standing', async ({ pa
   // The journey starts in the settlement, which is a named place — "Hairuvati, a settlement" —
   // rather than a grid reference. Unnamed ground still falls back to coordinates.
   await expect(title).toContainText(/, a settlement$|at \d+, \d+/);
-  await expect(page.locator('.journal')).toContainText(/discovered/);
+  await expect(page.locator('.journal')).not.toContainText(/places discovered|elders spoke/);
+  await openRecords(page);
+  await expect(page.getByRole('region', { name: 'Road notes' })).toContainText(/% of this map revealed/);
   // The landmark is named in the hint from the first step, so the goal is a place, not a marker.
-  await expect(page.locator('.status')).toContainText(/[A-Z][a-z]+(van|kund|shila|tala|gir|asa)\b/);
+  await expect(page.locator('.road-notes .status')).toContainText(/[A-Z][a-z]+(van|kund|shila|tala|gir|asa)\b/);
 
   expect(problems, problems.join('\n')).toEqual([]);
 });

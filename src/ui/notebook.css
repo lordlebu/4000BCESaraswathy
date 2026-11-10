@@ -137,6 +137,7 @@
 .field-diary :is(.reading.struck, .entry-blocked, .account, .word dd, .settling-step p, .goal-line) { font-size: 1em; }
 .field-diary :is(.disciplines li, .lexicon h4, .log-replay, .question h5, .account span, .evidence, .readings) { font-size: var(--notebook-control-size); }
 .field-diary .reading.struck { color: var(--muted); }
+.field-diary .road-notes p { font-size: 1em; }
 .field-diary .evidence li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); font-size: 1em; }
 .field-diary .evidence li b { min-width: 0; }
 .field-diary .readings li p { font-size: 1em; }

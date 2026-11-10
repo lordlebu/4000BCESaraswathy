@@ -36,7 +36,7 @@ for (const kind of ['empty', 'words', 'questions', 'dense'] as const) {
     if (kind === 'empty') await expect(diary.locator('.diary-empty')).toBeVisible();
     else {
       await expect(diary.locator('.diary-empty')).toHaveCount(0);
-      await expect(diary.locator('.diary-sub')).not.toHaveText('Nothing written yet.');
+      await expect(diary.locator('.diary-sub')).not.toHaveText('No field observations yet.');
     }
     if (kind === 'dense') {
       await expect(diary.locator('.entry')).toHaveCount(canon.discoveries.length);

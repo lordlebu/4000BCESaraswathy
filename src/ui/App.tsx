@@ -1747,6 +1747,13 @@ export function App() {
         onReadingSize={setReadingSize}
         hasGoals={goalRows.length > 0}
         hasSettling={!!road}
+        roadNotes={arrival && world ? {
+          hint: arrival.hint,
+          whereNext: arrival.whereNext,
+          atLandmark: arrival.atLandmark,
+          revealed: arrival.discovered,
+          total: world.width * world.height
+        } : null}
         targetDiscoveryId={targetDiscoveryId}
         tabs={
           <Suspense fallback={null}><RecordTabs
@@ -1900,13 +1907,8 @@ export function App() {
         notes={{
           entry: arrival?.entry ?? null,
           surroundings: arrival?.surroundings ?? '',
-          hint: arrival?.hint ?? '',
-          whereNext: arrival?.whereNext ?? '',
-          goal: nextLine ?? road?.next ?? '',
           fatigue: arrival?.fatigue ?? null,
           dusk: arrival?.dusk ?? null,
-          discovered: arrival?.discovered ?? 0,
-          atLandmark: arrival?.atLandmark ?? false,
           memory,
         }}
         sky={skyPhase === null ? null : { phase: skyPhase, weather: moment?.weather }}
