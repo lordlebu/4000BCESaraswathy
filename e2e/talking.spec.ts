@@ -91,7 +91,7 @@ test('walking out does not lose what you were told', async ({ page }) => {
   await page.getByRole('button', { name: 'Leave' }).click();
 
   await page.getByRole('button', { name: /Records/ }).click();
-  await expect(page.locator('.diary')).toBeVisible();
+  await expect(page.locator('.diary')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.question')).not.toHaveCount(0);
 });
 

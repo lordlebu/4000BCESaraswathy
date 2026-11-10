@@ -776,3 +776,14 @@ endpoint. Pulling the pinned Playwright Docker image failed while registering a 
 Docker storage capacity; the failed pull cleaned up and the workspace retained free space.
 Local browser verification uses the installed matching pinned Chromium and its software
 renderer; do not describe it as a successful CI-container reproduction.
+
+The first follow-up head `be60d46` passed PR run `42750116103`, while push run
+`42750110123` exposed a second landmark setup race and an export test with the same missing
+diary readiness wait. In the overlap test, `keyboard.press` can return while the scene still
+has pending input. Calling `__happen` immediately opens a modal before the step starts,
+preventing the very mid-step/arrival overlap the assertion expects. The setup now waits for
+`moving` and opens the card in the same browser callback. It retains the assertions that the
+arrival page is topmost and the deferred card returns afterward. The corrected overlap and
+export paths both pass locally. Remaining ordinary Records tests now use explicit panel
+readiness too; their content assertions are unchanged. This is a test setup fix, not a change
+to modal arbitration in the game.

@@ -116,7 +116,7 @@ test('progress opens and closes, and reading it does not walk the traveller', as
   const where = await page.locator('.journal h2').textContent();
 
   await page.getByRole('button', { name: /Records/ }).click();
-  await expect(diary).toBeVisible();
+  await expect(diary).toBeVisible({ timeout: 20_000 });
 
   // A tap on the panel is a tap on the panel, not a move order to the map underneath it.
   await diary.click({ position: { x: 60, y: 200 } });
