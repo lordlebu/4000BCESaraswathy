@@ -760,9 +760,8 @@ The logs establish two failed paths and two additional flaky observations:
   The test now waits for scene-owned `moving === false`, `pending === false` and `queued === 0`; the existing
   15-minute test deadline bounds a stuck walk. A regression test covers both a moving walker
   with stable text, a paused walker with queued steps, and a keyboard tap awaiting the next frame. Tap bounds use the whole dock, not
-  just its scrolling journal child. The inaccessible CI trace means the exact trigger of that
-  particular failed route remains unconfirmed; this fixes an independently verified observation
-  flaw rather than claiming a proven gameplay defect.
+  just its scrolling journal child. The trace was later recovered through the connector (see below): the decisive failure was
+  repeated entry into an authored place replacing the journal, not a gameplay movement defect.
 - The pinning test once measured a null bounding box after checking only text. It now checks
   visibility and observes current DOM geometry in a browser-side wait before enforcing the unchanged 44px touch floor.
   The null-box race reproduced locally even after adding a visibility check: the resource pointer
@@ -771,8 +770,8 @@ The logs establish two failed paths and two additional flaky observations:
   deadline. Observing the current control inside the browser removes that stale-handle/round-trip
   failure without changing pinning gameplay or the 44px requirement.
 
-Reproduction limitation: downloading the CI report was forbidden by the artifact storage
-endpoint. Pulling the pinned Playwright Docker image failed while registering a layer due to
+Reproduction limitation: the direct report download was forbidden by the artifact storage
+endpoint; the connector subsequently returned a usable file reference (see below). Pulling the pinned Playwright Docker image failed while registering a layer due to
 Docker storage capacity; the failed pull cleaned up and the workspace retained free space.
 Local browser verification uses the installed matching pinned Chromium and its software
 renderer; do not describe it as a successful CI-container reproduction.
@@ -787,3 +786,26 @@ arrival page is topmost and the deferred card returns afterward. The corrected o
 export paths both pass locally. Remaining ordinary Records tests now use explicit panel
 readiness too; their content assertions are unchanged. This is a test setup fix, not a change
 to modal arbitration in the game.
+
+
+### Trace-confirmed landmark cause and artifact recovery
+
+The GitHub connector's artifact-download route succeeded even though the direct `gh` download
+was forbidden. Its reusable file reference retrieved artifact 13708980571 from the original
+failed push run. Inspecting the retry trace showed repeated surveys alternating between
+`Wetland at 10, 20` with a southward bearing and empty journal/status strings. DOM snapshots
+showed The Silted Granary open with its Leave control. The driver repeatedly walked into the
+place, lost its journal bearings because the place occupies the dock, and stepped back north
+through its stuck fallback. This is the exact trigger that the earlier log-only review could
+not establish; it supersedes the earlier uncertainty recorded in the PR.
+
+The navigation survey now uses the real Leave control whenever an intervening place is open,
+then awaits the journal before reading bearings. A browser regression starts at the Silted
+Granary and proves the next survey has both position and bearing. Disabling the Leave handling
+must fail that regression; this directly covers the failure from the recovered trace. Keep the
+separate scene-state movement wait as well: unchanged prose is still not proof of idle movement.
+
+Operational lesson: prefer the connector's artifact-download capability before concluding that
+CI traces are unavailable. Direct download denial does not establish that every authorized
+artifact route is blocked. Retrieve the returned file reference without sending archive bytes
+into model context; inspect only relevant trace records and images.

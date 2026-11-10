@@ -33,3 +33,16 @@ Addressed lazy-diary readiness at the missed Records paths, the landmark test's 
 Verification: typecheck and two movement predicate regression cases pass; production build and unchanged app budget pass at 219.4 KB. Both diary cases pass locally. Landmark passes with final pending-input handling (3.3 minutes); three consecutive pinning boots pass with browser-side geometry readiness. Failed intermediate pinning experiments and the CI-container/storage limitation are recorded in testing.md. Confirm both new push and PR runs on the final follow-up head before reporting CI green.
 
 Follow-up verification found push run 42750110123 failed while PR run 42750116103 passed on be60d46. Earlier diary/pin/landmark paths passed; the remaining overlap fixture opened its event modal while the key was still pending, and the export test omitted diary readiness. Fixed the overlap setup to detect moving and open the card atomically, and audited remaining Records tests for readiness. Both new failing paths pass locally; typecheck and movement regression cases pass. Both event runs must again be checked on the next head. Details are in testing.md.
+
+
+Trace recovery supersedes the earlier navigation uncertainty: the connector downloaded the old
+artifact despite direct-storage denial. The failed retry repeatedly entered the Silted Granary,
+which replaces the journal; empty bearings sent the driver back north. The survey now leaves an
+open place through its real control before reading the journal. A targeted Granary regression
+passes and is checked with Leave handling disabled. Full cause and recovery details: testing.md.
+The prior final head 414449a passed BOTH push run 42752040830 and PR run 42752046666; this small
+trace-confirmed follow-up needs the same final-head check before completion is reported.
+
+Final local trace-based verification: the full landmark walk passed in 2.5 minutes and the
+restored Granary regression passed. Disabling its Leave handling failed with an empty position,
+matching the old CI trace. Typecheck and movement regression cases passed before publication.

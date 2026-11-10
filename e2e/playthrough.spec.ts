@@ -25,6 +25,13 @@ const SEED = 'play-test';
  * the page.
  */
 async function survey(page: Page) {
+  // A place opened on arrival replaces the journal. Leave through the player's control before
+  // reading bearings; treating its missing journal as an empty bearing makes the driver loop.
+  const place = page.locator('.place');
+  if (await place.isVisible()) {
+    await place.getByRole('button', { name: 'Leave', exact: true }).click();
+    await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
+  }
   return page.evaluate(() => {
     const canvas = document.querySelector('.map-surface canvas')!.getBoundingClientRect();
     const notes = document.querySelector('.dock')?.getBoundingClientRect();
@@ -240,4 +247,15 @@ test('walk from the settlement to the landmark and get a page for it', { tag: '@
   expect((await download).suggestedFilename()).toBe(`south-of-tethys-${SEED}.png`);
 
   expect(problems, problems.join('\n')).toEqual([]);
+});
+
+
+test('landmark bearings remain available after leaving an intervening place', async ({ page }) => {
+  await page.goto('?seed=play-test&at=poi_silted_granary&hour=12');
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
+  const view = await survey(page);
+  expect(view.here).not.toBe('');
+  expect(view.status).toMatch(/lies .* of here/);
+  expect(bearing(view.status)).not.toBeNull();
+  await expect(page.locator('.place')).toHaveCount(0);
 });
