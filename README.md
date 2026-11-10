@@ -179,6 +179,7 @@ npx vite build          # dist/ now plays from any folder on any static host
 - [Handover: the crossing and the basalt](docs/handover-crossing-and-basalt.md) — both plans closed, the stamp rule they leave behind, and what is still open
 - [Publishing](docs/publishing.md) — where the game is live, the audience it is listed for, and how to release
 - [Testing notes](docs/testing.md) — what the failures here have cost, and the rules that came out of them
+- [Compact notebook](docs/compact-notebook.md) — diary typography, reading sizes and layout verification
 - [Art brief](docs/art-brief.md) — how the character art is specified, and what went wrong twice
 - [Source layout](src/README.md) — the four layers and the rules between them
 - [Playtest guide](src/PLAYTEST.md) — showcase seeds and what to look for

@@ -19,6 +19,8 @@
 // state, their own escape handling and their own focus behaviour, because they were correct
 // before this existed and consolidating surfaces is not a licence to rewrite them.
 
+import { NotebookMark } from './NotebookMark';
+
 export type RecordTab = 'journey' | 'collection' | 'people';
 
 export interface RecordTabsProps {
@@ -75,6 +77,7 @@ function Tab({
       className={selected ? 'records-tab is-on' : 'records-tab'}
       onClick={() => onTab(id)}
     >
+      <NotebookMark kind={id === 'journey' ? 'book' : id === 'collection' ? 'leaf' : 'people'} />
       {label}
       {/* The count is on the tab because it is the reason to press it: a diary with three
           discoveries under way is worth opening and an empty one is not. Hidden at zero rather
@@ -83,3 +86,6 @@ function Tab({
     </button>
   );
 }
+
+// Loaded only when the Records door is opened.
+export default RecordTabs;

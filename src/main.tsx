@@ -4,6 +4,7 @@ import { App } from './ui/App';
 import { Fallback } from './ui/Fallback';
 import { seedFromUrl } from './ui/seed';
 import './ui/styles.css';
+import './ui/notebook.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Missing #root — index.html and main.tsx have drifted apart.');

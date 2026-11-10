@@ -20,7 +20,7 @@ export function GoalsSection({ rows }: { rows: readonly GoalRow[] }) {
   if (rows.length === 0) return null;
   return (
     <section className="diary-section goals">
-      <h3>Goals</h3>
+      <h3 id="notebook-goals" tabIndex={-1}>Goals</h3>
       <ul className="goal-list">
         {rows.map((row) => (
           <li key={row.id} className="goal-row">

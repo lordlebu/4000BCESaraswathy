@@ -1,0 +1,240 @@
+/* Notebook-only typography. Other modal panels also use .diary, so never style that
+   shared class here. Fonts are bundled with the game, with their OFL licenses. */
+@font-face {
+  font-family: Caladea;
+  src: url('./fonts/caladea-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Caladea;
+  src: url('./fonts/caladea-latin-400-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: Caladea;
+  src: url('./fonts/caladea-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Carlito;
+  src: url('./fonts/carlito-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Carlito;
+  src: url('./fonts/carlito-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+.notebook-settings {
+  --notebook-prose: Caladea, Cambria, Georgia, serif;
+  --notebook-ui: Carlito, Calibri, 'Segoe UI', sans-serif;
+  --notebook-size: 0.875rem;
+  --notebook-control-size: 0.8125rem;
+  --notebook-title-size: 1.125rem;
+  --notebook-heading-size: 1rem;
+  --notebook-meta-size: 0.75rem;
+}
+.notebook-settings[data-reading-size='comfortable'] {
+  --notebook-size: 1rem;
+  --notebook-control-size: 0.9375rem;
+  --notebook-title-size: 1.2857rem;
+  --notebook-heading-size: 1.1429rem;
+  --notebook-meta-size: 0.8571rem;
+}
+.notebook-settings[data-reading-size='large'] {
+  --notebook-size: 1.125rem;
+  --notebook-control-size: 1.0625rem;
+  --notebook-title-size: 1.4464rem;
+  --notebook-heading-size: 1.2857rem;
+  --notebook-meta-size: 0.9643rem;
+}
+
+.field-diary {
+  --notebook-header-height: 6rem;
+  padding: 0.75rem 1rem 1rem;
+  font: var(--notebook-size)/1.45 var(--notebook-prose);
+  overflow-wrap: anywhere;
+  scroll-padding-block-start: var(--notebook-header-height);
+  background-image: linear-gradient(90deg, rgba(164, 92, 64, 0.045), transparent 2rem);
+}
+.field-diary .diary-section { margin-top: 0.75rem; }
+.field-diary :is(.entry, .question, .lexicon) { margin-bottom: 0.5rem; }
+.field-diary :is(h2, h3, h4, h5, button, select, .diary-sub, .disciplines, .entry-rungs, .notebook-size) {
+  font-family: var(--notebook-ui);
+}
+.field-diary .notebook-header {
+  position: sticky;
+  top: -0.75rem;
+  z-index: var(--z-dock);
+  margin: 0 -0.25rem;
+  padding: 0.5rem 0.25rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  background: var(--paper);
+  border-bottom: 1px solid var(--accent);
+}
+.field-diary .diary-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--notebook-title-size);
+  line-height: 1.2;
+}
+.field-diary .diary-sub { font-size: var(--notebook-meta-size); }
+.notebook-tools {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+.notebook-size {
+  display: grid;
+  gap: 0.125rem;
+  color: var(--muted);
+  font-size: var(--notebook-meta-size);
+  line-height: 1.2;
+}
+.field-diary :is(button, select) {
+  min-height: 44px;
+  min-width: 44px;
+  max-width: 100%;
+  font-size: var(--notebook-control-size);
+  white-space: normal;
+}
+.notebook-size select {
+  width: 8.5em;
+  padding: 0.25rem 0.375rem;
+  color: var(--ink);
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  background: var(--paper);
+}
+.field-diary .diary-section > h3 {
+  margin-bottom: 0.375rem;
+  font-size: var(--notebook-control-size);
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  text-transform: none;
+}
+.field-diary :is(.entry-head h4, .question h4) {
+  min-width: 0;
+  font-size: var(--notebook-heading-size);
+  line-height: 1.3;
+}
+.field-diary .entry-rungs { flex: none; font-size: var(--notebook-meta-size); }
+.field-diary :is(.reading.struck, .entry-blocked, .account, .word dd, .settling-step p, .goal-line) { font-size: 1em; }
+.field-diary :is(.disciplines li, .lexicon h4, .log-replay, .question h5, .account span, .evidence, .readings) { font-size: var(--notebook-control-size); }
+.field-diary .reading.struck { color: var(--muted); }
+.field-diary .evidence li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); font-size: 1em; }
+.field-diary .evidence li b { min-width: 0; }
+.field-diary .readings li p { font-size: 1em; }
+.field-diary .goal-line { min-width: 0; }
+.field-diary .goal-row button { flex: none; max-width: 35%; border-radius: 4px; padding: 0.25rem 0.5rem; }
+.field-diary .entry-blocked { margin-top: 0.25rem; }
+.field-diary .revisions { margin-top: 0.25rem; max-width: 74ch; }
+.field-diary .reading { margin-bottom: 0.125rem; }
+.field-diary .disciplines { margin-top: 0.5rem; gap: 0.25rem 0.75rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); }
+.field-diary .log-actions { flex-wrap: wrap; }
+.field-diary :is(.goal-row, .entry-head, .word) { min-width: 0; }
+.field-diary :is(h3[id], .entry h4) { scroll-margin-block-start: 0.5rem; }
+
+.notebook-mark {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  vertical-align: middle;
+}
+.notebook-shortcuts {
+  display: flex;
+  gap: 0.375rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.125rem;
+  scrollbar-width: thin;
+  font: var(--notebook-control-size, 0.8125rem)/1.2 var(--notebook-ui, Carlito, Calibri, sans-serif);
+}
+.notebook-shortcuts a {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 44px;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--edge);
+  border-radius: 3px 8px 3px 3px;
+  background: rgba(164, 92, 64, 0.05);
+  color: var(--ink);
+  text-decoration: none;
+}
+.notebook-shortcuts a:hover { background: rgba(164, 92, 64, 0.12); }
+.notebook-shortcuts a:focus-visible,
+.notebook-size select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Shared Records tabs keep their labels and hit areas in all three panels. */
+.records-tabs {
+  gap: 0.375rem;
+  overflow-x: auto;
+  padding: 0.125rem;
+  margin-bottom: 0.375rem;
+}
+.records-tab {
+  flex: none;
+  min-height: 44px;
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px 9px 0 0;
+  font-family: Carlito, Calibri, 'Segoe UI', sans-serif;
+  font-size: var(--notebook-control-size, 0.8125rem);
+}
+.records-count { opacity: 1; font-size: 0.925em; }
+
+/* Live field notes inherit size tokens from the stage, but keep the dock's fixed
+   geometry. Typography must never feed new heights back to the camera. */
+.notebook-settings .journal {
+  padding: 4px 14px 10px;
+  font: var(--notebook-size)/1.45 var(--notebook-prose);
+  overflow-wrap: anywhere;
+}
+.notebook-settings .journal h2 {
+  font-family: var(--notebook-ui);
+  font-size: var(--notebook-title-size);
+  line-height: 1.25;
+}
+.notebook-settings .journal :is(h3, .note dt) {
+  font-family: var(--notebook-ui);
+  font-size: var(--notebook-heading-size);
+  line-height: 1.3;
+}
+.notebook-settings .journal :is(.journal-place, .surroundings, .memory, .note-empty, .note dd, .doing, .underfoot) { font-size: 1em; }
+.notebook-settings .journal-notes { gap: 0 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+.notebook-settings .journal-notes h3 { margin: 0.5rem 0 0.25rem; }
+.notebook-settings .journal .note { margin-bottom: 0.5rem; }
+.notebook-settings .journal-foot { gap: 0.25rem 0.5rem; margin-top: 0.5rem; padding-top: 0.375rem; }
+.notebook-settings .journal-foot p { font-size: var(--notebook-control-size); }
+
+@media (orientation: portrait) {
+  .notebook-settings .journal-notes { grid-template-columns: 1fr; }
+}
+@media (max-width: 34rem) {
+  .field-diary { padding: 0.5rem 0.625rem 0.75rem; }
+  .field-diary .notebook-header { top: -0.5rem; }
+  .field-diary .evidence li { grid-template-columns: 1fr; gap: 0.125rem; }
+}

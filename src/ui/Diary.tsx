@@ -10,7 +10,7 @@
 // Presentation only. Every rule — whether a rung can advance, why it cannot, which readings
 // of a question are open — is asked of `journey.ts`. Nothing here recomputes a ladder.
 
-import { useRef, type ReactNode, type RefObject } from 'react';
+import { useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
 import {
   type Progress,
   blockedBy,
@@ -25,6 +25,8 @@ import { discoveries, discovery, vocabulary, word } from '../content/knowledge';
 import { QuestionCard } from './Questions';
 import { specimensIn } from './FieldKit';
 import { Modal } from './Modal';
+import type { ReadingSize } from './preferences';
+import { NotebookMark } from './NotebookMark';
 
 /** Canon's discipline ids, in the order a naturalist would keep them. */
 const DISCIPLINE_ORDER = [
@@ -105,6 +107,9 @@ function Entry({ id, progress, targetRef }: { id: string; progress: Progress; ta
 }
 
 export interface DiaryProps {
+  readingSize?: ReadingSize;
+  onReadingSize?: (size: ReadingSize) => void;
+  leadSections?: readonly { id: string; label: string }[];
   targetDiscoveryId?: string | null;
   progress: Progress;
   open: boolean;
@@ -126,6 +131,9 @@ export interface DiaryProps {
 }
 
 export function Diary({
+  readingSize = 'compact',
+  onReadingSize,
+  leadSections = [],
   targetDiscoveryId = null,
   progress,
   open,
@@ -137,8 +145,24 @@ export function Diary({
   tabs,
   lead
 }: DiaryProps) {
+  const pageRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
   const targetRef = useRef<HTMLHeadingElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+
+  // The sticky header may wrap at large text sizes. Measure its real height so section
+  // shortcuts and focused discovery entries never land underneath it.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const page = pageRef.current;
+    const header = headerRef.current;
+    if (!page || !header) return;
+    const measure = () => page.style.setProperty('--notebook-header-height', `${header.getBoundingClientRect().height + 8}px`);
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(header);
+    return () => observer?.disconnect();
+  }, [open]);
 
   // Escape, the focus trap and putting focus back all live in `Modal` now. What is left here is
   // *where* focus starts, which is the one part that is this panel's own business: the way out,
@@ -152,8 +176,7 @@ export function Diary({
   const questions = openQuestions(progress);
   const finished = noticed.filter((d) => isComplete(progress, d.id)).length;
 
-  // Denser as it fills, which is the design's strongest aesthetic idea. An empty diary is
-  // mostly paper; a full one is crowded with your own handwriting.
+  // Retain the density marker for existing callers; reading rhythm stays consistent.
   const density = noticed.length === 0 ? 'sparse' : noticed.length < 6 ? 'filling' : 'dense';
 
   // A diary is not empty because no discovery has been climbed. A question somebody asked you
@@ -162,24 +185,51 @@ export function Diary({
   const written =
     noticed.length > 0 || questions.length > 0 || Object.keys(languages).length > 0;
 
+  const shortcuts = [
+    ...leadSections,
+    ...DISCIPLINE_ORDER.filter(k => noticed.some(d => d.discipline === k)).map(k => ({ id: `notebook-${k}`, label: DISCIPLINE_NAME[k]! })),
+    ...(questions.length ? [{ id: 'notebook-questions', label: 'Questions' }] : []),
+    ...(specimensIn(progress).length ? [{ id: 'notebook-kit', label: 'Field kit' }] : []),
+    ...(finished ? [{ id: 'notebook-ending', label: 'If you stopped here' }] : []),
+    ...(Object.keys(languages).length ? [{ id: 'notebook-words', label: 'Words' }] : []),
+    ...(footer ? [{ id: 'notebook-export', label: 'Take it with you' }] : [])
+  ];
+
   return (
     <Modal open label="Field diary" onClose={onClose} initialFocus={targetDiscoveryId && noticed.some(d => d.id === targetDiscoveryId) ? targetRef : closeRef}>
-      <section className={`diary diary-${density}`}>
+      <section ref={pageRef} className={`diary diary-${density} field-diary notebook-settings`} data-reading-size={readingSize}>
         {tabs}
-        <header className="diary-head">
+        <header ref={headerRef} className="diary-head notebook-header">
           <div>
-            <h2>Field Diary</h2>
+            <h2><NotebookMark /> Field Diary</h2>
             <p className="diary-sub">
               {noticed.length === 0
-                ? 'Nothing written yet.'
+                ? (written ? 'Notes from the journey.' : 'Nothing written yet.')
                 : `${noticed.length} under way · ${finished} understood`}
             </p>
           </div>
-          <button type="button" ref={closeRef} className="diary-close" onClick={onClose}>
-            Close
-          </button>
+          <div className="notebook-tools">
+            {onReadingSize && <label className="notebook-size">Reading size
+              <select value={readingSize} onChange={event => onReadingSize(event.target.value as ReadingSize)}>
+                <option value="compact">Compact</option>
+                <option value="comfortable">Comfortable</option>
+                <option value="large">Large</option>
+              </select>
+            </label>}
+            <button type="button" ref={closeRef} className="diary-close" onClick={onClose}>
+              Close
+            </button>
+          </div>
         </header>
 
+        {shortcuts.length > 0 && <nav className="notebook-shortcuts" aria-label="Diary sections">
+          {shortcuts.map(({ id, label }) => <a key={id} href={`#${id}`} onClick={event => {
+            event.preventDefault();
+            const heading = pageRef.current?.querySelector<HTMLElement>(`#${id}`);
+            heading?.focus({ preventScroll: true });
+            heading?.scrollIntoView({ block: 'start', behavior: 'instant' });
+          }}><NotebookMark kind="section" />{label}</a>)}
+        </nav>}
         {lead}
 
         {!written ? (
@@ -213,7 +263,7 @@ export function Diary({
               if (here.length === 0) return null;
               return (
                 <section key={k} className="diary-section">
-                  <h3>{DISCIPLINE_NAME[k] ?? k}</h3>
+                  <h3 id={`notebook-${k}`} tabIndex={-1}>{DISCIPLINE_NAME[k] ?? k}</h3>
                   {here.map((d) => (
                     <Entry key={d.id} id={d.id} progress={progress} targetRef={d.id === targetDiscoveryId ? targetRef : undefined} />
                   ))}
@@ -223,7 +273,7 @@ export function Diary({
 
             {questions.length > 0 && (
               <section className="diary-section">
-                <h3>Open questions</h3>
+                <h3 id="notebook-questions" tabIndex={-1}>Open questions</h3>
                 {questions.map((q) => (
                   <QuestionCard
                     key={q.id}
@@ -239,7 +289,7 @@ export function Diary({
                 as soon as there is one thing in it to examine. */}
             {specimensIn(progress).length > 0 && (
               <section className="diary-section">
-                <h3>Field kit</h3>
+                <h3 id="notebook-kit" tabIndex={-1}>Field kit</h3>
                 <button type="button" className="ending-open" onClick={onOpenKit}>
                   Examine what you have found
                 </button>
@@ -250,7 +300,7 @@ export function Diary({
                 before that it would say nothing a player could act on. */}
             {discoveries.some((d) => isComplete(progress, d.id)) && (
               <section className="diary-section">
-                <h3>If you stopped here</h3>
+                <h3 id="notebook-ending" tabIndex={-1}>If you stopped here</h3>
                 <button type="button" className="ending-open" onClick={onOpenEnding}>
                   See who would come
                 </button>
@@ -259,7 +309,7 @@ export function Diary({
 
             {Object.keys(languages).length > 0 && (
               <section className="diary-section">
-                <h3>Words</h3>
+                <h3 id="notebook-words" tabIndex={-1}>Words</h3>
                 {Object.entries(languages).map(([lang, count]) => (
                   <div key={lang} className="lexicon">
                     <h4>

@@ -14,10 +14,15 @@
 // on screen it competed with the understanding this surface is for.
 
 import type { ReactNode } from 'react';
+import type { ReadingSize } from './preferences';
 import { Diary } from './Diary';
 import type { Progress as Knowledge } from '../journey';
 
 export interface ProgressProps {
+  readingSize?: ReadingSize;
+  onReadingSize?: (size: ReadingSize) => void;
+  hasGoals?: boolean;
+  hasSettling?: boolean;
   targetDiscoveryId?: string | null;
   progress: Knowledge;
   open: boolean;
@@ -36,6 +41,10 @@ export interface ProgressProps {
 }
 
 export function Progress({
+  readingSize,
+  onReadingSize,
+  hasGoals,
+  hasSettling,
   targetDiscoveryId = null,
   progress,
   open,
@@ -53,6 +62,12 @@ export function Progress({
 
   return (
     <Diary
+      readingSize={readingSize}
+      onReadingSize={onReadingSize}
+      leadSections={[
+        ...(hasGoals ? [{ id: 'notebook-goals', label: 'Goals' }] : []),
+        ...(hasSettling ? [{ id: 'notebook-settling', label: 'Settling' }] : [])
+      ]}
       targetDiscoveryId={targetDiscoveryId}
       tabs={tabs}
       lead={lead}
@@ -66,7 +81,7 @@ export function Progress({
         // Taking a copy is something you do to a record you have read, so it lives at the end
         // of the record rather than in a panel of its own.
         <section className="diary-section">
-          <h3>Take it with you</h3>
+          <h3 id="notebook-export" tabIndex={-1}>Take it with you</h3>
           <div className="log-actions">
             <button type="button" onClick={onExportImage}>
               Save as image
