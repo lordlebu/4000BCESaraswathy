@@ -5,19 +5,34 @@ illustrated notebook, with Dwarf Fortress-like information density, small serif 
 sans-serif controls. Bundle open fonts, offer a saved reading-size control, illustrate Records
 tabs and provide shortcuts to populated diary sections.
 
+## Status — 10 November 2026
+
+All four implementation phases are complete. [PR #257](https://github.com/lordlebu/4000BCESaraswathy/pull/257)
+is open and unmerged. Implementation commit `c65f8e9` passed both
+[push CI](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/42807846698) and
+[PR CI](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/42807855300), including type
+checking, unit tests, builds, bundle/canon checks and all eight browser shards without retries.
+These results apply to that implementation commit; subsequent documentation commits have their
+own checks.
+
+The remaining milestone is review and release: explicit merge approval is pending. After approval,
+merge the reviewed PR, let the existing `pages.yml` workflow deploy, and verify the live diary.
+The merge has not occurred and the redesigned diary has not been verified on the live site.
+An itch.io release or version tag is a separate action.
+
 ## Implementation
 
-- Phase 1: inspect actual typography and capture the original game in an isolated checkout of
-  `e55caaf`. Review desktop 1280×800, phone 390×844, small phone 360×800 and landscape 844×390,
+- Phase 1 — complete: inspected actual typography and captured the original game in an isolated checkout of
+  `e55caaf`. Reviewed desktop 1280×800, phone 390×844, small phone 360×800 and landscape 844×390,
   using `?seed=notebook-review&hour=12&at=poi_eastern_field` and one Look closer.
-- Phase 2: Caladea prose and Carlito controls, bundled WOFF2 with OFL licenses. Defaults: 14px
+- Phase 2 — complete: Caladea prose and Carlito controls, bundled WOFF2 with OFL licenses. Defaults: 14px
   prose, 13px controls, 16px entry headings and 18px title at the browser's default root size;
   line height 1.45. Comfortable and Large use 16px and 18px prose, with supporting text scaled
   proportionally. `preferences.ts` stores the optional choice alongside existing screen choices.
-- Phase 3: small decorative SVG ink drawings on the Journey, Met and People tabs. A scrollable
+- Phase 3 — complete: small decorative SVG ink drawings on the Journey, Met and People tabs. A scrollable
   row links to populated sections and focuses their headings without hiding previous readings.
   The sticky header's measured height provides clearance for wrapping controls and focused text.
-- Phase 4: component, preference and browser regression checks, rendered screenshots, build and
+- Phase 4 — complete: component, preference and browser regression checks, rendered screenshots, build and
   bundle budgets. `e2e/notebook*.spec.ts` covers normal and dense reading scenarios.
 
 `notebook.css` is intentionally scoped to `.field-diary` and `.notebook-settings .journal`:

@@ -855,3 +855,11 @@ retain their explicit readiness wait and target-focus assertions. The saved-entr
 other content assertions keep their original expectations and budgets. Normal and delayed
 reload checks plus both People-tab cases pass locally; scene placement remains a separate
 setup precondition, as fixed in the notebook reload case above.
+
+Verification closed on implementation head `c65f8e9`: both
+[push run 42807846698](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/42807846698) and
+[PR run 42807855300](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/42807855300)
+completed successfully. Type checking, unit tests, builds, bundle/canon checks and all eight
+browser shards passed; completed browser logs reported no retries. These are commit-specific CI
+results, not a claim that the PR has merged or the live Pages deployment has been verified.
+See [the notebook status](compact-notebook.md#status--10-november-2026) for the remaining release milestone.
