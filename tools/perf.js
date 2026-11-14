@@ -159,9 +159,9 @@ async function measure() {
     page.on('pageerror', (e) => errors.push(String(e)));
 
     await page.goto(`http://localhost:${PORT}${URL_PATH}`, { waitUntil: 'domcontentloaded' });
-    // The journal heading is the last thing written when the scene is up, so it is the signal that
-    // the world is built rather than merely that the bundle loaded.
-    await page.locator('.journal h2').first().waitFor({ timeout: 120_000 });
+    // The scene installs this after creating the player. A place panel can cover the
+    // journal at arrival, so its visibility is not a readiness signal for every map.
+    await page.waitForFunction(() => Boolean(window.__walker), { timeout: 120_000 });
     await page.waitForTimeout(2500);
 
     // Which renderer actually answered. A machine that gives headless Chromium hardware

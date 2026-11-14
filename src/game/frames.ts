@@ -1433,10 +1433,16 @@ const TALLER: Record<string, number> = {
 
 /** The box an animal's side view is fitted to, in tiles. */
 /**
- * The one wanderer kept shorter than the whale's two tiles: the Sinauli wagon, a tile and a quarter
- * from the ox's nose to the back of the car, side-on -- the owner's size, 4 October 2026.
+ * The wagon is a tile and a quarter from ox to car. Small mainland wildlife has its own
+ * shorter box so a fox or bird is not enlarged to the whale's two-tile default.
  */
-const SHORTER: Record<string, number> = { 'sinauli-wagon': 1.25 };
+const SHORTER: Record<string, number> = {
+  'sinauli-wagon': 1.25,
+  'desert-fox': 0.55,
+  'river-otter': 0.6,
+  'monsoon-crane': 0.45,
+  'tethys-pelican': 0.65
+};
 
 export function boxFor(speciesId: string): { long: number; tall: number } {
   return { long: SHORTER[speciesId] ?? WANDERER_BOX.long, tall: TALLER[speciesId] ?? WANDERER_BOX.tall };

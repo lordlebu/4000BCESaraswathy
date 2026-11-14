@@ -10,6 +10,9 @@ test('new city art loads and the ostrich tram follows the causeway in both direc
   const ride=page.getByRole('button',{name:/ride the ostrich tram/i});
   await expect(ride).toBeEnabled({timeout:45000});
   expect(loaded.some(u=>u.includes('ground.png'))).toBe(true);expect(loaded.some(u=>u.includes('objects.png'))).toBe(true);
+  const wildlife=await page.evaluate(()=>(window as unknown as {__wanderers:()=>{id:string;texture:string;w:number}[]}).__wanderers());
+  expect(wildlife).toHaveLength(4);
+  for(const animal of wildlife){expect(animal.texture).toMatch(/^wanderer-art:/);expect(animal.w,animal.id).toBeLessThan(90);}
   const walker=()=>page.evaluate(()=>(window as unknown as {__walker:()=>{riding:boolean;carriage:boolean;at:{x:number;y:number}}}).__walker());
   await page.keyboard.press('KeyB');
   await expect.poll(async()=>(await walker()).riding,{timeout:10000}).toBe(true);

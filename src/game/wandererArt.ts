@@ -37,7 +37,7 @@ export type { Facing };
  */
 const files = import.meta.glob<string>('../../assets/wanderers/*.{png,webp}', {
   eager: true,
-  query: '?url',
+  query: '?url&no-inline',
   import: 'default'
 });
 

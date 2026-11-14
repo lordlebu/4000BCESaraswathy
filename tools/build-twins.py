@@ -167,6 +167,44 @@ for direction in range(4):
 sheet(trams,48,40,'tram',4)
 print('Built twins: 48 terrain frames, 10 hut-scale houses, 72 objects, 32 route pieces, four tram views.')
 
+# Species-specific map silhouettes; never let the generic whale-like stand-in
+# imply that a fox or a coastal bird is a large fish walking through the desert.
+wildlife=OUT.parent/'wanderers'
+for animal in ('desert-fox','river-otter','monsoon-crane','tethys-pelican'):
+ for facing in ('right','left','down','up'):
+    im=canvas(32,32);d=ImageDraw.Draw(im)
+    bird=animal in ('monsoon-crane','tethys-pelican')
+    if facing in ('right','left'):
+      if not bird:
+        c='mud' if animal=='desert-fox' else 'mud2'
+        d.ellipse((7,13,24,23),fill=P[c]);d.ellipse((21,10,29,19),fill=P[c])
+        d.polygon([(8,17),(1,10),(2,20),(11,23)],fill=P[c])
+        rect(d,(0,10,3,14),'cream' if animal=='desert-fox' else c)
+        for x in (10,20):rect(d,(x,21,x+2,27),'ink')
+        if animal=='desert-fox':
+          d.polygon([(22,12),(23,5),(26,12)],fill=P[c]);d.polygon([(26,12),(29,6),(29,15)],fill=P[c])
+        else:rect(d,(21,10,23,12),'mud')
+        rect(d,(27,13,28,14),'ink');rect(d,(29,16,31,17),'ink');rect(d,(15,15,21,18),'sand2')
+      else:
+        d.ellipse((6,12,24,23),fill=P['cream']);d.ellipse((8,14,20,20),fill=P['hill'])
+        rect(d,(23,6,25,18),'cream');rect(d,(22,4,27,8),'cream')
+        rect(d,(26,6,31,7),'mud');rect(d,(25,5,25,5),'ink')
+        if animal=='tethys-pelican':d.polygon([(26,8),(31,8),(27,13)],fill=P['sand2'])
+        else:rect(d,(23,3,25,4),'brick')
+        for x in (12,20):rect(d,(x,22,x,29),'mud2');rect(d,(x,29,x+3,29),'mud2')
+      if facing=='left':im=im.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    else:
+      c='cream' if bird else 'mud' if animal=='desert-fox' else 'mud2'
+      d.ellipse((10,11,22,25),fill=P[c]);d.ellipse((12,6,20,15),fill=P[c])
+      rect(d,(11,24,13,29),'mud2');rect(d,(19,24,21,29),'mud2')
+      if facing=='down':
+        rect(d,(13,9,13,10),'ink');rect(d,(19,9,19,10),'ink')
+        rect(d,(15,12,17,16),'mud2' if bird else 'ink')
+      else:rect(d,(14,8,18,11),'hill' if bird else 'sand2')
+      if animal=='desert-fox':
+        d.polygon([(11,8),(12,2),(15,8)],fill=P[c]);d.polygon([(18,8),(21,2),(21,9)],fill=P[c])
+    finish(im).resize((128,128),Image.Resampling.NEAREST).save(wildlife/(animal+'-'+facing+'.png'),optimize=True)
+
 # Notebook illustrations are built from the same original drawings, with exact lookup names.
 # This avoids the old generic place painting implying the wrong city's architecture.
 import json

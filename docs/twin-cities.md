@@ -41,6 +41,9 @@ comprises desert foxes, river otters, monsoon cranes and Tethys pelicans. Mainla
 filtering excludes island-only species. Three camp clearings rotate under the existing
 distance rules for roads and places.
 
+All four moving species have dedicated sprites in four directions. Their display bounds
+keep the smaller animals below hut width, avoiding the generic large-animal placeholder.
+
 ## Reproduce the art and demonstrations
 
 `python tools/build-twins.py` builds the original terrain, houses, walls, natural edges,
@@ -85,3 +88,7 @@ Consistent object scale, readable routes, district identity and sparse wildernes
 established tile-RPG practice; this is a design assessment, not an industry certification.
 Browser checks cover transport and diary use. A full human playtest and performance review
 on player hardware remain useful before release; software-renderer timings are not player FPS.
+
+`npm run perf -- --map=field_map_twins --seed=twin-review --json` measures the region on
+the available renderer. Readiness uses the actual scene rather than a journal heading
+that an arrival panel can cover. Compare measurements taken in the same sitting.
