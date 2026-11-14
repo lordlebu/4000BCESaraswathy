@@ -1,0 +1,59 @@
+[
+  {
+    "id": "field_map_dwarka",
+    "width": 48,
+    "height": 48,
+    "centre": {
+      "x": 12,
+      "y": 31,
+      "name": "Raampura"
+    },
+    "houseFrame": [
+      80,
+      88
+    ],
+    "placements": 5891
+  },
+  {
+    "id": "field_map_lothal",
+    "width": 48,
+    "height": 48,
+    "centre": {
+      "x": 12,
+      "y": 31,
+      "name": "Paimepura"
+    },
+    "houseFrame": [
+      80,
+      88
+    ],
+    "placements": 7435
+  },
+  {
+    "id": "field_map_twins",
+    "width": 64,
+    "height": 64,
+    "centre": {
+      "x": 18,
+      "y": 18,
+      "name": "Harappa"
+    },
+    "houseFrame": [
+      80,
+      88
+    ],
+    "placements": 441,
+    "cities": [
+      {
+        "name": "Harappa",
+        "tiles": 41,
+        "houses": 20
+      },
+      {
+        "name": "Mohenjodaro",
+        "tiles": 41,
+        "houses": 14
+      }
+    ]
+  }
+]

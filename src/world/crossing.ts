@@ -735,6 +735,7 @@ const ROPE_ANCHOR = 2;
  * that it has nothing under it is the point, not a reason to draw a ladder there.
  */
 export function isRope(world: World, x: number, y: number): boolean {
+  if (world.twinRegion) return false;
   if (isRail(world, y)) return false;
 
   // Nothing under it but air or water -- the flag is the only reason a walker can be here.
@@ -814,6 +815,7 @@ export function startOnTheSouthernShore(world: World): void {
  * no gaps. The route this returns is the middle column, which is the one a train would sit on.
  */
 export function trackRoute(world: World): Point[] {
+  if (world.twinRegion) return world.twinRegion.rail.map(p => ({...p}));
   const tracked = world.tiles.flat().filter((t) => t.track);
   if (tracked.length === 0) return [];
 
@@ -842,6 +844,7 @@ export function trackRoute(world: World): Point[] {
  * and there is nothing there to step onto.
  */
 export function canBoardAt(world: World, at: Point): boolean {
+  if (world.twinRegion) return world.twinRegion.stations.some(p => p.x===at.x && p.y===at.y);
   const tile = world.tiles[at.y]?.[at.x];
   if (!tile?.track) return false;
   if (tile.biome === 'sea' || tile.biome === 'sky_underside') return false;

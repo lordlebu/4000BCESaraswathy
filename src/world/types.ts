@@ -1,3 +1,4 @@
+import type { TwinRegion } from './twinCities';
 // Shapes shared by the generator, the content layer, and the Phaser scenes.
 //
 // This module imports nothing. Everything downstream of it — including the scenes — depends on
@@ -157,6 +158,8 @@ export interface River {
 }
 
 export interface World {
+  /** Optional, so existing worlds keep their exact save and generation contract. */
+  twinRegion?: TwinRegion;
   seed: string;
   width: number;
   height: number;

@@ -5699,6 +5699,21 @@
       ],
       "notes": "A two-wheeled cart drawn by a Steppe-Plumed Elephantbird, the shaggy ratite merchants tamed for burden on the coast roads. Faster than an ox and less patient; it walks at the pace it chooses and the driver walks beside it. The owner's paintings of every cart road between the maps, 1 October 2026, draw this bird in the shafts, and Kunch has always gone about 'up on a bird' -- so the roads moved to the art.",
       "source_index": 14
+    },
+    {
+      "id": "vehicle_ostrich_tram",
+      "type": "vehicle",
+      "name": "Ostrich tram",
+      "kind": "tram",
+      "crosses": [
+        "settlement",
+        "plains",
+        "desert",
+        "river"
+      ],
+      "capacity": 6,
+      "materials": [],
+      "notes": "A light wheeled carriage drawn along the causeway railway by a Giant Riding Ostrich. The road stays open beside it."
     }
   ]
 }

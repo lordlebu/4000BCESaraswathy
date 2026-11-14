@@ -15,7 +15,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { fieldMap, fieldMaps } from '../src/content/places';
+import { fieldMap, fieldMaps as classicAndDistrictMaps } from '../src/content/places';
 import { easeRoutes, thinRoad } from '../src/world/routes';
 import { planRiverBridges, planRoad, planScene } from '../src/game/scenePlan';
 import {
@@ -30,6 +30,9 @@ import {
 import { isWalkable } from '../src/world/generate';
 import { DEFAULT_SEED } from '../src/ui/seed';
 import type { World } from '../src/world/types';
+
+// Original art/route contracts. District art, geometry and reachability are covered in twinCities.test.ts.
+const fieldMaps = classicAndDistrictMaps.filter(m => m.relief !== 'river_valley');
 
 const built = (id: string, seed = DEFAULT_SEED) =>
   buildFieldMap(fieldMap(id)!, { seed });

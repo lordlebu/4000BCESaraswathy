@@ -6,7 +6,8 @@
 
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { fieldMaps } from '../src/content/places';
+import { fieldMaps as classicAndDistrictMaps } from '../src/content/places';
+const fieldMaps = classicAndDistrictMaps.filter(m => m.relief !== 'river_valley');
 import { planScene, planCliffs, planCliffJoints } from '../src/game/scenePlan';
 import {
   FEATURES,
@@ -26,6 +27,8 @@ import type { CornerPiece, Edge } from '../src/game/frames';
 
 const worlds = fieldMaps.map((map) => ({ id: map.id, built: buildFieldMap(map, {}) }));
 const only = (id: string) => worlds.find((w) => w.id === id)!;
+
+// Original art/route contracts. District art, geometry and reachability are covered in twinCities.test.ts.
 
 describe('things that stand up touch the ground', () => {
   it('gives every standing feature a shadow, and every flat one none', () => {

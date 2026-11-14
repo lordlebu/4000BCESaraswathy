@@ -419,7 +419,7 @@ describe('the Aravali crossing', () => {
 
   it('leaves every other map without a rail', () => {
     for (const map of fieldMaps) {
-      if (map.id === 'field_map_aravali') continue;
+      if (['field_map_aravali','field_map_twins'].includes(map.id)) continue;
       const world = buildFieldMap(map, { seed: DEFAULT_SEED }).world;
       expect(planTrack(world), `${map.id} grew a railway`).toEqual([]);
     }

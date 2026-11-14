@@ -380,7 +380,7 @@ function companyOn(fieldMapId: string): typeof COMPANY {
     .sort((a, b) => (counts[b.culture] ?? 0) - (counts[a.culture] ?? 0) || (a.id === 'company_pilgrim' ? -1 : 1));
   const walking = [carrier, ...others].slice(0, ROAD_COMPANY_PER_MAP);
   const kin = COMPANY.filter((c) => c.beside && walking.some((w) => w.culture === c.beside));
-  return [...walking, ...kin];
+  return fieldMapId === 'field_map_twins' ? walking : [...walking, ...kin];
 }
 
 /**

@@ -12,7 +12,8 @@
 
 import { describe, expect, it } from 'vitest';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { fieldMaps } from '../src/content/places';
+import { fieldMaps as classicAndDistrictMaps } from '../src/content/places';
+const fieldMaps = classicAndDistrictMaps.filter(m => m.relief !== 'river_valley');
 import type { BiomeId } from '../src/world/types';
 import {
   planScene,
@@ -60,6 +61,8 @@ function shoreEdges(
   }
   return n;
 }
+
+// Original art/route contracts. District art, geometry and reachability are covered in twinCities.test.ts.
 
 describe('the shore keeps its line and gains a thickness', () => {
   it('draws the shadow on the water side of every boundary, exactly once', () => {

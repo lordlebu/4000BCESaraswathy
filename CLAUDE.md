@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Varuna's Field Diary** — a cozy 2D browser naturalist RPG. Combat is absent by design; creatures
 are observed, not fought.
 
-The player travels between authored **field maps** (four, left only from each map's cart point),
+The player travels between authored **field maps** (five, left from each map's travel points),
 walks each one, stands in **points of interest**, talks to the people there, and looks closely at
 things. Looking closely climbs a **discovery** one rung, and each rung rewrites its diary entry —
 *the diary is the progression system*, and there are no experience points anywhere. Understanding
@@ -18,6 +18,9 @@ it move in. The Aravali is never settled; it is the crossing.
 
 The older loop — a procedural world with a landmark to find and a travel journal to export — still
 runs underneath, deliberately kept. See "Known issues".
+
+The Saraswati twin-cities map and its latest scale and art decisions are documented in
+[docs/twin-cities.md](docs/twin-cities.md).
 
 Stack: **React 19 + Phaser 4 + TypeScript + Vite**. React owns the DOM chrome, Phaser owns the map
 canvas, and the game logic belongs to neither.
@@ -385,7 +388,7 @@ data/making/ (the game's own: crafting, homesteads)  →  src/content/making.ts,
 ```
 
 **Everything in `data/canon/` is generated. Never hand-edit it.** Canon lives in the sibling
-`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 537 entities
+`SouthOfTethys` repository and now exports *its own shape* rather than this engine's: 581 entities
 across species, places, discoveries and world. To change any of it, edit the canon entity there and
 re-run `python utils/export_canon_bundle.py --apply`.
 

@@ -55,6 +55,11 @@ const the = (name: string): string => name.replace(/^The /, 'the ');
 export function settlingRoad(fieldMapId: string, homestead: Homestead | null, facts: SettlingFacts): SettlingRoad | null {
   const map = fieldMap(fieldMapId);
   if (!map) return null;
+  if (!homestead && fieldMapId==='field_map_twins') {
+    const helped=facts.standing.helped;
+    const tasks=[['npc_twin_mason','Look closely at the shade in Harappa’s courtyard.'],['npc_twin_waterkeeper','Follow the two channels in Mohenjodaro’s drain court.'],['npc_twin_maintainer','Study the rooted bank beside the causeway.']] as const;
+    return {title:'What the cities keep',steps:[],next:tasks.find(([id])=>!helped.includes(id))?.[1] ?? 'Visit the Three Channels, then return to the Shaded Courtyard to keep the cities’ final page.'};
+  }
   if (!homestead) {
     return {
       title: map.name,

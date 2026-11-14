@@ -12,11 +12,11 @@ import { SHELTER_LABEL } from './JournalPanel';
 import { ShelterMark } from './ShelterMark';
 import type { TileAction } from './TileActions';
 import type { Step } from '../content/making-chain';
-import { CollectionPanel } from './CollectionPanel';
+const CollectionPanel = lazy(() => import('./CollectionPanel').then(module => ({ default: module.CollectionPanel })));
 import { diaryCount } from '../content/discoveryChanges';
 import { Ending } from './Ending';
 import { FieldKit } from './FieldKit';
-import { Overworld } from './Overworld';
+const Overworld = lazy(() => import('./Overworld').then(module => ({ default: module.Overworld })));
 import { initialSurface, surfaceReducer } from './surface';
 import { readShowing, writeShowing, type ReadingSize } from './preferences';
 import { arrivalPoint, fieldMap, fieldMaps, poi } from '../content/places';
@@ -27,13 +27,13 @@ import { SatchelStrip } from './SatchelStrip';
 import type { RecordTab } from './Records';
 const RecordTabs = lazy(() => import('./Records'));
 
-import { PeoplePanel } from './PeoplePanel';
+const PeoplePanel = lazy(() => import('./PeoplePanel').then(module => ({ default: module.PeoplePanel })));
 import { met } from '../content/people';
 import { freshSeed, rememberSeed, seedFromUrl } from './seed';
 import { JourneySeed } from './journeySeed';
 import { SettlingSection } from './SettlingSection';
 import { settlingRoad } from '../content/settlingRoad';
-import { WorkshopPanel } from './WorkshopPanel';
+const WorkshopPanel = lazy(() => import('./WorkshopPanel').then(module => ({ default: module.WorkshopPanel })));
 import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
 import { standingLine } from '../content/gathering';
@@ -248,6 +248,9 @@ export function App() {
   const [targetDiscoveryId, setTargetDiscoveryId] = useState<string | null>(null);
   const recordsRef = useRef<HTMLButtonElement>(null);
   const [progress, setProgress] = useState(initialJourney.current.progress);
+  useEffect(() => {
+    if (world?.twinRegion) EventBus.emitEvent('twin-knowledge', {completed: discoveries.filter(d=>isComplete(progress,d.id)).map(d=>d.id)});
+  }, [world, progress]);
 
   // What the traveller is carrying. Every rule about changing it lives in `content/satchel.ts`
   // and `content/crafting.ts`; this only holds it and hands it to the save, exactly as
@@ -1073,7 +1076,8 @@ export function App() {
     // **Asked of the rule, never recomputed here.** `rideFrom` decides whether there is a line,
     // where it goes and which carriage runs it; this reads the answer and writes a sentence about
     // it. A panel that worked out the far station itself would be a second copy of `railSpan`.
-    const ride = world && arrival ? rideFrom(world, arrival.at) : null;
+    const tramClosed = Boolean(world?.twinRegion && moment?.timeOfDay === 'night');
+    const ride = world && arrival && !tramClosed ? rideFrom(world, arrival.at) : null;
     // Why the row is *there* when it is refused, which is this panel's convention: a line you are
     // standing on but cannot board from teaches that the carriage calls at the islands.
     const onTheLine = Boolean(
@@ -1128,7 +1132,7 @@ export function App() {
             {
               id: 'ride',
               label: ride ? `Ride the ${ride.vehicle.name.toLowerCase()}` : 'Ride the line',
-              detail: ride
+              detail: tramClosed ? 'The ostrich rests at night. The road is open.' : ride
                 ? `${ride.tiles} tiles of rail, at a quarter of the walking.`
                 : undefined,
               mark: '🚋',
@@ -1137,7 +1141,7 @@ export function App() {
                 : atTheFarEnd
                   ? 'You are at the far station. The line runs the other way.'
                   : onTheLine
-                    ? 'Out on the span. The carriage calls at the islands.'
+                    ? world?.twinRegion ? 'Board at either city platform.' : 'Out on the span. The carriage calls at the islands.'
                     : 'Not on the line.',
               key: 'B',
               onDo: () => {
@@ -1782,6 +1786,7 @@ export function App() {
       />
       </Suspense>}
 
+      {surface === 'collection' && <Suspense fallback={null}>
       <CollectionPanel
         tabs={
           <Suspense fallback={null}><RecordTabs
@@ -1797,7 +1802,9 @@ export function App() {
         onClose={() => dispatch({ type: 'close' })}
         canAsk={canon.lore}
       />
+      </Suspense>}
 
+      {surface === 'people' && <Suspense fallback={null}>
       <PeoplePanel
         tabs={
           <Suspense fallback={null}><RecordTabs
@@ -1813,6 +1820,7 @@ export function App() {
         open={surface === 'people'}
         onClose={() => dispatch({ type: 'close' })}
       />
+      </Suspense>}
 
       <FieldKit
         progress={progress}
@@ -1828,6 +1836,7 @@ export function App() {
         onClose={() => dispatch({ type: 'close-interrupt', which: 'satchel' })}
       />
 
+      {interrupts.workshop && <Suspense fallback={null}>
       <WorkshopPanel
         satchel={satchel}
         bench={bench}
@@ -1850,6 +1859,7 @@ export function App() {
           dispatch({ type: 'close-interrupt', which: 'workshop' });
         }}
       />
+      </Suspense>}
 
       {/* The negotiation at a ground, while one is open: a new ground starts a new conversation. */}
       {negotiation && <Negotiation key={negotiation.ground.id} {...negotiation} />}
@@ -1888,6 +1898,7 @@ export function App() {
         />
       )}
 
+      {interrupts.overworld && <Suspense fallback={null}>
       <Overworld
         current={fieldMapId}
         progress={progress}
@@ -1897,6 +1908,7 @@ export function App() {
         onTravel={travel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'overworld' })}
       />
+      </Suspense>}
 
       {/* One surface, two layers: the notes are the floor, a place sits over them, and canon
           is a section inside the notes rather than a panel of its own. */}

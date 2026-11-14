@@ -68,7 +68,7 @@ describe('the line can be ridden', () => {
     // Named rather than counted map-wide: a suite that only asserted "some map offers a ride"
     // would pass while a railway quietly appeared on the Narmada.
     for (const { id, built } of worlds) {
-      if (id === 'field_map_aravali') continue;
+      if (['field_map_aravali','field_map_twins'].includes(id)) continue;
       const world = built.world;
       expect(trackRoute(world), `${id} should have no line`).toEqual([]);
       for (const t of world.tiles.flat().slice(0, 200)) {

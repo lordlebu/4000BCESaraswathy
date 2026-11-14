@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.5.2",
+  "canon_version": "3.6.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -1315,6 +1315,207 @@
       ]
     },
     {
+      "id": "discovery_twin_banks",
+      "type": "discovery",
+      "name": "Roots Beside the Opening",
+      "discipline": "botany",
+      "found_at": [
+        "poi_twin_causeway"
+      ],
+      "levels": [
+        {
+          "entry": "Reeds grow close to the bridge opening."
+        },
+        {
+          "entry": "The central opening is clear. Most of the stems stand against the banks."
+        },
+        {
+          "entry": "Bare patches upstream are giving up silt while the rooted bank holds."
+        },
+        {
+          "entry": "Clear the driftwood at the opening, keep the rooted margins. The maintainer and landing keeper now have a line they can both care for."
+        }
+      ],
+      "helps": [
+        "npc_twin_maintainer",
+        "npc_twin_landingkeeper"
+      ]
+    },
+    {
+      "id": "discovery_twin_bricks",
+      "type": "discovery",
+      "name": "The Cool Side of the Brick",
+      "discipline": "archaeology",
+      "found_at": [
+        "poi_planted_ruins"
+      ],
+      "levels": [
+        {
+          "entry": "The exposed brick feels warm; the inner face is cool."
+        },
+        {
+          "entry": "The unroofed rooms keep a patch of shade all afternoon."
+        },
+        {
+          "entry": "The planted rooms use old walls as shelter, with the drain kept outside their roots."
+        },
+        {
+          "entry": "A roof is not the only useful part of a house. The gardener has kept what the plants need."
+        }
+      ],
+      "helps": []
+    },
+    {
+      "id": "discovery_twin_delta",
+      "type": "discovery",
+      "name": "The Smallest Channel",
+      "discipline": "geography",
+      "found_at": [
+        "poi_reed_junction"
+      ],
+      "levels": [
+        {
+          "entry": "The smallest channel looks blocked by reeds."
+        },
+        {
+          "entry": "A leaf moves through it even when the surface looks still."
+        },
+        {
+          "entry": "Fish enter the shade and leave through gaps beneath the stems."
+        },
+        {
+          "entry": "The quiet channel is connected. It does not need to look like the open river to be working."
+        }
+      ],
+      "helps": []
+    },
+    {
+      "id": "discovery_twin_desert",
+      "type": "discovery",
+      "name": "Life Between the Dunes",
+      "discipline": "zoology",
+      "found_at": [
+        "poi_desert_ground"
+      ],
+      "levels": [
+        {
+          "entry": "The dune face appears untouched."
+        },
+        {
+          "entry": "Tracks converge on the saltbush in the sheltered hollow."
+        },
+        {
+          "entry": "At midday the tracks end at shade or burrows."
+        },
+        {
+          "entry": "The empty sand is part of the habitat too. Planting it thickly would replace this country, not mend it."
+        }
+      ],
+      "helps": []
+    },
+    {
+      "id": "discovery_twin_drains",
+      "type": "discovery",
+      "name": "Two Channels, Two Jobs",
+      "discipline": "geography",
+      "found_at": [
+        "poi_drain_court"
+      ],
+      "levels": [
+        {
+          "entry": "Only one of the two drains has been cleared."
+        },
+        {
+          "entry": "The clear channel carries the quick flow; water seeps slowly through the reed bed."
+        },
+        {
+          "entry": "The water leaving the reeds carries less suspended silt."
+        },
+        {
+          "entry": "The water keeper needs one open channel and one planted one. Clearing both would remove half the system."
+        }
+      ],
+      "helps": [
+        "npc_twin_waterkeeper",
+        "npc_twin_brickworker"
+      ]
+    },
+    {
+      "id": "discovery_twin_nests",
+      "type": "discovery",
+      "name": "Rooms Without Roofs",
+      "discipline": "zoology",
+      "found_at": [
+        "poi_nesting_ruins"
+      ],
+      "levels": [
+        {
+          "entry": "The rooms look empty from the lane."
+        },
+        {
+          "entry": "Grass stems catch on the holes in the mortar. Birds enter carrying more."
+        },
+        {
+          "entry": "The occupied holes face away from the afternoon sun."
+        },
+        {
+          "entry": "These rooms have tenants. Repair the leaning outer wall and leave the occupied courses alone."
+        }
+      ],
+      "helps": []
+    },
+    {
+      "id": "discovery_twin_salt",
+      "type": "discovery",
+      "name": "Two Waters in One Cove",
+      "discipline": "geography",
+      "found_at": [
+        "poi_twin_cove"
+      ],
+      "levels": [
+        {
+          "entry": "The cove tastes of salt at its outer edge."
+        },
+        {
+          "entry": "Fresh river water enters above the mangrove roots."
+        },
+        {
+          "entry": "Different plants hold the fresher channel and the saline margin."
+        },
+        {
+          "entry": "A cove is several habitats meeting. Keeping the freshwater inlet open matters more than making every bank look alike."
+        }
+      ],
+      "helps": []
+    },
+    {
+      "id": "discovery_twin_shade",
+      "type": "discovery",
+      "name": "The Wall Around the Roots",
+      "discipline": "botany",
+      "found_at": [
+        "poi_harappa_court"
+      ],
+      "levels": [
+        {
+          "entry": "The wall is cracked beside the neem."
+        },
+        {
+          "entry": "The oldest cracks are dry. New plaster stops short of the living roots."
+        },
+        {
+          "entry": "At noon the shaded jars stay cool. The tree is doing work the courtyard needs."
+        },
+        {
+          "entry": "The mason can repair the loose upper course without cutting the roots. A wall can be kept without making the courtyard bare."
+        }
+      ],
+      "helps": [
+        "npc_twin_mason",
+        "npc_twin_gardener"
+      ]
+    },
+    {
       "id": "discovery_whale_in_the_hills",
       "type": "discovery",
       "name": "The Whale in the Hills",
@@ -1699,6 +1900,72 @@
       ],
       "local_knowledge": "Marn's people graze them, maintain the odd fallen course out of habit, and have no account of who built them. They will tell you the ground up there stays wet, and offer it as a fact about the ground.",
       "academic_hypothesis": "The survey of 388 assigns them a devotional function on the grounds of scale and effort, reasoning that no agricultural return could justify the labour. The reasoning is sound and the premise -- that the population was the present population -- is assumed rather than established."
+    },
+    {
+      "id": "question_twin_rooms",
+      "type": "field_question",
+      "question": "When is an empty building no longer abandoned?",
+      "discipline": "geography",
+      "raised_at": "poi_nesting_ruins",
+      "raised_by": "npc_twin_mason",
+      "evidence": [
+        "discovery_twin_nests",
+        "discovery_twin_shade",
+        "discovery_twin_bricks"
+      ],
+      "resolutions": [
+        {
+          "conclusion": "The city should roof every room before another winter.",
+          "requires": [
+            "discovery_twin_nests"
+          ],
+          "sound": false,
+          "revisit": "Something is thriving in the part I called unused.",
+          "revisit_after": "discovery_twin_shade"
+        },
+        {
+          "conclusion": "A room can shelter nests, plants or shade without sheltering a household. Keep its useful walls and repair the parts that threaten its neighbours.",
+          "requires": [
+            "discovery_twin_nests",
+            "discovery_twin_shade",
+            "discovery_twin_bricks"
+          ],
+          "sound": true
+        }
+      ]
+    },
+    {
+      "id": "question_twin_water",
+      "type": "field_question",
+      "question": "Which channels need clearing, and which are doing their work quietly?",
+      "discipline": "geography",
+      "raised_at": "poi_drain_court",
+      "raised_by": "npc_twin_waterkeeper",
+      "evidence": [
+        "discovery_twin_drains",
+        "discovery_twin_banks",
+        "discovery_twin_delta"
+      ],
+      "resolutions": [
+        {
+          "conclusion": "Every reed should be removed so water can move freely.",
+          "requires": [
+            "discovery_twin_drains"
+          ],
+          "sound": false,
+          "revisit": "Something is thriving in the part I called unused.",
+          "revisit_after": "discovery_twin_banks"
+        },
+        {
+          "conclusion": "Keep a clear route for the quick flow and leave connected planted margins to hold silt and shelter life.",
+          "requires": [
+            "discovery_twin_drains",
+            "discovery_twin_banks",
+            "discovery_twin_delta"
+          ],
+          "sound": true
+        }
+      ]
     },
     {
       "id": "question_two_names",

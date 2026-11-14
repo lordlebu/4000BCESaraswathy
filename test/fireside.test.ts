@@ -30,7 +30,7 @@ describe("canon's fireside stories", () => {
 
   it("are two for every kind the owner kept", () => {
     for (const kind of ['adventurers', 'dacoits', 'pilgrims', 'drovers']) {
-      expect(events.filter((e) => e.conditions.camps.includes(kind)).length, kind).toBe(2);
+      expect(events.filter((e) => e.conditions.camps.includes(kind) && e.conditions.fieldMaps.length===0).length, kind).toBe(2);
     }
   });
 

@@ -236,6 +236,8 @@ export interface GameToUi {
  * sketch recorded an otter.
  */
 export interface UiToGame {
+  'twin-knowledge': { completed: string[] };
+
   'new-journey': { seed: string };
   /**
    * Walk as somebody else, without restarting the journey.

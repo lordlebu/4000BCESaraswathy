@@ -1,3 +1,4 @@
+import { planTwinScene } from './twinArt';
 // What goes where on the map, decided without an engine.
 //
 // `WorldScene` used to work out *what* to draw and *how* to draw it in the same loop. Only the
@@ -72,8 +73,10 @@ import type { CliffTurn, Edge } from './frames';
 
 /** Which sheet a placement draws from. `marker` is the fallback glyph, which has no sheet. */
 export type PlacementSheet =
+  | 'twinObjects' | 'twinRoutes'
   | 'terrain'
   | 'huts'
+  | 'twinHouses'
   | 'overdraw'
   | 'features'
   | 'flora'
@@ -1232,6 +1235,7 @@ export function planMarkers(built: FieldMapWorld): Placement[] {
  * world return the same plan, which is what makes it worth asserting against.
  */
 export function planScene(built: FieldMapWorld): Placement[] {
+  if (built.world.twinRegion) return planTwinScene(built);
   // **A forecourt round every place**: the tile it stands on and the eight around it, kept clear of
   // huts, scrub and props, so a place has ground in front of it and the road arrives somewhere.
   const forecourt = forecourtsOf(built);

@@ -437,7 +437,8 @@ export function mayLeaveFrom(fieldMapId: string, standingOn: string | null): { o
  * prose describes. Reading only the cart points set every arriving traveller down on a floating
  * island in the middle of the strait.
  */
-export function arrivalPoint(fieldMapId: string): string | null {
+export function arrivalPoint(fieldMapId: string, from?: string): string | null {
+  if (fieldMapId==='field_map_twins' && from==='field_map_lothal') return 'poi_twin_landing';
   return arrivalOf(fieldMapId);
 }
 

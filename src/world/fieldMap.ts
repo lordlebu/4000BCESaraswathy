@@ -1,3 +1,4 @@
+import { buildTwinCities, TWIN_MAP } from './twinCities';
 // Turning a canon field map into ground the player can walk.
 //
 // This is the join the whole two-repo split was built for. Canon names Lothal, gives it a
@@ -616,6 +617,7 @@ export interface BuildOptions {
  * sees has to pass the seed a player has.**
  */
 export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): FieldMapWorld {
+  if (fieldMap.id === TWIN_MAP) return buildTwinCities(fieldMap, options.seed ?? fieldMap.id, poisOn(fieldMap.id));
   const {
     seed = fieldMap.id,
     width = EXTENT[fieldMap.proportion][fieldMap.scale].width,
