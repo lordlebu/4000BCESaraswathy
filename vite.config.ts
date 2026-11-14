@@ -105,6 +105,10 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    // Keep small sprite PNGs as cacheable files too. Inlining compressed pixel art
+    // puts every image into the app's JS; avoiding it leaves room for panels to be
+    // ready at boot instead of fetching their code on the player's first press.
+    assetsInlineLimit: 0,
     // Phaser is ~1 MB minified and will always trip the default warning. Raise it so a real
     // regression in our own bundle size is still visible.
     chunkSizeWarningLimit: 1500,

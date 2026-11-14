@@ -72,7 +72,9 @@ Local demo:
 Canon v3.6.0 owns places, people and writing; the game owns geography, art and transport
 rules. Ground, journey and knowledge version numbers remain unchanged. Two-city metadata
 is optional, preserving older maps and journeys. Map-size and bundle budgets are unchanged.
-The main app loads secondary notebook/workshop/map panels lazily to stay within its budget.
+The workshop, collection, people and map panels load with the app so their first press
+responds immediately. Small sprite assets remain separate cacheable files instead of
+being embedded in JavaScript, keeping the app within its unchanged bundle budget.
 
 ## Later phases
 

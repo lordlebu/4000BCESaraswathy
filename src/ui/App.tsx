@@ -12,11 +12,11 @@ import { SHELTER_LABEL } from './JournalPanel';
 import { ShelterMark } from './ShelterMark';
 import type { TileAction } from './TileActions';
 import type { Step } from '../content/making-chain';
-const CollectionPanel = lazy(() => import('./CollectionPanel').then(module => ({ default: module.CollectionPanel })));
+import { CollectionPanel } from './CollectionPanel';
 import { diaryCount } from '../content/discoveryChanges';
 import { Ending } from './Ending';
 import { FieldKit } from './FieldKit';
-const Overworld = lazy(() => import('./Overworld').then(module => ({ default: module.Overworld })));
+import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { readShowing, writeShowing, type ReadingSize } from './preferences';
 import { arrivalPoint, fieldMap, fieldMaps, poi } from '../content/places';
@@ -27,13 +27,13 @@ import { SatchelStrip } from './SatchelStrip';
 import type { RecordTab } from './Records';
 const RecordTabs = lazy(() => import('./Records'));
 
-const PeoplePanel = lazy(() => import('./PeoplePanel').then(module => ({ default: module.PeoplePanel })));
+import { PeoplePanel } from './PeoplePanel';
 import { met } from '../content/people';
 import { freshSeed, rememberSeed, seedFromUrl } from './seed';
 import { JourneySeed } from './journeySeed';
 import { SettlingSection } from './SettlingSection';
 import { settlingRoad } from '../content/settlingRoad';
-const WorkshopPanel = lazy(() => import('./WorkshopPanel').then(module => ({ default: module.WorkshopPanel })));
+import { WorkshopPanel } from './WorkshopPanel';
 import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
 import { standingLine } from '../content/gathering';
@@ -1786,7 +1786,6 @@ export function App() {
       />
       </Suspense>}
 
-      {surface === 'collection' && <Suspense fallback={null}>
       <CollectionPanel
         tabs={
           <Suspense fallback={null}><RecordTabs
@@ -1802,9 +1801,7 @@ export function App() {
         onClose={() => dispatch({ type: 'close' })}
         canAsk={canon.lore}
       />
-      </Suspense>}
 
-      {surface === 'people' && <Suspense fallback={null}>
       <PeoplePanel
         tabs={
           <Suspense fallback={null}><RecordTabs
@@ -1820,7 +1817,6 @@ export function App() {
         open={surface === 'people'}
         onClose={() => dispatch({ type: 'close' })}
       />
-      </Suspense>}
 
       <FieldKit
         progress={progress}
@@ -1836,7 +1832,6 @@ export function App() {
         onClose={() => dispatch({ type: 'close-interrupt', which: 'satchel' })}
       />
 
-      {interrupts.workshop && <Suspense fallback={null}>
       <WorkshopPanel
         satchel={satchel}
         bench={bench}
@@ -1859,7 +1854,6 @@ export function App() {
           dispatch({ type: 'close-interrupt', which: 'workshop' });
         }}
       />
-      </Suspense>}
 
       {/* The negotiation at a ground, while one is open: a new ground starts a new conversation. */}
       {negotiation && <Negotiation key={negotiation.ground.id} {...negotiation} />}
@@ -1898,7 +1892,6 @@ export function App() {
         />
       )}
 
-      {interrupts.overworld && <Suspense fallback={null}>
       <Overworld
         current={fieldMapId}
         progress={progress}
@@ -1908,7 +1901,6 @@ export function App() {
         onTravel={travel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'overworld' })}
       />
-      </Suspense>}
 
       {/* One surface, two layers: the notes are the floor, a place sits over them, and canon
           is a section inside the notes rather than a panel of its own. */}
