@@ -148,6 +148,7 @@ export function useHappenings({
           // noticed, and recipes somebody has shown them. Assembled here because App is the only
           // thing that holds a Progress.
           holds: [...p.words, ...Object.keys(p.rungs), ...p.recipes],
+          completed: Object.keys(p.rungs).filter(id=>isComplete(p,id)),
           seen: seenEvents.current,
           met: metStrangers.current,
           last: eventDays.current,

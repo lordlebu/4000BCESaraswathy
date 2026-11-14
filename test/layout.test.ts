@@ -8,7 +8,10 @@
 import { describe, expect, it } from 'vitest';
 import { LOOPS, networkLegs } from '../src/world/routes';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { fieldMaps } from '../src/content/places';
+import { fieldMaps as classicAndDistrictMaps } from '../src/content/places';
+
+// Original art/route contracts. District art, geometry and reachability are covered in twinCities.test.ts.
+const fieldMaps = classicAndDistrictMaps.filter(m => m.relief !== 'river_valley');
 
 describe('the road network', () => {
   it('joins every stop, with a spanning tree and at most a couple of loops', () => {

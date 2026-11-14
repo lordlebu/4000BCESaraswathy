@@ -104,7 +104,8 @@ describe('neighbours are closer than strangers', () => {
   it('so the picture agrees with the connections it draws', () => {
     // If the furthest joined pair is further apart than the nearest unjoined pair, the drawing
     // misleads: two places look adjacent while no road exists, and two joined places look distant.
-    const { furthestRoad, nearestStranger } = spread(shape);
+    // Distance ordering holds within the original island. Sea roads to mainland ports need not be shortest.
+    const { furthestRoad, nearestStranger } = spread(overworldShape(fieldMaps.filter(m=>m.continent==='jambhudweepa')));
     expect(
       furthestRoad,
       `furthest road ${furthestRoad.toFixed(1)} vs nearest stranger ${nearestStranger.toFixed(1)}`
@@ -196,7 +197,7 @@ describe('the drawing fits what is drawn', () => {
     // "The Aravali is the top-most part of insular India, and connects to Asia by the floating
     // island and the train line." Canon pins it; this holds the drawing to it. y grows southward.
     const aravali = shape.nodes.find((n) => n.id === 'field_map_aravali')!;
-    for (const n of shape.nodes) expect(aravali.y, `${n.name} is drawn above the Aravali`).toBeLessThanOrEqual(n.y);
+    for (const n of shape.nodes.filter(n=>fieldMaps.find(m=>m.id===n.id)?.continent==='jambhudweepa')) expect(aravali.y, `${n.name} is drawn above the Aravali`).toBeLessThanOrEqual(n.y);
   });
 
   it('falls back to canon’s square when nothing is placed', () => {

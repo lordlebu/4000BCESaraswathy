@@ -79,6 +79,7 @@ function groundOf(seed: string): Ground | null {
  * everything, as before landmasses existed.
  */
 export function landmassAt(seed: string, at: Point): Landmass | null {
+  if (seed.startsWith('twins:')) return 'mainland_asia';
   const ground = groundOf(seed);
   if (!ground) return null;
   return ground.across.get(`${at.x},${at.y}`) ?? ground.continent;

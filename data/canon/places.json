@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.5.2",
+  "canon_version": "3.6.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -227,6 +227,22 @@
       ]
     },
     {
+      "id": "region_saraswati_twin_valley",
+      "type": "region",
+      "name": "The Mainland Saraswati Valley",
+      "continent": "mainland_asia",
+      "biomes": [
+        "desert",
+        "hills",
+        "plains",
+        "settlement",
+        "river",
+        "wetland",
+        "coast",
+        "sea"
+      ]
+    },
+    {
       "id": "region_shattered_sea",
       "type": "region",
       "name": "Shattered Sea & Mappa Mundi",
@@ -330,7 +346,8 @@
       ],
       "neighbours": [
         "field_map_lothal",
-        "field_map_narmada"
+        "field_map_narmada",
+        "field_map_twins"
       ],
       "arrival": "The ranges come down to the water in steps of grey stone, and stop. Where they stop there is a rail-head, a shed, and a line of iron running out over the strait on trestles of pale timber. Two islands hang above the water along it, holding themselves up out of nothing anybody here will explain, and the rain that falls on their undersides falls upward. The far shore is a green smudge that is not Jambhudweepa. People cross. Nobody says much about the islands.",
       "climate": {
@@ -378,6 +395,19 @@
           "keeper": {
             "npc": "npc_hesh",
             "line": "The cart for the plateau waits at the far end. It waits longer than the line does."
+          }
+        },
+        {
+          "to": "field_map_twins",
+          "by": "vehicle_elephantbird_cart",
+          "art": "journey-aravali-twins",
+          "prose": [
+            "The Saraswati runs through green banks in a country of sand.",
+            "The two cities come into view on opposite banks, with a road and railway between them."
+          ],
+          "keeper": {
+            "npc": "npc_hesh",
+            "line": "North to the twin cities. The river still runs there."
           }
         }
       ],
@@ -492,7 +522,8 @@
       "neighbours": [
         "field_map_aravali",
         "field_map_dwarka",
-        "field_map_narmada"
+        "field_map_narmada",
+        "field_map_twins"
       ],
       "climate": {
         "clear": 58,
@@ -546,6 +577,19 @@
           "keeper": {
             "npc": "npc_kunch",
             "line": "Up the scarp, then. Sing on the steep part. The bird likes it, and so will you."
+          }
+        },
+        {
+          "to": "field_map_twins",
+          "by": "vehicle_coastal_dhow",
+          "art": "journey-lothal-twins",
+          "prose": [
+            "The Saraswati runs through green banks in a country of sand.",
+            "The two cities come into view on opposite banks, with a road and railway between them."
+          ],
+          "keeper": {
+            "npc": "npc_thrali",
+            "line": "North to the twin cities. The river still runs there."
           }
         }
       ],
@@ -676,6 +720,85 @@
           }
         }
       ]
+    },
+    {
+      "id": "field_map_twins",
+      "type": "field_map",
+      "name": "Harappa and Mohenjodaro",
+      "region": "region_saraswati_twin_valley",
+      "scale": "large",
+      "relief": "river_valley",
+      "seed_biomes": [
+        "desert",
+        "hills",
+        "plains",
+        "settlement",
+        "river",
+        "wetland",
+        "coast",
+        "sea"
+      ],
+      "points_of_interest": [
+        "poi_harappa_court",
+        "poi_earthen_workshop",
+        "poi_nesting_ruins",
+        "poi_harappa_station",
+        "poi_brick_quarter",
+        "poi_drain_court",
+        "poi_planted_ruins",
+        "poi_twin_landing",
+        "poi_twin_causeway",
+        "poi_desert_ground",
+        "poi_reed_junction",
+        "poi_twin_cove"
+      ],
+      "neighbours": [
+        "field_map_aravali",
+        "field_map_lothal"
+      ],
+      "coordinates": {
+        "x": 39,
+        "y": 12
+      },
+      "departs_from": [
+        "poi_harappa_station",
+        "poi_twin_landing"
+      ],
+      "arrival": "Ochre walls above the river, red brick below. Between them an ostrich draws a tram along the causeway. The road keeps beside it. Some of the rooms have roofs, some have trees, and somebody is looking after both.",
+      "climate": {
+        "clear": 75,
+        "mist": 10,
+        "rain": 13,
+        "storm": 2
+      },
+      "roads": [
+        {
+          "to": "field_map_aravali",
+          "by": "vehicle_elephantbird_cart",
+          "art": "journey-aravali-twins",
+          "prose": [
+            "The Saraswati runs through green banks in a country of sand.",
+            "The two cities come into view on opposite banks, with a road and railway between them."
+          ],
+          "keeper": {
+            "npc": "npc_twin_stationkeeper",
+            "line": "The way is open. Come back when you like."
+          }
+        },
+        {
+          "to": "field_map_lothal",
+          "by": "vehicle_coastal_dhow",
+          "art": "journey-lothal-twins",
+          "prose": [
+            "The Saraswati runs through green banks in a country of sand.",
+            "The two cities come into view on opposite banks, with a road and railway between them."
+          ],
+          "keeper": {
+            "npc": "npc_twin_landingkeeper",
+            "line": "The way is open. Come back when you like."
+          }
+        }
+      ]
     }
   ],
   "points_of_interest": [
@@ -752,6 +875,22 @@
       "arrival": "Every settlement has a midden and this one has the usual fish spine and oyster shell and broken pot. It also has, at intervals, layers of something else — and the intervals are the interesting part."
     },
     {
+      "id": "poi_brick_quarter",
+      "type": "point_of_interest",
+      "name": "The Raised Brick Quarter",
+      "field_map": "field_map_twins",
+      "kind": "settlement",
+      "terrain": [
+        "settlement"
+      ],
+      "arrival": "Red brick steps lift the doorways above an open drain. There is washing on the parapets and a platform for the tram.",
+      "description": "Red brick steps lift the doorways above an open drain. There is washing on the parapets and a platform for the tram.",
+      "discoveries": [],
+      "npcs": [
+        "npc_twin_brickworker"
+      ]
+    },
+    {
       "type": "point_of_interest",
       "field_map": "field_map_dwarka",
       "id": "poi_caravan_camp",
@@ -809,6 +948,40 @@
       ]
     },
     {
+      "id": "poi_desert_ground",
+      "type": "point_of_interest",
+      "name": "The Sheltered Caravan Ground",
+      "field_map": "field_map_twins",
+      "kind": "travel_node",
+      "terrain": [
+        "desert"
+      ],
+      "arrival": "A hollow holds the wind off the ground. The dunes beyond it are bare except for saltbush and the tracks around it.",
+      "description": "A hollow holds the wind off the ground. The dunes beyond it are bare except for saltbush and the tracks around it.",
+      "discoveries": [
+        "discovery_twin_desert"
+      ],
+      "npcs": []
+    },
+    {
+      "id": "poi_drain_court",
+      "type": "point_of_interest",
+      "name": "The Divided Drain",
+      "field_map": "field_map_twins",
+      "kind": "eco_site",
+      "terrain": [
+        "settlement"
+      ],
+      "arrival": "One channel has been swept clean. Reeds stand in the parallel channel, which nobody seems in a hurry to clear.",
+      "description": "One channel has been swept clean. Reeds stand in the parallel channel, which nobody seems in a hurry to clear.",
+      "discoveries": [
+        "discovery_twin_drains"
+      ],
+      "npcs": [
+        "npc_twin_waterkeeper"
+      ]
+    },
+    {
       "type": "point_of_interest",
       "field_map": "field_map_lothal",
       "id": "poi_drowned_dockyard",
@@ -846,6 +1019,22 @@
       ],
       "description": "Three seawalls, one behind the other, each built when the last stopped working.",
       "arrival": "You can wade the outermost at low water and stand on the innermost without getting your feet wet, and between them is four hundred years of a city agreeing, twice, that the sea had won that round."
+    },
+    {
+      "id": "poi_earthen_workshop",
+      "type": "point_of_interest",
+      "name": "The Earthen Workshop",
+      "field_map": "field_map_twins",
+      "kind": "settlement",
+      "terrain": [
+        "settlement"
+      ],
+      "arrival": "Fresh plaster dries beside a wall whose lower courses have been left open for small nesting birds.",
+      "description": "Fresh plaster dries beside a wall whose lower courses have been left open for small nesting birds.",
+      "discoveries": [],
+      "npcs": [
+        "npc_twin_mason"
+      ]
     },
     {
       "type": "point_of_interest",
@@ -984,6 +1173,41 @@
       "description": "A mill in good repair, turning, with nobody in sight and nothing to sell to.",
       "arrival": "White ceramic, rounded like a pot, braced in pale wood that somebody has oiled this year. A vine has been trained up one side rather than pulled off it. There are planters by the door with something flowering in them. The sails turn steadily in air that is not obviously moving, and inside, behind the door, the querns are running: you can feel it through the boards before you hear it. What comes out is black grit, bagged, stacked, more of it than anyone has carried down in a long time. Nobody answers.",
       "shore": "far"
+    },
+    {
+      "id": "poi_harappa_court",
+      "type": "point_of_interest",
+      "name": "The Shaded Courtyard",
+      "field_map": "field_map_twins",
+      "kind": "settlement",
+      "terrain": [
+        "settlement"
+      ],
+      "arrival": "A neem shades the water jars. The plaster behind it has been repaired around the roots, not over them.",
+      "description": "A neem shades the water jars. The plaster behind it has been repaired around the roots, not over them.",
+      "discoveries": [
+        "discovery_twin_shade"
+      ],
+      "npcs": [
+        "npc_twin_gardener"
+      ]
+    },
+    {
+      "id": "poi_harappa_station",
+      "type": "point_of_interest",
+      "name": "Harappa Tram Yard",
+      "field_map": "field_map_twins",
+      "kind": "travel_node",
+      "terrain": [
+        "settlement"
+      ],
+      "arrival": "An ostrich stands in loose harness beside a little wheeled carriage. Beyond the platform the road and the rails keep their own sides of the causeway.",
+      "description": "An ostrich stands in loose harness beside a little wheeled carriage. Beyond the platform the road and the rails keep their own sides of the causeway.",
+      "discoveries": [],
+      "npcs": [
+        "npc_twin_stationkeeper",
+        "npc_twin_handler"
+      ]
     },
     {
       "id": "poi_herders_terraces",
@@ -1224,6 +1448,24 @@
       "arrival": "It is smaller than the word suggests and busier than the quiet suggests. Nine halls, a yard with a rain gauge in it that has been read twice a day for four hundred and eleven years, and a great many people being careful. Nobody here is a fool. That turns out to matter more than the alternative would have."
     },
     {
+      "id": "poi_nesting_ruins",
+      "type": "point_of_interest",
+      "name": "The Unroofed Rooms",
+      "field_map": "field_map_twins",
+      "kind": "archaeological_site",
+      "terrain": [
+        "settlement"
+      ],
+      "arrival": "Nobody sleeps in these rooms. There is grain husk at the thresholds and a bird carrying grass into the wall.",
+      "description": "Nobody sleeps in these rooms. There is grain husk at the thresholds and a bird carrying grass into the wall.",
+      "discoveries": [
+        "discovery_twin_nests"
+      ],
+      "npcs": [
+        "npc_twin_mason"
+      ]
+    },
+    {
       "id": "poi_nomad_ground",
       "type": "point_of_interest",
       "name": "Nomad Ground",
@@ -1241,6 +1483,24 @@
         "npc_anu"
       ],
       "shore": "near"
+    },
+    {
+      "id": "poi_planted_ruins",
+      "type": "point_of_interest",
+      "name": "The Planted Rooms",
+      "field_map": "field_map_twins",
+      "kind": "eco_site",
+      "terrain": [
+        "settlement"
+      ],
+      "arrival": "The roof went long ago. Someone has kept the walls for shade and planted the rooms with herbs.",
+      "description": "The roof went long ago. Someone has kept the walls for shade and planted the rooms with herbs.",
+      "discoveries": [
+        "discovery_twin_bricks"
+      ],
+      "npcs": [
+        "npc_twin_gardener"
+      ]
     },
     {
       "id": "poi_quiet_atelier",
@@ -1278,6 +1538,24 @@
         "npc_ila"
       ],
       "shore": "near"
+    },
+    {
+      "id": "poi_reed_junction",
+      "type": "point_of_interest",
+      "name": "The Three Channels",
+      "field_map": "field_map_twins",
+      "kind": "eco_site",
+      "terrain": [
+        "wetland"
+      ],
+      "arrival": "The Saraswati divides here. The smallest channel looks still until a floating leaf finds it.",
+      "description": "The Saraswati divides here. The smallest channel looks still until a floating leaf finds it.",
+      "discoveries": [
+        "discovery_twin_delta"
+      ],
+      "npcs": [
+        "npc_twin_waterkeeper"
+      ]
     },
     {
       "type": "point_of_interest",
@@ -1411,6 +1689,57 @@
       ],
       "description": "Trading twice a day, around a tide that decides when the floor is a floor.",
       "arrival": "The market runs on the low water and stops on the high, so the day has two mornings and two evenings and everybody's sense of time is bent around it. Prices are quoted in what the tide will allow rather than in what a thing is worth."
+    },
+    {
+      "id": "poi_twin_causeway",
+      "type": "point_of_interest",
+      "name": "The Open Crossing",
+      "field_map": "field_map_twins",
+      "kind": "travel_node",
+      "terrain": [
+        "plains",
+        "river"
+      ],
+      "arrival": "The road runs beside the railway. Through the bridge openings the river carries reeds south without slowing.",
+      "description": "The road runs beside the railway. Through the bridge openings the river carries reeds south without slowing.",
+      "discoveries": [
+        "discovery_twin_banks"
+      ],
+      "npcs": [
+        "npc_twin_maintainer"
+      ]
+    },
+    {
+      "id": "poi_twin_cove",
+      "type": "point_of_interest",
+      "name": "The Quiet Coves",
+      "field_map": "field_map_twins",
+      "kind": "eco_site",
+      "terrain": [
+        "coast"
+      ],
+      "arrival": "Fresh water lies over salt in the cove. There are fish below the roots and a pelican drying its wings beyond them.",
+      "description": "Fresh water lies over salt in the cove. There are fish below the roots and a pelican drying its wings beyond them.",
+      "discoveries": [
+        "discovery_twin_salt"
+      ],
+      "npcs": []
+    },
+    {
+      "id": "poi_twin_landing",
+      "type": "point_of_interest",
+      "name": "The Southern Landing",
+      "field_map": "field_map_twins",
+      "kind": "travel_node",
+      "terrain": [
+        "coast"
+      ],
+      "arrival": "The boat waits in a sheltered bend above the salt line. The sewn sail is being mended with a needle too large to lose.",
+      "description": "The boat waits in a sheltered bend above the salt line. The sewn sail is being mended with a needle too large to lose.",
+      "discoveries": [],
+      "npcs": [
+        "npc_twin_landingkeeper"
+      ]
     },
     {
       "id": "poi_vedda_ford",
@@ -2490,6 +2819,269 @@
       "sex": "male"
     },
     {
+      "id": "npc_twin_brickworker",
+      "type": "npc",
+      "name": "Renu",
+      "role": "brickworker",
+      "found_at": [
+        "poi_brick_quarter"
+      ],
+      "language": "harappan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_bricks"
+      ],
+      "lines": [
+        {
+          "text": "We build the thresholds high and leave the drains open. A pretty street that sends water indoors is a bad street.",
+          "gives": [
+            "discovery_twin_bricks"
+          ]
+        },
+        {
+          "text": "Count the steps at the doors. The people who laid them knew how high the water could come."
+        },
+        {
+          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "requires": [
+            "discovery_twin_bricks"
+          ]
+        },
+        {
+          "text": "The work you helped us understand is keeping this place useful.",
+          "requires": [
+            "discovery_twin_drains"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_twin_gardener",
+      "type": "npc",
+      "name": "Nemi",
+      "role": "courtyard gardener",
+      "found_at": [
+        "poi_harappa_court",
+        "poi_planted_ruins"
+      ],
+      "language": "harappan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_shade"
+      ],
+      "lines": [
+        {
+          "text": "The empty rooms are the best garden I have. The walls keep the afternoon off it.",
+          "gives": [
+            "discovery_twin_shade"
+          ]
+        },
+        {
+          "text": "I water the planted rooms in the morning and come back to the courtyard when the shade reaches the jars."
+        },
+        {
+          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "requires": [
+            "discovery_twin_shade"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_twin_handler",
+      "type": "npc",
+      "name": "Pavi",
+      "role": "tram handler",
+      "found_at": [
+        "poi_harappa_station"
+      ],
+      "language": "harappan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_nests"
+      ],
+      "lines": [
+        {
+          "text": "The bird knows both yards. I bring the water and change the harness at the end. The carriage only follows.",
+          "gives": [
+            "discovery_twin_nests"
+          ]
+        },
+        {
+          "text": "A harness comes loose at the yard. A working bird should not spend its rest pulling against the carriage."
+        },
+        {
+          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "requires": [
+            "discovery_twin_nests"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_twin_landingkeeper",
+      "type": "npc",
+      "name": "Oru",
+      "role": "landing keeper",
+      "found_at": [
+        "poi_twin_landing"
+      ],
+      "language": "harappan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_salt"
+      ],
+      "lines": [
+        {
+          "text": "Lothal is across the sea. The boat waits in fresh water while the tide makes up its mind.",
+          "gives": [
+            "discovery_twin_salt"
+          ]
+        },
+        {
+          "text": "The boat has room. We wait for water, never for somebody to finish a notebook."
+        },
+        {
+          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "requires": [
+            "discovery_twin_salt"
+          ]
+        },
+        {
+          "text": "The work you helped us understand is keeping this place useful.",
+          "requires": [
+            "discovery_twin_banks"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_twin_maintainer",
+      "type": "npc",
+      "name": "Denu",
+      "role": "causeway maintainer",
+      "found_at": [
+        "poi_twin_causeway"
+      ],
+      "language": "harappan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_banks"
+      ],
+      "lines": [
+        {
+          "text": "Driftwood out of the middle, roots left at the sides. Come back after rain and you can see why.",
+          "gives": [
+            "discovery_twin_banks"
+          ]
+        },
+        {
+          "text": "The road stays open while the tram runs. Keep to its side and you can watch it pass."
+        },
+        {
+          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "requires": [
+            "discovery_twin_banks"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_twin_mason",
+      "type": "npc",
+      "name": "Eru",
+      "role": "earthen mason",
+      "found_at": [
+        "poi_earthen_workshop",
+        "poi_nesting_ruins"
+      ],
+      "language": "harappan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_shade"
+      ],
+      "lines": [
+        {
+          "text": "I patch above the roots. Cutting them would give me a sound wall and a courtyard nobody could sit in.",
+          "gives": [
+            "discovery_twin_shade"
+          ]
+        },
+        {
+          "text": "The older courses are sound. It is the fresh loose plaster I am watching."
+        },
+        {
+          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "requires": [
+            "discovery_twin_shade"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_twin_stationkeeper",
+      "type": "npc",
+      "name": "Tavra",
+      "role": "station keeper",
+      "found_at": [
+        "poi_harappa_station"
+      ],
+      "language": "harappan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_desert"
+      ],
+      "lines": [
+        {
+          "text": "Harappa above, Mohenjodaro below. Walk the road or ask for the tram. Neither city is going anywhere.",
+          "gives": [
+            "discovery_twin_desert"
+          ]
+        },
+        {
+          "text": "Both platforms have a place to sit. The keeper at the southern landing will tell you about the boat."
+        },
+        {
+          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "requires": [
+            "discovery_twin_desert"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npc_twin_waterkeeper",
+      "type": "npc",
+      "name": "Seli",
+      "role": "water keeper",
+      "found_at": [
+        "poi_drain_court",
+        "poi_reed_junction"
+      ],
+      "language": "harappan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_drains"
+      ],
+      "lines": [
+        {
+          "text": "That channel is clear because I clear it. This one has reeds because I leave them.",
+          "gives": [
+            "discovery_twin_drains"
+          ]
+        },
+        {
+          "text": "A moving leaf tells me more about the water than an empty channel does."
+        },
+        {
+          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "requires": [
+            "discovery_twin_drains"
+          ]
+        }
+      ]
+    },
+    {
       "id": "npc_uma",
       "type": "npc",
       "name": "Uma",
@@ -2910,6 +3502,264 @@
             "discovery_mask_niche"
           ]
         }
+      ]
+    },
+    {
+      "id": "happening_twin_arrival",
+      "type": "happening",
+      "title": "Two Cities, One Crossing",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "prose": "Tavi showed me the separate road and rail. I could go by either, and begin in either city.",
+      "requires": [],
+      "choices": [
+        {
+          "label": "Keep the page",
+          "line": "I wrote it down before going on."
+        }
+      ],
+      "at": [
+        "poi_harappa_station"
+      ]
+    },
+    {
+      "id": "happening_twin_bank",
+      "type": "happening",
+      "title": "The Bank We Kept",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "prose": "Denu lifted the driftwood from the opening. Oru marked the rooted margin we would leave alone.",
+      "requires": [
+        "discovery_twin_banks"
+      ],
+      "choices": [
+        {
+          "label": "Keep the page",
+          "line": "I wrote it down before going on."
+        }
+      ],
+      "at": [
+        "poi_twin_causeway"
+      ]
+    },
+    {
+      "id": "happening_twin_brick",
+      "type": "happening",
+      "title": "The Cool Side",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "prose": "Renu put a hand on the inner brick, then the outer face. The old room still had something to give.",
+      "requires": [
+        "discovery_twin_bricks"
+      ],
+      "choices": [
+        {
+          "label": "Keep the page",
+          "line": "I wrote it down before going on."
+        }
+      ],
+      "at": [
+        "poi_planted_ruins"
+      ]
+    },
+    {
+      "id": "happening_twin_camp",
+      "type": "happening",
+      "title": "A Place at Supper",
+      "occasion": "night",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "prose": "At the camp fire somebody moved a bowl along the ground to make a place. Tomorrow their shelters would be elsewhere.",
+      "requires": [],
+      "choices": [
+        {
+          "label": "Keep the page",
+          "line": "I wrote it down before going on."
+        }
+      ],
+      "camps": [
+        "drovers",
+        "pilgrims",
+        "adventurers"
+      ]
+    },
+    {
+      "id": "happening_twin_carrier",
+      "type": "happening",
+      "title": "The Longer Road",
+      "occasion": "road",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "prose": "A carrier took the bank path rather than the causeway. There was shade there, and no parcel worth hurrying past it for.",
+      "requires": [],
+      "choices": [
+        {
+          "label": "Keep the page",
+          "line": "I wrote it down before going on."
+        }
+      ]
+    },
+    {
+      "id": "happening_twin_closing",
+      "type": "happening",
+      "title": "What the Cities Kept",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "prose": "We walked between the cities and marked what needed care: a loose wall, an open channel, a rooted bank. We also marked the places already being used, so nobody would mend them empty. I had come looking for abandoned cities. I left a page about their inhabitants.",
+      "requires": [
+        "discovery_twin_shade",
+        "discovery_twin_drains",
+        "discovery_twin_banks",
+        "discovery_twin_delta"
+      ],
+      "choices": [
+        {
+          "label": "Keep the page",
+          "line": "I wrote it down before going on."
+        }
+      ],
+      "at": [
+        "poi_harappa_court"
+      ]
+    },
+    {
+      "id": "happening_twin_courtyard",
+      "type": "happening",
+      "title": "A Courtyard Worth Shading",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "prose": "Nemi and Eru showed me where the repair stopped short of the roots. The courtyard kept its shade.",
+      "requires": [
+        "discovery_twin_shade"
+      ],
+      "choices": [
+        {
+          "label": "Keep the page",
+          "line": "I wrote it down before going on."
+        }
+      ],
+      "at": [
+        "poi_harappa_court"
+      ]
+    },
+    {
+      "id": "happening_twin_cove",
+      "type": "happening",
+      "title": "Where the Water Changes",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "prose": "Oru pointed out the freshwater inlet. The plants changed before I could taste the salt.",
+      "requires": [
+        "discovery_twin_salt"
+      ],
+      "choices": [
+        {
+          "label": "Keep the page",
+          "line": "I wrote it down before going on."
+        }
+      ],
+      "at": [
+        "poi_twin_cove"
+      ]
+    },
+    {
+      "id": "happening_twin_drain",
+      "type": "happening",
+      "title": "The Drain Left Growing",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "prose": "Seli cleared the quick channel and left the neighbouring reeds standing. The work was choosing where to stop.",
+      "requires": [
+        "discovery_twin_drains"
+      ],
+      "choices": [
+        {
+          "label": "Keep the page",
+          "line": "I wrote it down before going on."
+        }
+      ],
+      "at": [
+        "poi_drain_court"
+      ]
+    },
+    {
+      "id": "happening_twin_lane",
+      "type": "happening",
+      "title": "The Empty Lane",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "prose": "There were no footsteps in the lane, but there were seeds caught against every threshold.",
+      "requires": [
+        "discovery_twin_nests"
+      ],
+      "choices": [
+        {
+          "label": "Keep the page",
+          "line": "I wrote it down before going on."
+        }
+      ],
+      "at": [
+        "poi_earthen_workshop"
+      ]
+    },
+    {
+      "id": "happening_twin_ostrich",
+      "type": "happening",
+      "title": "The Bird Knows Both Yards",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "prose": "Pavi loosened the ostrich harness and brought water before doing anything with the carriage.",
+      "requires": [],
+      "choices": [
+        {
+          "label": "Keep the page",
+          "line": "I wrote it down before going on."
+        }
+      ],
+      "at": [
+        "poi_harappa_station"
+      ]
+    },
+    {
+      "id": "happening_twin_workshop",
+      "type": "happening",
+      "title": "A Workshop With Tenants",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "prose": "Eru waited while a bird carried grass into the mortar. Then we went round by the unoccupied wall.",
+      "requires": [
+        "discovery_twin_nests"
+      ],
+      "choices": [
+        {
+          "label": "Keep the page",
+          "line": "I wrote it down before going on."
+        }
+      ],
+      "at": [
+        "poi_nesting_ruins"
       ]
     },
     {

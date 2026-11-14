@@ -86,7 +86,7 @@ describe("canon's happenings", () => {
     expect(events.length).toBeGreaterThan(0);
     for (const e of events) {
       expect(e.id).toMatch(/^happening_[a-z0-9_]+$/);
-      expect(e.once).toBe(true);
+      expect(e.once).toBe(!['happening_twin_carrier','happening_twin_camp'].includes(e.id));
       expect(e.art).toBe(e.id);
       expect(e.prose.length).toBeGreaterThan(0);
       expect(e.choices.length).toBeGreaterThan(0);

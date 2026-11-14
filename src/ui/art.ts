@@ -40,7 +40,9 @@
  */
 const files = import.meta.glob<string>('./*/*.{svg,png,webp,jpg,jpeg}', {
   eager: true,
-  query: '?url',
+  // Pixel art can compress below Vite's inline limit. Keep those bytes out of the
+  // app chunk too, so visiting one map does not download every other map's portraits.
+  query: '?url&no-inline',
   import: 'default'
 });
 

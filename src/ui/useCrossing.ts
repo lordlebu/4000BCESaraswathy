@@ -76,7 +76,7 @@ export function useCrossing({
       // **Set down at the new map's cart point**, which is where the cart goes. Written as `?at=`,
       // which the scene already reads, so a reload keeps you there -- and an `?at=` naming a place on
       // the map just left can no longer follow you across.
-      const arrive = arrivalPoint(next);
+      const arrive = arrivalPoint(next, fieldMapId);
       if (arrive) url.searchParams.set('at', arrive);
       else url.searchParams.delete('at');
       window.history.replaceState(null, '', url);

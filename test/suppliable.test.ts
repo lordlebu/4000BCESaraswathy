@@ -79,6 +79,8 @@ describe('not on this ground', () => {
  * Kulfi left the other three maps the same day: Tolla teaches it, on the Narmada only.
  */
 const NEVER_ON: Record<string, string[]> = {
+  // Initial measured baseline: this arid mainland map has no homestead or specialist teachers.
+  field_map_twins: ['recipe_antivenin', 'recipe_antler_pick', 'recipe_ashwagandha_tonic', 'recipe_bow_drill', 'recipe_choddo_shak', 'recipe_clay_seal', 'recipe_cooking_pot', 'recipe_flood_bread', 'recipe_green_mango_sour', 'recipe_grind_flour', 'recipe_guggul_pill', 'recipe_haritaki_powder', 'recipe_hide_tent', 'recipe_hill_curd', 'recipe_indigo_dye', 'recipe_jackfruit_curry', 'recipe_kuchla_grain', 'recipe_lamp_black', 'recipe_mahua_liquor', 'recipe_myrrh_poultice', 'recipe_neem_salve', 'recipe_potters_grog', 'recipe_press_mahua_oil', 'recipe_press_mustard_oil', 'recipe_purify_kuchla', 'recipe_reed_torch', 'recipe_salt_fish_stew', 'recipe_shilajit_tonic', 'recipe_sinew_lashing', 'recipe_sitar', 'recipe_spiced_oil', 'recipe_spiced_rice', 'recipe_stone_adze', 'recipe_tamarind_paste', 'recipe_travel_cake', 'recipe_tree_pitch', 'recipe_water_skin'],
   field_map_aravali: [
     'recipe_boar_spear', // boar tusk
     'recipe_clay_seal', // bone awl

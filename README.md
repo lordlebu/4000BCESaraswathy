@@ -3,8 +3,8 @@
 *Part of **The Ark of South Tethys: A Solarpunk Odyssey** — stories from the edge of time.*
 
 A cozy 2D exploration game set in an invented ancient South Asia. You are Varuna, a naturalist,
-travelling four field maps of river delta, cold desert harbour, basalt plateau and the Aravali
-crossing. You look closely at what lives and lies there, help the people you meet, and on three of
+travelling five field maps: river delta, cold desert harbour, basalt plateau, the Aravali
+crossing, and the mainland Saraswati twin cities. You look closely at what lives and lies there, help the people you meet, and on three of
 the maps settle among them, building a place they back and move into.
 
 **There is no combat and no threat.** Creatures are observed, not fought. The feeling to aim for is
@@ -89,11 +89,11 @@ The browser suite needs `npx playwright install chromium` once.
 ## World content
 
 The flora and fauna canon lives in the **SouthOfTethys** repository, not here — 235 fauna and 113
-flora among 537 entities, alongside the field maps, discoveries, questions, people, happenings, sayings, storylines and vocabulary
+flora among 581 entities, alongside the field maps, discoveries, questions, people, happenings, sayings, storylines and vocabulary
 the game is made of. **Making is the game's own**: materials, items, recipes, vehicles and the
 homesteads live in `data/making/`, edited here, since the owner moved them out of canon on
 2 October 2026 so the lore gives the world its context and the game does its own arithmetic. [docs/bestiary.md](docs/bestiary.md) is the prose document those species were
-originally extracted from, kept for provenance; it is no longer upstream of anything. 348 species across seven
+originally extracted from, kept for provenance; it is no longer upstream of anything. 348 species across eight
 regions, from the Saraswati deltas to the Asura-tainted horrors.
 
 `data/canon/` is **generated** by `utils/export_canon_bundle.py` in the canon repository and must
@@ -189,3 +189,9 @@ npx vite build          # dist/ now plays from any folder on any static host
 ## Licence
 
 MIT — see [LICENSE](LICENSE).
+
+## The Saraswati twin cities
+
+Harappa and Mohenjodaro share a 64×64 mainland region with an ostrich-drawn tram, two architectural traditions, and a river running from desert to delta.
+
+See [the implementation and review guide](docs/twin-cities.md) for the phased scope, screenshots, demo links, and expansion plan.

@@ -157,7 +157,7 @@ export function floraIn(biome: BiomeId): Flora[] {
  */
 export function creatureFor(tile: Point & { biome: BiomeId }, seed: string): Creature | null {
   return weightedPickFor(
-    onLandmass(creaturesByBiome, tile.biome, landmassAt(seed, tile)),
+    twinHabitat(onLandmass(creaturesByBiome, tile.biome, landmassAt(seed, tile)), tile, seed),
     seed,
     tile,
     'creature',
@@ -168,7 +168,7 @@ export function creatureFor(tile: Point & { biome: BiomeId }, seed: string): Cre
 
 export function floraFor(tile: Point & { biome: BiomeId }, seed: string): Flora | null {
   return weightedPickFor(
-    onLandmass(floraByBiome, tile.biome, landmassAt(seed, tile)),
+    twinHabitat(onLandmass(floraByBiome, tile.biome, landmassAt(seed, tile)), tile, seed),
     seed,
     tile,
     'flora',
@@ -258,4 +258,13 @@ export const ROAD_STEP = 0.75;
 export function stepCostOn(tile: Pick<Tile, 'biome' | 'road' | 'bridge'>): number {
   // A bridge is road over water: priced as the road, never as the wading underneath it.
   return tile.road || tile.bridge ? ROAD_STEP : stepCost(tile.biome);
+}
+
+/** The mainland valley's habitat pool; no other map's rendezvous scores change. */
+function twinHabitat<T extends Creature | Flora>(pool:T[], tile:Point & {biome:BiomeId}, seed:string):T[] {
+  if(seed!=='field_map_twins'&&!seed.startsWith('twins:'))return pool;
+  const floraIds=['desert-saltbush','sand-dune-gourd','spiny-acacia','tawny-sagebrush','frankincense-scrub','date-palm','neem','sacred-tulsi','sweet-indigo','river-bamboo','bamboo-grove','hinche','healing-silver-root','saraswati-reed','ghost-mangrove','iron-root-mangrove','golden-sun-barley','wayside-knotgrass','bethua'];
+  const faunaIds=['desert-fox','desert-jerboa-rat','sand-skink','gedrosian-sand-grouse','gedrosian-spiny-tailed-lizard','desert-falcon','desert-horned-owl','highland-ibex','river-otter','monsoon-crane','delta-kingfisher','shell-turtle','sacred-stepwell-koi','deep-river-bronze','tethyan-blue-crayfish','saraswati-reed-warbler','marsh-dwelling-terrapin','delta-fiddler-crab','tethys-pelican','saraswati-delta-heron','estuary-archer-fish','zebu'];
+  const ids=new Set([...floraIds,...faunaIds]);
+  return pool.filter(s=>ids.has(s.id) && !(tile.y<45 && s.id.includes('mangrove')));
 }

@@ -248,6 +248,9 @@ export function App() {
   const [targetDiscoveryId, setTargetDiscoveryId] = useState<string | null>(null);
   const recordsRef = useRef<HTMLButtonElement>(null);
   const [progress, setProgress] = useState(initialJourney.current.progress);
+  useEffect(() => {
+    if (world?.twinRegion) EventBus.emitEvent('twin-knowledge', {completed: discoveries.filter(d=>isComplete(progress,d.id)).map(d=>d.id)});
+  }, [world, progress]);
 
   // What the traveller is carrying. Every rule about changing it lives in `content/satchel.ts`
   // and `content/crafting.ts`; this only holds it and hands it to the save, exactly as
@@ -1073,7 +1076,8 @@ export function App() {
     // **Asked of the rule, never recomputed here.** `rideFrom` decides whether there is a line,
     // where it goes and which carriage runs it; this reads the answer and writes a sentence about
     // it. A panel that worked out the far station itself would be a second copy of `railSpan`.
-    const ride = world && arrival ? rideFrom(world, arrival.at) : null;
+    const tramClosed = Boolean(world?.twinRegion && moment?.timeOfDay === 'night');
+    const ride = world && arrival && !tramClosed ? rideFrom(world, arrival.at) : null;
     // Why the row is *there* when it is refused, which is this panel's convention: a line you are
     // standing on but cannot board from teaches that the carriage calls at the islands.
     const onTheLine = Boolean(
@@ -1128,7 +1132,7 @@ export function App() {
             {
               id: 'ride',
               label: ride ? `Ride the ${ride.vehicle.name.toLowerCase()}` : 'Ride the line',
-              detail: ride
+              detail: tramClosed ? 'The ostrich rests at night. The road is open.' : ride
                 ? `${ride.tiles} tiles of rail, at a quarter of the walking.`
                 : undefined,
               mark: '🚋',
@@ -1137,7 +1141,7 @@ export function App() {
                 : atTheFarEnd
                   ? 'You are at the far station. The line runs the other way.'
                   : onTheLine
-                    ? 'Out on the span. The carriage calls at the islands.'
+                    ? world?.twinRegion ? 'Board at either city platform.' : 'Out on the span. The carriage calls at the islands.'
                     : 'Not on the line.',
               key: 'B',
               onDo: () => {

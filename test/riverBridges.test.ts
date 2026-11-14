@@ -10,7 +10,7 @@ import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { bridgeTheCrossings, FORDED_PLACES, MAX_SPAN } from '../src/world/bridges';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { fieldMaps } from '../src/content/places';
+import { fieldMaps as classicAndDistrictMaps } from '../src/content/places';
 import { planRiverBridges } from '../src/game/scenePlan';
 import { RIVER_BRIDGE_FRAMES, SPAN_PIECE } from '../src/game/frames';
 import { ROAD_STEP, stepCost, stepCostOn } from '../src/content/species';
@@ -45,6 +45,9 @@ function world(rows: string[]): World {
 
 const flagged = (w: World, flag: 'bridge' | 'ford') =>
   w.tiles.flat().filter((t) => t[flag]).map((t) => `${t.x},${t.y}`);
+
+// Original art/route contracts. District art, geometry and reachability are covered in twinCities.test.ts.
+const fieldMaps = classicAndDistrictMaps.filter(m => m.relief !== 'river_valley');
 
 describe('which crossings are bridged', () => {
   it('bridges a crossing of up to three tiles', () => {

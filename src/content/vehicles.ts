@@ -134,6 +134,7 @@ export interface Ride {
  * `crosses` includes `sky_island`.
  */
 export function carriageFor(world: World, route: readonly Point[]): Vehicle | null {
+  if (world.twinRegion) return vehicles.find(v=>v.id==='vehicle_ostrich_tram') ?? null;
   const grounds = new Set(route.map((p) => world.tiles[p.y]?.[p.x]?.biome).filter(Boolean));
   // The stations are the solid ground the line calls at; the rest of the run is what it hangs over.
   for (const ground of ['sky_island', 'coast', 'plains', 'settlement'] as const) {
@@ -164,6 +165,11 @@ export function carriageFor(world: World, route: readonly Point[]): Vehicle | nu
  * clusters, y23-25 on one island and y39-44 on the other.
  */
 export function rideFrom(world: World, at: Point): Ride | null {
+  if (world.twinRegion) {
+    const index=world.twinRegion.stations.findIndex(p=>p.x===at.x&&p.y===at.y);
+    const vehicle=carriageFor(world,world.twinRegion.rail);
+    return index<0||!vehicle ? null : {vehicle,from:at,to:world.twinRegion.stations[1-index]!,tiles:world.twinRegion.rail.length+1};
+  }
   if (!canBoardAt(world, at)) return null;
 
   const route = trackRoute(world);
@@ -190,6 +196,10 @@ export function rideFrom(world: World, at: Point): Ride | null {
  * crossed, so somebody standing there is not in the way.
  */
 export function carriagePath(world: World, ride: Pick<Ride, 'from' | 'to'>): Point[] {
+  if (world.twinRegion) {
+    const route=[world.twinRegion.stations[0]!,...world.twinRegion.rail,world.twinRegion.stations[1]!];
+    return ride.from.x===route[0]!.x && ride.from.y===route[0]!.y ? route : route.reverse();
+  }
   const low = Math.min(ride.from.y, ride.to.y);
   const high = Math.max(ride.from.y, ride.to.y);
   return trackRoute(world).filter((p) => p.y >= low && p.y <= high);

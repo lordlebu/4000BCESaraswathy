@@ -149,6 +149,7 @@ export const VEHICLE_MARK: Record<string, string> = {
   boat: '🛶',
   ship: '⛵',
   cart: '🛒',
+  tram: '🚋',
   sled: '🛷',
   machine: '⚙️'
 };

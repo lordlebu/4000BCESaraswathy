@@ -51,7 +51,7 @@ describe('the README counts what the data actually holds', () => {
   });
 
   it('gets the species total right', () => {
-    expect(readme, `fauna plus flora is ${species}`).toMatch(new RegExp(`${species} species across seven`));
+    expect(readme, `fauna plus flora is ${species}`).toMatch(new RegExp(`${species} species across ${['zero','one','two','three','four','five','six','seven','eight','nine'][counts.regions!]}`));
   });
 
   it('gets the number of grounds right', () => {

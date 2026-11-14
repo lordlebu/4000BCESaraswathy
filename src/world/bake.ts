@@ -139,6 +139,7 @@ const BAND_ELEVATION: readonly number[] = [
 ];
 
 export interface BakedWorld {
+  twinRegion?: World['twinRegion'];
   bakeVersion: number;
   seed: string;
   fieldMapId: string;
@@ -193,6 +194,7 @@ export function bakeWorld(built: FieldMapWorld): BakedWorld {
 
   return {
     bakeVersion: BAKE_VERSION,
+    ...(world.twinRegion ? { twinRegion: world.twinRegion } : {}),
     camp: world.camp ? [world.camp.at.x, world.camp.at.y, world.camp.radius] : null,
     seed: world.seed,
     fieldMapId: built.fieldMap.id,
@@ -276,6 +278,7 @@ export function restoreWorld(baked: BakedWorld, fieldMap: FieldMap): FieldMapWor
 
   const world: World = {
     seed: baked.seed,
+    ...(baked.twinRegion ? { twinRegion: baked.twinRegion } : {}),
     camp: baked.camp
       ? { at: { x: baked.camp[0], y: baked.camp[1] }, radius: baked.camp[2] }
       : null,

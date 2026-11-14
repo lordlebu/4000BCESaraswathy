@@ -187,14 +187,19 @@ export function encampmentOn(
   const to = from + STAY_DAYS;
   if (day < Math.max(from, FIRST_DAY) || day >= to) return null;
 
-  const ground = campGround(world, places.map((p) => p.at));
+  let ground = campGround(world, places.map((p) => p.at));
+  if (world.twinRegion) {
+    const areas=[{x:10,y:31},{x:7,y:10},{x:24,y:43}];
+    ground=areas.flatMap(c=>{ const candidates=ground.filter(p=>Math.abs(p.x-c.x)+Math.abs(p.y-c.y)<=8); return candidates.length?[candidates.reduce((a,b)=>Math.abs(a.x-c.x)+Math.abs(a.y-c.y)<=Math.abs(b.x-c.x)+Math.abs(b.y-c.y)?a:b)]:[]; });
+  }
   if (ground.length === 0) return null;
   // The northern sky island on a turn that prefers it, when it has room; otherwise the better-hidden
   // half of everywhere.
   const sky = hash('sky') % SKY_TURN_ONE_IN === 0 ? skyGround(world, ground) : [];
   const hidden = sky.length > 0 ? sky : ground.slice(0, Math.max(1, Math.ceil(ground.length / 2)));
   const at = hidden[hash('tile') % hidden.length]!;
-  const kind = CAMP_KINDS[hash('kind') % CAMP_KINDS.length]!;
+  const kinds: readonly CampKind[] = world.twinRegion ? ['drovers','pilgrims','adventurers'] : CAMP_KINDS;
+  const kind = kinds[hash('kind') % kinds.length]!;
 
   let near: string | null = null;
   let best = Infinity;

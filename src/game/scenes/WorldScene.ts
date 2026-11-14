@@ -1,3 +1,5 @@
+import { loadTwinArt, TWIN_KEYS, twinGroundFrame } from '../twinArt';
+import { TWIN_MAP } from '../../world/twinCities';
 // The map: everything the player sees on the canvas.
 //
 // This is the only file in the project that knows Phaser exists, apart from `PhaserGame.tsx` and
@@ -108,6 +110,7 @@ const SHEET_KEY: Record<
   >,
   string
 > = {
+  twinHouses: TWIN_KEYS.houses, twinObjects: TWIN_KEYS.objects, twinRoutes: TWIN_KEYS.routes,
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
@@ -485,6 +488,20 @@ export class WorldScene extends Phaser.Scene {
   private hullView: DugoutView | null = null;
   /** The lodestone carriage, shown only while it is carrying him. See `onRide`. */
   private carriage!: Phaser.GameObjects.Image;
+  private twinEffects: Phaser.GameObjects.Image[] = [];
+  private onTwinKnowledge = ({completed}: UiToGame['twin-knowledge']): void => {
+    if (!this.world?.twinRegion) return;
+    this.tileOwned = this.tileOwned.filter(item => !this.twinEffects.includes(item.sprite as Phaser.GameObjects.Image));
+    for (const image of this.twinEffects) image.destroy();
+    this.twinEffects=[];
+    for (const [id,frame,x,y] of [['shade',21,19,17],['drains',19,48,37],['banks',22,33,28]] as const) {
+      if(!completed.includes('discovery_twin_'+id))continue;
+      const sprite=this.add.image((x+.5)*TILE_SIZE,(y+1)*TILE_SIZE,TWIN_KEYS.objects,frame).setOrigin(.5,1).setDepth(depthFor(y,ROW_SLOT.undergrowth));
+      this.twinEffects.push(sprite);
+      sprite.setVisible(this.discovered.has(`${x},${y}`));
+      this.tileOwned.push({sprite,x,y});
+    }
+  };
   /** Whether he is aboard it, which is also why he cannot be seen. */
   private riding = false;
   /**
@@ -709,6 +726,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   preload(): void {
+    if (this.fieldMapId === TWIN_MAP) loadTwinArt(this);
     // Every sheet, not just the one being walked. They are 9-12 KB each and 55 KB for the set, so
     // loading them all costs less than the machinery to load one lazily and swap textures later --
     // and it means a character can be changed without a scene restart.
@@ -783,6 +801,7 @@ export class WorldScene extends Phaser.Scene {
 
   create(data: WorldSceneData): void {
     createTileTextures(this);
+    if (this.fieldMapId === TWIN_MAP) for (const key of Object.values(TWIN_KEYS)) this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
 
     // Canon names the ground. A seed still varies it, so a journey stays shareable in a link;
     // leave the seed alone and every player walks the same documented Lothal.
@@ -817,7 +836,7 @@ export class WorldScene extends Phaser.Scene {
         // Ground the sheet has art for is drawn from the sheet; ground it does not is drawn from
         // the biome's own colour and symbol. Falling back to the plains frame would draw a lie
         // about what the traveller is standing on -- see `placeholderTileKey`.
-        const art = this.groundArt(tile.biome, variant);
+        const art = this.world.twinRegion ? {key:TWIN_KEYS.ground,frame:twinGroundFrame(this.world,tile,variant)} : this.groundArt(tile.biome, variant);
         const tileSprite = this.add
           .image(cx, cy, art.key, art.frame)
           .setDepth(DEPTH_TILE);
@@ -839,6 +858,9 @@ export class WorldScene extends Phaser.Scene {
       this.fogSprites.push(fogRow);
     }
 
+    if (import.meta.env.DEV && this.world.twinRegion && new URLSearchParams(window.location.search).get('survey')==='on') {
+      for (const row of this.world.tiles) for (const t of row) { this.discovered.add(`${t.x},${t.y}`); this.fogSprites[t.y]![t.x]!.setAlpha(0); }
+    }
     this.createGround();
 
     this.createPlayer();
@@ -1028,6 +1050,8 @@ export class WorldScene extends Phaser.Scene {
       // Bottom-anchored: a tower, a hut, a landmark and now a tree all stand *on* their tile and
       // rise into the one above, rather than filling a cell the way ground cover does.
       const anchored =
+        item.sheet === 'twinHouses' ||
+        item.sheet === 'twinObjects' ||
         item.sheet === 'huts' ||
         item.sheet === 'places' ||
         item.sheet === 'monuments' ||
@@ -1149,7 +1173,8 @@ export class WorldScene extends Phaser.Scene {
     this.hullBack = this.add.image(0, 0, DUGOUT_VIEWS.side.image).setOrigin(0.5, 0).setVisible(false);
     this.hullFront = this.add.image(0, 0, DUGOUT_VIEWS.side.image).setOrigin(0.5, 0).setVisible(false);
     // Anchored at the foot of its shadow, like everything else that stands on the map.
-    this.carriage = this.add.image(0, 0, CARRIAGE_IMAGE).setOrigin(0.5, 1).setVisible(false);
+    this.carriage = this.add.image(0, 0, this.world.twinRegion ? TWIN_KEYS.tram : CARRIAGE_IMAGE).setOrigin(0.5, 1).setVisible(false);
+    if (this.world.twinRegion) { const p=this.world.twinRegion.stations[0]!; this.carriage.setPosition((p.x+.5)*TILE_SIZE,(p.y+1)*TILE_SIZE).setDepth(depthFor(p.y,ROW_SLOT.walker)).setVisible(true); }
 
     this.updateAnimation();
     this.placePlayer(this.at);
@@ -1524,6 +1549,7 @@ export class WorldScene extends Phaser.Scene {
     EventBus.onEvent('zoom', this.onZoom);
     EventBus.onEvent('camp', this.onCamp);
     EventBus.onEvent('ride', this.onRide);
+    EventBus.onEvent('twin-knowledge', this.onTwinKnowledge);
     EventBus.onEvent('shelter-built', this.onShelterBuilt);
     EventBus.onEvent('boat-lent', this.onBoatLent);
     EventBus.onEvent('people-at-places', this.onPeopleAtPlaces);
@@ -1561,6 +1587,7 @@ export class WorldScene extends Phaser.Scene {
       EventBus.offEvent('zoom', this.onZoom);
       EventBus.offEvent('camp', this.onCamp);
       EventBus.offEvent('ride', this.onRide);
+      EventBus.offEvent('twin-knowledge', this.onTwinKnowledge);
       EventBus.offEvent('shelter-built', this.onShelterBuilt);
       EventBus.offEvent('boat-lent', this.onBoatLent);
       EventBus.offEvent('people-at-places', this.onPeopleAtPlaces);
@@ -1882,6 +1909,7 @@ export class WorldScene extends Phaser.Scene {
     if (this.moving) return;
     const ride = rideFrom(this.world, this.at);
     if (!ride) return;
+    if (this.world.twinRegion && this.momentNow().timeOfDay === 'night') return;
     if (ride.to.x !== to.x || ride.to.y !== to.y) return;
 
     // You saw the line go by. Revealing the route is what makes the ride feel like travel rather
@@ -1907,7 +1935,7 @@ export class WorldScene extends Phaser.Scene {
       to: { x: ride.to.x * TILE_SIZE + TILE_SIZE / 2, y: ride.to.y * TILE_SIZE + TILE_SIZE - 2 },
       at: ride.to,
       start: this.game.loop.now,
-      ms: RIDE_TILE_MS * ride.tiles,
+      ms: (this.world.twinRegion ? 100 : RIDE_TILE_MS) * ride.tiles,
       line: carriagePath(this.world, ride)
     };
     // Anybody walking the line steps off at the pier to let it by -- the owner's ruling. Placed now,
@@ -1939,12 +1967,18 @@ export class WorldScene extends Phaser.Scene {
       ride.from.x + (ride.to.x - ride.from.x) * eased,
       ride.from.y + (ride.to.y - ride.from.y) * eased
     );
+    if (this.world.twinRegion && ride.line.length>1) {
+      const distance=eased*(ride.line.length-1), i=Math.min(ride.line.length-2,Math.floor(distance)), f=distance-i;
+      const a=ride.line[i]!, b=ride.line[i+1]!;
+      this.player.setPosition((a.x+(b.x-a.x)*f+.5)*TILE_SIZE,(a.y+(b.y-a.y)*f+1)*TILE_SIZE-2);
+      this.carriage.setFrame(b.x>a.x?0:b.x<a.x?1:b.y<a.y?2:3);
+    }
     this.sortPlayer(rowAtFoot(this.player.y));
     this.carriage.setPosition(this.player.x, this.player.y).setDepth(this.player.depth);
     if (t < 1) return;
 
     this.ride = null;
-    this.carriage.setVisible(false);
+    this.carriage.setVisible(Boolean(this.world.twinRegion));
     this.cameras.main.setLerp(FOLLOW_LERP, FOLLOW_LERP);
     this.player.setVisible(true);
     this.riding = false;

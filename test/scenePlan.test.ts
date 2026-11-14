@@ -10,7 +10,8 @@
 import { describe, expect, it } from 'vitest';
 import type { World } from '../src/world/types';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { fieldMaps } from '../src/content/places';
+import { fieldMaps as classicAndDistrictMaps } from '../src/content/places';
+const fieldMaps = classicAndDistrictMaps.filter(m => m.relief !== 'river_valley');
 import { DEFAULT_SEED } from '../src/ui/seed';
 import { inTheCamp, planScene, planHuts, planOverdraw, SWAY_PERIOD } from '../src/game/scenePlan';
 import {
@@ -39,6 +40,8 @@ const key = (p: { x: number; y: number }) => `${p.x},${p.y}`;
 /** Whether an overdraw frame is one of the sixteen fence pieces rather than something growing. */
 const isFence = (frame: number): boolean =>
   frame >= FENCE_FIRST && frame < FENCE_FIRST + FENCE_PIECES;
+
+// Original art/route contracts. District art, geometry and reachability are covered in twinCities.test.ts.
 
 describe('felt for the camps, brick for the towns, and never the other way', () => {
   // Reported as a rule the owner had worked on: nomad yurts are not put in settlements, and huts do

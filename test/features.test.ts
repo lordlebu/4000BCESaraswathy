@@ -9,10 +9,13 @@ import { FEATURES, featureFrame } from '../src/game/frames';
 import { FEATURE_LAYOUT, featureNameAt } from '../src/world/features';
 import { planScene } from '../src/game/scenePlan';
 import { buildFieldMap } from '../src/world/fieldMap';
-import { fieldMaps } from '../src/content/places';
+import { fieldMaps as classicAndDistrictMaps } from '../src/content/places';
 import { yieldsAt } from '../src/content/gathering';
 import { tileHash } from '../src/world/rng';
 import type { BiomeId } from '../src/world/types';
+
+// Original art/route contracts. District art, geometry and reachability are covered in twinCities.test.ts.
+const fieldMaps = classicAndDistrictMaps.filter(m => m.relief !== 'river_valley');
 
 describe('the rules and the art agree about what a feature is', () => {
   it('lists every feature the art draws, in its order, with its frame count and rim', () => {

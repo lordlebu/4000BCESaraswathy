@@ -231,7 +231,7 @@ export function fromCanon(h: RawHappening): GameEvent {
       line: c.line,
       grants: c.grants ?? []
     })),
-    once: true
+    once: !['happening_twin_carrier','happening_twin_camp'].includes(h.id)
   };
 }
 
@@ -266,6 +266,7 @@ export interface Circumstance {
   day: number;
   /** Everything the player holds: discovery ids, word ids, recipe ids. */
   holds: readonly string[];
+  completed?: readonly string[];
   /** Event ids already seen, so a `once` event does not come round again. */
   seen: readonly string[];
   /** Strangers an event has already introduced, by their event id. Absent means nobody yet. */
@@ -289,6 +290,10 @@ export interface Circumstance {
 /** Whether this event can happen, given where and when the player is. */
 export function canHappen(event: GameEvent, now: Circumstance): boolean {
   if (event.occasion !== now.occasion) return false;
+  if (event.id.startsWith('happening_twin_')) {
+    if (!event.once && now.day-(now.last?.[event.id] ?? -100)<3) return false;
+    if (['happening_twin_courtyard','happening_twin_drain','happening_twin_bank','happening_twin_closing'].includes(event.id) && !event.conditions.requires.every(id=>now.completed?.includes(id))) return false;
+  }
   if (event.once && now.seen.includes(event.id)) return false;
   const { shelter, fieldMaps, fromDay, requires, pois, camps } = event.conditions;
   if (now.day < fromDay) return false;
