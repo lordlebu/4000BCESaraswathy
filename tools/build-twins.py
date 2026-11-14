@@ -227,7 +227,10 @@ for n,npc in enumerate(p for p in places['npcs'] if p['id'].startswith('npc_twin
     rect(d,(26,18,27,31),'ink');rect(d,(24,18+n%3,30,20+n%3),'hill' if n%2 else 'mud2')
     illustration('portraits',npc['id'][4:].replace('_','-'),im,(256,256))
 
-city_pois=[p for p in places['points_of_interest'] if p['field_map']=='field_map_twins']
+BASE_PLACE_ART=['poi_brick_quarter','poi_desert_ground','poi_drain_court','poi_earthen_workshop',
+ 'poi_harappa_court','poi_harappa_station','poi_nesting_ruins','poi_planted_ruins',
+ 'poi_reed_junction','poi_twin_causeway','poi_twin_cove','poi_twin_landing']
+city_pois=[next(p for p in places['points_of_interest'] if p['id']==key) for key in BASE_PLACE_ART]
 for n,poi in enumerate(city_pois):
     im=canvas(128,96);d=ImageDraw.Draw(im)
     rect(d,(0,0,127,95),'sand');rect(d,(0,0,127,25),'cream')

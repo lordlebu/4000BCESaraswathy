@@ -27,6 +27,7 @@ import { poisOn, type FieldMap, type PointOfInterest } from '../content/places';
 import { THRESHOLDS, band } from './classify';
 import { buildFieldMap, type FieldMapWorld, type PlacedPoi } from './fieldMap';
 import type { BiomeId, LandmarkTerrain, Point, River, Tile, World } from './types';
+import { addTwinPlaces } from './twinCities';
 
 /**
  * The bake format's version -- **not the generator's**, and the distinction is the whole point.
@@ -301,9 +302,11 @@ export function restoreWorld(baked: BakedWorld, fieldMap: FieldMap): FieldMapWor
     const poi = known.get(id);
     if (poi) placed.push({ poi, at: { x, y } });
   }
+  const present = new Set(placed.map(p => p.poi.id));
+  placed.push(...addTwinPlaces(world, [...known.values()].filter(p => !present.has(p.id))));
   const unplaced = baked.unplaced
     .map((id) => known.get(id))
-    .filter((p): p is PointOfInterest => Boolean(p));
+    .filter((p): p is PointOfInterest => Boolean(p) && !placed.some(at => at.poi.id === p!.id));
 
   return { fieldMap, world, placed, unplaced };
 }
@@ -329,8 +332,18 @@ export function worldFor(fieldMap: FieldMap, seed: string): FieldMapWorld {
   try {
     const raw = localStorage.getItem(key(seed, fieldMap.id));
     if (raw) {
-      const restored = restoreWorld(JSON.parse(raw) as BakedWorld, fieldMap);
-      if (restored) return restored;
+      const baked = JSON.parse(raw) as BakedWorld;
+      const restored = restoreWorld(baked, fieldMap);
+      if (restored) {
+        if (restored.world.twinRegion && restored.placed.length !== baked.placed.length) {
+          try {
+            localStorage.setItem(key(seed, fieldMap.id), JSON.stringify(bakeWorld(restored)));
+          } catch {
+            // Full storage must not turn a valid saved valley into a regenerated one.
+          }
+        }
+        return restored;
+      }
       // Unreadable, or written under an older format. Drop it rather than leaving it to fail
       // every load from here on.
       localStorage.removeItem(key(seed, fieldMap.id));

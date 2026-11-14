@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import { EventBus, type GameToUi } from '../game/EventBus';
 import { isComplete, receiveAll, type Progress, type WorldMoment } from '../journey';
-import { type Choice, type GameEvent, type Occasion } from '../content/events';
+import { events, type Choice, type GameEvent, type Occasion } from '../content/events';
 import { happeningNow, surroundingsAt, type CampTalk, type Talk, type Wanted } from '../content/happenings';
 import { atCamp, encampmentOn, type Encampment } from '../content/encampments';
 import { rumourAt } from '../content/rumours';
@@ -354,6 +354,15 @@ export function useHappenings({
     happens.current = maybeHappens;
     arrivedRef.current = (e) => onArrived(e as GameToUi['poi-reached']);
 
+    // Knowledge learned since the first visit can unlock a written valley follow-up.
+    // A return is a fresh entry, never a tile refresh or another camera arrival beat.
+    const onReturned = ({ poiId, fieldMapId }: GameToUi['poi-returned']) => {
+      const here = latest.current.at;
+      if (!here || fieldMapId !== latest.current.fieldMapId) return;
+      if (!events.some(e => e.id.startsWith('happening_valley_') && e.conditions.requires.length > 0 && e.conditions.pois.includes(poiId))) return;
+      maybeHappens('arriving', here, null, `returning:${poiId}`, { poiId });
+    };
+
     /** They have walked up and are standing beside you: open what they have to say. */
     const onApproached = ({ npcId }: GameToUi['approached']) => dispatch({ type: 'talk-to', npcId });
 
@@ -371,6 +380,7 @@ export function useHappenings({
     EventBus.onEvent('approached', onApproached);
     EventBus.onEvent('night-passed', onNight);
     EventBus.onEvent('poi-reached', onArrived);
+    EventBus.onEvent('poi-returned', onReturned);
     EventBus.onEvent('tile-entered', onRoad);
     EventBus.onEvent('tile-entered', onCampSeen);
     EventBus.onEvent('tile-entered', onStep);
@@ -379,6 +389,7 @@ export function useHappenings({
       EventBus.offEvent('approached', onApproached);
       EventBus.offEvent('night-passed', onNight);
       EventBus.offEvent('poi-reached', onArrived);
+      EventBus.offEvent('poi-returned', onReturned);
       EventBus.offEvent('tile-entered', onRoad);
       EventBus.offEvent('tile-entered', onCampSeen);
       EventBus.offEvent('tile-entered', onStep);

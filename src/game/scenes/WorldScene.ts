@@ -111,6 +111,7 @@ const SHEET_KEY: Record<
   string
 > = {
   twinHouses: TWIN_KEYS.houses, twinObjects: TWIN_KEYS.objects, twinRoutes: TWIN_KEYS.routes,
+  twinHousesDetail: TWIN_KEYS.housesDetail, twinDetails: TWIN_KEYS.details, twinRims: TWIN_KEYS.rims,
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
@@ -1050,6 +1051,8 @@ export class WorldScene extends Phaser.Scene {
       // Bottom-anchored: a tower, a hut, a landmark and now a tree all stand *on* their tile and
       // rise into the one above, rather than filling a cell the way ground cover does.
       const anchored =
+        item.sheet === 'twinHousesDetail' ||
+        item.sheet === 'twinDetails' ||
         item.sheet === 'twinHouses' ||
         item.sheet === 'twinObjects' ||
         item.sheet === 'huts' ||
@@ -1924,6 +1927,7 @@ export class WorldScene extends Phaser.Scene {
     this.at = ride.to;
     this.player.setVisible(false);
     this.carriage.setVisible(true).setPosition(this.player.x, this.player.y).setDepth(this.player.depth);
+    if (this.world.twinRegion) this.carriage.setTexture(TWIN_KEYS.tramWalk, 0);
     // **Held on the car, not eased after it.** The walk's 9% a frame is a gentle trail at walking
     // pace; at four times that pace, on a slow frame rate, it fell so far behind that the carriage
     // ran the whole strait under the dock and was never seen. The car eases in and out of the
@@ -1963,6 +1967,7 @@ export class WorldScene extends Phaser.Scene {
     if (!ride) return;
     const t = Math.min(1, (this.game.loop.now - ride.start) / ride.ms);
     const eased = Phaser.Math.Easing.Sine.InOut(t);
+    let heading = 0;
     this.player.setPosition(
       ride.from.x + (ride.to.x - ride.from.x) * eased,
       ride.from.y + (ride.to.y - ride.from.y) * eased
@@ -1971,7 +1976,8 @@ export class WorldScene extends Phaser.Scene {
       const distance=eased*(ride.line.length-1), i=Math.min(ride.line.length-2,Math.floor(distance)), f=distance-i;
       const a=ride.line[i]!, b=ride.line[i+1]!;
       this.player.setPosition((a.x+(b.x-a.x)*f+.5)*TILE_SIZE,(a.y+(b.y-a.y)*f+1)*TILE_SIZE-2);
-      this.carriage.setFrame(b.x>a.x?0:b.x<a.x?1:b.y<a.y?2:3);
+      heading=b.x>a.x?0:b.x<a.x?1:b.y<a.y?2:3;
+      this.carriage.setFrame(heading*4+Math.floor((this.game.loop.now-ride.start)/140)%4);
     }
     this.sortPlayer(rowAtFoot(this.player.y));
     this.carriage.setPosition(this.player.x, this.player.y).setDepth(this.player.depth);
@@ -1979,6 +1985,12 @@ export class WorldScene extends Phaser.Scene {
 
     this.ride = null;
     this.carriage.setVisible(Boolean(this.world.twinRegion));
+    if(this.world.twinRegion){
+      const reverse=[1,0,3,2][heading]!;
+      const quarter=[3,2,0,1][heading]!;
+      this.time.delayedCall(160,()=>{if(!this.riding)this.carriage.setFrame(quarter*4);});
+      this.time.delayedCall(320,()=>{if(!this.riding)this.carriage.setFrame(reverse*4);});
+    }
     this.cameras.main.setLerp(FOLLOW_LERP, FOLLOW_LERP);
     this.player.setVisible(true);
     this.riding = false;
@@ -2180,6 +2192,8 @@ export class WorldScene extends Phaser.Scene {
       // for `e2e/riding.spec.ts`, which is the only thing that can tell the two apart.
       riding: this.riding,
       carriage: this.carriage.visible,
+      carriageTexture: this.carriage.texture.key,
+      carriageFrame: this.carriage.frame.name,
       // The rail the carriage is crossing on this ride, for the spec that nobody is drawn on it.
       rideLine: this.ride?.line ?? [],
       // The diamond on the nearest seen source of what the pin wants, for \`e2e/finding.spec.ts\`.
@@ -2685,6 +2699,9 @@ export class WorldScene extends Phaser.Scene {
     if (here !== this.standingOn) {
       this.standingOn = here;
       EventBus.emitEvent('standing-on', { poiId: here, fieldMapId: this.built.fieldMap.id });
+      if (here && this.world.twinRegion && this.beaten.has(`poi:${here}`)) {
+        EventBus.emitEvent('poi-returned', { poiId: here, fieldMapId: this.built.fieldMap.id });
+      }
     }
 
     // Arriving somewhere gets a beat: the camera settles and the traveller sits down. The landmark

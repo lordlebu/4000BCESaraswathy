@@ -456,11 +456,17 @@ export function travellersOn(fieldMapId: string, seed = ''): Traveller[] {
   // chosen by a hash of the map and their own id, so it is the same on every machine and does not
   // move when a place is added ahead of them in canon's list.
   if (places.length >= 2) {
+    // The valley's two road companions keep their original circuits as new
+    // outlying stops are added. Their introduced identity and causeway route persist.
+    const roadPlaces = fieldMapId === 'field_map_twins'
+      ? places.filter(id => !['poi_dune_windbreak','poi_reedwright_bank','poi_nesting_cove'].includes(id))
+      : places;
     for (const who of companyOn(fieldMapId)) {
       const salt = hashOf(`${fieldMapId}:${who.id}`);
-      const first = places[salt % places.length]!;
-      const second = places[(salt + 1 + (salt >> 8) % (places.length - 1)) % places.length]!;
-      if (first === second) continue;
+      const first = roadPlaces[salt % roadPlaces.length]!;
+      let second = roadPlaces[(salt + 1 + (salt >> 8) % (roadPlaces.length - 1)) % roadPlaces.length]!;
+      // A signed hash offset can land back on the first stop for some roster lengths.
+      if (!second || first === second) second = roadPlaces[(salt % roadPlaces.length + 1) % roadPlaces.length]!;
       const circuit = [first, second];
       const grounds = new Set(circuit.flatMap((id) => poi(id)?.terrain ?? []));
       out.push({

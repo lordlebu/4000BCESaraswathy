@@ -15,7 +15,7 @@ async function measure() {
       const cities = world.twinRegion?.districts.map(d => ({
         name: d.name,
         tiles: world.tiles.flat().filter(t => t.biome === 'settlement' && districtAt(world.twinRegion, t)?.id === d.id).length,
-        houses: plan.filter(p => p.sheet === 'twinHouses' && !p.name && districtAt(world.twinRegion, p)?.id === d.id).length
+        houses: plan.filter(p => ['twinHouses','twinHousesDetail'].includes(p.sheet) && !p.name && districtAt(world.twinRegion, p)?.id === d.id).length
       }));
       return { id, width: world.width, height: world.height, centre: world.settlement,
         houseFrame: [80, 88], placements: plan.length, cities };

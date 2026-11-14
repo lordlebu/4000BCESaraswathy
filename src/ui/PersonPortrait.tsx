@@ -105,6 +105,8 @@ const TOOLS: [string[], string][] = [
   [['apothecary'], 'M22 6l-3 6M16 13h8v2a4 4 0 0 1-8 0zM17 21h6'],
   // A herbalist's sprig: a stem with three leaves. Guyuk the Seed-Gleaner, who keeps the Atelier.
   [['herbalist', 'courtyard gardener'], 'M20 21V8M20 11l-4-3M20 14l4-3M20 17l-4-2'],
+  [['reed boat repairer'], 'M15 20l10-12M16 12l4 4M20 8l4 4M15 20h10'],
+  [['cove watcher'], 'M15 16h10M17 16V9h6v7M20 9V6M17 20h6'],
   // A stonewaller's block, held against the hip the way a heavy thing is carried rather than
   // lifted. Dala used to share Pell's broom by sharing the words "wall-keeper", and they are not
   // the same job: Pell sweeps a gate, Dala puts stones back on a wall around nothing.

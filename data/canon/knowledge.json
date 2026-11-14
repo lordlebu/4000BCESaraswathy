@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.6.0",
+  "canon_version": "3.7.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -1320,7 +1320,8 @@
       "name": "Roots Beside the Opening",
       "discipline": "botany",
       "found_at": [
-        "poi_twin_causeway"
+        "poi_twin_causeway",
+        "poi_reedwright_bank"
       ],
       "levels": [
         {
@@ -1371,7 +1372,8 @@
       "name": "The Smallest Channel",
       "discipline": "geography",
       "found_at": [
-        "poi_reed_junction"
+        "poi_reed_junction",
+        "poi_nesting_cove"
       ],
       "levels": [
         {
@@ -1395,7 +1397,8 @@
       "name": "Life Between the Dunes",
       "discipline": "zoology",
       "found_at": [
-        "poi_desert_ground"
+        "poi_desert_ground",
+        "poi_dune_windbreak"
       ],
       "levels": [
         {
@@ -1446,7 +1449,8 @@
       "name": "Rooms Without Roofs",
       "discipline": "zoology",
       "found_at": [
-        "poi_nesting_ruins"
+        "poi_nesting_ruins",
+        "poi_nesting_cove"
       ],
       "levels": [
         {
