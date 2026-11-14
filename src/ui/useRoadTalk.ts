@@ -80,6 +80,7 @@ export function useRoadTalk({
   // beside you, and who else is near; `chosen` is somebody the player tapped, kept while they are
   // in view, and `previousTarget` keeps a tie between two equally near people from flicking.
   const [chosenTraveller, setChosenTraveller] = useState<string | null>(null);
+  const [talkNotice, setTalkNotice] = useState<string | null>(null);
   const previousTarget = useRef<string | null>(null);
   // Everybody who could be near: the road's travellers and, while a camp stands, the people who
   // keep it. The scene draws them both and reports them both; this is who they are.
@@ -143,11 +144,12 @@ export function useRoadTalk({
     // knows you, and what they have heard.
     const key = `${fieldMapId}:${travellerId}`;
     const met = metStrangers.current.includes(key);
-    happens.current?.('road', arrival.at, null, `walk-with:${arrival.day}:${travellerId}`, {
+    const opened = happens.current?.('road', arrival.at, null, `walk-with:${arrival.day}:${travellerId}`, {
       strangerId: travellerId,
       talk: met ? talkFor(travellerId, arrival.at) : null,
       force: { kind: met ? 'small-talk' : 'company', asked: true }
     });
+    if (!opened) setTalkNotice('Meet them on dry ground or a bridge, then call again.');
   };
 
   /**
@@ -157,6 +159,7 @@ export function useRoadTalk({
    */
   const callTo = useRef<(travellerId: string) => void>(() => {});
   callTo.current = (travellerId) => {
+    setTalkNotice(null);
     const near = nearbyTravellers.find((t) => t.id === travellerId);
     if (!near) return;
     // Held either way: beside you, so they do not walk off mid-sentence; further off, so they can
@@ -224,5 +227,5 @@ export function useRoadTalk({
     speakFirst.current([...named, ...callers, ...strangers]);
   }, [nearbyTravellers, bumpedNamed, fieldMapId, campFolk, campToday, cardOpen]);
 
-  return { talk, campToday, campFolk, talkWith, callTo };
+  return { talk: talk && talkNotice ? { ...talk, detail: talkNotice } : talk, campToday, campFolk, talkWith, callTo };
 }

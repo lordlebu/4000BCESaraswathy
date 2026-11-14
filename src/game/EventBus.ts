@@ -188,6 +188,9 @@ export interface GameToUi {
    */
   'poi-reached': { poiId: string; fieldMapId: string };
 
+  /** Entering a previously visited valley place, without replaying its camera beat. */
+  'poi-returned': { poiId: string; fieldMapId: string };
+
   /**
    * Somebody who came over has reached the traveller, and is standing beside them now.
    *

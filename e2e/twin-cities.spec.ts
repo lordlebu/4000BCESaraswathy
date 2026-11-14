@@ -5,18 +5,21 @@ test('new city art loads and the ostrich tram follows the causeway in both direc
   const errors:string[]=[];
   page.on('pageerror',e=>errors.push(e.message));
   page.on('console',m=>{if(/has no frame|Texture.*not found|failed to load/i.test(m.text()))errors.push(m.text());});
-  const loaded:string[]=[];page.on('response',r=>{if(r.url().includes('/assets/twins/'))loaded.push(r.url());});
+  const loaded:string[]=[];page.on('response',r=>{if(r.url().includes('/assets/'))loaded.push(r.url());});
   await page.goto(query+'&at=poi_harappa_station');
   const ride=page.getByRole('button',{name:/ride the ostrich tram/i});
   await expect(ride).toBeEnabled({timeout:45000});
-  expect(loaded.some(u=>u.includes('ground.png'))).toBe(true);expect(loaded.some(u=>u.includes('objects.png'))).toBe(true);
+  expect(loaded.some(u=>/\/ground(?:-|\.png)/.test(u))).toBe(true);expect(loaded.some(u=>/\/objects(?:-|\.png)/.test(u))).toBe(true);
   const wildlife=await page.evaluate(()=>(window as unknown as {__wanderers:()=>{id:string;texture:string;w:number}[]}).__wanderers());
   expect(wildlife).toHaveLength(4);
   for(const animal of wildlife){expect(animal.texture).toMatch(/^wanderer-art:/);expect(animal.w,animal.id).toBeLessThan(90);}
-  const walker=()=>page.evaluate(()=>(window as unknown as {__walker:()=>{riding:boolean;carriage:boolean;at:{x:number;y:number}}}).__walker());
+  const walker=()=>page.evaluate(()=>(window as unknown as {__walker:()=>{riding:boolean;carriage:boolean;carriageTexture:string;carriageFrame:number;at:{x:number;y:number}}}).__walker());
   await page.keyboard.press('KeyB');
   await expect.poll(async()=>(await walker()).riding,{timeout:10000}).toBe(true);
   expect((await walker()).carriage).toBe(true);
+  expect((await walker()).carriageTexture).toBe('twins-tram-walk');
+  const firstFrame=(await walker()).carriageFrame;
+  await expect.poll(async()=>(await walker()).carriageFrame,{timeout:5000}).not.toBe(firstFrame);
   await expect.poll(async()=>(await walker()).riding,{timeout:20000}).toBe(false);
   await expect(page.locator('body')).toContainText('The Raised Brick Quarter');
   await expect(ride).toBeEnabled();

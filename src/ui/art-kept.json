@@ -278,6 +278,17 @@
     "events/happening_twin_ostrich.png",
     "events/happening_twin_workshop.png",
     "events/journey-aravali-twins.png",
-    "events/journey-lothal-twins.png"
+    "events/journey-lothal-twins.png",
+    "portraits/reedwright-irekha.png",
+    "portraits/cove-watcher-ulenna.png",
+    "places/poi_dune_windbreak.png",
+    "places/poi_reedwright_bank.png",
+    "places/poi_nesting_cove.png",
+    "events/happening_valley_windbreak.png",
+    "events/happening_valley_seam.png",
+    "events/happening_valley_tide_room.png",
+    "events/happening_valley_reed_return.png",
+    "events/happening_valley_bird_return.png",
+    "events/happening_valley_courtyard_return.png"
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.6.0",
+  "canon_version": "3.7.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -750,7 +750,10 @@
         "poi_twin_causeway",
         "poi_desert_ground",
         "poi_reed_junction",
-        "poi_twin_cove"
+        "poi_twin_cove",
+        "poi_dune_windbreak",
+        "poi_reedwright_bank",
+        "poi_nesting_cove"
       ],
       "neighbours": [
         "field_map_aravali",
@@ -1019,6 +1022,22 @@
       ],
       "description": "Three seawalls, one behind the other, each built when the last stopped working.",
       "arrival": "You can wade the outermost at low water and stand on the innermost without getting your feet wet, and between them is four hundred years of a city agreeing, twice, that the sea had won that round."
+    },
+    {
+      "type": "point_of_interest",
+      "field_map": "field_map_twins",
+      "description": "A low crescent of repaired earth holds a patch of still sand. On the far side, the dune is already moving again.",
+      "id": "poi_dune_windbreak",
+      "name": "The Dune Windbreak",
+      "kind": "travel_node",
+      "terrain": [
+        "desert"
+      ],
+      "discoveries": [
+        "discovery_twin_desert"
+      ],
+      "npcs": [],
+      "arrival": "A low crescent of repaired earth holds a patch of still sand. On the far side, the dune is already moving again."
     },
     {
       "id": "poi_earthen_workshop",
@@ -1448,6 +1467,25 @@
       "arrival": "It is smaller than the word suggests and busier than the quiet suggests. Nine halls, a yard with a rain gauge in it that has been read twice a day for four hundred and eleven years, and a great many people being careful. Nobody here is a fool. That turns out to matter more than the alternative would have."
     },
     {
+      "type": "point_of_interest",
+      "field_map": "field_map_twins",
+      "description": "A stone shelf looks over a sheltered inlet. Ulenna has marked one narrow way through the old walls, leaving the reeds and nests undisturbed.",
+      "id": "poi_nesting_cove",
+      "name": "The Nesting Cove",
+      "kind": "eco_site",
+      "terrain": [
+        "coast"
+      ],
+      "discoveries": [
+        "discovery_twin_delta",
+        "discovery_twin_nests"
+      ],
+      "npcs": [
+        "npc_cove_watcher_ulenna"
+      ],
+      "arrival": "A stone shelf looks over a sheltered inlet. Ulenna has marked one narrow way through the old walls, leaving the reeds and nests undisturbed."
+    },
+    {
       "id": "poi_nesting_ruins",
       "type": "point_of_interest",
       "name": "The Unroofed Rooms",
@@ -1556,6 +1594,24 @@
       "npcs": [
         "npc_twin_waterkeeper"
       ]
+    },
+    {
+      "type": "point_of_interest",
+      "field_map": "field_map_twins",
+      "description": "Reed bundles dry on a light frame above the wet ground. Irekha tests a seam against the water before carrying it back into the shade.",
+      "id": "poi_reedwright_bank",
+      "name": "The Reedwright's Bank",
+      "kind": "eco_site",
+      "terrain": [
+        "wetland"
+      ],
+      "discoveries": [
+        "discovery_twin_banks"
+      ],
+      "npcs": [
+        "npc_reedwright_irekha"
+      ],
+      "arrival": "Reed bundles dry on a light frame above the wet ground. Irekha tests a seam against the water before carrying it back into the shade."
     },
     {
       "type": "point_of_interest",
@@ -2007,6 +2063,37 @@
         "character_kavik"
       ],
       "sex": "female"
+    },
+    {
+      "id": "npc_cove_watcher_ulenna",
+      "type": "npc",
+      "name": "Ulenna",
+      "role": "cove watcher",
+      "found_at": [
+        "poi_nesting_cove"
+      ],
+      "language": "harappan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_nests"
+      ],
+      "lines": [
+        {
+          "text": "The birds leave a path between the nests. We keep to the same path, and nobody has to move.",
+          "gives": [
+            "discovery_twin_nests"
+          ]
+        },
+        {
+          "text": "I count arrivals from the old stone shelf. It is a useful ruin when we leave most of it alone."
+        },
+        {
+          "text": "You have noticed the nesting rooms upriver. Here the tide makes the rooms; the same courtesy keeps them open.",
+          "requires": [
+            "discovery_twin_nests"
+          ]
+        }
+      ]
     },
     {
       "id": "npc_dala",
@@ -2566,6 +2653,37 @@
         }
       ],
       "sex": "male"
+    },
+    {
+      "id": "npc_reedwright_irekha",
+      "type": "npc",
+      "name": "Irekha",
+      "role": "reed boat repairer",
+      "found_at": [
+        "poi_reedwright_bank"
+      ],
+      "language": "harappan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_banks"
+      ],
+      "lines": [
+        {
+          "text": "The boat stays light because the reeds can move a little. A tight seam is not the same as a rigid one.",
+          "gives": [
+            "discovery_twin_banks"
+          ]
+        },
+        {
+          "text": "I mend the outer bundles here. The living reed bed supplies the next repair without losing its bank."
+        },
+        {
+          "text": "You have seen how the roots hold the bank. Leave them their strip of water and we both keep our work.",
+          "requires": [
+            "discovery_twin_banks"
+          ]
+        }
+      ]
     },
     {
       "id": "npc_sesh",
@@ -3760,6 +3878,156 @@
       ],
       "at": [
         "poi_nesting_ruins"
+      ]
+    },
+    {
+      "id": "happening_valley_bird_return",
+      "type": "happening",
+      "title": "Between Arrivals",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "at": [
+        "poi_nesting_cove"
+      ],
+      "requires": [
+        "discovery_twin_nests"
+      ],
+      "prose": "Ulenna shows an empty nest without touching it. A second bird has begun carrying stems to the next hollow.",
+      "choices": [
+        {
+          "label": "Keep watching",
+          "line": "An empty room can still belong to the next arrival."
+        },
+        {
+          "label": "Return by the marked path",
+          "line": "I left the hollow as I found it, with another use on the way."
+        }
+      ]
+    },
+    {
+      "id": "happening_valley_courtyard_return",
+      "type": "happening",
+      "title": "A Place at the Edge",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "at": [
+        "poi_harappa_court"
+      ],
+      "requires": [
+        "discovery_twin_shade"
+      ],
+      "prose": "Someone has set a small reed mat beneath the courtyard tree. The roots still have their ring of loose earth.",
+      "choices": [
+        {
+          "label": "Sit outside the root ring",
+          "line": "The courtyard has room for visitors because its oldest resident has room too."
+        },
+        {
+          "label": "Notice the shade",
+          "line": "The repair makes space, rather than filling everything that was empty."
+        }
+      ]
+    },
+    {
+      "id": "happening_valley_reed_return",
+      "type": "happening",
+      "title": "The Next Repair",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "at": [
+        "poi_reedwright_bank"
+      ],
+      "requires": [
+        "discovery_twin_banks"
+      ],
+      "prose": "A fresh reed is growing beside the drying frame. Irekha points out the old cut above it and the living root below.",
+      "choices": [
+        {
+          "label": "Look at the root",
+          "line": "The next repair is already growing beside the last one."
+        },
+        {
+          "label": "Leave the bed undisturbed",
+          "line": "The work and the wet bank have something to give each other."
+        }
+      ]
+    },
+    {
+      "id": "happening_valley_seam",
+      "type": "happening",
+      "title": "A Little Give",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "at": [
+        "poi_reedwright_bank"
+      ],
+      "requires": [],
+      "prose": "Irekha presses a repaired seam into the shallows. The bundles bend separately, and the water stays outside.",
+      "choices": [
+        {
+          "label": "Watch the test",
+          "line": "The repair holds because its parts still have room to move."
+        },
+        {
+          "label": "Ask about the reeds",
+          "line": "Irekha takes the cut stems and leaves the rooted strip beside the water."
+        }
+      ]
+    },
+    {
+      "id": "happening_valley_tide_room",
+      "type": "happening",
+      "title": "A Room for the Tide",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "at": [
+        "poi_nesting_cove"
+      ],
+      "requires": [],
+      "prose": "Water slides into the cove beneath the nesting shelf. Ulenna moves back one pace; the birds do not move at all.",
+      "choices": [
+        {
+          "label": "Wait on the path",
+          "line": "A small change in where we stand leaves the rest of the cove at ease."
+        },
+        {
+          "label": "Watch the inlet",
+          "line": "The tide brings water into the rooms that nobody has tried to close."
+        }
+      ]
+    },
+    {
+      "id": "happening_valley_windbreak",
+      "type": "happening",
+      "title": "The Sand That Stayed",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "at": [
+        "poi_dune_windbreak"
+      ],
+      "requires": [],
+      "prose": "The dune carries a thin stream of sand past the low wall. On this side a few old footprints have kept their edges.",
+      "choices": [
+        {
+          "label": "Read the sheltered tracks",
+          "line": "The windbreak keeps a small history while the open sand changes."
+        },
+        {
+          "label": "Listen to the wind",
+          "line": "The wall does not stop the desert. It makes a quiet place within it."
+        }
       ]
     },
     {

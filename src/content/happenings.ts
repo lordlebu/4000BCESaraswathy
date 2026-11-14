@@ -463,7 +463,7 @@ function woven(
   };
 }
 
-type Template = (around: Surroundings, roll: Roll, now: Circumstance) => GameEvent | null;
+type Template = (around: Surroundings, roll: Roll, now: Circumstance, asked?: boolean) => GameEvent | null;
 
 /** A flag written in the words file, with `{stranger}` made into the stranger it is about. */
 function flagFor(
@@ -506,8 +506,10 @@ const dropped: Template = ({ onRoad, biome, taken, wanted }, roll) => {
   ]);
 };
 
-const company: Template = ({ stranger, elsewhere, moment, onWater }, _roll, now) => {
-  if (onWater || !stranger || !elsewhere || !byDay(moment)) return null;
+const company: Template = ({ stranger, elsewhere, moment, onWater }, _roll, now, asked = false) => {
+  // A traveller can still be walking at dusk. Daylight paces chance encounters,
+  // but must not silence somebody the player can see and explicitly calls to.
+  if (onWater || !stranger || !elsewhere || (!asked && !byDay(moment))) return null;
   // Somebody you have met is met differently -- see `companyAgain`.
   if (now.met?.includes(stranger.id)) return null;
   return woven(
@@ -533,8 +535,8 @@ const company: Template = ({ stranger, elsewhere, moment, onWater }, _roll, now)
  * that makes a road feel lived on, and it needs exactly one fact kept between days. By now you
  * know their name, because every first meeting ends with it.
  */
-const companyAgain: Template = ({ stranger, moment, onWater }, _roll, now) => {
-  if (onWater || !stranger || !now.met?.includes(stranger.id) || !byDay(moment)) return null;
+const companyAgain: Template = ({ stranger, moment, onWater }, _roll, now, asked = false) => {
+  if (onWater || !stranger || !now.met?.includes(stranger.id) || (!asked && !byDay(moment))) return null;
   return woven(
     'road',
     'company-again',
@@ -936,7 +938,7 @@ export function wovenFor(
   const out: GameEvent[] = [];
   for (const template of TEMPLATES[now.occasion]) {
     if (kind && template.kind !== kind) continue;
-    const event = template.make(around, roll, now);
+    const event = template.make(around, roll, now, asked);
     // **Asked for, it happens.** Cooldowns and `again_after` pace what the road offers on its own;
     // they are not a reason to refuse somebody who walked up to a stranger and chose to talk.
     if (event && (asked || mayHappen(event, template.kind, now))) out.push(event);

@@ -3,7 +3,7 @@
 const { chromium } = require('@playwright/test');
 const fs = require('node:fs');
 const path = require('node:path');
-const OUT=path.resolve(__dirname,'../docs/images/twins');
+const OUT=path.resolve(__dirname,'../docs/images/twins',process.argv.includes('--polish')?'polish':'');
 fs.mkdirSync(OUT,{recursive:true});
 (async()=>{
   const metrics=await require('./measure-twins').measure();
@@ -13,14 +13,24 @@ fs.mkdirSync(OUT,{recursive:true});
   // Never photograph an earlier bake of the same review seed after geography changes.
   await page.addInitScript(()=>localStorage.clear());
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  const captures=[['harappa','poi_harappa_court'],['mohenjodaro','poi_brick_quarter'],['causeway','poi_twin_causeway'],['desert','poi_desert_ground'],['delta','poi_reed_junction'],['coves','poi_twin_cove']];
+  page.on('console',m=>{if(/has no frame|Texture.*not found|failed to load/i.test(m.text()))errors.push(m.text());});
+  let captures=[['harappa','poi_harappa_court'],['mohenjodaro','poi_brick_quarter'],['causeway','poi_twin_causeway'],['desert','poi_desert_ground'],['delta','poi_reed_junction'],['coves','poi_twin_cove'],['windbreak','poi_dune_windbreak'],['reedwright','poi_reedwright_bank'],['nesting-cove','poi_nesting_cove']];
+  if(process.argv.includes('--new-places'))captures=captures.slice(-3);
   for(const [name,at] of captures){
     await page.goto(`http://localhost:4173/?map=field_map_twins&seed=twin-review&hour=12&door=open&events=off&firsts=off&survey=on&at=${at}`);
     await page.locator('.map-surface canvas').waitFor({timeout:45000});
     await page.waitForFunction(()=>Boolean(window.__walker),{timeout:45000});
     await page.waitForTimeout(1800);
     const leave=page.getByRole('button',{name:'Leave',exact:true});if(await leave.isVisible())await leave.click();
+    if(['windbreak','reedwright','nesting-cove'].includes(name)){
+      await page.keyboard.press('KeyA');
+      await page.waitForTimeout(1200);
+    }
     await page.screenshot({path:path.join(OUT,name+'.png')});
+  }
+  if(process.argv.includes('--new-places')){
+    console.log(JSON.stringify({captures:captures.length,errors}));
+    await browser.close();if(errors.length)process.exitCode=1;return;
   }
   // Identical viewport and measured camera zoom for the existing-city reference.
   const zooms=[];
@@ -40,6 +50,14 @@ fs.mkdirSync(OUT,{recursive:true});
   await page.goto('http://localhost:4173/?map=field_map_twins&seed=twin-review&hour=12&door=open&events=off&at=poi_harappa_station');
   await page.getByRole('button',{name:/ride the ostrich tram/i}).waitFor({timeout:45000});
   await page.screenshot({path:path.join(OUT,'mobile-station.png')});
-  console.log(JSON.stringify({seed:'twin-review',captures:captures.length+4,zooms,survey:'development-only fog reveal; not a playthrough',errors},null,2));
+  await page.setViewportSize({width:1280,height:900});
+  await page.goto('http://localhost:4173/?map=field_map_twins&seed=twin-review&hour=12&door=open&events=off&firsts=off&at=poi_harappa_station');
+  await page.getByRole('button',{name:/ride the ostrich tram/i}).waitFor({timeout:45000});
+  await page.keyboard.press('KeyB');
+  await page.waitForFunction(()=>window.__walker?.().riding,{timeout:10000});
+  await page.waitForTimeout(700);
+  const tram=await page.evaluate(()=>({texture:window.__walker().carriageTexture,frame:window.__walker().carriageFrame}));
+  await page.screenshot({path:path.join(OUT,'tram-moving.png')});
+  console.log(JSON.stringify({seed:'twin-review',captures:captures.length+5,zooms,tram,survey:'development-only fog reveal; not a playthrough',errors},null,2));
   await browser.close();if(errors.length)process.exitCode=1;
 })().catch(e=>{console.error(e);process.exitCode=1;});
