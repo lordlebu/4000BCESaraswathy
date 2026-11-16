@@ -14,7 +14,7 @@
 // out by it silently not appearing.
 
 import { describe, expect, it } from 'vitest';
-import { art, artCount, artFolders, artNames, firstArt } from '../src/ui/art';
+import { art, artCount, artFolders, artNames, firstArt, preferredArt } from '../src/ui/art';
 import { plateFor } from '../src/ui/plates';
 import { markFor } from '../src/ui/marks';
 import { sceneFor } from '../src/ui/scenes';
@@ -23,6 +23,18 @@ import { placeArt, placeArtCount } from '../src/ui/places';
 import { thingArt, thingArtCount } from '../src/ui/things';
 
 describe('the art registry', () => {
+  it('prefers the painted edition through the portrait and place callers', () => {
+    expect(portraitFor('npc_twin_mason')).toBe(art('portraits', 'twin-mason-painted'));
+    expect(portraitFor('npc_twin_mason')).not.toBe(art('portraits', 'twin-mason'));
+    expect(placeArt('poi_harappa_court', 'settlement')).toBe(art('places', 'poi_harappa_court-painted'));
+    expect(preferredArt('events', ['happening_twin_courtyard'])).toBe(art('events', 'happening_twin_courtyard-painted'));
+  });
+
+  it('keeps specific subjects ahead of broader fallbacks, and preserves missing-edition fallback', () => {
+    expect(preferredArt('portraits', ['no-such-person', 'thrali'])).toBe(art('portraits', 'thrali'));
+    expect(preferredArt('events', ['happening_twin_arrival', 'happening_twin_courtyard'])).toBe(art('events', 'happening_twin_arrival'));
+    expect(preferredArt('places', [undefined, null, 'no-such-place'])).toBeNull();
+  });
   it('found the folders that have art in them', () => {
     const folders = artFolders();
     // Guards the guard: if the glob ever stops matching, every assertion below passes vacuously

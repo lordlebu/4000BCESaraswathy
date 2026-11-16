@@ -40,7 +40,7 @@ const files = existsSync(PORTRAITS)
 describe('src/ui/portraits holds built portraits and nothing else', () => {
   it('names somebody who exists', () => {
     for (const file of files) {
-      const name = file.replace(/\.[^.]+$/, '');
+      const name = file.replace(/\.[^.]+$/, '').replace(/-painted$/, '');
       expect(
         people.has(name),
         `${file} names nobody in canon. Portraits are filed under the person without canon's ` +

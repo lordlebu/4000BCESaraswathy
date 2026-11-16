@@ -22,7 +22,7 @@
 //
 // See `docs/art-placement.md` for the queue and what each should be of.
 
-import { artCount, firstArt } from './art';
+import { artCount, preferredArt } from './art';
 
 /**
  * The painted view of a place, or null — which is every place today and not a problem.
@@ -31,7 +31,7 @@ import { artCount, firstArt } from './art';
  * is legal and simply skips the first lookup.
  */
 export function placeArt(poiId: string, kind?: string | null): string | null {
-  return firstArt('places', [poiId, kind ? `kind-${kind}` : null]);
+  return preferredArt('places', [poiId, kind ? `kind-${kind}` : null]);
 }
 
 /** How many exist. Used by a test, to keep the loader honest about an empty folder. */

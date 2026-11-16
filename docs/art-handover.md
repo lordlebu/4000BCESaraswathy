@@ -1,5 +1,9 @@
 # Art handover
 
+The twin-city pass now supports preferred painted editions while retaining original files
+as fallbacks. See [the current naming and selection policy](art-placement.md#twin-city-painted-editions-17-november-2026)
+before applying the older rotation rule below to Harappa or Mohenjo-daro.
+
 Everything the art still wants, where each file goes, and what is on screen until it arrives.
 
 **Start here for an art session.** `docs/art-placement.md` is the mechanism — which folder, which

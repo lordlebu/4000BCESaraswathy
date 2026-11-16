@@ -13,6 +13,45 @@ import { planScene } from '../src/game/scenePlan';
 
 const map=fieldMap(TWIN_MAP)!;
 describe('the mainland twin cities',()=>{
+  it('uses continuous directional road bridges instead of the generic support and road overlay',()=>{
+    const built=buildFieldMap(map,{seed:'twin-review'}),plan=planScene(built);
+    const decks=plan.filter(p=>p.sheet==='riverBridge');
+    expect(decks.some(p=>p.frame>=4)).toBe(true);
+    expect(decks.some(p=>p.frame<4)).toBe(true);
+    for(const tile of built.world.tiles.flat().filter(t=>t.bridge&&t.road&&!t.track)){
+      expect(decks.filter(p=>p.x===tile.x&&p.y===tile.y)).toHaveLength(1);
+      expect(plan.some(p=>p.x===tile.x&&p.y===tile.y&&p.sheet==='twinRoutes')).toBe(false);
+      expect(plan.some(p=>p.x===tile.x&&p.y===tile.y&&p.sheet==='twinObjects'&&p.frame===18)).toBe(false);
+    }
+  });
+  it('places material surfaces off transport routes, without changing the saved world',()=>{
+    const built=buildFieldMap(map,{seed:'material-review'}),before=JSON.stringify(built.world);
+    const overlays=planScene(built).filter(p=>p.sheet==='twinSurfaces');
+    expect(new Set(overlays.map(p=>p.frame))).toEqual(new Set([0,1,2,3]));
+    for(const p of overlays){
+      const tile=built.world.tiles[p.y]![p.x]!;
+      expect(tile.road||tile.track).not.toBe(true);
+      expect(['settlement','desert']).toContain(tile.biome);
+      expect(p.depth).toBeLessThan(100);
+    }
+    expect(JSON.stringify(built.world)).toBe(before);
+  });
+  it('gives the shaded courtyard its neem and keeps the canopy clear across seeds',()=>{
+    for(let i=0;i<8;i++){
+      const built=buildFieldMap(map,{seed:`courtyard-${i}`});
+      const before=JSON.stringify(built.world);
+      const plan=planScene(built);
+      const court=built.placed.find(p=>p.poi.id==='poi_harappa_court')!.at;
+      const landmark=plan.find(p=>p.name==='poi:poi_harappa_court')!;
+      expect(landmark.sheet).toBe('twinCourtyard');
+      expect({x:landmark.x,y:landmark.y}).toEqual(court);
+      const canopy=plan.filter(p=>['twinHouses','twinHousesDetail','twinHomesPainted'].includes(p.sheet)&&!p.name&&
+        Math.abs(p.x-court.x)<=1&&p.y>=court.y-1&&p.y<=court.y);
+      expect(canopy).toEqual([]);
+      expect(JSON.stringify(built.world)).toBe(before);
+      expect(planScene(built)).toEqual(plan);
+    }
+  });
   it('keeps the authored geography and all places reachable across seeds',()=>{
     for(let i=0;i<20;i++){
       const b=buildFieldMap(map,{seed:`twins-${i}`}),w=b.world;
@@ -47,16 +86,27 @@ describe('the mainland twin cities',()=>{
   });
   it('draws both architectures from their actual city identity and keeps routes clear',()=>{
     const b=buildFieldMap(map);const plan=planScene(b);
-    const houses=plan.filter(p=>['twinHouses','twinHousesDetail'].includes(p.sheet)&&p.frame<8&&!p.name);
-    expect(houses.length).toBeGreaterThan(20);
-    for(const p of houses){expect(p.frame<4).toBe(districtAt(b.world.twinRegion!,p)?.id==='harappa');expect(b.world.tiles[p.y]![p.x]!.road).not.toBe(true);expect(b.world.tiles[p.y]![p.x]!.track).not.toBe(true);}
+    const houses=plan.filter(p=>['twinHouses','twinHousesDetail','twinHomesPainted'].includes(p.sheet)&&p.frame<8&&!p.name);
+    // Authored working courts replace the old random-density target. Both towns
+    // must still have residential frontage on each side of their civic centre.
+    for(const district of b.world.twinRegion!.districts){
+      const local=houses.filter(p=>districtAt(b.world.twinRegion!,p)?.id===district.id);
+      expect(local.some(p=>p.x<district.x)).toBe(true);
+      expect(local.some(p=>p.x>district.x)).toBe(true);
+    }
+    for(const p of houses){expect(p.sheet==='twinHomesPainted'?p.frame===0:p.frame<4).toBe(districtAt(b.world.twinRegion!,p)?.id==='harappa');expect(b.world.tiles[p.y]![p.x]!.road).not.toBe(true);expect(b.world.tiles[p.y]![p.x]!.track).not.toBe(true);}
     for(const p of b.placed)expect(plan.some(a=>a.name===`poi:${p.poi.id}`)).toBe(true);
     expect(houses.some(p=>p.sheet==='twinHouses')).toBe(true);
     expect(houses.some(p=>p.sheet==='twinHousesDetail')).toBe(true);
     const kept=new Set(Array.from({length:8},(_,i)=>planScene(buildFieldMap(map,{seed:`art-keep-${i}`})))
       .flat().filter(p=>p.sheet==='twinHouses'&&!p.name).map(p=>p.frame));
     expect([...kept].sort()).toEqual([0,1,2,3,4,5,6,7]);
-    expect(plan.every(p=>['twinHouses','twinHousesDetail','twinObjects','twinRoutes','twinDetails','twinRims'].includes(p.sheet))).toBe(true);
+    expect(plan.every(p=>['twinHouses','twinHousesDetail','twinObjects','twinRoutes','twinDetails','twinRims','twinCourtyard','twinSurfaces','twinHomesPainted','riverBridge','contact','twinEnvironment'].includes(p.sheet))).toBe(true);
+    for(const home of houses.filter(p=>p.sheet==='twinHomesPainted')){
+      const shade=plan.find(p=>p.sheet==='contact'&&p.x===home.x&&p.y===home.y);
+      expect(shade).toBeDefined();expect(shade!.depth).toBeLessThan(home.depth);
+      expect(shade!.offset!.y).toBeGreaterThan(0);
+    }
   });
   it('keeps each city at Dwarka scale, bounded by walls and natural features with open gates',()=>{
     const reference=buildFieldMap(fieldMap('field_map_dwarka')!,{seed:'twin-review'}).world;
