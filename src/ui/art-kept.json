@@ -289,6 +289,9 @@
     "events/happening_valley_tide_room.png",
     "events/happening_valley_reed_return.png",
     "events/happening_valley_bird_return.png",
-    "events/happening_valley_courtyard_return.png"
+    "events/happening_valley_courtyard_return.png",
+    "events/happening_twin_courtyard-painted.png",
+    "portraits/twin-mason-painted.png",
+    "places/poi_harappa_court-painted.png"
   ]
 }

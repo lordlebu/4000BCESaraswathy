@@ -1,5 +1,18 @@
 # Art placement
 
+## Twin-city painted editions (17 November 2026)
+
+The twin-city visual pass adds optional `<name>-painted.png` editions in `portraits/`,
+`places/` and `events/`. Each caller prefers that edition, then the accepted original,
+before trying its next broader subject. Original files remain available through `art()`.
+Portrait names still strip `npc_` and hyphenate underscores; POI and event IDs stay whole.
+Portrait and place selection stays stable. Events select seeded takes within the chosen
+edition. Numbered takes in other folders remain invalid.
+
+This is the new presentation policy for the twin-city work requested by the owner;
+it supersedes the older requirement to keep every earlier painting in normal rotation.
+Every original stays recorded in `art-kept.json`. See [the implementation record](twin-cities-art-progress.md).
+
 Every slot the interface will draw a picture into, what a file must be called, and what is on
 screen until one arrives.
 

@@ -139,6 +139,23 @@ export function firstArt(
   return null;
 }
 
+/** Prefer a reviewed painted edition, preserving the accepted original as a fallback.
+ * Resolve each subject before moving to its broader fallback: a painted generic scene must
+ * never displace a specific event. Take selection remains seeded within the chosen edition.
+ */
+export function preferredArt(
+  folder: 'portraits' | 'places' | 'events',
+  names: readonly (string | null | undefined)[],
+  pick = 0
+): string | null {
+  for (const name of names) {
+    if (!name) continue;
+    const found = firstArt(folder, [`${name}-painted`, name], pick);
+    if (found) return found;
+  }
+  return null;
+}
+
 /**
  * How many images a folder holds, counting every take.
  *

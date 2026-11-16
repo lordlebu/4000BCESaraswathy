@@ -112,6 +112,10 @@ const SHEET_KEY: Record<
 > = {
   twinHouses: TWIN_KEYS.houses, twinObjects: TWIN_KEYS.objects, twinRoutes: TWIN_KEYS.routes,
   twinHousesDetail: TWIN_KEYS.housesDetail, twinDetails: TWIN_KEYS.details, twinRims: TWIN_KEYS.rims,
+  twinCourtyard: TWIN_KEYS.courtyard,
+  twinSurfaces: 'twins-surfaces',
+  twinEnvironment: 'twins-environment',
+  twinHomesPainted: 'twins-homes-painted',
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
@@ -489,6 +493,7 @@ export class WorldScene extends Phaser.Scene {
   private hullView: DugoutView | null = null;
   /** The lodestone carriage, shown only while it is carrying him. See `onRide`. */
   private carriage!: Phaser.GameObjects.Image;
+  private terminalTurn: { start: number; heading: number } | null = null;
   private twinEffects: Phaser.GameObjects.Image[] = [];
   private onTwinKnowledge = ({completed}: UiToGame['twin-knowledge']): void => {
     if (!this.world?.twinRegion) return;
@@ -1051,6 +1056,8 @@ export class WorldScene extends Phaser.Scene {
       // Bottom-anchored: a tower, a hut, a landmark and now a tree all stand *on* their tile and
       // rise into the one above, rather than filling a cell the way ground cover does.
       const anchored =
+        item.sheet === 'twinHomesPainted' ||
+        item.sheet === 'twinCourtyard' ||
         item.sheet === 'twinHousesDetail' ||
         item.sheet === 'twinDetails' ||
         item.sheet === 'twinHouses' ||
@@ -1176,6 +1183,7 @@ export class WorldScene extends Phaser.Scene {
     this.hullBack = this.add.image(0, 0, DUGOUT_VIEWS.side.image).setOrigin(0.5, 0).setVisible(false);
     this.hullFront = this.add.image(0, 0, DUGOUT_VIEWS.side.image).setOrigin(0.5, 0).setVisible(false);
     // Anchored at the foot of its shadow, like everything else that stands on the map.
+    this.terminalTurn = null;
     this.carriage = this.add.image(0, 0, this.world.twinRegion ? TWIN_KEYS.tram : CARRIAGE_IMAGE).setOrigin(0.5, 1).setVisible(false);
     if (this.world.twinRegion) { const p=this.world.twinRegion.stations[0]!; this.carriage.setPosition((p.x+.5)*TILE_SIZE,(p.y+1)*TILE_SIZE).setDepth(depthFor(p.y,ROW_SLOT.walker)).setVisible(true); }
 
@@ -1924,6 +1932,7 @@ export class WorldScene extends Phaser.Scene {
     this.queuedPath = [];
     this.moving = true;
     this.riding = true;
+    this.terminalTurn = null;
     this.at = ride.to;
     this.player.setVisible(false);
     this.carriage.setVisible(true).setPosition(this.player.x, this.player.y).setDepth(this.player.depth);
@@ -1986,10 +1995,8 @@ export class WorldScene extends Phaser.Scene {
     this.ride = null;
     this.carriage.setVisible(Boolean(this.world.twinRegion));
     if(this.world.twinRegion){
-      const reverse=[1,0,3,2][heading]!;
-      const quarter=[3,2,0,1][heading]!;
-      this.time.delayedCall(160,()=>{if(!this.riding)this.carriage.setFrame(quarter*4);});
-      this.time.delayedCall(320,()=>{if(!this.riding)this.carriage.setFrame(reverse*4);});
+      this.carriage.setFrame(heading * 4);
+      this.terminalTurn = { start: this.game.loop.now, heading };
     }
     this.cameras.main.setLerp(FOLLOW_LERP, FOLLOW_LERP);
     this.player.setVisible(true);
@@ -2000,6 +2007,26 @@ export class WorldScene extends Phaser.Scene {
     this.travellers.closeLine([], phaseAt(this.time.now + this.travelled, this.startPhase));
     this.updateAnimation();
     this.arriveAt(ride.at);
+  }
+
+  /** A short halt and two planted steps, using the accepted four-direction NES sheet.
+   * No position/rotation tween: the carriage stays aligned with the platform. Raw loop time
+   * lets a slow renderer skip poses and still finish on time. A new ride cancels the turn.
+   */
+  private updateTerminalTurn(): void {
+    const turn = this.terminalTurn;
+    if (!turn || this.riding) return;
+    const elapsed = this.game.loop.now - turn.start;
+    const quarter = [3, 2, 0, 1][turn.heading]!;
+    const reverse = [1, 0, 3, 2][turn.heading]!;
+    // Neutral arrival, one step into each heading, then a neutral departure-ready rest.
+    const frame = elapsed < 200 ? turn.heading * 4
+      : elapsed < 320 ? quarter * 4 + 1
+      : elapsed < 440 ? quarter * 4
+      : elapsed < 600 ? reverse * 4 + 1
+      : reverse * 4;
+    this.carriage.setFrame(frame);
+    if (elapsed >= 600) this.terminalTurn = null;
   }
 
   /**
@@ -2432,6 +2459,7 @@ export class WorldScene extends Phaser.Scene {
     this.updateGuidanceEdge();
     this.updateSway();
     this.updateRide();
+    this.updateTerminalTurn();
     this.visitors.update();
     // A painted walk steps every frame; where the wanderers are is still the half-second gate's.
     this.wanderers.animate(this.time.now);

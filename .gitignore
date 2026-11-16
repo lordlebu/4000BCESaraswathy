@@ -56,7 +56,8 @@ assets/source/scenes/
 # than fifty-six species, so the total is smaller -- but a raw is still an input nothing ships, and
 # the rule that keeps plates out should not have an exception for people. Keep them on disk;
 # rebuilding at another size needs them.
-assets/source/portraits/
+assets/source/portraits/*
+!assets/source/portraits/portrait-twin-mason-painted.png
 
 # Local performance baseline: describes a machine, not the code.
 .perf-baseline.json
@@ -73,13 +74,15 @@ dump/
 
 # Raw place views, on the same footing as the scenes and plates above: 2-4 MB each against the
 # ~200 KB band that ships into src/ui/places/. Six of them cover every place in the game.
-assets/source/places/
+assets/source/places/*
+!assets/source/places/poi_harappa_court-painted.png
 
 # Raw stranger faces and event paintings, on the same footing as the portraits above: 0.3-9 MB each as
 # the image tools returned them, against the ~50 KB `tools/build-plates.js --faces` / `--events`
 # writes into src/ui/ and ships. Keep them on disk; the built file is what the game reads.
 assets/source/faces/
-assets/source/events/
+assets/source/events/*
+!assets/source/events/happening_twin_courtyard-painted.png
 # The opening's plates, raw: built to src/ui/prologue/ by build-plates --prologue, like the events.
 assets/source/prologue/
 

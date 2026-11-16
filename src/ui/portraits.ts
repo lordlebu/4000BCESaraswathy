@@ -18,7 +18,7 @@
 //
 // See `docs/portrait-prompts.md` for what to ask an image model for.
 
-import { art, artNames } from './art';
+import { preferredArt, artNames } from './art';
 
 /**
  * The bare name a portrait file carries, for a canon npc id.
@@ -38,7 +38,7 @@ export function portraitName(npcId: string): string {
  * actually cost time.
  */
 export function portraitFor(npcId: string): string | null {
-  return art('portraits', portraitName(npcId));
+  return preferredArt('portraits', [portraitName(npcId)]);
 }
 
 /**
@@ -48,5 +48,5 @@ export function portraitFor(npcId: string): string | null {
  * above would miss -- which is exactly the drift a second copy of anything produces here.
  */
 export function portraitNames(): string[] {
-  return artNames('portraits');
+  return [...new Set(artNames('portraits').map(name => name.replace(/-painted$/, '')))];
 }
