@@ -55,7 +55,7 @@ describe('the mainland twin cities',()=>{
   it('keeps the authored geography and all places reachable across seeds',()=>{
     for(let i=0;i<20;i++){
       const b=buildFieldMap(map,{seed:`twins-${i}`}),w=b.world;
-      expect([w.width,w.height]).toEqual([64,64]);expect(b.placed).toHaveLength(15);expect(b.unplaced).toEqual([]);
+      expect([w.width,w.height]).toEqual([64,64]);expect(b.placed).toHaveLength(16);expect(b.unplaced).toEqual([]);
       const reached=reachableFrom(w.tiles,w.width,w.height,w.start);
       for(const p of b.placed)expect(reached.has(`${p.at.x},${p.at.y}`),p.poi.id).toBe(true);
       expect(w.tiles[5]![5]!.biome).not.toBe('sea');expect(w.tiles[63]![63]!.biome).toBe('sea');
@@ -101,7 +101,7 @@ describe('the mainland twin cities',()=>{
     const kept=new Set(Array.from({length:8},(_,i)=>planScene(buildFieldMap(map,{seed:`art-keep-${i}`})))
       .flat().filter(p=>p.sheet==='twinHouses'&&!p.name).map(p=>p.frame));
     expect([...kept].sort()).toEqual([0,1,2,3,4,5,6,7]);
-    expect(plan.every(p=>['twinHouses','twinHousesDetail','twinObjects','twinRoutes','twinDetails','twinRims','twinCourtyard','twinSurfaces','twinHomesPainted','riverBridge','contact','twinEnvironment'].includes(p.sheet))).toBe(true);
+    expect(plan.every(p=>['twinHouses','twinHousesDetail','twinObjects','twinRoutes','twinDetails','twinRims','twinCourtyard','twinSurfaces','twinHomesPainted','riverBridge','contact','twinEnvironment','twinStories'].includes(p.sheet))).toBe(true);
     for(const home of houses.filter(p=>p.sheet==='twinHomesPainted')){
       const shade=plan.find(p=>p.sheet==='contact'&&p.x===home.x&&p.y===home.y);
       expect(shade).toBeDefined();expect(shade!.depth).toBeLessThan(home.depth);
@@ -132,7 +132,7 @@ describe('the mainland twin cities',()=>{
     }
   });
   it('counts named walkers once and caps strangers and active camp people',()=>{
-    const people=new Set(poisOn(TWIN_MAP).flatMap(p=>npcsAt(p.id).map(n=>n.id)));expect(people.size).toBe(10);
+    const people=new Set(poisOn(TWIN_MAP).flatMap(p=>npcsAt(p.id).map(n=>n.id)));expect(people.size).toBe(15);
     const travellers=travellersOn(TWIN_MAP,'twins');expect(travellers.filter(t=>t.npcId!==null)).toHaveLength(3);expect(travellers.filter(t=>t.npcId===null)).toHaveLength(2);
     const b=buildFieldMap(map);expect(encampmentOn(b.world,TWIN_MAP,[],0)).toBeNull();let active=0;
     for(let day=1;day<30;day++){const camp=encampmentOn(b.world,TWIN_MAP,b.placed.map(p=>({poiId:p.poi.id,at:p.at})),day);if(camp){active++;expect(['drovers','pilgrims','adventurers']).toContain(camp.kind);expect(campable(b.world,camp.at)).toBe(true);}}

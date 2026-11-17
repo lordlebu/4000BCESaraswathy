@@ -292,6 +292,17 @@
     "events/happening_valley_courtyard_return.png",
     "events/happening_twin_courtyard-painted.png",
     "portraits/twin-mason-painted.png",
-    "places/poi_harappa_court-painted.png"
+    "places/poi_harappa_court-painted.png",
+    "portraits/twin-gardener-painted.png",
+    "portraits/twin-waterkeeper-painted.png",
+    "portraits/twin-stationkeeper-painted.png",
+    "portraits/twin-handler-painted.png",
+    "portraits/twin-brickworker-painted.png",
+    "portraits/twin-landingkeeper-painted.png",
+    "portraits/twin-maintainer-painted.png",
+    "portraits/reedwright-irekha-painted.png",
+    "portraits/cove-watcher-ulenna-painted.png",
+    "portraits/mirlepa-painted.png",
+    "portraits/yamantaka-painted.png"
   ]
 }

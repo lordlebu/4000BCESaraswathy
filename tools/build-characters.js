@@ -178,6 +178,12 @@ function main() {
       continue;
     }
 
+    if (c.builder === 'twin-people') {
+      require('./build-twin-people').buildTwinPerson(c.id, out);
+      console.log(`  ok ${c.id} 20 authored NES frames  ${rel}`);
+      continue;
+    }
+
     const walkOut = path.join(tmp, `${c.id}-walk.png`);
     const sitOut = path.join(tmp, `${c.id}-sit.png`);
     build(path.join(ROOT, c.walk.source), walkOut, cell, c.colours, c.walk.frames);

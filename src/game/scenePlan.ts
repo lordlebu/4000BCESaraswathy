@@ -84,6 +84,7 @@ export type PlacementSheet =
   | 'twinSurfaces'
   | 'twinEnvironment'
   | 'twinHomesPainted'
+  | 'twinStories'
   | 'overdraw'
   | 'features'
   | 'flora'

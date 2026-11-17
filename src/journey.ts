@@ -299,13 +299,16 @@ function receive(progress: Progress, id: string): Progress {
 export function linesFor(
   progress: Progress,
   npcId: string,
-  carrying: Satchel = emptySatchel()
+  carrying: Satchel = emptySatchel(),
+  flags: readonly string[] = []
 ): Line[] {
   const who = npc(npcId);
   if (!who) return [];
   return who.lines.filter(
     (l) =>
       l.requires.every((r) => observed(progress, r)) &&
+      (l.requiresFlags ?? []).every(f => flags.includes(f)) &&
+      (l.excludesFlags ?? []).every(f => !flags.includes(f)) &&
       // A line with a price is not offered until it can be paid. Showing it greyed out would
       // be a shop; a person who has not been given anything simply has nothing to say yet.
       (l.costs === null || count(carrying, l.costs) > 0)
@@ -330,9 +333,10 @@ export function hear(
   progress: Progress,
   npcId: string,
   lineIndex: number,
-  carrying: Satchel = emptySatchel()
+  carrying: Satchel = emptySatchel(),
+  flags: readonly string[] = []
 ): Heard {
-  const line = linesFor(progress, npcId, carrying)[lineIndex];
+  const line = linesFor(progress, npcId, carrying, flags)[lineIndex];
   if (!line) return { progress, satchel: carrying, paid: null };
   // Both halves in one call, deliberately. A `pay` the caller has to remember beside `hear` is
   // the shape of the three mechanics this codebase has shipped with no caller — and a gift the

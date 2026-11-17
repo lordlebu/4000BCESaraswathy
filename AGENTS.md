@@ -87,6 +87,13 @@ merely because work was pushed or checks passed. At the next session, verify the
 
 ## Verification and environment translation
 
+When asked to run the game on this Windows desktop, use host network permission and
+`powershell.exe -NoProfile -File tools/start-local-game.ps1 -NoBrowser` for a persistent
+server with ignored logs. Open the page with the available browser tool. A sandboxed Vite
+"ready" banner does not prove the desktop can reach it: loopback can fail with `EACCES`.
+Confirm host HTTP availability before claiming it runs; report permission-review timeouts
+as unverified access, never as successful browser opening. See [desktop launch notes](docs/testing.md#windows-desktop-manual-review).
+
 Read [docs/testing.md](docs/testing.md) before changing tests. Verify real callers and the
 player-visible path: a pure function passing its own tests does not prove gameplay uses it.
 For visual changes, inspect actual images/screenshots as well as runtime loading and console
@@ -121,3 +128,7 @@ environment before applying its commands:
 Keep durable new owner decisions in the appropriate repository document and link them here
 when needed. Avoid duplicating historical counts, machine paths, tool names or version numbers
 as permanent facts.
+
+Desktop review screenshots and machine-specific performance samples belong in the already ignored
+`dump/twin-city-art-review/`, not tracked docs. See [the twin-city art plan](docs/twin-cities-art-plan.md).
+Preserve runtime assets and required visual-test baselines.

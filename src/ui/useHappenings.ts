@@ -27,6 +27,7 @@ import type { Happens } from './useRoadTalk';
 
 /** What the bus handlers read, kept current by `App` after every commit. See `latest` there. */
 export interface Latest {
+  activityOpen?: boolean;
   progress: Progress;
   satchel: Satchel;
   world: World | null;
@@ -56,7 +57,8 @@ export function useHappenings({
   progress,
   setProgress,
   setSatchel,
-  setMemory
+  setMemory,
+  blocked = false
 }: {
   latest: MutableRefObject<Latest>;
   seenEvents: MutableRefObject<string[]>;
@@ -84,8 +86,31 @@ export function useHappenings({
   setProgress: Dispatch<SetStateAction<Progress>>;
   setSatchel: Dispatch<SetStateAction<Satchel>>;
   setMemory: (line: string) => void;
+  blocked?: boolean;
 }) {
   const [happening, setHappening] = useState<{ event: GameEvent; shelter: string | null } | null>(null);
+  const blockedRef=useRef(blocked);blockedRef.current=blocked;
+  const pendingBeedu=useRef<string|null>(null);
+  const beeduSafe=useRef(true);
+  const [beeduNearby,setBeeduNearby]=useState(false);
+  useEffect(()=>{
+    const sight=({flightId}:GameToUi['beedu-sighted'])=>{pendingBeedu.current=flightId;};
+    const nearby=({near,safe=true}:GameToUi['beedu-nearby'])=>{beeduSafe.current=safe;setBeeduNearby(near);};
+    const timer=window.setInterval(()=>{
+      if(!pendingBeedu.current)return;
+      const current=latest.current;
+      if(current.fieldMapId!=='field_map_twins'||!current.world||!pendingBeedu.current.startsWith(current.world.seed+':')){pendingBeedu.current=null;return;}
+      if(current.activityOpen||!beeduSafe.current||blockedRef.current||cardOpenRef.current||pageOpenRef.current||crossing.current)return;
+      const event=events.find(e=>e.id==='happening_twin_beedu_flight');
+      if(!event||seenEvents.current.includes(event.id)){pendingBeedu.current=null;return;}
+      pendingBeedu.current=null;
+      seenEvents.current=[...seenEvents.current,event.id];
+      if(!journeyFlags.current.includes('beedu:witnessed'))journeyFlags.current=[...journeyFlags.current,'beedu:witnessed'];
+      cardOpenRef.current=true;setCardOpen(true);setHappening({event,shelter:null});
+    },500);
+    EventBus.onEvent('beedu-sighted',sight);EventBus.onEvent('beedu-nearby',nearby);
+    return()=>{window.clearInterval(timer);EventBus.offEvent('beedu-sighted',sight);EventBus.offEvent('beedu-nearby',nearby);};
+  },[]);
   useEffect(() => {
     cardOpenRef.current = happening !== null;
     setCardOpen(happening !== null);
@@ -94,7 +119,7 @@ export function useHappenings({
   /** `maybeHappens`, once the bus effect has made it. Null for the first render only. */
   const happens = useRef<Happens | null>(null);
   // The story check, handed out of the effect like `happens`; see `storyNow`.
-  const storyRef = useRef<((when: BeatWhen, poiId: string | null) => boolean) | null>(null);
+  const storyRef = useRef<((when: BeatWhen, poiId: string | null, requestedArc?: string) => boolean) | null>(null);
   /** The last day a road event was asked about, so the question is one a day and not one a step. */
   const lastRoadDay = useRef(-1);
   /** Steps walked on the map in hand, and which map that is: see `PASSING_AFTER_STEPS`. */
@@ -329,7 +354,7 @@ export function useHappenings({
      * before anything rationed or woven, at the same three moments: arriving somewhere, a night, a
      * day's road. A beat waits until it can be taken whole, so this either opens its card or is quiet.
      */
-    const storyNow = (when: BeatWhen, poiId: string | null): boolean => {
+    const storyNow = (when: BeatWhen, poiId: string | null, requestedArc?: string): boolean => {
       // Nothing of a story over the crossing's cards; an arrival is held until stepping down anyway.
       if (pageOpenRef.current || crossing.current) return false;
       const p = latest.current.progress;
@@ -339,9 +364,10 @@ export function useHappenings({
         day: latest.current.day,
         poiId,
         flags: journeyFlags.current,
+        requestedArc,
         // A discovery must be understood; a word, a recipe or a question held.
         holds: (id) =>
-          id.startsWith('discovery_') ? isComplete(p, id) : p.words.includes(id) || p.recipes.includes(id),
+          id.startsWith('discovery_') ? isComplete(p, id) : p.words.includes(id) || p.recipes.includes(id) || journeyFlags.current.includes(id),
         carried: (id) => carried[id] ?? 0
       });
       if (!event) return false;
@@ -359,6 +385,7 @@ export function useHappenings({
     const onReturned = ({ poiId, fieldMapId }: GameToUi['poi-returned']) => {
       const here = latest.current.at;
       if (!here || fieldMapId !== latest.current.fieldMapId) return;
+      if (storyNow('arriving', poiId)) return;
       if (!events.some(e => e.id.startsWith('happening_valley_') && e.conditions.requires.length > 0 && e.conditions.pois.includes(poiId))) return;
       maybeHappens('arriving', here, null, `returning:${poiId}`, { poiId });
     };
@@ -426,6 +453,7 @@ export function useHappenings({
           for (const flag of choice.sets ?? []) {
             if (!journeyFlags.current.includes(flag)) journeyFlags.current = [...journeyFlags.current, flag];
           }
+          EventBus.emitEvent('twin-knowledge', {completed:Object.keys(latest.current.progress.rungs).filter(id=>isComplete(latest.current.progress,id)), flags:journeyFlags.current});
           // Whoever this was about, you have met now.
           const stranger = happening.event.stranger;
           if (stranger && !metStrangers.current.includes(stranger.id)) {
@@ -439,5 +467,5 @@ export function useHappenings({
       }
     : null;
 
-  return { happening, setHappening, happens, storyRef, card };
+  return { happening, setHappening, happens, storyRef, beeduNearby, card };
 }

@@ -3,7 +3,7 @@
 const { chromium } = require('@playwright/test');
 const fs = require('node:fs');
 const path = require('node:path');
-const OUT=path.resolve(__dirname,'../docs/images/twins',process.argv.includes('--polish')?'polish':'');
+const OUT=path.resolve(__dirname,'../dump/twin-city-art-review',process.argv.includes('--polish')?'polish':'');
 fs.mkdirSync(OUT,{recursive:true});
 (async()=>{
   const metrics=await require('./measure-twins').measure();

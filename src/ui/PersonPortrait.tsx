@@ -44,7 +44,9 @@ export const LANGUAGE_INK: Record<string, string> = {
   kia: '#3d7a8c',
   maru: '#8a6a3a',
   sarv: '#7a5a7c',
-  harappan: '#986b46'
+  harappan: '#986b46',
+  elamite: '#8b654f',
+  denisovan: '#68745a'
 };
 
 const NEUTRAL_INK = '#6b5c6f';
@@ -67,6 +69,9 @@ export const SHOULDERS = 'M2 21c0-4 2.9-6.6 6.5-6.6S15 17 15 21z';
  * the plain figure rather than to nothing.
  */
 const TOOLS: [string[], string][] = [
+  // A camp pot and a meditator's folded hands keep unpainted fallbacks legible.
+  [['camp cook'], 'M16 12h9v4a4.5 4.5 0 0 1-9 0zM18 9h5M20 7V5'],
+  [['meditator'], 'M16 18l4-4 4 4M16 18h8M20 14v-4'],
   // A fisher's net: a hanging mesh, which is the shape a net makes when it is carried rather than
   // cast. Two crossing runs read as mesh at this size; more would be a smudge.
   [['fisher'], 'M17 6v10M23 6v10M17 6h6M17 11h6M17 16h6M20 6v10'],

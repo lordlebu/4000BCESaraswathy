@@ -24,7 +24,7 @@ describe('the additive valley expansion', () => {
   it('adds all three new stops to a saved valley without rerolling its ground or old places', () => {
     const old = olderValley(), restored = restoreWorld(old, map)!;
     expect(restored.world.tiles[1]![1]!.biome).toBe('coast');
-    expect(restored.placed).toHaveLength(15);
+    expect(restored.placed).toHaveLength(map.pointsOfInterest.length);
     for(const [id,x,y] of old.placed)expect(restored.placed.find(p=>p.poi.id===id)?.at).toEqual({x,y});
     const reached=reachableFrom(restored.world.tiles,64,64,restored.world.start);
     for(const id of additions){const p=restored.placed.find(p=>p.poi.id===id)!;expect(reached.has(`${p.at.x},${p.at.y}`)).toBe(true);}

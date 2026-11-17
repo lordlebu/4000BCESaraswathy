@@ -29,6 +29,7 @@ import { weightedPickFor } from '../world/rng';
 import { vehicles } from './making';
 import { stepCostOn } from './species';
 import { type Look, lookFor } from './looks';
+import { TWIN_PEOPLE } from './twinPeople';
 
 /**
  * How many travellers a map carries.
@@ -438,6 +439,9 @@ export function travellersOn(fieldMapId: string, seed = ''): Traveller[] {
     if (out.length >= TRAVELLERS_PER_MAP) break;
     const circuit = person.foundAt.filter((id) => here.has(id));
     const grounds = new Set(circuit.flatMap((id) => poi(id)?.terrain ?? []));
+    // Stable authored identities for the existing twin-city walkers. No roster, route or
+    // timetable changes; never re-dye their working clothes as a generic road-company body.
+    const namedArt = fieldMapId === 'field_map_twins' ? TWIN_PEOPLE[person.id] : undefined;
     out.push({
       id: person.id,
       name: person.name,
@@ -445,8 +449,8 @@ export function travellersOn(fieldMapId: string, seed = ''): Traveller[] {
       npcId: person.id,
       circuit,
       conveyance: conveyanceFor(grounds),
-      art: sheetFor(fieldMapId, out.length),
-      look: lookFor(person.id, sheetFor(fieldMapId, out.length)),
+      art: namedArt ?? sheetFor(fieldMapId, out.length),
+      look: namedArt ? null : lookFor(person.id, sheetFor(fieldMapId, out.length)),
       culture: null,
       givenName: null
     });

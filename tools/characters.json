@@ -21,6 +21,21 @@
   "cell": { "width": 26, "height": 40 },
 
   "characters": [
+    { "id": "priest-kang", "name": "Priest Kang", "builder": "twin-people", "colours": 8 },
+    { "id": "mirlepa", "name": "Mirlepa", "builder": "twin-people", "colours": 8 },
+    { "id": "yamantaka", "name": "Yamantaka", "builder": "twin-people", "colours": 8, "cell":{"width":34,"height":40} },
+    { "id": "cave-cook", "name": "The visiting cook", "builder": "twin-people", "colours": 8 },
+    { "id": "cave-herder", "name": "The visiting herder", "builder": "twin-people", "colours": 8 },
+    { "id": "twin-stationkeeper", "name": "Tavra", "builder": "twin-people", "colours": 8 },
+    { "id": "twin-handler", "name": "Pavi", "builder": "twin-people", "colours": 8 },
+    { "id": "twin-brickworker", "name": "Renu", "builder": "twin-people", "colours": 8 },
+    { "id": "twin-landingkeeper", "name": "Hutel", "builder": "twin-people", "colours": 8 },
+    { "id": "twin-maintainer", "name": "Denu", "builder": "twin-people", "colours": 8 },
+    { "id": "reedwright-irekha", "name": "Irekha", "builder": "twin-people", "colours": 8 },
+    { "id": "cove-watcher-ulenna", "name": "Ulenna", "builder": "twin-people", "colours": 8 },
+    { "id": "twin-mason", "name": "Eru", "builder": "twin-people", "colours": 8 },
+    { "id": "twin-gardener", "name": "Nemi", "builder": "twin-people", "colours": 8 },
+    { "id": "twin-waterkeeper", "name": "Seli", "builder": "twin-people", "colours": 8 },
     {
       "id": "varuna",
       "name": "Varuna",

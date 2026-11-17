@@ -22,6 +22,21 @@ import pilgrimUrl from '../../assets/traveller-pilgrim-overworld.png';
 import nomadUrl from '../../assets/traveller-nomad-overworld.png';
 import asuraUrl from '../../assets/traveller-asura-overworld.png';
 import princessUrl from '../../assets/asura-princess-overworld.png';
+import twinMasonUrl from '../../assets/twin-mason-overworld.png?no-inline';
+import twinGardenerUrl from '../../assets/twin-gardener-overworld.png?no-inline';
+import twinWaterkeeperUrl from '../../assets/twin-waterkeeper-overworld.png?no-inline';
+import twinStationkeeperUrl from '../../assets/twin-stationkeeper-overworld.png?no-inline';
+import twinHandlerUrl from '../../assets/twin-handler-overworld.png?no-inline';
+import twinBrickworkerUrl from '../../assets/twin-brickworker-overworld.png?no-inline';
+import twinLandingkeeperUrl from '../../assets/twin-landingkeeper-overworld.png?no-inline';
+import twinMaintainerUrl from '../../assets/twin-maintainer-overworld.png?no-inline';
+import irekhaUrl from '../../assets/reedwright-irekha-overworld.png?no-inline';
+import ulennaUrl from '../../assets/cove-watcher-ulenna-overworld.png?no-inline';
+import kangUrl from '../../assets/priest-kang-overworld.png?no-inline';
+import mirlepaUrl from '../../assets/mirlepa-overworld.png?no-inline';
+import yamantakaUrl from '../../assets/yamantaka-overworld.png?no-inline';
+import caveCookUrl from '../../assets/cave-cook-overworld.png?no-inline';
+import caveHerderUrl from '../../assets/cave-herder-overworld.png?no-inline';
 
 export interface CharacterArt {
   /** Texture key, also the prefix for its animation keys. */
@@ -106,6 +121,21 @@ export const TRAVELLER_ART = {
  * something of theirs puts them on the map -- `content/visitors.ts`, for the princess.
  */
 export const NAMED_ART = {
+  'priest-kang': {key:'priest-kang',name:'Priest Kang',url:kangUrl},
+  mirlepa: {key:'mirlepa',name:'Mirlepa',url:mirlepaUrl},
+  yamantaka: {key:'yamantaka',name:'Yamantaka',url:yamantakaUrl,frame:{width:34,height:40}},
+  'cave-cook': {key:'cave-cook',name:'The visiting cook',url:caveCookUrl},
+  'cave-herder': {key:'cave-herder',name:'The visiting herder',url:caveHerderUrl},
+  'twin-mason': { key: 'twin-mason', name: 'Eru', url: twinMasonUrl },
+  'twin-gardener': { key: 'twin-gardener', name: 'Nemi', url: twinGardenerUrl },
+  'twin-waterkeeper': { key: 'twin-waterkeeper', name: 'Seli', url: twinWaterkeeperUrl },
+  'twin-stationkeeper': { key: 'twin-stationkeeper', name: 'Tavra', url: twinStationkeeperUrl },
+  'twin-handler': { key: 'twin-handler', name: 'Pavi', url: twinHandlerUrl },
+  'twin-brickworker': { key: 'twin-brickworker', name: 'Renu', url: twinBrickworkerUrl },
+  'twin-landingkeeper': { key: 'twin-landingkeeper', name: 'Hutel', url: twinLandingkeeperUrl },
+  'twin-maintainer': { key: 'twin-maintainer', name: 'Denu', url: twinMaintainerUrl },
+  'reedwright-irekha': { key: 'reedwright-irekha', name: 'Irekha', url: irekhaUrl },
+  'cove-watcher-ulenna': { key: 'cove-watcher-ulenna', name: 'Ulenna', url: ulennaUrl },
   'asura-princess': {
     key: 'asura-princess',
     name: 'The Asura-Tainted Princess',

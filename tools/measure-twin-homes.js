@@ -40,6 +40,8 @@ const path=require('node:path');
    results.push({at,variant,atlasLoads,...result,walking:{median:walking.median,p90:walking.p90},errors});console.log(JSON.stringify(results.at(-1)));
    await context.close();
   }
-  fs.writeFileSync(path.join(__dirname,'../docs/images/twins/art-review/home-performance.json'),JSON.stringify(results,null,2)+'\n');
+  const out=path.join(__dirname,'../dump/twin-city-art-review/art-review/home-performance.json');
+  fs.mkdirSync(path.dirname(out),{recursive:true});
+  fs.writeFileSync(out,JSON.stringify(results,null,2)+'\n');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

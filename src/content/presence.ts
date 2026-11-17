@@ -22,6 +22,7 @@ import { fieldMap, npcsAt, poi, type Npc } from './places';
 import { travellersOn, type Traveller, type TravellerState } from './travellers';
 import { busyLine } from './campLife';
 import type { CampKind } from './encampments';
+import { caveHelperPresent } from './twinStories';
 
 /** What the scene said about one traveller, as `travellers-changed` carries it. */
 export interface Reported {
@@ -72,6 +73,7 @@ export function whoIsHere(
   const away: Away[] = [];
 
   for (const person of npcsAt(poiId)) {
+    if(!caveHelperPresent(person.id,day))continue;
     if (walking.has(person.id)) {
       const state = reported.find((r) => r.npcId === person.id)?.state;
       if (!state || (state.resting && (state.atPoi === poiId || state.atPoi === null))) {

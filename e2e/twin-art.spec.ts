@@ -2,6 +2,26 @@ import { expect, test } from '@playwright/test';
 
 const base = '?map=field_map_twins&seed=twin-art-review&hour=12&door=open&title=skip&chatter=off&firsts=off';
 
+test('the three circuit walkers load their own undyed NES identities', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', e => errors.push(e.message));
+  page.on('console', m => { if (/has no frame|Texture.*not found/i.test(m.text())) errors.push(m.text()); });
+  await page.goto(base + '&events=off&at=poi_harappa_court');
+  await expect.poll(() => page.evaluate(() => (window as any).__travellers?.()
+    .filter((t: any) => t.id.startsWith('npc_twin_'))
+    .map((t: any) => [t.id, t.sheet]).sort()), { timeout: 45000 }).toEqual([
+      ['npc_twin_gardener', 'twin-gardener'],
+      ['npc_twin_mason', 'twin-mason'],
+      ['npc_twin_waterkeeper', 'twin-waterkeeper']
+    ]);
+  await expect.poll(() => page.evaluate(() => (window as any).__walker?.().residents
+    .map((r: any) => r.npcId).sort()), {timeout:45000}).toEqual([
+      'npc_cave_cook','npc_cove_watcher_ulenna','npc_mirlepa','npc_priest_kang','npc_reedwright_irekha','npc_twin_brickworker',
+      'npc_twin_handler','npc_twin_landingkeeper','npc_twin_maintainer','npc_twin_stationkeeper','npc_yamantaka'
+    ]);
+  expect(errors).toEqual([]);
+});
+
 test('both cities load their material overlays without texture errors', async ({ page }, info) => {
   const errors: string[] = [];
   page.on('pageerror', e => errors.push(e.message));

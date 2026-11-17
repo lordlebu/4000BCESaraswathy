@@ -41,6 +41,20 @@ import { DEFAULT_SEED } from '../src/ui/seed';
 const built = (id: string, seed = DEFAULT_SEED) => buildFieldMap(fieldMap(id)!, { seed });
 
 describe('canon already knows who travels', () => {
+  it('keeps authored twin-city clothes on the three existing walkers without changing their circuits', () => {
+    const expected = new Map([
+      ['npc_twin_mason', 'twin-mason'], ['npc_twin_gardener', 'twin-gardener'],
+      ['npc_twin_waterkeeper', 'twin-waterkeeper']
+    ]);
+    const walkers = travellersOn('field_map_twins').filter(t => t.npcId !== null);
+    expect(walkers).toHaveLength(expected.size);
+    for (const walker of walkers) {
+      expect(walker.art).toBe(expected.get(walker.npcId!));
+      expect(walker.look).toBeNull();
+      expect(walker.circuit).toEqual(allNpcs().find(n => n.id === walker.npcId)!.foundAt);
+    }
+  });
+
   it('reads a circuit off found_at rather than inventing one', () => {
     // The measurement this module exists for: eleven of fifteen people are authored in more than
     // one place. If that stops being true, the derivation is no longer standing on anything and

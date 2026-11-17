@@ -61,7 +61,9 @@ function NamedCard({ npc, helped, open, onClose }: { npc: Npc; helped: boolean; 
           <h2 className="plate-card-name">{npc.name}</h2>
           <p className="plate-card-binomial">{capital(npc.role)}</p>
           <p className="plate-card-facts">
-            {npc.language && <span>Speaks {capital(npc.language)}</span>}
+              {npc.culture && <span>{capital(npc.culture)}</span>}
+              {npc.language && <span>Speaks {capital(npc.language)}</span>}
+              {npc.tradeLanguages?.length ? <span>Also speaks {npc.tradeLanguages.map(capital).join(', ')}</span> : null}
             {places.map((p) => (
               <span key={p}>{p}</span>
             ))}

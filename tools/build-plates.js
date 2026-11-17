@@ -546,8 +546,10 @@ function png(width, height, bitDepth, colourType, raw, plte) {
  * Which one wins is a property of the picture rather than of the pipeline, so there is nothing to
  * decide here and no flag to get wrong. Indexed usually wins by a wide margin on this art.
  */
-function encodePng(width, height, rgb) {
+function encodePng(width, height, rgb, fullColour = false) {
   const direct = png(width, height, 8, 2, filterRows(width, height, rgb, 3));
+  // Owner-approved delivery path: resizing is allowed, colour/palette reduction is not.
+  if (fullColour) return direct;
 
   const { palette, indices } = quantise(rgb, width, height);
   const plte = Buffer.alloc(palette.length * 3);
@@ -917,7 +919,7 @@ function main() {
     }
     const box = cropBox ?? squareBox(img.width, img.height, borderInset(img), aspect);
     const tall = Math.round(kind.size / aspect);
-    fs.writeFileSync(dest, encodePng(kind.size, tall, resample(img, box, kind.size, tall)));
+    fs.writeFileSync(dest, encodePng(kind.size, tall, resample(img, box, kind.size, tall), process.argv.includes('--full-colour')));
     const kb = (fs.statSync(dest).size / 1024).toFixed(0);
     const notes = [];
     if (cropBox) notes.push(`cropped to ${cropBox.x},${cropBox.y} +${cropBox.side}x${cropBox.tall}`);

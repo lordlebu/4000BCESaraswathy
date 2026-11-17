@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.7.0",
+  "canon_version": "3.8.0",
   "regions": [
     {
       "id": "region_aravali",
@@ -753,7 +753,8 @@
         "poi_twin_cove",
         "poi_dune_windbreak",
         "poi_reedwright_bank",
-        "poi_nesting_cove"
+        "poi_nesting_cove",
+        "poi_northwest_cave_camp"
       ],
       "neighbours": [
         "field_map_aravali",
@@ -1208,7 +1209,8 @@
         "discovery_twin_shade"
       ],
       "npcs": [
-        "npc_twin_gardener"
+        "npc_twin_gardener",
+        "npc_priest_kang"
       ]
     },
     {
@@ -1521,6 +1523,46 @@
         "npc_anu"
       ],
       "shore": "near"
+    },
+    {
+      "id": "poi_northwest_cave_camp",
+      "type": "point_of_interest",
+      "name": "The Windward Cave",
+      "field_map": "field_map_twins",
+      "kind": "settlement",
+      "stands": "high",
+      "terrain": [
+        "hills",
+        "desert"
+      ],
+      "description": "A sheltered cave at the valley's extreme northwestern ridge, with an open threshold, a small hearth and a fold outside.",
+      "arrival": "Three heads turn together at the cave mouth. Yamantaka makes room beside the windbreak. Beyond him Mirlepa sits in the lee of the rock; the dust reaches his feet and settles.",
+      "npcs": [
+        "npc_mirlepa",
+        "npc_yamantaka",
+        "npc_cave_cook",
+        "npc_cave_herder"
+      ],
+      "discoveries": [
+        "discovery_twin_cave"
+      ],
+      "sub_locations": [
+        {
+          "id": "cave_threshold",
+          "name": "The open threshold",
+          "description": "A clear passage between the windbreak and the hearth."
+        },
+        {
+          "id": "cave_alcove",
+          "name": "The meditation alcove",
+          "description": "A dry sheltered shelf with room to sit without blocking the doorway."
+        },
+        {
+          "id": "cave_fold",
+          "name": "The resting fold",
+          "description": "Low hurdles outside the sleeping place, empty between the herder's visits."
+        }
+      ]
     },
     {
       "id": "poi_planted_ruins",
@@ -2065,6 +2107,74 @@
       "sex": "female"
     },
     {
+      "id": "npc_cave_cook",
+      "type": "npc",
+      "name": "The visiting cook",
+      "role": "camp cook",
+      "found_at": [
+        "poi_northwest_cave_camp"
+      ],
+      "language": "harappan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_cave"
+      ],
+      "lines": [
+        {
+          "text": "The hearth is here because the smoke leaves by the upper crack. A sheltered flame is not the same as a smoky sleeping place.",
+          "gives": [
+            "discovery_twin_cave"
+          ]
+        },
+        {
+          "text": "I cook here for a little while, then take my pot to another household. The cave keeps its name when the cook changes."
+        },
+        {
+          "text": "If you bring news of the water jars, I will listen while this warms. Nobody has to earn a place beside the fire."
+        }
+      ],
+      "culture": "harappan"
+    },
+    {
+      "id": "npc_cave_herder",
+      "type": "npc",
+      "name": "The visiting herder",
+      "role": "camp herder",
+      "found_at": [
+        "poi_northwest_cave_camp"
+      ],
+      "language": "kia",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_cave"
+      ],
+      "lines": [
+        {
+          "text": "The goats graze beyond the approach. We leave the threshold free even when the shade is good.",
+          "gives": [
+            "discovery_twin_cave"
+          ]
+        },
+        {
+          "text": "A wide shadow once crossed the western sand without a footstep. I cannot promise you when a beedu will rise again."
+        },
+        {
+          "text": "I bring the animals here for rest, then move with the grazing. Yamantaka keeps the fold ready between visits."
+        },
+        {
+          "text": "You saw it rise, then. My old report and your own sighting belong on different lines of the page.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
+        }
+      ],
+      "culture": "kia",
+      "trade_languages": [
+        "harappan",
+        "maru"
+      ]
+    },
+    {
       "id": "npc_cove_watcher_ulenna",
       "type": "npc",
       "name": "Ulenna",
@@ -2072,7 +2182,7 @@
       "found_at": [
         "poi_nesting_cove"
       ],
-      "language": "harappan",
+      "language": "kia",
       "would_settle": false,
       "knows": [
         "discovery_twin_nests"
@@ -2092,7 +2202,17 @@
           "requires": [
             "discovery_twin_nests"
           ]
+        },
+        {
+          "text": "I believe your account of the western shore. Watch the beedu from where you stand; a rare animal is not an invitation to chase it.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
         }
+      ],
+      "culture": "kia",
+      "trade_languages": [
+        "harappan"
       ]
     },
     {
@@ -2458,6 +2578,52 @@
       "sex": "male"
     },
     {
+      "id": "npc_mirlepa",
+      "type": "npc",
+      "name": "Mirlepa",
+      "role": "Denisovan meditator",
+      "found_at": [
+        "poi_northwest_cave_camp"
+      ],
+      "language": "denisovan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_cave"
+      ],
+      "lines": [
+        {
+          "text": "You need not be still for my sake. Sit if there is something you want to notice.",
+          "gives": [
+            "discovery_twin_cave"
+          ]
+        },
+        {
+          "text": "The dust pauses at the threshold before it turns. I have watched it long enough to stop calling that an empty doorway."
+        },
+        {
+          "text": "We are Denisovans. Maru households share our grazing routes, but sharing a road does not make every household the same people."
+        },
+        {
+          "text": "When you return to the city, ask who clears its water. Stillness is one way of paying attention; work is another.",
+          "requires": [
+            "discovery_twin_cave"
+          ]
+        },
+        {
+          "text": "You watched a shadow change over the sand. You did not need the animal to be still in order to pay attention.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
+        }
+      ],
+      "character": "character_mirlepa",
+      "culture": "denisovan",
+      "trade_languages": [
+        "harappan",
+        "maru"
+      ]
+    },
+    {
       "id": "npc_moonj",
       "type": "npc",
       "name": "Moonj",
@@ -2655,6 +2821,51 @@
       "sex": "male"
     },
     {
+      "id": "npc_priest_kang",
+      "type": "npc",
+      "name": "Priest Kang",
+      "role": "keeper of the courtyard's civic memory",
+      "found_at": [
+        "poi_harappa_court"
+      ],
+      "language": "harappan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_shade"
+      ],
+      "lines": [
+        {
+          "text": "I belong to the house of the remembered Priest-King. His face comes down to me; what we do with the courtyard is still ours to decide.",
+          "gives": [
+            "discovery_twin_shade"
+          ]
+        },
+        {
+          "text": "A likeness could stand here, if it leaves room for the jars and the people. Ask Nemi about the roots before you ask anyone about a pedestal."
+        },
+        {
+          "text": "The channels are clear because Seli clears them. A city cannot live on the memory of its rulers alone."
+        },
+        {
+          "text": "Your beedu will not stand on a plinth. We can remember a passing life without trying to keep it here.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
+        },
+        {
+          "text": "There I am in stone. Remember the carver, Nemi, Eru and Renu beside the name; without their work it would only be a weight.",
+          "requires_flags": [
+            "story:storyline_twin_kang_bust:unveiling"
+          ]
+        }
+      ],
+      "character": "character_priest_kang",
+      "descended_from": [
+        "character_priest_king_harappa"
+      ],
+      "culture": "harappan"
+    },
+    {
       "id": "npc_reedwright_irekha",
       "type": "npc",
       "name": "Irekha",
@@ -2662,7 +2873,7 @@
       "found_at": [
         "poi_reedwright_bank"
       ],
-      "language": "harappan",
+      "language": "kia",
       "would_settle": false,
       "knows": [
         "discovery_twin_banks"
@@ -2682,7 +2893,17 @@
           "requires": [
             "discovery_twin_banks"
           ]
+        },
+        {
+          "text": "A beedu holds its shape by yielding to the air. You have given me a good comparison for the next tight seam.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
         }
+      ],
+      "culture": "kia",
+      "trade_languages": [
+        "harappan"
       ]
     },
     {
@@ -2960,7 +3181,7 @@
           "text": "Count the steps at the doors. The people who laid them knew how high the water could come."
         },
         {
-          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "text": "A threshold and a channel are parts of one decision. A high door is little help if its water runs into the next house.",
           "requires": [
             "discovery_twin_bricks"
           ]
@@ -2970,8 +3191,21 @@
           "requires": [
             "discovery_twin_drains"
           ]
+        },
+        {
+          "text": "A pale wing above the sand, and no footmarks below it. Your account tells me more than a carving of a wing could.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
+        },
+        {
+          "text": "Those bricks had another use before the plinth. We kept the sound ones and gave them work again.",
+          "requires_flags": [
+            "story:storyline_twin_kang_bust:unveiling"
+          ]
         }
-      ]
+      ],
+      "culture": "harappan"
     },
     {
       "id": "npc_twin_gardener",
@@ -2998,12 +3232,25 @@
           "text": "I water the planted rooms in the morning and come back to the courtyard when the shade reaches the jars."
         },
         {
-          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "text": "The shade reaches the jars before it reaches the planted rooms. That is why I keep both places alive.",
           "requires": [
             "discovery_twin_shade"
           ]
+        },
+        {
+          "text": "A flying ray? Tell me where its shadow crossed. A moving animal should not have to leave its home to be worth noticing.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
+        },
+        {
+          "text": "The likeness stands outside the roots, and the jars still have their shade. That was the part I wanted kept.",
+          "requires_flags": [
+            "story:storyline_twin_kang_bust:unveiling"
+          ]
         }
-      ]
+      ],
+      "culture": "harappan"
     },
     {
       "id": "npc_twin_handler",
@@ -3029,27 +3276,37 @@
           "text": "A harness comes loose at the yard. A working bird should not spend its rest pulling against the carriage."
         },
         {
-          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "text": "At the terminal I free the harness before I rest. A working bird should not have to pull even while it stands.",
           "requires": [
             "discovery_twin_nests"
           ]
+        },
+        {
+          "text": "The beedu borrows the moving air. My bird has to work for every yard; the water and the loose harness matter all the more.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
         }
-      ]
+      ],
+      "culture": "harappan"
     },
     {
       "id": "npc_twin_landingkeeper",
       "type": "npc",
-      "name": "Oru",
+      "name": "Hutel",
       "role": "landing keeper",
       "found_at": [
         "poi_twin_landing"
       ],
-      "language": "harappan",
+      "language": "elamite",
       "would_settle": false,
       "knows": [
         "discovery_twin_salt"
       ],
       "lines": [
+        {
+          "text": "Hutel, from the western coast. Elamite is the language of my first household; Harappan is the language I use with most boats here."
+        },
         {
           "text": "Lothal is across the sea. The boat waits in fresh water while the tide makes up its mind.",
           "gives": [
@@ -3060,7 +3317,7 @@
           "text": "The boat has room. We wait for water, never for somebody to finish a notebook."
         },
         {
-          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "text": "The fresh channel gives the boat room to wait while the tide changes. There is no notebook toll on leaving.",
           "requires": [
             "discovery_twin_salt"
           ]
@@ -3070,7 +3327,17 @@
           "requires": [
             "discovery_twin_banks"
           ]
+        },
+        {
+          "text": "From your description it turned with the coastal air. I heard reports from the west; I will keep your sighting separate from those.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
         }
+      ],
+      "culture": "elamite",
+      "trade_languages": [
+        "harappan"
       ]
     },
     {
@@ -3097,12 +3364,19 @@
           "text": "The road stays open while the tram runs. Keep to its side and you can watch it pass."
         },
         {
-          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "text": "I clear the middle and leave the rooted margins. A bridge needs banks that will still be there after rain.",
           "requires": [
             "discovery_twin_banks"
           ]
+        },
+        {
+          "text": "A broad shadow over uneven sand shows the ground differently. I would not strip a dune merely to find where it buried itself.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
         }
-      ]
+      ],
+      "culture": "harappan"
     },
     {
       "id": "npc_twin_mason",
@@ -3129,12 +3403,25 @@
           "text": "The older courses are sound. It is the fresh loose plaster I am watching."
         },
         {
-          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "text": "The sound old courses do not need replacing. I work on the loose plaster and leave the living roots their space.",
           "requires": [
             "discovery_twin_shade"
           ]
+        },
+        {
+          "text": "A shape can be steady in the air while its shadow runs over every hollow. I would like to see that.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
+        },
+        {
+          "text": "The carver made the face. I made sure the base would hold without closing the way through.",
+          "requires_flags": [
+            "story:storyline_twin_kang_bust:unveiling"
+          ]
         }
-      ]
+      ],
+      "culture": "harappan"
     },
     {
       "id": "npc_twin_stationkeeper",
@@ -3160,12 +3447,19 @@
           "text": "Both platforms have a place to sit. The keeper at the southern landing will tell you about the boat."
         },
         {
-          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "text": "The northwestern ridge has a cave household. Turn toward the rock above Harappa, and leave the threshold clear when you arrive.",
           "requires": [
             "discovery_twin_desert"
           ]
+        },
+        {
+          "text": "You saw the beedu yourself, then. Other travellers had brought reports; now I can say who described this passage.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
         }
-      ]
+      ],
+      "culture": "harappan"
     },
     {
       "id": "npc_twin_waterkeeper",
@@ -3192,12 +3486,19 @@
           "text": "A moving leaf tells me more about the water than an empty channel does."
         },
         {
-          "text": "You have looked long enough to see what we were trying to keep. That changes the conversation.",
+          "text": "Watch a leaf where the cleared channel meets the reeds. Keeping water moving does not mean clearing everything away.",
           "requires": [
             "discovery_twin_drains"
           ]
+        },
+        {
+          "text": "You followed the shadow, not the animal. That is a useful way of watching water as well as air.",
+          "requires_flags": [
+            "beedu:witnessed"
+          ]
         }
-      ]
+      ],
+      "culture": "harappan"
     },
     {
       "id": "npc_uma",
@@ -3340,6 +3641,46 @@
         }
       ],
       "sex": "female"
+    },
+    {
+      "id": "npc_yamantaka",
+      "type": "npc",
+      "name": "Yamantaka",
+      "role": "three-headed Denisovan threshold keeper",
+      "found_at": [
+        "poi_northwest_cave_camp"
+      ],
+      "language": "denisovan",
+      "would_settle": false,
+      "knows": [
+        "discovery_twin_cave"
+      ],
+      "lines": [
+        {
+          "text": "You can come in. Leave the centre of the threshold open; the cook carries hot water through it.",
+          "gives": [
+            "discovery_twin_cave"
+          ]
+        },
+        {
+          "text": "Three heads, one household's share of work. Someone still has to mend the windbreak."
+        },
+        {
+          "text": "Mirlepa is watching the entrance. You may sit beside him or speak with whoever is at the hearth. There is no toll."
+        },
+        {
+          "text": "We keep the fold outside the sleeping place. Shelter has room for a visitor because someone leaves that room.",
+          "requires": [
+            "discovery_twin_cave"
+          ]
+        }
+      ],
+      "character": "character_yamantaka",
+      "culture": "denisovan",
+      "trade_languages": [
+        "harappan",
+        "maru"
+      ]
     }
   ],
   "happenings": [
@@ -3665,6 +4006,42 @@
       ]
     },
     {
+      "id": "happening_twin_beedu_flight",
+      "type": "happening",
+      "title": "A Shadow Leaves the Sand",
+      "occasion": "road",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "requires_flags": [
+        "beedu:visible"
+      ],
+      "prose": "A broad shadow crossed the sand before I heard anything. Above it a pale beedu lifted on the moving air, its wings scarcely changing shape. It turned toward the coast; the sand it had left settled behind it.",
+      "choices": [
+        {
+          "label": "Watch the glide",
+          "line": "I watched the ray ride the air toward the water. Its shadow kept the shape of the ground below.",
+          "sets": [
+            "beedu:witnessed"
+          ]
+        },
+        {
+          "label": "Follow its shadow from here",
+          "line": "The shadow crossed dune and hollow while the animal held a steadier height. I followed it with my eyes.",
+          "sets": [
+            "beedu:witnessed"
+          ]
+        },
+        {
+          "label": "Let it pass",
+          "line": "The broad shadow went on toward the coast. I let the beedu keep its distance.",
+          "sets": [
+            "beedu:witnessed"
+          ]
+        }
+      ]
+    },
+    {
       "id": "happening_twin_brick",
       "type": "happening",
       "title": "The Cool Side",
@@ -3722,6 +4099,32 @@
         {
           "label": "Keep the page",
           "line": "I wrote it down before going on."
+        }
+      ]
+    },
+    {
+      "id": "happening_twin_cave_arrival",
+      "type": "happening",
+      "title": "Room Beside the Fire",
+      "occasion": "arriving",
+      "field_maps": [
+        "field_map_twins"
+      ],
+      "at": [
+        "poi_northwest_cave_camp"
+      ],
+      "prose": "Yamantaka showed me the open way in. Mirlepa shifted his mat, leaving room for another. The fold and the hearth were work someone had done before I arrived.",
+      "choices": [
+        {
+          "label": "Sit and notice the air",
+          "line": "Dust settled below the sleeping shelf. I kept the threshold clear.",
+          "grants": [
+            "discovery_twin_cave"
+          ]
+        },
+        {
+          "label": "Ask about the household",
+          "line": "The visitors change; the place they are offered stays."
         }
       ]
     },
@@ -4736,6 +5139,91 @@
           ]
         }
       ]
+    },
+    {
+      "id": "storyline_twin_kang_bust",
+      "type": "storyline",
+      "name": "A Likeness With Room Around It",
+      "person": "npc_priest_kang",
+      "field_map": "field_map_twins",
+      "joins": false,
+      "beats": [
+        {
+          "id": "commission",
+          "title": "A Place for a Likeness",
+          "when": "arriving",
+          "at": "poi_harappa_court",
+          "prose": "Priest Kang touches the edge of his cloak. A likeness might stand in this courtyard, he says, but Nemi points to the living roots and the people sitting by the jars. First we must find a place that leaves room for them.",
+          "choices": [
+            {
+              "label": "Help plan the bust",
+              "line": "I agreed to help make a likeness without taking the courtyard away from its people."
+            },
+            {
+              "label": "Another time",
+              "line": "Kang leaves the invitation open. The shade and the way through are still mine to use.",
+              "advance": false
+            }
+          ]
+        },
+        {
+          "id": "site",
+          "title": "Outside the Root Ring",
+          "when": "arriving",
+          "at": "poi_harappa_court",
+          "prose": "Nemi marks a bare patch outside the root ring. Eru checks the old paving and the clear way past the jars. Kang sits where you can study his face. The site is agreed before a stone is touched.",
+          "choices": [
+            {
+              "label": "Keep the roots and passage clear",
+              "line": "We chose a modest site clear of the tree, the jars and the walking way."
+            }
+          ]
+        },
+        {
+          "id": "prepare",
+          "title": "The Makers' Part",
+          "when": "arriving",
+          "at": "poi_earthen_workshop",
+          "prose": "Eru has prepared a clay study and a sound base. Renu has sent reused bricks. A carver from the local workshop lays a pale offcut beside them: enough for a life-size head and shoulders, without quarrying a new face from the hillside.",
+          "choices": [
+            {
+              "label": "Help coordinate the work",
+              "line": "The stone was donated, the base reused, and the makers named. A likeness would take more than a sitter."
+            }
+          ]
+        },
+        {
+          "id": "carving",
+          "title": "A Face Coming Out of Stone",
+          "when": "arriving",
+          "at": "poi_earthen_workshop",
+          "prose": "On your return the carver is bringing the likeness out of the pale block. The headband, quiet eyes and close beard are Kang's. Eru checks the base, leaving the face to the one who knows that work.",
+          "choices": [
+            {
+              "label": "Study the likeness with Kang",
+              "line": "We compared the face with its sitter. Kang asked that the makers' part be remembered with his."
+            }
+          ]
+        },
+        {
+          "id": "unveiling",
+          "title": "A Likeness With Room Around It",
+          "when": "arriving",
+          "at": "poi_harappa_court",
+          "prose": "The life-size bust stands on its modest plinth outside the neem's root ring. The jars have their shade and the way through remains open. Kang studies his own likeness; Nemi watches someone sit down where they always did.",
+          "choices": [
+            {
+              "label": "Remember the sitter and the makers",
+              "line": "Kang's bust stood in Harappa. I recorded the sitter and the people who had made room for him."
+            },
+            {
+              "label": "Remember the living courtyard",
+              "line": "The new bust had not cost the courtyard its shade, its seats or its passage. That was part of the work."
+            }
+          ]
+        }
+      ],
+      "by_request": true
     }
   ],
   "biomes": [

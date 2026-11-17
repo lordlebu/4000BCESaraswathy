@@ -28,11 +28,12 @@ export interface Beat {
   asks: { id: string; count: number }[];
   art: string | null;
   prose: string;
-  choices: { label: string; line: string; grants: string[] }[];
+  choices: { label: string; line: string; grants: string[]; advance?: boolean }[];
   joins: boolean;
 }
 
 export interface Storyline {
+  byRequest?: boolean;
   id: string;
   name: string;
   person: string;
@@ -42,6 +43,7 @@ export interface Storyline {
 }
 
 interface RawStoryline {
+  by_request?: boolean;
   id: string;
   name: string;
   person: string;
@@ -56,7 +58,7 @@ interface RawStoryline {
     asks?: { id: string; count: number }[];
     art?: string;
     prose: string;
-    choices: { label: string; line: string; grants?: string[] }[];
+    choices: { label: string; line: string; grants?: string[]; advance?: boolean }[];
     joins?: boolean;
   }[];
 }
@@ -68,6 +70,7 @@ export const storylines: readonly Storyline[] = ((placesBundle as { storylines?:
     person: s.person,
     fieldMapId: s.field_map,
     joins: s.joins,
+    ...(s.by_request ? {byRequest:true} : {}),
     beats: s.beats.map((b) => ({
       id: b.id,
       title: b.title,
@@ -77,7 +80,7 @@ export const storylines: readonly Storyline[] = ((placesBundle as { storylines?:
       asks: b.asks ?? [],
       art: b.art ?? null,
       prose: b.prose,
-      choices: b.choices.map((c) => ({ label: c.label, line: c.line, grants: c.grants ?? [] })),
+      choices: b.choices.map((c) => ({ label: c.label, line: c.line, grants: c.grants ?? [], ...(c.advance === false ? {advance:false} : {}) })),
       joins: b.joins ?? false
     }))
   })
@@ -100,6 +103,7 @@ export function arcProgress(arc: Storyline, flags: readonly string[]): { done: n
 }
 
 export interface StoryFacts {
+  requestedArc?: string;
   fieldMapId: string;
   /** The day of the journey. A road or night beat keeps the first day quiet, as woven events do. */
   day: number;
@@ -123,6 +127,7 @@ export function beatNow(when: BeatWhen, facts: StoryFacts): GameEvent | null {
   for (const arc of storylines) {
     if (arc.fieldMapId !== facts.fieldMapId) continue;
     const beat = nextBeat(arc, facts.flags);
+    if (arc.byRequest && beat === arc.beats[0] && facts.requestedArc !== arc.id) continue;
     if (!beat || beat.when !== when) continue;
     // **The first day belongs to the place** (`WOVEN_FROM_DAY`): a road or a night beat waits for
     // the second, as every woven event does. Arriving somewhere is asked for by walking there, so an
@@ -171,7 +176,7 @@ export function beatEvent(arc: Storyline, beat: Beat): GameEvent {
         line: c.line,
         grants: c.grants,
         ...(takes.length > 0 ? { takes } : {}),
-        sets
+        sets: c.advance === false ? [] : sets
       })
     ),
     once: true
@@ -183,7 +188,7 @@ export function beatEvent(arc: Storyline, beat: Beat): GameEvent {
  * storyline. Guyuk the Seed-Gleaner stands nowhere and has no lines; her beats are her words.
  */
 export function broughtByStory(npcId: string): boolean {
-  return storylines.some((s) => s.person === npcId);
+  return storylines.some((s) => s.person === npcId && !s.byRequest);
 }
 
 /** What somebody's arc teaches: every grant in every beat of the storylines they are the person of. */
