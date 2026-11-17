@@ -14,6 +14,7 @@
     "       four, and that is enough: a seated figure has nowhere to walk to. `frames` names which",
     "       figures to take from a packed sheet, in reading order, because position-in-row is not",
     "       reliable -- see the note on --frames in build-sprite-sheet.js.",
+    "jrpgSource: reviewed compact four-column/five-row RGBA atlas; copied without quantization.",
     "colours: per character, never shared. At 26x40 it is hue that tells one person from another,",
     "       and quantising three characters together starves all three."
   ],
@@ -22,8 +23,8 @@
 
   "characters": [
     { "id": "priest-kang", "name": "Priest Kang", "builder": "twin-people", "colours": 8 },
-    { "id": "mirlepa", "name": "Mirlepa", "builder": "twin-people", "colours": 8 },
-    { "id": "yamantaka", "name": "Yamantaka", "builder": "twin-people", "colours": 8, "cell":{"width":34,"height":40} },
+    { "id": "mirlepa", "name": "Mirlepa", "builder": "twin-people", "jrpgSource":"assets/source/twins/people/mirlepa-nes-jrpg.png" },
+    { "id": "yamantaka", "name": "Yamantaka", "builder": "twin-people", "jrpgSource":"assets/source/twins/people/yamantaka-nes-jrpg.png", "cell":{"width":34,"height":40} },
     { "id": "cave-cook", "name": "The visiting cook", "builder": "twin-people", "colours": 8 },
     { "id": "cave-herder", "name": "The visiting herder", "builder": "twin-people", "colours": 8 },
     { "id": "twin-stationkeeper", "name": "Tavra", "builder": "twin-people", "colours": 8 },
@@ -34,7 +35,7 @@
     { "id": "reedwright-irekha", "name": "Irekha", "builder": "twin-people", "colours": 8 },
     { "id": "cove-watcher-ulenna", "name": "Ulenna", "builder": "twin-people", "colours": 8 },
     { "id": "twin-mason", "name": "Eru", "builder": "twin-people", "colours": 8 },
-    { "id": "twin-gardener", "name": "Nemi", "builder": "twin-people", "colours": 8 },
+    { "id": "twin-gardener", "name": "Nemi", "builder": "twin-people", "jrpgSource":"assets/source/twins/people/twin-gardener-nes-jrpg.png" },
     { "id": "twin-waterkeeper", "name": "Seli", "builder": "twin-people", "colours": 8 },
     {
       "id": "varuna",

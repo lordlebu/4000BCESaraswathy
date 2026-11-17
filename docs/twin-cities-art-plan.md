@@ -1,5 +1,21 @@
 # Harappa and Mohenjo-daro Visual and Story Plan
 
+## Approved NES JRPG generation direction
+
+The owner approved the generated Nemi, Mirlepa and Yamantaka samples made with the exact phrase
+**“nes jrpg sprite”**. Their complete twenty-pose sheets now replace the interim code-authored
+figures: large expressive heads, cheerful faces, small bodies, simple cloth masses and short limbs.
+Keep this phrase and the approved samples in future character prompts. Do not return to the
+rejected rectangular figure style. Mirlepa retains seated meditation; Yamantaka keeps three
+anatomical heads in every facing. **Leave Beedu unchanged:** its current art is accepted.
+
+This delivery covers those three sampled characters. The other twelve valley identities retain
+their preceding cute NES sheets until separately generated in the approved direction. Portraits,
+animal art, map geometry and movement are unchanged. Source PNGs are compact, tracked 4×5 RGBA
+atlases; large generation outputs and comparison sheets stay ignored. Import uses cropping and
+nearest-neighbour resizing only, with no colour quantization, palette reduction or dithering.
+See [the exact prompt ledger](twin-overworld-jrpg-prompts.md) for provenance and rebuild commands.
+
 ## Overworld sprite correction — owner update, 17 November 2026
 
 Use the established carrier traveller as the proportion reference: larger round heads,

@@ -180,7 +180,7 @@ function main() {
 
     if (c.builder === 'twin-people') {
       require('./build-twin-people').buildTwinPerson(c.id, out);
-      console.log(`  ok ${c.id} 20 authored NES frames  ${rel}`);
+      console.log(`  ok ${c.id} 20 ${c.jrpgSource ? 'generated NES JRPG' : 'authored NES'} frames  ${rel}`);
       continue;
     }
 

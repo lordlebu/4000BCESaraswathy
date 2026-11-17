@@ -1,5 +1,20 @@
 # Twin-valley implementation ledger
 
+## Approved generated NES JRPG character batch
+
+Nemi, Mirlepa and Yamantaka now use the owner-approved generated “nes jrpg sprite” direction,
+with sixteen standing/walking poses and four seated facings each. Back views show backs;
+east/west profiles and Yamantaka's three-head silhouette were inspected in the generated sheets.
+Compact RGBA source atlases live in `assets/source/twins/people/`; the manifest requires them,
+so missing accepted sources fail instead of silently reverting to the interim art. The builder
+only rearranges source pixels into the existing 20-frame runtime strips. No palette or alpha
+quantization is applied. Large raw sheets and review composites stay ignored. The remaining
+twelve named sheets retain the earlier cute NES art. Beedu is accepted and unchanged.
+Batch verification: all 56 character/source/resident/traveller tests pass. The new source guard
+compares every delivered RGBA row against the tracked atlas, catching dropped or reordered poses,
+colour reduction and alpha changes. Sprite-manifest checks pass; Beedu's asset and builder have
+no diff. The preceding commit's full push and PR CI were green; this batch requires fresh CI.
+
 ## Overworld art follow-up
 
 After game PR #262 opened, the owner requested cuter carrier-like map characters and animals.
