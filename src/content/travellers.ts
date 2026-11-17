@@ -463,7 +463,7 @@ export function travellersOn(fieldMapId: string, seed = ''): Traveller[] {
     // The valley's two road companions keep their original circuits as new
     // outlying stops are added. Their introduced identity and causeway route persist.
     const roadPlaces = fieldMapId === 'field_map_twins'
-      ? places.filter(id => !['poi_dune_windbreak','poi_reedwright_bank','poi_nesting_cove'].includes(id))
+      ? places.filter(id => !['poi_dune_windbreak','poi_reedwright_bank','poi_nesting_cove','poi_northwest_cave_camp'].includes(id))
       : places;
     for (const who of companyOn(fieldMapId)) {
       const salt = hashOf(`${fieldMapId}:${who.id}`);

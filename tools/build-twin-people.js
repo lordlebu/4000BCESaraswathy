@@ -5,8 +5,8 @@ const path = require('node:path');
 const { encodePng } = require('./sprite-png');
 const PEOPLE = {
   'priest-kang': { skin:'#b08b66', light:'#d9b991', cloth:'#d2c3a0', shade:'#a89778', accent:'#a66855', hair:'priest', prop:'token' },
-  'mirlepa': { skin:'#a77f5e', light:'#cfa783', cloth:'#646d73', shade:'#454e57', accent:'#b69868', hair:'braid', prop:'none' },
-  'yamantaka': { width:34, skin:'#a07958', light:'#c6a17b', cloth:'#66756b', shade:'#46574e', accent:'#c08f59', hair:'three', prop:'none' },
+  'mirlepa': { skin:'#d6b091', light:'#f2d5b3', cloth:'#75825b', shade:'#4b5942', accent:'#c99b66', hair:'braid', prop:'none' },
+  'yamantaka': { width:34, skin:'#d6b091', light:'#f2d5b3', cloth:'#708795', shade:'#465665', accent:'#c99b66', hair:'three', prop:'none' },
   'cave-cook': { skin:'#a97c59', light:'#d3a677', cloth:'#977f62', shade:'#6d5a49', accent:'#d7bc83', hair:'wrap', prop:'jar' },
   'cave-herder': { skin:'#a77754', light:'#d3a574', cloth:'#8b8c70', shade:'#65694c', accent:'#bc9b68', hair:'wrap', prop:'reeds' },
   'twin-mason': { skin:'#ae7959', light:'#d9a176', cloth:'#d4c29a', shade:'#aa9678', accent:'#ad7650', hair:'beard', prop:'float' },
@@ -25,96 +25,112 @@ function buildTwinPerson(id, out) {
   if (!person) throw new Error(`Unknown twin-city figure: ${id}`);
   const cell=person.width??26, width = cell * 20, pixels = Buffer.alloc(width * 40 * 4);
   const { skin, light, cloth, shade, accent } = person;
-  const palette = { ink:'#493e3b', hair:person.hair.startsWith('grey')?'#938a7b':'#514237', wood:'#c6a271', skin, light, cloth, shade, accent };
+  const palette = { ink:'#30231e', hair:person.hair.startsWith('grey')?'#938a7b':'#514237', wood:'#c6a271', skin, light, cloth, shade, accent };
   const colour = name => {
     const hex = palette[name] ?? name;
     return [1,3,5].map(i => parseInt(hex.slice(i,i+2),16)).concat(255);
   };
   for (let frame = 0; frame < 20; frame++) {
-    const seated = frame >= 16, facing = seated ? frame-16 : Math.floor(frame/4);
-    const pose = seated ? 0 : frame%4;
-    const profile = facing >= 2, back = facing === 1;
-    const lower = seated ? 7 : 0;
-    const box = (x,y,w,h,c) => {
-      const rgba = colour(c);
+    const seated=frame>=16, facing=seated?frame-16:Math.floor(frame/4), pose=seated?0:frame%4;
+    const back=facing===1, profile=facing>=2, bob=pose===2?1:0, low=seated?7:0;
+    const box=(x,y,w,h,c)=>{
+      const rgba=colour(c);
       for(let dy=0;dy<h;dy++)for(let dx=0;dx<w;dx++){
-        const local=x+dx+(cell-26)/2,px = facing===3 ? cell-1-local : local, py=y+dy;
+        const local=x+dx, px=facing===3?cell-1-local:local, py=y+dy;
         if(px>=0&&px<cell&&py>=0&&py<40)pixels.set(rgba,(py*width+frame*cell+px)*4);
       }
     };
-    // Broad, quiet silhouette; three cloth values and two skin values.
-    box(8,16+lower,11,12,'shade'); box(9,16+lower,8,11,'cloth');
-    box(back?15:9,17+lower,3,11,'accent');
-    const headX=profile?11:9, headW=profile?7:8;
-    if(person.hair!=='three'){
-    box(headX,6+lower,headW,8,'skin'); box(headX,6+lower,headW,3,'hair');
-    if(!back){
-      box(headX+2,9+lower,profile?5:4,3,'light');
-      box(profile?17:10,10+lower,1,1,'ink');
-      if(!profile)box(15,10+lower,1,1,'ink');
-      if(profile)box(18,11+lower,1,2,'skin');
-    }else box(10,8+lower,7,4,'hair');
-    if(person.hair.endsWith('beard')&&!back)box(headX+1,13+lower,6,2,'hair');
-    if(person.hair==='moustache'&&!back)box(headX+2,12+lower,4,1,'hair');
-    if(person.hair==='wrap'){box(headX-1,5+lower,headW+2,4,'accent');box(8,9+lower,2,6,'accent');}
-    if(person.hair==='curls'){box(headX-1,5+lower,headW+1,2,'hair');box(headX+1,4+lower,2,2,'hair');}
-    if(person.hair==='bun'){box(profile?9:15,4+lower,4,4,'hair');box(11,6+lower,4,1,'accent');}
-    if(person.hair.endsWith('braid')){box(back?10:8,12+lower,2,9,'hair');box(back?10:8,20+lower,2,2,'accent');}
-    if(person.hair==='braids'){box(8,12+lower,2,9,'hair');box(17,12+lower,2,9,'hair');}
-    if(person.hair==='priest'){
-      box(headX,6+lower,headW,2,'accent');box(headX+3,6+lower,2,1,'wood');
-      if(!back)box(headX+1,12+lower,headW-1,4,'hair');
+    const round=(x,y,w,h,c)=>{
+      box(x+1,y,w-2,h,c);box(x,y+1,w,h-2,c);
+    };
+    const cx=cell/2, body=person.hair==='three'?16:11, bx=Math.round(cx-body/2);
+    // Carrier proportions: a round, expressive head, compact body and short boots.
+    if(!seated){
+      const step=pose===2?-1:pose===3?1:0;
+      round(cx-5,31,4,6-step,'ink');round(cx+1,31,4,6+step,'ink');
+      box(cx-4,31,2,3,'shade');box(cx+2,31,2,3,'cloth');
     }
+    round(bx-1,21+low,body+2,seated?7:11,'ink');
+    round(bx,21+low,body,seated?6:10,'shade');
+    box(bx+1,22+low,body-3,seated?4:7,'cloth');
+    box(bx+1,22+low,3,seated?3:6,'accent');
+    round(bx-3,23+low,4,7,'ink');round(bx+body-1,23+low,4,7,'ink');
+    box(bx-2,24+low,2,3,'cloth');box(bx+body,24+low,2,3,'cloth');
+    round(bx-2,27+low,3,3,'light');round(bx+body,27+low,3,3,'skin');
+    if(seated){
+      round(cx-8,34,16,5,'ink');round(cx-7,34,14,4,'cloth');
+      box(cx-5,35,4,2,'accent');box(cx+2,35,4,2,'shade');
+      // Folded knees and hands read as sitting cross-legged rather than shortened legs.
+      box(cx-3,32,6,2,'light');box(cx-1,34,2,2,'shade');
     }
-    if(person.hair==='three'){
-      box(4,16+lower,18,4,'cloth');
-      for(const hx of [3,11,19]){
-        box(hx,8+lower,6,7,'skin');box(hx,6+lower,6,3,'hair');
-        box(hx,6+lower,6,1,'accent');
-        if(!back){box(hx+1,10+lower,4,2,'light');box(hx+2,10+lower,1,1,'ink');}
+    const oval=(x,y,w,h,c)=>{
+      for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++)
+        if(((xx+.5-w/2)/(w/2))**2+((yy+.5-h/2)/(h/2))**2<=1)box(x+xx,y+yy,1,1,c);
+    };
+    // A visible neck joins the oversized head to the tunic in every bob/sitting pose.
+    box(cx-2,19+low+bob,4,3,'skin');
+    function head(x,y,w,h=13){
+      oval(x,y,w,h,'ink');oval(x+1,y+1,w-2,h-2,'skin');
+      oval(x+1,y+1,w-2,7,'hair');
+      round(x-1,y+6,3,4,'skin');round(x+w-2,y+6,3,4,'skin');
+      if(back){round(x+1,y+3,w-2,h-4,'hair');box(x+2,y+2,3,1,'accent');return;}
+      oval(x+2,y+4,w-4,h-5,'light');
+      if(profile){
+        box(x+w-4,y+6,2,2,'ink');
+        box(x+w-1,y+7,1,2,'skin');box(x+w-4,y+10,2,1,'skin');
+      }else{
+        for(const eye of [x+3,x+w-5]){
+          box(eye,y+6,2,2,'ink');
+        }
+        box(x+2,y+9,2,1,'skin');box(x+w-4,y+9,2,1,'skin');
+        box(x+Math.floor(w/2)-1,y+10,2,1,'skin');
       }
     }
-    if(['three','braid'].includes(person.hair)&&['yamantaka','mirlepa'].includes(id)){
-      box(8,24+lower,11,2,'accent');box(8,26+lower,11,1,'wood');
-    }
-    // Resting arms stay still; only the second idle pose relaxes a hand by one pixel.
-    const reach=pose===1?1:0;
-    box(6,18+lower,3,7,'shade');box(7,24+lower+reach,2,3,'skin');
-    box(18,18+lower,3,7,'cloth');box(19,24+lower,2,3,'skin');
-    if(seated){
-      box(7,32,14,4,'shade');box(8,33,5,3,'cloth');
-      box(7,37,6,2,'ink');box(17,37,6,2,'ink');
+    if(person.hair==='three'){
+      // Three round heads share one broad little coat. Side heads sit a pixel lower.
+      for(const [x,y] of [[2,11],[cell-11,11],[Math.floor(cx)-5,8]])head(x,y+low+bob,10,12);
+      box(bx,29+low,body,2,'accent');
     }else{
-      const stride=pose===2?-2:pose===3?2:0;
-      box(9+stride,28,3,9,'shade');box(15-stride,28,3,9,'cloth');
-      box(8+stride,37,5,2,'ink');box(15-stride,37,5,2,'ink');
+      const x=Math.floor(cx)-8+(profile?1:0),y=5+low+bob,w=profile?14:16;
+      head(x,y,w,15);
+      if(person.hair.endsWith('beard')&&!back){box(x+3,y+10,w-6,2,'hair');box(x+4,y+12,w-8,1,'hair');}
+      if(person.hair==='moustache'&&!back)box(x+4,y+9,w-8,1,'hair');
+      if(person.hair==='wrap'){
+        round(x-1,y-1,w+2,5,'ink');round(x,y-1,w,4,'accent');box(x+1,y,6,1,'light');
+      }
+      if(person.hair==='curls'){round(x+1,y-2,5,4,'hair');round(x+6,y-2,5,4,'hair');}
+      if(person.hair==='bun'){round(x+w-5,y-4,5,5,'ink');round(x+w-4,y-3,3,3,'hair');}
+      if(person.hair.includes('braid')){
+        for(const side of person.hair==='braids'?[x,x+w-2]:[back?x+w-3:x]){
+          round(side,y+8,3,9,'hair');box(side+1,y+14,2,1,'accent');
+        }
+      }
+      if(person.hair==='priest'){
+        box(x+1,y+3,w-2,2,'accent');box(x+6,y+3,2,2,'light');
+        if(!back){box(x+2,y+10,w-4,2,'hair');box(x+4,y+12,w-8,1,'hair');}
+      }
+      if(id==='mirlepa'){
+        round(x,y-1,w,4,'accent');box(x+2,y,2,1,'cloth');box(x+6,y,2,1,'cloth');box(x+10,y,2,1,'cloth');
+        if(!back){box(x+2,y+10,w-4,2,'hair');box(x+4,y+12,w-8,1,'hair');
+          // Restful closed eyes, not a blank square face.
+          box(x+3,y+6,2,3,'light');box(x+w-5,y+6,2,3,'light');
+          box(x+3,y+7,2,1,'ink');if(!profile)box(x+w-5,y+7,2,1,'ink');}
+      }
+      if(['reedwright-irekha','cove-watcher-ulenna'].includes(id)){
+        box(x+1,y+3,2,2,'#efe1b2');box(x+1,y+4,1,1,'accent');
+        box(bx+3,22+low,4,2,'skin');
+      }
     }
-    // One role cue each, never fine texture. Back views carry the prop at the same side.
-    if(person.prop==='float'){
-      box(20,23+lower,5,2,'wood');box(21,21+lower,2,2,'ink');
-      box(9,25+lower,7,2,'accent');
-    }else if(person.prop==='pouch'){
-      box(18,23+lower,5,6,'accent');box(19,24+lower,3,2,'wood');
-      box(21,19+lower,1,5,'shade');box(22,19+lower,2,2,'cloth');
-    }else if(person.prop==='jar'){
-      box(20,21+lower,4,2,'accent');box(19,23+lower,6,5,'shade');
-      box(20,23+lower,4,4,'cloth');box(21,24+lower,2,1,'accent');
-      box(20,28+lower,4,1,'accent');
-    }else if(person.prop==='token'){
-      box(20,23+lower,3,3,'wood');box(21,24+lower,1,1,'ink');
-    }else if(person.prop==='harness'){
-      box(16,17+lower,2,11,'ink');box(17,22+lower,4,3,'wood');box(18,23+lower,2,1,'ink');
-    }else if(person.prop==='brick'){
-      box(18,23+lower,7,4,'shade');box(18,23+lower,7,1,'cloth');
-    }else if(person.prop==='rope'){
-      box(18,18+lower,6,10,'accent');box(20,20+lower,2,6,'shade');
-    }else if(person.prop==='mallet'){
-      box(22,21+lower,1,9,'wood');box(19,20+lower,6,3,'ink');
-    }else if(person.prop==='reeds'){
-      box(20,17+lower,1,13,'wood');box(23,19+lower,1,11,'wood');box(19,24+lower,6,2,'shade');
-    }else if(person.prop==='feather'){
-      box(22,19+lower,1,11,'wood');box(21,17+lower,3,7,'accent');
-    }
+    // A single small occupational cue, kept below the face.
+    const px=bx+body+1,py=26+low;
+    if(person.prop==='jar'){round(px-2,py-2,5,6,'ink');round(px-1,py-2,3,5,'accent');box(px,py-3,2,1,'light');}
+    if(person.prop==='pouch'){round(px-1,py,4,5,'accent');box(px,py+1,2,1,'light');}
+    if(['reeds','feather'].includes(person.prop)){box(px+1,py-6,1,11,'wood');box(px,py-6,2,3,'accent');}
+    if(person.prop==='brick'){box(px-2,py,6,4,'ink');box(px-1,py,4,2,'accent');}
+    if(['float','mallet'].includes(person.prop)){box(px+1,py-3,1,8,'wood');box(px-1,py-3,5,2,'ink');}
+    if(person.prop==='token'){round(px-1,py,3,3,'wood');}
+    if(person.prop==='rope'){round(px-2,py-4,5,7,'accent');box(px,py-2,1,3,'shade');}
+    if(person.prop==='harness'){box(bx+body-3,23+low,2,7,'ink');box(bx+body-4,26+low,4,2,'wood');}
   }
   fs.writeFileSync(out, encodePng(width,40,pixels));
 }

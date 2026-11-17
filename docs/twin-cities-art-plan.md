@@ -1,5 +1,26 @@
 # Harappa and Mohenjo-daro Visual and Story Plan
 
+## Overworld sprite correction — owner update, 17 November 2026
+
+Use the established carrier traveller as the proportion reference: larger round heads,
+short compact bodies, short limbs, clear dark eyes and warm outlines. The valley's previous
+tall rectangular figures and tiny faces were rejected. Mirlepa and Yamantaka must also be cute:
+Mirlepa sits cross-legged with closed eyes; Yamantaka has three separate round heads on one
+compact body. Preserve their fair Tibetan-inspired complexion and woven highland costume cues.
+
+The fox, otter, crane, pelican and ostrich tram need recognizable, friendly silhouettes and
+expressive faces comparable in appeal to existing wanderers. Keep them simple NES-style;
+do not add texture noise or detailed map painting. Portraits are unchanged by this correction.
+
+**Explicit exception:** Beedu alone may use small 16-bit SNES pixel art, with curved manta wings,
+gentle colour ramps, cephalic fins and a trailing tail. Keep the existing 96×64 frame, singleton,
+flight path and shadow. The exception overrides the general NES rule for Beedu only.
+
+Rebuild sources: `node tools/build-twin-people.js` and `python tools/build-twin-fauna.py`.
+The latter owns the four animal species, Beedu and both tram atlases; older map builders delegate
+their animal outputs to it so a rebuild cannot restore the rejected figures. Review contact
+sheets remain in ignored `dump/twin-city-art-review/`.
+
 ## Conclusion checkpoint — 17 November 2026
 
 The current gameplay coding batch is complete and is in phase-end verification. This does

@@ -27,23 +27,6 @@ box(5,4,31,24,2,'earth');for(const x of [4,11,20,27])box(5,x,26,1,12,'rock');
 for(const [x,y,w]of [[6,30,6],[16,27,5],[22,32,5],[11,34,9]])box(6,x,y,w,1,'light');
 fs.writeFileSync(path.join(__dirname,'../assets/twins/stories-nes.png'),encodePng(width,height,data));
 
-const bw=96*4,bh=64*4,beedu=Buffer.alloc(bw*bh*4);
-function ray(f,x,y,w,h,c){for(let py=y;py<y+h;py++)for(let px=x;px<x+w;px++)
- for(let a=0;a<4;a++)for(let b=0;b<4;b++)if(px>=0&&px<24&&py>=0&&py<16)
- beedu.set(P[c],(((Math.floor(f/4)*64+(Math.floor(f/4)===0?15-py:py)*4+a)*bw)+(f%4)*96+px*4+b)*4);}
-for(let facing=0;facing<4;facing++)for(let pose=0;pose<4;pose++){
- const f=facing*4+pose,lift=pose===1?-1:pose===2?1:0,fold=pose===3;
- if(facing<2){
-  ray(f,10,5,4,5,'rock');ray(f,11,4,2,2,'light');ray(f,11,10,1,5,'ink');
-  for(let i=0;i<(fold?3:7);i++){
-   ray(f,9-i,6+Math.floor(i/2)+lift,2,3,'light');ray(f,14+i,6+Math.floor(i/2)+lift,2,3,'light');
-  }
-  ray(f,10,7,4,2,facing===0?'light':'cloth');
- }else{
-  const flip=facing===3,part=(x,y,w,h,c)=>ray(f,flip?24-x-w:x,y,w,h,c);
-  part(3,9,10,1,'ink');part(11,7,9,3,'rock');part(18,7,4,2,'light');
-  part(12,fold?6:3+lift,5,fold?5:8,'light');part(14,8,4,2,'cloth');
- }
-}
-fs.writeFileSync(path.join(__dirname,'../assets/twins/beedu-nes.png'),encodePng(bw,bh,beedu));
-console.log('Built seven story scenery frames and sixteen beedu poses.');
+// Beedu's compact SNES exception and wildlife share one reproducible source.
+require('node:child_process').execFileSync('python', [path.join(__dirname,'build-twin-fauna.py')], {stdio:'inherit'});
+console.log('Built seven story scenery frames.');

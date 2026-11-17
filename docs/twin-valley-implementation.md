@@ -1,5 +1,28 @@
 # Twin-valley implementation ledger
 
+## Overworld art follow-up
+
+After game PR #262 opened, the owner requested cuter carrier-like map characters and animals.
+All fifteen named sheets now use round larger heads, compact bodies and short limbs. Mirlepa
+has folded knees, closed eyes and a woven cap; Yamantaka keeps three separate heads and one
+small coat. The two Denisovan skin ramps follow their fairer portrait direction.
+Four animal species and both ostrich-tram atlases have new outlined silhouettes and faces.
+Beedu uses the owner's sole SNES exception: a finer 48×32 logical grid delivered in the existing
+96×64 cells, curved wings, small cephalic fins, a whip tail and restrained shading. No animation
+counts, actor counts, world layout, movement, runtime draw calls or collision rules changed.
+All sources remain reproducible; raw review sheets remain ignored. Phase-end checks for this
+art follow-up are recorded after the earlier gameplay results below.
+
+Sprite follow-up checks: 139 wildlife/map/frame/story tests plus 17 character-sheet tests pass;
+the sprite manifest validates. The 34 updated runtime images total approximately 44.8 KB.
+Review composite: ignored `dump/twin-city-art-review/cute-sprite-review.png`, including the
+original carrier for comparison. No image-generation or palette-reduction pass was used.
+The previous PR pipeline passed its build/unit gate but failed two dusk carrier conversations.
+Reproduction showed the cave had entered the road-company stop pool. It is now excluded with
+the other expansion stops, restoring established routes rather than changing test coordinates.
+After the fix, all 34 traveller tests and both previously failing keyboard/touch dusk browser
+cases pass. Follow-up total: 190 relevant unit/frame checks plus the two browser regressions.
+
 Owner authorized phased implementation and new review branches on 17 November 2026.
 This ledger distinguishes authored code from validated / published work. Do not treat the
 original planning estimates or a completed source edit as evidence that the game passed CI.
@@ -98,6 +121,10 @@ Previous lore PR #167 is merged: head `5dd4457c4734ea0256ade498e3a3f347f96bd77f`
 merge `e5f07f57b4e68e1619d1888604c69155e97dff70`, merged 14 November at 17:01:47 UTC.
 The new lore commit is `9a882d07d9e49e3c456b25c613961158aa8a114c`, published in
 [lore PR #168](https://github.com/lordlebu/SouthOfTethys/pull/168). Its exact-head push validation,
-PR validation and additional CI all passed. The game commit and exact-head CI status are pending publication.
+PR validation and additional CI all passed. The game implementation is published in
+[game PR #262](https://github.com/lordlebu/4000BCESaraswathy/pull/262), initially at
+`6c26e2207932fd69426b806202737605fb3ff120`. Its build/unit job passed; the two dusk carrier
+browser failures are addressed and verified by this art follow-up. The updated exact-head
+pipeline remains the merge gate; do not describe the previous failing run as green.
 Before publishing, refresh main and verify previous merges, then place compatible work on one
 fresh review branch per repository. The lore PR and game PR must link their canon dependency.
