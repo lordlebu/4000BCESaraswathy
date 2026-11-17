@@ -22,6 +22,13 @@ a request to repaint them.
 | Species notebook plates | **Watercolor natural-history field study** | Recognizable anatomy, warm paper and a few habitat strokes; separate from map sprites |
 | UI marks, tools, categories and icons | **Existing SVG/code-native line art** | Established strokes and geometry, legible at UI size |
 
+**Owner update, 18 November 2026:** retain the current mixture of building styles. Do not
+redraw, recolour or reposition buildings in this phase. Landscape improvements are additive:
+reuse suitable existing cliff/small-decor art and add sparse **“nes jrpg sprite”** dry-country
+props. Keep routes, courts and cave walking space clear. Event/travel/arrival cards use the
+broader-color cozy watercolor direction; the phase delivers nineteen event editions and two
+travel banners. See [production ledger](twin-graphics-phase-2026-11-18.md).
+
 Use the exact lowercase phrase **“nes jrpg sprite”** in new people, animal, tram and cave-prop prompts.
 This is an aesthetic, not literal console hardware emulation. Do not add fine texture,
 dithering or detailed SNES shading to those map prompts. Richer portraits/events remain allowed.

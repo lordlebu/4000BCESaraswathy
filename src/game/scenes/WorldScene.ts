@@ -123,6 +123,7 @@ const SHEET_KEY: Record<
   twinHomesPainted: 'twins-homes-painted',
   twinStories:'twins-stories',
   twinCaveProps:'twins-cave-props',
+  twinDryProps:'twins-dry-props',
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
@@ -1081,6 +1082,7 @@ export class WorldScene extends Phaser.Scene {
         item.sheet === 'twinHomesPainted' ||
         item.sheet === 'twinStories' ||
         item.sheet === 'twinCaveProps' ||
+        item.sheet === 'twinDryProps' ||
         item.sheet === 'twinCourtyard' ||
         item.sheet === 'twinHousesDetail' ||
         item.sheet === 'twinDetails' ||
@@ -2020,7 +2022,7 @@ export class WorldScene extends Phaser.Scene {
       to: { x: ride.to.x * TILE_SIZE + TILE_SIZE / 2, y: ride.to.y * TILE_SIZE + TILE_SIZE - 2 },
       at: ride.to,
       start: this.game.loop.now,
-      ms: (this.world.twinRegion ? 100 : RIDE_TILE_MS) * ride.tiles,
+      ms: RIDE_TILE_MS * ride.tiles,
       line: carriagePath(this.world, ride)
     };
     // Anybody walking the line steps off at the pier to let it by -- the owner's ruling. Placed now,
@@ -2297,6 +2299,7 @@ export class WorldScene extends Phaser.Scene {
       residents: this.residentSprites.map(({npcId,sprite}) => ({npcId,sheet:sprite.texture.key,x:sprite.x,y:sprite.y,frame:Number(sprite.frame.name)})),
       // The rail the carriage is crossing on this ride, for the spec that nobody is drawn on it.
       rideLine: this.ride?.line ?? [],
+      rideDurationMs: this.ride?.ms ?? null,
       // The diamond on the nearest seen source of what the pin wants, for \`e2e/finding.spec.ts\`.
       sourceMark: this.sourceMark?.visible ? this.sourceAt : null,
       guidanceId: this.sourceId,

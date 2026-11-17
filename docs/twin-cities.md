@@ -1,12 +1,28 @@
 # Harappa and Mohenjodaro
 
+## Completed graphics follow-up — 18 November 2026
+
+Nineteen preferred event paintings and both journey banners now replace the missing/filler
+editions. All twenty happenings have preferred art, and the actual map-arrival page now has its
+painting. The broader palettes keep blue/teal water, green growth, plum/indigo cloth and warm
+brick/sand distinct. Existing mixed building styles and placements are frozen for this phase.
+
+Shared cliffs and sparse ground decor are reused with clearance masks; compact generated
+**“nes jrpg sprite”** cactus, flowering cactus, grass and stones add dry-country variety.
+Unknown traveller profiles now keep the same face after introduction. The ostrich tram uses
+240ms/tile instead of 100ms/tile, with the same route, fare and game-time rules.
+
+The current required art backlog is **fifteen place views**, then final integrated review.
+See [the audited checklist](twin-cities-art-status.md) and
+[full phase/prompt ledger](twin-graphics-phase-2026-11-18.md). Large sources/reviews stay ignored.
+
 ## Latest Kang and phase status — 17 November 2026
 
 Kang's NES JRPG sprite now wears **light indigo**. His conversation portrait and the statue
 carving/unveiling cards use the owner's initial **simple cozy watercolor** style. The optional
 five-beat bust quest and three persistent map stages are wired; these are distinct delivered
 paintings, not a generic event fallback. Full-colour resize only. The current required art
-backlog is **36 images**; see [the phased checklist](twin-cities-art-status.md) and
+backlog is **15 place views**; see [the phased checklist](twin-cities-art-status.md) and
 [original plan checkpoint](twin-cities-art-plan.md#conclusion-checkpoint--17-november-2026).
 
 ## Cave household update — 17 November 2026

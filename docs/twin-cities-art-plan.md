@@ -1,5 +1,22 @@
 # Harappa and Mohenjo-daro Visual and Story Plan
 
+## Delivered graphics phase — owner update, 18 November 2026
+
+1. **Cards and entry delivered:** replaced the 19 remaining happening fillers and both journey/entry
+   banners with distinct cozy watercolor paintings and broader scene palettes. Preserve accepted
+   originals as fallbacks. Match named faces/clothing to their existing portraits. The 15 place
+   views remain the next phase, rather than claiming the whole illustration programme complete.
+2. **Landscape:** reuse suitable older-map cliff and small-decor placements, filtered away from
+   roads, rail, buildings, courts and cave routes. Add a sparse generated **“nes jrpg sprite”**
+   dry-country set (cactus, flowering cactus, grass and stones). No extra dense texture.
+3. **Buildings frozen:** keep all existing building styles, art, lots, positions and proportions.
+4. **Global stranger identity:** keep one face before/after introduction; only the visible name
+   changes. Unknown profile cards must not redact the identity input used by the portrait hash.
+5. **Tram pace:** remove the valley's 100ms/tile override and use the existing 240ms/tile pace,
+   2.4 times the previous viewing duration, preserving gameplay time/fare/route/turnaround rules.
+6. **Verification/publication:** phase production complete; combined identity, scene, art-resolution
+   and ride checks together. Raw generations/reviews remain in existing ignored desktop paths.
+
 ## Future palette direction — 17 November 2026
 
 Use a **wider variety of colours** in future work: distinct scene palettes, indigo/blue/teal,
@@ -8,7 +25,7 @@ make every surface sepia. Retain character identity, simple NES map pixels and s
 ramps. This is a prompt/review rule for upcoming batches, not a new repaint phase. See the
 [art guide](art-direction.md#colour-variety--owner-update-17-november-2026). Specifics from the
 linked external chat remain unverified until its text is available. The required illustration
-backlog stays **36 images**.
+backlog is now **15 place views** after the event/travel phase.
 
 ## Kang statue material correction — 17 November 2026
 
@@ -18,7 +35,8 @@ The carving stage remains unpainted pale sandstone; its small study is uniform t
 At the final unveiling only, **lapis lazuli eye inlays** and basic red-ochre/indigo paint accents
 finish the sculpture. Most stone stays bare, especially the carved hair and beard. Living Kang
 keeps his dark hair/beard, brown skin and light-indigo dress. This is a painting correction;
-quest rules, resource requirements and the remaining **36-image** art backlog are unchanged.
+quest rules and resource requirements are unchanged. The later event/travel phase above leaves
+**15 place views** as the current required illustration backlog.
 Exact edit prompts and retained raw-history locations are in [the watercolor ledger](twin-kang-watercolor-prompts.md).
 
 ## Priest Kang character and bust — 17 November 2026
@@ -29,7 +47,7 @@ Both use compact RGBA sources and resize-only delivery. See [the exact prompt/re
 Four of fifteen named overworld identities now have generated JRPG sheets; the other eleven
 retain their preceding compact NES sheets. Kang now wears light indigo and has a delivered
 cozy watercolor conversation portrait plus carving and unveiling event paintings. Required
-remaining illustrations: 36 (19 happenings, 15 place views, 2 journeys). Beedu remains unchanged.
+remaining illustrations are now **15 place views**, after the later event/travel phase. Beedu remains unchanged.
 
 ## Cave household update — 17 November 2026
 
@@ -103,16 +121,16 @@ phase, then final visual/performance review and passing CI; do not start another
 | Named map identities | All 15 identities built as simple NES sheets | Runtime/pipeline regression checks |
 | Cave, helpers, beedu, optional Kang bust | Implemented with canon, saved-map addition and conversation wiring | Phase-end checks and review |
 | Main cast portraits | All 13 preferred portraits delivered, including Kang in light indigo | Final integrated likeness/crop review |
-| Authored happenings | 1 of 20 has a preferred painted edition; existing pixel editions/fallbacks retained | 19 paintings, including cave welcome and beedu sighting |
+| Authored happenings | All 20 have preferred painted editions; original pixel editions retained | Final integrated review |
 | Individual place views | 1 of 16 has a preferred painted edition | 15 views, including Windward Cave |
-| Journey banners | Existing editions retained | 2 preferred paintings |
+| Journey banners and map entry | Both preferred banners delivered; actual arrival page now has its painting | Final integrated review |
 | Bust story illustrations | Carving and unveiling cozy watercolor paintings delivered and selected per quest beat | Optional commission/site/preparation takes only |
 | Further ambient polish | Existing map presentation accepted | Seasonal variants and bespoke bird/harness motion remain unfinished; decide during final polish review whether to retain that scope |
-| Publication | Game PR #262 and lore art-docs PR #169 are open; lore story PR #168 merged | Latest exact-head CI, owner review and merge |
+| Publication | Game PRs #262/#263 and lore PR #169 merged; fresh graphics branch from main | Current phase exact-head CI, owner review and merge |
 
-**Remaining required illustration inventory: 36 images** (19 happenings + 15 place views +
-2 journeys), plus separately optional takes. Kang’s portrait and both bust paintings are complete.
-This is an asset count, not 36 coding tasks. Helpers do not require bespoke portraits.
+**Remaining required illustration inventory: 15 place views**, plus separately optional takes.
+All twenty happening paintings, both journey banners, Kang’s portrait and both bust paintings
+are delivered. Helpers do not require bespoke portraits.
 See the [audited phased checklist and exact pending filenames](twin-cities-art-status.md).
 The current implementation can be reviewed and played with existing art fallbacks.
 

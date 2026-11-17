@@ -1,5 +1,28 @@
 # Twin-valley implementation ledger
 
+Phase-end results: typecheck, 1,322 combined UI/content/art/scene checks, production build,
+unchanged bundle budgets and all six targeted browser cases pass. Old portrait behavior fails
+the new continuity regression. Journey UI loads on travel; the initial app is 219.6 KiB gzipped
+within its 220 KiB budget. The new dry-prop atlas is 6,024 bytes; accepted building images and
+Beedu map art remain untouched. Exact-head CI and final integrated review remain open.
+
+## Delivered graphics phase — owner update, 18 November 2026
+
+1. **Cards and entry delivered:** replaced the 19 remaining happening fillers and both journey/entry
+   banners with distinct cozy watercolor paintings and broader scene palettes. Preserve accepted
+   originals as fallbacks. Match named faces/clothing to their existing portraits. The 15 place
+   views remain the next phase, rather than claiming the whole illustration programme complete.
+2. **Landscape:** reuse suitable older-map cliff and small-decor placements, filtered away from
+   roads, rail, buildings, courts and cave routes. Add a sparse generated **“nes jrpg sprite”**
+   dry-country set (cactus, flowering cactus, grass and stones). No extra dense texture.
+3. **Buildings frozen:** keep all existing building styles, art, lots, positions and proportions.
+4. **Global stranger identity:** keep one face before/after introduction; only the visible name
+   changes. Unknown profile cards must not redact the identity input used by the portrait hash.
+5. **Tram pace:** remove the valley's 100ms/tile override and use the existing 240ms/tile pace,
+   2.4 times the previous viewing duration, preserving gameplay time/fare/route/turnaround rules.
+6. **Verification/publication:** phase production complete; combined identity, scene, art-resolution
+   and ride checks together. Raw generations/reviews remain in existing ignored desktop paths.
+
 ## Kang statue material correction — 17 November 2026
 
 Both bust event paintings distinguish sculpture from the living sitter: hair, eyebrows, beard,
@@ -8,7 +31,8 @@ The carving stage remains unpainted pale sandstone; its small study is uniform t
 At the final unveiling only, **lapis lazuli eye inlays** and basic red-ochre/indigo paint accents
 finish the sculpture. Most stone stays bare, especially the carved hair and beard. Living Kang
 keeps his dark hair/beard, brown skin and light-indigo dress. This is a painting correction;
-quest rules, resource requirements and the remaining **36-image** art backlog are unchanged.
+quest rules and resource requirements are unchanged. The later event/travel phase above leaves
+**15 place views** as the current required illustration backlog.
 Exact edit prompts and retained raw-history locations are in [the watercolor ledger](twin-kang-watercolor-prompts.md).
 
 ## Latest Kang and phase status — 17 November 2026
@@ -23,7 +47,7 @@ Kang's NES JRPG sprite now wears **light indigo**. His conversation portrait and
 carving/unveiling cards use the owner's initial **simple cozy watercolor** style. The optional
 five-beat bust quest and three persistent map stages are wired; these are distinct delivered
 paintings, not a generic event fallback. Full-colour resize only. The current required art
-backlog is **36 images**; see [the phased checklist](twin-cities-art-status.md) and
+backlog is now **15 place views**; see [the phased checklist](twin-cities-art-status.md) and
 [original plan checkpoint](twin-cities-art-plan.md#conclusion-checkpoint--17-november-2026).
 
 ## Priest Kang character and bust — 17 November 2026
@@ -34,7 +58,7 @@ Both use compact RGBA sources and resize-only delivery. See [the exact prompt/re
 Four of fifteen named overworld identities now have generated JRPG sheets; the other eleven
 retain their preceding compact NES sheets. Kang now wears light indigo and has a delivered
 cozy watercolor conversation portrait plus carving and unveiling event paintings. Required
-remaining illustrations: 36 (19 happenings, 15 place views, 2 journeys). Beedu remains unchanged.
+remaining illustrations are now **15 place views**, after the later event/travel phase. Beedu remains unchanged.
 
 ## Cave household update — 17 November 2026
 
@@ -165,7 +189,7 @@ dress, the established earth palette, and exactly three heads for Yamantaka. Kia
 corrected against existing Kia face references to light open wraps and marsh flowers, preserving
 their faces and ages. All were resized only, without colour quantization. Sources stay ignored.
 No paid CLI/API fallback was used. At that earlier checkpoint Kang’s portrait and the remaining
-event/place/journey paintings were pending; the latest Kang delivery and current 36-image list
+event/place/journey paintings were pending; the latest Kang delivery and current 15-view list
 are recorded above.
 
 Generated portraits/event paintings use the existing preferred-edition path and art

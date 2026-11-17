@@ -50,7 +50,7 @@ import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/t
 import { clearJourney, hasBegun, loadJourney, saveJourney } from '../save';
 import { Opening } from './Opening';
 import { bearingTo } from '../content/journal';
-import { Journey } from './Journey';
+const Journey = lazy(() => import('./Journey').then(module => ({ default: module.Journey })));
 import { coachLine, MORNING_GOAL } from '../content/coach';
 import { GoalsSection } from './GoalsSection';
 import {
@@ -1618,6 +1618,7 @@ export function App() {
       )}
 
       {journey && fieldMap(journey.from) && fieldMap(journey.to) && (
+        <Suspense fallback={<Modal open label="The road" onClose={stepDown}><p role="status">Taking the road…</p></Modal>}>
         <Journey
           from={fieldMap(journey.from)!}
           to={fieldMap(journey.to)!}
@@ -1626,6 +1627,7 @@ export function App() {
           roll={(salt) => tileHash(seed, 0, 0, `${journey.road.art}:${salt}`)}
           onDone={stepDown}
         />
+        </Suspense>
       )}
 
       {opening && fieldMap(fieldMapId)?.prologue && (

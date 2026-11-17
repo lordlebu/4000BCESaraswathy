@@ -12,6 +12,7 @@ import { PROFILE_SIZE, ProfileButton, ProfileCard } from '../src/ui/Profile';
 import { npc } from '../src/content/places';
 import { strangersMet } from '../src/content/people';
 import { travellersOn } from '../src/content/travellers';
+import {JourneySeed} from '../src/ui/journeySeed';
 
 afterEach(cleanup);
 
@@ -47,6 +48,30 @@ describe('a stranger’s card', () => {
     expect(card.textContent).toContain('Harappan');
     expect(card.textContent).toMatch(/Walks the road between .+ and .+\./);
     expect(card.querySelector('.stranger-face, .person-portrait')?.getAttribute('width')).toBe(String(PROFILE_SIZE));
+  });
+
+  it('keeps a stranger’s face when their name is learned, across maps and journey seeds', () => {
+    for(const seed of ['play-test','twin-review','portrait-continuity']){
+      for(const map of ['field_map_lothal','field_map_dwarka','field_map_aravali','field_map_narmada','field_map_twins']){
+        for(const traveller of travellersOn(map,seed).filter(t=>t.npcId===null)){
+          const key=`${map}:${traveller.id}`;
+          const view=render(<JourneySeed.Provider value={seed}>
+            <ProfileCard who={{kind:'stranger',key,known:false}} open onClose={noop}/>
+          </JourneySeed.Provider>);
+          const image=document.querySelector('.profile-card .stranger-face');
+          const identity=image?.getAttribute('src')??image?.getAttribute('data-look');
+          expect(identity).toBeTruthy();
+          if(traveller.givenName)expect(document.querySelector('.profile-card')!.textContent).not.toContain(traveller.givenName);
+          view.rerender(<JourneySeed.Provider value={seed}>
+            <ProfileCard who={{kind:'stranger',key,known:true}} open onClose={noop}/>
+          </JourneySeed.Provider>);
+          const after=document.querySelector('.profile-card .stranger-face');
+          expect(after?.getAttribute('src')??after?.getAttribute('data-look'),`${seed}/${key}`).toBe(identity);
+          if(traveller.givenName)expect(screen.getByRole('heading',{name:traveller.givenName})).toBeTruthy();
+          view.unmount();
+        }
+      }
+    }
   });
 
   it('draws nothing for a stranger the roster no longer has', () => {

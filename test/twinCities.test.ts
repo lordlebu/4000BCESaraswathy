@@ -101,7 +101,7 @@ describe('the mainland twin cities',()=>{
     const kept=new Set(Array.from({length:8},(_,i)=>planScene(buildFieldMap(map,{seed:`art-keep-${i}`})))
       .flat().filter(p=>p.sheet==='twinHouses'&&!p.name).map(p=>p.frame));
     expect([...kept].sort()).toEqual([0,1,2,3,4,5,6,7]);
-    expect(plan.every(p=>['twinHouses','twinHousesDetail','twinObjects','twinRoutes','twinDetails','twinRims','twinCourtyard','twinSurfaces','twinHomesPainted','riverBridge','contact','twinEnvironment','twinStories','twinCaveProps'].includes(p.sheet))).toBe(true);
+    expect(plan.every(p=>['twinHouses','twinHousesDetail','twinObjects','twinRoutes','twinDetails','twinRims','twinCourtyard','twinSurfaces','twinHomesPainted','riverBridge','contact','twinEnvironment','twinStories','twinCaveProps','twinDryProps','cliffs','decor'].includes(p.sheet))).toBe(true);
     for(const home of houses.filter(p=>p.sheet==='twinHomesPainted')){
       const shade=plan.find(p=>p.sheet==='contact'&&p.x===home.x&&p.y===home.y);
       expect(shade).toBeDefined();expect(shade!.depth).toBeLessThan(home.depth);

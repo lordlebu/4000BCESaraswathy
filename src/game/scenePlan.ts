@@ -1,4 +1,5 @@
 import { planTwinScene } from './twinArt';
+import {planTwinLandscape,twinLandscapeClear} from './twinLandscape';
 import { planRiverBridges } from './riverBridges';
 export { planRiverBridges } from './riverBridges';
 // What goes where on the map, decided without an engine.
@@ -86,6 +87,7 @@ export type PlacementSheet =
   | 'twinHomesPainted'
   | 'twinStories'
   | 'twinCaveProps'
+  | 'twinDryProps'
   | 'overdraw'
   | 'features'
   | 'flora'
@@ -1244,7 +1246,10 @@ export function planMarkers(built: FieldMapWorld): Placement[] {
  * world return the same plan, which is what makes it worth asserting against.
  */
 export function planScene(built: FieldMapWorld): Placement[] {
-  if (built.world.twinRegion) return planTwinScene(built);
+  if (built.world.twinRegion) {
+    const base=planTwinScene(built),clear=twinLandscapeClear(built,base);
+    return [...base,...planTwinLandscape(built,base,planCliffs(built.world),planDecor(built.world,clear),clear)];
+  }
   // **A forecourt round every place**: the tile it stands on and the eight around it, kept clear of
   // huts, scrub and props, so a place has ground in front of it and the road arrives somewhere.
   const forecourt = forecourtsOf(built);
