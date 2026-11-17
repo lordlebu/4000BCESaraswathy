@@ -1,4 +1,5 @@
 // Authored geography, seeded detail. This branch never runs for an older field map.
+import { CAVE_AT, stampTwinHighlands } from './twinHighlands';
 import { tileHash } from './rng';
 import type { BiomeId, Point, Tile, World } from './types';
 import type { FieldMap, PointOfInterest } from '../content/places';
@@ -6,7 +7,7 @@ import type { FieldMapWorld } from './fieldMap';
 
 export const TWIN_MAP = 'field_map_twins';
 export interface CityDistrict { id: 'harappa' | 'mohenjodaro'; name: string; x: number; y: number; radius: number }
-export interface TwinRegion { districts: CityDistrict[]; rail: Point[]; stations: Point[] }
+export interface TwinRegion { districts: CityDistrict[]; rail: Point[]; stations: Point[]; highlands?: 1 }
 export const TWIN_ANCHORS: Record<string, Point> = {
   poi_harappa_court: { x: 18, y: 17 }, poi_earthen_workshop: { x: 15, y: 19 },
   poi_nesting_ruins: { x: 20, y: 19 }, poi_harappa_station: { x: 22, y: 25 },
@@ -16,7 +17,7 @@ export const TWIN_ANCHORS: Record<string, Point> = {
   poi_reed_junction: { x: 32, y: 49 }, poi_twin_cove: { x: 48, y: 50 },
   poi_dune_windbreak: { x: 9, y: 32 }, poi_reedwright_bank: { x: 38, y: 47 },
   poi_nesting_cove: { x: 54, y: 51 }
-  ,poi_northwest_cave_camp: {x:5,y:5}
+  ,poi_northwest_cave_camp: { ...CAVE_AT }
 };
 
 const EXPANSION_PLACES = ['poi_dune_windbreak', 'poi_reedwright_bank', 'poi_nesting_cove','poi_northwest_cave_camp'];
@@ -116,6 +117,7 @@ export function buildTwinCities(map: FieldMap, seed: string, pois: readonly Poin
   const world: World = { width, height, seed, tiles, camp: null, twinRegion: region,
     start: { x: 22, y: 25 }, settlement: {x:18,y:18,name:'Harappa'},
     landmark: {x:49,y:50,name:'The Quiet Coves',terrain:'coast'}, rivers:[{name:'The Saraswati',path:river}] };
+  stampTwinHighlands(world);
   // Surveyed rail: a bend at the east end, not a straight animation between stations.
   for (let x=23;x<=44;x++) region.rail.push({x,y:25});
   for (let y=26;y<=35;y++) region.rail.push({x:44,y});

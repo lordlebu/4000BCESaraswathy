@@ -88,6 +88,7 @@ export type PlacementSheet =
   | 'twinStories'
   | 'twinCaveProps'
   | 'twinDryProps'
+  | 'twinHighlandForms'
   | 'overdraw'
   | 'features'
   | 'flora'

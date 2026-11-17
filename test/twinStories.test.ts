@@ -38,7 +38,7 @@ describe('the optional bust and permanent cave',()=>{
   const built=buildFieldMap(fieldMap('field_map_twins')!,{seed:'cave-migration'});
   const roads=built.world.tiles.map(r=>r.map(t=>Boolean(t.road)));
   const placed=addTwinPlaces(built.world,[poi('poi_northwest_cave_camp')!]);
-  expect(placed[0]!.at).toEqual({x:5,y:5});
+  expect(placed[0]!.at).toEqual({x:51,y:12});
   expect(built.world.tiles.map(r=>r.map(t=>Boolean(t.road)))).toEqual(roads);
  });
 });

@@ -27,6 +27,7 @@ import { poisOn, type FieldMap, type PointOfInterest } from '../content/places';
 import { THRESHOLDS, band } from './classify';
 import { buildFieldMap, type FieldMapWorld, type PlacedPoi } from './fieldMap';
 import type { BiomeId, LandmarkTerrain, Point, River, Tile, World } from './types';
+import { CAVE_AT, CAVE_ID, stampTwinHighlands } from './twinHighlands';
 import { addTwinPlaces } from './twinCities';
 
 /**
@@ -279,7 +280,7 @@ export function restoreWorld(baked: BakedWorld, fieldMap: FieldMap): FieldMapWor
 
   const world: World = {
     seed: baked.seed,
-    ...(baked.twinRegion ? { twinRegion: baked.twinRegion } : {}),
+    ...(baked.twinRegion ? { twinRegion: { ...baked.twinRegion } } : {}),
     camp: baked.camp
       ? { at: { x: baked.camp[0], y: baked.camp[1] }, radius: baked.camp[2] }
       : null,
@@ -301,6 +302,11 @@ export function restoreWorld(baked: BakedWorld, fieldMap: FieldMap): FieldMapWor
   for (const [id, x, y] of baked.placed) {
     const poi = known.get(id);
     if (poi) placed.push({ poi, at: { x, y } });
+  }
+  stampTwinHighlands(world);
+  if (world.twinRegion) {
+    const cave = placed.find(p => p.poi.id === CAVE_ID);
+    if (cave) cave.at = { ...CAVE_AT };
   }
   const present = new Set(placed.map(p => p.poi.id));
   placed.push(...addTwinPlaces(world, [...known.values()].filter(p => !present.has(p.id))));
@@ -335,7 +341,7 @@ export function worldFor(fieldMap: FieldMap, seed: string): FieldMapWorld {
       const baked = JSON.parse(raw) as BakedWorld;
       const restored = restoreWorld(baked, fieldMap);
       if (restored) {
-        if (restored.world.twinRegion && restored.placed.length !== baked.placed.length) {
+        if (restored.world.twinRegion && (restored.placed.length !== baked.placed.length || baked.twinRegion?.highlands !== 1)) {
           try {
             localStorage.setItem(key(seed, fieldMap.id), JSON.stringify(bakeWorld(restored)));
           } catch {

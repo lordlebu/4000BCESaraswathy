@@ -1,4 +1,4 @@
-import { loadTwinArt, TWIN_KEYS, twinGroundFrame } from '../twinArt';
+import { loadTwinArt, TWIN_KEYS, twinGroundArt } from '../twinArt';
 import { TWIN_MAP } from '../../world/twinCities';
 // The map: everything the player sees on the canvas.
 //
@@ -124,6 +124,7 @@ const SHEET_KEY: Record<
   twinStories:'twins-stories',
   twinCaveProps:'twins-cave-props',
   twinDryProps:'twins-dry-props',
+  twinHighlandForms:'twins-highland-forms',
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
@@ -864,7 +865,7 @@ export class WorldScene extends Phaser.Scene {
         // Ground the sheet has art for is drawn from the sheet; ground it does not is drawn from
         // the biome's own colour and symbol. Falling back to the plains frame would draw a lie
         // about what the traveller is standing on -- see `placeholderTileKey`.
-        const art = this.world.twinRegion ? {key:TWIN_KEYS.ground,frame:twinGroundFrame(this.world,tile,variant)} : this.groundArt(tile.biome, variant);
+        const art = this.world.twinRegion ? twinGroundArt(this.world,tile,variant) : this.groundArt(tile.biome, variant);
         const tileSprite = this.add
           .image(cx, cy, art.key, art.frame)
           .setDepth(DEPTH_TILE);
@@ -1083,6 +1084,7 @@ export class WorldScene extends Phaser.Scene {
         item.sheet === 'twinStories' ||
         item.sheet === 'twinCaveProps' ||
         item.sheet === 'twinDryProps' ||
+        item.sheet === 'twinHighlandForms' ||
         item.sheet === 'twinCourtyard' ||
         item.sheet === 'twinHousesDetail' ||
         item.sheet === 'twinDetails' ||

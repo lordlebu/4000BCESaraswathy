@@ -1,5 +1,8 @@
 // Map-specific art and placements. Assets are requested only when this region is entered.
 import type Phaser from 'phaser';
+import highlandGround from '../../assets/twins/highland-ground-nes-jrpg.png?no-inline';
+import highlandForms from '../../assets/twins/highland-forms-nes-jrpg.png?no-inline';
+import { inTwinHighlands } from '../world/twinHighlands';
 import ground from '../../assets/twins/ground.png?no-inline';
 import objects from '../../assets/twins/objects.png?no-inline';
 import houses from '../../assets/twins/houses.png?no-inline';
@@ -28,10 +31,11 @@ import type { FieldMapWorld } from '../world/fieldMap';
 import type { Tile, World } from '../world/types';
 import type { Placement } from './scenePlan';
 
-export const TWIN_KEYS = { ground:'twins-ground', houses:'twins-houses', objects:'twins-objects', routes:'twins-routes', tram:'twins-tram',
+export const TWIN_KEYS = { highlandGround:'twins-highland-ground', ground:'twins-ground', houses:'twins-houses', objects:'twins-objects', routes:'twins-routes', tram:'twins-tram',
   housesDetail:'twins-houses-detail', details:'twins-details', rims:'twins-rims', tramWalk:'twins-tram-walk', courtyard:'twins-courtyard' };
 export function loadTwinArt(scene: Phaser.Scene): void {
-  for (const [key,url,w,h] of [[TWIN_KEYS.ground,ground,128,128],[TWIN_KEYS.houses,houses,80,88],[TWIN_KEYS.objects,objects,128,160],
+  for (const [key,url,w,h] of [[TWIN_KEYS.ground,ground,128,128],[TWIN_KEYS.highlandGround,highlandGround,128,128],
+    ['twins-highland-forms',highlandForms,128,160],[TWIN_KEYS.houses,houses,80,88],[TWIN_KEYS.objects,objects,128,160],
     [TWIN_KEYS.routes,routes,128,128],[TWIN_KEYS.tram,tram,192,160],
     [TWIN_KEYS.housesDetail,housesDetail,80,88],[TWIN_KEYS.details,details,128,160],
     [TWIN_KEYS.rims,rims,128,128],[TWIN_KEYS.tramWalk,tramWalk,192,160],
@@ -41,6 +45,12 @@ export function loadTwinArt(scene: Phaser.Scene): void {
     ['twins-dry-props',dryProps,64,64],['twins-cave-props',caveProps,128,128],['twins-beedu',beedu,96,64]] as const) {
     if (!scene.textures.exists(key)) scene.load.spritesheet(key,url,{frameWidth:w,frameHeight:h});
   }
+}
+export function twinGroundArt(world:World,tile:Tile,variant:number):{key:string;frame:number} {
+  if(world.twinRegion && inTwinHighlands(tile) && ['plains','hills','mountains','snow'].includes(tile.biome)) {
+    return {key:TWIN_KEYS.highlandGround,frame:tile.biome==='snow'?3:tile.biome==='mountains'?2:tile.biome==='hills'?0:1};
+  }
+  return {key:TWIN_KEYS.ground,frame:twinGroundFrame(world,tile,variant)};
 }
 export function twinGroundFrame(world:World,tile:Tile,variant:number):number {
   const district=world.twinRegion && districtAt(world.twinRegion,tile);
@@ -95,6 +105,15 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
     if(edge.wall&&hash%4===0)add('twinDetails',8,x,y);
     if(clear.has(`${x},${y}`))continue;
     const district=districtAt(region,tile);
+    if(inTwinHighlands(tile) && ['hills','mountains','snow'].includes(biome)) {
+      // A few large silhouettes give height; the camp meadow and stream stay open.
+      const nearCave=cave && Math.abs(x-cave.at.x)<=4 && Math.abs(y-cave.at.y)<=4;
+      const nearWater=[[0,0],[0,-1],[1,0],[0,1],[-1,0]].some(([dx,dy])=>world.tiles[y+dy!]?.[x+dx!]?.biome==='river');
+      if(!nearCave && !nearWater && x%3===1 && y%3===2)out.push({
+        sheet:'twinHighlandForms',frame:(biome==='snow'?4:biome==='mountains'?2:0)+(hash%2),x,y,
+        depth:depthFor(y,ROW_SLOT.undergrowth)});
+      continue;
+    }
     if(biome==='settlement'&&district&&twinHouseLot(x,y,district.x,district.y)){
       const brick=district.id==='mohenjodaro';
       surface(brick?1:0,x,y);
@@ -109,7 +128,7 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
     } else if(biome==='desert'&&hash%17===0)add(keepOriginal?'twinObjects':'twinDetails',keepOriginal?14:0,x,y);
     else if(biome==='hills'&&hash%9===0)add(keepOriginal?'twinObjects':'twinDetails',keepOriginal?13:1,x,y);
     else if(biome==='wetland'&&hash%5===0)add(keepOriginal?'twinObjects':'twinDetails',keepOriginal?12:4,x,y);
-    else if(biome==='plains'&&hash%13===0)add(keepOriginal?'twinObjects':'twinDetails',keepOriginal?(hash%2?10:11):(hash%2?2:3),x,y);
+    else if(biome==='plains'&&!inTwinHighlands(tile)&&hash%13===0)add(keepOriginal?'twinObjects':'twinDetails',keepOriginal?(hash%2?10:11):(hash%2?2:3),x,y);
   }
   // Exclude railway supports from road-span adjacency and orientation decisions.
   const roadWorld={...world,tiles:world.tiles.map(row=>row.map(tile=>tile.bridge&&tile.track?{...tile,bridge:false}:tile))};

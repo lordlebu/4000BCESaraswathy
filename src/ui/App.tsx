@@ -14,7 +14,7 @@ import type { TileAction } from './TileActions';
 import type { Step } from '../content/making-chain';
 import { CollectionPanel } from './CollectionPanel';
 import { diaryCount } from '../content/discoveryChanges';
-import { Ending } from './Ending';
+const Ending = lazy(() => import('./Ending').then(module => ({default: module.Ending})));
 import { FieldKit } from './FieldKit';
 import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
@@ -1869,12 +1869,15 @@ export function App() {
       {/* The negotiation at a ground, while one is open: a new ground starts a new conversation. */}
       {negotiation && <Negotiation key={negotiation.ground.id} {...negotiation} />}
 
+      {interrupts.ending && <Suspense fallback={<Modal open label="If you stopped here"
+        onClose={() => dispatch({ type: 'close-interrupt', which: 'ending' })}><p role="status">Opening the last page…</p></Modal>}>
       <Ending
         progress={progress}
         settlement={settlement}
         open={interrupts.ending}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'ending' })}
       />
+      </Suspense>}
 
       {/* The activity, while one is running: `useActivity` hands over everything the card needs. */}
       {activityCard && <ActivityModal {...activityCard} />}

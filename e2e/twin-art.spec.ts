@@ -2,12 +2,17 @@ import { expect, test } from '@playwright/test';
 
 const base = '?map=field_map_twins&seed=twin-art-review&hour=12&door=open&title=skip&chatter=off&firsts=off';
 
-test('the cave household uses generated walking and seated poses beside the cave', async ({page})=>{
+test('the cave household uses generated walking and seated poses beside the cave', async ({page},info)=>{
   const errors:string[]=[];
   page.on('pageerror',e=>errors.push(e.message));
   page.on('console',m=>{if(/has no frame|Texture.*not found/i.test(m.text()))errors.push(m.text());});
+  await page.setViewportSize({width:1280,height:900});
   const props=page.waitForResponse(r=>/cave-props-nes-jrpg/.test(r.url())&&r.ok());
-  await page.goto(base+'&events=off&at=poi_northwest_cave_camp');
+  const ground=page.waitForResponse(r=>/highland-ground-nes-jrpg/.test(r.url())&&r.ok());
+  const mountains=page.waitForResponse(r=>/highland-forms-nes-jrpg/.test(r.url())&&r.ok());
+  await page.goto(base+'&survey=on&events=off&at=poi_northwest_cave_camp');
+  await Promise.all([ground,mountains]);
+  await expect.poll(()=>page.evaluate(()=>{const w=(window as any).__walker?.();return w && [w.x,w.y,w.biome];}),{timeout:45000}).toEqual([51,12,'plains']);
   await props;
   const household=()=>page.evaluate(()=>(window as any).__walker?.().residents
     .filter((r:any)=>['npc_mirlepa','npc_yamantaka'].includes(r.npcId)));
@@ -20,6 +25,11 @@ test('the cave household uses generated walking and seated poses beside the cave
     const current=(await household()).find((r:any)=>r.npcId===moving.npcId);
     return Math.hypot(current.x-moving.x,current.y-moving.y);
   },{timeout:10000}).toBeGreaterThan(2);
+  const leave=page.getByRole('button',{name:'Leave',exact:true});
+  if(await leave.isVisible())await leave.click();
+  await page.keyboard.press('Escape');
+  for(let i=0;i<3;i++)await page.getByRole('button',{name:'Zoom out',exact:true}).click();
+  await page.screenshot({path:info.outputPath('northeast-cave-highlands.png')});
   expect(errors).toEqual([]);
 });
 

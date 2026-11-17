@@ -1,5 +1,7 @@
 # Art direction — the rules, and what they cost
 
+> **18 November relocation:** the household now occupies the northeastern green highlands at (51,12), with a stream, foothills, bare mountains and border snowcaps. The historical POI id is preserved. See [terrain ledger](twin-highlands-jrpg-prompts.md).
+
 ## Current element-by-element direction — 17 November 2026
 
 **This controls new art and overrides older blanket SNES / “never use NES” instructions.**
@@ -12,7 +14,7 @@ a request to repaint them.
 | Wandering animals | **“nes jrpg sprite”** | Friendly expressive faces, recognizable ears/muzzle/bill/tail, compact bodies, proper right/left/front/back views |
 | Ostrich/emu tram and new small map vehicles | **“nes jrpg sprite”** | Bird visibly pulls the carriage, clear wheels/harness/stride, genuine front/back views, existing frame sizes |
 | Priest Kang and his map bust statue | **“nes jrpg sprite”** | Matching beard, headband and cloak; three simple sandstone quest stages; [prompt ledger](twin-kang-jrpg-prompts.md). Light-indigo dress; his dialogue portrait and bust event cards use the owner’s cozy watercolor reference |
-| Northwest cave flags, cooker and bonfire | **“nes jrpg sprite”** | Simple 32px props with paired states; six five-day arrangements per journey month; [prompt ledger](twin-cave-jrpg-prompts.md) |
+| Northeast cave flags, cooker and bonfire | **“nes jrpg sprite”** | Simple 32px props with paired states; six five-day arrangements per journey month; [prompt ledger](twin-cave-jrpg-prompts.md) |
 | Beedu on the map | **Small 16-bit SNES pixel sprite — sole creature exception** | Accepted art stays; curved ray wings, restrained colour ramps and tail, existing small atlas/singleton/shadow/path |
 | Terrain, buildings, props, plants, boundaries | **Simple high-quality 8-bit NES-style map art** | Sparse detail and clear silhouettes/routes; quality comes from composition, layers, elevation/water separation and restrained gradient/contact shadows |
 | NPC portraits and random faces | **Simple cozy watercolor and fine ink on warm paper** | Rich off-map detail; preserve age, culture and face/costume continuity. Kia: airy wraps/flowers. Kang: Priest-King reference with strong jaw |

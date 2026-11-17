@@ -1,5 +1,24 @@
 # Harappa and Mohenjo-daro Visual and Story Plan
 
+## Northeast highlands — owner update, 18 November 2026
+
+The Windward Cave moves from the northwest desert to **(51,12) in the northeast**. Its stable
+`poi_northwest_cave_camp` id remains for diaries, discoveries, conversations and quest references.
+Fresh and saved twin-city maps receive the same bounded landscape addition; saved city ground,
+buildings, roads, rail, other POIs and journey progress remain intact.
+
+Completed in this follow-up: a cool sage/mint meadow distinct from the valley's existing grass;
+rounded foothills, bare blue-grey mountains and snow-capped peaks on the north/east border;
+and a narrow mountain stream joining the Saraswati. The meadow keeps both residents' local
+walking/seated turns and rotating props clear. The northwest Gedrosian margin remains arid.
+New ground and hill/mountain forms use **“nes jrpg sprite”**, compact crop/resize-only sources,
+simple pixel shapes and layered light/shadow. Buildings and accepted Beedu are unchanged.
+The earlier northwest cave instructions below are superseded by this relocation.
+See [terrain prompts and rebuild](twin-highlands-jrpg-prompts.md).
+
+The broader plan still has **15 required place-view paintings** and the final combined visual/
+performance review pending. This terrain follow-up does not mark those finished.
+
 ## Delivered graphics phase — owner update, 18 November 2026
 
 1. **Cards and entry delivered:** replaced the 19 remaining happening fillers and both journey/entry

@@ -4,7 +4,7 @@ import type {FieldMapWorld} from '../world/fieldMap';
 import type {Placement} from './scenePlan';
 
 const STRUCTURES=new Set(['twinHouses','twinHousesDetail','twinHomesPainted','twinObjects',
-  'twinDetails','twinCourtyard','twinEnvironment','twinStories','twinCaveProps']);
+  'twinDetails','twinCourtyard','twinEnvironment','twinStories','twinCaveProps','twinHighlandForms']);
 const GROUND=new Set(['desert','hills','plains','coast']);
 
 /** Presentation clearance only: never alter terrain, buildings, collision or seeded generation. */

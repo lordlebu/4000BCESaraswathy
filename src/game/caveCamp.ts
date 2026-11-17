@@ -8,7 +8,7 @@ import { depthFor, ROW_SLOT } from './frames';
 export const CAVE_TURN_MS = 45_000;
 export const CAVE_PEOPLE = ['npc_mirlepa', 'npc_yamantaka'] as const;
 const SOLID = new Set(['twinHouses', 'twinHousesDetail', 'twinHomesPainted', 'twinObjects',
-  'twinDetails', 'twinCourtyard', 'twinEnvironment', 'twinStories', 'twinCaveProps']);
+  'twinDetails', 'twinCourtyard', 'twinEnvironment', 'twinStories', 'twinCaveProps','twinHighlandForms']);
 const key = (p: {x:number;y:number}) => `${p.x},${p.y}`;
 
 /** Six five-day arrangements repeat over a thirty-day journey month. No OS calendar. */

@@ -1532,11 +1532,12 @@
       "kind": "settlement",
       "stands": "high",
       "terrain": [
+        "plains",
         "hills",
-        "desert"
+        "mountains"
       ],
-      "description": "A sheltered cave at the valley's extreme northwestern ridge, with an open threshold, a small hearth and a fold outside.",
-      "arrival": "Three heads turn together at the cave mouth. Yamantaka makes room beside the windbreak. Beyond him Mirlepa sits in the lee of the rock; the dust reaches his feet and settles.",
+      "description": "A sheltered cave in the valley's northeastern highlands, above a green meadow and a small mountain stream. Rounded hills rise to bare mountains and snow-capped peaks along the border.",
+      "arrival": "Three heads turn together at the cave mouth. Yamantaka makes room beside the windbreak. Beyond him Mirlepa sits in the lee of the rock; cool grass bends toward the sound of running water.",
       "npcs": [
         "npc_mirlepa",
         "npc_yamantaka",
