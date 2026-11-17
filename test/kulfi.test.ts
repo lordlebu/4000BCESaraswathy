@@ -67,10 +67,11 @@ describe('kulfi', () => {
     expect(mapAllows('recipe_kulfi', benchAt(camp, 'field_map_lothal'))).toBe(false);
   });
 
-  it('takes its ice from snow, and only the Narmada has snow', () => {
+  it('takes ice from snow on the plateau and the new twin-valley border', () => {
     expect(material('material_glacier_ice')?.foundIn).toEqual(['snow']);
     const snowy = fieldMaps.filter((m) => m.seedBiomes.includes('snow')).map((m) => m.id);
-    expect(snowy).toEqual(['field_map_narmada']);
+    expect(snowy).toEqual(['field_map_narmada','field_map_twins']);
+    expect(mapAllows('recipe_kulfi', benchAt(null, 'field_map_twins'))).toBe(false);
   });
 
   it('leaves every other recipe free of any map', () => {

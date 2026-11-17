@@ -2,6 +2,7 @@ import {describe,expect,it} from 'vitest';
 import {fieldMap} from '../src/content/places';
 import {buildFieldMap} from '../src/world/fieldMap';
 import {bakeWorld,restoreWorld,rebake} from '../src/world/bake';
+import {band} from '../src/world/classify';
 import {CAVE_AT,CAVE_ID,inTwinHighlands,stampTwinHighlands} from '../src/world/twinHighlands';
 import {planScene} from '../src/game/scenePlan';
 import {twinGroundArt,TWIN_KEYS} from '../src/game/twinArt';
@@ -12,6 +13,7 @@ describe('the northeastern Windward highlands',()=>{
     const built=buildFieldMap(map,{seed}),{world}=built;
     expect(built.placed.find(p=>p.poi.id===CAVE_ID)!.at).toEqual(CAVE_AT);
     expect(world.tiles[CAVE_AT.y]![CAVE_AT.x]!.biome).toBe('plains');
+    expect(band(world.tiles[CAVE_AT.y]![CAVE_AT.x]!.elevation)).toBe(1);
     expect(world.tiles[5]![5]!.biome).not.toBe('plains');
     const highlands=world.tiles.flat().filter(inTwinHighlands);
     for(const biome of ['plains','hills','mountains','snow','river'])expect(highlands.some(t=>t.biome===biome)).toBe(true);
@@ -28,18 +30,20 @@ describe('the northeastern Windward highlands',()=>{
     expect(bakeWorld(rebake(built)!)).toEqual(bakeWorld(built));
   });
 
-  it('migrates existing cave coordinates once without rebuilding cities, transport or other ground',()=>{
+  for(const version of [undefined,1] as const)it(`migrates cave/terrain version ${version} without rebuilding cities or transport`,()=>{
     const built=buildFieldMap(map,{seed:'legacy-highland'}),legacy=structuredClone(built);
     for(const t of legacy.world.tiles.flat().filter(inTwinHighlands)){
       t.biome='desert';t.elevation=.25;t.moisture=.05;t.temperature=.65;
     }
     const saved=bakeWorld(legacy);
-    delete saved.twinRegion!.highlands;
+    if(version===undefined)delete saved.twinRegion!.highlands;else saved.twinRegion!.highlands=version;
     saved.placed.find(p=>p[0]===CAVE_ID)![1]=5;
     saved.placed.find(p=>p[0]===CAVE_ID)![2]=5;
     const original=JSON.stringify(saved),baseline=rebake(built)!;
     const restored=restoreWorld(saved,map)!;
     expect(restored.world.tiles[CAVE_AT.y]![CAVE_AT.x]!.biome).toBe('plains');
+    expect(band(restored.world.tiles[CAVE_AT.y]![CAVE_AT.x]!.elevation)).toBe(1);
+    expect(restored.world.twinRegion!.highlands).toBe(2);
     expect(restored.placed.find(p=>p.poi.id===CAVE_ID)!.at).toEqual(CAVE_AT);
     expect(restored.placed.filter(p=>p.poi.id!==CAVE_ID)).toEqual(built.placed.filter(p=>p.poi.id!==CAVE_ID));
     for(const row of restored.world.tiles)for(const t of row){

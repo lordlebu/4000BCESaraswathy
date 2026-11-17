@@ -7,7 +7,7 @@ import type { FieldMapWorld } from './fieldMap';
 
 export const TWIN_MAP = 'field_map_twins';
 export interface CityDistrict { id: 'harappa' | 'mohenjodaro'; name: string; x: number; y: number; radius: number }
-export interface TwinRegion { districts: CityDistrict[]; rail: Point[]; stations: Point[]; highlands?: 1 }
+export interface TwinRegion { districts: CityDistrict[]; rail: Point[]; stations: Point[]; highlands?: 1 | 2 }
 export const TWIN_ANCHORS: Record<string, Point> = {
   poi_harappa_court: { x: 18, y: 17 }, poi_earthen_workshop: { x: 15, y: 19 },
   poi_nesting_ruins: { x: 20, y: 19 }, poi_harappa_station: { x: 22, y: 25 },

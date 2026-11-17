@@ -341,7 +341,7 @@ export function worldFor(fieldMap: FieldMap, seed: string): FieldMapWorld {
       const baked = JSON.parse(raw) as BakedWorld;
       const restored = restoreWorld(baked, fieldMap);
       if (restored) {
-        if (restored.world.twinRegion && (restored.placed.length !== baked.placed.length || baked.twinRegion?.highlands !== 1)) {
+        if (restored.world.twinRegion && (restored.placed.length !== baked.placed.length || baked.twinRegion?.highlands !== 2)) {
           try {
             localStorage.setItem(key(seed, fieldMap.id), JSON.stringify(bakeWorld(restored)));
           } catch {

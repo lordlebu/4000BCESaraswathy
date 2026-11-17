@@ -736,7 +736,9 @@
         "river",
         "wetland",
         "coast",
-        "sea"
+        "sea",
+        "mountains",
+        "snow"
       ],
       "points_of_interest": [
         "poi_harappa_court",

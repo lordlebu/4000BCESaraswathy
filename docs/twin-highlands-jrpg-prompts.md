@@ -50,3 +50,19 @@ and the settlement ending page. Cave screenshots remain in ignored `test-results
 Lore schema/reference lint, playability, export-boundary and actual sibling-export comparison
 passed. No save or bake version bump; the bounded terrain migration has its own region marker.
 Full exact-head CI remains the merge gate; this is not a final performance review.
+
+## CI correction ? 18 November 2026
+
+The full CI unit job exposed four gaps outside the earlier targeted subset: the authored
+mountain/snow ground was absent from canon's map palette, the green cave meadow used a lowland
+height despite the POI's high-standing requirement, and two older art/snow tests still expected
+the preceding inventory. Canon now declares mountains/snow. The meadow and foothills sit on the
+upland terrace, with bare/snowy peaks higher still. Region migration revision 2 upgrades both
+pre-highland saves and revision-1 previews without rebuilding towns or transport. Tests check
+upland cave placement through reload and constrain twin-valley snow to the northeast border;
+delta/basin maps still forbid snow. The arrival registry test expects the delivered painting.
+
+The full local suite also found the older kulfi test's assumption that Narmada was the sole
+snow-bearing map. It now includes twin-valley border snow while explicitly preserving the
+Narmada-only kulfi crafting rule. No recipe restriction was relaxed. All four browser shards
+of the original CI run passed; the reported failure was confined to the unit job.
