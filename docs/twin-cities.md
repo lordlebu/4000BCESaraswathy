@@ -1,5 +1,14 @@
 # Harappa and Mohenjodaro
 
+## Latest Kang and phase status — 17 November 2026
+
+Kang's NES JRPG sprite now wears **light indigo**. His conversation portrait and the statue
+carving/unveiling cards use the owner's initial **simple cozy watercolor** style. The optional
+five-beat bust quest and three persistent map stages are wired; these are distinct delivered
+paintings, not a generic event fallback. Full-colour resize only. The current required art
+backlog is **36 images**; see [the phased checklist](twin-cities-art-status.md) and
+[original plan checkpoint](twin-cities-art-plan.md#conclusion-checkpoint--17-november-2026).
+
 ## Cave household update — 17 November 2026
 
 Mirlepa and Yamantaka now take turns sitting and walking beside the northwest cave. Each

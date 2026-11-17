@@ -19,6 +19,9 @@ test('Kang offers an optional commission and keeps a declined invitation open', 
   await expect(page.getByRole('dialog', { name: 'A Place for a Likeness' })).not.toBeVisible();
   const ask = async () => {
     await page.locator('button.who').filter({ hasText: 'Priest Kang' }).click();
+    const portrait=page.locator('.conversation img.person-portrait').first();
+    await expect(portrait).toHaveAttribute('src',/priest-kang-painted/);
+    await expect.poll(()=>portrait.evaluate((img:HTMLImageElement)=>img.complete&&img.naturalWidth===256)).toBe(true);
     await page.getByRole('button', { name: 'Ask about making the bust', exact: true }).click();
   };
   await ask();

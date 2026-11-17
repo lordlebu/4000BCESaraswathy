@@ -1,5 +1,14 @@
 # Twin-city portrait prompts
 
+## Latest Kang and phase status — 17 November 2026
+
+Kang's NES JRPG sprite now wears **light indigo**. His conversation portrait and the statue
+carving/unveiling cards use the owner's initial **simple cozy watercolor** style. The optional
+five-beat bust quest and three persistent map stages are wired; these are distinct delivered
+paintings, not a generic event fallback. Full-colour resize only. The current required art
+backlog is **36 images**; see [the phased checklist](twin-cities-art-status.md) and
+[original plan checkpoint](twin-cities-art-plan.md#conclusion-checkpoint--17-november-2026).
+
 > **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
 
 ## Final Kia costume correction — controls earlier prompts

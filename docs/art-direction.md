@@ -11,13 +11,13 @@ a request to repaint them.
 | Overworld people and helpers | **“nes jrpg sprite”** | Cute large round heads, small bodies, short limbs, expressive eyes, warm dark outlines and simple pixel clusters; use the carrier and approved Nemi/Mirlepa/Yamantaka as references |
 | Wandering animals | **“nes jrpg sprite”** | Friendly expressive faces, recognizable ears/muzzle/bill/tail, compact bodies, proper right/left/front/back views |
 | Ostrich/emu tram and new small map vehicles | **“nes jrpg sprite”** | Bird visibly pulls the carriage, clear wheels/harness/stride, genuine front/back views, existing frame sizes |
-| Priest Kang and his map bust statue | **“nes jrpg sprite”** | Matching beard, headband and cloak; three simple sandstone quest stages; [prompt ledger](twin-kang-jrpg-prompts.md). His painted dialogue portrait remains pending |
+| Priest Kang and his map bust statue | **“nes jrpg sprite”** | Matching beard, headband and cloak; three simple sandstone quest stages; [prompt ledger](twin-kang-jrpg-prompts.md). Light-indigo dress; his dialogue portrait and bust event cards use the owner’s cozy watercolor reference |
 | Northwest cave flags, cooker and bonfire | **“nes jrpg sprite”** | Simple 32px props with paired states; six five-day arrangements per journey month; [prompt ledger](twin-cave-jrpg-prompts.md) |
 | Beedu on the map | **Small 16-bit SNES pixel sprite — sole creature exception** | Accepted art stays; curved ray wings, restrained colour ramps and tail, existing small atlas/singleton/shadow/path |
 | Terrain, buildings, props, plants, boundaries | **Simple high-quality 8-bit NES-style map art** | Sparse detail and clear silhouettes/routes; quality comes from composition, layers, elevation/water separation and restrained gradient/contact shadows |
-| NPC portraits and random faces | **Painted watercolor and fine ink on warm paper** | Rich off-map detail; preserve age, culture and face/costume continuity. Kia: airy wraps/flowers. Kang: Priest-King reference with strong jaw |
+| NPC portraits and random faces | **Simple cozy watercolor and fine ink on warm paper** | Rich off-map detail; preserve age, culture and face/costume continuity. Kia: airy wraps/flowers. Kang: Priest-King reference with strong jaw |
 | Mirlepa and Yamantaka portraits only | **JoJo-inspired anime in the existing earth palette** | Fair Tibetan-inspired fictional Denisovan faces and Kalash-inspired dress; Yamantaka has three heads. Their map sprites remain NES JRPG |
-| Events, story/activity scenes, journey banners | **Rich narrative watercolor / fine ink** | Readable moment, correct people/place and depth planes, composed for the card crop; not limited to NES detail |
+| Events, story/activity scenes, journey banners | **Simple cozy narrative watercolor / fine ink** | Readable moment, correct people/place and depth planes, composed for the card crop; not limited to NES detail |
 | Place views | **Painted landscape watercolor** | Recognizable architecture/ecology, broad depth planes and wide-panel composition |
 | Species notebook plates | **Watercolor natural-history field study** | Recognizable anatomy, warm paper and a few habitat strokes; separate from map sprites |
 | UI marks, tools, categories and icons | **Existing SVG/code-native line art** | Established strokes and geometry, legible at UI size |

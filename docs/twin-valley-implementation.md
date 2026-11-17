@@ -1,14 +1,29 @@
 # Twin-valley implementation ledger
 
+## Latest Kang and phase status — 17 November 2026
+
+Phase-end verification: typecheck, 1,239 focused content/art/retention checks, production build
+and bundle budgets pass. The real Kang conversation/optional commission browser case passes,
+including loading the new 256px portrait. Unit integration checks select distinct carving and
+unveiling paintings through the actual event resolver. Initial test-reader RGB/RGBA mismatch was
+corrected; final output is full-colour RGB, without quantization. Latest-head CI remains required.
+
+Kang's NES JRPG sprite now wears **light indigo**. His conversation portrait and the statue
+carving/unveiling cards use the owner's initial **simple cozy watercolor** style. The optional
+five-beat bust quest and three persistent map stages are wired; these are distinct delivered
+paintings, not a generic event fallback. Full-colour resize only. The current required art
+backlog is **36 images**; see [the phased checklist](twin-cities-art-status.md) and
+[original plan checkpoint](twin-cities-art-plan.md#conclusion-checkpoint--17-november-2026).
+
 ## Priest Kang character and bust — 17 November 2026
 
 Kang now also uses a generated **“nes jrpg sprite”** twenty-pose overworld sheet. His three bust
 quest stages share the same face, headband, beard and cloak silhouette, rendered in sandstone.
 Both use compact RGBA sources and resize-only delivery. See [the exact prompt/rebuild ledger](twin-kang-jrpg-prompts.md).
 Four of fifteen named overworld identities now have generated JRPG sheets; the other eleven
-retain their preceding compact NES sheets. The dedicated painted Kang portrait is still pending:
-conversation currently uses the generic SVG fallback. The 39 outstanding illustrations are
-unchanged by this map-art delivery. Beedu remains unchanged.
+retain their preceding compact NES sheets. Kang now wears light indigo and has a delivered
+cozy watercolor conversation portrait plus carving and unveiling event paintings. Required
+remaining illustrations: 36 (19 happenings, 15 place views, 2 journeys). Beedu remains unchanged.
 
 ## Cave household update — 17 November 2026
 
@@ -138,8 +153,9 @@ portraits: JoJo-inspired anime linework, fairer Tibetan-inspired faces, Kalash-i
 dress, the established earth palette, and exactly three heads for Yamantaka. Kia portraits were
 corrected against existing Kia face references to light open wraps and marsh flowers, preserving
 their faces and ages. All were resized only, without colour quantization. Sources stay ignored.
-No paid CLI/API fallback was used. Kang, remaining event/place views and journey paintings are
-still pending; no completed reference-faithful Kang portrait or full art inventory is claimed.
+No paid CLI/API fallback was used. At that earlier checkpoint Kang’s portrait and the remaining
+event/place/journey paintings were pending; the latest Kang delivery and current 36-image list
+are recorded above.
 
 Generated portraits/event paintings use the existing preferred-edition path and art
 manifest. Follow `twin-portrait-prompts.md` and the original

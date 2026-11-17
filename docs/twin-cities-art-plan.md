@@ -6,9 +6,9 @@ Kang now also uses a generated **“nes jrpg sprite”** twenty-pose overworld s
 quest stages share the same face, headband, beard and cloak silhouette, rendered in sandstone.
 Both use compact RGBA sources and resize-only delivery. See [the exact prompt/rebuild ledger](twin-kang-jrpg-prompts.md).
 Four of fifteen named overworld identities now have generated JRPG sheets; the other eleven
-retain their preceding compact NES sheets. The dedicated painted Kang portrait is still pending:
-conversation currently uses the generic SVG fallback. The 39 outstanding illustrations are
-unchanged by this map-art delivery. Beedu remains unchanged.
+retain their preceding compact NES sheets. Kang now wears light indigo and has a delivered
+cozy watercolor conversation portrait plus carving and unveiling event paintings. Required
+remaining illustrations: 36 (19 happenings, 15 place views, 2 journeys). Beedu remains unchanged.
 
 ## Cave household update — 17 November 2026
 
@@ -81,21 +81,22 @@ phase, then final visual/performance review and passing CI; do not start another
 | Accepted city map, bridges, depth and terminal turns | Prior merged map work retained | Final integrated review; no detailed map regeneration |
 | Named map identities | All 15 identities built as simple NES sheets | Runtime/pipeline regression checks |
 | Cave, helpers, beedu, optional Kang bust | Implemented with canon, saved-map addition and conversation wiring | Phase-end checks and review |
-| Main cast portraits | 12 of 13 preferred portraits delivered, including corrected Kia and Denisovan designs | Kang's reference-based portrait |
+| Main cast portraits | All 13 preferred portraits delivered, including Kang in light indigo | Final integrated likeness/crop review |
 | Authored happenings | 1 of 20 has a preferred painted edition; existing pixel editions/fallbacks retained | 19 paintings, including cave welcome and beedu sighting |
 | Individual place views | 1 of 16 has a preferred painted edition | 15 views, including Windward Cave |
 | Journey banners | Existing editions retained | 2 preferred paintings |
-| Bust story illustrations | Existing story fallback is used; no missing art filename is advertised | Required carving and unveiling paintings; optional separate commission/site/preparation takes |
+| Bust story illustrations | Carving and unveiling cozy watercolor paintings delivered and selected per quest beat | Optional commission/site/preparation takes only |
 | Further ambient polish | Existing map presentation accepted | Seasonal variants and bespoke bird/harness motion remain unfinished; decide during final polish review whether to retain that scope |
-| Publication | Fresh review branches prepared in both repos | Commit, push, linked PRs and full exact-head pipeline |
+| Publication | Game PR #262 and lore art-docs PR #169 are open; lore story PR #168 merged | Latest exact-head CI, owner review and merge |
 
-**Remaining required illustration inventory: 39 images** (1 portrait + 19 happenings +
-15 place views + 2 journeys + 2 bust paintings), plus any separately retained optional takes.
-This is an asset count, not 39 coding tasks. Helpers do not require bespoke portraits.
+**Remaining required illustration inventory: 36 images** (19 happenings + 15 place views +
+2 journeys), plus separately optional takes. Kang’s portrait and both bust paintings are complete.
+This is an asset count, not 36 coding tasks. Helpers do not require bespoke portraits.
+See the [audited phased checklist and exact pending filenames](twin-cities-art-status.md).
 The current implementation can be reviewed and played with existing art fallbacks.
 
-For scheduling, reserve roughly **1–3 focused working days for illustration generation,
-inspection, continuity corrections and delivery**, then pipeline/visual review and any fixes.
+For scheduling, reserve roughly **2–4 focused working days for the remaining illustration
+batches and continuity corrections**, then **0.5–1 day for integrated visual/performance review**.
 This is a revised planning estimate, not a measured completion promise; the older 17–32 day
 estimate describes the entire story expansion from its beginning, not work still remaining.
 

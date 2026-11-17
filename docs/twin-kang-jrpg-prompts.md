@@ -4,15 +4,17 @@ Owner update, 17 November 2026. Follow [the element guide](art-direction.md).
 
 Kang's overworld character and all three quest bust stages use the exact **“nes jrpg sprite”**
 direction. Large expressive head, compact body, short dark beard, broad jaw, narrow headband
-with a round ornament, cream single-shoulder wrap and a few broad terracotta cloak marks.
+with a round ornament, light-indigo single-shoulder wrap and a few broad darker-indigo cloak marks.
 The finished bust repeats those features in sandstone tones. It is a head-and-upper-chest bust
 on a modest plinth, not a full-body statue. The first two frames remain the empty plinth and
 partly carved likeness, preserving the existing optional quest and saved flags.
 
-**Portrait status:** no `src/ui/portraits/priest-kang*.png` exists in this revision. Conversation
-uses the language-coloured SVG fallback from `PersonPortrait.tsx`, not a dedicated painted face.
-Kang's reference-checked watercolor portrait remains one of the original plan's 39 outstanding
-illustrations. The new sprite face is a map design, not a completed archaeological portrait study.
+**Current portrait status:** `src/ui/portraits/priest-kang-painted.png` is now delivered and
+selected for conversation. His carving and unveiling cards use distinct cozy watercolor paintings,
+matching the owner-provided `exec-ad76b05a-607c-4b1a-b4b8-d00b7ef007c3.png` style reference.
+The stone bust remains sandstone; light indigo belongs to Kang's living dress. The optional
+five-beat quest already existed and now selects these paintings per beat. Original cream-sprite
+prompts below are production history, superseded by the [indigo/watercolor update](twin-kang-watercolor-prompts.md).
 
 ## Exact generation prompts
 
