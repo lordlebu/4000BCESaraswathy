@@ -1,5 +1,26 @@
 # Harappa and Mohenjo-daro Visual and Story Plan
 
+## Future palette direction — 17 November 2026
+
+Use a **wider variety of colours** in future work: distinct scene palettes, indigo/blue/teal,
+green, plum and earth/cream accents with warm/cool separation. Cozy watercolor should not
+make every surface sepia. Retain character identity, simple NES map pixels and small material
+ramps. This is a prompt/review rule for upcoming batches, not a new repaint phase. See the
+[art guide](art-direction.md#colour-variety--owner-update-17-november-2026). Specifics from the
+linked external chat remain unverified until its text is available. The required illustration
+backlog stays **36 images**.
+
+## Kang statue material correction — 17 November 2026
+
+Both bust event paintings distinguish sculpture from the living sitter: hair, eyebrows, beard,
+moustache, face and cloak read as carved stone, not flesh, hair strands or draped fabric.
+The carving stage remains unpainted pale sandstone; its small study is uniform terracotta clay.
+At the final unveiling only, **lapis lazuli eye inlays** and basic red-ochre/indigo paint accents
+finish the sculpture. Most stone stays bare, especially the carved hair and beard. Living Kang
+keeps his dark hair/beard, brown skin and light-indigo dress. This is a painting correction;
+quest rules, resource requirements and the remaining **36-image** art backlog are unchanged.
+Exact edit prompts and retained raw-history locations are in [the watercolor ledger](twin-kang-watercolor-prompts.md).
+
 ## Priest Kang character and bust — 17 November 2026
 
 Kang now also uses a generated **“nes jrpg sprite”** twenty-pose overworld sheet. His three bust

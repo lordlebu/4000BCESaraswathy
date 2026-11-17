@@ -1,5 +1,16 @@
 # Twin-valley implementation ledger
 
+## Kang statue material correction — 17 November 2026
+
+Both bust event paintings distinguish sculpture from the living sitter: hair, eyebrows, beard,
+moustache, face and cloak read as carved stone, not flesh, hair strands or draped fabric.
+The carving stage remains unpainted pale sandstone; its small study is uniform terracotta clay.
+At the final unveiling only, **lapis lazuli eye inlays** and basic red-ochre/indigo paint accents
+finish the sculpture. Most stone stays bare, especially the carved hair and beard. Living Kang
+keeps his dark hair/beard, brown skin and light-indigo dress. This is a painting correction;
+quest rules, resource requirements and the remaining **36-image** art backlog are unchanged.
+Exact edit prompts and retained raw-history locations are in [the watercolor ledger](twin-kang-watercolor-prompts.md).
+
 ## Latest Kang and phase status — 17 November 2026
 
 Phase-end verification: typecheck, 1,239 focused content/art/retention checks, production build

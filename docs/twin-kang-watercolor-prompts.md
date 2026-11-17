@@ -43,3 +43,30 @@ The map bust remains carved sandstone. The live character always wears light ind
   `beatEvent` now supplies a beat-specific art variant when canon has no explicit artwork.
   EventCard resolves that variant before its shared arc/arrival fallback; canon's explicit art
   stays authoritative. No extra quest is added and no story prose is duplicated or rewritten.
+
+
+## Statue material correction — owner review, 17 November 2026
+
+The earlier paintings made the bust's hair/beard/eyes too lifelike. Owner requested obvious
+coloured stone, then lapis lazuli eyes and basic paintwork for the final unveiling only.
+The carved hair and beard stay unpainted pale stone in both stages. Final mineral eye inlays
+and sparse ochre/indigo accents are decorative presentation, not new quest resources.
+Existing pre-edit runtime and raw versions remain under ignored
+`dump/twin-city-art-review/kang/stone-correction/`; original tool generations remain in their
+existing generated-images location. User explicitly requested correction of the two named
+paintings, which remain registered under the same runtime filenames.
+
+### Carving edit
+
+> undefined
+
+### Unveiling edit
+
+> undefined
+
+
+Corrected generation outputs: carving `exec-33eb0d7b-3587-4ccf-ac6d-b32ad9bd9af8.png`;
+unveiling `exec-7b04819d-35df-43f0-9881-78add1950e02.png`. Rebuilt at the same 512×384,
+full-colour, with unchanged filenames and quest wiring. Future scenes additionally follow
+[broader colour variety](art-direction.md#colour-variety--owner-update-17-november-2026);
+this focused correction preserves the existing scenes' composition and living characters.

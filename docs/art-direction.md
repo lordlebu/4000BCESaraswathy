@@ -48,6 +48,29 @@ are settled, and which are still open.
 Read this before proposing a change of direction. Two have been proposed and one was reverted; the
 reasoning is here so a third does not repeat either.
 
+## Colour variety — owner update, 17 November 2026
+
+Future art should use a wider variety of colours. Cozy watercolor does not mean a uniform
+sepia or yellow wash. Keep the accepted style, but give different scenes distinct palettes,
+with useful warm/cool contrast and clean separation between people, architecture and landscape.
+
+- Use varied clothing and accents: light indigo, cobalt/lapis, teal, leaf green, muted plum,
+  terracotta, ochre and cream as appropriate to the scene and established character identities.
+- Let water, sky, shade, vegetation and cloth retain their own hues. Warm paper and sunlight
+  should not turn every material orange. Cool blue/violet shade may balance warm earth and brick.
+- Select a few dominant hues plus restrained accents for each composition. Vary that choice
+  between images; do not put every colour into every painting or push everything to saturation.
+- Keep Kang's living dress light indigo. His carved hair/beard stay stone; the final bust's
+  lapis eyes and sparse ochre/indigo paint are deliberate mineral/paint accents, not living flesh.
+- Map art remains simple NES JRPG with small ramps and clear pixel masses. Wider hue choices
+  do not add fine texture, extra shading steps or SNES detail. Beedu remains the accepted exception.
+- Continue crop/resize-only delivery without palette reduction; accepted work is not automatically
+  regenerated just to introduce this future-facing palette direction.
+
+The owner also linked a shared ChatGPT discussion for specifics. Its contents could not be
+retrieved here; this records the explicit request from this chat, not inferred quotations
+or unverified rules from that linked discussion. Add any supplied excerpt to future prompts.
+
 ## Historical direction: 9 September 2026, three axes
 
 **Corrected the same day.** The first version of this section said "solarpunk, and brighter" and

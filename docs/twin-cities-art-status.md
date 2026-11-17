@@ -1,5 +1,15 @@
 # Harappan phased plan — completion audit
 
+## Future palette direction — 17 November 2026
+
+Use a **wider variety of colours** in future work: distinct scene palettes, indigo/blue/teal,
+green, plum and earth/cream accents with warm/cool separation. Cozy watercolor should not
+make every surface sepia. Retain character identity, simple NES map pixels and small material
+ramps. This is a prompt/review rule for upcoming batches, not a new repaint phase. See the
+[art guide](art-direction.md#colour-variety--owner-update-17-november-2026). Specifics from the
+linked external chat remain unverified until its text is available. The required illustration
+backlog stays **36 images**.
+
 17 November 2026. Current companion to the [original plan](twin-cities-art-plan.md).
 Counts are checked against the exported valley roster and delivered preferred paintings.
 Existing pixel editions remain playable fallbacks; these are remaining paintings, not missing quests.
