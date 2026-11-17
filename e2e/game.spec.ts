@@ -5,6 +5,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { openRecords } from './records';
+import { openGround } from './walk';
 
 const SEED = 'play-test';
 
@@ -87,24 +88,23 @@ test('boots, draws a map, and reports where the player is standing', async ({ pa
 
 test('walking changes the journal', async ({ page }) => {
   const problems = watchForErrors(page);
-  await page.goto(`?seed=${SEED}`);
+  // Choose one ordinary, walkable eastward step from the actual saved map. The old six-key
+  // loop could drop repeated presses on a slow renderer, then walk back to its starting tile.
+  const at = await openGround(page, SEED);
+  const [x, y] = at.split(',').map(Number) as [number, number];
+  await page.goto(`?seed=${SEED}&map=field_map_lothal&at=${at}&events=off&chatter=off&firsts=off`);
+  await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 30_000 });
   const title = await waitForJourney(page);
-  const before = await title.textContent();
+  const walker = () => page.evaluate(() => (window as any).__walker?.());
+  await expect.poll(walker, { timeout: 30_000 }).toMatchObject({x, y, moving:false, pending:false, queued:0});
+  await expect(title).toContainText(new RegExp(`at ${x}, ${y}$`));
 
-  // Walk a short way. Sea is impassable, so try both axes rather than assuming a free direction.
-  //
-  // `page.mouse` rather than a locator click, for the reason `walk.ts` gives for using
-  // `page.keyboard`: a locator waits for the canvas to hold the same bounding box for two frames,
-  // and a RESIZE-mode canvas beside a reflowing journal panel does not always manage it. This tap
-  // only needs to put focus on the game before the keys below.
-  const box = await page.locator('.map-surface canvas').boundingBox();
-  await page.mouse.click((box?.x ?? 0) + 10, (box?.y ?? 0) + 10);
-  for (const key of ['ArrowRight', 'ArrowRight', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowUp']) {
-    await page.keyboard.press(key);
-    await page.waitForTimeout(520);
-  }
-
-  await expect(title).not.toHaveText(before ?? '', { timeout: 10_000 });
+  // Window-level keyboard input needs no map click, which can itself queue a tap-walk.
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(walker, { timeout: 30_000 })
+    .toMatchObject({x:x+1, y, moving:false, pending:false, queued:0});
+  // Scene motion alone is insufficient: React must receive and describe the new tile too.
+  await expect(title).toContainText(new RegExp(`at ${x+1}, ${y}$`));
   expect(problems, problems.join('\n')).toEqual([]);
 });
 
