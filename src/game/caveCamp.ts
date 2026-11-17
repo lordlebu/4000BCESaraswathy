@@ -76,7 +76,7 @@ export function cavePose(walk:CaveWalk, clockMs:number):{x:number;y:number;frame
   const progress=(clock%CAVE_TURN_MS)/(CAVE_TURN_MS/3);
   const step=(progress%1)*(walk.points.length-1), segment=Math.floor(step), t=step-segment;
   const a=walk.points[segment]!, b=walk.points[segment+1]!;
-  const facing=b.y<a.y?0:b.y>a.y?4:b.x<a.x?8:12;
+  const facing=b.y<a.y?4:b.y>a.y?0:b.x<a.x?12:8;
   return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,
     frame:facing+Math.floor(clock/220)%4,sitting:false};
 }

@@ -11,6 +11,7 @@ a request to repaint them.
 | Overworld people and helpers | **“nes jrpg sprite”** | Cute large round heads, small bodies, short limbs, expressive eyes, warm dark outlines and simple pixel clusters; use the carrier and approved Nemi/Mirlepa/Yamantaka as references |
 | Wandering animals | **“nes jrpg sprite”** | Friendly expressive faces, recognizable ears/muzzle/bill/tail, compact bodies, proper right/left/front/back views |
 | Ostrich/emu tram and new small map vehicles | **“nes jrpg sprite”** | Bird visibly pulls the carriage, clear wheels/harness/stride, genuine front/back views, existing frame sizes |
+| Priest Kang and his map bust statue | **“nes jrpg sprite”** | Matching beard, headband and cloak; three simple sandstone quest stages; [prompt ledger](twin-kang-jrpg-prompts.md). His painted dialogue portrait remains pending |
 | Northwest cave flags, cooker and bonfire | **“nes jrpg sprite”** | Simple 32px props with paired states; six five-day arrangements per journey month; [prompt ledger](twin-cave-jrpg-prompts.md) |
 | Beedu on the map | **Small 16-bit SNES pixel sprite — sole creature exception** | Accepted art stays; curved ray wings, restrained colour ramps and tail, existing small atlas/singleton/shadow/path |
 | Terrain, buildings, props, plants, boundaries | **Simple high-quality 8-bit NES-style map art** | Sparse detail and clear silhouettes/routes; quality comes from composition, layers, elevation/water separation and restrained gradient/contact shadows |

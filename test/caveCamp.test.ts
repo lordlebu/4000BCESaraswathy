@@ -65,4 +65,11 @@ describe('the northwest cave household', () => {
     expect(planCaveProps(built)).toEqual([]);
     expect(planCaveWalks(built,[],[])).toEqual([]);
   });
+
+  it('uses the generated sheet directions when walking each cardinal leg',()=>{
+    for(const [dx,dy,frame] of [[0,1,0],[0,-1,4],[1,0,8],[-1,0,12]]){
+      const walk={npcId:'npc_mirlepa',points:[{x:5,y:5},{x:5+dx!,y:5+dy!},{x:5,y:5}]};
+      expect(cavePose(walk,0).frame).toBe(frame);
+    }
+  });
 });

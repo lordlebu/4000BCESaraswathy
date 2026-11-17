@@ -37,7 +37,9 @@ export function planTwinResidents(built:FieldMapWorld,scenery:readonly Placement
       if(!tile||!isWalkable(tile)||['river','sea','wetland'].includes(tile.biome)
         ||tile.road||tile.track||tile.bridge||occupied.has(key))continue;
       const facing=dy!>0?4:dy!<0?0:dx!>0?12:8;
-      out.push({npcId:person.id,art,x,y,frame:art==='mirlepa'?16+facing/4:art==='yamantaka'?0:facing});
+      // Kang's generated walking rows follow the shared down/up/right/left contract.
+      const kangFacing=dy!>0?0:dy!<0?4:dx!>0?8:12;
+      out.push({npcId:person.id,art,x,y,frame:art==='priest-kang'?kangFacing:art==='mirlepa'?16+facing/4:art==='yamantaka'?0:facing});
       occupied.add(key);
       break;
     }

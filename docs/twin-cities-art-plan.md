@@ -1,5 +1,15 @@
 # Harappa and Mohenjo-daro Visual and Story Plan
 
+## Priest Kang character and bust — 17 November 2026
+
+Kang now also uses a generated **“nes jrpg sprite”** twenty-pose overworld sheet. His three bust
+quest stages share the same face, headband, beard and cloak silhouette, rendered in sandstone.
+Both use compact RGBA sources and resize-only delivery. See [the exact prompt/rebuild ledger](twin-kang-jrpg-prompts.md).
+Four of fifteen named overworld identities now have generated JRPG sheets; the other eleven
+retain their preceding compact NES sheets. The dedicated painted Kang portrait is still pending:
+conversation currently uses the generic SVG fallback. The 39 outstanding illustrations are
+unchanged by this map-art delivery. Beedu remains unchanged.
+
 ## Cave household update — 17 November 2026
 
 Mirlepa and Yamantaka now take turns sitting and walking beside the northwest cave. Each

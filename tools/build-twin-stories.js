@@ -1,19 +1,18 @@
-// Small authored NES silhouettes. No texture noise or generated map-image inputs.
+// Generated NES JRPG bust stages; existing authored cave/sand silhouettes stay unchanged.
 const fs=require('node:fs'),path=require('node:path');
-const {encodePng}=require('./sprite-png');
+const {encodePng,decodePng}=require('./sprite-png');
 const P={ink:[64,53,51,255],rock:[135,112,83,255],light:[201,180,136,255],
  earth:[161,121,79,255],cloth:[178,151,106,255],green:[92,108,69,255]};
 const width=128*7,height=160,data=Buffer.alloc(width*height*4);
 function box(f,x,y,w,h,c){const v=P[c]||c;for(let py=y;py<y+h;py++)for(let px=x;px<x+w;px++)
  for(let a=0;a<4;a++)for(let b=0;b<4;b++)if(py>=0&&py<40&&px>=0&&px<32)data.set(v,((py*4+a)*width+f*128+px*4+b)*4);}
-for(let f=0;f<3;f++){
- box(f,10,33,12,6,'ink');box(f,11,32,10,6,'rock');box(f,10,31,12,2,'light');
- if(f===1){box(f,13,18,7,13,'rock');box(f,13,18,7,2,'light');box(f,11,28,12,3,'cloth');}
- if(f===2){
-  box(f,12,24,8,7,'rock');box(f,13,23,6,5,'light');
-  box(f,14,17,4,6,'light');box(f,14,17,4,1,'cloth');
-  box(f,14,21,4,2,'ink');box(f,15,19,2,1,'rock');
- }
+// Three reviewed 32x40 source cells: plinth, work in progress, finished likeness.
+// Copy full RGBA samples at integer 4x scale; never quantize colour or alpha.
+const bust=decodePng(path.join(__dirname,'../assets/source/twins/kang-bust-nes-jrpg.png'));
+if(bust.width!==96||bust.height!==40)throw new Error('Kang bust source must be 96x40');
+for(let y=0;y<40;y++)for(let x=0;x<96;x++)for(let a=0;a<4;a++)for(let b=0;b<4;b++){
+ const from=(y*96+x)*4,to=((y*4+a)*width+x*4+b)*4;
+ bust.data.copy(data,to,from,from+4);
 }
 // 3: open cave mouth; broad rock faces above a sheltered, dark threshold.
 box(3,4,10,24,29,'rock');box(3,7,6,18,7,'rock');box(3,10,4,12,3,'light');

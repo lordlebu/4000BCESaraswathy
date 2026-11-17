@@ -522,7 +522,8 @@ export class WorldScene extends Phaser.Scene {
     const stage=bustStage(flags),site=bustSite(this.built);
     if(stage!==null&&site){
       const sprite=this.add.image((site.x+.5)*TILE_SIZE,(site.y+1)*TILE_SIZE,'twins-stories',stage)
-        .setOrigin(.5,1).setDepth(depthFor(site.y,ROW_SLOT.undergrowth)).setName('priest-kang-bust');
+        .setOrigin(.5,1).setScale(travellerScale(TILE_SIZE)/4)
+        .setDepth(depthFor(site.y,ROW_SLOT.undergrowth)).setName('priest-kang-bust');
       this.twinEffects.push(sprite);this.tileOwned.push({sprite,...site});this.culled=null;
     }
   };
