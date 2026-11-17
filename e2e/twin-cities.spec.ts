@@ -13,10 +13,12 @@ test('new city art loads and the ostrich tram follows the causeway in both direc
   const wildlife=await page.evaluate(()=>(window as unknown as {__wanderers:()=>{id:string;texture:string;w:number}[]}).__wanderers());
   expect(wildlife).toHaveLength(4);
   for(const animal of wildlife){expect(animal.texture).toMatch(/^wanderer-art:/);expect(animal.w,animal.id).toBeLessThan(90);}
-  const walker=()=>page.evaluate(()=>(window as unknown as {__walker:()=>{riding:boolean;carriage:boolean;carriageTexture:string;carriageFrame:number;at:{x:number;y:number}}}).__walker());
+  const walker=()=>page.evaluate(()=>(window as unknown as {__walker:()=>{riding:boolean;carriage:boolean;carriageTexture:string;carriageFrame:number;rideDurationMs:number;rideLine:{x:number;y:number}[];at:{x:number;y:number}}}).__walker());
   await page.keyboard.press('KeyB');
   await expect.poll(async()=>(await walker()).riding,{timeout:10000}).toBe(true);
-  expect((await walker()).carriage).toBe(true);
+  const aboard=await walker();
+  expect(aboard.carriage).toBe(true);
+  expect(aboard.rideDurationMs).toBe(240*(aboard.rideLine.length-1));
   expect((await walker()).carriageTexture).toBe('twins-tram-walk');
   const firstFrame=(await walker()).carriageFrame;
   await expect.poll(async()=>(await walker()).carriageFrame,{timeout:5000}).not.toBe(firstFrame);

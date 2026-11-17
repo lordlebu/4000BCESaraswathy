@@ -1,4 +1,6 @@
-# Northwest cave — NES JRPG props and household
+# Northeast cave — NES JRPG props and household
+
+> **18 November relocation:** the household now occupies the northeastern green highlands at (51,12), with a stream, foothills, bare mountains and border snowcaps. The historical POI id is preserved. See [terrain ledger](twin-highlands-jrpg-prompts.md).
 
 Owner update, 17 November 2026. Follow [the element guide](art-direction.md).
 Both Mirlepa and Yamantaka use their approved generated walking and seated sprites;

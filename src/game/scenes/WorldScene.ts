@@ -1,4 +1,4 @@
-import { loadTwinArt, TWIN_KEYS, twinGroundFrame } from '../twinArt';
+import { loadTwinArt, TWIN_KEYS, twinGroundArt } from '../twinArt';
 import { TWIN_MAP } from '../../world/twinCities';
 // The map: everything the player sees on the canvas.
 //
@@ -123,6 +123,8 @@ const SHEET_KEY: Record<
   twinHomesPainted: 'twins-homes-painted',
   twinStories:'twins-stories',
   twinCaveProps:'twins-cave-props',
+  twinDryProps:'twins-dry-props',
+  twinHighlandForms:'twins-highland-forms',
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
@@ -863,7 +865,7 @@ export class WorldScene extends Phaser.Scene {
         // Ground the sheet has art for is drawn from the sheet; ground it does not is drawn from
         // the biome's own colour and symbol. Falling back to the plains frame would draw a lie
         // about what the traveller is standing on -- see `placeholderTileKey`.
-        const art = this.world.twinRegion ? {key:TWIN_KEYS.ground,frame:twinGroundFrame(this.world,tile,variant)} : this.groundArt(tile.biome, variant);
+        const art = this.world.twinRegion ? twinGroundArt(this.world,tile,variant) : this.groundArt(tile.biome, variant);
         const tileSprite = this.add
           .image(cx, cy, art.key, art.frame)
           .setDepth(DEPTH_TILE);
@@ -1081,6 +1083,8 @@ export class WorldScene extends Phaser.Scene {
         item.sheet === 'twinHomesPainted' ||
         item.sheet === 'twinStories' ||
         item.sheet === 'twinCaveProps' ||
+        item.sheet === 'twinDryProps' ||
+        item.sheet === 'twinHighlandForms' ||
         item.sheet === 'twinCourtyard' ||
         item.sheet === 'twinHousesDetail' ||
         item.sheet === 'twinDetails' ||
@@ -2020,7 +2024,7 @@ export class WorldScene extends Phaser.Scene {
       to: { x: ride.to.x * TILE_SIZE + TILE_SIZE / 2, y: ride.to.y * TILE_SIZE + TILE_SIZE - 2 },
       at: ride.to,
       start: this.game.loop.now,
-      ms: (this.world.twinRegion ? 100 : RIDE_TILE_MS) * ride.tiles,
+      ms: RIDE_TILE_MS * ride.tiles,
       line: carriagePath(this.world, ride)
     };
     // Anybody walking the line steps off at the pier to let it by -- the owner's ruling. Placed now,
@@ -2297,6 +2301,7 @@ export class WorldScene extends Phaser.Scene {
       residents: this.residentSprites.map(({npcId,sprite}) => ({npcId,sheet:sprite.texture.key,x:sprite.x,y:sprite.y,frame:Number(sprite.frame.name)})),
       // The rail the carriage is crossing on this ride, for the spec that nobody is drawn on it.
       rideLine: this.ride?.line ?? [],
+      rideDurationMs: this.ride?.ms ?? null,
       // The diamond on the nearest seen source of what the pin wants, for \`e2e/finding.spec.ts\`.
       sourceMark: this.sourceMark?.visible ? this.sourceAt : null,
       guidanceId: this.sourceId,

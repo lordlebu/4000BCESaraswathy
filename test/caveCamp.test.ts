@@ -6,7 +6,7 @@ import { planScene } from '../src/game/scenePlan';
 import { planTwinResidents } from '../src/game/twinResidents';
 import { cavePose, cavePropFrames, CAVE_TURN_MS, planCaveProps, planCaveWalks } from '../src/game/caveCamp';
 
-describe('the northwest cave household', () => {
+describe('the northeast cave household', () => {
   for (const seed of ['twin-review','twin-art-review','twin-manual-review']) {
     it(`keeps both walking routes clear and beside the restored cave (${seed})`, () => {
       const built=buildFieldMap(fieldMap('field_map_twins')!,{seed});

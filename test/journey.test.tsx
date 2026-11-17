@@ -11,6 +11,17 @@ import { canHappen, events, type GameEvent } from '../src/content/events';
 afterEach(cleanup);
 const roll = () => 0;
 
+it('illustrates both the road and the actual arrival page for the twin cities',()=>{
+  const from=fieldMap('field_map_aravali')!,to=fieldMap('field_map_twins')!;
+  const road=roadBetween(from.id,to.id)!;
+  render(<Journey from={from} to={to} road={road} first roll={roll} onDone={()=>{}}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Continue',exact:true}));
+  expect(document.querySelector('.journey .opening-plate')?.getAttribute('src')).toContain('journey-aravali-twins-painted');
+  fireEvent.click(screen.getByRole('button',{name:'Continue',exact:true}));
+  expect(screen.getByRole('heading',{name:to.name})).toBeTruthy();
+  expect(document.querySelector('.journey .opening-plate')?.getAttribute('src')).toContain('happening_twin_arrival-painted');
+});
+
 describe('the roads', () => {
   it('reach every neighbour, and each road is one painting from both ends', () => {
     for (const map of fieldMaps) {

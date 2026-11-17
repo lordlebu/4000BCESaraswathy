@@ -306,6 +306,27 @@
     "portraits/yamantaka-painted.png",
     "portraits/priest-kang-painted.png",
     "events/story-storyline_twin_kang_bust-carving-painted.png",
-    "events/story-storyline_twin_kang_bust-unveiling-painted.png"
+    "events/story-storyline_twin_kang_bust-unveiling-painted.png",
+    "events/happening_twin_arrival-painted.png",
+    "events/happening_twin_beedu_flight-painted.png",
+    "events/happening_twin_cave_arrival-painted.png",
+    "events/happening_twin_bank-painted.png",
+    "events/happening_twin_brick-painted.png",
+    "events/happening_twin_camp-painted.png",
+    "events/happening_twin_cove-painted.png",
+    "events/happening_twin_carrier-painted.png",
+    "events/happening_twin_closing-painted.png",
+    "events/happening_twin_drain-painted.png",
+    "events/happening_twin_lane-painted.png",
+    "events/happening_twin_ostrich-painted.png",
+    "events/happening_valley_courtyard_return-painted.png",
+    "events/happening_twin_workshop-painted.png",
+    "events/happening_valley_bird_return-painted.png",
+    "events/happening_valley_reed_return-painted.png",
+    "events/happening_valley_tide_room-painted.png",
+    "events/happening_valley_seam-painted.png",
+    "events/happening_valley_windbreak-painted.png",
+    "events/journey-aravali-twins-painted.png",
+    "events/journey-lothal-twins-painted.png"
   ]
 }

@@ -104,7 +104,9 @@ function StrangerCard({
               role: traveller.role,
               look: traveller.look!,
               culture: traveller.culture,
-              givenName: known ? traveller.givenName : null
+              // Identity does not change when the player learns a name. Only the visible label
+              // above is redacted; the portrait hash must match events and the People diary.
+              givenName: traveller.givenName
             }}
             size={PROFILE_SIZE}
           />

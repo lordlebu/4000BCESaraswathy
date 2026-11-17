@@ -32,7 +32,7 @@ describe('the art registry', () => {
 
   it('keeps specific subjects ahead of broader fallbacks, and preserves missing-edition fallback', () => {
     expect(preferredArt('portraits', ['no-such-person', 'thrali'])).toBe(art('portraits', 'thrali'));
-    expect(preferredArt('events', ['happening_twin_arrival', 'happening_twin_courtyard'])).toBe(art('events', 'happening_twin_arrival'));
+    expect(preferredArt('events', ['happening_twin_arrival', 'happening_twin_courtyard'])).toBe(art('events', 'happening_twin_arrival-painted'));
     expect(preferredArt('places', [undefined, null, 'no-such-place'])).toBeNull();
   });
   it('found the folders that have art in them', () => {

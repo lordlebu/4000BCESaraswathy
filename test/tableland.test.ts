@@ -102,11 +102,15 @@ describe('snow on the tableland', () => {
   });
 
   it('leaves the delta and the basin bare', () => {
-    // Snow is in Narmada's palette and nobody else's, so this also catches the day somebody makes
-    // it a climate the classifier can produce anywhere.
+    // Twin-valley border snow is authored separately; delta and basin maps stay snow-free.
     for (const { id, built } of worlds) {
       if (id === 'field_map_narmada') continue;
       const snow = built.world.tiles.flat().filter((t) => t.biome === 'snow');
+      if(id === 'field_map_twins') {
+        expect(snow.length).toBeGreaterThan(0);
+        for(const t of snow)expect(t.x>=40 && (t.y<=2 || (t.x>=61 && t.y<=17))).toBe(true);
+        continue;
+      }
       expect(snow.map((t) => `${t.x},${t.y}`), `${id} has snow on it`).toEqual([]);
     }
   });

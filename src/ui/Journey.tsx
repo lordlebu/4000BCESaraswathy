@@ -62,6 +62,8 @@ export function Journey({ from, to, road, first, roll, onDone }: JourneyProps) {
   const by = vehicles.find((v) => v.id === road.by)?.name.toLowerCase() ?? 'cart';
   const bySea = road.by.includes('dhow') || road.by.includes('boat');
   const picture = preferredArt('events', [road.art]);
+  const arrivalPicture=to.id==='field_map_twins'
+    ? preferredArt('events',['happening_twin_arrival']) : null;
 
   return (
     <Modal open label="The road" onClose={onDone} initialFocus={next}>
@@ -104,6 +106,7 @@ export function Journey({ from, to, road, first, roll, onDone }: JourneyProps) {
 
         {card === 'arrive' && (
           <>
+            {arrivalPicture && <img className="opening-plate" src={arrivalPicture} alt="" />}
             <h2 className="journey-arrive">{to.name}</h2>
             {to.arrival && <p className="journey-arrival">{to.arrival}</p>}
             <Saying occasion="arrival" map={to.id} roll={roll} />
