@@ -215,7 +215,7 @@ export async function openGround(
 ): Promise<string> {
   const remembered = openGroundFound.get(`${seed}:${map}`);
   if (remembered) return remembered;
-  await page.goto(`/?seed=${seed}&map=${map}`);
+  await page.goto(`?seed=${seed}&map=${map}`);
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
   const baked = await page.evaluate(
     (k) =>

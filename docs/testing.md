@@ -887,3 +887,25 @@ semantics intact and label the presentation accurately. The diary's Road notes a
 one map-coverage formatter; field notes retain local observations and immediate walking conditions.
 The landmark playthrough now opens Records to read its bearings and closes it before walking,
 preserving the full arrival test through the player's navigation controls.
+
+### Main smoke test: a round trip is still a working journal
+
+Main `7cad5e6` (PR #262 merge) failed CI run `44135747112` in only
+`game.spec.ts / walking changes the journal`, on both attempts. Build/unit/data/budget checks
+and the other three browser shards passed; Pages deployment and the lore main checks passed.
+
+The downloaded retry trace proves actual journal changes: `Settlement at 33, 3`, then
+`Coast at 33, 2`, then `Plains at 34, 4`, then back to `Settlement at 33, 3`. The test
+only compared its final heading with the first one after six presses separated by 520ms.
+Under a slow renderer presses can be replaced while movement is in progress; its extra map
+click can also queue a tap-walk. Ending where it started was not evidence of a broken journal.
+The unchanged old test passed twice locally, so a local pass alone did not diagnose this failure.
+
+The smoke case now selects ordinary ground with a walkable eastern neighbour from the saved
+map, awaits scene readiness and the initial journal coordinates, presses east once without a
+map click, and waits for the exact destination with no movement/pending input/queued path.
+It then asserts that the React journal names that destination. Fixed sleeps and a final-only
+round-trip comparison are gone; missing movement or a broken scene-to-journal bridge still fails.
+The shared open-ground lookup uses relative navigation so a Pages-style base path is preserved.
+
+CI artifacts remain under ignored `dump/ci-main-failure/`, never tracked screenshots or traces.
