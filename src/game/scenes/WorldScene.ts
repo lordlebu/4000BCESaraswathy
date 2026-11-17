@@ -78,7 +78,12 @@ import {
   placeholderTileKey,
   traceFrameFor,
 } from '../tileTextures';
-import { SWAY_PERIOD, planScene, type PlacementSheet } from '../scenePlan';
+import { SWAY_PERIOD, planScene, type Placement, type PlacementSheet } from '../scenePlan';
+import { bustSite } from '../twinStoryArt';
+import { cavePose, cavePropFrames, planCaveWalks, type CaveWalk } from '../caveCamp';
+import { bustStage } from '../../content/twinStories';
+import { planTwinResidents } from '../twinResidents';
+import { BeeduView } from '../systems/BeeduView';
 import { DUGOUT_VIEWS, ROW_SLOT, depthFor, dugoutFor, rowAtFoot, type DugoutView, type Edge } from '../frames';
 import { atCamp, encampmentOn, wayIn } from '../../content/encampments';
 import { campVisitors, runnerErrand } from '../../content/campLife';
@@ -116,6 +121,8 @@ const SHEET_KEY: Record<
   twinSurfaces: 'twins-surfaces',
   twinEnvironment: 'twins-environment',
   twinHomesPainted: 'twins-homes-painted',
+  twinStories:'twins-stories',
+  twinCaveProps:'twins-cave-props',
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
@@ -164,6 +171,7 @@ import {
   everySheet,
   frameOf,
   figureScale,
+  travellerScale,
   type CharacterArt,
   facingFromStep,
   loadCharacterSheet,
@@ -435,6 +443,10 @@ export class WorldScene extends Phaser.Scene {
    * the signature of nothing being culled.
    */
   private tileOwned: { sprite: Phaser.GameObjects.GameObject & { visible: boolean }; x: number; y: number }[] = [];
+  private residentSprites: { npcId: string; sprite: Phaser.GameObjects.Image; owned: {sprite:Phaser.GameObjects.Image;x:number;y:number}; walk?:CaveWalk }[] = [];
+  private residentScenery: readonly Placement[] = [];
+  private residentDay = -1;
+  private beedu:BeeduView|null=null;
   /** The tile window last culled to, so the sweep only runs when it actually changes. */
   private culled: { x0: number; y0: number; x1: number; y1: number } | null = null;
   private player!: Phaser.GameObjects.Sprite;
@@ -495,7 +507,7 @@ export class WorldScene extends Phaser.Scene {
   private carriage!: Phaser.GameObjects.Image;
   private terminalTurn: { start: number; heading: number } | null = null;
   private twinEffects: Phaser.GameObjects.Image[] = [];
-  private onTwinKnowledge = ({completed}: UiToGame['twin-knowledge']): void => {
+  private onTwinKnowledge = ({completed,flags=[]}: UiToGame['twin-knowledge']): void => {
     if (!this.world?.twinRegion) return;
     this.tileOwned = this.tileOwned.filter(item => !this.twinEffects.includes(item.sprite as Phaser.GameObjects.Image));
     for (const image of this.twinEffects) image.destroy();
@@ -506,6 +518,13 @@ export class WorldScene extends Phaser.Scene {
       this.twinEffects.push(sprite);
       sprite.setVisible(this.discovered.has(`${x},${y}`));
       this.tileOwned.push({sprite,x,y});
+    }
+    const stage=bustStage(flags),site=bustSite(this.built);
+    if(stage!==null&&site){
+      const sprite=this.add.image((site.x+.5)*TILE_SIZE,(site.y+1)*TILE_SIZE,'twins-stories',stage)
+        .setOrigin(.5,1).setScale(travellerScale(TILE_SIZE)/4)
+        .setDepth(depthFor(site.y,ROW_SLOT.undergrowth)).setName('priest-kang-bust');
+      this.twinEffects.push(sprite);this.tileOwned.push({sprite,...site});this.culled=null;
     }
   };
   /** Whether he is aboard it, which is also why he cannot be seen. */
@@ -593,6 +612,8 @@ export class WorldScene extends Phaser.Scene {
     this.tileSprites = [];
     this.fogSprites = [];
     this.tileOwned = [];
+    this.residentSprites = [];
+    this.residentScenery = [];this.residentDay=-1;
     this.culled = null;
     this.overdraw = [];
     this.spinning = [];
@@ -914,7 +935,8 @@ export class WorldScene extends Phaser.Scene {
    * ever needs a decision, that decision belongs in the plan rather than here.
    */
   private createGround(): void {
-    for (const item of planScene(this.built)) {
+    const scenery = planScene(this.built);
+    for (const item of scenery) {
       // The offset is a fraction of a cell and only decor carries one -- see `Placement.offset`.
       // Converting it here rather than in the plan is the same split as everything else: the plan
       // says "four tenths of a tile to the left", the scene knows what a tile is in pixels.
@@ -1057,6 +1079,8 @@ export class WorldScene extends Phaser.Scene {
       // rise into the one above, rather than filling a cell the way ground cover does.
       const anchored =
         item.sheet === 'twinHomesPainted' ||
+        item.sheet === 'twinStories' ||
+        item.sheet === 'twinCaveProps' ||
         item.sheet === 'twinCourtyard' ||
         item.sheet === 'twinHousesDetail' ||
         item.sheet === 'twinDetails' ||
@@ -1082,6 +1106,54 @@ export class WorldScene extends Phaser.Scene {
       // Markers are found by name for the fog reveal and must stay in the list; everything else
       // that belongs to one tile can be hidden with it.
       if (!item.name) this.tileOwned.push({ sprite, x: item.x, y: item.y });
+    }
+    // Quiet workplace figures use the same loaded character sheets and scale as walkers.
+    // No additional animation loop, hit targets, conversation logic or shadow layers.
+    this.residentScenery=scenery;
+    this.refreshResidents(this.dayOfJourney());
+    if(this.world.twinRegion){
+      const scene=this;
+      this.beedu=new BeeduView(this,{get world(){return scene.world;},get at(){return scene.at;},seen:(x,y)=>scene.discovered.has(`${x},${y}`),busy:()=>scene.moving||scene.riding});
+      this.events.once('shutdown',()=>{this.beedu?.destroy();this.beedu=null;});
+    }
+  }
+
+  private refreshResidents(day:number):void{
+    this.tileOwned=this.tileOwned.filter(item=>!this.residentSprites.some(r=>r.sprite===item.sprite));
+    for(const r of this.residentSprites)r.sprite.destroy();
+    this.residentDay=day;this.culled=null;
+    const residents=planTwinResidents(this.built, this.residentScenery,day);
+    const walks=planCaveWalks(this.built,this.residentScenery,residents);
+    const frames=cavePropFrames(day);
+    for(const item of this.tileOwned){
+      const image=item.sprite as Phaser.GameObjects.Image;
+      if(image.texture?.key==='twins-cave-props')image.setFrame(frames[Number(image.frame.name)%3]!);
+    }
+    this.residentSprites = residents.map(resident => {
+      const frame = frameOf(resident.art), scale = travellerScale(TILE_SIZE);
+      const sprite = this.add.image((resident.x + .5) * TILE_SIZE,
+        (resident.y + 1) * TILE_SIZE - 2, resident.art, resident.frame)
+        .setOrigin(.5, 1).setDisplaySize(frame.width * scale, frame.height * scale)
+        .setDepth(depthFor(resident.y, ROW_SLOT.walker)).setName(`resident:${resident.npcId}`);
+      sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+      const owned={ sprite, x: resident.x, y: resident.y };
+      this.tileOwned.push(owned);
+      return { npcId: resident.npcId, sprite, owned, walk:walks.find(w=>w.npcId===resident.npcId) };
+    });
+  }
+
+  private updateCaveResidents():void{
+    const view=this.cameras.main.worldView, margin=2*TILE_SIZE;
+    for(const resident of this.residentSprites){
+      if(!resident.walk)continue;
+      const pose=cavePose(resident.walk,this.time.now+this.travelled);
+      const {sprite,owned}=resident;
+      sprite.setPosition((pose.x+.5)*TILE_SIZE,(pose.y+1)*TILE_SIZE-2)
+        .setFrame(pose.frame).setDepth(depthFor(pose.y,ROW_SLOT.walker));
+      owned.x=pose.x;owned.y=pose.y;
+      // Moving actors must recull even when the camera's cached tile bounds do not change.
+      sprite.visible=sprite.x>=view.x-margin&&sprite.x<=view.right+margin
+        &&sprite.y>=view.y-margin&&sprite.y<=view.bottom+margin;
     }
   }
 
@@ -2162,6 +2234,7 @@ export class WorldScene extends Phaser.Scene {
     // showed up as slower frames under load rather than as anything visible.
     if (this.time.now - this.momentCheckedAt >= 500) {
       this.momentCheckedAt = this.time.now;
+      if(this.world.twinRegion&&this.residentDay!==this.dayOfJourney())this.refreshResidents(this.dayOfJourney());
       const moment = this.momentNow();
       const key = `${moment.timeOfDay}/${moment.weather}`;
       if (key !== this.lastMoment) {
@@ -2221,6 +2294,7 @@ export class WorldScene extends Phaser.Scene {
       carriage: this.carriage.visible,
       carriageTexture: this.carriage.texture.key,
       carriageFrame: this.carriage.frame.name,
+      residents: this.residentSprites.map(({npcId,sprite}) => ({npcId,sheet:sprite.texture.key,x:sprite.x,y:sprite.y,frame:Number(sprite.frame.name)})),
       // The rail the carriage is crossing on this ride, for the spec that nobody is drawn on it.
       rideLine: this.ride?.line ?? [],
       // The diamond on the nearest seen source of what the pin wants, for \`e2e/finding.spec.ts\`.
@@ -2460,6 +2534,8 @@ export class WorldScene extends Phaser.Scene {
     this.updateSway();
     this.updateRide();
     this.updateTerminalTurn();
+    this.beedu?.update(this.time.now);
+    this.updateCaveResidents();
     this.visitors.update();
     // A painted walk steps every frame; where the wanderers are is still the half-second gate's.
     this.wanderers.animate(this.time.now);

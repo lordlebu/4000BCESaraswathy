@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.7.0",
+  "canon_version": "3.8.0",
   "fauna": [
     {
       "id": "fauna_river_otter",
@@ -1593,9 +1593,12 @@
       "behaviour": [
         "gliding",
         "thermal_currents",
-        "camouflage"
+        "camouflage",
+        "sand_emergence",
+        "coastal_patrol",
+        "sand_burrowing"
       ],
-      "notes": "Desert manta ray with gas-filled bladders for silent gliding over dunes.",
+      "notes": "Desert manta ray with gas-filled bladders for silent gliding over dunes. It can rise from loose Gedrosian sand, follow coastal air and bury itself again; its broad shadow passes below it.",
       "biomes": [
         "desert"
       ],

@@ -1,5 +1,7 @@
 # Buildings on the sky islands
 
+> **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
+
 Opened when the islands started looking like country and stopped looking like anywhere. Grass,
 rock, water, trees and weather are all *ground*; what the reference has and the map does not is
 somebody having **built** there.

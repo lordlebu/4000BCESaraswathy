@@ -199,7 +199,9 @@ for facing in range(4):
             line(d, [(x, bird_y + 12), (x, bird_y + 20 + shift)], 'mud', 2)
         line(d, [(38, bird_y + 8), (59, bird_y + 8)], 'brick', 2)
     poses.append(im)
-atlas(poses, 'tram-walk', 4)
+# The current animal source owns both moving and stationary transport art.
+import runpy
+runpy.run_path(str(Path(__file__).with_name('build-twin-fauna.py')), run_name='__main__')
 print('Built additional art: 8 homes, 12 props, 34 bank/cliff/glint masks, 16 tram poses.')
 
 # Additional notebook art is authored here, rather than changing any accepted plate.

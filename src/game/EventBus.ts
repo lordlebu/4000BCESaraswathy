@@ -16,6 +16,8 @@ import type { TravellerState } from '../content/travellers';
 
 /** Scene → React. */
 export interface GameToUi {
+  'beedu-sighted': {flightId:string};
+  'beedu-nearby': {near:boolean; safe?:boolean};
   /** The scene's actual movement capabilities, for route-aware guidance. */
   'navigation-changed': { boat: boolean; afloat: boolean };
   /** A world was generated and the scene is drawing it. */
@@ -239,7 +241,7 @@ export interface GameToUi {
  * sketch recorded an otter.
  */
 export interface UiToGame {
-  'twin-knowledge': { completed: string[] };
+  'twin-knowledge': { completed: string[]; flags?: string[] };
 
   'new-journey': { seed: string };
   /**

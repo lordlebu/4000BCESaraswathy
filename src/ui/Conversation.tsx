@@ -74,14 +74,16 @@ function Person({
   person,
   progress,
   satchel,
-  onListen
+  onListen,
+  flags = []
 }: {
   person: Npc;
+  flags?: readonly string[];
   progress: Progress;
   satchel: Satchel;
   onListen: (npcId: string, lineIndex: number) => void;
 }) {
-  const available = linesFor(progress, person.id, satchel);
+  const available = linesFor(progress, person.id, satchel, flags);
   const spent = (l: Line) => lineIsSpent(progress, l);
   const first = isFirstMeeting(progress, person.id);
 
@@ -178,6 +180,7 @@ function Person({
 }
 
 export interface ConversationProps {
+  flags?: readonly string[];
   /** Who is talking. */
   npcId: string;
   progress: Progress;
@@ -225,7 +228,8 @@ export function Conversation({
   traits,
   onListen,
   onClose,
-  asks = []
+  asks = [],
+  flags = []
 }: ConversationProps) {
   const person = npc(npcId);
   // What they said to being asked, when it was "not yet". Keyed to the person, so it clears on the
@@ -261,7 +265,7 @@ export function Conversation({
         </ul>
       )}
 
-      <Person person={person} progress={progress} satchel={satchel} onListen={onListen} />
+      <Person person={person} progress={progress} satchel={satchel} onListen={onListen} flags={flags} />
 
       {asks.map((ask) => (
         <div key={ask.label} className="conversation-ask">

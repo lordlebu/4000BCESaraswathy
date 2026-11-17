@@ -79,7 +79,7 @@ import { ActivityModal } from './ActivityModal';
 import { useActivity, type Daybook } from './useActivity';
 import { goalOf, wanting } from '../content/goals';
 import { dayLines, leftOffLines, readingOf, tomorrowLine, type DayReading } from '../content/daybook';
-import { useHappenings } from './useHappenings';
+import { useHappenings, type Latest } from './useHappenings';
 import { useGuidance } from './useGuidance';
 import { useSettling } from './useSettling';
 import { useCrossing } from './useCrossing';
@@ -249,7 +249,7 @@ export function App() {
   const recordsRef = useRef<HTMLButtonElement>(null);
   const [progress, setProgress] = useState(initialJourney.current.progress);
   useEffect(() => {
-    if (world?.twinRegion) EventBus.emitEvent('twin-knowledge', {completed: discoveries.filter(d=>isComplete(progress,d.id)).map(d=>d.id)});
+    if (world?.twinRegion) EventBus.emitEvent('twin-knowledge', {completed: discoveries.filter(d=>isComplete(progress,d.id)).map(d=>d.id),flags:journeyFlags.current});
   }, [world, progress]);
 
   // What the traveller is carrying. Every rule about changing it lives in `content/satchel.ts`
@@ -344,7 +344,7 @@ export function App() {
    * Everything else should read the state directly. This is a workaround for a batching rule, not
    * a second copy of the truth, and it is kept in step immediately below.
    */
-  const latest = useRef({
+  const latest = useRef<Latest>({
     progress: initialJourney.current.progress,
     satchel: initialJourney.current.satchel ?? emptySatchel(),
     /**
@@ -431,8 +431,9 @@ export function App() {
 
   // Things that happen: the card, asking whether anything happens on a night, an arrival, the road
   // or at a camp, story beats first, and what a choice does -- `useHappenings.ts`.
-  const { happening, setHappening, happens, card: eventCard } = useHappenings({
+  const { happening, setHappening, happens, storyRef, card: eventCard } = useHappenings({
     latest,
+    blocked:Boolean(atTheDoor||titleUp||opening||arrivalPage||firstCard||talkingTo||placeOpen||(surface!==null&&surface!=='here')||Object.values(interrupts).some(Boolean)),
     seenEvents,
     eventDays,
     journeyFlags,
@@ -786,7 +787,7 @@ export function App() {
     // refs are what make a run of calls in a single tick each see the one before it: a state
     // setter's argument is not readable until React re-renders, and by then the rest of the
     // exchange has already been reported.
-    const heard = hear(latest.current.progress, npcId, lineIndex, latest.current.satchel);
+    const heard = hear(latest.current.progress, npcId, lineIndex, latest.current.satchel, journeyFlags.current);
     latest.current.progress = heard.progress;
     setProgress(heard.progress);
     if (heard.paid) {
@@ -1325,7 +1326,14 @@ export function App() {
    */
   const roadAnswer = talkingTo ? aboutTheRoad(fieldMapId, talkingTo) : null;
   const askAboutRoad = roadAnswer ? { label: 'Ask about the road', onAsk: () => roadAnswer.line, hint: roadAnswer.hint } : null;
-  const asks = [askForBoat, askAboutRoad].filter((a): a is NonNullable<typeof a> => a !== null);
+  const askForBust = talkingTo === 'npc_priest_kang'
+    && !journeyFlags.current.includes('story:storyline_twin_kang_bust:unveiling')
+    ? {label:'Ask about making the bust', onAsk:()=>{
+      dispatch({type:'stop-talking'});
+      return storyRef.current?.('arriving',standingOn,'storyline_twin_kang_bust')
+        ? null : 'The work continues at the earthen workshop; return to the courtyard when the makers are ready.';
+    }} : null;
+  const asks = [askForBoat, askAboutRoad, askForBust].filter((a): a is NonNullable<typeof a> => a !== null);
 
   // Who is walking: Varuna and Mithra, and whoever has joined since. Read from the flags each render,
   // because a joining is a flag a story card's choice sets. See `walkers` in characters.ts.
@@ -1519,6 +1527,7 @@ export function App() {
 
   const discoveriesFeedback = useDiscoveryNotices(progress, `${seed}:${journeyEpoch}`,
     Boolean(talkingTo || happening || activity || atTheDoor || titleUp || opening || arrivalPage || firstCard || Object.values(interrupts).some(Boolean)) || surface !== 'here');
+  useEffect(()=>{latest.current.activityOpen=Boolean(activity);},[activity]);
   const notice = discoveriesFeedback.notice;
   const readDiscovery = () => {
     if (!notice) return;
@@ -1973,6 +1982,7 @@ export function App() {
           talkingTo
             ? {
                 npcId: talkingTo,
+                flags: journeyFlags.current,
                 progress,
                 satchel,
                 traits: travellerTraits,

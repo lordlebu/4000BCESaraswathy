@@ -24,7 +24,8 @@ async function measure() {
 }
 module.exports = { measure };
 if (require.main === module) measure().then(result => {
-  const out = path.resolve(__dirname, '../docs/images/twins/metrics.json');
+  const out = path.resolve(__dirname, '../dump/twin-city-art-review/metrics.json');
+  fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, JSON.stringify(result, null, 2) + '\n');
   console.log(JSON.stringify(result, null, 2));
 }).catch(e => { console.error(e); process.exitCode = 1; });

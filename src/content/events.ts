@@ -42,6 +42,7 @@ export type Occasion = 'night' | 'arriving' | 'road' | 'working' | 'journey';
 
 /** What an event needs to be true before it can happen. All of them, or it does not fire. */
 export interface Conditions {
+  flags?: string[];
   /** Shelter kinds this can happen in. Empty means any of them. */
   shelter: string[];
   /** Field map ids this can happen on. Empty means all of them. */
@@ -189,6 +190,7 @@ export interface GameEvent {
 
 /** A written happening as canon exports it, in `places.json` beside the people standing there. */
 interface RawHappening {
+  requires_flags?: string[];
   id: string;
   title: string;
   occasion: Occasion;
@@ -197,7 +199,7 @@ interface RawHappening {
   requires?: string[];
   camps?: string[];
   prose: string;
-  choices: { label: string; line: string; needs?: string[]; grants?: string[] }[];
+  choices: { label: string; line: string; needs?: string[]; grants?: string[]; sets?: string[] }[];
 }
 
 /**
@@ -220,7 +222,8 @@ export function fromCanon(h: RawHappening): GameEvent {
       fieldMaps: h.field_maps ?? [],
       pois: h.at ?? [],
       requires: h.requires ?? [],
-      camps: h.camps ?? []
+      camps: h.camps ?? [],
+      ...(h.requires_flags ? {flags:h.requires_flags} : {})
     }),
     prose: h.prose,
     art: h.id,
@@ -229,7 +232,8 @@ export function fromCanon(h: RawHappening): GameEvent {
       label: c.label,
       needs: c.needs ?? [],
       line: c.line,
-      grants: c.grants ?? []
+      grants: c.grants ?? [],
+      ...(c.sets ? {sets:c.sets} : {})
     })),
     once: !['happening_twin_carrier','happening_twin_camp'].includes(h.id)
   };
@@ -289,6 +293,7 @@ export interface Circumstance {
 
 /** Whether this event can happen, given where and when the player is. */
 export function canHappen(event: GameEvent, now: Circumstance): boolean {
+  if (!(event.conditions.flags ?? []).every(f => now.flags?.includes(f))) return false;
   if (event.occasion !== now.occasion) return false;
   if (event.id.startsWith('happening_twin_')) {
     if (!event.once && now.day-(now.last?.[event.id] ?? -100)<3) return false;

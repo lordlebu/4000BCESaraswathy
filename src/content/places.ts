@@ -186,6 +186,8 @@ export interface PointOfInterest {
 
 /** Something an NPC says, and what it takes to hear — or to understand — it. */
 export interface Line {
+  requiresFlags?: string[];
+  excludesFlags?: string[];
   text: string;
   /**
    * Discovery or vocabulary ids needed first.
@@ -209,6 +211,8 @@ export interface Line {
 }
 
 export interface Npc {
+  culture?: string;
+  tradeLanguages?: string[];
   id: string;
   name: string;
   role: string;
@@ -252,9 +256,11 @@ interface RawPoi {
   ruin_of?: string;
 }
 interface RawNpc {
+  culture?: string;
+  trade_languages?: string[];
   id: string; name: string; role?: string; sex?: string; found_at?: string[]; would_settle?: boolean;
   language?: string; knows?: string[]; drives?: string;
-  lines?: { text: string; requires?: string[]; gives?: string[]; costs?: string }[];
+  lines?: { text: string; requires?: string[]; gives?: string[]; costs?: string; requires_flags?: string[]; excludes_flags?: string[] }[];
 }
 
 const raw = placesBundle as {
@@ -335,6 +341,8 @@ export const pointsOfInterest: PointOfInterest[] = raw.points_of_interest.map((p
 }));
 
 export const npcs: Npc[] = raw.npcs.map((n) => ({
+  ...(n.culture ? {culture:n.culture} : {}),
+  ...(n.trade_languages ? {tradeLanguages:n.trade_languages} : {}),
   id: n.id,
   name: n.name,
   role: n.role ?? '',
@@ -347,7 +355,9 @@ export const npcs: Npc[] = raw.npcs.map((n) => ({
     text: l.text,
     requires: l.requires ?? [],
     gives: l.gives ?? [],
-    costs: l.costs ?? null
+    costs: l.costs ?? null,
+    ...(l.requires_flags ? {requiresFlags:l.requires_flags} : {}),
+    ...(l.excludes_flags ? {excludesFlags:l.excludes_flags} : {})
   })),
   drives: n.drives ?? null
 }));

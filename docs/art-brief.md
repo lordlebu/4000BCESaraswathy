@@ -1,5 +1,7 @@
 # Art Brief — South of Tethys
 
+> **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
+
 > **Where to put what comes back:** raw generations go in `assets/source/` if a tool reads them, or
 > the git-ignored `assets/source/dump/` if they were rejected. Anything nobody's code opens — a
 > reference frame, a mood board — goes in the git-ignored `dump/`. See *Where an art file lives* in
@@ -50,11 +52,9 @@ already sitting in `assets/source/dump/` — see the provenance section below. `
 are now the denser ChatGPT versions rather than the sparse Gemini ones. They are still pixel art;
 they are simply much better pixel art, and worth having while the painted set is prompted.
 
-**Updated 2026-09-09 — solarpunk, and brighter. New art only; nothing is being redrawn.** See the
-top of `docs/art-direction.md` for the ruling, including why *16-bit* means the SNES era and why the
-word *NES* must not go in a prompt: that machine is 8-bit, gets three colours per tile, and cannot
-express a wash at all. The sprite pipeline already quantises to a 22-colour shared palette, which is
-16-bit sizing.
+**Historical September update:** The SNES-era/22-colour guidance below describes the earlier
+production pass. For new art, use the current element-by-element guide linked above; in particular,
+people, wandering animals and trams now explicitly request “nes jrpg sprite”.
 
 Think a **watercolour field study in a naturalist's notebook**, on a bright morning:
 

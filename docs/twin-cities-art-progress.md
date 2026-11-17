@@ -1,8 +1,75 @@
 # Twin-city art implementation
 
+> **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
+
 Started 17 November 2026 on `feat/twin-city-art`, based on `c725809`.
 Previous twin-city PR [#260](https://github.com/lordlebu/4000BCESaraswathy/pull/260)
 is merged; its head `57fcfa6` is an ancestor of the base.
+
+## Desktop continuation: review storage and walking identities
+
+### Following batch: complete named map identities
+
+The original plan now has NES sheets for all ten NPCs. Eru, Nemi and Seli retain their circuit
+walking; Tavra, Pavi, Renu, Oru, Denu, Irekha and Ulenna receive quiet stationary workplace
+figures. `src/content/twinPeople.ts` is the shared identity table. The pure `planTwinResidents`
+uses restored POI anchors, excludes the circuit walkers and reserves dry spaces clear of
+scenery, other people, roads and rail. Placement skips a resident if the workplace is crowded
+rather than covering a route or prop. This is visual composition, not a change to conversation,
+movement, collision, canon or saves.
+
+The runtime uses the standard character loader, row depth, traveller scale, fog cover and camera
+culling. Residents are static images with no new per-frame animation or lighting layer.
+All ten twenty-frame sheets total 10,500 bytes, with about 813 KiB of combined base RGBA area
+before renderer overhead. A contact sheet was inspected in the ignored local review folder.
+No local test, typecheck, build, browser walkthrough or performance run was executed for this
+batch. Added guards are intended for the pipeline.
+
+`Journey.tsx` now selects preferred painted banners with the original image as fallback.
+The nine remaining portrait prompts and costume keys are in
+[the portrait brief](twin-portrait-prompts.md). The built-in image generator failed with a
+connection error before producing a portrait; no substitute image or CLI fallback was used.
+The nine portraits, seventeen happening paintings, two journey paintings and fourteen place
+views remain open art work, alongside seasonal variants and bespoke bird/tram animation.
+
+Build all ten code-authored sheets with `node tools/build-twin-people.js`, or pass their IDs to
+the existing `tools/build-characters.js` manifest workflow. The earlier three-walker subsection
+below records the preceding slice and its then-current scope.
+
+PR [#261](https://github.com/lordlebu/4000BCESaraswathy/pull/261) was verified merged:
+head `21edff0`, merge commit `129a78a`. The desktop continuation preserves all 43 existing
+review captures and measurements locally under the already ignored `dump/twin-city-art-review/`
+(about 10.15 MB). Their tracked documentation copies are removed. Paths in this record and
+`twin-cities.md` now describe local files rather than embedding unpublished media. This does
+not remove binaries from past Git history; it prevents these review files entering future trees.
+`review-twins.js`, `measure-twins.js` and `measure-twin-homes.js` now write only to that local
+review directory. Playwright's normal test outputs remain in its existing ignored output folder.
+
+The three current circuit walkers receive unique, simple NES figures: Eru in cream/ochre with
+a plaster float and short beard; Nemi in olive with a seed pouch, sprig and hair bun; Seli in
+blue-green with a vessel and braid. The broad shapes use eight colours each, without added
+map texture, new actors, extra effects or changed routes. Their fixed costumes bypass generic
+traveller dyeing. Existing generic traveller art remains available to everyone else.
+
+The source is `tools/build-twin-people.js`, registered through `tools/characters.json` and the
+existing character loader/animation path. Rebuild this batch with:
+
+```text
+node tools/build-characters.js twin-mason twin-gardener twin-waterkeeper
+```
+
+All three built sheets total 3,252 bytes, each 520×40 (twenty 26×40 frames). Their combined raw
+RGBA texture area is about 244 KiB before renderer overhead. This is an asset-size observation,
+not a new runtime performance result. A local contact sheet was visually inspected and retained
+only in the ignored review folder. Regression cases cover actual runtime texture selection and
+the existing NPC circuits; they have not been run locally, respecting the owner's batch cadence.
+The seven other NPC map identities and remaining off-map paintings are still pending.
+
+Local Git refresh/publication was blocked by repeated automatic permission-review timeouts.
+The GitHub connector fallback also failed with transport errors. Working files and local captures
+are preserved. This section does not claim the continuation has been committed, pushed or
+verified by CI. The local branch remains the previously merged branch until Git access recovers;
+create a fresh feature branch from refreshed main before publishing this pending batch.
 
 ## First review slice
 
@@ -60,10 +127,10 @@ and scale pass pending.
 Captures use the real Phaser scene with normal fog. Knowledge is seeded to unlock the
 courtyard event; they are visual checks, not a claimed progression playthrough.
 
-![Courtyard world](images/twins/art-review/courtyard-world.png)
-![Mobile place panel](images/twins/art-review/courtyard-place-mobile.png)
-![Courtyard event](images/twins/art-review/courtyard-event.png)
-![Eru conversation](images/twins/art-review/eru-conversation.png)
+Courtyard world: `dump/twin-city-art-review/art-review/courtyard-world.png`
+Mobile place panel: `dump/twin-city-art-review/art-review/courtyard-place-mobile.png`
+Courtyard event: `dump/twin-city-art-review/art-review/courtyard-event.png`
+Eru conversation: `dump/twin-city-art-review/art-review/eru-conversation.png`
 
 Local review:
 
@@ -88,8 +155,8 @@ production build and size check. The updated drainage layout was recaptured afte
 the overlapping house stamps. The full unit suite has not been rerun for this second batch.
 These are deterministic procedural material textures; no additional image generation was used.
 
-![Harappa material surfaces](images/twins/art-review/harappa-materials.png)
-![Mohenjo-daro drainage strip](images/twins/art-review/mohenjodaro-materials.png)
+Harappa material surfaces: `dump/twin-city-art-review/art-review/harappa-materials.png`
+Mohenjo-daro drainage strip: `dump/twin-city-art-review/art-review/mohenjodaro-materials.png`
 
 ## Third batch: city-specific house silhouettes
 
@@ -114,8 +181,8 @@ checks, production build and unchanged bundle budget passed. Current root-build 
 variation between old and new homes, repeated adjacent new silhouettes, and compound grouping
 are still part of the next architecture pass; this is not the final city composition.
 
-![Harappa courtyard homes](images/twins/art-review/harappa-homes.png)
-![Mohenjo-daro brick homes](images/twins/art-review/mohenjodaro-homes.png)
+Harappa courtyard homes: `dump/twin-city-art-review/art-review/harappa-homes.png`
+Mohenjo-daro brick homes: `dump/twin-city-art-review/art-review/mohenjodaro-homes.png`
 
 ## Fourth batch: simpler SNES style and measured frame cost
 
@@ -137,7 +204,7 @@ were approximately 6.9 ms for both versions at both places, standing and walking
 around 7.0–7.2 ms and no runtime errors. These are display-paced requestAnimationFrame intervals,
 not uncapped GPU render times: no measurable slowdown was observed, but the samples cannot show
 how much GPU headroom remains. They do not establish performance on lower-end phones.
-[Raw samples](images/twins/art-review/home-performance.json) retain each run and renderer.
+Raw samples: `dump/twin-city-art-review/art-review/home-performance.json` retain each run and renderer.
 
 Detail within an unchanged texture quad does not add draw calls. Both atlases have identical
 256×144 dimensions, approximately 144 KiB of base RGBA pixels before renderer overhead. The
@@ -150,8 +217,8 @@ smaller). It reproduces byte-for-byte. Typecheck, nine city unit checks, four ar
 and production build/bundle checks passed; the final area-sampled revision was also recaptured
 and checked in both cities. The full unit suite was not repeated for this presentation-only pass.
 
-![Simpler Harappa houses](images/twins/art-review/harappa-snes.png)
-![Simpler Mohenjo-daro houses](images/twins/art-review/mohenjodaro-snes.png)
+Simpler Harappa houses: `dump/twin-city-art-review/art-review/harappa-snes.png`
+Simpler Mohenjo-daro houses: `dump/twin-city-art-review/art-review/mohenjodaro-snes.png`
 
 ## Fifth batch: directional bridge reuse and contact depth
 
@@ -172,10 +239,10 @@ The original plan records the bridge correction. Desktop and touch-mobile captur
 actual north–south crossing after walking north along it; both bridge orientations are covered
 by placement checks. The existing tram crossing and nighttime behavior remain covered.
 
-![North–south causeway bridge](images/twins/art-review/north-south-bridge.png)
-![Mobile bridge view](images/twins/art-review/north-south-bridge-mobile.png)
+North–south causeway bridge: `dump/twin-city-art-review/art-review/north-south-bridge.png`
+Mobile bridge view: `dump/twin-city-art-review/art-review/north-south-bridge-mobile.png`
 
-![House contact depth](images/twins/art-review/harappa-contact-shadows.png)
+House contact depth: `dump/twin-city-art-review/art-review/harappa-contact-shadows.png`
 
 Verification for this batch: typecheck, all 3,587 unit tests, nine targeted browser checks
 (two bridge viewport cases, three transport/diary cases and four art cases), production build
@@ -213,10 +280,10 @@ Final production build and bundle check passed at 213.4 KB gzipped for the app a
 unchanged 220 KB budget. The 6,852-byte environment atlas reproduced byte-for-byte. Phase-end
 Intel UHD/Direct3D11 samples remained around 6.9 ms median standing and walking, with no page
 errors; the existing display-paced measurement limitations still apply.
-[Environment frame samples](images/twins/art-review/environment-performance.json).
+Environment frame samples: `dump/twin-city-art-review/art-review/environment-performance.json`.
 
-![Harappa working courts](images/twins/art-review/harappa-environment.png)
-![Mohenjo-daro wells and bank depth](images/twins/art-review/mohenjodaro-environment.png)
+Harappa working courts: `dump/twin-city-art-review/art-review/harappa-environment.png`
+Mohenjo-daro wells and bank depth: `dump/twin-city-art-review/art-review/mohenjodaro-environment.png`
 
 This completes the current city-environment composition phase. Seasonal variants, richer
 tram-terminal motion and further NPC/event paintings remain separate work in the original plan.

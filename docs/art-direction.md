@@ -1,5 +1,41 @@
 # Art direction — the rules, and what they cost
 
+## Current element-by-element direction — 17 November 2026
+
+**This controls new art and overrides older blanket SNES / “never use NES” instructions.**
+Accepted older maps and illustrations stay valid; historical production notes below are not
+a request to repaint them.
+
+| Element | Current art form | Characteristics |
+| --- | --- | --- |
+| Overworld people and helpers | **“nes jrpg sprite”** | Cute large round heads, small bodies, short limbs, expressive eyes, warm dark outlines and simple pixel clusters; use the carrier and approved Nemi/Mirlepa/Yamantaka as references |
+| Wandering animals | **“nes jrpg sprite”** | Friendly expressive faces, recognizable ears/muzzle/bill/tail, compact bodies, proper right/left/front/back views |
+| Ostrich/emu tram and new small map vehicles | **“nes jrpg sprite”** | Bird visibly pulls the carriage, clear wheels/harness/stride, genuine front/back views, existing frame sizes |
+| Priest Kang and his map bust statue | **“nes jrpg sprite”** | Matching beard, headband and cloak; three simple sandstone quest stages; [prompt ledger](twin-kang-jrpg-prompts.md). Light-indigo dress; his dialogue portrait and bust event cards use the owner’s cozy watercolor reference |
+| Northwest cave flags, cooker and bonfire | **“nes jrpg sprite”** | Simple 32px props with paired states; six five-day arrangements per journey month; [prompt ledger](twin-cave-jrpg-prompts.md) |
+| Beedu on the map | **Small 16-bit SNES pixel sprite — sole creature exception** | Accepted art stays; curved ray wings, restrained colour ramps and tail, existing small atlas/singleton/shadow/path |
+| Terrain, buildings, props, plants, boundaries | **Simple high-quality 8-bit NES-style map art** | Sparse detail and clear silhouettes/routes; quality comes from composition, layers, elevation/water separation and restrained gradient/contact shadows |
+| NPC portraits and random faces | **Simple cozy watercolor and fine ink on warm paper** | Rich off-map detail; preserve age, culture and face/costume continuity. Kia: airy wraps/flowers. Kang: Priest-King reference with strong jaw |
+| Mirlepa and Yamantaka portraits only | **JoJo-inspired anime in the existing earth palette** | Fair Tibetan-inspired fictional Denisovan faces and Kalash-inspired dress; Yamantaka has three heads. Their map sprites remain NES JRPG |
+| Events, story/activity scenes, journey banners | **Simple cozy narrative watercolor / fine ink** | Readable moment, correct people/place and depth planes, composed for the card crop; not limited to NES detail |
+| Place views | **Painted landscape watercolor** | Recognizable architecture/ecology, broad depth planes and wide-panel composition |
+| Species notebook plates | **Watercolor natural-history field study** | Recognizable anatomy, warm paper and a few habitat strokes; separate from map sprites |
+| UI marks, tools, categories and icons | **Existing SVG/code-native line art** | Established strokes and geometry, legible at UI size |
+
+Use the exact lowercase phrase **“nes jrpg sprite”** in new people, animal, tram and cave-prop prompts.
+This is an aesthetic, not literal console hardware emulation. Do not add fine texture,
+dithering or detailed SNES shading to those map prompts. Richer portraits/events remain allowed.
+
+Delivery: prefer native low-resolution generation. If output is larger, crop and resize only,
+preserving resulting RGBA samples; **no palette/colour reduction, quantization or dithering**.
+The older quantized builds below describe legacy assets, not the current JRPG delivery path.
+Track compact reproducible sources; keep large originals and review screenshots ignored.
+Do not regenerate accepted Beedu during the animal/tram batch.
+
+References: [original plan](twin-cities-art-plan.md), [people prompts](twin-overworld-jrpg-prompts.md),
+[fauna/tram prompts](twin-fauna-jrpg-prompts.md).
+
+
 > Picking up the art? Read **[Repainting South of Tethys](https://claude.ai/code/artifact/2ee2b8c5-e1e5-429a-ba41-334576ce8ba0)** first — the whole programme in
 > one illustrated page, including what was tried and declined. Then this file for the rules, and
 > `docs/plate-prompts.md` for what to actually generate. (Private artifact; ask the repo owner if
@@ -12,7 +48,30 @@ are settled, and which are still open.
 Read this before proposing a change of direction. Two have been proposed and one was reverted; the
 reasoning is here so a third does not repeat either.
 
-## The direction changed on 2026-09-09, and it has three axes
+## Colour variety — owner update, 17 November 2026
+
+Future art should use a wider variety of colours. Cozy watercolor does not mean a uniform
+sepia or yellow wash. Keep the accepted style, but give different scenes distinct palettes,
+with useful warm/cool contrast and clean separation between people, architecture and landscape.
+
+- Use varied clothing and accents: light indigo, cobalt/lapis, teal, leaf green, muted plum,
+  terracotta, ochre and cream as appropriate to the scene and established character identities.
+- Let water, sky, shade, vegetation and cloth retain their own hues. Warm paper and sunlight
+  should not turn every material orange. Cool blue/violet shade may balance warm earth and brick.
+- Select a few dominant hues plus restrained accents for each composition. Vary that choice
+  between images; do not put every colour into every painting or push everything to saturation.
+- Keep Kang's living dress light indigo. His carved hair/beard stay stone; the final bust's
+  lapis eyes and sparse ochre/indigo paint are deliberate mineral/paint accents, not living flesh.
+- Map art remains simple NES JRPG with small ramps and clear pixel masses. Wider hue choices
+  do not add fine texture, extra shading steps or SNES detail. Beedu remains the accepted exception.
+- Continue crop/resize-only delivery without palette reduction; accepted work is not automatically
+  regenerated just to introduce this future-facing palette direction.
+
+The owner also linked a shared ChatGPT discussion for specifics. Its contents could not be
+retrieved here; this records the explicit request from this chat, not inferred quotations
+or unverified rules from that linked discussion. Add any supplied excerpt to future prompts.
+
+## Historical direction: 9 September 2026, three axes
 
 **Corrected the same day.** The first version of this section said "solarpunk, and brighter" and
 made *colour* carry the change — bright, saturated, living greens. That collapsed three independent
@@ -32,8 +91,8 @@ hardware has nowhere to put them. **16-bit** means the SNES and Mega Drive era: 
 sixteen colours per sprite palette, and that is precisely the era of painterly, softly dithered
 pixel art.
 
-Watercolour and solarpunk both want the second. So the direction is **16-bit, SNES-era**, and the
-word NES should not appear in a prompt — asking for it would fight everything else in the sentence.
+The September production direction was **16-bit, SNES-era**. Its blanket restriction on NES
+wording is superseded for new overworld people, animals and trams by the current guide above.
 
 **The pipeline already agreed with this before anyone said so.** `tools/build-sprite-sheet.js`
 quantises every figure to a shared **22-colour** palette. That is 16-bit sizing. Under a real NES

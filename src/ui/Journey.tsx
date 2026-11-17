@@ -18,7 +18,7 @@ import { useEffect, useRef, useState } from 'react';
 import { type FieldMap, type Road, npc, poi } from '../content/places';
 import { vehicles } from '../content/making';
 import { type Occasion, sayingFor } from '../content/sayings';
-import { art } from './art';
+import { preferredArt } from './art';
 import { Modal } from './Modal';
 
 export interface JourneyProps {
@@ -61,7 +61,7 @@ export function Journey({ from, to, road, first, roll, onDone }: JourneyProps) {
   const yard = from.departsFrom.map((id) => poi(id)?.name).find(Boolean) ?? from.name;
   const by = vehicles.find((v) => v.id === road.by)?.name.toLowerCase() ?? 'cart';
   const bySea = road.by.includes('dhow') || road.by.includes('boat');
-  const picture = art('events', road.art);
+  const picture = preferredArt('events', [road.art]);
 
   return (
     <Modal open label="The road" onClose={onDone} initialFocus={next}>

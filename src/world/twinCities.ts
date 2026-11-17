@@ -16,16 +16,17 @@ export const TWIN_ANCHORS: Record<string, Point> = {
   poi_reed_junction: { x: 32, y: 49 }, poi_twin_cove: { x: 48, y: 50 },
   poi_dune_windbreak: { x: 9, y: 32 }, poi_reedwright_bank: { x: 38, y: 47 },
   poi_nesting_cove: { x: 54, y: 51 }
+  ,poi_northwest_cave_camp: {x:5,y:5}
 };
 
-const EXPANSION_PLACES = ['poi_dune_windbreak', 'poi_reedwright_bank', 'poi_nesting_cove'];
+const EXPANSION_PLACES = ['poi_dune_windbreak', 'poi_reedwright_bank', 'poi_nesting_cove','poi_northwest_cave_camp'];
 
 /** Add only newly authored stops to a saved valley; never regenerate its existing ground. */
 export function addTwinPlaces(world: World, missing: readonly PointOfInterest[]) {
   if (!world.twinRegion) return [];
   return missing.filter(p => EXPANSION_PLACES.includes(p.id)).map(poi => {
     const at = { ...TWIN_ANCHORS[poi.id]! };
-    twinRoad(world, at, { x: at.x < 30 ? 22 : 46, y: at.x < 30 ? 27 : 39 });
+    if(poi.id!=='poi_northwest_cave_camp')twinRoad(world, at, { x: at.x < 30 ? 22 : 46, y: at.x < 30 ? 27 : 39 });
     const tile = world.tiles[at.y]![at.x]!;
     if (!poi.terrain.includes(tile.biome) && tile.biome !== 'river') tile.biome = poi.terrain[0] ?? 'plains';
     return { poi, at };
@@ -122,7 +123,7 @@ export function buildTwinCities(map: FieldMap, seed: string, pois: readonly Poin
   const road = (a:Point,b:Point) => twinRoad(world,a,b);
   // A separate road deck, two rows south of the railway, then two columns east.
   road({x:22,y:27},{x:46,y:27});road({x:46,y:27},{x:46,y:39});
-  for (const p of Object.values(TWIN_ANCHORS)) road(p,{x:p.x<30?22:46,y:p.x<30?27:39});
+  for (const [id,p] of Object.entries(TWIN_ANCHORS)) if(id!=='poi_northwest_cave_camp')road(p,{x:p.x<30?22:46,y:p.x<30?27:39});
   road({x:22,y:25},{x:22,y:27});road({x:44,y:35},{x:46,y:35});
   const placed=pois.map(poi=>({poi,at:{...TWIN_ANCHORS[poi.id]!}}));
   for (const p of placed) {

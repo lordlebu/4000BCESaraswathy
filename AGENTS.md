@@ -63,6 +63,11 @@ merely because work was pushed or checks passed. At the next session, verify the
 
 ## Preserve the game's decisions
 
+- Art forms are element-specific: read [the current guide](docs/art-direction.md#current-element-by-element-direction--17-november-2026).
+  New overworld people, wandering animals and trams explicitly use “nes jrpg sprite”; accepted
+  Beedu alone keeps small SNES art. Portraits/events/place views use their separate painted styles.
+  New delivery preserves colours/alpha through crop/resize only; older quantized briefs are history.
+
 - Keep the peaceful naturalist game: no combat or experience points. The diary is progression;
   observation, understanding, relationships and settling are its core. Read recorded rulings
   before proposing systems or reviving declined ideas.
@@ -86,6 +91,13 @@ merely because work was pushed or checks passed. At the next session, verify the
   requested action; pushing ordinary work is not a release request.
 
 ## Verification and environment translation
+
+When asked to run the game on this Windows desktop, use host network permission and
+`powershell.exe -NoProfile -File tools/start-local-game.ps1 -NoBrowser` for a persistent
+server with ignored logs. Open the page with the available browser tool. A sandboxed Vite
+"ready" banner does not prove the desktop can reach it: loopback can fail with `EACCES`.
+Confirm host HTTP availability before claiming it runs; report permission-review timeouts
+as unverified access, never as successful browser opening. See [desktop launch notes](docs/testing.md#windows-desktop-manual-review).
 
 Read [docs/testing.md](docs/testing.md) before changing tests. Verify real callers and the
 player-visible path: a pure function passing its own tests does not prove gameplay uses it.
@@ -121,3 +133,7 @@ environment before applying its commands:
 Keep durable new owner decisions in the appropriate repository document and link them here
 when needed. Avoid duplicating historical counts, machine paths, tool names or version numbers
 as permanent facts.
+
+Desktop review screenshots and machine-specific performance samples belong in the already ignored
+`dump/twin-city-art-review/`, not tracked docs. See [the twin-city art plan](docs/twin-cities-art-plan.md).
+Preserve runtime assets and required visual-test baselines.

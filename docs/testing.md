@@ -1,5 +1,19 @@
 # How this project tests, and what it cost to learn
 
+## Windows desktop manual review
+
+Run `powershell.exe -NoProfile -File tools/start-local-game.ps1` from the checkout. This
+starts a hidden persistent Vite process if needed, confirms an HTTP response containing the
+game entry, then opens the twin-city map. Logs and the server PID stay in ignored `dump/local-dev/`.
+This readiness check is not a gameplay test suite.
+Pass `-NoBrowser` when a browser tool will open the page separately.
+
+For Codex, launch with host network permission. A sandboxed process can print Vite's ready
+message while loopback requests fail with `EACCES` and the desktop browser cannot connect.
+Do not report the game as available based only on the ready message: verify the response
+from the host environment. An automatic permission-review timeout means the launch has not
+been approved/executed; it is not evidence that the game failed.
+
 Written after a run of failures that were each fixed twice before being fixed once. The
 specific bugs matter less than the shapes, which recur.
 

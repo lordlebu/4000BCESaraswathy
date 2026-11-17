@@ -1,16 +1,47 @@
 # Harappa and Mohenjodaro
 
+## Latest Kang and phase status — 17 November 2026
+
+Kang's NES JRPG sprite now wears **light indigo**. His conversation portrait and the statue
+carving/unveiling cards use the owner's initial **simple cozy watercolor** style. The optional
+five-beat bust quest and three persistent map stages are wired; these are distinct delivered
+paintings, not a generic event fallback. Full-colour resize only. The current required art
+backlog is **36 images**; see [the phased checklist](twin-cities-art-status.md) and
+[original plan checkpoint](twin-cities-art-plan.md#conclusion-checkpoint--17-november-2026).
+
+## Cave household update — 17 November 2026
+
+Mirlepa and Yamantaka now take turns sitting and walking beside the northwest cave. Each
+45-second turn leaves one in a generated seated pose while the other follows a short cardinal
+out-and-back route. Both use the same approved twenty-pose NES JRPG sheet quality. The routes
+stay on opposite sides, avoid other residents, props, water and the entrance, and follow restored
+POI coordinates. This is local presentation; neither joins the three city circuit walkers.
+
+Three **“nes jrpg sprite”** props — prayer flags, a fictional solarpunk Icmic cooker and a bonfire —
+have paired visual states. Six arrangements change every five journey days and repeat after
+thirty days. Returning on the same journey day gives the same arrangement. The cooker is a
+fictional insulated terracotta/basket design with a brass reflector, not a historical technology
+claim. This adds no fuel consumption, quest gate, combat or saved schema. Large generation
+originals remain ignored. See [the prompt and rebuild ledger](twin-cave-jrpg-prompts.md).
+
+> **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
+
 Owner decisions, 14 November 2026. The small-island proposal is replaced by a 64×64
-mainland map. The latest art direction is **SNES 16-bit**, replacing the earlier NES brief.
+mainland map. The controlling art direction is now **simple 8-bit NES map art**, as settled in
+[the current plan](twin-cities-art-plan.md). Existing accepted map work stays; improve composition,
+shadows and depth without adding dense texture. Off-map paintings can remain rich.
+
+Review captures and machine-specific measurements live locally under the already ignored
+`dump/twin-city-art-review/`. Paths below are local references, not tracked or published media.
 
 ## Phases and review
 
 | Phase | Implemented | Actual game captures |
 | --- | --- | --- |
-| Geography | 4,096 tiles, matching Narmada's size; northwest Gedrosian desert margin, dunes and hills; north–south Saraswati; southern delta and coves; southeast Tethys | [Survey](images/twins/survey.png) |
-| Architecture and scale | Two radius-four towns: 41 settlement tiles each, nine across, matching Dwarka's main city footprint. Ochre courtyard houses in Harappa, red fired brick in Mohenjodaro. Native 80×88 house frames match Lothal and Dwarka. | [Harappa](images/twins/harappa.png), [Mohenjodaro](images/twins/mohenjodaro.png) |
-| Boundaries and transport | Low walls meeting Harappa's northwest rocky shoulder and Mohenjodaro's eastern river terrace. Open road/rail gates; separate road and railway decks. Ostrich tram follows the bent track in both directions during daylight. | [Causeway](images/twins/causeway.png), [mobile station](images/twins/mobile-station.png) |
-| Life and diary | Twelve places, eight four-rung discoveries, two questions, knowledge-dependent dialogue and three visible local improvements | [Delta](images/twins/delta.png), [coves](images/twins/coves.png), [desert](images/twins/desert.png) |
+| Geography | 4,096 tiles, matching Narmada's size; northwest Gedrosian desert margin, dunes and hills; north–south Saraswati; southern delta and coves; southeast Tethys | Survey: `dump/twin-city-art-review/survey.png` |
+| Architecture and scale | Two radius-four towns: 41 settlement tiles each, nine across, matching Dwarka's main city footprint. Ochre courtyard houses in Harappa, red fired brick in Mohenjodaro. Native 80×88 house frames match Lothal and Dwarka. | Harappa: `dump/twin-city-art-review/harappa.png`, Mohenjodaro: `dump/twin-city-art-review/mohenjodaro.png` |
+| Boundaries and transport | Low walls meeting Harappa's northwest rocky shoulder and Mohenjodaro's eastern river terrace. Open road/rail gates; separate road and railway decks. Ostrich tram follows the bent track in both directions during daylight. | Causeway: `dump/twin-city-art-review/causeway.png`, mobile station: `dump/twin-city-art-review/mobile-station.png` |
+| Life and diary | Twelve places, eight four-rung discoveries, two questions, knowledge-dependent dialogue and three visible local improvements | Delta: `dump/twin-city-art-review/delta.png`, coves: `dump/twin-city-art-review/coves.png`, desert: `dump/twin-city-art-review/desert.png` |
 | Verification | Seeded geography, connected water network, reachable places, saved ground, boarding, nighttime rest, diary interaction and runtime art loading | `test/twinCities.test.ts`, `e2e/twin-cities.spec.ts` |
 
 Walls are low surviving enclosures, consistent with rooms becoming habitats. Like existing
@@ -58,9 +89,9 @@ between pages so an old baked map cannot replace revised geography. The six loca
 pictures and survey use a **development-only fog reveal**: visual reviews, not a claimed
 playthrough. The scale references use ordinary fog at identical camera zoom:
 
-- [Dwarka](images/twins/dwarka-scale.png)
-- [Harappa](images/twins/harappa-scale.png)
-- [Generator and placement measurements](images/twins/metrics.json)
+- Dwarka: `dump/twin-city-art-review/dwarka-scale.png`
+- Harappa: `dump/twin-city-art-review/harappa-scale.png`
+- Generator and placement measurements: `dump/twin-city-art-review/metrics.json`
 
 Local demo:
 
@@ -104,11 +135,11 @@ Place markers are selected by ID, so adding places cannot shift their artwork.
 
 Run `node tools/review-twins.js --polish` against the dev server for the current captures:
 
-- [Harappa](images/twins/polish/harappa.png), [Mohenjodaro](images/twins/polish/mohenjodaro.png)
-- [Causeway](images/twins/polish/causeway.png), [moving tram](images/twins/polish/tram-moving.png)
-- Identical-scale references: [Dwarka](images/twins/polish/dwarka-scale.png), [Harappa](images/twins/polish/harappa-scale.png)
-- New places: [dune windbreak](images/twins/polish/windbreak.png), [reedwright bank](images/twins/polish/reedwright.png), [nesting cove](images/twins/polish/nesting-cove.png)
-- [Mobile station](images/twins/polish/mobile-station.png), [survey](images/twins/polish/survey.png), [measurements](images/twins/polish/metrics.json)
+- Harappa: `dump/twin-city-art-review/polish/harappa.png`, Mohenjodaro: `dump/twin-city-art-review/polish/mohenjodaro.png`
+- Causeway: `dump/twin-city-art-review/polish/causeway.png`, moving tram: `dump/twin-city-art-review/polish/tram-moving.png`
+- Identical-scale references: Dwarka: `dump/twin-city-art-review/polish/dwarka-scale.png`, Harappa: `dump/twin-city-art-review/polish/harappa-scale.png`
+- New places: dune windbreak: `dump/twin-city-art-review/polish/windbreak.png`, reedwright bank: `dump/twin-city-art-review/polish/reedwright.png`, nesting cove: `dump/twin-city-art-review/polish/nesting-cove.png`
+- Mobile station: `dump/twin-city-art-review/polish/mobile-station.png`, survey: `dump/twin-city-art-review/polish/survey.png`, measurements: `dump/twin-city-art-review/polish/metrics.json`
 
 The original location pictures above the follow-on section remain the earlier visual baseline.
 Survey pictures reveal fog only for development art review. Touch behavior is separately

@@ -1,5 +1,5 @@
 {
-  "canon_version": "3.7.0",
+  "canon_version": "3.8.0",
   "discoveries": [
     {
       "id": "discovery_archive_baseline",
@@ -1365,6 +1365,33 @@
         }
       ],
       "helps": []
+    },
+    {
+      "id": "discovery_twin_cave",
+      "type": "discovery",
+      "name": "Room at the Threshold",
+      "discipline": "geography",
+      "found_at": [
+        "poi_northwest_cave_camp"
+      ],
+      "helps": [
+        "npc_mirlepa",
+        "npc_yamantaka"
+      ],
+      "levels": [
+        {
+          "entry": "The cave has a swept threshold and a small hearth."
+        },
+        {
+          "entry": "The windbreak bends the air without closing the entrance. Dust falls before it reaches the sleeping shelf."
+        },
+        {
+          "entry": "The fold is outside, the hearth draws smoke upward, and the centre stays clear for someone carrying water."
+        },
+        {
+          "entry": "This is a household organised around what passes through it: wind, smoke, animals and visitors. Stillness here is something maintained, like shade in the city."
+        }
+      ]
     },
     {
       "id": "discovery_twin_delta",
