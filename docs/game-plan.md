@@ -1,5 +1,7 @@
 # South of Tethys: Jambhudweepa Adventure Plan
 
+> **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
+
 ## Vision
 Create a gentle 2D indie adventure game for unwinding after a long day. The player travels across Jambhudweepa, a warm, hand-drawn world south of the ancient Tethys Sea, discovering geography, creatures, shrines, forests, rivers, coasts, mountain passes, and small stories rather than chasing combat-heavy goals.
 

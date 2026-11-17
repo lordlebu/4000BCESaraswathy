@@ -63,6 +63,11 @@ merely because work was pushed or checks passed. At the next session, verify the
 
 ## Preserve the game's decisions
 
+- Art forms are element-specific: read [the current guide](docs/art-direction.md#current-element-by-element-direction--17-november-2026).
+  New overworld people, wandering animals and trams explicitly use “nes jrpg sprite”; accepted
+  Beedu alone keeps small SNES art. Portraits/events/place views use their separate painted styles.
+  New delivery preserves colours/alpha through crop/resize only; older quantized briefs are history.
+
 - Keep the peaceful naturalist game: no combat or experience points. The diary is progression;
   observation, understanding, relationships and settling are its core. Read recorded rulings
   before proposing systems or reviving declined ideas.

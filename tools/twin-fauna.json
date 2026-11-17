@@ -1,0 +1,10 @@
+{
+  "directionOrder": ["right", "left", "down", "up"],
+  "animals": [
+    {"id":"desert-fox","source":"assets/source/twins/fauna/desert-fox-nes-jrpg.png"},
+    {"id":"river-otter","source":"assets/source/twins/fauna/river-otter-nes-jrpg.png"},
+    {"id":"monsoon-crane","source":"assets/source/twins/fauna/monsoon-crane-nes-jrpg.png"},
+    {"id":"tethys-pelican","source":"assets/source/twins/fauna/tethys-pelican-nes-jrpg.png"}
+  ],
+  "tram": {"source":"assets/source/twins/fauna/ostrich-tram-nes-jrpg.png","columns":4,"rows":4,"directionOrder":["right","left","up","down"]}
+}

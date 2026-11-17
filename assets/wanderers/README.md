@@ -1,5 +1,7 @@
 # Painted animals for the overworld
 
+> **Current art forms (17 November 2026):** Follow [the element-by-element guide](../../docs/art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
+
 One still picture per species **per facing**, named after the engine id — the id the canon bundle
 uses, with the `fauna_` prefix dropped and underscores turned into hyphens — then the facing.
 

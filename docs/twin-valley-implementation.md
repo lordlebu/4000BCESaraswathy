@@ -1,6 +1,23 @@
 # Twin-valley implementation ledger
 
+> **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
+
 ## Approved generated NES JRPG character batch
+
+### Wildlife, transport and documentation follow-up
+
+Final tram import maps generated right/left/down/up to the engine's right/left/up/down rows;
+the final delivery checks and typecheck pass. The 18 animal/tram runtime PNGs total 82.8 KB.
+The preceding generated character commit's PR CI passed; this new batch requires fresh CI.
+
+The fox, otter, crane and pelican now have generated NES JRPG right/left/front/back sprites;
+the ostrich/emu tram has sixteen generated poses with proper end-on geometry. Compact RGBA
+inputs are tracked under `assets/source/twins/fauna/` and required by `tools/twin-fauna.json`.
+The builder point-enlarges these samples without palette, colour or alpha quantization. Default
+fauna rebuilds never write accepted Beedu; `--beedu` is an explicit separate rebuild option.
+All 147 focused wildlife/frame/map/docs/RGBA tests pass. The new guide in `art-direction.md`
+lists each element's form, and related briefs plus agent entry points link to it. Historical
+SNES/quantized production notes are labelled as superseded for the new JRPG art.
 
 Nemi, Mirlepa and Yamantaka now use the owner-approved generated “nes jrpg sprite” direction,
 with sixteen standing/walking poses and four seated facings each. Back views show backs;

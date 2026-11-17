@@ -1,6 +1,14 @@
 # Harappa and Mohenjo-daro Visual and Story Plan
 
+> **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
+
 ## Approved NES JRPG generation direction
+
+The four valley wandering animals and the ostrich/emu tram now also use generated **“nes jrpg
+sprite”** sheets. Their four facings and sixteen vehicle poses keep the existing runtime frame
+sizes. The current [element guide](art-direction.md) controls every art surface; older blanket
+SNES directions are historical. The accepted Beedu image remains unchanged. Exact fauna/tram
+prompts and sources are in [the production ledger](twin-fauna-jrpg-prompts.md).
 
 The owner approved the generated Nemi, Mirlepa and Yamantaka samples made with the exact phrase
 **“nes jrpg sprite”**. Their complete twenty-pose sheets now replace the interim code-authored

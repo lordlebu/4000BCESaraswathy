@@ -4,6 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
+Current art forms: [element-by-element guide](docs/art-direction.md#current-element-by-element-direction--17-november-2026).
+New people/animal/tram overworld prompts use **“nes jrpg sprite”**. Beedu retains its accepted small
+SNES exception. Off-map portraits, paintings and UI marks follow their own forms in the guide.
+
 **Varuna's Field Diary** — a cozy 2D browser naturalist RPG. Combat is absent by design; creatures
 are observed, not fought.
 

@@ -1,5 +1,7 @@
 # Stranger face prompts — ready to paste
 
+> **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
+
 Twenty-two faces for the road company, by people and gender. **Each block below is the whole
 prompt**: copy one, paste it into an image tool, done. The watercolour style and the head-and-
 shoulders framing are the portraits' own, from `docs/portrait-prompts.md`, so a face sits beside a
