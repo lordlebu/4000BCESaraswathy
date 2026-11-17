@@ -11,6 +11,7 @@ a request to repaint them.
 | Overworld people and helpers | **“nes jrpg sprite”** | Cute large round heads, small bodies, short limbs, expressive eyes, warm dark outlines and simple pixel clusters; use the carrier and approved Nemi/Mirlepa/Yamantaka as references |
 | Wandering animals | **“nes jrpg sprite”** | Friendly expressive faces, recognizable ears/muzzle/bill/tail, compact bodies, proper right/left/front/back views |
 | Ostrich/emu tram and new small map vehicles | **“nes jrpg sprite”** | Bird visibly pulls the carriage, clear wheels/harness/stride, genuine front/back views, existing frame sizes |
+| Northwest cave flags, cooker and bonfire | **“nes jrpg sprite”** | Simple 32px props with paired states; six five-day arrangements per journey month; [prompt ledger](twin-cave-jrpg-prompts.md) |
 | Beedu on the map | **Small 16-bit SNES pixel sprite — sole creature exception** | Accepted art stays; curved ray wings, restrained colour ramps and tail, existing small atlas/singleton/shadow/path |
 | Terrain, buildings, props, plants, boundaries | **Simple high-quality 8-bit NES-style map art** | Sparse detail and clear silhouettes/routes; quality comes from composition, layers, elevation/water separation and restrained gradient/contact shadows |
 | NPC portraits and random faces | **Painted watercolor and fine ink on warm paper** | Rich off-map detail; preserve age, culture and face/costume continuity. Kia: airy wraps/flowers. Kang: Priest-King reference with strong jaw |
@@ -20,7 +21,7 @@ a request to repaint them.
 | Species notebook plates | **Watercolor natural-history field study** | Recognizable anatomy, warm paper and a few habitat strokes; separate from map sprites |
 | UI marks, tools, categories and icons | **Existing SVG/code-native line art** | Established strokes and geometry, legible at UI size |
 
-Use the exact lowercase phrase **“nes jrpg sprite”** in new people, animal and tram prompts.
+Use the exact lowercase phrase **“nes jrpg sprite”** in new people, animal, tram and cave-prop prompts.
 This is an aesthetic, not literal console hardware emulation. Do not add fine texture,
 dithering or detailed SNES shading to those map prompts. Richer portraits/events remain allowed.
 

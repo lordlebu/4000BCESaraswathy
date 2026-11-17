@@ -1,5 +1,20 @@
 # Harappa and Mohenjodaro
 
+## Cave household update — 17 November 2026
+
+Mirlepa and Yamantaka now take turns sitting and walking beside the northwest cave. Each
+45-second turn leaves one in a generated seated pose while the other follows a short cardinal
+out-and-back route. Both use the same approved twenty-pose NES JRPG sheet quality. The routes
+stay on opposite sides, avoid other residents, props, water and the entrance, and follow restored
+POI coordinates. This is local presentation; neither joins the three city circuit walkers.
+
+Three **“nes jrpg sprite”** props — prayer flags, a fictional solarpunk Icmic cooker and a bonfire —
+have paired visual states. Six arrangements change every five journey days and repeat after
+thirty days. Returning on the same journey day gives the same arrangement. The cooker is a
+fictional insulated terracotta/basket design with a brass reflector, not a historical technology
+claim. This adds no fuel consumption, quest gate, combat or saved schema. Large generation
+originals remain ignored. See [the prompt and rebuild ledger](twin-cave-jrpg-prompts.md).
+
 > **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
 
 Owner decisions, 14 November 2026. The small-island proposal is replaced by a 64×64

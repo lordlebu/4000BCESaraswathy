@@ -2,6 +2,27 @@ import { expect, test } from '@playwright/test';
 
 const base = '?map=field_map_twins&seed=twin-art-review&hour=12&door=open&title=skip&chatter=off&firsts=off';
 
+test('the cave household uses generated walking and seated poses beside the cave', async ({page})=>{
+  const errors:string[]=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  page.on('console',m=>{if(/has no frame|Texture.*not found/i.test(m.text()))errors.push(m.text());});
+  const props=page.waitForResponse(r=>/cave-props-nes-jrpg/.test(r.url())&&r.ok());
+  await page.goto(base+'&events=off&at=poi_northwest_cave_camp');
+  await props;
+  const household=()=>page.evaluate(()=>(window as any).__walker?.().residents
+    .filter((r:any)=>['npc_mirlepa','npc_yamantaka'].includes(r.npcId)));
+  await expect.poll(async()=> (await household())?.length,{timeout:45000}).toBe(2);
+  const initial=await household();
+  expect(initial.map((r:any)=>r.sheet).sort()).toEqual(['mirlepa','yamantaka']);
+  expect(initial.filter((r:any)=>r.frame>=16)).toHaveLength(1);
+  const moving=initial.find((r:any)=>r.frame<16);
+  await expect.poll(async()=>{
+    const current=(await household()).find((r:any)=>r.npcId===moving.npcId);
+    return Math.hypot(current.x-moving.x,current.y-moving.y);
+  },{timeout:10000}).toBeGreaterThan(2);
+  expect(errors).toEqual([]);
+});
+
 test('the three circuit walkers load their own undyed NES identities', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', e => errors.push(e.message));

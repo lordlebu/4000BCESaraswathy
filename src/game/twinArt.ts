@@ -14,6 +14,8 @@ import surfaces from '../../assets/twins/surfaces.png?no-inline';
 import homesSnes from '../../assets/twins/homes-snes.png?no-inline';
 import environment from '../../assets/twins/environment-nes.png?no-inline';
 import stories from '../../assets/twins/stories-nes.png?no-inline';
+import caveProps from '../../assets/twins/cave-props-nes-jrpg.png?no-inline';
+import { planCaveProps } from './caveCamp';
 import beedu from '../../assets/twins/beedu-nes.png?no-inline';
 import {bustSite} from './twinStoryArt';
 import {twinFurnishings,twinBankDepth,twinHouseLot} from './twinEnvironment';
@@ -35,7 +37,7 @@ export function loadTwinArt(scene: Phaser.Scene): void {
     [TWIN_KEYS.courtyard,courtyardNeem,192,192],
     ['twins-surfaces',surfaces,128,128],['twins-homes-painted',homesSnes,128,144],
     ['twins-environment',environment,128,128],['twins-stories',stories,128,160],
-    ['twins-beedu',beedu,96,64]] as const) {
+    ['twins-cave-props',caveProps,128,128],['twins-beedu',beedu,96,64]] as const) {
     if (!scene.textures.exists(key)) scene.load.spritesheet(key,url,{frameWidth:w,frameHeight:h});
   }
 }
@@ -50,7 +52,7 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
   const clear=new Set<string>();
   const statue=bustSite(built);if(statue)clear.add(`${statue.x},${statue.y}`);
   const cave=placed.find(p=>p.poi.id==='poi_northwest_cave_camp');
-  if(cave)for(const [dx,dy]of [[0,1],[-1,0],[2,1],[-1,2],[1,2]])clear.add(`${cave.at.x+dx!},${cave.at.y+dy!}`);
+  if(cave)for(let dy=-1;dy<=3;dy++)for(let dx=-3;dx<=3;dx++)clear.add(`${cave.at.x+dx},${cave.at.y+dy}`);
   const furnishings=twinFurnishings(built);
   for(const p of furnishings)clear.add(`${p.x},${p.y}`);
   // A modest doorstep in front of each place, leaving Dwarka-sized towns room for homes.
@@ -130,7 +132,8 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
   placed.forEach(({poi,at})=>{
     if(poi.id==='poi_northwest_cave_camp'){
       out.push({sheet:'twinStories',frame:3,x:at.x,y:at.y,depth:depthFor(at.y,ROW_SLOT.undergrowth),name:`poi:${poi.id}`});
-      for(const [dx,frame]of [[-1,4],[1,5]]as const){
+      out.push(...planCaveProps(built));
+      for(const [dx,frame]of [[1,5]]as const){
         const x=at.x+dx,y=at.y+1,t=world.tiles[y]?.[x];
         if(t&&!t.road&&!t.track)out.push({sheet:'twinStories',frame,x,y,depth:depthFor(y,ROW_SLOT.undergrowth)});
       }

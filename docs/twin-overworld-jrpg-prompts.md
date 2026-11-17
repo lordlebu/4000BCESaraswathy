@@ -1,5 +1,8 @@
 # Approved NES JRPG overworld prompts
 
+The two generated cave residents now alternate short local walks and seated rests; both use
+their existing twenty-pose sheets. See [cave props and schedule](twin-cave-jrpg-prompts.md).
+
 > **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
 
 Built-in imagegen, transparent-background requests. Owner approved the three initial previews.

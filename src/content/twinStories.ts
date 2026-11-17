@@ -8,7 +8,7 @@ export function bustStage(flags:readonly string[]):number|null{
   if(flags.includes(`story:${KANG_ARC}:commission`))return 0;
   return null;
 }
-/** One intermittent helper, with quiet days between visits. The household never moves. */
+/** One intermittent helper, with quiet days between visits. Both named residents stay at this POI. */
 export function caveHelperPresent(npcId:string,day:number):boolean{
   const phase=((Math.floor(day)%6)+6)%6;
   if(npcId==='npc_cave_cook')return phase===0||phase===1;
