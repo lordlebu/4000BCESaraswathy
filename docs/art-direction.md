@@ -383,3 +383,13 @@ Two ways it goes wrong, both observed:
 None of this shrinks an existing clone: `.git` holds every old version of every binary, so ignoring
 a file only stops new weight accruing. A history rewrite is the only thing that reclaims the rest,
 and it breaks every clone and open pull request, so it is not on the table.
+
+
+## Twin-valley terrain softening - 18 November 2026
+
+Owner-requested height/bank gradients use coarse stepped pixel bands baked into the ground,
+with wide irregular desert/grass transition bands. The cave meadow must be muted and lightly
+patterned, not bright flat mint. Three review palettes are sage, lichen and olive; see
+[twin terrain softening](twin-terrain-softening.md). Keep broad NES clusters, no fine texture
+or checkerboard dithering. This code-native terrain treatment does not edit accepted raster
+assets, buildings, characters or painted cards.

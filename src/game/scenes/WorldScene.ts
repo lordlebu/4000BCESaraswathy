@@ -1,4 +1,6 @@
 import { TwinAmbienceView } from '../systems/TwinAmbienceView';
+import {bakeTwinTerrain} from '../twinTerrainTextures';
+import {TWIN_TURF,type TwinTurf} from '../twinTerrain';
 import { loadTwinArt, TWIN_KEYS, twinGroundArt } from '../twinArt';
 import { TWIN_MAP } from '../../world/twinCities';
 // The map: everything the player sees on the canvas.
@@ -384,6 +386,7 @@ export class WorldScene extends Phaser.Scene {
   private fieldMapId = DEFAULT_FIELD_MAP;
   private twinAmbience: TwinAmbienceView | null = null;
   private twinShrubs: Phaser.GameObjects.Image[] = [];
+  private twinTerrainInfo: {palette:string;frames:number;bytes:number}|null=null;
 
   /** People who walk up to the traveller. See `systems/VisitorView.ts`. */
   private visitors!: VisitorView;
@@ -617,7 +620,7 @@ export class WorldScene extends Phaser.Scene {
     this.beaten = new Set();
     this.tileSprites = [];
     this.fogSprites = [];
-    this.twinAmbience?.destroy();this.twinAmbience=null;this.twinShrubs=[];
+    this.twinAmbience?.destroy();this.twinAmbience=null;this.twinShrubs=[];this.twinTerrainInfo=null;
     this.tileOwned = [];
     this.residentSprites = [];
     this.residentScenery = [];this.residentDay=-1;
@@ -857,6 +860,11 @@ export class WorldScene extends Phaser.Scene {
     const pixelWidth = width * TILE_SIZE;
     const pixelHeight = height * TILE_SIZE;
 
+    const requestedTurf=import.meta.env.DEV?new URLSearchParams(window.location.search).get('turf'):null;
+    const turf:TwinTurf=requestedTurf&&Object.hasOwn(TWIN_TURF,requestedTurf)?requestedTurf as TwinTurf:'sage';
+    const twinTerrain=this.world.twinRegion&&requestedTurf!=='legacy'?bakeTwinTerrain(this,this.world,turf):null;
+    this.twinTerrainInfo=twinTerrain?{palette:turf,frames:twinTerrain.count,bytes:twinTerrain.bytes}:null;
+
     for (let y = 0; y < height; y += 1) {
       const tileRow: Phaser.GameObjects.Image[] = [];
       const fogRow: Phaser.GameObjects.Image[] = [];
@@ -872,7 +880,8 @@ export class WorldScene extends Phaser.Scene {
         // about what the traveller is standing on -- see `placeholderTileKey`.
         const art = this.world.twinRegion ? twinGroundArt(this.world,tile,variant) : this.groundArt(tile.biome, variant);
         const tileSprite = this.add
-          .image(cx, cy, art.key, art.frame)
+          .image(cx, cy, twinTerrain?.key??art.key, twinTerrain?.frames[y]![x]??art.frame)
+          .setDisplaySize(TILE_SIZE,TILE_SIZE)
           .setDepth(DEPTH_TILE);
         tileRow.push(tileSprite);
         this.tileOwned.push({ sprite: tileSprite, x, y });
@@ -1060,6 +1069,10 @@ export class WorldScene extends Phaser.Scene {
         this.tileOwned.push({ sprite: blend, x: item.x, y: item.y });
         continue;
       }
+
+      // The new baked bank/slope bands replace these flat outlines; keep the animated water frames.
+      if(this.twinTerrainInfo&&((item.sheet==='twinRims'&&item.frame<32)
+        ||(item.sheet==='twinEnvironment'&&item.frame>=9&&item.frame<=23)))continue;
 
       // The mill's wheel: centred on the boss the builder measured rather than on the tile, and
       // advanced by the clock. It is the one sprite here that is neither anchored to its tile's
@@ -2312,6 +2325,9 @@ export class WorldScene extends Phaser.Scene {
       carriageTexture: this.carriage.texture.key,
       carriageFrame: this.carriage.frame.name,
       twinAmbience: this.twinAmbience?.report()??null,
+      twinTerrain:this.twinTerrainInfo?{...this.twinTerrainInfo,
+        texture:this.tileSprites[this.at.y]?.[this.at.x]?.texture.key,
+        width:this.tileSprites[this.at.y]?.[this.at.x]?.displayWidth}:null,
       twinShrubs: {count:this.twinShrubs.length,scales:[...new Set(this.twinShrubs.map(s=>s.scaleX))],widths:[...new Set(this.twinShrubs.map(s=>s.displayWidth))]},
       residents: this.residentSprites.map(({npcId,sprite}) => ({npcId,sheet:sprite.texture.key,x:sprite.x,y:sprite.y,frame:Number(sprite.frame.name)})),
       // The rail the carriage is crossing on this ride, for the spec that nobody is drawn on it.

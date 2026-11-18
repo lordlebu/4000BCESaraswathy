@@ -1,5 +1,18 @@
 # Harappan phased plan ? completion audit
 
+
+## Terrain height and palette follow-up - 18 November 2026
+
+The new map now bakes stepped height shading, river-bank bands and soft sand/turf/rock/snow
+transitions directly into a shared ground atlas. Ground stays one quad per tile, with no new
+per-frame animation or biome/elevation/save changes. The northeast meadow uses a muted sage
+palette and sparse broad turf/stone clusters instead of the bright flat green. Cool lichen and
+dry olive are available as development review samples; the owner selected sage.
+See [terrain samples and implementation notes](twin-terrain-softening.md). Buildings, sprites,
+portraits, event cards and the accepted Beedu remain unchanged. The owner approved muted sage. Eight combined browser checks pass; final
+integrated review remains pending.
+
+
 ## Landscape and motion follow-up - 18 November 2026
 
 The required illustration backlog remains **zero**. The owner added one focused landscape/

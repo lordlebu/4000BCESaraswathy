@@ -103,7 +103,8 @@ const MAP = flag('map');
 const SEED = flag('seed') ?? 'perf-guard';
 const AT = flag('at');
 const ATMOSPHERE = flag('twin-atmos');
-const URL_PATH = `/?seed=${SEED}&hour=12${MAP ? `&map=${MAP}` : ''}${AT ? `&at=${encodeURIComponent(AT)}` : ''}${ATMOSPHERE ? `&twin-atmos=${ATMOSPHERE}` : ''}&door=open&title=skip&events=off&firsts=off&chatter=off`;
+const TURF = flag('turf');
+const URL_PATH = `/?seed=${SEED}&hour=12${MAP ? `&map=${MAP}` : ''}${AT ? `&at=${encodeURIComponent(AT)}` : ''}${ATMOSPHERE ? `&twin-atmos=${ATMOSPHERE}` : ''}${TURF ? `&turf=${TURF}` : ''}&door=open&title=skip&events=off&firsts=off&chatter=off`;
 
 /** Frames sampled, and how many are thrown away while the scene settles. */
 const FRAMES = 110;
@@ -198,7 +199,7 @@ async function measure() {
     samples.sort((a, b) => a - b);
     return {
       renderer,
-      scene: await page.evaluate(()=>{const w=window.__walker?.();return w?{x:w.x,y:w.y,ambience:w.twinAmbience??null,shrubs:w.twinShrubs??null}:null;}),
+      scene: await page.evaluate(()=>{const w=window.__walker?.();return w?{x:w.x,y:w.y,terrain:w.twinTerrain??null,ambience:w.twinAmbience??null,shrubs:w.twinShrubs??null}:null;}),
       errors,
       median: samples[Math.floor(samples.length / 2)],
       p90: samples[Math.floor(samples.length * 0.9)],

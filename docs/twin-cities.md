@@ -1,5 +1,15 @@
 # Harappa and Mohenjodaro
 
+
+## Muted highland terrain and softer edges - 18 November 2026
+
+The cave meadow now uses muted sage with sparse broad turf/stone patches. Cool lichen and dry
+olive are development review alternatives. A shared baked ground atlas adds stepped gradients
+at hill/mountain/snow boundaries, soft river-bank bands and an earthy, irregular desert/grass
+transition on both sides of the seam. It replaces the old flat bank/hill outlines while keeping
+real cliff faces, buildings and transit unchanged. One ground image per tile remains; no extra
+animated layers, biome/elevation changes or save migration. See [the terrain sample ledger](twin-terrain-softening.md).
+
 ## Landscape and motion follow-up - 18 November 2026
 
 The required illustration backlog remains **zero**. The owner added one focused landscape/
