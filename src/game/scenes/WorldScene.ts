@@ -1,3 +1,4 @@
+import { TwinAmbienceView } from '../systems/TwinAmbienceView';
 import { loadTwinArt, TWIN_KEYS, twinGroundArt } from '../twinArt';
 import { TWIN_MAP } from '../../world/twinCities';
 // The map: everything the player sees on the canvas.
@@ -124,6 +125,7 @@ const SHEET_KEY: Record<
   twinStories:'twins-stories',
   twinCaveProps:'twins-cave-props',
   twinDryProps:'twins-dry-props',
+  twinShrubs:'twins-shrubs',
   twinHighlandForms:'twins-highland-forms',
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
@@ -380,6 +382,8 @@ export class WorldScene extends Phaser.Scene {
   private built!: FieldMapWorld;
   /** Which map this scene was started for. Known from `init`, before `built` exists. */
   private fieldMapId = DEFAULT_FIELD_MAP;
+  private twinAmbience: TwinAmbienceView | null = null;
+  private twinShrubs: Phaser.GameObjects.Image[] = [];
 
   /** People who walk up to the traveller. See `systems/VisitorView.ts`. */
   private visitors!: VisitorView;
@@ -613,6 +617,7 @@ export class WorldScene extends Phaser.Scene {
     this.beaten = new Set();
     this.tileSprites = [];
     this.fogSprites = [];
+    this.twinAmbience?.destroy();this.twinAmbience=null;this.twinShrubs=[];
     this.tileOwned = [];
     this.residentSprites = [];
     this.residentScenery = [];this.residentDay=-1;
@@ -1084,6 +1089,7 @@ export class WorldScene extends Phaser.Scene {
         item.sheet === 'twinStories' ||
         item.sheet === 'twinCaveProps' ||
         item.sheet === 'twinDryProps' ||
+        item.sheet === 'twinShrubs' ||
         item.sheet === 'twinHighlandForms' ||
         item.sheet === 'twinCourtyard' ||
         item.sheet === 'twinHousesDetail' ||
@@ -1101,6 +1107,10 @@ export class WorldScene extends Phaser.Scene {
         .image(cx, anchored ? item.y * TILE_SIZE + TILE_SIZE : cy, SHEET_KEY[item.sheet], item.frame)
         .setDepth(item.depth);
       if (anchored) sprite.setOrigin(0.5, 1);
+      if(item.sheet==='twinShrubs'){
+        sprite.setScale(item.scale??1).setPosition(cx+(item.offset?.x??0)*TILE_SIZE,(item.y+1+(item.offset?.y??0))*TILE_SIZE);
+        this.twinShrubs.push(sprite);
+      }
       if (item.name) sprite.setName(item.name);
       if (item.sway) this.overdraw.push({ sprite, ...item.sway });
       if (item.sheet === 'lamp') {
@@ -1117,6 +1127,9 @@ export class WorldScene extends Phaser.Scene {
     this.refreshResidents(this.dayOfJourney());
     if(this.world.twinRegion){
       const scene=this;
+      const motion=!(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false);
+      const enabled=motion&&!(import.meta.env.DEV&&new URLSearchParams(window.location.search).get('twin-atmos')==='off');
+      this.twinAmbience=new TwinAmbienceView(this,this.built,p=>this.discovered.has(`${p.x},${p.y}`),enabled);
       this.beedu=new BeeduView(this,{get world(){return scene.world;},get at(){return scene.at;},seen:(x,y)=>scene.discovered.has(`${x},${y}`),busy:()=>scene.moving||scene.riding});
       this.events.once('shutdown',()=>{this.beedu?.destroy();this.beedu=null;});
     }
@@ -1150,7 +1163,7 @@ export class WorldScene extends Phaser.Scene {
     const view=this.cameras.main.worldView, margin=2*TILE_SIZE;
     for(const resident of this.residentSprites){
       if(!resident.walk)continue;
-      const pose=cavePose(resident.walk,this.time.now+this.travelled);
+      const pose=cavePose(resident.walk,this.time.now);
       const {sprite,owned}=resident;
       sprite.setPosition((pose.x+.5)*TILE_SIZE,(pose.y+1)*TILE_SIZE-2)
         .setFrame(pose.frame).setDepth(depthFor(pose.y,ROW_SLOT.walker));
@@ -2298,6 +2311,8 @@ export class WorldScene extends Phaser.Scene {
       carriage: this.carriage.visible,
       carriageTexture: this.carriage.texture.key,
       carriageFrame: this.carriage.frame.name,
+      twinAmbience: this.twinAmbience?.report()??null,
+      twinShrubs: {count:this.twinShrubs.length,scales:[...new Set(this.twinShrubs.map(s=>s.scaleX))],widths:[...new Set(this.twinShrubs.map(s=>s.displayWidth))]},
       residents: this.residentSprites.map(({npcId,sprite}) => ({npcId,sheet:sprite.texture.key,x:sprite.x,y:sprite.y,frame:Number(sprite.frame.name)})),
       // The rail the carriage is crossing on this ride, for the spec that nobody is drawn on it.
       rideLine: this.ride?.line ?? [],
@@ -2541,6 +2556,7 @@ export class WorldScene extends Phaser.Scene {
     this.updateTerminalTurn();
     this.beedu?.update(this.time.now);
     this.updateCaveResidents();
+    this.twinAmbience?.update(this.time.now);
     this.visitors.update();
     // A painted walk steps every frame; where the wanderers are is still the half-second gate's.
     this.wanderers.animate(this.time.now);

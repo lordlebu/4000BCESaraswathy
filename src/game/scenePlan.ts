@@ -88,6 +88,7 @@ export type PlacementSheet =
   | 'twinStories'
   | 'twinCaveProps'
   | 'twinDryProps'
+  | 'twinShrubs'
   | 'twinHighlandForms'
   | 'overdraw'
   | 'features'
@@ -157,6 +158,8 @@ export interface Placement {
    * the cell it belongs to and a tile's props do not drift onto a neighbour that may be water.
    */
   offset?: { x: number; y: number };
+  /** Whole/half-size landscape props; omitted on all accepted baseline placements. */
+  scale?: number;
   /**
    * Which side of its own cell a band is pinned to. Present only on the shore band, which is the
    * one placement that is not a whole cell -- everything else is centred in one and needs no

@@ -1,5 +1,20 @@
 # Twin-valley implementation ledger
 
+## Landscape and motion follow-up - 18 November 2026
+
+The required illustration backlog remains **zero**. The owner added one focused landscape/
+motion pass: simple NES JRPG cliff shrubs and half-size grass/desert border bushes, richer
+older-map ground decor, very slow cave residents, cave smoke, subtle river ripples and localized
+desert haze. These are implemented with capped static placements and small cached pixel effects;
+phase-end browser, build and size checks pass. Desert haze remains after its measured on/off
+comparison; the cave software-renderer samples are noisy, as recorded in the phase ledger.
+The cave turn is now 120 seconds with a single slow out-and-back, independent of journey-time
+jumps. Existing buildings, Beedu and saved geography remain accepted. See the
+[landscape/motion ledger](twin-landscape-motion-phase.md) for scope, exact prompt and budgets.
+
+After this pass, the required work is still the final integrated visual/gameplay/save/performance
+review, resolving findings, and owner review/merge. Further character and seasonal art is optional.
+
 ## Place-view phase delivered — 18 November 2026
 
 All fifteen remaining place panoramas are delivered. Together with the accepted Harappa court,
@@ -99,7 +114,7 @@ remaining illustrations are now **15 place views**, after the later event/travel
 ## Cave household update — 17 November 2026
 
 Mirlepa and Yamantaka now take turns sitting and walking beside the northwest cave. Each
-45-second turn leaves one in a generated seated pose while the other follows a short cardinal
+120-second turn leaves one in a generated seated pose while the other follows a short cardinal
 out-and-back route. Both use the same approved twenty-pose NES JRPG sheet quality. The routes
 stay on opposite sides, avoid other residents, props, water and the entrance, and follow restored
 POI coordinates. This is local presentation; neither joins the three city circuit walkers.

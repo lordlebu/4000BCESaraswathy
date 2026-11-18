@@ -4,8 +4,9 @@
 
 Owner update, 17 November 2026. Follow [the element guide](art-direction.md).
 Both Mirlepa and Yamantaka use their approved generated walking and seated sprites;
-no smaller substitute or procedural sitting figure is introduced. Every 45 seconds they exchange
-roles, with three gentle out-and-back loops during the walking turn. Routes are cached on map
+no smaller substitute or procedural sitting figure is introduced. Every 120 seconds they exchange
+roles, with one very slow out-and-back walk during the turn. The stride is at least 12 seconds
+per tile (20 seconds on the usual six-leg route); the clock excludes journey-time jumps. Routes are cached on map
 entry/day refresh, confined within four tiles of the restored cave, and separated west/east.
 The entrance, props and other residents remain clear. This adds two pose updates per frame,
 no route search per frame, no new actor sprites, particle effects or pathfinding timers.

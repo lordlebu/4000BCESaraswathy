@@ -1,5 +1,7 @@
 # Art direction — the rules, and what they cost
 
+> **18 November landscape follow-up:** new shrubs explicitly use **nes jrpg sprite**, with half-size pairs at grass/desert seams and simple regular silhouettes at cliff lips. Reuse the old habitat decor. Smoke/haze/ripples are small cached voxel/pixel effects, capped and performance-checked; preserve the accepted building mix and Beedu. [Production ledger](twin-landscape-motion-phase.md).
+
 > **18 November place-art delivery:** all 16 twin-valley stops now have individual preferred watercolor views. The 15 new panels are full-colour 512?224 PNGs, crop/resize only; the accepted courtyard stays unchanged. [Prompts, sources and delivery ledger](twin-place-views-phase.md).
 
 > **18 November relocation:** the household now occupies the northeastern green highlands at (51,12), with a stream, foothills, bare mountains and border snowcaps. The historical POI id is preserved. See [terrain ledger](twin-highlands-jrpg-prompts.md).

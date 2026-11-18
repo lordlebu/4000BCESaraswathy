@@ -1,5 +1,20 @@
 # Harappan phased plan ? completion audit
 
+## Landscape and motion follow-up - 18 November 2026
+
+The required illustration backlog remains **zero**. The owner added one focused landscape/
+motion pass: simple NES JRPG cliff shrubs and half-size grass/desert border bushes, richer
+older-map ground decor, very slow cave residents, cave smoke, subtle river ripples and localized
+desert haze. These are implemented with capped static placements and small cached pixel effects;
+phase-end browser, build and size checks pass. Desert haze remains after its measured on/off
+comparison; the cave software-renderer samples are noisy, as recorded in the phase ledger.
+The cave turn is now 120 seconds with a single slow out-and-back, independent of journey-time
+jumps. Existing buildings, Beedu and saved geography remain accepted. See the
+[landscape/motion ledger](twin-landscape-motion-phase.md) for scope, exact prompt and budgets.
+
+After this pass, the required work is still the final integrated visual/gameplay/save/performance
+review, resolving findings, and owner review/merge. Further character and seasonal art is optional.
+
 Updated 18 November 2026. Companion to the [original plan](twin-cities-art-plan.md).
 
 ## Illustration production complete

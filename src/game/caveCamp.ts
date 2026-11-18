@@ -5,10 +5,11 @@ import type { Placement } from './scenePlan';
 import type { TwinResident } from './twinResidents';
 import { depthFor, ROW_SLOT } from './frames';
 
-export const CAVE_TURN_MS = 45_000;
+export const CAVE_TURN_MS = 120_000;
+export const CAVE_TILE_MS = 12_000;
 export const CAVE_PEOPLE = ['npc_mirlepa', 'npc_yamantaka'] as const;
 const SOLID = new Set(['twinHouses', 'twinHousesDetail', 'twinHomesPainted', 'twinObjects',
-  'twinDetails', 'twinCourtyard', 'twinEnvironment', 'twinStories', 'twinCaveProps','twinHighlandForms']);
+  'twinDetails', 'twinCourtyard', 'twinEnvironment', 'twinStories', 'twinCaveProps','twinHighlandForms','twinShrubs']);
 const key = (p: {x:number;y:number}) => `${p.x},${p.y}`;
 
 /** Six five-day arrangements repeat over a thirty-day journey month. No OS calendar. */
@@ -66,17 +67,19 @@ export function planCaveWalks(built:FieldMapWorld, scenery:readonly Placement[],
   });
 }
 
-/** One walks three gentle out-and-back loops while the other sits, then they exchange roles. */
+/** One very slow out-and-back over a two-minute turn; the other resident sits until the handoff. */
 export function cavePose(walk:CaveWalk, clockMs:number):{x:number;y:number;frame:number;sitting:boolean} {
   const index=CAVE_PEOPLE.indexOf(walk.npcId as typeof CAVE_PEOPLE[number]);
   const clock=Math.max(0,clockMs), turn=Math.floor(clock/CAVE_TURN_MS);
   const sitting=turn%2!==index || walk.points.length<2;
   const home=walk.points[0]!;
   if(sitting) return {...home,frame:17,sitting:true}; // Both use generated south-facing seated poses.
-  const progress=(clock%CAVE_TURN_MS)/(CAVE_TURN_MS/3);
-  const step=(progress%1)*(walk.points.length-1), segment=Math.floor(step), t=step-segment;
+  const strideMs=Math.max(CAVE_TILE_MS,CAVE_TURN_MS/(walk.points.length-1));
+  const step=(clock%CAVE_TURN_MS)/strideMs;
+  if(step>=walk.points.length-1)return {...home,frame:0,sitting:false};
+  const segment=Math.floor(step), t=step-segment;
   const a=walk.points[segment]!, b=walk.points[segment+1]!;
   const facing=b.y<a.y?4:b.y>a.y?0:b.x<a.x?12:8;
   return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,
-    frame:facing+Math.floor(clock/220)%4,sitting:false};
+    frame:facing+Math.floor(clock/900)%4,sitting:false};
 }

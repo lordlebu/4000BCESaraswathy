@@ -18,6 +18,7 @@ import homesSnes from '../../assets/twins/homes-snes.png?no-inline';
 import environment from '../../assets/twins/environment-nes.png?no-inline';
 import stories from '../../assets/twins/stories-nes.png?no-inline';
 import caveProps from '../../assets/twins/cave-props-nes-jrpg.png?no-inline';
+import shrubs from '../../assets/twins/shrubs-nes-jrpg.png?no-inline';
 import dryProps from '../../assets/twins/dry-props-nes-jrpg.png?no-inline';
 import { planCaveProps } from './caveCamp';
 import beedu from '../../assets/twins/beedu-nes.png?no-inline';
@@ -42,7 +43,7 @@ export function loadTwinArt(scene: Phaser.Scene): void {
     [TWIN_KEYS.courtyard,courtyardNeem,192,192],
     ['twins-surfaces',surfaces,128,128],['twins-homes-painted',homesSnes,128,144],
     ['twins-environment',environment,128,128],['twins-stories',stories,128,160],
-    ['twins-dry-props',dryProps,64,64],['twins-cave-props',caveProps,128,128],['twins-beedu',beedu,96,64]] as const) {
+    ['twins-shrubs',shrubs,128,128],['twins-dry-props',dryProps,64,64],['twins-cave-props',caveProps,128,128],['twins-beedu',beedu,96,64]] as const) {
     if (!scene.textures.exists(key)) scene.load.spritesheet(key,url,{frameWidth:w,frameHeight:h});
   }
 }
