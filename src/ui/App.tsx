@@ -3,37 +3,28 @@ import { useDiscoveryNotices } from './useDiscoveryNotices';
 
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, lazy, Suspense } from 'react';
 import { EventBus, type GameToUi } from '../game/EventBus';
-import { PhaserGame } from '../game/PhaserGame';
 import { Controls } from './Controls';
 import { FrontDoor } from './FrontDoor';
-import { CanonPanel } from './CanonPanel';
 import { Here } from './Here';
 import { SHELTER_LABEL } from './JournalPanel';
-import { ShelterMark } from './ShelterMark';
 import type { TileAction } from './TileActions';
 import type { Step } from '../content/making-chain';
-import { CollectionPanel } from './CollectionPanel';
 import { diaryCount } from '../content/discoveryChanges';
 const Ending = lazy(() => import('./Ending').then(module => ({default: module.Ending})));
-import { FieldKit } from './FieldKit';
-import { Overworld } from './Overworld';
 import { initialSurface, surfaceReducer } from './surface';
 import { readShowing, writeShowing, type ReadingSize } from './preferences';
-import { arrivalPoint, fieldMap, fieldMaps, poi } from '../content/places';
+import { arrivalPoint, DEFAULT_FIELD_MAP, fieldMap, fieldMaps, poi } from '../content/places';
 import { walkers } from '../game/characters';
 import { travellerAttributes, travellersOn } from '../content/travellers';
-import { SatchelPanel } from './SatchelPanel';
 import { SatchelStrip } from './SatchelStrip';
 import type { RecordTab } from './Records';
 const RecordTabs = lazy(() => import('./Records'));
 
-import { PeoplePanel } from './PeoplePanel';
 import { met } from '../content/people';
 import { freshSeed, rememberSeed, seedFromUrl } from './seed';
 import { JourneySeed } from './journeySeed';
 import { SettlingSection } from './SettlingSection';
 import { settlingRoad } from '../content/settlingRoad';
-import { WorkshopPanel } from './WorkshopPanel';
 import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
 import { standingLine } from '../content/gathering';
@@ -41,7 +32,7 @@ import { rideFrom } from '../content/vehicles';
 import { canBoardAt, trackRoute } from '../world/crossing';
 import { tileHash } from '../world/rng';
 import { conditionOf, noNodes, takeableAt, type Nodes } from '../content/nodes';
-import { canonStatus, type CanonStatus, type Place } from './canonClient';
+import type { CanonStatus, Place } from './canonClient';
 import { isPresent, routineFor } from '../content/routine';
 import { creatureFor, floraFor } from '../content/species';
 import { type Collection, emptyCollection, metOnTile, size } from '../content/collection';
@@ -65,7 +56,6 @@ import {
   rungOf,
   type WorldMoment
 } from '../journey';
-import { DEFAULT_FIELD_MAP } from '../game/scenes/WorldScene';
 import { characterFor } from '../game/player';
 import type { World } from '../world/types';
 import { isAnimal, isWaterSpecies } from '../content/species';
@@ -75,7 +65,6 @@ import {
   gestureFor,
 } from '../content/gestures';
 import { shelterBuilt } from '../content/using';
-import { ActivityModal } from './ActivityModal';
 import { useActivity, type Daybook } from './useActivity';
 import { goalOf, wanting } from '../content/goals';
 import { dayLines, leftOffLines, readingOf, tomorrowLine, type DayReading } from '../content/daybook';
@@ -83,7 +72,6 @@ import { useHappenings, type Latest } from './useHappenings';
 import { useGuidance } from './useGuidance';
 import { useSettling } from './useSettling';
 import { useCrossing } from './useCrossing';
-import { EventCard } from './EventCard';
 import { askAboutBoat, firstEvent, firstRide, lentFlag, lentVehicles, seenFlag } from '../content/firsts';
 import { aboutTheRoad } from '../content/roadTalk';
 import type { First } from '../content/places';
@@ -102,7 +90,6 @@ import {
   stateOf as homesteadState,
   type Holdings
 } from '../content/homestead';
-import { Negotiation } from './Negotiation';
 import type { Talk, Wanted } from '../content/happenings';
 import { benchAt, type Station } from '../content/stations';
 import { groundOf } from '../content/suppliable';
@@ -115,6 +102,10 @@ const SPEAK_FIRST_AFTER_MS = 1500;
 
 
 import { Modal } from './Modal';
+
+function LoadingPanel() {
+  return <p role="status">Opening…</p>;
+}
 
 /**
  * Which country to open on, for a link that wants to start somewhere other than Lothal.
@@ -167,6 +158,38 @@ function characterFromUrl(): string | null {
 type Arrival = GameToUi['tile-entered'];
 
 const Progress = lazy(() => import('./Progress').then(module => ({ default: module.Progress })));
+const CollectionPanel = lazy(() =>
+  import('./CollectionPanel').then(module => ({ default: module.CollectionPanel }))
+);
+const PeoplePanel = lazy(() =>
+  import('./PeoplePanel').then(module => ({ default: module.PeoplePanel }))
+);
+const SatchelPanel = lazy(() =>
+  import('./SatchelPanel').then(module => ({ default: module.SatchelPanel }))
+);
+const WorkshopPanel = lazy(() =>
+  import('./WorkshopPanel').then(module => ({ default: module.WorkshopPanel }))
+);
+const FieldKit = lazy(() => import('./FieldKit').then(module => ({ default: module.FieldKit })));
+const Overworld = lazy(() => import('./Overworld').then(module => ({ default: module.Overworld })));
+const Negotiation = lazy(() =>
+  import('./Negotiation').then(module => ({ default: module.Negotiation }))
+);
+const ActivityModal = lazy(() =>
+  import('./ActivityModal').then(module => ({ default: module.ActivityModal }))
+);
+const EventCard = lazy(() =>
+  import('./EventCard').then(module => ({ default: module.EventCard }))
+);
+const CanonPanel = lazy(() =>
+  import('./CanonPanel').then(module => ({ default: module.CanonPanel }))
+);
+const ShelterMark = lazy(() =>
+  import('./ShelterMark').then(module => ({ default: module.ShelterMark }))
+);
+const PhaserGame = lazy(() =>
+  import('../game/PhaserGame').then(module => ({ default: module.PhaserGame }))
+);
 
 export function App() {
   // Read the save once. Calling loadJourney per state initialiser would parse the same JSON
@@ -642,7 +665,7 @@ export function App() {
   const [canon, setCanon] = useState<CanonStatus>({ lore: false, ask: false });
   useEffect(() => {
     let live = true;
-    canonStatus().then((status) => {
+    import('./canonClient').then(({ canonStatus }) => canonStatus()).then((status) => {
       if (live) setCanon(status);
     });
     return () => {
@@ -1115,7 +1138,7 @@ export function App() {
         id: 'rest',
         label: standingOn===CAVE_POI?CAVE_REST_LABEL:SHELTER_LABEL[shelter] ?? 'Stop for the night',
         detail: arrival?.fatigue ?? undefined,
-        mark: <ShelterMark shelter={shelter} />,
+        mark: <Suspense fallback={null}><ShelterMark shelter={shelter} /></Suspense>,
         // `canCamp` is the rules layer's answer, not this panel's guess -- resting is refused
         // in daylight because a night passed at noon is not a night.
         blocked: arrival?.canCamp ? null : 'Not yet -- there is daylight left.',
@@ -1609,6 +1632,7 @@ export function App() {
           would spend a second of loading nobody asked for, and would make "start a new walk" a
           restart of something already running rather than a beginning. */}
       {!atTheDoor && (
+        <Suspense fallback={<p role="status">Opening the map…</p>}>
         <PhaserGame
           seed={seed}
           discovered={initialJourney.current.discovered}
@@ -1617,6 +1641,7 @@ export function App() {
           fieldMapId={bootFieldMap.current}
           characterId={characterId}
         />
+        </Suspense>
       )}
 
       {journey && fieldMap(journey.from) && fieldMap(journey.to) && (
@@ -1756,9 +1781,7 @@ export function App() {
           licence to rewrite them. The strip renders into each panel's own `tabs` slot rather than
           floating over it: both draw a full-screen veil, so anything positioned above the page
           sits underneath them. */}
-      {surface === 'progress' && <Suspense fallback={<Modal open label="Field diary" onClose={() => dispatch({ type: 'close' })}>
-        <p role="status">Opening diary…</p><button type="button" onClick={() => dispatch({ type: 'close' })}>Close</button>
-      </Modal>}>
+      {surface === 'progress' && <Suspense fallback={<LoadingPanel />}>
       <Progress
         readingSize={readingSize}
         onReadingSize={setReadingSize}
@@ -1799,7 +1822,7 @@ export function App() {
       />
       </Suspense>}
 
-      <CollectionPanel
+      {surface === 'collection' && <Suspense fallback={<LoadingPanel />}><CollectionPanel
         tabs={
           <Suspense fallback={null}><RecordTabs
             tab="collection"
@@ -1813,9 +1836,9 @@ export function App() {
         open={surface === 'collection'}
         onClose={() => dispatch({ type: 'close' })}
         canAsk={canon.lore}
-      />
+      /></Suspense>}
 
-      <PeoplePanel
+      {surface === 'people' && <Suspense fallback={<LoadingPanel />}><PeoplePanel
         tabs={
           <Suspense fallback={null}><RecordTabs
             tab="people"
@@ -1829,23 +1852,23 @@ export function App() {
         strangers={metStrangers.current}
         open={surface === 'people'}
         onClose={() => dispatch({ type: 'close' })}
-      />
+      /></Suspense>}
 
-      <FieldKit
+      {interrupts.kit && <Suspense fallback={<LoadingPanel />}><FieldKit
         progress={progress}
         open={interrupts.kit}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'kit' })}
         canResearch={canon.lore}
-      />
+      /></Suspense>}
 
-      <SatchelPanel
+      {interrupts.satchel && <Suspense fallback={<LoadingPanel />}><SatchelPanel
         satchel={satchel}
         onUse={useCarried}
         open={interrupts.satchel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'satchel' })}
-      />
+      /></Suspense>}
 
-      <WorkshopPanel
+      {interrupts.workshop && <Suspense fallback={<LoadingPanel />}><WorkshopPanel
         satchel={satchel}
         bench={bench}
         knows={knowsRecipeHere}
@@ -1866,10 +1889,10 @@ export function App() {
           setWorkshopAt(null);
           dispatch({ type: 'close-interrupt', which: 'workshop' });
         }}
-      />
+      /></Suspense>}
 
       {/* The negotiation at a ground, while one is open: a new ground starts a new conversation. */}
-      {negotiation && <Negotiation key={negotiation.ground.id} {...negotiation} />}
+      {negotiation && <Suspense fallback={<LoadingPanel />}><Negotiation key={negotiation.ground.id} {...negotiation} /></Suspense>}
 
       {interrupts.ending && <Suspense fallback={<Modal open label="If you stopped here"
         onClose={() => dispatch({ type: 'close-interrupt', which: 'ending' })}><p role="status">Opening the last page…</p></Modal>}>
@@ -1882,7 +1905,7 @@ export function App() {
       </Suspense>}
 
       {/* The activity, while one is running: `useActivity` hands over everything the card needs. */}
-      {activityCard && <ActivityModal {...activityCard} />}
+      {activityCard && <Suspense fallback={<LoadingPanel />}><ActivityModal {...activityCard} /></Suspense>}
 
       {/* Something that happened to you, as opposed to something you did. There are no events
           authored yet, so this never mounts -- the path is live so the first one needs no wiring.
@@ -1892,8 +1915,8 @@ export function App() {
           landmark -- the scene says where you stand, a camp beside it asks for its welcome, and
           only then says you have arrived -- and it sat on top of the journey's end. So a card waits
           while the page is up, and comes back when it is closed; `pageOpenRef` stops a new one. */}
-      {eventCard && !arrivalPage && <EventCard {...eventCard} />}
-      {firstCard && (
+      {eventCard && !arrivalPage && <Suspense fallback={<LoadingPanel />}><EventCard {...eventCard} /></Suspense>}
+      {firstCard && <Suspense fallback={<LoadingPanel />}>
         <EventCard
           event={firstEvent(firstCard.first, firstCard.title, firstCard.verb)}
           holds={[]}
@@ -1906,9 +1929,9 @@ export function App() {
             if (firstTaken.current) card.then();
           }}
         />
-      )}
+      </Suspense>}
 
-      <Overworld
+      {interrupts.overworld && <Suspense fallback={<LoadingPanel />}><Overworld
         current={fieldMapId}
         progress={progress}
         met={metStrangers.current}
@@ -1916,7 +1939,7 @@ export function App() {
         open={interrupts.overworld}
         onTravel={travel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'overworld' })}
-      />
+      /></Suspense>}
 
       {/* One surface, two layers: the notes are the floor, a place sits over them, and canon
           is a section inside the notes rather than a panel of its own. */}
@@ -1999,7 +2022,9 @@ export function App() {
               }
             : null
         }
-        canon={<CanonPanel place={place} status={canon} />}
+        canon={canon.lore && place ? <Suspense fallback={null}>
+          <CanonPanel place={place} status={canon} />
+        </Suspense> : null}
         actions={tileActions}
       />
 

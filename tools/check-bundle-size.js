@@ -14,9 +14,14 @@
 // canon's data was 569 KB by that measure and 116 KB on the wire, in a game whose paintings come
 // to 30 MB. Content was being withheld to satisfy a number nobody downloads.
 //
-// **Two chunks, two budgets.**
+// **Two startup payloads, two budgets.**
 //
-//   index-*   the app's own code. A "something is wrong" bound, not a target: about ten per cent
+//   app        every JavaScript file index.html loads or module-preloads at startup, except Phaser
+//              and canon. Vite may extract modules shared with lazy panels into separate files;
+//              counting only index-* would make that extraction look like a saving even though the
+//              browser still downloads those files before play.
+//
+//              A "something is wrong" bound, not a target: about ten per cent
 //             over what was measured when it was set, so ordinary growth passes and a sudden
 //             doubling does not. When it fails, find what grew before raising the number.
 //
@@ -24,7 +29,9 @@
 //             202.0: main stood at 197.4 and Satchel and Hearth added 4.6 KB, all of it the new
 //             goals, finding, guide, features and guidance modules -- no dependency and no data
 //             import. Twenty KB in two days is a pace worth watching: if it fails again soon, the
-//             answer is splitting a panel behind an `import()`, not a third raise.
+//             answer is splitting a panel behind an `import()`, not a third raise. Tightened to
+//             180 on 18 November 2026 from 164.9 after the engine and interrupt-only panels moved
+//             behind the front door and the gate began counting every startup preload.
 //
 //   canon-*   canon's data, split out in `vite.config.ts`. **The rule is that the data may not
 //             outweigh the engine that draws it** -- Phaser is 347.6 KB gzipped -- which is the same
@@ -41,8 +48,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('node:zlib');
 
-/** What each chunk may weigh, in KB gzipped. A chunk not named here is reported and not budgeted. */
-const BUDGETS_GZ_KB = { index: 220, canon: 350 };
+/** What each independently versioned payload may weigh, in KB gzipped. */
+const APP_STARTUP_BUDGET_GZ_KB = 180;
+const BUDGETS_GZ_KB = { canon: 350 };
 
 const assets = path.join(path.resolve(__dirname, '..'), 'dist', 'assets');
 if (!fs.existsSync(assets)) {
@@ -52,6 +60,7 @@ if (!fs.existsSync(assets)) {
 
 const chunks = fs.readdirSync(assets).filter((f) => f.endsWith('.js'));
 const kb = (bytes) => bytes / 1024;
+const gzippedKb = (file) => kb(zlib.gzipSync(fs.readFileSync(path.join(assets, file))).length);
 let failed = false;
 
 for (const name of Object.keys(BUDGETS_GZ_KB)) {
@@ -68,7 +77,7 @@ for (const name of Object.keys(BUDGETS_GZ_KB)) {
 for (const file of chunks.sort()) {
   const body = fs.readFileSync(path.join(assets, file));
   const raw = kb(body.length);
-  const gz = kb(zlib.gzipSync(body).length);
+  const gz = gzippedKb(file);
   const budget = BUDGETS_GZ_KB[file.split('-')[0]];
   const over = budget !== undefined && gz > budget;
   if (over) failed = true;
@@ -76,9 +85,29 @@ for (const file of chunks.sort()) {
   console.log(`  ${file.padEnd(28)} ${gz.toFixed(1).padStart(8)} KB gzipped  (${raw.toFixed(1)} KB raw)  ${note}`);
 }
 
+const html = fs.readFileSync(path.join(path.resolve(__dirname, '..'), 'dist', 'index.html'), 'utf8');
+const startupFiles = [...html.matchAll(/(?:src|href)=["'][^"']*\/assets\/([^"']+\.js)["']/g)]
+  .map((match) => match[1])
+  .filter((file, index, all) => all.indexOf(file) === index);
+const missingStartupFiles = startupFiles.filter((file) => !chunks.includes(file));
+if (missingStartupFiles.length > 0) {
+  console.error(`index.html names missing JavaScript: ${missingStartupFiles.join(', ')}`);
+  process.exit(1);
+}
+const appStartupFiles = startupFiles.filter(
+  (file) => !file.startsWith('canon-') && !file.startsWith('phaser-')
+);
+const appStartupGz = appStartupFiles.reduce((total, file) => total + gzippedKb(file), 0);
+const appOver = appStartupGz > APP_STARTUP_BUDGET_GZ_KB;
+if (appOver) failed = true;
+console.log(
+  `\n  app startup (${appStartupFiles.length} files)`.padEnd(35) +
+    `${appStartupGz.toFixed(2).padStart(8)} KB gzipped  budget ${APP_STARTUP_BUDGET_GZ_KB} KB gzipped${appOver ? '  OVER' : ''}`
+);
+
 if (failed) {
   console.error(
-    '\nA chunk is over its budget. Find what grew first -- ' +
+    '\nA payload is over its budget. Find what grew first -- ' +
       'see the comment at the top of tools/check-bundle-size.js.'
   );
   process.exit(1);

@@ -13,6 +13,9 @@ import placesBundle from '../../data/canon/places.json';
 import type { BiomeId, Landmass } from '../world/types';
 import { type Climate, DELTA_CLIMATE } from '../world/weather';
 
+/** Where a journey starts when nothing says otherwise. */
+export const DEFAULT_FIELD_MAP = 'field_map_lothal';
+
 /**
  * A road off a map: what carries you, the painting, the way, and who sees you off. Canon's
  * `field_map.roads`, stated from both ends. The game owns how long it takes (`CROSSING_MS`).

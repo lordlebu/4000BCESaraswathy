@@ -206,7 +206,7 @@ import {
 import { biomeFor, stepCostOn } from '../../content/species';
 import { worldFor } from '../../world/bake';
 import { poiAt, startTileFor, type FieldMapWorld } from '../../world/fieldMap';
-import { fieldMap } from '../../content/places';
+import { DEFAULT_FIELD_MAP, fieldMap } from '../../content/places';
 import { walkedRoad } from '../../content/travellers';
 import { wandererIdsOn } from '../../content/wanderers';
 import { loadWandererArt } from '../wandererArt';
@@ -380,9 +380,6 @@ export interface WorldSceneData {
    */
   lent?: string[];
 }
-
-/** Where a journey starts when nothing says otherwise. */
-export const DEFAULT_FIELD_MAP = 'field_map_lothal';
 
 export class WorldScene extends Phaser.Scene {
   private world!: World;

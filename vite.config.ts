@@ -118,6 +118,11 @@ export default defineConfig({
         // returning player should not re-download 1 MB of Phaser because a journal string moved.
         manualChunks(id: string) {
           if (id.includes('node_modules/phaser')) return 'phaser';
+          const path = id.replace(/\\/g, '/');
+          // Keep the runtime adapter with the data it adapts. Route splitting can otherwise name
+          // it as a second `canon-*` chunk and, worse, make the app budget count transformed canon
+          // separately from the canon payload that owns it.
+          if (path.endsWith('/src/content/canon.ts')) return 'canon';
           // Canon's data on the same footing, and for the same reason turned round: content
           // changes on its own schedule, so a canon release should not re-download the app and an
           // app fix should not re-download canon. It also gives the data a file of its own to
@@ -125,7 +130,6 @@ export default defineConfig({
           // The making layer's data rides with it: it was canon's until 2 October 2026, and it is
           // data on the same schedule whoever owns it -- in the app chunk it would cost the app
           // budget 36 KB for the move alone.
-          const path = id.replace(/\\/g, '/');
           if (path.includes('/data/canon/') || path.includes('/data/making/')) return 'canon';
           return undefined;
         }
