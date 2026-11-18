@@ -9,7 +9,7 @@ export const CAVE_TURN_MS = 120_000;
 export const CAVE_TILE_MS = 12_000;
 export const CAVE_PEOPLE = ['npc_mirlepa', 'npc_yamantaka'] as const;
 const SOLID = new Set(['twinHouses', 'twinHousesDetail', 'twinHomesPainted', 'twinObjects',
-  'twinDetails', 'twinCourtyard', 'twinEnvironment', 'twinStories', 'twinCaveProps','twinHighlandForms','twinShrubs']);
+  'twinDetails', 'twinCourtyard', 'twinEnvironment', 'twinStories', 'twinCaveProps','twinHighlandForms','twinShrubs','twinHighlandLife']);
 const key = (p: {x:number;y:number}) => `${p.x},${p.y}`;
 
 /** Six five-day arrangements repeat over a thirty-day journey month. No OS calendar. */
@@ -28,7 +28,8 @@ export function planCaveProps(built:FieldMapWorld, day=0):Placement[] {
     const x=cave.x+dx!, y=cave.y+dy!, tile=built.world.tiles[y]?.[x];
     return tile && isWalkable(tile) && !['river','sea','wetland'].includes(tile.biome)
       && !tile.road && !tile.track && !tile.bridge
-      ? [{sheet:'twinCaveProps' as const, frame:frames[i]!, x,y,depth:depthFor(y,ROW_SLOT.undergrowth)}] : [];
+      ? [{sheet:'twinCaveProps' as const, frame:frames[i]!, x,y,scale:i===1?.75:1,
+        name:`cave:${['flags','cooker','hearth'][i]}`,depth:depthFor(y,ROW_SLOT.undergrowth)}] : [];
   });
 }
 

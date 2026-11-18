@@ -132,6 +132,8 @@ export interface ActivityModalProps {
    * `sceneFor` tries the shelter on this ground before the shelter alone.
    */
   ground?: string | null;
+  /** Named-place rest painting, without changing shelter mechanics. */
+  placeId?:string|null;
   /**
    * What this act is *about*, when there is no material to name it.
    *
@@ -161,6 +163,7 @@ export interface ActivityModalProps {
 }
 
 export function ActivityModal({
+  placeId,
   open,
   gesture,
   promised,
@@ -259,7 +262,7 @@ export function ActivityModal({
   const picture = followed
     ? (act ?? plate ?? sceneFor(gesture, variant, pick))
     : // A night is painted at midnight while it is being chosen and at dawn once it is over.
-      sceneFor(gesture, variant, pick, gesture === 'rest' ? (done ? 'dawn' : 'midnight') : null, gesture === 'rest' ? ground : null);
+      sceneFor(gesture, variant, pick, gesture === 'rest' ? (done ? 'dawn' : 'midnight') : null, gesture === 'rest' ? ground : null,placeId);
   const what = subject ?? promised[0]?.material.name ?? 'it';
 
   return (

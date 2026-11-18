@@ -342,6 +342,8 @@
     "places/poi_reedwright_bank-painted.png",
     "places/poi_twin_causeway-painted.png",
     "places/poi_twin_cove-painted.png",
-    "places/poi_twin_landing-painted.png"
+    "places/poi_twin_landing-painted.png",
+    "scenes/rest-windward-cave-midnight.png",
+    "scenes/rest-windward-cave-dawn.png"
   ]
 }

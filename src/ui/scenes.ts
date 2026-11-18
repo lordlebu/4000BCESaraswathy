@@ -39,9 +39,10 @@ export function sceneFor(
   variant?: string | null,
   pick = 0,
   moment?: NightMoment | null,
-  ground?: string | null
+  ground?: string | null,
+  placeId?:string|null
 ): string | null {
-  return firstArt('scenes', sceneNames(gesture, variant, moment, ground), pick);
+  return firstArt('scenes', sceneNames(gesture, variant, moment, ground,placeId), pick);
 }
 
 /**
@@ -57,7 +58,8 @@ export function sceneNames(
   gesture: string,
   variant?: string | null,
   moment?: NightMoment | null,
-  ground?: string | null
+  ground?: string | null,
+  placeId?:string|null
 ): string[] {
   const group = variant ? GROUND_GROUP[variant] : undefined;
   const groundGroup = ground ? (gesture === 'rest' ? NIGHT_GROUND_GROUP : GROUND_GROUP)[ground] : undefined;
@@ -65,6 +67,7 @@ export function sceneNames(
     ? [ground, groundGroup].flatMap((g) => (g ? [moment ? `${gesture}-${variant}-${g}-${moment}` : null, `${gesture}-${variant}-${g}`] : []))
     : [];
   return [
+    ...(gesture==='rest'&&placeId==='poi_northwest_cave_camp'?[moment?`rest-windward-cave-${moment}`:null,'rest-windward-cave']:[]),
     ...onGround,
     variant && moment ? `${gesture}-${variant}-${moment}` : null,
     variant ? `${gesture}-${variant}` : null,

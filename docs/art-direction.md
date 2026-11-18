@@ -1,5 +1,9 @@
 # Art direction — the rules, and what they cost
 
+> **Mixed-art owner rule (18 November):** Inspect the element and approved references; ask if uncertain, and show new/replacement samples for selection before applying them, including code-native art. Preserve accepted exceptions. Current choices: JRPG rail bridge with proper shadow; lower road bridge retained; object shrubs/old grass; covered clay lamps. [Current delivery ledger](twin-walkway-phase.md).
+
+> **Cave/roads follow-up:** Yamantaka doubles in map scale; cave/cooker proportions, Maru cook reuse, sparse highland trees and masonry roads follow the simple NES direction. Cave-specific watercolor meal/sleep scenes show the traveller with both residents every night. [Exact delivery and prompts](twin-cave-roads-phase.md).
+
 > **Approved terrain - 18 November 2026:** Muted sage is the selected cave/highland palette. Use sparse broad turf/stone patterns, stepped height/riverbank shading and soft earthy desert/grass seams, baked once into the existing ground layer. Lichen/olive are review alternatives only. [Decision, implementation and verification](twin-terrain-softening.md).
 
 > **18 November landscape follow-up:** new shrubs explicitly use **nes jrpg sprite**, with half-size pairs at grass/desert seams and simple regular silhouettes at cliff lips. Reuse the old habitat decor. Smoke/haze/ripples are small cached voxel/pixel effects, capped and performance-checked; preserve the accepted building mix and Beedu. [Production ledger](twin-landscape-motion-phase.md).

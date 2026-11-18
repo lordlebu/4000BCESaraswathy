@@ -1,5 +1,7 @@
 # Art handover
 
+> **Mixed-art owner rule (18 November):** Inspect the element and approved references; ask if uncertain, and show new/replacement samples for selection before applying them, including code-native art. Preserve accepted exceptions. Current choices: JRPG rail bridge with proper shadow; lower road bridge retained; object shrubs/old grass; covered clay lamps. [Current delivery ledger](twin-walkway-phase.md).
+
 > **Current art forms (17 November 2026):** Follow [the element-by-element guide](art-direction.md#current-element-by-element-direction--17-november-2026). New overworld people, wandering animals and trams use **“nes jrpg sprite”**; Beedu alone keeps its accepted small SNES art. Terrain/buildings remain simple NES; off-map portraits/events/places/plates remain painted, with the two Denisovan portrait exceptions. Older prompts below are production history where they conflict; new delivery uses resize only, without colour reduction.
 
 The twin-city pass now supports preferred painted editions while retaining original files

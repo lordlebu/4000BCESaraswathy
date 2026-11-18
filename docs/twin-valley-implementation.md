@@ -1,5 +1,30 @@
 # Twin-valley implementation ledger
 
+
+## Rail bridge, mixed verges and walkway follow-up - 18 November 2026
+
+The owner approved the generated JRPG **rail** bridge with proper cast shading (upper crossing),
+vegetation C (object shrubs at cliffs, old grass at borders), and covered clay walkway lamps.
+The lower **road** bridge is accepted and retained. Otters gain a short bounded trail using the
+accepted water ripple. [Selections, provenance, implementation and verification](twin-walkway-phase.md).
+New/replacement art must be sampled for owner selection before applying it; mixed forms and
+accepted exceptions are deliberate. Final phase checks pass: 3,863 unit tests, ten focused browser cases and
+type/build/data/size gates (app 219.6/220 KiB gzip). Rail abutments overlap both banks; the
+road bridge remains accepted. Owner review/merge and broader final review remain.
+
+
+## Cave household and road follow-up - 18 November 2026
+
+Implemented the owner's follow-up: Yamantaka at double map scale; a 1.5-tile cave body with
+half-tile entrance; 75% Icmic cooker; reused Maru cook portrait/nomad sprite; sparse existing-style
+highland trees/frozen conifers; stone/sandstone/brick road masks and small grassy path stones.
+Every cave rest now selects shared-meal and three-companion sleeping paintings through the
+actual standing-on POI, keeping other shelters unchanged. Both new rest paintings are delivered.
+[Scope, provenance and verification](twin-cave-roads-phase.md). Muted sage and the very slow cave
+schedule remain approved. Final phase checks pass: 3,860 unit tests, eight browser cases and
+type/build/size/data gates (app 218.0/220 KiB gzip). Owner review/merge and the broader final
+integrated review remain pending.
+
 > **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
 
 

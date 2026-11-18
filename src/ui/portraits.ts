@@ -18,7 +18,7 @@
 //
 // See `docs/portrait-prompts.md` for what to ask an image model for.
 
-import { preferredArt, artNames } from './art';
+import { preferredArt, artNames,art } from './art';
 
 /**
  * The bare name a portrait file carries, for a canon npc id.
@@ -38,6 +38,7 @@ export function portraitName(npcId: string): string {
  * actually cost time.
  */
 export function portraitFor(npcId: string): string | null {
+  if(npcId==='npc_cave_cook')return art('faces','maru-m-01');
   return preferredArt('portraits', [portraitName(npcId)]);
 }
 

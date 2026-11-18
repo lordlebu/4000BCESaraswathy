@@ -1,5 +1,6 @@
 /** Shared presentation rules for the permanent cave household and optional Harappa bust. */
 export const CAVE_POI = 'poi_northwest_cave_camp';
+export const CAVE_REST_LABEL = 'Stay the night in the cave';
 export const KANG_ARC = 'storyline_twin_kang_bust';
 export const KANG_DONE = `story:${KANG_ARC}:unveiling`;
 export function bustStage(flags:readonly string[]):number|null{

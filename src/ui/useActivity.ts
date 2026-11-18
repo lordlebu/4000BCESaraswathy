@@ -1,3 +1,4 @@
+import {CAVE_POI,CAVE_REST_LABEL} from '../content/twinStories';
 // Doing something, from React's side: taking from the ground, making at a bench, stopping for the
 // night, and using what is carried -- and the activity card that each of them opens.
 //
@@ -59,6 +60,7 @@ export interface Activity {
 
 /** The tile under foot, as `App` derives it from the scene's last arrival. */
 export interface Underfoot {
+  placeId?: string|null;
   at: Point;
   biome: BiomeId;
   seed: string;
@@ -314,6 +316,7 @@ export function useActivity({
           variant: activity.resting ?? (activity.making ? processWord(activity.making) : underfoot.biome ?? null),
           // A night's ground, so a bedroll on a ridge can have its own painting (`sceneFor`).
           ground: activity.resting ? (underfoot.biome ?? null) : null,
+          placeId:activity.resting?underfoot.placeId:null,
           /**
            * Which of this thing's paintings to show.
            *
@@ -323,7 +326,7 @@ export function useActivity({
            */
           pick: tileHash(underfoot.seed, underfoot.at.x, underfoot.at.y, `take:${activity.day}`),
           subject: activity.resting
-            ? SHELTER_LABEL[activity.resting] ?? 'Stop for the night'
+            ? underfoot.placeId===CAVE_POI?CAVE_REST_LABEL:SHELTER_LABEL[activity.resting] ?? 'Stop for the night'
             : activity.making
               ? recipe(activity.making)?.name ?? 'it'
               : null,

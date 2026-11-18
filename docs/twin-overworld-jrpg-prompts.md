@@ -1,5 +1,7 @@
 # Approved NES JRPG overworld prompts
 
+> **Cave follow-up:** Yamantaka now draws at double map scale in both poses. The visiting cook reuses a stable Maru face/nomad sprite. Cave nights use the three-companion watercolor meal/sleep pair; highlands add sparse trees, conifers and masonry roads. [Current scope and art provenance](twin-cave-roads-phase.md).
+
 > **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
 
 ## Priest Kang character and bust — 17 November 2026

@@ -88,6 +88,7 @@ import { askAboutBoat, firstEvent, firstRide, lentFlag, lentVehicles, seenFlag }
 import { aboutTheRoad } from '../content/roadTalk';
 import type { First } from '../content/places';
 import { peopleAtPlaces, whoIsHere } from '../content/presence';
+import {CAVE_POI,CAVE_REST_LABEL} from '../content/twinStories';
 import { useRoadTalk } from './useRoadTalk';
 import { type Bumped, whoSpeaksFirst } from '../content/bumping';
 import { encampmentOn } from '../content/encampments';
@@ -814,8 +815,8 @@ export function App() {
   const underfoot = useMemo(() => {
     if (!world || !arrival) return null;
     const tile = world.tiles[arrival.at.y]?.[arrival.at.x];
-    return tile ? { at: arrival.at, biome: tile.biome, seed: world.seed } : null;
-  }, [world, arrival]);
+    return tile ? { at: arrival.at, biome: tile.biome, seed: world.seed,placeId:standingOn } : null;
+  }, [world, arrival,standingOn]);
 
   /**
    * What this ground still has to give, in the present tense.
@@ -1112,7 +1113,7 @@ export function App() {
         : [
       {
         id: 'rest',
-        label: SHELTER_LABEL[shelter] ?? 'Stop for the night',
+        label: standingOn===CAVE_POI?CAVE_REST_LABEL:SHELTER_LABEL[shelter] ?? 'Stop for the night',
         detail: arrival?.fatigue ?? undefined,
         mark: <ShelterMark shelter={shelter} />,
         // `canCamp` is the rules layer's answer, not this panel's guess -- resting is refused
@@ -1172,6 +1173,7 @@ export function App() {
     ];
   }, [
     underfoot,
+    standingOn,
     arrival,
     nodes,
     standing,

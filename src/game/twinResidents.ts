@@ -7,7 +7,7 @@ import type { FieldMapWorld } from '../world/fieldMap';
 import type { Placement } from './scenePlan';
 
 const SOLID = new Set(['twinHouses','twinHousesDetail','twinHomesPainted','twinObjects',
-  'twinDetails','twinCourtyard','twinEnvironment','twinStories','twinCaveProps','twinHighlandForms','twinShrubs']);
+  'twinDetails','twinCourtyard','twinEnvironment','twinStories','twinCaveProps','twinHighlandForms','twinShrubs','twinHighlandLife']);
 const SPOTS = [[0,1],[-1,1],[1,1],[-1,0],[1,0],[0,-1],[-1,-1],[1,-1]];
 for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
   if(Math.max(Math.abs(dx),Math.abs(dy))===2)SPOTS.push([dx,dy]);
