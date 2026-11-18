@@ -19,6 +19,9 @@ import environment from '../../assets/twins/environment-nes.png?no-inline';
 import stories from '../../assets/twins/stories-nes.png?no-inline';
 import caveProps from '../../assets/twins/cave-props-nes-jrpg.png?no-inline';
 import shrubs from '../../assets/twins/shrubs-nes-jrpg.png?no-inline';
+import highlandLife from '../../assets/twins/highland-life.png?no-inline';
+import masonryRoads from '../../assets/twins/roads-masonry.png?no-inline';
+import {twinRoadMaterial} from './twinHighlandLife';
 import dryProps from '../../assets/twins/dry-props-nes-jrpg.png?no-inline';
 import { planCaveProps } from './caveCamp';
 import beedu from '../../assets/twins/beedu-nes.png?no-inline';
@@ -43,6 +46,7 @@ export function loadTwinArt(scene: Phaser.Scene): void {
     [TWIN_KEYS.courtyard,courtyardNeem,192,192],
     ['twins-surfaces',surfaces,128,128],['twins-homes-painted',homesSnes,128,144],
     ['twins-environment',environment,128,128],['twins-stories',stories,128,160],
+    ['twins-highland-life',highlandLife,192,192],['twins-roads',masonryRoads,128,128],
     ['twins-shrubs',shrubs,128,128],['twins-dry-props',dryProps,64,64],['twins-cave-props',caveProps,128,128],['twins-beedu',beedu,96,64]] as const) {
     if (!scene.textures.exists(key)) scene.load.spritesheet(key,url,{frameWidth:w,frameHeight:h});
   }
@@ -94,7 +98,10 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
       // Road decks use the shared directional bridge, without a road painted over it.
       if(tile.bridge&&tile.road&&!tile.track)continue;
       if(tile.bridge)add('twinObjects',18,x,y);
-      add('twinRoutes',(tile.track?16:0)+neighbours(x,y,tile.track?'track':'road'),x,y);
+      const material=twinRoadMaterial(built,tile),mask=neighbours(x,y,tile.track?'track':'road');
+      if(tile.track||material==='sand')add('twinRoutes',(tile.track?16:0)+mask,x,y);
+      else out.push({sheet:'twinRoads',frame:({stone:0,sandstone:16,brick:32} as const)[material]+mask,
+        x,y,depth:70,name:`road:${material}`});
       if(tile.road&&biome==='settlement'&&districtAt(region,tile)&&[[0,-1],[1,0],[0,1],[-1,0]].some(([dx,dy])=>{
         const next=world.tiles[y+dy!]?.[x+dx!];return next?.road&&!districtAt(region,next);
       }))add('twinDetails',7,x,y);
@@ -152,7 +159,7 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
   const newFrames:Record<string,number>={poi_nesting_cove:9,poi_reedwright_bank:10,poi_dune_windbreak:11};
   placed.forEach(({poi,at})=>{
     if(poi.id==='poi_northwest_cave_camp'){
-      out.push({sheet:'twinStories',frame:3,x:at.x,y:at.y,depth:depthFor(at.y,ROW_SLOT.undergrowth),name:`poi:${poi.id}`});
+      out.push({sheet:'twinHighlandLife',frame:0,x:at.x,y:at.y,depth:depthFor(at.y,ROW_SLOT.undergrowth),name:`poi:${poi.id}`});
       out.push(...planCaveProps(built));
       for(const [dx,frame]of [[1,5]]as const){
         const x=at.x+dx,y=at.y+1,t=world.tiles[y]?.[x];

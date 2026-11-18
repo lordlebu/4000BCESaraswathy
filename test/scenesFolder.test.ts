@@ -33,6 +33,8 @@ const SCENES = join(__dirname, '..', 'src', 'ui', 'scenes');
  * to optimise against.
  */
 const MAX_KB = 300;
+// Owner-approved resize-only RGB scenes. Legacy palettised scenes retain their original guard.
+const FULL_COLOUR=new Set(['rest-windward-cave-midnight.png','rest-windward-cave-dawn.png']);
 
 /** What the builder emits. A scene that is not this shape did not come through it. */
 const WIDTH = 512;
@@ -63,6 +65,8 @@ const GROUPS = [...new Set(Object.values(GROUND_GROUP))];
 const ACTS = ['follow'];
 /** A night at a moment: `none-midnight`, `camp-dawn`. Only `rest` asks for these. */
 const NIGHTS = SHELTERS.flatMap((s) => NIGHT_MOMENTS.map((m) => `${s}-${m}`));
+const PLACE_NIGHTS=sceneNames('rest','roof','midnight',null,'poi_northwest_cave_camp')
+  .concat(sceneNames('rest','roof','dawn',null,'poi_northwest_cave_camp')).map(n=>n.replace(/^rest-/,''));
 /**
  * A night painted for its ground: `bedroll-snow-midnight`, `bedroll-high-dawn`. Asked of `sceneNames`
  * itself, over every shelter, moment and biome, so the guard knows exactly the names a night looks
@@ -111,7 +115,7 @@ describe('src/ui/scenes holds built scenes and nothing else', () => {
     ).toBe(true);
     if (variant) {
       expect(
-        [...SHELTERS, ...NIGHTS, ...PROCESSES, ...BIOMES, ...GROUPS, ...ACTS].includes(variant) ||
+        [...SHELTERS, ...NIGHTS, ...PLACE_NIGHTS, ...PROCESSES, ...BIOMES, ...GROUPS, ...ACTS].includes(variant) ||
           (gesture === 'rest' && GROUND_NIGHTS.has(variant)),
         `\`${variant}\` is not a shelter kind, a canon process, a biome or a ground group, so ` +
           `sceneFor('${gesture}', …) will never ask for it and this file will never draw.`
@@ -126,7 +130,7 @@ describe('src/ui/scenes holds built scenes and nothing else', () => {
       `${Math.round(kb)} KB. A built scene is around 130; a raw from an image model is thousands. ` +
         `Drop it in assets/source/scenes/ and run \`node tools/build-plates.js --scenes\` instead ` +
         `of copying it here.`
-    ).toBeLessThan(MAX_KB);
+    ).toBeLessThan(FULL_COLOUR.has(file)?WIDTH*HEIGHT*3/1024+16:MAX_KB);
   });
 
   it.each(files)('%s came out of the builder, at the builder’s size', (file) => {
@@ -135,12 +139,15 @@ describe('src/ui/scenes holds built scenes and nothing else', () => {
       width: WIDTH,
       height: HEIGHT
     });
-    // Colour type 3 is palettised. A raw is 2 (truecolour) or 6 (truecolour with alpha), and is
-    // where most of the excess weight lives even when the pixel dimensions happen to be right.
+    // Keep indexed legacy deliveries; the two owner-approved resize-only scenes must remain RGB.
     expect(
       colourType,
-      `colour type ${colourType}. The builder palettises to 3; a raw is 2 or 6.`
-    ).toBe(3);
+      `colour type ${colourType}. Expected ${FULL_COLOUR.has(file)?'full-colour RGB (2)':'legacy indexed colour (3)'}.`
+    ).toBe(FULL_COLOUR.has(file)?2:3);
+  });
+
+  it.each([...FULL_COLOUR])('%s preserves the approved compact RGB source byte for byte',file=>{
+    expect(readFileSync(join(SCENES,file))).toEqual(readFileSync(join(__dirname,'../assets/source/twins/rest-cave',file)));
   });
 });
 

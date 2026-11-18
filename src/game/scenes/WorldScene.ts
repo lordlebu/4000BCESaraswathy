@@ -129,6 +129,8 @@ const SHEET_KEY: Record<
   twinDryProps:'twins-dry-props',
   twinShrubs:'twins-shrubs',
   twinHighlandForms:'twins-highland-forms',
+  twinHighlandLife:'twins-highland-life',
+  twinRoads:'twins-roads',
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
   overdraw: OVERDRAW_SHEET,
@@ -1104,6 +1106,7 @@ export class WorldScene extends Phaser.Scene {
         item.sheet === 'twinDryProps' ||
         item.sheet === 'twinShrubs' ||
         item.sheet === 'twinHighlandForms' ||
+        item.sheet === 'twinHighlandLife' ||
         item.sheet === 'twinCourtyard' ||
         item.sheet === 'twinHousesDetail' ||
         item.sheet === 'twinDetails' ||
@@ -1120,6 +1123,7 @@ export class WorldScene extends Phaser.Scene {
         .image(cx, anchored ? item.y * TILE_SIZE + TILE_SIZE : cy, SHEET_KEY[item.sheet], item.frame)
         .setDepth(item.depth);
       if (anchored) sprite.setOrigin(0.5, 1);
+      if(item.scale!==undefined)sprite.setScale(item.scale);
       if(item.sheet==='twinShrubs'){
         sprite.setScale(item.scale??1).setPosition(cx+(item.offset?.x??0)*TILE_SIZE,(item.y+1+(item.offset?.y??0))*TILE_SIZE);
         this.twinShrubs.push(sprite);
@@ -1132,7 +1136,7 @@ export class WorldScene extends Phaser.Scene {
       }
       // Markers are found by name for the fog reveal and must stay in the list; everything else
       // that belongs to one tile can be hidden with it.
-      if (!item.name) this.tileOwned.push({ sprite, x: item.x, y: item.y });
+      if (!item.name||/^(cave|highland|road):/.test(item.name)) this.tileOwned.push({ sprite, x: item.x, y: item.y });
     }
     // Quiet workplace figures use the same loaded character sheets and scale as walkers.
     // No additional animation loop, hit targets, conversation logic or shadow layers.
@@ -1160,7 +1164,7 @@ export class WorldScene extends Phaser.Scene {
       if(image.texture?.key==='twins-cave-props')image.setFrame(frames[Number(image.frame.name)%3]!);
     }
     this.residentSprites = residents.map(resident => {
-      const frame = frameOf(resident.art), scale = travellerScale(TILE_SIZE);
+      const frame = frameOf(resident.art), scale = travellerScale(TILE_SIZE)*(resident.npcId==='npc_yamantaka'?2:1);
       const sprite = this.add.image((resident.x + .5) * TILE_SIZE,
         (resident.y + 1) * TILE_SIZE - 2, resident.art, resident.frame)
         .setOrigin(.5, 1).setDisplaySize(frame.width * scale, frame.height * scale)
@@ -2329,7 +2333,10 @@ export class WorldScene extends Phaser.Scene {
         texture:this.tileSprites[this.at.y]?.[this.at.x]?.texture.key,
         width:this.tileSprites[this.at.y]?.[this.at.x]?.displayWidth}:null,
       twinShrubs: {count:this.twinShrubs.length,scales:[...new Set(this.twinShrubs.map(s=>s.scaleX))],widths:[...new Set(this.twinShrubs.map(s=>s.displayWidth))]},
-      residents: this.residentSprites.map(({npcId,sprite}) => ({npcId,sheet:sprite.texture.key,x:sprite.x,y:sprite.y,frame:Number(sprite.frame.name)})),
+      caveScenery:this.children.list.filter(sprite=>sprite.name.startsWith('cave:')||sprite.name==='poi:poi_northwest_cave_camp')
+        .map(sprite=>({name:sprite.name,width:(sprite as Phaser.GameObjects.Image).displayWidth,height:(sprite as Phaser.GameObjects.Image).displayHeight})),
+      residents: this.residentSprites.map(({npcId,sprite}) => ({npcId,sheet:sprite.texture.key,x:sprite.x,y:sprite.y,
+        width:sprite.displayWidth,height:sprite.displayHeight,frame:Number(sprite.frame.name)})),
       // The rail the carriage is crossing on this ride, for the spec that nobody is drawn on it.
       rideLine: this.ride?.line ?? [],
       rideDurationMs: this.ride?.ms ?? null,

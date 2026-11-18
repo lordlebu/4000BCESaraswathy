@@ -30,7 +30,7 @@ describe('the shared valley landscape accents',()=>{
           if(p.scale===.5){expect(tile.biome).toBe('plains');expect(neighbours.some(t=>t?.biome==='desert')).toBe(true);}
           expect(p.offset).toBeDefined();expect(p.frame).toBeGreaterThanOrEqual(0);expect(p.frame).toBeLessThan(4);
         }
-        if(p.sheet!=='cliffs'&&p.sheet!=='twinShrubs'){
+        if(p.sheet!=='cliffs'&&p.sheet!=='twinShrubs'&&!p.name?.startsWith('highland:tree')&&!p.name?.startsWith('highland:conifer')){
           expect(small.has(`${p.x},${p.y}`)).toBe(false);small.add(`${p.x},${p.y}`);
         }
       }

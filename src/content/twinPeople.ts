@@ -3,7 +3,7 @@ export const TWIN_PEOPLE: Readonly<Record<string, string>> = {
   npc_priest_kang: 'priest-kang',
   npc_mirlepa: 'mirlepa',
   npc_yamantaka: 'yamantaka',
-  npc_cave_cook: 'cave-cook',
+  npc_cave_cook: 'traveller-nomad',
   npc_cave_herder: 'cave-herder',
   npc_twin_mason: 'twin-mason',
   npc_twin_gardener: 'twin-gardener',

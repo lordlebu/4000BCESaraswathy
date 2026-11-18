@@ -111,6 +111,8 @@ export type PlacementSheet =
   | 'rope'
   | 'road'
   | 'cliffs'
+  | 'twinHighlandLife'
+  | 'twinRoads'
   | 'treeline'
   | 'overhang'
   | 'marker'
