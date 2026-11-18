@@ -18,7 +18,10 @@ import homesSnes from '../../assets/twins/homes-snes.png?no-inline';
 import environment from '../../assets/twins/environment-nes.png?no-inline';
 import stories from '../../assets/twins/stories-nes.png?no-inline';
 import caveProps from '../../assets/twins/cave-props-nes-jrpg.png?no-inline';
-import shrubs from '../../assets/twins/shrubs-nes-jrpg.png?no-inline';
+import shrubs from '../../assets/twins/verge-shrubs.png?no-inline';
+import clayLamp from '../../assets/twins/covered-clay-lamp.png?no-inline';
+import railBridge from '../../assets/twins/rail-bridge-jrpg.png?no-inline';
+import {planTwinRailBridges} from './twinWalkway';
 import highlandLife from '../../assets/twins/highland-life.png?no-inline';
 import masonryRoads from '../../assets/twins/roads-masonry.png?no-inline';
 import {twinRoadMaterial} from './twinHighlandLife';
@@ -47,7 +50,7 @@ export function loadTwinArt(scene: Phaser.Scene): void {
     ['twins-surfaces',surfaces,128,128],['twins-homes-painted',homesSnes,128,144],
     ['twins-environment',environment,128,128],['twins-stories',stories,128,160],
     ['twins-highland-life',highlandLife,192,192],['twins-roads',masonryRoads,128,128],
-    ['twins-shrubs',shrubs,128,128],['twins-dry-props',dryProps,64,64],['twins-cave-props',caveProps,128,128],['twins-beedu',beedu,96,64]] as const) {
+    ['twins-rail-jrpg',railBridge,384,160],['twins-covered-lamp',clayLamp,64,128],['twins-shrubs',shrubs,128,128],['twins-dry-props',dryProps,64,64],['twins-cave-props',caveProps,128,128],['twins-beedu',beedu,96,64]] as const) {
     if (!scene.textures.exists(key)) scene.load.spritesheet(key,url,{frameWidth:w,frameHeight:h});
   }
 }
@@ -65,6 +68,8 @@ export function twinGroundFrame(world:World,tile:Tile,variant:number):number {
 }
 export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=new Set()):Placement[] {
   const {world,placed}=built;const region=world.twinRegion!;const out:Placement[]=[];
+  const railArt=planTwinRailBridges(world),spans=railArt.filter(p=>p.sheet==='twinRailBridge');
+  const onRailSpan=(x:number,y:number)=>spans.some(p=>p.y===y&&Math.abs(x-(p.x+(p.offset?.x??0)))<=(p.spanTiles!-1)/2);
   const clear=new Set<string>();
   const statue=bustSite(built);if(statue)clear.add(`${statue.x},${statue.y}`);
   const cave=placed.find(p=>p.poi.id==='poi_northwest_cave_camp');
@@ -97,6 +102,7 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
     if(tile.road||tile.track){
       // Road decks use the shared directional bridge, without a road painted over it.
       if(tile.bridge&&tile.road&&!tile.track)continue;
+      if(tile.track&&onRailSpan(x,y))continue;
       if(tile.bridge)add('twinObjects',18,x,y);
       const material=twinRoadMaterial(built,tile),mask=neighbours(x,y,tile.track?'track':'road');
       if(tile.track||material==='sand')add('twinRoutes',(tile.track?16:0)+mask,x,y);
@@ -141,7 +147,7 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
   // Exclude railway supports from road-span adjacency and orientation decisions.
   const roadWorld={...world,tiles:world.tiles.map(row=>row.map(tile=>tile.bridge&&tile.track?{...tile,bridge:false}:tile))};
   out.push(...planRiverBridges(roadWorld));
-  out.push(...furnishings,...twinBankDepth(built));
+  out.push(...furnishings,...twinBankDepth(built),...railArt);
   // Follow the actual drain-court anchor on restored maps; leave its east bank
   // and all roads untouched. These covers are scenery, not collision geometry.
   if(drain)for(let dy=-2;dy<=2;dy++){

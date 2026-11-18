@@ -1,0 +1,14 @@
+{
+  "rail_bridge": {
+    "mode": "built-in imagegen, reference-only generation",
+    "references": [
+      "assets/source/river-bridge.png",
+      "assets/twins/objects.png"
+    ],
+    "prompt": "Create ONE production game-map sprite, exact style words: nes jrpg sprite. A straight horizontal RAILWAY BRIDGE, a warm timber deck carried by two chunky shaded stone supports, with two continuous parallel iron rails and wooden sleepers on top. Image 1 is only a reference for the accepted bridge's overhead/three-quarter perspective, scale, warm wood, grey stone, clean chunky pixel masses and correct upper-left lighting. Image 2 is only a reference for the game's simple object drawing style. Create a NEW rail version, not a road bridge; no train. Entire bridge fully visible on a genuine transparent background, full horizontal span with square stone abutments at both ends and two modest visible stone pier faces beneath the timber beam. Logical design target 96 pixels wide by 40 pixels tall, horizontal three-tile span, simple 8-bit JRPG forms, broad coherent pixel clusters, small three-tone material ramps. Draw convincing physical depth: light on top/left planes, darker vertical front/right stone faces, narrow contact occlusion where timber rests on stone, and a proper cast shadow projected down-right onto the unseen water plane. The cast shadow must be semi-transparent and shaped by the actual beam, supports and piers, with small stepped pixel edges. Do not paint a rectangular dark apron or an arbitrary flat strip under the full sprite. No water pixels or background ground in the asset. All shadow and all piers fully within the image, modest padding. Keep deck straight and flat in a top-down JRPG view, rails exactly horizontal and evenly gauged, no isometric diagonal perspective, no photorealism, no painted blur, no fine grain, no tiny decorative screws, no moss, no plants, no glow, no labels, no text, no grid, no frame, no watermark. This is a small calm railway bridge for an ancient solarpunk game, not a modern industrial scene. Produce low-resolution pixel art from the start, not a detailed painting.",
+    "owner_selection": "Approved after seeing the JRPG sample over water",
+    "source": "assets/source/twins/rail-bridge-jrpg.png"
+  },
+  "vegetation": "Owner chose C: object-style cliff shrubs and existing old-map grass at borders",
+  "lamp": "Owner approved covered clay lamp sample"
+}

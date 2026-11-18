@@ -1,6 +1,18 @@
 # Harappa and Mohenjodaro
 
 
+## Rail bridge, mixed verges and walkway follow-up - 18 November 2026
+
+The owner approved the generated JRPG **rail** bridge with proper cast shading (upper crossing),
+vegetation C (object shrubs at cliffs, old grass at borders), and covered clay walkway lamps.
+The lower **road** bridge is accepted and retained. Otters gain a short bounded trail using the
+accepted water ripple. [Selections, provenance, implementation and verification](twin-walkway-phase.md).
+New/replacement art must be sampled for owner selection before applying it; mixed forms and
+accepted exceptions are deliberate. Final phase checks pass: 3,863 unit tests, ten focused browser cases and
+type/build/data/size gates (app 219.6/220 KiB gzip). Rail abutments overlap both banks; the
+road bridge remains accepted. Owner review/merge and broader final review remain.
+
+
 ## Cave household and road follow-up - 18 November 2026
 
 Implemented the owner's follow-up: Yamantaka at double map scale; a 1.5-tile cave body with

@@ -1,5 +1,6 @@
 import { planTwinScene } from './twinArt';
 import {planTwinLandscape,twinLandscapeClear} from './twinLandscape';
+import {planTwinLamps} from './twinWalkway';
 import { planRiverBridges } from './riverBridges';
 export { planRiverBridges } from './riverBridges';
 // What goes where on the map, decided without an engine.
@@ -113,6 +114,9 @@ export type PlacementSheet =
   | 'cliffs'
   | 'twinHighlandLife'
   | 'twinRoads'
+  | 'twinLamp'
+  | 'twinVergeGrass'
+  | 'twinRailBridge'
   | 'treeline'
   | 'overhang'
   | 'marker'
@@ -162,6 +166,9 @@ export interface Placement {
   offset?: { x: number; y: number };
   /** Whole/half-size landscape props; omitted on all accepted baseline placements. */
   scale?: number;
+  /** Whole-span rail art and its small original-track connection strips. */
+  spanTiles?:number;
+  crop?:{x:number;y:number;width:number;height:number};
   /**
    * Which side of its own cell a band is pinned to. Present only on the shore band, which is the
    * one placement that is not a whole cell -- everything else is centred in one and needs no
@@ -1254,7 +1261,7 @@ export function planMarkers(built: FieldMapWorld): Placement[] {
 export function planScene(built: FieldMapWorld): Placement[] {
   if (built.world.twinRegion) {
     const base=planTwinScene(built),clear=twinLandscapeClear(built,base);
-    return [...base,...planTwinLandscape(built,base,planCliffs(built.world),planDecor(built.world,clear),clear)];
+    return [...base,...planTwinLandscape(built,base,planCliffs(built.world),planDecor(built.world,clear),clear),...planTwinLamps(built)];
   }
   // **A forecourt round every place**: the tile it stands on and the eight around it, kept clear of
   // huts, scrub and props, so a place has ground in front of it and the road arrives somewhere.

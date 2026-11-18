@@ -1,5 +1,17 @@
 # Twin-city art implementation
 
+
+## Rail bridge, mixed verges and walkway follow-up - 18 November 2026
+
+The owner approved the generated JRPG **rail** bridge with proper cast shading (upper crossing),
+vegetation C (object shrubs at cliffs, old grass at borders), and covered clay walkway lamps.
+The lower **road** bridge is accepted and retained. Otters gain a short bounded trail using the
+accepted water ripple. [Selections, provenance, implementation and verification](twin-walkway-phase.md).
+New/replacement art must be sampled for owner selection before applying it; mixed forms and
+accepted exceptions are deliberate. Final phase checks pass: 3,863 unit tests, ten focused browser cases and
+type/build/data/size gates (app 219.6/220 KiB gzip). Rail abutments overlap both banks; the
+road bridge remains accepted. Owner review/merge and broader final review remain.
+
 > **Cave follow-up:** Yamantaka now draws at double map scale in both poses. The visiting cook reuses a stable Maru face/nomad sprite. Cave nights use the three-companion watercolor meal/sleep pair; highlands add sparse trees, conifers and masonry roads. [Current scope and art provenance](twin-cave-roads-phase.md).
 
 > **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.

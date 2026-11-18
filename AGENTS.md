@@ -63,6 +63,12 @@ merely because work was pushed or checks passed. At the next session, verify the
 
 ## Preserve the game's decisions
 
+- Mixed art forms are deliberate. Inspect the actual element and its approved references before
+  creating or replacing art. Follow the established style where it is clear; ask the owner when
+  uncertain. Show representative samples of new/replacement art and get the owner's selection
+  before applying it, including code-drawn art. A request for options is review-only until chosen.
+  Preserve accepted exceptions; never flatten the whole map into one style. See the current art guide.
+
 - Art forms are element-specific: read [the current guide](docs/art-direction.md#current-element-by-element-direction--17-november-2026).
   New overworld people, wandering animals and trams explicitly use “nes jrpg sprite”; accepted
   Beedu alone keeps small SNES art. Portraits/events/place views use their separate painted styles.

@@ -15,9 +15,12 @@ import { facingArt, hasPaintedArt, paintedKey, walkArt, walkKey } from '../wande
 import { biomeFor } from '../../content/species';
 import type { Facing } from '../player';
 import type { Point, World } from '../../world/types';
+import {OtterWakeView} from './OtterWakeView';
+import {OTTER_SWIM_MS} from '../otterWake';
 
 /** What the animals read of the scene. Live: a getter answers for the map shown now. */
 export interface WandererHost {
+  seen?:(x:number,y:number)=>boolean;
   readonly world: World;
   readonly fieldMapId: string;
   /** Where the map's places landed, for a patrol kept near one (`content/wanderers.ts`). */
@@ -27,6 +30,7 @@ export interface WandererHost {
 }
 
 export class WandererView {
+  private wake:OtterWakeView|null=null;
   /**
    * The animals walking their own ground, and the sprites drawing them.
    *
@@ -80,6 +84,9 @@ export class WandererView {
       this.size(wanderer, sprite);
       this.list.push({ wanderer, sprite });
     }
+    if(this.list.some(p=>p.wanderer.id==='river-otter')&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+      this.wake=new OtterWakeView(this.scene,this.host.world,(x,y)=>this.host.seen?.(x,y)??true);
+    (window as unknown as {__otterWake?:()=>unknown}).__otterWake=()=>this.wake?.report()??null;
 
     // **Exposed for the browser suite for the same reason `__travellers` is, and it is the half
     // that matters.** Every rule in `wanderers.ts` is proved under Node while this scene calls none
@@ -170,17 +177,25 @@ export class WandererView {
       if (wanderer.vehicle) continue;
       const where = wandererAt(this.host.world, wanderer, day, phase);
       if (!where) {
+        if(wanderer.id==='river-otter')this.scene.tweens.killTweensOf(sprite);
         sprite.setVisible(false);
         this.standing.delete(wanderer.id);
         this.going.delete(wanderer.id);
         continue;
       }
       sprite.setVisible(true);
+      const previous=this.standing.get(wanderer.id);
       this.standing.set(wanderer.id, where.at);
-      sprite.setPosition(
-        where.at.x * TILE_SIZE + TILE_SIZE / 2,
-        where.at.y * TILE_SIZE + TILE_SIZE - 2
-      );
+      const target={x:where.at.x*TILE_SIZE+TILE_SIZE/2,y:(where.at.y+1)*TILE_SIZE-2};
+      const changed=previous&&(previous.x!==where.at.x||previous.y!==where.at.y);
+      const wet=(p:Point)=>{const t=this.host.world.tiles[p.y]?.[p.x];return t&&['river','sea'].includes(t.biome)&&!t.bridge&&!t.road&&!t.track;};
+      if(wanderer.id==='river-otter'&&changed&&this.wake&&wet(previous)&&wet(where.at)
+        &&Math.abs(previous.x-where.at.x)+Math.abs(previous.y-where.at.y)===1){
+        this.scene.tweens.killTweensOf(sprite);
+        this.scene.tweens.add({targets:sprite,...target,duration:OTTER_SWIM_MS,ease:'Linear'});
+      }else if(!changed&&wanderer.id==='river-otter'&&this.scene.tweens.isTweening(sprite)){
+        // A logical waypoint can be sampled repeatedly while its cosmetic swim finishes.
+      }else{if(wanderer.id==='river-otter')this.scene.tweens.killTweensOf(sprite);sprite.setPosition(target.x,target.y);}
       // Sorted by row like everything else standing on the ground, so an animal south of the player
       // passes in front and one north of them passes behind.
       sprite.setDepth(depthFor(where.at.y, ROW_SLOT.walker));
@@ -250,6 +265,7 @@ export class WandererView {
    */
   animate(now: number): void {
     this.drive(now);
+    this.wake?.update(now,this.list.find(p=>p.wanderer.id==='river-otter')?.sprite??null);
     for (const { wanderer, sprite } of this.list) {
       const go = this.going.get(wanderer.id);
       if (!go?.moving || !sprite.visible) continue;

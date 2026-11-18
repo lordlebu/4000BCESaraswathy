@@ -73,8 +73,8 @@ export function planTwinShrubs(built:FieldMapWorld,clear:ReadonlySet<string>):Pl
     if(!edges.length||(!borders.length&&!banks.length&&hash%3===0))continue;
     const [dx,dy]=edges[(hash>>>8)%edges.length]!;
     const frame=t.biome==='wetland'?3:t.moisture<.2||t.biome==='mountains'?1:t.biome==='forest'||(t.moisture>.5&&hash%5===0)?2:hash%3===0?1:0;
-    const plants=(borders.length?[-.17,.17]:[0]).map(along=>({sheet:'twinShrubs' as const,
-      frame,x:t.x,y:t.y,scale:borders.length ? .5 : banks.length ? .75 : 1,
+    const plants=(borders.length?[-.17,.17]:[0]).map(along=>({sheet:borders.length?'twinVergeGrass' as const:'twinShrubs' as const,
+      frame:borders.length?hash%3:frame,x:t.x,y:t.y,scale:borders.length ? .5 : banks.length ? .75 : 1,
       offset:{x:dx*.32+(dy?along:0),y:dy*.32-.45+(dx?along:0)},
       depth:depthFor(t.y+dy*.32-.45,ROW_SLOT.undergrowth)}));
     groups.push({rank:hash,plants});
