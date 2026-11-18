@@ -16,7 +16,7 @@ describe('the northeast cave household', () => {
       const cave=built.placed.find(p=>p.poi.id==='poi_northwest_cave_camp')!.at;
       expect(walks.map(w=>w.npcId)).toEqual(['npc_mirlepa','npc_yamantaka']);
       const reserved=scenery.filter(p=>['twinStories','twinCaveProps','twinHouses','twinHousesDetail',
-        'twinHomesPainted','twinObjects','twinDetails','twinCourtyard','twinEnvironment'].includes(p.sheet));
+        'twinHomesPainted','twinShrubs','twinObjects','twinDetails','twinCourtyard','twinEnvironment'].includes(p.sheet));
       for(const walk of walks){
         expect(walk.points.length).toBeGreaterThan(2);
         expect(walk.points.at(-1)).toEqual(walk.points[0]);

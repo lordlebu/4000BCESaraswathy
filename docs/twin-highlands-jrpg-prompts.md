@@ -1,5 +1,7 @@
 # Northeast highlands — NES JRPG terrain
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
 ## Northeast highlands — owner update, 18 November 2026
 
 The Windward Cave moves from the northwest desert to **(51,12) in the northeast**. Its stable
@@ -7,7 +9,7 @@ The Windward Cave moves from the northwest desert to **(51,12) in the northeast*
 Fresh and saved twin-city maps receive the same bounded landscape addition; saved city ground,
 buildings, roads, rail, other POIs and journey progress remain intact.
 
-Completed in this follow-up: a cool sage/mint meadow distinct from the valley's existing grass;
+Completed in this follow-up: the original sage/mint meadow (now superseded by muted sage);
 rounded foothills, bare blue-grey mountains and snow-capped peaks on the north/east border;
 and a narrow mountain stream joining the Saraswati. The meadow keeps both residents' local
 walking/seated turns and rotating props clear. The northwest Gedrosian margin remains arid.

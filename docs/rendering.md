@@ -6,6 +6,23 @@
 before changing anything: what the layers are, what each one is allowed to do, and how to measure
 the cost of adding another.
 
+## Twin-valley terrain exception - 18 November 2026
+
+The twin map uses the owner-approved muted sage highlands, with broad pixel turf/stone patches.
+Its height/riverbank ramps and two-sided sand/grass transitions are baked at scene entry into one
+shared 32px-frame canvas atlas, displayed at 128px with nearest filtering. Ground remains one quad
+per tile; the baked bands replace the former flat twin hill/bank outlines. Existing real cliff
+faces, river animation, bridges and buildings retain their separate layers. Older maps retain the
+shared torn-mask system described below. No biome/elevation/save changes or per-frame drawing.
+
+The review seed used 521 frames / 2.125 MiB. Full verification at game commit `f80033e` passed
+3,839 unit tests, eight combined browser checks, typecheck, build, data lock and size gates
+(app 217.1/220 KiB gzip). SwiftShader timing was noisy; best cave frame cost matched the legacy
+terrain, but the higher median means hardware smoothness remains part of final review.
+See [the terrain ledger](twin-terrain-softening.md) for exact measurements and development-only
+`turf=sage|lichen|olive|legacy` comparisons. Optional ambience and the six-puff smoke cap are
+recorded in [the landscape ledger](twin-landscape-motion-phase.md).
+
 ## The layers, bottom to top
 
 Eight of them, and the rules between them are what stop this tangling. Three are scatter layers that

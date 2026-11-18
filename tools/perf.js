@@ -101,7 +101,10 @@ const flag = (name) => {
 };
 const MAP = flag('map');
 const SEED = flag('seed') ?? 'perf-guard';
-const URL_PATH = `/?seed=${SEED}&hour=12${MAP ? `&map=${MAP}` : ''}`;
+const AT = flag('at');
+const ATMOSPHERE = flag('twin-atmos');
+const TURF = flag('turf');
+const URL_PATH = `/?seed=${SEED}&hour=12${MAP ? `&map=${MAP}` : ''}${AT ? `&at=${encodeURIComponent(AT)}` : ''}${ATMOSPHERE ? `&twin-atmos=${ATMOSPHERE}` : ''}${TURF ? `&turf=${TURF}` : ''}&door=open&title=skip&events=off&firsts=off&chatter=off`;
 
 /** Frames sampled, and how many are thrown away while the scene settles. */
 const FRAMES = 110;
@@ -155,10 +158,11 @@ async function measure() {
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    await page.emulateMedia({reducedMotion:'no-preference'});
     const errors = [];
     page.on('pageerror', (e) => errors.push(String(e)));
 
-    await page.goto(`http://localhost:${PORT}${URL_PATH}`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`http://localhost:${PORT}${URL_PATH}`, { waitUntil: 'domcontentloaded', timeout: 120_000 });
     // The scene installs this after creating the player. A place panel can cover the
     // journal at arrival, so its visibility is not a readiness signal for every map.
     await page.waitForFunction(() => Boolean(window.__walker), { timeout: 120_000 });
@@ -195,6 +199,7 @@ async function measure() {
     samples.sort((a, b) => a - b);
     return {
       renderer,
+      scene: await page.evaluate(()=>{const w=window.__walker?.();return w?{x:w.x,y:w.y,terrain:w.twinTerrain??null,ambience:w.twinAmbience??null,shrubs:w.twinShrubs??null}:null;}),
       errors,
       median: samples[Math.floor(samples.length / 2)],
       p90: samples[Math.floor(samples.length * 0.9)],

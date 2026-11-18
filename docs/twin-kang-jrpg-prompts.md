@@ -1,5 +1,7 @@
 # Priest Kang — NES JRPG character and bust
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
 Owner update, 17 November 2026. Follow [the element guide](art-direction.md).
 
 Kang's overworld character and all three quest bust stages use the exact **“nes jrpg sprite”**

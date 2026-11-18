@@ -1,5 +1,35 @@
 # Harappan phased plan ? completion audit
 
+> **Current checkpoint - 18 November 2026:** Required illustration backlog: **0**. Muted sage is owner approved; terrain borders, shrubs, slow cave walks and bounded ambience are implemented. Final integrated visual/gameplay/save/hardware review and owner merge remain. [Terrain evidence](twin-terrain-softening.md).
+
+
+## Terrain height and palette follow-up - 18 November 2026
+
+The new map now bakes stepped height shading, river-bank bands and soft sand/turf/rock/snow
+transitions directly into a shared ground atlas. Ground stays one quad per tile, with no new
+per-frame animation or biome/elevation/save changes. The northeast meadow uses a muted sage
+palette and sparse broad turf/stone clusters instead of the bright flat green. Cool lichen and
+dry olive are available as development review samples; the owner selected sage.
+See [terrain samples and implementation notes](twin-terrain-softening.md). Buildings, sprites,
+portraits, event cards and the accepted Beedu remain unchanged. The owner approved muted sage. Eight combined browser checks pass; final
+integrated review remains pending.
+
+
+## Landscape and motion follow-up - 18 November 2026
+
+The required illustration backlog remains **zero**. The owner added one focused landscape/
+motion pass: simple NES JRPG cliff shrubs and half-size grass/desert border bushes, richer
+older-map ground decor, very slow cave residents, cave smoke, subtle river ripples and localized
+desert haze. These are implemented with capped static placements and small cached pixel effects;
+phase-end browser, build and size checks pass. Desert haze remains after its measured on/off
+comparison; the cave software-renderer samples are noisy, as recorded in the phase ledger.
+The cave turn is now 120 seconds with a single slow out-and-back, independent of journey-time
+jumps. Existing buildings, Beedu and saved geography remain accepted. See the
+[landscape/motion ledger](twin-landscape-motion-phase.md) for scope, exact prompt and budgets.
+
+After this pass, the required work is still the final integrated visual/gameplay/save/performance
+review, resolving findings, and owner review/merge. Further character and seasonal art is optional.
+
 Updated 18 November 2026. Companion to the [original plan](twin-cities-art-plan.md).
 
 ## Illustration production complete

@@ -3,7 +3,7 @@ import {fieldMap} from '../src/content/places';
 import {buildFieldMap} from '../src/world/fieldMap';
 import {planScene} from '../src/game/scenePlan';
 import {planTwinScene} from '../src/game/twinArt';
-import {twinLandscapeClear} from '../src/game/twinLandscape';
+import {MAX_TWIN_SHRUBS,MAX_TWIN_GROUND_DECOR,twinLandscapeClear} from '../src/game/twinLandscape';
 
 describe('the shared valley landscape accents',()=>{
   for(const seed of ['twin-review','twin-art-review','twin-manual-review']){
@@ -15,14 +15,22 @@ describe('the shared valley landscape accents',()=>{
       expect(accents.some(p=>p.sheet==='cliffs')).toBe(true);
       expect(accents.some(p=>p.sheet==='decor')).toBe(true);
       expect(accents.some(p=>p.sheet==='twinDryProps')).toBe(true);
-      expect(accents.length).toBeLessThan(500);
+      expect(accents.filter(p=>p.sheet==='twinShrubs').length).toBeLessThanOrEqual(MAX_TWIN_SHRUBS);
+      expect(accents.filter(p=>p.sheet==='decor').length).toBeLessThanOrEqual(MAX_TWIN_GROUND_DECOR);
+      expect(accents.some(p=>p.sheet==='twinShrubs'&&p.scale===.5)).toBe(true);
+      expect(accents.some(p=>p.sheet==='twinShrubs'&&p.scale===1)).toBe(true);
       const small=new Set<string>();
       for(const p of accents){
         const tile=built.world.tiles[p.y]![p.x]!;
         expect(clear.has(`${p.x},${p.y}`)).toBe(false);
         expect(tile.road||tile.track||tile.bridge).toBeFalsy();
-        expect(['desert','hills','plains','coast']).toContain(tile.biome);
-        if(p.sheet!=='cliffs'){
+        expect(['desert','hills','plains','coast','wetland','river','forest','mountains','snow']).toContain(tile.biome);
+        if(p.sheet==='twinShrubs'){
+          const neighbours=[[0,-1],[1,0],[0,1],[-1,0]].map(([dx,dy])=>built.world.tiles[p.y+dy!]?.[p.x+dx!]);
+          if(p.scale===.5){expect(tile.biome).toBe('plains');expect(neighbours.some(t=>t?.biome==='desert')).toBe(true);}
+          expect(p.offset).toBeDefined();expect(p.frame).toBeGreaterThanOrEqual(0);expect(p.frame).toBeLessThan(4);
+        }
+        if(p.sheet!=='cliffs'&&p.sheet!=='twinShrubs'){
           expect(small.has(`${p.x},${p.y}`)).toBe(false);small.add(`${p.x},${p.y}`);
         }
       }

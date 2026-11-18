@@ -1,5 +1,7 @@
 # Twin-valley place paintings ? 18 November 2026
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
 Fifteen new preferred panoramas complete the sixteen-place illustration inventory alongside the
 accepted Harappa courtyard. Simple cozy watercolor / spare fine ink, broad warm/cool palettes,
 recognizable local architecture and ecology. The imagery is off-map; the existing NES overworld,

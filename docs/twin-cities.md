@@ -1,5 +1,32 @@
 # Harappa and Mohenjodaro
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
+
+## Muted highland terrain and softer edges - 18 November 2026
+
+The cave meadow now uses muted sage with sparse broad turf/stone patches. Cool lichen and dry
+olive are development review alternatives. A shared baked ground atlas adds stepped gradients
+at hill/mountain/snow boundaries, soft river-bank bands and an earthy, irregular desert/grass
+transition on both sides of the seam. It replaces the old flat bank/hill outlines while keeping
+real cliff faces, buildings and transit unchanged. One ground image per tile remains; no extra
+animated layers, biome/elevation changes or save migration. See [the terrain sample ledger](twin-terrain-softening.md).
+
+## Landscape and motion follow-up - 18 November 2026
+
+The required illustration backlog remains **zero**. The owner added one focused landscape/
+motion pass: simple NES JRPG cliff shrubs and half-size grass/desert border bushes, richer
+older-map ground decor, very slow cave residents, cave smoke, subtle river ripples and localized
+desert haze. These are implemented with capped static placements and small cached pixel effects;
+phase-end browser, build and size checks pass. Desert haze remains after its measured on/off
+comparison; the cave software-renderer samples are noisy, as recorded in the phase ledger.
+The cave turn is now 120 seconds with a single slow out-and-back, independent of journey-time
+jumps. Existing buildings, Beedu and saved geography remain accepted. See the
+[landscape/motion ledger](twin-landscape-motion-phase.md) for scope, exact prompt and budgets.
+
+After this pass, the required work is still the final integrated visual/gameplay/save/performance
+review, resolving findings, and owner review/merge. Further character and seasonal art is optional.
+
 ## Place-view phase delivered — 18 November 2026
 
 All fifteen remaining place panoramas are delivered. Together with the accepted Harappa court,
@@ -24,7 +51,7 @@ The Windward Cave moves from the northwest desert to **(51,12) in the northeast*
 Fresh and saved twin-city maps receive the same bounded landscape addition; saved city ground,
 buildings, roads, rail, other POIs and journey progress remain intact.
 
-Completed in this follow-up: a cool sage/mint meadow distinct from the valley's existing grass;
+Completed in this follow-up: the original sage/mint meadow (now superseded by muted sage);
 rounded foothills, bare blue-grey mountains and snow-capped peaks on the north/east border;
 and a narrow mountain stream joining the Saraswati. The meadow keeps both residents' local
 walking/seated turns and rotating props clear. The northwest Gedrosian margin remains arid.
@@ -48,7 +75,7 @@ Shared cliffs and sparse ground decor are reused with clearance masks; compact g
 Unknown traveller profiles now keep the same face after introduction. The ostrich tram uses
 240ms/tile instead of 100ms/tile, with the same route, fare and game-time rules.
 
-The current required art backlog is **fifteen place views**, then final integrated review.
+That historical checkpoint had **fifteen place views**; all are now delivered. Final integrated review remains.
 See [the audited checklist](twin-cities-art-status.md) and
 [full phase/prompt ledger](twin-graphics-phase-2026-11-18.md). Large sources/reviews stay ignored.
 
@@ -63,8 +90,8 @@ backlog is **15 place views**; see [the phased checklist](twin-cities-art-status
 
 ## Cave household update — 17 November 2026
 
-Mirlepa and Yamantaka now take turns sitting and walking beside the northwest cave. Each
-45-second turn leaves one in a generated seated pose while the other follows a short cardinal
+Mirlepa and Yamantaka now take turns sitting and walking beside the northeast cave. Each
+120-second turn leaves one in a generated seated pose while the other follows a short cardinal
 out-and-back route. Both use the same approved twenty-pose NES JRPG sheet quality. The routes
 stay on opposite sides, avoid other residents, props, water and the entrance, and follow restored
 POI coordinates. This is local presentation; neither joins the three city circuit walkers.

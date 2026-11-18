@@ -1,5 +1,7 @@
 # NES JRPG wildlife and tram production prompts
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
 Built-in imagegen; genuine transparency requested. Current direction: [element guide](art-direction.md).
 New frames are cropped and point-resized only; no palette, colour or alpha quantization.
 Beedu is accepted and was not regenerated. Large originals stay in ignored desktop storage.

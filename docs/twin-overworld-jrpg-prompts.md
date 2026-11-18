@@ -1,5 +1,7 @@
 # Approved NES JRPG overworld prompts
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
 ## Priest Kang character and bust — 17 November 2026
 
 Kang now also uses a generated **“nes jrpg sprite”** twenty-pose overworld sheet. His three bust
@@ -7,8 +9,8 @@ quest stages share the same face, headband, beard and cloak silhouette, rendered
 Both use compact RGBA sources and resize-only delivery. See [the exact prompt/rebuild ledger](twin-kang-jrpg-prompts.md).
 Four of fifteen named overworld identities now have generated JRPG sheets; the other eleven
 retain their preceding compact NES sheets. Kang now wears light indigo and has a delivered
-cozy watercolor conversation portrait plus carving and unveiling event paintings. Required
-remaining illustrations: 36 (19 happenings, 15 place views, 2 journeys). Beedu remains unchanged.
+cozy watercolor conversation portrait plus carving and unveiling event paintings. The required
+illustrations at that historical checkpoint: 36 (19 happenings, 15 place views, 2 journeys), all subsequently delivered. Beedu remains unchanged.
 
 The two generated cave residents now alternate short local walks and seated rests; both use
 their existing twenty-pose sheets. See [cave props and schedule](twin-cave-jrpg-prompts.md).

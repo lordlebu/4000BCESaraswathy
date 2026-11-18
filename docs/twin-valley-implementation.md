@@ -1,5 +1,35 @@
 # Twin-valley implementation ledger
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
+
+## Terrain height and palette follow-up - 18 November 2026
+
+The new map now bakes stepped height shading, river-bank bands and soft sand/turf/rock/snow
+transitions directly into a shared ground atlas. Ground stays one quad per tile, with no new
+per-frame animation or biome/elevation/save changes. The northeast meadow uses a muted sage
+palette and sparse broad turf/stone clusters instead of the bright flat green. Cool lichen and
+dry olive are available as development review samples; the owner selected sage.
+See [terrain samples and implementation notes](twin-terrain-softening.md). Buildings, sprites,
+portraits, event cards and the accepted Beedu remain unchanged. The owner approved muted sage. Eight combined browser checks pass; final
+integrated review remains pending.
+
+
+## Landscape and motion follow-up - 18 November 2026
+
+The required illustration backlog remains **zero**. The owner added one focused landscape/
+motion pass: simple NES JRPG cliff shrubs and half-size grass/desert border bushes, richer
+older-map ground decor, very slow cave residents, cave smoke, subtle river ripples and localized
+desert haze. These are implemented with capped static placements and small cached pixel effects;
+phase-end browser, build and size checks pass. Desert haze remains after its measured on/off
+comparison; the cave software-renderer samples are noisy, as recorded in the phase ledger.
+The cave turn is now 120 seconds with a single slow out-and-back, independent of journey-time
+jumps. Existing buildings, Beedu and saved geography remain accepted. See the
+[landscape/motion ledger](twin-landscape-motion-phase.md) for scope, exact prompt and budgets.
+
+After this pass, the required work is still the final integrated visual/gameplay/save/performance
+review, resolving findings, and owner review/merge. Further character and seasonal art is optional.
+
 ## Place-view phase delivered — 18 November 2026
 
 All fifteen remaining place panoramas are delivered. Together with the accepted Harappa court,
@@ -24,7 +54,7 @@ The Windward Cave moves from the northwest desert to **(51,12) in the northeast*
 Fresh and saved twin-city maps receive the same bounded landscape addition; saved city ground,
 buildings, roads, rail, other POIs and journey progress remain intact.
 
-Completed in this follow-up: a cool sage/mint meadow distinct from the valley's existing grass;
+Completed in this follow-up: the original sage/mint meadow (now superseded by muted sage);
 rounded foothills, bare blue-grey mountains and snow-capped peaks on the north/east border;
 and a narrow mountain stream joining the Saraswati. The meadow keeps both residents' local
 walking/seated turns and rotating props clear. The northwest Gedrosian margin remains arid.
@@ -82,8 +112,8 @@ corrected; final output is full-colour RGB, without quantization. Latest-head CI
 Kang's NES JRPG sprite now wears **light indigo**. His conversation portrait and the statue
 carving/unveiling cards use the owner's initial **simple cozy watercolor** style. The optional
 five-beat bust quest and three persistent map stages are wired; these are distinct delivered
-paintings, not a generic event fallback. Full-colour resize only. The current required art
-backlog is now **15 place views**; see [the phased checklist](twin-cities-art-status.md) and
+paintings, not a generic event fallback. Full-colour resize only. At that historical checkpoint the art
+backlog was **15 place views**, all now delivered; see [the phased checklist](twin-cities-art-status.md) and
 [original plan checkpoint](twin-cities-art-plan.md#conclusion-checkpoint--17-november-2026).
 
 ## Priest Kang character and bust — 17 November 2026
@@ -93,13 +123,13 @@ quest stages share the same face, headband, beard and cloak silhouette, rendered
 Both use compact RGBA sources and resize-only delivery. See [the exact prompt/rebuild ledger](twin-kang-jrpg-prompts.md).
 Four of fifteen named overworld identities now have generated JRPG sheets; the other eleven
 retain their preceding compact NES sheets. Kang now wears light indigo and has a delivered
-cozy watercolor conversation portrait plus carving and unveiling event paintings. Required
-remaining illustrations are now **15 place views**, after the later event/travel phase. Beedu remains unchanged.
+cozy watercolor conversation portrait plus carving and unveiling event paintings. The required
+illustrations at that historical checkpoint were **15 place views**, subsequently delivered. Beedu remains unchanged.
 
 ## Cave household update — 17 November 2026
 
-Mirlepa and Yamantaka now take turns sitting and walking beside the northwest cave. Each
-45-second turn leaves one in a generated seated pose while the other follows a short cardinal
+Mirlepa and Yamantaka now take turns sitting and walking beside the northeast cave. Each
+120-second turn leaves one in a generated seated pose while the other follows a short cardinal
 out-and-back route. Both use the same approved twenty-pose NES JRPG sheet quality. The routes
 stay on opposite sides, avoid other residents, props, water and the entrance, and follow restored
 POI coordinates. This is local presentation; neither joins the three city circuit walkers.

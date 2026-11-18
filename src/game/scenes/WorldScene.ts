@@ -1,3 +1,6 @@
+import { TwinAmbienceView } from '../systems/TwinAmbienceView';
+import {bakeTwinTerrain} from '../twinTerrainTextures';
+import {TWIN_TURF,type TwinTurf} from '../twinTerrain';
 import { loadTwinArt, TWIN_KEYS, twinGroundArt } from '../twinArt';
 import { TWIN_MAP } from '../../world/twinCities';
 // The map: everything the player sees on the canvas.
@@ -124,6 +127,7 @@ const SHEET_KEY: Record<
   twinStories:'twins-stories',
   twinCaveProps:'twins-cave-props',
   twinDryProps:'twins-dry-props',
+  twinShrubs:'twins-shrubs',
   twinHighlandForms:'twins-highland-forms',
   terrain: TERRAIN_SHEET,
   huts: HUT_SHEET,
@@ -380,6 +384,9 @@ export class WorldScene extends Phaser.Scene {
   private built!: FieldMapWorld;
   /** Which map this scene was started for. Known from `init`, before `built` exists. */
   private fieldMapId = DEFAULT_FIELD_MAP;
+  private twinAmbience: TwinAmbienceView | null = null;
+  private twinShrubs: Phaser.GameObjects.Image[] = [];
+  private twinTerrainInfo: {palette:string;frames:number;bytes:number}|null=null;
 
   /** People who walk up to the traveller. See `systems/VisitorView.ts`. */
   private visitors!: VisitorView;
@@ -613,6 +620,7 @@ export class WorldScene extends Phaser.Scene {
     this.beaten = new Set();
     this.tileSprites = [];
     this.fogSprites = [];
+    this.twinAmbience?.destroy();this.twinAmbience=null;this.twinShrubs=[];this.twinTerrainInfo=null;
     this.tileOwned = [];
     this.residentSprites = [];
     this.residentScenery = [];this.residentDay=-1;
@@ -852,6 +860,11 @@ export class WorldScene extends Phaser.Scene {
     const pixelWidth = width * TILE_SIZE;
     const pixelHeight = height * TILE_SIZE;
 
+    const requestedTurf=import.meta.env.DEV?new URLSearchParams(window.location.search).get('turf'):null;
+    const turf:TwinTurf=requestedTurf&&Object.hasOwn(TWIN_TURF,requestedTurf)?requestedTurf as TwinTurf:'sage';
+    const twinTerrain=this.world.twinRegion&&requestedTurf!=='legacy'?bakeTwinTerrain(this,this.world,turf):null;
+    this.twinTerrainInfo=twinTerrain?{palette:turf,frames:twinTerrain.count,bytes:twinTerrain.bytes}:null;
+
     for (let y = 0; y < height; y += 1) {
       const tileRow: Phaser.GameObjects.Image[] = [];
       const fogRow: Phaser.GameObjects.Image[] = [];
@@ -867,7 +880,8 @@ export class WorldScene extends Phaser.Scene {
         // about what the traveller is standing on -- see `placeholderTileKey`.
         const art = this.world.twinRegion ? twinGroundArt(this.world,tile,variant) : this.groundArt(tile.biome, variant);
         const tileSprite = this.add
-          .image(cx, cy, art.key, art.frame)
+          .image(cx, cy, twinTerrain?.key??art.key, twinTerrain?.frames[y]![x]??art.frame)
+          .setDisplaySize(TILE_SIZE,TILE_SIZE)
           .setDepth(DEPTH_TILE);
         tileRow.push(tileSprite);
         this.tileOwned.push({ sprite: tileSprite, x, y });
@@ -1056,6 +1070,10 @@ export class WorldScene extends Phaser.Scene {
         continue;
       }
 
+      // The new baked bank/slope bands replace these flat outlines; keep the animated water frames.
+      if(this.twinTerrainInfo&&((item.sheet==='twinRims'&&item.frame<32)
+        ||(item.sheet==='twinEnvironment'&&item.frame>=9&&item.frame<=23)))continue;
+
       // The mill's wheel: centred on the boss the builder measured rather than on the tile, and
       // advanced by the clock. It is the one sprite here that is neither anchored to its tile's
       // bottom edge nor centred in its cell.
@@ -1084,6 +1102,7 @@ export class WorldScene extends Phaser.Scene {
         item.sheet === 'twinStories' ||
         item.sheet === 'twinCaveProps' ||
         item.sheet === 'twinDryProps' ||
+        item.sheet === 'twinShrubs' ||
         item.sheet === 'twinHighlandForms' ||
         item.sheet === 'twinCourtyard' ||
         item.sheet === 'twinHousesDetail' ||
@@ -1101,6 +1120,10 @@ export class WorldScene extends Phaser.Scene {
         .image(cx, anchored ? item.y * TILE_SIZE + TILE_SIZE : cy, SHEET_KEY[item.sheet], item.frame)
         .setDepth(item.depth);
       if (anchored) sprite.setOrigin(0.5, 1);
+      if(item.sheet==='twinShrubs'){
+        sprite.setScale(item.scale??1).setPosition(cx+(item.offset?.x??0)*TILE_SIZE,(item.y+1+(item.offset?.y??0))*TILE_SIZE);
+        this.twinShrubs.push(sprite);
+      }
       if (item.name) sprite.setName(item.name);
       if (item.sway) this.overdraw.push({ sprite, ...item.sway });
       if (item.sheet === 'lamp') {
@@ -1117,6 +1140,9 @@ export class WorldScene extends Phaser.Scene {
     this.refreshResidents(this.dayOfJourney());
     if(this.world.twinRegion){
       const scene=this;
+      const motion=!(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false);
+      const enabled=motion&&!(import.meta.env.DEV&&new URLSearchParams(window.location.search).get('twin-atmos')==='off');
+      this.twinAmbience=new TwinAmbienceView(this,this.built,p=>this.discovered.has(`${p.x},${p.y}`),enabled);
       this.beedu=new BeeduView(this,{get world(){return scene.world;},get at(){return scene.at;},seen:(x,y)=>scene.discovered.has(`${x},${y}`),busy:()=>scene.moving||scene.riding});
       this.events.once('shutdown',()=>{this.beedu?.destroy();this.beedu=null;});
     }
@@ -1150,7 +1176,7 @@ export class WorldScene extends Phaser.Scene {
     const view=this.cameras.main.worldView, margin=2*TILE_SIZE;
     for(const resident of this.residentSprites){
       if(!resident.walk)continue;
-      const pose=cavePose(resident.walk,this.time.now+this.travelled);
+      const pose=cavePose(resident.walk,this.time.now);
       const {sprite,owned}=resident;
       sprite.setPosition((pose.x+.5)*TILE_SIZE,(pose.y+1)*TILE_SIZE-2)
         .setFrame(pose.frame).setDepth(depthFor(pose.y,ROW_SLOT.walker));
@@ -2298,6 +2324,11 @@ export class WorldScene extends Phaser.Scene {
       carriage: this.carriage.visible,
       carriageTexture: this.carriage.texture.key,
       carriageFrame: this.carriage.frame.name,
+      twinAmbience: this.twinAmbience?.report()??null,
+      twinTerrain:this.twinTerrainInfo?{...this.twinTerrainInfo,
+        texture:this.tileSprites[this.at.y]?.[this.at.x]?.texture.key,
+        width:this.tileSprites[this.at.y]?.[this.at.x]?.displayWidth}:null,
+      twinShrubs: {count:this.twinShrubs.length,scales:[...new Set(this.twinShrubs.map(s=>s.scaleX))],widths:[...new Set(this.twinShrubs.map(s=>s.displayWidth))]},
       residents: this.residentSprites.map(({npcId,sprite}) => ({npcId,sheet:sprite.texture.key,x:sprite.x,y:sprite.y,frame:Number(sprite.frame.name)})),
       // The rail the carriage is crossing on this ride, for the spec that nobody is drawn on it.
       rideLine: this.ride?.line ?? [],
@@ -2541,6 +2572,7 @@ export class WorldScene extends Phaser.Scene {
     this.updateTerminalTurn();
     this.beedu?.update(this.time.now);
     this.updateCaveResidents();
+    this.twinAmbience?.update(this.time.now);
     this.visitors.update();
     // A painted walk steps every frame; where the wanderers are is still the half-second gate's.
     this.wanderers.animate(this.time.now);

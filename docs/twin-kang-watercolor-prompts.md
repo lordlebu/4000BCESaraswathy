@@ -1,5 +1,7 @@
 # Kang — light indigo and cozy watercolor update
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
 Owner update, 17 November 2026. Style reference: `exec-ad76b05a-607c-4b1a-b4b8-d00b7ef007c3.png`
 from the supplied local generated-images folder. The reference controls watercolor style;
 Kang's established sprite controls identity. His new portrait then controls both event cards.
