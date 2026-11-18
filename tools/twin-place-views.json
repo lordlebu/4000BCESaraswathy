@@ -1,0 +1,234 @@
+{
+  "generator": "built-in imagegen",
+  "size": [
+    512,
+    224
+  ],
+  "delivery": "crop / Lanczos resize only; PNG; no palette or colour reduction",
+  "paintings": [
+    {
+      "id": "poi_brick_quarter",
+      "source": "assets/source/events/twin-place-views/poi_brick_quarter.png",
+      "original_file": "exec-00f5c67b-5492-4e8c-999b-d7db7b39af06.png",
+      "native_size": [
+        1896,
+        830
+      ],
+      "source_sha256": "afbe870b1f2ebe94e3e20226eb3b712c636fc3a75398758fc7c403ccf2c9325f",
+      "file": "src/ui/places/poi_brick_quarter-painted.png",
+      "sha256": "37ce469933a547a6d5db52da55d64f7486d91a7a030c3a0511ec28e6d942169c",
+      "bytes": 241486,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 768 by 336 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Raised Brick Quarter in MOHENJODARO: red FIRED-BRICK steps and plinths visibly lift several modest flat-roofed house doorways above an OPEN DRAIN in the foreground. Laundry in indigo, coral and cream hangs on parapets; a simple low tram platform at the far side with narrow rails beyond, not a modern railway station. Weathered red masonry and warm cream accents contrast with cool blue shadows, plum textiles and a clean sky. Small-scale surviving city actively maintained. Very little greenery except a small courtyard pot. Put raised steps, open drain and laundry across the center band."
+    },
+    {
+      "id": "poi_desert_ground",
+      "source": "assets/source/events/twin-place-views/poi_desert_ground.png",
+      "original_file": "exec-a6dc80f1-d57a-4979-8fed-402703f614fb.png",
+      "native_size": [
+        1895,
+        830
+      ],
+      "source_sha256": "cc96ec95c680c81f6319a9e12c3bc948913719cec430c1833bc229070e215410",
+      "file": "src/ui/places/poi_desert_ground-painted.png",
+      "sha256": "78ce399f2829382843e8ec1903abb0cfcf0ca2b687f87ed5b92ddcc6e4c326d4",
+      "bytes": 236080,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 768 by 336 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Sheltered Caravan Ground on the DRY northwest Gedrosian desert margin. A shallow sand hollow sheltered between low dunes, a few bundles and rolled cream/indigo mats for a temporary caravan stop, discreet hoof and wheel tracks, sparse grey saltbush and a small red clay water jar. Bare dunes remain the dominant habitat, NO lush trees or meadow. A far ridge in dusty violet and pale blue sky. Cool plum shadows inside the hollow against peach/sand/cream dunes, small indigo textile accent. Low seated-eye view centered on the sheltered hollow.\nArchitecture only if this place subject explicitly calls for it; do not copy buildings or a tree from the style reference into other habitats."
+    },
+    {
+      "id": "poi_drain_court",
+      "source": "assets/source/events/twin-place-views/poi_drain_court.png",
+      "original_file": "exec-fc24d7ae-8aa8-44ff-a79a-c500734ac527.png",
+      "native_size": [
+        1895,
+        830
+      ],
+      "source_sha256": "4f8a71b6746d26a1a63520f35447bbd439de9f67766a01976a8e167958f50065",
+      "file": "src/ui/places/poi_drain_court-painted.png",
+      "sha256": "7ca8ffd8be8b045cad5f1dd2117a7bab168661ea3643969ae44131e145d7d4a1",
+      "bytes": 251405,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 768 by 336 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Divided Drain in MOHENJODARO: two parallel modest red fired-brick open channels through a courtyard. One channel is swept clean and runs clear blue water; the parallel channel has carefully retained reeds and a few marsh flowers. Clearly distinguish useful clean channel from planted habitat channel, both equally maintained, not a filthy abandoned sewer. Low brick coping, small practical flat-roofed houses and a clay pot, sparing shade awning. Palette fired red brick, teal water, sage/olive reeds, blue/lilac cool shade and cream sunlit plaster.\nArchitecture only if this place subject explicitly calls for it; do not copy buildings or a tree from the style reference into other habitats."
+    },
+    {
+      "id": "poi_dune_windbreak",
+      "source": "assets/source/events/twin-place-views/poi_dune_windbreak.png",
+      "original_file": "exec-055a2bfb-37db-4713-92c9-25c06e363183.png",
+      "native_size": [
+        1895,
+        830
+      ],
+      "source_sha256": "48804bf573c7d3574c7287b166f8b537c7ffd82f22491e46cc32b71270d91038",
+      "file": "src/ui/places/poi_dune_windbreak-painted.png",
+      "sha256": "6a275ef4e29377a2b3cd2c1a2dfd1b5263eaf0f9e98db7a39bf09ec6d2663138",
+      "bytes": 206556,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 768 by 336 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Dune Windbreak on the ARID Gedrosian margin: a low repaired crescent-shaped EARTHEN WALL shelters a small still patch of sand in its lee. Beyond the wall a dune is moving, with a delicate wind stream lifting sand along its ridge. An unassuming repaired seam in the wall, one simple rolled mat and a small saltbush outside the shelter. NO house, archway, city or lush greenery. Teal-blue sky, sandy peach, pale ochre, lilac shadows and a muted coral patch of repaired earth. Central crescent and quiet hollow clearly readable.\nArchitecture only if this place subject explicitly calls for it; do not copy buildings or a tree from the style reference into other habitats."
+    },
+    {
+      "id": "poi_earthen_workshop",
+      "source": "assets/source/events/twin-place-views/poi_earthen_workshop.png",
+      "original_file": "exec-a27c026b-9ff3-463f-8c1b-499064015a63.png",
+      "native_size": [
+        1895,
+        830
+      ],
+      "source_sha256": "be07170a908be012b4fc9987610c166c9d351781c475e2cf8f722d62c3d4d9d0",
+      "file": "src/ui/places/poi_earthen_workshop-painted.png",
+      "sha256": "b06be7bf4a48e4b42ef4c430f8b304695b7962c7d364a51574c2eff37f8c5e04",
+      "bytes": 242358,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 768 by 336 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Earthen Workshop in HARAPPA: a modest ochre earthen courtyard workshop, broad fresh pale plaster drying on a low adobe wall, small open nesting holes deliberately preserved in its lower courses with a few tiny sparrows carrying grass, baskets of sand/clay and a plaster bowl under a reed awning. Recognizable practical lived-in place, not an archaeological museum or stone ruin. Sparse courtyard plants only. Warm terracotta and cream plaster, indigo shade cloth, blue-grey shadow, soft sky and a few sage leaves. A strong horizontal view with the plaster wall and nesting holes central."
+    },
+    {
+      "id": "poi_harappa_station",
+      "source": "assets/source/events/twin-place-views/poi_harappa_station.png",
+      "original_file": "exec-f72845a0-eae7-4c11-965a-09710f3d28f8.png",
+      "native_size": [
+        1895,
+        830
+      ],
+      "source_sha256": "1f7eb272e12b617d7a2faedaf0c3b96e8be00beda1c3fd1bc34ee3b1fbda2f00",
+      "file": "src/ui/places/poi_harappa_station-painted.png",
+      "sha256": "9db17c9b9c1c0000af760a53dc2472afebace59ca7e34543d5d27e8a2b3d5d40",
+      "bytes": 235640,
+      "prompt": "Edit this Harappa Tram Yard watercolor painting to work in a VERY SHALLOW centered desktop banner crop. Preserve its cozy watercolor/ink style, earth/indigo/teal colours, modest earthen station, single ostrich correctly harnessed IN FRONT OF its small wheeled carriage, and separate rail/road routes. Recompose the bird and carriage as a MUCH SMALLER group in the middle distance, about 40 percent of their current painted size. Their ENTIRE silhouettes, including the ostrich's HEAD, long neck and FEET, carriage roof and BOTH WHEELS, must fit in the CENTRAL ONE-QUARTER of image height, centered exactly on the vertical midpoint. Leave quieter sky above and open stone/earth platform foreground below for cropping. The entire image stays a wide 16:7 panorama. No cut-off head, no extra animals or characters, no text or frame. This is a place illustration, not map pixel art. Requested native image 512x224, full-colour opaque.",
+      "history": [
+        {
+          "original_file": "exec-d61178eb-c620-4b36-b8b2-c32dada26758.png",
+          "source_sha256": "d53668730c6ddd7b6f9ec16fe0fc2bcc674afc9885f818d6161e30d45c8ee256",
+          "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 512 by 224 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: Harappa Tram Yard: a friendly small OSTRICH with a long bare neck and clear long legs stands in loose harness IN FRONT OF and visibly connected to a little wheeled passenger carriage beside a LOW platform. It is not sitting in the carriage. Simple ochre earthen Harappan buildings and a reed shade awning nearby. Past the platform, a public road and NARROW RAILS keep separate parallel sides on the same causeway. No locomotive, engine or modern railway structure. Palette light indigo carriage cloth, cream, warm earth, cool sky and green-blue river glimpse, one or two reed baskets.\nArchitecture only if this place subject explicitly calls for it; do not copy buildings or a tree from the style reference into other habitats.",
+          "source": "assets/source/events/twin-place-views/poi_harappa_station-first.png"
+        }
+      ],
+      "crop": [
+        148,
+        110,
+        1748,
+        810
+      ]
+    },
+    {
+      "id": "poi_nesting_cove",
+      "source": "assets/source/events/twin-place-views/poi_nesting_cove.png",
+      "original_file": "exec-cc46bd7f-d53a-4ebe-b7e9-4ab512c8e772.png",
+      "native_size": [
+        1896,
+        830
+      ],
+      "source_sha256": "8c2998cb0fefe02998b19f1290de3475db84e3c0cf6507f5bd3a2643f4593801",
+      "file": "src/ui/places/poi_nesting_cove-painted.png",
+      "sha256": "5e396e4470bdb2e5c6817bbe6af9d1a0ef2a5cb2e7543f5490025a19962fbe9b",
+      "bytes": 247296,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 512 by 224 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Nesting Cove: a pale stone shelf overlooks a small SHELTERED inlet. Old low weathered walls frame ONE narrow dry walking route through the center-left; undisturbed reed beds, nests and a few small coastal birds remain to the side. Paths should clearly avoid the nests. A calm turquoise/blue inlet with quiet water, pale sand, slate/lilac shade, restrained sage reeds and coral weathered stone. No people, large buildings or boat. Low ruins and reeds at foreground, inlet middle, sea and sky beyond.\nArchitecture only if this place subject explicitly calls for it; do not copy buildings or a tree from the style reference into other habitats."
+    },
+    {
+      "id": "poi_nesting_ruins",
+      "source": "assets/source/events/twin-place-views/poi_nesting_ruins.png",
+      "original_file": "exec-28586799-d824-40da-8e9c-31223c5660e9.png",
+      "native_size": [
+        1895,
+        830
+      ],
+      "source_sha256": "dcc2b37cf998efe89aae411b20bf2243e363011f9756ba50a2ad712920a8e674",
+      "file": "src/ui/places/poi_nesting_ruins-painted.png",
+      "sha256": "d8c3dd67efbe0bfb489eb71c3e3183a01ac99e28b9560e5c21d42dcf3642b251",
+      "bytes": 236965,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 512 by 224 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Unroofed Rooms in HARAPPA: modest adjoining earthen ochre rooms deliberately left WITHOUT roofs, intact low walls and open sky overhead. A little grain husk at thresholds; a tiny bird carries a strand of grass into an open nesting hole in a wall. It is a useful shared habitat beside occupied homes, not spectacular collapsing ruins or a jungle. Minimal sparse grasses only. Clay walls, pale cream light, blue/lilac shadow, muted indigo cloth visible far away and small warm terracotta bowls. Frame several open rooms across the center band.\nArchitecture only if this place subject explicitly calls for it; do not copy buildings or a tree from the style reference into other habitats."
+    },
+    {
+      "id": "poi_northwest_cave_camp",
+      "source": "assets/source/events/twin-place-views/poi_northwest_cave_camp.png",
+      "original_file": "exec-2d05814f-7b17-4703-b17e-f9dc8d022d68.png",
+      "native_size": [
+        1896,
+        830
+      ],
+      "source_sha256": "9a32af209efb4fa964bd3b4c29628a216aaa24b669661a85e61bb9183cc56c8a",
+      "file": "src/ui/places/poi_northwest_cave_camp-painted.png",
+      "sha256": "de49f785aaab98437fe4be911fbc84c04bcbfd86b0f88e74815764746429bca1",
+      "bytes": 258490,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 768 by 336 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Windward Cave in the NORTHEAST GREEN HIGHLANDS, not a desert: a sheltered slate-rock cave mouth at the side of a sage/mint grassy meadow. A small clear mountain stream curves close by. Three distinct depth layers: rounded green foothills, bare blue-grey mountains behind them, and distant snow-capped peaks along the skyline. Prayer flags cross above the entrance; small sheltered stone fire ring, folded woven Kalash-inspired mats, low sheep fold and compact terracotta basket-insulated camp cooker. Keep the entrance and central walking space open. No people. Palette sage/mint, slate/indigo, white snow, bright small flags and warm orange hearth."
+    },
+    {
+      "id": "poi_planted_ruins",
+      "source": "assets/source/events/twin-place-views/poi_planted_ruins.png",
+      "original_file": "exec-670011fd-4f78-4e36-9b2f-9b43e5d010fa.png",
+      "native_size": [
+        1895,
+        830
+      ],
+      "source_sha256": "3d1afd10200388a39e95d7fd49e6c071f3983880b926144732d969b3c5c3ef83",
+      "file": "src/ui/places/poi_planted_ruins-painted.png",
+      "sha256": "4048c6da616a8826b8095b996da01ddec12188e8cf9f9ea531ea9da437b3d87e",
+      "bytes": 247616,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 512 by 224 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Planted Rooms in MOHENJODARO: several modest roofless red fired-brick rooms whose standing walls are deliberately retained for SHADE, each room planted with modest beds of aromatic HERBS. The greenery is cultivated and stays within rooms, not jungle vines covering everything. A simple clay watering jar, narrow walking gap, weathered brick coping and a cool shaded corner. Palette blue-green herbs, red-brown fired brick, lilac shade, cream sunlight and a quiet coral cloth. Clear layered view into the useful herb rooms.\nArchitecture only if this place subject explicitly calls for it; do not copy buildings or a tree from the style reference into other habitats."
+    },
+    {
+      "id": "poi_reed_junction",
+      "source": "assets/source/events/twin-place-views/poi_reed_junction.png",
+      "original_file": "exec-d1e4d084-7af5-4efd-8b1a-be4310f6c906.png",
+      "native_size": [
+        1896,
+        830
+      ],
+      "source_sha256": "30ed149d531d6233fc45aae2b7dd22a6be40925bfcd85a3bc5dfd2e18c80bb97",
+      "file": "src/ui/places/poi_reed_junction-painted.png",
+      "sha256": "5ce6d3b8a8fbe91326d2c242db23a49d2e5719c7fde3903406e50fe8c01dae5c",
+      "bytes": 248714,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 512 by 224 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Three Channels: the Saraswati divides visibly into THREE modest river channels amid a low alluvial wetland, viewed from a bank at a gentle elevated angle. One small side channel seems still but a single floating leaf shows its flow; two broader channels continue beyond. Reed fringes and low sand/silt bars, restrained riparian plants with open water and broad sky remaining dominant. No dense forest, buildings, huge mountains or waterfalls. Broad blue/teal water, muted sage reeds, pale sand/silver-grey silt, cool lilac distance.\nArchitecture only if this place subject explicitly calls for it; do not copy buildings or a tree from the style reference into other habitats."
+    },
+    {
+      "id": "poi_reedwright_bank",
+      "source": "assets/source/events/twin-place-views/poi_reedwright_bank.png",
+      "original_file": "exec-36ac9ed1-f684-4cbb-b32a-5f9303e80ce3.png",
+      "native_size": [
+        1895,
+        830
+      ],
+      "source_sha256": "f1e1eba05929559ed9135ae52d70561ffa6d90ca2e3bf22f5771f5e1f5df5952",
+      "file": "src/ui/places/poi_reedwright_bank-painted.png",
+      "sha256": "51825e1f281106654a15ada0bbd947c8eef464e4de43618a452d4230798ff2ee",
+      "bytes": 265172,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 512 by 224 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Reedwright's Bank: a working river edge in the lower Saraswati. Bundles of reeds dry on a simple LIGHT WOOD FRAME raised ABOVE WET GROUND. A small partly made reed boat and visible simple lashings rest under a modest shade awning, a shallow seam-testing basin at water's edge, neatly kept reed offcuts and a broad clay bowl. No close-up worker or face. Not a dockyard with large ships. Palette pale reed straw, indigo/teal river, green reeds, cool plum shadows and warm clay accents. Frame drying rack and small boat centrally.\nArchitecture only if this place subject explicitly calls for it; do not copy buildings or a tree from the style reference into other habitats."
+    },
+    {
+      "id": "poi_twin_causeway",
+      "source": "assets/source/events/twin-place-views/poi_twin_causeway.png",
+      "original_file": "exec-9231d41f-0d5c-42c4-8d5d-272c7476edd3.png",
+      "native_size": [
+        1895,
+        830
+      ],
+      "source_sha256": "44efc274998183378b08ce8c8a7ddfb75af5c621d75561f4eb5061c4f5e4c81b",
+      "file": "src/ui/places/poi_twin_causeway-painted.png",
+      "sha256": "ec11640c851a40973c14eaf8dda13c0340c0d8dd2b7f5a2a228b99f7220bbc73",
+      "bytes": 259497,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 512 by 224 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Open Crossing over the Saraswati: a modest low bridge/causeway carries TWO clearly SEPARATE PARALLEL routes, an unpaved PUBLIC ROAD alongside a narrow TRAM RAIL line. View obliquely from riverbank so both route widths are legible. Repeated simple stone-and-timber bridge openings beneath let BLUE RIVER WATER and floating reeds continue south freely. No train locomotive, suspension bridge, massive Roman aqueduct or tall viaduct. Harappan vernacular low earth/stone abutments, simple timber rail deck. Palette teal water, pale grey stone, ochre road, indigo distant shade, small green reed accents.\nArchitecture only if this place subject explicitly calls for it; do not copy buildings or a tree from the style reference into other habitats."
+    },
+    {
+      "id": "poi_twin_cove",
+      "source": "assets/source/events/twin-place-views/poi_twin_cove.png",
+      "original_file": "exec-e9235a6a-955a-4696-ba8e-529485bb0a52.png",
+      "native_size": [
+        1896,
+        830
+      ],
+      "source_sha256": "27e81ff40bc2c4e505c035c9263fd3183d0ac7ae41e88b2f5c0e87fd0608107a",
+      "file": "src/ui/places/poi_twin_cove-painted.png",
+      "sha256": "f72d74c0caef4349869f9113466f80a861f134293580c436c702a3735511e3ab",
+      "bytes": 251274,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 512 by 224 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Quiet Coves near the southern delta: a calm curved inlet where fresh river water lies over the salt water. Exposed tree roots at one bank shelter a few small fish VISIBLE THROUGH the clear shallows. A single PELICAN dries spread wings on a low stone beyond the roots. Open water and pale sandy shelves remain dominant; small root thicket only, no lush tropical forest. Palette clear turquoise/sea blue, pale stone/sand, muted sage leaves, lilac shade and a warm peach sky. Root shelter, clear water and pelican all within center band.\nArchitecture only if this place subject explicitly calls for it; do not copy buildings or a tree from the style reference into other habitats."
+    },
+    {
+      "id": "poi_twin_landing",
+      "source": "assets/source/events/twin-place-views/poi_twin_landing.png",
+      "original_file": "exec-5b2f3a1e-b85b-4781-96bb-17c238d5645a.png",
+      "native_size": [
+        1896,
+        830
+      ],
+      "source_sha256": "7f48f1bf6d6d4d7812cb4e63d16783d2da0e1c0a53c4eafb729263e17cf1ce20",
+      "file": "src/ui/places/poi_twin_landing-painted.png",
+      "sha256": "6c4e330df540764b339aaebf129d1f4aa5c1a6f6ee3304e49c0f6a3bc715dfe5",
+      "bytes": 249013,
+      "prompt": "Create one wide PLACE-VIEW illustration for a cozy naturalist travel game in a fictional living Harappan river valley. Simple cozy watercolor and spare fine ink on warm paper, broad readable washes and layered distance, not photorealistic, not pixel art. Desired native delivery 512 by 224 pixels, panoramic 16:7 composition; put the defining architecture/water/objects across the middle horizontal band so a shallow place-card crop still tells the story. Use a WIDER VARIETY OF COLOURS: balanced cool blues/teals/plums with local earth, cream and restrained warm accents; do not tint everything sepia/yellow. The reference is STYLE/Harappan material reference ONLY; do not repeat its courtyard/tree. Keep the architecture small-scale, flat-roofed and vernacular with irregular earthen plaster or fired brick as specified, no fantasy palace or modern city. No readable text, border, lettering, UI or watermark. No close-up people or faces. Painting should feel inviting and inhabited, quietly reclaimed by nature.\n\nPLACE SUBJECT: The Southern Landing: a small vernacular river BOAT with a SEWN CLOTH SAIL waits in a sheltered bend upstream of the salty delta. The modest landing has low earthen/stone steps and simple timber mooring stakes, rolled cordage, cream sailcloth being MENDED laid over the gunwale with a large wooden sail needle visible on a folded patch. No people in close-up, large sailing ship, modern pier or lush forest. Low red-brick town far away only. Palette teal blue river, indigo shade, cream sail, weathered brown boat, coral repair patch and pale sand.\nArchitecture only if this place subject explicitly calls for it; do not copy buildings or a tree from the style reference into other habitats."
+    }
+  ]
+}

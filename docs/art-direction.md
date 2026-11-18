@@ -1,5 +1,7 @@
 # Art direction — the rules, and what they cost
 
+> **18 November place-art delivery:** all 16 twin-valley stops now have individual preferred watercolor views. The 15 new panels are full-colour 512?224 PNGs, crop/resize only; the accepted courtyard stays unchanged. [Prompts, sources and delivery ledger](twin-place-views-phase.md).
+
 > **18 November relocation:** the household now occupies the northeastern green highlands at (51,12), with a stream, foothills, bare mountains and border snowcaps. The historical POI id is preserved. See [terrain ledger](twin-highlands-jrpg-prompts.md).
 
 ## Current element-by-element direction — 17 November 2026

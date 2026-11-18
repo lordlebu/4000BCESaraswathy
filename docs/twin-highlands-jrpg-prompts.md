@@ -16,8 +16,8 @@ simple pixel shapes and layered light/shadow. Buildings and accepted Beedu are u
 The earlier northwest cave instructions below are superseded by this relocation.
 See [terrain prompts and rebuild](twin-highlands-jrpg-prompts.md).
 
-The broader plan still has **15 required place-view paintings** and the final combined visual/
-performance review pending. This terrain follow-up does not mark those finished.
+The fifteen place-view paintings were subsequently delivered; no required illustrations remain.
+The final combined visual/performance review is the remaining required phase.
 
 ## Generation and delivery
 

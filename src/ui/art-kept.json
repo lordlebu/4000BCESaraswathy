@@ -327,6 +327,21 @@
     "events/happening_valley_seam-painted.png",
     "events/happening_valley_windbreak-painted.png",
     "events/journey-aravali-twins-painted.png",
-    "events/journey-lothal-twins-painted.png"
+    "events/journey-lothal-twins-painted.png",
+    "places/poi_brick_quarter-painted.png",
+    "places/poi_desert_ground-painted.png",
+    "places/poi_drain_court-painted.png",
+    "places/poi_dune_windbreak-painted.png",
+    "places/poi_earthen_workshop-painted.png",
+    "places/poi_harappa_station-painted.png",
+    "places/poi_nesting_cove-painted.png",
+    "places/poi_nesting_ruins-painted.png",
+    "places/poi_northwest_cave_camp-painted.png",
+    "places/poi_planted_ruins-painted.png",
+    "places/poi_reed_junction-painted.png",
+    "places/poi_reedwright_bank-painted.png",
+    "places/poi_twin_causeway-painted.png",
+    "places/poi_twin_cove-painted.png",
+    "places/poi_twin_landing-painted.png"
   ]
 }

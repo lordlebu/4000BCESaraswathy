@@ -110,7 +110,7 @@ export function PlacePanel({
   // notes, so the two divided the bottom of the screen and each got half of a half. It is an
   // occupant of the dock now -- see `Here.tsx` -- and the slot it stands in is the whole of the
   // bottom rather than a share of it.
-  // A painted view of the place, or of its kind, or nothing at all — which is every place today.
+  // A preferred painted place view, then its category fallback, or no image.
   // The panel reads perfectly well without one and always has; this is the hook that makes the
   // first painting a file rather than a sprint. See `src/ui/places.ts`.
   const view = placeArt(place.id, place.kind);
