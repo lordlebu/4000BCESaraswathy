@@ -1,9 +1,8 @@
 // Which points of interest have a painted view, and where it is.
 //
-// **A placement, deliberately ahead of the art.** Nothing in this folder yet, and the game does not
-// wait for it: `PlacePanel` reads perfectly well without a picture and always has. What this file
-// buys is that the *first* painting is a file and not a sprint -- drop `poi_lothal_camp.png` into
-// `src/ui/places/` and the panel shows it.
+// Authored place panoramas arrive through this registry, including preferred painted editions.
+// `PlacePanel` also reads without a picture: drop a canon-id PNG into `src/ui/places/` and the
+// existing caller shows it, without a second per-map lookup table.
 //
 // The same arrangement as `plates.ts`, for the reason that file gives, and by now the reason this
 // repository keeps learning: **adding art must take no code.** A list is one more thing to drift.
@@ -25,7 +24,7 @@
 import { artCount, preferredArt } from './art';
 
 /**
- * The painted view of a place, or null — which is every place today and not a problem.
+ * The preferred painted view of a place, with category art or null as the fallback.
  *
  * Tries the place itself, then its kind. A caller that has only a kind passes it as both, which
  * is legal and simply skips the first lookup.

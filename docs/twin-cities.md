@@ -1,5 +1,22 @@
 # Harappa and Mohenjodaro
 
+## Place-view phase delivered — 18 November 2026
+
+All fifteen remaining place panoramas are delivered. Together with the accepted Harappa court,
+**all 16 twin-valley stops have individual preferred painted views; no required illustrations remain.**
+The new panels are 512×224 full-colour PNGs (16:7), using cozy watercolor/fine ink and distinct
+local palettes. Crop/resize only; no palette reduction. Total new art: 3,677,562 bytes. The cave
+shows its northeastern green meadow, stream and three mountain depth bands; desert stops stay arid.
+The actual place caller selects these through the existing preferred-art registry. Map graphics,
+buildings, accepted courtyard, Beedu, portraits, events and gameplay rules are unchanged.
+
+**Next:** finish the integrated crop/readability, fog/dusk, keyboard/touch, cave alternation,
+Beedu sighting/event, tram turnaround, optional Kang bust, save/reload and measured frame/load
+review. Resolve findings, then review/merge. Extra NPC replacements and seasonal animation takes
+remain optional; this is not a new map repaint. Earlier illustration backlog counts below are
+historical. See [current audit](twin-cities-art-status.md) and [place production ledger](twin-place-views-phase.md).
+
+
 ## Northeast highlands — owner update, 18 November 2026
 
 The Windward Cave moves from the northwest desert to **(51,12) in the northeast**. Its stable
@@ -16,8 +33,8 @@ simple pixel shapes and layered light/shadow. Buildings and accepted Beedu are u
 The earlier northwest cave instructions below are superseded by this relocation.
 See [terrain prompts and rebuild](twin-highlands-jrpg-prompts.md).
 
-The broader plan still has **15 required place-view paintings** and the final combined visual/
-performance review pending. This terrain follow-up does not mark those finished.
+The fifteen place-view paintings were subsequently delivered; no required illustrations remain.
+The final combined visual/performance review is the remaining required phase.
 
 ## Completed graphics follow-up — 18 November 2026
 

@@ -1,78 +1,46 @@
-# Harappan phased plan — completion audit
-
-## Northeast highlands — owner update, 18 November 2026
-
-The Windward Cave moves from the northwest desert to **(51,12) in the northeast**. Its stable
-`poi_northwest_cave_camp` id remains for diaries, discoveries, conversations and quest references.
-Fresh and saved twin-city maps receive the same bounded landscape addition; saved city ground,
-buildings, roads, rail, other POIs and journey progress remain intact.
-
-Completed in this follow-up: a cool sage/mint meadow distinct from the valley's existing grass;
-rounded foothills, bare blue-grey mountains and snow-capped peaks on the north/east border;
-and a narrow mountain stream joining the Saraswati. The meadow keeps both residents' local
-walking/seated turns and rotating props clear. The northwest Gedrosian margin remains arid.
-New ground and hill/mountain forms use **“nes jrpg sprite”**, compact crop/resize-only sources,
-simple pixel shapes and layered light/shadow. Buildings and accepted Beedu are unchanged.
-The earlier northwest cave instructions below are superseded by this relocation.
-See [terrain prompts and rebuild](twin-highlands-jrpg-prompts.md).
-
-The broader plan still has **15 required place-view paintings** and the final combined visual/
-performance review pending. This terrain follow-up does not mark those finished.
+# Harappan phased plan ? completion audit
 
 Updated 18 November 2026. Companion to the [original plan](twin-cities-art-plan.md).
 
-## Completed graphics phase
+## Illustration production complete
 
-- All twenty authored valley happenings have preferred paintings: nineteen new cozy watercolor
-  cards replace missing/filler pixel editions, while the accepted courtyard painting stays.
-- Both Aravali/twin-city and Lothal/twin-city journey banners have preferred paintings. The actual
-  map-arrival card now displays the new arrival scene instead of only text.
-- Wider blue/teal/green/plum/coral palettes, with recognizable people and distinct materials.
-- Sparse older-map cliffs and repeated ground decor, plus four generated **“nes jrpg sprite”**
-  cactus/flowering cactus/grass/stone props. Buildings, building styles, lots and proportions stay.
-- Unknown/known stranger profiles retain the same face; only the visible name is revealed.
-- Ostrich tram slowed from 100 to 240ms per tile, preserving route/fare/day cost and turnaround.
-- Earlier completed work remains: sixteen places/fifteen named identities and culture/language
-  data; cave residents' alternating walks/rests, helpers and monthly props; Beedu flight/sighting/
-  witness dialogue; generated wildlife/tram; thirteen main portraits; Kang's optional five-beat
-  bust quest, three map stages and two corrected stone/lapis-eye watercolor event paintings.
-- Exact new prompts, identity corrections and reproducible sources are in the
-  [phase ledger](twin-graphics-phase-2026-11-18.md). Raw generations and review captures stay ignored.
+**No required illustrations remain.** All sixteen authored places now have preferred painted
+views: fifteen new full-colour 512?224 panoramas and the accepted Harappa courtyard. They use
+cozy watercolor/fine ink, varied warm/cool palettes and each place's authored features. See
+[the exact delivery inventory, prompts and rebuild ledger](twin-place-views-phase.md).
 
-## Remaining phases
+Other completed art/gameplay work:
 
-| Phase | Required deliverable | Planning effort |
-| --- | --- | --- |
-| Place views | Fifteen cozy watercolor place panels, including Windward Cave, with distinct palettes and recognizable existing architecture/ecology | 1–2 focused days |
-| Final integrated review | Card crops, readability, fog/dusk, keyboard/touch, cave timing, Beedu, tram turns, save/reload, frame cost; resolve findings; exact-head CI and owner review/merge | 0.5–1 focused day plus pipeline time |
+- All twenty valley happenings have preferred paintings; both travel banners and the actual
+  map-arrival card have paintings. Accepted earlier originals remain fallbacks.
+- Thirteen main portraits, generated wildlife/tram, fifteen named map identities and culture/
+  language data; global unknown/known stranger faces remain stable through introductions.
+- Northeast Windward Cave at (51,12): distinct green meadow, stream, foothills, mountains and
+  border snowcaps, with bounded migration of earlier saved maps and the stable historical POI id.
+- Mirlepa/Yamantaka alternate local walks and seated turns; helpers and props rotate by journey day.
+- Beedu flight/sighting/witness dialogue and Kang's optional five-beat bust quest, three map
+  stages, corrected stone/clay texture and final lapis-eye/paint event cards.
+- Shared sparse cliffs/decor and generated NES JRPG props, directional road bridges and separate
+  road/rail gates. Ostrich tram uses 240ms/tile with its existing route/fare/day cost and turnaround.
 
-**15 required illustrations remain: the place views listed below.** The earlier count was 39,
-then 36 after Kang's portrait/bust paintings; the twenty-one event/travel deliveries close this
-phase. Gameplay additions are implemented, but the whole visual programme is not yet complete.
-Run checks at phase boundaries. Estimates are planning allowances, not completion promises.
+Existing building styles, art, lots and proportions are explicitly retained. New map art stays
+simple NES JRPG; accepted Beedu alone keeps small SNES art. Off-map place/event views stay painted.
+Raw generations and screenshots remain in existing ignored desktop paths.
 
-Optional: generated replacements for eleven other already-present NES NPC sheets, separate
-Kang commission/site/preparation takes, bespoke helper portraits and further seasonal polish.
-No new building repaint or accepted Beedu regeneration is requested.
+## Next required phase
 
-## Exact remaining place views
-
-Target `src/ui/places/`; cozy watercolor.
-
-| Place | Required preferred filename |
+| Work | Completion condition |
 | --- | --- |
-| The Raised Brick Quarter | `poi_brick_quarter-painted.png` |
-| The Sheltered Caravan Ground | `poi_desert_ground-painted.png` |
-| The Divided Drain | `poi_drain_court-painted.png` |
-| The Dune Windbreak | `poi_dune_windbreak-painted.png` |
-| The Earthen Workshop | `poi_earthen_workshop-painted.png` |
-| Harappa Tram Yard | `poi_harappa_station-painted.png` |
-| The Nesting Cove | `poi_nesting_cove-painted.png` |
-| The Unroofed Rooms | `poi_nesting_ruins-painted.png` |
-| The Windward Cave | `poi_northwest_cave_camp-painted.png` |
-| The Planted Rooms | `poi_planted_ruins-painted.png` |
-| The Three Channels | `poi_reed_junction-painted.png` |
-| The Reedwright's Bank | `poi_reedwright_bank-painted.png` |
-| The Open Crossing | `poi_twin_causeway-painted.png` |
-| The Quiet Coves | `poi_twin_cove-painted.png` |
-| The Southern Landing | `poi_twin_landing-painted.png` |
+| Integrated visual review | Check place/event/portrait crops, material/likeness continuity, desktop/mobile and keyboard/touch readability, fog and dusk |
+| Gameplay review | Check both cities/crossing, new highlands, cave turn-taking/helpers/props, Beedu event/dialogue, tram terminal turns and optional bust |
+| Save/performance review | Confirm reload continuity and measure frame/load costs on representative views; resolve actual findings |
+| Publication | Final exact-head CI, owner review and merge |
+
+Run checks after complete phases. This production delivery does not claim the final integrated
+visual/performance review is finished or replace owner review.
+
+## Optional work, outside the required illustration count
+
+Generated replacements for eleven other already-present NES NPC sheets, bespoke helper portraits,
+separate Kang commission/site/preparation takes and extra seasonal animation variants. None is
+required to fill a missing portrait/place/event slot. Do not repaint accepted buildings or Beedu.

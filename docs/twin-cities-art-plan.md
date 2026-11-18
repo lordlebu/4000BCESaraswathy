@@ -1,5 +1,22 @@
 # Harappa and Mohenjo-daro Visual and Story Plan
 
+## Place-view phase delivered — 18 November 2026
+
+All fifteen remaining place panoramas are delivered. Together with the accepted Harappa court,
+**all 16 twin-valley stops have individual preferred painted views; no required illustrations remain.**
+The new panels are 512×224 full-colour PNGs (16:7), using cozy watercolor/fine ink and distinct
+local palettes. Crop/resize only; no palette reduction. Total new art: 3,677,562 bytes. The cave
+shows its northeastern green meadow, stream and three mountain depth bands; desert stops stay arid.
+The actual place caller selects these through the existing preferred-art registry. Map graphics,
+buildings, accepted courtyard, Beedu, portraits, events and gameplay rules are unchanged.
+
+**Next:** finish the integrated crop/readability, fog/dusk, keyboard/touch, cave alternation,
+Beedu sighting/event, tram turnaround, optional Kang bust, save/reload and measured frame/load
+review. Resolve findings, then review/merge. Extra NPC replacements and seasonal animation takes
+remain optional; this is not a new map repaint. Earlier illustration backlog counts below are
+historical. See [current audit](twin-cities-art-status.md) and [place production ledger](twin-place-views-phase.md).
+
+
 ## Northeast highlands — owner update, 18 November 2026
 
 The Windward Cave moves from the northwest desert to **(51,12) in the northeast**. Its stable
@@ -16,8 +33,8 @@ simple pixel shapes and layered light/shadow. Buildings and accepted Beedu are u
 The earlier northwest cave instructions below are superseded by this relocation.
 See [terrain prompts and rebuild](twin-highlands-jrpg-prompts.md).
 
-The broader plan still has **15 required place-view paintings** and the final combined visual/
-performance review pending. This terrain follow-up does not mark those finished.
+The fifteen place-view paintings were subsequently delivered; no required illustrations remain.
+The final combined visual/performance review is the remaining required phase.
 
 ## Delivered graphics phase — owner update, 18 November 2026
 
@@ -141,13 +158,13 @@ phase, then final visual/performance review and passing CI; do not start another
 | Cave, helpers, beedu, optional Kang bust | Implemented with canon, saved-map addition and conversation wiring | Phase-end checks and review |
 | Main cast portraits | All 13 preferred portraits delivered, including Kang in light indigo | Final integrated likeness/crop review |
 | Authored happenings | All 20 have preferred painted editions; original pixel editions retained | Final integrated review |
-| Individual place views | 1 of 16 has a preferred painted edition | 15 views, including Windward Cave |
+| Individual place views | All 16 have preferred painted editions | Final integrated crop/readability review |
 | Journey banners and map entry | Both preferred banners delivered; actual arrival page now has its painting | Final integrated review |
 | Bust story illustrations | Carving and unveiling cozy watercolor paintings delivered and selected per quest beat | Optional commission/site/preparation takes only |
 | Further ambient polish | Existing map presentation accepted | Seasonal variants and bespoke bird/harness motion remain unfinished; decide during final polish review whether to retain that scope |
 | Publication | Game PRs #262/#263 and lore PR #169 merged; fresh graphics branch from main | Current phase exact-head CI, owner review and merge |
 
-**Remaining required illustration inventory: 15 place views**, plus separately optional takes.
+**Remaining required illustration inventory: 0.** Additional takes are optional.
 All twenty happening paintings, both journey banners, Kang’s portrait and both bust paintings
 are delivered. Helpers do not require bespoke portraits.
 See the [audited phased checklist and exact pending filenames](twin-cities-art-status.md).
