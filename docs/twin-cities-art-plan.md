@@ -1,5 +1,7 @@
 # Harappa and Mohenjo-daro Visual and Story Plan
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
 
 ## Terrain height and palette follow-up - 18 November 2026
 
@@ -52,7 +54,7 @@ The Windward Cave moves from the northwest desert to **(51,12) in the northeast*
 Fresh and saved twin-city maps receive the same bounded landscape addition; saved city ground,
 buildings, roads, rail, other POIs and journey progress remain intact.
 
-Completed in this follow-up: a cool sage/mint meadow distinct from the valley's existing grass;
+Completed in this follow-up: the original sage/mint meadow (now superseded by muted sage);
 rounded foothills, bare blue-grey mountains and snow-capped peaks on the north/east border;
 and a narrow mountain stream joining the Saraswati. The meadow keeps both residents' local
 walking/seated turns and rotating props clear. The northwest Gedrosian margin remains arid.
@@ -110,12 +112,12 @@ quest stages share the same face, headband, beard and cloak silhouette, rendered
 Both use compact RGBA sources and resize-only delivery. See [the exact prompt/rebuild ledger](twin-kang-jrpg-prompts.md).
 Four of fifteen named overworld identities now have generated JRPG sheets; the other eleven
 retain their preceding compact NES sheets. Kang now wears light indigo and has a delivered
-cozy watercolor conversation portrait plus carving and unveiling event paintings. Required
-remaining illustrations are now **15 place views**, after the later event/travel phase. Beedu remains unchanged.
+cozy watercolor conversation portrait plus carving and unveiling event paintings. The required
+illustrations at that historical checkpoint were **15 place views**, subsequently delivered. Beedu remains unchanged.
 
 ## Cave household update — 17 November 2026
 
-Mirlepa and Yamantaka now take turns sitting and walking beside the northwest cave. Each
+Mirlepa and Yamantaka now take turns sitting and walking beside the northeast cave. Each
 120-second turn leaves one in a generated seated pose while the other follows a short cardinal
 out-and-back route. Both use the same approved twenty-pose NES JRPG sheet quality. The routes
 stay on opposite sides, avoid other residents, props, water and the entrance, and follow restored

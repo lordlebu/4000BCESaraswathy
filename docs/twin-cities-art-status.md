@@ -1,5 +1,7 @@
 # Harappan phased plan ? completion audit
 
+> **Current checkpoint - 18 November 2026:** Required illustration backlog: **0**. Muted sage is owner approved; terrain borders, shrubs, slow cave walks and bounded ambience are implemented. Final integrated visual/gameplay/save/hardware review and owner merge remain. [Terrain evidence](twin-terrain-softening.md).
+
 
 ## Terrain height and palette follow-up - 18 November 2026
 

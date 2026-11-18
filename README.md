@@ -195,3 +195,12 @@ MIT — see [LICENSE](LICENSE).
 Harappa and Mohenjodaro share a 64×64 mainland region with an ostrich-drawn tram, two architectural traditions, and a river running from desert to delta.
 
 See [the implementation and review guide](docs/twin-cities.md) for the phased scope, screenshots, demo links, and expansion plan.
+
+
+## Twin-valley visual progress
+
+The new map uses owner-approved muted sage highlands, softened terrain boundaries, simple
+NES JRPG shrubs and slow cave-household walks. Required illustrations are complete. See the
+[current art audit](docs/twin-cities-art-status.md), [approved terrain treatment](docs/twin-terrain-softening.md)
+and [original phased plan](docs/twin-cities-art-plan.md) for completed work and remaining final
+visual/gameplay/save/hardware review. Raw art generations and review captures stay ignored.

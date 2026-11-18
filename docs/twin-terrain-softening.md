@@ -1,5 +1,7 @@
 # Twin-valley terrain softening - 18 November 2026
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
 The owner requested gentler height and river edges, a less abrupt northeastern desert/grass
 boundary, and quieter grass/hills around Windward Cave. This extends the open landscape phase.
 

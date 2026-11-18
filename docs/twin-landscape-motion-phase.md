@@ -1,5 +1,7 @@
 # Twin-valley landscape and motion polish — 18 November 2026
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
 This owner-requested pass follows the completed illustration inventory: all 16 place views,
 20 happening paintings, journey/arrival cards and main portraits already exist. No required
 illustration is reopened. This pass adds low-detail landscape texture and quiet movement.

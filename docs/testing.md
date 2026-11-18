@@ -1,5 +1,18 @@
 # How this project tests, and what it cost to learn
 
+
+## Twin-valley terrain review - 18 November 2026
+
+Complete a whole implementation phase before running its combined checks. The approved palette
+is **muted sage**; `turf=lichen`, `turf=olive` and `turf=legacy` are development-only comparisons,
+with no player preference/save field. `e2e/twin-terrain.spec.ts` checks the actual ground texture,
+display size, atlas budget, all three palette samples and console errors. Combine it with the
+landscape and existing cave contracts for the complete eight-case review. The phase ledger
+records the commands/results and the Windows dev-server teardown workaround; it does not weaken
+CI or replace broader gameplay/save/hardware review. Screenshots and performance JSON belong in
+already ignored `dump/twin-city-art-review/` or `test-results/`.
+
+
 ## Windows desktop manual review
 
 Run `powershell.exe -NoProfile -File tools/start-local-game.ps1` from the checkout. This

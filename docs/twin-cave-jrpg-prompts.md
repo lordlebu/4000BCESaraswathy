@@ -1,5 +1,7 @@
 # Northeast cave — NES JRPG props and household
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
 > **18 November relocation:** the household now occupies the northeastern green highlands at (51,12), with a stream, foothills, bare mountains and border snowcaps. The historical POI id is preserved. See [terrain ledger](twin-highlands-jrpg-prompts.md).
 
 Owner update, 17 November 2026. Follow [the element guide](art-direction.md).

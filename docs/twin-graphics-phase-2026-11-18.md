@@ -1,9 +1,11 @@
 # Twin-city graphics phase — 18 November 2026
 
+> **Current checkpoint - 18 November 2026:** Muted sage is approved; terrain softening, shrubs, slow cave walks and bounded ambience are implemented. Required illustration backlog: **0**. [Current completion audit](twin-cities-art-status.md) and [terrain decision/evidence](twin-terrain-softening.md) override earlier dated counts and production instructions below.
+
 Scope: nineteen preferred happening paintings, two journey banners, a painting on the actual
 arrival page, sparse shared cliff/decor layers, a compact NES JRPG dry-prop atlas, stable unknown/
 known stranger portraits, and a slower ostrich tram. Existing buildings and accepted map Beedu
-art are preserved. The next required painting phase is fifteen place views.
+art are preserved. The subsequent fifteen-place-view painting phase is also complete.
 
 ## Delivery rules
 

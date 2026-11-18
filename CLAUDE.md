@@ -25,6 +25,9 @@ runs underneath, deliberately kept. See "Known issues".
 
 The Saraswati twin-cities map and its latest scale and art decisions are documented in
 [docs/twin-cities.md](docs/twin-cities.md).
+The owner-approved highland palette and baked terrain borders are recorded in
+[docs/twin-terrain-softening.md](docs/twin-terrain-softening.md); the
+[current completion audit](docs/twin-cities-art-status.md) supersedes older backlog counts.
 
 Stack: **React 19 + Phaser 4 + TypeScript + Vite**. React owns the DOM chrome, Phaser owns the map
 canvas, and the game logic belongs to neither.

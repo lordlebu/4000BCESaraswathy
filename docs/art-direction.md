@@ -1,5 +1,7 @@
 # Art direction — the rules, and what they cost
 
+> **Approved terrain - 18 November 2026:** Muted sage is the selected cave/highland palette. Use sparse broad turf/stone patterns, stepped height/riverbank shading and soft earthy desert/grass seams, baked once into the existing ground layer. Lichen/olive are review alternatives only. [Decision, implementation and verification](twin-terrain-softening.md).
+
 > **18 November landscape follow-up:** new shrubs explicitly use **nes jrpg sprite**, with half-size pairs at grass/desert seams and simple regular silhouettes at cliff lips. Reuse the old habitat decor. Smoke/haze/ripples are small cached voxel/pixel effects, capped and performance-checked; preserve the accepted building mix and Beedu. [Production ledger](twin-landscape-motion-phase.md).
 
 > **18 November place-art delivery:** all 16 twin-valley stops now have individual preferred watercolor views. The 15 new panels are full-colour 512?224 PNGs, crop/resize only; the accepted courtyard stays unchanged. [Prompts, sources and delivery ledger](twin-place-views-phase.md).
@@ -389,7 +391,7 @@ and it breaks every clone and open pull request, so it is not on the table.
 
 Owner-requested height/bank gradients use coarse stepped pixel bands baked into the ground,
 with wide irregular desert/grass transition bands. The cave meadow must be muted and lightly
-patterned, not bright flat mint. Three review palettes are sage, lichen and olive; see
+patterned, not bright flat mint. The owner selected muted sage; lichen and olive remain review alternatives. See
 [twin terrain softening](twin-terrain-softening.md). Keep broad NES clusters, no fine texture
 or checkerboard dithering. This code-native terrain treatment does not edit accepted raster
 assets, buildings, characters or painted cards.
