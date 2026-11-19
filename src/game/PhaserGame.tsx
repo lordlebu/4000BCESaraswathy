@@ -10,8 +10,6 @@ import { EventBus } from './EventBus';
 import { CHECK_MS, KEEP, describeStall, isStall, lateness, remember, type Stall } from './stall';
 
 export interface PhaserGameProps {
-  /** The first tile is ready to show. Keep the loading canvas laid out for Phaser's sizing. */
-  ready: boolean;
   seed: string;
   discovered: string[];
   fieldMapId: string;
@@ -27,7 +25,7 @@ export interface PhaserGameProps {
   lent?: string[];
 }
 
-export function PhaserGame({ ready, seed, discovered, fieldMapId, characterId, travelled = 0, lent = [] }: PhaserGameProps) {
+export function PhaserGame({ seed, discovered, fieldMapId, characterId, travelled = 0, lent = [] }: PhaserGameProps) {
   const container = useRef<HTMLDivElement>(null);
   // Held in a ref, not state: changing it must never trigger a render.
   const game = useRef<Phaser.Game | null>(null);
@@ -137,8 +135,5 @@ export function PhaserGame({ ready, seed, discovered, fieldMapId, characterId, t
     };
   }, []);
 
-  return (
-    <div className="map-surface" ref={container} style={{ visibility: ready ? undefined : 'hidden' }}
-      aria-label="Generated Jambhudweepa world map" />
-  );
+  return <div className="map-surface" ref={container} aria-label="Generated Jambhudweepa world map" />;
 }
