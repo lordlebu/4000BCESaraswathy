@@ -1622,6 +1622,7 @@ export function App() {
           restart of something already running rather than a beginning. */}
       {!atTheDoor && PhaserGame && (
         <PhaserGame
+          ready={underfoot !== null}
           seed={seed}
           discovered={initialJourney.current.discovered}
           travelled={initialJourney.current.travelled}
