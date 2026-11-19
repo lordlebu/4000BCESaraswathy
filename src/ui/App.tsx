@@ -1620,7 +1620,7 @@ export function App() {
       {/* The scene mounts only once the door is open. Booting it behind the door and hiding it
           would spend a second of loading nobody asked for, and would make "start a new walk" a
           restart of something already running rather than a beginning. */}
-      {!atTheDoor && (PhaserGame ? (
+      {!atTheDoor && PhaserGame && (
         <PhaserGame
           seed={seed}
           discovered={initialJourney.current.discovered}
@@ -1629,7 +1629,8 @@ export function App() {
           fieldMapId={bootFieldMap.current}
           characterId={characterId}
         />
-      ) : fieldSessionFailed ? (
+      )}
+      {!atTheDoor && !underfoot && (fieldSessionFailed ? (
         <p role="alert">The map could not load. <button type="button" onClick={() => window.location.reload()}>Reload</button></p>
       ) : <p role="status">Opening the map…</p>)}
 
@@ -1717,7 +1718,9 @@ export function App() {
           screen because every other decision is read against it -- see the note at the top of
           `SatchelStrip` -- and it flows under the bar rather than sitting at a fixed offset,
           because the bar wraps to two rows on a narrow phone. */}
-      <div className="controls-stack">
+      {/* The canvas is attached before Phaser reports the first tile. Controls that can open
+          activities must wait for that tile so a click has a place to act on. */}
+      {!atTheDoor && underfoot && <div className="controls-stack">
       <Controls
         seed={seed}
         onGenerate={generate}
@@ -1763,7 +1766,7 @@ export function App() {
             onHide={() => dispatch({ type: 'toggle-satchel-ribbon' })}
           />
         )}
-      </div>
+      </div>}
 
       {/* One door, three tabs. The panels are unchanged -- each keeps its own escape handling and
           focus behaviour, because they were right before this and consolidating surfaces is not a
