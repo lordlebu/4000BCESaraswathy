@@ -8,7 +8,6 @@
 // schedule. Letting either drive the other directly is how canvas apps end up re-mounting the game
 // on every keystroke in a text input.
 
-import Phaser from 'phaser';
 import type { Shelter } from './night';
 import type { JournalEntry } from '../content/journal';
 import type { Point, World } from '../world/types';
@@ -351,17 +350,42 @@ export interface UiToGame {
 
 type Events = GameToUi & UiToGame;
 
-class TypedBus extends Phaser.Events.EventEmitter {
+type Handler = (payload: unknown) => void;
+
+class TypedBus {
+  private readonly handlers = new Map<string, Handler[]>();
+
+  emit(event: string, payload: unknown): boolean {
+    const listeners = this.handlers.get(event);
+    if (!listeners?.length) return false;
+    for (const listener of [...listeners]) listener(payload);
+    return true;
+  }
+
+  on(event: string, handler: Handler): this {
+    const listeners = this.handlers.get(event) ?? [];
+    listeners.push(handler);
+    this.handlers.set(event, listeners);
+    return this;
+  }
+
+  off(event: string, handler: Handler): this {
+    const listeners = this.handlers.get(event)?.filter((listener) => listener !== handler);
+    if (listeners?.length) this.handlers.set(event, listeners);
+    else this.handlers.delete(event);
+    return this;
+  }
+
   emitEvent<K extends keyof Events>(event: K, payload: Events[K]): boolean {
     return this.emit(event as string, payload);
   }
 
   onEvent<K extends keyof Events>(event: K, handler: (payload: Events[K]) => void): this {
-    return this.on(event as string, handler) as this;
+    return this.on(event as string, handler as Handler);
   }
 
   offEvent<K extends keyof Events>(event: K, handler: (payload: Events[K]) => void): this {
-    return this.off(event as string, handler) as this;
+    return this.off(event as string, handler as Handler);
   }
 }
 

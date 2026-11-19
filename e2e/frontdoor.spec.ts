@@ -64,8 +64,9 @@ test('starting over asks twice, and says what is lost', async ({ page }) => {
   // Walk far enough to have something worth losing, then come back to the door.
   await page.goto(`/?seed=${SEED}&door=open&at=10,8`);
   await expect(page.locator('.map-surface canvas')).toBeVisible({ timeout: 20_000 });
+  // Phaser attaches the canvas before the first tile can accept movement.
+  await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
   await page.keyboard.press('KeyD');
-  await expect(page.locator('.journal h2')).toBeVisible();
   // The save is flushed on a timer and on pagehide; navigating away triggers the second.
   await knock(page);
 
