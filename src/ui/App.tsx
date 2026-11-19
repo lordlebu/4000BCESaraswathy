@@ -103,10 +103,6 @@ const SPEAK_FIRST_AFTER_MS = 1500;
 
 import { Modal } from './Modal';
 
-function LoadingPanel() {
-  return <p role="status">Opening…</p>;
-}
-
 /**
  * Which country to open on, for a link that wants to start somewhere other than Lothal.
  *
@@ -158,40 +154,21 @@ function characterFromUrl(): string | null {
 type Arrival = GameToUi['tile-entered'];
 
 const Progress = lazy(() => import('./Progress').then(module => ({ default: module.Progress })));
-const CollectionPanel = lazy(() =>
-  import('./CollectionPanel').then(module => ({ default: module.CollectionPanel }))
-);
-const PeoplePanel = lazy(() =>
-  import('./PeoplePanel').then(module => ({ default: module.PeoplePanel }))
-);
-const SatchelPanel = lazy(() =>
-  import('./SatchelPanel').then(module => ({ default: module.SatchelPanel }))
-);
-const WorkshopPanel = lazy(() =>
-  import('./WorkshopPanel').then(module => ({ default: module.WorkshopPanel }))
-);
-const FieldKit = lazy(() => import('./FieldKit').then(module => ({ default: module.FieldKit })));
-const Overworld = lazy(() => import('./Overworld').then(module => ({ default: module.Overworld })));
-const Negotiation = lazy(() =>
-  import('./Negotiation').then(module => ({ default: module.Negotiation }))
-);
-const ActivityModal = lazy(() =>
-  import('./ActivityModal').then(module => ({ default: module.ActivityModal }))
-);
-const EventCard = lazy(() =>
-  import('./EventCard').then(module => ({ default: module.EventCard }))
-);
 const CanonPanel = lazy(() =>
   import('./CanonPanel').then(module => ({ default: module.CanonPanel }))
 );
 const ShelterMark = lazy(() =>
   import('./ShelterMark').then(module => ({ default: module.ShelterMark }))
 );
-const PhaserGame = lazy(() =>
-  import('../game/PhaserGame').then(module => ({ default: module.PhaserGame }))
-);
+type FieldSession = typeof import('./fieldSession');
 
 export function App() {
+  const [fieldSession, setFieldSession] = useState<FieldSession | null>(null);
+  const [fieldSessionFailed, setFieldSessionFailed] = useState(false);
+  const {
+    PhaserGame, ActivityModal, CollectionPanel, EventCard, FieldKit,
+    Negotiation, Overworld, PeoplePanel, SatchelPanel, WorkshopPanel
+  } = fieldSession ?? {};
   // Read the save once. Calling loadJourney per state initialiser would parse the same JSON
   // three times and, worse, let the three copies drift.
   const initialJourney = useRef(loadJourney(seedFromUrl()));
@@ -332,6 +309,18 @@ export function App() {
     if (asked === 'shut') return true;
     return !navigator.webdriver;
   });
+
+  // Scene events can open a card on the first tile. Make its UI available before starting
+  // Phaser so the first interaction can install its focus trap in the same React commit.
+  useEffect(() => {
+    if (atTheDoor) return;
+    let active = true;
+    import('./fieldSession').then(
+      (session) => { if (active) setFieldSession(session); },
+      () => { if (active) setFieldSessionFailed(true); }
+    );
+    return () => { active = false; };
+  }, [atTheDoor]);
 
   /**
    * The title card, which comes before the door (the owner, 4 October 2026): *South of Tethys*, and
@@ -1631,8 +1620,7 @@ export function App() {
       {/* The scene mounts only once the door is open. Booting it behind the door and hiding it
           would spend a second of loading nobody asked for, and would make "start a new walk" a
           restart of something already running rather than a beginning. */}
-      {!atTheDoor && (
-        <Suspense fallback={<p role="status">Opening the map…</p>}>
+      {!atTheDoor && (PhaserGame ? (
         <PhaserGame
           seed={seed}
           discovered={initialJourney.current.discovered}
@@ -1641,8 +1629,9 @@ export function App() {
           fieldMapId={bootFieldMap.current}
           characterId={characterId}
         />
-        </Suspense>
-      )}
+      ) : fieldSessionFailed ? (
+        <p role="alert">The map could not load. <button type="button" onClick={() => window.location.reload()}>Reload</button></p>
+      ) : <p role="status">Opening the map…</p>)}
 
       {journey && fieldMap(journey.from) && fieldMap(journey.to) && (
         <Suspense fallback={<Modal open label="The road" onClose={stepDown}><p role="status">Taking the road…</p></Modal>}>
@@ -1781,7 +1770,9 @@ export function App() {
           licence to rewrite them. The strip renders into each panel's own `tabs` slot rather than
           floating over it: both draw a full-screen veil, so anything positioned above the page
           sits underneath them. */}
-      {surface === 'progress' && <Suspense fallback={<LoadingPanel />}>
+      {surface === 'progress' && <Suspense fallback={<Modal open label="Field diary" onClose={() => dispatch({ type: 'close' })}>
+        <p role="status">Opening diary…</p><button type="button" onClick={() => dispatch({ type: 'close' })}>Close</button>
+      </Modal>}>
       <Progress
         readingSize={readingSize}
         onReadingSize={setReadingSize}
@@ -1822,7 +1813,7 @@ export function App() {
       />
       </Suspense>}
 
-      {surface === 'collection' && <Suspense fallback={<LoadingPanel />}><CollectionPanel
+      {CollectionPanel && <CollectionPanel
         tabs={
           <Suspense fallback={null}><RecordTabs
             tab="collection"
@@ -1836,9 +1827,9 @@ export function App() {
         open={surface === 'collection'}
         onClose={() => dispatch({ type: 'close' })}
         canAsk={canon.lore}
-      /></Suspense>}
+      />}
 
-      {surface === 'people' && <Suspense fallback={<LoadingPanel />}><PeoplePanel
+      {PeoplePanel && <PeoplePanel
         tabs={
           <Suspense fallback={null}><RecordTabs
             tab="people"
@@ -1852,23 +1843,23 @@ export function App() {
         strangers={metStrangers.current}
         open={surface === 'people'}
         onClose={() => dispatch({ type: 'close' })}
-      /></Suspense>}
+      />}
 
-      {interrupts.kit && <Suspense fallback={<LoadingPanel />}><FieldKit
+      {FieldKit && <FieldKit
         progress={progress}
         open={interrupts.kit}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'kit' })}
         canResearch={canon.lore}
-      /></Suspense>}
+      />}
 
-      {interrupts.satchel && <Suspense fallback={<LoadingPanel />}><SatchelPanel
+      {SatchelPanel && <SatchelPanel
         satchel={satchel}
         onUse={useCarried}
         open={interrupts.satchel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'satchel' })}
-      /></Suspense>}
+      />}
 
-      {interrupts.workshop && <Suspense fallback={<LoadingPanel />}><WorkshopPanel
+      {WorkshopPanel && <WorkshopPanel
         satchel={satchel}
         bench={bench}
         knows={knowsRecipeHere}
@@ -1889,10 +1880,10 @@ export function App() {
           setWorkshopAt(null);
           dispatch({ type: 'close-interrupt', which: 'workshop' });
         }}
-      /></Suspense>}
+      />}
 
       {/* The negotiation at a ground, while one is open: a new ground starts a new conversation. */}
-      {negotiation && <Suspense fallback={<LoadingPanel />}><Negotiation key={negotiation.ground.id} {...negotiation} /></Suspense>}
+      {Negotiation && negotiation && <Negotiation key={negotiation.ground.id} {...negotiation} />}
 
       {interrupts.ending && <Suspense fallback={<Modal open label="If you stopped here"
         onClose={() => dispatch({ type: 'close-interrupt', which: 'ending' })}><p role="status">Opening the last page…</p></Modal>}>
@@ -1905,7 +1896,7 @@ export function App() {
       </Suspense>}
 
       {/* The activity, while one is running: `useActivity` hands over everything the card needs. */}
-      {activityCard && <Suspense fallback={<LoadingPanel />}><ActivityModal {...activityCard} /></Suspense>}
+      {ActivityModal && activityCard && <ActivityModal {...activityCard} />}
 
       {/* Something that happened to you, as opposed to something you did. There are no events
           authored yet, so this never mounts -- the path is live so the first one needs no wiring.
@@ -1915,8 +1906,8 @@ export function App() {
           landmark -- the scene says where you stand, a camp beside it asks for its welcome, and
           only then says you have arrived -- and it sat on top of the journey's end. So a card waits
           while the page is up, and comes back when it is closed; `pageOpenRef` stops a new one. */}
-      {eventCard && !arrivalPage && <Suspense fallback={<LoadingPanel />}><EventCard {...eventCard} /></Suspense>}
-      {firstCard && <Suspense fallback={<LoadingPanel />}>
+      {EventCard && eventCard && !arrivalPage && <EventCard {...eventCard} />}
+      {EventCard && firstCard && (
         <EventCard
           event={firstEvent(firstCard.first, firstCard.title, firstCard.verb)}
           holds={[]}
@@ -1929,9 +1920,9 @@ export function App() {
             if (firstTaken.current) card.then();
           }}
         />
-      </Suspense>}
+      )}
 
-      {interrupts.overworld && <Suspense fallback={<LoadingPanel />}><Overworld
+      {Overworld && <Overworld
         current={fieldMapId}
         progress={progress}
         met={metStrangers.current}
@@ -1939,7 +1930,7 @@ export function App() {
         open={interrupts.overworld}
         onTravel={travel}
         onClose={() => dispatch({ type: 'close-interrupt', which: 'overworld' })}
-      /></Suspense>}
+      />}
 
       {/* One surface, two layers: the notes are the floor, a place sits over them, and canon
           is a section inside the notes rather than a panel of its own. */}
