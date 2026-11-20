@@ -22,8 +22,8 @@
 
 import { useCallback, useState } from 'react';
 import { type Choice, type GameEvent, choicesFor } from '../content/events';
-import { preferredArt } from './art';
-import { sceneFor } from './scenes';
+import { firstArtSelection, preferredArtSelection, type ArtSelection } from './art';
+import { sceneNames } from './scenes';
 import { Modal } from './Modal';
 import { StrangerFace } from './StrangerFace';
 import { ProfileButton } from './Profile';
@@ -48,7 +48,7 @@ export interface EventCardProps {
    */
   met?: readonly string[];
   /** Called once, with the choice taken and the line it writes. */
-  onChoose: (choice: Choice) => void;
+  onChoose: (choice: Choice, art: ArtSelection | null) => void;
   onClose: () => void;
 }
 
@@ -62,21 +62,25 @@ export function EventCard({ event, holds, shelter, pick = 0, met = [], onChoose,
    */
   const [taken, setTaken] = useState<{ line: string } | null>(null);
 
+  // Resolve the painting before creating the choice handler so a card updated in place records
+  // the image the player actually saw.
+  const selection =
+    preferredArtSelection('events', [event.artMoment, event.artVariant, event.art, event.artFallback], pick) ??
+    (shelter ? firstArtSelection('scenes', sceneNames('rest', shelter), pick) : null);
+
   const choose = useCallback(
     (choice: Choice) => {
       if (taken) return;
       setTaken({ line: choice.line });
-      onChoose(choice);
+      onChoose(choice, selection);
     },
-    [taken, onChoose]
+    [taken, onChoose, selection]
   );
 
   // The painting of this moment, then the event's own, then one that will do (a road's, for a road's
   // happening), then the night's, then nothing. Every step is optional and the card keeps its shape
   // at each one, so it does not jump when art lands.
-  const picture =
-    preferredArt('events', [event.artMoment, event.artVariant, event.art, event.artFallback], pick) ??
-    (shelter ? sceneFor('rest', shelter, pick) : null);
+  const picture = selection?.url ?? null;
   const choices = choicesFor(event, holds);
 
   return (

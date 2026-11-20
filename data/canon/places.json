@@ -1297,7 +1297,10 @@
         {
           "id": "lower_courses",
           "name": "The Lower Courses",
-          "description": "Twenty-two storeys of red sandstone, of which four remain standing and the rest lie in roughly the order they fell."
+          "description": "Twenty-two storeys of red sandstone, of which four remain standing and the rest lie in roughly the order they fell.",
+          "discoveries": [
+            "discovery_tower_collapse"
+          ]
         },
         {
           "id": "stair_shaft",

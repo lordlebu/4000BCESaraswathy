@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { examineFirst } from './context-event';
 
 const query='?map=field_map_twins&seed=twin-demo&hour=10&door=open&events=off&firsts=off';
 test('new city art loads and the ostrich tram follows the causeway in both directions',async({page})=>{
@@ -41,7 +42,7 @@ test('the ostrich rests at night and the player can use the road',async({page})=
 
 test('the diary can notice and deepen a new discovery through the place interface',async({page})=>{
   await page.goto(query+'&at=poi_harappa_court');
-  const look=page.getByRole('button',{name:'Look closer',exact:true});
-  await expect(look).toBeVisible({timeout:45000});await look.click();
+  await expect(page.getByRole('button',{name:'Examine',exact:true})).toBeVisible({timeout:45000});
+  await examineFirst(page);
   await expect(page.locator('body')).toContainText('The Wall Around the Roots');
 });

@@ -109,7 +109,7 @@ afterEach(cleanup);
 describe('the diary decides whether it is empty', () => {
   it('says so when nothing at all has happened', () => {
     render(<Diary progress={emptyProgress()} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
-    expect(screen.getByText(/No field observations recorded yet/i)).toBeDefined();
+    expect(screen.getByText(/Travel, speak, or examine a place to begin/i)).toBeDefined();
   });
 
   it('does not call itself empty when a question has been written in it', () => {
@@ -119,14 +119,14 @@ describe('the diary decides whether it is empty', () => {
     expect(p.questions.length).toBeGreaterThan(0);
 
     render(<Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
-    expect(screen.queryByText(/No field observations recorded yet/i)).toBeNull();
+    expect(screen.queryByText(/Travel, speak, or examine a place to begin/i)).toBeNull();
     expect(screen.getByRole('heading', { name: /open questions/i })).toBeDefined();
   });
 
   it('does not call itself empty when only a word has been learned', () => {
     const p = learn(emptyProgress(), 'word_kia_thal');
     render(<Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />);
-    expect(screen.queryByText(/No field observations recorded yet/i)).toBeNull();
+    expect(screen.queryByText(/Travel, speak, or examine a place to begin/i)).toBeNull();
   });
 
   it('renders nothing at all when closed', () => {
@@ -134,6 +134,40 @@ describe('the diary decides whether it is empty', () => {
       <Diary progress={emptyProgress()} open={false} onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
     );
     expect(container.firstChild).toBeNull();
+  });
+});
+
+describe('the diary remembers resolved events', () => {
+  it('reopens the image and the exact choice without replaying the event', () => {
+    render(<Diary
+      progress={emptyProgress()}
+      diaryEvents={[{
+        id: 'event:1',
+        eventId: 'event_camp_fire',
+        origin: 'happening',
+        title: 'A fire after dark',
+        prose: 'Smoke lies low over the camp.',
+        choiceId: 'stay',
+        choiceLabel: 'Stay by the fire',
+        outcome: 'The coals hold until morning.',
+        day: 2,
+        fieldMapId: 'field_map_aravali',
+        art: { collection: 'events', key: 'camp-night-fireside', take: 0 }
+      }]}
+      open
+      onClose={noop}
+      onAnswer={noop}
+      onOpenKit={noop}
+    />);
+
+    expect(screen.getByRole('heading', { name: 'Journey events' })).toBeDefined();
+    fireEvent.click(screen.getByRole('button', { name: 'Reopen event' }));
+    const memory = screen.getByRole('dialog', { name: 'A fire after dark' });
+    expect(memory.querySelector('img.activity-scene')).not.toBeNull();
+    expect(within(memory).getByText('Stay by the fire')).toBeDefined();
+    expect(within(memory).queryByText('Journey events')).toBeNull();
+    fireEvent.click(within(memory).getByRole('button', { name: 'Back to diary' }));
+    expect(screen.getByRole('dialog', { name: 'Field diary' })).toBeDefined();
   });
 });
 
@@ -335,21 +369,13 @@ describe('the last page', () => {
   });
 });
 
-describe('the diary offers the last page', () => {
-  it('only once something has been finished', () => {
-    const nothing = render(
-      <Diary progress={emptyProgress()} open onClose={noop} onAnswer={noop} onOpenEnding={noop} onOpenKit={noop} />
-    );
-    expect(nothing.queryByRole('button', { name: /see who would come/i })).toBeNull();
-    cleanup();
-
+describe('the diary leaves projections to Goals', () => {
+  it('does not offer the last page even once something has been finished', () => {
     const p = climb(emptyProgress(), 'discovery_saltreed_thatch');
-    const onOpenEnding = vi.fn();
     render(
-      <Diary progress={p} open onClose={noop} onAnswer={noop} onOpenEnding={onOpenEnding} onOpenKit={noop} />
+      <Diary progress={p} open onClose={noop} onAnswer={noop} onOpenKit={noop} />
     );
-    fireEvent.click(screen.getByRole('button', { name: /see who would come/i }));
-    expect(onOpenEnding).toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: /see who would come/i })).toBeNull();
   });
 });
 

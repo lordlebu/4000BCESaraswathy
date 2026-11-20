@@ -37,6 +37,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { openRecords } from './records';
 import { approachPlace, step } from './walk';
+import { examineFirst } from './context-event';
 
 /**
  * The seed no longer has to be searched.
@@ -78,22 +79,25 @@ test('stand on an authored place, and it opens', async ({ page }) => {
   expect((await place.locator('.place-arrival').textContent())!.length).toBeGreaterThan(60);
 });
 
-test('looking closer writes the diary, and the diary keeps the crossings-out', async ({ page }) => {
+test('examining writes both diary history and the discovery revision', async ({ page }) => {
   await walkOn(page, await boot(page));
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 
   // Climb whatever this place will give us without any other knowledge.
-  const look = page.getByRole('button', { name: 'Look closer' });
-  await expect(look.first()).toBeEnabled();
-  await look.first().click();
-  await look.first().click().catch(() => {}); // the second rung, if this one has no gate on it
+  let resolved = 1;
+  await examineFirst(page);
+  if (await page.getByRole('button', { name: 'Examine', exact: true }).first().isEnabled().catch(() => false)) {
+    await examineFirst(page);
+    resolved += 1;
+  }
 
   await page.getByRole('button', { name: 'Leave' }).click();
   await openRecords(page);
 
   const diary = page.locator('.diary');
   await expect(diary).toBeVisible({ timeout: 20_000 });
-  await expect(diary.locator('.entry')).toHaveCount(1);
+  await expect(diary.locator('.entry[data-discovery]')).toHaveCount(1);
+  await expect(diary.locator('.diary-event-entry')).toHaveCount(resolved);
   // At least one reading is on the page. If two rungs were climbed, the first is struck through
   // rather than replaced -- that is the whole idea of the panel.
   const readings = diary.locator('.reading');
@@ -112,7 +116,7 @@ test('the diary survives a reload', async ({ page }) => {
   // the identical two-step walk in the test above passed. A wait that is generous costs nothing on
   // a green run; it only bounds the failure.
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
-  await page.getByRole('button', { name: 'Look closer' }).first().click();
+  await examineFirst(page);
   await page.getByRole('button', { name: 'Leave' }).click();
 
   // Wait for the save to actually hold the rung, rather than sleeping longer than it should take.
@@ -130,7 +134,7 @@ test('the diary survives a reload', async ({ page }) => {
   // fifteen seconds waiting for a second write that had no reason to exist.
   //
   // A state assertion has no such race: the save either holds the rung or it does not, and when it
-  // was written does not matter. `progress.rungs` is what "Look closer" advances, so a non-empty
+  // was written does not matter. `progress.rungs` is what the examination event advances, so a non-empty
   // one is exactly the thing the reload has to restore.
   await expect
     .poll(
@@ -151,7 +155,7 @@ test('the diary survives a reload', async ({ page }) => {
       {
         timeout: 15_000,
         message:
-          'the rung from "Look closer" was never saved, so the reload had nothing to restore'
+          'the rung from the examination event was never saved, so the reload had nothing to restore'
       }
     )
     .toBe(true);
@@ -160,7 +164,8 @@ test('the diary survives a reload', async ({ page }) => {
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 
   await openRecords(page);
-  await expect(page.locator('.diary .entry')).toHaveCount(1);
+  await expect(page.locator('.diary .entry[data-discovery]')).toHaveCount(1);
+  await expect(page.locator('.diary .diary-event-entry')).toHaveCount(1);
 });
 
 test('an instance is a place you go into, and it says why when you cannot', async ({ page }) => {
@@ -177,14 +182,20 @@ test('an instance is a place you go into, and it says why when you cannot', asyn
 
   // Three ways further in, two of them shut until the work is done. A closed one explains
   // itself rather than showing a padlock -- that is the rule the whole panel is built on.
-  const deeper = place.locator('.place-section', { hasText: 'Further in' });
+  const deeper = place.locator('.contextual-events').last();
   await expect(deeper.locator('.look')).toHaveCount(3);
   await expect(deeper.getByRole('button', { name: 'Closed to you' })).toHaveCount(2);
   await expect(deeper).toContainText(/Not until you understand/);
 
   // The open one is a place you can stand in, and come back out of.
-  await deeper.getByRole('button', { name: 'Go in' }).click();
+  await deeper.getByRole('button', { name: /Enter the lower courses/i }).click();
+  const card = page.locator('.activity-card').last();
+  await card.getByRole('button', { name: 'Go in' }).click();
+  await card.getByRole('button', { name: 'Go on' }).click();
   await expect(place.locator('.sub h3')).toBeVisible();
+  await expect(place).toContainText('How the Tower Sat Down');
+  await examineFirst(page);
+  await expect(place.locator('.look.discovery-updated')).toContainText('How the Tower Sat Down');
   await page.getByRole('button', { name: 'Back out' }).click();
   await expect(place.locator('.sub')).toBeHidden();
   await expect(deeper.locator('.look')).toHaveCount(3);

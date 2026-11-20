@@ -20,8 +20,9 @@
 // before this existed and consolidating surfaces is not a licence to rewrite them.
 
 import { NotebookMark } from './NotebookMark';
+import { useState } from 'react';
 
-export type RecordTab = 'journey' | 'collection' | 'people';
+export type RecordTab = 'journey' | 'goals' | 'collection' | 'people';
 
 export interface RecordTabsProps {
   tab: RecordTab;
@@ -32,6 +33,10 @@ export interface RecordTabsProps {
   metCount: number;
   /** How many people have been talked to. */
   peopleCount: number;
+  goalCount?: number;
+  onExportImage?: () => void;
+  onExportText?: () => void;
+  replayUrl?: string | null;
 }
 
 /**
@@ -42,15 +47,25 @@ export interface RecordTabsProps {
  * screenshot showed a diary with no tabs at all and the second one unclickable. Each panel takes
  * a `tabs` slot instead, on the same footing as the `footer` slot `Diary` already had.
  */
-export function RecordTabs({ tab, onTab, journeyCount, metCount, peopleCount }: RecordTabsProps) {
+export function RecordTabs({ tab, onTab, journeyCount, metCount, peopleCount, goalCount = 0, onExportImage = () => {}, onExportText = () => {}, replayUrl = null }: RecordTabsProps) {
+  const [taking, setTaking] = useState(false);
   return (
-    <div className="records-tabs" role="tablist" aria-label="Records">
-      <Tab id="journey" label="Journey" count={journeyCount} current={tab} onTab={onTab} />
+    <div className="records-shell-tools">
+      <div className="records-tabs" role="tablist" aria-label="Records">
+      <Tab id="journey" label="Diary" count={journeyCount} current={tab} onTab={onTab} />
+      <Tab id="goals" label="Goals" count={goalCount} current={tab} onTab={onTab} />
       <Tab id="collection" label="Met" count={metCount} current={tab} onTab={onTab} />
       {/* Third, and last. "Two tabs, not four" was right about the *records* -- Progress already
           wrapped Diary and the overworld belongs with Travel -- and this is not a fourth record
           rediscovered, it is the one surface the people never had. */}
       <Tab id="people" label="People" count={peopleCount} current={tab} onTab={onTab} />
+      </div>
+      <button type="button" className="records-take" aria-expanded={taking} onClick={() => setTaking(!taking)}>Take it with you</button>
+      {taking && <section className="records-export" aria-label="Take it with you">
+        <button type="button" onClick={onExportImage}>Save as image</button>
+        <button type="button" className="ghost" onClick={onExportText}>Save as text</button>
+        {replayUrl && <p className="log-replay">Walk it yourself — <span>{replayUrl}</span></p>}
+      </section>}
     </div>
   );
 }
@@ -77,7 +92,7 @@ function Tab({
       className={selected ? 'records-tab is-on' : 'records-tab'}
       onClick={() => onTab(id)}
     >
-      <NotebookMark kind={id === 'journey' ? 'book' : id === 'collection' ? 'leaf' : 'people'} />
+      <NotebookMark kind={id === 'journey' ? 'book' : id === 'collection' ? 'leaf' : id === 'people' ? 'people' : 'section'} />
       {label}
       {/* The count is on the tab because it is the reason to press it: a diary with three
           discoveries under way is worth opening and an empty one is not. Hidden at zero rather

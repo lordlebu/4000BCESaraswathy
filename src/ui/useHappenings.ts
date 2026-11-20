@@ -24,6 +24,7 @@ import type { World } from '../world/types';
 import type { SurfaceAction } from './surface';
 import type { EventCardProps } from './EventCard';
 import type { Happens } from './useRoadTalk';
+import { occurrenceId, type DiaryEventEntry } from '../content/diaryEvents';
 
 /** What the bus handlers read, kept current by `App` after every commit. See `latest` there. */
 export interface Latest {
@@ -57,6 +58,7 @@ export function useHappenings({
   progress,
   setProgress,
   setSatchel,
+  setDiaryEvents,
   setMemory,
   blocked = false
 }: {
@@ -85,10 +87,15 @@ export function useHappenings({
   progress: Progress;
   setProgress: Dispatch<SetStateAction<Progress>>;
   setSatchel: Dispatch<SetStateAction<Satchel>>;
+  setDiaryEvents: Dispatch<SetStateAction<DiaryEventEntry[]>>;
   setMemory: (line: string) => void;
   blocked?: boolean;
 }) {
-  const [happening, setHappening] = useState<{ event: GameEvent; shelter: string | null } | null>(null);
+  const [happening, setHappening] = useState<{
+    event: GameEvent;
+    shelter: string | null;
+    afterChoice?: (choice: Choice) => void;
+  } | null>(null);
   const blockedRef=useRef(blocked);blockedRef.current=blocked;
   const pendingBeedu=useRef<string|null>(null);
   const beeduSafe=useRef(true);
@@ -432,7 +439,7 @@ export function useHappenings({
         shelter: happening.shelter,
         met: metStrangers.current,
         holds: [...progress.words, ...Object.keys(progress.rungs), ...progress.recipes],
-        onChoose: (choice: Choice) => {
+        onChoose: (choice: Choice, art) => {
           // Through the same door a conversation uses. An event grants the same kinds of thing a
           // person does, so it must not grow a second way to change a Progress.
           if (choice.grants.length > 0) setProgress((p) => receiveAll(p, choice.grants));
@@ -462,10 +469,45 @@ export function useHappenings({
           // Noted rather than announced, like every other outcome in this game: the progression
           // is a written journal and a thing that happened to you is a line in it.
           setMemory(choice.line);
+          const event = happening.event;
+          setDiaryEvents((entries) => [
+            ...entries,
+            {
+              id: occurrenceId(event.id, entries),
+              eventId: event.id,
+              origin: event.origin ?? (event.id.startsWith('happening_') ? 'happening' : 'woven'),
+              ...(event.subjectId ? { subjectId: event.subjectId } : {}),
+              title: event.title,
+              prose: event.prose,
+              choiceId: choice.id,
+              choiceLabel: choice.label,
+              outcome: choice.line,
+              day: latest.current.day,
+              fieldMapId: latest.current.fieldMapId,
+              ...(latest.current.poiId ? { poiId: latest.current.poiId } : {}),
+              art: art && (art.folder === 'events' || art.folder === 'scenes')
+                ? { collection: art.folder, key: art.key, take: art.take }
+                : null
+            }
+          ]);
+          if (event.once && !seenEvents.current.includes(event.id)) {
+            seenEvents.current = [...seenEvents.current, event.id];
+          }
+          happening.afterChoice?.(choice);
         },
         onClose: () => setHappening(null)
       }
     : null;
 
-  return { happening, setHappening, happens, storyRef, beeduNearby, card };
+  const openEvent = (event: GameEvent, afterChoice?: (choice: Choice) => void) => {
+    if (event.once && seenEvents.current.includes(event.id)) {
+      const choice = event.choices[0];
+      if (choice) afterChoice?.(choice);
+      return;
+    }
+    cardOpenRef.current = true;
+    setHappening({ event, shelter: null, afterChoice });
+  };
+
+  return { happening, setHappening, openEvent, happens, storyRef, beeduNearby, card };
 }

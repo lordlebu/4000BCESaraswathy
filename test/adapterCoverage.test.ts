@@ -175,7 +175,7 @@ const COVERAGE: Record<string, Coverage> = {
 /** Nested shapes, which is where `requires` and `gives` live and where drift would hurt most. */
 const NESTED: Record<string, Coverage> = {
   'points_of_interest.sub_locations': {
-    adapted: ['id', 'name', 'description', 'requires'],
+    adapted: ['id', 'name', 'description', 'requires', 'discoveries'],
     skipped: []
   },
   'npcs.lines': {

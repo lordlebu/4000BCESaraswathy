@@ -19,11 +19,11 @@ import { travellerAttributes, travellersOn } from '../content/travellers';
 import { SatchelStrip } from './SatchelStrip';
 import type { RecordTab } from './Records';
 const RecordTabs = lazy(() => import('./Records'));
+const GoalsPanel = lazy(() => import('./GoalsPanel').then(module => ({ default: module.GoalsPanel })));
 
 import { met } from '../content/people';
 import { freshSeed, rememberSeed, seedFromUrl } from './seed';
 import { JourneySeed } from './journeySeed';
-import { SettlingSection } from './SettlingSection';
 import { settlingRoad } from '../content/settlingRoad';
 import { distinct, emptySatchel } from '../content/satchel';
 import { offeredHere } from '../content/crafting';
@@ -43,7 +43,7 @@ import { Opening } from './Opening';
 import { bearingTo } from '../content/journal';
 const Journey = lazy(() => import('./Journey').then(module => ({ default: module.Journey })));
 import { coachLine, MORNING_GOAL } from '../content/coach';
-import { GoalsSection } from './GoalsSection';
+import type { DiaryEventEntry } from '../content/diaryEvents';
 import {
   advance,
   answer,
@@ -132,8 +132,8 @@ function fieldMapFromUrl(saved?: string): string {
  * that has to be edited in three places, which is the shape a fourth tab would get wrong -- and
  * the strips had already drifted into two copies of the same expression.
  */
-function recordSurface(tab: RecordTab): 'progress' | 'collection' | 'people' {
-  return tab === 'collection' ? 'collection' : tab === 'people' ? 'people' : 'progress';
+function recordSurface(tab: RecordTab): 'progress' | 'goals' | 'collection' | 'people' {
+  return tab === 'collection' ? 'collection' : tab === 'people' ? 'people' : tab === 'goals' ? 'goals' : 'progress';
 }
 
 /**
@@ -214,6 +214,7 @@ export function App() {
   const [arrival, setArrival] = useState<Arrival | null>(null);
   const [collection, setCollection] = useState<Collection>(initialJourney.current.collection);
   const [memory, setMemory] = useState('');
+  const [diaryEvents, setDiaryEvents] = useState<DiaryEventEntry[]>(initialJourney.current.diaryEvents ?? []);
   const [arrivalPage, setArrivalPage] = useState<GameToUi['landmark-reached'] | null>(null);
   useEffect(() => {
     pageOpenRef.current = arrivalPage !== null;
@@ -444,7 +445,7 @@ export function App() {
 
   // Things that happen: the card, asking whether anything happens on a night, an arrival, the road
   // or at a camp, story beats first, and what a choice does -- `useHappenings.ts`.
-  const { happening, setHappening, happens, storyRef, card: eventCard } = useHappenings({
+  const { happening, setHappening, openEvent, happens, storyRef, card: eventCard } = useHappenings({
     latest,
     blocked:Boolean(atTheDoor||titleUp||opening||arrivalPage||firstCard||talkingTo||placeOpen||(surface!==null&&surface!=='here')||Object.values(interrupts).some(Boolean)),
     seenEvents,
@@ -462,6 +463,7 @@ export function App() {
     progress,
     setProgress,
     setSatchel,
+    setDiaryEvents,
     setMemory
   });
 
@@ -574,6 +576,7 @@ export function App() {
         // reload. Unversioned: absent reads as none, which is true of every journey written before
         // there were events to have.
         seenEvents: seenEvents.current,
+        diaryEvents,
         // Strangers you have met, so somebody on the road can know you the second time.
         met: metStrangers.current,
         // When each event last happened, and what earlier choices left behind.
@@ -588,7 +591,7 @@ export function App() {
       window.removeEventListener('pagehide', flush);
       flush();
     };
-  }, [seed, collection, reached, progress, satchel, nodesByMap, fieldMapId, pinned]);
+  }, [seed, collection, reached, progress, satchel, nodesByMap, fieldMapId, pinned, diaryEvents]);
 
   /**
    * What the person being talked to is, if they are also somebody who walks a circuit.
@@ -695,6 +698,7 @@ export function App() {
     // And so did the events and the people in them. These were never reloaded here, so a new seed
     // inherited the old one's `seen` list and saved it as its own.
     seenEvents.current = loaded.seenEvents ?? [];
+    setDiaryEvents(loaded.diaryEvents ?? []);
     metStrangers.current = loaded.met ?? [];
     eventDays.current = loaded.eventDays ?? {};
     journeyFlags.current = loaded.flags ?? [];
@@ -769,7 +773,7 @@ export function App() {
     );
   }, [world, arrival, currentCreature, creatureIsOut]);
 
-  /** Look closer at something. The rule for whether that is possible is `journey.ts`'s. */
+  /** Resolve one discovery event. The rule for whether that is possible is `journey.ts`'s. */
   const look = useCallback(
     (discoveryId: string) => setProgress((p) => advance(p, discoveryId)),
     []
@@ -1729,7 +1733,7 @@ export function App() {
         metCount={size(collection)}
         diaryCount={diaryCount(progress)}
         recordsRef={recordsRef}
-        recordsOpen={surface === 'progress' || surface === 'collection'}
+        recordsOpen={surface === 'progress' || surface === 'goals' || surface === 'collection' || surface === 'people'}
         // Opens on the journey, which is the one a player is more often coming back to -- the
         // album is browsed and the diary is worked. Toggling closes whichever is showing.
         onOpenRecords={() => {
@@ -1779,8 +1783,6 @@ export function App() {
       <Progress
         readingSize={readingSize}
         onReadingSize={setReadingSize}
-        hasGoals={goalRows.length > 0}
-        hasSettling={!!road}
         roadNotes={arrival && world ? {
           hint: arrival.hint,
           whereNext: arrival.whereNext,
@@ -1796,24 +1798,37 @@ export function App() {
             journeyCount={diaryCount(progress)}
             metCount={size(collection)}
             peopleCount={met(progress).length}
+            goalCount={goalRows.length}
+            onExportImage={exportImage}
+            onExportText={exportText}
+            replayUrl={travelLog?.replayUrl ?? null}
           /></Suspense>
         }
-        lead={
-          <>
-            <GoalsSection rows={goalRows} />
-            <SettlingSection road={road} />
-          </>
-        }
         progress={progress}
+        diaryEvents={diaryEvents}
         open={surface === 'progress'}
         onClose={() => { setTargetDiscoveryId(null); dispatch({ type: 'close' }); }}
         onAnswer={settle}
-        onOpenEnding={() => dispatch({ type: 'open-interrupt', which: 'ending' })}
         onOpenKit={() => dispatch({ type: 'open-interrupt', which: 'kit' })}
-        replayUrl={travelLog?.replayUrl ?? null}
-        onExportImage={exportImage}
-        onExportText={exportText}
       />
+      </Suspense>}
+
+      {surface === 'goals' && <Suspense fallback={<Modal open label="Goals" onClose={() => dispatch({ type: 'close' })}><p role="status">Opening goals…</p></Modal>}>
+        <GoalsPanel
+          open
+          rows={goalRows}
+          road={road}
+          canEnd={discoveries.some((d) => isComplete(progress, d.id))}
+          onEnding={() => dispatch({ type: 'open-interrupt', which: 'ending' })}
+          onClose={() => dispatch({ type: 'close' })}
+          tabs={<RecordTabs
+            tab="goals"
+            onTab={(tab: RecordTab) => dispatch({ type: 'show', surface: recordSurface(tab) })}
+            journeyCount={diaryCount(progress)} metCount={size(collection)} peopleCount={met(progress).length}
+            goalCount={goalRows.length} onExportImage={exportImage} onExportText={exportText}
+            replayUrl={travelLog?.replayUrl ?? null}
+          />}
+        />
       </Suspense>}
 
       {CollectionPanel && <CollectionPanel
@@ -1824,6 +1839,10 @@ export function App() {
             journeyCount={diaryCount(progress)}
             metCount={size(collection)}
             peopleCount={met(progress).length}
+            goalCount={goalRows.length}
+            onExportImage={exportImage}
+            onExportText={exportText}
+            replayUrl={travelLog?.replayUrl ?? null}
           /></Suspense>
         }
         collection={collection}
@@ -1840,6 +1859,10 @@ export function App() {
             journeyCount={diaryCount(progress)}
             metCount={size(collection)}
             peopleCount={met(progress).length}
+            goalCount={goalRows.length}
+            onExportImage={exportImage}
+            onExportText={exportText}
+            replayUrl={travelLog?.replayUrl ?? null}
           /></Suspense>
         }
         progress={progress}
@@ -1981,6 +2004,7 @@ export function App() {
           firstVisit: Boolean(standingOn) && !visited.current.has(standingOn!),
           updatedDiscoveries: discoveriesFeedback.pending.map(change => change.id),
           onLook: look,
+          onEvent: (event, afterChoice) => openEvent(event, afterChoice),
           onTalkTo: (npcId: string) => dispatch({ type: 'talk-to', npcId }),
           /**
            * Walk up to a bench and open the workshop at it.

@@ -1451,10 +1451,9 @@ button.ghost:hover:not(:disabled) {
   min-height: 40px;
 }
 
-/* --- Records: two tabs, one sheet -----------------------------------------
+/* --- Records: four tabs, one sheet ----------------------------------------
  *
- * The diary and the album are the two things a player *has*, and they were two controls in a bar
- * that otherwise holds only things a player can *do*. One door, tabbed inside.
+ * The durable records share one door, tabbed inside; Goals is separate from the diary itself.
  *
  * The strip renders into each panel's own `tabs` slot rather than floating over it. Floating was
  * the first attempt: both panels draw a full-screen veil at `--z-modal`, so tabs positioned
@@ -1462,15 +1461,41 @@ button.ghost:hover:not(:disabled) {
 
 .records-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 12px;
 }
+
+.records-layout {
+  width: min(56rem, 100%);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.records-layout > .diary { width: 100%; min-height: 0; flex: 1; }
+.records-shell-tools {
+  flex: none;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  background: var(--paper);
+  box-shadow: 0 8px 24px rgba(27, 20, 32, 0.2);
+}
+.records-take { min-height: 44px; margin-top: 8px; }
+.records-export {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  background: rgba(255, 248, 236, 0.72);
+}
+.records-export > button { margin-right: 8px; }
 
 .records-tab {
   font: inherit;
   font-size: 0.82rem;
   padding: 5px 14px;
-  min-height: 34px;
+  min-height: 44px;
   border: 1px solid var(--edge);
   border-radius: 999px;
   background: transparent;
@@ -1494,6 +1519,9 @@ button.ghost:hover:not(:disabled) {
   font-variant-numeric: tabular-nums;
   opacity: 0.75;
 }
+
+.diary-event-entry > p { margin: 6px 0; }
+.event-memory { width: min(30rem, 100%); }
 
 /* --- The album's search and its headings ---------------------------------
  *

@@ -43,6 +43,25 @@ describe('a journey survives a round trip', () => {
     expect(back.discovered).toEqual(['1,2']);
   });
 
+  it('keeps event prose and art as a durable diary snapshot', () => {
+    const diaryEvents = [{
+      id: 'event:1',
+      eventId: 'event_camp_fire',
+      origin: 'happening' as const,
+      title: 'A fire after dark',
+      prose: 'Smoke lies low over the camp.',
+      choiceId: 'stay',
+      choiceLabel: 'Stay by the fire',
+      outcome: 'The coals hold until morning.',
+      day: 2,
+      fieldMapId: 'field_map_aravali',
+      art: { collection: 'events' as const, key: 'camp-night-fireside', take: 0 }
+    }];
+    saveJourney(SEED, { discovered: [], collection: {}, reached: true, diaryEvents });
+
+    expect(loadJourney(SEED).diaryEvents).toEqual(diaryEvents);
+  });
+
   it('starts empty when nothing was ever written', () => {
     expect(loadJourney('never-walked').collection).toEqual({});
   });

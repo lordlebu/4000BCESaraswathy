@@ -139,6 +139,29 @@ export function firstArt(
   return null;
 }
 
+export interface ArtSelection {
+  folder: string;
+  key: string;
+  take: number;
+  url: string;
+}
+
+/** The same lookup as `firstArt`, retaining the semantic key needed by a saved diary entry. */
+export function firstArtSelection(
+  folder: string,
+  names: readonly (string | null | undefined)[],
+  pick = 0
+): ArtSelection | null {
+  for (const name of names) {
+    if (!name) continue;
+    const takes = artTakes(folder, name);
+    if (takes.length === 0) continue;
+    const take = (pick >>> 0) % takes.length;
+    return { folder, key: name, take, url: takes[take]! };
+  }
+  return null;
+}
+
 /** Prefer a reviewed painted edition, preserving the accepted original as a fallback.
  * Resolve each subject before moving to its broader fallback: a painted generic scene must
  * never displace a specific event. Take selection remains seeded within the chosen edition.
@@ -151,6 +174,19 @@ export function preferredArt(
   for (const name of names) {
     if (!name) continue;
     const found = firstArt(folder, [`${name}-painted`, name], pick);
+    if (found) return found;
+  }
+  return null;
+}
+
+export function preferredArtSelection(
+  folder: 'portraits' | 'places' | 'events',
+  names: readonly (string | null | undefined)[],
+  pick = 0
+): ArtSelection | null {
+  for (const name of names) {
+    if (!name) continue;
+    const found = firstArtSelection(folder, [`${name}-painted`, name], pick);
     if (found) return found;
   }
   return null;

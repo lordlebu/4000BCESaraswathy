@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
+import { examineFirst } from './context-event';
 import { openRecords } from './records';
 
 // Read authored fixtures as JSON instead of importing the game's content graph into Node.
@@ -14,7 +15,7 @@ for (const kind of ['empty', 'words', 'questions', 'dense'] as const) {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto('/?seed=notebook-content&hour=12&at=poi_eastern_field');
     await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
-    await page.getByRole('button', { name: 'Look closer', exact: true }).first().click();
+    await examineFirst(page);
     const key = 'south-of-tethys:notebook-content';
     await expect.poll(() => page.evaluate(k => Boolean(JSON.parse(localStorage.getItem(k) ?? '{}').progress), key)).toBe(true);
     const saved = await page.evaluate(k => JSON.parse(localStorage.getItem(k)!), key);
@@ -26,7 +27,10 @@ for (const kind of ['empty', 'words', 'questions', 'dense'] as const) {
       ...(kind === 'questions' || kind === 'dense' ? { questions: canon.field_questions.map(q => q.id) } : {}),
       ...(kind === 'dense' ? { rungs: Object.fromEntries(canon.discoveries.map(d => [d.id, d.levels.length - 1])) } : {})
     };
-    await page.addInitScript(({ key, saved, progress }) => localStorage.setItem(key, JSON.stringify({ ...saved, progress })), { key, saved, progress });
+    // This fixture measures authored notebook content, not journey history. Examining above only
+    // creates a valid save to reshape; whether its occurrence reached the periodic save first was
+    // a CI timing race, so remove that unrelated ledger explicitly.
+    await page.addInitScript(({ key, saved, progress }) => localStorage.setItem(key, JSON.stringify({ ...saved, progress, diaryEvents: [] })), { key, saved, progress });
     await page.reload();
     await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
     await openRecords(page);
@@ -39,7 +43,7 @@ for (const kind of ['empty', 'words', 'questions', 'dense'] as const) {
       await expect(diary.locator('.diary-sub')).not.toHaveText('No field observations yet.');
     }
     if (kind === 'dense') {
-      await expect(diary.locator('.entry')).toHaveCount(canon.discoveries.length);
+      await expect(diary.locator('.entry[data-discovery]')).toHaveCount(canon.discoveries.length);
       expect((await diary.locator('.reading').allTextContents()).sort()).toEqual(canon.discoveries.flatMap(d => d.levels.map(l => l.entry)).sort());
     }
     // Layout checks visit every populated section, including questions and words far below the fold.
@@ -63,7 +67,7 @@ test('missing notebook fonts fall back to readable text', async ({ page }) => {
   await page.route('**/*.woff2', route => route.abort());
   await page.goto('/?seed=notebook-fallback&hour=12&at=poi_eastern_field');
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
-  await page.getByRole('button', { name: 'Look closer', exact: true }).first().click();
+  await examineFirst(page);
   await openRecords(page);
   await expect(page.locator('.field-diary')).toBeVisible({ timeout: 20_000 });
   await page.locator('.field-diary .reading').last().scrollIntoViewIfNeeded();

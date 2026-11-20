@@ -10,7 +10,7 @@
 // Presentation only. Every rule — whether a rung can advance, why it cannot, which readings
 // of a question are open — is asked of `journey.ts`. Nothing here recomputes a ladder.
 
-import { useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import {
   type Progress,
   blockedBy,
@@ -27,6 +27,9 @@ import { specimensIn } from './FieldKit';
 import { Modal } from './Modal';
 import type { ReadingSize } from './preferences';
 import { NotebookMark } from './NotebookMark';
+import type { DiaryEventEntry } from '../content/diaryEvents';
+import { art } from './art';
+import { fieldMap, poi } from '../content/places';
 
 /** Canon's discipline ids, in the order a naturalist would keep them. */
 const DISCIPLINE_ORDER = [
@@ -112,10 +115,12 @@ export interface DiaryProps {
   leadSections?: readonly { id: string; label: string }[];
   targetDiscoveryId?: string | null;
   progress: Progress;
+  diaryEvents?: readonly DiaryEventEntry[];
   open: boolean;
   onClose: () => void;
   onAnswer: (questionId: string, index: number) => void;
-  onOpenEnding: () => void;
+  /** Retained as an ignored compatibility prop; the ending now belongs to Goals. */
+  onOpenEnding?: () => void;
   onOpenKit: () => void;
   /**
    * Anything that belongs after the record, when this is being shown as the Progress surface.
@@ -136,10 +141,10 @@ export function Diary({
   leadSections = [],
   targetDiscoveryId = null,
   progress,
+  diaryEvents = [],
   open,
   onClose,
   onAnswer,
-  onOpenEnding,
   onOpenKit,
   footer,
   tabs,
@@ -149,6 +154,7 @@ export function Diary({
   const headerRef = useRef<HTMLElement>(null);
   const targetRef = useRef<HTMLHeadingElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const [memory, setEventMemory] = useState<DiaryEventEntry | null>(null);
 
   // The sticky header may wrap at large text sizes. Measure its real height so section
   // shortcuts and focused discovery entries never land underneath it.
@@ -183,22 +189,24 @@ export function Diary({
   // is written down too, and so is a word. Checking only discoveries hid the whole page --
   // including the questions — from a player whose first act was to talk to someone.
   const written =
-    noticed.length > 0 || questions.length > 0 || Object.keys(languages).length > 0;
+    diaryEvents.length > 0 || noticed.length > 0 || questions.length > 0 || Object.keys(languages).length > 0;
 
   const shortcuts = [
     ...leadSections,
+    ...(diaryEvents.length ? [{ id: 'notebook-events', label: 'Journey events' }] : []),
     ...DISCIPLINE_ORDER.filter(k => noticed.some(d => d.discipline === k)).map(k => ({ id: `notebook-${k}`, label: DISCIPLINE_NAME[k]! })),
     ...(questions.length ? [{ id: 'notebook-questions', label: 'Questions' }] : []),
     ...(specimensIn(progress).length ? [{ id: 'notebook-kit', label: 'Field kit' }] : []),
-    ...(finished ? [{ id: 'notebook-ending', label: 'If you stopped here' }] : []),
     ...(Object.keys(languages).length ? [{ id: 'notebook-words', label: 'Words' }] : []),
     ...(footer ? [{ id: 'notebook-export', label: 'Take it with you' }] : [])
   ];
 
   return (
-    <Modal open label="Field diary" onClose={onClose} initialFocus={targetDiscoveryId && noticed.some(d => d.id === targetDiscoveryId) ? targetRef : closeRef}>
-      <section ref={pageRef} className={`diary diary-${density} field-diary notebook-settings`} data-reading-size={readingSize}>
+    <>
+    <Modal open={!memory} label="Field diary" onClose={onClose} initialFocus={targetDiscoveryId && noticed.some(d => d.id === targetDiscoveryId) ? targetRef : closeRef}>
+      <div className="records-layout">
         {tabs}
+      <section ref={pageRef} className={`diary diary-${density} field-diary notebook-settings`} data-reading-size={readingSize}>
         <header ref={headerRef} className="diary-head notebook-header">
           <div>
             <h2><NotebookMark /> Field Diary</h2>
@@ -232,9 +240,29 @@ export function Diary({
         </nav>}
         {lead}
 
+        {diaryEvents.length > 0 && (
+          <section className="diary-section diary-events">
+            <h3 id="notebook-events" tabIndex={-1}>Journey events</h3>
+            {diaryEvents.map((entry) => {
+              const place = entry.poiId ? poi(entry.poiId) : null;
+              return (
+                <article key={entry.id} className="entry diary-event-entry">
+                  <header className="entry-head">
+                    <h4>{entry.title}</h4>
+                    <span className="entry-rungs">Day {entry.day + 1}</span>
+                  </header>
+                  <p className="muted">{place?.name ?? fieldMap(entry.fieldMapId)?.name ?? entry.fieldMapId}</p>
+                  <p>{entry.outcome}</p>
+                  {entry.art && <button type="button" className="ghost" onClick={() => setEventMemory(entry)}>Reopen event</button>}
+                </article>
+              );
+            })}
+          </section>
+        )}
+
         {!written ? (
           <p className="diary-empty">
-            No field observations recorded yet. Look closer at a place to begin.
+            Travel, speak, or examine a place to begin.
           </p>
         ) : (
           <>
@@ -296,17 +324,6 @@ export function Diary({
               </section>
             )}
 
-            {/* The way to the last page. Offered only once something has been finished, since
-                before that it would say nothing a player could act on. */}
-            {discoveries.some((d) => isComplete(progress, d.id)) && (
-              <section className="diary-section">
-                <h3 id="notebook-ending" tabIndex={-1}>If you stopped here</h3>
-                <button type="button" className="ending-open" onClick={onOpenEnding}>
-                  See who would come
-                </button>
-              </section>
-            )}
-
             {Object.keys(languages).length > 0 && (
               <section className="diary-section">
                 <h3 id="notebook-words" tabIndex={-1}>Words</h3>
@@ -337,7 +354,23 @@ export function Diary({
 
         {footer}
       </section>
+      </div>
     </Modal>
+      {memory && <Modal open label={memory.title} onClose={() => setEventMemory(null)}>
+        <section className="activity-card event-memory">
+          {memory.art && art(memory.art.collection, memory.art.key, memory.art.take) && (
+            <img className="activity-scene" src={art(memory.art.collection, memory.art.key, memory.art.take)!} alt="" aria-hidden="true" />
+          )}
+          <div className="activity-body">
+            <h2 className="activity-title">{memory.title}</h2>
+            <p className="activity-prose">{memory.prose}</p>
+            <p><strong>{memory.choiceLabel}</strong></p>
+            <p>{memory.outcome}</p>
+            <button type="button" className="activity-choice primary" onClick={() => setEventMemory(null)}>Back to diary</button>
+          </div>
+        </section>
+      </Modal>}
+    </>
   );
 }
 

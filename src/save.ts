@@ -9,6 +9,7 @@ import { type Collection, readCollection } from './content/collection';
 import { type Satchel, emptySatchel } from './content/satchel';
 import { type Drawn, type Nodes, noNodes } from './content/nodes';
 import { type Progress, emptyProgress } from './journey';
+import type { DiaryEventEntry, EventOrigin } from './content/diaryEvents';
 
 const PREFIX = 'south-of-tethys';
 
@@ -229,6 +230,8 @@ export interface Journey {
    * membership. `content/events.ts` decides what goes in; this only stores it.
    */
   seenEvents?: string[];
+  /** Resolved narrative occurrences, in diary order. Optional for older saves. */
+  diaryEvents?: DiaryEventEntry[];
   /**
    * The strangers the player has met in an event, by the id their event carried.
    *
@@ -262,6 +265,7 @@ const empty = (): Journey => ({
   nodesByMap: {},
   travelled: 0,
   seenEvents: [],
+  diaryEvents: [],
   met: [],
   eventDays: {},
   flags: []
@@ -280,6 +284,38 @@ function readDays(value: unknown): Record<string, number> {
 /** A list of strings, or none. A stored value from some other shape must never reach a caller. */
 function readIds(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : [];
+}
+
+const EVENT_ORIGINS: readonly EventOrigin[] = ['happening', 'discovery', 'sub-location', 'woven'];
+
+function readDiaryEvents(value: unknown): DiaryEventEntry[] {
+  if (!Array.isArray(value)) return [];
+  const out: DiaryEventEntry[] = [];
+  for (const raw of value) {
+    if (!raw || typeof raw !== 'object') continue;
+    const e = raw as Partial<DiaryEventEntry>;
+    if (
+      typeof e.id !== 'string' || typeof e.eventId !== 'string' ||
+      !EVENT_ORIGINS.includes(e.origin as EventOrigin) || typeof e.title !== 'string' ||
+      typeof e.prose !== 'string' || typeof e.choiceId !== 'string' ||
+      typeof e.choiceLabel !== 'string' || typeof e.outcome !== 'string' ||
+      typeof e.day !== 'number' || !Number.isInteger(e.day) || e.day < 0 ||
+      typeof e.fieldMapId !== 'string'
+    ) continue;
+    const art = e.art && typeof e.art === 'object' &&
+      (e.art.collection === 'events' || e.art.collection === 'scenes') &&
+      typeof e.art.key === 'string' && typeof e.art.take === 'number' && Number.isInteger(e.art.take)
+      ? { collection: e.art.collection, key: e.art.key, take: e.art.take }
+      : null;
+    out.push({
+      id: e.id, eventId: e.eventId, origin: e.origin as EventOrigin,
+      ...(typeof e.subjectId === 'string' ? { subjectId: e.subjectId } : {}),
+      title: e.title, prose: e.prose, choiceId: e.choiceId, choiceLabel: e.choiceLabel,
+      outcome: e.outcome, day: e.day, fieldMapId: e.fieldMapId,
+      ...(typeof e.poiId === 'string' ? { poiId: e.poiId } : {}), art
+    });
+  }
+  return out;
 }
 
 /** Anything unrecognisable becomes an empty progress rather than a half-read one. */
@@ -397,6 +433,7 @@ export function loadJourney(seed: string): Journey {
           // reach `canHappen` as an object, where it would silently never match an id and quietly
           // replay every `once` event the player has already had.
           seenEvents: readIds(parsed.seenEvents),
+          diaryEvents: readDiaryEvents(parsed.diaryEvents),
           met: readIds(parsed.met),
           eventDays: readDays(parsed.eventDays),
           flags: readIds(parsed.flags),
@@ -409,6 +446,7 @@ export function loadJourney(seed: string): Journey {
           satchel: fresh.satchel,
           travelled: 0,
           seenEvents: [],
+          diaryEvents: [],
           met: [],
           eventDays: {},
           flags: [],

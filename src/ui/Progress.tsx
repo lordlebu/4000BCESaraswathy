@@ -18,48 +18,35 @@ import type { ReadingSize } from './preferences';
 import { Diary } from './Diary';
 import { RoadNotes, type RoadNotesProps } from './RoadNotes';
 import type { Progress as Knowledge } from '../journey';
+import type { DiaryEventEntry } from '../content/diaryEvents';
 
 export interface ProgressProps {
   readingSize?: ReadingSize;
   onReadingSize?: (size: ReadingSize) => void;
-  hasGoals?: boolean;
-  hasSettling?: boolean;
   roadNotes?: RoadNotesProps | null;
   targetDiscoveryId?: string | null;
   progress: Knowledge;
+  diaryEvents?: readonly DiaryEventEntry[];
   open: boolean;
   onClose: () => void;
   onAnswer: (questionId: string, index: number) => void;
-  onOpenEnding: () => void;
   onOpenKit: () => void;
-  /** Where the walk can be picked up again. The seed is the whole save file. */
-  replayUrl: string | null;
-  onExportImage: () => void;
-  onExportText: () => void;
   /** Tabs, when this panel is one of two records behind one door. See `Records.tsx`. */
-  /** What leads the diary: the map's road to settling. */
-  lead?: ReactNode;
   tabs?: ReactNode;
 }
 
 export function Progress({
   readingSize,
   onReadingSize,
-  hasGoals,
-  hasSettling,
   roadNotes,
   targetDiscoveryId = null,
   progress,
+  diaryEvents,
   open,
   onClose,
   onAnswer,
-  onOpenEnding,
   onOpenKit,
-  replayUrl,
-  onExportImage,
-  onExportText,
-  tabs,
-  lead
+  tabs
 }: ProgressProps) {
   if (!open) return null;
 
@@ -68,39 +55,17 @@ export function Progress({
       readingSize={readingSize}
       onReadingSize={onReadingSize}
       leadSections={[
-        ...(hasGoals ? [{ id: 'notebook-goals', label: 'Goals' }] : []),
-        ...(hasSettling ? [{ id: 'notebook-settling', label: 'Settling' }] : []),
         ...(roadNotes ? [{ id: 'notebook-road', label: 'Road notes' }] : [])
       ]}
       targetDiscoveryId={targetDiscoveryId}
       tabs={tabs}
-      lead={<>{lead}{roadNotes && <RoadNotes {...roadNotes} />}</>}
+      lead={roadNotes && <RoadNotes {...roadNotes} />}
       progress={progress}
+      diaryEvents={diaryEvents}
       open
       onClose={onClose}
       onAnswer={onAnswer}
-      onOpenEnding={onOpenEnding}
       onOpenKit={onOpenKit}
-      footer={
-        // Taking a copy is something you do to a record you have read, so it lives at the end
-        // of the record rather than in a panel of its own.
-        <section className="diary-section">
-          <h3 id="notebook-export" tabIndex={-1}>Take it with you</h3>
-          <div className="log-actions">
-            <button type="button" onClick={onExportImage}>
-              Save as image
-            </button>
-            <button type="button" className="ghost" onClick={onExportText}>
-              Save as text
-            </button>
-          </div>
-          {replayUrl && (
-            <p className="log-replay">
-              Walk it yourself — <span>{replayUrl}</span>
-            </p>
-          )}
-        </section>
-      }
     />
   );
 }
