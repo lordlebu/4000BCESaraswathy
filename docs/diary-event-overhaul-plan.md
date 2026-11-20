@@ -30,6 +30,26 @@ never duplicated between them.
 - Final production budgets: app startup 164.22 KB / 180 KB gzipped; canon chunk 130.8 KB / 350 KB gzipped.
 - `git diff --check` passed in both repositories.
 
+### PR #269 CI failure record
+
+GitHub Actions runs [44741496396](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/44741496396)
+and [44742065129](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/44742065129)
+reported the same four browser failures on the original `b45b58b` head. The code/build `check`
+job and browser shards 2 and 4 were already green. The final `browser` job was only the aggregate
+failure from shards 1 and 3, not a fifth defect.
+
+| Failed browser case | Cause | Correction and retained regression assertion |
+|---|---|---|
+| `fielddiary`: examination writes the diary | The test counted every generic `.entry` and expected one. The overhaul correctly renders one analytical discovery entry plus one event-history entry per resolved examination. | Count `.entry[data-discovery]` and `.diary-event-entry` separately; require exactly one discovery entry and exactly one history entry per resolved event. |
+| `fielddiary`: diary survives reload | The reload assertion had the same stale aggregate count and received the persisted discovery plus its persisted event occurrence. | After reload, independently require one discovery entry and one event-history entry, proving both save paths survive. |
+| `game`: journal exports as text and image | Export moved from the diary body into the collapsed Records-level `Take it with you` sheet, but the test searched for `Save as text` immediately after opening Diary. | Expand `Take it with you`, require its named region to be visible, then verify both downloads and the rendered PNG size. |
+| `settling-road`: settling guidance is visible | Settling guidance intentionally moved from Diary to the new Goals tab, but the test opened Records and searched the default Diary tab. | Select the accessible Goals tab before asserting the `Settling` region and its authored steps. |
+
+These were expectation/ownership regressions in E2E coverage, not intermittent timeouts or runtime
+state failures. The four corrected cases pass together with one worker in 43.1 seconds. Their new
+selectors encode the overhaul's boundaries so a future disappearance of history, export, or Goals
+content cannot be hidden by a looser aggregate assertion.
+
 ### Implementation decisions recorded after delivery
 
 - `diaryEvents` remains an optional, validated save field, so older saves naturally read it as an empty list. No knowledge-version bump was needed and existing progress is preserved.

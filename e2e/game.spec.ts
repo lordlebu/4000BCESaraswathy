@@ -114,9 +114,11 @@ test('the journal can be taken away as text and as an image', async ({ page }) =
   await page.goto(`?seed=${SEED}`);
   await waitForJourney(page);
 
-  // Taking a copy now lives at the end of the Progress surface rather than in a panel of its
-  // own, so it has to be opened first -- which is the point: you copy a record you have read.
+  // Export belongs to the Records shell rather than the diary. Open its compact sheet before
+  // asking for either download, and keep this assertion so the ownership cannot drift back.
   await openRecords(page);
+  await page.getByRole('button', { name: 'Take it with you', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Take it with you' })).toBeVisible();
 
   const text = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Save as text' }).click();

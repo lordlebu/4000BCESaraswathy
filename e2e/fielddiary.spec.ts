@@ -79,14 +79,16 @@ test('stand on an authored place, and it opens', async ({ page }) => {
   expect((await place.locator('.place-arrival').textContent())!.length).toBeGreaterThan(60);
 });
 
-test('looking closer writes the diary, and the diary keeps the crossings-out', async ({ page }) => {
+test('examining writes both diary history and the discovery revision', async ({ page }) => {
   await walkOn(page, await boot(page));
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 
   // Climb whatever this place will give us without any other knowledge.
+  let resolved = 1;
   await examineFirst(page);
   if (await page.getByRole('button', { name: 'Examine', exact: true }).first().isEnabled().catch(() => false)) {
     await examineFirst(page);
+    resolved += 1;
   }
 
   await page.getByRole('button', { name: 'Leave' }).click();
@@ -94,7 +96,8 @@ test('looking closer writes the diary, and the diary keeps the crossings-out', a
 
   const diary = page.locator('.diary');
   await expect(diary).toBeVisible({ timeout: 20_000 });
-  await expect(diary.locator('.entry')).toHaveCount(1);
+  await expect(diary.locator('.entry[data-discovery]')).toHaveCount(1);
+  await expect(diary.locator('.diary-event-entry')).toHaveCount(resolved);
   // At least one reading is on the page. If two rungs were climbed, the first is struck through
   // rather than replaced -- that is the whole idea of the panel.
   const readings = diary.locator('.reading');
@@ -161,7 +164,8 @@ test('the diary survives a reload', async ({ page }) => {
   await expect(page.locator('.journal h2')).toBeVisible({ timeout: 20_000 });
 
   await openRecords(page);
-  await expect(page.locator('.diary .entry')).toHaveCount(1);
+  await expect(page.locator('.diary .entry[data-discovery]')).toHaveCount(1);
+  await expect(page.locator('.diary .diary-event-entry')).toHaveCount(1);
 });
 
 test('an instance is a place you go into, and it says why when you cannot', async ({ page }) => {
