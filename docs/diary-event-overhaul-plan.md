@@ -1,6 +1,6 @@
 # Diary event overhaul
 
-**Status:** implemented and verified (2026-11-20)
+**Status:** core implemented and verified; compact diary projection planned (2026-11-21)
 
 **Branch:** `codex/diary-event-overhaul`
 
@@ -147,6 +147,114 @@ Primary references:
 - [WAI-ARIA modal dialog pattern](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/)
 - [Playwright best practices](https://playwright.dev/docs/best-practices)
 - [Playwright trace guidance](https://playwright.dev/docs/trace-viewer)
+
+## Diary density and recurrence follow-up
+
+### Current behaviour and the reported problem
+
+The occurrence ledger is intentionally append-only. Today the diary also renders that ledger almost
+one-for-one, so a small event such as `Adventurers' fire` consumes a heading, day, place, outcome,
+and a separate `Reopen event` row. This is readable in isolation and too large as a history.
+
+The same event can appear again, but only where the event definition permits recurrence:
+
+- `once: true` authored, storyline, first, discovery-rung, and first sub-location events are
+  suppressed after resolution;
+- each discovery rung has its own event id, so several rungs may share a title while remaining
+  distinct observations;
+- `happening_twin_carrier`, `happening_twin_camp`, and woven events whose `again_after` is not null
+  may resolve more than once and currently append a new diary occurrence each time;
+- choosing a different option, meeting the event in another place, or seeing different art is a
+  meaningful new occurrence even when the title is unchanged;
+- reopening an event from the diary is read-only and never appends an occurrence.
+
+The problem is therefore a **read-model problem**, not a reason to discard history. Do not dedupe
+the saved ledger merely to make the page shorter.
+
+### Industry solution applied
+
+Use the established event-log split: immutable occurrences remain the source of truth, while the UI
+reads a compact projection designed for browsing. Microsoft's Event Sourcing guidance explicitly
+separates an append-only event stream from materialized read views and requires idempotent handling
+of duplicate delivery. Ink and Yarn Spinner similarly keep narrative state separate from the view
+that presents lines and choices. For the compact row, use the WAI-ARIA disclosure pattern: a button
+with `aria-expanded` reveals detail on demand. If the journey eventually grows into hundreds of
+rows, use a recycled/virtualized list rather than mounting every detail; Unity's `ListView` is the
+game-UI analogue of that pattern.
+
+References added for this follow-up:
+
+- [Microsoft Event Sourcing pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing)
+- [WAI-ARIA Disclosure pattern](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/)
+- [Unity UI Toolkit ListView](https://docs.unity3d.com/ScriptReference/UIElements.ListView.html)
+- [Ink runtime state and presentation](https://github.com/inkle/ink/blob/master/Documentation/RunningYourInk.md)
+- [Yarn Spinner dialogue runner and persistent state](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.dialoguerunner)
+
+### Proposed compact projection
+
+Keep `DiaryEventEntry[]` unchanged as the saved record. Add a pure
+`projectDiaryEvents(entries): DiaryEventRow[]` read function; it must never mutate, delete, or
+rewrite occurrences.
+
+Default row, one or two lines:
+
+- title;
+- compact metadata: `Day 2 · The Aravali Crossing`;
+- a short outcome preview, clamped to one line;
+- optional small art thumbnail that opens the same read-only memory;
+- one disclosure control whose accessible name includes title, day, and place. Remove the separate
+  full-width `Reopen event` row.
+
+Expanded detail contains the original prose, chosen action, outcome, and art. Only one row should
+be expanded at a time on narrow screens. The `Journey events` section initially shows the five most
+recent projected rows and a `Show earlier (N)` control; expanding the history adds the next page
+without discarding scroll or focus. Day headings are rendered only when a visible page crosses a
+day boundary.
+
+### Repetition and grouping policy
+
+Store every legitimate resolution, but compact presentation conservatively:
+
+1. Adjacent occurrences may roll into one row only when `eventId`, `choiceId`, outcome, place, and
+   semantic art selection all match. Show `×N` plus the first/last day; expansion lists each day.
+2. Never merge across an intervening different event, because that rewrites chronology.
+3. Never merge different choices, outcomes, locations, art, or event ids merely because titles
+   match.
+4. Discovery rungs may appear under one discovery thread (`origin + subjectId`) but expansion must
+   retain each rung outcome and order. The compact row shows `N observations` and the latest one.
+5. A repeated event delivered accidentally with the same resolution token is ignored at write
+   time. UI double-click protection remains, and a future resolver should accept an idempotency key
+   rather than infer duplicates from matching prose.
+6. A once-only event found twice in a save is treated as corrupt/legacy data: retain both in the
+   ledger for recoverability, project them as a duplicate group, and emit a development diagnostic.
+
+### Use-case matrix
+
+| Use case | Persisted occurrences | Default diary presentation |
+|---|---:|---|
+| Once-only authored story beat | One | One compact row; full memory on disclosure. |
+| Recurring ambient/woven event, identical outcome | One per resolution | Adjacent identical resolutions roll up as `×N`; separated resolutions remain in chronology. |
+| Same event, different choice or outcome | One per resolution | Separate rows; never collapse player choice. |
+| Same event at another place/day | One per resolution | Separate rows unless identical and adjacent at the same place; metadata makes the difference visible. |
+| Discovery with several rungs sharing a title | One per advanced rung | One compact discovery thread with `N observations`; expanded ordered rungs. |
+| First sub-location entry and later navigation | One first-entry occurrence | One row; ordinary re-entry adds nothing. |
+| Event without art | One per resolution | Same compact row without an empty thumbnail or reopen promise. |
+| Same title from different event ids | One per event | Separate rows; identity is never inferred from display text. |
+| Canon wording changes after play | Existing snapshots unchanged | Memory shows what the player originally saw. |
+| Very long journey | Full ledger retained | Five-row paging first; introduce virtualization only after measured need. |
+
+### Acceptance and testing for the follow-up
+
+- At 390 px width, a collapsed event row is no taller than three normal text lines plus spacing.
+- Five collapsed rows and `Show earlier` fit before discipline content without rendering full prose.
+- Opening a row shows its exact saved prose, action, outcome, and image and applies no game effects.
+- Two adjacent identical recurring occurrences show one row with `×2`; expanding shows both days.
+- Different choices, places, outcomes, art, or non-adjacent repeats remain distinct.
+- Discovery rungs compact under their subject without losing crossings-out in the analytical entry.
+- Keyboard focus remains on the disclosure after collapse; `Enter` and `Space` toggle it and
+  `aria-expanded` reflects state.
+- Projection tests use ledger fixtures and stay pure/unit-level. Browser coverage needs only one
+  compact-row/disclosure case and one narrow-layout case; GitHub runs the full E2E suite.
 
 ## Budget ownership — one fact, one payload
 
@@ -324,17 +432,18 @@ Do not automatically chain several cards without returning control to the place.
 
 ### 7. The diary gets an event chronology and reopenable event art
 
-Add a `Journey events` section before discipline entries. Render oldest to newest, grouped by day,
-with title, place, prose, chosen action, and outcome. Discovery event entries link visually to their
-discipline entry but do not duplicate its whole revision list. Existing discovery sections remain
-the analytical index; the chronology is the lived record.
+Add a `Journey events` section before discipline entries. The saved chronology remains complete;
+the default projection is the compact, paged summary defined in **Diary density and recurrence
+follow-up** above. Discovery event rows link visually to their discipline entry but do not duplicate
+its whole revision list. Existing discovery sections remain the analytical index; the chronology is
+the lived record.
 
-An occurrence with art shows a small thumbnail and a `Reopen event` control. It opens a read-only
-event-memory modal containing the same resolved image, title, prose, chosen action, and outcome.
-This review surface has no choice buttons and cannot reapply grants, inventory changes, flags, or
-discovery advances. The image itself may open to a larger fitted view inside the same modal, with
-Escape and focus restoration still owned by `Modal`. An occurrence without art remains fully
-readable and does not invent a placeholder painting.
+An occurrence with art exposes its thumbnail/title as the disclosure for a read-only event-memory
+view containing the exact resolved image, title, prose, chosen action, and outcome. Do not add a
+separate full-width `Reopen event` row. This review surface has no choice buttons and cannot reapply
+grants, inventory changes, flags, or discovery advances. Escape and focus restoration remain owned
+by `Modal`. An occurrence without art remains fully readable and does not invent a placeholder
+painting.
 
 Empty-state wording becomes `Travel, speak, or examine a place to begin.` and must not refer to the
 removed `Look closer` control.
