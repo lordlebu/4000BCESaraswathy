@@ -112,29 +112,13 @@ test('the player can settle a question, and is never told they were wrong', asyn
   await step(page, 'ArrowDown');
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
 
-  // Take everything this place will give. Rounds rather than a single pass: a rung opens the next
-  // rung, and hearing a line can unlock another, so one sweep leaves the place unfinished.
-  //
-  // Hear everybody first, one at a time -- a line can open a rung, so this has to happen before the
-  // looking rather than beside it. Only looking needs clicking after that: no button records a
-  // line, and pressing a button that is gone is a silent no-op that would leave this walking
-  // through the motions of a mechanic it had stopped exercising.
-  for (let i = 0, people = await page.locator('.who').count(); i < people; i += 1) {
-    await page.locator('.who').nth(i).click();
-    await expect(page.locator('.person')).toHaveCount(1, { timeout: 10_000 });
-    await page.getByRole('button', { name: 'Back', exact: true }).click();
-    await expect(page.locator('.place')).toBeVisible({ timeout: 10_000 });
-  }
-
-  for (let round = 0; round < 4; round += 1) {
-    const buttons = page.getByRole('button', { name: 'Examine', exact: true });
-    for (let i = 0; i < (await buttons.count()); i += 1) {
-      if (await buttons.nth(i).isEnabled()) {
-        await buttons.nth(i).click();
-        await resolveOpenEvent(page);
-      }
-    }
-  }
+  // Thrali raises this question, and its first reading requires only noticing the silver water.
+  // Resolving every rung of every discovery made this focused assertion exceed CI's three-minute
+  // budget on one duplicate run. Exercise exactly the evidence path the reading declares.
+  await listenToSomebody(page);
+  const silverWater = page.locator('.look').filter({ hasText: 'When the Channel Runs Silver' });
+  await silverWater.getByRole('button', { name: 'Examine', exact: true }).click();
+  await resolveOpenEvent(page);
   await page.getByRole('button', { name: 'Leave' }).click();
   await openDiary(page);
 

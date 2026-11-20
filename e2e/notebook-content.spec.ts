@@ -27,7 +27,10 @@ for (const kind of ['empty', 'words', 'questions', 'dense'] as const) {
       ...(kind === 'questions' || kind === 'dense' ? { questions: canon.field_questions.map(q => q.id) } : {}),
       ...(kind === 'dense' ? { rungs: Object.fromEntries(canon.discoveries.map(d => [d.id, d.levels.length - 1])) } : {})
     };
-    await page.addInitScript(({ key, saved, progress }) => localStorage.setItem(key, JSON.stringify({ ...saved, progress })), { key, saved, progress });
+    // This fixture measures authored notebook content, not journey history. Examining above only
+    // creates a valid save to reshape; whether its occurrence reached the periodic save first was
+    // a CI timing race, so remove that unrelated ledger explicitly.
+    await page.addInitScript(({ key, saved, progress }) => localStorage.setItem(key, JSON.stringify({ ...saved, progress, diaryEvents: [] })), { key, saved, progress });
     await page.reload();
     await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
     await openRecords(page);
@@ -40,7 +43,7 @@ for (const kind of ['empty', 'words', 'questions', 'dense'] as const) {
       await expect(diary.locator('.diary-sub')).not.toHaveText('No field observations yet.');
     }
     if (kind === 'dense') {
-      await expect(diary.locator('.entry')).toHaveCount(canon.discoveries.length);
+      await expect(diary.locator('.entry[data-discovery]')).toHaveCount(canon.discoveries.length);
       expect((await diary.locator('.reading').allTextContents()).sort()).toEqual(canon.discoveries.flatMap(d => d.levels.map(l => l.entry)).sort());
     }
     // Layout checks visit every populated section, including questions and words far below the fold.

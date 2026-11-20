@@ -50,6 +50,23 @@ state failures. The four corrected cases pass together with one worker in 43.1 s
 selectors encode the overhaul's boundaries so a future disappearance of history, export, or Goals
 content cannot be hidden by a looser aggregate assertion.
 
+#### Follow-up on head `b454ae1`
+
+The pull-request-event run
+[44746084701](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/44746084701)
+passed all four browser shards. The simultaneous push-event run
+[44746077744](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/44746077744)
+failed shards 2 and 3, exposing two additional test-design problems:
+
+| Failed browser case | Cause | Correction |
+|---|---|---|
+| `notebook-content`: empty and dense fixtures | The fixture examined once to create a valid save, then replaced only `progress`. Depending on whether the periodic save had already flushed, the synthetic notebook inherited zero or one unrelated `diaryEvents` occurrence. That made “empty” non-empty and made the dense generic `.entry` count 56 instead of 55. | The fixture now explicitly writes `diaryEvents: []` and counts discovery entries through `.entry[data-discovery]`. |
+| `questions`: settle a question | Converting discovery actions to event cards made the old four-round “resolve every available discovery” setup much more expensive. One run passed, while the duplicate run exhausted the 180-second budget and closed the browser mid-loop. The reading under test requires only `discovery_silver_water`. | Talk to the person who raises the question, then resolve exactly the named silver-water discovery event once before committing the available reading. |
+
+Both corrections narrow the fixtures to the state their assertions actually own. Full browser
+verification is delegated to GitHub Actions; no broad local E2E rerun is required for this
+follow-up.
+
 ### Implementation decisions recorded after delivery
 
 - `diaryEvents` remains an optional, validated save field, so older saves naturally read it as an empty list. No knowledge-version bump was needed and existing progress is preserved.
