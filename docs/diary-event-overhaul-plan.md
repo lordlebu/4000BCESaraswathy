@@ -1,0 +1,464 @@
+# Diary event overhaul
+
+**Status:** implemented and verified (2026-11-20)
+
+**Branch:** `codex/diary-event-overhaul`
+
+**Scope:** `4000BCESaraswathy` owns runtime behaviour and presentation. `SouthOfTethys` owns the
+small `sub_locations[].discoveries` relationship addition and its authored assignments. Prose is
+never duplicated between them.
+
+## Implementation progress
+
+| Stage | Status | Delivered |
+|---|---|---|
+| 0 — characterization | Complete | Existing local changes were isolated; focused component, save, event, and browser coverage was updated before the release-boundary run. |
+| 0.5 — canon seam | Complete | `sub_locations[].discoveries` is schema-validated, documented, exported, and assigned to Kavik's Tower's Lower Courses on `codex/diary-event-overhaul-canon`. |
+| 1 — occurrence ledger | Complete | Resolved events persist immutable prose, choice, outcome, context, and semantic art selection; diary art reopens in a read-only memory modal. |
+| 2 — discovery adapter | Complete | Place discoveries use the shared event card and the removed `Here`, placeholder, and `Look closer` UI no longer renders. |
+| 3 — sub-location adapter | Complete | Entry uses an event, Lower Courses owns `discovery_tower_collapse`, and backing out remains unrecorded navigation. |
+| 4 — arbitration and polish | Complete for this release | Existing happening priority is preserved, cancelled contextual events stay unresolved, focus traps do not overlap, and responsive desktop/touch flows pass. |
+| 5 — Records separation | Complete | Goals and ending projection have their own surface; Goals and `Take it with you` are outside `.field-diary`; Records tabs have 44px targets. |
+
+### Verification record
+
+- TypeScript typecheck and production build passed.
+- Focused Vitest suites passed, including 122 event/save/panel tests and the 29-test canon adapter boundary.
+- The full Vitest boundary ran 3,866 tests: 3,865 passed initially; the one missing adapter declaration was fixed and its complete file then passed.
+- Playwright passed the Kavik's Tower path, discovery feedback, question progression, twin-city discovery, and all four responsive notebook layouts.
+- Canon lint, playability, export-boundary, and game lock checks passed; canon export is 107.1 KB gzipped at the source boundary.
+- Final production budgets: app startup 164.22 KB / 180 KB gzipped; canon chunk 130.8 KB / 350 KB gzipped.
+- `git diff --check` passed in both repositories.
+
+### Implementation decisions recorded after delivery
+
+- `diaryEvents` remains an optional, validated save field, so older saves naturally read it as an empty list. No knowledge-version bump was needed and existing progress is preserved.
+- Event choice application remains coordinated in `useHappenings`; occurrence creation happens in the same choice callback as grants, inventory, flags, and seen-state. The focused tests cover this boundary without introducing a second state container.
+- The save stores the exact art collection, key, and take index. Image bytes and generated URLs remain outside the save.
+
+## Outcome
+
+The diary becomes the durable history of what happened during a journey. An event is no longer
+only a modal card that briefly appears and leaves an id behind: resolving it writes an immutable,
+readable diary entry. Looking at a discovery and entering a deeper part of a place use the same
+event flow as authored happenings.
+
+This removes the place-panel sections and controls currently labelled:
+
+- `Here`
+- `Something you have not looked at`
+- `Look closer`
+- `Further in`
+
+Their rules and content are retained. They are presented as contextual events, resolved through the
+shared event card, and recorded in the diary.
+
+The overhaul also narrows the Field Diary to observations and event history:
+
+- `Goals` becomes its own Records tab.
+- `If you stopped here` moves to the Goals surface as its projected outcome.
+- `Take it with you` moves to the shared Records toolbar because export applies to the journey, not
+  to one diary section.
+- Every event image can be reopened from the event's historical diary entry.
+
+## Existing system and the seam to keep
+
+The repository already has most of the right parts:
+
+- `content/events.ts` defines conditions, deterministic selection, choices, grants, and story flags.
+- `EventCard.tsx` is the accessible shared presentation for an event and its outcome.
+- `useHappenings.ts` owns event scheduling and applies resolved choices.
+- `journey.ts` is the authority for discovery gates and sub-location entry.
+- `save.ts` persists discovery progress, seen event ids, event days, and flags.
+- `Diary.tsx` renders discovery revisions but has no record of resolved event prose or choices.
+
+The missing seam is a persisted **event occurrence**. `seenEvents` answers whether a definition has
+run; it cannot answer what the player saw, chose, or wrote. Do not overload it. Keep event
+definitions, event scheduling, and diary occurrences as three separate concepts.
+
+## Industry patterns applied
+
+This is a small, repository-shaped application of established narrative-game patterns, not a new
+narrative engine.
+
+1. **Separate authored content, runtime state, and presentation.** Yarn Spinner's Dialogue Runner
+   delivers lines, options, and commands to presenters while variable storage owns state. Ink also
+   keeps generated choices and story state separate from the host game's UI. Here,
+   `GameEvent` remains the authored/runtime definition, the resolver produces a diary occurrence,
+   and React presents either the live card or the historical entry.
+2. **Use stable ids and explicit conditions.** Ink choices have source/target paths and conditional,
+   once-only behaviour. The existing event and discovery ids already provide stable identity, so
+   adapters should preserve those ids rather than copy prose into a second registry.
+3. **Always provide an exit from a narrative choice.** Yarn Spinner exposes option fallthrough and
+   Ink has invisible fallback choices. The existing `choicesFor` soft-lock guard stays binding for
+   adapted events too.
+4. **Persist outcomes, not UI state.** Save the resolved occurrence and its chosen outcome; never
+   save whether a card was open or which panel section was expanded.
+5. **Keep modal behaviour complete.** Event cards continue to use the shared `Modal`: focus moves
+   into the dialog, remains contained, Escape follows the intentional close policy, and focus is
+   restored. This follows the WAI-ARIA modal dialog pattern.
+6. **Test visible behaviour and deterministic state transitions.** Playwright recommends isolated
+   tests using user-visible locators and web-first assertions. Traces stay `on-first-retry`, not on
+   for every run; this repository already has that efficient configuration.
+
+Primary references:
+
+- [Yarn Spinner Dialogue Runner](https://docs.yarnspinner.dev/components/dialogue-runner)
+- [Yarn Spinner custom presenters](https://docs.yarnspinner.dev/components/dialogue-view/custom-dialogue-views)
+- [Ink writing and conditional choices](https://github.com/inkle/ink/blob/master/Documentation/WritingWithInk.md)
+- [Ink runtime integration and state](https://github.com/inkle/ink/blob/master/Documentation/RunningYourInk.md)
+- [WAI-ARIA modal dialog pattern](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/)
+- [Playwright best practices](https://playwright.dev/docs/best-practices)
+- [Playwright trace guidance](https://playwright.dev/docs/trace-viewer)
+
+## Budget ownership — one fact, one payload
+
+The ideal balance is not to minimize either budget in isolation. It is to ensure each thing is paid
+for once, by the payload that owns it.
+
+| Concern | Owner | Budget charged | Rule |
+|---|---|---|---|
+| Place, sub-location, discovery, event prose and authored outcomes | `SouthOfTethys` canon | canon/lore | Author once and export; never repeat in TypeScript. |
+| Relationships such as which discoveries belong in a sub-location | `SouthOfTethys` canon | canon/lore | Store ids, not copied descriptions or event objects. |
+| Eligibility, arbitration, resolution and save migration | game TypeScript | app code | One generic implementation; no per-place switches. |
+| Generic verbs and fallback sentences | game TypeScript | app code | One short template per event origin/discipline, reused everywhere. |
+| Resolved title, prose, outcome and art key | player save | neither download budget | Snapshot at resolution so a past journey cannot be rewritten by a later canon release. |
+| Paintings | static art assets | art/download budget | Keep out of JavaScript and canon JSON; saves retain only a semantic key. |
+| Goals, event-memory and export presentation | lazy UI chunks | deferred app code | Load when Records or a memory opens, not in the initial walk payload. |
+
+The current enforced startup limits are 180 KB gzipped for app code and 350 KB gzipped for the
+canon chunk. Neither limit is to be raised for this work.
+
+### Reuse before authoring
+
+An adapter first reuses the words canon already ships:
+
+- a sub-location event uses its existing `name` and `description`;
+- a discovery event uses its discovery `name`, current rung, and next authored rung entry;
+- an authored happening uses its existing `prose` and choice `line`;
+- art uses the existing event/place/scene lookup and records only the resolved key.
+
+Add a new canon text field only when the event genuinely needs to say something not already present.
+Do not add parallel `eventProse`, `diaryProse`, or copied sub-location descriptions merely to fit a
+UI component. The adapter is responsible for fitting existing content into the shared event shape.
+
+### Small schema addition, large duplication avoided
+
+Add optional discovery ownership to canon's sub-location schema:
+
+```json
+{
+  "id": "lower_courses",
+  "name": "The Lower Courses",
+  "description": "Twenty-two storeys of red sandstone, of which four remain standing and the rest lie in roughly the order they fell.",
+  "discoveries": ["discovery_tower_collapse"]
+}
+```
+
+This adds one relationship id to the lore payload and lets the generic adapter work for every
+place. It is preferable to a game-side map, a `switch (poiId)`, or a second copy of the prose, all of
+which would charge app code and create two sources of truth. This schema change triggers a small
+companion branch in `SouthOfTethys`: schema, authoring guidance, validation, export, and the initial
+sub-location assignments belong there.
+
+### Save size is a separate concern
+
+Snapshotting resolved prose duplicates it only in that player's local save, after play. It does not
+increase the app or canon download. Keep occurrences compact and JSON-safe; do not store base64
+images, imported URLs, complete event definitions, or duplicate discovery revision arrays. Add a
+save-size unit fixture containing a representative 100-event journey and record its serialized size
+so unexpected structural duplication is caught without imposing an arbitrary diary-length cap.
+
+## Target model
+
+### 1. Event definitions stay transient
+
+Keep `GameEvent` as the definition used to decide what can happen now. Add an explicit origin so
+diagnostics and the diary can distinguish authored happenings from adapters without relying on id
+prefixes:
+
+```ts
+type EventOrigin = 'happening' | 'discovery' | 'sub-location' | 'woven';
+
+interface GameEvent {
+  // existing fields
+  origin: EventOrigin;
+  subjectId?: string;
+}
+```
+
+### 2. Resolved occurrences become diary data
+
+Add a compact, JSON-safe record. Store the text the player actually received so later canon bundle
+edits do not rewrite an old journey.
+
+```ts
+interface DiaryEventEntry {
+  id: string;             // deterministic occurrence id, unique within the journey
+  eventId: string;        // definition id
+  origin: EventOrigin;
+  subjectId?: string;     // discovery or sub-location id
+  title: string;
+  prose: string;
+  choiceId: string;
+  outcome: string;
+  day: number;
+  fieldMapId: string;
+  poiId?: string;
+  art: {
+    collection: 'events' | 'scenes';
+    key: string;          // the exact preferred/fallback asset that was shown
+  } | null;
+}
+```
+
+Do not store callbacks, generated asset URLs, conditions, or the full `GameEvent`. Store the stable
+semantic art collection and key selected by `preferredArt`, including a fallback key when the
+event's own painting was absent. This makes the historical entry reopen the picture the player
+actually saw instead of re-running fallback selection against newer state. Keep `seenEvents` for
+selection/cooldown logic and add `diaryEvents` for history. Increment the knowledge save version
+and migrate older saves to `diaryEvents: []`; preserve all existing progress.
+
+### 3. One resolver applies every event
+
+Create a pure `resolveEvent(before, event, choice, context)` operation that returns:
+
+- updated knowledge progress from `grants`;
+- inventory changes from `gives` and `takes`;
+- tiredness change from `eases`;
+- story flags from `sets`;
+- seen/cooldown bookkeeping;
+- one `DiaryEventEntry`.
+
+`useHappenings` coordinates this result with React state but does not independently construct diary
+text. This gives unit tests one transaction boundary and prevents an event reward from saving
+without its diary entry.
+
+### 4. Discovery advances are event adapters
+
+Replace the `PlacePanel -> onLook -> advance` shortcut with a pure adapter:
+
+```ts
+discoveryEvent(progress, discoveryId, context): GameEvent | null
+```
+
+It asks `journey.ts` whether the next rung is available. The card uses the discovery name, the
+current observation as context, and the next rung's authored entry as its outcome. Its single
+choice uses a specific verb derived from the discipline (`Examine`, `Compare`, `Trace`, `Read`),
+with a safe generic `Examine` fallback. Resolving the choice advances exactly one rung and records
+the occurrence. Completed or blocked discoveries do not produce an actionable event; the diary
+continues to explain dependencies.
+
+The adapter derives from canon data at runtime. Do not create duplicate happening JSON for every
+discovery rung.
+
+### 5. Sub-location entry is an event adapter
+
+Replace `PlacePanel`'s local `openSub` state and the `Further in` list with:
+
+```ts
+subLocationEvent(progress, poiId, subLocationId, context): GameEvent | null
+```
+
+`canEnter` and `blockedFrom` remain the authority. An available transition opens an event card whose
+outcome records entering and whose resolution sets the current sub-location. A blocked transition
+does not open a modal; its reason remains available through the contextual action/diary dependency
+language. `Back out` is navigation, not a second diary event.
+
+The adapter reads the sub-location's optional `discoveries` ids. Once inside, only those discoveries
+are offered as contextual discovery events; discoveries owned by the parent place remain at the
+parent. An older canon bundle without the field treats the list as empty rather than guessing.
+
+### 6. The place panel becomes context, not a task list
+
+Keep the place title, people, stations, settlement work, and arrival prose. Remove the two stacked
+task sections. Contextual event candidates should enter the existing single-surface arbitration so
+only one card can open at a time and authored arrival happenings retain priority.
+
+Candidate priority at a point of interest:
+
+1. authored arrival happening;
+2. newly available discovery event;
+3. newly available sub-location event;
+4. woven ambient event.
+
+After a player resolves or dismisses the current allowed card, the next candidate may be offered.
+Do not automatically chain several cards without returning control to the place.
+
+### 7. The diary gets an event chronology and reopenable event art
+
+Add a `Journey events` section before discipline entries. Render oldest to newest, grouped by day,
+with title, place, prose, chosen action, and outcome. Discovery event entries link visually to their
+discipline entry but do not duplicate its whole revision list. Existing discovery sections remain
+the analytical index; the chronology is the lived record.
+
+An occurrence with art shows a small thumbnail and a `Reopen event` control. It opens a read-only
+event-memory modal containing the same resolved image, title, prose, chosen action, and outcome.
+This review surface has no choice buttons and cannot reapply grants, inventory changes, flags, or
+discovery advances. The image itself may open to a larger fitted view inside the same modal, with
+Escape and focus restoration still owned by `Modal`. An occurrence without art remains fully
+readable and does not invent a placeholder painting.
+
+Empty-state wording becomes `Travel, speak, or examine a place to begin.` and must not refer to the
+removed `Look closer` control.
+
+### 8. Records owns navigation and journey utilities
+
+Refactor the current embedded `RecordTabs` strip into a small Records shell shared by its panels.
+The shell owns tab navigation and record-wide utilities; the Field Diary owns only diary content.
+
+The tabs become:
+
+1. `Diary` — event chronology, discovery revisions, questions, field kit, and words;
+2. `Goals` — the existing `GoalsSection` and `SettlingSection` content;
+3. `Met` — the species collection;
+4. `People` — people encountered.
+
+`Goals` is lazy-loaded like the other Records surfaces and receives its own count/badge only for
+currently actionable rows. It must not mount above the diary or appear in the diary shortcut list.
+
+`If you stopped here` moves from `Diary.tsx` to the end of the Goals surface. It remains conditional
+on having completed at least one discovery and still opens the existing `Ending` modal. This keeps
+the projection beside the work toward it rather than among historical observations.
+
+`Take it with you` becomes a single action in the Records shell toolbar. It opens a compact export
+sheet containing the existing image export, text export, and replay link. The action is reachable
+from every Records tab and is removed from the diary footer and shortcut list. On narrow screens it
+may collapse to an icon-labelled menu button, but it must retain an accessible name and a 44px touch
+target.
+
+## Delivery stages
+
+### Stage 0 — characterization
+
+- Add unit tests that freeze current `advance`, `canEnter`, event grant, flag, and save behaviour.
+- Add a focused browser test proving the current discovery-to-diary and sub-location flows before
+  changing selectors.
+- Record the existing `CLAUDE.md` modification as pre-existing and do not include it in this work.
+- Record baseline app-startup and canon gzip sizes from a clean production build; budget caps remain
+  unchanged.
+
+### Stage 0.5 — canon relationship seam
+
+- In a companion `SouthOfTethys` branch, add optional `discoveries` to sub-locations and validate
+  that every id is a discovery offered at the parent point of interest.
+- Assign `discovery_tower_collapse` to Kavik's Tower's `lower_courses`; assign other discoveries only
+  where canon supports the relationship rather than distributing every parent discovery by guess.
+- Export the updated bundle and update the game canon lock before implementing adapters.
+- Acceptance: the export adds ids and schema structure without duplicating any existing prose.
+
+### Stage 1 — occurrence ledger
+
+- Add `DiaryEventEntry`, the pure resolver, save parsing, and migration.
+- Make existing authored/woven events write occurrences.
+- Render the new chronology in the diary.
+- Persist the exact resolved art collection/key and add the read-only event-memory modal.
+- Acceptance: a chosen happening survives reload with its exact outcome and image, can be reopened
+  without replaying its effects, and does not become eligible again when it is once-only.
+
+### Stage 2 — discovery adapter
+
+- Add `discoveryEvent` and discovery-specific resolution.
+- Route place discovery interaction through `EventCard`.
+- Remove `Here`, the anonymous placeholder title, and `Look closer` from `PlacePanel`.
+- Update empty states, accessibility labels, and tests.
+- Acceptance: one event advances one rung, writes one occurrence, updates the analytical entry, and
+  remains correct after reload.
+
+### Stage 3 — sub-location adapter
+
+- Add `subLocationEvent` and explicit sub-location surface state outside `PlacePanel`.
+- Remove the `Further in` section.
+- Preserve dependency explanations and back navigation.
+- Acceptance: gated locations cannot be entered; open locations produce one recorded entry and can
+  be exited without another entry.
+- Kavik's Tower acceptance path: enter `The Lower Courses`, record its existing description once,
+  expose `How the Tower Sat Down` there, back out without another occurrence, re-enter as ordinary
+  navigation, and reopen the first visit and its resolved image from the diary after reload.
+
+### Stage 4 — arbitration and polish
+
+- Centralize priority among arrival, discovery, sub-location, and woven candidates.
+- Verify keyboard focus, reduced motion, phone landscape layout, and repeated-event cooldowns.
+- Remove obsolete CSS and selectors only after the new browser tests pass.
+- Run the targeted regression set, then the full suite once at the release boundary.
+
+### Stage 5 — Records separation
+
+- Introduce the shared Records shell and a dedicated Goals tab.
+- Move `GoalsSection` and `SettlingSection` out of the Diary lead slot.
+- Move `If you stopped here` to Goals and `Take it with you` to the Records toolbar/export sheet.
+- Remove the obsolete Diary props, footer rendering, shortcuts, and associated layout CSS.
+- Keep Goals, export controls, and event-memory review behind the Records lazy boundary or narrower
+  dynamic imports so they do not enlarge the initial walk payload merely by existing.
+- Acceptance: opening Diary shows no goals, ending projection, or export block; all three remain
+  reachable from Records with keyboard, pointer, and phone landscape layouts.
+
+## Test strategy and token-efficient workflow
+
+Use the cheapest layer that can prove each rule and keep command output terse.
+
+1. During model work, run only focused Vitest files:
+   `npx vitest run test/events.test.ts test/save.test.ts test/journey.test.ts --reporter=dot`.
+2. During component work, run the affected React tests plus `npm run typecheck`.
+3. During each UI stage, run one named Playwright spec with one worker and line reporting:
+   `npx playwright test e2e/fielddiary.spec.ts --workers=1 --reporter=line`.
+4. Use deterministic `?seed` and `?at=poi_*` starts; never search or walk the world when the test is
+   about a panel.
+5. Prefer role/name locators and state polling. Do not add sleeps, screenshots on success, verbose
+   reporters, or always-on traces.
+6. Run `npm test -- --reporter=dot`, `npm run build`, and `npm run test:e2e:fast` once after the
+   stages compose. Reserve slow E2E for the final pre-merge check or when its owned code changes.
+7. On failure, inspect the retained Playwright trace before rerunning a broad suite.
+8. Add one focused Records spec for tab ownership and one event-memory spec for reopening art; do
+   not multiply the same assertions across every viewport. Keep viewport coverage in the existing
+   reachability/layout test.
+9. At each stage boundary, run `npm run check:size` against a clean production build and report app
+   startup and canon gzip deltas separately. A lore increase must come from canon content or ids; an
+   app increase must come from reusable behaviour. Any duplicated prose blocks the stage.
+
+This reduces both machine time and diagnostic output while keeping one end-to-end proof for each
+player-visible contract.
+
+## Compatibility and risks
+
+- **Old saves:** migrate by adding an empty occurrence ledger; never synthesize historical prose
+  from `seenEvents`, because the chosen outcome is unknowable.
+- **Repeated happenings:** occurrences need unique ids even when `eventId` repeats. Derive the id
+  from the monotonic ledger position plus event id, not wall-clock time.
+- **Canon edits:** snapshot player-visible prose and outcome in the occurrence; keep ids for linking.
+- **Art changes:** persist the exact semantic asset key selected at resolution. The build must keep
+  referenced event assets available; an asset-retention test should fail if a saved fixture points
+  at a missing key. Do not store hashed Vite URLs in saves.
+- **Double resolution:** disable choices after the first selection and make the resolver reject an
+  occurrence id already present.
+- **Card cascades:** return to player control between contextual events.
+- **Terminology collision:** `EventBus` transports UI/game messages; `GameEvent` is narrative
+  content; `DiaryEventEntry` is persisted history. Keep these names distinct.
+- **SouthOfTethys ownership:** use a companion branch for the optional sub-location discovery
+  relationship. Update its JSON schema, authoring guide, validation, exporter, and lock file first,
+  then consume that exact bundle here. Authored wording remains there; adapter logic remains in the
+  game.
+- **Budget drift:** no cap increase is part of this plan. Canon prose and relationships charge
+  canon, shared mechanics charge app code, history snapshots charge only the player's save, and
+  images remain assets. CI reports these independently.
+
+## Definition of done
+
+- None of the four removed labels remain in runtime UI or current E2E expectations.
+- Authored, woven, discovery, and sub-location events resolve through one transaction boundary.
+- Every resolved event writes one durable occurrence with the selected outcome.
+- Every occurrence that originally displayed art reopens that exact image in a read-only event
+  memory after navigation and reload; reopening cannot repeat rewards or state changes.
+- Discovery revisions still retain crossings-out and all existing gates.
+- Sub-location gates still use `journey.ts` and explain why entry is blocked.
+- Sub-location discoveries come from validated canon relationships, with no game-only place map and
+  no duplicated prose.
+- Field Diary contains no Goals, `If you stopped here`, or `Take it with you` section.
+- Goals has its own Records tab, the ending projection is reachable there, and export is reachable
+  from the shared Records toolbar on every tab.
+- Old saves load without losing discoveries, inventory, flags, or location.
+- Keyboard-only and reduced-motion flows work on desktop and phone landscape.
+- Focused tests, typecheck, production build, fast E2E, and the relevant slow save/reload test pass.
+- App-startup and canon chunks remain inside their unchanged budgets, with no authored prose copied
+  into game TypeScript and no image bytes copied into saves or JavaScript.

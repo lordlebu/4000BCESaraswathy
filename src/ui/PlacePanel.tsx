@@ -13,7 +13,6 @@ import {
   type Progress,
   blockedBy,
   blockedFrom,
-  canAdvance,
   canEnter,
   entryFor,
   isComplete,
@@ -26,6 +25,8 @@ import { PersonPortrait } from './PersonPortrait';
 import { placeArt } from './places';
 import { StationBoard } from './StationBoard';
 import { stationsAt, stationsMissing, type Station } from '../content/stations';
+import { discoveryEvent, subLocationEvent } from '../content/contextEvents';
+import type { GameEvent } from '../content/events';
 
 /** The face beside a name in the list of who is here. Small: this is an index, not a meeting. */
 const FACE_SIZE = 44;
@@ -72,6 +73,8 @@ export interface PlacePanelProps {
   // is there: canon prices two lines, and without it the panel asked what somebody says to a
   // traveller carrying nothing, which made two gift lines invisible.
   onLook: (discoveryId: string) => void;
+  /** Open a contextual event; its callback runs only after the player resolves it. */
+  onEvent?: (event: GameEvent, afterChoice: () => void) => void;
   /** Listen to somebody. They take the dock; this panel comes back when they are done. */
   onTalkTo: (npcId: string) => void;
   /**
@@ -92,6 +95,7 @@ export function PlacePanel({
   firstVisit,
   updatedDiscoveries = [],
   onLook,
+  onEvent = (_event, afterChoice) => afterChoice(),
   onTalkTo,
   onOpenStation,
   onClose
@@ -105,6 +109,8 @@ export function PlacePanel({
   const people = presence?.here ?? [];
   const away = presence ? awayLine(presence) : null;
   const sub = openSub ? place.subLocations.find((s) => s.id === openSub) : null;
+  const nestedDiscoveries = new Set(place.subLocations.flatMap((s) => s.discoveries));
+  const discoveriesHere = sub ? sub.discoveries : offered.filter((id) => !nestedDiscoveries.has(id));
 
   // **No veil.** This used to draw its own full-screen wrapper and position itself above the field
   // notes, so the two divided the bottom of the screen and each got half of a half. It is an
@@ -216,30 +222,45 @@ export function PlacePanel({
           <div className="sub">
             <h3>{sub.name}</h3>
             <p>{sub.description}</p>
+            {discoveriesHere.map((id) => {
+              const d = discovery(id);
+              if (!d) return null;
+              const event = discoveryEvent(progress, id);
+              const done = isComplete(progress, id);
+              return <div key={id} className={updatedDiscoveries.includes(id) ? 'look discovery-updated' : 'look'}>
+                <div className="look-text">
+                  <h4>{d.name}</h4>
+                  {rungOf(progress, id) >= 0 && <p>{entryFor(progress, id)}</p>}
+                  {!done && !event && <p className="muted">{why(progress, id)}</p>}
+                </div>
+                <button type="button" disabled={!event} onClick={() => event && onEvent(event, () => onLook(id))}>
+                  {done ? 'Understood' : 'Examine'}
+                </button>
+              </div>;
+            })}
             <button type="button" className="ghost" onClick={() => setOpenSub(null)}>
               Back out
             </button>
           </div>
         ) : (
           <>
-            {offered.length > 0 && (
-              <section className="place-section">
-                <h3>Here</h3>
-                {offered.map((id) => {
+            {discoveriesHere.length > 0 && (
+              <section className="place-section contextual-events">
+                {discoveriesHere.map((id) => {
                   const d = discovery(id);
                   if (!d) return null;
                   const seen = rungOf(progress, id) >= 0;
                   const done = isComplete(progress, id);
-                  const can = canAdvance(progress, id);
+                  const event = discoveryEvent(progress, id);
                   return (
                     <div key={id} className={updatedDiscoveries.includes(id) ? "look discovery-updated" : "look"}>
                       <div className="look-text">
-                        <h4>{seen ? d.name : 'Something you have not looked at'}</h4>
-                        <p>{seen ? entryFor(progress, id) : 'You have walked past this.'}</p>
-                        {!done && !can && seen && <p className="muted">{why(progress, id)}</p>}
+                        <h4>{d.name}</h4>
+                        {seen && <p>{entryFor(progress, id)}</p>}
+                        {!done && !event && seen && <p className="muted">{why(progress, id)}</p>}
                       </div>
-                      <button type="button" onClick={() => onLook(id)} disabled={!can}>
-                        {done ? 'Understood' : can ? 'Look closer' : 'Not yet'}
+                      <button type="button" onClick={() => event && onEvent(event, () => onLook(id))} disabled={!event}>
+                        {done ? 'Understood' : 'Examine'}
                       </button>
                     </div>
                   );
@@ -248,11 +269,11 @@ export function PlacePanel({
             )}
 
             {place.subLocations.length > 0 && (
-              <section className="place-section">
-                <h3>Further in</h3>
+              <section className="place-section contextual-events">
                 {place.subLocations.map((s) => {
                   const may = canEnter(progress, place.id, s.id);
                   const missing = blockedFrom(progress, place.id, s.id);
+                  const event = subLocationEvent(progress, place.id, s);
                   return (
                     <div key={s.id} className="look">
                       <div className="look-text">
@@ -267,8 +288,8 @@ export function PlacePanel({
                           </p>
                         )}
                       </div>
-                      <button type="button" onClick={() => setOpenSub(s.id)} disabled={!may}>
-                        {may ? 'Go in' : 'Closed to you'}
+                      <button type="button" onClick={() => event && onEvent(event, () => setOpenSub(s.id))} disabled={!may}>
+                        {may ? `Enter ${s.name.replace(/^The /, 'the ')}` : 'Closed to you'}
                       </button>
                     </div>
                   );

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { examineFirst } from './context-event';
 import { openRecords } from './records';
 for (const view of [{ width: 1280, height: 800, touch: false }, { width: 390, height: 844, touch: true }, { width: 844, height: 390, touch: true }]) {
   test(`Look feedback reaches the matching diary entry (${view.width}x${view.height})`, async ({ browser }) => {
@@ -8,8 +9,7 @@ for (const view of [{ width: 1280, height: 800, touch: false }, { width: 390, he
     page.on('pageerror', error => errors.push(error.message));
     await page.goto('/?seed=discovery-feedback&hour=12&at=poi_eastern_field');
     await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
-    const look = page.getByRole('button', { name: 'Look closer', exact: true }).first();
-    await look.click();
+    await examineFirst(page);
     const notice = page.locator('.discovery-notice');
     await expect(notice).toContainText('Discovery noticed');
     const name = (await page.locator('.look.discovery-updated h4').first().textContent())!;

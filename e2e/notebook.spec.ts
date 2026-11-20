@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { examineFirst } from './context-event';
 import { openRecords } from './records';
 
 for (const view of [
@@ -14,7 +15,7 @@ for (const view of [
     page.on('pageerror', error => errors.push(error.message));
     await page.goto('?seed=notebook-review&hour=12&at=poi_eastern_field');
     await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
-    await page.getByRole('button', { name: 'Look closer', exact: true }).first().click();
+    await examineFirst(page);
     await openRecords(page);
     const diary = page.locator('.field-diary');
     await expect(diary).toBeVisible({ timeout: 20_000 });
@@ -23,7 +24,8 @@ for (const view of [
     expect(text.length).toBeGreaterThan(0);
     await expect(diary.locator('.reading').last()).toHaveCSS('font-size', '14px');
     expect(await diary.locator('.reading').last().evaluate(el => getComputedStyle(el).fontFamily)).toContain('Caladea');
-    expect(await diary.locator('.records-tab').first().evaluate(el => getComputedStyle(el).fontFamily)).toContain('Carlito');
+    await expect(diary.locator('.records-tab')).toHaveCount(0);
+    expect(await page.locator('.records-tab').first().evaluate(el => getComputedStyle(el).fontFamily)).toContain('Carlito');
     for (const [size, px] of [['comfortable', 16], ['large', 18], ['compact', 14]] as const) {
       await page.getByRole('combobox', { name: 'Reading size' }).selectOption(size);
       await expect(diary.locator('.reading').last()).toHaveCSS('font-size', `${px}px`);
@@ -39,17 +41,9 @@ for (const view of [
     await expect(roadNotes.locator('.map-coverage')).toContainText(/About \d+% of this map revealed\./);
     const coverage = await roadNotes.locator('.map-coverage').innerText();
     await expect(diary).not.toContainText('places discovered');
-    const exportLink = shortcuts.getByRole('link', { name: 'Take it with you', exact: true });
-    await exportLink.click();
-    const heading = diary.locator('#notebook-export');
-    await expect(heading).toBeFocused();
-    const visible = await heading.evaluate(el => {
-      const rect = el.getBoundingClientRect();
-      const top = el.closest('.field-diary')!.querySelector('.notebook-header')!.getBoundingClientRect().bottom;
-      const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
-      return rect.top >= top && (hit === el || el.contains(hit));
-    });
-    expect(visible, 'section heading is below the sticky header and can be hit').toBe(true);
+    await expect(shortcuts.getByRole('link', { name: 'Take it with you', exact: true })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Take it with you', exact: true }).click();
+    await expect(page.getByRole('region', { name: 'Take it with you' })).toBeVisible();
     await diary.locator('.diary-close').click();
     await expect(page.getByRole('button', { name: /^Records/ })).toBeFocused();
     const handle = page.getByRole('button', { name: 'Open the field notes', exact: true });

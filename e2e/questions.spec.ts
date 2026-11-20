@@ -5,6 +5,7 @@
 // This walks it: hear a question from someone, look at the thing it is about, and commit.
 
 import { expect, test, type Page } from '@playwright/test';
+import { resolveOpenEvent } from './context-event';
 import { openRecords } from './records';
 import { step } from './walk';
 
@@ -126,9 +127,12 @@ test('the player can settle a question, and is never told they were wrong', asyn
   }
 
   for (let round = 0; round < 4; round += 1) {
-    const buttons = page.getByRole('button', { name: 'Look closer' });
+    const buttons = page.getByRole('button', { name: 'Examine', exact: true });
     for (let i = 0; i < (await buttons.count()); i += 1) {
-      if (await buttons.nth(i).isEnabled()) await buttons.nth(i).click();
+      if (await buttons.nth(i).isEnabled()) {
+        await buttons.nth(i).click();
+        await resolveOpenEvent(page);
+      }
     }
   }
   await page.getByRole('button', { name: 'Leave' }).click();

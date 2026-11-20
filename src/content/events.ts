@@ -21,6 +21,7 @@
 import placesBundle from '../../data/canon/places.json';
 import type { Look } from './looks';
 import type { StrangerCulture } from './travellers';
+import type { EventOrigin } from './diaryEvents';
 
 /**
  * Where an event can find you.
@@ -145,6 +146,9 @@ export interface EventStranger {
 
 export interface GameEvent {
   id: string;
+  /** Adapters state this explicitly; older event factories default by source. */
+  origin?: EventOrigin;
+  subjectId?: string;
   /** What the card is titled. */
   title: string;
   occasion: Occasion;

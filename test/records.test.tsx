@@ -17,9 +17,8 @@ describe('the record tabs', () => {
   it('marks the one showing, and only that one', () => {
     render(<RecordTabs tab="collection" onTab={() => {}} journeyCount={2} metCount={9} peopleCount={0} />);
     const tabs = screen.getAllByRole('tab');
-    // Three now: Journey, Met, People. Counted rather than named so a fourth fails here loudly
-    // instead of passing quietly with a tab nobody checks.
-    expect(tabs).toHaveLength(3);
+    // Diary, Goals, Met, People. Counted so an unreviewed surface fails loudly.
+    expect(tabs).toHaveLength(4);
     expect(tabs.filter((t) => t.getAttribute('aria-selected') === 'true')).toHaveLength(1);
     expect(screen.getByRole('tab', { name: /Met/ }).getAttribute('aria-selected')).toBe('true');
   });
@@ -36,7 +35,7 @@ describe('the record tabs', () => {
     // current tab from closing the sheet underneath it.
     const onTab = vi.fn();
     render(<RecordTabs tab="journey" onTab={onTab} journeyCount={0} metCount={4} peopleCount={0} />);
-    fireEvent.click(screen.getByRole('tab', { name: /Journey/ }));
+    fireEvent.click(screen.getByRole('tab', { name: /Diary/ }));
     expect(onTab).toHaveBeenCalledWith('journey');
   });
 

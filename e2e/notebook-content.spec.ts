@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
+import { examineFirst } from './context-event';
 import { openRecords } from './records';
 
 // Read authored fixtures as JSON instead of importing the game's content graph into Node.
@@ -14,7 +15,7 @@ for (const kind of ['empty', 'words', 'questions', 'dense'] as const) {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto('/?seed=notebook-content&hour=12&at=poi_eastern_field');
     await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
-    await page.getByRole('button', { name: 'Look closer', exact: true }).first().click();
+    await examineFirst(page);
     const key = 'south-of-tethys:notebook-content';
     await expect.poll(() => page.evaluate(k => Boolean(JSON.parse(localStorage.getItem(k) ?? '{}').progress), key)).toBe(true);
     const saved = await page.evaluate(k => JSON.parse(localStorage.getItem(k)!), key);
@@ -63,7 +64,7 @@ test('missing notebook fonts fall back to readable text', async ({ page }) => {
   await page.route('**/*.woff2', route => route.abort());
   await page.goto('/?seed=notebook-fallback&hour=12&at=poi_eastern_field');
   await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
-  await page.getByRole('button', { name: 'Look closer', exact: true }).first().click();
+  await examineFirst(page);
   await openRecords(page);
   await expect(page.locator('.field-diary')).toBeVisible({ timeout: 20_000 });
   await page.locator('.field-diary .reading').last().scrollIntoViewIfNeeded();
