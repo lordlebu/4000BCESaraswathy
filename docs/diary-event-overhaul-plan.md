@@ -83,6 +83,9 @@ The browser test expected two separate rows for two consecutive rungs of one dis
 It now checks for one summary row and verifies that reopening it shows every recorded occurrence.
 The browser aggregate failed because shard 1 failed. Shards 2–4 passed.
 
+The follow-up commit `dff824f` passed the PR workflow in
+[run 44867945092](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/44867945092).
+
 ### PR #269 CI failure record
 
 GitHub Actions runs [44741496396](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/44741496396)
