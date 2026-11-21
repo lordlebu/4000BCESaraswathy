@@ -1306,6 +1306,7 @@
         {
           "id": "stair_shaft",
           "name": "The Stair Shaft",
+          "arrival": "Your palm finds the worn inside of the turn. A narrow blade of daylight falls across the upper treads. The lowest one you can see is already under water.",
           "description": "The stair survives because it was cut into the core rather than built against it. It goes up into daylight and down into water.",
           "requires": [
             "discovery_tower_collapse"
@@ -1314,6 +1315,7 @@
         {
           "id": "flooded_undercroft",
           "name": "The Flooded Undercroft",
+          "arrival": "You wait on the dry lip until the water settles. In the stillness you can follow a cut line farther below the surface than you can above it.",
           "description": "Below the waterline the sandstone is cold and the carving is sharper, having been spared four hundred years of weather.",
           "requires": [
             "discovery_ghost_mangrove_channel"

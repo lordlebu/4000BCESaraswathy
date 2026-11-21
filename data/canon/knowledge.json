@@ -1302,15 +1302,18 @@
           "entry": "Twenty-two storeys in the chronicles. Four here, and a great deal of rubble that is not shaped like rubble."
         },
         {
+          "prompt": "Follow one course past the broken corner. The joints keep their intervals all the way into the silt.",
           "entry": "The fallen stone lies in courses. It did not scatter -- it descended."
         },
         {
+          "prompt": "Think of the dockyard reef, then look at the foot of the wall. The line where the ground meets the stone sits strangely high.",
           "entry": "The delta took the foundation before anything took the walls. The tower sank into its own footing and the upper structure came through the lower.",
           "requires": [
             "discovery_dockyard_reef"
           ]
         },
         {
+          "prompt": "Look from the square corner still standing to the water lying beyond it. The corner has kept its shape. The delta has not.",
           "entry": "Kavik built for a delta that drained. After the Shattering it stopped draining. The tower did not fail; the ground under it changed its mind."
         }
       ]

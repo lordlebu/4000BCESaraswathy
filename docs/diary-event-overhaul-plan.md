@@ -676,6 +676,16 @@ lore budget once and prevents per-place TypeScript switches.
 
 #### 7.3 Coverage inventory and rollout
 
+Run `node tools/diary-content-coverage.mjs` for the current export's event-art source and
+authored prose coverage by place. Discovery rows count each place where a discovery can be
+examined, so the same discovery can appear at multiple places.
+
+The Tower follow-up adds dedicated paintings and arrival prose for the Stair Shaft and Flooded
+Undercroft, and gives all four Tower-collapse rungs authored prompts. The current inventory
+finds dedicated art at 4 of 86 listed combinations, parent-place art at 16, and place-kind art
+at 66. The remaining dedicated art and prose are still in production. Artwork integration
+can proceed without an owner-selection pause per the current rollout instruction.
+
 **Kavik’s Tower artwork integrated.** Both 512×384 watercolors are in the runtime event registry.
 The discovery painting was revised to show irregular, partly buried wall sections and surviving
 openings rather than stair-like courses. The Tower browser fixture now checks the saved art keys,

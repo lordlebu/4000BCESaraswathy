@@ -2,7 +2,7 @@
 
 > **Mixed-art owner rule (18 November):** Inspect the element and approved references; ask if uncertain, and show new/replacement samples for selection before applying them, including code-native art. Preserve accepted exceptions. Current choices: JRPG rail bridge with proper shadow; lower road bridge retained; object shrubs/old grass; covered clay lamps. [Current delivery ledger](twin-walkway-phase.md).
 
-> **Diary event artwork:** The Lower Courses and How the Tower Sat Down have dedicated 512×384 watercolors. The discovery plate shows buried wall sections and openings as evidence of the collapse. [Artwork rollout and delivery status](diary-event-overhaul-plan.md#73-coverage-inventory-and-rollout).
+> **Diary event artwork:** The Lower Courses, Stair Shaft, Flooded Undercroft and How the Tower Sat Down have dedicated 512×384 watercolors. The discovery plate shows buried wall sections and openings as evidence of the collapse. [Artwork rollout and delivery status](diary-event-overhaul-plan.md#73-coverage-inventory-and-rollout).
 
 > **Cave/roads follow-up:** Yamantaka doubles in map scale; cave/cooker proportions, Maru cook reuse, sparse highland trees and masonry roads follow the simple NES direction. Cave-specific watercolor meal/sleep scenes show the traveller with both residents every night. [Exact delivery and prompts](twin-cave-roads-phase.md).
 
