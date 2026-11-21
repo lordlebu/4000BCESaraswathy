@@ -27,9 +27,14 @@ import { specimensIn } from './FieldKit';
 import { Modal } from './Modal';
 import type { ReadingSize } from './preferences';
 import { NotebookMark } from './NotebookMark';
-import type { DiaryEventEntry } from '../content/diaryEvents';
+import { projectDiaryEvents, type DiaryEventEntry, type DiaryEventRow } from '../content/diaryEvents';
 import { art } from './art';
 import { fieldMap, poi } from '../content/places';
+
+function MemoryArt({ entry }: { entry: DiaryEventEntry }) {
+  const picture = entry.art && art(entry.art.collection, entry.art.key, entry.art.take);
+  return picture ? <img className="activity-scene" src={picture} alt="" /> : null;
+}
 
 /** Canon's discipline ids, in the order a naturalist would keep them. */
 const DISCIPLINE_ORDER = [
@@ -154,7 +159,8 @@ export function Diary({
   const headerRef = useRef<HTMLElement>(null);
   const targetRef = useRef<HTMLHeadingElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const [memory, setEventMemory] = useState<DiaryEventEntry | null>(null);
+  const [memory, setEventMemory] = useState<DiaryEventRow | null>(null);
+  const [visibleEventRows, setVisibleEventRows] = useState(5);
 
   // The sticky header may wrap at large text sizes. Measure its real height so section
   // shortcuts and focused discovery entries never land underneath it.
@@ -177,6 +183,8 @@ export function Diary({
   if (!open) return null;
 
   const noticed = discoveries.filter((d) => rungOf(progress, d.id) >= 0);
+  const eventRows = projectDiaryEvents(diaryEvents);
+  const shownEventRows = eventRows.slice(-visibleEventRows);
   const byDiscipline = disciplineProgress(progress);
   const languages = languagesKnown(progress);
   const questions = openQuestions(progress);
@@ -243,20 +251,28 @@ export function Diary({
         {diaryEvents.length > 0 && (
           <section className="diary-section diary-events">
             <h3 id="notebook-events" tabIndex={-1}>Journey events</h3>
-            {diaryEvents.map((entry) => {
+            {shownEventRows.map((row) => {
+              const entry = row.latest;
               const place = entry.poiId ? poi(entry.poiId) : null;
+              const picture = entry.art ? art(entry.art.collection, entry.art.key, entry.art.take) : null;
               return (
-                <article key={entry.id} className="entry diary-event-entry">
-                  <header className="entry-head">
-                    <h4>{entry.title}</h4>
-                    <span className="entry-rungs">Day {entry.day + 1}</span>
-                  </header>
-                  <p className="muted">{place?.name ?? fieldMap(entry.fieldMapId)?.name ?? entry.fieldMapId}</p>
-                  <p>{entry.outcome}</p>
-                  {entry.art && <button type="button" className="ghost" onClick={() => setEventMemory(entry)}>Reopen event</button>}
+                <article key={row.id} className="diary-event-entry">
+                  <button type="button" className="diary-event-open" onClick={() => setEventMemory(row)}
+                    aria-label={`View ${entry.title}, Day ${entry.day + 1}, ${place?.name ?? fieldMap(entry.fieldMapId)?.name ?? entry.fieldMapId}`}>
+                    {picture && <img className="diary-event-thumb" src={picture} alt="" aria-hidden="true" />}
+                    <span className="diary-event-copy">
+                      <span className="diary-event-head"><strong>{entry.title}</strong><span>Day {entry.day + 1}{row.entries.length > 1 ? ` · ${row.entries.length} entries` : ''}</span></span>
+                      <span className="muted">{place?.name ?? fieldMap(entry.fieldMapId)?.name ?? entry.fieldMapId}</span>
+                      <span className="diary-event-outcome">{entry.outcome}</span>
+                    </span>
+                  </button>
                 </article>
               );
             })}
+            {eventRows.length > shownEventRows.length && <button type="button" className="ghost diary-events-earlier"
+              onClick={() => setVisibleEventRows((count) => count + 5)}>
+              Show earlier ({eventRows.length - shownEventRows.length})
+            </button>}
           </section>
         )}
 
@@ -356,16 +372,18 @@ export function Diary({
       </section>
       </div>
     </Modal>
-      {memory && <Modal open label={memory.title} onClose={() => setEventMemory(null)}>
+      {memory && <Modal open label={memory.latest.title} onClose={() => setEventMemory(null)}>
         <section className="activity-card event-memory">
-          {memory.art && art(memory.art.collection, memory.art.key, memory.art.take) && (
-            <img className="activity-scene" src={art(memory.art.collection, memory.art.key, memory.art.take)!} alt="" aria-hidden="true" />
-          )}
+          <MemoryArt entry={memory.latest} />
           <div className="activity-body">
-            <h2 className="activity-title">{memory.title}</h2>
-            <p className="activity-prose">{memory.prose}</p>
-            <p><strong>{memory.choiceLabel}</strong></p>
-            <p>{memory.outcome}</p>
+            <h2 className="activity-title">{memory.latest.title}</h2>
+            {memory.entries.map((entry) => <div key={entry.id} className="event-memory-entry">
+              {entry !== memory.latest && <MemoryArt entry={entry} />}
+              <p className="muted">Day {entry.day + 1} · {entry.poiId ? poi(entry.poiId)?.name : fieldMap(entry.fieldMapId)?.name}</p>
+              <p className="activity-prose">{entry.prose}</p>
+              <p><strong>{entry.choiceLabel}</strong></p>
+              <p>{entry.outcome}</p>
+            </div>)}
             <button type="button" className="activity-choice primary" onClick={() => setEventMemory(null)}>Back to diary</button>
           </div>
         </section>

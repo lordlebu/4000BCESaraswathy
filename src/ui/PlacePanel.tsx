@@ -225,7 +225,7 @@ export function PlacePanel({
             {discoveriesHere.map((id) => {
               const d = discovery(id);
               if (!d) return null;
-              const event = discoveryEvent(progress, id);
+              const event = discoveryEvent(progress, id, place.id);
               const done = isComplete(progress, id);
               return <div key={id} className={updatedDiscoveries.includes(id) ? 'look discovery-updated' : 'look'}>
                 <div className="look-text">
@@ -251,7 +251,7 @@ export function PlacePanel({
                   if (!d) return null;
                   const seen = rungOf(progress, id) >= 0;
                   const done = isComplete(progress, id);
-                  const event = discoveryEvent(progress, id);
+                  const event = discoveryEvent(progress, id, place.id);
                   return (
                     <div key={id} className={updatedDiscoveries.includes(id) ? "look discovery-updated" : "look"}>
                       <div className="look-text">

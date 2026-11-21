@@ -55,7 +55,7 @@ describe('a journey survives a round trip', () => {
       outcome: 'The coals hold until morning.',
       day: 2,
       fieldMapId: 'field_map_aravali',
-      art: { collection: 'events' as const, key: 'camp-night-fireside', take: 0 }
+      art: { collection: 'places' as const, key: 'kind-archaeological_site', take: 0 }
     }];
     saveJourney(SEED, { discovered: [], collection: {}, reached: true, diaryEvents });
 

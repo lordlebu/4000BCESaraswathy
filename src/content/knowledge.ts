@@ -25,6 +25,8 @@ export type Discipline =
 export interface Rung {
   /** What the diary reads here. Written for the player, and less certain lower down. */
   entry: string;
+  /** Optional prose shown before this rung is recorded. */
+  prompt: string | null;
   /** Discovery or vocabulary ids needed. Empty means it follows from the rung below. */
   requires: string[];
 }
@@ -87,6 +89,7 @@ export interface Word {
 
 interface RawRung {
   entry: string;
+  prompt?: string;
   requires?: string[];
 }
 interface RawDiscovery {
@@ -122,6 +125,7 @@ export const discoveries: Discovery[] = raw.discoveries.map((d) => ({
   foundAt: d.found_at ?? [],
   rungs: d.levels.map((l) => ({
     entry: l.entry,
+    prompt: l.prompt ?? null,
     requires: l.requires ?? []
   })),
   answers: d.answers ?? [],

@@ -151,6 +151,8 @@ export interface SubLocation {
   id: string;
   name: string;
   description: string;
+  /** What happens on entering; description remains the stable place summary. */
+  arrival: string | null;
   /** Discovery or vocabulary ids needed to get in. How a cave that is "too dark" opens later. */
   requires: string[];
   /** Discoveries whose evidence is specifically inside this part of the place. */
@@ -257,7 +259,7 @@ interface RawFieldMap {
 interface RawPoi {
   id: string; name: string; field_map: string; kind: string; terrain?: string[]; stands?: string; shore?: string;
   description?: string; arrival?: string; discoveries?: string[]; npcs?: string[];
-  sub_locations?: { id: string; name: string; description?: string; requires?: string[]; discoveries?: string[] }[];
+  sub_locations?: { id: string; name: string; description?: string; arrival?: string; requires?: string[]; discoveries?: string[] }[];
   ruin_of?: string;
 }
 interface RawNpc {
@@ -340,6 +342,7 @@ export const pointsOfInterest: PointOfInterest[] = raw.points_of_interest.map((p
     id: s.id,
     name: s.name,
     description: s.description ?? '',
+    arrival: s.arrival ?? null,
     requires: s.requires ?? [],
     discoveries: s.discoveries ?? []
   })),

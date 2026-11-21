@@ -180,6 +180,8 @@ export interface GameEvent {
    * picture, and the card after the road's painted one came up blank (the owner, 3 October 2026).
    */
   artFallback?: string;
+  /** Ordered cross-folder fallbacks for contextual events whose useful image belongs to a place. */
+  artCandidates?: readonly { collection: 'events' | 'places' | 'scenes'; key: string }[];
   choices: Choice[];
   /**
    * Whether it can happen more than once.

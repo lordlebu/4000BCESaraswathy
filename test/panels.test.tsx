@@ -161,7 +161,7 @@ describe('the diary remembers resolved events', () => {
     />);
 
     expect(screen.getByRole('heading', { name: 'Journey events' })).toBeDefined();
-    fireEvent.click(screen.getByRole('button', { name: 'Reopen event' }));
+    fireEvent.click(screen.getByRole('button', { name: /View A fire after dark, Day 3/i }));
     const memory = screen.getByRole('dialog', { name: 'A fire after dark' });
     expect(memory.querySelector('img.activity-scene')).not.toBeNull();
     expect(within(memory).getByText('Stay by the fire')).toBeDefined();

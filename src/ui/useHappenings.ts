@@ -485,7 +485,7 @@ export function useHappenings({
               day: latest.current.day,
               fieldMapId: latest.current.fieldMapId,
               ...(latest.current.poiId ? { poiId: latest.current.poiId } : {}),
-              art: art && (art.folder === 'events' || art.folder === 'scenes')
+              art: art && (art.folder === 'events' || art.folder === 'scenes' || art.folder === 'places')
                 ? { collection: art.folder, key: art.key, take: art.take }
                 : null
             }

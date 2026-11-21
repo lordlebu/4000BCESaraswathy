@@ -64,8 +64,15 @@ export function EventCard({ event, holds, shelter, pick = 0, met = [], onChoose,
 
   // Resolve the painting before creating the choice handler so a card updated in place records
   // the image the player actually saw.
-  const selection =
-    preferredArtSelection('events', [event.artMoment, event.artVariant, event.art, event.artFallback], pick) ??
+  const contextualSelection = event.artCandidates?.map(({ collection, key }) =>
+    collection === 'scenes'
+      ? firstArtSelection(collection, [key], pick)
+      : preferredArtSelection(collection, [key], pick)
+  ).find((candidate) => candidate !== null) ?? null;
+  const selection = contextualSelection ??
+    (!event.artCandidates
+      ? preferredArtSelection('events', [event.artMoment, event.artVariant, event.art, event.artFallback], pick)
+      : null) ??
     (shelter ? firstArtSelection('scenes', sceneNames('rest', shelter), pick) : null);
 
   const choose = useCallback(
@@ -88,9 +95,9 @@ export function EventCard({ event, holds, shelter, pick = 0, met = [], onChoose,
       <section className="activity-card">
         {picture ? (
           <img className="activity-scene" src={picture} alt="" aria-hidden="true" />
-        ) : (
+        ) : event.origin !== 'discovery' && event.origin !== 'sub-location' ? (
           <div className="activity-scene activity-scene-blank" aria-hidden="true" />
-        )}
+        ) : null}
 
         <div className="activity-body">
           {/* The stranger this is about, beside the title, when it is about somebody. The painting
