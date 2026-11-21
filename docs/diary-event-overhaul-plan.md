@@ -682,8 +682,9 @@ lead-in. There are 219 later rungs without an individually authored prompt.
 
 Review the generated event plates against South of Tethys canon before adding them to the
 runtime registry. Use the scene's field map, local culture records, and established game
-portraits for dress and material culture. A few people can appear in lived-in scenes where
-their activity tells the story. Use local flora and vary silhouette, age, spacing, and scale
+portraits for appearance, dress, and material culture. Follow The Lower Courses as the visual
+reference. Keep the environment in the foreground and people small and distant except in
+events explicitly about a person. Use local flora and vary silhouette, age, spacing, and scale
 so vegetation does not look repeated. The current drafts are held outside the runtime registry
 while this review and correction pass is underway.
 
@@ -693,8 +694,14 @@ examined, so the same discovery can appear at multiple places.
 
 The Tower follow-up adds dedicated paintings and arrival prose for the Stair Shaft and Flooded
 Undercroft, and gives all four Tower-collapse rungs authored prompts. The current inventory
-finds dedicated art at 4 of 86 listed combinations, parent-place art at 16, and place-kind art
-at 66. The remaining dedicated art and prose are still in production. Artwork integration
+finds dedicated art at 21 of 86 listed combinations, parent-place art at 13, and place-kind art
+at 52. The second art batch adds both Cloud Stair scenes, the Gate Court threshold, the Long
+Archive unread shelf, the three Northwest Cave Camp entries, and Tide Market. Tide Market
+uses the environment-led revision with two distant figures and varied mangrove silhouettes.
+Six revised discovery plates cover the hidden chamber, scarp-bird records, young Shringasaurus,
+Gate Court footpath, kiln yard, and winter supply tally. These put the evidence in the foreground
+and keep any people distant. The approved Flooded Undercroft entry painting is unchanged.
+The remaining dedicated art is still in production. Artwork integration
 can proceed without an owner-selection pause per the current rollout instruction.
 
 **Kavik’s Tower artwork integrated.** Both 512×384 watercolors are in the runtime event registry.
