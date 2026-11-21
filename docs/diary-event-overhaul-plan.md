@@ -676,6 +676,22 @@ lore budget once and prevents per-place TypeScript switches.
 
 #### 7.3 Coverage inventory and rollout
 
+**Kavik’s Tower artwork integrated.** Both 512×384 watercolors are in the runtime event registry.
+The discovery painting was revised to show irregular, partly buried wall sections and surviving
+openings rather than stair-like courses. The Tower browser fixture now checks the saved art keys,
+diary thumbnails, and reopened images after reload. GitHub Actions verification is pending.
+
+- **The Lower Courses** — a descent past window ledges at ankle height, with red sandstone courses
+  disappearing into delta silt. Delivery key: `events/poi_kavik_tower-lower_courses`.
+- **How the Tower Sat Down** — the standing wall and aligned fallen courses from the observation
+  point, with the stonework readable enough to support the discovery. Delivery key:
+  `events/discovery_tower_collapse`.
+- After selection, add the approved assets, check the event-card crop and diary thumbnail, and
+  verify that the same image reopens after saving and reloading. Let GitHub Actions run full E2E.
+- Use the coverage inventory to select the next high-traffic places where a dedicated painting
+  adds information the existing place view cannot convey. Expand prompt and arrival prose in canon
+  alongside each selected batch.
+
 Add a generated report, not a hand-maintained map, with these categories:
 
 - dedicated contextual art;
