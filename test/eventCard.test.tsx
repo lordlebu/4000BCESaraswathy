@@ -132,3 +132,27 @@ describe('a road happening with no painting of its own', () => {
     expect(baseElement.querySelector('img.activity-scene')?.getAttribute('src')).toMatch(/woven-company/);
   });
 });
+
+describe('contextual event art', () => {
+  it('uses a place fallback and records that semantic source', () => {
+    const onChoose = vi.fn();
+    const contextual = event({
+      origin: 'discovery',
+      art: 'not-painted',
+      artCandidates: [
+        { collection: 'events', key: 'not-painted' },
+        { collection: 'places', key: 'kind-archaeological_site' }
+      ]
+    });
+    const { baseElement } = render(<EventCard event={contextual} holds={[]} onChoose={onChoose} onClose={() => {}} />);
+    expect(baseElement.querySelector('img.activity-scene')?.getAttribute('src')).toMatch(/kind-archaeological_site/);
+    fireEvent.click(screen.getByRole('button', { name: 'Ask the way' }));
+    expect(onChoose.mock.calls[0]![1]).toMatchObject({ folder: 'places', key: 'kind-archaeological_site' });
+  });
+
+  it('does not reserve an empty painting block when no contextual art exists', () => {
+    const contextual = event({ origin: 'sub-location', art: 'not-painted', artCandidates: [] });
+    const { baseElement } = render(<EventCard event={contextual} holds={[]} onChoose={() => {}} onClose={() => {}} />);
+    expect(baseElement.querySelector('.activity-scene-blank')).toBeNull();
+  });
+});

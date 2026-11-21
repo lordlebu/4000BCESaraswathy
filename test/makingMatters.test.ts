@@ -39,7 +39,7 @@ describe('a rung never needs a tool', () => {
   it('asks only for what it stands on, because the lore does not gate the ladder', () => {
     // Six rungs used to ask for something that cuts, contains or carries, and none could be climbed
     // in play: no caller passed the satchel. The gate went instead (`docs/a-lighter-game.md`).
-    for (const d of discoveries) for (const r of d.rungs) expect(Object.keys(r).sort(), d.id).toEqual(['entry', 'requires']);
+    for (const d of discoveries) for (const r of d.rungs) expect(Object.keys(r).sort(), d.id).toEqual(['entry', 'prompt', 'requires']);
   });
 });
 

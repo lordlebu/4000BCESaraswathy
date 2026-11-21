@@ -97,7 +97,8 @@ test('examining writes both diary history and the discovery revision', async ({ 
   const diary = page.locator('.diary');
   await expect(diary).toBeVisible({ timeout: 20_000 });
   await expect(diary.locator('.entry[data-discovery]')).toHaveCount(1);
-  await expect(diary.locator('.diary-event-entry')).toHaveCount(resolved);
+  const row = diary.locator('.diary-event-entry');
+  await expect(row).toHaveCount(1);
   // At least one reading is on the page. If two rungs were climbed, the first is struck through
   // rather than replaced -- that is the whole idea of the panel.
   const readings = diary.locator('.reading');
@@ -105,6 +106,9 @@ test('examining writes both diary history and the discovery revision', async ({ 
   if ((await readings.count()) > 1) {
     await expect(readings.first()).toHaveClass(/struck/);
   }
+  await row.getByRole('button').click();
+  const memory = page.getByRole('dialog');
+  await expect(memory.locator('.event-memory-entry')).toHaveCount(resolved);
 });
 
 test('the diary survives a reload', async ({ page }) => {

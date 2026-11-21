@@ -1,6 +1,6 @@
 # Diary event overhaul
 
-**Status:** implemented and verified (2026-11-20)
+**Status:** compact diary and contextual fallback delivered; dedicated artwork rollout remains (2026-11-21)
 
 **Branch:** `codex/diary-event-overhaul`
 
@@ -10,17 +10,60 @@ never duplicated between them.
 
 ## Implementation progress
 
-| Stage | Status | Delivered |
+| Stage | Status | Delivered / remaining |
 |---|---|---|
 | 0 — characterization | Complete | Existing local changes were isolated; focused component, save, event, and browser coverage was updated before the release-boundary run. |
 | 0.5 — canon seam | Complete | `sub_locations[].discoveries` is schema-validated, documented, exported, and assigned to Kavik's Tower's Lower Courses on `codex/diary-event-overhaul-canon`. |
-| 1 — occurrence ledger | Complete | Resolved events persist immutable prose, choice, outcome, context, and semantic art selection; diary art reopens in a read-only memory modal. |
-| 2 — discovery adapter | Complete | Place discoveries use the shared event card and the removed `Here`, placeholder, and `Look closer` UI no longer renders. |
-| 3 — sub-location adapter | Complete | Entry uses an event, Lower Courses owns `discovery_tower_collapse`, and backing out remains unrecorded navigation. |
-| 4 — arbitration and polish | Complete for this release | Existing happening priority is preserved, cancelled contextual events stay unresolved, focus traps do not overlap, and responsive desktop/touch flows pass. |
+| 1 — occurrence ledger | Complete for events that resolve | Resolved events persist immutable prose, choice, outcome, context, and exact semantic `events`/`places`/`scenes` art when one exists. |
+| 2 — discovery adapter | Delivered; content rollout remains | Discoveries use the event card and folder-aware place fallback. The Tower path has authored prompt prose; other discoveries use honest place/composed fallback until expanded. |
+| 3 — sub-location adapter | Delivered; content rollout remains | Entry records once, backing out stays navigation, and description/outcome no longer repeat. Lower Courses has authored arrival prose; dedicated paintings remain optional. |
+| 4 — arbitration and polish | Partial | Existing happening priority is preserved, cancelled contextual events stay unresolved, and modal focus no longer overlaps. The proposed centralized candidate arbitration and contextual text/art quality gate were not delivered. |
 | 5 — Records separation | Complete | Goals and ending projection have their own surface; Goals and `Take it with you` are outside `.field-diary`; Records tabs have 44px targets. |
+| 6 — compact diary projection | Implemented in PR #270 | Five compact recent rows, paging, one accessible disclosure, and adjacent-only conservative repeat grouping preserve the immutable ledger. |
+| 7 — contextual artwork and prose | Core delivered; rollout partial | Folder-aware fallback, text-only cards, `places` persistence, and canon-owned prompt/arrival fields are implemented. Generated coverage reporting and dedicated paintings remain. |
+
+### Delivered feature truth
+
+| User-visible capability | Status | Current truth |
+|---|---|---|
+| Every resolved narrative event is remembered | Delivered | Each resolution appends a `DiaryEventEntry`; existing authored and woven events are covered. |
+| Same event may recur | Delivered by event policy | Every permitted occurrence remains stored; only adjacent exact repeats or adjacent rungs of one discovery are grouped in the read projection. |
+| Reopen an event image from the diary | Delivered when an honest asset exists | Exact `events`, `places`, or `scenes` art reopens. Artless rows still reopen their saved prose without a fake image. |
+| Discovery interaction as an event | Delivered | Choice advances one rung, records history, and changes prompt prose to the rung outcome. |
+| Sub-location interaction as an event | Delivered | First entry records once, navigation does not duplicate it, and outcome uses authored arrival or a short transition. |
+| Compact event history | Delivered | Five recent rows render initially; earlier rows page in five at a time and full history stays in the disclosure. |
+| Goals/export outside the diary | Delivered | Goals, ending projection, and export controls are separate from `.field-diary`. |
+| Exact historical prose and art survive later canon edits | Delivered when present | Text and exact selected collection/key/take are snapshotted, including `places` fallbacks. |
+
+### Contextual presentation audit
+
+The current adapters create structurally valid cards but do not yet have a complete content or art
+contract. The repository audit on 2026-11-21 found:
+
+- **55 discoveries, 0 matching `events/discovery_*` assets.** `discoveryEvent` asks only the
+  `events` registry for the discovery id.
+- **61 sub-locations, 0 direct event-art matches and 0 event-folder POI fallbacks.** The adapter's
+  fallback key is a POI id, but POI paintings live under `places` while `EventCard` searches only
+  `events`.
+- **15 of the 61 sub-location instances have a parent POI painting already available** in the
+  `places` registry. The resolver cannot currently select or persist those honest fallbacks.
+- A first discovery observation uses the generic prompt `There is more here than a first glance
+  held.` because canon supplies the discovered reading/outcome but no pre-choice prompt.
+- A sub-location card uses `sub.description` both before and after the choice, so resolving it
+  repeats rather than advances the prose.
+- `EventCard` renders a full-height `.activity-scene-blank` when selection fails. That blank region
+  is the visible placeholder card the user reported.
+
+These figures are the pre-implementation baseline. The contextual presentation baseline now
+passes; dedicated art and broader authored-prose coverage remain Stage 7 content work.
 
 ### Verification record
+
+PR #270 implementation verification (2026-11-21): TypeScript typecheck passed; focused diary
+projection (3), EventCard (9), panel (69), and save (22) tests passed. Canon schema/reference lint
+passed across 939 entities. The expected export-boundary failure identified changed
+`canon.lock.json`, `knowledge.json`, and `places.json`; `check_export_boundary.py --update` then
+re-pinned those intentional canon changes. Full browser E2E is delegated to GitHub Actions.
 
 - TypeScript typecheck and production build passed.
 - Focused Vitest suites passed, including 122 event/save/panel tests and the 29-test canon adapter boundary.
@@ -29,6 +72,16 @@ never duplicated between them.
 - Canon lint, playability, export-boundary, and game lock checks passed; canon export is 107.1 KB gzipped at the source boundary.
 - Final production budgets: app startup 164.22 KB / 180 KB gzipped; canon chunk 130.8 KB / 350 KB gzipped.
 - `git diff --check` passed in both repositories.
+
+### PR #270 CI failure record
+
+[Run 44865466115](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/44865466115)
+reported three unit assertion failures and one browser assertion failure on `238c8cc`.
+Adapter coverage still lacked declarations for the consumed `sub_locations[].arrival` and
+`levels[].prompt` fields. The rung shape check also needed to admit the prose-only `prompt`.
+The browser test expected two separate rows for two consecutive rungs of one discovery.
+It now checks for one summary row and verifies that reopening it shows every recorded occurrence.
+The browser aggregate failed because shard 1 failed. Shards 2–4 passed.
 
 ### PR #269 CI failure record
 
@@ -96,7 +149,8 @@ The overhaul also narrows the Field Diary to observations and event history:
 - `If you stopped here` moves to the Goals surface as its projected outcome.
 - `Take it with you` moves to the shared Records toolbar because export applies to the journey, not
   to one diary section.
-- Every event image can be reopened from the event's historical diary entry.
+- Every image that was actually shown can be reopened from the event's historical diary entry;
+  contextual art coverage remains Stage 7 work.
 
 ## Existing system and the seam to keep
 
@@ -147,6 +201,114 @@ Primary references:
 - [WAI-ARIA modal dialog pattern](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/)
 - [Playwright best practices](https://playwright.dev/docs/best-practices)
 - [Playwright trace guidance](https://playwright.dev/docs/trace-viewer)
+
+## Diary density and recurrence follow-up
+
+### Current behaviour and the reported problem
+
+The occurrence ledger is intentionally append-only. Today the diary also renders that ledger almost
+one-for-one, so a small event such as `Adventurers' fire` consumes a heading, day, place, outcome,
+and a separate `Reopen event` row. This is readable in isolation and too large as a history.
+
+The same event can appear again, but only where the event definition permits recurrence:
+
+- `once: true` authored, storyline, first, discovery-rung, and first sub-location events are
+  suppressed after resolution;
+- each discovery rung has its own event id, so several rungs may share a title while remaining
+  distinct observations;
+- `happening_twin_carrier`, `happening_twin_camp`, and woven events whose `again_after` is not null
+  may resolve more than once and currently append a new diary occurrence each time;
+- choosing a different option, meeting the event in another place, or seeing different art is a
+  meaningful new occurrence even when the title is unchanged;
+- reopening an event from the diary is read-only and never appends an occurrence.
+
+The problem is therefore a **read-model problem**, not a reason to discard history. Do not dedupe
+the saved ledger merely to make the page shorter.
+
+### Industry solution applied
+
+Use the established event-log split: immutable occurrences remain the source of truth, while the UI
+reads a compact projection designed for browsing. Microsoft's Event Sourcing guidance explicitly
+separates an append-only event stream from materialized read views and requires idempotent handling
+of duplicate delivery. Ink and Yarn Spinner similarly keep narrative state separate from the view
+that presents lines and choices. For the compact row, use the WAI-ARIA disclosure pattern: a button
+with `aria-expanded` reveals detail on demand. If the journey eventually grows into hundreds of
+rows, use a recycled/virtualized list rather than mounting every detail; Unity's `ListView` is the
+game-UI analogue of that pattern.
+
+References added for this follow-up:
+
+- [Microsoft Event Sourcing pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing)
+- [WAI-ARIA Disclosure pattern](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/)
+- [Unity UI Toolkit ListView](https://docs.unity3d.com/ScriptReference/UIElements.ListView.html)
+- [Ink runtime state and presentation](https://github.com/inkle/ink/blob/master/Documentation/RunningYourInk.md)
+- [Yarn Spinner dialogue runner and persistent state](https://docs.yarnspinner.dev/api/csharp/yarn.unity/yarn.unity.dialoguerunner)
+
+### Proposed compact projection
+
+Keep `DiaryEventEntry[]` unchanged as the saved record. Add a pure
+`projectDiaryEvents(entries): DiaryEventRow[]` read function; it must never mutate, delete, or
+rewrite occurrences.
+
+Default row, one or two lines:
+
+- title;
+- compact metadata: `Day 2 · The Aravali Crossing`;
+- a short outcome preview, clamped to one line;
+- optional small art thumbnail that opens the same read-only memory;
+- one disclosure control whose accessible name includes title, day, and place. Remove the separate
+  full-width `Reopen event` row.
+
+Expanded detail contains the original prose, chosen action, outcome, and art. Only one row should
+be expanded at a time on narrow screens. The `Journey events` section initially shows the five most
+recent projected rows and a `Show earlier (N)` control; expanding the history adds the next page
+without discarding scroll or focus. Day headings are rendered only when a visible page crosses a
+day boundary.
+
+### Repetition and grouping policy
+
+Store every legitimate resolution, but compact presentation conservatively:
+
+1. Adjacent occurrences may roll into one row only when `eventId`, `choiceId`, outcome, place, and
+   semantic art selection all match. Show `×N` plus the first/last day; expansion lists each day.
+2. Never merge across an intervening different event, because that rewrites chronology.
+3. Never merge different choices, outcomes, locations, art, or event ids merely because titles
+   match.
+4. Discovery rungs may appear under one discovery thread (`origin + subjectId`) but expansion must
+   retain each rung outcome and order. The compact row shows `N observations` and the latest one.
+5. A repeated event delivered accidentally with the same resolution token is ignored at write
+   time. UI double-click protection remains, and a future resolver should accept an idempotency key
+   rather than infer duplicates from matching prose.
+6. A once-only event found twice in a save is treated as corrupt/legacy data: retain both in the
+   ledger for recoverability, project them as a duplicate group, and emit a development diagnostic.
+
+### Use-case matrix
+
+| Use case | Persisted occurrences | Default diary presentation |
+|---|---:|---|
+| Once-only authored story beat | One | One compact row; full memory on disclosure. |
+| Recurring ambient/woven event, identical outcome | One per resolution | Adjacent identical resolutions roll up as `×N`; separated resolutions remain in chronology. |
+| Same event, different choice or outcome | One per resolution | Separate rows; never collapse player choice. |
+| Same event at another place/day | One per resolution | Separate rows unless identical and adjacent at the same place; metadata makes the difference visible. |
+| Discovery with several rungs sharing a title | One per advanced rung | One compact discovery thread with `N observations`; expanded ordered rungs. |
+| First sub-location entry and later navigation | One first-entry occurrence | One row; ordinary re-entry adds nothing. |
+| Event without art | One per resolution | Same compact row without an empty thumbnail or reopen promise. |
+| Same title from different event ids | One per event | Separate rows; identity is never inferred from display text. |
+| Canon wording changes after play | Existing snapshots unchanged | Memory shows what the player originally saw. |
+| Very long journey | Full ledger retained | Five-row paging first; introduce virtualization only after measured need. |
+
+### Acceptance and testing for the follow-up
+
+- At 390 px width, a collapsed event row is no taller than three normal text lines plus spacing.
+- Five collapsed rows and `Show earlier` fit before discipline content without rendering full prose.
+- Opening a row shows its exact saved prose, action, outcome, and image and applies no game effects.
+- Two adjacent identical recurring occurrences show one row with `×2`; expanding shows both days.
+- Different choices, places, outcomes, art, or non-adjacent repeats remain distinct.
+- Discovery rungs compact under their subject without losing crossings-out in the analytical entry.
+- Keyboard focus remains on the disclosure after collapse; `Enter` and `Space` toggle it and
+  `aria-expanded` reflects state.
+- Projection tests use ledger fixtures and stay pure/unit-level. Browser coverage needs only one
+  compact-row/disclosure case and one narrow-layout case; GitHub runs the full E2E suite.
 
 ## Budget ownership — one fact, one payload
 
@@ -243,18 +405,19 @@ interface DiaryEventEntry {
   fieldMapId: string;
   poiId?: string;
   art: {
-    collection: 'events' | 'scenes';
+    collection: 'events' | 'places' | 'scenes';
     key: string;          // the exact preferred/fallback asset that was shown
   } | null;
 }
 ```
 
 Do not store callbacks, generated asset URLs, conditions, or the full `GameEvent`. Store the stable
-semantic art collection and key selected by `preferredArt`, including a fallback key when the
-event's own painting was absent. This makes the historical entry reopen the picture the player
-actually saw instead of re-running fallback selection against newer state. Keep `seenEvents` for
-selection/cooldown logic and add `diaryEvents` for history. Increment the knowledge save version
-and migrate older saves to `diaryEvents: []`; preserve all existing progress.
+semantic art collection and key selected by the folder-aware resolver, including a fallback key
+when the event's own painting was absent. This makes the historical entry reopen the picture the
+player actually saw instead of re-running fallback selection against newer state. Keep
+`seenEvents` for selection/cooldown logic and `diaryEvents` for history. Older saves already treat
+the optional ledger as `[]`; adding `places` requires tolerant validation rather than discarding
+existing progress.
 
 ### 3. One resolver applies every event
 
@@ -324,17 +487,18 @@ Do not automatically chain several cards without returning control to the place.
 
 ### 7. The diary gets an event chronology and reopenable event art
 
-Add a `Journey events` section before discipline entries. Render oldest to newest, grouped by day,
-with title, place, prose, chosen action, and outcome. Discovery event entries link visually to their
-discipline entry but do not duplicate its whole revision list. Existing discovery sections remain
-the analytical index; the chronology is the lived record.
+Add a `Journey events` section before discipline entries. The saved chronology remains complete;
+the default projection is the compact, paged summary defined in **Diary density and recurrence
+follow-up** above. Discovery event rows link visually to their discipline entry but do not duplicate
+its whole revision list. Existing discovery sections remain the analytical index; the chronology is
+the lived record.
 
-An occurrence with art shows a small thumbnail and a `Reopen event` control. It opens a read-only
-event-memory modal containing the same resolved image, title, prose, chosen action, and outcome.
-This review surface has no choice buttons and cannot reapply grants, inventory changes, flags, or
-discovery advances. The image itself may open to a larger fitted view inside the same modal, with
-Escape and focus restoration still owned by `Modal`. An occurrence without art remains fully
-readable and does not invent a placeholder painting.
+An occurrence with art exposes its thumbnail/title as the disclosure for a read-only event-memory
+view containing the exact resolved image, title, prose, chosen action, and outcome. Do not add a
+separate full-width `Reopen event` row. This review surface has no choice buttons and cannot reapply
+grants, inventory changes, flags, or discovery advances. Escape and focus restoration remain owned
+by `Modal`. An occurrence without art remains fully readable and does not invent a placeholder
+painting.
 
 Empty-state wording becomes `Travel, speak, or examine a place to begin.` and must not refer to the
 removed `Look closer` control.
@@ -395,6 +559,8 @@ target.
 
 ### Stage 2 — discovery adapter
 
+**Status: mechanics delivered; contextual prompt/art acceptance remains in Stage 7.**
+
 - Add `discoveryEvent` and discovery-specific resolution.
 - Route place discovery interaction through `EventCard`.
 - Remove `Here`, the anonymous placeholder title, and `Look closer` from `PlacePanel`.
@@ -404,14 +570,17 @@ target.
 
 ### Stage 3 — sub-location adapter
 
+**Status: mechanics delivered; distinct arrival prose and art acceptance remain in Stage 7.**
+
 - Add `subLocationEvent` and explicit sub-location surface state outside `PlacePanel`.
 - Remove the `Further in` section.
 - Preserve dependency explanations and back navigation.
 - Acceptance: gated locations cannot be entered; open locations produce one recorded entry and can
   be exited without another entry.
-- Kavik's Tower acceptance path: enter `The Lower Courses`, record its existing description once,
-  expose `How the Tower Sat Down` there, back out without another occurrence, re-enter as ordinary
-  navigation, and reopen the first visit and its resolved image from the diary after reload.
+- Kavik's Tower mechanical acceptance path is delivered: enter `The Lower Courses`, record its
+  existing description once, expose `How the Tower Sat Down` there, back out without another
+  occurrence, and re-enter as ordinary navigation. Reopening a resolved image is not yet applicable
+  because its contextual art lookup currently misses; Stage 7 must complete that part.
 
 ### Stage 4 — arbitration and polish
 
@@ -430,6 +599,102 @@ target.
   dynamic imports so they do not enlarge the initial walk payload merely by existing.
 - Acceptance: opening Diary shows no goals, ending projection, or export block; all three remain
   reachable from Records with keyboard, pointer, and phone landscape layouts.
+
+### Stage 6 — compact diary projection
+
+**Status: implemented in PR #270.** The pure projection, conservative adjacent grouping, five-row
+paging, and accessible disclosure are in place. The occurrence ledger remains unchanged.
+
+- Replace the large diary event article with a one/two-line summary row.
+- Make the title/thumbnail the single disclosure action; remove the separate `Reopen event` row.
+- Show full saved prose, choice, outcome, and art only in the expanded memory view.
+- Group only repeats allowed by the repetition policy; preserve different choices and chronology.
+- Acceptance: the narrow-layout and repeat fixtures in the follow-up section pass, and the existing
+  save/reload fixture proves projection changes do not alter stored history.
+
+### Stage 7 — contextual artwork and prose expansion
+
+**Status: core implemented in PR #270; dedicated-art/report rollout remains.** Contextual cards use
+folder-aware fallback or honest text-only layout, and authored lore remains in canon.
+
+#### 7.1 Folder-aware artwork contract
+
+Replace string-only event art fields with ordered semantic references:
+
+```ts
+interface ArtRef {
+  collection: 'events' | 'places' | 'scenes';
+  key: string;
+}
+
+interface GameEvent {
+  // existing fields
+  artCandidates?: ArtRef[];
+}
+```
+
+Contextual fallback order:
+
+1. a dedicated event painting for this discovery rung or sub-location;
+2. the parent POI painting from `places`;
+3. the POI-kind painting from `places` (`kind-archaeological_site`, `kind-eco_site`, etc.);
+4. a text-only card with no reserved scene area.
+
+Do not show `.activity-scene-blank` for a contextual event. A blank rectangle communicates a
+missing asset and wastes the exact space this overhaul is meant to recover. Existing authored
+happenings may retain their current composition where their art contract already resolves.
+
+Extend `DiaryEventArt.collection` and save validation to admit `places`. Snapshot the exact
+collection, key, and take that the player actually saw; diary memory must never rerun fallback
+selection. Add an asset-retention fixture for one `events`, one `scenes`, and one `places` memory.
+
+#### 7.2 Canon-owned prose contract
+
+A live event needs two different pieces of writing:
+
+- **prompt/context before the choice** — what the traveller notices or what entering looks like;
+- **outcome after the choice** — what the traveller concludes or what changes.
+
+The existing discovery rung `entry` remains the outcome and analytical diary reading. Add an
+optional `prompt` beside a rung only when existing place/discovery prose cannot supply an honest
+lead-in. For the first rung, fallback order is:
+
+1. authored rung `prompt`;
+2. a short composition from the parent POI arrival/description plus the discovery discipline;
+3. one discipline-specific generic prompt, never the current universal placeholder.
+
+For sub-locations, keep `description` as pre-entry context and add optional `arrival` as the
+post-choice line. Where `arrival` is absent, use the small generic transition
+`You enter {sub-location name}.` Do not repeat the full description as both prompt and outcome.
+
+New authored prompts/arrivals belong in `SouthOfTethys` schemas, authoring guidance, validation,
+and exports. The game owns only composition/fallback mechanics. This charges new wording to the
+lore budget once and prevents per-place TypeScript switches.
+
+#### 7.3 Coverage inventory and rollout
+
+Add a generated report, not a hand-maintained map, with these categories:
+
+- dedicated contextual art;
+- parent-place fallback;
+- kind fallback;
+- intentionally text-only;
+- authored prompt/arrival;
+- composed fallback prose.
+
+Start with the acceptance path (`The Lower Courses` and `How the Tower Sat Down`), then high-traffic
+POIs. Do not block mechanics on 100% dedicated paintings: honest parent/kind fallbacks and
+text-only cards are valid. What is forbidden is an unlabelled blank scene or generic prose being
+reported as complete.
+
+Stage 7 acceptance:
+
+- The Lower Courses entry card shows dedicated or parent-place art, never a blank scene.
+- `How the Tower Sat Down` has an authored/contextual prompt distinct from its resolved reading.
+- Resolving either card changes prose from prompt to outcome rather than repeating one paragraph.
+- The diary reopens the exact displayed `events`, `places`, or `scenes` asset after reload.
+- An event with no valid art renders a compact text-only card without an empty image region.
+- Coverage reports the baseline and improvement; app/canon budgets remain independently green.
 
 ## Test strategy and token-efficient workflow
 
@@ -480,22 +745,26 @@ player-visible contract.
   canon, shared mechanics charge app code, history snapshots charge only the player's save, and
   images remain assets. CI reports these independently.
 
-## Definition of done
+## Definition of done and current status
 
-- None of the four removed labels remain in runtime UI or current E2E expectations.
-- Authored, woven, discovery, and sub-location events resolve through one transaction boundary.
-- Every resolved event writes one durable occurrence with the selected outcome.
-- Every occurrence that originally displayed art reopens that exact image in a read-only event
-  memory after navigation and reload; reopening cannot repeat rewards or state changes.
-- Discovery revisions still retain crossings-out and all existing gates.
-- Sub-location gates still use `journey.ts` and explain why entry is blocked.
-- Sub-location discoveries come from validated canon relationships, with no game-only place map and
-  no duplicated prose.
-- Field Diary contains no Goals, `If you stopped here`, or `Take it with you` section.
-- Goals has its own Records tab, the ending projection is reachable there, and export is reachable
-  from the shared Records toolbar on every tab.
-- Old saves load without losing discoveries, inventory, flags, or location.
-- Keyboard-only and reduced-motion flows work on desktop and phone landscape.
-- Focused tests, typecheck, production build, fast E2E, and the relevant slow save/reload test pass.
-- App-startup and canon chunks remain inside their unchanged budgets, with no authored prose copied
-  into game TypeScript and no image bytes copied into saves or JavaScript.
+| Requirement | Status |
+|---|---|
+| Removed labels no longer appear in runtime UI | Delivered. |
+| Authored, woven, discovery, and sub-location choices write durable occurrences | Delivered. |
+| Reopening a memory cannot repeat rewards or state changes | Delivered for occurrences with resolved art. |
+| Discovery revisions retain crossings-out and gates | Delivered. |
+| Sub-location gates remain in `journey.ts` and explain blocking | Delivered. |
+| Sub-location discovery ownership comes from validated canon | Delivered. |
+| Goals, ending projection, and export are outside Field Diary | Delivered. |
+| Old saves preserve discoveries, inventory, flags, and location | Delivered. |
+| App-startup and canon chunks stay inside unchanged budgets | Delivered at PR #269 boundary. Recheck after Stages 6–7. |
+| Event history is compact, paged, and conservatively groups repeats | Not delivered; Stage 6. |
+| Contextual cards use honest artwork or text-only composition, never a blank placeholder | Not delivered; Stage 7. |
+| Discovery prompts are authored/composed context rather than the universal placeholder | Not delivered; Stage 7. |
+| Sub-location outcome advances beyond its pre-entry description | Not delivered; Stage 7. |
+| `places` fallback art reopens exactly after navigation/reload | Not delivered; Stage 7. |
+| Centralized arrival/discovery/sub-location/woven arbitration | Not delivered; retain as a later Stage 4 refinement unless a concrete collision appears. |
+| Keyboard, reduced-motion, desktop, and phone-landscape coverage remains green | Delivered for PR #269; GitHub must rerun full E2E after Stages 6–7. |
+
+The overhaul is not fully done until the five Stage 6–7 rows above are delivered. Mechanical event
+conversion alone must not be described as completed presentation.

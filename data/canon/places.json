@@ -1298,6 +1298,7 @@
           "id": "lower_courses",
           "name": "The Lower Courses",
           "description": "Twenty-two storeys of red sandstone, of which four remain standing and the rest lie in roughly the order they fell.",
+          "arrival": "You step down between walls that were once upper rooms. Window ledges pass at ankle height, and the next course disappears whole beneath the delta silt.",
           "discoveries": [
             "discovery_tower_collapse"
           ]

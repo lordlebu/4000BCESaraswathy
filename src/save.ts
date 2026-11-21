@@ -303,7 +303,7 @@ function readDiaryEvents(value: unknown): DiaryEventEntry[] {
       typeof e.fieldMapId !== 'string'
     ) continue;
     const art = e.art && typeof e.art === 'object' &&
-      (e.art.collection === 'events' || e.art.collection === 'scenes') &&
+      (e.art.collection === 'events' || e.art.collection === 'places' || e.art.collection === 'scenes') &&
       typeof e.art.key === 'string' && typeof e.art.take === 'number' && Number.isInteger(e.art.take)
       ? { collection: e.art.collection, key: e.art.key, take: e.art.take }
       : null;
