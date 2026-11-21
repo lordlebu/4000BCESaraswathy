@@ -175,7 +175,7 @@ const COVERAGE: Record<string, Coverage> = {
 /** Nested shapes, which is where `requires` and `gives` live and where drift would hurt most. */
 const NESTED: Record<string, Coverage> = {
   'points_of_interest.sub_locations': {
-    adapted: ['id', 'name', 'description', 'requires', 'discoveries'],
+    adapted: ['id', 'name', 'description', 'arrival', 'requires', 'discoveries'],
     skipped: []
   },
   'npcs.lines': {
@@ -188,7 +188,7 @@ const NESTED: Record<string, Coverage> = {
   },
   'discoveries.levels': {
     // `conditions` and `needs_tool` left canon with v3.1.0: a rung waits only on understanding.
-    adapted: ['entry', 'requires'],
+    adapted: ['entry', 'prompt', 'requires'],
     skipped: []
   },
   'field_questions.resolutions': {

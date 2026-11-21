@@ -73,6 +73,16 @@ re-pinned those intentional canon changes. Full browser E2E is delegated to GitH
 - Final production budgets: app startup 164.22 KB / 180 KB gzipped; canon chunk 130.8 KB / 350 KB gzipped.
 - `git diff --check` passed in both repositories.
 
+### PR #270 CI failure record
+
+[Run 44865466115](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/44865466115)
+reported three unit assertion failures and one browser assertion failure on `238c8cc`.
+Adapter coverage still lacked declarations for the consumed `sub_locations[].arrival` and
+`levels[].prompt` fields. The rung shape check also needed to admit the prose-only `prompt`.
+The browser test expected two separate rows for two consecutive rungs of one discovery.
+It now checks for one summary row and verifies that reopening it shows every recorded occurrence.
+The browser aggregate failed because shard 1 failed. Shards 2–4 passed.
+
 ### PR #269 CI failure record
 
 GitHub Actions runs [44741496396](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/44741496396)
