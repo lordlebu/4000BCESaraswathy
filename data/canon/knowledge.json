@@ -12,6 +12,7 @@
       ],
       "levels": [
         {
+          "prompt": "Find the first date on the shelf, then follow the spines forward. See if there is a year where the sequence breaks.",
           "entry": "The archive is four hundred and eleven years old and complete. I have never seen anything like it."
         },
         {
@@ -55,6 +56,7 @@
       ],
       "levels": [
         {
+          "prompt": "Below the spring, grain heads bow over the wet soil. Check the archive's description before taking a handful.",
           "entry": "A hardy millet grows on the wet ground below the spring. The archive lists it as toxic to stock and to people."
         },
         {
@@ -85,6 +87,7 @@
       ],
       "levels": [
         {
+          "prompt": "Kneel where the black paving has worn thin. Two pointed shapes lie side by side in the stone.",
           "entry": "A seam of bone in the black pavement: heavy skulls, a pair of long teeth in the upper jaw, nothing like them alive."
         },
         {
@@ -116,6 +119,7 @@
       ],
       "levels": [
         {
+          "prompt": "Move along the west wall until the light catches its end. What looks solid from the water does not look solid from here.",
           "entry": "The undercroft is not one room. There is a second, behind the west wall, and the wall is a wall on one side only."
         },
         {
@@ -158,6 +162,7 @@
       ],
       "levels": [
         {
+          "prompt": "Follow the steps with your eyes from the cut rock to the place where the scarp falls away.",
           "entry": "A cut stair climbs the scarp. Above the scarp it continues. There is nothing under the upper flights."
         },
         {
@@ -193,6 +198,7 @@
       ],
       "levels": [
         {
+          "prompt": "Watch a ripple cross the dockyard. It bends sharply in the same place each time.",
           "entry": "The water here has corners."
         },
         {
@@ -216,6 +222,7 @@
       ],
       "levels": [
         {
+          "prompt": "Set the two scarp-bird descriptions side by side. Start with the details the writers could both have seen.",
           "entry": "The archive lists a grey scarp-bird twice, under two names, catalogued sixty years apart."
         },
         {
@@ -254,6 +261,7 @@
       ],
       "levels": [
         {
+          "prompt": "Pick a point on the scarp and keep watching it as the clouds move past.",
           "entry": "The cloud on the scarp is not weather passing. It sits in one place and the weather goes through it."
         },
         {
@@ -283,6 +291,7 @@
       ],
       "levels": [
         {
+          "prompt": "Walk the seaward row and look down between the dead orchard trunks.",
           "entry": "The seaward orchard rows are dead of salt. In among them something is thriving that I do not recognise."
         },
         {
@@ -324,6 +333,7 @@
       ],
       "levels": [
         {
+          "prompt": "Wait by the pen while the young animal lowers its head. The ridge of its neck comes into view between the rails.",
           "entry": "There is a young shringasaurus in a pen behind the fish stalls, about the size of a large dog, and the frill is not grown -- a ridge of skin over the neck with the horns still soft under it."
         },
         {
@@ -354,6 +364,7 @@
       ],
       "levels": [
         {
+          "prompt": "Stand where you can see both the doorway and the people crossing the court. Watch which way their feet turn.",
           "entry": "There is a doorway in the court that people walk around rather than through. Nobody has told me not to. I have not."
         },
         {
@@ -393,6 +404,7 @@
       ],
       "levels": [
         {
+          "prompt": "Follow the pale trunks from the bank. See if the next one stands where the last two lead your eye.",
           "entry": "Mangroves with bark far paler than the others. They seem to be arranged, though that is surely my eye imposing order."
         },
         {
@@ -431,6 +443,7 @@
       ],
       "levels": [
         {
+          "prompt": "Walk along the green-black seam. Look for a change in the sand on either side of it.",
           "entry": "A seam of green-black glass running straight across open sand. Nothing near it is scorched."
         },
         {
@@ -468,6 +481,7 @@
       ],
       "levels": [
         {
+          "prompt": "Trace the dry channel to the north wall. The stone goes on farther than the opening does.",
           "entry": "A stone channel runs into the granary's north wall and stops at a chamber full of silt. It has been dry so long the camp treats it as a wall."
         },
         {
@@ -511,6 +525,7 @@
       ],
       "levels": [
         {
+          "prompt": "Ask Uma to name the seasons when smoke comes out of the kiln mouths.",
           "entry": "The kilns are lit three times a year and never in spring. Uma says spring firings go wrong and nobody knows why."
         },
         {
@@ -546,6 +561,7 @@
       ],
       "levels": [
         {
+          "prompt": "Stay at the edge of the market after the first stalls start to close. See who leaves and who keeps waiting.",
           "entry": "The market opens twice and closes twice, and everyone knows when without being told."
         },
         {
@@ -577,6 +593,7 @@
       ],
       "levels": [
         {
+          "prompt": "Hold still by the pool and watch the reflection where the water is deepest.",
           "entry": "Something large moved in the pool and I did not see it move."
         },
         {
@@ -607,6 +624,7 @@
       "subject": "faction_mask_family",
       "levels": [
         {
+          "prompt": "Let your eye adjust to the stair core. At shoulder height, the rough wall gives way to a finished edge.",
           "entry": "A recess cut into the stair core at shoulder height, lined and finished, and empty."
         },
         {
@@ -630,6 +648,7 @@
       ],
       "levels": [
         {
+          "prompt": "Look at the exposed face of the heap. Follow one band of shell and see what lies immediately below it.",
           "entry": "The midden is layered like any midden: fish, shell, pot, ash, fish, shell, pot."
         },
         {
@@ -662,6 +681,7 @@
       ],
       "levels": [
         {
+          "prompt": "Put the archive's survey beside the ground in front of you. Start with the landmarks that have not moved.",
           "entry": "The archive gives the spring a fixed position, surveyed, with a date. The spring is not in that position."
         },
         {
@@ -703,6 +723,7 @@
       ],
       "levels": [
         {
+          "prompt": "Walk the edge of the bare field. Notice where the living ground ends.",
           "entry": "Eight acres that will not grow anything. The camp calls it poisoned."
         },
         {
@@ -732,6 +753,7 @@
       ],
       "levels": [
         {
+          "prompt": "Look between the two dark courses in the rock face. Pick out one shape in the pale band.",
           "entry": "A pale band in the quarry face, between two courses of basalt. Full of small shells."
         },
         {
@@ -775,6 +797,7 @@
       ],
       "levels": [
         {
+          "prompt": "Follow the red stems to their base. See whether they begin in soil or in the wall itself.",
           "entry": "Something red is growing out of the granary walls. Not planted, I think."
         },
         {
@@ -813,6 +836,7 @@
       ],
       "levels": [
         {
+          "prompt": "Stand at the bend and look along both lines: the road the caravan takes and the shorter way across.",
           "entry": "The caravan road bends north here for no reason I can see, and adds half a day."
         },
         {
@@ -851,6 +875,7 @@
       ],
       "levels": [
         {
+          "prompt": "Turn so the light skims across the field. One patch catches it differently from the crust beside it.",
           "entry": "The white crust on the eastern field is not all the same white. Some of it has a shine on it."
         },
         {
@@ -897,6 +922,7 @@
       ],
       "levels": [
         {
+          "prompt": "Walk out to where the fresh water gives way. Notice which stems are still standing there.",
           "entry": "Reeds, shoulder-high, growing where the water is brackish enough to kill everything else."
         },
         {
@@ -920,6 +946,7 @@
       ],
       "levels": [
         {
+          "prompt": "Look along the shore from high ground. Follow each line of stone as far as you can see it.",
           "entry": "There are three seawalls here, not one. I assumed rebuilding. It is not rebuilding -- all three still stand."
         },
         {
@@ -955,6 +982,7 @@
       ],
       "levels": [
         {
+          "prompt": "Ask Thrali where to stand when the water changes, and what to watch for first.",
           "entry": "Thrali says the water turns silver and that things come up when it does. I have written it down without knowing what I have written."
         },
         {
@@ -982,6 +1010,7 @@
       ],
       "levels": [
         {
+          "prompt": "Look at the back of a turned terrace stone. The face usually hidden in the wall is the one worth reading.",
           "entry": "Some terrace stones carry short marks on the inner face, where they would not be seen once laid.",
           "requires": [
             "word_maru_khet"
@@ -1023,6 +1052,7 @@
       ],
       "levels": [
         {
+          "prompt": "Walk the terrace edge from its high end. See where water would go if it arrived here.",
           "entry": "Stone terraces above the herders' camp. The survey calls them devotional. I have no reason yet to disagree."
         },
         {
@@ -1062,6 +1092,7 @@
       ],
       "levels": [
         {
+          "prompt": "Follow the straight line through the green cutting. At ground level, the roots have something to cross.",
           "entry": "Iron rails in the floor of a green cutting, with roots up between the sleepers."
         },
         {
@@ -1088,6 +1119,7 @@
       ],
       "levels": [
         {
+          "prompt": "Look through the soundest pane. Let your eyes move from the benches to what is still laid out on them.",
           "entry": "A glasshouse in a clearing, panes mostly whole, benches and seed trays inside."
         },
         {
@@ -1114,6 +1146,7 @@
       ],
       "levels": [
         {
+          "prompt": "Walk the outer curve until you can see over it. Take note of what the stones enclose.",
           "entry": "Dry stone round a shoulder of the range, enclosing a hollow with nothing in it."
         },
         {
@@ -1141,6 +1174,7 @@
       ],
       "levels": [
         {
+          "prompt": "Follow the rails out from the shore with your eyes. Look underneath where the water first passes below them.",
           "entry": "Iron rail running out over the strait. Nothing under it and no legs down to the water."
         },
         {
@@ -1167,6 +1201,7 @@
       ],
       "levels": [
         {
+          "prompt": "Watch the loose grit at the foot of the black rock. Notice how it rests against the slope.",
           "entry": "Black rock in the island's flank. Grit from it does not lie down; it stands on end and points."
         },
         {
@@ -1193,6 +1228,7 @@
       ],
       "levels": [
         {
+          "prompt": "Compare the far opening with the one somebody sweeps. Start with the stone at the edges.",
           "entry": "A second doorway, out past the salt, framed in the same dressed basalt as the swept one."
         },
         {
@@ -1219,6 +1255,7 @@
       ],
       "levels": [
         {
+          "prompt": "Find a point that lets you see both shores. Trace the water east until the other shore is gone.",
           "entry": "The sea between the shores is a mile or so. East of here it opens and does not close again."
         },
         {
@@ -1242,6 +1279,7 @@
       ],
       "levels": [
         {
+          "prompt": "Stand back from the island rim and watch where the rainwater goes once it reaches the edge.",
           "entry": "Rain falls on the island top and runs off the edge, as rain does."
         },
         {
@@ -1268,6 +1306,7 @@
       ],
       "levels": [
         {
+          "prompt": "Look for the place where tracks reach the bank from both sides.",
           "entry": "A bar of shingle you can wade. The nomads use it and so does everything with four legs."
         },
         {
@@ -1329,6 +1368,7 @@
       ],
       "levels": [
         {
+          "prompt": "Look down from the bridge and follow the reeds to the narrowest part of the opening.",
           "entry": "Reeds grow close to the bridge opening."
         },
         {
@@ -1356,6 +1396,7 @@
       ],
       "levels": [
         {
+          "prompt": "Put a hand on the exposed face, then reach around to the face turned inward.",
           "entry": "The exposed brick feels warm; the inner face is cool."
         },
         {
@@ -1384,6 +1425,7 @@
       ],
       "levels": [
         {
+          "prompt": "Stop at the cave mouth before stepping over the swept line. Look from the hearth back down to the stream.",
           "entry": "The cave has a swept threshold and a small hearth, with green hills and a clear mountain stream below it."
         },
         {
@@ -1408,6 +1450,7 @@
       ],
       "levels": [
         {
+          "prompt": "Follow the narrow channel with your eye until you lose sight of the water.",
           "entry": "The smallest channel looks blocked by reeds."
         },
         {
@@ -1433,6 +1476,7 @@
       ],
       "levels": [
         {
+          "prompt": "Look at the open dune from the foot of its slope. See what the surface has kept.",
           "entry": "The dune face appears untouched."
         },
         {
@@ -1457,6 +1501,7 @@
       ],
       "levels": [
         {
+          "prompt": "Follow each drain to its mouth and compare what the water can carry through.",
           "entry": "Only one of the two drains has been cleared."
         },
         {
@@ -1485,6 +1530,7 @@
       ],
       "levels": [
         {
+          "prompt": "Look into the rooms from the lane before deciding what an empty doorway tells you.",
           "entry": "The rooms look empty from the lane."
         },
         {
@@ -1509,6 +1555,7 @@
       ],
       "levels": [
         {
+          "prompt": "Walk along the cove toward the open water and notice where the salt becomes plain.",
           "entry": "The cove tastes of salt at its outer edge."
         },
         {
@@ -1533,6 +1580,7 @@
       ],
       "levels": [
         {
+          "prompt": "Step into the neem's shade and follow the join between the tree's ground and the wall.",
           "entry": "The wall is cracked beside the neem."
         },
         {
@@ -1562,6 +1610,7 @@
       ],
       "levels": [
         {
+          "prompt": "Watch the bend below the quarry. When the water lifts again, look at the shape of the back.",
           "entry": "Something large moves in the bend below the quarry. It is not a crocodile. I have watched crocodiles and they do not do that with their backs."
         },
         {
@@ -1602,6 +1651,7 @@
       ],
       "levels": [
         {
+          "prompt": "Watch the person walking ahead of the herd. Pay attention to the days when they return empty-handed.",
           "entry": "Somebody walks ahead of the herd carrying a short bow, and comes back with nothing most days."
         },
         {
@@ -1629,6 +1679,7 @@
       ],
       "levels": [
         {
+          "prompt": "Cross the island top slowly. Look at what grows in the middle and what keeps to the edge.",
           "entry": "The island top carries grass, cushion-plant and a stand of mangrove at the edge."
         },
         {
@@ -1652,6 +1703,7 @@
       ],
       "levels": [
         {
+          "prompt": "Read the trays in order before touching any of them. Compare what is growing with what the labels describe.",
           "entry": "Trays of soil under the glass, each one labelled, each one worse than the last."
         },
         {
@@ -1692,6 +1744,7 @@
       ],
       "levels": [
         {
+          "prompt": "Ask Bekh to show you where the count of what they have ends and the count of what they need begins.",
           "entry": "Bekh keeps a count of what the camp has and what it will need, and the two columns have never met. They move every third winter because of the gap."
         },
         {
@@ -1737,6 +1790,7 @@
       ],
       "levels": [
         {
+          "prompt": "Before lifting a bone from the midden, look at how the pieces still lie in relation to one another.",
           "entry": "A partial skeleton in the midden, picked over. Not fish, not bird, not anything I can put a name to."
         },
         {

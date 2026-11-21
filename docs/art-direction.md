@@ -4,6 +4,11 @@
 
 > **Diary event artwork:** The Lower Courses, Stair Shaft, Flooded Undercroft and How the Tower Sat Down have dedicated 512×384 watercolors. The discovery plate shows buried wall sections and openings as evidence of the collapse. [Artwork rollout and delivery status](diary-event-overhaul-plan.md#73-coverage-inventory-and-rollout).
 
+For settlement event cards, use the scene's South of Tethys culture and established portraits
+for clothing, people and material culture. Include a few figures where their activity explains
+the scene. Use the local biome and canon flora for vegetation, with varied silhouettes and
+spacing instead of repeated tree shapes.
+
 > **Cave/roads follow-up:** Yamantaka doubles in map scale; cave/cooker proportions, Maru cook reuse, sparse highland trees and masonry roads follow the simple NES direction. Cave-specific watercolor meal/sleep scenes show the traveller with both residents every night. [Exact delivery and prompts](twin-cave-roads-phase.md).
 
 > **Approved terrain - 18 November 2026:** Muted sage is the selected cave/highland palette. Use sparse broad turf/stone patterns, stepped height/riverbank shading and soft earthy desert/grass seams, baked once into the existing ground layer. Lichen/olive are review alternatives only. [Decision, implementation and verification](twin-terrain-softening.md).

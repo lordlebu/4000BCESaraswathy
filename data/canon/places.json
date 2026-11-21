@@ -935,11 +935,13 @@
       "sub_locations": [
         {
           "id": "lower_flights",
+          "arrival": "You climb where the middle of each tread has gone smooth. At the edge, the stone still takes the full print of your sandal.",
           "name": "The Lower Flights",
           "description": "Cut into the scarp, wide enough for two, worn in the middle like any stair anyone ever used."
         },
         {
           "id": "the_turn",
+          "arrival": "You stop at the last step that touches the scarp. From there you can see daylight in the gap beneath the next one.",
           "name": "The Turn",
           "description": "Where the stair stops climbing the rock and starts climbing away from it. There is no rock under the last four steps and they are still there.",
           "requires": [
@@ -1152,11 +1154,13 @@
       "sub_locations": [
         {
           "id": "outer_court",
+          "arrival": "You cross the drain where its cover stone has been lifted and set back. Someone has wedged it level with a chip of paving.",
           "name": "The Outer Court",
           "description": "Paving, a drain, and a low wall someone maintains. It looks like a yard because it is one."
         },
         {
           "id": "the_threshold",
+          "arrival": "You hold your hand across the opening. The change is sharp enough that you can move your wrist back and forth to find the line.",
           "name": "The Threshold",
           "description": "Where the air stops being the same on both sides. You can stand with one hand in each and feel the difference at the wrist.",
           "requires": [
@@ -1378,11 +1382,13 @@
       "sub_locations": [
         {
           "id": "reading_floor",
+          "arrival": "You take the place where the light falls across the table. The spine tells you whose copy you are holding and whose copy it was made from.",
           "name": "The Reading Floor",
           "description": "Long tables, north light, and the working copies -- which are copies of copies, and say so on the spine, which is more honest than most places manage."
         },
         {
           "id": "sequence_stacks",
+          "arrival": "You walk along the measurements until the years begin to feel like distance. A shelf can hold every reading taken and still leave room for what nobody thought to measure.",
           "name": "The Sequence Stacks",
           "description": "Every measurement the University has taken, in the order it was taken. Four hundred years of rainfall, riverflow, birds arriving and birds leaving. It is beautiful and it is the whole problem.",
           "requires": [
@@ -1391,6 +1397,7 @@
         },
         {
           "id": "unread_shelf",
+          "arrival": "You reach for a bundle, then stop. The writing on the outside is in the same hand as the writing within. Nobody has put a newer label over it.",
           "name": "The Unread Shelf",
           "description": "What came up the scarp already written and has never been transcribed, because nobody here can read it and nobody will admit that in writing.",
           "requires": [
@@ -1558,16 +1565,19 @@
       "sub_locations": [
         {
           "id": "cave_threshold",
+          "arrival": "You pass between the windbreak and the hearth with room to spare. Behind the stones, the wind lets go of your sleeve.",
           "name": "The open threshold",
           "description": "A clear passage between the windbreak and the hearth."
         },
         {
           "id": "cave_alcove",
+          "arrival": "You sit on the dry shelf. From here you can still see the doorway, and anyone coming through can pass without asking you to move.",
           "name": "The meditation alcove",
           "description": "A dry sheltered shelf with room to sit without blocking the doorway."
         },
         {
           "id": "cave_fold",
+          "arrival": "You lift the hurdle just far enough to step through. The ground is worn beside the latch, where the herder stands to close it.",
           "name": "The resting fold",
           "description": "Low hurdles outside the sleeping place, empty between the herder's visits."
         }

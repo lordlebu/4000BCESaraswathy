@@ -676,6 +676,17 @@ lore budget once and prevents per-place TypeScript switches.
 
 #### 7.3 Coverage inventory and rollout
 
+The current canon export has authored first prompts for all 55 discoveries and authored arrivals
+for all 13 exported sub-locations. Later discovery rungs can use the preceding reading as their
+lead-in. There are 219 later rungs without an individually authored prompt.
+
+Review the generated event plates against South of Tethys canon before adding them to the
+runtime registry. Use the scene's field map, local culture records, and established game
+portraits for dress and material culture. A few people can appear in lived-in scenes where
+their activity tells the story. Use local flora and vary silhouette, age, spacing, and scale
+so vegetation does not look repeated. The current drafts are held outside the runtime registry
+while this review and correction pass is underway.
+
 Run `node tools/diary-content-coverage.mjs` for the current export's event-art source and
 authored prose coverage by place. Discovery rows count each place where a discovery can be
 examined, so the same discovery can appear at multiple places.
