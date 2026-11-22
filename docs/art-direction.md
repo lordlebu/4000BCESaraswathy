@@ -16,6 +16,12 @@ paintings as style references and keep lettering, signs, and invented script out
 Keep figures realistically proportioned and use the relevant in-game portrait for appearance
 and clothing. Preserve the existing branch paintings for the owner's full review.
 
+**Examine controls:** Use the same warm paper and ink as the notebook. Below the NPC list, the
+compact pill follows the workshop chips and borrows its lens from the notebook icon set. Keep
+the hit area at least 44px high. Inside the window, keep the current choice visually primary
+and place navigation actions together as underlined text. Use Satoshi Medium for Examine
+controls and Caladea for notebook prose. See [font sources and licensing](../src/ui/fonts/README.md).
+
 > **Cave/roads follow-up:** Yamantaka doubles in map scale; cave/cooker proportions, Maru cook reuse, sparse highland trees and masonry roads follow the simple NES direction. Cave-specific watercolor meal/sleep scenes show the traveller with both residents every night. [Exact delivery and prompts](twin-cave-roads-phase.md).
 
 > **Approved terrain - 18 November 2026:** Muted sage is the selected cave/highland palette. Use sparse broad turf/stone patterns, stepped height/riverbank shading and soft earthy desert/grass seams, baked once into the existing ground layer. Lichen/olive are review alternatives only. [Decision, implementation and verification](twin-terrain-softening.md).

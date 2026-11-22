@@ -3,4 +3,5 @@
   <symbol id="leaf" viewBox="0 0 24 24"><path d="M5 20C3 9 9 3 21 3c0 12-6 18-16 17Zm0 0L17 7M9 16v-5M9 16h5"/></symbol>
   <symbol id="people" viewBox="0 0 24 24"><path d="M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-6 9v-2a6 6 0 0 1 12 0v2M17 4a4 4 0 0 1 0 8m1 3a5 5 0 0 1 4 5"/></symbol>
   <symbol id="section" viewBox="0 0 24 24"><path d="M6 3h13v18H6a3 3 0 0 1 0-6h13M6 3a3 3 0 0 0-3 3v12M9 7h6M9 10h4"/></symbol>
+  <symbol id="lens" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m14.5 14.5 5.5 5.5"/></symbol>
 </svg>

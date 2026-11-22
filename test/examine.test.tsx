@@ -38,30 +38,30 @@ it('follows the recommended card in one dialog and returns to a direct continuat
   const dialog = await screen.findByRole('dialog', { name: 'Examine location' });
   const card = within(dialog);
   if (!card.queryByRole('heading', { name: 'The Lower Courses' })) {
-    const other = card.getByRole('button', { name: 'Choose another' });
+    const other = card.getByRole('button', { name: 'Other leads' });
     expect(other.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(other);
     fireEvent.click(card.getByRole('button', { name: 'The Lower Courses' }));
   }
   fireEvent.click(card.getByRole('button', { name: 'Go in' }));
-  fireEvent.click(card.getByRole('button', { name: 'Next card' }));
+  fireEvent.click(card.getByRole('button', { name: 'Look further' }));
   expect(screen.getByRole('dialog')).toBe(dialog);
   expect(card.getByRole('heading', { name: 'How the Tower Sat Down' })).toBeTruthy();
 
   for (let index = 0; index < discovery('discovery_tower_collapse')!.rungs.length; index++) {
     fireEvent.click(card.getByRole('button', { name: /^Examine$/ }));
     if (index < discovery('discovery_tower_collapse')!.rungs.length - 1) {
-      fireEvent.click(card.getByRole('button', { name: 'Next card' }));
+      fireEvent.click(card.getByRole('button', { name: 'Look further' }));
     }
   }
-  expect(card.getByRole('button', { name: 'Finish examining' })).toBeTruthy();
+  expect(card.getByRole('button', { name: 'Done here' })).toBeTruthy();
   fireEvent.click(card.getByRole('button', { name: 'Back out' }));
   expect(screen.queryByRole('dialog')).toBeNull();
   expect(screen.queryByRole('button', { name: /^Examine$/ })).toBeNull();
-  fireEvent.click(screen.getByRole('button', { name: 'Explore the Stair Shaft' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Enter the Stair Shaft' }));
   const shaft = await screen.findByRole('dialog', { name: 'Examine location' });
   expect(within(shaft).getByRole('heading', { name: 'The Stair Shaft' })).toBeTruthy();
-  fireEvent.click(within(shaft).getByRole('button', { name: 'Leave examination' }));
+  fireEvent.click(within(shaft).getByRole('button', { name: 'Set aside' }));
   expect(resolve.mock.calls.map(([event]) => event.id)).toEqual([
     'sub_location_event:poi_kavik_tower:lower_courses',
     ...discovery('discovery_tower_collapse')!.rungs.map((_, index) => `discovery_event:discovery_tower_collapse:${index}`)

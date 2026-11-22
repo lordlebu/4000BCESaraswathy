@@ -186,23 +186,25 @@ test('an instance is a place you go into, and it says why when you cannot', asyn
 
   const examine = place.getByRole('button', { name: 'Examine', exact: true });
   await expect(examine).toHaveCount(1);
+  expect((await examine.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  expect((await examine.locator('.examine-chip').boundingBox())!.height).toBeLessThan(44);
   await examine.click();
   const session = page.getByRole('dialog', { name: 'Examine location' });
   const card = session.locator('.activity-card');
-  const alternatives = session.getByRole('button', { name: /Choose another|What is blocked/ });
+  const alternatives = session.getByRole('button', { name: /Other leads|Still out of reach/ });
   await alternatives.click();
   await expect(session).toContainText(/Not until you understand/);
   const lower = session.getByRole('button', { name: 'The Lower Courses', exact: true });
   if (await lower.isVisible()) await lower.click();
   await expect(card.locator('img.activity-scene')).toHaveAttribute('src', /poi_kavik_tower-lower_courses/);
   await card.getByRole('button', { name: 'Go in' }).click();
-  await card.getByRole('button', { name: 'Next card' }).click();
+  await card.getByRole('button', { name: 'Look further' }).click();
   await expect(session).toContainText('How the Tower Sat Down');
   await card.getByRole('button', { name: 'Examine', exact: true }).click();
   await session.getByRole('button', { name: 'Back out' }).click();
   await expect(session).toBeHidden();
   await expect(place.locator('.sub')).toBeHidden();
-  await expect(place.getByRole('button', { name: /^(Explore|Continue:)/ })).toBeVisible();
+  await expect(place.getByRole('button', { name: /^(Enter|Look at)/ })).toBeVisible();
 
   await page.getByRole('button', { name: 'Leave' }).click();
   await expect.poll(() => page.evaluate(() => {

@@ -11,5 +11,5 @@ export async function resolveOpenEvent(page: Page): Promise<void> {
   const card = page.getByRole('dialog', { name: 'Examine location' });
   await expect(card).toBeVisible();
   await card.locator('.activity-choice').first().click();
-  await card.getByRole('button', { name: 'Leave examination' }).click();
+  await card.getByRole('button', { name: 'Set aside' }).click();
 }
