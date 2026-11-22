@@ -31,8 +31,18 @@ import { projectDiaryEvents, type DiaryEventEntry, type DiaryEventRow } from '..
 import { art } from './art';
 import { fieldMap, poi } from '../content/places';
 
+function memoryPicture(saved: DiaryEventEntry['art']): string | null {
+  if (!saved) return null;
+  const { collection, key, take } = saved;
+  const picture = art(collection, key, take);
+  // Older saves can point at a retired block-art happening with a painted edition.
+  return picture ?? (collection === 'events' && key.startsWith('happening_')
+    ? art(collection, `${key}-painted`, take)
+    : null);
+}
+
 function MemoryArt({ entry }: { entry: DiaryEventEntry }) {
-  const picture = entry.art && art(entry.art.collection, entry.art.key, entry.art.take);
+  const picture = memoryPicture(entry.art);
   return picture ? <img className="activity-scene" src={picture} alt="" /> : null;
 }
 
@@ -254,7 +264,7 @@ export function Diary({
             {shownEventRows.map((row) => {
               const entry = row.latest;
               const place = entry.poiId ? poi(entry.poiId) : null;
-              const picture = entry.art ? art(entry.art.collection, entry.art.key, entry.art.take) : null;
+              const picture = memoryPicture(entry.art);
               return (
                 <article key={row.id} className="diary-event-entry">
                   <button type="button" className="diary-event-open" onClick={() => setEventMemory(row)}

@@ -138,7 +138,10 @@ describe('the diary decides whether it is empty', () => {
 });
 
 describe('the diary remembers resolved events', () => {
-  it('reopens the image and the exact choice without replaying the event', () => {
+  it.each([
+    ['camp-night-fireside', 'camp-night-fireside'],
+    ['happening_twin_drain', 'happening_twin_drain-painted']
+  ])('reopens saved art for %s and the exact choice without replaying the event', (key, expectedArt) => {
     render(<Diary
       progress={emptyProgress()}
       diaryEvents={[{
@@ -152,7 +155,7 @@ describe('the diary remembers resolved events', () => {
         outcome: 'The coals hold until morning.',
         day: 2,
         fieldMapId: 'field_map_aravali',
-        art: { collection: 'events', key: 'camp-night-fireside', take: 0 }
+        art: { collection: 'events', key, take: 0 }
       }]}
       open
       onClose={noop}
@@ -163,7 +166,7 @@ describe('the diary remembers resolved events', () => {
     expect(screen.getByRole('heading', { name: 'Journey events' })).toBeDefined();
     fireEvent.click(screen.getByRole('button', { name: /View A fire after dark, Day 3/i }));
     const memory = screen.getByRole('dialog', { name: 'A fire after dark' });
-    expect(memory.querySelector('img.activity-scene')).not.toBeNull();
+    expect(memory.querySelector('img.activity-scene')?.getAttribute('src')).toContain(expectedArt);
     expect(within(memory).getByText('Stay by the fire')).toBeDefined();
     expect(within(memory).queryByText('Journey events')).toBeNull();
     fireEvent.click(within(memory).getByRole('button', { name: 'Back to diary' }));

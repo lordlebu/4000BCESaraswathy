@@ -1,8 +1,8 @@
 # Diary event overhaul
 
-**Status:** compact diary and contextual fallback delivered; dedicated artwork rollout remains (2026-11-21)
+**Status:** implementation and dedicated card rollout complete. Final PR verification is pending (2026-11-22).
 
-**Branch:** `codex/diary-event-overhaul`
+**Branch:** `codex/diary-event-finish`
 
 **Scope:** `4000BCESaraswathy` owns runtime behaviour and presentation. `SouthOfTethys` owns the
 small `sub_locations[].discoveries` relationship addition and its authored assignments. Prose is
@@ -15,12 +15,12 @@ never duplicated between them.
 | 0 — characterization | Complete | Existing local changes were isolated; focused component, save, event, and browser coverage was updated before the release-boundary run. |
 | 0.5 — canon seam | Complete | `sub_locations[].discoveries` is schema-validated, documented, exported, and assigned to Kavik's Tower's Lower Courses on `codex/diary-event-overhaul-canon`. |
 | 1 — occurrence ledger | Complete for events that resolve | Resolved events persist immutable prose, choice, outcome, context, and exact semantic `events`/`places`/`scenes` art when one exists. |
-| 2 — discovery adapter | Delivered; content rollout remains | Discoveries use the event card and folder-aware place fallback. The Tower path has authored prompt prose; other discoveries use honest place/composed fallback until expanded. |
-| 3 — sub-location adapter | Delivered; content rollout remains | Entry records once, backing out stays navigation, and description/outcome no longer repeat. Lower Courses has authored arrival prose; dedicated paintings remain optional. |
+| 2 — discovery adapter | Complete | All 55 discoveries have an authored opening and dedicated art. Later rungs can use the preceding reading as context. |
+| 3 — sub-location adapter | Complete | All 13 sub-locations have authored arrivals and dedicated art. Entry records once and backing out stays navigation. |
 | 4 — arbitration and polish | Partial | Existing happening priority is preserved, cancelled contextual events stay unresolved, and modal focus no longer overlaps. The proposed centralized candidate arbitration and contextual text/art quality gate were not delivered. |
 | 5 — Records separation | Complete | Goals and ending projection have their own surface; Goals and `Take it with you` are outside `.field-diary`; Records tabs have 44px targets. |
 | 6 — compact diary projection | Implemented in PR #270 | Five compact recent rows, paging, one accessible disclosure, and adjacent-only conservative repeat grouping preserve the immutable ledger. |
-| 7 — contextual artwork and prose | Core delivered; rollout partial | Folder-aware fallback, text-only cards, `places` persistence, and canon-owned prompt/arrival fields are implemented. Generated coverage reporting and dedicated paintings remain. |
+| 7 — contextual artwork and prose | Complete | The generated inventory verifies dedicated paintings at all 86 map placements. Folder-aware fallback and text-only rendering remain available for future content. |
 
 ### Delivered feature truth
 
@@ -37,8 +37,7 @@ never duplicated between them.
 
 ### Contextual presentation audit
 
-The current adapters create structurally valid cards but do not yet have a complete content or art
-contract. The repository audit on 2026-11-21 found:
+The repository audit on 2026-11-21 recorded this pre-rollout baseline:
 
 - **55 discoveries, 0 matching `events/discovery_*` assets.** `discoveryEvent` asks only the
   `events` registry for the discovery id.
@@ -153,7 +152,7 @@ The overhaul also narrows the Field Diary to observations and event history:
 - `Take it with you` moves to the shared Records toolbar because export applies to the journey, not
   to one diary section.
 - Every image that was actually shown can be reopened from the event's historical diary entry;
-  contextual art coverage remains Stage 7 work.
+  the Stage 7 rollout now covers every exported discovery and sub-location placement.
 
 ## Existing system and the seam to keep
 
@@ -562,7 +561,7 @@ target.
 
 ### Stage 2 — discovery adapter
 
-**Status: mechanics delivered; contextual prompt/art acceptance remains in Stage 7.**
+**Status: complete, including the contextual card rollout in Stage 7.**
 
 - Add `discoveryEvent` and discovery-specific resolution.
 - Route place discovery interaction through `EventCard`.
@@ -573,7 +572,7 @@ target.
 
 ### Stage 3 — sub-location adapter
 
-**Status: mechanics delivered; distinct arrival prose and art acceptance remain in Stage 7.**
+**Status: complete, including distinct arrivals and dedicated art in Stage 7.**
 
 - Add `subLocationEvent` and explicit sub-location surface state outside `PlacePanel`.
 - Remove the `Further in` section.
@@ -617,7 +616,7 @@ paging, and accessible disclosure are in place. The occurrence ledger remains un
 
 ### Stage 7 — contextual artwork and prose expansion
 
-**Status: core implemented in PR #270; dedicated-art/report rollout remains.** Contextual cards use
+**Status: complete.** Contextual cards use
 folder-aware fallback or honest text-only layout, and authored lore remains in canon.
 
 #### 7.1 Folder-aware artwork contract
@@ -706,6 +705,10 @@ shipped paintings were preserved. The Aravali sky-island cards explicitly show f
 landmasses just below the clouds, with visible undersides and open air beneath them. The
 Lodestone Face shows aligned grit, The Water That Climbs shows rain runoff at the rim, and
 What Grows on Nothing shows grass, cushion plants, and aero-mangroves along the edge.
+
+The closeout retired 18 generated block-art happening files after verifying each had a preferred
+painted edition. The legacy builders skip that block art when the painting exists. A saved diary
+entry with a retired happening key can still show the painted edition in its thumbnail and memory.
 
 **Kavik’s Tower artwork integrated.** Both 512×384 watercolors are in the runtime event registry.
 The discovery painting was revised to show irregular, partly buried wall sections and surviving
@@ -807,14 +810,14 @@ player-visible contract.
 | Sub-location discovery ownership comes from validated canon | Delivered. |
 | Goals, ending projection, and export are outside Field Diary | Delivered. |
 | Old saves preserve discoveries, inventory, flags, and location | Delivered. |
-| App-startup and canon chunks stay inside unchanged budgets | Delivered at PR #269 boundary. Recheck after Stages 6–7. |
-| Event history is compact, paged, and conservatively groups repeats | Not delivered; Stage 6. |
-| Contextual cards use honest artwork or text-only composition, never a blank placeholder | Not delivered; Stage 7. |
-| Discovery prompts are authored/composed context rather than the universal placeholder | Not delivered; Stage 7. |
-| Sub-location outcome advances beyond its pre-entry description | Not delivered; Stage 7. |
-| `places` fallback art reopens exactly after navigation/reload | Not delivered; Stage 7. |
+| App-startup and canon chunks stay inside unchanged budgets | Passed for the complete artwork batch. Final PR check pending. |
+| Event history is compact, paged, and conservatively groups repeats | Delivered in Stage 6. |
+| Contextual cards use honest artwork or text-only composition, never a blank placeholder | Delivered in Stage 7. |
+| Discovery prompts are authored/composed context rather than the universal placeholder | Delivered in Stage 7. |
+| Sub-location outcome advances beyond its pre-entry description | Delivered in Stage 7. |
+| `places` fallback art persists and reopens | Implemented. Final PR verification pending. |
 | Centralized arrival/discovery/sub-location/woven arbitration | Not delivered; retain as a later Stage 4 refinement unless a concrete collision appears. |
 | Keyboard, reduced-motion, desktop, and phone-landscape coverage remains green | Delivered for PR #269; GitHub must rerun full E2E after Stages 6–7. |
 
-The overhaul is not fully done until the five Stage 6–7 rows above are delivered. Mechanical event
-conversion alone must not be described as completed presentation.
+The agreed diary presentation and content rollout are implemented. Centralized arbitration remains a
+deferred refinement. Final GitHub browser and integration checks are required before merge.
