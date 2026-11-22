@@ -749,6 +749,57 @@ Stage 7 acceptance:
 - An event with no valid art renders a compact text-only card without an empty image region.
 - Coverage reports the baseline and improvement; app/canon budgets remain independently green.
 
+## Stage 8 — guided Examine and a text-only journey index
+
+**Status: implemented on `codex/guided-examine`.** Focused component coverage includes the
+Tower's guided session and return to a newly available room, plus text-only rows and illustrated
+memory detail. Browser coverage is updated for the new flow. Illustrated-memory classification
+remains a future stage.
+
+### Confirmed decisions
+
+- Present one **Examine** action with a magnifying-glass icon directly below the location's NPC
+  list, before the workshop controls and arrival prose. Open the recommended available card directly
+  and reveal the session one card at a time. **Choose another** is optional and shows only the
+  currently available alternatives. The opening screen does not list every card in the location.
+- Keep **Journey events** to one text line per row with title, day, place, and repeat count when
+  applicable. Keep paging and full text in the reopened memory. Render no thumbnails in the index,
+  so opening the diary does not trigger image requests for its rows.
+- Keep existing images in reopened memories until illustrated-memory classification is ready.
+  Future event categories describe what happened. A separate authored flag can determine which
+  memories deserve an illustration. Retain saved artwork references for compatibility.
+
+### Proposed behavior
+
+- Reuse one accessible dialog for the session. After each resolved card, show its outcome and
+  recompute what is available. Reuse existing discovery and entry gates. Keep independently
+  triggered happenings on their current path for this pass.
+- Write each resolved result through the existing event and save flow. Closing or reloading
+  midway should retain resolved cards. Skipped cards should not create diary entries, and
+  finishing the session should not write them again.
+- Keep **Leave examination** available. After the last available outcome, give the player
+  **Finish examining** so they have time to read before the window closes. Return keyboard
+  focus to the Examine control or the next logical control.
+
+### Returning from a sub-location
+
+At Kavik's Tower the player opens **Examine**, chooses to enter **The Lower Courses**, and
+finishes the available cards inside. **Back out** closes the Examine window and returns to the
+tower's location panel. If the reading unlocked **The Stair Shaft**, the panel offers one
+primary continuation, such as **Explore the Stair Shaft**, which opens that card directly.
+There is no second generic Examine step and no list of repeated Examine buttons. If nothing
+new is available, return to the location panel without a continuation. Finishing the Lower
+Courses never moves the player automatically.
+
+### Acceptance checks
+
+- The Tower opens with one recommended card. **Choose another** reveals alternatives on demand.
+- A card resolved midway survives reload without duplicate rewards or entries. A newly unlocked
+  card appears at the right scope. Backing out returns to the parent panel, where the next
+  available card opens directly in one click.
+- Keyboard and touch users can leave at any point and read the final outcome before closing.
+- Journey events load no row images. Opening a saved memory still displays its saved painting.
+
 ## Test strategy and token-efficient workflow
 
 Use the cheapest layer that can prove each rule and keep command output terse.

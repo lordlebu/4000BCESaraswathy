@@ -20,7 +20,7 @@
 // Presentation only. What can happen, where, and what each choice grants are all
 // `content/events.ts`.
 
-import { useCallback, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { type Choice, type GameEvent, choicesFor } from '../content/events';
 import { firstArtSelection, preferredArtSelection, type ArtSelection } from './art';
 import { sceneNames } from './scenes';
@@ -52,7 +52,17 @@ export interface EventCardProps {
   onClose: () => void;
 }
 
-export function EventCard({ event, holds, shelter, pick = 0, met = [], onChoose, onClose }: EventCardProps) {
+export function EventCard(props: EventCardProps) {
+  return (
+    <Modal open label={props.event.title} onClose={props.onClose} veilClassName="diary-veil activity-veil">
+      <EventCardBody {...props} />
+    </Modal>
+  );
+}
+
+export function EventCardBody({
+  event, holds, shelter, pick = 0, met = [], onChoose, onClose, continuation = 'Go on', alternatives, children
+}: EventCardProps & { continuation?: string; alternatives?: ReactNode; children?: ReactNode }) {
   /**
    * The line the chosen option wrote, once one has been taken.
    *
@@ -61,6 +71,10 @@ export function EventCard({ event, holds, shelter, pick = 0, met = [], onChoose,
    * moment some outcome is legitimately empty.
    */
   const [taken, setTaken] = useState<{ line: string } | null>(null);
+  const nextButton = useRef<HTMLButtonElement>(null);
+  useLayoutEffect(() => {
+    if (taken) nextButton.current?.focus();
+  }, [taken]);
 
   // Resolve the painting before creating the choice handler so a card updated in place records
   // the image the player actually saw.
@@ -91,7 +105,6 @@ export function EventCard({ event, holds, shelter, pick = 0, met = [], onChoose,
   const choices = choicesFor(event, holds);
 
   return (
-    <Modal open label={event.title} onClose={onClose} veilClassName="diary-veil activity-veil">
       <section className="activity-card">
         {picture ? (
           <img className="activity-scene" src={picture} alt="" aria-hidden="true" />
@@ -121,8 +134,8 @@ export function EventCard({ event, holds, shelter, pick = 0, met = [], onChoose,
 
           <div className="activity-choices">
             {taken ? (
-              <button type="button" className="activity-choice primary" onClick={onClose}>
-                Go on
+              <button ref={nextButton} type="button" className="activity-choice primary" onClick={onClose}>
+                {continuation}
               </button>
             ) : (
               choices.map((choice) => (
@@ -137,8 +150,9 @@ export function EventCard({ event, holds, shelter, pick = 0, met = [], onChoose,
               ))
             )}
           </div>
+          {!taken && alternatives}
+          {children}
         </div>
       </section>
-    </Modal>
   );
 }

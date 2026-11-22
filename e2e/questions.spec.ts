@@ -116,8 +116,14 @@ test('the player can settle a question, and is never told they were wrong', asyn
   // Resolving every rung of every discovery made this focused assertion exceed CI's three-minute
   // budget on one duplicate run. Exercise exactly the evidence path the reading declares.
   await listenToSomebody(page);
-  const silverWater = page.locator('.look').filter({ hasText: 'When the Channel Runs Silver' });
-  await silverWater.getByRole('button', { name: 'Examine', exact: true }).click();
+  await page.locator('.place').getByRole('button', { name: 'Examine', exact: true }).click();
+  const examination = page.getByRole('dialog', { name: 'Examine location' });
+  const heading = examination.getByRole('heading', { level: 2 });
+  await expect(heading).toBeVisible();
+  if (await heading.textContent() !== 'When the Channel Runs Silver') {
+    await examination.getByRole('button', { name: 'Choose another' }).click();
+    await examination.getByRole('button', { name: 'When the Channel Runs Silver' }).click();
+  }
   await resolveOpenEvent(page);
   await page.getByRole('button', { name: 'Leave' }).click();
   await openDiary(page);

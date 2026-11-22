@@ -8,12 +8,11 @@
 // what is further in. People came second until play showed a player walking in could not tell who
 // was there -- the map draws nobody at a place, so this panel is the only place they are.
 
-import { useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import {
   type Progress,
   blockedBy,
   blockedFrom,
-  canEnter,
   entryFor,
   isComplete,
   rungOf
@@ -26,7 +25,10 @@ import { placeArt } from './places';
 import { StationBoard } from './StationBoard';
 import { stationsAt, stationsMissing, type Station } from '../content/stations';
 import { discoveryEvent, subLocationEvent } from '../content/contextEvents';
-import type { GameEvent } from '../content/events';
+import type { Choice, GameEvent } from '../content/events';
+import type { ArtSelection } from './art';
+
+const ExamineWindow = lazy(() => import('./ExamineWindow'));
 
 /** The face beside a name in the list of who is here. Small: this is an index, not a meeting. */
 const FACE_SIZE = 44;
@@ -73,8 +75,9 @@ export interface PlacePanelProps {
   // is there: canon prices two lines, and without it the panel asked what somebody says to a
   // traveller carrying nothing, which made two gift lines invisible.
   onLook: (discoveryId: string) => void;
-  /** Open a contextual event; its callback runs only after the player resolves it. */
-  onEvent?: (event: GameEvent, afterChoice: () => void) => void;
+  onResolveEvent?: (event: GameEvent, choice: Choice, art: ArtSelection | null) => void;
+  hasSeenEvent?: (id: string) => boolean;
+  onExamineOpen?: (open: boolean) => void;
   /** Listen to somebody. They take the dock; this panel comes back when they are done. */
   onTalkTo: (npcId: string) => void;
   /**
@@ -95,12 +98,26 @@ export function PlacePanel({
   firstVisit,
   updatedDiscoveries = [],
   onLook,
-  onEvent = (_event, afterChoice) => afterChoice(),
+  onResolveEvent,
+  hasSeenEvent,
+  onExamineOpen,
   onTalkTo,
   onOpenStation,
   onClose
 }: PlacePanelProps) {
   const [openSub, setOpenSub] = useState<string | null>(null);
+  const [card, setCard] = useState<GameEvent | null>(null);
+  const [backedOut, setBackedOut] = useState(false);
+  const [entered, setEntered] = useState<string[]>([]);
+  const [roomsBeforeEntry, setRoomsBeforeEntry] = useState<string[]>([]);
+  const examineButton = useRef<HTMLButtonElement>(null);
+  const leaveButton = useRef<HTMLButtonElement>(null);
+  const examining = card !== null;
+  useEffect(() => {
+    if (!examining) return;
+    onExamineOpen?.(true);
+    return () => onExamineOpen?.(false);
+  }, [examining, onExamineOpen]);
   const place = poiId ? poi(poiId) : null;
   if (!place) return null;
 
@@ -111,6 +128,50 @@ export function PlacePanel({
   const sub = openSub ? place.subLocations.find((s) => s.id === openSub) : null;
   const nestedDiscoveries = new Set(place.subLocations.flatMap((s) => s.discoveries));
   const discoveriesHere = sub ? sub.discoveries : offered.filter((id) => !nestedDiscoveries.has(id));
+  const wasEntered = (event: GameEvent) => entered.includes(event.id) || Boolean(hasSeenEvent?.(event.id));
+  const cards: GameEvent[] = [];
+  const blocked: string[] = [];
+  for (const id of discoveriesHere) {
+    const event = discoveryEvent(progress, id, place.id);
+    if (event) cards.push(event);
+    else if (!isComplete(progress, id)) {
+      const reason = why(progress, id);
+      if (reason) blocked.push(`${discovery(id)?.name ?? id}: ${reason}`);
+    }
+  }
+  if (!sub) {
+    for (const room of place.subLocations) {
+      const event = subLocationEvent(progress, place.id, room);
+      if (event) {
+        if (!wasEntered(event) || room.discoveries.some(id => discoveryEvent(progress, id, place.id))) {
+          cards.push(event);
+        }
+      } else {
+        const [missing] = blockedFrom(progress, place.id, room.id);
+        if (missing) blocked.push(`${room.name}: ${missing.startsWith('word_')
+          ? 'You would need a word you do not have.'
+          : `Not until you understand ${discovery(missing)?.name ?? 'more than you do'}.`}`);
+      }
+    }
+  }
+  // The arrival card is already resolved while its outcome is still on screen.
+  const next = cards.find(candidate => candidate.id !== card?.id);
+  const unlockedRoom = backedOut && !sub
+    ? cards.find(candidate => candidate.origin === 'sub-location' && !roomsBeforeEntry.includes(candidate.id))
+    : null;
+  const recommended = unlockedRoom || cards[0];
+  const updated = discoveriesHere.find(id => updatedDiscoveries.includes(id) && rungOf(progress, id) >= 0);
+
+  function close() {
+    setCard(null);
+    requestAnimationFrame(() => (examineButton.current ?? leaveButton.current)?.focus());
+  }
+
+  function backOut() {
+    setOpenSub(null);
+    setBackedOut(true);
+    close();
+  }
 
   // **No veil.** This used to draw its own full-screen wrapper and position itself above the field
   // notes, so the two divided the bottom of the screen and each got half of a half. It is an
@@ -134,7 +195,7 @@ export function PlacePanel({
             <h2>{place.name}</h2>
             <p className="place-kind">{place.kind.replace(/_/g, ' ')}</p>
           </div>
-          <button type="button" className="diary-close" onClick={onClose}>
+          <button type="button" ref={leaveButton} className="diary-close" onClick={onClose}>
             Leave
           </button>
         </header>
@@ -168,6 +229,35 @@ export function PlacePanel({
             {away && <p className="who-away">{away}</p>}
           </section>
         )}
+
+        <section className="place-section contextual-events" aria-label="Examination">
+          {recommended && (
+            <button type="button" className="examine-trigger" ref={examineButton} onClick={() => setCard(recommended)}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" aria-hidden="true" focusable="false">
+                <circle cx="10.5" cy="10.5" r="5.5" />
+                <path d="m14.5 14.5 5 5" />
+              </svg>
+              {backedOut
+                ? recommended.origin === 'sub-location'
+                  ? `Explore ${recommended.title.replace(/^The /, 'the ')}`
+                  : `Continue: ${recommended.title}`
+                : 'Examine'}
+            </button>
+          )}
+          {!recommended && blocked.length > 0 && (
+            <details>
+              <summary>What is blocked?</summary>
+              <ul>{blocked.map(reason => <li key={reason}>{reason}</li>)}</ul>
+            </details>
+          )}
+          {updated && <div className="look discovery-updated">
+            <div className="look-text">
+              <h4>{discovery(updated)?.name}</h4>
+              <p>{entryFor(progress, updated)}</p>
+            </div>
+          </div>}
+        </section>
 
         {/* What this place can work, before the prose rather than after it: a player who has
             walked in to use a bench should not have to read a paragraph to find out there is one.
@@ -218,85 +308,41 @@ export function PlacePanel({
             first time. Afterwards the shorter line is the honest thing to show. */}
         <p className="place-arrival">{firstVisit ? place.arrival : place.description}</p>
 
-        {sub ? (
-          <div className="sub">
-            <h3>{sub.name}</h3>
-            <p>{sub.description}</p>
-            {discoveriesHere.map((id) => {
-              const d = discovery(id);
-              if (!d) return null;
-              const event = discoveryEvent(progress, id, place.id);
-              const done = isComplete(progress, id);
-              return <div key={id} className={updatedDiscoveries.includes(id) ? 'look discovery-updated' : 'look'}>
-                <div className="look-text">
-                  <h4>{d.name}</h4>
-                  {rungOf(progress, id) >= 0 && <p>{entryFor(progress, id)}</p>}
-                  {!done && !event && <p className="muted">{why(progress, id)}</p>}
-                </div>
-                <button type="button" disabled={!event} onClick={() => event && onEvent(event, () => onLook(id))}>
-                  {done ? 'Understood' : 'Examine'}
-                </button>
-              </div>;
-            })}
-            <button type="button" className="ghost" onClick={() => setOpenSub(null)}>
-              Back out
-            </button>
-          </div>
-        ) : (
-          <>
-            {discoveriesHere.length > 0 && (
-              <section className="place-section contextual-events">
-                {discoveriesHere.map((id) => {
-                  const d = discovery(id);
-                  if (!d) return null;
-                  const seen = rungOf(progress, id) >= 0;
-                  const done = isComplete(progress, id);
-                  const event = discoveryEvent(progress, id, place.id);
-                  return (
-                    <div key={id} className={updatedDiscoveries.includes(id) ? "look discovery-updated" : "look"}>
-                      <div className="look-text">
-                        <h4>{d.name}</h4>
-                        {seen && <p>{entryFor(progress, id)}</p>}
-                        {!done && !event && seen && <p className="muted">{why(progress, id)}</p>}
-                      </div>
-                      <button type="button" onClick={() => event && onEvent(event, () => onLook(id))} disabled={!event}>
-                        {done ? 'Understood' : 'Examine'}
-                      </button>
-                    </div>
-                  );
-                })}
-              </section>
-            )}
+        {sub && <div className="sub">
+          <h3>{sub.name}</h3>
+          <p>{sub.description}</p>
+          <button type="button" className="ghost" onClick={backOut}>Back out</button>
+        </div>}
 
-            {place.subLocations.length > 0 && (
-              <section className="place-section contextual-events">
-                {place.subLocations.map((s) => {
-                  const may = canEnter(progress, place.id, s.id);
-                  const missing = blockedFrom(progress, place.id, s.id);
-                  const event = subLocationEvent(progress, place.id, s);
-                  return (
-                    <div key={s.id} className="look">
-                      <div className="look-text">
-                        <h4>{s.name}</h4>
-                        {!may && (
-                          <p className="muted">
-                            {missing.some((m) => m.startsWith('word_'))
-                              ? 'You would need a word you do not have.'
-                              : `Not until you understand ${
-                                  discovery(missing[0] ?? '')?.name ?? 'more than you do'
-                                }.`}
-                          </p>
-                        )}
-                      </div>
-                      <button type="button" onClick={() => event && onEvent(event, () => setOpenSub(s.id))} disabled={!may}>
-                        {may ? `Enter ${s.name.replace(/^The /, 'the ')}` : 'Closed to you'}
-                      </button>
-                    </div>
-                  );
-                })}
-              </section>
-            )}
-          </>
+        {card && (
+          <Suspense fallback={<p role="status">Opening examination…</p>}>
+            <ExamineWindow
+              event={card}
+              holds={[...progress.words, ...Object.keys(progress.rungs), ...progress.recipes]}
+              next={Boolean(next)}
+              alternatives={cards.filter(candidate => candidate.id !== card.id)}
+              blocked={blocked}
+              onSelect={id => {
+                const candidate = cards.find(item => item.id === id);
+                if (candidate) setCard(candidate);
+              }}
+              onChoose={(choice, art) => {
+                if (!wasEntered(card)) onResolveEvent?.(card, choice, art);
+                if (card.origin === 'discovery' && card.subjectId) onLook(card.subjectId);
+                if (card.origin === 'sub-location' && card.subjectId) {
+                  setRoomsBeforeEntry(place.subLocations.flatMap(room => {
+                    const available = subLocationEvent(progress, place.id, room);
+                    return available ? [available.id] : [];
+                  }));
+                  setEntered(ids => ids.includes(card.id) ? ids : [...ids, card.id]);
+                  setOpenSub(card.subjectId);
+                }
+              }}
+              onContinue={() => next ? setCard(next) : close()}
+              onClose={close}
+              onBackOut={sub ? backOut : undefined}
+            />
+          </Suspense>
         )}
     </section>
   );

@@ -23,6 +23,7 @@ import { tileHash } from '../world/rng';
 import type { World } from '../world/types';
 import type { SurfaceAction } from './surface';
 import type { EventCardProps } from './EventCard';
+import type { ArtSelection } from './art';
 import type { Happens } from './useRoadTalk';
 import { occurrenceId, type DiaryEventEntry } from '../content/diaryEvents';
 
@@ -60,6 +61,7 @@ export function useHappenings({
   setSatchel,
   setDiaryEvents,
   setMemory,
+  examining = false,
   blocked = false
 }: {
   latest: MutableRefObject<Latest>;
@@ -90,11 +92,11 @@ export function useHappenings({
   setDiaryEvents: Dispatch<SetStateAction<DiaryEventEntry[]>>;
   setMemory: (line: string) => void;
   blocked?: boolean;
+  examining?: boolean;
 }) {
   const [happening, setHappening] = useState<{
     event: GameEvent;
     shelter: string | null;
-    afterChoice?: (choice: Choice) => void;
   } | null>(null);
   const blockedRef=useRef(blocked);blockedRef.current=blocked;
   const pendingBeedu=useRef<string|null>(null);
@@ -119,9 +121,9 @@ export function useHappenings({
     return()=>{window.clearInterval(timer);EventBus.offEvent('beedu-sighted',sight);EventBus.offEvent('beedu-nearby',nearby);};
   },[]);
   useEffect(() => {
-    cardOpenRef.current = happening !== null;
-    setCardOpen(happening !== null);
-  }, [happening, cardOpenRef, setCardOpen]);
+    cardOpenRef.current = happening !== null || examining;
+    setCardOpen(cardOpenRef.current);
+  }, [happening, examining, cardOpenRef, setCardOpen]);
 
   /** `maybeHappens`, once the bus effect has made it. Null for the first render only. */
   const happens = useRef<Happens | null>(null);
@@ -432,6 +434,63 @@ export function useHappenings({
     // Registered once, like the rest of the bus: every handler reads the refs, never the closure.
   }, []);
 
+  function resolveEvent(event: GameEvent, choice: Choice, art: ArtSelection | null) {
+    if (event.once && (event.origin === 'discovery' || event.origin === 'sub-location') &&
+        seenEvents.current.includes(event.id)) return;
+    // Through the same door a conversation uses. An event grants the same kinds of thing a
+    // person does, so it must not grow a second way to change a Progress.
+    if (choice.grants.length > 0) setProgress((p) => receiveAll(p, choice.grants));
+    // Something found or given goes in the satchel, and something eased goes to the scene
+    // through the door a remedy already uses -- see `Choice.gives` and `Choice.eases`.
+    // And what a story beat asked to be handed over leaves the satchel: rice to Guyuk, the
+    // seeds to the Atelier. The beat only came because it was all carried.
+    if (choice.takes && choice.takes.length > 0) {
+      const taken = choice.takes;
+      setSatchel((s) => taken.reduce((held, t) => takeFromSatchel(held, t.id, t.n), s));
+    }
+    if (choice.gives && choice.gives.length > 0) {
+      const given = choice.gives;
+      setSatchel((s) => given.reduce((held, g) => addToSatchel(held, g.id, g.n), s));
+    }
+    if (choice.eases && choice.eases > 0) EventBus.emitEvent('ease', { by: choice.eases });
+    // What this choice leaves behind, for a later event to find.
+    for (const flag of choice.sets ?? []) {
+      if (!journeyFlags.current.includes(flag)) journeyFlags.current = [...journeyFlags.current, flag];
+    }
+    EventBus.emitEvent('twin-knowledge', {completed:Object.keys(latest.current.progress.rungs).filter(id=>isComplete(latest.current.progress,id)), flags:journeyFlags.current});
+    // Whoever this was about, you have met now.
+    const stranger = event.stranger;
+    if (stranger && !metStrangers.current.includes(stranger.id)) {
+      metStrangers.current = [...metStrangers.current, stranger.id];
+    }
+    // Noted rather than announced, like every other outcome in this game: the progression
+    // is a written journal and a thing that happened to you is a line in it.
+    setMemory(choice.line);
+    setDiaryEvents((entries) => [
+      ...entries,
+      {
+        id: occurrenceId(event.id, entries),
+        eventId: event.id,
+        origin: event.origin ?? (event.id.startsWith('happening_') ? 'happening' : 'woven'),
+        ...(event.subjectId ? { subjectId: event.subjectId } : {}),
+        title: event.title,
+        prose: event.prose,
+        choiceId: choice.id,
+        choiceLabel: choice.label,
+        outcome: choice.line,
+        day: latest.current.day,
+        fieldMapId: latest.current.fieldMapId,
+        ...(latest.current.poiId ? { poiId: latest.current.poiId } : {}),
+        art: art && (art.folder === 'events' || art.folder === 'scenes' || art.folder === 'places')
+          ? { collection: art.folder, key: art.key, take: art.take }
+          : null
+      }
+    ]);
+    if (event.once && !seenEvents.current.includes(event.id)) {
+      seenEvents.current = [...seenEvents.current, event.id];
+    }
+  }
+
   /** The event card's props, or null while nothing is open. */
   const card: EventCardProps | null = happening
     ? {
@@ -439,75 +498,10 @@ export function useHappenings({
         shelter: happening.shelter,
         met: metStrangers.current,
         holds: [...progress.words, ...Object.keys(progress.rungs), ...progress.recipes],
-        onChoose: (choice: Choice, art) => {
-          // Through the same door a conversation uses. An event grants the same kinds of thing a
-          // person does, so it must not grow a second way to change a Progress.
-          if (choice.grants.length > 0) setProgress((p) => receiveAll(p, choice.grants));
-          // Something found or given goes in the satchel, and something eased goes to the scene
-          // through the door a remedy already uses -- see `Choice.gives` and `Choice.eases`.
-          // And what a story beat asked to be handed over leaves the satchel: rice to Guyuk, the
-          // seeds to the Atelier. The beat only came because it was all carried.
-          if (choice.takes && choice.takes.length > 0) {
-            const taken = choice.takes;
-            setSatchel((s) => taken.reduce((held, t) => takeFromSatchel(held, t.id, t.n), s));
-          }
-          if (choice.gives && choice.gives.length > 0) {
-            const given = choice.gives;
-            setSatchel((s) => given.reduce((held, g) => addToSatchel(held, g.id, g.n), s));
-          }
-          if (choice.eases && choice.eases > 0) EventBus.emitEvent('ease', { by: choice.eases });
-          // What this choice leaves behind, for a later event to find.
-          for (const flag of choice.sets ?? []) {
-            if (!journeyFlags.current.includes(flag)) journeyFlags.current = [...journeyFlags.current, flag];
-          }
-          EventBus.emitEvent('twin-knowledge', {completed:Object.keys(latest.current.progress.rungs).filter(id=>isComplete(latest.current.progress,id)), flags:journeyFlags.current});
-          // Whoever this was about, you have met now.
-          const stranger = happening.event.stranger;
-          if (stranger && !metStrangers.current.includes(stranger.id)) {
-            metStrangers.current = [...metStrangers.current, stranger.id];
-          }
-          // Noted rather than announced, like every other outcome in this game: the progression
-          // is a written journal and a thing that happened to you is a line in it.
-          setMemory(choice.line);
-          const event = happening.event;
-          setDiaryEvents((entries) => [
-            ...entries,
-            {
-              id: occurrenceId(event.id, entries),
-              eventId: event.id,
-              origin: event.origin ?? (event.id.startsWith('happening_') ? 'happening' : 'woven'),
-              ...(event.subjectId ? { subjectId: event.subjectId } : {}),
-              title: event.title,
-              prose: event.prose,
-              choiceId: choice.id,
-              choiceLabel: choice.label,
-              outcome: choice.line,
-              day: latest.current.day,
-              fieldMapId: latest.current.fieldMapId,
-              ...(latest.current.poiId ? { poiId: latest.current.poiId } : {}),
-              art: art && (art.folder === 'events' || art.folder === 'scenes' || art.folder === 'places')
-                ? { collection: art.folder, key: art.key, take: art.take }
-                : null
-            }
-          ]);
-          if (event.once && !seenEvents.current.includes(event.id)) {
-            seenEvents.current = [...seenEvents.current, event.id];
-          }
-          happening.afterChoice?.(choice);
-        },
+        onChoose: (choice, art) => resolveEvent(happening.event, choice, art),
         onClose: () => setHappening(null)
       }
     : null;
 
-  const openEvent = (event: GameEvent, afterChoice?: (choice: Choice) => void) => {
-    if (event.once && seenEvents.current.includes(event.id)) {
-      const choice = event.choices[0];
-      if (choice) afterChoice?.(choice);
-      return;
-    }
-    cardOpenRef.current = true;
-    setHappening({ event, shelter: null, afterChoice });
-  };
-
-  return { happening, setHappening, openEvent, happens, storyRef, beeduNearby, card };
+  return { happening, setHappening, resolveEvent, happens, storyRef, beeduNearby, card };
 }
