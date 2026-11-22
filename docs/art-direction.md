@@ -2,6 +2,20 @@
 
 > **Mixed-art owner rule (18 November):** Inspect the element and approved references; ask if uncertain, and show new/replacement samples for selection before applying them, including code-native art. Preserve accepted exceptions. Current choices: JRPG rail bridge with proper shadow; lower road bridge retained; object shrubs/old grass; covered clay lamps. [Current delivery ledger](twin-walkway-phase.md).
 
+> **Diary event artwork:** The Lower Courses, Stair Shaft, Flooded Undercroft and How the Tower Sat Down have dedicated 512×384 watercolors. The discovery plate shows buried wall sections and openings as evidence of the collapse. [Artwork rollout and delivery status](diary-event-overhaul-plan.md#73-coverage-inventory-and-rollout).
+
+Use **The Lower Courses** as the visual reference for environment-led event cards. Let the
+architecture, terrain, and visible evidence carry the foreground. In inhabited settings,
+use at most a few small background figures where their activity helps establish the place.
+Reserve foreground figures for events explicitly about a person. Match the local South of
+Tethys culture and established portraits for appearance, clothing, hair, and material culture.
+Use the local biome and canon flora, with varied silhouettes, scale, and spacing.
+Paint new event cards in the original cozy narrative watercolor and loose fine ink, with
+broad depth planes and enough detail to read the discovery at card size. Use approved game
+paintings as style references and keep lettering, signs, and invented script out of the image.
+Keep figures realistically proportioned and use the relevant in-game portrait for appearance
+and clothing. Preserve the existing branch paintings for the owner's full review.
+
 > **Cave/roads follow-up:** Yamantaka doubles in map scale; cave/cooker proportions, Maru cook reuse, sparse highland trees and masonry roads follow the simple NES direction. Cave-specific watercolor meal/sleep scenes show the traveller with both residents every night. [Exact delivery and prompts](twin-cave-roads-phase.md).
 
 > **Approved terrain - 18 November 2026:** Muted sage is the selected cave/highland palette. Use sparse broad turf/stone patterns, stepped height/riverbank shading and soft earthy desert/grass seams, baked once into the existing ground layer. Lichen/olive are review alternatives only. [Decision, implementation and verification](twin-terrain-softening.md).

@@ -194,6 +194,7 @@ test('an instance is a place you go into, and it says why when you cannot', asyn
   // The open one is a place you can stand in, and come back out of.
   await deeper.getByRole('button', { name: /Enter the lower courses/i }).click();
   const card = page.locator('.activity-card').last();
+  await expect(card.locator('img.activity-scene')).toHaveAttribute('src', /poi_kavik_tower-lower_courses/);
   await card.getByRole('button', { name: 'Go in' }).click();
   await card.getByRole('button', { name: 'Go on' }).click();
   await expect(place.locator('.sub h3')).toBeVisible();
@@ -203,6 +204,31 @@ test('an instance is a place you go into, and it says why when you cannot', asyn
   await page.getByRole('button', { name: 'Back out' }).click();
   await expect(place.locator('.sub')).toBeHidden();
   await expect(deeper.locator('.look')).toHaveCount(3);
+
+  await page.getByRole('button', { name: 'Leave' }).click();
+  await expect.poll(() => page.evaluate(() => {
+    const keys = ['poi_kavik_tower-lower_courses', 'discovery_tower_collapse'];
+    return Object.keys(localStorage).filter(key => key.startsWith('south-of-tethys:')).some(key => {
+      const saved = JSON.parse(localStorage.getItem(key) ?? '{}');
+      return keys.every(artKey => saved.diaryEvents?.some(
+        (entry: { art?: { collection: string; key: string } }) =>
+          entry.art?.collection === 'events' && entry.art.key === artKey
+      ));
+    });
+  })).toBe(true);
+  await page.reload();
+  await openRecords(page);
+  for (const [title, key] of [
+    ['The Lower Courses', 'poi_kavik_tower-lower_courses'],
+    ['How the Tower Sat Down', 'discovery_tower_collapse']
+  ] as const) {
+    const row = page.getByRole('button', { name: new RegExp(`View ${title}`, 'i') });
+    await expect(row.locator('img')).toHaveAttribute('src', new RegExp(key));
+    await row.click();
+    const memory = page.getByRole('dialog', { name: title });
+    await expect(memory.locator('img.activity-scene')).toHaveAttribute('src', new RegExp(key));
+    await memory.getByRole('button', { name: 'Back to diary' }).click();
+  }
 });
 
 test('the overworld joins the two field maps, from where the cart leaves', async ({ page }) => {

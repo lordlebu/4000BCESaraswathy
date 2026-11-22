@@ -250,6 +250,8 @@ def view(kind):
 for key, kind in [('poi_dune_windbreak','dune'),('poi_reedwright_bank','reed'),('poi_nesting_cove','nest')]:
     illustration('places', key, view(kind), (512,384))
 for key, kind in [('windbreak','dune'),('seam','reed'),('tide_room','nest'),('reed_return','reed'),('bird_return','nest'),('courtyard_return','dune')]:
+    if (ROOT / 'src/ui/events' / ('happening_valley_' + key + '-painted.png')).exists():
+        continue
     im = view(kind)
     if key == 'courtyard_return':
         d = ImageDraw.Draw(im); box(d, (0, 49, 255, 191), 'mud')
@@ -257,4 +259,4 @@ for key, kind in [('windbreak','dune'),('seam','reed'),('tide_room','nest'),('re
         im.alpha_composite(props[3], (113, 52)); im.alpha_composite(props[5], (122, 105))
     illustration('events', 'happening_valley_' + key, im, (512,384))
 kept_path.write_text(json.dumps(kept,ensure_ascii=False,indent=2)+'\n')
-print('Built two portraits, three place views and six event plates for the expansion.')
+print('Built two portraits, three place views, and any event plates without painted editions.')

@@ -217,6 +217,8 @@ for route in ('journey-aravali-twins','journey-lothal-twins'):
     im.alpha_composite(objects[0],(10,12));im.alpha_composite(objects[4],(94,46));im.alpha_composite(trams[0],(27,50));
     illustration('events',route,im,(512,384))
 for n,event in enumerate(h for h in places['happenings'] if h['id'].startswith('happening_twin_')):
+    if (ROOT / 'src/ui/events' / (event['id'] + '-painted.png')).exists():
+        continue
     im=canvas(128,96);d=ImageDraw.Draw(im);rect(d,(0,0,127,95),'sand');rect(d,(0,0,127,23),'cream')
     if any(k in event['id'] for k in ('bank','cove','drain')):rect(d,(61,24,84,95),'water')
     im.alpha_composite(objects[n%8],(12,30));im.alpha_composite(objects[10+n%3],(88,20))
@@ -225,4 +227,4 @@ for n,event in enumerate(h for h in places['happenings'] if h['id'].startswith('
       rect(d,(53,53,61,61),'mud');rect(d,(51,62,63,82),'green');rect(d,(52,82,55,93),'ink');rect(d,(59,82,62,93),'ink')
     illustration('events',event['id'],im,(512,384))
 kept_path.write_text(json.dumps(kept,ensure_ascii=False,indent=2)+'\n')
-print('Built 8 portraits, 12 place views, and 12 event illustrations; retained in the art manifest.')
+print('Built portraits, place views, and event illustrations without painted editions.')
