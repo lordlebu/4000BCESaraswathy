@@ -11,5 +11,5 @@ export async function resolveOpenEvent(page: Page): Promise<void> {
   const card = page.locator('.activity-card').last();
   await expect(card).toBeVisible();
   await card.locator('.activity-choice').first().click();
-  await card.getByRole('button', { name: 'Go on' }).click();
+  await card.getByRole('button', { name: 'Leave examination' }).click();
 }

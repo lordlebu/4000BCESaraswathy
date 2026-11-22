@@ -445,8 +445,10 @@ export function App() {
 
   // Things that happen: the card, asking whether anything happens on a night, an arrival, the road
   // or at a camp, story beats first, and what a choice does -- `useHappenings.ts`.
-  const { happening, setHappening, openEvent, happens, storyRef, card: eventCard } = useHappenings({
+  const [examining, setExamining] = useState(false);
+  const { happening, setHappening, resolveEvent, happens, storyRef, card: eventCard } = useHappenings({
     latest,
+    examining,
     blocked:Boolean(atTheDoor||titleUp||opening||arrivalPage||firstCard||talkingTo||placeOpen||(surface!==null&&surface!=='here')||Object.values(interrupts).some(Boolean)),
     seenEvents,
     eventDays,
@@ -558,6 +560,7 @@ export function App() {
 
   // Persist on a timer rather than on every step: walking writes to localStorage 4-5 times a
   // second otherwise, and the journey is not worth a synchronous write that often.
+  const savedDiaryEvents = useRef(diaryEvents);
   useEffect(() => {
     const flush = () =>
       saveJourney(seed, {
@@ -584,6 +587,10 @@ export function App() {
         flags: journeyFlags.current,
         pinned: pinned ?? undefined
       });
+    if (savedDiaryEvents.current !== diaryEvents) {
+      savedDiaryEvents.current = diaryEvents;
+      flush();
+    }
     const timer = window.setInterval(flush, 3000);
     window.addEventListener('pagehide', flush);
     return () => {
@@ -2004,7 +2011,9 @@ export function App() {
           firstVisit: Boolean(standingOn) && !visited.current.has(standingOn!),
           updatedDiscoveries: discoveriesFeedback.pending.map(change => change.id),
           onLook: look,
-          onEvent: (event, afterChoice) => openEvent(event, afterChoice),
+          onResolveEvent: resolveEvent,
+          hasSeenEvent: (id) => seenEvents.current.includes(id),
+          onExamineOpen: setExamining,
           onTalkTo: (npcId: string) => dispatch({ type: 'talk-to', npcId }),
           /**
            * Walk up to a bench and open the workshop at it.

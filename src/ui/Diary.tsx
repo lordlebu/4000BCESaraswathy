@@ -264,16 +264,14 @@ export function Diary({
             {shownEventRows.map((row) => {
               const entry = row.latest;
               const place = entry.poiId ? poi(entry.poiId) : null;
-              const picture = memoryPicture(entry.art);
+              const where = place?.name ?? fieldMap(entry.fieldMapId)?.name ?? entry.fieldMapId;
+              const repeat = row.entries.length > 1 ? ` · ${row.entries.length} entries` : '';
               return (
                 <article key={row.id} className="diary-event-entry">
                   <button type="button" className="diary-event-open" onClick={() => setEventMemory(row)}
-                    aria-label={`View ${entry.title}, Day ${entry.day + 1}, ${place?.name ?? fieldMap(entry.fieldMapId)?.name ?? entry.fieldMapId}`}>
-                    {picture && <img className="diary-event-thumb" src={picture} alt="" aria-hidden="true" />}
-                    <span className="diary-event-copy">
-                      <span className="diary-event-head"><strong>{entry.title}</strong><span>Day {entry.day + 1}{row.entries.length > 1 ? ` · ${row.entries.length} entries` : ''}</span></span>
-                      <span className="muted">{place?.name ?? fieldMap(entry.fieldMapId)?.name ?? entry.fieldMapId}</span>
-                      <span className="diary-event-outcome">{entry.outcome}</span>
+                    aria-label={`View ${entry.title}, Day ${entry.day + 1}, ${where}${repeat}`}>
+                    <span className="diary-event-line">
+                      <strong>{entry.title}</strong><span className="muted"> · Day {entry.day + 1} · {where}{repeat}</span>
                     </span>
                   </button>
                 </article>

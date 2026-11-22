@@ -184,26 +184,25 @@ test('an instance is a place you go into, and it says why when you cannot', asyn
   await expect(place).toBeVisible({ timeout: 20_000 });
   await expect(place.locator('h2')).toHaveText(/Kavik/i);
 
-  // Three ways further in, two of them shut until the work is done. A closed one explains
-  // itself rather than showing a padlock -- that is the rule the whole panel is built on.
-  const deeper = place.locator('.contextual-events').last();
-  await expect(deeper.locator('.look')).toHaveCount(3);
-  await expect(deeper.getByRole('button', { name: 'Closed to you' })).toHaveCount(2);
-  await expect(deeper).toContainText(/Not until you understand/);
-
-  // The open one is a place you can stand in, and come back out of.
-  await deeper.getByRole('button', { name: /Enter the lower courses/i }).click();
-  const card = page.locator('.activity-card').last();
+  const examine = place.getByRole('button', { name: 'Examine', exact: true });
+  await expect(examine).toHaveCount(1);
+  await examine.click();
+  const session = page.getByRole('dialog', { name: 'Examine location' });
+  const card = session.locator('.activity-card');
+  const alternatives = session.getByRole('button', { name: /Choose another|What is blocked/ });
+  await alternatives.click();
+  await expect(session).toContainText(/Not until you understand/);
+  const lower = session.getByRole('button', { name: 'The Lower Courses', exact: true });
+  if (await lower.isVisible()) await lower.click();
   await expect(card.locator('img.activity-scene')).toHaveAttribute('src', /poi_kavik_tower-lower_courses/);
   await card.getByRole('button', { name: 'Go in' }).click();
-  await card.getByRole('button', { name: 'Go on' }).click();
-  await expect(place.locator('.sub h3')).toBeVisible();
-  await expect(place).toContainText('How the Tower Sat Down');
-  await examineFirst(page);
-  await expect(place.locator('.look.discovery-updated')).toContainText('How the Tower Sat Down');
-  await page.getByRole('button', { name: 'Back out' }).click();
+  await card.getByRole('button', { name: 'Next card' }).click();
+  await expect(session).toContainText('How the Tower Sat Down');
+  await card.getByRole('button', { name: 'Examine', exact: true }).click();
+  await session.getByRole('button', { name: 'Back out' }).click();
+  await expect(session).toBeHidden();
   await expect(place.locator('.sub')).toBeHidden();
-  await expect(deeper.locator('.look')).toHaveCount(3);
+  await expect(place.getByRole('button', { name: /^(Explore|Continue:)/ })).toBeVisible();
 
   await page.getByRole('button', { name: 'Leave' }).click();
   await expect.poll(() => page.evaluate(() => {
@@ -223,7 +222,7 @@ test('an instance is a place you go into, and it says why when you cannot', asyn
     ['How the Tower Sat Down', 'discovery_tower_collapse']
   ] as const) {
     const row = page.getByRole('button', { name: new RegExp(`View ${title}`, 'i') });
-    await expect(row.locator('img')).toHaveAttribute('src', new RegExp(key));
+    await expect(row.locator('img')).toHaveCount(0);
     await row.click();
     const memory = page.getByRole('dialog', { name: title });
     await expect(memory.locator('img.activity-scene')).toHaveAttribute('src', new RegExp(key));

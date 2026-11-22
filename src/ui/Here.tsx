@@ -181,7 +181,7 @@ export function Here({
         {conversation ? (
           <Conversation {...conversation} />
         ) : reading ? (
-          <PlacePanel {...place} />
+          <PlacePanel key={place.poiId} {...place} />
         ) : (
           <JournalPanel {...notes}>{canon}</JournalPanel>
         )}
