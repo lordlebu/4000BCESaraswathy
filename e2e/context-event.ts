@@ -8,7 +8,7 @@ export async function examineFirst(page: Page): Promise<void> {
 
 /** Choose the first response and close an event card that is already open. */
 export async function resolveOpenEvent(page: Page): Promise<void> {
-  const card = page.locator('.activity-card').last();
+  const card = page.getByRole('dialog', { name: 'Examine location' });
   await expect(card).toBeVisible();
   await card.locator('.activity-choice').first().click();
   await card.getByRole('button', { name: 'Leave examination' }).click();

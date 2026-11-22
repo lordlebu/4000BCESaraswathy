@@ -756,6 +756,12 @@ Tower's guided session and return to a newly available room, plus text-only rows
 memory detail. Browser coverage is updated for the new flow. Illustrated-memory classification
 remains a future stage.
 
+PR #272 passed CI, but [the merge run on main](https://github.com/lordlebu/4000BCESaraswathy/actions/runs/45044235642)
+failed two notebook browser cases. The captured page showed “Opening examination…” after the
+click, so Examine now loads with its location panel. On retry the desktop geometry case spent
+its overall budget before reopening Records after reload. Reload persistence is checked in a
+separate case, with the original test and assertion timeout settings.
+
 ### Confirmed decisions
 
 - Present one **Examine** action with a magnifying-glass icon directly below the location's NPC

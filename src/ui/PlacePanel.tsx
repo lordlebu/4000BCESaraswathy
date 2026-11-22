@@ -8,7 +8,7 @@
 // what is further in. People came second until play showed a player walking in could not tell who
 // was there -- the map draws nobody at a place, so this panel is the only place they are.
 
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   type Progress,
   blockedBy,
@@ -28,7 +28,7 @@ import { discoveryEvent, subLocationEvent } from '../content/contextEvents';
 import type { Choice, GameEvent } from '../content/events';
 import type { ArtSelection } from './art';
 
-const ExamineWindow = lazy(() => import('./ExamineWindow'));
+import ExamineWindow from './ExamineWindow';
 
 /** The face beside a name in the list of who is here. Small: this is an index, not a meeting. */
 const FACE_SIZE = 44;
@@ -315,34 +315,32 @@ export function PlacePanel({
         </div>}
 
         {card && (
-          <Suspense fallback={<p role="status">Opening examination…</p>}>
-            <ExamineWindow
-              event={card}
-              holds={[...progress.words, ...Object.keys(progress.rungs), ...progress.recipes]}
-              next={Boolean(next)}
-              alternatives={cards.filter(candidate => candidate.id !== card.id)}
-              blocked={blocked}
-              onSelect={id => {
-                const candidate = cards.find(item => item.id === id);
-                if (candidate) setCard(candidate);
-              }}
-              onChoose={(choice, art) => {
-                if (!wasEntered(card)) onResolveEvent?.(card, choice, art);
-                if (card.origin === 'discovery' && card.subjectId) onLook(card.subjectId);
-                if (card.origin === 'sub-location' && card.subjectId) {
-                  setRoomsBeforeEntry(place.subLocations.flatMap(room => {
-                    const available = subLocationEvent(progress, place.id, room);
-                    return available ? [available.id] : [];
-                  }));
-                  setEntered(ids => ids.includes(card.id) ? ids : [...ids, card.id]);
-                  setOpenSub(card.subjectId);
-                }
-              }}
-              onContinue={() => next ? setCard(next) : close()}
-              onClose={close}
-              onBackOut={sub ? backOut : undefined}
-            />
-          </Suspense>
+          <ExamineWindow
+            event={card}
+            holds={[...progress.words, ...Object.keys(progress.rungs), ...progress.recipes]}
+            next={Boolean(next)}
+            alternatives={cards.filter(candidate => candidate.id !== card.id)}
+            blocked={blocked}
+            onSelect={id => {
+              const candidate = cards.find(item => item.id === id);
+              if (candidate) setCard(candidate);
+            }}
+            onChoose={(choice, art) => {
+              if (!wasEntered(card)) onResolveEvent?.(card, choice, art);
+              if (card.origin === 'discovery' && card.subjectId) onLook(card.subjectId);
+              if (card.origin === 'sub-location' && card.subjectId) {
+                setRoomsBeforeEntry(place.subLocations.flatMap(room => {
+                  const available = subLocationEvent(progress, place.id, room);
+                  return available ? [available.id] : [];
+                }));
+                setEntered(ids => ids.includes(card.id) ? ids : [...ids, card.id]);
+                setOpenSub(card.subjectId);
+              }
+            }}
+            onContinue={() => next ? setCard(next) : close()}
+            onClose={close}
+            onBackOut={sub ? backOut : undefined}
+          />
         )}
     </section>
   );
