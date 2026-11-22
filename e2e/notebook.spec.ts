@@ -39,7 +39,6 @@ for (const view of [
     const roadNotes = diary.getByRole('region', { name: 'Road notes' });
     await expect(roadNotes.locator('.status')).not.toBeEmpty();
     await expect(roadNotes.locator('.map-coverage')).toContainText(/About \d+% of this map revealed\./);
-    const coverage = await roadNotes.locator('.map-coverage').innerText();
     await expect(diary).not.toContainText('places discovered');
     await expect(shortcuts.getByRole('link', { name: 'Take it with you', exact: true })).toHaveCount(0);
     await page.getByRole('button', { name: 'Take it with you', exact: true }).click();
@@ -59,15 +58,29 @@ for (const view of [
     if (await handle.isVisible()) await handle.click();
     await expect(page.locator('.journal')).toHaveCSS('font-size', '18px');
     expect(await page.locator('.dock').evaluate(el => el.getBoundingClientRect().height)).toBe(dockHeight);
-    await page.reload();
-    // Initial placement can open the place and replace a surface opened before the world is ready.
-    await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
-    await openRecords(page);
-    await expect(diary).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole('combobox', { name: 'Reading size' })).toHaveValue('large');
-    await expect(diary.locator('.map-coverage')).toHaveText(coverage);
-    await expect(diary.locator('.reading').last()).toHaveCSS('font-size', '18px');
     expect(errors).toEqual([]);
     await context.close();
   });
 }
+
+test('notebook reading size and map coverage survive reload', async ({ page }) => {
+  await page.goto('?seed=notebook-persistence&hour=12&at=poi_eastern_field');
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
+  await examineFirst(page);
+  await openRecords(page);
+  const diary = page.locator('.field-diary');
+  const size = diary.getByRole('combobox', { name: 'Reading size' });
+  const mapCoverage = diary.locator('.map-coverage');
+  await expect(mapCoverage).toContainText(/About \d+% of this map revealed\./);
+  const coverage = await mapCoverage.innerText();
+  await size.selectOption('large');
+  await expect(diary.locator('.reading').last()).toHaveCSS('font-size', '18px');
+
+  await page.reload();
+  // Initial placement can replace a surface opened before the world is ready.
+  await expect(page.locator('.place')).toBeVisible({ timeout: 20_000 });
+  await openRecords(page);
+  await expect(size).toHaveValue('large');
+  await expect(mapCoverage).toHaveText(coverage);
+  await expect(diary.locator('.reading').last()).toHaveCSS('font-size', '18px');
+});
