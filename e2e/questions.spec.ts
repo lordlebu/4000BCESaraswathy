@@ -121,7 +121,7 @@ test('the player can settle a question, and is never told they were wrong', asyn
   const heading = examination.getByRole('heading', { level: 2 });
   await expect(heading).toBeVisible();
   if (await heading.textContent() !== 'When the Channel Runs Silver') {
-    await examination.getByRole('button', { name: 'Choose another' }).click();
+    await examination.getByRole('button', { name: 'Other leads' }).click();
     await examination.getByRole('button', { name: 'When the Channel Runs Silver' }).click();
   }
   await resolveOpenEvent(page);

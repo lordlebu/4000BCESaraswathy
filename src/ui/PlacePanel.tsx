@@ -29,6 +29,7 @@ import type { Choice, GameEvent } from '../content/events';
 import type { ArtSelection } from './art';
 
 import ExamineWindow from './ExamineWindow';
+import { NotebookMark } from './NotebookMark';
 
 /** The face beside a name in the list of who is here. Small: this is an index, not a meeting. */
 const FACE_SIZE = 44;
@@ -233,21 +234,19 @@ export function PlacePanel({
         <section className="place-section contextual-events" aria-label="Examination">
           {recommended && (
             <button type="button" className="examine-trigger" ref={examineButton} onClick={() => setCard(recommended)}>
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
-                strokeWidth="2" strokeLinecap="round" aria-hidden="true" focusable="false">
-                <circle cx="10.5" cy="10.5" r="5.5" />
-                <path d="m14.5 14.5 5 5" />
-              </svg>
-              {backedOut
-                ? recommended.origin === 'sub-location'
-                  ? `Explore ${recommended.title.replace(/^The /, 'the ')}`
-                  : `Continue: ${recommended.title}`
-                : 'Examine'}
+              <span className="station examine-chip">
+                <NotebookMark kind="lens" />
+                {backedOut
+                  ? recommended.origin === 'sub-location'
+                    ? `Enter ${recommended.title.replace(/^The /, 'the ')}`
+                    : `Look at ${recommended.title}`
+                  : 'Examine'}
+              </span>
             </button>
           )}
           {!recommended && blocked.length > 0 && (
             <details>
-              <summary>What is blocked?</summary>
+              <summary>Still out of reach</summary>
               <ul>{blocked.map(reason => <li key={reason}>{reason}</li>)}</ul>
             </details>
           )}

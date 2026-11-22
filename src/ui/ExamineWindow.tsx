@@ -22,11 +22,11 @@ function ExaminationCard({ alternatives, blocked, onSelect, onContinue, next, on
       <EventCardBody
         {...card}
         onClose={onContinue}
-        continuation={next ? 'Next card' : 'Finish examining'}
+        continuation={next ? 'Look further' : 'Done here'}
         alternatives={(alternatives.length > 0 || blocked.length > 0) && (
           <div className="examine-options">
-            <button type="button" className="ghost" aria-expanded={choosing} onClick={() => setChoosing(!choosing)}>
-              {alternatives.length ? 'Choose another' : 'What is blocked?'}
+            <button type="button" className="examine-link" aria-expanded={choosing} onClick={() => setChoosing(!choosing)}>
+              {alternatives.length ? 'Other leads' : 'Still out of reach'}
             </button>
             {choosing && (
               <ul>
@@ -39,9 +39,9 @@ function ExaminationCard({ alternatives, blocked, onSelect, onContinue, next, on
           </div>
         )}
       >
-        <div className="activity-choices">
-          {onBackOut && <button type="button" className="ghost" onClick={onBackOut}>Back out</button>}
-          <button type="button" className="ghost" onClick={card.onClose}>Leave examination</button>
+        <div className="examine-footer">
+          {onBackOut && <button type="button" className="examine-link" onClick={onBackOut}>Back out</button>}
+          <button type="button" className="examine-link" onClick={card.onClose}>Set aside</button>
         </div>
       </EventCardBody>
     </div>

@@ -766,7 +766,7 @@ separate case, with the original test and assertion timeout settings.
 
 - Present one **Examine** action with a magnifying-glass icon directly below the location's NPC
   list, before the workshop controls and arrival prose. Open the recommended available card directly
-  and reveal the session one card at a time. **Choose another** is optional and shows only the
+  and reveal the session one card at a time. **Other leads** is optional and shows only the
   currently available alternatives. The opening screen does not list every card in the location.
 - Keep **Journey events** to one text line per row with title, day, place, and repeat count when
   applicable. Keep paging and full text in the reopened memory. Render no thumbnails in the index,
@@ -783,8 +783,8 @@ separate case, with the original test and assertion timeout settings.
 - Write each resolved result through the existing event and save flow. Closing or reloading
   midway should retain resolved cards. Skipped cards should not create diary entries, and
   finishing the session should not write them again.
-- Keep **Leave examination** available. After the last available outcome, give the player
-  **Finish examining** so they have time to read before the window closes. Return keyboard
+- Keep **Set aside** available. After the last available outcome, give the player
+  **Done here** so they have time to read before the window closes. Return keyboard
   focus to the Examine control or the next logical control.
 
 ### Returning from a sub-location
@@ -792,14 +792,14 @@ separate case, with the original test and assertion timeout settings.
 At Kavik's Tower the player opens **Examine**, chooses to enter **The Lower Courses**, and
 finishes the available cards inside. **Back out** closes the Examine window and returns to the
 tower's location panel. If the reading unlocked **The Stair Shaft**, the panel offers one
-primary continuation, such as **Explore the Stair Shaft**, which opens that card directly.
+primary continuation, such as **Enter the Stair Shaft**, which opens that card directly.
 There is no second generic Examine step and no list of repeated Examine buttons. If nothing
 new is available, return to the location panel without a continuation. Finishing the Lower
 Courses never moves the player automatically.
 
 ### Acceptance checks
 
-- The Tower opens with one recommended card. **Choose another** reveals alternatives on demand.
+- The Tower opens with one recommended card. **Other leads** reveals alternatives on demand.
 - A card resolved midway survives reload without duplicate rewards or entries. A newly unlocked
   card appears at the right scope. Backing out returns to the parent panel, where the next
   available card opens directly in one click.
