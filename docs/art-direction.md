@@ -10,6 +10,11 @@ use at most a few small background figures where their activity helps establish 
 Reserve foreground figures for events explicitly about a person. Match the local South of
 Tethys culture and established portraits for appearance, clothing, hair, and material culture.
 Use the local biome and canon flora, with varied silhouettes, scale, and spacing.
+Paint new event cards in the original cozy narrative watercolor and loose fine ink, with
+broad depth planes and enough detail to read the discovery at card size. Use approved game
+paintings as style references and keep lettering, signs, and invented script out of the image.
+Keep figures realistically proportioned and use the relevant in-game portrait for appearance
+and clothing. Preserve the existing branch paintings for the owner's full review.
 
 > **Cave/roads follow-up:** Yamantaka doubles in map scale; cave/cooker proportions, Maru cook reuse, sparse highland trees and masonry roads follow the simple NES direction. Cave-specific watercolor meal/sleep scenes show the traveller with both residents every night. [Exact delivery and prompts](twin-cave-roads-phase.md).
 

@@ -685,24 +685,27 @@ runtime registry. Use the scene's field map, local culture records, and establis
 portraits for appearance, dress, and material culture. Follow The Lower Courses as the visual
 reference. Keep the environment in the foreground and people small and distant except in
 events explicitly about a person. Use local flora and vary silhouette, age, spacing, and scale
-so vegetation does not look repeated. The current drafts are held outside the runtime registry
-while this review and correction pass is underway.
+so vegetation does not look repeated. Drafts are kept outside the runtime registry until reviewed.
 
 Run `node tools/diary-content-coverage.mjs` for the current export's event-art source and
 authored prose coverage by place. Discovery rows count each place where a discovery can be
 examined, so the same discovery can appear at multiple places.
 
 The Tower follow-up adds dedicated paintings and arrival prose for the Stair Shaft and Flooded
-Undercroft, and gives all four Tower-collapse rungs authored prompts. The current inventory
-finds dedicated art at 21 of 86 listed combinations, parent-place art at 13, and place-kind art
-at 52. The second art batch adds both Cloud Stair scenes, the Gate Court threshold, the Long
+Undercroft, and gives all four Tower-collapse rungs authored prompts. The second art batch adds
+both Cloud Stair scenes, the Gate Court threshold, the Long
 Archive unread shelf, the three Northwest Cave Camp entries, and Tide Market. Tide Market
 uses the environment-led revision with two distant figures and varied mangrove silhouettes.
 Six revised discovery plates cover the hidden chamber, scarp-bird records, young Shringasaurus,
 Gate Court footpath, kiln yard, and winter supply tally. These put the evidence in the foreground
 and keep any people distant. The approved Flooded Undercroft entry painting is unchanged.
-The remaining dedicated art is still in production. Artwork integration
-can proceed without an owner-selection pause per the current rollout instruction.
+
+The completion batch adds 50 watercolors. The inventory now resolves dedicated art at all 86
+exported map-event placements, covering all 55 discoveries and 13 sub-locations. Previously
+shipped paintings were preserved. The Aravali sky-island cards explicitly show floating
+landmasses just below the clouds, with visible undersides and open air beneath them. The
+Lodestone Face shows aligned grit, The Water That Climbs shows rain runoff at the rim, and
+What Grows on Nothing shows grass, cushion plants, and aero-mangroves along the edge.
 
 **Kavik’s Tower artwork integrated.** Both 512×384 watercolors are in the runtime event registry.
 The discovery painting was revised to show irregular, partly buried wall sections and surviving
