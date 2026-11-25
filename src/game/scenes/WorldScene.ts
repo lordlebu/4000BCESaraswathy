@@ -2,6 +2,7 @@ import { TwinAmbienceView } from '../systems/TwinAmbienceView';
 import {bakeTwinTerrain} from '../twinTerrainTextures';
 import {TWIN_TURF,type TwinTurf} from '../twinTerrain';
 import {railSpanWidth} from '../twinWalkway';
+import { addCourtyardShadow, COURTYARD_SHADOW } from '../twinCourtyardShadow';
 import { loadTwinArt, TWIN_KEYS, twinGroundArt } from '../twinArt';
 import { TWIN_MAP } from '../../world/twinCities';
 // The map: everything the player sees on the canvas.
@@ -867,6 +868,7 @@ export class WorldScene extends Phaser.Scene {
     const requestedTurf=import.meta.env.DEV?new URLSearchParams(window.location.search).get('turf'):null;
     const turf:TwinTurf=requestedTurf&&Object.hasOwn(TWIN_TURF,requestedTurf)?requestedTurf as TwinTurf:'sage';
     const twinTerrain=this.world.twinRegion&&requestedTurf!=='legacy'?bakeTwinTerrain(this,this.world,turf):null;
+    if (twinTerrain) this.textures.get(twinTerrain.key).setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.twinTerrainInfo=twinTerrain?{palette:turf,frames:twinTerrain.count,bytes:twinTerrain.bytes}:null;
 
     for (let y = 0; y < height; y += 1) {
@@ -889,16 +891,19 @@ export class WorldScene extends Phaser.Scene {
           .setDepth(DEPTH_TILE);
         tileRow.push(tileSprite);
         this.tileOwned.push({ sprite: tileSprite, x, y });
-        fogRow.push(
-          this.add
-            .image(cx, cy, FOG_TEXTURE)
-            // Exactly its own cell. Anything wider bleeds onto neighbours and buries the tile the
-            // traveller is standing on -- see `createTileTextures`.
-            .setDisplaySize(TILE_SIZE, TILE_SIZE)
-            .setTint(0x241a26)
-            .setAlpha(FOG_UNKNOWN)
-            .setDepth(DEPTH_FOG)
-        );
+        const fogSprite = this.add
+          .image(cx, cy, FOG_TEXTURE)
+          // Exactly its own cell. Anything wider bleeds onto neighbouring tiles.
+          .setDisplaySize(TILE_SIZE, TILE_SIZE)
+          .setTint(0x241a26)
+          .setAlpha(FOG_UNKNOWN)
+          .setDepth(DEPTH_FOG);
+        // Adjacent ground and fog quads need the same screen-pixel edges at fractional zoom.
+        if (twinTerrain) {
+          tileSprite.setVertexRoundMode('full');
+          fogSprite.setVertexRoundMode('full');
+        }
+        fogRow.push(fogSprite);
       }
       for (let x = 0; x < width; x += 1) this.tileOwned.push({ sprite: fogRow[x]!, x, y });
       this.tileSprites.push(tileRow);
@@ -1139,6 +1144,10 @@ export class WorldScene extends Phaser.Scene {
         this.twinShrubs.push(sprite);
       }
       if (item.name) sprite.setName(item.name);
+      if (item.sheet === 'twinCourtyard') {
+        const shadow = addCourtyardShadow(this, sprite);
+        if (shadow) this.tileOwned.push({ sprite: shadow, x: item.x, y: item.y });
+      }
       if (item.sway) this.overdraw.push({ sprite, ...item.sway });
       if (item.sheet === 'lamp'||item.sheet==='twinLamp') {
         const lampX=cx+(item.sheet==='twinLamp'?(item.offset?.x??0)*TILE_SIZE:0);
@@ -2342,12 +2351,20 @@ export class WorldScene extends Phaser.Scene {
       twinAmbience: this.twinAmbience?.report()??null,
       twinTerrain:this.twinTerrainInfo?{...this.twinTerrainInfo,
         texture:this.tileSprites[this.at.y]?.[this.at.x]?.texture.key,
-        width:this.tileSprites[this.at.y]?.[this.at.x]?.displayWidth}:null,
+        width:this.tileSprites[this.at.y]?.[this.at.x]?.displayWidth,
+        terrainRounding:this.tileSprites[this.at.y]?.[this.at.x]?.vertexRoundMode,
+        fogRounding:this.fogSprites[this.at.y]?.[this.at.x]?.vertexRoundMode,
+        filter:this.tileSprites[this.at.y]?.[this.at.x]?.texture.source[0]?.scaleMode}:null,
       twinShrubs: {count:this.twinShrubs.length,scales:[...new Set(this.twinShrubs.map(s=>s.scaleX))],widths:[...new Set(this.twinShrubs.map(s=>s.displayWidth))],textures:[...new Set(this.twinShrubs.map(s=>s.texture.key))]},
       roadLights:{posts:this.tileOwned.filter(p=>(p.sprite as Phaser.GameObjects.Image).texture?.key==='twins-covered-lamp').length,
         visiblePosts:this.tileOwned.filter(p=>(p.sprite as Phaser.GameObjects.Image).texture?.key==='twins-covered-lamp'&&p.sprite.visible).length,
         lit:this.glows.filter(g=>g.sprite.visible&&g.sprite.alpha>.05).length},
       railBridge:this.children.list.filter(p=>p.name==='rail:jrpg-span').map(p=>({width:(p as Phaser.GameObjects.Image).displayWidth,height:(p as Phaser.GameObjects.Image).displayHeight})),
+      courtyardShadows: this.children.list.filter(sprite => sprite.name === COURTYARD_SHADOW)
+        .map(sprite => {
+          const shadow = sprite as Phaser.GameObjects.Image;
+          return { texture: shadow.texture.key, visible: shadow.visible };
+        }),
       caveScenery:this.children.list.filter(sprite=>sprite.name.startsWith('cave:')||sprite.name==='poi:poi_northwest_cave_camp')
         .map(sprite=>({name:sprite.name,width:(sprite as Phaser.GameObjects.Image).displayWidth,height:(sprite as Phaser.GameObjects.Image).displayHeight})),
       residents: this.residentSprites.map(({npcId,sprite}) => ({npcId,sheet:sprite.texture.key,x:sprite.x,y:sprite.y,

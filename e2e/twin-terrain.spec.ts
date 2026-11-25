@@ -8,6 +8,7 @@ for(const palette of ['sage','lichen','olive'])test(`the ${palette} highlands us
   await expect.poll(()=>page.evaluate(()=>(window as any).__walker?.()?.twinTerrain?.palette),{timeout:45000}).toBe(palette);
   const terrain=await page.evaluate(()=>(window as any).__walker().twinTerrain);
   expect(terrain.texture).toBe('twins-terrain-surface');expect(terrain.width).toBe(128);
+  expect(terrain).toMatchObject({terrainRounding:'full',fogRounding:'full',filter:1}); // Phaser NEAREST
   expect(terrain.frames).toBeGreaterThan(40);expect(terrain.frames).toBeLessThanOrEqual(768);
   expect(terrain.bytes).toBeLessThanOrEqual(3*1024*1024);
   for(let i=0;i<3;i++){

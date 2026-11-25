@@ -94,6 +94,9 @@ for (const mobile of [false, true]) {
       await expect.poll(() => loaded.some(u => /courtyard-neem/.test(u))).toBe(true);
       await page.screenshot({ path: info.outputPath('courtyard-place.png') });
       await page.getByRole('button', { name: 'Leave', exact: true }).click();
+      await expect.poll(() => page.evaluate(() => (window as any).__walker?.()?.courtyardShadows)).toEqual([
+        { texture: 'twins:harappa-neem-shadow', visible: true }
+      ]);
       await page.screenshot({ path: info.outputPath('courtyard-world.png') });
       await expect.poll(() => page.evaluate(() => (window as any).__happen?.('arriving', undefined, undefined, 'poi_harappa_court') ?? false)).toBe(true);
       const card = page.locator('.activity-card');
