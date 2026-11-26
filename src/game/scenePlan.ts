@@ -1,6 +1,8 @@
 import { planTwinScene } from './twinArt';
 import {planTwinLandscape,twinLandscapeClear} from './twinLandscape';
 import {planTwinLamps} from './twinWalkway';
+import {planTwinScenery} from './twinPlaceScenes';
+import type {TwinSceneryReview} from './twinSceneryReview';
 import { planRiverBridges } from './riverBridges';
 export { planRiverBridges } from './riverBridges';
 // What goes where on the map, decided without an engine.
@@ -91,6 +93,8 @@ export type PlacementSheet =
   | 'twinDryProps'
   | 'twinShrubs'
   | 'twinHighlandForms'
+  | 'twinRelief'
+  | 'twinSite'
   | 'overdraw'
   | 'features'
   | 'flora'
@@ -133,6 +137,7 @@ export interface Placement {
   x: number;
   y: number;
   depth: number;
+  twinShadow?: 'contact' | 'wall' | 'house' | 'outcrop' | 'tree';
   /** Set on anything the scene needs to find again -- markers, for the fog to reveal. */
   name?: string;
   /**
@@ -1259,9 +1264,10 @@ export function planMarkers(built: FieldMapWorld): Placement[] {
  * state, so the whole plan is a function of the world and nothing else. Two calls with the same
  * world return the same plan, which is what makes it worth asserting against.
  */
-export function planScene(built: FieldMapWorld, smoothTwinRail = true): Placement[] {
+export function planScene(built: FieldMapWorld, smoothTwinRail = true, review: TwinSceneryReview = {}): Placement[] {
   if (built.world.twinRegion) {
-    const base=planTwinScene(built, undefined, smoothTwinRail),clear=twinLandscapeClear(built,base);
+    const original=planTwinScene(built, undefined, smoothTwinRail);
+    const base=planTwinScenery(built,original,review),clear=twinLandscapeClear(built,base);
     return [...base,...planTwinLandscape(built,base,planCliffs(built.world),planDecor(built.world,clear),clear),...planTwinLamps(built)];
   }
   // **A forecourt round every place**: the tile it stands on and the eight around it, kept clear of

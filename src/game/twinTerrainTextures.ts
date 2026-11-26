@@ -2,12 +2,13 @@ import type Phaser from 'phaser';
 import type {World} from '../world/types';
 import {TILE_SIZE} from './tileTextures';
 import {terrainAtlasLayout,terrainColourFor,twinTerrainProfile,type TerrainPalette,type TerrainRenderProfile,type TwinTerrainCell,type TwinTurf} from './twinTerrain';
+import type {ReliefCell,ReliefStyle} from './twinRelief';
 
 const PIXELS=32,COLUMNS=32;
 
 /** All bands/patterns are baked once into one native-pixel atlas. Still one quad per ground tile. */
-export function bakeTwinTerrain(scene:Phaser.Scene,world:World,palette:TwinTurf){
-  return bakeTerrainProfile(scene, world, twinTerrainProfile(palette), 'twins-terrain-surface');
+export function bakeTwinTerrain(scene:Phaser.Scene,world:World,palette:TwinTurf,relief?:ReliefStyle){
+  return bakeTerrainProfile(scene, world, twinTerrainProfile(palette,relief), 'twins-terrain-surface');
 }
 
 export function bakeTerrainProfile(scene: Phaser.Scene, world: World, profile: TerrainRenderProfile, key: string) {
@@ -43,6 +44,7 @@ function paintTerrainCell(ctx:CanvasRenderingContext2D,cell:TwinTerrainCell,p:Te
     }
     ctx.globalAlpha=1;
   }
+  if(cell.relief) paintRelief(ctx,cell.relief,cell.variant);
   for(const edge of cell.edges){
     const water=edge.from==='water'||edge.to==='water';
     const drySeam=!water&&(edge.from==='sand'||edge.to==='sand');
@@ -68,6 +70,52 @@ function paintTerrainCell(ctx:CanvasRenderingContext2D,cell:TwinTerrainCell,p:Te
     }
     ctx.globalAlpha=1;
   }
+}
+
+const RELIEF_RAMP = {
+  hill:['#78826a','#909679','#a5ab8a'],
+  rock:['#606a64','#7d8880','#a0a99a'],
+  snow:['#8b9b98','#bec9c1','#dbe2d2']
+} as const;
+
+function paintRelief(ctx:CanvasRenderingContext2D,relief:ReliefCell,variant:number){
+  const {joins,faces,material,style}=relief;
+  const treatment=style==='combined' ? material==='hill'?'rounded':material==='snow'?'alpine':'terraces' : style;
+  const [dark,middle,light]=RELIEF_RAMP[material];
+  // Joined edges meet at the same midtone and width. Keep continuous interiors quiet
+  // so the range reads as one landform instead of a repeated hill stamp on every tile.
+  ctx.globalAlpha=.64;
+  for(let y=0;y<32;y++)for(let x=0;x<32;x++){
+    const dx=x-15.5,dy=y-15.5, ax=Math.abs(dx),ay=Math.abs(dy);
+    const side=ax>ay?(dx>0?1:3):(dy>0?2:0);
+    const longitudinal=Math.max(ax,ay), across=Math.min(ax,ay);
+    const taper=treatment==='rounded'?3:treatment==='terraces'?4:2;
+    const width=longitudinal<7 ? 11 : 6+Math.floor((16-longitudinal)/taper);
+    if(joins!==15&&(across>width||longitudinal>9&&!(joins&(1<<side))))continue;
+    const lightLip=faces&9 && (y<4||x<4) && longitudinal<14;
+    const darkLip=faces&6 && (y>27||x>27) && longitudinal<14;
+    ctx.fillStyle=lightLip?light:darkLip?dark:middle;
+    ctx.fillRect(x,y,1,1);
+  }
+  for(let side=0;side<4;side++){
+    if(!(faces&(1<<side)))continue;
+    for(let along=1;along<31;along++){
+      const lip=3+Math.min(4,Math.floor(Math.min(along,31-along)/4))+(treatment==='terraces'?1:0);
+      for(let d=1;d<=lip;d++){
+        const [x,y]=edgePoint(side,along,d);
+        ctx.fillStyle=d===lip?light:side===0||side===3?middle:dark;
+        ctx.fillRect(x,y,1,1);
+      }
+    }
+  }
+  ctx.globalAlpha=.41;
+  const x=[8,14,19,11][variant]!, y=[12,19,11,23][variant]!;
+  ctx.fillStyle=light;
+  ctx.fillRect(x,y,5,1);ctx.fillRect(x-2,y+1,5,1);
+  ctx.fillStyle=dark;
+  ctx.fillRect(x,y+3,7,1);ctx.fillRect(x+3,y+4,4,1);
+  if(material==='snow'){ctx.fillStyle=middle;ctx.fillRect(x-3,y+6,5,1);}
+  ctx.globalAlpha=1;
 }
 
 function edgePoint(side:number,along:number,depth:number):[number,number]{

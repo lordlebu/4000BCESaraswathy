@@ -29,7 +29,7 @@ import dryProps from '../../assets/twins/dry-props-nes-jrpg.png?no-inline';
 import { planCaveProps } from './caveCamp';
 import beedu from '../../assets/twins/beedu-nes.png?no-inline';
 import {bustSite} from './twinStoryArt';
-import {twinFurnishings,twinBankDepth,twinHouseLot} from './twinEnvironment';
+import {twinFurnishings,twinBankDepth,twinHouseLot,twinHome} from './twinEnvironment';
 import { cityEdges, districtAt } from '../world/twinCities';
 import { planRiverBridges } from './riverBridges';
 import { tileHash } from '../world/rng';
@@ -139,15 +139,11 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
     if(biome==='settlement'&&district&&(generatedLots?.has(pointKey(tile)) ?? twinHouseLot(x,y,district.x,district.y))){
       const brick=district.id==='mohenjodaro';
       surface(brick?1:0,x,y);
-      const painted=!keepOriginal&&hash%5!==0;
-      if(painted||region.generation===2){
+      const home=twinHome(world.seed,x,y,brick);
+      if(home.sheet==='twinHomesPainted'||region.generation===2){
         out.push({sheet:'contact',frame:0,x,y,offset:{x:0,y:.43},depth:depthFor(y,ROW_SLOT.underfoot)});
       }
-      if(painted){
-        out.push({sheet:'twinHomesPainted',frame:brick?1:0,x,y,
-          depth:depthFor(y,ROW_SLOT.undergrowth)});
-      }
-      else add(keepOriginal?'twinHouses':'twinHousesDetail',(brick?4:0)+hash%4,x,y);
+      out.push(home);
     } else if(biome==='desert'&&hash%17===0)add(keepOriginal?'twinObjects':'twinDetails',keepOriginal?14:0,x,y);
     else if(biome==='hills'&&hash%9===0)add(keepOriginal?'twinObjects':'twinDetails',keepOriginal?13:1,x,y);
     else if(biome==='wetland'&&hash%5===0)add(keepOriginal?'twinObjects':'twinDetails',keepOriginal?12:4,x,y);
