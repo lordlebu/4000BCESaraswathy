@@ -3657,6 +3657,32 @@ button.pinned-recipe:focus-visible { outline: 2px solid currentColor; outline-of
   cursor: pointer;
 }
 
+.event-topics {
+  margin: 0 0 0.9rem;
+}
+.event-topic-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.event-topic-buttons .activity-choice {
+  width: auto;
+  min-height: 44px;
+  padding: 0.38rem 0.6rem;
+}
+.event-topic-buttons .activity-choice[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: rgba(164, 92, 64, 0.12);
+}
+.event-topic-reply {
+  margin: 0.55rem 0 0;
+  padding-left: 0.65rem;
+  border-left: 2px solid var(--edge);
+  color: var(--muted);
+  line-height: 1.5;
+  min-height: 3em;
+}
+
 .activity-choice:hover { background: rgba(164, 92, 64, 0.12); }
 .activity-choice.primary { border-color: var(--accent); font-weight: 600; }
 .activity-choice:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

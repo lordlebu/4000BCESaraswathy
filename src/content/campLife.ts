@@ -26,7 +26,7 @@ import { tileHash, weightedPickFor } from '../world/rng';
 import { givenNames } from './places';
 import { lookFor } from './looks';
 import { CAMP_DAY, MEET_HOURS, RUNNER_PACE, VISIT_HOURS, VISIT_PACE_CAP } from './tiers';
-import { FIRST_DAY, PROPS_AROUND, campSpots, campable, type CampKind, type Encampment, type WayIn } from './encampments';
+import { FIRST_DAY, PROPS_AROUND, campKindFor, campSpots, campable, type CampKind, type Encampment, type WayIn } from './encampments';
 import type { Bumped } from './bumping';
 import {
   STRANGER_CULTURES,
@@ -110,8 +110,12 @@ const isCulture = (c: string): c is StrangerCulture => (STRANGER_CULTURES as rea
  * and never two alike in one camp.
  */
 export function campPeople(camp: Encampment, fieldMapId: string, seed = ''): CampPerson[] {
-  const words = CAMP_WORDS[camp.kind];
-  const turn = camp.id.split(':').pop() ?? '0';
+  return campRoster(camp.id, camp.kind, fieldMapId, seed);
+}
+
+function campRoster(campId: string, kind: CampKind, fieldMapId: string, seed: string): CampPerson[] {
+  const words = CAMP_WORDS[kind];
+  const turn = campId.split(':').pop() ?? '0';
   const taken = new Set(
     travellersOn(fieldMapId, seed)
       .map((t) => t.givenName ?? (t.npcId === null ? givenNameFor(`${fieldMapId}:${t.id}`, seed) : null))
@@ -124,7 +128,7 @@ export function campPeople(camp: Encampment, fieldMapId: string, seed = ''): Cam
     const names = culture ? (givenNames[culture] ?? []) : [];
     const free = names.filter((n) => !taken.has(n));
     const givenName =
-      weightedPickFor(free.length > 0 ? free : names, 'camp-name', { x: 0, y: 0 }, `${camp.id}:${slot}`, (n) => n, () => 1) ?? null;
+      weightedPickFor(free.length > 0 ? free : names, 'camp-name', { x: 0, y: 0 }, `${campId}:${slot}`, (n) => n, () => 1) ?? null;
     if (givenName) taken.add(givenName);
     return {
       id,
@@ -137,12 +141,23 @@ export function campPeople(camp: Encampment, fieldMapId: string, seed = ''): Cam
       look: lookFor(`${fieldMapId}:${id}`, who.body),
       culture,
       givenName,
-      campId: camp.id,
+      campId,
       slot,
-      kind: camp.kind,
+      kind,
       title: who.title
     };
   });
+}
+
+/** Recreate a resident using the same roster the scene drew, even when the camp has moved on. */
+export function campPersonFor(fieldMapId: string, id: string, seed: string): CampPerson | undefined {
+  const match = /^camp-(0|[1-9]\d*)-(leader|runner|watch)$/.exec(id);
+  if (!match) return undefined;
+  const cycle = Number(match[1]);
+  if (!Number.isSafeInteger(cycle)) return undefined;
+  const campId = `${fieldMapId}:${cycle}`;
+  const kind = campKindFor(seed, fieldMapId, cycle);
+  return campRoster(campId, kind, fieldMapId, seed).find((person) => person.id === id);
 }
 
 /** Whether this is the day a camp pitches, and the day it strikes. */

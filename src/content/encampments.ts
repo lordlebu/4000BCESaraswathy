@@ -19,11 +19,19 @@ import { isWalkable } from '../world/generate';
 import { tileHash } from '../world/rng';
 import { Heap } from '../world/heap';
 import { orthogonalNeighbours } from '../world/rivers';
+import { TWIN_MAP } from '../world/twinGeneration';
 import { stepCostOn } from './species';
 
 export type CampKind = 'adventurers' | 'dacoits' | 'pilgrims' | 'drovers';
 
 export const CAMP_KINDS: readonly CampKind[] = ['adventurers', 'dacoits', 'pilgrims', 'drovers'];
+const TWIN_CAMP_KINDS: readonly CampKind[] = ['drovers', 'pilgrims', 'adventurers'];
+
+/** The kind is recoverable from a saved camp ID even after the camp has left. */
+export function campKindFor(seed: string, fieldMapId: string, cycle: number, twinRegion = fieldMapId === TWIN_MAP): CampKind {
+  const kinds = twinRegion ? TWIN_CAMP_KINDS : CAMP_KINDS;
+  return kinds[tileHash(seed, cycle, 0, `camp:${fieldMapId}:kind`) % kinds.length]!;
+}
 
 export interface Encampment {
   /** Stable for one camp's stay: `<map>:<cycle>`. What "seen" is kept against. */
@@ -198,8 +206,7 @@ export function encampmentOn(
   const sky = hash('sky') % SKY_TURN_ONE_IN === 0 ? skyGround(world, ground) : [];
   const hidden = sky.length > 0 ? sky : ground.slice(0, Math.max(1, Math.ceil(ground.length / 2)));
   const at = hidden[hash('tile') % hidden.length]!;
-  const kinds: readonly CampKind[] = world.twinRegion ? ['drovers','pilgrims','adventurers'] : CAMP_KINDS;
-  const kind = kinds[hash('kind') % kinds.length]!;
+  const kind = campKindFor(world.seed, fieldMapId, cycle, Boolean(world.twinRegion));
 
   let near: string | null = null;
   let best = Infinity;

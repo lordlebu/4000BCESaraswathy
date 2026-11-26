@@ -133,7 +133,7 @@ export function useRoadTalk({
       }
       const doing = (nearbyTravellers.find((t) => t.id === travellerId)?.doing ?? 'chore') as CampActivity;
       happens.current?.('road', arrival.at, null, `camp-talk:${arrival.day}:${travellerId}`, {
-        campPerson: { person, doing: doingLine(person.kind, person.slot, doing), meal: doing === 'meal' },
+        campPerson: { person, activity: doing, doing: doingLine(person.kind, person.slot, doing), meal: doing === 'meal' },
         force: { kind: 'camp-talk', asked: true }
       });
       return;

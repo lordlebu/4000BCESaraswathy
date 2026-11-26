@@ -14,7 +14,7 @@
 
 import { weightedPickFor } from '../world/rng';
 import type { EventStranger } from '../content/events';
-import { headwearOf, swatchesFor, type Headwear } from '../content/looks';
+import { BODIES, headwearOf, swatchesFor, type Headwear, type Look } from '../content/looks';
 import { art, artNames } from './art';
 import { HEAD, SHOULDERS } from './PersonPortrait';
 
@@ -51,9 +51,43 @@ export function facesFor(culture: string | null, names: readonly string[] = artN
   return [...own, ...anybody];
 }
 
-/** The painted face for this stranger, if the pool holds one for them. Seeded, so it never changes. */
-export function paintedFaceFor(id: string, culture: string | null = null): string | null {
-  const name = weightedPickFor(facesFor(culture), 'face', { x: 0, y: 0 }, id, (n) => n, () => 1);
+interface FaceAppearance {
+  headwear: Headwear;
+  skin: readonly string[];
+  headDye: string;
+  shoulderDye: string;
+}
+
+// Audited existing paintings. A dye denotes the visible colour family, including undyed cloth.
+// Untagged paintings remain in the library while bodies and their palettes evolve.
+const PAINTED_APPEARANCE: Readonly<Record<string, FaceAppearance>> = {
+  'any-01': { headwear: 'hood', skin: ['as-painted', 'light'], headDye: 'charcoal', shoulderDye: 'charcoal' },
+  'harappan-f-02': { headwear: 'hood', skin: ['as-painted', 'light'], headDye: 'ochre', shoulderDye: 'ochre' },
+  'harappan-f-04': { headwear: 'wrap', skin: ['as-painted', 'light'], headDye: 'undyed', shoulderDye: 'indigo' },
+  'harappan-m-02': { headwear: 'wrap', skin: ['as-painted', 'light'], headDye: 'ochre', shoulderDye: 'undyed' },
+  'harappan-m-05': { headwear: 'turban', skin: ['as-painted', 'light'], headDye: 'undyed', shoulderDye: 'undyed' },
+  'maru-m-02': { headwear: 'hood', skin: ['dark', 'deep'], headDye: 'ochre', shoulderDye: 'charcoal' }
+};
+
+export function compatibleFaces(look: Look, culture: string | null): string[] {
+  const body = BODIES[look.body];
+  if (!body) return [];
+  const dyeFor = (part: string) => part === 'cloth' ? look.cloth : part === 'second' ? look.second : part;
+  const headDye = body.face.headwear === '#f9e3cc' ? 'undyed' : dyeFor(body.face.headwear);
+  const shoulderDye = dyeFor(body.face.shoulders);
+  const compatible = facesFor(culture).filter((name) => {
+    const face = PAINTED_APPEARANCE[name];
+    return face?.headwear === body.headwear && face.skin.includes(look.skin) &&
+      face.headDye === headDye && face.shoulderDye === shoulderDye;
+  });
+  const own = compatible.filter((name) => !name.startsWith('any-'));
+  return own.length ? own : compatible;
+}
+
+export function paintedFaceFor(stranger: EventStranger): string | null {
+  const id = `${stranger.id}:${stranger.givenName ?? ''}`;
+  const faces = compatibleFaces(stranger.look, stranger.culture);
+  const name = weightedPickFor(faces, 'face', { x: 0, y: 0 }, id, (n) => n, () => 1);
   return name ? art('faces', name) : null;
 }
 
@@ -66,7 +100,7 @@ export interface StrangerFaceProps {
 export function StrangerFace({ stranger, size = 40 }: StrangerFaceProps) {
   // Keyed on the name as well as who they are, because the name is dealt per journey: a new journey's
   // carrier is a new face, and one journey's carrier keeps theirs.
-  const painted = paintedFaceFor(stranger.givenName ? `${stranger.id}:${stranger.givenName}` : stranger.id, stranger.culture);
+  const painted = paintedFaceFor(stranger);
   if (painted) {
     return (
       <img

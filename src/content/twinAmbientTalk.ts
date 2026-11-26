@@ -1,0 +1,122 @@
+import type { BiomeId } from '../world/types';
+import { tileHash } from '../world/rng';
+import type { CampActivity, CampSlot } from './campLife';
+import type { CampKind } from './encampments';
+import type { Standing } from './standing';
+import type { StrangerCulture } from './travellers';
+
+const LABELS = {
+  greeting: 'Say hello',
+  people: 'Ask about home',
+  work: 'Ask about the work',
+  ground: 'Ask about the land',
+  camp: 'Ask about camp',
+  parting: 'Wish them well',
+  news: 'Ask for local news'
+};
+
+type Topic = keyof typeof LABELS;
+type LocalTopic = Exclude<Topic, 'news'>;
+
+export interface AmbientTopic {
+  id: Topic;
+  label: string;
+  line: string;
+  historyKey: string;
+  day: number;
+}
+
+type Context =
+  | { road: true; culture: StrangerCulture | null; biome: BiomeId; standing: Standing; warm: boolean }
+  | { road: false; kind: CampKind; slot: CampSlot; activity?: CampActivity };
+
+interface Line {
+  id: string;
+  topic: LocalTopic;
+  text: string;
+  fits?: (context: Context) => boolean;
+  immediate?: boolean;
+}
+
+const warmRoad = (c: Context) => c.road && c.warm;
+const culture = (id: StrangerCulture) => (c: Context) => c.road && c.culture === id;
+const ground = (...biomes: BiomeId[]) => (c: Context) => c.road && biomes.includes(c.biome);
+const camp = (kind: CampKind, slot: CampSlot) => (c: Context) => !c.road && c.kind === kind && c.slot === slot;
+const doing = (...activities: CampActivity[]) => (c: Context) => !c.road && c.activity !== undefined && activities.includes(c.activity);
+
+const ROAD: readonly Line[] = [
+  { id: 'long-stride', topic: 'greeting', text: '“There you are. I thought I knew that stride.”' },
+  { id: 'cool-morning', topic: 'greeting', text: '“I thought I might catch you before the road forks.”' },
+  { id: 'name-ahead', topic: 'greeting', text: '“Your name got here before you did.”', fits: (c) => c.road && c.warm && c.standing !== 'stranger' },
+  { id: 'yard', topic: 'people', text: '“At home we judge the hour by which side of the yard is in shade. Out here I have to look up.”', fits: warmRoad },
+  { id: 'courtyard', topic: 'people', text: '“Someone in our courtyard always keeps a jar by the door for whoever comes through.”', fits: culture('harappan') },
+  { id: 'ridge-fires', topic: 'people', text: '“On a clear night at home, you can count the families along the ridge by their hearths.”', fits: culture('maru') },
+  { id: 'reed-mat', topic: 'people', text: '“At home you offer a visitor a reed mat first. A name can wait until they’ve sat down.”', fits: culture('kia') },
+  { id: 'load', topic: 'work', text: '“Put the heavy things against your back. Tie them with a knot you can undo one-handed.”', fits: culture('harappan') },
+  { id: 'goats', topic: 'work', text: '“Count the goats when they lie down. Count them again when they stand up. That second count is the one I trust.”', fits: culture('maru') },
+  { id: 'lamps', topic: 'work', text: '“An old wick is still worth saving. Twist it into a fresh one and the flame takes quicker.”', fits: culture('kia') },
+  { id: 'exchange', topic: 'work', text: '“Twine or a little salt will get you a better welcome than a heavy thing nobody wants to carry.”' },
+  { id: 'river-edge', topic: 'ground', text: '“Watch the reeds when the river rises. The current takes them first, and then it widens its bed.”', fits: ground('river', 'wetland', 'coast') },
+  { id: 'dry-ridge', topic: 'ground', text: '“That ridge keeps the wind all day. I’d stop on the far side if I wanted to hear myself think.”', fits: ground('hills', 'mountains') },
+  { id: 'trees', topic: 'ground', text: '“Under these trees, you feel the rain twice. Once in the open and again after you think it’s over.”', fits: ground('forest') },
+  { id: 'roads', topic: 'ground', text: '“Between the two cities, I let the road take me round the wet ground. A dry boot saves more time than a shortcut.”' },
+  { id: 'dust', topic: 'ground', text: '“The dust stays in the ruts after the rain. Walk on the shoulder and you can see who passed before you.”', fits: ground('plains', 'desert', 'settlement', 'landmark') },
+  { id: 'shade-ahead', topic: 'parting', text: '“May the next stretch have shade where you need it.”' },
+  { id: 'see-you', topic: 'parting', text: '“I’ll know to look for you on this road now.”' }
+];
+
+const CAMP: readonly Line[] = [
+  { id: 'first-light-fold', topic: 'work', text: '“I leave the bend in the thorn fence until last. No sense closing the gate with half the herd outside it.”', fits: camp('drovers', 'leader') },
+  { id: 'fold-trade', topic: 'work', text: '“I take skins to the road. Salt comes back lighter and the goats will walk a long way for it.”', fits: camp('drovers', 'runner') },
+  { id: 'fold-watch', topic: 'camp', text: '“The goats will tell me if something moves out there. I keep close enough to hear the first one stand up.”', fits: camp('drovers', 'watch') },
+  { id: 'pilgrims-way', topic: 'camp', text: '“We hang the strips where the path turns. You can see one move in the wind long before you see the shelter.”', fits: camp('pilgrims', 'leader') },
+  { id: 'pilgrims-oil', topic: 'work', text: '“I ask for oil when I go down to the road. The cloth we have here can always spare another wick.”', fits: camp('pilgrims', 'runner') },
+  { id: 'pilgrims-light', topic: 'camp', text: '“I keep the cairn lamp low. It only has to light the last few steps.”', fits: camp('pilgrims', 'watch') },
+  { id: 'survey', topic: 'work', text: '“We agree about where we slept. Ask us which bend in the river that was, and you’ll get three maps.”', fits: camp('adventurers', 'leader') },
+  { id: 'venture-road', topic: 'work', text: '“I go down to the road to ask who’s come through. A wet hem often tells me more about a crossing than the directions do.”', fits: camp('adventurers', 'runner') },
+  { id: 'venture-packs', topic: 'camp', text: '“I keep the packs where I can reach them in the dark. It saves waking the others when the weather turns.”', fits: camp('adventurers', 'watch') },
+  { id: 'peg', topic: 'camp', text: '“Mind the loose corner there. I’m about to pull it taut.”', fits: doing('pitch'), immediate: true },
+  { id: 'bowl', topic: 'camp', text: '“Keep your bowl near. The good bits settle, so I’ll stir it again before you take more.”', fits: doing('meal'), immediate: true },
+  { id: 'coals', topic: 'camp', text: '“Give the coals a moment. There’s enough heat in them to start the fire again.”', fits: doing('relight'), immediate: true },
+  { id: 'strike', topic: 'camp', text: '“I’ll get the last peg when the cloth is folded. It puts up a fight if you give the wind an edge to catch.”', fits: doing('strike'), immediate: true },
+  { id: 'cool-coals', topic: 'camp', text: '“We leave the stones in a ring once the fire goes cold. It saves the next people looking for them.”' },
+  { id: 'spare-seat', topic: 'greeting', text: '“You found your way back. Take the dry side of the fire.”' },
+  { id: 'hearth', topic: 'people', text: '“Give people three nights around a fire and they’ll have a favourite place to sit, same as at home.”' },
+  { id: 'light-left', topic: 'parting', text: '“Give us a wave at the turn. That’s the last place we can see you from here.”' },
+  { id: 'next-fire', topic: 'parting', text: '“Travel easy. Say hello if you see our fire again.”' }
+];
+
+export function ambientTopics(
+  speaker: string,
+  context: Context,
+  day: number,
+  history: Readonly<Record<string, number>> = {},
+  news?: { id: string; text: string }
+): AmbientTopic[] {
+  const key = (id: string) => `ambient:${speaker}:${id}`;
+  const topic = (id: Topic, line: string, historyKey: string): AmbientTopic => ({
+    id, label: LABELS[id], line, historyKey, day
+  });
+  const intro: LocalTopic = context.road ? 'greeting' : 'camp';
+  const subjects: LocalTopic[] = context.road
+    ? ['work', 'ground', 'people', 'parting']
+    : ['work', 'greeting', 'people', 'parting'];
+  const rank = (id: string, at = 0) => tileHash(speaker, at, 0, id);
+  subjects.sort((a, b) => rank(a, day) - rank(b, day));
+  const local = (context.road ? ROAD : CAMP).filter((line) => !line.fits || line.fits(context));
+  const options = news ? [topic('news', news.text, key(news.id))] : [];
+  const age = (line: Line) => day - (history[key(line.id)] ?? -Infinity);
+  for (const id of [intro, ...subjects]) {
+    const choices = local.filter((line) => line.topic === id && (age(line) === 0 || age(line) >= 3));
+    choices.sort((a, b) =>
+      Number(Boolean(b.immediate)) - Number(Boolean(a.immediate)) ||
+      Number(age(b) === 0) - Number(age(a) === 0) ||
+      Number(age(b) === Infinity) - Number(age(a) === Infinity) ||
+      rank(a.id) - rank(b.id)
+    );
+    const line = choices[0];
+    if (line) options.push(topic(id, line.text, key(line.id)));
+    if (options.length === 3) break;
+  }
+  return options;
+}

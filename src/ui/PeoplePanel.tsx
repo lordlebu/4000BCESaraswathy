@@ -104,7 +104,7 @@ export function PeoplePanel({ progress, strangers = [], open, onClose, tabs }: P
             card that closes. Only those met, so a name is never shown before it was told. */}
         {road.length > 0 && (
           <section className="diary-section">
-            <h3>On the road</h3>
+            <h3>{road.some((s) => s.traveller.campId) ? 'Travellers and camp residents' : 'On the road'}</h3>
             <ul className="people">
               {road.map((s) => (
                 <li key={s.key} className="people-row">
@@ -128,7 +128,7 @@ export function PeoplePanel({ progress, strangers = [], open, onClose, tabs }: P
                       {s.traveller.givenName ?? s.traveller.name}{' '}
                       <span className="muted">· {s.traveller.role.split(',')[0]}</span>
                     </h4>
-                    <p className="muted people-where">{s.between.join(' · ')}</p>
+                    <p className="muted people-where">{s.traveller.campId ? 'Temporary camp' : s.between.join(' · ')}</p>
                   </div>
                 </li>
               ))}

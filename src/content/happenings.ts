@@ -66,7 +66,9 @@ import type { Standing } from './standing';
 import { rumourAt, type Rumour } from './rumours';
 import { sayingFor } from './sayings';
 import type { Encampment } from './encampments';
-import { CAMP_WORDS, type CampPerson } from './campLife';
+import { CAMP_WORDS, type CampActivity, type CampPerson } from './campLife';
+import { TWIN_MAP } from '../world/twinGeneration';
+import { ambientTopics } from './twinAmbientTalk';
 
 /** A seeded roll, as `eventNow` takes it: the same salt always gives the same number. */
 export type Roll = (salt: string) => number;
@@ -147,6 +149,7 @@ export interface Surroundings {
 /** Somebody at a camp, as the talk row hands them over: who, and what the hour has them doing. */
 export interface CampTalk {
   person: CampPerson;
+  activity?: CampActivity;
   /** The rest of "{name} ...", from `doingLine`. */
   doing: string;
   /** Whether everybody is sitting down to eat, which is when you can eat with them. */
@@ -579,10 +582,16 @@ const smallTalk: Template = ({ stranger, talk, biome }, _roll, now) => {
       flags: rumour ? { rumour: rumour.id, rumour_at: rumour.poiId } : {}
     }
   );
-  if (!rumour) return event;
-  const variant = rumour.kind === 'camp' ? rumour.campKind : rumour.person ? 'someone' : 'nobody';
-  const said = fill(pick(words.lines?.[rumour.kind] ?? '', variant), slots);
-  return { ...event, prose: `${event.prose} ${said}` };
+  let news: { id: string; text: string } | undefined;
+  if (rumour) {
+    const variant = rumour.kind === 'camp' ? rumour.campKind : rumour.person ? 'someone' : 'nobody';
+    news = { id: rumour.id, text: fill(pick(words.lines?.[rumour.kind] ?? '', variant), slots) };
+  }
+  if (now.fieldMapId === TWIN_MAP) {
+    const context = { road: true as const, biome, culture: stranger.culture, standing: talk.standing, warm: talk.warm };
+    return { ...event, topics: ambientTopics(stranger.id, context, now.day, now.last, news) };
+  }
+  return news ? { ...event, prose: `${event.prose} ${news.text}` } : event;
 };
 
 /**
@@ -654,7 +663,7 @@ const campTalk: Template = ({ campPerson }, _roll, now) => {
   const id = `${now.fieldMapId}:${person.id}`;
   const known = Boolean(now.met?.includes(id));
   const name = person.givenName ?? `the ${person.title}`;
-  return woven(
+  const event = woven(
     'road',
     'camp-talk',
     `${id}:${now.day}`,
@@ -672,6 +681,11 @@ const campTalk: Template = ({ campPerson }, _roll, now) => {
       ...(meal ? { artMoment: `woven-camp-meal-${person.kind}` } : {})
     }
   );
+  if (!known || now.fieldMapId !== TWIN_MAP) return event;
+  const context = { road: false as const, kind: person.kind, slot: person.slot, activity: campPerson.activity };
+  const topics = ambientTopics(id, context, now.day, now.last);
+  if (!topics.length) return event;
+  return { ...event, prose: `${name} ${doing}, and nods as if you had only stepped away.`, topics };
 };
 
 /**

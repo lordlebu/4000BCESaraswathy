@@ -14,6 +14,7 @@
 
 import Phaser from 'phaser';
 import {
+  DECOR_SHEET,
   FEATURE_SHEET,
   HUT_SHEET,
   PLACE_SHEET,
@@ -22,7 +23,7 @@ import {
   TREE_SHEET,
   lampGlowKey
 } from '../tileTextures';
-import { FIRST_YURT, ROW_SLOT, depthFor, placeFrame } from '../frames';
+import { FIRST_YURT, ROW_SLOT, depthFor, decorFrame, placeFrame } from '../frames';
 import { campSpots, encampmentOn, wayIn, type Encampment, type WayIn } from '../../content/encampments';
 import { campStage } from '../../content/campLife';
 import {
@@ -32,6 +33,7 @@ import {
   CROSSED_COLOUR,
   CROSSED_GROUND,
   PRINTED_GROUND,
+  TWIN_CAMP_DETAILS,
   YURT_ONE_IN,
   campKey,
   carriesTint,
@@ -39,6 +41,8 @@ import {
 } from '../campArt';
 import { walkedRoad } from '../../content/travellers';
 import { biomeFor } from '../../content/species';
+import { twinCampDressingSpots, twinCampRouteTiles } from '../../content/twinCampDressing';
+import { TWIN_MAP } from '../../world/twinGeneration';
 import { tileHash } from '../../world/rng';
 import type { Point, World } from '../../world/types';
 
@@ -142,7 +146,7 @@ export class CampView {
   /**
    * A camp, drawn from its kind's own props round the old fire ring.
    *
-   * **Every camp of a kind is not the same picture.** The seed for this camp chooses whether the
+   * **Every camp of a kind is not the same picture.** Outside Twin Cities the seed chooses whether the
    * kind's own shelter stands or the old yurt does (`YURT_ONE_IN`), and which way round the things
    * about the fire are set. The ring is the one the camp was always drawn with; the owner asked for
    * the generic camp art to be kept, and this is where it lives now.
@@ -192,14 +196,40 @@ export class CampView {
     const ring = placeFrame('', 'travel_node');
     if (ring !== null) piece(PLACE_SHEET, ring, camp.at, 1, 0.6, false);
     // About one camp in three is pitched round the old yurt instead of the kind's own shelter.
-    const yurt = Math.floor(roll / 7) % YURT_ONE_IN === 0;
+    const details = this.host.fieldMapId === TWIN_MAP ? TWIN_CAMP_DETAILS[camp.kind] : undefined;
+    const yurt = !details && Math.floor(roll / 7) % YURT_ONE_IN === 0;
     const shelter = yurt
       ? piece(HUT_SHEET, FIRST_YURT, spot(0), 2)
       : piece(campKey(camp.kind, layout.shelter), undefined, spot(0), 2);
     layout.extras.forEach((n, i) => piece(campKey(camp.kind, n), undefined, spot(i + 1), 2));
 
-    for (const s of sprites) s.img.setName(`camp:${camp.kind}`);
+    const way = wayIn(this.host.world, camp, walkedRoad(this.host.world, this.host.fieldMapId, places), places.map((p) => p.at));
     const cleared = this.clearCampGround(camp, sprites.map((s) => s.at));
+    if (details) {
+      const occupied = twinCampRouteTiles(this.host.world, camp, way, places);
+      for (const { sprite, x, y } of this.host.tileOwned) {
+        if (Math.max(Math.abs(x - camp.at.x), Math.abs(y - camp.at.y)) !== 3) continue;
+        const key = (sprite as Phaser.GameObjects.Image).texture?.key;
+        if (key && (key === HUT_SHEET || key === TREE_SHEET || key === FEATURE_SHEET ||
+          /(?:build|house|home|courtyard|site|landmark)/i.test(key) || /^(poi|cave|twin-site):/.test(sprite.name))) {
+          occupied.add(`${x},${y}`);
+        }
+      }
+      const spots = twinCampDressingSpots(this.host.world, camp, places.map((p) => p.at), occupied);
+      spots.forEach((at, i) => {
+        const detail = details[i];
+        if (!detail) return;
+        if ('piece' in detail) {
+          const stands = detail.piece !== layout.ground;
+          piece(campKey(camp.kind, detail.piece), undefined, at, 1, detail.scale, stands);
+        } else {
+          const frame = decorFrame(detail.decor, roll);
+          if (frame !== null) piece(DECOR_SHEET, frame, at, 0, detail.scale, false);
+        }
+      });
+    }
+
+    for (const s of sprites) s.img.setName(`camp:${camp.kind}`);
     for (const s of shelter) s.setName(`camp-shelter:${camp.kind}`);
     const fire = foot(camp.at);
     const glow = this.scene.add
@@ -209,7 +239,6 @@ export class CampView {
       .setScale(1.6)
       .setAlpha(0)
       .setName('camp-glow');
-    const way = wayIn(this.host.world, camp, walkedRoad(this.host.world, this.host.fieldMapId, places), places.map((p) => p.at));
     return {
       id: camp.id,
       key: `${camp.at.x},${camp.at.y}`,

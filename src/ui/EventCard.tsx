@@ -12,16 +12,15 @@
 // written too. If an event ever needs something this card cannot do, the honest fix is to change
 // the shared card, not to fork it.
 //
-// **What is different from an activity, and it is only one thing:** an activity has one action and
-// a way out, and an event has *n* choices and no way out. You do not decline a dream. So there is
-// no "Leave it" row here, and `choicesFor` guarantees at least one choice is always offered -- a
-// scene a player cannot leave is a soft lock.
+// Event choices resolve the scene. Conversation topics can change the displayed line before
+// the player takes one of those choices.
 //
 // Presentation only. What can happen, where, and what each choice grants are all
 // `content/events.ts`.
 
-import { useCallback, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { type Choice, type GameEvent, choicesFor } from '../content/events';
+import type { AmbientTopic } from '../content/twinAmbientTalk';
 import { firstArtSelection, preferredArtSelection, type ArtSelection } from './art';
 import { sceneNames } from './scenes';
 import { Modal } from './Modal';
@@ -48,20 +47,21 @@ export interface EventCardProps {
    */
   met?: readonly string[];
   /** Called once, with the choice taken and the line it writes. */
-  onChoose: (choice: Choice, art: ArtSelection | null) => void;
+  onChoose: (choice: Choice, art: ArtSelection | null, topic?: AmbientTopic) => void;
   onClose: () => void;
+  onTopicHeard?: (topic: AmbientTopic) => void;
 }
 
 export function EventCard(props: EventCardProps) {
   return (
     <Modal open label={props.event.title} onClose={props.onClose} veilClassName="diary-veil activity-veil">
-      <EventCardBody {...props} />
+      <EventCardBody key={props.event.id} {...props} />
     </Modal>
   );
 }
 
 export function EventCardBody({
-  event, holds, shelter, pick = 0, met = [], onChoose, onClose, continuation = 'Go on', alternatives, children
+  event, holds, shelter, pick = 0, met = [], onChoose, onClose, onTopicHeard, continuation = 'Go on', alternatives, children
 }: EventCardProps & { continuation?: string; alternatives?: ReactNode; children?: ReactNode }) {
   /**
    * The line the chosen option wrote, once one has been taken.
@@ -71,6 +71,11 @@ export function EventCardBody({
    * moment some outcome is legitimately empty.
    */
   const [taken, setTaken] = useState<{ line: string } | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<AmbientTopic['id'] | null>(null);
+  const topic = taken ? undefined : event.topics?.find(({ id }) => id === selectedTopic) ?? event.topics?.[0];
+  useEffect(() => {
+    if (topic) onTopicHeard?.(topic);
+  }, [topic, onTopicHeard]);
   const nextButton = useRef<HTMLButtonElement>(null);
   useLayoutEffect(() => {
     if (taken) nextButton.current?.focus();
@@ -93,9 +98,9 @@ export function EventCardBody({
     (choice: Choice) => {
       if (taken) return;
       setTaken({ line: choice.line });
-      onChoose(choice, selection);
+      onChoose(choice, selection, topic);
     },
-    [taken, onChoose, selection]
+    [taken, onChoose, selection, topic]
   );
 
   // The painting of this moment, then the event's own, then one that will do (a road's, for a road's
@@ -132,6 +137,19 @@ export function EventCardBody({
           )}
           <p className="activity-prose">{taken?.line || event.prose}</p>
 
+          {topic && (
+            <div className="event-topics">
+              <div className="event-topic-buttons" role="group" aria-label="Conversation topics">
+                {event.topics?.map(({ id, label }) => (
+                  <button key={id} type="button" className="activity-choice" aria-pressed={id === topic.id}
+                    onClick={() => setSelectedTopic(id)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="event-topic-reply" aria-live="polite">{topic.line}</p>
+            </div>
+          )}
           <div className="activity-choices">
             {taken ? (
               <button ref={nextButton} type="button" className="activity-choice primary" onClick={onClose}>
