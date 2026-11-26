@@ -6,7 +6,7 @@
 // rendering a component. What this guards:
 //
 //   * a stranger's face is on the card: a painted one from their own people's part of the pool
-//     when the pool has one, and otherwise drawn in the colours their figure wears on the road;
+//     when the pool has a compatible painting, and otherwise drawn in the colours their figure wears on the road;
 //   * an event about nobody is unchanged, with no empty face slot;
 //   * a woven choice hands its caller the whole choice, `gives` and `eases` included, exactly once.
 
@@ -14,17 +14,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { EventCard } from '../src/ui/EventCard';
 import { anyConditions, type GameEvent } from '../src/content/events';
-import { lookFor, swatchesFor } from '../src/content/looks';
+import { swatchesFor, type Look } from '../src/content/looks';
 
 afterEach(cleanup);
 
-/**
- * Whether the face pool reads as empty, for the one test of the drawn fallback.
- *
- * The pool is real art now -- twenty-four faces -- so every people has painted ones and the drawn
- * face is only reached when a pool is empty. That is still the state every new people starts in,
- * so it is still tested, by hiding the pool rather than by deleting art.
- */
+// Hide the real artwork to exercise the empty-pool fallback.
 let emptyPool = false;
 vi.mock('../src/ui/art', async (original) => {
   const actual = await original<typeof import('../src/ui/art')>();
@@ -37,7 +31,7 @@ afterEach(() => {
   emptyPool = false;
 });
 
-const look = lookFor('field_map_narmada:company_carrier', 'traveller-carrier')!;
+const look: Look = { body: 'traveller-carrier', skin: 'as-painted', cloth: 'undyed', second: 'indigo' };
 
 const event = (over: Partial<GameEvent> = {}): GameEvent => ({
   id: 'woven:company:company_carrier',
@@ -63,22 +57,24 @@ const event = (over: Partial<GameEvent> = {}): GameEvent => ({
 });
 
 describe('the card with a stranger on it', () => {
-  it('shows a painted face from their own people when the pool has one', () => {
+  it('shows a painted face from their own people when the pool has a compatible painting', () => {
     const { baseElement } = render(<EventCard event={event()} holds={[]} onChoose={() => {}} onClose={() => {}} />);
     const face = baseElement.querySelector('img.stranger-face');
     expect(face, 'no painted face on the card').not.toBeNull();
-    // A Harappan carrier is dealt a Harappan face or one that could be anybody -- never a Kia's.
-    expect(face!.getAttribute('src')).toMatch(/(harappan-[fm]-\d{2}|any-\d{2})/);
+    expect(face!.getAttribute('src')).toContain('harappan-f-04');
     expect(face!.closest('.event-heading')?.querySelector('h2')?.textContent).toBe('Company on the road');
   });
 
-  it('draws their face in the dyes their figure wears when the pool has none', () => {
-    emptyPool = true;
-    const { baseElement } = render(<EventCard event={event()} holds={[]} onChoose={() => {}} onClose={() => {}} />);
+  it.each([true, false])('draws the figure’s dyes without a matching painting (empty pool: %s)', (empty) => {
+    emptyPool = empty;
+    const fixture = event();
+    const fallbackLook = empty ? look : { ...look, cloth: 'leaf' };
+    const stranger = { ...fixture.stranger!, look: fallbackLook };
+    const { baseElement } = render(<EventCard event={{ ...fixture, stranger }} holds={[]} onChoose={() => {}} onClose={() => {}} />);
     const face = baseElement.querySelector('svg.stranger-face');
     expect(face, 'no face on the card').not.toBeNull();
     const fills = [...face!.querySelectorAll('path')].map((p) => p.getAttribute('fill'));
-    const { skin, headwear, shoulders } = swatchesFor(look);
+    const { skin, headwear, shoulders } = swatchesFor(fallbackLook);
     expect(fills).toEqual([shoulders, skin, headwear]);
     // The face sits beside the title, not somewhere else on the card.
     expect(face!.closest('.event-heading')?.querySelector('h2')?.textContent).toBe('Company on the road');
