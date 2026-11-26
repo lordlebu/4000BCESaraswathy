@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
-import {SITE,type SiteFrame} from './twinPlaceScenes';
+import {MEADOW_FIRST,MEADOW_FRAMES,SITE,type SiteFrame} from './twinPlaceScenes';
 import {RELIEF_CAVE_LEFT,RELIEF_CAVE_RIGHT,RELIEF_CAVE_SKIRT,RELIEF_ROCK_SUMMIT,RELIEF_SNOW_SUMMIT} from './twinRelief';
 
 export const TWIN_SITE_TEXTURE = 'twins-site-review';
 export const TWIN_RELIEF_TEXTURE = 'twins-relief-review';
+export const TWIN_LANDMARK_TEXTURE = 'twins-nes-landmarks';
 const WIDTH=32, SITE_HEIGHT=40, RELIEF_HEIGHT=48;
 type Ink=CanvasRenderingContext2D;
 type XY=readonly [number,number];
@@ -167,6 +168,38 @@ function paintCrown(c:Ink,frame:number){
   rect(c,'#8f9a87',4,44,7,2);rect(c,'#6b786a',22,43,8,2);
 }
 
+function paintMeadow(c:Ink,index:number){
+  const variant=index<4?index:index%3;
+  const sprig=(x:number,y:number,h:number)=>{
+    rect(c,'#657650',x,y-h+1,1,h-1);
+    rect(c,'#829166',x-1,y-h+2,1,h-2);
+    rect(c,'#9fa679',x-2,y-h,1,2);
+    rect(c,'#839366',x+1,y-h,1,Math.max(2,h-2));
+    rect(c,'#a5ac7e',x+2,y-h-1,1,2);
+  };
+  if(index>=25){
+    shape(c,'#b0b6a2',[[8,36],[12,31],[17,30],[20,31],[23,30],[25,35],[22,38],[12,39]]);
+    for(let i=0;i<3;i++)sprig(11+i*5,37,3+i%2);
+  }else if(index>=22||index>=7&&index<10){
+    shape(c,'#6e825d',[[6,36],[8,32],[13,30-variant],[20,31],[26,35],[23,38],[10,38]]);
+    shape(c,'#96a17b',[[9,35],[13,31-variant],[19,32],[21,34],[15,35]]);
+    sprig(19,37,4);sprig(12,36,3);
+  }else if(index>=19){
+    for(let i=0;i<4;i++)reed(c,9+i*4,25+(i+variant)%4,'#90965e');
+  }else if(index>=13){
+    shape(c,'#7a8270',[[10,36],[12,31],[17,30],[23,32],[25,36],[19,38],[13,38]]);
+    shape(c,'#a3a494',[[12,34],[15,31],[19,31],[22,33],[18,35]]);
+    if(index<16)rect(c,'#859363',14+variant,33,5,2);
+  }else{
+    for(let i=0;i<5;i++){
+      const x=8+i*4,y=34+(i+variant)%4;
+      const h=index>=4&&index<7?7+(i+variant)%4:3+(i+variant)%3;
+      sprig(x,y,h);
+      if(index>=10&&i%2===0)rect(c,i===2?'#c9b882':'#d4d2a8',x-1,y-h,3,1);
+    }
+  }
+}
+
 function bakeSheet(scene:Phaser.Scene,key:string,height:number,frames:readonly number[],draw:(c:Ink,id:number)=>void){
   if(scene.textures.exists(key))return;
   const columns=Math.min(8,frames.length);
@@ -182,7 +215,10 @@ function bakeSheet(scene:Phaser.Scene,key:string,height:number,frames:readonly n
 }
 
 export function bakeTwinScenery(scene:Phaser.Scene,relief:boolean){
-  bakeSheet(scene,TWIN_SITE_TEXTURE,SITE_HEIGHT,Object.values(SITE),(c,id)=>paintSite(c,id as SiteFrame));
+  bakeSheet(scene,TWIN_SITE_TEXTURE,SITE_HEIGHT,[...Object.values(SITE),...MEADOW_FRAMES],(c,id)=>{
+    if(id>=MEADOW_FIRST)paintMeadow(c,id-MEADOW_FIRST);
+    else paintSite(c,id as SiteFrame);
+  });
   if(relief)bakeSheet(scene,TWIN_RELIEF_TEXTURE,RELIEF_HEIGHT,
     [RELIEF_ROCK_SUMMIT,RELIEF_SNOW_SUMMIT,RELIEF_CAVE_SKIRT,RELIEF_CAVE_LEFT,RELIEF_CAVE_RIGHT],paintCrown);
 }

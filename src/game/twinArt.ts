@@ -3,6 +3,7 @@ import type Phaser from 'phaser';
 import highlandGround from '../../assets/twins/highland-ground-nes-jrpg.png?no-inline';
 import highlandForms from '../../assets/twins/highland-forms-nes-jrpg.png?no-inline';
 import { inTwinHighlands } from '../world/twinHighlands';
+import landmarks from '../../assets/twins/poi-landmarks.png?no-inline';
 import ground from '../../assets/twins/ground.png?no-inline';
 import objects from '../../assets/twins/objects.png?no-inline';
 import houses from '../../assets/twins/houses.png?no-inline';
@@ -44,7 +45,7 @@ export const TWIN_KEYS = { highlandGround:'twins-highland-ground', ground:'twins
   housesDetail:'twins-houses-detail', details:'twins-details', rims:'twins-rims', tramWalk:'twins-tram-walk', courtyard:'twins-courtyard' };
 export function loadTwinArt(scene: Phaser.Scene): void {
   for (const [key,url,w,h] of [[TWIN_KEYS.ground,ground,128,128],[TWIN_KEYS.highlandGround,highlandGround,128,128],
-    ['twins-highland-forms',highlandForms,128,160],[TWIN_KEYS.houses,houses,80,88],[TWIN_KEYS.objects,objects,128,160],
+    ['twins-nes-landmarks',landmarks,48,48],['twins-highland-forms',highlandForms,128,160],[TWIN_KEYS.houses,houses,80,88],[TWIN_KEYS.objects,objects,128,160],
     [TWIN_KEYS.routes,routes,128,128],[TWIN_KEYS.tram,tram,192,160],
     [TWIN_KEYS.housesDetail,housesDetail,80,88],[TWIN_KEYS.details,details,128,160],
     [TWIN_KEYS.rims,rims,128,128],[TWIN_KEYS.tramWalk,tramWalk,192,160],

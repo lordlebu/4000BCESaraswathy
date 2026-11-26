@@ -84,7 +84,7 @@ function paintRelief(ctx:CanvasRenderingContext2D,relief:ReliefCell,variant:numb
   const [dark,middle,light]=RELIEF_RAMP[material];
   // Joined edges meet at the same midtone and width. Keep continuous interiors quiet
   // so the range reads as one landform instead of a repeated hill stamp on every tile.
-  ctx.globalAlpha=.64;
+  ctx.globalAlpha=material==='hill'?.64:.79;
   for(let y=0;y<32;y++)for(let x=0;x<32;x++){
     const dx=x-15.5,dy=y-15.5, ax=Math.abs(dx),ay=Math.abs(dy);
     const side=ax>ay?(dx>0?1:3):(dy>0?2:0);
@@ -100,10 +100,10 @@ function paintRelief(ctx:CanvasRenderingContext2D,relief:ReliefCell,variant:numb
   for(let side=0;side<4;side++){
     if(!(faces&(1<<side)))continue;
     for(let along=1;along<31;along++){
-      const lip=3+Math.min(4,Math.floor(Math.min(along,31-along)/4))+(treatment==='terraces'?1:0);
+      const lip=3+Math.min(5,Math.floor(Math.min(along,31-along)/3))+(treatment==='terraces'?2:0);
       for(let d=1;d<=lip;d++){
         const [x,y]=edgePoint(side,along,d);
-        ctx.fillStyle=d===lip?light:side===0||side===3?middle:dark;
+        ctx.fillStyle=d===lip?light:d<lip-3 && (side===1||side===2)?dark:middle;
         ctx.fillRect(x,y,1,1);
       }
     }
