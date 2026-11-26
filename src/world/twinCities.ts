@@ -5,7 +5,7 @@ import type { BiomeId, Point, Tile, World } from './types';
 import type { FieldMap, PointOfInterest } from '../content/places';
 import type { FieldMapWorld } from './fieldMap';
 
-export const TWIN_MAP = 'field_map_twins';
+export { TWIN_MAP } from './twinGeneration';
 export interface CityDistrict { id: 'harappa' | 'mohenjodaro'; name: string; x: number; y: number; radius: number }
 export interface TwinRegion {
   districts: CityDistrict[];

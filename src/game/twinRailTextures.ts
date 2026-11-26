@@ -1,15 +1,15 @@
 import Phaser from 'phaser';
-import { TWIN_RAIL_REVIEW_FRAMES, railCurve } from './twinRail';
+import { TWIN_RAIL_DETAIL_FRAMES, railCurve } from './twinRail';
 
-export const TWIN_RAIL_REVIEW = 'twins-rail-review';
+export const TWIN_RAIL_DETAILS = 'twins-rail-detail';
 const PIXELS = 32;
 
-export function bakeTwinRailReview(scene: Phaser.Scene) {
-  if (scene.textures.exists(TWIN_RAIL_REVIEW)) return;
-  const atlas = scene.textures.createCanvas(TWIN_RAIL_REVIEW, PIXELS * TWIN_RAIL_REVIEW_FRAMES.length, PIXELS);
+export function bakeTwinRailDetails(scene: Phaser.Scene) {
+  if (scene.textures.exists(TWIN_RAIL_DETAILS)) return;
+  const atlas = scene.textures.createCanvas(TWIN_RAIL_DETAILS, PIXELS * TWIN_RAIL_DETAIL_FRAMES.length, PIXELS);
   if (!atlas) throw new Error('Could not create the Twin Cities rail review atlas');
   const ctx = atlas.getContext();
-  for (const [frame, mask] of TWIN_RAIL_REVIEW_FRAMES.entries()) {
+  for (const [frame, mask] of TWIN_RAIL_DETAIL_FRAMES.entries()) {
     const left = frame * PIXELS;
     ctx.save();
     ctx.translate(left, 0);

@@ -10,7 +10,7 @@ import { TWIN_PROFILE } from '../src/world/twinHybrid';
 import { twinGenerationFor } from '../src/world/twinGeneration';
 import { loadJourney, saveJourney } from '../src/save';
 import { MAX_TWIN_TERRAIN_FRAMES, terrainAtlasLayout, terrainColourFor, twinTerrainProfile } from '../src/game/twinTerrain';
-import { railMask, tramOnRail, usesRailReviewFrame } from '../src/game/twinRail';
+import { railMask, tramOnRail, usesRailDetailFrame } from '../src/game/twinRail';
 
 const map = fieldMap(TWIN_MAP)!;
 const build = (seed: string) => buildFieldMap(map, { seed, twinGeneration: 2 });
@@ -60,6 +60,8 @@ it('preserves unversioned saves and restores baked maps ahead of the requested g
   const seed = 'older-valley';
   expect(loadJourney(seed).twinGeneration).toBeUndefined();
   expect(twinGenerationFor(undefined, null, false)).toBe(1);
+  expect(twinGenerationFor(undefined, null, true)).toBe(2);
+  expect(twinGenerationFor(undefined, '1', true)).toBe(1);
   expect(twinGenerationFor(undefined, '2', false)).toBe(2);
   saveJourney(seed, { discovered: ['1,2'], reached: false, collection: {} });
   expect(twinGenerationFor(loadJourney(seed).twinGeneration, '2', false)).toBe(1);
@@ -124,7 +126,7 @@ it('joins the replacement rail frames and holds the same centreline in both dire
   const region = build('hybrid-review-0').world.twinRegion!;
   const route = [region.stations[0]!, ...region.rail, region.stations[1]!];
   const reversed = [...route].reverse();
-  expect(route.filter((_, i) => usesRailReviewFrame(railMask(route, i)))).toHaveLength(4);
+  expect(route.filter((_, i) => usesRailDetailFrame(railMask(route, i)))).toHaveLength(4);
   const steps = (route.length - 1) * 32;
   let last = route[0]!;
   for (let n = 0; n <= steps; n++) {

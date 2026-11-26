@@ -1,7 +1,8 @@
 export type TwinGeneration = 1 | 2;
 
-/** Once the new valley passes visual review, newly created journeys pin version 2. */
-export const NEW_TWIN_GENERATION: TwinGeneration = 1;
+/** Newly created journeys pin this version. Unversioned seed links still mean version 1. */
+export const NEW_TWIN_GENERATION: TwinGeneration = 2;
+export const TWIN_MAP = 'field_map_twins';
 
 export function twinGenerationFor(
   saved: TwinGeneration | undefined,

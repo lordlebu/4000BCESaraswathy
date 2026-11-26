@@ -21,10 +21,10 @@ export function railMask(route: readonly Point[], index: number): number {
 
 const CORNERS = [3, 6, 12, 9];
 const TERMINALS = [1, 2, 4, 8];
-export const TWIN_RAIL_REVIEW_FRAMES = [...TERMINALS, ...CORNERS];
+export const TWIN_RAIL_DETAIL_FRAMES = [...TERMINALS, ...CORNERS];
 
-export function usesRailReviewFrame(mask: number): boolean {
-  return TWIN_RAIL_REVIEW_FRAMES.includes(mask);
+export function usesRailDetailFrame(mask: number): boolean {
+  return TWIN_RAIL_DETAIL_FRAMES.includes(mask);
 }
 
 /** Edge-to-edge rail geometry in tile-local coordinates relative to the tile centre. */

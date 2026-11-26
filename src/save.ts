@@ -10,8 +10,7 @@ import { type Satchel, emptySatchel } from './content/satchel';
 import { type Drawn, type Nodes, noNodes } from './content/nodes';
 import { type Progress, emptyProgress } from './journey';
 import type { DiaryEventEntry, EventOrigin } from './content/diaryEvents';
-
-const PREFIX = 'south-of-tethys';
+import { journeyStorageKey as key } from './storageKeys';
 
 /**
  * Bump when the payload shape changes. The Phaser shell reset it to 1; `reached` made it 3;
@@ -388,10 +387,6 @@ function readNodes(value: unknown): Nodes {
     out[at] = { left, day };
   }
   return out;
-}
-
-function key(seed: string): string {
-  return `${PREFIX}:${seed}`;
 }
 
 export function loadJourney(seed: string): Journey {

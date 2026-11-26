@@ -3,16 +3,20 @@ import { examineFirst } from './context-event';
 
 const query='?map=field_map_twins&seed=twin-demo&hour=10&door=open&events=off&firsts=off';
 
-test('a versioned Twin Cities link restores the same valley and atlas after reload', async ({page}) => {
-  const versioned = query.replace('seed=twin-demo','seed=twin-hybrid-browser')+'&twinGen=2&at=poi_harappa_station';
+test('a fresh Twin Cities walk shares generation 2 and restores it after reload', async ({page}) => {
+  await page.addInitScript(() => Object.defineProperty(navigator, 'webdriver', {get: () => false}));
+  const fresh = query.replace('&seed=twin-demo', '')+'&at=poi_harappa_station';
   const read = () => page.evaluate(() => (window as unknown as {
-    __walker?: () => {twinGeneration: number; twinTerrain: {frames: number; texture: string}};
+    __walker?: () => {twinGeneration: number; twinRailDetails: number; twinTerrain: {frames: number; texture: string}};
   }).__walker?.());
-  await page.goto(versioned);
+  await page.goto(fresh);
   await expect.poll(async () => (await read())?.twinGeneration,{timeout:45000}).toBe(2);
-  const terrain = (await read())!.twinTerrain;
+  const {twinTerrain: terrain, twinRailDetails} = (await read())!;
+  expect(new URL(page.url()).searchParams.get('seed')).toBeTruthy();
+  expect(new URL(page.url()).searchParams.get('twinGen')).toBe('2');
   expect(terrain.texture).toBe('twins-terrain-surface');
   expect(terrain.frames).toBeLessThanOrEqual(768);
+  expect(twinRailDetails).toBe(4);
   await page.reload();
   await expect.poll(async () => (await read())?.twinGeneration,{timeout:45000}).toBe(2);
   expect((await read())!.twinTerrain.frames).toBe(terrain.frames);
@@ -26,6 +30,11 @@ test('new city art loads and the ostrich tram follows the causeway in both direc
   await page.goto(query+'&at=poi_harappa_station');
   const ride=page.getByRole('button',{name:/ride the ostrich tram/i});
   await expect(ride).toBeEnabled({timeout:45000});
+  const legacy = await page.evaluate(() => (window as unknown as {
+    __walker: () => {twinGeneration: number; twinRailDetails: number};
+  }).__walker());
+  expect(legacy.twinGeneration).toBe(1);
+  expect(legacy.twinRailDetails).toBe(4);
   expect(loaded.some(u=>/\/ground(?:-|\.png)/.test(u))).toBe(true);expect(loaded.some(u=>/\/objects(?:-|\.png)/.test(u))).toBe(true);
   const wildlife=await page.evaluate(()=>(window as unknown as {__wanderers:()=>{id:string;texture:string;w:number}[]}).__wanderers());
   expect(wildlife).toHaveLength(4);

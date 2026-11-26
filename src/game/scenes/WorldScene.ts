@@ -4,7 +4,7 @@ import {TWIN_TURF,type TwinTurf} from '../twinTerrain';
 import {railSpanWidth} from '../twinWalkway';
 import { addCourtyardShadow, COURTYARD_SHADOW } from '../twinCourtyardShadow';
 import { tramOnRail } from '../twinRail';
-import { bakeTwinRailReview, TWIN_RAIL_REVIEW } from '../twinRailTextures';
+import { bakeTwinRailDetails, TWIN_RAIL_DETAILS } from '../twinRailTextures';
 import { loadTwinArt, TWIN_KEYS, twinGroundArt } from '../twinArt';
 import { TWIN_MAP } from '../../world/twinCities';
 // The map: everything the player sees on the canvas.
@@ -123,7 +123,7 @@ const SHEET_KEY: Record<
   string
 > = {
   twinHouses: TWIN_KEYS.houses, twinObjects: TWIN_KEYS.objects, twinRoutes: TWIN_KEYS.routes,
-  twinRailReview: TWIN_RAIL_REVIEW,
+  twinRailDetail: TWIN_RAIL_DETAILS,
   twinHousesDetail: TWIN_KEYS.housesDetail, twinDetails: TWIN_KEYS.details, twinRims: TWIN_KEYS.rims,
   twinCourtyard: TWIN_KEYS.courtyard,
   twinSurfaces: 'twins-surfaces',
@@ -621,11 +621,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private twinGeneration: 1 | 2 = 1;
-  private reviewTwinRail = false;
+  private smoothTwinRail = true;
 
   init(data: WorldSceneData): void {
     this.twinGeneration = data.twinGeneration ?? 1;
-    this.reviewTwinRail = import.meta.env.DEV && new URLSearchParams(window.location.search).get('twinRailReview') === '1';
+    this.smoothTwinRail = !import.meta.env.DEV || new URLSearchParams(window.location.search).get('twinRailReview') !== '0';
     this.character = characterFor(data.characterId);
     this.fieldMapId = data.fieldMapId ?? DEFAULT_FIELD_MAP;
     // A restart re-enters init, so every piece of per-journey state is reset here rather than in
@@ -971,8 +971,8 @@ export class WorldScene extends Phaser.Scene {
    * ever needs a decision, that decision belongs in the plan rather than here.
    */
   private createGround(): void {
-    if (this.reviewTwinRail && this.world.twinRegion) bakeTwinRailReview(this);
-    const scenery = planScene(this.built, this.reviewTwinRail);
+    if (this.smoothTwinRail && this.world.twinRegion) bakeTwinRailDetails(this);
+    const scenery = planScene(this.built, this.smoothTwinRail);
     for (const item of scenery) {
       // The offset is a fraction of a cell and only decor carries one -- see `Placement.offset`.
       // Converting it here rather than in the plan is the same split as everything else: the plan
@@ -1144,7 +1144,7 @@ export class WorldScene extends Phaser.Scene {
         .image(cx, anchored ? item.y * TILE_SIZE + TILE_SIZE : cy, SHEET_KEY[item.sheet], item.frame)
         .setDepth(item.depth);
       if (anchored) sprite.setOrigin(0.5, 1);
-      if (item.sheet === 'twinRailReview') sprite.setDisplaySize(TILE_SIZE, TILE_SIZE).setVertexRoundMode('full');
+      if (item.sheet === 'twinRailDetail') sprite.setDisplaySize(TILE_SIZE, TILE_SIZE).setVertexRoundMode('full');
       if(item.crop)sprite.setCrop(item.crop.x,item.crop.y,item.crop.width,item.crop.height);
       if(item.sheet==='twinRailBridge'){
         // Source iron is on native rows 16/20. At 6px/row it matches the existing 24px rail gauge.
@@ -1326,7 +1326,7 @@ export class WorldScene extends Phaser.Scene {
     this.carriage = this.add.image(0, 0, this.world.twinRegion ? TWIN_KEYS.tram : CARRIAGE_IMAGE).setOrigin(0.5, 1).setVisible(false);
     if (this.world.twinRegion) {
       const p = this.world.twinRegion.stations[0]!;
-      const foot = this.reviewTwinRail ? TWIN_TRAM_FOOT_Y : 1;
+      const foot = this.smoothTwinRail ? TWIN_TRAM_FOOT_Y : 1;
       this.carriage.setPosition((p.x + .5) * TILE_SIZE, (p.y + foot) * TILE_SIZE)
         .setDepth(depthFor(p.y, ROW_SLOT.walker)).setVisible(true);
     }
@@ -2084,7 +2084,7 @@ export class WorldScene extends Phaser.Scene {
     this.carriage.setVisible(true).setPosition(this.player.x, this.player.y).setDepth(this.player.depth);
     if (this.world.twinRegion) {
       this.carriage.setTexture(TWIN_KEYS.tramWalk, 0);
-      if (this.reviewTwinRail) this.carriage.y = (ride.from.y + TWIN_TRAM_FOOT_Y) * TILE_SIZE;
+      if (this.smoothTwinRail) this.carriage.y = (ride.from.y + TWIN_TRAM_FOOT_Y) * TILE_SIZE;
     }
     // **Held on the car, not eased after it.** The walk's 9% a frame is a gentle trail at walking
     // pace; at four times that pace, on a slow frame rate, it fell so far behind that the carriage
@@ -2134,7 +2134,7 @@ export class WorldScene extends Phaser.Scene {
       const distance=eased*(ride.line.length-1), i=Math.min(ride.line.length-2,Math.floor(distance)), f=distance-i;
       const a=ride.line[i]!, b=ride.line[i+1]!;
       heading=b.x>a.x?0:b.x<a.x?1:b.y<a.y?2:3;
-      if (this.reviewTwinRail) {
+      if (this.smoothTwinRail) {
         const pose = tramOnRail(ride.line, eased);
         this.player.setPosition((pose.at.x + .5) * TILE_SIZE, (pose.at.y + TWIN_TRAM_FOOT_Y) * TILE_SIZE);
         heading = pose.heading;
@@ -2379,6 +2379,7 @@ export class WorldScene extends Phaser.Scene {
       carriageFrame: this.carriage.frame.name,
       twinAmbience: this.twinAmbience?.report()??null,
       twinGeneration: this.world.twinRegion ? this.world.twinRegion.generation ?? 1 : null,
+      twinRailDetails: this.children.list.filter(sprite => (sprite as Phaser.GameObjects.Image).texture?.key === TWIN_RAIL_DETAILS).length,
       twinTerrain:this.twinTerrainInfo?{...this.twinTerrainInfo,
         texture:this.tileSprites[this.at.y]?.[this.at.x]?.texture.key,
         width:this.tileSprites[this.at.y]?.[this.at.x]?.displayWidth,

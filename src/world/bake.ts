@@ -24,6 +24,7 @@
 // of `Tile[][]` and a localStorage budget of roughly 5 MB.
 
 import { poisOn, type FieldMap, type PointOfInterest } from '../content/places';
+import { worldStorageKey as key } from '../storageKeys';
 import { THRESHOLDS, band } from './classify';
 import { buildFieldMap, type FieldMapWorld, type PlacedPoi } from './fieldMap';
 import type { BiomeId, LandmarkTerrain, Point, River, Tile, World } from './types';
@@ -320,12 +321,6 @@ export function restoreWorld(baked: BakedWorld, fieldMap: FieldMap): FieldMapWor
 /** Round-trip a world through the bake format, as storage would. Exported for tests. */
 export function rebake(built: FieldMapWorld): FieldMapWorld | null {
   return restoreWorld(JSON.parse(JSON.stringify(bakeWorld(built))) as BakedWorld, built.fieldMap);
-}
-
-const PREFIX = 'south-of-tethys:world';
-
-function key(seed: string, fieldMapId: string): string {
-  return `${PREFIX}:${seed}:${fieldMapId}`;
 }
 
 /**

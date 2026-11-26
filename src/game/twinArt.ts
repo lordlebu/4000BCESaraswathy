@@ -38,7 +38,7 @@ import type { FieldMapWorld } from '../world/fieldMap';
 import type { Tile, World } from '../world/types';
 import type { Placement } from './scenePlan';
 import { pointKey } from '../world/pathfind';
-import { railMask, usesRailReviewFrame } from './twinRail';
+import { railMask, usesRailDetailFrame } from './twinRail';
 
 export const TWIN_KEYS = { highlandGround:'twins-highland-ground', ground:'twins-ground', houses:'twins-houses', objects:'twins-objects', routes:'twins-routes', tram:'twins-tram',
   housesDetail:'twins-houses-detail', details:'twins-details', rims:'twins-rims', tramWalk:'twins-tram-walk', courtyard:'twins-courtyard' };
@@ -68,11 +68,11 @@ export function twinGroundFrame(world:World,tile:Tile,variant:number):number {
     : ({desert:0,hills:1,plains:2,river:3,wetland:4,coast:5,sea:6,landmark:5} as Record<string,number>)[tile.biome]??0;
   return index*4+variant%4;
 }
-export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=new Set(),reviewRail=false):Placement[] {
+export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=new Set(),smoothRail=true):Placement[] {
   const {world,placed}=built;const region=world.twinRegion!;const out:Placement[]=[];
   const generatedLots = region.residentialLots && new Set(region.residentialLots.map(pointKey));
   const railRoute = [region.stations[0]!, ...region.rail, region.stations[1]!];
-  const orderedRail = reviewRail ? new Map(railRoute.map((point, index) => [pointKey(point), railMask(railRoute, index)])) : null;
+  const orderedRail = smoothRail ? new Map(railRoute.map((point, index) => [pointKey(point), railMask(railRoute, index)])) : null;
   const railArt=planTwinRailBridges(world),spans=railArt.filter(p=>p.sheet==='twinRailBridge');
   const onRailSpan=(x:number,y:number)=>spans.some(p=>p.y===y&&Math.abs(x-(p.x+(p.offset?.x??0)))<=(p.spanTiles!-1)/2);
   const clear=new Set<string>();
@@ -111,8 +111,8 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
       if(tile.bridge)add('twinObjects',18,x,y);
       const material=twinRoadMaterial(built,tile),mask=(tile.track ? orderedRail?.get(pointKey(tile)) : undefined)
         ?? neighbours(x,y,tile.track?'track':'road');
-      if (tile.track && reviewRail && usesRailReviewFrame(mask)) {
-        out.push({ sheet:'twinRailReview', frame:mask, x, y, depth:70, name:'rail:corner' });
+      if (tile.track && smoothRail && usesRailDetailFrame(mask)) {
+        out.push({ sheet:'twinRailDetail', frame:mask, x, y, depth:70, name:'rail:corner' });
       } else if(tile.track||material==='sand')add('twinRoutes',(tile.track?16:0)+mask,x,y);
       else out.push({sheet:'twinRoads',frame:({stone:0,sandstone:16,brick:32} as const)[material]+mask,
         x,y,depth:70,name:`road:${material}`});
@@ -159,8 +159,8 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
   out.push(...furnishings,...twinBankDepth(built),...railArt);
   if (orderedRail) for (const station of region.stations) {
     const mask = orderedRail.get(pointKey(station));
-    if (mask !== undefined && usesRailReviewFrame(mask)) {
-      out.push({ sheet:'twinRailReview', frame:mask, ...station, depth:71, name:'rail:terminal' });
+    if (mask !== undefined && usesRailDetailFrame(mask)) {
+      out.push({ sheet:'twinRailDetail', frame:mask, ...station, depth:71, name:'rail:terminal' });
     }
   }
   // Follow the actual drain-court anchor on restored maps; leave its east bank
