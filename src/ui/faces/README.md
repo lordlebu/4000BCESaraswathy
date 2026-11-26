@@ -5,9 +5,9 @@ the game puts on every map and canon never wrote down. Every other folder beside
 up by the name of what it depicts; this one is not. A face here belongs to nobody in particular
 until `StrangerFace.tsx` deals it to somebody.
 
-**Empty, and nothing waits for it.** Until a face lands, a stranger is drawn from their own look —
-their skin, the headwear their body wears, and their clothes in the same dyes as the figure walking
-the map (`src/content/looks.ts`). A painted face replaces that the moment the pool holds one.
+The traveller’s seeded look supplies skin, headwear and garment colours for both the map figure
+and the portrait. Each eligible painting has appearance metadata in `StrangerFace.tsx`. The
+illustrated portrait uses the same look when no painting matches.
 
 ## Naming
 
@@ -21,10 +21,9 @@ Build them from `assets/source/faces/` with `node tools/build-plates.js --faces`
 
 ## How a face is chosen
 
-From the stranger's own people's faces and the `any-` ones, by rendezvous hash of who they are
-(`weightedPickFor` in `world/rng.ts`). So the same carrier has the same face on every machine and
-every reload, and adding a face changes only the strangers it outright wins. A people with no
-faces yet is dealt the `any-` ones; with none of those either, the drawn face.
+Match headwear, skin and the visible garment dyes, then prefer matching paintings from the
+stranger’s own culture. The selector uses the stable traveller id and given name to choose among
+compatible paintings. Give an approved painting metadata when its dress matches a map body.
 
 The gender in the name is the painting's and goes no further: event prose calls a stranger *they*.
 

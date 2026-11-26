@@ -117,6 +117,7 @@ function StrangerCard({
           <p className="plate-card-facts">
             {people && <span>{people}</span>}
             {map && <span>{map}</span>}
+            {traveller.campId && <span>Temporary camp</span>}
           </p>
           {met.between.length >= 2 && (
             <p className="plate-card-prose">

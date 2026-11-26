@@ -8,7 +8,8 @@
 // bus listeners that ask moved with the question they ask; the rest of the bus stays in `App`.
 // `Happens`, the shape everything else calls it by, is `useRoadTalk`'s.
 
-import { useEffect, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
+import type { AmbientTopic } from '../content/twinAmbientTalk';
+import { useCallback, useEffect, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import { EventBus, type GameToUi } from '../game/EventBus';
 import { isComplete, receiveAll, type Progress, type WorldMoment } from '../journey';
 import { events, type Choice, type GameEvent, type Occasion } from '../content/events';
@@ -434,7 +435,7 @@ export function useHappenings({
     // Registered once, like the rest of the bus: every handler reads the refs, never the closure.
   }, []);
 
-  function resolveEvent(event: GameEvent, choice: Choice, art: ArtSelection | null) {
+  function resolveEvent(event: GameEvent, choice: Choice, art: ArtSelection | null, topic?: AmbientTopic) {
     if (event.once && (event.origin === 'discovery' || event.origin === 'sub-location') &&
         seenEvents.current.includes(event.id)) return;
     // Through the same door a conversation uses. An event grants the same kinds of thing a
@@ -466,6 +467,8 @@ export function useHappenings({
     // Noted rather than announced, like every other outcome in this game: the progression
     // is a written journal and a thing that happened to you is a line in it.
     setMemory(choice.line);
+    const news = event.topics?.find(({ id }) => id === 'news');
+    const prose = [event.prose, news?.line, topic?.id === 'news' ? null : topic?.line].filter(Boolean).join(' ');
     setDiaryEvents((entries) => [
       ...entries,
       {
@@ -474,7 +477,7 @@ export function useHappenings({
         origin: event.origin ?? (event.id.startsWith('happening_') ? 'happening' : 'woven'),
         ...(event.subjectId ? { subjectId: event.subjectId } : {}),
         title: event.title,
-        prose: event.prose,
+        prose,
         choiceId: choice.id,
         choiceLabel: choice.label,
         outcome: choice.line,
@@ -491,6 +494,11 @@ export function useHappenings({
     }
   }
 
+  const hearTopic = useCallback(({ historyKey, day }: AmbientTopic) => {
+    if (eventDays.current[historyKey] === day) return;
+    eventDays.current = { ...eventDays.current, [historyKey]: day };
+  }, [eventDays]);
+
   /** The event card's props, or null while nothing is open. */
   const card: EventCardProps | null = happening
     ? {
@@ -498,7 +506,8 @@ export function useHappenings({
         shelter: happening.shelter,
         met: metStrangers.current,
         holds: [...progress.words, ...Object.keys(progress.rungs), ...progress.recipes],
-        onChoose: (choice, art) => resolveEvent(happening.event, choice, art),
+        onChoose: (choice, art, topic) => resolveEvent(happening.event, choice, art, topic),
+        onTopicHeard: hearTopic,
         onClose: () => setHappening(null)
       }
     : null;

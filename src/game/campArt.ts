@@ -41,6 +41,28 @@ export const CAMP_LAYOUT: Readonly<Record<CampKind, CampLayout>> = {
   drovers: { shelter: 2, extras: [3], ground: 1 } // felt tent; a rack of skins; the thorn fold underneath
 };
 
+type CampDetail =
+  | { piece: number; scale: number }
+  | { decor: string; scale: number };
+
+export const TWIN_CAMP_DETAILS: Readonly<Partial<Record<CampKind, readonly CampDetail[]>>> = {
+  adventurers: [
+    { piece: 2, scale: 0.64 },
+    { decor: 'pebbles', scale: 0.95 },
+    { decor: 'twig', scale: 0.85 }
+  ],
+  pilgrims: [
+    { piece: 2, scale: 0.58 },
+    { decor: 'forest-stone', scale: 0.8 },
+    { decor: 'wildflower', scale: 0.85 }
+  ],
+  drovers: [
+    { piece: 1, scale: 0.5 },
+    { piece: 3, scale: 0.55 },
+    { decor: 'dry-brush', scale: 0.9 }
+  ]
+};
+
 /**
  * A piece that carries a flame of its own, and where the flame is in the piece's own pixels.
  *

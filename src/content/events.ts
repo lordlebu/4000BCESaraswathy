@@ -18,6 +18,7 @@
 //
 // Pure and free of React and Phaser, like the rest of `content/`. No clock: the caller says when.
 
+import type { AmbientTopic } from './twinAmbientTalk';
 import placesBundle from '../../data/canon/places.json';
 import type { Look } from './looks';
 import type { StrangerCulture } from './travellers';
@@ -155,6 +156,7 @@ export interface GameEvent {
   conditions: Conditions;
   /** The passage, in the diary's voice. This is the event. */
   prose: string;
+  topics?: readonly AmbientTopic[];
   /**
    * What the painting is called, in `src/ui/events/`.
    *
