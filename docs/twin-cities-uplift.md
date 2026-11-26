@@ -27,7 +27,7 @@ Declare the dimensions and protected anchors in `MapProfile`. Supply a base layo
 
 The desktop and touch comparison covers eight views each, with current and proposed versions for a total of 32 captures. It includes the two bends and station approaches, both bridges, Windward Cave, Harappa at dusk, the Brick Quarter and the waterfront.
 
-On the review seed the ground atlas uses 582 frames in generation 2 and 525 in generation 1, against a 768-frame budget. In local software-rendered Chromium the median of eight sampled view medians was 117 ms at the desktop viewport and 67 ms at the mobile viewport for both layouts. These measurements describe that local renderer. The production build puts startup at 169.25 KiB gzip against its 180 KiB budget. Typecheck and the canon lock passed.
+On the review seed the ground atlas uses 582 frames in generation 2 and 525 in generation 1, against a 768-frame budget. In local software-rendered Chromium the median of eight sampled view medians was 117 ms at the desktop viewport and 67 ms at the mobile viewport for both layouts. These measurements describe that local renderer. The approved production build puts startup at 169.39 KiB gzip against its 180 KiB budget. Typecheck and the canon lock passed. Production browser checks confirmed that the fresh layout survives reload and that the tram runs both ways with the approved rail.
 
 ## Release
 
