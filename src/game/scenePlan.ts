@@ -95,6 +95,7 @@ export type PlacementSheet =
   | 'twinHighlandForms'
   | 'twinRelief'
   | 'twinSite'
+  | 'twinLandmark'
   | 'overdraw'
   | 'features'
   | 'flora'

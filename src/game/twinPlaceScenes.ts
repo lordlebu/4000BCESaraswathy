@@ -7,6 +7,7 @@ import type {Placement} from './scenePlan';
 import {twinHome} from './twinEnvironment';
 import {RELIEF_CAVE_LEFT, RELIEF_CAVE_RIGHT, RELIEF_CAVE_SKIRT, RELIEF_DIRECTIONS, planTwinSummits} from './twinRelief';
 import {planTwinResidents} from './twinResidents';
+import {planCaveWalks} from './caveCamp';
 import {bustSite} from './twinStoryArt';
 import type {TwinSceneryReview} from './twinSceneryReview';
 
@@ -17,6 +18,14 @@ export const SITE = {
   basket:22, reedMat:23, seat:24, earthenWall:25, brickWall:26, shadeTree:27
 } as const;
 export type SiteFrame = (typeof SITE)[keyof typeof SITE];
+export const MEADOW_FIRST = 28;
+export const MEADOW_FRAMES = Array.from({length:28},(_,index)=>MEADOW_FIRST+index);
+export const TWIN_LANDMARK_IDS = [
+  'poi_harappa_court','poi_earthen_workshop','poi_nesting_ruins','poi_harappa_station',
+  'poi_brick_quarter','poi_drain_court','poi_planted_ruins','poi_twin_landing',
+  'poi_twin_causeway','poi_desert_ground','poi_reed_junction','poi_twin_cove',
+  'poi_dune_windbreak','poi_reedwright_bank','poi_nesting_cove','poi_northwest_cave_camp'
+] as const;
 const DRY = new Set(['settlement','desert','plains','hills','forest','coast']);
 const HOME_SHEETS = new Set(['twinHouses','twinHousesDetail','twinHomesPainted']);
 const STRUCTURES = new Set([...HOME_SHEETS,'twinDetails','twinObjects','twinCourtyard','twinStories','twinEnvironment','twinCaveProps','twinHighlandLife']);
@@ -114,6 +123,27 @@ export function planTwinScenery(built:FieldMapWorld,baseline:readonly Placement[
         if(DISTANCE(p,cave)>8)continue;
         for(const tile of neighbours(p))if(dry(tile)&&!occupancy.has(pointKey(tile)))addFloor(SITE.riverEdge,tile,'highland:meltwater');
       }
+      const clear=new Set(baseline.filter(p=>STRUCTURES.has(p.sheet)).map(pointKey));
+      // The door, seats, fire, and both household routes keep their readable silhouettes.
+      for(let day=0;day<30;day+=5){
+        const residents=planTwinResidents(built,baseline,day);
+        for(const person of residents)clear.add(pointKey(person));
+        for(const walk of planCaveWalks(built,baseline,residents))for(const tile of walk.points)clear.add(pointKey(tile));
+      }
+      for(const tile of world.tiles.flat()){
+        if(!dry(tile)||DISTANCE(cave,tile)>11||!['plains','hills'].includes(tile.biome))continue;
+        if(DISTANCE(cave,tile)<=1||reserved.has(pointKey(tile))||clear.has(pointKey(tile)))continue;
+        const hash=tileHash(world.seed,tile.x,tile.y,'windward-meadow');
+        const patch=tileHash(world.seed,Math.floor(tile.x/3),Math.floor(tile.y/3),'windward-grass-patch');
+        const bank=nearBank(tile);
+        if(hash%8>(bank?6:patch%2?5:2))continue;
+        const edge=neighbours(tile).some(n=>n?.biome==='snow');
+        const family=bank?19:edge?25:hash%13===0?22:hash%11===0?16:hash%7===0?13:
+          hash%5===0?10:patch%3===0?7:patch%2===0?4:0;
+        const frame=MEADOW_FIRST+family+(hash>>>8)%(family===0?4:3);
+        planned.push({sheet:'twinSite',frame,x:tile.x,y:tile.y,depth:74,
+          offset:{x:((hash>>>16)%9-4)/32,y:((hash>>>23)%7-3)/32},name:'highland:meadow'});
+      }
     }
   }
 
@@ -162,11 +192,37 @@ export function planTwinScenery(built:FieldMapWorld,baseline:readonly Placement[
           addFloor(district.id==='mohenjodaro'?SITE.brickCourt:SITE.yard,tile,'twin-site:outskirts');
         }
         const yard=candidates.find(t=>DISTANCE(t,center)<=2&&!occupancy.has(pointKey(t)));
-        if(yard)addFloor(SITE.clippedGarden,yard,'twin-site:outskirts');
+        if(yard){
+          addFloor(SITE.clippedGarden,yard,'twin-site:outskirts');
+          const adjoining=neighbours(yard).find(t=>dry(t)&&!occupancy.has(pointKey(t))&&
+            !floorCells.has(pointKey(t))&&DISTANCE(t,district)>district.radius);
+          if(adjoining)addFloor(SITE.clippedGarden,adjoining,'twin-site:cultivation');
+        }
       }
       if(!centers.length){
         const yard=candidates.find(routeAdjacent);
         if(yard)addFloor(SITE.clippedGarden,yard,'twin-site:outskirts');
+      }
+    }
+  }
+  if(review.landmarks){
+    const waterfront=new Set(['poi_twin_landing','poi_twin_causeway','poi_reed_junction','poi_twin_cove','poi_reedwright_bank','poi_nesting_cove']);
+    for(const [frame,id] of TWIN_LANDMARK_IDS.entries()){
+      const at=anchors.get(id);if(!at)continue;
+      const bank=waterfront.has(id);
+      const candidates=world.tiles.flat().filter(t=>DISTANCE(t,at)<=4&&
+        (DRY.has(t.biome)||bank&&t.biome==='wetland')&&!transport.has(pointKey(t))&&!reserved.has(pointKey(t))&&
+        (!occupancy.has(pointKey(t))||id==='poi_northwest_cave_camp'&&t.y<at.y&&DISTANCE(t,at)===2&&
+          !baseline.some(p=>p.x===t.x&&p.y===t.y)&&!transport.has(pointKey(t))));
+      candidates.sort((a,b)=>Number(bank&&nearBank(b))-Number(bank&&nearBank(a))||
+        DISTANCE(a,at)-DISTANCE(b,at)||Number(a.y>=at.y)-Number(b.y>=at.y)||a.x-b.x);
+      const tile=candidates[0];if(!tile)continue;
+      occupancy.add(pointKey(tile));
+      planned.push({sheet:'twinLandmark',frame,x:tile.x,y:tile.y,depth:depthFor(tile.y,ROW_SLOT.undergrowth),
+        name:`twin-site:landmark:${id}`});
+      if(bank&&nearBank(tile))for(const edge of neighbours(tile)){
+        if(edge&&['wetland','coast','plains','desert'].includes(edge.biome)&&!occupancy.has(pointKey(edge)))
+          addFloor(SITE.riverEdge,edge,`twin-site:bank:${id}`);
       }
     }
   }

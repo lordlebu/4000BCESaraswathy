@@ -4,9 +4,12 @@ export interface TwinSceneryReview {
   relief?: ReliefStyle;
   civic?: boolean;
   outlying?: boolean;
+  landmarks?: boolean;
 }
 
-/** These treatments are previewed in development before owner selection. */
+export const TWIN_SCENERY = {relief:'combined',civic:true,outlying:true,landmarks:true} as const;
+
+/** Development comparisons can isolate a treatment or show the original scenery. */
 export function twinSceneryReview(search: string): TwinSceneryReview {
   const value = new URLSearchParams(search).get('twinScenery');
   switch (value) {
@@ -14,7 +17,7 @@ export function twinSceneryReview(search: string): TwinSceneryReview {
     case 'highlands': return {relief:'combined'};
     case 'civic': return {civic:true};
     case 'outlying': return {outlying:true};
-    case 'all': return {relief:'combined',civic:true,outlying:true};
-    default: return {};
+    case 'original': return {};
+    default: return TWIN_SCENERY;
   }
 }

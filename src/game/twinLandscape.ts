@@ -6,7 +6,7 @@ import type {FieldMapWorld} from '../world/fieldMap';
 import type {Placement} from './scenePlan';
 
 const STRUCTURES=new Set(['twinHouses','twinHousesDetail','twinHomesPainted','twinObjects',
-  'twinDetails','twinCourtyard','twinEnvironment','twinStories','twinCaveProps','twinHighlandForms','twinShrubs','twinHighlandLife','twinRelief','twinSite']);
+  'twinDetails','twinCourtyard','twinEnvironment','twinStories','twinCaveProps','twinHighlandForms','twinShrubs','twinHighlandLife','twinRelief','twinSite','twinLandmark']);
 const GROUND=new Set(['desert','hills','plains','coast','wetland','river','forest','mountains','snow']);
 const STEP=[[0,-1],[1,0],[0,1],[-1,0]] as const;
 export const MAX_TWIN_SHRUBS=160;
@@ -19,7 +19,7 @@ export function twinLandscapeClear(built:FieldMapWorld,base:readonly Placement[]
     for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++)clear.add(`${x+dx},${y+dy}`);
   };
   for(const p of built.placed)reserve(p.at.x,p.at.y,p.poi.id==='poi_northwest_cave_camp'?4:3);
-  for(const p of base)if(STRUCTURES.has(p.sheet))reserve(p.x,p.y,1);
+  for(const p of base)if(STRUCTURES.has(p.sheet)&&p.name!=='highland:meadow')reserve(p.x,p.y,1);
   for(const row of built.world.tiles)for(const t of row)if(t.road||t.track||t.bridge)reserve(t.x,t.y,1);
   return clear;
 }

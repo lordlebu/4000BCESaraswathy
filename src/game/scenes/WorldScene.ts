@@ -3,8 +3,8 @@ import {bakeTwinTerrain} from '../twinTerrainTextures';
 import {TWIN_TURF,type TwinTurf} from '../twinTerrain';
 import {railSpanWidth} from '../twinWalkway';
 import { addCourtyardShadow, addTwinStaticShadow, COURTYARD_SHADOW } from '../twinCourtyardShadow';
-import { bakeTwinScenery, TWIN_SITE_TEXTURE, TWIN_RELIEF_TEXTURE } from '../twinSceneryTextures';
-import { twinSceneryReview, type TwinSceneryReview } from '../twinSceneryReview';
+import { bakeTwinScenery, TWIN_SITE_TEXTURE, TWIN_RELIEF_TEXTURE, TWIN_LANDMARK_TEXTURE } from '../twinSceneryTextures';
+import { TWIN_SCENERY, twinSceneryReview, type TwinSceneryReview } from '../twinSceneryReview';
 import { tramOnRail } from '../twinRail';
 import { bakeTwinRailDetails, TWIN_RAIL_DETAILS } from '../twinRailTextures';
 import { loadTwinArt, TWIN_KEYS, twinGroundArt } from '../twinArt';
@@ -138,6 +138,7 @@ const SHEET_KEY: Record<
   twinHighlandForms:'twins-highland-forms',
   twinRelief:TWIN_RELIEF_TEXTURE,
   twinSite:TWIN_SITE_TEXTURE,
+  twinLandmark:TWIN_LANDMARK_TEXTURE,
   twinHighlandLife:'twins-highland-life',
   twinRoads:'twins-roads',
   twinLamp:'twins-covered-lamp',
@@ -630,7 +631,7 @@ export class WorldScene extends Phaser.Scene {
 
   init(data: WorldSceneData): void {
     this.twinGeneration = data.twinGeneration ?? 1;
-    this.twinScenery = import.meta.env.DEV ? twinSceneryReview(window.location.search) : {};
+    this.twinScenery = import.meta.env.DEV ? twinSceneryReview(window.location.search) : TWIN_SCENERY;
     this.smoothTwinRail = !import.meta.env.DEV || new URLSearchParams(window.location.search).get('twinRailReview') !== '0';
     this.character = characterFor(data.characterId);
     this.fieldMapId = data.fieldMapId ?? DEFAULT_FIELD_MAP;
@@ -1136,6 +1137,7 @@ export class WorldScene extends Phaser.Scene {
         item.sheet === 'twinHighlandForms' ||
         item.sheet === 'twinRelief' ||
         item.sheet === 'twinSite' ||
+        item.sheet === 'twinLandmark' ||
         item.sheet === 'twinHighlandLife' ||
         item.sheet === 'twinLamp' ||
         item.sheet === 'twinVergeGrass' ||
@@ -1157,6 +1159,11 @@ export class WorldScene extends Phaser.Scene {
       if (anchored) sprite.setOrigin(0.5, 1);
       if (item.sheet === 'twinRelief' || item.sheet === 'twinSite') {
         sprite.setDisplaySize(TILE_SIZE, TILE_SIZE * sprite.frame.height / 32).setVertexRoundMode('full');
+      }
+      if(item.name==='highland:meadow')sprite.y+=jy;
+      if(item.sheet==='twinLandmark'){
+        sprite.setDisplaySize(TILE_SIZE,TILE_SIZE).setVertexRoundMode('full');
+        sprite.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
       }
       if (item.sheet === 'twinRailDetail') sprite.setDisplaySize(TILE_SIZE, TILE_SIZE).setVertexRoundMode('full');
       if(item.crop)sprite.setCrop(item.crop.x,item.crop.y,item.crop.width,item.crop.height);
@@ -2402,6 +2409,8 @@ export class WorldScene extends Phaser.Scene {
         preview:this.twinScenery,
         relief:this.children.list.filter(sprite => (sprite as Phaser.GameObjects.Image).texture?.key===TWIN_RELIEF_TEXTURE).length,
         sites:this.children.list.filter(sprite => (sprite as Phaser.GameObjects.Image).texture?.key===TWIN_SITE_TEXTURE)
+          .map(sprite=>sprite.name),
+        landmarks:this.children.list.filter(sprite=>(sprite as Phaser.GameObjects.Image).texture?.key===TWIN_LANDMARK_TEXTURE)
           .map(sprite=>sprite.name),
         shadows:this.children.list.filter(sprite=>sprite.name==='twin-static-shadow').length,
         visible:this.tileOwned.filter(item=>item.sprite.visible).length

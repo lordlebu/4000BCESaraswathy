@@ -33,6 +33,8 @@ it('rebuilds six registered sites while keeping the approved homes and cave rout
       expect(after).toEqual(before);
       expect(planCaveWalks(built,plan,after)).toEqual(planCaveWalks(built,original,before));
     }
+    expect(plan.filter(p=>p.sheet==='twinLandmark')).toHaveLength(16);
+    expect(plan.some(p=>p.name==='highland:meadow')).toBe(true);
     expect(plan.filter(p=>p.sheet==='twinRelief').length).toBeGreaterThan(0);
     expect(plan.some(p=>p.name==='highland:cave-skirt')).toBe(true);
     expect(plan.some(p=>p.name==='highland:meltwater')).toBe(true);
@@ -47,7 +49,7 @@ it('preserves gameplay ground, reciprocal ridge joins and preview placement acro
     const before=JSON.stringify(built);
     const plan=planScene(built,true,review);
     expect(JSON.stringify(built)).toBe(before);
-    const preview=(list:typeof plan)=>list.filter(p=>p.sheet==='twinRelief'||p.sheet==='twinSite'||p.twinShadow);
+    const preview=(list:typeof plan)=>list.filter(p=>p.sheet==='twinRelief'||p.sheet==='twinSite'||p.sheet==='twinLandmark'||p.twinShadow);
     expect(preview(planScene(restored,true,review))).toEqual(preview(plan));
     const allowed=new Set(built.placed.map(p=>pointKey(p.at)));
     for(const p of preview(plan)){
