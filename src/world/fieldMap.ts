@@ -1,4 +1,5 @@
 import { buildTwinCities, TWIN_MAP } from './twinCities';
+import { buildHybridTwinCities } from './twinHybrid';
 // Turning a canon field map into ground the player can walk.
 //
 // This is the join the whole two-repo split was built for. Canon names Lothal, gives it a
@@ -594,6 +595,7 @@ const EXTENT: Record<'square' | 'portrait', Record<'small' | 'large', { width: n
 
 export interface BuildOptions {
   seed?: string;
+  twinGeneration?: 1 | 2;
   width?: number;
   height?: number;
   /** Manhattan distance points of interest are kept apart, where the map allows. */
@@ -617,7 +619,10 @@ export interface BuildOptions {
  * sees has to pass the seed a player has.**
  */
 export function buildFieldMap(fieldMap: FieldMap, options: BuildOptions = {}): FieldMapWorld {
-  if (fieldMap.id === TWIN_MAP) return buildTwinCities(fieldMap, options.seed ?? fieldMap.id, poisOn(fieldMap.id));
+  if (fieldMap.id === TWIN_MAP) {
+    const build = options.twinGeneration === 2 ? buildHybridTwinCities : buildTwinCities;
+    return build(fieldMap, options.seed ?? fieldMap.id, poisOn(fieldMap.id));
+  }
   const {
     seed = fieldMap.id,
     width = EXTENT[fieldMap.proportion][fieldMap.scale].width,

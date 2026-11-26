@@ -6,7 +6,7 @@
 // left off, because the save is keyed by seed.
 
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SEED, chooseSeed } from '../src/ui/seed';
+import { DEFAULT_SEED, chooseSeed, unusedSeed } from '../src/ui/seed';
 
 const fixed = () => 0.42;
 
@@ -30,5 +30,11 @@ describe('the seed a visit starts on', () => {
 
   it('is the fixed world under automation, which every suite measures', () => {
     expect(chooseSeed({ query: null, automated: true, last: 'saffron-kiln-17', random: fixed })).toBe(DEFAULT_SEED);
+  });
+
+  it('keeps existing seed keys when a new walk rolls an occupied name', () => {
+    const known = new Set(['saffron-kiln-17', 'saffron-kiln-17-2']);
+    expect(unusedSeed('saffron-kiln-17', seed => known.has(seed))).toBe('saffron-kiln-17-3');
+    expect(unusedSeed('saffron-kiln-18', seed => known.has(seed))).toBe('saffron-kiln-18');
   });
 });

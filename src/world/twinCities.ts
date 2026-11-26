@@ -5,9 +5,17 @@ import type { BiomeId, Point, Tile, World } from './types';
 import type { FieldMap, PointOfInterest } from '../content/places';
 import type { FieldMapWorld } from './fieldMap';
 
-export const TWIN_MAP = 'field_map_twins';
+export { TWIN_MAP } from './twinGeneration';
 export interface CityDistrict { id: 'harappa' | 'mohenjodaro'; name: string; x: number; y: number; radius: number }
-export interface TwinRegion { districts: CityDistrict[]; rail: Point[]; stations: Point[]; highlands?: 1 | 2 }
+export interface TwinRegion {
+  districts: CityDistrict[];
+  rail: Point[];
+  stations: Point[];
+  highlands?: 1 | 2;
+  generation?: 2;
+  residentialLots?: Point[];
+  channels?: Point[][];
+}
 export const TWIN_ANCHORS: Record<string, Point> = {
   poi_harappa_court: { x: 18, y: 17 }, poi_earthen_workshop: { x: 15, y: 19 },
   poi_nesting_ruins: { x: 20, y: 19 }, poi_harappa_station: { x: 22, y: 25 },
@@ -72,7 +80,15 @@ export function riverX(seed: string, y: number): number {
   return 30 + Math.round(Math.sin(y / 10) * 2) + shift;
 }
 
-export function buildTwinCities(map: FieldMap, seed: string, pois: readonly PointOfInterest[]): FieldMapWorld {
+interface TwinLandform {
+  centre: (y: number) => number;
+  halfWidth: (y: number) => number;
+  coastOffset: (x: number) => number;
+}
+
+export function buildTwinCities(
+  map: FieldMap, seed: string, pois: readonly PointOfInterest[], landform?: TwinLandform
+): FieldMapWorld {
   seed = seed.startsWith('twins:') ? seed : `twins:${seed}`;
   const width = 64, height = 64;
   const region: TwinRegion = { districts: [
@@ -83,11 +99,12 @@ export function buildTwinCities(map: FieldMap, seed: string, pois: readonly Poin
   const river: Point[] = [];
   for (let y = 0; y < height; y++) {
     const row: Tile[] = [];
-    const rx = riverX(seed, y);
+    const rx = landform?.centre(y) ?? riverX(seed, y);
     for (let x = 0; x < width; x++) {
       const h = tileHash(seed, x, y, 'twin-ground');
-      const coast = 56 - Math.max(0, x - 32) / 4 + Math.sin(x / 4) * 1.5;
-      const water = Math.abs(x - rx) <= 1 || (y > 44 && [rx - (y - 44) / 2, rx + (y - 44) / 2].some(v => Math.abs(x - v) < 1.5));
+      const coast = 56 - Math.max(0, x - 32) / 4 + Math.sin(x / 4) * 1.5 + (landform?.coastOffset(x) ?? 0);
+      const water = Math.abs(x - rx) <= (landform?.halfWidth(y) ?? 1)
+        || (y > 44 && [rx - (y - 44) / 2, rx + (y - 44) / 2].some(v => Math.abs(x - v) < 1.5));
       let biome: BiomeId = y > coast ? 'sea' : y > coast - 2 ? 'coast' : 'desert';
       let elevation = 0.25;
       if (biome === 'desert') {
@@ -106,7 +123,7 @@ export function buildTwinCities(map: FieldMap, seed: string, pois: readonly Poin
       // A minor Saraswati channel follows the eastern terrace and rejoins the delta below.
       const terrace = (row: number) => row <= 40 ? 50 - Math.abs(row - 36) : 46;
       const side = terrace(y);
-      if ((y >= 33 && y <= 44 && x >= side && x <= Math.max(side, terrace(y - 1), terrace(y + 1))) || (y === 44 && x >= rx && x <= 46)) {
+      if (!landform && ((y >= 33 && y <= 44 && x >= side && x <= Math.max(side, terrace(y - 1), terrace(y + 1))) || (y === 44 && x >= rx && x <= 46))) {
         biome = 'river'; elevation = 0.12;
         if (!river.some(p => p.x === x && p.y === y)) river.push({x, y});
       }
@@ -117,16 +134,18 @@ export function buildTwinCities(map: FieldMap, seed: string, pois: readonly Poin
   const world: World = { width, height, seed, tiles, camp: null, twinRegion: region,
     start: { x: 22, y: 25 }, settlement: {x:18,y:18,name:'Harappa'},
     landmark: {x:49,y:50,name:'The Quiet Coves',terrain:'coast'}, rivers:[{name:'The Saraswati',path:river}] };
-  stampTwinHighlands(world);
+  stampTwinHighlands(world, !landform);
   // Surveyed rail: a bend at the east end, not a straight animation between stations.
   for (let x=23;x<=44;x++) region.rail.push({x,y:25});
   for (let y=26;y<=35;y++) region.rail.push({x:44,y});
   for (const p of region.rail) { const t=tiles[p.y]![p.x]!;t.track=true;if(t.biome==='river')t.bridge=true; }
   const road = (a:Point,b:Point) => twinRoad(world,a,b);
   // A separate road deck, two rows south of the railway, then two columns east.
-  road({x:22,y:27},{x:46,y:27});road({x:46,y:27},{x:46,y:39});
-  for (const [id,p] of Object.entries(TWIN_ANCHORS)) if(id!=='poi_northwest_cave_camp')road(p,{x:p.x<30?22:46,y:p.x<30?27:39});
-  road({x:22,y:25},{x:22,y:27});road({x:44,y:35},{x:46,y:35});
+  if (!landform) {
+    road({x:22,y:27},{x:46,y:27});road({x:46,y:27},{x:46,y:39});
+    for (const [id,p] of Object.entries(TWIN_ANCHORS)) if(id!=='poi_northwest_cave_camp')road(p,{x:p.x<30?22:46,y:p.x<30?27:39});
+    road({x:22,y:25},{x:22,y:27});road({x:44,y:35},{x:46,y:35});
+  }
   const placed=pois.map(poi=>({poi,at:{...TWIN_ANCHORS[poi.id]!}}));
   for (const p of placed) {
     // Authored anchor terrain is authoritative; do not block the main river for a place.

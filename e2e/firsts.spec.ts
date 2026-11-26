@@ -7,6 +7,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { journeyStorageKey } from '../src/storageKeys';
 import { step } from './walk';
 
 // Thrali stands at the drowned dockyard, two steps south of `at=9,40` on this seed -- the walk
@@ -14,7 +15,7 @@ import { step } from './walk';
 const SEED = 'dock-8';
 const AT_THE_DOCK = `/?seed=${SEED}&hour=0&at=9,40&firsts=on`;
 const DAY_MS = Number(/export const DAY_MS = ([\d *]+);/.exec(readFileSync('src/game/dayNight.ts', 'utf8'))![1]!.split('*').reduce((a, n) => a * Number(n), 1));
-const SAVE = `${/const PREFIX = '([^']+)'/.exec(readFileSync('src/save.ts', 'utf8'))![1]}:${SEED}`;
+const SAVE = journeyStorageKey(SEED);
 
 type Walker = { boat: boolean };
 const walker = (page: Page) => page.evaluate(() => (window as unknown as { __walker: () => Walker }).__walker());

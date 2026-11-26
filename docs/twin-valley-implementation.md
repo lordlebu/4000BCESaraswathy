@@ -1,5 +1,8 @@
 # Twin-valley implementation ledger
 
+The [Twin Cities uplift](twin-cities-uplift.md) records the current seven-phase architecture,
+versioned generation, railway review, and release decision.
+
 
 ## Rail bridge, mixed verges and walkway follow-up - 18 November 2026
 

@@ -1,3 +1,6 @@
+import { NEW_TWIN_GENERATION, TWIN_MAP } from '../world/twinGeneration';
+import { journeyStorageKey, worldStorageKey } from '../storageKeys';
+
 // Which world this is.
 //
 // Lifted out of `App` when the error boundary needed it too. The boundary sits *above* `App` --
@@ -75,10 +78,12 @@ export function seedFromUrl(): string {
   // both measure the one fixed world, as the door's bypass does in `App`.
   const automated = Boolean(navigator.webdriver) || import.meta.env?.MODE === 'test';
   chosen = chooseSeed({ query: null, automated, last, random: cryptoRandom });
+  if (!automated && !last?.trim()) chosen = unusedSeed(chosen, seedExists);
   if (!automated) {
     rememberSeed(chosen);
     const url = new URL(window.location.href);
     url.searchParams.set('seed', chosen);
+    if (!last?.trim() && !url.searchParams.has('twinGen')) url.searchParams.set('twinGen', String(NEW_TWIN_GENERATION));
     window.history.replaceState(null, '', url);
   }
   return chosen;
@@ -86,7 +91,22 @@ export function seedFromUrl(): string {
 
 /** A fresh seed from the browser's own chance: what "Start a new walk" sets out on. */
 export function freshSeed(): string {
-  return randomSeed(cryptoRandom);
+  return unusedSeed(randomSeed(cryptoRandom), seedExists);
+}
+
+function seedExists(seed: string): boolean {
+  try {
+    return localStorage.getItem(journeyStorageKey(seed)) !== null || localStorage.getItem(worldStorageKey(seed, TWIN_MAP)) !== null;
+  } catch {
+    return false;
+  }
+}
+
+/** The readable random seed space is finite. Keep an occupied walk or bake under its own key. */
+export function unusedSeed(seed: string, exists: (candidate: string) => boolean): string {
+  let candidate = seed;
+  for (let n = 2; exists(candidate); n++) candidate = `${seed}-${n}`;
+  return candidate;
 }
 
 /** Words a random seed is made of: a time or a weather, then something you might meet. */

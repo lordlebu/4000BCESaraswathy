@@ -1,5 +1,28 @@
 # Harappa and Mohenjo-daro Visual and Story Plan
 
+The [Twin Cities uplift](twin-cities-uplift.md) records the current seven-phase architecture,
+versioned generation, railway review, and release decision.
+
+## Current plan — Twin Cities art pilot, 25 November 2026
+
+The owner selected a Twin Cities pilot and retained the existing Mirlepa and Yamantaka
+portraits. The approved sage palette, Beedu, buildings, bridges, and mixed art forms
+remain the references for future work. All 16 stops have preferred painted views.
+
+| Work | Delivery and acceptance |
+| --- | --- |
+| Visual baseline | Compare both cities, the crossing, Windward Cave and the desert–highland seam at desktop and mobile sizes. Include dusk and normal exploration fog. |
+| Terrain alignment | Use nearest-neighbour sampling on the Twin Cities atlas and align the ground and fog quads at fractional zoom. The owner approved the side-by-side treatment. |
+| Harappa courtyard | Use the owner-approved static neem cast shadow. Generate one mask from the existing sprite, cull it with the scene, and keep it below actors and fog. |
+| Regression and delivery | Verify the installed artwork, traversal, cave and story interactions, and save restoration. Record browser and software-renderer evidence in the [completion audit](twin-cities-art-status.md) and submit the feature branch for review. |
+
+The pilot's completion evidence uses representative gameplay views and the existing asset
+coverage checks. The historical capture matrix below remains a reference for a broader art
+production pass. A full map-by-map repaint, generator changes, extra casters and time-of-day
+shadow variants are separate proposals. A physical-device performance claim requires a
+hardware run. Existing saves keep their explored ground and resume at the map entry point
+when a link does not specify a location, as before the pilot.
+
 
 ## Rail bridge, mixed verges and walkway follow-up - 18 November 2026
 
@@ -515,6 +538,21 @@ The twin-city renderer should reuse the visual grammar already proven elsewhere 
 - Test every palette under the game's dawn, noon, dusk and night tinting. A good noon ramp that collapses into one value at dusk is not finished.
 - Check greyscale readability so Harappa and Mohenjo-daro remain structurally distinct without depending on ochre versus red.
 
+#### Courtyard cast-shadow pilot
+
+[The shadow proposal](https://chatgpt.com/s/t_6b073b0b9ab48191b2bcd1e0c117c892) builds on
+the existing contact shadows, baked bank and elevation shading, and approved rail-bridge cast
+shadow. Keep roof, wall, and stair occlusion in the source artwork where it is already painted.
+
+1. Previewed one cast shadow under the Shaded Courtyard neem in Harappa. It projects a warm,
+   stepped mask from the approved tree sprite and draws over the ground below objects, actors,
+   and fog. The scene uses one cached mask and one culled draw object.
+2. Reviewed identical views at noon and dusk on desktop and mobile for trunk contact, route and
+   NPC readability, and interaction with existing shading. The owner approved the static sample.
+3. Installed the shadow and verified save restoration and map re-entry. The
+   [completion audit](twin-cities-art-status.md#rendering-and-shadow-pilot--25-november-2026)
+   records the software-renderer comparison.
+
 #### Elevation, cliffs and overhang lessons
 
 - Study the existing `cliffAt`, cliff-turn and rim-mask rules before designing twin-city height edges. Their main lesson is that ground texture stays quiet and height is carried by a separate edge layer.
@@ -772,7 +810,7 @@ Add motion only after static compositions are approved:
 
 ## Review and verification
 
-### Capture matrix
+### Original production capture matrix
 
 Capture both cities at:
 

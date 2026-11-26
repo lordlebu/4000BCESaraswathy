@@ -117,6 +117,7 @@ export type PlacementSheet =
   | 'twinLamp'
   | 'twinVergeGrass'
   | 'twinRailBridge'
+  | 'twinRailDetail'
   | 'treeline'
   | 'overhang'
   | 'marker'
@@ -1258,9 +1259,9 @@ export function planMarkers(built: FieldMapWorld): Placement[] {
  * state, so the whole plan is a function of the world and nothing else. Two calls with the same
  * world return the same plan, which is what makes it worth asserting against.
  */
-export function planScene(built: FieldMapWorld): Placement[] {
+export function planScene(built: FieldMapWorld, smoothTwinRail = true): Placement[] {
   if (built.world.twinRegion) {
-    const base=planTwinScene(built),clear=twinLandscapeClear(built,base);
+    const base=planTwinScene(built, undefined, smoothTwinRail),clear=twinLandscapeClear(built,base);
     return [...base,...planTwinLandscape(built,base,planCliffs(built.world),planDecor(built.world,clear),clear),...planTwinLamps(built)];
   }
   // **A forecourt round every place**: the tile it stands on and the eight around it, kept clear of

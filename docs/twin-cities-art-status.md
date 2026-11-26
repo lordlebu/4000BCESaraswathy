@@ -1,4 +1,27 @@
-# Harappan phased plan ? completion audit
+# Harappan art plan — completion audit
+
+The [Twin Cities uplift](twin-cities-uplift.md) records the current seven-phase architecture,
+versioned generation, railway review, and release decision.
+
+## Rendering and shadow pilot — 25 November 2026
+
+The approved Twin Cities terrain alignment uses nearest-neighbour atlas sampling and rounds
+ground and fog quads to the same screen-pixel edges at fractional zoom. The original sage
+palette, map geometry, and fog states are preserved.
+
+The owner approved the [courtyard cast-shadow pilot](twin-cities-art-plan.md#courtyard-cast-shadow-pilot).
+Harappa's neem now projects a warm, stepped shadow from the existing sprite. The scene uses
+one cached 64 × 32 mask and one camera-culled ground sprite below actors and fog.
+Desktop and mobile browser checks confirmed the shadow draws. Reload and map re-entry recreated
+one shadow and kept the baked map and explored fog. Two samples per treatment in software-rendered
+Chromium at 900 × 650 had 100 ms median frame intervals with the shadow on and off. Physical-device
+performance is still unverified.
+
+The review baseline includes 14 captures across Harappa, Mohenjo-daro, the river crossing,
+Windward Cave and the desert–highland seam. It includes dusk, normal exploration fog, and
+desktop and mobile sizes. The installed courtyard treatment was captured separately after
+owner approval. Use the [current plan](twin-cities-art-plan.md#current-plan--twin-cities-art-pilot-25-november-2026)
+for scope. The dated production records below are historical.
 
 
 ## Rail bridge, mixed verges and walkway follow-up - 18 November 2026
@@ -82,17 +105,15 @@ Existing building styles, art, lots and proportions are explicitly retained. New
 simple NES JRPG; accepted Beedu alone keeps small SNES art. Off-map place/event views stay painted.
 Raw generations and screenshots remain in existing ignored desktop paths.
 
-## Next required phase
+## Broader review and publication
 
 | Work | Completion condition |
 | --- | --- |
-| Integrated visual review | Check place/event/portrait crops, material/likeness continuity, desktop/mobile and keyboard/touch readability, fog and dusk |
-| Gameplay review | Check both cities/crossing, new highlands, cave turn-taking/helpers/props, Beedu event/dialogue, tram terminal turns and optional bust |
-| Save/performance review | Confirm reload continuity and measure frame/load costs on representative views; resolve actual findings |
-| Publication | Final exact-head CI, owner review and merge |
+| Twin Cities visual review | The baseline and approved treatments cover both cities, the river crossing and highlands. New artwork proposals still require representative samples. |
+| Save and performance | The browser reload and map re-entry check passed. Physical-device performance remains open. |
+| Publication | Verify CI on the submitted revision and leave the merge to the owner. |
 
-Run checks after complete phases. This production delivery does not claim the final integrated
-visual/performance review is finished or replace owner review.
+Expand art or lighting work only when a specific new issue or reviewed proposal justifies it.
 
 ## Optional work, outside the required illustration count
 

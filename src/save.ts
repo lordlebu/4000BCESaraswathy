@@ -10,8 +10,7 @@ import { type Satchel, emptySatchel } from './content/satchel';
 import { type Drawn, type Nodes, noNodes } from './content/nodes';
 import { type Progress, emptyProgress } from './journey';
 import type { DiaryEventEntry, EventOrigin } from './content/diaryEvents';
-
-const PREFIX = 'south-of-tethys';
+import { journeyStorageKey as key } from './storageKeys';
 
 /**
  * Bump when the payload shape changes. The Phaser shell reset it to 1; `reached` made it 3;
@@ -146,6 +145,8 @@ export const KNOWLEDGE_VERSION = 1;
 const KNOWLEDGE_1_UNSTAMPED = 18;
 
 export interface Journey {
+  /** A valid stored journey without this field predates the hybrid valley. */
+  twinGeneration?: 1 | 2;
   /** The where-you-are half's version. See `SAVE_VERSION`. */
   version: number;
   /** The what-you-know half's version. See `KNOWLEDGE_VERSION`. */
@@ -388,10 +389,6 @@ function readNodes(value: unknown): Nodes {
   return out;
 }
 
-function key(seed: string): string {
-  return `${PREFIX}:${seed}`;
-}
-
 export function loadJourney(seed: string): Journey {
   let raw: string | null = null;
   try {
@@ -463,7 +460,10 @@ export function loadJourney(seed: string): Journey {
         { discovered: [], reached: false, nodesByMap: fresh.nodesByMap };
     // Outside both halves, like `characterId`: which country you are in survives either half moving.
     const fieldMapId = typeof parsed.fieldMapId === 'string' ? parsed.fieldMapId : undefined;
-    return { version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, ...knowledge, ...ground, fieldMapId };
+    return {
+      version: SAVE_VERSION, knowledgeVersion: KNOWLEDGE_VERSION, ...knowledge, ...ground, fieldMapId,
+      twinGeneration: parsed.twinGeneration === 2 ? 2 : 1
+    };
   } catch {
     localStorage.removeItem(key(seed));
     return empty();

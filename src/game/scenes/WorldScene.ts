@@ -2,6 +2,9 @@ import { TwinAmbienceView } from '../systems/TwinAmbienceView';
 import {bakeTwinTerrain} from '../twinTerrainTextures';
 import {TWIN_TURF,type TwinTurf} from '../twinTerrain';
 import {railSpanWidth} from '../twinWalkway';
+import { addCourtyardShadow, COURTYARD_SHADOW } from '../twinCourtyardShadow';
+import { tramOnRail } from '../twinRail';
+import { bakeTwinRailDetails, TWIN_RAIL_DETAILS } from '../twinRailTextures';
 import { loadTwinArt, TWIN_KEYS, twinGroundArt } from '../twinArt';
 import { TWIN_MAP } from '../../world/twinCities';
 // The map: everything the player sees on the canvas.
@@ -120,6 +123,7 @@ const SHEET_KEY: Record<
   string
 > = {
   twinHouses: TWIN_KEYS.houses, twinObjects: TWIN_KEYS.objects, twinRoutes: TWIN_KEYS.routes,
+  twinRailDetail: TWIN_RAIL_DETAILS,
   twinHousesDetail: TWIN_KEYS.housesDetail, twinDetails: TWIN_KEYS.details, twinRims: TWIN_KEYS.rims,
   twinCourtyard: TWIN_KEYS.courtyard,
   twinSurfaces: 'twins-surfaces',
@@ -308,6 +312,8 @@ const STEP_MS = 425;
  * little over half a walker's step, about six seconds island to island, so the car is seen.
  */
 const RIDE_TILE_MS = 240;
+// Place the accepted sprite's wheel baseline on the nearer rail at the platform.
+const TWIN_TRAM_FOOT_Y = .625;
 /** How much of the way to the traveller the camera closes each frame: a soft trail behind a walk. */
 const FOLLOW_LERP = 0.09;
 
@@ -347,6 +353,7 @@ const STEP_KEYS: Record<string, [number, number]> = {
 
 export interface WorldSceneData {
   seed: string;
+  twinGeneration?: 1 | 2;
   discovered?: string[];
   /**
    * How much of the journey's time has already been spent, in milliseconds.
@@ -613,7 +620,12 @@ export class WorldScene extends Phaser.Scene {
     super('WorldScene');
   }
 
+  private twinGeneration: 1 | 2 = 1;
+  private smoothTwinRail = true;
+
   init(data: WorldSceneData): void {
+    this.twinGeneration = data.twinGeneration ?? 1;
+    this.smoothTwinRail = !import.meta.env.DEV || new URLSearchParams(window.location.search).get('twinRailReview') !== '0';
     this.character = characterFor(data.characterId);
     this.fieldMapId = data.fieldMapId ?? DEFAULT_FIELD_MAP;
     // A restart re-enters init, so every piece of per-journey state is reset here rather than in
@@ -851,7 +863,7 @@ export class WorldScene extends Phaser.Scene {
     // Resolved once and kept, rather than generated afresh on every load. A journey therefore
     // keeps the ground it started on even when the generator changes underneath it -- which is
     // what stops a terrain change from being a save-breaking change. See `world/bake.ts`.
-    this.built = worldFor(map, data.seed);
+    this.built = worldFor(map, data.seed, this.twinGeneration);
     this.world = this.built.world;
     this.at = startTileFor(this.built, window.location.search);
     this.boat = boatOn(this.built.fieldMap.id, this.lent) !== null;
@@ -867,6 +879,7 @@ export class WorldScene extends Phaser.Scene {
     const requestedTurf=import.meta.env.DEV?new URLSearchParams(window.location.search).get('turf'):null;
     const turf:TwinTurf=requestedTurf&&Object.hasOwn(TWIN_TURF,requestedTurf)?requestedTurf as TwinTurf:'sage';
     const twinTerrain=this.world.twinRegion&&requestedTurf!=='legacy'?bakeTwinTerrain(this,this.world,turf):null;
+    if (twinTerrain) this.textures.get(twinTerrain.key).setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.twinTerrainInfo=twinTerrain?{palette:turf,frames:twinTerrain.count,bytes:twinTerrain.bytes}:null;
 
     for (let y = 0; y < height; y += 1) {
@@ -889,16 +902,19 @@ export class WorldScene extends Phaser.Scene {
           .setDepth(DEPTH_TILE);
         tileRow.push(tileSprite);
         this.tileOwned.push({ sprite: tileSprite, x, y });
-        fogRow.push(
-          this.add
-            .image(cx, cy, FOG_TEXTURE)
-            // Exactly its own cell. Anything wider bleeds onto neighbours and buries the tile the
-            // traveller is standing on -- see `createTileTextures`.
-            .setDisplaySize(TILE_SIZE, TILE_SIZE)
-            .setTint(0x241a26)
-            .setAlpha(FOG_UNKNOWN)
-            .setDepth(DEPTH_FOG)
-        );
+        const fogSprite = this.add
+          .image(cx, cy, FOG_TEXTURE)
+          // Exactly its own cell. Anything wider bleeds onto neighbouring tiles.
+          .setDisplaySize(TILE_SIZE, TILE_SIZE)
+          .setTint(0x241a26)
+          .setAlpha(FOG_UNKNOWN)
+          .setDepth(DEPTH_FOG);
+        // Adjacent ground and fog quads need the same screen-pixel edges at fractional zoom.
+        if (twinTerrain) {
+          tileSprite.setVertexRoundMode('full');
+          fogSprite.setVertexRoundMode('full');
+        }
+        fogRow.push(fogSprite);
       }
       for (let x = 0; x < width; x += 1) this.tileOwned.push({ sprite: fogRow[x]!, x, y });
       this.tileSprites.push(tileRow);
@@ -955,7 +971,8 @@ export class WorldScene extends Phaser.Scene {
    * ever needs a decision, that decision belongs in the plan rather than here.
    */
   private createGround(): void {
-    const scenery = planScene(this.built);
+    if (this.smoothTwinRail && this.world.twinRegion) bakeTwinRailDetails(this);
+    const scenery = planScene(this.built, this.smoothTwinRail);
     for (const item of scenery) {
       // The offset is a fraction of a cell and only decor carries one -- see `Placement.offset`.
       // Converting it here rather than in the plan is the same split as everything else: the plan
@@ -1127,6 +1144,7 @@ export class WorldScene extends Phaser.Scene {
         .image(cx, anchored ? item.y * TILE_SIZE + TILE_SIZE : cy, SHEET_KEY[item.sheet], item.frame)
         .setDepth(item.depth);
       if (anchored) sprite.setOrigin(0.5, 1);
+      if (item.sheet === 'twinRailDetail') sprite.setDisplaySize(TILE_SIZE, TILE_SIZE).setVertexRoundMode('full');
       if(item.crop)sprite.setCrop(item.crop.x,item.crop.y,item.crop.width,item.crop.height);
       if(item.sheet==='twinRailBridge'){
         // Source iron is on native rows 16/20. At 6px/row it matches the existing 24px rail gauge.
@@ -1139,6 +1157,10 @@ export class WorldScene extends Phaser.Scene {
         this.twinShrubs.push(sprite);
       }
       if (item.name) sprite.setName(item.name);
+      if (item.sheet === 'twinCourtyard') {
+        const shadow = addCourtyardShadow(this, sprite);
+        if (shadow) this.tileOwned.push({ sprite: shadow, x: item.x, y: item.y });
+      }
       if (item.sway) this.overdraw.push({ sprite, ...item.sway });
       if (item.sheet === 'lamp'||item.sheet==='twinLamp') {
         const lampX=cx+(item.sheet==='twinLamp'?(item.offset?.x??0)*TILE_SIZE:0);
@@ -1302,7 +1324,12 @@ export class WorldScene extends Phaser.Scene {
     // Anchored at the foot of its shadow, like everything else that stands on the map.
     this.terminalTurn = null;
     this.carriage = this.add.image(0, 0, this.world.twinRegion ? TWIN_KEYS.tram : CARRIAGE_IMAGE).setOrigin(0.5, 1).setVisible(false);
-    if (this.world.twinRegion) { const p=this.world.twinRegion.stations[0]!; this.carriage.setPosition((p.x+.5)*TILE_SIZE,(p.y+1)*TILE_SIZE).setDepth(depthFor(p.y,ROW_SLOT.walker)).setVisible(true); }
+    if (this.world.twinRegion) {
+      const p = this.world.twinRegion.stations[0]!;
+      const foot = this.smoothTwinRail ? TWIN_TRAM_FOOT_Y : 1;
+      this.carriage.setPosition((p.x + .5) * TILE_SIZE, (p.y + foot) * TILE_SIZE)
+        .setDepth(depthFor(p.y, ROW_SLOT.walker)).setVisible(true);
+    }
 
     this.updateAnimation();
     this.placePlayer(this.at);
@@ -1787,10 +1814,11 @@ export class WorldScene extends Phaser.Scene {
     EventBus.emitEvent('character-changed', { characterId: this.character.key });
   }
 
-  private onNewJourney = (payload: { seed: string; discovered?: string[] }): void => {
+  private onNewJourney = (payload: UiToGame['new-journey'] & { discovered?: string[] }): void => {
     this.scene.restart({
       seed: payload.seed,
-      discovered: payload.discovered ?? [],
+      twinGeneration: payload.twinGeneration,
+      discovered: payload.discovered,
       // A new seed re-rolls the ground under the same place, rather than moving you.
       fieldMapId: this.built?.fieldMap.id,
       lent: this.lent
@@ -1810,6 +1838,7 @@ export class WorldScene extends Phaser.Scene {
     // and every node's regrowth all went back to the first morning, and the save wrote that down.
     this.scene.restart({
       seed: payload.seed,
+      twinGeneration: this.twinGeneration,
       discovered: [],
       fieldMapId: payload.fieldMapId,
       // And the ride itself takes time: a day's travel between two countries (`CROSSING_MS`).
@@ -2053,7 +2082,10 @@ export class WorldScene extends Phaser.Scene {
     this.at = ride.to;
     this.player.setVisible(false);
     this.carriage.setVisible(true).setPosition(this.player.x, this.player.y).setDepth(this.player.depth);
-    if (this.world.twinRegion) this.carriage.setTexture(TWIN_KEYS.tramWalk, 0);
+    if (this.world.twinRegion) {
+      this.carriage.setTexture(TWIN_KEYS.tramWalk, 0);
+      if (this.smoothTwinRail) this.carriage.y = (ride.from.y + TWIN_TRAM_FOOT_Y) * TILE_SIZE;
+    }
     // **Held on the car, not eased after it.** The walk's 9% a frame is a gentle trail at walking
     // pace; at four times that pace, on a slow frame rate, it fell so far behind that the carriage
     // ran the whole strait under the dock and was never seen. The car eases in and out of the
@@ -2101,8 +2133,14 @@ export class WorldScene extends Phaser.Scene {
     if (this.world.twinRegion && ride.line.length>1) {
       const distance=eased*(ride.line.length-1), i=Math.min(ride.line.length-2,Math.floor(distance)), f=distance-i;
       const a=ride.line[i]!, b=ride.line[i+1]!;
-      this.player.setPosition((a.x+(b.x-a.x)*f+.5)*TILE_SIZE,(a.y+(b.y-a.y)*f+1)*TILE_SIZE-2);
       heading=b.x>a.x?0:b.x<a.x?1:b.y<a.y?2:3;
+      if (this.smoothTwinRail) {
+        const pose = tramOnRail(ride.line, eased);
+        this.player.setPosition((pose.at.x + .5) * TILE_SIZE, (pose.at.y + TWIN_TRAM_FOOT_Y) * TILE_SIZE);
+        heading = pose.heading;
+      } else {
+        this.player.setPosition((a.x+(b.x-a.x)*f+.5)*TILE_SIZE,(a.y+(b.y-a.y)*f+1)*TILE_SIZE-2);
+      }
       this.carriage.setFrame(heading*4+Math.floor((this.game.loop.now-ride.start)/140)%4);
     }
     this.sortPlayer(rowAtFoot(this.player.y));
@@ -2340,14 +2378,24 @@ export class WorldScene extends Phaser.Scene {
       carriageTexture: this.carriage.texture.key,
       carriageFrame: this.carriage.frame.name,
       twinAmbience: this.twinAmbience?.report()??null,
+      twinGeneration: this.world.twinRegion ? this.world.twinRegion.generation ?? 1 : null,
+      twinRailDetails: this.children.list.filter(sprite => (sprite as Phaser.GameObjects.Image).texture?.key === TWIN_RAIL_DETAILS).length,
       twinTerrain:this.twinTerrainInfo?{...this.twinTerrainInfo,
         texture:this.tileSprites[this.at.y]?.[this.at.x]?.texture.key,
-        width:this.tileSprites[this.at.y]?.[this.at.x]?.displayWidth}:null,
+        width:this.tileSprites[this.at.y]?.[this.at.x]?.displayWidth,
+        terrainRounding:this.tileSprites[this.at.y]?.[this.at.x]?.vertexRoundMode,
+        fogRounding:this.fogSprites[this.at.y]?.[this.at.x]?.vertexRoundMode,
+        filter:this.tileSprites[this.at.y]?.[this.at.x]?.texture.source[0]?.scaleMode}:null,
       twinShrubs: {count:this.twinShrubs.length,scales:[...new Set(this.twinShrubs.map(s=>s.scaleX))],widths:[...new Set(this.twinShrubs.map(s=>s.displayWidth))],textures:[...new Set(this.twinShrubs.map(s=>s.texture.key))]},
       roadLights:{posts:this.tileOwned.filter(p=>(p.sprite as Phaser.GameObjects.Image).texture?.key==='twins-covered-lamp').length,
         visiblePosts:this.tileOwned.filter(p=>(p.sprite as Phaser.GameObjects.Image).texture?.key==='twins-covered-lamp'&&p.sprite.visible).length,
         lit:this.glows.filter(g=>g.sprite.visible&&g.sprite.alpha>.05).length},
       railBridge:this.children.list.filter(p=>p.name==='rail:jrpg-span').map(p=>({width:(p as Phaser.GameObjects.Image).displayWidth,height:(p as Phaser.GameObjects.Image).displayHeight})),
+      courtyardShadows: this.children.list.filter(sprite => sprite.name === COURTYARD_SHADOW)
+        .map(sprite => {
+          const shadow = sprite as Phaser.GameObjects.Image;
+          return { texture: shadow.texture.key, visible: shadow.visible };
+        }),
       caveScenery:this.children.list.filter(sprite=>sprite.name.startsWith('cave:')||sprite.name==='poi:poi_northwest_cave_camp')
         .map(sprite=>({name:sprite.name,width:(sprite as Phaser.GameObjects.Image).displayWidth,height:(sprite as Phaser.GameObjects.Image).displayHeight})),
       residents: this.residentSprites.map(({npcId,sprite}) => ({npcId,sheet:sprite.texture.key,x:sprite.x,y:sprite.y,

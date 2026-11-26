@@ -39,6 +39,7 @@ import { type Collection, emptyCollection, metOnTile, size } from '../content/co
 import { downloadImage, downloadText } from './exportJournal';
 import { buildTravelLog, travelLogFilename, travelLogToText } from '../content/travelLog';
 import { clearJourney, hasBegun, loadJourney, saveJourney } from '../save';
+import { twinGenerationFor, type TwinGeneration } from '../world/twinGeneration';
 import { Opening } from './Opening';
 import { bearingTo } from '../content/journal';
 const Journey = lazy(() => import('./Journey').then(module => ({ default: module.Journey })));
@@ -195,6 +196,16 @@ export function App() {
   const [cardOpen, setCardOpen] = useState(false);
 
   const [seed, setSeed] = useState(seedFromUrl);
+  const [twinGeneration, setTwinGeneration] = useState(() =>
+    twinGenerationFor(initialJourney.current.twinGeneration, new URLSearchParams(window.location.search).get('twinGen'), false));
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const requested = url.searchParams.get('twinGen');
+    if (twinGeneration === 2 && requested !== '2') url.searchParams.set('twinGen', '2');
+    else if (twinGeneration === 1 && requested === '2') url.searchParams.delete('twinGen');
+    else return;
+    window.history.replaceState(null, '', url);
+  }, [twinGeneration]);
   // Who is walking. Part of the journey rather than a setting: a save belongs to a traveller, so
   // the URL only decides it when the save has nothing to say.
   const [characterId, setCharacterId] = useState(
@@ -564,6 +575,7 @@ export function App() {
   useEffect(() => {
     const flush = () =>
       saveJourney(seed, {
+        twinGeneration,
         characterId,
         discovered: discovered.current,
         collection,
@@ -598,7 +610,7 @@ export function App() {
       window.removeEventListener('pagehide', flush);
       flush();
     };
-  }, [seed, collection, reached, progress, satchel, nodesByMap, fieldMapId, pinned, diaryEvents]);
+  }, [seed, twinGeneration, collection, reached, progress, satchel, nodesByMap, fieldMapId, pinned, diaryEvents]);
 
   /**
    * What the person being talked to is, if they are also somebody who walks a circuit.
@@ -687,12 +699,13 @@ export function App() {
     };
   }, [world, arrival]);
 
-  const generate = useCallback((next: string) => {
+  const generate = useCallback((next: string, generation?: TwinGeneration) => {
     // A new map is a deliberate fresh start, so it must not inherit fog the player already lifted.
     discovered.current = [];
     // The collection is trip-scoped: a new world is a new walk, not a continuing album.
     setCollection(emptyCollection());
     const loaded = loadJourney(next);
+    const nextGeneration = generation ?? twinGenerationFor(loaded.twinGeneration, null, true);
     setJourneyEpoch(epoch => epoch + 1);
     setTargetDiscoveryId(null);
     setProgress(loaded.progress);
@@ -720,11 +733,14 @@ export function App() {
     setArrivalPage(null);
     setReached(false);
     setSeed(next);
+    setTwinGeneration(nextGeneration);
     rememberSeed(next);
     const url = new URL(window.location.href);
     url.searchParams.set('seed', next);
+    if (nextGeneration === 2) url.searchParams.set('twinGen', '2');
+    else url.searchParams.delete('twinGen');
     window.history.replaceState(null, '', url);
-    EventBus.emitEvent('new-journey', { seed: next });
+    EventBus.emitEvent('new-journey', { seed: next, twinGeneration: nextGeneration });
   }, []);
 
   /**
@@ -1634,6 +1650,7 @@ export function App() {
       {!atTheDoor && PhaserGame && (
         <PhaserGame
           seed={seed}
+          twinGeneration={twinGeneration}
           discovered={initialJourney.current.discovered}
           travelled={initialJourney.current.travelled}
           lent={lentVehicles(initialJourney.current.flags ?? [])}
@@ -1703,7 +1720,7 @@ export function App() {
           // arrived on -- a random one, or the one a shared link carried.
           const next = hasBegun(initialJourney.current) ? freshSeed() : seed;
           clearJourney(next);
-          generate(next);
+          generate(next, next === seed ? twinGeneration : undefined);
           // A new walk starts where the address asks, else on the opening map -- never on the map
           // the old walk ended on.
           const map = fieldMapFromUrl();

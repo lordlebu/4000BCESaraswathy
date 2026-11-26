@@ -24,6 +24,7 @@
 // of `Tile[][]` and a localStorage budget of roughly 5 MB.
 
 import { poisOn, type FieldMap, type PointOfInterest } from '../content/places';
+import { worldStorageKey as key } from '../storageKeys';
 import { THRESHOLDS, band } from './classify';
 import { buildFieldMap, type FieldMapWorld, type PlacedPoi } from './fieldMap';
 import type { BiomeId, LandmarkTerrain, Point, River, Tile, World } from './types';
@@ -322,19 +323,13 @@ export function rebake(built: FieldMapWorld): FieldMapWorld | null {
   return restoreWorld(JSON.parse(JSON.stringify(bakeWorld(built))) as BakedWorld, built.fieldMap);
 }
 
-const PREFIX = 'south-of-tethys:world';
-
-function key(seed: string, fieldMapId: string): string {
-  return `${PREFIX}:${seed}:${fieldMapId}`;
-}
-
 /**
  * The world for this seed and this map: the one already resolved, or a fresh one, baked and kept.
  *
  * The only function the scene needs. Storage failing -- private browsing, a full quota, a corrupt
  * payload -- costs nothing but the guarantee: the world is generated exactly as it always was.
  */
-export function worldFor(fieldMap: FieldMap, seed: string): FieldMapWorld {
+export function worldFor(fieldMap: FieldMap, seed: string, twinGeneration: 1 | 2 = 1): FieldMapWorld {
   try {
     const raw = localStorage.getItem(key(seed, fieldMap.id));
     if (raw) {
@@ -358,7 +353,7 @@ export function worldFor(fieldMap: FieldMap, seed: string): FieldMapWorld {
     // Fall through and generate.
   }
 
-  const built = buildFieldMap(fieldMap, { seed });
+  const built = buildFieldMap(fieldMap, { seed, twinGeneration });
   try {
     localStorage.setItem(key(seed, fieldMap.id), JSON.stringify(bakeWorld(built)));
   } catch {
