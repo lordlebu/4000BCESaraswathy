@@ -312,6 +312,8 @@ const STEP_MS = 425;
  * little over half a walker's step, about six seconds island to island, so the car is seen.
  */
 const RIDE_TILE_MS = 240;
+// Place the accepted sprite's wheel baseline on the nearer rail at the platform.
+const TWIN_TRAM_FOOT_Y = .625;
 /** How much of the way to the traveller the camera closes each frame: a soft trail behind a walk. */
 const FOLLOW_LERP = 0.09;
 
@@ -1322,7 +1324,12 @@ export class WorldScene extends Phaser.Scene {
     // Anchored at the foot of its shadow, like everything else that stands on the map.
     this.terminalTurn = null;
     this.carriage = this.add.image(0, 0, this.world.twinRegion ? TWIN_KEYS.tram : CARRIAGE_IMAGE).setOrigin(0.5, 1).setVisible(false);
-    if (this.world.twinRegion) { const p=this.world.twinRegion.stations[0]!; this.carriage.setPosition((p.x+.5)*TILE_SIZE,(p.y+1)*TILE_SIZE).setDepth(depthFor(p.y,ROW_SLOT.walker)).setVisible(true); }
+    if (this.world.twinRegion) {
+      const p = this.world.twinRegion.stations[0]!;
+      const foot = this.reviewTwinRail ? TWIN_TRAM_FOOT_Y : 1;
+      this.carriage.setPosition((p.x + .5) * TILE_SIZE, (p.y + foot) * TILE_SIZE)
+        .setDepth(depthFor(p.y, ROW_SLOT.walker)).setVisible(true);
+    }
 
     this.updateAnimation();
     this.placePlayer(this.at);
@@ -2075,7 +2082,10 @@ export class WorldScene extends Phaser.Scene {
     this.at = ride.to;
     this.player.setVisible(false);
     this.carriage.setVisible(true).setPosition(this.player.x, this.player.y).setDepth(this.player.depth);
-    if (this.world.twinRegion) this.carriage.setTexture(TWIN_KEYS.tramWalk, 0);
+    if (this.world.twinRegion) {
+      this.carriage.setTexture(TWIN_KEYS.tramWalk, 0);
+      if (this.reviewTwinRail) this.carriage.y = (ride.from.y + TWIN_TRAM_FOOT_Y) * TILE_SIZE;
+    }
     // **Held on the car, not eased after it.** The walk's 9% a frame is a gentle trail at walking
     // pace; at four times that pace, on a slow frame rate, it fell so far behind that the carriage
     // ran the whole strait under the dock and was never seen. The car eases in and out of the
@@ -2126,7 +2136,7 @@ export class WorldScene extends Phaser.Scene {
       heading=b.x>a.x?0:b.x<a.x?1:b.y<a.y?2:3;
       if (this.reviewTwinRail) {
         const pose = tramOnRail(ride.line, eased);
-        this.player.setPosition((pose.at.x + .5) * TILE_SIZE, (pose.at.y + .75) * TILE_SIZE);
+        this.player.setPosition((pose.at.x + .5) * TILE_SIZE, (pose.at.y + TWIN_TRAM_FOOT_Y) * TILE_SIZE);
         heading = pose.heading;
       } else {
         this.player.setPosition((a.x+(b.x-a.x)*f+.5)*TILE_SIZE,(a.y+(b.y-a.y)*f+1)*TILE_SIZE-2);

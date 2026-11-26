@@ -8,7 +8,7 @@ The November 25 rendering pilot fixed fractional-zoom terrain and fog alignment 
 | 2. Generation stages | The ordered stages initialise landforms, carve the Saraswati and two tributaries, connect roads and lay out residential plots. Layout salts are separate from the legacy seed streams. A rejected layout retries the reference landform while preserving the journey's surveyed crossing positions. |
 | 3. Twin Cities vertical slice | Generation 2 varies river width and bends, shoreline, foothills and house lots. The civic anchors and cave threshold are protected. New layouts reuse established building materials and contact shadows, pair occasional bank plants and align cached ripples with nearby flow. |
 | 4. Save and route compatibility | `twinGen=2` selects the preview. Saved generation selection and valid baked ground take precedence. Unversioned links, existing journeys, and their fog and progress use the established selection. The fixed-seed tests cover all POIs, bridges, reachability and bake round trips. |
-| 5. Cross-map boundaries | The seam contract reads an authored strip of elevations, rivers and road crossings in either orientation. Two fixture maps exercise the same seam in opposite generation orders. The Twin Cities' existing travel links need no physical seam. |
+| 5. Cross-map boundaries | The seam contract reads an authored strip of elevations, terrain and road crossings in either orientation. Two fixture maps exercise the same seam in opposite generation orders. The Twin Cities' existing travel links need no physical seam. |
 | 6. Rendering and rail | Both profile fixtures use the shared terrain planning path. Game terrain still uses one atlas quad per tile with shared pixel alignment and fog. The candidate rail atlas supplies terminal and corner frames, and carriage motion follows the same centreline. The existing rail bridge, fares and journey duration carry through. |
 | 7. Onboarding and acceptance | The steps below reproduce the versioned layout and rail review. The fixed-seed suite covers 20 layouts. GitHub Actions runs the complete browser suite, including a generation-2 reload case. The owner reviews the changed visual treatments and controls merge. |
 
@@ -22,6 +22,12 @@ The November 25 rendering pilot fixed fractional-zoom terrain and fog alignment 
 ## Add a profile
 
 Declare the dimensions and protected anchors in `MapProfile`. Supply a base layout and pass ordered deterministic stages to `generateFromProfile`. Use a separate salt for each independent layer and validate navigation after routes. Where published geography specifies a physical boundary, author one edge and apply it from both profiles with `applyProfileBoundary`; match strip lengths and test both orientations. Give the renderer a ground art selector, highland predicate and palette via `TerrainRenderProfile`. Test the resulting `terrainAtlasLayout` against the frame budget before wiring the renderer into gameplay.
+
+## Review evidence
+
+The desktop and touch comparison covers eight views each, with current and proposed versions for a total of 32 captures. It includes the two bends and station approaches, both bridges, Windward Cave, Harappa at dusk, the Brick Quarter and the waterfront.
+
+On the review seed the ground atlas uses 582 frames in generation 2 and 525 in generation 1, against a 768-frame budget. In local software-rendered Chromium the median of eight sampled view medians was 117 ms at the desktop viewport and 67 ms at the mobile viewport for both layouts. These measurements describe that local renderer. The production build puts startup at 169.25 KiB gzip against its 180 KiB budget. Typecheck and the canon lock passed.
 
 ## Release review
 

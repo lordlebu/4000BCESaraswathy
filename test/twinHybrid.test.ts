@@ -23,9 +23,9 @@ it('resolves both sides of an authored edge independently of generation order', 
     b: { mapId: plateau.id, edge: 'west' },
     reversed: true,
     samples: [
-      { elevation: .3, river: false, road: false },
-      { elevation: .1, river: true, road: true },
-      { elevation: .8, river: false, road: false }
+      { elevation: .3, biome: 'coast', road: false },
+      { elevation: .1, biome: 'river', road: true },
+      { elevation: .8, biome: 'hills', road: false }
     ]
   };
   const far = boundaryFor(plateau, edge);
@@ -36,17 +36,19 @@ it('resolves both sides of an authored edge independently of generation order', 
   const fixture = (profile: typeof coast) => generateFromProfile(profile, () => {
     const {world} = buildFieldMap(map, {seed: 'edge-fixture'});
     const tiles = world.tiles.slice(0, 3).map(row => row.slice(0, 3));
-    return {world: {...world, width: 3, height: 3, tiles, twinRegion: undefined},
+    Object.assign(tiles[0]![2]!, {biome: 'river', road: true, bridge: true});
+    return {world: {...world, width: 3, height: 3, tiles, rivers: [], twinRegion: undefined},
       fieldMap: map, placed: [], unplaced: []};
   }, [built => {applyProfileBoundary(built.world, profile, edge); return true;}])!.world;
   const samples = (world: ReturnType<typeof fixture>, x: number) => world.tiles.map(row => {
     const t = row[x]!;
-    return [t.elevation, t.biome === 'river', !!t.road, !!t.bridge];
+    return [t.elevation, t.biome, !!t.road, !!t.bridge];
   });
   const east = fixture(plateau);
   const west = fixture(coast);
   expect(samples(west, 2)).toEqual([...samples(east, 0)].reverse());
-  expect(samples(east, 0)[1]).toEqual([.1, true, true, true]);
+  expect(samples(west, 2)[0]).toEqual([.3, 'coast', false, false]);
+  expect(samples(east, 0)[1]).toEqual([.1, 'river', true, true]);
   expect(fixture(plateau)).toEqual(east);
   const sage = twinTerrainProfile('sage');
   const olive = {...twinTerrainProfile('olive'), art: () => ({key: 'fixture-ground', frame: 0}), highland: () => false};

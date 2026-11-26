@@ -1,4 +1,4 @@
-import type { Point, World } from './types';
+import type { Point, TerrainBiomeId, World } from './types';
 import type { FieldMapWorld } from './fieldMap';
 
 export interface MapProfile {
@@ -12,7 +12,7 @@ export interface MapProfile {
 
 export interface BoundarySample {
   elevation: number;
-  river: boolean;
+  biome: TerrainBiomeId | 'river';
   road: boolean;
 }
 
@@ -50,9 +50,9 @@ export function applyProfileBoundary(world: World, profile: MapProfile, boundary
     const y = horizontal ? end ? world.height - 1 : 0 : i;
     const tile = world.tiles[y]![x]!;
     tile.elevation = sample.elevation;
-    if (sample.river) tile.biome = 'river';
-    if (sample.road) tile.road = true;
-    if (sample.road && sample.river) tile.bridge = true;
+    tile.biome = sample.biome;
+    tile.road = sample.road;
+    tile.bridge = sample.road && sample.biome === 'river';
   }
 }
 
