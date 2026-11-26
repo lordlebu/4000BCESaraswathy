@@ -11,6 +11,7 @@ import { CHECK_MS, KEEP, describeStall, isStall, lateness, remember, type Stall 
 
 export interface PhaserGameProps {
   seed: string;
+  twinGeneration?: 1 | 2;
   discovered: string[];
   fieldMapId: string;
   /** Who is walking. Read once, like the seed: changing it must not rebuild the game. */
@@ -25,12 +26,12 @@ export interface PhaserGameProps {
   lent?: string[];
 }
 
-export function PhaserGame({ seed, discovered, fieldMapId, characterId, travelled = 0, lent = [] }: PhaserGameProps) {
+export function PhaserGame({ seed, twinGeneration, discovered, fieldMapId, characterId, travelled = 0, lent = [] }: PhaserGameProps) {
   const container = useRef<HTMLDivElement>(null);
   // Held in a ref, not state: changing it must never trigger a render.
   const game = useRef<Phaser.Game | null>(null);
   // The first journey's data has to reach `create()`, but must not restart the scene afterwards.
-  const initial = useRef({ seed, discovered, fieldMapId, characterId, travelled, lent });
+  const initial = useRef({ seed, twinGeneration, discovered, fieldMapId, characterId, travelled, lent });
 
   useEffect(() => {
     const node = container.current;

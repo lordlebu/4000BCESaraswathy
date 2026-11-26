@@ -37,6 +37,8 @@ import { depthFor, ROW_SLOT } from './frames';
 import type { FieldMapWorld } from '../world/fieldMap';
 import type { Tile, World } from '../world/types';
 import type { Placement } from './scenePlan';
+import { pointKey } from '../world/pathfind';
+import { railMask, usesRailReviewFrame } from './twinRail';
 
 export const TWIN_KEYS = { highlandGround:'twins-highland-ground', ground:'twins-ground', houses:'twins-houses', objects:'twins-objects', routes:'twins-routes', tram:'twins-tram',
   housesDetail:'twins-houses-detail', details:'twins-details', rims:'twins-rims', tramWalk:'twins-tram-walk', courtyard:'twins-courtyard' };
@@ -66,8 +68,11 @@ export function twinGroundFrame(world:World,tile:Tile,variant:number):number {
     : ({desert:0,hills:1,plains:2,river:3,wetland:4,coast:5,sea:6,landmark:5} as Record<string,number>)[tile.biome]??0;
   return index*4+variant%4;
 }
-export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=new Set()):Placement[] {
+export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=new Set(),reviewRail=false):Placement[] {
   const {world,placed}=built;const region=world.twinRegion!;const out:Placement[]=[];
+  const generatedLots = region.residentialLots && new Set(region.residentialLots.map(pointKey));
+  const railRoute = [region.stations[0]!, ...region.rail, region.stations[1]!];
+  const orderedRail = reviewRail ? new Map(railRoute.map((point, index) => [pointKey(point), railMask(railRoute, index)])) : null;
   const railArt=planTwinRailBridges(world),spans=railArt.filter(p=>p.sheet==='twinRailBridge');
   const onRailSpan=(x:number,y:number)=>spans.some(p=>p.y===y&&Math.abs(x-(p.x+(p.offset?.x??0)))<=(p.spanTiles!-1)/2);
   const clear=new Set<string>();
@@ -104,8 +109,11 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
       if(tile.bridge&&tile.road&&!tile.track)continue;
       if(tile.track&&onRailSpan(x,y))continue;
       if(tile.bridge)add('twinObjects',18,x,y);
-      const material=twinRoadMaterial(built,tile),mask=neighbours(x,y,tile.track?'track':'road');
-      if(tile.track||material==='sand')add('twinRoutes',(tile.track?16:0)+mask,x,y);
+      const material=twinRoadMaterial(built,tile),mask=(tile.track ? orderedRail?.get(pointKey(tile)) : undefined)
+        ?? neighbours(x,y,tile.track?'track':'road');
+      if (tile.track && reviewRail && usesRailReviewFrame(mask)) {
+        out.push({ sheet:'twinRailReview', frame:mask, x, y, depth:70, name:'rail:corner' });
+      } else if(tile.track||material==='sand')add('twinRoutes',(tile.track?16:0)+mask,x,y);
       else out.push({sheet:'twinRoads',frame:({stone:0,sandstone:16,brick:32} as const)[material]+mask,
         x,y,depth:70,name:`road:${material}`});
       if(tile.road&&biome==='settlement'&&districtAt(region,tile)&&[[0,-1],[1,0],[0,1],[-1,0]].some(([dx,dy])=>{
@@ -128,13 +136,14 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
         depth:depthFor(y,ROW_SLOT.undergrowth)});
       continue;
     }
-    if(biome==='settlement'&&district&&twinHouseLot(x,y,district.x,district.y)){
+    if(biome==='settlement'&&district&&(generatedLots?.has(pointKey(tile)) ?? twinHouseLot(x,y,district.x,district.y))){
       const brick=district.id==='mohenjodaro';
       surface(brick?1:0,x,y);
-      if(!keepOriginal&&hash%5!==0){
-        // Existing soft contact texture, tucked beneath the baseline rather than
-        // a new full-screen lighting pass. Keep the map sprites themselves quiet.
+      const painted=!keepOriginal&&hash%5!==0;
+      if(painted||region.generation===2){
         out.push({sheet:'contact',frame:0,x,y,offset:{x:0,y:.43},depth:depthFor(y,ROW_SLOT.underfoot)});
+      }
+      if(painted){
         out.push({sheet:'twinHomesPainted',frame:brick?1:0,x,y,
           depth:depthFor(y,ROW_SLOT.undergrowth)});
       }
@@ -148,6 +157,12 @@ export function planTwinScene(built:FieldMapWorld,finished:ReadonlySet<string>=n
   const roadWorld={...world,tiles:world.tiles.map(row=>row.map(tile=>tile.bridge&&tile.track?{...tile,bridge:false}:tile))};
   out.push(...planRiverBridges(roadWorld));
   out.push(...furnishings,...twinBankDepth(built),...railArt);
+  if (orderedRail) for (const station of region.stations) {
+    const mask = orderedRail.get(pointKey(station));
+    if (mask !== undefined && usesRailReviewFrame(mask)) {
+      out.push({ sheet:'twinRailReview', frame:mask, ...station, depth:71, name:'rail:terminal' });
+    }
+  }
   // Follow the actual drain-court anchor on restored maps; leave its east bank
   // and all roads untouched. These covers are scenery, not collision geometry.
   if(drain)for(let dy=-2;dy<=2;dy++){

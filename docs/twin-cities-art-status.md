@@ -1,5 +1,8 @@
 # Harappan art plan — completion audit
 
+The [Twin Cities uplift](twin-cities-uplift.md) records the current seven-phase architecture,
+versioned generation, railway review, and release decision.
+
 ## Rendering and shadow pilot — 25 November 2026
 
 The approved Twin Cities terrain alignment uses nearest-neighbour atlas sampling and rounds

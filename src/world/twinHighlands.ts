@@ -10,7 +10,7 @@ export function inTwinHighlands(p: Point): boolean {
 }
 
 /** A bounded authored addition, shared by generation and the one-time saved-ground migration. */
-export function stampTwinHighlands(world: World): void {
+export function stampTwinHighlands(world: World, carveLegacyStream = true): void {
   if (!world.twinRegion || world.twinRegion.highlands === 2) return;
   for (const row of world.tiles) for (const t of row) {
     if (!inTwinHighlands(t) || t.road || t.track || t.biome === 'settlement') continue;
@@ -22,6 +22,8 @@ export function stampTwinHighlands(world: World): void {
     t.moisture = .65;
     t.temperature = snow ? .12 : mountain ? .25 : .45;
   }
+  world.twinRegion.highlands = 2;
+  if (!carveLegacyStream) return;
   // A narrow meltwater tributary skirts the camp's walking meadow, then joins the Saraswati.
   const main = world.rivers[0];
   const mouth = main?.path.find(p => p.y === 22);
@@ -42,5 +44,4 @@ export function stampTwinHighlands(world: World): void {
   }
   // One river identity, with its tributary included; no invented lore river name.
   if (main) for (const p of stream) if (!main.path.some(q => q.x===p.x && q.y===p.y)) main.path.push(p);
-  world.twinRegion.highlands = 2;
 }

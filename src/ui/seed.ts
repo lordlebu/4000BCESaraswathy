@@ -1,3 +1,5 @@
+import { NEW_TWIN_GENERATION } from '../world/twinGeneration';
+
 // Which world this is.
 //
 // Lifted out of `App` when the error boundary needed it too. The boundary sits *above* `App` --
@@ -79,6 +81,7 @@ export function seedFromUrl(): string {
     rememberSeed(chosen);
     const url = new URL(window.location.href);
     url.searchParams.set('seed', chosen);
+    if (!last?.trim() && NEW_TWIN_GENERATION === 2) url.searchParams.set('twinGen', '2');
     window.history.replaceState(null, '', url);
   }
   return chosen;

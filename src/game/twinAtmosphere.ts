@@ -6,14 +6,28 @@ import type {Point} from '../world/types';
 export const MAX_TWIN_RIPPLES=96;
 export const MAX_TWIN_HAZE=12;
 export const TWIN_RIPPLE_MS=900;
+type Ripple = Point & { angle?: number };
+
+function flowDirections(channels: readonly Point[][]): Map<string, number> {
+  const flow = new Map<string, number>();
+  for (const reach of channels) for (const [i, point] of reach.entries()) {
+    const next = reach[i + 1];
+    if (next) flow.set(`${point.x},${point.y}`, Math.atan2(next.y - point.y, next.x - point.x));
+  }
+  return flow;
+}
 
 /** Cached presentation only. The saved water network and transport remain authoritative. */
-export function planTwinAtmosphere(built:FieldMapWorld):{ripples:Point[];haze:Point[];hearth:Point|null}{
+export function planTwinAtmosphere(built:FieldMapWorld):{ripples:Ripple[];haze:Point[];hearth:Point|null}{
   const {world}=built;
   if(!world.twinRegion)return {ripples:[],haze:[],hearth:null};
   const rank=(p:Point)=>tileHash(world.seed,p.x,p.y,'twin-water-motion');
+  const flow = flowDirections(world.twinRegion.channels ?? []);
   const ripples=world.tiles.flat().filter(t=>t.biome==='river'&&!t.bridge&&!t.road&&!t.track&&rank(t)%4===0)
-    .sort((a,b)=>rank(a)-rank(b)).slice(0,MAX_TWIN_RIPPLES).map(({x,y})=>({x,y}));
+    .sort((a,b)=>rank(a)-rank(b)).slice(0,MAX_TWIN_RIPPLES).map(({x,y})=>{
+      const angle = flow.get(`${x},${y}`) ?? flow.get(`${x - 1},${y}`) ?? flow.get(`${x + 1},${y}`);
+      return angle === undefined ? {x,y} : {x,y,angle};
+    });
   const haze:Point[]=[];
   const dry=(p:Point)=>{
     const t=world.tiles[p.y]?.[p.x];

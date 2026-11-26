@@ -1,5 +1,8 @@
 # Harappa and Mohenjo-daro Visual and Story Plan
 
+The [Twin Cities uplift](twin-cities-uplift.md) records the current seven-phase architecture,
+versioned generation, railway review, and release decision.
+
 ## Current plan — Twin Cities art pilot, 25 November 2026
 
 The owner selected a Twin Cities pilot and retained the existing Mirlepa and Yamantaka

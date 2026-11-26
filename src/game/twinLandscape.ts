@@ -68,12 +68,15 @@ export function planTwinShrubs(built:FieldMapWorld,clear:ReadonlySet<string>):Pl
       const next=world.tiles[t.y+dy]?.[t.x+dx];
       return next&&!['river','sea','wetland'].includes(next.biome)&&band(t.elevation)>band(next.elevation);
     });
-    const banks=t.biome==='wetland'&&hash%9===0?STEP.filter(([dx,dy])=>world.tiles[t.y+dy]?.[t.x+dx]?.biome==='river'):[];
+    const wetland=t.biome==='wetland';
+    const hybrid=world.twinRegion.generation===2;
+    const banks=wetland&&hash%(hybrid?5:9)===0?STEP.filter(([dx,dy])=>world.tiles[t.y+dy]?.[t.x+dx]?.biome==='river'):[];
     const edges=borders.length?borders:cliffs.length?cliffs:banks;
     if(!edges.length||(!borders.length&&!banks.length&&hash%3===0))continue;
     const [dx,dy]=edges[(hash>>>8)%edges.length]!;
     const frame=t.biome==='wetland'?3:t.moisture<.2||t.biome==='mountains'?1:t.biome==='forest'||(t.moisture>.5&&hash%5===0)?2:hash%3===0?1:0;
-    const plants=(borders.length?[-.17,.17]:[0]).map(along=>({sheet:borders.length?'twinVergeGrass' as const:'twinShrubs' as const,
+    const offsets=borders.length?[-.17,.17]:hybrid&&banks.length>0?[-.16,.16]:[0];
+    const plants=offsets.map(along=>({sheet:borders.length?'twinVergeGrass' as const:'twinShrubs' as const,
       frame:borders.length?hash%3:frame,x:t.x,y:t.y,scale:borders.length ? .5 : banks.length ? .75 : 1,
       offset:{x:dx*.32+(dy?along:0),y:dy*.32-.45+(dx?along:0)},
       depth:depthFor(t.y+dy*.32-.45,ROW_SLOT.undergrowth)}));

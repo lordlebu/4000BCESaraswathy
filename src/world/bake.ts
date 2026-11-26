@@ -334,7 +334,7 @@ function key(seed: string, fieldMapId: string): string {
  * The only function the scene needs. Storage failing -- private browsing, a full quota, a corrupt
  * payload -- costs nothing but the guarantee: the world is generated exactly as it always was.
  */
-export function worldFor(fieldMap: FieldMap, seed: string): FieldMapWorld {
+export function worldFor(fieldMap: FieldMap, seed: string, twinGeneration: 1 | 2 = 1): FieldMapWorld {
   try {
     const raw = localStorage.getItem(key(seed, fieldMap.id));
     if (raw) {
@@ -358,7 +358,7 @@ export function worldFor(fieldMap: FieldMap, seed: string): FieldMapWorld {
     // Fall through and generate.
   }
 
-  const built = buildFieldMap(fieldMap, { seed });
+  const built = buildFieldMap(fieldMap, { seed, twinGeneration });
   try {
     localStorage.setItem(key(seed, fieldMap.id), JSON.stringify(bakeWorld(built)));
   } catch {

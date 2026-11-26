@@ -242,7 +242,7 @@ export interface GameToUi {
 export interface UiToGame {
   'twin-knowledge': { completed: string[]; flags?: string[] };
 
-  'new-journey': { seed: string };
+  'new-journey': { seed: string; twinGeneration?: 1 | 2 };
   /**
    * Walk as somebody else, without restarting the journey.
    *
@@ -255,7 +255,7 @@ export interface UiToGame {
   'camp': Record<string, never>;
   /** Lay down a different field map. The overworld sends this. */
   'travel-to': { fieldMapId: string; seed: string; ride?: number };
-  'resume-journey': { seed: string; discovered: string[] };
+  'resume-journey': { seed: string; discovered: string[]; twinGeneration?: 1 | 2 };
   /**
    * How much of the canvas the overlays are covering, in CSS pixels.
    *

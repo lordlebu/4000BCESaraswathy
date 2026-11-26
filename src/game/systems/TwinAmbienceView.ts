@@ -33,7 +33,7 @@ export class TwinAmbienceView {
       g.generateTexture('twins-cave-smoke',32,24);g.destroy();
     }
     this.water=plan.ripples.map(p=>({...p,sprite:scene.add.image((p.x+.5)*TILE_SIZE,(p.y+.5)*TILE_SIZE,'twins-ripple-0')
-      .setAlpha(.35).setDepth(62).setVisible(false)}));
+      .setRotation(p.angle??0).setAlpha(.35).setDepth(62).setVisible(false)}));
     this.haze=plan.haze.map((p,i)=>({...p,sprite:scene.add.image((p.x+.5)*TILE_SIZE,(p.y+.5)*TILE_SIZE,cloudTextureKey(scene,i%6))
       .setTint(0xe2c6a1).setAlpha(.055).setDepth(1988).setVisible(false)}));
     if(this.hearth)for(let i=0;i<6;i++)this.smoke.push(scene.add.image(0,0,'twins-cave-smoke').setDepth(1990).setVisible(false));

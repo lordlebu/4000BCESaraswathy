@@ -1,17 +1,18 @@
 import type Phaser from 'phaser';
 import type {World} from '../world/types';
 import {TILE_SIZE} from './tileTextures';
-import {TWIN_TURF,terrainColour,twinTerrainCell,type TwinTerrainCell,type TwinTurf} from './twinTerrain';
+import {terrainAtlasLayout,terrainColourFor,twinTerrainProfile,type TerrainPalette,type TerrainRenderProfile,type TwinTerrainCell,type TwinTurf} from './twinTerrain';
 
 const PIXELS=32,COLUMNS=32;
 
 /** All bands/patterns are baked once into one native-pixel atlas. Still one quad per ground tile. */
 export function bakeTwinTerrain(scene:Phaser.Scene,world:World,palette:TwinTurf){
-  const cells=world.tiles.map(row=>row.map(tile=>twinTerrainCell(world,tile)));
-  const unique=new Map<string,TwinTerrainCell>();
-  for(const row of cells)for(const cell of row)unique.set(cell.key,cell);
+  return bakeTerrainProfile(scene, world, twinTerrainProfile(palette), 'twins-terrain-surface');
+}
+
+export function bakeTerrainProfile(scene: Phaser.Scene, world: World, profile: TerrainRenderProfile, key: string) {
+  const {cells,unique}=terrainAtlasLayout(world,profile);
   const entries=[...unique.values()];
-  const key='twins-terrain-surface';
   // The previous scene's tile images are gone on re-entry. Reuse one bounded atlas slot.
   if(scene.textures.exists(key))scene.textures.remove(key);
   const atlas=scene.textures.createCanvas(key,COLUMNS*PIXELS,Math.ceil(entries.length/COLUMNS)*PIXELS);
@@ -21,7 +22,7 @@ export function bakeTwinTerrain(scene:Phaser.Scene,world:World,palette:TwinTurf)
   for(const [frame,cell] of entries.entries()){
     const x=frame%COLUMNS*PIXELS,y=Math.floor(frame/COLUMNS)*PIXELS;
     ctx.save();ctx.translate(x,y);ctx.beginPath();ctx.rect(0,0,PIXELS,PIXELS);ctx.clip();
-    paintTwinTerrain(ctx,cell,palette,scene);
+    paintTerrainCell(ctx,cell,profile.palette,scene);
     ctx.restore();atlas.add(frame,0,x,y,PIXELS,PIXELS);frames.set(cell.key,frame);
   }
   atlas.refresh();
@@ -29,12 +30,11 @@ export function bakeTwinTerrain(scene:Phaser.Scene,world:World,palette:TwinTurf)
     bytes:COLUMNS*PIXELS*Math.ceil(entries.length/COLUMNS)*PIXELS*4,tileSize:TILE_SIZE};
 }
 
-function paintTwinTerrain(ctx:CanvasRenderingContext2D,cell:TwinTerrainCell,palette:TwinTurf,scene:Phaser.Scene){
-  const p=TWIN_TURF[palette];
+function paintTerrainCell(ctx:CanvasRenderingContext2D,cell:TwinTerrainCell,p:TerrainPalette,scene:Phaser.Scene){
   const source=scene.textures.getFrame(cell.art.key,cell.art.frame);
   ctx.drawImage(source.source.image as CanvasImageSource,source.cutX,source.cutY,source.cutWidth,source.cutHeight,0,0,PIXELS,PIXELS);
   if(cell.highland&&cell.surface){
-    ctx.fillStyle=terrainColour(cell.surface,palette);ctx.fillRect(0,0,PIXELS,PIXELS);
+    ctx.fillStyle=terrainColourFor(cell.surface,p);ctx.fillRect(0,0,PIXELS,PIXELS);
     // Few broad pixel clusters, not checkerboard dithering or detailed grass blades.
     for(let i=0;i<9;i++){
       const x=(i*11+cell.variant*7)%30,y=(i*7+cell.variant*11)%30;
@@ -47,7 +47,7 @@ function paintTwinTerrain(ctx:CanvasRenderingContext2D,cell:TwinTerrainCell,pale
     const water=edge.from==='water'||edge.to==='water';
     const drySeam=!water&&(edge.from==='sand'||edge.to==='sand');
     const width=water?6:drySeam?14:8;
-    ctx.fillStyle=terrainColour(edge.to,palette);
+    ctx.fillStyle=terrainColourFor(edge.to,p);
     // An earthy transition tile, then the feathered edge: avoids a bright green rectangle at sand.
     if(drySeam){ctx.globalAlpha=edge.to==='sand'?.12:.06;ctx.fillRect(0,0,32,32);}
     for(let along=0;along<32;along++){

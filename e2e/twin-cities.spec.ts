@@ -2,6 +2,22 @@ import { expect, test } from '@playwright/test';
 import { examineFirst } from './context-event';
 
 const query='?map=field_map_twins&seed=twin-demo&hour=10&door=open&events=off&firsts=off';
+
+test('a versioned Twin Cities link restores the same valley and atlas after reload', async ({page}) => {
+  const versioned = query.replace('seed=twin-demo','seed=twin-hybrid-browser')+'&twinGen=2&at=poi_harappa_station';
+  const read = () => page.evaluate(() => (window as unknown as {
+    __walker?: () => {twinGeneration: number; twinTerrain: {frames: number; texture: string}};
+  }).__walker?.());
+  await page.goto(versioned);
+  await expect.poll(async () => (await read())?.twinGeneration,{timeout:45000}).toBe(2);
+  const terrain = (await read())!.twinTerrain;
+  expect(terrain.texture).toBe('twins-terrain-surface');
+  expect(terrain.frames).toBeLessThanOrEqual(768);
+  await page.reload();
+  await expect.poll(async () => (await read())?.twinGeneration,{timeout:45000}).toBe(2);
+  expect((await read())!.twinTerrain.frames).toBe(terrain.frames);
+});
+
 test('new city art loads and the ostrich tram follows the causeway in both directions',async({page})=>{
   const errors:string[]=[];
   page.on('pageerror',e=>errors.push(e.message));

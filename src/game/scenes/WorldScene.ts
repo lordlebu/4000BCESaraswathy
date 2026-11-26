@@ -3,6 +3,8 @@ import {bakeTwinTerrain} from '../twinTerrainTextures';
 import {TWIN_TURF,type TwinTurf} from '../twinTerrain';
 import {railSpanWidth} from '../twinWalkway';
 import { addCourtyardShadow, COURTYARD_SHADOW } from '../twinCourtyardShadow';
+import { tramOnRail } from '../twinRail';
+import { bakeTwinRailReview, TWIN_RAIL_REVIEW } from '../twinRailTextures';
 import { loadTwinArt, TWIN_KEYS, twinGroundArt } from '../twinArt';
 import { TWIN_MAP } from '../../world/twinCities';
 // The map: everything the player sees on the canvas.
@@ -121,6 +123,7 @@ const SHEET_KEY: Record<
   string
 > = {
   twinHouses: TWIN_KEYS.houses, twinObjects: TWIN_KEYS.objects, twinRoutes: TWIN_KEYS.routes,
+  twinRailReview: TWIN_RAIL_REVIEW,
   twinHousesDetail: TWIN_KEYS.housesDetail, twinDetails: TWIN_KEYS.details, twinRims: TWIN_KEYS.rims,
   twinCourtyard: TWIN_KEYS.courtyard,
   twinSurfaces: 'twins-surfaces',
@@ -348,6 +351,7 @@ const STEP_KEYS: Record<string, [number, number]> = {
 
 export interface WorldSceneData {
   seed: string;
+  twinGeneration?: 1 | 2;
   discovered?: string[];
   /**
    * How much of the journey's time has already been spent, in milliseconds.
@@ -614,7 +618,12 @@ export class WorldScene extends Phaser.Scene {
     super('WorldScene');
   }
 
+  private twinGeneration: 1 | 2 = 1;
+  private reviewTwinRail = false;
+
   init(data: WorldSceneData): void {
+    this.twinGeneration = data.twinGeneration ?? 1;
+    this.reviewTwinRail = import.meta.env.DEV && new URLSearchParams(window.location.search).get('twinRailReview') === '1';
     this.character = characterFor(data.characterId);
     this.fieldMapId = data.fieldMapId ?? DEFAULT_FIELD_MAP;
     // A restart re-enters init, so every piece of per-journey state is reset here rather than in
@@ -852,7 +861,7 @@ export class WorldScene extends Phaser.Scene {
     // Resolved once and kept, rather than generated afresh on every load. A journey therefore
     // keeps the ground it started on even when the generator changes underneath it -- which is
     // what stops a terrain change from being a save-breaking change. See `world/bake.ts`.
-    this.built = worldFor(map, data.seed);
+    this.built = worldFor(map, data.seed, this.twinGeneration);
     this.world = this.built.world;
     this.at = startTileFor(this.built, window.location.search);
     this.boat = boatOn(this.built.fieldMap.id, this.lent) !== null;
@@ -960,7 +969,8 @@ export class WorldScene extends Phaser.Scene {
    * ever needs a decision, that decision belongs in the plan rather than here.
    */
   private createGround(): void {
-    const scenery = planScene(this.built);
+    if (this.reviewTwinRail && this.world.twinRegion) bakeTwinRailReview(this);
+    const scenery = planScene(this.built, this.reviewTwinRail);
     for (const item of scenery) {
       // The offset is a fraction of a cell and only decor carries one -- see `Placement.offset`.
       // Converting it here rather than in the plan is the same split as everything else: the plan
@@ -1132,6 +1142,7 @@ export class WorldScene extends Phaser.Scene {
         .image(cx, anchored ? item.y * TILE_SIZE + TILE_SIZE : cy, SHEET_KEY[item.sheet], item.frame)
         .setDepth(item.depth);
       if (anchored) sprite.setOrigin(0.5, 1);
+      if (item.sheet === 'twinRailReview') sprite.setDisplaySize(TILE_SIZE, TILE_SIZE).setVertexRoundMode('full');
       if(item.crop)sprite.setCrop(item.crop.x,item.crop.y,item.crop.width,item.crop.height);
       if(item.sheet==='twinRailBridge'){
         // Source iron is on native rows 16/20. At 6px/row it matches the existing 24px rail gauge.
@@ -1796,10 +1807,11 @@ export class WorldScene extends Phaser.Scene {
     EventBus.emitEvent('character-changed', { characterId: this.character.key });
   }
 
-  private onNewJourney = (payload: { seed: string; discovered?: string[] }): void => {
+  private onNewJourney = (payload: UiToGame['new-journey'] & { discovered?: string[] }): void => {
     this.scene.restart({
       seed: payload.seed,
-      discovered: payload.discovered ?? [],
+      twinGeneration: payload.twinGeneration,
+      discovered: payload.discovered,
       // A new seed re-rolls the ground under the same place, rather than moving you.
       fieldMapId: this.built?.fieldMap.id,
       lent: this.lent
@@ -1819,6 +1831,7 @@ export class WorldScene extends Phaser.Scene {
     // and every node's regrowth all went back to the first morning, and the save wrote that down.
     this.scene.restart({
       seed: payload.seed,
+      twinGeneration: this.twinGeneration,
       discovered: [],
       fieldMapId: payload.fieldMapId,
       // And the ride itself takes time: a day's travel between two countries (`CROSSING_MS`).
@@ -2110,8 +2123,14 @@ export class WorldScene extends Phaser.Scene {
     if (this.world.twinRegion && ride.line.length>1) {
       const distance=eased*(ride.line.length-1), i=Math.min(ride.line.length-2,Math.floor(distance)), f=distance-i;
       const a=ride.line[i]!, b=ride.line[i+1]!;
-      this.player.setPosition((a.x+(b.x-a.x)*f+.5)*TILE_SIZE,(a.y+(b.y-a.y)*f+1)*TILE_SIZE-2);
       heading=b.x>a.x?0:b.x<a.x?1:b.y<a.y?2:3;
+      if (this.reviewTwinRail) {
+        const pose = tramOnRail(ride.line, eased);
+        this.player.setPosition((pose.at.x + .5) * TILE_SIZE, (pose.at.y + .75) * TILE_SIZE);
+        heading = pose.heading;
+      } else {
+        this.player.setPosition((a.x+(b.x-a.x)*f+.5)*TILE_SIZE,(a.y+(b.y-a.y)*f+1)*TILE_SIZE-2);
+      }
       this.carriage.setFrame(heading*4+Math.floor((this.game.loop.now-ride.start)/140)%4);
     }
     this.sortPlayer(rowAtFoot(this.player.y));
@@ -2349,6 +2368,7 @@ export class WorldScene extends Phaser.Scene {
       carriageTexture: this.carriage.texture.key,
       carriageFrame: this.carriage.frame.name,
       twinAmbience: this.twinAmbience?.report()??null,
+      twinGeneration: this.world.twinRegion ? this.world.twinRegion.generation ?? 1 : null,
       twinTerrain:this.twinTerrainInfo?{...this.twinTerrainInfo,
         texture:this.tileSprites[this.at.y]?.[this.at.x]?.texture.key,
         width:this.tileSprites[this.at.y]?.[this.at.x]?.displayWidth,
