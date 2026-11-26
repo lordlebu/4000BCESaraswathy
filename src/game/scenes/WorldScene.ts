@@ -2,7 +2,9 @@ import { TwinAmbienceView } from '../systems/TwinAmbienceView';
 import {bakeTwinTerrain} from '../twinTerrainTextures';
 import {TWIN_TURF,type TwinTurf} from '../twinTerrain';
 import {railSpanWidth} from '../twinWalkway';
-import { addCourtyardShadow, COURTYARD_SHADOW } from '../twinCourtyardShadow';
+import { addCourtyardShadow, addTwinStaticShadow, COURTYARD_SHADOW } from '../twinCourtyardShadow';
+import { bakeTwinScenery, TWIN_SITE_TEXTURE, TWIN_RELIEF_TEXTURE } from '../twinSceneryTextures';
+import { twinSceneryReview, type TwinSceneryReview } from '../twinSceneryReview';
 import { tramOnRail } from '../twinRail';
 import { bakeTwinRailDetails, TWIN_RAIL_DETAILS } from '../twinRailTextures';
 import { loadTwinArt, TWIN_KEYS, twinGroundArt } from '../twinArt';
@@ -134,6 +136,8 @@ const SHEET_KEY: Record<
   twinDryProps:'twins-dry-props',
   twinShrubs:'twins-shrubs',
   twinHighlandForms:'twins-highland-forms',
+  twinRelief:TWIN_RELIEF_TEXTURE,
+  twinSite:TWIN_SITE_TEXTURE,
   twinHighlandLife:'twins-highland-life',
   twinRoads:'twins-roads',
   twinLamp:'twins-covered-lamp',
@@ -622,9 +626,11 @@ export class WorldScene extends Phaser.Scene {
 
   private twinGeneration: 1 | 2 = 1;
   private smoothTwinRail = true;
+  private twinScenery: TwinSceneryReview = {};
 
   init(data: WorldSceneData): void {
     this.twinGeneration = data.twinGeneration ?? 1;
+    this.twinScenery = import.meta.env.DEV ? twinSceneryReview(window.location.search) : {};
     this.smoothTwinRail = !import.meta.env.DEV || new URLSearchParams(window.location.search).get('twinRailReview') !== '0';
     this.character = characterFor(data.characterId);
     this.fieldMapId = data.fieldMapId ?? DEFAULT_FIELD_MAP;
@@ -878,7 +884,7 @@ export class WorldScene extends Phaser.Scene {
 
     const requestedTurf=import.meta.env.DEV?new URLSearchParams(window.location.search).get('turf'):null;
     const turf:TwinTurf=requestedTurf&&Object.hasOwn(TWIN_TURF,requestedTurf)?requestedTurf as TwinTurf:'sage';
-    const twinTerrain=this.world.twinRegion&&requestedTurf!=='legacy'?bakeTwinTerrain(this,this.world,turf):null;
+    const twinTerrain=this.world.twinRegion&&requestedTurf!=='legacy'?bakeTwinTerrain(this,this.world,turf,this.twinScenery.relief):null;
     if (twinTerrain) this.textures.get(twinTerrain.key).setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.twinTerrainInfo=twinTerrain?{palette:turf,frames:twinTerrain.count,bytes:twinTerrain.bytes}:null;
 
@@ -972,7 +978,10 @@ export class WorldScene extends Phaser.Scene {
    */
   private createGround(): void {
     if (this.smoothTwinRail && this.world.twinRegion) bakeTwinRailDetails(this);
-    const scenery = planScene(this.built, this.smoothTwinRail);
+    if(this.world.twinRegion&&(this.twinScenery.relief||this.twinScenery.civic||this.twinScenery.outlying)){
+      bakeTwinScenery(this,Boolean(this.twinScenery.relief));
+    }
+    const scenery = planScene(this.built, this.smoothTwinRail, this.twinScenery);
     for (const item of scenery) {
       // The offset is a fraction of a cell and only decor carries one -- see `Placement.offset`.
       // Converting it here rather than in the plan is the same split as everything else: the plan
@@ -1125,6 +1134,8 @@ export class WorldScene extends Phaser.Scene {
         item.sheet === 'twinDryProps' ||
         item.sheet === 'twinShrubs' ||
         item.sheet === 'twinHighlandForms' ||
+        item.sheet === 'twinRelief' ||
+        item.sheet === 'twinSite' ||
         item.sheet === 'twinHighlandLife' ||
         item.sheet === 'twinLamp' ||
         item.sheet === 'twinVergeGrass' ||
@@ -1144,6 +1155,9 @@ export class WorldScene extends Phaser.Scene {
         .image(cx, anchored ? item.y * TILE_SIZE + TILE_SIZE : cy, SHEET_KEY[item.sheet], item.frame)
         .setDepth(item.depth);
       if (anchored) sprite.setOrigin(0.5, 1);
+      if (item.sheet === 'twinRelief' || item.sheet === 'twinSite') {
+        sprite.setDisplaySize(TILE_SIZE, TILE_SIZE * sprite.frame.height / 32).setVertexRoundMode('full');
+      }
       if (item.sheet === 'twinRailDetail') sprite.setDisplaySize(TILE_SIZE, TILE_SIZE).setVertexRoundMode('full');
       if(item.crop)sprite.setCrop(item.crop.x,item.crop.y,item.crop.width,item.crop.height);
       if(item.sheet==='twinRailBridge'){
@@ -1161,6 +1175,10 @@ export class WorldScene extends Phaser.Scene {
         const shadow = addCourtyardShadow(this, sprite);
         if (shadow) this.tileOwned.push({ sprite: shadow, x: item.x, y: item.y });
       }
+      if (item.twinShadow) {
+        const shadow = addTwinStaticShadow(this,sprite,item.twinShadow);
+        if (shadow) this.tileOwned.push({sprite:shadow,x:item.x,y:item.y});
+      }
       if (item.sway) this.overdraw.push({ sprite, ...item.sway });
       if (item.sheet === 'lamp'||item.sheet==='twinLamp') {
         const lampX=cx+(item.sheet==='twinLamp'?(item.offset?.x??0)*TILE_SIZE:0);
@@ -1169,7 +1187,7 @@ export class WorldScene extends Phaser.Scene {
       }
       // Markers are found by name for the fog reveal and must stay in the list; everything else
       // that belongs to one tile can be hidden with it.
-      if (!item.name||/^(cave|highland|road|rail):/.test(item.name)) this.tileOwned.push({ sprite, x: item.x, y: item.y });
+      if (!item.name||/^(cave|highland|road|rail|twin-site):/.test(item.name)) this.tileOwned.push({ sprite, x: item.x, y: item.y });
     }
     // Quiet workplace figures use the same loaded character sheets and scale as walkers.
     // No additional animation loop, hit targets, conversation logic or shadow layers.
@@ -2380,6 +2398,14 @@ export class WorldScene extends Phaser.Scene {
       twinAmbience: this.twinAmbience?.report()??null,
       twinGeneration: this.world.twinRegion ? this.world.twinRegion.generation ?? 1 : null,
       twinRailDetails: this.children.list.filter(sprite => (sprite as Phaser.GameObjects.Image).texture?.key === TWIN_RAIL_DETAILS).length,
+      twinScenery: this.world.twinRegion ? {
+        preview:this.twinScenery,
+        relief:this.children.list.filter(sprite => (sprite as Phaser.GameObjects.Image).texture?.key===TWIN_RELIEF_TEXTURE).length,
+        sites:this.children.list.filter(sprite => (sprite as Phaser.GameObjects.Image).texture?.key===TWIN_SITE_TEXTURE)
+          .map(sprite=>sprite.name),
+        shadows:this.children.list.filter(sprite=>sprite.name==='twin-static-shadow').length,
+        visible:this.tileOwned.filter(item=>item.sprite.visible).length
+      } : null,
       twinTerrain:this.twinTerrainInfo?{...this.twinTerrainInfo,
         texture:this.tileSprites[this.at.y]?.[this.at.x]?.texture.key,
         width:this.tileSprites[this.at.y]?.[this.at.x]?.displayWidth,

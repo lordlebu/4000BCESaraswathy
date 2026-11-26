@@ -1,6 +1,7 @@
 import {tileHash} from '../world/rng';
 import {inTwinHighlands} from '../world/twinHighlands';
 import {twinGroundArt} from './twinArt';
+import {reliefCell,type ReliefCell,type ReliefStyle} from './twinRelief';
 import type {Tile,World} from '../world/types';
 
 export const MAX_TWIN_TERRAIN_FRAMES=768;
@@ -19,19 +20,25 @@ const height=(t:Tile)=>t.biome==='snow'?3:t.biome==='mountains'?2:t.biome==='hil
 export type TerrainEdge={side:number;from:Surface;to:Surface;rise:number};
 export interface TwinTerrainCell {
   art:{key:string;frame:number};highland:boolean;surface:Surface|null;variant:number;edges:TerrainEdge[];key:string;
+  relief?: ReliefCell;
 }
 
 export interface TerrainRenderProfile {
   palette: TerrainPalette;
   art: (world: World, tile: Tile, variant: number) => TwinTerrainCell['art'];
   highland: (tile: Tile) => boolean;
+  relief?: ReliefStyle;
 }
 
-export function twinTerrainProfile(palette: TwinTurf): TerrainRenderProfile {
+export function twinTerrainProfile(palette: TwinTurf, relief?: ReliefStyle): TerrainRenderProfile {
   return {
-    palette: TWIN_TURF[palette], art: twinGroundArt,
+    palette: TWIN_TURF[palette], art: twinGroundArt, relief,
     highland: tile => inTwinHighlands(tile) && ['plains','hills','mountains','snow'].includes(tile.biome)
   };
+}
+
+function reliefKey(relief: ReliefCell | undefined): string {
+  return relief ? `${relief.material}:${relief.joins}:${relief.faces}` : '';
 }
 
 /** Presentation only: no elevation, biome, RNG stream, collision or saved-ground changes. */
@@ -45,8 +52,9 @@ export function profileTerrainCell(world:World,tile:Tile,profile:TerrainRenderPr
     const rise=from==='water'||to==='water'?0:Math.sign(height(next)-height(tile));
     if(from!==to||rise)edges.push({side,from,to,rise});
   }
-  const key=[art.key,art.frame,Number(highland),variant,...edges.map(e=>`${e.side}${e.to}${e.rise}`)].join(':');
-  return {art,highland,surface:from,variant,edges,key};
+  const relief = profile.relief && reliefCell(world,tile,profile.relief) || undefined;
+  const key=[art.key,art.frame,Number(highland),variant,...edges.map(e=>`${e.side}${e.to}${e.rise}`),reliefKey(relief)].join(':');
+  return {art,highland,surface:from,variant,edges,key,relief};
 }
 
 export function terrainAtlasLayout(world: World, profile: TerrainRenderProfile) {
@@ -61,7 +69,7 @@ export function terrainAtlasLayout(world: World, profile: TerrainRenderProfile) 
     cells = cells.map(row => row.map(cell => {
       const edges = cell.edges.slice(0, limit);
       const edge = edges[0];
-      const key = [cell.art.key, cell.art.frame, cell.highland, cell.surface, edge?.side, edge?.to, edge?.rise].join(':');
+      const key = [cell.art.key, cell.art.frame, cell.highland, cell.surface, edge?.side, edge?.to, edge?.rise, reliefKey(cell.relief)].join(':');
       return {...cell, key, variant: 0, edges};
     }));
     index();

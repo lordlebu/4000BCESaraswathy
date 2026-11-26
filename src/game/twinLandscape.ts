@@ -6,7 +6,7 @@ import type {FieldMapWorld} from '../world/fieldMap';
 import type {Placement} from './scenePlan';
 
 const STRUCTURES=new Set(['twinHouses','twinHousesDetail','twinHomesPainted','twinObjects',
-  'twinDetails','twinCourtyard','twinEnvironment','twinStories','twinCaveProps','twinHighlandForms','twinShrubs','twinHighlandLife']);
+  'twinDetails','twinCourtyard','twinEnvironment','twinStories','twinCaveProps','twinHighlandForms','twinShrubs','twinHighlandLife','twinRelief','twinSite']);
 const GROUND=new Set(['desert','hills','plains','coast','wetland','river','forest','mountains','snow']);
 const STEP=[[0,-1],[1,0],[0,1],[-1,0]] as const;
 export const MAX_TWIN_SHRUBS=160;

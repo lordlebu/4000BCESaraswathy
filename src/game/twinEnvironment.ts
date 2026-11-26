@@ -2,6 +2,7 @@ import type { FieldMapWorld } from '../world/fieldMap';
 import type { Placement } from './scenePlan';
 import { depthFor, ROW_SLOT } from './frames';
 
+import { tileHash } from '../world/rng';
 const WATER=new Set(['river','sea']);
 const HOUSE_ROWS:Record<number,readonly number[]>={
  '-3':[0],'-2':[-1,0,1],'-1':[-2,-1,1,2],
@@ -47,4 +48,15 @@ export function twinBankDepth(built:FieldMapWorld):Placement[]{
   if(mask)out.push({sheet:'twinEnvironment',frame:8+mask,x:t.x,y:t.y,depth:62});
  }
  return out;
+}
+
+/** Both established districts and preview outskirts use the same approved housing mix. */
+export function twinHome(seed: string, x: number, y: number, brick: boolean): Placement {
+  const hash = tileHash(seed,x,y,'twin-scenery');
+  const original = (hash >>> 8) % 3 === 0;
+  const painted = !original && hash % 5 !== 0;
+  return {
+    sheet:painted?'twinHomesPainted':original?'twinHouses':'twinHousesDetail',
+    frame:painted?(brick?1:0):(brick?4:0)+hash%4,x,y,depth:depthFor(y,ROW_SLOT.undergrowth)
+  };
 }
